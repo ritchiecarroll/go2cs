@@ -49,7 +49,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
         outUsed: 0
     ));
 
-    copy((~x).cipher, iv);
+    copy(x.cipher, iv);
     return new ofbжStream(x);
 }
 

@@ -33,14 +33,14 @@ partial struct lazybuf {
 }
 
 internal static byte index(this ref lazybuf b, nint i) {
-    if (b.buf != default!) {
+    if (b.buf != nil) {
         return b.buf[i];
     }
     return b.path[i];
 }
 
 internal static void append(this ref lazybuf b, byte c) {
-    if (b.buf == default!) {
+    if (b.buf == nil) {
         if (b.w < len(b.path) && b.path[b.w] == c) {
             b.w++;
             return;
@@ -60,7 +60,7 @@ internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp)
 }
 
 internal static @string @string(this ref lazybuf b) {
-    if (b.buf == default!) {
+    if (b.buf == nil) {
         return b.volAndPath.slice(0, b.volLen + b.w);
     }
     return b.volAndPath.slice(0, b.volLen) + ((sstring)(b.buf.slice(0, b.w)));
@@ -86,8 +86,7 @@ public static @string Clean(@string path) {
     //	dotdot is index in buf where .. must stop, either because
     //		it is the leading slash or it is a leading ../../.. prefix.
     nint n = len(path);
-    ref var @out = ref heap<lazybuf>(out var Ꮡout);
-    @out = new lazybuf(path: path, volAndPath: originalPath, volLen: volLen);
+    ref var @out = ref heap<lazybuf>(new lazybuf(path: path, volAndPath: originalPath, volLen: volLen), out var Ꮡout);
     nint r = 0;
     nint dotdot = 0;
     if (rooted) {
@@ -102,12 +101,12 @@ public static @string Clean(@string path) {
             r++;
             break;
         }
-        case {} when path[r] == (rune)'.' && (r + 1 == n || IsPathSeparator(path[r + 1])): {
+        case {} when path[r] == (byte)'.' && (r + 1 == n || IsPathSeparator(path[r + 1])): {
             // . element
             r++;
             break;
         }
-        case {} when path[r] == (rune)'.' && path[r + 1] == (rune)'.' && (r + 2 == n || IsPathSeparator(path[r + 2])): {
+        case {} when path[r] == (byte)'.' && path[r + 1] == (byte)'.' && (r + 2 == n || IsPathSeparator(path[r + 2])): {
             // .. element: remove to last separator
             r += 2;
             switch (ᐧ) {
@@ -124,8 +123,8 @@ public static @string Clean(@string path) {
                 if (@out.w > 0) {
                     @out.append(Separator);
                 }
-                @out.append((rune)'.');
-                @out.append((rune)'.');
+                @out.append((byte)'.');
+                @out.append((byte)'.');
                 dotdot = @out.w;
                 break;
             }}
@@ -147,7 +146,7 @@ public static @string Clean(@string path) {
 
     // Turn empty string into "."
     if (@out.w == 0) {
-        @out.append((rune)'.');
+        @out.append((byte)'.');
     }
 
     postClean(Ꮡout); // avoid creating absolute paths on Windows
@@ -165,7 +164,7 @@ internal static bool unixIsLocal(@string path) {
     }
     var hasDots = false;
     for (@string p = path; p != ""u8; ) {
-        @string part = default!;
+        @string part = default;
         (part, p, _) = stringslite.Cut(p, "/"u8);
         if (part == "."u8 || part == ".."u8) {
             hasDots = true;
@@ -194,7 +193,7 @@ public static @string ToSlash(@string path) {
     if (Separator == (rune)'/') {
         return path;
     }
-    return replaceStringByte(path, Separator, (rune)'/');
+    return replaceStringByte(path, Separator, (byte)'/');
 }
 
 // FromSlash is filepath.FromSlash.
@@ -202,7 +201,7 @@ public static @string FromSlash(@string path) {
     if (Separator == (rune)'/') {
         return path;
     }
-    return replaceStringByte(path, (rune)'/', Separator);
+    return replaceStringByte(path, (byte)'/', Separator);
 }
 
 internal static @string replaceStringByte(@string s, byte old, byte @new) {
@@ -231,7 +230,7 @@ public static (@string dir, @string @file) Split(@string path) {
 // Ext is filepath.Ext.
 public static @string Ext(@string path) {
     for (nint i = len(path) - 1; i >= 0 && !IsPathSeparator(path[i]); i--) {
-        if (path[i] == (rune)'.') {
+        if (path[i] == '.') {
             return path.slice(i);
         }
     }

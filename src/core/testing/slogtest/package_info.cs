@@ -10,20 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using slogꓸHandler = go.log.slog_package.ΔHandler;
-global using slogꓸKind = go.log.slog_package.ΔKind;
 global using slogꓸLevel = go.log.slog_package.ΔLevel;
-global using slogꓸLogValuer = go.log.slog_package.ΔLogValuer;
-global using slogꓸSource = go.log.slog_package.ΔSource;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,6 +49,10 @@ using static go.testing.slogtest_package;
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
 [assembly: go.GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(go.log.slog_package.Record))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

@@ -30,7 +30,7 @@ internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (Ꮡl == nil) {
-        return default!;
+        return default;
     }
     return l.tparams;
 }
@@ -43,7 +43,7 @@ partial struct TypeList {
 // newTypeList returns a new TypeList with the types in list.
 internal static ж<TypeList> newTypeList(slice<ΔType> list) {
     if (len(list) == 0) {
-        return default!;
+        return default;
     }
     return Ꮡ(new TypeList(list));
 }
@@ -66,7 +66,7 @@ internal static slice<ΔType> list(this ж<TypeList> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (Ꮡl == nil) {
-        return default!;
+        return default;
     }
     return l.types;
 }
@@ -75,13 +75,13 @@ internal static slice<ΔType> list(this ж<TypeList> Ꮡl) {
 // Implementation
 internal static ж<TypeParamList> bindTParams(slice<ж<TypeParam>> list) {
     if (len(list) == 0) {
-        return default!;
+        return default;
     }
     foreach (var (i, typ) in list) {
-        if ((~typ).index >= 0) {
+        if (typ.index >= 0) {
             throw panic("type parameter bound more than once");
         }
-        typ.Value.index = i;
+        typ.index = i;
     }
     return Ꮡ(new TypeParamList(tparams: list));
 }

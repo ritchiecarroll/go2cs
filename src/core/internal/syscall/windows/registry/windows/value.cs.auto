@@ -55,45 +55,43 @@ public static error ErrUnexpectedType = errors.New("unexpected key value type"u8
 // Get*Value function instead.
 public static (nint n, uint32 valtype, error err) GetValue(this Key k, @string name, slice<byte> buf) {
     ref var valtype = ref heap(new uint32(), out var Ꮡvaltype);
-    error err = default!;
+    error err = default;
 
     (var pname, err) = syscall.UTF16PtrFromString(name);
-    if (err != default!) {
+    if (err != nil) {
         return (0, 0, err);
     }
-    ж<byte> pbuf = default!;
+    ж<byte> pbuf = default;
     if (len(buf) > 0) {
         pbuf = Ꮡ(buf, 0);
     }
-    ref var l = ref heap<uint32>(out var Ꮡl);
-    l = (uint32)len(buf);
+    ref var l = ref heap<uint32>((uint32)len(buf), out var Ꮡl);
     err = syscall.RegQueryValueEx((syscallꓸHandle)k, pname, nil, Ꮡvaltype, pbuf, Ꮡl);
-    if (err != default!) {
+    if (err != nil) {
         return ((nint)l, valtype, err);
     }
-    return ((nint)l, valtype, default!);
+    return ((nint)l, valtype, default);
 }
 
 internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key k, @string name, slice<byte> buf) {
-    error err = default!;
+    error err = default;
 
     (var p, err) = syscall.UTF16PtrFromString(name);
-    if (err != default!) {
-        return (default!, 0, err);
+    if (err != nil) {
+        return (default, 0, err);
     }
     ref var t = ref heap(new uint32(), out var Ꮡt);
-    ref var n = ref heap<uint32>(out var Ꮡn);
-    n = (uint32)len(buf);
-    while (ᐧ) {
+    ref var n = ref heap<uint32>((uint32)len(buf), out var Ꮡn);
+    for (;;) {
         err = syscall.RegQueryValueEx((syscallꓸHandle)k, p, nil, Ꮡt, Ꮡ(buf, 0), Ꮡn);
-        if (err == default!) {
-            return (buf.slice(0, (nint)(n)), t, default!);
+        if (err == nil) {
+            return (buf.slice(0, (nint)(n)), t, default);
         }
         if (!AreEqual(err, syscall.ERROR_MORE_DATA)) {
-            return (default!, 0, err);
+            return (default, 0, err);
         }
         if (n <= (uint32)len(buf)) {
-            return (default!, 0, err);
+            return (default, 0, err);
         }
         buf = new slice<byte>((nint)(n));
     }
@@ -106,20 +104,21 @@ internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key 
 // type and ErrUnexpectedType.
 public static unsafe (@string val, uint32 valtype, error err) GetStringValue(this Key k, @string name) {
     var (data, typ, err2) = k.getValue(name, new slice<byte>(64));
-    if (err2 != default!) {
+    if (err2 != nil) {
         return ("", typ, err2);
     }
-    var exprᴛ1 = typ;
-    if (exprᴛ1 == SZ || exprᴛ1 == EXPAND_SZ) {
+    switch (typ) {
+    case var ᴛ when ᴛ == SZ || ᴛ == EXPAND_SZ: {
+        break;
     }
-    else { /* default: */
+    default: {
         return ("", typ, ErrUnexpectedType);
-    }
+    }}
     if (len(data) == 0) {
-        return ("", typ, default!);
+        return ("", typ, default);
     }
     var u = new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(data, 0))), (int)(len(data) / 2)));
-    return (syscall.UTF16ToString(u), typ, default!);
+    return (syscall.UTF16ToString(u), typ, default);
 }
 
 // GetMUIStringValue retrieves the localized string value for
@@ -128,13 +127,13 @@ public static unsafe (@string val, uint32 valtype, error err) GetStringValue(thi
 // can't be resolved, GetMUIStringValue returns ErrNotExist.
 public static (@string, error) GetMUIStringValue(this Key k, @string name) {
     var (pname, err) = syscall.UTF16PtrFromString(name);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
 
     var buf = new slice<uint16>(1024);
     ref var buflen = ref heap(new uint32(), out var Ꮡbuflen);
-    ж<uint16> pdir = default!;
+    ж<uint16> pdir = default;
 
     err = regLoadMUIString((syscallꓸHandle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     if (AreEqual(err, syscall.ERROR_FILE_NOT_FOUND)) { // Try fallback path
@@ -145,13 +144,13 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
         // This approach works with tzres.dll but may have to be revised
         // in the future to allow callers to provide custom search paths.
 
-        @string s = default!;
+        @string s = default;
         (s, err) = ExpandString("%SystemRoot%\\system32\\"u8);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         (pdir, err) = syscall.UTF16PtrFromString(s);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
 
@@ -166,11 +165,11 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
         err = regLoadMUIString((syscallꓸHandle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     }
 
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
 
-    return (syscall.UTF16ToString(buf), default!);
+    return (syscall.UTF16ToString(buf), default);
 }
 
 // ExpandString expands environment-variable strings and replaces
@@ -178,20 +177,20 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
 // Use ExpandString to expand EXPAND_SZ strings.
 public static (@string, error) ExpandString(@string value) {
     if (value == ""u8) {
-        return ("", default!);
+        return ("", default);
     }
     var (p, err) = syscall.UTF16PtrFromString(value);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     var r = new slice<uint16>(100);
-    while (ᐧ) {
+    for (;;) {
         var (n, errΔ1) = expandEnvironmentStrings(p, Ꮡ(r, 0), (uint32)len(r));
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return ("", errΔ1);
         }
         if (n <= (uint32)len(r)) {
-            return (syscall.UTF16ToString(r.slice(0, (nint)(n))), default!);
+            return (syscall.UTF16ToString(r.slice(0, (nint)(n))), default);
         }
         r = new slice<uint16>((nint)(n));
     }
@@ -203,21 +202,21 @@ public static (@string, error) ExpandString(@string value) {
 // If value is not MULTI_SZ, it will return the correct value
 // type and ErrUnexpectedType.
 public static unsafe (slice<@string> val, uint32 valtype, error err) GetStringsValue(this Key k, @string name) {
-    slice<@string> val = default!;
+    slice<@string> val = default;
 
     var (data, typ, err2) = k.getValue(name, new slice<byte>(64));
-    if (err2 != default!) {
-        return (default!, typ, err2);
+    if (err2 != nil) {
+        return (default, typ, err2);
     }
     if (typ != MULTI_SZ) {
-        return (default!, typ, ErrUnexpectedType);
+        return (default, typ, ErrUnexpectedType);
     }
     if (len(data) == 0) {
-        return (default!, typ, default!);
+        return (default, typ, default);
     }
     var p = new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(data, 0))), (int)(len(data) / 2)));
     if (len(p) == 0) {
-        return (default!, typ, default!);
+        return (default, typ, default);
     }
     if (p[len(p) - 1] == 0) {
         p = p.slice(0, len(p) - 1); // remove terminating null
@@ -230,7 +229,7 @@ public static unsafe (slice<@string> val, uint32 valtype, error err) GetStringsV
             from = i + 1;
         }
     }
-    return (val, typ, default!);
+    return (val, typ, default);
 }
 
 // GetIntegerValue retrieves the integer value for the specified
@@ -240,25 +239,25 @@ public static unsafe (slice<@string> val, uint32 valtype, error err) GetStringsV
 // type and ErrUnexpectedType.
 public static (uint64 val, uint32 valtype, error err) GetIntegerValue(this Key k, @string name) {
     var (data, typ, err2) = k.getValue(name, new slice<byte>(8));
-    if (err2 != default!) {
+    if (err2 != nil) {
         return (0, typ, err2);
     }
-    var exprᴛ1 = typ;
-    if (exprᴛ1 == DWORD) {
+    switch (typ) {
+    case var ᴛ when ᴛ == DWORD: {
         if (len(data) != 4) {
             return (0, typ, errors.New("DWORD value is not 4 bytes long"u8));
         }
-        return ((uint64)(~Ꮡ(data, 0).Reinterpret<byte, uint32>()), DWORD, default!);
+        return ((uint64)(~Ꮡ(data, 0).Reinterpret<byte, uint32>()), DWORD, default);
     }
-    if (exprᴛ1 == QWORD) {
+    case var ᴛ when ᴛ == QWORD: {
         if (len(data) != 8) {
             return (0, typ, errors.New("QWORD value is not 8 bytes long"u8));
         }
-        return (~Ꮡ(data, 0).Reinterpret<byte, uint64>(), QWORD, default!);
+        return (~Ꮡ(data, 0).Reinterpret<byte, uint64>(), QWORD, default);
     }
-    { /* default: */
+    default: {
         return (0, typ, ErrUnexpectedType);
-    }
+    }}
 }
 
 // GetBinaryValue retrieves the binary value for the specified
@@ -268,18 +267,18 @@ public static (uint64 val, uint32 valtype, error err) GetIntegerValue(this Key k
 // type and ErrUnexpectedType.
 public static (slice<byte> val, uint32 valtype, error err) GetBinaryValue(this Key k, @string name) {
     var (data, typ, err2) = k.getValue(name, new slice<byte>(64));
-    if (err2 != default!) {
-        return (default!, typ, err2);
+    if (err2 != nil) {
+        return (default, typ, err2);
     }
     if (typ != BINARY) {
-        return (default!, typ, ErrUnexpectedType);
+        return (default, typ, ErrUnexpectedType);
     }
-    return (data, typ, default!);
+    return (data, typ, default);
 }
 
 internal static error setValue(this Key k, @string name, uint32 valtype, slice<byte> data) {
     var (p, err) = syscall.UTF16PtrFromString(name);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (len(data) == 0) {
@@ -306,7 +305,7 @@ public static error SetQWordValue(this Key k, @string name, uint64 valueʗp) {
 
 internal static unsafe error setStringValue(this Key k, @string name, uint32 valtype, @string value) {
     var (v, err) = syscall.UTF16FromString(value);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var buf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(v, 0))), (int)(len(v) * 2)));
@@ -352,7 +351,7 @@ public static error SetBinaryValue(this Key k, @string name, slice<byte> value) 
 // DeleteValue removes a named value from the key k.
 public static error DeleteValue(this Key k, @string name) {
     var (namep, err) = syscall.UTF16PtrFromString(name);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return regDeleteValue((syscallꓸHandle)k, namep);
@@ -361,18 +360,17 @@ public static error DeleteValue(this Key k, @string name) {
 // ReadValueNames returns the value names of key k.
 public static (slice<@string>, error) ReadValueNames(this Key k) {
     var (ki, err) = k.Stat();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    var names = new slice<@string>(0, (nint)((~ki).ValueCount));
-    var buf = new slice<uint16>((nint)((~ki).MaxValueNameLen + 1)); // extra room for terminating null character
+    var names = new slice<@string>(0, (nint)(ki.ValueCount));
+    var buf = new slice<uint16>((nint)(ki.MaxValueNameLen + 1)); // extra room for terminating null character
 loopItems:
-    for (var i = (uint32)0; ᐧ ; i++) {
-        ref var l = ref heap<uint32>(out var Ꮡl);
-        l = (uint32)len(buf);
-        while (ᐧ) {
+    for (var i = (uint32)0; ; i++) {
+        ref var l = ref heap<uint32>((uint32)len(buf), out var Ꮡl);
+        for (;;) {
             var errΔ1 = regEnumValue((syscallꓸHandle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
-            if (errΔ1 == default!) {
+            if (errΔ1 == nil) {
                 break;
             }
             if (AreEqual(errΔ1, syscall.ERROR_MORE_DATA)) {
@@ -390,7 +388,7 @@ loopItems:
 continue_loopItems:;
     }
 break_loopItems:;
-    return (names, default!);
+    return (names, default);
 }
 
 } // end registry_package

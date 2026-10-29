@@ -17,14 +17,14 @@ partial class mldsa_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string mlDsaSignAndVerifyPctˢ = "ML-DSA sign and verify PCT"u8;
 
-internal static void fipsPCT(ж<PrivateKey> Ꮡpriv) {
+internal static void fipsPCT(ж<PrivateKey> priv) {
     fips140.PCT(mlDsaSignAndVerifyPctˢ, () => {
         var μ = new slice<byte>(64);
-        var (sig, err) = SignExternalMuDeterministic(Ꮡpriv, μ);
-        if (err != default!) {
+        var (sig, err) = SignExternalMuDeterministic(priv, μ);
+        if (err != nil) {
             return err;
         }
-        return VerifyExternalMu(Ꮡpriv.PublicKey(), μ, sig);
+        return VerifyExternalMu(priv.PublicKey(), μ, sig);
     });
 }
 
@@ -62,29 +62,29 @@ internal static error fips140CAST() {
         0x9a, 0x20, 0x8f, 0x88, 0x07, 0x27, 0x1f, 0xdb,
         0x7e, 0xda, 0x6e, 0x60, 0x14, 0x1b, 0xd2, 0x63
     }.array());
-    slice<byte> skHash = new byte[]{
+    slice<byte> skHash = slice<byte>([
         0x29, 0x37, 0x49, 0x51, 0xcb, 0x2b, 0xc3, 0xcd,
         0xa7, 0x31, 0x5c, 0xe7, 0xf0, 0xab, 0x99, 0xc7,
         0xd2, 0xd6, 0x52, 0x92, 0xe6, 0xc5, 0x15, 0x6e,
         0x8a, 0xa6, 0x2a, 0xc1, 0x4b, 0x14, 0x12, 0xaf
-    }.slice();
-    slice<byte> sigHash = new byte[]{
+    ]);
+    slice<byte> sigHash = slice<byte>([
         0xdc, 0xc7, 0x1a, 0x42, 0x1b, 0xc6, 0xff, 0xaf,
         0xb7, 0xdf, 0x0c, 0x7f, 0x6d, 0x01, 0x8a, 0x19,
         0xad, 0xa1, 0x54, 0xd1, 0xe2, 0xee, 0x36, 0x0e,
         0xd5, 0x33, 0xce, 0xcd, 0x5d, 0xc9, 0x80, 0xad
-    }.slice();
+    ]);
     var priv = newPrivateKey(seed, params44);
     var H = sha256.New();
     H.Write(TestingOnlyPrivateKeySemiExpandedBytes(priv));
-    if (!bytes.Equal(H.Sum(default!), skHash)) {
+    if (!bytes.Equal(H.Sum(default), skHash)) {
         return errors.New(unexpectedPrivateKeyHashˢ);
     }
     ref var random = ref heap(new array<byte>(32), out var Ꮡrandom);
     var sig = signInternal(ref (priv).DerefOrNull(), μ, Ꮡrandom);
     H.Reset();
     H.Write(sig);
-    if (!bytes.Equal(H.Sum(default!), sigHash)) {
+    if (!bytes.Equal(H.Sum(default), sigHash)) {
         return errors.New(unexpectedSignatureHashˢ);
     }
     return verifyInternal(ref (priv.PublicKey()).DerefOrNull(), μ, sig);

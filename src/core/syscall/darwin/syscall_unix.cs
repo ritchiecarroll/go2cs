@@ -16,7 +16,6 @@ using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
 
-[GoFieldAccess(typeof(RawSockaddrInet4), typeof(RawSockaddrInet6))]
 partial class syscall_package {
 
 public static readonly ж<nint> ᏑStdin = new StaticBox<nint>(0);
@@ -48,20 +47,20 @@ partial struct mmapper {
 }
 
 internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) {
-    slice<byte> data = default!;
-    error err = default!;
+    slice<byte> data = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();
 
         if (length <= 0) {
-            (data, err) = (default!, EINVAL); goto ᒐdone;
+            (data, err) = (default, EINVAL); goto ᒐdone;
         }
 
         // Map the requested memory.
         var (addr, errno) = m.mmap(0, (uintptr)length, prot, flags, fd, offset);
-        if (errno != default!) {
-            (data, err) = (default!, errno); goto ᒐdone;
+        if (errno != nil) {
+            (data, err) = (default, errno); goto ᒐdone;
         }
 
         // Use unsafe to turn addr into a []byte.
@@ -72,7 +71,7 @@ internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint f
         Ꮡm.of(mmapper.ᏑMutex).Lock();
         defer(Ꮡm.of(mmapper.ᏑMutex).Unlock, ref ᒐ);
         m.active[p] = b;
-        (data, err) = (b, default!);
+        (data, err) = (b, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -80,7 +79,7 @@ internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint f
 }
 
 internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();
@@ -94,18 +93,18 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
         Ꮡm.of(mmapper.ᏑMutex).Lock();
         defer(Ꮡm.of(mmapper.ᏑMutex).Unlock, ref ᒐ);
         var b = m.active[p];
-        if (b == default! || Ꮡelem(b, 0) != Ꮡelem(data, 0)) {
+        if (b == nil || Ꮡelem(b, 0) != Ꮡelem(data, 0)) {
             err = EINVAL; goto ᒐdone;
         }
 
         // Unmap the memory and update m.
         {
-            var errno = m.munmap((uintptr)Ꮡ(b, 0), (uintptr)len(b)); if (errno != default!) {
+            var errno = m.munmap((uintptr)Ꮡ(b, 0), (uintptr)len(b)); if (errno != nil) {
                 err = errno; goto ᒐdone;
             }
         }
         delete(m.active, p);
-        err = default!;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -129,29 +128,29 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
 partial struct Errno /*num:uintptr*/;
 
 public static @string Error(this Errno e) {
-    if (0 <= (nint)(uintptr)e && (nint)(uintptr)e < len(errors)) {
+    if (0 <= (nint)e && (nint)e < len(errors)) {
         @string s = errors[e];
         if (s != ""u8) {
             return s;
         }
     }
-    return "errno "u8 + strconv.Itoa((nint)(uintptr)e);
+    return "errno "u8 + strconv.Itoa((nint)e);
 }
 
 public static bool Is(this Errno e, error target) {
-    var exprᴛ1 = target;
-    if (AreEqual(exprᴛ1, oserror.ErrPermission)) {
+    switch (target) {
+    case var ᴛ when AreEqual(ᴛ, oserror.ErrPermission): {
         return e == EACCES || e == EPERM;
     }
-    if (AreEqual(exprᴛ1, oserror.ErrExist)) {
+    case var ᴛ when AreEqual(ᴛ, oserror.ErrExist): {
         return e == EEXIST || e == ENOTEMPTY;
     }
-    if (AreEqual(exprᴛ1, oserror.ErrNotExist)) {
+    case var ᴛ when AreEqual(ᴛ, oserror.ErrNotExist): {
         return e == ENOENT;
     }
-    if (AreEqual(exprᴛ1, errorspkg.ErrUnsupported)) {
+    case var ᴛ when AreEqual(ᴛ, errorspkg.ErrUnsupported): {
         return e == ENOSYS || e == ENOTSUP || e == EOPNOTSUPP;
-    }
+    }}
     return false;
 }
 
@@ -172,19 +171,19 @@ internal static error errENOENT = ((Errno)ENOENT);
 // errnoErr returns common boxed Errno values, to prevent
 // allocations at runtime.
 internal static error errnoErr(Errno e) {
-    var exprᴛ1 = e;
-    if (exprᴛ1 == (Errno)(0)) {
-        return default!;
+    switch (e) {
+    case var ᴛ when ᴛ == (Errno)(0): {
+        return default;
     }
-    if (exprᴛ1 == EAGAIN) {
+    case var ᴛ when ᴛ == EAGAIN: {
         return errEAGAIN;
     }
-    if (exprᴛ1 == EINVAL) {
+    case var ᴛ when ᴛ == EINVAL: {
         return errEINVAL;
     }
-    if (exprᴛ1 == ENOENT) {
+    case var ᴛ when ᴛ == ENOENT: {
         return errENOENT;
-    }
+    }}
     return e;
 }
 
@@ -206,15 +205,15 @@ public static @string String(this ΔSignal s) {
 }
 
 public static (nint n, error err) Read(nint fd, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = read(fd, p);
     if (race.Enabled) {
         if (n > 0) {
             race.WriteRange(@unsafe.Pointer.FromPinnedBox(Ꮡ(p, 0)), n);
         }
-        if (err == default!) {
+        if (err == nil) {
             race.Acquire(@unsafe.Pointer.FromPinnedBox(ᏑioSync));
         }
     }
@@ -228,13 +227,13 @@ public static (nint n, error err) Read(nint fd, slice<byte> p) {
 }
 
 public static (nint n, error err) Write(nint fd, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (race.Enabled) {
         race.ReleaseMerge(@unsafe.Pointer.FromPinnedBox(ᏑioSync));
     }
-    if (faketime && (fd == 1 || fd == 2)){
+    if (faketime && (fd == 1 || fd == 2)) {
         n = faketimeWrite(fd, p);
         if (n < 0) {
             (n, err) = (0, errnoErr((Errno)(uintptr)(-n)));
@@ -255,15 +254,15 @@ public static (nint n, error err) Write(nint fd, slice<byte> p) {
 }
 
 public static (nint n, error err) Pread(nint fd, slice<byte> p, int64 offset) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = pread(fd, p, offset);
     if (race.Enabled) {
         if (n > 0) {
             race.WriteRange(@unsafe.Pointer.FromPinnedBox(Ꮡ(p, 0)), n);
         }
-        if (err == default!) {
+        if (err == nil) {
             race.Acquire(@unsafe.Pointer.FromPinnedBox(ᏑioSync));
         }
     }
@@ -277,8 +276,8 @@ public static (nint n, error err) Pread(nint fd, slice<byte> p, int64 offset) {
 }
 
 public static (nint n, error err) Pwrite(nint fd, slice<byte> p, int64 offset) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (race.Enabled) {
         race.ReleaseMerge(@unsafe.Pointer.FromPinnedBox(ᏑioSync));
@@ -330,11 +329,10 @@ partial struct SockaddrUnix {
 // go2cs generated this placeholder — func Getpeername is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static (nint value, error err) GetsockoptInt(nint fd, nint level, nint opt) {
-    error err = default!;
+    error err = default;
 
     ref var n = ref heap(new int32(), out var Ꮡn);
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)4;
+    ref var vallen = ref heap<_Socklen>((_Socklen)4, out var Ꮡvallen);
     err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡn), Ꮡvallen);
     return ((nint)n, err);
 }
@@ -342,14 +340,14 @@ public static (nint value, error err) GetsockoptInt(nint fd, nint level, nint op
 // go2cs generated this placeholder — func Recvfrom is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint flags, ref SockaddrInet4 from) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
     ref var socklen = ref heap(new _Socklen(), out var Ꮡsocklen);
     socklen = SizeofSockaddrAny;
     {
-        (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡsocklen); if (err != default!) {
+        (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡsocklen); if (err != nil) {
             return (n, err);
         }
     }
@@ -361,14 +359,14 @@ internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint f
 }
 
 internal static (nint n, error err) recvfromInet6(nint fd, slice<byte> p, nint flags, ref SockaddrInet6 from) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
     ref var socklen = ref heap(new _Socklen(), out var Ꮡsocklen);
     socklen = SizeofSockaddrAny;
     {
-        (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡsocklen); if (err != default!) {
+        (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡsocklen); if (err != nil) {
             return (n, err);
         }
     }
@@ -381,14 +379,14 @@ internal static (nint n, error err) recvfromInet6(nint fd, slice<byte> p, nint f
 }
 
 internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet4(nint fd, slice<byte> p, slice<byte> oob, nint flags, ref SockaddrInet4 from) {
-    nint n = default!;
-    nint oobn = default!;
-    nint recvflags = default!;
-    error err = default!;
+    nint n = default;
+    nint oobn = default;
+    nint recvflags = default;
+    error err = default;
 
     ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
     (n, oobn, recvflags, err) = recvmsgRaw(fd, p, oob, flags, Ꮡrsa);
-    if (err != default!) {
+    if (err != nil) {
         return (n, oobn, recvflags, err);
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
@@ -399,14 +397,14 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet4(nint
 }
 
 internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet6(nint fd, slice<byte> p, slice<byte> oob, nint flags, ref SockaddrInet6 from) {
-    nint n = default!;
-    nint oobn = default!;
-    nint recvflags = default!;
-    error err = default!;
+    nint n = default;
+    nint oobn = default;
+    nint recvflags = default;
+    error err = default;
 
     ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
     (n, oobn, recvflags, err) = recvmsgRaw(fd, p, oob, flags, Ꮡrsa);
-    if (err != default!) {
+    if (err != nil) {
         return (n, oobn, recvflags, err);
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
@@ -418,11 +416,11 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet6(nint
 }
 
 public static (nint n, nint oobn, nint recvflags, Sockaddr from, error err) Recvmsg(nint fd, slice<byte> p, slice<byte> oob, nint flags) {
-    nint n = default!;
-    nint oobn = default!;
-    nint recvflags = default!;
-    Sockaddr from = default!;
-    error err = default!;
+    nint n = default;
+    nint oobn = default;
+    nint recvflags = default;
+    Sockaddr from = default;
+    error err = default;
 
     ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
     (n, oobn, recvflags, err) = recvmsgRaw(fd, p, oob, flags, Ꮡrsa);
@@ -434,7 +432,7 @@ public static (nint n, nint oobn, nint recvflags, Sockaddr from, error err) Recv
 }
 
 public static error /*err*/ Sendmsg(nint fd, slice<byte> p, slice<byte> oob, Sockaddr to, nint flags) {
-    error err = default!;
+    error err = default;
 
     (_, err) = SendmsgN(fd, p, oob, to, flags);
     return err;
@@ -442,49 +440,49 @@ public static error /*err*/ Sendmsg(nint fd, slice<byte> p, slice<byte> oob, Soc
 
 // go2cs generated this placeholder — func SendmsgN is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static (nint n, error err) sendmsgNInet4(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet4> Ꮡto, nint flags) {
-    error err = default!;
+internal static (nint n, error err) sendmsgNInet4(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet4> to, nint flags) {
+    error err = default;
 
-    @unsafe.Pointer ptr = default!;
-    _Socklen salen = default!;
-    if (Ꮡto != nil) {
-        (ptr, salen, err) = Ꮡto.sockaddr();
-        if (err != default!) {
+    @unsafe.Pointer ptr = default;
+    _Socklen salen = default;
+    if (to != nil) {
+        (ptr, salen, err) = to.sockaddr();
+        if (err != nil) {
             return (0, err);
         }
     }
     return sendmsgN(fd, p, oob, ptr, salen, flags);
 }
 
-internal static (nint n, error err) sendmsgNInet6(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet6> Ꮡto, nint flags) {
-    error err = default!;
+internal static (nint n, error err) sendmsgNInet6(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet6> to, nint flags) {
+    error err = default;
 
-    @unsafe.Pointer ptr = default!;
-    _Socklen salen = default!;
-    if (Ꮡto != nil) {
-        (ptr, salen, err) = Ꮡto.sockaddr();
-        if (err != default!) {
+    @unsafe.Pointer ptr = default;
+    _Socklen salen = default;
+    if (to != nil) {
+        (ptr, salen, err) = to.sockaddr();
+        if (err != nil) {
             return (0, err);
         }
     }
     return sendmsgN(fd, p, oob, ptr, salen, flags);
 }
 
-internal static error /*err*/ sendtoInet4(nint fd, slice<byte> p, nint flags, ж<SockaddrInet4> Ꮡto) {
-    error err = default!;
+internal static error /*err*/ sendtoInet4(nint fd, slice<byte> p, nint flags, ж<SockaddrInet4> to) {
+    error err = default;
 
-    (var ptr, var n, err) = Ꮡto.sockaddr();
-    if (err != default!) {
+    (var ptr, var n, err) = to.sockaddr();
+    if (err != nil) {
         return err;
     }
     return sendto(fd, p, flags, ptr, n);
 }
 
-internal static error /*err*/ sendtoInet6(nint fd, slice<byte> p, nint flags, ж<SockaddrInet6> Ꮡto) {
-    error err = default!;
+internal static error /*err*/ sendtoInet6(nint fd, slice<byte> p, nint flags, ж<SockaddrInet6> to) {
+    error err = default;
 
-    (var ptr, var n, err) = Ꮡto.sockaddr();
-    if (err != default!) {
+    (var ptr, var n, err) = to.sockaddr();
+    if (err != nil) {
         return err;
     }
     return sendto(fd, p, flags, ptr, n);
@@ -511,37 +509,37 @@ public static error /*err*/ SetsockoptInet4Addr(nint fd, nint level, nint opt, /
     return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue.at<byte>(0)), 4);
 }
 
-public static error /*err*/ SetsockoptIPMreq(nint fd, nint level, nint opt, ж<IPMreq> Ꮡmreq) {
-    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡmreq), SizeofIPMreq);
+public static error /*err*/ SetsockoptIPMreq(nint fd, nint level, nint opt, ж<IPMreq> mreq) {
+    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(mreq), SizeofIPMreq);
 }
 
-public static error /*err*/ SetsockoptIPv6Mreq(nint fd, nint level, nint opt, ж<IPv6Mreq> Ꮡmreq) {
-    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡmreq), SizeofIPv6Mreq);
+public static error /*err*/ SetsockoptIPv6Mreq(nint fd, nint level, nint opt, ж<IPv6Mreq> mreq) {
+    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(mreq), SizeofIPv6Mreq);
 }
 
-public static error SetsockoptICMPv6Filter(nint fd, nint level, nint opt, ж<ICMPv6Filter> Ꮡfilter) {
-    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡfilter), SizeofICMPv6Filter);
+public static error SetsockoptICMPv6Filter(nint fd, nint level, nint opt, ж<ICMPv6Filter> filter) {
+    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(filter), SizeofICMPv6Filter);
 }
 
-public static error /*err*/ SetsockoptLinger(nint fd, nint level, nint opt, ж<Linger> Ꮡl) {
-    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡl), SizeofLinger);
+public static error /*err*/ SetsockoptLinger(nint fd, nint level, nint opt, ж<Linger> l) {
+    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(l), SizeofLinger);
 }
 
 public static error /*err*/ SetsockoptString(nint fd, nint level, nint opt, @string s) {
-    @unsafe.Pointer p = default!;
+    @unsafe.Pointer p = default;
     if (len(s) > 0) {
         p = @unsafe.Pointer.FromPinnedBox(Ꮡ(slice<byte>(s), 0));
     }
     return setsockopt(fd, level, opt, p, (uintptr)len(s));
 }
 
-public static error /*err*/ SetsockoptTimeval(nint fd, nint level, nint opt, ж<Timeval> Ꮡtv) {
-    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡtv), /* unsafe.Sizeof(*tv) */ (uintptr)16);
+public static error /*err*/ SetsockoptTimeval(nint fd, nint level, nint opt, ж<Timeval> tv) {
+    return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(tv), /* unsafe.Sizeof(*tv) */ (uintptr)16);
 }
 
 public static (nint fd, error err) Socket(nint domain, nint typ, nint proto) {
-    nint fd = default!;
-    error err = default!;
+    nint fd = default;
+    error err = default;
 
     if (domain == AF_INET6 && SocketDisableIPv6) {
         return (-1, EAFNOSUPPORT);
@@ -552,22 +550,22 @@ public static (nint fd, error err) Socket(nint domain, nint typ, nint proto) {
 
 public static (array<nint> fd, error err) Socketpair(nint domain, nint typ, nint proto) {
     array<nint> fd = new(2);
-    error err = default!;
+    error err = default;
 
     ref var fdx = ref heap(new array<int32>(2), out var Ꮡfdx);
     err = socketpair(domain, typ, proto, Ꮡfdx);
-    if (err == default!) {
+    if (err == nil) {
         fd[0] = (nint)fdx[0];
         fd[1] = (nint)fdx[1];
     }
     return (fd, err);
 }
 
-public static (nint written, error err) Sendfile(nint outfd, nint infd, ж<int64> Ꮡoffset, nint count) {
+public static (nint written, error err) Sendfile(nint outfd, nint infd, ж<int64> offset, nint count) {
     if (race.Enabled) {
         race.ReleaseMerge(@unsafe.Pointer.FromPinnedBox(ᏑioSync));
     }
-    return sendfile(outfd, infd, ref (Ꮡoffset).DerefOrNull(), count);
+    return sendfile(outfd, infd, ref (offset).DerefOrNull(), count);
 }
 
 internal static readonly ж<int64> ᏑioSync = new StaticBox<int64>(default(int64));

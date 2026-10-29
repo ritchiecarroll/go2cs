@@ -59,7 +59,7 @@ using static go.compress.zlib_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("compress/zlib/reader.go", "reader.cs", "ACpWlJQAEjbyAAIQ0oKCgpSmgoKmgoKClLiAgoKUgraCgoKUrLKClIKmgoKAgpTIgoKClJSCgoKUgoKCgoKUlIKCgriCgpSmlII=")]
-[assembly: go.GoPositionMap("compress/zlib/writer.go", "writer.cs", "ACZY0oIAAhLiAAIQ0oKUAAYUspSClIKUgoKosrjKlKSkpKSUgpSCgIKklIKAgramgoKUlKzigpSClIKUgoKClIKokoKUgpSCqqKClIKUgoKUlIKC")]
+[assembly: go.GoPositionMap("compress/zlib/writer.go", "writer.cs", "ACZY0oIAAhLiAAIQ0oKUAAYUspSClIKUgoKosrjKlLS0tLSkgpSCgIKklIKAgramgoKUlKzigpSClIKUgoKClIKokoKUgpSCqqKClIKUgoKUlIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

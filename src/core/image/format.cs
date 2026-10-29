@@ -64,7 +64,7 @@ internal static bool match(@string magic, slice<byte> b) {
         return false;
     }
     foreach (var (i, c) in b) {
-        if (magic[i] != c && magic[i] != (rune)'?') {
+        if (magic[i] != c && magic[i] != '?') {
             return false;
         }
     }
@@ -76,11 +76,11 @@ internal static format sniff(reader r) {
     var (formats, _) = ᏑatomicFormats.Load()._<slice<format>>(ᐧ);
     foreach (var (_, f) in formats) {
         var (b, err) = r.Peek(len(f.magic));
-        if (err == default! && match(f.magic, b)) {
+        if (err == nil && match(f.magic, b)) {
             return f;
         }
     }
-    return new format(nil);
+    return new format();
 }
 
 // Decode decodes an image that has been encoded in a registered format.
@@ -90,8 +90,8 @@ internal static format sniff(reader r) {
 public static (Image, @string, error) Decode(io.Reader r) {
     var rr = asReader(r);
     var f = sniff(rr);
-    if (f.decode == default!) {
-        return (default!, "", ErrFormat);
+    if (f.decode == nil) {
+        return (default, "", ErrFormat);
     }
     var (m, err) = f.decode(rr);
     return (m, f.name, err);
@@ -104,8 +104,8 @@ public static (Image, @string, error) Decode(io.Reader r) {
 public static (Config, @string, error) DecodeConfig(io.Reader r) {
     var rr = asReader(r);
     var f = sniff(rr);
-    if (f.decodeConfig == default!) {
-        return (new Config(nil), "", ErrFormat);
+    if (f.decodeConfig == nil) {
+        return (new Config(), "", ErrFormat);
     }
     var (c, err) = f.decodeConfig(rr);
     return (c, f.name, err);

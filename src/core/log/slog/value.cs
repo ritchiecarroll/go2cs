@@ -37,9 +37,9 @@ partial struct Value {
     internal any any;
 }
 
-partial class stringptr /*ж<byte>*/;
+partial class stringptr /*ж<byte>*/; // used in Value.any when the Value is a string
 
-partial class groupptr /*ж<Attr>*/;
+partial class groupptr /*ж<Attr>*/;  // used in Value.any when the Value is a []Attr
 
 // Kind is the kind of a [Value].
 partial struct ΔKind /*num:nint*/;
@@ -57,7 +57,7 @@ public static ΔKind KindUint64 => 7;
 public static ΔKind KindGroup => 8;
 public static ΔKind KindLogValuer => 9;
 
-internal static slice<@string> kindStrings = new @string[]{
+internal static slice<@string> kindStrings = slice<@string>([
     "Any"u8,
     "Bool"u8,
     "Duration"u8,
@@ -68,7 +68,7 @@ internal static slice<@string> kindStrings = new @string[]{
     "Uint64"u8,
     "Group"u8,
     "LogValuer"u8
-}.slice();
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unknownSlogKindˢ = "<unknown slog.Kind>"u8;
@@ -302,8 +302,8 @@ public static Value AnyValue(any v) {
 
 // Any returns v's value as an any.
 public static any Any(this Value v) {
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == KindAny) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == KindAny: {
         {
             var (k, ok) = v.any._<kind>(ᐧ); if (ok) {
                 return (ΔKind)(nint)k;
@@ -311,36 +311,37 @@ public static any Any(this Value v) {
         }
         return v.any;
     }
-    if (exprᴛ1 == KindLogValuer) {
+    case var ᴛ when ᴛ == KindLogValuer: {
         return v.any;
     }
-    if (exprᴛ1 == KindGroup) {
+    case var ᴛ when ᴛ == KindGroup: {
         return v.group();
     }
-    if (exprᴛ1 == KindInt64) {
+    case var ᴛ when ᴛ == KindInt64: {
         return (int64)v.num;
     }
-    if (exprᴛ1 == KindUint64) {
+    case var ᴛ when ᴛ == KindUint64: {
         return v.num;
     }
-    if (exprᴛ1 == KindFloat64) {
+    case var ᴛ when ᴛ == KindFloat64: {
         return v.@float();
     }
-    if (exprᴛ1 == KindString) {
+    case var ᴛ when ᴛ == KindString: {
         return v.str();
     }
-    if (exprᴛ1 == KindBool) {
+    case var ᴛ when ᴛ == KindBool: {
         return v.@bool();
     }
-    if (exprᴛ1 == KindDuration) {
+    case var ᴛ when ᴛ == KindDuration: {
         return v.duration();
     }
-    if (exprᴛ1 == KindTime) {
+    case var ᴛ when ᴛ == KindTime: {
         return v.time();
     }
-    { /* default: */
+    default: {
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
-    }
+        break;
+    }}
 }
 
 // String returns Value's value as a string, formatted like [fmt.Sprint]. Unlike
@@ -352,7 +353,7 @@ public static @string String(this Value v) {
             return @unsafe.String(sp, v.num);
         }
     }
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     return (@string)v.append(buf);
 }
 
@@ -451,7 +452,7 @@ internal static time.Time time(this Value v) {
     switch (v.any.type()) {
     case timeLocation a: {
         if (a == nil) {
-            return new time_package.Time(nil);
+            return new time_package.Time();
         }
         return time_package.Unix(0, (int64)v.num).In(a);
     }
@@ -495,28 +496,29 @@ public static bool Equal(this Value v, Value w) {
     if (k1 != k2) {
         return false;
     }
-    var exprᴛ1 = k1;
-    if (exprᴛ1 == KindInt64 || exprᴛ1 == KindUint64 || exprᴛ1 == KindBool || exprᴛ1 == KindDuration) {
+    switch (k1) {
+    case var ᴛ when ᴛ == KindInt64 || ᴛ == KindUint64 || ᴛ == KindBool || ᴛ == KindDuration: {
         return v.num == w.num;
     }
-    if (exprᴛ1 == KindString) {
+    case var ᴛ when ᴛ == KindString: {
         return v.str() == w.str();
     }
-    if (exprᴛ1 == KindFloat64) {
+    case var ᴛ when ᴛ == KindFloat64: {
         return v.@float() == w.@float();
     }
-    if (exprᴛ1 == KindTime) {
+    case var ᴛ when ᴛ == KindTime: {
         return v.time().Equal(w.time());
     }
-    if (exprᴛ1 == KindAny || exprᴛ1 == KindLogValuer) {
+    case var ᴛ when ᴛ == KindAny || ᴛ == KindLogValuer: {
         return AreEqual(v.any, w.any); // may panic if non-comparable
     }
-    if (exprᴛ1 == KindGroup) {
+    case var ᴛ when ᴛ == KindGroup: {
         return slices.EqualFunc<slice<Attr>, slice<Attr>, Attr, Attr>(v.group(), w.group(), ((Func<Attr, Attr, bool>)(Equal)));
     }
-    { /* default: */
+    default: {
         throw panic(fmt.Sprintf("bad kind: %s"u8, k1));
-    }
+        break;
+    }}
 }
 
 // isEmptyGroup reports whether v is a group that has no attributes.
@@ -533,37 +535,38 @@ internal static bool isEmptyGroup(this Value v) {
 // append appends a text representation of v to dst.
 // v is formatted as with fmt.Sprint.
 internal static slice<byte> append(this Value v, slice<byte> dst) {
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == KindString) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == KindString: {
         return builtin.append(dst, v.str().ꓸꓸꓸ);
     }
-    if (exprᴛ1 == KindInt64) {
+    case var ᴛ when ᴛ == KindInt64: {
         return strconv.AppendInt(dst, (int64)v.num, 10);
     }
-    if (exprᴛ1 == KindUint64) {
+    case var ᴛ when ᴛ == KindUint64: {
         return strconv.AppendUint(dst, v.num, 10);
     }
-    if (exprᴛ1 == KindFloat64) {
-        return strconv.AppendFloat(dst, v.@float(), (rune)'g', -1, 64);
+    case var ᴛ when ᴛ == KindFloat64: {
+        return strconv.AppendFloat(dst, v.@float(), (byte)'g', -1, 64);
     }
-    if (exprᴛ1 == KindBool) {
+    case var ᴛ when ᴛ == KindBool: {
         return strconv.AppendBool(dst, v.@bool());
     }
-    if (exprᴛ1 == KindDuration) {
+    case var ᴛ when ᴛ == KindDuration: {
         return builtin.append(dst, v.duration().String().ꓸꓸꓸ);
     }
-    if (exprᴛ1 == KindTime) {
+    case var ᴛ when ᴛ == KindTime: {
         return builtin.append(dst, v.time().String().ꓸꓸꓸ);
     }
-    if (exprᴛ1 == KindGroup) {
+    case var ᴛ when ᴛ == KindGroup: {
         return fmt.Append(dst, v.group());
     }
-    if (exprᴛ1 == KindAny || exprᴛ1 == KindLogValuer) {
+    case var ᴛ when ᴛ == KindAny || ᴛ == KindLogValuer: {
         return fmt.Append(dst, v.any);
     }
-    { /* default: */
+    default: {
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
-    }
+        break;
+    }}
 }
 
 // A LogValuer is any Go value that can convert itself into a Value for logging.
@@ -584,13 +587,13 @@ internal static UntypedInt maxLogValues => 100;
 // error is returned.
 // Resolve's return value is guaranteed not to be of Kind [KindLogValuer].
 public static Value /*rv*/ Resolve(this Value v) {
-    Value rv = default!;
+    Value rv = default;
     GoFrame ᒐ = default;
     try {
         var orig = v;
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     rv = AnyValue(fmt.Errorf("LogValue panicked\n%s"u8, stack(3, 5)));
                 }
             }
@@ -622,7 +625,7 @@ internal static partial @string stack(nint skip, nint nFrames) {
     var frames = runtime.CallersFrames(pcs.slice(0, n));
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     nint i = 0;
-    while (ᐧ) {
+    for (;;) {
         var (frame, more) = frames.Next();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "called from %s (%s:%d)\n"u8, frame.Function, frame.File, frame.Line);
         if (!more) {

@@ -11,7 +11,6 @@ using @unsafe = unsafe_package;
 using System.Runtime.CompilerServices;
 using go.@internal;
 
-[GoFieldAccess(typeof(abi.EmptyInterface))]
 partial class reflectlite_package {
 
 // Value is the reflection interface to a Go value.
@@ -77,7 +76,7 @@ internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
 internal static abiꓸKind kind(this flag f) {
-    return (abiꓸKind)(uint8)((uintptr)((flag)(f & flagKindMask)));
+    return (abiꓸKind)(uint8)((flag)(f & flagKindMask));
 }
 
 internal static flag ro(this flag f) {
@@ -279,7 +278,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
         // Overwrite type so that they match.
         // Same memory layout, so no harm done.
         var fl = (flag)((flag)(v.flag & ((flag)(flagAddr | flagIndir))) | v.flag.ro());
-        fl |= (flag)(((flag)(uintptr)(uint8)dst.Kind()));
+        fl |= (flag)(((flag)(uintptr)dst.Kind()));
         return new Value(Ꮡdst, v.ptr, fl);
     }
     case {} when implements(Ꮡdst, v.typ()): {
@@ -290,15 +289,15 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
             // A nil ReadWriter passed to nil Reader is OK,
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
-            return new Value(Ꮡdst, nil, (flag)(uintptr)(uint8)abi.Interface);
+            return new Value(Ꮡdst, nil, (flag)(uintptr)abi.Interface);
         }
         var x = valueInterface(v);
-        if (Ꮡdst.NumMethod() == 0){
+        if (Ꮡdst.NumMethod() == 0) {
             ((ж<any>)(uintptr)(target)).ValueSlot = x;
         } else {
             ifaceE2I(Ꮡdst, x, target);
         }
-        return new Value(Ꮡdst, target.Value, (flag)(flagIndir | ((flag)(uintptr)(uint8)abi.Interface)));
+        return new Value(Ꮡdst, target.Value, (flag)(flagIndir | ((flag)(uintptr)abi.Interface)));
     }}
 
     // Failed.

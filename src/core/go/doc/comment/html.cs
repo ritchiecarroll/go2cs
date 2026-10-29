@@ -48,7 +48,7 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
         if (!p.tight) {
             @out.WriteString("<p>"u8);
         }
-        p.text(Ꮡout, (~xΔ1).Text);
+        p.text(Ꮡout, xΔ1.Text);
         @out.WriteString("\n"u8);
         break;
     }
@@ -64,7 +64,7 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
             }
         }
         @out.WriteString(">"u8);
-        p.text(Ꮡout, (~xΔ1).Text);
+        p.text(Ꮡout, xΔ1.Text);
         @out.WriteString("</h"u8);
         @out.WriteString(h);
         @out.WriteString(">\n"u8);
@@ -72,22 +72,22 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
     }
     case ж<Code> xΔ1: {
         @out.WriteString(preˢ);
-        p.escape(Ꮡout, (~xΔ1).Text);
+        p.escape(Ꮡout, xΔ1.Text);
         @out.WriteString(preˢ2);
         break;
     }
     case ж<List> xΔ1: {
         @string kind = "ol>\n"u8;
-        if ((~(~xΔ1).Items[0]).Number == ""u8) {
+        if (xΔ1.Items[0].Number == ""u8) {
             kind = "ul>\n"u8;
         }
         @out.WriteString("<"u8);
         @out.WriteString(kind);
         @string next = "1"u8;
-        foreach (var (_, item) in (~xΔ1).Items) {
+        foreach (var (_, item) in xΔ1.Items) {
             @out.WriteString("<li"u8);
             {
-                @string n = item.Value.Number; if (n != ""u8) {
+                @string n = item.Number; if (n != ""u8) {
                     if (n != next) {
                         @out.WriteString(valueˢ);
                         @out.WriteString(n);
@@ -99,7 +99,7 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
             }
             @out.WriteString(">"u8);
             p.tight = !xΔ1.BlankBetween();
-            foreach (var (_, blk) in (~item).Content) {
+            foreach (var (_, blk) in item.Content) {
                 p.block(Ꮡout, blk);
             }
             p.tight = false;
@@ -115,11 +115,11 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
 internal static @string inc(@string s) {
     var b = slice<byte>(s);
     for (nint i = len(b) - 1; i >= 0; i--) {
-        if (b[i] < (rune)'9') {
+        if (b[i] < '9') {
             b[i]++;
             return (@string)b;
         }
-        b[i] = (rune)'0';
+        b[i] = (byte)'0';
     }
     return "1"u8 + ((sstring)b);
 }
@@ -145,9 +145,9 @@ internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice
         }
         case ж<Link> tΔ1: {
             @out.WriteString(aHrefˢ);
-            p.escape(Ꮡout, (~tΔ1).URL);
+            p.escape(Ꮡout, tΔ1.URL);
             @out.WriteString(@""">"u8);
-            p.text(Ꮡout, (~tΔ1).Text);
+            p.text(Ꮡout, tΔ1.Text);
             @out.WriteString("</a>"u8);
             break;
         }
@@ -158,7 +158,7 @@ internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice
                 p.escape(Ꮡout, url);
                 @out.WriteString(@""">"u8);
             }
-            p.text(Ꮡout, (~tΔ1).Text);
+            p.text(Ꮡout, tΔ1.Text);
             if (url != ""u8) {
                 @out.WriteString("</a>"u8);
             }
@@ -181,31 +181,31 @@ internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @st
     nint start = 0;
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
-        case (rune)'<': {
+        case (byte)'<': {
             @out.WriteString(s.slice(start, i));
             @out.WriteString("&lt;"u8);
             start = i + 1;
             break;
         }
-        case (rune)'&': {
+        case (byte)'&': {
             @out.WriteString(s.slice(start, i));
             @out.WriteString(ampˢ);
             start = i + 1;
             break;
         }
-        case (rune)'"': {
+        case (byte)'"': {
             @out.WriteString(s.slice(start, i));
             @out.WriteString(quotˢ);
             start = i + 1;
             break;
         }
-        case (rune)'\'': {
+        case (byte)'\'': {
             @out.WriteString(s.slice(start, i));
             @out.WriteString(aposˢ);
             start = i + 1;
             break;
         }
-        case (rune)'>': {
+        case (byte)'>': {
             @out.WriteString(s.slice(start, i));
             @out.WriteString("&gt;"u8);
             start = i + 1;

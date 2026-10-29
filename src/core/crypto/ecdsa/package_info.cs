@@ -11,8 +11,6 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
@@ -56,6 +54,13 @@ using static go.crypto.ecdsa_package;
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
 [assembly: go.GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(PrivateKey))]
+[assembly: go.GoFieldAccess(typeof(PublicKey))]
+[assembly: go.GoFieldAccess(typeof(go.crypto.@internal.fips140.ecdsa_package.Signature))]
+[assembly: go.GoFieldAccess(typeof(go.crypto.elliptic_package.CurveParams))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

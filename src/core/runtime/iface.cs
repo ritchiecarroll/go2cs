@@ -11,23 +11,22 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(itab), typeof(itabTableType), typeof(abi.TypeAssertCache), typeof(abi.InterfaceSwitchCache))]
 partial class runtime_package {
 
 internal static UntypedInt itabInitSize => 512;
 
 internal static readonly ж<mutex> ᏑitabLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex itabLock => ref ((StaticBox<mutex>)ᏑitabLock).ValueSlot;                         // lock for accessing itab table
+internal static ref mutex itabLock => ref ((StaticBox<mutex>)ᏑitabLock).ValueSlot;                           // lock for accessing itab table
 internal static readonly ж<ж<itabTableType>> ᏑitabTable = new StaticBox<ж<itabTableType>>(default(ж<itabTableType>));
 internal static ref ж<itabTableType> itabTable => ref ((StaticBox<ж<itabTableType>>)ᏑitabTable).ValueSlot;
-internal static void initᴛitabTable() { itabTable = ᏑitabTableInit; }                    // pointer to current table
+internal static void initᴛitabTable() { itabTable = ᏑitabTableInit; }                                        // pointer to current table
 internal static readonly ж<itabTableType> ᏑitabTableInit = new StaticBox<itabTableType>(new itabTableType(size: itabInitSize));
 internal static ref itabTableType itabTableInit => ref ((StaticBox<itabTableType>)ᏑitabTableInit).ValueSlot; // starter table
 
 // Note: change the formula in the mallocgc call in itabAdd if you change these fields.
 partial struct itabTableType {
-    internal uintptr size;             // length of entries array. Always a power of 2.
-    internal uintptr count;             // current number of filled entries.
+    internal uintptr size;                               // length of entries array. Always a power of 2.
+    internal uintptr count;                              // current number of filled entries.
     internal array<ж<itab>> entries = new(itabInitSize); // really [size] large
 }
 
@@ -59,13 +58,13 @@ internal static ж<itab> getitab(ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp, b
     // easy case
     if ((abi.TFlag)(typ.TFlag & abi.TFlagUncommon) == 0) {
         if (canfail) {
-            return default!;
+            return default;
         }
         var name = toRType(Ꮡinter.of(interfacetype.ᏑType)).nameOff(inter.Methods[0].Name);
         throw panic(Ꮡ(new TypeAssertionError(nil, Ꮡtyp, Ꮡinter.of(interfacetype.ᏑType), name.Name())));
     }
 
-    ж<itab> m = default!;
+    ж<itab> m = default;
 
     // First, look in the existing table to see if we can find the itab we need.
     // This is by far the most common case, so do it without locks.
@@ -89,23 +88,23 @@ internal static ж<itab> getitab(ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp, b
 
     // Entry doesn't exist yet. Make a new entry & add it.
     m = (ж<itab>)(uintptr)(persistentalloc(/* unsafe.Sizeof(itab{}) */ (uintptr)32 + (uintptr)(len(inter.Methods) - 1) * (uintptr)goarch.PtrSize, 0, Ꮡmemstats.of(mstats.Ꮡother_sys)));
-    m.Value.Inter = Ꮡinter;
-    m.Value.Type = Ꮡtyp;
+    m.Inter = Ꮡinter;
+    m.Type = Ꮡtyp;
     // The hash is used in type switches. However, compiler statically generates itab's
     // for all interface/type pairs used in switches (which are added to itabTable
     // in itabsinit). The dynamically-generated itab's never participate in type switches,
     // and thus the hash is irrelevant.
     // Note: m.Hash is _not_ the hash used for the runtime itabTable hash table.
-    m.Value.Hash = 0;
+    m.Hash = 0;
     itabInit(m, true);
     itabAdd(m);
     unlock(ᏑitabLock);
 finish:
-    if ((~m).Fun[0] != 0) {
+    if (m.Fun[0] != 0) {
         return m;
     }
     if (canfail) {
-        return default!;
+        return default;
     }
     // this can only happen if the conversion
     // was already done once using the , ok form
@@ -118,24 +117,24 @@ finish:
 
 // find finds the given interface/type pair in t.
 // Returns nil if the given interface/type pair isn't present.
-internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp) {
+internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Implemented using quadratic probing.
     // Probe sequence is h(i) = h0 + i*(i+1)/2 mod 2^k.
     // We're guaranteed to hit all table entries using this probe sequence.
     var mask = t.size - 1;
-    var h = (uintptr)(itabHashFunc(ref (Ꮡinter).DerefOrNull(), ref (Ꮡtyp).DerefOrNull()) & mask);
-    for (var i = (uintptr)1; ᐧ ; i++) {
+    var h = (uintptr)(itabHashFunc(ref (inter).DerefOrNull(), ref (typ).DerefOrNull()) & mask);
+    for (var i = (uintptr)1; ; i++) {
         var Δp = (ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.of(itabTableType.Ꮡentries)), h * (uintptr)goarch.PtrSize));
         // Use atomic read here so if we see m != nil, we also see
         // the initializations of the fields of m.
         // m := *p
         var m = (ж<itab>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Δp)));
         if (m == nil) {
-            return default!;
+            return default;
         }
-        if (m.Inter == Ꮡinter && m.Type == Ꮡtyp) {
+        if (m.Inter == inter && m.Type == typ) {
             return m;
         }
         h += i;
@@ -160,20 +159,20 @@ internal static void itabAdd(ж<itab> Ꮡm) {
     }
 
     var t = itabTable;
-    if ((~t).count >= 3 * ((~t).size / 4)) { // 75% load factor
+    if (t.count >= 3 * (t.size / 4)) { // 75% load factor
         // Grow hash table.
         // t2 = new(itabTableType) + some additional entries
         // We lie and tell malloc we want pointer-free memory because
         // all the pointed-to values are not in the heap.
-        var t2 = (ж<itabTableType>)(uintptr)(mallocgc((2 + 2 * (~t).size) * (uintptr)goarch.PtrSize, nil, true));
-        t2.size = (~t).size * 2;
+        var t2 = (ж<itabTableType>)(uintptr)(mallocgc((2 + 2 * t.size) * (uintptr)goarch.PtrSize, nil, true));
+        t2.size = t.size * 2;
 
         // Copy over entries.
         // Note: while copying, other threads may look for an itab and
         // fail to find it. That's ok, they will then try to get the itab lock
         // and as a consequence wait until this copying is complete.
         iterate_itabs(t2.add);
-        if (t2.count != (~t).count) {
+        if (t2.count != t.count) {
             @throw(mismatchedCountDuringˢ);
         }
         // Publish new hash table. Use an atomic write: see comment in getitab.
@@ -195,7 +194,7 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
     // Insert new itab in the first empty spot in the probe sequence.
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (m.Inter).DerefOrNull(), ref (m.Type).DerefOrNull()) & mask);
-    for (var i = (uintptr)1; ᐧ ; i++) {
+    for (var i = (uintptr)1; ; i++) {
         var Δp = (ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.of(itabTableType.Ꮡentries)), h * (uintptr)goarch.PtrSize));
         var m2 = Δp.ValueSlot;
         if (m2 == Ꮡm) {
@@ -241,40 +240,39 @@ internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     // and interface names are unique,
     // so can iterate over both in lock step;
     // the loop is O(ni+nt) not O(ni*nt).
-    nint ni = len((~inter).Methods);
-    nint nt = (nint)(~x).Mcount;
-    var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)(~x).Moff)), (int)(nt)));
+    nint ni = len(inter.Methods);
+    nint nt = (nint)x.Mcount;
+    var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff)), (int)(nt)));
     nint j = 0;
     // These are code pointers, not heap pointers. Use a uintptr slice so the
     // store emits no write barrier: on wasm a code pointer can look like a
     // heap pointer and make the GC crash (see issue 80472).
     var methods = array<uintptr>.AliasPointer(Ꮡm.at(itab.ᏑFun, 0), 65536).slice(0, ni, ni);
-    @unsafe.Pointer fun0 = default!;
+    @unsafe.Pointer fun0 = default;
 imethods:
     for (nint k = 0; k < ni; k++) {
-        var i = Ꮡ((~inter).Methods, k);
-        var itype = toRType(inter.of(abiꓸInterfaceType.ᏑType)).typeOff((~i).Typ);
-        var name = toRType(inter.of(abiꓸInterfaceType.ᏑType)).nameOff((~i).Name);
+        var i = Ꮡ(inter.Methods, k);
+        var itype = toRType(inter.of(abiꓸInterfaceType.ᏑType)).typeOff(i.Typ);
+        var name = toRType(inter.of(abiꓸInterfaceType.ᏑType)).nameOff(i.Name);
         @string iname = name.Name();
         @string ipkg = pkgPath(name);
         if (ipkg == ""u8) {
-            ipkg = (~inter).PkgPath.Name();
+            ipkg = inter.PkgPath.Name();
         }
         for (; j < nt; j++) {
             var t = Ꮡ(xmhdr, j);
             var rtyp = toRType(typ);
-            var tname = rtyp.nameOff((~t).Name);
-            if (rtyp.typeOff((~t).Mtyp) == itype && tname.Name() == iname) {
+            var tname = rtyp.nameOff(t.Name);
+            if (rtyp.typeOff(t.Mtyp) == itype && tname.Name() == iname) {
                 @string pkgPathΔ1 = pkgPath(tname);
                 if (pkgPathΔ1 == ""u8) {
-                    pkgPathΔ1 = rtyp.nameOff((~x).PkgPath).Name();
+                    pkgPathΔ1 = rtyp.nameOff(x.PkgPath).Name();
                 }
                 if (tname.IsExported() || pkgPathΔ1 == ipkg) {
-                    @unsafe.Pointer ifn = (uintptr)rtyp.textOff((~t).Ifn);
-                    if (k == 0){
+                    @unsafe.Pointer ifn = (uintptr)rtyp.textOff(t.Ifn);
+                    if (k == 0) {
                         fun0 = ifn; // we'll set m.Fun[0] at the end
-                    } else 
-                    if (firstTime) {
+                    } else if (firstTime) {
                         methods[k] = (uintptr)ifn;
                     }
                     goto continue_imethods;
@@ -297,7 +295,7 @@ internal static void itabsinit() {
     lockInit(ref itabLock, lockRankItab);
     @lock(ᏑitabLock);
     foreach (var (_, md) in activeModules()) {
-        foreach (var (_, i) in (~md).itablinks) {
+        foreach (var (_, i) in md.itablinks) {
             itabAdd(i);
         }
     }
@@ -308,26 +306,26 @@ internal static void itabsinit() {
 // have = the dynamic type we have.
 // want = the static type we're trying to convert to.
 // iface = the static type we're converting from.
-internal static void panicdottypeE(ж<_type> Ꮡhave, ж<_type> Ꮡwant, ж<_type> Ꮡiface) {
-    throw panic(Ꮡ(new TypeAssertionError(Ꮡiface, Ꮡhave, Ꮡwant, ""u8)));
+internal static void panicdottypeE(ж<_type> have, ж<_type> want, ж<_type> iface) {
+    throw panic(Ꮡ(new TypeAssertionError(iface, have, want, ""u8)));
 }
 
 // panicdottypeI is called when doing an i.(T) conversion and the conversion fails.
 // Same args as panicdottypeE, but "have" is the dynamic itab we have.
-internal static void panicdottypeI(ж<itab> Ꮡhave, ж<_type> Ꮡwant, ж<_type> Ꮡiface) {
+internal static void panicdottypeI(ж<itab> Ꮡhave, ж<_type> want, ж<_type> iface) {
     ref var have = ref Ꮡhave.DerefOrNull();
 
-    ж<_type> t = default!;
+    ж<_type> t = default;
     if (Ꮡhave != nil) {
         t = have.Type;
     }
-    panicdottypeE(t, Ꮡwant, Ꮡiface);
+    panicdottypeE(t, want, iface);
 }
 
 // panicnildottype is called when doing an i.(T) conversion and the interface i is nil.
 // want = the static type we're trying to convert to.
-internal static void panicnildottype(ж<_type> Ꮡwant) {
-    throw panic(Ꮡ(new TypeAssertionError(nil, nil, Ꮡwant, ""u8)));
+internal static void panicnildottype(ж<_type> want) {
+    throw panic(Ꮡ(new TypeAssertionError(nil, nil, want, ""u8)));
     // TODO: Add the static type we're converting from as well.
     // It might generate a better error message.
     // Just to match other nil conversion errors, we don't for now.
@@ -357,7 +355,7 @@ internal static readonly ж<any> Ꮡuint64Eface = new StaticBox<any>(((uint64Int
 internal static ref any uint64Eface => ref ((StaticBox<any>)Ꮡuint64Eface).ValueSlot;
 internal static readonly ж<any> ᏑstringEface = new StaticBox<any>(((stringInterfacePtr)(@string)""u8));
 internal static ref any stringEface => ref ((StaticBox<any>)ᏑstringEface).ValueSlot;
-internal static readonly ж<any> ᏑsliceEface = new StaticBox<any>(((sliceInterfacePtr)default!));
+internal static readonly ж<any> ᏑsliceEface = new StaticBox<any>(((sliceInterfacePtr)default));
 internal static ref any sliceEface => ref ((StaticBox<any>)ᏑsliceEface).ValueSlot;
 
 internal static ж<_type> uint16Type = (~efaceOf(Ꮡuint16Eface))._type;
@@ -412,9 +410,9 @@ internal static @unsafe.Pointer convTnoptr(ж<_type> Ꮡt, @unsafe.Pointer v) {
 }
 
 internal static @unsafe.Pointer /*x*/ convT16(uint16 val) {
-    @unsafe.Pointer x = default!;
+    @unsafe.Pointer x = default;
 
-    if (val < (uint16)len(staticuint64s)){
+    if (val < (uint16)len(staticuint64s)) {
         x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((nint)(val)));
         if (goarch.BigEndian) {
             x = (uintptr)add(x, 6);
@@ -427,9 +425,9 @@ internal static @unsafe.Pointer /*x*/ convT16(uint16 val) {
 }
 
 internal static @unsafe.Pointer /*x*/ convT32(uint32 val) {
-    @unsafe.Pointer x = default!;
+    @unsafe.Pointer x = default;
 
-    if (val < (uint32)len(staticuint64s)){
+    if (val < (uint32)len(staticuint64s)) {
         x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((ulong)(val)));
         if (goarch.BigEndian) {
             x = (uintptr)add(x, 4);
@@ -451,9 +449,9 @@ internal static @unsafe.Pointer /*x*/ convT32(uint32 val) {
 //
 //go:linkname convT64
 internal static @unsafe.Pointer /*x*/ convT64(uint64 val) {
-    @unsafe.Pointer x = default!;
+    @unsafe.Pointer x = default;
 
-    if (val < (uint64)len(staticuint64s)){
+    if (val < (uint64)len(staticuint64s)) {
         x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((ulong)(val)));
     } else {
         x = (uintptr)mallocgc(8, uint64Type, false);
@@ -472,9 +470,9 @@ internal static @unsafe.Pointer /*x*/ convT64(uint64 val) {
 //
 //go:linkname convTstring
 internal static @unsafe.Pointer /*x*/ convTstring(@string val) {
-    @unsafe.Pointer x = default!;
+    @unsafe.Pointer x = default;
 
-    if (val == ""u8){
+    if (val == ""u8) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
         x = (uintptr)mallocgc(/* unsafe.Sizeof(val) */ (uintptr)16, stringType, true);
@@ -493,11 +491,11 @@ internal static @unsafe.Pointer /*x*/ convTstring(@string val) {
 //
 //go:linkname convTslice
 internal static @unsafe.Pointer /*x*/ convTslice(slice<byte> valʗp) {
-    @unsafe.Pointer x = default!;
+    @unsafe.Pointer x = default;
     ref var val = ref heap(valʗp, out var Ꮡval);
 
     // Note: this must work for any element type, not just byte.
-    if ((Ꮡval.Reinterpret<slice<byte>, Δsliceᴛ>()).Value.Δarray == nil){
+    if ((Ꮡval.Reinterpret<slice<byte>, Δsliceᴛ>()).Value.Δarray == nil) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
         x = (uintptr)mallocgc(/* unsafe.Sizeof(val) */ (uintptr)24, sliceType, true);
@@ -506,34 +504,34 @@ internal static @unsafe.Pointer /*x*/ convTslice(slice<byte> valʗp) {
     return x;
 }
 
-internal static ж<itab> assertE2I(ж<interfacetype> Ꮡinter, ж<_type> Ꮡt) {
-    if (Ꮡt == nil) {
+internal static ж<itab> assertE2I(ж<interfacetype> inter, ж<_type> t) {
+    if (t == nil) {
         // explicit conversions require non-nil interface value.
-        throw panic(Ꮡ(new TypeAssertionError(nil, nil, Ꮡinter.of(interfacetype.ᏑType), ""u8)));
+        throw panic(Ꮡ(new TypeAssertionError(nil, nil, inter.of(interfacetype.ᏑType), ""u8)));
     }
-    return getitab(Ꮡinter, Ꮡt, false);
+    return getitab(inter, t, false);
 }
 
-internal static ж<itab> assertE2I2(ж<interfacetype> Ꮡinter, ж<_type> Ꮡt) {
-    if (Ꮡt == nil) {
-        return default!;
+internal static ж<itab> assertE2I2(ж<interfacetype> inter, ж<_type> t) {
+    if (t == nil) {
+        return default;
     }
-    return getitab(Ꮡinter, Ꮡt, true);
+    return getitab(inter, t, true);
 }
 
 // typeAssert builds an itab for the concrete type t and the
 // interface type s.Inter. If the conversion is not possible it
 // panics if s.CanFail is false and returns nil if s.CanFail is true.
-internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> Ꮡt) {
+internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> t) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    ж<itab> tab = default!;
-    if (Ꮡt == nil){
+    ж<itab> tab = default;
+    if (t == nil) {
         if (!s.CanFail) {
             throw panic(Ꮡ(new TypeAssertionError(nil, nil, s.Inter.of(abiꓸInterfaceType.ᏑType), ""u8)));
         }
     } else {
-        tab = getitab(s.Inter, Ꮡt, s.CanFail);
+        tab = getitab(s.Inter, t, s.CanFail);
     }
 
     if (!abi.UseInterfaceSwitchCache(goarch.ArchFamily)) {
@@ -556,7 +554,7 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> Ꮡt) {
     }
 
     // Make a new cache.
-    var newC = buildTypeAssertCache(oldC, Ꮡt, tab);
+    var newC = buildTypeAssertCache(oldC, t, tab);
 
     // Update cache. Use compare-and-swap so if multiple threads
     // are fighting to update the cache, at least one of their
@@ -566,7 +564,7 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> Ꮡt) {
     return tab;
 }
 
-internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCache> ᏑoldC, ж<_type> Ꮡtyp, ж<itab> Ꮡtab) {
+internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCache> ᏑoldC, ж<_type> typ, ж<itab> tab) {
     ref var oldC = ref ᏑoldC.DerefOrNull();
 
     var oldEntries = @unsafe.Slice(ᏑoldC.at(abi.TypeAssertCache.ᏑEntries, 0), oldC.Mask + 1);
@@ -582,7 +580,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
     // Figure out how big a table we need.
     // We need at least one more slot than the number of entries
     // so that we are guaranteed an empty slot (for termination).
-    nint newN = n * 2; // make it at most 50% full
+    nint newN = n * 2;                                            // make it at most 50% full
     newN = ((nint)1).Lsh((int64)(sys.Len64((uint64)(newN - 1)))); // round up to a power of 2
 
     // Allocate the new table.
@@ -594,8 +592,8 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
     // Fill the new table.
     var newEntriesʗ1 = newEntries;
     void addEntry(ж<_type> typΔ1, ж<itab> tabΔ1) {
-        nint h = (nint)(~typΔ1).Hash & (newN - 1);
-        while (ᐧ) {
+        nint h = (nint)typΔ1.Hash & (newN - 1);
+        for (;;) {
             if (newEntriesʗ1[h].Typ == 0) {
                 newEntriesʗ1[h].Typ = (uintptr)typΔ1;
                 newEntriesʗ1[h].Itab = (uintptr)tabΔ1;
@@ -609,7 +607,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
             addEntry((ж<_type>)(uintptr)((@unsafe.Pointer)e.Typ), (ж<itab>)(uintptr)((@unsafe.Pointer)e.Itab));
         }
     }
-    addEntry(Ꮡtyp, Ꮡtab);
+    addEntry(typ, tab);
 
     return newC;
 }
@@ -623,18 +621,18 @@ internal static abi.TypeAssertCache emptyTypeAssertCache = new abi.TypeAssertCac
 // an itab for the pair <t, s.Cases[i]>.
 // If there is no match, return N,nil, where N is the number
 // of cases.
-internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, ж<_type> Ꮡt) {
+internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, ж<_type> t) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var cases = @unsafe.Slice(Ꮡs.at(abi.InterfaceSwitch.ᏑCases, 0), s.NCases);
 
     // Results if we don't find a match.
     nint case_ = len(cases);
-    ж<itab> tab = default!;
+    ж<itab> tab = default;
 
     // Look through each case in order.
     foreach (var (i, c) in cases) {
-        tab = getitab(c, Ꮡt, true);
+        tab = getitab(c, t, true);
         if (tab != nil) {
             case_ = i;
             break;
@@ -664,7 +662,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
     }
 
     // Make a new cache.
-    var newC = buildInterfaceSwitchCache(oldC, Ꮡt, case_, tab);
+    var newC = buildInterfaceSwitchCache(oldC, t, case_, tab);
 
     // Update cache. Use compare-and-swap so if multiple threads
     // are fighting to update the cache, at least one of their
@@ -677,7 +675,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
 // buildInterfaceSwitchCache constructs an interface switch cache
 // containing all the entries from oldC plus the new entry
 // (typ,case_,tab).
-internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.InterfaceSwitchCache> ᏑoldC, ж<_type> Ꮡtyp, nint case_, ж<itab> Ꮡtab) {
+internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.InterfaceSwitchCache> ᏑoldC, ж<_type> typ, nint case_, ж<itab> tab) {
     ref var oldC = ref ᏑoldC.DerefOrNull();
 
     var oldEntries = @unsafe.Slice(ᏑoldC.at(abi.InterfaceSwitchCache.ᏑEntries, 0), oldC.Mask + 1);
@@ -693,7 +691,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
     // Figure out how big a table we need.
     // We need at least one more slot than the number of entries
     // so that we are guaranteed an empty slot (for termination).
-    nint newN = n * 2; // make it at most 50% full
+    nint newN = n * 2;                                            // make it at most 50% full
     newN = ((nint)1).Lsh((int64)(sys.Len64((uint64)(newN - 1)))); // round up to a power of 2
 
     // Allocate the new table.
@@ -705,8 +703,8 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
     // Fill the new table.
     var newEntriesʗ1 = newEntries;
     void addEntry(ж<_type> typΔ1, nint case_Δ1, ж<itab> tabΔ1) {
-        nint h = (nint)(~typΔ1).Hash & (newN - 1);
-        while (ᐧ) {
+        nint h = (nint)typΔ1.Hash & (newN - 1);
+        for (;;) {
             if (newEntriesʗ1[h].Typ == 0) {
                 newEntriesʗ1[h].Typ = (uintptr)typΔ1;
                 newEntriesʗ1[h].Case = case_Δ1;
@@ -721,7 +719,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
             addEntry((ж<_type>)(uintptr)((@unsafe.Pointer)e.Typ), e.Case, (ж<itab>)(uintptr)((@unsafe.Pointer)e.Itab));
         }
     }
-    addEntry(Ꮡtyp, case_, Ꮡtab);
+    addEntry(typ, case_, tab);
 
     return newC;
 }
@@ -740,20 +738,20 @@ internal static abi.InterfaceSwitchCache emptyInterfaceSwitchCache = new abi.Int
 // Do not remove or change the type signature.
 //
 //go:linkname reflect_ifaceE2I reflect.ifaceE2I
-internal static void reflect_ifaceE2I(ж<interfacetype> Ꮡinter, eface e, ref iface dst) {
-    dst = new iface(assertE2I(Ꮡinter, e._type), e.data);
+internal static void reflect_ifaceE2I(ж<interfacetype> inter, eface e, ref iface dst) {
+    dst = new iface(assertE2I(inter, e._type), e.data);
 }
 
 //go:linkname reflectlite_ifaceE2I internal/reflectlite.ifaceE2I
-internal static void reflectlite_ifaceE2I(ж<interfacetype> Ꮡinter, eface e, ref iface dst) {
-    dst = new iface(assertE2I(Ꮡinter, e._type), e.data);
+internal static void reflectlite_ifaceE2I(ж<interfacetype> inter, eface e, ref iface dst) {
+    dst = new iface(assertE2I(inter, e._type), e.data);
 }
 
 internal static void iterate_itabs(Action<ж<itab>> fn) {
     // Note: only runs during stop the world or with itabLock held,
     // so no other locks/atomics needed.
     var t = itabTable;
-    for (var i = (uintptr)0; i < (~t).size; i++) {
+    for (var i = (uintptr)0; i < t.size; i++) {
         var m = ~(ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(t.of(itabTableType.Ꮡentries)), i * (uintptr)goarch.PtrSize));
         if (m != nil) {
             fn(m);

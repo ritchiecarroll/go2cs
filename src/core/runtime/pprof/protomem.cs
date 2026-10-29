@@ -32,8 +32,8 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
         b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_DefaultSampleType, b.stringIndex(defaultSampleType));
     }
 
-    var values = new int64[]{0, 0, 0, 0}.slice();
-    slice<uint64> locs = default!;
+    var values = slice<int64>([0, 0, 0, 0]);
+    slice<uint64> locs = default;
     foreach (var (_, vᴛ1) in p) {
         var r = vᴛ1;
 
@@ -64,7 +64,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
 
         (values[0], values[1]) = scaleHeapSample(r.AllocObjects, r.AllocBytes, rate);
         (values[2], values[3]) = scaleHeapSample(r.InUseObjects(), r.InUseBytes(), rate);
-        int64 blockSize = default!;
+        int64 blockSize = default;
         if (r.AllocObjects > 0) {
             blockSize = quo(r.AllocBytes, r.AllocObjects);
         }

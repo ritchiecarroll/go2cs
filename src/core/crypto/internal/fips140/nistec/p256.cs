@@ -32,24 +32,24 @@ partial struct P256Point {
 
 // NewP256Point returns a new P256Point representing the point at infinity point.
 public static ж<P256Point> NewP256Point() {
-    var p = Ꮡ(new P256Point(nil));
+    var p = Ꮡ(new P256Point());
     p.of(P256Point.Ꮡy).One();
     return p;
 }
 
 // SetGenerator sets p to the canonical generator and returns p.
 public static ж<P256Point> SetGenerator(this ж<P256Point> Ꮡp) {
-    Ꮡp.of(P256Point.Ꮡx).SetBytes(new byte[]{0x6b, 0x17, 0xd1, 0xf2, 0xe1, 0x2c, 0x42, 0x47, 0xf8, 0xbc, 0xe6, 0xe5, 0x63, 0xa4, 0x40, 0xf2, 0x77, 0x3, 0x7d, 0x81, 0x2d, 0xeb, 0x33, 0xa0, 0xf4, 0xa1, 0x39, 0x45, 0xd8, 0x98, 0xc2, 0x96}.slice());
-    Ꮡp.of(P256Point.Ꮡy).SetBytes(new byte[]{0x4f, 0xe3, 0x42, 0xe2, 0xfe, 0x1a, 0x7f, 0x9b, 0x8e, 0xe7, 0xeb, 0x4a, 0x7c, 0xf, 0x9e, 0x16, 0x2b, 0xce, 0x33, 0x57, 0x6b, 0x31, 0x5e, 0xce, 0xcb, 0xb6, 0x40, 0x68, 0x37, 0xbf, 0x51, 0xf5}.slice());
+    Ꮡp.of(P256Point.Ꮡx).SetBytes(slice<byte>([0x6b, 0x17, 0xd1, 0xf2, 0xe1, 0x2c, 0x42, 0x47, 0xf8, 0xbc, 0xe6, 0xe5, 0x63, 0xa4, 0x40, 0xf2, 0x77, 0x3, 0x7d, 0x81, 0x2d, 0xeb, 0x33, 0xa0, 0xf4, 0xa1, 0x39, 0x45, 0xd8, 0x98, 0xc2, 0x96]));
+    Ꮡp.of(P256Point.Ꮡy).SetBytes(slice<byte>([0x4f, 0xe3, 0x42, 0xe2, 0xfe, 0x1a, 0x7f, 0x9b, 0x8e, 0xe7, 0xeb, 0x4a, 0x7c, 0xf, 0x9e, 0x16, 0x2b, 0xce, 0x33, 0x57, 0x6b, 0x31, 0x5e, 0xce, 0xcb, 0xb6, 0x40, 0x68, 0x37, 0xbf, 0x51, 0xf5]));
     Ꮡp.of(P256Point.Ꮡz).One();
     return Ꮡp;
 }
 
 // Set sets p = q and returns p.
-public static ж<P256Point> Set(this ж<P256Point> Ꮡp, ж<P256Point> Ꮡq) {
-    Ꮡp.of(P256Point.Ꮡx).Set(Ꮡq.of(P256Point.Ꮡx));
-    Ꮡp.of(P256Point.Ꮡy).Set(Ꮡq.of(P256Point.Ꮡy));
-    Ꮡp.of(P256Point.Ꮡz).Set(Ꮡq.of(P256Point.Ꮡz));
+public static ж<P256Point> Set(this ж<P256Point> Ꮡp, ж<P256Point> q) {
+    Ꮡp.of(P256Point.Ꮡx).Set(q.of(P256Point.Ꮡx));
+    Ꮡp.of(P256Point.Ꮡy).Set(q.of(P256Point.Ꮡy));
+    Ꮡp.of(P256Point.Ꮡz).Set(q.of(P256Point.Ꮡz));
     return Ꮡp;
 }
 
@@ -71,39 +71,39 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
     switch (ᐧ) {
     // Point at infinity.
     case {} when len(b) == 1 && b[0] == 0: {
-        return (Ꮡp.Set(NewP256Point()), default!);
+        return (Ꮡp.Set(NewP256Point()), default);
     }
     // Uncompressed form.
     case {} when len(b) == p256UncompressedLength && b[0] == 4: {
         var (x, err) = @new<fiat.P256Element>().SetBytes(b[1..(int)(1 + p256ElementLength)]);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         (var y, err) = @new<fiat.P256Element>().SetBytes(b[(int)(1 + p256ElementLength)..]);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         {
-            var errΔ1 = p256CheckOnCurve(x, y); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var errΔ1 = p256CheckOnCurve(x, y); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
         Ꮡp.of(P256Point.Ꮡx).Set(x);
         Ꮡp.of(P256Point.Ꮡy).Set(y);
         Ꮡp.of(P256Point.Ꮡz).One();
-        return (Ꮡp, default!);
+        return (Ꮡp, default);
     }
     // Compressed form.
     case {} when len(b) == p256CompressedLength && (b[0] == 2 || b[0] == 3): {
         var (x, err) = @new<fiat.P256Element>().SetBytes(b[1..]);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
         // y² = x³ - 3x + b
         var y = p256Polynomial(@new<fiat.P256Element>(), x);
         if (!p256Sqrt(y, y)) {
-            return (default!, errors.New(invalidP256Compressedˢ));
+            return (default, errors.New(invalidP256Compressedˢ));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -116,10 +116,10 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
         Ꮡp.of(P256Point.Ꮡx).Set(x);
         Ꮡp.of(P256Point.Ꮡy).Set(y);
         Ꮡp.of(P256Point.Ꮡz).One();
-        return (Ꮡp, default!);
+        return (Ꮡp, default);
     }
     default: {
-        return (default!, errors.New(invalidP256PointEncodingˢ));
+        return (default, errors.New(invalidP256PointEncodingˢ));
     }}
 }
 
@@ -130,34 +130,34 @@ internal static ref sync.Once _p256BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p256B
 
 internal static ж<fiat.P256Element> p256B() {
     Ꮡ_p256BOnce.Do(() => {
-        (_p256B, _) = @new<fiat.P256Element>().SetBytes(new byte[]{0x5a, 0xc6, 0x35, 0xd8, 0xaa, 0x3a, 0x93, 0xe7, 0xb3, 0xeb, 0xbd, 0x55, 0x76, 0x98, 0x86, 0xbc, 0x65, 0x1d, 0x6, 0xb0, 0xcc, 0x53, 0xb0, 0xf6, 0x3b, 0xce, 0x3c, 0x3e, 0x27, 0xd2, 0x60, 0x4b}.slice());
+        (_p256B, _) = @new<fiat.P256Element>().SetBytes(slice<byte>([0x5a, 0xc6, 0x35, 0xd8, 0xaa, 0x3a, 0x93, 0xe7, 0xb3, 0xeb, 0xbd, 0x55, 0x76, 0x98, 0x86, 0xbc, 0x65, 0x1d, 0x6, 0xb0, 0xcc, 0x53, 0xb0, 0xf6, 0x3b, 0xce, 0x3c, 0x3e, 0x27, 0xd2, 0x60, 0x4b]));
     });
     return _p256B;
 }
 
 // p256Polynomial sets y2 to x³ - 3x + b, and returns y2.
-internal static ж<fiat.P256Element> p256Polynomial(ж<fiat.P256Element> Ꮡy2, ж<fiat.P256Element> Ꮡx) {
-    Ꮡy2.Square(Ꮡx);
-    Ꮡy2.Mul(Ꮡy2, Ꮡx);
+internal static ж<fiat.P256Element> p256Polynomial(ж<fiat.P256Element> y2, ж<fiat.P256Element> x) {
+    y2.Square(x);
+    y2.Mul(y2, x);
 
-    var threeX = @new<fiat.P256Element>().Add(Ꮡx, Ꮡx);
-    threeX.Add(threeX, Ꮡx);
-    Ꮡy2.Sub(Ꮡy2, threeX);
+    var threeX = @new<fiat.P256Element>().Add(x, x);
+    threeX.Add(threeX, x);
+    y2.Sub(y2, threeX);
 
-    return Ꮡy2.Add(Ꮡy2, p256B());
+    return y2.Add(y2, p256B());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string p256PointNotOnCurveˢ = "P256 point not on curve"u8;
 
-internal static error p256CheckOnCurve(ж<fiat.P256Element> Ꮡx, ж<fiat.P256Element> Ꮡy) {
+internal static error p256CheckOnCurve(ж<fiat.P256Element> x, ж<fiat.P256Element> y) {
     // y² = x³ - 3x + b
-    var rhs = p256Polynomial(@new<fiat.P256Element>(), Ꮡx);
-    var lhs = @new<fiat.P256Element>().Square(Ꮡy);
+    var rhs = p256Polynomial(@new<fiat.P256Element>(), x);
+    var lhs = @new<fiat.P256Element>().Square(y);
     if (rhs.Equal(lhs) != 1) {
         return errors.New(p256PointNotOnCurveˢ);
     }
-    return default!;
+    return default;
 }
 
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
@@ -205,13 +205,13 @@ internal static (slice<byte>, error) bytesX(this ж<P256Point> Ꮡp, /*[32]*/ ж
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (Ꮡp.of(P256Point.Ꮡz).IsZero() == 1) {
-        return (default!, errors.New(p256PointIsThePointAtˢ));
+        return (default, errors.New(p256PointIsThePointAtˢ));
     }
 
     var zinv = @new<fiat.P256Element>().Invert(Ꮡp.of(P256Point.Ꮡz));
     var x = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡx), zinv);
 
-    return (appendꓸꓸꓸ(@out[..0], x.Bytes()), default!);
+    return (appendꓸꓸꓸ(@out[..0], x.Bytes()), default);
 }
 
 // BytesCompressed returns the compressed or infinity encoding of p, as
@@ -244,53 +244,53 @@ internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, /*[33]*/ ж
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж<P256Point> Ꮡp2) {
+public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> p1, ж<P256Point> p2) {
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
 
-    var t0 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡx), Ꮡp2.of(P256Point.Ꮡx)); // t0 := X1 * X2
-    var t1 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡy), Ꮡp2.of(P256Point.Ꮡy)); // t1 := Y1 * Y2
-    var t2 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡz), Ꮡp2.of(P256Point.Ꮡz)); // t2 := Z1 * Z2
-    var t3 = @new<fiat.P256Element>().Add(Ꮡp1.of(P256Point.Ꮡx), Ꮡp1.of(P256Point.Ꮡy)); // t3 := X1 + Y1
-    var t4 = @new<fiat.P256Element>().Add(Ꮡp2.of(P256Point.Ꮡx), Ꮡp2.of(P256Point.Ꮡy)); // t4 := X2 + Y2
-    t3.Mul(t3, t4); // t3 := t3 * t4
-    t4.Add(t0, t1); // t4 := t0 + t1
-    t3.Sub(t3, t4); // t3 := t3 - t4
-    t4.Add(Ꮡp1.of(P256Point.Ꮡy), Ꮡp1.of(P256Point.Ꮡz)); // t4 := Y1 + Z1
-    var x3 = @new<fiat.P256Element>().Add(Ꮡp2.of(P256Point.Ꮡy), Ꮡp2.of(P256Point.Ꮡz)); // X3 := Y2 + Z2
-    t4.Mul(t4, x3); // t4 := t4 * X3
-    x3.Add(t1, t2); // X3 := t1 + t2
-    t4.Sub(t4, x3); // t4 := t4 - X3
-    x3.Add(Ꮡp1.of(P256Point.Ꮡx), Ꮡp1.of(P256Point.Ꮡz)); // X3 := X1 + Z1
-    var y3 = @new<fiat.P256Element>().Add(Ꮡp2.of(P256Point.Ꮡx), Ꮡp2.of(P256Point.Ꮡz)); // Y3 := X2 + Z2
-    x3.Mul(x3, y3); // X3 := X3 * Y3
-    y3.Add(t0, t2); // Y3 := t0 + t2
-    y3.Sub(x3, y3); // Y3 := X3 - Y3
-    var z3 = @new<fiat.P256Element>().Mul(p256B(), t2); // Z3 := b * t2
-    x3.Sub(y3, z3); // X3 := Y3 - Z3
-    z3.Add(x3, x3); // Z3 := X3 + X3
-    x3.Add(x3, z3); // X3 := X3 + Z3
-    z3.Sub(t1, x3); // Z3 := t1 - X3
-    x3.Add(t1, x3); // X3 := t1 + X3
-    y3.Mul(p256B(), y3); // Y3 := b * Y3
-    t1.Add(t2, t2); // t1 := t2 + t2
-    t2.Add(t1, t2); // t2 := t1 + t2
-    y3.Sub(y3, t2); // Y3 := Y3 - t2
-    y3.Sub(y3, t0); // Y3 := Y3 - t0
-    t1.Add(y3, y3); // t1 := Y3 + Y3
-    y3.Add(t1, y3); // Y3 := t1 + Y3
-    t1.Add(t0, t0); // t1 := t0 + t0
-    t0.Add(t1, t0); // t0 := t1 + t0
-    t0.Sub(t0, t2); // t0 := t0 - t2
-    t1.Mul(t4, y3); // t1 := t4 * Y3
-    t2.Mul(t0, y3); // t2 := t0 * Y3
-    y3.Mul(x3, z3); // Y3 := X3 * Z3
-    y3.Add(y3, t2); // Y3 := Y3 + t2
-    x3.Mul(t3, x3); // X3 := t3 * X3
-    x3.Sub(x3, t1); // X3 := X3 - t1
-    z3.Mul(t4, z3); // Z3 := t4 * Z3
-    t1.Mul(t3, t0); // t1 := t3 * t0
-    z3.Add(z3, t1); // Z3 := Z3 + t1
+    var t0 = @new<fiat.P256Element>().Mul(p1.of(P256Point.Ꮡx), p2.of(P256Point.Ꮡx)); // t0 := X1 * X2
+    var t1 = @new<fiat.P256Element>().Mul(p1.of(P256Point.Ꮡy), p2.of(P256Point.Ꮡy)); // t1 := Y1 * Y2
+    var t2 = @new<fiat.P256Element>().Mul(p1.of(P256Point.Ꮡz), p2.of(P256Point.Ꮡz)); // t2 := Z1 * Z2
+    var t3 = @new<fiat.P256Element>().Add(p1.of(P256Point.Ꮡx), p1.of(P256Point.Ꮡy)); // t3 := X1 + Y1
+    var t4 = @new<fiat.P256Element>().Add(p2.of(P256Point.Ꮡx), p2.of(P256Point.Ꮡy)); // t4 := X2 + Y2
+    t3.Mul(t3, t4);                                                                  // t3 := t3 * t4
+    t4.Add(t0, t1);                                                                  // t4 := t0 + t1
+    t3.Sub(t3, t4);                                                                  // t3 := t3 - t4
+    t4.Add(p1.of(P256Point.Ꮡy), p1.of(P256Point.Ꮡz));                                // t4 := Y1 + Z1
+    var x3 = @new<fiat.P256Element>().Add(p2.of(P256Point.Ꮡy), p2.of(P256Point.Ꮡz)); // X3 := Y2 + Z2
+    t4.Mul(t4, x3);                                                                  // t4 := t4 * X3
+    x3.Add(t1, t2);                                                                  // X3 := t1 + t2
+    t4.Sub(t4, x3);                                                                  // t4 := t4 - X3
+    x3.Add(p1.of(P256Point.Ꮡx), p1.of(P256Point.Ꮡz));                                // X3 := X1 + Z1
+    var y3 = @new<fiat.P256Element>().Add(p2.of(P256Point.Ꮡx), p2.of(P256Point.Ꮡz)); // Y3 := X2 + Z2
+    x3.Mul(x3, y3);                                                                  // X3 := X3 * Y3
+    y3.Add(t0, t2);                                                                  // Y3 := t0 + t2
+    y3.Sub(x3, y3);                                                                  // Y3 := X3 - Y3
+    var z3 = @new<fiat.P256Element>().Mul(p256B(), t2);                              // Z3 := b * t2
+    x3.Sub(y3, z3);                                                                  // X3 := Y3 - Z3
+    z3.Add(x3, x3);                                                                  // Z3 := X3 + X3
+    x3.Add(x3, z3);                                                                  // X3 := X3 + Z3
+    z3.Sub(t1, x3);                                                                  // Z3 := t1 - X3
+    x3.Add(t1, x3);                                                                  // X3 := t1 + X3
+    y3.Mul(p256B(), y3);                                                             // Y3 := b * Y3
+    t1.Add(t2, t2);                                                                  // t1 := t2 + t2
+    t2.Add(t1, t2);                                                                  // t2 := t1 + t2
+    y3.Sub(y3, t2);                                                                  // Y3 := Y3 - t2
+    y3.Sub(y3, t0);                                                                  // Y3 := Y3 - t0
+    t1.Add(y3, y3);                                                                  // t1 := Y3 + Y3
+    y3.Add(t1, y3);                                                                  // Y3 := t1 + Y3
+    t1.Add(t0, t0);                                                                  // t1 := t0 + t0
+    t0.Add(t1, t0);                                                                  // t0 := t1 + t0
+    t0.Sub(t0, t2);                                                                  // t0 := t0 - t2
+    t1.Mul(t4, y3);                                                                  // t1 := t4 * Y3
+    t2.Mul(t0, y3);                                                                  // t2 := t0 * Y3
+    y3.Mul(x3, z3);                                                                  // Y3 := X3 * Z3
+    y3.Add(y3, t2);                                                                  // Y3 := Y3 + t2
+    x3.Mul(t3, x3);                                                                  // X3 := t3 * X3
+    x3.Sub(x3, t1);                                                                  // X3 := X3 - t1
+    z3.Mul(t4, z3);                                                                  // Z3 := t4 * Z3
+    t1.Mul(t3, t0);                                                                  // t1 := t3 * t0
+    z3.Add(z3, t1);                                                                  // Z3 := Z3 + t1
 
     Ꮡq.of(P256Point.Ꮡx).Set(x3);
     Ꮡq.of(P256Point.Ꮡy).Set(y3);
@@ -299,44 +299,44 @@ public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp) {
+public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> p) {
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
 
-    var t0 = @new<fiat.P256Element>().Square(Ꮡp.of(P256Point.Ꮡx)); // t0 := X ^ 2
-    var t1 = @new<fiat.P256Element>().Square(Ꮡp.of(P256Point.Ꮡy)); // t1 := Y ^ 2
-    var t2 = @new<fiat.P256Element>().Square(Ꮡp.of(P256Point.Ꮡz)); // t2 := Z ^ 2
-    var t3 = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡx), Ꮡp.of(P256Point.Ꮡy)); // t3 := X * Y
-    t3.Add(t3, t3); // t3 := t3 + t3
-    var z3 = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡx), Ꮡp.of(P256Point.Ꮡz)); // Z3 := X * Z
-    z3.Add(z3, z3); // Z3 := Z3 + Z3
-    var y3 = @new<fiat.P256Element>().Mul(p256B(), t2); // Y3 := b * t2
-    y3.Sub(y3, z3); // Y3 := Y3 - Z3
-    var x3 = @new<fiat.P256Element>().Add(y3, y3); // X3 := Y3 + Y3
-    y3.Add(x3, y3); // Y3 := X3 + Y3
-    x3.Sub(t1, y3); // X3 := t1 - Y3
-    y3.Add(t1, y3); // Y3 := t1 + Y3
-    y3.Mul(x3, y3); // Y3 := X3 * Y3
-    x3.Mul(x3, t3); // X3 := X3 * t3
-    t3.Add(t2, t2); // t3 := t2 + t2
-    t2.Add(t2, t3); // t2 := t2 + t3
-    z3.Mul(p256B(), z3); // Z3 := b * Z3
-    z3.Sub(z3, t2); // Z3 := Z3 - t2
-    z3.Sub(z3, t0); // Z3 := Z3 - t0
-    t3.Add(z3, z3); // t3 := Z3 + Z3
-    z3.Add(z3, t3); // Z3 := Z3 + t3
-    t3.Add(t0, t0); // t3 := t0 + t0
-    t0.Add(t3, t0); // t0 := t3 + t0
-    t0.Sub(t0, t2); // t0 := t0 - t2
-    t0.Mul(t0, z3); // t0 := t0 * Z3
-    y3.Add(y3, t0); // Y3 := Y3 + t0
-    t0.Mul(Ꮡp.of(P256Point.Ꮡy), Ꮡp.of(P256Point.Ꮡz)); // t0 := Y * Z
-    t0.Add(t0, t0); // t0 := t0 + t0
-    z3.Mul(t0, z3); // Z3 := t0 * Z3
-    x3.Sub(x3, z3); // X3 := X3 - Z3
-    z3.Mul(t0, t1); // Z3 := t0 * t1
-    z3.Add(z3, z3); // Z3 := Z3 + Z3
-    z3.Add(z3, z3); // Z3 := Z3 + Z3
+    var t0 = @new<fiat.P256Element>().Square(p.of(P256Point.Ꮡx));                  // t0 := X ^ 2
+    var t1 = @new<fiat.P256Element>().Square(p.of(P256Point.Ꮡy));                  // t1 := Y ^ 2
+    var t2 = @new<fiat.P256Element>().Square(p.of(P256Point.Ꮡz));                  // t2 := Z ^ 2
+    var t3 = @new<fiat.P256Element>().Mul(p.of(P256Point.Ꮡx), p.of(P256Point.Ꮡy)); // t3 := X * Y
+    t3.Add(t3, t3);                                                                // t3 := t3 + t3
+    var z3 = @new<fiat.P256Element>().Mul(p.of(P256Point.Ꮡx), p.of(P256Point.Ꮡz)); // Z3 := X * Z
+    z3.Add(z3, z3);                                                                // Z3 := Z3 + Z3
+    var y3 = @new<fiat.P256Element>().Mul(p256B(), t2);                            // Y3 := b * t2
+    y3.Sub(y3, z3);                                                                // Y3 := Y3 - Z3
+    var x3 = @new<fiat.P256Element>().Add(y3, y3);                                 // X3 := Y3 + Y3
+    y3.Add(x3, y3);                                                                // Y3 := X3 + Y3
+    x3.Sub(t1, y3);                                                                // X3 := t1 - Y3
+    y3.Add(t1, y3);                                                                // Y3 := t1 + Y3
+    y3.Mul(x3, y3);                                                                // Y3 := X3 * Y3
+    x3.Mul(x3, t3);                                                                // X3 := X3 * t3
+    t3.Add(t2, t2);                                                                // t3 := t2 + t2
+    t2.Add(t2, t3);                                                                // t2 := t2 + t3
+    z3.Mul(p256B(), z3);                                                           // Z3 := b * Z3
+    z3.Sub(z3, t2);                                                                // Z3 := Z3 - t2
+    z3.Sub(z3, t0);                                                                // Z3 := Z3 - t0
+    t3.Add(z3, z3);                                                                // t3 := Z3 + Z3
+    z3.Add(z3, t3);                                                                // Z3 := Z3 + t3
+    t3.Add(t0, t0);                                                                // t3 := t0 + t0
+    t0.Add(t3, t0);                                                                // t0 := t3 + t0
+    t0.Sub(t0, t2);                                                                // t0 := t0 - t2
+    t0.Mul(t0, z3);                                                                // t0 := t0 * Z3
+    y3.Add(y3, t0);                                                                // Y3 := Y3 + t0
+    t0.Mul(p.of(P256Point.Ꮡy), p.of(P256Point.Ꮡz));                                // t0 := Y * Z
+    t0.Add(t0, t0);                                                                // t0 := t0 + t0
+    z3.Mul(t0, z3);                                                                // Z3 := t0 * Z3
+    x3.Sub(x3, z3);                                                                // X3 := X3 - Z3
+    z3.Mul(t0, t1);                                                                // Z3 := t0 * t1
+    z3.Add(z3, z3);                                                                // Z3 := Z3 + Z3
+    z3.Add(z3, z3);                                                                // Z3 := Z3 + Z3
 
     Ꮡq.of(P256Point.Ꮡx).Set(x3);
     Ꮡq.of(P256Point.Ꮡy).Set(y3);
@@ -360,59 +360,59 @@ public static ж<P256Point> Projective(this ref p256AffinePoint p) {
 // p2 can't be the point at infinity as it can't be represented in affine
 // coordinates, instead callers can set p2 to an arbitrary point and set
 // infinity to 1.
-public static ж<P256Point> AddAffine(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж<p256AffinePoint> Ꮡp2, nint infinity) {
+public static ж<P256Point> AddAffine(this ж<P256Point> Ꮡq, ж<P256Point> p1, ж<p256AffinePoint> p2, nint infinity) {
     // Complete mixed addition formula for a = -3 from "Complete addition
     // formulas for prime order elliptic curves"
     // (https://eprint.iacr.org/2015/1060), Algorithm 5.
 
-    var t0 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡx), Ꮡp2.of(p256AffinePoint.Ꮡx)); // t0 ← X1 · X2
-    var t1 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡy), Ꮡp2.of(p256AffinePoint.Ꮡy)); // t1 ← Y1 · Y2
-    var t3 = @new<fiat.P256Element>().Add(Ꮡp2.of(p256AffinePoint.Ꮡx), Ꮡp2.of(p256AffinePoint.Ꮡy)); // t3 ← X2 + Y2
-    var t4 = @new<fiat.P256Element>().Add(Ꮡp1.of(P256Point.Ꮡx), Ꮡp1.of(P256Point.Ꮡy)); // t4 ← X1 + Y1
-    t3.Mul(t3, t4); // t3 ← t3 · t4
-    t4.Add(t0, t1); // t4 ← t0 + t1
-    t3.Sub(t3, t4); // t3 ← t3 − t4
-    t4.Mul(Ꮡp2.of(p256AffinePoint.Ꮡy), Ꮡp1.of(P256Point.Ꮡz)); // t4 ← Y2 · Z1
-    t4.Add(t4, Ꮡp1.of(P256Point.Ꮡy)); // t4 ← t4 + Y1
-    var y3 = @new<fiat.P256Element>().Mul(Ꮡp2.of(p256AffinePoint.Ꮡx), Ꮡp1.of(P256Point.Ꮡz)); // Y3 ← X2 · Z1
-    y3.Add(y3, Ꮡp1.of(P256Point.Ꮡx)); // Y3 ← Y3 + X1
-    var z3 = @new<fiat.P256Element>().Mul(p256B(), Ꮡp1.of(P256Point.Ꮡz)); // Z3 ← b  · Z1
-    var x3 = @new<fiat.P256Element>().Sub(y3, z3); // X3 ← Y3 − Z3
-    z3.Add(x3, x3); // Z3 ← X3 + X3
-    x3.Add(x3, z3); // X3 ← X3 + Z3
-    z3.Sub(t1, x3); // Z3 ← t1 − X3
-    x3.Add(t1, x3); // X3 ← t1 + X3
-    y3.Mul(p256B(), y3); // Y3 ← b  · Y3
-    t1.Add(Ꮡp1.of(P256Point.Ꮡz), Ꮡp1.of(P256Point.Ꮡz)); // t1 ← Z1 + Z1
-    var t2 = @new<fiat.P256Element>().Add(t1, Ꮡp1.of(P256Point.Ꮡz)); // t2 ← t1 + Z1
-    y3.Sub(y3, t2); // Y3 ← Y3 − t2
-    y3.Sub(y3, t0); // Y3 ← Y3 − t0
-    t1.Add(y3, y3); // t1 ← Y3 + Y3
-    y3.Add(t1, y3); // Y3 ← t1 + Y3
-    t1.Add(t0, t0); // t1 ← t0 + t0
-    t0.Add(t1, t0); // t0 ← t1 + t0
-    t0.Sub(t0, t2); // t0 ← t0 − t2
-    t1.Mul(t4, y3); // t1 ← t4 · Y3
-    t2.Mul(t0, y3); // t2 ← t0 · Y3
-    y3.Mul(x3, z3); // Y3 ← X3 · Z3
-    y3.Add(y3, t2); // Y3 ← Y3 + t2
-    x3.Mul(t3, x3); // X3 ← t3 · X3
-    x3.Sub(x3, t1); // X3 ← X3 − t1
-    z3.Mul(t4, z3); // Z3 ← t4 · Z3
-    t1.Mul(t3, t0); // t1 ← t3 · t0
-    z3.Add(z3, t1); // Z3 ← Z3 + t1
+    var t0 = @new<fiat.P256Element>().Mul(p1.of(P256Point.Ꮡx), p2.of(p256AffinePoint.Ꮡx));       // t0 ← X1 · X2
+    var t1 = @new<fiat.P256Element>().Mul(p1.of(P256Point.Ꮡy), p2.of(p256AffinePoint.Ꮡy));       // t1 ← Y1 · Y2
+    var t3 = @new<fiat.P256Element>().Add(p2.of(p256AffinePoint.Ꮡx), p2.of(p256AffinePoint.Ꮡy)); // t3 ← X2 + Y2
+    var t4 = @new<fiat.P256Element>().Add(p1.of(P256Point.Ꮡx), p1.of(P256Point.Ꮡy));             // t4 ← X1 + Y1
+    t3.Mul(t3, t4);                                                                              // t3 ← t3 · t4
+    t4.Add(t0, t1);                                                                              // t4 ← t0 + t1
+    t3.Sub(t3, t4);                                                                              // t3 ← t3 − t4
+    t4.Mul(p2.of(p256AffinePoint.Ꮡy), p1.of(P256Point.Ꮡz));                                      // t4 ← Y2 · Z1
+    t4.Add(t4, p1.of(P256Point.Ꮡy));                                                             // t4 ← t4 + Y1
+    var y3 = @new<fiat.P256Element>().Mul(p2.of(p256AffinePoint.Ꮡx), p1.of(P256Point.Ꮡz));       // Y3 ← X2 · Z1
+    y3.Add(y3, p1.of(P256Point.Ꮡx));                                                             // Y3 ← Y3 + X1
+    var z3 = @new<fiat.P256Element>().Mul(p256B(), p1.of(P256Point.Ꮡz));                         // Z3 ← b  · Z1
+    var x3 = @new<fiat.P256Element>().Sub(y3, z3);                                               // X3 ← Y3 − Z3
+    z3.Add(x3, x3);                                                                              // Z3 ← X3 + X3
+    x3.Add(x3, z3);                                                                              // X3 ← X3 + Z3
+    z3.Sub(t1, x3);                                                                              // Z3 ← t1 − X3
+    x3.Add(t1, x3);                                                                              // X3 ← t1 + X3
+    y3.Mul(p256B(), y3);                                                                         // Y3 ← b  · Y3
+    t1.Add(p1.of(P256Point.Ꮡz), p1.of(P256Point.Ꮡz));                                            // t1 ← Z1 + Z1
+    var t2 = @new<fiat.P256Element>().Add(t1, p1.of(P256Point.Ꮡz));                              // t2 ← t1 + Z1
+    y3.Sub(y3, t2);                                                                              // Y3 ← Y3 − t2
+    y3.Sub(y3, t0);                                                                              // Y3 ← Y3 − t0
+    t1.Add(y3, y3);                                                                              // t1 ← Y3 + Y3
+    y3.Add(t1, y3);                                                                              // Y3 ← t1 + Y3
+    t1.Add(t0, t0);                                                                              // t1 ← t0 + t0
+    t0.Add(t1, t0);                                                                              // t0 ← t1 + t0
+    t0.Sub(t0, t2);                                                                              // t0 ← t0 − t2
+    t1.Mul(t4, y3);                                                                              // t1 ← t4 · Y3
+    t2.Mul(t0, y3);                                                                              // t2 ← t0 · Y3
+    y3.Mul(x3, z3);                                                                              // Y3 ← X3 · Z3
+    y3.Add(y3, t2);                                                                              // Y3 ← Y3 + t2
+    x3.Mul(t3, x3);                                                                              // X3 ← t3 · X3
+    x3.Sub(x3, t1);                                                                              // X3 ← X3 − t1
+    z3.Mul(t4, z3);                                                                              // Z3 ← t4 · Z3
+    t1.Mul(t3, t0);                                                                              // t1 ← t3 · t0
+    z3.Add(z3, t1);                                                                              // Z3 ← Z3 + t1
 
-    Ꮡq.of(P256Point.Ꮡx).Select(Ꮡp1.of(P256Point.Ꮡx), x3, infinity);
-    Ꮡq.of(P256Point.Ꮡy).Select(Ꮡp1.of(P256Point.Ꮡy), y3, infinity);
-    Ꮡq.of(P256Point.Ꮡz).Select(Ꮡp1.of(P256Point.Ꮡz), z3, infinity);
+    Ꮡq.of(P256Point.Ꮡx).Select(p1.of(P256Point.Ꮡx), x3, infinity);
+    Ꮡq.of(P256Point.Ꮡy).Select(p1.of(P256Point.Ꮡy), y3, infinity);
+    Ꮡq.of(P256Point.Ꮡz).Select(p1.of(P256Point.Ꮡz), z3, infinity);
     return Ꮡq;
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-public static ж<P256Point> Select(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж<P256Point> Ꮡp2, nint cond) {
-    Ꮡq.of(P256Point.Ꮡx).Select(Ꮡp1.of(P256Point.Ꮡx), Ꮡp2.of(P256Point.Ꮡx), cond);
-    Ꮡq.of(P256Point.Ꮡy).Select(Ꮡp1.of(P256Point.Ꮡy), Ꮡp2.of(P256Point.Ꮡy), cond);
-    Ꮡq.of(P256Point.Ꮡz).Select(Ꮡp1.of(P256Point.Ꮡz), Ꮡp2.of(P256Point.Ꮡz), cond);
+public static ж<P256Point> Select(this ж<P256Point> Ꮡq, ж<P256Point> p1, ж<P256Point> p2, nint cond) {
+    Ꮡq.of(P256Point.Ꮡx).Select(p1.of(P256Point.Ꮡx), p2.of(P256Point.Ꮡx), cond);
+    Ꮡq.of(P256Point.Ꮡy).Select(p1.of(P256Point.Ꮡy), p2.of(P256Point.Ꮡy), cond);
+    Ꮡq.of(P256Point.Ꮡz).Select(p1.of(P256Point.Ꮡz), p2.of(P256Point.Ꮡz), cond);
     return Ꮡq;
 }
 
@@ -446,7 +446,7 @@ internal static (ж<p256OrdElement>, error) SetBytes(this ж<p256OrdElement> Ꮡ
     s.Value[2] ^= (uint64)(((t2 ^ s.Value[2]) & tMask));
     s.Value[3] ^= (uint64)(((t3 ^ s.Value[3]) & tMask));
 
-    return (Ꮡs, default!);
+    return (Ꮡs, default);
 }
 
 internal static slice<byte> Bytes(this ref p256OrdElement s) {
@@ -482,26 +482,26 @@ partial struct p256Table /*[16]P256Point*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time. n must be in [0, 16]. If n is 0, p is set to the identity point.
-internal static void Select(this ref p256Table table, ж<P256Point> Ꮡp, uint8 n) {
+internal static void Select(this ref p256Table table, ж<P256Point> p, uint8 n) {
     if (n > 16) {
         throw panic("nistec: internal error: p256Table called with out-of-bounds value");
     }
-    Ꮡp.Set(NewP256Point());
+    p.Set(NewP256Point());
     for (var i = (uint8)1; i <= 16; i++) {
         nint cond = constanttime.ByteEq(i, n);
-        Ꮡp.Select(Ꮡ(table.Value, (uint8)(i - 1)), Ꮡp, cond);
+        p.Select(Ꮡ(table.Value, (uint8)(i - 1)), p, cond);
     }
 }
 
 // Compute populates the table to the first 16 multiples of q.
-internal static ж<p256Table> Compute(this ж<p256Table> Ꮡtable, ж<P256Point> Ꮡq) {
+internal static ж<p256Table> Compute(this ж<p256Table> Ꮡtable, ж<P256Point> q) {
     ref var table = ref Ꮡtable.DerefOrNull();
 
-    Ꮡtable.at<P256Point>(0).Set(Ꮡq);
+    Ꮡtable.at<P256Point>(0).Set(q);
     for (nint i = 1; i < 16; i += 2) {
         Ꮡtable.at<P256Point>(i).Double(Ꮡ(table.Value, i / 2));
         if (i + 1 < 16) {
-            Ꮡtable.at<P256Point>(i + 1).Add(Ꮡ(table.Value, i), Ꮡq);
+            Ꮡtable.at<P256Point>(i + 1).Add(Ꮡ(table.Value, i), q);
         }
     }
     return Ꮡtable;
@@ -518,10 +518,10 @@ internal static (uint8, nint) boothW5(uint64 @in) {
 // ScalarMult sets r = scalar * q, where scalar is a 32-byte big endian value,
 // and returns r. If scalar is not 32 bytes long, ScalarMult returns an error
 // and the receiver is unchanged.
-public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡp, ж<P256Point> Ꮡq, slice<byte> scalar) {
+public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡp, ж<P256Point> q, slice<byte> scalar) {
     var (s, err) = @new<p256OrdElement>().SetBytes(scalar);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // Start scanning the window from the most significant bits. We move by
@@ -535,7 +535,7 @@ public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡp, ж<P256
 
     // Neither Select nor Add have exceptions for the point at infinity /
     // selector zero, so we don't need to check for it here or in the loop.
-    var table = @new<p256Table>().Compute(Ꮡq);
+    var table = @new<p256Table>().Compute(q);
     table.Select(Ꮡp, sel);
 
     var t = NewP256Point();
@@ -548,7 +548,7 @@ public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡp, ж<P256
         Ꮡp.Double(Ꮡp);
         Ꮡp.Double(Ꮡp);
 
-        if (index >= 0){
+        if (index >= 0) {
             (sel, sign) = boothW5(s.Rsh(index) & 0b111111);
         } else {
             // Booth encoding considers a virtual zero bit at index -1,
@@ -562,7 +562,7 @@ public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡp, ж<P256
         Ꮡp.Add(Ꮡp, t);
     }
 
-    return (Ꮡp, default!);
+    return (Ꮡp, default);
 }
 
 // Negate sets p to -p, if cond == 1, and to p if cond == 0.
@@ -580,14 +580,14 @@ partial struct p256AffineTable /*[32]p256AffinePoint*/;
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time. n can be in [0, 32], but (unlike p256Table.Select) if n is 0,
 // p is set to an undefined value.
-internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> Ꮡp, uint8 n) {
+internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> p, uint8 n) {
     if (n > 32) {
         throw panic("nistec: internal error: p256AffineTable.Select called with out-of-bounds value");
     }
     for (var i = (uint8)1; i <= 32; i++) {
         nint cond = constanttime.ByteEq(i, n);
-        Ꮡp.of(p256AffinePoint.Ꮡx).Select(Ꮡ(table.Value, (uint8)(i - 1)).of(p256AffinePoint.Ꮡx), Ꮡp.of(p256AffinePoint.Ꮡx), cond);
-        Ꮡp.of(p256AffinePoint.Ꮡy).Select(Ꮡ(table.Value, (uint8)(i - 1)).of(p256AffinePoint.Ꮡy), Ꮡp.of(p256AffinePoint.Ꮡy), cond);
+        p.of(p256AffinePoint.Ꮡx).Select(Ꮡ(table.Value, (uint8)(i - 1)).of(p256AffinePoint.Ꮡx), p.of(p256AffinePoint.Ꮡx), cond);
+        p.of(p256AffinePoint.Ꮡy).Select(Ꮡ(table.Value, (uint8)(i - 1)).of(p256AffinePoint.Ꮡy), p.of(p256AffinePoint.Ꮡy), cond);
     }
 }
 
@@ -620,8 +620,8 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
     // next table at each iteration.
 
     var (s, err) = @new<p256OrdElement>().SetBytes(scalar);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // Start scanning the window from the most significant bits. We move by
@@ -633,7 +633,7 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
     // most five bits long, so the top bit is never set.
     _ = sign;
 
-    var t = Ꮡ(new p256AffinePoint(nil));
+    var t = Ꮡ(new p256AffinePoint());
     var table = p256GeneratorTables.at<p256AffineTable>((index + 1) / 6);
     table.Select(t, sel);
 
@@ -647,7 +647,7 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
     while (index >= 5) {
         index -= 6;
 
-        if (index >= 0){
+        if (index >= 0) {
             (sel, sign) = boothW6(s.Rsh(index) & 0b1111111);
         } else {
             // Booth encoding considers a virtual zero bit at index -1,
@@ -663,7 +663,7 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
         Ꮡp.AddAffine(Ꮡp, t, selIsZeroΔ1);
     }
 
-    return (Ꮡp, default!);
+    return (Ꮡp, default);
 }
 
 // Negate sets p to -p, if cond == 1, and to p if cond == 0.
@@ -676,7 +676,7 @@ public static ж<p256AffinePoint> Negate(this ж<p256AffinePoint> Ꮡp, nint con
 
 // p256Sqrt sets e to a square root of x. If x is not a square, p256Sqrt returns
 // false and e is unchanged. e and x can overlap.
-internal static bool /*isSquare*/ p256Sqrt(ж<fiat.P256Element> Ꮡe, ж<fiat.P256Element> Ꮡx) {
+internal static bool /*isSquare*/ p256Sqrt(ж<fiat.P256Element> e, ж<fiat.P256Element> x) {
     var (t0, t1) = (@new<fiat.P256Element>(), @new<fiat.P256Element>());
 
     // Since p = 3 mod 4, exponentiation by (p + 1) / 4 yields a square root candidate.
@@ -694,8 +694,8 @@ internal static bool /*isSquare*/ p256Sqrt(ж<fiat.P256Element> Ꮡe, ж<fiat.P2
     //	x32       = x16 << 16 + x16
     //	return      ((x32 << 32 + 1) << 96 + 1) << 94
     //
-    p256Square(t0, Ꮡx, 1);
-    t0.Mul(Ꮡx, t0);
+    p256Square(t0, x, 1);
+    t0.Mul(x, t0);
     p256Square(t1, t0, 2);
     t0.Mul(t0, t1);
     p256Square(t1, t0, 4);
@@ -705,25 +705,25 @@ internal static bool /*isSquare*/ p256Sqrt(ж<fiat.P256Element> Ꮡe, ж<fiat.P2
     p256Square(t1, t0, 16);
     t0.Mul(t0, t1);
     p256Square(t0, t0, 32);
-    t0.Mul(Ꮡx, t0);
+    t0.Mul(x, t0);
     p256Square(t0, t0, 96);
-    t0.Mul(Ꮡx, t0);
+    t0.Mul(x, t0);
     p256Square(t0, t0, 94);
 
     // Check if the candidate t0 is indeed a square root of x.
     t1.Square(t0);
-    if (t1.Equal(Ꮡx) != 1) {
+    if (t1.Equal(x) != 1) {
         return false;
     }
-    Ꮡe.Set(t0);
+    e.Set(t0);
     return true;
 }
 
 // p256Square sets e to the square of x, repeated n times > 1.
-internal static void p256Square(ж<fiat.P256Element> Ꮡe, ж<fiat.P256Element> Ꮡx, nint n) {
-    Ꮡe.Square(Ꮡx);
+internal static void p256Square(ж<fiat.P256Element> e, ж<fiat.P256Element> x, nint n) {
+    e.Square(x);
     for (nint i = 1; i < n; i++) {
-        Ꮡe.Square(Ꮡe);
+        e.Square(e);
     }
 }
 

@@ -12,10 +12,10 @@ partial class asmgen_package {
     WordBits: 32,
     WordBytes: 4,
 
-    regs: new @string[]{
+    regs: slice<@string>([
         "BX"u8, "SI"u8, "DI"u8, "BP"u8,
         "CX"u8, "DX"u8, "AX"u8 // last, to leave available for hinted allocation
-    }.slice(),
+    ]),
     op3: x86Op3,
     hint: x86Hint,
     memOK: true,
@@ -57,7 +57,7 @@ partial class asmgen_package {
 internal static ΔReg _386MemIndex(ж<Asm> Ꮡa, nint off, ΔReg ix, RegPtr p) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    return new ΔReg(fmt.Sprintf("%d(%s)(%s*%d)"u8, off, p, ix, (~a.Arch).WordBytes));
+    return new ΔReg(fmt.Sprintf("%d(%s)(%s*%d)"u8, off, p, ix, a.Arch.WordBytes));
 }
 
 } // end asmgen_package

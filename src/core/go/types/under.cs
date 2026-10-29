@@ -59,8 +59,8 @@ internal static ж<typeError> typeErrorf(@string format, params ꓸꓸꓸany arg
 
 // format formats a type error as a string.
 // check may be nil.
-internal static @string format(this ref typeError err, ж<Checker> Ꮡcheck) {
-    return Ꮡcheck.sprintf(err.format_, err.args.ꓸꓸꓸ);
+internal static @string format(this ref typeError err, ж<Checker> check) {
+    return check.sprintf(err.format_, err.args.ꓸꓸꓸ);
 }
 
 // If t is a type parameter, cond is nil, and t's type set contains no channel types,
@@ -81,23 +81,23 @@ internal static @string format(this ref typeError err, ж<Checker> Ꮡcheck) {
 // If t is not a type parameter, commonUnder behaves as if t was a type parameter
 // with the single type t in its type set.
 internal static (ΔType, ж<typeError>) commonUnder(ΔType t, Func<ΔType, ΔType, ж<typeError>> cond) {
-    ΔType ct = default!;              // type and respective common underlying type
-    ΔType cu = default!;
+    ΔType ct = default; // type and respective common underlying type
+    ΔType cu = default;
     foreach (var (tΔ1, u) in range<ΔType, ΔType>(typeset(t).Invoke)) {
-        if (cond != default!) {
+        if (cond != nil) {
             {
                 var err = cond(tΔ1, u); if (err != nil) {
-                    return (default!, err);
+                    return (default, err);
                 }
             }
         }
 
-        if (u == default!) {
-            return (default!, typeErrorf("no specific type"u8));
+        if (u == nil) {
+            return (default, typeErrorf("no specific type"u8));
         }
 
         // If this is the first type we're seeing, we're done.
-        if (cu == default!) {
+        if (cu == nil) {
             (ct, cu) = (tΔ1, u);
             continue;
         }
@@ -107,22 +107,22 @@ internal static (ΔType, ж<typeError>) commonUnder(ΔType t, Func<ΔType, ΔTyp
             var (chu, _) = cu._<ж<Chan>>(ᐧ); if (chu != nil) {
                 {
                     var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil) {
-                        if (!Identical((~chu).elem, (~ch).elem)) {
-                            return (default!, typeErrorf("channels %s and %s have different element types"u8, ct, tΔ1));
+                        if (!Identical(chu.elem, ch.elem)) {
+                            return (default, typeErrorf("channels %s and %s have different element types"u8, ct, tΔ1));
                         }
                         // If we have different channel directions, keep the restricted one
                         // and complain if they conflict.
                         switch (ᐧ) {
-                        case {} when (~chu).dir == (~ch).dir: {
+                        case {} when chu.dir == ch.dir: {
                             // nothing to do
                             break;
                         }
-                        case {} when (~chu).dir == SendRecv: {
+                        case {} when chu.dir == SendRecv: {
                             (ct, cu) = (tΔ1, u); // switch to restricted channel
                             break;
                         }
-                        case {} when (~ch).dir != SendRecv: {
-                            return (default!, typeErrorf("channels %s and %s have conflicting directions"u8, ct, tΔ1));
+                        case {} when ch.dir != SendRecv: {
+                            return (default, typeErrorf("channels %s and %s have conflicting directions"u8, ct, tΔ1));
                         }}
                         continue;
                     }
@@ -132,10 +132,10 @@ internal static (ΔType, ж<typeError>) commonUnder(ΔType t, Func<ΔType, ΔTyp
 
         // Otherwise, the current type must have the same underlying type as all previous types.
         if (!Identical(cu, u)) {
-            return (default!, typeErrorf("%s and %s have different underlying types"u8, ct, tΔ1));
+            return (default, typeErrorf("%s and %s have different underlying types"u8, ct, tΔ1));
         }
     }
-    return (cu, default!);
+    return (cu, default);
 }
 
 } // end types_package

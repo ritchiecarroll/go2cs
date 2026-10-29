@@ -11,7 +11,7 @@ using @internal.syscall;
 partial class net_package {
 
 internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
-    ж<dnsConfig> conf = default!;
+    ж<dnsConfig> conf = default;
     GoFrame ᒐ = default;
     try {
         conf = Ꮡ(new dnsConfig(
@@ -20,40 +20,40 @@ internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
             attempts: 2
         ));
         defer(() => {
-            if (len((~conf).servers) == 0) {
-                conf.Value.servers = defaultNS;
+            if (len(conf.servers) == 0) {
+                conf.servers = defaultNS;
             }
         }, ref ᒐ);
         var (aas, err) = adapterAddresses();
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone;
         }
 
         foreach (var (_, aa) in aas) {
             // Only take interfaces whose OperStatus is IfOperStatusUp(0x01) into DNS configs.
-            if ((~aa).OperStatus != windows.IfOperStatusUp) {
+            if (aa.OperStatus != windows.IfOperStatusUp) {
                 continue;
             }
 
             // Only take interfaces which have at least one gateway
-            if ((~aa).FirstGatewayAddress == nil) {
+            if (aa.FirstGatewayAddress == nil) {
                 continue;
             }
 
-            for (var dns = aa.Value.FirstDnsServerAddress; dns != nil; dns = dns.Value.Next) {
-                var (sa, errΔ1) = (~dns).Address.Sockaddr.Sockaddr();
-                if (errΔ1 != default!) {
+            for (var dns = aa.FirstDnsServerAddress; dns != nil; dns = dns.Next) {
+                var (sa, errΔ1) = dns.Address.Sockaddr.Sockaddr();
+                if (errΔ1 != nil) {
                     continue;
                 }
-                IP ip = default!;
+                IP ip = default;
                 switch (sa.type()) {
                 case ж<syscall.SockaddrInet4> saΔ1: {
-                    ip = IPv4((~saΔ1).Addr[0], (~saΔ1).Addr[1], (~saΔ1).Addr[2], (~saΔ1).Addr[3]);
+                    ip = IPv4(saΔ1.Addr[0], saΔ1.Addr[1], saΔ1.Addr[2], saΔ1.Addr[3]);
                     break;
                 }
                 case ж<syscall.SockaddrInet6> saΔ1: {
                     ip = new IP(IPv6len);
-                    copy(ip, (~saΔ1).Addr[..]);
+                    copy(ip, saΔ1.Addr[..]);
                     if (ip[0] == 0xfe && ip[1] == 0xc0) {
                         // fec0/10 IPv6 addresses are site local anycast DNS
                         // addresses Microsoft sets by default if no other
@@ -70,7 +70,7 @@ internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
                     continue;
                     break;
                 }}
-                conf.Value.servers = append((~conf).servers, JoinHostPort(ip.String(), "53"u8));
+                conf.servers = append(conf.servers, JoinHostPort(ip.String(), "53"u8));
             }
         }
     }

@@ -135,7 +135,7 @@ internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>>
     while (start >= 0) {
         decryptBlock(ref b, dst.slice(start, end), src.slice(start, end));
 
-        if (start > 0){
+        if (start > 0) {
             subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), src.slice(prev, start));
         } else {
             // The first block is special because it uses the saved iv.

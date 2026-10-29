@@ -30,24 +30,24 @@ partial struct locReg {
 }
 
 internal static @string LocString(this locReg l) {
-    var exprᴛ1 = l.cls;
-    if (exprᴛ1 == regClassFixed) {
+    switch (l.cls) {
+    case var ᴛ when ᴛ == regClassFixed: {
         return fixedRegs[l.reg];
     }
-    if (exprᴛ1 == regClassGP) {
+    case var ᴛ when ᴛ == regClassGP: {
         return gpRegs[l.reg];
     }
-    if (exprᴛ1 == regClassZ) {
+    case var ᴛ when ᴛ == regClassZ: {
         return fmt.Sprintf("Z%d"u8, l.reg);
     }
-    if (exprᴛ1 == regClassK) {
+    case var ᴛ when ᴛ == regClassK: {
         return fmt.Sprintf("K%d"u8, l.reg);
-    }
+    }}
     throw panic("bad register class");
 }
 
 internal static (loc, error) Deref(this locReg l, nint off) {
-    return (new locMem(l, off, ""u8), default!);
+    return (new locMem(l, off, ""u8), default);
 }
 
 internal static (locReg, bool) Reg(this locReg l) {
@@ -74,27 +74,27 @@ internal static @string LocString(this locMem l) {
 }
 
 internal static (loc, error) Deref(this locMem l, nint off) {
-    return (default!, fmt.Errorf("cannot dereference already memory address %s"u8, l.LocString()));
+    return (default, fmt.Errorf("cannot dereference already memory address %s"u8, l.LocString()));
 }
 
 internal static (locReg, bool) Reg(this locMem l) {
     if (l.@base.cls == regClassFixed) {
-        return (new locReg(nil), false);
+        return (new locReg(), false);
     }
     return (l.@base, true);
 }
 
 partial interface loc {
-    @string LocString();         // Return the assembly syntax for this location
+    @string LocString();          // Return the assembly syntax for this location
     (loc, error) Deref(nint off); // Treat this location as an address and return a location with the contents of memory at that address
-    (locReg, bool) Reg();        // Register used by this location
+    (locReg, bool) Reg();         // Register used by this location
 }
 
 internal static map<@string, nint> opRMW = new map<@string, nint>{
-    ["VPERMI2B"u8] = 2, // Overwrites third argument
-    ["VPERMI2B.Z"u8] = 3, // Overwrites fourth argument
-    ["VPERMI2B.mask"u8] = 3, // Overwrites fourth argument
-    ["VPERMT2B"u8] = 1, // Overwrites second argument TODO: Check this. Unused for now.
+    ["VPERMI2B"u8] = 2,         // Overwrites third argument
+    ["VPERMI2B.Z"u8] = 3,       // Overwrites fourth argument
+    ["VPERMI2B.mask"u8] = 3,    // Overwrites fourth argument
+    ["VPERMT2B"u8] = 1,         // Overwrites second argument TODO: Check this. Unused for now.
     ["VPBROADCASTQ.mask"u8] = 2 // Overwrites last argument
 };
 
@@ -105,7 +105,7 @@ internal static UntypedInt regFP => 1;
 
 internal static slice<@string> fixedRegs = new golib.SparseArray<@string>{[regSB] = "SB"u8, [regFP] = "FP"u8}.slice();
 
-internal static slice<@string> gpRegs = new @string[]{"AX"u8, "BX"u8, "CX"u8, "DI"u8, "SI"u8, "R8"u8, "R9"u8, "R10"u8, "R11"u8}.slice(); // ABI argument order
+internal static slice<@string> gpRegs = slice<@string>(["AX"u8, "BX"u8, "CX"u8, "DI"u8, "SI"u8, "R8"u8, "R9"u8, "R10"u8, "R11"u8]); // ABI argument order
 
 partial struct regSet {
     internal array<uint32> inUse = new(numRegClasses);
@@ -114,7 +114,7 @@ partial struct regSet {
 internal static void used(this ref regSet s, ж<op> Ꮡo, loc l) {
     ref var o = ref Ꮡo.DerefOrNull();
 
-    if (l == default!) {
+    if (l == nil) {
         return;
     }
     var (reg, ok) = l.Reg();
@@ -131,7 +131,7 @@ internal static void used(this ref regSet s, ж<op> Ꮡo, loc l) {
 }
 
 internal static void free(this ref regSet s, loc l) {
-    if (l == default!) {
+    if (l == nil) {
         return;
     }
     var (reg, ok) = l.Reg();
@@ -169,7 +169,7 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     var overwritten = new map<ж<op>, bool>();
     foreach (var (_, o) in fn.ops) {
         // Check that this op doesn't use any overwritten inputs.
-        foreach (var (_, arg) in (~o).args) {
+        foreach (var (_, arg) in o.args) {
             if (overwritten[arg]) {
                 // TODO: The solution to this is to insert copy ops.
                 fatalf("op %+v uses overwritten input %+v"u8, o.OrTypedNil(), arg.OrTypedNil());
@@ -177,14 +177,13 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
         }
 
         // Record canonical op.
-        var (rmw, ok) = opRMW[(~o).Δop, ꟷ];
-        if (ok){
-            canon[o] = canon[(~o).args[rmw]];
+        var (rmw, ok) = opRMW[o.Δop, ꟷ];
+        if (ok) {
+            canon[o] = canon[o.args[rmw]];
             // Record that the input is dead now and must not be referenced.
-            overwritten[(~o).args[rmw]] = true;
-        } else 
-        if ((~o).Δop == "deref"u8){
-            canon[o] = canon[(~o).args[0]];
+            overwritten[o.args[rmw]] = true;
+        } else if (o.Δop == "deref"u8) {
+            canon[o] = canon[o.args[0]];
         } else {
             canon[o] = o;
         }
@@ -195,7 +194,7 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     // First, find the last use of each op.
     var lastUses = new map<ж<op>, ж<op>>(); // Canonical creation op -> last use op
     foreach (var (_, op) in fn.ops) {
-        foreach (var (_, arg) in (~op).args) {
+        foreach (var (_, arg) in op.args) {
             lastUses[canon[arg]] = op;
         }
     }
@@ -240,53 +239,60 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     // Assign fixed locations
     nint id = 0;
     foreach (var (_, o) in fn.ops) {
-        var exprᴛ1 = (~o).Δop;
-        if (exprᴛ1 == "arg"u8) {
+        var exprᴛ1 = o.Δop;
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "arg"u8: {
             if (traceRegAlloc) {
                 log.Printf("fixed op %+v"u8, o.OrTypedNil());
             }
-            assign(o, (~o).c._<locReg>());
+            assign(o, o.c._<locReg>());
+            break;
         }
-        else if (exprᴛ1 == "const"u8) {
+        case {} when exprᴛ1 == "const"u8: {
             if (traceRegAlloc) {
                 log.Printf("fixed op %+v"u8, o.OrTypedNil());
             }
-            @string name = o.Value.name;
-            if (name == ""u8){
+            @string name = o.name;
+            if (name == ""u8) {
                 name = fmt.Sprintf("%s_%d<>"u8, nameBase, id);
                 id++;
-            } else 
-            if (name[0] == (rune)'*') {
+            } else if (name[0] == '*') {
                 name = nameBase + name[1..];
             }
             assign(o, new locMem(new locReg(cls: regClassFixed, reg: regSB), 0, name));
+            break;
         }
-        else if (exprᴛ1 == "return"u8) {
+        case {} when exprᴛ1 == "return"u8: {
             if (traceRegAlloc) {
                 log.Printf("fixed op %+v"u8, o.OrTypedNil());
             }
-            assign(o, default!); // no location
+            assign(o, default); // no location
             // TODO: argZ should start at 0.
             nint argGP = 0;
             nint argZ = 1;
-            foreach (var (_, arg) in (~o).args) {
-                var exprᴛ2 = (~(~arg).kind).reg;
-                if (exprᴛ2 == regClassGP) {
+            foreach (var (_, arg) in o.args) {
+                switch (arg.kind.reg) {
+                default: {
+                    fatalf("bad register class for return value"u8);
+                    break;
+                }
+                case var ᴛ when ᴛ == regClassGP: {
                     assign(canon[arg], new locReg(regClassGP, argGP));
                     argGP++;
+                    break;
                 }
-                else if (exprᴛ2 == regClassZ) {
+                case var ᴛ when ᴛ == regClassZ: {
                     assign(canon[arg], new locReg(regClassZ, argZ));
                     argZ++;
-                }
-                else { /* default: */
-                    fatalf("bad register class for return value"u8);
-                }
+                    break;
+                }}
             }
+            break;
         }
-        else if (exprᴛ1 == "imm"u8) {
-            assign(o, default!); // no location
-        }
+        case {} when exprᴛ1 == "imm"u8: {
+            assign(o, default); // no location
+            break;
+        }}
     }
 
     // Assign locations.
@@ -302,9 +308,9 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
             }
         }
 
-        if ((~o).Δop == "deref"u8) {
-            var (locΔ1, err) = locs[(~o).args[0]].Deref((~o).c._<nint>());
-            if (err != default!) {
+        if (o.Δop == "deref"u8) {
+            var (locΔ1, err) = locs[o.args[0]].Deref(o.c._<nint>());
+            if (err != nil) {
                 fatalf("%v"u8, err);
             }
             // We don't "assign" here because we've already processed the
@@ -322,39 +328,43 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
         // Below here we know that o is already a canonical op.
 
         {
-            var (_, ok) = opRMW[(~o).Δop, ꟷ]; if (ok) {
+            var (_, ok) = opRMW[o.Δop, ꟷ]; if (ok) {
                 fatalf("read-modify-write op not canonicalized"u8);
             }
         }
 
         // Find a free register of the right class.
-        var cls = o.Value.kind.Value.reg;
-        uint32 used = default!;
+        var cls = o.kind.reg;
+        uint32 used = default;
         for (nint i = opIndexes[o]; i < opIndexes[lastUses[o]]; i++) {
             used |= (uint32)(regUsed[i].inUse[cls]);
         }
 
         // Assign result location.
         nint num = bits.TrailingZeros32(~used);
-        var exprᴛ3 = cls;
-        if (exprᴛ3 == regClassGP) {
+        switch (cls) {
+        default: {
+            fatalf("unknown reg class %v"u8, cls);
+            break;
+        }
+        case var ᴛ when ᴛ == regClassGP: {
             if (num >= len(gpRegs)) {
                 throw panic("out of GP regs");
             }
+            break;
         }
-        else if (exprᴛ3 == regClassZ) {
+        case var ᴛ when ᴛ == regClassZ: {
             if (num >= 32) {
                 throw panic("out of Z regs");
             }
+            break;
         }
-        else if (exprᴛ3 == regClassK) {
+        case var ᴛ when ᴛ == regClassK: {
             if (num >= 8) {
                 throw panic("out of K regs");
             }
-        }
-        else { /* default: */
-            fatalf("unknown reg class %v"u8, cls);
-        }
+            break;
+        }}
         var loc = new locReg(cls, num);
         assign(o, loc);
     }

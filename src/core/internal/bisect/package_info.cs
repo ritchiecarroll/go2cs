@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,6 +48,11 @@ using static go.@internal.bisect_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Matcher))]
+[assembly: go.GoFieldAccess(typeof(cond))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -57,7 +61,7 @@ using static go.@internal.bisect_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/bisect/bisect.go", "bisect.cs", "ALwBggMACAKCppSmgoKCgriCgoKCgtyCgoKCgriUgriCgoKClIKClIKCgpS0pIKUpIKkgpSCpIKUpJSUgoKClIKUgpSCkpSUgoKCpgAUMsKosoKUqLKClKiSgoKCpqqigpSqwoKCgpSmqJKCgoKCgoKokoKCgoKClIKCgoKClIKssoKUqsKCgpSCppSCpoKCgoKCgpSCgriCgqaUgpS4AAgWooKCgoKqopSClIKCgoKCgoKCgoKCpoKCgqyy2JKCgoKCgpSCAAUQAAkEgoKCgpSCyoKClIK4gpSClIKCgKS0tNiCpoKCgKSkAAkQgoKSgpSCqsKCgv60tLS0tLS0tLS0gsaCxoLGgsaCxoLGgsaCxoLIAAoSgAAIFoKCgqaCgoKUpoKCgoKUpoKCgoKUABEqwoKClIKCgq7CgoKCyoKClII=")]
+[assembly: go.GoPositionMap("internal/bisect/bisect.go", "bisect.cs", "ALwBggMACAKCppSmgoKCgriCgoKCgtyCgoKCgriUgriCgoKClIKClIKCgpS0pIKUpIKkgpSCpIKUpJSUgoKClIKUgpSCgpSUgoKCpgAUMsKosoKUqLKClKiSgoKCpqqigpSqwoKCgpSmqJKCgoKCgoKokoKCgoKClIKCgoKClIKssoKUqsKCgpSCppSCpoKCgoKCgpSCgriCgqaUgpS4AAgWooKCgoKqopSClIKCgoKCgoKCgoKCpoKCgqyy2JKCgoKCgpSCAAUQAAkEgoKCgpSCyoKClIK4gpSClIKCgKS0tNiCpoKCgKSkAAkQgoKCgpSCqsKCgv60tLS0tLS0tLS0gsaCxoLGgsaCxoLGgsaCxoLIAAoSgAAIFoKCgqaCgoKUpoKCgoKUpoKCgoKUABEqwoKClIKCgq7CgoKCyoKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

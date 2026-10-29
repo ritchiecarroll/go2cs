@@ -31,21 +31,21 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
     x.expr = new ast.IdentжExpr(Ꮡe);
 
     var (scope, obj) = Ꮡcheck.of(Checker.Ꮡenvironment).lookupScope(e.Name);
-    var exprᴛ1 = obj;
-    if (AreEqual(exprᴛ1, default!)) {
-        if (e.Name == "_"u8){
+    switch (obj) {
+    case var ᴛ when AreEqual(ᴛ, default): {
+        if (e.Name == "_"u8) {
             Ꮡcheck.error(new ast_Identжpositioner(Ꮡe), InvalidBlank, cannotUseAsValueOrTypeˢ);
-        } else 
-        if (isValidName(e.Name)) {
+        } else if (isValidName(e.Name)) {
             Ꮡcheck.errorf(new ast_Identжpositioner(Ꮡe), UndeclaredName, "undefined: %s"u8, e.Name);
         }
         return;
     }
-    if (AreEqual(exprᴛ1, universeComparable)) {
+    case var ᴛ when AreEqual(ᴛ, universeComparable): {
         if (!Ꮡcheck.verifyVersionf(new ast_Identжpositioner(Ꮡe), go1_18, "predeclared %s"u8, e.Name)) {
             return; // avoid follow-on errors
         }
-    }
+        break;
+    }}
     // Because the representation of any depends on gotypesalias, we don't check
     // pointer identity here.
     if (obj.Name() == "any"u8 && obj.Parent() == Universe) {
@@ -85,11 +85,11 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
     // Note that it is important to avoid calling objDecl on objects from other
     // packages, to avoid races: see issue #69912.
     var typ = obj.Type();
-    if (typ == default! || (gotType && wantType && obj.Pkg() == check.pkg)) {
+    if (typ == nil || (gotType && wantType && obj.Pkg() == check.pkg)) {
         Ꮡcheck.objDecl(obj);
         typ = obj.Type(); // type must have been assigned by Checker.objDecl
     }
-    assert(typ != default!);
+    assert(typ != nil);
 
     // The object may have been dot-imported.
     // If so, mark the respective package as used.
@@ -111,21 +111,21 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
         if (!isValid(typ)) {
             return;
         }
-        if (AreEqual(objΔ1, universeIota)){
-            if (check.iota == default!) {
+        if (AreEqual(objΔ1, universeIota)) {
+            if (check.iota == nil) {
                 Ꮡcheck.error(new ast_Identжpositioner(Ꮡe), InvalidIota, cannotUseIotaOutsideˢ);
                 return;
             }
             x.val = check.iota;
         } else {
-            x.val = objΔ1.Value.val;
+            x.val = objΔ1.val;
         }
-        assert(x.val != default!);
+        assert(x.val != nil);
         x.mode = constant_;
         break;
     }
     case ж<TypeName> objΔ1: {
-        if (!(~check.conf)._EnableAlias && check.isBrokenAlias(objΔ1)) {
+        if (!check.conf._EnableAlias && check.isBrokenAlias(objΔ1)) {
             Ꮡcheck.errorf(new ast_Identжpositioner(Ꮡe), InvalidDeclCycle, "invalid use of type alias %s in recursive type (see go.dev/issue/50729)"u8, (~objΔ1).name);
             return;
         }
@@ -152,7 +152,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
         break;
     }
     case ж<Builtin> objΔ1: {
-        x.id = objΔ1.Value.id;
+        x.id = objΔ1.id;
         x.mode = Δbuiltinᴛ;
         break;
     }
@@ -202,7 +202,7 @@ internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, ΔType 
             var (t, _) = typ.Underlying()._<ж<Interface>>(ᐧ); if (t != nil) {
                 var tset = computeInterfaceTypeSet(Ꮡcheck, e.Pos(), t); // TODO(gri) is this the correct position?
                 if (!tset.IsMethodSet()) {
-                    if ((~tset).comparable){
+                    if (tset.comparable) {
                         Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(e), MisplacedConstraintIface, "cannot use type %s outside a type constraint: interface is (or embeds) comparable"u8, typ);
                     } else {
                         Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(e), MisplacedConstraintIface, "cannot use type %s outside a type constraint: interface contains type constraints"u8, typ);
@@ -217,16 +217,16 @@ internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, ΔType 
 // If def != nil, e is the type specification for the [Alias] or [Named] type
 // named def, and def.typ.fromRHS will be set to the [Type] of e immediately
 // after its creation.
-internal static ΔType declaredType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeName> Ꮡdef) {
+internal static ΔType declaredType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeName> def) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    var typ = Ꮡcheck.typInternal(e, Ꮡdef);
+    var typ = Ꮡcheck.typInternal(e, def);
     assert(isTyped(typ));
     if (isGeneric(typ)) {
         Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), WrongTypeArgCount, "cannot use generic type %s without instantiation"u8, typ);
         typ = new BasicжΔType(Typ[Invalid]);
     }
-    check.recordTypeAndValue(e, typexpr, typ, default!);
+    check.recordTypeAndValue(e, typexpr, typ, default);
     return typ;
 }
 
@@ -250,7 +250,7 @@ internal static ΔType genericType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<@st
         typ = new BasicжΔType(Typ[Invalid]);
     }
     // TODO(gri) what is the correct call below?
-    check.recordTypeAndValue(e, typexpr, typ, default!);
+    check.recordTypeAndValue(e, typexpr, typ, default);
     return typ;
 }
 
@@ -271,24 +271,24 @@ internal static readonly @string missingComparableˢ = " (missing comparable con
 
 // typInternal drives type checking of types.
 // Must only be called by declaredType or genericType.
-internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0, ж<TypeName> Ꮡdef) {
-    ΔType T = default!;
+internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0, ж<TypeName> def) {
+    ΔType T = default;
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
 
-        if ((~check.conf)._Trace) {
+        if (check.conf._Trace) {
             Ꮡcheck.trace(e0.Pos(), typeSˢ, e0);
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
-                ΔType under = default!;
-                if (T != default!) {
+                ΔType under = default;
+                if (T != nil) {
                     // Calling T.Underlying() here may lead to endless instantiations.
                     // Test case: type T[P any] *T[P]
                     under = safeUnderlying(T);
                 }
-                if (AreEqual(T, under)){
+                if (AreEqual(T, under)) {
                     Ꮡcheck.trace(e0.Pos(), "=> %s // %s"u8, T, goTypeName(T));
                 } else {
                     Ꮡcheck.trace(e0.Pos(), sUnderSSˢ, T, under, goTypeName(T));
@@ -305,56 +305,62 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
             ref var x = ref heap(new operand(), out var Ꮡx);
             Ꮡcheck.ident(Ꮡx, e, true);
 
-            var exprᴛ1 = x.mode;
-            if (exprᴛ1 == typexpr) {
+            switch (x.mode) {
+            case var ᴛ when ᴛ == typexpr: {
                 T = x.typ; goto ᒐdone;
             }
-            if (exprᴛ1 == invalid) {
+            case var ᴛ when ᴛ == invalid: {
                 // ignore - error reported before
+                break;
             }
-            else if (exprᴛ1 == novalue) {
+            case var ᴛ when ᴛ == novalue: {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NotAType, "%s used as type"u8, Ꮡx);
+                break;
             }
-            else { /* default: */
+            default: {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NotAType, "%s is not a type"u8, Ꮡx);
-            }
+                break;
+            }}
             break;
         }
         case ж<ast.SelectorExpr> e: {
             ref var x = ref heap(new operand(), out var Ꮡx);
             Ꮡcheck.selector(Ꮡx, e, true);
 
-            var exprᴛ2 = x.mode;
-            if (exprᴛ2 == typexpr) {
+            switch (x.mode) {
+            case var ᴛ when ᴛ == typexpr: {
                 T = x.typ; goto ᒐdone;
             }
-            if (exprᴛ2 == invalid) {
+            case var ᴛ when ᴛ == invalid: {
                 // ignore - error reported before
+                break;
             }
-            else if (exprᴛ2 == novalue) {
+            case var ᴛ when ᴛ == novalue: {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NotAType, "%s used as type"u8, Ꮡx);
+                break;
             }
-            else { /* default: */
+            default: {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NotAType, "%s is not a type"u8, Ꮡx);
-            }
+                break;
+            }}
             break;
         }
         case ж<ast.IndexExpr> _:
         case ж<ast.IndexListExpr> _: {
             var e = e0;
             var ix = unpackIndexedExpr(e);
-            Ꮡcheck.verifyVersionf(inNode(e, (~ix).lbrack), go1_18, "type instantiation"u8);
+            Ꮡcheck.verifyVersionf(inNode(e, ix.lbrack), go1_18, "type instantiation"u8);
             T = Ꮡcheck.instantiatedType(ix); goto ᒐdone;
         }
         case ж<ast.ParenExpr> e: {
             // Generic types must be instantiated before they can be used in any form.
             // Consequently, generic types cannot be parenthesized.
-            T = Ꮡcheck.declaredType((~e).X, Ꮡdef); goto ᒐdone;
+            T = Ꮡcheck.declaredType(e.X, def); goto ᒐdone;
         }
         case ж<ast.ArrayType> e: {
-            if ((~e).Len == default!) {
+            if (e.Len == nil) {
                 var typΔ1 = @new<Slice>();
-                typΔ1.Value.elem = Ꮡcheck.varType((~e).Elt);
+                typΔ1.elem = Ꮡcheck.varType(e.Elt);
                 T = new SliceжΔType(typΔ1); goto ᒐdone;
             }
 
@@ -362,15 +368,15 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
             // Provide a more specific error when encountering a [...] array
             // rather than leaving it to the handling of the ... expression.
             {
-                var (_, ok) = (~e).Len._<ж<ast.Ellipsis>>(ᐧ); if (ok){
-                    Ꮡcheck.error(new ast_Exprᴠpositioner((~e).Len), BadDotDotDotSyntax, invalidUseOfArrayOutsideˢ);
-                    typΔ2.Value.len = -1;
+                var (_, ok) = e.Len._<ж<ast.Ellipsis>>(ᐧ); if (ok) {
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(e.Len), BadDotDotDotSyntax, invalidUseOfArrayOutsideˢ);
+                    typΔ2.len = -1;
                 } else {
-                    typΔ2.Value.len = Ꮡcheck.arrayLength((~e).Len);
+                    typΔ2.len = Ꮡcheck.arrayLength(e.Len);
                 }
             }
-            typΔ2.Value.elem = Ꮡcheck.varType((~e).Elt);
-            if ((~typΔ2).len >= 0) {
+            typΔ2.elem = Ꮡcheck.varType(e.Elt);
+            if (typΔ2.len >= 0) {
                 T = new ArrayжΔType(typΔ2); goto ᒐdone;
             }
             // report error if we encountered [...]
@@ -388,13 +394,13 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
         }
         case ж<ast.StarExpr> e: {
             var typΔ4 = @new<Pointer>();
-            typΔ4.Value.@base = new BasicжΔType(Typ[Invalid]); // avoid nil base in invalid recursive type declaration
-            typΔ4.Value.@base = Ꮡcheck.varType((~e).X);
+            typΔ4.@base = new BasicжΔType(Typ[Invalid]); // avoid nil base in invalid recursive type declaration
+            typΔ4.@base = Ꮡcheck.varType(e.X);
             // If typ.base is invalid, it's unlikely that *base is particularly
             // useful - even a valid dereferenciation will lead to an invalid
             // type again, and in some cases we get unexpected follow-on errors
             // (e.g., go.dev/issue/49005). Return an invalid type instead.
-            if (!isValid((~typΔ4).@base)) {
+            if (!isValid(typΔ4.@base)) {
                 T = new BasicжΔType(Typ[Invalid]); goto ᒐdone;
             }
             T = new PointerжΔType(typΔ4); goto ᒐdone;
@@ -406,13 +412,13 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
         }
         case ж<ast.InterfaceType> e: {
             var typΔ6 = Ꮡcheck.newInterface();
-            Ꮡcheck.interfaceType(typΔ6, e, Ꮡdef);
+            Ꮡcheck.interfaceType(typΔ6, e, def);
             T = new InterfaceжΔType(typΔ6); goto ᒐdone;
         }
         case ж<ast.MapType> e: {
             var typΔ7 = @new<Map>();
-            typΔ7.Value.key = Ꮡcheck.varType((~e).Key);
-            typΔ7.Value.elem = Ꮡcheck.varType((~e).Value);
+            typΔ7.key = Ꮡcheck.varType(e.Key);
+            typΔ7.elem = Ꮡcheck.varType((~e).Value);
 
             // spec: "The comparison operators == and != must be fully defined
             // for operands of the key type; thus the key type must not be a
@@ -422,14 +428,14 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
             // it is safe to continue in any case (was go.dev/issue/6667).
             var typʗ1 = typΔ7;
             check.later(() => {
-                if (!Comparable((~typʗ1).key)) {
-                    @string why = default!;
-                    if (isTypeParam((~typʗ1).key)) {
+                if (!Comparable(typʗ1.key)) {
+                    @string why = default;
+                    if (isTypeParam(typʗ1.key)) {
                         why = missingComparableˢ;
                     }
-                    Ꮡcheck.errorf(new ast_Exprᴠpositioner((~e).Key), IncomparableMapKey, "invalid map key type %s%s"u8, (~typʗ1).key, why);
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(e.Key), IncomparableMapKey, "invalid map key type %s%s"u8, typʗ1.key, why);
                 }
-            }).describef(new ast_Exprᴠpositioner((~e).Key), "check map key %s"u8, (~typΔ7).key);
+            }).describef(new ast_Exprᴠpositioner(e.Key), "check map key %s"u8, typΔ7.key);
 
             T = new MapжΔType(typΔ7); goto ᒐdone;
         }
@@ -437,23 +443,27 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
             var typΔ8 = @new<Chan>();
 
             ChanDir dir = SendRecv;
-            var exprᴛ3 = (~e).Dir;
-            if (exprᴛ3 == (ast.ChanDir)((ast.ChanDir)(ast.SEND | ast.RECV))) {
+            switch (e.Dir) {
+            case var ᴛ when ᴛ == (ast.ChanDir)((ast.ChanDir)(ast.SEND | ast.RECV)): {
                 // nothing to do
+                break;
             }
-            else if (exprᴛ3 == ast.SEND) {
+            case var ᴛ when ᴛ == ast.SEND: {
                 dir = SendOnly;
+                break;
             }
-            else if (exprᴛ3 == ast.RECV) {
+            case var ᴛ when ᴛ == ast.RECV: {
                 dir = RecvOnly;
+                break;
             }
-            else { /* default: */
-                Ꮡcheck.errorf(new ast_ChanTypeжpositioner(e), InvalidSyntaxTree, "unknown channel direction %d"u8, (~e).Dir);
+            default: {
+                Ꮡcheck.errorf(new ast_ChanTypeжpositioner(e), InvalidSyntaxTree, "unknown channel direction %d"u8, e.Dir);
                 // ok to continue
-            }
+                break;
+            }}
 
-            typΔ8.Value.dir = dir;
-            typΔ8.Value.elem = Ꮡcheck.varType((~e).Value);
+            typΔ8.dir = dir;
+            typΔ8.elem = Ꮡcheck.varType((~e).Value);
             T = new ChanжΔType(typΔ8); goto ᒐdone;
         }
         default: {
@@ -479,13 +489,13 @@ internal partial interface instantiatedType_type /*dyn*/ {
 }
 
 internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡix) {
-    ΔType res = default!;
+    ΔType res = default;
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var ix = ref Ꮡix.DerefOrNull();
 
-        if ((~check.conf)._Trace) {
+        if (check.conf._Trace) {
             Ꮡcheck.trace(ix.Pos(), instantiatingTypeSWithSˢ, ix.x, ix.indices);
             check.indent++;
             defer(() => {
@@ -513,7 +523,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
 
         // evaluate arguments
         var targs = Ꮡcheck.typeList(ix.indices);
-        if (targs == default!) {
+        if (targs == nil) {
             res = new BasicжΔType(Typ[Invalid]); goto ᒐdone;
         }
 
@@ -523,7 +533,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
         // it has type parameters, too.
         var ityp = Ꮡcheck.instance(ix.Pos(), gtyp, targs, nil, check.context());
         var (inst, _) = ityp._<ΔgenericType>(ᐧ);
-        if (inst == default!) {
+        if (inst == nil) {
             res = new BasicжΔType(Typ[Invalid]); goto ᒐdone;
         }
 
@@ -541,7 +551,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
             if (Ꮡcheck.validateTArgLen(Ꮡix.Value.Pos(), name, len(tparams), len(targsʗ1))) {
                 // check type constraints
                 {
-                    var (i, err) = Ꮡcheck.verify(Ꮡix.Value.Pos(), instʗ1.TypeParams().list(), targsʗ1, Ꮡcheck.Value.context()); if (err != default!){
+                    var (i, err) = Ꮡcheck.verify(Ꮡix.Value.Pos(), instʗ1.TypeParams().list(), targsʗ1, Ꮡcheck.Value.context()); if (err != nil) {
                         // best position for error reporting
                         tokenꓸPos pos = Ꮡix.Value.Pos();
                         if (i < len(Ꮡix.Value.indices)) {
@@ -576,14 +586,14 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
     // length.
     {
         var (name, _) = e._<ж<ast.Ident>>(ᐧ); if (name != nil) {
-            var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup((~name).Name);
-            if (obj == default!) {
-                Ꮡcheck.errorf(new ast_Identжpositioner(name), InvalidArrayLen, "undefined array length %s or missing type constraint"u8, (~name).Name);
+            var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(name.Name);
+            if (obj == nil) {
+                Ꮡcheck.errorf(new ast_Identжpositioner(name), InvalidArrayLen, "undefined array length %s or missing type constraint"u8, name.Name);
                 return -1;
             }
             {
                 var (_, ok) = obj._<ж<Const>>(ᐧ); if (!ok) {
-                    Ꮡcheck.errorf(new ast_Identжpositioner(name), InvalidArrayLen, "invalid array length %s"u8, (~name).Name);
+                    Ꮡcheck.errorf(new ast_Identжpositioner(name), InvalidArrayLen, "invalid array length %s"u8, name.Name);
                     return -1;
                 }
             }
@@ -613,8 +623,8 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
         }
     }
 
-    @string msg = default!;
-    if (isInteger(x.typ)){
+    @string msg = default;
+    if (isInteger(x.typ)) {
         msg = invalidArrayLengthSˢ;
     } else {
         msg = arrayLengthSMustBeˢ;
@@ -630,9 +640,9 @@ internal static slice<ΔType> typeList(this ж<Checker> Ꮡcheck, slice<ast.Expr
     foreach (var (i, x) in list) {
         var t = Ꮡcheck.varType(x);
         if (!isValid(t)) {
-            res = default!;
+            res = default;
         }
-        if (res != default!) {
+        if (res != nil) {
             res[i] = t;
         }
     }

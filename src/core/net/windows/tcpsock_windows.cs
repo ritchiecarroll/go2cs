@@ -19,34 +19,33 @@ public static error SetKeepAliveConfig(this ж<TCPConn> Ꮡc, KeepAliveConfig co
     }
 
     {
-        var err = setKeepAlive(c.fd, config.Enable); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+        var err = setKeepAlive(c.fd, config.Enable); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
-    if (windows.SupportTCPKeepAliveIdle() && windows.SupportTCPKeepAliveInterval()){
+    if (windows.SupportTCPKeepAliveIdle() && windows.SupportTCPKeepAliveInterval()) {
         {
-            var err = setKeepAliveIdle(c.fd, config.Idle); if (err != default!) {
-                return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+            var err = setKeepAliveIdle(c.fd, config.Idle); if (err != nil) {
+                return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
             }
         }
         {
-            var err = setKeepAliveInterval(c.fd, config.Interval); if (err != default!) {
-                return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+            var err = setKeepAliveInterval(c.fd, config.Interval); if (err != nil) {
+                return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
             }
         }
-    } else 
-    {
-        var err = setKeepAliveIdleAndInterval(c.fd, config.Idle, config.Interval); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    } else {
+        var err = setKeepAliveIdleAndInterval(c.fd, config.Idle, config.Interval); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
     {
-        var err = setKeepAliveCount(c.fd, config.Count); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+        var err = setKeepAliveCount(c.fd, config.Count); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
 
-    return default!;
+    return default;
 }
 
 } // end net_package

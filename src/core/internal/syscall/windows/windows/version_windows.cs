@@ -32,8 +32,7 @@ partial struct _OSVERSIONINFOEXW {
 // Retrieves version information of the current Windows OS
 // from the RtlGetVersion API.
 internal static ж<_OSVERSIONINFOEXW> getVersionInfo() {
-    ref var info = ref heap<_OSVERSIONINFOEXW>(out var Ꮡinfo);
-    info = new _OSVERSIONINFOEXW(nil);
+    ref var info = ref heap<_OSVERSIONINFOEXW>(new _OSVERSIONINFOEXW(), out var Ꮡinfo);
     info.osVersionInfoSize = (uint32)/* unsafe.Sizeof(info) */ (uintptr)284;
     rtlGetVersion(Ꮡinfo);
     return Ꮡinfo;
@@ -43,7 +42,7 @@ internal static ж<_OSVERSIONINFOEXW> getVersionInfo() {
 // of the current Windows OS from the RtlGetVersion API.
 public static (uint32 major, uint32 minor, uint32 build) Version() {
     var info = getVersionInfo();
-    return ((~info).majorVersion, (~info).minorVersion, (~info).buildNumber);
+    return (info.majorVersion, info.minorVersion, info.buildNumber);
 }
 
 // SupportUnlimitedTransmitFile indicates whether the current
@@ -58,7 +57,7 @@ public static readonly ж<Func<bool>> ᏑSupportUnlimitedTransmitFile = new Stat
 public static ref Func<bool> SupportUnlimitedTransmitFile => ref ((StaticBox<Func<bool>>)ᏑSupportUnlimitedTransmitFile).ValueSlot;
 internal static void initᴛSupportUnlimitedTransmitFile() { SupportUnlimitedTransmitFile = sync.OnceValue(bool () => {
     var info = getVersionInfo();
-    return (~info).productType != VER_NT_WORKSTATION;
+    return info.productType != VER_NT_WORKSTATION;
 }); }
 
 internal static bool supportTCPKeepAliveIdle;
@@ -70,7 +69,7 @@ internal static void initᴛinitTCPKeepAlive() { initTCPKeepAlive = sync.OnceFun
     GoFrame ᒐ = default;
     try {
         var (s, err) = WSASocket(syscall.AF_INET, syscall.SOCK_STREAM, syscall.IPPROTO_TCP, nil, 0, WSA_FLAG_NO_HANDLE_INHERIT);
-        if (err != default!) {
+        if (err != nil) {
             // Fallback to checking the Windows version.
             var (major, _, build) = Version();
             supportTCPKeepAliveIdle = major >= 10 && build >= 16299;
@@ -135,7 +134,7 @@ public static readonly ж<Func<bool>> ᏑSupportUnixSocket = new StaticBox<Func<
     // Second call to get the actual protocols.
     var buf = new slice<syscall.WSAProtocolInfo>(n, () => new());
     (n, var err) = syscall.WSAEnumProtocols(nil, Ꮡ(buf, 0), Ꮡsize);
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
     for (var i = (int32)0; i < n; i++) {

@@ -14,12 +14,12 @@ partial class gob_package {
 // other side of a connection.  It is safe for concurrent use by multiple
 // goroutines.
 partial struct Encoder {
-    internal sync.Mutex mutex;              // each item must be sent atomically
-    internal slice<io.Writer> w;        // where to send the data
+    internal sync.Mutex mutex;               // each item must be sent atomically
+    internal slice<io.Writer> w;             // where to send the data
     internal map<reflectꓸType, typeId> sent; // which types we've already sent
-    internal ж<encoderState> countState;        // stage for writing counts
-    internal ж<encoderState> freeList;        // list of free encoderStates; avoids reallocation
-    internal encBuffer byteBuf;               // buffer for top-level encoderState
+    internal ж<encoderState> countState;     // stage for writing counts
+    internal ж<encoderState> freeList;       // list of free encoderStates; avoids reallocation
+    internal encBuffer byteBuf;              // buffer for top-level encoderState
     internal error err;
 }
 
@@ -33,9 +33,9 @@ internal static slice<byte> spaceForLength = new slice<byte>(maxLength);
 // NewEncoder returns a new encoder that will transmit on the [io.Writer].
 public static ж<Encoder> NewEncoder(io.Writer w) {
     var enc = @new<Encoder>();
-    enc.Value.w = new io.Writer[]{w}.slice();
-    enc.Value.sent = new map<reflectꓸType, typeId>();
-    enc.Value.countState = enc.newEncoderState(@new<encBuffer>());
+    enc.w = slice<io.Writer>([w]);
+    enc.sent = new map<reflectꓸType, typeId>();
+    enc.countState = enc.newEncoderState(@new<encBuffer>());
     return enc;
 }
 
@@ -55,7 +55,7 @@ internal static void popWriter(this ref Encoder enc) {
 }
 
 internal static void setError(this ref Encoder enc, error err) {
-    if (enc.err == default!) { // remember the first.
+    if (enc.err == nil) { // remember the first.
         enc.err = err;
     }
 }
@@ -78,17 +78,17 @@ internal static void writeMessage(this ref Encoder enc, io.Writer w, ж<encBuffe
         return;
     }
     // Encode the length.
-    (~enc.countState).b.Reset();
+    enc.countState.b.Reset();
     enc.countState.encodeUint((uint64)messageLen);
     // Copy the length to be a prefix of the message.
-    nint offset = (nint)maxLength - (~enc.countState).b.Len();
-    copy(message.slice(offset), (~enc.countState).b.Bytes());
+    nint offset = (nint)maxLength - enc.countState.b.Len();
+    copy(message.slice(offset), enc.countState.b.Bytes());
     // Write the data.
     var (_, err) = w.Write(message.slice(offset));
     // Drain the buffer and restore the space at the front for the count of the next message.
     b.Reset();
     b.Write(spaceForLength);
-    if (err != default!) {
+    if (err != nil) {
         enc.setError(err);
     }
 }
@@ -96,7 +96,7 @@ internal static void writeMessage(this ref Encoder enc, io.Writer w, ж<encBuffe
 // sendActualType sends the requested type, without further investigation, unless
 // it's been sent before.
 internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflectꓸType actual) {
-    bool sent = default!;
+    bool sent = default;
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
@@ -107,101 +107,100 @@ internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer 
         }
     }
     var (info, err) = getTypeInfo(ref (Ꮡut).DerefOrNull());
-    if (err != default!) {
+    if (err != nil) {
         enc.setError(err);
         return sent;
     }
     // Send the pair (-id, type)
     // Id:
-    state.encodeInt(-(int64)(int32)(~info).id);
+    state.encodeInt(-(int64)info.id);
     // Type:
-    Ꮡenc.encode(state.b, reflect.ValueOf((~info).wire), wireTypeUserInfo);
+    Ꮡenc.encode(state.b, reflect.ValueOf(info.wire), wireTypeUserInfo);
     enc.writeMessage(w, state.b);
-    if (enc.err != default!) {
+    if (enc.err != nil) {
         return sent;
     }
 
     // Remember we've sent this type, both what the user gave us and the base type.
-    enc.sent[ut.@base] = info.Value.id;
+    enc.sent[ut.@base] = info.id;
     if (!AreEqual(ut.user, ut.@base)) {
-        enc.sent[ut.user] = info.Value.id;
+        enc.sent[ut.user] = info.id;
     }
     // Now send the inner types
     {
         var st = actual;
-        var exprᴛ1 = st.Kind();
-        if (exprᴛ1 == reflect.Struct) {
+        switch (st.Kind()) {
+        case var ᴛ when ᴛ == reflect.Struct: {
             for (nint i = 0; i < st.NumField(); i++) {
                 if (isExported(st.Field(i).Name)) {
                     Ꮡenc.sendType(w, Ꮡstate, st.Field(i).Type);
                 }
             }
+            break;
         }
-        else if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) {
+        case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice: {
             Ꮡenc.sendType(w, Ꮡstate, st.Elem());
+            break;
         }
-        else if (exprᴛ1 == reflect.Map) {
+        case var ᴛ when ᴛ == reflect.Map: {
             Ꮡenc.sendType(w, Ꮡstate, st.Key());
             Ꮡenc.sendType(w, Ꮡstate, st.Elem());
-        }
+            break;
+        }}
     }
     return true;
 }
 
 // sendType sends the type info to the other side, if necessary.
-internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, reflectꓸType origt) {
-    bool sent = default!;
+internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, reflectꓸType origt) {
+    bool sent = default;
 
     var ut = userType(origt);
-    if ((~ut).externalEnc != 0) {
+    if (ut.externalEnc != 0) {
         // The rules are different: regardless of the underlying type's representation,
         // we need to tell the other side that the base type is a GobEncoder.
-        return Ꮡenc.sendActualType(w, Ꮡstate, ut, (~ut).@base);
+        return Ꮡenc.sendActualType(w, state, ut, ut.@base);
     }
 
     // It's a concrete value, so drill down to the base type.
     {
-        var rt = ut.Value.@base;
-        var exprᴛ1 = rt.Kind();
-        if (exprᴛ1 == reflect.ΔSlice) {
-            do {
-                // If it's []uint8, don't send; it's considered basic.
-                if (rt.Elem().Kind() == reflect.Uint8) {
-                    return sent;
-                }
-                // Otherwise we do send.
-                break;
-            } while (false);
-        }
-        else if (exprᴛ1 == reflect.Array) {
-            do {
-                // arrays must be sent so we know their lengths and element types.
-                break;
-            } while (false);
-        }
-        else if (exprᴛ1 == reflect.Map) {
-            do {
-                // maps must be sent so we know their lengths and key/value types.
-                break;
-            } while (false);
-        }
-        else if (exprᴛ1 == reflect.Struct) {
-            do {
-                // structs must be sent so we know their fields.
-                break;
-            } while (false);
-        }
-        else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func) {
-            // If we get here, it's a field of a struct; ignore it.
-            return sent;
-        }
-        else { /* default: */
+        var rt = ut.@base;
+        switch (rt.Kind()) {
+        default: {
             // Basic types and interfaces do not need to be described.
             return sent;
         }
+        case var ᴛ when ᴛ == reflect.ΔSlice: {
+            // If it's []uint8, don't send; it's considered basic.
+            if (rt.Elem().Kind() == reflect.Uint8) {
+                return sent;
+            }
+            // Otherwise we do send.
+            break;
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.Array: {
+            // arrays must be sent so we know their lengths and element types.
+            break;
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.Map: {
+            // maps must be sent so we know their lengths and key/value types.
+            break;
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.Struct: {
+            // structs must be sent so we know their fields.
+            break;
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func: {
+            // If we get here, it's a field of a struct; ignore it.
+            return sent;
+        }}
     }
 
-    return Ꮡenc.sendActualType(w, Ꮡstate, ut, (~ut).@base);
+    return Ꮡenc.sendActualType(w, state, ut, ut.@base);
 }
 
 // Encode transmits the data item represented by the empty interface value,
@@ -214,7 +213,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any e) {
 // sendTypeDescriptor makes sure the remote side knows about this type.
 // It will send a descriptor if this is the first time the type has been
 // sent.
-internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) {
+internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, ж<userTypeInfo> Ꮡut) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
 
@@ -227,8 +226,8 @@ internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж
     {
         var (_, alreadySent) = enc.sent[rt, ꟷ]; if (!alreadySent) {
             // No, so send it.
-            var sent = Ꮡenc.sendType(w, Ꮡstate, rt);
-            if (enc.err != default!) {
+            var sent = Ꮡenc.sendType(w, state, rt);
+            if (enc.err != nil) {
                 return;
             }
             // If the type info has still not been transmitted, it means we have
@@ -236,11 +235,11 @@ internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж
             // need to send the type info but we do need to update enc.sent.
             if (!sent) {
                 var (info, err) = getTypeInfo(ref (Ꮡut).DerefOrNull());
-                if (err != default!) {
+                if (err != nil) {
                     enc.setError(err);
                     return;
                 }
-                enc.sent[rt] = info.Value.id;
+                enc.sent[rt] = info.id;
             }
         }
     }
@@ -252,7 +251,7 @@ internal static void sendTypeId(this ref Encoder enc, ж<encoderState> Ꮡstate,
     ref var ut = ref Ꮡut.DerefOrNull();
 
     // Identify the type of this top-level value.
-    state.encodeInt((int64)(int32)enc.sent[ut.@base]);
+    state.encodeInt((int64)enc.sent[ut.@base]);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -283,31 +282,31 @@ public static error EncodeValue(this ж<Encoder> Ꮡenc, reflectꓸValue value) 
         enc.w = enc.w[0..1];
 
         var (ut, err) = validUserType(value.Type());
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
 
-        enc.err = default!;
+        enc.err = default;
         enc.byteBuf.Reset();
         enc.byteBuf.Write(spaceForLength);
         var state = Ꮡenc.newEncoderState(Ꮡenc.of(Encoder.ᏑbyteBuf));
 
         Ꮡenc.sendTypeDescriptor(enc.writer(), state, ut);
         enc.sendTypeId(state, ut);
-        if (enc.err != default!) {
+        if (enc.err != nil) {
             return enc.err;
         }
 
         // Encode the object.
-        Ꮡenc.encode((~state).b, value, ut);
-        if (enc.err == default!) {
-            enc.writeMessage(enc.writer(), (~state).b);
+        Ꮡenc.encode(state.b, value, ut);
+        if (enc.err == nil) {
+            enc.writeMessage(enc.writer(), state.b);
         }
 
         enc.freeEncoderState(state);
         return enc.err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡenc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 

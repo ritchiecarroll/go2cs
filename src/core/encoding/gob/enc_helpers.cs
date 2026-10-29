@@ -46,12 +46,12 @@ partial class gob_package {
     [reflect.Uintptr] = encUintptrSlice
 }; }
 
-internal static bool encBoolArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encBoolArray(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encBoolSlice(Ꮡstate, v.Slice(0, v.Len()));
+    return encBoolSlice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encBoolSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -64,7 +64,7 @@ internal static bool encBoolSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
     }
     foreach (var (_, x) in Δslice) {
         if (x != false || state.sendZero) {
-            if (x){
+            if (x) {
                 state.encodeUint(1);
             } else {
                 state.encodeUint(0);
@@ -74,12 +74,12 @@ internal static bool encBoolSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
     return true;
 }
 
-internal static bool encComplex64Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encComplex64Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encComplex64Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encComplex64Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encComplex64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -101,12 +101,12 @@ internal static bool encComplex64Slice(ж<encoderState> Ꮡstate, reflectꓸValu
     return true;
 }
 
-internal static bool encComplex128Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encComplex128Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encComplex128Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encComplex128Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encComplex128Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -128,12 +128,12 @@ internal static bool encComplex128Slice(ж<encoderState> Ꮡstate, reflectꓸVal
     return true;
 }
 
-internal static bool encFloat32Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encFloat32Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encFloat32Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encFloat32Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encFloat32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -153,12 +153,12 @@ internal static bool encFloat32Slice(ж<encoderState> Ꮡstate, reflectꓸValue 
     return true;
 }
 
-internal static bool encFloat64Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encFloat64Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encFloat64Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encFloat64Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encFloat64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -178,12 +178,12 @@ internal static bool encFloat64Slice(ж<encoderState> Ꮡstate, reflectꓸValue 
     return true;
 }
 
-internal static bool encIntArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encIntArray(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encIntSlice(Ꮡstate, v.Slice(0, v.Len()));
+    return encIntSlice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encIntSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -202,12 +202,12 @@ internal static bool encIntSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     return true;
 }
 
-internal static bool encInt16Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encInt16Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encInt16Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encInt16Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encInt16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -226,12 +226,12 @@ internal static bool encInt16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
     return true;
 }
 
-internal static bool encInt32Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encInt32Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encInt32Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encInt32Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encInt32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -250,12 +250,12 @@ internal static bool encInt32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
     return true;
 }
 
-internal static bool encInt64Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encInt64Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encInt64Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encInt64Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encInt64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -274,12 +274,12 @@ internal static bool encInt64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
     return true;
 }
 
-internal static bool encInt8Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encInt8Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encInt8Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encInt8Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encInt8Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -298,12 +298,12 @@ internal static bool encInt8Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
     return true;
 }
 
-internal static bool encStringArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encStringArray(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encStringSlice(Ꮡstate, v.Slice(0, v.Len()));
+    return encStringSlice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encStringSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -323,12 +323,12 @@ internal static bool encStringSlice(ж<encoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool encUintArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encUintArray(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encUintSlice(Ꮡstate, v.Slice(0, v.Len()));
+    return encUintSlice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encUintSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -347,12 +347,12 @@ internal static bool encUintSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
     return true;
 }
 
-internal static bool encUint16Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encUint16Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encUint16Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encUint16Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encUint16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -371,12 +371,12 @@ internal static bool encUint16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool encUint32Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encUint32Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encUint32Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encUint32Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encUint32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -395,12 +395,12 @@ internal static bool encUint32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool encUint64Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encUint64Array(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encUint64Slice(Ꮡstate, v.Slice(0, v.Len()));
+    return encUint64Slice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encUint64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
@@ -419,12 +419,12 @@ internal static bool encUint64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool encUintptrArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
+internal static bool encUintptrArray(ж<encoderState> state, reflectꓸValue v) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return encUintptrSlice(Ꮡstate, v.Slice(0, v.Len()));
+    return encUintptrSlice(state, v.Slice(0, v.Len()));
 }
 
 internal static bool encUintptrSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {

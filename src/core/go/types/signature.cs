@@ -29,11 +29,11 @@ partial struct ΔSignature {
     // We then unpack the *Signature and use the scope for the literal body.
     internal ж<TypeParamList> rparams; // receiver type parameters from left to right, or nil
     internal ж<TypeParamList> tparams; // type parameters from left to right, or nil
-    internal ж<ΔScope> scope;      // function scope for package-local and non-instantiated signatures; nil otherwise
-    internal ж<Var> recv;        // nil if not a method
-    internal ж<Tuple> @params;      // (incoming) parameters from left to right; or nil
-    internal ж<Tuple> results;      // (outgoing) results from left to right; or nil
-    internal bool variadic;           // true if the last parameter's type is of the form ...T
+    internal ж<ΔScope> scope;          // function scope for package-local and non-instantiated signatures; nil otherwise
+    internal ж<Var> recv;              // nil if not a method
+    internal ж<Tuple> @params;         // (incoming) parameters from left to right; or nil
+    internal ж<Tuple> results;         // (outgoing) results from left to right; or nil
+    internal bool variadic;            // true if the last parameter's type is of the form ...T
 }
 
 // If variadic, the last element of params ordinarily has an
@@ -50,8 +50,8 @@ partial struct ΔSignature {
 // Deprecated: Use [NewSignatureType] instead which allows for type parameters.
 //
 //go:fix inline
-public static ж<ΔSignature> NewSignature(ж<Var> Ꮡrecv, ж<Tuple> Ꮡparams, ж<Tuple> Ꮡresults, bool variadic) {
-    return NewSignatureType(Ꮡrecv, default!, default!, Ꮡparams, Ꮡresults, variadic);
+public static ж<ΔSignature> NewSignature(ж<Var> recv, ж<Tuple> @params, ж<Tuple> results, bool variadic) {
+    return NewSignatureType(recv, default, default, @params, results, variadic);
 }
 
 // NewSignatureType creates a new function type for the given receiver,
@@ -69,7 +69,7 @@ public static ж<ΔSignature> NewSignature(ж<Var> Ꮡrecv, ж<Tuple> Ꮡparams,
 //
 // If recv is non-nil, typeParams must be empty. If recvTypeParams is
 // non-empty, recv must be non-nil.
-public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypeParam>> recvTypeParams, slice<ж<TypeParam>> typeParams, ж<Tuple> Ꮡparams, ж<Tuple> Ꮡresults, bool variadic) {
+public static ж<ΔSignature> NewSignatureType(ж<Var> recv, slice<ж<TypeParam>> recvTypeParams, slice<ж<TypeParam>> typeParams, ж<Tuple> Ꮡparams, ж<Tuple> results, bool variadic) {
     ref var @params = ref Ꮡparams.DerefOrNull();
 
     if (variadic) {
@@ -78,13 +78,13 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
             throw panic("variadic function must have at least one parameter");
         }
         var last = @params.At(n - 1).Value.typ;
-        ж<Slice> S = default!;
+        ж<Slice> S = default;
         foreach (var (t, _) in range<ΔType, ΔType>(typeset(last).Invoke)) {
-            if (t == default!) {
+            if (t == nil) {
                 break;
             }
-            ж<Slice> s = default!;
-            if (isString(t)){
+            ж<Slice> s = default;
+            if (isString(t)) {
                 s = NewSlice(universeByte);
             } else {
                 // Variadic Go functions have a last parameter of type []T,
@@ -101,11 +101,10 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
                 // know that it is dealing with the append special case.)
                 (s, _) = t.Underlying()._<ж<Slice>>(ᐧ);
             }
-            if (S == nil){
+            if (S == nil) {
                 S = s;
-            } else 
-            if (s == nil || !Identical(new SliceжΔType(S), new SliceжΔType(s))) {
-                S = default!;
+            } else if (s == nil || !Identical(new SliceжΔType(S), new SliceжΔType(s))) {
+                S = default;
                 break;
             }
         }
@@ -113,18 +112,18 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
             throw panic(fmt.Sprintf("got %s, want variadic parameter of slice or string type"u8, last));
         }
     }
-    var sig = Ꮡ(new ΔSignature(recv: Ꮡrecv, @params: Ꮡparams, results: Ꮡresults, variadic: variadic));
+    var sig = Ꮡ(new ΔSignature(recv: recv, @params: Ꮡparams, results: results, variadic: variadic));
     if (len(recvTypeParams) != 0) {
-        if (Ꮡrecv == nil) {
+        if (recv == nil) {
             throw panic("function with receiver type parameters must have a receiver");
         }
-        sig.Value.rparams = bindTParams(recvTypeParams);
+        sig.rparams = bindTParams(recvTypeParams);
     }
     if (len(typeParams) != 0) {
-        if (Ꮡrecv != nil) {
+        if (recv != nil) {
             throw panic("function with type parameters cannot have a receiver");
         }
-        sig.Value.tparams = bindTParams(typeParams);
+        sig.tparams = bindTParams(typeParams);
     }
     return sig;
 }
@@ -170,7 +169,7 @@ public static ΔType Underlying(this ж<ΔSignature> Ꮡs) {
 }
 
 public static @string String(this ж<ΔSignature> Ꮡs) {
-    return TypeString(new ΔSignatureжΔType(Ꮡs), default!);
+    return TypeString(new ΔSignatureжΔType(Ꮡs), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -190,14 +189,14 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
         ref var ftyp = ref Ꮡftyp.DerefOrNull();
 
         check.openScope(new ast.FuncTypeжNode(Ꮡftyp), functionˢ);
-        check.scope.Value.isFunc = true;
+        check.scope.isFunc = true;
         check.recordScope(new ast.FuncTypeжNode(Ꮡftyp), check.scope);
         sig.scope = check.scope;
         ᒐd1 = true;
 
         // collect method receiver, if any
-        ж<Var> recv = default!;
-        ж<TypeParamList> rparams = default!;
+        ж<Var> recv = default;
+        ж<TypeParamList> rparams = default;
         if (ᏑrecvPar != nil && ᏑrecvPar.NumFields() > 0) {
             // We have at least one receiver; make sure we don't have more than one.
             {
@@ -229,7 +228,7 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
         // declare named receiver, ordinary, and result parameters
         tokenꓸPos scopePos = ftyp.End(); // all parameter's scopes start after the signature
         if (recv != nil && (~recv).name != ""u8) {
-            Ꮡcheck.declare(check.scope, (~recvPar.List[0]).Names[0], new VarжObject(recv), scopePos);
+            Ꮡcheck.declare(check.scope, recvPar.List[0].Names[0], new VarжObject(recv), scopePos);
         }
         Ꮡcheck.declareParams(pnames, @params, scopePos);
         Ꮡcheck.declareParams(rnames, results, scopePos);
@@ -261,8 +260,8 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
 
     // Determine the receiver base type.
     ΔType recvType = new BasicжΔType(Typ[Invalid]);
-    ж<TypeParamList> recvTParamsList = default!;
-    if (rtparams == default!){
+    ж<TypeParamList> recvTParamsList = default;
+    if (rtparams == nil) {
         // If there are no type parameters, we can simply typecheck rparam.Type.
         // If that is a generic type, varType will complain.
         // Further receiver constraints will be checked later, with validRecv.
@@ -275,9 +274,9 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
         // doesn't matter if we have multiple pointers.)
         var (a, _) = unpointer(recvType)._<ж<Alias>>(ᐧ); // recvType is not generic per above
         while (a != nil) {
-            var baseType = unpointer((~a).fromRHS);
+            var baseType = unpointer(a.fromRHS);
             {
-                var (g, _) = baseType._<ΔgenericType>(ᐧ); if (g != default! && g.TypeParams() != nil) {
+                var (g, _) = baseType._<ΔgenericType>(ᐧ); if (g != nil && g.TypeParams() != nil) {
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "cannot define new methods on instantiated type %s"u8, g);
                     recvType = new BasicжΔType(Typ[Invalid]); // avoid follow-on errors by Checker.validRecv
                     break;
@@ -289,10 +288,10 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
         // If there are type parameters, rbase must denote a generic base type.
         // Important: rbase must be resolved before declaring any receiver type
         // parameters (which may have the same name, see below).
-        ж<Named> baseType = default!;      // nil if not valid
+        ж<Named> baseType = default; // nil if not valid
         ref var cause = ref heap(new @string(), out var Ꮡcause);
         {
-            var t = Ꮡcheck.genericType(rbase, Ꮡcause); if (isValid(t)){
+            var t = Ꮡcheck.genericType(rbase, Ꮡcause); if (isValid(t)) {
                 switch (t.type()) {
                 case ж<Named> tΔ1: {
                     baseType = tΔ1;
@@ -332,8 +331,8 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
             // For historic reasons, type parameters in receiver type expressions
             // are considered both definitions and uses and thus must be recorded
             // in the Info.Uses and Info.Types maps (see go.dev/issue/68670).
-            check.recordUse(rparamΔ1, new TypeNameжObject((~tpar).obj));
-            check.recordTypeAndValue(new ast.IdentжExpr(rparamΔ1), typexpr, new TypeParamжΔType(tpar), default!);
+            check.recordUse(rparamΔ1, new TypeNameжObject(tpar.obj));
+            check.recordTypeAndValue(new ast.IdentжExpr(rparamΔ1), typexpr, new TypeParamжΔType(tpar), default);
         }
         recvTParamsList = bindTParams(recvTParams);
 
@@ -341,7 +340,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
         // and set them for the respective (local) receiver type parameters.
         if (baseType != nil) {
             var baseTParams = baseType.TypeParams().list();
-            if (len(recvTParams) == len(baseTParams)){
+            if (len(recvTParams) == len(baseTParams)) {
                 var smap = makeRenameMap(baseTParams, recvTParams);
                 foreach (var (i, recvTPar) in recvTParams) {
                     var baseTPar = baseTParams[i];
@@ -349,7 +348,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
                     // baseTPar.bound is possibly parameterized by other type parameters
                     // defined by the generic base type. Substitute those parameters with
                     // the receiver type parameters declared by the current method.
-                    recvTPar.Value.bound = Ꮡcheck.subst((~(~recvTPar).obj).pos, (~baseTPar).bound, smap, nil, check.context());
+                    recvTPar.bound = Ꮡcheck.subst((~recvTPar.obj).pos, baseTPar.bound, smap, nil, check.context());
                 }
             } else {
                 @string got = measure(len(recvTParams), typeParameterˢ);
@@ -376,7 +375,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
     }
 
     // Make sure we have no more than one receiver name.
-    ж<ast.Ident> rname = default!;
+    ж<ast.Ident> rname = default;
     {
         nint n = len(rparam.Names); if (n >= 1) {
             if (n > 1) {
@@ -388,10 +387,10 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
 
     // Create the receiver parameter.
     // recvType is invalid if baseType was never set.
-    ж<Var> recv = default!;
-    if (rname != nil && (~rname).Name != ""u8){
+    ж<Var> recv = default;
+    if (rname != nil && rname.Name != ""u8) {
         // named receiver
-        recv = newVar(RecvVar, rname.Pos(), check.pkg, (~rname).Name, recvType);
+        recv = newVar(RecvVar, rname.Pos(), check.pkg, rname.Name, recvType);
         // In this case, the receiver is declared by the caller
         // because it must be declared after any type parameters
         // (otherwise it might shadow one of them).
@@ -413,12 +412,12 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
 }
 
 internal static ΔType unpointer(ΔType t) {
-    while (ᐧ) {
+    for (;;) {
         var (p, _) = t._<ж<Pointer>>(ᐧ);
         if (p == nil) {
             return t;
         }
-        t = p.Value.@base;
+        t = p.@base;
     }
 }
 
@@ -433,22 +432,22 @@ internal static ΔType unpointer(ΔType t) {
 //	  (T[P])          T[P]
 //	   T[P]           T[P]
 internal static void recordParenthesizedRecvTypes(this ref Checker check, ast.Expr expr, ΔType typ) {
-    while (ᐧ) {
-        check.recordTypeAndValue(expr, typexpr, typ, default!);
+    for (;;) {
+        check.recordTypeAndValue(expr, typexpr, typ, default);
         switch (expr.type()) {
         case ж<ast.ParenExpr> e: {
-            expr = e.Value.X;
+            expr = e.X;
             break;
         }
         case ж<ast.StarExpr> e: {
-            expr = e.Value.X;
+            expr = e.X;
             // In a correct program, typ must be an unnamed
             // pointer type. But be careful and don't panic.
             var (ptr, _) = typ._<ж<Pointer>>(ᐧ);
             if (ptr == nil) {
                 return; // something is wrong
             }
-            typ = ptr.Value.@base;
+            typ = ptr.@base;
             break;
         }
         default: {
@@ -467,9 +466,9 @@ internal static readonly @string listContainsBothNamedAndˢ = "list contains bot
 // variables, and whether the (parameter) list is variadic.
 // Anonymous parameters are recorded with nil names.
 internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variadic) collectParams(this ж<Checker> Ꮡcheck, VarKind kind, ж<ast.FieldList> Ꮡlist) {
-    slice<ж<ast.Ident>> names = default!;
-    slice<ж<Var>> @params = default!;
-    bool variadic = default!;
+    slice<ж<ast.Ident>> names = default;
+    slice<ж<Var>> @params = default;
+    bool variadic = default;
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var list = ref Ꮡlist.DerefOrNull();
 
@@ -477,14 +476,14 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
         return (names, @params, variadic);
     }
 
-    bool named = default!;
-    bool anonymous = default!;
+    bool named = default;
+    bool anonymous = default;
     foreach (var (i, field) in list.List) {
-        var ftype = field.Value.Type;
+        var ftype = field.Type;
         {
             var (t, _) = ftype._<ж<ast.Ellipsis>>(ᐧ); if (t != nil) {
-                ftype = t.Value.Elt;
-                if (kind == ParamVar && i == len(list.List) - 1 && len((~field).Names) <= 1){
+                ftype = t.Elt;
+                if (kind == ParamVar && i == len(list.List) - 1 && len(field.Names) <= 1) {
                     variadic = true;
                 } else {
                     Ꮡcheck.softErrorf(new ast_Ellipsisжpositioner(t), InvalidSyntaxTree, "invalid use of ..."u8);
@@ -495,14 +494,14 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
         var typ = Ꮡcheck.varType(ftype);
         // The parser ensures that f.Tag is nil and we don't
         // care if a constructed AST contains a non-nil tag.
-        if (len((~field).Names) > 0){
+        if (len(field.Names) > 0) {
             // named parameter
-            foreach (var (_, name) in (~field).Names) {
-                if ((~name).Name == ""u8) {
+            foreach (var (_, name) in field.Names) {
+                if (name.Name == ""u8) {
                     Ꮡcheck.error(new ast_Identжpositioner(name), InvalidSyntaxTree, anonymousParameterˢ);
                     // ok to continue
                 }
-                var par = newVar(kind, name.Pos(), check.pkg, (~name).Name, typ);
+                var par = newVar(kind, name.Pos(), check.pkg, name.Name, typ);
                 // named parameter is declared by caller
                 names = append(names, name);
                 @params = append(@params, par);
@@ -529,7 +528,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
     if (variadic) {
         var last = @params[len(@params) - 1];
         last.Value.typ = new SliceжΔType(Ꮡ(new Slice(elem: (~last).typ)));
-        check.recordTypeAndValue((~list.List[len(list.List) - 1]).Type, typexpr, (~last).typ, default!);
+        check.recordTypeAndValue(list.List[len(list.List) - 1].Type, typexpr, (~last).typ, default);
     }
 
     return (names, @params, variadic);
@@ -540,7 +539,7 @@ internal static void declareParams(this ж<Checker> Ꮡcheck, slice<ж<ast.Ident
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     foreach (var (i, name) in names) {
-        if (name != nil && (~name).Name != ""u8) {
+        if (name != nil && name.Name != ""u8) {
             Ꮡcheck.declare(check.scope, name, new VarжObject(@params[i]), scopePos);
         }
     }
@@ -567,16 +566,16 @@ internal static void validRecv(this ж<Checker> Ꮡcheck, positioner pos, ж<Var
     // as the method."
     switch (atyp.type()) {
     case ж<Named> T: {
-        if ((~(~T).obj).pkg != check.pkg || isCGoTypeObj(check.fset, ref ((~T).obj).DerefOrNull())) {
+        if ((~T.obj).pkg != check.pkg || isCGoTypeObj(check.fset, ref (T.obj).DerefOrNull())) {
             Ꮡcheck.errorf(pos, InvalidRecv, "cannot define new methods on non-local type %s"u8, rtyp);
             break;
         }
-        @string cause = default!;
+        @string cause = default;
         var switchᴛ12 = T.Underlying();
         switch (switchᴛ12.type()) {
         case ж<Basic> u: {
             // unsafe.Pointer is treated like a regular pointer
-            if ((~u).kind == UnsafePointer) {
+            if (u.kind == UnsafePointer) {
                 cause = unsafePointerˢ;
             }
             break;
@@ -614,8 +613,8 @@ internal static readonly @string ctypeˢ = "_Ctype_"u8;
 internal static readonly @string cgoˢ = "_cgo_"u8;
 
 // isCGoTypeObj reports whether the given type name was created by cgo.
-internal static bool isCGoTypeObj(ж<token.FileSet> Ꮡfset, ref TypeName obj) {
-    return strings.HasPrefix(obj.name, ctypeˢ) || strings.HasPrefix(filepath.Base(Ꮡfset.File(obj.pos).Name()), cgoˢ);
+internal static bool isCGoTypeObj(ж<token.FileSet> fset, ref TypeName obj) {
+    return strings.HasPrefix(obj.name, ctypeˢ) || strings.HasPrefix(filepath.Base(fset.File(obj.pos).Name()), cgoˢ);
 }
 
 } // end types_package

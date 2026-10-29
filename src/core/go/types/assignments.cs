@@ -28,24 +28,26 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
 
     Ꮡcheck.singleValue(Ꮡx);
 
-    var exprᴛ1 = x.mode;
-    if (exprᴛ1 == invalid) {
+    switch (x.mode) {
+    case var ᴛ when ᴛ == invalid: {
         return; // error reported before
     }
-    if (exprᴛ1 == nilvalue) {
+    case var ᴛ when ᴛ == nilvalue: {
         assert(isTypes2);
         // ok
+        break;
     }
-    else if (exprᴛ1 == constant_ || exprᴛ1 == variable || exprᴛ1 == mapindex || exprᴛ1 == value || exprᴛ1 == commaok || exprᴛ1 == commaerr) {
+    case var ᴛ when ᴛ == constant_ || ᴛ == variable || ᴛ == mapindex || ᴛ == value || ᴛ == commaok || ᴛ == commaerr: {
         // ok
+        break;
     }
-    else { /* default: */
+    default: {
         // we may get here because of other problems (go.dev/issue/39634, crash 12)
         // TODO(gri) do we need a new "generic" error code here?
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), IncompatibleAssign, "cannot assign %s to %s in %s"u8, Ꮡx.OrTypedNil(), T, context);
         x.mode = invalid;
         return;
-    }
+    }}
 
     if (isUntyped(x.typ)) {
         var target = T;
@@ -54,20 +56,19 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         // bool, rune, int, float64, complex128 or string respectively, depending
         // on whether the value is a boolean, rune, integer, floating-point,
         // complex, or string constant."
-        if (isTypes2){
-            if (x.isNil()){
-                if (T == default!) {
+        if (isTypes2) {
+            if (x.isNil()) {
+                if (T == nil) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UntypedNilUse, "use of untyped nil in %s"u8, context);
                     x.mode = invalid;
                     return;
                 }
-            } else 
-            if (T == default! || isNonTypeParamInterface(T)) {
+            } else if (T == nil || isNonTypeParamInterface(T)) {
                 target = Default(x.typ);
             }
         } else { // go/types
-            if (T == default! || isNonTypeParamInterface(T)) {
-                if (T == default! && AreEqual(x.typ, Typ[UntypedNil])) {
+            if (T == nil || isNonTypeParamInterface(T)) {
+                if (T == nil && AreEqual(x.typ, Typ[UntypedNil])) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UntypedNilUse, "use of untyped nil in %s"u8, context);
                     x.mode = invalid;
                     return;
@@ -78,21 +79,24 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         var (newType, val, code) = Ꮡcheck.implicitTypeAndValue(Ꮡx, target);
         if (code != 0) {
             @string msg = Ꮡcheck.sprintf("cannot use %s as %s value in %s"u8, Ꮡx.OrTypedNil(), target, context);
-            var exprᴛ2 = code;
-            if (exprᴛ2 == TruncatedFloat) {
+            switch (code) {
+            case var ᴛ when ᴛ == TruncatedFloat: {
                 msg += " (truncated)"u8;
+                break;
             }
-            else if (exprᴛ2 == NumericOverflow) {
+            case var ᴛ when ᴛ == NumericOverflow: {
                 msg += " (overflows)"u8;
+                break;
             }
-            else { /* default: */
+            default: {
                 code = IncompatibleAssign;
-            }
+                break;
+            }}
             Ꮡcheck.error(new operandжpositioner(Ꮡx), code, msg);
             x.mode = invalid;
             return;
         }
-        if (val != default!) {
+        if (val != nil) {
             x.val = val;
             check.updateExprVal(x.expr, val);
         }
@@ -115,15 +119,14 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     // spec: "If a left-hand side is the blank identifier, any typed or
     // non-constant value except for the predeclared identifier nil may
     // be assigned to it."
-    if (T == default!) {
+    if (T == nil) {
         return;
     }
 
-    ref var cause = ref heap<@string>(out var Ꮡcause);
-    cause = ""u8;
+    ref var cause = ref heap<@string>(""u8, out var Ꮡcause);
     {
         var (ok, code) = Ꮡx.assignableTo(Ꮡcheck, T, Ꮡcause); if (!ok) {
-            if (cause != ""u8){
+            if (cause != ""u8) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "cannot use %s as %s value in %s: %s"u8, Ꮡx.OrTypedNil(), T, context, cause);
             } else {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "cannot use %s as %s value in %s"u8, Ꮡx.OrTypedNil(), T, context);
@@ -141,7 +144,7 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || !isValid(x.typ) || !isValid(lhs.typ)) {
-        if (lhs.typ == default!) {
+        if (lhs.typ == nil) {
             lhs.typ = new BasicжΔType(Typ[Invalid]);
         }
         return;
@@ -150,7 +153,7 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
     // rhs must be a constant
     if (x.mode != constant_) {
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConstInit, "%s is not constant"u8, Ꮡx.OrTypedNil());
-        if (lhs.typ == default!) {
+        if (lhs.typ == nil) {
             lhs.typ = new BasicжΔType(Typ[Invalid]);
         }
         return;
@@ -158,7 +161,7 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
     assert(isConstType(x.typ));
 
     // If the lhs doesn't have a type yet, use the type of x.
-    if (lhs.typ == default!) {
+    if (lhs.typ == nil) {
         lhs.typ = x.typ;
     }
 
@@ -179,7 +182,7 @@ internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<opera
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || !isValid(x.typ) || !isValid(lhs.typ)) {
-        if (lhs.typ == default!) {
+        if (lhs.typ == nil) {
             lhs.typ = new BasicжΔType(Typ[Invalid]);
         }
         x.mode = invalid;
@@ -187,7 +190,7 @@ internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<opera
     }
 
     // If lhs doesn't have a type yet, use the type of x.
-    if (lhs.typ == default!) {
+    if (lhs.typ == nil) {
         var typ = x.typ;
         if (isUntyped(typ)) {
             // convert untyped types to default types
@@ -216,19 +219,19 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
     var (ident, _) = ast.Unparen(lhs)._<ж<ast.Ident>>(ᐧ);
 
     // Don't evaluate lhs if it is the blank identifier.
-    if (ident != nil && (~ident).Name == "_"u8) {
-        check.recordDef(ident, default!);
-        return default!;
+    if (ident != nil && ident.Name == "_"u8) {
+        check.recordDef(ident, default);
+        return default;
     }
 
     // If the lhs is an identifier denoting a variable v, this reference
     // is not a 'use' of v. Remember current value of v.used and restore
     // after evaluating the lhs via check.expr.
-    ж<Var> v = default!;
-    bool v_used = default!;
+    ж<Var> v = default;
+    bool v_used = default;
     if (ident != nil) {
         {
-            var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup((~ident).Name); if (obj != default!) {
+            var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(ident.Name); if (obj != nil) {
                 // It's ok to mark non-local variables, but ignore variables
                 // from other packages to avoid potential race conditions with
                 // dot-imported variables.
@@ -255,18 +258,19 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
 
     // spec: "Each left-hand side operand must be addressable, a map index
     // expression, or the blank identifier. Operands may be parenthesized."
-    var exprᴛ1 = x.mode;
-    if (exprᴛ1 == invalid) {
+    switch (x.mode) {
+    case var ᴛ when ᴛ == invalid: {
         return new BasicжΔType(Typ[Invalid]);
     }
-    if (exprᴛ1 == variable || exprᴛ1 == mapindex) {
+    case var ᴛ when ᴛ == variable || ᴛ == mapindex: {
         // ok
+        break;
     }
-    else { /* default: */
+    default: {
         {
             var (sel, ok) = x.expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
                 ref var op = ref heap(new operand(), out var Ꮡop);
-                Ꮡcheck.expr(nil, Ꮡop, (~sel).X);
+                Ꮡcheck.expr(nil, Ꮡop, sel.X);
                 if (op.mode == mapindex) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnaddressableFieldAssign, "cannot assign to struct field %s in map"u8, ExprString(x.expr));
                     return new BasicжΔType(Typ[Invalid]);
@@ -275,7 +279,7 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
         }
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnassignableOperand, "cannot assign to %s (neither addressable nor a map index expression)"u8, x.expr);
         return new BasicжΔType(Typ[Invalid]);
-    }
+    }}
 
     return x.typ;
 }
@@ -291,7 +295,7 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
 
     var T = Ꮡcheck.lhsVar(lhs); // nil if lhs is _
     if (!isValid(T)) {
-        if (Ꮡx != nil){
+        if (Ꮡx != nil) {
             x.mode = invalid;
         } else {
             Ꮡcheck.use(rhs);
@@ -300,9 +304,9 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
     }
 
     if (Ꮡx == nil) {
-        ж<target> target = default!;
+        ж<target> target = default;
         // avoid calling ExprString if not needed
-        if (T != default!) {
+        if (T != nil) {
             {
                 var (_, ok) = T.Underlying()._<ж<ΔSignature>>(ᐧ); if (ok) {
                     target = newTarget(T, ExprString(lhs));
@@ -313,7 +317,7 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
         Ꮡcheck.expr(target, Ꮡx, rhs);
     }
 
-    if (T == default! && context == "assignment"u8) {
+    if (T == nil && context == "assignment"u8) {
         context = assignmentToIdentifierˢ;
     }
     Ꮡcheck.assignment(Ꮡx, T, context);
@@ -321,11 +325,11 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
 
 // operandTypes returns the list of types for the given operands.
 internal static slice<ΔType> /*res*/ operandTypes(slice<ж<operand>> list) {
-    slice<ΔType> res = default!;
+    slice<ΔType> res = default;
     var resᴷ = new stackAppend<ΔType>(moves: true);
 
     foreach (var (_, x) in list) {
-        res = append(resᴷ, res, (~x).typ);
+        res = append(resᴷ, res, x.typ);
     }
     res = move2heap(resᴷ, res);
     return res;
@@ -333,7 +337,7 @@ internal static slice<ΔType> /*res*/ operandTypes(slice<ж<operand>> list) {
 
 // varTypes returns the list of types for the given variables.
 internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
-    slice<ΔType> res = default!;
+    slice<ΔType> res = default;
     var resᴷ = new stackAppend<ΔType>(moves: true);
 
     foreach (var (_, x) in list) {
@@ -359,18 +363,18 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
     var resᴷ = new stackAppend<@string>();
 
     assert(!(variadic && hasDots));
-    slice<@string> res = default!;
+    slice<@string> res = default;
     foreach (var (i, t) in list) {
-        @string s = default!;
+        @string s = default;
         var matchᴛ1 = false;
-        if (t == default!) { matchᴛ1 = true; // should not happen but be cautious
+        if (t == nil) { matchᴛ1 = true; // should not happen but be cautious
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (!isValid(t))) { matchᴛ1 = true;
             s = unknownTypeˢ;
         }
         else if (isUntyped(t)) { // => *Basic
-            if (isNumeric(t)){
+            if (isNumeric(t)) {
                 // Do not imply a specific type requirement:
                 // "have number, want float64" is better than
                 // "have untyped int, want float64" or
@@ -379,7 +383,7 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
             } else {
                 // If we don't have a number, omit the "untyped" qualifier
                 // for compactness.
-                s = strings.ReplaceAll((~t._<ж<Basic>>()).name, untypedˢ, ""u8);
+                s = strings.ReplaceAll(t._<ж<Basic>>().name, untypedˢ, ""u8);
             }
         }
         else if (!matchᴛ1) { /* default: */
@@ -392,7 +396,7 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
                 // In correct code, the parameter type is a slice, but be careful.
                 {
                     var (tΔ2, _) = t._<ж<Slice>>(ᐧ); if (tΔ2 != nil) {
-                        s = Ꮡcheck.sprintf("%s"u8, (~tΔ2).elem);
+                        s = Ꮡcheck.sprintf("%s"u8, tΔ2.elem);
                     }
                 }
                 s = "..."u8 + s;
@@ -427,7 +431,7 @@ internal static void assignError(this ж<Checker> Ꮡcheck, slice<ast.Expr> rhs,
     if (len(rhs) == 1) {
         {
             var (call, _) = ast.Unparen(rhs0)._<ж<ast.CallExpr>>(ᐧ); if (call != nil) {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(rhs0), WrongAssignCount, "assignment mismatch: %s but %s returns %s"u8, vars, (~call).Fun, vals);
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(rhs0), WrongAssignCount, "assignment mismatch: %s but %s returns %s"u8, vars, call.Fun, vals);
                 return;
             }
         }
@@ -443,11 +447,10 @@ internal static void returnError(this ж<Checker> Ꮡcheck, positioner at, slice
     nint l = len(lhs);
     nint r = len(rhs);
     @string qualifier = notEnoughˢ;
-    if (r > l){
+    if (r > l) {
         at = new operandжpositioner(rhs[l]); // report at first extra value
         qualifier = tooManyˢ;
-    } else 
-    if (r > 0) {
+    } else if (r > 0) {
         at = new operandжpositioner(rhs[r - 1]); // report at last value
     }
     var err = Ꮡcheck.newError(WrongResultCount);
@@ -470,7 +473,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     @string context = assignmentˢ;
-    if (returnStmt != default!) {
+    if (returnStmt != nil) {
         context = returnStatementˢ;
     }
 
@@ -490,7 +493,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         ref var x = ref heap(new operand(), out var Ꮡx);
         foreach (var (i, lhsΔ1) in lhs) {
             @string desc = lhsΔ1.Value.name;
-            if (returnStmt != default! && desc == ""u8) {
+            if (returnStmt != nil && desc == ""u8) {
                 desc = resultVariableˢ;
             }
             Ꮡcheck.expr(newTarget((~lhsΔ1).typ, desc), Ꮡx, orig_rhs[i]);
@@ -504,7 +507,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
     if (r != 1) {
         // Only report a mismatch error if there are no other errors on the rhs.
         if (Ꮡcheck.use(orig_rhs.ꓸꓸꓸ)) {
-            if (returnStmt != default!){
+            if (returnStmt != nil) {
                 var rhsΔ1 = Ꮡcheck.exprList(orig_rhs);
                 Ꮡcheck.returnError(new ast_Stmtᴠpositioner(returnStmt), lhs, rhsΔ1);
             } else {
@@ -513,14 +516,14 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         }
         // ensure that LHS variables have a type
         foreach (var (_, v) in lhs) {
-            if ((~v).typ == default!) {
+            if ((~v).typ == nil) {
                 v.Value.typ = new BasicжΔType(Typ[Invalid]);
             }
         }
         return;
     }
 
-    var (rhs, commaOk) = Ꮡcheck.multiExpr(orig_rhs[0], l == 2 && returnStmt == default!);
+    var (rhs, commaOk) = Ꮡcheck.multiExpr(orig_rhs[0], l == 2 && returnStmt == nil);
     r = len(rhs);
     if (l == r) {
         foreach (var (i, lhsΔ2) in lhs) {
@@ -528,7 +531,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         }
         // Only record comma-ok expression if both initializations succeeded
         // (go.dev/issue/59371).
-        if (commaOk && (~rhs[0]).mode != invalid && (~rhs[1]).mode != invalid) {
+        if (commaOk && rhs[0].mode != invalid && rhs[1].mode != invalid) {
             check.recordCommaOkTypes(orig_rhs[0], rhs);
         }
         return;
@@ -536,8 +539,8 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
 
     // In all other cases we have an assignment mismatch.
     // Only report a mismatch error if there are no other errors on the rhs.
-    if ((~rhs[0]).mode != invalid) {
-        if (returnStmt != default!){
+    if (rhs[0].mode != invalid) {
+        if (returnStmt != nil) {
             Ꮡcheck.returnError(new ast_Stmtᴠpositioner(returnStmt), lhs, rhs);
         } else {
             Ꮡcheck.assignError(orig_rhs, l, r);
@@ -545,7 +548,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
     }
     // ensure that LHS variables have a type
     foreach (var (_, v) in lhs) {
-        if ((~v).typ == default!) {
+        if ((~v).typ == nil) {
             v.Value.typ = new BasicжΔType(Typ[Invalid]);
         }
     }
@@ -591,11 +594,11 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
     r = len(rhs);
     if (l == r) {
         foreach (var (i, lhsΔ2) in lhs) {
-            Ꮡcheck.assignVar(lhsΔ2, default!, rhs[i], assignmentˢ);
+            Ꮡcheck.assignVar(lhsΔ2, default, rhs[i], assignmentˢ);
         }
         // Only record comma-ok expression if both assignments succeeded
         // (go.dev/issue/59371).
-        if (commaOk && (~rhs[0]).mode != invalid && (~rhs[1]).mode != invalid) {
+        if (commaOk && rhs[0].mode != invalid && rhs[1].mode != invalid) {
             check.recordCommaOkTypes(orig_rhs[0], rhs);
         }
         return;
@@ -603,7 +606,7 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
 
     // In all other cases we have an assignment mismatch.
     // Only report a mismatch error if there are no other errors on the rhs.
-    if ((~rhs[0]).mode != invalid) {
+    if (rhs[0].mode != invalid) {
         Ꮡcheck.assignError(orig_rhs, l, r);
     }
     Ꮡcheck.useLHS(lhs.ꓸꓸꓸ);
@@ -632,7 +635,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
             continue;
         }
 
-        @string name = ident.Value.Name;
+        @string name = ident.Name;
         if (name != "_"u8) {
             if (seen[name]) {
                 Ꮡcheck.errorf(new ast_Exprᴠpositioner(lhsΔ1), RepeatedDecl, "%s repeated on left side of :="u8, lhsΔ1);
@@ -647,11 +650,11 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
         // must use Scope.Lookup here and call Scope.Insert
         // (via check.declare) later.
         {
-            var alt = scope.Lookup(name); if (alt != default!) {
+            var alt = scope.Lookup(name); if (alt != nil) {
                 check.recordUse(ident, alt);
                 // redeclared object must be a variable
                 {
-                    var (objΔ1, _) = alt._<ж<Var>>(ᐧ); if (objΔ1 != nil){
+                    var (objΔ1, _) = alt._<ж<Var>>(ᐧ); if (objΔ1 != nil) {
                         lhsVars[i] = objΔ1;
                     } else {
                         Ꮡcheck.errorf(new ast_Exprᴠpositioner(lhsΔ1), UnassignableOperand, "cannot assign to %s"u8, lhsΔ1);
@@ -663,7 +666,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
         }
 
         // declare new variable
-        var obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default!);
+        var obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default);
         lhsVars[i] = obj;
         if (name != "_"u8) {
             newVars = append(newVarsᴷ, newVars, obj);
@@ -674,11 +677,11 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
     // create dummy variables where the lhs is invalid
     foreach (var (i, obj) in lhsVars) {
         if (obj == nil) {
-            lhsVars[i] = newVar(LocalVar, lhs[i].Pos(), check.pkg, "_"u8, default!);
+            lhsVars[i] = newVar(LocalVar, lhs[i].Pos(), check.pkg, "_"u8, default);
         }
     }
 
-    Ꮡcheck.initVars(lhsVars, rhs, default!);
+    Ꮡcheck.initVars(lhsVars, rhs, default);
 
     // process function literals in rhs expressions before scope changes
     Ꮡcheck.processDelayed(top);

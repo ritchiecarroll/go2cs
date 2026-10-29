@@ -32,9 +32,9 @@ public static error ErrNegativeCount = errors.New("bufio: negative count"u8);
 partial struct Reader {
     internal slice<byte> buf;
     internal io.Reader rd; // reader provided by the client
-    internal nint r, w;      // buf read and write positions
+    internal nint r, w;    // buf read and write positions
     internal error err;
-    internal nint lastByte; // last byte read for UnreadByte; -1 means invalid
+    internal nint lastByte;     // last byte read for UnreadByte; -1 means invalid
     internal nint lastRuneSize; // size of last rune read for UnreadRune; -1 means invalid
 }
 
@@ -48,7 +48,7 @@ internal static UntypedInt maxConsecutiveEmptyReads => 100;
 public static ж<Reader> NewReaderSize(io.Reader rd, nint size) {
     // Is it already a Reader?
     var (b, ok) = rd._<ж<Reader>>(ᐧ);
-    if (ok && len((~b).buf) >= size) {
+    if (ok && len(b.buf) >= size) {
         return b;
     }
     var r = @new<Reader>();
@@ -80,7 +80,7 @@ public static void Reset(this ж<Reader> Ꮡb, io.Reader r) {
     if (AreEqual(Ꮡb, r)) {
         return;
     }
-    if (b.buf == default!) {
+    if (b.buf == nil) {
         b.buf = new slice<byte>(defaultBufSize);
     }
     b.reset(b.buf, r);
@@ -117,7 +117,7 @@ internal static void fill(this ref Reader b) {
             throw panic(errNegativeRead);
         }
         b.w += n;
-        if (err != default!) {
+        if (err != nil) {
             b.err = err;
             return;
         }
@@ -130,7 +130,7 @@ internal static void fill(this ref Reader b) {
 
 internal static error readErr(this ref Reader b) {
     var err = b.err;
-    b.err = default!;
+    b.err = default;
     return err;
 }
 
@@ -144,13 +144,13 @@ internal static error readErr(this ref Reader b) {
 // until the next read operation.
 public static (slice<byte>, error) Peek(this ref Reader b, nint n) {
     if (n < 0) {
-        return (default!, ErrNegativeCount);
+        return (default, ErrNegativeCount);
     }
 
     b.lastByte = -1;
     b.lastRuneSize = -1;
 
-    while (b.w - b.r < n && b.w - b.r < len(b.buf) && b.err == default!) {
+    while (b.w - b.r < n && b.w - b.r < len(b.buf) && b.err == nil) {
         b.fill(); // b.w-b.r < len(b.buf) => buffer is not full
     }
 
@@ -159,13 +159,13 @@ public static (slice<byte>, error) Peek(this ref Reader b, nint n) {
     }
 
     // 0 <= n <= len(b.buf)
-    error err = default!;
+    error err = default;
     {
         nint avail = b.w - b.r; if (avail < n) {
             // not enough data in buffer
             n = avail;
             err = b.readErr();
-            if (err == default!) {
+            if (err == nil) {
                 err = ErrBufferFull;
             }
         }
@@ -179,8 +179,8 @@ public static (slice<byte>, error) Peek(this ref Reader b, nint n) {
 // If 0 <= n <= b.Buffered(), Discard is guaranteed to succeed without
 // reading from the underlying io.Reader.
 public static (nint discarded, error err) Discard(this ref Reader b, nint n) {
-    nint discarded = default!;
-    error err = default!;
+    nint discarded = default;
+    error err = default;
 
     if (n < 0) {
         return (0, ErrNegativeCount);
@@ -193,7 +193,7 @@ public static (nint discarded, error err) Discard(this ref Reader b, nint n) {
     b.lastRuneSize = -1;
 
     nint remain = n;
-    while (ᐧ) {
+    for (;;) {
         nint skip = b.Buffered();
         if (skip == 0) {
             b.fill();
@@ -205,9 +205,9 @@ public static (nint discarded, error err) Discard(this ref Reader b, nint n) {
         b.r += skip;
         remain -= skip;
         if (remain == 0) {
-            return (n, default!);
+            return (n, default);
         }
-        if (b.err != default!) {
+        if (b.err != nil) {
             return (n - remain, b.readErr());
         }
     }
@@ -221,17 +221,17 @@ public static (nint discarded, error err) Discard(this ref Reader b, nint n) {
 // If the underlying [Reader] can return a non-zero count with io.EOF,
 // then this Read method can do so as well; see the [io.Reader] docs.
 public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
 
     n = len(p);
     if (n == 0) {
         if (b.Buffered() > 0) {
-            return (0, default!);
+            return (0, default);
         }
         return (0, b.readErr());
     }
     if (b.r == b.w) {
-        if (b.err != default!) {
+        if (b.err != nil) {
             return (0, b.readErr());
         }
         if (len(p) >= len(b.buf)) {
@@ -268,7 +268,7 @@ public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
     b.r += n;
     b.lastByte = (nint)b.buf[b.r - 1];
     b.lastRuneSize = -1;
-    return (n, default!);
+    return (n, default);
 }
 
 // ReadByte reads and returns a single byte.
@@ -276,7 +276,7 @@ public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
 public static (byte, error) ReadByte(this ref Reader b) {
     b.lastRuneSize = -1;
     while (b.r == b.w) {
-        if (b.err != default!) {
+        if (b.err != nil) {
             return (0, b.readErr());
         }
         b.fill(); // buffer is empty
@@ -284,7 +284,7 @@ public static (byte, error) ReadByte(this ref Reader b) {
     var c = b.buf[b.r];
     b.r++;
     b.lastByte = (nint)c;
-    return (c, default!);
+    return (c, default);
 }
 
 // UnreadByte unreads the last byte. Only the most recently read byte can be unread.
@@ -297,7 +297,7 @@ public static error UnreadByte(this ref Reader b) {
         return ErrInvalidUnreadByte;
     }
     // b.r > 0 || b.w == 0
-    if (b.r > 0){
+    if (b.r > 0) {
         b.r--;
     } else {
         // b.r == 0 && b.w == 0
@@ -306,17 +306,17 @@ public static error UnreadByte(this ref Reader b) {
     b.buf[b.r] = (byte)b.lastByte;
     b.lastByte = -1;
     b.lastRuneSize = -1;
-    return default!;
+    return default;
 }
 
 // ReadRune reads a single UTF-8 encoded Unicode character and returns the
 // rune and its size in bytes. If the encoded rune is invalid, it consumes one byte
 // and returns unicode.ReplacementChar (U+FFFD) with a size of 1.
 public static (rune r, nint size, error err) ReadRune(this ref Reader b) {
-    rune r = default!;
-    nint size = default!;
+    rune r = default;
+    nint size = default;
 
-    while (b.r + (nint)utf8.UTFMax > b.w && !utf8.FullRune(b.buf.slice(b.r, b.w)) && b.err == default! && b.w - b.r < len(b.buf)) {
+    while (b.r + (nint)utf8.UTFMax > b.w && !utf8.FullRune(b.buf.slice(b.r, b.w)) && b.err == nil && b.w - b.r < len(b.buf)) {
         b.fill(); // b.w-b.r < len(buf) => buffer is not full
     }
     b.lastRuneSize = -1;
@@ -327,7 +327,7 @@ public static (rune r, nint size, error err) ReadRune(this ref Reader b) {
     b.r += size;
     b.lastByte = (nint)b.buf[b.r - 1];
     b.lastRuneSize = size;
-    return (r, size, default!);
+    return (r, size, default);
 }
 
 // UnreadRune unreads the last rune. If the most recent method called on
@@ -341,7 +341,7 @@ public static error UnreadRune(this ref Reader b) {
     b.r -= b.lastRuneSize;
     b.lastByte = -1;
     b.lastRuneSize = -1;
-    return default!;
+    return default;
 }
 
 // Buffered returns the number of bytes that can be read from the current buffer.
@@ -360,11 +360,11 @@ public static nint Buffered(this ref Reader b) {
 // [Reader.ReadBytes] or ReadString instead.
 // ReadSlice returns err != nil if and only if line does not end in delim.
 public static (slice<byte> line, error err) ReadSlice(this ref Reader b, byte delim) {
-    slice<byte> line = default!;
-    error err = default!;
+    slice<byte> line = default;
+    error err = default;
 
     nint s = 0; // search start index
-    while (ᐧ) {
+    for (;;) {
         // Search buffer.
         {
             nint i = bytes.IndexByte(b.buf.slice(b.r + s, b.w), delim); if (i >= 0) {
@@ -376,7 +376,7 @@ public static (slice<byte> line, error err) ReadSlice(this ref Reader b, byte de
         }
 
         // Pending error?
-        if (b.err != default!) {
+        if (b.err != nil) {
             line = b.buf.slice(b.r, b.w);
             b.r = b.w;
             err = b.readErr();
@@ -424,14 +424,14 @@ public static (slice<byte> line, error err) ReadSlice(this ref Reader b, byte de
 // (possibly a character belonging to the line end) even if that byte is not
 // part of the line returned by ReadLine.
 public static (slice<byte> line, bool isPrefix, error err) ReadLine(this ref Reader b) {
-    slice<byte> line = default!;
-    bool isPrefix = default!;
-    error err = default!;
+    slice<byte> line = default;
+    bool isPrefix = default;
+    error err = default;
 
-    (line, err) = b.ReadSlice((rune)'\n');
+    (line, err) = b.ReadSlice((byte)'\n');
     if (AreEqual(err, ErrBufferFull)) {
         // Handle the case where "\r\n" straddles the buffer.
-        if (len(line) > 0 && line[len(line) - 1] == (rune)'\r') {
+        if (len(line) > 0 && line[len(line) - 1] == '\r') {
             // Put the '\r' back on buf and drop it from line.
             // Let the next call to ReadLine check for "\r\n".
             if (b.r == 0) {
@@ -441,20 +441,20 @@ public static (slice<byte> line, bool isPrefix, error err) ReadLine(this ref Rea
             b.r--;
             line = line.slice(0, len(line) - 1);
         }
-        return (line, true, default!);
+        return (line, true, default);
     }
 
     if (len(line) == 0) {
-        if (err != default!) {
-            line = default!;
+        if (err != nil) {
+            line = default;
         }
         return (line, isPrefix, err);
     }
-    err = default!;
+    err = default;
 
-    if (line[len(line) - 1] == (rune)'\n') {
+    if (line[len(line) - 1] == '\n') {
         nint drop = 1;
-        if (len(line) > 1 && line[len(line) - 2] == (rune)'\r') {
+        if (len(line) > 1 && line[len(line) - 2] == '\r') {
             drop = 2;
         }
         line = line.slice(0, len(line) - drop);
@@ -470,17 +470,17 @@ public static (slice<byte> line, bool isPrefix, error err) ReadLine(this ref Rea
 // length of `totalLen`. The result is structured in this way to allow callers
 // to minimize allocations and copies.
 internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint totalLen, error err) collectFragments(this ref Reader b, byte delim) {
-    slice<slice<byte>> fullBuffers = default!;
-    nint totalLen = default!;
-    error err = default!;
+    slice<slice<byte>> fullBuffers = default;
+    nint totalLen = default;
+    error err = default;
     var fullBuffersᴷ = new stackAppend<slice<byte>>(moves: true);
 
-    slice<byte> frag = default!;
+    slice<byte> frag = default;
     // Use ReadSlice to look for delim, accumulating full buffers.
-    while (ᐧ) {
-        error e = default!;
+    for (;;) {
+        error e = default;
         (frag, e) = b.ReadSlice(delim);
-        if (e == default!) { // got final fragment
+        if (e == nil) { // got final fragment
             break;
         }
         if (!AreEqual(e, ErrBufferFull)) { // unexpected error
@@ -544,15 +544,15 @@ public static (@string, error) ReadString(this ref Reader b, byte delim) {
 // If the underlying reader supports the [Reader.WriteTo] method,
 // this calls the underlying [Reader.WriteTo] without buffering.
 public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
-    int64 n = default!;
-    error err = default!;
+    int64 n = default;
+    error err = default;
 
     b.lastByte = -1;
     b.lastRuneSize = -1;
 
     if (b.r < b.w) {
         (n, err) = b.writeBuf(w);
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
     }
@@ -581,14 +581,14 @@ public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
         // b.r < b.w => buffer is not empty
         var (m, errΔ3) = b.writeBuf(w);
         n += m;
-        if (errΔ3 != default!) {
+        if (errΔ3 != nil) {
             return (n, errΔ3);
         }
         b.fill(); // buffer is empty
     }
 
     if (AreEqual(b.err, io.EOF)) {
-        b.err = default!;
+        b.err = default;
     }
 
     return (n, b.readErr());
@@ -627,7 +627,7 @@ partial struct Writer {
 public static ж<Writer> NewWriterSize(io.Writer w, nint size) {
     // Is it already a Writer?
     var (b, ok) = w._<ж<Writer>>(ᐧ);
-    if (ok && len((~b).buf) >= size) {
+    if (ok && len(b.buf) >= size) {
         return b;
     }
     if (size <= 0) {
@@ -665,27 +665,27 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
     if (AreEqual(Ꮡb, w)) {
         return;
     }
-    if (b.buf == default!) {
+    if (b.buf == nil) {
         b.buf = new slice<byte>(defaultBufSize);
     }
-    b.err = default!;
+    b.err = default;
     b.n = 0;
     b.wr = w;
 }
 
 // Flush writes any buffered data to the underlying [io.Writer].
 public static error Flush(this ref Writer b) {
-    if (b.err != default!) {
+    if (b.err != nil) {
         return b.err;
     }
     if (b.n == 0) {
-        return default!;
+        return default;
     }
     var (n, err) = b.wr.Write(b.buf.slice(0, b.n));
-    if (n < b.n && err == default!) {
+    if (n < b.n && err == nil) {
         err = io.ErrShortWrite;
     }
-    if (err != default!) {
+    if (err != nil) {
         if (n > 0 && n < b.n) {
             copy(b.buf.slice(0, b.n - n), b.buf.slice(n, b.n));
         }
@@ -694,7 +694,7 @@ public static error Flush(this ref Writer b) {
         return err;
     }
     b.n = 0;
-    return default!;
+    return default;
 }
 
 // Available returns how many bytes are unused in the buffer.
@@ -720,11 +720,11 @@ public static nint Buffered(this ref Writer b) {
 // If nn < len(p), it also returns an error explaining
 // why the write is short.
 public static (nint nn, error err) Write(this ref Writer b, slice<byte> p) {
-    nint nn = default!;
+    nint nn = default;
 
-    while (len(p) > b.Available() && b.err == default!) {
-        nint nΔ1 = default!;
-        if (b.Buffered() == 0){
+    while (len(p) > b.Available() && b.err == nil) {
+        nint nΔ1 = default;
+        if (b.Buffered() == 0) {
             // Large write, empty buffer.
             // Write directly from p to avoid copy.
             (nΔ1, b.err) = b.wr.Write(p);
@@ -736,49 +736,49 @@ public static (nint nn, error err) Write(this ref Writer b, slice<byte> p) {
         nn += nΔ1;
         p = p.slice(nΔ1);
     }
-    if (b.err != default!) {
+    if (b.err != nil) {
         return (nn, b.err);
     }
     nint n = copy(b.buf.slice(b.n), p);
     b.n += n;
     nn += n;
-    return (nn, default!);
+    return (nn, default);
 }
 
 // WriteByte writes a single byte.
 public static error WriteByte(this ref Writer b, byte c) {
-    if (b.err != default!) {
+    if (b.err != nil) {
         return b.err;
     }
-    if (b.Available() <= 0 && b.Flush() != default!) {
+    if (b.Available() <= 0 && b.Flush() != nil) {
         return b.err;
     }
     b.buf[b.n] = c;
     b.n++;
-    return default!;
+    return default;
 }
 
 // WriteRune writes a single Unicode code point, returning
 // the number of bytes written and any error.
 public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
-    nint size = default!;
-    error err = default!;
+    nint size = default;
+    error err = default;
 
     // Compare as uint32 to correctly handle negative runes.
     if ((uint32)r < utf8.RuneSelf) {
         err = b.WriteByte((byte)r);
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
-        return (1, default!);
+        return (1, default);
     }
-    if (b.err != default!) {
+    if (b.err != nil) {
         return (0, b.err);
     }
     nint n = b.Available();
     if (n < utf8.UTFMax) {
         {
-            b.Flush(); if (b.err != default!) {
+            b.Flush(); if (b.err != nil) {
                 return (0, b.err);
             }
         }
@@ -790,7 +790,7 @@ public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
     }
     size = utf8.EncodeRune(b.buf.slice(b.n), r);
     b.n += size;
-    return (size, default!);
+    return (size, default);
 }
 
 // WriteString writes a string.
@@ -798,17 +798,17 @@ public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
 // If the count is less than len(s), it also returns an error explaining
 // why the write is short.
 public static (nint, error) WriteString(this ref Writer b, @string s) {
-    io.StringWriter sw = default!;
+    io.StringWriter sw = default;
     var tryStringWriter = true;
 
     nint nn = 0;
-    while (len(s) > b.Available() && b.err == default!) {
-        nint nΔ1 = default!;
-        if (b.Buffered() == 0 && sw == default! && tryStringWriter) {
+    while (len(s) > b.Available() && b.err == nil) {
+        nint nΔ1 = default;
+        if (b.Buffered() == 0 && sw == nil && tryStringWriter) {
             // Check at most once whether b.wr is a StringWriter.
             (sw, tryStringWriter) = b.wr._<io.StringWriter>(ᐧ);
         }
-        if (b.Buffered() == 0 && tryStringWriter){
+        if (b.Buffered() == 0 && tryStringWriter) {
             // Large write, empty buffer, and the underlying writer supports
             // WriteString: forward the write to the underlying StringWriter.
             // This avoids an extra copy.
@@ -821,13 +821,13 @@ public static (nint, error) WriteString(this ref Writer b, @string s) {
         nn += nΔ1;
         s = s.slice(nΔ1);
     }
-    if (b.err != default!) {
+    if (b.err != nil) {
         return (nn, b.err);
     }
     nint n = copy(b.buf.slice(b.n), s);
     b.n += n;
     nn += n;
-    return (nn, default!);
+    return (nn, default);
 }
 
 // ReadFrom implements [io.ReaderFrom]. If the underlying writer
@@ -835,18 +835,18 @@ public static (nint, error) WriteString(this ref Writer b, @string s) {
 // If there is buffered data and an underlying ReadFrom, this fills
 // the buffer and writes it before calling ReadFrom.
 public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
-    int64 n = default!;
-    error err = default!;
+    int64 n = default;
+    error err = default;
 
-    if (b.err != default!) {
+    if (b.err != nil) {
         return (0, b.err);
     }
     var (readerFrom, readerFromOK) = b.wr._<io.ReaderFrom>(ᐧ);
-    nint m = default!;
-    while (ᐧ) {
+    nint m = default;
+    for (;;) {
         if (b.Available() == 0) {
             {
-                var err1 = b.Flush(); if (err1 != default!) {
+                var err1 = b.Flush(); if (err1 != nil) {
                     return (n, err1);
                 }
             }
@@ -860,7 +860,7 @@ public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
         nint nr = 0;
         while (nr < maxConsecutiveEmptyReads) {
             (m, err) = r.Read(b.buf.slice(b.n));
-            if (m != 0 || err != default!) {
+            if (m != 0 || err != nil) {
                 break;
             }
             nr++;
@@ -870,16 +870,16 @@ public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
         }
         b.n += m;
         n += (int64)m;
-        if (err != default!) {
+        if (err != nil) {
             break;
         }
     }
     if (AreEqual(err, io.EOF)) {
         // If we filled the buffer exactly, flush preemptively.
-        if (b.Available() == 0){
+        if (b.Available() == 0) {
             err = b.Flush();
         } else {
-            err = default!;
+            err = default;
         }
     }
     return (n, err);
@@ -895,8 +895,8 @@ partial struct ReadWriter {
 }
 
 // NewReadWriter allocates a new [ReadWriter] that dispatches to r and w.
-public static ж<ReadWriter> NewReadWriter(ж<Reader> Ꮡr, ж<Writer> Ꮡw) {
-    return Ꮡ(new ReadWriter(Ꮡr, Ꮡw));
+public static ж<ReadWriter> NewReadWriter(ж<Reader> r, ж<Writer> w) {
+    return Ꮡ(new ReadWriter(r, w));
 }
 
 } // end bufio_package

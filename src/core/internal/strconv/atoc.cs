@@ -32,15 +32,15 @@ public static (complex128, error) ParseComplex(@string s, nint bitSize) {
     }
 
     // Remove parentheses, if any.
-    if (len(s) >= 2 && s[0] == (rune)'(' && s[len(s) - 1] == (rune)')') {
+    if (len(s) >= 2 && s[0] == '(' && s[len(s) - 1] == ')') {
         s = s.slice(1, len(s) - 1);
     }
 
-    error pending = default!;     // pending range error, or nil
+    error pending = default; // pending range error, or nil
 
     // Read real part (possibly imaginary part if followed by 'i').
     var (re, n, err) = parseFloatPrefix(s, size);
-    if (err != default!) {
+    if (err != nil) {
         if (!AreEqual(err, ErrRange)) {
             return (0D, err);
         }
@@ -56,17 +56,17 @@ public static (complex128, error) ParseComplex(@string s, nint bitSize) {
     // Otherwise, look at the next character.
     var exprᴛ1 = s[0];
     var matchᴛ1 = false;
-    if (exprᴛ1 is (rune)'+') { matchᴛ1 = true;
+    if (exprᴛ1 is (byte)'+') { matchᴛ1 = true;
         // Consume the '+' to avoid an error if we have "+NaNi", but
         // do this only if we don't have a "++" (don't hide that error).
-        if (len(s) > 1 && s[1] != (rune)'+') {
+        if (len(s) > 1 && s[1] != '+') {
             s = s[1..];
         }
     }
-    else if (exprᴛ1 is (rune)'-') { matchᴛ1 = true;
+    else if (exprᴛ1 is (byte)'-') { matchᴛ1 = true;
         // ok
     }
-    else if (exprᴛ1 is (rune)'i') { matchᴛ1 = true;
+    else if (exprᴛ1 is (byte)'i') { matchᴛ1 = true;
         // If 'i' is the last character, we only have an imaginary part.
         if (len(s) == 1) {
             return (complex(0D, re), pending);
@@ -79,7 +79,7 @@ public static (complex128, error) ParseComplex(@string s, nint bitSize) {
 
     // Read imaginary part.
     (var im, n, err) = parseFloatPrefix(s, size);
-    if (err != default!) {
+    if (err != nil) {
         if (!AreEqual(err, ErrRange)) {
             return (0D, err);
         }

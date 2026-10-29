@@ -27,25 +27,25 @@ internal static readonly @string yCbCrSubsampleRatio411ˢ = "YCbCrSubsampleRatio
 internal static readonly @string yCbCrSubsampleRatio410ˢ = "YCbCrSubsampleRatio410"u8;
 
 public static @string String(this YCbCrSubsampleRatio s) {
-    var exprᴛ1 = s;
-    if (exprᴛ1 == YCbCrSubsampleRatio444) {
+    switch (s) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio444: {
         return yCbCrSubsampleRatio444ˢ;
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio422) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio422: {
         return yCbCrSubsampleRatio422ˢ;
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio420) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio420: {
         return yCbCrSubsampleRatio420ˢ;
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio440) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio440: {
         return yCbCrSubsampleRatio440ˢ;
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio411) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio411: {
         return yCbCrSubsampleRatio411ˢ;
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio410) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio410: {
         return yCbCrSubsampleRatio410ˢ;
-    }
+    }}
     return "YCbCrSubsampleRatioUnknown"u8;
 }
 
@@ -90,7 +90,7 @@ public static color.RGBA64 RGBA64At(this ref YCbCr p, nint x, nint y) {
 
 public static color.YCbCr YCbCrAt(this ref YCbCr p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.YCbCr(nil);
+        return new color.YCbCr();
     }
     nint yi = p.YOffset(x, y);
     nint ci = p.COffset(x, y);
@@ -110,22 +110,22 @@ public static nint YOffset(this ref YCbCr p, nint x, nint y) {
 // COffset returns the index of the first element of Cb or Cr that corresponds
 // to the pixel at (x, y).
 public static nint COffset(this ref YCbCr p, nint x, nint y) {
-    var exprᴛ1 = p.SubsampleRatio;
-    if (exprᴛ1 == YCbCrSubsampleRatio422) {
+    switch (p.SubsampleRatio) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio422: {
         return (y - p.Rect.Min.Y) * p.CStride + (x / 2 - p.Rect.Min.X / 2);
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio420) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio420: {
         return (y / 2 - p.Rect.Min.Y / 2) * p.CStride + (x / 2 - p.Rect.Min.X / 2);
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio440) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio440: {
         return (y / 2 - p.Rect.Min.Y / 2) * p.CStride + (x - p.Rect.Min.X);
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio411) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio411: {
         return (y - p.Rect.Min.Y) * p.CStride + (x / 4 - p.Rect.Min.X / 4);
     }
-    if (exprᴛ1 == YCbCrSubsampleRatio410) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio410: {
         return (y / 2 - p.Rect.Min.Y / 2) * p.CStride + (x / 4 - p.Rect.Min.X / 4);
-    }
+    }}
     // Default to 4:4:4 subsampling.
     return (y - p.Rect.Min.Y) * p.CStride + (x - p.Rect.Min.X);
 }
@@ -160,38 +160,44 @@ public static bool Opaque(this ref YCbCr p) {
 }
 
 internal static (nint w, nint h, nint cw, nint ch) yCbCrSize(Rectangle r, YCbCrSubsampleRatio subsampleRatio) {
-    nint w = default!;
-    nint h = default!;
-    nint cw = default!;
-    nint ch = default!;
+    nint w = default;
+    nint h = default;
+    nint cw = default;
+    nint ch = default;
 
     (w, h) = (r.Dx(), r.Dy());
-    var exprᴛ1 = subsampleRatio;
-    if (exprᴛ1 == YCbCrSubsampleRatio422) {
+    switch (subsampleRatio) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio422: {
         cw = (r.Max.X + 1) / 2 - r.Min.X / 2;
         ch = h;
+        break;
     }
-    else if (exprᴛ1 == YCbCrSubsampleRatio420) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio420: {
         cw = (r.Max.X + 1) / 2 - r.Min.X / 2;
         ch = (r.Max.Y + 1) / 2 - r.Min.Y / 2;
+        break;
     }
-    else if (exprᴛ1 == YCbCrSubsampleRatio440) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio440: {
         cw = w;
         ch = (r.Max.Y + 1) / 2 - r.Min.Y / 2;
+        break;
     }
-    else if (exprᴛ1 == YCbCrSubsampleRatio411) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio411: {
         cw = (r.Max.X + 3) / 4 - r.Min.X / 4;
         ch = h;
+        break;
     }
-    else if (exprᴛ1 == YCbCrSubsampleRatio410) {
+    case var ᴛ when ᴛ == YCbCrSubsampleRatio410: {
         cw = (r.Max.X + 3) / 4 - r.Min.X / 4;
         ch = (r.Max.Y + 1) / 2 - r.Min.Y / 2;
+        break;
     }
-    else { /* default: */
+    default: {
         // Default to 4:4:4 subsampling.
         cw = w;
         ch = h;
-    }
+        break;
+    }}
     return (w, h, cw, ch);
 }
 
@@ -249,7 +255,7 @@ public static color.RGBA64 RGBA64At(this ref NYCbCrA p, nint x, nint y) {
 
 public static color.NYCbCrA NYCbCrAAt(this ref NYCbCrA p, nint x, nint y) {
     if (!(new Point(X: x, Y: y).In(p.Rect))) {
-        return new color.NYCbCrA(nil);
+        return new color.NYCbCrA();
     }
     nint yi = p.YCbCr.YOffset(x, y);
     nint ci = p.YCbCr.COffset(x, y);

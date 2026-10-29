@@ -11,7 +11,6 @@ using @internal;
 using @internal.runtime.syscall;
 using ꓸꓸꓸuintptr = Span<uintptr>;
 
-[GoFieldAccess(typeof(structtype))]
 partial class runtime_package {
 
 // cbs stores all registered Go callbacks.
@@ -44,8 +43,8 @@ internal static void cbsUnlock() {
 
 // winCallback records information about a registered Go callback.
 partial struct winCallback {
-    internal ж<funcval> fn; // Go function
-    internal uintptr retPop;  // For 386 cdecl, how many bytes to pop on return
+    internal ж<funcval> fn;  // Go function
+    internal uintptr retPop; // For 386 cdecl, how many bytes to pop on return
     internal abiDesc abiMap;
 }
 
@@ -54,14 +53,14 @@ partial struct abiPartKind /*num:nint*/;
 
 internal static abiPartKind abiPartBad => /* iota */ 0;
 internal static abiPartKind abiPartStack => 1; // Move a value from memory to the stack.
-internal static abiPartKind abiPartReg => 2; // Move a value from memory to a register.
+internal static abiPartKind abiPartReg => 2;   // Move a value from memory to a register.
 
 // abiPart encodes a step in translating between calling ABIs.
 partial struct abiPart {
     internal abiPartKind kind;
     internal uintptr srcStackOffset;
     internal uintptr dstStackOffset; // used if kind == abiPartStack
-    internal nint dstRegister;    // used if kind == abiPartReg
+    internal nint dstRegister;       // used if kind == abiPartReg
     internal uintptr len;
 }
 
@@ -85,7 +84,7 @@ partial struct abiDesc {
     internal slice<abiPart> parts;
     internal uintptr srcStackSize; // stdcall/fastcall stack space tracking
     internal uintptr dstStackSize; // Go stack space used
-    internal uintptr dstSpill; // Extra stack space for argument spill slots
+    internal uintptr dstSpill;     // Extra stack space for argument spill slots
     internal nint dstRegisters;    // Go ABI int argument registers used
     // retOffset is the offset of the uintptr-sized result in the Go
     // frame.
@@ -130,7 +129,7 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
     // arguments.
 
     var oldParts = Δp.parts;
-    if (Δp.tryRegAssignArg(Ꮡt, 0)){
+    if (Δp.tryRegAssignArg(Ꮡt, 0)) {
         // Account for spill space.
         //
         // TODO(mknyszek): Remove this when we no longer have
@@ -179,33 +178,35 @@ internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintp
 
     {
         var k = t.Kind();
-        var exprᴛ1 = k;
-        if (exprᴛ1 == abi.Bool || exprᴛ1 == abi.Int || exprᴛ1 == abi.Int8 || exprᴛ1 == abi.Int16 || exprᴛ1 == abi.Int32 || exprᴛ1 == abi.Uint || exprᴛ1 == abi.Uint8 || exprᴛ1 == abi.Uint16 || exprᴛ1 == abi.Uint32 || exprᴛ1 == abi.Uintptr || exprᴛ1 == abi.Pointer || exprᴛ1 == abi.UnsafePointer) {
+        switch (k) {
+        case var ᴛ when ᴛ == abi.Bool || ᴛ == abi.Int || ᴛ == abi.Int8 || ᴛ == abi.Int16 || ᴛ == abi.Int32 || ᴛ == abi.Uint || ᴛ == abi.Uint8 || ᴛ == abi.Uint16 || ᴛ == abi.Uint32 || ᴛ == abi.Uintptr || ᴛ == abi.Pointer || ᴛ == abi.UnsafePointer: {
             // Assign a register for all these types.
             return Δp.assignReg(t.Size_, offset);
         }
-        if (exprᴛ1 == abi.Int64 || exprᴛ1 == abi.Uint64) {
+        case var ᴛ when ᴛ == abi.Int64 || ᴛ == abi.Uint64: {
             // Only register-assign if the registers are big enough.
             if (goarch.PtrSize == 8) {
                 return Δp.assignReg(t.Size_, offset);
             }
+            break;
         }
-        else if (exprᴛ1 == abi.Array) {
+        case var ᴛ when ᴛ == abi.Array: {
             var at = Ꮡt.Reinterpret<_type, arraytype>();
             if (at.of(arraytype.ᏑLen).Value == 1) {
                 return Δp.tryRegAssignArg(at.of(arraytype.ᏑElem).Value, offset); // TODO fix when runtime is fully commoned up w/ abi.Type
             }
+            break;
         }
-        else if (exprᴛ1 == abi.Struct) {
+        case var ᴛ when ᴛ == abi.Struct: {
             var st = Ꮡt.Reinterpret<_type, structtype>();
             foreach (var i in range(st.Fields)) {
                 var f = Ꮡ(st.Fields, i);
-                if (!Δp.tryRegAssignArg((~f).Typ, offset + (~f).Offset)) {
+                if (!Δp.tryRegAssignArg(f.Typ, offset + f.Offset)) {
                     return false;
                 }
             }
             return true;
-        }
+        }}
     }
     // Pointer-sized types such as maps and channels are currently
     // not supported.
@@ -248,19 +249,23 @@ internal static partial void callbackasm();
 // R12 is loaded with the callback index. Each entry is two instructions,
 // hence 8 bytes.
 internal static uintptr callbackasmAddr(nint i) {
-    nint entrySize = default!;
+    nint entrySize = default;
     var exprᴛ1 = GOARCH;
-    if (exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8) {
-        entrySize = 5;
+    switch (ᐧ) {
+    default: {
+        throw panic("unsupported architecture");
+        break;
     }
-    else if (exprᴛ1 == "arm64"u8) {
+    case {} when exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8: {
+        entrySize = 5;
+        break;
+    }
+    case {} when exprᴛ1 == "arm64"u8: {
         // On ARM64, each entry is a MOV instruction
         // followed by a branch instruction
         entrySize = 8;
-    }
-    else { /* default: */
-        throw panic("unsupported architecture");
-    }
+        break;
+    }}
     return abi.FuncPCABI0(callbackasm) + (uintptr)(i * entrySize);
 }
 
@@ -289,7 +294,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     var ft = fn._type.FuncType();
 
     // Check arguments and construct ABI translation.
-    abiDesc abiMap = default!;
+    abiDesc abiMap = default;
     foreach (var (_, t) in ft.InSlice()) {
         abiMap.assignArg(t);
     }
@@ -301,7 +306,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     if (len(ft.OutSlice()) != 1) {
         throw panic("compileCallback: expected function with one uintptr-sized result");
     }
-    if ((~ft.OutSlice()[0]).Size_ != goarch.PtrSize) {
+    if (ft.OutSlice()[0].Size_ != goarch.PtrSize) {
         throw panic("compileCallback: expected function with one uintptr-sized result");
     }
     {
@@ -329,7 +334,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
 
     // For cdecl, the callee is responsible for popping its
     // arguments from the C stack.
-    uintptr retPop = default!;
+    uintptr retPop = default;
     if (cdecl) {
         retPop = abiMap.srcStackSize;
     }
@@ -347,7 +352,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     }
 
     // Register the callback.
-    if (cbs.index == default!) {
+    if (cbs.index == nil) {
         cbs.index = new map<winCallbackKey, nint>();
     }
     nint n = cbs.n;
@@ -389,17 +394,20 @@ internal static void callbackWrap(ref callbackArgs a) {
     ref var frame = ref heap(new array<byte>(512), out var Ꮡframe);
     @unsafe.Pointer goArgs = @unsafe.Pointer.FromPinnedBox(Ꮡframe);
     foreach (var (_, part) in c.abiMap.parts) {
-        var exprᴛ1 = part.kind;
-        if (exprᴛ1 == abiPartStack) {
+        switch (part.kind) {
+        case var ᴛ when ᴛ == abiPartStack: {
             memmove((uintptr)add(goArgs, part.dstStackOffset), (uintptr)add(a.args, part.srcStackOffset), part.len);
+            break;
         }
-        else if (exprᴛ1 == abiPartReg) {
+        case var ᴛ when ᴛ == abiPartReg: {
             @unsafe.Pointer goReg = @unsafe.Pointer.FromBox(Ꮡregs.at(abi.RegArgs.ᏑInts, part.dstRegister));
             memmove(goReg, (uintptr)add(a.args, part.srcStackOffset), part.len);
+            break;
         }
-        else { /* default: */
+        default: {
             throw panic("bad ABI description");
-        }
+            break;
+        }}
     }
 
     // TODO(mknyszek): Remove this when we no longer have
@@ -416,10 +424,10 @@ internal static void callbackWrap(ref callbackArgs a) {
     // There's always exactly one return value, one pointer in size.
     // If it's on the stack, then we will have reserved space for it
     // at the end of the frame, otherwise it was passed in a register.
-    if (c.abiMap.dstStackSize != c.abiMap.retOffset){
+    if (c.abiMap.dstStackSize != c.abiMap.retOffset) {
         a.result = ~Ꮡframe.at<byte>((ulong)(c.abiMap.retOffset)).Reinterpret<byte, uintptr>();
     } else {
-        nint zero = default!;
+        nint zero = default;
         // On architectures with no registers, Ints[0] would be a compile error,
         // so we use a dynamic index. These architectures will never take this
         // branch, so this won't cause a runtime panic.

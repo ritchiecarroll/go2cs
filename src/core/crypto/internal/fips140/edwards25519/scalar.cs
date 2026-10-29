@@ -57,15 +57,15 @@ partial struct Scalar {
 
 // NewScalar returns a new zero Scalar.
 public static ж<Scalar> NewScalar() {
-    return Ꮡ(new Scalar(nil));
+    return Ꮡ(new Scalar());
 }
 
 // MultiplyAdd sets s = x * y + z mod l, and returns s. It is equivalent to
 // using Multiply and then Add.
-public static ж<Scalar> MultiplyAdd(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy, ж<Scalar> Ꮡz) {
+public static ж<Scalar> MultiplyAdd(this ж<Scalar> Ꮡs, ж<Scalar> x, ж<Scalar> y, ж<Scalar> z) {
     // Make a copy of z in case it aliases s.
-    var zCopy = @new<Scalar>().Set(Ꮡz);
-    return Ꮡs.Multiply(Ꮡx, Ꮡy).Add(Ꮡs, zCopy);
+    var zCopy = @new<Scalar>().Set(z);
+    return Ꮡs.Multiply(x, y).Add(Ꮡs, zCopy);
 }
 
 // Add sets s = x + y mod l, and returns s.
@@ -131,7 +131,7 @@ internal static readonly @string edwards25519Invalidˢ = "edwards25519: invalid 
 // 64 uniformly distributed random bytes.
 public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<byte> x) {
     if (len(x) != 64) {
-        return (default!, errors.New(edwards25519Invalidˢ));
+        return (default, errors.New(edwards25519Invalidˢ));
     }
 
     // We have a value x of 512 bits, but our fiatScalarFromBytes function
@@ -151,7 +151,7 @@ public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<by
     t.setShortBytes(x[42..]);
     Ꮡs.Add(Ꮡs, t.Multiply(t, scalarTwo336));
 
-    return (Ꮡs, default!);
+    return (Ꮡs, default);
 }
 
 // scalarTwo168 and scalarTwo336 are 2^168 and 2^336 modulo l, encoded as a
@@ -193,10 +193,10 @@ public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (len(x) != 32) {
-        return (default!, errors.New(invalidScalarLengthˢ));
+        return (default, errors.New(invalidScalarLengthˢ));
     }
     if (!isReduced(x)) {
-        return (default!, errors.New(invalidScalarEncodingˢ));
+        return (default, errors.New(invalidScalarEncodingˢ));
     }
 
     var ᴛ3 = nonnil(ref s).s.Value;
@@ -204,7 +204,7 @@ public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<
     var ᴛ4 = (fiatScalarNonMontgomeryDomainFieldElement)((nonnil(ref s).s).Value);
     fiatScalarToMontgomery(ref nonnil(ref s).s, ref ᴛ4);
 
-    return (Ꮡs, default!);
+    return (Ꮡs, default);
 }
 
 // scalarMinusOneBytes is l - 1 in little endian.
@@ -256,7 +256,7 @@ public static (ж<Scalar>, error) SetBytesWithClamping(this ж<Scalar> Ꮡs, sli
     // irrelevant to edwards25519 as they protect against a specific
     // implementation bug that was once observed in a generic Montgomery ladder.
     if (len(x) != 32) {
-        return (default!, errors.New(edwards25519Invalidˢ2));
+        return (default, errors.New(edwards25519Invalidˢ2));
     }
 
     // We need to use the wide reduction from SetUniformBytes, since clamping
@@ -281,7 +281,7 @@ internal static slice<byte> bytes(this ж<Scalar> Ꮡs, /*[32]*/ ж<array<byte>>
     ref var s = ref Ꮡs.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    fiatScalarNonMontgomeryDomainFieldElement ss = default!;
+    fiatScalarNonMontgomeryDomainFieldElement ss = default;
     fiatScalarFromMontgomery(ref ss, ref nonnil(ref s).s);
     var ᴛ5 = ss.Value;
     fiatScalarToBytes(ref (Ꮡout).DerefOrNull(), ref ᴛ5);
@@ -293,9 +293,9 @@ public static nint Equal(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    fiatScalarMontgomeryDomainFieldElement diff = default!;
+    fiatScalarMontgomeryDomainFieldElement diff = default;
     fiatScalarSub(ref diff, ref nonnil(ref s).s, ref nonnil(ref t).s);
-    uint64 nonzero = default!;
+    uint64 nonzero = default;
     var ᴛ6 = diff.Value;
     fiatScalarNonzero(ref nonzero, ref ᴛ6);
     nonzero |= (uint64)((nonzero >> 32));
@@ -318,10 +318,9 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
     if (b[31] > 127) {
         throw panic("scalar has high bit set illegally");
     }
-    if (w < 2){
+    if (w < 2) {
         throw panic("w must be at least 2 by the definition of NAF");
-    } else 
-    if (w > 8) {
+    } else if (w > 8) {
         throw panic("NAF digits must fit in int8");
     }
 
@@ -340,8 +339,8 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
     while (pos < 256) {
         nuint indexU64 = pos / 64;
         nuint indexBit = pos % 64;
-        uint64 bitBuf = default!;
-        if (indexBit < 64 - w){
+        uint64 bitBuf = default;
+        if (indexBit < 64 - w) {
             // This window's bits are contained in a single u64
             bitBuf = digits[indexU64].Rsh(indexBit);
         } else {
@@ -363,7 +362,7 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
             continue;
         }
 
-        if (window < width / 2){
+        if (window < width / 2) {
             carry = 0;
             naf[pos] = (int8)window;
         } else {

@@ -37,7 +37,7 @@ partial struct CoverageMetaDataBuilder {
 
 public static (ж<CoverageMetaDataBuilder>, error) NewCoverageMetaDataBuilder(@string pkgpath, @string pkgname, @string modulepath) {
     if (pkgpath == ""u8) {
-        return (default!, fmt.Errorf("invalid empty package path"u8));
+        return (default, fmt.Errorf("invalid empty package path"u8));
     }
     var x = Ꮡ(new CoverageMetaDataBuilder(
         tmp: new slice<byte>(0, 256),
@@ -45,13 +45,13 @@ public static (ж<CoverageMetaDataBuilder>, error) NewCoverageMetaDataBuilder(@s
     ));
     x.of(CoverageMetaDataBuilder.Ꮡstab).InitWriter();
     x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(""u8);
-    x.Value.pkgpath = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(pkgpath);
-    x.Value.pkgname = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(pkgname);
-    x.Value.modpath = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(modulepath);
-    io.WriteString((~x).h, pkgpath);
-    io.WriteString((~x).h, pkgname);
-    io.WriteString((~x).h, modulepath);
-    return (x, default!);
+    x.pkgpath = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(pkgpath);
+    x.pkgname = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(pkgname);
+    x.modpath = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(modulepath);
+    io.WriteString(x.h, pkgpath);
+    io.WriteString(x.h, pkgname);
+    io.WriteString(x.h, modulepath);
+    return (x, default);
 }
 
 internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
@@ -68,7 +68,7 @@ partial struct funcDesc {
 // AddFunc registers a new function with the meta data builder.
 public static nuint AddFunc(this ref CoverageMetaDataBuilder b, coverage.FuncDesc f) {
     hashFuncDesc(b.h, ref f, b.tmp);
-    var fd = new funcDesc(nil);
+    var fd = new funcDesc();
     b.tmp = b.tmp[..0];
     b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)len(f.Units));
     b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)b.stab.Lookup(f.Funcname));
@@ -104,18 +104,17 @@ internal static int64 emitFuncOffsets(this ref CoverageMetaDataBuilder b, io.Wri
 internal static (int64, error) emitFunc(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) {
     nint ew = len(f.encoded);
     {
-        var (nw, err) = w.Write(f.encoded); if (err != default!){
+        var (nw, err) = w.Write(f.encoded); if (err != nil) {
             return (0, err);
-        } else 
-        if (ew != nw) {
+        } else if (ew != nw) {
             return (0, fmt.Errorf("short write emitting coverage meta-data"u8));
         }
     }
-    return (off + (int64)ew, default!);
+    return (off + (int64)ew, default);
 }
 
 internal static void reportWriteError(this ref CoverageMetaDataBuilder b, error err) {
-    if (b.werr != default!) {
+    if (b.werr != nil) {
         b.werr = err;
     }
 }
@@ -125,10 +124,9 @@ internal static void wrUint32(this ref CoverageMetaDataBuilder b, io.WriteSeeker
     b.tmp = append(b.tmp, (byte)0, (byte)0, (byte)0, (byte)0);
     binary.LittleEndian.PutUint32(b.tmp, v);
     {
-        var (nw, err) = w.Write(b.tmp); if (err != default!){
+        var (nw, err) = w.Write(b.tmp); if (err != nil) {
             b.reportWriteError(err);
-        } else 
-        if (nw != 4) {
+        } else if (nw != 4) {
             b.reportWriteError(fmt.Errorf("short write"u8));
         }
     }
@@ -142,7 +140,7 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
     // Emit header.  Length will initially be zero, we'll
     // back-patch it later.
     array<byte> digest = new(16);
-    copy(digest[..], b.h.Sum(default!));
+    copy(digest[..], b.h.Sum(default));
     var mh = new coverage.MetaSymbolHeader(
         // hash and length initially zero, will be back-patched
         PkgPath: (uint32)b.pkgpath,
@@ -156,7 +154,7 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= writing header: %+v\n"u8, mh);
     }
     {
-        var err = binary.Write(w, binary.LittleEndian, mh); if (err != default!) {
+        var err = binary.Write(w, binary.LittleEndian, mh); if (err != nil) {
             return (digest.Clone(), fmt.Errorf("error writing meta-file header: %v"u8, err));
         }
     }
@@ -166,13 +164,13 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
     off = b.emitFuncOffsets(w, off);
 
     // Check for any errors up to this point.
-    if (b.werr != default!) {
+    if (b.werr != nil) {
         return (digest.Clone(), b.werr);
     }
 
     // Write string table.
     {
-        var err = Ꮡb.of(CoverageMetaDataBuilder.Ꮡstab).Write(w); if (err != default!) {
+        var err = Ꮡb.of(CoverageMetaDataBuilder.Ꮡstab).Write(w); if (err != nil) {
             return (digest.Clone(), err);
         }
     }
@@ -180,9 +178,9 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
 
     // Write functions
     foreach (var (_, f) in b.funcs) {
-        error err = default!;
+        error err = default;
         (off, err) = b.emitFunc(w, off, f);
-        if (err != default!) {
+        if (err != nil) {
             return (digest.Clone(), err);
         }
     }
@@ -190,25 +188,25 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
     // Back-patch the length.
     var totalLength = (uint32)off;
     {
-        var (_, err) = w.Seek(0, io.SeekStart); if (err != default!) {
+        var (_, err) = w.Seek(0, io.SeekStart); if (err != nil) {
             return (digest.Clone(), err);
         }
     }
     b.wrUint32(w, totalLength);
-    if (b.werr != default!) {
+    if (b.werr != nil) {
         return (digest.Clone(), b.werr);
     }
-    return (digest.Clone(), default!);
+    return (digest.Clone(), default);
 }
 
 // HashFuncDesc computes an md5 sum of a coverage.FuncDesc and returns
 // a digest for it.
-public static array<byte> HashFuncDesc(ж<coverage.FuncDesc> Ꮡf) {
+public static array<byte> HashFuncDesc(ж<coverage.FuncDesc> f) {
     var h = fnv.New128a();
     var tmp = new slice<byte>(0, 32);
-    hashFuncDesc(h, ref (Ꮡf).DerefOrNull(), tmp);
+    hashFuncDesc(h, ref (f).DerefOrNull(), tmp);
     array<byte> r = new(16);
-    copy(r[..], h.Sum(default!));
+    copy(r[..], h.Sum(default));
     return r.Clone();
 }
 

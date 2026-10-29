@@ -45,14 +45,14 @@ partial struct HeaderField {
 // It is not otherwise guaranteed to be a valid pseudo header field,
 // though.
 public static bool IsPseudo(this HeaderField hf) {
-    return builtin.len(hf.Name) != 0 && hf.Name[0] == (rune)':';
+    return builtin.len(hf.Name) != 0 && hf.Name[0] == ':';
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string sensitiveˢ = " (sensitive)"u8;
 
 public static @string String(this HeaderField hf) {
-    @string suffix = default!;
+    @string suffix = default;
     if (hf.Sensitive) {
         suffix = sensitiveˢ;
     }
@@ -82,7 +82,7 @@ partial struct Decoder {
     internal dynamicTable dynTab;
     internal Action<HeaderField> emit;
     internal bool emitEnabled; // whether calls to emit are enabled
-    internal nint maxStrLen; // 0 means unlimited
+    internal nint maxStrLen;   // 0 means unlimited
     // buf is the unparsed buffer. It's only written to
     // saveBuf if it was truncated in the middle of a header
     // block. Because it's usually not owned, we can only
@@ -104,7 +104,7 @@ public static ж<Decoder> NewDecoder(uint32 maxDynamicTableSize, Action<HeaderFi
         firstField: true
     ));
     d.of(Decoder.ᏑdynTab).of(dynamicTable.Ꮡtable).init();
-    d.Value.dynTab.allowedMaxSize = maxDynamicTableSize;
+    d.dynTab.allowedMaxSize = maxDynamicTableSize;
     d.of(Decoder.ᏑdynTab).setMaxSize(maxDynamicTableSize);
     return d;
 }
@@ -161,8 +161,8 @@ public static void SetAllowedMaxDynamicTableSize(this ref Decoder d, uint32 v) {
 partial struct dynamicTable {
     // https://httpwg.org/specs/rfc7541.html#rfc.section.2.3.2
     internal headerFieldTable table;
-    internal uint32 size; // in bytes
-    internal uint32 maxSize; // current maxSize
+    internal uint32 size;           // in bytes
+    internal uint32 maxSize;        // current maxSize
     internal uint32 allowedMaxSize; // maxSize may go up to this, inclusive
 }
 
@@ -179,7 +179,7 @@ internal static void add(this ref dynamicTable dt, HeaderField f) {
 
 // If we're too big, evict old stuff.
 internal static void evict(this ref dynamicTable dt) {
-    nint n = default!;
+    nint n = default;
     while (dt.size > dt.maxSize && n < dt.table.len()) {
         dt.size -= dt.table.ents[n].Size();
         n++;
@@ -195,15 +195,15 @@ internal static nint maxTableIndex(this ref Decoder d) {
 }
 
 internal static (HeaderField hf, bool ok) at(this ref Decoder d, uint64 i) {
-    HeaderField hf = default!;
-    bool ok = default!;
+    HeaderField hf = default;
+    bool ok = default;
 
     // See Section 2.3.3.
     if (i == 0) {
         return (hf, ok);
     }
     if (i <= (uint64)staticTable.len()) {
-        return ((~staticTable).ents[i - 1], true);
+        return (staticTable.ents[i - 1], true);
     }
     if (i > (uint64)d.maxTableIndex()) {
         return (hf, ok);
@@ -234,18 +234,18 @@ public static (slice<HeaderField>, error) DecodeFull(this ж<Decoder> Ꮡd, slic
             Ꮡhf.ValueSlot = append(Ꮡhf.ValueSlot, f);
         };
         {
-            var (_, err) = d.Write(p); if (err != default!) {
-                return (default!, err);
+            var (_, err) = d.Write(p); if (err != nil) {
+                return (default, err);
             }
         }
         {
-            var err = d.Close(); if (err != default!) {
-                return (default!, err);
+            var err = d.Close(); if (err != nil) {
+                return (default, err);
             }
         }
-        return (hf, default!);
+        return (hf, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -261,12 +261,12 @@ public static error Close(this ref Decoder d) {
         return new DecodingError(errors.New(truncatedHeadersˢ));
     }
     d.firstField = true;
-    return default!;
+    return default;
 }
 
 public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (builtin.len(p) == 0) {
         // Prevent state machine CPU attacks (making us redo
@@ -276,7 +276,7 @@ public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
     }
     // Only copy the data if we have to. Optimistically assume
     // that p will contain a complete header block.
-    if (d.saveBuf.Len() == 0){
+    if (d.saveBuf.Len() == 0) {
         d.buf = p;
     } else {
         d.saveBuf.Write(p);
@@ -297,10 +297,10 @@ public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
                 return (0, ErrStringLength);
             }
             d.saveBuf.Write(d.buf);
-            return (builtin.len(p), default!);
+            return (builtin.len(p), default);
         }
         d.firstField = false;
-        if (err != default!) {
+        if (err != nil) {
             break;
         }
     }
@@ -374,7 +374,7 @@ internal static error parseHeaderFieldRepr(this ref Decoder d) {
 internal static error parseFieldIndexed(this ref Decoder d) {
     var buf = d.buf;
     (var idx, buf, var err) = readVarInt(7, buf);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var (hf, ok) = d.at(idx);
@@ -389,14 +389,14 @@ internal static error parseFieldIndexed(this ref Decoder d) {
 internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType it) {
     var buf = d.buf;
     (var nameIdx, buf, var err) = readVarInt(n, buf);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
-    HeaderField hf = default!;
+    HeaderField hf = default;
     var wantStr = d.emitEnabled || it.indexed();
-    undecodedString undecodedName = default!;
-    if (nameIdx > 0){
+    undecodedString undecodedName = default;
+    if (nameIdx > 0) {
         var (ihf, ok) = d.at(nameIdx);
         if (!ok) {
             return new DecodingError((InvalidIndexError)(nint)nameIdx);
@@ -404,23 +404,23 @@ internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType i
         hf.Name = ihf.Name;
     } else {
         (undecodedName, buf, err) = d.readString(buf);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
     }
     (var undecodedValue, buf, err) = d.readString(buf);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (wantStr) {
         if (nameIdx <= 0) {
             (hf.Name, err) = d.decodeString(undecodedName);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
         }
         (hf.Value, err) = d.decodeString(undecodedValue);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
     }
@@ -441,7 +441,7 @@ internal static error callEmit(this ref Decoder d, HeaderField hf) {
     if (d.emitEnabled) {
         d.emit(hf);
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -458,7 +458,7 @@ internal static error parseDynamicTableSizeUpdate(this ref Decoder d) {
 
     var buf = d.buf;
     (var size, buf, var err) = readVarInt(5, buf);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (size > (uint64)d.dynTab.allowedMaxSize) {
@@ -466,7 +466,7 @@ internal static error parseDynamicTableSizeUpdate(this ref Decoder d) {
     }
     d.dynTab.setMaxSize((uint32)size);
     d.buf = buf;
-    return default!;
+    return default;
 }
 
 internal static DecodingError errVarintOverflow = new DecodingError(errors.New("varint integer overflow"u8));
@@ -480,7 +480,7 @@ internal static DecodingError errVarintOverflow = new DecodingError(errors.New("
 // The returned remain buffer is either a smaller suffix of p, or err != nil.
 // The error is errNeedMore if p doesn't contain a complete integer.
 internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, slice<byte> p) {
-    uint64 i = default!;
+    uint64 i = default;
 
     if (n < 1 || n > 8) {
         throw panic("bad n");
@@ -493,18 +493,18 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
         i &= (uint64)((((uint64)1).Lsh((uint64)n)) - 1);
     }
     if (i < (((uint64)1).Lsh((uint64)n)) - 1) {
-        return (i, p[1..], default!);
+        return (i, p[1..], default);
     }
 
     var origP = p;
     p = p[1..];
-    uint64 m = default!;
+    uint64 m = default;
     while (builtin.len(p) > 0) {
         var b = p[0];
         p = p[1..];
         i += ((uint64)((byte)(b & 127))).Lsh(m);
         if ((byte)(b & 128) == 0) {
-            return (i, p, default!);
+            return (i, p, default);
         }
         m += 7;
         if (m >= 63) { // TODO: proper overflow check. making this up.
@@ -519,15 +519,15 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
 // It returns a reference to the encoded string data to permit deferring decode costs
 // until after the caller verifies all data is present.
 internal static (undecodedString u, slice<byte> remain, error err) readString(this ref Decoder d, slice<byte> p) {
-    undecodedString u = default!;
-    error err = default!;
+    undecodedString u = default;
+    error err = default;
 
     if (builtin.len(p) == 0) {
         return (u, p, errNeedMore);
     }
     var isHuff = (byte)(p[0] & 128) != 0;
     (var strLen, p, err) = readVarInt(7, p);
-    if (err != default!) {
+    if (err != nil) {
         return (u, p, err);
     }
     if (d.maxStrLen != 0 && strLen > (uint64)d.maxStrLen) {
@@ -536,14 +536,14 @@ internal static (undecodedString u, slice<byte> remain, error err) readString(th
         // are ignored, but the server is returning an error anyway
         // and because the string is not indexed the error will not
         // affect the decoding state.
-        return (u, default!, ErrStringLength);
+        return (u, default, ErrStringLength);
     }
     if ((uint64)builtin.len(p) < strLen) {
         return (u, p, errNeedMore);
     }
     u.isHuff = isHuff;
     u.b = p.slice(0, (nint)(strLen));
-    return (u, p.slice((nint)(strLen)), default!);
+    return (u, p.slice((nint)(strLen)), default);
 }
 
 partial struct undecodedString {
@@ -553,13 +553,13 @@ partial struct undecodedString {
 
 internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) {
     if (!u.isHuff) {
-        return ((@string)u.b, default!);
+        return ((@string)u.b, default);
     }
     var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
     buf.Reset(); // don't trust others
-    @string s = default!;
+    @string s = default;
     var err = huffmanDecode(buf, d.maxStrLen, u.b);
-    if (err == default!) {
+    if (err == nil) {
         s = buf.String();
     }
     buf.Reset(); // be nice to GC

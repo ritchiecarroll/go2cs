@@ -11,19 +11,8 @@
 
 // <ImportedTypeAliases>
 global using fuzzꓸCorpusEntry = go.@internal.fuzz_package.CorpusEntryᴛ1;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -72,7 +61,7 @@ using static go.testing.@internal.testdeps_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("testing/internal/testdeps/deps.go", "deps.cs", "ACxOsoKCgoKmpoKmgqaC7ILaggAMFILWgtaC1oKo4oKmgoKClIKCgqIACAiCgoLKgoKUpqKCgoKC2JKmAAYagpIACxiClNYACA6CkoKClNaCpoKmgqaCABYiwoKU9qKCgoKClJSCgoCCpA==")]
+[assembly: global::go.GoPositionMap("testing/internal/testdeps/deps.go", "deps.cs", "ACxOsoKCgoKmpoKmgqaC7ILaggAMFILWgtaC1oKo4oKmgoKClIKCgqIACAiCgoLKgoKUpqKCgoKC2JKmAAYagpIACxiClNYACA6CkoKClNaCpoKmgqaCABYiwoKU9qKCgoKClJSCgoCCpA==", "", "", "", "194:21,227:21")]
 // </GoSourcePositionMaps>
 
 namespace go.testing.@internal;

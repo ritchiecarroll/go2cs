@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,7 +56,7 @@ using static go.crypto.dsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/dsa/dsa.go", "dsa.cs", "AC9eABImwoIABxCSlIKkgqSCpIKkpoKUgoKCgpSCgoCCtoKClIKmgoCCtoKUgoKCgoKmgqaCgtiCgpSClIKCgoKmguzCgqaCpoKUgoKClIKCuIKCgq7CgoIAAiQAFAKCpriCgoKUlIKCgoKCgoKUyoK4lIKUgqaUgoKCgpSC3IKmAAISAAoCgsqCpoKUgqaCgqaCgpSUgoKCgoKCgoKU")]
+[assembly: go.GoPositionMap("crypto/dsa/dsa.go", "dsa.cs", "AC9eABImwoIABxCSlIK0grSCtIK0poKUgoKCgpSCgoCCtoKClIKmgoCCtoKUgoKCgoKmgqaCgtiCgpSClIKCgoKmguzCgqaCpoKUgoKClIKCuIKCgq7CgoIAAiQAFAKCpriCgoKUlIKCgoKCgoKUyoK4lIKUgqaUgoKCgpSC3IKmAAISAAoCgsqCpoKUgqaCgqaCgpSUgoKCgoKCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

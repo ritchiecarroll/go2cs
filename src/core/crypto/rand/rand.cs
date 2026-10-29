@@ -44,14 +44,14 @@ internal static partial void fatal(@string _);
 // an error is returned. The default Reader uses operating system APIs that are
 // documented to never return an error on all but legacy Linux systems.
 public static (nint n, error err) Read(slice<byte> b) {
-    error err = default!;
+    error err = default;
 
     // We don't want b to escape to the heap, but escape analysis can't see
     // through a potentially overridden Reader, so we special-case the default
     // case which we can keep non-escaping, and in the general case we read into
     // a heap buffer and copy from it.
-    if (rand.IsDefaultReader(Reader)){
-        if (boring.Enabled){
+    if (rand.IsDefaultReader(Reader)) {
+        if (boring.Enabled) {
             (_, err) = io.ReadFull(new boring_randReaderᴠReader(boring.RandReader), b);
         } else {
             drbg.Read(b);
@@ -61,11 +61,11 @@ public static (nint n, error err) Read(slice<byte> b) {
         (_, err) = io.ReadFull(Reader, bb);
         copy(b, bb);
     }
-    if (err != default!) {
+    if (err != nil) {
         fatal("crypto/rand: failed to read random data (see https://go.dev/issue/66821): "u8 + err.Error());
         throw panic("unreachable"); // To be sure.
     }
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 } // end rand_package

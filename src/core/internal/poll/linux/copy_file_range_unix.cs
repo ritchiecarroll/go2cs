@@ -11,35 +11,35 @@ partial class poll_package {
 
 // CopyFileRange copies at most remain bytes of data from src to dst, using
 // the copy_file_range system call. dst and src must refer to regular files.
-public static (int64 written, bool handled, error err) CopyFileRange(ж<FD> Ꮡdst, ж<FD> Ꮡsrc, int64 remain) {
-    int64 written = default!;
-    bool handled = default!;
-    error err = default!;
+public static (int64 written, bool handled, error err) CopyFileRange(ж<FD> dst, ж<FD> src, int64 remain) {
+    int64 written = default;
+    bool handled = default;
+    error err = default;
 
     if (!supportCopyFileRange()) {
-        return (0, false, default!);
+        return (0, false, default);
     }
 
     while (remain > 0) {
         var max = min(remain, (int64)(maxCopyFileRangeRound));
-        var (n, e) = copyFileRange(Ꮡdst, Ꮡsrc, (nint)max);
+        var (n, e) = copyFileRange(dst, src, (nint)max);
         if (n > 0) {
             remain -= n;
             written += n;
         }
         (handled, err) = handleCopyFileRangeErr(e, n, written);
-        if (n == 0 || !handled || err != default!) {
+        if (n == 0 || !handled || err != nil) {
             return (written, handled, err);
         }
     }
 
-    return (written, true, default!);
+    return (written, true, default);
 }
 
 // copyFileRange performs one round of copy_file_range(2).
-internal static (int64 written, error err) copyFileRange(ж<FD> Ꮡdst, ж<FD> Ꮡsrc, nint max) {
-    int64 written = default!;
-    error err = default!;
+internal static (int64 written, error err) copyFileRange(ж<FD> dst, ж<FD> src, nint max) {
+    int64 written = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         // For Linux, the signature of copy_file_range(2) is:
@@ -62,19 +62,19 @@ internal static (int64 written, error err) copyFileRange(ж<FD> Ꮡdst, ж<FD> �
         // That is why we must acquire locks for both file descriptors (and why
         // this whole machinery is in the internal/poll package to begin with).
         {
-            var errΔ1 = Ꮡdst.writeLock(); if (errΔ1 != default!) {
+            var errΔ1 = dst.writeLock(); if (errΔ1 != nil) {
                 (written, err) = (0, errΔ1); goto ᒐdone;
             }
         }
-        defer(Ꮡdst.writeUnlock, ref ᒐ);
+        defer(dst.writeUnlock, ref ᒐ);
         {
-            var errΔ2 = Ꮡsrc.readLock(); if (errΔ2 != default!) {
+            var errΔ2 = src.readLock(); if (errΔ2 != nil) {
                 (written, err) = (0, errΔ2); goto ᒐdone;
             }
         }
-        defer(Ꮡsrc.readUnlock, ref ᒐ);
+        defer(src.readUnlock, ref ᒐ);
         (written, err) = ignoringEINTR2((int64, error) () => {
-            var (n, errΔ3) = unix.CopyFileRange(Ꮡsrc.Value.Sysfd, nil, Ꮡdst.Value.Sysfd, nil, max, 0);
+            var (n, errΔ3) = unix.CopyFileRange(src.Value.Sysfd, nil, dst.Value.Sysfd, nil, max, 0);
             return ((int64)n, errΔ3);
         });
     }

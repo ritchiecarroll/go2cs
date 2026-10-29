@@ -29,7 +29,7 @@ internal static slice<byte> nextTrafficSecret(this ж<cipherSuiteTLS13> Ꮡc, sl
     ref var c = ref Ꮡc.DerefOrNull();
 
     var recvʗ1 = c.hash;
-    return tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), trafficSecret, trafficUpdˢ, default!, c.hash.Size());
+    return tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), trafficSecret, trafficUpdˢ, default, c.hash.Size());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -37,14 +37,14 @@ internal static readonly @string keyˢ = "key"u8;
 
 // trafficKey generates traffic keys according to RFC 8446, Section 7.3.
 internal static (slice<byte> key, slice<byte> iv) trafficKey(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) {
-    slice<byte> key = default!;
-    slice<byte> iv = default!;
+    slice<byte> key = default;
+    slice<byte> iv = default;
     ref var c = ref Ꮡc.DerefOrNull();
 
     var recvʗ1 = c.hash;
-    key = tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), trafficSecret, keyˢ, default!, c.keyLen);
+    key = tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), trafficSecret, keyˢ, default, c.keyLen);
     var recvʗ2 = c.hash;
-    iv = tls13.ExpandLabel<hash.Hash>(() => recvʗ2.New(), trafficSecret, "iv"u8, default!, aeadNonceLength);
+    iv = tls13.ExpandLabel<hash.Hash>(() => recvʗ2.New(), trafficSecret, "iv"u8, default, aeadNonceLength);
     return (key, iv);
 }
 
@@ -58,11 +58,11 @@ internal static slice<byte> finishedHash(this ж<cipherSuiteTLS13> Ꮡc, slice<b
     ref var c = ref Ꮡc.DerefOrNull();
 
     var recvʗ1 = c.hash;
-    var finishedKey = tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), baseKey, finishedˢ, default!, c.hash.Size());
+    var finishedKey = tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), baseKey, finishedˢ, default, c.hash.Size());
     var recvʗ2 = c.hash;
     var verifyData = hmac.New(() => recvʗ2.New(), finishedKey);
-    verifyData.Write(transcript.Sum(default!));
-    return verifyData.Sum(default!);
+    verifyData.Write(transcript.Sum(default));
+    return verifyData.Sum(default);
 }
 
 // exportKeyingMaterial implements RFC5705 exporters for TLS 1.3 according to
@@ -72,7 +72,7 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKey
 
     var expMasterSecret = s.ExporterMasterSecret(transcript);
     var expMasterSecretʗ1 = expMasterSecret;
-    return (@string label, slice<byte> context, nint length) => (expMasterSecretʗ1.Exporter(label, context, length), default!);
+    return (@string label, slice<byte> context, nint length) => (expMasterSecretʗ1.Exporter(label, context, length), default);
 }
 
 partial struct keySharePrivateKeys {
@@ -115,37 +115,37 @@ internal static (keyExchange, error) keyExchangeForCurveID(CurveID id) {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey1024(b);
         return (new mlkem.EncapsulationKey1024жEncapsulator(ᴛ1), ᴛ2);
     };
-    var exprᴛ1 = id;
-    if (exprᴛ1 == X25519) {
-        return (new ecdhKeyExchangeжkeyExchange(Ꮡ(new ecdhKeyExchange(id, ecdh.X25519()))), default!);
+    switch (id) {
+    case var ᴛ when ᴛ == X25519: {
+        return (new ecdhKeyExchangeжkeyExchange(Ꮡ(new ecdhKeyExchange(id, ecdh.X25519()))), default);
     }
-    if (exprᴛ1 == CurveP256) {
-        return (new ecdhKeyExchangeжkeyExchange(Ꮡ(new ecdhKeyExchange(id, ecdh.P256()))), default!);
+    case var ᴛ when ᴛ == CurveP256: {
+        return (new ecdhKeyExchangeжkeyExchange(Ꮡ(new ecdhKeyExchange(id, ecdh.P256()))), default);
     }
-    if (exprᴛ1 == CurveP384) {
-        return (new ecdhKeyExchangeжkeyExchange(Ꮡ(new ecdhKeyExchange(id, ecdh.P384()))), default!);
+    case var ᴛ when ᴛ == CurveP384: {
+        return (new ecdhKeyExchangeжkeyExchange(Ꮡ(new ecdhKeyExchange(id, ecdh.P384()))), default);
     }
-    if (exprᴛ1 == CurveP521) {
-        return (new ecdhKeyExchangeжkeyExchange(Ꮡ(new ecdhKeyExchange(id, ecdh.P521()))), default!);
+    case var ᴛ when ᴛ == CurveP521: {
+        return (new ecdhKeyExchangeжkeyExchange(Ꮡ(new ecdhKeyExchange(id, ecdh.P521()))), default);
     }
-    if (exprᴛ1 == X25519MLKEM768) {
+    case var ᴛ when ᴛ == X25519MLKEM768: {
         return (new hybridKeyExchangeжkeyExchange(Ꮡ(new hybridKeyExchange(id, new ecdhKeyExchange(X25519, ecdh.X25519()),
             32, mlkem.EncapsulationKeySize768, mlkem.CiphertextSize768,
-            newMLKEMPrivateKey768, newMLKEMPublicKey768))), default!);
+            newMLKEMPrivateKey768, newMLKEMPublicKey768))), default);
     }
-    if (exprᴛ1 == SecP256r1MLKEM768) {
+    case var ᴛ when ᴛ == SecP256r1MLKEM768: {
         return (new hybridKeyExchangeжkeyExchange(Ꮡ(new hybridKeyExchange(id, new ecdhKeyExchange(CurveP256, ecdh.P256()),
             65, mlkem.EncapsulationKeySize768, mlkem.CiphertextSize768,
-            newMLKEMPrivateKey768, newMLKEMPublicKey768))), default!);
+            newMLKEMPrivateKey768, newMLKEMPublicKey768))), default);
     }
-    if (exprᴛ1 == SecP384r1MLKEM1024) {
+    case var ᴛ when ᴛ == SecP384r1MLKEM1024: {
         return (new hybridKeyExchangeжkeyExchange(Ꮡ(new hybridKeyExchange(id, new ecdhKeyExchange(CurveP384, ecdh.P384()),
             97, mlkem.EncapsulationKeySize1024, mlkem.CiphertextSize1024,
-            newMLKEMPrivateKey1024, newMLKEMPublicKey1024))), default!);
+            newMLKEMPrivateKey1024, newMLKEMPublicKey1024))), default);
     }
-    { /* default: */
-        return (default!, errors.New(tlsUnsupportedKeyˢ));
-    }
+    default: {
+        return (default, errors.New(tlsUnsupportedKeyˢ));
+    }}
 }
 
 partial struct ecdhKeyExchange {
@@ -155,40 +155,40 @@ partial struct ecdhKeyExchange {
 
 internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this ref ecdhKeyExchange ke, io.Reader rand) {
     var (priv, err) = ke.curve.GenerateKey(rand);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
-    return (Ꮡ(new keySharePrivateKeys(ecdhe: priv)), new keyShare[]{new(ke.id, priv.PublicKey().Bytes())}.slice(), default!);
+    return (Ꮡ(new keySharePrivateKeys(ecdhe: priv)), slice<keyShare>([new(ke.id, priv.PublicKey().Bytes())]), default);
 }
 
 internal static (slice<byte>, keyShare, error) serverSharedSecret(this ref ecdhKeyExchange ke, io.Reader rand, slice<byte> clientKeyShare) {
     var (key, err) = ke.curve.GenerateKey(rand);
-    if (err != default!) {
-        return (default!, new keyShare(nil), err);
+    if (err != nil) {
+        return (default, new keyShare(), err);
     }
     (var peerKey, err) = ke.curve.NewPublicKey(clientKeyShare);
-    if (err != default!) {
-        return (default!, new keyShare(nil), err);
+    if (err != nil) {
+        return (default, new keyShare(), err);
     }
     (var sharedKey, err) = key.ECDH(peerKey);
-    if (err != default!) {
-        return (default!, new keyShare(nil), err);
+    if (err != nil) {
+        return (default, new keyShare(), err);
     }
-    return (sharedKey, new keyShare(ke.id, key.PublicKey().Bytes()), default!);
+    return (sharedKey, new keyShare(ke.id, key.PublicKey().Bytes()), default);
 }
 
 internal static (slice<byte>, error) clientSharedSecret(this ref ecdhKeyExchange ke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     var (peerKey, err) = ke.curve.NewPublicKey(serverKeyShare);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var sharedKey, err) = priv.ecdhe.ECDH(peerKey);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (sharedKey, default!);
+    return (sharedKey, default);
 }
 
 partial struct hybridKeyExchange {
@@ -210,29 +210,29 @@ internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this
     fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
         (Ꮡpriv.ValueSlot, ᏑecdhShares.ValueSlot, Ꮡerr.ValueSlot) = Ꮡke.Value.ecdh.keyShares(rand);
     });
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
     var seed = new slice<byte>(mlkem.SeedSize);
     {
-        var (_, errΔ1) = io.ReadFull(rand, seed); if (errΔ1 != default!) {
-            return (default!, default!, errΔ1);
+        var (_, errΔ1) = io.ReadFull(rand, seed); if (errΔ1 != nil) {
+            return (default, default, errΔ1);
         }
     }
-    (priv.Value.mlkem, err) = ke.newMLKEMPrivateKey(seed);
-    if (err != default!) {
-        return (default!, default!, err);
+    (priv.mlkem, err) = ke.newMLKEMPrivateKey(seed);
+    if (err != nil) {
+        return (default, default, err);
     }
-    slice<byte> shareData = default!;
+    slice<byte> shareData = default;
     // For X25519MLKEM768, the ML-KEM-768 encapsulation key comes first.
     // For SecP256r1MLKEM768 and SecP384r1MLKEM1024, the ECDH share comes first.
     // See draft-ietf-tls-ecdhe-mlkem-02, Section 4.1.
-    if (ke.id == X25519MLKEM768){
-        shareData = appendꓸꓸꓸ((~priv).mlkem.Encapsulator().Bytes(), ecdhShares[0].data);
+    if (ke.id == X25519MLKEM768) {
+        shareData = appendꓸꓸꓸ(priv.mlkem.Encapsulator().Bytes(), ecdhShares[0].data);
     } else {
-        shareData = appendꓸꓸꓸ(ecdhShares[0].data, (~priv).mlkem.Encapsulator().Bytes());
+        shareData = appendꓸꓸꓸ(ecdhShares[0].data, priv.mlkem.Encapsulator().Bytes());
     }
-    return (priv, new keyShare[]{new(ke.id, shareData), ecdhShares[0]}.slice(), default!);
+    return (priv, slice<keyShare>([new(ke.id, shareData), ecdhShares[0]]), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -242,11 +242,11 @@ internal static (slice<byte>, keyShare, error) serverSharedSecret(this ж<hybrid
     ref var ke = ref Ꮡke.DerefOrNull();
 
     if (len(clientKeyShare) != ke.ecdhElementSize + ke.mlkemPublicKeySize) {
-        return (default!, new keyShare(nil), errors.New(tlsInvalidClientKeyShareˢ2));
+        return (default, new keyShare(), errors.New(tlsInvalidClientKeyShareˢ2));
     }
-    slice<byte> ecdhShareData = default!;
-    slice<byte> mlkemShareData = default!;
-    if (ke.id == X25519MLKEM768){
+    slice<byte> ecdhShareData = default;
+    slice<byte> mlkemShareData = default;
+    if (ke.id == X25519MLKEM768) {
         mlkemShareData = clientKeyShare.slice(0, ke.mlkemPublicKeySize);
         ecdhShareData = clientKeyShare.slice(ke.mlkemPublicKeySize);
     } else {
@@ -260,16 +260,16 @@ internal static (slice<byte>, keyShare, error) serverSharedSecret(this ж<hybrid
     fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
         (ᏑecdhSharedSecret.ValueSlot, Ꮡks.Value, Ꮡerr.ValueSlot) = Ꮡke.Value.ecdh.serverSharedSecret(rand, ecdhShareDataʗ1);
     });
-    if (err != default!) {
-        return (default!, new keyShare(nil), err);
+    if (err != nil) {
+        return (default, new keyShare(), err);
     }
     (var mlkemPeerKey, err) = ke.newMLKEMPublicKey(mlkemShareData);
-    if (err != default!) {
-        return (default!, new keyShare(nil), err);
+    if (err != nil) {
+        return (default, new keyShare(), err);
     }
     var (mlkemSharedSecret, mlkemKeyShare) = mlkemPeerKey.Encapsulate();
-    slice<byte> sharedKey = default!;
-    if (ke.id == X25519MLKEM768){
+    slice<byte> sharedKey = default;
+    if (ke.id == X25519MLKEM768) {
         sharedKey = appendꓸꓸꓸ(mlkemSharedSecret, ecdhSharedSecret);
         ks.data = appendꓸꓸꓸ(mlkemKeyShare, ks.data);
     } else {
@@ -277,7 +277,7 @@ internal static (slice<byte>, keyShare, error) serverSharedSecret(this ж<hybrid
         ks.data = appendꓸꓸꓸ(ks.data, mlkemKeyShare);
     }
     ks.group = ke.id;
-    return (sharedKey, ks, default!);
+    return (sharedKey, ks, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -288,11 +288,11 @@ internal static (slice<byte>, error) clientSharedSecret(this ж<hybridKeyExchang
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     if (len(serverKeyShare) != ke.ecdhElementSize + ke.mlkemCiphertextSize) {
-        return (default!, errors.New(tlsInvalidServerKeyShareˢ2));
+        return (default, errors.New(tlsInvalidServerKeyShareˢ2));
     }
-    slice<byte> ecdhShareData = default!;
-    slice<byte> mlkemShareData = default!;
-    if (ke.id == X25519MLKEM768){
+    slice<byte> ecdhShareData = default;
+    slice<byte> mlkemShareData = default;
+    if (ke.id == X25519MLKEM768) {
         mlkemShareData = serverKeyShare.slice(0, ke.mlkemCiphertextSize);
         ecdhShareData = serverKeyShare.slice(ke.mlkemCiphertextSize);
     } else {
@@ -305,20 +305,20 @@ internal static (slice<byte>, error) clientSharedSecret(this ж<hybridKeyExchang
     fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
         (ᏑecdhSharedSecret.ValueSlot, Ꮡerr.ValueSlot) = Ꮡke.Value.ecdh.clientSharedSecret(Ꮡpriv, ecdhShareDataʗ1);
     });
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var mlkemSharedSecret, err) = priv.mlkem.Decapsulate(mlkemShareData);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    slice<byte> sharedKey = default!;
-    if (ke.id == X25519MLKEM768){
+    slice<byte> sharedKey = default;
+    if (ke.id == X25519MLKEM768) {
         sharedKey = appendꓸꓸꓸ(mlkemSharedSecret, ecdhSharedSecret);
     } else {
         sharedKey = appendꓸꓸꓸ(ecdhSharedSecret, mlkemSharedSecret);
     }
-    return (sharedKey, default!);
+    return (sharedKey, default);
 }
 
 } // end tls_package

@@ -66,7 +66,7 @@ public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
 }
 
 public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) {
-    if (d.is224){
+    if (d.is224) {
         b = append(b, magic224.ꓸꓸꓸ);
     } else {
         b = append(b, magic256.ꓸꓸꓸ);
@@ -82,7 +82,7 @@ public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b
     b = appendꓸꓸꓸ(b, d.x.slice(0, d.nx));
     b = appendꓸꓸꓸ(b, makeꓸꓸꓸ<byte>(len(d.x) - d.nx));
     b = byteorder.BEAppendUint64(b, d.len);
-    return (b, default!);
+    return (b, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -108,7 +108,7 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     b = b.slice(copy(d.x[..], b));
     (b, d.len) = consumeUint64(b);
     d.nx = (nint)(d.len % (uint64)chunk);
-    return default!;
+    return default;
 }
 
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
@@ -120,13 +120,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
 }
 
 public static (hash.Cloner, error) Clone(this ref Digest d) {
-    ref var r = ref heap<Digest>(out var Ꮡr);
-    r = d.ΔClone();
-    return (new DigestжCloner(Ꮡr), default!);
+    ref var r = ref heap<Digest>(d.ΔClone(), out var Ꮡr);
+    return (new DigestжCloner(Ꮡr), default);
 }
 
 public static void Reset(this ref Digest d) {
-    if (!d.is224){
+    if (!d.is224) {
         d.h[0] = init0;
         d.h[1] = init1;
         d.h[2] = init2;
@@ -159,7 +158,7 @@ public static ж<Digest> New() {
 // New224 returns a new Digest computing the SHA-224 hash.
 public static ж<Digest> New224() {
     var d = @new<Digest>();
-    d.Value.is224 = true;
+    d.is224 = true;
     d.Reset();
     return d;
 }
@@ -176,8 +175,8 @@ public static nint BlockSize(this ref Digest d) {
 }
 
 public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
-    nint nn = default!;
-    error err = default!;
+    nint nn = default;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     nn = len(p);
@@ -210,8 +209,7 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
 public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
     fips140.RecordApproved();
     // Make a copy of d so that caller can keep writing and summing.
-    ref var d0 = ref heap<Digest>(out var Ꮡd0);
-    d0 = d.ΔClone();
+    ref var d0 = ref heap<Digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.checkSum();
     if (d0.is224) {
         return appendꓸꓸꓸ(@in, hash[..(int)(size224)]);
@@ -224,17 +222,17 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
 
     var len = d.len;
     // Padding. Add a 1 bit and 0 bits until 56 bytes mod 64.
-    array<byte> tmp = new(72); /* 64 + 8 */                   // padding + length buffer
+    array<byte> tmp = new(72); /* 64 + 8 */ // padding + length buffer
     tmp[0] = 0x80;
-    uint64 t = default!;
-    if (len % 64 < 56){
+    uint64 t = default;
+    if (len % 64 < 56) {
         t = 56 - len % 64;
     } else {
         t = 64 + 56 - len % 64;
     }
 
     // Length in bits.
-    len <<= (int)(3);
+    len <<= 3;
     var padlen = tmp.slice(0, (nint)(t + 8));
     byteorder.BEPutUint64(padlen.slice((nint)(t + 0)), len);
     Ꮡd.Write(padlen);

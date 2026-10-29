@@ -77,7 +77,7 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
         return true; // avoid follow-up errors
     }
 
-    ж<Config> conf = default!;
+    ж<Config> conf = default;
     if (Ꮡcheck != nil) {
         conf = check.conf;
     }
@@ -99,27 +99,27 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
         }
         {
             var (xΔ4, ok) = constant.Int64Val(xΔ3); if (ok) {
-                var exprᴛ1 = typ.kind;
-                if (exprᴛ1 == Int) {
+                switch (typ.kind) {
+                case var ᴛ when ᴛ == Int: {
                     nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8;
                     return ((int64)(-1)).Lsh((s - 1)) <= xΔ4 && xΔ4 <= ((int64)1).Lsh((s - 1)) - 1;
                 }
-                if (exprᴛ1 == Int8) {
+                case var ᴛ when ᴛ == Int8: {
                     UntypedInt s = 8;
                     return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
                 }
-                if (exprᴛ1 == Int16) {
+                case var ᴛ when ᴛ == Int16: {
                     UntypedInt s = 16;
                     return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
                 }
-                if (exprᴛ1 == Int32) {
+                case var ᴛ when ᴛ == Int32: {
                     UntypedInt s = 32;
                     return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
                 }
-                if (exprᴛ1 == Int64 || exprᴛ1 == ΔUntypedInt) {
+                case var ᴛ when ᴛ == Int64 || ᴛ == ΔUntypedInt: {
                     return true;
                 }
-                if (exprᴛ1 == Uint || exprᴛ1 == Uintptr) {
+                case var ᴛ when ᴛ == Uint || ᴛ == Uintptr: {
                     {
                         nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8; if (s < 64) {
                             return 0 <= xΔ4 && xΔ4 <= ((int64)1).Lsh(s) - 1;
@@ -127,40 +127,41 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                     }
                     return 0 <= xΔ4;
                 }
-                if (exprᴛ1 == Uint8) {
+                case var ᴛ when ᴛ == Uint8: {
                     UntypedInt s = 8;
                     return 0 <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s)) - 1);
                 }
-                if (exprᴛ1 == Uint16) {
+                case var ᴛ when ᴛ == Uint16: {
                     UntypedInt s = 16;
                     return 0 <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s)) - 1);
                 }
-                if (exprᴛ1 == Uint32) {
+                case var ᴛ when ᴛ == Uint32: {
                     UntypedInt s = 32;
                     return 0 <= xΔ4 && xΔ4 <= (int64)4294967295L;
                 }
-                if (exprᴛ1 == Uint64) {
+                case var ᴛ when ᴛ == Uint64: {
                     return 0 <= xΔ4;
                 }
-                { /* default: */
+                default: {
                     throw panic("unreachable");
-                }
+                    break;
+                }}
             }
         }
         // x does not fit into int64
         {
             nint n = constant.BitLen(xΔ3);
-            var exprᴛ2 = typ.kind;
-            if (exprᴛ2 == Uint || exprᴛ2 == Uintptr) {
+            switch (typ.kind) {
+            case var ᴛ when ᴛ == Uint || ᴛ == Uintptr: {
                 nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8;
                 return constant.Sign(xΔ3) >= 0 && n <= (nint)s;
             }
-            if (exprᴛ2 == Uint64) {
+            case var ᴛ when ᴛ == Uint64: {
                 return constant.Sign(xΔ3) >= 0 && n <= 64;
             }
-            if (exprᴛ2 == ΔUntypedInt) {
+            case var ᴛ when ᴛ == ΔUntypedInt: {
                 return true;
-            }
+            }}
         }
         break;
     }
@@ -169,33 +170,36 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
         if (xΔ5.Kind() != constant.Float) {
             return false;
         }
-        var exprᴛ3 = typ.kind;
-        if (exprᴛ3 == Float32) {
+        switch (typ.kind) {
+        case var ᴛ when ᴛ == Float32: {
             if (Ꮡrounded == nil) {
                 return fitsFloat32(xΔ5);
             }
             var r = roundFloat32(xΔ5);
-            if (r != default!) {
+            if (r != nil) {
                 rounded = r;
                 return true;
             }
+            break;
         }
-        else if (exprᴛ3 == Float64) {
+        case var ᴛ when ᴛ == Float64: {
             if (Ꮡrounded == nil) {
                 return fitsFloat64(xΔ5);
             }
             var r = roundFloat64(xΔ5);
-            if (r != default!) {
+            if (r != nil) {
                 rounded = r;
                 return true;
             }
+            break;
         }
-        else if (exprᴛ3 == ΔUntypedFloat) {
+        case var ᴛ when ᴛ == ΔUntypedFloat: {
             return true;
         }
-        else { /* default: */
+        default: {
             throw panic("unreachable");
-        }
+            break;
+        }}
         break;
     }
     case {} when isComplex(new BasicжΔType(Ꮡtyp)): {
@@ -203,35 +207,38 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
         if (xΔ6.Kind() != constant.Complex) {
             return false;
         }
-        var exprᴛ4 = typ.kind;
-        if (exprᴛ4 == Complex64) {
+        switch (typ.kind) {
+        case var ᴛ when ᴛ == Complex64: {
             if (Ꮡrounded == nil) {
                 return fitsFloat32(constant.Real(xΔ6)) && fitsFloat32(constant.Imag(xΔ6));
             }
             var re = roundFloat32(constant.Real(xΔ6));
             var im = roundFloat32(constant.Imag(xΔ6));
-            if (re != default! && im != default!) {
+            if (re != nil && im != nil) {
                 rounded = constant.BinaryOp(re, token.ADD, constant.MakeImag(im));
                 return true;
             }
+            break;
         }
-        else if (exprᴛ4 == Complex128) {
+        case var ᴛ when ᴛ == Complex128: {
             if (Ꮡrounded == nil) {
                 return fitsFloat64(constant.Real(xΔ6)) && fitsFloat64(constant.Imag(xΔ6));
             }
             var re = roundFloat64(constant.Real(xΔ6));
             var im = roundFloat64(constant.Imag(xΔ6));
-            if (re != default! && im != default!) {
+            if (re != nil && im != nil) {
                 rounded = constant.BinaryOp(re, token.ADD, constant.MakeImag(im));
                 return true;
             }
+            break;
         }
-        else if (exprᴛ4 == ΔUntypedComplex) {
+        case var ᴛ when ᴛ == ΔUntypedComplex: {
             return true;
         }
-        else { /* default: */
+        default: {
             throw panic("unreachable");
-        }
+            break;
+        }}
         break;
     }
     case {} when isString(new BasicжΔType(Ꮡtyp)): {
@@ -256,7 +263,7 @@ internal static constant.Value roundFloat32(constant.Value x) {
     if (!math.IsInf(f, 0)) {
         return constant.MakeFloat64(f);
     }
-    return default!;
+    return default;
 }
 
 internal static bool fitsFloat64(constant.Value x) {
@@ -269,21 +276,21 @@ internal static constant.Value roundFloat64(constant.Value x) {
     if (!math.IsInf(f, 0)) {
         return constant.MakeFloat64(f);
     }
-    return default!;
+    return default;
 }
 
 // representable checks that a constant operand is representable in the given
 // basic type.
-internal static void representable(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> Ꮡtyp) {
+internal static void representable(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> typ) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    var (v, code) = Ꮡcheck.representation(Ꮡx, Ꮡtyp);
+    var (v, code) = Ꮡcheck.representation(Ꮡx, typ);
     if (code != 0) {
-        Ꮡcheck.invalidConversion(code, Ꮡx, new BasicжΔType(Ꮡtyp));
+        Ꮡcheck.invalidConversion(code, Ꮡx, new BasicжΔType(typ));
         x.mode = invalid;
         return;
     }
-    assert(v != default!);
+    assert(v != nil);
     x.val = v;
 }
 
@@ -296,8 +303,7 @@ internal static (constant.Value, errors.Code) representation(this ж<Checker> �
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     assert(x.mode == constant_);
-    ref var v = ref heap<constant.Value>(out var Ꮡv);
-    v = x.val;
+    ref var v = ref heap<constant.Value>(x.val, out var Ꮡv);
     if (!representableConst(x.val, Ꮡcheck, Ꮡtyp, Ꮡv)) {
         if (isNumeric(x.typ) && isNumeric(new BasicжΔType(Ꮡtyp))) {
             // numeric conversion : error msg
@@ -307,13 +313,13 @@ internal static (constant.Value, errors.Code) representation(this ж<Checker> �
             // float   -> integer : truncated
             // float   -> float   : overflows
             //
-            if (!isInteger(x.typ) && isInteger(new BasicжΔType(Ꮡtyp))){
-                return (default!, TruncatedFloat);
+            if (!isInteger(x.typ) && isInteger(new BasicжΔType(Ꮡtyp))) {
+                return (default, TruncatedFloat);
             } else {
-                return (default!, NumericOverflow);
+                return (default, NumericOverflow);
             }
         }
-        return (default!, InvalidConstVal);
+        return (default, InvalidConstVal);
     }
     return (v, 0);
 }
@@ -323,16 +329,18 @@ internal static readonly @string cannotConvertSToTypeSˢ = "cannot convert %s to
 internal static readonly @string sTruncatedToSˢ = "%s truncated to %s"u8;
 internal static readonly @string sOverflowsSˢ = "%s overflows %s"u8;
 
-internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code code, ж<operand> Ꮡx, ΔType target) {
+internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code code, ж<operand> x, ΔType target) {
     @string msg = cannotConvertSToTypeSˢ;
-    var exprᴛ1 = code;
-    if (exprᴛ1 == TruncatedFloat) {
+    switch (code) {
+    case var ᴛ when ᴛ == TruncatedFloat: {
         msg = sTruncatedToSˢ;
+        break;
     }
-    else if (exprᴛ1 == NumericOverflow) {
+    case var ᴛ when ᴛ == NumericOverflow: {
         msg = sOverflowsSˢ;
-    }
-    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, msg, Ꮡx.OrTypedNil(), target);
+        break;
+    }}
+    Ꮡcheck.errorf(new operandжpositioner(x), code, msg, x.OrTypedNil(), target);
 }
 
 // convertUntyped attempts to set the type of an untyped value to the target type.
@@ -350,7 +358,7 @@ internal static void convertUntyped(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx,
         x.mode = invalid;
         return;
     }
-    if (val != default!) {
+    if (val != nil) {
         x.val = val;
         check.updateExprVal(x.expr, val);
     }

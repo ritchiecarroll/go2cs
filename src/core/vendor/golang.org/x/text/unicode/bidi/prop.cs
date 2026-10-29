@@ -60,7 +60,7 @@ internal static rune reverseBracket(this Properties p, rune r) {
     [0x6] = LRI, // U+2066 LeftToRightIsolate,
     [0x7] = RLI, // U+2067 RightToLeftIsolate,
     [0x8] = FSI, // U+2068 FirstStrongIsolate,
-    [0x9] = PDI // U+2069 PopDirectionalIsolate,
+    [0x9] = PDI  // U+2069 PopDirectionalIsolate,
 }; }
 
 // LookupRune returns properties for r.
@@ -95,61 +95,61 @@ public static (Properties p, nint sz) Lookup(slice<byte> s) {
         return (new Properties(entry: bidiValues[c0]), 1);
     }
     case {} when c0 is < 0xC2: {
-        return (new Properties(nil), 1);
+        return (new Properties(), 1);
     }
     case {} when c0 is < 0xE0: { // 2-byte UTF-8
         if (len(s) < 2) {
-            return (new Properties(nil), 0);
+            return (new Properties(), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
         if (c1 < 0x80 || 0xC0 <= c1) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         return (new Properties(entry: trie.lookupValue((uint32)i, c1)), 2);
     }
     case {} when c0 is < 0xF0: { // 3-byte UTF-8
         if (len(s) < 3) {
-            return (new Properties(nil), 0);
+            return (new Properties(), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
         if (c1 < 0x80 || 0xC0 <= c1) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         return (new Properties(entry: trie.lookupValue((uint32)i, c2), last: c2), 3);
     }
     case {} when c0 is < 0xF8: { // 4-byte UTF-8
         if (len(s) < 4) {
-            return (new Properties(nil), 0);
+            return (new Properties(), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
         if (c1 < 0x80 || 0xC0 <= c1) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         o = ((uint32)i << 6) + (uint32)c2;
         i = bidiIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         return (new Properties(entry: trie.lookupValue((uint32)i, c3)), 4);
     }}
     // Illegal rune
-    return (new Properties(nil), 1);
+    return (new Properties(), 1);
 }
 
 // LookupString returns properties for the first rune in s and the width in
@@ -162,61 +162,61 @@ public static (Properties p, nint sz) LookupString(@string s) {
         return (new Properties(entry: bidiValues[c0]), 1);
     }
     case {} when c0 is < 0xC2: {
-        return (new Properties(nil), 1);
+        return (new Properties(), 1);
     }
     case {} when c0 is < 0xE0: { // 2-byte UTF-8
         if (len(s) < 2) {
-            return (new Properties(nil), 0);
+            return (new Properties(), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
         if (c1 < 0x80 || 0xC0 <= c1) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         return (new Properties(entry: trie.lookupValue((uint32)i, c1)), 2);
     }
     case {} when c0 is < 0xF0: { // 3-byte UTF-8
         if (len(s) < 3) {
-            return (new Properties(nil), 0);
+            return (new Properties(), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
         if (c1 < 0x80 || 0xC0 <= c1) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         return (new Properties(entry: trie.lookupValue((uint32)i, c2), last: c2), 3);
     }
     case {} when c0 is < 0xF8: { // 4-byte UTF-8
         if (len(s) < 4) {
-            return (new Properties(nil), 0);
+            return (new Properties(), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
         if (c1 < 0x80 || 0xC0 <= c1) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         o = ((uint32)i << 6) + (uint32)c2;
         i = bidiIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
-            return (new Properties(nil), 1);
+            return (new Properties(), 1);
         }
         return (new Properties(entry: trie.lookupValue((uint32)i, c3)), 4);
     }}
     // Illegal rune
-    return (new Properties(nil), 1);
+    return (new Properties(), 1);
 }
 
 } // end bidi_package

@@ -63,7 +63,7 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
             continue;
         }
         var (fi, err) = stat(strings.Join(parts.slice(0, i + 1), (@string)sep));
-        if (err != default!) {
+        if (err != nil) {
             return originalErr;
         }
         if (!fi.IsDir()) {
@@ -86,8 +86,8 @@ public static (File, error) Open(this Dir d, @string name) {
         pathΔ1 = "."u8;
     }
     (pathΔ1, var err) = filepath.Localize(pathΔ1);
-    if (err != default!) {
-        return (default!, errInvalidUnsafePath);
+    if (err != nil) {
+        return (default, errInvalidUnsafePath);
     }
     @string dir = (@string)d;
     if (dir == ""u8) {
@@ -95,10 +95,10 @@ public static (File, error) Open(this Dir d, @string name) {
     }
     @string fullName = filepath.Join(dir, pathΔ1);
     (var f, err) = os.Open(fullName);
-    if (err != default!) {
-        return (default!, mapOpenError(err, fullName, filepath.Separator, os.Stat));
+    if (err != nil) {
+        return (default, mapOpenError(err, fullName, filepath.Separator, os.Stat));
     }
-    return (new os_FileжFile(f), default!);
+    return (new os_FileжFile(f), default);
 }
 
 // A FileSystem implements access to a collection of named files.
@@ -164,26 +164,26 @@ internal static @string name(this dirEntryDirs d, nint i) {
 internal static readonly @string errorReadingDirectoryˢ = "Error reading directory"u8;
 internal static readonly @string textHtmlCharsetUtf8ˢ = "text/html; charset=utf-8"u8;
 
-internal static void dirList(ResponseWriter w, ж<Request> Ꮡr, File f) {
+internal static void dirList(ResponseWriter w, ж<Request> r, File f) {
     // Prefer to use ReadDir instead of Readdir,
     // because the former doesn't require calling
     // Stat on every entry of a directory on Unix.
-    anyDirs dirs = default!;
-    error err = default!;
+    anyDirs dirs = default;
+    error err = default;
     {
-        var (d, ok) = f._<fs.ReadDirFile>(ᐧ); if (ok){
-            dirEntryDirs list = default!;
+        var (d, ok) = f._<fs.ReadDirFile>(ᐧ); if (ok) {
+            dirEntryDirs list = default;
             (list, err) = d.ReadDir(-1);
             dirs = list;
         } else {
-            fileInfoDirs list = default!;
+            fileInfoDirs list = default;
             (list, err) = f.Readdir(-1);
             dirs = list;
         }
     }
 
-    if (err != default!) {
-        logf(Ꮡr, "http: error reading directory: %v"u8, err);
+    if (err != nil) {
+        logf(r, "http: error reading directory: %v"u8, err);
         Error(w, errorReadingDirectoryˢ, StatusInternalServerError);
         return;
     }
@@ -220,16 +220,16 @@ internal static void serveError(ResponseWriter w, @string text, nint code) {
     var h = w.Header();
 
     var nonDefault = false;
-    foreach (var (_, k) in new @string[]{
+    foreach (var (_, k) in slice<@string>([
         "Cache-Control"u8,
         "Content-Encoding"u8,
         "Etag"u8,
         "Last-Modified"u8
-    }.slice()) {
+    ])) {
         if (!h.has(k)) {
             continue;
         }
-        if (httpservecontentkeepheaders.Value() == "1"u8){
+        if (httpservecontentkeepheaders.Value() == "1"u8) {
             nonDefault = true;
         } else {
             h.Del(k);
@@ -273,19 +273,19 @@ internal static void serveError(ResponseWriter w, @string text, nint code) {
 // Content-Encoding, ETag, and Last-Modified headers from error responses.
 // The GODEBUG setting httpservecontentkeepheaders=1 causes ServeContent
 // to preserve these headers.
-public static void ServeContent(ResponseWriter w, ж<Request> Ꮡreq, @string name, time.Time modtime, io.ReadSeeker content) {
+public static void ServeContent(ResponseWriter w, ж<Request> req, @string name, time.Time modtime, io.ReadSeeker content) {
     var sizeFunc = (int64, error) () => {
         var (size, err) = content.Seek(0, io.SeekEnd);
-        if (err != default!) {
+        if (err != nil) {
             return (0, errSeeker);
         }
         (_, err) = content.Seek(0, io.SeekStart);
-        if (err != default!) {
+        if (err != nil) {
             return (0, errSeeker);
         }
-        return (size, default!);
+        return (size, default);
     };
-    serveContent(w, ref (Ꮡreq).DerefOrNull(), name, modtime, sizeFunc, content);
+    serveContent(w, ref (req).DerefOrNull(), name, modtime, sizeFunc, content);
 }
 
 // errSeeker is returned by ServeContent's sizeFunc when the content
@@ -325,8 +325,8 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         // If Content-Type isn't set, use the file's extension to find it, but
         // if the Content-Type is unset explicitly, do not sniff the type.
         var (ctypes, haveType) = w.Header()[contentTypeˢ, ꟷ];
-        @string ctype = default!;
-        if (!haveType){
+        @string ctype = default;
+        if (!haveType) {
             ctype = mime.TypeByExtension(filepath.Ext(name));
             if (ctype == ""u8) {
                 // read a chunk to decide between utf-8 text and binary
@@ -334,19 +334,18 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
                 var (n, _) = io.ReadFull(content, buf[..]);
                 ctype = DetectContentType(buf.slice(0, n));
                 var (_, errΔ1) = content.Seek(0, io.SeekStart); // rewind to output whole file
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     serveError(w, seekerCanTSeekˢ, StatusInternalServerError);
                     return;
                 }
             }
             w.Header().Set(contentTypeˢ, ctype);
-        } else 
-        if (builtin.len(ctypes) > 0) {
+        } else if (builtin.len(ctypes) > 0) {
             ctype = ctypes[0];
         }
 
         var (size, err) = sizeFunc();
-        if (err != default!) {
+        if (err != nil) {
             serveError(w, err.Error(), StatusInternalServerError);
             return;
         }
@@ -362,7 +361,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         (var ranges, err) = parseRange(rangeReq, size);
         var exprᴛ1 = err;
         var matchᴛ1 = false;
-        if (AreEqual(exprᴛ1, default!)) { matchᴛ1 = true;
+        if (AreEqual(exprᴛ1, default)) { matchᴛ1 = true;
         }
         else if (AreEqual(exprᴛ1, errNoOverlap)) { matchᴛ1 = true;
             do {
@@ -371,7 +370,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
                     // limit the size of the response. If the file is empty,
                     // ignore the range header and respond with a 200 rather
                     // than a 416.
-                    ranges = default!;
+                    ranges = default;
                     break;
                 }
                 w.Header().Set(contentRangeˢ, fmt.Sprintf("bytes */%d"u8, size));
@@ -388,7 +387,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             // is larger than the size of the file by
             // itself, so this is probably an attack, or a
             // dumb client. Ignore the range request.
-            ranges = default!;
+            ranges = default;
         }
         switch (ᐧ) {
         case {} when builtin.len(ranges) is 1: {
@@ -405,7 +404,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             // multipart responses."
             var ra = ranges[0];
             {
-                var (_, errΔ6) = content.Seek(ra.start, io.SeekStart); if (errΔ6 != default!) {
+                var (_, errΔ6) = content.Seek(ra.start, io.SeekStart); if (errΔ6 != nil) {
                     serveError(w, errΔ6.Error(), StatusRequestedRangeNotSatisfiable);
                     return;
                 }
@@ -434,18 +433,18 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
                     ra = vᴛ1;
 
                     var (part, errΔ7) = mwʗ1.CreatePart(ra.mimeHeader(ctype, size));
-                    if (errΔ7 != default!) {
+                    if (errΔ7 != nil) {
                         pwʗ1.CloseWithError(errΔ7);
                         return;
                     }
                     {
-                        var (_, errΔ8) = content.Seek(ra.start, io.SeekStart); if (errΔ8 != default!) {
+                        var (_, errΔ8) = content.Seek(ra.start, io.SeekStart); if (errΔ8 != nil) {
                             pwʗ1.CloseWithError(errΔ8);
                             return;
                         }
                     }
                     {
-                        var (_, errΔ9) = io.CopyN(part, content, ra.length); if (errΔ9 != default!) {
+                        var (_, errΔ9) = io.CopyN(part, content, ra.length); if (errΔ9 != nil) {
                             pwʗ1.CloseWithError(errΔ9);
                             return;
                         }
@@ -506,7 +505,7 @@ internal static (@string etag, @string remain) scanETag(@string s) {
     if (strings.HasPrefix(s, "W/"u8)) {
         start = 2;
     }
-    if (builtin.len(s.slice(start)) < 2 || s[start] != (rune)'"') {
+    if (builtin.len(s.slice(start)) < 2 || s[start] != '"') {
         return ("", "");
     }
     // ETag is either W/"text" or "text".
@@ -518,7 +517,7 @@ internal static (@string etag, @string remain) scanETag(@string s) {
         case {} when c == 0x21 || c >= 0x23 && c <= 0x7E || c >= 0x80: {
             break;
         }
-        case {} when c is (rune)'"': {
+        case {} when c is (byte)'"': {
             return (s.slice(0, i + 1), s.slice(i + 1));
         }
         default: {
@@ -531,7 +530,7 @@ internal static (@string etag, @string remain) scanETag(@string s) {
 // etagStrongMatch reports whether a and b match using strong ETag comparison.
 // Assumes a and b are valid ETags.
 internal static bool etagStrongMatch(@string a, @string b) {
-    return a == b && a != ""u8 && a[0] == (rune)'"';
+    return a == b && a != ""u8 && a[0] == '"';
 }
 
 // etagWeakMatch reports whether a and b match using weak ETag comparison.
@@ -557,16 +556,16 @@ internal static condResult checkIfMatch(ResponseWriter w, ref Request r) {
     if (im == ""u8) {
         return condNone;
     }
-    while (ᐧ) {
+    for (;;) {
         im = textproto.TrimString(im);
         if (builtin.len(im) == 0) {
             break;
         }
-        if (im[0] == (rune)',') {
+        if (im[0] == ',') {
             im = im[1..];
             continue;
         }
-        if (im[0] == (rune)'*') {
+        if (im[0] == '*') {
             return condTrue;
         }
         var (etag, remain) = scanETag(im);
@@ -591,7 +590,7 @@ internal static condResult checkIfUnmodifiedSince(ref Request r, time.Time modti
         return condNone;
     }
     var (t, err) = ParseTime(ius);
-    if (err != default!) {
+    if (err != nil) {
         return condNone;
     }
 
@@ -615,16 +614,16 @@ internal static condResult checkIfNoneMatch(ResponseWriter w, ref Request r) {
         return condNone;
     }
     @string buf = inm;
-    while (ᐧ) {
+    for (;;) {
         buf = textproto.TrimString(buf);
         if (builtin.len(buf) == 0) {
             break;
         }
-        if (buf[0] == (rune)',') {
+        if (buf[0] == ',') {
             buf = buf[1..];
             continue;
         }
-        if (buf[0] == (rune)'*') {
+        if (buf[0] == '*') {
             return condFalse;
         }
         var (etag, remain) = scanETag(buf);
@@ -651,7 +650,7 @@ internal static condResult checkIfModifiedSince(ref Request r, time.Time modtime
         return condNone;
     }
     var (t, err) = ParseTime(ims);
-    if (err != default!) {
+    if (err != nil) {
         return condNone;
     }
     // The Last-Modified header truncates sub-second precision so
@@ -678,7 +677,7 @@ internal static condResult checkIfRange(ResponseWriter w, ref Request r, time.Ti
     }
     var (etag, _) = scanETag(ir);
     if (etag != ""u8) {
-        if (etagStrongMatch(etag, w.Header().Get(etagˢ))){
+        if (etagStrongMatch(etag, w.Header().Get(etagˢ))) {
             return condTrue;
         } else {
             return condFalse;
@@ -690,7 +689,7 @@ internal static condResult checkIfRange(ResponseWriter w, ref Request r, time.Ti
         return condFalse;
     }
     var (t, err) = ParseTime(ir);
-    if (err != default!) {
+    if (err != nil) {
         return condFalse;
     }
     if (t.Unix() == modtime.Unix()) {
@@ -737,7 +736,7 @@ internal static readonly @string rangeˢ = "Range"u8;
 // checkPreconditions evaluates request preconditions and reports whether a precondition
 // resulted in sending StatusNotModified or StatusPreconditionFailed.
 internal static (bool done, @string rangeHeader) checkPreconditions(ResponseWriter w, ref Request r, time.Time modtime) {
-    @string rangeHeader = default!;
+    @string rangeHeader = default;
 
     // This function carefully follows RFC 7232 section 6.
     condResult ch = checkIfMatch(w, ref r);
@@ -748,22 +747,24 @@ internal static (bool done, @string rangeHeader) checkPreconditions(ResponseWrit
         w.WriteHeader(StatusPreconditionFailed);
         return (true, "");
     }
-    var exprᴛ1 = checkIfNoneMatch(w, ref r);
-    if (exprᴛ1 == condFalse) {
-        if (r.Method == "GET"u8 || r.Method == "HEAD"u8){
+    switch (checkIfNoneMatch(w, ref r)) {
+    case var ᴛ when ᴛ == condFalse: {
+        if (r.Method == "GET"u8 || r.Method == "HEAD"u8) {
             writeNotModified(w);
             return (true, "");
         } else {
             w.WriteHeader(StatusPreconditionFailed);
             return (true, "");
         }
+        break;
     }
-    if (exprᴛ1 == condNone) {
+    case var ᴛ when ᴛ == condNone: {
         if (checkIfModifiedSince(ref r, modtime) == condFalse) {
             writeNotModified(w);
             return (true, "");
         }
-    }
+        break;
+    }}
 
     rangeHeader = r.Header.get(rangeˢ);
     if (rangeHeader != ""u8 && checkIfRange(w, ref r, modtime) == condFalse) {
@@ -789,13 +790,13 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
         // redirect .../index.html to .../
         // can't use Redirect() because that would make the path absolute,
         // which would be a problem running under StripPrefix
-        if (strings.HasSuffix((~r.URL).Path, indexPage)) {
+        if (strings.HasSuffix(r.URL.Path, indexPage)) {
             localRedirect(w, ref (Ꮡr).DerefOrNull(), "./"u8);
             return;
         }
 
         var (f, err) = fs.Open(name);
-        if (err != default!) {
+        if (err != nil) {
             var (msg, code) = toHTTPError(err);
             serveError(w, msg, code);
             return;
@@ -804,7 +805,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
         defer(() => fʗ1.Close(), ref ᒐ);
 
         (var d, err) = f.Stat();
-        if (err != default!) {
+        if (err != nil) {
             var (msg, code) = toHTTPError(err);
             serveError(w, msg, code);
             return;
@@ -813,14 +814,13 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
         if (redirect) {
             // redirect to canonical path: / at end of directory url
             // r.URL.Path always begins with /
-            @string url = r.URL.Value.Path;
-            if (d.IsDir()){
-                if (url[builtin.len(url) - 1] != (rune)'/') {
+            @string url = r.URL.Path;
+            if (d.IsDir()) {
+                if (url[builtin.len(url) - 1] != '/') {
                     localRedirect(w, ref (Ꮡr).DerefOrNull(), path.Base(url) + "/"u8);
                     return;
                 }
-            } else 
-            if (url[builtin.len(url) - 1] == (rune)'/') {
+            } else if (url[builtin.len(url) - 1] == '/') {
                 @string @base = path.Base(url);
                 if (@base == "/"u8 || @base == "."u8) {
                     // The FileSystem maps a path like "/" or "/./" to a file instead of a directory.
@@ -834,9 +834,9 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
         }
 
         if (d.IsDir()) {
-            @string url = r.URL.Value.Path;
+            @string url = r.URL.Path;
             // redirect if the directory name doesn't end in a slash
-            if (url == ""u8 || url[builtin.len(url) - 1] != (rune)'/') {
+            if (url == ""u8 || url[builtin.len(url) - 1] != '/') {
                 localRedirect(w, ref (Ꮡr).DerefOrNull(), path.Base(url) + "/"u8);
                 return;
             }
@@ -844,11 +844,11 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
             // use contents of index.html for directory, if present
             @string index = strings.TrimSuffix(name, "/"u8) + indexPage;
             var (ff, errΔ1) = fs.Open(index);
-            if (errΔ1 == default!) {
+            if (errΔ1 == nil) {
                 var ffʗ1 = ff;
                 defer(() => ffʗ1.Close(), ref ᒐ);
                 var (dd, errΔ2) = ff.Stat();
-                if (errΔ2 == default!) {
+                if (errΔ2 == nil) {
                     d = dd;
                     f = ff;
                 }
@@ -868,7 +868,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
 
         // serveContent will check modification time
         var dʗ1 = d;
-        var sizeFunc = (int64, error) () => (dʗ1.Size(), default!);
+        var sizeFunc = (int64, error) () => (dʗ1.Size(), default);
         serveContent(w, ref (Ꮡr).DerefOrNull(), d.Name(), d.ModTime(), sizeFunc, new FileᴠReadSeeker(f));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -903,7 +903,7 @@ internal static (@string msg, nint httpStatus) toHTTPError(error err) {
 // It does not convert relative paths to absolute paths like Redirect does.
 internal static void localRedirect(ResponseWriter w, ref Request r, @string newPath) {
     {
-        @string q = r.URL.Value.RawQuery; if (q != ""u8) {
+        @string q = r.URL.RawQuery; if (q != ""u8) {
             newPath += "?"u8 + q;
         }
     }
@@ -938,7 +938,7 @@ internal static readonly @string invalidUrlPathˢ = "invalid URL path"u8;
 public static void ServeFile(ResponseWriter w, ж<Request> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    if (containsDotDot((~r.URL).Path)) {
+    if (containsDotDot(r.URL.Path)) {
         // Too many programs use r.URL.Path to construct the argument to
         // serveFile. Reject the request under the assumption that happened
         // here and ".." may not be wanted.
@@ -974,7 +974,7 @@ public static void ServeFile(ResponseWriter w, ж<Request> Ꮡr, @string name) {
 public static void ServeFileFS(ResponseWriter w, ж<Request> Ꮡr, fs.FS fsys, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    if (containsDotDot((~r.URL).Path)) {
+    if (containsDotDot(r.URL.Path)) {
         // Too many programs use r.URL.Path to construct the argument to
         // serveFile. Reject the request under the assumption that happened
         // here and ".." may not be wanted.
@@ -999,7 +999,7 @@ internal static bool containsDotDot(@string v) {
 }
 
 internal static bool isSlashRune(rune r) {
-    return r == (rune)'/' || r == (rune)'\\';
+    return r == '/' || r == '\\';
 }
 
 partial struct fileHandler {
@@ -1015,17 +1015,17 @@ partial struct ioFile {
 }
 
 internal static (File, error) Open(this ioFS f, @string name) {
-    if (name == "/"u8){
+    if (name == "/"u8) {
         name = "."u8;
     } else {
         name = strings.TrimPrefix(name, "/"u8);
     }
     var (@file, err) = f.fsys.Open(name);
-    if (err != default!) {
+    if (err != nil) {
         var fʗ1 = f;
-        return (default!, mapOpenError(err, name, (rune)'/', (@string path) => fs.Stat(fʗ1.fsys, path)));
+        return (default, mapOpenError(err, name, '/', (@string path) => fs.Stat(fʗ1.fsys, path)));
     }
-    return (new ioFile(@file), default!);
+    return (new ioFile(@file), default);
 }
 
 internal static error Close(this ioFile f) {
@@ -1055,7 +1055,7 @@ internal static (int64, error) Seek(this ioFile f, int64 offset, nint whence) {
 internal static (slice<fs.DirEntry>, error) ReadDir(this ioFile f, nint count) {
     var (d, ok) = f.@file._<fs.ReadDirFile>(ᐧ);
     if (!ok) {
-        return (default!, errMissingReadDir);
+        return (default, errMissingReadDir);
     }
     return d.ReadDir(count);
 }
@@ -1063,27 +1063,27 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ioFile f, nint count) {
 internal static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
     var (d, ok) = f.@file._<fs.ReadDirFile>(ᐧ);
     if (!ok) {
-        return (default!, errMissingReadDir);
+        return (default, errMissingReadDir);
     }
-    slice<fs.FileInfo> list = default!;
-    while (ᐧ) {
+    slice<fs.FileInfo> list = default;
+    for (;;) {
         var (dirs, err) = d.ReadDir(count - builtin.len(list));
         foreach (var (_, dir) in dirs) {
             var (info, errΔ1) = dir.Info();
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 // Pretend it doesn't exist, like (*os.File).Readdir does.
                 continue;
             }
             list = append(list, info);
         }
-        if (err != default!) {
+        if (err != nil) {
             return (list, err);
         }
         if (count < 0 || builtin.len(list) >= count) {
             break;
         }
     }
-    return (list, default!);
+    return (list, default);
 }
 
 // FS converts fsys to a [FileSystem] implementation,
@@ -1126,10 +1126,10 @@ public static ΔHandler FileServerFS(fs.FS root) {
 internal static void ServeHTTP(this ref fileHandler f, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    @string upath = r.URL.Value.Path;
+    @string upath = r.URL.Path;
     if (!strings.HasPrefix(upath, "/"u8)) {
         upath = "/"u8 + upath;
-        r.URL.Value.Path = upath;
+        r.URL.Path = upath;
     }
     serveFile(w, Ꮡr, f.root, path.Clean(upath), true);
 }
@@ -1145,8 +1145,8 @@ internal static @string contentRange(this httpRange r, int64 size) {
 
 internal static textproto.MIMEHeader mimeHeader(this httpRange r, @string contentType, int64 size) {
     return new textproto.MIMEHeader(new map<@string, slice<@string>>{
-        ["Content-Range"u8] = new @string[]{r.contentRange(size)}.slice(),
-        ["Content-Type"u8] = new @string[]{contentType}.slice()
+        ["Content-Range"u8] = slice<@string>([r.contentRange(size)]),
+        ["Content-Type"u8] = slice<@string>([contentType])
     });
 }
 
@@ -1161,7 +1161,7 @@ internal static nint maxContentRanges() {
     {
         @string v = httpservecontentmaxranges.Value(); if (v != ""u8) {
             {
-                var (n, err) = strconv.Atoi(v); if (err == default! && n >= 0) {
+                var (n, err) = strconv.Atoi(v); if (err == nil && n >= 0) {
                     maxRanges = n;
                     if (maxRanges == 0) {
                         maxRanges = math.MaxInt;
@@ -1183,13 +1183,13 @@ internal static readonly @string bᶜ = "bytes="u8;
 // errNoOverlap is returned if none of the ranges overlap.
 internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
     if (s == ""u8) {
-        return (default!, default!); // header not present
+        return (default, default); // header not present
     }
     @string b = bᶜ;
     if (!strings.HasPrefix(s, b)) {
-        return (default!, errors.New(invalidRangeˢ));
+        return (default, errors.New(invalidRangeˢ));
     }
-    slice<httpRange> ranges = default!;
+    slice<httpRange> ranges = default;
     var noOverlap = false;
     nint numRanges = strings.Count(s[(int)(builtin.len(b))..], ","u8) + 1;
     nint maxRanges = maxContentRanges();
@@ -1197,7 +1197,7 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
         httpservecontentmaxranges.IncNonDefault();
     }
     if (numRanges > maxRanges) {
-        return (default!, default!); // ignore header with too many ranges
+        return (default, default); // ignore header with too many ranges
     }
     foreach (var iᴛ1 in range<@string>(strings.SplitSeq(s[(int)(builtin.len(b))..], ","u8).Invoke)) {
         var ra = iᴛ1;
@@ -1207,22 +1207,22 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
         }
         var (start, end, ok) = strings.Cut(ra, "-"u8);
         if (!ok) {
-            return (default!, errors.New(invalidRangeˢ));
+            return (default, errors.New(invalidRangeˢ));
         }
         (start, end) = (textproto.TrimString(start), textproto.TrimString(end));
-        httpRange r = default!;
-        if (start == ""u8){
+        httpRange r = default;
+        if (start == ""u8) {
             // If no start is specified, end specifies the
             // range start relative to the end of the file,
             // and we are dealing with <suffix-length>
             // which has to be a non-negative integer as per
             // RFC 7233 Section 2.1 "Byte-Ranges".
-            if (end == ""u8 || end[0] == (rune)'-') {
-                return (default!, errors.New(invalidRangeˢ));
+            if (end == ""u8 || end[0] == '-') {
+                return (default, errors.New(invalidRangeˢ));
             }
             var (i, err) = strconv.ParseInt(end, 10, 64);
-            if (i < 0 || err != default!) {
-                return (default!, errors.New(invalidRangeˢ));
+            if (i < 0 || err != nil) {
+                return (default, errors.New(invalidRangeˢ));
             }
             if (i > size) {
                 i = size;
@@ -1231,8 +1231,8 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
             r.length = size - r.start;
         } else {
             var (i, err) = strconv.ParseInt(start, 10, 64);
-            if (err != default! || i < 0) {
-                return (default!, errors.New(invalidRangeˢ));
+            if (err != nil || i < 0) {
+                return (default, errors.New(invalidRangeˢ));
             }
             if (i >= size) {
                 // If the range begins after the size of the content,
@@ -1241,13 +1241,13 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
                 continue;
             }
             r.start = i;
-            if (end == ""u8){
+            if (end == ""u8) {
                 // If no end is specified, range extends to end of the file.
                 r.length = size - r.start;
             } else {
                 var (iΔ1, errΔ1) = strconv.ParseInt(end, 10, 64);
-                if (errΔ1 != default! || r.start > iΔ1) {
-                    return (default!, errors.New(invalidRangeˢ));
+                if (errΔ1 != nil || r.start > iΔ1) {
+                    return (default, errors.New(invalidRangeˢ));
                 }
                 if (iΔ1 >= size) {
                     iΔ1 = size - 1;
@@ -1259,9 +1259,9 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
     }
     if (noOverlap && builtin.len(ranges) == 0) {
         // The specified ranges did not overlap with the content.
-        return (default!, errNoOverlap);
+        return (default, errNoOverlap);
     }
-    return (ranges, default!);
+    return (ranges, default);
 }
 
 // countingWriter counts how many bytes have been written to it.
@@ -1269,13 +1269,13 @@ partial struct countingWriter /*num:int64*/;
 
 internal static (nint n, error err) Write(this ref countingWriter w, slice<byte> p) {
     w += ((countingWriter)(int64)builtin.len(p));
-    return (builtin.len(p), default!);
+    return (builtin.len(p), default);
 }
 
 // rangesMIMESize returns the number of bytes it takes to encode the
 // provided ranges as a multipart response.
 internal static int64 /*encSize*/ rangesMIMESize(slice<httpRange> ranges, @string contentType, int64 contentSize) {
-    int64 encSize = default!;
+    int64 encSize = default;
 
     ref var w = ref heap(new countingWriter(), out var Ꮡw);
     var mw = multipart.NewWriter(new countingWriterжWriter(Ꮡw));
@@ -1289,7 +1289,7 @@ internal static int64 /*encSize*/ rangesMIMESize(slice<httpRange> ranges, @strin
 }
 
 internal static int64 /*size*/ sumRangesSize(slice<httpRange> ranges) {
-    int64 size = default!;
+    int64 size = default;
 
     foreach (var (_, ra) in ranges) {
         size += ra.length;

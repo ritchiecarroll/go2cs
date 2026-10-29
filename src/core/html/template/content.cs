@@ -109,8 +109,8 @@ internal static contentType contentTypeUnsafe => 8;
 // indirect returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil).
 internal static any indirect(any a) {
-    if (a == default!) {
-        return default!;
+    if (a == nil) {
+        return default;
     }
     {
         var t = reflect.TypeOf(a); if (t.Kind() != reflect.ΔPointer) {
@@ -132,8 +132,8 @@ internal static reflectꓸType fmtStringerType = reflect.TypeFor<fmt.Stringer>()
 // as necessary to reach the base type (or nil) or an implementation of fmt.Stringer
 // or error.
 internal static any indirectToStringerOrError(any a) {
-    if (a == default!) {
-        return default!;
+    if (a == nil) {
+        return default;
     }
     var v = reflect.ValueOf(a);
     while (!v.Type().Implements(fmtStringerType) && !v.Type().Implements(errorType) && v.Kind() == reflect.ΔPointer && !v.IsNil()) {
@@ -179,7 +179,7 @@ internal static (@string, contentType) stringify(params ꓸꓸꓸany argsʗp) {
         // We skip untyped nil arguments for backward compatibility.
         // Without this they would be output as <nil>, escaped.
         // See issue 25875.
-        if (arg == default!) {
+        if (arg == nil) {
             continue;
         }
 

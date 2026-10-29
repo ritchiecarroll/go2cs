@@ -18,7 +18,7 @@ public static error Grantpt(nint fd) {
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 //go:cgo_import_dynamic libc_unlockpt unlockpt "/usr/lib/libSystem.B.dylib"
@@ -29,7 +29,7 @@ public static error Unlockpt(nint fd) {
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 //go:cgo_import_dynamic libc_ptsname_r ptsname_r "/usr/lib/libSystem.B.dylib"
@@ -51,7 +51,7 @@ public static (@string, error) Ptsname(nint fd) {
             break;
         }
     }
-    return ((@string)buf, default!);
+    return ((@string)buf, default);
 }
 
 //go:cgo_import_dynamic libc_posix_openpt posix_openpt "/usr/lib/libSystem.B.dylib"
@@ -62,7 +62,7 @@ public static (nint fd, error err) PosixOpenpt(nint flag) {
     if (errno != 0) {
         return (-1, errno);
     }
-    return ((nint)ufd, default!);
+    return ((nint)ufd, default);
 }
 
 } // end unix_package

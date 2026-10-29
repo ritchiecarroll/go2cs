@@ -14,14 +14,14 @@ internal static void interrupt() {
 
 internal static (uintptr, error) open(@string name) {
     var (fd, err) = syscall.Open(name, syscall.O_RDONLY, 0);
-    if (err != default!) {
+    if (err != nil) {
         // This condition solves issue https://go.dev/issue/50248
         if (AreEqual(err, syscall.ERROR_PATH_NOT_FOUND)) {
             err = syscall.ENOENT;
         }
         return (0, err);
     }
-    return ((uintptr)fd, default!);
+    return ((uintptr)fd, default);
 }
 
 internal static (nint, error) read(uintptr fd, slice<byte> buf) {
@@ -41,21 +41,21 @@ internal static error preadn(uintptr fd, slice<byte> buf, nint off) {
         whence = seekEnd;
     }
     {
-        var (_, err) = syscall.Seek((syscallꓸHandle)fd, (int64)off, whence); if (err != default!) {
+        var (_, err) = syscall.Seek((syscallꓸHandle)fd, (int64)off, whence); if (err != nil) {
             return err;
         }
     }
     while (len(buf) > 0) {
         var (m, err) = syscall.Read((syscallꓸHandle)fd, buf);
         if (m <= 0) {
-            if (err == default!) {
+            if (err == nil) {
                 return errors.New(shortReadˢ);
             }
             return err;
         }
         buf = buf.slice(m);
     }
-    return default!;
+    return default;
 }
 
 } // end time_package

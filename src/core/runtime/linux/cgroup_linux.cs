@@ -42,7 +42,7 @@ internal static ж<godebugInc> containermaxprocs = Ꮡ(new godebugInc(name: "con
 // Must run after parsedebugvars.
 internal static void defaultGOMAXPROCSInit() {
     var (c, err) = cgroup.OpenCPU(cgroupScratch[..]);
-    if (err != default!) {
+    if (err != nil) {
         // Likely cgroup.ErrNoCgroup.
         return;
     }
@@ -106,7 +106,7 @@ internal static int32 defaultGOMAXPROCS(int32 ncpu) {
 // Lower procs as necessary for the current cgroup CPU limit.
 internal static int32 adjustCgroupGOMAXPROCS(int32 procs, cgroup.CPU cpu) {
     var (limit, ok, err) = cgroup.ReadCPULimit(cpu);
-    if (err == default! && ok) {
+    if (err == nil && ok) {
         limit = ceil(limit);
         limit = builtin.max(limit, 2D);
         if ((int32)limit < procs) {

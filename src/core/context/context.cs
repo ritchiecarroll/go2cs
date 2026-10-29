@@ -168,7 +168,7 @@ public static error Canceled = errors.New("context canceled"u8);
 
 // DeadlineExceeded is the error returned by [Context.Err] when the context is canceled
 // due to its deadline passing.
-public static error DeadlineExceeded = new deadlineExceededError(nil);
+public static error DeadlineExceeded = new deadlineExceededError();
 
 partial struct deadlineExceededError {
 }
@@ -194,22 +194,22 @@ partial struct emptyCtx {
 }
 
 internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) {
-    time.Time deadline = default!;
-    bool ok = default!;
+    time.Time deadline = default;
+    bool ok = default;
 
     return (deadline, ok);
 }
 
 internal static /*<-*/channel<EmptyStruct> Done(this emptyCtx _) {
-    return default!;
+    return default;
 }
 
 internal static error Err(this emptyCtx _) {
-    return default!;
+    return default;
 }
 
 internal static any Value(this emptyCtx _, any key) {
-    return default!;
+    return default;
 }
 
 partial struct backgroundCtx {
@@ -239,7 +239,7 @@ internal static @string String(this todoCtx _) {
 // initialization, and tests, and as the top-level Context for incoming
 // requests.
 public static Context Background() {
-    return new backgroundCtx(nil);
+    return new backgroundCtx();
 }
 
 // TODO returns a non-nil, empty [Context]. Code should use context.TODO when
@@ -247,7 +247,7 @@ public static Context Background() {
 // surrounding function has not yet been extended to accept a Context
 // parameter).
 public static Context TODO() {
-    return new todoCtx(nil);
+    return new todoCtx();
 }
 
 // A CancelFunc tells an operation to abandon its work.
@@ -267,7 +267,7 @@ public static (Context ctx, Action cancel) WithCancel(Context parent) {
     var c = withCancel(parent);
     var cʗ1 = c;
     return (new cancelCtxжContext(c), () => {
-        cʗ1.cancel(true, Canceled, default!);
+        cʗ1.cancel(true, Canceled, default);
     });
 }
 
@@ -303,10 +303,10 @@ public static (Context ctx, Action<error> cancel) WithCancelCause(Context parent
 }
 
 internal static ж<cancelCtx> withCancel(Context parent) {
-    if (parent == default!) {
+    if (parent == nil) {
         throw panic("cannot create context from nil parent");
     }
-    var c = Ꮡ(new cancelCtx(nil));
+    var c = Ꮡ(new cancelCtx());
     c.propagateCancel(parent, new cancelCtxжcanceler(c));
     return c;
 }
@@ -319,15 +319,15 @@ internal static ж<cancelCtx> withCancel(Context parent) {
 // Cause returns nil if c has not been canceled yet.
 public static error Cause(Context c) {
     var err = c.Err();
-    if (err == default!) {
-        return default!;
+    if (err == nil) {
+        return default;
     }
     {
         var (cc, ok) = c.Value(ᏑcancelCtxKey)._<ж<cancelCtx>>(ᐧ); if (ok) {
             cc.of(cancelCtx.Ꮡmu).Lock();
-            var cause = cc.Value.cause;
+            var cause = cc.cause;
             cc.of(cancelCtx.Ꮡmu).Unlock();
-            if (cause != default!) {
+            if (cause != nil) {
                 return cause;
             }
             // The parent cancelCtx doesn't have a cause,
@@ -368,7 +368,7 @@ public static Func<bool> /*stop*/ AfterFunc(Context ctx, Action f) {
             stopped = true;
         });
         if (stopped) {
-            aʗ1.cancel(true, Canceled, default!);
+            aʗ1.cancel(true, Canceled, default);
         }
         return stopped;
     };
@@ -420,16 +420,16 @@ internal static ref nint cancelCtxKey => ref ((StaticBox<nint>)ᏑcancelCtxKey).
 // different done channel, in which case we should not bypass it.)
 internal static (ж<cancelCtx>, bool) parentCancelCtx(Context parent) {
     var done = parent.Done();
-    if (done == closedchan || done == default!) {
-        return (default!, false);
+    if (done == closedchan || done == nil) {
+        return (default, false);
     }
     var (p, ok) = parent.Value(ᏑcancelCtxKey)._<ж<cancelCtx>>(ᐧ);
     if (!ok) {
-        return (default!, false);
+        return (default, false);
     }
     var (pdone, _) = p.of(cancelCtx.Ꮡdone).Load()._<channel<EmptyStruct>>(ᐧ);
     if (pdone != done) {
-        return (default!, false);
+        return (default, false);
     }
     return (p, true);
 }
@@ -447,8 +447,8 @@ internal static void removeChild(Context parent, canceler child) {
         return;
     }
     p.of(cancelCtx.Ꮡmu).Lock();
-    if ((~p).children != default!) {
-        delete((~p).children, child);
+    if (p.children != nil) {
+        delete(p.children, child);
     }
     p.of(cancelCtx.Ꮡmu).Unlock();
 }
@@ -471,11 +471,11 @@ internal static channel<EmptyStruct> closedchan = new channel<EmptyStruct>(0);
 // that implement canceler.
 partial struct cancelCtx {
     /*embed*/ public Context Context;
-    internal Δsync.Mutex mu;            // protects following fields
-    internal atomic.Value done;          // of chan struct{}, created lazily, closed by first cancel call
+    internal Δsync.Mutex mu;                      // protects following fields
+    internal atomic.Value done;                   // of chan struct{}, created lazily, closed by first cancel call
     internal map<canceler, EmptyStruct> children; // set to nil by the first cancel call
-    internal atomic.Value err;          // set to non-nil by the first cancel call
-    internal error cause;                 // set to non-nil by the first cancel call
+    internal atomic.Value err;                    // set to non-nil by the first cancel call
+    internal error cause;                         // set to non-nil by the first cancel call
 }
 
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
@@ -498,32 +498,32 @@ internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) {
         ref var c = ref Ꮡc.DerefOrNull();
 
         var d = Ꮡc.of(cancelCtx.Ꮡdone).Load();
-        if (d != default!) {
-            return d._<channel<EmptyStruct>>().WithDirection(GoChanDir.Recv);
+        if (d != nil) {
+            return d._<channel<EmptyStruct>>().AsRecvOnly();
         }
         c.mu.Lock();
         ᒐd1 = true;
         d = Ꮡc.of(cancelCtx.Ꮡdone).Load();
-        if (d == default!) {
+        if (d == nil) {
             d = new channel<EmptyStruct>(0);
             Ꮡc.of(cancelCtx.Ꮡdone).Store(d);
         }
-        return d._<channel<EmptyStruct>>().WithDirection(GoChanDir.Recv);
+        return d._<channel<EmptyStruct>>().AsRecvOnly();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
 internal static error Err(this ж<cancelCtx> Ꮡc) {
     // An atomic load is ~5x faster than a mutex, which can matter in tight loops.
     {
-        var err = Ꮡc.of(cancelCtx.Ꮡerr).Load(); if (err != default!) {
+        var err = Ꮡc.of(cancelCtx.Ꮡerr).Load(); if (err != nil) {
             // Ensure the done channel has been closed before returning a non-nil error.
             ᐸꟷ(Ꮡc.Done());
             return err._<error>();
         }
     }
-    return default!;
+    return default;
 }
 
 // propagateCancel arranges for child to be canceled when parent is.
@@ -534,7 +534,7 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
     c.Context = parent;
 
     var done = parent.Done();
-    if (done == default!) {
+    if (done == nil) {
         return; // parent is never canceled
     }
 
@@ -554,14 +554,14 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
             // parent is a *cancelCtx, or derives from one.
             p.of(cancelCtx.Ꮡmu).Lock();
             {
-                var err = p.of(cancelCtx.Ꮡerr).Load(); if (err != default!){
+                var err = p.of(cancelCtx.Ꮡerr).Load(); if (err != nil) {
                     // parent has already been canceled
-                    child.cancel(false, err._<error>(), (~p).cause);
+                    child.cancel(false, err._<error>(), p.cause);
                 } else {
-                    if ((~p).children == default!) {
-                        p.Value.children = new map<canceler, EmptyStruct>();
+                    if (p.children == nil) {
+                        p.children = new map<canceler, EmptyStruct>();
                     }
-                    p.Value.children[child] = new EmptyStruct();
+                    p.children[child] = new EmptyStruct();
                 }
             }
             p.of(cancelCtx.Ꮡmu).Unlock();
@@ -623,21 +623,21 @@ internal static @string String(this ref cancelCtx c) {
 internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (err == default!) {
+    if (err == nil) {
         throw panic("context: internal error: missing cancel error");
     }
-    if (cause == default!) {
+    if (cause == nil) {
         cause = err;
     }
     c.mu.Lock();
-    if (Ꮡc.of(cancelCtx.Ꮡerr).Load() != default!) {
+    if (Ꮡc.of(cancelCtx.Ꮡerr).Load() != nil) {
         c.mu.Unlock();
         return; // already canceled
     }
     Ꮡc.of(cancelCtx.Ꮡerr).Store(err);
     c.cause = cause;
     var (d, _) = Ꮡc.of(cancelCtx.Ꮡdone).Load()._<channel<EmptyStruct>>(ᐧ);
-    if (d == default!){
+    if (d == nil) {
         Ꮡc.of(cancelCtx.Ꮡdone).Store(closedchan);
     } else {
         close(d);
@@ -646,7 +646,7 @@ internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, erro
         // NOTE: acquiring the child's lock while holding parent's lock.
         child.cancel(false, err, cause);
     }
-    c.children = default!;
+    c.children = default;
     c.mu.Unlock();
 
     if (removeFromParent) {
@@ -659,7 +659,7 @@ internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, erro
 // The returned context returns no Deadline or Err, and its Done channel is nil.
 // Calling [Cause] on the returned context returns nil.
 public static Context WithoutCancel(Context parent) {
-    if (parent == default!) {
+    if (parent == nil) {
         throw panic("cannot create context from nil parent");
     }
     return new withoutCancelCtx(parent);
@@ -670,18 +670,18 @@ partial struct withoutCancelCtx {
 }
 
 internal static (time.Time deadline, bool ok) Deadline(this withoutCancelCtx _) {
-    time.Time deadline = default!;
-    bool ok = default!;
+    time.Time deadline = default;
+    bool ok = default;
 
     return (deadline, ok);
 }
 
 internal static /*<-*/channel<EmptyStruct> Done(this withoutCancelCtx _) {
-    return default!;
+    return default;
 }
 
 internal static error Err(this withoutCancelCtx _) {
-    return default!;
+    return default;
 }
 
 internal static any Value(this withoutCancelCtx c, any key) {
@@ -702,7 +702,7 @@ internal static @string String(this withoutCancelCtx c) {
 // Canceling this context releases resources associated with it, so code should
 // call cancel as soon as the operations running in this [Context] complete.
 public static (Context, Action) WithDeadline(Context parent, time.Time d) {
-    return WithDeadlineCause(parent, d, default!);
+    return WithDeadlineCause(parent, d, default);
 }
 
 // WithDeadlineCause behaves like [WithDeadline] but also sets the cause of the
@@ -711,7 +711,7 @@ public static (Context, Action) WithDeadline(Context parent, time.Time d) {
 public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, error cause) {
     GoFrame ᒐ = default;
     try {
-        if (parent == default!) {
+        if (parent == nil) {
             throw panic("cannot create context from nil parent");
         }
         {
@@ -729,24 +729,24 @@ public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, e
             c.cancel(true, DeadlineExceeded, cause); // deadline has already passed
             var cʗ1 = c;
             return (new timerCtxжContext(c), () => {
-                cʗ1.cancel(false, Canceled, default!);
+                cʗ1.cancel(false, Canceled, default);
             });
         }
         c.of(timerCtx.Ꮡmu).Lock();
         var cʗ2 = c;
         defer(cʗ2.of(timerCtx.Ꮡmu).Unlock, ref ᒐ);
-        if (c.of(timerCtx.Ꮡerr).Load() == default!) {
+        if (c.of(timerCtx.Ꮡerr).Load() == nil) {
             var cʗ3 = c;
-            c.Value.timer = time.AfterFunc(dur, () => {
+            c.timer = time.AfterFunc(dur, () => {
                 cʗ3.cancel(true, DeadlineExceeded, cause);
             });
         }
         var cʗ4 = c;
         return (new timerCtxжContext(c), () => {
-            cʗ4.cancel(true, Canceled, default!);
+            cʗ4.cancel(true, Canceled, default);
         });
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -778,7 +778,7 @@ internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error
     c.mu.Lock();
     if (c.timer != nil) {
         c.timer.Stop();
-        c.timer = default!;
+        c.timer = default;
     }
     c.mu.Unlock();
 }
@@ -818,10 +818,10 @@ public static (Context, Action) WithTimeoutCause(Context parent, time.Duration t
 // struct{}. Alternatively, exported context key variables' static
 // type should be a pointer or interface.
 public static Context WithValue(Context parent, any key, any val) {
-    if (parent == default!) {
+    if (parent == nil) {
         throw panic("cannot create context from nil parent");
     }
-    if (key == default!) {
+    if (key == nil) {
         throw panic("nil key");
     }
     if (!reflectlite.TypeOf(key).Comparable()) {
@@ -881,27 +881,27 @@ internal static any Value(this ref valueCtx c, any key) {
 }
 
 internal static any value(Context c, any key) {
-    while (ᐧ) {
+    for (;;) {
         switch (c.type()) {
         case ж<valueCtx> ctx: {
-            if (AreEqual(key, (~ctx).key)) {
-                return (~ctx).val;
+            if (AreEqual(key, ctx.key)) {
+                return ctx.val;
             }
-            c = ctx.Value.Context;
+            c = ctx.Context;
             break;
         }
         case ж<cancelCtx> ctx: {
             if (AreEqual(key, ᏑcancelCtxKey)) {
                 return c;
             }
-            c = ctx.Value.Context;
+            c = ctx.Context;
             break;
         }
         case withoutCancelCtx ctx: {
             if (AreEqual(key, ᏑcancelCtxKey)) {
                 // This implements Cause(ctx) == nil
                 // when ctx is created using WithoutCancel.
-                return default!;
+                return default;
             }
             c = ctx.c;
             break;
@@ -916,7 +916,7 @@ internal static any value(Context c, any key) {
         case backgroundCtx _:
         case todoCtx _: {
             var ctx = c;
-            return default!;
+            return default;
         }
         default: {
             var ctx = c;

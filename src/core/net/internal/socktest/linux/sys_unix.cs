@@ -10,8 +10,8 @@ partial class socktest_package {
 
 // Socket wraps [syscall.Socket].
 public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) {
-    nint s = default!;
-    error err = default!;
+    nint s = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var sw = ref Ꮡsw.DerefOrNull();
@@ -24,13 +24,13 @@ public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nin
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
 
         (var af, err) = f.apply(so);
-        if (err != default!) {
+        if (err != nil) {
             (s, err) = (-1, err); goto ᒐdone;
         }
-        (s, so.Value.Err) = syscall.Socket(family, sotype, proto);
+        (s, so.Err) = syscall.Socket(family, sotype, proto);
         {
-            err = af.apply(so); if (err != default!) {
-                if ((~so).Err == default!) {
+            err = af.apply(so); if (err != nil) {
+                if (so.Err == nil) {
                     syscall.Close(s);
                 }
                 (s, err) = (-1, err); goto ᒐdone;
@@ -39,13 +39,13 @@ public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nin
 
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
-        if ((~so).Err != default!) {
-            sw.stats.getLocked((~so).Cookie).Value.OpenFailed++;
-            (s, err) = (-1, (~so).Err); goto ᒐdone;
+        if (so.Err != nil) {
+            sw.stats.getLocked(so.Cookie).OpenFailed++;
+            (s, err) = (-1, so.Err); goto ᒐdone;
         }
         var nso = Ꮡsw.addLocked(s, family, sotype, proto);
-        sw.stats.getLocked((~nso).Cookie).Value.Opened++;
-        (s, err) = (s, default!);
+        sw.stats.getLocked(nso.Cookie).Opened++;
+        (s, err) = (s, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -54,7 +54,7 @@ public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nin
 
 // Close wraps syscall.Close.
 public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) {
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var sw = ref Ꮡsw.DerefOrNull();
@@ -68,25 +68,25 @@ public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) {
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
 
         (var af, err) = f.apply(so);
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone;
         }
-        so.Value.Err = syscall.Close(s);
+        so.Err = syscall.Close(s);
         {
-            err = af.apply(so); if (err != default!) {
+            err = af.apply(so); if (err != nil) {
                 goto ᒐdone;
             }
         }
 
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
-        if ((~so).Err != default!) {
-            sw.stats.getLocked((~so).Cookie).Value.CloseFailed++;
-            err = (~so).Err; goto ᒐdone;
+        if (so.Err != nil) {
+            sw.stats.getLocked(so.Cookie).CloseFailed++;
+            err = so.Err; goto ᒐdone;
         }
         delete(sw.sotab, s);
-        sw.stats.getLocked((~so).Cookie).Value.Closed++;
-        err = default!;
+        sw.stats.getLocked(so.Cookie).Closed++;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -95,7 +95,7 @@ public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) {
 
 // Connect wraps syscall.Connect.
 public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Sockaddr sa) {
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var sw = ref Ꮡsw.DerefOrNull();
@@ -109,24 +109,24 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Socka
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
 
         (var af, err) = f.apply(so);
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone;
         }
-        so.Value.Err = syscall.Connect(s, sa);
+        so.Err = syscall.Connect(s, sa);
         {
-            err = af.apply(so); if (err != default!) {
+            err = af.apply(so); if (err != nil) {
                 goto ᒐdone;
             }
         }
 
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
-        if ((~so).Err != default!) {
-            sw.stats.getLocked((~so).Cookie).Value.ConnectFailed++;
-            err = (~so).Err; goto ᒐdone;
+        if (so.Err != nil) {
+            sw.stats.getLocked(so.Cookie).ConnectFailed++;
+            err = so.Err; goto ᒐdone;
         }
-        sw.stats.getLocked((~so).Cookie).Value.Connected++;
-        err = default!;
+        sw.stats.getLocked(so.Cookie).Connected++;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -135,7 +135,7 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Socka
 
 // Listen wraps syscall.Listen.
 public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) {
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var sw = ref Ꮡsw.DerefOrNull();
@@ -149,24 +149,24 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) 
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
 
         (var af, err) = f.apply(so);
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone;
         }
-        so.Value.Err = syscall.Listen(s, backlog);
+        so.Err = syscall.Listen(s, backlog);
         {
-            err = af.apply(so); if (err != default!) {
+            err = af.apply(so); if (err != nil) {
                 goto ᒐdone;
             }
         }
 
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
-        if ((~so).Err != default!) {
-            sw.stats.getLocked((~so).Cookie).Value.ListenFailed++;
-            err = (~so).Err; goto ᒐdone;
+        if (so.Err != nil) {
+            sw.stats.getLocked(so.Cookie).ListenFailed++;
+            err = so.Err; goto ᒐdone;
         }
-        sw.stats.getLocked((~so).Cookie).Value.Listened++;
-        err = default!;
+        sw.stats.getLocked(so.Cookie).Listened++;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -175,9 +175,9 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) 
 
 // Accept wraps syscall.Accept.
 public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> Ꮡsw, nint s) {
-    nint ns = default!;
-    syscall.Sockaddr sa = default!;
-    error err = default!;
+    nint ns = default;
+    syscall.Sockaddr sa = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var sw = ref Ꮡsw.DerefOrNull();
@@ -191,28 +191,28 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> �
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
 
         (var af, err) = f.apply(so);
-        if (err != default!) {
-            (ns, sa, err) = (-1, default!, err); goto ᒐdone;
+        if (err != nil) {
+            (ns, sa, err) = (-1, default, err); goto ᒐdone;
         }
-        (ns, sa, so.Value.Err) = syscall.Accept(s);
+        (ns, sa, so.Err) = syscall.Accept(s);
         {
-            err = af.apply(so); if (err != default!) {
-                if ((~so).Err == default!) {
+            err = af.apply(so); if (err != nil) {
+                if (so.Err == nil) {
                     syscall.Close(ns);
                 }
-                (ns, sa, err) = (-1, default!, err); goto ᒐdone;
+                (ns, sa, err) = (-1, default, err); goto ᒐdone;
             }
         }
 
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
-        if ((~so).Err != default!) {
-            sw.stats.getLocked((~so).Cookie).Value.AcceptFailed++;
-            (ns, sa, err) = (-1, default!, (~so).Err); goto ᒐdone;
+        if (so.Err != nil) {
+            sw.stats.getLocked(so.Cookie).AcceptFailed++;
+            (ns, sa, err) = (-1, default, so.Err); goto ᒐdone;
         }
-        var nso = Ꮡsw.addLocked(ns, (~so).Cookie.Family(), (~so).Cookie.Type(), (~so).Cookie.Protocol());
-        sw.stats.getLocked((~nso).Cookie).Value.Accepted++;
-        (ns, sa, err) = (ns, sa, default!);
+        var nso = Ꮡsw.addLocked(ns, so.Cookie.Family(), so.Cookie.Type(), so.Cookie.Protocol());
+        sw.stats.getLocked(nso.Cookie).Accepted++;
+        (ns, sa, err) = (ns, sa, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -221,8 +221,8 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> �
 
 // GetsockoptInt wraps syscall.GetsockoptInt.
 public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint s, nint level, nint opt) {
-    nint soerr = default!;
-    error err = default!;
+    nint soerr = default;
+    error err = default;
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     var so = Ꮡsw.sockso(s);
@@ -234,26 +234,26 @@ public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint 
     Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
 
     (var af, err) = f.apply(so);
-    if (err != default!) {
+    if (err != nil) {
         return (-1, err);
     }
-    (soerr, so.Value.Err) = syscall.GetsockoptInt(s, level, opt);
-    so.Value.SocketErr = ((syscall.Errno)(uintptr)soerr);
+    (soerr, so.Err) = syscall.GetsockoptInt(s, level, opt);
+    so.SocketErr = ((syscall.Errno)(uintptr)soerr);
     {
-        err = af.apply(so); if (err != default!) {
+        err = af.apply(so); if (err != nil) {
             return (-1, err);
         }
     }
 
-    if ((~so).Err != default!) {
-        return (-1, (~so).Err);
+    if (so.Err != nil) {
+        return (-1, so.Err);
     }
-    if (opt == syscall.SO_ERROR && (AreEqual((~so).SocketErr, ((syscall.Errno)0)) || AreEqual((~so).SocketErr, syscall.EISCONN))) {
+    if (opt == syscall.SO_ERROR && (AreEqual(so.SocketErr, ((syscall.Errno)0)) || AreEqual(so.SocketErr, syscall.EISCONN))) {
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
-        sw.stats.getLocked((~so).Cookie).Value.Connected++;
+        sw.stats.getLocked(so.Cookie).Connected++;
         Ꮡsw.of(Switch.Ꮡsmu).Unlock();
     }
-    return (soerr, default!);
+    return (soerr, default);
 }
 
 } // end socktest_package

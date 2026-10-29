@@ -117,7 +117,7 @@ public static @string String(this Tag i) {
         return _Tag_name_5.slice(_Tag_index_5[i], _Tag_index_5[i + 1]);
     }
     default: {
-        return "Tag("u8 + strconv.FormatInt((int64)(uint32)i, 10) + ")"u8;
+        return "Tag("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 

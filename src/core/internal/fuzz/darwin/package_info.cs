@@ -10,27 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -77,6 +59,24 @@ using static go.@internal.fuzz_package;
 // the assembly.
 [assembly: global::go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: global::go.GoFieldAccess(typeof(coordinator))]
+[assembly: global::go.GoFieldAccess(typeof(fuzzResult))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.ArrayType))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.BasicLit))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.CallExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.Ident))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.SelectorExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.UnaryExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: global::go.GoFieldAccess(typeof(mutator))]
+[assembly: global::go.GoFieldAccess(typeof(pcgRand))]
+[assembly: global::go.GoFieldAccess(typeof(sharedMem))]
+[assembly: global::go.GoFieldAccess(typeof(sharedMemHeader))]
+[assembly: global::go.GoFieldAccess(typeof(time_package.Ticker))]
+[assembly: global::go.GoFieldAccess(typeof(time_package.Timer))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -87,17 +87,17 @@ using static go.@internal.fuzz_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("internal/fuzz/counters_supported.go", "counters_supported.cs", "AAoiwoKC")]
 [assembly: global::go.GoPositionMap("internal/fuzz/coverage.go", "coverage.cs", "AAscooKuwoKCvKKClIKCgoKmgpSCgpSqooKClKqigoKmqqKCgqamgoKClLiSAAwWgoKCgoKCgg==")]
-[assembly: global::go.GoPositionMap("internal/fuzz/encoding.go", "encoding.cs", "ABkwwoKUpoIACgS0AAwaAAoWxoKUxgAPHIKU6rTEtqiygpSCgpSCgpSCooKClIKClJQACwaCgoKClIKClIKUlICCgpSCgpSCgpSCgpS2goCCgoKUlKSkpoKClIKCgpSCkoKU2piAgpSCpoK0gpSClJTEppS0gpTEyICkgpS0gpSkpoKUgoKUgoKUgpSClKSClKSClKSClIKkgpS0gpSCgpSkgpSCgpSkypLugqSCpIKkgqS0upKUgqSCpIKkgqS0")]
-[assembly: global::go.GoPositionMap("internal/fuzz/fuzz.go", "fuzz.cs", "AE2qAQAOAoCCpIKUgpSUpoKCpoKCgsiCkqaSgrKCgoKUuLiUgpSClIKCyoKigpSCgoKUggAIEoKCgpSCgoKCgoKmgoKygoKUgoKU7oKCkqSClIKmgoKCpoKCgqYACQjIgoKC6oKUlIKCgoKClIKmgpTKgoKSpoKCgsqCAAcSpIKCggAGEIKCgoKC7oAACBKmpoKCgoKUgoK6lIKCgoIACxqCAAgQpoKCgoIACRTItgAUIIKmgqaCAAcY4oKygoKUgoKClIKAgtqUgpQAGUKigqYAgQHGArSCgqYACBKAgqSCgoKCyoKCuIKCpoKCppSUgoKCgpSCgoKmpoKCgqaCgoKCgpSkgpSCgoKUpoIAAhoACgKmlIKmlKaCgpTKgpSmgqaCgoKUgoKmqJKCqqKCvKKCAAYQgqbKqqKmlIKClJSClIKSgoKUgoK4goKCpqqiggACIAANAqyygpSCgoKClKqiqIIAAhDSgIKkgoKApuyAgqQACRSigoKUrsKCgpKClIKC3IKUgoKClIKCgoKUlIKUpoKCgpSAgqSqooKUgoKUgoKmruKCgoCCpICCgqSmgqaCgoKmpgATKJSCpqKC", "119-144:1;149-164:2;184-194:3", "", "176=New/1/1/2;305=New/1/1/2;325=diffCoverage/1/1/3,countBits/1/1/3;337=countBits/1/1/3;378=countBits/1/2/5,countBits/2/2/6;671=Now/1/2/2,Now/2/2/6;789=warmupRun/1/1/3")]
+[assembly: global::go.GoPositionMap("internal/fuzz/encoding.go", "encoding.cs", "ABkwwoKUpoIACgS0AAwaAAoWxoKUxgAPHIKU6rTEtqiygpSCgpSCgpSCooKClIKClJQACwaCgoKClIKClIKUlICCgpSCgpSCgpSCgpS2goCCgoKUpLS0poKClIKCgpSCgoKU2piAgpSCpoK0gpSClJTEppS0gpTEyIC0gpS0gqSkpoKUgoKUgoKUgpSClKSClKSClKSClIKkgpS0gpSCgpSkgpSCgpSkypL+gqSCpIKkgqS0ypKkgqSCpIKkgqS0")]
+[assembly: global::go.GoPositionMap("internal/fuzz/fuzz.go", "fuzz.cs", "AE2qAQAOAoCCpIKUgpSUpoKCpoKCgsiCkpaSgrKCgoKUuLiUgpSClIKCyoKigpSCgoKUggAIEoKCgpSCgoKCgoKmgoKygoKUgoKU7oKCkqSClIKmgoKCpoKCgqYACQjIgoKC6oKUlIKCgoKClIKmgpTKgoKCpoKCgsqCAAcSlIKCggAGEIKCgoKC3oAACBKmpoKCgoKUgoK6lIKCgoIACxqCAAcQpoKCgoIACRTItgAUIIKmgqaCAAcY4oKygoKUgoKClIKAgtqUgpQAGUKigqYAgQHGArSCgqYACBKAgqSCgoKCyoKCuIKCpoKCppSUgoKCgpSCgoKmpoKCgqaCgoKCgpSUgpSCgoKUpoIAAhoACgKmlIKmlKaCgpTKgpSmgqaCgoKUgoKmqJKCqqKCvKKCAAYQgqbKqqKmlIKClJSClIKCgoKUgoK4goKCpqqiggACIAANAqyygpSCgoKClKqiqIIAAhDSgIKkgoKApuyAgqQACRSigoKUrsKCgoKClIKC3IKUgoKClIKCgoKUlIKUpoKCgpSAgqSqooKUgoKUgoKmruKCgoCCpICCgqSmgqaCgoKmpgATKJSCpqKC", "119-144:1;149-164:2;184-194:3", "", "175=New/1/1/2;303=New/1/1/2;322=diffCoverage/1/1/3,countBits/1/1/3;334=countBits/1/1/3;374=countBits/1/2/5,countBits/2/2/6;666=Now/1/2/2,Now/2/2/6;783=warmupRun/1/1/3", "124:21")]
 [assembly: global::go.GoPositionMap("internal/fuzz/mem.go", "mem.cs", "ADF2tNr0goKUooKCyoKAgsiC6JKqooKCqJKCrLKCgpSCAAIS4oKClA==", "72-77:1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/minimize.go", "minimize.cs", "AAkWgqai3KaCgoKUgoKmyoKClIKCgoKmgqa4goKCgpSCgoKmgoLcgoKCpoKClKbG")]
-[assembly: global::go.GoPositionMap("internal/fuzz/mutator.go", "mutator.cs", "ABImgqaCpoKClKqigKSkpMoAChC4gpS0tLS0tLS0tLS0gsa0tIKUgpSClIK0gpSClIKUgsTIgoKCgqaClJSUgraClJSUgsqCgoKCpoKUlKaCtoKUlJSCyoKCgqaClIKUlIK2gpSClJSCtoKClIKUlIK2gpSC7gAUKtKSgoKUpoKCgIKCAAgMgoIABBCCgpSC", "259-264:1")]
+[assembly: global::go.GoPositionMap("internal/fuzz/minimize.go", "minimize.cs", "AAkWgqai3KaCgoKUgoKmyoKClIKCgoKmgqa4goKCgpSCgoKmgoLcgoKCpoKClKbG", "", "", "", "23:27")]
+[assembly: global::go.GoPositionMap("internal/fuzz/mutator.go", "mutator.cs", "ABImgqaCpoKClKqigKSkpMoAChC4gpS0tLS0tLS0tLS0gsa0tIKUgpSClIK0gpSClIKUgsTIgoKCgqaClJSUgraClJSUgsqCgoKCpoKUlKaCtoKUlJSCyoKCgqaClIKUlIK2gpSClJSCtoKClIKUlIK2gpSC7gAUKtKCgoKUpoKCgIKCAAgMgoIABBCCgpSC", "259-264:1")]
 [assembly: global::go.GoPositionMap("internal/fuzz/mutators_byteslice.go", "mutators_byteslice.cs", "AAoQsoKUgoKCgqrCgoKClIKCgpSqwoKUgoKClLiClKamppSCgqiygpSCgoKUgoKosoKUgoKosoKUuIKosoKUgoKClIKosoKUgoKClJSosoKUgoKUgoKCqLKClIKClIKCgqiygpSCgpSCgoKqwoKUgoKqwoKUgoKCqsKClIKCgqiygpQACBKCgpSCgoKClKiygpSCgoKClKiygpSCgoLKgoKUqLKClIKCgsqCgpSmgsqClIKCgoKCgg==")]
 [assembly: global::go.GoPositionMap("internal/fuzz/pcg.go", "pcg.cs", "ADFYgoKCgpKClKaokoKCgIKkgoKCgoKCpoKCprKCpoKCqJKCgqqigpQAAhDSgoKCgoKCgoKmqJIAChay")]
 [assembly: global::go.GoPositionMap("internal/fuzz/queue.go", "queue.cs", "ABcugqaCgoKClIKCgpSCpoKClIKCpoKClIKCgoKmgoKUpoI=")]
 [assembly: global::go.GoPositionMap("internal/fuzz/sys_posix.go", "sys_posix.cs", "ABMkgoKCgoKmqsiypoKUgoKmqqKCgoL4soKCgoKClIKClIKCgpSCgqqigoKUgqyygoKUggACHAALAgAHEqQ=", "", "", "40=Munmap/1/1/1,Close/1/1/2")]
 [assembly: global::go.GoPositionMap("internal/fuzz/trace.go", "trace.cs", "AAowAAwCoqKkoqKipKI=")]
-[assembly: global::go.GoPositionMap("internal/fuzz/worker.go", "worker.cs", "AD1+goKClIKCAAkWkoKClIIAAhoADQSUgoCCyOaCgpS4goKUAAoWlICmyMrcgoKUgpSUppSA3KSmyoKUAAkUyILK3IKmggAHEgAFEgAKAoKCgrbKgpSC3AAHEAAJFIKmAA4WggACFgAKAoKUgIKkgIKCgpSUpqQAAhoADwKClIKClIKCAAkUgoKUkoKCgpSSpoCCgoLsgoKCgpSCgqYABhgACwKClLaUpoKCggAIDoKSgqaCuKaCgsaCgoKCuIKmgoK4goK4AAYgAAoCkoKUxoKUkoKC6ACBAa4CAAwCgoKCgoCCgpTIgpS0tLSmgIIAEzYAEAKCgoKUlJKQpIKCgqSCgpKClIKCpoKCgpSClKaygoKCgoKClJSClKaCgoKClIKClKaCpKSCgpSUgoKCgpSCgoKUggAKDNKSkJKCkJKCgpSCgoKC2oKCgoKCgoLugpS4AAUQAAkCkpKCgqiC3IKCgoKkgpTcwoKUtLSkgoKCgoKCgriUpoKUgpSUtMSkpqKCqqIAECSCrAAIAoK4gIKC2oCCgqQADBSYAAsCgpSSgpSAkoKCgpSCgoKClIKCpoKCgoKCgqaCgpTKlLS0pJSmlIKCgsqCgoKmgoKCuIKCggAICAALAoKUgoKUgoKCgpSClIKCgpSCgpSQkpSClISCgoKUgpSCgqaUgoLcprjo4oKCgoLaooKCgIKkAA8gooCCpJiigqKCprSk", "386-389:1;426-429:1;491-499:1;492-494:1.1;715-715:1;724-727:2;741-743:3;744-759:4;805-805:1;807-807:2;855-858:1;881-912:2;996-996:1;1100-1100:1;1184-1187:1", "", "287=Sprintf/1/1/2;541=newMutator/1/1/11")]
+[assembly: global::go.GoPositionMap("internal/fuzz/worker.go", "worker.cs", "AD1+goKClIKCAAkWkoKClIIAAhoADQSUgoCCyOaCgpS4goKUAAoWlICmyMrcgoKUgpSUppSA3KSmyoKUAAkUyILK3IKmggAHEgAFEgAKAoKCgrbKgpSC3AAHEAAJFIKmAA4WggACFgAKAoKUgIKkgIKCgpSUpqQAAhoADwKClIKClIKCAAkUgoKUkoKCgpSSpoCCgoLsgoKCgpSCgqYABhgACwKClLaUpoKCggAIDoKSgqaCuKaCgsaCgoKCuIKmgoLIgoLIAAcgAAoCkoKUxoKUkoKC6ACBAa4CAAwCgoKCgoCCgpTIgpS0tLSmgIIAEzYAEAKCgoKUlIKQpIKCgqSCgpKClIKCpoKCgpSClKaygoKCgoKClJSClKaCgoKClIKClKaCpKSCgpSUgoKCgpSCgoKUggAKDNKCkJKCkJKCgpSCgoKC2oKCgoKCgoLugpS4AAUQAAkCgoKCgqiC3IKCgoKUgpTcwoKUtLSkgoKCgoKCgriUpoKUgpSUtMSkpqKCqqIAECSCrAAIAoK4gIKC2oCCgqQADBSYAAsCgpSSgpSAkoKCgpSCgoKClIKCpoKCgoKCgqaCgpTKlLS0pJSmlIKCgsqCgoKmgoKCuIKCggAICAALAoKUgoKUgoKCgpSClIKCgpSCgpSQkpSClISCgoKUgpSCgqaUgoLcprjo4oKCgoLaooKCgIKkAA8gooCCpJiigqKCprSk", "386-389:1;426-429:1;491-499:1;492-494:1.1;715-715:1;724-727:2;741-743:3;744-759:4;805-805:1;807-807:2;855-858:1;881-912:2;996-996:1;1100-1100:1;1184-1187:1", "", "287=Sprintf/1/1/2;544=newMutator/1/1/11", "396:21,403:21,553:29")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -49,12 +49,12 @@ public static error ErrBadPattern = errors.New("syntax error in pattern"u8);
 public static (bool matched, error err) Match(@string pattern, @string name) {
 Pattern:
     while (len(pattern) > 0) {
-        bool star = default!;
-        @string chunk = default!;
+        bool star = default;
+        @string chunk = default;
         (star, chunk, pattern) = scanChunk(pattern);
         if (star && chunk == ""u8) {
             // Trailing * matches rest of string unless it has a /.
-            return (!strings.Contains(name, (@string)(rune)Separator), default!);
+            return (!strings.Contains(name, (@string)(rune)Separator), default);
         }
         // Look for match at current position.
         var (t, ok, errΔ1) = matchChunk(chunk, name);
@@ -65,7 +65,7 @@ Pattern:
             name = t;
             continue;
         }
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return (false, errΔ1);
         }
         if (star) {
@@ -81,46 +81,46 @@ Pattern:
                     name = tΔ1;
                     goto continue_Pattern;
                 }
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return (false, errΔ2);
                 }
             }
         }
-        return (false, default!);
+        return (false, default);
 continue_Pattern:;
     }
 break_Pattern:;
-    return (len(name) == 0, default!);
+    return (len(name) == 0, default);
 }
 
 // scanChunk gets the next segment of pattern, which is a non-star string
 // possibly preceded by a star.
 internal static (bool star, @string chunk, @string rest) scanChunk(@string pattern) {
-    bool star = default!;
+    bool star = default;
 
-    while (len(pattern) > 0 && pattern[0] == (rune)'*') {
+    while (len(pattern) > 0 && pattern[0] == '*') {
         pattern = pattern[1..];
         star = true;
     }
     var inrange = false;
     for (nint i = 0; i < len(pattern); i++) {
         switch (pattern[i]) {
-        case (rune)'\\': {
+        case (byte)'\\': {
             // error check handled in matchChunk: bad pattern.
             if (runtime.GOOS != "windows"u8 && i + 1 < len(pattern)) {
                 i++;
             }
             break;
         }
-        case (rune)'[': {
+        case (byte)'[': {
             inrange = true;
             break;
         }
-        case (rune)']': {
+        case (byte)']': {
             inrange = false;
             break;
         }
-        case (rune)'*': {
+        case (byte)'*': {
             if (!inrange) {
                 return (star, pattern.slice(0, i), pattern.slice(i));
             }
@@ -134,7 +134,7 @@ internal static (bool star, @string chunk, @string rest) scanChunk(@string patte
 // If so, it returns the remainder of s (after the match).
 // Chunk is all single-character operators: literals, char classes, and ?.
 internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @string s) {
-    error err = default!;
+    error err = default;
 
     // failed records whether the match has failed.
     // After the match fails, the loop continues on processing chunk,
@@ -144,40 +144,40 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
         failed = failed || len(s) == 0;
         var exprᴛ1 = chunk[0];
         var matchᴛ1 = false;
-        if (exprᴛ1 is (rune)'[') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)'[') { matchᴛ1 = true;
             // character class
-            rune r = default!;
+            rune r = default;
             if (!failed) {
-                nint n = default!;
+                nint n = default;
                 (r, n) = utf8.DecodeRuneInString(s);
                 s = s.slice(n);
             }
             chunk = chunk[1..];
             // possibly negated
             var negated = false;
-            if (len(chunk) > 0 && chunk[0] == (rune)'^') {
+            if (len(chunk) > 0 && chunk[0] == '^') {
                 negated = true;
                 chunk = chunk[1..];
             }
             // parse all ranges
             var match = false;
             nint nrange = 0;
-            while (ᐧ) {
-                if (len(chunk) > 0 && chunk[0] == (rune)']' && nrange > 0) {
+            for (;;) {
+                if (len(chunk) > 0 && chunk[0] == ']' && nrange > 0) {
                     chunk = chunk[1..];
                     break;
                 }
-                rune loΔ1 = default!;
-                rune hiΔ1 = default!;
+                rune loΔ1 = default;
+                rune hiΔ1 = default;
                 {
-                    (loΔ1, chunk, err) = getEsc(chunk); if (err != default!) {
+                    (loΔ1, chunk, err) = getEsc(chunk); if (err != nil) {
                         return ("", false, err);
                     }
                 }
                 hiΔ1 = loΔ1;
-                if (chunk[0] == (rune)'-') {
+                if (chunk[0] == '-') {
                     {
-                        (hiΔ1, chunk, err) = getEsc(chunk[1..]); if (err != default!) {
+                        (hiΔ1, chunk, err) = getEsc(chunk[1..]); if (err != nil) {
                             return ("", false, err);
                         }
                     }
@@ -187,7 +187,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
             }
             failed = failed || match == negated;
         }
-        else if (exprᴛ1 is (rune)'?') { matchᴛ1 = true;
+        else if (exprᴛ1 is (byte)'?') { matchᴛ1 = true;
             if (!failed) {
                 failed = s[0] == Separator;
                 var (_, n) = utf8.DecodeRuneInString(s);
@@ -195,7 +195,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
             }
             chunk = chunk[1..];
         }
-        else if (exprᴛ1 is (rune)'\\') { matchᴛ1 = true;
+        else if (exprᴛ1 is (byte)'\\') { matchᴛ1 = true;
             if (runtime.GOOS != "windows"u8) {
                 chunk = chunk[1..];
                 if (len(chunk) == 0) {
@@ -213,22 +213,22 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
         }
     }
     if (failed) {
-        return ("", false, default!);
+        return ("", false, default);
     }
-    return (s, true, default!);
+    return (s, true, default);
 }
 
 // getEsc gets a possibly-escaped character from chunk, for a character class.
 internal static (rune r, @string nchunk, error err) getEsc(@string chunk) {
-    rune r = default!;
-    @string nchunk = default!;
-    error err = default!;
+    rune r = default;
+    @string nchunk = default;
+    error err = default;
 
-    if (len(chunk) == 0 || chunk[0] == (rune)'-' || chunk[0] == (rune)']') {
+    if (len(chunk) == 0 || chunk[0] == '-' || chunk[0] == ']') {
         err = ErrBadPattern;
         return (r, nchunk, err);
     }
-    if (chunk[0] == (rune)'\\' && runtime.GOOS != "windows"u8) {
+    if (chunk[0] == '\\' && runtime.GOOS != "windows"u8) {
         chunk = chunk[1..];
         if (len(chunk) == 0) {
             err = ErrBadPattern;
@@ -259,55 +259,55 @@ public static (slice<@string> matches, error err) Glob(@string pattern) {
 }
 
 internal static (slice<@string> matches, error err) globWithLimit(@string pattern, nint depth) {
-    slice<@string> matches = default!;
-    error err = default!;
+    slice<@string> matches = default;
+    error err = default;
 
     // This limit is used prevent stack exhaustion issues. See CVE-2022-30632.
     const nint pathSeparatorsLimit = 10000;
     if (depth == pathSeparatorsLimit) {
-        return (default!, ErrBadPattern);
+        return (default, ErrBadPattern);
     }
 
     // Check pattern is well-formed.
     {
-        var (_, errΔ1) = Match(pattern, ""u8); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var (_, errΔ1) = Match(pattern, ""u8); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     if (!hasMeta(pattern)) {
         {
-            (_, err) = os.Lstat(pattern); if (err != default!) {
-                return (default!, default!);
+            (_, err) = os.Lstat(pattern); if (err != nil) {
+                return (default, default);
             }
         }
-        return (new @string[]{pattern}.slice(), default!);
+        return (slice<@string>([pattern]), default);
     }
 
     var (dir, @file) = Split(pattern);
     nint volumeLen = 0;
-    if (runtime.GOOS == "windows"u8){
+    if (runtime.GOOS == "windows"u8) {
         (volumeLen, dir) = cleanGlobPathWindows(dir);
     } else {
         dir = cleanGlobPath(dir);
     }
 
     if (!hasMeta(dir.slice(volumeLen))) {
-        return glob(dir, @file, default!);
+        return glob(dir, @file, default);
     }
 
     // Prevent infinite recursion. See issue 15879.
     if (dir == pattern) {
-        return (default!, ErrBadPattern);
+        return (default, ErrBadPattern);
     }
 
-    slice<@string> m = default!;
+    slice<@string> m = default;
     (m, err) = globWithLimit(dir, depth + 1);
-    if (err != default!) {
+    if (err != nil) {
         return (matches, err);
     }
     foreach (var (_, d) in m) {
         (matches, err) = glob(d, @file, matches);
-        if (err != default!) {
+        if (err != nil) {
             return (matches, err);
         }
     }
@@ -317,16 +317,17 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
 // cleanGlobPath prepares path for glob matching.
 internal static @string cleanGlobPath(@string path) {
     var exprᴛ1 = path;
-    if (exprᴛ1 == ""u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == ""u8: {
         return "."u8;
     }
-    if (exprᴛ1 == ((@string)(rune)Separator)) {
+    case {} when exprᴛ1 == ((@string)(rune)Separator): {
         // do nothing to the path
         return path;
     }
-    { /* default: */
+    default: {
         return path.slice(0, len(path) - 1); // chop off trailing separator
-    }
+    }}
 }
 
 // cleanGlobPathWindows is windows version of cleanGlobPath.
@@ -356,20 +357,20 @@ internal static (nint prefixLen, @string cleaned) cleanGlobPathWindows(@string p
 // opened, it returns the existing matches. New matches are
 // added in lexicographical order.
 internal static (slice<@string> m, error e) glob(@string dir, @string pattern, slice<@string> matches) {
-    slice<@string> m = default!;
-    error e = default!;
+    slice<@string> m = default;
+    error e = default;
     GoFrame ᒐ = default;
     try {
         m = matches;
         var (fi, err) = os.Stat(dir);
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone; // ignore I/O error
         }
         if (!fi.IsDir()) {
             goto ᒐdone; // ignore I/O error
         }
         (var d, err) = os.Open(dir);
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone; // ignore I/O error
         }
         var dʗ1 = d;
@@ -380,7 +381,7 @@ internal static (slice<@string> m, error e) glob(@string dir, @string pattern, s
 
         foreach (var (_, n) in names) {
             var (matched, errΔ1) = Match(pattern, n);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 (m, e) = (m, errΔ1); goto ᒐdone;
             }
             if (matched) {

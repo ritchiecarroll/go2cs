@@ -42,7 +42,7 @@ partial class hmac_package {
 public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) {
     if (boring.Enabled) {
         var hm = boring.NewHMAC(h, key);
-        if (hm != default!) {
+        if (hm != nil) {
             return hm;
         }
         // BoringCrypto did not recognize h, so fall through to standard Go code.

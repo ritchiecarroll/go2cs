@@ -73,12 +73,12 @@ public static (ж<ecdhꓸPublicKey>, error) ECDH(this ж<PublicKey> Ꮡpub) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     var c = curveToECDH(pub.Curve);
-    if (c == default!) {
-        return (default!, errors.New(ecdsaUnsupportedCurveByˢ));
+    if (c == nil) {
+        return (default, errors.New(ecdsaUnsupportedCurveByˢ));
     }
     var (k, err) = Ꮡpub.Bytes();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return c.NewPublicKey(k);
 }
@@ -93,12 +93,12 @@ public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
     if (!ok) {
         return false;
     }
-    return bigIntEqual(pub.X, (~xx).X) && bigIntEqual(pub.Y, (~xx).Y) &&
+    return bigIntEqual(pub.X, xx.X) && bigIntEqual(pub.Y, xx.Y) &&
         // Standard library Curve implementations are singletons, so this check
         // will work for those. Other Curves might be equivalent even if not
         // singletons, but there is no definitive way to check for that, and
         // better to err on the side of safety.
-        AreEqual(pub.Curve, (~xx).Curve);
+        AreEqual(pub.Curve, xx.Curve);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -121,32 +121,32 @@ internal static readonly @string ecdsaCurveNotSupportedByˢ = "ecdsa: curve not 
 // can be parsed with [crypto/x509.ParsePKIXPublicKey] (and [encoding/pem]).
 public static (ж<PublicKey>, error) ParseUncompressedPublicKey(elliptic.Curve curve, slice<byte> data) {
     if (len(data) < 1 || data[0] != 4) {
-        return (default!, errors.New(ecdsaInvalidUncompressedˢ));
+        return (default, errors.New(ecdsaInvalidUncompressedˢ));
     }
-    var exprᴛ1 = curve;
-    if (AreEqual(exprᴛ1, elliptic.P224())) {
+    switch (curve) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P224()): {
         return parseUncompressedPublicKey<ecdsa.P224PointжPoint>(ecdsa.P224(), curve, data);
     }
-    if (AreEqual(exprᴛ1, elliptic.P256())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P256()): {
         return parseUncompressedPublicKey<ecdsa.P256PointжPoint>(ecdsa.P256(), curve, data);
     }
-    if (AreEqual(exprᴛ1, elliptic.P384())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P384()): {
         return parseUncompressedPublicKey<ecdsa.P384PointжPoint>(ecdsa.P384(), curve, data);
     }
-    if (AreEqual(exprᴛ1, elliptic.P521())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P521()): {
         return parseUncompressedPublicKey<ecdsa.P521PointжPoint>(ecdsa.P521(), curve, data);
     }
-    { /* default: */
-        return (default!, errors.New(ecdsaCurveNotSupportedByˢ));
-    }
+    default: {
+        return (default, errors.New(ecdsaCurveNotSupportedByˢ));
+    }}
 }
 
-internal static (ж<PublicKey>, error) parseUncompressedPublicKey<P>(ж<ecdsa.Curve<P>> Ꮡc, elliptic.Curve curve, slice<byte> data)
+internal static (ж<PublicKey>, error) parseUncompressedPublicKey<P>(ж<ecdsa.Curve<P>> c, elliptic.Curve curve, slice<byte> data)
     where P : ecdsa.Point<P>
 {
-    var (k, err) = ecdsa.NewPublicKey(Ꮡc, data);
-    if (err != default!) {
-        return (default!, err);
+    var (k, err) = ecdsa.NewPublicKey(c, data);
+    if (err != nil) {
+        return (default, err);
     }
     return publicKeyFromFIPS(curve, k);
 }
@@ -168,32 +168,32 @@ internal static readonly @string ecdsaCurveNotSupportedByˢ2 = "ecdsa: curve not
 public static (slice<byte>, error) Bytes(this ж<PublicKey> Ꮡpub) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
-    var exprᴛ1 = pub.Curve;
-    if (AreEqual(exprᴛ1, elliptic.P224())) {
+    switch (pub.Curve) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P224()): {
         return publicKeyBytes<ecdsa.P224PointжPoint>(ecdsa.P224(), ref (Ꮡpub).DerefOrNull());
     }
-    if (AreEqual(exprᴛ1, elliptic.P256())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P256()): {
         return publicKeyBytes<ecdsa.P256PointжPoint>(ecdsa.P256(), ref (Ꮡpub).DerefOrNull());
     }
-    if (AreEqual(exprᴛ1, elliptic.P384())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P384()): {
         return publicKeyBytes<ecdsa.P384PointжPoint>(ecdsa.P384(), ref (Ꮡpub).DerefOrNull());
     }
-    if (AreEqual(exprᴛ1, elliptic.P521())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P521()): {
         return publicKeyBytes<ecdsa.P521PointжPoint>(ecdsa.P521(), ref (Ꮡpub).DerefOrNull());
     }
-    { /* default: */
-        return (default!, errors.New(ecdsaCurveNotSupportedByˢ2));
-    }
+    default: {
+        return (default, errors.New(ecdsaCurveNotSupportedByˢ2));
+    }}
 }
 
-internal static (slice<byte>, error) publicKeyBytes<P>(ж<ecdsa.Curve<P>> Ꮡc, ref PublicKey pub)
+internal static (slice<byte>, error) publicKeyBytes<P>(ж<ecdsa.Curve<P>> c, ref PublicKey pub)
     where P : ecdsa.Point<P>
 {
-    var (k, err) = publicKeyToFIPS(Ꮡc, ref pub);
-    if (err != default!) {
-        return (default!, err);
+    var (k, err) = publicKeyToFIPS(c, ref pub);
+    if (err != nil) {
+        return (default, err);
     }
-    return (k.Bytes(), default!);
+    return (k.Bytes(), default);
 }
 
 // PrivateKey represents an ECDSA private key.
@@ -217,30 +217,30 @@ public static (ж<ecdh.PrivateKey>, error) ECDH(this ж<PrivateKey> Ꮡpriv) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     var c = curveToECDH(priv.Curve);
-    if (c == default!) {
-        return (default!, errors.New(ecdsaUnsupportedCurveByˢ));
+    if (c == nil) {
+        return (default, errors.New(ecdsaUnsupportedCurveByˢ));
     }
     var (k, err) = Ꮡpriv.Bytes();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return c.NewPrivateKey(k);
 }
 
 internal static ecdhꓸCurve curveToECDH(elliptic.Curve c) {
-    var exprᴛ1 = c;
-    if (AreEqual(exprᴛ1, elliptic.P256())) {
+    switch (c) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P256()): {
         return ecdh.P256();
     }
-    if (AreEqual(exprᴛ1, elliptic.P384())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P384()): {
         return ecdh.P384();
     }
-    if (AreEqual(exprᴛ1, elliptic.P521())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P521()): {
         return ecdh.P521();
     }
-    { /* default: */
-        return default!;
-    }
+    default: {
+        return default;
+    }}
 }
 
 // Public returns the public key corresponding to priv.
@@ -256,7 +256,7 @@ public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
     if (!ok) {
         return false;
     }
-    return priv.PublicKey.Equal(xx.of(PrivateKey.ᏑPublicKey)) && bigIntEqual(priv.D, (~xx).D);
+    return priv.PublicKey.Equal(xx.of(PrivateKey.ᏑPublicKey)) && bigIntEqual(priv.D, xx.D);
 }
 
 // bigIntEqual reports whether a and b are equal leaking only their bit length
@@ -286,34 +286,34 @@ internal static readonly @string ecdsaCurveNotSupportedByˢ3 = "ecdsa: curve not
 // which can be parsed with [crypto/x509.ParseECPrivateKey] or
 // [crypto/x509.ParsePKCS8PrivateKey] (and [encoding/pem]).
 public static (ж<PrivateKey>, error) ParseRawPrivateKey(elliptic.Curve curve, slice<byte> data) {
-    var exprᴛ1 = curve;
-    if (AreEqual(exprᴛ1, elliptic.P224())) {
+    switch (curve) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P224()): {
         return parseRawPrivateKey<ecdsa.P224PointжPoint>(ecdsa.P224(), () => nistec.NewP224Point(), curve, data);
     }
-    if (AreEqual(exprᴛ1, elliptic.P256())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P256()): {
         return parseRawPrivateKey<ecdsa.P256PointжPoint>(ecdsa.P256(), () => nistec.NewP256Point(), curve, data);
     }
-    if (AreEqual(exprᴛ1, elliptic.P384())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P384()): {
         return parseRawPrivateKey<ecdsa.P384PointжPoint>(ecdsa.P384(), () => nistec.NewP384Point(), curve, data);
     }
-    if (AreEqual(exprᴛ1, elliptic.P521())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P521()): {
         return parseRawPrivateKey<ecdsa.P521PointжPoint>(ecdsa.P521(), () => nistec.NewP521Point(), curve, data);
     }
-    { /* default: */
-        return (default!, errors.New(ecdsaCurveNotSupportedByˢ3));
-    }
+    default: {
+        return (default, errors.New(ecdsaCurveNotSupportedByˢ3));
+    }}
 }
 
-internal static (ж<PrivateKey>, error) parseRawPrivateKey<P>(ж<ecdsa.Curve<P>> Ꮡc, Func<P> newPoint, elliptic.Curve curve, slice<byte> data)
+internal static (ж<PrivateKey>, error) parseRawPrivateKey<P>(ж<ecdsa.Curve<P>> c, Func<P> newPoint, elliptic.Curve curve, slice<byte> data)
     where P : ecdsa.Point<P>
 {
     var (q, err) = newPoint().ScalarBaseMult(data);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    (var k, err) = ecdsa.NewPrivateKey(Ꮡc, data, q.Bytes());
-    if (err != default!) {
-        return (default!, err);
+    (var k, err) = ecdsa.NewPrivateKey(c, data, q.Bytes());
+    if (err != nil) {
+        return (default, err);
     }
     return privateKeyFromFIPS(curve, k);
 }
@@ -336,32 +336,32 @@ internal static readonly @string ecdsaCurveNotSupportedByˢ4 = "ecdsa: curve not
 public static (slice<byte>, error) Bytes(this ж<PrivateKey> Ꮡpriv) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    var exprᴛ1 = priv.Curve;
-    if (AreEqual(exprᴛ1, elliptic.P224())) {
+    switch (priv.Curve) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P224()): {
         return privateKeyBytes<ecdsa.P224PointжPoint>(ecdsa.P224(), Ꮡpriv);
     }
-    if (AreEqual(exprᴛ1, elliptic.P256())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P256()): {
         return privateKeyBytes<ecdsa.P256PointжPoint>(ecdsa.P256(), Ꮡpriv);
     }
-    if (AreEqual(exprᴛ1, elliptic.P384())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P384()): {
         return privateKeyBytes<ecdsa.P384PointжPoint>(ecdsa.P384(), Ꮡpriv);
     }
-    if (AreEqual(exprᴛ1, elliptic.P521())) {
+    case var ᴛ when AreEqual(ᴛ, elliptic.P521()): {
         return privateKeyBytes<ecdsa.P521PointжPoint>(ecdsa.P521(), Ꮡpriv);
     }
-    { /* default: */
-        return (default!, errors.New(ecdsaCurveNotSupportedByˢ4));
-    }
+    default: {
+        return (default, errors.New(ecdsaCurveNotSupportedByˢ4));
+    }}
 }
 
-internal static (slice<byte>, error) privateKeyBytes<P>(ж<ecdsa.Curve<P>> Ꮡc, ж<PrivateKey> Ꮡpriv)
+internal static (slice<byte>, error) privateKeyBytes<P>(ж<ecdsa.Curve<P>> c, ж<PrivateKey> priv)
     where P : ecdsa.Point<P>
 {
-    var (k, err) = privateKeyToFIPS(Ꮡc, Ꮡpriv);
-    if (err != default!) {
-        return (default!, err);
+    var (k, err) = privateKeyToFIPS(c, priv);
+    if (err != nil) {
+        return (default, err);
     }
-    return (k.Bytes(), default!);
+    return (k.Bytes(), default);
 }
 
 // Sign signs a hash (which should be the result of hashing a larger message
@@ -380,7 +380,7 @@ internal static (slice<byte>, error) privateKeyBytes<P>(ж<ecdsa.Curve<P>> Ꮡc,
 // function used to produce digest and priv.Curve must be one of
 // [elliptic.P224], [elliptic.P256], [elliptic.P384], or [elliptic.P521].
 public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader random, slice<byte> digest, crypto.SignerOpts opts) {
-    if (random == default!) {
+    if (random == nil) {
         return signRFC6979(Ꮡpriv, digest, opts);
     }
     random = rand.CustomReader(random);
@@ -394,46 +394,46 @@ public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader r
 // in a future Go release. Instead, use [testing/cryptotest.SetGlobalRandom].
 public static (ж<PrivateKey>, error) GenerateKey(elliptic.Curve c, io.Reader r) {
     if (boring.Enabled && rand.IsDefaultReader(r)) {
-        var (x, y, d, err) = boring.GenerateKeyECDSA((~c.Params()).Name);
-        if (err != default!) {
-            return (default!, err);
+        var (x, y, d, err) = boring.GenerateKeyECDSA(c.Params().Name);
+        if (err != nil) {
+            return (default, err);
         }
-        return (Ꮡ(new PrivateKey(PublicKey: new PublicKey(Curve: c, X: bbig.Dec(x), Y: bbig.Dec(y)), D: bbig.Dec(d))), default!);
+        return (Ꮡ(new PrivateKey(PublicKey: new PublicKey(Curve: c, X: bbig.Dec(x), Y: bbig.Dec(y)), D: bbig.Dec(d))), default);
     }
     boring.UnreachableExceptTests();
 
     r = rand.CustomReader(r);
 
-    var exprᴛ1 = c.Params();
-    if (exprᴛ1 == elliptic.P224().Params()) {
+    switch (c.Params()) {
+    case var ᴛ when ᴛ == elliptic.P224().Params(): {
         return generateFIPS<ecdsa.P224PointжPoint>(c, ecdsa.P224(), r);
     }
-    if (exprᴛ1 == elliptic.P256().Params()) {
+    case var ᴛ when ᴛ == elliptic.P256().Params(): {
         return generateFIPS<ecdsa.P256PointжPoint>(c, ecdsa.P256(), r);
     }
-    if (exprᴛ1 == elliptic.P384().Params()) {
+    case var ᴛ when ᴛ == elliptic.P384().Params(): {
         return generateFIPS<ecdsa.P384PointжPoint>(c, ecdsa.P384(), r);
     }
-    if (exprᴛ1 == elliptic.P521().Params()) {
+    case var ᴛ when ᴛ == elliptic.P521().Params(): {
         return generateFIPS<ecdsa.P521PointжPoint>(c, ecdsa.P521(), r);
     }
-    { /* default: */
+    default: {
         return generateLegacy(c, r);
-    }
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cryptoEcdsaOnlyCryptoˢ = "crypto/ecdsa: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
 
-internal static (ж<PrivateKey>, error) generateFIPS<P>(elliptic.Curve curve, ж<ecdsa.Curve<P>> Ꮡc, io.Reader rand)
+internal static (ж<PrivateKey>, error) generateFIPS<P>(elliptic.Curve curve, ж<ecdsa.Curve<P>> c, io.Reader rand)
     where P : ecdsa.Point<P>
 {
     if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(rand)) {
-        return (default!, errors.New(cryptoEcdsaOnlyCryptoˢ));
+        return (default, errors.New(cryptoEcdsaOnlyCryptoˢ));
     }
-    var (privateKey, err) = ecdsa.GenerateKey(Ꮡc, rand);
-    if (err != default!) {
-        return (default!, err);
+    var (privateKey, err) = ecdsa.GenerateKey(c, rand);
+    if (err != nil) {
+        return (default, err);
     }
     return privateKeyFromFIPS(curve, privateKey);
 }
@@ -452,8 +452,8 @@ public static (slice<byte>, error) SignASN1(io.Reader r, ж<PrivateKey> Ꮡpriv,
 
     if (boring.Enabled && rand.IsDefaultReader(r)) {
         var (b, err) = boringPrivateKey(Ꮡpriv);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         return boring.SignMarshalECDSA(b, hash);
     }
@@ -461,42 +461,42 @@ public static (slice<byte>, error) SignASN1(io.Reader r, ж<PrivateKey> Ꮡpriv,
 
     r = rand.CustomReader(r);
 
-    var exprᴛ1 = priv.Curve.Params();
-    if (exprᴛ1 == elliptic.P224().Params()) {
+    switch (priv.Curve.Params()) {
+    case var ᴛ when ᴛ == elliptic.P224().Params(): {
         return signFIPS<ecdsa.P224PointжPoint>(ecdsa.P224(), Ꮡpriv, r, hash);
     }
-    if (exprᴛ1 == elliptic.P256().Params()) {
+    case var ᴛ when ᴛ == elliptic.P256().Params(): {
         return signFIPS<ecdsa.P256PointжPoint>(ecdsa.P256(), Ꮡpriv, r, hash);
     }
-    if (exprᴛ1 == elliptic.P384().Params()) {
+    case var ᴛ when ᴛ == elliptic.P384().Params(): {
         return signFIPS<ecdsa.P384PointжPoint>(ecdsa.P384(), Ꮡpriv, r, hash);
     }
-    if (exprᴛ1 == elliptic.P521().Params()) {
+    case var ᴛ when ᴛ == elliptic.P521().Params(): {
         return signFIPS<ecdsa.P521PointжPoint>(ecdsa.P521(), Ꮡpriv, r, hash);
     }
-    { /* default: */
+    default: {
         return signLegacy(ref (Ꮡpriv).DerefOrNull(), r, hash);
-    }
+    }}
 }
 
-internal static (slice<byte>, error) signFIPS<P>(ж<ecdsa.Curve<P>> Ꮡc, ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> hash)
+internal static (slice<byte>, error) signFIPS<P>(ж<ecdsa.Curve<P>> c, ж<PrivateKey> priv, io.Reader rand, slice<byte> hash)
     where P : ecdsa.Point<P>
 {
     if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(rand)) {
-        return (default!, errors.New(cryptoEcdsaOnlyCryptoˢ));
+        return (default, errors.New(cryptoEcdsaOnlyCryptoˢ));
     }
-    var (k, err) = privateKeyToFIPS(Ꮡc, Ꮡpriv);
-    if (err != default!) {
-        return (default!, err);
+    var (k, err) = privateKeyToFIPS(c, priv);
+    if (err != nil) {
+        return (default, err);
     }
     // Always using SHA-512 instead of the hash that computed hash is
     // technically a violation of draft-irtf-cfrg-det-sigs-with-noise-04 but in
     // our API we don't get to know what it was, and this has no security impact.
-    (var sig, err) = ecdsa.Sign<P, hash.Hash>(Ꮡc, sha512.New, k, rand, hash);
-    if (err != default!) {
-        return (default!, err);
+    (var sig, err) = ecdsa.Sign<P, hash.Hash>(c, sha512.New, k, rand, hash);
+    if (err != nil) {
+        return (default, err);
     }
-    return encodeSignature((~sig).R, (~sig).S);
+    return encodeSignature(sig.R, sig.S);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -507,51 +507,51 @@ internal static readonly @string ecdsaCurveNotSupportedByˢ5 = "ecdsa: curve not
 internal static (slice<byte>, error) signRFC6979(ж<PrivateKey> Ꮡpriv, slice<byte> hash, crypto.SignerOpts opts) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    if (opts == default!) {
-        return (default!, errors.New(ecdsaSignCalledWithNilˢ));
+    if (opts == nil) {
+        return (default, errors.New(ecdsaSignCalledWithNilˢ));
     }
     crypto.Hash h = opts.HashFunc();
     if (h.Size() != len(hash)) {
-        return (default!, errors.New(ecdsaHashLengthDoesNotˢ));
+        return (default, errors.New(ecdsaHashLengthDoesNotˢ));
     }
-    var exprᴛ1 = priv.Curve.Params();
-    if (exprᴛ1 == elliptic.P224().Params()) {
+    switch (priv.Curve.Params()) {
+    case var ᴛ when ᴛ == elliptic.P224().Params(): {
         return signFIPSDeterministic<ecdsa.P224PointжPoint>(ecdsa.P224(), h, Ꮡpriv, hash);
     }
-    if (exprᴛ1 == elliptic.P256().Params()) {
+    case var ᴛ when ᴛ == elliptic.P256().Params(): {
         return signFIPSDeterministic<ecdsa.P256PointжPoint>(ecdsa.P256(), h, Ꮡpriv, hash);
     }
-    if (exprᴛ1 == elliptic.P384().Params()) {
+    case var ᴛ when ᴛ == elliptic.P384().Params(): {
         return signFIPSDeterministic<ecdsa.P384PointжPoint>(ecdsa.P384(), h, Ꮡpriv, hash);
     }
-    if (exprᴛ1 == elliptic.P521().Params()) {
+    case var ᴛ when ᴛ == elliptic.P521().Params(): {
         return signFIPSDeterministic<ecdsa.P521PointжPoint>(ecdsa.P521(), h, Ꮡpriv, hash);
     }
-    { /* default: */
-        return (default!, errors.New(ecdsaCurveNotSupportedByˢ5));
-    }
+    default: {
+        return (default, errors.New(ecdsaCurveNotSupportedByˢ5));
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cryptoEcdsaUseOfHashˢ = "crypto/ecdsa: use of hash functions other than SHA-2 or SHA-3 is not allowed in FIPS 140-only mode"u8;
 
-internal static (slice<byte>, error) signFIPSDeterministic<P>(ж<ecdsa.Curve<P>> Ꮡc, crypto.Hash hashFunc, ж<PrivateKey> Ꮡpriv, slice<byte> hash)
+internal static (slice<byte>, error) signFIPSDeterministic<P>(ж<ecdsa.Curve<P>> c, crypto.Hash hashFunc, ж<PrivateKey> priv, slice<byte> hash)
     where P : ecdsa.Point<P>
 {
-    var (k, err) = privateKeyToFIPS(Ꮡc, Ꮡpriv);
-    if (err != default!) {
-        return (default!, err);
+    var (k, err) = privateKeyToFIPS(c, priv);
+    if (err != nil) {
+        return (default, err);
     }
     var hashFuncʗ1 = hashFunc;
     var h = fips140hash.UnwrapNew<hash.Hash>(() => hashFuncʗ1.New());
     if (fips140only.Enforced() && !fips140only.ApprovedHash(h())) {
-        return (default!, errors.New(cryptoEcdsaUseOfHashˢ));
+        return (default, errors.New(cryptoEcdsaUseOfHashˢ));
     }
-    (var sig, err) = ecdsa.SignDeterministic(Ꮡc, h, k, hash);
-    if (err != default!) {
-        return (default!, err);
+    (var sig, err) = ecdsa.SignDeterministic(c, h, k, hash);
+    if (err != nil) {
+        return (default, err);
     }
-    return encodeSignature((~sig).R, (~sig).S);
+    return encodeSignature(sig.R, sig.S);
 }
 
 internal static (slice<byte>, error) encodeSignature(slice<byte> r, slice<byte> s) {
@@ -599,44 +599,44 @@ public static bool VerifyASN1(ж<PublicKey> Ꮡpub, slice<byte> hash, slice<byte
 
     if (boring.Enabled) {
         var (key, err) = boringPublicKey(Ꮡpub);
-        if (err != default!) {
+        if (err != nil) {
             return false;
         }
         return boring.VerifyECDSA(key, hash, sig);
     }
     boring.UnreachableExceptTests();
 
-    var exprᴛ1 = pub.Curve.Params();
-    if (exprᴛ1 == elliptic.P224().Params()) {
+    switch (pub.Curve.Params()) {
+    case var ᴛ when ᴛ == elliptic.P224().Params(): {
         return verifyFIPS<ecdsa.P224PointжPoint>(ecdsa.P224(), ref (Ꮡpub).DerefOrNull(), hash, sig);
     }
-    if (exprᴛ1 == elliptic.P256().Params()) {
+    case var ᴛ when ᴛ == elliptic.P256().Params(): {
         return verifyFIPS<ecdsa.P256PointжPoint>(ecdsa.P256(), ref (Ꮡpub).DerefOrNull(), hash, sig);
     }
-    if (exprᴛ1 == elliptic.P384().Params()) {
+    case var ᴛ when ᴛ == elliptic.P384().Params(): {
         return verifyFIPS<ecdsa.P384PointжPoint>(ecdsa.P384(), ref (Ꮡpub).DerefOrNull(), hash, sig);
     }
-    if (exprᴛ1 == elliptic.P521().Params()) {
+    case var ᴛ when ᴛ == elliptic.P521().Params(): {
         return verifyFIPS<ecdsa.P521PointжPoint>(ecdsa.P521(), ref (Ꮡpub).DerefOrNull(), hash, sig);
     }
-    { /* default: */
+    default: {
         return verifyLegacy(ref (Ꮡpub).DerefOrNull(), hash, sig);
-    }
+    }}
 }
 
-internal static bool verifyFIPS<P>(ж<ecdsa.Curve<P>> Ꮡc, ref PublicKey pub, slice<byte> hash, slice<byte> sig)
+internal static bool verifyFIPS<P>(ж<ecdsa.Curve<P>> c, ref PublicKey pub, slice<byte> hash, slice<byte> sig)
     where P : ecdsa.Point<P>
 {
     var (r, s, err) = parseSignature(sig);
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
-    (var k, err) = publicKeyToFIPS(Ꮡc, ref pub);
-    if (err != default!) {
+    (var k, err) = publicKeyToFIPS(c, ref pub);
+    if (err != nil) {
         return false;
     }
     {
-        var errΔ1 = ecdsa.Verify(Ꮡc, k, hash, Ꮡ(new ecdsa.Signature(R: r, S: s))); if (errΔ1 != default!) {
+        var errΔ1 = ecdsa.Verify(c, k, hash, Ꮡ(new ecdsa.Signature(R: r, S: s))); if (errΔ1 != nil) {
             return false;
         }
     }
@@ -653,39 +653,39 @@ internal static (slice<byte> r, slice<byte> s, error err) parseSignature(slice<b
     ref var inner = ref heap<cryptobyte.String>(out var Ꮡinner);
     var input = (cryptobyte.String)sig;
     if (!input.ReadASN1(Ꮡinner, asn1.SEQUENCE) || !input.Empty() || !inner.ReadASN1Integer(Ꮡr) || !inner.ReadASN1Integer(Ꮡs) || !inner.Empty()) {
-        return (default!, default!, errors.New(invalidAsn1ˢ));
+        return (default, default, errors.New(invalidAsn1ˢ));
     }
-    return (r, s, default!);
+    return (r, s, default);
 }
 
 internal static (ж<PublicKey>, error) publicKeyFromFIPS(elliptic.Curve curve, ж<ecdsaꓸPublicKey> Ꮡpub) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     var (x, y, err) = pointToAffine(curve, pub.Bytes());
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new PublicKey(Curve: curve, X: x, Y: y)), default!);
+    return (Ꮡ(new PublicKey(Curve: curve, X: x, Y: y)), default);
 }
 
 internal static (ж<PrivateKey>, error) privateKeyFromFIPS(elliptic.Curve curve, ж<ecdsa.PrivateKey> Ꮡpriv) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     var (pub, err) = publicKeyFromFIPS(curve, Ꮡpriv.PublicKey());
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new PrivateKey(PublicKey: pub.Value, D: @new<bigꓸInt>().SetBytes(priv.Bytes()))), default!);
+    return (Ꮡ(new PrivateKey(PublicKey: pub.Value, D: @new<bigꓸInt>().SetBytes(priv.Bytes()))), default);
 }
 
-internal static (ж<ecdsaꓸPublicKey>, error) publicKeyToFIPS<P>(ж<ecdsa.Curve<P>> Ꮡc, ref PublicKey pub)
+internal static (ж<ecdsaꓸPublicKey>, error) publicKeyToFIPS<P>(ж<ecdsa.Curve<P>> c, ref PublicKey pub)
     where P : ecdsa.Point<P>
 {
     var (Q, err) = pointFromAffine(pub.Curve, pub.X, pub.Y);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return ecdsa.NewPublicKey(Ꮡc, Q);
+    return ecdsa.NewPublicKey(c, Q);
 }
 
 internal static readonly ж<fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>> ᏑprivateKeyCache = new StaticBox<fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>>(default(fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>));
@@ -696,28 +696,28 @@ internal static readonly @string ecdsaPrivateKeyScalarTooˢ = "ecdsa: private ke
 internal static readonly @string ecdsaPrivateKeyScalarIsˢ = "ecdsa: private key scalar is zero or negative"u8;
 internal static readonly @string ecdsaInternalErrorCurveˢ = "ecdsa: internal error: curve size too large"u8;
 
-internal static (ж<ecdsa.PrivateKey>, error) privateKeyToFIPS<P>(ж<ecdsa.Curve<P>> Ꮡc, ж<PrivateKey> Ꮡpriv)
+internal static (ж<ecdsa.PrivateKey>, error) privateKeyToFIPS<P>(ж<ecdsa.Curve<P>> c, ж<PrivateKey> Ꮡpriv)
     where P : ecdsa.Point<P>
 {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     var (Q, err) = pointFromAffine(priv.Curve, priv.X, priv.Y);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // Reject values that would not get correctly encoded.
-    if (priv.D.BitLen() > (~priv.Curve.Params()).N.BitLen()) {
-        return (default!, errors.New(ecdsaPrivateKeyScalarTooˢ));
+    if (priv.D.BitLen() > priv.Curve.Params().N.BitLen()) {
+        return (default, errors.New(ecdsaPrivateKeyScalarTooˢ));
     }
     if (priv.D.Sign() <= 0) {
-        return (default!, errors.New(ecdsaPrivateKeyScalarIsˢ));
+        return (default, errors.New(ecdsaPrivateKeyScalarIsˢ));
     }
 
-    nint size = ((~priv.Curve.Params()).N.BitLen() + 7) / 8;
+    nint size = (priv.Curve.Params().N.BitLen() + 7) / 8;
     const nint maxScalarSize = 66; // enough for a P-521 private key
     if (size > maxScalarSize) {
-        return (default!, errors.New(ecdsaInternalErrorCurveˢ));
+        return (default, errors.New(ecdsaInternalErrorCurveˢ));
     }
     var D = priv.D.FillBytes(new slice<byte>(size, maxScalarSize));
 
@@ -726,7 +726,7 @@ internal static (ж<ecdsa.PrivateKey>, error) privateKeyToFIPS<P>(ж<ecdsa.Curve
 
     var Dʗ2 = D;
     var Qʗ2 = Q;
-    return ᏑprivateKeyCache.Get(Ꮡpriv, () => ecdsa.NewPrivateKey(Ꮡc, Dʗ1, Qʗ1), (ж<ecdsa.PrivateKey> k) => subtle.ConstantTimeCompare(k.PublicKey().Bytes(), Qʗ2) == 1 && subtle.ConstantTimeCompare(k.Bytes(), Dʗ2) == 1);
+    return ᏑprivateKeyCache.Get(Ꮡpriv, () => ecdsa.NewPrivateKey(c, Dʗ1, Qʗ1), (ж<ecdsa.PrivateKey> k) => subtle.ConstantTimeCompare(k.PublicKey().Bytes(), Qʗ2) == 1 && subtle.ConstantTimeCompare(k.Bytes(), Dʗ2) == 1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -738,13 +738,13 @@ internal static (slice<byte>, error) pointFromAffine(elliptic.Curve curve, ж<bi
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
-    nint bitSize = curve.Params().Value.BitSize;
+    nint bitSize = curve.Params().BitSize;
     // Reject values that would not get correctly encoded.
     if (x.Sign() < 0 || y.Sign() < 0) {
-        return (default!, errors.New(negativeCoordinateˢ));
+        return (default, errors.New(negativeCoordinateˢ));
     }
     if (x.BitLen() > bitSize || y.BitLen() > bitSize) {
-        return (default!, errors.New(overflowingCoordinateˢ));
+        return (default, errors.New(overflowingCoordinateˢ));
     }
     // Encode the coordinates and let [ecdsa.NewPublicKey] reject invalid points.
     nint byteLen = (bitSize + 7) / 8;
@@ -752,7 +752,7 @@ internal static (slice<byte>, error) pointFromAffine(elliptic.Curve curve, ж<bi
     buf[0] = 4; // uncompressed point
     x.FillBytes(buf.slice(1, 1 + byteLen));
     y.FillBytes(buf.slice(1 + byteLen, 1 + 2 * byteLen));
-    return (buf, default!);
+    return (buf, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -760,17 +760,17 @@ internal static readonly @string ecdsaPublicKeyPointIsTheˢ = "ecdsa: public key
 
 // pointToAffine is used to convert a nistec Bytes encoding to a PublicKey.
 internal static (ж<bigꓸInt> x, ж<bigꓸInt> y, error err) pointToAffine(elliptic.Curve curve, slice<byte> p) {
-    ж<bigꓸInt> x = default!;
-    ж<bigꓸInt> y = default!;
+    ж<bigꓸInt> x = default;
+    ж<bigꓸInt> y = default;
 
     if (len(p) == 1 && p[0] == 0) {
         // This is the encoding of the point at infinity.
-        return (default!, default!, errors.New(ecdsaPublicKeyPointIsTheˢ));
+        return (default, default, errors.New(ecdsaPublicKeyPointIsTheˢ));
     }
-    nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
+    nint byteLen = (curve.Params().BitSize + 7) / 8;
     x = @new<bigꓸInt>().SetBytes(p.slice(1, 1 + byteLen));
     y = @new<bigꓸInt>().SetBytes(p.slice(1 + byteLen));
-    return (x, y, default!);
+    return (x, y, default);
 }
 
 } // end ecdsa_package

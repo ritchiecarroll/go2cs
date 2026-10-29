@@ -29,10 +29,10 @@ public static error ErrShutdown = errors.New("connection is shut down"u8);
 
 // Call represents an active RPC.
 partial struct ΔCall {
-    public @string ServiceMethod;    // The name of the service and method to call.
-    public any Args;        // The argument to the function (*struct).
-    public any Reply;        // The reply from the function (*struct).
-    public error Error;      // After completion, the error status.
+    public @string ServiceMethod;  // The name of the service and method to call.
+    public any Args;               // The argument to the function (*struct).
+    public any Reply;              // The reply from the function (*struct).
+    public error Error;            // After completion, the error status.
     public channel<ж<ΔCall>> Done; // Receives *Call when Go is complete.
 }
 
@@ -47,7 +47,7 @@ partial struct Client {
     internal sync.Mutex mutex; // protects following
     internal uint64 seq;
     internal map<uint64, ж<ΔCall>> pending;
-    internal bool closing; // user has called Close
+    internal bool closing;  // user has called Close
     internal bool shutdown; // server has told us to stop
 }
 
@@ -95,7 +95,7 @@ internal static void send(this ж<Client> Ꮡclient, ж<ΔCall> Ꮡcall) {
         client.request.Seq = seq;
         client.request.ServiceMethod = call.ServiceMethod;
         var err = client.codec.WriteRequest(Ꮡclient.of(Client.Ꮡrequest), call.Args);
-        if (err != default!) {
+        if (err != nil) {
             client.mutex.Lock();
             Ꮡcall = client.pending[seq]; call = ref Ꮡcall.DerefOrNull();
             delete(client.pending, seq);
@@ -116,12 +116,12 @@ internal static readonly object rpcClientProtocolErrorˢ = (@string)"rpc: client
 internal static void input(this ж<Client> Ꮡclient) {
     ref var client = ref Ꮡclient.DerefOrNull();
 
-    error err = default!;
+    error err = default;
     ref var response = ref heap(new Response(), out var Ꮡresponse);
-    while (err == default!) {
-        response = new Response(nil);
+    while (err == nil) {
+        response = new Response();
         err = client.codec.ReadResponseHeader(Ꮡresponse);
-        if (err != default!) {
+        if (err != nil) {
             break;
         }
         var seq = response.Seq;
@@ -137,8 +137,8 @@ internal static void input(this ж<Client> Ꮡclient) {
             // removed; response is a server telling us about an
             // error reading request body. We should still attempt
             // to read error body, but there's no one to give it to.
-            err = client.codec.ReadResponseBody(default!);
-            if (err != default!) {
+            err = client.codec.ReadResponseBody(default);
+            if (err != nil) {
                 err = errors.New("reading error body: "u8 + err.Error());
             }
             break;
@@ -147,18 +147,18 @@ internal static void input(this ж<Client> Ꮡclient) {
             // We've got an error response. Give this to the request;
             // any subsequent requests will get the ReadResponseBody
             // error if there is one.
-            call.Value.Error = ((ServerError)response.Error);
-            err = client.codec.ReadResponseBody(default!);
-            if (err != default!) {
+            call.Error = ((ServerError)response.Error);
+            err = client.codec.ReadResponseBody(default);
+            if (err != nil) {
                 err = errors.New("reading error body: "u8 + err.Error());
             }
             call.done();
             break;
         }
         default: {
-            err = client.codec.ReadResponseBody((~call).Reply);
-            if (err != default!) {
-                call.Value.Error = errors.New("reading body "u8 + err.Error());
+            err = client.codec.ReadResponseBody(call.Reply);
+            if (err != nil) {
+                call.Error = errors.New("reading body "u8 + err.Error());
             }
             call.done();
             break;
@@ -170,14 +170,14 @@ internal static void input(this ж<Client> Ꮡclient) {
     client.shutdown = true;
     var closing = client.closing;
     if (AreEqual(err, io.EOF)) {
-        if (closing){
+        if (closing) {
             err = ErrShutdown;
         } else {
             err = io.ErrUnexpectedEOF;
         }
     }
     foreach (var (_, call) in client.pending) {
-        call.Value.Error = err;
+        call.Error = err;
         call.done();
     }
     client.mutex.Unlock();
@@ -243,24 +243,24 @@ partial struct gobClientCodec {
     internal ж<bufio.Writer> encBuf;
 }
 
-internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> Ꮡr, any body) {
-    error err = default!;
+internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> r, any body) {
+    error err = default;
 
     {
-        err = c.enc.Encode(Ꮡr.OrTypedNil()); if (err != default!) {
+        err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
             return err;
         }
     }
     {
-        err = c.enc.Encode(body); if (err != default!) {
+        err = c.enc.Encode(body); if (err != nil) {
             return err;
         }
     }
     return c.encBuf.Flush();
 }
 
-internal static error ReadResponseHeader(this ref gobClientCodec c, ж<Response> Ꮡr) {
-    return c.dec.Decode(Ꮡr.OrTypedNil());
+internal static error ReadResponseHeader(this ref gobClientCodec c, ж<Response> r) {
+    return c.dec.Decode(r.OrTypedNil());
 }
 
 internal static error ReadResponseBody(this ref gobClientCodec c, any body) {
@@ -281,25 +281,25 @@ public static (ж<Client>, error) DialHTTP(@string network, @string address) {
 // at the specified network address and path.
 public static (ж<Client>, error) DialHTTPPath(@string network, @string address, @string path) {
     var (conn, err) = net.Dial(network, address);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     io.WriteString(new net_ConnᴠWriter(conn), "CONNECT "u8 + path + " HTTP/1.0\n\n"u8);
 
     // Require successful HTTP response
     // before switching to RPC protocol.
     (var resp, err) = Δhttp.ReadResponse(bufio.NewReader(new net_ConnᴠReader(conn)), Ꮡ(new Δhttp.Request(Method: "CONNECT"u8)));
-    if (err == default! && (~resp).Status == connected) {
-        return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default!);
+    if (err == nil && resp.Status == connected) {
+        return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default);
     }
-    if (err == default!) {
-        err = errors.New("unexpected HTTP response: "u8 + (~resp).Status);
+    if (err == nil) {
+        err = errors.New("unexpected HTTP response: "u8 + resp.Status);
     }
     conn.Close();
-    return (default!, new net.OpErrorжerror(Ꮡ(new net.OpError(
+    return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(
         Op: "dial-http"u8,
         Net: network + " "u8 + address,
-        Addr: default!,
+        Addr: default,
         Err: err
     ))));
 }
@@ -307,10 +307,10 @@ public static (ж<Client>, error) DialHTTPPath(@string network, @string address,
 // Dial connects to an RPC server at the specified network address.
 public static (ж<Client>, error) Dial(@string network, @string address) {
     var (conn, err) = net.Dial(network, address);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default!);
+    return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default);
 }
 
 // Close calls the underlying codec's Close method. If the connection is already
@@ -337,10 +337,10 @@ internal static readonly object rpcDoneChannelIsˢ = (@string)"rpc: done channel
 // If non-nil, done must be buffered or Go will deliberately crash.
 public static ж<ΔCall> Go(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<ΔCall>> done) {
     var call = @new<ΔCall>();
-    call.Value.ServiceMethod = serviceMethod;
-    call.Value.Args = args;
-    call.Value.Reply = reply;
-    if (done == default!){
+    call.ServiceMethod = serviceMethod;
+    call.Args = args;
+    call.Reply = reply;
+    if (done == nil) {
         done = new channel<ж<ΔCall>>(10); // buffered.
     } else {
         // If caller passes done != nil, it must arrange that
@@ -351,15 +351,15 @@ public static ж<ΔCall> Go(this ж<Client> Ꮡclient, @string serviceMethod, an
             log.Panic(rpcDoneChannelIsˢ);
         }
     }
-    call.Value.Done = done;
+    call.Done = done;
     Ꮡclient.send(call);
     return call;
 }
 
 // Call invokes the named function, waits for it to complete, and returns its error status.
 public static error Call(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply) {
-    var call = ᐸꟷ((~Ꮡclient.Go(serviceMethod, args, reply, new channel<ж<ΔCall>>(1))).Done);
-    return (~call).Error;
+    var call = ᐸꟷ(Ꮡclient.Go(serviceMethod, args, reply, new channel<ж<ΔCall>>(1)).Done);
+    return call.Error;
 }
 
 } // end rpc_package

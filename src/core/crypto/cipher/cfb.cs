@@ -84,8 +84,7 @@ public static Stream NewCFBDecrypter(Block block, slice<byte> iv) {
 }
 
 internal static Stream newCFB(Block block, slice<byte> iv, bool decrypt) {
-    ref var blockSize = ref heap<nint>(out var ᏑblockSize);
-    blockSize = block.BlockSize();
+    ref var blockSize = ref heap<nint>(block.BlockSize(), out var ᏑblockSize);
     if (len(iv) != blockSize) {
         // Stack trace will indicate whether it was de- or en-cryption.
         throw panic("cipher.newCFB: IV length must equal block size");
@@ -97,7 +96,7 @@ internal static Stream newCFB(Block block, slice<byte> iv, bool decrypt) {
         outUsed: blockSize,
         decrypt: decrypt
     ));
-    copy((~x).next, iv);
+    copy(x.next, iv);
 
     return new cfbжStream(x);
 }

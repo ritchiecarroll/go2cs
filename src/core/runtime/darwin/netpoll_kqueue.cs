@@ -30,7 +30,7 @@ internal static void netpollinit() {
     addWakeupEvent(kq);
 }
 
-internal static int32 netpollopen(uintptr fd, ж<pollDesc> Ꮡpd) {
+internal static int32 netpollopen(uintptr fd, ж<pollDesc> pd) {
     // Arm both EVFILT_READ and EVFILT_WRITE in edge-triggered mode (EV_CLEAR)
     // for the whole fd lifetime. The notifications are automatically unregistered
     // when fd is closed.
@@ -41,15 +41,15 @@ internal static int32 netpollopen(uintptr fd, ж<pollDesc> Ꮡpd) {
     ev[0].fflags = 0;
     ev[0].data = 0;
 
-    if (goarch.PtrSize == 4){
+    if (goarch.PtrSize == 4) {
         // We only have a pointer-sized field to store into,
         // so on a 32-bit system we get no sequence protection.
         // TODO(iant): If we notice any problems we could at least
         // steal the low-order 2 bits for a tiny sequence number.
-        ev[0].udata = Ꮡpd.Reinterpret<pollDesc, byte>();
+        ev[0].udata = pd.Reinterpret<pollDesc, byte>();
     } else {
-        var tp = taggedPointerPack(@unsafe.Pointer.FromPinnedBox(Ꮡpd), Ꮡpd.of(pollDesc.Ꮡfdseq).Load());
-        ev[0].udata = (ж<byte>)(uintptr)((@unsafe.Pointer)(uintptr)(uint64)tp);
+        var tp = taggedPointerPack(@unsafe.Pointer.FromPinnedBox(pd), pd.of(pollDesc.Ꮡfdseq).Load());
+        ev[0].udata = (ж<byte>)(uintptr)((@unsafe.Pointer)(uintptr)tp);
     }
     ev[1] = ev[0];
     ev[1].filter = _EVFILT_WRITE;
@@ -88,14 +88,13 @@ internal static readonly @string runtimeNetpollFailedˢ = "runtime: netpoll fail
 // delay > 0: block for up to that many nanoseconds
 internal static (gList, int32) netpoll(int64 delay) {
     if (kq == -1) {
-        return (new gList(nil), 0);
+        return (new gList(), 0);
     }
-    ж<timespec> tp = default!;
+    ж<timespec> tp = default;
     ref var ts = ref heap(new timespec(), out var Ꮡts);
-    if (delay < 0){
-        tp = default!;
-    } else 
-    if (delay == 0){
+    if (delay < 0) {
+        tp = default;
+    } else if (delay == 0) {
         tp = Ꮡts;
     } else {
         ts.setNsec(delay);
@@ -119,7 +118,7 @@ retry:
         // If a timed sleep was interrupted, just return to
         // recalculate how long we should sleep now.
         if (delay > 0) {
-            return (new gList(nil), 0);
+            return (new gList(), 0);
         }
         goto retry;
     }
@@ -139,10 +138,10 @@ retry:
             continue;
         }
 
-        int32 mode = default!;
-        var exprᴛ1 = (~ev).filter;
-        if (exprᴛ1 == _EVFILT_READ) {
-            mode += (rune)'r';
+        int32 mode = default;
+        switch (ev.filter) {
+        case var ᴛ when ᴛ == _EVFILT_READ: {
+            mode += 'r';
 
             // On some systems when the read end of a pipe
             // is closed the write end will not get a
@@ -153,30 +152,32 @@ retry:
             // that goroutine will try the write again,
             // and the appropriate thing will happen based
             // on what that write returns (success, EPIPE, EAGAIN).
-            if ((uint16)((~ev).flags & (uint16)_EV_EOF) != 0) {
-                mode += (rune)'w';
+            if ((uint16)(ev.flags & (uint16)_EV_EOF) != 0) {
+                mode += 'w';
             }
+            break;
         }
-        else if (exprᴛ1 == _EVFILT_WRITE) {
-            mode += (rune)'w';
-        }
+        case var ᴛ when ᴛ == _EVFILT_WRITE: {
+            mode += 'w';
+            break;
+        }}
         if (mode != 0) {
-            ж<pollDesc> pd = default!;
-            uintptr tag = default!;
-            if (goarch.PtrSize == 4){
+            ж<pollDesc> pd = default;
+            uintptr tag = default;
+            if (goarch.PtrSize == 4) {
                 // No sequence protection on 32-bit systems.
                 // See netpollopen for details.
-                pd = (~ev).udata.Reinterpret<byte, pollDesc>();
+                pd = ev.udata.Reinterpret<byte, pollDesc>();
                 tag = 0;
             } else {
-                var tpΔ1 = (taggedPointer)(uint64)(uintptr)(~ev).udata;
+                var tpΔ1 = (taggedPointer)(uint64)(uintptr)ev.udata;
                 pd = (ж<pollDesc>)(uintptr)(tpΔ1.pointer());
                 tag = tpΔ1.tag();
                 if (pd.of(pollDesc.Ꮡfdseq).Load() != tag) {
                     continue;
                 }
             }
-            pd.setEventErr((~ev).flags == _EV_ERROR, tag);
+            pd.setEventErr(ev.flags == _EV_ERROR, tag);
             delta += netpollready(ᏑtoRun, pd, mode);
         }
     }

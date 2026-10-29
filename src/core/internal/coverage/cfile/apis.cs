@@ -25,7 +25,7 @@ public static error WriteMetaDir(@string dir) {
 
 // WriteMeta implements [runtime/coverage.WriteMeta].
 public static error WriteMeta(io.Writer w) {
-    if (w == default!) {
+    if (w == nil) {
         return fmt.Errorf("error: nil writer in WriteMeta"u8);
     }
     if (!finalHashComputed) {
@@ -45,7 +45,7 @@ public static error WriteCountersDir(@string dir) {
 
 // WriteCounters implements [runtime/coverage.WriteCounters].
 public static error WriteCounters(io.Writer w) {
-    if (w == default!) {
+    if (w == nil) {
         return fmt.Errorf("error: nil writer in WriteCounters"u8);
     }
     if (cmode != coverage.CtrModeAtomic) {
@@ -152,7 +152,7 @@ public static error ClearCounters() {
             i += (nint)coverage.FirstCtrOffset + (nint)nCtrs - 1;
         }
     }
-    return default!;
+    return default;
 }
 
 } // end cfile_package

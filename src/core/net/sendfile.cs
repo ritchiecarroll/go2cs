@@ -23,45 +23,45 @@ internal static readonly @string sendfileˢ = "sendfile"u8;
 // copied and any non-EOF error.
 //
 // if handled == false, sendFile performed no work.
-internal static (int64 written, error err, bool handled) sendFile(ж<netFD> Ꮡc, Δio.Reader r) {
-    int64 written = default!;
-    error err = default!;
-    bool handled = default!;
+internal static (int64 written, error err, bool handled) sendFile(ж<netFD> c, Δio.Reader r) {
+    int64 written = default;
+    error err = default;
+    bool handled = default;
 
     if (!supportsSendfile()) {
-        return (0, default!, false);
+        return (0, default, false);
     }
-    int64 remain = 0;     // 0 writes the entire file
+    int64 remain = 0; // 0 writes the entire file
     var (lr, ok) = r._<ж<Δio.LimitedReader>>(ᐧ);
     if (ok) {
-        (remain, r) = (lr.Value.N, lr.Value.R);
+        (remain, r) = (lr.N, lr.R);
         if (remain <= 0) {
-            return (0, default!, true);
+            return (0, default, true);
         }
     }
     // r might be an *os.File or an os.fileWithoutWriteTo.
     // Type assert to an interface rather than *os.File directly to handle the latter case.
     (var f, ok) = r._<syscall.Conn>(ᐧ);
     if (!ok) {
-        return (0, default!, false);
+        return (0, default, false);
     }
 
     (var sc, err) = f.SyscallConn();
-    if (err != default!) {
-        return (0, default!, false);
+    if (err != nil) {
+        return (0, default, false);
     }
 
     ref var werr = ref heap<error>(out var Ꮡwerr);
     err = sc.Read((uintptr fd) => {
-        (written, Ꮡwerr.ValueSlot, handled) = poll.SendFile(Ꮡc.of(netFD.Ꮡpfd), fd, remain);
+        (written, Ꮡwerr.ValueSlot, handled) = poll.SendFile(c.of(netFD.Ꮡpfd), fd, remain);
         return true;
     });
-    if (err == default!) {
+    if (err == nil) {
         err = werr;
     }
 
     if (lr != nil) {
-        lr.Value.N = remain - written;
+        lr.N = remain - written;
     }
 
     return (written, wrapSyscallError(sendfileˢ, err), handled);

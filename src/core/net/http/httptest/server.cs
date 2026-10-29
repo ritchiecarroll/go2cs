@@ -61,15 +61,15 @@ internal static readonly @string tcp6ˢ = "tcp6"u8;
 internal static net.Listener newLocalListener() {
     if (serveFlag != ""u8) {
         var (lΔ1, errΔ1) = net.Listen(tcpˢ, serveFlag);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             throw panic(fmt.Sprintf("httptest: failed to listen on %v: %v"u8, serveFlag, errΔ1));
         }
         return lΔ1;
     }
     var (l, err) = net.Listen(tcpˢ, "127.0.0.1:0"u8);
-    if (err != default!) {
+    if (err != nil) {
         {
-            (l, err) = net.Listen(tcp6ˢ, "[::1]:0"u8); if (err != default!) {
+            (l, err) = net.Listen(tcp6ˢ, "[::1]:0"u8); if (err != nil) {
                 throw panic(fmt.Sprintf("httptest: failed to listen on a port: %v"u8, err));
             }
         }
@@ -138,16 +138,15 @@ public static void Start(this ж<Server> Ꮡs) {
     }
 
     if (s.client == nil) {
-        var tr = Ꮡ(new http.Transport(nil));
-        ref var dialer = ref heap<net.Dialer>(out var Ꮡdialer);
-        dialer = new net.Dialer(nil);
+        var tr = Ꮡ(new http.Transport());
+        ref var dialer = ref heap<net.Dialer>(new net.Dialer(), out var Ꮡdialer);
         // User code may set either of Dial or DialContext, with DialContext taking precedence.
         // We set DialContext here to preserve any context values that are passed in,
         // but fall back to Dial if the user has set it.
         var trʗ1 = tr;
-        tr.Value.DialContext = (context.Context ctx, @string network, @string addr) => {
-            if ((~trʗ1).Dial != default!) {
-                return (~trʗ1).Dial(network, addr);
+        tr.DialContext = (context.Context ctx, @string network, @string addr) => {
+            if (trʗ1.Dial != nil) {
+                return trʗ1.Dial(network, addr);
             }
             if (addr == "example.com:80"u8 || strings.HasSuffix(addr, exampleCom80ˢ)) {
                 addr = Ꮡs.Value.Listener.Addr().String();
@@ -176,31 +175,31 @@ public static void StartTLS(this ж<Server> Ꮡs) {
         throw panic("Server already started");
     }
     if (s.client == nil) {
-        s.client = Ꮡ(new http.Client(nil));
+        s.client = Ꮡ(new http.Client());
     }
     var (cert, err) = tls.X509KeyPair(testcert.LocalhostCert, testcert.LocalhostKey);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(fmt.Sprintf("httptest: NewTLSServer: %v"u8, err));
     }
 
     var existingConfig = s.TLS;
-    if (existingConfig != nil){
+    if (existingConfig != nil) {
         s.TLS = existingConfig.Clone();
     } else {
         s.TLS = @new<tls.Config>();
     }
-    if ((~s.TLS).NextProtos == default!) {
-        var nextProtos = new @string[]{"http/1.1"u8}.slice();
+    if (s.TLS.NextProtos == nil) {
+        var nextProtos = slice<@string>(["http/1.1"u8]);
         if (s.EnableHTTP2) {
-            nextProtos = new @string[]{"h2"u8}.slice();
+            nextProtos = slice<@string>(["h2"u8]);
         }
-        s.TLS.Value.NextProtos = nextProtos;
+        s.TLS.NextProtos = nextProtos;
     }
-    if (len((~s.TLS).Certificates) == 0) {
-        s.TLS.Value.Certificates = new tls.Certificate[]{cert}.slice();
+    if (len(s.TLS.Certificates) == 0) {
+        s.TLS.Certificates = slice<tls.Certificate>([cert]);
     }
-    (s.certificate, err) = x509.ParseCertificate((~s.TLS).Certificates[0].ΔCertificate[0]);
-    if (err != default!) {
+    (s.certificate, err) = x509.ParseCertificate(s.TLS.Certificates[0].ΔCertificate[0]);
+    if (err != nil) {
         throw panic(fmt.Sprintf("httptest: NewTLSServer: %v"u8, err));
     }
     var certpool = x509.NewCertPool();
@@ -211,19 +210,18 @@ public static void StartTLS(this ж<Server> Ꮡs) {
         )),
         ForceAttemptHTTP2: s.EnableHTTP2
     ));
-    ref var dialer = ref heap<net.Dialer>(out var Ꮡdialer);
-    dialer = new net.Dialer(nil);
+    ref var dialer = ref heap<net.Dialer>(new net.Dialer(), out var Ꮡdialer);
     var trʗ1 = tr;
-    tr.Value.DialContext = (context.Context ctx, @string network, @string addr) => {
-        if ((~trʗ1).Dial != default!) {
-            return (~trʗ1).Dial(network, addr);
+    tr.DialContext = (context.Context ctx, @string network, @string addr) => {
+        if (trʗ1.Dial != nil) {
+            return trʗ1.Dial(network, addr);
         }
         if (addr == "example.com:443"u8 || strings.HasSuffix(addr, exampleCom443ˢ)) {
             addr = Ꮡs.Value.Listener.Addr().String();
         }
         return Ꮡdialer.DialContext(ctx, network, addr);
     };
-    s.client.Value.Transport = new http.TransportжRoundTripper(tr);
+    s.client.Transport = new http.TransportжRoundTripper(tr);
     s.Listener = tls.NewListener(s.Listener, s.TLS);
     s.URL = "https://"u8 + s.Listener.Addr().String();
     Ꮡs.wrap();
@@ -296,7 +294,7 @@ public static void Close(this ж<Server> Ꮡs) {
         // Also close the client idle connections.
         if (s.client != nil) {
             {
-                var (t, ok) = (~s.client).Transport._<closeIdleTransport>(ᐧ); if (ok) {
+                var (t, ok) = s.client.Transport._<closeIdleTransport>(ᐧ); if (ok) {
                     t.CloseIdleConnections();
                 }
             }
@@ -340,7 +338,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
         nint nconn = len(s.conns);
         var ch = new channel<EmptyStruct>(nconn);
         foreach (var (c, _) in s.conns) {
-            goǃ(Ꮡs.closeConnChan, c, ch.WithDirection(GoChanDir.Send));
+            goǃ(Ꮡs.closeConnChan, c, ch.AsSendOnly());
         }
         s.mu.Unlock();
 
@@ -355,7 +353,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
         defer(() => timerʗ1.Stop(), ref ᒐ);
         for (nint i = 0; i < nconn; i++) {
             var selᴛ1 = ch;
-            var selᴛ2 = (~timer).C;
+            var selᴛ2 = timer.C;
             switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out _): {
                 break;
@@ -404,22 +402,22 @@ internal static partial void goServe(this ж<Server> Ꮡs) {
 internal static void wrap(this ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    var oldHook = s.Config.Value.ConnState;
+    var oldHook = s.Config.ConnState;
     var oldHookʗ1 = oldHook;
-    s.Config.Value.ConnState = (net.Conn c, http.ConnState cs) => {
+    s.Config.ConnState = (net.Conn c, http.ConnState cs) => {
         GoFrame ᒐ = default;
         try {
             Ꮡs.Value.mu.Lock();
             defer(Ꮡs.of(Server.Ꮡmu).Unlock, ref ᒐ);
 
-            var exprᴛ1 = cs;
-            if (exprᴛ1 == http.StateNew) {
+            switch (cs) {
+            case var ᴛ when ᴛ == http.StateNew: {
                 {
                     var (_, exists) = Ꮡs.Value.conns[c, ꟷ]; if (exists) {
                         throw panic("invalid state transition");
                     }
                 }
-                if (Ꮡs.Value.conns == default!) {
+                if (Ꮡs.Value.conns == nil) {
                     Ꮡs.Value.conns = new map<net.Conn, http.ConnState>();
                 }
                 // Add c to the set of tracked conns and increment it to the
@@ -433,8 +431,9 @@ internal static void wrap(this ж<Server> Ꮡs) {
                     // never be used).
                     Ꮡs.Value.closeConn(c);
                 }
+                break;
             }
-            else if (exprᴛ1 == http.StateActive) {
+            case var ᴛ when ᴛ == http.StateActive: {
                 {
                     var (oldState, ok) = Ꮡs.Value.conns[c, ꟷ]; if (ok) {
                         if (oldState != http.StateNew && oldState != http.StateIdle) {
@@ -443,8 +442,9 @@ internal static void wrap(this ж<Server> Ꮡs) {
                         Ꮡs.Value.conns[c] = cs;
                     }
                 }
+                break;
             }
-            else if (exprᴛ1 == http.StateIdle) {
+            case var ᴛ when ᴛ == http.StateIdle: {
                 {
                     var (oldState, ok) = Ꮡs.Value.conns[c, ꟷ]; if (ok) {
                         if (oldState != http.StateActive) {
@@ -456,8 +456,9 @@ internal static void wrap(this ж<Server> Ꮡs) {
                 if (Ꮡs.Value.closed) {
                     Ꮡs.Value.closeConn(c);
                 }
+                break;
             }
-            else if (exprᴛ1 == http.StateHijacked || exprᴛ1 == http.StateClosed) {
+            case var ᴛ when ᴛ == http.StateHijacked || ᴛ == http.StateClosed: {
                 // Remove c from the set of tracked conns and decrement it from the
                 // waitgroup, unless it was previously removed.
                 {
@@ -468,8 +469,9 @@ internal static void wrap(this ж<Server> Ꮡs) {
                         defer(Ꮡs.of(Server.Ꮡwg).Done, ref ᒐ);
                     }
                 }
-            }
-            if (oldHookʗ1 != default!) {
+                break;
+            }}
+            if (oldHookʗ1 != nil) {
                 oldHookʗ1(c, cs);
             }
         }
@@ -481,14 +483,14 @@ internal static void wrap(this ж<Server> Ꮡs) {
 // closeConn closes c.
 // s.mu must be held.
 internal static void closeConn(this ref Server s, net.Conn c) {
-    s.closeConnChan(c, default!);
+    s.closeConnChan(c, default);
 }
 
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.
 internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
     c.Close();
-    if (done != default!) {
+    if (done != nil) {
         done.ᐸꟷ(new EmptyStruct());
     }
 }

@@ -4,7 +4,7 @@
 namespace go.@internal;
 
 using Δsyscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 
 partial class poll_package {
 
@@ -18,21 +18,21 @@ public static (uintptr, @string, error) OpenDir(this ж<FD> Ꮡfd) {
     // fdopendir(3) takes control of the file descriptor,
     // so use a dup.
     var (fd2, call, err) = Ꮡfd.Dup();
-    if (err != default!) {
+    if (err != nil) {
         return (0, call, err);
     }
-    uintptr dir = default!;
-    while (ᐧ) {
+    uintptr dir = default;
+    for (;;) {
         (dir, err) = fdopendir(fd2);
         if (!AreEqual(err, Δsyscall.EINTR)) {
             break;
         }
     }
-    if (err != default!) {
+    if (err != nil) {
         Δsyscall.Close(fd2);
         return (0, fdopendirˢ, err);
     }
-    return (dir, "", default!);
+    return (dir, "", default);
 }
 
 // Implemented in syscall/syscall_darwin.go.

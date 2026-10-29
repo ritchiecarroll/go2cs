@@ -42,8 +42,8 @@ partial class types_package {
 partial struct Context {
     internal sync.Mutex mu;
     internal map<@string, slice<ctxtEntry>> typeMap; // type hash -> instances entries
-    internal nint nextID;                   // next unique ID
-    internal map<ΔType, nint> originIDs;        // origin type -> unique ID
+    internal nint nextID;                            // next unique ID
+    internal map<ΔType, nint> originIDs;             // origin type -> unique ID
 }
 
 partial struct ctxtEntry {
@@ -65,7 +65,7 @@ public static ж<Context> NewContext() {
 // does not assume this. The result is guaranteed to not contain blanks.
 internal static @string instanceHash(this ж<Context> Ꮡctxt, ΔType orig, slice<ΔType> targs) {
     assert(Ꮡctxt != nil);
-    assert(orig != default!);
+    assert(orig != nil);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
     var h = newTypeHasher(Ꮡbuf, Ꮡctxt);
@@ -104,9 +104,9 @@ internal static ΔType lookup(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
             }
         }
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡctxt.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -120,13 +120,13 @@ internal static ΔType update(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
     try {
         ref var ctxt = ref Ꮡctxt.DerefOrNull();
 
-        assert(inst != default!);
+        assert(inst != nil);
 
         ctxt.mu.Lock();
         ᒐd1 = true;
 
         foreach (var (_, e) in ctxt.typeMap[h]) {
-            if (inst == default! || Identical(inst, e.instance)) {
+            if (inst == nil || Identical(inst, e.instance)) {
                 return e.instance;
             }
             if (debug) {
@@ -143,7 +143,7 @@ internal static ΔType update(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
 
         return inst;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡctxt.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -164,7 +164,7 @@ internal static nint getID(this ж<Context> Ꮡctxt, ΔType t) {
         }
         return id;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡctxt.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 

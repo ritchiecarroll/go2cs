@@ -66,7 +66,7 @@ public partial struct table {
     internal groupsReference groups;
 }
 
-internal static ж<table> newTable(ж<abiꓸMapType> Ꮡtyp, uint64 capacity, nint index, uint8 localDepth) {
+internal static ж<table> newTable(ж<abiꓸMapType> typ, uint64 capacity, nint index, uint8 localDepth) {
     if (capacity < abi.MapGroupSlots) {
         capacity = abi.MapGroupSlots;
     }
@@ -87,21 +87,21 @@ internal static ж<table> newTable(ж<abiꓸMapType> Ꮡtyp, uint64 capacity, ni
         throw panic("rounded-up capacity overflows uint64");
     }
 
-    t.reset(Ꮡtyp, (uint16)capacity);
+    t.reset(typ, (uint16)capacity);
 
     return t;
 }
 
 // reset resets the table with new, empty groups with the specified new total
 // capacity.
-internal static void reset(this ref table t, ж<abiꓸMapType> Ꮡtyp, uint16 capacity) {
+internal static void reset(this ref table t, ж<abiꓸMapType> typ, uint16 capacity) {
     var groupCount = (uint64)capacity / (uint64)abi.MapGroupSlots;
-    t.groups = newGroups(ref (Ꮡtyp).DerefOrNull(), groupCount);
+    t.groups = newGroups(ref (typ).DerefOrNull(), groupCount);
     t.capacity = capacity;
     t.growthLeft = t.maxGrowthLeft();
 
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
-        var g = t.groups.group(Ꮡtyp, i);
+        var g = t.groups.group(typ, i);
         g.ctrls().setEmpty();
     }
 }
@@ -109,12 +109,11 @@ internal static void reset(this ref table t, ж<abiꓸMapType> Ꮡtyp, uint16 ca
 // maxGrowthLeft is the number of inserts we can do before
 // resizing, starting from an empty table.
 internal static uint16 maxGrowthLeft(this ref table t) {
-    if (t.capacity == 0){
+    if (t.capacity == 0) {
         // No real reason to support zero capacity table, since an
         // empty Map simply won't have a table.
         throw panic("table must have positive capacity");
-    } else 
-    if (t.capacity <= abi.MapGroupSlots){
+    } else if (t.capacity <= abi.MapGroupSlots) {
         // If the map fits in a single group then we're able to fill all of
         // the slots except 1 (an empty slot is needed to terminate find
         // operations).
@@ -192,7 +191,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
     // positive comparisons we must perform is less than 1/8 per find.
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
     var h2Hash = h2(hash);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
 
         var match = (~g.ctrls()).matchH2(h2Hash);
@@ -204,7 +203,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
             }
-            if ((~typ.Key).Equal(key, slotKey)) {
+            if (typ.Key.Equal(key, slotKey)) {
                 @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()) {
                     slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
@@ -218,7 +217,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
-            return (default!, default!, false);
+            return (default, default, false);
         }
     }
 }
@@ -228,7 +227,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi�
 
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
     var h2Hash = h2(hash);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
 
         var match = (~g.ctrls()).matchH2(h2Hash);
@@ -240,7 +239,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi�
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
             }
-            if ((~typ.Key).Equal(key, slotKey)) {
+            if (typ.Key.Equal(key, slotKey)) {
                 @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()) {
                     slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
@@ -254,7 +253,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi�
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
-            return (default!, false);
+            return (default, false);
         }
     }
 }
@@ -275,11 +274,11 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
 
     // As we look for a match, keep track of the first deleted slot we
     // find, which we'll use to insert the new entry if necessary.
-    groupReference firstDeletedGroup = default!;
-    uintptr firstDeletedSlot = default!;
+    groupReference firstDeletedGroup = default;
+    uintptr firstDeletedSlot = default;
 
     var h2Hash = h2(hash);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
         var match = (~g.ctrls()).matchH2(h2Hash);
 
@@ -291,7 +290,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
             }
-            if ((~typ.Key).Equal(key, slotKey)) {
+            if (typ.Key.Equal(key, slotKey)) {
                 if (typ.NeedKeyUpdate()) {
                     typedmemmove(typ.Key, slotKey, key);
                 }
@@ -366,7 +365,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
         }
 
         Ꮡt.rehash(Ꮡtyp, Ꮡm);
-        return (default!, false);
+        return (default, false);
     }
 }
 
@@ -398,7 +397,7 @@ internal static void uncheckedPutSlot(this ref table t, ж<abiꓸMapType> Ꮡtyp
     // or deleted) slot. We place the key/value into the first such slot in
     // the group and mark it as full with key's H2.
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
 
         var match = (~g.ctrls()).matchEmptyOrDeleted();
@@ -406,14 +405,14 @@ internal static void uncheckedPutSlot(this ref table t, ж<abiꓸMapType> Ꮡtyp
             var i = match.first();
 
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
-            if (typ.IndirectKey()){
+            if (typ.IndirectKey()) {
                 ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
             } else {
                 typedmemmove(typ.Key, slotKey, key);
             }
 
             @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
-            if (typ.IndirectElem()){
+            if (typ.IndirectElem()) {
                 ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = elem;
             } else {
                 typedmemmove(typ.Elem, slotElem, elem);
@@ -434,7 +433,7 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
 
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
     var h2Hash = h2(hash);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
         var match = (~g.ctrls()).matchH2(h2Hash);
 
@@ -447,24 +446,23 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
             }
 
-            if ((~typ.Key).Equal(key, slotKey)) {
+            if (typ.Key.Equal(key, slotKey)) {
                 t.used--;
                 m.used--;
 
-                if (typ.IndirectKey()){
+                if (typ.IndirectKey()) {
                     // Clearing the pointer is sufficient.
-                    ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default!;
-                } else 
-                if (typ.Key.Pointers()) {
+                    ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default;
+                } else if (typ.Key.Pointers()) {
                     // Only bothing clear the key if there
                     // are pointers in it.
                     typedmemclr(typ.Key, slotKey);
                 }
 
                 @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
-                if (typ.IndirectElem()){
+                if (typ.IndirectElem()) {
                     // Clearing the pointer is sufficient.
-                    ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = default!;
+                    ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = default;
                 } else {
                     // Unlike keys, always clear the elem (even if
                     // it contains no pointers), as compound
@@ -482,8 +480,8 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
                 // full now, we can simply remove the element.
                 // Otherwise, we create a tombstone to mark the
                 // slot as deleted.
-                bool tombstone = default!;
-                if ((~g.ctrls()).matchEmpty() != 0){
+                bool tombstone = default;
+                if ((~g.ctrls()).matchEmpty() != 0) {
                     g.ctrls().set(i, ctrlEmpty);
                     t.growthLeft++;
                 } else {
@@ -543,7 +541,7 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
             if (typ.IndirectKey()) {
                 key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
             }
-            if (!(~typ.Key).Equal(key, key)) {
+            if (!typ.Key.Equal(key, key)) {
                 // Key not equal to itself. We never have to find these
                 // keys on lookup (only on iteration), so we can break
                 // their probe sequences at will.
@@ -552,7 +550,7 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
             // Walk probe sequence for this key.
             // Each tombstone group we need to walk past is marked required.
             var hash = typ.Hasher(key, m.seed);
-            for (var seq = makeProbeSeq(h1(hash), t.groups.lengthMask); ᐧ ; seq = seq.next()) {
+            for (var seq = makeProbeSeq(h1(hash), t.groups.lengthMask); ; seq = seq.next()) {
                 if (seq.offset == i) {
                     break; // reached group of element in probe sequence
                 }
@@ -637,7 +635,7 @@ public static void Clear(this ref table t, ж<abiꓸMapType> Ꮡtyp) {
         // For large slots, it is always worth doing the test first.
         fullTest = true;
     }
-    if (fullTest){
+    if (fullTest) {
         for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
             var g = t.groups.group(Ꮡtyp, i);
             if ((~g.ctrls()).anyFull()) {
@@ -657,7 +655,7 @@ public static void Clear(this ref table t, ж<abiꓸMapType> Ꮡtyp) {
 }
 
 partial struct Iter {
-    internal @unsafe.Pointer key; // Must be in first position.  Write nil to indicate iteration end (see cmd/compile/internal/walk/range.go).
+    internal @unsafe.Pointer key;  // Must be in first position.  Write nil to indicate iteration end (see cmd/compile/internal/walk/range.go).
     internal @unsafe.Pointer elem; // Must be in second position (see cmd/compile/internal/walk/range.go).
     internal ж<abiꓸMapType> typ;
     internal ж<ΔMap> m;
@@ -697,7 +695,7 @@ public static void Init(this ref Iter it, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> �
     }
 
     nint dirIdx = 0;
-    groupReference groupSmall = default!;
+    groupReference groupSmall = default;
     if (m.dirLen <= 0) {
         // Use dirIdx == -1 as sentinel for small maps.
         dirIdx = -1;
@@ -764,10 +762,10 @@ internal static void nextDirIdx(this ref Iter it) {
     // We can achieve both of these by using to difference between
     // the directory and table depth to compute how many entries
     // the table covers.
-    nint entries = ((nint)1).Lsh((uint64)((uint8)((~it.m).globalDepth - (~it.tab).localDepth)));
+    nint entries = ((nint)1).Lsh((uint64)((uint8)(it.m.globalDepth - it.tab.localDepth)));
     it.dirIdx += entries;
-    it.tab = default!;
-    it.group = new groupReference(nil);
+    it.tab = default;
+    it.group = new groupReference();
     it.entryIdx = 0;
 }
 
@@ -799,7 +797,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElem(this ref I
         // immediately, as iteration doesn't
         // need to return anything added after
         // clear.
-        if (it.clearSeq == (~it.m).clearSeq && !(~(~it.typ).Key).Equal(key, key)) {
+        if (it.clearSeq == it.m.clearSeq && !(~it.typ).Key.Equal(key, key)) {
             @unsafe.Pointer elem = (uintptr)it.group.elem(it.typ, slotIdx);
             if (it.typ.IndirectElem()) {
                 elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
@@ -808,7 +806,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElem(this ref I
         }
 
         // This entry doesn't exist anymore.
-        return (default!, default!, false);
+        return (default, default, false);
     }
 
     return (newKey, newElem, true);
@@ -827,12 +825,12 @@ internal static readonly @string concurrentMapIterationˢ = "concurrent map iter
 public static void Next(this ref Iter it) {
     if (it.m == nil) {
         // Map was empty at Iter.Init.
-        it.key = default!;
-        it.elem = default!;
+        it.key = default;
+        it.elem = default;
         return;
     }
 
-    if ((~it.m).writing != 0) {
+    if (it.m.writing != 0) {
         fatal(concurrentMapIterationˢ);
         return;
     }
@@ -856,14 +854,14 @@ public static void Next(this ref Iter it) {
             // we continue to use the old group to decide the keys
             // to return, but must look them up again in the new
             // tables.
-            var grown = (~it.m).dirLen > 0;
-            @unsafe.Pointer elem = default!;
-            if (grown){
-                bool ok = default!;
+            var grown = it.m.dirLen > 0;
+            @unsafe.Pointer elem = default;
+            if (grown) {
+                bool ok = default;
                 (var newKey, var newElem, ok) = it.m.getWithKey(it.typ, key);
-                if (!ok){
+                if (!ok) {
                     // See comment below.
-                    if (it.clearSeq == (~it.m).clearSeq && !(~(~it.typ).Key).Equal(key, key)){
+                    if (it.clearSeq == it.m.clearSeq && !(~it.typ).Key.Equal(key, key)) {
                         elem = (uintptr)it.group.elem(it.typ, k);
                         if (it.typ.IndirectElem()) {
                             elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
@@ -887,12 +885,12 @@ public static void Next(this ref Iter it) {
             it.elem = elem;
             return;
         }
-        it.key = default!;
-        it.elem = default!;
+        it.key = default;
+        it.elem = default;
         return;
     }
 
-    if (it.globalDepth != (~it.m).globalDepth) {
+    if (it.globalDepth != it.m.globalDepth) {
         // Directory has grown since the last call to Next. Adjust our
         // directory index.
         //
@@ -922,21 +920,21 @@ public static void Next(this ref Iter it) {
         //
         // Thus we can achieve this by adjusting it.dirIdx,
         // it.dirOffset, and it.m.dirLen individually.
-        var orders = (uint8)((~it.m).globalDepth - it.globalDepth);
+        var orders = (uint8)(it.m.globalDepth - it.globalDepth);
         it.dirIdx.LshAssign((uint64)(orders));
         it.dirOffset.LshAssign((uint64)(orders));
         // it.m.dirLen was already adjusted when the directory grew.
 
-        it.globalDepth = it.m.Value.globalDepth;
+        it.globalDepth = it.m.globalDepth;
     }
 
     // Continue iteration until we find a full slot.
-    for (; it.dirIdx < (~it.m).dirLen; it.nextDirIdx()) {
+    for (; it.dirIdx < it.m.dirLen; it.nextDirIdx()) {
         // Resolve the table.
         if (it.tab == nil) {
-            nint dirIdx = (nint)(((uint64)it.dirIdx + it.dirOffset) & (uint64)((~it.m).dirLen - 1));
+            nint dirIdx = (nint)(((uint64)it.dirIdx + it.dirOffset) & (uint64)(it.m.dirLen - 1));
             var newTab = it.m.directoryAt((uintptr)dirIdx);
-            if ((~newTab).index != dirIdx) {
+            if (newTab.index != dirIdx) {
                 // Normally we skip past all duplicates of the
                 // same entry in the table (see updates to
                 // it.dirIdx at the end of the loop below), so
@@ -948,9 +946,9 @@ public static void Next(this ref Iter it) {
                 // directory. Do a one-time adjustment of the
                 // offset to ensure we start at first index for
                 // newTable.
-                nint diff = dirIdx - (~newTab).index;
+                nint diff = dirIdx - newTab.index;
                 it.dirOffset -= (uint64)diff;
-                dirIdx = newTab.Value.index;
+                dirIdx = newTab.index;
             }
             it.tab = newTab;
         }
@@ -959,7 +957,7 @@ public static void Next(this ref Iter it) {
         // table for key selection if the table has grown. See comment
         // on grown below.
 
-        var entryMask = (uint64)(~it.tab).capacity - 1;
+        var entryMask = (uint64)it.tab.capacity - 1;
         if (it.entryIdx > entryMask) {
             // Continue to next table.
             continue;
@@ -995,11 +993,11 @@ public static void Next(this ref Iter it) {
                 key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
             }
 
-            var grown = (~it.tab).index == -1;
-            @unsafe.Pointer elem = default!;
-            if (grown){
+            var grown = it.tab.index == -1;
+            @unsafe.Pointer elem = default;
+            if (grown) {
                 var (newKey, newElem, ok) = it.grownKeyElem(key, slotIdx);
-                if (!ok){
+                if (!ok) {
                     // This entry doesn't exist
                     // anymore. Continue to the
                     // next one.
@@ -1041,7 +1039,7 @@ next:
         // may be deleted between calls later calls would still need to
         // double-check the control value.
 
-        bitset groupMatch = default!;
+        bitset groupMatch = default;
         while (it.entryIdx <= entryMask) {
             var entryIdxΔ1 = (it.entryIdx + it.entryOffset) & entryMask;
             var slotIdxΔ1 = (uintptr)(entryIdxΔ1 & (uint64)(abi.MapGroupSlots - 1));
@@ -1099,11 +1097,11 @@ next:
             // We still use our old table to decide which
             // keys to lookup in order to avoid returning
             // the same key twice.
-            var grown = (~it.tab).index == -1;
-            @unsafe.Pointer elem = default!;
-            if (grown){
+            var grown = it.tab.index == -1;
+            @unsafe.Pointer elem = default;
+            if (grown) {
                 var (newKey, newElem, ok) = it.grownKeyElem(key, slotIdxΔ1);
-                if (!ok){
+                if (!ok) {
                     // This entry doesn't exist anymore.
                     // Continue to the next one.
                     groupMatch = groupMatch.removeFirst();
@@ -1132,7 +1130,7 @@ next:
 
             // Jump ahead to the next full slot or next group.
             groupMatch = groupMatch.removeFirst();
-            if (groupMatch == 0){
+            if (groupMatch == 0) {
                 // No more entries in
                 // this group. Continue
                 // to next group.
@@ -1151,15 +1149,15 @@ next:
         // Continue to next table.
     }
 
-    it.key = default!;
-    it.elem = default!;
+    it.key = default;
+    it.elem = default;
     return;
 }
 
 // Replaces the table with one larger table or two split tables to fit more
 // entries. Since the table is replaced, t is now stale and should not be
 // modified.
-internal static void rehash(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+internal static void rehash(this ж<table> Ꮡt, ж<abiꓸMapType> typ, ж<ΔMap> m) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // TODO(prattmic): SwissTables typically perform a "rehash in place"
@@ -1179,11 +1177,11 @@ internal static void rehash(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<Δ
 
     var newCapacity = (uint16)(2 * t.capacity);
     if (newCapacity <= maxTableCapacity) {
-        t.grow(Ꮡtyp, Ꮡm, newCapacity);
+        t.grow(typ, m, newCapacity);
         return;
     }
 
-    Ꮡt.split(Ꮡtyp, Ꮡm);
+    Ꮡt.split(typ, m);
 }
 
 // Bitmask for the last selection bit at this depth.
@@ -1229,8 +1227,8 @@ internal static void split(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔM
             }
 
             var hash = typ.Hasher(key, m.seed);
-            ж<table> newTableΔ1 = default!;
-            if ((uintptr)(hash & mask) == 0){
+            ж<table> newTableΔ1 = default;
+            if ((uintptr)(hash & mask) == 0) {
                 newTableΔ1 = left;
             } else {
                 newTableΔ1 = right;
@@ -1317,7 +1315,7 @@ internal static probeSeq next(this probeSeq s) {
     return s;
 }
 
-internal static ж<table> clone(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp) {
+internal static ж<table> clone(this ж<table> Ꮡt, ж<abiꓸMapType> typ) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Shallow copy the table structure.
@@ -1327,11 +1325,11 @@ internal static ж<table> clone(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp) {
 
     // We need to just deep copy the groups.data field.
     var oldGroups = t.groups;
-    var newGroupsΔ1 = newGroups(ref (Ꮡtyp).DerefOrNull(), oldGroups.lengthMask + 1);
+    var newGroupsΔ1 = newGroups(ref (typ).DerefOrNull(), oldGroups.lengthMask + 1);
     for (var i = (uint64)0; i <= oldGroups.lengthMask; i++) {
-        var oldGroup = oldGroups.group(Ꮡtyp, i);
-        var newGroup = newGroupsΔ1.group(Ꮡtyp, i);
-        cloneGroup(Ꮡtyp, newGroup, oldGroup);
+        var oldGroup = oldGroups.group(typ, i);
+        var newGroup = newGroupsΔ1.group(typ, i);
+        cloneGroup(typ, newGroup, oldGroup);
     }
     t.groups = newGroupsΔ1;
 

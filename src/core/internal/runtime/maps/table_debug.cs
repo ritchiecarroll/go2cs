@@ -21,9 +21,9 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
 
     // For every non-empty slot, verify we can retrieve the key using Get.
     // Count the number of used and deleted slots.
-    uint16 used = default!;
-    uint16 deleted = default!;
-    uint16 empty = default!;
+    uint16 used = default;
+    uint16 deleted = default;
+    uint16 empty = default;
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         var g = t.groups.group(Ꮡtyp, i);
         for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
@@ -47,7 +47,7 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
 
                 // Can't lookup keys that don't compare equal
                 // to themselves (e.g., NaN).
-                if (!(~typ.Key).Equal(key, key)) {
+                if (!typ.Key.Equal(key, key)) {
                     continue;
                 }
 
@@ -55,7 +55,7 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
                     var (_, ok) = t.Get(Ꮡtyp, Ꮡm, key); if (!ok) {
                         var hash = typ.Hasher(key, m.seed);
                         print((@string)"invariant failed: slot("u8, i, (@string)"/"u8, j, (@string)"): key "u8);
-                        dump(key, (~typ.Key).Size_);
+                        dump(key, typ.Key.Size_);
                         print((@string)" not found [hash="u8, hash, (@string)", h2="u8, h2(hash), (@string)" h1="u8, h1(hash), (@string)"]\n"u8);
                         t.Print(Ꮡtyp, Ꮡm);
                         throw panic("invariant failed: slot: key not found");
@@ -91,7 +91,7 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
     }
 }
 
-public static void Print(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+public static void Print(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> m) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""
@@ -125,22 +125,25 @@ table{
 
             var c = ctrls.get(j);
             print((@string)"\t\t\t\tctrl "u8, c);
-            var exprᴛ1 = c;
-            if (exprᴛ1 == ctrlEmpty) {
+            switch (c) {
+            case var ᴛ when ᴛ == ctrlEmpty: {
                 print((@string)" (empty)\n"u8);
+                break;
             }
-            else if (exprᴛ1 == ctrlDeleted) {
+            case var ᴛ when ᴛ == ctrlDeleted: {
                 print((@string)" (deleted)\n"u8);
+                break;
             }
-            else { /* default: */
+            default: {
                 print((@string)"\n"u8);
-            }
+                break;
+            }}
 
             print((@string)"\t\t\t\tkey  "u8);
-            dump((uintptr)g.key(Ꮡtyp, j), (~typ.Key).Size_);
+            dump((uintptr)g.key(Ꮡtyp, j), typ.Key.Size_);
             println((@string)""u8);
             print((@string)"\t\t\t\telem "u8);
-            dump((uintptr)g.elem(Ꮡtyp, j), (~typ.Elem).Size_);
+            dump((uintptr)g.elem(Ꮡtyp, j), typ.Elem.Size_);
             println((@string)""u8);
         }
     }

@@ -70,22 +70,22 @@ public static error SkipAll = errors.New("skip everything and stop the walk"u8);
 // walkDir recursively descends path, calling walkDirFn.
 internal static error walkDir(FS fsys, @string name, DirEntry d, Func<@string, DirEntry, error, error> walkDirFn) {
     {
-        var errΔ1 = walkDirFn(name, d, default!); if (errΔ1 != default! || !d.IsDir()) {
+        var errΔ1 = walkDirFn(name, d, default); if (errΔ1 != nil || !d.IsDir()) {
             if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
                 // Successfully skipped directory.
-                errΔ1 = default!;
+                errΔ1 = default;
             }
             return errΔ1;
         }
     }
 
     var (dirs, err) = ReadDir(fsys, name);
-    if (err != default!) {
+    if (err != nil) {
         // Second call, to report ReadDir error.
         err = walkDirFn(name, d, err);
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, SkipDir) && d.IsDir()) {
-                err = default!;
+                err = default;
             }
             return err;
         }
@@ -94,7 +94,7 @@ internal static error walkDir(FS fsys, @string name, DirEntry d, Func<@string, D
     foreach (var (_, d1) in dirs) {
         @string name1 = path.Join(name, d1.Name());
         {
-            var errΔ2 = walkDir(fsys, name1, d1, walkDirFn); if (errΔ2 != default!) {
+            var errΔ2 = walkDir(fsys, name1, d1, walkDirFn); if (errΔ2 != nil) {
                 if (AreEqual(errΔ2, SkipDir)) {
                     break;
                 }
@@ -102,7 +102,7 @@ internal static error walkDir(FS fsys, @string name, DirEntry d, Func<@string, D
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // WalkDir walks the file tree rooted at root, calling fn for each file or
@@ -119,13 +119,13 @@ internal static error walkDir(FS fsys, @string name, DirEntry d, Func<@string, D
 // but if root itself is a symbolic link, its target will be walked.
 public static error WalkDir(FS fsys, @string root, Func<@string, DirEntry, error, error> fn) {
     var (info, err) = Stat(fsys, root);
-    if (err != default!){
-        err = fn(root, default!, err);
+    if (err != nil) {
+        err = fn(root, default, err);
     } else {
         err = walkDir(fsys, root, FileInfoToDirEntry(info), fn);
     }
     if (AreEqual(err, SkipDir) || AreEqual(err, SkipAll)) {
-        return default!;
+        return default;
     }
     return err;
 }

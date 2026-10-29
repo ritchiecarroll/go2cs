@@ -77,7 +77,7 @@ internal static error read(this ref beginRequest br, slice<byte> content) {
     }
     br.role = binary.BigEndian.Uint16(content);
     br.flags = content[2];
-    return default!;
+    return default;
 }
 
 // for padding so we don't have to allocate all the time
@@ -122,7 +122,7 @@ internal static error Close(this ж<conn> Ꮡc) {
         }
         return c.closeErr;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
@@ -135,11 +135,11 @@ partial struct record {
 internal static readonly @string fcgiInvalidHeaderVersionˢ = "fcgi: invalid header version"u8;
 
 internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
-    error err = default!;
+    error err = default;
     ref var rec = ref Ꮡrec.DerefOrNull();
 
     {
-        err = binary.Read(r, binary.BigEndian, Ꮡrec.of(record.Ꮡh)); if (err != default!) {
+        err = binary.Read(r, binary.BigEndian, Ꮡrec.of(record.Ꮡh)); if (err != nil) {
             return err;
         }
     }
@@ -148,11 +148,11 @@ internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
     }
     nint n = (nint)rec.h.ContentLength + (nint)rec.h.PaddingLength;
     {
-        (_, err) = io.ReadFull(r, rec.buf.slice(0, n)); if (err != default!) {
+        (_, err) = io.ReadFull(r, rec.buf.slice(0, n)); if (err != nil) {
             return err;
         }
     }
-    return default!;
+    return default;
 }
 
 internal static slice<byte> content(this ref record r) {
@@ -171,24 +171,24 @@ internal static error writeRecord(this ж<conn> Ꮡc, recType recType, uint16 re
         c.buf.Reset();
         c.h.init(recType, reqId, len(b));
         {
-            var errΔ1 = binary.Write(new bytes_BufferжWriter(Ꮡc.of(conn.Ꮡbuf)), binary.BigEndian, c.h); if (errΔ1 != default!) {
+            var errΔ1 = binary.Write(new bytes_BufferжWriter(Ꮡc.of(conn.Ꮡbuf)), binary.BigEndian, c.h); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
         {
-            var (_, errΔ2) = c.buf.Write(b); if (errΔ2 != default!) {
+            var (_, errΔ2) = c.buf.Write(b); if (errΔ2 != nil) {
                 return errΔ2;
             }
         }
         {
-            var (_, errΔ3) = c.buf.Write(pad.slice(0, c.h.PaddingLength)); if (errΔ3 != default!) {
+            var (_, errΔ3) = c.buf.Write(pad.slice(0, c.h.PaddingLength)); if (errΔ3 != nil) {
                 return errΔ3;
             }
         }
         var (_, err) = c.rwc.Write(c.buf.Bytes());
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
@@ -206,23 +206,23 @@ internal static error writePairs(this ж<conn> Ꮡc, recType recType, uint16 req
         nint n = encodeSize(b, (uint32)len(k));
         n += encodeSize(b.slice(n), (uint32)len(v));
         {
-            var (_, err) = w.Value.Writer.Value.Write(b.slice(0, n)); if (err != default!) {
+            var (_, err) = w.Value.Writer.Value.Write(b.slice(0, n)); if (err != nil) {
                 return err;
             }
         }
         {
-            var (_, err) = w.Value.Writer.Value.WriteString(k); if (err != default!) {
+            var (_, err) = w.Value.Writer.Value.WriteString(k); if (err != nil) {
                 return err;
             }
         }
         {
-            var (_, err) = w.Value.Writer.Value.WriteString(v); if (err != default!) {
+            var (_, err) = w.Value.Writer.Value.WriteString(v); if (err != nil) {
                 return err;
             }
         }
     }
     w.Close();
-    return default!;
+    return default;
 }
 
 internal static (uint32, nint) readSize(slice<byte> s) {
@@ -268,7 +268,7 @@ partial struct bufWriter {
 
 internal static error Close(this ref bufWriter w) {
     {
-        var err = w.Writer.Flush(); if (err != default!) {
+        var err = w.Writer.Flush(); if (err != nil) {
             w.closer.Close();
             return err;
         }
@@ -276,8 +276,8 @@ internal static error Close(this ref bufWriter w) {
     return w.closer.Close();
 }
 
-internal static ж<bufWriter> newWriter(ж<conn> Ꮡc, recType recType, uint16 reqId) {
-    var s = Ꮡ(new streamWriter(c: Ꮡc, recType: recType, reqId: reqId));
+internal static ж<bufWriter> newWriter(ж<conn> c, recType recType, uint16 reqId) {
+    var s = Ꮡ(new streamWriter(c: c, recType: recType, reqId: reqId));
     var w = bufio.NewWriterSize(new streamWriterжWriter(s), maxWrite);
     return Ꮡ(new bufWriter(new streamWriterжCloser(s), w));
 }
@@ -298,19 +298,19 @@ internal static (nint, error) Write(this ref streamWriter w, slice<byte> p) {
             n = maxWrite;
         }
         {
-            var err = w.c.writeRecord(w.recType, w.reqId, p.slice(0, n)); if (err != default!) {
+            var err = w.c.writeRecord(w.recType, w.reqId, p.slice(0, n)); if (err != nil) {
                 return (nn, err);
             }
         }
         nn += n;
         p = p.slice(n);
     }
-    return (nn, default!);
+    return (nn, default);
 }
 
 internal static error Close(this ref streamWriter w) {
     // send empty record to close the stream
-    return w.c.writeRecord(w.recType, w.reqId, default!);
+    return w.c.writeRecord(w.recType, w.reqId, default);
 }
 
 } // end fcgi_package

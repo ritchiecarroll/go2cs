@@ -126,7 +126,7 @@ internal static slice<byte> sharedSecret(this ref hybridKEM kem, slice<byte> ssP
     h.Write(ctT);
     h.Write(ekT);
     h.Write(slice<byte>(kem.label));
-    return h.Sum(default!);
+    return h.Sum(default);
 }
 
 partial struct hybridPublicKey {
@@ -156,34 +156,34 @@ internal static readonly @string invalidPqKemForP384ˢ = "invalid PQ KEM for P-3
 public static (ΔPublicKey, error) NewHybridPublicKey(crypto.Encapsulator pq, ж<ecdhꓸPublicKey> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var exprᴛ1 = t.Curve();
-    if (AreEqual(exprᴛ1, ecdh.X25519())) {
+    switch (t.Curve()) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.X25519()): {
         {
             var (_, ok) = pq._<ж<mlkem.EncapsulationKey768>>(ᐧ); if (!ok) {
-                return (default!, errors.New(invalidPqKemForX25519ˢ));
+                return (default, errors.New(invalidPqKemForX25519ˢ));
             }
         }
-        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem768X25519, Ꮡt, pq))), default!);
+        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem768X25519, Ꮡt, pq))), default);
     }
-    if (AreEqual(exprᴛ1, ecdh.P256())) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.P256()): {
         {
             var (_, ok) = pq._<ж<mlkem.EncapsulationKey768>>(ᐧ); if (!ok) {
-                return (default!, errors.New(invalidPqKemForP256ˢ));
+                return (default, errors.New(invalidPqKemForP256ˢ));
             }
         }
-        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem768P256, Ꮡt, pq))), default!);
+        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem768P256, Ꮡt, pq))), default);
     }
-    if (AreEqual(exprᴛ1, ecdh.P384())) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.P384()): {
         {
             var (_, ok) = pq._<ж<mlkem.EncapsulationKey1024>>(ᐧ); if (!ok) {
-                return (default!, errors.New(invalidPqKemForP384ˢ));
+                return (default, errors.New(invalidPqKemForP384ˢ));
             }
         }
-        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem1024P384, Ꮡt, pq))), default!);
+        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem1024P384, Ꮡt, pq))), default);
     }
-    { /* default: */
-        return (default!, errors.New(unsupportedCurveˢ));
-    }
+    default: {
+        return (default, errors.New(unsupportedCurveˢ));
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -193,20 +193,20 @@ internal static (ΔPublicKey, error) NewPublicKey(this ж<hybridKEM> Ꮡkem, sli
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     if (len(data) != kem.pqEncapsKeySize + kem.curvePointSize) {
-        return (default!, errors.New(invalidPublicKeySizeˢ));
+        return (default, errors.New(invalidPublicKeySizeˢ));
     }
     ref var err = ref heap<error>(out var Ꮡerr);
     (var pq, err) = kem.pqNewPublicKey(data.slice(0, kem.pqEncapsKeySize));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     ref var k = ref heap<ж<ecdhꓸPublicKey>>(out var Ꮡk);
     var dataʗ1 = data;
     fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
         (Ꮡk.ValueSlot, Ꮡerr.ValueSlot) = Ꮡkem.Value.curve.NewPublicKey(dataʗ1.slice(Ꮡkem.Value.pqEncapsKeySize));
     });
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return NewHybridPublicKey(pq, k);
 }
@@ -222,36 +222,36 @@ internal static slice<byte> Bytes(this ref hybridPublicKey pk) {
 internal static Func<(slice<byte>, slice<byte>)> testingOnlyEncapsulate;
 
 internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ж<hybridPublicKey> Ꮡpk) {
-    error err = default!;
+    error err = default;
     ref var pk = ref Ꮡpk.DerefOrNull();
 
     ref var skE = ref heap<ж<ecdh.PrivateKey>>(out var ᏑskE);
     fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
         (ᏑskE.ValueSlot, err) = Ꮡpk.Value.t.Curve().GenerateKey(rand.Reader);
     });
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
-    if (testingOnlyGenerateKey != default!) {
+    if (testingOnlyGenerateKey != nil) {
         skE = testingOnlyGenerateKey();
     }
     ref var ssT = ref heap<slice<byte>>(out var ᏑssT);
     fips140.WithoutEnforcement(() => {
         (ᏑssT.ValueSlot, err) = ᏑskE.ValueSlot.ECDH(Ꮡpk.Value.t);
     });
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
     var ctT = skE.PublicKey().Bytes();
 
     var (ssPQ, ctPQ) = pk.pq.Encapsulate();
-    if (testingOnlyEncapsulate != default!) {
+    if (testingOnlyEncapsulate != nil) {
         (ssPQ, ctPQ) = testingOnlyEncapsulate();
     }
 
     var ss = pk.kem.sharedSecret(ssPQ, ssT, ctT, pk.t.Bytes());
     var ct = appendꓸꓸꓸ(ctPQ, ctT);
-    return (ss, ct, default!);
+    return (ss, ct, default);
 }
 
 partial struct hybridPrivateKey {
@@ -277,7 +277,7 @@ partial struct hybridPrivateKey {
 // Otherwise, applications should use the [KEM.NewPrivateKey] method of e.g.
 // [MLKEM768X25519].
 public static (PrivateKey, error) NewHybridPrivateKey(crypto.Decapsulator pq, ecdh.KeyExchanger t) {
-    return newHybridPrivateKey(pq, t, default!);
+    return newHybridPrivateKey(pq, t, default);
 }
 
 internal static (PrivateKey, error) GenerateKey(this ж<hybridKEM> Ꮡkem) {
@@ -293,7 +293,7 @@ internal static (PrivateKey, error) NewPrivateKey(this ж<hybridKEM> Ꮡkem, sli
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     if (len(priv) != 32) {
-        return (default!, errors.New(hpkeInvalidHybridKemˢ));
+        return (default, errors.New(hpkeInvalidHybridKemˢ));
     }
 
     var s = sha3.NewSHAKE256();
@@ -303,12 +303,12 @@ internal static (PrivateKey, error) NewPrivateKey(this ж<hybridKEM> Ꮡkem, sli
     s.Read(seedPQ);
     ref var err = ref heap<error>(out var Ꮡerr);
     (var pq, err) = kem.pqNewPrivateKey(seedPQ);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var seedT = new slice<byte>(kem.curveSeedSize);
-    while (ᐧ) {
+    for (;;) {
         s.Read(seedT);
         ref var k = ref heap<ecdh.KeyExchanger>(out var Ꮡk);
         var seedTʗ1 = seedT;
@@ -316,7 +316,7 @@ internal static (PrivateKey, error) NewPrivateKey(this ж<hybridKEM> Ꮡkem, sli
             var (ᴛ1, ᴛ2) = Ꮡkem.Value.curve.NewPrivateKey(seedTʗ1);
             (Ꮡk.ValueSlot, Ꮡerr.ValueSlot) = (new ecdh.PrivateKeyжKeyExchanger(ᴛ1), ᴛ2);
         });
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
         return newHybridPrivateKey(pq, k, priv);
@@ -324,34 +324,34 @@ internal static (PrivateKey, error) NewPrivateKey(this ж<hybridKEM> Ꮡkem, sli
 }
 
 internal static (PrivateKey, error) newHybridPrivateKey(crypto.Decapsulator pq, ecdh.KeyExchanger t, slice<byte> seed) {
-    var exprᴛ1 = t.Curve();
-    if (AreEqual(exprᴛ1, ecdh.X25519())) {
+    switch (t.Curve()) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.X25519()): {
         {
             var (_, ok) = pq.Encapsulator()._<ж<mlkem.EncapsulationKey768>>(ᐧ); if (!ok) {
-                return (default!, errors.New(invalidPqKemForX25519ˢ));
+                return (default, errors.New(invalidPqKemForX25519ˢ));
             }
         }
-        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768X25519, bytes.Clone(seed), t, pq))), default!);
+        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768X25519, bytes.Clone(seed), t, pq))), default);
     }
-    if (AreEqual(exprᴛ1, ecdh.P256())) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.P256()): {
         {
             var (_, ok) = pq.Encapsulator()._<ж<mlkem.EncapsulationKey768>>(ᐧ); if (!ok) {
-                return (default!, errors.New(invalidPqKemForP256ˢ));
+                return (default, errors.New(invalidPqKemForP256ˢ));
             }
         }
-        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768P256, bytes.Clone(seed), t, pq))), default!);
+        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768P256, bytes.Clone(seed), t, pq))), default);
     }
-    if (AreEqual(exprᴛ1, ecdh.P384())) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.P384()): {
         {
             var (_, ok) = pq.Encapsulator()._<ж<mlkem.EncapsulationKey1024>>(ᐧ); if (!ok) {
-                return (default!, errors.New(invalidPqKemForP384ˢ));
+                return (default, errors.New(invalidPqKemForP384ˢ));
             }
         }
-        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem1024P384, bytes.Clone(seed), t, pq))), default!);
+        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem1024P384, bytes.Clone(seed), t, pq))), default);
     }
-    { /* default: */
-        return (default!, errors.New(unsupportedCurveˢ));
-    }
+    default: {
+        return (default, errors.New(unsupportedCurveˢ));
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -361,9 +361,9 @@ internal static (PrivateKey, error) DeriveKeyPair(this ж<hybridKEM> Ꮡkem, sli
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢ, default!, 32);
-    if (err != default!) {
-        return (default!, err);
+    var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢ, default, 32);
+    if (err != nil) {
+        return (default, err);
     }
     return Ꮡkem.NewPrivateKey(dk);
 }
@@ -376,10 +376,10 @@ internal static ΔKEM KEM(this ref hybridPrivateKey k) {
 internal static readonly @string privateKeySeedNotˢ = "private key seed not available"u8;
 
 internal static (slice<byte>, error) Bytes(this ref hybridPrivateKey k) {
-    if (k.seed == default!) {
-        return (default!, errors.New(privateKeySeedNotˢ));
+    if (k.seed == nil) {
+        return (default, errors.New(privateKeySeedNotˢ));
     }
-    return (k.seed, default!);
+    return (k.seed, default);
 }
 
 internal static ΔPublicKey PublicKey(this ref hybridPrivateKey k) {
@@ -396,32 +396,32 @@ internal static readonly @string invalidEncapsulatedKeyˢ = "invalid encapsulate
 internal static (slice<byte>, error) decap(this ж<hybridPrivateKey> Ꮡk, slice<byte> enc) {
     ref var k = ref Ꮡk.DerefOrNull();
 
-    if (len(enc) != (~k.kem).pqCiphertextSize + (~k.kem).curvePointSize) {
-        return (default!, errors.New(invalidEncapsulatedKeyˢ));
+    if (len(enc) != k.kem.pqCiphertextSize + k.kem.curvePointSize) {
+        return (default, errors.New(invalidEncapsulatedKeyˢ));
     }
-    var (ctPQ, ctT) = (enc.slice(0, (~k.kem).pqCiphertextSize), enc.slice((~k.kem).pqCiphertextSize));
+    var (ctPQ, ctT) = (enc.slice(0, k.kem.pqCiphertextSize), enc.slice(k.kem.pqCiphertextSize));
     ref var err = ref heap<error>(out var Ꮡerr);
     (var ssPQ, err) = k.pq.Decapsulate(ctPQ);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     ref var pub = ref heap<ж<ecdhꓸPublicKey>>(out var Ꮡpub);
     var ctTʗ1 = ctT;
     fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
         (Ꮡpub.ValueSlot, Ꮡerr.ValueSlot) = Ꮡk.Value.t.Curve().NewPublicKey(ctTʗ1);
     });
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     ref var ssT = ref heap<slice<byte>>(out var ᏑssT);
     fips140.WithoutEnforcement(() => {
         (ᏑssT.ValueSlot, Ꮡerr.ValueSlot) = Ꮡk.Value.t.ECDH(Ꮡpub.ValueSlot);
     });
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var ss = k.kem.sharedSecret(ssPQ, ssT, ctT, k.t.PublicKey().Bytes());
-    return (ss, default!);
+    return (ss, default);
 }
 
 [GoLazy] partial class lazyᴛmlkem768 { internal static ж<mlkemKEM> mlkem768 = Ꮡ(new mlkemKEM(
@@ -506,20 +506,20 @@ internal static readonly @string unsupportedPublicKeyTypeˢ = "unsupported publi
 public static (ΔPublicKey, error) NewMLKEMPublicKey(crypto.Encapsulator pub) {
     switch (pub.type()) {
     case ж<mlkem.EncapsulationKey768>: {
-        return (new mlkemPublicKeyжΔPublicKey(Ꮡ(new mlkemPublicKey(mlkem768, pub))), default!);
+        return (new mlkemPublicKeyжΔPublicKey(Ꮡ(new mlkemPublicKey(mlkem768, pub))), default);
     }
     case ж<mlkem.EncapsulationKey1024>: {
-        return (new mlkemPublicKeyжΔPublicKey(Ꮡ(new mlkemPublicKey(mlkem1024, pub))), default!);
+        return (new mlkemPublicKeyжΔPublicKey(Ꮡ(new mlkemPublicKey(mlkem1024, pub))), default);
     }
     default: {
-        return (default!, errors.New(unsupportedPublicKeyTypeˢ));
+        return (default, errors.New(unsupportedPublicKeyTypeˢ));
     }}
 }
 
 internal static (ΔPublicKey, error) NewPublicKey(this ref mlkemKEM kem, slice<byte> data) {
     var (pq, err) = kem.newPublicKey(data);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return NewMLKEMPublicKey(pq);
 }
@@ -534,10 +534,10 @@ internal static slice<byte> Bytes(this ref mlkemPublicKey pk) {
 
 internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ref mlkemPublicKey pk) {
     var (ss, ct) = pk.pq.Encapsulate();
-    if (testingOnlyEncapsulate != default!) {
+    if (testingOnlyEncapsulate != nil) {
         (ss, ct) = testingOnlyEncapsulate();
     }
-    return (ss, ct, default!);
+    return (ss, ct, default);
 }
 
 partial struct mlkemPrivateKey {
@@ -559,37 +559,37 @@ partial struct mlkemPrivateKey {
 public static (PrivateKey, error) NewMLKEMPrivateKey(crypto.Decapsulator priv) {
     switch (priv.Encapsulator().type()) {
     case ж<mlkem.EncapsulationKey768>: {
-        return (new mlkemPrivateKeyжPrivateKey(Ꮡ(new mlkemPrivateKey(mlkem768, priv))), default!);
+        return (new mlkemPrivateKeyжPrivateKey(Ꮡ(new mlkemPrivateKey(mlkem768, priv))), default);
     }
     case ж<mlkem.EncapsulationKey1024>: {
-        return (new mlkemPrivateKeyжPrivateKey(Ꮡ(new mlkemPrivateKey(mlkem1024, priv))), default!);
+        return (new mlkemPrivateKeyжPrivateKey(Ꮡ(new mlkemPrivateKey(mlkem1024, priv))), default);
     }
     default: {
-        return (default!, errors.New(unsupportedPublicKeyTypeˢ));
+        return (default, errors.New(unsupportedPublicKeyTypeˢ));
     }}
 }
 
 internal static (PrivateKey, error) GenerateKey(this ref mlkemKEM kem) {
     var (pq, err) = kem.generateKey();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return NewMLKEMPrivateKey(pq);
 }
 
 internal static (PrivateKey, error) NewPrivateKey(this ref mlkemKEM kem, slice<byte> priv) {
     var (pq, err) = kem.newPrivateKey(priv);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return NewMLKEMPrivateKey(pq);
 }
 
 internal static (PrivateKey, error) DeriveKeyPair(this ref mlkemKEM kem, slice<byte> ikm) {
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢ, default!, 64);
-    if (err != default!) {
-        return (default!, err);
+    var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢ, default, 64);
+    if (err != nil) {
+        return (default, err);
     }
     return kem.NewPrivateKey(dk);
 }
@@ -605,9 +605,9 @@ internal partial interface Bytes_type /*dyn*/ {
 internal static (slice<byte>, error) Bytes(this ref mlkemPrivateKey k) {
     var (pq, ok) = k.pq._<Bytes_type>(ᐧ);
     if (!ok) {
-        return (default!, errors.New(privateKeySeedNotˢ));
+        return (default, errors.New(privateKeySeedNotˢ));
     }
-    return (pq.Bytes(), default!);
+    return (pq.Bytes(), default);
 }
 
 internal static ΔPublicKey PublicKey(this ref mlkemPrivateKey k) {

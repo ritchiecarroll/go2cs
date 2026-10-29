@@ -39,8 +39,8 @@ partial struct cacheTable<K, V> /*[1021]global::go.sync.atomic_package.Pointer<c
 
 // A cacheEntry is a single entry in the linked list for a given hash table entry.
 partial struct cacheEntry<K, V> {
-    internal ж<K> k;             // immutable once created
-    internal atomic.Pointer<V> v; // read and written atomically to allow updates
+    internal ж<K> k;                   // immutable once created
+    internal atomic.Pointer<V> v;      // read and written atomically to allow updates
     internal ж<cacheEntry<K, V>> next; // immutable once linked into table
 }
 
@@ -63,7 +63,7 @@ internal static UntypedInt cacheSize => 1021;
 // table returns a pointer to the current cache hash table,
 // coping with the possibility of the GC clearing it out from under us.
 internal static ж<cacheTable<K, V>> table<K, V>(this ж<Cache<K, V>> Ꮡc) {
-    while (ᐧ) {
+    for (;;) {
         var p = Ꮡc.of(Cache<K, V>.Ꮡptable).Load();
         if (p == nil) {
             p = @new<cacheTable<K, V>>();
@@ -97,11 +97,11 @@ public static ж<V> Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk) {
             return e.of(cacheEntry<K, V>.Ꮡv).Load();
         }
     }
-    return default!;
+    return default;
 }
 
 // Put sets the cached value associated with k to v.
-public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> Ꮡv) {
+public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> v) {
     ref var k = ref Ꮡk.DerefOrNull();
 
     var head = Ꮡc.table().at<atomic.Pointer<cacheEntry<K, V>>>((ulong)((uintptr)Ꮡk % (uintptr)cacheSize));
@@ -124,28 +124,28 @@ public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> Ꮡv) 
     //
     //  2. We only allocate the entry to be added once,
     //     saving it in add for the next attempt.
-    ж<cacheEntry<K, V>> add = default!;
-    ж<cacheEntry<K, V>> noK = default!;
+    ж<cacheEntry<K, V>> add = default;
+    ж<cacheEntry<K, V>> noK = default;
     nint n = 0;
-    while (ᐧ) {
+    for (;;) {
         var e = head.Load();
         var start = e;
         for (; e != nil && e != noK; e = e.Value.next) {
             if ((~e).k == Ꮡk) {
-                e.of(cacheEntry<K, V>.Ꮡv).Store(Ꮡv);
+                e.of(cacheEntry<K, V>.Ꮡv).Store(v);
                 return;
             }
             n++;
         }
         if (add == nil) {
             add = Ꮡ(new cacheEntry<K, V>(k: Ꮡk));
-            add.of(cacheEntry<K, V>.Ꮡv).Store(Ꮡv);
+            add.of(cacheEntry<K, V>.Ꮡv).Store(v);
         }
         add.Value.next = start;
         if (n >= 1000) {
             // If an individual list gets too long, which shouldn't happen,
             // throw it away to avoid quadratic lookup behavior.
-            add.Value.next = default!;
+            add.Value.next = default;
         }
         if (head.CompareAndSwap(start, add)) {
             return;

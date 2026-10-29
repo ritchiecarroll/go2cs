@@ -25,14 +25,14 @@ partial struct ΔOID {
 
 // ParseOID parses a Object Identifier string, represented by ASCII numbers separated by dots.
 public static (ΔOID, error) ParseOID(@string oid) {
-    ΔOID o = default!;
+    ΔOID o = default;
     var ᴛ1 = o.unmarshalOIDText(oid);
     return (o, ᴛ1);
 }
 
 internal static (ΔOID, bool) newOIDFromDER(slice<byte> der) {
     if (builtin.len(der) == 0 || (byte)(der[builtin.len(der) - 1] & 0x80) != 0) {
-        return (new ΔOID(nil), false);
+        return (new ΔOID(), false);
     }
 
     nint start = 0;
@@ -41,7 +41,7 @@ internal static (ΔOID, bool) newOIDFromDER(slice<byte> der) {
         // The subidentifier shall be encoded in the fewest possible octets,
         // that is, the leading octet of the subidentifier shall not have the value 0x80.
         if (i == start && v == 0x80) {
-            return (new ΔOID(nil), false);
+            return (new ΔOID(), false);
         }
         if ((byte)(v & 0x80) == 0) {
             start = i + 1;
@@ -54,7 +54,7 @@ internal static (ΔOID, bool) newOIDFromDER(slice<byte> der) {
 // OIDFromInts creates a new OID using ints, each integer is a separate component.
 public static (ΔOID, error) OIDFromInts(slice<uint64> oid) {
     if (builtin.len(oid) < 2 || oid[0] > 2 || (oid[0] < 2 && oid[1] >= 40)) {
-        return (new ΔOID(nil), errInvalidOID);
+        return (new ΔOID(), errInvalidOID);
     }
 
     nint length = base128IntLength(oid[0] * 40 + oid[1]);
@@ -67,7 +67,7 @@ public static (ΔOID, error) OIDFromInts(slice<uint64> oid) {
     foreach (var (_, v) in oid[2..]) {
         der = appendBase128Int(der, v);
     }
-    return (new ΔOID(der), default!);
+    return (new ΔOID(der), default);
 }
 
 internal static nint base128IntLength(uint64 n) {
@@ -98,13 +98,13 @@ internal static nint base128BigIntLength(ж<bigꓸInt> Ꮡn) {
     return (n.BitLen() + 6) / 7;
 }
 
-internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<bigꓸInt> Ꮡn) {
-    if (Ꮡn.Cmp(big.NewInt(0)) == 0) {
+internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<bigꓸInt> n) {
+    if (n.Cmp(big.NewInt(0)) == 0) {
         return append(dst, (byte)0);
     }
 
-    for (nint i = base128BigIntLength(Ꮡn) - 1; i >= 0; i--) {
-        var o = (byte)(nuint)big.NewInt(0).Rsh(Ꮡn, (nuint)i * 7).Bits()[0];
+    for (nint i = base128BigIntLength(n) - 1; i >= 0; i--) {
+        var o = (byte)big.NewInt(0).Rsh(n, (nuint)i * 7).Bits()[0];
         o &= (byte)(0x7f);
         if (i != 0) {
             o |= (byte)(0x80);
@@ -116,12 +116,12 @@ internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<bigꓸInt> �
 
 // AppendText implements [encoding.TextAppender]
 public static (slice<byte>, error) AppendText(this ΔOID o, slice<byte> b) {
-    return (append(b, o.String().ꓸꓸꓸ), default!);
+    return (append(b, o.String().ꓸꓸꓸ), default);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
 public static (slice<byte>, error) MarshalText(this ΔOID o) {
-    return o.AppendText(default!);
+    return o.AppendText(default);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
@@ -134,16 +134,16 @@ internal static error unmarshalOIDText(this ref ΔOID o, @string oid) {
     // to allow them in the string representation of Object Identifier, so
     // reject such encodings.
     foreach (var (_, c) in oid) {
-        var isDigit = c >= (rune)'0' && c <= (rune)'9';
-        if (!isDigit && c != (rune)'.') {
+        var isDigit = c >= '0' && c <= '9';
+        if (!isDigit && c != '.') {
             return errInvalidOID;
         }
     }
 
-    @string firstNum = default!;
-    @string secondNum = default!;
+    @string firstNum = default;
+    @string secondNum = default;
 
-    bool nextComponentExists = default!;
+    bool nextComponentExists = default;
     (firstNum, oid, nextComponentExists) = strings.Cut(oid, "."u8);
     if (!nextComponentExists) {
         return errInvalidOID;
@@ -174,7 +174,7 @@ internal static error unmarshalOIDText(this ref ΔOID o, @string oid) {
     var der = appendBase128BigInt(new slice<byte>(0, 32), firstComponent);
 
     while (nextComponentExists) {
-        @string strNum = default!;
+        @string strNum = default;
         (strNum, oid, nextComponentExists) = strings.Cut(oid, "."u8);
         var (b, ok) = big.NewInt(0).SetString(strNum, 10);
         if (!ok) {
@@ -184,17 +184,17 @@ internal static error unmarshalOIDText(this ref ΔOID o, @string oid) {
     }
 
     o.der = der;
-    return default!;
+    return default;
 }
 
 // AppendBinary implements [encoding.BinaryAppender]
 public static (slice<byte>, error) AppendBinary(this ΔOID o, slice<byte> b) {
-    return (appendꓸꓸꓸ(b, o.der), default!);
+    return (appendꓸꓸꓸ(b, o.der), default);
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler]
 public static (slice<byte>, error) MarshalBinary(this ΔOID o) {
-    return o.AppendBinary(default!);
+    return o.AppendBinary(default);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler]
@@ -204,7 +204,7 @@ public static error UnmarshalBinary(this ref ΔOID o, slice<byte> b) {
         return errInvalidOID;
     }
     o = oid;
-    return default!;
+    return default;
 }
 
 // Equal returns true when oid and other represents the same Object Identifier.
@@ -215,12 +215,12 @@ public static bool Equal(this ΔOID oid, ΔOID other) {
 }
 
 internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte> bytes, nint initOffset) {
-    nint ret = default!;
-    nint offset = default!;
-    bool failed = default!;
+    nint ret = default;
+    nint offset = default;
+    bool failed = default;
 
     offset = initOffset;
-    int64 ret64 = default!;
+    int64 ret64 = default;
     for (nint shifted = 0; offset < builtin.len(bytes); shifted++) {
         // 5 * 7 bits per byte == 35 bits of data
         // Thus the representation is either non-minimal or too large for an int32
@@ -228,7 +228,7 @@ internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte>
             failed = true;
             return (ret, offset, failed);
         }
-        ret64 <<= (int)(7);
+        ret64 <<= 7;
         var b = bytes[offset];
         // integers should be minimally encoded, so the leading octet should
         // never be 0x80
@@ -264,7 +264,7 @@ public static bool EqualASN1OID(this ΔOID oid, asn1.ObjectIdentifier other) {
         // but just in case.
         return false;
     }
-    if (v < 80){
+    if (v < 80) {
         nint a = v / 40;
         nint b = v % 40;
         if (other[0] != a || other[1] != b) {
@@ -304,14 +304,14 @@ public static @string String(this ΔOID oid) {
     nint start = 0;
     uint64 val = (uint64)0;
     slice<byte> numBuf = new slice<byte>(0, 21);
-    ж<bigꓸInt> bigVal = default!;
-    bool overflow = default!;
+    ж<bigꓸInt> bigVal = default;
+    bool overflow = default;
     foreach (var (i, v) in oid.der) {
         var curVal = (byte)(v & 0x7F);
         var valEnd = (byte)(v & 0x80) == 0;
         if (valEnd) {
             if (start != 0) {
-                Ꮡb.WriteByte((rune)'.');
+                Ꮡb.WriteByte((byte)'.');
             }
         }
         if (!overflow && val > maxValSafeShift) {
@@ -340,10 +340,10 @@ public static @string String(this ΔOID oid) {
         val <<= (int)(bitsPerByte);
         val |= (uint64)((uint64)curVal);
         if (valEnd) {
-            if (start == 0){
-                if (val < 80){
+            if (start == 0) {
+                if (val < 80) {
                     Ꮡb.Write(strconv.AppendUint(numBuf, val / 40, 10));
-                    Ꮡb.WriteByte((rune)'.');
+                    Ꮡb.WriteByte((byte)'.');
                     Ꮡb.Write(strconv.AppendUint(numBuf, val % 40, 10));
                 } else {
                     Ꮡb.WriteString("2."u8);
@@ -370,7 +370,7 @@ internal static (asn1.ObjectIdentifier, bool) toASN1OID(this ΔOID oid) {
 
     foreach (var (_, v) in oid.der) {
         if (val > maxValSafeShift) {
-            return (default!, false);
+            return (default, false);
         }
 
         val <<= (int)(bitsPerByte);
@@ -378,7 +378,7 @@ internal static (asn1.ObjectIdentifier, bool) toASN1OID(this ΔOID oid) {
 
         if ((byte)(v & 0x80) == 0) {
             if (builtin.len(@out) == 0) {
-                if (val < 80){
+                if (val < 80) {
                     @out = append(@out, val / 40);
                     @out = append(@out, val % 40);
                 } else {
@@ -406,7 +406,7 @@ public static (ΔOID, error) OIDFromASN1OID(asn1.ObjectIdentifier asn1OID) {
     var uint64OID = new slice<uint64>(0, builtin.len(asn1OID));
     foreach (var (_, component) in asn1OID) {
         if (component < 0) {
-            return (new ΔOID(nil), errors.New(x509OidComponentsMustBeˢ));
+            return (new ΔOID(), errors.New(x509OidComponentsMustBeˢ));
         }
         uint64OID = append(uint64OIDᴷ, uint64OID, (uint64)component);
     }

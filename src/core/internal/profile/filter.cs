@@ -13,8 +13,8 @@ partial class profile_package {
 // those that match focus and do not match the ignore regular
 // expression.
 public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) {
-    bool fm = default!;
-    bool im = default!;
+    bool fm = default;
+    bool im = default;
 
     var samples = new slice<ж<Sample>>(0, len(p.Sample));
     foreach (var (_, s) in p.Sample) {
@@ -32,13 +32,13 @@ public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@st
 // focusedSample checks a sample against focus and ignore regexps.
 // Returns whether the focus/ignore regexps match any tags.
 internal static (bool fm, bool im) focusedSample(ref Sample s, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) {
-    bool fm = default!;
-    bool im = default!;
+    bool fm = default;
+    bool im = default;
 
-    fm = focus == default!;
+    fm = focus == nil;
     foreach (var (key, vals) in s.Label) {
         foreach (var (_, val) in vals) {
-            if (ignore != default! && ignore(key, val, 0)) {
+            if (ignore != nil && ignore(key, val, 0)) {
                 im = true;
             }
             if (!fm && focus(key, val, 0)) {
@@ -48,7 +48,7 @@ internal static (bool fm, bool im) focusedSample(ref Sample s, Func<@string, @st
     }
     foreach (var (key, vals) in s.NumLabel) {
         foreach (var (_, val) in vals) {
-            if (ignore != default! && ignore(key, ""u8, val)) {
+            if (ignore != nil && ignore(key, ""u8, val)) {
                 im = true;
             }
             if (!fm && focus(key, ""u8, val)) {

@@ -11,7 +11,7 @@ partial class unix_package {
 
 public static error Unlinkat(nint dirfd, @string path, nint flags) {
     var (p, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -22,12 +22,12 @@ public static error Unlinkat(nint dirfd, @string path, nint flags) {
         return errno;
     }
 
-    return default!;
+    return default;
 }
 
 public static (nint, error) Openat(nint dirfd, @string path, nint flags, uint32 perm) {
     var (p, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
 
@@ -38,16 +38,16 @@ public static (nint, error) Openat(nint dirfd, @string path, nint flags, uint32 
         return (0, errno);
     }
 
-    return ((nint)fd, default!);
+    return ((nint)fd, default);
 }
 
 public static (nint, error) Readlinkat(nint dirfd, @string path, slice<byte> buf) {
     var (p0, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
-    @unsafe.Pointer p1 = default!;
-    if (len(buf) > 0){
+    @unsafe.Pointer p1 = default;
+    if (len(buf) > 0) {
         p1 = @unsafe.Pointer.FromPinnedBox(Ꮡ(buf, 0));
     } else {
         p1 = @unsafe.Pointer.FromBox(Ꮡ_zero);
@@ -61,12 +61,12 @@ public static (nint, error) Readlinkat(nint dirfd, @string path, slice<byte> buf
         return (0, errno);
     }
 
-    return ((nint)n, default!);
+    return ((nint)n, default);
 }
 
 public static error Mkdirat(nint dirfd, @string path, uint32 mode) {
     var (p, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -76,12 +76,12 @@ public static error Mkdirat(nint dirfd, @string path, uint32 mode) {
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 public static error Fchownat(nint dirfd, @string path, nint uid, nint gid, nint flags) {
     var (p, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var ᴋ5 = p;
@@ -90,16 +90,16 @@ public static error Fchownat(nint dirfd, @string path, nint uid, nint gid, nint 
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 public static error Renameat(nint olddirfd, @string oldpath, nint newdirfd, @string newpath) {
     var (oldp, err) = syscall.BytePtrFromString(oldpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var newp, err) = syscall.BytePtrFromString(newpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var ᴋ6 = oldp;
@@ -110,16 +110,16 @@ public static error Renameat(nint olddirfd, @string oldpath, nint newdirfd, @str
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 public static error Linkat(nint olddirfd, @string oldpath, nint newdirfd, @string newpath, nint flag) {
     var (oldp, err) = syscall.BytePtrFromString(oldpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var newp, err) = syscall.BytePtrFromString(newpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var ᴋ8 = oldp;
@@ -130,16 +130,16 @@ public static error Linkat(nint olddirfd, @string oldpath, nint newdirfd, @strin
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 public static error Symlinkat(@string oldpath, nint newdirfd, @string newpath) {
     var (oldp, err) = syscall.BytePtrFromString(oldpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var newp, err) = syscall.BytePtrFromString(newpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var ᴋ10 = oldp;
@@ -150,7 +150,7 @@ public static error Symlinkat(@string oldpath, nint newdirfd, @string newpath) {
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 } // end unix_package

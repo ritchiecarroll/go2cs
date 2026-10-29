@@ -67,13 +67,13 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
 
     var outʗ1 = @out;
     void writeUint32(uint32 x) {
-        assert(binary.Write(outʗ1, binary.LittleEndian, x) == default!);
+        assert(binary.Write(outʗ1, binary.LittleEndian, x) == nil);
     }
 
     writeUint32((uint32)pw.version);
 
     if (pw.version.Has(Flags)) {
-        uint32 flags = default!;
+        uint32 flags = default;
         if (pw.SyncMarkers()) {
             flags |= (uint32)(flagSyncMarkers);
         }
@@ -82,7 +82,7 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
 
     // TODO(markfreeman): Also can use delta encoding to write section ends,
     // but not as impactful.
-    uint32 sum = default!;
+    uint32 sum = default;
     foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
         sum += (uint32)len(elems);
         writeUint32(sum);
@@ -103,14 +103,14 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
     foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
         foreach (var (_, elem) in elems) {
             var (_, errΔ1) = io.WriteString(@out, elem);
-            assert(errΔ1 == default!);
+            assert(errΔ1 == nil);
         }
     }
 
     // Write fingerprint.
-    copy(fingerprint[..], h.Sum(default!));
+    copy(fingerprint[..], h.Sum(default));
     var (_, err) = out0.Write(fingerprint[..]);
-    assert(err == default!);
+    assert(err == nil);
 
     return fingerprint;
 }
@@ -147,8 +147,7 @@ public static ж<Encoder> NewEncoder(this ж<PkgEncoder> Ꮡpw, SectionKind k, S
 public static ж<Encoder> NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, SectionKind k) {
     ref var pw = ref Ꮡpw.DerefOrNull();
 
-    ref var idx = ref heap<RelElemIdx>(out var Ꮡidx);
-    idx = (RelElemIdx)(int32)len(pw.elems[k]);
+    ref var idx = ref heap<RelElemIdx>((RelElemIdx)(int32)len(pw.elems[k]), out var Ꮡidx);
     pw.elems[k] = append(pw.elems[k], ""u8); // placeholder
 
     return Ꮡ(new Encoder(
@@ -191,19 +190,19 @@ public static RelElemIdx Flush(this ж<Encoder> Ꮡw) {
     w.Len(len(w.Relocs));
     foreach (var (_, rEnt) in w.Relocs) {
         w.Sync(SyncReloc);
-        w.Len((nint)(int32)rEnt.Kind);
-        w.Len((nint)(int32)rEnt.Idx);
+        w.Len((nint)rEnt.Kind);
+        w.Len((nint)rEnt.Idx);
     }
 
     io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡw.of(Encoder.ᏑData)));
     io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡtmp));
-    (~w.p).elems[w.k][w.Idx] = sb.String();
+    w.p.elems[w.k][w.Idx] = sb.String();
 
     return w.Idx;
 }
 
 internal static void checkErr(this ref Encoder w, error err) {
-    if (err != default!) {
+    if (err != nil) {
         panicf("unexpected encoding error: %v"u8, err);
     }
 }
@@ -227,7 +226,7 @@ internal static void rawVarint(this ref Encoder w, int64 x) {
 
 internal static nint rawReloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
     var e = new RefTableEntry(k, idx);
-    if (w.RelocMap != default!){
+    if (w.RelocMap != nil) {
         {
             var (iΔ1, ok) = w.RelocMap[e, ꟷ]; if (ok) {
                 return (nint)iΔ1;
@@ -252,16 +251,16 @@ public static partial void Sync(this ref Encoder w, SyncMarker m) {
     // relocations, but writing out the relocations themselves involves
     // sync markers. To prevent infinite recursion, we simply trim the
     // stack frame for sync markers within the relocation header.
-    slice<@string> frames = default!;
-    if (!w.encodingRelocHeader && (~w.p).syncFrames > 0) {
-        var pcs = new slice<uintptr>((~w.p).syncFrames);
+    slice<@string> frames = default;
+    if (!w.encodingRelocHeader && w.p.syncFrames > 0) {
+        var pcs = new slice<uintptr>(w.p.syncFrames);
         nint n = Δruntime.Callers(2, pcs);
         frames = fmtFrames(pcs.slice(0, n).ꓸꓸꓸ);
     }
 
     // TODO(mdempsky): Save space by writing out stack frames as a
     // linked list so we can share common stack frames.
-    w.rawUvarint((uint64)(nint)m);
+    w.rawUvarint((uint64)m);
     w.rawUvarint((uint64)len(frames));
     foreach (var (_, frame) in frames) {
         w.rawUvarint((uint64)w.rawReloc(SectionString, w.p.StringIdx(frame)));
@@ -283,7 +282,7 @@ public static partial void Sync(this ref Encoder w, SyncMarker m) {
 // For multi-alternative encodings, use Code instead.
 public static bool Bool(this ref Encoder w, bool b) {
     w.Sync(SyncBool);
-    byte x = default!;
+    byte x = default;
     if (b) {
         x = 1;
     }
@@ -367,7 +366,7 @@ public static void Strings(this ref Encoder w, slice<@string> ss) {
 // bitstream.
 public static void Value(this ref Encoder w, constant.Value val) {
     w.Sync(SyncValue);
-    if (w.Bool(val.Kind() == constant.Complex)){
+    if (w.Bool(val.Kind() == constant.Complex)) {
         w.scalar(constant.Real(val));
         w.scalar(constant.Imag(val));
     } else {
@@ -424,14 +423,14 @@ internal static void bigInt(this ref Encoder w, ж<bigꓸInt> Ꮡv) {
     w.Bool(v.Sign() < 0);
 }
 
-internal static void bigFloat(this ref Encoder w, ж<big.Float> Ꮡv) {
-    var b = Ꮡv.Append(default!, (rune)'p', -1);
+internal static void bigFloat(this ref Encoder w, ж<big.Float> v) {
+    var b = v.Append(default, (byte)'p', -1);
     w.String((@string)b); // TODO: More efficient encoding.
 }
 
 // Version reports the version of the bitstream.
 public static ΔVersion Version(this ref Encoder w) {
-    return (~w.p).version;
+    return w.p.version;
 }
 
 } // end pkgbits_package

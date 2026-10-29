@@ -9,7 +9,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(pollDesc))]
 partial class runtime_package {
 
 // Integrated network poller (platform-independent part).
@@ -41,9 +40,9 @@ partial class runtime_package {
 
 // Error codes returned by runtime_pollReset and runtime_pollWait.
 // These must match the values in internal/poll/fd_poll_runtime.go.
-internal static UntypedInt pollNoError => 0; // no error
-internal static UntypedInt pollErrClosing => 1; // descriptor is closed
-internal static UntypedInt pollErrTimeout => 2; // I/O timeout
+internal static UntypedInt pollNoError => 0;        // no error
+internal static UntypedInt pollErrClosing => 1;     // descriptor is closed
+internal static UntypedInt pollErrTimeout => 2;     // I/O timeout
 internal static UntypedInt pollErrNotPollable => 3; // general error polling descriptor
 
 // pollDesc contains 2 binary semaphores, rg and wg, to park reader and writer
@@ -70,8 +69,8 @@ internal static UntypedInt pollBlockSize => /* 4 * 1024 */ 4096;
 // No heap pointers.
 partial struct pollDesc {
     internal sys.NotInHeap _;
-    internal ж<pollDesc> link;   // in pollcache, protected by pollcache.lock
-    internal uintptr fd;        // constant for pollDesc usage lifetime
+    internal ж<pollDesc> link;     // in pollcache, protected by pollcache.lock
+    internal uintptr fd;           // constant for pollDesc usage lifetime
     internal atomic.Uintptr fdseq; // protects against stale pollDesc
     // atomicInfo holds bits from closing, rd, and wd,
     // which are only ever written while holding the lock,
@@ -95,15 +94,15 @@ partial struct pollDesc {
     internal atomic.Uintptr wg; // pdReady, pdWait, G waiting for write or pdNil
     internal mutex @lock; // protects the following fields
     internal bool closing;
-    internal bool rrun;      // whether rt is running
-    internal bool wrun;      // whether wt is running
-    internal uint32 user;    // user settable cookie
-    internal uintptr rseq;   // protects from stale read timers
-    internal timer rt;     // read deadline timer
-    internal int64 rd;     // read deadline (a nanotime in the future, -1 when expired)
-    internal uintptr wseq;   // protects from stale write timers
-    internal timer wt;     // write deadline timer
-    internal int64 wd;     // write deadline (a nanotime in the future, -1 when expired)
+    internal bool rrun;        // whether rt is running
+    internal bool wrun;        // whether wt is running
+    internal uint32 user;      // user settable cookie
+    internal uintptr rseq;     // protects from stale read timers
+    internal timer rt;         // read deadline timer
+    internal int64 rd;         // read deadline (a nanotime in the future, -1 when expired)
+    internal uintptr wseq;     // protects from stale write timers
+    internal timer wt;         // write deadline timer
+    internal int64 wd;         // write deadline (a nanotime in the future, -1 when expired)
     internal ж<pollDesc> self; // storage for indirect interface. See (*pollDesc).makeArg.
 }
 
@@ -119,7 +118,7 @@ internal static UntypedInt pollExpiredReadDeadline => 4;
 internal static UntypedInt pollExpiredWriteDeadline => 8;
 internal static UntypedInt pollFDSeq => 16; // 20 bit field, low 20 bits of fdseq field
 
-internal static UntypedInt pollFDSeqBits => 20;    // number of bits in pollFDSeq
+internal static UntypedInt pollFDSeqBits => 20;                                 // number of bits in pollFDSeq
 internal static UntypedInt pollFDSeqMask => /* 1<<pollFDSeqBits - 1 */ 1048575; // mask for pollFDSeq
 
 internal static bool closing(this pollInfo i) {
@@ -153,7 +152,7 @@ internal static pollInfo info(this ж<pollDesc> Ꮡpd) {
 internal static void publishInfo(this ж<pollDesc> Ꮡpd) {
     ref var pd = ref Ꮡpd.DerefOrNull();
 
-    uint32 info = default!;
+    uint32 info = default;
     if (pd.closing) {
         info |= (uint32)(pollClosing);
     }
@@ -249,27 +248,27 @@ internal static (ж<pollDesc>, nint) poll_runtime_pollOpen(uintptr fd) {
     if (rg != pdNil && rg != pdReady) {
         @throw(runtimeBlockedReadOnFreeˢ);
     }
-    pd.Value.fd = fd;
+    pd.fd = fd;
     if (pd.of(pollDesc.Ꮡfdseq).Load() == 0) {
         // The value 0 is special in setEventErr, so don't use it.
         pd.of(pollDesc.Ꮡfdseq).Store(1);
     }
-    pd.Value.closing = false;
+    pd.closing = false;
     pd.setEventErr(false, 0);
-    pd.Value.rseq++;
+    pd.rseq++;
     pd.of(pollDesc.Ꮡrg).Store(pdNil);
-    pd.Value.rd = 0;
-    pd.Value.wseq++;
+    pd.rd = 0;
+    pd.wseq++;
     pd.of(pollDesc.Ꮡwg).Store(pdNil);
-    pd.Value.wd = 0;
-    pd.Value.self = pd;
+    pd.wd = 0;
+    pd.self = pd;
     pd.publishInfo();
     unlock(pd.of(pollDesc.Ꮡlock));
 
     var errno = netpollopen(fd, pd);
     if (errno != 0) {
         Ꮡpollcache.free(pd);
-        return (default!, (nint)errno);
+        return (default, (nint)errno);
     }
     return (pd, 0);
 }
@@ -327,16 +326,15 @@ internal static void free(this ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
 // This returns an error code; the codes are defined above.
 //
 //go:linkname poll_runtime_pollReset internal/poll.runtime_pollReset
-internal static nint poll_runtime_pollReset(ж<pollDesc> Ꮡpd, nint mode) {
-    nint errcode = netpollcheckerr(Ꮡpd, (int32)mode);
+internal static nint poll_runtime_pollReset(ж<pollDesc> pd, nint mode) {
+    nint errcode = netpollcheckerr(pd, (int32)mode);
     if (errcode != pollNoError) {
         return errcode;
     }
-    if (mode == (rune)'r'){
-        Ꮡpd.of(pollDesc.Ꮡrg).Store(pdNil);
-    } else 
-    if (mode == (rune)'w') {
-        Ꮡpd.of(pollDesc.Ꮡwg).Store(pdNil);
+    if (mode == 'r') {
+        pd.of(pollDesc.Ꮡrg).Store(pdNil);
+    } else if (mode == 'w') {
+        pd.of(pollDesc.Ꮡwg).Store(pdNil);
     }
     return pollNoError;
 }
@@ -347,17 +345,17 @@ internal static nint poll_runtime_pollReset(ж<pollDesc> Ꮡpd, nint mode) {
 // This returns an error code; the codes are defined above.
 //
 //go:linkname poll_runtime_pollWait internal/poll.runtime_pollWait
-internal static nint poll_runtime_pollWait(ж<pollDesc> Ꮡpd, nint mode) {
-    nint errcode = netpollcheckerr(Ꮡpd, (int32)mode);
+internal static nint poll_runtime_pollWait(ж<pollDesc> pd, nint mode) {
+    nint errcode = netpollcheckerr(pd, (int32)mode);
     if (errcode != pollNoError) {
         return errcode;
     }
     // As for now only Solaris, illumos, AIX and wasip1 use level-triggered IO.
     if (GOOS == "solaris"u8 || GOOS == "illumos"u8 || GOOS == "aix"u8 || GOOS == "wasip1"u8) {
-        netpollarm(ref (Ꮡpd).DerefOrNull(), mode);
+        netpollarm(ref (pd).DerefOrNull(), mode);
     }
-    while (!netpollblock(Ꮡpd, (int32)mode, false)) {
-        errcode = netpollcheckerr(Ꮡpd, (int32)mode);
+    while (!netpollblock(pd, (int32)mode, false)) {
+        errcode = netpollcheckerr(pd, (int32)mode);
         if (errcode != pollNoError) {
             return errcode;
         }
@@ -369,10 +367,10 @@ internal static nint poll_runtime_pollWait(ж<pollDesc> Ꮡpd, nint mode) {
 }
 
 //go:linkname poll_runtime_pollWaitCanceled internal/poll.runtime_pollWaitCanceled
-internal static void poll_runtime_pollWaitCanceled(ж<pollDesc> Ꮡpd, nint mode) {
+internal static void poll_runtime_pollWaitCanceled(ж<pollDesc> pd, nint mode) {
     // This function is used only on windows after a failed attempt to cancel
     // a pending async IO operation. Wait for ioready, ignore closing or timeouts.
-    while (!netpollblock(Ꮡpd, (int32)mode, true)) {
+    while (!netpollblock(pd, (int32)mode, true)) {
     }
 }
 
@@ -395,10 +393,10 @@ internal static void poll_runtime_pollSetDeadline(ж<pollDesc> Ꮡpd, int64 d, n
             d = 9223372036854775807L;
         }
     }
-    if (mode == (rune)'r' || mode == (rune)'r' + (rune)'w') {
+    if (mode == 'r' || mode == (rune)'r' + (rune)'w') {
         pd.rd = d;
     }
-    if (mode == (rune)'w' || mode == (rune)'r' + (rune)'w') {
+    if (mode == 'w' || mode == (rune)'r' + (rune)'w') {
         pd.wd = d;
     }
     Ꮡpd.publishInfo();
@@ -407,7 +405,7 @@ internal static void poll_runtime_pollSetDeadline(ж<pollDesc> Ꮡpd, int64 d, n
     if (combo) {
         rtf = netpollDeadline;
     }
-    if (!pd.rrun){
+    if (!pd.rrun) {
         if (pd.rd > 0) {
             // Copy current seq into the timer arg.
             // Timer func will check the seq against current descriptor seq,
@@ -415,25 +413,23 @@ internal static void poll_runtime_pollSetDeadline(ж<pollDesc> Ꮡpd, int64 d, n
             Ꮡpd.of(pollDesc.Ꮡrt).modify(pd.rd, 0, rtf, Ꮡpd.makeArg(), pd.rseq);
             pd.rrun = true;
         }
-    } else 
-    if (pd.rd != rd0 || combo != combo0) {
+    } else if (pd.rd != rd0 || combo != combo0) {
         pd.rseq++; // invalidate current timers
-        if (pd.rd > 0){
+        if (pd.rd > 0) {
             Ꮡpd.of(pollDesc.Ꮡrt).modify(pd.rd, 0, rtf, Ꮡpd.makeArg(), pd.rseq);
         } else {
             Ꮡpd.of(pollDesc.Ꮡrt).stop();
             pd.rrun = false;
         }
     }
-    if (!pd.wrun){
+    if (!pd.wrun) {
         if (pd.wd > 0 && !combo) {
             Ꮡpd.of(pollDesc.Ꮡwt).modify(pd.wd, 0, netpollWriteDeadline, Ꮡpd.makeArg(), pd.wseq);
             pd.wrun = true;
         }
-    } else 
-    if (pd.wd != wd0 || combo != combo0) {
+    } else if (pd.wd != wd0 || combo != combo0) {
         pd.wseq++; // invalidate current timers
-        if (pd.wd > 0 && !combo){
+        if (pd.wd > 0 && !combo) {
             Ꮡpd.of(pollDesc.Ꮡwt).modify(pd.wd, 0, netpollWriteDeadline, Ꮡpd.makeArg(), pd.wseq);
         } else {
             Ꮡpd.of(pollDesc.Ꮡwt).stop();
@@ -443,13 +439,13 @@ internal static void poll_runtime_pollSetDeadline(ж<pollDesc> Ꮡpd, int64 d, n
     // If we set the new deadline in the past, unblock currently pending IO if any.
     // Note that pd.publishInfo has already been called, above, immediately after modifying rd and wd.
     var delta = (int32)0;
-    ж<g> rg = default!;
-    ж<g> wg = default!;
+    ж<g> rg = default;
+    ж<g> wg = default;
     if (pd.rd < 0) {
-        rg = netpollunblock(Ꮡpd, (rune)'r', false, ref delta);
+        rg = netpollunblock(Ꮡpd, 'r', false, ref delta);
     }
     if (pd.wd < 0) {
-        wg = netpollunblock(Ꮡpd, (rune)'w', false, ref delta);
+        wg = netpollunblock(Ꮡpd, 'w', false, ref delta);
     }
     unlock(Ꮡpd.of(pollDesc.Ꮡlock));
     if (rg != nil) {
@@ -475,12 +471,12 @@ internal static void poll_runtime_pollUnblock(ж<pollDesc> Ꮡpd) {
     pd.closing = true;
     pd.rseq++;
     pd.wseq++;
-    ж<g> rg = default!;
-    ж<g> wg = default!;
+    ж<g> rg = default;
+    ж<g> wg = default;
     Ꮡpd.publishInfo();
     var delta = (int32)0;
-    rg = netpollunblock(Ꮡpd, (rune)'r', false, ref delta);
-    wg = netpollunblock(Ꮡpd, (rune)'w', false, ref delta);
+    rg = netpollunblock(Ꮡpd, 'r', false, ref delta);
+    wg = netpollunblock(Ꮡpd, 'w', false, ref delta);
     if (pd.rrun) {
         Ꮡpd.of(pollDesc.Ꮡrt).stop();
         pd.rrun = false;
@@ -510,17 +506,17 @@ internal static void poll_runtime_pollUnblock(ж<pollDesc> Ꮡpd) {
 // This may run while the world is stopped, so write barriers are not allowed.
 //
 //go:nowritebarrier
-internal static int32 netpollready(ж<gList> ᏑtoRun, ж<pollDesc> Ꮡpd, int32 mode) {
+internal static int32 netpollready(ж<gList> ᏑtoRun, ж<pollDesc> pd, int32 mode) {
     ref var toRun = ref ᏑtoRun.DerefOrNull();
 
     var delta = (int32)0;
-    ж<g> rg = default!;
-    ж<g> wg = default!;
-    if (mode == (rune)'r' || mode == (rune)'r' + (rune)'w') {
-        rg = netpollunblock(Ꮡpd, (rune)'r', true, ref delta);
+    ж<g> rg = default;
+    ж<g> wg = default;
+    if (mode == 'r' || mode == (rune)'r' + (rune)'w') {
+        rg = netpollunblock(pd, 'r', true, ref delta);
     }
-    if (mode == (rune)'w' || mode == (rune)'r' + (rune)'w') {
-        wg = netpollunblock(Ꮡpd, (rune)'w', true, ref delta);
+    if (mode == 'w' || mode == (rune)'r' + (rune)'w') {
+        wg = netpollunblock(pd, 'w', true, ref delta);
     }
     if (rg != nil) {
         toRun.push(rg);
@@ -531,25 +527,25 @@ internal static int32 netpollready(ж<gList> ᏑtoRun, ж<pollDesc> Ꮡpd, int32
     return delta;
 }
 
-internal static nint netpollcheckerr(ж<pollDesc> Ꮡpd, int32 mode) {
-    var info = Ꮡpd.info();
+internal static nint netpollcheckerr(ж<pollDesc> pd, int32 mode) {
+    var info = pd.info();
     if (info.closing()) {
         return pollErrClosing;
     }
-    if ((mode == (rune)'r' && info.expiredReadDeadline()) || (mode == (rune)'w' && info.expiredWriteDeadline())) {
+    if ((mode == 'r' && info.expiredReadDeadline()) || (mode == 'w' && info.expiredWriteDeadline())) {
         return pollErrTimeout;
     }
     // Report an event scanning error only on a read event.
     // An error on a write event will be captured in a subsequent
     // write call that is able to report a more specific error.
-    if (mode == (rune)'r' && info.eventErr()) {
+    if (mode == 'r' && info.eventErr()) {
         return pollErrNotPollable;
     }
     return pollNoError;
 }
 
-internal static bool netpollblockcommit(ж<g> Ꮡgp, @unsafe.Pointer gpp) {
-    var r = atomic.Casuintptr((ж<uintptr>)(uintptr)(gpp), pdWait, (uintptr)Ꮡgp);
+internal static bool netpollblockcommit(ж<g> gp, @unsafe.Pointer gpp) {
+    var r = atomic.Casuintptr((ж<uintptr>)(uintptr)(gpp), pdWait, (uintptr)gp);
     if (r) {
         // Bump the count of goroutines waiting for the poller.
         // The scheduler uses this to decide whether to block
@@ -559,8 +555,8 @@ internal static bool netpollblockcommit(ж<g> Ꮡgp, @unsafe.Pointer gpp) {
     return r;
 }
 
-internal static void netpollgoready(ж<g> Ꮡgp, nint traceskip) {
-    goready(Ꮡgp, traceskip + 1);
+internal static void netpollgoready(ж<g> gp, nint traceskip) {
+    goready(gp, traceskip + 1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -571,14 +567,14 @@ internal static readonly @string runtimeCorruptedPolldescˢ = "runtime: corrupte
 // waitio - wait only for completed IO, ignore errors
 // Concurrent calls to netpollblock in the same mode are forbidden, as pollDesc
 // can hold only a single waiting goroutine for each mode.
-internal static bool netpollblock(ж<pollDesc> Ꮡpd, int32 mode, bool waitio) {
-    var gpp = Ꮡpd.of(pollDesc.Ꮡrg);
-    if (mode == (rune)'w') {
-        gpp = Ꮡpd.of(pollDesc.Ꮡwg);
+internal static bool netpollblock(ж<pollDesc> pd, int32 mode, bool waitio) {
+    var gpp = pd.of(pollDesc.Ꮡrg);
+    if (mode == 'w') {
+        gpp = pd.of(pollDesc.Ꮡwg);
     }
 
     // set the gpp semaphore to pdWait
-    while (ᐧ) {
+    for (;;) {
         // Consume notification if already ready.
         if (gpp.CompareAndSwap(pdReady, pdNil)) {
             return true;
@@ -599,7 +595,7 @@ internal static bool netpollblock(ж<pollDesc> Ꮡpd, int32 mode, bool waitio) {
     // need to recheck error states after setting gpp to pdWait
     // this is necessary because runtime_pollUnblock/runtime_pollSetDeadline/deadlineimpl
     // do the opposite: store to closing/rd/wd, publishInfo, load of rg/wg
-    if (waitio || netpollcheckerr(Ꮡpd, mode) == pollNoError) {
+    if (waitio || netpollcheckerr(pd, mode) == pollNoError) {
         gopark(netpollblockcommit, @unsafe.Pointer.FromPinnedBox(gpp), waitReasonIOWait, traceBlockNet, 5);
     }
     // be careful to not lose concurrent pdReady notification
@@ -616,31 +612,30 @@ internal static bool netpollblock(ж<pollDesc> Ꮡpd, int32 mode, bool waitio) {
 // It adds any adjustment to netpollWaiters to *delta;
 // this adjustment should be applied after the goroutine has
 // been marked ready.
-internal static ж<g> netpollunblock(ж<pollDesc> Ꮡpd, int32 mode, bool ioready, ref int32 delta) {
-    var gpp = Ꮡpd.of(pollDesc.Ꮡrg);
-    if (mode == (rune)'w') {
-        gpp = Ꮡpd.of(pollDesc.Ꮡwg);
+internal static ж<g> netpollunblock(ж<pollDesc> pd, int32 mode, bool ioready, ref int32 delta) {
+    var gpp = pd.of(pollDesc.Ꮡrg);
+    if (mode == 'w') {
+        gpp = pd.of(pollDesc.Ꮡwg);
     }
 
-    while (ᐧ) {
+    for (;;) {
         var old = gpp.Load();
         if (old == pdReady) {
-            return default!;
+            return default;
         }
         if (old == pdNil && !ioready) {
             // Only set pdReady for ioready. runtime_pollWait
             // will check for timeout/cancel before waiting.
-            return default!;
+            return default;
         }
         var @new = pdNil;
         if (ioready) {
             @new = pdReady;
         }
         if (gpp.CompareAndSwap(old, @new)) {
-            if (old == pdWait){
+            if (old == pdWait) {
                 old = pdNil;
-            } else 
-            if (old != pdNil) {
+            } else if (old != pdNil) {
                 delta -= 1;
             }
             return (ж<g>)(uintptr)((@unsafe.Pointer)old);
@@ -668,23 +663,23 @@ internal static void netpolldeadlineimpl(ж<pollDesc> Ꮡpd, uintptr seq, bool r
         return;
     }
     var delta = (int32)0;
-    ж<g> rg = default!;
+    ж<g> rg = default;
     if (read) {
         if (pd.rd <= 0 || !pd.rrun) {
             @throw(runtimeInconsistentReadˢ);
         }
         pd.rd = -1;
         Ꮡpd.publishInfo();
-        rg = netpollunblock(Ꮡpd, (rune)'r', false, ref delta);
+        rg = netpollunblock(Ꮡpd, 'r', false, ref delta);
     }
-    ж<g> wg = default!;
+    ж<g> wg = default;
     if (write) {
         if (pd.wd <= 0 || !pd.wrun && !read) {
             @throw(runtimeInconsistentWriteˢ);
         }
         pd.wd = -1;
         Ꮡpd.publishInfo();
-        wg = netpollunblock(Ꮡpd, (rune)'w', false, ref delta);
+        wg = netpollunblock(Ꮡpd, 'w', false, ref delta);
     }
     unlock(Ꮡpd.of(pollDesc.Ꮡlock));
     if (rg != nil) {
@@ -741,14 +736,14 @@ internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
         for (var i = (uintptr)0; i < n; i++) {
             var pdΔ1 = (ж<pollDesc>)(uintptr)(add(mem, i * pdSize));
             lockInit(ref (pdΔ1.of(pollDesc.Ꮡlock)).DerefOrNull(), lockRankPollDesc);
-            pdΔ1.of(pollDesc.Ꮡrt).init(default!, default!);
-            pdΔ1.of(pollDesc.Ꮡwt).init(default!, default!);
+            pdΔ1.of(pollDesc.Ꮡrt).init(default, default);
+            pdΔ1.of(pollDesc.Ꮡwt).init(default, default);
             pdΔ1.link = c.first;
             c.first = pdΔ1;
         }
     }
     var pd = c.first;
-    c.first = pd.Value.link;
+    c.first = pd.link;
     unlock(Ꮡc.of(pollCache.Ꮡlock));
     return pd;
 }

@@ -17,11 +17,11 @@ public static (ж<File> r, ж<File> w, error err) Pipe() {
     array<nint> p = new(2);
 
     var e = syscall.Pipe2(p[0..], syscall.O_CLOEXEC);
-    if (e != default!) {
-        return (default!, default!, NewSyscallError(pipe2ˢ, e));
+    if (e != nil) {
+        return (default, default, NewSyscallError(pipe2ˢ, e));
     }
 
-    return (newFile(p[0], "|0"u8, kindPipe, false), newFile(p[1], "|1"u8, kindPipe, false), default!);
+    return (newFile(p[0], "|0"u8, kindPipe, false), newFile(p[1], "|1"u8, kindPipe, false), default);
 }
 
 } // end os_package

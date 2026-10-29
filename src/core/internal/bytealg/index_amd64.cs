@@ -11,7 +11,7 @@ partial class bytealg_package {
 public static UntypedInt MaxBruteForce => 64;
 
 [GoInit] internal static void init() {
-    if (cpu.X86.HasAVX2){
+    if (cpu.X86.HasAVX2) {
         MaxLen = 63;
     } else {
         MaxLen = 31;

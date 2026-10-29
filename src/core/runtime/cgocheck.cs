@@ -21,7 +21,7 @@ internal static readonly @string cgoWriteBarrierFail = "unpinned Go pointer stor
 //
 //go:nosplit
 //go:nowritebarrier
-internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer src) {
+internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> dst, @unsafe.Pointer src) {
     if (!mainStarted) {
         // Something early in startup hates this function.
         // Don't start doing any actual checking until the
@@ -31,7 +31,7 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
     if (!cgoIsGoPointer(src)) {
         return;
     }
-    if (cgoIsGoPointer(@unsafe.Pointer.FromPinnedBox(Ꮡdst))) {
+    if (cgoIsGoPointer(@unsafe.Pointer.FromPinnedBox(dst))) {
         return;
     }
 
@@ -57,12 +57,12 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
     // It's OK if writing to memory allocated by persistentalloc.
     // Do this check last because it is more expensive and rarely true.
     // If it is false the expense doesn't matter since we are crashing.
-    if (inPersistentAlloc((uintptr)Ꮡdst)) {
+    if (inPersistentAlloc((uintptr)dst)) {
         return;
     }
 
     systemstack(() => {
-        println((@string)"write of unpinned Go pointer"u8, (Δhex)(uint64)(uintptr)src, (@string)"to non-Go memory"u8, (Δhex)(uint64)(uintptr)Ꮡdst);
+        println((@string)"write of unpinned Go pointer"u8, (Δhex)(uint64)(uintptr)src, (@string)"to non-Go memory"u8, (Δhex)(uint64)(uintptr)dst);
         @throw(cgoWriteBarrierFail);
     });
 }
@@ -159,22 +159,22 @@ internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, u
 //
 //go:nosplit
 //go:nowritebarrier
-internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintptr off, uintptr size) {
+internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> gcbits, uintptr off, uintptr size) {
     var skipMask = off / (uintptr)goarch.PtrSize / 8;
     var skipBytes = skipMask * (uintptr)goarch.PtrSize * 8;
-    var ptrmask = addb(Ꮡgcbits, skipMask);
+    var ptrmask = addb(gcbits, skipMask);
     src = (uintptr)add(src, skipBytes);
     off -= skipBytes;
     size += off;
-    uint32 bits = default!;
+    uint32 bits = default;
     for (var i = (uintptr)0; i < size; i += goarch.PtrSize) {
-        if ((uintptr)(i & (uintptr)(goarch.PtrSize * 8 - 1)) == 0){
+        if ((uintptr)(i & (uintptr)(goarch.PtrSize * 8 - 1)) == 0) {
             bits = (uint32)(ptrmask.Value);
             ptrmask = addb(ptrmask, 1);
         } else {
-            bits >>= (int)(1);
+            bits >>= 1;
         }
-        if (off > 0){
+        if (off > 0) {
             off -= goarch.PtrSize;
         } else {
             if ((bits & 1) != 0) {

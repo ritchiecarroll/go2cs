@@ -65,7 +65,7 @@ internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) {
                 if (h.want(n)) {
                     handlers.@ref[n]--;
                     h.clear(n);
-                    if ((~h).mask == zerohandler.mask) {
+                    if (h.mask == zerohandler.mask) {
                         delete(handlers.m, c);
                     }
                 }
@@ -74,7 +74,7 @@ internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) {
             action(n);
         }
 
-        if (len(sigs) == 0){
+        if (len(sigs) == 0) {
             for (nint n = 0; n < numSig; n++) {
                 remove(n);
             }
@@ -133,7 +133,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
     try {
         var sig = sigʗp.sslice();
 
-        if (c == default!) {
+        if (c == nil) {
             throw panic("os/signal: Notify using nil channel");
         }
 
@@ -142,7 +142,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
 
         var h = handlers.m[c];
         if (h == nil) {
-            if (handlers.m == default!) {
+            if (handlers.m == nil) {
                 handlers.m = new map<channel/*<-*/<osꓸSignal>, ж<handler>>();
             }
             h = @new<handler>();
@@ -162,7 +162,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
                     // The runtime requires that we enable a
                     // signal before starting the watcher.
                     ᏑwatchSignalLoopOnce.Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
-                        if (watchSignalLoop != default!) {
+                        if (watchSignalLoop != nil) {
                             goǃ(watchSignalLoop);
                         }
                     });
@@ -171,7 +171,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
             }
         }
 
-        if (len(sig) == 0){
+        if (len(sig) == 0) {
             for (nint n = 0; n < numSig; n++) {
                 add(n);
             }
@@ -313,7 +313,7 @@ internal static void process(osꓸSignal sig) {
 // call stop as soon as the operations running in this Context complete and
 // signals no longer need to be diverted to the context.
 public static partial (context.Context ctx, Action stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
-    context.Context ctx = default!;
+    context.Context ctx = default;
     var signals = signalsʗp.slice();
 
     (ctx, var cancel) = context.WithCancelCause(parent);
@@ -322,16 +322,16 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
         cancel: cancel,
         signals: signals
     ));
-    c.Value.ch = new channel<osꓸSignal>(1);
-    Notify((~c).ch.WithDirection(GoChanDir.Send), (~c).signals.ꓸꓸꓸ);
-    if (ctx.Err() == default!) {
+    c.ch = new channel<osꓸSignal>(1);
+    Notify(c.ch.AsSendOnly(), c.signals.ꓸꓸꓸ);
+    if (ctx.Err() == nil) {
         var cʗ1 = c;
         goǃ(() => {
-            var selᴛ3 = (~cʗ1).ch;
+            var selᴛ3 = cʗ1.ch;
             var selᴛ4 = (~cʗ1).Context.Done();
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
             case 0 when selᴛ3.ꟷᐳ(out var s): {
-                (~cʗ1).cancel((signalError)(s.String() + " signal received"u8));
+                cʗ1.cancel((signalError)(s.String() + " signal received"u8));
                 break;
             }
             case 1 when selᴛ4.ꟷᐳ(out _): {
@@ -350,8 +350,8 @@ partial struct signalCtx {
 }
 
 internal static void stop(this ref signalCtx c) {
-    c.cancel(default!);
-    Stop(c.ch.WithDirection(GoChanDir.Send));
+    c.cancel(default);
+    Stop(c.ch.AsSendOnly());
 }
 
 partial interface stringer {
@@ -361,7 +361,7 @@ partial interface stringer {
 internal static @string String(this ref signalCtx c) {
     var bufᴷ = new stackAppend<byte>();
 
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     // We know that the type of c.Context is context.cancelCtx, and we know that the
     // String method of cancelCtx returns a string that ends with ".WithCancel".
     @string name = c.Context._<stringer>().String();
@@ -372,12 +372,12 @@ internal static @string String(this ref signalCtx c) {
         foreach (var (i, s) in c.signals) {
             buf = append(buf, s.String().ꓸꓸꓸ);
             if (i != len(c.signals) - 1) {
-                buf = append(bufᴷ, buf, (byte)((rune)' '));
+                buf = append(bufᴷ, buf, (byte)' ');
             }
         }
-        buf = append(buf, (byte)((rune)']'));
+        buf = append(buf, (byte)']');
     }
-    buf = append(buf, (byte)((rune)')'));
+    buf = append(buf, (byte)')');
     return (@string)buf;
 }
 

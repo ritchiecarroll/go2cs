@@ -37,11 +37,11 @@ internal static readonly @string cryptoRc4UseOfRc4IsNotˢ = "crypto/rc4: use of 
 // RC4 key, at least 1 byte and at most 256 bytes.
 public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoRc4UseOfRc4IsNotˢ));
+        return (default, errors.New(cryptoRc4UseOfRc4IsNotˢ));
     }
     nint k = len(key);
     if (k < 1 || k > 256) {
-        return (default!, ((KeySizeError)k));
+        return (default, ((KeySizeError)k));
     }
     ref var c = ref heap(new Cipher(), out var Ꮡc);
     for (nint i = 0; i < 256; i++) {
@@ -52,7 +52,7 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
         j += (uint8)((uint8)c.s[i] + key[rem(i, k)]);
         (c.s[i], c.s[j]) = (c.s[j], c.s[i]);
     }
-    return (Ꮡc, default!);
+    return (Ꮡc, default);
 }
 
 // Reset zeros the key data and makes the [Cipher] unusable.

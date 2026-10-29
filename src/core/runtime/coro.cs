@@ -40,24 +40,22 @@ partial struct coro {
 // and returns that coro.
 internal static ж<coro> newcoro(Action<ж<coro>> f) {
     var c = @new<coro>();
-    c.Value.f = f;
+    c.f = f;
     var pc = sys.GetCallerPC();
-    ref var gp = ref heap<ж<g>>(out var Ꮡgp);
-    gp = getg();
+    ref var gp = ref heap<ж<g>>(getg(), out var Ꮡgp);
     var cʗ1 = c;
     systemstack(() => {
         var mp = Ꮡgp.ValueSlot.Value.m;
-        ref var start = ref heap<Action>(out var Ꮡstart);
-        start = corostart;
+        ref var start = ref heap<Action>(corostart, out var Ꮡstart);
         var startfv = ~Ꮡstart.Reinterpret<Action, ж<funcval>>();
         Ꮡgp.ValueSlot = newproc1(startfv, Ꮡgp.ValueSlot, pc, true, waitReasonCoroutine);
 
         // Scribble down locked thread state if needed and/or donate
         // thread-lock state to the new goroutine.
         if ((~mp).lockedExt + (~mp).lockedInt != 0) {
-            cʗ1.Value.mp = mp;
-            cʗ1.Value.lockedExt = mp.Value.lockedExt;
-            cʗ1.Value.lockedInt = mp.Value.lockedInt;
+            cʗ1.mp = mp;
+            cʗ1.lockedExt = mp.Value.lockedExt;
+            cʗ1.lockedInt = mp.Value.lockedInt;
         }
     });
     gp.Value.coroarg = c;
@@ -73,10 +71,10 @@ internal static void corostart() {
     try {
         var gp = getg();
         var c = gp.Value.coroarg;
-        gp.Value.coroarg = default!;
+        gp.Value.coroarg = default;
 
         defer(coroexit, c, ref ᒐ);
-        (~c).f(c);
+        c.f(c);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -84,9 +82,9 @@ internal static void corostart() {
 
 // coroexit is like coroswitch but closes the coro
 // and exits the current goroutine
-internal static void coroexit(ж<coro> Ꮡc) {
+internal static void coroexit(ж<coro> c) {
     var gp = getg();
-    gp.Value.coroarg = Ꮡc;
+    gp.Value.coroarg = c;
     gp.Value.coroexit = true;
     mcall(coroswitch_m);
 }
@@ -95,9 +93,9 @@ internal static void coroexit(ж<coro> Ꮡc) {
 
 // coroswitch switches to the goroutine blocked on c
 // and then blocks the current goroutine on c.
-internal static void coroswitch(ж<coro> Ꮡc) {
+internal static void coroswitch(ж<coro> c) {
     var gp = getg();
-    gp.Value.coroarg = Ꮡc;
+    gp.Value.coroarg = c;
     mcall(coroswitch_m);
 }
 
@@ -122,7 +120,7 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var c = gp.coroarg;
-    gp.coroarg = default!;
+    gp.coroarg = default;
     var exit = gp.coroexit;
     gp.coroexit = false;
     var mp = gp.m;
@@ -134,11 +132,11 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     // the goroutine which called newcoro. Thread-lock state consists of the thread and the number
     // of internal (cgo callback, etc.) and external (LockOSThread) thread locks.
     var locked = gp.lockedm != 0;
-    if ((~c).mp != nil || locked) {
-        if (mp != (~c).mp || (~mp).lockedInt != (~c).lockedInt || (~mp).lockedExt != (~c).lockedExt) {
-            print((@string)"coro: got thread "u8, @unsafe.Pointer.FromPinnedBox(mp), (@string)", want "u8, @unsafe.Pointer.FromPinnedBox((~c).mp), (@string)"\n"u8);
-            print((@string)"coro: got lock internal "u8, (~mp).lockedInt, (@string)", want "u8, (~c).lockedInt, (@string)"\n"u8);
-            print((@string)"coro: got lock external "u8, (~mp).lockedExt, (@string)", want "u8, (~c).lockedExt, (@string)"\n"u8);
+    if (c.mp != nil || locked) {
+        if (mp != c.mp || (~mp).lockedInt != c.lockedInt || (~mp).lockedExt != c.lockedExt) {
+            print((@string)"coro: got thread "u8, @unsafe.Pointer.FromPinnedBox(mp), (@string)", want "u8, @unsafe.Pointer.FromPinnedBox(c.mp), (@string)"\n"u8);
+            print((@string)"coro: got lock internal "u8, (~mp).lockedInt, (@string)", want "u8, c.lockedInt, (@string)"\n"u8);
+            print((@string)"coro: got lock external "u8, (~mp).lockedExt, (@string)", want "u8, c.lockedExt, (@string)"\n"u8);
             @throw(coroOsThreadLockingMustˢ);
         }
     }
@@ -167,14 +165,14 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
         gp.lockedm.set(nil);
     }
 
-    if (exit){
+    if (exit) {
         // The M might have a non-zero OS thread lock count when we get here, gdestroy
         // will avoid destroying the M if the G isn't explicitly locked to it via lockedm,
         // which we cleared above. It's fine to gdestroy here also, even when locked to
         // the thread, because we'll be switching back to another goroutine anyway, which
         // will take back its thread-lock state before returning.
         gdestroy(Ꮡgp);
-        Ꮡgp = default!; gp = ref Ꮡgp.DerefOrNull();
+        Ꮡgp = default; gp = ref Ꮡgp.DerefOrNull();
     } else {
         // If we can CAS ourselves directly from running to waiting, so do,
         // keeping the control transfer as lightweight as possible.
@@ -191,8 +189,8 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
 
     // The goroutine stored in c is the one to run next.
     // Swap it with ourselves.
-    ж<g> gnext = default!;
-    while (ᐧ) {
+    ж<g> gnext = default;
+    for (;;) {
         // Note: this is a racy load, but it will eventually
         // get the right value, and if it gets the wrong value,
         // the c.gp.cas will fail, so no harm done other than
@@ -203,11 +201,11 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
         // We are avoiding the atomic load to keep this path
         // as lightweight as absolutely possible.
         // (The atomic load is free on x86 but not free elsewhere.)
-        var next = c.Value.gp;
+        var next = c.gp;
         if (next.ptr() == nil) {
             @throw(coroswitchOnExitedCoroˢ);
         }
-        Δguintptr self = default!;
+        Δguintptr self = default;
         self.set(Ꮡgp);
         if (c.of(coro.Ꮡgp).cas(next, self)) {
             gnext = next.ptr();
@@ -244,7 +242,7 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     // in curg, so that we have a valid curg for allocation (tryRecordGoroutineProfile
     // may allocate).
     if (goroutineProfile.active) {
-        tryRecordGoroutineProfile(gnext, default!, osyield);
+        tryRecordGoroutineProfile(gnext, default, osyield);
     }
 
     if (!canCAS || !gnext.of(g.Ꮡatomicstatus).CompareAndSwap(_Gwaiting, _Grunning)) {

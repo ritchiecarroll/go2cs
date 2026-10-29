@@ -57,7 +57,7 @@ public static (slice<byte> value, bool ok) GetParam(this ref ΔSVCBResource r, S
             break;
         }
     }
-    return (default!, false);
+    return (default, false);
 }
 
 // SetParam sets a parameter value by key.
@@ -160,11 +160,11 @@ internal static (slice<byte>, error) pack(this ref ΔSVCBResource r, slice<byte>
     // compression for RR types that are not "well-known".
     // https://datatracker.ietf.org/doc/html/rfc9460#section-2.2 explicitly states that
     // compression of the Target is prohibited, following RFC 3597.
-    (msg, var err) = r.Target.pack(msg, default!, 0);
-    if (err != default!) {
+    (msg, var err) = r.Target.pack(msg, default, 0);
+    if (err != nil) {
         return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SVCBResource.Target"u8, err))));
     }
-    SVCParamKey previousKey = default!;
+    SVCParamKey previousKey = default;
     foreach (var (i, param) in r.Params) {
         if (i > 0 && param.Key <= previousKey) {
             return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SVCBResource.Params"u8, errParamOutOfOrder))));
@@ -176,61 +176,61 @@ internal static (slice<byte>, error) pack(this ref ΔSVCBResource r, slice<byte>
         msg = packUint16(msg, (uint16)len(param.Value));
         msg = appendꓸꓸꓸ(msg, param.Value);
     }
-    return (msg, default!);
+    return (msg, default);
 }
 
 internal static (ΔSVCBResource, error) unpackSVCBResource(slice<byte> msg, nint off, uint16 length) {
     // Wire format reference: https://www.rfc-editor.org/rfc/rfc9460.html#section-2.2.
-    var r = new ΔSVCBResource(nil);
+    var r = new ΔSVCBResource();
     nint paramsOff = off;
     nint bodyEnd = off + (nint)length;
 
-    error err = default!;
+    error err = default;
     {
-        (r.Priority, paramsOff, err) = unpackUint16(msg, paramsOff); if (err != default!) {
-            return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Priority"u8, err))));
+        (r.Priority, paramsOff, err) = unpackUint16(msg, paramsOff); if (err != nil) {
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Priority"u8, err))));
         }
     }
 
     {
-        (paramsOff, err) = r.Target.unpack(msg, paramsOff); if (err != default!) {
-            return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Target"u8, err))));
+        (paramsOff, err) = r.Target.unpack(msg, paramsOff); if (err != nil) {
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Target"u8, err))));
         }
     }
 
     // Two-pass parsing to avoid allocations.
     // First, count the number of params.
     nint n = 0;
-    uint16 totalValueLen = default!;
+    uint16 totalValueLen = default;
     off = paramsOff;
-    uint16 previousKey = default!;
+    uint16 previousKey = default;
     while (off < bodyEnd) {
-        uint16 key = default!;
-        uint16 size = default!;
+        uint16 key = default;
+        uint16 size = default;
         {
-            (key, off, err) = unpackUint16(msg, off); if (err != default!) {
-                return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Params key"u8, err))));
+            (key, off, err) = unpackUint16(msg, off); if (err != nil) {
+                return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Params key"u8, err))));
             }
         }
         if (n > 0 && key <= previousKey) {
             // As per https://www.rfc-editor.org/rfc/rfc9460.html#section-2.2, clients MUST
             // consider the RR malformed if the SvcParamKeys are not in strictly increasing numeric order
-            return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Params"u8, errParamOutOfOrder))));
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Params"u8, errParamOutOfOrder))));
         }
         {
-            (size, off, err) = unpackUint16(msg, off); if (err != default!) {
-                return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Params value length"u8, err))));
+            (size, off, err) = unpackUint16(msg, off); if (err != nil) {
+                return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Params value length"u8, err))));
             }
         }
         if (off + (nint)size > bodyEnd) {
-            return (new ΔSVCBResource(nil), errResourceLen);
+            return (new ΔSVCBResource(), errResourceLen);
         }
         totalValueLen += size;
         off += (nint)size;
         n++;
     }
     if (off != bodyEnd) {
-        return (new ΔSVCBResource(nil), errResourceLen);
+        return (new ΔSVCBResource(), errResourceLen);
     }
 
     // Second, fill in the params.
@@ -241,46 +241,46 @@ internal static (ΔSVCBResource, error) unpackSVCBResource(slice<byte> msg, nint
     off = paramsOff;
     for (nint i = 0; i < n; i++) {
         var p = Ꮡ(r.Params, i);
-        uint16 key = default!;
-        uint16 size = default!;
+        uint16 key = default;
+        uint16 size = default;
         {
-            (key, off, err) = unpackUint16(msg, off); if (err != default!) {
-                return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("param key"u8, err))));
+            (key, off, err) = unpackUint16(msg, off); if (err != nil) {
+                return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param key"u8, err))));
             }
         }
-        p.Value.Key = (SVCParamKey)key;
+        p.Key = (SVCParamKey)key;
         {
-            (size, off, err) = unpackUint16(msg, off); if (err != default!) {
-                return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("param length"u8, err))));
+            (size, off, err) = unpackUint16(msg, off); if (err != nil) {
+                return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param length"u8, err))));
             }
         }
         if (len(msg.slice(off)) < (nint)size) {
-            return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("param value"u8, errCalcLen))));
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param value"u8, errCalcLen))));
         }
         if (copy(valuesBuf, msg.slice(off).slice(0, (nint)size)) != (nint)size) {
-            return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("param value"u8, errCalcLen))));
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param value"u8, errCalcLen))));
         }
         p.Value.Value = valuesBuf.slice(0, size, size);
         valuesBuf = valuesBuf.slice(size);
         off += (nint)size;
     }
 
-    return (r.ΔClone(), default!);
+    return (r.ΔClone(), default);
 }
 
 // genericSVCBResource parses a single Resource Record compatible with SVCB.
 internal static (ΔSVCBResource, error) genericSVCBResource(this ref Parser p, Type svcbType) {
     if (!p.resHeaderValid || p.resHeaderType != svcbType) {
-        return (new ΔSVCBResource(nil), ErrNotStarted);
+        return (new ΔSVCBResource(), ErrNotStarted);
     }
     var (r, err) = unpackSVCBResource(p.msg, p.off, p.resHeaderLength);
-    if (err != default!) {
-        return (new ΔSVCBResource(nil), err);
+    if (err != nil) {
+        return (new ΔSVCBResource(), err);
     }
     p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
-    return (r.ΔClone(), default!);
+    return (r.ΔClone(), default);
 }
 
 // SVCBResource parses a single SVCBResource.
@@ -297,10 +297,10 @@ public static (ΔSVCBResource, error) SVCBResource(this ref Parser p) {
 // method.
 public static (ΔHTTPSResource, error) HTTPSResource(this ref Parser p) {
     var (svcb, err) = p.genericSVCBResource(TypeHTTPS);
-    if (err != default!) {
-        return (new ΔHTTPSResource(nil), err);
+    if (err != nil) {
+        return (new ΔHTTPSResource(), err);
     }
-    return (new ΔHTTPSResource(svcb.ΔClone()), default!);
+    return (new ΔHTTPSResource(svcb.ΔClone()), default);
 }
 
 // genericSVCBResource is the generic implementation for adding SVCB-like resources.
@@ -310,32 +310,32 @@ internal static error genericSVCBResource(this ж<Builder> Ꮡb, ResourceHeader 
     ref var b = ref Ꮡb.DerefOrNull();
 
     {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
+        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
-    if (err != default!) {
+    if (err != nil) {
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader"u8, err)));
     }
     nint preLen = len(msg);
     {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
+        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
             return new nestedErrorжerror(Ꮡ(new nestedError("ResourceBody"u8, err)));
         }
     }
     {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != default!) {
+        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
             return errΔ2;
         }
     }
     {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != default!) {
+        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
             return errΔ3;
         }
     }
     b.msg = msg;
-    return default!;
+    return default;
 }
 
 // SVCBResource adds a single SVCBResource.

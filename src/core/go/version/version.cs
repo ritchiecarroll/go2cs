@@ -42,7 +42,7 @@ public static @string Lang(@string x) {
     if (v == ""u8) {
         return ""u8;
     }
-    if (strings.HasPrefix(x[2..], v)){
+    if (strings.HasPrefix(x[2..], v)) {
         return x.slice(0, 2 + len(v)); // "go"+v without allocation
     } else {
         return "go"u8 + v;

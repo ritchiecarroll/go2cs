@@ -13,7 +13,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(debugCallWrapArgs))]
 partial class runtime_package {
 
 internal static readonly @string debugCallSystemStack = "executing on Go runtime stack"u8;
@@ -50,7 +49,7 @@ internal static @string debugCallCheck(uintptr pc) {
 
     // Switch to the system stack to avoid overflowing the user
     // stack.
-    @string ret = default!;
+    @string ret = default;
     systemstack(() => {
         var f = findfunc(pc);
         if (!f.valid()) {
@@ -61,11 +60,12 @@ internal static @string debugCallCheck(uintptr pc) {
         @string name = funcname(f);
 
         var exprᴛ1 = name;
-        if (exprᴛ1 == "debugCall32"u8 || exprᴛ1 == "debugCall64"u8 || exprᴛ1 == "debugCall128"u8 || exprᴛ1 == "debugCall256"u8 || exprᴛ1 == "debugCall512"u8 || exprᴛ1 == "debugCall1024"u8 || exprᴛ1 == "debugCall2048"u8 || exprᴛ1 == "debugCall4096"u8 || exprᴛ1 == "debugCall8192"u8 || exprᴛ1 == "debugCall16384"u8 || exprᴛ1 == "debugCall32768"u8 || exprᴛ1 == "debugCall65536"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "debugCall32"u8 || exprᴛ1 == "debugCall64"u8 || exprᴛ1 == "debugCall128"u8 || exprᴛ1 == "debugCall256"u8 || exprᴛ1 == "debugCall512"u8 || exprᴛ1 == "debugCall1024"u8 || exprᴛ1 == "debugCall2048"u8 || exprᴛ1 == "debugCall4096"u8 || exprᴛ1 == "debugCall8192"u8 || exprᴛ1 == "debugCall16384"u8 || exprᴛ1 == "debugCall32768"u8 || exprᴛ1 == "debugCall65536"u8: {
             // These functions are allowed so that the debugger can initiate multiple function calls.
             // See: https://golang.org/cl/161137/
             return;
-        }
+        }}
 
         // Disallow calls from the runtime. We could
         // potentially make this condition tighter (e.g., not
@@ -105,7 +105,7 @@ internal static readonly @string inconsistentLockedmˢ = "inconsistent lockedm"u
 //
 //go:nosplit
 internal static void debugCallWrap(uintptr dispatch) {
-    uint32 lockedExt = default!;
+    uint32 lockedExt = default;
     var callerpc = sys.GetCallerPC();
     var gp = getg();
 
@@ -124,8 +124,7 @@ internal static void debugCallWrap(uintptr dispatch) {
         // TODO(mknyszek): It would be nice to wrap these arguments in an allocated
         // closure and start the goroutine with that closure, but the compiler disallows
         // implicit closure allocation in the runtime.
-        ref var fn = ref heap<Action>(out var Ꮡfn);
-        fn = debugCallWrap1;
+        ref var fn = ref heap<Action>(debugCallWrap1, out var Ꮡfn);
         var newg = newproc1(~Ꮡfn.Reinterpret<Action, ж<funcval>>(), gpʗ1, callerpc, false, waitReasonZero);
         var args = Ꮡ(new debugCallWrapArgs(
             dispatch: dispatch,
@@ -213,7 +212,7 @@ internal static void debugCallWrap1() {
     var gp = getg();
     var args = (ж<debugCallWrapArgs>)(uintptr)((~gp).param);
     var (dispatch, callingG) = (args.dispatch, args.callingG);
-    gp.Value.param = default!;
+    gp.Value.param = default;
 
     // Dispatch call and trap panics.
     debugCallWrap2(dispatch);
@@ -265,11 +264,10 @@ internal static void debugCallWrap2(uintptr dispatch) {
     try {
         // Call the dispatch function and trap panics.
         ref var dispatchF = ref heap<Action>(out var ᏑdispatchF);
-        ref var dispatchFV = ref heap<funcval>(out var ᏑdispatchFV);
-        dispatchFV = new funcval(dispatch);
+        ref var dispatchFV = ref heap<funcval>(new funcval(dispatch), out var ᏑdispatchFV);
         (Ꮡ(@unsafe.Pointer.OfFunc(dispatchF))).Value = (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(ᏑdispatchFV));
 
-        bool ok = default!;
+        bool ok = default;
         defer(() => {
             if (!ok) {
                 var err = recover();

@@ -30,7 +30,7 @@ internal static ref sync.Pool flateWriterPool => ref ((StaticBox<sync.Pool>)Ꮡf
 
 internal static io.WriteCloser newFlateWriter(io.Writer w) {
     var (fw, ok) = ᏑflateWriterPool.Get()._<ж<flate.Writer>>(ᐧ);
-    if (ok){
+    if (ok) {
         fw.Reset(w);
     } else {
         (fw, _) = flate.NewWriter(w, 5);
@@ -47,8 +47,8 @@ partial struct pooledFlateWriter {
 internal static readonly @string writeAfterCloseˢ = "Write after Close"u8;
 
 internal static (nint n, error err) Write(this ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -73,15 +73,15 @@ internal static error Close(this ж<pooledFlateWriter> Ꮡw) {
 
         w.mu.Lock();
         ᒐd1 = true;
-        error err = default!;
+        error err = default;
         if (w.fw != nil) {
             err = w.fw.Close();
             ᏑflateWriterPool.Put(w.fw.OrTypedNil());
-            w.fw = default!;
+            w.fw = default;
         }
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -90,8 +90,8 @@ internal static ref sync.Pool flateReaderPool => ref ((StaticBox<sync.Pool>)Ꮡf
 
 internal static io.ReadCloser newFlateReader(io.Reader r) {
     var (fr, ok) = ᏑflateReaderPool.Get()._<io.ReadCloser>(ᐧ);
-    if (ok){
-        fr._<flate.Resetter>().Reset(r, default!);
+    if (ok) {
+        fr._<flate.Resetter>().Reset(r, default);
     } else {
         fr = flate.NewReader(r);
     }
@@ -107,15 +107,15 @@ partial struct pooledFlateReader {
 internal static readonly @string readAfterCloseˢ = "Read after Close"u8;
 
 internal static (nint n, error err) Read(this ж<pooledFlateReader> Ꮡr, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var r = ref Ꮡr.DerefOrNull();
 
         r.mu.Lock();
         defer(Ꮡr.of(pooledFlateReader.Ꮡmu).Unlock, ref ᒐ);
-        if (r.fr == default!) {
+        if (r.fr == nil) {
             (n, err) = (0, errors.New(readAfterCloseˢ)); goto ᒐdone;
         }
         (n, err) = r.fr.Read(p);
@@ -133,26 +133,26 @@ internal static error Close(this ж<pooledFlateReader> Ꮡr) {
 
         r.mu.Lock();
         ᒐd1 = true;
-        error err = default!;
-        if (r.fr != default!) {
+        error err = default;
+        if (r.fr != nil) {
             err = r.fr.Close();
             ᏑflateReaderPool.Put(r.fr);
-            r.fr = default!;
+            r.fr = default;
         }
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
 internal static readonly ж<sync.Map> Ꮡcompressors = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map compressors => ref ((StaticBox<sync.Map>)Ꮡcompressors).ValueSlot; // map[uint16]Compressor
+internal static ref sync.Map compressors => ref ((StaticBox<sync.Map>)Ꮡcompressors).ValueSlot;     // map[uint16]Compressor
 internal static readonly ж<sync.Map> Ꮡdecompressors = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map decompressors => ref ((StaticBox<sync.Map>)Ꮡdecompressors).ValueSlot; // map[uint16]Decompressor
 
 [GoInit] internal static void init() {
-    Ꮡcompressors.Store(Store, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default!)));
-    Ꮡcompressors.Store(Deflate, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (newFlateWriter(w), default!)));
+    Ꮡcompressors.Store(Store, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default)));
+    Ꮡcompressors.Store(Deflate, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (newFlateWriter(w), default)));
 
     Ꮡdecompressors.Store(Store, NilSafeDelegateConversion<Func<io.Reader, io.ReadCloser>, Func<io.Reader, io.ReadCloser>>(io.NopCloser));
     Ꮡdecompressors.Store(Deflate, new Func<io.Reader, io.ReadCloser>(newFlateReader));
@@ -181,7 +181,7 @@ public static void RegisterCompressor(uint16 method, Func<io.Writer, (io.WriteCl
 internal static Func<io.Writer, (io.WriteCloser, error)> compressor(uint16 method) {
     var (ci, ok) = Ꮡcompressors.Load(method);
     if (!ok) {
-        return default!;
+        return default;
     }
     return ci._<Func<io.Writer, (io.WriteCloser, error)>>();
 }
@@ -189,7 +189,7 @@ internal static Func<io.Writer, (io.WriteCloser, error)> compressor(uint16 metho
 internal static Func<io.Reader, io.ReadCloser> decompressor(uint16 method) {
     var (di, ok) = Ꮡdecompressors.Load(method);
     if (!ok) {
-        return default!;
+        return default;
     }
     return di._<Func<io.Reader, io.ReadCloser>>();
 }

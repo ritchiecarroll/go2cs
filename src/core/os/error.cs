@@ -23,11 +23,11 @@ partial class os_package {
 public static error ErrInvalid = fs.ErrInvalid; // "invalid argument"
 
 public static error ErrPermission = fs.ErrPermission; // "permission denied"
-public static error ErrExist = fs.ErrExist; // "file already exists"
-public static error ErrNotExist = fs.ErrNotExist; // "file does not exist"
-public static error ErrClosed = fs.ErrClosed; // "file already closed"
+public static error ErrExist = fs.ErrExist;           // "file already exists"
+public static error ErrNotExist = fs.ErrNotExist;     // "file does not exist"
+public static error ErrClosed = fs.ErrClosed;         // "file already closed"
 
-public static error ErrNoDeadline = errNoDeadline(); // "file type does not support deadline"
+public static error ErrNoDeadline = errNoDeadline();             // "file type does not support deadline"
 public static error ErrDeadlineExceeded = errDeadlineExceeded(); // "i/o timeout"
 
 internal static error errNoDeadline() {
@@ -73,8 +73,8 @@ public static bool Timeout(this ref SyscallError e) {
 // with the given system call name and error details.
 // As a convenience, if err is nil, NewSyscallError returns nil.
 public static error NewSyscallError(@string syscall, error err) {
-    if (err == default!) {
-        return default!;
+    if (err == nil) {
+        return default;
     }
     return new SyscallErrorжerror(Ꮡ(new SyscallError(syscall, err)));
 }
@@ -139,13 +139,13 @@ internal static bool underlyingErrorIs(error err, error target) {
 internal static error underlyingError(error err) {
     switch (err.type()) {
     case ж<PathError> errΔ1: {
-        return (~errΔ1).Err;
+        return errΔ1.Err;
     }
     case ж<LinkError> errΔ1: {
-        return (~errΔ1).Err;
+        return errΔ1.Err;
     }
     case ж<SyscallError> errΔ1: {
-        return (~errΔ1).Err;
+        return errΔ1.Err;
     }}
     return err;
 }

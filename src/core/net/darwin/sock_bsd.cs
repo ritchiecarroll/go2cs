@@ -15,22 +15,27 @@ internal static readonly @string kernIpcSoacceptqueueˢ = "kern.ipc.soacceptqueu
 internal static readonly @string kernSomaxconnˢ = "kern.somaxconn"u8;
 
 internal static nint maxListenerBacklog() {
-    uint32 n = default!;
-    error err = default!;
+    uint32 n = default;
+    error err = default;
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
         (n, err) = syscall.SysctlUint32(kernIpcSomaxconnˢ);
+        break;
     }
-    else if (exprᴛ1 == "freebsd"u8) {
+    case {} when exprᴛ1 == "freebsd"u8: {
         (n, err) = syscall.SysctlUint32(kernIpcSoacceptqueueˢ);
+        break;
     }
-    else if (exprᴛ1 == "netbsd"u8) {
+    case {} when exprᴛ1 == "netbsd"u8: {
         // NOTE: NetBSD has no somaxconn-like kernel state so far
+        break;
     }
-    else if (exprᴛ1 == "openbsd"u8) {
+    case {} when exprᴛ1 == "openbsd"u8: {
         (n, err) = syscall.SysctlUint32(kernSomaxconnˢ);
-    }
-    if (n == 0 || err != default!) {
+        break;
+    }}
+    if (n == 0 || err != nil) {
         return syscall.SOMAXCONN;
     }
     // FreeBSD stores the backlog in a uint16, as does Linux.

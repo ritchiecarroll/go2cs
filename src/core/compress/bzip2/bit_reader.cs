@@ -33,18 +33,18 @@ internal static bitReader newBitReader(io.Reader r) {
 // least-significant part of a uint64. In the event of an error, it returns 0
 // and the error can be obtained by calling bitReader.Err().
 internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) {
-    uint64 n = default!;
+    uint64 n = default;
 
     while (bits > br.bits) {
         var (b, err) = br.r.ReadByte();
         if (AreEqual(err, io.EOF)) {
             err = io.ErrUnexpectedEOF;
         }
-        if (err != default!) {
+        if (err != nil) {
             br.err = err;
             return 0;
         }
-        br.n <<= (int)(8);
+        br.n <<= 8;
         br.n |= (uint64)((uint64)b);
         br.bits += 8;
     }

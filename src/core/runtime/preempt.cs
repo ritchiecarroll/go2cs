@@ -120,14 +120,14 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
 
     // See https://golang.org/cl/21503 for justification of the yield delay.
     UntypedInt yieldDelay = /* 10 * 1000 */ 10000;
-    int64 nextYield = default!;
+    int64 nextYield = default;
 
     // Drive the goroutine to a preemption point.
     var stopped = false;
-    ж<m> asyncM = default!;
-    uint32 asyncGen = default!;
-    int64 nextPreemptM = default!;
-    for (nint i = 0; ᐧ ; i++) {
+    ж<m> asyncM = default;
+    uint32 asyncGen = default;
+    int64 nextPreemptM = default;
+    for (nint i = 0; ; i++) {
         {
             var s = readgstatus(Ꮡgp);
             var exprᴛ1 = s;
@@ -264,7 +264,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
         if (i == 0) {
             nextYield = nanotime() + (int64)yieldDelay;
         }
-        if (nanotime() < nextYield){
+        if (nanotime() < nextYield) {
             procyield(10);
         } else {
             osyield();
@@ -287,14 +287,16 @@ internal static void resumeG(suspendGState state) {
     var gp = state.g;
     {
         var s = readgstatus(gp);
-        var exprᴛ1 = s;
-        if (exprᴛ1 == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gleaked | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gsyscall | (uint32)_Gscan)) {
-            casfrom_Gscanstatus(gp, s, s & ~(uint32)_Gscan);
-        }
-        else { /* default: */
+        switch (s) {
+        default: {
             dumpgstatus(gp);
             @throw(unexpectedGStatusˢ);
+            break;
         }
+        case var ᴛ when ᴛ == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || ᴛ == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || ᴛ == (uint32)((uint32)_Gleaked | (uint32)_Gscan) || ᴛ == (uint32)((uint32)_Gsyscall | (uint32)_Gscan): {
+            casfrom_Gscanstatus(gp, s, s & ~(uint32)_Gscan);
+            break;
+        }}
     }
 
     if (state.stopped) {
@@ -346,7 +348,7 @@ internal static void asyncPreempt2() {
         // we're on the system stack to avoid stack splits.
         xRegSave(ref (gpΔ1).DerefOrNull());
 
-        if ((~gpΔ1).preemptStop){
+        if ((~gpΔ1).preemptStop) {
             preemptPark(gpΔ1);
         } else {
             gopreempt_m(gpΔ1);
@@ -512,8 +514,8 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
         // in incrementally.
         return (false, 0);
     }
-    var exprᴛ1 = up;
-    if (exprᴛ1 == abi.UnsafePointRestart1 || exprᴛ1 == abi.UnsafePointRestart2) {
+    switch (up) {
+    case var ᴛ when ᴛ == abi.UnsafePointRestart1 || ᴛ == abi.UnsafePointRestart2: {
         // Restartable instruction sequence. Back off PC to
         // the start PC.
         if (startpc == 0 || startpc > pc || pc - startpc > 20) {
@@ -521,10 +523,10 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
         }
         return (true, startpc);
     }
-    if (exprᴛ1 == abi.UnsafePointRestartAtEntry) {
+    case var ᴛ when ᴛ == abi.UnsafePointRestartAtEntry: {
         // Restart from the function entry at resumption.
         return (true, f.entry());
-    }
+    }}
     return (true, pc);
 }
 

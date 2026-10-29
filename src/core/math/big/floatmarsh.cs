@@ -21,12 +21,12 @@ public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
-        return (default!, default!);
+        return (default, default);
     }
 
     // determine max. space (bytes) required for encoding
     nint sz = 1 + 1 + 4; // version + mode|acc|form|neg (3+2+2+1bit) + prec
-    nint n = 0; // number of mantissa words
+    nint n = 0;          // number of mantissa words
     if (x.form == finite) {
         // add space for mantissa and exponent
         n = (nint)((x.prec + (uint32)(_W - 1)) / (uint32)_W); // required mantissa length in words for given precision
@@ -44,7 +44,7 @@ public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
     var buf = new slice<byte>(sz);
 
     buf[0] = floatGobVersion;
-    var b = (byte)((byte)((byte)((byte)((RoundingMode)(x.mode & 7)) << 5) | (byte)((byte)(int8)((Accuracy)((x.acc + 1) & 3)) << 3)) | (byte)((byte)((form)(x.form & 3)) << 1));
+    var b = (byte)((byte)((byte)((byte)((RoundingMode)(x.mode & 7)) << 5) | (byte)((byte)((Accuracy)((x.acc + 1) & 3)) << 3)) | (byte)((byte)((form)(x.form & 3)) << 1));
     if (x.neg) {
         b |= (byte)(1);
     }
@@ -56,7 +56,7 @@ public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
         x.mant.slice(len(x.mant) - n).bytes(buf[10..]); // cut off unused trailing words
     }
 
-    return (buf, default!);
+    return (buf, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -72,8 +72,8 @@ public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
 
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
-        z = new Float(nil);
-        return default!;
+        z = new Float();
+        return default;
     }
     if (len(buf) < 6) {
         return errors.New(floatGobDecodeBufferTooˢ);
@@ -112,7 +112,7 @@ public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
         }
     }
 
-    return default!;
+    return default;
 }
 
 // AppendText implements the [encoding.TextAppender] interface.
@@ -120,16 +120,16 @@ public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
 // attributes such as precision or accuracy are ignored.
 public static (slice<byte>, error) AppendText(this ж<Float> Ꮡx, slice<byte> b) {
     if (Ꮡx == nil) {
-        return (append(b, ((@string)"<nil>"u8).ꓸꓸꓸ), default!);
+        return (append(b, ((@string)"<nil>"u8).ꓸꓸꓸ), default);
     }
-    return (Ꮡx.Append(b, (rune)'g', -1), default!);
+    return (Ꮡx.Append(b, (byte)'g', -1), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 // Only the [Float] value is marshaled (in full precision), other
 // attributes such as precision or accuracy are ignored.
 public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
-    return Ꮡx.AppendText(default!);
+    return Ꮡx.AppendText(default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
@@ -139,7 +139,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
 public static error UnmarshalText(this ж<Float> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
     var (_, _, err) = Ꮡz.Parse((@string)text, 0);
-    if (err != default!) {
+    if (err != nil) {
         err = fmt.Errorf("math/big: cannot unmarshal %q into a *big.Float (%v)"u8, text, err);
     }
     return err;

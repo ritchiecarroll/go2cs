@@ -31,10 +31,10 @@ internal static Action copyenv = Δsync.OnceFunc(() => {
     env = new map<@string, nint>();
     foreach (var (i, s) in envs) {
         for (nint j = 0; j < len(s); j++) {
-            if (s[j] == (rune)'=') {
+            if (s[j] == '=') {
                 @string key = s.slice(0, j);
                 {
-                    var (_, ok) = env[key, ꟷ]; if (!ok){
+                    var (_, ok) = env[key, ꟷ]; if (!ok) {
                         env[key] = i; // first mention of key
                     } else {
                         // Clear duplicate keys. This permits Unsetenv to
@@ -65,15 +65,15 @@ public static error Unsetenv(@string key) {
             }
         }
         runtimeUnsetenv(key);
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 public static (@string value, bool found) Getenv(@string key) {
-    @string value = default!;
-    bool found = default!;
+    @string value = default;
+    bool found = default;
     GoFrame ᒐ = default;
     try {
         copyenv();
@@ -90,7 +90,7 @@ public static (@string value, bool found) Getenv(@string key) {
         }
         @string s = envs[i];
         for (nint iΔ1 = 0; iΔ1 < len(s); iΔ1++) {
-            if (s[iΔ1] == (rune)'=') {
+            if (s[iΔ1] == '=') {
                 (value, found) = (s.slice(iΔ1 + 1), true); goto ᒐdone;
             }
         }
@@ -109,7 +109,7 @@ public static error Setenv(@string key, @string value) {
             return EINVAL;
         }
         for (nint iΔ1 = 0; iΔ1 < len(key); iΔ1++) {
-            if (key[iΔ1] == (rune)'=' || key[iΔ1] == 0) {
+            if (key[iΔ1] == '=' || key[iΔ1] == 0) {
                 return EINVAL;
             }
         }
@@ -127,7 +127,7 @@ public static error Setenv(@string key, @string value) {
 
         var (i, ok) = env[key, ꟷ];
         @string kv = key + "="u8 + value;
-        if (ok){
+        if (ok) {
             envs[i] = kv;
         } else {
             i = len(envs);
@@ -135,9 +135,9 @@ public static error Setenv(@string key, @string value) {
         }
         env[key] = i;
         runtimeSetenv(key, value);
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -152,7 +152,7 @@ public static void Clearenv() {
         runtimeClearenv(env);
 
         env = new map<@string, nint>();
-        envs = new @string[]{}.slice();
+        envs = slice<@string>([]);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -172,7 +172,7 @@ public static slice<@string> Environ() {
         }
         return a;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

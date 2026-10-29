@@ -74,7 +74,7 @@ partial struct paragraph {
     internal slice<ΔClass> initialTypes;
     // Arrays of properties needed for paired bracket evaluation in N0
     internal slice<bracketType> pairTypes; // paired Bracket types for paragraph
-    internal slice<rune> pairValues;   // rune for opening bracket or pbOpen and pbClose; 0 for pbNone
+    internal slice<rune> pairValues;       // rune for opening bracket or pbOpen and pbClose; 0 for pbNone
     internal level embeddingLevel; // default: = implicitLevel;
     // at the paragraph levels
     internal slice<ΔClass> resultTypes;
@@ -98,39 +98,39 @@ partial struct paragraph {
 // close brackets, after normalization). The embedding levels are optional, but
 // may be supplied to encode embedding levels of styled text.
 internal static (ж<paragraph>, error) newParagraph(slice<ΔClass> types, slice<bracketType> pairTypes, slice<rune> pairValues, level levels) {
-    error err = default!;
+    error err = default;
     {
-        err = validateTypes(types); if (err != default!) {
-            return (default!, err);
+        err = validateTypes(types); if (err != nil) {
+            return (default, err);
         }
     }
     {
-        err = validatePbTypes(pairTypes); if (err != default!) {
-            return (default!, err);
+        err = validatePbTypes(pairTypes); if (err != nil) {
+            return (default, err);
         }
     }
     {
-        err = validatePbValues(pairValues, pairTypes); if (err != default!) {
-            return (default!, err);
+        err = validatePbValues(pairValues, pairTypes); if (err != nil) {
+            return (default, err);
         }
     }
     {
-        err = validateParagraphEmbeddingLevel(levels); if (err != default!) {
-            return (default!, err);
+        err = validateParagraphEmbeddingLevel(levels); if (err != nil) {
+            return (default, err);
         }
     }
 
     var p = Ꮡ(new paragraph(
-        initialTypes: appendꓸꓸꓸ(slice<ΔClass>(default!), types),
+        initialTypes: appendꓸꓸꓸ(slice<ΔClass>(default), types),
         embeddingLevel: levels,
 
         pairTypes: pairTypes,
         pairValues: pairValues,
 
-        resultTypes: appendꓸꓸꓸ(slice<ΔClass>(default!), types)
+        resultTypes: appendꓸꓸꓸ(slice<ΔClass>(default), types)
     ));
     p.run();
-    return (p, default!);
+    return (p, default);
 }
 
 internal static nint Len(this ref paragraph p) {
@@ -226,10 +226,9 @@ internal static void determineMatchingIsolates(this ref paragraph p) {
                 nint depthCounter = 1;
                 for (nint j = i + 1; j < p.Len(); j++) {
                     {
-                        ΔClass u = p.resultTypes[j]; if (u.@in(LRI, RLI, FSI)){
+                        ΔClass u = p.resultTypes[j]; if (u.@in(LRI, RLI, FSI)) {
                             depthCounter++;
-                        } else 
-                        if (u == PDI) {
+                        } else if (u == PDI) {
                             {
                                 depthCounter--; if (depthCounter == 0) {
                                     p.matchingPDI[i] = j;
@@ -262,11 +261,10 @@ internal static level determineParagraphEmbeddingLevel(this ref paragraph p, nin
     // Rule P2.
     for (nint i = start; i < end; i++) {
         {
-            ΔClass t = p.resultTypes[i]; if (t.@in(L, AL, R)){
+            ΔClass t = p.resultTypes[i]; if (t.@in(L, AL, R)) {
                 strongType = t;
                 break;
-            } else 
-            if (t.@in(FSI, LRI, RLI)) {
+            } else if (t.@in(FSI, LRI, RLI)) {
                 i = p.matchingPDI[i]; // skip over to the matching PDI
                 if (i > end) {
                     log.Panic(assertIEndˢ);
@@ -275,17 +273,17 @@ internal static level determineParagraphEmbeddingLevel(this ref paragraph p, nin
         }
     }
     // Rule P3.
-    var exprᴛ1 = strongType;
-    if (exprᴛ1 == unknownClass) { // none found
+    switch (strongType) {
+    case var ᴛ when ᴛ == unknownClass: { // none found
         // default embedding level when no strong types found is 0.
         return 0;
     }
-    if (exprᴛ1 == L) {
+    case var ᴛ when ᴛ == L: {
         return 0;
     }
-    { /* default: */ // AL, R
+    default: { // AL, R
         return 1;
-    }
+    }}
 }
 
 internal static UntypedInt maxDepth => 125;
@@ -333,17 +331,17 @@ internal static bool lastDirectionalIsolateStatus(this ref directionalStatusStac
 // Determine explicit levels using rules X1 - X8
 internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
     directionalStatusStack stack = new();
-    nint overflowIsolateCount = default!;
-    nint overflowEmbeddingCount = default!;
-    nint validIsolateCount = default!;
+    nint overflowIsolateCount = default;
+    nint overflowEmbeddingCount = default;
+    nint validIsolateCount = default;
 
     // Rule X1.
     stack.push(p.embeddingLevel, ON, false);
 
     foreach (var (i, t) in p.resultTypes) {
         // Rules X2, X3, X4, X5, X5a, X5b, X5c
-        var exprᴛ1 = t;
-        if (exprᴛ1 == RLE || exprᴛ1 == LRE || exprᴛ1 == RLO || exprᴛ1 == LRO || exprᴛ1 == RLI || exprᴛ1 == LRI || exprᴛ1 == FSI) {
+        switch (t) {
+        case var ᴛ when ᴛ == RLE || ᴛ == LRE || ᴛ == RLO || ᴛ == LRO || ᴛ == RLI || ᴛ == LRI || ᴛ == FSI: {
             var isIsolate = t.@in(RLI, LRI, FSI);
             var isRTL = t.@in(RLE, RLO, RLI);
 
@@ -358,8 +356,8 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                 }
             }
 
-            level newLevel = default!;
-            if (isRTL){
+            level newLevel = default;
+            if (isRTL) {
                 // least greater odd
                 newLevel = (level)((stack.lastEmbeddingLevel() + 1) | 1);
             } else {
@@ -367,7 +365,7 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                 newLevel = (level)((stack.lastEmbeddingLevel() + 2) & ~1);
             }
 
-            if (newLevel <= maxDepth && overflowIsolateCount == 0 && overflowEmbeddingCount == 0){
+            if (newLevel <= maxDepth && overflowIsolateCount == 0 && overflowEmbeddingCount == 0) {
                 if (isIsolate) {
                     validIsolateCount++;
                 }
@@ -375,16 +373,19 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                 // status.
                 // No check for valid stack counter, since the level check
                 // suffices.
-                var exprᴛ2 = t;
-                if (exprᴛ2 == LRO) {
+                switch (t) {
+                case var ᴛ2 when ᴛ2 == LRO: {
                     stack.push(newLevel, L, isIsolate);
+                    break;
                 }
-                else if (exprᴛ2 == RLO) {
+                case var ᴛ2 when ᴛ2 == RLO: {
                     stack.push(newLevel, R, isIsolate);
+                    break;
                 }
-                else { /* default: */
+                default: {
                     stack.push(newLevel, ON, isIsolate);
-                }
+                    break;
+                }}
                 // Not really part of the spec
                 if (!isIsolate) {
                     p.resultLevels[i] = newLevel;
@@ -392,7 +393,7 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
             } else {
                 // This is an invalid explicit formatting character,
                 // so apply the "Otherwise" part of rules X2-X5b.
-                if (isIsolate){
+                if (isIsolate) {
                     overflowIsolateCount++;
                 } else { // !isIsolate
                     if (overflowIsolateCount == 0) {
@@ -400,13 +401,13 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                     }
                 }
             }
+            break;
         }
         // Rule X6a
-        else if (exprᴛ1 == PDI) {
-            if (overflowIsolateCount > 0){
+        case var ᴛ when ᴛ == PDI: {
+            if (overflowIsolateCount > 0) {
                 overflowIsolateCount--;
-            } else 
-            if (validIsolateCount == 0){
+            } else if (validIsolateCount == 0) {
                 // do nothing
             } else {
                 overflowEmbeddingCount = 0;
@@ -417,23 +418,23 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                 validIsolateCount--;
             }
             p.resultLevels[i] = stack.lastEmbeddingLevel();
+            break;
         }
         // Rule X7
-        else if (exprᴛ1 == PDF) {
+        case var ᴛ when ᴛ == PDF: {
             // Not really part of the spec
             p.resultLevels[i] = stack.lastEmbeddingLevel();
 
-            if (overflowIsolateCount > 0){
+            if (overflowIsolateCount > 0) {
                 // do nothing
-            } else 
-            if (overflowEmbeddingCount > 0){
+            } else if (overflowEmbeddingCount > 0) {
                 overflowEmbeddingCount--;
-            } else 
-            if (!stack.lastDirectionalIsolateStatus() && stack.depth() >= 2) {
+            } else if (!stack.lastDirectionalIsolateStatus() && stack.depth() >= 2) {
                 stack.pop();
             }
+            break;
         }
-        else if (exprᴛ1 == B) { // paragraph separator.
+        case var ᴛ when ᴛ == B: { // paragraph separator.
             // Rule X8.
 
             // These values are reset for clarity, in this implementation B
@@ -443,20 +444,22 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
             overflowEmbeddingCount = 0;
             validIsolateCount = 0;
             p.resultLevels[i] = p.embeddingLevel;
+            break;
         }
-        else { /* default: */
+        default: {
             p.resultLevels[i] = stack.lastEmbeddingLevel();
             if (stack.lastDirectionalOverrideStatus() != ON) {
                 p.resultTypes[i] = stack.lastDirectionalOverrideStatus();
             }
-        }
+            break;
+        }}
     }
 }
 
 partial struct ΔisolatingRunSequence {
     internal ж<paragraph> p;
     internal slice<nint> indexes; // indexes to the original string
-    internal slice<ΔClass> types; // type of each character using the index
+    internal slice<ΔClass> types;         // type of each character using the index
     internal slice<level> resolvedLevels; // resolved levels after application of rules
     internal level level;
     internal ΔClass sos, eos;
@@ -487,9 +490,9 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
         prevLevel = p.resultLevels[prevChar];
     }
 
-    level succLevel = default!;
+    level succLevel = default;
     ΔClass lastType = types[length - 1];
-    if (lastType.@in(LRI, RLI, FSI)){
+    if (lastType.@in(LRI, RLI, FSI)) {
         succLevel = p.embeddingLevel;
     } else {
         // the first character after the end of run sequence
@@ -501,8 +504,7 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
             succLevel = p.resultLevels[limit];
         }
     }
-    ref var level = ref heap<level>(out var Ꮡlevel);
-    level = p.resultLevels[indexes[0]];
+    ref var level = ref heap<level>(p.resultLevels[indexes[0]], out var Ꮡlevel);
     return Ꮡ(new ΔisolatingRunSequence(
         p: Ꮡp,
         indexes: indexes,
@@ -525,7 +527,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
     // Changes all NSMs.
     ΔClass precedingCharacterType = s.sos;
     foreach (var (i, t) in s.types) {
-        if (t == NSM){
+        if (t == NSM) {
             s.types[i] = precedingCharacterType;
         } else {
             // if t.in(LRI, RLI, FSI, PDI) {
@@ -577,10 +579,9 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
         if (t == ES || t == CS) {
             ΔClass prevSepType = s.types[i - 1];
             ΔClass succSepType = s.types[i + 1];
-            if (prevSepType == EN && succSepType == EN){
+            if (prevSepType == EN && succSepType == EN) {
                 s.types[i] = EN;
-            } else 
-            if (s.types[i] == CS && prevSepType == AN && succSepType == AN) {
+            } else if (s.types[i] == CS && prevSepType == AN && succSepType == AN) {
                 s.types[i] = AN;
             }
         }
@@ -650,19 +651,19 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
     foreach (var (iᴛ1, t) in s.types) {
         var i = iᴛ1;
 
-        var exprᴛ1 = t;
-        if (exprᴛ1 == WS || exprᴛ1 == ON || exprᴛ1 == B || exprᴛ1 == S || exprᴛ1 == RLI || exprᴛ1 == LRI || exprᴛ1 == FSI || exprᴛ1 == PDI) {
+        switch (t) {
+        case var ᴛ when ᴛ == WS || ᴛ == ON || ᴛ == B || ᴛ == S || ᴛ == RLI || ᴛ == LRI || ᴛ == FSI || ᴛ == PDI: {
             // find bounds of run of neutrals
             nint runStart = i;
             nint runEnd = s.findRunLimit(runStart, B, S, WS, ON, RLI, LRI, FSI, PDI);
 
             // determine effective types at ends of run
-            ΔClass leadType = default!;
-            ΔClass trailType = default!;
+            ΔClass leadType = default;
+            ΔClass trailType = default;
 
             // Note that the character found can only be L, R, AN, or
             // EN.
-            if (runStart == 0){
+            if (runStart == 0) {
                 leadType = s.sos;
             } else {
                 leadType = s.types[runStart - 1];
@@ -670,7 +671,7 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
                     leadType = R;
                 }
             }
-            if (runEnd == len(s.types)){
+            if (runEnd == len(s.types)) {
                 trailType = s.eos;
             } else {
                 trailType = s.types[runEnd];
@@ -679,8 +680,8 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
                 }
             }
 
-            ΔClass resolvedType = default!;
-            if (leadType == trailType){
+            ΔClass resolvedType = default;
+            if (leadType == trailType) {
                 // Rule N1.
                 resolvedType = leadType;
             } else {
@@ -694,7 +695,8 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
 
             // skip over run of (former) neutrals
             i = runEnd;
-        }
+            break;
+        }}
     }
 }
 
@@ -718,13 +720,12 @@ internal static void resolveImplicitLevels(this ref ΔisolatingRunSequence s) {
     s.resolvedLevels = new slice<level>(len(s.types));
     setLevels(s.resolvedLevels, s.level);
 
-    if (((level)(s.level & 1)) == 0){ // even level
+    if (((level)(s.level & 1)) == 0) { // even level
         foreach (var (i, t) in s.types) {
             // Rule I1.
-            if (t == L){
+            if (t == L) {
                 // no change
-            } else 
-            if (t == R){
+            } else if (t == R) {
                 s.resolvedLevels[i] += 1;
             } else { // t == AN || t == EN
                 s.resolvedLevels[i] += 2;
@@ -733,7 +734,7 @@ internal static void resolveImplicitLevels(this ref ΔisolatingRunSequence s) {
     } else { // odd level
         foreach (var (i, t) in s.types) {
             // Rule I2.
-            if (t == R){
+            if (t == R) {
                 // no change
             } else { // t == L || t == AN || t == EN
                 s.resolvedLevels[i] += 1;
@@ -746,8 +747,8 @@ internal static void resolveImplicitLevels(this ref ΔisolatingRunSequence s) {
 // resultLevels array.
 internal static void applyLevelsAndTypes(this ref ΔisolatingRunSequence s) {
     foreach (var (i, x) in s.indexes) {
-        s.p.Value.resultTypes[x] = s.types[i];
-        s.p.Value.resultLevels[x] = s.resolvedLevels[i];
+        s.p.resultTypes[x] = s.types[i];
+        s.p.resultLevels[x] = s.resolvedLevels[i];
     }
 }
 
@@ -797,8 +798,8 @@ break_loop:;
 // runs, in the way that makes sure the characters that are supposed to be
 // removed are not included in the runs.
 internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
-    var run = new nint[]{}.slice();
-    var allRuns = new slice<nint>[]{}.slice();
+    var run = slice<nint>([]);
+    var allRuns = slice<slice<nint>>([]);
     var currentLevel = implicitLevel;
 
     foreach (var i in range(p.initialTypes)) {
@@ -807,7 +808,7 @@ internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
                 // we just encountered a new run; wrap up last run
                 if (currentLevel >= 0) { // only wrap it up if there was a run
                     allRuns = append(allRuns, run);
-                    run = default!;
+                    run = default;
                 }
                 // Start new run
                 currentLevel = p.resultLevels[i];
@@ -837,24 +838,24 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
         }
     }
 
-    var sequences = new ж<ΔisolatingRunSequence>[]{}.slice();
+    var sequences = slice<ж<ΔisolatingRunSequence>>([]);
 
-    slice<nint> currentRunSequence = default!;
+    slice<nint> currentRunSequence = default;
 
     foreach (var (_, vᴛ1) in levelRuns) {
         var run = vᴛ1;
 
         nint first = run[0];
         if (p.initialTypes[first] != PDI || p.matchingIsolateInitiator[first] == -1) {
-            currentRunSequence = default!;
+            currentRunSequence = default;
             // int run = i;
-            while (ᐧ) {
+            for (;;) {
                 // Copy this level run into currentRunSequence
                 currentRunSequence = appendꓸꓸꓸ(currentRunSequence, run);
 
                 nint last = currentRunSequence[len(currentRunSequence) - 1];
                 ΔClass lastT = p.initialTypes[last];
-                if (lastT.@in(LRI, RLI, FSI) && p.matchingPDI[last] != p.Len()){
+                if (lastT.@in(LRI, RLI, FSI) && p.matchingPDI[last] != p.Len()) {
                     run = levelRuns[runForCharacter[p.matchingPDI[last]]];
                 } else {
                     break;
@@ -918,7 +919,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
 
     validateLineBreaks(linebreaks, p.Len());
 
-    var result = appendꓸꓸꓸ(slice<level>(default!), p.resultLevels);
+    var result = appendꓸꓸꓸ(slice<level>(default), p.resultLevels);
 
     // don't worry about linebreaks since if there is a break within
     // a series of WS values preceding S, the linebreak itself
@@ -930,7 +931,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
 
             // Rule L1, clause three.
             for (nint j = i - 1; j >= 0; j--) {
-                if (isWhitespace(p.initialTypes[j])){ // including format codes
+                if (isWhitespace(p.initialTypes[j])) { // including format codes
                     result[j] = p.embeddingLevel;
                 } else {
                     break;
@@ -943,7 +944,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
     nint start = 0;
     foreach (var (_, limit) in linebreaks) {
         for (nint j = limit - 1; j >= start; j--) {
-            if (isWhitespace(p.initialTypes[j])){ // including format codes
+            if (isWhitespace(p.initialTypes[j])) { // including format codes
                 result[j] = p.embeddingLevel;
             } else {
                 break;
@@ -1043,19 +1044,19 @@ internal static slice<nint> computeReordering(slice<level> levels) {
 // isWhitespace reports whether the type is considered a whitespace type for the
 // line break rules.
 internal static bool isWhitespace(ΔClass c) {
-    var exprᴛ1 = c;
-    if (exprᴛ1 == LRE || exprᴛ1 == RLE || exprᴛ1 == LRO || exprᴛ1 == RLO || exprᴛ1 == PDF || exprᴛ1 == LRI || exprᴛ1 == RLI || exprᴛ1 == FSI || exprᴛ1 == PDI || exprᴛ1 == BN || exprᴛ1 == WS) {
+    switch (c) {
+    case var ᴛ when ᴛ == LRE || ᴛ == RLE || ᴛ == LRO || ᴛ == RLO || ᴛ == PDF || ᴛ == LRI || ᴛ == RLI || ᴛ == FSI || ᴛ == PDI || ᴛ == BN || ᴛ == WS: {
         return true;
-    }
+    }}
     return false;
 }
 
 // isRemovedByX9 reports whether the type is one of the types removed in X9.
 internal static bool isRemovedByX9(ΔClass c) {
-    var exprᴛ1 = c;
-    if (exprᴛ1 == LRE || exprᴛ1 == RLE || exprᴛ1 == LRO || exprᴛ1 == RLO || exprᴛ1 == PDF || exprᴛ1 == BN) {
+    switch (c) {
+    case var ᴛ when ᴛ == LRE || ᴛ == RLE || ᴛ == LRO || ᴛ == RLO || ᴛ == PDF || ᴛ == BN: {
         return true;
-    }
+    }}
     return false;
 }
 
@@ -1076,14 +1077,14 @@ internal static error validateTypes(slice<ΔClass> types) {
             return fmt.Errorf("B type before end of paragraph at index: %d"u8, i);
         }
     }
-    return default!;
+    return default;
 }
 
 internal static error validateParagraphEmbeddingLevel(level embeddingLevel) {
     if (embeddingLevel != implicitLevel && embeddingLevel != 0 && embeddingLevel != 1) {
         return fmt.Errorf("illegal paragraph embedding level: %d"u8, embeddingLevel);
     }
-    return default!;
+    return default;
 }
 
 internal static error validateLineBreaks(slice<nint> linebreaks, nint textLength) {
@@ -1097,7 +1098,7 @@ internal static error validateLineBreaks(slice<nint> linebreaks, nint textLength
     if (prev != textLength) {
         return fmt.Errorf("last linebreak was %d, want %d"u8, prev, textLength);
     }
-    return default!;
+    return default;
 }
 
 internal static error validatePbTypes(slice<bracketType> pairTypes) {
@@ -1105,24 +1106,25 @@ internal static error validatePbTypes(slice<bracketType> pairTypes) {
         return fmt.Errorf("pairTypes is null"u8);
     }
     foreach (var (i, pt) in pairTypes) {
-        var exprᴛ1 = pt;
-        if (exprᴛ1 == bpNone || exprᴛ1 == bpOpen || exprᴛ1 == bpClose) {
+        switch (pt) {
+        case var ᴛ when ᴛ == bpNone || ᴛ == bpOpen || ᴛ == bpClose: {
+            break;
         }
-        else { /* default: */
+        default: {
             return fmt.Errorf("illegal pairType value at %d: %v"u8, i, pairTypes[i]);
-        }
+        }}
     }
-    return default!;
+    return default;
 }
 
 internal static error validatePbValues(slice<rune> pairValues, slice<bracketType> pairTypes) {
-    if (pairValues == default!) {
+    if (pairValues == nil) {
         return fmt.Errorf("pairValues is null"u8);
     }
     if (len(pairTypes) != len(pairValues)) {
         return fmt.Errorf("pairTypes is different length from pairValues"u8);
     }
-    return default!;
+    return default;
 }
 
 } // end bidi_package

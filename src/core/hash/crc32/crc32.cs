@@ -88,7 +88,7 @@ internal static Action castagnoliInitOnce;
 internal static void initᴛcastagnoliInitOnce() { castagnoliInitOnce = sync.OnceFunc(() => {
     castagnoliTable = simpleMakeTable(Castagnoli);
 
-    if (archAvailableCastagnoli()){
+    if (archAvailableCastagnoli()) {
         archInitCastagnoli();
         updateCastagnoli = archUpdateCastagnoli;
     } else {
@@ -110,7 +110,7 @@ internal static Func<uint32, slice<byte>, uint32> updateIEEE;
 
 internal static Action ieeeInitOnce;
 internal static void initᴛieeeInitOnce() { ieeeInitOnce = sync.OnceFunc(() => {
-    if (archAvailableIEEE()){
+    if (archAvailableIEEE()) {
         archInitIEEE();
         updateIEEE = archUpdateIEEE;
     } else {
@@ -123,18 +123,18 @@ internal static void initᴛieeeInitOnce() { ieeeInitOnce = sync.OnceFunc(() => 
 // MakeTable returns a [Table] constructed from the specified polynomial.
 // The contents of this [Table] must not be modified.
 public static ж<Table> MakeTable(uint32 poly) {
-    var exprᴛ1 = poly;
-    if (exprᴛ1 == IEEE) {
+    switch (poly) {
+    case var ᴛ when ᴛ == IEEE: {
         ieeeInitOnce();
         return IEEETable;
     }
-    if (exprᴛ1 == Castagnoli) {
+    case var ᴛ when ᴛ == Castagnoli: {
         castagnoliInitOnce();
         return castagnoliTable;
     }
-    { /* default: */
+    default: {
         return simpleMakeTable(poly);
-    }
+    }}
 }
 
 // digest represents the partial evaluation of a checksum.
@@ -148,11 +148,11 @@ partial struct digest {
 // value out in big-endian byte order. The returned Hash32 also
 // implements [encoding.BinaryMarshaler] and [encoding.BinaryUnmarshaler] to
 // marshal and unmarshal the internal state of the hash.
-public static hash.Hash32 New(ж<Table> Ꮡtab) {
-    if (Ꮡtab == IEEETable) {
+public static hash.Hash32 New(ж<Table> tab) {
+    if (tab == IEEETable) {
         ieeeInitOnce();
     }
-    return new digestжHash32(Ꮡ(new digest(0, Ꮡtab)));
+    return new digestжHash32(Ꮡ(new digest(0, tab)));
 }
 
 // NewIEEE creates a new [hash.Hash32] computing the CRC-32 checksum using
@@ -183,7 +183,7 @@ internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte>
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, tableSum(d.tab));
     b = byteorder.BEAppendUint32(b, d.crc);
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
@@ -206,43 +206,42 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
         return errors.New(hashCrc32TablesDoNotˢ);
     }
     d.crc = byteorder.BEUint32(b[8..]);
-    return default!;
+    return default;
 }
 
 internal static (hash.Cloner, error) Clone(this ref digest d) {
-    ref var r = ref heap<digest>(out var Ꮡr);
-    r = d;
-    return (new digestжCloner(Ꮡr), default!);
+    ref var r = ref heap<digest>(d, out var Ꮡr);
+    return (new digestжCloner(Ꮡr), default);
 }
 
-internal static uint32 update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p, bool checkInitIEEE) {
+internal static uint32 update(uint32 crc, ж<Table> tab, slice<byte> p, bool checkInitIEEE) {
     switch (ᐧ) {
-    case {} when ᏑhaveCastagnoli.Load() && Ꮡtab == castagnoliTable: {
+    case {} when ᏑhaveCastagnoli.Load() && tab == castagnoliTable: {
         return updateCastagnoli(crc, p);
     }
-    case {} when Ꮡtab == IEEETable: {
+    case {} when tab == IEEETable: {
         if (checkInitIEEE) {
             ieeeInitOnce();
         }
         return updateIEEE(crc, p);
     }
     default: {
-        return simpleUpdate(crc, ref (Ꮡtab).DerefOrNull(), p);
+        return simpleUpdate(crc, ref (tab).DerefOrNull(), p);
     }}
 }
 
 // Update returns the result of adding the bytes in p to the crc.
-public static uint32 Update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p) {
+public static uint32 Update(uint32 crc, ж<Table> tab, slice<byte> p) {
     // Unfortunately, because IEEETable is exported, IEEE may be used without a
     // call to MakeTable. We have to make sure it gets initialized in that case.
-    return update(crc, Ꮡtab, p, true);
+    return update(crc, tab, p, true);
 }
 
 internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
     // We only create digest objects through New() which takes care of
     // initialization in this case.
     d.crc = update(d.crc, d.tab, p, false);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 internal static uint32 Sum32(this ref digest d) {
@@ -256,8 +255,8 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 
 // Checksum returns the CRC-32 checksum of data
 // using the polynomial represented by the [Table].
-public static uint32 Checksum(slice<byte> data, ж<Table> Ꮡtab) {
-    return Update(0, Ꮡtab, data);
+public static uint32 Checksum(slice<byte> data, ж<Table> tab) {
+    return Update(0, tab, data);
 }
 
 // ChecksumIEEE returns the CRC-32 checksum of data

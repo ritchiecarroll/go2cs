@@ -63,75 +63,75 @@ public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) 
     ref var priv = ref heap(new pkcs1PrivateKey(), out var Ꮡpriv);
     var (rest, err) = asn1.Unmarshal(der, Ꮡpriv);
     if (builtin.len(rest) > 0) {
-        return (default!, new asn1.SyntaxError(Msg: "trailing data"u8));
+        return (default, new asn1.SyntaxError(Msg: "trailing data"u8));
     }
-    if (err != default!) {
+    if (err != nil) {
         {
-            var (_, errΔ1) = asn1.Unmarshal(der, Ꮡ(new ecPrivateKey(nil))); if (errΔ1 == default!) {
-                return (default!, errors.New(x509FailedToParsePrivateˢ));
+            var (_, errΔ1) = asn1.Unmarshal(der, Ꮡ(new ecPrivateKey())); if (errΔ1 == nil) {
+                return (default, errors.New(x509FailedToParsePrivateˢ));
             }
         }
         {
-            var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new pkcs8(nil))); if (errΔ2 == default!) {
-                return (default!, errors.New(x509FailedToParsePrivateˢ2));
+            var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new pkcs8())); if (errΔ2 == nil) {
+                return (default, errors.New(x509FailedToParsePrivateˢ2));
             }
         }
-        return (default!, err);
+        return (default, err);
     }
 
     if (priv.Version > 1) {
-        return (default!, errors.New(x509UnsupportedPrivateˢ));
+        return (default, errors.New(x509UnsupportedPrivateˢ));
     }
 
     if (priv.N.Sign() <= 0 || priv.D.Sign() <= 0 || priv.P.Sign() <= 0 || priv.Q.Sign() <= 0 || priv.Dp != nil && priv.Dp.Sign() <= 0 || priv.Dq != nil && priv.Dq.Sign() <= 0 || priv.Qinv != nil && priv.Qinv.Sign() <= 0) {
-        return (default!, errors.New(x509PrivateKeyContainsˢ));
+        return (default, errors.New(x509PrivateKeyContainsˢ));
     }
 
     var key = @new<rsa.PrivateKey>();
-    key.Value.PublicKey = new rsa.PublicKey(
+    key.PublicKey = new rsa.PublicKey(
         E: priv.E,
         N: priv.N
     );
 
-    key.Value.D = priv.D;
-    key.Value.Primes = new slice<ж<bigꓸInt>>(2 + builtin.len(priv.AdditionalPrimes));
-    key.Value.Primes[0] = priv.P;
-    key.Value.Primes[1] = priv.Q;
-    key.Value.Precomputed.Dp = priv.Dp;
-    key.Value.Precomputed.Dq = priv.Dq;
-    key.Value.Precomputed.Qinv = priv.Qinv;
+    key.D = priv.D;
+    key.Primes = new slice<ж<bigꓸInt>>(2 + builtin.len(priv.AdditionalPrimes));
+    key.Primes[0] = priv.P;
+    key.Primes[1] = priv.Q;
+    key.Precomputed.Dp = priv.Dp;
+    key.Precomputed.Dq = priv.Dq;
+    key.Precomputed.Qinv = priv.Qinv;
     foreach (var (i, a) in priv.AdditionalPrimes) {
         if (a.Prime.Sign() <= 0) {
-            return (default!, errors.New(x509PrivateKeyContainsˢ2));
+            return (default, errors.New(x509PrivateKeyContainsˢ2));
         }
-        key.Value.Primes[i + 2] = a.Prime;
+        key.Primes[i + 2] = a.Prime;
         // We ignore the other two values because rsa will calculate
         // them as needed.
     }
 
     key.Precompute();
     {
-        var errΔ3 = key.Validate(); if (errΔ3 != default!) {
+        var errΔ3 = key.Validate(); if (errΔ3 != nil) {
             // If x509rsacrt=0 is set, try dropping the CRT values and
             // rerunning precomputation and key validation.
             if (x509rsacrt.Value() == "0"u8) {
-                key.Value.Precomputed.Dp = default!;
-                key.Value.Precomputed.Dq = default!;
-                key.Value.Precomputed.Qinv = default!;
+                key.Precomputed.Dp = default;
+                key.Precomputed.Dq = default;
+                key.Precomputed.Qinv = default;
                 key.Precompute();
                 {
-                    var errΔ4 = key.Validate(); if (errΔ4 == default!) {
+                    var errΔ4 = key.Validate(); if (errΔ4 == nil) {
                         x509rsacrt.IncNonDefault();
-                        return (key, default!);
+                        return (key, default);
                     }
                 }
             }
 
-            return (default!, errΔ3);
+            return (default, errΔ3);
         }
     }
 
-    return (key, default!);
+    return (key, default);
 }
 
 // MarshalPKCS1PrivateKey converts an [RSA] private key to PKCS #1, ASN.1 DER form.
@@ -187,29 +187,29 @@ internal static readonly @string x509PublicKeyContainsˢ2 = "x509: public key co
 public static (ж<rsa.PublicKey>, error) ParsePKCS1PublicKey(slice<byte> der) {
     ref var pub = ref heap(new pkcs1PublicKey(), out var Ꮡpub);
     var (rest, err) = asn1.Unmarshal(der, Ꮡpub);
-    if (err != default!) {
+    if (err != nil) {
         {
-            var (_, errΔ1) = asn1.Unmarshal(der, Ꮡ(new publicKeyInfo(nil))); if (errΔ1 == default!) {
-                return (default!, errors.New(x509FailedToParsePublicˢ));
+            var (_, errΔ1) = asn1.Unmarshal(der, Ꮡ(new publicKeyInfo())); if (errΔ1 == nil) {
+                return (default, errors.New(x509FailedToParsePublicˢ));
             }
         }
-        return (default!, err);
+        return (default, err);
     }
     if (builtin.len(rest) > 0) {
-        return (default!, new asn1.SyntaxError(Msg: "trailing data"u8));
+        return (default, new asn1.SyntaxError(Msg: "trailing data"u8));
     }
 
     if (pub.N.Sign() <= 0 || pub.E <= 0) {
-        return (default!, errors.New(x509PublicKeyContainsˢ));
+        return (default, errors.New(x509PublicKeyContainsˢ));
     }
     if (pub.E > (nint)(2147483648L - 1)) {
-        return (default!, errors.New(x509PublicKeyContainsˢ2));
+        return (default, errors.New(x509PublicKeyContainsˢ2));
     }
 
     return (Ꮡ(new rsa.PublicKey(
         E: pub.E,
         N: pub.N
-    )), default!);
+    )), default);
 }
 
 // MarshalPKCS1PublicKey converts an [RSA] public key to PKCS #1, ASN.1 DER form.

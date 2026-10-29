@@ -71,7 +71,7 @@ public static (ж<Cipher>, error) NewUnauthenticatedCipher(slice<byte> key, slic
     // This function is split into a wrapper so that the Cipher allocation will
     // be inlined, and depending on how the caller uses the return value, won't
     // escape to the heap.
-    var c = Ꮡ(new Cipher(nil));
+    var c = Ꮡ(new Cipher());
     return newUnauthenticatedCipher(c, key, nonce);
 }
 
@@ -83,9 +83,9 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(key) != KeySize) {
-        return (default!, errors.New(chacha20WrongKeySizeˢ));
+        return (default, errors.New(chacha20WrongKeySizeˢ));
     }
-    if (len(nonce) == NonceSizeX){
+    if (len(nonce) == NonceSizeX) {
         // XChaCha20 uses the ChaCha20 core to mix 16 bytes of the nonce into a
         // derived key, allowing it to operate on a nonce of 24 bytes. See
         // draft-irtf-cfrg-xchacha-01, Section 2.3.
@@ -93,9 +93,8 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
         var cNonce = new slice<byte>(NonceSize);
         copy(cNonce[4..12], nonce[16..24]);
         nonce = cNonce;
-    } else 
-    if (len(nonce) != NonceSize) {
-        return (default!, errors.New(chacha20WrongNonceSizeˢ));
+    } else if (len(nonce) != NonceSize) {
+        return (default, errors.New(chacha20WrongNonceSizeˢ));
     }
 
     (key, nonce) = (key[..(int)(KeySize)], nonce[..(int)(NonceSize)]); // bounds check elimination hint
@@ -114,14 +113,14 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
         binary.LittleEndian.Uint32(nonce[4..8]),
         binary.LittleEndian.Uint32(nonce[8..12])
     }.array();
-    return (Ꮡc, default!);
+    return (Ꮡc, default);
 }
 
 // The constant first 4 words of the ChaCha20 state.
-internal const uint32 j0 = 0x61707865;      // expa
-internal const uint32 j1 = 0x3320646e;      // nd 3
-internal const uint32 j2 = 0x79622d32;      // 2-by
-internal const uint32 j3 = 0x6b206574;      // te k
+internal const uint32 j0 = 0x61707865; // expa
+internal const uint32 j1 = 0x3320646e; // nd 3
+internal const uint32 j2 = 0x79622d32; // 2-by
+internal const uint32 j3 = 0x6b206574; // te k
 
 internal static UntypedInt blockSize => 64;
 
@@ -166,7 +165,7 @@ public static void SetCounter(this ref Cipher s, uint32 counter) {
     // causing the next call to XORKeyStream to refill the buffer. However, if
     // we're advancing within the existing buffer, we can save work by simply
     // setting s.len.
-    if (counter < s.counter){
+    if (counter < s.counter) {
         s.len = (nint)(s.counter - counter) * (nint)blockSize;
     } else {
         s.counter = counter;
@@ -217,10 +216,9 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
     // panic immediately. If instead we'd only reach the last block, remember
     // not to generate any more output after the buffer is drained.
     var numBlocks = ((uint64)len(src) + (uint64)blockSize - 1) / (uint64)blockSize;
-    if (s.overflow || (uint64)s.counter + numBlocks > (uint64)1 << 32){
+    if (s.overflow || (uint64)s.counter + numBlocks > (uint64)1 << 32) {
         throw panic("chacha20: counter overflow");
-    } else 
-    if ((uint64)s.counter + numBlocks == (uint64)1 << 32) {
+    } else if ((uint64)s.counter + numBlocks == (uint64)1 << 32) {
         s.overflow = true;
     }
 
@@ -369,10 +367,10 @@ private static readonly @string chacha20WrongHChaCha20ˢ2 = "chacha20: wrong HCh
 
 internal static (slice<byte>, error) hChaCha20(slice<byte> @out, slice<byte> key, slice<byte> nonce) {
     if (len(key) != KeySize) {
-        return (default!, errors.New(chacha20WrongHChaCha20ˢ));
+        return (default, errors.New(chacha20WrongHChaCha20ˢ));
     }
     if (len(nonce) != 16) {
-        return (default!, errors.New(chacha20WrongHChaCha20ˢ2));
+        return (default, errors.New(chacha20WrongHChaCha20ˢ2));
     }
 
     var (x0, x1, x2, x3) = (j0, j1, j2, j3);
@@ -412,7 +410,7 @@ internal static (slice<byte>, error) hChaCha20(slice<byte> @out, slice<byte> key
     binary.LittleEndian.PutUint32(@out[20..24], x13);
     binary.LittleEndian.PutUint32(@out[24..28], x14);
     binary.LittleEndian.PutUint32(@out[28..32], x15);
-    return (@out, default!);
+    return (@out, default);
 }
 
 } // end chacha20_package

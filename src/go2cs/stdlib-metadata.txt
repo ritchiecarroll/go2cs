@@ -3029,22 +3029,6 @@
 [assembly: GoImplement<signalError, error>]
 [assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
 
-##os.signal@darwin
-// <ExportedTypeAliases>
-// </ExportedTypeAliases>
-[assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
-[assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
-[assembly: GoImplement<signalError, error>]
-[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
-
-##os.signal@linux
-// <ExportedTypeAliases>
-// </ExportedTypeAliases>
-[assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
-[assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
-[assembly: GoImplement<signalError, error>]
-[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
-
 ##os.user
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -3471,14 +3455,6 @@
 [assembly: GoImplement<parseDurationError, error>(Pointer = true)]
 
 ##time.tzdata
-// <ExportedTypeAliases>
-// </ExportedTypeAliases>
-
-##time.tzdata@darwin
-// <ExportedTypeAliases>
-// </ExportedTypeAliases>
-
-##time.tzdata@linux
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 

@@ -36,7 +36,7 @@ internal static T clone<T>(T valueʗp, ж<cloneSeq> Ꮡseq) {
 }
 
 // singleStringClone describes how to clone a single string.
-internal static cloneSeq singleStringClone = new cloneSeq(stringOffsets: new uintptr[]{0}.slice());
+internal static cloneSeq singleStringClone = new cloneSeq(stringOffsets: slice<uintptr>([0]));
 
 // cloneSeq describes how to clone a value of a particular type.
 partial struct cloneSeq {
@@ -48,60 +48,68 @@ internal static cloneSeq makeCloneSeq(ж<abi.Type> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (Ꮡtyp == nil) {
-        return new cloneSeq(nil);
+        return new cloneSeq();
     }
     if (typ.Kind() == abi.ΔString) {
         return singleStringClone;
     }
     ref var seq = ref heap(new cloneSeq(), out var Ꮡseq);
-    var exprᴛ1 = typ.Kind();
-    if (exprᴛ1 == abi.Struct) {
+    switch (typ.Kind()) {
+    case var ᴛ when ᴛ == abi.Struct: {
         buildStructCloneSeq(Ꮡtyp, Ꮡseq, 0);
+        break;
     }
-    else if (exprᴛ1 == abi.Array) {
+    case var ᴛ when ᴛ == abi.Array: {
         buildArrayCloneSeq(Ꮡtyp, Ꮡseq, 0);
-    }
+        break;
+    }}
     return seq;
 }
 
 // buildStructCloneSeq populates a cloneSeq for an abi.Type that has Kind abi.Struct.
-internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡseq, uintptr baseOffset) {
+internal static void buildStructCloneSeq(ж<abi.Type> typ, ж<cloneSeq> Ꮡseq, uintptr baseOffset) {
     ref var seq = ref Ꮡseq.DerefOrNull();
 
-    var styp = Ꮡtyp.StructType();
-    foreach (var i in range((~styp).Fields)) {
-        var f = Ꮡ((~styp).Fields, i);
-        var exprᴛ1 = (~f).Typ.Kind();
-        if (exprᴛ1 == abi.ΔString) {
-            seq.stringOffsets = append(seq.stringOffsets, baseOffset + (~f).Offset);
+    var styp = typ.StructType();
+    foreach (var i in range(styp.Fields)) {
+        var f = Ꮡ(styp.Fields, i);
+        switch (f.Typ.Kind()) {
+        case var ᴛ when ᴛ == abi.ΔString: {
+            seq.stringOffsets = append(seq.stringOffsets, baseOffset + f.Offset);
+            break;
         }
-        else if (exprᴛ1 == abi.Struct) {
-            buildStructCloneSeq((~f).Typ, Ꮡseq, baseOffset + (~f).Offset);
+        case var ᴛ when ᴛ == abi.Struct: {
+            buildStructCloneSeq(f.Typ, Ꮡseq, baseOffset + f.Offset);
+            break;
         }
-        else if (exprᴛ1 == abi.Array) {
-            buildArrayCloneSeq((~f).Typ, Ꮡseq, baseOffset + (~f).Offset);
-        }
+        case var ᴛ when ᴛ == abi.Array: {
+            buildArrayCloneSeq(f.Typ, Ꮡseq, baseOffset + f.Offset);
+            break;
+        }}
     }
 }
 
 // buildArrayCloneSeq populates a cloneSeq for an abi.Type that has Kind abi.Array.
-internal static void buildArrayCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡseq, uintptr baseOffset) {
+internal static void buildArrayCloneSeq(ж<abi.Type> typ, ж<cloneSeq> Ꮡseq, uintptr baseOffset) {
     ref var seq = ref Ꮡseq.DerefOrNull();
 
-    var atyp = Ꮡtyp.ArrayType();
+    var atyp = typ.ArrayType();
     var etyp = atyp.Value.Elem;
     var offset = baseOffset;
     foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
-        var exprᴛ1 = etyp.Kind();
-        if (exprᴛ1 == abi.ΔString) {
+        switch (etyp.Kind()) {
+        case var ᴛ when ᴛ == abi.ΔString: {
             seq.stringOffsets = append(seq.stringOffsets, offset);
+            break;
         }
-        else if (exprᴛ1 == abi.Struct) {
+        case var ᴛ when ᴛ == abi.Struct: {
             buildStructCloneSeq(etyp, Ꮡseq, offset);
+            break;
         }
-        else if (exprᴛ1 == abi.Array) {
+        case var ᴛ when ᴛ == abi.Array: {
             buildArrayCloneSeq(etyp, Ꮡseq, offset);
-        }
+            break;
+        }}
         offset += etyp.Size();
         var align = (uintptr)etyp.FieldAlign();
         offset = (uintptr)((offset + align - 1) & ~(align - 1));

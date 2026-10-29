@@ -18,52 +18,52 @@ internal static (ж<User>, error) current() {
 }
 
 internal static (ж<User>, error) lookupUser(@string username) {
-    _C_struct_passwd pwd = default!;
-    bool found = default!;
+    _C_struct_passwd pwd = default;
+    bool found = default;
     var nameC = new slice<byte>(len(username) + 1);
     copy(nameC, username);
 
     var nameCʗ1 = nameC;
     var err = retryWithBuffer(userBuffer, (slice<byte> buf) => {
-        syscall.Errno errno = default!;
+        syscall.Errno errno = default;
         (pwd, found, errno) = _C_getpwnam_r(Ꮡ(nameCʗ1, 0),
             Ꮡ(buf, 0), (_C_size_t)len(buf));
         return errno;
     });
-    if (AreEqual(err, syscall.ENOENT) || (err == default! && !found)) {
-        return (default!, ((UnknownUserError)username));
+    if (AreEqual(err, syscall.ENOENT) || (err == nil && !found)) {
+        return (default, ((UnknownUserError)username));
     }
-    if (err != default!) {
-        return (default!, fmt.Errorf("user: lookup username %s: %v"u8, username, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("user: lookup username %s: %v"u8, username, err));
     }
-    return (buildUser(ref pwd), default!);
+    return (buildUser(ref pwd), default);
 }
 
 internal static (ж<User>, error) lookupUserId(@string uid) {
     var (i, e) = strconv.Atoi(uid);
-    if (e != default!) {
-        return (default!, e);
+    if (e != nil) {
+        return (default, e);
     }
     return lookupUnixUid(i);
 }
 
 internal static (ж<User>, error) lookupUnixUid(nint uid) {
-    _C_struct_passwd pwd = default!;
-    bool found = default!;
+    _C_struct_passwd pwd = default;
+    bool found = default;
 
     var err = retryWithBuffer(userBuffer, (slice<byte> buf) => {
-        syscall.Errno errno = default!;
+        syscall.Errno errno = default;
         (pwd, found, errno) = _C_getpwuid_r((_C_uid_t)uid,
             Ꮡ(buf, 0), (_C_size_t)len(buf));
         return errno;
     });
-    if (AreEqual(err, syscall.ENOENT) || (err == default! && !found)) {
-        return (default!, ((UnknownUserIdError)uid));
+    if (AreEqual(err, syscall.ENOENT) || (err == nil && !found)) {
+        return (default, ((UnknownUserIdError)uid));
     }
-    if (err != default!) {
-        return (default!, fmt.Errorf("user: lookup userid %d: %v"u8, uid, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("user: lookup userid %d: %v"u8, uid, err));
     }
-    return (buildUser(ref pwd), default!);
+    return (buildUser(ref pwd), default);
 }
 
 internal static ж<User> buildUser(ref _C_struct_passwd pwd) {
@@ -78,58 +78,58 @@ internal static ж<User> buildUser(ref _C_struct_passwd pwd) {
     // say: "It is expected to be a comma separated list of
     // personal data where the first item is the full name of the
     // user."
-    (u.Value.Name, _, _) = strings.Cut((~u).Name, ","u8);
+    (u.Name, _, _) = strings.Cut(u.Name, ","u8);
     return u;
 }
 
 internal static (ж<Group>, error) lookupGroup(@string groupname) {
-    _C_struct_group grp = default!;
-    bool found = default!;
+    _C_struct_group grp = default;
+    bool found = default;
 
     var cname = new slice<byte>(len(groupname) + 1);
     copy(cname, groupname);
 
     var cnameʗ1 = cname;
     var err = retryWithBuffer(groupBuffer, (slice<byte> buf) => {
-        syscall.Errno errno = default!;
+        syscall.Errno errno = default;
         (grp, found, errno) = _C_getgrnam_r(Ꮡ(cnameʗ1, 0),
             Ꮡ(buf, 0), (_C_size_t)len(buf));
         return errno;
     });
-    if (AreEqual(err, syscall.ENOENT) || (err == default! && !found)) {
-        return (default!, ((UnknownGroupError)groupname));
+    if (AreEqual(err, syscall.ENOENT) || (err == nil && !found)) {
+        return (default, ((UnknownGroupError)groupname));
     }
-    if (err != default!) {
-        return (default!, fmt.Errorf("user: lookup groupname %s: %v"u8, groupname, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("user: lookup groupname %s: %v"u8, groupname, err));
     }
-    return (buildGroup(ref grp), default!);
+    return (buildGroup(ref grp), default);
 }
 
 internal static (ж<Group>, error) lookupGroupId(@string gid) {
     var (i, e) = strconv.Atoi(gid);
-    if (e != default!) {
-        return (default!, e);
+    if (e != nil) {
+        return (default, e);
     }
     return lookupUnixGid(i);
 }
 
 internal static (ж<Group>, error) lookupUnixGid(nint gid) {
-    _C_struct_group grp = default!;
-    bool found = default!;
+    _C_struct_group grp = default;
+    bool found = default;
 
     var err = retryWithBuffer(groupBuffer, (slice<byte> buf) => {
-        syscall.Errno errno = default!;
+        syscall.Errno errno = default;
         (grp, found, errno) = _C_getgrgid_r((_C_gid_t)gid,
             Ꮡ(buf, 0), (_C_size_t)len(buf));
         return errno;
     });
-    if (AreEqual(err, syscall.ENOENT) || (err == default! && !found)) {
-        return (default!, ((UnknownGroupIdError)strconv.Itoa(gid)));
+    if (AreEqual(err, syscall.ENOENT) || (err == nil && !found)) {
+        return (default, ((UnknownGroupIdError)strconv.Itoa(gid)));
     }
-    if (err != default!) {
-        return (default!, fmt.Errorf("user: lookup groupid %d: %v"u8, gid, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("user: lookup groupid %d: %v"u8, gid, err));
     }
-    return (buildGroup(ref grp), default!);
+    return (buildGroup(ref grp), default);
 }
 
 internal static ж<Group> buildGroup(ref _C_struct_group grp) {
@@ -165,16 +165,14 @@ internal static _C_size_t initialSize(this bufferKind k) {
 // or the buffer exceeds a reasonable limit.
 internal static error retryWithBuffer(bufferKind kind, Func<slice<byte>, syscall.Errno> f) {
     var buf = new slice<byte>((nint)(kind.initialSize()));
-    while (ᐧ) {
+    for (;;) {
         var errno = f(buf);
-        if (errno == 0){
-            return default!;
-        } else 
-        if (runtime.GOOS == "aix"u8 && errno + 1 == 0){
+        if (errno == 0) {
+            return default;
+        } else if (runtime.GOOS == "aix"u8 && errno + 1 == 0) {
             // On AIX getpwuid_r appears to return -1,
             // not ERANGE, on buffer overflow.
-        } else 
-        if (errno != syscall.ERANGE) {
+        } else if (errno != syscall.ERANGE) {
             return errno;
         }
         nint newSize = len(buf) * 2;
@@ -193,8 +191,7 @@ internal static bool isSizeReasonable(int64 sz) {
 
 // Because we can't use cgo in tests:
 internal static _C_struct_passwd structPasswdForNegativeTest() {
-    ref var sp = ref heap<_C_struct_passwd>(out var Ꮡsp);
-    sp = new _C_struct_passwd();
+    ref var sp = ref heap<_C_struct_passwd>(new _C_struct_passwd(), out var Ꮡsp);
     _C_pw_uidp(Ꮡsp).Value = unchecked((uint32)(4294967294UL));
     _C_pw_gidp(Ꮡsp).Value = unchecked((uint32)(4294967293UL));
     return sp;

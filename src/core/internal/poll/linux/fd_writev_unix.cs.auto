@@ -16,9 +16,9 @@ using @unsafe = unsafe_package;
 partial class poll_package {
 
 internal static (uintptr, error) writev(nint fd, slice<Δsyscall.Iovec> iovecs) {
-    uintptr r = default!;
-    Δsyscall.Errno e = default!;
-    while (ᐧ) {
+    uintptr r = default;
+    Δsyscall.Errno e = default;
+    for (;;) {
         var ᴋ0 = Ꮡ(iovecs, 0);
                 (r, _, e) = Δsyscall.Syscall(Δsyscall.SYS_WRITEV, (uintptr)fd, (uintptr)ᴋ0, (uintptr)len(iovecs));
         System.GC.KeepAlive(ᴋ0);
@@ -29,7 +29,7 @@ internal static (uintptr, error) writev(nint fd, slice<Δsyscall.Iovec> iovecs) 
     if (e != 0) {
         return (r, e);
     }
-    return (r, default!);
+    return (r, default);
 }
 
 } // end poll_package

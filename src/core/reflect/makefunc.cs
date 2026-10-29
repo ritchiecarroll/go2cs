@@ -55,9 +55,8 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
 
     // Ignoring the flagMethod bit, v describes the receiver, not the method type.
     var fl = (flag)(v.flag & ((flag)((flag)(flagRO | flagAddr) | flagIndir)));
-    fl |= (flag)(((flag)(uintptr)(uint8)v.typ().Kind()));
-    ref var rcvr = ref heap<ΔValue>(out var Ꮡrcvr);
-    rcvr = new ΔValue(v.typ(), v.ptr, fl);
+    fl |= (flag)(((flag)(uintptr)v.typ().Kind()));
+    ref var rcvr = ref heap<ΔValue>(new ΔValue(v.typ(), v.ptr, fl), out var Ꮡrcvr);
 
     // v.Type returns the actual type of the method value.
     var ftyp = v.Type()._<ж<rtype>>().Reinterpret<rtype, abi.Type>().FuncType();
@@ -73,16 +72,16 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
             argLen: abid.stackCallArgsSize,
             regPtrs: abid.inRegPtrs.Clone()
         ),
-        method: ((nint)(uintptr)v.flag >> (int)(flagMethodShift)),
+        method: ((nint)v.flag >> (int)(flagMethodShift)),
         rcvr: rcvr
     ));
 
     // Cause panic if method is not appropriate.
     // The panic would still happen during the call if we omit this,
     // but we want Interface() and other operations to fail early.
-    methodReceiver(op, (~fv).rcvr, (~fv).method);
+    methodReceiver(op, fv.rcvr, fv.method);
 
-    return new ΔValue(ftyp.of(funcType.ᏑType).Common(), @unsafe.Pointer.FromPinnedBox(fv), (flag)((flag)(v.flag & flagRO) | ((flag)(uintptr)(nuint)Func)));
+    return new ΔValue(ftyp.of(funcType.ᏑType).Common(), @unsafe.Pointer.FromPinnedBox(fv), (flag)((flag)(v.flag & flagRO) | ((flag)(uintptr)Func)));
 }
 
 internal static uintptr methodValueCallCodePtr() {
@@ -101,7 +100,7 @@ internal static partial void methodValueCall();
 partial struct makeFuncCtxt {
     internal uintptr fn;
     internal ж<bitVector> stack; // ptrmap for both stack args and results
-    internal uintptr argLen;    // just args
+    internal uintptr argLen;     // just args
     internal abi.IntArgRegBitmap regPtrs;
 }
 
@@ -119,7 +118,7 @@ internal static readonly @string alwaysIn0IntArgRegsˢ = "always in [0:IntArgReg
 // memory.
 //
 //go:nosplit
-internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> Ꮡctxt, ref abi.RegArgs args) {
+internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> ctxt, ref abi.RegArgs args) {
     foreach (var (i, arg) in args.Ints.ΔRangeSnapshot()) {
         // Avoid write barriers! Because our write barrier enqueues what
         // was there before, we might enqueue garbage.
@@ -128,7 +127,7 @@ internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> Ꮡctxt, ref abi.RegAr
         // use too much stack.)
         // ptr := &args.Ptrs[i] (but cast from *unsafe.Pointer to *uintptr)
         var ptr = (ж<uintptr>)(uintptr)((uintptr)add(@unsafe.Pointer.FromBox(@unsafe.SliceData(args.Ptrs[..])), (uintptr)i * (uintptr)goarch.PtrSize, alwaysIn0IntArgRegsˢ));
-        if (Ꮡctxt.of(makeFuncCtxt.ᏑregPtrs).Get(i)){
+        if (ctxt.of(makeFuncCtxt.ᏑregPtrs).Get(i)) {
             ptr.Value = arg;
         } else {
             // We *must* zero this space ourselves because it's defined in

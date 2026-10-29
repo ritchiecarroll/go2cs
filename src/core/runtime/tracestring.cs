@@ -70,7 +70,7 @@ internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, ui
     var w = unsafeTraceWriter(gen, t.buf);
 
     // Ensure we have a place to write to.
-    bool flushed = default!;
+    bool flushed = default;
     (w, flushed) = w.ensure((nint)(2 + 2 * traceBytesPerNumber) + len(s) /* tracev2.EvStrings + tracev2.EvString + ID + len + string data */);
     if (flushed) {
         // Annotate the batch as containing strings.
@@ -101,7 +101,7 @@ internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
             traceBufFlush(Ꮡt.Value.buf, gen);
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
         });
-        t.buf = default!;
+        t.buf = default;
     }
 
     // Reset the table.

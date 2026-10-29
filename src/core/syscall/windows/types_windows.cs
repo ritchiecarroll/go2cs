@@ -50,7 +50,7 @@ public static UntypedInt O_ASYNC => 0x02000;
 internal static UntypedInt o_DIRECTORY => 0x04000;
 public static UntypedInt O_CLOEXEC => 0x80000;
 internal static UntypedInt o_NOFOLLOW_ANY => 0x200000000; // used by internal/syscall/windows
-internal static UntypedInt o_WRITE_ATTRS => 0x800000000; // used by internal/syscall/windows
+internal static UntypedInt o_WRITE_ATTRS => 0x800000000;  // used by internal/syscall/windows
 
 // More invented values for signals
 public static ΔSignal SIGHUP => /* Signal(0x1) */ 1;
@@ -337,7 +337,7 @@ public static int64 Nanoseconds(this ref Timeval tv) {
 }
 
 public static Timeval /*tv*/ NsecToTimeval(int64 nsec) {
-    Timeval tv = default!;
+    Timeval tv = default;
 
     tv.Sec = (int32)(nsec / 1000000000);
     tv.Usec = (int32)(nsec % 1000000000 / 1000);
@@ -383,7 +383,7 @@ public static int64 Nanoseconds(this ref Filetime ft) {
 }
 
 public static Filetime /*ft*/ NsecToFiletime(int64 nsec) {
-    Filetime ft = default!;
+    Filetime ft = default;
 
     // convert into 100-nanosecond
     nsec /= 100;

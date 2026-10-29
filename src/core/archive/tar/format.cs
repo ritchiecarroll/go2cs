@@ -48,7 +48,7 @@ partial struct Format /*num:nint*/;
 
 // Constants to identify various tar formats.
 // Deliberately hide the meaning of constants from public API.
-internal static Format _ᴛ1ʗ => /* (1 << iota) / 4 */ 0;     // Sequence of 0, 0, 1, 2, 4, 8, etc...
+internal static Format _ᴛ1ʗ => /* (1 << iota) / 4 */ 0; // Sequence of 0, 0, 1, 2, 4, 8, etc...
 
 // FormatUnknown indicates that the format is unknown.
 public static Format FormatUnknown => 0;
@@ -130,7 +130,7 @@ internal static readonly @string unknownˢ = "<unknown>"u8;
 public static @string String(this Format f) {
     var ssᴷ = new stackAppend<@string>();
 
-    slice<@string> ss = default!;
+    slice<@string> ss = default;
     for (Format f2 = (Format)1; f2 < formatMax; f2 <<= (int)(1)) {
         if (f.has(f2)) {
             ss = append(ssᴷ, ss, formatNames[f2]);
@@ -156,8 +156,8 @@ internal static readonly @string versionUSTAR = "00"u8;
 internal static readonly @string trailerSTAR = "tar\x00"u8;
 
 // Size constants from various tar specifications.
-internal static UntypedInt blockSize => 512; // Size of each block in a tar stream
-internal static UntypedInt nameSize => 100; // Max length of the name field in USTAR format
+internal static UntypedInt blockSize => 512;  // Size of each block in a tar stream
+internal static UntypedInt nameSize => 100;   // Max length of the name field in USTAR format
 internal static UntypedInt prefixSize => 155; // Max length of the prefix field in USTAR format
 
 // Max length of a special file (PAX header, GNU long name or link).
@@ -217,10 +217,10 @@ internal static Format getFormat(this ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Verify checksum.
-    parser p = default!;
+    parser p = default;
     var value = p.parseOctal(Ꮡb.toV7().chksum());
     var (chksum1, chksum2) = b.computeChecksum();
-    if (p.err != default! || (value != chksum1 && value != chksum2)) {
+    if (p.err != nil || (value != chksum1 && value != chksum2)) {
         return FormatUnknown;
     }
 
@@ -277,11 +277,11 @@ internal static void setFormat(this ж<block> Ꮡb, Format format) {
 
     // Update checksum.
     // This field is special in that it is terminated by a NULL then space.
-    formatter f = default!;
+    formatter f = default;
     var field = Ꮡb.toV7().chksum();
     var (chksum, _) = b.computeChecksum(); // Possible values are 256..128776
-    f.formatOctal(field[..7], chksum); // Never fails since 128776 < 262143
-    field[7] = (rune)' ';
+    f.formatOctal(field[..7], chksum);     // Never fails since 128776 < 262143
+    field[7] = (byte)' ';
 }
 
 // computeChecksum computes the checksum for the header block.
@@ -289,14 +289,14 @@ internal static void setFormat(this ж<block> Ꮡb, Format format) {
 // signed byte values.
 // We compute and return both.
 internal static (int64 unsigned, int64 signed) computeChecksum(this ref block b) {
-    int64 unsigned = default!;
-    int64 signed = default!;
+    int64 unsigned = default;
+    int64 signed = default;
 
     foreach (var (i, vᴛ1) in b.Value) {
         var c = vᴛ1;
 
         if (148 <= i && i < 156) {
-            c = (rune)' '; // Treat the checksum field itself as all spaces.
+            c = (byte)' '; // Treat the checksum field itself as all spaces.
         }
         unsigned += (int64)c;
         signed += (int64)(int8)c;

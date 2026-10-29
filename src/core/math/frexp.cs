@@ -23,8 +23,8 @@ public static (float64 frac, nint exp) Frexp(float64 f) {
 }
 
 internal static (float64 frac, nint exp) frexp(float64 f) {
-    float64 frac = default!;
-    nint exp = default!;
+    float64 frac = default;
+    nint exp = default;
 
     // special cases
     switch (ᐧ) {

@@ -52,7 +52,7 @@ public static (slice<byte>, error) MarshalECPrivateKey(ж<ecdsa.PrivateKey> Ꮡk
 
     var (oid, ok) = oidFromNamedCurve(key.Curve);
     if (!ok) {
-        return (default!, errors.New(x509UnknownEllipticCurveˢ));
+        return (default, errors.New(x509UnknownEllipticCurveˢ));
     }
 
     return marshalECPrivateKeyWithOID(Ꮡkey, oid);
@@ -60,14 +60,14 @@ public static (slice<byte>, error) MarshalECPrivateKey(ж<ecdsa.PrivateKey> Ꮡk
 
 // marshalECPrivateKeyWithOID marshals an EC private key into ASN.1, DER format and
 // sets the curve ID to the given OID, or omits it if OID is nil.
-internal static (slice<byte>, error) marshalECPrivateKeyWithOID(ж<ecdsa.PrivateKey> Ꮡkey, asn1.ObjectIdentifier oid) {
-    var (privateKey, err) = Ꮡkey.Bytes();
-    if (err != default!) {
-        return (default!, err);
+internal static (slice<byte>, error) marshalECPrivateKeyWithOID(ж<ecdsa.PrivateKey> key, asn1.ObjectIdentifier oid) {
+    var (privateKey, err) = key.Bytes();
+    if (err != nil) {
+        return (default, err);
     }
-    (var publicKey, err) = Ꮡkey.of(ecdsa.PrivateKey.ᏑPublicKey).Bytes();
-    if (err != default!) {
-        return (default!, err);
+    (var publicKey, err) = key.of(ecdsa.PrivateKey.ᏑPublicKey).Bytes();
+    if (err != nil) {
+        return (default, err);
     }
     return asn1.Marshal(new ecPrivateKey(
         Version: 1,
@@ -101,42 +101,42 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
 
     ref var privKey = ref heap(new ecPrivateKey(), out var ᏑprivKey);
     {
-        var (_, errΔ1) = asn1.Unmarshal(der, ᏑprivKey); if (errΔ1 != default!) {
+        var (_, errΔ1) = asn1.Unmarshal(der, ᏑprivKey); if (errΔ1 != nil) {
             {
-                var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new pkcs8(nil))); if (errΔ2 == default!) {
-                    return (default!, errors.New(x509FailedToParsePrivateˢ2));
+                var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new pkcs8())); if (errΔ2 == nil) {
+                    return (default, errors.New(x509FailedToParsePrivateˢ2));
                 }
             }
             {
-                var (_, errΔ3) = asn1.Unmarshal(der, Ꮡ(new pkcs1PrivateKey(nil))); if (errΔ3 == default!) {
-                    return (default!, errors.New(x509FailedToParsePrivateˢ3));
+                var (_, errΔ3) = asn1.Unmarshal(der, Ꮡ(new pkcs1PrivateKey())); if (errΔ3 == nil) {
+                    return (default, errors.New(x509FailedToParsePrivateˢ3));
                 }
             }
-            return (default!, errors.New("x509: failed to parse EC private key: "u8 + errΔ1.Error()));
+            return (default, errors.New("x509: failed to parse EC private key: "u8 + errΔ1.Error()));
         }
     }
     if (privKey.Version != ecPrivKeyVersion) {
-        return (default!, fmt.Errorf("x509: unknown EC private key version %d"u8, privKey.Version));
+        return (default, fmt.Errorf("x509: unknown EC private key version %d"u8, privKey.Version));
     }
 
-    elliptic.Curve curve = default!;
-    if (ᏑnamedCurveOID != nil){
+    elliptic.Curve curve = default;
+    if (ᏑnamedCurveOID != nil) {
         curve = namedCurveFromOID(namedCurveOID);
     } else {
         curve = namedCurveFromOID(privKey.NamedCurveOID);
     }
-    if (curve == default!) {
-        return (default!, errors.New(x509UnknownEllipticCurveˢ));
+    if (curve == nil) {
+        return (default, errors.New(x509UnknownEllipticCurveˢ));
     }
 
-    nint size = ((~curve.Params()).N.BitLen() + 7) / 8;
+    nint size = (curve.Params().N.BitLen() + 7) / 8;
     var privateKey = new slice<byte>(size);
 
     // Some private keys have leading zero padding. This is invalid
     // according to [SEC1], but this code will ignore it.
     while (builtin.len(privKey.PrivateKey) > builtin.len(privateKey)) {
         if (privKey.PrivateKey[0] != 0) {
-            return (default!, errors.New(x509InvalidPrivateKeyˢ));
+            return (default, errors.New(x509InvalidPrivateKeyˢ));
         }
         privKey.PrivateKey = privKey.PrivateKey[1..];
     }

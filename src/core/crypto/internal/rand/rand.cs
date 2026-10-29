@@ -22,14 +22,14 @@ partial struct reader {
 internal static (nint n, error err) Read(this reader r, slice<byte> b) {
     if (Δboring.Enabled) {
         {
-            var (_, errΔ1) = Δboring.RandReader.Read(b); if (errΔ1 != default!) {
+            var (_, errΔ1) = Δboring.RandReader.Read(b); if (errΔ1 != nil) {
                 throw panic("crypto/rand: boring RandReader failed: " + errΔ1.Error());
             }
         }
-        return (len(b), default!);
+        return (len(b), default);
     }
     drbg.Read(b);
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 // Reader is an io.Reader that calls [drbg.Read].
@@ -37,7 +37,7 @@ internal static (nint n, error err) Read(this reader r, slice<byte> b) {
 // It should be used internally instead of [crypto/rand.Reader], because the
 // latter can be set by applications outside of tests. These applications then
 // risk breaking between Go releases, if the way the Reader is used changes.
-public static io.Reader Reader = new reader(nil);
+public static io.Reader Reader = new reader();
 
 // SetTestingReader overrides all calls to [drbg.Read]. The Read method of
 // r must never return an error or return short.

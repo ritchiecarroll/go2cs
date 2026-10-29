@@ -124,14 +124,14 @@ public static ж<Element> Subtract(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<E
 }
 
 // Negate sets v = -a, and returns v.
-public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> Ꮡa) {
-    return Ꮡv.Subtract(feZero, Ꮡa);
+public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> a) {
+    return Ꮡv.Subtract(feZero, a);
 }
 
 // Invert sets v = 1/z mod p, and returns v.
 //
 // If z == 0, Invert returns v = 0.
-public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> Ꮡz) {
+public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> z) {
     // Inversion is implemented as exponentiation with exponent p − 2. It uses the
     // same sequence of 255 squarings and 11 multiplications as [Curve25519].
     ref var z2 = ref heap(new Element(), out var Ꮡz2);
@@ -144,12 +144,12 @@ public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> Ꮡz) {
     ref var z2_100_0 = ref heap(new Element(), out var Ꮡz2_100_0);
     ref var t = ref heap(new Element(), out var Ꮡt);
 
-    Ꮡz2.Square(Ꮡz); // 2
-    Ꮡt.Square(Ꮡz2); // 4
-    Ꮡt.Square(Ꮡt); // 8
-    Ꮡz9.Multiply(Ꮡt, Ꮡz); // 9
-    Ꮡz11.Multiply(Ꮡz9, Ꮡz2); // 11
-    Ꮡt.Square(Ꮡz11); // 22
+    Ꮡz2.Square(z);             // 2
+    Ꮡt.Square(Ꮡz2);            // 4
+    Ꮡt.Square(Ꮡt);             // 8
+    Ꮡz9.Multiply(Ꮡt, z);       // 9
+    Ꮡz11.Multiply(Ꮡz9, Ꮡz2);   // 11
+    Ꮡt.Square(Ꮡz11);           // 22
     Ꮡz2_5_0.Multiply(Ꮡt, Ꮡz9); // 31 = 2^5 - 2^0
 
     Ꮡt.Square(Ꮡz2_5_0); // 2^6 - 2^1
@@ -227,7 +227,7 @@ public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x
     ref var v = ref Ꮡv.DerefOrNull();
 
     if (len(x) != 32) {
-        return (default!, errors.New(edwards25519InvalidFieldˢ));
+        return (default, errors.New(edwards25519InvalidFieldˢ));
     }
 
     // Bits 0:51 (bytes 0:8, bits 0:64, shift 0, mask 51).
@@ -247,7 +247,7 @@ public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x
     v.l4 = byteorder.LEUint64(x[24..32]) >> 12;
     v.l4 &= (uint64)(maskLow51Bits);
 
-    return (Ꮡv, default!);
+    return (Ꮡv, default);
 }
 
 // Bytes returns the canonical 32-byte little-endian encoding of v.
@@ -261,8 +261,7 @@ public static slice<byte> Bytes(this ref Element v) {
 internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    ref var t = ref heap<Element>(out var Ꮡt);
-    t = v;
+    ref var t = ref heap<Element>(v, out var Ꮡt);
     Ꮡt.reduce();
 
     // Pack five 51-bit limbs into four 64-bit words:
@@ -348,14 +347,14 @@ public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) {
 }
 
 // Multiply sets v = x * y, and returns v.
-public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> Ꮡx, ж<Element> Ꮡy) {
-    feMul(ref (Ꮡv).DerefOrNull(), ref (Ꮡx).DerefOrNull(), ref (Ꮡy).DerefOrNull());
+public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> x, ж<Element> y) {
+    feMul(ref (Ꮡv).DerefOrNull(), ref (x).DerefOrNull(), ref (y).DerefOrNull());
     return Ꮡv;
 }
 
 // Square sets v = x * x, and returns v.
-public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> Ꮡx) {
-    feSquare(ref (Ꮡv).DerefOrNull(), ref (Ꮡx).DerefOrNull());
+public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> x) {
+    feSquare(ref (Ꮡv).DerefOrNull(), ref (x).DerefOrNull());
     return Ꮡv;
 }
 
@@ -381,8 +380,8 @@ public static ж<Element> Mult32(this ж<Element> Ꮡv, ж<Element> Ꮡx, uint32
 
 // mul51 returns lo + hi * 2⁵¹ = a * b.
 internal static (uint64 lo, uint64 hi) mul51(uint64 a, uint32 b) {
-    uint64 lo = default!;
-    uint64 hi = default!;
+    uint64 lo = default;
+    uint64 hi = default;
 
     var (mh, ml) = bits.Mul64(a, (uint64)b);
     lo = ml & maskLow51Bits;
@@ -391,56 +390,56 @@ internal static (uint64 lo, uint64 hi) mul51(uint64 a, uint32 b) {
 }
 
 // Pow22523 set v = x^((p-5)/8), and returns v. (p-5)/8 is 2^252-3.
-public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> Ꮡx) {
+public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> x) {
     ref var t0 = ref heap(new Element(), out var Ꮡt0);
     ref var t1 = ref heap(new Element(), out var Ꮡt1);
     ref var t2 = ref heap(new Element(), out var Ꮡt2);
 
-    Ꮡt0.Square(Ꮡx); // x^2
-    Ꮡt1.Square(Ꮡt0); // x^4
-    Ꮡt1.Square(Ꮡt1); // x^8
-    Ꮡt1.Multiply(Ꮡx, Ꮡt1); // x^9
-    Ꮡt0.Multiply(Ꮡt0, Ꮡt1); // x^11
-    Ꮡt0.Square(Ꮡt0); // x^22
-    Ꮡt0.Multiply(Ꮡt1, Ꮡt0); // x^31
-    Ꮡt1.Square(Ꮡt0); // x^62
+    Ꮡt0.Square(x);                 // x^2
+    Ꮡt1.Square(Ꮡt0);               // x^4
+    Ꮡt1.Square(Ꮡt1);               // x^8
+    Ꮡt1.Multiply(x, Ꮡt1);          // x^9
+    Ꮡt0.Multiply(Ꮡt0, Ꮡt1);        // x^11
+    Ꮡt0.Square(Ꮡt0);               // x^22
+    Ꮡt0.Multiply(Ꮡt1, Ꮡt0);        // x^31
+    Ꮡt1.Square(Ꮡt0);               // x^62
     for (nint i = 1; i < 5; i++) { // x^992
         Ꮡt1.Square(Ꮡt1);
     }
-    Ꮡt0.Multiply(Ꮡt1, Ꮡt0); // x^1023 -> 1023 = 2^10 - 1
-    Ꮡt1.Square(Ꮡt0); // 2^11 - 2
+    Ꮡt0.Multiply(Ꮡt1, Ꮡt0);         // x^1023 -> 1023 = 2^10 - 1
+    Ꮡt1.Square(Ꮡt0);                // 2^11 - 2
     for (nint i = 1; i < 10; i++) { // 2^20 - 2^10
         Ꮡt1.Square(Ꮡt1);
     }
-    Ꮡt1.Multiply(Ꮡt1, Ꮡt0); // 2^20 - 1
-    Ꮡt2.Square(Ꮡt1); // 2^21 - 2
+    Ꮡt1.Multiply(Ꮡt1, Ꮡt0);         // 2^20 - 1
+    Ꮡt2.Square(Ꮡt1);                // 2^21 - 2
     for (nint i = 1; i < 20; i++) { // 2^40 - 2^20
         Ꮡt2.Square(Ꮡt2);
     }
-    Ꮡt1.Multiply(Ꮡt2, Ꮡt1); // 2^40 - 1
-    Ꮡt1.Square(Ꮡt1); // 2^41 - 2
+    Ꮡt1.Multiply(Ꮡt2, Ꮡt1);         // 2^40 - 1
+    Ꮡt1.Square(Ꮡt1);                // 2^41 - 2
     for (nint i = 1; i < 10; i++) { // 2^50 - 2^10
         Ꮡt1.Square(Ꮡt1);
     }
-    Ꮡt0.Multiply(Ꮡt1, Ꮡt0); // 2^50 - 1
-    Ꮡt1.Square(Ꮡt0); // 2^51 - 2
+    Ꮡt0.Multiply(Ꮡt1, Ꮡt0);         // 2^50 - 1
+    Ꮡt1.Square(Ꮡt0);                // 2^51 - 2
     for (nint i = 1; i < 50; i++) { // 2^100 - 2^50
         Ꮡt1.Square(Ꮡt1);
     }
-    Ꮡt1.Multiply(Ꮡt1, Ꮡt0); // 2^100 - 1
-    Ꮡt2.Square(Ꮡt1); // 2^101 - 2
+    Ꮡt1.Multiply(Ꮡt1, Ꮡt0);          // 2^100 - 1
+    Ꮡt2.Square(Ꮡt1);                 // 2^101 - 2
     for (nint i = 1; i < 100; i++) { // 2^200 - 2^100
         Ꮡt2.Square(Ꮡt2);
     }
-    Ꮡt1.Multiply(Ꮡt2, Ꮡt1); // 2^200 - 1
-    Ꮡt1.Square(Ꮡt1); // 2^201 - 2
+    Ꮡt1.Multiply(Ꮡt2, Ꮡt1);         // 2^200 - 1
+    Ꮡt1.Square(Ꮡt1);                // 2^201 - 2
     for (nint i = 1; i < 50; i++) { // 2^250 - 2^50
         Ꮡt1.Square(Ꮡt1);
     }
-    Ꮡt0.Multiply(Ꮡt1, Ꮡt0); // 2^250 - 1
-    Ꮡt0.Square(Ꮡt0); // 2^251 - 2
-    Ꮡt0.Square(Ꮡt0); // 2^252 - 4
-    return Ꮡv.Multiply(Ꮡt0, Ꮡx); // 2^252 - 3 -> x^(2^252-3)
+    Ꮡt0.Multiply(Ꮡt1, Ꮡt0);     // 2^250 - 1
+    Ꮡt0.Square(Ꮡt0);            // 2^251 - 2
+    Ꮡt0.Square(Ꮡt0);            // 2^252 - 4
+    return Ꮡv.Multiply(Ꮡt0, x); // 2^252 - 3 -> x^(2^252-3)
 }
 
 // sqrtM1 is 2^((p-1)/4), which squared is equal to -1 by Euler's Criterion.
@@ -452,19 +451,19 @@ internal static ж<Element> sqrtM1 = Ꮡ(new Element(1718705420411056UL, 2349088
 // If u/v is square, SqrtRatio returns r and 1. If u/v is not square, SqrtRatio
 // sets r according to Section 4.3 of draft-irtf-cfrg-ristretto255-decaf448-00,
 // and returns r and 0.
-public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, ж<Element> Ꮡu, ж<Element> Ꮡv) {
+public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, ж<Element> u, ж<Element> v) {
     var t0 = @new<Element>();
 
     // r = (u * v3) * (u * v7)^((p-5)/8)
-    var v2 = @new<Element>().Square(Ꮡv);
-    var uv3 = @new<Element>().Multiply(Ꮡu, t0.Multiply(v2, Ꮡv));
+    var v2 = @new<Element>().Square(v);
+    var uv3 = @new<Element>().Multiply(u, t0.Multiply(v2, v));
     var uv7 = @new<Element>().Multiply(uv3, t0.Square(v2));
     var rr = @new<Element>().Multiply(uv3, t0.Pow22523(uv7));
 
-    var check = @new<Element>().Multiply(Ꮡv, t0.Square(rr)); // check = v * r^2
+    var check = @new<Element>().Multiply(v, t0.Square(rr)); // check = v * r^2
 
-    var uNeg = @new<Element>().Negate(Ꮡu);
-    nint correctSignSqrt = check.Equal(Ꮡu);
+    var uNeg = @new<Element>().Negate(u);
+    nint correctSignSqrt = check.Equal(u);
     nint flippedSignSqrt = check.Equal(uNeg);
     nint flippedSignSqrtI = check.Equal(t0.Multiply(uNeg, sqrtM1));
 

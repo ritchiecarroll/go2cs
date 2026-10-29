@@ -4,7 +4,7 @@
 namespace go.crypto;
 
 using godebug = go.@internal.godebug_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.@internal;
 
 partial class fips140_package {

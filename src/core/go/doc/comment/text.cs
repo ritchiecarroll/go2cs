@@ -34,24 +34,24 @@ public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
         codePrefix: p.TextCodePrefix,
         width: p.TextWidth
     ));
-    if ((~tp).codePrefix == ""u8) {
-        tp.Value.codePrefix = p.TextPrefix + "\t"u8;
+    if (tp.codePrefix == ""u8) {
+        tp.codePrefix = p.TextPrefix + "\t"u8;
     }
-    if ((~tp).width == 0) {
-        tp.Value.width = 80 - utf8.RuneCountInString((~tp).prefix);
+    if (tp.width == 0) {
+        tp.width = 80 - utf8.RuneCountInString(tp.prefix);
     }
 
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     foreach (var (i, x) in d.Content) {
         if (i > 0 && blankBefore(x)) {
-            @out.WriteString((~tp).prefix);
+            @out.WriteString(tp.prefix);
             writeNL(Ꮡout);
         }
         tp.block(Ꮡout, x);
     }
     var anyUsed = false;
     foreach (var (_, def) in d.Links) {
-        if ((~def).Used) {
+        if (def.Used) {
             anyUsed = true;
             break;
         }
@@ -59,8 +59,8 @@ public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     if (anyUsed) {
         writeNL(Ꮡout);
         foreach (var (_, def) in d.Links) {
-            if ((~def).Used) {
-                fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "[%s]: %s\n"u8, (~def).Text, (~def).URL);
+            if (def.Used) {
+                fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "[%s]: %s\n"u8, def.Text, def.URL);
             }
         }
     }
@@ -75,13 +75,13 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
     // Trim trailing spaces.
     var data = @out.Bytes();
     nint n = 0;
-    while (n < len(data) && (data[len(data) - n - 1] == (rune)' ' || data[len(data) - n - 1] == (rune)'\t')) {
+    while (n < len(data) && (data[len(data) - n - 1] == ' ' || data[len(data) - n - 1] == '\t')) {
         n++;
     }
     if (n > 0) {
         @out.Truncate(len(data) - n);
     }
-    @out.WriteByte((rune)'\n');
+    @out.WriteByte((byte)'\n');
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -100,19 +100,19 @@ internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, B
     }
     case ж<Paragraph> xΔ1: {
         @out.WriteString(p.prefix);
-        Ꮡp.text(Ꮡout, ""u8, (~xΔ1).Text);
+        Ꮡp.text(Ꮡout, ""u8, xΔ1.Text);
         break;
     }
     case ж<Heading> xΔ1: {
         @out.WriteString(p.prefix);
         @out.WriteString("# "u8);
-        Ꮡp.text(Ꮡout, ""u8, (~xΔ1).Text);
+        Ꮡp.text(Ꮡout, ""u8, xΔ1.Text);
         break;
     }
     case ж<Code> xΔ1: {
-        @string text = xΔ1.Value.Text;
+        @string text = xΔ1.Text;
         while (text != ""u8) {
-            @string line = default!;
+            @string line = default;
             (line, text, _) = strings.Cut(text, "\n"u8);
             if (line != ""u8) {
                 @out.WriteString(p.codePrefix);
@@ -124,27 +124,27 @@ internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, B
     }
     case ж<List> xΔ1: {
         var loose = xΔ1.BlankBetween();
-        foreach (var (i, item) in (~xΔ1).Items) {
+        foreach (var (i, item) in xΔ1.Items) {
             if (i > 0 && loose) {
                 @out.WriteString(p.prefix);
                 writeNL(Ꮡout);
             }
             @out.WriteString(p.prefix);
             @out.WriteString(" "u8);
-            if ((~item).Number == ""u8){
+            if (item.Number == ""u8) {
                 @out.WriteString(" - "u8);
             } else {
-                @out.WriteString((~item).Number);
+                @out.WriteString(item.Number);
                 @out.WriteString(". "u8);
             }
-            foreach (var (iΔ1, blk) in (~item).Content) {
+            foreach (var (iΔ1, blk) in item.Content) {
                 @string fourSpace = fourSpaceᶜ2;
                 if (iΔ1 > 0) {
                     writeNL(Ꮡout);
                     @out.WriteString(p.prefix);
                     @out.WriteString(fourSpace);
                 }
-                Ꮡp.text(Ꮡout, fourSpace, (~blk._<ж<Paragraph>>()).Text);
+                Ꮡp.text(Ꮡout, fourSpace, blk._<ж<Paragraph>>().Text);
             }
         }
         break;
@@ -160,9 +160,9 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
     var words = strings.Fields(p.@long.String());
     p.@long.Reset();
 
-    slice<nint> seq = default!;
-    if (p.width < 0 || len(words) == 0){
-        seq = new nint[]{0, len(words)}.slice(); // one long line
+    slice<nint> seq = default;
+    if (p.width < 0 || len(words) == 0) {
+        seq = slice<nint>([0, len(words)]); // one long line
     } else {
         seq = wrap(words, p.width - utf8.RuneCountInString(indent));
     }
@@ -184,23 +184,23 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
 // oneLongLine prints the text sequence x to out as one long line,
 // without worrying about line wrapping.
 // Explicit links have the [ ] dropped to improve readability.
-internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡout, slice<ΔText> x) {
+internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @out, slice<ΔText> x) {
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {
-            Ꮡout.WriteString((@string)tΔ1);
+            @out.WriteString((@string)tΔ1);
             break;
         }
         case Italic tΔ1: {
-            Ꮡout.WriteString((@string)tΔ1);
+            @out.WriteString((@string)tΔ1);
             break;
         }
         case ж<Link> tΔ1: {
-            p.oneLongLine(Ꮡout, (~tΔ1).Text);
+            p.oneLongLine(@out, tΔ1.Text);
             break;
         }
         case ж<DocLink> tΔ1: {
-            p.oneLongLine(Ꮡout, (~tΔ1).Text);
+            p.oneLongLine(@out, tΔ1.Text);
             break;
         }}
     }
@@ -229,7 +229,7 @@ internal partial struct wrap_score /*dyn*/ {
 //
 // [The least weight subsequence problem]: https://doi.org/10.1109/SFCS.1985.60
 internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
-    slice<nint> seq = default!;
+    slice<nint> seq = default;
     var fᴷ = new stackAppend<wrap_score>();
     var bestleftᴷ = new stackAppend<nint>();
     var dᴷ = new stackAppend<nint>();
@@ -312,8 +312,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     // The rest of this function is “The Basic Algorithm” from
     // Hirschberg and Larmore's conference paper,
     // using the same names as in the paper.
-    ref var f = ref heap<slice<wrap_score>>(out var Ꮡf);
-    f = new wrap_score[]{new(0, 0)}.slice();
+    ref var f = ref heap<slice<wrap_score>>(slice<wrap_score>([new(0, 0)]), out var Ꮡf);
     var addʗ1 = add;
     var weightʗ1 = weight;
     wrap_score g(nint i, nint j) => addʗ1(Ꮡf.ValueSlot[i], weightʗ1(i, j));
@@ -376,7 +375,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
 // wrapPenalty is the penalty for inserting a line break after word s.
 internal static int64 wrapPenalty(@string s) {
     switch (s[len(s) - 1]) {
-    case (rune)'.' or (rune)',' or (rune)':' or (rune)';': {
+    case (byte)'.' or (byte)',' or (byte)':' or (byte)';': {
         return 0;
     }}
     return 64;

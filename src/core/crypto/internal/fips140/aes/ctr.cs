@@ -18,15 +18,14 @@ partial class aes_package {
 partial struct CTR {
     internal Block b;
     internal uint64 ivlo, ivhi; // start counter as 64-bit limbs
-    internal uint64 offset; // for XORKeyStream only
+    internal uint64 offset;     // for XORKeyStream only
 }
 
-public static ж<CTR> NewCTR(ж<Block> Ꮡb, slice<byte> iv) {
+public static ж<CTR> NewCTR(ж<Block> b, slice<byte> iv) {
     // Allocate the CTR here, in an easily inlineable function, so
     // the allocation can be done in the caller's stack frame
     // instead of the heap.  See issue 70499.
-    ref var c = ref heap<CTR>(out var Ꮡc);
-    c = newCTR(ref (Ꮡb).DerefOrNull(), iv);
+    ref var c = ref heap<CTR>(newCTR(ref (b).DerefOrNull(), iv), out var Ꮡc);
     return Ꮡc;
 }
 
@@ -48,7 +47,7 @@ public static void XORKeyStream(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> 
 
     Ꮡc.XORKeyStreamAt(dst, src, c.offset);
 
-    uint64 carry = default!;
+    uint64 carry = default;
     (c.offset, carry) = bits.Add64(c.offset, (uint64)len(src), 0);
     if (carry != 0) {
         throw panic("crypto/aes: counter overflow");
@@ -62,7 +61,7 @@ public static void RoundToBlock(ж<CTR> Ꮡc) {
 
     {
         var remainder = c.offset % (uint64)ΔBlockSize; if (remainder != 0) {
-            uint64 carry = default!;
+            uint64 carry = default;
             (c.offset, carry) = bits.Add64(c.offset, (uint64)ΔBlockSize - remainder, 0);
             if (carry != 0) {
                 throw panic("crypto/aes: counter overflow");

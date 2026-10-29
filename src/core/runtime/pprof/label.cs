@@ -23,9 +23,9 @@ partial struct labelContextKey {
 }
 
 internal static labelMap labelValue(context.Context ctx) {
-    var (labels, _) = ctx.Value(new labelContextKey(nil))._<ж<labelMap>>(ᐧ);
+    var (labels, _) = ctx.Value(new labelContextKey())._<ж<labelMap>>(ᐧ);
     if (labels == nil) {
-        return new labelMap(nil);
+        return new labelMap();
     }
     return labels.Value;
 }
@@ -60,14 +60,13 @@ internal static @string String(this ж<labelMap> Ꮡl) {
 // A label overwrites a prior label with the same key.
 public static context.Context WithLabels(context.Context ctx, LabelSet labels) {
     var parentLabels = labelValue(ctx);
-    return context.WithValue(ctx, new labelContextKey(nil), Ꮡ(new labelMap(mergeLabelSets(parentLabels.Set, labels))));
+    return context.WithValue(ctx, new labelContextKey(), Ꮡ(new labelMap(mergeLabelSets(parentLabels.Set, labels))));
 }
 
 internal static label.Set mergeLabelSets(label.Set left, LabelSet right) {
-    if (len(left.List) == 0){
+    if (len(left.List) == 0) {
         return label.NewSet(right.list);
-    } else 
-    if (len(right.list) == 0) {
+    } else if (len(right.list) == 0) {
         return left;
     }
 
@@ -76,20 +75,23 @@ internal static label.Set mergeLabelSets(label.Set left, LabelSet right) {
     nint r = 0;
     var result = new slice<label.Label>(0, len(rList));
     while (l < len(lList) && r < len(rList)) {
-        var exprᴛ1 = strings_package.Compare(lList[l].Key, rList[r].Key);
-        if (exprᴛ1 == -1) { // left key < right key
+        switch (strings_package.Compare(lList[l].Key, rList[r].Key)) {
+        case var ᴛ when ᴛ == -1: { // left key < right key
             result = append(result, lList[l]);
             l++;
+            break;
         }
-        else if (exprᴛ1 is 1) { // right key < left key
+        case 1: { // right key < left key
             result = append(result, rList[r]);
             r++;
+            break;
         }
-        else if (exprᴛ1 is 0) { // keys are equal, right value overwrites left value
+        case 0: { // keys are equal, right value overwrites left value
             result = append(result, rList[r]);
             l++;
             r++;
-        }
+            break;
+        }}
     }
 
     // Append the remaining elements
@@ -122,7 +124,7 @@ public static LabelSet Labels(params ꓸꓸꓸstring argsʗp) {
         slices.SortStableFunc(list, (label.Label a, label.Label b) => strings_package.Compare(a.Key, b.Key));
         var deduped = new slice<label.Label>(0, len(list));
         foreach (var (i, lbl) in list) {
-            if (i == 0 || lbl.Key != list[i - 1].Key){
+            if (i == 0 || lbl.Key != list[i - 1].Key) {
                 deduped = append(deduped, lbl);
             } else {
                 deduped[len(deduped) - 1] = lbl;

@@ -16,9 +16,9 @@ partial struct block /*[]byte*/;
 // bitReader reads a bit stream going forward.
 partial struct bitReader {
     internal ж<Reader> r; // for error reporting
-    internal block data;   // the bits to read
+    internal block data;  // the bits to read
     internal uint32 off;  // current offset into data
-    internal uint32 bits;  // bits ready to be returned
+    internal uint32 bits; // bits ready to be returned
     internal uint32 cnt;  // number of valid bits in the bits field
 }
 
@@ -43,7 +43,7 @@ internal static error moreBits(this ref bitReader br) {
         br.bits |= (uint32)(((uint32)c).Lsh((uint64)(br.cnt)));
         br.cnt += 8;
     }
-    return default!;
+    return default;
 }
 
 // val is called to fetch a value of b bits.
@@ -69,12 +69,12 @@ internal static error makeError(this ref bitReader br, @string msg) {
 
 // reverseBitReader reads a bit stream in reverse.
 partial struct reverseBitReader {
-    internal ж<Reader> r; // for error reporting
+    internal ж<Reader> r;  // for error reporting
     internal block data;   // the bits to read
-    internal uint32 off;  // current offset into data
-    internal uint32 start;  // start in data; we read backward to start
+    internal uint32 off;   // current offset into data
+    internal uint32 start; // start in data; we read backward to start
     internal uint32 bits;  // bits ready to be returned
-    internal uint32 cnt;  // number of valid bits in bits field
+    internal uint32 cnt;   // number of valid bits in bits field
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -88,7 +88,7 @@ internal static (reverseBitReader, error) makeReverseBitReader(this ж<Reader> �
 
     var streamStart = data[off];
     if (streamStart == 0) {
-        return (new reverseBitReader(nil), r.makeError(off, zeroByteAtReverseBitˢ));
+        return (new reverseBitReader(), r.makeError(off, zeroByteAtReverseBitˢ));
     }
     var rbr = new reverseBitReader(
         r: Ꮡr,
@@ -98,7 +98,7 @@ internal static (reverseBitReader, error) makeReverseBitReader(this ж<Reader> �
         bits: (uint32)streamStart,
         cnt: (uint32)(7 - bits.LeadingZeros8(streamStart))
     );
-    return (rbr, default!);
+    return (rbr, default);
 }
 
 // val is called to fetch a value of b bits.
@@ -109,7 +109,7 @@ internal static (uint32, error) val(this ref reverseBitReader rbr, uint8 b) {
 
     rbr.cnt -= (uint32)b;
     var v = (rbr.bits.Rsh((uint64)(rbr.cnt))) & ((((uint32)1).Lsh((uint64)(b))) - 1);
-    return (v, default!);
+    return (v, default);
 }
 
 // fetch is called to ensure that at least b bits are available.
@@ -122,7 +122,7 @@ internal static bool fetch(this ref reverseBitReader rbr, uint8 b) {
         }
         rbr.off--;
         var c = rbr.data[rbr.off];
-        rbr.bits <<= (int)(8);
+        rbr.bits <<= 8;
         rbr.bits |= (uint32)((uint32)c);
         rbr.cnt += 8;
     }

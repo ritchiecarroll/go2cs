@@ -10,17 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,6 +49,11 @@ using static go.@internal.coverage.cfile_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(emitState))]
+[assembly: go.GoFieldAccess(typeof(tstate))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -69,9 +63,9 @@ using static go.@internal.coverage.cfile_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCpoK4qJKCgpSCADt4goKUgoKmgoKmpg==")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFGgAbKClIKCgoKmgoKmgoKCpoCCgoLagoKUgoKUpoKCgpSsxO6Cpu6UgoKCooKClJSCgoLKgoKigIKkgoKClIKCyoKmgoKClKqigoKUgqaU7oCCyIKAgrassoKUgIKCgtykgpSmgriCAAcQgIKkgriAgqSAgtqAgraokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKAgraCgIK2rNKAgqSAgtqAgrasstaylIKigpSmgpSCgoKUpoKCgpSCgriCgoKCyoKCgoKmlIKmgoKCpgAIEoKCgpKCgIKUggAIEKaCgILIlIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKUgpSCgoKCooKClJSCgg==", "455-461:1", "", "189=Getenv/1/1/2;265=Getenv/1/1/2;321=Getenv/1/1/4")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFGgAbKClIKCgoKmgoKmgoKCpoCCgoLagoKUgoKUpoKCgpSsxO6Cpu6UgoKCooKClJSCgoLKgoKigIKkgoKClIKCyoKmgoKClKqigoKUgqaU7oCCyIKAgrassoKUgIKCgtykgpSmgriCAAcQgIKkgriAgqSAgtqAgraokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKAgraCgIK2rNKAgqSAgtqAgrasstaylIKigpSmgpSCgoKUpoKCgpSCgriCgoKCyoKCgoKmlIKmgoKCpgAIEoKCgoKCgIKUggAIEKaCgILIlIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKUgpSCgoKCooKClJSCgg==", "455-461:1", "", "189=Getenv/1/1/2;265=Getenv/1/1/2;321=Getenv/1/1/4")]
 [assembly: go.GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484pKCuILKgIKkgIIACBCCgqiSgoKCgoKUkoKC3AAIEoKCgoKUgILIgoCCgILqgILIgoCCpIKAgsgADBbkgoKUkpSCgoKUgoKUgoCCyKaygoKUkoKCgpSCgoKClIK4goCUgILGgoKU6IKAgtqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAIEIKCgIKkgoKAgrYAAhLigpSmgoKCgoKUgqaClIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2", "", "91=NewFormatter/1/1/2")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484oKCuILKgIKkgIIACBCCgqiSgoKCgoKUkoKC3AAIEoKCgoKUgILIgoCCgILqgILIgoCCpIKAgsgADBbkgoKUkpSCgoKUgoKUgoCCyKaygoKUkoKCgpSCgoKClIK4goCUgILGgoKU6IKAgtqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAIEIKCgIKkgoKAgrYAAhLigpSmgoKCgoKUgqaClIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2", "", "90=NewFormatter/1/1/2", "202:29")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

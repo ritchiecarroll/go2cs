@@ -13,14 +13,14 @@ partial class unix_package {
 //go:cgo_import_dynamic libc_getgrouplist getgrouplist "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_getgrouplist_trampoline();
 
-public static error Getgrouplist(ж<byte> Ꮡname, uint32 gid, ж<uint32> Ꮡgids, ж<int32> Ꮡn) {
+public static error Getgrouplist(ж<byte> name, uint32 gid, ж<uint32> gids, ж<int32> n) {
     var (_, _, errno) = syscall_syscall6(abi.FuncPCABI0(libc_getgrouplist_trampoline),
-        (uintptr)Ꮡname, (uintptr)gid, (uintptr)Ꮡgids,
-        (uintptr)Ꮡn, 0, 0);
+        (uintptr)name, (uintptr)gid, (uintptr)gids,
+        (uintptr)n, 0, 0);
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 public static UntypedInt SC_GETGR_R_SIZE_MAX => 0x46;
@@ -29,9 +29,9 @@ public static UntypedInt SC_GETPW_R_SIZE_MAX => 0x47;
 partial struct Passwd {
     public ж<byte> Name;
     public ж<byte> ΔPasswd;
-    public uint32 Uid; // uid_t
-    public uint32 Gid; // gid_t
-    public int64 Change;  // time_t
+    public uint32 Uid;   // uid_t
+    public uint32 Gid;   // gid_t
+    public int64 Change; // time_t
     public ж<byte> Class;
     public ж<byte> Gecos;
     public ж<byte> Dir;

@@ -47,34 +47,34 @@ internal static readonly @string unsupportedKemˢ = "unsupported KEM"u8;
 public static (ΔKEM, error) NewKEM(uint16 id) {
     switch (id) {
     case 0x0010: { // DHKEM(P-256, HKDF-SHA256)
-        return (DHKEM(ecdh.P256()), default!);
+        return (DHKEM(ecdh.P256()), default);
     }
     case 0x0011: { // DHKEM(P-384, HKDF-SHA384)
-        return (DHKEM(ecdh.P384()), default!);
+        return (DHKEM(ecdh.P384()), default);
     }
     case 0x0012: { // DHKEM(P-521, HKDF-SHA512)
-        return (DHKEM(ecdh.P521()), default!);
+        return (DHKEM(ecdh.P521()), default);
     }
     case 0x0020: { // DHKEM(X25519, HKDF-SHA256)
-        return (DHKEM(ecdh.X25519()), default!);
+        return (DHKEM(ecdh.X25519()), default);
     }
     case 0x0041: { // ML-KEM-768
-        return (MLKEM768(), default!);
+        return (MLKEM768(), default);
     }
     case 0x0042: { // ML-KEM-1024
-        return (MLKEM1024(), default!);
+        return (MLKEM1024(), default);
     }
     case 0x647a: { // MLKEM768-X25519
-        return (MLKEM768X25519(), default!);
+        return (MLKEM768X25519(), default);
     }
     case 0x0050: { // MLKEM768-P256
-        return (MLKEM768P256(), default!);
+        return (MLKEM768P256(), default);
     }
     case 0x0051: { // MLKEM1024-P384
-        return (MLKEM1024P384(), default!);
+        return (MLKEM1024P384(), default);
     }
     default: {
-        return (default!, errors.New(unsupportedKemˢ));
+        return (default, errors.New(unsupportedKemˢ));
     }}
 }
 
@@ -125,9 +125,9 @@ internal static readonly @string sharedSecretˢ = "shared_secret"u8;
 
 internal static (slice<byte>, error) extractAndExpand(this ref dhKEM kem, slice<byte> dhKey, slice<byte> kemContext) {
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (eaePRK, err) = kem.kdf.labeledExtract(suiteID, default!, eaePrkˢ, dhKey);
-    if (err != default!) {
-        return (default!, err);
+    var (eaePRK, err) = kem.kdf.labeledExtract(suiteID, default, eaePrkˢ, dhKey);
+    if (err != nil) {
+        return (default, err);
     }
     return kem.kdf.labeledExpand(suiteID, eaePRK, sharedSecretˢ, kemContext, kem.Nsecret);
 }
@@ -161,25 +161,25 @@ internal static void initᴛdhKEMX25519() { dhKEMX25519 = Ꮡ(new dhKEM(HKDFSHA2
 //
 // depending on curve.
 public static ΔKEM DHKEM(ecdhꓸCurve curve) {
-    var exprᴛ1 = curve;
-    if (AreEqual(exprᴛ1, ecdh.P256())) {
+    switch (curve) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.P256()): {
         return new dhKEMжΔKEM(dhKEMP256);
     }
-    if (AreEqual(exprᴛ1, ecdh.P384())) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.P384()): {
         return new dhKEMжΔKEM(dhKEMP384);
     }
-    if (AreEqual(exprᴛ1, ecdh.P521())) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.P521()): {
         return new dhKEMжΔKEM(dhKEMP521);
     }
-    if (AreEqual(exprᴛ1, ecdh.X25519())) {
+    case var ᴛ when AreEqual(ᴛ, ecdh.X25519()): {
         return new dhKEMжΔKEM(dhKEMX25519);
     }
-    { /* default: */
+    default: {
         // The set of ecdh.Curve implementations is closed, because the
         // interface has unexported methods. Therefore, this default case is
         // only hit if a new curve is added that DHKEM doesn't support.
-        return new unsupportedCurveKEM(nil);
-    }
+        return new unsupportedCurveKEM();
+    }}
 }
 
 partial struct unsupportedCurveKEM {
@@ -193,19 +193,19 @@ internal static uint16 ID(this unsupportedCurveKEM _) {
 internal static readonly @string unsupportedCurveˢ = "unsupported curve"u8;
 
 internal static (PrivateKey, error) GenerateKey(this unsupportedCurveKEM _) {
-    return (default!, errors.New(unsupportedCurveˢ));
+    return (default, errors.New(unsupportedCurveˢ));
 }
 
 internal static (ΔPublicKey, error) NewPublicKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default!, errors.New(unsupportedCurveˢ));
+    return (default, errors.New(unsupportedCurveˢ));
 }
 
 internal static (PrivateKey, error) NewPrivateKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default!, errors.New(unsupportedCurveˢ));
+    return (default, errors.New(unsupportedCurveˢ));
 }
 
 internal static (PrivateKey, error) DeriveKeyPair(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default!, errors.New(unsupportedCurveˢ));
+    return (default, errors.New(unsupportedCurveˢ));
 }
 
 internal static nint encSize(this unsupportedCurveKEM _) {
@@ -235,18 +235,18 @@ public static (ΔPublicKey, error) NewDHKEMPublicKey(ж<ecdhꓸPublicKey> Ꮡpub
 
     var (kem, ok) = DHKEM(pub.Curve())._<ж<dhKEM>>(ᐧ);
     if (!ok) {
-        return (default!, errors.New(unsupportedCurveˢ));
+        return (default, errors.New(unsupportedCurveˢ));
     }
     return (new dhKEMPublicKeyжΔPublicKey(Ꮡ(new dhKEMPublicKey(
         kem: kem,
         pub: Ꮡpub
-    ))), default!);
+    ))), default);
 }
 
 internal static (ΔPublicKey, error) NewPublicKey(this ref dhKEM kem, slice<byte> data) {
     var (pub, err) = kem.curve.NewPublicKey(data);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return NewDHKEMPublicKey(pub);
 }
@@ -264,29 +264,29 @@ internal static slice<byte> Bytes(this ref dhKEMPublicKey pk) {
 internal static Func<ж<ecdh.PrivateKey>> testingOnlyGenerateKey;
 
 internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ref dhKEMPublicKey pk) {
-    slice<byte> sharedSecret = default!;
-    error err = default!;
+    slice<byte> sharedSecret = default;
+    error err = default;
 
     (var privEph, err) = pk.pub.Curve().GenerateKey(rand.Reader);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
-    if (testingOnlyGenerateKey != default!) {
+    if (testingOnlyGenerateKey != nil) {
         privEph = testingOnlyGenerateKey();
     }
     (var dhVal, err) = privEph.ECDH(pk.pub);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
     var encPubEph = privEph.PublicKey().Bytes();
 
     var encPubRecip = pk.pub.Bytes();
     var kemContext = appendꓸꓸꓸ(encPubEph, encPubRecip);
     (sharedSecret, err) = pk.kem.extractAndExpand(dhVal, kemContext);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
-    return (sharedSecret, encPubEph, default!);
+    return (sharedSecret, encPubEph, default);
 }
 
 partial struct dhKEMPrivateKey {
@@ -311,26 +311,26 @@ partial struct dhKEMPrivateKey {
 public static (PrivateKey, error) NewDHKEMPrivateKey(ecdh.KeyExchanger priv) {
     var (kem, ok) = DHKEM(priv.Curve())._<ж<dhKEM>>(ᐧ);
     if (!ok) {
-        return (default!, errors.New(unsupportedCurveˢ));
+        return (default, errors.New(unsupportedCurveˢ));
     }
     return (new dhKEMPrivateKeyжPrivateKey(Ꮡ(new dhKEMPrivateKey(
         kem: kem,
         priv: priv
-    ))), default!);
+    ))), default);
 }
 
 internal static (PrivateKey, error) GenerateKey(this ref dhKEM kem) {
     var (priv, err) = kem.curve.GenerateKey(rand.Reader);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return NewDHKEMPrivateKey(new ecdh.PrivateKeyжKeyExchanger(priv));
 }
 
 internal static (PrivateKey, error) NewPrivateKey(this ref dhKEM kem, slice<byte> ikm) {
     var (priv, err) = kem.curve.NewPrivateKey(ikm);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return NewDHKEMPrivateKey(new ecdh.PrivateKeyжKeyExchanger(priv));
 }
@@ -344,32 +344,32 @@ internal static (PrivateKey, error) DeriveKeyPair(this ж<dhKEM> Ꮡkem, slice<b
 
     // DeriveKeyPair from RFC 9180 Section 7.1.3.
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (prk, err) = kem.kdf.labeledExtract(suiteID, default!, dkpPrkˢ, ikm);
-    if (err != default!) {
-        return (default!, err);
+    var (prk, err) = kem.kdf.labeledExtract(suiteID, default, dkpPrkˢ, ikm);
+    if (err != nil) {
+        return (default, err);
     }
     if (Ꮡkem == dhKEMX25519) {
-        var (s, errΔ1) = kem.kdf.labeledExpand(suiteID, prk, "sk"u8, default!, kem.Nsk);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var (s, errΔ1) = kem.kdf.labeledExpand(suiteID, prk, "sk"u8, default, kem.Nsk);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         return kem.NewPrivateKey(s);
     }
-    uint8 counter = default!;
+    uint8 counter = default;
     while (counter < 4) {
-        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢ, new byte[]{counter}.slice(), kem.Nsk);
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢ, slice<byte>([counter]), kem.Nsk);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         if (Ꮡkem == dhKEMP521) {
             s[0] &= (byte)(0x01);
         }
         (var r, errΔ2) = kem.NewPrivateKey(s);
-        if (errΔ2 != default!) {
+        if (errΔ2 != nil) {
             counter++;
             continue;
         }
-        return (r, default!);
+        return (r, default);
     }
     throw panic("chance of four rejections is < 2^-128");
 }
@@ -393,16 +393,16 @@ internal static (slice<byte>, error) Bytes(this ref dhKEMPrivateKey k) {
     // I'm sure this will not lead to any unexpected behavior or interop issue.
     var (priv, ok) = k.priv._<ж<ecdh.PrivateKey>>(ᐧ);
     if (!ok) {
-        return (default!, errors.New(ecdhPrivateKeyDoesNotˢ));
+        return (default, errors.New(ecdhPrivateKeyDoesNotˢ));
     }
     if (k.kem == dhKEMX25519) {
         var b = priv.Bytes();
         b[0] &= (byte)(248);
         b[31] &= (byte)(127);
         b[31] |= (byte)(64);
-        return (b, default!);
+        return (b, default);
     }
-    return (priv.Bytes(), default!);
+    return (priv.Bytes(), default);
 }
 
 internal static ΔPublicKey PublicKey(this ref dhKEMPrivateKey k) {
@@ -414,12 +414,12 @@ internal static ΔPublicKey PublicKey(this ref dhKEMPrivateKey k) {
 
 internal static (slice<byte>, error) decap(this ref dhKEMPrivateKey k, slice<byte> encPubEph) {
     var (pubEph, err) = k.priv.Curve().NewPublicKey(encPubEph);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var dhVal, err) = k.priv.ECDH(pubEph);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var kemContext = appendꓸꓸꓸ(slices.Clip<slice<byte>, byte>(encPubEph), k.priv.PublicKey().Bytes());
     return k.kem.extractAndExpand(dhVal, kemContext);

@@ -15,7 +15,7 @@ partial class reflect_package {
 // For each element e of the returned slice, the corresponding field
 // can be retrieved from a value v of type t by calling v.FieldByIndex(e.Index).
 public static slice<StructField> VisibleFields(ΔType t) {
-    if (t == default!) {
+    if (t == nil) {
         throw panic("reflect: VisibleFields(nil)");
     }
     if (t.Kind() != Struct) {
@@ -32,19 +32,19 @@ public static slice<StructField> VisibleFields(ΔType t) {
     // Use an in-place removal that avoids copying in
     // the common case that there are no hidden fields.
     nint j = 0;
-    foreach (var i in range((~w).fields)) {
-        var f = Ꮡ((~w).fields, i);
-        if ((~f).Name == ""u8) {
+    foreach (var i in range(w.fields)) {
+        var f = Ꮡ(w.fields, i);
+        if (f.Name == ""u8) {
             continue;
         }
         if (i != j) {
             // A field has been removed. We need to shuffle
             // all the subsequent elements up.
-            w.Value.fields[j] = f.Value;
+            w.fields[j] = f.Value;
         }
         j++;
     }
-    return (~w).fields.slice(0, j);
+    return w.fields.slice(0, j);
 }
 
 partial struct visibleFieldsWalker {
@@ -71,17 +71,16 @@ internal static void walk(this ref visibleFieldsWalker w, ΔType t) {
         {
             var (oldIndex, ok) = w.byName[f.Name, ꟷ]; if (ok) {
                 var old = Ꮡ(w.fields, oldIndex);
-                if (len(w.index) == len((~old).Index)){
+                if (len(w.index) == len(old.Index)) {
                     // Fields with the same name at the same depth
                     // cancel one another out. Set the field name
                     // to empty to signify that has happened, and
                     // there's no need to add this field.
-                    old.Value.Name = ""u8;
+                    old.Name = ""u8;
                     add = false;
-                } else 
-                if (len(w.index) < len((~old).Index)){
+                } else if (len(w.index) < len(old.Index)) {
                     // The old field loses because it's deeper than the new one.
-                    old.Value.Name = ""u8;
+                    old.Name = ""u8;
                 } else {
                     // The old field wins because it's shallower than the new one.
                     add = false;
@@ -91,7 +90,7 @@ internal static void walk(this ref visibleFieldsWalker w, ΔType t) {
         if (add) {
             // Copy the index so that it's not overwritten
             // by the other appends.
-            f.Index = builtin.appendꓸꓸꓸ(slice<nint>(default!), w.index);
+            f.Index = builtin.appendꓸꓸꓸ(slice<nint>(default), w.index);
             w.byName[f.Name] = len(w.fields);
             w.fields = builtin.append(w.fields, f);
         }

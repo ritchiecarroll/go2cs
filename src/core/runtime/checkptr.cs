@@ -123,11 +123,11 @@ internal static uintptr checkptrBase(@unsafe.Pointer Δp) {
 
     // data or bss
     foreach (var (_, datap) in activeModules()) {
-        if ((~datap).data <= (uintptr)Δp && (uintptr)Δp < (~datap).edata) {
-            return (~datap).data;
+        if (datap.data <= (uintptr)Δp && (uintptr)Δp < datap.edata) {
+            return datap.data;
         }
-        if ((~datap).bss <= (uintptr)Δp && (uintptr)Δp < (~datap).ebss) {
-            return (~datap).bss;
+        if (datap.bss <= (uintptr)Δp && (uintptr)Δp < datap.ebss) {
+            return datap.bss;
         }
     }
 

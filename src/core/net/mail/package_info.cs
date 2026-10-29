@@ -10,12 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using textprotoꓸError = go.net.textproto_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -55,6 +49,11 @@ using static go.net.mail_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(go.net.textproto_package.Reader))]
+[assembly: go.GoFieldAccess(typeof(mime_package.WordDecoder))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -63,7 +62,7 @@ using static go.net.mail_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/mail/message.go", "message.cs", "AClOooIACRrSlIKCpgAFGgAJAqaAgoKClLaCgoK4goKUpoK4lJSC7qaCgoKUlIKUgoKCgoKC7vikgoKmgriAgoKUgsqCgrimgraClIKCgqYABRjipsaSgoKUqJKCgpQAChiSqJIACBaiqqLcxIKSppS4goKClLiCpoKUgqiUgriCpoKCpoLcgpQAChCigoKmgqaCgpSUgpSClIK4gpSCpuaigoKUgpSClIKUgpQACAiygoKCAAkUgoKCgoKCgrjKgpaSgoKCppSCgoK4goKCgoKmpsqUgoKUgpSU3KKUgoKClKaClIKClJSClIKClJSCpgAICPKUkpKCupKCgpSUgoKCuIKUgoKmgqiSgoKmlIKCuIKCuOjShKiUgoKokoKClIKUyoKCuIKUgpS0goK0yIK4goKUgtjEgpSUgoKUlKbKgqaC2ra2tqi0ggAIDuKUgoKClKa26oKUgoKClIKUgqbopIK4goKCgpSCpoKClIKmgpSmgriCptaCgpSCgriCgoKClIK4poKClIKokqaCpoKmgqiSlIKCpoCCtqamlJSCgoKmgpKCkoKUgpSmprKCggAIEoKCkoKClIKClJSCggAHEIK4pgAGEIKqopS4lKikgpSokoKCgoKSgoKmgqikqqKqoqikgpQ=", "517-521:1;784-784:1;882-892:1")]
+[assembly: go.GoPositionMap("net/mail/message.go", "message.cs", "AClOooIACRrSlIKCpgAFGgAJAqaAgoKClLaCgoK4goKUpoK4lJSC7qaCgoKUlIKUgoKCgoKC7vikgoKmgriAgoKUgsqCgrimgraClIKCgqYABRjipsaSgoKUqJKCgpQAChiSqJIACBaiqqLcxIKSppS4goKClLiCpoKUgqiUgriCpoKCpoLcgpQAChCigoKmgqaCgpSUgpSClIK4gpSCpuaigoKUgpSClIKUgpQACAiygoKCAAkUgoKCgoKCgrjKgpaSgoKCppSCgoK4goKCgoKmpsqUgoKUgpSU3KKUgoKClKaClIKClJSClIKClJSCpgAICPKUgpKCupKCgpSUgoKCuIKUgoKmgqiSgoKmlIKCuIKCuOjShKiUgoKokoKClIKUyoKCuIKUgpS0goK0yIK4goKUgtjEgpSUgoKUlKbKgqaC2ra2tqi0ggAIDuKUgoKClKa26oKUgoKClIKUgqbopIK4goKCgpSCpoKClIKmgpSmgriCptaCgpSCgriCgoKClIK4poKClIKokqaCpoKmgqiSlIKCpoCCtqamlJSCgoKmgoKCgoKUgpSmprKCggAIEoKCkoKClIKClJSCggAHEIK4pgAGEIKqopS4lKikgpSokoKCgoKCgoKmgqikqqKqoqikgpQ=", "517-521:1;784-784:1;882-892:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

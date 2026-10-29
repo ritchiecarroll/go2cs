@@ -53,7 +53,7 @@ partial class coverage_package {
 // will be in the meta-data blobs themselves).
 
 // CovMetaMagic holds the magic string for a meta-data file.
-public static readonly ж<array<byte>> ᏑCovMetaMagic = new StaticBox<array<byte>>(new byte[]{(rune)'\x00', (rune)'\x63', (rune)'\x76', (rune)'\x6d'}.array());
+public static readonly ж<array<byte>> ᏑCovMetaMagic = new StaticBox<array<byte>>(new byte[]{(byte)'\x00', (byte)'\x63', (byte)'\x76', (byte)'\x6d'}.array());
 public static ref array<byte> CovMetaMagic => ref ((StaticBox<array<byte>>)ᏑCovMetaMagic).ValueSlot;
 
 // MetaFilePref is a prefix used when emitting meta-data files; these
@@ -83,12 +83,12 @@ partial struct MetaFileHeader {
 // meta-data blob, e.g. the coverage meta-data payload
 // computed for a given Go package.
 partial struct MetaSymbolHeader {
-    public uint32 Length; // size of meta-symbol payload in bytes
-    public uint32 PkgName; // string table index
-    public uint32 PkgPath; // string table index
+    public uint32 Length;     // size of meta-symbol payload in bytes
+    public uint32 PkgName;    // string table index
+    public uint32 PkgPath;    // string table index
     public uint32 ModulePath; // string table index
     public array<byte> MetaHash = new(16);
-    internal byte _;    // currently unused
+    internal byte _;                  // currently unused
     internal array<byte> __ = new(3); // padding
     public uint32 NumFiles;
     public uint32 NumFuncs;
@@ -198,10 +198,10 @@ partial struct CoverableUnit {
 partial struct CounterMode /*num:uint8*/;
 
 public static CounterMode CtrModeInvalid => /* iota */ 0;
-public static CounterMode CtrModeSet => 1; // "set" mode
-public static CounterMode CtrModeCount => 2; // "count" mode
-public static CounterMode CtrModeAtomic => 3; // "atomic" mode
-public static CounterMode CtrModeRegOnly => 4; // registration-only pseudo-mode
+public static CounterMode CtrModeSet => 1;      // "set" mode
+public static CounterMode CtrModeCount => 2;    // "count" mode
+public static CounterMode CtrModeAtomic => 3;   // "atomic" mode
+public static CounterMode CtrModeRegOnly => 4;  // registration-only pseudo-mode
 public static CounterMode CtrModeTestMain => 5; // testmain pseudo-mode
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -213,46 +213,53 @@ private static readonly @string testmainˢ = "testmain"u8;
 private static readonly @string invalidˢ = "<invalid>"u8;
 
 public static @string String(this CounterMode cm) {
-    var exprᴛ1 = cm;
-    if (exprᴛ1 == CtrModeSet) {
+    switch (cm) {
+    case var ᴛ when ᴛ == CtrModeSet: {
         return setˢ;
     }
-    if (exprᴛ1 == CtrModeCount) {
+    case var ᴛ when ᴛ == CtrModeCount: {
         return countˢ;
     }
-    if (exprᴛ1 == CtrModeAtomic) {
+    case var ᴛ when ᴛ == CtrModeAtomic: {
         return atomicˢ;
     }
-    if (exprᴛ1 == CtrModeRegOnly) {
+    case var ᴛ when ᴛ == CtrModeRegOnly: {
         return regonlyˢ;
     }
-    if (exprᴛ1 == CtrModeTestMain) {
+    case var ᴛ when ᴛ == CtrModeTestMain: {
         return testmainˢ;
-    }
+    }}
     return invalidˢ;
 }
 
 public static CounterMode ParseCounterMode(@string mode) {
-    CounterMode cm = default!;
+    CounterMode cm = default;
     var exprᴛ1 = mode;
-    if (exprᴛ1 == "set"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "set"u8: {
         cm = CtrModeSet;
+        break;
     }
-    else if (exprᴛ1 == "count"u8) {
+    case {} when exprᴛ1 == "count"u8: {
         cm = CtrModeCount;
+        break;
     }
-    else if (exprᴛ1 == "atomic"u8) {
+    case {} when exprᴛ1 == "atomic"u8: {
         cm = CtrModeAtomic;
+        break;
     }
-    else if (exprᴛ1 == "regonly"u8) {
+    case {} when exprᴛ1 == "regonly"u8: {
         cm = CtrModeRegOnly;
+        break;
     }
-    else if (exprᴛ1 == "testmain"u8) {
+    case {} when exprᴛ1 == "testmain"u8: {
         cm = CtrModeTestMain;
+        break;
     }
-    else { /* default: */
+    default: {
         cm = CtrModeInvalid;
-    }
+        break;
+    }}
     return cm;
 }
 
@@ -269,13 +276,13 @@ private static readonly @string perblockˢ = "perblock"u8;
 private static readonly @string perfuncˢ = "perfunc"u8;
 
 public static @string String(this CounterGranularity cm) {
-    var exprᴛ1 = cm;
-    if (exprᴛ1 == CtrGranularityPerBlock) {
+    switch (cm) {
+    case var ᴛ when ᴛ == CtrGranularityPerBlock: {
         return perblockˢ;
     }
-    if (exprᴛ1 == CtrGranularityPerFunc) {
+    case var ᴛ when ᴛ == CtrGranularityPerFunc: {
         return perfuncˢ;
-    }
+    }}
     return invalidˢ;
 }
 
@@ -302,7 +309,7 @@ partial struct MetaFileCollection {
 // run of a give binary) followed by a footer.
 
 // CovCounterMagic holds the magic string for a coverage counter-data file.
-public static readonly ж<array<byte>> ᏑCovCounterMagic = new StaticBox<array<byte>>(new byte[]{(rune)'\x00', (rune)'\x63', (rune)'\x77', (rune)'\x6d'}.array());
+public static readonly ж<array<byte>> ᏑCovCounterMagic = new StaticBox<array<byte>>(new byte[]{(byte)'\x00', (byte)'\x63', (byte)'\x77', (byte)'\x6d'}.array());
 public static ref array<byte> CovCounterMagic => ref ((StaticBox<array<byte>>)ᏑCovCounterMagic).ValueSlot;
 
 // CounterFileVersion stores the most recent counter data file version.

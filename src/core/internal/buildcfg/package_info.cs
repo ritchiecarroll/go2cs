@@ -10,17 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,6 +48,10 @@ using static go.@internal.buildcfg_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(ExperimentFlags))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -66,8 +60,8 @@ using static go.@internal.buildcfg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABkusqKioqKioqKioqKi1AAHEJKCgriCgIKk1oKApKSkpKSC1oKClJSClIKqooKClICCpICCpICCpIKUgIKCpICCpKqigoKUAAcQgoKClJQACwaimIKUlJSCgoKClIKCppSkpKSCuIKUAA4egoKClIKUAAgGsqqClIKCgoKmgoKCpqaUppSklKbWooKqtIKmgqaGpoKUgpKUlOiCgKSkgtaCgKSkgtaCgKSkpKSC1oKApKSkpIKChoIABRKygtaiggAKEKbWgqaCgoKmotyClOqilKSkpKSkpKSklKbClKSCgpS0goKUtIKCgoKmgoKmpKSkgoKUtIKClIKUpJSUgpQ=", "326-328:1")]
-[assembly: go.GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "ACA+goKCgpQADxzO2tKUgqQACxiU/gAHEJSCgoKCgv6SgriSgpS4gpSCgpSCgpS4goKmgoKmgpSqoq7CgoKCgpSCgoKCgoKUgoKUuKqiqqI=", "112-115:1", "105=reflect.Value.SetBool")]
+[assembly: go.GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABkusqKioqKioqKioqKi1AAHEJKCgriCgIKk1oKAtKSkpKSC1oKCpJSClIKqooKClICCpICCpICCpIKUgIKCpICCpKqigoKUAAcQgoKClJQACwaimIKUlJSCgoKClIKCpqS0tLSCyIKUAA4egoKClIKUAAgGsqqClIKCgoKmgoKCpqaktpS0lLbWooKqtIKmgqaGpoKUgoKUlOiCgLSkgtaCgLSkgtaCgLSkpKSC1oKAtKSkpIKChoIABRKygtaiggAOELbWgqaCgoKmotyClOqipKSkpKSkpKSklKbCpKSCgpS0goKUtIKCgoKmgoKmpKSkgoKUtIKClIKUpJSUgpQ=", "326-328:1")]
+[assembly: go.GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "ACA+goKCgpQADxzO2tKkgrQADBiU7gAHEJSCgoKCgv6SgriSgpS4gpSCgpSCgpS4goKmgoKmgpSqoq7CgoKCgpSCgoKCgoKUgoKUuKqiqqI=", "112-115:1", "105=reflect.Value.SetBool")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

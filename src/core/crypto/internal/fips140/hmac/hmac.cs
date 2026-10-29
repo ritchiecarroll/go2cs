@@ -65,9 +65,9 @@ public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) {
     nint origLen = len(@in);
     @in = h.inner.Sum(@in);
 
-    if (h.marshaled){
+    if (h.marshaled) {
         {
-            var err = h.outer._<marshalable>().UnmarshalBinary(h.opad); if (err != default!) {
+            var err = h.outer._<marshalable>().UnmarshalBinary(h.opad); if (err != nil) {
                 throw panic(err);
             }
         }
@@ -94,7 +94,7 @@ public static nint BlockSize(this ref HMAC h) {
 public static void Reset(this ref HMAC h) {
     if (h.marshaled) {
         {
-            var errΔ1 = h.inner._<marshalable>().UnmarshalBinary(h.ipad); if (errΔ1 != default!) {
+            var errΔ1 = h.inner._<marshalable>().UnmarshalBinary(h.ipad); if (errΔ1 != nil) {
                 throw panic(errΔ1);
             }
         }
@@ -127,14 +127,14 @@ public static void Reset(this ref HMAC h) {
     }
 
     var (imarshal, err) = marshalableInner.MarshalBinary();
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
 
     h.outer.Reset();
     h.outer.Write(h.opad);
     (var omarshal, err) = marshalableOuter.MarshalBinary();
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
 
@@ -161,26 +161,25 @@ internal static error Unwrap(this errCloneUnsupported e) {
 // Clone implements [hash.Cloner] if the underlying hash does.
 // Otherwise, it returns an error wrapping [errors.ErrUnsupported].
 public static (hash.Cloner, error) Clone(this ref HMAC h) {
-    ref var r = ref heap<HMAC>(out var Ꮡr);
-    r = h;
+    ref var r = ref heap<HMAC>(h, out var Ꮡr);
     var (ic, ok) = h.inner._<hash.Cloner>(ᐧ);
     if (!ok) {
-        return (default!, new errCloneUnsupported(nil));
+        return (default, new errCloneUnsupported());
     }
     (var oc, ok) = h.outer._<hash.Cloner>(ᐧ);
     if (!ok) {
-        return (default!, new errCloneUnsupported(nil));
+        return (default, new errCloneUnsupported());
     }
-    error err = default!;
+    error err = default;
     (r.inner, err) = ic.Clone();
-    if (err != default!) {
-        return (default!, new errCloneUnsupported(nil));
+    if (err != nil) {
+        return (default, new errCloneUnsupported());
     }
     (r.outer, err) = oc.Clone();
-    if (err != default!) {
-        return (default!, new errCloneUnsupported(nil));
+    if (err != nil) {
+        return (default, new errCloneUnsupported());
     }
-    return (new HMACжCloner(Ꮡr), default!);
+    return (new HMACжCloner(Ꮡr), default);
 }
 
 // New returns a new HMAC hash using the given [hash.Hash] type and key.
@@ -188,44 +187,44 @@ public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)
     where H : hash.Hash
 {
     var hm = Ꮡ(new HMAC(keyLen: len(key)));
-    hm.Value.outer = h();
-    hm.Value.inner = h();
+    hm.outer = h();
+    hm.inner = h();
     var unique = true;
     var hmʗ1 = hm;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
                 // The comparison might panic if the underlying types are not comparable.
                 _ = recover();
             }, ref ᒐ);
-            if (AreEqual((~hmʗ1).outer, (~hmʗ1).inner)) {
+            if (AreEqual(hmʗ1.outer, hmʗ1.inner)) {
                 unique = false;
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     if (!unique) {
         throw panic("crypto/hmac: hash generation function does not produce unique values");
     }
-    nint blocksize = (~hm).inner.BlockSize();
-    hm.Value.ipad = new slice<byte>(blocksize);
-    hm.Value.opad = new slice<byte>(blocksize);
+    nint blocksize = hm.inner.BlockSize();
+    hm.ipad = new slice<byte>(blocksize);
+    hm.opad = new slice<byte>(blocksize);
     if (len(key) > blocksize) {
         // If key is too big, hash it.
-        (~hm).outer.Write(key);
-        key = (~hm).outer.Sum(default!);
+        hm.outer.Write(key);
+        key = hm.outer.Sum(default);
     }
-    copy((~hm).ipad, key);
-    copy((~hm).opad, key);
-    foreach (var i in range((~hm).ipad)) {
-        hm.Value.ipad[i] ^= (byte)(0x36);
+    copy(hm.ipad, key);
+    copy(hm.opad, key);
+    foreach (var i in range(hm.ipad)) {
+        hm.ipad[i] ^= (byte)(0x36);
     }
-    foreach (var i in range((~hm).opad)) {
-        hm.Value.opad[i] ^= (byte)(0x5c);
+    foreach (var i in range(hm.opad)) {
+        hm.opad[i] ^= (byte)(0x5c);
     }
-    (~hm).inner.Write((~hm).ipad);
+    hm.inner.Write(hm.ipad);
 
     return hm;
 }

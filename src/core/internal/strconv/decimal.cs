@@ -13,10 +13,10 @@ partial class strconv_package {
 
 public partial struct @decimal {
     internal array<byte> d = new(800); // digits, big-endian representation
-    internal nint nd;      // number of digits used
-    internal nint dp;      // decimal point
-    internal bool neg;      // negative flag
-    internal bool trunc;      // discarded nonzero digits beyond d[:nd]
+    internal nint nd;                  // number of digits used
+    internal nint dp;                  // decimal point
+    internal bool neg;                 // negative flag
+    internal bool trunc;               // discarded nonzero digits beyond d[:nd]
 }
 
 public static @string String(this ref @decimal a) {
@@ -36,9 +36,9 @@ public static @string String(this ref @decimal a) {
     }
     case {} when a.dp is <= 0: {
         // zeros fill space between decimal point and digits
-        buf[w] = (rune)'0';
+        buf[w] = (byte)'0';
         w++;
-        buf[w] = (rune)'.';
+        buf[w] = (byte)'.';
         w++;
         w += digitZero(buf.slice(w, w + -a.dp));
         w += copy(buf.slice(w), a.d.slice(0, a.nd));
@@ -47,7 +47,7 @@ public static @string String(this ref @decimal a) {
     case {} when a.dp < a.nd: {
         // decimal point in middle of digits
         w += copy(buf.slice(w), a.d.slice(0, a.dp));
-        buf[w] = (rune)'.';
+        buf[w] = (byte)'.';
         w++;
         w += copy(buf.slice(w), a.d.slice(a.dp, a.nd));
         break;
@@ -63,7 +63,7 @@ public static @string String(this ref @decimal a) {
 
 internal static nint digitZero(slice<byte> dst) {
     foreach (var i in range(dst)) {
-        dst[i] = (rune)'0';
+        dst[i] = (byte)'0';
     }
     return len(dst);
 }
@@ -72,7 +72,7 @@ internal static nint digitZero(slice<byte> dst) {
 // (They are meaningless; the decimal point is tracked
 // independent of the number of digits.)
 internal static void trim(ref @decimal a) {
-    while (a.nd > 0 && a.d[a.nd - 1] == (rune)'0') {
+    while (a.nd > 0 && a.d[a.nd - 1] == '0') {
         a.nd--;
     }
     if (a.nd == 0) {
@@ -91,7 +91,7 @@ public static void Assign(this ж<@decimal> Ꮡa, uint64 v) {
     while (v > 0) {
         var v1 = v / 10;
         v -= 10 * v1;
-        buf[n] = (byte)(v + (rune)'0');
+        buf[n] = (byte)(v + '0');
         n++;
         v = v1;
     }
@@ -118,7 +118,7 @@ internal static void rightShift(ref @decimal a, nuint k) {
     nint w = 0; // write pointer
 
     // Pick up enough leading digits to cover first shift.
-    nuint n = default!;
+    nuint n = default;
     for (; n.Rsh(k) == 0; r++) {
         if (r >= a.nd) {
             if (n == 0) {
@@ -133,7 +133,7 @@ internal static void rightShift(ref @decimal a, nuint k) {
             break;
         }
         nuint c = (nuint)a.d[r];
-        n = n * 10 + c - (rune)'0';
+        n = n * 10 + c - '0';
     }
     a.dp -= r - 1;
 
@@ -144,20 +144,19 @@ internal static void rightShift(ref @decimal a, nuint k) {
         nuint c = (nuint)a.d[r];
         nuint dig = n.Rsh(k);
         n &= (nuint)(mask);
-        a.d[w] = (byte)(dig + (rune)'0');
+        a.d[w] = (byte)(dig + '0');
         w++;
-        n = n * 10 + c - (rune)'0';
+        n = n * 10 + c - '0';
     }
 
     // Put down extra digits.
     while (n > 0) {
         nuint dig = n.Rsh(k);
         n &= (nuint)(mask);
-        if (w < len(a.d)){
-            a.d[w] = (byte)(dig + (rune)'0');
+        if (w < len(a.d)) {
+            a.d[w] = (byte)(dig + '0');
             w++;
-        } else 
-        if (dig > 0) {
+        } else if (dig > 0) {
             a.trunc = true;
         }
         n = n * 10;
@@ -177,11 +176,11 @@ internal static void rightShift(ref @decimal a, nuint k) {
 //
 // Credit for this trick goes to Ken.
 partial struct leftCheat {
-    internal nint delta;   // number of new digits
+    internal nint delta;     // number of new digits
     internal @string cutoff; // minus one digit if original < a.
 }
 
-[GoLazy] partial class lazyᴛleftcheats { internal static slice<leftCheat> leftcheats = new leftCheat[]{
+[GoLazy] partial class lazyᴛleftcheats { internal static slice<leftCheat> leftcheats = slice<leftCheat>([
     // Leading digits of 1/2^i = 5^i.
     // 5^23 is not an exact 64-bit floating point number,
     // so have to use bc for the math.
@@ -196,67 +195,67 @@ partial struct leftCheat {
 		}'
 	*/
     new(0, ""u8),
-    new(1, "5"u8), // * 2
-    new(1, "25"u8), // * 4
-    new(1, "125"u8), // * 8
-    new(2, "625"u8), // * 16
-    new(2, "3125"u8), // * 32
-    new(2, "15625"u8), // * 64
-    new(3, "78125"u8), // * 128
-    new(3, "390625"u8), // * 256
-    new(3, "1953125"u8), // * 512
-    new(4, "9765625"u8), // * 1024
-    new(4, "48828125"u8), // * 2048
-    new(4, "244140625"u8), // * 4096
-    new(4, "1220703125"u8), // * 8192
-    new(5, "6103515625"u8), // * 16384
-    new(5, "30517578125"u8), // * 32768
-    new(5, "152587890625"u8), // * 65536
-    new(6, "762939453125"u8), // * 131072
-    new(6, "3814697265625"u8), // * 262144
-    new(6, "19073486328125"u8), // * 524288
-    new(7, "95367431640625"u8), // * 1048576
-    new(7, "476837158203125"u8), // * 2097152
-    new(7, "2384185791015625"u8), // * 4194304
-    new(7, "11920928955078125"u8), // * 8388608
-    new(8, "59604644775390625"u8), // * 16777216
-    new(8, "298023223876953125"u8), // * 33554432
-    new(8, "1490116119384765625"u8), // * 67108864
-    new(9, "7450580596923828125"u8), // * 134217728
-    new(9, "37252902984619140625"u8), // * 268435456
-    new(9, "186264514923095703125"u8), // * 536870912
-    new(10, "931322574615478515625"u8), // * 1073741824
-    new(10, "4656612873077392578125"u8), // * 2147483648
-    new(10, "23283064365386962890625"u8), // * 4294967296
-    new(10, "116415321826934814453125"u8), // * 8589934592
-    new(11, "582076609134674072265625"u8), // * 17179869184
-    new(11, "2910383045673370361328125"u8), // * 34359738368
-    new(11, "14551915228366851806640625"u8), // * 68719476736
-    new(12, "72759576141834259033203125"u8), // * 137438953472
-    new(12, "363797880709171295166015625"u8), // * 274877906944
-    new(12, "1818989403545856475830078125"u8), // * 549755813888
-    new(13, "9094947017729282379150390625"u8), // * 1099511627776
-    new(13, "45474735088646411895751953125"u8), // * 2199023255552
-    new(13, "227373675443232059478759765625"u8), // * 4398046511104
-    new(13, "1136868377216160297393798828125"u8), // * 8796093022208
-    new(14, "5684341886080801486968994140625"u8), // * 17592186044416
-    new(14, "28421709430404007434844970703125"u8), // * 35184372088832
-    new(14, "142108547152020037174224853515625"u8), // * 70368744177664
-    new(15, "710542735760100185871124267578125"u8), // * 140737488355328
-    new(15, "3552713678800500929355621337890625"u8), // * 281474976710656
-    new(15, "17763568394002504646778106689453125"u8), // * 562949953421312
-    new(16, "88817841970012523233890533447265625"u8), // * 1125899906842624
-    new(16, "444089209850062616169452667236328125"u8), // * 2251799813685248
-    new(16, "2220446049250313080847263336181640625"u8), // * 4503599627370496
-    new(16, "11102230246251565404236316680908203125"u8), // * 9007199254740992
-    new(17, "55511151231257827021181583404541015625"u8), // * 18014398509481984
-    new(17, "277555756156289135105907917022705078125"u8), // * 36028797018963968
-    new(17, "1387778780781445675529539585113525390625"u8), // * 72057594037927936
-    new(18, "6938893903907228377647697925567626953125"u8), // * 144115188075855872
-    new(18, "34694469519536141888238489627838134765625"u8), // * 288230376151711744
+    new(1, "5"u8),                                           // * 2
+    new(1, "25"u8),                                          // * 4
+    new(1, "125"u8),                                         // * 8
+    new(2, "625"u8),                                         // * 16
+    new(2, "3125"u8),                                        // * 32
+    new(2, "15625"u8),                                       // * 64
+    new(3, "78125"u8),                                       // * 128
+    new(3, "390625"u8),                                      // * 256
+    new(3, "1953125"u8),                                     // * 512
+    new(4, "9765625"u8),                                     // * 1024
+    new(4, "48828125"u8),                                    // * 2048
+    new(4, "244140625"u8),                                   // * 4096
+    new(4, "1220703125"u8),                                  // * 8192
+    new(5, "6103515625"u8),                                  // * 16384
+    new(5, "30517578125"u8),                                 // * 32768
+    new(5, "152587890625"u8),                                // * 65536
+    new(6, "762939453125"u8),                                // * 131072
+    new(6, "3814697265625"u8),                               // * 262144
+    new(6, "19073486328125"u8),                              // * 524288
+    new(7, "95367431640625"u8),                              // * 1048576
+    new(7, "476837158203125"u8),                             // * 2097152
+    new(7, "2384185791015625"u8),                            // * 4194304
+    new(7, "11920928955078125"u8),                           // * 8388608
+    new(8, "59604644775390625"u8),                           // * 16777216
+    new(8, "298023223876953125"u8),                          // * 33554432
+    new(8, "1490116119384765625"u8),                         // * 67108864
+    new(9, "7450580596923828125"u8),                         // * 134217728
+    new(9, "37252902984619140625"u8),                        // * 268435456
+    new(9, "186264514923095703125"u8),                       // * 536870912
+    new(10, "931322574615478515625"u8),                      // * 1073741824
+    new(10, "4656612873077392578125"u8),                     // * 2147483648
+    new(10, "23283064365386962890625"u8),                    // * 4294967296
+    new(10, "116415321826934814453125"u8),                   // * 8589934592
+    new(11, "582076609134674072265625"u8),                   // * 17179869184
+    new(11, "2910383045673370361328125"u8),                  // * 34359738368
+    new(11, "14551915228366851806640625"u8),                 // * 68719476736
+    new(12, "72759576141834259033203125"u8),                 // * 137438953472
+    new(12, "363797880709171295166015625"u8),                // * 274877906944
+    new(12, "1818989403545856475830078125"u8),               // * 549755813888
+    new(13, "9094947017729282379150390625"u8),               // * 1099511627776
+    new(13, "45474735088646411895751953125"u8),              // * 2199023255552
+    new(13, "227373675443232059478759765625"u8),             // * 4398046511104
+    new(13, "1136868377216160297393798828125"u8),            // * 8796093022208
+    new(14, "5684341886080801486968994140625"u8),            // * 17592186044416
+    new(14, "28421709430404007434844970703125"u8),           // * 35184372088832
+    new(14, "142108547152020037174224853515625"u8),          // * 70368744177664
+    new(15, "710542735760100185871124267578125"u8),          // * 140737488355328
+    new(15, "3552713678800500929355621337890625"u8),         // * 281474976710656
+    new(15, "17763568394002504646778106689453125"u8),        // * 562949953421312
+    new(16, "88817841970012523233890533447265625"u8),        // * 1125899906842624
+    new(16, "444089209850062616169452667236328125"u8),       // * 2251799813685248
+    new(16, "2220446049250313080847263336181640625"u8),      // * 4503599627370496
+    new(16, "11102230246251565404236316680908203125"u8),     // * 9007199254740992
+    new(17, "55511151231257827021181583404541015625"u8),     // * 18014398509481984
+    new(17, "277555756156289135105907917022705078125"u8),    // * 36028797018963968
+    new(17, "1387778780781445675529539585113525390625"u8),   // * 72057594037927936
+    new(18, "6938893903907228377647697925567626953125"u8),   // * 144115188075855872
+    new(18, "34694469519536141888238489627838134765625"u8),  // * 288230376151711744
     new(18, "173472347597680709441192448139190673828125"u8), // * 576460752303423488
-    new(19, "867361737988403547205962240695953369140625"u8) // * 1152921504606846976
-}.slice(); }
+    new(19, "867361737988403547205962240695953369140625"u8)  // * 1152921504606846976
+]); }
 
 // Is the leading prefix of b lexicographically less than s?
 internal static bool prefixIsLessThan(slice<byte> b, @string s) {
@@ -278,20 +277,19 @@ internal static void leftShift(ref @decimal a, nuint k) {
         delta--;
     }
 
-    nint r = a.nd; // read index
+    nint r = a.nd;         // read index
     nint w = a.nd + delta; // write index
 
     // Pick up a digit, put down a digit.
-    nuint n = default!;
+    nuint n = default;
     for (r--; r >= 0; r--) {
-        n += ((nuint)a.d[r] - (rune)'0').Lsh(k);
+        n += ((nuint)a.d[r] - '0').Lsh(k);
         nuint quo = n / 10;
         nuint rem = n - 10 * quo;
         w--;
-        if (w < len(a.d)){
-            a.d[w] = (byte)(rem + (rune)'0');
-        } else 
-        if (rem != 0) {
+        if (w < len(a.d)) {
+            a.d[w] = (byte)(rem + '0');
+        } else if (rem != 0) {
             a.trunc = true;
         }
         n = quo;
@@ -302,10 +300,9 @@ internal static void leftShift(ref @decimal a, nuint k) {
         nuint quo = n / 10;
         nuint rem = n - 10 * quo;
         w--;
-        if (w < len(a.d)){
-            a.d[w] = (byte)(rem + (rune)'0');
-        } else 
-        if (rem != 0) {
+        if (w < len(a.d)) {
+            a.d[w] = (byte)(rem + '0');
+        } else if (rem != 0) {
             a.trunc = true;
         }
         n = quo;
@@ -351,15 +348,15 @@ internal static bool shouldRoundUp(ref @decimal a, nint nd) {
     if (nd < 0 || nd >= a.nd) {
         return false;
     }
-    if (a.d[nd] == (rune)'5' && nd + 1 == a.nd) { // exactly halfway - round to even
+    if (a.d[nd] == '5' && nd + 1 == a.nd) { // exactly halfway - round to even
         // if we truncated, a little higher than what's recorded - always round up
         if (a.trunc) {
             return true;
         }
-        return nd > 0 && (byte)((byte)(a.d[nd - 1] - (rune)'0') % 2) != 0;
+        return nd > 0 && (byte)((byte)(a.d[nd - 1] - '0') % 2) != 0;
     }
     // not halfway - digit tells all
-    return a.d[nd] >= (rune)'5';
+    return a.d[nd] >= '5';
 }
 
 // Round a to nd digits (or fewer).
@@ -372,7 +369,7 @@ public static void Round(this ж<@decimal> Ꮡa, nint nd) {
     if (nd < 0 || nd >= a.nd) {
         return;
     }
-    if (shouldRoundUp(ref (Ꮡa).DerefOrNull(), nd)){
+    if (shouldRoundUp(ref (Ꮡa).DerefOrNull(), nd)) {
         a.RoundUp(nd);
     } else {
         Ꮡa.RoundDown(nd);
@@ -399,7 +396,7 @@ public static void RoundUp(this ref @decimal a, nint nd) {
     // round up
     for (nint i = nd - 1; i >= 0; i--) {
         var c = a.d[i];
-        if (c < (rune)'9') { // can stop after this digit
+        if (c < '9') { // can stop after this digit
             a.d[i]++;
             a.nd = i + 1;
             return;
@@ -408,7 +405,7 @@ public static void RoundUp(this ref @decimal a, nint nd) {
 
     // Number is all 9s.
     // Change to single 1 with adjusted decimal point.
-    a.d[0] = (rune)'1';
+    a.d[0] = (byte)'1';
     a.nd = 1;
     a.dp++;
 }
@@ -421,10 +418,10 @@ public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) {
     if (a.dp > 20) {
         return 0xFFFFFFFFFFFFFFFFUL;
     }
-    nint i = default!;
+    nint i = default;
     var n = (uint64)0;
     for (i = 0; i < a.dp && i < a.nd; i++) {
-        n = n * 10 + (uint64)((byte)(a.d[i] - (rune)'0'));
+        n = n * 10 + (uint64)((byte)(a.d[i] - '0'));
     }
     for (; i < a.dp; i++) {
         n *= 10;

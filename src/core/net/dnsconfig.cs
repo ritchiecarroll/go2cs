@@ -23,25 +23,25 @@ partial class net_package {
 // See go.dev/issue/67401.
 //
 //go:linkname defaultNS
-public static slice<@string> defaultNS = new @string[]{"127.0.0.1:53"u8, "[::1]:53"u8}.slice();
+public static slice<@string> defaultNS = slice<@string>(["127.0.0.1:53"u8, "[::1]:53"u8]);
 
-internal static Func<(@string, error)> getHostname = os.Hostname;      // variable for testing
+internal static Func<(@string, error)> getHostname = os.Hostname; // variable for testing
 
 partial struct dnsConfig {
     internal slice<@string> servers; // server addresses (in host:port form) to use
-    internal slice<@string> search; // rooted suffixes to append to local name
-    internal nint ndots;          // number of dots in name to trigger absolute lookup
-    internal time.Duration timeout; // wait before giving up on a query, including retries
+    internal slice<@string> search;  // rooted suffixes to append to local name
+    internal nint ndots;             // number of dots in name to trigger absolute lookup
+    internal time.Duration timeout;  // wait before giving up on a query, including retries
     internal nint attempts;          // lost packets before giving up on server
-    internal bool rotate;          // round robin among servers
-    internal bool unknownOpt;          // anything unknown was encountered
-    internal slice<@string> lookup; // OpenBSD top-level database "lookup" order
-    internal error err;         // any error that occurs during open of resolv.conf
-    internal time.Time mtime;     // time of resolv.conf modification
-    internal uint32 soffset;        // used by serverOffset
-    internal bool singleRequest;          // use sequential A and AAAA queries instead of parallel queries
-    internal bool useTCP;          // force usage of TCP for DNS resolutions
-    internal bool trustAD;          // add AD flag to queries
+    internal bool rotate;            // round robin among servers
+    internal bool unknownOpt;        // anything unknown was encountered
+    internal slice<@string> lookup;  // OpenBSD top-level database "lookup" order
+    internal error err;              // any error that occurs during open of resolv.conf
+    internal time.Time mtime;        // time of resolv.conf modification
+    internal uint32 soffset;         // used by serverOffset
+    internal bool singleRequest;     // use sequential A and AAAA queries instead of parallel queries
+    internal bool useTCP;            // force usage of TCP for DNS resolutions
+    internal bool trustAD;           // add AD flag to queries
     internal bool noReload;          // do not check for config file updates
 }
 

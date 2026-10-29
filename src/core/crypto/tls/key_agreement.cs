@@ -46,8 +46,8 @@ internal static error errServerKeyExchange = errors.New("tls: invalid ServerKeyE
 partial struct rsaKeyAgreement {
 }
 
-internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
-    return (default!, default!);
+internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this rsaKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> hello) {
+    return (default, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -59,22 +59,22 @@ internal static (slice<byte>, error) processClientKeyExchange(this rsaKeyAgreeme
     ref var ckx = ref Ꮡckx.DerefOrNull();
 
     if (len(ckx.ciphertext) < 2) {
-        return (default!, errClientKeyExchange);
+        return (default, errClientKeyExchange);
     }
     nint ciphertextLen = (nint)ckx.ciphertext[0] << 8 | (nint)ckx.ciphertext[1];
     if (ciphertextLen != len(ckx.ciphertext) - 2) {
-        return (default!, errClientKeyExchange);
+        return (default, errClientKeyExchange);
     }
     var ciphertext = ckx.ciphertext[2..];
 
     var (priv, ok) = cert.PrivateKey._<crypto.Decrypter>(ᐧ);
     if (!ok) {
-        return (default!, errors.New(tlsCertificatePrivateKeyˢ));
+        return (default, errors.New(tlsCertificatePrivateKeyˢ));
     }
     // Perform constant time RSA PKCS #1 v1.5 decryption
     var (preMasterSecret, err) = priv.Decrypt(config.rand(), ciphertext, Ꮡ(new rsa.PKCS1v15DecryptOptions(SessionKeyLen: 48)));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     // We don't check the version number in the premaster secret. For one,
     // by checking it, we would leak information about the validity of the
@@ -82,13 +82,13 @@ internal static (slice<byte>, error) processClientKeyExchange(this rsaKeyAgreeme
     // benefit against a downgrade attack and some implementations send the
     // wrong version anyway. See the discussion at the end of section
     // 7.4.7.1 of RFC 4346.
-    return (preMasterSecret, default!);
+    return (preMasterSecret, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsUnexpectedˢ = "tls: unexpected ServerKeyExchange"u8;
 
-internal static error processServerKeyExchange(this rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
+internal static error processServerKeyExchange(this rsaKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> serverHello, ж<Δx509.Certificate> cert, ж<serverKeyExchangeMsg> skx) {
     return errors.New(tlsUnexpectedˢ);
 }
 
@@ -104,24 +104,24 @@ internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKey
     preMasterSecret[0] = (byte)(clientHello.vers >> 8);
     preMasterSecret[1] = (byte)clientHello.vers;
     var (_, err) = io.ReadFull(config.rand(), preMasterSecret[2..]);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
 
     var (rsaKey, ok) = cert.PublicKey._<ж<rsa.PublicKey>>(ᐧ);
     if (!ok) {
-        return (default!, default!, errors.New(tlsServerCertificateˢ));
+        return (default, default, errors.New(tlsServerCertificateˢ));
     }
     (var encrypted, err) = rsa.EncryptPKCS1v15(config.rand(), rsaKey, preMasterSecret);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
     var ckx = @new<clientKeyExchangeMsg>();
-    ckx.Value.ciphertext = new slice<byte>(len(encrypted) + 2);
-    ckx.Value.ciphertext[0] = (byte)(len(encrypted) >> 8);
-    ckx.Value.ciphertext[1] = (byte)len(encrypted);
-    copy((~ckx).ciphertext[2..], encrypted);
-    return (preMasterSecret, ckx, default!);
+    ckx.ciphertext = new slice<byte>(len(encrypted) + 2);
+    ckx.ciphertext[0] = (byte)(len(encrypted) >> 8);
+    ckx.ciphertext[1] = (byte)len(encrypted);
+    copy(ckx.ciphertext[2..], encrypted);
+    return (preMasterSecret, ckx, default);
 }
 
 // sha1Hash calculates a SHA1 hash over the given byte slices.
@@ -130,7 +130,7 @@ internal static slice<byte> sha1Hash(slice<slice<byte>> slices) {
     foreach (var (_, Δslice) in slices) {
         hsha1.Write(Δslice);
     }
-    return hsha1.Sum(default!);
+    return hsha1.Sum(default);
 }
 
 // md5SHA1Hash implements TLS 1.0's hybrid hash function which consists of the
@@ -141,7 +141,7 @@ internal static slice<byte> md5SHA1Hash(slice<slice<byte>> slices) {
     foreach (var (_, Δslice) in slices) {
         hmd5.Write(Δslice);
     }
-    copy(md5sha1, hmd5.Sum(default!));
+    copy(md5sha1, hmd5.Sum(default));
     copy(md5sha1[(int)(md5.ΔSize)..], sha1Hash(slices));
     return md5sha1;
 }
@@ -193,17 +193,17 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
     }
 
     if (ka.curveID == 0) {
-        return (default!, errors.New(tlsNoSupportedEllipticˢ2));
+        return (default, errors.New(tlsNoSupportedEllipticˢ2));
     }
     {
         var (_, okΔ1) = curveForCurveID(ka.curveID); if (!okΔ1) {
-            return (default!, errors.New(tlsCurvePreferencesˢ));
+            return (default, errors.New(tlsCurvePreferencesˢ));
         }
     }
 
     var (key, err) = generateECDHEKey(config.rand(), ka.curveID);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     ka.key = key;
 
@@ -211,26 +211,26 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
     var ecdhePublic = key.PublicKey().Bytes();
     var serverECDHEParams = new slice<byte>(1 + 2 + 1 + len(ecdhePublic));
     serverECDHEParams[0] = 3; // named curve
-    serverECDHEParams[1] = (byte)(uint16)((ka.curveID >> 8));
-    serverECDHEParams[2] = (byte)(uint16)ka.curveID;
+    serverECDHEParams[1] = (byte)(ka.curveID >> 8);
+    serverECDHEParams[2] = (byte)ka.curveID;
     serverECDHEParams[3] = (byte)len(ecdhePublic);
     copy(serverECDHEParams[4..], ecdhePublic);
 
     var (priv, ok) = cert.PrivateKey._<crypto.Signer>(ᐧ);
     if (!ok) {
-        return (default!, fmt.Errorf("tls: certificate private key of type %T does not implement crypto.Signer"u8, cert.PrivateKey));
+        return (default, fmt.Errorf("tls: certificate private key of type %T does not implement crypto.Signer"u8, cert.PrivateKey));
     }
 
-    slice<byte> sig = default!;
-    if (ka.version >= VersionTLS12){
+    slice<byte> sig = default;
+    if (ka.version >= VersionTLS12) {
         (ka.signatureAlgorithm, err) = selectSignatureScheme(ka.version, Ꮡcert, clientHello.supportedSignatureAlgorithms);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         ref var sigHash = ref heap<crypto.Hash>(out var ᏑsigHash);
         (var sigType, sigHash, var errΔ1) = typeAndHashFromSignatureScheme(ka.signatureAlgorithm);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         if (sigHash == crypto.SHA1) {
             tlssha1.Value(); // ensure godebug is initialized
@@ -238,28 +238,28 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
         }
         var signed = slices.Concat<slice<byte>, byte>(clientHello.random, hello.random, serverECDHEParams);
         if ((sigType == signaturePKCS1v15 || sigType == signatureRSAPSS) != ka.isRSA) {
-            return (default!, errors.New(tlsCertificateCannotBeˢ));
+            return (default, errors.New(tlsCertificateCannotBeˢ));
         }
         var signOpts = ((crypto.SignerOpts)sigHash);
         if (sigType == signatureRSAPSS) {
             signOpts = new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: sigHash)));
         }
         (sig, errΔ1) = crypto.SignMessage(priv, config.rand(), signed, signOpts);
-        if (errΔ1 != default!) {
-            return (default!, errors.New("tls: failed to sign ECDHE parameters: "u8 + errΔ1.Error()));
+        if (errΔ1 != nil) {
+            return (default, errors.New("tls: failed to sign ECDHE parameters: "u8 + errΔ1.Error()));
         }
     } else {
         var (sigType, sigHash, errΔ2) = legacyTypeAndHashFromPublicKey(priv.Public());
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         var signed = hashForServerKeyExchange(sigType, clientHello.random, hello.random, serverECDHEParams);
         if ((sigType == signaturePKCS1v15) != ka.isRSA) {
-            return (default!, errors.New(tlsCertificateCannotBeˢ));
+            return (default, errors.New(tlsCertificateCannotBeˢ));
         }
         (sig, errΔ2) = priv.Sign(config.rand(), signed, sigHash);
-        if (errΔ2 != default!) {
-            return (default!, errors.New("tls: failed to sign ECDHE parameters: "u8 + errΔ2.Error()));
+        if (errΔ2 != nil) {
+            return (default, errors.New("tls: failed to sign ECDHE parameters: "u8 + errΔ2.Error()));
         }
     }
 
@@ -268,38 +268,38 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
     if (ka.version >= VersionTLS12) {
         sigAndHashLen = 2;
     }
-    skx.Value.key = new slice<byte>(len(serverECDHEParams) + sigAndHashLen + 2 + len(sig));
-    copy((~skx).key, serverECDHEParams);
-    var k = (~skx).key.slice(len(serverECDHEParams));
+    skx.key = new slice<byte>(len(serverECDHEParams) + sigAndHashLen + 2 + len(sig));
+    copy(skx.key, serverECDHEParams);
+    var k = skx.key.slice(len(serverECDHEParams));
     if (ka.version >= VersionTLS12) {
-        k[0] = (byte)(uint16)((ka.signatureAlgorithm >> 8));
-        k[1] = (byte)(uint16)ka.signatureAlgorithm;
+        k[0] = (byte)(ka.signatureAlgorithm >> 8);
+        k[1] = (byte)ka.signatureAlgorithm;
         k = k[2..];
     }
     k[0] = (byte)(len(sig) >> 8);
     k[1] = (byte)len(sig);
     copy(k[2..], sig);
 
-    return (skx, default!);
+    return (skx, default);
 }
 
-internal static (slice<byte>, error) processClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
+internal static (slice<byte>, error) processClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
     ref var ckx = ref Ꮡckx.DerefOrNull();
 
     if (len(ckx.ciphertext) == 0 || (nint)ckx.ciphertext[0] != len(ckx.ciphertext) - 1) {
-        return (default!, errClientKeyExchange);
+        return (default, errClientKeyExchange);
     }
 
     var (peerKey, err) = ka.key.Curve().NewPublicKey(ckx.ciphertext[1..]);
-    if (err != default!) {
-        return (default!, errClientKeyExchange);
+    if (err != nil) {
+        return (default, errClientKeyExchange);
     }
     (var preMasterSecret, err) = ka.key.ECDH(peerKey);
-    if (err != default!) {
-        return (default!, errClientKeyExchange);
+    if (err != nil) {
+        return (default, errClientKeyExchange);
     }
 
-    return (preMasterSecret, default!);
+    return (preMasterSecret, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -356,34 +356,34 @@ internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж
     }
 
     var (key, err) = generateECDHEKey(config.rand(), ka.curveID);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     ka.key = key;
 
     (var peerKey, err) = key.Curve().NewPublicKey(publicKey);
-    if (err != default!) {
+    if (err != nil) {
         return errServerKeyExchange;
     }
     (ka.preMasterSecret, err) = key.ECDH(peerKey);
-    if (err != default!) {
+    if (err != nil) {
         return errServerKeyExchange;
     }
 
     var ourPublicKey = key.PublicKey().Bytes();
     ka.ckx = @new<clientKeyExchangeMsg>();
-    ka.ckx.Value.ciphertext = new slice<byte>(1 + len(ourPublicKey));
-    ka.ckx.Value.ciphertext[0] = (byte)len(ourPublicKey);
-    copy((~ka.ckx).ciphertext[1..], ourPublicKey);
+    ka.ckx.ciphertext = new slice<byte>(1 + len(ourPublicKey));
+    ka.ckx.ciphertext[0] = (byte)len(ourPublicKey);
+    copy(ka.ckx.ciphertext[1..], ourPublicKey);
 
-    uint8 sigType = default!;
-    crypto.Hash sigHash = default!;
-    if (ka.version >= VersionTLS12){
+    uint8 sigType = default;
+    crypto.Hash sigHash = default;
+    if (ka.version >= VersionTLS12) {
         if (!isSupportedSignatureAlgorithm(ka.signatureAlgorithm, clientHello.supportedSignatureAlgorithms)) {
             return errors.New(tlsCertificateUsedWithˢ);
         }
         (sigType, sigHash, err) = typeAndHashFromSignatureScheme(ka.signatureAlgorithm);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (sigHash == crypto.SHA1) {
@@ -395,13 +395,13 @@ internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж
         }
         var signed = slices.Concat<slice<byte>, byte>(clientHello.random, serverHello.random, serverECDHEParams);
         {
-            var errΔ1 = verifyHandshakeSignature(sigType, cert.PublicKey, sigHash, signed, sig); if (errΔ1 != default!) {
+            var errΔ1 = verifyHandshakeSignature(sigType, cert.PublicKey, sigHash, signed, sig); if (errΔ1 != nil) {
                 return errors.New("tls: invalid signature by the server certificate: "u8 + errΔ1.Error());
             }
         }
     } else {
         (sigType, sigHash, err) = legacyTypeAndHashFromPublicKey(cert.PublicKey);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if ((sigType == signaturePKCS1v15) != ka.isRSA) {
@@ -409,24 +409,24 @@ internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж
         }
         var signed = hashForServerKeyExchange(sigType, clientHello.random, serverHello.random, serverECDHEParams);
         {
-            var errΔ2 = verifyLegacyHandshakeSignature(sigType, cert.PublicKey, sigHash, signed, sig); if (errΔ2 != default!) {
+            var errΔ2 = verifyLegacyHandshakeSignature(sigType, cert.PublicKey, sigHash, signed, sig); if (errΔ2 != nil) {
                 return errors.New("tls: invalid signature by the server certificate: "u8 + errΔ2.Error());
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsMissingˢ = "tls: missing ServerKeyExchange message"u8;
 
-internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) {
+internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<Δx509.Certificate> cert) {
     if (ka.ckx == nil) {
-        return (default!, default!, errors.New(tlsMissingˢ));
+        return (default, default, errors.New(tlsMissingˢ));
     }
 
-    return (ka.preMasterSecret, ka.ckx, default!);
+    return (ka.preMasterSecret, ka.ckx, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -437,29 +437,29 @@ internal static readonly @string tlsInternalErrorˢ6 = "tls: internal error: uns
 internal static (ж<ecdh.PrivateKey>, error) generateECDHEKey(io.Reader rand, CurveID curveID) {
     var (curve, ok) = curveForCurveID(curveID);
     if (!ok) {
-        return (default!, errors.New(tlsInternalErrorˢ6));
+        return (default, errors.New(tlsInternalErrorˢ6));
     }
 
     return curve.GenerateKey(rand);
 }
 
 internal static (ecdhꓸCurve, bool) curveForCurveID(CurveID id) {
-    var exprᴛ1 = id;
-    if (exprᴛ1 == X25519) {
+    switch (id) {
+    case var ᴛ when ᴛ == X25519: {
         return (ecdh.X25519(), true);
     }
-    if (exprᴛ1 == CurveP256) {
+    case var ᴛ when ᴛ == CurveP256: {
         return (ecdh.P256(), true);
     }
-    if (exprᴛ1 == CurveP384) {
+    case var ᴛ when ᴛ == CurveP384: {
         return (ecdh.P384(), true);
     }
-    if (exprᴛ1 == CurveP521) {
+    case var ᴛ when ᴛ == CurveP521: {
         return (ecdh.P521(), true);
     }
-    { /* default: */
-        return (default!, false);
-    }
+    default: {
+        return (default, false);
+    }}
 }
 
 } // end tls_package

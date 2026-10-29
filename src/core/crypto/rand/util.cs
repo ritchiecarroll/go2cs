@@ -25,10 +25,10 @@ internal static readonly @string cryptoRandPrimeSizeMustˢ = "crypto/rand: prime
 // in a future Go release. Instead, use [testing/cryptotest.SetGlobalRandom].
 public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoRandUseOfPrimeIsˢ));
+        return (default, errors.New(cryptoRandUseOfPrimeIsˢ));
     }
     if (bits < 2) {
-        return (default!, errors.New(cryptoRandPrimeSizeMustˢ));
+        return (default, errors.New(cryptoRandPrimeSizeMustˢ));
     }
 
     r = rand.CustomReader(r);
@@ -41,10 +41,10 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
     var bytes = new slice<byte>((bits + 7) / 8);
     var p = @new<bigꓸInt>();
 
-    while (ᐧ) {
+    for (;;) {
         {
-            var (_, err) = io.ReadFull(r, bytes); if (err != default!) {
-                return (default!, err);
+            var (_, err) = io.ReadFull(r, bytes); if (err != nil) {
+                return (default, err);
             }
         }
 
@@ -54,7 +54,7 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
         // Setting the top two bits, rather than just the top bit,
         // means that when two of these values are multiplied together,
         // the result isn't ever one bit short.
-        if (b >= 2){
+        if (b >= 2) {
             bytes[0] |= (byte)(((byte)3).Lsh((b - 2)));
         } else {
             // Here b==1, because b cannot be zero.
@@ -68,7 +68,7 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
 
         p.SetBytes(bytes);
         if (p.ProbablyPrime(20)) {
-            return (p, default!);
+            return (p, default);
         }
     }
 }
@@ -76,8 +76,8 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
 // Int returns a uniform random value in [0, max). It panics if max <= 0, and
 // returns an error if rand.Read returns one.
 public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡmax) {
-    ж<bigꓸInt> n = default!;
-    error err = default!;
+    ж<bigꓸInt> n = default;
+    error err = default;
     ref var max = ref Ꮡmax.DerefOrNull();
 
     if (max.Sign() <= 0) {
@@ -101,10 +101,10 @@ public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡ
 
     var bytes = new slice<byte>(k);
 
-    while (ᐧ) {
+    for (;;) {
         (_, err) = io.ReadFull(rand, bytes);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
         // Clear bits in the first byte to increase the probability

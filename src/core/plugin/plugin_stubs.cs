@@ -12,11 +12,11 @@ partial class plugin_package {
 private static readonly @string pluginNotImplementedˢ = "plugin: not implemented"u8;
 
 internal static (Symbol, error) lookup(ref Plugin p, @string symName) {
-    return (default!, errors.New(pluginNotImplementedˢ));
+    return (default, errors.New(pluginNotImplementedˢ));
 }
 
 internal static (ж<Plugin>, error) open(@string name) {
-    return (default!, errors.New(pluginNotImplementedˢ));
+    return (default, errors.New(pluginNotImplementedˢ));
 }
 
 } // end plugin_package

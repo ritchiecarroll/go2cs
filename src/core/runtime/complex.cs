@@ -16,12 +16,12 @@ internal static float64 inf2one(float64 f) {
 }
 
 internal static complex128 complex128div(complex128 n, complex128 m) {
-    float64 e = default!;                  // complex(e, f) = n/m
-    float64 f = default!;
+    float64 e = default; // complex(e, f) = n/m
+    float64 f = default;
 
     // Algorithm for robust complex division as described in
     // Robert L. Smith: Algorithm 116: Complex division. Commun. ACM 5(8): 435 (1962).
-    if (abs(real(m)) >= abs(imag(m))){
+    if (abs(real(m)) >= abs(imag(m))) {
         var ratio = imag(m) / real(m);
         var denom = real(m) + ratio * imag(m);
         e = (real(n) + imag(n) * ratio) / denom;

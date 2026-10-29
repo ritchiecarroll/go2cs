@@ -26,9 +26,9 @@ partial class tabwriter_package {
 // segment's size in bytes, its width in runes, and whether it's an htab
 // ('\t') terminated cell.
 partial struct cell {
-    internal nint size; // cell size in bytes
+    internal nint size;  // cell size in bytes
     internal nint width; // cell width in runes
-    internal bool htab; // true if the cell is terminated by an htab ('\t')
+    internal bool htab;  // true if the cell is terminated by an htab ('\t')
 }
 
 // A Writer is a filter that inserts padding around tab-delimited
@@ -97,12 +97,12 @@ partial struct Writer {
     internal array<byte> padbytes = new(8);
     internal nuint flags;
     // current state
-    internal slice<byte> buf; // collected text excluding tabs or line breaks
-    internal nint pos;     // buffer position up to which cell.width of incomplete cell has been computed
-    internal cell cell;     // current incomplete cell; cell.width is up to buf[pos] excluding ignored sections
-    internal byte endChar;     // terminating char of escaped sequence (Escape for escapes, '>', ';' for HTML tags/entities, or 0)
+    internal slice<byte> buf;          // collected text excluding tabs or line breaks
+    internal nint pos;                 // buffer position up to which cell.width of incomplete cell has been computed
+    internal cell cell;                // current incomplete cell; cell.width is up to buf[pos] excluding ignored sections
+    internal byte endChar;             // terminating char of escaped sequence (Escape for escapes, '>', ';' for HTML tags/entities, or 0)
     internal slice<slice<cell>> lines; // list of lines; each line is a list of cells
-    internal slice<nint> widths; // list of column widths in runes - re-used during formatting
+    internal slice<nint> widths;       // list of column widths in runes - re-used during formatting
 }
 
 // addLine adds a new line.
@@ -113,11 +113,11 @@ internal static void addLine(this ref Writer b, bool flushed) {
     // as that gives us an opportunity
     // to re-use an existing []cell.
     {
-        nint n = len(b.lines) + 1; if (n <= cap(b.lines)){
+        nint n = len(b.lines) + 1; if (n <= cap(b.lines)) {
             b.lines = b.lines.slice(0, n);
             b.lines[n - 1] = b.lines[n - 1][..0];
         } else {
-            b.lines = builtin.append(b.lines, (slice<cell>)(default!));
+            b.lines = builtin.append(b.lines, (slice<cell>)(default));
         }
     }
 
@@ -142,7 +142,7 @@ internal static void addLine(this ref Writer b, bool flushed) {
 internal static void reset(this ref Writer b) {
     b.buf = b.buf[..0];
     b.pos = 0;
-    b.cell = new cell(nil);
+    b.cell = new cell();
     b.endChar = 0;
     b.lines = b.lines[0..0];
     b.widths = b.widths[0..0];
@@ -223,7 +223,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
     foreach (var i in range(b.padbytes)) {
         b.padbytes[i] = padchar;
     }
-    if (padchar == (rune)'\t') {
+    if (padchar == '\t') {
         // tab padding enforces left-alignment
         flags &= unchecked((nuint)~(nuint)(AlignRight));
     }
@@ -256,10 +256,10 @@ partial struct osError {
 
 internal static void write0(this ref Writer b, slice<byte> buf) {
     var (n, err) = b.output.Write(buf);
-    if (n != len(buf) && err == default!) {
+    if (n != len(buf) && err == nil) {
         err = io.ErrShortWrite;
     }
-    if (err != default!) {
+    if (err != nil) {
         throw panic(new osError(err));
     }
 }
@@ -272,11 +272,11 @@ internal static void writeN(this ref Writer b, slice<byte> src, nint n) {
     b.write0(src.slice(0, n));
 }
 
-internal static slice<byte> newline = new byte[]{(rune)'\n'}.slice();
+internal static slice<byte> newline = slice<byte>([(byte)'\n']);
 internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
 
 internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) {
-    if (b.padbytes[0] == (rune)'\t' || useTabs) {
+    if (b.padbytes[0] == '\t' || useTabs) {
         // padding is done with tabs
         if (b.tabwidth == 0) {
             return; // tabs have no width - can't do any padding
@@ -295,10 +295,10 @@ internal static void writePadding(this ref Writer b, nint textw, nint cellw, boo
     b.writeN(b.padbytes[0..], cellw - textw);
 }
 
-internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
+internal static slice<byte> vbar = slice<byte>([(byte)'|']);
 
 internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0, nint line1) {
-    nint pos = default!;
+    nint pos = default;
 
     pos = pos0;
     for (nint i = line0; i < line1; i++) {
@@ -313,7 +313,7 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
                 b.write0(vbar);
             }
 
-            if (c.size == 0){
+            if (c.size == 0) {
                 // empty cell
                 if (j < len(b.widths)) {
                     b.writePadding(c.width, b.widths[j], useTabs);
@@ -321,7 +321,7 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
             } else {
                 // non-empty cell
                 useTabs = false;
-                if ((b.flags & AlignRight) == 0){ // align left
+                if ((b.flags & AlignRight) == 0) { // align left
                     b.write0(b.buf.slice(pos, pos + c.size));
                     pos += c.size;
                     if (j < len(b.widths)) {
@@ -337,7 +337,7 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
             }
         }
 
-        if (i + 1 == len(b.lines)){
+        if (i + 1 == len(b.lines)) {
             // last buffered line - we don't have a newline, so just write
             // any outstanding buffered data
             b.write0(b.buf.slice(pos, pos + b.cell.size));
@@ -355,7 +355,7 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
 // Returns the buffer position corresponding to the beginning of
 // line1 and an error, if any.
 internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, nint line1) {
-    nint pos = default!;
+    nint pos = default;
 
     pos = pos0;
     nint column = len(b.widths);
@@ -378,7 +378,7 @@ internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, ni
 
         // column block begin
         nint width = b.minwidth; // minimal column width
-        var discardable = true; // true if all cells in this column are empty and "soft"
+        var discardable = true;  // true if all cells in this column are empty and "soft"
         for (; @this < line1; @this++) {
             line = b.lines[@this];
             if (column >= len(line) - 1) {
@@ -438,16 +438,19 @@ public static UntypedInt Escape => /* '\xff' */ 255;
 
 // Start escaped mode.
 internal static void startEscape(this ref Writer b, byte ch) {
-    var exprᴛ1 = ch;
-    if (exprᴛ1 == Escape) {
+    switch (ch) {
+    case var ᴛ when ᴛ == Escape: {
         b.endChar = Escape;
+        break;
     }
-    else if (exprᴛ1 is (rune)'<') {
-        b.endChar = (rune)'>';
+    case (byte)'<': {
+        b.endChar = (byte)'>';
+        break;
     }
-    else if (exprᴛ1 is (rune)'&') {
-        b.endChar = (rune)';';
-    }
+    case (byte)'&': {
+        b.endChar = (byte)';';
+        break;
+    }}
 }
 
 // Terminate escaped mode. If the escaped text was an HTML tag, its width
@@ -455,18 +458,21 @@ internal static void startEscape(this ref Writer b, byte ch) {
 // its width is assumed to be one. In all other cases, the width is the
 // unicode width of the text.
 internal static void endEscape(this ref Writer b) {
-    var exprᴛ1 = b.endChar;
-    if (exprᴛ1 == Escape) {
+    switch (b.endChar) {
+    case var ᴛ when ᴛ == Escape: {
         b.updateWidth();
         if ((b.flags & StripEscape) == 0) {
             b.cell.width -= 2; // don't count the Escape chars
         }
+        break;
     }
-    else if (exprᴛ1 is (rune)'>') { // tag of zero width
+    case (byte)'>': { // tag of zero width
+        break;
     }
-    else if (exprᴛ1 is (rune)';') {
+    case (byte)';': {
         b.cell.width++; // entity, count as one rune
-    }
+        break;
+    }}
     b.pos = len(b.buf);
     b.endChar = 0;
 }
@@ -477,7 +483,7 @@ internal static nint terminateCell(this ref Writer b, bool htab) {
     b.cell.htab = htab;
     var line = Ꮡ(b.lines, len(b.lines) - 1);
     line.ValueSlot = builtin.append(line.ValueSlot, b.cell);
-    b.cell = new cell(nil);
+    b.cell = new cell();
     return len(line.ValueSlot);
 }
 
@@ -489,7 +495,7 @@ internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string
         ref var err = ref Ꮡerr.DerefOrNull();
 
         {
-            var e = recover(calledByDefer); if (e != default!) {
+            var e = recover(calledByDefer); if (e != nil) {
                 if (op == "Flush"u8) {
                     // If Flush ran into a panic, we still need to reset.
                     b.reset();
@@ -530,7 +536,7 @@ internal static error /*err*/ flush(this ж<Writer> Ꮡb) {
 
         defer(Ꮡb.handlePanic, Ꮡerr, flushˢ, ref ᒐ, recovers: true);
         b.flushNoDefers();
-        err = default!;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -564,7 +570,7 @@ private static readonly @string writeˢ = "Write"u8;
 // The only errors returned are ones encountered
 // while writing to the underlying output stream.
 public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
-    nint n = default!;
+    nint n = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -576,33 +582,34 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
         // split text into cells
         n = 0;
         foreach (var (i, ch) in buf) {
-            if (b.endChar == 0){
+            if (b.endChar == 0) {
                 // outside escape
-                var exprᴛ1 = ch;
-                if (exprᴛ1 is (rune)'\t' or (rune)'\v' or (rune)'\n' or (rune)'\f') {
+                switch (ch) {
+                case (byte)'\t' or (byte)'\v' or (byte)'\n' or (byte)'\f': {
                     // end of cell
                     b.append(buf.slice(n, i));
                     b.updateWidth();
                     n = i + 1; // ch consumed
-                    nint ncells = b.terminateCell(ch == (rune)'\t');
-                    if (ch == (rune)'\n' || ch == (rune)'\f') {
+                    nint ncells = b.terminateCell(ch == '\t');
+                    if (ch == '\n' || ch == '\f') {
                         // terminate line
-                        b.addLine(ch == (rune)'\f');
-                        if (ch == (rune)'\f' || ncells == 1) {
+                        b.addLine(ch == '\f');
+                        if (ch == '\f' || ncells == 1) {
                             // A '\f' always forces a flush. Otherwise, if the previous
                             // line has only one cell which does not have an impact on
                             // the formatting of the following lines (the last cell per
                             // line is ignored by format()), thus we can flush the
                             // Writer contents.
                             b.flushNoDefers();
-                            if (ch == (rune)'\f' && (b.flags & Debug) != 0) {
+                            if (ch == '\f' && (b.flags & Debug) != 0) {
                                 // indicate section break
                                 b.write0(hbar);
                             }
                         }
                     }
+                    break;
                 }
-                else if (exprᴛ1 == Escape) {
+                case var ᴛ when ᴛ == Escape: {
                     // start of escaped sequence
                     b.append(buf.slice(n, i));
                     b.updateWidth();
@@ -611,8 +618,9 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                         n++; // strip Escape
                     }
                     b.startEscape(Escape);
+                    break;
                 }
-                else if (exprᴛ1 is (rune)'<' or (rune)'&') {
+                case (byte)'<' or (byte)'&': {
                     // possibly an html tag/entity
                     if ((b.flags & FilterHTML) != 0) {
                         // begin of tag/entity
@@ -621,7 +629,8 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                         n = i;
                         b.startEscape(ch);
                     }
-                }
+                    break;
+                }}
             } else {
                 // inside escape
                 if (ch == b.endChar) {

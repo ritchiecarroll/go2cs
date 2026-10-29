@@ -47,7 +47,7 @@ public static @string String(this ref Event e) {
     if (spec.IsStack) {
         var frames = e.Args.slice(len(spec.Args));
         for (nint i = 0; i < len(frames); i++) {
-            if (i % 4 == 0){
+            if (i % 4 == 0) {
                 Ꮡs.WriteString("\n\t"u8);
             } else {
                 Ꮡs.WriteString(" "u8);
@@ -57,7 +57,7 @@ public static @string String(this ref Event e) {
             Ꮡs.WriteString(strconv.FormatUint(frames[i], 10));
         }
     }
-    if (e.Data != default!) {
+    if (e.Data != nil) {
         Ꮡs.WriteString(dataˢ);
         Ꮡs.WriteString(strconv.Quote((@string)e.Data));
     }

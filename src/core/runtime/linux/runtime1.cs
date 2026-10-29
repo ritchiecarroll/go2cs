@@ -38,18 +38,17 @@ internal static uint32 traceback_env;
 //
 //go:nosplit
 internal static (int32 level, bool all, bool crash) gotraceback() {
-    int32 level = default!;
-    bool all = default!;
-    bool crash = default!;
+    int32 level = default;
+    bool all = default;
+    bool crash = default;
 
     var gp = getg();
     var t = atomic.Load(Ꮡtraceback_cache);
     crash = (t & (uint32)tracebackCrash) != 0;
     all = (~(~gp).m).throwing > throwTypeUser || (t & (uint32)tracebackAll) != 0;
-    if ((~(~gp).m).traceback != 0){
+    if ((~(~gp).m).traceback != 0) {
         level = (int32)(~(~gp).m).traceback;
-    } else 
-    if ((~(~gp).m).throwing >= throwTypeRuntime){
+    } else if ((~(~gp).m).throwing >= throwTypeRuntime) {
         // Always include runtime frames in runtime throws unless
         // otherwise overridden by m.traceback.
         level = 2;
@@ -65,14 +64,14 @@ internal static ж<ж<byte>> argv;
 // nosplit for use in linux startup sysargs.
 //
 //go:nosplit
-internal static ж<byte> argv_index(ж<ж<byte>> Ꮡargv, int32 i) {
-    return ~(ж<ж<byte>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡargv), (uintptr)i * (uintptr)goarch.PtrSize));
+internal static ж<byte> argv_index(ж<ж<byte>> argv, int32 i) {
+    return ~(ж<ж<byte>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)i * (uintptr)goarch.PtrSize));
 }
 
-internal static void args(int32 c, ж<ж<byte>> Ꮡv) {
+internal static void args(int32 c, ж<ж<byte>> v) {
     argc = c;
-    argv = Ꮡv;
-    sysargs(c, Ꮡv);
+    argv = v;
+    sysargs(c, v);
 }
 
 internal static void goargs() {
@@ -199,23 +198,23 @@ internal partial struct check_y1t /*dyn*/ {
 }
 
 internal static void check() {
-    int8 a = default!;
-    uint8 b = default!;
-    int16 c = default!;
-    uint16 d = default!;
-    int32 e = default!;
-    uint32 f = default!;
-    int64 g = default!;
-    uint64 h = default!;
+    int8 a = default;
+    uint8 b = default;
+    int16 c = default;
+    uint16 d = default;
+    int32 e = default;
+    uint32 f = default;
+    int64 g = default;
+    uint64 h = default;
     ref var i = ref heap(new float32(), out var Ꮡi);
     ref var i1 = ref heap(new float32(), out var Ꮡi1);
     ref var j = ref heap(new float64(), out var Ꮡj);
     ref var j1 = ref heap(new float64(), out var Ꮡj1);
-    @unsafe.Pointer k = default!;
-    ж<uint16> l = default!;
+    @unsafe.Pointer k = default;
+    ж<uint16> l = default;
     ref var m = ref heap(new array<byte>(4), out var Ꮡm);
-    check_x1t x1 = default!;
-    check_y1t y1 = default!;
+    check_x1t x1 = default;
+    check_y1t y1 = default;
 
     if (/* unsafe.Sizeof(a) */ (uintptr)1 != 1) {
         @throw(badAˢ);
@@ -345,9 +344,9 @@ internal static void check() {
 
 partial struct dbgVar {
     internal @string name;
-    internal ж<int32> value;     // for variables that can only be set at startup
+    internal ж<int32> value;         // for variables that can only be set at startup
     internal ж<atomic.Int32> atomic; // for variables that can be changed during execution
-    internal int32 def;         // default value (ideally zero)
+    internal int32 def;              // default value (ideally zero)
 }
 
 // Holds variables parsed from GODEBUG env var,
@@ -415,7 +414,7 @@ partial struct debugᴛ1 /*dyn*/ {
 internal static readonly ж<debugᴛ1> Ꮡdebug = new StaticBox<debugᴛ1>(default(debugᴛ1));
 internal static ref debugᴛ1 debug => ref ((StaticBox<debugᴛ1>)Ꮡdebug).ValueSlot;
 
-internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
+internal static slice<ж<dbgVar>> dbgvars = slice<ж<dbgVar>>([
     Ꮡ(new dbgVar(name: "adaptivestackstart"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡadaptivestackstart))),
     Ꮡ(new dbgVar(name: "asyncpreemptoff"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡasyncpreemptoff))),
     Ꮡ(new dbgVar(name: "asynctimerchan"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan))),
@@ -450,7 +449,7 @@ internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
     Ꮡ(new dbgVar(name: "tracebacklabels"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels), def: 0)),
     Ꮡ(new dbgVar(name: "tracefpunwindoff"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡtracefpunwindoff))),
     Ꮡ(new dbgVar(name: "updatemaxprocs"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡupdatemaxprocs), def: 1))
-}.slice();
+]);
 
 internal static void parseRuntimeDebugVars(@string godebug) {
     // defaults
@@ -472,21 +471,20 @@ internal static void parseRuntimeDebugVars(@string godebug) {
 
     // apply runtime defaults, if any
     foreach (var (_, v) in dbgvars) {
-        if ((~v).def != 0) {
+        if (v.def != 0) {
             // Every var should have either v.value or v.atomic set.
-            if ((~v).value != nil){
-                (~v).value.Value = v.Value.def;
-            } else 
-            if ((~v).atomic != nil) {
-                (~v).atomic.Store((~v).def);
+            if (v.value != nil) {
+                v.value.Value = v.def;
+            } else if (v.atomic != nil) {
+                v.atomic.Store(v.def);
             }
         }
     }
     // apply compile-time GODEBUG settings
-    parsegodebug(godebugDefault, default!);
+    parsegodebug(godebugDefault, default);
 
     // apply environment settings
-    parsegodebug(godebug, default!);
+    parsegodebug(godebug, default);
 
     debug.malloc = (debug.inittrace | debug.sbrk | debug.checkfinalizers) != 0;
     debug.profstackdepth = min(debug.profstackdepth, (int32)(maxProfStackDepth));
@@ -531,8 +529,8 @@ internal static void reparsedebugvars(@string env) {
     parsegodebug(godebugDefault, seen);
     // apply defaults for as-yet-unseen variables
     foreach (var (_, v) in dbgvars) {
-        if ((~v).atomic != nil && !seen[(~v).name]) {
-            (~v).atomic.Store(0);
+        if (v.atomic != nil && !seen[v.name]) {
+            v.atomic.Store(0);
         }
     }
 }
@@ -552,11 +550,11 @@ internal static readonly @string cgocheck1ModeIsNoLongerˢ = "cgocheck > 1 mode 
 // cleargodebug(seen) to reset any now-unset values back to their defaults.
 internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
     for (@string Δp = godebug; Δp != ""u8; ) {
-        @string field = default!;
-        if (seen == default!){
+        @string field = default;
+        if (seen == nil) {
             // startup: process left to right, overwriting older settings with newer
-            nint iΔ1 = bytealg.IndexByteString(Δp, (rune)',');
-            if (iΔ1 < 0){
+            nint iΔ1 = bytealg.IndexByteString(Δp, (byte)',');
+            if (iΔ1 < 0) {
                 (field, Δp) = (Δp, "");
             } else {
                 (field, Δp) = (Δp.slice(0, iΔ1), Δp.slice(iΔ1 + 1));
@@ -564,16 +562,16 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
         } else {
             // incremental update: process right to left, updating and skipping seen
             nint iΔ2 = len(Δp) - 1;
-            while (iΔ2 >= 0 && Δp[iΔ2] != (rune)',') {
+            while (iΔ2 >= 0 && Δp[iΔ2] != ',') {
                 iΔ2--;
             }
-            if (iΔ2 < 0){
+            if (iΔ2 < 0) {
                 (Δp, field) = ("", Δp);
             } else {
                 (Δp, field) = (Δp.slice(0, iΔ2), Δp.slice(iΔ2 + 1));
             }
         }
-        nint i = bytealg.IndexByteString(field, (rune)'=');
+        nint i = bytealg.IndexByteString(field, (byte)'=');
         if (i < 0) {
             continue;
         }
@@ -582,29 +580,28 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
         if (seen[key]) {
             continue;
         }
-        if (seen != default!) {
+        if (seen != nil) {
             seen[key] = true;
         }
 
         // Update MemProfileRate directly here since it
         // is int, not int32, and should only be updated
         // if specified in GODEBUG.
-        if (seen == default! && key == "memprofilerate"u8){
+        if (seen == nil && key == "memprofilerate"u8) {
             {
-                var (n, err) = strconv.Atoi(value); if (err == default!) {
+                var (n, err) = strconv.Atoi(value); if (err == nil) {
                     MemProfileRate = n;
                 }
             }
         } else {
             foreach (var (_, v) in dbgvars) {
-                if ((~v).name == key) {
+                if (v.name == key) {
                     {
-                        var (n, err) = strconv.ParseInt(value, 10, 32); if (err == default!) {
-                            if (seen == default! && (~v).value != nil){
-                                (~v).value.Value = (int32)n;
-                            } else 
-                            if ((~v).atomic != nil) {
-                                (~v).atomic.Store((int32)n);
+                        var (n, err) = strconv.ParseInt(value, 10, 32); if (err == nil) {
+                            if (seen == nil && v.value != nil) {
+                                v.value.Value = (int32)n;
+                            } else if (v.atomic != nil) {
+                                v.atomic.Store((int32)n);
                             }
                         }
                     }
@@ -620,7 +617,7 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
 
 //go:linkname setTraceback runtime/debug.SetTraceback
 internal static void setTraceback(@string level) {
-    uint32 t = default!;
+    uint32 t = default;
     var exprᴛ1 = level;
     var matchᴛ1 = false;
     if (exprᴛ1 == "none"u8) { matchᴛ1 = true;
@@ -651,7 +648,7 @@ internal static void setTraceback(@string level) {
     if (fallthrough || !matchᴛ1) { /* default: */
         t = tracebackAll;
         {
-            var (n, err) = strconv.Atoi(level); if (err == default! && n == (nint)(uint32)n) {
+            var (n, err) = strconv.Atoi(level); if (err == nil && n == (nint)(uint32)n) {
                 t |= (uint32)(((uint32)n << (int)(tracebackShift)));
             }
         }
@@ -706,11 +703,11 @@ internal static (slice<@unsafe.Pointer>, slice<slice<int32>>) reflect_typelinks(
     var retᴷ = new stackAppend<slice<int32>>(moves: true);
 
     var modules = activeModules();
-    var sections = new @unsafe.Pointer[]{(@unsafe.Pointer)(~modules[0]).types}.slice();
-    var ret = new slice<int32>[]{(~modules[0]).typelinks}.slice();
+    var sections = slice<@unsafe.Pointer>([(@unsafe.Pointer)modules[0].types]);
+    var ret = slice<slice<int32>>([modules[0].typelinks]);
     foreach (var (_, md) in modules[1..]) {
-        sections = append(sectionsᴷ, sections, (@unsafe.Pointer)(~md).types);
-        ret = append(retᴷ, ret, (~md).typelinks);
+        sections = append(sectionsᴷ, sections, (@unsafe.Pointer)md.types);
+        ret = append(retᴷ, ret, md.typelinks);
     }
     sections = move2heap(sectionsᴷ, sections);
     ret = move2heap(retᴷ, ret);
@@ -784,7 +781,7 @@ internal static @unsafe.Pointer reflectlite_resolveTypeOff(@unsafe.Pointer Δrty
 //go:linkname reflect_addReflectOff reflect.addReflectOff
 public static int32 reflect_addReflectOff(@unsafe.Pointer ptr) {
     reflectOffsLock();
-    if (reflectOffs.m == default!) {
+    if (reflectOffs.m == nil) {
         reflectOffs.m = new map<int32, @unsafe.Pointer>();
         reflectOffs.minv = new map<@unsafe.Pointer, int32>();
         reflectOffs.next = -1;

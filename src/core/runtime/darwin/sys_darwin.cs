@@ -19,8 +19,8 @@ internal static partial void libc_error_trampoline();
 // libcCallInfo is a structure used to pass parameters to the system call.
 partial struct libcCallInfo {
     internal uintptr fn;
-    internal uintptr n; // number of parameters
-    internal uintptr args; // parameters
+    internal uintptr n;      // number of parameters
+    internal uintptr args;   // parameters
     internal uintptr r1, r2; // return values
 }
 
@@ -30,9 +30,9 @@ partial struct libcCallInfo {
 //go:nosplit
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscalln(uintptr fn, params ꓸꓸꓸuintptr argsʗp) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    uintptr err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    uintptr err = default;
     var args = argsʗp.sslice();
 
     entersyscall();
@@ -50,19 +50,19 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscalln(uintptr f
 //go:nosplit
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawsyscalln(uintptr fn, params ꓸꓸꓸuintptr argsʗp) {
-    uintptr err = default!;
+    uintptr err = default;
     var args = argsʗp.slice();
 
     var c = Ꮡ(new libcCallInfo(
         fn: fn,
         n: (uintptr)len(args)
     ));
-    if ((~c).n != 0) {
-        c.Value.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+    if (c.n != 0) {
+        c.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
     }
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscallN_trampoline), @unsafe.Pointer.FromPinnedBox(c));
     {
-        var gp = getg(); if (gp != nil && (~gp).m != nil && (~(~gp).m).errnoAddr != nil){
+        var gp = getg(); if (gp != nil && (~gp).m != nil && (~(~gp).m).errnoAddr != nil) {
             err = (uintptr)((~(~gp).m).errnoAddr.Value);
         } else {
             ref var errnoAddr = ref heap<ж<int32>>(out var ᏑerrnoAddr);
@@ -70,7 +70,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawsyscalln(uintpt
             err = (uintptr)(errnoAddr.Value);
         }
     }
-    return ((~c).r1, (~c).r2, err);
+    return (c.r1, c.r2, err);
 }
 
 internal static partial void syscallN_trampoline();
@@ -86,10 +86,9 @@ internal partial struct crypto_x509_syscall_args /*dyn*/ {
 //go:linkname crypto_x509_syscall crypto/x509/internal/macos.syscall
 //go:nosplit
 internal static uintptr /*r1*/ crypto_x509_syscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, float64 f1) {
-    uintptr r1 = default!;
+    uintptr r1 = default;
 
-    ref var args = ref heap<crypto_x509_syscall_args>(out var Ꮡargs);
-    args = new crypto_x509_syscall_args(fn, a1, a2, a3, a4, a5, f1, r1);
+    ref var args = ref heap<crypto_x509_syscall_args>(new crypto_x509_syscall_args(fn, a1, a2, a3, a4, a5, f1, r1), out var Ꮡargs);
     entersyscall();
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscall_x509), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     exitsyscall();
@@ -107,11 +106,11 @@ internal partial struct pthread_attr_init_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_attr_init(ж<pthreadattr> Ꮡattr) {
-    ref var args = ref heap(new pthread_attr_init_args((uintptr)Ꮡattr.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_attr_init(ж<pthreadattr> attr) {
+    ref var args = ref heap(new pthread_attr_init_args((uintptr)attr.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_attr_init_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡattr.OrTypedNil());
+    KeepAlive(attr.OrTypedNil());
     return ret;
 }
 
@@ -124,12 +123,12 @@ internal partial struct pthread_attr_getstacksize_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_attr_getstacksize(ж<pthreadattr> Ꮡattr, ж<uintptr> Ꮡsize) {
-    ref var args = ref heap(new pthread_attr_getstacksize_args((uintptr)Ꮡattr.OrTypedNil(), (uintptr)Ꮡsize.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_attr_getstacksize(ж<pthreadattr> attr, ж<uintptr> size) {
+    ref var args = ref heap(new pthread_attr_getstacksize_args((uintptr)attr.OrTypedNil(), (uintptr)size.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_attr_getstacksize_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡattr.OrTypedNil());
-    KeepAlive(Ꮡsize.OrTypedNil());
+    KeepAlive(attr.OrTypedNil());
+    KeepAlive(size.OrTypedNil());
     return ret;
 }
 
@@ -142,11 +141,11 @@ internal partial struct pthread_attr_setdetachstate_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_attr_setdetachstate(ж<pthreadattr> Ꮡattr, nint state) {
-    ref var args = ref heap(new pthread_attr_setdetachstate_args((uintptr)Ꮡattr.OrTypedNil(), state), out var Ꮡargs);
+internal static int32 pthread_attr_setdetachstate(ж<pthreadattr> attr, nint state) {
+    ref var args = ref heap(new pthread_attr_setdetachstate_args((uintptr)attr.OrTypedNil(), state), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_attr_setdetachstate_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡattr.OrTypedNil());
+    KeepAlive(attr.OrTypedNil());
     return ret;
 }
 
@@ -160,11 +159,11 @@ internal partial struct pthread_create_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_create(ж<pthreadattr> Ꮡattr, uintptr start, @unsafe.Pointer arg) {
-    ref var args = ref heap(new pthread_create_args((uintptr)Ꮡattr.OrTypedNil(), start, (uintptr)arg), out var Ꮡargs);
+internal static int32 pthread_create(ж<pthreadattr> attr, uintptr start, @unsafe.Pointer arg) {
+    ref var args = ref heap(new pthread_create_args((uintptr)attr.OrTypedNil(), start, (uintptr)arg), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_create_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡattr.OrTypedNil());
+    KeepAlive(attr.OrTypedNil());
     KeepAlive(@unsafe.Pointer.OrTypedNil(arg)); // Just for consistency. Arg of course needs to be kept alive for the start function.
     return ret;
 }
@@ -368,12 +367,12 @@ internal partial struct open_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 /*ret*/ open(ж<byte> Ꮡname, int32 mode, int32 perm) {
-    int32 ret = default!;
-    ref var args = ref heap(new open_args((uintptr)Ꮡname.OrTypedNil(), mode, perm), out var Ꮡargs);
+internal static int32 /*ret*/ open(ж<byte> name, int32 mode, int32 perm) {
+    int32 ret = default;
+    ref var args = ref heap(new open_args((uintptr)name.OrTypedNil(), mode, perm), out var Ꮡargs);
 
     ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(open_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡname.OrTypedNil());
+    KeepAlive(name.OrTypedNil());
     return ret;
 }
 
@@ -417,9 +416,9 @@ internal partial struct sigaltstack_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static void sigaltstack(ж<stackt> Ꮡnew, ж<stackt> Ꮡold) {
+internal static void sigaltstack(ж<stackt> Ꮡnew, ж<stackt> old) {
     ref var @new = ref Ꮡnew.DerefOrNull();
-    ref var args = ref heap(new sigaltstack_args((uintptr)Ꮡnew.OrTypedNil(), (uintptr)Ꮡold.OrTypedNil()), out var Ꮡargs);
+    ref var args = ref heap(new sigaltstack_args((uintptr)Ꮡnew.OrTypedNil(), (uintptr)old.OrTypedNil()), out var Ꮡargs);
 
     if (Ꮡnew != nil && (@new.ss_flags & (int32)_SS_DISABLE) != 0 && @new.ss_size == 0) {
         // Despite the fact that Darwin's sigaltstack man page says it ignores the size
@@ -430,7 +429,7 @@ internal static void sigaltstack(ж<stackt> Ꮡnew, ж<stackt> Ꮡold) {
     }
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(sigaltstack_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     KeepAlive(Ꮡnew.OrTypedNil());
-    KeepAlive(Ꮡold.OrTypedNil());
+    KeepAlive(old.OrTypedNil());
 }
 
 internal static partial void sigaltstack_trampoline();
@@ -457,12 +456,12 @@ internal partial struct setitimer_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static void setitimer(int32 mode, ж<itimerval> Ꮡnew, ж<itimerval> Ꮡold) {
-    ref var args = ref heap(new setitimer_args(mode, (uintptr)Ꮡnew.OrTypedNil(), (uintptr)Ꮡold.OrTypedNil()), out var Ꮡargs);
+internal static void setitimer(int32 mode, ж<itimerval> @new, ж<itimerval> old) {
+    ref var args = ref heap(new setitimer_args(mode, (uintptr)@new.OrTypedNil(), (uintptr)old.OrTypedNil()), out var Ꮡargs);
 
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(setitimer_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡnew.OrTypedNil());
-    KeepAlive(Ꮡold.OrTypedNil());
+    KeepAlive(@new.OrTypedNil());
+    KeepAlive(old.OrTypedNil());
 }
 
 internal static partial void setitimer_trampoline();
@@ -478,14 +477,14 @@ internal partial struct sysctl_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 sysctl(ж<uint32> Ꮡmib, uint32 miblen, ж<byte> Ꮡoldp, ж<uintptr> Ꮡoldlenp, ж<byte> Ꮡnewp, uintptr newlen) {
-    ref var args = ref heap(new sysctl_args((uintptr)Ꮡmib.OrTypedNil(), miblen, (uintptr)Ꮡoldp.OrTypedNil(), (uintptr)Ꮡoldlenp.OrTypedNil(), (uintptr)Ꮡnewp.OrTypedNil(), newlen), out var Ꮡargs);
+internal static int32 sysctl(ж<uint32> mib, uint32 miblen, ж<byte> oldp, ж<uintptr> oldlenp, ж<byte> newp, uintptr newlen) {
+    ref var args = ref heap(new sysctl_args((uintptr)mib.OrTypedNil(), miblen, (uintptr)oldp.OrTypedNil(), (uintptr)oldlenp.OrTypedNil(), (uintptr)newp.OrTypedNil(), newlen), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(sysctl_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡmib.OrTypedNil());
-    KeepAlive(Ꮡoldp.OrTypedNil());
-    KeepAlive(Ꮡoldlenp.OrTypedNil());
-    KeepAlive(Ꮡnewp.OrTypedNil());
+    KeepAlive(mib.OrTypedNil());
+    KeepAlive(oldp.OrTypedNil());
+    KeepAlive(oldlenp.OrTypedNil());
+    KeepAlive(newp.OrTypedNil());
     return ret;
 }
 
@@ -501,14 +500,14 @@ internal partial struct sysctlbyname_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 sysctlbyname(ж<byte> Ꮡname, ж<byte> Ꮡoldp, ж<uintptr> Ꮡoldlenp, ж<byte> Ꮡnewp, uintptr newlen) {
-    ref var args = ref heap(new sysctlbyname_args((uintptr)Ꮡname.OrTypedNil(), (uintptr)Ꮡoldp.OrTypedNil(), (uintptr)Ꮡoldlenp.OrTypedNil(), (uintptr)Ꮡnewp.OrTypedNil(), newlen), out var Ꮡargs);
+internal static int32 sysctlbyname(ж<byte> name, ж<byte> oldp, ж<uintptr> oldlenp, ж<byte> newp, uintptr newlen) {
+    ref var args = ref heap(new sysctlbyname_args((uintptr)name.OrTypedNil(), (uintptr)oldp.OrTypedNil(), (uintptr)oldlenp.OrTypedNil(), (uintptr)newp.OrTypedNil(), newlen), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(sysctlbyname_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡname.OrTypedNil());
-    KeepAlive(Ꮡoldp.OrTypedNil());
-    KeepAlive(Ꮡoldlenp.OrTypedNil());
-    KeepAlive(Ꮡnewp.OrTypedNil());
+    KeepAlive(name.OrTypedNil());
+    KeepAlive(oldp.OrTypedNil());
+    KeepAlive(oldlenp.OrTypedNil());
+    KeepAlive(newp.OrTypedNil());
     return ret;
 }
 
@@ -522,8 +521,7 @@ internal partial struct fcntl_args /*dyn*/ {
 //go:nosplit
 //go:cgo_unsafe_args
 public static (int32 ret, int32 errno) fcntl(int32 fd, int32 cmd, int32 arg) {
-    ref var args = ref heap<fcntl_args>(out var Ꮡargs);
-    args = new fcntl_args(fd, cmd, arg, 0, 0);
+    ref var args = ref heap<fcntl_args>(new fcntl_args(fd, cmd, arg, 0, 0), out var Ꮡargs);
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(fcntl_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     return (args.ret, args.errno);
 }
@@ -550,13 +548,13 @@ internal partial struct kevent_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 kevent(int32 kq, ж<keventt> Ꮡch, int32 nch, ж<keventt> Ꮡev, int32 nev, ж<timespec> Ꮡts) {
-    ref var args = ref heap(new kevent_args(kq, (uintptr)Ꮡch.OrTypedNil(), nch, (uintptr)Ꮡev.OrTypedNil(), nev, (uintptr)Ꮡts.OrTypedNil()), out var Ꮡargs);
+internal static int32 kevent(int32 kq, ж<keventt> ch, int32 nch, ж<keventt> ev, int32 nev, ж<timespec> ts) {
+    ref var args = ref heap(new kevent_args(kq, (uintptr)ch.OrTypedNil(), nch, (uintptr)ev.OrTypedNil(), nev, (uintptr)ts.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(kevent_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡch.OrTypedNil());
-    KeepAlive(Ꮡev.OrTypedNil());
-    KeepAlive(Ꮡts.OrTypedNil());
+    KeepAlive(ch.OrTypedNil());
+    KeepAlive(ev.OrTypedNil());
+    KeepAlive(ts.OrTypedNil());
     return ret;
 }
 
@@ -569,12 +567,12 @@ internal partial struct pthread_mutex_init_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_mutex_init(ж<pthreadmutex> Ꮡm, ж<pthreadmutexattr> Ꮡattr) {
-    ref var args = ref heap(new pthread_mutex_init_args((uintptr)Ꮡm.OrTypedNil(), (uintptr)Ꮡattr.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_mutex_init(ж<pthreadmutex> m, ж<pthreadmutexattr> attr) {
+    ref var args = ref heap(new pthread_mutex_init_args((uintptr)m.OrTypedNil(), (uintptr)attr.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_mutex_init_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡm.OrTypedNil());
-    KeepAlive(Ꮡattr.OrTypedNil());
+    KeepAlive(m.OrTypedNil());
+    KeepAlive(attr.OrTypedNil());
     return ret;
 }
 
@@ -586,11 +584,11 @@ internal partial struct pthread_mutex_lock_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_mutex_lock(ж<pthreadmutex> Ꮡm) {
-    ref var args = ref heap(new pthread_mutex_lock_args((uintptr)Ꮡm.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_mutex_lock(ж<pthreadmutex> m) {
+    ref var args = ref heap(new pthread_mutex_lock_args((uintptr)m.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_mutex_lock_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡm.OrTypedNil());
+    KeepAlive(m.OrTypedNil());
     return ret;
 }
 
@@ -602,11 +600,11 @@ internal partial struct pthread_mutex_unlock_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_mutex_unlock(ж<pthreadmutex> Ꮡm) {
-    ref var args = ref heap(new pthread_mutex_unlock_args((uintptr)Ꮡm.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_mutex_unlock(ж<pthreadmutex> m) {
+    ref var args = ref heap(new pthread_mutex_unlock_args((uintptr)m.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_mutex_unlock_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡm.OrTypedNil());
+    KeepAlive(m.OrTypedNil());
     return ret;
 }
 
@@ -619,12 +617,12 @@ internal partial struct pthread_cond_init_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_cond_init(ж<pthreadcond> Ꮡc, ж<pthreadcondattr> Ꮡattr) {
-    ref var args = ref heap(new pthread_cond_init_args((uintptr)Ꮡc.OrTypedNil(), (uintptr)Ꮡattr.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_cond_init(ж<pthreadcond> c, ж<pthreadcondattr> attr) {
+    ref var args = ref heap(new pthread_cond_init_args((uintptr)c.OrTypedNil(), (uintptr)attr.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_cond_init_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡc.OrTypedNil());
-    KeepAlive(Ꮡattr.OrTypedNil());
+    KeepAlive(c.OrTypedNil());
+    KeepAlive(attr.OrTypedNil());
     return ret;
 }
 
@@ -637,12 +635,12 @@ internal partial struct pthread_cond_wait_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_cond_wait(ж<pthreadcond> Ꮡc, ж<pthreadmutex> Ꮡm) {
-    ref var args = ref heap(new pthread_cond_wait_args((uintptr)Ꮡc.OrTypedNil(), (uintptr)Ꮡm.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_cond_wait(ж<pthreadcond> c, ж<pthreadmutex> m) {
+    ref var args = ref heap(new pthread_cond_wait_args((uintptr)c.OrTypedNil(), (uintptr)m.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_cond_wait_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡc.OrTypedNil());
-    KeepAlive(Ꮡm.OrTypedNil());
+    KeepAlive(c.OrTypedNil());
+    KeepAlive(m.OrTypedNil());
     return ret;
 }
 
@@ -656,13 +654,13 @@ internal partial struct pthread_cond_timedwait_relative_np_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_cond_timedwait_relative_np(ж<pthreadcond> Ꮡc, ж<pthreadmutex> Ꮡm, ж<timespec> Ꮡt) {
-    ref var args = ref heap(new pthread_cond_timedwait_relative_np_args((uintptr)Ꮡc.OrTypedNil(), (uintptr)Ꮡm.OrTypedNil(), (uintptr)Ꮡt.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_cond_timedwait_relative_np(ж<pthreadcond> c, ж<pthreadmutex> m, ж<timespec> t) {
+    ref var args = ref heap(new pthread_cond_timedwait_relative_np_args((uintptr)c.OrTypedNil(), (uintptr)m.OrTypedNil(), (uintptr)t.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_cond_timedwait_relative_np_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡc.OrTypedNil());
-    KeepAlive(Ꮡm.OrTypedNil());
-    KeepAlive(Ꮡt.OrTypedNil());
+    KeepAlive(c.OrTypedNil());
+    KeepAlive(m.OrTypedNil());
+    KeepAlive(t.OrTypedNil());
     return ret;
 }
 
@@ -674,11 +672,11 @@ internal partial struct pthread_cond_signal_args /*dyn*/ {
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static int32 pthread_cond_signal(ж<pthreadcond> Ꮡc) {
-    ref var args = ref heap(new pthread_cond_signal_args((uintptr)Ꮡc.OrTypedNil()), out var Ꮡargs);
+internal static int32 pthread_cond_signal(ж<pthreadcond> c) {
+    ref var args = ref heap(new pthread_cond_signal_args((uintptr)c.OrTypedNil()), out var Ꮡargs);
 
     var ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_cond_signal_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(Ꮡc.OrTypedNil());
+    KeepAlive(c.OrTypedNil());
     return ret;
 }
 
@@ -737,7 +735,7 @@ internal partial struct mach_vm_region_args /*dyn*/ {
 // to obtaining mappings for the current process.
 //
 //go:linkname mach_vm_region runtime/pprof.mach_vm_region
-public static int32 mach_vm_region(ж<uint64> Ꮡaddress, ж<uint64> Ꮡregion_size, @unsafe.Pointer info) {
+public static int32 mach_vm_region(ж<uint64> address, ж<uint64> region_size, @unsafe.Pointer info) {
     // kern_return_t mach_vm_region(
     // 	vm_map_read_t target_task,
     // 	mach_vm_address_t *address,
@@ -749,15 +747,14 @@ public static int32 mach_vm_region(ж<uint64> Ꮡaddress, ж<uint64> Ꮡregion_s
     ref var count = ref heap(new machMsgTypeNumber(), out var Ꮡcount);
     count = _VM_REGION_BASIC_INFO_COUNT_64;
     ref var object_name = ref heap(new machPort(), out var Ꮡobject_name);
-    ref var args = ref heap<mach_vm_region_args>(out var Ꮡargs);
-    args = new mach_vm_region_args(
-        address: Ꮡaddress,
-        size: Ꮡregion_size,
+    ref var args = ref heap<mach_vm_region_args>(new mach_vm_region_args(
+        address: address,
+        size: region_size,
         flavor: _VM_REGION_BASIC_INFO_64,
         info: info,
         count: Ꮡcount,
         object_name: Ꮡobject_name
-    );
+    ), out var Ꮡargs);
     return libcCall((@unsafe.Pointer)abi.FuncPCABI0(mach_vm_region_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
 
@@ -771,14 +768,13 @@ internal partial struct proc_regionfilename_args /*dyn*/ {
 }
 
 //go:linkname proc_regionfilename runtime/pprof.proc_regionfilename
-public static int32 proc_regionfilename(nint pid, uint64 address, ж<byte> Ꮡbuf, int64 buflen) {
-    ref var args = ref heap<proc_regionfilename_args>(out var Ꮡargs);
-    args = new proc_regionfilename_args(
+public static int32 proc_regionfilename(nint pid, uint64 address, ж<byte> buf, int64 buflen) {
+    ref var args = ref heap<proc_regionfilename_args>(new proc_regionfilename_args(
         pid: pid,
         address: address,
-        buf: Ꮡbuf,
+        buf: buf,
         bufSize: buflen
-    );
+    ), out var Ꮡargs);
     return libcCall((@unsafe.Pointer)abi.FuncPCABI0(proc_regionfilename_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
 

@@ -33,19 +33,19 @@ internal static void pHash<H>(Func<H> hashΔ1, slice<byte> result, slice<byte> s
 {
     var h = hmac.New(hashΔ1, secret);
     h.Write(seed);
-    var a = h.Sum(default!);
+    var a = h.Sum(default);
 
     while (len(result) > 0) {
         h.Reset();
         h.Write(a);
         h.Write(seed);
-        var b = h.Sum(default!);
+        var b = h.Sum(default);
         nint n = copy(result, b);
         result = result.slice(n);
 
         h.Reset();
         h.Write(a);
-        a = h.Sum(default!);
+        a = h.Sum(default);
     }
 }
 

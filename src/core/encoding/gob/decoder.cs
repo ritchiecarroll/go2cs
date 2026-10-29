@@ -26,14 +26,14 @@ internal static UntypedInt tooBig => /* (1 << 30) << (^uint(0) >> 62) */ 8589934
 // and its limits are not configurable. Take caution when decoding gob data
 // from untrusted sources.
 partial struct Decoder {
-    internal sync.Mutex mutex;                              // each item must be received atomically
-    internal io.Reader r;                               // source of the data
-    internal decBuffer buf;                               // buffer for more efficient i/o from r
-    internal map<typeId, ж<wireType>> wireType;               // map from remote ID to local description
+    internal sync.Mutex mutex;                                             // each item must be received atomically
+    internal io.Reader r;                                                  // source of the data
+    internal decBuffer buf;                                                // buffer for more efficient i/o from r
+    internal map<typeId, ж<wireType>> wireType;                            // map from remote ID to local description
     internal map<reflectꓸType, map<typeId, ж<ж<decEngine>>>> decoderCache; // cache of compiled engines
-    internal map<typeId, ж<ж<decEngine>>> ignorerCache;          // ditto for ignored objects
-    internal ж<decoderState> freeList;                        // list of free decoderStates; avoids reallocation
-    internal slice<byte> countBuf;                             // used for decoding integers while parsing messages
+    internal map<typeId, ж<ж<decEngine>>> ignorerCache;                    // ditto for ignored objects
+    internal ж<decoderState> freeList;                                     // list of free decoderStates; avoids reallocation
+    internal slice<byte> countBuf;                                         // used for decoding integers while parsing messages
     internal error err;
     // ignoreDepth tracks the depth of recursively parsed ignored fields
     internal nint ignoreDepth;
@@ -50,11 +50,11 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
             r = new bufio_ReaderжReader(bufio.NewReader(r));
         }
     }
-    dec.Value.r = r;
-    dec.Value.wireType = new map<typeId, ж<wireType>>();
-    dec.Value.decoderCache = new map<reflectꓸType, map<typeId, ж<ж<decEngine>>>>();
-    dec.Value.ignorerCache = new map<typeId, ж<ж<decEngine>>>();
-    dec.Value.countBuf = new slice<byte>(9); // counts may be uint64s (unlikely!), require 9 bytes
+    dec.r = r;
+    dec.wireType = new map<typeId, ж<wireType>>();
+    dec.decoderCache = new map<reflectꓸType, map<typeId, ж<ж<decEngine>>>>();
+    dec.ignorerCache = new map<typeId, ж<ж<decEngine>>>();
+    dec.countBuf = new slice<byte>(9); // counts may be uint64s (unlikely!), require 9 bytes
 
     return dec;
 }
@@ -75,7 +75,7 @@ internal static void recvType(this ж<Decoder> Ꮡdec, typeId id) {
     // Type:
     var wire = @new<wireType>();
     Ꮡdec.decodeValue(tWireType, reflect.ValueOf(wire.OrTypedNil()));
-    if (dec.err != default!) {
+    if (dec.err != nil) {
         return;
     }
     // Remember we've seen this type.
@@ -89,7 +89,7 @@ internal static error errBadCount = errors.New("invalid message length"u8);
 internal static bool recvMessage(this ref Decoder dec) {
     // Read a count.
     var (nbytes, _, err) = decodeUintReader(dec.r, dec.countBuf);
-    if (err != default!) {
+    if (err != nil) {
         dec.err = err;
         return false;
     }
@@ -98,7 +98,7 @@ internal static bool recvMessage(this ref Decoder dec) {
         return false;
     }
     dec.readMessage((nint)nbytes);
-    return dec.err == default!;
+    return dec.err == nil;
 }
 
 // readMessage reads the next nbytes bytes from the input.
@@ -108,7 +108,7 @@ internal static void readMessage(this ref Decoder dec, nint nbytes) {
         throw panic("non-empty decoder buffer");
     }
     // Read the data
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     (buf, dec.err) = saferio.ReadData(dec.r, (uint64)nbytes);
     dec.buf.SetBytes(buf);
     if (AreEqual(dec.err, io.EOF)) {
@@ -129,7 +129,7 @@ internal static int64 nextInt(this ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var (n, _, err) = decodeUintReader(new decBufferжReader(Ꮡdec.of(Decoder.Ꮡbuf)), dec.countBuf);
-    if (err != default!) {
+    if (err != nil) {
         dec.err = err;
     }
     return toInt(n);
@@ -139,7 +139,7 @@ internal static uint64 nextUint(this ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var (n, _, err) = decodeUintReader(new decBufferжReader(Ꮡdec.of(Decoder.Ꮡbuf)), dec.countBuf);
-    if (err != default!) {
+    if (err != nil) {
         dec.err = err;
     }
     return n;
@@ -161,7 +161,7 @@ internal static typeId decodeTypeSequence(this ж<Decoder> Ꮡdec, bool isInterf
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var firstMessage = true;
-    while (dec.err == default!) {
+    while (dec.err == nil) {
         if (dec.buf.Len() == 0) {
             if (!dec.recvMessage()) {
                 // We can only return io.EOF if the input was empty.
@@ -182,7 +182,7 @@ internal static typeId decodeTypeSequence(this ж<Decoder> Ꮡdec, bool isInterf
         }
         // Type definition for (-id) follows.
         Ꮡdec.recvType(-id);
-        if (dec.err != default!) {
+        if (dec.err != nil) {
             break;
         }
         // When decoding an interface, after a type there may be a
@@ -214,8 +214,8 @@ internal static readonly @string gobAttemptToDecodeIntoAˢ = "gob: attempt to de
 public static error Decode(this ж<Decoder> Ꮡdec, any e) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
-    if (e == default!) {
-        return Ꮡdec.DecodeValue(new reflectꓸValue(nil));
+    if (e == nil) {
+        return Ꮡdec.DecodeValue(new reflectꓸValue());
     }
     var value = reflect.ValueOf(e);
     // If e represents a value as opposed to a pointer, the answer won't
@@ -243,10 +243,9 @@ public static error DecodeValue(this ж<Decoder> Ꮡdec, reflectꓸValue v) {
         ref var dec = ref Ꮡdec.DerefOrNull();
 
         if (v.IsValid()) {
-            if (v.Kind() == reflect.ΔPointer && !v.IsNil()){
+            if (v.Kind() == reflect.ΔPointer && !v.IsNil()) {
                 // That's okay, we'll store through the pointer.
-            } else 
-            if (!v.CanSet()) {
+            } else if (!v.CanSet()) {
                 return errors.New(gobDecodeValueOfˢ);
             }
         }
@@ -255,14 +254,14 @@ public static error DecodeValue(this ж<Decoder> Ꮡdec, reflectꓸValue v) {
         ᒐd1 = true;
 
         dec.buf.Reset(); // In case data lingers from previous invocation.
-        dec.err = default!;
+        dec.err = default;
         var id = Ꮡdec.decodeTypeSequence(false);
-        if (dec.err == default!) {
+        if (dec.err == nil) {
             Ꮡdec.decodeValue(id, v);
         }
         return dec.err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡdec.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 

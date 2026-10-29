@@ -42,18 +42,18 @@ partial class types_package {
 // This setting also causes the predeclared type "any" to be
 // represented as an Alias, not a bare [Interface].
 partial struct Alias {
-    internal ж<TypeName> obj;   // corresponding declared alias object
-    internal ж<Alias> orig;      // original, uninstantiated alias
+    internal ж<TypeName> obj;          // corresponding declared alias object
+    internal ж<Alias> orig;            // original, uninstantiated alias
     internal ж<TypeParamList> tparams; // type parameters, or nil
-    internal ж<TypeList> targs;   // type arguments, or nil
-    internal ΔType fromRHS;           // RHS of type alias declaration; may be an alias
-    internal ΔType actual;           // actual (aliased) type; never an alias
+    internal ж<TypeList> targs;        // type arguments, or nil
+    internal ΔType fromRHS;            // RHS of type alias declaration; may be an alias
+    internal ΔType actual;             // actual (aliased) type; never an alias
 }
 
 // NewAlias creates a new Alias type with the given type name and rhs.
 // If rhs is nil, the alias is incomplete.
-public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
-    var alias = (((ж<Checker>)nil)).newAlias(Ꮡobj, rhs);
+public static ж<Alias> NewAlias(ж<TypeName> obj, ΔType rhs) {
+    var alias = (((ж<Checker>)nil)).newAlias(obj, rhs);
     // Ensure that alias.actual is set (#65455).
     alias.cleanup();
     return alias;
@@ -62,11 +62,11 @@ public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
 // Obj returns the type name for the declaration defining the alias type a.
 // For instantiated types, this is same as the type name of the origin type.
 public static ж<TypeName> Obj(this ref Alias a) {
-    return (~a.orig).obj;
+    return a.orig.obj;
 }
 
 public static @string String(this ж<Alias> Ꮡa) {
-    return TypeString(new AliasжΔType(Ꮡa), default!);
+    return TypeString(new AliasжΔType(Ꮡa), default);
 }
 
 // Underlying returns the [underlying type] of the alias type a, which is the
@@ -126,12 +126,12 @@ public static ΔType Unalias(ΔType t) {
 internal static ΔType unalias(ж<Alias> Ꮡa0) {
     ref var a0 = ref Ꮡa0.DerefOrNull();
 
-    if (a0.actual != default!) {
+    if (a0.actual != nil) {
         return a0.actual;
     }
-    ΔType t = default!;
+    ΔType t = default;
     for (var a = Ꮡa0; a != nil; (a, _) = t._<ж<Alias>>(ᐧ)) {
-        t = a.Value.fromRHS;
+        t = a.fromRHS;
     }
     // It's fine to memoize nil types since it's the zero value for actual.
     // It accomplishes nothing.
@@ -153,10 +153,10 @@ internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     var a = @new<Alias>();
-    a.Value.obj = Ꮡobj;
-    a.Value.orig = a;
-    a.Value.fromRHS = rhs;
-    if (obj.typ == default!) {
+    a.obj = Ꮡobj;
+    a.orig = a;
+    a.fromRHS = rhs;
+    if (obj.typ == nil) {
         obj.typ = new AliasжΔType(a);
     }
 
@@ -171,16 +171,16 @@ internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
 // newAliasInstance creates a new alias instance for the given origin and type
 // arguments, recording pos as the position of its synthetic object (for error
 // reporting).
-internal static ж<Alias> newAliasInstance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Alias> Ꮡorig, slice<ΔType> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
+internal static ж<Alias> newAliasInstance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Alias> Ꮡorig, slice<ΔType> targs, ж<Named> expanding, ж<Context> ctxt) {
     ref var orig = ref Ꮡorig.DerefOrNull();
 
     assert(len(targs) > 0);
-    var obj = NewTypeName(pos, (~orig.obj).pkg, (~orig.obj).name, default!);
-    var rhs = Ꮡcheck.subst(pos, orig.fromRHS, makeSubstMap(orig.TypeParams().list(), targs), Ꮡexpanding, Ꮡctxt);
+    var obj = NewTypeName(pos, (~orig.obj).pkg, (~orig.obj).name, default);
+    var rhs = Ꮡcheck.subst(pos, orig.fromRHS, makeSubstMap(orig.TypeParams().list(), targs), expanding, ctxt);
     var res = Ꮡcheck.newAlias(obj, rhs);
-    res.Value.orig = Ꮡorig;
-    res.Value.tparams = orig.tparams;
-    res.Value.targs = newTypeList(targs);
+    res.orig = Ꮡorig;
+    res.tparams = orig.tparams;
+    res.targs = newTypeList(targs);
     return res;
 }
 

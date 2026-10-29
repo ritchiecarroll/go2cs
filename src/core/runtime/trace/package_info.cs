@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -51,6 +47,11 @@ using static go.runtime.trace_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(FlightRecorder))]
+[assembly: go.GoFieldAccess(typeof(Task))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -59,12 +60,12 @@ using static go.runtime.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgpKCggAVLIKAgqQABxSy2pSmqrKCqLKmggAGIAAYIIKCgqIAAhQACAKClJKCAAgSlrKClKyyAAIQ5qam")]
+[assembly: go.GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgoKCggAVLIKAgqQABxSy2pSmqrKCqLKmggAGIAAYIIKCgqIAAhQACAKClIKCAAgSlrKClKyyAAIQ5qam")]
 [assembly: go.GoPositionMap("runtime/trace/batch.go", "batch.cs", "ABQuooKUgqaAgoKUpICCpIKmgoKUgqaCgpSCpoKClIKmgoKUgpSCgoKUpg==")]
 [assembly: go.GoPositionMap("runtime/trace/encoding.go", "encoding.cs", "AAwegpiSgoKCgoKCgpSUgpSssoKCgoKUgg==")]
 [assembly: go.GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "AClgkoKClKaClJSu4oKUgoKCuICCtoKokoKUgqaCrLAAAhAADAKClKaUpgAHEIKCpoKClKaClIKCgrgAGzTG")]
 [assembly: go.GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABIq8pSSlILKgoKUgoKUgpSCgpSmgpSClIKU5oKmpgAHEIKCuIKUgpSCgqYACRSCqNySABcykg==", "24-31:1")]
-[assembly: go.GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "AB460oKUgoKClIKUgIKCgoKk1tKClJSCgoKUgpSC1tKClIKCgpSClICCgoKCpNbSgpSUgoKClIKUgtailJSAgraCpqKClIKCgqa4gpS4ooCCAAkSgpKSlIKCgpSCpoKCgpSClIKUgoK4goKCgoKUgpSCyoKo", "157-198:1")]
+[assembly: go.GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "AB460oKUgoKClIKUgIKCgoKk1tKClJSCgoKUgpSC1tKClIKCgpSClICCgoKCpNbSgpSUgoKClIKUgtailJSAgraCpqKClIKCgqa4gpS4ooCCAAkSgoKClIKCgpSCpoKCgpSClIKUgoK4goKCgoKUgpSCyoKo", "157-198:1")]
 [assembly: go.GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHLsAbKqog==")]
 // </GoSourcePositionMaps>
 

@@ -27,7 +27,7 @@ internal static @unsafe.Pointer sysAllocOS(uintptr n, @string vmaName) {
             print((@string)"runtime: mmap: too much locked memory (check 'ulimit -l').\n"u8);
             exit(2);
         }
-        return default!;
+        return default;
     }
     setVMAName(Δp, n, vmaName);
     return Δp;
@@ -185,7 +185,7 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
 internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string vmaName) {
     var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
-        return default!;
+        return default;
     }
     setVMAName(Δp, n, vmaName);
     return Δp;

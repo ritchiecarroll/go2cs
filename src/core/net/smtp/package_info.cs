@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
 global using textprotoꓸError = go.net.textproto_package.ΔError;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
@@ -56,6 +54,10 @@ using static go.net.smtp_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Client))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -65,7 +67,7 @@ using static go.net.smtp_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/smtp/auth.go", "auth.cs", "ACxqAAgCpoL2/IKUgpSC1oKUlAAGFsLWgqaCgoKCgpQ=")]
-[assembly: go.GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADpqooKClIKqooKCgoKUgoKokqiygoKCgqYABRDygIKkgpSCqOKCgpSCgoIACArCgoLqwoKClIKCgoKCgqaAgqSC2sKAgqSCgpSCgoKs4oKClN7CgIKkgIKkgqzSgIKkgoKCgpSCgqKCgpTGtKSClJSCgpSClIKClAAGEPKAgqSAgqSCgoCCpICCtoLcsoCCpIIACxCCgoLe4oKClAAHMgAWAoCCpIKAgraCgpSSgIKkgIKCgpSAgsaCgIKkgIK2gIKkgoCCtoKClIKClIKClN7igIKkgpSCgtqigIKkgtqigIKkgtiygoKClNiSgpQ=")]
+[assembly: go.GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADpqooKClIKqooKCgoKUgoKokqiygoKCgqYABRDygIKkgpSCqOKCgpSCgoIACArCgoLqwoKClIKCgoKCgqaAgqSC2sKAgqSCgpSCgoKs4oKClN7CgIKkgIKkgqzSgIKkgoKCgpSCgqKCgpTGtKSClJSCgpSClIKClAAGEPKAgqSAgqSCgoCCpICCtoLcsoCCpIIACxCCgoLe4oKClAAHMgAWAoCCpIKAgraCgpSSgIKkgIKCgpSAgsaCgIKkgIK2gIKkgoCCtoKClIKClIKClN7igIKkgpSCgtqigIKkgtqigIKkgtiygoKClNiSgpQ=", "", "", "", "438:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

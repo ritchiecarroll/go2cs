@@ -10,9 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
 global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
@@ -54,6 +52,15 @@ using static go.crypto.rsa_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(CRTValue))]
+[assembly: go.GoFieldAccess(typeof(OAEPOptions))]
+[assembly: go.GoFieldAccess(typeof(PKCS1v15DecryptOptions))]
+[assembly: go.GoFieldAccess(typeof(PSSOptions))]
+[assembly: go.GoFieldAccess(typeof(PrivateKey))]
+[assembly: go.GoFieldAccess(typeof(PublicKey))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -62,7 +69,7 @@ using static go.crypto.rsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rsa/fips.go", "fips.cs", "ACtakqaigpQACBgADAKAgraCpoKCgpSUlJSAgqSClIKmgoKmgoKUlIKCtsiCuAADGAAJAoCCtoKCgpSAgqSmlICCpIKmgoKmgoKUlKSkAAMsABICAAIUAAkCgpSmwoCCtoKUgoKClIKClJSUlICCpIKUgqaCgpQABhoADAKC1qKAgraCgoSUgoKUgoKUpoKUgIKkgoK4goKmAAYeAA4CgoKClKaAgraCgoKUpoCCpIKmgoKUAAMWAAgCgoKClKaAgraCgoKUgIKkpoCCpIKmgoKUpoKUpKSUpoIACQaCgpSClIKUgpSClIKU5oKClICCpIKUgpQ=", "", "", "323=Size/1/1/1")]
+[assembly: go.GoPositionMap("crypto/rsa/fips.go", "fips.cs", "ACtakqaigpQACBgADAKAgraCpoKCgpSUlJSAgqSClIKmgoKmgoKUlIKCxtiCyAADGAAJAoCCtoKCgpSAgqSmlICCpIKmgoKmgoKUlKSkAAMsABICAAIUAAkCgpSmwoCCtoKUgoKClIKClJSUlICCpIKUgqaCgpQABhoADAKC1qKAgraCgoSUgoKUgoKUpoKUgIKkgoK4goKmAAYeAA4CgoKClKaAgraCgoKUpoCCpIKmgoKUAAMWAAgCgoKClKaAgraCgoKUgIKkpoCCpIKmgoKUpoKUpKSUpoIACQaCgpSClIKUgpSClIKU5oKClICCpIKUgpQ=", "", "", "326=Size/1/1/1")]
 [assembly: go.GoPositionMap("crypto/rsa/notboring.go", "notboring.cs", "AAsWgqSC")]
 [assembly: go.GoPositionMap("crypto/rsa/pkcs1v15.go", "pkcs1v15.cs", "ACdkABECgqaAgraCgqaCgoKUlJSmgoKCgoKUgpSCgoKClKaCgpQAAhwADQKAgraCgoKUgoKUpoKClIKUAAJYACsCgIK2goKmgoKmpqaCggACEgALAoKmgoKCpoKCgoKUgoKmgoKUgoK4gtyUgoKCypSCgqiygoKmgoKCgri4")]
 [assembly: go.GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AER8AAog0qiSgoKUAB1EkqqigoKUgpSClIKCpqrSAAIWAAgCgIK23NKCppSClMiAgoKAgqSAgqSU6AAeQviCuIKUgpSCpoKClIKClIKUAAISwoKUgsqUgoKUgoKU1oKClAAFGgAKAoCCtoSCgpSCgoKCgoKCgoKCpgANHKaUgpSClIKmggAKFoKmgpSCABEkAAc0ABcCgpSCppSClIKmgpSmpoKCuJSCggALGIKUgoKCgpS4goKCyoKCgoKCgpS4poKClIKCgtiCgIK23Li4mKKCpoKmgpT2gpSClIKUgpSClIK4gqaClIKCgqaUgqaCgoKCgoL2gpSCgpSUgriCgpSCuIKUgpSCgqaCgoKClIKUgoKCpqamgoKClKaigpSCgpQ=", "", "", "288=bigIntEqualToBytes/2/5/1,bigIntEqualToBytes/3/5/2,bigIntEqualToBytes/4/5/3,bigIntEqualToBytes/5/5/4;415=SetBytes/1/7/2,SetBytes/2/7/5,SetBytes/3/7/7,SetBytes/4/7/8,SetBytes/5/7/12,SetBytes/6/7/13,SetBytes/7/7/14;627=Bytes/3/7/1,Bytes/4/7/1,Bytes/5/7/2,Bytes/6/7/2,Bytes/7/7/2;639=Bytes/3/4/1,Bytes/4/4/1")]

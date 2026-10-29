@@ -34,7 +34,7 @@ internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
         etyp = PointerTo(etyp);
     }
 
-    var fields = new StructField[]{
+    var fields = slice<StructField>([
         new(
             Name: "Key"u8,
             Type: ktyp
@@ -43,10 +43,10 @@ internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
             Name: "Elem"u8,
             Type: etyp
         )
-    }.slice();
+    ]);
     var slot = StructOf(fields);
 
-    fields = new StructField[]{
+    fields = slice<StructField>([
         new(
             Name: "Ctrl"u8,
             Type: TypeFor<uint64>()
@@ -55,7 +55,7 @@ internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
             Name: "Slots"u8,
             Type: ArrayOf(abi.MapGroupSlots, slot)
         )
-    }.slice();
+    ]);
     var group = StructOf(fields);
     return (group, slot);
 }
@@ -67,15 +67,15 @@ internal static ж<abi.Type> stringType = rtypeOf((@string)""u8);
 // Equivalent to runtime.mapIterStart.
 //
 //go:noinline
-internal static partial void mapIterStart(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> Ꮡm, ж<maps.Iter> Ꮡit) {
+internal static partial void mapIterStart(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<maps.Iter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
-    if (race.Enabled && Ꮡm != nil) {
+    if (race.Enabled && m != nil) {
         var callerpc = sys.GetCallerPC();
-        race.ReadPC(@unsafe.Pointer.FromPinnedBox(Ꮡm), callerpc, abi.FuncPCABIInternal(mapIterStart));
+        race.ReadPC(@unsafe.Pointer.FromPinnedBox(m), callerpc, abi.FuncPCABIInternal(mapIterStart));
     }
 
-    it.Init(Ꮡt, Ꮡm);
+    it.Init(t, m);
     it.Next();
 }
 

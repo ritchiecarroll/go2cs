@@ -67,16 +67,16 @@ partial struct tagAndLength {
 
 // fieldParameters is the parsed representation of tag string from a structure field.
 partial struct fieldParameters {
-    internal bool optional;   // true iff the field is OPTIONAL
-    internal bool @explicit;   // true iff an EXPLICIT tag is in use.
-    internal bool application;   // true iff an APPLICATION tag is in use.
-    internal bool @private;   // true iff a PRIVATE tag is in use.
+    internal bool optional;         // true iff the field is OPTIONAL
+    internal bool @explicit;        // true iff an EXPLICIT tag is in use.
+    internal bool application;      // true iff an APPLICATION tag is in use.
+    internal bool @private;         // true iff a PRIVATE tag is in use.
     internal ж<int64> defaultValue; // a default value for INTEGER typed fields (maybe nil).
-    internal ж<nint> tag; // the EXPLICIT or IMPLICIT tag (maybe nil).
-    internal nint stringType;   // the string tag to use when marshaling.
-    internal nint timeType;   // the time tag to use when marshaling.
-    internal bool set;   // true iff this should be encoded as a SET
-    internal bool omitEmpty;   // true iff this should be omitted if empty when marshaling.
+    internal ж<nint> tag;           // the EXPLICIT or IMPLICIT tag (maybe nil).
+    internal nint stringType;       // the string tag to use when marshaling.
+    internal nint timeType;         // the time tag to use when marshaling.
+    internal bool set;              // true iff this should be encoded as a SET
+    internal bool omitEmpty;        // true iff this should be omitted if empty when marshaling.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -90,9 +90,9 @@ internal static readonly @string tagˢ = "tag:"u8;
 // parseFieldParameters will parse it into a fieldParameters structure,
 // ignoring unknown parts of the string.
 internal static fieldParameters /*ret*/ parseFieldParameters(@string str) {
-    fieldParameters ret = default!;
+    fieldParameters ret = default;
 
-    @string part = default!;
+    @string part = default;
     while (len(str) > 0) {
         (part, str, _) = strings.Cut(str, ","u8);
         switch (ᐧ) {
@@ -133,7 +133,7 @@ internal static fieldParameters /*ret*/ parseFieldParameters(@string str) {
         }
         case {} when strings.HasPrefix(part, defaultˢ): {
             var (i, err) = strconv.ParseInt(part[8..], 10, 64);
-            if (err == default!) {
+            if (err == nil) {
                 ret.defaultValue = @new<int64>();
                 ret.defaultValue.Value = i;
             }
@@ -141,7 +141,7 @@ internal static fieldParameters /*ret*/ parseFieldParameters(@string str) {
         }
         case {} when strings.HasPrefix(part, tagˢ): {
             var (i, err) = strconv.Atoi(part[4..]);
-            if (err == default!) {
+            if (err == nil) {
                 ret.tag = @new<nint>();
                 ret.tag.Value = i;
             }
@@ -179,36 +179,36 @@ internal static readonly @string setˢ = "SET"u8;
 // Given a reflected Go type, getUniversalType returns the default tag number
 // and expected compound flag.
 internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUniversalType(reflectꓸType t) {
-    var exprᴛ1 = t;
-    if (AreEqual(exprᴛ1, rawValueType)) {
+    switch (t) {
+    case var ᴛ when AreEqual(ᴛ, rawValueType): {
         return (true, -1, false, true);
     }
-    if (AreEqual(exprᴛ1, objectIdentifierType)) {
+    case var ᴛ when AreEqual(ᴛ, objectIdentifierType): {
         return (false, TagOID, false, true);
     }
-    if (AreEqual(exprᴛ1, bitStringType)) {
+    case var ᴛ when AreEqual(ᴛ, bitStringType): {
         return (false, TagBitString, false, true);
     }
-    if (AreEqual(exprᴛ1, timeType)) {
+    case var ᴛ when AreEqual(ᴛ, timeType): {
         return (false, TagUTCTime, false, true);
     }
-    if (AreEqual(exprᴛ1, enumeratedType)) {
+    case var ᴛ when AreEqual(ᴛ, enumeratedType): {
         return (false, TagEnum, false, true);
     }
-    if (AreEqual(exprᴛ1, bigIntType)) {
+    case var ᴛ when AreEqual(ᴛ, bigIntType): {
         return (false, TagInteger, false, true);
-    }
-    var exprᴛ2 = t.Kind();
-    if (exprᴛ2 == reflect.ΔBool) {
+    }}
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
         return (false, TagBoolean, false, true);
     }
-    if (exprᴛ2 == reflect.ΔInt || exprᴛ2 == reflect.Int8 || exprᴛ2 == reflect.Int16 || exprᴛ2 == reflect.Int32 || exprᴛ2 == reflect.Int64) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (false, TagInteger, false, true);
     }
-    if (exprᴛ2 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         return (false, TagSequence, true, true);
     }
-    if (exprᴛ2 == reflect.ΔSlice) {
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
         if (t.Elem().Kind() == reflect.Uint8) {
             return (false, TagOctetString, false, true);
         }
@@ -217,9 +217,9 @@ internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUni
         }
         return (false, TagSequence, true, true);
     }
-    if (exprᴛ2 == reflect.ΔString) {
+    case var ᴛ when ᴛ == reflect.ΔString: {
         return (false, TagPrintableString, false, true);
-    }
+    }}
     return (false, 0, false, false);
 }
 

@@ -38,7 +38,7 @@ public static @string Encode(this WordEncoder e, @string charset, @string s) {
 
 internal static bool needsEncoding(@string s) {
     foreach (var (_, b) in s) {
-        if ((b < (rune)' ' || b > (rune)'~') && b != (rune)'\t') {
+        if ((b < ' ' || b > '~') && b != '\t') {
             return true;
         }
     }
@@ -54,7 +54,7 @@ internal static @string encodeWord(this WordEncoder e, @string charset, @string 
     Ꮡbuf.Grow(48);
 
     e.openWord(Ꮡbuf, charset);
-    if (e == BEncoding){
+    if (e == BEncoding) {
         e.bEncode(Ꮡbuf, charset, s);
     } else {
         e.qEncode(Ꮡbuf, charset, s);
@@ -74,8 +74,8 @@ internal const nint maxContentLen = /* maxEncodedWordLen - len("=?UTF-8?q?") - l
 internal static nint maxBase64Len = base64.StdEncoding.DecodedLen(maxContentLen);
 
 // bEncode encodes s using base64 encoding and writes it to buf.
-internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset, @string s) {
-    var w = base64.NewEncoder(base64.StdEncoding, new strings_BuilderжWriter(Ꮡbuf));
+internal static void bEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
+    var w = base64.NewEncoder(base64.StdEncoding, new strings_BuilderжWriter(buf));
     // If the charset is not UTF-8 or if the content is short, do not bother
     // splitting the encoded-word.
     if (!isUTF8(charset) || base64.StdEncoding.EncodedLen(len(s)) <= maxContentLen) {
@@ -84,20 +84,20 @@ internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
         return;
     }
 
-    nint currentLen = default!;
-    nint last = default!;
-    nint runeLen = default!;
+    nint currentLen = default;
+    nint last = default;
+    nint runeLen = default;
     for (nint i = 0; i < len(s); i += runeLen) {
         // Multi-byte characters must not be split across encoded-words.
         // See RFC 2047, section 5.3.
         (_, runeLen) = utf8.DecodeRuneInString(s.slice(i));
 
-        if (currentLen + runeLen <= maxBase64Len){
+        if (currentLen + runeLen <= maxBase64Len) {
             currentLen += runeLen;
         } else {
             Δio.WriteString(w, s.slice(last, i));
             w.Close();
-            e.splitWord(Ꮡbuf, charset);
+            e.splitWord(buf, charset);
             last = i;
             currentLen = runeLen;
         }
@@ -108,21 +108,21 @@ internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
 
 // qEncode encodes s using Q encoding and writes it to buf. It splits the
 // encoded-words when necessary.
-internal static void qEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset, @string s) {
+internal static void qEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
     // We only split encoded-words when the charset is UTF-8.
     if (!isUTF8(charset)) {
-        writeQString(Ꮡbuf, s);
+        writeQString(buf, s);
         return;
     }
 
-    nint currentLen = default!;
-    nint runeLen = default!;
+    nint currentLen = default;
+    nint runeLen = default;
     for (nint i = 0; i < len(s); i += runeLen) {
         var b = s[i];
         // Multi-byte characters must not be split across encoded-words.
         // See RFC 2047, section 5.3.
-        nint encLen = default!;
-        if (b >= (rune)' ' && b <= (rune)'~' && b != (rune)'=' && b != (rune)'?' && b != (rune)'_'){
+        nint encLen = default;
+        if (b >= ' ' && b <= '~' && b != '=' && b != '?' && b != '_') {
             (runeLen, encLen) = (1, 1);
         } else {
             (_, runeLen) = utf8.DecodeRuneInString(s.slice(i));
@@ -130,32 +130,32 @@ internal static void qEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
         }
 
         if (currentLen + encLen > maxContentLen) {
-            e.splitWord(Ꮡbuf, charset);
+            e.splitWord(buf, charset);
             currentLen = 0;
         }
-        writeQString(Ꮡbuf, s.slice(i, i + runeLen));
+        writeQString(buf, s.slice(i, i + runeLen));
         currentLen += encLen;
     }
 }
 
 // writeQString encodes s using Q encoding and writes it to buf.
-internal static void writeQString(ж<strings.Builder> Ꮡbuf, @string s) {
+internal static void writeQString(ж<strings.Builder> buf, @string s) {
     for (nint i = 0; i < len(s); i++) {
         {
             var b = s[i];
             switch (ᐧ) {
-            case {} when b is (rune)' ': {
-                Ꮡbuf.WriteByte((rune)'_');
+            case {} when b is (byte)' ': {
+                buf.WriteByte((byte)'_');
                 break;
             }
-            case {} when b >= (rune)'!' && b <= (rune)'~' && b != (rune)'=' && b != (rune)'?' && b != (rune)'_': {
-                Ꮡbuf.WriteByte(b);
+            case {} when b >= (byte)'!' && b <= (byte)'~' && b != (byte)'=' && b != (byte)'?' && b != (byte)'_': {
+                buf.WriteByte(b);
                 break;
             }
             default: {
-                Ꮡbuf.WriteByte((rune)'=');
-                Ꮡbuf.WriteByte(upperhex[(b >> 4)]);
-                Ꮡbuf.WriteByte(upperhex[(byte)(b & 0x0f)]);
+                buf.WriteByte((byte)'=');
+                buf.WriteByte(upperhex[(b >> 4)]);
+                buf.WriteByte(upperhex[(byte)(b & 0x0f)]);
                 break;
             }}
         }
@@ -163,24 +163,24 @@ internal static void writeQString(ж<strings.Builder> Ꮡbuf, @string s) {
 }
 
 // openWord writes the beginning of an encoded-word into buf.
-internal static void openWord(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset) {
-    Ꮡbuf.WriteString("=?"u8);
-    Ꮡbuf.WriteString(charset);
-    Ꮡbuf.WriteByte((rune)'?');
-    Ꮡbuf.WriteByte((byte)e);
-    Ꮡbuf.WriteByte((rune)'?');
+internal static void openWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) {
+    buf.WriteString("=?"u8);
+    buf.WriteString(charset);
+    buf.WriteByte((byte)'?');
+    buf.WriteByte((byte)e);
+    buf.WriteByte((byte)'?');
 }
 
 // closeWord writes the end of an encoded-word into buf.
-internal static void closeWord(ж<strings.Builder> Ꮡbuf) {
-    Ꮡbuf.WriteString("?="u8);
+internal static void closeWord(ж<strings.Builder> buf) {
+    buf.WriteString("?="u8);
 }
 
 // splitWord closes the current encoded-word and opens a new one.
-internal static void splitWord(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset) {
-    closeWord(Ꮡbuf);
-    Ꮡbuf.WriteByte((rune)' ');
-    e.openWord(Ꮡbuf, charset);
+internal static void splitWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) {
+    closeWord(buf);
+    buf.WriteByte((byte)' ');
+    e.openWord(buf, charset);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -223,17 +223,17 @@ public static (@string, error) Decode(this ref WordDecoder d, @string word) {
     }
 
     var (content, err) = decode(encoding[0], text);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     {
-        var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != default!) {
+        var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != nil) {
             return ("", errΔ1);
         }
     }
-    return (buf.String(), default!);
+    return (buf.String(), default);
 }
 
 // DecodeHeader decodes all encoded-words of the given string. It returns an
@@ -242,7 +242,7 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
     // If there is no encoded-word, returns before creating a buffer.
     nint i = strings.Index(header, "=?"u8);
     if (i == -1) {
-        return (header, default!);
+        return (header, default);
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -251,7 +251,7 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
     header = header.slice(i);
 
     var betweenWords = false;
-    while (ᐧ) {
+    for (;;) {
         nint start = strings.Index(header, "=?"u8);
         if (start == -1) {
             break;
@@ -271,7 +271,7 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
         var encoding = header[cur];
         cur++;
 
-        if (header[cur] != (rune)'?') {
+        if (header[cur] != '?') {
             break;
         }
         cur++;
@@ -284,7 +284,7 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
         nint end = cur + j + len("?=");
 
         var (content, err) = decode(encoding, text);
-        if (err != default!) {
+        if (err != nil) {
             betweenWords = false;
             Ꮡbuf.WriteString(header.slice(0, end));
             header = header.slice(end);
@@ -298,7 +298,7 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
         }
 
         {
-            var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != default!) {
+            var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != nil) {
                 return ("", errΔ1);
             }
         }
@@ -311,19 +311,19 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
         Ꮡbuf.WriteString(header);
     }
 
-    return (buf.String(), default!);
+    return (buf.String(), default);
 }
 
 internal static (slice<byte>, error) decode(byte encoding, @string text) {
     switch (encoding) {
-    case (rune)'B' or (rune)'b': {
+    case (byte)'B' or (byte)'b': {
         return base64.StdEncoding.DecodeString(text);
     }
-    case (rune)'Q' or (rune)'q': {
+    case (byte)'Q' or (byte)'q': {
         return qDecode(text);
     }
     default: {
-        return (default!, errInvalidWord);
+        return (default, errInvalidWord);
     }}
 }
 
@@ -332,44 +332,44 @@ internal static readonly @string utf8ˢ2 = "utf-8"u8;
 internal static readonly @string iso88591ˢ = "iso-8859-1"u8;
 internal static readonly @string usAsciiˢ = "us-ascii"u8;
 
-internal static error convert(this ref WordDecoder d, ж<strings.Builder> Ꮡbuf, @string charset, slice<byte> content) {
+internal static error convert(this ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) {
     switch (ᐧ) {
     case {} when strings.EqualFold(utf8ˢ2, charset): {
-        Ꮡbuf.Write(content);
+        buf.Write(content);
         break;
     }
     case {} when strings.EqualFold(iso88591ˢ, charset): {
         foreach (var (_, c) in content) {
-            Ꮡbuf.WriteRune((rune)c);
+            buf.WriteRune((rune)c);
         }
         break;
     }
     case {} when strings.EqualFold(usAsciiˢ, charset): {
         foreach (var (_, c) in content) {
-            if (c >= utf8.RuneSelf){
-                Ꮡbuf.WriteRune(Δunicode.ReplacementChar);
+            if (c >= utf8.RuneSelf) {
+                buf.WriteRune(Δunicode.ReplacementChar);
             } else {
-                Ꮡbuf.WriteByte(c);
+                buf.WriteByte(c);
             }
         }
         break;
     }
     default: {
-        if (d.CharsetReader == default!) {
+        if (d.CharsetReader == nil) {
             return fmt.Errorf("mime: unhandled charset %q"u8, charset);
         }
         var (r, errΔ1) = d.CharsetReader(strings.ToLower(charset), new bytes_ReaderжReader(bytes.NewReader(content)));
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return errΔ1;
         }
         {
-            (_, errΔ1) = Δio.Copy(new strings_BuilderжWriter(Ꮡbuf), r); if (errΔ1 != default!) {
+            (_, errΔ1) = Δio.Copy(new strings_BuilderжWriter(buf), r); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
         break;
     }}
-    return default!;
+    return default;
 }
 
 // hasNonWhitespace reports whether s (assumed to be ASCII) contains at least
@@ -379,7 +379,7 @@ internal static bool hasNonWhitespace(@string s) {
         switch (b) {
         // Encoded-words can only be separated by linear white spaces which does
         // not include vertical tabs (\v).
-        case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\r': {
+        case ' ' or '\t' or '\n' or '\r': {
             break;
         }
         default: {
@@ -397,65 +397,65 @@ internal static (slice<byte>, error) qDecode(@string s) {
         {
             var c = s[i];
             switch (ᐧ) {
-            case {} when c is (rune)'_': {
-                dec[n] = (rune)' ';
+            case {} when c is (byte)'_': {
+                dec[n] = (byte)' ';
                 break;
             }
-            case {} when c is (rune)'=': {
+            case {} when c is (byte)'=': {
                 if (i + 2 >= len(s)) {
-                    return (default!, errInvalidWord);
+                    return (default, errInvalidWord);
                 }
                 var (b, err) = readHexByte(s[i + 1], s[i + 2]);
-                if (err != default!) {
-                    return (default!, err);
+                if (err != nil) {
+                    return (default, err);
                 }
                 dec[n] = b;
                 i += 2;
                 break;
             }
-            case {} when (c <= (rune)'~' && c >= (rune)' ') || c == (rune)'\n' || c == (rune)'\r' || c == (rune)'\t': {
+            case {} when (c <= (byte)'~' && c >= (byte)' ') || c == (byte)'\n' || c == (byte)'\r' || c == (byte)'\t': {
                 dec[n] = c;
                 break;
             }
             default: {
-                return (default!, errInvalidWord);
+                return (default, errInvalidWord);
             }}
         }
         n++;
     }
 
-    return (dec.slice(0, n), default!);
+    return (dec.slice(0, n), default);
 }
 
 // readHexByte returns the byte from its quoted-printable representation.
 internal static (byte, error) readHexByte(byte a, byte b) {
-    byte hb = default!;
-    byte lb = default!;
-    error err = default!;
+    byte hb = default;
+    byte lb = default;
+    error err = default;
     {
-        (hb, err) = fromHex(a); if (err != default!) {
+        (hb, err) = fromHex(a); if (err != nil) {
             return (0, err);
         }
     }
     {
-        (lb, err) = fromHex(b); if (err != default!) {
+        (lb, err) = fromHex(b); if (err != nil) {
             return (0, err);
         }
     }
-    return ((byte)((byte)(hb << 4) | lb), default!);
+    return ((byte)((byte)(hb << 4) | lb), default);
 }
 
 internal static (byte, error) fromHex(byte b) {
     switch (ᐧ) {
-    case {} when b >= (rune)'0' && b <= (rune)'9': {
-        return ((byte)(b - (rune)'0'), default!);
+    case {} when b >= (byte)'0' && b <= (byte)'9': {
+        return ((byte)(b - '0'), default);
     }
-    case {} when b >= (rune)'A' && b <= (rune)'F': {
-        return ((byte)(b - (rune)'A' + 10), default!);
+    case {} when b >= (byte)'A' && b <= (byte)'F': {
+        return ((byte)(b - 'A' + 10), default);
     }
     // Accept badly encoded bytes.
-    case {} when b >= (rune)'a' && b <= (rune)'f': {
-        return ((byte)(b - (rune)'a' + 10), default!);
+    case {} when b >= (byte)'a' && b <= (byte)'f': {
+        return ((byte)(b - 'a' + 10), default);
     }}
     return (0, fmt.Errorf("mime: invalid hex byte %#02x"u8, b));
 }

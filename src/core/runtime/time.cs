@@ -15,13 +15,13 @@ partial class runtime_package {
 
 //go:linkname time_runtimeNow time.runtimeNow
 internal static (int64 sec, int32 nsec, int64 mono) time_runtimeNow() {
-    int64 sec = default!;
-    int32 nsec = default!;
+    int64 sec = default;
+    int32 nsec = default;
 
     {
         var bubble = getg().Value.bubble; if (bubble != nil) {
-            sec = (~bubble).now / (1000 * 1000 * 1000);
-            nsec = (int32)((~bubble).now % (1000 * 1000 * 1000));
+            sec = bubble.now / (1000 * 1000 * 1000);
+            nsec = (int32)(bubble.now % (1000 * 1000 * 1000));
             // Don't return a monotonic time inside a synctest bubble.
             // If we return a monotonic time based on the fake clock,
             // arithmetic on times created inside/outside bubbles is confusing.
@@ -38,7 +38,7 @@ internal static (int64 sec, int32 nsec, int64 mono) time_runtimeNow() {
 internal static int64 time_runtimeNano() {
     var gp = getg();
     if ((~gp).bubble != nil) {
-        return (~(~gp).bubble).now;
+        return (~gp).bubble.now;
     }
     return nanotime();
 }
@@ -61,11 +61,11 @@ partial struct timer {
     // mu protects reads and writes to all fields, with exceptions noted below.
     internal mutex mu;
     internal atomic.Uint8 astate; // atomic copy of state bits at last unlock
-    internal uint8 state;        // state bits
+    internal uint8 state;         // state bits
     internal bool isChan;         // timer has a channel; immutable; can be read without lock
     internal bool isFake;         // timer is using fake time; immutable; can be read without lock
     internal uint32 blocked; // number of goroutines blocked on timer's channel
-    internal uint32 rand; // randomizes order of timers at same instant; only set when isFake
+    internal uint32 rand;    // randomizes order of timers at same instant; only set when isFake
     // Timer wakes up at when, and then at when+period, ... (period > 0 only)
     // each time calling f(arg, seq, delay) in the timer goroutine, so f must be
     // a well-behaved function and not block.
@@ -172,7 +172,7 @@ internal static bool less(this timerWhen tw, timerWhen other) {
         // When timers wake at the same time, use a per-timer random value to order them.
         // We only set the random value for timers using fake time, since there's
         // no practical way to schedule real-time timers for the same instant.
-        return (~tw.timer).rand < (~other.timer).rand;
+        return tw.timer.rand < other.timer.rand;
     }}
 }
 
@@ -302,7 +302,7 @@ internal static bool /*updated*/ updateHeap(this ж<timer> Ꮡt) {
     assertWorldStoppedOrLockHeld(ref nonnil(ref t).mu);
     Ꮡt.trace(updateHeapˢ);
     var ts = t.ts;
-    if (ts == nil || Ꮡt != (~ts).heap[0].timer) {
+    if (ts == nil || Ꮡt != ts.heap[0].timer) {
         badTimer();
     }
     assertLockHeld(ts.of(timers.Ꮡmu));
@@ -317,7 +317,7 @@ internal static bool /*updated*/ updateHeap(this ж<timer> Ꮡt) {
     if ((uint8)(t.state & timerModified) != 0) {
         // Update ts.heap[0].when and move within heap.
         t.state &= unchecked((uint8)~(uint8)(timerModified));
-        (~ts).heap[0].when = t.when;
+        ts.heap[0].when = t.when;
         ts.siftDown(0);
         ts.updateMinWhenHeap();
         return true;
@@ -351,14 +351,14 @@ internal static void timeSleep(int64 ns) {
         t = @new<timer>();
         t.init(goroutineReady, gp.OrTypedNil());
         if ((~gp).bubble != nil) {
-            t.Value.isFake = true;
+            t.isFake = true;
         }
         gp.Value.timer = t;
     }
-    int64 now = default!;
+    int64 now = default;
     {
-        var bubble = gp.Value.bubble; if (bubble != nil){
-            now = bubble.Value.now;
+        var bubble = gp.Value.bubble; if (bubble != nil) {
+            now = bubble.now;
         } else {
             now = nanotime();
         }
@@ -368,12 +368,12 @@ internal static void timeSleep(int64 ns) {
         when = maxWhen;
     }
     gp.Value.sleepWhen = when;
-    if ((~t).isFake){
+    if (t.isFake) {
         // Call timer.reset in this goroutine, since it's the one in a bubble.
         // We don't need to worry about the timer function running before the goroutine
         // is parked, because time won't advance until we park.
         resetForSleep(gp, nil);
-        gopark(default!, nil, waitReasonSleep, traceBlockSleep, 1);
+        gopark(default, nil, waitReasonSleep, traceBlockSleep, 1);
     } else {
         gopark(resetForSleep, nil, waitReasonSleep, traceBlockSleep, 1);
     }
@@ -411,7 +411,7 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
     ref var c = ref Ꮡc.DerefOrNull();
 
     var t = @new<timeTimer>();
-    t.of(timeTimer.Ꮡtimer).init(default!, default!);
+    t.of(timeTimer.Ꮡtimer).init(default, default);
     t.of(timeTimer.Ꮡtimer).trace(newˢ);
     if (raceenabled) {
         racerelease(@unsafe.Pointer.FromPinnedBox(t.of(timeTimer.Ꮡtimer)));
@@ -600,15 +600,15 @@ internal static void deleteMin(this ж<timers> Ꮡts) {
 
     assertLockHeld(Ꮡts.of(timers.Ꮡmu));
     var t = ts.heap[0].timer;
-    if ((~t).ts != Ꮡts) {
+    if (t.ts != Ꮡts) {
         @throw(wrongTimersˢ);
     }
-    t.Value.ts = default!;
+    t.ts = default;
     nint last = len(ts.heap) - 1;
     if (last > 0) {
         ts.heap[0] = ts.heap[last];
     }
-    ts.heap[last] = new timerWhen(nil);
+    ts.heap[last] = new timerWhen();
     ts.heap = ts.heap.slice(0, last);
     if (last > 0) {
         ts.siftDown(0);
@@ -652,7 +652,7 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
     Ꮡt.trace(modifyˢ);
     var oldPeriod = t.period;
     t.period = period;
-    if (f != default!) {
+    if (f != nil) {
         t.f = f;
         t.arg = arg;
         t.seq = seq;
@@ -699,13 +699,13 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         if (bubble == nil) {
             @throw(fakeTimerExecutingWithNoˢ);
         }
-        if ((uint8)(t.state & timerHeaped) == 0 && when <= (~bubble).now) {
+        if ((uint8)(t.state & timerHeaped) == 0 && when <= bubble.now) {
             var bubbleʗ1 = bubble;
             systemstack(() => {
                 if (!async && Ꮡt.Value.isChan) {
                     unlock(Ꮡt.of(timer.ᏑsendLock));
                 }
-                Ꮡt.unlockAndRun((~bubbleʗ1).now, bubbleʗ1);
+                Ꮡt.unlockAndRun(bubbleʗ1.now, bubbleʗ1);
             });
             return pending;
         }
@@ -754,7 +754,7 @@ internal static bool needsAdd(this ж<timer> Ꮡt) {
 
     assertLockHeld(Ꮡt.of(timer.Ꮡmu));
     var need = (uint8)(t.state & timerHeaped) == 0 && t.when > 0 && (!t.isChan || t.blocked > 0);
-    if (need){
+    if (need) {
         Ꮡt.trace(needsAddˢ);
     } else {
         Ꮡt.trace(needsAddˢ2);
@@ -797,8 +797,8 @@ internal static void maybeAdd(this ж<timer> Ꮡt) {
     // Calling acquirem instead of using getg().m makes sure that
     // we end up locking and inserting into the current P's timers.
     var mp = acquirem();
-    ж<timers> ts = default!;
-    if (t.isFake){
+    ж<timers> ts = default;
+    if (t.isFake) {
         var bubble = getg().Value.bubble;
         if (bubble == nil) {
             @throw(invalidTimerFakeTimeButˢ);
@@ -838,7 +838,7 @@ internal static void maybeAdd(this ж<timer> Ꮡt) {
 // If used for an inactive timer, the timer will become active.
 // Reports whether the timer was active and was stopped.
 internal static bool reset(this ж<timer> Ꮡt, int64 when, int64 period) {
-    return Ꮡt.modify(when, period, default!, default!, 0);
+    return Ꮡt.modify(when, period, default, default, 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -855,7 +855,7 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
     Ꮡts.trace(cleanHeadˢ);
     assertLockHeld(Ꮡts.of(timers.Ꮡmu));
     var gp = getg();
-    while (ᐧ) {
+    for (;;) {
         if (len(ts.heap) == 0) {
             return;
         }
@@ -876,11 +876,11 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
         {
             var tΔ1 = ts.heap[n - 1].timer; if ((uint8)(tΔ1.of(timer.Ꮡastate).Load() & timerZombie) != 0) {
                 tΔ1.@lock();
-                if ((uint8)((~tΔ1).state & timerZombie) != 0) {
-                    tΔ1.Value.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
-                    tΔ1.Value.ts = default!;
+                if ((uint8)(tΔ1.state & timerZombie) != 0) {
+                    tΔ1.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
+                    tΔ1.ts = default;
                     Ꮡts.of(timers.Ꮡzombies).Add(-1);
-                    ts.heap[n - 1] = new timerWhen(nil);
+                    ts.heap[n - 1] = new timerWhen();
                     ts.heap = ts.heap.slice(0, n - 1);
                 }
                 tΔ1.unlock();
@@ -889,7 +889,7 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
         }
 
         var t = ts.heap[0].timer;
-        if ((~t).ts != Ꮡts) {
+        if (t.ts != Ꮡts) {
             @throw(badTsˢ);
         }
 
@@ -928,15 +928,15 @@ internal static void take(this ж<timers> Ꮡts, ж<timers> Ꮡsrc) {
         // which we'd rather avoid in the static ranking.
         foreach (var (_, tw) in src.heap) {
             var t = tw.timer;
-            t.Value.ts = default!;
-            if ((uint8)((~t).state & timerZombie) != 0){
-                t.Value.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
+            t.ts = default;
+            if ((uint8)(t.state & timerZombie) != 0) {
+                t.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
             } else {
-                t.Value.state &= unchecked((uint8)~(uint8)(timerModified));
+                t.state &= unchecked((uint8)~(uint8)(timerModified));
                 Ꮡts.addHeap(t);
             }
         }
-        src.heap = default!;
+        src.heap = default;
         Ꮡsrc.of(timers.Ꮡzombies).Store(0);
         Ꮡsrc.of(timers.ᏑminWhenHeap).Store(0);
         Ꮡsrc.of(timers.ᏑminWhenModified).Store(0);
@@ -1029,8 +1029,8 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
     var changed = false;
     for (nint i = 0; i < len(ts.heap); i++) {
         var tw = Ꮡ(ts.heap, i);
-        var t = tw.Value.timer;
-        if ((~t).ts != Ꮡts) {
+        var t = tw.timer;
+        if (t.ts != Ꮡts) {
             @throw(badTsˢ);
         }
 
@@ -1041,25 +1041,25 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
 
         t.@lock();
         switch (ᐧ) {
-        case {} when (uint8)((~t).state & timerHeaped) == 0: {
+        case {} when (uint8)(t.state & timerHeaped) == 0: {
             badTimer();
             break;
         }
-        case {} when (uint8)((~t).state & timerZombie) != 0: {
+        case {} when (uint8)(t.state & timerZombie) != 0: {
             Ꮡts.of(timers.Ꮡzombies).Add(-1);
-            t.Value.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
+            t.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
             nint n = len(ts.heap);
             ts.heap[i] = ts.heap[n - 1];
-            ts.heap[n - 1] = new timerWhen(nil);
+            ts.heap[n - 1] = new timerWhen();
             ts.heap = ts.heap.slice(0, n - 1);
-            t.Value.ts = default!;
+            t.ts = default;
             i--;
             changed = true;
             break;
         }
-        case {} when (uint8)((~t).state & timerModified) != 0: {
-            tw.Value.when = t.Value.when;
-            t.Value.state &= unchecked((uint8)~(uint8)(timerModified));
+        case {} when (uint8)(t.state & timerModified) != 0: {
+            tw.when = t.when;
+            t.state &= unchecked((uint8)~(uint8)(timerModified));
             changed = true;
             break;
         }}
@@ -1109,9 +1109,9 @@ internal static readonly @string checkˢ = "check"u8;
 // We pass now in and out to avoid extra calls of nanotime.
 //
 //go:yeswritebarrierrec
-internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> Ꮡbubble) {
-    int64 pollUntil = default!;
-    bool ran = default!;
+internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
+    int64 pollUntil = default;
+    bool ran = default;
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(checkˢ);
@@ -1147,7 +1147,7 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
         while (len(ts.heap) > 0) {
             // Note that runtimer may temporarily unlock ts.
             {
-                var tw = Ꮡts.run(now, Ꮡbubble); if (tw != 0) {
+                var tw = Ꮡts.run(now, bubble); if (tw != 0) {
                     if (tw > 0) {
                         pollUntil = tw;
                     }
@@ -1183,7 +1183,7 @@ internal static readonly @string runˢ = "run"u8;
 // If a timer is run, this will temporarily unlock ts.
 //
 //go:systemstack
-internal static int64 run(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> Ꮡbubble) {
+internal static int64 run(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(runˢ);
@@ -1194,7 +1194,7 @@ Redo:
     }
     var tw = ts.heap[0];
     var t = tw.timer;
-    if ((~t).ts != Ꮡts) {
+    if (t.ts != Ꮡts) {
         @throw(badTsˢ);
     }
 
@@ -1209,17 +1209,17 @@ Redo:
         goto Redo;
     }
 
-    if ((uint8)((~t).state & timerHeaped) == 0 || (uint8)((~t).state & timerModified) != 0) {
+    if ((uint8)(t.state & timerHeaped) == 0 || (uint8)(t.state & timerModified) != 0) {
         badTimer();
     }
 
-    if ((~t).when > now) {
+    if (t.when > now) {
         // Not ready to run.
         t.unlock();
-        return (~t).when;
+        return t.when;
     }
 
-    t.unlockAndRun(now, Ꮡbubble);
+    t.unlockAndRun(now, bubble);
     assertLockHeld(Ꮡts.of(timers.Ꮡmu)); // t is unlocked now, but not ts
     return 0;
 }
@@ -1251,16 +1251,16 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
         // so there is no chance of getg().m being reassigned
         // out from under us while this function executes.
         var gp = getg();
-        ж<timers> tsLocal = default!;
-        if (Ꮡbubble == nil){
+        ж<timers> tsLocal = default;
+        if (Ꮡbubble == nil) {
             tsLocal = (~(~gp).m).p.ptr().of(runtime_package.Δp.Ꮡtimers);
         } else {
             tsLocal = Ꮡbubble.of(synctestBubble.Ꮡtimers);
         }
-        if ((~tsLocal).raceCtx == 0) {
-            tsLocal.Value.raceCtx = racegostart(abi.FuncPCABIInternal(((Func<ж<timers>, int64, ж<synctestBubble>, int64>)(run))) + (uintptr)sys.PCQuantum);
+        if (tsLocal.raceCtx == 0) {
+            tsLocal.raceCtx = racegostart(abi.FuncPCABIInternal(((Func<ж<timers>, int64, ж<synctestBubble>, int64>)(run))) + (uintptr)sys.PCQuantum);
         }
-        raceacquirectx((~tsLocal).raceCtx, (uintptr)@unsafe.Pointer.FromRef(ref t));
+        raceacquirectx(tsLocal.raceCtx, (uintptr)@unsafe.Pointer.FromRef(ref t));
     }
 
     if ((uint8)(t.state & ((uint8)(timerModified | timerZombie))) != 0) {
@@ -1270,9 +1270,9 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
     var f = t.f;
     var arg = t.arg;
     var seq = t.seq;
-    int64 next = default!;
+    int64 next = default;
     var delay = now - t.when;
-    if (t.period > 0){
+    if (t.period > 0) {
         // Leave in heap but adjust next time to fire.
         next = t.when + t.period * (1 + quo(delay, t.period));
         if (next < 0) { // check for overflow.
@@ -1308,7 +1308,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
         if ((~gp).racectx != 0) {
             @throw(unexpectedRacectxˢ);
         }
-        if (Ꮡbubble == nil){
+        if (Ꮡbubble == nil) {
             gp.Value.racectx = (~(~gp).m).p.ptr().Value.timers.raceCtx;
         } else {
             gp.Value.racectx = bubble.timers.raceCtx;
@@ -1379,7 +1379,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
             // the next synctest.Wait call.
             racereleasemergeg(ref (gp).DerefOrNull(), (uintptr)Ꮡbubble.raceaddr());
         }
-        gp.Value.bubble = default!;
+        gp.Value.bubble = default;
     }
 
     if (ts != nil) {
@@ -1430,7 +1430,7 @@ internal static void updateMinWhenHeap(this ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertWorldStoppedOrLockHeld(ref nonnil(ref ts).mu);
-    if (len(ts.heap) == 0){
+    if (len(ts.heap) == 0) {
         Ꮡts.of(timers.ᏑminWhenHeap).Store(0);
     } else {
         Ꮡts.of(timers.ᏑminWhenHeap).Store(ts.heap[0].when);
@@ -1440,7 +1440,7 @@ internal static void updateMinWhenHeap(this ж<timers> Ꮡts) {
 // updateMinWhenModified updates ts.minWhenModified to be <= when.
 // ts need not be (and usually is not) locked.
 internal static void updateMinWhenModified(this ж<timers> Ꮡts, int64 when) {
-    while (ᐧ) {
+    for (;;) {
         var old = Ꮡts.of(timers.ᏑminWhenModified).Load();
         if (old != 0 && old < when) {
             return;
@@ -1526,7 +1526,7 @@ internal static void siftDown(this ref timers ts, nint i) {
     if (tw.when <= 0) {
         badTimer();
     }
-    while (ᐧ) {
+    for (;;) {
         nint leftChild = i * (nint)timerHeapN + 1;
         if (leftChild >= n) {
             break;
@@ -1601,7 +1601,7 @@ internal static void maybeRunChan(this ж<timer> Ꮡt, ж<Δhchan> Ꮡc) {
     Ꮡt.@lock();
     var now = nanotime();
     if (t.isFake) {
-        now = getg().Value.bubble.Value.now;
+        now = getg().Value.bubble.now;
     }
     if ((uint8)(t.state & timerHeaped) != 0 || t.when == 0 || t.when > now) {
         Ꮡt.trace(maybeRunChanˢ);
@@ -1624,25 +1624,25 @@ internal static readonly @string blockTimerChanˢ = "blockTimerChan"u8;
 // adding it if needed.
 internal static void blockTimerChan(ref Δhchan c) {
     var t = c.timer;
-    if ((~t).isFake && c.bubble != (~getg()).bubble) {
+    if (t.isFake && c.bubble != (~getg()).bubble) {
         // This should have been checked by the caller, but check just in case.
         fatal(synctestTimerAccessedˢ);
     }
 
     t.@lock();
     t.trace(blockTimerChanˢ);
-    if (!(~t).isChan) {
+    if (!t.isChan) {
         badTimer();
     }
 
-    t.Value.blocked++;
+    t.blocked++;
 
     // If this is the first enqueue after a recent dequeue,
     // the timer may still be in the heap but marked as a zombie.
     // Unmark it in this case, if the timer is still pending.
-    if ((uint8)((~t).state & timerHeaped) != 0 && (uint8)((~t).state & timerZombie) != 0 && (~t).when > 0) {
-        t.Value.state &= unchecked((uint8)~(uint8)(timerZombie));
-        (~t).ts.of(timers.Ꮡzombies).Add(-1);
+    if ((uint8)(t.state & timerHeaped) != 0 && (uint8)(t.state & timerZombie) != 0 && t.when > 0) {
+        t.state &= unchecked((uint8)~(uint8)(timerZombie));
+        t.ts.of(timers.Ꮡzombies).Add(-1);
     }
 
     // t.maybeAdd must be called with t unlocked,
@@ -1671,16 +1671,16 @@ internal static void unblockTimerChan(ref Δhchan c) {
     var t = c.timer;
     t.@lock();
     t.trace(unblockTimerChanˢ);
-    if (!(~t).isChan || (~t).blocked == 0) {
+    if (!t.isChan || t.blocked == 0) {
         badTimer();
     }
-    t.Value.blocked--;
-    if ((~t).blocked == 0 && (uint8)((~t).state & timerHeaped) != 0 && (uint8)((~t).state & timerZombie) == 0) {
+    t.blocked--;
+    if (t.blocked == 0 && (uint8)(t.state & timerHeaped) != 0 && (uint8)(t.state & timerZombie) == 0) {
         // Last goroutine that was blocked on this timer.
         // Mark for removal from heap but do not clear t.when,
         // so that we know what time it is still meant to trigger.
-        t.Value.state |= (uint8)(timerZombie);
-        (~t).ts.of(timers.Ꮡzombies).Add(1);
+        t.state |= (uint8)(timerZombie);
+        t.ts.of(timers.Ꮡzombies).Add(1);
     }
     t.unlock();
 }

@@ -12,7 +12,7 @@ using io = io_package;
 
 partial class cryptotest_package {
 
-internal static slice<nint> lengths = new nint[]{0, 156, 8192, 8193, 8208}.slice();
+internal static slice<nint> lengths = slice<nint>([0, 156, 8192, 8193, 8208]);
 
 // MakeAEAD returns a cipher.AEAD instance.
 //
@@ -35,14 +35,14 @@ private static readonly @string wrongCiphertextˢ = "WrongCiphertext"u8;
 
 // TestAEAD performs a set of tests on cipher.AEAD implementations, checking
 // the documented requirements of NonceSize, Overhead, Seal and Open.
-public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD) {
+public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     var (aead, err) = mAEAD();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var aeadʗ1 = aead;
-    Ꮡt.Run(roundtripˢ, (ж<testing.T> tΔ1) => {
+    t.Run(roundtripˢ, (ж<testing.T> tΔ1) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in lengths) {
             foreach (var (_, adLen) in lengths) {
@@ -57,8 +57,8 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                     rng.Read(before);
                     rng.Read(addData);
 
-                    var ciphertext = sealMsg(tΔ2, aeadʗ2, default!, nonce, before, addData);
-                    var after = openWithoutError(tΔ2, aeadʗ2, default!, nonce, ciphertext, addData);
+                    var ciphertext = sealMsg(tΔ2, aeadʗ2, default, nonce, before, addData);
+                    var after = openWithoutError(tΔ2, aeadʗ2, default, nonce, ciphertext, addData);
 
                     if (!bytes.Equal(after, before)) {
                         tΔ2.Errorf("plaintext is different after a seal/open cycle; got %s, want %s"u8, truncateHex(after), truncateHex(before));
@@ -69,7 +69,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
     });
 
     var aeadʗ3 = aead;
-    Ꮡt.Run(inputNotModifiedˢ, (ж<testing.T> tΔ3) => {
+    t.Run(inputNotModifiedˢ, (ж<testing.T> tΔ3) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in lengths) {
             foreach (var (_, adLen) in lengths) {
@@ -89,7 +89,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                         var addData = new slice<byte>(adLen);
                         rng.Read(addData);
 
-                        sealMsg(tΔ5, aeadʗ5, default!, nonce, src, addData);
+                        sealMsg(tΔ5, aeadʗ5, default, nonce, src, addData);
                         if (!bytes.Equal(src, before)) {
                             tΔ5.Errorf("Seal modified src; got %s, want %s"u8, truncateHex(src), truncateHex(before));
                         }
@@ -108,11 +108,11 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
 
                         // Record the ciphertext that shouldn't be modified as the input of
                         // Open.
-                        var ciphertext = sealMsg(tΔ6, aeadʗ6, default!, nonce, plaintext, addData);
+                        var ciphertext = sealMsg(tΔ6, aeadʗ6, default, nonce, plaintext, addData);
                         var before = new slice<byte>(len(ciphertext));
                         copy(before, ciphertext);
 
-                        openWithoutError(tΔ6, aeadʗ6, default!, nonce, ciphertext, addData);
+                        openWithoutError(tΔ6, aeadʗ6, default, nonce, ciphertext, addData);
                         if (!bytes.Equal(ciphertext, before)) {
                             tΔ6.Errorf("Open modified src; got %s, want %s"u8, truncateHex(ciphertext), truncateHex(before));
                         }
@@ -123,7 +123,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
     });
 
     var aeadʗ7 = aead;
-    Ꮡt.Run(bufferOverlapˢ, (ж<testing.T> tΔ7) => {
+    t.Run(bufferOverlapˢ, (ж<testing.T> tΔ7) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in lengths) {
             if (ptLen <= 1) { // We need enough room for an inexact overlap to occur.
@@ -149,10 +149,8 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                         rng.Read(addData);
 
                         // Make plaintext and dst slices point to same array with inexact overlap.
-                        ref var plaintext = ref heap<slice<byte>>(out var Ꮡplaintext);
-                        Ꮡplaintext.ValueSlot = buff.slice(0, ptLen);
-                        ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-                        Ꮡdst.ValueSlot = buff[1..1]; // Shift dst to not start at start of plaintext.
+                        ref var plaintext = ref heap<slice<byte>>(buff.slice(0, ptLen), out var Ꮡplaintext);
+                        ref var dst = ref heap<slice<byte>>(buff[1..1], out var Ꮡdst); // Shift dst to not start at start of plaintext.
                         var addDataʗ1 = addData;
                         var aeadʗ10 = aeadʗ9;
                         var nonceʗ1 = nonce;
@@ -183,18 +181,16 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                         rng.Read(plaintext);
                         var addData = new slice<byte>(adLen);
                         rng.Read(addData);
-                        var validCT = sealMsg(tΔ10, aeadʗ12, default!, nonce, plaintext, addData);
+                        var validCT = sealMsg(tΔ10, aeadʗ12, default, nonce, plaintext, addData);
 
                         // Make a buffer that can hold a plaintext and ciphertext as we
                         // overlap their slices to check for panic on inexact overlaps.
                         var buff = new slice<byte>(ptLen + len(validCT));
 
                         // Make ciphertext and dst slices point to same array with inexact overlap.
-                        ref var ciphertext = ref heap<slice<byte>>(out var Ꮡciphertext);
-                        Ꮡciphertext.ValueSlot = buff.slice(0, len(validCT));
+                        ref var ciphertext = ref heap<slice<byte>>(buff.slice(0, len(validCT)), out var Ꮡciphertext);
                         copy(Ꮡciphertext.ValueSlot, validCT);
-                        ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-                        Ꮡdst.ValueSlot = buff[1..1]; // Shift dst to not start at start of ciphertext.
+                        ref var dst = ref heap<slice<byte>>(buff[1..1], out var Ꮡdst); // Shift dst to not start at start of ciphertext.
                         var addDataʗ3 = addData;
                         var aeadʗ13 = aeadʗ12;
                         var nonceʗ3 = nonce;
@@ -224,7 +220,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
     });
 
     var aeadʗ15 = aead;
-    Ꮡt.Run(appendDstˢ, (ж<testing.T> tΔ11) => {
+    t.Run(appendDstˢ, (ж<testing.T> tΔ11) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in lengths) {
             foreach (var (_, adLen) in lengths) {
@@ -240,7 +236,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                         var shortBuff = slice<byte>("a"u8);
                         var longBuff = new slice<byte>(512);
                         rng.Read(longBuff);
-                        var prefixes = new slice<byte>[]{shortBuff, longBuff}.slice();
+                        var prefixes = slice<slice<byte>>([shortBuff, longBuff]);
 
                         // Check each prefix gets appended to by Seal without altering them.
                         foreach (var (_, prefix) in prefixes) {
@@ -258,7 +254,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                                 var ciphertext = @out.slice(len(prefix));
                                 // Check that the appended ciphertext wasn't affected by the prefix
                                 {
-                                    var expectedCT = sealMsg(tΔ13, aeadʗ17, default!, nonce, plaintext, addData); if (!bytes.Equal(ciphertext, expectedCT)) {
+                                    var expectedCT = sealMsg(tΔ13, aeadʗ17, default, nonce, plaintext, addData); if (!bytes.Equal(ciphertext, expectedCT)) {
                                         tΔ13.Errorf("Seal behavior affected by pre-existing data in dst; got %s, want %s"u8, truncateHex(ciphertext), truncateHex(expectedCT));
                                     }
                                 }
@@ -276,14 +272,14 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                         var shortBuff = slice<byte>("a"u8);
                         var longBuff = new slice<byte>(512);
                         rng.Read(longBuff);
-                        var prefixes = new slice<byte>[]{shortBuff, longBuff}.slice();
+                        var prefixes = slice<slice<byte>>([shortBuff, longBuff]);
 
                         // Check each prefix gets appended to by Open without altering them.
                         foreach (var (_, prefix) in prefixes) {
                             var (before, addData) = (new slice<byte>(adLen), new slice<byte>(ptLen));
                             rng.Read(before);
                             rng.Read(addData);
-                            var ciphertext = sealMsg(tΔ14, aeadʗ18, default!, nonce, before, addData);
+                            var ciphertext = sealMsg(tΔ14, aeadʗ18, default, nonce, before, addData);
 
                             var @out = openWithoutError(tΔ14, aeadʗ18, prefix, nonce, ciphertext, addData);
 
@@ -305,7 +301,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
     });
 
     var aeadʗ19 = aead;
-    Ꮡt.Run(wrongNonceˢ, (ж<testing.T> tΔ15) => {
+    t.Run(wrongNonceˢ, (ж<testing.T> tΔ15) => {
         if (aeadʗ19.NonceSize() == 0) {
             tΔ15.Skip(aeadDoesNotUseANonceˢ);
         }
@@ -323,15 +319,15 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                     rng.Read(plaintext);
                     rng.Read(addData);
 
-                    var ciphertext = sealMsg(tΔ16, aeadʗ20, default!, nonce, plaintext, addData);
+                    var ciphertext = sealMsg(tΔ16, aeadʗ20, default, nonce, plaintext, addData);
 
                     // Perturb the nonce and check for an error when Opening
                     var alterNonce = new slice<byte>(aeadʗ20.NonceSize());
                     copy(alterNonce, nonce);
                     alterNonce[len(alterNonce) - 1] += 1;
-                    var (_, errΔ1) = aeadʗ20.Open(default!, alterNonce, ciphertext, addData);
+                    var (_, errΔ1) = aeadʗ20.Open(default, alterNonce, ciphertext, addData);
 
-                    if (errΔ1 == default!) {
+                    if (errΔ1 == nil) {
                         tΔ16.Errorf("Open did not error when given different nonce than Sealed with"u8);
                     }
                 });
@@ -340,7 +336,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
     });
 
     var aeadʗ21 = aead;
-    Ꮡt.Run(wrongAddDataˢ, (ж<testing.T> tΔ17) => {
+    t.Run(wrongAddDataˢ, (ж<testing.T> tΔ17) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in lengths) {
             foreach (var (_, adLen) in lengths) {
@@ -359,15 +355,15 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                     rng.Read(plaintext);
                     rng.Read(addData);
 
-                    var ciphertext = sealMsg(tΔ18, aeadʗ22, default!, nonce, plaintext, addData);
+                    var ciphertext = sealMsg(tΔ18, aeadʗ22, default, nonce, plaintext, addData);
 
                     // Perturb the Additional Data and check for an error when Opening
                     var alterAD = new slice<byte>(adLen);
                     copy(alterAD, addData);
                     alterAD[len(alterAD) - 1] += 1;
-                    var (_, errΔ2) = aeadʗ22.Open(default!, nonce, ciphertext, alterAD);
+                    var (_, errΔ2) = aeadʗ22.Open(default, nonce, ciphertext, alterAD);
 
-                    if (errΔ2 == default!) {
+                    if (errΔ2 == nil) {
                         tΔ18.Errorf("Open did not error when given different Additional Data than Sealed with"u8);
                     }
                 });
@@ -376,7 +372,7 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
     });
 
     var aeadʗ23 = aead;
-    Ꮡt.Run(wrongCiphertextˢ, (ж<testing.T> tΔ19) => {
+    t.Run(wrongCiphertextˢ, (ж<testing.T> tΔ19) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in lengths) {
             foreach (var (_, adLen) in lengths) {
@@ -391,15 +387,15 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
                     rng.Read(plaintext);
                     rng.Read(addData);
 
-                    var ciphertext = sealMsg(tΔ20, aeadʗ24, default!, nonce, plaintext, addData);
+                    var ciphertext = sealMsg(tΔ20, aeadʗ24, default, nonce, plaintext, addData);
 
                     // Perturb the ciphertext and check for an error when Opening
                     var alterCT = new slice<byte>(len(ciphertext));
                     copy(alterCT, ciphertext);
                     alterCT[len(alterCT) - 1] += 1;
-                    var (_, errΔ3) = aeadʗ24.Open(default!, nonce, alterCT, addData);
+                    var (_, errΔ3) = aeadʗ24.Open(default, nonce, alterCT, addData);
 
-                    if (errΔ3 == default!) {
+                    if (errΔ3 == nil) {
                         tΔ20.Errorf("Open did not error when given different ciphertext than was produced by Seal"u8);
                     }
                 });
@@ -410,8 +406,8 @@ public static void TestAEAD(ж<testing.T> Ꮡt, Func<(cipher.AEAD, error)> mAEAD
 
 // Helper function to Seal a plaintext with additional data. Checks that
 // ciphertext isn't bigger than the plaintext length plus Overhead()
-internal static slice<byte> sealMsg(ж<testing.T> Ꮡt, cipher.AEAD aead, slice<byte> ciphertext, slice<byte> nonce, slice<byte> plaintext, slice<byte> addData) {
-    Ꮡt.Helper();
+internal static slice<byte> sealMsg(ж<testing.T> t, cipher.AEAD aead, slice<byte> ciphertext, slice<byte> nonce, slice<byte> plaintext, slice<byte> addData) {
+    t.Helper();
 
     nint initialLen = len(ciphertext);
 
@@ -422,7 +418,7 @@ internal static slice<byte> sealMsg(ж<testing.T> Ꮡt, cipher.AEAD aead, slice<
     // Appended ciphertext shouldn't ever be longer than the length of the
     // plaintext plus Overhead
     if (lenCT > len(plaintext) + aead.Overhead()) {
-        Ꮡt.Errorf("length of ciphertext from Seal exceeds length of plaintext by more than Overhead(); got %d, want <=%d"u8, lenCT, len(plaintext) + aead.Overhead());
+        t.Errorf("length of ciphertext from Seal exceeds length of plaintext by more than Overhead(); got %d, want <=%d"u8, lenCT, len(plaintext) + aead.Overhead());
     }
 
     return ciphertext;
@@ -435,20 +431,20 @@ internal static bool isDeterministic(cipher.AEAD aead) {
     var nonce = new slice<byte>(aead.NonceSize());
     var addData = slice<byte>("additional data"u8);
     var plaintext = slice<byte>("plaintext"u8);
-    var ciphertext1 = aead.Seal(default!, nonce, plaintext, addData);
-    var ciphertext2 = aead.Seal(default!, nonce, plaintext, addData);
+    var ciphertext1 = aead.Seal(default, nonce, plaintext, addData);
+    var ciphertext2 = aead.Seal(default, nonce, plaintext, addData);
     return bytes.Equal(ciphertext1, ciphertext2);
 }
 
 // Helper function to Open and authenticate ciphertext. Checks that Open
 // doesn't error (assuming ciphertext was well-formed with corresponding nonce
 // and additional data).
-internal static slice<byte> openWithoutError(ж<testing.T> Ꮡt, cipher.AEAD aead, slice<byte> plaintext, slice<byte> nonce, slice<byte> ciphertext, slice<byte> addData) {
-    Ꮡt.Helper();
+internal static slice<byte> openWithoutError(ж<testing.T> t, cipher.AEAD aead, slice<byte> plaintext, slice<byte> nonce, slice<byte> ciphertext, slice<byte> addData) {
+    t.Helper();
 
     (plaintext, var err) = aead.Open(plaintext, nonce, ciphertext, addData);
-    if (err != default!) {
-        Ꮡt.Fatalf("Open returned error on properly formed ciphertext; got \"%s\", want \"nil\""u8, err);
+    if (err != nil) {
+        t.Fatalf("Open returned error on properly formed ciphertext; got \"%s\", want \"nil\""u8, err);
     }
 
     return plaintext;

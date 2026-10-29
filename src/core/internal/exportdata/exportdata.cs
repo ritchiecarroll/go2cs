@@ -62,8 +62,8 @@ private static readonly @string markerᶜ = "\n$$\n"u8;
 // | [ar file header]      | other ar files
 // | [ar file data]        |
 public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
-    slice<byte> data = default!;
-    error err = default!;
+    slice<byte> data = default;
+    error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
     // We historically guaranteed headers at the default buffer size (4096) work.
@@ -72,13 +72,13 @@ public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
     Ꮡr = bufio.NewReaderSize(new bufio_ReaderжReader(Ꮡr), minBufferSize); r = ref Ꮡr.DerefOrNull();
 
     (var size, err) = FindPackageDefinition(Ꮡr);
-    if (err != default!) {
+    if (err != nil) {
         return (data, err);
     }
     nint n = size;
 
     (var objapi, var headers, err) = ReadObjectHeaders(Ꮡr);
-    if (err != default!) {
+    if (err != nil) {
         return (data, err);
     }
     n -= len(objapi);
@@ -87,7 +87,7 @@ public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
     }
 
     (var hdrlen, err) = ReadExportDataHeader(Ꮡr);
-    if (err != default!) {
+    if (err != nil) {
         return (data, err);
     }
     n -= hdrlen;
@@ -103,14 +103,14 @@ public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
 
     // Read n bytes from buf.
     (data, err) = saferio.ReadData(new bufio_ReaderжReader(Ꮡr), (uint64)n);
-    if (err != default!) {
+    if (err != nil) {
         return (data, err);
     }
 
     // Check for marker at the end.
     array<byte> suffix = new(4); /* len(marker) */
     (_, err) = io.ReadFull(new bufio_ReaderжReader(Ꮡr), suffix[..]);
-    if (err != default!) {
+    if (err != nil) {
         return (data, err);
     }
     {
@@ -135,15 +135,15 @@ private static readonly @string pkgdefˢ = "__.PKGDEF"u8;
 //
 // See cmd/internal/archive for details on the archive format.
 public static (nint size, error err) FindPackageDefinition(ж<bufio.Reader> Ꮡr) {
-    nint size = default!;
-    error err = default!;
+    nint size = default;
+    error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Uses ReadSlice to limit risk of malformed inputs.
 
     // Read first line to make sure this is an object file.
-    (var line, err) = r.ReadSlice((rune)'\n');
-    if (err != default!) {
+    (var line, err) = r.ReadSlice((byte)'\n');
+    if (err != nil) {
         err = fmt.Errorf("can't find export data (%v)"u8, err);
         return (size, err);
     }
@@ -174,18 +174,18 @@ private static readonly @string goObjectˢ = "go object "u8;
 //
 // It returns an error if any header does not fit in r.Size() bytes.
 public static (@string objapi, slice<@string> headers, error err) ReadObjectHeaders(ж<bufio.Reader> Ꮡr) {
-    @string objapi = default!;
-    slice<@string> headers = default!;
-    error err = default!;
+    @string objapi = default;
+    slice<@string> headers = default;
+    error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
     // line is a temporary buffer for headers.
     // Use bounded reads (ReadSlice, Peek) to limit risk of malformed inputs.
-    slice<byte> line = default!;
+    slice<byte> line = default;
 
     // objapi header should be the first line
     {
-        (line, err) = r.ReadSlice((rune)'\n'); if (err != default!) {
+        (line, err) = r.ReadSlice((byte)'\n'); if (err != nil) {
             err = fmt.Errorf("can't find export data (%v)"u8, err);
             return (objapi, headers, err);
         }
@@ -199,10 +199,10 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
     }
 
     // process remaining object header lines
-    while (ᐧ) {
+    for (;;) {
         // check for an end of section marker "$$"
         (line, err) = r.Peek(2);
-        if (err != default!) {
+        if (err != nil) {
             return (objapi, headers, err);
         }
         if (((sstring)line) == "$$"u8) {
@@ -210,8 +210,8 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
         }
 
         // read next header
-        (line, err) = r.ReadSlice((rune)'\n');
-        if (err != default!) {
+        (line, err) = r.ReadSlice((byte)'\n');
+        if (err != nil) {
             return (objapi, headers, err);
         }
         headers = append(headers, (@string)line);
@@ -225,31 +225,32 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
 // The only currently supported format is binary export data in the
 // unified export format.
 public static (nint n, error err) ReadExportDataHeader(ж<bufio.Reader> Ꮡr) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Read export data header.
-    (var line, err) = r.ReadSlice((rune)'\n');
-    if (err != default!) {
+    (var line, err) = r.ReadSlice((byte)'\n');
+    if (err != nil) {
         return (n, err);
     }
 
     @string hdr = (@string)line;
     var exprᴛ1 = hdr;
-    if (exprᴛ1 == "$$\n"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "$$\n"u8: {
         err = fmt.Errorf("old textual export format no longer supported (recompile package)"u8);
         return (n, err);
     }
-    if (exprᴛ1 == "$$B\n"u8) {
-        byte format = default!;
+    case {} when exprᴛ1 == "$$B\n"u8: {
+        byte format = default;
         (format, err) = r.ReadByte();
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
         // The unified export format starts with a 'u'.
         switch (format) {
-        case (rune)'u': {
+        case (byte)'u': {
             break;
         }
         default: {
@@ -260,11 +261,12 @@ public static (nint n, error err) ReadExportDataHeader(ж<bufio.Reader> Ꮡr) {
             err = fmt.Errorf("binary export format %q is no longer supported (recompile package)"u8, format);
             return (n, err);
         }}
+        break;
     }
-    else { /* default: */
+    default: {
         err = fmt.Errorf("unknown export data header: %q"u8, hdr);
         return (n, err);
-    }
+    }}
 
     n = len(hdr) + 1; // + 1 is for 'u'
     return (n, err);
@@ -278,41 +280,41 @@ private static readonly @string pathIsEmptyˢ = "path is empty"u8;
 // the build.Default build.Context). A relative srcDir is interpreted
 // relative to the current working directory.
 public static (@string filename, @string id, error err) FindPkg(@string path, @string srcDir) {
-    @string filename = default!;
-    @string id = default!;
-    error err = default!;
+    @string filename = default;
+    @string id = default;
+    error err = default;
 
     if (path == ""u8) {
         return ("", "", errors.New(pathIsEmptyˢ));
     }
 
-    @string noext = default!;
+    @string noext = default;
     switch (ᐧ) {
     default: {
         // "x" -> "$GOPATH/pkg/$GOOS_$GOARCH/x.ext", "x"
         // Don't require the source files to be present.
         {
-            var (abs, errΔ2) = filepath.Abs(srcDir); if (errΔ2 == default!) { // see issue 14282
+            var (abs, errΔ2) = filepath.Abs(srcDir); if (errΔ2 == nil) { // see issue 14282
                 srcDir = abs;
             }
         }
-        ж<build.Package> bp = default!;
+        ж<build.Package> bp = default;
         (bp, err) = build.Import(path, srcDir, (build.ImportMode)(build.FindOnly | build.AllowBinary));
-        if ((~bp).PkgObj == ""u8){
-            if ((~bp).Goroot && (~bp).Dir != ""u8) {
-                (filename, err) = lookupGorootExport((~bp).Dir);
-                if (err == default!) {
+        if (bp.PkgObj == ""u8) {
+            if (bp.Goroot && bp.Dir != ""u8) {
+                (filename, err) = lookupGorootExport(bp.Dir);
+                if (err == nil) {
                     (_, err) = os.Stat(filename);
                 }
-                if (err == default!) {
-                    return (filename, (~bp).ImportPath, default!);
+                if (err == nil) {
+                    return (filename, bp.ImportPath, default);
                 }
             }
             goto notfound;
         } else {
-            noext = strings.TrimSuffix((~bp).PkgObj, ".a"u8);
+            noext = strings.TrimSuffix(bp.PkgObj, ".a"u8);
         }
-        id = bp.Value.ImportPath;
+        id = bp.ImportPath;
         break;
     }
     case {} when build.IsLocalImport(path): {
@@ -340,16 +342,16 @@ public static (@string filename, @string id, error err) FindPkg(@string path, @s
     foreach (var (_, ext) in pkgExts.ΔRangeSnapshot()) {
         filename = noext + ext;
         var (f, statErr) = os.Stat(filename);
-        if (statErr == default! && !f.IsDir()) {
-            return (filename, id, default!);
+        if (statErr == nil && !f.IsDir()) {
+            return (filename, id, default);
         }
-        if (err == default!) {
+        if (err == nil) {
             err = statErr;
         }
     }
 
 notfound:
-    if (err == default!) {
+    if (err == nil) {
         return ("", path, fmt.Errorf("can't find import: %q"u8, path));
     }
     return ("", path, fmt.Errorf("can't find import: %q: %w"u8, path, err));
@@ -377,19 +379,19 @@ internal static (@string, error) lookupGorootExport(@string pkgDir) {
     var (f, ok) = ᏑexportMap.Load(pkgDir);
     if (!ok) {
         ref var listOnce = ref heap(new sync.Once(), out var ᏑlistOnce);
-        @string exportPath = default!;
+        @string exportPath = default;
         ref var err = ref heap<error>(out var Ꮡerr);
         (f, _) = ᏑexportMap.LoadOrStore(pkgDir, (@string, error) () => {
             ᏑlistOnce.Do(() => {
                 var cmd = exec.Command(filepath.Join(build.Default.GOROOT, binˢ, "go"), listˢ, exportˢ, "-f", exportˢ2, pkgDir);
-                cmd.Value.Dir = build.Default.GOROOT;
-                cmd.Value.Env = append(os.Environ(), "PWD="u8 + (~cmd).Dir, "GOROOT=" + build.Default.GOROOT);
-                slice<byte> output = default!;
+                cmd.Dir = build.Default.GOROOT;
+                cmd.Env = append(os.Environ(), "PWD="u8 + cmd.Dir, "GOROOT=" + build.Default.GOROOT);
+                slice<byte> output = default;
                 (output, Ꮡerr.ValueSlot) = cmd.Output();
-                if (Ꮡerr.ValueSlot != default!) {
+                if (Ꮡerr.ValueSlot != nil) {
                     {
-                        var (ee, okΔ1) = Ꮡerr.ValueSlot._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && len((~ee).Stderr) > 0) {
-                            Ꮡerr.ValueSlot = errors.New((@string)(~ee).Stderr);
+                        var (ee, okΔ1) = Ꮡerr.ValueSlot._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && len(ee.Stderr) > 0) {
+                            Ꮡerr.ValueSlot = errors.New((@string)ee.Stderr);
                         }
                     }
                     return;

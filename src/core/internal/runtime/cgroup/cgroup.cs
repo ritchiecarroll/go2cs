@@ -49,22 +49,22 @@ public static Version V2 => 2;
 
 internal static (int64, error) parseV1Number(slice<byte> buf) {
     // Ignore trailing newline.
-    nint i = bytealg.IndexByte(buf, (rune)'\n');
+    nint i = bytealg.IndexByte(buf, (byte)'\n');
     if (i < 0) {
         return (0, errMalformedFile);
     }
     buf = buf.slice(0, i);
 
     var (val, err) = strconv.ParseInt((@string)buf, 10, 64);
-    if (err != default!) {
+    if (err != nil) {
         return (0, errMalformedFile);
     }
 
-    return (val, default!);
+    return (val, default);
 }
 
 internal static (float64, bool, error) parseV2Limit(slice<byte> buf) {
-    nint i = bytealg.IndexByte(buf, (rune)' ');
+    nint i = bytealg.IndexByte(buf, (byte)' ');
     if (i < 0) {
         return (0D, false, errMalformedFile);
     }
@@ -72,28 +72,28 @@ internal static (float64, bool, error) parseV2Limit(slice<byte> buf) {
     var quotaStr = buf.slice(0, i);
     if (bytealg.Compare(quotaStr, slice<byte>("max"u8)) == 0) {
         // No limit.
-        return (0D, false, default!);
+        return (0D, false, default);
     }
 
     var periodStr = buf.slice(i + 1);
     // Ignore trailing newline, if any.
-    i = bytealg.IndexByte(periodStr, (rune)'\n');
+    i = bytealg.IndexByte(periodStr, (byte)'\n');
     if (i < 0) {
         return (0D, false, errMalformedFile);
     }
     periodStr = periodStr.slice(0, i);
 
     var (quota, err) = strconv.ParseInt((@string)quotaStr, 10, 64);
-    if (err != default!) {
+    if (err != nil) {
         return (0D, false, errMalformedFile);
     }
 
     (var period, err) = strconv.ParseInt((@string)periodStr, 10, 64);
-    if (err != default!) {
+    if (err != nil) {
         return (0D, false, errMalformedFile);
     }
 
-    return ((float64)quota / (float64)period, true, default!);
+    return ((float64)quota / (float64)period, true, default);
 }
 
 // Finds the path of the current process's CPU cgroup and writes it to out.
@@ -123,20 +123,18 @@ internal static (nint, Version, error) parseCPUCgroup(nint fd, Func<nint, slice<
     // Bytes written to out.
     nint n = 0;
 
-    while (ᐧ) {
+    for (;;) {
         var err = l.next();
-        if (AreEqual(err, errIncompleteLine)){
+        if (AreEqual(err, errIncompleteLine)) {
             // Don't allow incomplete lines. While in theory the
             // incomplete line may be for a controller we don't
             // care about, in practice all lines should be of
             // similar length, so we should just have a buffer big
             // enough for any.
             return (0, 0, err);
-        } else 
-        if (AreEqual(err, errEOF)){
+        } else if (AreEqual(err, errEOF)) {
             break;
-        } else 
-        if (err != default!) {
+        } else if (err != nil) {
             return (0, 0, err);
         }
 
@@ -148,7 +146,7 @@ internal static (nint, Version, error) parseCPUCgroup(nint fd, Func<nint, slice<
         //
         // controller-list is comma-separated.
         // See man 7 cgroups for more details.
-        nint i = bytealg.IndexByte(line, (rune)':');
+        nint i = bytealg.IndexByte(line, (byte)':');
         if (i < 0) {
             return (0, 0, errMalformedFile);
         }
@@ -156,7 +154,7 @@ internal static (nint, Version, error) parseCPUCgroup(nint fd, Func<nint, slice<
         var hierarchy = line.slice(0, i);
         line = line.slice(i + 1);
 
-        i = bytealg.IndexByte(line, (rune)':');
+        i = bytealg.IndexByte(line, (byte)':');
         if (i < 0) {
             return (0, 0, errMalformedFile);
         }
@@ -165,7 +163,7 @@ internal static (nint, Version, error) parseCPUCgroup(nint fd, Func<nint, slice<
         line = line.slice(i + 1);
 
         var path = line;
-        if (len(path) == 0 || path[0] != (rune)'/') {
+        if (len(path) == 0 || path[0] != '/') {
             // We rely on this when composing the full path.
             return (0, 0, errMalformedFile);
         }
@@ -175,7 +173,7 @@ internal static (nint, Version, error) parseCPUCgroup(nint fd, Func<nint, slice<
             return (0, 0, errPathTooLong);
         }
 
-        if (((sstring)hierarchy) == "0"u8){
+        if (((sstring)hierarchy) == "0"u8) {
             // v2 hierarchy.
             n = copy(@out, path);
             // Keep searching, we might find a v1 hierarchy with a
@@ -185,7 +183,7 @@ internal static (nint, Version, error) parseCPUCgroup(nint fd, Func<nint, slice<
             if (containsCPU(controllers)) {
                 // Found a v1 CPU controller. This must be the
                 // only one, so we're done.
-                return (copy(@out, path), V1, default!);
+                return (copy(@out, path), V1, default);
             }
         }
     }
@@ -196,13 +194,13 @@ internal static (nint, Version, error) parseCPUCgroup(nint fd, Func<nint, slice<
     }
 
     // Must be v2, v1 returns above.
-    return (n, V2, default!);
+    return (n, V2, default);
 }
 
 // Returns true if comma-separated list b contains "cpu".
 internal static bool containsCPU(slice<byte> b) {
     while (len(b) > 0) {
-        nint i = bytealg.IndexByte(b, (rune)',');
+        nint i = bytealg.IndexByte(b, (byte)',');
         if (i < 0) {
             // Neither cmd/compile nor gccgo allocates for these string conversions.
             return ((sstring)b) == "cpu"u8;
@@ -268,20 +266,18 @@ internal static (nint, error) parseCPUMount(nint fd, Func<nint, slice<byte>, (ni
 
     var l = newLineReader(fd, scratch, read);
 
-    while (ᐧ) {
+    for (;;) {
         var err = l.next();
-        if (AreEqual(err, errIncompleteLine)){
+        if (AreEqual(err, errIncompleteLine)) {
             // An incomplete line is fine as long as it doesn't
             // impede parsing the fields we need. It shouldn't be
             // possible for any mount to use more than 3*PATH_MAX
             // before (9) because there are two paths and all other
             // earlier fields have bounded options. Only (11) has
             // unbounded options.
-        } else 
-        if (AreEqual(err, errEOF)){
+        } else if (AreEqual(err, errEOF)) {
             break;
-        } else 
-        if (err != default!) {
+        } else if (err != nil) {
             return (0, err);
         }
 
@@ -289,7 +285,7 @@ internal static (nint, error) parseCPUMount(nint fd, Func<nint, slice<byte>, (ni
 
         // Skip first three fields.
         foreach (var _ᴛ1 in range(3)) {
-            nint iΔ1 = bytealg.IndexByte(line, (rune)' ');
+            nint iΔ1 = bytealg.IndexByte(line, (byte)' ');
             if (iΔ1 < 0) {
                 return (0, errMalformedFile);
             }
@@ -297,19 +293,19 @@ internal static (nint, error) parseCPUMount(nint fd, Func<nint, slice<byte>, (ni
         }
 
         // (4) root:  root of the mount within the filesystem
-        nint i = bytealg.IndexByte(line, (rune)' ');
+        nint i = bytealg.IndexByte(line, (byte)' ');
         if (i < 0) {
             return (0, errMalformedFile);
         }
         var root = line.slice(0, i);
-        if (len(root) == 0 || root[0] != (rune)'/') {
+        if (len(root) == 0 || root[0] != '/') {
             // We rely on this in hasPathPrefix.
             return (0, errMalformedFile);
         }
         line = line.slice(i + 1);
 
         // (5) mount point:  mount point relative to the process's root
-        i = bytealg.IndexByte(line, (rune)' ');
+        i = bytealg.IndexByte(line, (byte)' ');
         if (i < 0) {
             return (0, errMalformedFile);
         }
@@ -317,8 +313,8 @@ internal static (nint, error) parseCPUMount(nint fd, Func<nint, slice<byte>, (ni
         line = line.slice(i + 1);
 
         // Skip ahead past optional fields, delimited by " - ".
-        while (ᐧ) {
-            i = bytealg.IndexByte(line, (rune)' ');
+        for (;;) {
+            i = bytealg.IndexByte(line, (byte)' ');
             if (i < 0) {
                 return (0, errMalformedFile);
             }
@@ -334,20 +330,20 @@ internal static (nint, error) parseCPUMount(nint fd, Func<nint, slice<byte>, (ni
         }
 
         // (9) filesystem type:  name of filesystem of the form "type[.subtype]"
-        i = bytealg.IndexByte(line, (rune)' ');
+        i = bytealg.IndexByte(line, (byte)' ');
         if (i < 0) {
             return (0, errMalformedFile);
         }
         var ftype = line.slice(0, i);
         line = line.slice(i + 1);
 
-        var exprᴛ1 = version;
-        if (exprᴛ1 == V1) {
+        switch (version) {
+        case var ᴛ when ᴛ == V1: {
             if (((sstring)ftype) != "cgroup"u8) {
                 continue;
             }
             // (10) mount source:  filesystem specific information or "none"
-            i = bytealg.IndexByte(line, (rune)' ');
+            i = bytealg.IndexByte(line, (byte)' ');
             if (i < 0) {
                 return (0, errMalformedFile);
             }
@@ -358,22 +354,25 @@ internal static (nint, error) parseCPUMount(nint fd, Func<nint, slice<byte>, (ni
             if (!containsCPU(line)) {
                 continue;
             }
+            break;
         }
-        else if (exprᴛ1 == V2) {
+        case var ᴛ when ᴛ == V2: {
             if (((sstring)ftype) != "cgroup2"u8) {
                 continue;
             }
+            break;
         }
-        else { /* default: */
+        default: {
             @throw(impossibleCgroupVersionˢ);
             throw panic("unreachable");
-        }
+            break;
+        }}
 
         // Check cgroup is in the root.
         // If the cgroup is /sandbox/container, the matching mount point root could be
         // /sandbox/container, /sandbox, or /
         (var rootLen, err) = unescapePath(root, root);
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         root = root.slice(0, rootLen);
@@ -408,13 +407,13 @@ internal static (nint, error) parseCPUMount(nint fd, Func<nint, slice<byte>, (ni
         }
         copy(@out.slice(n), rel);
         (var n2, err) = unescapePath(@out.slice(0, n), mnt);
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         if (n2 != n) {
             @throw(wrongUnescapedLenˢ);
         }
-        return (n + len(rel), default!);
+        return (n + len(rel), default);
     }
 
     // Found nothing.
@@ -429,14 +428,14 @@ internal static bool hasPathPrefix(slice<byte> p, slice<byte> prefix) {
     if (len(p) < i || !bytealg.Equal(prefix, p.slice(0, i))) {
         return false;
     }
-    return len(p) == i || p[i] == (rune)'/'; // must match at path boundary
+    return len(p) == i || p[i] == '/'; // must match at path boundary
 }
 
 internal static error errInvalidEscape = ((stringError)(@string)"invalid path escape sequence"u8);
 internal static error errPathTooLong = ((stringError)(@string)"path too long"u8);
 
 internal static nint unescapedLen(slice<byte> @in) {
-    return len(@in) - bytealg.Count(@in, (byte)(rune)'\\') * 3;
+    return len(@in) - bytealg.Count(@in, (byte)'\\') * 3;
 }
 
 // unescapePath copies in to out, unescaping escape sequences generated by
@@ -452,8 +451,8 @@ internal static nint unescapedLen(slice<byte> @in) {
 //
 // Also see escapePath in cgroup_linux_test.go.
 internal static (nint, error) unescapePath(slice<byte> @out, slice<byte> @in) {
-    nint outi = default!;
-    nint ini = default!;
+    nint outi = default;
+    nint ini = default;
     while (ini < len(@in)) {
         if (outi >= len(@out)) {
             // given that caller already ensured out is long enough, this
@@ -462,7 +461,7 @@ internal static (nint, error) unescapePath(slice<byte> @out, slice<byte> @in) {
             return (outi, errInvalidEscape);
         }
         var c = @in[ini];
-        if (c != (rune)'\\') {
+        if (c != '\\') {
             @out[outi] = c;
             outi++;
             ini++;
@@ -477,15 +476,15 @@ internal static (nint, error) unescapePath(slice<byte> @out, slice<byte> @in) {
             return (outi, errInvalidEscape);
         }
 
-        nint outc = default!;
+        nint outc = default;
         foreach (var i in range(3)) {
             var cΔ1 = @in[ini + 1 + i];
-            if (cΔ1 < (rune)'0' || cΔ1 > (rune)'7') {
+            if (cΔ1 < '0' || cΔ1 > '7') {
                 return (outi, errInvalidEscape);
             }
 
             outc *= 8;
-            outc += (nint)((byte)(cΔ1 - (rune)'0'));
+            outc += (nint)((byte)(cΔ1 - '0'));
         }
 
         if (outc > 0xFF) {
@@ -497,7 +496,7 @@ internal static (nint, error) unescapePath(slice<byte> @out, slice<byte> @in) {
         ini += 4;
     }
 
-    return (outi, default!);
+    return (outi, default);
 }
 
 } // end cgroup_package

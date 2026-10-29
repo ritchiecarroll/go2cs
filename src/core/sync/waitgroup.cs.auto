@@ -99,21 +99,24 @@ public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) {
         if (synctest.IsInBubble()) {
             // If Add is called from within a bubble, then all Add calls must be made
             // from the same bubble.
-            var exprᴛ1 = synctest.Associate(Ꮡwg);
-            if (exprᴛ1 == synctest.Unbubbled) {
+            switch (synctest.Associate(Ꮡwg)) {
+            case var ᴛ when ᴛ == synctest.Unbubbled: {
+                break;
             }
-            else if (exprᴛ1 == synctest.OtherBubble) {
+            case var ᴛ when ᴛ == synctest.OtherBubble: {
                 // wg is already associated with a different bubble.
                 fatal("sync: WaitGroup.Add called from multiple synctest bubbles"u8);
+                break;
             }
-            else if (exprᴛ1 == synctest.CurrentBubble) {
+            case var ᴛ when ᴛ == synctest.CurrentBubble: {
                 bubbled = true;
                 var stateΔ2 = Ꮡwg.of(WaitGroup.Ꮡstate).Or(waitGroupBubbleFlag);
                 if (stateΔ2 != 0 && (stateΔ2 & (uint64)waitGroupBubbleFlag) == 0) {
                     // Add has been called from outside this bubble.
                     fatal("sync: WaitGroup.Add called from inside and outside synctest bubble"u8);
                 }
-            }
+                break;
+            }}
         }
         var state = Ꮡwg.of(WaitGroup.Ꮡstate).Add((uint64)delta << 32);
         if ((state & (uint64)waitGroupBubbleFlag) != 0 && !bubbled) {
@@ -180,7 +183,7 @@ public static void Wait(this ж<WaitGroup> Ꮡwg) {
     if (race.Enabled) {
         race.Disable();
     }
-    while (ᐧ) {
+    for (;;) {
         var state = Ꮡwg.of(WaitGroup.Ꮡstate).Load();
         var v = (int32)(state >> 32);
         var w = (uint32)(state & 0x7fffffff);
@@ -259,7 +262,7 @@ public static partial void Go(this ж<WaitGroup> Ꮡwg, Action f) {
         try {
             defer(() => {
                 {
-                    var x = recover(); if (x != default!) {
+                    var x = recover(); if (x != nil) {
                         // f panicked, which will be fatal because
                         // this is a new goroutine.
                         //

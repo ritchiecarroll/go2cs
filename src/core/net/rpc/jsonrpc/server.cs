@@ -50,8 +50,8 @@ partial struct serverRequest {
 
 internal static void reset(this ref serverRequest r) {
     r.Method = ""u8;
-    r.Params = default!;
-    r.Id = default!;
+    r.Params = default;
+    r.Id = default;
 }
 
 partial struct serverResponse {
@@ -66,7 +66,7 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
 
     c.req.reset();
     {
-        var err = c.dec.Decode(Ꮡc.of(serverCodec.Ꮡreq)); if (err != default!) {
+        var err = c.dec.Decode(Ꮡc.of(serverCodec.Ꮡreq)); if (err != nil) {
             return err;
         }
     }
@@ -78,16 +78,16 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
     c.mutex.Lock();
     c.seq++;
     c.pending[c.seq] = c.req.Id;
-    c.req.Id = default!;
+    c.req.Id = default;
     r.Seq = c.seq;
     c.mutex.Unlock();
 
-    return default!;
+    return default;
 }
 
 internal static error ReadRequestBody(this ref serverCodec c, any x) {
-    if (x == default!) {
-        return default!;
+    if (x == nil) {
+        return default;
     }
     if (c.req.Params == nil) {
         return errMissingParams;
@@ -125,7 +125,7 @@ internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> 
         b = Ꮡnull;
     }
     var resp = new serverResponse(Id: b);
-    if (r.Error == ""u8){
+    if (r.Error == ""u8) {
         resp.Result = x;
     } else {
         resp.Error = r.Error;

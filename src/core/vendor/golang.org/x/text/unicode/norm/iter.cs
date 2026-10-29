@@ -18,10 +18,10 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 partial struct Iter {
     internal reorderBuffer rb;
     internal array<byte> buf = new(maxByteBufferSize);
-    internal ΔProperties info; // first character saved from previous iteration
+    internal ΔProperties info;                // first character saved from previous iteration
     internal Func<ж<Iter>, slice<byte>> next; // implementation of next depends on form
     internal Func<ж<Iter>, slice<byte>> asciiF;
-    internal nint p;   // current position in input source
+    internal nint p;               // current position in input source
     internal slice<byte> multiSeg; // remainder of multi-segment decomposition
 }
 
@@ -35,7 +35,7 @@ public static void Init(this ref Iter i, Form f, slice<byte> src) {
         i.rb.nsrc = 0;
         return;
     }
-    i.multiSeg = default!;
+    i.multiSeg = default;
     i.rb.init(f, src);
     i.next = i.rb.f.nextMain;
     i.asciiF = nextASCIIBytes;
@@ -51,7 +51,7 @@ public static void InitString(this ref Iter i, Form f, @string src) {
         i.rb.nsrc = 0;
         return;
     }
-    i.multiSeg = default!;
+    i.multiSeg = default;
     i.rb.initString(f, src);
     i.next = i.rb.f.nextMain;
     i.asciiF = nextASCIIString;
@@ -63,7 +63,7 @@ public static void InitString(this ref Iter i, Form f, @string src) {
 // at position p.  It is the responsibility of the caller to set p to the
 // start of a segment.
 public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) {
-    int64 abs = default!;
+    int64 abs = default;
     switch (whence) {
     case 0: {
         abs = offset;
@@ -85,14 +85,14 @@ public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) {
     }
     if ((nint)abs >= i.rb.nsrc) {
         i.setDone();
-        return ((int64)i.p, default!);
+        return ((int64)i.p, default);
     }
     i.p = (nint)abs;
-    i.multiSeg = default!;
+    i.multiSeg = default;
     i.next = i.rb.f.nextMain;
     i.info = i.rb.f.info(i.rb.src, i.p);
     i.rb.ss.first(i.info);
-    return (abs, default!);
+    return (abs, default);
 }
 
 // returnSlice returns a slice of the underlying input type as a byte slice.
@@ -100,7 +100,7 @@ public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) {
 // If the underlying is of type string, it will copy the slice to the buffer
 // and return that.
 internal static slice<byte> returnSlice(this ref Iter i, nint a, nint b) {
-    if (i.rb.src.bytes == default!) {
+    if (i.rb.src.bytes == nil) {
         return i.buf.slice(0, copy(i.buf[..], i.rb.src.str.slice(a, b)));
     }
     return i.rb.src.bytes.slice(a, b);
@@ -175,10 +175,9 @@ internal static slice<byte> nextHangul(ж<Iter> Ꮡi) {
 
     nint p = i.p;
     nint next = p + (nint)hangulUTF8Size;
-    if (next >= i.rb.nsrc){
+    if (next >= i.rb.nsrc) {
         i.setDone();
-    } else 
-    if (i.rb.src.hangul(next) == 0) {
+    } else if (i.rb.src.hangul(next) == 0) {
         i.rb.ss.next(i.info);
         i.info = i.rb.f.info(i.rb.src, i.p);
         i.next = i.rb.f.nextMain;
@@ -188,8 +187,8 @@ internal static slice<byte> nextHangul(ж<Iter> Ꮡi) {
     return i.buf.slice(0, decomposeHangul(i.buf[..], i.rb.src.hangul(p)));
 }
 
-internal static slice<byte> nextDone(ж<Iter> Ꮡi) {
-    return default!;
+internal static slice<byte> nextDone(ж<Iter> i) {
+    return default;
 }
 
 // nextMulti is used for iterating over multi-segment decompositions
@@ -234,7 +233,7 @@ internal static slice<byte> nextMultiNorm(ж<Iter> Ꮡi) {
         Ꮡi.of(Iter.Ꮡrb).insertUnsafe(new input(bytes: d), j, info);
         j += (nint)info.size;
     }
-    i.multiSeg = default!;
+    i.multiSeg = default;
     i.next = nextComposed;
     return doNormComposed(Ꮡi);
 }
@@ -246,55 +245,52 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
     nint outp = 0;
     nint inCopyStart = i.p;
     nint outCopyStart = 0;
-    while (ᐧ) {
+    for (;;) {
         {
-            nint sz = (nint)i.info.size; if (sz <= 1){
+            nint sz = (nint)i.info.size; if (sz <= 1) {
                 i.rb.ss = 0;
                 nint p = i.p;
                 i.p++; // ASCII or illegal byte.  Either way, advance by 1.
-                if (i.p >= i.rb.nsrc){
+                if (i.p >= i.rb.nsrc) {
                     i.setDone();
                     return i.returnSlice(p, i.p);
-                } else 
-                if (i.rb.src._byte(i.p) < utf8.RuneSelf) {
+                } else if (i.rb.src._byte(i.p) < utf8.RuneSelf) {
                     i.next = i.asciiF;
                     return i.returnSlice(p, i.p);
                 }
                 outp++;
-            } else 
-            {
-                var d = i.info.Decomposition(); if (d != default!){
+            } else {
+                var d = i.info.Decomposition(); if (d != nil) {
                     // Note: If leading CCC != 0, then len(d) == 2 and last is also non-zero.
                     // Case 1: there is a leftover to copy.  In this case the decomposition
                     // must begin with a modifier and should always be appended.
                     // Case 2: no leftover. Simply return d if followed by a ccc == 0 value.
                     nint p = outp + len(d);
-                    if (outp > 0){
+                    if (outp > 0) {
                         i.rb.src.copySlice(i.buf.slice(outCopyStart), inCopyStart, i.p);
                         // TODO: this condition should not be possible, but we leave it
                         // in for defensive purposes.
                         if (p > len(i.buf)) {
                             return i.buf.slice(0, outp);
                         }
-                    } else 
-                    if (i.info.multiSegment()) {
+                    } else if (i.info.multiSegment()) {
                         // outp must be 0 as multi-segment decompositions always
                         // start a new segment.
-                        if (i.multiSeg == default!) {
+                        if (i.multiSeg == nil) {
                             i.multiSeg = d;
                             i.next = nextMulti;
                             return nextMulti(Ꮡi);
                         }
                         // We are in the last segment.  Treat as normal decomposition.
                         d = i.multiSeg;
-                        i.multiSeg = default!;
+                        i.multiSeg = default;
                         p = len(d);
                     }
                     var prevCCΔ1 = i.info.tccc;
                     {
-                        i.p += sz; if (i.p >= i.rb.nsrc){
+                        i.p += sz; if (i.p >= i.rb.nsrc) {
                             i.setDone();
-                            i.info = new ΔProperties(nil); // Force BoundaryBefore to succeed.
+                            i.info = new ΔProperties(); // Force BoundaryBefore to succeed.
                         } else {
                             i.info = i.rb.f.info(i.rb.src, i.p);
                         }
@@ -319,17 +315,15 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
                         goto doNorm;
                     }
                     continue;
-                } else 
-                {
-                    var r = i.rb.src.hangul(i.p); if (r != 0){
+                } else {
+                    var r = i.rb.src.hangul(i.p); if (r != 0) {
                         outp = decomposeHangul(i.buf[..], r);
                         i.p += hangulUTF8Size;
                         (inCopyStart, outCopyStart) = (i.p, outp);
-                        if (i.p >= i.rb.nsrc){
+                        if (i.p >= i.rb.nsrc) {
                             i.setDone();
                             break;
-                        } else 
-                        if (i.rb.src.hangul(i.p) != 0) {
+                        } else if (i.rb.src.hangul(i.p) != 0) {
                             i.next = nextHangul;
                             return i.buf.slice(0, outp);
                         }
@@ -351,10 +345,9 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
         var prevCC = i.info.tccc;
         i.info = i.rb.f.info(i.rb.src, i.p);
         {
-            ssState v = i.rb.ss.next(i.info); if (v == ssStarter){
+            ssState v = i.rb.ss.next(i.info); if (v == ssStarter) {
                 break;
-            } else 
-            if (v == ssOverflow) {
+            } else if (v == ssOverflow) {
                 i.next = nextCGJDecompose;
                 break;
             }
@@ -363,10 +356,9 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
             goto doNorm;
         }
     }
-    if (outCopyStart == 0){
+    if (outCopyStart == 0) {
         return i.returnSlice(inCopyStart, i.p);
-    } else 
-    if (inCopyStart < i.p) {
+    } else if (inCopyStart < i.p) {
         i.rb.src.copySlice(i.buf.slice(outCopyStart), inCopyStart, i.p);
     }
     return i.buf.slice(0, outp);
@@ -381,7 +373,7 @@ doNorm:
 internal static slice<byte> doNormDecomposed(ж<Iter> Ꮡi) {
     ref var i = ref Ꮡi.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         Ꮡi.of(Iter.Ꮡrb).insertUnsafe(i.rb.src, i.p, i.info);
         {
             i.p += (nint)i.info.size; if (i.p >= i.rb.nsrc) {
@@ -421,8 +413,8 @@ internal static slice<byte> nextComposed(ж<Iter> Ꮡi) {
 
     nint outp = 0;
     nint startp = i.p;
-    uint8 prevCC = default!;
-    while (ᐧ) {
+    uint8 prevCC = default;
+    for (;;) {
         if (!i.info.isYesC()) {
             goto doNorm;
         }
@@ -437,21 +429,19 @@ internal static slice<byte> nextComposed(ж<Iter> Ꮡi) {
         }
         outp = p;
         i.p += sz;
-        if (i.p >= i.rb.nsrc){
+        if (i.p >= i.rb.nsrc) {
             i.setDone();
             break;
-        } else 
-        if (i.rb.src._byte(i.p) < utf8.RuneSelf) {
+        } else if (i.rb.src._byte(i.p) < utf8.RuneSelf) {
             i.rb.ss = 0;
             i.next = i.asciiF;
             break;
         }
         i.info = i.rb.f.info(i.rb.src, i.p);
         {
-            ssState v = i.rb.ss.next(i.info); if (v == ssStarter){
+            ssState v = i.rb.ss.next(i.info); if (v == ssStarter) {
                 break;
-            } else 
-            if (v == ssOverflow) {
+            } else if (v == ssOverflow) {
                 i.next = nextCGJCompose;
                 break;
             }
@@ -483,7 +473,7 @@ internal static slice<byte> doNormComposed(ж<Iter> Ꮡi) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     // First rune should already be inserted.
-    while (ᐧ) {
+    for (;;) {
         {
             i.p += (nint)i.info.size; if (i.p >= i.rb.nsrc) {
                 i.setDone();
@@ -492,10 +482,9 @@ internal static slice<byte> doNormComposed(ж<Iter> Ꮡi) {
         }
         i.info = i.rb.f.info(i.rb.src, i.p);
         {
-            ssState s = i.rb.ss.next(i.info); if (s == ssStarter){
+            ssState s = i.rb.ss.next(i.info); if (s == ssStarter) {
                 break;
-            } else 
-            if (s == ssOverflow) {
+            } else if (s == ssOverflow) {
                 i.next = nextCGJCompose;
                 break;
             }

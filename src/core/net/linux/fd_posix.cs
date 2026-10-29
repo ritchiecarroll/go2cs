@@ -25,12 +25,12 @@ partial struct netFD {
 }
 
 internal static @string name(this ref netFD fd) {
-    @string ls = default!;
-    @string rs = default!;
-    if (fd.laddr != default!) {
+    @string ls = default;
+    @string rs = default;
+    if (fd.laddr != nil) {
         ls = fd.laddr.String();
     }
-    if (fd.raddr != default!) {
+    if (fd.raddr != nil) {
         rs = fd.raddr.String();
     }
     return fd.net + ":"u8 + ls + "->"u8 + rs;
@@ -47,7 +47,7 @@ internal static void setAddr(this ж<netFD> Ꮡfd, ΔAddr laddr, ΔAddr raddr) {
 
 internal static error Close(this ж<netFD> Ꮡfd) {
     // TODO Replace with runtime.AddCleanup.
-    runtime.SetFinalizer(Ꮡfd.OrTypedNil(), default!);
+    runtime.SetFinalizer(Ꮡfd.OrTypedNil(), default);
     return Ꮡfd.of(netFD.Ꮡpfd).Close();
 }
 
@@ -69,8 +69,8 @@ internal static error closeWrite(this ж<netFD> Ꮡfd) {
 }
 
 internal static (nint n, error err) Read(this ж<netFD> Ꮡfd, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = Ꮡfd.of(netFD.Ꮡpfd).Read(p);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
@@ -78,70 +78,70 @@ internal static (nint n, error err) Read(this ж<netFD> Ꮡfd, slice<byte> p) {
 }
 
 internal static (nint n, syscall.Sockaddr sa, error err) readFrom(this ж<netFD> Ꮡfd, slice<byte> p) {
-    nint n = default!;
-    syscall.Sockaddr sa = default!;
-    error err = default!;
+    nint n = default;
+    syscall.Sockaddr sa = default;
+    error err = default;
 
     (n, sa, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadFrom(p);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, sa, wrapSyscallError(readFromSyscallName, err));
 }
 
-internal static (nint n, error err) readFromInet4(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> Ꮡfrom) {
-    nint n = default!;
-    error err = default!;
+internal static (nint n, error err) readFromInet4(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> from) {
+    nint n = default;
+    error err = default;
 
-    (n, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadFromInet4(p, Ꮡfrom);
+    (n, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadFromInet4(p, from);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, wrapSyscallError(readFromSyscallName, err));
 }
 
-internal static (nint n, error err) readFromInet6(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet6> Ꮡfrom) {
-    nint n = default!;
-    error err = default!;
+internal static (nint n, error err) readFromInet6(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet6> from) {
+    nint n = default;
+    error err = default;
 
-    (n, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadFromInet6(p, Ꮡfrom);
+    (n, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadFromInet6(p, from);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, wrapSyscallError(readFromSyscallName, err));
 }
 
 internal static (nint n, nint oobn, nint retflags, syscall.Sockaddr sa, error err) readMsg(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
-    nint n = default!;
-    nint oobn = default!;
-    nint retflags = default!;
-    syscall.Sockaddr sa = default!;
-    error err = default!;
+    nint n = default;
+    nint oobn = default;
+    nint retflags = default;
+    syscall.Sockaddr sa = default;
+    error err = default;
 
     (n, oobn, retflags, sa, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadMsg(p, oob, flags);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, oobn, retflags, sa, wrapSyscallError(readMsgSyscallName, err));
 }
 
-internal static (nint n, nint oobn, nint retflags, error err) readMsgInet4(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet4> Ꮡsa) {
-    nint n = default!;
-    nint oobn = default!;
-    nint retflags = default!;
-    error err = default!;
+internal static (nint n, nint oobn, nint retflags, error err) readMsgInet4(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet4> sa) {
+    nint n = default;
+    nint oobn = default;
+    nint retflags = default;
+    error err = default;
 
-    (n, oobn, retflags, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadMsgInet4(p, oob, flags, Ꮡsa);
+    (n, oobn, retflags, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadMsgInet4(p, oob, flags, sa);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, oobn, retflags, wrapSyscallError(readMsgSyscallName, err));
 }
 
-internal static (nint n, nint oobn, nint retflags, error err) readMsgInet6(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet6> Ꮡsa) {
-    nint n = default!;
-    nint oobn = default!;
-    nint retflags = default!;
-    error err = default!;
+internal static (nint n, nint oobn, nint retflags, error err) readMsgInet6(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet6> sa) {
+    nint n = default;
+    nint oobn = default;
+    nint retflags = default;
+    error err = default;
 
-    (n, oobn, retflags, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadMsgInet6(p, oob, flags, Ꮡsa);
+    (n, oobn, retflags, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadMsgInet6(p, oob, flags, sa);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, oobn, retflags, wrapSyscallError(readMsgSyscallName, err));
 }
 
 internal static (nint nn, error err) Write(this ж<netFD> Ꮡfd, slice<byte> p) {
-    nint nn = default!;
-    error err = default!;
+    nint nn = default;
+    error err = default;
 
     (nn, err) = Ꮡfd.of(netFD.Ꮡpfd).Write(p);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
@@ -149,58 +149,58 @@ internal static (nint nn, error err) Write(this ж<netFD> Ꮡfd, slice<byte> p) 
 }
 
 internal static (nint n, error err) writeTo(this ж<netFD> Ꮡfd, slice<byte> p, syscall.Sockaddr sa) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteTo(p, sa);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, wrapSyscallError(writeToSyscallName, err));
 }
 
-internal static (nint n, error err) writeToInet4(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> Ꮡsa) {
-    nint n = default!;
-    error err = default!;
+internal static (nint n, error err) writeToInet4(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> sa) {
+    nint n = default;
+    error err = default;
 
-    (n, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteToInet4(p, Ꮡsa);
+    (n, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteToInet4(p, sa);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, wrapSyscallError(writeToSyscallName, err));
 }
 
-internal static (nint n, error err) writeToInet6(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet6> Ꮡsa) {
-    nint n = default!;
-    error err = default!;
+internal static (nint n, error err) writeToInet6(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet6> sa) {
+    nint n = default;
+    error err = default;
 
-    (n, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteToInet6(p, Ꮡsa);
+    (n, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteToInet6(p, sa);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, wrapSyscallError(writeToSyscallName, err));
 }
 
 internal static (nint n, nint oobn, error err) writeMsg(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, syscall.Sockaddr sa) {
-    nint n = default!;
-    nint oobn = default!;
-    error err = default!;
+    nint n = default;
+    nint oobn = default;
+    error err = default;
 
     (n, oobn, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteMsg(p, oob, sa);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, oobn, wrapSyscallError(writeMsgSyscallName, err));
 }
 
-internal static (nint n, nint oobn, error err) writeMsgInet4(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet4> Ꮡsa) {
-    nint n = default!;
-    nint oobn = default!;
-    error err = default!;
+internal static (nint n, nint oobn, error err) writeMsgInet4(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet4> sa) {
+    nint n = default;
+    nint oobn = default;
+    error err = default;
 
-    (n, oobn, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteMsgInet4(p, oob, Ꮡsa);
+    (n, oobn, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteMsgInet4(p, oob, sa);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, oobn, wrapSyscallError(writeMsgSyscallName, err));
 }
 
-internal static (nint n, nint oobn, error err) writeMsgInet6(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet6> Ꮡsa) {
-    nint n = default!;
-    nint oobn = default!;
-    error err = default!;
+internal static (nint n, nint oobn, error err) writeMsgInet6(this ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet6> sa) {
+    nint n = default;
+    nint oobn = default;
+    error err = default;
 
-    (n, oobn, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteMsgInet6(p, oob, Ꮡsa);
+    (n, oobn, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteMsgInet6(p, oob, sa);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, oobn, wrapSyscallError(writeMsgSyscallName, err));
 }

@@ -13,7 +13,7 @@ internal static slice<byte> byteSliceRemoveBytes(ж<mutator> Ꮡm, slice<byte> b
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) <= 1) {
-        return default!;
+        return default;
     }
     nint pos0 = m.rand(len(b));
     nint pos1 = pos0 + m.chooseLen(len(b) - pos0);
@@ -30,7 +30,7 @@ internal static slice<byte> byteSliceInsertRandomBytes(ж<mutator> Ꮡm, slice<b
     nint pos = m.rand(len(b) + 1);
     nint n = m.chooseLen(1024);
     if (len(b) + n >= builtin.cap(b)) {
-        return default!;
+        return default;
     }
     b = b.slice(0, len(b) + n);
     copy(b.slice(pos + n), b.slice(pos));
@@ -46,7 +46,7 @@ internal static slice<byte> byteSliceDuplicateBytes(ж<mutator> Ꮡm, slice<byte
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) <= 1) {
-        return default!;
+        return default;
     }
     nint src = m.rand(len(b));
     nint dst = m.rand(len(b));
@@ -58,7 +58,7 @@ internal static slice<byte> byteSliceDuplicateBytes(ж<mutator> Ꮡm, slice<byte
     // allocation. If the slice is too small abort and try something
     // else.
     if (len(b) + (n * 2) >= builtin.cap(b)) {
-        return default!;
+        return default;
     }
     nint end = len(b);
     // Increase the size of b to fit the duplicated block as well as
@@ -81,7 +81,7 @@ internal static slice<byte> byteSliceOverwriteBytes(ж<mutator> Ꮡm, slice<byte
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) <= 1) {
-        return default!;
+        return default;
     }
     nint src = m.rand(len(b));
     nint dst = m.rand(len(b));
@@ -98,7 +98,7 @@ internal static slice<byte> byteSliceBitFlip(ж<mutator> Ꮡm, slice<byte> b) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) == 0) {
-        return default!;
+        return default;
     }
     nint pos = m.rand(len(b));
     b[pos] ^= (byte)(((byte)1).Lsh((nuint)m.rand(8)));
@@ -110,7 +110,7 @@ internal static slice<byte> byteSliceXORByte(ж<mutator> Ꮡm, slice<byte> b) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) == 0) {
-        return default!;
+        return default;
     }
     nint pos = m.rand(len(b));
     // In order to avoid a no-op (where the random value matches
@@ -125,7 +125,7 @@ internal static slice<byte> byteSliceSwapByte(ж<mutator> Ꮡm, slice<byte> b) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) <= 1) {
-        return default!;
+        return default;
     }
     nint src = m.rand(len(b));
     nint dst = m.rand(len(b));
@@ -141,11 +141,11 @@ internal static slice<byte> byteSliceArithmeticUint8(ж<mutator> Ꮡm, slice<byt
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) == 0) {
-        return default!;
+        return default;
     }
     nint pos = m.rand(len(b));
     var v = (byte)(m.rand(35) + 1);
-    if (m.r.@bool()){
+    if (m.r.@bool()) {
         b[pos] += v;
     } else {
         b[pos] -= v;
@@ -158,7 +158,7 @@ internal static slice<byte> byteSliceArithmeticUint16(ж<mutator> Ꮡm, slice<by
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) < 2) {
-        return default!;
+        return default;
     }
     var v = (uint16)(m.rand(35) + 1);
     if (m.r.@bool()) {
@@ -175,7 +175,7 @@ internal static slice<byte> byteSliceArithmeticUint32(ж<mutator> Ꮡm, slice<by
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) < 4) {
-        return default!;
+        return default;
     }
     var v = (uint32)(m.rand(35) + 1);
     if (m.r.@bool()) {
@@ -192,7 +192,7 @@ internal static slice<byte> byteSliceArithmeticUint64(ж<mutator> Ꮡm, slice<by
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) < 8) {
-        return default!;
+        return default;
     }
     var v = (uint64)(m.rand(35) + 1);
     if (m.r.@bool()) {
@@ -210,7 +210,7 @@ internal static slice<byte> byteSliceOverwriteInterestingUint8(ж<mutator> Ꮡm,
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) == 0) {
-        return default!;
+        return default;
     }
     nint pos = m.rand(len(b));
     b[pos] = (byte)interesting8[m.rand(len(interesting8))];
@@ -223,7 +223,7 @@ internal static slice<byte> byteSliceOverwriteInterestingUint16(ж<mutator> Ꮡm
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) < 2) {
-        return default!;
+        return default;
     }
     nint pos = m.rand(len(b) - 1);
     var v = (uint16)interesting16[m.rand(len(interesting16))];
@@ -237,7 +237,7 @@ internal static slice<byte> byteSliceOverwriteInterestingUint32(ж<mutator> Ꮡm
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) < 4) {
-        return default!;
+        return default;
     }
     nint pos = m.rand(len(b) - 3);
     var v = (uint32)interesting32[m.rand(len(interesting32))];
@@ -250,7 +250,7 @@ internal static slice<byte> byteSliceInsertConstantBytes(ж<mutator> Ꮡm, slice
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) <= 1) {
-        return default!;
+        return default;
     }
     nint dst = m.rand(len(b));
     // TODO(rolandshoemaker,katiehockman): 4096 was mainly picked
@@ -263,7 +263,7 @@ internal static slice<byte> byteSliceInsertConstantBytes(ж<mutator> Ꮡm, slice
     // that range).
     nint n = m.chooseLen(4096);
     if (len(b) + n >= builtin.cap(b)) {
-        return default!;
+        return default;
     }
     b = b.slice(0, len(b) + n);
     copy(b.slice(dst + n), b.slice(dst));
@@ -279,7 +279,7 @@ internal static slice<byte> byteSliceOverwriteConstantBytes(ж<mutator> Ꮡm, sl
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) <= 1) {
-        return default!;
+        return default;
     }
     nint dst = m.rand(len(b));
     nint n = m.chooseLen(len(b) - dst);
@@ -295,12 +295,12 @@ internal static slice<byte> byteSliceShuffleBytes(ж<mutator> Ꮡm, slice<byte> 
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) <= 1) {
-        return default!;
+        return default;
     }
     nint dst = m.rand(len(b));
     nint n = m.chooseLen(len(b) - dst);
     if (n <= 2) {
-        return default!;
+        return default;
     }
     // Start at the end of the range, and iterate backwards
     // to dst, swapping each element with another element in
@@ -317,7 +317,7 @@ internal static slice<byte> byteSliceSwapBytes(ж<mutator> Ꮡm, slice<byte> b) 
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (len(b) <= 1) {
-        return default!;
+        return default;
     }
     nint src = m.rand(len(b));
     nint dst = m.rand(len(b));
@@ -335,13 +335,13 @@ internal static slice<byte> byteSliceSwapBytes(ж<mutator> Ꮡm, slice<byte> b) 
     // Check that neither chunk intersect, so that we don't end up
     // duplicating parts of the input, rather than swapping them
     if (src > dst && dst + n >= src || dst > src && src + n >= dst) {
-        return default!;
+        return default;
     }
     // Use the end of the slice as scratch space to avoid doing an
     // allocation. If the slice is too small abort and try something
     // else.
     if (len(b) + n >= builtin.cap(b)) {
-        return default!;
+        return default;
     }
     nint end = len(b);
     b = b.slice(0, end + n);

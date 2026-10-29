@@ -19,7 +19,7 @@ internal static nint commonPrefixLenIgnoreCase(@string s, @string prefix) {
     nint n = min(len(prefix), len(s));
     for (nint i = 0; i < n; i++) {
         var c = s[i];
-        if ((rune)'A' <= c && c <= (rune)'Z') {
+        if ('A' <= c && c <= 'Z') {
             c += (byte)((rune)'a' - (rune)'A');
         }
         if (c != prefix[i]) {
@@ -46,15 +46,15 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
     nint nsign = 0;
     var exprᴛ1 = s[0];
     var matchᴛ1 = false;
-    if (exprᴛ1 is (rune)'+' or (rune)'-') { matchᴛ1 = true;
-        if (s[0] == (rune)'-') {
+    if (exprᴛ1 is (byte)'+' or (byte)'-') { matchᴛ1 = true;
+        if (s[0] == '-') {
             sign = -1;
         }
         nsign = 1;
         s = s[1..];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && (exprᴛ1 is (rune)'i' or (rune)'I')) {
+    if (fallthrough || !matchᴛ1 && (exprᴛ1 is (byte)'i' or (byte)'I')) {
         nint nΔ2 = commonPrefixLenIgnoreCase(s, infinityˢ);
         // Anything longer than "inf" is ok, but if we
         // don't have "infinity", only consume "inf".
@@ -65,7 +65,7 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
             return (inf(sign), nsign + nΔ2, true);
         }
     }
-    else if (exprᴛ1 is (rune)'n' or (rune)'N') { matchᴛ1 = true;
+    else if (exprᴛ1 is (byte)'n' or (byte)'N') { matchᴛ1 = true;
         if (commonPrefixLenIgnoreCase(s, nanˢ) == 3) {
             return (nan(), 3, true);
         }
@@ -74,7 +74,7 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
 }
 
 internal static bool /*ok*/ set(this ref @decimal b, @string s) {
-    bool ok = default!;
+    bool ok = default;
 
     nint i = 0;
     b.neg = false;
@@ -85,11 +85,11 @@ internal static bool /*ok*/ set(this ref @decimal b, @string s) {
         return ok;
     }
     switch (s[i]) {
-    case (rune)'+': {
+    case (byte)'+': {
         i++;
         break;
     }
-    case (rune)'-': {
+    case (byte)'-': {
         i++;
         b.neg = true;
         break;
@@ -100,12 +100,12 @@ internal static bool /*ok*/ set(this ref @decimal b, @string s) {
     var sawdigits = false;
     for (; i < len(s); i++) {
         switch (ᐧ) {
-        case {} when s[i] is (rune)'_': {
+        case {} when s[i] is (byte)'_': {
             // readFloat already checked underscores
             continue;
             break;
         }
-        case {} when s[i] is (rune)'.': {
+        case {} when s[i] is (byte)'.': {
             if (sawdot) {
                 return ok;
             }
@@ -114,17 +114,16 @@ internal static bool /*ok*/ set(this ref @decimal b, @string s) {
             continue;
             break;
         }
-        case {} when (rune)'0' <= s[i] && s[i] <= (rune)'9': {
+        case {} when (byte)'0' <= s[i] && s[i] <= (byte)'9': {
             sawdigits = true;
-            if (s[i] == (rune)'0' && b.nd == 0) { // ignore leading zeros
+            if (s[i] == '0' && b.nd == 0) { // ignore leading zeros
                 b.dp--;
                 continue;
             }
-            if (b.nd < len(b.d)){
+            if (b.nd < len(b.d)) {
                 b.d[b.nd] = s[i];
                 b.nd++;
-            } else 
-            if (s[i] != (rune)'0') {
+            } else if (s[i] != '0') {
                 b.trunc = true;
             }
             continue;
@@ -144,33 +143,33 @@ internal static bool /*ok*/ set(this ref @decimal b, @string s) {
     // just be sure to move the decimal point by
     // a lot (say, 100000).  it doesn't matter if it's
     // not the exact number.
-    if (i < len(s) && lower(s[i]) == (rune)'e') {
+    if (i < len(s) && lower(s[i]) == 'e') {
         i++;
         if (i >= len(s)) {
             return ok;
         }
         nint esign = 1;
         switch (s[i]) {
-        case (rune)'+': {
+        case (byte)'+': {
             i++;
             break;
         }
-        case (rune)'-': {
+        case (byte)'-': {
             i++;
             esign = -1;
             break;
         }}
-        if (i >= len(s) || s[i] < (rune)'0' || s[i] > (rune)'9') {
+        if (i >= len(s) || s[i] < '0' || s[i] > '9') {
             return ok;
         }
         nint e = 0;
-        for (; i < len(s) && ((rune)'0' <= s[i] && s[i] <= (rune)'9' || s[i] == (rune)'_'); i++) {
-            if (s[i] == (rune)'_') {
+        for (; i < len(s) && ('0' <= s[i] && s[i] <= '9' || s[i] == '_'); i++) {
+            if (s[i] == '_') {
                 // readFloat already checked underscores
                 continue;
             }
             if (e < 10000) {
-                e = e * 10 + (nint)s[i] - (rune)'0';
+                e = e * 10 + (nint)s[i] - '0';
             }
         }
         b.dp += e * esign;
@@ -189,13 +188,13 @@ internal static bool /*ok*/ set(this ref @decimal b, @string s) {
 // readFloat reports the number of bytes consumed (i), and whether the number
 // is valid (ok).
 internal static (uint64 mantissa, nint exp, bool neg, bool trunc, bool hex, nint i, bool ok) readFloat(@string s) {
-    uint64 mantissa = default!;
-    nint exp = default!;
-    bool neg = default!;
-    bool trunc = default!;
-    bool hex = default!;
-    nint i = default!;
-    bool ok = default!;
+    uint64 mantissa = default;
+    nint exp = default;
+    bool neg = default;
+    bool trunc = default;
+    bool hex = default;
+    nint i = default;
+    bool ok = default;
 
     var underscores = false;
 
@@ -204,11 +203,11 @@ internal static (uint64 mantissa, nint exp, bool neg, bool trunc, bool hex, nint
         return (mantissa, exp, neg, trunc, hex, i, ok);
     }
     switch (s[i]) {
-    case (rune)'+': {
+    case (byte)'+': {
         i++;
         break;
     }
-    case (rune)'-': {
+    case (byte)'-': {
         i++;
         neg = true;
         break;
@@ -217,12 +216,12 @@ internal static (uint64 mantissa, nint exp, bool neg, bool trunc, bool hex, nint
     // digits
     var @base = (uint64)10;
     nint maxMantDigits = 19; // 10^19 fits in uint64
-    var expChar = (byte)(rune)'e';
-    if (i + 2 < len(s) && s[i] == (rune)'0' && lower(s[i + 1]) == (rune)'x') {
+    var expChar = (byte)'e';
+    if (i + 2 < len(s) && s[i] == '0' && lower(s[i + 1]) == 'x') {
         @base = 16;
         maxMantDigits = 16; // 16^16 fits in uint64
         i += 2;
-        expChar = (rune)'p';
+        expChar = (byte)'p';
         hex = true;
     }
     var sawdot = false;
@@ -235,12 +234,12 @@ loop:
         {
             var c = s[i];
             switch (ᐧ) {
-            case {} when c is (rune)'_': {
+            case {} when c is (byte)'_': {
                 underscores = true;
                 continue;
                 break;
             }
-            case {} when c is (rune)'.': {
+            case {} when c is (byte)'.': {
                 if (sawdot) {
                     goto break_loop;
                 }
@@ -249,30 +248,29 @@ loop:
                 continue;
                 break;
             }
-            case {} when (rune)'0' <= c && c <= (rune)'9': {
+            case {} when (byte)'0' <= c && c <= (byte)'9': {
                 sawdigits = true;
-                if (c == (rune)'0' && nd == 0) { // ignore leading zeros
+                if (c == '0' && nd == 0) { // ignore leading zeros
                     dp--;
                     continue;
                 }
                 nd++;
-                if (ndMant < maxMantDigits){
+                if (ndMant < maxMantDigits) {
                     mantissa *= @base;
-                    mantissa += (uint64)((byte)(c - (rune)'0'));
+                    mantissa += (uint64)((byte)(c - '0'));
                     ndMant++;
-                } else 
-                if (c != (rune)'0') {
+                } else if (c != '0') {
                     trunc = true;
                 }
                 continue;
                 break;
             }
-            case {} when @base == 16 && (rune)'a' <= lower(c) && lower(c) <= (rune)'f': {
+            case {} when @base == 16 && (byte)'a' <= lower(c) && lower(c) <= (byte)'f': {
                 sawdigits = true;
                 nd++;
-                if (ndMant < maxMantDigits){
+                if (ndMant < maxMantDigits) {
                     mantissa *= 16;
-                    mantissa += (uint64)((byte)(lower(c) - (rune)'a' + 10));
+                    mantissa += (uint64)((byte)(lower(c) - 'a' + 10));
                     ndMant++;
                 } else {
                     trunc = true;
@@ -302,38 +300,37 @@ break_loop:;
     // just be sure to move the decimal point by
     // a lot (say, 100000).  it doesn't matter if it's
     // not the exact number.
-    if (i < len(s) && lower(s[i]) == expChar){
+    if (i < len(s) && lower(s[i]) == expChar) {
         i++;
         if (i >= len(s)) {
             return (mantissa, exp, neg, trunc, hex, i, ok);
         }
         nint esign = 1;
         switch (s[i]) {
-        case (rune)'+': {
+        case (byte)'+': {
             i++;
             break;
         }
-        case (rune)'-': {
+        case (byte)'-': {
             i++;
             esign = -1;
             break;
         }}
-        if (i >= len(s) || s[i] < (rune)'0' || s[i] > (rune)'9') {
+        if (i >= len(s) || s[i] < '0' || s[i] > '9') {
             return (mantissa, exp, neg, trunc, hex, i, ok);
         }
         nint e = 0;
-        for (; i < len(s) && ((rune)'0' <= s[i] && s[i] <= (rune)'9' || s[i] == (rune)'_'); i++) {
-            if (s[i] == (rune)'_') {
+        for (; i < len(s) && ('0' <= s[i] && s[i] <= '9' || s[i] == '_'); i++) {
+            if (s[i] == '_') {
                 underscores = true;
                 continue;
             }
             if (e < 10000) {
-                e = e * 10 + (nint)s[i] - (rune)'0';
+                e = e * 10 + (nint)s[i] - '0';
             }
         }
         dp += e * esign;
-    } else 
-    if (@base == 16) {
+    } else if (@base == 16) {
         // Must have exponent.
         return (mantissa, exp, neg, trunc, hex, i, ok);
     }
@@ -351,15 +348,15 @@ break_loop:;
 }
 
 // decimal power of ten to binary power of two.
-internal static slice<nint> powtab = new nint[]{1, 3, 6, 9, 13, 16, 19, 23, 26}.slice();
+internal static slice<nint> powtab = slice<nint>([1, 3, 6, 9, 13, 16, 19, 23, 26]);
 
 internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) {
-    bool overflow = default!;
+    bool overflow = default;
     ref var d = ref Ꮡd.DerefOrNull();
     ref var flt = ref Ꮡflt.DerefOrNull();
 
-    nint exp = default!;
-    uint64 mant = default!;
+    nint exp = default;
+    uint64 mant = default;
 
     // Zero is always a special case.
     if (d.nd == 0) {
@@ -384,8 +381,8 @@ internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<f
     // Scale by powers of two until in range [0.5, 1.0)
     exp = 0;
     while (d.dp > 0) {
-        nint n = default!;
-        if (d.dp >= len(powtab)){
+        nint n = default;
+        if (d.dp >= len(powtab)) {
             n = 27;
         } else {
             n = powtab[d.dp];
@@ -393,9 +390,9 @@ internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<f
         Ꮡd.Shift(-n);
         exp += n;
     }
-    while (d.dp < 0 || d.dp == 0 && d.d[0] < (rune)'5') {
-        nint n = default!;
-        if (-d.dp >= len(powtab)){
+    while (d.dp < 0 || d.dp == 0 && d.d[0] < '5') {
+        nint n = default;
+        if (-d.dp >= len(powtab)) {
             n = 27;
         } else {
             n = powtab[-d.dp];
@@ -426,7 +423,7 @@ internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<f
 
     // Rounding might have added a bit; shift down.
     if (mant == ((uint64)2).Lsh(flt.mantbits)) {
-        mant >>= (int)(1);
+        mant >>= 1;
         exp++;
         if (exp - flt.bias >= ((nint)1).Lsh(flt.expbits) - 1) {
             goto overflow;
@@ -456,13 +453,13 @@ overflow:
 }
 
 // Exact powers of 10.
-[GoLazy] partial class lazyᴛfloat64pow10 { internal static slice<float64> float64pow10 = new float64[]{
+[GoLazy] partial class lazyᴛfloat64pow10 { internal static slice<float64> float64pow10 = slice<float64>([
     1e0D, 1e1D, 1e2D, 1e3D, 1e4D, 1e5D, 1e6D, 1e7D, 1e8D, 1e9D,
     1e10D, 1e11D, 1e12D, 1e13D, 1e14D, 1e15D, 1e16D, 1e17D, 1e18D, 1e19D,
     1e20D, 1e21D, 1e22D
-}.slice(); }
+]); }
 
-internal static slice<float32> float32pow10 = new float32[]{1e0F, 1e1F, 1e2F, 1e3F, 1e4F, 1e5F, 1e6F, 1e7F, 1e8F, 1e9F, 1e10F}.slice();
+internal static slice<float32> float32pow10 = slice<float32>([1e0F, 1e1F, 1e2F, 1e3F, 1e4F, 1e5F, 1e6F, 1e7F, 1e8F, 1e9F, 1e10F]);
 
 // If possible to convert decimal representation to 64-bit float f exactly,
 // entirely in floating-point math, do so, avoiding the expense of decimalToFloatBits.
@@ -474,8 +471,8 @@ internal static slice<float32> float32pow10 = new float32[]{1e0F, 1e1F, 1e2F, 1e
 //
 // These all produce potentially inexact but correctly rounded answers.
 internal static (float64 f, bool ok) atof64exact(uint64 mantissa, nint exp, bool neg) {
-    float64 f = default!;
-    bool ok = default!;
+    float64 f = default;
+    bool ok = default;
 
     if (mantissa.Rsh(float64info.mantbits) != 0) {
         return (f, ok);
@@ -513,8 +510,8 @@ internal static (float64 f, bool ok) atof64exact(uint64 mantissa, nint exp, bool
 // If possible to compute mantissa*10^exp to 32-bit float f exactly,
 // entirely in floating-point math, do so, avoiding the machinery above.
 internal static (float32 f, bool ok) atof32exact(uint64 mantissa, nint exp, bool neg) {
-    float32 f = default!;
-    bool ok = default!;
+    float32 f = default;
+    bool ok = default;
 
     if (mantissa >> (int)(float32MantBits) != 0) {
         return (f, ok);
@@ -567,7 +564,7 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
     // (If the mantissa has already lost non-zero bits, trunc is true,
     // and we OR in a 1 below after shifting left appropriately.)
     while (mantissa != 0 && mantissa.Rsh((flt.mantbits + 2)) == 0) {
-        mantissa <<= (int)(1);
+        mantissa <<= 1;
         exp--;
     }
     if (trunc) {
@@ -588,13 +585,13 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
 
     // Round using two bottom bits.
     var round = mantissa & 3;
-    mantissa >>= (int)(2);
+    mantissa >>= 2;
     round |= (uint64)((mantissa & 1)); // round to even (round up if mantissa is odd)
     exp += 2;
     if (round == 3) {
         mantissa++;
         if (mantissa == ((uint64)1).Lsh((1 + flt.mantbits))) {
-            mantissa >>= (int)(1);
+            mantissa >>= 1;
             exp++;
         }
     }
@@ -602,7 +599,7 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
     if (mantissa.Rsh(flt.mantbits) == 0) { // Denormal or zero.
         exp = flt.bias;
     }
-    error err = default!;
+    error err = default;
     if (exp > maxExp) { // infinity and range error
         mantissa = ((uint64)1).Lsh(flt.mantbits);
         exp = maxExp + 1;
@@ -623,13 +620,13 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
 internal static readonly @string fnParseFloat = "ParseFloat"u8;
 
 internal static (float32 f, nint n, error err) atof32(@string s) {
-    float32 f = default!;
-    nint n = default!;
-    error err = default!;
+    float32 f = default;
+    nint n = default;
+    error err = default;
 
     {
         var (val, nΔ1, okΔ1) = special(s); if (okΔ1) {
-            return ((float32)val, nΔ1, default!);
+            return ((float32)val, nΔ1, default);
         }
     }
 
@@ -649,21 +646,21 @@ internal static (float32 f, nint n, error err) atof32(@string s) {
         if (!trunc) {
             {
                 var (fΔ2, okΔ2) = atof32exact(mantissa, exp, neg); if (okΔ2) {
-                    return (fΔ2, n, default!);
+                    return (fΔ2, n, default);
                 }
             }
         }
         var (fΔ3, okΔ3) = eiselLemire32(mantissa, exp, neg);
         if (okΔ3) {
             if (!trunc) {
-                return (fΔ3, n, default!);
+                return (fΔ3, n, default);
             }
             // Even if the mantissa was truncated, we may
             // have found the correct result. Confirm by
             // converting the upper mantissa bound.
             var (fUp, okΔ4) = eiselLemire32(mantissa + 1, exp, neg);
             if (okΔ4 && fΔ3 == fUp) {
-                return (fΔ3, n, default!);
+                return (fΔ3, n, default);
             }
         }
     }
@@ -682,13 +679,13 @@ internal static (float32 f, nint n, error err) atof32(@string s) {
 }
 
 internal static (float64 f, nint n, error err) atof64(@string s) {
-    float64 f = default!;
-    nint n = default!;
-    error err = default!;
+    float64 f = default;
+    nint n = default;
+    error err = default;
 
     {
         var (val, nΔ1, okΔ1) = special(s); if (okΔ1) {
-            return (val, nΔ1, default!);
+            return (val, nΔ1, default);
         }
     }
 
@@ -708,21 +705,21 @@ internal static (float64 f, nint n, error err) atof64(@string s) {
         if (!trunc) {
             {
                 var (fΔ2, okΔ2) = atof64exact(mantissa, exp, neg); if (okΔ2) {
-                    return (fΔ2, n, default!);
+                    return (fΔ2, n, default);
                 }
             }
         }
         var (fΔ3, okΔ3) = eiselLemire64(mantissa, exp, neg);
         if (okΔ3) {
             if (!trunc) {
-                return (fΔ3, n, default!);
+                return (fΔ3, n, default);
             }
             // Even if the mantissa was truncated, we may
             // have found the correct result. Confirm by
             // converting the upper mantissa bound.
             var (fUp, okΔ4) = eiselLemire64(mantissa + 1, exp, neg);
             if (okΔ4 && fΔ3 == fUp) {
-                return (fΔ3, n, default!);
+                return (fΔ3, n, default);
             }
         }
     }

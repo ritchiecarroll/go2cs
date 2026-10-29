@@ -11,13 +11,13 @@ using @internal.syscall;
 
 partial class os_package {
 
-public static UntypedInt PathSeparator => /* '\\' */ 92; // OS-specific path separator
+public static UntypedInt PathSeparator => /* '\\' */ 92;    // OS-specific path separator
 public static UntypedInt PathListSeparator => /* ';' */ 59; // OS-specific path list separator
 
 // IsPathSeparator reports whether c is a directory separator character.
 public static bool IsPathSeparator(uint8 c) {
     // NOTE: Windows accepts / as path separator.
-    return c == (rune)'\\' || c == (rune)'/';
+    return c == '\\' || c == '/';
 }
 
 // splitPath returns the base name and parent directory.
@@ -30,12 +30,11 @@ internal static (@string, @string) splitPath(@string path) {
     // The prefix consists of the volume name (if any) and the first \ (if significant).
     nint prefixlen = filepathlite.VolumeNameLen(path);
     if (len(path) > prefixlen && IsPathSeparator(path[prefixlen])) {
-        if (prefixlen == 0){
+        if (prefixlen == 0) {
             // This is a path relative to the current volume, like \foo.
             // Include the initial \ in the prefix.
             prefixlen = 1;
-        } else 
-        if (path[prefixlen - 1] == (rune)':') {
+        } else if (path[prefixlen - 1] == ':') {
             // This is an absolute path on a named drive, like c:\foo.
             // Include the initial \ in the prefix.
             prefixlen++;
@@ -111,7 +110,7 @@ internal static @string addExtendedPrefix(@string path) {
             // Already extended with \??\
             return path;
         }
-        if (IsPathSeparator(path[0]) && IsPathSeparator(path[1]) && path[2] == (rune)'?' && IsPathSeparator(path[3])) {
+        if (IsPathSeparator(path[0]) && IsPathSeparator(path[1]) && path[2] == '?' && IsPathSeparator(path[3])) {
             // Already extended with \\?\ or any combination of directory separators.
             return path;
         }
@@ -152,10 +151,10 @@ internal static @string addExtendedPrefix(@string path) {
         return path;
     }
 
-    bool isUNC = default!;
-    bool isDevice = default!;
+    bool isUNC = default;
+    bool isDevice = default;
     if (len(path) >= 2 && IsPathSeparator(path[0]) && IsPathSeparator(path[1])) {
-        if (len(path) >= 4 && path[2] == (rune)'.' && IsPathSeparator(path[3])){
+        if (len(path) >= 4 && path[2] == '.' && IsPathSeparator(path[3])) {
             // Starts with //./
             isDevice = true;
         } else {
@@ -163,31 +162,30 @@ internal static @string addExtendedPrefix(@string path) {
             isUNC = true;
         }
     }
-    slice<uint16> prefix = default!;
-    if (isUNC){
+    slice<uint16> prefix = default;
+    if (isUNC) {
         // UNC path, prepend the \\?\UNC\ prefix.
-        prefix = new uint16[]{(rune)'\\', (rune)'\\', (rune)'?', (rune)'\\', (rune)'U', (rune)'N', (rune)'C', (rune)'\\'}.slice();
-    } else 
-    if (isDevice){
+        prefix = slice<uint16>(['\\', '\\', '?', '\\', 'U', 'N', 'C', '\\']);
+    } else if (isDevice) {
         // Don't add the extended prefix to device paths, as it would
         // change its meaning.
     } else {
-        prefix = new uint16[]{(rune)'\\', (rune)'\\', (rune)'?', (rune)'\\'}.slice();
+        prefix = slice<uint16>(['\\', '\\', '?', '\\']);
     }
 
     var (p, err) = syscall.UTF16FromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return path;
     }
     // Estimate the required buffer size using the path length plus the null terminator.
     // pathLength includes the working directory. This should be accurate unless
     // the working directory has changed without using os.Chdir.
     var n = (uint32)pathLength + 1;
-    slice<uint16> buf = default!;
-    while (ᐧ) {
+    slice<uint16> buf = default;
+    for (;;) {
         buf = new slice<uint16>((nint)(n + (uint32)len(prefix)));
         (n, err) = syscall.GetFullPathName(Ꮡ(p, 0), n, Ꮡ(buf, len(prefix)), nil);
-        if (err != default!) {
+        if (err != nil) {
             return path;
         }
         if (n <= (uint32)(len(buf) - len(prefix))) {

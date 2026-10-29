@@ -22,20 +22,20 @@ internal static (nint, error) sysSocket(nint family, nint sotype, nint proto) {
     // See ../syscall/exec_unix.go for description of ForkLock.
     syscall.ᏑForkLock.RLock();
     var (s, err) = socketFunc(family, sotype, proto);
-    if (err == default!) {
+    if (err == nil) {
         syscall.CloseOnExec(s);
     }
     syscall.ᏑForkLock.RUnlock();
-    if (err != default!) {
+    if (err != nil) {
         return (-1, os.NewSyscallError(socketˢ, err));
     }
     {
-        err = syscall.SetNonblock(s, true); if (err != default!) {
+        err = syscall.SetNonblock(s, true); if (err != nil) {
             poll.CloseFunc(s);
             return (-1, os.NewSyscallError(setnonblockˢ, err));
         }
     }
-    return (s, default!);
+    return (s, default);
 }
 
 } // end net_package

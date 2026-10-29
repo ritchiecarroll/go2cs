@@ -87,34 +87,33 @@ internal static bool resolve(ж<Scope> Ꮡscope, ref Ident ident) {
 // The result is a package node and a [scanner.ErrorList] if there were errors.
 //
 // Deprecated: use the type checker [go/types] instead; see [Object].
-public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@string, ж<File>> files, Func<map<@string, ж<Object>>, @string, (ж<Object>, error)> importer, ж<Scope> Ꮡuniverse) {
+public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@string, ж<File>> files, Func<map<@string, ж<Object>>, @string, (ж<Object>, error)> importer, ж<Scope> universe) {
     ref var fset = ref Ꮡfset.DerefOrNull();
 
-    pkgBuilder p = default!;
+    pkgBuilder p = default;
     p.fset = Ꮡfset;
 
     // complete package scope
-    ref var pkgName = ref heap<@string>(out var ᏑpkgName);
-    pkgName = ""u8;
-    var pkgScope = NewScope(Ꮡuniverse);
+    ref var pkgName = ref heap<@string>(""u8, out var ᏑpkgName);
+    var pkgScope = NewScope(universe);
     foreach (var (_, @file) in files) {
         // package names must match
         {
-            @string name = @file.Value.Name.Value.Name;
+            @string name = @file.Name.Name;
             switch (ᐧ) {
             case {} when pkgName == ""u8: {
                 pkgName = name;
                 break;
             }
             case {} when name != pkgName: {
-                p.errorf((~@file).Package, "package %s; expected %s"u8, name, pkgName);
+                p.errorf(@file.Package, "package %s; expected %s"u8, name, pkgName);
                 continue; // ignore this file
                 break;
             }}
         }
 
         // collect top-level file objects in package scope
-        foreach (var (_, obj) in (~(~@file).Scope).Objects) {
+        foreach (var (_, obj) in @file.Scope.Objects) {
             p.declare(pkgScope, nil, obj);
         }
     }
@@ -126,22 +125,22 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
     foreach (var (_, @file) in files) {
         // ignore file if it belongs to a different package
         // (error has already been reported)
-        if ((~(~@file).Name).Name != pkgName) {
+        if (@file.Name.Name != pkgName) {
             continue;
         }
 
         // build file scope by processing all imports
         var importErrors = false;
         var fileScope = NewScope(pkgScope);
-        foreach (var (_, spec) in (~@file).Imports) {
-            if (importer == default!) {
+        foreach (var (_, spec) in @file.Imports) {
+            if (importer == nil) {
                 importErrors = true;
                 continue;
             }
-            var (path, _) = strconv.Unquote((~(~spec).Path).Value);
+            var (path, _) = strconv.Unquote((~spec.Path).Value);
             var (pkg, err) = importer(imports, path);
-            if (err != default!) {
-                p.errorf((~spec).Path.Pos(), "could not import %s (%s)"u8, path, err);
+            if (err != nil) {
+                p.errorf(spec.Path.Pos(), "could not import %s (%s)"u8, path, err);
                 importErrors = true;
                 continue;
             }
@@ -150,26 +149,25 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
             // import failed. Consider adjusting the logic here a bit.
 
             // local name overrides imported package name
-            @string name = pkg.Value.Name;
-            if ((~spec).Name != nil) {
-                name = spec.Value.Name.Value.Name;
+            @string name = pkg.Name;
+            if (spec.Name != nil) {
+                name = spec.Name.Name;
             }
 
             // add import to file scope
-            if (name == "."u8){
+            if (name == "."u8) {
                 // merge imported scope with file scope
-                foreach (var (_, obj) in (~(~pkg).Data._<ж<Scope>>()).Objects) {
+                foreach (var (_, obj) in pkg.Data._<ж<Scope>>().Objects) {
                     p.declare(fileScope, pkgScope, obj);
                 }
-            } else 
-            if (name != "_"u8) {
+            } else if (name != "_"u8) {
                 // declare imported package object in file scope
                 // (do not re-use pkg in the file scope but create
                 // a new object instead; the Decl field is different
                 // for different files)
                 var obj = NewObj(Pkg, name);
-                obj.Value.Decl = spec.OrTypedNil();
-                obj.Value.Data = pkg.Value.Data;
+                obj.Decl = spec.OrTypedNil();
+                obj.Data = pkg.Data;
                 p.declare(fileScope, pkgScope, obj);
             }
         }
@@ -180,18 +178,18 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
             // (objects in the universe may be shadowed by imports;
             // with missing imports, identifiers might get resolved
             // incorrectly to universe objects)
-            pkgScope.Value.Outer = default!;
+            pkgScope.Outer = default;
         }
         nint i = 0;
-        foreach (var (_, ident) in (~@file).Unresolved) {
+        foreach (var (_, ident) in @file.Unresolved) {
             if (!resolve(fileScope, ref (ident).DerefOrNull())) {
-                p.errorf(ident.Pos(), "undeclared name: %s"u8, (~ident).Name);
-                @file.Value.Unresolved[i] = ident;
+                p.errorf(ident.Pos(), "undeclared name: %s"u8, ident.Name);
+                @file.Unresolved[i] = ident;
                 i++;
             }
         }
-        @file.Value.Unresolved = (~@file).Unresolved.slice(0, i);
-        pkgScope.Value.Outer = Ꮡuniverse; // reset universe scope
+        @file.Unresolved = @file.Unresolved.slice(0, i);
+        pkgScope.Outer = universe; // reset universe scope
     }
 
     p.errors.Sort();

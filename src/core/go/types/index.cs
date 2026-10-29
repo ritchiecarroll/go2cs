@@ -27,12 +27,12 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     Ꮡcheck.exprOrType(Ꮡx, e.x, true);
     // x may be generic
 
-    var exprᴛ1 = x.mode;
-    if (exprᴛ1 == invalid) {
+    switch (x.mode) {
+    case var ᴛ when ᴛ == invalid: {
         Ꮡcheck.use(e.indices.ꓸꓸꓸ);
         return false;
     }
-    if (exprᴛ1 == typexpr) {
+    case var ᴛ when ᴛ == typexpr: {
         // type instantiation
         x.mode = invalid;
         // TODO(gri) here we re-evaluate e.X - try to avoid this
@@ -42,14 +42,15 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
         }
         return false;
     }
-    if (exprᴛ1 == value) {
+    case var ᴛ when ᴛ == value: {
         {
             var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
                 // function instantiation
                 return true;
             }
         }
-    }
+        break;
+    }}
 
     // x should not be generic at this point, but be safe and check
     Ꮡcheck.nonGeneric(nil, Ꮡx);
@@ -77,20 +78,20 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     }
     case ж<Array> typ: {
         valid = true;
-        length = typ.Value.len;
+        length = typ.len;
         if (x.mode != variable) {
             x.mode = value;
         }
-        x.typ = typ.Value.elem;
+        x.typ = typ.elem;
         break;
     }
     case ж<Pointer> typ: {
         {
-            var (typΔ1, _) = (~typ).@base.Underlying()._<ж<Array>>(ᐧ); if (typΔ1 != nil) {
+            var (typΔ1, _) = typ.@base.Underlying()._<ж<Array>>(ᐧ); if (typΔ1 != nil) {
                 valid = true;
-                length = typΔ1.Value.len;
+                length = typΔ1.len;
                 x.mode = variable;
-                x.typ = typΔ1.Value.elem;
+                x.typ = typΔ1.elem;
             }
         }
         break;
@@ -98,21 +99,21 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     case ж<Slice> typ: {
         valid = true;
         x.mode = variable;
-        x.typ = typ.Value.elem;
+        x.typ = typ.elem;
         break;
     }
     case ж<Map> typ: {
         var indexΔ1 = Ꮡcheck.singleIndex(Ꮡe);
-        if (indexΔ1 == default!) {
+        if (indexΔ1 == nil) {
             x.mode = invalid;
             return false;
         }
         ref var key = ref heap(new operand(), out var Ꮡkey);
         Ꮡcheck.expr(nil, Ꮡkey, indexΔ1);
-        Ꮡcheck.assignment(Ꮡkey, (~typ).key, mapIndexˢ);
+        Ꮡcheck.assignment(Ꮡkey, typ.key, mapIndexˢ);
         // ok to continue even if indexing failed - map element type is known
         x.mode = mapindex;
-        x.typ = typ.Value.elem;
+        x.typ = typ.elem;
         x.expr = e.orig;
         return false;
     }
@@ -121,14 +122,14 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
             break;
         }
         // TODO(gri) report detailed failure cause for better error messages
-        ref var key = ref heap<ΔType>(out var Ꮡkey);               // key != nil: we must have all maps
+        ref var key = ref heap<ΔType>(out var Ꮡkey); // key != nil: we must have all maps
         ref var elem = ref heap<ΔType>(out var Ꮡelem);
-        var mode = variable; // non-maps result mode
+        var mode = variable;                         // non-maps result mode
         // TODO(gri) factor out closure and use it for non-typeparam cases as well
         if (underIs(x.typ, (ΔType u) => {
             var l = (int64)(-1); // valid if >= 0
-            ΔType k = default!;               // k is only set for maps
-            ΔType eΔ1 = default!;
+            ΔType k = default;   // k is only set for maps
+            ΔType eΔ1 = default;
             switch (u.type()) {
             case ж<Basic> t: {
                 if (isString(new BasicжΔType(t))) {
@@ -138,8 +139,8 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
                 break;
             }
             case ж<Array> t: {
-                l = t.Value.len;
-                eΔ1 = t.Value.elem;
+                l = t.len;
+                eΔ1 = t.elem;
                 if (Ꮡx.Value.mode != variable) {
                     mode = value;
                 }
@@ -147,26 +148,26 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
             }
             case ж<Pointer> t: {
                 {
-                    var (tΔ1, _) = (~t).@base.Underlying()._<ж<Array>>(ᐧ); if (tΔ1 != nil) {
-                        l = tΔ1.Value.len;
-                        eΔ1 = tΔ1.Value.elem;
+                    var (tΔ1, _) = t.@base.Underlying()._<ж<Array>>(ᐧ); if (tΔ1 != nil) {
+                        l = tΔ1.len;
+                        eΔ1 = tΔ1.elem;
                     }
                 }
                 break;
             }
             case ж<Slice> t: {
-                eΔ1 = t.Value.elem;
+                eΔ1 = t.elem;
                 break;
             }
             case ж<Map> t: {
-                k = t.Value.key;
-                eΔ1 = t.Value.elem;
+                k = t.key;
+                eΔ1 = t.elem;
                 break;
             }}
-            if (eΔ1 == default!) {
+            if (eΔ1 == nil) {
                 return false;
             }
-            if (Ꮡelem.ValueSlot == default!) {
+            if (Ꮡelem.ValueSlot == nil) {
                 // first type
                 length = l;
                 (Ꮡkey.ValueSlot, Ꮡelem.ValueSlot) = (k, eΔ1);
@@ -188,9 +189,9 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
             return true;
         })) {
             // For maps, the index expression must be assignable to the map key type.
-            if (key != default!) {
+            if (key != nil) {
                 var indexΔ2 = Ꮡcheck.singleIndex(Ꮡe);
-                if (indexΔ2 == default!) {
+                if (indexΔ2 == nil) {
                     x.mode = invalid;
                     return false;
                 }
@@ -221,7 +222,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     }
 
     var index = Ꮡcheck.singleIndex(Ꮡe);
-    if (index == default!) {
+    if (index == nil) {
         x.mode = invalid;
         return false;
     }
@@ -229,7 +230,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     // In pathological (invalid) cases (e.g.: type T1 [][[]T1{}[0][0]]T0)
     // the element type may be accessed before it's set. Make sure we have
     // a valid type.
-    if (x.typ == default!) {
+    if (x.typ == nil) {
         x.typ = new BasicжΔType(Typ[Invalid]);
     }
 
@@ -251,14 +252,14 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     }
 
     // determine common underlying type cu
-    ref var ct = ref heap<ΔType>(out var Ꮡct);              // type and respective common underlying type
+    ref var ct = ref heap<ΔType>(out var Ꮡct); // type and respective common underlying type
     ref var cu = ref heap<ΔType>(out var Ꮡcu);
-    bool hasString = default!;
+    bool hasString = default;
     // TODO(adonovan): use go1.23 "range typeset()".
     typeset(x.typ)((ΔType t, ΔType u) => {
-        if (u == default!) {
+        if (u == nil) {
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice %s: no specific type in %s"u8, Ꮡx.OrTypedNil(), Ꮡx.Value.typ);
-            Ꮡcu.ValueSlot = default!;
+            Ꮡcu.ValueSlot = default;
             return false;
         }
 
@@ -269,7 +270,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
         }
 
         // If this is the first type we're seeing, we're done.
-        if (Ꮡcu.ValueSlot == default!) {
+        if (Ꮡcu.ValueSlot == nil) {
             (Ꮡct.ValueSlot, Ꮡcu.ValueSlot) = (t, u);
             return true;
         }
@@ -277,7 +278,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
         // Otherwise, the current type must have the same underlying type as all previous types.
         if (!Identical(Ꮡcu.ValueSlot, u)) {
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice %s: %s and %s have different underlying types"u8, Ꮡx.OrTypedNil(), Ꮡct.ValueSlot, t);
-            Ꮡcu.ValueSlot = default!;
+            Ꮡcu.ValueSlot = default;
             return false;
         }
 
@@ -304,7 +305,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
         if (isString(new BasicжΔType(u))) {
             if (e.Slice3) {
                 var at = e.Max;
-                if (at == default!) {
+                if (at == nil) {
                     at = new ast.SliceExprжExpr(Ꮡe); // e.Index[2] should be present but be careful
                 }
                 Ꮡcheck.error(new ast_Exprᴠpositioner(at), InvalidSliceExpr, invalidOp + "3-index slice of string");
@@ -325,21 +326,21 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     }
     case ж<Array> u: {
         valid = true;
-        length = u.Value.len;
+        length = u.len;
         if (x.mode != variable) {
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice unaddressable value %s"u8, Ꮡx.OrTypedNil());
             x.mode = invalid;
             return;
         }
-        x.typ = new SliceжΔType(Ꮡ(new Slice(elem: (~u).elem)));
+        x.typ = new SliceжΔType(Ꮡ(new Slice(elem: u.elem)));
         break;
     }
     case ж<Pointer> u: {
         {
-            var (uΔ1, _) = (~u).@base.Underlying()._<ж<Array>>(ᐧ); if (uΔ1 != nil) {
+            var (uΔ1, _) = u.@base.Underlying()._<ж<Array>>(ᐧ); if (uΔ1 != nil) {
                 valid = true;
-                length = uΔ1.Value.len;
-                x.typ = new SliceжΔType(Ꮡ(new Slice(elem: (~uΔ1).elem)));
+                length = uΔ1.len;
+                x.typ = new SliceжΔType(Ꮡ(new Slice(elem: uΔ1.elem)));
             }
         }
         break;
@@ -359,7 +360,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     x.mode = value;
 
     // spec: "Only the first index may be omitted; it defaults to 0."
-    if (e.Slice3 && (e.High == default! || e.Max == default!)) {
+    if (e.Slice3 && (e.High == nil || e.Max == nil)) {
         Ꮡcheck.error(inNode(new ast.SliceExprжNode(Ꮡe), e.Rbrack), InvalidSyntaxTree, and3rdIndexRequiredIn3ˢ);
         x.mode = invalid;
         return;
@@ -367,10 +368,10 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
 
     // check indices
     array<int64> ind = new(3);
-    foreach (var (i, expr) in new ast.Expr[]{e.Low, e.High, e.Max}.slice()) {
+    foreach (var (i, expr) in slice<ast.Expr>([e.Low, e.High, e.Max])) {
         var xΔ1 = (int64)(-1);
         switch (ᐧ) {
-        case {} when expr != default!: {
+        case {} when expr != nil: {
             // The "capacity" is only known statically for strings, arrays,
             // and pointers to arrays, and it is the same as the length for
             // those types.
@@ -408,7 +409,7 @@ L:
                     // The value y corresponds to the expression e.Index[i+1+j].
                     // Because y >= 0, it must have been set from the expression
                     // when checking indices and thus e.Index[i+1+j] is not nil.
-                    var at = new ast.Expr[]{e.Low, e.High, e.Max}.slice()[i + 1 + j];
+                    var at = slice<ast.Expr>([e.Low, e.High, e.Max])[i + 1 + j];
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(at), SwappedSliceIndices, "invalid slice indices: %d < %d"u8, y, xΔ2);
                     goto break_L; // only report one error, ok to continue
                 }
@@ -427,7 +428,7 @@ internal static ast.Expr singleIndex(this ж<Checker> Ꮡcheck, ж<indexedExpr> 
 
     if (len(expr.indices) == 0) {
         Ꮡcheck.errorf(new ast_Exprᴠpositioner(expr.orig), InvalidSyntaxTree, "index expression %v with 0 indices"u8, Ꮡexpr.OrTypedNil());
-        return default!;
+        return default;
     }
     if (len(expr.indices) > 1) {
         // TODO(rFindley) should this get a distinct error code?
@@ -444,8 +445,8 @@ internal static readonly @string indexˢ = "index"u8;
 // If the result typ is != Typ[Invalid], index is valid and typ is its (possibly named) integer type.
 // If the result val >= 0, index is valid and val is its constant int value.
 internal static (ΔType typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
-    ΔType typ = default!;
-    int64 val = default!;
+    ΔType typ = default;
+    int64 val = default;
 
     typ = new BasicжΔType(Typ[Invalid]);
     val = -1;
@@ -521,11 +522,11 @@ internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, e
 // TODO(rfindley): remove this helper, in favor of just having a helper
 // function that returns indices.
 partial struct indexedExpr {
-    internal ast.Expr orig;   // the wrapped expr, which may be distinct from the IndexListExpr below.
-    internal ast.Expr x;   // expression
-    internal tokenꓸPos lbrack;  // position of "["
+    internal ast.Expr orig;           // the wrapped expr, which may be distinct from the IndexListExpr below.
+    internal ast.Expr x;              // expression
+    internal tokenꓸPos lbrack;        // position of "["
     internal slice<ast.Expr> indices; // index expressions
-    internal tokenꓸPos rbrack;  // position of "]"
+    internal tokenꓸPos rbrack;        // position of "]"
 }
 
 internal static tokenꓸPos Pos(this ref indexedExpr x) {
@@ -537,22 +538,22 @@ internal static ж<indexedExpr> unpackIndexedExpr(ast.Node n) {
     case ж<ast.IndexExpr> e: {
         return Ꮡ(new indexedExpr(
             orig: new ast.IndexExprжExpr(e),
-            x: (~e).X,
-            lbrack: (~e).Lbrack,
-            indices: new ast.Expr[]{(~e).Index}.slice(),
-            rbrack: (~e).Rbrack
+            x: e.X,
+            lbrack: e.Lbrack,
+            indices: slice<ast.Expr>([e.Index]),
+            rbrack: e.Rbrack
         ));
     }
     case ж<ast.IndexListExpr> e: {
         return Ꮡ(new indexedExpr(
             orig: new ast.IndexListExprжExpr(e),
-            x: (~e).X,
-            lbrack: (~e).Lbrack,
-            indices: (~e).Indices,
-            rbrack: (~e).Rbrack
+            x: e.X,
+            lbrack: e.Lbrack,
+            indices: e.Indices,
+            rbrack: e.Rbrack
         ));
     }}
-    return default!;
+    return default;
 }
 
 } // end types_package

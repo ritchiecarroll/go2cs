@@ -18,12 +18,12 @@ partial struct lockRankStruct {
 internal static void lockInit(ref mutex l, lockRank rank) {
 }
 
-internal static lockRank getLockRank(ж<mutex> Ꮡl) {
+internal static lockRank getLockRank(ж<mutex> l) {
     return 0;
 }
 
-internal static void lockWithRank(ж<mutex> Ꮡl, lockRank rank) {
-    lock2(Ꮡl);
+internal static void lockWithRank(ж<mutex> l, lockRank rank) {
+    lock2(l);
 }
 
 // This function may be called in nosplit context and thus must be nosplit.
@@ -33,8 +33,8 @@ internal static void acquireLockRankAndM(lockRank rank) {
     acquirem();
 }
 
-internal static partial void unlockWithRank(ж<mutex> Ꮡl) {
-    unlock2(Ꮡl);
+internal static partial void unlockWithRank(ж<mutex> l) {
+    unlock2(l);
 }
 
 // This function may be called in nosplit context and thus must be nosplit.
@@ -47,11 +47,11 @@ internal static void releaseLockRankAndM(lockRank rank) {
 // This function may be called in nosplit context and thus must be nosplit.
 //
 //go:nosplit
-internal static void lockWithRankMayAcquire(ж<mutex> Ꮡl, lockRank rank) {
+internal static void lockWithRankMayAcquire(ж<mutex> l, lockRank rank) {
 }
 
 //go:nosplit
-internal static void assertLockHeld(ж<mutex> Ꮡl) {
+internal static void assertLockHeld(ж<mutex> l) {
 }
 
 //go:nosplit

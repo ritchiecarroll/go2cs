@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,7 +57,7 @@ using static go.compress.gzip_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("compress/gzip/gunzip.go", "gunzip.cs", "AB9AlJaWkoKUAChg8oKAgqSssriAgpSkggACJgAQAq7igoKCgpSCgpSClJSmgoKClJTO0oAABxCkgpSCgKa2gpSCgIKkgoKAgqSCpoKCgIKkpoKAgqSmgoCCpIKCuIKClJSosoKmgoKCgpS4gIKCpIKCgoKUpoKUlICCyKyw")]
-[assembly: go.GoPositionMap("compress/gzip/gzip.go", "gzip.cs", "AChiAAgCggACEuKClIKCpoKCgpQACRzC2JKClIKCgpSC2tSCgoKUgqaCgoKUlJSCpoKCqqKClJSCgoKClIKUgpSmlIKSgpSCgoKUgoKCpoKCgqaCgoKmgqaCgoIAAhYACAKClIKUgoKCpoKssoKUgpSCgoKCpoKClIKCgg==")]
+[assembly: go.GoPositionMap("compress/gzip/gzip.go", "gzip.cs", "AChiAAgCggACEuKClIKCpoKCgpQACRzC2JKClIKCgpSC2tSCgoKUgqaCgoKUlJSCpoKCqqKClJSCgoKClIKUgpSmlIKCgpSCgoKUgoKCpoKCgqaCgoKmgqaCgoIAAhYACAKClIKUgoKCpoKssoKUgpSCgoKCpoKClIKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

@@ -59,7 +59,7 @@ public static @string String(this KeyUsage i) {
         return _KeyUsage_name_7;
     }
     default: {
-        return "KeyUsage("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "KeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 
@@ -90,7 +90,7 @@ internal static array<uint8> _ExtKeyUsage_index = new uint8[]{0, 19, 29, 39, 50,
 public static @string String(this ExtKeyUsage i) {
     nint idx = (nint)i - 0;
     if (i < 0 || idx >= builtin.len(_ExtKeyUsage_index) - 1) {
-        return "ExtKeyUsage("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "ExtKeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _ExtKeyUsage_name.slice(_ExtKeyUsage_index[idx], _ExtKeyUsage_index[idx + 1]);
 }

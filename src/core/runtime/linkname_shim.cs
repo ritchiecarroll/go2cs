@@ -85,18 +85,18 @@ partial struct linknameIter {
 // See go.dev/issue/67401.
 //
 //go:linkname mapiterinit
-internal static void mapiterinit(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> Ꮡm, ж<linknameIter> Ꮡit) {
+internal static void mapiterinit(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<linknameIter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
-    if (raceenabled && Ꮡm != nil) {
+    if (raceenabled && m != nil) {
         var callerpc = sys.GetCallerPC();
-        racereadpc(@unsafe.Pointer.FromPinnedBox(Ꮡm), callerpc, abi.FuncPCABIInternal(mapiterinit));
+        racereadpc(@unsafe.Pointer.FromPinnedBox(m), callerpc, abi.FuncPCABIInternal(mapiterinit));
     }
 
-    it.typ = Ꮡt;
+    it.typ = t;
 
     it.it = @new<maps.Iter>();
-    it.it.Init(Ꮡt, Ꮡm);
+    it.it.Init(t, m);
     it.it.Next();
 
     it.key = (uintptr)it.it.Key();
@@ -119,8 +119,8 @@ internal static void mapiterinit(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> Ꮡm, ж
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_mapiterinit reflect.mapiterinit
-internal static void reflect_mapiterinit(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> Ꮡm, ж<linknameIter> Ꮡit) {
-    mapiterinit(Ꮡt, Ꮡm, Ꮡit);
+internal static void reflect_mapiterinit(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<linknameIter> it) {
+    mapiterinit(t, m, it);
 }
 
 // mapiternext is a compatibility wrapper for map iterator for users of
@@ -171,8 +171,8 @@ internal static void mapiternext(ж<linknameIter> Ꮡit) {
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_mapiternext reflect.mapiternext
-internal static void reflect_mapiternext(ж<linknameIter> Ꮡit) {
-    mapiternext(Ꮡit);
+internal static void reflect_mapiternext(ж<linknameIter> it) {
+    mapiternext(it);
 }
 
 // reflect_mapiterkey is a compatibility wrapper for map iterator for users of

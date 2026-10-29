@@ -6,7 +6,7 @@ namespace go;
 
 using atomic = @internal.runtime.atomic_package;
 using tracev2 = @internal.trace.tracev2_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal.runtime;
 using @internal.trace;
 
@@ -25,12 +25,12 @@ internal static void reset(this ref gTraceState s) {
 
 // mTraceState is per-M state for the tracer.
 partial struct mTraceState {
-    internal atomic.Bool writing;                          // flag indicating that this M is writing to a trace buffer.
+    internal atomic.Bool writing;                                  // flag indicating that this M is writing to a trace buffer.
     internal array<array<ж<traceBuf>>> buf = new(2, () => new(2)); // Per-M traceBuf for writing. Indexed by trace.gen%2.
-    internal ж<m> link;                                // Snapshot of alllink or freelink.
-    internal uint32 reentered;                               // Whether we've reentered tracing from within tracing.
-    internal uintptr entryGen;                              // The generation value on first entry.
-    internal bool oldthrowsplit;                                 // gp.throwsplit upon calling traceLocker.writer. For debugging.
+    internal ж<m> link;                                            // Snapshot of alllink or freelink.
+    internal uint32 reentered;                                     // Whether we've reentered tracing from within tracing.
+    internal uintptr entryGen;                                     // The generation value on first entry.
+    internal bool oldthrowsplit;                                   // gp.throwsplit upon calling traceLocker.writer. For debugging.
 }
 
 // pTraceState is per-P state for the tracer.
@@ -179,7 +179,7 @@ internal const bool debugTraceReentrancy = false;
 //go:nosplit
 internal static traceLocker traceAcquire() {
     if (!traceEnabled()) {
-        return new traceLocker(nil);
+        return new traceLocker();
     }
     return traceAcquireEnabled();
 }
@@ -228,7 +228,7 @@ internal static traceLocker traceAcquireEnabled() {
     if (gen == 0) {
         mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
         releasem(ref (mp).DerefOrNull());
-        return new traceLocker(nil);
+        return new traceLocker();
     }
     mp.Value.trace.entryGen = gen;
     return new traceLocker(mp, gen);
@@ -249,7 +249,7 @@ internal static bool ok(this traceLocker tl) {
 //
 //go:nosplit
 internal static void traceRelease(traceLocker tl) {
-    if ((~tl.mp).trace.reentered > 0){
+    if ((~tl.mp).trace.reentered > 0) {
         tl.mp.Value.trace.reentered--;
     } else {
         tl.mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
@@ -286,7 +286,7 @@ internal static void ProcStart(this traceLocker tl) {
 }
 
 // ProcStop traces a ProcStop event.
-internal static void ProcStop(this traceLocker tl, ж<Δp> Ꮡpp) {
+internal static void ProcStop(this traceLocker tl, ж<Δp> pp) {
     // The only time a goroutine is allowed to have its Proc moved around
     // from under it is during a syscall.
     tl.eventWriter(tracev2.GoSyscall, tracev2.ProcRunning).@event(tracev2.EvProcStop);
@@ -522,7 +522,7 @@ internal static void GoSysCall(this traceLocker tl) {
 internal static void GoSysExit(this traceLocker tl, bool lostP) {
     var ev = tracev2.EvGoSyscallEnd;
     var procStatus = tracev2.ProcSyscall; // Procs implicitly enter tracev2.ProcSyscall on GoSyscallBegin.
-    if (lostP){
+    if (lostP) {
         ev = tracev2.EvGoSyscallEndBlocked;
         procStatus = tracev2.ProcRunning; // If a G has a P when emitting this event, it reacquired a P and is indeed running.
     } else {
@@ -662,7 +662,7 @@ internal static void trace_userRegion(uint64 id, uint64 mode, @string name) {
         // Need to do this check because the caller won't have it.
         return;
     }
-    tracev2.EventType ev = default!;
+    tracev2.EventType ev = default;
     switch (mode) {
     case 0: {
         ev = tracev2.EvUserRegionBegin;
@@ -701,7 +701,7 @@ internal static readonly @string badUseOfTraceWritingˢ = "bad use of trace.writ
 // mp must not be able to emit trace events anymore.
 //
 // sched.lock must be held to synchronize with traceAdvance.
-internal static void traceThreadDestroy(ж<m> Ꮡmp) {
+internal static void traceThreadDestroy(ж<m> mp) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
 
     // Flush all outstanding buffers to maintain the invariant
@@ -711,25 +711,25 @@ internal static void traceThreadDestroy(ж<m> Ꮡmp) {
     // Perform a traceAcquire/traceRelease on behalf of mp to
     // synchronize with the tracer trying to flush our buffer
     // as well.
-    if (debugTraceReentrancy && Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Load()) {
+    if (debugTraceReentrancy && mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Load()) {
         @throw(badUseOfTraceWritingˢ);
     }
-    Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(true);
+    mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(true);
     systemstack(() => {
         @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-        foreach (var i in range(Ꮡmp.Value.trace.buf)) {
-            foreach (var (exp, buf) in Ꮡmp.Value.trace.buf[i].ΔRangeSnapshot()) {
+        foreach (var i in range(mp.Value.trace.buf)) {
+            foreach (var (exp, buf) in mp.Value.trace.buf[i].ΔRangeSnapshot()) {
                 if (buf != nil) {
                     // N.B. traceBufFlush accepts a generation, but it
                     // really just cares about gen%2.
                     traceBufFlush(buf, (uintptr)i);
-                    Ꮡmp.Value.trace.buf[i][exp] = default!;
+                    mp.Value.trace.buf[i][exp] = default;
                 }
             }
         }
         unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
     });
-    Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
+    mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
 }
 
 } // end runtime_package

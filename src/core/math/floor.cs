@@ -100,14 +100,13 @@ public static float64 Round(float64 x) {
     // }
     var bits = Float64bits(x);
     nuint e = (nuint)(bits >> (int)(shift)) & (nuint)mask;
-    if (e < bias){
+    if (e < bias) {
         // Round abs(x) < 1 including denormals.
         bits &= (uint64)(signMask); // +-0
         if (e == (nuint)(bias - 1)) {
             bits |= (uint64)(uvone); // +-1
         }
-    } else 
-    if (e < (nuint)(bias + shift)) {
+    } else if (e < (nuint)(bias + shift)) {
         // Round any abs(x) >= 1 containing a fractional component [0,1).
         //
         // Numbers with larger exponents are returned unchanged since they
@@ -140,7 +139,7 @@ public static float64 RoundToEven(float64 x) {
     // }
     var bits = Float64bits(x);
     nuint e = (nuint)(bits >> (int)(shift)) & (nuint)mask;
-    if (e >= bias){
+    if (e >= bias) {
         // Round abs(x) >= 1.
         // - Large numbers without fractional components, infinity, and NaN are unchanged.
         // - Add 0.499.. or 0.5 before truncating depending on whether the truncated
@@ -149,8 +148,7 @@ public static float64 RoundToEven(float64 x) {
         e -= bias;
         bits += (halfMinusULP + ((bits.Rsh(((nuint)shift - e))) & 1)).Rsh(e);
         bits &= unchecked((uint64)~(uint64)(((uint64)fracMask).Rsh(e)));
-    } else 
-    if (e == (nuint)(bias - 1) && (bits & (uint64)fracMask) != 0){
+    } else if (e == (nuint)(bias - 1) && (bits & (uint64)fracMask) != 0) {
         // Round 0.5 < abs(x) < 1.
         bits = bits & (uint64)signMask | (uint64)uvone; // +-1
     } else {

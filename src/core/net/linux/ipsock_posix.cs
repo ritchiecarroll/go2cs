@@ -9,7 +9,7 @@ using poll = @internal.poll_package;
 using netip = net.netip_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using net;
 
@@ -36,52 +36,57 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         var exprᴛ1 = runtime.GOOS;
-        if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
             // Both ipv4 and ipv6 are faked; see net_fake.go.
             p.ipv4Enabled = true;
             p.ipv6Enabled = true;
             p.ipv4MappedIPv6Enabled = true;
             return;
-        }
+        }}
 
         var (s, err) = sysSocket(syscall.AF_INET, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
-        var exprᴛ2 = err;
-        if (AreEqual(exprᴛ2, syscall.EAFNOSUPPORT) || AreEqual(exprᴛ2, syscall.EPROTONOSUPPORT)) {
+        switch (err) {
+        case var ᴛ when AreEqual(ᴛ, syscall.EAFNOSUPPORT) || AreEqual(ᴛ, syscall.EPROTONOSUPPORT): {
+            break;
         }
-        else if (AreEqual(exprᴛ2, default!)) {
+        case var ᴛ when AreEqual(ᴛ, default): {
             poll.CloseFunc(s);
             p.ipv4Enabled = true;
-        }
-        slice<probe_type> probes = new probe_type[]{
+            break;
+        }}
+        slice<probe_type> probes = slice<probe_type>([
             // IPv6 communication capability
             new(laddr: new TCPAddr(IP: ParseIP("::1"u8)), value: 1),
             // IPv4-mapped IPv6 address communication capability
             new(laddr: new TCPAddr(IP: IPv4(127, 0, 0, 1)), value: 0)
-        }.slice();
+        ]);
         var exprᴛ3 = runtime.GOOS;
-        if (exprᴛ3 == "dragonfly"u8 || exprᴛ3 == "openbsd"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ3 == "dragonfly"u8 || exprᴛ3 == "openbsd"u8: {
             // The latest DragonFly BSD and OpenBSD kernels don't
             // support IPV6_V6ONLY=0. They always return an error
             // and we don't need to probe the capability.
             probes = probes[..1];
-        }
+            break;
+        }}
         foreach (var i in range(probes)) {
             var (sΔ1, errΔ1) = sysSocket(syscall.AF_INET6, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 continue;
             }
             defer(poll.CloseFunc, sΔ1, ref ᒐ);
             syscall.SetsockoptInt(sΔ1, syscall.IPPROTO_IPV6, syscall.IPV6_V6ONLY, probes[i].value);
             (var sa, errΔ1) = Ꮡ(probes, i).of(probe_type.Ꮡladdr).sockaddr(syscall.AF_INET6);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 continue;
             }
             {
-                var errΔ2 = syscall.Bind(sΔ1, sa); if (errΔ2 != default!) {
+                var errΔ2 = syscall.Bind(sΔ1, sa); if (errΔ2 != nil) {
                     continue;
                 }
             }
-            if (i == 0){
+            if (i == 0) {
                 p.ipv6Enabled = true;
             } else {
                 p.ipv4MappedIPv6Enabled = true;
@@ -145,24 +150,24 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
 //go:linkname favoriteAddrFamily
 internal static (nint family, bool ipv6only) favoriteAddrFamily(@string network, Δsockaddr laddr, Δsockaddr raddr, @string mode) {
     switch (network[len(network) - 1]) {
-    case (rune)'4': {
+    case (byte)'4': {
         return (syscall.AF_INET, false);
     }
-    case (rune)'6': {
+    case (byte)'6': {
         return (syscall.AF_INET6, true);
     }}
 
-    if (mode == "listen"u8 && (laddr == default! || laddr.isWildcard())) {
+    if (mode == "listen"u8 && (laddr == nil || laddr.isWildcard())) {
         if (supportsIPv4map() || !supportsIPv4()) {
             return (syscall.AF_INET6, false);
         }
-        if (laddr == default!) {
+        if (laddr == nil) {
             return (syscall.AF_INET, false);
         }
         return (laddr.family(), false);
     }
 
-    if ((laddr == default! || laddr.family() == syscall.AF_INET) && (raddr == default! || raddr.family() == syscall.AF_INET)) {
+    if ((laddr == nil || laddr.family() == syscall.AF_INET) && (raddr == nil || raddr.family() == syscall.AF_INET)) {
         return (syscall.AF_INET, false);
     }
     return (syscall.AF_INET6, false);
@@ -170,11 +175,13 @@ internal static (nint family, bool ipv6only) favoriteAddrFamily(@string network,
 
 internal static (ж<netFD> fd, error err) internetSocket(context.Context ctx, @string net, Δsockaddr laddr, Δsockaddr raddr, nint sotype, nint proto, @string mode, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "aix"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
         if (mode == "dial"u8 && raddr.isWildcard()) {
             raddr = raddr.toLocal(net);
         }
-    }
+        break;
+    }}
     var (family, ipv6only) = favoriteAddrFamily(net, laddr, raddr, mode);
     return socket(ctx, net, family, sotype, proto, ipv6only, laddr, raddr, ctrlCtxFn);
 }
@@ -184,12 +191,12 @@ internal static (syscall.SockaddrInet4, error) ipToSockaddrInet4(IP ip, nint por
         ip = IPv4zero;
     }
     var ip4 = ip.To4();
-    if (ip4 == default!) {
-        return (new syscall.SockaddrInet4(nil), new AddrErrorжerror(Ꮡ(new AddrError(Err: "non-IPv4 address"u8, Addr: ip.String()))));
+    if (ip4 == nil) {
+        return (new syscall.SockaddrInet4(), new AddrErrorжerror(Ꮡ(new AddrError(Err: "non-IPv4 address"u8, Addr: ip.String()))));
     }
     var sa = new syscall.SockaddrInet4(Port: port);
     copy(sa.Addr[..], ip4);
-    return (sa.ΔClone(), default!);
+    return (sa.ΔClone(), default);
 }
 
 internal static (syscall.SockaddrInet6, error) ipToSockaddrInet6(IP ip, nint port, @string zone) {
@@ -209,12 +216,12 @@ internal static (syscall.SockaddrInet6, error) ipToSockaddrInet6(IP ip, nint por
     // We accept any IPv6 address including IPv4-mapped
     // IPv6 address.
     var ip6 = ip.To16();
-    if (ip6 == default!) {
-        return (new syscall.SockaddrInet6(nil), new AddrErrorжerror(Ꮡ(new AddrError(Err: "non-IPv6 address"u8, Addr: ip.String()))));
+    if (ip6 == nil) {
+        return (new syscall.SockaddrInet6(), new AddrErrorжerror(Ꮡ(new AddrError(Err: "non-IPv6 address"u8, Addr: ip.String()))));
     }
     var sa = new syscall.SockaddrInet6(Port: port, ZoneId: (uint32)zoneCache.index(zone));
     copy(sa.Addr[..], ip6);
-    return (sa.ΔClone(), default!);
+    return (sa.ΔClone(), default);
 }
 
 // ipToSockaddr should be an internal detail,
@@ -229,24 +236,24 @@ internal static (syscall.SockaddrInet6, error) ipToSockaddrInet6(IP ip, nint por
 //
 //go:linkname ipToSockaddr
 internal static (syscall.Sockaddr, error) ipToSockaddr(nint family, IP ip, nint port, @string zone) {
-    var exprᴛ1 = family;
-    if (exprᴛ1 == syscall.AF_INET) {
+    switch (family) {
+    case var ᴛ when ᴛ == syscall.AF_INET: {
         ref var sa = ref heap<syscall.SockaddrInet4>(out var Ꮡsa);
         (sa, var err) = ipToSockaddrInet4(ip, port);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        return (new syscall.SockaddrInet4жSockaddr(Ꮡsa), default!);
+        return (new syscall.SockaddrInet4жSockaddr(Ꮡsa), default);
     }
-    if (exprᴛ1 == syscall.AF_INET6) {
+    case var ᴛ when ᴛ == syscall.AF_INET6: {
         ref var sa = ref heap<syscall.SockaddrInet6>(out var Ꮡsa);
         (sa, var err) = ipToSockaddrInet6(ip, port, zone);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        return (new syscall.SockaddrInet6жSockaddr(Ꮡsa), default!);
-    }
-    return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid address family"u8, Addr: ip.String()))));
+        return (new syscall.SockaddrInet6жSockaddr(Ꮡsa), default);
+    }}
+    return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid address family"u8, Addr: ip.String()))));
 }
 
 internal static (syscall.SockaddrInet4, error) addrPortToSockaddrInet4(netip.AddrPort ap) {
@@ -258,13 +265,13 @@ internal static (syscall.SockaddrInet4, error) addrPortToSockaddrInet4(netip.Add
     // The error message is kept consistent with ipToSockaddrInet4.
     var addr = ap.Addr();
     if (!addr.Is4() && !addr.Is4In6()) {
-        return (new syscall.SockaddrInet4(nil), new AddrErrorжerror(Ꮡ(new AddrError(Err: "non-IPv4 address"u8, Addr: addr.String()))));
+        return (new syscall.SockaddrInet4(), new AddrErrorжerror(Ꮡ(new AddrError(Err: "non-IPv4 address"u8, Addr: addr.String()))));
     }
     var sa = new syscall.SockaddrInet4(
         Addr: addr.As4(),
         Port: (nint)ap.Port()
     );
-    return (sa.ΔClone(), default!);
+    return (sa.ΔClone(), default);
 }
 
 internal static (syscall.SockaddrInet6, error) addrPortToSockaddrInet6(netip.AddrPort ap) {
@@ -280,7 +287,7 @@ internal static (syscall.SockaddrInet6, error) addrPortToSockaddrInet6(netip.Add
         Port: (nint)ap.Port(),
         ZoneId: (uint32)zoneCache.index(addr.Zone())
     );
-    return (sa.ΔClone(), default!);
+    return (sa.ΔClone(), default);
 }
 
 } // end net_package

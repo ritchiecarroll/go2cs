@@ -40,7 +40,7 @@ partial struct node {
     internal ж<node> left;
     internal ж<node> right;
     internal ж<ΔFile> @file;
-    internal Δkey key;   // = file.key(), but improves locality (25% faster)
+    internal Δkey key;      // = file.key(), but improves locality (25% faster)
     internal int32 balance; // at most ±2
     internal int32 height;
 }
@@ -114,19 +114,18 @@ internal static void checkBalance(this ref node n) {
 // present, it returns a pointer to the node where the key should be
 // inserted by a subsequent call to [tree.set].
 internal static (ж<ж<node>> pos, ж<node> parent) locate(this ж<tree> Ꮡt, Δkey k) {
-    ж<ж<node>> pos = default!;
-    ж<node> parent = default!;
+    ж<ж<node>> pos = default;
+    ж<node> parent = default;
     ref var t = ref Ꮡt.DerefOrNull();
 
     pos = Ꮡt.of(tree.Ꮡroot);
     var x = t.root;
     while (x != nil) {
-        nint sign = compareKey(k, (~x).key);
-        if (sign < 0){
-            (pos, x, parent) = (x.of(node.Ꮡleft), x.Value.left, x);
-        } else 
-        if (sign > 0){
-            (pos, x, parent) = (x.of(node.Ꮡright), x.Value.right, x);
+        nint sign = compareKey(k, x.key);
+        if (sign < 0) {
+            (pos, x, parent) = (x.of(node.Ꮡleft), x.left, x);
+        } else if (sign > 0) {
+            (pos, x, parent) = (x.of(node.Ꮡright), x.right, x);
         } else {
             break;
         }
@@ -145,17 +144,17 @@ internal static iter.Seq<ж<ΔFile>> all(this ж<tree> Ꮡt) {
         }
         var x = Ꮡt.Value.root;
         if (x != nil) {
-            while ((~x).left != nil) {
-                x = x.Value.left;
+            while (x.left != nil) {
+                x = x.left;
             }
         }
-        while (x != nil && yield((~x).@file)) {
-            if ((~x).height >= 0){
+        while (x != nil && yield(x.@file)) {
+            if (x.height >= 0) {
                 // still in tree
                 x = x.next();
             } else {
                 // deleted
-                var (ᴛ1, ᴛ2) = Ꮡt.locate((~x).key);
+                var (ᴛ1, ᴛ2) = Ꮡt.locate(x.key);
                 x = Ꮡt.Value.nextAfter(ᴛ1, ᴛ2);
             }
         }
@@ -164,21 +163,21 @@ internal static iter.Seq<ж<ΔFile>> all(this ж<tree> Ꮡt) {
 
 // nextAfter returns the node in the key sequence following
 // (pos, parent), a result pair from [tree.locate].
-internal static ж<node> nextAfter(this ref tree t, ж<ж<node>> Ꮡpos, ж<node> Ꮡparent) {
+internal static ж<node> nextAfter(this ref tree t, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     switch (ᐧ) {
     case {} when pos != nil: {
         return (pos).next();
     }
-    case {} when Ꮡparent == nil: {
-        return default!;
+    case {} when parent == nil: {
+        return default;
     }
-    case {} when Ꮡpos == Ꮡparent.of(node.Ꮡleft): {
-        return Ꮡparent;
+    case {} when Ꮡpos == parent.of(node.Ꮡleft): {
+        return parent;
     }
     default: {
-        return Ꮡparent.next();
+        return parent.next();
     }}
 }
 
@@ -186,7 +185,7 @@ internal static ж<node> next(this ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.right == nil) {
-        while (x.parent != nil && (~x.parent).right == Ꮡx) {
+        while (x.parent != nil && x.parent.right == Ꮡx) {
             Ꮡx = x.parent; x = ref Ꮡx.DerefOrNull();
         }
         return x.parent;
@@ -203,7 +202,7 @@ internal static void setRoot(this ref tree t, ж<node> Ꮡx) {
 
     t.root = Ꮡx;
     if (Ꮡx != nil) {
-        x.parent = default!;
+        x.parent = default;
     }
 }
 
@@ -242,23 +241,23 @@ internal static void update(this ref node n) {
     n.balance = rheight - lheight;
 }
 
-internal static void replaceChild(this ref tree t, ж<node> Ꮡparent, ж<node> Ꮡold, ж<node> Ꮡnew) {
+internal static void replaceChild(this ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     switch (ᐧ) {
     case {} when Ꮡparent == nil: {
-        if (t.root != Ꮡold) {
+        if (t.root != old) {
             throw panic("corrupt tree");
         }
-        t.setRoot(Ꮡnew);
+        t.setRoot(@new);
         break;
     }
-    case {} when parent.left == Ꮡold: {
-        Ꮡparent.setLeft(Ꮡnew);
+    case {} when parent.left == old: {
+        Ꮡparent.setLeft(@new);
         break;
     }
-    case {} when parent.right == Ꮡold: {
-        Ꮡparent.setRight(Ꮡnew);
+    case {} when parent.right == old: {
+        Ꮡparent.setRight(@new);
         break;
     }
     default: {
@@ -279,19 +278,21 @@ internal static void rebalanceUp(this ref tree t, ж<node> Ꮡx) {
     while (Ꮡx != nil) {
         var h = x.height;
         x.update();
-        var exprᴛ1 = x.balance;
-        if (exprᴛ1 == -2) {
-            if ((~x.left).balance == 1) {
+        switch (x.balance) {
+        case var ᴛ when ᴛ == -2: {
+            if (x.left.balance == 1) {
                 t.rotateLeft(x.left);
             }
             Ꮡx = t.rotateRight(Ꮡx); x = ref Ꮡx.DerefOrNull();
+            break;
         }
-        else if (exprᴛ1 == +2) {
-            if ((~x.right).balance == -1) {
+        case var ᴛ when ᴛ == +2: {
+            if (x.right.balance == -1) {
                 t.rotateRight(x.right);
             }
             Ꮡx = t.rotateLeft(Ꮡx); x = ref Ꮡx.DerefOrNull();
-        }
+            break;
+        }}
         if (x.height == h) {
             // x's height has not changed, so the height
             // and balance of its ancestors have not changed;
@@ -310,7 +311,7 @@ internal static ж<node> rotateRight(this ref tree t, ж<node> Ꮡy) {
     // p -> (y (x a b) c)
     var p = y.parent;
     var x = y.left;
-    var b = x.Value.right;
+    var b = x.right;
 
     x.checkBalance();
     y.checkBalance();
@@ -332,7 +333,7 @@ internal static ж<node> rotateLeft(this ref tree t, ж<node> Ꮡx) {
     // p -> (x a (y b c))
     var p = x.parent;
     var y = x.right;
-    var b = y.Value.left;
+    var b = y.left;
 
     x.checkBalance();
     y.checkBalance();
@@ -358,7 +359,7 @@ internal static void add(this ж<tree> Ꮡt, ж<ΔFile> Ꮡfile) {
         return;
     }
     {
-        var prev = (pos.ValueSlot).Value.@file; if (prev != Ꮡfile) {
+        var prev = (pos.ValueSlot).@file; if (prev != Ꮡfile) {
             throw panic(fmt.Sprintf("file %s (%d-%d) overlaps with file %s (%d-%d)"u8,
                 prev.Name(), prev.Base(), prev.End(),
                 @file.Name(), @file.Base(), @file.End()));
@@ -368,7 +369,7 @@ internal static void add(this ж<tree> Ꮡt, ж<ΔFile> Ꮡfile) {
 
 // set updates the existing node at (pos, parent) if present, or
 // inserts a new node if not, so that it refers to file.
-internal static void set(this ref tree t, ж<ΔFile> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> Ꮡparent) {
+internal static void set(this ref tree t, ж<ΔFile> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var @file = ref Ꮡfile.DerefOrNull();
     ref var pos = ref Ꮡpos.DerefOrNull();
 
@@ -380,11 +381,11 @@ internal static void set(this ref tree t, ж<ΔFile> Ꮡfile, ж<ж<node>> Ꮡpo
             if (true) { // defeat vet's unreachable pass
                 throw panic("unreachable according to current FileSet requirements");
             }
-            xΔ1.Value.@file = Ꮡfile;
+            xΔ1.@file = Ꮡfile;
             return;
         }
     }
-    var x = Ꮡ(new node(@file: Ꮡfile, key: @file.key(), parent: Ꮡparent, height: -1));
+    var x = Ꮡ(new node(@file: Ꮡfile, key: @file.key(), parent: parent, height: -1));
     pos = x;
     t.rebalanceUp(x);
 }
@@ -406,19 +407,19 @@ internal static void delete(this ref tree t, ж<ж<node>> Ꮡpos) {
         }
         return;
     }
-    case {} when (~x).left == nil: {
+    case {} when x.left == nil: {
         {
-            pos = x.Value.right; if (pos != nil) {
-                (pos).Value.parent = x.Value.parent;
+            pos = x.right; if (pos != nil) {
+                (pos).parent = x.parent;
             }
         }
-        t.rebalanceUp((~x).parent);
+        t.rebalanceUp(x.parent);
         break;
     }
-    case {} when (~x).right == nil: {
-        pos = x.Value.left;
-        x.Value.left.Value.parent = x.Value.parent;
-        t.rebalanceUp((~x).parent);
+    case {} when x.right == nil: {
+        pos = x.left;
+        x.left.parent = x.parent;
+        t.rebalanceUp(x.parent);
         break;
     }
     default: {
@@ -426,11 +427,11 @@ internal static void delete(this ref tree t, ж<ж<node>> Ꮡpos) {
         break;
     }}
 
-    x.Value.balance = -100;
-    x.Value.parent = default!;
-    x.Value.left = default!;
-    x.Value.right = default!;
-    x.Value.height = -1;
+    x.balance = -100;
+    x.parent = default;
+    x.left = default;
+    x.right = default;
+    x.height = -1;
     t.root.check(nil);
 }
 
@@ -443,15 +444,15 @@ internal static void deleteSwap(this ref tree t, ж<ж<node>> Ꮡpos) {
     var z = t.deleteMin(x.of(node.Ꮡright));
 
     pos = z;
-    var unbalanced = z.Value.parent; // lowest potentially unbalanced node
+    var unbalanced = z.parent; // lowest potentially unbalanced node
     if (unbalanced == x) {
         unbalanced = z; // (x a (z nil b)) -> (z a b)
     }
-    z.Value.parent = x.Value.parent;
-    z.Value.height = x.Value.height;
-    z.Value.balance = x.Value.balance;
-    z.setLeft((~x).left);
-    z.setRight((~x).right);
+    z.parent = x.parent;
+    z.height = x.height;
+    z.balance = x.balance;
+    z.setLeft(x.left);
+    z.setRight(x.right);
 
     t.rebalanceUp(unbalanced);
 }
@@ -460,16 +461,16 @@ internal static void deleteSwap(this ref tree t, ж<ж<node>> Ꮡpos) {
 // (leftmost) element, which may be *zpos itself. It returns the
 // deleted node.
 internal static ж<node> /*z*/ deleteMin(this ref tree t, ж<ж<node>> Ꮡzpos) {
-    ж<node> z = default!;
+    ж<node> z = default;
     ref var zpos = ref Ꮡzpos.DerefOrNull();
 
-    while ((~(zpos)).left != nil) {
+    while ((zpos).left != nil) {
         Ꮡzpos = (zpos).of(node.Ꮡleft); zpos = ref Ꮡzpos.DerefOrNull();
     }
     z = zpos;
-    zpos = z.Value.right;
+    zpos = z.right;
     if (zpos != nil) {
-        (zpos).Value.parent = z.Value.parent;
+        (zpos).parent = z.parent;
     }
     return z;
 }

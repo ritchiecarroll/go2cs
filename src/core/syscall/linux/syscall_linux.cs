@@ -63,11 +63,11 @@ public static (uintptr r1, uintptr r2, Errno err) RawSyscall(uintptr trap, uintp
 //go:norace
 //go:linkname RawSyscall6
 public static (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
-    uintptr errno = default!;
+    uintptr errno = default;
     (r1, r2, errno) = linux.Syscall6(trap, a1, a2, a3, a4, a5, a6);
     err = (Errno)errno;
     return (r1, r2, err);
@@ -77,9 +77,9 @@ public static (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr trap, uint
 //go:nosplit
 //go:linkname Syscall
 public static (uintptr r1, uintptr r2, Errno err) Syscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     runtime_entersyscall();
     // N.B. Calling RawSyscall here is unsafe with atomic coverage
@@ -103,9 +103,9 @@ public static (uintptr r1, uintptr r2, Errno err) Syscall(uintptr trap, uintptr 
 //go:nosplit
 //go:linkname Syscall6
 public static (uintptr r1, uintptr r2, Errno err) Syscall6(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     runtime_entersyscall();
     (r1, r2, err) = RawSyscall6(trap, a1, a2, a3, a4, a5, a6);
@@ -145,7 +145,7 @@ public static (nint fd, error err) EpollCreate(nint size) {
 
 internal static bool isGroupMember(nint gid) {
     var (groups, err) = Getgroups();
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
 
@@ -200,19 +200,19 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
 
     ref var st = ref heap(new Stat_t(), out var Ꮡst);
     {
-        var errΔ2 = fstatat(dirfd, path, Ꮡst, flags & (nint)_AT_SYMLINK_NOFOLLOW); if (errΔ2 != default!) {
+        var errΔ2 = fstatat(dirfd, path, Ꮡst, flags & (nint)_AT_SYMLINK_NOFOLLOW); if (errΔ2 != nil) {
             return errΔ2;
         }
     }
 
     mode &= (uint32)(7);
     if (mode == 0) {
-        return default!;
+        return default;
     }
 
     // Fallback to checking permission bits.
-    nint uid = default!;
-    if ((flags & (nint)_AT_EACCESS) != 0){
+    nint uid = default;
+    if ((flags & (nint)_AT_EACCESS) != 0) {
         uid = Geteuid();
         if (uid != 0 && isCapDacOverrideSet()) {
             // If CAP_DAC_OVERRIDE is set, file access check is
@@ -227,27 +227,27 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
     if (uid == 0) {
         if ((mode & 1) == 0) {
             // Root can read and write any file.
-            return default!;
+            return default;
         }
         if ((st.Mode & 73) != 0) {
             // Root can execute any file that anybody can execute.
-            return default!;
+            return default;
         }
         return EACCES;
     }
 
-    uint32 fmode = default!;
-    if ((uint32)uid == st.Uid){
+    uint32 fmode = default;
+    if ((uint32)uid == st.Uid) {
         fmode = (st.Mode >> 6) & 7;
     } else {
-        nint gid = default!;
-        if ((flags & (nint)_AT_EACCESS) != 0){
+        nint gid = default;
+        if ((flags & (nint)_AT_EACCESS) != 0) {
             gid = Getegid();
         } else {
             gid = Getgid();
         }
 
-        if ((uint32)gid == st.Gid || isGroupMember((nint)st.Gid)){
+        if ((uint32)gid == st.Gid || isGroupMember((nint)st.Gid)) {
             fmode = (st.Mode >> 3) & 7;
         } else {
             fmode = st.Mode & 7;
@@ -255,7 +255,7 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
     }
 
     if ((fmode & mode) == mode) {
-        return default!;
+        return default;
     }
 
     return EACCES;
@@ -271,10 +271,9 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
         if (AreEqual(err, ENOSYS)) {
             // fchmodat2 isn't available. If the flags are known to be valid,
             // return EOPNOTSUPP to indicate that fchmodat doesn't support them.
-            if ((flags & ~(nint)((nint)((nint)_AT_SYMLINK_NOFOLLOW | (nint)_AT_EMPTY_PATH))) != 0){
+            if ((flags & ~(nint)((nint)((nint)_AT_SYMLINK_NOFOLLOW | (nint)_AT_EMPTY_PATH))) != 0) {
                 return EINVAL;
-            } else 
-            if ((flags & (nint)((nint)((nint)_AT_SYMLINK_NOFOLLOW | (nint)_AT_EMPTY_PATH))) != 0) {
+            } else if ((flags & (nint)((nint)((nint)_AT_SYMLINK_NOFOLLOW | (nint)_AT_EMPTY_PATH))) != 0) {
                 return EOPNOTSUPP;
             }
         }
@@ -316,9 +315,9 @@ public static error Pipe2(slice<nint> p, nint flags) {
     }
     ref var pp = ref heap(new array<_C_int>(2), out var Ꮡpp);
     var err = pipe2(Ꮡpp, flags);
-    if (err == default!) {
-        p[0] = (nint)(int32)pp[0];
-        p[1] = (nint)(int32)pp[1];
+    if (err == nil) {
+        p[0] = (nint)pp[0];
+        p[1] = (nint)pp[1];
     }
     return err;
 }
@@ -382,11 +381,11 @@ public const bool ImplementsGetwd = true;
 
 //sys	Getcwd(buf []byte) (n int, err error)
 public static (@string wd, error err) Getwd() {
-    error err = default!;
+    error err = default;
 
     array<byte> buf = new(4096); /* PathMax */
     (var n, err) = Getcwd(buf[0..]);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     // Getcwd returns the number of bytes written to buf, including the NUL.
@@ -396,38 +395,38 @@ public static (@string wd, error err) Getwd() {
     // In some cases, Linux can return a path that starts with the
     // "(unreachable)" prefix, which can potentially be a valid relative
     // path. To work around that, return ENOENT if path is not absolute.
-    if (buf[0] != (rune)'/') {
+    if (buf[0] != '/') {
         return ("", ENOENT);
     }
 
-    return ((@string)(buf.slice(0, n - 1)), default!);
+    return ((@string)(buf.slice(0, n - 1)), default);
 }
 
 public static (slice<nint> gids, error err) Getgroups() {
-    slice<nint> gids = default!;
-    error err = default!;
+    slice<nint> gids = default;
+    error err = default;
 
     (var n, err) = getgroups(0, nil);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (n == 0) {
-        return (default!, default!);
+        return (default, default);
     }
 
     // Sanity check group count. Max is 1<<16 on Linux.
     if (n < 0 || n > 1 << 20) {
-        return (default!, EINVAL);
+        return (default, EINVAL);
     }
 
     var a = new slice<_Gid_t>(n);
     (n, err) = getgroups(n, Ꮡ(a, 0));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     gids = new slice<nint>(n);
     foreach (var (i, v) in a.slice(0, n)) {
-        gids[i] = (nint)(uint32)v;
+        gids[i] = (nint)v;
     }
     return (gids, err);
 }
@@ -476,40 +475,40 @@ public static nint ExitStatus(this WaitStatus w) {
     if (!w.Exited()) {
         return -1;
     }
-    return (nint)(uint32)((w >> (int)(shift))) & 0xFF;
+    return (nint)(w >> (int)(shift)) & 0xFF;
 }
 
 public static ΔSignal Signal(this WaitStatus w) {
     if (!w.Signaled()) {
         return -1;
     }
-    return (ΔSignal)(nint)((uint32)((WaitStatus)(w & (uint32)mask)));
+    return (ΔSignal)(nint)((WaitStatus)(w & (uint32)mask));
 }
 
 public static ΔSignal StopSignal(this WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
-    return (ΔSignal)(((ΔSignal)(nint)((uint32)(w >> (int)(shift)))) & 0xFF);
+    return (ΔSignal)(((ΔSignal)(nint)((w >> (int)(shift)))) & 0xFF);
 }
 
 public static nint TrapCause(this WaitStatus w) {
     if (w.StopSignal() != SIGTRAP) {
         return -1;
     }
-    return (nint)(uint32)((w >> (int)(shift))) >> 8;
+    return (nint)(w >> (int)(shift)) >> 8;
 }
 
 //sys	wait4(pid int, wstatus *_C_int, options int, rusage *Rusage) (wpid int, err error)
-public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> Ꮡrusage) {
-    nint wpid = default!;
-    error err = default!;
+public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> rusage) {
+    nint wpid = default;
+    error err = default;
     ref var wstatus = ref Ꮡwstatus.DerefOrNull();
 
     ref var status = ref heap(new _C_int(), out var Ꮡstatus);
-    (wpid, err) = wait4(pid, Ꮡstatus, options, Ꮡrusage);
+    (wpid, err) = wait4(pid, Ꮡstatus, options, rusage);
     if (Ꮡwstatus != nil) {
-        wstatus = (WaitStatus)(uint32)(int32)status;
+        wstatus = (WaitStatus)(uint32)status;
     }
     return (wpid, err);
 }
@@ -528,16 +527,16 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     @string name = sa.Name;
     nint n = len(name);
     if (n > len(sa.raw.Path)) {
-        return (default!, 0, EINVAL);
+        return (default, 0, EINVAL);
     }
     // Abstract addresses start with NUL.
     // '@' is also a valid way to specify abstract addresses.
-    var isAbstract = n > 0 && (name[0] == (rune)'@' || name[0] == (rune)'\x00');
+    var isAbstract = n > 0 && (name[0] == '@' || name[0] == '\x00');
 
     // Non-abstract named addresses are NUL terminated.
     // The length can't use the full capacity as we need to add NUL.
     if (n == len(sa.raw.Path) && !isAbstract) {
-        return (default!, 0, EINVAL);
+        return (default, 0, EINVAL);
     }
     sa.raw.Family = AF_UNIX;
     for (nint i = 0; i < n; i++) {
@@ -546,17 +545,16 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     // Length is family + name (+ NUL if non-abstract).
     // Family is of type uint16 (2 bytes).
     var sl = (_Socklen)(uint32)(2 + n);
-    if (isAbstract){
+    if (isAbstract) {
         // Abstract addresses are not NUL terminated.
         // We rewrite '@' prefix to NUL here.
         sa.raw.Path[0] = 0;
-    } else 
-    if (n > 0) {
+    } else if (n > 0) {
         // Add NUL for non-abstract named addresses.
         sl++;
     }
 
-    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), sl, default!);
+    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), sl, default);
 }
 
 partial struct SockaddrLinklayer {
@@ -573,7 +571,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLink
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     if (sa.Ifindex < 0 || sa.Ifindex > 0x7fffffff) {
-        return (default!, 0, EINVAL);
+        return (default, 0, EINVAL);
     }
     sa.raw.Family = AF_PACKET;
     sa.raw.Protocol = sa.Protocol;
@@ -582,7 +580,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLink
     sa.raw.Pkttype = sa.Pkttype;
     sa.raw.Halen = sa.Halen;
     sa.raw.Addr = sa.Addr.Clone();
-    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrLinklayer.Ꮡraw)), SizeofSockaddrLinklayer, default!);
+    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrLinklayer.Ꮡraw)), SizeofSockaddrLinklayer, default);
 }
 
 partial struct SockaddrNetlink {
@@ -600,7 +598,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrNetl
     sa.raw.Pad = sa.Pad;
     sa.raw.Pid = sa.Pid;
     sa.raw.Groups = sa.Groups;
-    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrNetlink.Ꮡraw)), SizeofSockaddrNetlink, default!);
+    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrNetlink.Ꮡraw)), SizeofSockaddrNetlink, default);
 }
 
 // go2cs generated this placeholder — func anyToSockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -615,10 +613,9 @@ public static (nint nfd, Sockaddr sa, error err) Accept(nint fd) {
 
 public static (array<byte> value, error err) GetsockoptInet4Addr(nint fd, nint level, nint opt) {
     ref var value = ref heap(new array<byte>(4), out var Ꮡvalue);
-    error err = default!;
+    error err = default;
 
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)4;
+    ref var vallen = ref heap<_Socklen>((_Socklen)4, out var Ꮡvallen);
     err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue.at<byte>(0)), Ꮡvallen);
     return (value.Clone(), err);
 }
@@ -631,8 +628,7 @@ public static (array<byte> value, error err) GetsockoptInet4Addr(nint fd, nint l
 
 public static (ж<IPv6MTUInfo>, error) GetsockoptIPv6MTUInfo(nint fd, nint level, nint opt) {
     ref var value = ref heap(new IPv6MTUInfo(), out var Ꮡvalue);
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)SizeofIPv6MTUInfo;
+    ref var vallen = ref heap<_Socklen>((_Socklen)SizeofIPv6MTUInfo, out var Ꮡvallen);
     var err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue), Ꮡvallen);
     return (Ꮡvalue, err);
 }
@@ -641,8 +637,7 @@ public static (ж<IPv6MTUInfo>, error) GetsockoptIPv6MTUInfo(nint fd, nint level
 
 public static (ж<Ucred>, error) GetsockoptUcred(nint fd, nint level, nint opt) {
     ref var value = ref heap(new Ucred(), out var Ꮡvalue);
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)SizeofUcred;
+    ref var vallen = ref heap<_Socklen>((_Socklen)SizeofUcred, out var Ꮡvallen);
     var err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue), Ꮡvallen);
     return (Ꮡvalue, err);
 }
@@ -652,8 +647,8 @@ public static (ж<Ucred>, error) GetsockoptUcred(nint fd, nint level, nint opt) 
 // go2cs generated this placeholder — func recvmsgRaw is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte> oob, @unsafe.Pointer ptr, _Socklen salen, nint flags) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     ref var msg = ref heap(new Msghdr(), out var Ꮡmsg);
     msg.Name = (ж<byte>)(uintptr)(ptr);
@@ -666,9 +661,9 @@ internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte>
     ref var dummy = ref heap(new byte(), out var Ꮡdummy);
     if (len(oob) > 0) {
         if (len(p) == 0) {
-            nint sockType = default!;
+            nint sockType = default;
             (sockType, err) = GetsockoptInt(fd, SOL_SOCKET, SO_TYPE);
-            if (err != default!) {
+            if (err != nil) {
                 return (0, err);
             }
             // send at least one normal byte
@@ -683,14 +678,14 @@ internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte>
     msg.Iov = Ꮡiov;
     msg.Iovlen = 1;
     {
-        (n, err) = sendmsg(fd, Ꮡmsg, flags); if (err != default!) {
+        (n, err) = sendmsg(fd, Ꮡmsg, flags); if (err != nil) {
             return (0, err);
         }
     }
     if (len(oob) > 0 && len(p) == 0) {
         n = 0;
     }
-    return (n, default!);
+    return (n, default);
 }
 
 // BindToDevice binds the socket associated with fd to device.
@@ -701,7 +696,7 @@ public static error /*err*/ BindToDevice(nint fd, @string device) {
 //sys	ptrace(request int, pid int, addr uintptr, data uintptr) (err error)
 //sys	ptracePtr(request int, pid int, addr uintptr, data unsafe.Pointer) (err error) = SYS_PTRACE
 internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr addr, slice<byte> @out) {
-    error err = default!;
+    error err = default;
 
     // The peek requests are machine-size oriented, so we wrap it
     // to retrieve arbitrary-length data.
@@ -719,7 +714,7 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
     nint n = 0;
     if (addr % (uintptr)sizeofPtr != 0) {
         err = ptracePtr(req, pid, addr - addr % (uintptr)sizeofPtr, @unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0)));
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         n += copy(@out, buf.slice((nint)(addr % (uintptr)sizeofPtr)));
@@ -731,7 +726,7 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
         // We use an internal buffer to guarantee alignment.
         // It's not documented if this is necessary, but we're paranoid.
         err = ptracePtr(req, pid, addr + (uintptr)n, @unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0)));
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
         nint copied = copy(@out, buf[0..]);
@@ -739,7 +734,7 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
         @out = @out.slice(copied);
     }
 
-    return (n, default!);
+    return (n, default);
 }
 
 public static (nint count, error err) PtracePeekText(nint pid, uintptr addr, slice<byte> @out) {
@@ -751,7 +746,7 @@ public static (nint count, error err) PtracePeekData(nint pid, uintptr addr, sli
 }
 
 internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, nint pid, uintptr addr, slice<byte> data) {
-    error err = default!;
+    error err = default;
 
     // As for ptracePeek, we need to align our accesses to deal
     // with the possibility of straddling an invalid page.
@@ -761,13 +756,13 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
     if (addr % (uintptr)sizeofPtr != 0) {
         ref var buf = ref heap(new array<byte>(8), out var Ꮡbuf);
         err = ptracePtr(peekReq, pid, addr - addr % (uintptr)sizeofPtr, @unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0)));
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         n += copy(buf.slice((nint)(addr % (uintptr)sizeofPtr)), data);
         var word = (Ꮡbuf.at<byte>(0).Reinterpret<byte, uintptr>()).Value;
         err = ptrace(pokeReq, pid, addr - addr % (uintptr)sizeofPtr, word);
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         data = data.slice(n);
@@ -777,7 +772,7 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
     while (len(data) > sizeofPtr) {
         var word = (Ꮡ(data, 0).Reinterpret<byte, uintptr>()).Value;
         err = ptrace(pokeReq, pid, addr + (uintptr)n, word);
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
         n += sizeofPtr;
@@ -788,19 +783,19 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
     if (len(data) > 0) {
         ref var buf = ref heap(new array<byte>(8), out var Ꮡbuf);
         err = ptracePtr(peekReq, pid, addr + (uintptr)n, @unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0)));
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
         copy(buf[0..], data);
         var word = (Ꮡbuf.at<byte>(0).Reinterpret<byte, uintptr>()).Value;
         err = ptrace(pokeReq, pid, addr + (uintptr)n, word);
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
         n += len(data);
     }
 
-    return (n, default!);
+    return (n, default);
 }
 
 public static (nint count, error err) PtracePokeText(nint pid, uintptr addr, slice<byte> data) {
@@ -813,16 +808,16 @@ public static (nint count, error err) PtracePokeData(nint pid, uintptr addr, sli
 
 internal static UntypedInt _NT_PRSTATUS => 1;
 
-public static error /*err*/ PtraceGetRegs(nint pid, ж<PtraceRegs> Ꮡregsout) {
+public static error /*err*/ PtraceGetRegs(nint pid, ж<PtraceRegs> regsout) {
     ref var iov = ref heap(new Iovec(), out var Ꮡiov);
-    iov.Base = Ꮡregsout.Reinterpret<PtraceRegs, byte>();
+    iov.Base = regsout.Reinterpret<PtraceRegs, byte>();
     iov.SetLen((nint)/* unsafe.Sizeof(*regsout) */ (uintptr)216);
     return ptracePtr(PTRACE_GETREGSET, pid, (uintptr)_NT_PRSTATUS, @unsafe.Pointer.FromPinnedBox(Ꮡiov));
 }
 
-public static error /*err*/ PtraceSetRegs(nint pid, ж<PtraceRegs> Ꮡregs) {
+public static error /*err*/ PtraceSetRegs(nint pid, ж<PtraceRegs> regs) {
     ref var iov = ref heap(new Iovec(), out var Ꮡiov);
-    iov.Base = Ꮡregs.Reinterpret<PtraceRegs, byte>();
+    iov.Base = regs.Reinterpret<PtraceRegs, byte>();
     iov.SetLen((nint)/* unsafe.Sizeof(*regs) */ (uintptr)216);
     return ptracePtr(PTRACE_SETREGSET, pid, (uintptr)_NT_PRSTATUS, @unsafe.Pointer.FromPinnedBox(Ꮡiov));
 }
@@ -832,12 +827,12 @@ public static error /*err*/ PtraceSetOptions(nint pid, nint options) {
 }
 
 public static (nuint msg, error err) PtraceGetEventMsg(nint pid) {
-    nuint msg = default!;
-    error err = default!;
+    nuint msg = default;
+    error err = default;
 
     ref var data = ref heap(new _C_long(), out var Ꮡdata);
     err = ptracePtr(PTRACE_GETEVENTMSG, pid, 0, @unsafe.Pointer.FromPinnedBox(Ꮡdata));
-    msg = (nuint)(int64)data;
+    msg = (nuint)data;
     return (msg, err);
 }
 
@@ -888,7 +883,7 @@ internal static (uint64, bool) direntNamlen(slice<byte> buf) {
 
 //sys	mount(source string, target string, fstype string, flags uintptr, data *byte) (err error)
 public static error /*err*/ Mount(@string source, @string target, @string fstype, uintptr flags, @string data) {
-    error err = default!;
+    error err = default;
 
     // Certain file systems get rather angry and EINVAL if you give
     // them an empty string of data, rather than NULL.
@@ -896,7 +891,7 @@ public static error /*err*/ Mount(@string source, @string target, @string fstype
         return mount(source, target, fstype, flags, nil);
     }
     (var datap, err) = BytePtrFromString(data);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return mount(source, target, fstype, flags, datap);
@@ -928,7 +923,7 @@ public static error /*err*/ Mount(@string source, @string target, @string fstype
 //sys	Getdents(fd int, buf []byte) (n int, err error) = SYS_GETDENTS64
 //sysnb	Getpgid(pid int) (pgid int, err error)
 public static nint /*pid*/ Getpgrp() {
-    nint pid = default!;
+    nint pid = default;
 
     (pid, _) = Getpgid(0);
     return pid;
@@ -984,8 +979,8 @@ internal static partial (uintptr r1, uintptr r2, uintptr err) runtime_doAllThrea
 //
 //go:uintptrescapes
 public static (uintptr r1, uintptr r2, Errno err) AllThreadsSyscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
 
     if (cgo_libc_setegid != nil) {
         return (minus1, minus1, ENOTSUP);
@@ -999,8 +994,8 @@ public static (uintptr r1, uintptr r2, Errno err) AllThreadsSyscall(uintptr trap
 //
 //go:uintptrescapes
 public static (uintptr r1, uintptr r2, Errno err) AllThreadsSyscall6(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
 
     if (cgo_libc_setegid != nil) {
         return (minus1, minus1, ENOTSUP);
@@ -1019,16 +1014,15 @@ internal static @unsafe.Pointer cgo_libc_setegid; // non-nil if cgo linked.
 internal static uintptr minus1 => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 
 public static error /*err*/ Setegid(nint egid) {
-    error err = default!;
+    error err = default;
 
-    if (cgo_libc_setegid == nil){
+    if (cgo_libc_setegid == nil) {
         {
             var (_, _, e1) = AllThreadsSyscall(SYS_SETRESGID, minus1, (uintptr)egid, minus1); if (e1 != 0) {
                 err = errnoErr(e1);
             }
         }
-    } else 
-    {
+    } else {
         var ret = cgocaller(cgo_libc_setegid, (uintptr)egid); if (ret != 0) {
             err = errnoErr((Errno)ret);
         }
@@ -1039,16 +1033,15 @@ public static error /*err*/ Setegid(nint egid) {
 internal static @unsafe.Pointer cgo_libc_seteuid; // non-nil if cgo linked.
 
 public static error /*err*/ Seteuid(nint euid) {
-    error err = default!;
+    error err = default;
 
-    if (cgo_libc_seteuid == nil){
+    if (cgo_libc_seteuid == nil) {
         {
             var (_, _, e1) = AllThreadsSyscall(SYS_SETRESUID, minus1, (uintptr)euid, minus1); if (e1 != 0) {
                 err = errnoErr(e1);
             }
         }
-    } else 
-    {
+    } else {
         var ret = cgocaller(cgo_libc_seteuid, (uintptr)euid); if (ret != 0) {
             err = errnoErr((Errno)ret);
         }
@@ -1059,16 +1052,15 @@ public static error /*err*/ Seteuid(nint euid) {
 internal static @unsafe.Pointer cgo_libc_setgid; // non-nil if cgo linked.
 
 public static error /*err*/ Setgid(nint gid) {
-    error err = default!;
+    error err = default;
 
-    if (cgo_libc_setgid == nil){
+    if (cgo_libc_setgid == nil) {
         {
             var (_, _, e1) = AllThreadsSyscall(sys_SETGID, (uintptr)gid, 0, 0); if (e1 != 0) {
                 err = errnoErr(e1);
             }
         }
-    } else 
-    {
+    } else {
         var ret = cgocaller(cgo_libc_setgid, (uintptr)gid); if (ret != 0) {
             err = errnoErr((Errno)ret);
         }
@@ -1079,16 +1071,15 @@ public static error /*err*/ Setgid(nint gid) {
 internal static @unsafe.Pointer cgo_libc_setregid; // non-nil if cgo linked.
 
 public static error /*err*/ Setregid(nint rgid, nint egid) {
-    error err = default!;
+    error err = default;
 
-    if (cgo_libc_setregid == nil){
+    if (cgo_libc_setregid == nil) {
         {
             var (_, _, e1) = AllThreadsSyscall(sys_SETREGID, (uintptr)rgid, (uintptr)egid, 0); if (e1 != 0) {
                 err = errnoErr(e1);
             }
         }
-    } else 
-    {
+    } else {
         var ret = cgocaller(cgo_libc_setregid, (uintptr)rgid, (uintptr)egid); if (ret != 0) {
             err = errnoErr((Errno)ret);
         }
@@ -1099,16 +1090,15 @@ public static error /*err*/ Setregid(nint rgid, nint egid) {
 internal static @unsafe.Pointer cgo_libc_setresgid; // non-nil if cgo linked.
 
 public static error /*err*/ Setresgid(nint rgid, nint egid, nint sgid) {
-    error err = default!;
+    error err = default;
 
-    if (cgo_libc_setresgid == nil){
+    if (cgo_libc_setresgid == nil) {
         {
             var (_, _, e1) = AllThreadsSyscall(sys_SETRESGID, (uintptr)rgid, (uintptr)egid, (uintptr)sgid); if (e1 != 0) {
                 err = errnoErr(e1);
             }
         }
-    } else 
-    {
+    } else {
         var ret = cgocaller(cgo_libc_setresgid, (uintptr)rgid, (uintptr)egid, (uintptr)sgid); if (ret != 0) {
             err = errnoErr((Errno)ret);
         }
@@ -1119,16 +1109,15 @@ public static error /*err*/ Setresgid(nint rgid, nint egid, nint sgid) {
 internal static @unsafe.Pointer cgo_libc_setresuid; // non-nil if cgo linked.
 
 public static error /*err*/ Setresuid(nint ruid, nint euid, nint suid) {
-    error err = default!;
+    error err = default;
 
-    if (cgo_libc_setresuid == nil){
+    if (cgo_libc_setresuid == nil) {
         {
             var (_, _, e1) = AllThreadsSyscall(sys_SETRESUID, (uintptr)ruid, (uintptr)euid, (uintptr)suid); if (e1 != 0) {
                 err = errnoErr(e1);
             }
         }
-    } else 
-    {
+    } else {
         var ret = cgocaller(cgo_libc_setresuid, (uintptr)ruid, (uintptr)euid, (uintptr)suid); if (ret != 0) {
             err = errnoErr((Errno)ret);
         }
@@ -1139,16 +1128,15 @@ public static error /*err*/ Setresuid(nint ruid, nint euid, nint suid) {
 internal static @unsafe.Pointer cgo_libc_setreuid; // non-nil if cgo linked.
 
 public static error /*err*/ Setreuid(nint ruid, nint euid) {
-    error err = default!;
+    error err = default;
 
-    if (cgo_libc_setreuid == nil){
+    if (cgo_libc_setreuid == nil) {
         {
             var (_, _, e1) = AllThreadsSyscall(sys_SETREUID, (uintptr)ruid, (uintptr)euid, 0); if (e1 != 0) {
                 err = errnoErr(e1);
             }
         }
-    } else 
-    {
+    } else {
         var ret = cgocaller(cgo_libc_setreuid, (uintptr)ruid, (uintptr)euid); if (ret != 0) {
             err = errnoErr((Errno)ret);
         }
@@ -1159,16 +1147,15 @@ public static error /*err*/ Setreuid(nint ruid, nint euid) {
 internal static @unsafe.Pointer cgo_libc_setuid; // non-nil if cgo linked.
 
 public static error /*err*/ Setuid(nint uid) {
-    error err = default!;
+    error err = default;
 
-    if (cgo_libc_setuid == nil){
+    if (cgo_libc_setuid == nil) {
         {
             var (_, _, e1) = AllThreadsSyscall(sys_SETUID, (uintptr)uid, 0, 0); if (e1 != 0) {
                 err = errnoErr(e1);
             }
         }
-    } else 
-    {
+    } else {
         var ret = cgocaller(cgo_libc_setuid, (uintptr)uid); if (ret != 0) {
             err = errnoErr((Errno)ret);
         }
@@ -1213,15 +1200,15 @@ public static error /*err*/ Munmap(slice<byte> b) {
 //sys	Munlock(b []byte) (err error)
 //sys	Mlockall(flags int) (err error)
 //sys	Munlockall() (err error)
-public static error /*err*/ Getrlimit(nint resource, ж<Rlimit> Ꮡrlim) {
+public static error /*err*/ Getrlimit(nint resource, ж<Rlimit> rlim) {
     // prlimit1 is the same as prlimit when newlimit == nil
-    return prlimit1(0, resource, nil, Ꮡrlim);
+    return prlimit1(0, resource, nil, rlim);
 }
 
 // setrlimit sets a resource limit.
 // The Setrlimit function is in rlimit.go, and calls this one.
-internal static error /*err*/ setrlimit(nint resource, ж<Rlimit> Ꮡrlim) {
-    return prlimit1(0, resource, Ꮡrlim, nil);
+internal static error /*err*/ setrlimit(nint resource, ж<Rlimit> rlim) {
+    return prlimit1(0, resource, rlim, nil);
 }
 
 // prlimit changes a resource limit. We use a single definition so that
@@ -1231,11 +1218,11 @@ internal static error /*err*/ setrlimit(nint resource, ж<Rlimit> Ꮡrlim) {
 // Do not remove or change the type signature.
 //
 //go:linkname prlimit
-public static error /*err*/ prlimit(nint pid, nint resource, ж<Rlimit> Ꮡnewlimit, ж<Rlimit> Ꮡold) {
-    error err = default!;
+public static error /*err*/ prlimit(nint pid, nint resource, ж<Rlimit> newlimit, ж<Rlimit> old) {
+    error err = default;
 
-    err = prlimit1(pid, resource, Ꮡnewlimit, Ꮡold);
-    if (err == default! && Ꮡnewlimit != nil && resource == RLIMIT_NOFILE && (pid == 0 || pid == Getpid())) {
+    err = prlimit1(pid, resource, newlimit, old);
+    if (err == nil && newlimit != nil && resource == RLIMIT_NOFILE && (pid == 0 || pid == Getpid())) {
         ᏑorigRlimitNofile.Store(nil);
     }
     return err;

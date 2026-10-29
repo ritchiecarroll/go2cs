@@ -33,7 +33,7 @@ public static void Read(@unsafe.Pointer addr) {
 public static void ReadPC(@unsafe.Pointer addr, uintptr callerpc, uintptr pc) {
 }
 
-public static void ReadObjectPC(ж<abi.Type> Ꮡt, @unsafe.Pointer addr, uintptr callerpc, uintptr pc) {
+public static void ReadObjectPC(ж<abi.Type> t, @unsafe.Pointer addr, uintptr callerpc, uintptr pc) {
 }
 
 public static void Write(@unsafe.Pointer addr) {
@@ -42,7 +42,7 @@ public static void Write(@unsafe.Pointer addr) {
 public static void WritePC(@unsafe.Pointer addr, uintptr callerpc, uintptr pc) {
 }
 
-public static void WriteObjectPC(ж<abi.Type> Ꮡt, @unsafe.Pointer addr, uintptr callerpc, uintptr pc) {
+public static void WriteObjectPC(ж<abi.Type> t, @unsafe.Pointer addr, uintptr callerpc, uintptr pc) {
 }
 
 public static void ReadRange(@unsafe.Pointer addr, nint len) {

@@ -168,13 +168,13 @@ partial struct blockRecord {
 }
 
 internal static readonly ж<atomic.UnsafePointer> Ꮡmbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
-internal static ref atomic.UnsafePointer mbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡmbuckets).ValueSlot;                    // *bucket, memory profile buckets
+internal static ref atomic.UnsafePointer mbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡmbuckets).ValueSlot; // *bucket, memory profile buckets
 internal static readonly ж<atomic.UnsafePointer> Ꮡbbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
-internal static ref atomic.UnsafePointer bbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡbbuckets).ValueSlot;                    // *bucket, blocking profile buckets
+internal static ref atomic.UnsafePointer bbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡbbuckets).ValueSlot; // *bucket, blocking profile buckets
 internal static readonly ж<atomic.UnsafePointer> Ꮡxbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
-internal static ref atomic.UnsafePointer xbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡxbuckets).ValueSlot;                    // *bucket, mutex profile buckets
+internal static ref atomic.UnsafePointer xbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡxbuckets).ValueSlot; // *bucket, mutex profile buckets
 internal static readonly ж<atomic.UnsafePointer> Ꮡbuckhash = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
-internal static ref atomic.UnsafePointer buckhash => ref ((StaticBox<atomic.UnsafePointer>)Ꮡbuckhash).ValueSlot;                    // *buckhashArray
+internal static ref atomic.UnsafePointer buckhash => ref ((StaticBox<atomic.UnsafePointer>)Ꮡbuckhash).ValueSlot; // *buckhashArray
 
 internal static readonly ж<mProfCycleHolder> ᏑmProfCycle = new StaticBox<mProfCycleHolder>(default(mProfCycleHolder));
 internal static ref mProfCycleHolder mProfCycle => ref ((StaticBox<mProfCycleHolder>)ᏑmProfCycle).ValueSlot;
@@ -194,7 +194,7 @@ partial struct mProfCycleHolder {
 
 // read returns the current cycle count.
 internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) {
-    uint32 cycle = default!;
+    uint32 cycle = default;
 
     var v = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
     cycle = v >> 1;
@@ -204,10 +204,10 @@ internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) {
 // setFlushed sets the flushed flag. It returns the current cycle count and the
 // previous value of the flushed flag.
 internal static (uint32 cycle, bool alreadyFlushed) setFlushed(this ж<mProfCycleHolder> Ꮡc) {
-    uint32 cycle = default!;
-    bool alreadyFlushed = default!;
+    uint32 cycle = default;
+    bool alreadyFlushed = default;
 
-    while (ᐧ) {
+    for (;;) {
         var prev = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
         cycle = prev >> 1;
         alreadyFlushed = (prev & 0x1) != 0;
@@ -224,7 +224,7 @@ internal static void increment(this ж<mProfCycleHolder> Ꮡc) {
     // We explicitly wrap mProfCycle rather than depending on
     // uint wraparound because the memRecord.future ring does not
     // itself wrap at a power of two.
-    while (ᐧ) {
+    for (;;) {
         var prev = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
         var cycle = prev >> 1;
         cycle = (cycle + 1) % mProfCycleWrap;
@@ -282,7 +282,7 @@ internal static void mProf_Flush() {
         return;
     }
 
-    var index = cycle % (uint32)len(new memRecord(nil).future);
+    var index = cycle % (uint32)len(new memRecord().future);
     @lock(ᏑprofMemActiveLock);
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mProf_FlushLocked(index);
@@ -298,14 +298,14 @@ internal static void mProf_FlushLocked(uint32 index) {
     assertLockHeld(ᏑprofMemActiveLock);
     assertLockHeld(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
-    for (var b = head; b != nil; b = b.Value.allnext) {
+    for (var b = head; b != nil; b = b.allnext) {
         var mp = b.mp();
 
         // Flush cycle C into the published profile and clear
         // it for reuse.
         var mpc = mp.at(memRecord.Ꮡfuture, (ulong)(index));
         mp.of(memRecord.Ꮡactive).add(mpc);
-        mpc.Value = new memRecordCycle(nil);
+        mpc.Value = new memRecordCycle();
     }
 }
 
@@ -321,7 +321,7 @@ internal static void mProf_PostSweep() {
     // and so on.
     var cycle = ᏑmProfCycle.read() + 1;
 
-    var index = cycle % (uint32)len(new memRecord(nil).future);
+    var index = cycle % (uint32)len(new memRecord().future);
     @lock(ᏑprofMemActiveLock);
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mProf_FlushLocked(index);
@@ -331,7 +331,7 @@ internal static void mProf_PostSweep() {
 
 // Called by malloc to record a profiled block.
 internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer Δp, uintptr size) {
-    if (mp.profStack == default!) {
+    if (mp.profStack == nil) {
         // mp.profStack is nil if we happen to sample an allocation during the
         // initialization of mp. This case is rare, so we just ignore such
         // allocations. Change MemProfileRate to 1 if you need to reproduce such
@@ -341,15 +341,15 @@ internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer Δp, uintptr
     // Only use the part of mp.profStack we need and ignore the extra space
     // reserved for delayed inline expansion with frame pointer unwinding.
     nint nstk = callers(3, mp.profStack.slice(0, debug.profstackdepth + 2));
-    var index = (ᏑmProfCycle.read() + 2) % (uint32)len(new memRecord(nil).future);
+    var index = (ᏑmProfCycle.read() + 2) % (uint32)len(new memRecord().future);
 
     var b = stkbucket(memProfile, size, mp.profStack.slice(0, nstk), true);
     var mr = b.mp();
     var mpc = mr.at(memRecord.Ꮡfuture, (ulong)(index));
 
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
-    mpc.Value.allocs++;
-    mpc.Value.alloc_bytes += size;
+    mpc.allocs++;
+    mpc.alloc_bytes += size;
     unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
 
     // Setprofilebucket locks a bunch of other mutexes, so we call it outside of
@@ -363,15 +363,15 @@ internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer Δp, uintptr
 }
 
 // Called when freeing a profiled block.
-internal static void mProf_Free(ж<bucket> Ꮡb, uintptr size) {
-    var index = (ᏑmProfCycle.read() + 1) % (uint32)len(new memRecord(nil).future);
+internal static void mProf_Free(ж<bucket> b, uintptr size) {
+    var index = (ᏑmProfCycle.read() + 1) % (uint32)len(new memRecord().future);
 
-    var mp = Ꮡb.mp();
+    var mp = b.mp();
     var mpc = mp.at(memRecord.Ꮡfuture, (ulong)(index));
 
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
-    mpc.Value.frees++;
-    mpc.Value.free_bytes += size;
+    mpc.frees++;
+    mpc.free_bytes += size;
     unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
 }
 
@@ -385,11 +385,10 @@ internal static ref uint64 blockprofilerate => ref ((StaticBox<uint64>)Ꮡblockp
 // To include every blocking event in the profile, pass rate = 1.
 // To turn off profiling entirely, pass rate <= 0.
 public static void SetBlockProfileRate(nint rate) {
-    int64 r = default!;
-    if (rate <= 0){
+    int64 r = default;
+    if (rate <= 0) {
         r = 0; // disable profiling
-    } else 
-    if (rate == 1){
+    } else if (rate == 1) {
         r = 1; // profile everything
     } else {
         // convert ns to cycles, use float64 to prevent overflow during multiplication
@@ -429,14 +428,13 @@ internal static bool blocksampled(int64 cycles, int64 rate) {
 // inlining, and save remaining frames as "physical" return addresses. The
 // consumer should later use CallersFrames or similar to expand inline frames.
 internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, slice<uintptr> pcBuf) {
-    nint n = default!;
+    nint n = default;
     var lastFuncID = abi.FuncIDNormal;
     var pcBufʗ1 = pcBuf;
     bool skipOrAdd(uintptr retPC) {
-        if (skip > 0){
+        if (skip > 0) {
             skip--;
-        } else 
-        if (n < len(pcBufʗ1)) {
+        } else if (n < len(pcBufʗ1)) {
             pcBufʗ1[n] = retPC;
             n++;
         }
@@ -446,16 +444,15 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
         // return addr sits one word above the frame pointer
         var pc = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)((uintptr)fp + (uintptr)goarch.PtrSize));
 
-        if (skip > 0){
+        if (skip > 0) {
             var callPC = pc - 1;
             var fi = findfunc(callPC);
             var (u, uf) = newInlineUnwinder(fi, callPC);
             for (; uf.valid(); uf = u.next(uf)) {
                 var sf = u.srcFunc(uf);
-                if (sf.funcID == abi.FuncIDWrapper && elideWrapperCalling(lastFuncID)){
+                if (sf.funcID == abi.FuncIDWrapper && elideWrapperCalling(lastFuncID)) {
                     // ignore wrappers
-                } else 
-                {
+                } else {
                     var more = skipOrAdd(uf.pc + 1); if (!more) {
                         return n;
                     }
@@ -508,10 +505,10 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
 // "additional contention" and not include a call stack, to avoid an echo.
 partial struct mLockProfile {
     internal atomic.Int64 waitTime; // (nanotime) total time this M has spent waiting in runtime.lockWithRank. Read by runtime/metrics.
-    internal slice<uintptr> stack; // call stack at the point of this M's unlock call, when other Ms had to wait
-    internal int64 cycles;        // (cputicks) cycles attributable to "stack"
-    internal int64 cyclesLost;        // (cputicks) contention for which we weren't able to record a call stack
-    internal bool haveStack;         // stack and cycles are to be added to the mutex profile (even if cycles is 0)
+    internal slice<uintptr> stack;  // call stack at the point of this M's unlock call, when other Ms had to wait
+    internal int64 cycles;          // (cputicks) cycles attributable to "stack"
+    internal int64 cyclesLost;      // (cputicks) contention for which we weren't able to record a call stack
+    internal bool haveStack;        // stack and cycles are to be added to the mutex profile (even if cycles is 0)
     internal bool disabled;         // attribute all time to "lost"
 }
 
@@ -559,7 +556,7 @@ internal static void recordUnlock(this ж<mLockProfile> Ꮡprof, int64 cycles) {
             }
             var prevScore = (uint64)cheaprand64() % (uint64)prev;
             var thisScore = (uint64)cheaprand64() % (uint64)cycles;
-            if (prevScore > thisScore){
+            if (prevScore > thisScore) {
                 prof.cyclesLost += cycles;
                 return;
             } else {
@@ -597,7 +594,7 @@ internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
 
     prof.stack[0] = logicalStackSentinel;
 
-    nint nstk = default!;
+    nint nstk = default;
     var gp = getg();
     var sp = sys.GetCallerSP();
     var pc = sys.GetCallerPC();
@@ -671,17 +668,16 @@ internal static void saveBlockEventStack(int64 cycles, int64 rate, slice<uintptr
     // the sample probability is 1 if cycles >= rate, and cycles / rate
     // otherwise. For mutex profile events, the sample probability is 1 / rate.
     // We scale the events by 1 / (probability the event was sampled).
-    if (which == blockProfile && cycles < rate){
+    if (which == blockProfile && cycles < rate) {
         // Remove sampling bias, see discussion on http://golang.org/cl/299991.
-        bp.Value.count += (float64)rate / (float64)cycles;
-        bp.Value.cycles += rate;
-    } else 
-    if (which == mutexProfile){
-        bp.Value.count += (float64)rate;
-        bp.Value.cycles += rate * cycles;
+        bp.count += (float64)rate / (float64)cycles;
+        bp.cycles += rate;
+    } else if (which == mutexProfile) {
+        bp.count += (float64)rate;
+        bp.cycles += rate * cycles;
     } else {
-        bp.Value.count++;
-        bp.Value.cycles += cycles;
+        bp.count++;
+        bp.cycles += cycles;
     }
     unlock(ᏑprofBlockLock);
 }
@@ -759,8 +755,8 @@ internal static bool disableMemoryProfiling;
 // A MemProfileRecord describes the live objects allocated
 // by a particular call sequence (stack trace).
 partial struct MemProfileRecord {
-    public int64 AllocBytes, FreeBytes;       // number of bytes allocated, freed
-    public int64 AllocObjects, FreeObjects;       // number of objects allocated, freed
+    public int64 AllocBytes, FreeBytes;     // number of bytes allocated, freed
+    public int64 AllocObjects, FreeObjects; // number of objects allocated, freed
     public array<uintptr> Stack0 = new(32); // stack trace for this record; ends at first 0 entry
 }
 
@@ -824,26 +820,26 @@ public static (nint n, bool ok) MemProfile(slice<MemProfileRecord> Δp, bool inu
 //
 //go:noinline
 internal static partial (nint n, bool ok) memProfileInternal(nint size, bool inuseZero, Action<profilerecord.MemProfileRecord> copyFn) {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
     var cycle = ᏑmProfCycle.read();
     // If we're between mProf_NextCycle and mProf_Flush, take care
     // of flushing to the active profile so we only have to look
     // at the active profile below.
-    var index = cycle % (uint32)len(new memRecord(nil).future);
+    var index = cycle % (uint32)len(new memRecord().future);
     @lock(ᏑprofMemActiveLock);
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mProf_FlushLocked(index);
     unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     var clear = true;
     var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
-    for (var b = head; b != nil; b = b.Value.allnext) {
+    for (var b = head; b != nil; b = b.allnext) {
         var mp = b.mp();
-        if (inuseZero || (~mp).active.alloc_bytes != (~mp).active.free_bytes) {
+        if (inuseZero || mp.active.alloc_bytes != mp.active.free_bytes) {
             n++;
         }
-        if ((~mp).active.allocs != 0 || (~mp).active.frees != 0) {
+        if (mp.active.allocs != 0 || mp.active.frees != 0) {
             clear = false;
         }
     }
@@ -853,29 +849,29 @@ internal static partial (nint n, bool ok) memProfileInternal(nint size, bool inu
         // garbage collection is disabled from the beginning of execution,
         // accumulate all of the cycles, and recount buckets.
         n = 0;
-        for (var b = head; b != nil; b = b.Value.allnext) {
+        for (var b = head; b != nil; b = b.allnext) {
             var mp = b.mp();
-            foreach (var c in range((~mp).future)) {
+            foreach (var c in range(mp.future)) {
                 @lock(ᏑprofMemFutureLock.at<mutex>(c));
                 mp.of(memRecord.Ꮡactive).add(mp.at(memRecord.Ꮡfuture, c));
-                mp.Value.future[c] = new memRecordCycle(nil);
+                mp.future[c] = new memRecordCycle();
                 unlock(ᏑprofMemFutureLock.at<mutex>(c));
             }
-            if (inuseZero || (~mp).active.alloc_bytes != (~mp).active.free_bytes) {
+            if (inuseZero || mp.active.alloc_bytes != mp.active.free_bytes) {
                 n++;
             }
         }
     }
     if (n <= size) {
         ok = true;
-        for (var b = head; b != nil; b = b.Value.allnext) {
+        for (var b = head; b != nil; b = b.allnext) {
             var mp = b.mp();
-            if (inuseZero || (~mp).active.alloc_bytes != (~mp).active.free_bytes) {
+            if (inuseZero || mp.active.alloc_bytes != mp.active.free_bytes) {
                 var r = new profilerecord.MemProfileRecord(
-                    AllocBytes: (int64)(~mp).active.alloc_bytes,
-                    FreeBytes: (int64)(~mp).active.free_bytes,
-                    AllocObjects: (int64)(~mp).active.allocs,
-                    FreeObjects: (int64)(~mp).active.frees,
+                    AllocBytes: (int64)mp.active.alloc_bytes,
+                    FreeBytes: (int64)mp.active.free_bytes,
+                    AllocObjects: (int64)mp.active.allocs,
+                    FreeObjects: (int64)mp.active.frees,
                     Stack: b.stk()
                 );
                 copyFn(r);
@@ -917,9 +913,9 @@ public static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.Mem
 internal static void iterate_memprof(Action<ж<bucket>, uintptr, ж<uintptr>, uintptr, uintptr, uintptr> fn) {
     @lock(ᏑprofMemActiveLock);
     var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
-    for (var b = head; b != nil; b = b.Value.allnext) {
+    for (var b = head; b != nil; b = b.allnext) {
         var mp = b.mp();
-        fn(b, (~b).nstk, Ꮡ(b.stk(), 0), (~b).size, (~mp).active.allocs, (~mp).active.frees);
+        fn(b, b.nstk, Ꮡ(b.stk(), 0), b.size, mp.active.allocs, mp.active.frees);
     }
     unlock(ᏑprofMemActiveLock);
 }
@@ -940,10 +936,10 @@ partial struct BlockProfileRecord {
 // the [testing] package's -test.blockprofile flag instead
 // of calling BlockProfile directly.
 public static (nint n, bool ok) BlockProfile(slice<BlockProfileRecord> Δp) {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
-    nint m = default!;
+    nint m = default;
     var pʗ1 = Δp;
     (n, ok) = blockProfileInternal(len(Δp), (profilerecord.BlockProfileRecord r) => {
         copyBlockProfileRecord(Ꮡ(pʗ1, m), r);
@@ -979,21 +975,21 @@ internal static partial void expandFrames(slice<BlockProfileRecord> Δp) {
 // are less than size records, copyFn is invoked for each record, and ok returns
 // true.
 internal static (nint n, bool ok) blockProfileInternal(nint size, Action<profilerecord.BlockProfileRecord> copyFn) {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
     @lock(ᏑprofBlockLock);
     var head = (ж<bucket>)(uintptr)(Ꮡbbuckets.Load());
-    for (var b = head; b != nil; b = b.Value.allnext) {
+    for (var b = head; b != nil; b = b.allnext) {
         n++;
     }
     if (n <= size) {
         ok = true;
-        for (var b = head; b != nil; b = b.Value.allnext) {
+        for (var b = head; b != nil; b = b.allnext) {
             var bp = b.bp();
             var r = new profilerecord.BlockProfileRecord(
-                Count: (int64)(~bp).count,
-                Cycles: (~bp).cycles,
+                Count: (int64)bp.count,
+                Cycles: bp.cycles,
                 Stack: b.stk()
             );
             // Prevent callers from having to worry about division by zero errors.
@@ -1048,10 +1044,10 @@ public static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.B
 // Most clients should use the [runtime/pprof] package
 // instead of calling MutexProfile directly.
 public static (nint n, bool ok) MutexProfile(slice<BlockProfileRecord> Δp) {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
-    nint m = default!;
+    nint m = default;
     var pʗ1 = Δp;
     (n, ok) = mutexProfileInternal(len(Δp), (profilerecord.BlockProfileRecord r) => {
         copyBlockProfileRecord(Ꮡ(pʗ1, m), r);
@@ -1067,21 +1063,21 @@ public static (nint n, bool ok) MutexProfile(slice<BlockProfileRecord> Δp) {
 // are less than size records, copyFn is invoked for each record, and ok returns
 // true.
 internal static (nint n, bool ok) mutexProfileInternal(nint size, Action<profilerecord.BlockProfileRecord> copyFn) {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
     @lock(ᏑprofBlockLock);
     var head = (ж<bucket>)(uintptr)(Ꮡxbuckets.Load());
-    for (var b = head; b != nil; b = b.Value.allnext) {
+    for (var b = head; b != nil; b = b.allnext) {
         n++;
     }
     if (n <= size) {
         ok = true;
-        for (var b = head; b != nil; b = b.Value.allnext) {
+        for (var b = head; b != nil; b = b.allnext) {
             var bp = b.bp();
             var r = new profilerecord.BlockProfileRecord(
-                Count: (int64)(~bp).count,
-                Cycles: (~bp).cycles,
+                Count: (int64)bp.count,
+                Cycles: bp.cycles,
                 Stack: b.stk()
             );
             copyFn(r);
@@ -1117,8 +1113,8 @@ public static (nint n, bool ok) ThreadCreateProfile(slice<StackRecord> Δp) {
 // If there are less than size records, copyFn is invoked for each record, and
 // ok returns true.
 internal static (nint n, bool ok) threadCreateProfileInternal(nint size, Action<profilerecord.StackRecord> copyFn) {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
     var first = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm)));
     for (var mp = first; mp != nil; mp = mp.Value.alllink) {
@@ -1156,8 +1152,8 @@ internal static (nint n, bool ok) pprof_goroutineLeakProfileWithLabels(slice<pro
 
 // labels may be nil. If labels is non-nil, it must have the same length as p.
 internal static (nint n, bool ok) goroutineLeakProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
-    if (labels != default! && len(labels) != len(Δp)) {
-        labels = default!;
+    if (labels != nil && len(labels) != len(Δp)) {
+        labels = default;
     }
 
     return goroutineLeakProfileWithLabelsConcurrent(Δp, labels);
@@ -1207,7 +1203,7 @@ internal static bool CompareAndSwap(this ж<goroutineProfileStateHolder> Ꮡp, g
 }
 
 internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
-    nint n = default!;
+    nint n = default;
 
     if (len(Δp) == 0) {
         // An empty slice is obviously too small. Return a rough
@@ -1227,7 +1223,7 @@ internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice
     }
 
     // Visit each leaked goroutine and try to record its stack.
-    nint offset = default!;
+    nint offset = default;
     var labelsʗ1 = labels;
     var pʗ1 = Δp;
     var pcbufʗ1 = pcbuf;
@@ -1238,7 +1234,7 @@ internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice
             systemstack(() => {
                 saveg(~(uintptr)0, ~(uintptr)0, gp1, ref (Ꮡ(pʗ2, offset)).DerefOrNull(), pcbufʗ2);
             });
-            if (labelsʗ1 != default!) {
+            if (labelsʗ1 != nil) {
                 labelsʗ1[offset] = gp1.Value.labels;
             }
             offset++;
@@ -1253,7 +1249,7 @@ internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice
 }
 
 internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
-    nint n = default!;
+    nint n = default;
 
     if (len(Δp) == 0) {
         // An empty slice is obviously too small. Return a rough
@@ -1300,7 +1296,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     systemstack(() => {
         saveg(pc, sp, ourgʗ1, ref (Ꮡ(pʗ1, 0)).DerefOrNull(), pcbufʗ1);
     });
-    if (labels != default!) {
+    if (labels != nil) {
         labels[0] = ourg.Value.labels;
     }
     ourg.of(g.ᏑgoroutineProfiled).Store(goroutineProfileSatisfied);
@@ -1335,8 +1331,8 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     stw = stopTheWorld(stwGoroutineProfileCleanup);
     var endOffset = ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡoffset).Swap(0);
     goroutineProfile.active = false;
-    goroutineProfile.records = default!;
-    goroutineProfile.labels = default!;
+    goroutineProfile.records = default;
+    goroutineProfile.labels = default;
     startTheWorld(stw);
 
     // Restore the invariant that every goroutine struct in allgs has its
@@ -1372,19 +1368,19 @@ internal static readonly @string noPAvailableWriteˢ = "no P available, write ba
 // tryRecordGoroutineProfile.
 //
 //go:yeswritebarrierrec
-internal static void tryRecordGoroutineProfileWB(ж<g> Ꮡgp1) {
+internal static void tryRecordGoroutineProfileWB(ж<g> gp1) {
     if ((~(~getg()).m).p.ptr() == nil) {
         @throw(noPAvailableWriteˢ);
     }
-    tryRecordGoroutineProfile(Ꮡgp1, default!, osyield);
+    tryRecordGoroutineProfile(gp1, default, osyield);
 }
 
 // tryRecordGoroutineProfile ensures that gp1 has the appropriate representation
 // in the current goroutine profile: either that it should not be profiled, or
 // that a snapshot of its call stack and labels are now in the profile.
-internal static void tryRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf, Action yield) {
+internal static void tryRecordGoroutineProfile(ж<g> gp1, slice<uintptr> pcbuf, Action yield) {
     {
-        var status = readgstatus(Ꮡgp1); if (status == _Gdead || status == _Gdeadextra) {
+        var status = readgstatus(gp1); if (status == _Gdead || status == _Gdeadextra) {
             // Dead goroutines should not appear in the profile. Goroutines that
             // start while profile collection is active will get goroutineProfiled
             // set to goroutineProfileSatisfied before transitioning out of _Gdead,
@@ -1393,8 +1389,8 @@ internal static void tryRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbu
         }
     }
 
-    while (ᐧ) {
-        var prev = Ꮡgp1.of(g.ᏑgoroutineProfiled).Load();
+    for (;;) {
+        var prev = gp1.of(g.ᏑgoroutineProfiled).Load();
         if (prev == goroutineProfileSatisfied) {
             // This goroutine is already in the profile (or is new since the
             // start of collection, so shouldn't appear in the profile).
@@ -1413,9 +1409,9 @@ internal static void tryRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbu
         // sure we finish profiling gp1 right away instead of leaving it stuck
         // in this limbo.
         var mp = acquirem();
-        if (Ꮡgp1.of(g.ᏑgoroutineProfiled).CompareAndSwap(goroutineProfileAbsent, goroutineProfileInProgress)) {
-            doRecordGoroutineProfile(Ꮡgp1, pcbuf);
-            Ꮡgp1.of(g.ᏑgoroutineProfiled).Store(goroutineProfileSatisfied);
+        if (gp1.of(g.ᏑgoroutineProfiled).CompareAndSwap(goroutineProfileAbsent, goroutineProfileInProgress)) {
+            doRecordGoroutineProfile(gp1, pcbuf);
+            gp1.of(g.ᏑgoroutineProfiled).Store(goroutineProfileSatisfied);
         }
         releasem(ref (mp).DerefOrNull());
     }
@@ -1483,14 +1479,14 @@ internal static void doRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf
         saveg(~(uintptr)0, ~(uintptr)0, Ꮡgp1, ref (Ꮡ(goroutineProfile.records, offset)).DerefOrNull(), pcbufʗ1);
     });
 
-    if (goroutineProfile.labels != default!) {
+    if (goroutineProfile.labels != nil) {
         goroutineProfile.labels[offset] = gp1.labels;
     }
 }
 
 internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
     var gp = getg();
 
@@ -1542,7 +1538,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
         r = r[1..];
 
         // If we have a place to put our goroutine labelmap, insert it there.
-        if (labels != default!) {
+        if (labels != nil) {
             lbl[0] = gp.Value.labels;
             lbl = lbl[1..];
         }
@@ -1569,7 +1565,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
             systemstack(() => {
                 saveg(~(uintptr)0, ~(uintptr)0, gp1, ref (Ꮡ(Ꮡr.ValueSlot, 0)).DerefOrNull(), pcbufʗ3);
             });
-            if (labelsʗ1 != default!) {
+            if (labelsʗ1 != nil) {
                 Ꮡlbl.ValueSlot[0] = gp1.Value.labels;
                 Ꮡlbl.ValueSlot = Ꮡlbl.ValueSlot[1..];
             }
@@ -1592,8 +1588,8 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
 // Most clients should use the [runtime/pprof] package instead
 // of calling GoroutineProfile directly.
 public static (nint n, bool ok) GoroutineProfile(slice<StackRecord> Δp) {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
     var records = new slice<profilerecord.StackRecord>(len(Δp));
     (n, ok) = goroutineProfileInternal(records);
@@ -1608,10 +1604,10 @@ public static (nint n, bool ok) GoroutineProfile(slice<StackRecord> Δp) {
 }
 
 internal static (nint n, bool ok) goroutineProfileInternal(slice<profilerecord.StackRecord> Δp) {
-    return goroutineProfileWithLabels(Δp, default!);
+    return goroutineProfileWithLabels(Δp, default);
 }
 
-internal static void saveg(uintptr pc, uintptr sp, ж<g> Ꮡgp, ref profilerecord.StackRecord r, slice<uintptr> pcbuf) {
+internal static void saveg(uintptr pc, uintptr sp, ж<g> gp, ref profilerecord.StackRecord r, slice<uintptr> pcbuf) {
     // To reduce memory usage, we want to allocate a r.Stack that is just big
     // enough to hold gp's stack trace. Naively we might achieve this by
     // recording our stack trace into mp.profStack, and then allocating a
@@ -1622,12 +1618,12 @@ internal static void saveg(uintptr pc, uintptr sp, ж<g> Ꮡgp, ref profilerecor
     // to allocate one here. This will only happen for goroutines that were in a
     // syscall when the goroutine profile started or for goroutines that manage
     // to execute before we finish iterating over all the goroutines.
-    if (pcbuf == default!) {
+    if (pcbuf == nil) {
         pcbuf = makeProfStack();
     }
 
     ref var u = ref heap(new unwinder(), out var Ꮡu);
-    Ꮡu.initAt(pc, sp, 0, Ꮡgp, unwindSilentErrors);
+    Ꮡu.initAt(pc, sp, 0, gp, unwindSilentErrors);
     nint n = tracebackPCs(Ꮡu, 0, pcbuf);
     r.Stack = new slice<uintptr>(n);
     copy(r.Stack, pcbuf);

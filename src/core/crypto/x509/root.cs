@@ -5,7 +5,7 @@ namespace go.crypto;
 
 using godebug = go.@internal.godebug_package;
 using sync = sync_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.@internal;
 
 partial class x509_package {
@@ -36,7 +36,7 @@ internal static ж<CertPool> systemRootsPool() {
         defer(ᏑsystemRootsMu.RUnlock, ref ᒐ);
         return systemRoots;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -48,15 +48,15 @@ internal static void initSystemRoots() {
 
         var fallbackRoots = systemRoots;
         (systemRoots, systemRootsErr) = loadSystemRoots();
-        if (systemRootsErr != default!) {
-            systemRoots = default!;
+        if (systemRootsErr != nil) {
+            systemRoots = default;
         }
 
         if (fallbackRoots == nil) {
             return; // no fallbacks to try
         }
 
-        var systemCertsAvail = systemRoots != nil && (systemRoots.len() > 0 || (~systemRoots).systemPool);
+        var systemCertsAvail = systemRoots != nil && (systemRoots.len() > 0 || systemRoots.systemPool);
 
         if (!useFallbackRoots && systemCertsAvail) {
             return;
@@ -66,7 +66,7 @@ internal static void initSystemRoots() {
             x509usefallbackroots.IncNonDefault(); // overriding system certs with fallback certs.
         }
 
-        (systemRoots, systemRootsErr) = (fallbackRoots, default!);
+        (systemRoots, systemRootsErr) = (fallbackRoots, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -108,7 +108,7 @@ public static void SetFallbackRoots(ж<CertPool> Ꮡroots) {
         // We handle that specially instead of calling loadSystemRoots, to avoid
         // spending excessive amount of cpu here, since the SetFallbackRoots in most cases
         // is going to be called at program startup.
-        if (systemRoots == nil && systemRootsErr == default!) {
+        if (systemRoots == nil && systemRootsErr == nil) {
             systemRoots = Ꮡroots;
             useFallbackRoots = x509usefallbackroots.Value() == "1"u8;
             return;
@@ -119,7 +119,7 @@ public static void SetFallbackRoots(ж<CertPool> Ꮡroots) {
         }); // asserts that system roots were indeed loaded before.
 
         var forceFallbackRoots = x509usefallbackroots.Value() == "1"u8;
-        var systemCertsAvail = systemRoots != nil && (systemRoots.len() > 0 || (~systemRoots).systemPool);
+        var systemCertsAvail = systemRoots != nil && (systemRoots.len() > 0 || systemRoots.systemPool);
 
         if (!forceFallbackRoots && systemCertsAvail) {
             return;
@@ -129,7 +129,7 @@ public static void SetFallbackRoots(ж<CertPool> Ꮡroots) {
             x509usefallbackroots.IncNonDefault(); // overriding system certs with fallback certs.
         }
 
-        (systemRoots, systemRootsErr) = (Ꮡroots, default!);
+        (systemRoots, systemRootsErr) = (Ꮡroots, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

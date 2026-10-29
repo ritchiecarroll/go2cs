@@ -61,7 +61,7 @@ partial interface Curve {
     (ж<bigꓸInt> x, ж<bigꓸInt> y) ScalarBaseMult(slice<byte> k);
 }
 
-internal static slice<byte> mask = new byte[]{0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f}.slice();
+internal static slice<byte> mask = slice<byte>([0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f]);
 
 // GenerateKey returns a public/private key pair. The private key is
 // generated using the given reader, which must return random data.
@@ -69,19 +69,19 @@ internal static slice<byte> mask = new byte[]{0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x
 // Deprecated: for ECDH, use the GenerateKey methods of the [crypto/ecdh] package;
 // for ECDSA, use the GenerateKey function of the crypto/ecdsa package.
 public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) GenerateKey(Curve curve, io.Reader rand) {
-    slice<byte> priv = default!;
-    ж<bigꓸInt> x = default!;
-    ж<bigꓸInt> y = default!;
-    error err = default!;
+    slice<byte> priv = default;
+    ж<bigꓸInt> x = default;
+    ж<bigꓸInt> y = default;
+    error err = default;
 
-    var N = curve.Params().Value.N;
+    var N = curve.Params().N;
     nint bitSize = N.BitLen();
     nint byteLen = (bitSize + 7) / 8;
     priv = new slice<byte>(byteLen);
 
     while (x == nil) {
         (_, err) = io.ReadFull(rand, priv);
-        if (err != default!) {
+        if (err != nil) {
             return (priv, x, y, err);
         }
         // We have to mask off any excess bits in the case that the size of the
@@ -113,7 +113,7 @@ public static slice<byte> Marshal(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt>
 
     panicIfNotOnCurve(curve, Ꮡx, Ꮡy);
 
-    nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
+    nint byteLen = (curve.Params().BitSize + 7) / 8;
 
     var ret = new slice<byte>(1 + 2 * byteLen);
     ret[0] = 4; // uncompressed point
@@ -132,7 +132,7 @@ public static slice<byte> MarshalCompressed(Curve curve, ж<bigꓸInt> Ꮡx, ж<
     ref var y = ref Ꮡy.DerefOrNull();
 
     panicIfNotOnCurve(curve, Ꮡx, Ꮡy);
-    nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
+    nint byteLen = (curve.Params().BitSize + 7) / 8;
     var compressed = new slice<byte>(1 + byteLen);
     compressed[0] = (byte)((byte)y.Bit(0) | 2);
     x.FillBytes(compressed[1..]);
@@ -149,7 +149,7 @@ partial interface unmarshaler {
 }
 
 // Assert that the known curves implement unmarshaler.
-internal static slice<unmarshaler> _ᴛ1ʗ = new unmarshaler[]{new nistCurveжunmarshaler<P224PointжnistPoint>(p224), new nistCurveжunmarshaler<P256PointжnistPoint>(p256), new nistCurveжunmarshaler<P384PointжnistPoint>(p384), new nistCurveжunmarshaler<P521PointжnistPoint>(p521)}.slice();
+internal static slice<unmarshaler> _ᴛ1ʗ = slice<unmarshaler>([new nistCurveжunmarshaler<P224PointжnistPoint>(p224), new nistCurveжunmarshaler<P256PointжnistPoint>(p256), new nistCurveжunmarshaler<P384PointжnistPoint>(p384), new nistCurveжunmarshaler<P521PointжnistPoint>(p521)]);
 
 // Unmarshal converts a point, serialized by [Marshal], into an x, y pair. It is
 // an error if the point is not in uncompressed form, is not on the curve, or is
@@ -158,8 +158,8 @@ internal static slice<unmarshaler> _ᴛ1ʗ = new unmarshaler[]{new nistCurveжun
 // Deprecated: for ECDH, use the crypto/ecdh package. This function accepts an
 // encoding equivalent to that of the NewPublicKey methods in crypto/ecdh.
 public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<byte> data) {
-    ж<bigꓸInt> x = default!;
-    ж<bigꓸInt> y = default!;
+    ж<bigꓸInt> x = default;
+    ж<bigꓸInt> y = default;
 
     {
         var (c, ok) = curve._<unmarshaler>(ᐧ); if (ok) {
@@ -167,21 +167,21 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<by
         }
     }
 
-    nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
+    nint byteLen = (curve.Params().BitSize + 7) / 8;
     if (len(data) != 1 + 2 * byteLen) {
-        return (default!, default!);
+        return (default, default);
     }
     if (data[0] != 4) { // uncompressed form
-        return (default!, default!);
+        return (default, default);
     }
-    var p = curve.Params().Value.P;
+    var p = curve.Params().P;
     x = @new<bigꓸInt>().SetBytes(data.slice(1, 1 + byteLen));
     y = @new<bigꓸInt>().SetBytes(data.slice(1 + byteLen));
     if (x.Cmp(p) >= 0 || y.Cmp(p) >= 0) {
-        return (default!, default!);
+        return (default, default);
     }
     if (!curve.IsOnCurve(x, y)) {
-        return (default!, default!);
+        return (default, default);
     }
     return (x, y);
 }
@@ -190,8 +190,8 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<by
 // an x, y pair. It is an error if the point is not in compressed form, is not
 // on the curve, or is the point at infinity. On error, x = nil.
 public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve, slice<byte> data) {
-    ж<bigꓸInt> x = default!;
-    ж<bigꓸInt> y = default!;
+    ж<bigꓸInt> x = default;
+    ж<bigꓸInt> y = default;
 
     {
         var (c, ok) = curve._<unmarshaler>(ᐧ); if (ok) {
@@ -199,29 +199,29 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve
         }
     }
 
-    nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
+    nint byteLen = (curve.Params().BitSize + 7) / 8;
     if (len(data) != 1 + byteLen) {
-        return (default!, default!);
+        return (default, default);
     }
     if (data[0] != 2 && data[0] != 3) { // compressed form
-        return (default!, default!);
+        return (default, default);
     }
-    var p = curve.Params().Value.P;
+    var p = curve.Params().P;
     x = @new<bigꓸInt>().SetBytes(data[1..]);
     if (x.Cmp(p) >= 0) {
-        return (default!, default!);
+        return (default, default);
     }
     // y² = x³ - 3x + b
     y = curve.Params().polynomial(x);
     y = y.ModSqrt(y, p);
     if (y == nil) {
-        return (default!, default!);
+        return (default, default);
     }
     if ((byte)y.Bit(0) != (byte)(data[0] & 1)) {
         y.Neg(y).Mod(y, p);
     }
     if (!curve.IsOnCurve(x, y)) {
-        return (default!, default!);
+        return (default, default);
     }
     return (x, y);
 }

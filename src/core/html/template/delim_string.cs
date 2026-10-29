@@ -21,7 +21,7 @@ internal static array<uint8> _delim_index = new uint8[]{0, 9, 25, 41, 59}.array(
 
 internal static @string String(this delim i) {
     if (i >= ((delim)(uint8)(len(_delim_index) - 1))) {
-        return "delim("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "delim("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _delim_name.slice(_delim_index[i], _delim_index[i + 1]);
 }

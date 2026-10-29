@@ -9,11 +9,11 @@ using go.crypto.@internal;
 
 partial class cryptotest_package {
 
-public static void MustSupportFIPS140(ж<testing.T> Ꮡt) {
-    Ꮡt.Helper();
+public static void MustSupportFIPS140(ж<testing.T> t) {
+    t.Helper();
     {
-        var err = Δfips140.Supported(); if (err != default!) {
-            Ꮡt.Skipf("test requires FIPS 140 mode: %v"u8, err);
+        var err = Δfips140.Supported(); if (err != nil) {
+            t.Skipf("test requires FIPS 140 mode: %v"u8, err);
         }
     }
 }

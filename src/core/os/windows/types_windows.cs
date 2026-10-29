@@ -43,20 +43,20 @@ partial struct fileStat {
 // newFileStatFromGetFileInformationByHandle calls GetFileInformationByHandle
 // to gather all required information about the file handle h.
 internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationByHandle(@string path, syscallꓸHandle h) {
-    error err = default!;
+    error err = default;
 
     ref var d = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡd);
     err = syscall.GetFileInformationByHandle(h, Ꮡd);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileInformationByHandle"u8, Path: path, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileInformationByHandle"u8, Path: path, Err: err))));
     }
 
     ref var reparseTag = ref heap(new uint32(), out var ᏑreparseTag);
     if ((d.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
         ref var ti = ref heap(new windows.FILE_ATTRIBUTE_TAG_INFO(), out var Ꮡti);
         err = windows.GetFileInformationByHandleEx(h, windows.FileAttributeTagInfo, Ꮡti.Reinterpret<windows.FILE_ATTRIBUTE_TAG_INFO, byte>(), (uint32)/* unsafe.Sizeof(ti) */ (uintptr)8);
-        if (err != default!) {
-            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileInformationByHandleEx"u8, Path: path, Err: err))));
+        if (err != nil) {
+            return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileInformationByHandleEx"u8, Path: path, Err: err))));
         }
         reparseTag = ti.ReparseTag;
     }
@@ -76,7 +76,7 @@ internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationBy
         // fileStat.path is used by os.SameFile to decide if it needs
         // to fetch vol, idxhi and idxlo. But these are already set,
         // so set fileStat.path to "" to prevent os.SameFile doing it again.
-    )), default!);
+    )), default);
 }
 
 // newFileStatFromWin32FileAttributeData copies all required information
@@ -146,7 +146,7 @@ internal static ж<fileStat> newFileStatFromWin32finddata(ref syscall.Win32findd
         // “If the dwFileAttributes member includes the FILE_ATTRIBUTE_REPARSE_POINT
         // attribute, this member specifies the reparse point tag. Otherwise, this
         // value is undefined and should not be used.”
-        fs.Value.ReparseTag = d.Reserved0;
+        fs.ReparseTag = d.Reserved0;
     }
     return fs;
 }
@@ -180,9 +180,9 @@ internal static FileMode Mode(this ref fileStat fs) {
 }
 
 internal static FileMode /*m*/ mode(this ref fileStat fs) {
-    FileMode m = default!;
+    FileMode m = default;
 
-    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
+    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
         m |= (FileMode)(292);
     } else {
         m |= (FileMode)(438);
@@ -202,24 +202,28 @@ internal static FileMode /*m*/ mode(this ref fileStat fs) {
             m |= (fs.FileMode)((fs.FileMode)(ModeDir | 73));
         }
 
-        var exprᴛ1 = fs.filetype;
-        if (exprᴛ1 == syscall.FILE_TYPE_PIPE) {
+        switch (fs.filetype) {
+        case var ᴛ when ᴛ == syscall.FILE_TYPE_PIPE: {
             m |= (fs.FileMode)(ModeNamedPipe);
+            break;
         }
-        else if (exprᴛ1 == syscall.FILE_TYPE_CHAR) {
+        case var ᴛ when ᴛ == syscall.FILE_TYPE_CHAR: {
             m |= (fs.FileMode)((fs.FileMode)(ModeDevice | ModeCharDevice));
-        }
+            break;
+        }}
     }
 
     if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
-        var exprᴛ2 = fs.ReparseTag;
-        if (exprᴛ2 == syscall.IO_REPARSE_TAG_SYMLINK) {
+        switch (fs.ReparseTag) {
+        case var ᴛ when ᴛ == syscall.IO_REPARSE_TAG_SYMLINK: {
             m |= (fs.FileMode)(ModeSymlink);
+            break;
         }
-        else if (exprᴛ2 == windows.IO_REPARSE_TAG_AF_UNIX) {
+        case var ᴛ when ᴛ == windows.IO_REPARSE_TAG_AF_UNIX: {
             m |= (fs.FileMode)(ModeSocket);
+            break;
         }
-        else if (exprᴛ2 == windows.IO_REPARSE_TAG_DEDUP) {
+        case var ᴛ when ᴛ == windows.IO_REPARSE_TAG_DEDUP: {
             // If the Data Deduplication service is enabled on Windows Server, its
             // Optimization job may convert regular files to IO_REPARSE_TAG_DEDUP
             // whenever that job runs.
@@ -233,10 +237,12 @@ internal static FileMode /*m*/ mode(this ref fileStat fs) {
             // raw device files on Linux, POSIX FIFO special files, and so on), so
             // to avoid files changing unpredictably from regular to irregular we will
             // consider DEDUP files to be close enough to regular to treat as such.
+            break;
         }
-        else { /* default: */
+        default: {
             m |= (fs.FileMode)(ModeIrregular);
-        }
+            break;
+        }}
     }
     return m;
 }
@@ -246,9 +252,9 @@ internal static FileMode /*m*/ mode(this ref fileStat fs) {
 // The logic is subtle and not well-documented, so it is better to keep it
 // separate from the new logic.
 internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
-    FileMode m = default!;
+    FileMode m = default;
 
-    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
+    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
         m |= (FileMode)(292);
     } else {
         m |= (FileMode)(438);
@@ -259,19 +265,21 @@ internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
     if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
         m |= (fs.FileMode)((fs.FileMode)(ModeDir | 73));
     }
-    var exprᴛ1 = fs.filetype;
-    if (exprᴛ1 == syscall.FILE_TYPE_PIPE) {
+    switch (fs.filetype) {
+    case var ᴛ when ᴛ == syscall.FILE_TYPE_PIPE: {
         m |= (fs.FileMode)(ModeNamedPipe);
+        break;
     }
-    else if (exprᴛ1 == syscall.FILE_TYPE_CHAR) {
+    case var ᴛ when ᴛ == syscall.FILE_TYPE_CHAR: {
         m |= (fs.FileMode)((fs.FileMode)(ModeDevice | ModeCharDevice));
-    }
+        break;
+    }}
     if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
         if (fs.ReparseTag == windows.IO_REPARSE_TAG_AF_UNIX) {
             m |= (fs.FileMode)(ModeSocket);
         }
         if ((FileMode)(m & ModeType) == 0) {
-            if (fs.ReparseTag == windows.IO_REPARSE_TAG_DEDUP){
+            if (fs.ReparseTag == windows.IO_REPARSE_TAG_DEDUP) {
                 // See comment in fs.Mode.
             } else {
                 m |= (fs.FileMode)(ModeIrregular);
@@ -306,16 +314,16 @@ internal static error loadFileId(this ж<fileStat> Ꮡfs) {
         defer(Ꮡfs.of(fileStat.ᏑMutex).Unlock, ref ᒐ);
         if (fs.path == ""u8) {
             // already done
-            return default!;
+            return default;
         }
-        @string path = default!;
-        if (fs.appendNameToPath){
+        @string path = default;
+        if (fs.appendNameToPath) {
             path = fixLongPath(fs.path + @"\"u8 + fs.name);
         } else {
             path = fs.path;
         }
         var (pathp, err) = syscall.UTF16PtrFromString(path);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
 
@@ -336,22 +344,22 @@ internal static error loadFileId(this ж<fileStat> Ꮡfs) {
         var attrs = (uint32)((uint32)((uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS | (uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT));
 
         (var h, err) = syscall.CreateFile(pathp, 0, 0, nil, syscall.OPEN_EXISTING, attrs, 0);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
         ref var i = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡi);
         err = syscall.GetFileInformationByHandle(h, Ꮡi);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         fs.path = ""u8;
         fs.vol = i.VolumeSerialNumber;
         fs.idxhi = i.FileIndexHigh;
         fs.idxlo = i.FileIndexLow;
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -360,14 +368,14 @@ internal static error loadFileId(this ж<fileStat> Ꮡfs) {
 internal static error saveInfoFromPath(this ref fileStat fs, @string path) {
     fs.path = path;
     if (!filepathlite.IsAbs(fs.path)) {
-        error err = default!;
+        error err = default;
         (fs.path, err) = syscall.FullPath(fs.path);
-        if (err != default!) {
+        if (err != nil) {
             return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "FullPath"u8, Path: path, Err: err)));
         }
     }
     fs.name = filepathlite.Base(path);
-    return default!;
+    return default;
 }
 
 internal static bool sameFile(ж<fileStat> Ꮡfs1, ж<fileStat> Ꮡfs2) {
@@ -375,11 +383,11 @@ internal static bool sameFile(ж<fileStat> Ꮡfs1, ж<fileStat> Ꮡfs2) {
     ref var fs2 = ref Ꮡfs2.DerefOrNull();
 
     var e = Ꮡfs1.loadFileId();
-    if (e != default!) {
+    if (e != nil) {
         return false;
     }
     e = Ꮡfs2.loadFileId();
-    if (e != default!) {
+    if (e != nil) {
         return false;
     }
     return fs1.vol == fs2.vol && fs1.idxhi == fs2.idxhi && fs1.idxlo == fs2.idxlo;

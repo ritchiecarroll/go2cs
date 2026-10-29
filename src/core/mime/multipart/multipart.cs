@@ -65,9 +65,9 @@ partial struct Part {
     // wrapper around such a reader, decoding the
     // Content-Transfer-Encoding
     internal io.Reader r;
-    internal nint n;  // known data bytes waiting in mr.bufReader
-    internal int64 total; // total data bytes read already
-    internal error err; // error to return when n == 0
+    internal nint n;        // known data bytes waiting in mr.bufReader
+    internal int64 total;   // total data bytes read already
+    internal error err;     // error to return when n == 0
     internal error readErr; // read error observed from mr.bufReader
 }
 
@@ -79,7 +79,7 @@ internal static readonly @string nameˢ = "name"u8;
 public static @string FormName(this ref Part p) {
     // See https://tools.ietf.org/html/rfc2183 section 2 for EBNF
     // of Content-Disposition value format.
-    if (p.dispositionParams == default!) {
+    if (p.dispositionParams == nil) {
         p.parseContentDisposition();
     }
     if (p.disposition != "form-data"u8) {
@@ -95,7 +95,7 @@ internal static readonly @string filenameˢ = "filename"u8;
 // header. If not empty, the filename is passed through filepath.Base (which is
 // platform dependent) before being returned.
 public static @string FileName(this ref Part p) {
-    if (p.dispositionParams == default!) {
+    if (p.dispositionParams == nil) {
         p.parseContentDisposition();
     }
     @string filename = p.dispositionParams[filenameˢ];
@@ -112,9 +112,9 @@ internal static readonly @string contentDispositionˢ = "Content-Disposition"u8;
 
 internal static void parseContentDisposition(this ref Part p) {
     @string v = p.Header.Get(contentDispositionˢ);
-    error err = default!;
+    error err = default;
     (p.disposition, p.dispositionParams, err) = mime.ParseMediaType(v);
-    if (err != default!) {
+    if (err != nil) {
         p.dispositionParams = emptyParams;
     }
 }
@@ -147,9 +147,9 @@ partial struct stickyErrorReader {
 }
 
 internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
 
-    if (r.err != default!) {
+    if (r.err != nil) {
         return (0, r.err);
     }
     (n, r.err) = r.r.Read(p);
@@ -162,37 +162,37 @@ internal static readonly @string quotedPrintableˢ = "quoted-printable"u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string cteᶜ = "Content-Transfer-Encoding"u8;
 
-internal static (ж<Part>, error) newPart(ж<Reader> Ꮡmr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static (ж<Part>, error) newPart(ж<Reader> mr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     var bp = Ꮡ(new Part(
         Header: new map<@string, slice<@string>>(),
-        mr: Ꮡmr
+        mr: mr
     ));
     {
-        var err = bp.populateHeaders(maxMIMEHeaderSize, maxMIMEHeaders); if (err != default!) {
-            return (default!, err);
+        var err = bp.populateHeaders(maxMIMEHeaderSize, maxMIMEHeaders); if (err != nil) {
+            return (default, err);
         }
     }
-    bp.Value.r = new partReader(bp);
+    bp.r = new partReader(bp);
 
     // rawPart is used to switch between Part.NextPart and Part.NextRawPart.
     if (!rawPart) {
         @string cte = cteᶜ;
-        if (strings.EqualFold((~bp).Header.Get(cte), quotedPrintableˢ)) {
-            (~bp).Header.Del(cte);
-            bp.Value.r = new quotedprintable_ReaderжReader(quotedprintable.NewReader((~bp).r));
+        if (strings.EqualFold(bp.Header.Get(cte), quotedPrintableˢ)) {
+            bp.Header.Del(cte);
+            bp.r = new quotedprintable_ReaderжReader(quotedprintable.NewReader(bp.r));
         }
     }
-    return (bp, default!);
+    return (bp, default);
 }
 
 internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
-    var r = textproto.NewReader((~p.mr).bufReader);
+    var r = textproto.NewReader(p.mr.bufReader);
     var (header, err) = readMIMEHeader(r, maxMIMEHeaderSize, maxMIMEHeaders);
-    if (err == default!) {
+    if (err == nil) {
         p.Header = header;
     }
     // TODO: Add a distinguishable error to net/textproto.
-    if (err != default! && err.Error() == "message too large"u8) {
+    if (err != nil && err.Error() == "message too large"u8) {
         err = ErrMessageTooLarge;
     }
     return err;
@@ -212,37 +212,37 @@ partial struct partReader {
 
 internal static (nint, error) Read(this partReader pr, slice<byte> d) {
     var p = pr.p;
-    var br = p.Value.mr.Value.bufReader;
+    var br = p.mr.bufReader;
 
     // Read into buffer until we identify some data to return,
     // or we find a reason to stop (boundary or read error).
-    while ((~p).n == 0 && (~p).err == default!) {
+    while (p.n == 0 && p.err == nil) {
         var (peek, _) = br.Peek(br.Buffered());
-        (p.Value.n, p.Value.err) = scanUntilBoundary(peek, (~(~p).mr).dashBoundary, (~(~p).mr).nlDashBoundary, (~p).total, (~p).readErr);
-        if ((~p).n == 0 && (~p).err == default!) {
+        (p.n, p.err) = scanUntilBoundary(peek, p.mr.dashBoundary, p.mr.nlDashBoundary, p.total, p.readErr);
+        if (p.n == 0 && p.err == nil) {
             // Force buffered I/O to read more into buffer.
-            (_, p.Value.readErr) = br.Peek(len(peek) + 1);
-            if (AreEqual((~p).readErr, io.EOF)) {
-                p.Value.readErr = io.ErrUnexpectedEOF;
+            (_, p.readErr) = br.Peek(len(peek) + 1);
+            if (AreEqual(p.readErr, io.EOF)) {
+                p.readErr = io.ErrUnexpectedEOF;
             }
         }
     }
 
     // Read out from "data to return" part of buffer.
-    if ((~p).n == 0) {
-        return (0, (~p).err);
+    if (p.n == 0) {
+        return (0, p.err);
     }
     nint n = len(d);
-    if (n > (~p).n) {
-        n = p.Value.n;
+    if (n > p.n) {
+        n = p.n;
     }
     (n, _) = br.Read(d.slice(0, n));
-    p.Value.total += (int64)n;
-    p.Value.n -= n;
-    if ((~p).n == 0) {
-        return (n, (~p).err);
+    p.total += (int64)n;
+    p.n -= n;
+    if (p.n == 0) {
+        return (n, p.err);
     }
-    return (n, default!);
+    return (n, default);
 }
 
 // scanUntilBoundary scans buf to identify how much of it can be safely
@@ -259,16 +259,16 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
     if (total == 0) {
         // At beginning of body, allow dashBoundary.
         if (bytes.HasPrefix(buf, dashBoundary)) {
-            var exprᴛ1 = matchAfterPrefix(buf, dashBoundary, readErr);
-            if (exprᴛ1 == -1) {
-                return (len(dashBoundary), default!);
+            switch (matchAfterPrefix(buf, dashBoundary, readErr)) {
+            case var ᴛ when ᴛ == -1: {
+                return (len(dashBoundary), default);
             }
-            if (exprᴛ1 is 0) {
-                return (0, default!);
+            case 0: {
+                return (0, default);
             }
-            if (exprᴛ1 == +1) {
+            case var ᴛ when ᴛ == +1: {
                 return (0, io.EOF);
-            }
+            }}
         }
         if (bytes.HasPrefix(dashBoundary, buf)) {
             return (0, readErr);
@@ -278,16 +278,16 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
     // Search for "\n--boundary".
     {
         nint iΔ1 = bytes.Index(buf, nlDashBoundary); if (iΔ1 >= 0) {
-            var exprᴛ2 = matchAfterPrefix(buf.slice(iΔ1), nlDashBoundary, readErr);
-            if (exprᴛ2 == -1) {
-                return (iΔ1 + len(nlDashBoundary), default!);
+            switch (matchAfterPrefix(buf.slice(iΔ1), nlDashBoundary, readErr)) {
+            case var ᴛ when ᴛ == -1: {
+                return (iΔ1 + len(nlDashBoundary), default);
             }
-            if (exprᴛ2 is 0) {
-                return (iΔ1, default!);
+            case 0: {
+                return (iΔ1, default);
             }
-            if (exprᴛ2 == +1) {
+            case var ᴛ when ᴛ == +1: {
                 return (iΔ1, io.EOF);
-            }
+            }}
         }
     }
     if (bytes.HasPrefix(nlDashBoundary, buf)) {
@@ -300,7 +300,7 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
     // it too must be part of the body.
     nint i = bytes.LastIndexByte(buf, nlDashBoundary[0]);
     if (i >= 0 && bytes.HasPrefix(nlDashBoundary, buf.slice(i))) {
-        return (i, default!);
+        return (i, default);
     }
     return (len(buf), readErr);
 }
@@ -319,27 +319,27 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
 // meaning that len(buf) == len(prefix) and readErr == nil.
 internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error readErr) {
     if (len(buf) == len(prefix)) {
-        if (readErr != default!) {
+        if (readErr != nil) {
             return +1;
         }
         return 0;
     }
     var c = buf[len(prefix)];
 
-    if (c == (rune)' ' || c == (rune)'\t' || c == (rune)'\r' || c == (rune)'\n') {
+    if (c == ' ' || c == '\t' || c == '\r' || c == '\n') {
         return +1;
     }
 
     // Try to detect boundaryDash
-    if (c == (rune)'-') {
+    if (c == '-') {
         if (len(buf) == len(prefix) + 1) {
-            if (readErr != default!) {
+            if (readErr != nil) {
                 // Prefix + "-" does not match
                 return -1;
             }
             return 0;
         }
-        if (buf[len(prefix) + 1] == (rune)'-') {
+        if (buf[len(prefix) + 1] == '-') {
             return +1;
         }
     }
@@ -349,7 +349,7 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
 
 public static error Close(this ж<Part> Ꮡp) {
     io.Copy(io.Discard, new PartжReader(Ꮡp));
-    return default!;
+    return default;
 }
 
 // Reader is an iterator over parts in a MIME multipart body.
@@ -360,10 +360,10 @@ partial struct Reader {
     internal @string tempDir; // used in tests
     internal ж<Part> currentPart;
     internal nint partsRead;
-    internal slice<byte> nl; // "\r\n" or "\n" (set after seeing first boundary line)
-    internal slice<byte> nlDashBoundary; // nl + "--boundary"
+    internal slice<byte> nl;               // "\r\n" or "\n" (set after seeing first boundary line)
+    internal slice<byte> nlDashBoundary;   // nl + "--boundary"
     internal slice<byte> dashBoundaryDash; // "--boundary--"
-    internal slice<byte> dashBoundary; // "--boundary"
+    internal slice<byte> dashBoundary;     // "--boundary"
 }
 
 // maxMIMEHeaderSize is the maximum size of a MIME header we will parse,
@@ -379,7 +379,7 @@ internal static int64 maxMIMEHeaders() {
     {
         @string s = multipartmaxheaders.Value(); if (s != ""u8) {
             {
-                var (v, err) = strconv.ParseInt(s, 10, 64); if (err == default! && v >= 0) {
+                var (v, err) = strconv.ParseInt(s, 10, 64); if (err == nil && v >= 0) {
                     multipartmaxheaders.IncNonDefault();
                     return v;
                 }
@@ -415,11 +415,11 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
         r.currentPart.Close();
     }
     if (((sstring)r.dashBoundary) == "--"u8) {
-        return (default!, fmt.Errorf("multipart: boundary is empty"u8));
+        return (default, fmt.Errorf("multipart: boundary is empty"u8));
     }
     var expectNewPart = false;
-    while (ᐧ) {
-        var (line, err) = r.bufReader.ReadSlice((rune)'\n');
+    for (;;) {
+        var (line, err) = r.bufReader.ReadSlice((byte)'\n');
 
         if (AreEqual(err, io.EOF) && r.isFinalBoundary(line)) {
             // If the buffer ends in "--boundary--" without the
@@ -427,29 +427,29 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
             // (since it's missing the '\n'), but this is a valid
             // multipart EOF so we need to return io.EOF instead of
             // a fmt-wrapped one.
-            return (default!, io.EOF);
+            return (default, io.EOF);
         }
-        if (err != default!) {
-            return (default!, fmt.Errorf("multipart: NextPart: %w"u8, err));
+        if (err != nil) {
+            return (default, fmt.Errorf("multipart: NextPart: %w"u8, err));
         }
 
         if (r.isBoundaryDelimiterLine(line)) {
             r.partsRead++;
             var (bp, errΔ1) = newPart(Ꮡr, rawPart, maxMIMEHeaderSize, maxMIMEHeaders);
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
             r.currentPart = bp;
-            return (bp, default!);
+            return (bp, default);
         }
 
         if (r.isFinalBoundary(line)) {
             // Expected EOF
-            return (default!, io.EOF);
+            return (default, io.EOF);
         }
 
         if (expectNewPart) {
-            return (default!, fmt.Errorf("multipart: expecting a new Part; got line %q"u8, (@string)line));
+            return (default, fmt.Errorf("multipart: expecting a new Part; got line %q"u8, (@string)line));
         }
 
         if (r.partsRead == 0) {
@@ -466,7 +466,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
             continue;
         }
 
-        return (default!, fmt.Errorf("multipart: unexpected line in Next(): %q"u8, line));
+        return (default, fmt.Errorf("multipart: unexpected line in Next(): %q"u8, line));
     }
 }
 
@@ -498,7 +498,7 @@ internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<by
     // On the first part, see our lines are ending in \n instead of \r\n
     // and switch into that mode if so. This is a violation of the spec,
     // but occurs in practice.
-    if (r.partsRead == 0 && len(rest) == 1 && rest[0] == (rune)'\n') {
+    if (r.partsRead == 0 && len(rest) == 1 && rest[0] == '\n') {
         r.nl = r.nl[1..];
         r.nlDashBoundary = r.nlDashBoundary[1..];
     }
@@ -510,7 +510,7 @@ internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<by
 //
 //	LWSP-char = SPACE / HTAB
 internal static slice<byte> skipLWSPChar(slice<byte> b) {
-    while (len(b) > 0 && (b[0] == (rune)' ' || b[0] == (rune)'\t')) {
+    while (len(b) > 0 && (b[0] == ' ' || b[0] == '\t')) {
         b = b[1..];
     }
     return b;

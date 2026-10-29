@@ -232,7 +232,7 @@ public static ErrorCode ErrJSTemplate => 12;
 
 public static @string Error(this ref ΔError e) {
     switch (ᐧ) {
-    case {} when e.Node != default!: {
+    case {} when e.Node != nil: {
         var (loc, _) = (((ж<parse.Tree>)nil)).ErrorContext(e.Node);
         return fmt.Sprintf("html/template:%s: %s"u8, loc, e.Description);
     }

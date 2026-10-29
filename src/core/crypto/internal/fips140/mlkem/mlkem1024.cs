@@ -96,7 +96,7 @@ internal static slice<byte> bytes(this ref EncapsulationKey1024 ek, slice<byte> 
 
 // encryptionKey1024 is the parsed and expanded form of a PKE encryption key.
 partial struct encryptionKey1024 {
-    internal array<nttElement> t = new(k1024);     // ByteDecode₁₂(ek[:384k])
+    internal array<nttElement> t = new(k1024);         // ByteDecode₁₂(ek[:384k])
     internal array<nttElement> a = new(k1024 * k1024); // A[i*k+j] = sampleNTT(ρ, j, i)
 }
 
@@ -109,31 +109,31 @@ partial struct decryptionKey1024 {
 // a DRBG. The decapsulation key must be kept secret.
 public static (ж<DecapsulationKey1024>, error) GenerateKey1024() {
     // The actual logic is in a separate function to outline this allocation.
-    var dk = Ꮡ(new DecapsulationKey1024(nil));
+    var dk = Ꮡ(new DecapsulationKey1024());
     return generateKey1024(dk);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string mlKemPctˢ = "ML-KEM PCT"u8;
 
-internal static (ж<DecapsulationKey1024>, error) generateKey1024(ж<DecapsulationKey1024> Ꮡdk) {
+internal static (ж<DecapsulationKey1024>, error) generateKey1024(ж<DecapsulationKey1024> dk) {
     fipsSelfTest();
     ref var d = ref heap(new array<byte>(32), out var Ꮡd);
     drbg.Read(d[..]);
     ref var z = ref heap(new array<byte>(32), out var Ꮡz);
     drbg.Read(z[..]);
-    kemKeyGen1024(Ꮡdk, Ꮡd, ref z);
-    fips140.PCT(mlKemPctˢ, () => kemPCT1024(Ꮡdk));
+    kemKeyGen1024(dk, Ꮡd, ref z);
+    fips140.PCT(mlKemPctˢ, () => kemPCT1024(dk));
     fips140.RecordApproved();
-    return (Ꮡdk, default!);
+    return (dk, default);
 }
 
 // GenerateKeyInternal1024 is a derandomized version of GenerateKey1024,
 // exclusively for use in tests.
-public static ж<DecapsulationKey1024> GenerateKeyInternal1024(/*[32]*/ ж<array<byte>> Ꮡd, /*[32]*/ ж<array<byte>> Ꮡz) {
+public static ж<DecapsulationKey1024> GenerateKeyInternal1024(/*[32]*/ ж<array<byte>> d, /*[32]*/ ж<array<byte>> z) {
     fipsSelfTest();
-    var dk = Ꮡ(new DecapsulationKey1024(nil));
-    kemKeyGen1024(dk, Ꮡd, ref (Ꮡz).DerefOrNull());
+    var dk = Ꮡ(new DecapsulationKey1024());
+    kemKeyGen1024(dk, d, ref (z).DerefOrNull());
     return dk;
 }
 
@@ -141,22 +141,22 @@ public static ж<DecapsulationKey1024> GenerateKeyInternal1024(/*[32]*/ ж<array
 // seed in the "d || z" form. The seed must be uniformly random.
 public static (ж<DecapsulationKey1024>, error) NewDecapsulationKey1024(slice<byte> seed) {
     // The actual logic is in a separate function to outline this allocation.
-    var dk = Ꮡ(new DecapsulationKey1024(nil));
+    var dk = Ꮡ(new DecapsulationKey1024());
     return newKeyFromSeed1024(dk, seed);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string mlkemInvalidSeedLengthˢ = "mlkem: invalid seed length"u8;
 
-internal static (ж<DecapsulationKey1024>, error) newKeyFromSeed1024(ж<DecapsulationKey1024> Ꮡdk, slice<byte> seed) {
+internal static (ж<DecapsulationKey1024>, error) newKeyFromSeed1024(ж<DecapsulationKey1024> dk, slice<byte> seed) {
     if (len(seed) != SeedSize) {
-        return (default!, errors.New(mlkemInvalidSeedLengthˢ));
+        return (default, errors.New(mlkemInvalidSeedLengthˢ));
     }
     var d = Ꮡ(array<byte>.Alias(seed[..32], 32));
     var z = Ꮡ(array<byte>.Alias(seed[32..], 32));
-    kemKeyGen1024(Ꮡdk, d, ref (z).DerefOrNull());
+    kemKeyGen1024(dk, d, ref (z).DerefOrNull());
     fips140.RecordApproved();
-    return (Ꮡdk, default!);
+    return (dk, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -173,42 +173,42 @@ internal static readonly @string mlkemInconsistentHEkInˢ = "mlkem: inconsistent
 // other purposes.
 public static (ж<DecapsulationKey1024>, error) TestingOnlyNewDecapsulationKey1024(slice<byte> b) {
     if (len(b) != decapsulationKeySize1024) {
-        return (default!, errors.New(mlkemInvalidNistˢ));
+        return (default, errors.New(mlkemInvalidNistˢ));
     }
 
-    var dk = Ꮡ(new DecapsulationKey1024(nil));
+    var dk = Ꮡ(new DecapsulationKey1024());
     foreach (var i in range((~dk).s)) {
-        error errΔ1 = default!;
+        error errΔ1 = default;
         (dk.Value.s[i], errΔ1) = polyByteDecode<nttElement>(b[..(int)(encodingSize12)]);
-        if (errΔ1 != default!) {
-            return (default!, errors.New(mlkemInvalidSecretKeyˢ));
+        if (errΔ1 != nil) {
+            return (default, errors.New(mlkemInvalidSecretKeyˢ));
         }
         b = b[(int)(encodingSize12)..];
     }
 
     var (ek, err) = NewEncapsulationKey1024(b[..(int)(EncapsulationKeySize1024)]);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    dk.Value.ρ = ek.Value.ρ.Clone();
-    dk.Value.h = ek.Value.h.Clone();
-    dk.Value.encryptionKey1024 = ek.Value.encryptionKey1024.ΔClone();
+    dk.ρ = ek.ρ.Clone();
+    dk.h = ek.h.Clone();
+    dk.encryptionKey1024 = ek.encryptionKey1024.ΔClone();
     b = b[(int)(EncapsulationKeySize1024)..];
 
-    if (!bytes_package.Equal((~dk).h[..], b[..32])) {
-        return (default!, errors.New(mlkemInconsistentHEkInˢ));
+    if (!bytes_package.Equal(dk.h[..], b[..32])) {
+        return (default, errors.New(mlkemInconsistentHEkInˢ));
     }
     b = b[32..];
 
-    copy((~dk).z[..], b);
+    copy(dk.z[..], b);
 
     // Generate a random d value for use in Bytes(). This is a safety mechanism
     // that avoids returning a broken key vs a random key if this function is
     // called in contravention of the TestingOnlyNewDecapsulationKey1024 function
     // comment advising against it.
-    drbg.Read((~dk).d[..]);
+    drbg.Read(dk.d[..]);
 
-    return (dk, default!);
+    return (dk, default);
 }
 
 // kemKeyGen1024 generates a decapsulation key.
@@ -225,7 +225,7 @@ internal static void kemKeyGen1024(ж<DecapsulationKey1024> Ꮡdk, /*[32]*/ ж<a
 
     var g = sha3.New512();
     g.Write(d[..]);
-    g.Write(new byte[]{k1024}.slice()); // Module dimension as a domain separator.
+    g.Write(slice<byte>([k1024])); // Module dimension as a domain separator.
     var G = g.Sum(new slice<byte>(0, 64));
     var (ρ, σ) = (G[..32], G[32..]);
     dk.ρ = new array<byte>(ρ, 32);
@@ -237,7 +237,7 @@ internal static void kemKeyGen1024(ж<DecapsulationKey1024> Ꮡdk, /*[32]*/ ж<a
         }
     }
 
-    byte N = default!;
+    byte N = default;
     var s = Ꮡdk.of(DecapsulationKey1024.Ꮡs);
     foreach (var i in range(s, 4)) {
         s.Value[i] = ntt(samplePolyCBD(σ, N));
@@ -280,13 +280,13 @@ internal static error kemPCT1024(ж<DecapsulationKey1024> Ꮡdk) {
     var ek = dk.EncapsulationKey();
     var (K, c) = ek.Encapsulate();
     var (K1, err) = Ꮡdk.Decapsulate(c);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (subtle.ConstantTimeCompare(K, K1) != 1) {
         return errors.New(mlkemPctFailedˢ);
     }
-    return default!;
+    return default;
 }
 
 // Encapsulate generates a shared key and an associated ciphertext from an
@@ -299,39 +299,39 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this �
     return Ꮡek.encapsulate(Ꮡcc);
 }
 
-internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey1024> Ꮡek, /*[1568]*/ ж<array<byte>> Ꮡcc) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey1024> Ꮡek, /*[1568]*/ ж<array<byte>> cc) {
     fipsSelfTest();
     ref var m = ref heap(new array<byte>(32), out var Ꮡm);
     drbg.Read(m[..]);
     // Note that the modulus check (step 2 of the encapsulation key check from
     // FIPS 203, Section 7.2) is performed by polyByteDecode in parseEK1024.
     fips140.RecordApproved();
-    return kemEncaps1024(Ꮡcc, ref (Ꮡek).DerefOrNull(), Ꮡm);
+    return kemEncaps1024(cc, ref (Ꮡek).DerefOrNull(), Ꮡm);
 }
 
 // EncapsulateInternal is a derandomized version of Encapsulate, exclusively for
 // use in tests.
-public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey1024> Ꮡek, /*[32]*/ ж<array<byte>> Ꮡm) {
+public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey1024> Ꮡek, /*[32]*/ ж<array<byte>> m) {
     fipsSelfTest();
     var cc = Ꮡ(new byte[]{}.array(1568));
-    return kemEncaps1024(cc, ref (Ꮡek).DerefOrNull(), Ꮡm);
+    return kemEncaps1024(cc, ref (Ꮡek).DerefOrNull(), m);
 }
 
 // kemEncaps1024 generates a shared key and an associated ciphertext.
 //
 // It implements ML-KEM.Encaps_internal according to FIPS 203, Algorithm 17.
-internal static (slice<byte> K, slice<byte> c) kemEncaps1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref EncapsulationKey1024 ek, /*[32]*/ ж<array<byte>> Ꮡm) {
-    slice<byte> K = default!;
-    slice<byte> c = default!;
+internal static (slice<byte> K, slice<byte> c) kemEncaps1024(/*[1568]*/ ж<array<byte>> cc, ref EncapsulationKey1024 ek, /*[32]*/ ж<array<byte>> Ꮡm) {
+    slice<byte> K = default;
+    slice<byte> c = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
     var g = sha3.New512();
     g.Write(m[..]);
     g.Write(ek.h[..]);
-    var G = g.Sum(default!);
+    var G = g.Sum(default);
     K = G[..(int)(SharedKeySize)];
     var r = G[(int)(SharedKeySize)..];
-    c = pkeEncrypt1024(Ꮡcc, ref nonnil(ref ek).encryptionKey1024, Ꮡm, r);
+    c = pkeEncrypt1024(cc, ref nonnil(ref ek).encryptionKey1024, Ꮡm, r);
     return (K, c);
 }
 
@@ -339,7 +339,7 @@ internal static (slice<byte> K, slice<byte> c) kemEncaps1024(/*[1568]*/ ж<array
 // If the encapsulation key is not valid, NewEncapsulationKey1024 returns an error.
 public static (ж<EncapsulationKey1024>, error) NewEncapsulationKey1024(slice<byte> encapsulationKey) {
     // The actual logic is in a separate function to outline this allocation.
-    var ek = Ꮡ(new EncapsulationKey1024(nil));
+    var ek = Ꮡ(new EncapsulationKey1024());
     return parseEK1024(ek, encapsulationKey);
 }
 
@@ -354,7 +354,7 @@ internal static (ж<EncapsulationKey1024>, error) parseEK1024(ж<EncapsulationKe
     ref var ek = ref Ꮡek.DerefOrNull();
 
     if (len(ekPKE) != EncapsulationKeySize1024) {
-        return (default!, errors.New(mlkemInvalidˢ));
+        return (default, errors.New(mlkemInvalidˢ));
     }
 
     var h = sha3.New256();
@@ -362,10 +362,10 @@ internal static (ж<EncapsulationKey1024>, error) parseEK1024(ж<EncapsulationKe
     h.Sum(ek.h[..0]);
 
     foreach (var i in range(ek.t)) {
-        error err = default!;
+        error err = default;
         (ek.t[i], err) = polyByteDecode<nttElement>(ekPKE[..(int)(encodingSize12)]);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         ekPKE = ekPKE[(int)(encodingSize12)..];
     }
@@ -377,17 +377,17 @@ internal static (ж<EncapsulationKey1024>, error) parseEK1024(ж<EncapsulationKe
         }
     }
 
-    return (Ꮡek, default!);
+    return (Ꮡek, default);
 }
 
 // pkeEncrypt1024 encrypt a plaintext message.
 //
 // It implements K-PKE.Encrypt according to FIPS 203, Algorithm 14, although the
 // computation of t and AT is done in parseEK1024.
-internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref encryptionKey1024 ex, /*[32]*/ ж<array<byte>> Ꮡm, slice<byte> rnd) {
+internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref encryptionKey1024 ex, /*[32]*/ ж<array<byte>> m, slice<byte> rnd) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
-    byte N = default!;
+    byte N = default;
     var (r, e1) = (GoReflect.WithElemDims(new slice<nttElement>(k1024), 256), GoReflect.WithElemDims(new slice<ringElement>(k1024), 256));
     foreach (var i in range(r)) {
         r[i] = ntt(samplePolyCBD(rnd, N));
@@ -401,7 +401,7 @@ internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref
 
     var u = GoReflect.WithElemDims(new slice<ringElement>(k1024), 256); // NTT⁻¹(AT ◦ r) + e1
     foreach (var i in range(u)) {
-        nttElement uHat = default!;
+        nttElement uHat = default;
         foreach (var j in range(r)) {
             // Note that i and j are inverted, as we need the transposed of A.
             uHat = polyAdd<nttElement>(uHat, nttMul(ex.a[j * (nint)k1024 + i], r[j]));
@@ -409,9 +409,9 @@ internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref
         u[i] = polyAdd(e1[i], inverseNTT(uHat));
     }
 
-    var μ = ringDecodeAndDecompress1(ref (Ꮡm).DerefOrNull());
+    var μ = ringDecodeAndDecompress1(ref (m).DerefOrNull());
 
-    nttElement vNTT = default!;                  // t⊺ ◦ r
+    nttElement vNTT = default; // t⊺ ◦ r
     foreach (var i in range(ex.t)) {
         vNTT = polyAdd(vNTT, nttMul(ex.t[i], r[i]));
     }
@@ -438,13 +438,13 @@ internal static readonly @string mlkemInvalidCiphertextˢ = "mlkem: invalid ciph
 public static (slice<byte> sharedKey, error err) Decapsulate(this ж<DecapsulationKey1024> Ꮡdk, slice<byte> ciphertext) {
     fipsSelfTest();
     if (len(ciphertext) != CiphertextSize1024) {
-        return (default!, errors.New(mlkemInvalidCiphertextˢ));
+        return (default, errors.New(mlkemInvalidCiphertextˢ));
     }
     var c = Ꮡ(array<byte>.Alias(ciphertext, 1568));
     // Note that the hash check (step 3 of the decapsulation input check from
     // FIPS 203, Section 7.3) is foregone as a DecapsulationKey is always
     // validly generated by ML-KEM.KeyGen_internal.
-    return (kemDecaps1024(ref (Ꮡdk).DerefOrNull(), c), default!);
+    return (kemDecaps1024(ref (Ꮡdk).DerefOrNull(), c), default);
 }
 
 // kemDecaps1024 produces a shared key from a ciphertext.
@@ -488,13 +488,13 @@ internal static slice<byte> pkeDecrypt1024(ref decryptionKey1024 dx, /*[1568]*/ 
     var b = Ꮡ(array<byte>.Alias(c[(int)(encodingSize11 * k1024)..], 160));
     var v = ringDecodeAndDecompress5(b);
 
-    nttElement mask = default!;                  // s⊺ ◦ NTT(u)
+    nttElement mask = default; // s⊺ ◦ NTT(u)
     foreach (var i in range(dx.s)) {
         mask = polyAdd(mask, nttMul(dx.s[i], ntt(u[i])));
     }
     var w = polySub(v, inverseNTT(mask));
 
-    return ringCompressAndEncode1(default!, w);
+    return ringCompressAndEncode1(default, w);
 }
 
 } // end mlkem_package

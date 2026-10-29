@@ -10,14 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using dwarfꓸLineReader = go.debug.dwarf_package.ΔLineReader;
-global using dwarfꓸReader = go.debug.dwarf_package.ΔReader;
-global using dwarfꓸType = go.debug.dwarf_package.ΔType;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,6 +52,30 @@ using static go.@internal.xcoff_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Archive))]
+[assembly: go.GoFieldAccess(typeof(AuxCSect32))]
+[assembly: go.GoFieldAccess(typeof(AuxCSect64))]
+[assembly: go.GoFieldAccess(typeof(AuxFcn32))]
+[assembly: go.GoFieldAccess(typeof(AuxFcn64))]
+[assembly: go.GoFieldAccess(typeof(File))]
+[assembly: go.GoFieldAccess(typeof(FileHeader32))]
+[assembly: go.GoFieldAccess(typeof(FileHeader64))]
+[assembly: go.GoFieldAccess(typeof(LoaderHeader32))]
+[assembly: go.GoFieldAccess(typeof(LoaderHeader64))]
+[assembly: go.GoFieldAccess(typeof(LoaderSymbol32))]
+[assembly: go.GoFieldAccess(typeof(LoaderSymbol64))]
+[assembly: go.GoFieldAccess(typeof(Member))]
+[assembly: go.GoFieldAccess(typeof(Reloc32))]
+[assembly: go.GoFieldAccess(typeof(Reloc64))]
+[assembly: go.GoFieldAccess(typeof(SectionHeader32))]
+[assembly: go.GoFieldAccess(typeof(SectionHeader64))]
+[assembly: go.GoFieldAccess(typeof(SymEnt32))]
+[assembly: go.GoFieldAccess(typeof(SymEnt64))]
+[assembly: go.GoFieldAccess(typeof(Symbol))]
+[assembly: go.GoFieldAccess(typeof(ΔSection))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -68,8 +84,8 @@ using static go.@internal.xcoff_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEiYAaKCgpSCgoKUgqyygoKClKiShpaSgIK2gpSkpKaCgIKkgIK2goKmlKaCgrjKgIK2goCCtoKUgoKUpoKClIKAgqSUgoKCgILKkoCCpIKmgpSClIKCuqyygoKm", "104-106:1")]
-[assembly: go.GoPositionMap("internal/xcoff/file.go", "file.cs", "AFmyAZKCgpSCgoKUgqyygoKClK7CgoKmqqKCgqaqooKUqJKClKiShJKAgqSCpoKmgIKkgoKCgoKUgoCCpIKCgoKkgoCCpIKCgoKmgriCgIKmkoCCpIKCgpS4gIKkgoKUgoKCgpSCgIKkgoKCgoKCpIKAgqSCgoKCgoKUgoKUgoKotoCCpIKCgpKClIKAgqSCgoKCgoKClIKCgsiCgIKkgoKCgoKCgqaCpoKmgpSClKbcgpSCgIKkpIKAgqTKgoCCtoKClIKAgqSCgqSCgIKkgoKUgoKCgILsgoKUgpSCgpSCgIKkgoKUgoCCpIKCgpSClIK4goCCpIKCgoKClIK4uAAICoKokoKCgpSokoKCgIKCgoKCgpS2pqaIsoKCgoKCgpS4gqrUgIKkgoKClIKAgqSCgqSCgIKkgoK4gIKkgoCCtpSCgoKCgoKCgoKCgoKClJSmrsKCgqaAgqSCgoKClIKAgqSCgoKkgoCCpIKCgriAgqSCgILIgoK4gIKkgoKCgoKUgoCCpIKUgoKUgoKCpqSCgIKkgpSCgpSUgoKClKassoKClII=")]
+[assembly: go.GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEiYAaKCgpSCgoKUgqyygoKClKiShpaSgIK2gqS0pKaCgIKkgIK2goKmlKaCgrjKgIK2goCCtoKUgoKUpoKClIKAgqSUgoKCgILKkoCCpIKmgpSClIKCuqyygoKm", "104-106:1")]
+[assembly: go.GoPositionMap("internal/xcoff/file.go", "file.cs", "AFmyAZKCgpSCgoKUgqyygoKClK7CgoKmqqKCgqaqooKUqJKClKiShJKAgqSCpoKmgIKkgoKCgoKUgoCCpIKCgoK0goCCpIKCgoK2griCgIKmkoCCpIKCgpS4gIKkgoKUgoKCgpSCgIKkgoKCgoKCtIKAgqSCgoKCgoKkgoKUgoKotoCCpIKCgpKClIKAgqSCgoKCgoKClIKCgtiCgIKkgoKCgoKCgraCpoKmgpSClKbcgpSCgIKktIKAgqTagoCCtoKClIKAgqSCgrSCgIKkgoKkgoKCgILsgoKUgpSCgpSCgIKkgoKUgoCCpIKCgpSClILIgoCCpIKCgoKClILIuAAICoKokoKCgpSokoKCgIKCgoKCgpS2pqaIsoKCgoKCgpS4gqrUgIKkgoKClIKAgqSCgrSCgIKkgoLIgIKkgoCCtpSCgoKCgoKCgoKCgoKClJSmrsKCgqaAgqSCgoKClIKAgqSCgoK0goCCpIKCgsiAgqSCgILIgoK4gIKkgoKCgoKUgoCCpIKUgoKUgoKCprSCgIKkgpSCgpSkgoKClKassoKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

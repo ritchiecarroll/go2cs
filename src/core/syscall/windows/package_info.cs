@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,6 +56,16 @@ using static go.syscall_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(ProcessEntry32))]
+[assembly: go.GoFieldAccess(typeof(ProcessInformation))]
+[assembly: go.GoFieldAccess(typeof(_STARTUPINFOEXW))]
+[assembly: go.GoFieldAccess(typeof(mountPointReparseBuffer))]
+[assembly: go.GoFieldAccess(typeof(procThreadAttributeListContainer))]
+[assembly: go.GoFieldAccess(typeof(reparseDataBuffer))]
+[assembly: go.GoFieldAccess(typeof(symbolicLinkReparseBuffer))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -68,7 +76,7 @@ using static go.syscall_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("syscall/env_windows.go", "env_windows.cs", "AAoagoKClIKCgoKClILKgoKClIKClIKClIKmgoKClIKClIKmgriCgoLcooKClJSCgpSCgqaCgpQ=")]
 [assembly: go.GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACENCqsoKClAAGEJKokqiSqJKqopaimA==")]
-[assembly: go.GoPositionMap("syscall/syscall_windows.go", "syscall_windows.cs", "ABg80oKClK7CggAHEIKCrLKCgoKClJS0AAkQtoKqooKUgoKCgpQAAhLgrMKCgpQACxiArMLalIKCpoKUgIKkpoKClKaEkoKCgoKCuJQABxSClKisqp6mgqaCqAACEOIAAhLiAALgAQBqAoKCgqaigpSCgpSCgpSkpJSClLiCppSCgoKUgoLcgIKUtgAKFJSCntKUgrS0pIKClIKCppSEkoCCgqSCgriEgriAgraCgqamgoKCgpSUlKaCgoKClKaigoKClJSClIKUpqKClIKClIKUgpTqvKKCgsa0gpSmsoKUtLSkgqaCyKKiloKCyoLcgoKClIKUuKKCgpSmooKClKaigoKUpqKCgpSmooKClIKClKaCkoKCgpTmgoiCgqaigoKCpoKClJKCgpSCgqaygpSCgpSmgpSCkpKClIKUAAkMsoKUgoKUpoKUgpKSgpSClOaCpoKCgpSCgpSClJSmgqaCAGPyAaKCgoK4uIKUgoK4gqaSlKYABGKCgpSmgpIACkqCpoIABC6igoKUAAoCgoKUpqaigoKUAAoCgoKUpqaCAAw6ogAIAoKClKYAEDaApICkgKSApICkgKSApICkgAAJEoCkooKCqpCigqSAooAAGzqCkpKCpqKSpqIABhKApAADEgAIAoKClKaigoKClKaigoKUgoKCgIKkgoKUgoL6goKClKaCmIKCgoKUgpSUpqKCgoIAChaClKiQooCkgKKAooCigKSAooCigKKAooDIpIKCgoKmpoKo0oKClJSClJSCgoKCpoKClIKCgoKCgtgADBKCgoKC/pSU6JKosoKCgoKUgoKCgqaoktiSgoKCgpSUgoKCpoKCgpSCqJKCqJKCgoKokgACNgAYAqaCgqaygqaU")]
+[assembly: go.GoPositionMap("syscall/syscall_windows.go", "syscall_windows.cs", "ABc80oKClK7CggAHEIKCrLKCgoKClJS0AAkQtoKqooKUgoKCgpQAAhLgrMKCgpQACxiArMLalIKCpoKUgIKktoKClKaEkoKCgoKCuJQABxSClKisqp6mgqaCqAACEOIAAhLiAALgAQBqAoKCgqaigpSCgpSCgpS0tKSClLiCppSCgoKUgoLcgIKUtgALFKSCntKUgrS0pIKClIKCppSEkoCCgqSCgriEgriAgraCgqamgoKCgpSUlKaCgoKClKaigoKClJSClIKUpqKClIKClIKUgpTqvKKCgsa0gpSmsoKUtLSkgqaCyKKiloKCyoLcgoKClIKUuKKCgpSmooKClKaigoKUpqKCgpSmooKClIKClKaCkoKCgpTmgoiCgqaigoKCpoKClJKCgpSCgqaygpSCgpSmgpSCgoKClIKUAAkMsoKUgoKUpoKUgoKCgpSClOaCpoKCgpSCgpSClJSmgqaCAGPyAaKCgoK4uIKUgoK4gqaClKYABGKCgpSmgoIACkqCpoIABC6igoKUAAoCgoKUpqaigoKUAAoCgoKUpqaCAAw6ogAIAoKClKYAEDaApICkgKSApICkgKSApICkgAAJEoCkooKCqpCigqSAooAAGzqCgoKCpqKCpqIABhKApAADEgAIAoKClKaigoKClKaigoKUgoKCgIKkgoKUgoL6goKClKaCmIKCgoKUgpSUpqKCgoIAChaClKiQooCkgKKAooCigKSAooCigKKAooDIpIKCgoKmpoKo0oKClJSClJSCgoKCpoKClIKCgoKCgtgADRKCgoKCAAgOlJTokqiygoKCgpSCgoKCpqiS2JKCgoKClJSCgoKmgoKClIKokoKokoKCgqiSAAI2ABgCpoKCprKCppQ=")]
 [assembly: go.GoPositionMap("syscall/time_nofake.go", "time_nofake.cs", "AAoWlA==")]
 [assembly: go.GoPositionMap("syscall/types_windows.go", "types_windows.cs", "AEWaAQDzAf4DkpIAECKCpqKCggAcPrSUlIKmtJSUgoIAHk7ygoKCgoKCgqaCAOUEgAo=")]
 [assembly: go.GoPositionMap("syscall/wtf8_windows.go", "wtf8_windows.cs", "ACZYoqaClICCgoKCtoKUqqKCgoC2yILqgoKUgrSU")]

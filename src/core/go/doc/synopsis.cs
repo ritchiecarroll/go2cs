@@ -14,19 +14,19 @@ partial class doc_package {
 // The sentence ends after the first period followed by space and
 // not preceded by exactly one uppercase letter.
 internal static @string firstSentence(@string s) {
-    rune ppp = default!;
-    rune pp = default!;
-    rune p = default!;
+    rune ppp = default;
+    rune pp = default;
+    rune p = default;
     foreach (var (i, rᴛ1) in s) {
         var q = rᴛ1;
 
-        if (q == (rune)'\n' || q == (rune)'\r' || q == (rune)'\t') {
-            q = (rune)' ';
+        if (q == '\n' || q == '\r' || q == '\t') {
+            q = ' ';
         }
-        if (q == (rune)' ' && p == (rune)'.' && (!unicode.IsUpper(pp) || unicode.IsUpper(ppp))) {
+        if (q == ' ' && p == '.' && (!unicode.IsUpper(pp) || unicode.IsUpper(ppp))) {
             return s.slice(0, i);
         }
-        if (p == (rune)'。' || p == (rune)'．') {
+        if (p == '。' || p == '．') {
             return s.slice(0, i);
         }
         (ppp, pp, p) = (pp, p, q);
@@ -48,11 +48,11 @@ public static @string Synopsis(@string text) {
 // This helps to avoid misinterpreting the common mistake
 // of a copyright notice immediately before a package statement
 // as being a doc comment.
-public static readonly ж<slice<@string>> ᏑIllegalPrefixes = new StaticBox<slice<@string>>(new @string[]{
+public static readonly ж<slice<@string>> ᏑIllegalPrefixes = new StaticBox<slice<@string>>(slice<@string>([
     "copyright"u8,
     "all rights"u8,
     "author"u8
-}.slice());
+]));
 public static ref slice<@string> IllegalPrefixes => ref ((StaticBox<slice<@string>>)ᏑIllegalPrefixes).ValueSlot;
 
 // Synopsis returns a cleaned version of the first sentence in text.
@@ -72,17 +72,17 @@ public static @string Synopsis(this ж<Package> Ꮡp, @string text) {
         }
     }
     var pr = p.Printer();
-    pr.Value.TextWidth = -1;
+    pr.TextWidth = -1;
     var d = Ꮡp.Parser().Parse(text);
-    if (len((~d).Content) == 0) {
+    if (len(d.Content) == 0) {
         return ""u8;
     }
     {
-        var (_, ok) = (~d).Content[0]._<ж<comment.Paragraph>>(ᐧ); if (!ok) {
+        var (_, ok) = d.Content[0]._<ж<comment.Paragraph>>(ᐧ); if (!ok) {
             return ""u8;
         }
     }
-    d.Value.Content = (~d).Content[..1]; // might be blank lines, code blocks, etc in “first sentence”
+    d.Content = d.Content[..1]; // might be blank lines, code blocks, etc in “first sentence”
     return strings.TrimSpace((@string)pr.Text(d));
 }
 

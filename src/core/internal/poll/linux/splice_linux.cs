@@ -29,25 +29,25 @@ internal static UntypedInt maxSpliceSize => /* 1 << 20 */ 1048576;
 //
 // Splice gets a pipe buffer from the pool or creates a new one if needed, to serve as a buffer for the data transfer.
 // src and dst must both be stream-oriented sockets.
-public static (int64 written, bool handled, error err) Splice(ж<FD> Ꮡdst, ж<FD> Ꮡsrc, int64 remain) {
-    int64 written = default!;
-    bool handled = default!;
-    error err = default!;
+public static (int64 written, bool handled, error err) Splice(ж<FD> dst, ж<FD> src, int64 remain) {
+    int64 written = default;
+    bool handled = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         (var p, err) = getPipe();
-        if (err != default!) {
+        if (err != nil) {
             (written, handled, err) = (0, false, err); goto ᒐdone;
         }
         defer(putPipe, p, ref ᒐ);
-        nint inPipe = default!;
-        nint n = default!;
-        while (err == default! && remain > 0) {
+        nint inPipe = default;
+        nint n = default;
+        while (err == nil && remain > 0) {
             nint max = maxSpliceSize;
             if ((int64)max > remain) {
                 max = (nint)remain;
             }
-            (inPipe, err) = spliceDrain((~p).wfd, Ꮡsrc, max);
+            (inPipe, err) = spliceDrain((~p).wfd, src, max);
             // The operation is considered handled if splice returns no
             // error, or an error other than EINVAL. An EINVAL means the
             // kernel does not support splice for the socket type of src.
@@ -60,22 +60,22 @@ public static (int64 written, bool handled, error err) Splice(ж<FD> Ꮡdst, ж<
             // If inPipe == 0 && err == nil, src is at EOF, and the
             // transfer is complete.
             handled = handled || (!AreEqual(err, Δsyscall.EINVAL));
-            if (err != default! || inPipe == 0) {
+            if (err != nil || inPipe == 0) {
                 break;
             }
             p.Value.data += inPipe;
 
-            (n, err) = splicePump(Ꮡdst, (~p).rfd, inPipe);
+            (n, err) = splicePump(dst, (~p).rfd, inPipe);
             if (n > 0) {
                 written += (int64)n;
                 remain -= (int64)n;
                 p.Value.data -= n;
             }
         }
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone;
         }
-        (written, handled, err) = (written, true, default!);
+        (written, handled, err) = (written, true, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -98,17 +98,17 @@ internal static (nint, error) spliceDrain(nint pipefd, ж<FD> Ꮡsock, nint max)
         ref var sock = ref Ꮡsock.DerefOrNull();
 
         {
-            var err = Ꮡsock.readLock(); if (err != default!) {
+            var err = Ꮡsock.readLock(); if (err != nil) {
                 return (0, err);
             }
         }
         defer(Ꮡsock.readUnlock, ref ᒐ);
         {
-            var err = sock.pd.prepareRead(sock.isFile); if (err != default!) {
+            var err = sock.pd.prepareRead(sock.isFile); if (err != nil) {
                 return (0, err);
             }
         }
-        while (ᐧ) {
+        for (;;) {
             // In theory calling splice(2) with SPLICE_F_NONBLOCK could end up an infinite loop here,
             // because it could return EAGAIN ceaselessly when the write end of the pipe is full,
             // but this shouldn't be a concern here, since the pipe buffer must be sufficient for
@@ -122,14 +122,14 @@ internal static (nint, error) spliceDrain(nint pipefd, ж<FD> Ꮡsock, nint max)
             }
             if (sock.pd.pollable()) {
                 {
-                    var errΔ1 = sock.pd.waitRead(sock.isFile); if (errΔ1 != default!) {
+                    var errΔ1 = sock.pd.waitRead(sock.isFile); if (errΔ1 != nil) {
                         return (n, errΔ1);
                     }
                 }
             }
         }
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -152,13 +152,13 @@ internal static (nint, error) splicePump(ж<FD> Ꮡsock, nint pipefd, nint inPip
         ref var sock = ref Ꮡsock.DerefOrNull();
 
         {
-            var err = Ꮡsock.writeLock(); if (err != default!) {
+            var err = Ꮡsock.writeLock(); if (err != nil) {
                 return (0, err);
             }
         }
         defer(Ꮡsock.writeUnlock, ref ᒐ);
         {
-            var err = sock.pd.prepareWrite(sock.isFile); if (err != default!) {
+            var err = sock.pd.prepareWrite(sock.isFile); if (err != nil) {
                 return (0, err);
             }
         }
@@ -184,15 +184,15 @@ internal static (nint, error) splicePump(ж<FD> Ꮡsock, nint pipefd, nint inPip
             }
             if (sock.pd.pollable()) {
                 {
-                    var errΔ1 = sock.pd.waitWrite(sock.isFile); if (errΔ1 != default!) {
+                    var errΔ1 = sock.pd.waitWrite(sock.isFile); if (errΔ1 != nil) {
                         return (written, errΔ1);
                     }
                 }
             }
         }
-        return (written, default!);
+        return (written, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -228,23 +228,23 @@ internal static any newPoolPipe() {
     // redirecting the data transmission to the conventional way utilizing read() + write() as a fallback.
     var p = newPipe();
     if (p == nil) {
-        return default!;
+        return default;
     }
 
-    p.Value.cleanup = Δruntime.AddCleanup(p, (splicePipeFields spf) => {
+    p.cleanup = Δruntime.AddCleanup(p, (splicePipeFields spf) => {
         var ᴛ1 = new splicePipe(splicePipeFields: spf);
         destroyPipe(ref ᴛ1);
-    }, (~p).splicePipeFields);
+    }, p.splicePipeFields);
     return p.OrTypedNil();
 }
 
 // getPipe tries to acquire a pipe buffer from the pool or create a new one with newPipe() if it gets nil from the cache.
 internal static (ж<splicePipe>, error) getPipe() {
     var v = ᏑsplicePipePool.Get();
-    if (v == default!) {
-        return (default!, Δsyscall.EINVAL);
+    if (v == nil) {
+        return (default, Δsyscall.EINVAL);
     }
-    return (v._<ж<splicePipe>>(), default!);
+    return (v._<ж<splicePipe>>(), default);
 }
 
 internal static void putPipe(ж<splicePipe> Ꮡp) {
@@ -264,8 +264,8 @@ internal static void putPipe(ж<splicePipe> Ꮡp) {
 internal static ж<splicePipe> newPipe() {
     array<nint> fds = new(2);
     {
-        var err = Δsyscall.Pipe2(fds[..], (nint)((nint)Δsyscall.O_CLOEXEC | (nint)Δsyscall.O_NONBLOCK)); if (err != default!) {
-            return default!;
+        var err = Δsyscall.Pipe2(fds[..], (nint)((nint)Δsyscall.O_CLOEXEC | (nint)Δsyscall.O_NONBLOCK)); if (err != nil) {
+            return default;
         }
     }
 

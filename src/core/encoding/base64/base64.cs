@@ -23,14 +23,14 @@ partial class base64_package {
 // (RFC 1421).  RFC 4648 also defines an alternate encoding, which is
 // the standard encoding with - and _ substituted for + and /.
 partial struct Encoding {
-    internal array<byte> encode = new(64); // mapping of symbol index to symbol byte value
+    internal array<byte> encode = new(64);      // mapping of symbol index to symbol byte value
     internal array<uint8> decodeMap = new(256); // mapping of symbol byte value to symbol index
     internal rune padChar;
     internal bool strict;
 }
 
 public const rune StdPadding = /* '=' */ 61; // Standard padding character
-public const rune NoPadding = -1;  // No padding
+public const rune NoPadding = -1;            // No padding
 
 internal static readonly @string decodeMapInitialize = ((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}));
 internal static UntypedInt invalidIndex => /* '\xff' */ 255;
@@ -48,24 +48,24 @@ public static ж<Encoding> NewEncoding(@string encoder) {
     }
 
     var e = @new<Encoding>();
-    e.Value.padChar = StdPadding;
-    copy((~e).encode[..], encoder);
-    copy((~e).decodeMap[..], decodeMapInitialize);
+    e.padChar = StdPadding;
+    copy(e.encode[..], encoder);
+    copy(e.decodeMap[..], decodeMapInitialize);
 
     for (nint i = 0; i < len(encoder); i++) {
         // Note: While we document that the alphabet cannot contain
         // the padding character, we do not enforce it since we do not know
         // if the caller intends to switch the padding from StdPadding later.
         switch (ᐧ) {
-        case {} when encoder[i] == (rune)'\n' || encoder[i] == (rune)'\r': {
+        case {} when encoder[i] == (byte)'\n' || encoder[i] == (byte)'\r': {
             throw panic("encoding alphabet contains newline character");
             break;
         }
-        case {} when (~e).decodeMap[encoder[i]] != invalidIndex: {
+        case {} when e.decodeMap[encoder[i]] != invalidIndex: {
             throw panic("encoding alphabet includes duplicate symbols");
             break;
         }}
-        e.Value.decodeMap[encoder[i]] = (uint8)i;
+        e.decodeMap[encoder[i]] = (uint8)i;
     }
     return e;
 }
@@ -81,7 +81,7 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
     ref var enc = ref heap(encʗp.ΔClone(), out var Ꮡenc);
 
     switch (ᐧ) {
-    case {} when padding < NoPadding || padding == (rune)'\r' || padding == (rune)'\n' || padding > 0xff: {
+    case {} when padding < NoPadding || padding == '\r' || padding == '\n' || padding > 0xff: {
         throw panic("invalid padding");
         break;
     }
@@ -208,22 +208,22 @@ partial struct encoder {
     internal error err;
     internal ж<Encoding> enc;
     internal io.Writer w;
-    internal array<byte> buf = new(3); // buffered data waiting to be encoded
-    internal nint nbuf;       // number of bytes in buf
+    internal array<byte> buf = new(3);     // buffered data waiting to be encoded
+    internal nint nbuf;                    // number of bytes in buf
     internal array<byte> @out = new(1024); // output buffer
 }
 
 internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    if (e.err != default!) {
+    if (e.err != nil) {
         return (0, e.err);
     }
 
     // Leading fringe.
     if (e.nbuf > 0) {
-        nint i = default!;
+        nint i = default;
         for (i = 0; i < len(p) && e.nbuf < 3; i++) {
             e.buf[e.nbuf] = p[i];
             e.nbuf++;
@@ -235,7 +235,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         }
         e.enc.Encode(e.@out[..], e.buf[..]);
         {
-            (_, e.err) = e.w.Write(e.@out[..4]); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out[..4]); if (e.err != nil) {
                 return (n, e.err);
             }
         }
@@ -251,7 +251,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         }
         e.enc.Encode(e.@out[..], p.slice(0, nn));
         {
-            (_, e.err) = e.w.Write(e.@out.slice(0, nn / 3 * 4)); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out.slice(0, nn / 3 * 4)); if (e.err != nil) {
                 return (n, e.err);
             }
         }
@@ -270,7 +270,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
 // It is an error to call Write after calling Close.
 internal static error Close(this ref encoder e) {
     // If there's anything left in the buffer, flush it out
-    if (e.err == default! && e.nbuf > 0) {
+    if (e.err == nil && e.nbuf > 0) {
         e.enc.Encode(e.@out[..], e.buf.slice(0, e.nbuf));
         (_, e.err) = e.w.Write(e.@out.slice(0, e.enc.EncodedLen(e.nbuf)));
         e.nbuf = 0;
@@ -283,8 +283,8 @@ internal static error Close(this ref encoder e) {
 // Base64 encodings operate in 4-byte blocks; when finished
 // writing, the caller must Close the returned encoder to flush any
 // partially written blocks.
-public static io.WriteCloser NewEncoder(ж<Encoding> Ꮡenc, io.Writer w) {
-    return new encoderжWriteCloser(Ꮡ(new encoder(enc: Ꮡenc, w: w)));
+public static io.WriteCloser NewEncoder(ж<Encoding> enc, io.Writer w) {
+    return new encoderжWriteCloser(Ꮡ(new encoder(enc: enc, w: w)));
 }
 
 // EncodedLen returns the length in bytes of the base64 encoding
@@ -311,7 +311,7 @@ public static @string Error(this CorruptInputError e) {
 // It returns the number of bytes read from src, the number of bytes written
 // to dst, and an error, if any.
 internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding enc, slice<byte> dst, slice<byte> src, nint si) {
-    error err = default!;
+    error err = default;
 
     // Decode quantum using the base64 alphabet
     array<byte> dbuf = new(4);
@@ -324,7 +324,7 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
         if (len(src) == si) {
             switch (ᐧ) {
             case {} when j is 0: {
-                return (si, 0, default!);
+                return (si, 0, default);
             }
             case {} when (j == 1) || (enc.padChar != NoPadding): {
                 return (si, 0, ((CorruptInputError)(int64)(si - j)));
@@ -341,7 +341,7 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
             continue;
         }
 
-        if (@in == (rune)'\n' || @in == (rune)'\r') {
+        if (@in == '\n' || @in == '\r') {
             j--;
             continue;
         }
@@ -359,7 +359,7 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
         case 2: {
             // "==" is expected, the first "=" is already consumed.
             // skip over newlines
-            while (si < len(src) && (src[si] == (rune)'\n' || src[si] == (rune)'\r')) {
+            while (si < len(src) && (src[si] == '\n' || src[si] == '\r')) {
                 si++;
             }
             if (si == len(src)) {
@@ -376,7 +376,7 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
         }}
 
         // skip over newlines
-        while (si < len(src) && (src[si] == (rune)'\n' || src[si] == (rune)'\r')) {
+        while (si < len(src) && (src[si] == '\n' || src[si] == '\r')) {
             si++;
         }
         if (si < len(src)) {
@@ -453,23 +453,23 @@ partial struct decoder {
 }
 
 internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
 
     // Use leftover decoded output from last read.
     if (len(d.@out) > 0) {
         n = copy(p, d.@out);
         d.@out = d.@out.slice(n);
-        return (n, default!);
+        return (n, default);
     }
 
-    if (d.err != default!) {
+    if (d.err != nil) {
         return (0, d.err);
     }
 
     // This code assumes that d.r strips supported whitespace ('\r' and '\n').
 
     // Refill buffer.
-    while (d.nbuf < 4 && d.readErr == default!) {
+    while (d.nbuf < 4 && d.readErr == nil) {
         nint nn = len(p) / 3 * 4;
         if (nn < 4) {
             nn = 4;
@@ -482,18 +482,18 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     }
 
     if (d.nbuf < 4) {
-        if ((~d.enc).padChar == NoPadding && d.nbuf > 0) {
+        if (d.enc.padChar == NoPadding && d.nbuf > 0) {
             // Decode final fragment, without padding.
-            nint nwΔ1 = default!;
+            nint nwΔ1 = default;
             (nwΔ1, d.err) = d.enc.Decode(d.outbuf[..], d.buf.slice(0, d.nbuf));
             d.nbuf = 0;
             d.@out = d.outbuf.slice(0, nwΔ1);
             n = copy(p, d.@out);
             d.@out = d.@out.slice(n);
             if (n > 0 || len(p) == 0 && len(d.@out) > 0) {
-                return (n, default!);
+                return (n, default);
             }
-            if (d.err != default!) {
+            if (d.err != nil) {
                 return (0, d.err);
             }
         }
@@ -507,7 +507,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     // Decode chunk into p, or d.out and then p if p is too small.
     nint nr = d.nbuf / 4 * 4;
     nint nw = d.nbuf / 4 * 3;
-    if (nw > len(p)){
+    if (nw > len(p)) {
         (nw, d.err) = d.enc.Decode(d.outbuf[..], d.buf.slice(0, nr));
         d.@out = d.outbuf.slice(0, nw);
         n = copy(p, d.@out);
@@ -527,11 +527,11 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
 // number of bytes successfully written and [CorruptInputError].
 // New line characters (\r and \n) are ignored.
 public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (len(src) == 0) {
-        return (0, default!);
+        return (0, default);
     }
 
     // Lift the nil check outside of the loop. enc.decodeMap is directly
@@ -551,15 +551,15 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
                 enc.decodeMap[src2[4]],
                 enc.decodeMap[src2[5]],
                 enc.decodeMap[src2[6]],
-                enc.decodeMap[src2[7]]); if (ok){
+                enc.decodeMap[src2[7]]); if (ok) {
                 byteorder.BEPutUint64(dst.slice(n), dn);
                 n += 6;
                 si += 8;
             } else {
-                nint ninc = default!;
+                nint ninc = default;
                 (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
                 n += ninc;
-                if (err != default!) {
+                if (err != nil) {
                     return (n, err);
                 }
             }
@@ -573,15 +573,15 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
                 enc.decodeMap[src2[0]],
                 enc.decodeMap[src2[1]],
                 enc.decodeMap[src2[2]],
-                enc.decodeMap[src2[3]]); if (ok){
+                enc.decodeMap[src2[3]]); if (ok) {
                 byteorder.BEPutUint32(dst.slice(n), dn);
                 n += 3;
                 si += 4;
             } else {
-                nint ninc = default!;
+                nint ninc = default;
                 (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
                 n += ninc;
-                if (err != default!) {
+                if (err != nil) {
                     return (n, err);
                 }
             }
@@ -589,10 +589,10 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
     }
 
     while (si < len(src)) {
-        nint ninc = default!;
+        nint ninc = default;
         (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
         n += ninc;
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
     }
@@ -632,7 +632,7 @@ internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte
     while (n > 0) {
         nint offset = 0;
         foreach (var (i, b) in p.slice(0, n)) {
-            if (b != (rune)'\r' && b != (rune)'\n') {
+            if (b != '\r' && b != '\n') {
                 if (i != offset) {
                     p[offset] = b;
                 }
@@ -649,8 +649,8 @@ internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte
 }
 
 // NewDecoder constructs a new base64 stream decoder.
-public static io.Reader NewDecoder(ж<Encoding> Ꮡenc, io.Reader r) {
-    return new decoderжReader(Ꮡ(new decoder(enc: Ꮡenc, r: new newlineFilteringReaderжReader(Ꮡ(new newlineFilteringReader(r))))));
+public static io.Reader NewDecoder(ж<Encoding> enc, io.Reader r) {
+    return new decoderжReader(Ꮡ(new decoder(enc: enc, r: new newlineFilteringReaderжReader(Ꮡ(new newlineFilteringReader(r))))));
 }
 
 // DecodedLen returns the maximum length in bytes of the decoded data

@@ -21,7 +21,7 @@ internal static void readServices() {
     GoFrame ᒐ = default;
     try {
         var (Δfile, err) = open(etcServicesˢ);
-        if (err != default!) {
+        if (err != nil) {
             return;
         }
         var fileʗ1 = Δfile;
@@ -30,7 +30,7 @@ internal static void readServices() {
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
             // "http 80/tcp www www-http # World Wide Web HTTP"
             {
-                nint i = bytealg.IndexByteString(line, (rune)'#'); if (i >= 0) {
+                nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {
                     line = line.slice(0, i);
                 }
             }
@@ -40,7 +40,7 @@ internal static void readServices() {
             }
             @string portnet = f[1]; // "80/tcp"
             var (port, j, okΔ1) = dtoi(portnet);
-            if (!okΔ1 || port <= 0 || j >= len(portnet) || portnet[j] != (rune)'/') {
+            if (!okΔ1 || port <= 0 || j >= len(portnet) || portnet[j] != '/') {
                 continue;
             }
             @string netw = portnet.slice(j + 1); // "tcp"

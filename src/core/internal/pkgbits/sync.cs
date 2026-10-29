@@ -17,8 +17,7 @@ private static readonly @string cmdCompileInternalNoderˢ = "cmd/compile/interna
 internal static slice<@string> fmtFrames(params ꓸꓸꓸuintptr pcsʗp) {
     var pcs = pcsʗp.slice();
 
-    ref var res = ref heap<slice<@string>>(out var Ꮡres);
-    res = new slice<@string>(0, len(pcs));
+    ref var res = ref heap<slice<@string>>(new slice<@string>(0, len(pcs)), out var Ꮡres);
     walkFrames(pcs, (@string @file, nint line, @string name, uintptr offset) => {
         // Trim package from function name. It's just redundant noise.
         name = strings.TrimPrefix(name, cmdCompileInternalNoderˢ);
@@ -39,7 +38,7 @@ internal static void walkFrames(slice<uintptr> pcs, Action<@string, nint, @strin
     }
 
     var frames = Δruntime.CallersFrames(pcs);
-    while (ᐧ) {
+    for (;;) {
         var (frame, more) = frames.Next();
         visit(frame.File, frame.Line, frame.Function, frame.PC - frame.Entry);
         if (!more) {

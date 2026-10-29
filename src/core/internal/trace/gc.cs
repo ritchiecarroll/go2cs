@@ -72,13 +72,13 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     var psᴷ = new stackAppend<MutatorUtilizationV2_perP>();
     var procsᴷ = new stackAppend<MutatorUtilizationV2_procsCount>();
 
-    var @out = new slice<MutatorUtil>[]{}.slice();
+    var @out = slice<slice<MutatorUtil>>([]);
     nint stw = 0;
-    var ps = new MutatorUtilizationV2_perP[]{}.slice();
+    var ps = slice<MutatorUtilizationV2_perP>([]);
     var inGC = new map<GoID, bool>();
     var states = new map<GoID, GoState>();
     var bgMark = new map<GoID, bool>();
-    var procs = new MutatorUtilizationV2_procsCount[]{}.slice();
+    var procs = slice<MutatorUtilizationV2_procsCount>([]);
     nint nSync = 0;
 
     // Helpers.
@@ -87,46 +87,46 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     bool handleSweep(ΔRange r) => (UtilFlags)(flags & UtilSweep) != 0 && isGCSweep(r);
 
     // Iterate through the trace, tracking mutator utilization.
-    ж<ΔEvent> lastEv = default!;
+    ж<ΔEvent> lastEv = default;
     foreach (var i in range(events)) {
         var ev = Ꮡ(events, i);
         lastEv = ev;
 
         // Process the event.
-        var exprᴛ1 = (~ev).Kind();
-        if (exprᴛ1 == EventSync) {
+        switch ((~ev).Kind()) {
+        case var ᴛ when ᴛ == EventSync: {
             nSync = (~ev).Sync().N;
+            break;
         }
-        else if (exprᴛ1 == EventMetric) {
-            do {
-                var m = (~ev).Metric();
-                if (m.Name != "/sched/gomaxprocs:threads"u8) {
-                    break;
-                }
-                nint gomaxprocs = (nint)m.Value.Uint64();
-                if (len(ps) > gomaxprocs) {
-                    if ((UtilFlags)(flags & UtilPerProc) != 0) {
-                        // End each P's series.
-                        foreach (var (_, p) in ps.slice(gomaxprocs)) {
-                            @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)(~ev).Time(), 0D));
-                        }
+        case var ᴛ when ᴛ == EventMetric: {
+            var m = (~ev).Metric();
+            if (m.Name != "/sched/gomaxprocs:threads"u8) {
+                break;
+            }
+            nint gomaxprocs = (nint)m.Value.Uint64();
+            if (len(ps) > gomaxprocs) {
+                if ((UtilFlags)(flags & UtilPerProc) != 0) {
+                    // End each P's series.
+                    foreach (var (_, p) in ps.slice(gomaxprocs)) {
+                        @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)(~ev).Time(), 0D));
                     }
-                    ps = ps.slice(0, gomaxprocs);
                 }
-                while (len(ps) < gomaxprocs) {
-                    // Start new P's series.
-                    nint series = 0;
-                    if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
-                        series = len(@out);
-                        @out = builtin.append(outᴷ, @out, new MutatorUtil[]{new((int64)(~ev).Time(), 1D)}.slice());
-                    }
-                    ps = builtin.append(psᴷ, ps, new MutatorUtilizationV2_perP(series: series));
+                ps = ps.slice(0, gomaxprocs);
+            }
+            while (len(ps) < gomaxprocs) {
+                // Start new P's series.
+                nint series = 0;
+                if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
+                    series = len(@out);
+                    @out = builtin.append(outᴷ, @out, slice<MutatorUtil>([new((int64)(~ev).Time(), 1D)]));
                 }
-                if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
-                    procs = builtin.append(procsᴷ, procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
-                }
-            } while (false);
-        }
+                ps = builtin.append(psᴷ, ps, new MutatorUtilizationV2_perP(series: series));
+            }
+            if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
+                procs = builtin.append(procsᴷ, procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
+            }
+            break;
+        }}
         if (len(ps) == 0) {
             // We can't start doing any analysis until we see what GOMAXPROCS is.
             // It will show up very early in the trace, but we need to be robust to
@@ -199,13 +199,11 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
         }
         if (fallthrough || !matchᴛ1 && exprᴛ2 == EventRangeBegin) { matchᴛ1 = true;
             var r = (~ev).Range();
-            if (handleSTW(r)){
+            if (handleSTW(r)) {
                 stw++;
-            } else 
-            if (handleSweep(r)){
+            } else if (handleSweep(r)) {
                 ps[(nint)((~ev).Proc())].gc++;
-            } else 
-            if (handleMarkAssist(r)) {
+            } else if (handleMarkAssist(r)) {
                 ps[(nint)((~ev).Proc())].gc++;
                 {
                     var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
@@ -216,13 +214,11 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
         }
         else if (exprᴛ2 == EventRangeEnd) { matchᴛ1 = true;
             var r = (~ev).Range();
-            if (handleSTW(r)){
+            if (handleSTW(r)) {
                 stw--;
-            } else 
-            if (handleSweep(r)){
+            } else if (handleSweep(r)) {
                 ps[(nint)((~ev).Proc())].gc--;
-            } else 
-            if (handleMarkAssist(r)) {
+            } else if (handleMarkAssist(r)) {
                 ps[(nint)((~ev).Proc())].gc--;
                 {
                     var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
@@ -240,11 +236,10 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 var (old, @new) = st.Goroutine();
                 var g = st.Resource.Goroutine();
                 if (inGC[g] || bgMark[g]) {
-                    if (!old.Executing() && @new.Executing()){
+                    if (!old.Executing() && @new.Executing()) {
                         // Started running while doing GC things.
                         ps[(nint)((~ev).Proc())].gc++;
-                    } else 
-                    if (old.Executing() && !@new.Executing()) {
+                    } else if (old.Executing() && !@new.Executing()) {
                         // Stopped running while doing GC things.
                         ps[(nint)((~ev).Proc())].gc--;
                     }
@@ -269,13 +264,13 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             }
         }
 
-        if ((UtilFlags)(flags & UtilPerProc) == 0){
+        if ((UtilFlags)(flags & UtilPerProc) == 0) {
             // Compute the current average utilization.
             if (len(ps) == 0) {
                 continue;
             }
             nint gcPs = 0;
-            if (stw > 0){
+            if (stw > 0) {
                 gcPs = len(ps);
             } else {
                 foreach (var iΔ1 in range(ps)) {
@@ -294,17 +289,17 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             foreach (var iΔ2 in range(ps)) {
                 var p = Ꮡ(ps, iΔ2);
                 var util = 1.0D;
-                if (stw > 0 || (~p).gc > 0) {
+                if (stw > 0 || p.gc > 0) {
                     util = 0.0D;
                 }
-                @out[(~p).series] = addUtil(@out[(~p).series], new MutatorUtil((int64)(~ev).Time(), util));
+                @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)(~ev).Time(), util));
             }
         }
     }
 
     // No events in the stream.
     if (lastEv == nil) {
-        return default!;
+        return default;
     }
 
     // Add final 0 utilization event to any remaining series. This
@@ -347,7 +342,7 @@ internal static totalUtil totalUtilOf(float64 meanUtil, int64 dur) {
 
 // mean returns the mean utilization over dur.
 internal static float64 mean(this totalUtil u, time.Duration dur) {
-    return (float64)u / (float64)(int64)dur;
+    return (float64)u / (float64)dur;
 }
 
 // An MMUCurve is the minimum mutator utilization curve across
@@ -396,8 +391,8 @@ internal static nint bandsPerSeries = 1000;
 internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
     // Compute cumulative sum.
     var sums = new slice<totalUtil>(len(util));
-    MutatorUtil prev = default!;
-    totalUtil sum = default!;
+    MutatorUtil prev = default;
+    totalUtil sum = default;
     foreach (var (j, u) in util) {
         sum += totalUtilOf(prev.Util, u.Time - prev.Time);
         sums[j] = sum;
@@ -423,8 +418,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
     // Compute the bands. There are numBands+1 bands in order to
     // record the final cumulative sum.
     var bands = new slice<mmuBand>(numBands + 1);
-    ref var s = ref heap<mmuSeries>(out var Ꮡs);
-    s = new mmuSeries(util, sums, bands, bandDur);
+    ref var s = ref heap<mmuSeries>(new mmuSeries(util, sums, bands, bandDur), out var Ꮡs);
     var leftSum = new integrator(Ꮡs, 0);
     foreach (var i in range(bands)) {
         var (startTime, endTime) = s.bandTime(i);
@@ -441,8 +435,8 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
 }
 
 internal static (int64 start, int64 end) bandTime(this ref mmuSeries s, nint i) {
-    int64 start = default!;
-    int64 end = default!;
+    int64 start = default;
+    int64 end = default;
 
     start = (int64)i * s.bandDur + s.util[0].Time;
     end = start + s.bandDur;
@@ -576,7 +570,7 @@ internal static bool addMU(this ж<accumulator> Ꮡacc, int64 timeΔ1, float64 m
         // worse.
         foreach (var (i, ui) in acc.wHeap) {
             if (timeΔ1 + (int64)window > ui.Time && ui.Time + (int64)window > timeΔ1) {
-                if (ui.MutatorUtil <= mu){
+                if (ui.MutatorUtil <= mu) {
                     // Keep the first window.
                     goto keep;
                 } else {
@@ -594,7 +588,7 @@ internal static bool addMU(this ж<accumulator> Ꮡacc, int64 timeΔ1, float64 m
 keep:;
     }
 
-    if (len(acc.wHeap) < acc.nWorst){
+    if (len(acc.wHeap) < acc.nWorst) {
         // We don't have N windows yet, so keep accumulating.
         acc.bound = 1.0D;
     } else {
@@ -609,7 +603,7 @@ keep:;
         }
         (acc.lastTime, acc.lastMU) = (timeΔ1, mu);
         {
-            var (_, mudBound, ok) = acc.mud.approxInvCumulativeSum(); if (ok){
+            var (_, mudBound, ok) = acc.mud.approxInvCumulativeSum(); if (ok) {
                 acc.bound = math.Max(acc.bound, mudBound);
             } else {
                 // We haven't accumulated enough total precise
@@ -632,8 +626,7 @@ keep:;
 // duration across the execution. The returned value is in the range
 // [0, 1].
 public static float64 /*mmu*/ MMU(this ref MMUCurve c, time.Duration window) {
-    ref var acc = ref heap<accumulator>(out var Ꮡacc);
-    acc = new accumulator(mmu: 1.0D, bound: 1.0D);
+    ref var acc = ref heap<accumulator>(new accumulator(mmu: 1.0D, bound: 1.0D), out var Ꮡacc);
     c.mmu(window, Ꮡacc);
     return acc.mmu;
 }
@@ -644,8 +637,7 @@ public static float64 /*mmu*/ MMU(this ref MMUCurve c, time.Duration window) {
 // mostly-overlapping windows at the single lowest point). There are
 // no guarantees on which set of disjoint windows this returns.
 public static slice<UtilWindow> /*worst*/ Examples(this ref MMUCurve c, time.Duration window, nint n) {
-    ref var acc = ref heap<accumulator>(out var Ꮡacc);
-    acc = new accumulator(mmu: 1.0D, bound: 1.0D, nWorst: n);
+    ref var acc = ref heap<accumulator>(new accumulator(mmu: 1.0D, bound: 1.0D, nWorst: n), out var Ꮡacc);
     c.mmu(window, Ꮡacc);
     sort.Sort(sort.Reverse(acc.wHeap));
     return (slice<UtilWindow>)acc.wHeap;
@@ -663,7 +655,7 @@ public static slice<UtilWindow> /*worst*/ Examples(this ref MMUCurve c, time.Dur
 // more efficient to use the MMU method.)
 public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slice<float64> quantiles) {
     if (len(quantiles) == 0) {
-        return new float64[]{}.slice();
+        return slice<float64>([]);
     }
 
     // Each unrefined band contributes a known total mass to the
@@ -690,7 +682,7 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
     // total final mass will be the duration of the trace itself
     // minus the window size. Using this, we can compute the mass
     // corresponding to quantile maxQ.
-    int64 duration = default!;
+    int64 duration = default;
     foreach (var (_, s) in c.series) {
         var duration1 = s.util[len(s.util) - 1].Time - s.util[0].Time;
         if (duration1 >= (int64)window) {
@@ -701,8 +693,7 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
 
     // Accumulate the MUD until we have precise information for
     // everything to the left of qMass.
-    ref var acc = ref heap<accumulator>(out var Ꮡacc);
-    acc = new accumulator(mmu: 1.0D, bound: 1.0D, preciseMass: qMass, mud: @new<mud>());
+    ref var acc = ref heap<accumulator>(new accumulator(mmu: 1.0D, bound: 1.0D, preciseMass: qMass, mud: @new<mud>()), out var Ꮡacc);
     acc.mud.setTrackMass(qMass);
     c.mmu(window, Ꮡacc);
 
@@ -752,7 +743,7 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
         }
 
         var bandU1 = (bandUtilHeap)s.mkBandUtil(i, windows[i]);
-        if (bandU == default!){
+        if (bandU == nil) {
             bandU = bandU1;
         } else {
             bandU = builtin.appendꓸꓸꓸ(bandU, bandU1);
@@ -795,7 +786,7 @@ internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, ti
         // for any bands that are only partially overlapped by
         // some window and the mean for any bands that are
         // completely covered by all windows.
-        totalUtil util = default!;
+        totalUtil util = default;
 
         // Find the lowest and second lowest of the partial
         // bands.
@@ -806,7 +797,7 @@ internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, ti
         // Assume the worst window maximally overlaps the
         // worst minimum and then the rest overlaps the second
         // worst minimum.
-        if (minBands == 1){
+        if (minBands == 1) {
             util += totalUtilOf(minBand, (int64)window);
         } else {
             util += totalUtilOf(minBand, c.bandDur);
@@ -870,7 +861,7 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
         }
     }
     acc.resetTime();
-    while (ᐧ) {
+    for (;;) {
         // Advance edges to time and time+window.
         var mu = (right.advance(timeΔ1 + (int64)window) - left.advance(timeΔ1)).mean(window);
         if (Ꮡacc.addMU(timeΔ1, mu, window)) {
@@ -884,13 +875,13 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
         // utilization function is 1/window, so we can always
         // advance the time by at least (mu - mmu) * window
         // without dropping below mmu.
-        var minTime = timeΔ1 + (int64)((mu - acc.bound) * (float64)(int64)window);
+        var minTime = timeΔ1 + (int64)((mu - acc.bound) * (float64)window);
 
         // Advance the window to the next time where either
         // the left or right edge of the window encounters a
         // change in the utilization curve.
         {
-            var (t1, t2) = (left.next(timeΔ1), right.next(timeΔ1 + (int64)window) - (int64)window); if (t1 < t2){
+            var (t1, t2) = (left.next(timeΔ1), right.next(timeΔ1 + (int64)window) - (int64)window); if (t1 < t2) {
                 timeΔ1 = t1;
             } else {
                 timeΔ1 = t2;
@@ -921,7 +912,7 @@ partial struct integrator {
 // time. advance must be called on monotonically increasing values of
 // times.
 internal static totalUtil advance(this ref integrator @in, int64 time) {
-    var util = @in.u.Value.util;
+    var util = @in.u.util;
     nint pos = @in.pos;
     // Advance pos until pos+1 is time's strict successor (making
     // pos time's non-strict predecessor).
@@ -930,7 +921,7 @@ internal static totalUtil advance(this ref integrator @in, int64 time) {
     // but it may be arbitrarily far away, so we handled that
     // efficiently, too.
     const nint maxSeq = 8;
-    if (pos + maxSeq < len(util) && util[pos + maxSeq].Time > time){
+    if (pos + maxSeq < len(util) && util[pos + maxSeq].Time > time) {
         // Nearby. Use a linear scan.
         while (pos + 1 < len(util) && util[pos + 1].Time <= time) {
             pos++;
@@ -941,7 +932,7 @@ internal static totalUtil advance(this ref integrator @in, int64 time) {
         nint r = len(util);
         while (l < r) {
             nint h = (nint)((nuint)(l + r) >> 1);
-            if (util[h].Time <= time){
+            if (util[h].Time <= time) {
                 l = h + 1;
             } else {
                 r = h;
@@ -950,17 +941,17 @@ internal static totalUtil advance(this ref integrator @in, int64 time) {
         pos = l - 1; // Non-strict predecessor.
     }
     @in.pos = pos;
-    totalUtil partial = default!;
+    totalUtil partial = default;
     if (time != util[pos].Time) {
         partial = totalUtilOf(util[pos].Util, time - util[pos].Time);
     }
-    return (~@in.u).sums[pos] + partial;
+    return @in.u.sums[pos] + partial;
 }
 
 // next returns the smallest time t' > time of a change in the
 // utilization function.
 internal static int64 next(this ref integrator @in, int64 time) {
-    foreach (var (_, u) in (~@in.u).util.slice(@in.pos)) {
+    foreach (var (_, u) in @in.u.util.slice(@in.pos)) {
         if (u.Time > time) {
             return u.Time;
         }

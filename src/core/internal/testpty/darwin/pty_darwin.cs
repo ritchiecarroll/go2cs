@@ -18,31 +18,31 @@ private static readonly @string ptsnameˢ = "ptsname"u8;
 private static readonly @string ptyˢ = "pty"u8;
 
 internal static (ж<os.File> pty, @string processTTY, error err) open() {
-    @string processTTY = default!;
-    error err = default!;
+    @string processTTY = default;
+    error err = default;
 
     (var m, err) = unix.PosixOpenpt(Δsyscall.O_RDWR);
-    if (err != default!) {
-        return (default!, "", new PtyErrorжerror(ptyError(posixOpenptˢ, err)));
+    if (err != nil) {
+        return (default, "", new PtyErrorжerror(ptyError(posixOpenptˢ, err)));
     }
     {
-        var errΔ1 = unix.Grantpt(m); if (errΔ1 != default!) {
+        var errΔ1 = unix.Grantpt(m); if (errΔ1 != nil) {
             Δsyscall.Close(m);
-            return (default!, "", new PtyErrorжerror(ptyError(grantptˢ, errΔ1)));
+            return (default, "", new PtyErrorжerror(ptyError(grantptˢ, errΔ1)));
         }
     }
     {
-        var errΔ2 = unix.Unlockpt(m); if (errΔ2 != default!) {
+        var errΔ2 = unix.Unlockpt(m); if (errΔ2 != nil) {
             Δsyscall.Close(m);
-            return (default!, "", new PtyErrorжerror(ptyError(unlockptˢ, errΔ2)));
+            return (default, "", new PtyErrorжerror(ptyError(unlockptˢ, errΔ2)));
         }
     }
     (processTTY, err) = unix.Ptsname(m);
-    if (err != default!) {
+    if (err != nil) {
         Δsyscall.Close(m);
-        return (default!, "", new PtyErrorжerror(ptyError(ptsnameˢ, err)));
+        return (default, "", new PtyErrorжerror(ptyError(ptsnameˢ, err)));
     }
-    return (os.NewFile((uintptr)m, ptyˢ), processTTY, default!);
+    return (os.NewFile((uintptr)m, ptyˢ), processTTY, default);
 }
 
 } // end testpty_package

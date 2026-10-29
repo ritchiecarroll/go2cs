@@ -75,8 +75,8 @@ partial class jpeg_package {
 // (It is called dctBox because the rotate+scale operation
 // is drawn as a box in Figures 1 and 2 in the paper.)
 internal static (int32 y0, int32 y1) dctBox(int32 x0, int32 x1, int32 kcos, int32 ksin) {
-    int32 y0 = default!;
-    int32 y1 = default!;
+    int32 y0 = default;
+    int32 y1 = default;
 
     // y0 = x0*kcos + x1*ksin
     // y1 = -x0*ksin + x1*kcos
@@ -136,14 +136,14 @@ internal static UntypedInt blockSize => /* 8 * 8 */ 64;
 // using this scaling helper function:
 //
 //	op fix x = floor 0.5 + x * 2**60
-internal static UntypedInt cos1 => 1130768441178740757; // fix cos 1*pi/16
-internal static UntypedInt sin1 => 224923827593068887; // fix sin 1*pi/16
-internal static UntypedInt cos3 => 958619196450722178; // fix cos 3*pi/16
-internal static UntypedInt sin3 => 640528868967736374; // fix sin 3*pi/16
-internal static UntypedInt sqrt2 => 1630477228166597777; // fix sqrt 2
-internal static UntypedInt sqrt2_cos6 => 623956622067911264; // fix (sqrt 2)*cos 6*pi/16
-internal static UntypedInt sqrt2_sin6 => 1506364539328854985; // fix (sqrt 2)*sin 6*pi/16
-internal static UntypedInt sqrt2inv => 815238614083298888; // fix 1/sqrt 2
+internal static UntypedInt cos1 => 1130768441178740757;         // fix cos 1*pi/16
+internal static UntypedInt sin1 => 224923827593068887;          // fix sin 1*pi/16
+internal static UntypedInt cos3 => 958619196450722178;          // fix cos 3*pi/16
+internal static UntypedInt sin3 => 640528868967736374;          // fix sin 3*pi/16
+internal static UntypedInt sqrt2 => 1630477228166597777;        // fix sqrt 2
+internal static UntypedInt sqrt2_cos6 => 623956622067911264;    // fix (sqrt 2)*cos 6*pi/16
+internal static UntypedInt sqrt2_sin6 => 1506364539328854985;   // fix (sqrt 2)*sin 6*pi/16
+internal static UntypedInt sqrt2inv => 815238614083298888;      // fix 1/sqrt 2
 internal static UntypedInt sqrt2inv_cos6 => 311978311033955632; // fix (1/sqrt 2)*cos 6*pi/16
 internal static UntypedInt sqrt2inv_sin6 => 753182269664427492; // fix (1/sqrt 2)*sin 6*pi/16
 
@@ -153,9 +153,9 @@ internal static int32 c(uint64 x, nint bits) {
 
 // fdct implements the forward DCT.
 // Inputs are UQ8.0; outputs are Q13.0.
-internal static void fdct(ж<block> Ꮡb) {
-    fdctCols(ref (Ꮡb).DerefOrNull());
-    fdctRows(Ꮡb);
+internal static void fdct(ж<block> b) {
+    fdctCols(ref (b).DerefOrNull());
+    fdctRows(b);
 }
 
 // fdctCols applies the 1D DCT to the columns of b.
@@ -356,10 +356,10 @@ internal static void fdctRows(ж<block> Ꮡb) {
 
 // idct implements the inverse DCT.
 // Inputs are UQ8.0; outputs are Q10.3.
-internal static void idct(ж<block> Ꮡb) {
+internal static void idct(ж<block> b) {
     // A 2D IDCT is a 1D IDCT on rows followed by columns.
-    idctRows(Ꮡb);
-    idctCols(ref (Ꮡb).DerefOrNull());
+    idctRows(b);
+    idctCols(ref (b).DerefOrNull());
 }
 
 // idctRows applies the 1D IDCT to the rows of b.
@@ -390,8 +390,8 @@ internal static void idctRows(ж<block> Ꮡb) {
 
         // Stages 4, 3, 2: x0, x1, x2, x3.
 
-        x0 <<= (int)(17);
-        x1 <<= (int)(17);
+        x0 <<= 17;
+        x1 <<= 17;
         // x0, x1 now UQ8.17.
         (x0, x1) = (x0 + x1, x0 - x1);
         // x0 now UQ8.18 in [0, 255].
@@ -406,8 +406,8 @@ internal static void idctRows(ж<block> Ꮡb) {
 
         // Stages 4, 3, 2: x4, x5, x6, x7.
 
-        x4 <<= (int)(7);
-        x7 <<= (int)(7);
+        x4 <<= 7;
+        x7 <<= 7;
         // x[47] now UQ8.7
         (x7, x4) = (x7 + x4, x7 - x4);
         // x7 now UQ8.8 in [0, 255].
@@ -506,14 +506,14 @@ internal static void idctCols(ref block b) {
         (x3, x4) = (x3 + x4, x3 - x4);
         // x[01234567] now Q10.21.
 
-        x0 >>= (int)(18);
-        x1 >>= (int)(18);
-        x2 >>= (int)(18);
-        x3 >>= (int)(18);
-        x4 >>= (int)(18);
-        x5 >>= (int)(18);
-        x6 >>= (int)(18);
-        x7 >>= (int)(18);
+        x0 >>= 18;
+        x1 >>= 18;
+        x2 >>= 18;
+        x3 >>= 18;
+        x4 >>= 18;
+        x5 >>= 18;
+        x6 >>= 18;
+        x7 >>= 18;
         // x[01234567] now Q10.3.
 
         b[0 * 8 + i] = x0;

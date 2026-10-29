@@ -57,14 +57,14 @@ using static go.crypto.@internal.fips140.aes_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes.go", "aes.cs", "AC5mksqCrMSuwraUpqKUpKSUpoCklIKClIKUgpSmlIKClIKUgpSssg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_generic.go", "aes_generic.cs", "AClUkoKUgoKCgqaCgoKmgrKCgoKCgoK4goKClIKCgpSCgoKCqJKClIKCgoKmgoKCpoKygoKCgoKCuIKCgpSCgoKUgoKCgqiSrpCowpaSgoKUgoKCkoKU3IKCgoKCgpQ=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes.go", "aes.cs", "AC5mksqCrMSuwsaUpqKUtLSkpoCklIKClIKUgpSmlIKClIKUgpSssg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_generic.go", "aes_generic.cs", "AClUkoKUgoKCgqaCgoKmgrKCgoKCgoK4goKClIKCgpSCgoKCqJKClIKCgoKmgoKCpoKygoKCgoKCuIKCgpSCgoKUgoKCgqiSrpCowpaSgoKUgoKCgoKU3IKCgoKCgpQ=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_noasm.go", "aes_noasm.cs", "AAwagoKmgqaCpg==")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/cast.go", "cast.cs", "AA0cgoK4uLi4goKUgoKClIKClA==", "15-46:1")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/cbc.go", "cbc.cs", "ABIo0qaApKKClIKUgpSCgpSmgoKUpqKClIKmgoK4AAcU0qaApKKClIKUgpSCgpSmgoKUptiCgqaClIKUgqamgoI=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/cbc_noasm.go", "cbc_noasm.cs", "AAgSgqaC")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/const.go", "const.cs", "ABImABMoABMoABQsACJEACJEACJEACRMACJEACJEACJE")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquJKkgoKmAAcQopSCgoK8woCCgoKCAAUS4oKUgoKUlJSAhKKCgoKCgraCgoKCuIKCgoKUgoKCgpSCgoKCpoSigoIAAxLCgoKCgoKmgqaCgoI=", "", "", "38=BEUint64/1/2/2,BEUint64/2/2/3")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquIKkgoKmAAcQopSCgoK8woCCgoKCAAUS4oKUgoKUlJSAhKKCgoKCgraCgoKCuIKCgoKUgoKCgpSCgoKCpoSigoIAAxLCgoKCgoKmgqaCgoI=", "", "", "37=BEUint64/1/2/2,BEUint64/2/2/3")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/ctr_noasm.go", "ctr_noasm.cs", "AAgSsqayprKmsg==")]
 // </GoSourcePositionMaps>
 

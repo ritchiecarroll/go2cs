@@ -42,27 +42,26 @@ internal static void later(this ref pkgReader pr, Action fn) {
 
 // readUnifiedPackage reads a package description from the given
 // unified IR export data decoder.
-internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, ж<types.Context> Ꮡctxt, map<@string, ж<types.Package>> imports, pkgbits.PkgDecoder input) {
+internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> fset, ж<types.Context> ctxt, map<@string, ж<types.Package>> imports, pkgbits.PkgDecoder input) {
     GoFrame ᒐ = default;
     try {
         input = input.ΔClone();
 
-        ref var pr = ref heap<pkgReader>(out var Ꮡpr);
-        pr = new pkgReader(
+        ref var pr = ref heap<pkgReader>(new pkgReader(
             PkgDecoder: input.ΔClone(),
 
             fake: new fakeFileSet(
-                fset: Ꮡfset,
+                fset: fset,
                 files: new map<@string, ж<fileInfo>>()
             ),
 
-            ctxt: Ꮡctxt,
+            ctxt: ctxt,
             imports: imports,
 
             posBases: new slice<@string>(input.NumElems(pkgbits.SectionPosBase)),
             pkgs: new slice<ж<types.Package>>(input.NumElems(pkgbits.SectionPkg)),
             typs: new slice<typesꓸType>(input.NumElems(pkgbits.SectionType))
-        );
+        ), out var Ꮡpr);
         defer(Ꮡpr.of(pkgReader.Ꮡfake).setLines, ref ᒐ);
 
         var r = Ꮡpr.newReader(pkgbits.SectionMeta, pkgbits.PublicRootIdx, pkgbits.SyncPublic);
@@ -78,7 +77,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
             if (r.of(reader.ᏑDecoder).Version().Has(pkgbits.DerivedFuncInstance)) {
                 assert(!r.of(reader.ᏑDecoder).Bool());
             }
-            (~r).p.objIdx(r.of(reader.ᏑDecoder).Reloc(pkgbits.SectionObj));
+            r.p.objIdx(r.of(reader.ᏑDecoder).Reloc(pkgbits.SectionObj));
             assert(r.of(reader.ᏑDecoder).Len() == 0);
         }
 
@@ -93,7 +92,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
         }
 
         // Imports() of pkg are all of the transitive packages that were loaded.
-        slice<ж<types.Package>> imps = default!;
+        slice<ж<types.Package>> imps = default;
         foreach (var (_, imp) in pr.pkgs) {
             if (imp != nil && imp != pkg) {
                 imps = append(imps, imp);
@@ -105,7 +104,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
         pkg.MarkComplete();
         return pkg;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -145,8 +144,8 @@ internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionK
     ));
 }
 
-internal static void retireReader(this ref pkgReader pr, ж<reader> Ꮡr) {
-    pr.PkgDecoder.RetireDecoder(Ꮡr.of(reader.ᏑDecoder));
+internal static void retireReader(this ref pkgReader pr, ж<reader> r) {
+    pr.PkgDecoder.RetireDecoder(r.of(reader.ᏑDecoder));
 }
 
 // @@@ Positions
@@ -180,7 +179,7 @@ internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) 
         }
     }
 
-    @string filename = default!;
+    @string filename = default;
     {
         var r = Ꮡpr.tempReader(pkgbits.SectionPosBase, idx, pkgbits.SyncPosBase);
 
@@ -191,7 +190,7 @@ internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) 
 
         filename = r.of(reader.ᏑDecoder).String();
 
-        if (r.of(reader.ᏑDecoder).Bool()){ // file base
+        if (r.of(reader.ᏑDecoder).Bool()) { // file base
             // Was: "b = token.NewTrimmedFileBase(filename, true)"
         } else { // line base
             tokenꓸPos pos = r.pos();
@@ -239,18 +238,20 @@ internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) {
 
     @string path = Ꮡr.of(reader.ᏑDecoder).String();
     var exprᴛ1 = path;
-    if (exprᴛ1 == ""u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == ""u8: {
         path = r.p.of(pkgReader.ᏑPkgDecoder).PkgPath();
+        break;
     }
-    else if (exprᴛ1 == "builtin"u8) {
-        return default!; // universe
+    case {} when exprᴛ1 == "builtin"u8: {
+        return default; // universe
     }
-    else if (exprᴛ1 == "unsafe"u8) {
+    case {} when exprᴛ1 == "unsafe"u8: {
         return types.Unsafe;
-    }
+    }}
 
     {
-        var pkgΔ1 = (~r.p).imports[path]; if (pkgΔ1 != nil) {
+        var pkgΔ1 = r.p.imports[path]; if (pkgΔ1 != nil) {
             return pkgΔ1;
         }
     }
@@ -258,7 +259,7 @@ internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) {
     @string name = Ꮡr.of(reader.ᏑDecoder).String();
 
     var pkg = types.NewPackage(path, name);
-    r.p.Value.imports[path] = pkg;
+    r.p.imports[path] = pkg;
 
     return pkg;
 }
@@ -283,8 +284,8 @@ internal static typesꓸType typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<
     ref var dict = ref Ꮡdict.DerefOrNull();
 
     var idx = info.idx;
-    ж<typesꓸType> where = default!;
-    if (info.derived){
+    ж<typesꓸType> where = default;
+    if (info.derived) {
         where = Ꮡ(dict.derivedTypes, idx);
         idx = dict.derived[idx].idx;
     } else {
@@ -292,23 +293,23 @@ internal static typesꓸType typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<
     }
 
     {
-        var typΔ1 = where.ValueSlot; if (typΔ1 != default!) {
+        var typΔ1 = where.ValueSlot; if (typΔ1 != nil) {
             return typΔ1;
         }
     }
 
-    typesꓸType typ = default!;
+    typesꓸType typ = default;
     {
         var r = Ꮡpr.tempReader(pkgbits.SectionType, idx, pkgbits.SyncTypeIdx);
-        r.Value.dict = Ꮡdict;
+        r.dict = Ꮡdict;
 
         typ = r.doTyp();
-        assert(typ != default!);
+        assert(typ != nil);
         pr.retireReader(r);
     }
     // See comment in pkgReader.typIdx explaining how this happens.
     {
-        var prev = where.ValueSlot; if (prev != default!) {
+        var prev = where.ValueSlot; if (prev != nil) {
             return prev;
         }
     }
@@ -322,61 +323,62 @@ internal static typesꓸType /*res*/ doTyp(this ж<reader> Ꮡr) {
 
     {
         pkgbits.CodeType tag = (pkgbits.CodeType)Ꮡr.of(reader.ᏑDecoder).Code(pkgbits.SyncType);
-        var exprᴛ1 = tag;
-        if (exprᴛ1 == pkgbits.TypeBasic) {
+        switch (tag) {
+        default: {
+            errorf("unhandled type tag: %v"u8, tag);
+            throw panic("unreachable");
+            break;
+        }
+        case var ᴛ when ᴛ == pkgbits.TypeBasic: {
             return new types.BasicжΔType(types.Typ[Ꮡr.of(reader.ᏑDecoder).Len()]);
         }
-        if (exprᴛ1 == pkgbits.TypeNamed) {
+        case var ᴛ when ᴛ == pkgbits.TypeNamed: {
             var (obj, targs) = Ꮡr.obj();
             var name = obj._<ж<types.TypeName>>();
             if (len(targs) != 0) {
-                var (t, _) = types.Instantiate((~r.p).ctxt, name.Type(), targs, false);
+                var (t, _) = types.Instantiate(r.p.ctxt, name.Type(), targs, false);
                 return t;
             }
             return name.Type();
         }
-        if (exprᴛ1 == pkgbits.TypeTypeParam) {
-            return new types.TypeParamжΔType((~r.dict).tparams[Ꮡr.of(reader.ᏑDecoder).Len()]);
+        case var ᴛ when ᴛ == pkgbits.TypeTypeParam: {
+            return new types.TypeParamжΔType(r.dict.tparams[Ꮡr.of(reader.ᏑDecoder).Len()]);
         }
-        if (exprᴛ1 == pkgbits.TypeArray) {
+        case var ᴛ when ᴛ == pkgbits.TypeArray: {
             var lenΔ2 = (int64)Ꮡr.of(reader.ᏑDecoder).Uint64();
             return new types.ArrayжΔType(types.NewArray(Ꮡr.typ(), lenΔ2));
         }
-        if (exprᴛ1 == pkgbits.TypeChan) {
+        case var ᴛ when ᴛ == pkgbits.TypeChan: {
             types.ChanDir dir = (types.ChanDir)Ꮡr.of(reader.ᏑDecoder).Len();
             return new types.ChanжΔType(types.NewChan(dir, Ꮡr.typ()));
         }
-        if (exprᴛ1 == pkgbits.TypeMap) {
+        case var ᴛ when ᴛ == pkgbits.TypeMap: {
             return new types.MapжΔType(types.NewMap(Ꮡr.typ(), Ꮡr.typ()));
         }
-        if (exprᴛ1 == pkgbits.TypePointer) {
+        case var ᴛ when ᴛ == pkgbits.TypePointer: {
             return new types.PointerжΔType(types.NewPointer(Ꮡr.typ()));
         }
-        if (exprᴛ1 == pkgbits.TypeSignature) {
-            return new types.ΔSignatureжΔType(Ꮡr.signature(nil, default!, default!));
+        case var ᴛ when ᴛ == pkgbits.TypeSignature: {
+            return new types.ΔSignatureжΔType(Ꮡr.signature(nil, default, default));
         }
-        if (exprᴛ1 == pkgbits.TypeSlice) {
+        case var ᴛ when ᴛ == pkgbits.TypeSlice: {
             return new types.SliceжΔType(types.NewSlice(Ꮡr.typ()));
         }
-        if (exprᴛ1 == pkgbits.TypeStruct) {
+        case var ᴛ when ᴛ == pkgbits.TypeStruct: {
             return new types.StructжΔType(Ꮡr.structType());
         }
-        if (exprᴛ1 == pkgbits.TypeInterface) {
+        case var ᴛ when ᴛ == pkgbits.TypeInterface: {
             return new types.InterfaceжΔType(Ꮡr.interfaceType());
         }
-        if (exprᴛ1 == pkgbits.TypeUnion) {
+        case var ᴛ when ᴛ == pkgbits.TypeUnion: {
             return new types.UnionжΔType(Ꮡr.unionType());
-        }
-        { /* default: */
-            errorf("unhandled type tag: %v"u8, tag);
-            throw panic("unreachable");
-        }
+        }}
     }
 }
 
 internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
     var fields = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
-    slice<@string> tags = default!;
+    slice<@string> tags = default;
     foreach (var i in range(fields)) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.selector();
@@ -413,7 +415,7 @@ internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) {
     foreach (var i in range(methods)) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.selector();
-        var mtyp = Ꮡr.signature(nil, default!, default!);
+        var mtyp = Ꮡr.signature(nil, default, default);
         methods[i] = types.NewFunc(pos, pkg, name, mtyp);
     }
 
@@ -433,19 +435,19 @@ internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) {
     //
     // TODO(mdempsky): After CL 424876 lands, it should be safe to call
     // iface.Complete() immediately.
-    r.p.Value.ifaces = append((~r.p).ifaces, iface);
+    r.p.ifaces = append(r.p.ifaces, iface);
 
     return iface;
 }
 
-internal static ж<typesꓸSignature> signature(this ж<reader> Ꮡr, ж<types.Var> Ꮡrecv, slice<ж<types.TypeParam>> rtparams, slice<ж<types.TypeParam>> tparams) {
+internal static ж<typesꓸSignature> signature(this ж<reader> Ꮡr, ж<types.Var> recv, slice<ж<types.TypeParam>> rtparams, slice<ж<types.TypeParam>> tparams) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncSignature);
 
     var @params = Ꮡr.@params(types.ParamVar);
     var results = Ꮡr.@params(types.ResultVar);
     var variadic = Ꮡr.of(reader.ᏑDecoder).Bool();
 
-    return types.NewSignatureType(Ꮡrecv, rtparams, tparams, @params, results, variadic);
+    return types.NewSignatureType(recv, rtparams, tparams, @params, results, variadic);
 }
 
 internal static ж<types.Tuple> @params(this ж<reader> Ꮡr, types.VarKind kind) {
@@ -495,9 +497,9 @@ internal static (types.Object, slice<typesꓸType>) obj(this ж<reader> Ꮡr) {
 internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
-    ж<types.Package> objPkg = default!;
-    @string objName = default!;
-    pkgbits.CodeObj tag = default!;
+    ж<types.Package> objPkg = default;
+    @string objName = default;
+    pkgbits.CodeObj tag = default;
     {
         var rname = Ꮡpr.tempReader(pkgbits.SectionName, idx, pkgbits.SyncObject1);
 
@@ -520,44 +522,51 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
         }
     }
 
-    if (objPkg.Scope().Lookup(objName) == default!) {
+    if (objPkg.Scope().Lookup(objName) == nil) {
         var dict = Ꮡpr.objDictIdx(idx);
 
         var r = Ꮡpr.newReader(pkgbits.SectionObj, idx, pkgbits.SyncObject1);
-        r.Value.dict = dict;
+        r.dict = dict;
 
         var objPkgʗ1 = objPkg;
         void declare(types.Object obj) {
             objPkgʗ1.Scope().Insert(obj);
         }
 
-        var exprᴛ1 = tag;
-        if (exprᴛ1 == pkgbits.ObjAlias) {
+        switch (tag) {
+        default: {
+            throw panic("weird");
+            break;
+        }
+        case var ᴛ when ᴛ == pkgbits.ObjAlias: {
             tokenꓸPos pos = r.pos();
-            slice<ж<types.TypeParam>> tparams = default!;
+            slice<ж<types.TypeParam>> tparams = default;
             if (r.of(reader.ᏑDecoder).Version().Has(pkgbits.AliasTypeParamNames)) {
                 tparams = r.typeParamNames();
             }
             var typ = r.typ();
             declare(new types.TypeNameжObject(newAliasTypeName(pos, objPkg, objName, typ, tparams)));
+            break;
         }
-        else if (exprᴛ1 == pkgbits.ObjConst) {
+        case var ᴛ when ᴛ == pkgbits.ObjConst: {
             tokenꓸPos pos = r.pos();
             var typ = r.typ();
             var val = r.of(reader.ᏑDecoder).Value();
             declare(new types.ConstжObject(types.NewConst(pos, objPkg, objName, typ, val)));
+            break;
         }
-        else if (exprᴛ1 == pkgbits.ObjFunc) {
+        case var ᴛ when ᴛ == pkgbits.ObjFunc: {
             tokenꓸPos pos = r.pos();
             var tparams = r.typeParamNames();
-            var sig = r.signature(nil, default!, tparams);
+            var sig = r.signature(nil, default, tparams);
             declare(new types.FuncжObject(types.NewFunc(pos, objPkg, objName, sig)));
+            break;
         }
-        else if (exprᴛ1 == pkgbits.ObjType) {
+        case var ᴛ when ᴛ == pkgbits.ObjType: {
             tokenꓸPos pos = r.pos();
 
-            var obj = types.NewTypeName(pos, objPkg, objName, default!);
-            var named = types.NewNamed(obj, default!, default!);
+            var obj = types.NewTypeName(pos, objPkg, objName, default);
+            var named = types.NewNamed(obj, default, default);
             declare(new types.TypeNameжObject(obj));
 
             named.SetTypeParams(r.typeParamNames());
@@ -585,7 +594,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
                     }
 
                     var newIface = types.NewInterfaceType(methods, embeds);
-                    r.Value.p.Value.ifaces = append((~(~r).p).ifaces, newIface);
+                    r.p.ifaces = append(r.p.ifaces, newIface);
                     underlying = new types.InterfaceжΔType(newIface);
                 }
             }
@@ -595,15 +604,14 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
             for ((nint i, nint n) = (0, r.of(reader.ᏑDecoder).Len()); i < n; i++) {
                 named.AddMethod(r.method());
             }
+            break;
         }
-        else if (exprᴛ1 == pkgbits.ObjVar) {
+        case var ᴛ when ᴛ == pkgbits.ObjVar: {
             tokenꓸPos pos = r.pos();
             var typ = r.typ();
             declare(new types.VarжObject(types.NewVar(pos, objPkg, objName, typ)));
-        }
-        else { /* default: */
-            throw panic("weird");
-        }
+            break;
+        }}
     }
 
     return (objPkg, objName);
@@ -653,8 +661,8 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     // reader is only used to read in exported declarations, which are
     // always package scoped.
 
-    if (len((~r.dict).bounds) == 0) {
-        return default!;
+    if (len(r.dict.bounds) == 0) {
+        return default;
     }
 
     // Careful: Type parameter lists may have cycles. To allow for this,
@@ -662,17 +670,17 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     // create all the TypeNames and TypeParams, then we construct and
     // set the bound type.
 
-    r.dict.Value.tparams = new slice<ж<types.TypeParam>>(len((~r.dict).bounds));
-    foreach (var i in range((~r.dict).bounds)) {
+    r.dict.tparams = new slice<ж<types.TypeParam>>(len(r.dict.bounds));
+    foreach (var i in range(r.dict.bounds)) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.localIdent();
 
-        var tname = types.NewTypeName(pos, pkg, name, default!);
-        r.dict.Value.tparams[i] = types.NewTypeParam(tname, default!);
+        var tname = types.NewTypeName(pos, pkg, name, default);
+        r.dict.tparams[i] = types.NewTypeParam(tname, default);
     }
 
-    var typs = new slice<typesꓸType>(len((~r.dict).bounds));
-    foreach (var (i, bound) in (~r.dict).bounds) {
+    var typs = new slice<typesꓸType>(len(r.dict.bounds));
+    foreach (var (i, bound) in r.dict.bounds) {
         typs[i] = r.p.typIdx(bound, r.dict);
     }
 
@@ -688,7 +696,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     // TODO(mdempsky): Is it safe to have a single "later" slice or do
     // we need to have multiple passes? See comments on CL 386002 and
     // go.dev/issue/52104.
-    var tparams = r.dict.Value.tparams;
+    var tparams = r.dict.tparams;
     var tparamsʗ1 = tparams;
     var typsʗ1 = typs;
     r.p.later(() => {
@@ -697,7 +705,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
         }
     });
 
-    return (~r.dict).tparams;
+    return r.dict.tparams;
 }
 
 internal static ж<types.Func> method(this ж<reader> Ꮡr) {
@@ -706,7 +714,7 @@ internal static ж<types.Func> method(this ж<reader> Ꮡr) {
     var (pkg, name) = Ꮡr.selector();
 
     var rparams = Ꮡr.typeParamNames();
-    var sig = Ꮡr.signature(Ꮡr.param(types.RecvVar), rparams, default!);
+    var sig = Ꮡr.signature(Ꮡr.param(types.RecvVar), rparams, default);
 
     _ = Ꮡr.pos(); // TODO(mdempsky): Remove; this is a hacker for linker.go.
     return types.NewFunc(pos, pkg, name, sig);
@@ -733,9 +741,9 @@ internal static (ж<types.Package>, @string) ident(this ж<reader> Ꮡr, pkgbits
 // If pkg is nil, it returns types.Universe instead.
 //
 // TODO(mdempsky): Remove after x/tools can depend on Go 1.19.
-internal static ж<typesꓸScope> pkgScope(ж<types.Package> Ꮡpkg) {
-    if (Ꮡpkg != nil) {
-        return Ꮡpkg.Scope();
+internal static ж<typesꓸScope> pkgScope(ж<types.Package> pkg) {
+    if (pkg != nil) {
+        return pkg.Scope();
     }
     return types.Universe;
 }
@@ -744,18 +752,19 @@ internal static ж<typesꓸScope> pkgScope(ж<types.Package> Ꮡpkg) {
 private static readonly @string gotypesaliasˢ = "gotypesalias"u8;
 
 // newAliasTypeName returns a new TypeName, with a materialized *types.Alias if supported.
-internal static ж<types.TypeName> newAliasTypeName(tokenꓸPos pos, ж<types.Package> Ꮡpkg, @string name, typesꓸType rhs, slice<ж<types.TypeParam>> tparams) {
+internal static ж<types.TypeName> newAliasTypeName(tokenꓸPos pos, ж<types.Package> pkg, @string name, typesꓸType rhs, slice<ж<types.TypeParam>> tparams) {
     // When GODEBUG=gotypesalias=1 or unset, the Type() of the return value is a
     // *types.Alias. Copied from x/tools/internal/aliases.NewAlias.
     var exprᴛ1 = godebug.New(gotypesaliasˢ).Value();
-    if (exprᴛ1 == ""u8 || exprᴛ1 == "1"u8) {
-        var tname = types.NewTypeName(pos, Ꮡpkg, name, default!);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == ""u8 || exprᴛ1 == "1"u8: {
+        var tname = types.NewTypeName(pos, pkg, name, default);
         var a = types.NewAlias(tname, rhs); // form TypeName -> Alias cycle
         a.SetTypeParams(tparams);
         return tname;
-    }
+    }}
     assert(len(tparams) == 0);
-    return types.NewTypeName(pos, Ꮡpkg, name, rhs);
+    return types.NewTypeName(pos, pkg, name, rhs);
 }
 
 } // end gcimporter_package

@@ -26,7 +26,7 @@ partial class big_package {
 // The zero value for decimal represents a ready-to-use 0.0.
 partial struct @decimal {
     internal slice<byte> mant; // mantissa ASCII digits, big-endian
-    internal nint exp;   // exponent
+    internal nint exp;         // exponent
 }
 
 // at returns the i'th mantissa digit, starting with the most significant digit at 0.
@@ -34,7 +34,7 @@ internal static byte at(this ref @decimal d, nint i) {
     if (0 <= i && i < len(d.mant)) {
         return d.mant[i];
     }
-    return (rune)'0';
+    return (byte)'0';
 }
 
 // Maximum shift amount that can be done in one pass without overflow.
@@ -70,13 +70,13 @@ internal static void init(this ж<@decimal> Ꮡx, Δnat m, nint shift) {
         if (sΔ1 >= ntz) {
             sΔ1 = ntz; // shift at most ntz bits
         }
-        m = ((Δnat)default!).rsh(m, sΔ1);
+        m = ((Δnat)default).rsh(m, sΔ1);
         shift += (nint)sΔ1;
     }
 
     // Do any shift left in binary representation.
     if (shift > 0) {
-        m = ((Δnat)default!).lsh(m, (nuint)shift);
+        m = ((Δnat)default).lsh(m, (nuint)shift);
         shift = 0;
     }
 
@@ -86,7 +86,7 @@ internal static void init(this ж<@decimal> Ꮡx, Δnat m, nint shift) {
     x.exp = n;
     // Trim trailing zeros; instead the exponent is tracking
     // the decimal point independent of the number of digits.
-    while (n > 0 && s[n - 1] == (rune)'0') {
+    while (n > 0 && s[n - 1] == '0') {
         n--;
     }
     x.mant = appendꓸꓸꓸ(x.mant[..0], s.slice(0, n));
@@ -107,7 +107,7 @@ internal static void rsh(ref @decimal x, nuint s) {
 
     // pick up enough leading digits to cover first shift
     nint r = 0; // read index
-    Word n = default!;
+    Word n = default;
     while (n >> s == 0 && r < len(x.mant)) {
         Word ch = (Word)(nuint)x.mant[r];
         r++;
@@ -132,7 +132,7 @@ internal static void rsh(ref @decimal x, nuint s) {
         r++;
         Word d = n >> s;
         n &= (Word)(mask); // n -= d << s
-        x.mant[w] = (byte)(nuint)(d + (rune)'0');
+        x.mant[w] = (byte)(d + (rune)'0');
         w++;
         n = n * 10 + ch - (rune)'0';
     }
@@ -141,7 +141,7 @@ internal static void rsh(ref @decimal x, nuint s) {
     while (n > 0 && w < len(x.mant)) {
         Word d = n >> s;
         n &= (Word)(mask);
-        x.mant[w] = (byte)(nuint)(d + (rune)'0');
+        x.mant[w] = (byte)(d + (rune)'0');
         w++;
         n = n * 10;
     }
@@ -151,7 +151,7 @@ internal static void rsh(ref @decimal x, nuint s) {
     while (n > 0) {
         Word d = n >> s;
         n &= (Word)(mask);
-        x.mant = append(x.mant, (byte)(nuint)(d + (rune)'0'));
+        x.mant = append(x.mant, (byte)(d + (rune)'0'));
         n = n * 10;
     }
 
@@ -165,7 +165,7 @@ internal static @string String(this ref @decimal x) {
         return "0"u8;
     }
 
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     switch (ᐧ) {
     case {} when x.exp is <= 0: {
         // 0.00ddd
@@ -180,7 +180,7 @@ internal static @string String(this ref @decimal x) {
         // dd.ddd
         buf = new slice<byte>(0, 1 + len(x.mant));
         buf = appendꓸꓸꓸ(buf, x.mant.slice(0, x.exp));
-        buf = append(bufᴷ, buf, (byte)((rune)'.'));
+        buf = append(bufᴷ, buf, (byte)'.');
         buf = appendꓸꓸꓸ(buf, x.mant.slice(x.exp));
         break;
     }
@@ -200,7 +200,7 @@ internal static slice<byte> appendZeros(slice<byte> buf, nint n) {
     var bufᴷ = new stackAppend<byte>(moves: true);
 
     for (; n > 0; n--) {
-        buf = append(bufᴷ, buf, (byte)((rune)'0'));
+        buf = append(bufᴷ, buf, (byte)'0');
     }
     buf = move2heap(bufᴷ, buf);
     return buf;
@@ -210,12 +210,12 @@ internal static slice<byte> appendZeros(slice<byte> buf, nint n) {
 // if shortened to n digits. n must be a valid index
 // for x.mant.
 internal static bool shouldRoundUp(ref @decimal x, nint n) {
-    if (x.mant[n] == (rune)'5' && n + 1 == len(x.mant)) {
+    if (x.mant[n] == '5' && n + 1 == len(x.mant)) {
         // exactly halfway - round to even
-        return n > 0 && (byte)((x.mant[n - 1] - (rune)'0') & 1) != 0;
+        return n > 0 && (byte)((x.mant[n - 1] - '0') & 1) != 0;
     }
     // not halfway - digit tells all (x.mant has no trailing zeros)
-    return x.mant[n] >= (rune)'5';
+    return x.mant[n] >= '5';
 }
 
 // round sets x to (at most) n mantissa digits by rounding it
@@ -228,7 +228,7 @@ internal static void round(this ж<@decimal> Ꮡx, nint n) {
         return; // nothing to do
     }
 
-    if (shouldRoundUp(ref (Ꮡx).DerefOrNull(), n)){
+    if (shouldRoundUp(ref (Ꮡx).DerefOrNull(), n)) {
         x.roundUp(n);
     } else {
         Ꮡx.roundDown(n);
@@ -242,13 +242,13 @@ internal static void roundUp(this ref @decimal x, nint n) {
     // 0 <= n < len(x.mant)
 
     // find first digit < '9'
-    while (n > 0 && x.mant[n - 1] >= (rune)'9') {
+    while (n > 0 && x.mant[n - 1] >= '9') {
         n--;
     }
 
     if (n == 0) {
         // all digits are '9's => round up to '1' and update exponent
-        x.mant[0] = (rune)'1'; // ok since len(x.mant) > n
+        x.mant[0] = (byte)'1'; // ok since len(x.mant) > n
         x.mant = x.mant[..1];
         x.exp++;
         return;
@@ -274,7 +274,7 @@ internal static void roundDown(this ж<@decimal> Ꮡx, nint n) {
 // they are meaningless for the value of x.
 internal static void trim(ref @decimal x) {
     nint i = len(x.mant);
-    while (i > 0 && x.mant[i - 1] == (rune)'0') {
+    while (i > 0 && x.mant[i - 1] == '0') {
         i--;
     }
     x.mant = x.mant.slice(0, i);

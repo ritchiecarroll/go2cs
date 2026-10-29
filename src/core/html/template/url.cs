@@ -100,8 +100,8 @@ internal static @string urlProcessor(bool norm, params ꓸꓸꓸany argsʗp) {
 
 // processURLOnto appends a normalized URL corresponding to its input to b
 // and reports whether the appended content differs from s.
-internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> Ꮡb) {
-    Ꮡb.Grow(len(s) + 16);
+internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> b) {
+    b.Grow(len(s) + 16);
     nint written = 0;
     // The byte loop below assumes that all URLs use UTF-8 as the
     // content-encoding. This is similar to the URI to IRI encoding scheme
@@ -118,7 +118,7 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> �
         // Single quotes are reserved in URLs, but are only used in
         // the obsolete "mark" rule in an appendix in RFC 3986
         // so can be safely encoded.
-        case (rune)'!' or (rune)'#' or (rune)'$' or (rune)'&' or (rune)'*' or (rune)'+' or (rune)',' or (rune)'/' or (rune)':' or (rune)';' or (rune)'=' or (rune)'?' or (rune)'@' or (rune)'[' or (rune)']': {
+        case (byte)'!' or (byte)'#' or (byte)'$' or (byte)'&' or (byte)'*' or (byte)'+' or (byte)',' or (byte)'/' or (byte)':' or (byte)';' or (byte)'=' or (byte)'?' or (byte)'@' or (byte)'[' or (byte)']': {
             if (norm) {
                 continue;
             }
@@ -129,11 +129,11 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> �
         // ALPHA (%41-%5A and %61-%7A), DIGIT (%30-%39), hyphen (%2D),
         // period (%2E), underscore (%5F), or tilde (%7E) should not be
         // created by URI producers
-        case (rune)'-' or (rune)'.' or (rune)'_' or (rune)'~': {
+        case (byte)'-' or (byte)'.' or (byte)'_' or (byte)'~': {
             continue;
             break;
         }
-        case (rune)'%': {
+        case (byte)'%': {
             // When normalizing do not re-encode valid escapes.
             if (norm && i + 2 < len(s) && isHex(s[i + 1]) && isHex(s[i + 2])) {
                 continue;
@@ -142,22 +142,22 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> �
         }
         default: {
             // Unreserved according to RFC 3986 sec 2.3
-            if ((rune)'a' <= c && c <= (rune)'z') {
+            if ('a' <= c && c <= 'z') {
                 continue;
             }
-            if ((rune)'A' <= c && c <= (rune)'Z') {
+            if ('A' <= c && c <= 'Z') {
                 continue;
             }
-            if ((rune)'0' <= c && c <= (rune)'9') {
+            if ('0' <= c && c <= '9') {
                 continue;
             }
             break;
         }}
-        Ꮡb.WriteString(s.slice(written, i));
-        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "%%%02x"u8, c);
+        b.WriteString(s.slice(written, i));
+        fmt.Fprintf(new strings_BuilderжWriter(b), "%%%02x"u8, c);
         written = i + 1;
     }
-    Ꮡb.WriteString(s.slice(written));
+    b.WriteString(s.slice(written));
     return written != 0;
 }
 
@@ -167,11 +167,11 @@ internal static @string srcsetFilterAndEscaper(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (s, t) = stringify(args.ꓸꓸꓸ);
-    var exprᴛ1 = t;
-    if (exprᴛ1 == contentTypeSrcset) {
+    switch (t) {
+    case var ᴛ when ᴛ == contentTypeSrcset: {
         return s;
     }
-    if (exprᴛ1 == contentTypeURL) {
+    case var ᴛ when ᴛ == contentTypeURL: {
         // Normalizing gets rid of all HTML whitespace
         // which separate the image URL from its metadata.
         ref var bΔ2 = ref heap(new strings.Builder(), out var ᏑbΔ2);
@@ -180,12 +180,12 @@ internal static @string srcsetFilterAndEscaper(params ꓸꓸꓸany argsʗp) {
         }
         // Additionally, commas separate one source from another.
         return strings.ReplaceAll(s, ","u8, "%2c"u8);
-    }
+    }}
 
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     nint written = 0;
     for (nint i = 0; i < len(s); i++) {
-        if (s[i] == (rune)',') {
+        if (s[i] == ',') {
             filterSrcsetElement(s, written, i, Ꮡb);
             Ꮡb.WriteString(","u8);
             written = i + 1;
@@ -208,7 +208,7 @@ internal static bool isHTMLSpaceOrASCIIAlnum(byte c) {
     return (c < 0x80) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> 3)] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
 }
 
-internal static void filterSrcsetElement(@string s, nint left, nint right, ж<strings.Builder> Ꮡb) {
+internal static void filterSrcsetElement(@string s, nint left, nint right, ж<strings.Builder> b) {
     nint start = left;
     while (start < right && isHTMLSpace(s[start])) {
         start++;
@@ -232,15 +232,15 @@ internal static void filterSrcsetElement(@string s, nint left, nint right, ж<st
                 }
             }
             if (metadataOk) {
-                Ꮡb.WriteString(s.slice(left, start));
-                processURLOnto(url, true, Ꮡb);
-                Ꮡb.WriteString(s.slice(end, right));
+                b.WriteString(s.slice(left, start));
+                processURLOnto(url, true, b);
+                b.WriteString(s.slice(end, right));
                 return;
             }
         }
     }
-    Ꮡb.WriteString("#"u8);
-    Ꮡb.WriteString(filterFailsafe);
+    b.WriteString("#"u8);
+    b.WriteString(filterFailsafe);
 }
 
 } // end template_package

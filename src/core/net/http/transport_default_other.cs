@@ -9,8 +9,8 @@ using net = net_package;
 
 partial class http_package {
 
-internal static Func<context.Context, @string, @string, (net.Conn, error)> defaultTransportDialContext(ж<net.Dialer> Ꮡdialer) {
-    return Ꮡdialer.DialContext;
+internal static Func<context.Context, @string, @string, (net.Conn, error)> defaultTransportDialContext(ж<net.Dialer> dialer) {
+    return dialer.DialContext;
 }
 
 } // end http_package

@@ -73,7 +73,7 @@ public static bool HasGoBuild() {
         return false;
     }
 
-    return tryGoBuild() == default!;
+    return tryGoBuild() == nil;
 }
 
 internal static Func<error> tryGoBuild;
@@ -84,13 +84,13 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
     // we sometimes ended up with cmd/go installed in the test environment
     // without a cmd/compile it could use to actually build things.)
     var (goToolΔ1, err) = goTool();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var cmd = exec.Command(goToolΔ1, "tool"u8, "-n", "compile");
-    cmd.Value.Env = origEnv;
+    cmd.Env = origEnv;
     (var @out, err) = cmd.Output();
-    if (err != default!) {
+    if (err != nil) {
         return fmt.Errorf("%v: %w"u8, cmd.OrTypedNil(), err);
     }
     @out = bytes.TrimSpace(@out);
@@ -98,7 +98,7 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
         return fmt.Errorf("%v: no tool reported"u8, cmd.OrTypedNil());
     }
     {
-        var (_, errΔ1) = exec.LookPath((@string)@out); if (errΔ1 != default!) {
+        var (_, errΔ1) = exec.LookPath((@string)@out); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -114,9 +114,9 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
         // to determine which toolchain it would use by default.
         if (os.Getenv("CC"u8) == ""u8) {
             var cmdΔ1 = exec.Command(goToolΔ1, "env"u8, "CC");
-            cmdΔ1.Value.Env = origEnv;
+            cmdΔ1.Env = origEnv;
             var (outΔ1, errΔ2) = cmdΔ1.Output();
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 return fmt.Errorf("%v: %w"u8, cmdΔ1.OrTypedNil(), errΔ2);
             }
             outΔ1 = bytes.TrimSpace(outΔ1);
@@ -127,7 +127,7 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
             return errΔ2;
         }
     }
-    return default!;
+    return default;
 }); }
 
 // MustHaveGoBuild checks that the current system can build programs with “go build”
@@ -164,9 +164,10 @@ public static partial void MustHaveGoRun(testing.TB t) {
 // There is a copy of this function in cmd/dist/test.go.
 public static bool HasParallelism() {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
         return false;
-    }
+    }}
     return true;
 }
 
@@ -186,7 +187,7 @@ public static partial void MustHaveParallelism(testing.TB t) {
 public static @string GoToolPath(testing.TB t) {
     MustHaveGoBuild(t);
     var (path, err) = GoTool();
-    if (err != default!) {
+    if (err != nil) {
         t.Fatal(err);
     }
     // Add all environment variables that affect the Go command to test metadata.
@@ -199,7 +200,7 @@ public static @string GoToolPath(testing.TB t) {
 }
 
 internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string path, error err) () => {
-    error err = default!;
+    error err = default;
     {
         @string pathΔ1 = Δruntime.GOROOT(); if (pathΔ1 != ""u8) {
             // If runtime.GOROOT() is non-empty, assume that it is valid.
@@ -207,7 +208,7 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
             // (It might not be: for example, the user may have explicitly set GOROOT
             // to the wrong directory. But this case is
             // rare, and if that happens the user can fix what they broke.)
-            return (pathΔ1, default!);
+            return (pathΔ1, default);
         }
     }
 
@@ -224,12 +225,12 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
     // subprocess.
 
     (var cwd, err) = os.Getwd();
-    if (err != default!) {
+    if (err != nil) {
         return ("", fmt.Errorf("finding GOROOT: %w"u8, err));
     }
 
     @string dir = cwd;
-    while (ᐧ) {
+    for (;;) {
         @string parent = filepath.Dir(dir);
         if (parent == dir) {
             // dir is either "." or only a volume name.
@@ -244,7 +245,7 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
         }
 
         var (b, errΔ1) = os.ReadFile(filepath.Join(dir, "go.mod"));
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             if (os.IsNotExist(errΔ1)) {
                 dir = parent;
                 continue;
@@ -254,12 +255,12 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
         @string goMod = (@string)b;
 
         while (goMod != ""u8) {
-            @string line = default!;
+            @string line = default;
             (line, goMod, _) = strings.Cut(goMod, "\n"u8);
             var fields = strings.Fields(line);
             if (len(fields) >= 2 && fields[0] == "module" && fields[1] == "std") {
                 // Found "module std", which is the module declaration in GOROOT/src!
-                return (parent, default!);
+                return (parent, default);
             }
         }
     }
@@ -274,8 +275,8 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
 // or panics otherwise.
 public static @string GOROOT(testing.TB t) {
     var (path, err) = findGOROOT();
-    if (err != default!) {
-        if (t == default!) {
+    if (err != nil) {
+        if (t == nil) {
             throw panic(err);
         }
         t.Helper();
@@ -301,10 +302,12 @@ internal static Func<(@string, error)> goTool = sync.OnceValues((@string, error)
 // If not, it calls t.Skip with an explanation.
 public static void MustHaveSource(testing.TB t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "ios"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "ios"u8: {
         t.Helper();
         t.Skip("skipping test: no source tree on " + Δruntime.GOOS);
-    }
+        break;
+    }}
 }
 
 // HasExternalNetwork reports whether the current system can use
@@ -334,17 +337,17 @@ public static bool HasCGO() {
 
 internal static Func<bool> hasCgo = sync.OnceValue(bool () => {
     var (goToolΔ1, err) = goTool();
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
     var cmd = exec.Command(goToolΔ1, "env"u8, "CGO_ENABLED");
-    cmd.Value.Env = origEnv;
+    cmd.Env = origEnv;
     (var @out, err) = cmd.Output();
-    if (err != default!) {
+    if (err != nil) {
         throw panic(fmt.Sprintf("%v: %v"u8, cmd.OrTypedNil(), @out));
     }
     (var ok, err) = strconv.ParseBool((@string)bytes.TrimSpace(@out));
-    if (err != default!) {
+    if (err != nil) {
         throw panic(fmt.Sprintf("%v: non-boolean output %q"u8, cmd.OrTypedNil(), @out));
     }
     return ok;
@@ -470,9 +473,10 @@ public static void SkipFlakyNet(testing.TB t) {
 // CPUIsSlow reports whether the CPU running the test is suspected to be slow.
 public static bool CPUIsSlow() {
     var exprᴛ1 = Δruntime.GOARCH;
-    if (exprᴛ1 == "arm"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "wasm"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "arm"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "wasm"u8: {
         return true;
-    }
+    }}
     return false;
 }
 
@@ -525,11 +529,11 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
     if (len(pkgs) > 0) {
         // Use 'go list' to resolve any missing packages and rewrite the import map.
         var cmd = Command(t, GoToolPath(t), listˢ, exportˢ, depsˢ, "-f", ifNeImportPathCommandˢ);
-        cmd.Value.Args = appendꓸꓸꓸ((~cmd).Args, pkgs);
-        cmd.Value.Stderr = new strings_BuilderжWriter(@new<strings.Builder>());
+        cmd.Args = appendꓸꓸꓸ(cmd.Args, pkgs);
+        cmd.Stderr = new strings_BuilderжWriter(@new<strings.Builder>());
         var (@out, err) = cmd.Output();
-        if (err != default!) {
-            t.Fatalf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, (~cmd).Stderr);
+        if (err != nil) {
+            t.Fatalf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, cmd.Stderr);
         }
 
         foreach (var line in range<@string>(strings.SplitSeq((@string)@out, "\n"u8).Invoke)) {
@@ -547,7 +551,7 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
     }
 
     {
-        var err = os.WriteFile(dstPath, icfg.Bytes(), 438); if (err != default!) {
+        var err = os.WriteFile(dstPath, icfg.Bytes(), 438); if (err != nil) {
             t.Fatal(err);
         }
     }
@@ -562,11 +566,11 @@ public static bool SyscallIsNotSupported(error err) {
 // ParallelOn64Bit calls t.Parallel() unless there is a case that cannot be parallel.
 // This function should be used when it is necessary to avoid t.Parallel on
 // 32-bit machines, typically because the test uses lots of memory.
-public static void ParallelOn64Bit(ж<testing.T> Ꮡt) {
+public static void ParallelOn64Bit(ж<testing.T> t) {
     if (goarch.PtrSize == 4) {
         return;
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 }
 
 // go2cs generated this placeholder — func CPUProfilingBroken is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

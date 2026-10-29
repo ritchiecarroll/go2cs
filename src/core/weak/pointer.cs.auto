@@ -77,7 +77,7 @@ public static Pointer<T> Make<T>(ж<T> Ꮡptr) {
     // Explicitly force ptr to escape to the heap.
     Ꮡptr = abi.Escape(Ꮡptr); ptr = ref Ꮡptr.DerefOrNull();
 
-    @unsafe.Pointer u = default!;
+    @unsafe.Pointer u = default;
     if (Ꮡptr != nil) {
         u = (uintptr)runtime_registerWeakPointer(@unsafe.Pointer.FromPinnedBox(Ꮡptr));
     }
@@ -92,7 +92,7 @@ public static Pointer<T> Make<T>(ж<T> Ꮡptr) {
 // return nil as soon as the object's finalizer is queued for execution.
 public static ж<T> Value<T>(this Pointer<T> p) {
     if (p.u == nil) {
-        return default!;
+        return default;
     }
     return (ж<T>)(uintptr)(runtime_makeStrongFromWeak(p.u));
 }

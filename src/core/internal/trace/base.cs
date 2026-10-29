@@ -31,10 +31,10 @@ partial struct baseEvent {
 // extra returns a slice representing extra available space in args
 // that the parser can use to pass data up into Event.
 internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
-    var exprᴛ1 = v;
-    if (exprᴛ1 == version.Go122) {
+    switch (v) {
+    case var ᴛ when ᴛ == version.Go122: {
         return e.args.slice(len(tracev2.Specs()[e.typ].Args) - 1);
-    }
+    }}
     throw panic(fmt.Sprintf("unsupported version: go 1.%d"u8, v));
 }
 
@@ -61,7 +61,7 @@ internal static extraStringID addExtraString(this ref evTable t, @string s) {
     if (s == ""u8) {
         return 0;
     }
-    if (t.extraStringIDs == default!) {
+    if (t.extraStringIDs == nil) {
         t.extraStringIDs = new map<@string, extraStringID>();
     }
     {
@@ -102,7 +102,7 @@ partial struct dataTable<EI, E>
 internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
-    if (d.sparse == default!) {
+    if (d.sparse == nil) {
         d.sparse = new map<EI, E>();
     }
     {
@@ -111,14 +111,14 @@ internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
         }
     }
     d.sparse[id] = data;
-    return default!;
+    return default;
 }
 
 // append adds a new element to the data table and returns its ID.
 internal static EI append<EI, E>(this ref dataTable<EI, E> d, E data)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
-    if (d.sparse == default!) {
+    if (d.sparse == nil) {
         d.sparse = new map<EI, E>();
     }
     var id = ConvertToType<EI>(len(d.sparse)) + ConvertToType<EI>(1);
@@ -132,7 +132,7 @@ internal static EI append<EI, E>(this ref dataTable<EI, E> d, E data)
 internal static void compactify<EI, E>(this ref dataTable<EI, E> d)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
-    if (d.sparse == default! || len(d.dense) != 0) {
+    if (d.sparse == nil || len(d.dense) != 0) {
         // Already compactified.
         return;
     }
@@ -165,7 +165,7 @@ internal static void compactify<EI, E>(this ref dataTable<EI, E> d)
         d.dense[(nint)(ConvertToUInt64<EI>(id))] = data;
         d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] |= (uint8)((uint8)((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))));
     }
-    d.sparse = default!;
+    d.sparse = default;
 }
 
 // get returns the E for id or false if it doesn't
@@ -176,12 +176,11 @@ internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id)
     if (AreEqual(id, ConvertToType<EI>(0))) {
         return (@new<E>().ValueSlot, true);
     }
-    if (ConvertToUInt64<EI>(id) < (uint64)len(d.dense)){
+    if (ConvertToUInt64<EI>(id) < (uint64)len(d.dense)) {
         if ((uint8)(d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] & ((uint8)((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))))) != 0) {
             return (d.dense[(nint)(ConvertToUInt64<EI>(id))], true);
         }
-    } else 
-    if (d.sparse != default!) {
+    } else if (d.sparse != nil) {
         {
             var (data, ok) = d.sparse[id, ꟷ]; if (ok) {
                 return (data, true);
@@ -203,7 +202,7 @@ internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, boo
             return false;
         }
     }
-    if (d.sparse == default!) {
+    if (d.sparse == nil) {
         return true;
     }
     foreach (var (id, value) in d.sparse) {
@@ -232,7 +231,7 @@ partial struct frequency /*num:float64*/;
 
 // mul multiplies an unprocessed to produce a time in nanoseconds.
 internal static ΔTime mul(this frequency f, timestamp t) {
-    return (ΔTime)(int64)((float64)(uint64)t * (float64)f);
+    return (ΔTime)(int64)((float64)t * (float64)f);
 }
 
 // stringID is an index into the string table for a generation.
@@ -256,11 +255,11 @@ partial struct cpuSample {
 //
 // We don't just store it as an Event in generation to minimize
 // the amount of pointer data floating around.
-internal static ΔEvent asEvent(this cpuSample s, ж<evTable> Ꮡtable) {
+internal static ΔEvent asEvent(this cpuSample s, ж<evTable> table) {
     // TODO(mknyszek): This is go122-specific, but shouldn't be.
     // Generalize this in the future.
     var e = new ΔEvent(
-        table: Ꮡtable,
+        table: table,
         ctx: s.schedCtx,
         @base: new baseEvent(
             typ: tracev2.EvCPUSample,

@@ -40,7 +40,7 @@ partial struct ResponseRecorder {
     // Flushed is whether the Handler called Flush.
     public bool Flushed;
     internal ж<http.Response> result; // cache of Result's return value
-    internal httpꓸHeader snapHeader;    // snapshot of HeaderMap at first Write
+    internal httpꓸHeader snapHeader;  // snapshot of HeaderMap at first Write
     internal bool wroteHeader;
 }
 
@@ -63,7 +63,7 @@ public static readonly @string DefaultRemoteAddr = "1.2.3.4"u8;
 // the returned Response value's Header.
 public static httpꓸHeader Header(this ref ResponseRecorder rw) {
     var m = rw.HeaderMap;
-    if (m == default!) {
+    if (m == nil) {
         m = new httpꓸHeader(0);
         rw.HeaderMap = m;
     }
@@ -94,7 +94,7 @@ internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @s
     var (_, hasType) = m[contentTypeˢ, ꟷ];
     var hasTE = m.Get(transferEncodingˢ) != ""u8;
     if (!hasType && !hasTE) {
-        if (b == default!) {
+        if (b == nil) {
             b = slice<byte>(str);
         }
         m.Set(contentTypeˢ, http.DetectContentType(b));
@@ -114,21 +114,21 @@ public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf)
     if (!bodyAllowedForStatus(rw.Code)) {
         return (0, http.ErrBodyNotAllowed);
     }
-    return (len(buf), default!);
+    return (len(buf), default);
 }
 
 // WriteString implements [io.StringWriter]. The data in str is written
 // to rw.Body, if not nil.
 public static (nint, error) WriteString(this ref ResponseRecorder rw, @string str) {
     // Record the write, even if we're going to return an error.
-    rw.writeHeader(default!, str);
+    rw.writeHeader(default, str);
     if (rw.Body != nil) {
         rw.Body.WriteString(str);
     }
     if (!bodyAllowedForStatus(rw.Code)) {
         return (0, http.ErrBodyNotAllowed);
     }
-    return (len(str), default!);
+    return (len(str), default);
 }
 
 // bodyAllowedForStatus reports whether a given response status code
@@ -173,7 +173,7 @@ public static void WriteHeader(this ref ResponseRecorder rw, nint code) {
     checkWriteHeaderCode(code);
     rw.Code = code;
     rw.wroteHeader = true;
-    if (rw.HeaderMap == default!) {
+    if (rw.HeaderMap == nil) {
         rw.HeaderMap = new httpꓸHeader(0);
     }
     rw.snapHeader = rw.HeaderMap.Clone();
@@ -211,7 +211,7 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
     if (rw.result != nil) {
         return rw.result;
     }
-    if (rw.snapHeader == default!) {
+    if (rw.snapHeader == nil) {
         rw.snapHeader = rw.HeaderMap.Clone();
     }
     var res = Ꮡ(new http.Response(
@@ -222,20 +222,20 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
         Header: rw.snapHeader
     ));
     rw.result = res;
-    if ((~res).StatusCode == 0) {
-        res.Value.StatusCode = 200;
+    if (res.StatusCode == 0) {
+        res.StatusCode = 200;
     }
-    res.Value.Status = fmt.Sprintf("%03d %s"u8, (~res).StatusCode, http.StatusText((~res).StatusCode));
-    if (rw.Body != nil){
-        res.Value.Body = io.NopCloser(new bytes_ReaderжReader(bytes.NewReader(rw.Body.Bytes())));
+    res.Status = fmt.Sprintf("%03d %s"u8, res.StatusCode, http.StatusText(res.StatusCode));
+    if (rw.Body != nil) {
+        res.Body = io.NopCloser(new bytes_ReaderжReader(bytes.NewReader(rw.Body.Bytes())));
     } else {
-        res.Value.Body = http.NoBody;
+        res.Body = http.NoBody;
     }
-    res.Value.ContentLength = parseContentLength((~res).Header.Get(contentLengthˢ));
+    res.ContentLength = parseContentLength(res.Header.Get(contentLengthˢ));
 
     {
         var (trailers, ok) = rw.snapHeader[trailerˢ, ꟷ]; if (ok) {
-            res.Value.Trailer = new httpꓸHeader(len(trailers));
+            res.Trailer = new httpꓸHeader(len(trailers));
             foreach (var (_, k) in trailers) {
                 foreach (var iᴛ1 in range<@string>(strings.SplitSeq(k, ","u8).Invoke)) {
                     var kΔ1 = iᴛ1;
@@ -250,7 +250,7 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
                     }
                     var vv2 = new slice<@string>(len(vv));
                     copy(vv2, vv);
-                    res.Value.Trailer[kΔ1] = vv2;
+                    res.Trailer[kΔ1] = vv2;
                 }
             }
         }
@@ -259,11 +259,11 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
         if (!strings.HasPrefix(k, http.TrailerPrefix)) {
             continue;
         }
-        if ((~res).Trailer == default!) {
-            res.Value.Trailer = new httpꓸHeader(0);
+        if (res.Trailer == nil) {
+            res.Trailer = new httpꓸHeader(0);
         }
         foreach (var (_, v) in vv) {
-            (~res).Trailer.Add(strings.TrimPrefix(k, http.TrailerPrefix), v);
+            res.Trailer.Add(strings.TrimPrefix(k, http.TrailerPrefix), v);
         }
     }
     return res;
@@ -280,7 +280,7 @@ internal static int64 parseContentLength(@string cl) {
         return -1;
     }
     var (n, err) = strconv.ParseUint(cl, 10, 63);
-    if (err != default!) {
+    if (err != nil) {
         return -1;
     }
     return (int64)n;

@@ -59,7 +59,7 @@ public static slice<byte> Bytes(this ref ΔPublicKey pub) {
 
 // GenerateKey generates a new Ed25519 private key pair.
 public static (ж<PrivateKey>, error) GenerateKey() {
-    var priv = Ꮡ(new PrivateKey(nil));
+    var priv = Ꮡ(new PrivateKey());
     return generateKey(priv);
 }
 
@@ -70,11 +70,11 @@ internal static (ж<PrivateKey>, error) generateKey(ж<PrivateKey> Ꮡpriv) {
     drbg.Read(priv.seed[..]);
     precomputePrivateKey(Ꮡpriv);
     fipsPCT(Ꮡpriv);
-    return (Ꮡpriv, default!);
+    return (Ꮡpriv, default);
 }
 
 public static (ж<PrivateKey>, error) NewPrivateKeyFromSeed(slice<byte> seed) {
-    var priv = Ꮡ(new PrivateKey(nil));
+    var priv = Ꮡ(new PrivateKey());
     return newPrivateKeyFromSeed(priv, seed);
 }
 
@@ -84,12 +84,12 @@ internal static (ж<PrivateKey>, error) newPrivateKeyFromSeed(ж<PrivateKey> Ꮡ
     fips140.RecordApproved();
     {
         nint l = len(seed); if (l != seedSize) {
-            return (default!, errors.New("ed25519: bad seed length: "u8 + strconv.Itoa(l)));
+            return (default, errors.New("ed25519: bad seed length: "u8 + strconv.Itoa(l)));
         }
     }
     copy(priv.seed[..], seed);
     precomputePrivateKey(Ꮡpriv);
-    return (Ꮡpriv, default!);
+    return (Ꮡpriv, default);
 }
 
 internal static void precomputePrivateKey(ж<PrivateKey> Ꮡpriv) {
@@ -100,17 +100,17 @@ internal static void precomputePrivateKey(ж<PrivateKey> Ꮡpriv) {
     var h = hs.Sum(new slice<byte>(0, sha512Size));
 
     var (s, err) = Ꮡpriv.of(PrivateKey.Ꮡs).SetBytesWithClamping(h[..32]);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
-    var A = (Ꮡ(new Δedwards25519.Point(nil))).ScalarBaseMult(s);
+    var A = (Ꮡ(new Δedwards25519.Point())).ScalarBaseMult(s);
     copy(priv.pub[..], A.Bytes());
 
     copy(priv.prefix[..], h[32..]);
 }
 
 public static (ж<PrivateKey>, error) NewPrivateKey(slice<byte> priv) {
-    var p = Ꮡ(new PrivateKey(nil));
+    var p = Ꮡ(new PrivateKey());
     return newPrivateKey(p, priv);
 }
 
@@ -120,7 +120,7 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, sl
     fips140.RecordApproved();
     {
         nint l = len(privBytes); if (l != privateKeySize) {
-            return (default!, errors.New("ed25519: bad private key length: "u8 + strconv.Itoa(l)));
+            return (default, errors.New("ed25519: bad private key length: "u8 + strconv.Itoa(l)));
         }
     }
 
@@ -131,7 +131,7 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, sl
     var h = hs.Sum(new slice<byte>(0, sha512Size));
 
     {
-        var (_, err) = Ꮡpriv.of(PrivateKey.Ꮡs).SetBytesWithClamping(h[..32]); if (err != default!) {
+        var (_, err) = Ꮡpriv.of(PrivateKey.Ꮡs).SetBytesWithClamping(h[..32]); if (err != nil) {
             throw panic("ed25519: internal error: setting scalar failed");
         }
     }
@@ -142,11 +142,11 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, sl
 
     copy(priv.prefix[..], h[32..]);
 
-    return (Ꮡpriv, default!);
+    return (Ꮡpriv, default);
 }
 
 public static (ж<ΔPublicKey>, error) NewPublicKey(slice<byte> pub) {
-    var p = Ꮡ(new ΔPublicKey(nil));
+    var p = Ꮡ(new ΔPublicKey());
     return newPublicKey(p, pub);
 }
 
@@ -158,17 +158,17 @@ internal static (ж<ΔPublicKey>, error) newPublicKey(ж<ΔPublicKey> Ꮡpub, sl
 
     {
         nint l = len(pubBytes); if (l != publicKeySize) {
-            return (default!, errors.New("ed25519: bad public key length: "u8 + strconv.Itoa(l)));
+            return (default, errors.New("ed25519: bad public key length: "u8 + strconv.Itoa(l)));
         }
     }
     // SetBytes checks that the point is on the curve.
     {
-        var (_, err) = Ꮡpub.of(ed25519_package.ΔPublicKey.Ꮡa).SetBytes(pubBytes); if (err != default!) {
-            return (default!, errors.New(ed25519BadPublicKeyˢ));
+        var (_, err) = Ꮡpub.of(ed25519_package.ΔPublicKey.Ꮡa).SetBytes(pubBytes); if (err != nil) {
+            return (default, errors.New(ed25519BadPublicKeyˢ));
         }
     }
     copy(pub.aBytes[..], pubBytes);
-    return (Ꮡpub, default!);
+    return (Ꮡpub, default);
 }
 
 // Domain separation prefixes used to disambiguate Ed25519/Ed25519ph/Ed25519ctx.
@@ -182,60 +182,60 @@ internal static readonly @string domPrefixPh = "SigEd25519 no Ed25519 collisions
 // uint8-length prefixed context.
 internal static readonly @string domPrefixCtx = "SigEd25519 no Ed25519 collisions\x00"u8;
 
-public static slice<byte> Sign(ж<PrivateKey> Ꮡpriv, slice<byte> message) {
+public static slice<byte> Sign(ж<PrivateKey> priv, slice<byte> message) {
     // Outline the function body so that the returned signature can be
     // stack-allocated.
     var signature = new slice<byte>(signatureSize);
-    return sign(signature, Ꮡpriv, message);
+    return sign(signature, priv, message);
 }
 
-internal static slice<byte> sign(slice<byte> signature, ж<PrivateKey> Ꮡpriv, slice<byte> message) {
+internal static slice<byte> sign(slice<byte> signature, ж<PrivateKey> priv, slice<byte> message) {
     fipsSelfTest();
     fips140.RecordApproved();
-    return signWithDom(signature, Ꮡpriv, message, domPrefixPure, ""u8);
+    return signWithDom(signature, priv, message, domPrefixPure, ""u8);
 }
 
-public static (slice<byte>, error) SignPH(ж<PrivateKey> Ꮡpriv, slice<byte> message, @string context) {
+public static (slice<byte>, error) SignPH(ж<PrivateKey> priv, slice<byte> message, @string context) {
     // Outline the function body so that the returned signature can be
     // stack-allocated.
     var signature = new slice<byte>(signatureSize);
-    return signPH(signature, Ꮡpriv, message, context);
+    return signPH(signature, priv, message, context);
 }
 
-internal static (slice<byte>, error) signPH(slice<byte> signature, ж<PrivateKey> Ꮡpriv, slice<byte> message, @string context) {
+internal static (slice<byte>, error) signPH(slice<byte> signature, ж<PrivateKey> priv, slice<byte> message, @string context) {
     fipsSelfTest();
     fips140.RecordApproved();
     {
         nint l = len(message); if (l != sha512Size) {
-            return (default!, errors.New("ed25519: bad Ed25519ph message hash length: "u8 + strconv.Itoa(l)));
+            return (default, errors.New("ed25519: bad Ed25519ph message hash length: "u8 + strconv.Itoa(l)));
         }
     }
     {
         nint l = len(context); if (l > 255) {
-            return (default!, errors.New("ed25519: bad Ed25519ph context length: "u8 + strconv.Itoa(l)));
+            return (default, errors.New("ed25519: bad Ed25519ph context length: "u8 + strconv.Itoa(l)));
         }
     }
-    return (signWithDom(signature, Ꮡpriv, message, domPrefixPh, context), default!);
+    return (signWithDom(signature, priv, message, domPrefixPh, context), default);
 }
 
-public static (slice<byte>, error) SignCtx(ж<PrivateKey> Ꮡpriv, slice<byte> message, @string context) {
+public static (slice<byte>, error) SignCtx(ж<PrivateKey> priv, slice<byte> message, @string context) {
     // Outline the function body so that the returned signature can be
     // stack-allocated.
     var signature = new slice<byte>(signatureSize);
-    return signCtx(signature, Ꮡpriv, message, context);
+    return signCtx(signature, priv, message, context);
 }
 
-internal static (slice<byte>, error) signCtx(slice<byte> signature, ж<PrivateKey> Ꮡpriv, slice<byte> message, @string context) {
+internal static (slice<byte>, error) signCtx(slice<byte> signature, ж<PrivateKey> priv, slice<byte> message, @string context) {
     fipsSelfTest();
     // FIPS 186-5 specifies Ed25519 and Ed25519ph (with context), but not Ed25519ctx.
     fips140.RecordNonApproved();
     // Note that per RFC 8032, Section 5.1, the context SHOULD NOT be empty.
     {
         nint l = len(context); if (l > 255) {
-            return (default!, errors.New("ed25519: bad Ed25519ctx context length: "u8 + strconv.Itoa(l)));
+            return (default, errors.New("ed25519: bad Ed25519ctx context length: "u8 + strconv.Itoa(l)));
         }
     }
-    return (signWithDom(signature, Ꮡpriv, message, domPrefixCtx, context), default!);
+    return (signWithDom(signature, priv, message, domPrefixCtx, context), default);
 }
 
 internal static slice<byte> signWithDom(slice<byte> signature, ж<PrivateKey> Ꮡpriv, slice<byte> message, @string domPrefix, @string context) {
@@ -244,7 +244,7 @@ internal static slice<byte> signWithDom(slice<byte> signature, ж<PrivateKey> �
     var mh = sha512.New();
     if (domPrefix != domPrefixPure) {
         mh.Write(slice<byte>(domPrefix));
-        mh.Write(new byte[]{(byte)len(context)}.slice());
+        mh.Write(slice<byte>([(byte)len(context)]));
         mh.Write(slice<byte>(context));
     }
     mh.Write(priv.prefix[..]);
@@ -252,16 +252,16 @@ internal static slice<byte> signWithDom(slice<byte> signature, ж<PrivateKey> �
     var messageDigest = new slice<byte>(0, sha512Size);
     messageDigest = mh.Sum(messageDigest);
     var (r, err) = Δedwards25519.NewScalar().SetUniformBytes(messageDigest);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
 
-    var R = (Ꮡ(new Δedwards25519.Point(nil))).ScalarBaseMult(r);
+    var R = (Ꮡ(new Δedwards25519.Point())).ScalarBaseMult(r);
 
     var kh = sha512.New();
     if (domPrefix != domPrefixPure) {
         kh.Write(slice<byte>(domPrefix));
-        kh.Write(new byte[]{(byte)len(context)}.slice());
+        kh.Write(slice<byte>([(byte)len(context)]));
         kh.Write(slice<byte>(context));
     }
     kh.Write(R.Bytes());
@@ -270,7 +270,7 @@ internal static slice<byte> signWithDom(slice<byte> signature, ж<PrivateKey> �
     var hramDigest = new slice<byte>(0, sha512Size);
     hramDigest = kh.Sum(hramDigest);
     (var k, err) = Δedwards25519.NewScalar().SetUniformBytes(hramDigest);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
 
@@ -282,17 +282,17 @@ internal static slice<byte> signWithDom(slice<byte> signature, ж<PrivateKey> �
     return signature;
 }
 
-public static error Verify(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice<byte> sig) {
-    return verify(Ꮡpub, message, sig);
+public static error Verify(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig) {
+    return verify(pub, message, sig);
 }
 
-internal static error verify(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice<byte> sig) {
+internal static error verify(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig) {
     fipsSelfTest();
     fips140.RecordApproved();
-    return verifyWithDom(Ꮡpub, message, sig, domPrefixPure, ""u8);
+    return verifyWithDom(pub, message, sig, domPrefixPure, ""u8);
 }
 
-public static error VerifyPH(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice<byte> sig, @string context) {
+public static error VerifyPH(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig, @string context) {
     fipsSelfTest();
     fips140.RecordApproved();
     {
@@ -305,10 +305,10 @@ public static error VerifyPH(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice<
             return errors.New("ed25519: bad Ed25519ph context length: "u8 + strconv.Itoa(l));
         }
     }
-    return verifyWithDom(Ꮡpub, message, sig, domPrefixPh, context);
+    return verifyWithDom(pub, message, sig, domPrefixPh, context);
 }
 
-public static error VerifyCtx(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice<byte> sig, @string context) {
+public static error VerifyCtx(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig, @string context) {
     fipsSelfTest();
     // FIPS 186-5 specifies Ed25519 and Ed25519ph (with context), but not Ed25519ctx.
     fips140.RecordNonApproved();
@@ -317,7 +317,7 @@ public static error VerifyCtx(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice
             return errors.New("ed25519: bad Ed25519ctx context length: "u8 + strconv.Itoa(l));
         }
     }
-    return verifyWithDom(Ꮡpub, message, sig, domPrefixCtx, context);
+    return verifyWithDom(pub, message, sig, domPrefixCtx, context);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -339,7 +339,7 @@ internal static error verifyWithDom(ж<ΔPublicKey> Ꮡpub, slice<byte> message,
     var kh = sha512.New();
     if (domPrefix != domPrefixPure) {
         kh.Write(slice<byte>(domPrefix));
-        kh.Write(new byte[]{(byte)len(context)}.slice());
+        kh.Write(slice<byte>([(byte)len(context)]));
         kh.Write(slice<byte>(context));
     }
     kh.Write(sig[..32]);
@@ -348,23 +348,23 @@ internal static error verifyWithDom(ж<ΔPublicKey> Ꮡpub, slice<byte> message,
     var hramDigest = new slice<byte>(0, sha512Size);
     hramDigest = kh.Sum(hramDigest);
     var (k, err) = Δedwards25519.NewScalar().SetUniformBytes(hramDigest);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
 
     (var S, err) = Δedwards25519.NewScalar().SetCanonicalBytes(sig[32..]);
-    if (err != default!) {
+    if (err != nil) {
         return errors.New(ed25519InvalidSignatureˢ);
     }
 
     // [S]B = R + [k]A --> [k](-A) + [S]B = R
-    var minusA = (Ꮡ(new Δedwards25519.Point(nil))).Negate(Ꮡpub.of(ed25519_package.ΔPublicKey.Ꮡa));
-    var R = (Ꮡ(new Δedwards25519.Point(nil))).VarTimeDoubleScalarBaseMult(k, minusA, S);
+    var minusA = (Ꮡ(new Δedwards25519.Point())).Negate(Ꮡpub.of(ed25519_package.ΔPublicKey.Ꮡa));
+    var R = (Ꮡ(new Δedwards25519.Point())).VarTimeDoubleScalarBaseMult(k, minusA, S);
 
     if (!bytes.Equal(sig[..32], R.Bytes())) {
         return errors.New(ed25519InvalidSignatureˢ);
     }
-    return default!;
+    return default;
 }
 
 } // end ed25519_package

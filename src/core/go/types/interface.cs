@@ -16,12 +16,12 @@ partial class types_package {
 
 // An Interface represents an interface type.
 partial struct Interface {
-    internal ж<Checker> check;  // for error reporting; nil once type set is computed
-    internal slice<ж<Func>> methods; // ordered list of explicitly declared methods
-    internal slice<ΔType> embeddeds;  // ordered list of explicitly embedded elements
+    internal ж<Checker> check;             // for error reporting; nil once type set is computed
+    internal slice<ж<Func>> methods;       // ordered list of explicitly declared methods
+    internal slice<ΔType> embeddeds;       // ordered list of explicitly embedded elements
     internal ж<slice<tokenꓸPos>> embedPos; // positions of embedded elements; or nil (for error messages) - use pointer to save space
-    internal bool @implicit;         // interface is wrapper for type set literal (non-interface T, ~T, or A|B)
-    internal bool complete;         // indicates that obj, methods, and embeddeds are set and type set can be computed
+    internal bool @implicit;               // interface is wrapper for type set literal (non-interface T, ~T, or A|B)
+    internal bool complete;                // indicates that obj, methods, and embeddeds are set and type set can be computed
     internal ж<_TypeSet> tset; // type set described by this interface, computed lazily
 }
 
@@ -65,8 +65,8 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     var typ = (((ж<Checker>)nil)).newInterface();
     foreach (var (_, m) in methods) {
         {
-            var sig = (~m).typ._<ж<ΔSignature>>(); if ((~sig).recv == nil) {
-                sig.Value.recv = newVar(RecvVar, (~m).pos, (~m).pkg, ""u8, new InterfaceжΔType(typ));
+            var sig = (~m).typ._<ж<ΔSignature>>(); if (sig.recv == nil) {
+                sig.recv = newVar(RecvVar, (~m).pos, (~m).pkg, ""u8, new InterfaceжΔType(typ));
             }
         }
     }
@@ -74,9 +74,9 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     // sort for API stability
     sortMethods(methods);
 
-    typ.Value.methods = methods;
-    typ.Value.embeddeds = embeddeds;
-    typ.Value.complete = true;
+    typ.methods = methods;
+    typ.embeddeds = embeddeds;
+    typ.complete = true;
 
     return typ;
 }
@@ -147,7 +147,7 @@ public static bool Empty(this ж<Interface> Ꮡt) {
 
 // IsComparable reports whether each type in interface t's type set is comparable.
 public static bool IsComparable(this ж<Interface> Ꮡt) {
-    return Ꮡt.typeSet().IsComparable(default!);
+    return Ꮡt.typeSet().IsComparable(default);
 }
 
 // IsMethodSet reports whether the interface t is fully described by its method
@@ -183,7 +183,7 @@ public static ΔType Underlying(this ж<Interface> Ꮡt) {
 }
 
 public static @string String(this ж<Interface> Ꮡt) {
-    return TypeString(new InterfaceжΔType(Ꮡt), default!);
+    return TypeString(new InterfaceжΔType(Ꮡt), default);
 }
 
 // ----------------------------------------------------------------------------
@@ -192,8 +192,8 @@ internal static void cleanup(this ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.typeSet(); // any interface that escapes type checking must be safe for concurrent use
-    t.check = default!;
-    t.embedPos = default!;
+    t.check = default;
+    t.embedPos = default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -214,35 +214,35 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
         Ꮡityp.Value.embedPos.ValueSlot = append(Ꮡityp.Value.embedPos.ValueSlot, pos);
     }
 
-    foreach (var (_, f) in (~iface.Methods).List) {
-        if (len((~f).Names) == 0) {
-            addEmbedded((~f).Type.Pos(), parseUnion(Ꮡcheck, (~f).Type));
+    foreach (var (_, f) in iface.Methods.List) {
+        if (len(f.Names) == 0) {
+            addEmbedded(f.Type.Pos(), parseUnion(Ꮡcheck, f.Type));
             continue;
         }
         // f.Name != nil
 
         // We have a method with name f.Names[0].
-        var name = (~f).Names[0];
-        if ((~name).Name == "_"u8) {
+        var name = f.Names[0];
+        if (name.Name == "_"u8) {
             Ꮡcheck.error(new ast_Identжpositioner(name), BlankIfaceMethod, methodsMustHaveAUniqueˢ);
             continue; // ignore
         }
 
-        var typ = Ꮡcheck.typ((~f).Type);
+        var typ = Ꮡcheck.typ(f.Type);
         var (sig, _) = typ._<ж<ΔSignature>>(ᐧ);
         if (sig == nil) {
             if (isValid(typ)) {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner((~f).Type), InvalidSyntaxTree, "%s is not a method signature"u8, typ);
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(f.Type), InvalidSyntaxTree, "%s is not a method signature"u8, typ);
             }
             continue; // ignore
         }
 
         // The go/parser doesn't accept method type parameters but an ast.FuncType may have them.
-        if ((~sig).tparams != nil) {
-            positioner at = new ast_Exprᴠpositioner((~f).Type);
+        if (sig.tparams != nil) {
+            positioner at = new ast_Exprᴠpositioner(f.Type);
             {
-                var (ftyp, _) = (~f).Type._<ж<ast.FuncType>>(ᐧ); if (ftyp != nil && (~ftyp).TypeParams != nil) {
-                    at = new ast_FieldListжpositioner(ftyp.Value.TypeParams);
+                var (ftyp, _) = f.Type._<ж<ast.FuncType>>(ᐧ); if (ftyp != nil && ftyp.TypeParams != nil) {
+                    at = new ast_FieldListжpositioner(ftyp.TypeParams);
                 }
             }
             Ꮡcheck.error(at, InvalidSyntaxTree, methodsCannotHaveTypeˢ);
@@ -257,9 +257,9 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
                 }
             }
         }
-        sig.Value.recv = newVar(RecvVar, name.Pos(), check.pkg, ""u8, recvTyp);
+        sig.recv = newVar(RecvVar, name.Pos(), check.pkg, ""u8, recvTyp);
 
-        var m = NewFunc(name.Pos(), check.pkg, (~name).Name, sig);
+        var m = NewFunc(name.Pos(), check.pkg, name.Name, sig);
         check.recordDef(name, new FuncжObject(m));
         ityp.methods = append(ityp.methods, m);
     }

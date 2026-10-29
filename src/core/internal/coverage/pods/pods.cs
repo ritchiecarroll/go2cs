@@ -59,12 +59,12 @@ public static (slice<Pod>, error) CollectPods(slice<@string> dirs, bool warn) {
     var filesᴷ = new stackAppend<@string>();
     var dirIndicesᴷ = new stackAppend<nint>();
 
-    var files = new @string[]{}.slice();
-    var dirIndices = new nint[]{}.slice();
+    var files = slice<@string>([]);
+    var dirIndices = slice<nint>([]);
     foreach (var (k, dir) in dirs) {
         var (dents, err) = os.ReadDir(dir);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         foreach (var (_, e) in dents) {
             if (e.IsDir()) {
@@ -74,13 +74,13 @@ public static (slice<Pod>, error) CollectPods(slice<@string> dirs, bool warn) {
             dirIndices = append(dirIndicesᴷ, dirIndices, k);
         }
     }
-    return (collectPodsImpl(files, dirIndices, warn), default!);
+    return (collectPodsImpl(files, dirIndices, warn), default);
 }
 
 // CollectPodsFromFiles functions the same as "CollectPods" but
 // operates on an explicit list of files instead of a directory.
 public static slice<Pod> CollectPodsFromFiles(slice<@string> files, bool warn) {
-    return collectPodsImpl(files, default!, warn);
+    return collectPodsImpl(files, default, warn);
 }
 
 partial struct fileWithAnnotations {
@@ -137,7 +137,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
     foreach (var (_, f) in files) {
         @string @base = filepath.Base(f);
         {
-            var m = metaRE.FindStringSubmatch(@base); if (m != default!) {
+            var m = metaRE.FindStringSubmatch(@base); if (m != nil) {
                 @string tag = m[1];
                 // We need to allow for the possibility of duplicate
                 // meta-data files. If we hit this case, use the
@@ -156,16 +156,16 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
     foreach (var (k, f) in files) {
         @string @base = filepath.Base(f);
         {
-            var m = counterRE.FindStringSubmatch(@base); if (m != default!) {
+            var m = counterRE.FindStringSubmatch(@base); if (m != nil) {
                 @string tag = m[1]; // meta hash
                 var (pid, err) = strconv.Atoi(m[2]);
-                if (err != default!) {
+                if (err != nil) {
                     continue;
                 }
                 {
-                    var (v, ok) = mm[tag, ꟷ]; if (ok){
+                    var (v, ok) = mm[tag, ꟷ]; if (ok) {
                         nint idx = -1;
-                        if (dirIndices != default!) {
+                        if (dirIndices != nil) {
                             idx = dirIndices[k];
                         }
                         var fo = new fileWithAnnotations(@file: f, origin: idx, pid: pid);
@@ -184,7 +184,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
         if (warn) {
             warning(noCoverageDataFilesFoundˢ);
         }
-        return default!;
+        return default;
     }
     var pods = new slice<Pod>(0, len(mm));
     foreach (var (_, p) in mm) {

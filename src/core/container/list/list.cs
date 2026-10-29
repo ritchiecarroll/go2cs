@@ -34,7 +34,7 @@ public static ж<Element> Next(this ref Element e) {
             return p;
         }
     }
-    return default!;
+    return default;
 }
 
 // Prev returns the previous list element or nil.
@@ -44,14 +44,14 @@ public static ж<Element> Prev(this ref Element e) {
             return p;
         }
     }
-    return default!;
+    return default;
 }
 
 // List represents a doubly linked list.
 // The zero value for List is an empty list ready to use.
 partial struct List {
     internal Element root; // sentinel list element, only &root, root.prev, and root.next are used
-    internal nint len;    // current list length excluding (this) sentinel element
+    internal nint len;     // current list length excluding (this) sentinel element
 }
 
 // Init initializes or clears list l.
@@ -78,7 +78,7 @@ public static nint Len(this ref List l) {
 // Front returns the first element of list l or nil if the list is empty.
 public static ж<Element> Front(this ref List l) {
     if (l.len == 0) {
-        return default!;
+        return default;
     }
     return l.root.next;
 }
@@ -86,7 +86,7 @@ public static ж<Element> Front(this ref List l) {
 // Back returns the last element of list l or nil if the list is empty.
 public static ж<Element> Back(this ref List l) {
     if (l.len == 0) {
-        return default!;
+        return default;
     }
     return l.root.prev;
 }
@@ -108,27 +108,27 @@ internal static ж<Element> insert(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Elem
 
     e.prev = Ꮡat;
     e.next = at.next;
-    e.prev.Value.next = Ꮡe;
-    e.next.Value.prev = Ꮡe;
+    e.prev.next = Ꮡe;
+    e.next.prev = Ꮡe;
     e.list = Ꮡl;
     l.len++;
     return Ꮡe;
 }
 
 // insertValue is a convenience wrapper for insert(&Element{Value: v}, at).
-internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> Ꮡat) {
-    return Ꮡl.insert(Ꮡ(new Element(Value: v)), Ꮡat);
+internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> at) {
+    return Ꮡl.insert(Ꮡ(new Element(Value: v)), at);
 }
 
 // remove removes e from its list, decrements l.len
 internal static void remove(this ref List l, ж<Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
-    e.prev.Value.next = e.next;
-    e.next.Value.prev = e.prev;
-    e.next = default!; // avoid memory leaks
-    e.prev = default!; // avoid memory leaks
-    e.list = default!;
+    e.prev.next = e.next;
+    e.next.prev = e.prev;
+    e.next = default; // avoid memory leaks
+    e.prev = default; // avoid memory leaks
+    e.list = default;
     l.len--;
 }
 
@@ -140,13 +140,13 @@ internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) 
     if (Ꮡe == Ꮡat) {
         return;
     }
-    e.prev.Value.next = e.next;
-    e.next.Value.prev = e.prev;
+    e.prev.next = e.next;
+    e.next.prev = e.prev;
 
     e.prev = Ꮡat;
     e.next = at.next;
-    e.prev.Value.next = Ꮡe;
-    e.next.Value.prev = Ꮡe;
+    e.prev.next = Ꮡe;
+    e.next.prev = Ꮡe;
 }
 
 // Remove removes e from l if e is an element of list l.
@@ -185,7 +185,7 @@ public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> �
     ref var mark = ref Ꮡmark.DerefOrNull();
 
     if (mark.list != Ꮡl) {
-        return default!;
+        return default;
     }
     // see comment in List.Remove about initialization of l
     return Ꮡl.insertValue(v, mark.prev);
@@ -198,7 +198,7 @@ public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡ
     ref var mark = ref Ꮡmark.DerefOrNull();
 
     if (mark.list != Ꮡl) {
-        return default!;
+        return default;
     }
     // see comment in List.Remove about initialization of l
     return Ꮡl.insertValue(v, Ꮡmark);

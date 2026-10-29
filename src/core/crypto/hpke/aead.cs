@@ -28,19 +28,19 @@ partial interface AEAD {
 public static (AEAD, error) NewAEAD(uint16 id) {
     switch (id) {
     case 0x0001: { // AES-128-GCM
-        return (AES128GCM(), default!);
+        return (AES128GCM(), default);
     }
     case 0x0002: { // AES-256-GCM
-        return (AES256GCM(), default!);
+        return (AES256GCM(), default);
     }
     case 0x0003: { // ChaCha20Poly1305
-        return (ChaCha20Poly1305(), default!);
+        return (ChaCha20Poly1305(), default);
     }
     case 0xFFFF: { // Export-only
-        return (ExportOnly(), default!);
+        return (ExportOnly(), default);
     }
     default: {
-        return (default!, fmt.Errorf("unsupported AEAD %04x"u8, id));
+        return (default, fmt.Errorf("unsupported AEAD %04x"u8, id));
     }}
 }
 
@@ -64,7 +64,7 @@ public static AEAD ChaCha20Poly1305() {
 //
 // When this is used, [Sender.Seal] and [Recipient.Open] return errors.
 public static AEAD ExportOnly() {
-    return new exportOnlyAEAD(nil);
+    return new exportOnlyAEAD();
 }
 
 partial struct Δaead {
@@ -104,7 +104,7 @@ internal static readonly @string invalidKeySizeˢ = "invalid key size"u8;
 
 internal static (cipher.AEAD, error) aead(this ref Δaead a, slice<byte> key) {
     if (len(key) != a.nK) {
-        return (default!, errors.New(invalidKeySizeˢ));
+        return (default, errors.New(invalidKeySizeˢ));
     }
     return a.@new(key);
 }
@@ -125,7 +125,7 @@ internal static uint16 ID(this exportOnlyAEAD _) {
 }
 
 internal static (cipher.AEAD, error) aead(this exportOnlyAEAD _, slice<byte> key) {
-    return (default!, default!);
+    return (default, default);
 }
 
 internal static nint keySize(this exportOnlyAEAD _) {

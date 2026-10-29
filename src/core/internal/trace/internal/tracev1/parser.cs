@@ -36,12 +36,12 @@ partial struct Event {
 // The Event type is carefully laid out to optimize its size and to avoid
 // pointers, the latter so that the garbage collector won't have to scan any
 // memory of our millions of events.
-    public Timestamp Ts; // timestamp in nanoseconds
-    public uint64 G;    // G on which the event happened
+    public Timestamp Ts;                // timestamp in nanoseconds
+    public uint64 G;                    // G on which the event happened
     public array<uint64> Args = new(4); // event-type-specific arguments
-    public uint32 StkID;    // unique stack ID
-    public int32 P;     // P on which the event happened (can be a real P or one of TimerP, NetpollP, SyscallP)
-    public EventType Type; // one of Ev*
+    public uint32 StkID;                // unique stack ID
+    public int32 P;                     // P on which the event happened (can be a real P or one of TimerP, NetpollP, SyscallP)
+    public EventType Type;              // one of Ev*
 }
 
 // Frame is a frame in stack traces.
@@ -56,10 +56,10 @@ partial struct Frame {
 
 // Special P identifiers:
 public static UntypedInt FakeP => /* 1000000 + iota */ 1000000;
-public static UntypedInt TimerP => 1000001; // contains timer unblocks
+public static UntypedInt TimerP => 1000001;   // contains timer unblocks
 public static UntypedInt NetpollP => 1000002; // contains network unblocks
 public static UntypedInt SyscallP => 1000003; // contains returns from syscalls
-public static UntypedInt GCP => 1000004; // contains GC state
+public static UntypedInt GCP => 1000004;      // contains GC state
 public static UntypedInt ProfileP => 1000005; // contains recording of CPU profile samples
 
 // Trace is the result of Parse.
@@ -113,7 +113,7 @@ internal static bool discard(this ref parser p, uint64 n) {
         return false;
     }
     {
-        nint noff = p.off + (nint)n; if (noff < p.off || noff > len(p.data)){
+        nint noff = p.off + (nint)n; if (noff < p.off || noff > len(p.data)) {
             return false;
         } else {
             p.off = noff;
@@ -123,38 +123,38 @@ internal static bool discard(this ref parser p, uint64 n) {
 }
 
 internal static (ж<parser>, error) newParser(io.Reader r, version.Version ver) {
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     {
-        var (seeker, ok) = r._<io.Seeker>(ᐧ); if (ok){
+        var (seeker, ok) = r._<io.Seeker>(ᐧ); if (ok) {
             // Determine the size of the reader so that we can allocate a buffer
             // without having to grow it later.
             var (cur, err) = seeker.Seek(0, io.SeekCurrent);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
             (var end, err) = seeker.Seek(0, io.SeekEnd);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
             (_, err) = seeker.Seek(cur, io.SeekStart);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
             buf = new slice<byte>((nint)(end - cur));
             (_, err) = io.ReadFull(r, buf);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
         } else {
-            error err = default!;
+            error err = default;
             (buf, err) = io.ReadAll(r);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
         }
     }
-    return (Ꮡ(new parser(data: buf, ver: ver, timerGoids: new map<uint64, bool>())), default!);
+    return (Ꮡ(new parser(data: buf, ver: ver, timerGoids: new map<uint64, bool>())), default);
 }
 
 // Parse parses Go execution traces from versions 1.11–1.21. The provided reader
@@ -168,8 +168,8 @@ public static (Trace, error) Parse(io.Reader r, version.Version vers) {
     // We accept the version as an argument because internal/trace will have
     // already read the version to determine which parser to use.
     var (p, err) = newParser(r, vers);
-    if (err != default!) {
-        return (new Trace(nil), err);
+    if (err != nil) {
+        return (new Trace(), err);
     }
     return p.parse();
 }
@@ -184,7 +184,7 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         defer(() => {
-            Ꮡp.Value.data = default!;
+            Ꮡp.Value.data = default;
         }, ref ᒐ);
 
         // We parse a trace by running the following steps in order:
@@ -211,41 +211,41 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
         p.inlineStringsMapping = new map<@string, nint>();
 
         {
-            var errΔ1 = p.collectBatchesAndCPUSamples(); if (errΔ1 != default!) {
-                return (new Trace(nil), errΔ1);
+            var errΔ1 = p.collectBatchesAndCPUSamples(); if (errΔ1 != nil) {
+                return (new Trace(), errΔ1);
             }
         }
 
         var (events, err) = p.parseEventBatches();
-        if (err != default!) {
-            return (new Trace(nil), err);
+        if (err != nil) {
+            return (new Trace(), err);
         }
 
         if (p.ticksPerSec == 0) {
-            return (new Trace(nil), errors.New(noEvFrequencyEventˢ));
+            return (new Trace(), errors.New(noEvFrequencyEventˢ));
         }
 
         if (events.Len() > 0) {
             // Translate cpu ticks to real time.
-            var minTs = events.Ptr(0).Value.Ts;
+            var minTs = events.Ptr(0).Ts;
             // Use floating point to avoid integer overflows.
             var freq = 1e9D / (float64)p.ticksPerSec;
             for (nint i = 0; i < events.Len(); i++) {
                 var ev = events.Ptr(i);
-                ev.Value.Ts = (Timestamp)(int64)((float64)(int64)((~ev).Ts - minTs) * freq);
+                ev.Ts = (Timestamp)(int64)((float64)(ev.Ts - minTs) * freq);
                 // Move timers and syscalls to separate fake Ps.
-                if (p.timerGoids[(~ev).G] && (~ev).Type == EvGoUnblock) {
-                    ev.Value.P = TimerP;
+                if (p.timerGoids[ev.G] && ev.Type == EvGoUnblock) {
+                    ev.P = TimerP;
                 }
-                if ((~ev).Type == EvGoSysExit) {
-                    ev.Value.P = SyscallP;
+                if (ev.Type == EvGoSysExit) {
+                    ev.P = SyscallP;
                 }
             }
         }
 
         {
-            var errΔ2 = Ꮡp.postProcessTrace(events); if (errΔ2 != default!) {
-                return (new Trace(nil), errΔ2);
+            var errΔ2 = Ꮡp.postProcessTrace(events); if (errΔ2 != nil) {
+                return (new Trace(), errΔ2);
             }
         }
 
@@ -257,9 +257,9 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
             InlineStrings: p.inlineStrings,
             PCs: p.pcs
         );
-        return (res, default!);
+        return (res, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -333,7 +333,7 @@ public static nint Len(this ref Events l) {
 }
 
 public static bool Less(this ref Events l, nint i, nint j) {
-    return (~l.Ptr(i)).Ts < (~l.Ptr(j)).Ts;
+    return l.Ptr(i).Ts < l.Ptr(j).Ts;
 }
 
 public static void Swap(this ref Events l, nint i, nint j) {
@@ -342,7 +342,7 @@ public static void Swap(this ref Events l, nint i, nint j) {
 
 public static (ж<Event>, bool) Pop(this ref Events l) {
     if (l.off == l.n) {
-        return (default!, false);
+        return (default, false);
     }
     var (a, b) = l.index(l.off);
     var ptr = l.buckets[a].at<Event>(b);
@@ -357,7 +357,7 @@ public static (ж<Event>, bool) Pop(this ref Events l) {
 
 public static (ж<Event>, bool) Peek(this ref Events l) {
     if (l.off == l.n) {
-        return (default!, false);
+        return (default, false);
     }
     var (a, b) = l.index(l.off);
     return (l.buckets[a].at<Event>(b), true);
@@ -404,8 +404,7 @@ internal static (Events, error) parseEventBatches(this ref parser p) {
     }
     allProcs = builtin.append(allProcs, new proc(pid: ProfileP, events: p.cpuSamples));
 
-    ref var events = ref heap<Events>(out var Ꮡevents);
-    events = new Events(nil);
+    ref var events = ref heap<Events>(new Events(), out var Ꮡevents);
 
     // Merge events as long as at least one P has more events
     var gs = new map<uint64, gState>();
@@ -422,33 +421,32 @@ internal static (Events, error) parseEventBatches(this ref parser p) {
     foreach (var i in range(allProcs)) {
         availableProcs[i] = Ꮡ(allProcs, i);
     }
-    while (ᐧ) {
+    for (;;) {
 pidLoop:
         for (nint i = 0; i < len(availableProcs); i++) {
             var proc = availableProcs[i];
 
-            while (len((~proc).events) == 0) {
+            while (len(proc.events) == 0) {
                 // Call loadBatch in a loop because sometimes batches are empty
-                var (evs, err) = p.loadBatch((~proc).pid, (~proc).buf[..0]);
-                proc.Value.buf = evs[..0];
-                if (AreEqual(err, io.EOF)){
+                var (evs, err) = p.loadBatch(proc.pid, proc.buf[..0]);
+                proc.buf = evs[..0];
+                if (AreEqual(err, io.EOF)) {
                     // This P has no more events
-                    proc.Value.done = true;
+                    proc.done = true;
                     (availableProcs[i], availableProcs[len(availableProcs) - 1]) = (availableProcs[len(availableProcs) - 1], availableProcs[i]);
                     availableProcs = availableProcs.slice(0, len(availableProcs) - 1);
                     // We swapped the element at i with another proc, so look at
                     // the index again
                     i--;
                     goto continue_pidLoop;
-                } else 
-                if (err != default!){
-                    return (new Events(nil), err);
+                } else if (err != nil) {
+                    return (new Events(), err);
                 } else {
-                    proc.Value.events = evs;
+                    proc.events = evs;
                 }
             }
 
-            var ev = Ꮡ((~proc).events, 0);
+            var ev = Ꮡ(proc.events, 0);
             var (gΔ1, initΔ1, _) = stateTransition(ref (ev).DerefOrNull());
 
             // TODO(dh): This implementation matches the behavior of the
@@ -464,7 +462,7 @@ pidLoop:
             if (!transitionReady(gΔ1, gs[gΔ1], initΔ1)) {
                 continue;
             }
-            proc.Value.events = (~proc).events[1..];
+            proc.events = proc.events[1..];
             (availableProcs[i], availableProcs[len(availableProcs) - 1]) = (availableProcs[len(availableProcs) - 1], availableProcs[i]);
             availableProcs = availableProcs.slice(0, len(availableProcs) - 1);
             Ꮡfrontier.Push(new orderEvent(ev.Value.ΔClone(), proc));
@@ -479,7 +477,7 @@ break_pidLoop:;
         if (len(frontier) == 0) {
             foreach (var i in range(allProcs)) {
                 if (!allProcs[i].done) {
-                    return (new Events(nil), fmt.Errorf("no consistent ordering of events possible"u8));
+                    return (new Events(), fmt.Errorf("no consistent ordering of events possible"u8));
                 }
             }
             break;
@@ -493,21 +491,24 @@ break_pidLoop:;
         var (g, init, next) = stateTransition(ref f.ev);
 
         // Get rid of "Local" events, they are intended merely for ordering.
-        var exprᴛ1 = f.ev.Type;
-        if (exprᴛ1 == EvGoStartLocal) {
+        switch (f.ev.Type) {
+        case var ᴛ when ᴛ == EvGoStartLocal: {
             f.ev.Type = EvGoStart;
+            break;
         }
-        else if (exprᴛ1 == EvGoUnblockLocal) {
+        case var ᴛ when ᴛ == EvGoUnblockLocal: {
             f.ev.Type = EvGoUnblock;
+            break;
         }
-        else if (exprᴛ1 == EvGoSysExitLocal) {
+        case var ᴛ when ᴛ == EvGoSysExitLocal: {
             f.ev.Type = EvGoSysExit;
-        }
+            break;
+        }}
         events.append(f.ev);
 
         {
-            var err = transition(gs, g, init, next); if (err != default!) {
-                return (new Events(nil), err);
+            var err = transition(gs, g, init, next); if (err != nil) {
+                return (new Events(), err);
             }
         }
         availableProcs = builtin.append(availableProcsᴷ, availableProcs, f.proc);
@@ -517,7 +518,7 @@ break_pidLoop:;
     // stamps respect the ordering. The tests will skip (not fail) the test case
     // if they see this error.
     if (!sort.IsSorted(new EventsжInterface(Ꮡevents))) {
-        return (new Events(nil), ErrTimeOrder);
+        return (new Events(), ErrTimeOrder);
     }
 
     // The last part is giving correct timestamps to EvGoSysExit events. The
@@ -532,41 +533,43 @@ break_pidLoop:;
     var lastSysBlock = new map<uint64, Timestamp>();
     for (nint i = 0; i < events.Len(); i++) {
         var ev = events.Ptr(i);
-        var exprᴛ2 = (~ev).Type;
-        if (exprᴛ2 == EvGoSysBlock || exprᴛ2 == EvGoInSyscall) {
-            lastSysBlock[(~ev).G] = ev.Value.Ts;
+        switch (ev.Type) {
+        case var ᴛ when ᴛ == EvGoSysBlock || ᴛ == EvGoInSyscall: {
+            lastSysBlock[ev.G] = ev.Ts;
+            break;
         }
-        else if (exprᴛ2 == EvGoSysExit) {
-            var ts = (Timestamp)(int64)(~ev).Args[2];
+        case var ᴛ when ᴛ == EvGoSysExit: {
+            var ts = (Timestamp)(int64)ev.Args[2];
             if (ts == 0) {
                 continue;
             }
-            var block = lastSysBlock[(~ev).G];
+            var block = lastSysBlock[ev.G];
             if (block == 0) {
-                return (new Events(nil), fmt.Errorf("stray syscall exit"u8));
+                return (new Events(), fmt.Errorf("stray syscall exit"u8));
             }
             if (ts < block) {
-                return (new Events(nil), ErrTimeOrder);
+                return (new Events(), ErrTimeOrder);
             }
-            ev.Value.Ts = ts;
-        }
+            ev.Ts = ts;
+            break;
+        }}
     }
     sort.Stable(new EventsжInterface(Ꮡevents));
 
-    return (events, default!);
+    return (events, default);
 }
 
 // collectBatchesAndCPUSamples records the offsets of batches and parses CPU samples.
 internal static error collectBatchesAndCPUSamples(this ref parser p) {
     // Read events.
     ref var raw = ref heap(new rawEvent(), out var Ꮡraw);
-    int32 curP = default!;
-    for (var n = (uint64)0; ᐧ ; n++) {
+    int32 curP = default;
+    for (var n = (uint64)0; ; n++) {
         var err = p.readRawEvent((nuint)((nuint)skipArgs | (nuint)skipStrings), Ꮡraw);
         if (AreEqual(err, io.EOF)) {
             break;
         }
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (raw.typ == EvNone) {
@@ -595,7 +598,7 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
                 return fmt.Errorf("CPU sample has wrong number of arguments: want %d, got %d"u8, narg, len(raw.args));
             }
             for (nint i = argOffset; i < narg; i++) {
-                if (i == narg - 1){
+                if (i == narg - 1) {
                     e.StkID = (uint32)raw.args[i];
                 } else {
                     e.Args[i - argOffset] = raw.args[i];
@@ -624,14 +627,14 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
         }
     }
 
-    return default!;
+    return default;
 }
 
 internal static UntypedInt skipArgs => /* 1 << iota */ 1;
 internal static UntypedInt skipStrings => 2;
 
 internal static (byte, bool) readByte(this ref parser p) {
-    if (p.off < len(p.data) && p.off >= 0){
+    if (p.off < len(p.data) && p.off >= 0) {
         var b = p.data[p.off];
         p.off++;
         return (b, true);
@@ -646,11 +649,11 @@ internal static (slice<byte>, error) readFull(this ref parser p, nint n) {
         //
         // We do fail outright if there's not enough data, we don't care about
         // partial results.
-        return (default!, io.ErrUnexpectedEOF);
+        return (default, io.ErrUnexpectedEOF);
     }
     var buf = p.data.slice(p.off, p.off + n);
     p.off += n;
-    return (buf, default!);
+    return (buf, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -690,17 +693,17 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
         return fmt.Errorf("unknown event type %d"u8, typ);
     }
 
-    var exprᴛ1 = typ;
-    if (exprᴛ1 == EvString) {
-        if ((flags & (nuint)skipStrings) != 0){
+    switch (typ) {
+    case var ᴛ when ᴛ == EvString: {
+        if ((flags & (nuint)skipStrings) != 0) {
             // String dictionary entry [ID, length, string].
             {
-                var (_, errΔ7) = p.readVal(); if (errΔ7 != default!) {
+                var (_, errΔ7) = p.readVal(); if (errΔ7 != nil) {
                     return errMalformedVarint;
                 }
             }
             var (ln, err) = p.readVal();
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             if (!p.discard(ln)) {
@@ -709,7 +712,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
         } else {
             // String dictionary entry [ID, length, string].
             var (id, err) = p.readVal();
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             if (id == 0) {
@@ -718,9 +721,9 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             if (p.strings[id] != "") {
                 return fmt.Errorf("string has duplicate id %d"u8, id);
             }
-            uint64 ln = default!;
+            uint64 ln = default;
             (ln, err) = p.readVal();
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             if (ln == 0) {
@@ -730,16 +733,16 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                 return fmt.Errorf("string has too large length %d"u8, ln);
             }
             (var buf, err) = p.readFull((nint)ln);
-            if (err != default!) {
+            if (err != nil) {
                 return fmt.Errorf("failed to read trace: %w"u8, err);
             }
             p.strings[id] = (@string)buf;
         }
 
         ev.typ = EvNone;
-        return default!;
+        return default;
     }
-    if (exprᴛ1 == EvBatch) {
+    case var ᴛ when ᴛ == EvBatch: {
         {
             var want = (byte)2; if (narg != want) {
                 return fmt.Errorf("EvBatch has wrong number of arguments: got %d, want %d"u8, narg, want);
@@ -750,22 +753,22 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
         nint off = p.off - 1;
 
         var (pid, err) = p.readVal();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (pid != math.MaxUint64 && pid > math.MaxInt32) {
             return fmt.Errorf("processor ID %d is larger than maximum of %d"u8, pid, (uint64)math.MaxUint);
         }
 
-        int32 pid32 = default!;
-        if (pid == math.MaxUint64){
+        int32 pid32 = default;
+        if (pid == math.MaxUint64) {
             pid32 = -1;
         } else {
             pid32 = (int32)pid;
         }
 
         (var v, err) = p.readVal();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
 
@@ -776,15 +779,15 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             batchOffset: off
         );
         ev.args = builtin.append(ev.args, pid, v);
-        return default!;
+        return default;
     }
-    { /* default: */
+    default: {
         ev = new rawEvent(typ: typ, args: p.args[..0]);
-        if (narg <= inlineArgs){
-            if ((flags & (nuint)skipArgs) == 0){
+        if (narg <= inlineArgs) {
+            if ((flags & (nuint)skipArgs) == 0) {
                 for (nint i = 0; i < (nint)narg; i++) {
                     var (v, err) = p.readVal();
-                    if (err != default!) {
+                    if (err != nil) {
                         return fmt.Errorf("failed to read event %d argument: %w"u8, typ, err);
                     }
                     ev.args = builtin.append(ev.args, v);
@@ -792,7 +795,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             } else {
                 for (nint i = 0; i < (nint)narg; i++) {
                     {
-                        var (_, err) = p.readVal(); if (err != default!) {
+                        var (_, err) = p.readVal(); if (err != nil) {
                             return fmt.Errorf("failed to read event %d argument: %w"u8, typ, errMalformedVarint);
                         }
                     }
@@ -802,7 +805,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             // More than inlineArgs args, the first value is length of the event
             // in bytes.
             var (v, err) = p.readVal();
-            if (err != default!) {
+            if (err != nil) {
                 return fmt.Errorf("failed to read event %d argument: %w"u8, typ, err);
             }
 
@@ -814,15 +817,15 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                 }
             }
 
-            if ((flags & (nuint)skipArgs) == 0 || typ == EvCPUSample){
+            if ((flags & (nuint)skipArgs) == 0 || typ == EvCPUSample) {
                 var (buf, errΔ1) = p.readFull((nint)v);
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     return fmt.Errorf("failed to read trace: %w"u8, errΔ1);
                 }
                 while (len(buf) > 0) {
-                    uint64 vΔ1 = default!;
+                    uint64 vΔ1 = default;
                     (vΔ1, buf, errΔ1) = readValFrom(buf);
-                    if (errΔ1 != default!) {
+                    if (errΔ1 != nil) {
                         return errΔ1;
                     }
                     ev.args = builtin.append(ev.args, vΔ1);
@@ -835,17 +838,17 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             }
             if (typ == EvUserLog) {
                 // EvUserLog records are followed by a value string
-                if ((flags & (nuint)skipArgs) == 0){
+                if ((flags & (nuint)skipArgs) == 0) {
                     // Read string
                     var (s, errΔ2) = p.readStr();
-                    if (errΔ2 != default!) {
+                    if (errΔ2 != nil) {
                         return errΔ2;
                     }
                     ev.sargs = builtin.append(ev.sargs, s);
                 } else {
                     // Skip string
                     var (vΔ2, errΔ3) = p.readVal();
-                    if (errΔ3 != default!) {
+                    if (errΔ3 != nil) {
                         return errΔ3;
                     }
                     if (!p.discard(vΔ2)) {
@@ -856,15 +859,15 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
         }
 
         p.args = ev.args[..0];
-        return default!;
-    }
+        return default;
+    }}
 }
 
 // loadBatch loads the next batch for pid and appends its contents to events.
 internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, slice<Event> events) {
     var offsets = p.batchOffsets[pid];
     if (len(offsets) == 0) {
-        return (default!, io.EOF);
+        return (default, io.EOF);
     }
     nint n = offsets[0].numEvents;
     nint offset = offsets[0].offset;
@@ -880,19 +883,19 @@ internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, sl
     var gotHeader = false;
     ref var raw = ref heap(new rawEvent(), out var Ꮡraw);
     ref var ev = ref heap(new Event(), out var Ꮡev);
-    while (ᐧ) {
+    for (;;) {
         var err = p.readRawEvent(0, Ꮡraw);
         if (AreEqual(err, io.EOF)) {
             break;
         }
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         if (raw.typ == EvNone || raw.typ == EvCPUSample) {
             continue;
         }
         if (raw.typ == EvBatch) {
-            if (gotHeader){
+            if (gotHeader) {
                 break;
             } else {
                 gotHeader = true;
@@ -900,35 +903,35 @@ internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, sl
         }
 
         err = p.parseEvent(Ꮡraw, Ꮡev);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         if (ev.Type != EvNone) {
             events = builtin.append(events, ev.ΔClone());
         }
     }
 
-    return (events, default!);
+    return (events, default);
 }
 
 internal static (@string s, error err) readStr(this ref parser p) {
-    error err = default!;
+    error err = default;
 
     (var sz, err) = p.readVal();
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     if (sz == 0) {
-        return ("", default!);
+        return ("", default);
     }
     if (sz > 1000000) {
         return ("", fmt.Errorf("string is too large (len=%d)"u8, sz));
     }
     (var buf, err) = p.readFull((nint)sz);
-    if (err != default!) {
+    if (err != nil) {
         return ("", fmt.Errorf("failed to read trace: %w"u8, err));
     }
-    return ((@string)buf, default!);
+    return ((@string)buf, default);
 }
 
 // parseEvent transforms raw events into events.
@@ -945,21 +948,22 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
     if (len(raw.args) != narg) {
         return fmt.Errorf("%s has wrong number of arguments: want %d, got %d"u8, (~desc).Name, narg, len(raw.args));
     }
-    var exprᴛ1 = raw.typ;
-    if (exprᴛ1 == EvBatch) {
+    switch (raw.typ) {
+    case var ᴛ when ᴛ == EvBatch: {
         p.lastGs[p.lastP] = p.lastG;
         if (raw.args[0] != math.MaxUint64 && raw.args[0] > math.MaxInt32) {
             return fmt.Errorf("processor ID %d is larger than maximum of %d"u8, raw.args[0], (uint64)math.MaxInt32);
         }
-        if (raw.args[0] == math.MaxUint64){
+        if (raw.args[0] == math.MaxUint64) {
             p.lastP = -1;
         } else {
             p.lastP = (int32)raw.args[0];
         }
         p.lastG = p.lastGs[p.lastP];
         p.lastTs = (Timestamp)(int64)raw.args[1];
+        break;
     }
-    else if (exprᴛ1 == EvFrequency) {
+    case var ᴛ when ᴛ == EvFrequency: {
         p.ticksPerSec = (int64)raw.args[0];
         if (p.ticksPerSec <= 0) {
             // The most likely cause for this is tick skew on different CPUs.
@@ -967,11 +971,13 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
             // ticks on different CPUs.
             return ErrTimeOrder;
         }
+        break;
     }
-    else if (exprᴛ1 == EvTimerGoroutine) {
+    case var ᴛ when ᴛ == EvTimerGoroutine: {
         p.timerGoids[raw.args[0]] = true;
+        break;
     }
-    else if (exprᴛ1 == EvStack) {
+    case var ᴛ when ᴛ == EvStack: {
         if (len(raw.args) < 2) {
             return fmt.Errorf("EvStack has wrong number of arguments: want at least 2, got %d"u8, len(raw.args));
         }
@@ -1001,47 +1007,54 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
             }
             p.stacks[id] = stk;
         }
+        break;
     }
-    else if (exprᴛ1 == EvCPUSample) {
+    case var ᴛ when ᴛ == EvCPUSample: {
         // These events get parsed during the indexing step and don't strictly
         // belong to the batch.
+        break;
     }
-    else { /* default: */
+    default: {
         ev = new Event(Type: raw.typ, P: p.lastP, G: p.lastG);
-        nint argOffset = default!;
+        nint argOffset = default;
         ev.Ts = p.lastTs + ((Timestamp)(int64)raw.args[0]);
         argOffset = 1;
         p.lastTs = ev.Ts;
         for (nint i = argOffset; i < narg; i++) {
-            if (i == narg - 1 && (~desc).Stack){
+            if (i == narg - 1 && (~desc).Stack) {
                 ev.StkID = (uint32)raw.args[i];
             } else {
                 ev.Args[i - argOffset] = raw.args[i];
             }
         }
-        var exprᴛ2 = raw.typ;
-        if (exprᴛ2 == EvGoStart || exprᴛ2 == EvGoStartLocal || exprᴛ2 == EvGoStartLabel) {
+        switch (raw.typ) {
+        case var ᴛ2 when ᴛ2 == EvGoStart || ᴛ2 == EvGoStartLocal || ᴛ2 == EvGoStartLabel: {
             p.lastG = ev.Args[0];
             ev.G = p.lastG;
+            break;
         }
-        else if (exprᴛ2 == EvGoEnd || exprᴛ2 == EvGoStop || exprᴛ2 == EvGoSched || exprᴛ2 == EvGoPreempt || exprᴛ2 == EvGoSleep || exprᴛ2 == EvGoBlock || exprᴛ2 == EvGoBlockSend || exprᴛ2 == EvGoBlockRecv || exprᴛ2 == EvGoBlockSelect || exprᴛ2 == EvGoBlockSync || exprᴛ2 == EvGoBlockCond || exprᴛ2 == EvGoBlockNet || exprᴛ2 == EvGoSysBlock || exprᴛ2 == EvGoBlockGC) {
+        case var ᴛ2 when ᴛ2 == EvGoEnd || ᴛ2 == EvGoStop || ᴛ2 == EvGoSched || ᴛ2 == EvGoPreempt || ᴛ2 == EvGoSleep || ᴛ2 == EvGoBlock || ᴛ2 == EvGoBlockSend || ᴛ2 == EvGoBlockRecv || ᴛ2 == EvGoBlockSelect || ᴛ2 == EvGoBlockSync || ᴛ2 == EvGoBlockCond || ᴛ2 == EvGoBlockNet || ᴛ2 == EvGoSysBlock || ᴛ2 == EvGoBlockGC: {
             p.lastG = 0;
+            break;
         }
-        else if (exprᴛ2 == EvGoSysExit || exprᴛ2 == EvGoWaiting || exprᴛ2 == EvGoInSyscall) {
+        case var ᴛ2 when ᴛ2 == EvGoSysExit || ᴛ2 == EvGoWaiting || ᴛ2 == EvGoInSyscall: {
             ev.G = ev.Args[0];
+            break;
         }
-        else if (exprᴛ2 == EvUserTaskCreate) {
+        case var ᴛ2 when ᴛ2 == EvUserTaskCreate: {
             // e.Args 0: taskID, 1:parentID, 2:nameID
+            break;
         }
-        else if (exprᴛ2 == EvUserRegion) {
+        case var ᴛ2 when ᴛ2 == EvUserRegion: {
             // e.Args 0: taskID, 1: mode, 2:nameID
+            break;
         }
-        else if (exprᴛ2 == EvUserLog) {
+        case var ᴛ2 when ᴛ2 == EvUserLog: {
             // e.Args 0: taskID, 1:keyID, 2: stackID, 3: messageID
             // raw.sargs 0: message
 
             {
-                var (id, ok) = p.inlineStringsMapping[raw.sargs[0], ꟷ]; if (ok){
+                var (id, ok) = p.inlineStringsMapping[raw.sargs[0], ꟷ]; if (ok) {
                     ev.Args[3] = (uint64)id;
                 } else {
                     nint idΔ1 = len(p.inlineStrings);
@@ -1050,13 +1063,14 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
                     ev.Args[3] = (uint64)idΔ1;
                 }
             }
-        }
+            break;
+        }}
 
-        return default!;
-    }
+        return default;
+    }}
 
     ev.Type = EvNone;
-    return default!;
+    return default;
 }
 
 // ErrTimeOrder is returned by Parse when the trace contains
@@ -1091,332 +1105,355 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
 
     var gs = new map<uint64, postProcessTrace_gdesc>();
     var ps = new map<int32, postProcessTrace_pdesc>();
-    var tasks = new map<uint64, ж<Event>>(); // task id to task creation events
+    var tasks = new map<uint64, ж<Event>>();                // task id to task creation events
     var activeRegions = new map<uint64, slice<ж<Event>>>(); // goroutine id to stack of regions
     gs[0] = new postProcessTrace_gdesc(state: gRunning);
-    ж<Event> evGC = default!;
+    ж<Event> evGC = default;
     ref var evSTW = ref heap<ж<Event>>(out var ᏑevSTW);
 
     error checkRunning(postProcessTrace_pdesc pΔ1, postProcessTrace_gdesc g, ж<Event> ev, bool allowG0) {
-        @string name = EventDescriptions[(~ev).Type].Name;
+        @string name = EventDescriptions[ev.Type].Name;
         if (g.state != gRunning) {
-            return fmt.Errorf("g %d is not running while %s (time %d)"u8, (~ev).G, name, (~ev).Ts);
+            return fmt.Errorf("g %d is not running while %s (time %d)"u8, ev.G, name, ev.Ts);
         }
-        if (pΔ1.g != (~ev).G) {
-            return fmt.Errorf("p %d is not running g %d while %s (time %d)"u8, (~ev).P, (~ev).G, name, (~ev).Ts);
+        if (pΔ1.g != ev.G) {
+            return fmt.Errorf("p %d is not running g %d while %s (time %d)"u8, ev.P, ev.G, name, ev.Ts);
         }
-        if (!allowG0 && (~ev).G == 0) {
-            return fmt.Errorf("g 0 did %s (time %d)"u8, name, (~ev).Ts);
+        if (!allowG0 && ev.G == 0) {
+            return fmt.Errorf("g 0 did %s (time %d)"u8, name, ev.Ts);
         }
-        return default!;
+        return default;
     }
 
     for (nint evIdx = 0; evIdx < events.Len(); evIdx++) {
         var ev = events.Ptr(evIdx);
 
-        var exprᴛ1 = (~ev).Type;
-        if (exprᴛ1 == EvProcStart) {
-            var pΔ3 = ps[(~ev).P];
+        switch (ev.Type) {
+        case var ᴛ when ᴛ == EvProcStart: {
+            var pΔ3 = ps[ev.P];
             if (pΔ3.running) {
-                return fmt.Errorf("p %d is running before start (time %d)"u8, (~ev).P, (~ev).Ts);
+                return fmt.Errorf("p %d is running before start (time %d)"u8, ev.P, ev.Ts);
             }
             pΔ3.running = true;
 
-            ps[(~ev).P] = pΔ3;
+            ps[ev.P] = pΔ3;
+            break;
         }
-        else if (exprᴛ1 == EvProcStop) {
-            var pΔ4 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvProcStop: {
+            var pΔ4 = ps[ev.P];
             if (!pΔ4.running) {
-                return fmt.Errorf("p %d is not running before stop (time %d)"u8, (~ev).P, (~ev).Ts);
+                return fmt.Errorf("p %d is not running before stop (time %d)"u8, ev.P, ev.Ts);
             }
             if (pΔ4.g != 0) {
-                return fmt.Errorf("p %d is running a goroutine %d during stop (time %d)"u8, (~ev).P, pΔ4.g, (~ev).Ts);
+                return fmt.Errorf("p %d is running a goroutine %d during stop (time %d)"u8, ev.P, pΔ4.g, ev.Ts);
             }
             pΔ4.running = false;
 
-            ps[(~ev).P] = pΔ4;
+            ps[ev.P] = pΔ4;
+            break;
         }
-        else if (exprᴛ1 == EvGCStart) {
+        case var ᴛ when ᴛ == EvGCStart: {
             if (evGC != nil) {
-                return fmt.Errorf("previous GC is not ended before a new one (time %d)"u8, (~ev).Ts);
+                return fmt.Errorf("previous GC is not ended before a new one (time %d)"u8, ev.Ts);
             }
             evGC = ev;
             // Attribute this to the global GC state.
-            ev.Value.P = GCP;
+            ev.P = GCP;
+            break;
         }
-        else if (exprᴛ1 == EvGCDone) {
+        case var ᴛ when ᴛ == EvGCDone: {
             if (evGC == nil) {
-                return fmt.Errorf("bogus GC end (time %d)"u8, (~ev).Ts);
+                return fmt.Errorf("bogus GC end (time %d)"u8, ev.Ts);
             }
-            evGC = default!;
+            evGC = default;
+            break;
         }
-        else if (exprᴛ1 == EvSTWStart) {
+        case var ᴛ when ᴛ == EvSTWStart: {
             var evp = ᏑevSTW;
             if (evp.ValueSlot != nil) {
-                return fmt.Errorf("previous STW is not ended before a new one (time %d)"u8, (~ev).Ts);
+                return fmt.Errorf("previous STW is not ended before a new one (time %d)"u8, ev.Ts);
             }
             evp.ValueSlot = ev;
+            break;
         }
-        else if (exprᴛ1 == EvSTWDone) {
+        case var ᴛ when ᴛ == EvSTWDone: {
             var evp = ᏑevSTW;
             if (evp.ValueSlot == nil) {
-                return fmt.Errorf("bogus STW end (time %d)"u8, (~ev).Ts);
+                return fmt.Errorf("bogus STW end (time %d)"u8, ev.Ts);
             }
-            evp.ValueSlot = default!;
+            evp.ValueSlot = default;
+            break;
         }
-        else if (exprᴛ1 == EvGCSweepStart) {
-            var pΔ5 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGCSweepStart: {
+            var pΔ5 = ps[ev.P];
             if (pΔ5.evSweep != nil) {
-                return fmt.Errorf("previous sweeping is not ended before a new one (time %d)"u8, (~ev).Ts);
+                return fmt.Errorf("previous sweeping is not ended before a new one (time %d)"u8, ev.Ts);
             }
             pΔ5.evSweep = ev;
 
-            ps[(~ev).P] = pΔ5;
+            ps[ev.P] = pΔ5;
+            break;
         }
-        else if (exprᴛ1 == EvGCMarkAssistStart) {
-            var g = gs[(~ev).G];
+        case var ᴛ when ᴛ == EvGCMarkAssistStart: {
+            var g = gs[ev.G];
             if (g.evMarkAssist != nil) {
-                return fmt.Errorf("previous mark assist is not ended before a new one (time %d)"u8, (~ev).Ts);
+                return fmt.Errorf("previous mark assist is not ended before a new one (time %d)"u8, ev.Ts);
             }
             g.evMarkAssist = ev;
 
-            gs[(~ev).G] = g;
+            gs[ev.G] = g;
+            break;
         }
-        else if (exprᴛ1 == EvGCMarkAssistDone) {
+        case var ᴛ when ᴛ == EvGCMarkAssistDone: {
             // Unlike most events, mark assists can be in progress when a
             // goroutine starts tracing, so we can't report an error here.
-            var g = gs[(~ev).G];
+            var g = gs[ev.G];
             if (g.evMarkAssist != nil) {
-                g.evMarkAssist = default!;
+                g.evMarkAssist = default;
             }
 
-            gs[(~ev).G] = g;
+            gs[ev.G] = g;
+            break;
         }
-        else if (exprᴛ1 == EvGCSweepDone) {
-            var pΔ6 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGCSweepDone: {
+            var pΔ6 = ps[ev.P];
             if (pΔ6.evSweep == nil) {
-                return fmt.Errorf("bogus sweeping end (time %d)"u8, (~ev).Ts);
+                return fmt.Errorf("bogus sweeping end (time %d)"u8, ev.Ts);
             }
-            pΔ6.evSweep = default!;
+            pΔ6.evSweep = default;
 
-            ps[(~ev).P] = pΔ6;
+            ps[ev.P] = pΔ6;
+            break;
         }
-        else if (exprᴛ1 == EvGoWaiting) {
-            var g = gs[(~ev).G];
+        case var ᴛ when ᴛ == EvGoWaiting: {
+            var g = gs[ev.G];
             if (g.state != gRunnable) {
-                return fmt.Errorf("g %d is not runnable before EvGoWaiting (time %d)"u8, (~ev).G, (~ev).Ts);
+                return fmt.Errorf("g %d is not runnable before EvGoWaiting (time %d)"u8, ev.G, ev.Ts);
             }
             g.state = gWaiting;
             g.ev = ev;
 
-            gs[(~ev).G] = g;
+            gs[ev.G] = g;
+            break;
         }
-        else if (exprᴛ1 == EvGoInSyscall) {
-            var g = gs[(~ev).G];
+        case var ᴛ when ᴛ == EvGoInSyscall: {
+            var g = gs[ev.G];
             if (g.state != gRunnable) {
-                return fmt.Errorf("g %d is not runnable before EvGoInSyscall (time %d)"u8, (~ev).G, (~ev).Ts);
+                return fmt.Errorf("g %d is not runnable before EvGoInSyscall (time %d)"u8, ev.G, ev.Ts);
             }
             g.state = gWaiting;
             g.ev = ev;
 
-            gs[(~ev).G] = g;
+            gs[ev.G] = g;
+            break;
         }
-        else if (exprᴛ1 == EvGoCreate) {
-            var g = gs[(~ev).G];
-            var pΔ7 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGoCreate: {
+            var g = gs[ev.G];
+            var pΔ7 = ps[ev.P];
             {
-                var err = checkRunning(pΔ7, g, ev, true); if (err != default!) {
+                var err = checkRunning(pΔ7, g, ev, true); if (err != nil) {
                     return err;
                 }
             }
             {
-                var (_, ok) = gs[(~ev).Args[0], ꟷ]; if (ok) {
-                    return fmt.Errorf("g %d already exists (time %d)"u8, (~ev).Args[0], (~ev).Ts);
+                var (_, ok) = gs[ev.Args[0], ꟷ]; if (ok) {
+                    return fmt.Errorf("g %d already exists (time %d)"u8, ev.Args[0], ev.Ts);
                 }
             }
-            gs[(~ev).Args[0]] = new postProcessTrace_gdesc(state: gRunnable, ev: ev, evCreate: ev);
+            gs[ev.Args[0]] = new postProcessTrace_gdesc(state: gRunnable, ev: ev, evCreate: ev);
+            break;
         }
-        else if (exprᴛ1 == EvGoStart || exprᴛ1 == EvGoStartLabel) {
-            var g = gs[(~ev).G];
-            var pΔ8 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGoStart || ᴛ == EvGoStartLabel: {
+            var g = gs[ev.G];
+            var pΔ8 = ps[ev.P];
             if (g.state != gRunnable) {
-                return fmt.Errorf("g %d is not runnable before start (time %d)"u8, (~ev).G, (~ev).Ts);
+                return fmt.Errorf("g %d is not runnable before start (time %d)"u8, ev.G, ev.Ts);
             }
             if (pΔ8.g != 0) {
-                return fmt.Errorf("p %d is already running g %d while start g %d (time %d)"u8, (~ev).P, pΔ8.g, (~ev).G, (~ev).Ts);
+                return fmt.Errorf("p %d is already running g %d while start g %d (time %d)"u8, ev.P, pΔ8.g, ev.G, ev.Ts);
             }
             g.state = gRunning;
             g.evStart = ev;
-            pΔ8.g = ev.Value.G;
+            pΔ8.g = ev.G;
             if (g.evCreate != nil) {
-                ev.Value.StkID = (uint32)(~g.evCreate).Args[1];
-                g.evCreate = default!;
+                ev.StkID = (uint32)g.evCreate.Args[1];
+                g.evCreate = default;
             }
 
             if (g.ev != nil) {
-                g.ev = default!;
+                g.ev = default;
             }
 
-            gs[(~ev).G] = g;
-            ps[(~ev).P] = pΔ8;
+            gs[ev.G] = g;
+            ps[ev.P] = pΔ8;
+            break;
         }
-        else if (exprᴛ1 == EvGoEnd || exprᴛ1 == EvGoStop) {
-            var g = gs[(~ev).G];
-            var pΔ9 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGoEnd || ᴛ == EvGoStop: {
+            var g = gs[ev.G];
+            var pΔ9 = ps[ev.P];
             {
-                var err = checkRunning(pΔ9, g, ev, false); if (err != default!) {
+                var err = checkRunning(pΔ9, g, ev, false); if (err != nil) {
                     return err;
                 }
             }
-            g.evStart = default!;
+            g.evStart = default;
             g.state = gDead;
             pΔ9.g = 0;
 
-            if ((~ev).Type == EvGoEnd) { // flush all active regions
-                delete(activeRegions, (~ev).G);
+            if (ev.Type == EvGoEnd) { // flush all active regions
+                delete(activeRegions, ev.G);
             }
 
-            gs[(~ev).G] = g;
-            ps[(~ev).P] = pΔ9;
+            gs[ev.G] = g;
+            ps[ev.P] = pΔ9;
+            break;
         }
-        else if (exprᴛ1 == EvGoSched || exprᴛ1 == EvGoPreempt) {
-            var g = gs[(~ev).G];
-            var pΔ10 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGoSched || ᴛ == EvGoPreempt: {
+            var g = gs[ev.G];
+            var pΔ10 = ps[ev.P];
             {
-                var err = checkRunning(pΔ10, g, ev, false); if (err != default!) {
+                var err = checkRunning(pΔ10, g, ev, false); if (err != nil) {
                     return err;
                 }
             }
             g.state = gRunnable;
-            g.evStart = default!;
+            g.evStart = default;
             pΔ10.g = 0;
             g.ev = ev;
 
-            gs[(~ev).G] = g;
-            ps[(~ev).P] = pΔ10;
+            gs[ev.G] = g;
+            ps[ev.P] = pΔ10;
+            break;
         }
-        else if (exprᴛ1 == EvGoUnblock) {
-            var g = gs[(~ev).G];
-            var pΔ11 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGoUnblock: {
+            var g = gs[ev.G];
+            var pΔ11 = ps[ev.P];
             if (g.state != gRunning) {
-                return fmt.Errorf("g %d is not running while unpark (time %d)"u8, (~ev).G, (~ev).Ts);
+                return fmt.Errorf("g %d is not running while unpark (time %d)"u8, ev.G, ev.Ts);
             }
-            if ((~ev).P != TimerP && pΔ11.g != (~ev).G) {
-                return fmt.Errorf("p %d is not running g %d while unpark (time %d)"u8, (~ev).P, (~ev).G, (~ev).Ts);
+            if (ev.P != TimerP && pΔ11.g != ev.G) {
+                return fmt.Errorf("p %d is not running g %d while unpark (time %d)"u8, ev.P, ev.G, ev.Ts);
             }
-            var g1 = gs[(~ev).Args[0]];
+            var g1 = gs[ev.Args[0]];
             if (g1.state != gWaiting) {
-                return fmt.Errorf("g %d is not waiting before unpark (time %d)"u8, (~ev).Args[0], (~ev).Ts);
+                return fmt.Errorf("g %d is not waiting before unpark (time %d)"u8, ev.Args[0], ev.Ts);
             }
-            if (g1.ev != nil && (~g1.ev).Type == EvGoBlockNet) {
-                ev.Value.P = NetpollP;
+            if (g1.ev != nil && g1.ev.Type == EvGoBlockNet) {
+                ev.P = NetpollP;
             }
             g1.state = gRunnable;
             g1.ev = ev;
-            gs[(~ev).Args[0]] = g1;
+            gs[ev.Args[0]] = g1;
+            break;
         }
-        else if (exprᴛ1 == EvGoSysCall) {
-            var g = gs[(~ev).G];
-            var pΔ12 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGoSysCall: {
+            var g = gs[ev.G];
+            var pΔ12 = ps[ev.P];
             {
-                var err = checkRunning(pΔ12, g, ev, false); if (err != default!) {
+                var err = checkRunning(pΔ12, g, ev, false); if (err != nil) {
                     return err;
                 }
             }
             g.ev = ev;
 
-            gs[(~ev).G] = g;
+            gs[ev.G] = g;
+            break;
         }
-        else if (exprᴛ1 == EvGoSysBlock) {
-            var g = gs[(~ev).G];
-            var pΔ13 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGoSysBlock: {
+            var g = gs[ev.G];
+            var pΔ13 = ps[ev.P];
             {
-                var err = checkRunning(pΔ13, g, ev, false); if (err != default!) {
+                var err = checkRunning(pΔ13, g, ev, false); if (err != nil) {
                     return err;
                 }
             }
             g.state = gWaiting;
-            g.evStart = default!;
+            g.evStart = default;
             pΔ13.g = 0;
 
-            gs[(~ev).G] = g;
-            ps[(~ev).P] = pΔ13;
+            gs[ev.G] = g;
+            ps[ev.P] = pΔ13;
+            break;
         }
-        else if (exprᴛ1 == EvGoSysExit) {
-            var g = gs[(~ev).G];
+        case var ᴛ when ᴛ == EvGoSysExit: {
+            var g = gs[ev.G];
             if (g.state != gWaiting) {
-                return fmt.Errorf("g %d is not waiting during syscall exit (time %d)"u8, (~ev).G, (~ev).Ts);
+                return fmt.Errorf("g %d is not waiting during syscall exit (time %d)"u8, ev.G, ev.Ts);
             }
             g.state = gRunnable;
             g.ev = ev;
 
-            gs[(~ev).G] = g;
+            gs[ev.G] = g;
+            break;
         }
-        else if (exprᴛ1 == EvGoSleep || exprᴛ1 == EvGoBlock || exprᴛ1 == EvGoBlockSend || exprᴛ1 == EvGoBlockRecv || exprᴛ1 == EvGoBlockSelect || exprᴛ1 == EvGoBlockSync || exprᴛ1 == EvGoBlockCond || exprᴛ1 == EvGoBlockNet || exprᴛ1 == EvGoBlockGC) {
-            var g = gs[(~ev).G];
-            var pΔ14 = ps[(~ev).P];
+        case var ᴛ when ᴛ == EvGoSleep || ᴛ == EvGoBlock || ᴛ == EvGoBlockSend || ᴛ == EvGoBlockRecv || ᴛ == EvGoBlockSelect || ᴛ == EvGoBlockSync || ᴛ == EvGoBlockCond || ᴛ == EvGoBlockNet || ᴛ == EvGoBlockGC: {
+            var g = gs[ev.G];
+            var pΔ14 = ps[ev.P];
             {
-                var err = checkRunning(pΔ14, g, ev, false); if (err != default!) {
+                var err = checkRunning(pΔ14, g, ev, false); if (err != nil) {
                     return err;
                 }
             }
             g.state = gWaiting;
             g.ev = ev;
-            g.evStart = default!;
+            g.evStart = default;
             pΔ14.g = 0;
 
-            gs[(~ev).G] = g;
-            ps[(~ev).P] = pΔ14;
+            gs[ev.G] = g;
+            ps[ev.P] = pΔ14;
+            break;
         }
-        else if (exprᴛ1 == EvUserTaskCreate) {
-            var taskid = (~ev).Args[0];
+        case var ᴛ when ᴛ == EvUserTaskCreate: {
+            var taskid = ev.Args[0];
             {
                 var (prevEv, ok) = tasks[taskid, ꟷ]; if (ok) {
                     return fmt.Errorf("task id conflicts (id:%d), %q vs %q"u8, taskid, ev.OrTypedNil(), prevEv.OrTypedNil());
                 }
             }
-            tasks[(~ev).Args[0]] = ev;
+            tasks[ev.Args[0]] = ev;
+            break;
         }
-        else if (exprᴛ1 == EvUserTaskEnd) {
-            var taskid = (~ev).Args[0];
+        case var ᴛ when ᴛ == EvUserTaskEnd: {
+            var taskid = ev.Args[0];
             delete(tasks, taskid);
+            break;
         }
-        else if (exprᴛ1 == EvUserRegion) {
-            var mode = (~ev).Args[1];
-            var regions = activeRegions[(~ev).G];
-            if (mode == 0){ // region start
-                activeRegions[(~ev).G] = builtin.append(regions, ev); // push
-            } else 
-            if (mode == 1){ // region end
+        case var ᴛ when ᴛ == EvUserRegion: {
+            var mode = ev.Args[1];
+            var regions = activeRegions[ev.G];
+            if (mode == 0) { // region start
+                activeRegions[ev.G] = builtin.append(regions, ev); // push
+            } else if (mode == 1) { // region end
                 nint n = len(regions);
                 if (n > 0) { // matching region start event is in the trace.
                     var s = regions[n - 1];
-                    if ((~s).Args[0] != (~ev).Args[0] || (~s).Args[2] != (~ev).Args[2]) { // task id, region name mismatch
-                        return fmt.Errorf("misuse of region in goroutine %d: span end %q when the inner-most active span start event is %q"u8, (~ev).G, ev.OrTypedNil(), s.OrTypedNil());
+                    if (s.Args[0] != ev.Args[0] || s.Args[2] != ev.Args[2]) { // task id, region name mismatch
+                        return fmt.Errorf("misuse of region in goroutine %d: span end %q when the inner-most active span start event is %q"u8, ev.G, ev.OrTypedNil(), s.OrTypedNil());
                     }
 
-                    if (n > 1){
-                        activeRegions[(~ev).G] = regions.slice(0, n - 1);
+                    if (n > 1) {
+                        activeRegions[ev.G] = regions.slice(0, n - 1);
                     } else {
-                        delete(activeRegions, (~ev).G);
+                        delete(activeRegions, ev.G);
                     }
                 }
             } else {
                 return fmt.Errorf("invalid user region mode: %q"u8, ev.OrTypedNil());
             }
-        }
+            break;
+        }}
 
-        if ((~ev).StkID != 0 && len(p.stacks[(~ev).StkID]) == 0) {
+        if (ev.StkID != 0 && len(p.stacks[ev.StkID]) == 0) {
             // Make sure events don't refer to stacks that don't exist or to
             // stacks with zero frames. Neither of these should be possible, but
             // better be safe than sorry.
 
-            ev.Value.StkID = 0;
+            ev.StkID = 0;
         }
     }
 
     // TODO(mknyszek): restore stacks for EvGoStart events.
-    return default!;
+    return default;
 }
 
 internal static error errMalformedVarint = errors.New("malformatted base-128 varint"u8);
@@ -1428,17 +1465,17 @@ internal static (uint64, error) readVal(this ref parser p) {
         return (0, errMalformedVarint);
     }
     p.off += n;
-    return (v, default!);
+    return (v, default);
 }
 
 internal static (uint64 v, slice<byte> rem, error err) readValFrom(slice<byte> buf) {
-    uint64 v = default!;
+    uint64 v = default;
 
     (v, var n) = binary.Uvarint(buf);
     if (n <= 0) {
-        return (0, default!, errMalformedVarint);
+        return (0, default, errMalformedVarint);
     }
-    return (v, buf.slice(n), default!);
+    return (v, buf.slice(n), default);
 }
 
 public static @string String(this ref Event ev) {
@@ -1462,10 +1499,10 @@ internal static nint argNum(this ref rawEvent raw) {
     if ((~desc).Stack) {
         narg++;
     }
-    var exprᴛ1 = raw.typ;
-    if (exprᴛ1 == EvBatch || exprᴛ1 == EvFrequency || exprᴛ1 == EvTimerGoroutine) {
+    switch (raw.typ) {
+    case var ᴛ when ᴛ == EvBatch || ᴛ == EvFrequency || ᴛ == EvTimerGoroutine: {
         return narg;
-    }
+    }}
     narg++; // timestamp
     return narg;
 }
@@ -1474,56 +1511,56 @@ partial struct EventType /*num:uint8*/;
 
 // Event types in the trace.
 // Verbatim copy from src/runtime/trace.go with the "trace" prefix removed.
-public static EventType EvNone => 0;             // unused
-public static EventType EvBatch => 1;            // start of per-P batch of events [pid, timestamp]
-public static EventType EvFrequency => 2;        // contains tracer timer frequency [frequency (ticks per second)]
-public static EventType EvStack => 3;            // stack [stack id, number of PCs, array of {PC, func string ID, file string ID, line}]
-public static EventType EvGomaxprocs => 4;       // current value of GOMAXPROCS [timestamp, GOMAXPROCS, stack id]
-public static EventType EvProcStart => 5;        // start of P [timestamp, thread id]
-public static EventType EvProcStop => 6;         // stop of P [timestamp]
-public static EventType EvGCStart => 7;          // GC start [timestamp, seq, stack id]
-public static EventType EvGCDone => 8;           // GC done [timestamp]
-public static EventType EvSTWStart => 9;         // GC mark termination start [timestamp, kind]
-public static EventType EvSTWDone => 10;          // GC mark termination done [timestamp]
-public static EventType EvGCSweepStart => 11;     // GC sweep start [timestamp, stack id]
-public static EventType EvGCSweepDone => 12;      // GC sweep done [timestamp, swept, reclaimed]
-public static EventType EvGoCreate => 13;         // goroutine creation [timestamp, new goroutine id, new stack id, stack id]
-public static EventType EvGoStart => 14;          // goroutine starts running [timestamp, goroutine id, seq]
-public static EventType EvGoEnd => 15;            // goroutine ends [timestamp]
-public static EventType EvGoStop => 16;           // goroutine stops (like in select{}) [timestamp, stack]
-public static EventType EvGoSched => 17;          // goroutine calls Gosched [timestamp, stack]
-public static EventType EvGoPreempt => 18;        // goroutine is preempted [timestamp, stack]
-public static EventType EvGoSleep => 19;          // goroutine calls Sleep [timestamp, stack]
-public static EventType EvGoBlock => 20;          // goroutine blocks [timestamp, stack]
-public static EventType EvGoUnblock => 21;        // goroutine is unblocked [timestamp, goroutine id, seq, stack]
-public static EventType EvGoBlockSend => 22;      // goroutine blocks on chan send [timestamp, stack]
-public static EventType EvGoBlockRecv => 23;      // goroutine blocks on chan recv [timestamp, stack]
-public static EventType EvGoBlockSelect => 24;    // goroutine blocks on select [timestamp, stack]
-public static EventType EvGoBlockSync => 25;      // goroutine blocks on Mutex/RWMutex [timestamp, stack]
-public static EventType EvGoBlockCond => 26;      // goroutine blocks on Cond [timestamp, stack]
-public static EventType EvGoBlockNet => 27;       // goroutine blocks on network [timestamp, stack]
-public static EventType EvGoSysCall => 28;        // syscall enter [timestamp, stack]
-public static EventType EvGoSysExit => 29;        // syscall exit [timestamp, goroutine id, seq, real timestamp]
-public static EventType EvGoSysBlock => 30;       // syscall blocks [timestamp]
-public static EventType EvGoWaiting => 31;        // denotes that goroutine is blocked when tracing starts [timestamp, goroutine id]
-public static EventType EvGoInSyscall => 32;      // denotes that goroutine is in syscall when tracing starts [timestamp, goroutine id]
-public static EventType EvHeapAlloc => 33;        // gcController.heapLive change [timestamp, heap live bytes]
-public static EventType EvHeapGoal => 34;         // gcController.heapGoal change [timestamp, heap goal bytes]
-public static EventType EvTimerGoroutine => 35;   // denotes timer goroutine [timer goroutine id]
-public static EventType EvFutileWakeup => 36;     // denotes that the previous wakeup of this goroutine was futile [timestamp]
-public static EventType EvString => 37;           // string dictionary entry [ID, length, string]
-public static EventType EvGoStartLocal => 38;     // goroutine starts running on the same P as the last event [timestamp, goroutine id]
-public static EventType EvGoUnblockLocal => 39;   // goroutine is unblocked on the same P as the last event [timestamp, goroutine id, stack]
-public static EventType EvGoSysExitLocal => 40;   // syscall exit on the same P as the last event [timestamp, goroutine id, real timestamp]
-public static EventType EvGoStartLabel => 41;     // goroutine starts running with label [timestamp, goroutine id, seq, label string id]
-public static EventType EvGoBlockGC => 42;        // goroutine blocks on GC assist [timestamp, stack]
+public static EventType EvNone => 0;               // unused
+public static EventType EvBatch => 1;              // start of per-P batch of events [pid, timestamp]
+public static EventType EvFrequency => 2;          // contains tracer timer frequency [frequency (ticks per second)]
+public static EventType EvStack => 3;              // stack [stack id, number of PCs, array of {PC, func string ID, file string ID, line}]
+public static EventType EvGomaxprocs => 4;         // current value of GOMAXPROCS [timestamp, GOMAXPROCS, stack id]
+public static EventType EvProcStart => 5;          // start of P [timestamp, thread id]
+public static EventType EvProcStop => 6;           // stop of P [timestamp]
+public static EventType EvGCStart => 7;            // GC start [timestamp, seq, stack id]
+public static EventType EvGCDone => 8;             // GC done [timestamp]
+public static EventType EvSTWStart => 9;           // GC mark termination start [timestamp, kind]
+public static EventType EvSTWDone => 10;           // GC mark termination done [timestamp]
+public static EventType EvGCSweepStart => 11;      // GC sweep start [timestamp, stack id]
+public static EventType EvGCSweepDone => 12;       // GC sweep done [timestamp, swept, reclaimed]
+public static EventType EvGoCreate => 13;          // goroutine creation [timestamp, new goroutine id, new stack id, stack id]
+public static EventType EvGoStart => 14;           // goroutine starts running [timestamp, goroutine id, seq]
+public static EventType EvGoEnd => 15;             // goroutine ends [timestamp]
+public static EventType EvGoStop => 16;            // goroutine stops (like in select{}) [timestamp, stack]
+public static EventType EvGoSched => 17;           // goroutine calls Gosched [timestamp, stack]
+public static EventType EvGoPreempt => 18;         // goroutine is preempted [timestamp, stack]
+public static EventType EvGoSleep => 19;           // goroutine calls Sleep [timestamp, stack]
+public static EventType EvGoBlock => 20;           // goroutine blocks [timestamp, stack]
+public static EventType EvGoUnblock => 21;         // goroutine is unblocked [timestamp, goroutine id, seq, stack]
+public static EventType EvGoBlockSend => 22;       // goroutine blocks on chan send [timestamp, stack]
+public static EventType EvGoBlockRecv => 23;       // goroutine blocks on chan recv [timestamp, stack]
+public static EventType EvGoBlockSelect => 24;     // goroutine blocks on select [timestamp, stack]
+public static EventType EvGoBlockSync => 25;       // goroutine blocks on Mutex/RWMutex [timestamp, stack]
+public static EventType EvGoBlockCond => 26;       // goroutine blocks on Cond [timestamp, stack]
+public static EventType EvGoBlockNet => 27;        // goroutine blocks on network [timestamp, stack]
+public static EventType EvGoSysCall => 28;         // syscall enter [timestamp, stack]
+public static EventType EvGoSysExit => 29;         // syscall exit [timestamp, goroutine id, seq, real timestamp]
+public static EventType EvGoSysBlock => 30;        // syscall blocks [timestamp]
+public static EventType EvGoWaiting => 31;         // denotes that goroutine is blocked when tracing starts [timestamp, goroutine id]
+public static EventType EvGoInSyscall => 32;       // denotes that goroutine is in syscall when tracing starts [timestamp, goroutine id]
+public static EventType EvHeapAlloc => 33;         // gcController.heapLive change [timestamp, heap live bytes]
+public static EventType EvHeapGoal => 34;          // gcController.heapGoal change [timestamp, heap goal bytes]
+public static EventType EvTimerGoroutine => 35;    // denotes timer goroutine [timer goroutine id]
+public static EventType EvFutileWakeup => 36;      // denotes that the previous wakeup of this goroutine was futile [timestamp]
+public static EventType EvString => 37;            // string dictionary entry [ID, length, string]
+public static EventType EvGoStartLocal => 38;      // goroutine starts running on the same P as the last event [timestamp, goroutine id]
+public static EventType EvGoUnblockLocal => 39;    // goroutine is unblocked on the same P as the last event [timestamp, goroutine id, stack]
+public static EventType EvGoSysExitLocal => 40;    // syscall exit on the same P as the last event [timestamp, goroutine id, real timestamp]
+public static EventType EvGoStartLabel => 41;      // goroutine starts running with label [timestamp, goroutine id, seq, label string id]
+public static EventType EvGoBlockGC => 42;         // goroutine blocks on GC assist [timestamp, stack]
 public static EventType EvGCMarkAssistStart => 43; // GC mark assist start [timestamp, stack]
-public static EventType EvGCMarkAssistDone => 44; // GC mark assist done [timestamp]
-public static EventType EvUserTaskCreate => 45;   // trace.NewTask [timestamp, internal task id, internal parent id, stack, name string]
-public static EventType EvUserTaskEnd => 46;      // end of task [timestamp, internal task id, stack]
-public static EventType EvUserRegion => 47;       // trace.WithRegion [timestamp, internal task id, mode(0:start, 1:end), name string]
-public static EventType EvUserLog => 48;          // trace.Log [timestamp, internal id, key string id, stack, value string]
-public static EventType EvCPUSample => 49;        // CPU profiling sample [timestamp, stack, real timestamp, real P id (-1 when absent), goroutine id]
+public static EventType EvGCMarkAssistDone => 44;  // GC mark assist done [timestamp]
+public static EventType EvUserTaskCreate => 45;    // trace.NewTask [timestamp, internal task id, internal parent id, stack, name string]
+public static EventType EvUserTaskEnd => 46;       // end of task [timestamp, internal task id, stack]
+public static EventType EvUserRegion => 47;        // trace.WithRegion [timestamp, internal task id, mode(0:start, 1:end), name string]
+public static EventType EvUserLog => 48;           // trace.Log [timestamp, internal id, key string id, stack, value string]
+public static EventType EvCPUSample => 49;         // CPU profiling sample [timestamp, stack, real timestamp, real P id (-1 when absent), goroutine id]
 public static EventType EvCount => 50;
 
 partial struct EventDescriptionsᴛ1 /*dyn*/ {
@@ -1534,63 +1571,63 @@ partial struct EventDescriptionsᴛ1 /*dyn*/ {
     public slice<@string> SArgs; // string arguments
 }
 [GoLazy] partial class lazyᴛEventDescriptions { public static readonly ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new StaticBox<array<EventDescriptionsᴛ1>>(new golib.SparseArray<EventDescriptionsᴛ1>{
-    [EvNone] = new("None"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvBatch] = new("Batch"u8, 5, false, new @string[]{"p"u8, "ticks"u8}.slice(), default!), // in 1.5 format it was {"p", "seq", "ticks"}
-    [EvFrequency] = new("Frequency"u8, 5, false, new @string[]{"freq"u8}.slice(), default!), // in 1.5 format it was {"freq", "unused"}
-    [EvStack] = new("Stack"u8, 5, false, new @string[]{"id"u8, "siz"u8}.slice(), default!),
-    [EvGomaxprocs] = new("Gomaxprocs"u8, 5, true, new @string[]{"procs"u8}.slice(), default!),
-    [EvProcStart] = new("ProcStart"u8, 5, false, new @string[]{"thread"u8}.slice(), default!),
-    [EvProcStop] = new("ProcStop"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvGCStart] = new("GCStart"u8, 5, true, new @string[]{"seq"u8}.slice(), default!), // in 1.5 format it was {}
-    [EvGCDone] = new("GCDone"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvSTWStart] = new("GCSTWStart"u8, 5, false, new @string[]{"kindid"u8}.slice(), new @string[]{"kind"u8}.slice()), // <= 1.9, args was {} (implicitly {0})
-    [EvSTWDone] = new("GCSTWDone"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvGCSweepStart] = new("GCSweepStart"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGCSweepDone] = new("GCSweepDone"u8, 5, false, new @string[]{"swept"u8, "reclaimed"u8}.slice(), default!), // before 1.9, format was {}
-    [EvGoCreate] = new("GoCreate"u8, 5, true, new @string[]{"g"u8, "stack"u8}.slice(), default!),
-    [EvGoStart] = new("GoStart"u8, 5, false, new @string[]{"g"u8, "seq"u8}.slice(), default!), // in 1.5 format it was {"g"}
-    [EvGoEnd] = new("GoEnd"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvGoStop] = new("GoStop"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoSched] = new("GoSched"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoPreempt] = new("GoPreempt"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoSleep] = new("GoSleep"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoBlock] = new("GoBlock"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoUnblock] = new("GoUnblock"u8, 5, true, new @string[]{"g"u8, "seq"u8}.slice(), default!), // in 1.5 format it was {"g"}
-    [EvGoBlockSend] = new("GoBlockSend"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoBlockRecv] = new("GoBlockRecv"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoBlockSelect] = new("GoBlockSelect"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoBlockSync] = new("GoBlockSync"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoBlockCond] = new("GoBlockCond"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoBlockNet] = new("GoBlockNet"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoSysCall] = new("GoSysCall"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoSysExit] = new("GoSysExit"u8, 5, false, new @string[]{"g"u8, "seq"u8, "ts"u8}.slice(), default!),
-    [EvGoSysBlock] = new("GoSysBlock"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvGoWaiting] = new("GoWaiting"u8, 5, false, new @string[]{"g"u8}.slice(), default!),
-    [EvGoInSyscall] = new("GoInSyscall"u8, 5, false, new @string[]{"g"u8}.slice(), default!),
-    [EvHeapAlloc] = new("HeapAlloc"u8, 5, false, new @string[]{"mem"u8}.slice(), default!),
-    [EvHeapGoal] = new("HeapGoal"u8, 5, false, new @string[]{"mem"u8}.slice(), default!),
-    [EvTimerGoroutine] = new("TimerGoroutine"u8, 5, false, new @string[]{"g"u8}.slice(), default!), // in 1.5 format it was {"g", "unused"}
-    [EvFutileWakeup] = new("FutileWakeup"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvString] = new("String"u8, 7, false, new @string[]{}.slice(), default!),
-    [EvGoStartLocal] = new("GoStartLocal"u8, 7, false, new @string[]{"g"u8}.slice(), default!),
-    [EvGoUnblockLocal] = new("GoUnblockLocal"u8, 7, true, new @string[]{"g"u8}.slice(), default!),
-    [EvGoSysExitLocal] = new("GoSysExitLocal"u8, 7, false, new @string[]{"g"u8, "ts"u8}.slice(), default!),
-    [EvGoStartLabel] = new("GoStartLabel"u8, 8, false, new @string[]{"g"u8, "seq"u8, "labelid"u8}.slice(), new @string[]{"label"u8}.slice()),
-    [EvGoBlockGC] = new("GoBlockGC"u8, 8, true, new @string[]{}.slice(), default!),
-    [EvGCMarkAssistStart] = new("GCMarkAssistStart"u8, 9, true, new @string[]{}.slice(), default!),
-    [EvGCMarkAssistDone] = new("GCMarkAssistDone"u8, 9, false, new @string[]{}.slice(), default!),
-    [EvUserTaskCreate] = new("UserTaskCreate"u8, 11, true, new @string[]{"taskid"u8, "pid"u8, "typeid"u8}.slice(), new @string[]{"name"u8}.slice()),
-    [EvUserTaskEnd] = new("UserTaskEnd"u8, 11, true, new @string[]{"taskid"u8}.slice(), default!),
-    [EvUserRegion] = new("UserRegion"u8, 11, true, new @string[]{"taskid"u8, "mode"u8, "typeid"u8}.slice(), new @string[]{"name"u8}.slice()),
-    [EvUserLog] = new("UserLog"u8, 11, true, new @string[]{"id"u8, "keyid"u8}.slice(), new @string[]{"category"u8, "message"u8}.slice()),
-    [EvCPUSample] = new("CPUSample"u8, 19, true, new @string[]{"ts"u8, "p"u8, "g"u8}.slice(), default!)
+    [EvNone] = new("None"u8, 5, false, slice<@string>([]), default),
+    [EvBatch] = new("Batch"u8, 5, false, slice<@string>(["p"u8, "ticks"u8]), default), // in 1.5 format it was {"p", "seq", "ticks"}
+    [EvFrequency] = new("Frequency"u8, 5, false, slice<@string>(["freq"u8]), default), // in 1.5 format it was {"freq", "unused"}
+    [EvStack] = new("Stack"u8, 5, false, slice<@string>(["id"u8, "siz"u8]), default),
+    [EvGomaxprocs] = new("Gomaxprocs"u8, 5, true, slice<@string>(["procs"u8]), default),
+    [EvProcStart] = new("ProcStart"u8, 5, false, slice<@string>(["thread"u8]), default),
+    [EvProcStop] = new("ProcStop"u8, 5, false, slice<@string>([]), default),
+    [EvGCStart] = new("GCStart"u8, 5, true, slice<@string>(["seq"u8]), default), // in 1.5 format it was {}
+    [EvGCDone] = new("GCDone"u8, 5, false, slice<@string>([]), default),
+    [EvSTWStart] = new("GCSTWStart"u8, 5, false, slice<@string>(["kindid"u8]), slice<@string>(["kind"u8])), // <= 1.9, args was {} (implicitly {0})
+    [EvSTWDone] = new("GCSTWDone"u8, 5, false, slice<@string>([]), default),
+    [EvGCSweepStart] = new("GCSweepStart"u8, 5, true, slice<@string>([]), default),
+    [EvGCSweepDone] = new("GCSweepDone"u8, 5, false, slice<@string>(["swept"u8, "reclaimed"u8]), default), // before 1.9, format was {}
+    [EvGoCreate] = new("GoCreate"u8, 5, true, slice<@string>(["g"u8, "stack"u8]), default),
+    [EvGoStart] = new("GoStart"u8, 5, false, slice<@string>(["g"u8, "seq"u8]), default), // in 1.5 format it was {"g"}
+    [EvGoEnd] = new("GoEnd"u8, 5, false, slice<@string>([]), default),
+    [EvGoStop] = new("GoStop"u8, 5, true, slice<@string>([]), default),
+    [EvGoSched] = new("GoSched"u8, 5, true, slice<@string>([]), default),
+    [EvGoPreempt] = new("GoPreempt"u8, 5, true, slice<@string>([]), default),
+    [EvGoSleep] = new("GoSleep"u8, 5, true, slice<@string>([]), default),
+    [EvGoBlock] = new("GoBlock"u8, 5, true, slice<@string>([]), default),
+    [EvGoUnblock] = new("GoUnblock"u8, 5, true, slice<@string>(["g"u8, "seq"u8]), default), // in 1.5 format it was {"g"}
+    [EvGoBlockSend] = new("GoBlockSend"u8, 5, true, slice<@string>([]), default),
+    [EvGoBlockRecv] = new("GoBlockRecv"u8, 5, true, slice<@string>([]), default),
+    [EvGoBlockSelect] = new("GoBlockSelect"u8, 5, true, slice<@string>([]), default),
+    [EvGoBlockSync] = new("GoBlockSync"u8, 5, true, slice<@string>([]), default),
+    [EvGoBlockCond] = new("GoBlockCond"u8, 5, true, slice<@string>([]), default),
+    [EvGoBlockNet] = new("GoBlockNet"u8, 5, true, slice<@string>([]), default),
+    [EvGoSysCall] = new("GoSysCall"u8, 5, true, slice<@string>([]), default),
+    [EvGoSysExit] = new("GoSysExit"u8, 5, false, slice<@string>(["g"u8, "seq"u8, "ts"u8]), default),
+    [EvGoSysBlock] = new("GoSysBlock"u8, 5, false, slice<@string>([]), default),
+    [EvGoWaiting] = new("GoWaiting"u8, 5, false, slice<@string>(["g"u8]), default),
+    [EvGoInSyscall] = new("GoInSyscall"u8, 5, false, slice<@string>(["g"u8]), default),
+    [EvHeapAlloc] = new("HeapAlloc"u8, 5, false, slice<@string>(["mem"u8]), default),
+    [EvHeapGoal] = new("HeapGoal"u8, 5, false, slice<@string>(["mem"u8]), default),
+    [EvTimerGoroutine] = new("TimerGoroutine"u8, 5, false, slice<@string>(["g"u8]), default), // in 1.5 format it was {"g", "unused"}
+    [EvFutileWakeup] = new("FutileWakeup"u8, 5, false, slice<@string>([]), default),
+    [EvString] = new("String"u8, 7, false, slice<@string>([]), default),
+    [EvGoStartLocal] = new("GoStartLocal"u8, 7, false, slice<@string>(["g"u8]), default),
+    [EvGoUnblockLocal] = new("GoUnblockLocal"u8, 7, true, slice<@string>(["g"u8]), default),
+    [EvGoSysExitLocal] = new("GoSysExitLocal"u8, 7, false, slice<@string>(["g"u8, "ts"u8]), default),
+    [EvGoStartLabel] = new("GoStartLabel"u8, 8, false, slice<@string>(["g"u8, "seq"u8, "labelid"u8]), slice<@string>(["label"u8])),
+    [EvGoBlockGC] = new("GoBlockGC"u8, 8, true, slice<@string>([]), default),
+    [EvGCMarkAssistStart] = new("GCMarkAssistStart"u8, 9, true, slice<@string>([]), default),
+    [EvGCMarkAssistDone] = new("GCMarkAssistDone"u8, 9, false, slice<@string>([]), default),
+    [EvUserTaskCreate] = new("UserTaskCreate"u8, 11, true, slice<@string>(["taskid"u8, "pid"u8, "typeid"u8]), slice<@string>(["name"u8])),
+    [EvUserTaskEnd] = new("UserTaskEnd"u8, 11, true, slice<@string>(["taskid"u8]), default),
+    [EvUserRegion] = new("UserRegion"u8, 11, true, slice<@string>(["taskid"u8, "mode"u8, "typeid"u8]), slice<@string>(["name"u8])),
+    [EvUserLog] = new("UserLog"u8, 11, true, slice<@string>(["id"u8, "keyid"u8]), slice<@string>(["category"u8, "message"u8])),
+    [EvCPUSample] = new("CPUSample"u8, 19, true, slice<@string>(["ts"u8, "p"u8, "g"u8]), default)
 }.array(256)); }
 public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ((StaticBox<array<EventDescriptionsᴛ1>>)ᏑEventDescriptions).ValueSlot;
 
 //gcassert:inline
 internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {
     if (size == 0) {
-        return default!;
+        return default;
     }
 
     // Stacks are plentiful but small. For our "Staticcheck on std" trace with
@@ -1606,15 +1643,14 @@ internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {
 }
 
 public static ΔSTWReason STWReason(this ref Trace tr, uint64 kindID) {
-    if (tr.Version < 21){
-        if (kindID == 0 || kindID == 1){
+    if (tr.Version < 21) {
+        if (kindID == 0 || kindID == 1) {
             return (ΔSTWReason)(nint)(kindID + 1);
         } else {
             return STWUnknown;
         }
-    } else 
-    if (tr.Version == 21){
-        if (kindID < NumSTWReasons){
+    } else if (tr.Version == 21) {
+        if (kindID < NumSTWReasons) {
             return (ΔSTWReason)(nint)kindID;
         } else {
             return STWUnknown;

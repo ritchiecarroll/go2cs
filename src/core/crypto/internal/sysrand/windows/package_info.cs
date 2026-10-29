@@ -10,17 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -66,7 +55,7 @@ using static go.crypto.@internal.sysrand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/sysrand/rand.go", "rand.cs", "ABQmgqwACxYACQKmgqSAgoKClJSCxAANEIKClIKUgriClJQ=", "63-65:1")]
+[assembly: go.GoPositionMap("crypto/internal/sysrand/rand.go", "rand.cs", "ABQmgqwACxYACQKmgqSAgoKClJSCxAANEIKClIKUgriClJQ=", "63-65:1", "", "", "52:25")]
 [assembly: go.GoPositionMap("crypto/internal/sysrand/rand_windows.go", "rand_windows.cs", "AAoSgg==")]
 // </GoSourcePositionMaps>
 

@@ -49,6 +49,10 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Point))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -58,10 +62,10 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519.go", "edwards25519.cs", "ACdSooKCAAwekoKCgti6kurekqaCgoKCgqaCgoKCrOKCrsaipoKUooKClIKCpgAFEgAPEoKCAAcQgqaCpoKCuIKUgoKClKaygqqSgoKCpoKCgoKmgoKCgoKmgoKCgoK46pSCgoKCgqaCgoKUgoKCgoKssoKCgqiSgoKCpoLkgpSCgoKUlIKCgoKmguSClIKCgpSUgoKCgqaC5IKUgoKUlIKCgoKmguSClIKClJSCgoKCqpLEgoKCgoKUgpSCgqyygoKCgoKokpSygoKClKyygoKCgqiSgoKCqLKCgqiygoI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar.go", "scalar.cs", "AB10AB0CqrSCqOSCqOSCqNSCqOSCqMKCAAUS4oIADRyCgoKClNy0usKClIKCkpLs0oKUgqaSpLiYooKmgoKClIKCgriCgoKCAAUcAA8KgqqigoKCgqiWoqaygoKSqMKCgoKSgoKCgoKCrOiCgpSCkoKmgpSCpoKUgoKCgoKClKa4lO6CpoKClIKmlKaCgoKmpoKCuIKCgqY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar.go", "scalar.cs", "AB10AB0CqrSCqOSCqOSCqNSCqOSCqMKCAAUS4oIADRyCgoKClNy0usKClIKCkpLs0oKUgqaSpLiYooKmgoKClIKCgriCgoKCAAUcAA8KgqqigoKCgqiWoqaygoKSqMKCgoKSgoKCgoKCrOiCgpSCgoKmgpSCpoKUgoKCgoKClKa4lO6CpoKClIKmlKaCgoKmpoKCuIKCgqY=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar_fiat.go", "scalar_fiat.cs", "ADqOAQAPAoKCAAIcAAsCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAhwACwKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAIcAAsCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggACGgAKAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAigAEQKCAAIaAAoCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggACGgAKAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAigAEQKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAIqABQCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult.go", "scalarmult.cs", "AAkWooKCgoKCuAAJGMIADBqUgoKmgoKCgriCgoKCgoKCgqaCgoKmrLKUggAIEqaCgoKUgoKCgoKCgoKCgoKCgpSCqqKClAAJGMIADyCCgqaCpoKCgriCgoKCyoKmgoKCkoKCgqaCgoKSgoKCpqaC", "12-20:1;128-130:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/tables.go", "tables.cs", "AB5A1oKSkri6toKSkpS6toKSgpKSgrqSgpKCkpKCvsSClIKUgqaopIKUgpSCpqiyqLI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult.go", "scalarmult.cs", "AAkWooKCgoKCuAAJGMIADBqUgoKmgoKCgriCgoKCgoKCgqaCgoKmrLKUggAIEqaCgoKUgoKCgoKCgoKCgoKCgpSCqqKClAAJGMIADyCCgqaCpoKCgriCgoKCyoKmgoKCgoKCgqaCgoKCgoKCpqaC", "12-20:1;128-130:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/tables.go", "tables.cs", "AB5A1oKCgri6toKCgpS6toKCgoKCgrqSgoKCgoKCvsSClIKUgqaopIKUgpSCpqiyqLI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

@@ -20,7 +20,7 @@ public static @string FormatUint(uint64 i, nint @base) {
         nint j = formatBase10(a[..], i);
         return (@string)(a.slice(j));
     }
-    var (_, s) = formatBits(default!, i, @base, false, false);
+    var (_, s) = formatBits(default, i, @base, false, false);
     return s;
 }
 
@@ -40,11 +40,11 @@ public static @string FormatInt(int64 i, nint @base) {
         nint j = formatBase10(a[..], u);
         if (i < 0) {
             j--;
-            a[j] = (rune)'-';
+            a[j] = (byte)'-';
         }
         return (@string)(a.slice(j));
     }
-    var (_, s) = formatBits(default!, (uint64)i, @base, i < 0, false);
+    var (_, s) = formatBits(default, (uint64)i, @base, i < 0, false);
     return s;
 }
 
@@ -58,7 +58,7 @@ public static @string Itoa(nint i) {
 public static slice<byte> AppendInt(slice<byte> dst, int64 i, nint @base) {
     var u = (uint64)i;
     if (i < 0) {
-        dst = append(dst, (byte)((rune)'-'));
+        dst = append(dst, (byte)'-');
         u = ((uint64)0 - u);
     }
     return AppendUint(dst, u, @base);
@@ -88,15 +88,15 @@ internal static readonly @string digits = "0123456789abcdefghijklmnopqrstuvwxyz"
 // as the second result value.
 // The caller is expected to have handled base 10 separately for speed.
 internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u, nint @base, bool neg, bool append_) {
-    slice<byte> d = default!;
-    @string s = default!;
+    slice<byte> d = default;
+    @string s = default;
 
     if (@base < 2 || @base == 10 || @base > len(digits)) {
         throw panic("strconv: illegal AppendInt/FormatInt base");
     }
     // 2 <= base && base <= len(digits)
 
-    array<byte> a = new(65); /* 64 + 1 */                     // +1 for sign of 64bit value in base 2
+    array<byte> a = new(65); /* 64 + 1 */ // +1 for sign of 64bit value in base 2
     nint i = len(a);
     if (neg) {
         u = ((uint64)0 - u);
@@ -105,7 +105,7 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
     // convert bits
     // We use uint values where we can because those will
     // fit into a single register even on a 32bit machine.
-    if (isPowerOfTwo(@base)){
+    if (isPowerOfTwo(@base)) {
         // Use shifts and masks instead of / and %.
         nuint shift = (nuint)bits.TrailingZeros((nuint)@base);
         var b = (uint64)@base;
@@ -138,7 +138,7 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
     // add sign, if any
     if (neg) {
         i--;
-        a[i] = (rune)'-';
+        a[i] = (byte)'-';
     }
 
     if (append_) {
@@ -192,12 +192,12 @@ internal static nint formatBase10(slice<byte> a, uint64 u) {
     // Instead, we approximate it by u>>29 != 0, which is usually faster and good enough.
     nint i = len(a);
     while ((host64bit && u >> 29 != 0) || (!host64bit && ((uint32)u >> 29 | (uint32)(u >> 32)) != 0)) {
-        uint32 loΔ1 = default!;
+        uint32 loΔ1 = default;
         (u, loΔ1) = (u / 1000000000, (uint32)(u % 1000000000));
 
         // Convert 9 digits.
         foreach (var _ᴛ1 in range(4)) {
-            uint32 ddΔ1 = default!;
+            uint32 ddΔ1 = default;
             (loΔ1, ddΔ1) = (loΔ1 / 100, (loΔ1 % 100) * 2);
             i -= 2;
             (a[i + 0], a[i + 1]) = (smalls[ddΔ1 + 0], smalls[ddΔ1 + 1]);
@@ -217,7 +217,7 @@ internal static nint formatBase10(slice<byte> a, uint64 u) {
     // Convert final chunk, at most 8 digits.
     var lo = (uint32)u;
     while (lo >= 100) {
-        uint32 ddΔ2 = default!;
+        uint32 ddΔ2 = default;
         (lo, ddΔ2) = (lo / 100, (lo % 100) * 2);
         i -= 2;
         (a[i + 0], a[i + 1]) = (smalls[ddΔ2 + 0], smalls[ddΔ2 + 1]);

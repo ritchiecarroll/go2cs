@@ -27,7 +27,7 @@ internal static readonly @string huffmanTableTooSmallˢ = "Huffman table too sma
 // This returns the number of bits in the Huffman table and the new offset.
 // RFC 4.2.1.
 internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) {
-    nint tableBits = default!;
+    nint tableBits = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (off >= builtin.len(data)) {
@@ -38,14 +38,14 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     off++;
 
     array<uint8> weights = new(256);
-    nint count = default!;
-    if (hdr < 128){
+    nint count = default;
+    if (hdr < 128) {
         // The table is compressed using an FSE. RFC 4.2.1.2.
         if (builtin.len(r.fseScratch) < 1 << 6) {
             r.fseScratch = new slice<fseEntry>((1 << 6));
         }
         var (fseBits, noff, errΔ1) = Ꮡr.readFSE(data, off, 255, 6, r.fseScratch);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return (0, 0, errΔ1);
         }
         var fseTable = r.fseScratch;
@@ -55,71 +55,71 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         }
 
         (var rbr, errΔ1) = Ꮡr.makeReverseBitReader(data, off + (nint)hdr - 1, noff);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return (0, 0, errΔ1);
         }
 
         (var state1, errΔ1) = rbr.val((uint8)fseBits);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return (0, 0, errΔ1);
         }
 
         (var state2, errΔ1) = rbr.val((uint8)fseBits);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return (0, 0, errΔ1);
         }
 
         // There are two independent FSE streams, tracked by
         // state1 and state2. We decode them alternately.
 
-        while (ᐧ) {
+        for (;;) {
             var pt = Ꮡ(fseTable, state1);
-            if (!rbr.fetch((~pt).bits)) {
+            if (!rbr.fetch(pt.bits)) {
                 if (count >= 254) {
                     return (0, 0, rbr.makeError(huffmanCountOverflowˢ));
                 }
-                weights[count] = pt.Value.sym;
+                weights[count] = pt.sym;
                 weights[count + 1] = fseTable[state2].sym;
                 count += 2;
                 break;
             }
 
-            var (v, errΔ2) = rbr.val((~pt).bits);
-            if (errΔ2 != default!) {
+            var (v, errΔ2) = rbr.val(pt.bits);
+            if (errΔ2 != nil) {
                 return (0, 0, errΔ2);
             }
-            state1 = (uint32)(~pt).@base + v;
+            state1 = (uint32)pt.@base + v;
 
             if (count >= 255) {
                 return (0, 0, rbr.makeError(huffmanCountOverflowˢ));
             }
 
-            weights[count] = pt.Value.sym;
+            weights[count] = pt.sym;
             count++;
 
             pt = Ꮡ(fseTable, state2);
 
-            if (!rbr.fetch((~pt).bits)) {
+            if (!rbr.fetch(pt.bits)) {
                 if (count >= 254) {
                     return (0, 0, rbr.makeError(huffmanCountOverflowˢ));
                 }
-                weights[count] = pt.Value.sym;
+                weights[count] = pt.sym;
                 weights[count + 1] = fseTable[state1].sym;
                 count += 2;
                 break;
             }
 
-            (v, errΔ2) = rbr.val((~pt).bits);
-            if (errΔ2 != default!) {
+            (v, errΔ2) = rbr.val(pt.bits);
+            if (errΔ2 != nil) {
                 return (0, 0, errΔ2);
             }
-            state2 = (uint32)(~pt).@base + v;
+            state2 = (uint32)pt.@base + v;
 
             if (count >= 255) {
                 return (0, 0, rbr.makeError(huffmanCountOverflowˢ));
             }
 
-            weights[count] = pt.Value.sym;
+            weights[count] = pt.sym;
             count++;
         }
 
@@ -209,7 +209,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         weightMark[w] += length;
     }
 
-    return (tableBits, off, default!);
+    return (tableBits, off, default);
 }
 
 } // end zstd_package

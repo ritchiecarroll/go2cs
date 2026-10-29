@@ -58,7 +58,7 @@ using static go.net.http.internal_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/internal/chunked.go", "chunked.cs", "ABMqAAEQ4oKClAAOGISSgoKUgoKCgpSCggAQIoKCgpSCuIKCgoKU1qKCgriUgIKCgqaClKSUgqaUgpSClIKClIKCgoKmgpKCpu7igqaCkoKUAAcQgIKSgqSUgpSmgoKUpoKmAAES8rgAAhwACwIACBj2gqaAgqSAgqSCgpSAgqSAgqSmgoIAEBiygpSilLS0tJSClIKU")]
+[assembly: go.GoPositionMap("net/http/internal/chunked.go", "chunked.cs", "ABMqAAEQ4oKClAAOGISSgoKUgoKCgpSCggAQIoKCgpSCuIKCgoKU1qKCgriUgIKCgqaClKSUgqaUgpSClIKClIKCgoKmgoKCpu7igqaCgoKUAAcQgIKCgqSUgpSmgoKUpoKmAAES8rgAAhwACwIACBj2gqaAgqSAgqSCgpSAgqSAgqSmgoIAEBiygpSilLS0tJSClIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

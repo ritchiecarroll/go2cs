@@ -16,7 +16,7 @@ partial class quotedprintable_package {
 // Reader is a quoted-printable decoder.
 partial struct Reader {
     internal ж<bufio.Reader> br;
-    internal error rerr;  // last read error
+    internal error rerr;       // last read error
     internal slice<byte> line; // to be consumed before more of br
 }
 
@@ -29,43 +29,43 @@ public static ж<Reader> NewReader(io.Reader r) {
 
 internal static (byte, error) fromHex(byte b) {
     switch (ᐧ) {
-    case {} when b >= (rune)'0' && b <= (rune)'9': {
-        return ((byte)(b - (rune)'0'), default!);
+    case {} when b >= (byte)'0' && b <= (byte)'9': {
+        return ((byte)(b - '0'), default);
     }
-    case {} when b >= (rune)'A' && b <= (rune)'F': {
-        return ((byte)(b - (rune)'A' + 10), default!);
+    case {} when b >= (byte)'A' && b <= (byte)'F': {
+        return ((byte)(b - 'A' + 10), default);
     }
     // Accept badly encoded bytes.
-    case {} when b >= (rune)'a' && b <= (rune)'f': {
-        return ((byte)(b - (rune)'a' + 10), default!);
+    case {} when b >= (byte)'a' && b <= (byte)'f': {
+        return ((byte)(b - 'a' + 10), default);
     }}
     return (0, fmt.Errorf("quotedprintable: invalid hex byte 0x%02x"u8, b));
 }
 
 internal static (byte b, error err) readHexByte(slice<byte> v) {
-    error err = default!;
+    error err = default;
 
     if (len(v) < 2) {
         return (0, io.ErrUnexpectedEOF);
     }
-    byte hb = default!;
-    byte lb = default!;
+    byte hb = default;
+    byte lb = default;
     {
-        (hb, err) = fromHex(v[0]); if (err != default!) {
+        (hb, err) = fromHex(v[0]); if (err != nil) {
             return (0, err);
         }
     }
     {
-        (lb, err) = fromHex(v[1]); if (err != default!) {
+        (lb, err) = fromHex(v[1]); if (err != nil) {
             return (0, err);
         }
     }
-    return ((byte)((byte)(hb << 4) | lb), default!);
+    return ((byte)((byte)(hb << 4) | lb), default);
 }
 
 internal static bool isQPDiscardWhitespace(rune r) {
     switch (r) {
-    case (rune)'\n' or (rune)'\r' or (rune)' ' or (rune)'\t': {
+    case '\n' or '\r' or ' ' or '\t': {
         return true;
     }}
     return false;
@@ -78,8 +78,8 @@ internal static @string lwspChar = " \t"u8;
 
 // Read reads and decodes quoted-printable data from the underlying reader.
 public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     // Deviations from RFC 2045:
     // 1. in addition to "=\r\n", "=\n" is also treated as soft line break.
@@ -92,28 +92,27 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
     //    but not at end of line (issue 13219).
     while (len(p) > 0) {
         if (len(r.line) == 0) {
-            if (r.rerr != default!) {
+            if (r.rerr != nil) {
                 return (n, r.rerr);
             }
-            (r.line, r.rerr) = r.br.ReadSlice((rune)'\n');
+            (r.line, r.rerr) = r.br.ReadSlice((byte)'\n');
 
             // Does the line end in CRLF instead of just LF?
             var hasLF = bytes.HasSuffix(r.line, lf);
             var hasCR = bytes.HasSuffix(r.line, crlf);
             var wholeLine = r.line;
             r.line = bytes.TrimRightFunc(wholeLine, isQPDiscardWhitespace);
-            if (bytes.HasSuffix(r.line, softSuffix)){
+            if (bytes.HasSuffix(r.line, softSuffix)) {
                 var rightStripped = bytes.TrimLeft(wholeLine.slice(len(r.line)), lwspChar);
                 r.line = r.line.slice(0, len(r.line) - 1);
                 if (!bytes.HasPrefix(rightStripped, lf) && !bytes.HasPrefix(rightStripped, crlf) && !(len(rightStripped) == 0 && len(r.line) > 0 && AreEqual(r.rerr, io.EOF))) {
                     r.rerr = fmt.Errorf("quotedprintable: invalid bytes after =: %q"u8, rightStripped);
                 }
-            } else 
-            if (hasLF) {
-                if (hasCR){
-                    r.line = append(r.line, (byte)((rune)'\r'), (byte)((rune)'\n'));
+            } else if (hasLF) {
+                if (hasCR) {
+                    r.line = append(r.line, (byte)'\r', (byte)'\n');
                 } else {
-                    r.line = append(r.line, (byte)((rune)'\n'));
+                    r.line = append(r.line, (byte)'\n');
                 }
             }
             continue;
@@ -121,12 +120,12 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
         var b = r.line[0];
 
         switch (ᐧ) {
-        case {} when b is (rune)'=': {
+        case {} when b is (byte)'=': {
             (b, err) = readHexByte(r.line[1..]);
-            if (err != default!) {
-                if (len(r.line) >= 2 && r.line[1] != (rune)'\r' && r.line[1] != (rune)'\n') {
+            if (err != nil) {
+                if (len(r.line) >= 2 && r.line[1] != '\r' && r.line[1] != '\n') {
                     // Take the = as a literal =.
-                    b = (rune)'=';
+                    b = (byte)'=';
                     break;
                 }
                 return (n, err);
@@ -134,7 +133,7 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
             r.line = r.line[2..]; // 2 of the 3; other 1 is done below
             break;
         }
-        case {} when b == (rune)'\t' || b == (rune)'\r' || b == (rune)'\n': {
+        case {} when b == (byte)'\t' || b == (byte)'\r' || b == (byte)'\n': {
             break;
             break;
         }
@@ -144,7 +143,7 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
             break;
             break;
         }
-        case {} when b < (rune)' ' || b > (rune)'~': {
+        case {} when b < (byte)' ' || b > (byte)'~': {
             return (n, fmt.Errorf("quotedprintable: invalid unescaped byte 0x%02x in body"u8, b));
         }}
         p[0] = b;
@@ -152,7 +151,7 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
         r.line = r.line[1..];
         n++;
     }
-    return (n, default!);
+    return (n, default);
 }
 
 } // end quotedprintable_package

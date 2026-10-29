@@ -25,7 +25,7 @@ partial class profile_package {
 
 // Options encodes the options for constructing a graph
 partial struct Options {
-    public Func<slice<int64>, int64> SampleValue; // Function to compute the value of a sample
+    public Func<slice<int64>, int64> SampleValue;       // Function to compute the value of a sample
     public Func<slice<int64>, int64> SampleMeanDivisor; // Function to compute the divisor for mean graphs, or nil
     public bool DropNegative; // Drop nodes with overall negative values
     public NodeSet KeptNodes; // If non-nil, only use nodes in this set
@@ -79,8 +79,8 @@ public static int64 CumValue(this ref Node n) {
 
 // AddToEdge increases the weight of an edge between two nodes. If
 // there isn't such an edge one is created.
-public static void AddToEdge(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 v, bool residual, bool inline) {
-    Ꮡn.AddToEdgeDiv(Ꮡto, 0, v, residual, inline);
+public static void AddToEdge(this ж<Node> Ꮡn, ж<Node> to, int64 v, bool residual, bool inline) {
+    Ꮡn.AddToEdgeDiv(to, 0, v, residual, inline);
 }
 
 // AddToEdgeDiv increases the weight of an edge between two nodes. If
@@ -91,13 +91,13 @@ public static void AddToEdgeDiv(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, in
 
     {
         var e = n.Out.FindTo(Ꮡto); if (e != nil) {
-            e.Value.WeightDiv += dv;
-            e.Value.Weight += v;
+            e.WeightDiv += dv;
+            e.Weight += v;
             if (residual) {
-                e.Value.Residual = true;
+                e.Residual = true;
             }
             if (!inline) {
-                e.Value.Inline = false;
+                e.Inline = false;
             }
             return;
         }
@@ -122,7 +122,7 @@ public static @string PrintableName(this ref NodeInfo i) {
 
 // NameComponents returns the components of the printable name to be used for a node.
 public static slice<@string> NameComponents(this ref NodeInfo i) {
-    slice<@string> name = default!;
+    slice<@string> name = default;
     if (i.Address != 0) {
         name = append(name, fmt.Sprintf("%016x"u8, i.Address));
     }
@@ -171,10 +171,10 @@ partial struct NodePtrSet /*map[ж<Node>, bool]*/;
 // from the node map if one exists, or adds one to the map if one does not.
 // If kept is non-nil, nodes are only added if they can be located on it.
 public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet kept) {
-    if (kept != default!) {
+    if (kept != nil) {
         {
             var (_, ok) = kept[info, ꟷ]; if (!ok) {
-                return default!;
+                return default;
             }
         }
     }
@@ -192,35 +192,35 @@ public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet 
     if (info.Address == 0 && info.Lineno == 0) {
         // This node represents the whole function, so point Function
         // back to itself.
-        n.Value.Function = n;
+        n.Function = n;
         return n;
     }
     // Find a node that represents the whole function.
     info.Address = 0;
     info.Lineno = 0;
-    n.Value.Function = nm.FindOrInsertNode(info, default!);
+    n.Function = nm.FindOrInsertNode(info, default);
     return n;
 }
 
 // EdgeMap is used to represent the incoming/outgoing edges from a node.
 partial struct EdgeMap /*[]ж<Edge>*/;
 
-public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
+public static ж<Edge> FindTo(this EdgeMap em, ж<Node> n) {
     foreach (var (_, e) in em) {
-        if ((~e).Dest == Ꮡn) {
+        if (e.Dest == n) {
             return e;
         }
     }
-    return default!;
+    return default;
 }
 
-public static void Add(this ref EdgeMap em, ж<Edge> Ꮡe) {
-    em = append(em, Ꮡe);
+public static void Add(this ref EdgeMap em, ж<Edge> e) {
+    em = append(em, e);
 }
 
-public static void Delete(this ref EdgeMap em, ж<Edge> Ꮡe) {
+public static void Delete(this ref EdgeMap em, ж<Edge> e) {
     foreach (var (i, edge) in em) {
-        if (edge == Ꮡe) {
+        if (edge == e) {
             (em)[i] = (em)[len(em) - 1];
             em = (em).slice(0, len(em) - 1);
             return;
@@ -258,10 +258,10 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
     var seenNode = new map<ж<Node>, bool>();
     var seenEdge = new map<nodePair, bool>();
     foreach (var (_, sample) in prof.Sample) {
-        int64 w = default!;
-        int64 dw = default!;
+        int64 w = default;
+        int64 dw = default;
         w = o.SampleValue((~sample).Value);
-        if (o.SampleMeanDivisor != default!) {
+        if (o.SampleMeanDivisor != nil) {
             dw = o.SampleMeanDivisor((~sample).Value);
         }
         if (dw == 0 && w == 0) {
@@ -269,7 +269,7 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
         }
         clear(seenNode);
         clear(seenEdge);
-        ж<Node> parent = default!;
+        ж<Node> parent = default;
         // A residual edge goes over one or more nodes that were not kept.
         var residual = false;
 
@@ -282,13 +282,13 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
         // approximation.
         nint i = 1;
         {
-            nint last = len((~sample).Location) - 1; if (last < i) {
+            nint last = len(sample.Location) - 1; if (last < i) {
                 i = last;
             }
         }
         for (; i >= 0; i--) {
-            var l = (~sample).Location[i];
-            var locNodes = locationMap.get((~l).ID);
+            var l = sample.Location[i];
+            var locNodes = locationMap.get(l.ID);
             for (nint ni = len(locNodes) - 1; ni >= 0; ni--) {
                 var n = locNodes[ni];
                 if (n == nil) {
@@ -327,7 +327,7 @@ internal static ж<Graph> selectNodesForGraph(Nodes nodes, bool dropNegative) {
         if (n == nil) {
             continue;
         }
-        if ((~n).Cum == 0 && (~n).Flat == 0) {
+        if (n.Cum == 0 && n.Flat == 0) {
             continue;
         }
         if (dropNegative && isNegative(ref (n).DerefOrNull())) {
@@ -358,12 +358,12 @@ internal static bool isNegative(ref Node n) {
 }
 
 public partial struct locationMap {
-    internal slice<Nodes> s;     // a slice for small sequential IDs
+    internal slice<Nodes> s;       // a slice for small sequential IDs
     internal map<uint64, Nodes> m; // fallback for large IDs (unlikely)
 }
 
 internal static void add(this ref locationMap l, uint64 id, Nodes n) {
-    if (id < (uint64)len(l.s)){
+    if (id < (uint64)len(l.s)) {
         l.s[id] = n;
     } else {
         l.m[id] = n;
@@ -371,7 +371,7 @@ internal static void add(this ref locationMap l, uint64 id, Nodes n) {
 }
 
 internal static Nodes get(this locationMap l, uint64 id) {
-    if (id < (uint64)len(l.s)){
+    if (id < (uint64)len(l.s)) {
         return l.s[id];
     } else {
         return l.m[id];
@@ -381,21 +381,21 @@ internal static Nodes get(this locationMap l, uint64 id) {
 // CreateNodes creates graph nodes for all locations in a profile. It
 // returns set of all nodes, plus a mapping of each location to the
 // set of corresponding nodes (one per location.Line).
-public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
+public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> o) {
     ref var prof = ref Ꮡprof.DerefOrNull();
 
     var locations = new locationMap(new slice<Nodes>(len(prof.Location) + 1), new map<uint64, Nodes>());
     var nm = new NodeMap(len(prof.Location));
     foreach (var (_, l) in prof.Location) {
-        var lines = l.Value.Line;
+        var lines = l.Line;
         if (len(lines) == 0) {
-            lines = new Line[]{new()}.slice(); // Create empty line to include location info.
+            lines = slice<Line>([new()]); // Create empty line to include location info.
         }
         var nodes = new Nodes(len(lines));
         foreach (var ln in range(lines)) {
-            nodes[ln] = nm.findOrInsertLine(l, lines[ln], Ꮡo);
+            nodes[ln] = nm.findOrInsertLine(l, lines[ln], o);
         }
-        locations.add((~l).ID, nodes);
+        locations.add(l.ID, nodes);
     }
     return (nm.nodes(), locations);
 }
@@ -412,10 +412,10 @@ internal static ж<Node> findOrInsertLine(this NodeMap nm, ж<Location> Ꮡl, Li
     ref var l = ref Ꮡl.DerefOrNull();
     ref var o = ref Ꮡo.DerefOrNull();
 
-    @string objfile = default!;
+    @string objfile = default;
     {
-        var m = l.Mapping; if (m != nil && (~m).File != ""u8) {
-            objfile = m.Value.File;
+        var m = l.Mapping; if (m != nil && m.File != ""u8) {
+            objfile = m.File;
         }
     }
 
@@ -424,7 +424,7 @@ internal static ж<Node> findOrInsertLine(this NodeMap nm, ж<Location> Ꮡl, Li
             return nm.FindOrInsertNode(ni.Value, o.KeptNodes);
         }
     }
-    return default!;
+    return default;
 }
 
 internal static ж<NodeInfo> nodeInfo(ref Location l, Line line, @string objfile, ref Options o) {
@@ -434,27 +434,27 @@ internal static ж<NodeInfo> nodeInfo(ref Location l, Line line, @string objfile
     var ni = Ꮡ(new NodeInfo(
         Address: l.Address,
         Lineno: (nint)line.ΔLine,
-        Name: (~line.Function).Name
+        Name: line.Function.Name
     ));
-    ni.Value.StartLine = (nint)(~line.Function).StartLine;
+    ni.StartLine = (nint)line.Function.StartLine;
     return ni;
 }
 
 // Sum adds the flat and cum values of a set of nodes.
 public static (int64 flat, int64 cum) Sum(this Nodes ns) {
-    int64 flat = default!;
-    int64 cum = default!;
+    int64 flat = default;
+    int64 cum = default;
 
     foreach (var (_, n) in ns) {
-        flat += n.Value.Flat;
-        cum += n.Value.Cum;
+        flat += n.Flat;
+        cum += n.Cum;
     }
     return (flat, cum);
 }
 
 internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) {
     // Update sample value
-    if (flat){
+    if (flat) {
         n.FlatDiv += dw;
         n.Flat += w;
     } else {
@@ -467,7 +467,7 @@ internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) {
 public static @string String(this ref Graph g) {
     var sᴷ = new stackAppend<@string>();
 
-    slice<@string> s = default!;
+    slice<@string> s = default;
 
     var nodeIndex = new map<ж<Node>, nint>(len(g.Nodes));
 
@@ -477,16 +477,16 @@ public static @string String(this ref Graph g) {
 
     foreach (var (i, n) in g.Nodes) {
         @string name = n.of(Node.ᏑInfo).PrintableName();
-        slice<nint> @in = default!;
-        slice<nint> @out = default!;
+        slice<nint> @in = default;
+        slice<nint> @out = default;
 
-        foreach (var (_, from) in (~n).In) {
-            @in = append(@in, nodeIndex[(~from).Src]);
+        foreach (var (_, from) in n.In) {
+            @in = append(@in, nodeIndex[from.Src]);
         }
-        foreach (var (_, to) in (~n).Out) {
-            @out = append(@out, nodeIndex[(~to).Dest]);
+        foreach (var (_, to) in n.Out) {
+            @out = append(@out, nodeIndex[to.Dest]);
         }
-        s = append(sᴷ, s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, (~n).Flat, (~n).Cum, @in, @out));
+        s = append(sᴷ, s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, n.Flat, n.Cum, @in, @out));
     }
     return strings.Join(s, "\n"u8);
 }
@@ -506,9 +506,9 @@ public static slice<ж<Edge>> Sort(this EdgeMap em) {
 
 // Sum returns the total weight for a set of nodes.
 public static int64 Sum(this EdgeMap em) {
-    int64 ret = default!;
+    int64 ret = default;
     foreach (var (_, edge) in em) {
-        ret += edge.Value.Weight;
+        ret += edge.Weight;
     }
     return ret;
 }
@@ -520,18 +520,18 @@ internal static nint Len(this edgeList el) {
 }
 
 internal static bool Less(this edgeList el, nint i, nint j) {
-    if ((~el[i]).Weight != (~el[j]).Weight) {
-        return abs64((~el[i]).Weight) > abs64((~el[j]).Weight);
+    if (el[i].Weight != el[j].Weight) {
+        return abs64(el[i].Weight) > abs64(el[j].Weight);
     }
 
-    @string from1 = (~el[i]).Src.of(Node.ᏑInfo).PrintableName();
-    @string from2 = (~el[j]).Src.of(Node.ᏑInfo).PrintableName();
+    @string from1 = el[i].Src.of(Node.ᏑInfo).PrintableName();
+    @string from2 = el[j].Src.of(Node.ᏑInfo).PrintableName();
     if (from1 != from2) {
         return from1 < from2;
     }
 
-    @string to1 = (~el[i]).Dest.of(Node.ᏑInfo).PrintableName();
-    @string to2 = (~el[j]).Dest.of(Node.ᏑInfo).PrintableName();
+    @string to1 = el[i].Dest.of(Node.ᏑInfo).PrintableName();
+    @string to2 = el[j].Dest.of(Node.ᏑInfo).PrintableName();
 
     return to1 < to2;
 }

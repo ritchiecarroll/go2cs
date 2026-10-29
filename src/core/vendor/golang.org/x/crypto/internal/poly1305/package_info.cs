@@ -56,7 +56,7 @@ using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABs40oKCqLKCggACGAAJAoKCAA4ikKzigpSqooKCgqqigoKC")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA4+AA8CkoKmgoKCABQwwoKCgoKClIKClICCgqSClKyygoKUAAgYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSkAAHGNLugoKmggAHEIKUgg==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA4+AA8CgoKmgoKCABQwwoKCgoKClIKClICCgqSClKyygoKUAAgYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSkAAHGNLugoKmggAHEIKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto.@internal;

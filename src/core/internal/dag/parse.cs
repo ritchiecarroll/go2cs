@@ -80,7 +80,7 @@ public static void DelEdge(this ref Graph g, @string from, @string to) {
 }
 
 public static bool HasEdge(this ref Graph g, @string from, @string to) {
-    return g.edges[from] != default! && g.edges[from][to];
+    return g.edges[from] != nil && g.edges[from][to];
 }
 
 public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) {
@@ -99,11 +99,11 @@ public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) {
 // to "a" if b < a (or a > b) in the partial order.
 public static (ж<Graph>, error) Parse(@string dag) {
     var g = newGraph();
-    var disallowed = new rule[]{}.slice();
+    var disallowed = slice<rule>([]);
 
     var (rules, err) = parseRules(dag);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // TODO: Add line numbers to errors.
@@ -130,7 +130,7 @@ public static (ж<Graph>, error) Parse(@string dag) {
                     continue;
                 }
                 {
-                    var (_, ok) = (~g).byLabel[less, ꟷ]; if (!ok){
+                    var (_, ok) = g.byLabel[less, ꟷ]; if (!ok) {
                         errorf("use of %s before its definition"u8, less);
                     } else {
                         g.AddEdge(def, less);
@@ -141,18 +141,18 @@ public static (ж<Graph>, error) Parse(@string dag) {
     }
 
     // Check for missing definition.
-    foreach (var (_, tos) in (~g).edges) {
+    foreach (var (_, tos) in g.edges) {
         foreach (var (to, _) in tos) {
-            if ((~g).edges[to] == default!) {
+            if (g.edges[to] == nil) {
                 errorf("missing definition for %s"u8, to);
             }
         }
     }
 
     // Complete transitive closure.
-    foreach (var (_, k) in (~g).Nodes) {
-        foreach (var (_, i) in (~g).Nodes) {
-            foreach (var (_, j) in (~g).Nodes) {
+    foreach (var (_, k) in g.Nodes) {
+        foreach (var (_, i) in g.Nodes) {
+            foreach (var (_, j) in g.Nodes) {
                 if (i != k && k != j && g.HasEdge(i, k) && g.HasEdge(k, j)) {
                     if (i == j) {
                         // Can only happen along with a "use of X before deps" error above,
@@ -178,10 +178,10 @@ public static (ж<Graph>, error) Parse(@string dag) {
     }
 
     if (len(errors) > 0) {
-        return (default!, fmt.Errorf("%s"u8, strings.Join(errors, "\n"u8)));
+        return (default, fmt.Errorf("%s"u8, strings.Join(errors, "\n"u8)));
     }
 
-    return (g, default!);
+    return (g, default);
 }
 
 // A rule is a line in the DAG language where "less < def" or "less !< def".
@@ -203,8 +203,8 @@ internal static readonly @string missingˢ = "missing <"u8;
 
 // parseRules parses the rules of a DAG.
 internal static (slice<rule> @out, error err) parseRules(@string rules) {
-    slice<rule> @out = default!;
-    error err = default!;
+    slice<rule> @out = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -225,22 +225,22 @@ internal static (slice<rule> @out, error err) parseRules(@string rules) {
         }, ref ᒐ);
         var p = Ꮡ(new rulesParser(lineno: 1, text: rules));
 
-        slice<@string> prev = default!;
-        @string op = default!;
-        while (ᐧ) {
+        slice<@string> prev = default;
+        @string op = default;
+        for (;;) {
             var (list, tok) = p.nextList();
             if (tok == ""u8) {
-                if (prev == default!) {
+                if (prev == nil) {
                     break;
                 }
                 p.syntaxError(unexpectedEofˢ);
             }
-            if (prev != default!) {
+            if (prev != nil) {
                 @out = append(@out, new rule(prev, op, list));
             }
             prev = list;
             if (tok == ";"u8) {
-                prev = default!;
+                prev = default;
                 op = ""u8;
                 continue;
             }
@@ -272,15 +272,15 @@ internal static readonly @string badListSyntaxˢ = "bad list syntax"u8;
 
 // nextList parses and returns a comma-separated list of names.
 internal static (slice<@string> list, @string token) nextList(this ref rulesParser p) {
-    slice<@string> list = default!;
+    slice<@string> list = default;
 
-    while (ᐧ) {
+    for (;;) {
         @string tok = p.nextToken();
         var exprᴛ1 = tok;
         var matchᴛ1 = false;
         if (exprᴛ1 == ""u8) {
             if (len(list) == 0) {
-                return (default!, "");
+                return (default, "");
             }
             fallthrough = true;
         }
@@ -302,25 +302,25 @@ internal static readonly @string unexpectedTokenˢ = "unexpected token !"u8;
 // nextToken returns the next token in the deps rules,
 // one of ";" "," "<" "!<" or a name.
 internal static @string nextToken(this ref rulesParser p) {
-    while (ᐧ) {
+    for (;;) {
         if (p.text == ""u8) {
             return ""u8;
         }
         var exprᴛ1 = p.text[0];
         var matchᴛ1 = false;
-        if (exprᴛ1 is (rune)';' or (rune)',' or (rune)'<') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)';' or (byte)',' or (byte)'<') { matchᴛ1 = true;
             @string t = p.text[..1];
             p.text = p.text[1..];
             return t;
         }
-        if (exprᴛ1 is (rune)'!') { matchᴛ1 = true;
-            if (len(p.text) < 2 || p.text[1] != (rune)'<') {
+        if (exprᴛ1 is (byte)'!') { matchᴛ1 = true;
+            if (len(p.text) < 2 || p.text[1] != '<') {
                 p.syntaxError(unexpectedTokenˢ);
             }
             p.text = p.text[2..];
             return "!<"u8;
         }
-        if (exprᴛ1 is (rune)'#') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)'#') { matchᴛ1 = true;
             nint i = strings.Index(p.text, "\n"u8);
             if (i < 0) {
                 i = len(p.text);
@@ -328,11 +328,11 @@ internal static @string nextToken(this ref rulesParser p) {
             p.text = p.text.slice(i);
             continue;
         }
-        else if (exprᴛ1 is (rune)'\n') { matchᴛ1 = true;
+        else if (exprᴛ1 is (byte)'\n') { matchᴛ1 = true;
             p.lineno++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 is (rune)' ' or (rune)'\t')) {
+        if (fallthrough || !matchᴛ1 && (exprᴛ1 is (byte)' ' or (byte)'\t')) {
             p.text = p.text[1..];
             continue;
         }

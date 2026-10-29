@@ -28,14 +28,14 @@ public static (FileInfo, error) Stat(FS fsys, @string name) {
         }
 
         var (@file, err) = fsys.Open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fileʗ1 = @file;
         defer(() => fileʗ1.Close(), ref ᒐ);
         return @file.Stat();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

@@ -37,7 +37,7 @@ internal static void initᴛdrbgPool() { drbgPool = new sync.Pool(
 public static void Read(slice<byte> b) {
     GoFrame ᒐ = default;
     try {
-        if (testingReader != default!) {
+        if (testingReader != nil) {
             fips140.RecordNonApproved();
             // Avoid letting b escape in the non-testing case.
             var bb = new slice<byte>(len(b));
@@ -117,7 +117,7 @@ public static error ReadWithReader(io.Reader r, slice<byte> b) {
     {
         var (_, ok) = r._<DefaultReader>(ᐧ); if (ok) {
             Read(b);
-            return default!;
+            return default;
         }
     }
 

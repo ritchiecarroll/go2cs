@@ -88,7 +88,7 @@ internal static void Start(this ж<sequencer> Ꮡs, nuint id) {
         return;
     }
     var c = new channel<EmptyStruct>(0);
-    if (s.wait == default!) {
+    if (s.wait == nil) {
         s.wait = new map<nuint, channel<EmptyStruct>>();
     }
     s.wait[id] = c;
@@ -109,7 +109,7 @@ internal static void End(this ж<sequencer> Ꮡs, nuint id) {
     }
     id++;
     s.id = id;
-    if (s.wait == default!) {
+    if (s.wait == nil) {
         s.wait = new map<nuint, channel<EmptyStruct>>();
     }
     var (c, ok) = s.wait[id, ꟷ];

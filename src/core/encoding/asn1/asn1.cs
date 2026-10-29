@@ -59,8 +59,8 @@ public static @string Error(this SyntaxError e) {
 // We start by dealing with each of the primitive types in turn.
 // BOOLEAN
 internal static (bool ret, error err) parseBool(slice<byte> bytes) {
-    bool ret = default!;
-    error err = default!;
+    bool ret = default;
+    error err = default;
 
     if (len(bytes) != 1) {
         err = new SyntaxError("invalid boolean"u8);
@@ -96,22 +96,22 @@ internal static error checkInteger(slice<byte> bytes) {
         return new StructuralError("empty integer"u8);
     }
     if (len(bytes) == 1) {
-        return default!;
+        return default;
     }
     if ((bytes[0] == 0 && (byte)(bytes[1] & 0x80) == 0) || (bytes[0] == 0xff && (byte)(bytes[1] & 0x80) == 0x80)) {
         return new StructuralError("integer not minimally-encoded"u8);
     }
-    return default!;
+    return default;
 }
 
 // parseInt64 treats the given bytes as a big-endian, signed integer and
 // returns the result.
 internal static (int64 ret, error err) parseInt64(slice<byte> bytes) {
-    int64 ret = default!;
-    error err = default!;
+    int64 ret = default;
+    error err = default;
 
     err = checkInteger(bytes);
-    if (err != default!) {
+    if (err != nil) {
         return (ret, err);
     }
     if (len(bytes) > 8) {
@@ -120,7 +120,7 @@ internal static (int64 ret, error err) parseInt64(slice<byte> bytes) {
         return (ret, err);
     }
     for (nint bytesRead = 0; bytesRead < len(bytes); bytesRead++) {
-        ret <<= (int)(8);
+        ret <<= 8;
         ret |= (int64)((int64)bytes[bytesRead]);
     }
 
@@ -134,18 +134,18 @@ internal static (int64 ret, error err) parseInt64(slice<byte> bytes) {
 // the result.
 internal static (int32, error) parseInt32(slice<byte> bytes) {
     {
-        var errΔ1 = checkInteger(bytes); if (errΔ1 != default!) {
+        var errΔ1 = checkInteger(bytes); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
     var (ret64, err) = parseInt64(bytes);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
     if (ret64 != (int64)(int32)ret64) {
         return (0, new StructuralError("integer too large"u8));
     }
-    return ((int32)ret64, default!);
+    return ((int32)ret64, default);
 }
 
 internal static ж<bigꓸInt> bigOne = big.NewInt(1);
@@ -154,8 +154,8 @@ internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 // the result.
 internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
     {
-        var err = checkInteger(bytes); if (err != default!) {
-            return (default!, err);
+        var err = checkInteger(bytes); if (err != nil) {
+            return (default, err);
         }
     }
     var ret = @new<bigꓸInt>();
@@ -168,10 +168,10 @@ internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
         ret.SetBytes(notBytes);
         ret.Add(ret, bigOne);
         ret.Neg(ret);
-        return (ret, default!);
+        return (ret, default);
     }
     ret.SetBytes(bytes);
-    return (ret, default!);
+    return (ret, default);
 }
 
 // BIT STRING
@@ -181,7 +181,7 @@ internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
 // valid bits is recorded. Padding bits will be zero.
 partial struct BitString {
     public slice<byte> Bytes; // bits packed into bytes.
-    public nint BitLength;   // length in bits.
+    public nint BitLength;    // length in bits.
 }
 
 // At returns the bit at the given index. If the index is out of range it
@@ -215,8 +215,8 @@ public static slice<byte> RightAlign(this BitString b) {
 
 // parseBitString parses an ASN.1 bit string from the given byte slice and returns it.
 internal static (BitString ret, error err) parseBitString(slice<byte> bytes) {
-    BitString ret = default!;
-    error err = default!;
+    BitString ret = default;
+    error err = default;
 
     if (len(bytes) == 0) {
         err = new SyntaxError("zero length BIT STRING"u8);
@@ -239,7 +239,7 @@ public static readonly ж<RawValue> ᏑNullRawValue = new StaticBox<RawValue>(ne
 public static ref RawValue NullRawValue => ref ((StaticBox<RawValue>)ᏑNullRawValue).ValueSlot;
 
 // NullBytes contains bytes representing the DER-encoded ASN.1 NULL type.
-public static readonly ж<slice<byte>> ᏑNullBytes = new StaticBox<slice<byte>>(new byte[]{TagNull, 0}.slice());
+public static readonly ж<slice<byte>> ᏑNullBytes = new StaticBox<slice<byte>>(slice<byte>([TagNull, 0]));
 public static ref slice<byte> NullBytes => ref ((StaticBox<slice<byte>>)ᏑNullBytes).ValueSlot;
 
 // OBJECT IDENTIFIER
@@ -259,7 +259,7 @@ public static @string String(this ObjectIdentifier oi) {
     var buf = new slice<byte>(0, 19);
     foreach (var (i, v) in oi) {
         if (i > 0) {
-            Ꮡs.WriteByte((rune)'.');
+            Ꮡs.WriteByte((byte)'.');
         }
         Ꮡs.Write(strconv.AppendInt(buf, (int64)v, 10));
     }
@@ -271,8 +271,8 @@ public static @string String(this ObjectIdentifier oi) {
 // returns it. An object identifier is a sequence of variable length integers
 // that are assigned in a hierarchy.
 internal static (ObjectIdentifier s, error err) parseObjectIdentifier(slice<byte> bytes) {
-    ObjectIdentifier s = default!;
-    error err = default!;
+    ObjectIdentifier s = default;
+    error err = default;
 
     if (len(bytes) == 0) {
         err = new SyntaxError("zero length OBJECT IDENTIFIER"u8);
@@ -288,10 +288,10 @@ internal static (ObjectIdentifier s, error err) parseObjectIdentifier(slice<byte
     // When value1 = 0 or value1 = 1, then value2 is <= 39. When value1 = 2,
     // then there are no restrictions on value2.
     (var v, var offset, err) = parseBase128Int(bytes, 0);
-    if (err != default!) {
+    if (err != nil) {
         return (s, err);
     }
-    if (v < 80){
+    if (v < 80) {
         s[0] = v / 40;
         s[1] = v % 40;
     } else {
@@ -302,7 +302,7 @@ internal static (ObjectIdentifier s, error err) parseObjectIdentifier(slice<byte
     nint i = 2;
     for (; offset < len(bytes); i++) {
         (v, offset, err) = parseBase128Int(bytes, offset);
-        if (err != default!) {
+        if (err != nil) {
             return (s, err);
         }
         s[i] = v;
@@ -324,12 +324,12 @@ partial struct Flag /*bool*/;
 // parseBase128Int parses a base-128 encoded int from the given offset in the
 // given byte slice. It returns the value and the new offset.
 internal static (nint ret, nint offset, error err) parseBase128Int(slice<byte> bytes, nint initOffset) {
-    nint ret = default!;
-    nint offset = default!;
-    error err = default!;
+    nint ret = default;
+    nint offset = default;
+    error err = default;
 
     offset = initOffset;
-    int64 ret64 = default!;
+    int64 ret64 = default;
     for (nint shifted = 0; offset < len(bytes); shifted++) {
         // 5 * 7 bits per byte == 35 bits of data
         // Thus the representation is either non-minimal or too large for an int32
@@ -337,7 +337,7 @@ internal static (nint ret, nint offset, error err) parseBase128Int(slice<byte> b
             err = new StructuralError("base 128 integer too large"u8);
             return (ret, offset, err);
         }
-        ret64 <<= (int)(7);
+        ret64 <<= 7;
         var b = bytes[offset];
         // integers should be minimally encoded, so the leading octet should
         // never be 0x80
@@ -362,18 +362,18 @@ internal static (nint ret, nint offset, error err) parseBase128Int(slice<byte> b
 
 // UTCTime
 internal static (time.Time ret, error err) parseUTCTime(slice<byte> bytes) {
-    time.Time ret = default!;
-    error err = default!;
+    time.Time ret = default;
+    error err = default;
 
     @string s = (@string)bytes;
 
     @string formatStr = "0601021504Z0700"u8;
     (ret, err) = time.Parse(formatStr, s);
-    if (err != default!) {
+    if (err != nil) {
         formatStr = "060102150405Z0700"u8;
         (ret, err) = time.Parse(formatStr, s);
     }
-    if (err != default!) {
+    if (err != nil) {
         return (ret, err);
     }
 
@@ -398,14 +398,14 @@ internal static readonly @string formatStrᶜ = "20060102150405.999999999Z0700"u
 // parseGeneralizedTime parses the GeneralizedTime from the given byte slice
 // and returns the resulting time.
 internal static (time.Time ret, error err) parseGeneralizedTime(slice<byte> bytes) {
-    time.Time ret = default!;
-    error err = default!;
+    time.Time ret = default;
+    error err = default;
 
     @string formatStr = formatStrᶜ;
     @string s = (@string)bytes;
 
     {
-        (ret, err) = time.Parse(formatStr, s); if (err != default!) {
+        (ret, err) = time.Parse(formatStr, s); if (err != nil) {
             return (ret, err);
         }
     }
@@ -429,12 +429,12 @@ internal static (@string ret, error err) parseNumericString(slice<byte> bytes) {
             return ("", new SyntaxError("NumericString contains invalid character"u8));
         }
     }
-    return ((@string)bytes, default!);
+    return ((@string)bytes, default);
 }
 
 // isNumeric reports whether the given b is in the ASN.1 NumericString set.
 internal static bool isNumeric(byte b) {
-    return (rune)'0' <= b && b <= (rune)'9' || b == (rune)' ';
+    return '0' <= b && b <= '9' || b == ' ';
 }
 
 // PrintableString
@@ -442,8 +442,8 @@ internal static bool isNumeric(byte b) {
 // parsePrintableString parses an ASN.1 PrintableString from the given byte
 // array and returns it.
 internal static (@string ret, error err) parsePrintableString(slice<byte> bytes) {
-    @string ret = default!;
-    error err = default!;
+    @string ret = default;
+    error err = default;
 
     foreach (var (_, b) in bytes) {
         if (!isPrintable(b, allowAsterisk, allowAmpersand)) {
@@ -469,16 +469,16 @@ internal static ampersandFlag rejectAmpersand => false;
 // If asterisk is allowAsterisk then '*' is also allowed, reflecting existing
 // practice. If ampersand is allowAmpersand then '&' is allowed as well.
 internal static bool isPrintable(byte b, asteriskFlag asterisk, ampersandFlag ampersand) {
-    return (rune)'a' <= b && b <= (rune)'z' || (rune)'A' <= b && b <= (rune)'Z' || (rune)'0' <= b && b <= (rune)'9' || (rune)'\'' <= b && b <= (rune)')' || (rune)'+' <= b && b <= (rune)'/' || b == (rune)' ' || b == (rune)':' || b == (rune)'=' || b == (rune)'?' ||
+    return 'a' <= b && b <= 'z' || 'A' <= b && b <= 'Z' || '0' <= b && b <= '9' || '\'' <= b && b <= ')' || '+' <= b && b <= '/' || b == ' ' || b == ':' || b == '=' || b == '?' ||
         // This is technically not allowed in a PrintableString.
         // However, x509 certificates with wildcard strings don't
         // always use the correct string type so we permit it.
-        ((bool)asterisk && b == (rune)'*') ||
+        ((bool)asterisk && b == '*') ||
         // This is not technically allowed either. However, not
         // only is it relatively common, but there are also a
         // handful of CA certificates that contain it. At least
         // one of which will not expire until 2027.
-        ((bool)ampersand && b == (rune)'&');
+        ((bool)ampersand && b == '&');
 }
 
 // IA5String
@@ -486,8 +486,8 @@ internal static bool isPrintable(byte b, asteriskFlag asterisk, ampersandFlag am
 // parseIA5String parses an ASN.1 IA5String (ASCII string) from the given
 // byte slice and returns it.
 internal static (@string ret, error err) parseIA5String(slice<byte> bytes) {
-    @string ret = default!;
-    error err = default!;
+    @string ret = default;
+    error err = default;
 
     foreach (var (_, b) in bytes) {
         if (b >= utf8.RuneSelf) {
@@ -518,7 +518,7 @@ internal static (@string ret, error err) parseT61String(slice<byte> bytes) {
         // All the 1-byte UTF-8 runes map 1-1 with Latin-1.
         buf = utf8.AppendRune(buf, (rune)v);
     }
-    return ((@string)buf, default!);
+    return ((@string)buf, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -532,7 +532,7 @@ internal static (@string ret, error err) parseUTF8String(slice<byte> bytes) {
     if (!utf8.Valid(bytes)) {
         return ("", errors.New(asn1InvalidUtf8Stringˢ));
     }
-    return ((@string)bytes, default!);
+    return ((@string)bytes, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -577,7 +577,7 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
         bmpString = bmpString[2..];
     }
 
-    return ((@string)utf16.Decode(s), default!);
+    return ((@string)utf16.Decode(s), default);
 }
 
 // A RawValue represents an undecoded ASN.1 object.
@@ -603,9 +603,9 @@ internal static readonly @string asn1InternalErrorInˢ = "asn1: internal error i
 // SET OF (tag 17) are mapped to SEQUENCE and SEQUENCE OF (tag 16) since we
 // don't distinguish between ordered and unordered objects in this code.
 internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(slice<byte> bytes, nint initOffset) {
-    tagAndLength ret = default!;
-    nint offset = default!;
-    error err = default!;
+    tagAndLength ret = default;
+    nint offset = default;
+    error err = default;
 
     offset = initOffset;
     // parseTagAndLength should not be called without at least a single
@@ -624,7 +624,7 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
     // encoded afterwards
     if (ret.tag == 0x1f) {
         (ret.tag, offset, err) = parseBase128Int(bytes, offset);
-        if (err != default!) {
+        if (err != nil) {
             return (ret, offset, err);
         }
         // Tags should be encoded in minimal form.
@@ -639,7 +639,7 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
     }
     b = bytes[offset];
     offset++;
-    if ((byte)(b & 0x80) == 0){
+    if ((byte)(b & 0x80) == 0) {
         // The length is encoded in the bottom 7 bits.
         ret.length = (nint)((byte)(b & 0x7f));
     } else {
@@ -663,7 +663,7 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
                 err = new StructuralError("length too large"u8);
                 return (ret, offset, err);
             }
-            ret.length <<= (int)(8);
+            ret.length <<= 8;
             ret.length |= (nint)((nint)b);
             if (ret.length == 0) {
                 // DER requires that lengths be minimal.
@@ -686,7 +686,7 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
 // slice of Go values of the given type.
 internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> bytes, reflectꓸType sliceType, reflectꓸType elemType, nint depth) {
     reflectꓸValue ret = new(nil);
-    error err = default!;
+    error err = default;
 
     var (matchAny, expectedTag, compoundType, ok) = getUniversalType(elemType);
     if (!ok) {
@@ -698,22 +698,24 @@ internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> byt
     // checking that the types are correct in each case.
     nint numElements = 0;
     for (nint offsetΔ1 = 0; offsetΔ1 < len(bytes); ) {
-        tagAndLength t = default!;
+        tagAndLength t = default;
         (t, offsetΔ1, err) = parseTagAndLength(bytes, offsetΔ1);
-        if (err != default!) {
+        if (err != nil) {
             return (ret, err);
         }
-        var exprᴛ1 = t.tag;
-        if (exprᴛ1 == TagIA5String || exprᴛ1 == TagGeneralString || exprᴛ1 == TagT61String || exprᴛ1 == TagUTF8String || exprᴛ1 == TagNumericString || exprᴛ1 == TagBMPString) {
+        switch (t.tag) {
+        case var ᴛ when ᴛ == TagIA5String || ᴛ == TagGeneralString || ᴛ == TagT61String || ᴛ == TagUTF8String || ᴛ == TagNumericString || ᴛ == TagBMPString: {
             // We pretend that various other string types are
             // PRINTABLE STRINGs so that a sequence of them can be
             // parsed into a []string.
             t.tag = TagPrintableString;
+            break;
         }
-        else if (exprᴛ1 == TagGeneralizedTime || exprᴛ1 == TagUTCTime) {
+        case var ᴛ when ᴛ == TagGeneralizedTime || ᴛ == TagUTCTime: {
             // Likewise, both time types are treated the same.
             t.tag = TagUTCTime;
-        }
+            break;
+        }}
 
         if (!matchAny && (t.@class != ClassUniversal || t.isCompound != compoundType || t.tag != expectedTag)) {
             err = new StructuralError("sequence tag mismatch"u8);
@@ -733,12 +735,12 @@ internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> byt
         return (ret, err);
     }
     ret = reflect.MakeSlice(sliceType, 0, safeCap);
-    var @params = new fieldParameters(nil);
+    var @params = new fieldParameters();
     nint offset = 0;
     for (nint i = 0; i < numElements; i++) {
         ret = reflect.Append(ret, reflect.Zero(elemType));
         (offset, err) = parseField(ret.Index(i), bytes, offset, @params, depth);
-        if (err != default!) {
+        if (err != nil) {
             return (ret, err);
         }
     }
@@ -767,8 +769,8 @@ internal static readonly @string asn1ˢ = "asn1"u8;
 // into the array, it will try to parse a suitable ASN.1 value out and store it
 // in the given Value.
 internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byte> bytes, nint initOffset, fieldParameters @params, nint depth) {
-    nint offset = default!;
-    error err = default!;
+    nint offset = default;
+    error err = default;
 
     depth++;
     const nint maxDecodeDepth = 10000;
@@ -790,67 +792,81 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     // Deal with the ANY type.
     {
         var ifaceType = fieldType; if (ifaceType.Kind() == reflect.ΔInterface && ifaceType.NumMethod() == 0) {
-            tagAndLength tΔ1 = default!;
+            tagAndLength tΔ1 = default;
             (tΔ1, offset, err) = parseTagAndLength(bytes, offset);
-            if (err != default!) {
+            if (err != nil) {
                 return (offset, err);
             }
             if (invalidLength(offset, tΔ1.length, len(bytes))) {
                 err = new SyntaxError("data truncated"u8);
                 return (offset, err);
             }
-            any result = default!;
+            any result = default;
             if (!tΔ1.isCompound && tΔ1.@class == ClassUniversal) {
                 var innerBytesΔ1 = bytes.slice(offset, offset + tΔ1.length);
-                var exprᴛ1 = tΔ1.tag;
-                if (exprᴛ1 == TagBoolean) {
+                switch (tΔ1.tag) {
+                case var ᴛ when ᴛ == TagBoolean: {
                     (result, err) = parseBool(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagPrintableString) {
+                case var ᴛ when ᴛ == TagPrintableString: {
                     (result, err) = parsePrintableString(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagNumericString) {
+                case var ᴛ when ᴛ == TagNumericString: {
                     (result, err) = parseNumericString(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagIA5String) {
+                case var ᴛ when ᴛ == TagIA5String: {
                     (result, err) = parseIA5String(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagT61String) {
+                case var ᴛ when ᴛ == TagT61String: {
                     (result, err) = parseT61String(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagUTF8String) {
+                case var ᴛ when ᴛ == TagUTF8String: {
                     (result, err) = parseUTF8String(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagInteger) {
+                case var ᴛ when ᴛ == TagInteger: {
                     (result, err) = parseInt64(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagBitString) {
+                case var ᴛ when ᴛ == TagBitString: {
                     (result, err) = parseBitString(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagOID) {
+                case var ᴛ when ᴛ == TagOID: {
                     (result, err) = parseObjectIdentifier(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagUTCTime) {
+                case var ᴛ when ᴛ == TagUTCTime: {
                     (result, err) = parseUTCTime(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagGeneralizedTime) {
+                case var ᴛ when ᴛ == TagGeneralizedTime: {
                     (result, err) = parseGeneralizedTime(innerBytesΔ1);
+                    break;
                 }
-                else if (exprᴛ1 == TagOctetString) {
+                case var ᴛ when ᴛ == TagOctetString: {
                     result = innerBytesΔ1;
+                    break;
                 }
-                else if (exprᴛ1 == TagBMPString) {
+                case var ᴛ when ᴛ == TagBMPString: {
                     (result, err) = parseBMPString(innerBytesΔ1);
+                    break;
                 }
-                else { /* default: */
+                default: {
                     // If we don't know how to handle the type, we just leave Value as nil.
-                }
+                    break;
+                }}
             }
             offset += tΔ1.length;
-            if (err != default!) {
+            if (err != nil) {
                 return (offset, err);
             }
-            if (result != default!) {
+            if (result != nil) {
                 v.Set(reflect.ValueOf(result));
             }
             return (offset, err);
@@ -858,7 +874,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }
 
     (var t, offset, err) = parseTagAndLength(bytes, offset);
-    if (err != default!) {
+    if (err != nil) {
         return (offset, err);
     }
     if (@params.@explicit) {
@@ -870,13 +886,12 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             err = new StructuralError("explicit tag has no child"u8);
             return (offset, err);
         }
-        if (t.@class == expectedClassΔ1 && t.tag == @params.tag.Value && (t.length == 0 || t.isCompound)){
-            if (AreEqual(fieldType, rawValueType)){
+        if (t.@class == expectedClassΔ1 && t.tag == @params.tag.Value && (t.length == 0 || t.isCompound)) {
+            if (AreEqual(fieldType, rawValueType)) {
                 // The inner element should not be parsed for RawValues.
-            } else 
-            if (t.length > 0){
+            } else if (t.length > 0) {
                 (t, offset, err) = parseTagAndLength(bytes, offset);
-                if (err != default!) {
+                if (err != nil) {
                     return (offset, err);
                 }
             } else {
@@ -890,7 +905,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         } else {
             // The tags didn't match, it might be an optional element.
             var ok = setDefaultValue(v, @params);
-            if (ok){
+            if (ok) {
                 offset = initOffset;
             } else {
                 err = new StructuralError("explicitly tagged member didn't match"u8);
@@ -910,13 +925,13 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     // when it sees a string, so if we see a different string type on the
     // wire, we change the universal type to match.
     if (universalTag == TagPrintableString) {
-        if (t.@class == ClassUniversal){
-            var exprᴛ2 = t.tag;
-            if (exprᴛ2 == TagIA5String || exprᴛ2 == TagGeneralString || exprᴛ2 == TagT61String || exprᴛ2 == TagUTF8String || exprᴛ2 == TagNumericString || exprᴛ2 == TagBMPString) {
+        if (t.@class == ClassUniversal) {
+            switch (t.tag) {
+            case var ᴛ when ᴛ == TagIA5String || ᴛ == TagGeneralString || ᴛ == TagT61String || ᴛ == TagUTF8String || ᴛ == TagNumericString || ᴛ == TagBMPString: {
                 universalTag = t.tag;
-            }
-        } else 
-        if (@params.stringType != 0) {
+                break;
+            }}
+        } else if (@params.stringType != 0) {
             universalTag = @params.stringType;
         }
     }
@@ -927,12 +942,11 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     // or the field is tagged with a different type, we change the universal
     // type to match.
     if (universalTag == TagUTCTime) {
-        if (t.@class == ClassUniversal){
+        if (t.@class == ClassUniversal) {
             if (t.tag == TagGeneralizedTime) {
                 universalTag = t.tag;
             }
-        } else 
-        if (@params.timeType != 0) {
+        } else if (@params.timeType != 0) {
             universalTag = @params.timeType;
         }
     }
@@ -967,7 +981,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     if (!matchAnyClassAndTag && (t.@class != expectedClass || t.tag != expectedTag) || (!matchAny && t.isCompound != compoundType)) {
         // Tags don't match. Again, it could be an optional element.
         var ok = setDefaultValue(v, @params);
-        if (ok){
+        if (ok) {
             offset = initOffset;
         } else {
             err = new StructuralError(fmt.Sprintf("tags don't match (%d vs %+v) %+v %s @%d"u8, expectedTag, t, @params, fieldType.Name(), offset));
@@ -1005,7 +1019,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }
     case ж<Enumerated> vΔ1: {
         var (parsedInt, err1) = parseInt32(innerBytes);
-        if (err1 == default!) {
+        if (err1 == nil) {
             vΔ1.Value = (Enumerated)(nint)parsedInt;
         }
         err = err1;
@@ -1017,7 +1031,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }
     case ж<ж<bigꓸInt>> vΔ1: {
         var (parsedInt, err1) = parseBigInt(innerBytes);
-        if (err1 == default!) {
+        if (err1 == nil) {
             vΔ1.ValueSlot = parsedInt;
         }
         err = err1;
@@ -1025,25 +1039,25 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }}
     {
         var val = v;
-        var exprᴛ3 = val.Kind();
-        if (exprᴛ3 == reflect.ΔBool) {
+        switch (val.Kind()) {
+        case var ᴛ when ᴛ == reflect.ΔBool: {
             var (parsedBool, err1) = parseBool(innerBytes);
-            if (err1 == default!) {
+            if (err1 == nil) {
                 val.SetBool(parsedBool);
             }
             err = err1;
             return (offset, err);
         }
-        if (exprᴛ3 == reflect.ΔInt || exprᴛ3 == reflect.Int32 || exprᴛ3 == reflect.Int64) {
-            if (val.Type().Size() == 4){
+        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+            if (val.Type().Size() == 4) {
                 var (parsedInt, err1) = parseInt32(innerBytes);
-                if (err1 == default!) {
+                if (err1 == nil) {
                     val.SetInt((int64)parsedInt);
                 }
                 err = err1;
             } else {
                 var (parsedInt, err1) = parseInt64(innerBytes);
-                if (err1 == default!) {
+                if (err1 == nil) {
                     val.SetInt(parsedInt);
                 }
                 err = err1;
@@ -1051,7 +1065,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             return (offset, err);
         }
         // TODO(dfc) Add support for the remaining integer types
-        if (exprᴛ3 == reflect.Struct) {
+        case var ᴛ when ᴛ == reflect.Struct: {
             var structType = fieldType;
 
             for (nint i = 0; i < structType.NumField(); i++) {
@@ -1073,7 +1087,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
                     continue;
                 }
                 (innerOffset, err) = parseField(val.Field(i), innerBytes, innerOffset, parseFieldParameters(field.Tag.Get(asn1ˢ)), depth);
-                if (err != default!) {
+                if (err != nil) {
                     return (offset, err);
                 }
             }
@@ -1082,7 +1096,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             // version numbers have increased.
             return (offset, err);
         }
-        if (exprᴛ3 == reflect.ΔSlice) {
+        case var ᴛ when ᴛ == reflect.ΔSlice: {
             var sliceType = fieldType;
             if (sliceType.Elem().Kind() == reflect.Uint8) {
                 val.Set(reflect.MakeSlice(sliceType, len(innerBytes), len(innerBytes)));
@@ -1090,48 +1104,56 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
                 return (offset, err);
             }
             var (newSlice, err1) = parseSequenceOf(innerBytes, sliceType, sliceType.Elem(), depth);
-            if (err1 == default!) {
+            if (err1 == nil) {
                 val.Set(newSlice);
             }
             err = err1;
             return (offset, err);
         }
-        if (exprᴛ3 == reflect.ΔString) {
-            @string vΔ3 = default!;
-            var exprᴛ4 = universalTag;
-            if (exprᴛ4 == TagPrintableString) {
+        case var ᴛ when ᴛ == reflect.ΔString: {
+            @string vΔ3 = default;
+            switch (universalTag) {
+            case var ᴛ2 when ᴛ2 == TagPrintableString: {
                 (vΔ3, err) = parsePrintableString(innerBytes);
+                break;
             }
-            else if (exprᴛ4 == TagNumericString) {
+            case var ᴛ2 when ᴛ2 == TagNumericString: {
                 (vΔ3, err) = parseNumericString(innerBytes);
+                break;
             }
-            else if (exprᴛ4 == TagIA5String) {
+            case var ᴛ2 when ᴛ2 == TagIA5String: {
                 (vΔ3, err) = parseIA5String(innerBytes);
+                break;
             }
-            else if (exprᴛ4 == TagT61String) {
+            case var ᴛ2 when ᴛ2 == TagT61String: {
                 (vΔ3, err) = parseT61String(innerBytes);
+                break;
             }
-            else if (exprᴛ4 == TagUTF8String) {
+            case var ᴛ2 when ᴛ2 == TagUTF8String: {
                 (vΔ3, err) = parseUTF8String(innerBytes);
+                break;
             }
-            else if (exprᴛ4 == TagGeneralString) {
+            case var ᴛ2 when ᴛ2 == TagGeneralString: {
                 // GeneralString is specified in ISO-2022/ECMA-35,
                 // A brief review suggests that it includes structures
                 // that allow the encoding to change midstring and
                 // such. We give up and pass it as an 8-bit string.
                 (vΔ3, err) = parseT61String(innerBytes);
+                break;
             }
-            else if (exprᴛ4 == TagBMPString) {
+            case var ᴛ2 when ᴛ2 == TagBMPString: {
                 (vΔ3, err) = parseBMPString(innerBytes);
+                break;
             }
-            else { /* default: */
+            default: {
                 err = new SyntaxError(fmt.Sprintf("internal error: unknown string type %d"u8, universalTag));
-            }
-            if (err == default!) {
+                break;
+            }}
+            if (err == nil) {
                 val.SetString(vΔ3);
             }
             return (offset, err);
-        }
+        }}
     }
     err = new StructuralError("unsupported: "u8 + v.Type().String());
     return (offset, err);
@@ -1140,10 +1162,10 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
 // canHaveDefaultValue reports whether k is a Kind that we will set a default
 // value for. (A signed integer, essentially.)
 internal static bool canHaveDefaultValue(reflectꓸKind k) {
-    var exprᴛ1 = k;
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+    switch (k) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return true;
-    }
+    }}
 
     return false;
 }
@@ -1152,7 +1174,7 @@ internal static bool canHaveDefaultValue(reflectꓸKind k) {
 // a Value. It is successful if the field was optional, even if a default value
 // wasn't provided or it failed to install it into the Value.
 internal static bool /*ok*/ setDefaultValue(reflectꓸValue v, fieldParameters @params) {
-    bool ok = default!;
+    bool ok = default;
 
     if (!@params.optional) {
         return ok;
@@ -1257,7 +1279,7 @@ partial struct invalidUnmarshalError {
 internal static readonly @string asn1UnmarshalRecipientˢ = "asn1: Unmarshal recipient value is nil"u8;
 
 internal static @string Error(this ref invalidUnmarshalError e) {
-    if (e.Type == default!) {
+    if (e.Type == nil) {
         return asn1UnmarshalRecipientˢ;
     }
 
@@ -1270,17 +1292,17 @@ internal static @string Error(this ref invalidUnmarshalError e) {
 // UnmarshalWithParams allows field parameters to be specified for the
 // top-level element. The form of the params is the same as the field tags.
 public static (slice<byte> rest, error err) UnmarshalWithParams(slice<byte> b, any val, @string @params) {
-    error err = default!;
+    error err = default;
 
     var v = reflect.ValueOf(val);
     if (v.Kind() != reflect.ΔPointer || v.IsNil()) {
-        return (default!, new invalidUnmarshalErrorжerror(Ꮡ(new invalidUnmarshalError(reflect.TypeOf(val)))));
+        return (default, new invalidUnmarshalErrorжerror(Ꮡ(new invalidUnmarshalError(reflect.TypeOf(val)))));
     }
     (var offset, err) = parseField(v.Elem(), b, 0, parseFieldParameters(@params), 0);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (b.slice(offset), default!);
+    return (b.slice(offset), default);
 }
 
 } // end asn1_package

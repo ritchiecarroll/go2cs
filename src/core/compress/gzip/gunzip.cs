@@ -52,8 +52,8 @@ partial struct Header {
     public @string Comment;   // comment
     public slice<byte> Extra; // "extra data"
     public time.Time ModTime; // modification time
-    public @string Name;   // file name
-    public byte OS;      // operating system type
+    public @string Name;      // file name
+    public byte OS;           // operating system type
 }
 
 // A Reader is an [io.Reader] that can be read to retrieve
@@ -71,11 +71,11 @@ partial struct Header {
 // returned by [Reader.Read] as tentative until they receive the [io.EOF]
 // marking the end of the data.
 partial struct Reader {
-    /*embed*/ public Header Header;       // valid after NewReader or Reader.Reset
+    /*embed*/ public Header Header; // valid after NewReader or Reader.Reset
     internal flate.Reader r;
     internal io.ReadCloser decompressor;
     internal uint32 digest; // CRC-32, IEEE polynomial (section 8)
-    internal uint32 size; // Uncompressed size (section 2.3.1)
+    internal uint32 size;   // Uncompressed size (section 2.3.1)
     internal array<byte> buf = new(512);
     internal error err;
     internal bool multistream;
@@ -91,11 +91,11 @@ partial struct Reader {
 public static (ж<Reader>, error) NewReader(io.Reader r) {
     var z = @new<Reader>();
     {
-        var err = z.Reset(r); if (err != default!) {
-            return (default!, err);
+        var err = z.Reset(r); if (err != nil) {
+            return (default, err);
         }
     }
-    return (z, default!);
+    return (z, default);
 }
 
 // Reset discards the [Reader] z's state and makes it equivalent to the
@@ -107,7 +107,7 @@ public static error Reset(this ref Reader z, io.Reader r) {
         multistream: true
     );
     {
-        var (rr, ok) = r._<flate.Reader>(ᐧ); if (ok){
+        var (rr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
             z.r = rr;
         } else {
             z.r = new bufio_ReaderжReader(bufio.NewReader(r));
@@ -144,14 +144,14 @@ public static void Multistream(this ref Reader z, bool ok) {
 internal static (@string, error) readString(this ref Reader z) {
     var sᴷ = new stackAppend<rune>();
 
-    error err = default!;
+    error err = default;
     var needConv = false;
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         if (i >= len(z.buf)) {
             return ("", ErrHeader);
         }
         (z.buf[i], err) = z.r.ReadByte();
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         if (z.buf[i] > 0x7f) {
@@ -167,9 +167,9 @@ internal static (@string, error) readString(this ref Reader z) {
                 foreach (var (_, v) in z.buf.slice(0, i)) {
                     s = append(sᴷ, s, (rune)v);
                 }
-                return ((@string)s, default!);
+                return ((@string)s, default);
             }
-            return ((@string)(z.buf.slice(0, i)), default!);
+            return ((@string)(z.buf.slice(0, i)), default);
         }
     }
 }
@@ -177,11 +177,11 @@ internal static (@string, error) readString(this ref Reader z) {
 // readHeader reads the GZIP header according to section 2.3.1.
 // This method does not set z.err.
 internal static (Header hdr, error err) readHeader(this ref Reader z) {
-    Header hdr = default!;
-    error err = default!;
+    Header hdr = default;
+    error err = default;
 
     {
-        (_, err) = io.ReadFull(z.r, z.buf[..10]); if (err != default!) {
+        (_, err) = io.ReadFull(z.r, z.buf[..10]); if (err != nil) {
             // RFC 1952, section 2.2, says the following:
             //	A gzip file consists of a series of "members" (compressed data sets).
             //
@@ -209,14 +209,14 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
 
     if ((byte)(flg & (byte)flagExtra) != 0) {
         {
-            (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != default!) {
+            (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != nil) {
                 return (hdr, noEOF(err));
             }
         }
         z.digest = crc32.Update(z.digest, crc32.IEEETable, z.buf[..2]);
         var data = new slice<byte>(le.Uint16(z.buf[..2]));
         {
-            (_, err) = io.ReadFull(z.r, data); if (err != default!) {
+            (_, err) = io.ReadFull(z.r, data); if (err != nil) {
                 return (hdr, noEOF(err));
             }
         }
@@ -224,10 +224,10 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
         hdr.Extra = data;
     }
 
-    @string s = default!;
+    @string s = default;
     if ((byte)(flg & (byte)flagName) != 0) {
         {
-            (s, err) = z.readString(); if (err != default!) {
+            (s, err) = z.readString(); if (err != nil) {
                 return (hdr, noEOF(err));
             }
         }
@@ -236,7 +236,7 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
 
     if ((byte)(flg & (byte)flagComment) != 0) {
         {
-            (s, err) = z.readString(); if (err != default!) {
+            (s, err) = z.readString(); if (err != nil) {
                 return (hdr, noEOF(err));
             }
         }
@@ -245,7 +245,7 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
 
     if ((byte)(flg & (byte)flagHdrCrc) != 0) {
         {
-            (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != default!) {
+            (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != nil) {
                 return (hdr, noEOF(err));
             }
         }
@@ -256,19 +256,19 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
     }
 
     z.digest = 0;
-    if (z.decompressor == default!){
+    if (z.decompressor == nil) {
         z.decompressor = flate.NewReader(z.r);
     } else {
-        z.decompressor._<flate.Resetter>().Reset(z.r, default!);
+        z.decompressor._<flate.Resetter>().Reset(z.r, default);
     }
-    return (hdr, default!);
+    return (hdr, default);
 }
 
 // Read implements [io.Reader], reading uncompressed bytes from its underlying reader.
 public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
 
-    if (z.err != default!) {
+    if (z.err != nil) {
         return (0, z.err);
     }
 
@@ -283,7 +283,7 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
 
         // Finished file; check checksum and size.
         {
-            var (_, errΔ1) = io.ReadFull(z.r, z.buf[..8]); if (errΔ1 != default!) {
+            var (_, errΔ1) = io.ReadFull(z.r, z.buf[..8]); if (errΔ1 != nil) {
                 z.err = noEOF(errΔ1);
                 return (n, z.err);
             }
@@ -300,16 +300,16 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
         if (!z.multistream) {
             return (n, io.EOF);
         }
-        z.err = default!; // Remove io.EOF
+        z.err = default; // Remove io.EOF
 
         {
-            (_, z.err) = z.readHeader(); if (z.err != default!) {
+            (_, z.err) = z.readHeader(); if (z.err != nil) {
                 return (n, z.err);
             }
         }
     }
 
-    return (n, default!);
+    return (n, default);
 }
 
 // Close closes the [Reader]. It does not close the underlying reader.

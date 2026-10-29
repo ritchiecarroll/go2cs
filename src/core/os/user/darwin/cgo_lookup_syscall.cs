@@ -23,16 +23,16 @@ internal static _C_uid_t _C_pw_uid(ref _C_struct_passwd p) {
     return p.Uid;
 }
 
-internal static ж<_C_uid_t> _C_pw_uidp(ж<_C_struct_passwd> Ꮡp) {
-    return Ꮡp.of(_C_struct_passwd.ᏑUid);
+internal static ж<_C_uid_t> _C_pw_uidp(ж<_C_struct_passwd> p) {
+    return p.of(_C_struct_passwd.ᏑUid);
 }
 
 internal static _C_gid_t _C_pw_gid(ref _C_struct_passwd p) {
     return p.Gid;
 }
 
-internal static ж<_C_gid_t> _C_pw_gidp(ж<_C_struct_passwd> Ꮡp) {
-    return Ꮡp.of(_C_struct_passwd.ᏑGid);
+internal static ж<_C_gid_t> _C_pw_gidp(ж<_C_struct_passwd> p) {
+    return p.of(_C_struct_passwd.ᏑGid);
 }
 
 internal static ж<_C_char> _C_pw_name(ref _C_struct_passwd p) {
@@ -55,43 +55,43 @@ internal static ж<_C_char> _C_gr_name(ref _C_struct_group g) {
     return g.Name;
 }
 
-internal static @string _C_GoString(ж<_C_char> Ꮡp) {
-    return unix.GoString(Ꮡp);
+internal static @string _C_GoString(ж<_C_char> p) {
+    return unix.GoString(p);
 }
 
-internal static (_C_struct_passwd pwd, bool found, syscall.Errno errno) _C_getpwnam_r(ж<_C_char> Ꮡname, ж<_C_char> Ꮡbuf, _C_size_t size) {
+internal static (_C_struct_passwd pwd, bool found, syscall.Errno errno) _C_getpwnam_r(ж<_C_char> name, ж<_C_char> buf, _C_size_t size) {
     ref var pwd = ref heap(new _C_struct_passwd(), out var Ꮡpwd);
-    syscall.Errno errno = default!;
+    syscall.Errno errno = default;
 
     ref var result = ref heap<ж<_C_struct_passwd>>(out var Ꮡresult);
-    errno = unix.Getpwnam(Ꮡname, Ꮡpwd, Ꮡbuf, size, Ꮡresult);
+    errno = unix.Getpwnam(name, Ꮡpwd, buf, size, Ꮡresult);
     return (pwd, result != nil, errno);
 }
 
-internal static (_C_struct_passwd pwd, bool found, syscall.Errno errno) _C_getpwuid_r(_C_uid_t uid, ж<_C_char> Ꮡbuf, _C_size_t size) {
+internal static (_C_struct_passwd pwd, bool found, syscall.Errno errno) _C_getpwuid_r(_C_uid_t uid, ж<_C_char> buf, _C_size_t size) {
     ref var pwd = ref heap(new _C_struct_passwd(), out var Ꮡpwd);
-    syscall.Errno errno = default!;
+    syscall.Errno errno = default;
 
     ref var result = ref heap<ж<_C_struct_passwd>>(out var Ꮡresult);
-    errno = unix.Getpwuid(uid, Ꮡpwd, Ꮡbuf, size, Ꮡresult);
+    errno = unix.Getpwuid(uid, Ꮡpwd, buf, size, Ꮡresult);
     return (pwd, result != nil, errno);
 }
 
-internal static (_C_struct_group grp, bool found, syscall.Errno errno) _C_getgrnam_r(ж<_C_char> Ꮡname, ж<_C_char> Ꮡbuf, _C_size_t size) {
+internal static (_C_struct_group grp, bool found, syscall.Errno errno) _C_getgrnam_r(ж<_C_char> name, ж<_C_char> buf, _C_size_t size) {
     ref var grp = ref heap(new _C_struct_group(), out var Ꮡgrp);
-    syscall.Errno errno = default!;
+    syscall.Errno errno = default;
 
     ref var result = ref heap<ж<_C_struct_group>>(out var Ꮡresult);
-    errno = unix.Getgrnam(Ꮡname, Ꮡgrp, Ꮡbuf, size, Ꮡresult);
+    errno = unix.Getgrnam(name, Ꮡgrp, buf, size, Ꮡresult);
     return (grp, result != nil, errno);
 }
 
-internal static (_C_struct_group grp, bool found, syscall.Errno errno) _C_getgrgid_r(_C_gid_t gid, ж<_C_char> Ꮡbuf, _C_size_t size) {
+internal static (_C_struct_group grp, bool found, syscall.Errno errno) _C_getgrgid_r(_C_gid_t gid, ж<_C_char> buf, _C_size_t size) {
     ref var grp = ref heap(new _C_struct_group(), out var Ꮡgrp);
-    syscall.Errno errno = default!;
+    syscall.Errno errno = default;
 
     ref var result = ref heap<ж<_C_struct_group>>(out var Ꮡresult);
-    errno = unix.Getgrgid(gid, Ꮡgrp, Ꮡbuf, size, Ꮡresult);
+    errno = unix.Getgrgid(gid, Ꮡgrp, buf, size, Ꮡresult);
     return (grp, result != nil, errno);
 }
 

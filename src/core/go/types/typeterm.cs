@@ -25,7 +25,7 @@ public static @string String(this ж<Δterm> Ꮡx) {
     case {} when Ꮡx == nil: {
         return "∅"u8;
     }
-    case {} when x.typ == default!: {
+    case {} when x.typ == nil: {
         return "𝓤"u8;
     }
     case {} when x.tilde: {
@@ -46,7 +46,7 @@ internal static bool equal(this ж<Δterm> Ꮡx, ж<Δterm> Ꮡy) {
     case {} when Ꮡx == nil || Ꮡy == nil: {
         return Ꮡx == Ꮡy;
     }
-    case {} when x.typ == default! || y.typ == default!: {
+    case {} when x.typ == nil || y.typ == nil: {
         return AreEqual(x.typ, y.typ);
     }}
     // ∅ ⊂ x, y ⊂ 𝓤
@@ -62,19 +62,19 @@ internal static (ж<Δterm>, ж<Δterm>) union(this ж<Δterm> Ꮡx, ж<Δterm> 
     // easy cases
     switch (ᐧ) {
     case {} when Ꮡx == nil && Ꮡy == nil: {
-        return (default!, default!); // ∅ ∪ ∅ == ∅
+        return (default, default); // ∅ ∪ ∅ == ∅
     }
     case {} when Ꮡx == nil: {
-        return (Ꮡy, default!); // ∅ ∪ y == y
+        return (Ꮡy, default); // ∅ ∪ y == y
     }
     case {} when Ꮡy == nil: {
-        return (Ꮡx, default!); // x ∪ ∅ == x
+        return (Ꮡx, default); // x ∪ ∅ == x
     }
-    case {} when x.typ == default!: {
-        return (Ꮡx, default!); // 𝓤 ∪ y == 𝓤
+    case {} when x.typ == nil: {
+        return (Ꮡx, default); // 𝓤 ∪ y == 𝓤
     }
-    case {} when y.typ == default!: {
-        return (Ꮡy, default!); // x ∪ 𝓤 == 𝓤
+    case {} when y.typ == nil: {
+        return (Ꮡy, default); // x ∪ 𝓤 == 𝓤
     }}
     // ∅ ⊂ x, y ⊂ 𝓤
 
@@ -88,9 +88,9 @@ internal static (ж<Δterm>, ж<Δterm>) union(this ж<Δterm> Ꮡx, ж<Δterm> 
     //  T ∪ ~t == ~t
     //  T ∪  T ==  T
     if (x.tilde || !y.tilde) {
-        return (Ꮡx, default!);
+        return (Ꮡx, default);
     }
-    return (Ꮡy, default!);
+    return (Ꮡy, default);
 }
 
 // intersect returns the intersection x ∩ y.
@@ -101,18 +101,18 @@ internal static ж<Δterm> intersect(this ж<Δterm> Ꮡx, ж<Δterm> Ꮡy) {
     // easy cases
     switch (ᐧ) {
     case {} when Ꮡx == nil || Ꮡy == nil: {
-        return default!; // ∅ ∩ y == ∅ and ∩ ∅ == ∅
+        return default; // ∅ ∩ y == ∅ and ∩ ∅ == ∅
     }
-    case {} when x.typ == default!: {
+    case {} when x.typ == nil: {
         return Ꮡy; // 𝓤 ∩ y == y
     }
-    case {} when y.typ == default!: {
+    case {} when y.typ == nil: {
         return Ꮡx; // x ∩ 𝓤 == x
     }}
     // ∅ ⊂ x, y ⊂ 𝓤
 
     if (x.disjoint(Ꮡy)) {
-        return default!; // x ∩ y == ∅ if x ∩ y == ∅
+        return default; // x ∩ y == ∅ if x ∩ y == ∅
     }
     // x.typ == y.typ
 
@@ -135,7 +135,7 @@ internal static bool includes(this ж<Δterm> Ꮡx, ΔType t) {
     case {} when Ꮡx == nil: {
         return false; // t ∈ ∅ == false
     }
-    case {} when x.typ == default!: {
+    case {} when x.typ == nil: {
         return true; // t ∈ 𝓤 == true
     }}
     // ∅ ⊂ x ⊂ 𝓤
@@ -160,10 +160,10 @@ internal static bool subsetOf(this ж<Δterm> Ꮡx, ж<Δterm> Ꮡy) {
     case {} when Ꮡy == nil: {
         return false; // x ⊆ ∅ == false since x != ∅
     }
-    case {} when y.typ == default!: {
+    case {} when y.typ == nil: {
         return true; // x ⊆ 𝓤 == true
     }
-    case {} when x.typ == default!: {
+    case {} when x.typ == nil: {
         return false; // 𝓤 ⊆ y == false since y != 𝓤
     }}
     // ∅ ⊂ x, y ⊂ 𝓤
@@ -185,7 +185,7 @@ internal static bool subsetOf(this ж<Δterm> Ꮡx, ж<Δterm> Ꮡy) {
 internal static bool disjoint(this ref Δterm x, ж<Δterm> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
-    if (debug && (x.typ == default! || y.typ == default!)) {
+    if (debug && (x.typ == nil || y.typ == nil)) {
         throw panic("invalid argument(s)");
     }
     var ux = x.typ;

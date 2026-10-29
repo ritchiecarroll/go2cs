@@ -18,7 +18,7 @@ partial class types_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string nilˢ = "<nil>"u8;
 
-internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @string> qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
+internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @string> qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     foreach (var (i, vᴛ1) in args) {
@@ -39,20 +39,20 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
         }
         case slice<ж<operand>> a: {
             ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-            Ꮡbuf.WriteByte((rune)'[');
+            Ꮡbuf.WriteByte((byte)'[');
             foreach (var (iΔ1, x) in a) {
                 if (iΔ1 > 0) {
                     Ꮡbuf.WriteString(", "u8);
                 }
                 Ꮡbuf.WriteString(operandString(ref (x).DerefOrNull(), qf));
             }
-            Ꮡbuf.WriteByte((rune)']');
+            Ꮡbuf.WriteByte((byte)']');
             arg = buf.String();
             break;
         }
         case tokenꓸPos a: {
-            if (Ꮡfset != nil) {
-                arg = Ꮡfset.Position(a).String();
+            if (fset != nil) {
+                arg = fset.Position(a).String();
             }
             break;
         }
@@ -62,9 +62,9 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
         }
         case slice<ast.Expr> a: {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-            buf.WriteByte((rune)'[');
+            buf.WriteByte((byte)'[');
             writeExprList(Ꮡbuf, a);
-            buf.WriteByte((rune)']');
+            buf.WriteByte((byte)']');
             arg = Ꮡbuf.String();
             break;
         }
@@ -75,7 +75,7 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
         case {} Δa when Δa._<ΔType>(out var a): {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             var w = newTypeWriter(Ꮡbuf, qf);
-            w.Value.tpSubscripts = tpSubscripts;
+            w.tpSubscripts = tpSubscripts;
             w.typ(a);
             arg = Ꮡbuf.String();
             break;
@@ -83,30 +83,30 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
         case slice<ΔType> a: {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             var w = newTypeWriter(Ꮡbuf, qf);
-            w.Value.tpSubscripts = tpSubscripts;
-            buf.WriteByte((rune)'[');
+            w.tpSubscripts = tpSubscripts;
+            buf.WriteByte((byte)'[');
             foreach (var (iΔ2, x) in a) {
                 if (iΔ2 > 0) {
                     buf.WriteString(", "u8);
                 }
                 w.typ(x);
             }
-            buf.WriteByte((rune)']');
+            buf.WriteByte((byte)']');
             arg = Ꮡbuf.String();
             break;
         }
         case slice<ж<TypeParam>> a: {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             var w = newTypeWriter(Ꮡbuf, qf);
-            w.Value.tpSubscripts = tpSubscripts;
-            buf.WriteByte((rune)'[');
+            w.tpSubscripts = tpSubscripts;
+            buf.WriteByte((byte)'[');
             foreach (var (iΔ3, x) in a) {
                 if (iΔ3 > 0) {
                     buf.WriteString(", "u8);
                 }
                 w.typ(new TypeParamжΔType(x));
             }
-            buf.WriteByte((rune)']');
+            buf.WriteByte((byte)']');
             arg = Ꮡbuf.String();
             break;
         }}
@@ -120,8 +120,8 @@ internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, param
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    ж<token.FileSet> fset = default!;
-    Func<ж<Package>, @string> qf = default!;
+    ж<token.FileSet> fset = default;
+    Func<ж<Package>, @string> qf = default;
     if (Ꮡcheck != nil) {
         fset = check.fset;
         qf = (ж<Package> p1) => Ꮡcheck.qualifier(p1);
@@ -175,7 +175,7 @@ internal static @string qualifier(this ref Checker check, ж<Package> Ꮡpkg) {
 
     // Qualify the package unless it's the package being type-checked.
     if (Ꮡpkg != check.pkg) {
-        if (check.pkgPathMap == default!) {
+        if (check.pkgPathMap == nil) {
             check.pkgPathMap = new map<@string, map<@string, bool>>();
             check.seenPkgMap = new map<ж<Package>, bool>();
             check.markImports(check.pkg);
@@ -216,7 +216,7 @@ internal static @string stripAnnotations(@string s) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (_, r) in s) {
         // strip #'s and subscript digits
-        if (r < (rune)'₀' || (rune)'₀' + 10 <= r) { // '₀' == U+2080
+        if (r < '₀' || (rune)'₀' + 10 <= r) { // '₀' == U+2080
             Ꮡbuf.WriteRune(r);
         }
     }

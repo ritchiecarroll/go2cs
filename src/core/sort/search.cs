@@ -63,7 +63,7 @@ public static nint Search(nint n, Func<nint, bool> f) {
     while (i < j) {
         nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
-        if (!f(h)){
+        if (!f(h)) {
             i = h + 1; // preserves f(i-1) == false
         } else {
             j = h; // preserves f(j) == true
@@ -98,7 +98,7 @@ public static nint Search(nint n, Func<nint, bool> f) {
 //	    fmt.Printf("%s not found, would insert at %d", target, i)
 //	}
 public static (nint i, bool found) Find(nint n, Func<nint, nint> cmp) {
-    nint i = default!;
+    nint i = default;
 
     // The invariants here are similar to the ones in Search.
     // Define cmp(-1) > 0 and cmp(n) <= 0
@@ -108,7 +108,7 @@ public static (nint i, bool found) Find(nint n, Func<nint, nint> cmp) {
     while (i < j) {
         nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
-        if (cmp(h) > 0){
+        if (cmp(h) > 0) {
             i = h + 1; // preserves cmp(i-1) > 0
         } else {
             j = h; // preserves cmp(j) <= 0

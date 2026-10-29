@@ -17,14 +17,14 @@ internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool, @strin
     GoFrame ᒐ = default;
     try {
         var (tmpdir, err) = os.MkdirTemp(""u8, "symtest"u8);
-        if (err != default!) {
+        if (err != nil) {
             throw panic("failed to create temp directory: " + err.Error());
         }
         defer(os.RemoveAll, tmpdir, ref ᒐ);
 
         err = os.Symlink("target"u8, filepath.Join(tmpdir, "symlink"));
         switch (ᐧ) {
-        case {} when err == default!: {
+        case {} when err == nil: {
             return (true, "");
         }
         case {} when errors.Is(err, Δsyscall.EWINDOWS): {
@@ -35,7 +35,7 @@ internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool, @strin
         }}
         return (false, "");
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 });
 

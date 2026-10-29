@@ -26,15 +26,15 @@ public static UntypedInt O_DIRECTORY => 0x04000; // target must be a directory
 // the set of invented O_ values in syscall/types_windows.go
 // to avoid overlap.
 public static UntypedInt O_NOFOLLOW_ANY => 0x200000000; // disallow symlinks anywhere in the path
-public static UntypedInt O_WRITE_ATTRS => 0x800000000; // FILE_WRITE_ATTRIBUTES, used by Chmod
+public static UntypedInt O_WRITE_ATTRS => 0x800000000;  // FILE_WRITE_ATTRIBUTES, used by Chmod
 
 public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @string name, uint64 flag, uint32 perm) {
     if (len(name) == 0) {
         return (syscall.InvalidHandle, syscall.ERROR_FILE_NOT_FOUND);
     }
 
-    uint32 access = default!;
-    uint32 options = default!;
+    uint32 access = default;
+    uint32 options = default;
     // Map Win32 file flags to NT create options.
     var fileFlags = (uint32)flag & (uint32)FileFlagsMask;
     if ((fileFlags & ~(uint32)ValidFileFlagsMask) != 0) {
@@ -61,24 +61,28 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     setOptionFlag(FILE_OPEN_NO_RECALL, O_FILE_FLAG_OPEN_NO_RECALL);
     setOptionFlag(FILE_OPEN_REPARSE_POINT, O_FILE_FLAG_OPEN_REPARSE_POINT);
 
-    var exprᴛ1 = (uint64)(flag & ((uint64)((UntypedInt)(syscall.O_RDONLY | syscall.O_WRONLY) | (uint64)syscall.O_RDWR)));
-    if (exprᴛ1 == syscall.O_RDONLY) {
+    switch ((uint64)(flag & ((uint64)((UntypedInt)(syscall.O_RDONLY | syscall.O_WRONLY) | (uint64)syscall.O_RDWR)))) {
+    case var ᴛ when ᴛ == syscall.O_RDONLY: {
         // FILE_GENERIC_READ includes FILE_LIST_DIRECTORY.
         access |= (uint32)(FILE_GENERIC_READ);
+        break;
     }
-    else if (exprᴛ1 == syscall.O_WRONLY) {
+    case var ᴛ when ᴛ == syscall.O_WRONLY: {
         access |= (uint32)(FILE_GENERIC_WRITE);
         options |= (uint32)(FILE_NON_DIRECTORY_FILE);
+        break;
     }
-    else if (exprᴛ1 == syscall.O_RDWR) {
+    case var ᴛ when ᴛ == syscall.O_RDWR: {
         access |= (uint32)((uint32)((uint32)FILE_GENERIC_READ | (uint32)FILE_GENERIC_WRITE));
         options |= (uint32)(FILE_NON_DIRECTORY_FILE);
+        break;
     }
-    else { /* default: */
+    default: {
         // Stat opens files without requesting read or write permissions,
         // but we still need to request SYNCHRONIZE.
         access |= (uint32)(SYNCHRONIZE);
-    }
+        break;
+    }}
     if ((flag & (uint64)syscall.O_CREAT) != 0) {
         access |= (uint32)(FILE_GENERIC_WRITE);
     }
@@ -107,18 +111,18 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     // Allow File.Stat.
     access |= (uint32)((uint32)((UntypedInt)(STANDARD_RIGHTS_READ | FILE_READ_ATTRIBUTES) | (uint32)FILE_READ_EA));
 
-    var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES(nil));
+    var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
     if ((flag & (uint64)O_NOFOLLOW_ANY) != 0) {
-        objAttrs.Value.Attributes |= (uint32)(OBJ_DONT_REPARSE);
+        objAttrs.Attributes |= (uint32)(OBJ_DONT_REPARSE);
     }
     if ((flag & (uint64)syscall.O_CLOEXEC) == 0) {
-        objAttrs.Value.Attributes |= (uint32)(OBJ_INHERIT);
+        objAttrs.Attributes |= (uint32)(OBJ_INHERIT);
     }
     if ((fileFlags & (uint32)O_FILE_FLAG_POSIX_SEMANTICS) == 0) {
-        objAttrs.Value.Attributes |= (uint32)(OBJ_CASE_INSENSITIVE);
+        objAttrs.Attributes |= (uint32)(OBJ_CASE_INSENSITIVE);
     }
     {
-        var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != default!) {
+        var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
             return (syscall.InvalidHandle, errΔ1);
         }
     }
@@ -128,7 +132,7 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     // file with a new, read-only one.
     //
     // Instead, we ftruncate the file after opening when O_TRUNC is set.
-    uint32 disposition = default!;
+    uint32 disposition = default;
     switch (ᐧ) {
     case {} when (uint64)(flag & ((uint64)((uint64)syscall.O_CREAT | (uint64)syscall.O_EXCL))) == (uint64)((uint64)((uint64)syscall.O_CREAT | (uint64)syscall.O_EXCL)): {
         disposition = FILE_CREATE;
@@ -150,15 +154,15 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     }
 
     ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
-    error err = default!;
-    if (TestOpenatFallback && (flag & (uint64)O_NOFOLLOW_ANY) != 0){
+    error err = default;
+    if (TestOpenatFallback && (flag & (uint64)O_NOFOLLOW_ANY) != 0) {
         err = STATUS_INVALID_PARAMETER;
     } else {
         err = NtCreateFile(
             Ꮡh,
             (uint32)SYNCHRONIZE | access,
             objAttrs,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             nil,
             fileAttrs,
             (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE),
@@ -170,7 +174,7 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     if (AreEqual(err, STATUS_INVALID_PARAMETER) && (flag & (uint64)O_NOFOLLOW_ANY) != 0) {
         (h, err) = openatFallback(name, (uint32)SYNCHRONIZE | access, objAttrs.Value, fileAttrs, disposition, (uint32)FILE_OPEN_FOR_BACKUP_INTENT | options);
     }
-    if (err != default!) {
+    if (err != nil) {
         return (h, ntCreateFileError(err, flag));
     }
 
@@ -181,18 +185,18 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
             // Unix's O_TRUNC specification says to ignore O_TRUNC on named pipes and terminal devices.
             // We do the same here.
             {
-                var (t, err1) = syscall.GetFileType(h); if (err1 == default! && (t == syscall.FILE_TYPE_PIPE || t == syscall.FILE_TYPE_CHAR)) {
-                    err = default!;
+                var (t, err1) = syscall.GetFileType(h); if (err1 == nil && (t == syscall.FILE_TYPE_PIPE || t == syscall.FILE_TYPE_CHAR)) {
+                    err = default;
                 }
             }
         }
-        if (err != default!) {
+        if (err != nil) {
             syscall.CloseHandle(h);
             return (syscall.InvalidHandle, err);
         }
     }
 
-    return (h, default!);
+    return (h, default);
 }
 
 // TestOpenatFallback should only be used for testing purposes.
@@ -216,16 +220,16 @@ internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 ac
         // fallback also supports multi-component paths passed to those APIs.
         // Reject other paths here rather than weaken O_NOFOLLOW_ANY: this is
         // not a general replacement for OBJ_DONT_REPARSE.
-        if (attrs.RootDirectory == 0 || name == ".."u8 || stringslite.IndexByte(name, (rune)'\\') >= 0 || stringslite.IndexByte(name, (rune)'/') >= 0 || stringslite.IndexByte(name, (rune)':') >= 0) {
+        if (attrs.RootDirectory == 0 || name == ".."u8 || stringslite.IndexByte(name, (byte)'\\') >= 0 || stringslite.IndexByte(name, (byte)'/') >= 0 || stringslite.IndexByte(name, (byte)':') >= 0) {
             return (syscall.InvalidHandle, STATUS_INVALID_PARAMETER);
         }
         attrs.Attributes &= unchecked((uint32)~(uint32)(OBJ_DONT_REPARSE));
         ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
         var err = NtCreateFile(
-            Ꮡh, access, Ꮡattrs, Ꮡ(new IO_STATUS_BLOCK(nil)), nil, fileAttrs,
+            Ꮡh, access, Ꮡattrs, Ꮡ(new IO_STATUS_BLOCK()), nil, fileAttrs,
             (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE), disposition,
             (options | (uint32)FILE_OPEN_REPARSE_POINT) & ~(uint32)FILE_DELETE_ON_CLOSE, nil, 0);
-        if (err != default!) {
+        if (err != nil) {
             return (syscall.InvalidHandle, err);
         }
         // Inspect the handle, not the path, before truncation or delete-on-close.
@@ -234,16 +238,16 @@ internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 ac
         if ((options & (uint32)FILE_OPEN_REPARSE_POINT) == 0) {
             ref var info = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡinfo);
             err = syscall.GetFileInformationByHandle(h, Ꮡinfo);
-            if (err == default! && (info.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+            if (err == nil && (info.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
                 err = STATUS_REPARSE_POINT_ENCOUNTERED;
             }
-            if (err != default!) {
+            if (err != nil) {
                 syscall.CloseHandle(h);
                 return (syscall.InvalidHandle, err);
             }
         }
         if ((options & (uint32)FILE_DELETE_ON_CLOSE) == 0) {
-            return (h, default!);
+            return (h, default);
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
 
@@ -252,18 +256,18 @@ internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 ac
         // or its directory entry has been replaced since the first open.
         // The file already exists, including when created with O_EXCL.
         attrs.RootDirectory = h;
-        attrs.ObjectName = Ꮡ(new NTUnicodeString(nil));
+        attrs.ObjectName = Ꮡ(new NTUnicodeString());
         ref var dh = ref heap(new syscallꓸHandle(), out var Ꮡdh);
         err = NtOpenFile(
-            Ꮡdh, access, Ꮡattrs, Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡdh, access, Ꮡattrs, Ꮡ(new IO_STATUS_BLOCK()),
             (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE),
             options | (uint32)FILE_OPEN_REPARSE_POINT);
-        if (err != default!) {
+        if (err != nil) {
             return (syscall.InvalidHandle, err);
         }
-        return (dh, default!);
+        return (dh, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -274,11 +278,11 @@ internal static error ntCreateFileError(error err, uint64 flag) {
         // The Openat fallback can also return Win32 errors.
         return err;
     }
-    var exprᴛ1 = s;
-    if (exprᴛ1 == STATUS_REPARSE_POINT_ENCOUNTERED) {
+    switch (s) {
+    case var ᴛ when ᴛ == STATUS_REPARSE_POINT_ENCOUNTERED: {
         return syscall.ELOOP;
     }
-    if (exprᴛ1 == STATUS_NOT_A_DIRECTORY) {
+    case var ᴛ when ᴛ == STATUS_NOT_A_DIRECTORY: {
         // ENOTDIR is the errno returned by open when O_DIRECTORY is specified
         // and the target is not a directory.
         //
@@ -290,20 +294,21 @@ internal static error ntCreateFileError(error err, uint64 flag) {
         if ((flag & (uint64)O_DIRECTORY) != 0) {
             return syscall.ENOTDIR;
         }
+        break;
     }
-    else if (exprᴛ1 == STATUS_FILE_IS_A_DIRECTORY) {
+    case var ᴛ when ᴛ == STATUS_FILE_IS_A_DIRECTORY: {
         return syscall.EISDIR;
     }
-    else if (exprᴛ1 == STATUS_OBJECT_NAME_COLLISION) {
+    case var ᴛ when ᴛ == STATUS_OBJECT_NAME_COLLISION: {
         return syscall.EEXIST;
-    }
+    }}
     return s.Errno();
 }
 
 public static error Mkdirat(syscallꓸHandle dirfd, @string name, uint32 mode) {
-    var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES(nil));
+    var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
     {
-        var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != default!) {
+        var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -312,7 +317,7 @@ public static error Mkdirat(syscallꓸHandle dirfd, @string name, uint32 mode) {
         Ꮡh,
         FILE_GENERIC_READ,
         objAttrs,
-        Ꮡ(new IO_STATUS_BLOCK(nil)),
+        Ꮡ(new IO_STATUS_BLOCK()),
         nil,
         syscall.FILE_ATTRIBUTE_NORMAL,
         (uint32)((UntypedInt)(syscall.FILE_SHARE_READ | syscall.FILE_SHARE_WRITE) | (uint32)syscall.FILE_SHARE_DELETE),
@@ -320,11 +325,11 @@ public static error Mkdirat(syscallꓸHandle dirfd, @string name, uint32 mode) {
         (uint32)((uint32)FILE_DIRECTORY_FILE | (uint32)FILE_OPEN_REPARSE_POINT),
         nil,
         0);
-    if (err != default!) {
+    if (err != nil) {
         return ntCreateFileError(err, 0);
     }
     syscall.CloseHandle(h);
-    return default!;
+    return default;
 }
 
 public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 options) {
@@ -335,9 +340,9 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
             // Make this an error consistent with that of POSIX.
             return syscall.EINVAL;
         }
-        var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES(nil));
+        var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
         {
-            var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != default!) {
+            var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
@@ -346,10 +351,10 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
             Ꮡh,
             (uint32)((uint32)FILE_READ_ATTRIBUTES | (uint32)DELETE),
             objAttrs,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             (uint32)((UntypedInt)(FILE_SHARE_DELETE | FILE_SHARE_READ) | (uint32)FILE_SHARE_WRITE),
             (uint32)((uint32)FILE_OPEN_REPARSE_POINT | (uint32)FILE_OPEN_FOR_BACKUP_INTENT) | options);
-        if (err != default!) {
+        if (err != nil) {
             {
                 var (ntStatus, ok) = err._<NTStatus>(ᐧ); if (!ok || ntStatus != STATUS_ACCESS_DENIED) {
                     return ntCreateFileError(err, 0);
@@ -363,10 +368,10 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
                 Ꮡh,
                 DELETE,
                 objAttrs,
-                Ꮡ(new IO_STATUS_BLOCK(nil)),
+                Ꮡ(new IO_STATUS_BLOCK()),
                 (uint32)((UntypedInt)(FILE_SHARE_DELETE | FILE_SHARE_READ) | (uint32)FILE_SHARE_WRITE),
                 (uint32)((uint32)FILE_OPEN_REPARSE_POINT | (uint32)FILE_OPEN_FOR_BACKUP_INTENT) | options);
-            if (err != default!) {
+            if (err != nil) {
                 return ntCreateFileError(err, 0);
             }
         }
@@ -390,7 +395,7 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
         // Also, some file systems, like FAT32, don't support POSIX semantics.
         err = NtSetInformationFile(
             h,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             @unsafe.Pointer.FromPinnedBox(Ꮡ(new FILE_DISPOSITION_INFORMATION_EX(
                 Flags: (uint32)((UntypedInt)((UntypedInt)(FILE_DISPOSITION_DELETE | FILE_DISPOSITION_FORCE_IMAGE_SECTION_CHECK) | FILE_DISPOSITION_POSIX_SEMANTICS) |
                     // This differs from DeleteFileW, but matches os.Remove's
@@ -400,20 +405,20 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
             ))),
             (uint32)/* unsafe.Sizeof(FILE_DISPOSITION_INFORMATION_EX{}) */ (uintptr)4,
             FileDispositionInformationEx);
-        var exprᴛ1 = err;
-        if (AreEqual(exprᴛ1, default!)) {
-            return default!;
+        switch (err) {
+        case var ᴛ when AreEqual(ᴛ, default): {
+            return default;
         }
-        if (AreEqual(exprᴛ1, STATUS_INVALID_INFO_CLASS) || AreEqual(exprᴛ1, STATUS_INVALID_PARAMETER) || AreEqual(exprᴛ1, STATUS_NOT_SUPPORTED)) { // the file system doesn't support FILE_DISPOSITION_INFORMATION_EX or one of the flags
+        case var ᴛ when AreEqual(ᴛ, STATUS_INVALID_INFO_CLASS) || AreEqual(ᴛ, STATUS_INVALID_PARAMETER) || AreEqual(ᴛ, STATUS_NOT_SUPPORTED): { // the file system doesn't support FILE_DISPOSITION_INFORMATION_EX or one of the flags
             // the operating system doesn't support FileDispositionInformationEx
             // the operating system doesn't support one of the flags
             return deleteatFallback(h);
         }
-        { /* default: */
+        default: {
             return err._<NTStatus>().Errno();
-        }
+        }}
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -428,14 +433,14 @@ public static ref bool TestDeleteatFallback => ref ((StaticBox<bool>)ᏑTestDele
 internal static error deleteatFallback(syscallꓸHandle h) {
     ref var data = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡdata);
     {
-        var err = syscall.GetFileInformationByHandle(h, Ꮡdata); if (err == default! && (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
+        var err = syscall.GetFileInformationByHandle(h, Ꮡdata); if (err == nil && (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
             // Remove read-only attribute. Reopen the file, as it was previously open without FILE_WRITE_ATTRIBUTES access
             // in order to maximize compatibility in the happy path.
             var (wh, errΔ1) = ReOpenFile(h,
                 FILE_WRITE_ATTRIBUTES,
                 (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE),
                 (uint32)((uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT | (uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS));
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
             errΔ1 = SetFileInformationByHandle(
@@ -446,7 +451,7 @@ internal static error deleteatFallback(syscallꓸHandle h) {
                 ))),
                 (uint32)/* unsafe.Sizeof(FILE_BASIC_INFO{}) */ (uintptr)40);
             syscall.CloseHandle(wh);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
@@ -464,9 +469,9 @@ internal static error deleteatFallback(syscallꓸHandle h) {
 public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscallꓸHandle newdirfd, @string newpath) {
     GoFrame ᒐ = default;
     try {
-        var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES(nil));
+        var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
         {
-            var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != default!) {
+            var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
@@ -475,21 +480,20 @@ public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscall
             Ꮡh,
             (uint32)((uint32)SYNCHRONIZE | (uint32)DELETE),
             objAttrs,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             (uint32)((UntypedInt)(FILE_SHARE_DELETE | FILE_SHARE_READ) | (uint32)FILE_SHARE_WRITE),
             (uint32)((UntypedInt)(FILE_OPEN_REPARSE_POINT | FILE_OPEN_FOR_BACKUP_INTENT) | (uint32)FILE_SYNCHRONOUS_IO_NONALERT));
-        if (err != default!) {
+        if (err != nil) {
             return ntCreateFileError(err, 0);
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
 
-        ref var renameInfoEx = ref heap<FILE_RENAME_INFORMATION_EX>(out var ᏑrenameInfoEx);
-        renameInfoEx = new FILE_RENAME_INFORMATION_EX(
+        ref var renameInfoEx = ref heap<FILE_RENAME_INFORMATION_EX>(new FILE_RENAME_INFORMATION_EX(
             Flags: (uint32)((uint32)FILE_RENAME_REPLACE_IF_EXISTS | (uint32)FILE_RENAME_POSIX_SEMANTICS),
             RootDirectory: newdirfd
-        );
+        ), out var ᏑrenameInfoEx);
         (var p16, err) = syscall.UTF16FromString(newpath);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (len(p16) > len(renameInfoEx.FileName)) {
@@ -502,12 +506,12 @@ public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscall
         const uint32 FileRenameInformationEx = 65;
         err = NtSetInformationFile(
             h,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             @unsafe.Pointer.FromPinnedBox(ᏑrenameInfoEx),
             (uint32)/* unsafe.Sizeof(FILE_RENAME_INFORMATION_EX{}) */ (uintptr)544,
             FileRenameInformationEx);
-        if (err == default!) {
-            return default!;
+        if (err == nil) {
+            return default;
         }
 
         // If the prior rename failed, the filesystem might not support
@@ -515,17 +519,16 @@ public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscall
         // FILE_RENAME_INFORMATION_EX.
         //
         // Try again.
-        ref var renameInfo = ref heap<FILE_RENAME_INFORMATION>(out var ᏑrenameInfo);
-        renameInfo = new FILE_RENAME_INFORMATION(
+        ref var renameInfo = ref heap<FILE_RENAME_INFORMATION>(new FILE_RENAME_INFORMATION(
             ReplaceIfExists: true,
             RootDirectory: newdirfd
-        );
+        ), out var ᏑrenameInfo);
         copy(renameInfo.FileName[..], p16);
         renameInfo.FileNameLength = renameInfoEx.FileNameLength;
 
         err = NtSetInformationFile(
             h,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             @unsafe.Pointer.FromPinnedBox(ᏑrenameInfo),
             (uint32)/* unsafe.Sizeof(FILE_RENAME_INFORMATION{}) */ (uintptr)544,
             FileRenameInformation);
@@ -536,16 +539,16 @@ public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscall
         }
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 public static error Linkat(syscallꓸHandle olddirfd, @string oldpath, syscallꓸHandle newdirfd, @string newpath) {
     GoFrame ᒐ = default;
     try {
-        var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES(nil));
+        var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
         {
-            var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != default!) {
+            var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
@@ -554,20 +557,19 @@ public static error Linkat(syscallꓸHandle olddirfd, @string oldpath, syscall�
             Ꮡh,
             (uint32)((uint32)SYNCHRONIZE | (uint32)FILE_WRITE_ATTRIBUTES),
             objAttrs,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             (uint32)((UntypedInt)(FILE_SHARE_DELETE | FILE_SHARE_READ) | (uint32)FILE_SHARE_WRITE),
             (uint32)((UntypedInt)(FILE_OPEN_REPARSE_POINT | FILE_OPEN_FOR_BACKUP_INTENT) | (uint32)FILE_SYNCHRONOUS_IO_NONALERT));
-        if (err != default!) {
+        if (err != nil) {
             return ntCreateFileError(err, 0);
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
 
-        ref var linkInfo = ref heap<FILE_LINK_INFORMATION>(out var ᏑlinkInfo);
-        linkInfo = new FILE_LINK_INFORMATION(
+        ref var linkInfo = ref heap<FILE_LINK_INFORMATION>(new FILE_LINK_INFORMATION(
             RootDirectory: newdirfd
-        );
+        ), out var ᏑlinkInfo);
         (var p16, err) = syscall.UTF16FromString(newpath);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (len(p16) > len(linkInfo.FileName)) {
@@ -579,7 +581,7 @@ public static error Linkat(syscallꓸHandle olddirfd, @string oldpath, syscall�
         const uint32 FileLinkInformation = 11;
         err = NtSetInformationFile(
             h,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             @unsafe.Pointer.FromPinnedBox(ᏑlinkInfo),
             (uint32)/* unsafe.Sizeof(FILE_LINK_INFORMATION{}) */ (uintptr)544,
             FileLinkInformation);
@@ -590,7 +592,7 @@ public static error Linkat(syscallꓸHandle olddirfd, @string oldpath, syscall�
         }
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -635,21 +637,21 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
     GoFrame ᒐ = default;
     try {
         var (oldnameu16, err) = syscall.UTF16FromString(oldname);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         oldnameu16 = oldnameu16.slice(0, len(oldnameu16) - 1); // trim off terminal NUL
 
-        uint32 options = default!;
-        if ((SymlinkatFlags)(flags & SYMLINKAT_DIRECTORY) != 0){
+        uint32 options = default;
+        if ((SymlinkatFlags)(flags & SYMLINKAT_DIRECTORY) != 0) {
             options |= (uint32)(FILE_DIRECTORY_FILE);
         } else {
             options |= (uint32)(FILE_NON_DIRECTORY_FILE);
         }
 
-        var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES(nil));
+        var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
         {
-            var errΔ1 = objAttrs.init(newdirfd, newname); if (errΔ1 != default!) {
+            var errΔ1 = objAttrs.init(newdirfd, newname); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
@@ -658,7 +660,7 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
             Ꮡh,
             (uint32)((UntypedInt)(SYNCHRONIZE | FILE_WRITE_ATTRIBUTES) | (uint32)DELETE),
             objAttrs,
-            Ꮡ(new IO_STATUS_BLOCK(nil)),
+            Ꮡ(new IO_STATUS_BLOCK()),
             nil,
             syscall.FILE_ATTRIBUTE_NORMAL,
             0,
@@ -666,7 +668,7 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
             (uint32)((UntypedInt)(FILE_OPEN_REPARSE_POINT | FILE_OPEN_FOR_BACKUP_INTENT) | (uint32)FILE_SYNCHRONOUS_IO_NONALERT) | options,
             nil,
             0);
-        if (err != default!) {
+        if (err != nil) {
             return ntCreateFileError(err, 0);
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
@@ -678,14 +680,14 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
         var rdbbuf = new slice<byte>((uint16)(bufferSize + (uint16)(2 * len(oldnameu16))));
 
         var rdb = Ꮡ(rdbbuf, 0).Reinterpret<byte, symlinkat_reparseDataBufferT>();
-        rdb.Value.ReparseTag = syscall.IO_REPARSE_TAG_SYMLINK;
-        rdb.Value.ReparseDataLength = (uint16)((uint16)len(rdbbuf) - (uint16)headerSize);
-        rdb.Value.SubstituteNameOffset = 0;
-        rdb.Value.SubstituteNameLength = (uint16)(2 * len(oldnameu16));
-        rdb.Value.PrintNameOffset = 0;
-        rdb.Value.PrintNameLength = rdb.Value.SubstituteNameLength;
+        rdb.ReparseTag = syscall.IO_REPARSE_TAG_SYMLINK;
+        rdb.ReparseDataLength = (uint16)((uint16)len(rdbbuf) - (uint16)headerSize);
+        rdb.SubstituteNameOffset = 0;
+        rdb.SubstituteNameLength = (uint16)(2 * len(oldnameu16));
+        rdb.PrintNameOffset = 0;
+        rdb.PrintNameLength = rdb.SubstituteNameLength;
         if ((SymlinkatFlags)(flags & SYMLINKAT_RELATIVE) != 0) {
-            rdb.Value.Flags = SYMLINK_FLAG_RELATIVE;
+            rdb.Flags = SYMLINK_FLAG_RELATIVE;
         }
 
         var namebuf = rdbbuf[(int)(bufferSize)..];
@@ -700,12 +702,12 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
             0,
             nil,
             nil);
-        if (err != default!) {
+        if (err != nil) {
             // Creating the symlink has failed, so try to remove the file.
             const uint32 FileDispositionInformation = 13;
             NtSetInformationFile(
                 h,
-                Ꮡ(new IO_STATUS_BLOCK(nil)),
+                Ꮡ(new IO_STATUS_BLOCK()),
                 @unsafe.Pointer.FromPinnedBox(Ꮡ(new FILE_DISPOSITION_INFORMATION(
                     DeleteFile: true
                 ))),
@@ -714,9 +716,9 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
             return err;
         }
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -730,42 +732,42 @@ internal static error withPrivilege(@string privilege, Func<error> f) {
         defer(runtime.UnlockOSThread, ref ᒐ);
 
         var err = ImpersonateSelf(SecurityImpersonation);
-        if (err != default!) {
+        if (err != nil) {
             return f();
         }
         defer(() => RevertToSelf(), ref ᒐ);
 
         (var curThread, err) = GetCurrentThread();
-        if (err != default!) {
+        if (err != nil) {
             return f();
         }
         ref var token = ref heap(new syscall.Token(), out var Ꮡtoken);
         err = OpenThreadToken(curThread, (uint32)((uint32)syscall.TOKEN_QUERY | (uint32)TOKEN_ADJUST_PRIVILEGES), false, Ꮡtoken);
-        if (err != default!) {
+        if (err != nil) {
             return f();
         }
         defer(syscall.CloseHandle, (syscallꓸHandle)(uintptr)token, ref ᒐ);
 
         (var privStr, err) = syscall.UTF16PtrFromString(privilege);
-        if (err != default!) {
+        if (err != nil) {
             return f();
         }
         ref var tokenPriv = ref heap(new TOKEN_PRIVILEGES(), out var ᏑtokenPriv);
         err = LookupPrivilegeValue(nil, privStr, ᏑtokenPriv.at(TOKEN_PRIVILEGES.ᏑPrivileges, 0).of(LUID_AND_ATTRIBUTES.ᏑLuid));
-        if (err != default!) {
+        if (err != nil) {
             return f();
         }
 
         tokenPriv.PrivilegeCount = 1;
         tokenPriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
         err = AdjustTokenPrivileges(token, false, ᏑtokenPriv, 0, nil, nil);
-        if (err != default!) {
+        if (err != nil) {
             return f();
         }
 
         return f();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

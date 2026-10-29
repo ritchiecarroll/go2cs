@@ -27,7 +27,7 @@ public static ΔType Underlying(this ж<Pointer> Ꮡp) {
 }
 
 public static @string String(this ж<Pointer> Ꮡp) {
-    return TypeString(new PointerжΔType(Ꮡp), default!);
+    return TypeString(new PointerжΔType(Ꮡp), default);
 }
 
 } // end types_package

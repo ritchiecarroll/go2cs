@@ -20,13 +20,13 @@ internal static error errERROR_EINVAL = ((syscall.Errno)syscall.EINVAL);
 // errnoErr returns common boxed Errno values, to prevent
 // allocations at runtime.
 internal static error errnoErr(syscall.Errno e) {
-    var exprᴛ1 = e;
-    if (exprᴛ1 == (syscall.Errno)(0)) {
+    switch (e) {
+    case var ᴛ when ᴛ == (syscall.Errno)(0): {
         return errERROR_EINVAL;
     }
-    if (exprᴛ1 == errnoERROR_IO_PENDING) {
+    case var ᴛ when ᴛ == errnoERROR_IO_PENDING: {
         return errERROR_IO_PENDING;
-    }
+    }}
     // TODO: add more here, after collecting data on the common
     // error values see on Windows. (perhaps when running
     // all.bat?)
@@ -44,14 +44,14 @@ internal static ж<syscall.LazyProc> procRegLoadMUIStringW = modadvapi32.NewProc
 internal static ж<syscall.LazyProc> procRegSetValueExW = modadvapi32.NewProc("RegSetValueExW"u8);
 internal static ж<syscall.LazyProc> procExpandEnvironmentStringsW = modkernel32.NewProc("ExpandEnvironmentStringsW"u8);
 
-internal static error /*regerrno*/ regCreateKeyEx(syscallꓸHandle key, ж<uint16> Ꮡsubkey, uint32 reserved, ж<uint16> Ꮡclass, uint32 options, uint32 desired, ж<syscall.SecurityAttributes> Ꮡsa, ж<syscallꓸHandle> Ꮡresult, ж<uint32> Ꮡdisposition) {
-    error regerrno = default!;
+internal static error /*regerrno*/ regCreateKeyEx(syscallꓸHandle key, ж<uint16> subkey, uint32 reserved, ж<uint16> @class, uint32 options, uint32 desired, ж<syscall.SecurityAttributes> sa, ж<syscallꓸHandle> result, ж<uint32> disposition) {
+    error regerrno = default;
 
-    var ᴋ0 = Ꮡsubkey;
-    var ᴋ1 = Ꮡclass;
-    var ᴋ2 = Ꮡsa;
-    var ᴋ3 = Ꮡresult;
-    var ᴋ4 = Ꮡdisposition;
+    var ᴋ0 = subkey;
+    var ᴋ1 = @class;
+    var ᴋ2 = sa;
+    var ᴋ3 = result;
+    var ᴋ4 = disposition;
         var (r0, _, _) = syscall.SyscallN(procRegCreateKeyExW.Addr(), (uintptr)key, (uintptr)ᴋ0, (uintptr)reserved, (uintptr)ᴋ1, (uintptr)options, (uintptr)desired, (uintptr)ᴋ2, (uintptr)ᴋ3, (uintptr)ᴋ4);
     System.GC.KeepAlive(ᴋ0);
     System.GC.KeepAlive(ᴋ1);
@@ -64,10 +64,10 @@ internal static error /*regerrno*/ regCreateKeyEx(syscallꓸHandle key, ж<uint1
     return regerrno;
 }
 
-internal static error /*regerrno*/ regDeleteKey(syscallꓸHandle key, ж<uint16> Ꮡsubkey) {
-    error regerrno = default!;
+internal static error /*regerrno*/ regDeleteKey(syscallꓸHandle key, ж<uint16> subkey) {
+    error regerrno = default;
 
-    var ᴋ5 = Ꮡsubkey;
+    var ᴋ5 = subkey;
         var (r0, _, _) = syscall.SyscallN(procRegDeleteKeyW.Addr(), (uintptr)key, (uintptr)ᴋ5);
     System.GC.KeepAlive(ᴋ5);
     if (r0 != 0) {
@@ -76,10 +76,10 @@ internal static error /*regerrno*/ regDeleteKey(syscallꓸHandle key, ж<uint16>
     return regerrno;
 }
 
-internal static error /*regerrno*/ regDeleteValue(syscallꓸHandle key, ж<uint16> Ꮡname) {
-    error regerrno = default!;
+internal static error /*regerrno*/ regDeleteValue(syscallꓸHandle key, ж<uint16> name) {
+    error regerrno = default;
 
-    var ᴋ6 = Ꮡname;
+    var ᴋ6 = name;
         var (r0, _, _) = syscall.SyscallN(procRegDeleteValueW.Addr(), (uintptr)key, (uintptr)ᴋ6);
     System.GC.KeepAlive(ᴋ6);
     if (r0 != 0) {
@@ -88,15 +88,15 @@ internal static error /*regerrno*/ regDeleteValue(syscallꓸHandle key, ж<uint1
     return regerrno;
 }
 
-internal static error /*regerrno*/ regEnumValue(syscallꓸHandle key, uint32 index, ж<uint16> Ꮡname, ж<uint32> ᏑnameLen, ж<uint32> Ꮡreserved, ж<uint32> Ꮡvaltype, ж<byte> Ꮡbuf, ж<uint32> Ꮡbuflen) {
-    error regerrno = default!;
+internal static error /*regerrno*/ regEnumValue(syscallꓸHandle key, uint32 index, ж<uint16> name, ж<uint32> nameLen, ж<uint32> reserved, ж<uint32> valtype, ж<byte> buf, ж<uint32> buflen) {
+    error regerrno = default;
 
-    var ᴋ7 = Ꮡname;
-    var ᴋ8 = ᏑnameLen;
-    var ᴋ9 = Ꮡreserved;
-    var ᴋ10 = Ꮡvaltype;
-    var ᴋ11 = Ꮡbuf;
-    var ᴋ12 = Ꮡbuflen;
+    var ᴋ7 = name;
+    var ᴋ8 = nameLen;
+    var ᴋ9 = reserved;
+    var ᴋ10 = valtype;
+    var ᴋ11 = buf;
+    var ᴋ12 = buflen;
         var (r0, _, _) = syscall.SyscallN(procRegEnumValueW.Addr(), (uintptr)key, (uintptr)index, (uintptr)ᴋ7, (uintptr)ᴋ8, (uintptr)ᴋ9, (uintptr)ᴋ10, (uintptr)ᴋ11, (uintptr)ᴋ12);
     System.GC.KeepAlive(ᴋ7);
     System.GC.KeepAlive(ᴋ8);
@@ -110,13 +110,13 @@ internal static error /*regerrno*/ regEnumValue(syscallꓸHandle key, uint32 ind
     return regerrno;
 }
 
-internal static error /*regerrno*/ regLoadMUIString(syscallꓸHandle key, ж<uint16> Ꮡname, ж<uint16> Ꮡbuf, uint32 buflen, ж<uint32> ᏑbuflenCopied, uint32 flags, ж<uint16> Ꮡdir) {
-    error regerrno = default!;
+internal static error /*regerrno*/ regLoadMUIString(syscallꓸHandle key, ж<uint16> name, ж<uint16> buf, uint32 buflen, ж<uint32> buflenCopied, uint32 flags, ж<uint16> dir) {
+    error regerrno = default;
 
-    var ᴋ13 = Ꮡname;
-    var ᴋ14 = Ꮡbuf;
-    var ᴋ15 = ᏑbuflenCopied;
-    var ᴋ16 = Ꮡdir;
+    var ᴋ13 = name;
+    var ᴋ14 = buf;
+    var ᴋ15 = buflenCopied;
+    var ᴋ16 = dir;
         var (r0, _, _) = syscall.SyscallN(procRegLoadMUIStringW.Addr(), (uintptr)key, (uintptr)ᴋ13, (uintptr)ᴋ14, (uintptr)buflen, (uintptr)ᴋ15, (uintptr)flags, (uintptr)ᴋ16);
     System.GC.KeepAlive(ᴋ13);
     System.GC.KeepAlive(ᴋ14);
@@ -128,11 +128,11 @@ internal static error /*regerrno*/ regLoadMUIString(syscallꓸHandle key, ж<uin
     return regerrno;
 }
 
-internal static error /*regerrno*/ regSetValueEx(syscallꓸHandle key, ж<uint16> ᏑvalueName, uint32 reserved, uint32 vtype, ж<byte> Ꮡbuf, uint32 bufsize) {
-    error regerrno = default!;
+internal static error /*regerrno*/ regSetValueEx(syscallꓸHandle key, ж<uint16> valueName, uint32 reserved, uint32 vtype, ж<byte> buf, uint32 bufsize) {
+    error regerrno = default;
 
-    var ᴋ17 = ᏑvalueName;
-    var ᴋ18 = Ꮡbuf;
+    var ᴋ17 = valueName;
+    var ᴋ18 = buf;
         var (r0, _, _) = syscall.SyscallN(procRegSetValueExW.Addr(), (uintptr)key, (uintptr)ᴋ17, (uintptr)reserved, (uintptr)vtype, (uintptr)ᴋ18, (uintptr)bufsize);
     System.GC.KeepAlive(ᴋ17);
     System.GC.KeepAlive(ᴋ18);
@@ -142,12 +142,12 @@ internal static error /*regerrno*/ regSetValueEx(syscallꓸHandle key, ж<uint16
     return regerrno;
 }
 
-internal static (uint32 n, error err) expandEnvironmentStrings(ж<uint16> Ꮡsrc, ж<uint16> Ꮡdst, uint32 size) {
-    uint32 n = default!;
-    error err = default!;
+internal static (uint32 n, error err) expandEnvironmentStrings(ж<uint16> src, ж<uint16> dst, uint32 size) {
+    uint32 n = default;
+    error err = default;
 
-    var ᴋ19 = Ꮡsrc;
-    var ᴋ20 = Ꮡdst;
+    var ᴋ19 = src;
+    var ᴋ20 = dst;
         var (r0, _, e1) = syscall.SyscallN(procExpandEnvironmentStringsW.Addr(), (uintptr)ᴋ19, (uintptr)ᴋ20, (uintptr)size);
     System.GC.KeepAlive(ᴋ19);
     System.GC.KeepAlive(ᴋ20);

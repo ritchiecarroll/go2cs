@@ -31,12 +31,12 @@ internal static void patch(this patchList l, ж<Prog> Ꮡp, uint32 val) {
     var head = l.head;
     while (head != 0) {
         var i = Ꮡ(p.Inst, (head >> 1));
-        if ((head & 1) == 0){
-            head = i.Value.Out;
-            i.Value.Out = val;
+        if ((head & 1) == 0) {
+            head = i.Out;
+            i.Out = val;
         } else {
-            head = i.Value.Arg;
-            i.Value.Arg = val;
+            head = i.Arg;
+            i.Arg = val;
         }
     }
 }
@@ -52,19 +52,19 @@ internal static patchList append(this patchList l1, ж<Prog> Ꮡp, patchList l2)
     }
 
     var i = Ꮡ(p.Inst, (l1.tail >> 1));
-    if ((l1.tail & 1) == 0){
-        i.Value.Out = l2.head;
+    if ((l1.tail & 1) == 0) {
+        i.Out = l2.head;
     } else {
-        i.Value.Arg = l2.head;
+        i.Arg = l2.head;
     }
     return new patchList(l1.head, l2.tail);
 }
 
 // A frag represents a compiled program fragment.
 partial struct frag {
-    internal uint32 i;    // index of first instruction
+    internal uint32 i;       // index of first instruction
     internal patchList @out; // where to record end instruction
-    internal bool nullable;      // whether fragment can match empty string
+    internal bool nullable;  // whether fragment can match empty string
 }
 
 partial struct compiler {
@@ -73,43 +73,43 @@ partial struct compiler {
 
 // Compile compiles the regexp into a program to be executed.
 // The regexp should have been simplified already (returned from re.Simplify).
-public static (ж<Prog>, error) Compile(ж<Regexp> Ꮡre) {
-    compiler c = default!;
+public static (ж<Prog>, error) Compile(ж<Regexp> re) {
+    compiler c = default;
     c.init();
-    var f = c.compile(Ꮡre);
+    var f = c.compile(re);
     f.@out.patch(c.p, c.inst(InstMatch).i);
-    c.p.Value.Start = (nint)f.i;
-    return (c.p, default!);
+    c.p.Start = (nint)f.i;
+    return (c.p, default);
 }
 
 internal static void init(this ref compiler c) {
     c.p = @new<Prog>();
-    c.p.Value.NumCap = 2; // implicit ( and ) for whole match $0
+    c.p.NumCap = 2; // implicit ( and ) for whole match $0
     c.inst(InstFail);
 }
 
-internal static slice<rune> anyRuneNotNL = new rune[]{0, (rune)'\n' - 1, (rune)'\n' + 1, unicode.MaxRune}.slice();
+internal static slice<rune> anyRuneNotNL = slice<rune>([0, (rune)'\n' - 1, (rune)'\n' + 1, unicode.MaxRune]);
 
-internal static slice<rune> anyRune = new rune[]{0, unicode.MaxRune}.slice();
+internal static slice<rune> anyRune = slice<rune>([0, unicode.MaxRune]);
 
 internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
-    var exprᴛ1 = re.Op;
-    if (exprᴛ1 == OpNoMatch) {
+    switch (re.Op) {
+    case var ᴛ when ᴛ == OpNoMatch: {
         return c.fail();
     }
-    if (exprᴛ1 == OpEmptyMatch) {
+    case var ᴛ when ᴛ == OpEmptyMatch: {
         return c.nop();
     }
-    if (exprᴛ1 == OpLiteral) {
+    case var ᴛ when ᴛ == OpLiteral: {
         if (len(re.Rune) == 0) {
             return c.nop();
         }
-        frag f = default!;
+        frag f = default;
         foreach (var j in range(re.Rune)) {
             var f1 = c.rune(re.Rune.slice(j, j + 1), re.Flags);
-            if (j == 0){
+            if (j == 0) {
                 f = f1;
             } else {
                 f = c.cat(f, f1);
@@ -117,55 +117,55 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
         }
         return f;
     }
-    if (exprᴛ1 == OpCharClass) {
+    case var ᴛ when ᴛ == OpCharClass: {
         return c.rune(re.Rune, re.Flags);
     }
-    if (exprᴛ1 == OpAnyCharNotNL) {
+    case var ᴛ when ᴛ == OpAnyCharNotNL: {
         return c.rune(anyRuneNotNL, 0);
     }
-    if (exprᴛ1 == OpAnyChar) {
+    case var ᴛ when ᴛ == OpAnyChar: {
         return c.rune(anyRune, 0);
     }
-    if (exprᴛ1 == OpBeginLine) {
+    case var ᴛ when ᴛ == OpBeginLine: {
         return c.empty(EmptyBeginLine);
     }
-    if (exprᴛ1 == OpEndLine) {
+    case var ᴛ when ᴛ == OpEndLine: {
         return c.empty(EmptyEndLine);
     }
-    if (exprᴛ1 == OpBeginText) {
+    case var ᴛ when ᴛ == OpBeginText: {
         return c.empty(EmptyBeginText);
     }
-    if (exprᴛ1 == OpEndText) {
+    case var ᴛ when ᴛ == OpEndText: {
         return c.empty(EmptyEndText);
     }
-    if (exprᴛ1 == OpWordBoundary) {
+    case var ᴛ when ᴛ == OpWordBoundary: {
         return c.empty(EmptyWordBoundary);
     }
-    if (exprᴛ1 == OpNoWordBoundary) {
+    case var ᴛ when ᴛ == OpNoWordBoundary: {
         return c.empty(EmptyNoWordBoundary);
     }
-    if (exprᴛ1 == OpCapture) {
+    case var ᴛ when ᴛ == OpCapture: {
         var bra = c.cap((uint32)(re.Cap << 1));
         var sub = c.compile(re.Sub[0]);
         var ket = c.cap((uint32)(re.Cap << 1 | 1));
         return c.cat(c.cat(bra, sub), ket);
     }
-    if (exprᴛ1 == OpStar) {
+    case var ᴛ when ᴛ == OpStar: {
         return c.star(c.compile(re.Sub[0]), (Flags)(re.Flags & NonGreedy) != 0);
     }
-    if (exprᴛ1 == OpPlus) {
+    case var ᴛ when ᴛ == OpPlus: {
         return c.plus(c.compile(re.Sub[0]), (Flags)(re.Flags & NonGreedy) != 0);
     }
-    if (exprᴛ1 == OpQuest) {
+    case var ᴛ when ᴛ == OpQuest: {
         return c.quest(c.compile(re.Sub[0]), (Flags)(re.Flags & NonGreedy) != 0);
     }
-    if (exprᴛ1 == OpConcat) {
+    case var ᴛ when ᴛ == OpConcat: {
         if (len(re.Sub) == 0) {
             return c.nop();
         }
-        frag f = default!;
+        frag f = default;
         foreach (var (i, sub) in re.Sub) {
-            if (i == 0){
+            if (i == 0) {
                 f = c.compile(sub);
             } else {
                 f = c.cat(f, c.compile(sub));
@@ -173,20 +173,20 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
         }
         return f;
     }
-    if (exprᴛ1 == OpAlternate) {
-        frag f = default!;
+    case var ᴛ when ᴛ == OpAlternate: {
+        frag f = default;
         foreach (var (_, sub) in re.Sub) {
             f = c.alt(f, c.compile(sub));
         }
         return f;
-    }
+    }}
     throw panic("regexp: unhandled case in compile");
 }
 
 internal static frag inst(this ref compiler c, InstOp op) {
     // TODO: impose length limit
-    var f = new frag(i: (uint32)len((~c.p).Inst), nullable: true);
-    c.p.Value.Inst = builtin.append((~c.p).Inst, new Inst(Op: op));
+    var f = new frag(i: (uint32)len(c.p.Inst), nullable: true);
+    c.p.Inst = builtin.append(c.p.Inst, new Inst(Op: op));
     return f;
 }
 
@@ -197,16 +197,16 @@ internal static frag nop(this ref compiler c) {
 }
 
 internal static frag fail(this ref compiler c) {
-    return new frag(nil);
+    return new frag();
 }
 
 internal static frag cap(this ref compiler c, uint32 arg) {
     var f = c.inst(InstCapture);
     f.@out = makePatchList(f.i << 1);
-    (~c.p).Inst[f.i].Arg = arg;
+    c.p.Inst[f.i].Arg = arg;
 
-    if ((~c.p).NumCap < (nint)arg + 1) {
-        c.p.Value.NumCap = (nint)arg + 1;
+    if (c.p.NumCap < (nint)arg + 1) {
+        c.p.NumCap = (nint)arg + 1;
     }
     return f;
 }
@@ -214,7 +214,7 @@ internal static frag cap(this ref compiler c, uint32 arg) {
 internal static frag cat(this ref compiler c, frag f1, frag f2) {
     // concat of failure is failure
     if (f1.i == 0 || f2.i == 0) {
-        return new frag(nil);
+        return new frag();
     }
 
     // TODO: elide nop
@@ -233,9 +233,9 @@ internal static frag alt(this ref compiler c, frag f1, frag f2) {
     }
 
     var f = c.inst(InstAlt);
-    var i = Ꮡ((~c.p).Inst, f.i);
-    i.Value.Out = f1.i;
-    i.Value.Arg = f2.i;
+    var i = Ꮡ(c.p.Inst, f.i);
+    i.Out = f1.i;
+    i.Arg = f2.i;
     f.@out = f1.@out.append(c.p, f2.@out);
     f.nullable = f1.nullable || f2.nullable;
     return f;
@@ -243,12 +243,12 @@ internal static frag alt(this ref compiler c, frag f1, frag f2) {
 
 internal static frag quest(this ref compiler c, frag f1, bool nongreedy) {
     var f = c.inst(InstAlt);
-    var i = Ꮡ((~c.p).Inst, f.i);
-    if (nongreedy){
-        i.Value.Arg = f1.i;
+    var i = Ꮡ(c.p.Inst, f.i);
+    if (nongreedy) {
+        i.Arg = f1.i;
         f.@out = makePatchList(f.i << 1);
     } else {
-        i.Value.Out = f1.i;
+        i.Out = f1.i;
         f.@out = makePatchList(f.i << 1 | 1);
     }
     f.@out = f.@out.append(c.p, f1.@out);
@@ -262,12 +262,12 @@ internal static frag quest(this ref compiler c, frag f1, bool nongreedy) {
 // to get the priority match order correct.)
 internal static frag loop(this ref compiler c, frag f1, bool nongreedy) {
     var f = c.inst(InstAlt);
-    var i = Ꮡ((~c.p).Inst, f.i);
-    if (nongreedy){
-        i.Value.Arg = f1.i;
+    var i = Ꮡ(c.p.Inst, f.i);
+    if (nongreedy) {
+        i.Arg = f1.i;
         f.@out = makePatchList(f.i << 1);
     } else {
-        i.Value.Out = f1.i;
+        i.Out = f1.i;
         f.@out = makePatchList(f.i << 1 | 1);
     }
     f1.@out.patch(c.p, f.i);
@@ -289,7 +289,7 @@ internal static frag plus(this ref compiler c, frag f1, bool nongreedy) {
 
 internal static frag empty(this ref compiler c, EmptyOp op) {
     var f = c.inst(InstEmptyWidth);
-    (~c.p).Inst[f.i].Arg = (uint32)(uint8)op;
+    c.p.Inst[f.i].Arg = (uint32)op;
     f.@out = makePatchList(f.i << 1);
     return f;
 }
@@ -297,28 +297,28 @@ internal static frag empty(this ref compiler c, EmptyOp op) {
 internal static frag rune(this ref compiler c, slice<rune> r, Flags flags) {
     var f = c.inst(InstRune);
     f.nullable = false;
-    var i = Ꮡ((~c.p).Inst, f.i);
-    i.Value.Rune = r;
+    var i = Ꮡ(c.p.Inst, f.i);
+    i.Rune = r;
     flags &= (Flags)(FoldCase); // only relevant flag is FoldCase
     if (len(r) != 1 || unicode.SimpleFold(r[0]) == r[0]) {
         // and sometimes not even that
         flags &= unchecked((Flags)~(Flags)(FoldCase));
     }
-    i.Value.Arg = (uint32)(uint16)flags;
+    i.Arg = (uint32)flags;
     f.@out = makePatchList(f.i << 1);
 
     // Special cases for exec machine.
     switch (ᐧ) {
     case {} when (Flags)(flags & FoldCase) == 0 && (len(r) == 1 || len(r) == 2 && r[0] == r[1]): {
-        i.Value.Op = InstRune1;
+        i.Op = InstRune1;
         break;
     }
     case {} when len(r) == 2 && r[0] == 0 && r[1] == unicode.MaxRune: {
-        i.Value.Op = InstRuneAny;
+        i.Op = InstRuneAny;
         break;
     }
     case {} when len(r) == 4 && r[0] == 0 && r[1] == (rune)'\n' - 1 && r[2] == (rune)'\n' + 1 && r[3] == unicode.MaxRune: {
-        i.Value.Op = InstRuneAnyNotNL;
+        i.Op = InstRuneAnyNotNL;
         break;
     }}
 

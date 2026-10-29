@@ -28,14 +28,14 @@ partial struct lazybuf {
 }
 
 internal static byte index(this ref lazybuf b, nint i) {
-    if (b.buf != default!) {
+    if (b.buf != nil) {
         return b.buf[i];
     }
     return b.s[i];
 }
 
 internal static void append(this ref lazybuf b, byte c) {
-    if (b.buf == default!) {
+    if (b.buf == nil) {
         if (b.w < len(b.s) && b.s[b.w] == c) {
             b.w++;
             return;
@@ -48,7 +48,7 @@ internal static void append(this ref lazybuf b, byte c) {
 }
 
 internal static @string @string(this ref lazybuf b) {
-    if (b.buf == default!) {
+    if (b.buf == nil) {
         return b.s.slice(0, b.w);
     }
     return (@string)(b.buf.slice(0, b.w));
@@ -78,7 +78,7 @@ public static @string Clean(@string path) {
         return "."u8;
     }
 
-    var rooted = path[0] == (rune)'/';
+    var rooted = path[0] == '/';
     nint n = len(path);
 
     // Invariants:
@@ -90,30 +90,30 @@ public static @string Clean(@string path) {
     nint r = 0;
     nint dotdot = 0;
     if (rooted) {
-        @out.append((rune)'/');
+        @out.append((byte)'/');
         (r, dotdot) = (1, 1);
     }
 
     while (r < n) {
         switch (ᐧ) {
-        case {} when path[r] is (rune)'/': {
+        case {} when path[r] is (byte)'/': {
             // empty path element
             r++;
             break;
         }
-        case {} when path[r] == (rune)'.' && (r + 1 == n || path[r + 1] == (rune)'/'): {
+        case {} when path[r] == (byte)'.' && (r + 1 == n || path[r + 1] == (byte)'/'): {
             // . element
             r++;
             break;
         }
-        case {} when path[r] == (rune)'.' && path[r + 1] == (rune)'.' && (r + 2 == n || path[r + 2] == (rune)'/'): {
+        case {} when path[r] == (byte)'.' && path[r + 1] == (byte)'.' && (r + 2 == n || path[r + 2] == (byte)'/'): {
             // .. element: remove to last /
             r += 2;
             switch (ᐧ) {
             case {} when @out.w > dotdot: {
                 // can backtrack
                 @out.w--;
-                while (@out.w > dotdot && @out.index(@out.w) != (rune)'/') {
+                while (@out.w > dotdot && @out.index(@out.w) != '/') {
                     @out.w--;
                 }
                 break;
@@ -121,10 +121,10 @@ public static @string Clean(@string path) {
             case {} when !rooted: {
                 // cannot backtrack, but not rooted, so append .. element.
                 if (@out.w > 0) {
-                    @out.append((rune)'/');
+                    @out.append((byte)'/');
                 }
-                @out.append((rune)'.');
-                @out.append((rune)'.');
+                @out.append((byte)'.');
+                @out.append((byte)'.');
                 dotdot = @out.w;
                 break;
             }}
@@ -134,10 +134,10 @@ public static @string Clean(@string path) {
             // real path element.
             // add slash if needed
             if (rooted && @out.w != 1 || !rooted && @out.w != 0) {
-                @out.append((rune)'/');
+                @out.append((byte)'/');
             }
             // copy element
-            for (; r < n && path[r] != (rune)'/'; r++) {
+            for (; r < n && path[r] != '/'; r++) {
                 @out.append(path[r]);
             }
             break;
@@ -158,7 +158,7 @@ public static @string Clean(@string path) {
 // file set to path.
 // The returned values have the property that path = dir+file.
 public static (@string dir, @string @file) Split(@string path) {
-    nint i = bytealg.LastIndexByteString(path, (rune)'/');
+    nint i = bytealg.LastIndexByteString(path, (byte)'/');
     return (path.slice(0, i + 1), path.slice(i + 1));
 }
 
@@ -182,7 +182,7 @@ public static @string Join(params ꓸꓸꓸstring elemʗp) {
     foreach (var (_, e) in elem) {
         if (len(buf) > 0 || e != ""u8) {
             if (len(buf) > 0) {
-                buf = builtin.append(bufᴷ, buf, (byte)((rune)'/'));
+                buf = builtin.append(bufᴷ, buf, (byte)'/');
             }
             buf = builtin.append(buf, e.ꓸꓸꓸ);
         }
@@ -195,8 +195,8 @@ public static @string Join(params ꓸꓸꓸstring elemʗp) {
 // in the final slash-separated element of path;
 // it is empty if there is no dot.
 public static @string Ext(@string path) {
-    for (nint i = len(path) - 1; i >= 0 && path[i] != (rune)'/'; i--) {
-        if (path[i] == (rune)'.') {
+    for (nint i = len(path) - 1; i >= 0 && path[i] != '/'; i--) {
+        if (path[i] == '.') {
             return path.slice(i);
         }
     }
@@ -212,12 +212,12 @@ public static @string Base(@string path) {
         return "."u8;
     }
     // Strip trailing slashes.
-    while (len(path) > 0 && path[len(path) - 1] == (rune)'/') {
+    while (len(path) > 0 && path[len(path) - 1] == '/') {
         path = path.slice(0, len(path) - 1);
     }
     // Find the last element
     {
-        nint i = bytealg.LastIndexByteString(path, (rune)'/'); if (i >= 0) {
+        nint i = bytealg.LastIndexByteString(path, (byte)'/'); if (i >= 0) {
             path = path.slice(i + 1);
         }
     }
@@ -230,7 +230,7 @@ public static @string Base(@string path) {
 
 // IsAbs reports whether the path is absolute.
 public static bool IsAbs(@string path) {
-    return len(path) > 0 && path[0] == (rune)'/';
+    return len(path) > 0 && path[0] == '/';
 }
 
 // Dir returns all but the last element of path, typically the path's directory.

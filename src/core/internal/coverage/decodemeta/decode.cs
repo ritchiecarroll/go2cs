@@ -35,37 +35,37 @@ public static (ж<CoverageMetaDataDecoder>, error) NewCoverageMetaDataDecoder(sl
         tmp: new slice<byte>(0, 256)
     ));
     {
-        var err = x.readHeader(); if (err != default!) {
-            return (default!, err);
+        var err = x.readHeader(); if (err != nil) {
+            return (default, err);
         }
     }
     {
-        var err = x.readStringTable(); if (err != default!) {
-            return (default!, err);
+        var err = x.readStringTable(); if (err != nil) {
+            return (default, err);
         }
     }
-    return (x, default!);
+    return (x, default);
 }
 
 internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     {
-        var err = binary.Read(new slicereader_ReaderжReader(d.r), binary.LittleEndian, Ꮡd.of(CoverageMetaDataDecoder.Ꮡhdr)); if (err != default!) {
+        var err = binary.Read(new slicereader_ReaderжReader(d.r), binary.LittleEndian, Ꮡd.of(CoverageMetaDataDecoder.Ꮡhdr)); if (err != nil) {
             return err;
         }
     }
     if (d.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= after readHeader: %+v\n"u8, d.hdr);
     }
-    return default!;
+    return default;
 }
 
 internal static error readStringTable(this ref CoverageMetaDataDecoder d) {
     // Seek to the correct location to read the string table.
     var stringTableLocation = (int64)((uint32)coverage.CovMetaHeaderSize + 4 * d.hdr.NumFuncs);
     {
-        var (_, err) = d.r.Seek(stringTableLocation, io.SeekStart); if (err != default!) {
+        var (_, err) = d.r.Seek(stringTableLocation, io.SeekStart); if (err != nil) {
             return err;
         }
     }
@@ -73,7 +73,7 @@ internal static error readStringTable(this ref CoverageMetaDataDecoder d) {
     // Read the table itself.
     d.strtab = stringtab.NewReader(d.r);
     d.strtab.Read();
-    return default!;
+    return default;
 }
 
 public static @string PackagePath(this ref CoverageMetaDataDecoder d) {
@@ -104,7 +104,7 @@ public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж
     // Seek to the correct location to read the function offset and read it.
     var funcOffsetLocation = (int64)((uint32)coverage.CovMetaHeaderSize + 4 * fidx);
     {
-        var (_, err) = d.r.Seek(funcOffsetLocation, io.SeekStart); if (err != default!) {
+        var (_, err) = d.r.Seek(funcOffsetLocation, io.SeekStart); if (err != nil) {
             return err;
         }
     }
@@ -118,7 +118,7 @@ public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж
     // Seek to the correct location to read the function.
     var floc = (int64)foff;
     {
-        var (_, err) = d.r.Seek(floc, io.SeekStart); if (err != default!) {
+        var (_, err) = d.r.Seek(floc, io.SeekStart); if (err != nil) {
             return err;
         }
     }
@@ -148,7 +148,7 @@ public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж
     }
     var lit = d.r.ReadULEB128();
     f.Lit = lit != 0;
-    return default!;
+    return default;
 }
 
 } // end decodemeta_package

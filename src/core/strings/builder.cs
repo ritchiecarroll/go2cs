@@ -32,15 +32,14 @@ partial struct Builder {
 internal static void copyCheck(this ж<Builder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    if (b.addr == nil){
+    if (b.addr == nil) {
         // This hack works around a failing of Go's escape analysis
         // that was causing b to escape and be heap allocated.
         // See issue 23382.
         // TODO: once issue 7921 is fixed, this should be reverted to
         // just "b.addr = b".
         b.addr = Ꮡb;
-    } else 
-    if (b.addr != Ꮡb) {
+    } else if (b.addr != Ꮡb) {
         throw panic("strings: illegal use of non-zero Builder copied by value");
     }
 }
@@ -64,8 +63,8 @@ public static nint Cap(this ref Builder b) {
 
 // Reset resets the [Builder] to be empty.
 public static void Reset(this ref Builder b) {
-    b.addr = default!;
-    b.buf = default!;
+    b.addr = default;
+    b.buf = default;
 }
 
 // grow copies the buffer to a new, larger buffer so that there are at least n
@@ -98,7 +97,7 @@ public static (nint, error) Write(this ж<Builder> Ꮡb, slice<byte> p) {
 
     Ꮡb.copyCheck();
     b.buf = appendꓸꓸꓸ(b.buf, p);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 // WriteByte appends the byte c to b's buffer.
@@ -108,7 +107,7 @@ public static error WriteByte(this ж<Builder> Ꮡb, byte c) {
 
     Ꮡb.copyCheck();
     b.buf = append(b.buf, c);
-    return default!;
+    return default;
 }
 
 // WriteRune appends the UTF-8 encoding of Unicode code point r to b's buffer.
@@ -119,7 +118,7 @@ public static (nint, error) WriteRune(this ж<Builder> Ꮡb, rune r) {
     Ꮡb.copyCheck();
     nint n = len(b.buf);
     b.buf = utf8.AppendRune(b.buf, r);
-    return (len(b.buf) - n, default!);
+    return (len(b.buf) - n, default);
 }
 
 // WriteString appends the contents of s to b's buffer.
@@ -129,7 +128,7 @@ public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s) {
 
     Ꮡb.copyCheck();
     b.buf = append(b.buf, s.ꓸꓸꓸ);
-    return (len(s), default!);
+    return (len(s), default);
 }
 
 } // end strings_package

@@ -20,19 +20,19 @@ internal static partial @string modinfo();
 public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
     @string data = modinfo();
     if (len(data) < 32) {
-        return (default!, false);
+        return (default, false);
     }
     data = data.slice(16, len(data) - 16);
     var (bi, err) = ParseBuildInfo(data);
-    if (err != default!) {
-        return (default!, false);
+    if (err != nil) {
+        return (default, false);
     }
 
     // The go version is stored separately from other build info, mostly for
     // historical reasons. It is not part of the modinfo() string, and
     // ParseBuildInfo does not recognize it. We inject it here to hide this
     // awkwardness from the user.
-    bi.Value.GoVersion = runtime.Version();
+    bi.GoVersion = runtime.Version();
 
     return (bi, true);
 }
@@ -56,9 +56,9 @@ partial struct BuildInfo {
 
 // A Module describes a single module included in a build.
 partial struct Module {
-    public @string Path; /*`json:",omitempty"`*/ // module path
-    public @string Version; /*`json:",omitempty"`*/ // module version
-    public @string Sum; /*`json:",omitempty"`*/ // checksum
+    public @string Path; /*`json:",omitempty"`*/      // module path
+    public @string Version; /*`json:",omitempty"`*/   // module version
+    public @string Sum; /*`json:",omitempty"`*/       // checksum
     public ж<Module> Replace; /*`json:",omitempty"`*/ // replaced by this module
 }
 
@@ -117,20 +117,20 @@ public static @string String(this ref BuildInfo bi) {
     var bufʗ1 = buf;
     formatMod = (@string word, Module m) => {
         bufʗ1.WriteString(word);
-        bufʗ1.WriteByte((rune)'\t');
+        bufʗ1.WriteByte((byte)'\t');
         bufʗ1.WriteString(m.Path);
-        bufʗ1.WriteByte((rune)'\t');
+        bufʗ1.WriteByte((byte)'\t');
         bufʗ1.WriteString(m.Version);
-        if (m.Replace == nil){
-            bufʗ1.WriteByte((rune)'\t');
+        if (m.Replace == nil) {
+            bufʗ1.WriteByte((byte)'\t');
             bufʗ1.WriteString(m.Sum);
         } else {
-            bufʗ1.WriteByte((rune)'\n');
+            bufʗ1.WriteByte((byte)'\n');
             ᏑformatMod.ValueSlot("=>"u8, m.Replace.Value);
         }
-        bufʗ1.WriteByte((rune)'\n');
+        bufʗ1.WriteByte((byte)'\n');
     };
-    if (bi.Main != (new Module(nil))) {
+    if (bi.Main != (new Module())) {
         formatMod(modˢ, bi.Main);
     }
     foreach (var (_, dep) in bi.Deps) {
@@ -179,13 +179,13 @@ private static readonly @string tabᶜ = "\t"u8;
 // but instead call [ReadBuildInfo], [debug/buildinfo.ReadFile],
 // or [debug/buildinfo.Read].
 public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
-    ж<BuildInfo> bi = default!;
-    error err = default!;
+    ж<BuildInfo> bi = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         nint lineNum = 1;
         defer(() => {
-            if (err != default!) {
+            if (err != nil) {
                 err = fmt.Errorf("could not parse Go build info: line %d: %w"u8, lineNum, err);
             }
         }, ref ᒐ);
@@ -200,7 +200,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
 
         (Module, error) readModuleLine(slice<@string> elem) {
             if (len(elem) != 2 && len(elem) != 3) {
-                return (new Module(nil), fmt.Errorf("expected 2 or 3 columns; got %d"u8, len(elem)));
+                return (new Module(), fmt.Errorf("expected 2 or 3 columns; got %d"u8, len(elem)));
             }
             @string version = elem[1];
             @string sum = ""u8;
@@ -211,13 +211,13 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                 Path: elem[0],
                 Version: version,
                 Sum: sum
-            ), default!);
+            ), default);
         }
 
         bi = @new<BuildInfo>();
-        ж<Module> last = default!;
-        @string line = default!;
-        bool ok = default!;
+        ж<Module> last = default;
+        @string line = default;
+        bool ok = default;
         // Reverse of BuildInfo.String(), except for go version.
         while (len(data) > 0) {
             (line, data, ok) = strings.Cut(data, newline);
@@ -227,67 +227,67 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
             switch (ᐧ) {
             case {} when strings.HasPrefix(line, pathLine): {
                 @string elem = line[(int)(len(pathLine))..];
-                bi.Value.Path = elem;
+                bi.Path = elem;
                 break;
             }
             case {} when strings.HasPrefix(line, modLine): {
                 var elem = strings.Split(line[(int)(len(modLine))..], tab);
                 last = bi.of(BuildInfo.ᏑMain);
                 (last.Value, err) = readModuleLine(elem);
-                if (err != default!) {
-                    (bi, err) = (default!, err); goto ᒐdone;
+                if (err != nil) {
+                    (bi, err) = (default, err); goto ᒐdone;
                 }
                 break;
             }
             case {} when strings.HasPrefix(line, depLine): {
                 var elem = strings.Split(line[(int)(len(depLine))..], tab);
                 last = @new<Module>();
-                bi.Value.Deps = append((~bi).Deps, last);
+                bi.Deps = append(bi.Deps, last);
                 (last.Value, err) = readModuleLine(elem);
-                if (err != default!) {
-                    (bi, err) = (default!, err); goto ᒐdone;
+                if (err != nil) {
+                    (bi, err) = (default, err); goto ᒐdone;
                 }
                 break;
             }
             case {} when strings.HasPrefix(line, repLine): {
                 var elem = strings.Split(line[(int)(len(repLine))..], tab);
                 if (len(elem) != 3) {
-                    (bi, err) = (default!, fmt.Errorf("expected 3 columns for replacement; got %d"u8, len(elem))); goto ᒐdone;
+                    (bi, err) = (default, fmt.Errorf("expected 3 columns for replacement; got %d"u8, len(elem))); goto ᒐdone;
                 }
                 if (last == nil) {
-                    (bi, err) = (default!, fmt.Errorf("replacement with no module on previous line"u8)); goto ᒐdone;
+                    (bi, err) = (default, fmt.Errorf("replacement with no module on previous line"u8)); goto ᒐdone;
                 }
-                last.Value.Replace = Ꮡ(new Module(
+                last.Replace = Ꮡ(new Module(
                     Path: elem[0],
                     Version: elem[1],
                     Sum: elem[2]
                 ));
-                last = default!;
+                last = default;
                 break;
             }
             case {} when strings.HasPrefix(line, buildLine): {
                 @string kv = line[(int)(len(buildLine))..];
                 if (len(kv) < 1) {
-                    (bi, err) = (default!, fmt.Errorf("build line missing '='"u8)); goto ᒐdone;
+                    (bi, err) = (default, fmt.Errorf("build line missing '='"u8)); goto ᒐdone;
                 }
 
-                @string key = default!;
-                @string rawValue = default!;
+                @string key = default;
+                @string rawValue = default;
                 switch (kv[0]) {
-                case (rune)'=': {
-                    (bi, err) = (default!, fmt.Errorf("build line with missing key"u8)); goto ᒐdone;
+                case (byte)'=': {
+                    (bi, err) = (default, fmt.Errorf("build line with missing key"u8)); goto ᒐdone;
                 }
-                case (rune)'`' or (rune)'"': {
+                case (byte)'`' or (byte)'"': {
                     var (rawKey, errΔ6) = strconv.QuotedPrefix(kv);
-                    if (errΔ6 != default!) {
-                        (bi, err) = (default!, fmt.Errorf("invalid quoted key in build line"u8)); goto ᒐdone;
+                    if (errΔ6 != nil) {
+                        (bi, err) = (default, fmt.Errorf("invalid quoted key in build line"u8)); goto ᒐdone;
                     }
                     if (len(kv) == len(rawKey)) {
-                        (bi, err) = (default!, fmt.Errorf("build line missing '=' after quoted key"u8)); goto ᒐdone;
+                        (bi, err) = (default, fmt.Errorf("build line missing '=' after quoted key"u8)); goto ᒐdone;
                     }
                     {
-                        var c = kv[len(rawKey)]; if (c != (rune)'=') {
-                            (bi, err) = (default!, fmt.Errorf("unexpected character after quoted key: %q"u8, c)); goto ᒐdone;
+                        var c = kv[len(rawKey)]; if (c != '=') {
+                            (bi, err) = (default, fmt.Errorf("unexpected character after quoted key: %q"u8, c)); goto ᒐdone;
                         }
                     }
                     (key, _) = strconv.Unquote(rawKey);
@@ -295,43 +295,43 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                     break;
                 }
                 default: {
-                    bool okΔ4 = default!;
+                    bool okΔ4 = default;
                     (key, rawValue, okΔ4) = strings.Cut(kv, "="u8);
                     if (!okΔ4) {
-                        (bi, err) = (default!, fmt.Errorf("build line missing '=' after key"u8)); goto ᒐdone;
+                        (bi, err) = (default, fmt.Errorf("build line missing '=' after key"u8)); goto ᒐdone;
                     }
                     if (quoteKey(key)) {
-                        (bi, err) = (default!, fmt.Errorf("unquoted key %q must be quoted"u8, key)); goto ᒐdone;
+                        (bi, err) = (default, fmt.Errorf("unquoted key %q must be quoted"u8, key)); goto ᒐdone;
                     }
                     break;
                 }}
 
-                @string value = default!;
+                @string value = default;
                 if (len(rawValue) > 0) {
                     switch (rawValue[0]) {
-                    case (rune)'`' or (rune)'"': {
-                        error errΔ8 = default!;
+                    case (byte)'`' or (byte)'"': {
+                        error errΔ8 = default;
                         (value, errΔ8) = strconv.Unquote(rawValue);
-                        if (errΔ8 != default!) {
-                            (bi, err) = (default!, fmt.Errorf("invalid quoted value in build line"u8)); goto ᒐdone;
+                        if (errΔ8 != nil) {
+                            (bi, err) = (default, fmt.Errorf("invalid quoted value in build line"u8)); goto ᒐdone;
                         }
                         break;
                     }
                     default: {
                         value = rawValue;
                         if (quoteValue(value)) {
-                            (bi, err) = (default!, fmt.Errorf("unquoted value %q must be quoted"u8, value)); goto ᒐdone;
+                            (bi, err) = (default, fmt.Errorf("unquoted value %q must be quoted"u8, value)); goto ᒐdone;
                         }
                         break;
                     }}
                 }
 
-                bi.Value.Settings = append((~bi).Settings, new BuildSetting(Key: key, Value: value));
+                bi.Settings = append(bi.Settings, new BuildSetting(Key: key, Value: value));
                 break;
             }}
             lineNum++;
         }
-        (bi, err) = (bi, default!);
+        (bi, err) = (bi, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

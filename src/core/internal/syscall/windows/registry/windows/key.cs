@@ -72,15 +72,15 @@ public static error Close(this Key k) {
 // key to be opened.
 public static (Key, error) OpenKey(Key k, @string path, uint32 access) {
     var (p, err) = syscall.UTF16PtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return ((Key)(syscallꓸHandle)(0), err);
     }
     ref var subkey = ref heap(new syscallꓸHandle(), out var Ꮡsubkey);
     err = syscall.RegOpenKeyEx((syscallꓸHandle)k, p, 0, access, Ꮡsubkey);
-    if (err != default!) {
+    if (err != nil) {
         return ((Key)(syscallꓸHandle)(0), err);
     }
-    return ((Key)subkey, default!);
+    return ((Key)subkey, default);
 }
 
 // ReadSubKeyNames returns the names of subkeys of key k.
@@ -98,12 +98,11 @@ public static (slice<@string>, error) ReadSubKeyNames(this Key k) {
         // https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-element-size-limits
         var buf = new slice<uint16>(256); //plus extra room for terminating zero byte
 loopItems:
-        for (var i = (uint32)0; ᐧ ; i++) {
-            ref var l = ref heap<uint32>(out var Ꮡl);
-            l = (uint32)len(buf);
-            while (ᐧ) {
+        for (var i = (uint32)0; ; i++) {
+            ref var l = ref heap<uint32>((uint32)len(buf), out var Ꮡl);
+            for (;;) {
                 var err = syscall.RegEnumKeyEx((syscallꓸHandle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
-                if (err == default!) {
+                if (err == nil) {
                     break;
                 }
                 if (AreEqual(err, syscall.ERROR_MORE_DATA)) {
@@ -121,9 +120,9 @@ loopItems:
 continue_loopItems:;
         }
 break_loopItems:;
-        return (names, default!);
+        return (names, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -133,26 +132,26 @@ break_loopItems:;
 // The access parameter specifies the access rights for the key
 // to be created.
 public static (Key newk, bool openedExisting, error err) CreateKey(Key k, @string path, uint32 access) {
-    error err = default!;
+    error err = default;
 
     ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
     ref var d = ref heap(new uint32(), out var Ꮡd);
     (var pathp, err) = syscall.UTF16PtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return ((Key)(syscallꓸHandle)(0), false, err);
     }
     err = regCreateKeyEx((syscallꓸHandle)k, pathp,
         0, nil, _REG_OPTION_NON_VOLATILE, access, nil, Ꮡh, Ꮡd);
-    if (err != default!) {
+    if (err != nil) {
         return ((Key)(syscallꓸHandle)(0), false, err);
     }
-    return ((Key)h, d == _REG_OPENED_EXISTING_KEY, default!);
+    return ((Key)h, d == _REG_OPENED_EXISTING_KEY, default);
 }
 
 // DeleteKey deletes the subkey path of key k and its values.
 public static error DeleteKey(Key k, @string path) {
     var (pathp, err) = syscall.UTF16PtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return regDeleteKey((syscallꓸHandle)k, pathp);
@@ -164,7 +163,7 @@ partial struct KeyInfo {
     public uint32 MaxSubKeyLen; // size of the key's subkey with the longest name, in Unicode characters, not including the terminating zero byte
     public uint32 ValueCount;
     public uint32 MaxValueNameLen; // size of the key's longest value name, in Unicode characters, not including the terminating zero byte
-    public uint32 MaxValueLen; // longest data component among the key's values, in bytes
+    public uint32 MaxValueLen;     // longest data component among the key's values, in bytes
     internal syscall.Filetime lastWriteTime;
 }
 
@@ -174,10 +173,10 @@ public static (ж<KeyInfo>, error) Stat(this Key k) {
     var err = syscall.RegQueryInfoKey((syscallꓸHandle)k, nil, nil, nil,
         Ꮡki.of(KeyInfo.ᏑSubKeyCount), Ꮡki.of(KeyInfo.ᏑMaxSubKeyLen), nil, Ꮡki.of(KeyInfo.ᏑValueCount),
         Ꮡki.of(KeyInfo.ᏑMaxValueNameLen), Ꮡki.of(KeyInfo.ᏑMaxValueLen), nil, Ꮡki.of(KeyInfo.ᏑlastWriteTime));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡki, default!);
+    return (Ꮡki, default);
 }
 
 } // end registry_package

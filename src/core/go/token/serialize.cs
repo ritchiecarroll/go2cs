@@ -29,7 +29,7 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
 
     ref var ss = ref heap(new serializedFileSet(), out var Ꮡss);
     {
-        var err = decode(Ꮡss); if (err != default!) {
+        var err = decode(Ꮡss); if (err != nil) {
             return err;
         }
     }
@@ -48,26 +48,26 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
     Ꮡs.of(FileSet.Ꮡlast).Store(nil);
     Ꮡs.of(FileSet.Ꮡmutex).Unlock();
 
-    return default!;
+    return default;
 }
 
 // Write calls encode to serialize the file set s.
 public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    serializedFileSet ss = default!;
+    serializedFileSet ss = default;
 
     Ꮡs.of(FileSet.Ꮡmutex).Lock();
     ss.Base = s.@base;
-    slice<serializedFile> files = default!;
+    slice<serializedFile> files = default;
     foreach (var f in range<ж<ΔFile>>(Ꮡs.of(FileSet.Ꮡtree).all().Invoke)) {
         f.of(token_package.ΔFile.Ꮡmutex).Lock();
         files = append(files, new serializedFile(
-            Name: (~f).name,
-            Base: (~f).@base,
-            Size: (~f).size,
-            Lines: slices.Clone<slice<nint>, nint>((~f).lines),
-            Infos: slices.Clone<slice<lineInfo>, lineInfo>((~f).infos)
+            Name: f.name,
+            Base: f.@base,
+            Size: f.size,
+            Lines: slices.Clone<slice<nint>, nint>(f.lines),
+            Infos: slices.Clone<slice<lineInfo>, lineInfo>(f.infos)
         ));
         f.of(token_package.ΔFile.Ꮡmutex).Unlock();
     }

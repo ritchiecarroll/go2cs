@@ -84,7 +84,7 @@ partial struct SessionState {
     // createdAt is the generation time of the secret on the server (which for
     // TLS 1.0–1.2 might be earlier than the current session) and the time at
     // which the ticket was received on the client.
-    internal uint64 createdAt; // seconds since UNIX epoch
+    internal uint64 createdAt;   // seconds since UNIX epoch
     internal slice<byte> secret; // master secret for TLS 1.2, or the PSK for TLS 1.3
     internal bool extMasterSecret;
     internal slice<ж<Δx509.Certificate>> peerCertificates;
@@ -114,7 +114,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
 
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint16(s.version);
-    if (s.isClient){
+    if (s.isClient) {
         b.AddUint8(2); // client
     } else {
         b.AddUint8(1); // server
@@ -132,12 +132,12 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
             });
         }
     });
-    if (s.extMasterSecret){
+    if (s.extMasterSecret) {
         b.AddUint8(1);
     } else {
         b.AddUint8(0);
     }
-    if (s.EarlyData){
+    if (s.EarlyData) {
         b.AddUint8(1);
     } else {
         b.AddUint8(0);
@@ -159,7 +159,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
                 foreach (var (_, cert) in chainʗ1[1..]) {
                     var certʗ1 = cert;
                     bΔ5.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
-                        bΔ6.AddBytes((~certʗ1).Raw);
+                        bΔ6.AddBytes(certʗ1.Raw);
                     });
                 }
             });
@@ -170,7 +170,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
             bΔ7.AddBytes(slice<byte>(Ꮡs.Value.alpnProtocol));
         });
     }
-    if (s.version >= VersionTLS13){
+    if (s.version >= VersionTLS13) {
         if (s.isClient) {
             addUint64(Ꮡb, s.useBy);
             b.AddUint32(s.ageAdd);
@@ -184,7 +184,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
 internal static slice<slice<byte>> certificatesToBytesSlice(slice<ж<Δx509.Certificate>> certs) {
     var s = new slice<slice<byte>>(0, len(certs));
     foreach (var (_, c) in certs) {
-        s = append(s, (~c).Raw);
+        s = append(s, c.Raw);
     }
     return s;
 }
@@ -196,118 +196,117 @@ internal static readonly @string tlsNoServerCertificatesˢ = "tls: no server cer
 
 // ParseSessionState parses a [SessionState] encoded by [SessionState.Bytes].
 public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
-    var ss = Ꮡ(new SessionState(nil));
-    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = (cryptobyte.String)data;
+    var ss = Ꮡ(new SessionState());
+    ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
     ref var typ = ref heap(new uint8(), out var Ꮡtyp);
     ref var extMasterSecret = ref heap(new uint8(), out var ᏑextMasterSecret);
     ref var earlyData = ref heap(new uint8(), out var ᏑearlyData);
     ref var cert = ref heap(new Certificate(), out var Ꮡcert);
     ref var extra = ref heap<cryptobyte.String>(out var Ꮡextra);
-    if (!s.ReadUint16(ss.of(SessionState.Ꮡversion)) || !s.ReadUint8(Ꮡtyp) || !s.ReadUint16(ss.of(SessionState.ᏑcipherSuite)) || !readUint64(Ꮡs, ref (ss.of(SessionState.ᏑcreatedAt)).DerefOrNull()) || !readUint8LengthPrefixed(Ꮡs, ss.of(SessionState.Ꮡsecret)) || !s.ReadUint24LengthPrefixed(Ꮡextra) || !s.ReadUint8(ᏑextMasterSecret) || !s.ReadUint8(ᏑearlyData) || len((~ss).secret) == 0 || !unmarshalCertificate(Ꮡs, Ꮡcert)) {
-        return (default!, errors.New(tlsInvalidSessionˢ));
+    if (!s.ReadUint16(ss.of(SessionState.Ꮡversion)) || !s.ReadUint8(Ꮡtyp) || !s.ReadUint16(ss.of(SessionState.ᏑcipherSuite)) || !readUint64(Ꮡs, ref (ss.of(SessionState.ᏑcreatedAt)).DerefOrNull()) || !readUint8LengthPrefixed(Ꮡs, ss.of(SessionState.Ꮡsecret)) || !s.ReadUint24LengthPrefixed(Ꮡextra) || !s.ReadUint8(ᏑextMasterSecret) || !s.ReadUint8(ᏑearlyData) || len(ss.secret) == 0 || !unmarshalCertificate(Ꮡs, Ꮡcert)) {
+        return (default, errors.New(tlsInvalidSessionˢ));
     }
     while (!extra.Empty()) {
         ref var e = ref heap<slice<byte>>(out var Ꮡe);
         if (!readUint24LengthPrefixed(Ꮡextra, Ꮡe)) {
-            return (default!, errors.New(tlsInvalidSessionˢ));
+            return (default, errors.New(tlsInvalidSessionˢ));
         }
-        ss.Value.Extra = append((~ss).Extra, e);
+        ss.Extra = append(ss.Extra, e);
     }
     switch (typ) {
     case 1: {
-        ss.Value.isClient = false;
+        ss.isClient = false;
         break;
     }
     case 2: {
-        ss.Value.isClient = true;
+        ss.isClient = true;
         break;
     }
     default: {
-        return (default!, errors.New(tlsUnknownSessionˢ));
+        return (default, errors.New(tlsUnknownSessionˢ));
     }}
     switch (extMasterSecret) {
     case 0: {
-        ss.Value.extMasterSecret = false;
+        ss.extMasterSecret = false;
         break;
     }
     case 1: {
-        ss.Value.extMasterSecret = true;
+        ss.extMasterSecret = true;
         break;
     }
     default: {
-        return (default!, errors.New(tlsInvalidSessionˢ));
+        return (default, errors.New(tlsInvalidSessionˢ));
     }}
     switch (earlyData) {
     case 0: {
-        ss.Value.EarlyData = false;
+        ss.EarlyData = false;
         break;
     }
     case 1: {
-        ss.Value.EarlyData = true;
+        ss.EarlyData = true;
         break;
     }
     default: {
-        return (default!, errors.New(tlsInvalidSessionˢ));
+        return (default, errors.New(tlsInvalidSessionˢ));
     }}
     foreach (var (_, certΔ1) in cert.ΔCertificate) {
         var (c, err) = globalCertCache.newCert(certΔ1);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        ss.Value.peerCertificates = append((~ss).peerCertificates, c);
+        ss.peerCertificates = append(ss.peerCertificates, c);
     }
-    if ((~ss).isClient && len((~ss).peerCertificates) == 0) {
-        return (default!, errors.New(tlsNoServerCertificatesˢ));
+    if (ss.isClient && len(ss.peerCertificates) == 0) {
+        return (default, errors.New(tlsNoServerCertificatesˢ));
     }
-    ss.Value.ocspResponse = cert.OCSPStaple;
-    ss.Value.scts = cert.SignedCertificateTimestamps;
+    ss.ocspResponse = cert.OCSPStaple;
+    ss.scts = cert.SignedCertificateTimestamps;
     ref var chainList = ref heap<cryptobyte.String>(out var ᏑchainList);
     if (!s.ReadUint24LengthPrefixed(ᏑchainList)) {
-        return (default!, errors.New(tlsInvalidSessionˢ));
+        return (default, errors.New(tlsInvalidSessionˢ));
     }
     while (!chainList.Empty()) {
         ref var certList = ref heap<cryptobyte.String>(out var ᏑcertList);
         if (!chainList.ReadUint24LengthPrefixed(ᏑcertList)) {
-            return (default!, errors.New(tlsInvalidSessionˢ));
+            return (default, errors.New(tlsInvalidSessionˢ));
         }
-        slice<ж<Δx509.Certificate>> chain = default!;
-        if (len((~ss).peerCertificates) == 0) {
-            return (default!, errors.New(tlsInvalidSessionˢ));
+        slice<ж<Δx509.Certificate>> chain = default;
+        if (len(ss.peerCertificates) == 0) {
+            return (default, errors.New(tlsInvalidSessionˢ));
         }
-        chain = append(chain, (~ss).peerCertificates[0]);
+        chain = append(chain, ss.peerCertificates[0]);
         while (!certList.Empty()) {
             ref var certΔ2 = ref heap<slice<byte>>(out var ᏑcertΔ2);
             if (!readUint24LengthPrefixed(ᏑcertList, ᏑcertΔ2)) {
-                return (default!, errors.New(tlsInvalidSessionˢ));
+                return (default, errors.New(tlsInvalidSessionˢ));
             }
             var (c, err) = globalCertCache.newCert(certΔ2);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
             chain = append(chain, c);
         }
-        ss.Value.verifiedChains = append((~ss).verifiedChains, chain);
+        ss.verifiedChains = append(ss.verifiedChains, chain);
     }
-    if ((~ss).EarlyData) {
+    if (ss.EarlyData) {
         ref var alpn = ref heap<slice<byte>>(out var Ꮡalpn);
         if (!readUint8LengthPrefixed(Ꮡs, Ꮡalpn)) {
-            return (default!, errors.New(tlsInvalidSessionˢ));
+            return (default, errors.New(tlsInvalidSessionˢ));
         }
-        ss.Value.alpnProtocol = (@string)alpn;
+        ss.alpnProtocol = (@string)alpn;
     }
-    if ((~ss).version >= VersionTLS13){
-        if ((~ss).isClient) {
+    if (ss.version >= VersionTLS13) {
+        if (ss.isClient) {
             if (!s.ReadUint64(ss.of(SessionState.ᏑuseBy)) || !s.ReadUint32(ss.of(SessionState.ᏑageAdd))) {
-                return (default!, errors.New(tlsInvalidSessionˢ));
+                return (default, errors.New(tlsInvalidSessionˢ));
             }
         }
     } else {
         if (!s.ReadUint16(ss.of(SessionState.ᏑcurveID).Reinterpret<CurveID, uint16>())) {
-            return (default!, errors.New(tlsInvalidSessionˢ));
+            return (default, errors.New(tlsInvalidSessionˢ));
         }
     }
-    return (ss, default!);
+    return (ss, default);
 }
 
 // sessionState returns a partially filled-out [SessionState] with information
@@ -330,13 +329,13 @@ internal static ж<SessionState> sessionState(this ref Conn c) {
 
 // EncryptTicket encrypts a ticket with the [Config]'s configured (or default)
 // session ticket keys. It can be used as a [Config.WrapSession] implementation.
-public static (slice<byte>, error) EncryptTicket(this ж<Config> Ꮡc, ΔConnectionState cs, ж<SessionState> Ꮡss) {
+public static (slice<byte>, error) EncryptTicket(this ж<Config> Ꮡc, ΔConnectionState cs, ж<SessionState> ss) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
-    var (stateBytes, err) = Ꮡss.Bytes();
-    if (err != default!) {
-        return (default!, err);
+    var (stateBytes, err) = ss.Bytes();
+    if (err != nil) {
+        return (default, err);
     }
     return c.encryptTicket(stateBytes, ticketKeys);
 }
@@ -346,7 +345,7 @@ internal static readonly @string tlsInternalErrorSessionˢ = "tls: internal erro
 
 internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
     if (len(ticketKeys) == 0) {
-        return (default!, errors.New(tlsInternalErrorSessionˢ));
+        return (default, errors.New(tlsInternalErrorSessionˢ));
     }
 
     var encrypted = new slice<byte>((nint)aes.BlockSize + len(state) + (nint)sha256.Size);
@@ -356,14 +355,14 @@ internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte
     var macBytes = encrypted.slice(len(encrypted) - (nint)sha256.Size);
 
     {
-        var (_, errΔ1) = io.ReadFull(c.rand(), iv); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var (_, errΔ1) = io.ReadFull(c.rand(), iv); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     var key = ticketKeys[0].ΔClone();
     var (block, err) = aes.NewCipher(key.aesKey[..]);
-    if (err != default!) {
-        return (default!, errors.New("tls: failed to create cipher while encrypting ticket: "u8 + err.Error()));
+    if (err != nil) {
+        return (default, errors.New("tls: failed to create cipher while encrypting ticket: "u8 + err.Error()));
     }
     cipher.NewCTR(block, iv).XORKeyStream(ciphertext, state);
 
@@ -371,7 +370,7 @@ internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte
     mac.Write(authenticated);
     mac.Sum(macBytes[..0]);
 
-    return (encrypted, default!);
+    return (encrypted, default);
 }
 
 // DecryptTicket decrypts a ticket encrypted by [Config.EncryptTicket]. It can
@@ -383,19 +382,19 @@ public static (ж<SessionState>, error) DecryptTicket(this ж<Config> Ꮡc, slic
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
     var stateBytes = c.decryptTicket(identity, ticketKeys);
-    if (stateBytes == default!) {
-        return (default!, default!);
+    if (stateBytes == nil) {
+        return (default, default);
     }
     var (s, err) = ParseSessionState(stateBytes);
-    if (err != default!) {
-        return (default!, default!); // drop unparsable tickets on the floor
+    if (err != nil) {
+        return (default, default); // drop unparsable tickets on the floor
     }
-    return (s, default!);
+    return (s, default);
 }
 
 internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
     if (len(encrypted) < (nint)(aes.BlockSize + sha256.Size)) {
-        return default!;
+        return default;
     }
 
     var iv = encrypted[..(int)(aes.BlockSize)];
@@ -408,15 +407,15 @@ internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypt
 
         var mac = hmac.New(sha256.New, key.hmacKey[..]);
         mac.Write(authenticated);
-        var expected = mac.Sum(default!);
+        var expected = mac.Sum(default);
 
         if (subtle.ConstantTimeCompare(macBytes, expected) != 1) {
             continue;
         }
 
         var (block, err) = aes.NewCipher(key.aesKey[..]);
-        if (err != default!) {
-            return default!;
+        if (err != nil) {
+            return default;
         }
         var plaintext = new slice<byte>(len(ciphertext));
         cipher.NewCTR(block, iv).XORKeyStream(plaintext, ciphertext);
@@ -424,7 +423,7 @@ internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypt
         return plaintext;
     }
 
-    return default!;
+    return default;
 }
 
 // ClientSessionState contains the state needed by a client to
@@ -442,9 +441,9 @@ public static (slice<byte> ticket, ж<SessionState> state, error err) Resumption
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     if (Ꮡcs == nil || cs.session == nil) {
-        return (default!, default!, default!);
+        return (default, default, default);
     }
-    return ((~cs.session).ticket, cs.session, default!);
+    return (cs.session.ticket, cs.session, default);
 }
 
 // NewResumptionState returns a state value that can be returned by
@@ -458,7 +457,7 @@ public static (ж<ClientSessionState>, error) NewResumptionState(slice<byte> tic
     state.ticket = ticket;
     return (Ꮡ(new ClientSessionState(
         session: Ꮡstate
-    )), default!);
+    )), default);
 }
 
 } // end tls_package

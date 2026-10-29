@@ -38,7 +38,7 @@ public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, 
     if (len(src) != len(dst)) {
         return (fmt.Errorf("merging counters: len(dst)=%d len(src)=%d"u8, len(dst), len(src)), false);
     }
-    if (m.cmode == coverage.CtrModeSet){
+    if (m.cmode == coverage.CtrModeSet) {
         for (nint i = 0; i < len(src); i++) {
             if (src[i] != 0) {
                 dst[i] = 1;
@@ -51,7 +51,7 @@ public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, 
     }
     var ovf = m.overflow;
     m.overflow = false;
-    return (default!, ovf);
+    return (default, ovf);
 }
 
 // SaturatingAdd does a saturating addition of 'dst' and 'src',
@@ -84,7 +84,7 @@ public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
 // more than one meta-data file, we need to check for and resolve
 // mode/granularity clashes.
 public static error SetModeAndGranularity(this ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) {
-    if (cm.cmode == coverage.CtrModeInvalid){
+    if (cm.cmode == coverage.CtrModeInvalid) {
         // Set merger mode based on what we're seeing here.
         cm.cmode = cmode;
         cm.cgran = cgran;
@@ -106,7 +106,7 @@ public static error SetModeAndGranularity(this ref Merger cm, @string mdf, cover
             }
         }
     }
-    return default!;
+    return default;
 }
 
 public static void ResetModeAndGranularity(this ref Merger cm) {

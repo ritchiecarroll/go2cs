@@ -50,6 +50,10 @@ using static go.crypto.@internal.fips140.hmac_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(HMAC))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -59,7 +63,7 @@ using static go.crypto.@internal.fips140.hmac_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/hmac/cast.go", "cast.cs", "AA8cgoK43IKCgoCCpA==", "15-33:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "AC5euIKU5raClIKAgraClIKmgqaAooCkgoKAgqSmggAOHoKClIKCpoKCpoKCgoK4goIACAqCpoKqopKCgpSCgpSCgoKUgoKUqLKCgoKCspSUgrSSgpSCgoKUgpSCgoKUgpSUqLI=", "173-181:1;174-177:1.1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "AC5euIKU5raClIKAgraClIKmgqaAooCkgoKAgqSmggAOHoKClIKCpoKCpoKCgoK4goIACAqCpoKqooKCgpSCgpSCgoKUgoKUqLKCgoKCspSUgrSSgpSCgoKUgpSCgoKUgpSUqLI=", "173-181:1;174-177:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

@@ -309,10 +309,10 @@ partial class runtime_package {
 // on Windows), and the line number within the file of the corresponding call.
 // The boolean ok is false if it was not possible to recover the information.
 public static partial (uintptr pc, @string @file, nint line, bool ok) Caller(nint skip) {
-    uintptr pc = default!;
-    @string @file = default!;
-    nint line = default!;
-    bool ok = default!;
+    uintptr pc = default;
+    @string @file = default;
+    nint line = default;
+    bool ok = default;
 
     var rpc = new slice<uintptr>(1);
     nint n = callers(skip + 1, rpc);

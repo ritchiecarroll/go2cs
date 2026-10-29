@@ -97,7 +97,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(stackObjectBuf))]
 partial class runtime_package {
 
 internal const bool stackTraceDebug = false;
@@ -149,19 +148,19 @@ partial struct stackObjectBufHdr {
 partial struct stackObject {
     internal sys.NotInHeap _;
     internal uint32 off;             // offset above stack.lo
-    internal uint32 size;             // size of object
+    internal uint32 size;            // size of object
     internal ж<stackObjectRecord> r; // info of the object (for ptr/nonptr bits). nil if object has been scanned.
     internal ж<stackObject> left;    // objects with lower addresses
-    internal ж<stackObject> right;    // objects with higher addresses
+    internal ж<stackObject> right;   // objects with higher addresses
 }
 
 // obj.r = r, but with no write barrier.
 //
 //go:nowritebarrier
-internal static void setRecord(this ж<stackObject> Ꮡobj, ж<stackObjectRecord> Ꮡr) {
+internal static void setRecord(this ж<stackObject> Ꮡobj, ж<stackObjectRecord> r) {
     // Types of stack objects are always in read-only memory, not the heap.
     // So not using a write barrier is ok.
-    (Ꮡobj.of(stackObject.Ꮡr).Reinterpret<ж<stackObjectRecord>, uintptr>()).Value = (uintptr)Ꮡr;
+    (Ꮡobj.of(stackObject.Ꮡr).Reinterpret<ж<stackObjectRecord>, uintptr>()).Value = (uintptr)r;
 }
 
 // A stackScanState keeps track of the state used during the GC walk
@@ -209,17 +208,16 @@ internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr Δp, bool cons
         head = Ꮡs.of(stackScanState.Ꮡcbuf);
     }
     var buf = head.ValueSlot;
-    if (buf == nil){
+    if (buf == nil) {
         // Initial setup.
         buf = getempty().Reinterpret<workbuf, stackWorkBuf>();
         buf.Value.nobj = 0;
-        buf.Value.next = default!;
+        buf.Value.next = default;
         head.ValueSlot = buf;
-    } else 
-    if ((~buf).nobj == len((~buf).obj)) {
-        if (s.freeBuf != nil){
+    } else if ((~buf).nobj == len(buf.obj)) {
+        if (s.freeBuf != nil) {
             buf = s.freeBuf;
-            s.freeBuf = default!;
+            s.freeBuf = default;
         } else {
             buf = getempty().Reinterpret<workbuf, stackWorkBuf>();
         }
@@ -227,7 +225,7 @@ internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr Δp, bool cons
         buf.Value.next = head.ValueSlot;
         head.ValueSlot = buf;
     }
-    buf.Value.obj[(~buf).nobj] = Δp;
+    buf.obj[(~buf).nobj] = Δp;
     buf.Value.nobj++;
 }
 
@@ -239,7 +237,7 @@ internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr Δp, bool cons
 internal static (uintptr Δp, bool conservative) getPtr(this ж<stackScanState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    foreach (var (_, head) in new ж<ж<stackWorkBuf>>[]{Ꮡs.of(stackScanState.Ꮡbuf), Ꮡs.of(stackScanState.Ꮡcbuf)}.slice()) {
+    foreach (var (_, head) in slice<ж<ж<stackWorkBuf>>>([Ꮡs.of(stackScanState.Ꮡbuf), Ꮡs.of(stackScanState.Ꮡcbuf)])) {
         var buf = head.ValueSlot;
         if (buf == nil) {
             // Never had any data.
@@ -260,12 +258,12 @@ internal static (uintptr Δp, bool conservative) getPtr(this ж<stackScanState> 
             }
         }
         buf.Value.nobj--;
-        return ((~buf).obj[(~buf).nobj], head == Ꮡs.of(stackScanState.Ꮡcbuf));
+        return (buf.obj[(~buf).nobj], head == Ꮡs.of(stackScanState.Ꮡcbuf));
     }
     // No more data in either list.
     if (s.freeBuf != nil) {
         putempty(s.freeBuf.Reinterpret<stackWorkBuf, workbuf>());
-        s.freeBuf = default!;
+        s.freeBuf = default;
     }
     return (0, false);
 }
@@ -281,25 +279,25 @@ internal static void addObject(this ref stackScanState s, uintptr addr, ж<stack
     if (x == nil) {
         // initial setup
         x = getempty().Reinterpret<workbuf, stackObjectBuf>();
-        x.Value.next = default!;
+        x.Value.next = default;
         s.head = x;
         s.tail = x;
     }
-    if ((~x).nobj > 0 && (uint32)(addr - s.stack.lo) < (~x).obj[(~x).nobj - 1].off + (~x).obj[(~x).nobj - 1].size) {
+    if ((~x).nobj > 0 && (uint32)(addr - s.stack.lo) < x.obj[(~x).nobj - 1].off + x.obj[(~x).nobj - 1].size) {
         @throw(objectsAddedOutOfOrderOrˢ);
     }
-    if ((~x).nobj == len((~x).obj)) {
+    if ((~x).nobj == len(x.obj)) {
         // full buffer - allocate a new buffer, add to end of linked list
         var y = getempty().Reinterpret<workbuf, stackObjectBuf>();
-        y.stackObjectBufHdr.next = default!;
+        y.stackObjectBufHdr.next = default;
         x.Value.next = y;
         s.tail = y;
         x = y;
     }
     var obj = x.at(stackObjectBuf.Ꮡobj, (~x).nobj);
     x.Value.nobj++;
-    obj.Value.off = (uint32)(addr - s.stack.lo);
-    obj.Value.size = (uint32)r.size;
+    obj.off = (uint32)(addr - s.stack.lo);
+    obj.size = (uint32)r.size;
     obj.setRecord(Ꮡr);
     // obj.left and obj.right will be initialized by buildIndex before use.
     s.nobjs++;
@@ -318,14 +316,14 @@ internal static void buildIndex(this ref stackScanState s) {
 // (The first object that was not included in the binary search tree.)
 // If n == 0, returns nil, x.
 internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx) binarySearchTree(ж<stackObjectBuf> Ꮡx, nint idx, nint n) {
-    ж<stackObject> root = default!;
+    ж<stackObject> root = default;
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (n == 0) {
-        return (default!, Ꮡx, idx);
+        return (default, Ꮡx, idx);
     }
-    ж<stackObject> left = default!;
-    ж<stackObject> right = default!;
+    ж<stackObject> left = default;
+    ж<stackObject> right = default;
     (left, Ꮡx, idx) = binarySearchTree(Ꮡx, idx, n / 2); x = ref Ꮡx.DerefOrNull();
     root = Ꮡx.at(stackObjectBuf.Ꮡobj, idx);
     idx++;
@@ -334,8 +332,8 @@ internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx)
         idx = 0;
     }
     (right, Ꮡx, idx) = binarySearchTree(Ꮡx, idx, n - n / 2 - 1); x = ref Ꮡx.DerefOrNull();
-    root.Value.left = left;
-    root.Value.right = right;
+    root.left = left;
+    root.right = right;
     return (root, Ꮡx, idx);
 }
 
@@ -344,16 +342,16 @@ internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx)
 internal static ж<stackObject> findObject(this ref stackScanState s, uintptr a) {
     var off = (uint32)(a - s.stack.lo);
     var obj = s.root;
-    while (ᐧ) {
+    for (;;) {
         if (obj == nil) {
-            return default!;
+            return default;
         }
-        if (off < (~obj).off) {
-            obj = obj.Value.left;
+        if (off < obj.off) {
+            obj = obj.left;
             continue;
         }
-        if (off >= (~obj).off + (~obj).size) {
-            obj = obj.Value.right;
+        if (off >= obj.off + obj.size) {
+            obj = obj.right;
             continue;
         }
         return obj;

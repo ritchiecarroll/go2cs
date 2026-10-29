@@ -11,7 +11,7 @@ using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 
 partial class time_package {
@@ -54,9 +54,9 @@ partial struct dataIO {
 
 internal static slice<byte> read(this ref dataIO d, nint n) {
     if (len(d.p) < n) {
-        d.p = default!;
+        d.p = default;
         d.error = true;
-        return default!;
+        return default;
     }
     var p = d.p.slice(0, n);
     d.p = d.p.slice(n);
@@ -94,7 +94,7 @@ internal static (byte n, bool ok) @byte(this ref dataIO d) {
 // rest returns the rest of the data in the buffer.
 internal static slice<byte> rest(this ref dataIO d) {
     var r = d.p;
-    d.p = default!;
+    d.p = default;
     return r;
 }
 
@@ -120,32 +120,32 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     // 4-byte magic "TZif"
     {
         var magic = d.read(4); if (((sstring)magic) != "TZif"u8) {
-            return (default!, errBadData);
+            return (default, errBadData);
         }
     }
 
     // 1-byte version, then 15 bytes of padding
-    nint version = default!;
-    slice<byte> p = default!;
+    nint version = default;
+    slice<byte> p = default;
     {
-        p = d.read(16); if (len(p) != 16){
-            return (default!, errBadData);
+        p = d.read(16); if (len(p) != 16) {
+            return (default, errBadData);
         } else {
             switch (p[0]) {
             case 0: {
                 version = 1;
                 break;
             }
-            case (rune)'2': {
+            case (byte)'2': {
                 version = 2;
                 break;
             }
-            case (rune)'3': {
+            case (byte)'3': {
                 version = 3;
                 break;
             }
             default: {
-                return (default!, errBadData);
+                return (default, errBadData);
             }}
         }
     }
@@ -167,10 +167,10 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     for (nint i = 0; i < 6; i++) {
         var (nn, ok) = d.big4();
         if (!ok) {
-            return (default!, errBadData);
+            return (default, errBadData);
         }
         if ((uint32)(nint)nn != nn) {
-            return (default!, errBadData);
+            return (default, errBadData);
         }
         n[i] = (nint)nn;
     }
@@ -194,10 +194,10 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
         for (nint i = 0; i < 6; i++) {
             var (nn, ok) = d.big4();
             if (!ok) {
-                return (default!, errBadData);
+                return (default, errBadData);
             }
             if ((uint32)(nint)nn != nn) {
-                return (default!, errBadData);
+                return (default, errBadData);
             }
             n[i] = (nint)nn;
         }
@@ -232,12 +232,12 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     var isutc = d.read(n[NUTCLocal]);
 
     if (d.error) { // ran out of data
-        return (default!, errBadData);
+        return (default, errBadData);
     }
 
     ref var extend = ref heap(new @string(), out var Ꮡextend);
     var rest = d.rest();
-    if (len(rest) > 2 && rest[0] == (rune)'\n' && rest[len(rest) - 1] == (rune)'\n') {
+    if (len(rest) > 2 && rest[0] == '\n' && rest[len(rest) - 1] == '\n') {
         extend = (@string)(rest.slice(1, len(rest) - 1));
     }
 
@@ -248,31 +248,31 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     if (nzone == 0) {
         // Reject tzdata files with no zones. There's nothing useful in them.
         // This also avoids a panic later when we add and then use a fake transition (golang.org/issue/29437).
-        return (default!, errBadData);
+        return (default, errBadData);
     }
     var zones = new slice<zone>(nzone);
     foreach (var i in range(zones)) {
-        bool ok = default!;
-        uint32 nΔ1 = default!;
+        bool ok = default;
+        uint32 nΔ1 = default;
         {
             (nΔ1, ok) = zonedata.big4(); if (!ok) {
-                return (default!, errBadData);
+                return (default, errBadData);
             }
         }
         if ((uint32)(nint)nΔ1 != nΔ1) {
-            return (default!, errBadData);
+            return (default, errBadData);
         }
         zones[i].offset = (nint)(int32)nΔ1;
-        byte b = default!;
+        byte b = default;
         {
             (b, ok) = zonedata.@byte(); if (!ok) {
-                return (default!, errBadData);
+                return (default, errBadData);
             }
         }
         zones[i].isDST = b != 0;
         {
             (b, ok) = zonedata.@byte(); if (!ok || (nint)b >= len(abbrev)) {
-                return (default!, errBadData);
+                return (default, errBadData);
             }
         }
         zones[i].name = byteString(abbrev.slice(b));
@@ -289,19 +289,19 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     // Now the transition time info.
     var tx = new slice<zoneTrans>(n[NTime]);
     foreach (var i in range(tx)) {
-        int64 nΔ2 = default!;
-        if (!is64){
+        int64 nΔ2 = default;
+        if (!is64) {
             {
-                var (n4, ok) = txtimes.big4(); if (!ok){
-                    return (default!, errBadData);
+                var (n4, ok) = txtimes.big4(); if (!ok) {
+                    return (default, errBadData);
                 } else {
                     nΔ2 = (int64)(int32)n4;
                 }
             }
         } else {
             {
-                var (n8, ok) = txtimes.big8(); if (!ok){
-                    return (default!, errBadData);
+                var (n8, ok) = txtimes.big8(); if (!ok) {
+                    return (default, errBadData);
                 } else {
                     nΔ2 = (int64)n8;
                 }
@@ -309,7 +309,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
         }
         tx[i].when = nΔ2;
         if ((nint)txzones[i] >= len(zones)) {
-            return (default!, errBadData);
+            return (default, errBadData);
         }
         tx[i].index = txzones[i];
         if (i < len(isstd)) {
@@ -334,28 +334,27 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     var (sec, _, _) = runtimeNow();
     foreach (var i in range(tx)) {
         if (tx[i].when <= sec && (i + 1 == len(tx) || sec < tx[i + 1].when)) {
-            l.Value.cacheStart = tx[i].when;
-            l.Value.cacheEnd = omega;
-            l.Value.cacheZone = Ꮡ((~l).zone, tx[i].index);
-            if (i + 1 < len(tx)){
-                l.Value.cacheEnd = tx[i + 1].when;
-            } else 
-            if ((~l).extend != ""u8) {
+            l.cacheStart = tx[i].when;
+            l.cacheEnd = omega;
+            l.cacheZone = Ꮡ(l.zone, tx[i].index);
+            if (i + 1 < len(tx)) {
+                l.cacheEnd = tx[i + 1].when;
+            } else if (l.extend != ""u8) {
                 // If we're at the end of the known zone transitions,
                 // try the extend string.
                 {
                     ref var nameΔ1 = ref heap<@string>(out var ᏑnameΔ1);
                     ref var offset = ref heap<nint>(out var Ꮡoffset);
                     ref var isDST = ref heap<bool>(out var ᏑisDST);
-                    (nameΔ1, offset, var estart, var eend, isDST, var ok) = tzset((~l).extend, (~l).cacheStart, sec); if (ok) {
-                        l.Value.cacheStart = estart;
-                        l.Value.cacheEnd = eend;
+                    (nameΔ1, offset, var estart, var eend, isDST, var ok) = tzset(l.extend, l.cacheStart, sec); if (ok) {
+                        l.cacheStart = estart;
+                        l.cacheEnd = eend;
                         // Find the zone that is returned by tzset to avoid allocation if possible.
                         {
-                            nint zoneIdx = findZone((~l).zone, nameΔ1, offset, isDST); if (zoneIdx != -1){
-                                l.Value.cacheZone = Ꮡ((~l).zone, zoneIdx);
+                            nint zoneIdx = findZone(l.zone, nameΔ1, offset, isDST); if (zoneIdx != -1) {
+                                l.cacheZone = Ꮡ(l.zone, zoneIdx);
                             } else {
-                                l.Value.cacheZone = Ꮡ(new zone(
+                                l.cacheZone = Ꮡ(new zone(
                                     name: nameΔ1,
                                     offset: offset,
                                     isDST: isDST
@@ -369,7 +368,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
         }
     }
 
-    return (l, default!);
+    return (l, default);
 }
 
 internal static nint findZone(slice<zone> zones, @string name, nint offset, bool isDST) {
@@ -423,8 +422,8 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
     GoFrame ᒐ = default;
     try {
         var (fd, err) = open(zipfile);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         defer(closefd, fd, ref ᒐ);
 
@@ -437,8 +436,8 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
 
         var buf = new slice<byte>(ztailsize);
         {
-            var errΔ1 = preadn(fd, buf, -ztailsize); if (errΔ1 != default! || get4(buf) != zecheader) {
-                return (default!, errors.New("corrupt zip file "u8 + zipfile));
+            var errΔ1 = preadn(fd, buf, -ztailsize); if (errΔ1 != nil || get4(buf) != zecheader) {
+                return (default, errors.New("corrupt zip file "u8 + zipfile));
             }
         }
         nint n = get2(buf[10..]);
@@ -447,8 +446,8 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
 
         buf = new slice<byte>(size);
         {
-            var errΔ2 = preadn(fd, buf, off); if (errΔ2 != default!) {
-                return (default!, errors.New("corrupt zip file "u8 + zipfile));
+            var errΔ2 = preadn(fd, buf, off); if (errΔ2 != nil) {
+                return (default, errors.New("corrupt zip file "u8 + zipfile));
             }
         }
 
@@ -491,7 +490,7 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
                 continue;
             }
             if (meth != 0) {
-                return (default!, errors.New("unsupported compression for "u8 + name + " in "u8 + zipfile));
+                return (default, errors.New("unsupported compression for "u8 + name + " in "u8 + zipfile));
             }
 
             // zip per-file header layout:
@@ -512,25 +511,25 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
             //
             buf = new slice<byte>(zheadersize + namelen);
             {
-                var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != default! || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((sstring)(buf.slice(30, 30 + namelen))) != name) {
-                    return (default!, errors.New("corrupt zip file "u8 + zipfile));
+                var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != nil || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((sstring)(buf.slice(30, 30 + namelen))) != name) {
+                    return (default, errors.New("corrupt zip file "u8 + zipfile));
                 }
             }
             xlen = get2(buf[28..]);
 
             buf = new slice<byte>(sizeΔ1);
             {
-                var errΔ4 = preadn(fd, buf, offΔ1 + 30 + namelen + xlen); if (errΔ4 != default!) {
-                    return (default!, errors.New("corrupt zip file "u8 + zipfile));
+                var errΔ4 = preadn(fd, buf, offΔ1 + 30 + namelen + xlen); if (errΔ4 != nil) {
+                    return (default, errors.New("corrupt zip file "u8 + zipfile));
                 }
             }
 
-            return (buf, default!);
+            return (buf, default);
         }
 
-        return (default!, syscall.ENOENT);
+        return (default, syscall.ENOENT);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -555,54 +554,54 @@ internal static (slice<byte>, error) loadTzinfo(@string name, @string source) {
 // The first timezone data matching the given name that is successfully loaded
 // and parsed is returned as a Location.
 internal static (ж<ΔLocation> z, error firstErr) loadLocation(@string name, slice<@string> sources) {
-    ж<ΔLocation> z = default!;
-    error firstErr = default!;
+    ж<ΔLocation> z = default;
+    error firstErr = default;
 
     foreach (var (_, source) in sources) {
         var (zoneData, err) = loadTzinfo(name, source);
-        if (err == default!) {
+        if (err == nil) {
             {
-                (z, err) = LoadLocationFromTZData(name, zoneData); if (err == default!) {
-                    return (z, default!);
+                (z, err) = LoadLocationFromTZData(name, zoneData); if (err == nil) {
+                    return (z, default);
                 }
             }
         }
-        if (firstErr == default! && !AreEqual(err, syscall.ENOENT)) {
+        if (firstErr == nil && !AreEqual(err, syscall.ENOENT)) {
             firstErr = err;
         }
     }
-    if (loadFromEmbeddedTZData != default!) {
+    if (loadFromEmbeddedTZData != nil) {
         var (zoneData, err) = loadFromEmbeddedTZData(name);
-        if (err == default!) {
+        if (err == nil) {
             {
-                (z, err) = LoadLocationFromTZData(name, slice<byte>(zoneData)); if (err == default!) {
-                    return (z, default!);
+                (z, err) = LoadLocationFromTZData(name, slice<byte>(zoneData)); if (err == nil) {
+                    return (z, default);
                 }
             }
         }
-        if (firstErr == default! && !AreEqual(err, syscall.ENOENT)) {
+        if (firstErr == nil && !AreEqual(err, syscall.ENOENT)) {
             firstErr = err;
         }
     }
     {
         var (source, ok) = gorootZoneSource(runtime.GOROOT()); if (ok) {
             var (zoneData, err) = loadTzinfo(name, source);
-            if (err == default!) {
+            if (err == nil) {
                 {
-                    (z, err) = LoadLocationFromTZData(name, zoneData); if (err == default!) {
-                        return (z, default!);
+                    (z, err) = LoadLocationFromTZData(name, zoneData); if (err == nil) {
+                        return (z, default);
                     }
                 }
             }
-            if (firstErr == default! && !AreEqual(err, syscall.ENOENT)) {
+            if (firstErr == nil && !AreEqual(err, syscall.ENOENT)) {
                 firstErr = err;
             }
         }
     }
-    if (firstErr != default!) {
-        return (default!, firstErr);
+    if (firstErr != nil) {
+        return (default, firstErr);
     }
-    return (default!, errors.New("unknown time zone "u8 + name));
+    return (default, errors.New("unknown time zone "u8 + name));
 }
 
 // readFile reads and returns the content of the named file.
@@ -613,28 +612,28 @@ internal static (slice<byte>, error) readFile(@string name) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         defer(closefd, f, ref ᒐ);
         array<byte> buf = new(4096);
-        slice<byte> ret = default!;
-        nint n = default!;
-        while (ᐧ) {
+        slice<byte> ret = default;
+        nint n = default;
+        for (;;) {
             (n, err) = read(f, buf[..]);
             if (n > 0) {
                 ret = appendꓸꓸꓸ(ret, buf.slice(0, n));
             }
-            if (n == 0 || err != default!) {
+            if (n == 0 || err != nil) {
                 break;
             }
             if (len(ret) > maxFileSize) {
-                return (default!, ((fileSizeError)name));
+                return (default, ((fileSizeError)name));
             }
         }
         return (ret, err);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

@@ -17,10 +17,10 @@ partial class gcm_package {
     // Resolution 1.d(i). AES decryption is covered by the CBC CAST in package
     // crypto/internal/fips140/aes.
     fips140.CAST("CounterKDF"u8, error () => {
-        var key = new byte[]{
+        var key = slice<byte>([
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10
-        }.slice();
+        ]);
         var context = new byte[]{
             0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
             0x29, 0x2a, 0x2b, 0x2c
@@ -32,14 +32,14 @@ partial class gcm_package {
             0x6a, 0x27, 0x5e, 0x85, 0x22, 0x5e, 0x7a, 0xee
         }.array();
         var (b, err) = aes.New(key);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var got = NewCounterKDF(b).DeriveKey(0xFF, context);
         if (got != want) {
             return errors.New("unexpected result"u8);
         }
-        return default!;
+        return default;
     });
 }
 

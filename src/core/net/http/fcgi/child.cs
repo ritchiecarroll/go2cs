@@ -42,14 +42,14 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
         @params: new map<@string, @string>{},
         keepConn: (uint8)(flags & (uint8)flagKeepConn) != 0
     ));
-    r.Value.rawParams = (~r).buf[..0];
+    r.rawParams = r.buf[..0];
     return r;
 }
 
 // parseParams reads an encoded []byte into Params.
 internal static void parseParams(this ref request r) {
     var text = r.rawParams;
-    r.rawParams = default!;
+    r.rawParams = default;
     while (len(text) > 0) {
         var (keyLen, n) = readSize(text);
         if (n == 0) {
@@ -183,14 +183,14 @@ internal static void serve(this ж<child> Ꮡc) {
         defer(ᴛ0 => ᴛ0.Close(), Ꮡc.Value.conn, ref ᒐ);
         defer(Ꮡc.cleanUp, ref ᒐ);
         ref var rec = ref heap(new record(), out var Ꮡrec);
-        while (ᐧ) {
+        for (;;) {
             {
-                var err = Ꮡrec.read((~c.conn).rwc); if (err != default!) {
+                var err = Ꮡrec.read(c.conn.rwc); if (err != nil) {
                     return;
                 }
             }
             {
-                var err = Ꮡc.handleRecord(Ꮡrec); if (err != default!) {
+                var err = Ꮡc.handleRecord(Ꮡrec); if (err != nil) {
                     return;
                 }
             }
@@ -222,11 +222,11 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
     var (req, ok) = c.requests[rec.h.Id, ꟷ];
     if (!ok && rec.h.Type != typeBeginRequest && rec.h.Type != typeGetValues) {
         // The spec says to ignore unknown request IDs.
-        return default!;
+        return default;
     }
 
-    var exprᴛ1 = rec.h.Type;
-    if (exprᴛ1 == typeBeginRequest) {
+    switch (rec.h.Type) {
+    case var ᴛ when ᴛ == typeBeginRequest: {
         if (req != nil) {
             // The server is trying to begin a request with the same ID
             // as an in-progress request. This is an error.
@@ -235,81 +235,81 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
 
         beginRequest br = new();
         {
-            var err = br.read(rec.content()); if (err != default!) {
+            var err = br.read(rec.content()); if (err != nil) {
                 return err;
             }
         }
         if (br.role != roleResponder) {
             c.conn.writeEndRequest(rec.h.Id, 0, statusUnknownRole);
-            return default!;
+            return default;
         }
         req = newRequest(rec.h.Id, br.flags);
         c.requests[rec.h.Id] = req;
-        return default!;
+        return default;
     }
-    if (exprᴛ1 == typeParams) {
+    case var ᴛ when ᴛ == typeParams: {
         // NOTE(eds): Technically a key-value pair can straddle the boundary
         // between two packets. We buffer until we've received all parameters.
         if (len(rec.content()) > 0) {
-            req.Value.rawParams = appendꓸꓸꓸ((~req).rawParams, rec.content());
-            return default!;
+            req.rawParams = appendꓸꓸꓸ(req.rawParams, rec.content());
+            return default;
         }
         req.parseParams();
-        return default!;
+        return default;
     }
-    if (exprᴛ1 == typeStdin) {
+    case var ᴛ when ᴛ == typeStdin: {
         var content = rec.content();
-        if ((~req).pw == nil) {
-            io.ReadCloser body = default!;
-            if (len(content) > 0){
+        if (req.pw == nil) {
+            io.ReadCloser body = default;
+            if (len(content) > 0) {
                 // body could be an io.LimitReader, but it shouldn't matter
                 // as long as both sides are behaving.
                 var (ᴛ1, ᴛ2) = io.Pipe();
-                (body, req.Value.pw) = (new io.PipeReaderжReadCloser(ᴛ1), ᴛ2);
+                (body, req.pw) = (new io.PipeReaderжReadCloser(ᴛ1), ᴛ2);
             } else {
                 body = emptyBody;
             }
             goǃ(Ꮡc.serveRequest, req, body);
         }
-        if (len(content) > 0){
+        if (len(content) > 0) {
             // TODO(eds): This blocks until the handler reads from the pipe.
             // If the handler takes a long time, it might be a problem.
-            (~req).pw.Write(content);
+            req.pw.Write(content);
         } else {
-            delete(c.requests, (~req).reqId);
-            if ((~req).pw != nil) {
-                (~req).pw.Close();
+            delete(c.requests, req.reqId);
+            if (req.pw != nil) {
+                req.pw.Close();
             }
         }
-        return default!;
+        return default;
     }
-    if (exprᴛ1 == typeGetValues) {
+    case var ᴛ when ᴛ == typeGetValues: {
         var values = new map<@string, @string>{["FCGI_MPXS_CONNS"u8] = "1"u8};
         c.conn.writePairs(typeGetValuesResult, 0, values);
-        return default!;
+        return default;
     }
-    if (exprᴛ1 == typeData) {
+    case var ᴛ when ᴛ == typeData: {
         // If the filter role is implemented, read the data stream here.
-        return default!;
+        return default;
     }
-    if (exprᴛ1 == typeAbortRequest) {
+    case var ᴛ when ᴛ == typeAbortRequest: {
         delete(c.requests, rec.h.Id);
         c.conn.writeEndRequest(rec.h.Id, 0, statusRequestComplete);
-        if ((~req).pw != nil) {
-            (~req).pw.CloseWithError(ErrRequestAborted);
+        if (req.pw != nil) {
+            req.pw.CloseWithError(ErrRequestAborted);
         }
-        if (!(~req).keepConn) {
+        if (!req.keepConn) {
             // connection will close upon return
             return errCloseConn;
         }
-        return default!;
+        return default;
     }
-    { /* default: */
+    default: {
         var b = new slice<byte>(8);
         b[0] = (byte)rec.h.Type;
         c.conn.writeRecord(typeUnknownType, 0, b);
-        return default!;
-    }
+        return default;
+    }}
 }
 
 // filterOutUsedEnvVars returns a new map of env vars without the
@@ -330,19 +330,19 @@ internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.Re
 
     var r = newResponse(ref (Ꮡc).DerefOrNull(), Ꮡreq);
     var (httpReq, err) = cgi.RequestFromMap(req.@params);
-    if (err != default!){
+    if (err != nil) {
         // there was an error reading the request
         r.WriteHeader(http.StatusInternalServerError);
         c.conn.writeRecord(typeStderr, req.reqId, slice<byte>(err.Error()));
     } else {
-        httpReq.Value.Body = body;
+        httpReq.Body = body;
         var withoutUsedEnvVars = filterOutUsedEnvVars(req.@params);
-        var envVarCtx = context.WithValue(httpReq.Context(), new envVarsContextKey(nil), withoutUsedEnvVars);
+        var envVarCtx = context.WithValue(httpReq.Context(), new envVarsContextKey(), withoutUsedEnvVars);
         httpReq = httpReq.WithContext(envVarCtx);
         c.handler.ServeHTTP(new responseжResponseWriter(r), httpReq);
     }
     // Make sure we serve something even if nothing was written to r
-    r.Write(default!);
+    r.Write(default);
     r.Close();
     c.conn.writeEndRequest(req.reqId, 0, statusRequestComplete);
 
@@ -363,10 +363,10 @@ internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.Re
 
 internal static void cleanUp(this ref child c) {
     foreach (var (_, req) in c.requests) {
-        if ((~req).pw != nil) {
+        if (req.pw != nil) {
             // race with call to Close in c.serveRequest doesn't matter because
             // Pipe(Reader|Writer).Close are idempotent
-            (~req).pw.CloseWithError(ErrConnClosed);
+            req.pw.CloseWithError(ErrConnClosed);
         }
     }
 }
@@ -379,20 +379,20 @@ internal static void cleanUp(this ref child c) {
 public static partial error Serve(net.Listener l, httpꓸHandler handler) {
     GoFrame ᒐ = default;
     try {
-        if (l == default!) {
-            error err = default!;
+        if (l == nil) {
+            error err = default;
             (l, err) = net.FileListener(os.Stdin);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             defer(() => l.Close(), ref ᒐ);
         }
-        if (handler == default!) {
+        if (handler == nil) {
             handler = new http.ServeMuxжΔHandler(http.DefaultServeMux);
         }
-        while (ᐧ) {
+        for (;;) {
             var (rw, err) = l.Accept();
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             var c = newChild(new net_ConnᴠReadWriteCloser(rw), handler);
@@ -400,7 +400,7 @@ public static partial error Serve(net.Listener l, httpꓸHandler handler) {
             goǃ(cʗ1.serve);
         }
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -412,7 +412,7 @@ public static partial error Serve(net.Listener l, httpꓸHandler handler) {
 public static map<@string, @string> ProcessEnv(ж<http.Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    var (env, _) = r.Context().Value(new envVarsContextKey(nil))._<map<@string, @string>>(ᐧ);
+    var (env, _) = r.Context().Value(new envVarsContextKey())._<map<@string, @string>>(ᐧ);
     return env;
 }
 
@@ -424,9 +424,10 @@ internal static readonly @string httpˢ = "HTTP_"u8;
 internal static bool addFastCGIEnvToContext(@string s) {
     // Exclude things supported by net/http natively:
     var exprᴛ1 = s;
-    if (exprᴛ1 == "CONTENT_LENGTH"u8 || exprᴛ1 == "CONTENT_TYPE"u8 || exprᴛ1 == "HTTPS"u8 || exprᴛ1 == "PATH_INFO"u8 || exprᴛ1 == "QUERY_STRING"u8 || exprᴛ1 == "REMOTE_ADDR"u8 || exprᴛ1 == "REMOTE_HOST"u8 || exprᴛ1 == "REMOTE_PORT"u8 || exprᴛ1 == "REQUEST_METHOD"u8 || exprᴛ1 == "REQUEST_URI"u8 || exprᴛ1 == "SCRIPT_NAME"u8 || exprᴛ1 == "SERVER_PROTOCOL"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "CONTENT_LENGTH"u8 || exprᴛ1 == "CONTENT_TYPE"u8 || exprᴛ1 == "HTTPS"u8 || exprᴛ1 == "PATH_INFO"u8 || exprᴛ1 == "QUERY_STRING"u8 || exprᴛ1 == "REMOTE_ADDR"u8 || exprᴛ1 == "REMOTE_HOST"u8 || exprᴛ1 == "REMOTE_PORT"u8 || exprᴛ1 == "REQUEST_METHOD"u8 || exprᴛ1 == "REQUEST_URI"u8 || exprᴛ1 == "SCRIPT_NAME"u8 || exprᴛ1 == "SERVER_PROTOCOL"u8: {
         return false;
-    }
+    }}
     if (strings.HasPrefix(s, httpˢ)) {
         return false;
     }
@@ -435,9 +436,10 @@ internal static bool addFastCGIEnvToContext(@string s) {
     // Consider this documentation of the sorts of things we expect
     // to maybe see.
     var exprᴛ2 = s;
-    if (exprᴛ2 == "REMOTE_USER"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ2 == "REMOTE_USER"u8: {
         return true;
-    }
+    }}
     // Unknown, so include it to be safe.
     return true;
 }

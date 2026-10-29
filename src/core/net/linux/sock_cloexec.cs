@@ -18,10 +18,10 @@ internal static readonly @string socketˢ = "socket"u8;
 // descriptor as nonblocking and close-on-exec.
 internal static (nint, error) sysSocket(nint family, nint sotype, nint proto) {
     var (s, err) = socketFunc(family, sotype | (nint)syscall.SOCK_NONBLOCK | (nint)syscall.SOCK_CLOEXEC, proto);
-    if (err != default!) {
+    if (err != nil) {
         return (-1, os.NewSyscallError(socketˢ, err));
     }
-    return (s, default!);
+    return (s, default);
 }
 
 } // end net_package

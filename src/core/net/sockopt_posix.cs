@@ -18,61 +18,61 @@ internal static nint boolint(bool b) {
     return 0;
 }
 
-internal static (IP, error) interfaceToIPv4Addr(ж<Interface> Ꮡifi) {
-    if (Ꮡifi == nil) {
-        return (IPv4zero, default!);
+internal static (IP, error) interfaceToIPv4Addr(ж<Interface> ifi) {
+    if (ifi == nil) {
+        return (IPv4zero, default);
     }
-    var (ifat, err) = Ꮡifi.Addrs();
-    if (err != default!) {
-        return (default!, err);
+    var (ifat, err) = ifi.Addrs();
+    if (err != nil) {
+        return (default, err);
     }
     foreach (var (_, ifa) in ifat) {
         switch (ifa.type()) {
         case ж<IPAddr> v: {
-            if ((~v).IP.To4() != default!) {
-                return ((~v).IP, default!);
+            if (v.IP.To4() != nil) {
+                return (v.IP, default);
             }
             break;
         }
         case ж<IPNet> v: {
-            if ((~v).IP.To4() != default!) {
-                return ((~v).IP, default!);
+            if (v.IP.To4() != nil) {
+                return (v.IP, default);
             }
             break;
         }}
     }
-    return (default!, errNoSuchInterface);
+    return (default, errNoSuchInterface);
 }
 
-internal static error setReadBuffer(ж<netFD> Ꮡfd, nint bytes) {
-    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_RCVBUF, bytes);
-    runtime.KeepAlive(Ꮡfd.OrTypedNil());
+internal static error setReadBuffer(ж<netFD> fd, nint bytes) {
+    var err = fd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_RCVBUF, bytes);
+    runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
 }
 
-internal static error setWriteBuffer(ж<netFD> Ꮡfd, nint bytes) {
-    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_SNDBUF, bytes);
-    runtime.KeepAlive(Ꮡfd.OrTypedNil());
+internal static error setWriteBuffer(ж<netFD> fd, nint bytes) {
+    var err = fd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_SNDBUF, bytes);
+    runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
 }
 
-internal static error setKeepAlive(ж<netFD> Ꮡfd, bool keepalive) {
-    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_KEEPALIVE, boolint(keepalive));
-    runtime.KeepAlive(Ꮡfd.OrTypedNil());
+internal static error setKeepAlive(ж<netFD> fd, bool keepalive) {
+    var err = fd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_KEEPALIVE, boolint(keepalive));
+    runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
 }
 
-internal static error setLinger(ж<netFD> Ꮡfd, nint sec) {
+internal static error setLinger(ж<netFD> fd, nint sec) {
     ref var l = ref heap(new syscall.Linger(), out var Ꮡl);
-    if (sec >= 0){
+    if (sec >= 0) {
         l.Onoff = 1;
         l.ΔLinger = (int32)sec;
     } else {
         l.Onoff = 0;
         l.ΔLinger = 0;
     }
-    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptLinger(syscall.SOL_SOCKET, syscall.SO_LINGER, Ꮡl);
-    runtime.KeepAlive(Ꮡfd.OrTypedNil());
+    var err = fd.of(netFD.Ꮡpfd).SetsockoptLinger(syscall.SOL_SOCKET, syscall.SO_LINGER, Ꮡl);
+    runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
 }
 

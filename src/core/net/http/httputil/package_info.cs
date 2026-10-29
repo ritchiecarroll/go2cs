@@ -10,16 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸCookie = go.net.http_package.ΔCookie;
-global using httpꓸHandler = go.net.http_package.ΔHandler;
 global using httpꓸHeader = go.net.http_package.ΔHeader;
 global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using textprotoꓸError = go.net.textproto_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -77,6 +69,16 @@ using static go.net.http.httputil_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(ClientConn))]
+[assembly: go.GoFieldAccess(typeof(ProxyRequest))]
+[assembly: go.GoFieldAccess(typeof(delegateReader))]
+[assembly: go.GoFieldAccess(typeof(go.net.http_package.Request))]
+[assembly: go.GoFieldAccess(typeof(go.net.http_package.Response))]
+[assembly: go.GoFieldAccess(typeof(go.net.url_package.URL))]
+[assembly: go.GoFieldAccess(typeof(maxLatencyWriter))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -85,10 +87,10 @@ using static go.net.http.httputil_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABQy8pSUgoCCpICCpAAIEoCigKKAooCigKKAyIKClKqigpSClOzygoKCgoKCpoKCggAHEIKCgoKCggACENKCkpKUytqUsoKmgpT4yJSCgoKClO6CgIK2AA0WgoKCgIK2qJKClKYACiwAEgKCgoKUgoK4AAcQgoKmpoKCgoKUgriCgqaCgqaUgoKClIKCgriCgpTKAAgQgKKAtpaygoKClKaClKSClIKCpoKClIKCgpQ=", "119-121:1;130-144:2")]
+[assembly: go.GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABQy8pSUgoCCpICCpAAIEoCigKKAooCigKKAyIKClKqigpSClOzygoKCgoKCpoKCggAHEIKCgoKCggACENKCkpKUytqUsoKmgpT4yJSCgoKClO6CgIK2AA0WgoKCgIK2qJKClKYACiwAEgKCgoKUgoK4AAcQgoKmpoKCgoKUgriCgqaCgqaUgoKClIKCgriCgpTKAAgQgKKAtpaygoKClKaClJSClIKCpoKClIKCgpQ=", "119-121:1;130-144:2", "", "", "147:21,149:21")]
 [assembly: go.GoPositionMap("net/http/httputil/httputil.go", "httputil.cs", "AA4o4gACHAALAso=")]
 [assembly: go.GoPositionMap("net/http/httputil/persist.go", "persist.cs", "ABImpqa6ABEw8oKUrgAJAoKCgoKCgtiSgoKUrgAIAoKmgoKCgoKCpoKCuIKCgpSCgpSCgpSCgoKmuIKCgoKCuIKCgoK4gpSCpoKCgoKU2vKCggAIDAAJBoKCgoKClKaClIKCgpSCgpSCgoKUuJSUgoKCgoKUlAAWNPKClAAHGtKCgq4ACgKCgoKCgoLYkoKClAACEAAKAqaCgoKCgoKmgoK4goKClIKClIKClIKmlJSCgoKCgpSU2vKCgt4ACwSCgoKCgpSmgpSCgoKUgoKUgoKCpriCgoKCgriCgoKCgpSUlIKClNiSgoKU", "95-106:1;305-316:1")]
-[assembly: go.GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ADF0AA4CggAILAATAoKCgoKUlJSCgpQAqwHmAoKCgpSklKaygriClIKUlKSUAAI2ABgCgpSmooKCgoKClLiCgoIACRQACxiCgqaigpSq0oKUgIKCgqQADAbigoKmggALFoCCgoKSgrK0AAkMgoKUAAsY7qSCpoKCpoKCgqaUgoKClO6CyoKCpriCgoKmlLiClIC4goKClILayoKClIKUpoCmtpi0goKmlIKCpoLWlIKCgoKCgriCgpSCppSCpriCgoKClKaUgoLIgoKUlJS4poKCpqKCgsYABBLylJSmuKikgpKAgv6C7MK4gILIgqamwpSCyraClKaCgoKUgtqigpSCgoKClIKCgpSClIKmgoKUyqKClAAMHOKCgoKCgpSClIKUlILW0oKCgpSCoqTSgoKCgrSkgoKUptKCgoKClIKCpoKCgqaCgoKCpoLGAAgIlJSCgpSklIKCgIKCpICCgqSCkpLIgoK0pAALEIKAgoLIgIKCtqaCgIKCyICCgramyoKCgpSUlICUpIKUpIKUtLamgpSkpJQABxCCgtaigpQ=", "334-336:1;426-432:1;560-575:2;861-869:1;947-950:1", "", "792=NewResponseController/1/1/2")]
+[assembly: go.GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ADF0AA4CggAILAATAoKCgoKUlJSCgpQAqwHmAoKCgpSklKaygriClIKUlKSUAAI2ABgCgpSmooKCgoKClLiCgoIACRQACxiCgqaigpSq0oKUgIKCgqQADAbigoKmggAKFoCCgoKSgrK0AAkMgoKUAAsY7qSCpoKCpoKCgqaUgoKClO6CyoKCpriCgoKmlLiClIC4goKClILayoKClIKUpoCmtpi0goKmlIKCpoLWlIKCgoKCgriCgpSCppSCpriCgoKClKaUgoLIgoKUlJS4poKCpqKCgsYABBLylJSmuKikgpKAgv6C7MK4gILIgqamwpSCyraClKaCgoKUgtqigpSCgoKClIKCgpSClIKmgoKUyqKClAAMHOKCgoKCgpSClIKUlILW0oKCgpSCoqTSgoKCgrSkgoKUptKCgoKClIKCpoKCgqaCgoKCpoLGAAgIlJSCgpSklIKCgIKCpICCgqSCgpLIgoK0pAALEIKAgoLIgIKCtqaCgIKCyICCgramyoKCgpSUlICUpIKUpIKUtLamgpSkpJQABxCCgtaigpQ=", "334-336:1;426-432:1;560-575:2;861-869:1;947-950:1", "", "791=NewResponseController/1/1/2", "461:29,505:25,675:25,988:21,995:21,1016:19,1018:19")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

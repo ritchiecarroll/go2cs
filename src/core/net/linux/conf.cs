@@ -50,11 +50,11 @@ partial class net_package {
 
 // conf is used to determine name resolution configuration.
 partial struct conf {
-    internal bool netGo; // prefer go approach, based on build tag and GODEBUG
+    internal bool netGo;  // prefer go approach, based on build tag and GODEBUG
     internal bool netCgo; // prefer cgo approach, based on build tag and GODEBUG
     internal nint dnsDebugLevel; // from GODEBUG
     internal bool preferCgo; // if no explicit preference, use cgo
-    internal @string goos;  // copy of runtime.GOOS, used for testing
+    internal @string goos;      // copy of runtime.GOOS, used for testing
     internal mdnsTest mdnsTest; // assume /etc/mdns.allow exists, for testing
 }
 
@@ -87,21 +87,21 @@ internal static void initConfVal() {
     GoFrame ᒐ = default;
     try {
         var (dnsMode, debugLevel) = goDebugNetDNS();
-        confVal.Value.netGo = netGoBuildTag || dnsMode == "go"u8;
-        confVal.Value.netCgo = netCgoBuildTag || dnsMode == "cgo"u8;
-        confVal.Value.dnsDebugLevel = debugLevel;
+        confVal.netGo = netGoBuildTag || dnsMode == "go"u8;
+        confVal.netCgo = netCgoBuildTag || dnsMode == "cgo"u8;
+        confVal.dnsDebugLevel = debugLevel;
 
-        if ((~confVal).dnsDebugLevel > 0) {
+        if (confVal.dnsDebugLevel > 0) {
             defer(() => {
-                if ((~confVal).dnsDebugLevel > 1) {
-                    println((@string)"go package net: confVal.netCgo ="u8, (~confVal).netCgo, (@string)" netGo ="u8, (~confVal).netGo);
+                if (confVal.dnsDebugLevel > 1) {
+                    println((@string)"go package net: confVal.netCgo ="u8, confVal.netCgo, (@string)" netGo ="u8, confVal.netGo);
                 }
                 if (dnsMode != "go"u8 && dnsMode != "cgo"u8 && dnsMode != ""u8) {
                     println((@string)"go package net: GODEBUG=netdns contains an invalid dns mode, ignoring it"u8);
                 }
                 switch (ᐧ) {
                 case {} when ᐧᐧ: {
-                    if (dnsMode == "cgo"u8){
+                    if (dnsMode == "cgo"u8) {
                         println((@string)"go package net: ignoring GODEBUG=netdns=cgo as the binary was compiled without support for the cgo resolver"u8);
                     } else {
                         println((@string)"go package net: using the Go DNS resolver"u8);
@@ -109,7 +109,7 @@ internal static void initConfVal() {
                     break;
                 }
                 case {} when netCgoBuildTag: {
-                    if (dnsMode == "go"u8){
+                    if (dnsMode == "go"u8) {
                         println((@string)"go package net: GODEBUG setting forcing use of the Go resolver"u8);
                     } else {
                         println((@string)"go package net: using the cgo DNS resolver"u8);
@@ -117,10 +117,9 @@ internal static void initConfVal() {
                     break;
                 }
                 default: {
-                    if (dnsMode == "go"u8){
+                    if (dnsMode == "go"u8) {
                         println((@string)"go package net: GODEBUG setting forcing use of the Go resolver"u8);
-                    } else 
-                    if (dnsMode == "cgo"u8){
+                    } else if (dnsMode == "cgo"u8) {
                         println((@string)"go package net: GODEBUG setting forcing use of the cgo resolver"u8);
                     } else {
                         println((@string)"go package net: dynamic selection of DNS resolver"u8);
@@ -134,7 +133,7 @@ internal static void initConfVal() {
         // conditions that will not change during program execution.
 
         // By default, prefer the go resolver.
-        confVal.Value.preferCgo = false;
+        confVal.preferCgo = false;
 
         // If the cgo resolver is not available, we can't prefer it.
         if (!cgoAvailable) {
@@ -143,15 +142,16 @@ internal static void initConfVal() {
 
         // Some operating systems always prefer the cgo resolver.
         if (goosPrefersCgo()) {
-            confVal.Value.preferCgo = true;
+            confVal.preferCgo = true;
             return;
         }
 
         // The remaining checks are specific to Unix systems.
         var exprᴛ1 = runtime.GOOS;
-        if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
             return;
-        }
+        }}
 
         // If any environment-specified resolver options are specified,
         // prefer the cgo resolver.
@@ -159,14 +159,14 @@ internal static void initConfVal() {
         // specified with the empty string.
         var (_, localDomainDefined) = os.LookupEnv(localdomainˢ);
         if (localDomainDefined || os.Getenv(resOptionsˢ) != ""u8 || os.Getenv(hostaliasesˢ) != ""u8) {
-            confVal.Value.preferCgo = true;
+            confVal.preferCgo = true;
             return;
         }
 
         // OpenBSD apparently lets you override the location of resolv.conf
         // with ASR_CONFIG. If we notice that, defer to libc.
         if (runtime.GOOS == "openbsd"u8 && os.Getenv(asrConfigˢ) != ""u8) {
-            confVal.Value.preferCgo = true;
+            confVal.preferCgo = true;
             return;
         }
     }
@@ -178,28 +178,29 @@ internal static void initConfVal() {
 // the cgo resolver.
 internal static bool goosPrefersCgo() {
     var exprᴛ1 = runtime.GOOS;
+    switch (ᐧ) {
     // Historically on Windows and Plan 9 we prefer the
     // cgo resolver (which doesn't use the cgo tool) rather than
     // the go resolver. This is because originally these
     // systems did not support the go resolver.
     // Keep it this way for better compatibility.
     // Perhaps we can revisit this some day.
-    if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8) {
+    case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8: {
         return true;
     }
     // Darwin pops up annoying dialog boxes if programs try to
     // do their own DNS requests, so prefer cgo.
-    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+    case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
         return true;
     }
     // DNS requests don't work on Android, so prefer the cgo resolver.
     // Issue #10714.
-    if (exprᴛ1 == "android"u8) {
+    case {} when exprᴛ1 == "android"u8: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 // mustUseGoResolver reports whether a DNS lookup of any sort is
@@ -220,7 +221,7 @@ internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
         // DNS cache) and they don't want to actually hit the network.
         // Once we add support for looking the default DNS servers
         // from plan9, though, then we can relax this.
-        if (Ꮡr == nil || r.Dial == default!) {
+        if (Ꮡr == nil || r.Dial == nil) {
             return false;
         }
     }
@@ -231,9 +232,9 @@ internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
 // addrLookupOrder determines which strategy to use to resolve addresses.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ж<conf> Ꮡc, ж<Resolver> Ꮡr, @string addr) {
-    ΔhostLookupOrder ret = default!;
-    ж<dnsConfig> dnsConf = default!;
+internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
+    ΔhostLookupOrder ret = default;
+    ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -243,7 +244,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(t
                 print((@string)"go package net: addrLookupOrder("u8, addr, (@string)") = "u8, ret.String(), (@string)"\n"u8);
             }, ref ᒐ);
         }
-        (ret, dnsConf) = c.lookupOrder(Ꮡr, ""u8);
+        (ret, dnsConf) = c.lookupOrder(r, ""u8);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -253,9 +254,9 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(t
 // hostLookupOrder determines which strategy to use to resolve hostname.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ж<conf> Ꮡc, ж<Resolver> Ꮡr, @string hostname) {
-    ΔhostLookupOrder ret = default!;
-    ж<dnsConfig> dnsConf = default!;
+internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
+    ΔhostLookupOrder ret = default;
+    ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -265,7 +266,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(t
                 print((@string)"go package net: hostLookupOrder("u8, hostname, (@string)") = "u8, ret.String(), (@string)"\n"u8);
             }, ref ᒐ);
         }
-        (ret, dnsConf) = c.lookupOrder(Ꮡr, hostname);
+        (ret, dnsConf) = c.lookupOrder(r, hostname);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -279,35 +280,33 @@ internal static readonly @string localˢ = ".local"u8;
 internal static readonly @string etcMdnsAllowˢ = "/etc/mdns.allow"u8;
 internal static readonly @string dnsˢ = "dns"u8;
 
-internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> Ꮡr, @string hostname) {
-    ж<dnsConfig> dnsConf = default!;
+internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> r, @string hostname) {
+    ж<dnsConfig> dnsConf = default;
 
     // fallbackOrder is the order we return if we can't figure it out.
-    ΔhostLookupOrder fallbackOrder = default!;
+    ΔhostLookupOrder fallbackOrder = default;
 
-    bool canUseCgo = default!;
-    if (c.mustUseGoResolver(Ꮡr)){
+    bool canUseCgo = default;
+    if (c.mustUseGoResolver(r)) {
         // Go resolver was explicitly requested
         // or cgo resolver is not available.
         // Figure out the order below.
         fallbackOrder = hostLookupFilesDNS;
         canUseCgo = false;
-    } else 
-    if (c.netCgo){
+    } else if (c.netCgo) {
         // Cgo resolver was explicitly requested.
-        return (hostLookupCgo, default!);
-    } else 
-    if (c.preferCgo){
+        return (hostLookupCgo, default);
+    } else if (c.preferCgo) {
         // Given a choice, we prefer the cgo resolver.
-        return (hostLookupCgo, default!);
+        return (hostLookupCgo, default);
     } else {
         // Neither resolver was explicitly requested
         // and we have no preference.
 
-        if (bytealg.IndexByteString(hostname, (rune)'\\') != -1 || bytealg.IndexByteString(hostname, (rune)'%') != -1) {
+        if (bytealg.IndexByteString(hostname, (byte)'\\') != -1 || bytealg.IndexByteString(hostname, (byte)'%') != -1) {
             // Don't deal with special form hostnames
             // with backslashes or '%'.
-            return (hostLookupCgo, default!);
+            return (hostLookupCgo, default);
         }
 
         // If something is unrecognized, use cgo.
@@ -317,9 +316,10 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
 
     // On systems that don't use /etc/resolv.conf or /etc/nsswitch.conf, we are done.
     var exprᴛ1 = c.goos;
-    if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "ios"u8) {
-        return (fallbackOrder, default!);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "ios"u8: {
+        return (fallbackOrder, default);
+    }}
 
     // Try to figure out the order to use for searches.
     // If we don't recognize something, use fallbackOrder.
@@ -329,12 +329,12 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
 
     dnsConf = getSystemDNSConfig();
 
-    if (canUseCgo && (~dnsConf).err != default! && !errors.Is((~dnsConf).err, fs.ErrNotExist) && !errors.Is((~dnsConf).err, fs.ErrPermission)) {
+    if (canUseCgo && dnsConf.err != nil && !errors.Is(dnsConf.err, fs.ErrNotExist) && !errors.Is(dnsConf.err, fs.ErrPermission)) {
         // We can't read the resolv.conf file, so use cgo if we can.
         return (hostLookupCgo, dnsConf);
     }
 
-    if (canUseCgo && (~dnsConf).unknownOpt) {
+    if (canUseCgo && dnsConf.unknownOpt) {
         // We didn't recognize something in resolv.conf,
         // so use cgo if we can.
         return (hostLookupCgo, dnsConf);
@@ -346,11 +346,11 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
         // OpenBSD's resolv.conf manpage says that a
         // non-existent resolv.conf means "lookup" defaults
         // to only "files", without DNS lookups.
-        if (errors.Is((~dnsConf).err, fs.ErrNotExist)) {
+        if (errors.Is(dnsConf.err, fs.ErrNotExist)) {
             return (hostLookupFiles, dnsConf);
         }
 
-        var lookup = dnsConf.Value.lookup;
+        var lookup = dnsConf.lookup;
         if (len(lookup) == 0) {
             // https://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/resolv.conf.5
             // "If the lookup keyword is not used in the
@@ -363,7 +363,8 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
             return (fallbackOrder, dnsConf);
         }
         var exprᴛ2 = lookup[0];
-        if (exprᴛ2 == "bind"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ2 == "bind"u8: {
             if (len(lookup) == 2) {
                 if (lookup[1] == "file") {
                     return (hostLookupDNSFiles, dnsConf);
@@ -373,7 +374,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
             }
             return (hostLookupDNS, dnsConf);
         }
-        if (exprᴛ2 == "file"u8) {
+        case {} when exprᴛ2 == "file"u8: {
             if (len(lookup) == 2) {
                 if (lookup[1] == "bind") {
                     return (hostLookupFilesDNS, dnsConf);
@@ -383,10 +384,10 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
             }
             return (hostLookupFiles, dnsConf);
         }
-        { /* default: */
+        default: {
             // Unrecognized.
             return (fallbackOrder, dnsConf);
-        }
+        }}
 
         // We always return before this point.
         // The code below is for non-OpenBSD.
@@ -396,10 +397,10 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
     hostname = stringslite.TrimSuffix(hostname, "."u8);
 
     var nss = getSystemNSS();
-    var srcs = (~nss).sources[hostsˢ];
+    var srcs = nss.sources[hostsˢ];
     // If /etc/nsswitch.conf doesn't exist or doesn't specify any
     // sources for "hosts", assume Go's DNS will work fine.
-    if (errors.Is((~nss).err, fs.ErrNotExist) || ((~nss).err == default! && len(srcs) == 0)) {
+    if (errors.Is(nss.err, fs.ErrNotExist) || (nss.err == nil && len(srcs) == 0)) {
         if (canUseCgo && c.goos == "solaris"u8) {
             // illumos defaults to
             // "nis [NOTFOUND=return] files",
@@ -409,25 +410,25 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
 
         return (hostLookupFilesDNS, dnsConf);
     }
-    if ((~nss).err != default!) {
+    if (nss.err != nil) {
         // We failed to parse or open nsswitch.conf, so
         // we have nothing to base an order on.
         return (fallbackOrder, dnsConf);
     }
 
-    bool hasDNSSource = default!;
-    bool hasDNSSourceChecked = default!;
+    bool hasDNSSource = default;
+    bool hasDNSSourceChecked = default;
 
-    bool filesSource = default!;
-    bool dnsSource = default!;
-    @string first = default!;
+    bool filesSource = default;
+    bool dnsSource = default;
+    @string first = default;
     foreach (var (i, src) in srcs) {
         if (src.source == "files"u8 || src.source == "dns"u8) {
             if (canUseCgo && !src.standardCriteria()) {
                 // non-standard; let libc deal with it.
                 return (hostLookupCgo, dnsConf);
             }
-            if (src.source == "files"u8){
+            if (src.source == "files"u8) {
                 filesSource = true;
             } else {
                 hasDNSSource = true;
@@ -449,7 +450,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
                     return (hostLookupCgo, dnsConf);
                 }
                 var (hn, err) = getHostname();
-                if (err != default! || stringsEqualFold(hostname, hn)) {
+                if (err != nil || stringsEqualFold(hostname, hn)) {
                     return (hostLookupCgo, dnsConf);
                 }
                 continue;
@@ -467,22 +468,25 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
                 // We don't parse mdns.allow files. They're rare. If one
                 // exists, it might list other TLDs (besides .local) or even
                 // '*', so just let libc deal with it.
-                bool haveMDNSAllow = default!;
-                var exprᴛ3 = c.mdnsTest;
-                if (exprᴛ3 == mdnsFromSystem) {
+                bool haveMDNSAllow = default;
+                switch (c.mdnsTest) {
+                case var ᴛ when ᴛ == mdnsFromSystem: {
                     var (_, err) = os.Stat(etcMdnsAllowˢ);
-                    if (err != default! && !errors.Is(err, fs.ErrNotExist)) {
+                    if (err != nil && !errors.Is(err, fs.ErrNotExist)) {
                         // Let libc figure out what is going on.
                         return (hostLookupCgo, dnsConf);
                     }
-                    haveMDNSAllow = err == default!;
+                    haveMDNSAllow = err == nil;
+                    break;
                 }
-                else if (exprᴛ3 == mdnsAssumeExists) {
+                case var ᴛ when ᴛ == mdnsAssumeExists: {
                     haveMDNSAllow = true;
+                    break;
                 }
-                else if (exprᴛ3 == mdnsAssumeDoesNotExist) {
+                case var ᴛ when ᴛ == mdnsAssumeDoesNotExist: {
                     haveMDNSAllow = false;
-                }
+                    break;
+                }}
                 if (haveMDNSAllow) {
                     return (hostLookupCgo, dnsConf);
                 }
@@ -520,7 +524,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
     // or where the Go resolver has been forced.
     switch (ᐧ) {
     case {} when filesSource && dnsSource: {
-        if (first == "files"u8){
+        if (first == "files"u8) {
             return (hostLookupFilesDNS, dnsConf);
         } else {
             return (hostLookupDNSFiles, dnsConf);
@@ -553,22 +557,22 @@ internal static ж<godebug.Setting> netdns = godebug.New("netdns"u8);
 //
 // etc.
 internal static (@string dnsMode, nint debugLevel) goDebugNetDNS() {
-    @string dnsMode = default!;
-    nint debugLevel = default!;
+    @string dnsMode = default;
+    nint debugLevel = default;
 
     @string goDebug = netdns.Value();
     void parsePart(@string s) {
         if (s == ""u8) {
             return;
         }
-        if ((rune)'0' <= s[0] && s[0] <= (rune)'9'){
+        if ('0' <= s[0] && s[0] <= '9') {
             (debugLevel, _, _) = dtoi(s);
         } else {
             dnsMode = s;
         }
     }
     {
-        nint i = bytealg.IndexByteString(goDebug, (rune)'+'); if (i != -1) {
+        nint i = bytealg.IndexByteString(goDebug, (byte)'+'); if (i != -1) {
             parsePart(goDebug.slice(0, i));
             parsePart(goDebug.slice(i + 1));
             return (dnsMode, debugLevel);

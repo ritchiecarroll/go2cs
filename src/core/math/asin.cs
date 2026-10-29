@@ -39,7 +39,7 @@ internal static float64 asin(float64 x) {
     }
 
     var temp = Sqrt(1D - x * x);
-    if (x > 0.7D){
+    if (x > 0.7D) {
         temp = /* Pi / 2 */ 1.5707963267948966D - satan(temp / x);
     } else {
         temp = satan(x / temp);

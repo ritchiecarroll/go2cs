@@ -27,8 +27,8 @@ internal static Func<bool> supportCopyFileRange = sync.OnceValue(bool () => {
 internal static UntypedInt maxCopyFileRangeRound => 0x7ffff000;
 
 internal static (bool, error) handleCopyFileRangeErr(error err, int64 copied, int64 written) {
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, Δsyscall.ENOSYS)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, Δsyscall.ENOSYS): {
         // copy_file_range(2) was introduced in Linux 4.5.
         // Go supports Linux >= 3.2, so the system call
         // may not be present.
@@ -37,9 +37,9 @@ internal static (bool, error) handleCopyFileRangeErr(error err, int64 copied, in
         // any data, so we can tell the caller that we
         // couldn't handle the transfer and let them fall
         // back to more generic code.
-        return (false, default!);
+        return (false, default);
     }
-    if (AreEqual(exprᴛ1, Δsyscall.EXDEV) || AreEqual(exprᴛ1, Δsyscall.EINVAL) || AreEqual(exprᴛ1, Δsyscall.EIO) || AreEqual(exprᴛ1, Δsyscall.EOPNOTSUPP) || AreEqual(exprᴛ1, Δsyscall.EPERM)) {
+    case var ᴛ when AreEqual(ᴛ, Δsyscall.EXDEV) || AreEqual(ᴛ, Δsyscall.EINVAL) || AreEqual(ᴛ, Δsyscall.EIO) || AreEqual(ᴛ, Δsyscall.EOPNOTSUPP) || AreEqual(ᴛ, Δsyscall.EPERM): {
         // Prior to Linux 5.3, it was not possible to
         // copy_file_range across file systems. Similarly to
         // the ENOSYS case above, if we see EXDEV, we have
@@ -61,9 +61,9 @@ internal static (bool, error) handleCopyFileRangeErr(error err, int64 copied, in
         // we might see EPERM instead of ENOSYS. See issue
         // #40893. Since EPERM might also be a legitimate error,
         // don't mark copy_file_range(2) as unsupported.
-        return (false, default!);
+        return (false, default);
     }
-    if (AreEqual(exprᴛ1, default!)) {
+    case var ᴛ when AreEqual(ᴛ, default): {
         if (copied == 0) {
             // Prior to Linux 5.19
             // (https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=868f9f2f8e004bfe0d3935b1976f625b2924893b),
@@ -71,13 +71,14 @@ internal static (bool, error) handleCopyFileRangeErr(error err, int64 copied, in
             // success and 0 bytes written. Assume such cases are
             // failure and fallback to a different copy mechanism.
             if (written == 0) {
-                return (false, default!);
+                return (false, default);
             }
 
             // Otherwise src is at EOF, which means
             // we are done.
         }
-    }
+        break;
+    }}
     return (true, err);
 }
 

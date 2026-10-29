@@ -17,10 +17,10 @@ internal static readonly @string accept4ˢ = "accept4"u8;
 // descriptor as nonblocking and close-on-exec.
 internal static (nint, Δsyscall.Sockaddr, @string, error) accept(nint s) {
     var (ns, sa, err) = Accept4Func(s, (nint)((nint)Δsyscall.SOCK_NONBLOCK | (nint)Δsyscall.SOCK_CLOEXEC));
-    if (err != default!) {
-        return (-1, default!, accept4ˢ, err);
+    if (err != nil) {
+        return (-1, default, accept4ˢ, err);
     }
-    return (ns, sa, "", default!);
+    return (ns, sa, "", default);
 }
 
 } // end poll_package

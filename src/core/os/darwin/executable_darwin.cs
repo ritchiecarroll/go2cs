@@ -4,12 +4,12 @@
 namespace go;
 
 using errors = errors_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 
 partial class os_package {
 
 //go:linkname executablePath
-public static @string executablePath { get => go.runtime_package.executablePath; set => go.runtime_package.executablePath = value; }
+public static @string executablePath { get => go.runtime_package.executablePath; set => go.runtime_package.executablePath = value; } // set by ../runtime/os_darwin.go
 
 internal static @string initCwd;
 internal static error initCwdErr;
@@ -23,8 +23,8 @@ internal static (@string, error) executable() {
     if (len(ep) == 0) {
         return (ep, errors.New(cannotFindExecutablePathˢ));
     }
-    if (ep[0] != (rune)'/') {
-        if (initCwdErr != default!) {
+    if (ep[0] != '/') {
+        if (initCwdErr != nil) {
             return (ep, initCwdErr);
         }
         if (len(ep) > 2 && ep[0..2] == "./") {
@@ -33,7 +33,7 @@ internal static (@string, error) executable() {
         }
         ep = initCwd + "/"u8 + ep;
     }
-    return (ep, default!);
+    return (ep, default);
 }
 
 } // end os_package

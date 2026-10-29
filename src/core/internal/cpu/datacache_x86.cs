@@ -15,7 +15,7 @@ partial class cpu_package {
 public static slice<uintptr> DataCacheSizes() {
     var (maxFunctionInformation, ebx0, ecx0, edx0) = cpuid(0, 0);
     if (maxFunctionInformation < 1) {
-        return default!;
+        return default;
     }
 
     switch (ᐧ) {
@@ -27,7 +27,7 @@ public static slice<uintptr> DataCacheSizes() {
     case {} when ebx0 == 0x68747541 && ecx0 == 0x444D4163 && edx0 == 0x69746E65: {
         return getDataCacheSizesAMD();
     }}
-    return default!;
+    return default;
 }
 
 internal static uint32 extractBits(uint32 arg, nint l, nint r) {
@@ -46,11 +46,11 @@ internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
     UntypedInt instructionCache = 2;
     const uint32 unifiedCache = 3;
     if (maxID < 4) {
-        return default!;
+        return default;
     }
 
     // Iterate through CPUID leaf 4 (deterministic cache parameters)
-    slice<uintptr> caches = default!;
+    slice<uintptr> caches = default;
     for (var i = (uint32)0; i < 0xFFFF; i++) {
         var (eax, ebx, ecx, _) = cpuid(4, i);
 
@@ -67,10 +67,10 @@ internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
         // Guaranteed to always start counting from 1.
         var level = (eax >> 5) & 0x7;
 
-        var lineSize = extractBits(ebx, 0, 11) + 1; // Bits 11-0: Line size in bytes - 1
-        var partitions = extractBits(ebx, 12, 21) + 1; // Bits 21-12: Physical line partitions - 1
-        var ways = extractBits(ebx, 22, 31) + 1; // Bits 31-22: Ways of associativity - 1
-        var sets = (uint64)ecx + 1; // Number of sets - 1
+        var lineSize = extractBits(ebx, 0, 11) + 1;               // Bits 11-0: Line size in bytes - 1
+        var partitions = extractBits(ebx, 12, 21) + 1;            // Bits 21-12: Physical line partitions - 1
+        var ways = extractBits(ebx, 22, 31) + 1;                  // Bits 31-22: Ways of associativity - 1
+        var sets = (uint64)ecx + 1;                               // Number of sets - 1
         var size = (uint64)(ways * partitions * lineSize) * sets; // Calculate cache size in bytes
 
         caches = append(cachesᴷ, caches, (uintptr)size);
@@ -91,10 +91,10 @@ internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
 internal static slice<uintptr> getDataCacheSizesAMD() {
     var (maxExtendedFunctionInformation, _, _, _) = cpuid(0x80000000U, 0);
     if (maxExtendedFunctionInformation < 0x80000006U) {
-        return default!;
+        return default;
     }
 
-    slice<uintptr> caches = default!;
+    slice<uintptr> caches = default;
 
     var (_, _, ecx5, _) = cpuid(0x80000005U, 0);
     var (_, _, ecx6, edx6) = cpuid(0x80000006U, 0);

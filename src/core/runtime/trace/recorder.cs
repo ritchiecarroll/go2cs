@@ -6,7 +6,7 @@ namespace go.runtime;
 using fmt = fmt_package;
 using slices = slices_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // added for go linkname usage
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // added for go linkname usage
 
 partial class trace_package {
 
@@ -17,7 +17,7 @@ partial struct recorder {
 }
 
 internal static (nint n, error err) Write(this ж<recorder> Ꮡw, slice<byte> b) {
-    nint n = default!;
+    nint n = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -28,42 +28,42 @@ internal static (nint n, error err) Write(this ж<recorder> Ꮡw, slice<byte> b)
 
         var rʗ1 = r;
         defer(() => {
-            if (Ꮡerr.ValueSlot != default!) {
+            if (Ꮡerr.ValueSlot != nil) {
                 // Propagate errors to the flightrecorder.
-                if ((~rʗ1).err == default!) {
-                    rʗ1.Value.err = Ꮡerr.ValueSlot;
+                if (rʗ1.err == nil) {
+                    rʗ1.err = Ꮡerr.ValueSlot;
                 }
             }
         }, ref ᒐ);
 
         if (!w.headerReceived) {
-            if (len(b) < len((~r).header)) {
-                (n, err) = (0, fmt.Errorf("expected at least %d bytes in the first write"u8, len((~r).header))); goto ᒐdone;
+            if (len(b) < len(r.header)) {
+                (n, err) = (0, fmt.Errorf("expected at least %d bytes in the first write"u8, len(r.header))); goto ᒐdone;
             }
-            r.Value.header = new array<byte>(b[..16], 16);
+            r.header = new array<byte>(b[..16], 16);
             n += 16;
             w.headerReceived = true;
         }
         if (len(b) == n) {
-            (n, err) = (n, default!); goto ᒐdone;
+            (n, err) = (n, default); goto ᒐdone;
         }
         (var ba, var nb, err) = readBatch(b.slice(n)); // Every write from the runtime is guaranteed to be a complete batch.
-        if (err != default!) {
+        if (err != nil) {
             (n, err) = (len(b) - (nint)nb - n, err); goto ᒐdone;
         }
         n += (nint)nb;
 
         // Append the batch to the current generation.
-        if (ba.gen != 0 && (~r).active.gen == 0) {
-            r.Value.active.gen = ba.gen;
+        if (ba.gen != 0 && r.active.gen == 0) {
+            r.active.gen = ba.gen;
         }
-        if (ba.time != 0 && ((~r).active.minTime == 0 || (~r).active.minTime > (~r).freq.mul(ba.time))) {
-            r.Value.active.minTime = (~r).freq.mul(ba.time);
+        if (ba.time != 0 && (r.active.minTime == 0 || r.active.minTime > r.freq.mul(ba.time))) {
+            r.active.minTime = r.freq.mul(ba.time);
         }
-        r.Value.active.size += len(ba.data);
-        r.Value.active.batches = append((~r).active.batches, ba.data);
+        r.active.size += len(ba.data);
+        r.active.batches = append(r.active.batches, ba.data);
 
-        (n, err) = (len(b), default!);
+        (n, err) = (len(b), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -77,7 +77,7 @@ internal static void endGeneration(this ref recorder w) {
     r.of(FlightRecorder.ᏑringMu).Lock();
 
     // Get the current trace clock time.
-    var now = traceTimeNow((~r).freq);
+    var now = traceTimeNow(r.freq);
 
     // Add the current generation to the ring. Make sure we always have at least one
     // complete generation by putting the active generation onto the new list, regardless
@@ -85,24 +85,24 @@ internal static void endGeneration(this ref recorder w) {
     //
     // N.B. Let's completely replace the ring here, so that WriteTo can just make a copy
     // and not worry about aliasing. This creates allocations, but at a very low rate.
-    var newRing = new rawGeneration[]{(~r).active}.slice();
-    nint size = r.Value.active.size;
-    for (nint i = len((~r).ring) - 1; i >= 0; i--) {
+    var newRing = slice<rawGeneration>([r.active]);
+    nint size = r.active.size;
+    for (nint i = len(r.ring) - 1; i >= 0; i--) {
         // Stop adding older generations if the new ring already exceeds the thresholds.
         // This ensures we keep generations that cross a threshold, but not any that lie
         // entirely outside it.
-        if ((uint64)size > (~r).wantSize || now.Sub(newRing[len(newRing) - 1].minTime) > (~r).wantDur) {
+        if ((uint64)size > r.wantSize || now.Sub(newRing[len(newRing) - 1].minTime) > r.wantDur) {
             break;
         }
-        size += (~r).ring[i].size;
-        newRing = append(newRing, (~r).ring[i]);
+        size += r.ring[i].size;
+        newRing = append(newRing, r.ring[i]);
     }
     slices.Reverse<slice<rawGeneration>, rawGeneration>(newRing);
-    r.Value.ring = newRing;
+    r.ring = newRing;
     r.of(FlightRecorder.ᏑringMu).Unlock();
 
     // Start a new active generation.
-    r.Value.active = new rawGeneration(nil);
+    r.active = new rawGeneration();
 }
 
 partial struct rawGeneration {
@@ -124,7 +124,7 @@ partial struct frequency /*num:float64*/;
 
 // mul multiplies an unprocessed timestamp to produce a time in nanoseconds.
 internal static eventTime mul(this frequency f, timestamp t) {
-    return (eventTime)(int64)((float64)(uint64)t * (float64)f);
+    return (eventTime)(int64)((float64)t * (float64)f);
 }
 
 // eventTime is a timestamp in nanoseconds.

@@ -39,7 +39,7 @@ public static slice<byte> CFDataToSlice(CFRef data) {
 // in CFString, or an empty string if it's invalid.
 public static @string CFStringToString(CFRef @ref) {
     var (data, err) = CFStringCreateExternalRepresentation(@ref);
-    if (err != default!) {
+    if (err != nil) {
         return ""u8;
     }
     var b = CFDataToSlice(data);
@@ -116,7 +116,7 @@ public static (int32, error) CFNumberGetValue(CFRef num) {
     if (ret == 0) {
         return (0, errors.New(cfNumberGetValueCallˢ));
     }
-    return (value, default!);
+    return (value, default);
 }
 
 internal static partial void x509_CFNumberGetValue_trampoline();
@@ -216,7 +216,7 @@ public static (CFRef, error) CFStringCreateExternalRepresentation(CFRef strRef) 
     if (ret == 0) {
         return (0, errors.New(stringCanTBeRepresentedˢ));
     }
-    return ((CFRef)ret, default!);
+    return ((CFRef)ret, default);
 }
 
 internal static partial void x509_CFStringCreateExternalRepresentation_trampoline();

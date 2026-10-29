@@ -55,57 +55,56 @@ internal static ж<temporaryError> errServerTemporarilyMisbehaving = Ꮡ(new tem
 internal static ж<godebug.Setting> netedns0 = godebug.New("netedns0"u8);
 
 internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) newRequest(dnsmessageꓸQuestion q, bool ad) {
-    uint16 id = default!;
-    slice<byte> udpReq = default!;
-    slice<byte> tcpReq = default!;
-    error err = default!;
+    uint16 id = default;
+    slice<byte> udpReq = default;
+    slice<byte> tcpReq = default;
+    error err = default;
     q = q.ΔClone();
 
     id = (uint16)randInt();
-    ref var b = ref heap<dnsmessage.Builder>(out var Ꮡb);
-    b = dnsmessage.NewBuilder(new slice<byte>(2, 514), new dnsmessage.Header(ID: id, RecursionDesired: true, AuthenticData: ad));
+    ref var b = ref heap<dnsmessage.Builder>(dnsmessage.NewBuilder(new slice<byte>(2, 514), new dnsmessage.Header(ID: id, RecursionDesired: true, AuthenticData: ad)), out var Ꮡb);
     {
-        var errΔ1 = b.StartQuestions(); if (errΔ1 != default!) {
-            return (0, default!, default!, errΔ1);
+        var errΔ1 = b.StartQuestions(); if (errΔ1 != nil) {
+            return (0, default, default, errΔ1);
         }
     }
     {
-        var errΔ2 = Ꮡb.Question(q); if (errΔ2 != default!) {
-            return (0, default!, default!, errΔ2);
+        var errΔ2 = Ꮡb.Question(q); if (errΔ2 != nil) {
+            return (0, default, default, errΔ2);
         }
     }
 
-    if (netedns0.Value() == "0"u8){
+    if (netedns0.Value() == "0"u8) {
         netedns0.IncNonDefault();
     } else {
         // Accept packets up to maxDNSPacketSize.  RFC 6891.
         {
-            var errΔ3 = b.StartAdditionals(); if (errΔ3 != default!) {
-                return (0, default!, default!, errΔ3);
+            var errΔ3 = b.StartAdditionals(); if (errΔ3 != nil) {
+                return (0, default, default, errΔ3);
             }
         }
         dnsmessage.ResourceHeader rh = new();
         {
-            var errΔ4 = rh.SetEDNS0(maxDNSPacketSize, dnsmessage.RCodeSuccess, false); if (errΔ4 != default!) {
-                return (0, default!, default!, errΔ4);
+            var errΔ4 = rh.SetEDNS0(maxDNSPacketSize, dnsmessage.RCodeSuccess, false); if (errΔ4 != nil) {
+                return (0, default, default, errΔ4);
             }
         }
         {
-            var errΔ5 = Ꮡb.OPTResource(rh, new dnsmessageꓸOPTResource(nil)); if (errΔ5 != default!) {
-                return (0, default!, default!, errΔ5);
+            var errΔ5 = Ꮡb.OPTResource(rh, new dnsmessageꓸOPTResource()); if (errΔ5 != nil) {
+                return (0, default, default, errΔ5);
             }
         }
     }
 
     (tcpReq, err) = b.Finish();
-    if (err != default!) {
-        return (0, default!, default!, err);
+    if (err != nil) {
+        return (0, default, default, err);
     }
     udpReq = tcpReq[2..];
     nint l = len(tcpReq) - 2;
     tcpReq[0] = (byte)(l >> 8);
     tcpReq[1] = (byte)l;
-    return (id, udpReq, tcpReq, default!);
+    return (id, udpReq, tcpReq, default);
 }
 
 internal static bool checkResponse(uint16 reqID, dnsmessageꓸQuestion reqQues, dnsmessage.Header respHdr, dnsmessageꓸQuestion respQues) {
@@ -128,30 +127,30 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsPacketRoundTrip
     query = query.ΔClone();
 
     {
-        var (_, err) = c.Write(b); if (err != default!) {
-            return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), err);
+        var (_, err) = c.Write(b); if (err != nil) {
+            return (new dnsmessage.Parser(), new dnsmessage.Header(), err);
         }
     }
 
     b = new slice<byte>(maxDNSPacketSize);
-    while (ᐧ) {
+    for (;;) {
         var (n, err) = c.Read(b);
-        if (err != default!) {
-            return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), err);
+        if (err != nil) {
+            return (new dnsmessage.Parser(), new dnsmessage.Header(), err);
         }
-        dnsmessage.Parser p = default!;
+        dnsmessage.Parser p = default;
         // Ignore invalid responses as they may be malicious
         // forgery attempts. Instead continue waiting until
         // timeout. See golang.org/issue/13281.
         (var h, err) = p.Start(b.slice(0, n));
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
         (var q, err) = p.Question();
-        if (err != default! || !checkResponse(id, query, h, q)) {
+        if (err != nil || !checkResponse(id, query, h, q)) {
             continue;
         }
-        return (p, h, default!);
+        return (p, h, default);
     }
 }
 
@@ -159,15 +158,15 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
     query = query.ΔClone();
 
     {
-        var (_, errΔ1) = c.Write(b); if (errΔ1 != default!) {
-            return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ1);
+        var (_, errΔ1) = c.Write(b); if (errΔ1 != nil) {
+            return (new dnsmessage.Parser(), new dnsmessage.Header(), errΔ1);
         }
     }
 
     b = new slice<byte>(1280); // 1280 is a reasonable initial size for IP over Ethernet, see RFC 4035
     {
-        var (_, errΔ2) = Δio.ReadFull(new ConnᴠReader(c), b[..2]); if (errΔ2 != default!) {
-            return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ2);
+        var (_, errΔ2) = Δio.ReadFull(new ConnᴠReader(c), b[..2]); if (errΔ2 != nil) {
+            return (new dnsmessage.Parser(), new dnsmessage.Header(), errΔ2);
         }
     }
     nint l = (nint)b[0] << 8 | (nint)b[1];
@@ -175,22 +174,22 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
         b = new slice<byte>(l);
     }
     var (n, err) = Δio.ReadFull(new ConnᴠReader(c), b.slice(0, l));
-    if (err != default!) {
-        return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), err);
+    if (err != nil) {
+        return (new dnsmessage.Parser(), new dnsmessage.Header(), err);
     }
-    dnsmessage.Parser p = default!;
+    dnsmessage.Parser p = default;
     (var h, err) = p.Start(b.slice(0, n));
-    if (err != default!) {
-        return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errCannotUnmarshalDNSMessage);
+    if (err != nil) {
+        return (new dnsmessage.Parser(), new dnsmessage.Header(), errCannotUnmarshalDNSMessage);
     }
     (var q, err) = p.Question();
-    if (err != default!) {
-        return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errCannotUnmarshalDNSMessage);
+    if (err != nil) {
+        return (new dnsmessage.Parser(), new dnsmessage.Header(), errCannotUnmarshalDNSMessage);
     }
     if (!checkResponse(id, query, h, q)) {
-        return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errInvalidDNSResponse);
+        return (new dnsmessage.Parser(), new dnsmessage.Header(), errInvalidDNSResponse);
     }
-    return (p, h, default!);
+    return (p, h, default);
 }
 
 // exchange sends a query on the connection and hopes for a response.
@@ -201,14 +200,14 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ж<R
 
         q.Class = dnsmessage.ClassINET;
         var (id, udpReq, tcpReq, err) = newRequest(q, ad);
-        if (err != default!) {
-            return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errCannotMarshalDNSMessage);
+        if (err != nil) {
+            return (new dnsmessage.Parser(), new dnsmessage.Header(), errCannotMarshalDNSMessage);
         }
-        slice<@string> networks = default!;
-        if (useTCP){
-            networks = new @string[]{"tcp"u8}.slice();
+        slice<@string> networks = default;
+        if (useTCP) {
+            networks = slice<@string>(["tcp"u8]);
         } else {
-            networks = new @string[]{"udp"u8, "tcp"u8}.slice();
+            networks = slice<@string>(["udp"u8, "tcp"u8]);
         }
         foreach (var (_, network) in networks) {
             var (ctxΔ1, cancel) = context.WithDeadline(ctx, time.Now().Add(timeout));
@@ -216,30 +215,30 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ж<R
             defer(() => cancelʗ1(), ref ᒐ);
 
             var (c, errΔ1) = Ꮡr.dial(ctxΔ1, network, server);
-            if (errΔ1 != default!) {
-                return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ1);
+            if (errΔ1 != nil) {
+                return (new dnsmessage.Parser(), new dnsmessage.Header(), errΔ1);
             }
             {
                 var (d, ok) = ctxΔ1.Deadline(); if (ok && !d.IsZero()) {
                     c.SetDeadline(d);
                 }
             }
-            dnsmessage.Parser p = default!;
-            dnsmessage.Header h = default!;
+            dnsmessage.Parser p = default;
+            dnsmessage.Header h = default;
             {
-                var (_, ok) = c._<PacketConn>(ᐧ); if (ok){
+                var (_, ok) = c._<PacketConn>(ᐧ); if (ok) {
                     (p, h, errΔ1) = dnsPacketRoundTrip(c, id, q, udpReq);
                 } else {
                     (p, h, errΔ1) = dnsStreamRoundTrip(c, id, q, tcpReq);
                 }
             }
             c.Close();
-            if (errΔ1 != default!) {
-                return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), mapErr(errΔ1));
+            if (errΔ1 != nil) {
+                return (new dnsmessage.Parser(), new dnsmessage.Header(), mapErr(errΔ1));
             }
             {
                 var errΔ2 = p.SkipQuestion(); if (!AreEqual(errΔ2, dnsmessage.ErrSectionDone)) {
-                    return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errInvalidDNSResponse);
+                    return (new dnsmessage.Parser(), new dnsmessage.Header(), errInvalidDNSResponse);
                 }
             }
             // RFC 5966 indicates that when a client receives a UDP response with
@@ -252,11 +251,11 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ж<R
             if (h.Truncated && network == "udp"u8) {
                 continue;
             }
-            return (p, h, default!);
+            return (p, h, default);
         }
-        return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errNoAnswerFromDNSServer);
+        return (new dnsmessage.Parser(), new dnsmessage.Header(), errNoAnswerFromDNSServer);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -271,7 +270,7 @@ internal static error checkHeader(ж<dnsmessage.Parser> Ꮡp, dnsmessage.Header 
     }
 
     var (_, err) = p.AnswerHeader();
-    if (err != default! && !AreEqual(err, dnsmessage.ErrSectionDone)) {
+    if (err != nil && !AreEqual(err, dnsmessage.ErrSectionDone)) {
         return errCannotUnmarshalDNSMessage;
     }
 
@@ -293,25 +292,25 @@ internal static error checkHeader(ж<dnsmessage.Parser> Ꮡp, dnsmessage.Header 
         return errServerMisbehaving;
     }
 
-    return default!;
+    return default;
 }
 
 internal static error skipToAnswer(ж<dnsmessage.Parser> Ꮡp, dnsmessage.Type qtype) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         var (h, err) = p.AnswerHeader();
         if (AreEqual(err, dnsmessage.ErrSectionDone)) {
             return new notFoundErrorжerror(errNoSuchHost);
         }
-        if (err != default!) {
+        if (err != nil) {
             return errCannotUnmarshalDNSMessage;
         }
         if (h.Type == qtype) {
-            return default!;
+            return default;
         }
         {
-            var errΔ1 = p.SkipAnswer(); if (errΔ1 != default!) {
+            var errΔ1 = p.SkipAnswer(); if (errΔ1 != nil) {
                 return errCannotUnmarshalDNSMessage;
             }
         }
@@ -325,9 +324,9 @@ internal static (dnsmessage.RCode, bool) extractExtendedRCode(dnsmessage.Parser 
     p.SkipAllAnswers();
     p.SkipAllAuthorities();
     var hasAdd = false;
-    while (ᐧ) {
+    for (;;) {
         var (ahdr, err) = p.AdditionalHeader();
-        if (err != default!) {
+        if (err != nil) {
             return (hdr.RCode, hasAdd);
         }
         hasAdd = true;
@@ -335,7 +334,7 @@ internal static (dnsmessage.RCode, bool) extractExtendedRCode(dnsmessage.Parser 
             return (ahdr.ExtendedRCode(hdr.RCode), hasAdd);
         }
         {
-            var errΔ1 = p.SkipAdditional(); if (errΔ1 != default!) {
+            var errΔ1 = p.SkipAdditional(); if (errΔ1 != nil) {
                 return (hdr.RCode, hasAdd);
             }
         }
@@ -347,13 +346,13 @@ internal static (dnsmessage.RCode, bool) extractExtendedRCode(dnsmessage.Parser 
 internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver> Ꮡr, context.Context ctx, ж<dnsConfig> Ꮡcfg, @string name, dnsmessage.Type qtype) {
     ref var cfg = ref Ꮡcfg.DerefOrNull();
 
-    error lastErr = default!;
+    error lastErr = default;
     var serverOffset = Ꮡcfg.serverOffset();
     var sLen = (uint32)len(cfg.servers);
 
     var (n, err) = dnsmessage.NewName(name);
-    if (err != default!) {
-        return (new dnsmessage.Parser(nil), "", new DNSErrorжerror(Ꮡ(new DNSError(Err: errCannotMarshalDNSMessage.Error(), Name: name))));
+    if (err != nil) {
+        return (new dnsmessage.Parser(), "", new DNSErrorжerror(Ꮡ(new DNSError(Err: errCannotMarshalDNSMessage.Error(), Name: name))));
     }
     var q = new dnsmessageꓸQuestion(
         Name: n.ΔClone(),
@@ -367,13 +366,13 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
 
             ref var p = ref heap<dnsmessage.Parser>(out var Ꮡp);
             (p, var h, var errΔ1) = Ꮡr.exchange(ctx, server, q, cfg.timeout, cfg.useTCP, cfg.trustAD);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 var dnsErr = newDNSError(errΔ1, name, server);
                 // Set IsTemporary for socket-level errors. Note that this flag
                 // may also be used to indicate a SERVFAIL response.
                 {
                     var (_, ok) = errΔ1._<ж<OpError>>(ᐧ); if (ok) {
-                        dnsErr.Value.IsTemporary = true;
+                        dnsErr.IsTemporary = true;
                     }
                 }
                 lastErr = new DNSErrorжerror(dnsErr);
@@ -381,7 +380,7 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
             }
 
             {
-                var errΔ2 = checkHeader(Ꮡp, h); if (errΔ2 != default!) {
+                var errΔ2 = checkHeader(Ꮡp, h); if (errΔ2 != nil) {
                     if (AreEqual(errΔ2, errNoSuchHost)) {
                         // The name does not exist, so trying
                         // another server won't help.
@@ -393,7 +392,7 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
             }
 
             {
-                var errΔ3 = skipToAnswer(Ꮡp, qtype); if (errΔ3 != default!) {
+                var errΔ3 = skipToAnswer(Ꮡp, qtype); if (errΔ3 != nil) {
                     if (AreEqual(errΔ3, errNoSuchHost)) {
                         // The name does not exist, so trying
                         // another server won't help.
@@ -404,10 +403,10 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
                 }
             }
 
-            return (p, server, default!);
+            return (p, server, default);
         }
     }
-    return (new dnsmessage.Parser(nil), "", lastErr);
+    return (new dnsmessage.Parser(), "", lastErr);
 }
 
 // A resolverConfig represents a DNS stub resolver configuration.
@@ -416,7 +415,7 @@ partial struct resolverConfig {
     // ch is used as a semaphore that only allows one lookup at a
     // time to recheck resolv.conf.
     internal channel<EmptyStruct> ch; // guards lastChecked and modTime
-    internal time.Time lastChecked;     // last time resolv.conf was checked
+    internal time.Time lastChecked;   // last time resolv.conf was checked
     internal atomic.Pointer<dnsConfig> dnsConfig; // parsed resolv.conf structure used in lookups
 }
 
@@ -456,7 +455,7 @@ internal static void tryUpdate(this ж<resolverConfig> Ꮡconf, @string name) {
 
         Ꮡconf.of(resolverConfig.ᏑinitOnce).Do(Ꮡconf.init);
 
-        if ((~Ꮡconf.of(resolverConfig.ᏑdnsConfig).Load()).noReload) {
+        if (Ꮡconf.of(resolverConfig.ᏑdnsConfig).Load().noReload) {
             return;
         }
 
@@ -473,24 +472,27 @@ internal static void tryUpdate(this ж<resolverConfig> Ꮡconf, @string name) {
         conf.lastChecked = now;
 
         var exprᴛ1 = runtime.GOOS;
-        if (exprᴛ1 == "windows"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "windows"u8: {
             // There's no file on disk, so don't bother checking
             // and failing.
             //
             // The Windows implementation of dnsReadConfig (called
             // below) ignores the name.
+            break;
         }
-        else { /* default: */
-            time.Time mtime = default!;
+        default: {
+            time.Time mtime = default;
             {
-                var (fi, err) = os.Stat(name); if (err == default!) {
+                var (fi, err) = os.Stat(name); if (err == nil) {
                     mtime = fi.ModTime();
                 }
             }
-            if (mtime.Equal((~Ꮡconf.of(resolverConfig.ᏑdnsConfig).Load()).mtime)) {
+            if (mtime.Equal(Ꮡconf.of(resolverConfig.ᏑdnsConfig).Load().mtime)) {
                 return;
             }
-        }
+            break;
+        }}
 
         var dnsConf = dnsReadConfig(name);
         Ꮡconf.of(resolverConfig.ᏑdnsConfig).Store(dnsConf);
@@ -523,19 +525,19 @@ internal static (dnsmessage.Parser, @string, error) lookup(this ж<Resolver> Ꮡ
         // Other lookups might allow broader name syntax
         // (for example Multicast DNS allows UTF-8; see RFC 6762).
         // For consistency with libc resolvers, report no such host.
-        return (new dnsmessage.Parser(nil), "", new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
+        return (new dnsmessage.Parser(), "", new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
     }
 
     if (Ꮡconf == nil) {
         Ꮡconf = getSystemDNSConfig(); conf = ref Ꮡconf.DerefOrNull();
     }
 
-    dnsmessage.Parser p = default!;
-    @string server = default!;
-    error err = default!;
+    dnsmessage.Parser p = default;
+    @string server = default;
+    error err = default;
     foreach (var (_, fqdn) in conf.nameList(name)) {
         (p, server, err) = Ꮡr.tryOneName(ctx, Ꮡconf, fqdn, qtype);
-        if (err == default!) {
+        if (err == nil) {
             break;
         }
         {
@@ -546,18 +548,18 @@ internal static (dnsmessage.Parser, @string, error) lookup(this ж<Resolver> Ꮡ
             }
         }
     }
-    if (err == default!) {
-        return (p, server, default!);
+    if (err == nil) {
+        return (p, server, default);
     }
     {
         var (errΔ1, ok) = err._<ж<DNSError>>(ᐧ); if (ok) {
             // Show original name passed to lookup, not suffixed one.
             // In general we might have tried many suffixes; showing
             // just one is misleading. See also golang.org/issue/6324.
-            errΔ1.Value.Name = name;
+            errΔ1.Name = name;
         }
     }
-    return (new dnsmessage.Parser(nil), "", err);
+    return (new dnsmessage.Parser(), "", err);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -579,20 +581,20 @@ internal static bool avoidDNS(@string name) {
 internal static slice<@string> nameList(this ref dnsConfig conf, @string name) {
     // Check name length (see isDomainName).
     nint l = len(name);
-    var rooted = l > 0 && name[l - 1] == (rune)'.';
+    var rooted = l > 0 && name[l - 1] == '.';
     if (l > 254 || l == 254 && !rooted) {
-        return default!;
+        return default;
     }
 
     // If name is rooted (trailing dot), try only that name.
     if (rooted) {
         if (avoidDNS(name)) {
-            return default!;
+            return default;
         }
-        return new @string[]{name}.slice();
+        return slice<@string>([name]);
     }
 
-    var hasNdots = bytealg.CountString(name, (rune)'.') >= conf.ndots;
+    var hasNdots = bytealg.CountString(name, (byte)'.') >= conf.ndots;
     name += "."u8;
     l++;
 
@@ -625,8 +627,8 @@ partial struct ΔhostLookupOrder /*num:nint*/;
 internal static ΔhostLookupOrder hostLookupCgo => /* iota */ 0;
 internal static ΔhostLookupOrder hostLookupFilesDNS => 1; // files first
 internal static ΔhostLookupOrder hostLookupDNSFiles => 2; // dns first
-internal static ΔhostLookupOrder hostLookupFiles => 3; // only files
-internal static ΔhostLookupOrder hostLookupDNS => 4; // only DNS
+internal static ΔhostLookupOrder hostLookupFiles => 3;    // only files
+internal static ΔhostLookupOrder hostLookupDNS => 4;      // only DNS
 
 internal static map<ΔhostLookupOrder, @string> lookupOrderName = new map<ΔhostLookupOrder, @string>{
     [hostLookupCgo] = "cgo"u8,
@@ -645,9 +647,9 @@ internal static @string String(this ΔhostLookupOrder o) {
     return "hostLookupOrder="u8 + strconv.Itoa((nint)o) + "??"u8;
 }
 
-internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string name, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
-    slice<@string> addrs = default!;
-    error err = default!;
+internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string name, ΔhostLookupOrder order, ж<dnsConfig> conf) {
+    slice<@string> addrs = default;
+    error err = default;
 
     if (order == hostLookupFilesDNS || order == hostLookupFiles) {
         // Use entries from /etc/hosts if they match.
@@ -657,11 +659,11 @@ internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Reso
         }
 
         if (order == hostLookupFiles) {
-            return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
+            return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
         }
     }
-    (var ips, _, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, "ip"u8, name, order, Ꮡconf);
-    if (err != default!) {
+    (var ips, _, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, "ip"u8, name, order, conf);
+    if (err != nil) {
         return (addrs, err);
     }
     addrs = new slice<@string>(0, len(ips));
@@ -676,14 +678,14 @@ internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Reso
 
 // lookup entries from /etc/hosts
 internal static (slice<IPAddr> addrs, @string canonical) goLookupIPFiles(@string name) {
-    slice<IPAddr> addrs = default!;
-    @string canonical = default!;
+    slice<IPAddr> addrs = default;
+    @string canonical = default;
 
     (var addr, canonical) = lookupStaticHost(name);
     foreach (var (_, haddr) in addr) {
         var (haddrΔ1, zone) = splitHostZone(haddr);
         {
-            var ip = ParseIP(haddrΔ1); if (ip != default!) {
+            var ip = ParseIP(haddrΔ1); if (ip != nil) {
                 var addrΔ1 = new IPAddr(IP: ip, Zone: zone);
                 addrs = append(addrs, addrΔ1);
             }
@@ -695,11 +697,11 @@ internal static (slice<IPAddr> addrs, @string canonical) goLookupIPFiles(@string
 
 // goLookupIP is the native Go implementation of LookupIP.
 // The libc versions are in cgo_*.go.
-internal static (slice<IPAddr> addrs, error err) goLookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
-    slice<IPAddr> addrs = default!;
-    error err = default!;
+internal static (slice<IPAddr> addrs, error err) goLookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host, ΔhostLookupOrder order, ж<dnsConfig> conf) {
+    slice<IPAddr> addrs = default;
+    error err = default;
 
-    (addrs, _, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, network, host, order, Ꮡconf);
+    (addrs, _, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, network, host, order, conf);
     return (addrs, err);
 }
 
@@ -710,32 +712,32 @@ internal partial struct goLookupIPCNAMEOrder_result /*dyn*/ {
 }
 
 internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookupIPCNAMEOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
-    slice<IPAddr> addrs = default!;
+    slice<IPAddr> addrs = default;
     dnsmessage.Name cname = new();
     ref var conf = ref Ꮡconf.DerefOrNull();
     var qtypesᴷ = new stackAppend<dnsmessage.Type>();
 
     if (order == hostLookupFilesDNS || order == hostLookupFiles) {
-        @string canonical = default!;
+        @string canonical = default;
         (addrs, canonical) = goLookupIPFiles(name);
 
         if (len(addrs) > 0) {
-            error errΔ1 = default!;
+            error errΔ1 = default;
             (cname, errΔ1) = dnsmessage.NewName(canonical);
-            if (errΔ1 != default!) {
-                return (default!, new dnsmessage.Name(nil), errΔ1);
+            if (errΔ1 != nil) {
+                return (default, new dnsmessage.Name(), errΔ1);
             }
-            return (addrs, cname.ΔClone(), default!);
+            return (addrs, cname.ΔClone(), default);
         }
 
         if (order == hostLookupFiles) {
-            return (default!, new dnsmessage.Name(nil), new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
+            return (default, new dnsmessage.Name(), new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
         }
     }
 
     if (!isDomainName(name)) {
         // See comment in func lookup above about use of errNoSuchHost.
-        return (default!, new dnsmessage.Name(nil), new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
+        return (default, new dnsmessage.Name(), new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
     }
 
     if (Ꮡconf == nil) {
@@ -743,22 +745,22 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     }
 
     var lane = new channel<goLookupIPCNAMEOrder_result>(1);
-    var qtypes = new dnsmessage.Type[]{dnsmessage.TypeA, dnsmessage.TypeAAAA}.slice();
+    var qtypes = slice<dnsmessage.Type>([dnsmessage.TypeA, dnsmessage.TypeAAAA]);
     if (network == "CNAME"u8) {
         qtypes = append(qtypesᴷ, qtypes, dnsmessage.TypeCNAME);
     }
     switch (ipVersion(network)) {
-    case (rune)'4': {
-        qtypes = new dnsmessage.Type[]{dnsmessage.TypeA}.slice();
+    case (byte)'4': {
+        qtypes = slice<dnsmessage.Type>([dnsmessage.TypeA]);
         break;
     }
-    case (rune)'6': {
-        qtypes = new dnsmessage.Type[]{dnsmessage.TypeAAAA}.slice();
+    case (byte)'6': {
+        qtypes = slice<dnsmessage.Type>([dnsmessage.TypeAAAA]);
         break;
     }}
-    Action<@string, dnsmessage.Type> queryFn = default!;
-    Func<@string, dnsmessage.Type, goLookupIPCNAMEOrder_result> responseFn = default!;
-    if (conf.singleRequest){
+    Action<@string, dnsmessage.Type> queryFn = default;
+    Func<@string, dnsmessage.Type, goLookupIPCNAMEOrder_result> responseFn = default;
+    if (conf.singleRequest) {
         queryFn = (@string fqdn, dnsmessage.Type qtype) => {
         };
         responseFn = (@string fqdn, dnsmessage.Type qtype) => {
@@ -769,7 +771,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
                 var (p, server, errΔ2) = Ꮡr.tryOneName(ctx, Ꮡconf, fqdn, qtype);
                 return new goLookupIPCNAMEOrder_result(p, server, errΔ2);
             }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
             finally { ᒐ.Run(); }
         };
     } else {
@@ -787,7 +789,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
         var laneʗ3 = lane;
         responseFn = (@string fqdn, dnsmessage.Type qtype) => ᐸꟷ(laneʗ3);
     }
-    error lastErr = default!;
+    error lastErr = default;
     foreach (var (_, fqdn) in conf.nameList(name)) {
         foreach (var (_, qtype) in qtypes) {
             queryFn(fqdn, qtype);
@@ -795,14 +797,13 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
         var hitStrictError = false;
         foreach (var (_, qtype) in qtypes) {
             var result = responseFn(fqdn, qtype);
-            if (result.error != default!) {
+            if (result.error != nil) {
                 {
-                    var (nerr, ok) = result.error._<ΔError>(ᐧ); if (ok && nerr.Temporary() && Ꮡr.strictErrors()){
+                    var (nerr, ok) = result.error._<ΔError>(ᐧ); if (ok && nerr.Temporary() && Ꮡr.strictErrors()) {
                         // This error will abort the nameList loop.
                         hitStrictError = true;
                         lastErr = result.error;
-                    } else 
-                    if (lastErr == default! || fqdn == name + "."u8) {
+                    } else if (lastErr == nil || fqdn == name + "."u8) {
                         // Prefer error for original name.
                         lastErr = result.error;
                     }
@@ -826,22 +827,22 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
             // for the canonical name.
 
 loop:
-            while (ᐧ) {
+            for (;;) {
                 var (h, errΔ4) = result.p.AnswerHeader();
-                if (errΔ4 != default! && !AreEqual(errΔ4, dnsmessage.ErrSectionDone)) {
+                if (errΔ4 != nil && !AreEqual(errΔ4, dnsmessage.ErrSectionDone)) {
                     lastErr = new DNSErrorжerror(Ꮡ(new DNSError(
                         Err: errCannotUnmarshalDNSMessage.Error(),
                         Name: name,
                         Server: result.server
                     )));
                 }
-                if (errΔ4 != default!) {
+                if (errΔ4 != nil) {
                     break;
                 }
-                var exprᴛ1 = h.Type;
-                if (exprᴛ1 == dnsmessage.TypeA) {
+                switch (h.Type) {
+                case var ᴛ when ᴛ == dnsmessage.TypeA: {
                     var (a, errΔ7) = result.p.AResource();
-                    if (errΔ7 != default!) {
+                    if (errΔ7 != nil) {
                         lastErr = new DNSErrorжerror(Ꮡ(new DNSError(
                             Err: errCannotUnmarshalDNSMessage.Error(),
                             Name: name,
@@ -853,10 +854,11 @@ loop:
                     if (cname.Length == 0 && h.Name.Length != 0) {
                         cname = h.Name.ΔClone();
                     }
+                    break;
                 }
-                else if (exprᴛ1 == dnsmessage.TypeAAAA) {
+                case var ᴛ when ᴛ == dnsmessage.TypeAAAA: {
                     var (aaaa, errΔ8) = result.p.AAAAResource();
-                    if (errΔ8 != default!) {
+                    if (errΔ8 != nil) {
                         lastErr = new DNSErrorжerror(Ꮡ(new DNSError(
                             Err: errCannotUnmarshalDNSMessage.Error(),
                             Name: name,
@@ -868,10 +870,11 @@ loop:
                     if (cname.Length == 0 && h.Name.Length != 0) {
                         cname = h.Name.ΔClone();
                     }
+                    break;
                 }
-                else if (exprᴛ1 == dnsmessage.TypeCNAME) {
+                case var ᴛ when ᴛ == dnsmessage.TypeCNAME: {
                     var (c, errΔ9) = result.p.CNAMEResource();
-                    if (errΔ9 != default!) {
+                    if (errΔ9 != nil) {
                         lastErr = new DNSErrorжerror(Ꮡ(new DNSError(
                             Err: errCannotUnmarshalDNSMessage.Error(),
                             Name: name,
@@ -882,10 +885,11 @@ loop:
                     if (cname.Length == 0 && c.CNAME.Length > 0) {
                         cname = c.CNAME.ΔClone();
                     }
+                    break;
                 }
-                else { /* default: */
+                default: {
                     {
-                        var errΔ10 = result.p.SkipAnswer(); if (errΔ10 != default!) {
+                        var errΔ10 = result.p.SkipAnswer(); if (errΔ10 != nil) {
                             lastErr = new DNSErrorжerror(Ꮡ(new DNSError(
                                 Err: errCannotUnmarshalDNSMessage.Error(),
                                 Name: name,
@@ -895,7 +899,8 @@ loop:
                         }
                     }
                     continue;
-                }
+                    break;
+                }}
 continue_loop:;
             }
 break_loop:;
@@ -904,7 +909,7 @@ break_loop:;
             // If either family hit an error with StrictErrors enabled,
             // discard all addresses. This ensures that network flakiness
             // cannot turn a dualstack hostname IPv4/IPv6-only.
-            addrs = default!;
+            addrs = default;
             break;
         }
         if (len(addrs) > 0 || network == "CNAME"u8 && cname.Length > 0) {
@@ -916,81 +921,81 @@ break_loop:;
             // Show original name passed to lookup, not suffixed one.
             // In general we might have tried many suffixes; showing
             // just one is misleading. See also golang.org/issue/6324.
-            lastErrΔ1.Value.Name = name;
+            lastErrΔ1.Name = name;
         }
     }
     sortByRFC6724(addrs);
     if (len(addrs) == 0 && !(network == "CNAME"u8 && cname.Length > 0)) {
         if (order == hostLookupDNSFiles) {
-            @string canonical = default!;
+            @string canonical = default;
             (addrs, canonical) = goLookupIPFiles(name);
             if (len(addrs) > 0) {
-                error errΔ11 = default!;
+                error errΔ11 = default;
                 (cname, errΔ11) = dnsmessage.NewName(canonical);
-                if (errΔ11 != default!) {
-                    return (default!, new dnsmessage.Name(nil), errΔ11);
+                if (errΔ11 != nil) {
+                    return (default, new dnsmessage.Name(), errΔ11);
                 }
-                return (addrs, cname.ΔClone(), default!);
+                return (addrs, cname.ΔClone(), default);
             }
         }
-        if (lastErr != default!) {
-            return (default!, new dnsmessage.Name(nil), lastErr);
+        if (lastErr != nil) {
+            return (default, new dnsmessage.Name(), lastErr);
         }
     }
-    return (addrs, cname.ΔClone(), default!);
+    return (addrs, cname.ΔClone(), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cnameˢ = "CNAME"u8;
 
 // goLookupCNAME is the native Go (non-cgo) implementation of LookupCNAME.
-internal static (@string, error) goLookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string host, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
-    var (_, cname, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, cnameˢ, host, order, Ꮡconf);
+internal static (@string, error) goLookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string host, ΔhostLookupOrder order, ж<dnsConfig> conf) {
+    var (_, cname, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, cnameˢ, host, order, conf);
     return (cname.String(), err);
 }
 
 // goLookupPTR is the native Go implementation of LookupAddr.
-internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, context.Context ctx, @string addr, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
+internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, context.Context ctx, @string addr, ΔhostLookupOrder order, ж<dnsConfig> conf) {
     var ptrsᴷ = new stackAppend<@string>(moves: true);
 
     if (order == hostLookupFiles || order == hostLookupFilesDNS) {
         var names = lookupStaticAddr(addr);
         if (len(names) > 0) {
-            return (names, default!);
+            return (names, default);
         }
 
         if (order == hostLookupFiles) {
-            return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), addr, ""u8)));
+            return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), addr, ""u8)));
         }
     }
 
     var (arpa, err) = reverseaddr(addr);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     ref var server = ref heap<@string>(out var Ꮡserver);
-    (var p, server, err) = Ꮡr.lookup(ctx, arpa, dnsmessage.TypePTR, Ꮡconf);
-    if (err != default!) {
+    (var p, server, err) = Ꮡr.lookup(ctx, arpa, dnsmessage.TypePTR, conf);
+    if (err != nil) {
         {
-            var (dnsErr, ok) = errors.AsType<ж<DNSError>>(err); if (ok && (~dnsErr).IsNotFound) {
+            var (dnsErr, ok) = errors.AsType<ж<DNSError>>(err); if (ok && dnsErr.IsNotFound) {
                 if (order == hostLookupDNSFiles) {
                     var names = lookupStaticAddr(addr);
                     if (len(names) > 0) {
-                        return (names, default!);
+                        return (names, default);
                     }
                 }
             }
         }
-        return (default!, err);
+        return (default, err);
     }
-    slice<@string> ptrs = default!;
-    while (ᐧ) {
+    slice<@string> ptrs = default;
+    for (;;) {
         var (h, errΔ1) = p.AnswerHeader();
         if (AreEqual(errΔ1, dnsmessage.ErrSectionDone)) {
             break;
         }
-        if (errΔ1 != default!) {
-            return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
+        if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(Ꮡ(new DNSError(
                 Err: errCannotUnmarshalDNSMessage.Error(),
                 Name: addr,
                 Server: server
@@ -998,8 +1003,8 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
         }
         if (h.Type != dnsmessage.TypePTR) {
             var errΔ2 = p.SkipAnswer();
-            if (errΔ2 != default!) {
-                return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
+            if (errΔ2 != nil) {
+                return (default, new DNSErrorжerror(Ꮡ(new DNSError(
                     Err: errCannotUnmarshalDNSMessage.Error(),
                     Name: addr,
                     Server: server
@@ -1008,8 +1013,8 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
             continue;
         }
         (var ptr, errΔ1) = p.PTRResource();
-        if (errΔ1 != default!) {
-            return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
+        if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(Ꮡ(new DNSError(
                 Err: errCannotUnmarshalDNSMessage.Error(),
                 Name: addr,
                 Server: server
@@ -1019,7 +1024,7 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
     }
 
     ptrs = move2heap(ptrsᴷ, ptrs);
-    return (ptrs, default!);
+    return (ptrs, default);
 }
 
 } // end net_package

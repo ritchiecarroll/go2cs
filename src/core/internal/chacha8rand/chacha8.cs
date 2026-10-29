@@ -18,10 +18,10 @@ partial class chacha8rand_package {
 internal static uintptr offsetLOONG64HasLSX => /* unsafe.Offsetof(cpu.Loong64.HasLSX) */ 64;
 internal static uintptr offsetRISCV64HasV => /* unsafe.Offsetof(cpu.RISCV64.HasV) */ 65;
 
-internal static UntypedInt ctrInc => 4; // increment counter by 4 between block calls
+internal static UntypedInt ctrInc => 4;  // increment counter by 4 between block calls
 internal static UntypedInt ctrMax => 16; // reseed when counter reaches 16
-internal static UntypedInt chunk => 32; // each chunk produced by block is 32 uint64s
-internal static UntypedInt reseed => 4; // reseed with 4 words
+internal static UntypedInt chunk => 32;  // each chunk produced by block is 32 uint64s
+internal static UntypedInt reseed => 4;  // reseed with 4 words
 
 // block is the chacha8rand block function.
 internal static partial void block(/*[4]*/ ж<array<uint64>> seed, /*[32]*/ ж<array<uint64>> blocks, uint32 counter);
@@ -119,7 +119,7 @@ public static void Reseed(this ж<State> Ꮡs) {
 
     array<uint64> seed = new(4);
     foreach (var i in range(seed)) {
-        while (ᐧ) {
+        for (;;) {
             var (x, ok) = s.Next();
             if (ok) {
                 seed[i] = x;
@@ -180,7 +180,7 @@ public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
     if (s.c == (uint32)(ctrMax - ctrInc)) {
         s.n = chunk - reseed;
     }
-    return default!;
+    return default;
 }
 
 } // end chacha8rand_package

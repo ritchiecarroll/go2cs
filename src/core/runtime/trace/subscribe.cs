@@ -28,7 +28,7 @@ partial struct traceMultiplexer {
     internal ж<recorder> flightRecorder;
 }
 
-internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> Ꮡr) {
+internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> r) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -42,20 +42,20 @@ internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж
             t.subscribersMu.Unlock();
             return fmt.Errorf("flight recorder already enabled"u8);
         }
-        t.flightRecorder = Ꮡr;
+        t.flightRecorder = r;
         t.subscribersMu.Unlock();
 
         {
-            var err = Ꮡt.addedSubscriber(); if (err != default!) {
+            var err = Ꮡt.addedSubscriber(); if (err != nil) {
                 t.subscribersMu.Lock();
-                t.flightRecorder = default!;
+                t.flightRecorder = default;
                 t.subscribersMu.Unlock();
                 return err;
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
@@ -75,13 +75,13 @@ internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) 
             t.subscribersMu.Unlock();
             return fmt.Errorf("attempt to unsubscribe missing flight recorder"u8);
         }
-        t.flightRecorder = default!;
+        t.flightRecorder = default;
         t.subscribersMu.Unlock();
 
         t.removedSubscriber();
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
@@ -95,7 +95,7 @@ internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, 
         ᒐd1 = true;
 
         t.subscribersMu.Lock();
-        if (t.traceStartWriter != default!) {
+        if (t.traceStartWriter != nil) {
             t.subscribersMu.Unlock();
             return fmt.Errorf("execution tracer already enabled"u8);
         }
@@ -103,16 +103,16 @@ internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, 
         t.subscribersMu.Unlock();
 
         {
-            var err = Ꮡt.addedSubscriber(); if (err != default!) {
+            var err = Ꮡt.addedSubscriber(); if (err != nil) {
                 t.subscribersMu.Lock();
-                t.traceStartWriter = default!;
+                t.traceStartWriter = default;
                 t.subscribersMu.Unlock();
                 return err;
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
@@ -128,11 +128,11 @@ internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt)
         Ꮡt.removingSubscriber();
 
         t.subscribersMu.Lock();
-        if (t.traceStartWriter == default!) {
+        if (t.traceStartWriter == nil) {
             t.subscribersMu.Unlock();
             return;
         }
-        t.traceStartWriter = default!;
+        t.traceStartWriter = default;
         t.subscribersMu.Unlock();
 
         t.removedSubscriber();
@@ -145,18 +145,18 @@ internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt)
 internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    if (Ꮡt.of(traceMultiplexer.Ꮡenabled).Load()){
+    if (Ꮡt.of(traceMultiplexer.Ꮡenabled).Load()) {
         // This is necessary for the trace reader goroutine to pick up on the new subscriber.
         runtime_traceAdvance(false);
     } else {
         {
-            var err = Ꮡt.startLocked(); if (err != default!) {
+            var err = Ꮡt.startLocked(); if (err != nil) {
                 return err;
             }
         }
     }
     t.subscribers++;
-    return default!;
+    return default;
 }
 
 internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) {
@@ -166,7 +166,7 @@ internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) {
         return;
     }
     t.subscribers--;
-    if (t.subscribers == 0){
+    if (t.subscribers == 0) {
         runtime.StopTrace();
         Ꮡt.of(traceMultiplexer.Ꮡenabled).Store(false);
     } else {
@@ -186,7 +186,7 @@ internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     {
-        var err = runtime.StartTrace(); if (err != default!) {
+        var err = runtime.StartTrace(); if (err != nil) {
             return err;
         }
     }
@@ -198,27 +198,25 @@ internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
     // or unsubscriptions must call traceAdvance to ensure the reader
     // goroutine sees an end-of-generation signal.
     t.subscribersMu.Lock();
-    ref var flightRecorder = ref heap<ж<recorder>>(out var ᏑflightRecorder);
-    flightRecorder = t.flightRecorder;
-    ref var traceStartWriter = ref heap<io.Writer>(out var ᏑtraceStartWriter);
-    traceStartWriter = t.traceStartWriter;
+    ref var flightRecorder = ref heap<ж<recorder>>(t.flightRecorder, out var ᏑflightRecorder);
+    ref var traceStartWriter = ref heap<io.Writer>(t.traceStartWriter, out var ᏑtraceStartWriter);
     t.subscribersMu.Unlock();
 
     goǃ(() => {
         var header = runtime.ReadTrace();
-        if (ᏑtraceStartWriter.ValueSlot != default!) {
+        if (ᏑtraceStartWriter.ValueSlot != nil) {
             ᏑtraceStartWriter.ValueSlot.Write(header);
         }
         if (ᏑflightRecorder.ValueSlot != nil) {
             ᏑflightRecorder.ValueSlot.Write(header);
         }
 
-        while (ᐧ) {
+        for (;;) {
             var data = runtime.ReadTrace();
-            if (data == default!) {
+            if (data == nil) {
                 break;
             }
-            if (ᏑtraceStartWriter.ValueSlot != default!) {
+            if (ᏑtraceStartWriter.ValueSlot != nil) {
                 ᏑtraceStartWriter.ValueSlot.Write(data);
             }
             if (ᏑflightRecorder.ValueSlot != nil) {
@@ -232,7 +230,7 @@ internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
                 // Pick up any changes.
                 Ꮡt.Value.subscribersMu.Lock();
                 var frIsNew = ᏑflightRecorder.ValueSlot != Ꮡt.Value.flightRecorder && Ꮡt.Value.flightRecorder != nil;
-                var trIsNew = !AreEqual(ᏑtraceStartWriter.ValueSlot, Ꮡt.Value.traceStartWriter) && Ꮡt.Value.traceStartWriter != default!;
+                var trIsNew = !AreEqual(ᏑtraceStartWriter.ValueSlot, Ꮡt.Value.traceStartWriter) && Ꮡt.Value.traceStartWriter != nil;
                 ᏑflightRecorder.ValueSlot = Ꮡt.Value.flightRecorder;
                 ᏑtraceStartWriter.ValueSlot = Ꮡt.Value.traceStartWriter;
                 Ꮡt.Value.subscribersMu.Unlock();
@@ -247,7 +245,7 @@ internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
         }
     });
     Ꮡt.of(traceMultiplexer.Ꮡenabled).Store(true);
-    return default!;
+    return default;
 }
 
 //go:linkname runtime_readTrace

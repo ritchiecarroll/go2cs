@@ -37,7 +37,7 @@ public static (slice<byte>, error) AppendBinary(this ref PCG p, slice<byte> b) {
     b = append(b, ((@string)"pcg:"u8).ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, p.hi);
     b = byteorder.BEAppendUint64(b, p.lo);
-    return (b, default!);
+    return (b, default);
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
@@ -54,12 +54,12 @@ public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
     }
     p.hi = byteorder.BEUint64(data[4..]);
     p.lo = byteorder.BEUint64(data[(int)(4 + 8)..]);
-    return default!;
+    return default;
 }
 
 internal static (uint64 hi, uint64 lo) next(this ref PCG p) {
-    uint64 hi = default!;
-    uint64 lo = default!;
+    uint64 hi = default;
+    uint64 lo = default;
 
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L161
     //

@@ -24,7 +24,7 @@ internal static array<uint8> _attr_index = new uint8[]{0, 8, 18, 32, 41, 48, 58,
 
 internal static @string String(this attr i) {
     if (i >= ((attr)(uint8)(len(_attr_index) - 1))) {
-        return "attr("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "attr("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _attr_name.slice(_attr_index[i], _attr_index[i + 1]);
 }

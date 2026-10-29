@@ -53,55 +53,62 @@ internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp
         if (!r.Time.IsZero()) {
             buf.WriteString(timeˢ);
             h.appendTime(buf, r.Time);
-            buf.WriteByte((rune)' ');
+            buf.WriteByte((byte)' ');
         }
         buf.WriteString(levelˢ);
-        buf.ValueSlot = strconv.AppendInt(buf.ValueSlot, (int64)(nint)r.Level, 10);
-        buf.WriteByte((rune)' ');
+        buf.ValueSlot = strconv.AppendInt(buf.ValueSlot, (int64)r.Level, 10);
+        buf.WriteByte((byte)' ');
         buf.WriteString(msgˢ);
         buf.WriteString(r.Message);
         var bufʗ2 = buf;
         r.Attrs((slog.Attr a) => {
-            bufʗ2.WriteByte((rune)' ');
+            bufʗ2.WriteByte((byte)' ');
             bufʗ2.WriteString(a.Key);
-            bufʗ2.WriteByte((rune)'=');
+            bufʗ2.WriteByte((byte)'=');
             Ꮡh.Value.appendValue(bufʗ2, a.Value);
             return true;
         });
-        buf.WriteByte((rune)'\n');
+        buf.WriteByte((byte)'\n');
         var (_, err) = h.w.Write(buf.ValueSlot);
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == slog.KindString) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == slog.KindString: {
         buf.WriteString(v.String());
+        break;
     }
-    else if (exprᴛ1 == slog.KindInt64) {
+    case var ᴛ when ᴛ == slog.KindInt64: {
         buf = strconv.AppendInt(buf, v.Int64(), 10);
+        break;
     }
-    else if (exprᴛ1 == slog.KindUint64) {
+    case var ᴛ when ᴛ == slog.KindUint64: {
         buf = strconv.AppendUint(buf, v.Uint64(), 10);
+        break;
     }
-    else if (exprᴛ1 == slog.KindFloat64) {
-        buf = strconv.AppendFloat(buf, v.Float64(), (rune)'g', -1, 64);
+    case var ᴛ when ᴛ == slog.KindFloat64: {
+        buf = strconv.AppendFloat(buf, v.Float64(), (byte)'g', -1, 64);
+        break;
     }
-    else if (exprᴛ1 == slog.KindBool) {
+    case var ᴛ when ᴛ == slog.KindBool: {
         buf = strconv.AppendBool(buf, v.Bool());
+        break;
     }
-    else if (exprᴛ1 == slog.KindDuration) {
+    case var ᴛ when ᴛ == slog.KindDuration: {
         buf = strconv.AppendInt(buf, v.Duration().Nanoseconds(), 10);
+        break;
     }
-    else if (exprᴛ1 == slog.KindTime) {
+    case var ᴛ when ᴛ == slog.KindTime: {
         h.appendTime(Ꮡbuf, v.Time());
+        break;
     }
-    else if (exprᴛ1 == slog.KindAny) {
+    case var ᴛ when ᴛ == slog.KindAny: {
         var a = v.Any();
         switch (a.type()) {
         case {} ΔaΔ1 when ΔaΔ1._<error>(out var aΔ1): {
@@ -113,10 +120,12 @@ internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> �
             fmt.Fprint(new buffer_BufferжWriter(Ꮡbuf), aΔ1);
             break;
         }}
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
-    }
+        break;
+    }}
 }
 
 internal static void appendTime(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {
@@ -147,7 +156,7 @@ partial struct asyncHandler {
 }
 
 internal static ж<asyncHandler> newAsyncHandler() {
-    return Ꮡ(new asyncHandler(nil));
+    return Ꮡ(new asyncHandler());
 }
 
 internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1, slogꓸLevel _Δp2) {
@@ -159,7 +168,7 @@ internal static error Handle(this ref asyncHandler h, context.Context _, slog.Re
 
     h.ringBuffer[h.next] = r.Clone();
     h.next = (h.next + 1) % len(h.ringBuffer);
-    return default!;
+    return default;
 }
 
 internal static slogꓸHandler WithAttrs(this ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) {

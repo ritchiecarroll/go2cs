@@ -38,8 +38,8 @@ partial struct chunkedReader {
     internal uint64 n; // unread bytes in chunk
     internal error err;
     internal array<byte> buf = new(2);
-    internal bool checkEnd;  // whether need to check for \r\n chunk footer
-    internal int64 excess; // "excessive" chunk overhead, for malicious sender detection
+    internal bool checkEnd; // whether need to check for \r\n chunk footer
+    internal int64 excess;  // "excessive" chunk overhead, for malicious sender detection
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -47,19 +47,19 @@ internal static readonly @string chunkedEncodingContainsˢ = "chunked encoding c
 
 internal static void beginChunk(this ref chunkedReader cr) {
     // chunk-size CRLF
-    slice<byte> line = default!;
+    slice<byte> line = default;
     (line, cr.err) = readChunkLine(cr.r);
-    if (cr.err != default!) {
+    if (cr.err != nil) {
         return;
     }
     cr.excess += (int64)len(line) + 2; // header, plus \r\n after the chunk data
     line = trimTrailingWhitespace(line);
     (line, cr.err) = removeChunkExtension(line);
-    if (cr.err != default!) {
+    if (cr.err != nil) {
         return;
     }
     (cr.n, cr.err) = parseHexUint(line);
-    if (cr.err != default!) {
+    if (cr.err != nil) {
         return;
     }
     // A sender who sends one byte per chunk will send 5 bytes of overhead
@@ -91,7 +91,7 @@ internal static bool chunkHeaderAvailable(this ref chunkedReader cr) {
     nint n = cr.r.Buffered();
     if (n > 0) {
         var (peek, _) = cr.r.Peek(n);
-        return bytes.IndexByte(peek, (rune)'\n') >= 0;
+        return bytes.IndexByte(peek, (byte)'\n') >= 0;
     }
     return false;
 }
@@ -100,9 +100,9 @@ internal static bool chunkHeaderAvailable(this ref chunkedReader cr) {
 internal static readonly @string malformedChunkedEncodingˢ = "malformed chunked encoding"u8;
 
 internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8> b) {
-    nint n = default!;
+    nint n = default;
 
-    while (cr.err == default!) {
+    while (cr.err == nil) {
         if (cr.checkEnd) {
             if (n > 0 && cr.r.Buffered() < 2) {
                 // We have some data. Return early (per the io.Reader
@@ -111,7 +111,7 @@ internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8>
                 break;
             }
             {
-                (_, cr.err) = io.ReadFull(new bufio_ReaderжReader(cr.r), cr.buf[..2]); if (cr.err == default!){
+                (_, cr.err) = io.ReadFull(new bufio_ReaderжReader(cr.r), cr.buf[..2]); if (cr.err == nil) {
                     if (((sstring)(cr.buf[..])) != "\r\n"u8) {
                         cr.err = errors.New(malformedChunkedEncodingˢ);
                         break;
@@ -141,17 +141,16 @@ internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8>
         if ((uint64)len(rbuf) > cr.n) {
             rbuf = rbuf.slice(0, (nint)(cr.n));
         }
-        nint n0 = default!;
+        nint n0 = default;
         (n0, cr.err) = cr.r.Read(rbuf);
         n += n0;
         b = b.slice(n0);
         cr.n -= (uint64)n0;
         // If we're at the end of a chunk, read the next two
         // bytes to verify they are "\r\n".
-        if (cr.n == 0 && cr.err == default!){
+        if (cr.n == 0 && cr.err == nil) {
             cr.checkEnd = true;
-        } else 
-        if (AreEqual(cr.err, io.EOF)) {
+        } else if (AreEqual(cr.err, io.EOF)) {
             cr.err = io.ErrUnexpectedEOF;
         }
     }
@@ -169,17 +168,16 @@ internal static readonly @string invalidCrInChunkedLineˢ = "invalid CR in chunk
 internal static (slice<byte>, error) readChunkLine(ж<bufio.Reader> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var (p, err) = b.ReadSlice((rune)'\n');
-    if (err != default!) {
+    var (p, err) = b.ReadSlice((byte)'\n');
+    if (err != nil) {
         // We always know when EOF is coming.
         // If the caller asked for a line, there should be a line.
-        if (AreEqual(err, io.EOF)){
+        if (AreEqual(err, io.EOF)) {
             err = io.ErrUnexpectedEOF;
-        } else 
-        if (AreEqual(err, bufio.ErrBufferFull)) {
+        } else if (AreEqual(err, bufio.ErrBufferFull)) {
             err = ErrLineTooLong;
         }
-        return (default!, err);
+        return (default, err);
     }
 
     // RFC 9112 permits parsers to accept a bare \n as a line ending in headers,
@@ -188,19 +186,18 @@ internal static (slice<byte>, error) readChunkLine(ж<bufio.Reader> Ꮡb) {
     //
     // Verify that the line ends in a CRLF, and that no CRs appear before the end.
     {
-        nint idx = bytes.IndexByte(p, (rune)'\r'); if (idx == -1){
-            return (default!, errors.New(chunkedLineEndsWithBareˢ));
-        } else 
-        if (idx != len(p) - 2) {
-            return (default!, errors.New(invalidCrInChunkedLineˢ));
+        nint idx = bytes.IndexByte(p, (byte)'\r'); if (idx == -1) {
+            return (default, errors.New(chunkedLineEndsWithBareˢ));
+        } else if (idx != len(p) - 2) {
+            return (default, errors.New(invalidCrInChunkedLineˢ));
         }
     }
     p = p.slice(0, len(p) - 2); // trim CRLF
 
     if (len(p) >= maxLineLength) {
-        return (default!, ErrLineTooLong);
+        return (default, ErrLineTooLong);
     }
-    return (p, default!);
+    return (p, default);
 }
 
 internal static slice<byte> trimTrailingWhitespace(slice<byte> b) {
@@ -211,7 +208,7 @@ internal static slice<byte> trimTrailingWhitespace(slice<byte> b) {
 }
 
 internal static bool isOWS(byte b) {
-    return b == (rune)' ' || b == (rune)'\t';
+    return b == ' ' || b == '\t';
 }
 
 internal static slice<byte> semi = slice<byte>(";"u8);
@@ -228,7 +225,7 @@ internal static (slice<byte>, error) removeChunkExtension(slice<byte> p) {
     // TODO: care about exact syntax of chunk extensions? We're
     // ignoring and stripping them anyway. For now just never
     // return an error.
-    return (p, default!);
+    return (p, default);
 }
 
 // NewChunkedWriter returns a new chunkedWriter that translates writes into HTTP
@@ -256,21 +253,21 @@ partial struct chunkedWriter {
 // NOTE: Note that the corresponding chunk-writing procedure in Conn.Write has
 // a bug since it does not check for success of [io.WriteString]
 internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte> data) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     // Don't send 0-length data. It looks like EOF for chunked encoding.
     if (len(data) == 0) {
-        return (0, default!);
+        return (0, default);
     }
 
     {
-        (_, err) = fmt.Fprintf(cw.Wire, "%x\r\n"u8, len(data)); if (err != default!) {
+        (_, err) = fmt.Fprintf(cw.Wire, "%x\r\n"u8, len(data)); if (err != nil) {
             return (0, err);
         }
     }
     {
-        (n, err) = cw.Wire.Write(data); if (err != default!) {
+        (n, err) = cw.Wire.Write(data); if (err != nil) {
             return (n, err);
         }
     }
@@ -279,7 +276,7 @@ internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte>
         return (n, err);
     }
     {
-        (_, err) = io.WriteString(cw.Wire, "\r\n"u8); if (err != default!) {
+        (_, err) = io.WriteString(cw.Wire, "\r\n"u8); if (err != nil) {
             return (n, err);
         }
     }
@@ -311,8 +308,8 @@ internal static readonly @string invalidByteInChunkLengthˢ = "invalid byte in c
 internal static readonly @string httpChunkLengthTooLargeˢ = "http chunk length too large"u8;
 
 internal static (uint64 n, error err) parseHexUint(slice<byte> v) {
-    uint64 n = default!;
-    error err = default!;
+    uint64 n = default;
+    error err = default;
 
     if (len(v) == 0) {
         return (0, errors.New(emptyHexNumberForChunkˢ));
@@ -321,16 +318,16 @@ internal static (uint64 n, error err) parseHexUint(slice<byte> v) {
         var b = vᴛ1;
 
         switch (ᐧ) {
-        case {} when (rune)'0' <= b && b <= (rune)'9': {
-            b = (byte)(b - (rune)'0');
+        case {} when (byte)'0' <= b && b <= (byte)'9': {
+            b = (byte)(b - '0');
             break;
         }
-        case {} when (rune)'a' <= b && b <= (rune)'f': {
-            b = (byte)(b - (rune)'a' + 10);
+        case {} when (byte)'a' <= b && b <= (byte)'f': {
+            b = (byte)(b - 'a' + 10);
             break;
         }
-        case {} when (rune)'A' <= b && b <= (rune)'F': {
-            b = (byte)(b - (rune)'A' + 10);
+        case {} when (byte)'A' <= b && b <= (byte)'F': {
+            b = (byte)(b - 'A' + 10);
             break;
         }
         default: {
@@ -339,7 +336,7 @@ internal static (uint64 n, error err) parseHexUint(slice<byte> v) {
         if (i == 16) {
             return (0, errors.New(httpChunkLengthTooLargeˢ));
         }
-        n <<= (int)(4);
+        n <<= 4;
         n |= (uint64)((uint64)b);
     }
     return (n, err);

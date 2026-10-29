@@ -107,7 +107,7 @@ partial struct Client {
 }
 
 // DefaultClient is the default [Client] and is used by [Get], [Head], and [Post].
-public static ж<Client> DefaultClient = Ꮡ(new Client(nil));
+public static ж<Client> DefaultClient = Ꮡ(new Client());
 
 // RoundTripper is an interface representing the ability to execute a
 // single HTTP transaction, obtaining the [Response] for a given [Request].
@@ -175,44 +175,44 @@ internal static @string refererForURL(ж<url.URL> ᏑlastReq, ref url.URL newReq
 
 // didTimeout is non-nil only if err != nil.
 internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this ref Client c, ж<Request> Ꮡreq, time.Time deadline) {
-    ж<Response> resp = default!;
-    Func<bool> didTimeout = default!;
-    error err = default!;
+    ж<Response> resp = default;
+    Func<bool> didTimeout = default;
+    error err = default;
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var cookieURL = req.URL;
     if (req.Host != ""u8) {
         cookieURL = cloneURL(cookieURL);
-        cookieURL.Value.Host = req.Host;
+        cookieURL.Host = req.Host;
     }
-    if (c.Jar != default!) {
+    if (c.Jar != nil) {
         foreach (var (_, cookie) in c.Jar.Cookies(cookieURL)) {
             req.AddCookie(cookie);
         }
     }
     (resp, didTimeout, err) = send(Ꮡreq, c.transport(), deadline);
-    if (err != default!) {
-        return (default!, didTimeout, err);
+    if (err != nil) {
+        return (default, didTimeout, err);
     }
-    if (c.Jar != default!) {
+    if (c.Jar != nil) {
         {
             var rc = resp.Cookies(); if (builtin.len(rc) > 0) {
                 c.Jar.SetCookies(cookieURL, rc);
             }
         }
     }
-    return (resp, default!, default!);
+    return (resp, default, default);
 }
 
 internal static time.Time deadline(this ref Client c) {
     if (c.Timeout > 0) {
         return time.Now().Add(c.Timeout);
     }
-    return new time.Time(nil);
+    return new time.Time();
 }
 
 internal static RoundTripper transport(this ref Client c) {
-    if (c.Transport != default!) {
+    if (c.Transport != nil) {
         return c.Transport;
     }
     return DefaultTransport;
@@ -230,27 +230,26 @@ internal static readonly @string authorizationˢ = "Authorization"u8;
 // send issues an HTTP request.
 // Caller should close resp.Body when done reading from it.
 internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Request> Ꮡireq, RoundTripper rt, time.Time deadline) {
-    ж<Response> resp = default!;
-    Func<bool> didTimeout = default!;
-    error err = default!;
+    ж<Response> resp = default;
+    Func<bool> didTimeout = default;
+    error err = default;
     ref var ireq = ref Ꮡireq.DerefOrNull();
 
-    ref var req = ref heap<ж<Request>>(out var Ꮡreq);
-    req = Ꮡireq; // req is either the original request, or a modified fork
+    ref var req = ref heap<ж<Request>>(Ꮡireq, out var Ꮡreq); // req is either the original request, or a modified fork
 
-    if (rt == default!) {
+    if (rt == nil) {
         req.closeBody();
-        return (default!, alwaysFalse, errors.New(httpNoClientTransportOrˢ));
+        return (default, alwaysFalse, errors.New(httpNoClientTransportOrˢ));
     }
 
-    if ((~req).URL == nil) {
+    if (req.URL == nil) {
         req.closeBody();
-        return (default!, alwaysFalse, errors.New(httpNilRequestUrlˢ));
+        return (default, alwaysFalse, errors.New(httpNilRequestUrlˢ));
     }
 
-    if ((~req).RequestURI != ""u8) {
+    if (req.RequestURI != ""u8) {
         req.closeBody();
-        return (default!, alwaysFalse, errors.New(httpRequestRequestURICanˢ));
+        return (default, alwaysFalse, errors.New(httpRequestRequestURICanˢ));
     }
 
     // forkReq forks req into a shallow clone of ireq the first
@@ -265,18 +264,18 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
     // Most the callers of send (Get, Post, et al) don't need
     // Headers, leaving it uninitialized. We guarantee to the
     // Transport that this has been initialized, though.
-    if ((~req).Header == default!) {
+    if (req.Header == nil) {
         forkReq();
-        req.Value.Header = new ΔHeader(0);
+        req.Header = new ΔHeader(0);
     }
 
     {
-        var u = req.Value.URL.Value.User; if (u != nil && (~req).Header.Get(authorizationˢ) == ""u8) {
+        var u = req.URL.User; if (u != nil && req.Header.Get(authorizationˢ) == ""u8) {
             @string username = u.Username();
             var (password, _) = u.Password();
             forkReq();
-            req.Value.Header = cloneOrMakeHeader(ireq.Header);
-            (~req).Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
+            req.Header = cloneOrMakeHeader(ireq.Header);
+            req.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
         }
     }
 
@@ -286,7 +285,7 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
     (var stopTimer, didTimeout) = setRequestCancel(req, rt, deadline);
 
     (resp, err) = rt.RoundTrip(req);
-    if (err != default!) {
+    if (err != nil) {
         stopTimer();
         if (resp != nil) {
             log.Printf("RoundTripper returned a response & error; ignoring response"u8);
@@ -301,12 +300,12 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
                 }
             }
         }
-        return (default!, didTimeout, err);
+        return (default, didTimeout, err);
     }
     if (resp == nil) {
-        return (default!, didTimeout, fmt.Errorf("http: RoundTripper implementation (%T) returned a nil *Response with a nil error"u8, rt));
+        return (default, didTimeout, fmt.Errorf("http: RoundTripper implementation (%T) returned a nil *Response with a nil error"u8, rt));
     }
-    if ((~resp).Body == default!) {
+    if (resp.Body == nil) {
         // The documentation on the Body field says “The http Client and Transport
         // guarantee that Body is always non-nil, even on responses without a body
         // or responses with a zero-length body.” Unfortunately, we didn't document
@@ -317,19 +316,19 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
         //
         // If the ContentLength allows the Body to be empty, fill in an empty one
         // here to ensure that it is non-nil.
-        if ((~resp).ContentLength > 0 && (~req).Method != "HEAD"u8) {
-            return (default!, didTimeout, fmt.Errorf("http: RoundTripper implementation (%T) returned a *Response with content length %d but a nil Body"u8, rt, (~resp).ContentLength));
+        if (resp.ContentLength > 0 && req.Method != "HEAD"u8) {
+            return (default, didTimeout, fmt.Errorf("http: RoundTripper implementation (%T) returned a *Response with content length %d but a nil Body"u8, rt, resp.ContentLength));
         }
-        resp.Value.Body = io.NopCloser(new strings_ReaderжReader(strings.NewReader(""u8)));
+        resp.Body = io.NopCloser(new strings_ReaderжReader(strings.NewReader(""u8)));
     }
     if (!deadline.IsZero()) {
-        resp.Value.Body = new cancelTimerBodyжReadCloser(Ꮡ(new cancelTimerBody(
+        resp.Body = new cancelTimerBodyжReadCloser(Ꮡ(new cancelTimerBody(
             stop: stopTimer,
-            rc: (~resp).Body,
+            rc: resp.Body,
             reqDidTimeout: didTimeout
         )));
     }
-    return (resp, default!, default!);
+    return (resp, default, default);
 }
 
 // timeBeforeContextDeadline reports whether the non-zero Time t is
@@ -348,12 +347,12 @@ internal static bool timeBeforeContextDeadline(time.Time t, context.Context ctx)
 // optional semantics (notably contexts). The Request is used
 // to check whether this particular request is using an alternate protocol,
 // in which case we need to check the RoundTripper for that protocol.
-internal static bool knownRoundTripperImpl(RoundTripper rt, ж<Request> Ꮡreq) {
+internal static bool knownRoundTripperImpl(RoundTripper rt, ж<Request> req) {
     switch (rt.type()) {
     case ж<Transport> t: {
         {
-            var altRT = t.alternateRoundTripper(Ꮡreq); if (altRT != default!) {
-                return knownRoundTripperImpl(altRT, Ꮡreq);
+            var altRT = t.alternateRoundTripper(req); if (altRT != nil) {
+                return knownRoundTripperImpl(altRT, req);
             }
         }
         return true;
@@ -391,7 +390,7 @@ internal partial interface setRequestCancel_canceler /*dyn*/ {
 // Third was Request.Context.
 // This function populates the second and third, and uses the first if it really needs to.
 internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCancel(ж<Request> Ꮡreq, RoundTripper rt, time.Time deadline) {
-    Action stopTimer = default!;
+    Action stopTimer = default;
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (deadline.IsZero()) {
@@ -400,27 +399,27 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     var knownTransport = knownRoundTripperImpl(rt, Ꮡreq);
     var oldCtx = req.Context();
 
-    if (req.Cancel == default! && knownTransport) {
+    if (req.Cancel == nil && knownTransport) {
         // If they already had a Request.Context that's
         // expiring sooner, do nothing:
         if (!timeBeforeContextDeadline(deadline, oldCtx)) {
             return (nop, alwaysFalse);
         }
 
-        Action cancelCtxΔ1 = default!;
+        Action cancelCtxΔ1 = default;
         (req.ctx, cancelCtxΔ1) = context_package.WithDeadline(oldCtx, deadline);
         var deadlineʗ1 = deadline;
         return (cancelCtxΔ1, () => time.Now().After(deadlineʗ1));
     }
     var initialReqCancel = req.Cancel; // the user's original Request.Cancel, if any
 
-    Action cancelCtx = default!;
+    Action cancelCtx = default;
     if (timeBeforeContextDeadline(deadline, oldCtx)) {
         (req.ctx, cancelCtx) = context_package.WithDeadline(oldCtx, deadline);
     }
 
     var cancel = new channel<EmptyStruct>(0);
-    req.Cancel = cancel.WithDirection(GoChanDir.Recv);
+    req.Cancel = cancel.AsRecvOnly();
 
     var cancelʗ1 = cancel;
     void doCancel() {
@@ -438,7 +437,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     var stopTimerChʗ1 = stopTimerCh;
     stopTimer = sync.OnceFunc(() => {
         builtin.close(stopTimerChʗ1);
-        if (cancelCtxʗ1 != default!) {
+        if (cancelCtxʗ1 != nil) {
             cancelCtxʗ1();
         }
     });
@@ -452,7 +451,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     var timerʗ1 = timer;
     goǃ(() => {
         var selᴛ1 = initialReqCancelʗ1;
-        var selᴛ2 = (~timerʗ1).C;
+        var selᴛ2 = timerʗ1.C;
         var selᴛ3 = stopTimerChʗ2;
         switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out _): {
@@ -540,11 +539,11 @@ internal static readonly @string getˢ = "GET"u8;
 // To make a request with a specified context.Context, use [NewRequestWithContext]
 // and Client.Do.
 public static (ж<Response> resp, error err) Get(this ж<Client> Ꮡc, @string url) {
-    error err = default!;
+    error err = default;
 
-    (var req, err) = NewRequest(getˢ, url, default!);
-    if (err != default!) {
-        return (default!, err);
+    (var req, err) = NewRequest(getˢ, url, default);
+    if (err != nil) {
+        return (default, err);
     }
     return Ꮡc.Do(req);
 }
@@ -561,20 +560,20 @@ public static error ErrUseLastResponse = errors.New("net/http: use last response
 
 // checkRedirect calls either the user's configured CheckRedirect
 // function, or the default.
-internal static error checkRedirect(this ref Client c, ж<Request> Ꮡreq, slice<ж<Request>> via) {
+internal static error checkRedirect(this ref Client c, ж<Request> req, slice<ж<Request>> via) {
     var fn = c.CheckRedirect;
-    if (fn == default!) {
+    if (fn == nil) {
         fn = defaultCheckRedirect;
     }
-    return fn(Ꮡreq, via);
+    return fn(req, via);
 }
 
 // redirectBehavior describes what should happen when the
 // client encounters a 3xx status code from the server.
 internal static (@string redirectMethod, bool shouldRedirect, bool includeBody) redirectBehavior(@string reqMethod, ref Response resp, ж<Request> Ꮡireq) {
-    @string redirectMethod = default!;
-    bool shouldRedirect = default!;
-    bool includeBody = default!;
+    @string redirectMethod = default;
+    bool shouldRedirect = default;
+    bool includeBody = default;
     ref var ireq = ref Ꮡireq.DerefOrNull();
 
     switch (resp.StatusCode) {
@@ -597,7 +596,7 @@ internal static (@string redirectMethod, bool shouldRedirect, bool includeBody) 
         shouldRedirect = true;
         includeBody = true;
 
-        if (ireq.GetBody == default! && ireq.outgoingLength() != 0) {
+        if (ireq.GetBody == nil && ireq.outgoingLength() != 0) {
             // We had a request body, and 307/308 require
             // re-sending it, but GetBody is not defined. So just
             // return this response to the user instead of an
@@ -663,8 +662,8 @@ internal static @string urlErrorOp(@string method) {
 //
 // Any returned error will be of type [*url.Error]. The url.Error
 // value's Timeout method will report true if the request timed out.
-public static (ж<Response>, error) Do(this ж<Client> Ꮡc, ж<Request> Ꮡreq) {
-    return Ꮡc.@do(Ꮡreq);
+public static (ж<Response>, error) Do(this ж<Client> Ꮡc, ж<Request> req) {
+    return Ꮡc.@do(req);
 }
 
 internal static Action<ж<Response>, error> testHookClientDoResult;
@@ -674,21 +673,21 @@ internal static readonly @string locationˢ = "Location"u8;
 internal static readonly @string refererˢ = "Referer"u8;
 
 internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж<Request> Ꮡreq) {
-    ж<Response> retres = default!;
-    error reterr = default!;
+    ж<Response> retres = default;
+    error reterr = default;
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
         ref var req = ref Ꮡreq.DerefOrNull();
 
-        if (testHookClientDoResult != default!) {
+        if (testHookClientDoResult != nil) {
             defer(() => {
                 testHookClientDoResult(retres, reterr);
             }, ref ᒐ);
         }
         if (req.URL == nil) {
             req.closeBody();
-            (retres, reterr) = (default!, new url.ΔErrorжerror(Ꮡ(new urlꓸError(
+            (retres, reterr) = (default, new url.ΔErrorжerror(Ꮡ(new urlꓸError(
                 Op: urlErrorOp(req.Method),
                 Err: errors.New(httpNilRequestUrlˢ)
             )))); goto ᒐdone;
@@ -711,36 +710,35 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                 Ꮡreq.Value.closeBody();
             }
             ref var urlStr = ref heap(new @string(), out var ᏑurlStr);
-            if (Ꮡresp.ValueSlot != nil && (~Ꮡresp.ValueSlot).Request != nil){
-                urlStr = stripPassword((~(~Ꮡresp.ValueSlot).Request).URL);
+            if (Ꮡresp.ValueSlot != nil && Ꮡresp.ValueSlot.Request != nil) {
+                urlStr = stripPassword(Ꮡresp.ValueSlot.Request.URL);
             } else {
                 urlStr = stripPassword(Ꮡreq.Value.URL);
             }
             return new url.ΔErrorжerror(Ꮡ(new urlꓸError(
-                Op: urlErrorOp((~Ꮡreqs.ValueSlot[0]).Method),
+                Op: urlErrorOp(Ꮡreqs.ValueSlot[0].Method),
                 URL: urlStr,
                 Err: err
             )));
         }
-        while (ᐧ) {
+        for (;;) {
             // For all but the first request, create the next
             // request hop and replace req.
             if (builtin.len(reqs) > 0) {
-                @string loc = (~resp).Header.Get(locationˢ);
+                @string loc = resp.Header.Get(locationˢ);
                 if (loc == ""u8) {
                     // While most 3xx responses include a Location, it is not
                     // required and 3xx responses without a Location have been
                     // observed in the wild. See issues #17773 and #49281.
-                    (retres, reterr) = (resp, default!); goto ᒐdone;
+                    (retres, reterr) = (resp, default); goto ᒐdone;
                 }
                 var (u, errΔ1) = req.URL.Parse(loc);
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     resp.closeBody();
-                    (retres, reterr) = (default!, uerr(fmt.Errorf("failed to parse Location header %q: %v"u8, loc, errΔ1))); goto ᒐdone;
+                    (retres, reterr) = (default, uerr(fmt.Errorf("failed to parse Location header %q: %v"u8, loc, errΔ1))); goto ᒐdone;
                 }
-                ref var host = ref heap<@string>(out var Ꮡhost);
-                host = ""u8;
-                if (req.Host != ""u8 && req.Host != (~req.URL).Host) {
+                ref var host = ref heap<@string>(""u8, out var Ꮡhost);
+                if (req.Host != ""u8 && req.Host != req.URL.Host) {
                     // If the caller specified a custom Host header and the
                     // redirect location is relative, preserve the Host header
                     // through the redirect. See issue #22233.
@@ -757,25 +755,25 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                     URL: u,
                     Header: new ΔHeader(0),
                     Host: host,
-                    Cancel: (~ireq).Cancel,
-                    ctx: (~ireq).ctx
+                    Cancel: ireq.Cancel,
+                    ctx: ireq.ctx
                 )); req = ref Ꮡreq.DerefOrNull();
-                if (includeBody && (~ireq).GetBody != default!) {
-                    (req.Body, errΔ1) = (~ireq).GetBody();
-                    if (errΔ1 != default!) {
+                if (includeBody && ireq.GetBody != nil) {
+                    (req.Body, errΔ1) = ireq.GetBody();
+                    if (errΔ1 != nil) {
                         resp.closeBody();
-                        (retres, reterr) = (default!, uerr(errΔ1)); goto ᒐdone;
+                        (retres, reterr) = (default, uerr(errΔ1)); goto ᒐdone;
                     }
-                    req.GetBody = ireq.Value.GetBody;
-                    req.ContentLength = ireq.Value.ContentLength;
+                    req.GetBody = ireq.GetBody;
+                    req.ContentLength = ireq.ContentLength;
                 }
 
                 // Copy original headers before setting the Referer,
                 // in case the user set Referer on their first request.
                 // If they really want to override, they can do it in
                 // their CheckRedirect func.
-                if (!stripSensitiveHeaders && (~(~reqs[0]).URL).Host != (~req.URL).Host) {
-                    if (!shouldCopyHeaderOnRedirect((~reqs[0]).URL, req.URL)) {
+                if (!stripSensitiveHeaders && reqs[0].URL.Host != req.URL.Host) {
+                    if (!shouldCopyHeaderOnRedirect(reqs[0].URL, req.URL)) {
                         stripSensitiveHeaders = true;
                     }
                 }
@@ -783,7 +781,7 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                 // Add the Referer header from the most recent
                 // request URL to the new one, if it's not https->http:
                 {
-                    @string @ref = refererForURL((~reqs[builtin.len(reqs) - 1]).URL, ref (req.URL).DerefOrNull(), req.Header.Get(refererˢ)); if (@ref != ""u8) {
+                    @string @ref = refererForURL(reqs[builtin.len(reqs) - 1].URL, ref (req.URL).DerefOrNull(), req.Header.Get(refererˢ)); if (@ref != ""u8) {
                         req.Header.Set(refererˢ, @ref);
                     }
                 }
@@ -793,7 +791,7 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                 // previous response, without closing its
                 // body. See Issue 10069.
                 if (AreEqual(errΔ1, ErrUseLastResponse)) {
-                    (retres, reterr) = (resp, default!); goto ᒐdone;
+                    (retres, reterr) = (resp, default); goto ᒐdone;
                 }
 
                 // Close the previous response's body. But
@@ -802,41 +800,41 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                 // re-used. No need to check for errors: if it
                 // fails, the Transport won't reuse it anyway.
                 const int64 maxBodySlurpSize = /* 2 << 10 */ 2048;
-                if ((~resp).ContentLength == -1 || (~resp).ContentLength <= maxBodySlurpSize) {
-                    io.CopyN(io.Discard, (~resp).Body, maxBodySlurpSize);
+                if (resp.ContentLength == -1 || resp.ContentLength <= maxBodySlurpSize) {
+                    io.CopyN(io.Discard, resp.Body, maxBodySlurpSize);
                 }
-                (~resp).Body.Close();
+                resp.Body.Close();
 
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     // Special case for Go 1 compatibility: return both the response
                     // and an error if the CheckRedirect function failed.
                     // See https://golang.org/issue/3795
                     // The resp.Body has already been closed.
                     var ue = uerr(errΔ1);
-                    ue._<ж<urlꓸError>>().Value.URL = loc;
+                    ue._<ж<urlꓸError>>().URL = loc;
                     (retres, reterr) = (resp, ue); goto ᒐdone;
                 }
             }
 
             reqs = append(reqs, Ꮡreq);
-            error err = default!;
-            Func<bool> didTimeout = default!;
+            error err = default;
+            Func<bool> didTimeout = default;
             {
-                (resp, didTimeout, err) = c.send(Ꮡreq, deadline); if (err != default!) {
+                (resp, didTimeout, err) = c.send(Ꮡreq, deadline); if (err != nil) {
                     // c.send() always closes req.Body
                     reqBodyClosed = true;
                     if (!deadline.IsZero() && didTimeout()) {
                         err = new timeoutErrorжerror(Ꮡ(new timeoutError(err.Error() + " (Client.Timeout exceeded while awaiting headers)"u8)));
                     }
-                    (retres, reterr) = (default!, uerr(err)); goto ᒐdone;
+                    (retres, reterr) = (default, uerr(err)); goto ᒐdone;
                 }
             }
 
-            bool shouldRedirect = default!;
-            bool includeBodyOnHop = default!;
+            bool shouldRedirect = default;
+            bool includeBodyOnHop = default;
             (redirectMethod, shouldRedirect, includeBodyOnHop) = redirectBehavior(req.Method, ref (resp).DerefOrNull(), reqs[0]);
             if (!shouldRedirect) {
-                (retres, reterr) = (resp, default!); goto ᒐdone;
+                (retres, reterr) = (resp, default); goto ᒐdone;
             }
             if (!includeBodyOnHop) {
                 // Once a hop drops the body, we never send it again
@@ -865,11 +863,11 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
     // The headers to copy are from the very initial request.
     // We use a closured callback to keep a reference to these original headers.
     ΔHeader ireqhdr = cloneOrMakeHeader(ireq.Header);
-    map<@string, slice<ж<ΔCookie>>> icookies = default!;
-    if (c.Jar != default! && ireq.Header.Get(cookieˢ) != ""u8) {
+    map<@string, slice<ж<ΔCookie>>> icookies = default;
+    if (c.Jar != nil && ireq.Header.Get(cookieˢ) != ""u8) {
         icookies = new map<@string, slice<ж<ΔCookie>>>();
         foreach (var (_, cΔ1) in ireq.Cookies()) {
-            icookies[(~cΔ1).Name] = append(icookies[(~cΔ1).Name], cΔ1);
+            icookies[cΔ1.Name] = append(icookies[cΔ1.Name], cΔ1);
         }
     }
 
@@ -888,23 +886,23 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
         // regardless of domain or path.
         //
         // See https://golang.org/issue/17494
-        if (Ꮡc.Value.Jar != default! && icookiesʗ1 != default!) {
-            bool changed = default!;
-            var resp = req.Value.Response; // The response that caused the upcoming redirect
+        if (Ꮡc.Value.Jar != nil && icookiesʗ1 != nil) {
+            bool changed = default;
+            var resp = req.Response; // The response that caused the upcoming redirect
             foreach (var (_, cΔ2) in resp.Cookies()) {
                 {
-                    var (_, ok) = icookiesʗ1[(~cΔ2).Name, ꟷ]; if (ok) {
-                        delete(icookiesʗ1, (~cΔ2).Name);
+                    var (_, ok) = icookiesʗ1[cΔ2.Name, ꟷ]; if (ok) {
+                        delete(icookiesʗ1, cΔ2.Name);
                         changed = true;
                     }
                 }
             }
             if (changed) {
                 ireqhdrʗ1.Del(cookieˢ);
-                slice<@string> ss = default!;
+                slice<@string> ss = default;
                 foreach (var (_, cs) in icookiesʗ1) {
                     foreach (var (_, cΔ3) in cs) {
-                        ss = append(ssᴷ, ss, (~cΔ3).Name + "="u8 + (~cΔ3).Value);
+                        ss = append(ssᴷ, ss, cΔ3.Name + "="u8 + (~cΔ3).Value);
                     }
                 }
                 slices.Sort<slice<@string>, @string>(ss); // Ensure deterministic headers
@@ -918,17 +916,20 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
             var sensitive = false;
             var body = false;
             var exprᴛ1 = CanonicalHeaderKey(k);
-            if (exprᴛ1 == "Authorization"u8 || exprᴛ1 == "Www-Authenticate"u8 || exprᴛ1 == "Cookie"u8 || exprᴛ1 == "Cookie2"u8 || exprᴛ1 == "Proxy-Authorization"u8 || exprᴛ1 == "Proxy-Authenticate"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "Authorization"u8 || exprᴛ1 == "Www-Authenticate"u8 || exprᴛ1 == "Cookie"u8 || exprᴛ1 == "Cookie2"u8 || exprᴛ1 == "Proxy-Authorization"u8 || exprᴛ1 == "Proxy-Authenticate"u8: {
                 sensitive = true;
+                break;
             }
-            else if (exprᴛ1 == "Content-Encoding"u8 || exprᴛ1 == "Content-Language"u8 || exprᴛ1 == "Content-Location"u8 || exprᴛ1 == "Content-Type"u8) {
+            case {} when exprᴛ1 == "Content-Encoding"u8 || exprᴛ1 == "Content-Language"u8 || exprᴛ1 == "Content-Location"u8 || exprᴛ1 == "Content-Type"u8: {
                 // Headers relating to the body which is removed for
                 // POST to GET redirects
                 // https://fetch.spec.whatwg.org/#http-redirect-fetch
                 body = true;
-            }
+                break;
+            }}
             if (!(sensitive && stripSensitiveHeaders) && !(body && stripBodyHeaders)) {
-                req.Value.Header[k] = vv;
+                req.Header[k] = vv;
             }
         }
     };
@@ -937,11 +938,11 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stoppedAfter10Redirectsˢ = "stopped after 10 redirects"u8;
 
-internal static error defaultCheckRedirect(ж<Request> Ꮡreq, slice<ж<Request>> via) {
+internal static error defaultCheckRedirect(ж<Request> req, slice<ж<Request>> via) {
     if (builtin.len(via) >= 10) {
         return errors.New(stoppedAfter10Redirectsˢ);
     }
-    return default!;
+    return default;
 }
 
 // Post issues a POST to the specified URL.
@@ -983,13 +984,13 @@ internal static readonly @string contentTypeˢ = "Content-Type"u8;
 // See the [Client.Do] method documentation for details on how redirects
 // are handled.
 public static (ж<Response> resp, error err) Post(this ж<Client> Ꮡc, @string url, @string contentType, io.Reader body) {
-    error err = default!;
+    error err = default;
 
     (var req, err) = NewRequest(postˢ, url, body);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    (~req).Header.Set(contentTypeˢ, contentType);
+    req.Header.Set(contentTypeˢ, contentType);
     return Ꮡc.Do(req);
 }
 
@@ -1068,11 +1069,11 @@ internal static readonly @string headˢ = "HEAD"u8;
 // To make a request with a specified [context.Context], use [NewRequestWithContext]
 // and [Client.Do].
 public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string url) {
-    error err = default!;
+    error err = default;
 
-    (var req, err) = NewRequest(headˢ, url, default!);
-    if (err != default!) {
-        return (default!, err);
+    (var req, err) = NewRequest(headˢ, url, default);
+    if (err != nil) {
+        return (default, err);
     }
     return Ꮡc.Do(req);
 }
@@ -1107,12 +1108,12 @@ partial struct cancelTimerBody {
 }
 
 internal static (nint n, error err) Read(this ref cancelTimerBody b, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = b.rc.Read(p);
-    if (err == default!) {
-        return (n, default!);
+    if (err == nil) {
+        return (n, default);
     }
     if (AreEqual(err, io.EOF)) {
         return (n, err);
@@ -1129,7 +1130,7 @@ internal static error Close(this ref cancelTimerBody b) {
     return err;
 }
 
-internal static bool shouldCopyHeaderOnRedirect(ж<url.URL> Ꮡinitial, ж<url.URL> Ꮡdest) {
+internal static bool shouldCopyHeaderOnRedirect(ж<url.URL> initial, ж<url.URL> dest) {
     // Permit sending auth/cookie headers from "foo.com"
     // to "sub.foo.com".
 
@@ -1143,8 +1144,8 @@ internal static bool shouldCopyHeaderOnRedirect(ж<url.URL> Ꮡinitial, ж<url.U
     // directly, we don't know their scope, so we assume
     // it's for *.domain.com.
 
-    @string ihost = idnaASCIIFromURL(Ꮡinitial);
-    @string dhost = idnaASCIIFromURL(Ꮡdest);
+    @string ihost = idnaASCIIFromURL(initial);
+    @string dhost = idnaASCIIFromURL(dest);
     return isDomainOrSubdomain(dhost, ihost);
 }
 
@@ -1168,7 +1169,7 @@ internal static bool isDomainOrSubdomain(@string sub, @string parent) {
     if (!strings.HasSuffix(sub, parent)) {
         return false;
     }
-    return sub[builtin.len(sub) - builtin.len(parent) - 1] == (rune)'.';
+    return sub[builtin.len(sub) - builtin.len(parent) - 1] == '.';
 }
 
 internal static @string stripPassword(ж<url.URL> Ꮡu) {

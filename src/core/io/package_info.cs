@@ -76,6 +76,12 @@ using static go.io_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(LimitedReader))]
+[assembly: go.GoFieldAccess(typeof(multiReader))]
+[assembly: go.GoFieldAccess(typeof(multiWriter))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -84,7 +90,7 @@ using static go.io_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/io.go", "io.cs", "ABo6pqYACBK4ygCLAooEsoCCpAACFgALAoKUgoKClIKSgpQAAhTyAAISAAkCgoKUlJQAAh4ADAIAAhTygpSq9oCCtoCCpIKCgIKClLaUgoKCgoKCgqaCgoKUgoKmgoKUpqywAAsWsoKUgpSCgqqigoKCuJQADBqygpSAgqSCgqaSlIKYpKSrAAEQgpSCprKClIKAgoKCgpSkqJCswgAJGKKmsoKCpoKCpoKmgpikp5yClIIAAhDSAAcQsoKCgIK2yuyUgqaCppSCyLKCgoKCgoKCgpQABBLCgIKk7oDsgKSCrgAIBsqChJKCgoKCgpSCuIKCgpSCppSCgoI=")]
+[assembly: go.GoPositionMap("io/io.go", "io.cs", "ABo6pqYACBK4ygCLAooEsoCCpAACFgALAoKUgoKClIKCgpQAAhTyAAISAAkCgoKUlJQAAh4ADAIAAhTygpSq9oCCtoCCpIKCgIKClLaUgoKCgoKCgqaCgoKUgoKmgoKUpqywAAsWsoKUgpSCgqqigoKCuJQADBqygpSAgqSCgqaSlIKUpLS0pIKUgqaygpSCgIKCgoKUpKiQrMIACRiiprKCgqaCgqaCpoKUpLSkgpSCAAIQ0gAHELKCgoCCtsrslIKmgqaUgsiygoKCgoKCgoKUAAQSwoCCpO6A7ICkgq4ACAbKgoSSgoKCgoKUgriCgoKUgqaUgoKC")]
 [assembly: go.GoPositionMap("io/multi.go", "multi.cs", "AA0Sgu6ylIKAgoK2gqaClIKUlKamgqaygoKAgpSkgoKClJSCppzigoLusoKCgpSCgqamlLKCgoCClIKUpIKUgoKmAAISAAgCgoKAgpS2")]
 [assembly: go.GoPositionMap("io/pipe.go", "pipe.cs", "ABIq0oKCgpSiotKCgugADByipNi0goKkyIKClIKAkqbipKSCtoK0goK0puaCgpSCgJKokoKAgqSokoKAgqQABxbSqqIAAhDSAAcW0qqiAAIS4gACJAAPAuo=", "72-72:1;103-103:1")]
 // </GoSourcePositionMaps>

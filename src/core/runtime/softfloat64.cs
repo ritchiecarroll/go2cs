@@ -12,7 +12,7 @@ internal const nuint mantbits64 = 52;
 internal const nuint expbits64 = 11;
 internal static UntypedInt bias64 => /* -1<<(expbits64-1) + 1 */ -1023;
 
-internal const uint64 nan64 = /* (1<<expbits64-1)<<mantbits64 + 1<<(mantbits64-1) */ 9221120237041090560;                                            // quiet NaN, 0 payload
+internal const uint64 nan64 = /* (1<<expbits64-1)<<mantbits64 + 1<<(mantbits64-1) */ 9221120237041090560; // quiet NaN, 0 payload
 internal const uint64 inf64 = /* (1<<expbits64 - 1) << mantbits64 */ 9218868437227405312;
 internal const uint64 neg64 = /* 1 << (expbits64 + mantbits64) */ 9223372036854775808;
 
@@ -20,23 +20,23 @@ internal const nuint mantbits32 = 23;
 internal const nuint expbits32 = 8;
 internal static UntypedInt bias32 => /* -1<<(expbits32-1) + 1 */ -127;
 
-internal const uint32 nan32 = /* (1<<expbits32-1)<<mantbits32 + 1<<(mantbits32-1) */ 2143289344;                                            // quiet NaN, 0 payload
+internal const uint32 nan32 = /* (1<<expbits32-1)<<mantbits32 + 1<<(mantbits32-1) */ 2143289344; // quiet NaN, 0 payload
 internal const uint32 inf32 = /* (1<<expbits32 - 1) << mantbits32 */ 2139095040;
 internal const uint32 neg32 = /* 1 << (expbits32 + mantbits32) */ 2147483648;
 
 internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack64(uint64 f) {
-    uint64 sign = default!;
-    uint64 mant = default!;
-    nint exp = default!;
-    bool inf = default!;
-    bool nan = default!;
+    uint64 sign = default;
+    uint64 mant = default;
+    nint exp = default;
+    bool inf = default;
+    bool nan = default;
 
     sign = (uint64)(f & ((uint64)1 << (int)(mantbits64 + expbits64)));
     mant = (uint64)(f & ((uint64)(4503599627370496L - 1)));
     exp = (nint)(f >> (int)(mantbits64)) & (nint)((1 << (int)(expbits64)) - 1);
 
-    var exprᴛ1 = exp;
-    if (exprᴛ1 == (1 << (int)(expbits64)) - 1) {
+    switch (exp) {
+    case var ᴛ when ᴛ == (1 << (int)(expbits64)) - 1: {
         if (mant != 0) {
             nan = true;
             return (sign, mant, exp, inf, nan);
@@ -44,37 +44,39 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
         inf = true;
         return (sign, mant, exp, inf, nan);
     }
-    if (exprᴛ1 is 0) {
+    case 0: {
         // denormalized
         if (mant != 0) {
             exp += bias64 + 1;
             while (mant < (uint64)1 << (int)(mantbits64)) {
-                mant <<= (int)(1);
+                mant <<= 1;
                 exp--;
             }
         }
+        break;
     }
-    else { /* default: */
+    default: {
         // add implicit top bit
         mant |= (uint64)(((uint64)1 << (int)(mantbits64)));
         exp += bias64;
-    }
+        break;
+    }}
     return (sign, mant, exp, inf, nan);
 }
 
 internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack32(uint32 f) {
-    uint32 sign = default!;
-    uint32 mant = default!;
-    nint exp = default!;
-    bool inf = default!;
-    bool nan = default!;
+    uint32 sign = default;
+    uint32 mant = default;
+    nint exp = default;
+    bool inf = default;
+    bool nan = default;
 
     sign = (uint32)(f & ((uint32)1 << (int)(mantbits32 + expbits32)));
     mant = (uint32)(f & ((1 << (int)(mantbits32)) - 1));
     exp = (nint)(f >> (int)(mantbits32)) & (nint)((1 << (int)(expbits32)) - 1);
 
-    var exprᴛ1 = exp;
-    if (exprᴛ1 == (1 << (int)(expbits32)) - 1) {
+    switch (exp) {
+    case var ᴛ when ᴛ == (1 << (int)(expbits32)) - 1: {
         if (mant != 0) {
             nan = true;
             return (sign, mant, exp, inf, nan);
@@ -82,21 +84,23 @@ internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack
         inf = true;
         return (sign, mant, exp, inf, nan);
     }
-    if (exprᴛ1 is 0) {
+    case 0: {
         // denormalized
         if (mant != 0) {
             exp += bias32 + 1;
             while (mant < (uint32)1 << (int)(mantbits32)) {
-                mant <<= (int)(1);
+                mant <<= 1;
                 exp--;
             }
         }
+        break;
     }
-    else { /* default: */
+    default: {
         // add implicit top bit
         mant |= (uint32)(((uint32)1 << (int)(mantbits32)));
         exp += bias32;
-    }
+        break;
+    }}
     return (sign, mant, exp, inf, nan);
 }
 
@@ -108,23 +112,23 @@ internal static uint64 fpack64(uint64 sign, uint64 mant, nint exp, uint64 trunc)
         return sign;
     }
     while (mant < (uint64)1 << (int)(mantbits64)) {
-        mant <<= (int)(1);
+        mant <<= 1;
         exp--;
     }
     while (mant >= (uint64)4 << (int)(mantbits64)) {
         trunc |= (uint64)((mant & 1));
-        mant >>= (int)(1);
+        mant >>= 1;
         exp++;
     }
     if (mant >= (uint64)2 << (int)(mantbits64)) {
         if ((mant & 1) != 0 && (trunc != 0 || (mant & 2) != 0)) {
             mant++;
             if (mant >= (uint64)4 << (int)(mantbits64)) {
-                mant >>= (int)(1);
+                mant >>= 1;
                 exp++;
             }
         }
-        mant >>= (int)(1);
+        mant >>= 1;
         exp++;
     }
     if (exp >= (nint)((1 << (int)(expbits64)) - 1 + bias64)) {
@@ -138,13 +142,13 @@ internal static uint64 fpack64(uint64 sign, uint64 mant, nint exp, uint64 trunc)
         (mant, exp, trunc) = (mant0, exp0, trunc0);
         while (exp < bias64) {
             trunc |= (uint64)((mant & 1));
-            mant >>= (int)(1);
+            mant >>= 1;
             exp++;
         }
         if ((mant & 1) != 0 && (trunc != 0 || (mant & 2) != 0)) {
             mant++;
         }
-        mant >>= (int)(1);
+        mant >>= 1;
         exp++;
         if (mant < (uint64)1 << (int)(mantbits64)) {
             return sign | mant;
@@ -161,23 +165,23 @@ internal static uint32 fpack32(uint32 sign, uint32 mant, nint exp, uint32 trunc)
         return sign;
     }
     while (mant < (uint32)1 << (int)(mantbits32)) {
-        mant <<= (int)(1);
+        mant <<= 1;
         exp--;
     }
     while (mant >= (uint32)4 << (int)(mantbits32)) {
         trunc |= (uint32)((mant & 1));
-        mant >>= (int)(1);
+        mant >>= 1;
         exp++;
     }
     if (mant >= (uint32)2 << (int)(mantbits32)) {
         if ((mant & 1) != 0 && (trunc != 0 || (mant & 2) != 0)) {
             mant++;
             if (mant >= (uint32)4 << (int)(mantbits32)) {
-                mant >>= (int)(1);
+                mant >>= 1;
                 exp++;
             }
         }
-        mant >>= (int)(1);
+        mant >>= 1;
         exp++;
     }
     if (exp >= (nint)((1 << (int)(expbits32)) - 1 + bias32)) {
@@ -191,13 +195,13 @@ internal static uint32 fpack32(uint32 sign, uint32 mant, nint exp, uint32 trunc)
         (mant, exp, trunc) = (mant0, exp0, trunc0);
         while (exp < bias32) {
             trunc |= (uint32)((mant & 1));
-            mant >>= (int)(1);
+            mant >>= 1;
             exp++;
         }
         if ((mant & 1) != 0 && (trunc != 0 || (mant & 2) != 0)) {
             mant++;
         }
-        mant >>= (int)(1);
+        mant >>= 1;
         exp++;
         if (mant < (uint32)1 << (int)(mantbits32)) {
             return sign | mant;
@@ -242,11 +246,11 @@ internal static uint64 fadd64(uint64 f, uint64 g) {
     }
 
     nuint shift = (nuint)(fe - ge);
-    fm <<= (int)(2);
-    gm <<= (int)(2);
+    fm <<= 2;
+    gm <<= 2;
     var trunc = gm & (((uint64)1).Lsh(shift) - 1);
     gm.RshAssign(shift);
-    if (fs == gs){
+    if (fs == gs) {
         fm += gm;
     } else {
         fm -= gm;
@@ -388,7 +392,7 @@ internal static (int32 cmp, bool isnan) fcmp64(uint64 f, uint64 g) {
 }
 
 internal static (int64 val, bool ok) f64toint(uint64 f) {
-    int64 val = default!;
+    int64 val = default;
 
     var (fs, fm, fe, fi, fn) = funpack64(f);
 
@@ -411,11 +415,11 @@ internal static (int64 val, bool ok) f64toint(uint64 f) {
 
     while (fe > (nint)mantbits64) {
         fe--;
-        fm <<= (int)(1);
+        fm <<= 1;
     }
     while (fe < (nint)mantbits64) {
         fe++;
-        fm >>= (int)(1);
+        fm >>= 1;
     }
     val = (int64)fm;
     if (fs != 0) {
@@ -443,10 +447,10 @@ internal static uint32 /*f*/ fintto32(int64 val) {
     // Keep track of the bits we throw away, and if any are
     // nonzero or them into the lowest bit.
     nint exp = (nint)mantbits32;
-    uint32 trunc = default!;
+    uint32 trunc = default;
     while (mant >= (uint64)1 << 32) {
         trunc |= (uint32)(((uint32)mant & 1));
-        mant >>= (int)(1);
+        mant >>= 1;
         exp++;
     }
 
@@ -483,7 +487,7 @@ internal static (uint64 q, uint64 r) divlu(uint64 u1, uint64 u0, uint64 v) {
     nuint s = (nuint)0;
     while ((uint64)(v & ((uint64)1 << 63)) == 0) {
         s++;
-        v <<= (int)(1);
+        v <<= 1;
     }
 
     var vn1 = v >> 32;
@@ -600,7 +604,7 @@ internal static int64 f64toint64(uint64 x) {
 }
 
 internal static uint64 f64touint64(uint64 x) {
-    uint64 m = 0x43e0000000000000UL;  // float64 1<<63
+    uint64 m = 0x43e0000000000000UL; // float64 1<<63
     if (fgt64(m, x)) {
         return (uint64)f64toint64(x);
     }
@@ -610,7 +614,7 @@ internal static uint64 f64touint64(uint64 x) {
 }
 
 internal static uint64 f32touint64(uint32 x) {
-    uint32 m = 0x5f000000;     // float32 1<<63
+    uint32 m = 0x5f000000; // float32 1<<63
     if (fgt32(m, x)) {
         return (uint64)f32toint64(x);
     }

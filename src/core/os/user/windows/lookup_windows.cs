@@ -19,11 +19,11 @@ internal static (bool, error) isDomainJoined() {
     ref var domain = ref heap<ж<uint16>>(out var Ꮡdomain);
     ref var status = ref heap(new uint32(), out var Ꮡstatus);
     var err = syscall.NetGetJoinInformation(nil, Ꮡdomain, Ꮡstatus);
-    if (err != default!) {
+    if (err != nil) {
         return (false, err);
     }
     syscall.NetApiBufferFree(domain.Reinterpret<uint16, byte>());
-    return (status == syscall.NetSetupDomainName, default!);
+    return (status == syscall.NetSetupDomainName, default);
 }
 
 internal static (@string, error) lookupFullNameDomain(@string domainAndUser) {
@@ -35,32 +35,31 @@ internal static (@string, error) lookupFullNameDomain(@string domainAndUser) {
 
 internal static (@string, error) lookupFullName(@string domain, @string username, @string domainAndUser) {
     var (joined, err) = isDomainJoined();
-    if (err == default! && joined) {
+    if (err == nil && joined) {
         var (nameΔ1, errΔ1) = lookupFullNameDomain(domainAndUser);
-        if (errΔ1 == default!) {
-            return (nameΔ1, default!);
+        if (errΔ1 == nil) {
+            return (nameΔ1, default);
         }
     }
     (var name, err) = lookupFullNameServer(domain, username);
-    if (err == default!) {
-        return (name, default!);
+    if (err == nil) {
+        return (name, default);
     }
     // domain worked neither as a domain nor as a server
     // could be domain server unavailable
     // pretend username is fullname
-    return (username, default!);
+    return (username, default);
 }
 
 // getProfilesDirectory retrieves the path to the root directory
 // where user profiles are stored.
 internal static (@string, error) getProfilesDirectory() {
-    ref var n = ref heap<uint32>(out var Ꮡn);
-    n = (uint32)100;
-    while (ᐧ) {
+    ref var n = ref heap<uint32>((uint32)100, out var Ꮡn);
+    for (;;) {
         var b = new slice<uint16>((nint)(n));
         var e = windows.GetProfilesDirectory(Ꮡ(b, 0), Ꮡn);
-        if (e == default!) {
-            return (syscall.UTF16ToString(b), default!);
+        if (e == nil) {
+            return (syscall.UTF16ToString(b), default);
         }
         if (!AreEqual(e, syscall.ERROR_INSUFFICIENT_BUFFER)) {
             return ("", e);
@@ -71,8 +70,8 @@ internal static (@string, error) getProfilesDirectory() {
     }
 }
 
-internal static bool isServiceAccount(ж<syscall.SID> Ꮡsid) {
-    if (!windows.IsValidSid(Ꮡsid)) {
+internal static bool isServiceAccount(ж<syscall.SID> sid) {
+    if (!windows.IsValidSid(sid)) {
         // We don't accept SIDs from the public API, so this should never happen.
         // Better be on the safe side and validate anyway.
         return false;
@@ -83,40 +82,40 @@ internal static bool isServiceAccount(ж<syscall.SID> Ꮡsid) {
     // - "S-1-5-18": LocalSystem
     // - "S-1-5-19": LocalService
     // - "S-1-5-20": NetworkService
-    if (windows.GetSidSubAuthorityCount(Ꮡsid) != windows.SID_REVISION || windows.GetSidIdentifierAuthority(Ꮡsid) != windows.SECURITY_NT_AUTHORITY) {
+    if (windows.GetSidSubAuthorityCount(sid) != windows.SID_REVISION || windows.GetSidIdentifierAuthority(sid) != windows.SECURITY_NT_AUTHORITY) {
         return false;
     }
-    var exprᴛ1 = windows.GetSidSubAuthority(Ꮡsid, 0);
-    if (exprᴛ1 == windows.SECURITY_LOCAL_SYSTEM_RID || exprᴛ1 == windows.SECURITY_LOCAL_SERVICE_RID || exprᴛ1 == windows.SECURITY_NETWORK_SERVICE_RID) {
+    switch (windows.GetSidSubAuthority(sid, 0)) {
+    case var ᴛ when ᴛ == windows.SECURITY_LOCAL_SYSTEM_RID || ᴛ == windows.SECURITY_LOCAL_SERVICE_RID || ᴛ == windows.SECURITY_NETWORK_SERVICE_RID: {
         return true;
-    }
+    }}
     return false;
 }
 
-internal static bool isValidUserAccountType(ж<syscall.SID> Ꮡsid, uint32 sidType) {
-    var exprᴛ1 = sidType;
-    if (exprᴛ1 == syscall.SidTypeUser) {
+internal static bool isValidUserAccountType(ж<syscall.SID> sid, uint32 sidType) {
+    switch (sidType) {
+    case var ᴛ when ᴛ == syscall.SidTypeUser: {
         return true;
     }
-    if (exprᴛ1 == syscall.SidTypeWellKnownGroup) {
-        return isServiceAccount(Ꮡsid);
-    }
+    case var ᴛ when ᴛ == syscall.SidTypeWellKnownGroup: {
+        return isServiceAccount(sid);
+    }}
     return false;
 }
 
 internal static bool isValidGroupAccountType(uint32 sidType) {
-    var exprᴛ1 = sidType;
-    if (exprᴛ1 == syscall.SidTypeGroup) {
+    switch (sidType) {
+    case var ᴛ when ᴛ == syscall.SidTypeGroup: {
         return true;
     }
-    if (exprᴛ1 == syscall.SidTypeWellKnownGroup) {
+    case var ᴛ when ᴛ == syscall.SidTypeWellKnownGroup: {
         // Some well-known groups are also considered service accounts,
         // so isValidUserAccountType would return true for them.
         // We have historically allowed them in LookupGroup and LookupGroupId,
         // so don't treat them as invalid here.
         return true;
     }
-    if (exprᴛ1 == syscall.SidTypeAlias) {
+    case var ᴛ when ᴛ == syscall.SidTypeAlias: {
         // https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/7b2aeb27-92fc-41f6-8437-deb65d950921#gt_0387e636-5654-4910-9519-1f8326cf5ec0
         // SidTypeAlias should also be treated as a group type next to SidTypeGroup
         // and SidTypeWellKnownGroup:
@@ -124,25 +123,25 @@ internal static bool isValidGroupAccountType(uint32 sidType) {
         //
         // Tests show that "Administrators" can be considered of type SidTypeAlias.
         return true;
-    }
+    }}
     return false;
 }
 
 // lookupUsernameAndDomain obtains the username and domain for usid.
-internal static (@string username, @string domain, uint32 sidType, error e) lookupUsernameAndDomain(ж<syscall.SID> Ꮡusid) {
-    @string username = default!;
-    @string domain = default!;
-    uint32 sidType = default!;
-    error e = default!;
+internal static (@string username, @string domain, uint32 sidType, error e) lookupUsernameAndDomain(ж<syscall.SID> usid) {
+    @string username = default;
+    @string domain = default;
+    uint32 sidType = default;
+    error e = default;
 
-    (username, domain, sidType, e) = Ꮡusid.LookupAccount(""u8);
-    if (e != default!) {
+    (username, domain, sidType, e) = usid.LookupAccount(""u8);
+    if (e != nil) {
         return ("", "", 0, e);
     }
-    if (!isValidUserAccountType(Ꮡusid, sidType)) {
+    if (!isValidUserAccountType(usid, sidType)) {
         return ("", "", 0, fmt.Errorf("user: should be user account type, not %d"u8, sidType));
     }
-    return (username, domain, sidType, default!);
+    return (username, domain, sidType, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -150,20 +149,20 @@ internal static readonly @string profileImagePathˢ = "ProfileImagePath"u8;
 
 // findHomeDirInRegistry finds the user home path based on the uid.
 internal static (@string dir, error e) findHomeDirInRegistry(@string uid) {
-    @string dir = default!;
-    error e = default!;
+    @string dir = default;
+    error e = default;
     GoFrame ᒐ = default;
     try {
         (var k, e) = registry.OpenKey(registry.LOCAL_MACHINE, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\"u8 + uid, registry.QUERY_VALUE);
-        if (e != default!) {
+        if (e != nil) {
             (dir, e) = ("", e); goto ᒐdone;
         }
         defer(() => k.Close(), ref ᒐ);
         (dir, _, e) = k.GetStringValue(profileImagePathˢ);
-        if (e != default!) {
+        if (e != nil) {
             (dir, e) = ("", e); goto ᒐdone;
         }
-        (dir, e) = (dir, default!);
+        (dir, e) = (dir, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -173,7 +172,7 @@ internal static (@string dir, error e) findHomeDirInRegistry(@string uid) {
 // lookupGroupName accepts the name of a group and retrieves the group SID.
 internal static (@string, error) lookupGroupName(@string groupname) {
     var (sid, _, t, e) = syscall.LookupSID(""u8, groupname);
-    if (e != default!) {
+    if (e != nil) {
         return ("", e);
     }
     if (!isValidGroupAccountType(t)) {
@@ -185,12 +184,11 @@ internal static (@string, error) lookupGroupName(@string groupname) {
 // go2cs generated this placeholder — func listGroupsForUsernameAndDomain is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (ж<User>, error) newUser(@string uid, @string gid, @string dir, @string username, @string domain) {
-    ref var domainAndUser = ref heap<@string>(out var ᏑdomainAndUser);
-    domainAndUser = domain + @"\"u8 + username;
+    ref var domainAndUser = ref heap<@string>(domain + @"\"u8 + username, out var ᏑdomainAndUser);
     ref var name = ref heap<@string>(out var Ꮡname);
     (name, var e) = lookupFullName(domain, username, domainAndUser);
-    if (e != default!) {
-        return (default!, e);
+    if (e != nil) {
+        return (default, e);
     }
     var u = Ꮡ(new User(
         Uid: uid,
@@ -199,7 +197,7 @@ internal static (ж<User>, error) newUser(@string uid, @string gid, @string dir,
         Name: name,
         HomeDir: dir
     ));
-    return (u, default!);
+    return (u, default);
 }
 
 // unused variables (in this implementation)
@@ -216,41 +214,41 @@ internal static (ж<User>, error) current() {
         GoFrame ᒐ = default;
         try {
             var (t, e) = syscall.OpenCurrentProcessToken();
-            if (e != default!) {
+            if (e != nil) {
                 return e;
             }
             defer(() => t.Close(), ref ᒐ);
             (var u, e) = t.GetTokenUser();
-            if (e != default!) {
+            if (e != nil) {
                 return e;
             }
             (var pg, e) = t.GetTokenPrimaryGroup();
-            if (e != default!) {
+            if (e != nil) {
                 return e;
             }
             ref var uid = ref heap<@string>(out var Ꮡuid);
-            (uid, e) = (~u).User.Sid.String();
-            if (e != default!) {
+            (uid, e) = u.User.Sid.String();
+            if (e != nil) {
                 return e;
             }
             ref var gid = ref heap<@string>(out var Ꮡgid);
-            (gid, e) = (~pg).PrimaryGroup.String();
-            if (e != default!) {
+            (gid, e) = pg.PrimaryGroup.String();
+            if (e != nil) {
                 return e;
             }
             ref var dir = ref heap<@string>(out var Ꮡdir);
             (dir, e) = t.GetUserProfileDirectory();
-            if (e != default!) {
+            if (e != nil) {
                 return e;
             }
             ref var username = ref heap<@string>(out var Ꮡusername);
             (username, e) = windows.GetUserName(syscall.NameSamCompatible);
-            if (e != default!) {
+            if (e != nil) {
                 return e;
             }
             ref var displayName = ref heap<@string>(out var ᏑdisplayName);
             (displayName, e) = windows.GetUserName(syscall.NameDisplay);
-            if (e != default!) {
+            if (e != nil) {
                 // Historically, the username is used as fallback
                 // when the display name can't be retrieved.
                 displayName = username;
@@ -262,9 +260,9 @@ internal static (ж<User>, error) current() {
                 Name: displayName,
                 HomeDir: dir
             ));
-            return default!;
+            return default;
         }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
         finally { ᒐ.Run(); }
     });
     return (usr, err);
@@ -282,7 +280,7 @@ internal static error runAsProcessOwner(Func<error> f) {
             // If impersonation failed, the thread is running with the wrong token,
             // so it's better to terminate it.
             // This is achieved by not calling runtime.UnlockOSThread.
-            if (ᏑimpersonationRollbackErr.ValueSlot != default!){
+            if (ᏑimpersonationRollbackErr.ValueSlot != nil) {
                 println((@string)"os/user: failed to revert to previous token:"u8, ᏑimpersonationRollbackErr.ValueSlot.Error());
                 runtime.Goexit();
             } else {
@@ -290,13 +288,13 @@ internal static error runAsProcessOwner(Func<error> f) {
             }
         }, ref ᒐ);
         var (prevToken, isProcessToken, err) = getCurrentToken();
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("os/user: failed to get current token: %w"u8, err);
         }
         defer(() => prevToken.Close(), ref ᒐ);
         if (!isProcessToken) {
             {
-                err = windows.RevertToSelf(); if (err != default!) {
+                err = windows.RevertToSelf(); if (err != nil) {
                     return fmt.Errorf("os/user: failed to revert to self: %w"u8, err);
                 }
             }
@@ -306,7 +304,7 @@ internal static error runAsProcessOwner(Func<error> f) {
         }
         return f();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -314,8 +312,8 @@ internal static error runAsProcessOwner(Func<error> f) {
 // the process token if the thread doesn't have a token.
 internal static (syscall.Token t, bool isProcessToken, error err) getCurrentToken() {
     ref var t = ref heap(new syscall.Token(), out var Ꮡt);
-    bool isProcessToken = default!;
-    error err = default!;
+    bool isProcessToken = default;
+    error err = default;
 
     var (thread, _) = windows.GetCurrentThread();
     // Need TOKEN_DUPLICATE and TOKEN_IMPERSONATE to use the token in ImpersonateLoggedOnUser.
@@ -330,17 +328,17 @@ internal static (syscall.Token t, bool isProcessToken, error err) getCurrentToke
 
 // go2cs generated this placeholder — func lookupUserPrimaryGroup is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static (ж<User>, error) newUserFromSid(ж<syscall.SID> Ꮡusid) {
-    var (username, domain, sidType, e) = lookupUsernameAndDomain(Ꮡusid);
-    if (e != default!) {
-        return (default!, e);
+internal static (ж<User>, error) newUserFromSid(ж<syscall.SID> usid) {
+    var (username, domain, sidType, e) = lookupUsernameAndDomain(usid);
+    if (e != nil) {
+        return (default, e);
     }
-    (var uid, e) = Ꮡusid.String();
-    if (e != default!) {
-        return (default!, e);
+    (var uid, e) = usid.String();
+    if (e != nil) {
+        return (default, e);
     }
-    @string gid = default!;
-    if (sidType == syscall.SidTypeWellKnownGroup){
+    @string gid = default;
+    if (sidType == syscall.SidTypeWellKnownGroup) {
         // The SID does not contain a domain; this function's domain variable has
         // been populated with the SID's identifier authority. This happens with
         // special service user accounts such as "NT AUTHORITY\LocalSystem".
@@ -348,8 +346,8 @@ internal static (ж<User>, error) newUserFromSid(ж<syscall.SID> Ꮡusid) {
         gid = uid;
     } else {
         (gid, e) = lookupUserPrimaryGroup(username, domain);
-        if (e != default!) {
-            return (default!, e);
+        if (e != nil) {
+            return (default, e);
         }
     }
     // If this user has logged in at least once their home path should be stored
@@ -362,14 +360,14 @@ internal static (ж<User>, error) newUserFromSid(ж<syscall.SID> Ꮡusid) {
     // (e.g. C:\users). Reference:
     // https://answers.microsoft.com/en-us/windows/forum/windows_7-security/how-do-i-set-a-home-directory-outside-cusers-for-a/aed68262-1bf4-4a4d-93dc-7495193a440f
     (var dir, e) = findHomeDirInRegistry(uid);
-    if (e != default!) {
+    if (e != nil) {
         // If the home path does not exist in the registry, the user might
         // have not logged in yet; fall back to using getProfilesDirectory().
         // Find the username based on a SID and append that to the result of
         // getProfilesDirectory(). The domain is not relevant here.
         (dir, e) = getProfilesDirectory();
-        if (e != default!) {
-            return (default!, e);
+        if (e != nil) {
+            return (default, e);
         }
         dir += @"\"u8 + username;
     }
@@ -378,19 +376,19 @@ internal static (ж<User>, error) newUserFromSid(ж<syscall.SID> Ꮡusid) {
 
 internal static (ж<User>, error) lookupUser(@string username) {
     var (sid, _, t, e) = syscall.LookupSID(""u8, username);
-    if (e != default!) {
-        return (default!, e);
+    if (e != nil) {
+        return (default, e);
     }
     if (!isValidUserAccountType(sid, t)) {
-        return (default!, fmt.Errorf("user: should be user account type, not %d"u8, t));
+        return (default, fmt.Errorf("user: should be user account type, not %d"u8, t));
     }
     return newUserFromSid(sid);
 }
 
 internal static (ж<User>, error) lookupUserId(@string uid) {
     var (sid, e) = syscall.StringToSid(uid);
-    if (e != default!) {
-        return (default!, e);
+    if (e != nil) {
+        return (default, e);
     }
     return newUserFromSid(sid);
 }
@@ -398,73 +396,73 @@ internal static (ж<User>, error) lookupUserId(@string uid) {
 internal static (ж<Group>, error) lookupGroup(@string groupname) {
     ref var sid = ref heap<@string>(out var Ꮡsid);
     (sid, var err) = lookupGroupName(groupname);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new Group(Name: groupname, Gid: sid)), default!);
+    return (Ꮡ(new Group(Name: groupname, Gid: sid)), default);
 }
 
 internal static (ж<Group>, error) lookupGroupId(@string gid) {
     var (sid, err) = syscall.StringToSid(gid);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     ref var groupname = ref heap<@string>(out var Ꮡgroupname);
     (groupname, _, var t, err) = sid.LookupAccount(""u8);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (!isValidGroupAccountType(t)) {
-        return (default!, fmt.Errorf("lookupGroupId: should be group account type, not %d"u8, t));
+        return (default, fmt.Errorf("lookupGroupId: should be group account type, not %d"u8, t));
     }
-    return (Ꮡ(new Group(Name: groupname, Gid: gid)), default!);
+    return (Ꮡ(new Group(Name: groupname, Gid: gid)), default);
 }
 
 internal static (slice<@string>, error) listGroups(ref User user) {
     ref var sids = ref heap<slice<@string>>(out var Ꮡsids);
     {
-        var (u, err) = Current(); if (err == default! && (~u).Uid == user.Uid){
+        var (u, err) = Current(); if (err == nil && u.Uid == user.Uid) {
             // It is faster and more reliable to get the groups
             // of the current user from the current process token.
             var errΔ1 = runAsProcessOwner(error () => {
                 GoFrame ᒐ = default;
                 try {
                     var (t, errΔ2) = syscall.OpenCurrentProcessToken();
-                    if (errΔ2 != default!) {
+                    if (errΔ2 != nil) {
                         return errΔ2;
                     }
                     defer(() => t.Close(), ref ᒐ);
                     (var groups, errΔ2) = windows.GetTokenGroups(t);
-                    if (errΔ2 != default!) {
+                    if (errΔ2 != nil) {
                         return errΔ2;
                     }
                     foreach (var (_, g) in groups.AllGroups()) {
                         var (sid, errΔ3) = g.Sid.String();
-                        if (errΔ3 != default!) {
+                        if (errΔ3 != nil) {
                             return errΔ3;
                         }
                         Ꮡsids.ValueSlot = append(Ꮡsids.ValueSlot, sid);
                     }
-                    return default!;
+                    return default;
                 }
-                catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+                catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
                 finally { ᒐ.Run(); }
             });
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         } else {
             var (sid, errΔ4) = syscall.StringToSid(user.Uid);
-            if (errΔ4 != default!) {
-                return (default!, errΔ4);
+            if (errΔ4 != nil) {
+                return (default, errΔ4);
             }
             (var username, var domain, _, errΔ4) = lookupUsernameAndDomain(sid);
-            if (errΔ4 != default!) {
-                return (default!, errΔ4);
+            if (errΔ4 != nil) {
+                return (default, errΔ4);
             }
             (sids, errΔ4) = listGroupsForUsernameAndDomain(username, domain);
-            if (errΔ4 != default!) {
-                return (default!, errΔ4);
+            if (errΔ4 != nil) {
+                return (default, errΔ4);
             }
         }
     }
@@ -472,10 +470,10 @@ internal static (slice<@string>, error) listGroups(ref User user) {
     // This is done only to comply with the POSIX concept of a primary group.
     foreach (var (_, sid) in sids) {
         if (sid == user.Gid) {
-            return (sids, default!);
+            return (sids, default);
         }
     }
-    return (append(sids, user.Gid), default!);
+    return (append(sids, user.Gid), default);
 }
 
 } // end user_package

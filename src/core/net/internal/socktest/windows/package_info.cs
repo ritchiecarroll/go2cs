@@ -11,10 +11,7 @@
 
 // <ImportedTypeAliases>
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -53,6 +50,11 @@ using static go.net.@internal.socktest_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Stat))]
+[assembly: go.GoFieldAccess(typeof(Status))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -62,8 +64,8 @@ using static go.net.@internal.socktest_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABg0goKCqLKCgoKClIKosoKCgpSCAAYQkKaQppCkggAJFIIAEyyCyoKCgoKUABc0goKUAAsYgoKUqLKCgoI=")]
-[assembly: go.GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABAcgpSkpKQACQiCgpSkpKSklICCpPaClKSkpA==")]
-[assembly: go.GoPositionMap("net/internal/socktest/switch_windows.go", "switch_windows.cs", "AAwY0oKCkoKU2sKCkoI=")]
+[assembly: go.GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABAcgpSkpKQACQiCgpS0tLS0pICCpPaClKSkpA==")]
+[assembly: go.GoPositionMap("net/internal/socktest/switch_windows.go", "switch_windows.cs", "AAwY0oKCkoKU2sKCgoI=")]
 [assembly: go.GoPositionMap("net/internal/socktest/sys_windows.go", "sys_windows.cs", "AAsa8pSCgoKUgoKUgoCCgpS2goKCgpSCgujigoKUgoKUgoKUgoCCtoKCgoKUgoLo4oKClIKClIKClIKAgraCgoKClILo4oKClIKClIKClIKAgraCgoKClILo4oKClIKClIKClIKAgraCgoKClILo4oKClIKClIKClIKAgraCgoKClIKC")]
 // </GoSourcePositionMaps>
 

@@ -93,7 +93,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
 
     // Check whether any bits have been truncated from dm.
     // If so, set dt != 0. If not, leave dt == 0 (meaning dm is exact).
-    nuint dt = default!;
+    nuint dt = default;
     switch (ᐧ) {
     default: {
         // Most powers of 10 use a truncated constant,
@@ -136,7 +136,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
     // The << 1 is leaving room for the rounding bit.
     var max = uint64pow10[digits] << 1;
     if (dm >= max) {
-        nuint r = default!;
+        nuint r = default;
         (dm, r) = (dm / 10, (nuint)(dm % 10));
         dt |= (nuint)(bool2uint(r != 0));
         d.dp++;
@@ -145,9 +145,9 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
     // If this is %.*f we may have overestimated the digits needed.
     // Now that we know where the decimal point is,
     // trim to the actual number of digits, which is d.dp+prec.
-    if (fmt == (rune)'f' && digits != d.dp + prec) {
+    if (fmt == 'f' && digits != d.dp + prec) {
         while (digits > d.dp + prec) {
-            nuint r = default!;
+            nuint r = default;
             (dm, r) = (dm / 10, (nuint)(dm % 10));
             dt |= (nuint)(bool2uint(r != 0));
             digits--;
@@ -171,7 +171,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
     //     (dm&1 != 0 and dm&2 != 0).
     // The bitwise expression encodes that logic.
     dm += (uint64)((nuint)dm & (dt | (nuint)dm >> 1) & 1);
-    dm >>= (int)(1);
+    dm >>= 1;
     if (dm == max >> 1) {
         // 999... rolled over to 1000...
         dm = uint64pow10[digits - 1];
@@ -184,7 +184,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
             throw panic("formatBase10");
         }
         d.nd = digits;
-        while (d.d[d.nd - 1] == (rune)'0') {
+        while (d.d[d.nd - 1] == '0') {
             d.nd--;
         }
     }

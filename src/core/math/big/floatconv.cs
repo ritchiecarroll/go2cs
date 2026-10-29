@@ -20,11 +20,11 @@ internal static ref Float floatZero => ref ((StaticBox<Float>)ᏑfloatZero).Valu
 // but the returned value is nil.
 public static (ж<Float>, bool) SetString(this ж<Float> Ꮡz, @string s) {
     {
-        var (f, _, err) = Ꮡz.Parse(s, 0); if (err == default!) {
+        var (f, _, err) = Ꮡz.Parse(s, 0); if (err == nil) {
             return (f, true);
         }
     }
-    return (default!, false);
+    return (default, false);
 }
 
 // scan is like Parse but reads the longest possible prefix representing a valid
@@ -32,9 +32,9 @@ public static (ж<Float>, bool) SetString(this ж<Float> Ꮡz, @string s) {
 // as the implementation of Parse. It does not recognize ±Inf and does not expect
 // EOF at the end.
 internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.ByteScanner r, nint @base) {
-    ж<Float> f = default!;
-    nint b = default!;
-    error err = default!;
+    ж<Float> f = default;
+    nint b = default;
+    error err = default;
     ref var z = ref Ꮡz.DerefOrNull();
 
     var prec = z.prec;
@@ -47,22 +47,22 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
 
     // sign
     (z.neg, err) = scanSign(r);
-    if (err != default!) {
+    if (err != nil) {
         return (f, b, err);
     }
 
     // mantissa
-    nint fcount = default!;  // fractional digit count; valid if <= 0
+    nint fcount = default; // fractional digit count; valid if <= 0
     (z.mant, b, fcount, err) = z.mant.scan(r, @base, true);
-    if (err != default!) {
+    if (err != nil) {
         return (f, b, err);
     }
 
     // exponent
-    int64 exp = default!;
-    nint ebase = default!;
+    int64 exp = default;
+    nint ebase = default;
     (exp, ebase, err) = scanExponent(r, true, @base == 0);
-    if (err != default!) {
+    if (err != nil) {
         return (f, b, err);
     }
 
@@ -134,7 +134,7 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     // exp consumed - not needed anymore
 
     // apply 2**exp2
-    if (MinExp <= exp2 && exp2 <= MaxExp){
+    if (MinExp <= exp2 && exp2 <= MaxExp) {
         z.prec = prec;
         z.form = finite;
         z.exp = (int32)exp2;
@@ -153,7 +153,7 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
 
     // apply 5**exp5
     var p = @new<Float>().SetPrec(z.Prec() + 64); // use more bits for p -- TODO(gri) what is the right number?
-    if (exp5 < 0){
+    if (exp5 < 0) {
         Ꮡz.Quo(Ꮡz, p.pow5((uint64)(-exp5)));
     } else {
         Ꮡz.Mul(Ꮡz, p.pow5((uint64)exp5));
@@ -221,7 +221,7 @@ internal static ж<Float> pow5(this ж<Float> Ꮡz, uint64 n) {
             Ꮡz.Mul(Ꮡz, f);
         }
         f.Mul(f, f);
-        n >>= (int)(1);
+        n >>= 1;
     }
 
     return Ꮡz;
@@ -273,33 +273,32 @@ internal static ж<Float> pow5(this ж<Float> Ꮡz, uint64 n) {
 // The returned *Float f is nil and the value of z is valid but not
 // defined if an error is reported.
 public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @string s, nint @base) {
-    ж<Float> f = default!;
-    nint b = default!;
-    error err = default!;
+    ж<Float> f = default;
+    nint b = default;
+    error err = default;
 
     // scan doesn't handle ±Inf
     if (len(s) == 3 && (s == "Inf"u8 || s == "inf"u8)) {
         f = Ꮡz.SetInf(false);
         return (f, b, err);
     }
-    if (len(s) == 4 && (s[0] == (rune)'+' || s[0] == (rune)'-') && (s[1..] == "Inf" || s[1..] == "inf")) {
-        f = Ꮡz.SetInf(s[0] == (rune)'-');
+    if (len(s) == 4 && (s[0] == '+' || s[0] == '-') && (s[1..] == "Inf" || s[1..] == "inf")) {
+        f = Ꮡz.SetInf(s[0] == '-');
         return (f, b, err);
     }
 
     var r = strings.NewReader(s);
     {
-        (f, b, err) = Ꮡz.scan(new strings_ReaderжByteScanner(r), @base); if (err != default!) {
+        (f, b, err) = Ꮡz.scan(new strings_ReaderжByteScanner(r), @base); if (err != nil) {
             return (f, b, err);
         }
     }
 
     // entire string must have been consumed
     {
-        var (ch, err2) = r.ReadByte(); if (err2 == default!){
+        var (ch, err2) = r.ReadByte(); if (err2 == nil) {
             err = fmt.Errorf("expected end of string, found %q"u8, ch);
-        } else 
-        if (!AreEqual(err2, io.EOF)) {
+        } else if (!AreEqual(err2, io.EOF)) {
             err = err2;
         }
     }

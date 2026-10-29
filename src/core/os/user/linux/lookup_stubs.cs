@@ -22,13 +22,12 @@ internal static readonly @string androidˢ = "android"u8;
 internal static readonly @string userˢ2 = "$USER"u8;
 
 internal static (ж<User>, error) current() {
-    ref var uid = ref heap<@string>(out var Ꮡuid);
-    uid = currentUID();
+    ref var uid = ref heap<@string>(currentUID(), out var Ꮡuid);
     // $USER and /etc/passwd may disagree; prefer the latter if we can get it.
     // See issue 27524 for more information.
     var (u, err) = lookupUserId(uid);
-    if (err == default!) {
-        return (u, default!);
+    if (err == nil) {
+        return (u, default);
     }
 
     ref var homeDir = ref heap<@string>(out var ᏑhomeDir);
@@ -42,24 +41,26 @@ internal static (ж<User>, error) current() {
     ));
     // On Android, return a dummy user instead of failing.
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "android"u8) {
-        if ((~u).Uid == ""u8) {
-            u.Value.Uid = "1"u8;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "android"u8: {
+        if (u.Uid == ""u8) {
+            u.Uid = "1"u8;
         }
-        if ((~u).Username == ""u8) {
-            u.Value.Username = androidˢ;
+        if (u.Username == ""u8) {
+            u.Username = androidˢ;
         }
-    }
+        break;
+    }}
     // cgo isn't available, but if we found the minimum information
     // without it, use it:
-    if ((~u).Uid != ""u8 && (~u).Username != ""u8 && (~u).HomeDir != ""u8) {
-        return (u, default!);
+    if (u.Uid != ""u8 && u.Username != ""u8 && u.HomeDir != ""u8) {
+        return (u, default);
     }
-    @string missing = default!;
-    if ((~u).Username == ""u8) {
+    @string missing = default;
+    if (u.Username == ""u8) {
         missing = userˢ2;
     }
-    if ((~u).HomeDir == ""u8) {
+    if (u.HomeDir == ""u8) {
         if (missing != ""u8) {
             missing += ", "u8;
         }

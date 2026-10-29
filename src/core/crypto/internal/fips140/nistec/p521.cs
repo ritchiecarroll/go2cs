@@ -37,8 +37,8 @@ public static ж<P521Point> NewP521Point() {
 public static ж<P521Point> SetGenerator(this ж<P521Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    p.x.SetBytes(new byte[]{0x0, 0xc6, 0x85, 0x8e, 0x6, 0xb7, 0x4, 0x4, 0xe9, 0xcd, 0x9e, 0x3e, 0xcb, 0x66, 0x23, 0x95, 0xb4, 0x42, 0x9c, 0x64, 0x81, 0x39, 0x5, 0x3f, 0xb5, 0x21, 0xf8, 0x28, 0xaf, 0x60, 0x6b, 0x4d, 0x3d, 0xba, 0xa1, 0x4b, 0x5e, 0x77, 0xef, 0xe7, 0x59, 0x28, 0xfe, 0x1d, 0xc1, 0x27, 0xa2, 0xff, 0xa8, 0xde, 0x33, 0x48, 0xb3, 0xc1, 0x85, 0x6a, 0x42, 0x9b, 0xf9, 0x7e, 0x7e, 0x31, 0xc2, 0xe5, 0xbd, 0x66}.slice());
-    p.y.SetBytes(new byte[]{0x1, 0x18, 0x39, 0x29, 0x6a, 0x78, 0x9a, 0x3b, 0xc0, 0x4, 0x5c, 0x8a, 0x5f, 0xb4, 0x2c, 0x7d, 0x1b, 0xd9, 0x98, 0xf5, 0x44, 0x49, 0x57, 0x9b, 0x44, 0x68, 0x17, 0xaf, 0xbd, 0x17, 0x27, 0x3e, 0x66, 0x2c, 0x97, 0xee, 0x72, 0x99, 0x5e, 0xf4, 0x26, 0x40, 0xc5, 0x50, 0xb9, 0x1, 0x3f, 0xad, 0x7, 0x61, 0x35, 0x3c, 0x70, 0x86, 0xa2, 0x72, 0xc2, 0x40, 0x88, 0xbe, 0x94, 0x76, 0x9f, 0xd1, 0x66, 0x50}.slice());
+    p.x.SetBytes(slice<byte>([0x0, 0xc6, 0x85, 0x8e, 0x6, 0xb7, 0x4, 0x4, 0xe9, 0xcd, 0x9e, 0x3e, 0xcb, 0x66, 0x23, 0x95, 0xb4, 0x42, 0x9c, 0x64, 0x81, 0x39, 0x5, 0x3f, 0xb5, 0x21, 0xf8, 0x28, 0xaf, 0x60, 0x6b, 0x4d, 0x3d, 0xba, 0xa1, 0x4b, 0x5e, 0x77, 0xef, 0xe7, 0x59, 0x28, 0xfe, 0x1d, 0xc1, 0x27, 0xa2, 0xff, 0xa8, 0xde, 0x33, 0x48, 0xb3, 0xc1, 0x85, 0x6a, 0x42, 0x9b, 0xf9, 0x7e, 0x7e, 0x31, 0xc2, 0xe5, 0xbd, 0x66]));
+    p.y.SetBytes(slice<byte>([0x1, 0x18, 0x39, 0x29, 0x6a, 0x78, 0x9a, 0x3b, 0xc0, 0x4, 0x5c, 0x8a, 0x5f, 0xb4, 0x2c, 0x7d, 0x1b, 0xd9, 0x98, 0xf5, 0x44, 0x49, 0x57, 0x9b, 0x44, 0x68, 0x17, 0xaf, 0xbd, 0x17, 0x27, 0x3e, 0x66, 0x2c, 0x97, 0xee, 0x72, 0x99, 0x5e, 0xf4, 0x26, 0x40, 0xc5, 0x50, 0xb9, 0x1, 0x3f, 0xad, 0x7, 0x61, 0x35, 0x3c, 0x70, 0x86, 0xa2, 0x72, 0xc2, 0x40, 0x88, 0xbe, 0x94, 0x76, 0x9f, 0xd1, 0x66, 0x50]));
     p.z.One();
     return Ꮡp;
 }
@@ -68,39 +68,39 @@ public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byt
     switch (ᐧ) {
     // Point at infinity.
     case {} when len(b) == 1 && b[0] == 0: {
-        return (Ꮡp.Set(NewP521Point()), default!);
+        return (Ꮡp.Set(NewP521Point()), default);
     }
     // Uncompressed form.
     case {} when len(b) == (nint)(1 + 2 * p521ElementLength) && b[0] == 4: {
         var (x, err) = @new<fiat.P521Element>().SetBytes(b[1..(int)(1 + p521ElementLength)]);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         (var y, err) = @new<fiat.P521Element>().SetBytes(b[(int)(1 + p521ElementLength)..]);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         {
-            var errΔ1 = p521CheckOnCurve(x, y); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var errΔ1 = p521CheckOnCurve(x, y); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
         p.x.Set(x);
         p.y.Set(y);
         p.z.One();
-        return (Ꮡp, default!);
+        return (Ꮡp, default);
     }
     // Compressed form.
     case {} when len(b) == (nint)(1 + p521ElementLength) && (b[0] == 2 || b[0] == 3): {
         var (x, err) = @new<fiat.P521Element>().SetBytes(b[1..]);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
         // y² = x³ - 3x + b
         var y = p521Polynomial(@new<fiat.P521Element>(), x);
         if (!p521Sqrt(y, y)) {
-            return (default!, errors.New(invalidP521Compressedˢ));
+            return (default, errors.New(invalidP521Compressedˢ));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -113,10 +113,10 @@ public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byt
         p.x.Set(x);
         p.y.Set(y);
         p.z.One();
-        return (Ꮡp, default!);
+        return (Ꮡp, default);
     }
     default: {
-        return (default!, errors.New(invalidP521PointEncodingˢ));
+        return (default, errors.New(invalidP521PointEncodingˢ));
     }}
 }
 
@@ -127,34 +127,34 @@ internal static ref sync.Once _p521BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p521B
 
 internal static ж<fiat.P521Element> p521B() {
     Ꮡ_p521BOnce.Do(() => {
-        (_p521B, _) = @new<fiat.P521Element>().SetBytes(new byte[]{0x0, 0x51, 0x95, 0x3e, 0xb9, 0x61, 0x8e, 0x1c, 0x9a, 0x1f, 0x92, 0x9a, 0x21, 0xa0, 0xb6, 0x85, 0x40, 0xee, 0xa2, 0xda, 0x72, 0x5b, 0x99, 0xb3, 0x15, 0xf3, 0xb8, 0xb4, 0x89, 0x91, 0x8e, 0xf1, 0x9, 0xe1, 0x56, 0x19, 0x39, 0x51, 0xec, 0x7e, 0x93, 0x7b, 0x16, 0x52, 0xc0, 0xbd, 0x3b, 0xb1, 0xbf, 0x7, 0x35, 0x73, 0xdf, 0x88, 0x3d, 0x2c, 0x34, 0xf1, 0xef, 0x45, 0x1f, 0xd4, 0x6b, 0x50, 0x3f, 0x0}.slice());
+        (_p521B, _) = @new<fiat.P521Element>().SetBytes(slice<byte>([0x0, 0x51, 0x95, 0x3e, 0xb9, 0x61, 0x8e, 0x1c, 0x9a, 0x1f, 0x92, 0x9a, 0x21, 0xa0, 0xb6, 0x85, 0x40, 0xee, 0xa2, 0xda, 0x72, 0x5b, 0x99, 0xb3, 0x15, 0xf3, 0xb8, 0xb4, 0x89, 0x91, 0x8e, 0xf1, 0x9, 0xe1, 0x56, 0x19, 0x39, 0x51, 0xec, 0x7e, 0x93, 0x7b, 0x16, 0x52, 0xc0, 0xbd, 0x3b, 0xb1, 0xbf, 0x7, 0x35, 0x73, 0xdf, 0x88, 0x3d, 0x2c, 0x34, 0xf1, 0xef, 0x45, 0x1f, 0xd4, 0x6b, 0x50, 0x3f, 0x0]));
     });
     return _p521B;
 }
 
 // p521Polynomial sets y2 to x³ - 3x + b, and returns y2.
-internal static ж<fiat.P521Element> p521Polynomial(ж<fiat.P521Element> Ꮡy2, ж<fiat.P521Element> Ꮡx) {
-    Ꮡy2.Square(Ꮡx);
-    Ꮡy2.Mul(Ꮡy2, Ꮡx);
+internal static ж<fiat.P521Element> p521Polynomial(ж<fiat.P521Element> y2, ж<fiat.P521Element> x) {
+    y2.Square(x);
+    y2.Mul(y2, x);
 
-    var threeX = @new<fiat.P521Element>().Add(Ꮡx, Ꮡx);
-    threeX.Add(threeX, Ꮡx);
-    Ꮡy2.Sub(Ꮡy2, threeX);
+    var threeX = @new<fiat.P521Element>().Add(x, x);
+    threeX.Add(threeX, x);
+    y2.Sub(y2, threeX);
 
-    return Ꮡy2.Add(Ꮡy2, p521B());
+    return y2.Add(y2, p521B());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string p521PointNotOnCurveˢ = "P521 point not on curve"u8;
 
-internal static error p521CheckOnCurve(ж<fiat.P521Element> Ꮡx, ж<fiat.P521Element> Ꮡy) {
+internal static error p521CheckOnCurve(ж<fiat.P521Element> x, ж<fiat.P521Element> y) {
     // y² = x³ - 3x + b
-    var rhs = p521Polynomial(@new<fiat.P521Element>(), Ꮡx);
-    var lhs = @new<fiat.P521Element>().Square(Ꮡy);
+    var rhs = p521Polynomial(@new<fiat.P521Element>(), x);
+    var lhs = @new<fiat.P521Element>().Square(y);
     if (rhs.Equal(lhs) != 1) {
         return errors.New(p521PointNotOnCurveˢ);
     }
-    return default!;
+    return default;
 }
 
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
@@ -200,13 +200,13 @@ internal static (slice<byte>, error) bytesX(this ref P521Point p, /*[66]*/ ж<ar
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
-        return (default!, errors.New(p521PointIsThePointAtˢ));
+        return (default, errors.New(p521PointIsThePointAtˢ));
     }
 
     var zinv = @new<fiat.P521Element>().Invert(p.z);
     var x = @new<fiat.P521Element>().Mul(p.x, zinv);
 
-    return (appendꓸꓸꓸ(@out[..0], x.Bytes()), default!);
+    return (appendꓸꓸꓸ(@out[..0], x.Bytes()), default);
 }
 
 // BytesCompressed returns the compressed or infinity encoding of p, as
@@ -247,49 +247,49 @@ public static ж<P521Point> Add(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
 
-    var t0 = @new<fiat.P521Element>().Mul(p1.x, p2.x); // t0 := X1 * X2
-    var t1 = @new<fiat.P521Element>().Mul(p1.y, p2.y); // t1 := Y1 * Y2
-    var t2 = @new<fiat.P521Element>().Mul(p1.z, p2.z); // t2 := Z1 * Z2
-    var t3 = @new<fiat.P521Element>().Add(p1.x, p1.y); // t3 := X1 + Y1
-    var t4 = @new<fiat.P521Element>().Add(p2.x, p2.y); // t4 := X2 + Y2
-    t3.Mul(t3, t4); // t3 := t3 * t4
-    t4.Add(t0, t1); // t4 := t0 + t1
-    t3.Sub(t3, t4); // t3 := t3 - t4
-    t4.Add(p1.y, p1.z); // t4 := Y1 + Z1
-    var x3 = @new<fiat.P521Element>().Add(p2.y, p2.z); // X3 := Y2 + Z2
-    t4.Mul(t4, x3); // t4 := t4 * X3
-    x3.Add(t1, t2); // X3 := t1 + t2
-    t4.Sub(t4, x3); // t4 := t4 - X3
-    x3.Add(p1.x, p1.z); // X3 := X1 + Z1
-    var y3 = @new<fiat.P521Element>().Add(p2.x, p2.z); // Y3 := X2 + Z2
-    x3.Mul(x3, y3); // X3 := X3 * Y3
-    y3.Add(t0, t2); // Y3 := t0 + t2
-    y3.Sub(x3, y3); // Y3 := X3 - Y3
+    var t0 = @new<fiat.P521Element>().Mul(p1.x, p2.x);  // t0 := X1 * X2
+    var t1 = @new<fiat.P521Element>().Mul(p1.y, p2.y);  // t1 := Y1 * Y2
+    var t2 = @new<fiat.P521Element>().Mul(p1.z, p2.z);  // t2 := Z1 * Z2
+    var t3 = @new<fiat.P521Element>().Add(p1.x, p1.y);  // t3 := X1 + Y1
+    var t4 = @new<fiat.P521Element>().Add(p2.x, p2.y);  // t4 := X2 + Y2
+    t3.Mul(t3, t4);                                     // t3 := t3 * t4
+    t4.Add(t0, t1);                                     // t4 := t0 + t1
+    t3.Sub(t3, t4);                                     // t3 := t3 - t4
+    t4.Add(p1.y, p1.z);                                 // t4 := Y1 + Z1
+    var x3 = @new<fiat.P521Element>().Add(p2.y, p2.z);  // X3 := Y2 + Z2
+    t4.Mul(t4, x3);                                     // t4 := t4 * X3
+    x3.Add(t1, t2);                                     // X3 := t1 + t2
+    t4.Sub(t4, x3);                                     // t4 := t4 - X3
+    x3.Add(p1.x, p1.z);                                 // X3 := X1 + Z1
+    var y3 = @new<fiat.P521Element>().Add(p2.x, p2.z);  // Y3 := X2 + Z2
+    x3.Mul(x3, y3);                                     // X3 := X3 * Y3
+    y3.Add(t0, t2);                                     // Y3 := t0 + t2
+    y3.Sub(x3, y3);                                     // Y3 := X3 - Y3
     var z3 = @new<fiat.P521Element>().Mul(p521B(), t2); // Z3 := b * t2
-    x3.Sub(y3, z3); // X3 := Y3 - Z3
-    z3.Add(x3, x3); // Z3 := X3 + X3
-    x3.Add(x3, z3); // X3 := X3 + Z3
-    z3.Sub(t1, x3); // Z3 := t1 - X3
-    x3.Add(t1, x3); // X3 := t1 + X3
-    y3.Mul(p521B(), y3); // Y3 := b * Y3
-    t1.Add(t2, t2); // t1 := t2 + t2
-    t2.Add(t1, t2); // t2 := t1 + t2
-    y3.Sub(y3, t2); // Y3 := Y3 - t2
-    y3.Sub(y3, t0); // Y3 := Y3 - t0
-    t1.Add(y3, y3); // t1 := Y3 + Y3
-    y3.Add(t1, y3); // Y3 := t1 + Y3
-    t1.Add(t0, t0); // t1 := t0 + t0
-    t0.Add(t1, t0); // t0 := t1 + t0
-    t0.Sub(t0, t2); // t0 := t0 - t2
-    t1.Mul(t4, y3); // t1 := t4 * Y3
-    t2.Mul(t0, y3); // t2 := t0 * Y3
-    y3.Mul(x3, z3); // Y3 := X3 * Z3
-    y3.Add(y3, t2); // Y3 := Y3 + t2
-    x3.Mul(t3, x3); // X3 := t3 * X3
-    x3.Sub(x3, t1); // X3 := X3 - t1
-    z3.Mul(t4, z3); // Z3 := t4 * Z3
-    t1.Mul(t3, t0); // t1 := t3 * t0
-    z3.Add(z3, t1); // Z3 := Z3 + t1
+    x3.Sub(y3, z3);                                     // X3 := Y3 - Z3
+    z3.Add(x3, x3);                                     // Z3 := X3 + X3
+    x3.Add(x3, z3);                                     // X3 := X3 + Z3
+    z3.Sub(t1, x3);                                     // Z3 := t1 - X3
+    x3.Add(t1, x3);                                     // X3 := t1 + X3
+    y3.Mul(p521B(), y3);                                // Y3 := b * Y3
+    t1.Add(t2, t2);                                     // t1 := t2 + t2
+    t2.Add(t1, t2);                                     // t2 := t1 + t2
+    y3.Sub(y3, t2);                                     // Y3 := Y3 - t2
+    y3.Sub(y3, t0);                                     // Y3 := Y3 - t0
+    t1.Add(y3, y3);                                     // t1 := Y3 + Y3
+    y3.Add(t1, y3);                                     // Y3 := t1 + Y3
+    t1.Add(t0, t0);                                     // t1 := t0 + t0
+    t0.Add(t1, t0);                                     // t0 := t1 + t0
+    t0.Sub(t0, t2);                                     // t0 := t0 - t2
+    t1.Mul(t4, y3);                                     // t1 := t4 * Y3
+    t2.Mul(t0, y3);                                     // t2 := t0 * Y3
+    y3.Mul(x3, z3);                                     // Y3 := X3 * Z3
+    y3.Add(y3, t2);                                     // Y3 := Y3 + t2
+    x3.Mul(t3, x3);                                     // X3 := t3 * X3
+    x3.Sub(x3, t1);                                     // X3 := X3 - t1
+    z3.Mul(t4, z3);                                     // Z3 := t4 * Z3
+    t1.Mul(t3, t0);                                     // t1 := t3 * t0
+    z3.Add(z3, t1);                                     // Z3 := Z3 + t1
 
     q.x.Set(x3);
     q.y.Set(y3);
@@ -305,40 +305,40 @@ public static ж<P521Point> Double(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) 
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
 
-    var t0 = @new<fiat.P521Element>().Square(p.x); // t0 := X ^ 2
-    var t1 = @new<fiat.P521Element>().Square(p.y); // t1 := Y ^ 2
-    var t2 = @new<fiat.P521Element>().Square(p.z); // t2 := Z ^ 2
-    var t3 = @new<fiat.P521Element>().Mul(p.x, p.y); // t3 := X * Y
-    t3.Add(t3, t3); // t3 := t3 + t3
-    var z3 = @new<fiat.P521Element>().Mul(p.x, p.z); // Z3 := X * Z
-    z3.Add(z3, z3); // Z3 := Z3 + Z3
+    var t0 = @new<fiat.P521Element>().Square(p.x);      // t0 := X ^ 2
+    var t1 = @new<fiat.P521Element>().Square(p.y);      // t1 := Y ^ 2
+    var t2 = @new<fiat.P521Element>().Square(p.z);      // t2 := Z ^ 2
+    var t3 = @new<fiat.P521Element>().Mul(p.x, p.y);    // t3 := X * Y
+    t3.Add(t3, t3);                                     // t3 := t3 + t3
+    var z3 = @new<fiat.P521Element>().Mul(p.x, p.z);    // Z3 := X * Z
+    z3.Add(z3, z3);                                     // Z3 := Z3 + Z3
     var y3 = @new<fiat.P521Element>().Mul(p521B(), t2); // Y3 := b * t2
-    y3.Sub(y3, z3); // Y3 := Y3 - Z3
-    var x3 = @new<fiat.P521Element>().Add(y3, y3); // X3 := Y3 + Y3
-    y3.Add(x3, y3); // Y3 := X3 + Y3
-    x3.Sub(t1, y3); // X3 := t1 - Y3
-    y3.Add(t1, y3); // Y3 := t1 + Y3
-    y3.Mul(x3, y3); // Y3 := X3 * Y3
-    x3.Mul(x3, t3); // X3 := X3 * t3
-    t3.Add(t2, t2); // t3 := t2 + t2
-    t2.Add(t2, t3); // t2 := t2 + t3
-    z3.Mul(p521B(), z3); // Z3 := b * Z3
-    z3.Sub(z3, t2); // Z3 := Z3 - t2
-    z3.Sub(z3, t0); // Z3 := Z3 - t0
-    t3.Add(z3, z3); // t3 := Z3 + Z3
-    z3.Add(z3, t3); // Z3 := Z3 + t3
-    t3.Add(t0, t0); // t3 := t0 + t0
-    t0.Add(t3, t0); // t0 := t3 + t0
-    t0.Sub(t0, t2); // t0 := t0 - t2
-    t0.Mul(t0, z3); // t0 := t0 * Z3
-    y3.Add(y3, t0); // Y3 := Y3 + t0
-    t0.Mul(p.y, p.z); // t0 := Y * Z
-    t0.Add(t0, t0); // t0 := t0 + t0
-    z3.Mul(t0, z3); // Z3 := t0 * Z3
-    x3.Sub(x3, z3); // X3 := X3 - Z3
-    z3.Mul(t0, t1); // Z3 := t0 * t1
-    z3.Add(z3, z3); // Z3 := Z3 + Z3
-    z3.Add(z3, z3); // Z3 := Z3 + Z3
+    y3.Sub(y3, z3);                                     // Y3 := Y3 - Z3
+    var x3 = @new<fiat.P521Element>().Add(y3, y3);      // X3 := Y3 + Y3
+    y3.Add(x3, y3);                                     // Y3 := X3 + Y3
+    x3.Sub(t1, y3);                                     // X3 := t1 - Y3
+    y3.Add(t1, y3);                                     // Y3 := t1 + Y3
+    y3.Mul(x3, y3);                                     // Y3 := X3 * Y3
+    x3.Mul(x3, t3);                                     // X3 := X3 * t3
+    t3.Add(t2, t2);                                     // t3 := t2 + t2
+    t2.Add(t2, t3);                                     // t2 := t2 + t3
+    z3.Mul(p521B(), z3);                                // Z3 := b * Z3
+    z3.Sub(z3, t2);                                     // Z3 := Z3 - t2
+    z3.Sub(z3, t0);                                     // Z3 := Z3 - t0
+    t3.Add(z3, z3);                                     // t3 := Z3 + Z3
+    z3.Add(z3, t3);                                     // Z3 := Z3 + t3
+    t3.Add(t0, t0);                                     // t3 := t0 + t0
+    t0.Add(t3, t0);                                     // t0 := t3 + t0
+    t0.Sub(t0, t2);                                     // t0 := t0 - t2
+    t0.Mul(t0, z3);                                     // t0 := t0 * Z3
+    y3.Add(y3, t0);                                     // Y3 := Y3 + t0
+    t0.Mul(p.y, p.z);                                   // t0 := Y * Z
+    t0.Add(t0, t0);                                     // t0 := t0 + t0
+    z3.Mul(t0, z3);                                     // Z3 := t0 * Z3
+    x3.Sub(x3, z3);                                     // X3 := X3 - Z3
+    z3.Mul(t0, t1);                                     // Z3 := t0 * t1
+    z3.Add(z3, z3);                                     // Z3 := Z3 + Z3
+    z3.Add(z3, z3);                                     // Z3 := Z3 + Z3
 
     q.x.Set(x3);
     q.y.Set(y3);
@@ -365,29 +365,29 @@ partial struct p521Table /*[15]ж<P521Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-internal static void Select(this ref p521Table table, ж<P521Point> Ꮡp, uint8 n) {
+internal static void Select(this ref p521Table table, ж<P521Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p521Table called with out-of-bounds value");
     }
-    Ꮡp.Set(NewP521Point());
+    p.Set(NewP521Point());
     for (var i = (uint8)1; i < 16; i++) {
         nint cond = constanttime.ByteEq(i, n);
-        Ꮡp.Select(table.Value[(uint8)(i - 1)], Ꮡp, cond);
+        p.Select(table.Value[(uint8)(i - 1)], p, cond);
     }
 }
 
 // ScalarMult sets p = scalar * q, and returns p.
-public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521Point> Ꮡq, slice<byte> scalar) {
+public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) {
     // Compute a p521Table for the base point q. The explicit NewP521Point
     // calls get inlined, letting the allocations live on the stack.
     p521Table table = new p521Table(new ж<P521Point>[]{NewP521Point(), NewP521Point(), NewP521Point(),
         NewP521Point(), NewP521Point(), NewP521Point(), NewP521Point(),
         NewP521Point(), NewP521Point(), NewP521Point(), NewP521Point(),
         NewP521Point(), NewP521Point(), NewP521Point(), NewP521Point()}.array());
-    table[0].Set(Ꮡq);
+    table[0].Set(q);
     for (nint i = 1; i < 15; i += 2) {
         table[i].Double(table[i / 2]);
-        table[i + 1].Add(table[i], Ꮡq);
+        table[i + 1].Add(table[i], q);
     }
 
     // Instead of doing the classic double-and-add chain, we do it with a
@@ -418,7 +418,7 @@ public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521
         Ꮡp.Add(Ꮡp, t);
     }
 
-    return (Ꮡp, default!);
+    return (Ꮡp, default);
 }
 
 internal static ж<array<p521Table>> p521GeneratorTable;
@@ -453,7 +453,7 @@ public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, sli
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p521ElementLength) {
-        return (default!, errors.New(invalidScalarLengthˢ));
+        return (default, errors.New(invalidScalarLengthˢ));
     }
     var tables = p.generatorTable();
 
@@ -478,24 +478,24 @@ public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, sli
         tableIndex--;
     }
 
-    return (Ꮡp, default!);
+    return (Ꮡp, default);
 }
 
 // p521Sqrt sets e to a square root of x. If x is not a square, p521Sqrt returns
 // false and e is unchanged. e and x can overlap.
-internal static bool /*isSquare*/ p521Sqrt(ж<fiat.P521Element> Ꮡe, ж<fiat.P521Element> Ꮡx) {
+internal static bool /*isSquare*/ p521Sqrt(ж<fiat.P521Element> e, ж<fiat.P521Element> x) {
     var candidate = @new<fiat.P521Element>();
-    p521SqrtCandidate(candidate, Ꮡx);
+    p521SqrtCandidate(candidate, x);
     var square = @new<fiat.P521Element>().Square(candidate);
-    if (square.Equal(Ꮡx) != 1) {
+    if (square.Equal(x) != 1) {
         return false;
     }
-    Ꮡe.Set(candidate);
+    e.Set(candidate);
     return true;
 }
 
 // p521SqrtCandidate sets z to a square root candidate for x. z and x must not overlap.
-internal static void p521SqrtCandidate(ж<fiat.P521Element> Ꮡz, ж<fiat.P521Element> Ꮡx) {
+internal static void p521SqrtCandidate(ж<fiat.P521Element> z, ж<fiat.P521Element> x) {
     // Since p = 3 mod 4, exponentiation by (p + 1) / 4 yields a square root candidate.
     //
     // The sequence of 0 multiplications and 519 squarings is derived from the
@@ -504,9 +504,9 @@ internal static void p521SqrtCandidate(ж<fiat.P521Element> Ꮡz, ж<fiat.P521El
     //	return  1 << 519
     //
 
-    Ꮡz.Square(Ꮡx);
+    z.Square(x);
     for (nint s = 1; s < 519; s++) {
-        Ꮡz.Square(Ꮡz);
+        z.Square(z);
     }
 }
 

@@ -29,7 +29,7 @@ partial struct call {
 // Group represents a class of work and forms a namespace in
 // which units of work can be executed with duplicate suppression.
 partial struct Group {
-    internal sync.Mutex mu;       // protects m
+    internal sync.Mutex mu;           // protects m
     internal map<@string, ж<call>> m; // lazily initialized
 }
 
@@ -50,15 +50,15 @@ public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string ke
     ref var g = ref Ꮡg.DerefOrNull();
 
     g.mu.Lock();
-    if (g.m == default!) {
+    if (g.m == nil) {
         g.m = new map<@string, ж<call>>();
     }
     {
         var (cΔ1, ok) = g.m[key, ꟷ]; if (ok) {
-            cΔ1.Value.dups++;
+            cΔ1.dups++;
             g.mu.Unlock();
             cΔ1.of(call.Ꮡwg).Wait();
-            return ((~cΔ1).val, (~cΔ1).err, true);
+            return (cΔ1.val, cΔ1.err, true);
         }
     }
     var c = @new<call>();
@@ -67,7 +67,7 @@ public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string ke
     g.mu.Unlock();
 
     Ꮡg.doCall(c, key, fn);
-    return ((~c).val, (~c).err, (~c).dups > 0);
+    return (c.val, c.err, c.dups > 0);
 }
 
 // DoChan is like Do but returns a channel that will receive the
@@ -77,25 +77,25 @@ public static partial /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string 
 
     var ch = new channel<Result>(1);
     g.mu.Lock();
-    if (g.m == default!) {
+    if (g.m == nil) {
         g.m = new map<@string, ж<call>>();
     }
     {
         var (cΔ1, ok) = g.m[key, ꟷ]; if (ok) {
-            cΔ1.Value.dups++;
-            cΔ1.Value.chans = append((~cΔ1).chans, ch.WithDirection(GoChanDir.Send));
+            cΔ1.dups++;
+            cΔ1.chans = append(cΔ1.chans, ch.AsSendOnly());
             g.mu.Unlock();
-            return ch.WithDirection(GoChanDir.Recv);
+            return ch.AsRecvOnly();
         }
     }
-    var c = Ꮡ(new call(chans: new channel/*<-*/<Result>[]{ch}.slice()));
+    var c = Ꮡ(new call(chans: slice<channel/*<-*/<Result>>([ch])));
     c.of(call.Ꮡwg).Add(1);
     g.m[key] = c;
     g.mu.Unlock();
 
     goǃ(Ꮡg.doCall, c, key, fn);
 
-    return ch.WithDirection(GoChanDir.Recv);
+    return ch.AsRecvOnly();
 }
 
 // doCall handles the single call for a key.
@@ -133,13 +133,13 @@ public static bool ForgetUnshared(this ж<Group> Ꮡg, @string key) {
         if (!ok) {
             return true;
         }
-        if ((~c).dups == 0) {
+        if (c.dups == 0) {
             delete(g.m, key);
             return true;
         }
         return false;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡg.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 

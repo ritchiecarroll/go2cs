@@ -10,18 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using scannerꓸError = go.go.scanner_package.ΔError;
-global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
@@ -171,6 +160,61 @@ using static go.go.ast_package;
 // the assembly.
 [assembly: global::go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: global::go.GoFieldAccess(typeof(ArrayType))]
+[assembly: global::go.GoFieldAccess(typeof(AssignStmt))]
+[assembly: global::go.GoFieldAccess(typeof(BinaryExpr))]
+[assembly: global::go.GoFieldAccess(typeof(BlockStmt))]
+[assembly: global::go.GoFieldAccess(typeof(BranchStmt))]
+[assembly: global::go.GoFieldAccess(typeof(CallExpr))]
+[assembly: global::go.GoFieldAccess(typeof(CaseClause))]
+[assembly: global::go.GoFieldAccess(typeof(CommClause))]
+[assembly: global::go.GoFieldAccess(typeof(Comment))]
+[assembly: global::go.GoFieldAccess(typeof(CommentGroup))]
+[assembly: global::go.GoFieldAccess(typeof(CompositeLit))]
+[assembly: global::go.GoFieldAccess(typeof(DeclStmt))]
+[assembly: global::go.GoFieldAccess(typeof(DeferStmt))]
+[assembly: global::go.GoFieldAccess(typeof(Ellipsis))]
+[assembly: global::go.GoFieldAccess(typeof(ExprStmt))]
+[assembly: global::go.GoFieldAccess(typeof(Field))]
+[assembly: global::go.GoFieldAccess(typeof(FieldList))]
+[assembly: global::go.GoFieldAccess(typeof(File))]
+[assembly: global::go.GoFieldAccess(typeof(ForStmt))]
+[assembly: global::go.GoFieldAccess(typeof(FuncDecl))]
+[assembly: global::go.GoFieldAccess(typeof(FuncLit))]
+[assembly: global::go.GoFieldAccess(typeof(FuncType))]
+[assembly: global::go.GoFieldAccess(typeof(GenDecl))]
+[assembly: global::go.GoFieldAccess(typeof(GoStmt))]
+[assembly: global::go.GoFieldAccess(typeof(Ident))]
+[assembly: global::go.GoFieldAccess(typeof(IfStmt))]
+[assembly: global::go.GoFieldAccess(typeof(ImportSpec))]
+[assembly: global::go.GoFieldAccess(typeof(IncDecStmt))]
+[assembly: global::go.GoFieldAccess(typeof(IndexExpr))]
+[assembly: global::go.GoFieldAccess(typeof(IndexListExpr))]
+[assembly: global::go.GoFieldAccess(typeof(InterfaceType))]
+[assembly: global::go.GoFieldAccess(typeof(KeyValueExpr))]
+[assembly: global::go.GoFieldAccess(typeof(LabeledStmt))]
+[assembly: global::go.GoFieldAccess(typeof(MapType))]
+[assembly: global::go.GoFieldAccess(typeof(Package))]
+[assembly: global::go.GoFieldAccess(typeof(ParenExpr))]
+[assembly: global::go.GoFieldAccess(typeof(RangeStmt))]
+[assembly: global::go.GoFieldAccess(typeof(ReturnStmt))]
+[assembly: global::go.GoFieldAccess(typeof(Scope))]
+[assembly: global::go.GoFieldAccess(typeof(SelectStmt))]
+[assembly: global::go.GoFieldAccess(typeof(SelectorExpr))]
+[assembly: global::go.GoFieldAccess(typeof(SendStmt))]
+[assembly: global::go.GoFieldAccess(typeof(SliceExpr))]
+[assembly: global::go.GoFieldAccess(typeof(StarExpr))]
+[assembly: global::go.GoFieldAccess(typeof(StructType))]
+[assembly: global::go.GoFieldAccess(typeof(SwitchStmt))]
+[assembly: global::go.GoFieldAccess(typeof(TypeAssertExpr))]
+[assembly: global::go.GoFieldAccess(typeof(TypeSpec))]
+[assembly: global::go.GoFieldAccess(typeof(TypeSwitchStmt))]
+[assembly: global::go.GoFieldAccess(typeof(UnaryExpr))]
+[assembly: global::go.GoFieldAccess(typeof(ValueSpec))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.Object))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -183,9 +227,9 @@ using static go.go.ast_package;
 [assembly: global::go.GoPositionMap("go/ast/commentmap.go", "commentmap.cs", "ABAikgAHFIKCgpSUqJKClLSUggAOHgALGIKmgoKCgoIABxSigqzSgoKClIIAAiQAEQKCpqaCgoKCpoKWAAYQgoKCmKKCuJSAgoKu0gAGEt7GppSkgoKUuIKm1MissoCCgqSssoKigIKklKqigoKUgqaCgqaCuIKClOqCgriCgpTI1qSSgpSCgoKUpoKCgoSSgIKUpJSC", "18-20:1;41-49:1;242-247:1;304-310:1")]
 [assembly: global::go.GoPositionMap("go/ast/directive.go", "directive.cs", "ACtwAA0GgqaC3IKClIKClIKmgqaCgoKUpoKmgKKAAAsiAAgClIKCgpSUtoKCpqaCgoLalAAKFIKCpoKCgqaCgoKUpoKC")]
 [assembly: global::go.GoPositionMap("go/ast/filter.go", "filter.cs", "AAsgwgACFPIAAhgACQIABBCigoKCgqasspSkgILWlKaygpSCgoKClIKUgoKClJSCgpSCpoKUgqaCgoKCuIKCgpS0gIKkgILGgpSmooKUgoKCpqaClKSkpIKUpIKCpIKUpIKCpJSmgpSCgoKClMaCgpSU3LamgoKCgoKmAAIS4qaClIKklAACGAAJAqaCgoKCgqaCAAIgAA0CpoKCgoKmABU2soCUlICCtoCC2MqeAAoIgoKCgpKCgoKCgpSCgoKUgqacwoKCgoKCgoKUgpSCgpS4uKiSgoKCgoKCgqIACRSAgoKAlKamlJTYggAIEoKCgoKCprqSgoKCgoKAAAcQguyCgrqSgoKCgoLK")]
-[assembly: global::go.GoPositionMap("go/ast/import.go", "import.cs", "AA0gwoKCpqaUuIKCgpSCpoKmgoKCgoKC3IKCgIKC7IKmgoKClKaCgoKUpoKCgpSokoKUAAwauIK4goK4goKCgoKCgpSUgoKCgqaUgpSCyoKCuIKCgoKUlIKSlIKUggAHEIKCgoKClIKCgoKUyoKCgpSmgILIpoKCgpSCgoKCgtzcmKzSgoKC", "186-200:1;242-244:2")]
-[assembly: global::go.GoPositionMap("go/ast/print.go", "print.cs", "ABMsopSUAAIYAAkCpsQACRKCgILagoKUgoTaogAMGpSygpSCgoKClJKCgoKUgoKCuJSCgpQACBSygIIABBoACgKCgqaUpoKCgoKCgoKClJSmuIKAgpSCyIKCgoKCgoKUlKaAgoKkgoKCgoKCgpSUpoKCgoKmgIKCgoKClIKCyIKmgqaCtoKCyA==", "54-58:1")]
-[assembly: global::go.GoPositionMap("go/ast/resolve.go", "resolve.cs", "ABQqgqaipsKClJSCgoCCpLiikoCCgrYADzQADAKCppKClICktILYgsqmpoK4goKCgoKUgoKCgoLugoK4lIKkyoKCgsrKlIKCgoKCqIKmgg==")]
+[assembly: global::go.GoPositionMap("go/ast/import.go", "import.cs", "AA0gwoKCpqaUuIKCgpSCpoKmgoKCgoKC3IKCgIKC7IKmgoKClKaCgoKUpoKCgpSokoKUAAwauIK4goK4goKCgoKCgpSUgoKCgqaUgpSCyoKCuIKCgoKUlIKClIKUggAHEIKCgoKClIKCgoKUyoKCgpSmgILIpoKCgpSCgoKCgtzcmKzSgoKC", "186-200:1;242-244:2")]
+[assembly: global::go.GoPositionMap("go/ast/print.go", "print.cs", "ABMsopSUAAIYAAkCpsQACBKCgILagoKUgoTaogAMGpSygpSCgoKClIKCgoKUgoKCuJSCgpQACBSygIIABBoACgKCgqaUtoKCgoKCgoKClJS2uIKAgpSC2IKCgoKCgoKUlLaAgoKkgoKCgoKCgpSUtoKCgoKmgIKCgoKClIKCyIK2gqaCtoKCyA==", "54-58:1")]
+[assembly: global::go.GoPositionMap("go/ast/resolve.go", "resolve.cs", "ABQqgqaipsKClJSCgoCCpLiikoCCgrYADzQADAKCpoKClICktILYgsqmpoK4goKCgoKUgoKCgoLugoK4lIKUyoKCgsrKlIKCgoKCqIKmgg==")]
 [assembly: global::go.GoPositionMap("go/ast/scope.go", "scope.cs", "ABg0koKssq7ygIKkqLKCgoKCgqaCACJIkqyygpSCgtiClKSCgtiCxoLGgsaCgIIACQwADiIACRSA")]
 [assembly: global::go.GoPositionMap("go/ast/walk.go", "walk.cs", "ABEmooIAAxgACAKAguzstoKUgoKUgpSCyAALDoLIgraClLa2graCtoK2goKUgpSCyIKCyIK2traCtoLIgpS2toKUgpSCyLaCtgAIDvyCtraCtraCtra2toLItoKUgoKCyIK2gpSClLaClIK2gpS2toKUgpSClLaClIKUgsiClIKUgoLIgpSCgpSCgsiClIKClIKCAAgOgpS2gpSClIKCgtqClILsgti2yoKClAACGAAJAgACEuKCgoKUlAAEIgAMAoKCgpSUlJSUgg==", "387-396:1;389-395:1.1;413-424:1")]
 // </GoSourcePositionMaps>

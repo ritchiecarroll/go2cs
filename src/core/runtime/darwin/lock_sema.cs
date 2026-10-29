@@ -28,19 +28,19 @@ internal static void noteclear(ж<note> Ꮡn) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string notetsleepNotOnG0ˢ = "notetsleep not on g0"u8;
 
-internal static bool notetsleep(ж<note> Ꮡn, int64 ns) {
+internal static bool notetsleep(ж<note> n, int64 ns) {
     var gp = getg();
     if (gp != (~(~gp).m).g0) {
         @throw(notetsleepNotOnG0ˢ);
     }
     semacreate((~gp).m);
-    return notetsleep_internal(Ꮡn, ns, nil, 0);
+    return notetsleep_internal(n, ns, nil, 0);
 }
 
 // go2cs generated this placeholder — func notetsleepg is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (ж<g>, bool) beforeIdle(int64 _Δp0, int64 _Δp1) {
-    return (default!, false);
+    return (default, false);
 }
 
 internal static void checkTimeouts() {

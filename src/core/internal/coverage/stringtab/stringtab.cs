@@ -76,36 +76,34 @@ public static error Write(this ж<Writer> Ꮡstw, io.Writer w) {
         Ꮡstw.Value.tmp = Ꮡstw.Value.tmp[..0];
         Ꮡstw.Value.tmp = uleb128.AppendUleb128(Ꮡstw.Value.tmp, v);
         {
-            var (nw, err) = w.Write(Ꮡstw.Value.tmp); if (err != default!){
+            var (nw, err) = w.Write(Ꮡstw.Value.tmp); if (err != nil) {
                 return fmt.Errorf("writing string table: %v"u8, err);
-            } else 
-            if (nw != len(Ꮡstw.Value.tmp)) {
+            } else if (nw != len(Ꮡstw.Value.tmp)) {
                 return fmt.Errorf("short write emitting stringtab uleb"u8);
             }
         }
-        return default!;
+        return default;
     }
     {
-        var err = wr128((nuint)len(stw.strs)); if (err != default!) {
+        var err = wr128((nuint)len(stw.strs)); if (err != nil) {
             return err;
         }
     }
     foreach (var (_, s) in stw.strs) {
         {
-            var err = wr128((nuint)len(s)); if (err != default!) {
+            var err = wr128((nuint)len(s)); if (err != nil) {
                 return err;
             }
         }
         {
-            var (nw, err) = w.Write(slice<byte>(s)); if (err != default!){
+            var (nw, err) = w.Write(slice<byte>(s)); if (err != nil) {
                 return fmt.Errorf("writing string table: %v"u8, err);
-            } else 
-            if (nw != len(slice<byte>(s))) {
+            } else if (nw != len(slice<byte>(s))) {
                 return fmt.Errorf("short write emitting stringtab"u8);
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // Freeze sends a signal to the writer that no more additions are
@@ -125,9 +123,9 @@ partial struct Reader {
 
 // NewReader creates a stringtab.Reader to read the contents
 // of a string table from 'r'.
-public static ж<Reader> NewReader(ж<slicereader.Reader> Ꮡr) {
+public static ж<Reader> NewReader(ж<slicereader.Reader> r) {
     var str = Ꮡ(new Reader(
-        r: Ꮡr
+        r: r
     ));
     return str;
 }

@@ -19,26 +19,26 @@ private static readonly @string decryptionˢ = "Decryption"u8;
 
 // TestBlock performs a set of tests on cipher.Block implementations, checking
 // the documented requirements of BlockSize, Encrypt, and Decrypt.
-public static void TestBlock(ж<testing.T> Ꮡt, nint keySize, Func<slice<byte>, (cipher.Block, error)> mb) {
+public static void TestBlock(ж<testing.T> t, nint keySize, Func<slice<byte>, (cipher.Block, error)> mb) {
     // Generate random key
     var key = new slice<byte>(keySize);
-    newRandReader(Ꮡt).Read(key);
-    Ꮡt.Logf("Cipher key: 0x%x"u8, key);
+    newRandReader(t).Read(key);
+    t.Logf("Cipher key: 0x%x"u8, key);
 
     var (block, err) = mb(key);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     nint blockSize = block.BlockSize();
 
     var blockʗ1 = block;
-    Ꮡt.Run(encryptionˢ, (ж<testing.T> tΔ1) => {
+    t.Run(encryptionˢ, (ж<testing.T> tΔ1) => {
         testCipher(tΔ1, blockʗ1.Encrypt, blockSize);
     });
 
     var blockʗ2 = block;
-    Ꮡt.Run(decryptionˢ, (ж<testing.T> tΔ2) => {
+    t.Run(decryptionˢ, (ж<testing.T> tΔ2) => {
         testCipher(tΔ2, blockʗ2.Decrypt, blockSize);
     });
 
@@ -46,7 +46,7 @@ public static void TestBlock(ж<testing.T> Ꮡt, nint keySize, Func<slice<byte>,
     // implementation-specific characterization/golden tests should be done
     // for each block cipher implementation.
     var blockʗ3 = block;
-    Ꮡt.Run(roundtripˢ, (ж<testing.T> tΔ3) => {
+    t.Run(roundtripˢ, (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         // Check Decrypt inverts Encrypt
@@ -87,8 +87,8 @@ private static readonly @string shortBlockˢ = "ShortBlock"u8;
 private static readonly @string inputNotFullBlockˢ = "input not full block"u8;
 private static readonly @string outputNotFullBlockˢ = "output not full block"u8;
 
-internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<byte>> cipher, nint blockSize) {
-    Ꮡt.Run(alterInputˢ, (ж<testing.T> tΔ1) => {
+internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>> cipher, nint blockSize) {
+    t.Run(alterInputˢ, (ж<testing.T> tΔ1) => {
         var rng = newRandReader(tΔ1);
 
         // Make long src that shouldn't be modified at all, within block
@@ -105,7 +105,7 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         }
     });
 
-    Ꮡt.Run(aliasingˢ, (ж<testing.T> tΔ2) => {
+    t.Run(aliasingˢ, (ж<testing.T> tΔ2) => {
         var rng = newRandReader(tΔ2);
 
         var (buff, expectedOutput) = (new slice<byte>(blockSize), new slice<byte>(blockSize));
@@ -122,7 +122,7 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         }
     });
 
-    Ꮡt.Run(outOfBoundsWriteˢ, (ж<testing.T> tΔ3) => {
+    t.Run(outOfBoundsWriteˢ, (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         var src = new slice<byte>(blockSize);
@@ -163,7 +163,7 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
     // Check that output of cipher isn't affected by adjacent data beyond input
     // slice scope
     // For encryption, this assumes block ciphers encrypt deterministically
-    Ꮡt.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ4) => {
+    t.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ4) => {
         var rng = newRandReader(tΔ4);
 
         var src = new slice<byte>(blockSize);
@@ -194,7 +194,7 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         }
     });
 
-    Ꮡt.Run(nonZeroDstˢ, (ж<testing.T> tΔ5) => {
+    t.Run(nonZeroDstˢ, (ж<testing.T> tΔ5) => {
         var rng = newRandReader(tΔ5);
 
         // Record what the cipher writes into a destination of zeroes
@@ -217,17 +217,15 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
         }
     });
 
-    Ꮡt.Run(bufferOverlapˢ, (ж<testing.T> tΔ6) => {
+    t.Run(bufferOverlapˢ, (ж<testing.T> tΔ6) => {
         var rng = newRandReader(tΔ6);
 
         var buff = new slice<byte>(blockSize * 2);
         rng.Read((buff));
 
         // Make src and dst slices point to same array with inexact overlap
-        ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
-        Ꮡsrc.ValueSlot = buff.slice(0, blockSize);
-        ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-        Ꮡdst.ValueSlot = buff.slice(1, blockSize + 1);
+        ref var src = ref heap<slice<byte>>(buff.slice(0, blockSize), out var Ꮡsrc);
+        ref var dst = ref heap<slice<byte>>(buff.slice(1, blockSize + 1), out var Ꮡdst);
         mustPanic(tΔ6, invalidBufferOverlapˢ, () => {
             cipher(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
@@ -250,7 +248,7 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
     // Test short input/output.
     // Assembly used to not notice.
     // See issue 7928.
-    Ꮡt.Run(shortBlockˢ, (ж<testing.T> tΔ7) => {
+    t.Run(shortBlockˢ, (ж<testing.T> tΔ7) => {
         // Returns slice of n bytes of an n+1 length array.  Lets us test that a
         // slice is still considered too short even if the underlying array it
         // points to is large enough
@@ -282,18 +280,18 @@ internal static void testCipher(ж<testing.T> Ꮡt, Action<slice<byte>, slice<by
     });
 }
 
-internal static void mustPanic(ж<testing.T> Ꮡt, @string msg, Action f) {
+internal static void mustPanic(ж<testing.T> t, @string msg, Action f) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Helper();
+        t.Helper();
 
         defer(() => {
-            Ꮡt.Helper();
+            t.Helper();
 
             var err = recover();
 
-            if (err == default!) {
-                Ꮡt.Errorf("function did not panic for %q"u8, msg);
+            if (err == nil) {
+                t.Errorf("function did not panic for %q"u8, msg);
             }
         }, ref ᒐ);
         f();

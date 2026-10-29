@@ -21,11 +21,11 @@ internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscallꓸHandle s) {
         ref var so = ref heap<Status>(out var Ꮡso);
         (so, var ok) = sw.sotab[s, ꟷ];
         if (!ok) {
-            return default!;
+            return default;
         }
         return Ꮡso;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡsw.of(Switch.Ꮡsmu).RUnlock(); ᒐ.Run(); }
 }
 
@@ -35,8 +35,7 @@ internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, syscallꓸHandle s, 
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.of(Switch.Ꮡonce).Do(Ꮡsw.init);
-    ref var so = ref heap<Status>(out var Ꮡso);
-    so = new Status(Cookie: cookie(family, sotype, proto));
+    ref var so = ref heap<Status>(new Status(Cookie: cookie(family, sotype, proto)), out var Ꮡso);
     sw.sotab[s] = so;
     return Ꮡso;
 }

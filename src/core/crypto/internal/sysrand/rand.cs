@@ -52,9 +52,9 @@ public static void Read(slice<byte> b) {
             defer(() => tʗ1.Stop(), ref ᒐ);
         }
         {
-            var err = read(b); if (err != default! || testingOnlyFailRead) {
-                @string errStr = default!;
-                if (!testingOnlyFailRead){
+            var err = read(b); if (err != nil || testingOnlyFailRead) {
+                @string errStr = default;
+                if (!testingOnlyFailRead) {
                     errStr = err.Error();
                 } else {
                     errStr = testingSimulatedFailureˢ;
@@ -83,7 +83,7 @@ internal static error urandomRead(slice<byte> b) {
     ᏑurandomOnce.Do(() => {
         (urandomFile, urandomErr) = os.Open(devUrandomˢ);
     });
-    if (urandomErr != default!) {
+    if (urandomErr != nil) {
         return urandomErr;
     }
     while (len(b) > 0) {
@@ -91,12 +91,12 @@ internal static error urandomRead(slice<byte> b) {
         // Note that we don't ignore EAGAIN because it should not be possible to
         // hit for a blocking read from urandom, although there were
         // unreproducible reports of it at https://go.dev/issue/9205.
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         b = b.slice(n);
     }
-    return default!;
+    return default;
 }
 
 } // end sysrand_package

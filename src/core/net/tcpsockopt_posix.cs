@@ -10,9 +10,9 @@ using @internal;
 
 partial class net_package {
 
-internal static error setNoDelay(ж<netFD> Ꮡfd, bool noDelay) {
-    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_NODELAY, boolint(noDelay));
-    runtime.KeepAlive(Ꮡfd.OrTypedNil());
+internal static error setNoDelay(ж<netFD> fd, bool noDelay) {
+    var err = fd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_NODELAY, boolint(noDelay));
+    runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
 }
 

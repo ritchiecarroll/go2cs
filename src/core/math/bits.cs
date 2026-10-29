@@ -17,8 +17,8 @@ internal static UntypedInt fracMask => /* 1<<shift - 1 */ 4503599627370495;
 
 // Inf returns positive infinity if sign >= 0, negative infinity if sign < 0.
 public static float64 Inf(nint sign) {
-    uint64 v = default!;
-    if (sign >= 0){
+    uint64 v = default;
+    if (sign >= 0) {
         v = uvinf;
     } else {
         v = uvneginf;
@@ -49,10 +49,9 @@ public static bool IsInf(float64 f, nint sign) {
     // To avoid the floating-point hardware, could use:
     //	x := Float64bits(f);
     //	return sign >= 0 && x == uvinf || sign <= 0 && x == uvneginf;
-    if (sign == 0){
+    if (sign == 0) {
         f = Abs(f);
-    } else 
-    if (sign < 0) {
+    } else if (sign < 0) {
         f = -f;
     }
     return f > MaxFloat64;

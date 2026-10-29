@@ -66,13 +66,13 @@ internal static partial slice<rtcov.CovCounterBlob> getCovCounterList();
 // the openOutputFiles() stores the counter data file in 'cfname' and
 // then places the *io.File into 'cf'.
 partial struct emitState {
-    internal @string mfname;  // path of final meta-data output file
+    internal @string mfname; // path of final meta-data output file
     internal @string mftmp;  // path to meta-data temp file (if needed)
-    internal ж<os.File> mf; // open os.File for meta-data temp file
-    internal @string cfname;  // path of final counter data file
+    internal ж<os.File> mf;  // open os.File for meta-data temp file
+    internal @string cfname; // path of final counter data file
     internal @string cftmp;  // path to counter data temp file
-    internal ж<os.File> cf; // open os.File for counter data file
-    internal @string outdir;  // output directory
+    internal ж<os.File> cf;  // open os.File for counter data file
+    internal @string outdir; // output directory
     // List of meta-data symbols obtained from the runtime
     internal slice<rtcov.CovMetaBlob> metalist;
     // List of counter-data symbols obtained from the runtime
@@ -124,7 +124,7 @@ internal static void emitMetaData() {
         return;
     }
     var (ml, err) = prepareForMetaEmit();
-    if (err != default!) {
+    if (err != nil) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage meta-data prep failed: %v\n"u8, err);
         if (os.Getenv(gocoverdebugˢ) != ""u8) {
             throw panic("meta-data write failure");
@@ -142,7 +142,7 @@ internal static void emitMetaData() {
     }
 
     {
-        var errΔ1 = emitMetaDataToDirectory(goCoverDir, ml); if (errΔ1 != default!) {
+        var errΔ1 = emitMetaDataToDirectory(goCoverDir, ml); if (errΔ1 != nil) {
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage meta-data emit failed: %v\n"u8, errΔ1);
             if (os.Getenv(gocoverdebugˢ) != ""u8) {
                 throw panic("meta-data write failure");
@@ -183,7 +183,7 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
     // APIs (for example, to write out coverage data from a server
     // program that doesn't ever call os.Exit).
     if (len(ml) == 0) {
-        return (default!, default!);
+        return (default, default);
     }
 
     var s = Ꮡ(new emitState(
@@ -195,7 +195,7 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
     // are rewritten during program execution.
     capturedOsArgs = captureOsArgs();
 
-    if ((~s).debug) {
+    if (s.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= GOCOVERDIR is %s\n"u8, os.Getenv(gocoverdirˢ));
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= contents of covmetalist:\n"u8);
         foreach (var (k, vᴛ1) in ml) {
@@ -221,18 +221,18 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
         var entry = vᴛ2.ΔClone();
 
         {
-            var (_, err) = h.Write(entry.Hash[..]); if (err != default!) {
-                return (default!, err);
+            var (_, err) = h.Write(entry.Hash[..]); if (err != nil) {
+                return (default, err);
             }
         }
         tlen += (uint64)entry.Len;
         var ecm = (coverage.CounterMode)entry.CounterMode;
         if (modeClash(ecm)) {
-            return (default!, fmt.Errorf("coverage counter mode clash: package %s uses mode=%d, but package %s uses mode=%s\n"u8, ml[0].PkgPath, cmode, entry.PkgPath, ecm));
+            return (default, fmt.Errorf("coverage counter mode clash: package %s uses mode=%d, but package %s uses mode=%s\n"u8, ml[0].PkgPath, cmode, entry.PkgPath, ecm));
         }
         var ecg = (coverage.CounterGranularity)entry.CounterGranularity;
         if (granClash(ecg)) {
-            return (default!, fmt.Errorf("coverage counter granularity clash: package %s uses gran=%d, but package %s uses gran=%s\n"u8, ml[0].PkgPath, cgran, entry.PkgPath, ecg));
+            return (default, fmt.Errorf("coverage counter granularity clash: package %s uses gran=%d, but package %s uses gran=%s\n"u8, ml[0].PkgPath, cgran, entry.PkgPath, ecg));
         }
     }
 
@@ -241,23 +241,23 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
     h.Write(slice<byte>(cgran.String()));
 
     // Compute final digest.
-    var fh = h.Sum(default!);
+    var fh = h.Sum(default);
     copy(finalHash[..], fh);
     finalHashComputed = true;
     finalMetaLen = tlen;
 
-    return (ml, default!);
+    return (ml, default);
 }
 
 // emitMetaDataToDirectory emits the meta-data output file to the specified
 // directory, returning an error if something went wrong.
 internal static error emitMetaDataToDirectory(@string outdir, slice<rtcov.CovMetaBlob> ml) {
     (ml, var err) = prepareForMetaEmit();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (len(ml) == 0) {
-        return default!;
+        return default;
     }
 
     metaDataEmitAttempted = true;
@@ -270,7 +270,7 @@ internal static error emitMetaDataToDirectory(@string outdir, slice<rtcov.CovMet
 
     // Open output files.
     {
-        var errΔ1 = s.openOutputFiles(finalHash, finalMetaLen, metaDataFile); if (errΔ1 != default!) {
+        var errΔ1 = s.openOutputFiles(finalHash, finalMetaLen, metaDataFile); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -278,12 +278,12 @@ internal static error emitMetaDataToDirectory(@string outdir, slice<rtcov.CovMet
     // Emit meta-data file only if needed (may already be present).
     if (s.needMetaDataFile()) {
         {
-            var errΔ2 = s.emitMetaDataFile(finalHash, finalMetaLen); if (errΔ2 != default!) {
+            var errΔ2 = s.emitMetaDataFile(finalHash, finalMetaLen); if (errΔ2 != nil) {
                 return errΔ2;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // emitCounterData emits the counter data output file for this coverage run.
@@ -294,7 +294,7 @@ internal static void emitCounterData() {
         return;
     }
     {
-        var err = emitCounterDataToDirectory(goCoverDir); if (err != default!) {
+        var err = emitCounterDataToDirectory(goCoverDir); if (err != nil) {
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage counter data emit failed: %v\n"u8, err);
             if (os.Getenv(gocoverdebugˢ) != ""u8) {
                 throw panic("counter-data write failure");
@@ -309,7 +309,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
     var cl = getCovCounterList();
     if (len(cl) == 0) {
         // no work to do here.
-        return default!;
+        return default;
     }
 
     if (!finalHashComputed) {
@@ -327,22 +327,22 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 
     // Open output file.
     {
-        var err = s.openOutputFiles(finalHash, finalMetaLen, counterDataFile); if (err != default!) {
+        var err = s.openOutputFiles(finalHash, finalMetaLen, counterDataFile); if (err != nil) {
             return err;
         }
     }
-    if ((~s).cf == nil) {
+    if (s.cf == nil) {
         return fmt.Errorf("counter data output file open failed (no additional info"u8);
     }
 
     // Emit counter data file.
     {
-        var err = s.emitCounterDataFile(finalHash, new os.FileжWriter((~s).cf)); if (err != default!) {
+        var err = s.emitCounterDataFile(finalHash, new os.FileжWriter(s.cf)); if (err != nil) {
             return err;
         }
     }
     {
-        var err = (~s).cf.Close(); if (err != default!) {
+        var err = s.cf.Close(); if (err != nil) {
             return fmt.Errorf("closing counter data file: %v"u8, err);
         }
     }
@@ -350,22 +350,22 @@ internal static error emitCounterDataToDirectory(@string outdir) {
     // Counter file has now been closed. Rename the temp to the
     // final desired path.
     {
-        var err = os.Rename((~s).cftmp, (~s).cfname); if (err != default!) {
-            return fmt.Errorf("writing %s: rename from %s failed: %v\n"u8, (~s).cfname, (~s).cftmp, err);
+        var err = os.Rename(s.cftmp, s.cfname); if (err != nil) {
+            return fmt.Errorf("writing %s: rename from %s failed: %v\n"u8, s.cfname, s.cftmp, err);
         }
     }
 
-    return default!;
+    return default;
 }
 
 // emitCounterDataToWriter emits counter data for this coverage run to an io.Writer.
 internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) {
     {
-        var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != default!) {
+        var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != nil) {
             return err;
         }
     }
-    return default!;
+    return default;
 }
 
 // openMetaFile determines whether we need to emit a meta-data output
@@ -380,16 +380,16 @@ internal static error openMetaFile(this ref emitState s, /*[16]*/ array<byte> me
     @string fn = fmt.Sprintf("%s.%x"u8, coverage.MetaFilePref, metaHash);
     s.mfname = filepath.Join(s.outdir, fn);
     var (fi, err) = os.Stat(s.mfname);
-    if (err != default! || fi.Size() != (int64)metaLen) {
+    if (err != nil || fi.Size() != (int64)metaLen) {
         // We need a new meta-file.
         @string tname = "tmp."u8 + fn + strconv.FormatInt(time.Now().UnixNano(), 10);
         s.mftmp = filepath.Join(s.outdir, tname);
         (s.mf, err) = os.Create(s.mftmp);
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("creating meta-data file %s: %v"u8, s.mftmp, err);
         }
     }
-    return default!;
+    return default;
 }
 
 // openCounterFile opens an output file for the counter data portion
@@ -402,12 +402,12 @@ internal static error openCounterFile(this ref emitState s, /*[16]*/ array<byte>
     @string fn = fmt.Sprintf(coverage.CounterFileTempl, coverage.CounterFilePref, metaHash, processID, time.Now().UnixNano());
     s.cfname = filepath.Join(s.outdir, fn);
     s.cftmp = filepath.Join(s.outdir, "tmp." + fn);
-    error err = default!;
+    error err = default;
     (s.cf, err) = os.Create(s.cftmp);
-    if (err != default!) {
+    if (err != nil) {
         return fmt.Errorf("creating counter data file %s: %v"u8, s.cftmp, err);
     }
-    return default!;
+    return default;
 }
 
 // openOutputFiles opens output files in preparation for emitting
@@ -425,7 +425,7 @@ internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte>
     metaHash = metaHash.Clone();
 
     var (fi, err) = os.Stat(s.outdir);
-    if (err != default!) {
+    if (err != nil) {
         return fmt.Errorf("output directory %q inaccessible (err: %v); no coverage data written"u8, s.outdir, err);
     }
     if (!fi.IsDir()) {
@@ -434,19 +434,19 @@ internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte>
 
     if (((fileType)(which & (nint)metaDataFile)) != 0) {
         {
-            var errΔ1 = s.openMetaFile(metaHash, metaLen); if (errΔ1 != default!) {
+            var errΔ1 = s.openMetaFile(metaHash, metaLen); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
     }
     if (((fileType)(which & (nint)counterDataFile)) != 0) {
         {
-            var errΔ2 = s.openCounterFile(metaHash); if (errΔ2 != default!) {
+            var errΔ2 = s.openCounterFile(metaHash); if (errΔ2 != nil) {
                 return errΔ2;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // emitMetaDataFile emits coverage meta-data to a previously opened
@@ -456,12 +456,12 @@ internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte
     finalHash = finalHash.Clone();
 
     {
-        var err = writeMetaData(new os.FileжWriter(s.mf), s.metalist, cmode, cgran, finalHash); if (err != default!) {
+        var err = writeMetaData(new os.FileжWriter(s.mf), s.metalist, cmode, cgran, finalHash); if (err != nil) {
             return fmt.Errorf("writing %s: %v\n"u8, s.mftmp, err);
         }
     }
     {
-        var err = s.mf.Close(); if (err != default!) {
+        var err = s.mf.Close(); if (err != nil) {
             return fmt.Errorf("closing meta data temp file: %v"u8, err);
         }
     }
@@ -469,12 +469,12 @@ internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte
     // Temp file has now been flushed and closed. Rename the temp to the
     // final desired path.
     {
-        var err = os.Rename(s.mftmp, s.mfname); if (err != default!) {
+        var err = os.Rename(s.mftmp, s.mfname); if (err != nil) {
             return fmt.Errorf("writing %s: rename from %s failed: %v\n"u8, s.mfname, s.mftmp, err);
         }
     }
 
-    return default!;
+    return default;
 }
 
 // needMetaDataFile returns TRUE if we need to emit a meta-data file
@@ -493,7 +493,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
 
     var mfw = encodemeta.NewCoverageMetaFileWriter(ioWriterˢ, w);
 
-    slice<slice<byte>> blobs = default!;
+    slice<slice<byte>> blobs = default;
     foreach (var (_, vᴛ1) in metalist) {
         var e = vᴛ1.ΔClone();
 
@@ -504,7 +504,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
 }
 
 internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) {
-    slice<uint32> tcounters = default!;
+    slice<uint32> tcounters = default;
 
     slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {
         ctrs = ctrs[..0];
@@ -563,13 +563,12 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
             // This is a fatal error that we should only see during
             // Go development (e.g. tip).
             var ipk = (int32)pkgId;
-            if (ipk == 0){
+            if (ipk == 0) {
                 fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
                 reportErrorInHardcodedList((int32)i, ipk, funcId, nCtrs);
-            } else 
-            if (ipk < 0){
+            } else if (ipk < 0) {
                 {
-                    var (newId, ok) = s.pkgmap[(nint)ipk, ꟷ]; if (ok){
+                    var (newId, ok) = s.pkgmap[(nint)ipk, ꟷ]; if (ok) {
                         pkgId = (uint32)newId;
                     } else {
                         fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
@@ -587,7 +586,7 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
 
             tcounters = rdCounters(counters, tcounters);
             {
-                var err = f(pkgId, funcId, tcounters); if (err != default!) {
+                var err = f(pkgId, funcId, tcounters); if (err != nil) {
                     return err;
                 }
             }
@@ -599,7 +598,7 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -630,11 +629,11 @@ internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ arra
 
     var cfw = encodecounter.NewCoverageDataWriter(w, coverage.CtrULeb128);
     {
-        var err = cfw.Write(finalHash, capturedOsArgs, new emitStateжCounterVisitor(Ꮡs)); if (err != default!) {
+        var err = cfw.Write(finalHash, capturedOsArgs, new emitStateжCounterVisitor(Ꮡs)); if (err != nil) {
             return err;
         }
     }
-    return default!;
+    return default;
 }
 
 // MarkProfileEmitted signals the coverage machinery that

@@ -108,9 +108,9 @@ internal static UntypedInt stackGuard => /* stackNosplit + stackSystem + abi.Sta
 //            == 3: logging of per-word updates
 //            == 4: logging of per-word reads
 internal static UntypedInt stackDebug => 0;
-internal static UntypedInt stackFromSystem => 0; // allocate stacks from system memory instead of the heap
+internal static UntypedInt stackFromSystem => 0;  // allocate stacks from system memory instead of the heap
 internal static UntypedInt stackFaultOnFree => 0; // old stacks are mapped noaccess to detect use after free
-internal static UntypedInt stackNoCache => 0; // disable per-P small stack caches
+internal static UntypedInt stackNoCache => 0;     // disable per-P small stack caches
 
 // check the BP links during traceback.
 internal const bool debugCheckBP = false;
@@ -199,7 +199,7 @@ internal static readonly @string spanHasNoFreeStacksˢ = "span has no free stack
 // stackpool[order].item.mu held.
 internal static gclinkptr stackpoolalloc(uint8 order) {
     var list = Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡspan);
-    var s = list.Value.first;
+    var s = list.first;
     lockWithRankMayAcquire(Ꮡmheap_.of(mheap.Ꮡlock), lockRankMheap);
     if (s == nil) {
         // no free stacks. Allocate another span worth.
@@ -207,15 +207,15 @@ internal static gclinkptr stackpoolalloc(uint8 order) {
         if (s == nil) {
             @throw(outOfMemoryˢ);
         }
-        if ((~s).allocCount != 0) {
+        if (s.allocCount != 0) {
             @throw(badAllocCountˢ);
         }
-        if ((~s).manualFreeList.ptr() != nil) {
+        if (s.manualFreeList.ptr() != nil) {
             @throw(badManualFreeListˢ);
         }
         osStackAlloc(ref (s).DerefOrNull());
-        s.Value.elemsize = ((uintptr)fixedStack).Lsh((uint64)(order));
-        for (var i = (uintptr)0; i < _StackCacheSize; i += s.Value.elemsize) {
+        s.elemsize = ((uintptr)fixedStack).Lsh((uint64)(order));
+        for (var i = (uintptr)0; i < _StackCacheSize; i += s.elemsize) {
             var xΔ1 = (gclinkptr)(s.@base() + i);
             if (valgrindenabled) {
                 // The address of x.ptr() becomes the base of stacks. We need to
@@ -224,18 +224,18 @@ internal static gclinkptr stackpoolalloc(uint8 order) {
                 // uninitialized memory errors in valgrind.
                 valgrindMalloc(@unsafe.Pointer.FromPinnedBox(xΔ1.ptr()), /* unsafe.Sizeof(x.ptr()) */ (uintptr)8);
             }
-            xΔ1.ptr().Value.next = s.Value.manualFreeList;
-            s.Value.manualFreeList = xΔ1;
+            xΔ1.ptr().next = s.manualFreeList;
+            s.manualFreeList = xΔ1;
         }
         list.insert(s);
     }
-    var x = s.Value.manualFreeList;
+    var x = s.manualFreeList;
     if (x.ptr() == nil) {
         @throw(spanHasNoFreeStacksˢ);
     }
-    s.Value.manualFreeList = x.ptr().Value.next;
-    s.Value.allocCount++;
-    if ((~s).manualFreeList.ptr() == nil) {
+    s.manualFreeList = x.ptr().next;
+    s.allocCount++;
+    if (s.manualFreeList.ptr() == nil) {
         // all stacks in s are allocated.
         list.remove(s);
     }
@@ -251,14 +251,14 @@ internal static void stackpoolfree(gclinkptr x, uint8 order) {
     if (s.of(mspan.Ꮡstate).get() != mSpanManual) {
         @throw(freeingStackNotInAStackˢ);
     }
-    if ((~s).manualFreeList.ptr() == nil) {
+    if (s.manualFreeList.ptr() == nil) {
         // s will now have a free stack
         Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡspan).insert(s);
     }
-    x.ptr().Value.next = s.Value.manualFreeList;
-    s.Value.manualFreeList = x;
-    s.Value.allocCount--;
-    if (gcphase == _GCoff && (~s).allocCount == 0) {
+    x.ptr().next = s.manualFreeList;
+    s.manualFreeList = x;
+    s.allocCount--;
+    if (gcphase == _GCoff && s.allocCount == 0) {
         // Span is completely free. Return it to the heap
         // immediately if we're sweeping.
         //
@@ -275,7 +275,7 @@ internal static void stackpoolfree(gclinkptr x, uint8 order) {
         //
         // By not freeing, we prevent step #4 until GC is done.
         Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡspan).remove(s);
-        s.Value.manualFreeList = 0;
+        s.manualFreeList = 0;
         osStackFree(ref (s).DerefOrNull());
         Ꮡmheap_.freeManual(s, spanAllocStack);
     }
@@ -292,12 +292,12 @@ internal static void stackcacherefill(ref mcache c, uint8 order) {
 
     // Grab some stacks from the global cache.
     // Grab half of the allowed capacity (to prevent thrashing).
-    gclinkptr list = default!;
-    uintptr size = default!;
+    gclinkptr list = default;
+    uintptr size = default;
     @lock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
     while (size < (uintptr)(_StackCacheSize / 2)) {
         var x = stackpoolalloc(order);
-        x.ptr().Value.next = list;
+        x.ptr().next = list;
         list = x;
         size += ((uintptr)fixedStack).Lsh((uint64)(order));
     }
@@ -315,7 +315,7 @@ internal static void stackcacherelease(ref mcache c, uint8 order) {
     var size = c.stackcache[order].size;
     @lock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
     while (size > (uintptr)(_StackCacheSize / 2)) {
-        var y = x.ptr().Value.next;
+        var y = x.ptr().next;
         stackpoolfree(x, order);
         x = y;
         size -= ((uintptr)fixedStack).Lsh((uint64)(order));
@@ -334,7 +334,7 @@ internal static void stackcache_clear(ref mcache c) {
         @lock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
         var x = c.stackcache[order].list;
         while (x.ptr() != nil) {
-            var y = x.ptr().Value.next;
+            var y = x.ptr().next;
             stackpoolfree(x, order);
             x = y;
         }
@@ -383,16 +383,16 @@ internal static Δstack @stackalloc(uint32 n) {
     // Small stacks are allocated with a fixed-size free-list allocator.
     // If we need a stack of a bigger size, we fall back on allocating
     // a dedicated span.
-    @unsafe.Pointer v = default!;
-    if (n < (uint32)((uint32)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize){
+    @unsafe.Pointer v = default;
+    if (n < (uint32)((uint32)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize) {
         var order = (uint8)0;
         var n2 = n;
         while (n2 > fixedStack) {
             order++;
-            n2 >>= (int)(1);
+            n2 >>= 1;
         }
-        gclinkptr x = default!;
-        if (stackNoCache != 0 || (~(~thisg).m).p == 0 || (~(~thisg).m).preemptoff != ""u8){
+        gclinkptr x = default;
+        if (stackNoCache != 0 || (~(~thisg).m).p == 0 || (~(~thisg).m).preemptoff != ""u8) {
             // thisg.m.p == 0 can happen in the guts of exitsyscall
             // or procresize. Just get a stack from the global pool.
             // Also don't touch stackcache during gc
@@ -402,13 +402,13 @@ internal static Δstack @stackalloc(uint32 n) {
             unlock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
         } else {
             var c = (~(~thisg).m).p.ptr().Value.mcache;
-            x = (~c).stackcache[order].list;
+            x = c.stackcache[order].list;
             if (x.ptr() == nil) {
                 stackcacherefill(ref (c).DerefOrNull(), order);
-                x = (~c).stackcache[order].list;
+                x = c.stackcache[order].list;
             }
-            (~c).stackcache[order].list = x.ptr().Value.next;
-            (~c).stackcache[order].size -= (uintptr)n;
+            c.stackcache[order].list = x.ptr().next;
+            c.stackcache[order].size -= (uintptr)n;
         }
         if (valgrindenabled) {
             // We're about to allocate the stack region starting at x.ptr().
@@ -418,7 +418,7 @@ internal static Δstack @stackalloc(uint32 n) {
         }
         v = (@unsafe.Pointer)(uintptr)x;
     } else {
-        ж<mspan> s = default!;
+        ж<mspan> s = default;
         var npage = (uintptr)n >> (int)(gc.PageShift);
         nint log2npage = stacklog2(npage);
 
@@ -439,7 +439,7 @@ internal static Δstack @stackalloc(uint32 n) {
                 @throw(outOfMemoryˢ);
             }
             osStackAlloc(ref (s).DerefOrNull());
-            s.Value.elemsize = (uintptr)n;
+            s.elemsize = (uintptr)n;
         }
         v = (@unsafe.Pointer)s.@base();
     }
@@ -495,7 +495,7 @@ internal static void stackfree(Δstack stk) {
         memclrNoHeapPointers(v, n); // for testing, clobber stack data
     }
     if (debug.efence != 0 || stackFromSystem != 0) {
-        if (debug.efence != 0 || stackFaultOnFree != 0){
+        if (debug.efence != 0 || stackFaultOnFree != 0) {
             sysFault(v, n);
         } else {
             sysFree(v, n, Ꮡmemstats.of(mstats.Ꮡstacks_sys));
@@ -518,15 +518,15 @@ internal static void stackfree(Δstack stk) {
     if (valgrindenabled) {
         valgrindFree(v);
     }
-    if (n < (uintptr)((uintptr)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize){
+    if (n < (uintptr)((uintptr)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize) {
         var order = (uint8)0;
         var n2 = n;
         while (n2 > fixedStack) {
             order++;
-            n2 >>= (int)(1);
+            n2 >>= 1;
         }
         var x = (gclinkptr)(uintptr)v;
-        if (stackNoCache != 0 || (~(~gp).m).p == 0 || (~(~gp).m).preemptoff != ""u8){
+        if (stackNoCache != 0 || (~(~gp).m).p == 0 || (~(~gp).m).preemptoff != ""u8) {
             @lock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
             if (valgrindenabled) {
                 // x.ptr() is the head of the list of free stacks, and will be used
@@ -537,7 +537,7 @@ internal static void stackfree(Δstack stk) {
             unlock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
         } else {
             var c = (~(~gp).m).p.ptr().Value.mcache;
-            if ((~c).stackcache[order].size >= _StackCacheSize) {
+            if (c.stackcache[order].size >= _StackCacheSize) {
                 stackcacherelease(ref (c).DerefOrNull(), order);
             }
             if (valgrindenabled) {
@@ -546,9 +546,9 @@ internal static void stackfree(Δstack stk) {
                 // marked allocated.
                 valgrindMalloc(@unsafe.Pointer.FromPinnedBox(x.ptr()), /* unsafe.Sizeof(x.ptr()) */ (uintptr)8);
             }
-            x.ptr().Value.next = (~c).stackcache[order].list;
-            (~c).stackcache[order].list = x;
-            (~c).stackcache[order].size += n;
+            x.ptr().next = c.stackcache[order].list;
+            c.stackcache[order].list = x;
+            c.stackcache[order].size += n;
         }
     } else {
         var s = spanOfUnchecked((uintptr)v);
@@ -556,7 +556,7 @@ internal static void stackfree(Δstack stk) {
             println((Δhex)(uint64)s.@base(), @unsafe.Pointer.OrTypedNil(v));
             @throw(badSpanStateˢ);
         }
-        if (gcphase == _GCoff){
+        if (gcphase == _GCoff) {
             // Free the stack immediately if we're
             // sweeping.
             osStackFree(ref (s).DerefOrNull());
@@ -567,7 +567,7 @@ internal static void stackfree(Δstack stk) {
             // reused as a heap span, and this state
             // change would race with GC. Add it to the
             // large stack cache instead.
-            nint log2npage = stacklog2((~s).npages);
+            nint log2npage = stacklog2(s.npages);
             @lock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
             ᏑstackLarge.at(stackLargeᴛ1.Ꮡfree, log2npage).insert(s);
             unlock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
@@ -627,8 +627,7 @@ partial struct adjustinfo {
 // If so, it rewrites *vpp to point into the new stack.
 internal static void adjustpointer(ref adjustinfo adjinfo, @unsafe.Pointer vpp) {
     var pp = (ж<uintptr>)(uintptr)(vpp);
-    ref var Δp = ref heap<uintptr>(out var Ꮡp);
-    Δp = pp.Value;
+    ref var Δp = ref heap<uintptr>(pp.Value, out var Ꮡp);
     if (stackDebug >= 4) {
         print((@string)"        "u8, pp.OrTypedNil(), (@string)":"u8, (Δhex)(uint64)Δp, (@string)"\n"u8);
     }
@@ -708,7 +707,7 @@ retry:
                 if (stackDebug >= 3) {
                     print((@string)"adjust ptr "u8, (Δhex)(uint64)Δp, (@string)" "u8, funcname(f), (@string)"\n"u8);
                 }
-                if (useCAS){
+                if (useCAS) {
                     var ppu = Ꮡ(new @unsafe.Pointer(~pp));
                     if (!atomic.Casp1(ppu, (@unsafe.Pointer)Δp, (@unsafe.Pointer)(Δp + delta))) {
                         goto retry;
@@ -803,7 +802,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
         if (stackDebug >= 3) {
             print((@string)"      args\n"u8);
         }
-        adjustpointers((@unsafe.Pointer)frame.argp, Ꮡargs, ref adjinfo, new ΔfuncInfo(nil));
+        adjustpointers((@unsafe.Pointer)frame.argp, Ꮡargs, ref adjinfo, new ΔfuncInfo());
     }
 
     // Adjust pointers in all stack objects (whether they are live or not).
@@ -811,7 +810,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
     if (frame.varp != 0) {
         foreach (var i in range(objs)) {
             var obj = Ꮡ(objs, i);
-            var off = obj.Value.off;
+            var off = obj.off;
             var @base = frame.varp; // locals base pointer
             if (off >= 0) {
                 @base = frame.argp; // arguments and return values base pointer
@@ -878,10 +877,10 @@ internal static void adjustdefers(ж<g> Ꮡgp, ref adjustinfo adjinfo) {
     }
 }
 
-internal static void adjustpanics(ж<g> Ꮡgp, ref adjustinfo adjinfo) {
+internal static void adjustpanics(ж<g> gp, ref adjustinfo adjinfo) {
     // Panics are on stack and already adjusted.
     // Update pointer to head of list in G.
-    adjustpointer(ref adjinfo, @unsafe.Pointer.FromBox(Ꮡgp.of(g.Ꮡ_panic)));
+    adjustpointer(ref adjinfo, @unsafe.Pointer.FromBox(gp.of(g.Ꮡ_panic)));
 }
 
 internal static void adjustsudogs(ref g gp, ref adjustinfo adjinfo) {
@@ -900,9 +899,9 @@ internal static void fillstack(Δstack stk, byte b) {
 }
 
 internal static uintptr findsghi(ref g gp, Δstack stk) {
-    uintptr sghi = default!;
+    uintptr sghi = default;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
-        var Δp = sg.of(sudog.Ꮡelem).uintptr() + (uintptr)(~sg.of(sudog.Ꮡc).get()).elemsize;
+        var Δp = sg.of(sudog.Ꮡelem).uintptr() + (uintptr)sg.of(sudog.Ꮡc).get().elemsize;
         if (stk.lo <= Δp && Δp < stk.hi && Δp > sghi) {
             sghi = Δp;
         }
@@ -919,7 +918,7 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
     }
 
     // Lock channels to prevent concurrent send/receive.
-    ж<Δhchan> lastc = default!;
+    ж<Δhchan> lastc = default;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
         if (sg.of(sudog.Ꮡc).get() != lastc) {
             // There is a ranking cycle here between gscan bit and
@@ -942,7 +941,7 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
     // Copy the part of the stack the sudogs point in to
     // while holding the lock to prevent races on
     // send/receive slots.
-    uintptr sgsize = default!;
+    uintptr sgsize = default;
     if (adjinfo.sghi != 0) {
         var oldBot = adjinfo.old.hi - used;
         var newBot = oldBot + adjinfo.delta;
@@ -951,7 +950,7 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
     }
 
     // Unlock channels.
-    lastc = default!;
+    lastc = default;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
         if (sg.of(sudog.Ꮡc).get() != lastc) {
             unlock(sg.of(sudog.Ꮡc).get().of(runtime_package.Δhchan.Ꮡlock));
@@ -996,13 +995,13 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
     }
 
     // Compute adjustment.
-    adjustinfo adjinfo = default!;
+    adjustinfo adjinfo = default;
     adjinfo.old = old;
     adjinfo.delta = @new.hi - old.hi;
 
     // Adjust sudogs, synchronizing with channel ops if necessary.
     var ncopy = used;
-    if (!gp.activeStackChans){
+    if (!gp.activeStackChans) {
         if (newsize < old.hi - old.lo && Ꮡgp.of(g.ᏑparkingOnChan).Load()) {
             // It's not safe for someone to shrink this stack while we're actively
             // parking on a channel, but it is safe to grow since we do that
@@ -1052,7 +1051,7 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
     }
 
     if (valgrindenabled) {
-        if (gp.valgrindStackID == 0){
+        if (gp.valgrindStackID == 0) {
             gp.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)@new.lo, (@unsafe.Pointer)@new.hi);
         } else {
             valgrindChangeStack(gp.valgrindStackID, (@unsafe.Pointer)@new.lo, (@unsafe.Pointer)@new.hi);
@@ -1115,7 +1114,7 @@ internal static void newstack() {
         @throw(stackGrowthAfterForkˢ);
     }
     if ((~(~thisg).m).morebuf.g.ptr() != (~(~thisg).m).curg) {
-        print((@string)"runtime: newstack called from g="u8, (Δhex)(uint64)(uintptr)(~(~thisg).m).morebuf.g, (@string)("\n" + "\tm="), (~thisg).m.OrTypedNil(), (@string)" m->curg="u8, (~(~thisg).m).curg.OrTypedNil(), (@string)" m->g0="u8, (~(~thisg).m).g0.OrTypedNil(), (@string)" m->gsignal="u8, (~(~thisg).m).gsignal.OrTypedNil(), (@string)"\n"u8);
+        print((@string)"runtime: newstack called from g="u8, (Δhex)(uint64)(~(~thisg).m).morebuf.g, (@string)("\n" + "\tm="), (~thisg).m.OrTypedNil(), (@string)" m->curg="u8, (~(~thisg).m).curg.OrTypedNil(), (@string)" m->g0="u8, (~(~thisg).m).g0.OrTypedNil(), (@string)" m->gsignal="u8, (~(~thisg).m).gsignal.OrTypedNil(), (@string)"\n"u8);
         var morebufΔ1 = thisg.Value.m.Value.morebuf;
         traceback(morebufΔ1.pc, morebufΔ1.sp, morebufΔ1.lr, morebufΔ1.g.ptr());
         @throw(runtimeWrongGoroutineInˢ);
@@ -1257,7 +1256,7 @@ internal static void newstack() {
     }
 
     if (newsize > maxstacksize || newsize > maxstackceiling) {
-        if (maxstacksize < maxstackceiling){
+        if (maxstacksize < maxstackceiling) {
             print((@string)"runtime: goroutine stack exceeds "u8, maxstacksize, (@string)"-byte limit\n"u8);
         } else {
             print((@string)"runtime: goroutine stack exceeds "u8, maxstackceiling, (@string)"-byte limit\n"u8);
@@ -1290,8 +1289,8 @@ internal static void nilfunc() {
 internal static void gostartcallfn(ref gobuf gobuf, ж<funcval> Ꮡfv) {
     ref var fv = ref Ꮡfv.DerefOrNull();
 
-    @unsafe.Pointer fn = default!;
-    if (Ꮡfv != nil){
+    @unsafe.Pointer fn = default;
+    if (Ꮡfv != nil) {
         fn = (@unsafe.Pointer)fv.fn;
     } else {
         fn = (@unsafe.Pointer)abi.FuncPCABIInternal(nilfunc);
@@ -1350,11 +1349,11 @@ internal static void freeStackSpans() {
     foreach (var order in range(stackpool)) {
         @lock(Ꮡstackpool.at<stackpoolᴛ1>(order).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
         var list = Ꮡstackpool.at<stackpoolᴛ1>(order).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡspan);
-        for (var s = list.Value.first; s != nil; ) {
-            var next = s.Value.next;
-            if ((~s).allocCount == 0) {
+        for (var s = list.first; s != nil; ) {
+            var next = s.next;
+            if (s.allocCount == 0) {
                 list.remove(s);
-                s.Value.manualFreeList = 0;
+                s.manualFreeList = 0;
                 osStackFree(ref (s).DerefOrNull());
                 Ꮡmheap_.freeManual(s, spanAllocStack);
             }
@@ -1367,7 +1366,7 @@ internal static void freeStackSpans() {
     @lock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
     foreach (var i in range(stackLarge.free)) {
         for (var s = stackLarge.free[i].first; s != nil; ) {
-            var next = s.Value.next;
+            var next = s.next;
             ᏑstackLarge.at(stackLargeᴛ1.Ꮡfree, i).remove(s);
             osStackFree(ref (s).DerefOrNull());
             Ꮡmheap_.freeManual(s, spanAllocStack);
@@ -1396,15 +1395,15 @@ internal static (uintptr, ж<byte>) gcdata(this ж<stackObjectRecord> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var ptr = (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref r);
-    ж<moduledata> mod = default!;
-    for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
+    ж<moduledata> mod = default;
+    for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.next) {
         // The normal case: stackObjectRecord is in funcdata.
-        if ((~datap).gofunc <= ptr && ptr < (~datap).epclntab) {
+        if (datap.gofunc <= ptr && ptr < datap.epclntab) {
             mod = datap;
             break;
         }
         // A special case: methodValueCallFrameObjs.
-        if ((~datap).noptrbss <= ptr && ptr < (~datap).enoptrbss) {
+        if (datap.noptrbss <= ptr && ptr < datap.enoptrbss) {
             mod = datap;
             break;
         }
@@ -1412,7 +1411,7 @@ internal static (uintptr, ж<byte>) gcdata(this ж<stackObjectRecord> Ꮡr) {
     // If you get a panic here due to a nil mod,
     // you may have made a copy of a stackObjectRecord.
     // You must use the original pointer.
-    var res = (~mod).rodata + (uintptr)r.gcdataoff;
+    var res = mod.rodata + (uintptr)r.gcdataoff;
     return ((uintptr)r.ptrBytes, (ж<byte>)(uintptr)((@unsafe.Pointer)res));
 }
 
@@ -1447,8 +1446,8 @@ internal static void gcComputeStartingStackSize() {
     // early in a goroutine's lifetime. See issue 18138. Stacks that
     // are allocated too small can still grow, and stacks allocated
     // too large can still shrink.
-    uint64 scannedStackSize = default!;
-    uint64 scannedStacks = default!;
+    uint64 scannedStackSize = default;
+    uint64 scannedStacks = default;
     foreach (var (_, Δp) in allp) {
         scannedStackSize += Δp.Value.scannedStackSize;
         scannedStacks += Δp.Value.scannedStacks;

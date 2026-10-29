@@ -42,7 +42,7 @@ partial struct readSeekerFromReader {
 
 internal static void start(this ref readSeekerFromReader r) {
     var (x, err) = r.reset();
-    if (err != default!){
+    if (err != nil) {
         r.r = new errorReader(err);
     } else {
         r.r = x;
@@ -51,10 +51,10 @@ internal static void start(this ref readSeekerFromReader r) {
 }
 
 internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    if (r.r == default!) {
+    if (r.r == nil) {
         r.start();
     }
     (n, err) = r.r.Read(p);
@@ -63,30 +63,33 @@ internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<
 }
 
 internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) {
-    int64 newOffset = default!;
-    var exprᴛ1 = whence;
-    if (exprᴛ1 == io.SeekStart) {
+    int64 newOffset = default;
+    switch (whence) {
+    case var ᴛ when ᴛ == io.SeekStart: {
         newOffset = offset;
+        break;
     }
-    else if (exprᴛ1 == io.SeekCurrent) {
+    case var ᴛ when ᴛ == io.SeekCurrent: {
         newOffset = r.offset + offset;
+        break;
     }
-    else if (exprᴛ1 == io.SeekEnd) {
+    case var ᴛ when ᴛ == io.SeekEnd: {
         newOffset = r.size + offset;
+        break;
     }
-    else { /* default: */
+    default: {
         return (0, os.ErrInvalid);
-    }
+    }}
 
     switch (ᐧ) {
     case {} when newOffset == r.offset: {
-        return (newOffset, default!);
+        return (newOffset, default);
     }
     case {} when (newOffset < 0) || (newOffset > r.size): {
         return (0, os.ErrInvalid);
     }
     case {} when newOffset is 0: {
-        r.r = default!;
+        r.r = default;
         break;
     }
     case {} when newOffset == r.size: {
@@ -106,7 +109,7 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
                 b = buf.slice(0, (nint)(newOffset - r.offset));
             }
             {
-                var (_, err) = r.Read(b); if (err != default!) {
+                var (_, err) = r.Read(b); if (err != nil) {
                     return (0, err);
                 }
             }
@@ -114,7 +117,7 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
         break;
     }}
     r.offset = newOffset;
-    return (r.offset, default!);
+    return (r.offset, default);
 }
 
 } // end elf_package

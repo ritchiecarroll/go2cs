@@ -51,14 +51,14 @@ internal static nint len(this ref ints a) {
 }
 
 internal static int64 get(this ref ints a, nint i) {
-    if (a.int32 != default!) {
+    if (a.int32 != nil) {
         return (int64)a.int32[i];
     }
     return a.int64[i];
 }
 
 internal static void set(this ref ints a, nint i, int64 v) {
-    if (a.int32 != default!){
+    if (a.int32 != nil) {
         a.int32[i] = (int32)v;
     } else {
         a.int64[i] = v;
@@ -66,22 +66,22 @@ internal static void set(this ref ints a, nint i, int64 v) {
 }
 
 internal static ints Δslice(this ref ints a, nint i, nint j) {
-    if (a.int32 != default!) {
-        return new ints(a.int32.slice(i, j), default!);
+    if (a.int32 != nil) {
+        return new ints(a.int32.slice(i, j), default);
     }
-    return new ints(default!, a.int64.slice(i, j));
+    return new ints(default, a.int64.slice(i, j));
 }
 
 // New creates a new [Index] for data.
 // [Index] creation time is O(N) for N = len(data).
 public static ж<Index> New(slice<byte> data) {
     var ix = Ꮡ(new Index(data: data));
-    if (builtin.len(data) <= maxData32){
-        ix.Value.sa.int32 = new slice<int32>(builtin.len(data));
-        text_32(data, (~ix).sa.int32);
+    if (builtin.len(data) <= maxData32) {
+        ix.sa.int32 = new slice<int32>(builtin.len(data));
+        text_32(data, ix.sa.int32);
     } else {
-        ix.Value.sa.int64 = new slice<int64>(builtin.len(data));
-        text_64(data, (~ix).sa.int64);
+        ix.sa.int64 = new slice<int64>(builtin.len(data));
+        text_64(data, ix.sa.int64);
     }
     return ix;
 }
@@ -103,8 +103,8 @@ internal static (int64, error) readInt(io.Reader r, slice<byte> buf) {
 // writeSlice writes data[:n] to w and returns n.
 // It uses buf to buffer the write.
 internal static (nint n, error err) writeSlice(io.Writer w, slice<byte> buf, ints data) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     // encode as many elements as fit into buf
     nint p = binary.MaxVarintLen64;
@@ -126,13 +126,13 @@ internal static error errTooBig = errors.New("suffixarray: data too large"u8);
 // readSlice reads data[:n] from r and returns n.
 // It uses buf to buffer the read.
 internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints data) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     // read buffer size
-    int64 size64 = default!;
+    int64 size64 = default;
     (size64, err) = readInt(r, buf);
-    if (err != default!) {
+    if (err != nil) {
         return (n, err);
     }
     if ((int64)(nint)size64 != size64 || (nint)size64 < 0) {
@@ -143,7 +143,7 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
 
     // read buffer w/o the size
     {
-        (_, err) = io.ReadFull(r, buf.slice(binary.MaxVarintLen64, size)); if (err != default!) {
+        (_, err) = io.ReadFull(r, buf.slice(binary.MaxVarintLen64, size)); if (err != nil) {
             return (n, err);
         }
     }
@@ -167,7 +167,7 @@ public static error Read(this ref Index x, io.Reader r) {
 
     // read length
     var (n64, err) = readInt(r, buf);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if ((int64)(nint)n64 != n64 || (nint)n64 < 0) {
@@ -176,13 +176,13 @@ public static error Read(this ref Index x, io.Reader r) {
     nint n = (nint)n64;
 
     // allocate space
-    if (2 * n < cap(x.data) || cap(x.data) < n || x.sa.int32 != default! && n > maxData32 || x.sa.int64 != default! && n <= maxData32){
+    if (2 * n < cap(x.data) || cap(x.data) < n || x.sa.int32 != nil && n > maxData32 || x.sa.int64 != nil && n <= maxData32) {
         // new data is significantly smaller or larger than
         // existing buffers - allocate new ones
         x.data = new slice<byte>(n);
-        x.sa.int32 = default!;
-        x.sa.int64 = default!;
-        if (n <= maxData32){
+        x.sa.int32 = default;
+        x.sa.int64 = default;
+        if (n <= maxData32) {
             x.sa.int32 = new slice<int32>(n);
         } else {
             x.sa.int64 = new slice<int64>(n);
@@ -195,7 +195,7 @@ public static error Read(this ref Index x, io.Reader r) {
 
     // read data
     {
-        var (_, errΔ1) = io.ReadFull(r, x.data); if (errΔ1 != default!) {
+        var (_, errΔ1) = io.ReadFull(r, x.data); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -204,12 +204,12 @@ public static error Read(this ref Index x, io.Reader r) {
     var sa = x.sa;
     while (sa.len() > 0) {
         var (nΔ1, errΔ2) = readSlice(r, buf, sa);
-        if (errΔ2 != default!) {
+        if (errΔ2 != nil) {
             return errΔ2;
         }
         sa = sa.Δslice(nΔ1, sa.len());
     }
-    return default!;
+    return default;
 }
 
 // Write writes the index x to w.
@@ -219,14 +219,14 @@ public static error Write(this ref Index x, io.Writer w) {
 
     // write length
     {
-        var err = writeInt(w, buf, builtin.len(x.data)); if (err != default!) {
+        var err = writeInt(w, buf, builtin.len(x.data)); if (err != nil) {
             return err;
         }
     }
 
     // write data
     {
-        var (_, err) = w.Write(x.data); if (err != default!) {
+        var (_, err) = w.Write(x.data); if (err != nil) {
             return err;
         }
     }
@@ -235,12 +235,12 @@ public static error Write(this ref Index x, io.Writer w) {
     var sa = x.sa;
     while (sa.len() > 0) {
         var (n, err) = writeSlice(w, buf, sa);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         sa = sa.Δslice(n, sa.len());
     }
-    return default!;
+    return default;
 }
 
 // Bytes returns the data over which the index was created.
@@ -274,7 +274,7 @@ internal static ints lookupAll(this ж<Index> Ꮡx, slice<byte> s) {
 // Lookup time is O(log(N)*len(s) + len(result)) where N is the
 // size of the indexed data.
 public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, nint n) {
-    slice<nint> result = default!;
+    slice<nint> result = default;
 
     if (builtin.len(s) > 0 && n != 0) {
         var matches = Ꮡx.lookupAll(s);
@@ -285,7 +285,7 @@ public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, 
         // 0 <= n <= count
         if (n > 0) {
             result = new slice<nint>(n);
-            if (matches.int32 != default!){
+            if (matches.int32 != nil) {
                 foreach (var i in range(result)) {
                     result[i] = (nint)matches.int32[i];
                 }
@@ -306,7 +306,7 @@ public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, 
 // they may not be successive. The result is nil if there are no matches,
 // or if n == 0.
 public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) {
-    slice<slice<nint>> result = default!;
+    slice<slice<nint>> result = default;
     ref var x = ref Ꮡx.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -329,7 +329,7 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
         // increased value n1, but only if Lookup returned all the requested
         // indices in the first place (if it returned fewer than that then
         // there cannot be more).
-        for (nint n1 = n; ᐧ ; n1 += 2 * (n - builtin.len(result))) {
+        for (nint n1 = n; ; n1 += 2 * (n - builtin.len(result))) {
             /* overflow ok */
             var indices = Ꮡx.Lookup(lit, n1);
             if (builtin.len(indices) == 0) {
@@ -362,7 +362,7 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
             }
         }
         if (builtin.len(result) == 0) {
-            result = default!;
+            result = default;
         }
         return result;
     }
@@ -374,7 +374,7 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
     Ꮡr = regexp.MustCompile("^"u8 + r.String()); r = ref Ꮡr.DerefOrNull(); // compiles because r compiled
 
     // same comment about Lookup applies here as in the loop above
-    for (nint n1 = n; ᐧ ; n1 += 2 * (n - builtin.len(result))) {
+    for (nint n1 = n; ; n1 += 2 * (n - builtin.len(result))) {
         /* overflow ok */
         var indices = Ꮡx.Lookup(lit, n1);
         if (builtin.len(indices) == 0) {
@@ -389,7 +389,7 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
             }
             var m = Ꮡr.FindIndex(x.data.slice(i)); // anchored search - will not run off
             // ignore indices leading to overlapping matches
-            if (m != default! && prev <= i) {
+            if (m != nil && prev <= i) {
                 m[0] = i; // correct m
                 m[1] += i;
                 result = append(result, m);
@@ -403,7 +403,7 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
         }
     }
     if (builtin.len(result) == 0) {
-        result = default!;
+        result = default;
     }
     return result;
 }

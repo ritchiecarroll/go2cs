@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 
 partial class fips140_package {
 

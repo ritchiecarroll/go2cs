@@ -10,16 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,6 +51,10 @@ using static go.vendor.golang.org.x.net.http.httpproxy_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(go.net.url_package.URL))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -69,7 +63,7 @@ using static go.vendor.golang.org.x.net.http.httpproxy_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpproxy/proxy.go", "proxy.cs", "AFe0AfIABxCigoCCtgACGgALBKaC1qKCgpKCgoKmgpSCpqaCgqaCuICCtoKUrLKClIKClIKUgoKCgoK4lIKCgriCgqamgoCCpICCtqKCgqaCgoK4gIKCyIKClJSCpqaAgoK2lO6ClIKCgpSAgqS43rKCgIKkgoKUqqCkAAkUgpSmgoKCpgANGoLuggAHEIKClAAIFIKClIKU", "", "", "96=getEnvAny/1/3/1,getEnvAny/2/3/2,getEnvAny/3/3/3,Getenv/1/1/4")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpproxy/proxy.go", "proxy.cs", "AFe0AfIABxCigoCCtgACGgALBKaC1qKCgoKCgoKmgpSCpqaCgqaCuICCtoKUrLKClIKClIKUgoKCgoK4lIKCgriCgqamgoCCpICCtqKCgqaCgoK4gIKCyIKClJSCpqaAgoK2lO6ClIKCgpSAgqS43rKCgIKkgoKUqqCkAAkUgpSmgoKCpgANGoLuggAHEIKClAAIFIKClIKU", "", "", "96=getEnvAny/1/3/1,getEnvAny/2/3/2,getEnvAny/3/3/3,Getenv/1/1/4")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.http;

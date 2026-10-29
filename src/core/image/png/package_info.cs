@@ -54,6 +54,21 @@ using static go.image.png_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Encoder))]
+[assembly: go.GoFieldAccess(typeof(decoder))]
+[assembly: go.GoFieldAccess(typeof(encoder))]
+[assembly: go.GoFieldAccess(typeof(image_package.Alpha))]
+[assembly: go.GoFieldAccess(typeof(image_package.Alpha16))]
+[assembly: go.GoFieldAccess(typeof(image_package.Gray))]
+[assembly: go.GoFieldAccess(typeof(image_package.Gray16))]
+[assembly: go.GoFieldAccess(typeof(image_package.NRGBA))]
+[assembly: go.GoFieldAccess(typeof(image_package.NRGBA64))]
+[assembly: go.GoFieldAccess(typeof(image_package.Paletted))]
+[assembly: go.GoFieldAccess(typeof(image_package.RGBA64))]
+[assembly: go.GoFieldAccess(typeof(image_package.ΔRGBA))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -62,9 +77,9 @@ using static go.image.png_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/png/paeth.go", "paeth.cs", "AAoUlO6oAAgQgoKCgoKCgpKClKqi0oKCgoKCgoKCgqSClJSCgoI=")]
-[assembly: go.GoPositionMap("image/png/reader.go", "reader.cs", "ADFkgqaCABU0AC1igP6AAAoEgoKUgIKkgoKUgpSClJSCgoKUgoKCpoKmgoKUlKTGlKTGlKTGlKSkpKTGlKSkpLaClILmgoKClIKClIKUgoKU3JTqlOaClIKUgoKUlIKUpKSUpoKUgoKUlIKmgpSCgpSUgpSCgriUAAYYAAkCgpSUgILIgIKkgoKUgpSClIKCgtjSgoKUkoKCgoKklIKClIKCgpSC3IKCgpSUgpSCpgAICJKCggAHFJKClIK4gqaUgoKClIK2goKkgoKClIK2goKkgoKkgoKClIK2goKkgoKClIK2goKUgpSmgoKmgpSUgoKClLiCgsiCtoLsgpSCtqS4lIKCgoKCgoKClIK4goKCgtqCgoKCgoKCgpSCuIKCgoLagoKCgoKCgoKUgriCgoKC2oKCgoKCgpSmgraCgraCooKCgoKCgoKUgoKCgoKUlKKCgoKCgoKUtoKCgoKClILIgoKCgoKUgsiCgoKCgpSCyIKCgriCpIKkgoKCgoKClKaCgsiCgoK2goKCgoKCgoKCgpSmgoKCgsiCgoKCgsqmqJKCzpSCgrSCgrSCgrSCgrSCgrSCgrSCgoKCysaCgrSCgqSSgoKCgoLKsoKCgpTWgoKUprSAgqSCgqaUgpSCpIKUgqSCgqSCgqSClIK0gpLclIKClLSClIKUgpaSgoKClIKU1oKAgqSClNaCgoKUgpSqoriAgoKUpIKAgoKUtqqiuICCgpS2goCCgpS2goKmgsqClKSkpKSkpKSklO6C", "", "", "1104=NewIEEE/1/1/2;1132=NewIEEE/1/1/2")]
-[assembly: go.GoPositionMap("image/png/writer.go", "writer.cs", "AEaQAZKAgqSCgoKCgriokoKUpoKClIKCgpSCgoKCgoKCgpSCgpSCgpTWgoKClJSCpIKkgqSCpIKkgqSCpIKkgqSClIKCguaCgoKUgoKCgoKCgpSUgoIABhTigoKUquqCgoKCgoKmgoKClIKmgoKClIKCgoKmgoK4goKCgqaCgriCgoKUgoKCgqaCgriCgoKUgoKCgqaCpqbSgoKClIKUlJSUlKSkpKSkpKSkpAAHEIKCgoKUlJSCgpSClJSCgoKUlIKUgoKUgoKC2oKSgpKClIKCgoKCgoKmgoKCgoLIgoKUgoKCypSCgoKCgoKCgoKCpoKCgpS4goKSgoKCgoKCgoKCgpKCAAEUAAgCgoKCgsqCgoKCgoLIgoKCgsiCgoKCgoKCgsiCgoKCgoKCgoKCAAcQgqaCuICCyJTYsoKUgpSUgoKUqqKUpKSkpOiAqKKCqAAICIKCpoKCgpaClIKmgoKUlICCpIKCkoKSgpSmlKSkgpS2gpTKgoKClIKC")]
+[assembly: go.GoPositionMap("image/png/paeth.go", "paeth.cs", "AAoUlO6oAAgQgoKCgoKCgoKClKqi0oKCgoKCgoKCgpSClJSCgoI=")]
+[assembly: go.GoPositionMap("image/png/reader.go", "reader.cs", "ADFkgqaCABU0AC1igP6AAAoEgoKUgIKkgoKUgpSClJSCgoKUgoKCpoKmgoKUlLTWlLTWlLTWlLS0tLTWlLS0tMaClILmgoKClIKClIKUgoKU3JQACAqU5oKUgpSCgpSUgpS0tKS2gpSCgpSUgraClIKClJSClIKCyJQABhgACQKClJSAgsiAgqSCgpSClIKUgoKC2NKCgpSSgoKCgpSUgoKUgoKClILcgoKClJSClIKmAAgIkoKCAAcUkoKUgriCppSCgoKUgsaCgrSCgoKUgsaCgrSCgrSCgoKUgsaCgrSCgoKUgsaCgqSClKaCgqaClJSCgoKUuIKC2ILGgvyClILGtLiUgoKCgoKCgoKUgriCgoKC6oKCgoKCgoKClIK4goKCguqCgoKCgoKCgpSCuIKCgoLqgoKCgoKClKaCxoKCxoKigoKCgoKCgpSCgoKCgpSUooKCgoKCgpTGgoKCgoKUgtiCgoKCgpSC2IKCgoKClILYgoKCuIK0grSCgoKCgoKUpoKC2IKCgsaCgoKCgoKCgoKClKaCgoKC2IKCgoKC2qaokoLOlIKCtIKCtIKCtIKCtIKCtIKCtIKCgoLKxoKCtIKCpJKCgoKCgsqygoKClNaCgpSmtICCpIKCpqSClIKkgpSCpIKClIKClIKUgqSCgtyUgoKUpIKUgpSClpKCgoKUgpTWgoCCpIKU1oKCgpSClKqiuICCgpSkgoCCgpS2qqK4gIKClLaCgIKClLaCgqaCyoKUtLS0tLS0tLSk7oI=", "", "", "1151=NewIEEE/1/1/2;1179=NewIEEE/1/1/2", "445:21")]
+[assembly: go.GoPositionMap("image/png/writer.go", "writer.cs", "AEaQAZKAgqSCgoKCgriokoKUpoKClIKCgpSCgoKCgoKCgpSCgpSCgpTWgoKClJSCtIK0grSCtIK0grSCtIK0grSCpIKCguaCgoKUgoKCgoKCgpSUgoIABhTigoKUquqCgoKCgoKmgoKClIKmgoKClIKCgoKmgoK4goKCgqaCgriCgoKUgoKCgqaCgriCgoKUgoKCgqaCpqbSgoKClIKUlJSUlLS0tLS0tLS0tAAIEIKCgoKUlJSCgpSClJSCgoKUlIKUgoKUgoKC6oKSgoKClIKCgoKCgoKmgoKCgoLYgoKUgoKC2pSCgoKCgoKCgoKCpoKCgpTIgoKCgoKCgoKCgoKCgoKCAAEUAAgCgoKCgsqCgoKCgoLYgoKCgtiCgoKCgoKCgtiCgoKCgoKCgoKCAAgQgqaCuICCyJTYsoKUgpSUgoKUqqKUpKSkpOiAqKKCqAAICIKCpoKCgpaClIKmgoKUlICCpIKCgoKCgpSmlLS0gpTGgpTagoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

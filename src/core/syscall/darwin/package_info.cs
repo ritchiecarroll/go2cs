@@ -10,16 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -69,6 +59,24 @@ using static go.syscall_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Cmsghdr))]
+[assembly: go.GoFieldAccess(typeof(Credential))]
+[assembly: go.GoFieldAccess(typeof(InterfaceAddrMessage))]
+[assembly: go.GoFieldAccess(typeof(InterfaceMessage))]
+[assembly: go.GoFieldAccess(typeof(InterfaceMulticastAddrMessage))]
+[assembly: go.GoFieldAccess(typeof(RawSockaddr))]
+[assembly: go.GoFieldAccess(typeof(RawSockaddrDatalink))]
+[assembly: go.GoFieldAccess(typeof(RawSockaddrInet4))]
+[assembly: go.GoFieldAccess(typeof(RawSockaddrInet6))]
+[assembly: go.GoFieldAccess(typeof(RouteMessage))]
+[assembly: go.GoFieldAccess(typeof(SockaddrDatalink))]
+[assembly: go.GoFieldAccess(typeof(SockaddrInet4))]
+[assembly: go.GoFieldAccess(typeof(SockaddrInet6))]
+[assembly: go.GoFieldAccess(typeof(anyMessage))]
+[assembly: go.GoFieldAccess(typeof(parseLinkLayerAddr_linkLayerAddr))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -78,23 +86,23 @@ using static go.syscall_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("syscall/bpf_bsd.go", "bpf_bsd.cs", "AAsgkqiSqJKCgoKUqLKCgpSokoKCgpSosoKClKiygoKUqJKCgpQABxKSgoKClKiSgoKCgpSokoKCgpSokoKClKiSgoKClKiygoKUqJKCgoKCgpSokoKCgpSClKiSgoKClKiygoKU")]
-[assembly: go.GoPositionMap("syscall/dirent.go", "dirent.cs", "AA4ikoKUgpSmgpSkpKSkuIKUpKSkpAADEOKCgoKCgpSCgoKCuIKUgoKClIKCgoK4gpSCgpQ=")]
+[assembly: go.GoPositionMap("syscall/dirent.go", "dirent.cs", "AA4ikoKUgpSmgpSkpKSkyIKUpKSkpAAEEOKCgoKCgpSCgoKCuIKUgoKClIKCgoK4gpSCgpQ=")]
 [assembly: go.GoPositionMap("syscall/env_unix.go", "env_unix.cs", "ABY0lsSCgoKCgoKAgtyk3KKUgpSAgoKkgtbCgoKmgpSCgpSCgoKm5qKCgpSCgriCgoLKgpSCgoKUgpSCgtailIKUlIKipKKCgoKCgoKm")]
 [assembly: go.GoPositionMap("syscall/exec_libc2.go", "exec_libc2.cs", "ACZQopIAARwADgYACRLKgoKCgpSUuIKCgoKmlILcgoKClIKCyoKCgsqUgoK4poKCgoKUuKKC3KaCooLKgIKCgoKUgoKCpoKClIKC2oKigtyCgpSCgpSUgpSClIKCgpSClIKClJSClILKgoKClKaCgpS4goIABxCCuIKCgsqCgoLKgtj6hLKCug==")]
 [assembly: go.GoPositionMap("syscall/exec_unix.go", "exec_unix.cs", "AEGQAdKCgpSCrLKCgoKUlIKCgoKCgpSmgKSigoKUgpSClJSCAByKApKowoKoog==")]
 [assembly: go.GoPositionMap("syscall/flock_bsd.go", "flock_bsd.cs", "AAoYkoI=")]
 [assembly: go.GoPositionMap("syscall/forkpipe.go", "forkpipe.cs", "AAgWooKClIKClIKmgqaC")]
-[assembly: go.GoPositionMap("syscall/rlimit.go", "rlimit.cs", "AA88AA4CgoCCggAIEJSCyIKmlA==")]
+[assembly: go.GoPositionMap("syscall/rlimit.go", "rlimit.cs", "AA88AA4CgoCCggAHEJSCyIKmlA==")]
 [assembly: go.GoPositionMap("syscall/rlimit_darwin.go", "rlimit_darwin.cs", "AAsUtoKClII=")]
-[assembly: go.GoPositionMap("syscall/route_bsd.go", "route_bsd.cs", "AA0gmJKCppKmksqCpoKUqJKClIKClIKCgoIAFQoAAhqOgoKUgoKClKiSlIKUgqSClIKkAAYWABUogoK4lIKCpIKClJSkgoKkgoKUlAADEtKUkoCCpIKUgoCCpAAaNoKCgoKCgpSClIKClIKkgoKUgoKkgoKUgqYACxiCgoKUgoKUggALGIKCgoKCgpSClIKClIKkgoKUgoKkgoKUgqau8pKCgoKCgpSAgpSkpoKUvsKCgpQ=")]
-[assembly: go.GoPositionMap("syscall/route_darwin.go", "route_darwin.cs", "AAoSopSCpIKkgqSClAALGIKCgoKClIKUgoKUgqSCgpSCpIKClIKm")]
+[assembly: go.GoPositionMap("syscall/route_bsd.go", "route_bsd.cs", "AAwgmJKCpoKmgsqCpoKUqJKClIKClIKCgoIAFQoAAhqOgoKUgoKClKiSlIKUgqSClIKkAAYWABUogoK4lIKCpIKClJSkgoKkgoKUlAADEtKUgoCCpIKUgoCCpAAaNoKCgoKCgpSClIKClIK0goKUgoK0goKUgrYACxiCgoKUgoKUggALGIKCgoKCgpSClIKClIK0goKUgoK0goKUgrau8pKCgoKCgpSAgpSkpoKUvsKCgpQ=")]
+[assembly: go.GoPositionMap("syscall/route_darwin.go", "route_darwin.cs", "AAkSopSCpIKkgqSClAALGIKCgoKClIKUgoKUgrSCgpSCtIKClIK2")]
 [assembly: go.GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AAwioqqipqIACBaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
-[assembly: go.GoPositionMap("syscall/sockcmsg_unix_other.go", "sockcmsg_unix_other.cs", "AAockrim2oLIgqaCuA==")]
+[assembly: go.GoPositionMap("syscall/sockcmsg_unix_other.go", "sockcmsg_unix_other.cs", "AAockri26oLYgqaCyA==")]
 [assembly: go.GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACENCqsoKClAAHEJKokqiSqJKqopaimA==")]
-[assembly: go.GoPositionMap("syscall/syscall_bsd.go", "syscall_bsd.cs", "ABIsgoKCgpSCgpQAAhQACAKCgpSCuIKmgoKClIKClKaCgqaCgpSmisIAECiApIKClKaApIKCgpSmgKSApICkgoKUpoCo0oKCgpQAD1CigoKClIKCgpSmooKUgoKCgoKCgoIACMoBsoKSgqaykoKmgoKSgqaCgpKCpoKCkoKmgoKSggAHTMKCgoKCgoKUgpSCgpSClIKCgIKkgpSqkpKClIKUprSCgriSgIKkgriCgILIgpSmtIKCuJKCgIKkgpSqkoKUpoKClIKCuMiqkoKUAAcQ3IKmgg==", "", "", "398=TimespecToNsec/1/2/1,NsecToTimeval/1/2/1,TimespecToNsec/2/2/2,NsecToTimeval/2/2/2")]
-[assembly: go.GoPositionMap("syscall/syscall_darwin.go", "syscall_darwin.cs", "ABMokpKSlAANHsIAARLypIKCgsqAgqSmgqaCpoKmgKKAqLKClIKCgoKUprKCgoKClKKCgpSmAAEqAA4AAALCAQBeAqaygoKClKaYwqKCgpQABJoBwoKUrsKClK7CgpQAAjYAGgKCrPKCAAIaAA4CgqzyggACEAAJAoKuAAgCgq4ACAKCrgAIAoKs4oKsxg==")]
+[assembly: go.GoPositionMap("syscall/syscall_bsd.go", "syscall_bsd.cs", "ABIsgoKCgpSCgpQAAhQACAKCgpSCuIKmgoKClIKClKaCgqaCgpSmisIAECiApIKClKaApIKCgpSmgKSApICkgoKUpoCo0oKCgpQAD1CigoKClIKCgpSmooKUgoKCgoKCgoIACMoBsoKCgqaygoKmgoKCgqaCgoKCpoKCgoKmgoKCggAHTMKCgoKCgoKUgpSCgpSClIKCgIKkgpSqkpKClIKUprSCgriCgIKkgriCgILIgpSmtIKCuIKCgIKkgpSqkoKUpoKClIKCuLiqkoKUAAcQ3IKmgg==", "", "", "390=TimespecToNsec/1/2/1,NsecToTimeval/1/2/1,TimespecToNsec/2/2/2,NsecToTimeval/2/2/2")]
+[assembly: go.GoPositionMap("syscall/syscall_darwin.go", "syscall_darwin.cs", "ABMokpKSlAANHsIAARLylIKCgsqAgqSmgqaCpoKmgKKAqLKClIKCgoKUprKCgoKClKKCgpSmAAEqAA4AAALCAQBeAqaygoKClKaYwqKCgpQABJoBwoKUrsKClK7CgpQAAjYAGgKCrPKCAAIaAA4CgqzyggACEAAJAoKuAAgCgq4ACAKCrgAIAoKs4oKsxg==")]
 [assembly: go.GoPositionMap("syscall/syscall_darwin_amd64.go", "syscall_darwin_amd64.cs", "AAsYgqaCAAIYAAoCgoKmgqaCpoKmsrS0lIKUppg=")]
-[assembly: go.GoPositionMap("syscall/syscall_unix.go", "syscall_unix.cs", "AB9EkoCCpAAKGOKCuIKCuKaCgoKC5tKCuIKCgoKCuICCpIIAFiaCgoKCpqaClKSkpJSmgqaCAAgaopSkpKSU7qSCgoKCpqaygoKClIKmgpSClKaygpSCgoKmlIKUgpSClKaygoKClIKmgpSClKaygpSCgpSClIKUACNsooKSggAEHrKCkoCCpIKCgoKmsoKSgIKkgoKCgoKm0oKCgpSCgoKCptKCgoKUgoKCgoKm4oKUgpSmooIABB6igoKCgoKmpqKCgoKCgqamooKClKaigoKUAAQioqaCoqaipoKmgqaCpoKmgoKClKaCprKClIKmsoKCgoKUpoKClA==")]
+[assembly: go.GoPositionMap("syscall/syscall_unix.go", "syscall_unix.cs", "AB5EkoCCpAAKGOKCuIKCuKaCgoKC5tKCuIKCgoKCuICCpIIAFiaCgoKCpqaClKSkpJSmgqaCAAgaopSkpKSU7qSCgoKCpqaygoKClIKmgpSClKaygpSCgoKmlIKUgpSClKaygoKClIKmgpSClKaygpSCgpSClIKUACNsooKCggAEHrKCkoCCpIKCgoKmsoKSgIKkgoKCgoKm0oKCgpSCgoKCptKCgoKUgoKCgoKm4oKUgpSmooIABB6igoKCgoKmpqKCgoKCgqamooKClKaigoKUAAQioqaCoqaipoKmgqaCpoKmgoKClKaCprKClIKmsoKCgoKUpoKClA==")]
 [assembly: go.GoPositionMap("syscall/time_nofake.go", "time_nofake.cs", "AAoWlA==")]
 [assembly: go.GoPositionMap("syscall/timestruct.go", "timestruct.cs", "AAgUkKaSgoKCgpSosKaSgoKCgoKU")]
 [assembly: go.GoPositionMap("syscall/zerrors_darwin_amd64.go", "zerrors_darwin_amd64.cs", "APkJgBQAbNoB")]

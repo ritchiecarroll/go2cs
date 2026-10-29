@@ -19,9 +19,9 @@ public static void Reset(this Form _) {
 // Users should either catch ErrShortDst and allow dst to grow or have dst be at
 // least of size MaxTransformChunkSize to be guaranteed of progress.
 public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
-    nint nDst = default!;
-    nint nSrc = default!;
-    error err = default!;
+    nint nDst = default;
+    nint nSrc = default;
+    error err = default;
 
     // Cap the maximum number of src bytes to check.
     var b = src;
@@ -40,7 +40,7 @@ public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byt
         return (nDst + n, nSrc + n, err);
     }
 
-    if (err == default! && n < len(src) && !atEOF) {
+    if (err == nil && n < len(src) && !atEOF) {
         err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
     }
     return (n, n, err);
@@ -57,20 +57,19 @@ internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
     return true;
 }
 
-internal static slice<error> errs = new error[]{default!, go.vendor.golang.org.x.text.transform_package.ErrShortDst, go.vendor.golang.org.x.text.transform_package.ErrShortSrc}.slice();
+internal static slice<error> errs = slice<error>([default, go.vendor.golang.org.x.text.transform_package.ErrShortDst, go.vendor.golang.org.x.text.transform_package.ErrShortSrc]);
 
 // transform implements the transform.Transformer interface. It is only called
 // when quickSpan does not pass for a given string.
 internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
-    nint nDst = default!;
-    nint nSrc = default!;
-    error err = default!;
+    nint nDst = default;
+    nint nSrc = default;
+    error err = default;
 
     // TODO: get rid of reorderBuffer. See CL 23460044.
-    ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(nil);
+    ref var rb = ref heap<reorderBuffer>(new reorderBuffer(), out var Ꮡrb);
     rb.init(f, src);
-    while (ᐧ) {
+    for (;;) {
         // Load segment into reorder buffer.
         rb.setFlusher(dst.slice(nDst), flushTransform);
         nint end = decomposeSegment(Ꮡrb, nSrc, atEOF);
@@ -95,7 +94,7 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
         nSrc += n;
         nDst += n;
         if (ok) {
-            if (err == default! && n < rb.nsrc && !atEOF) {
+            if (err == nil && n < rb.nsrc && !atEOF) {
                 err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
             }
             return (nDst, nSrc, err);

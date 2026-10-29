@@ -21,10 +21,10 @@ internal static readonly @string parseBoolˢ = "ParseBool"u8;
 // Any other value returns an error.
 public static (bool, error) ParseBool(@string str) {
     var (x, err) = strconv.ParseBool(str);
-    if (err != default!) {
+    if (err != nil) {
         return (x, toError(parseBoolˢ, str, 0, 0, err));
     }
-    return (x, default!);
+    return (x, default);
 }
 
 // FormatBool returns "true" or "false" according to the value of b.
@@ -63,10 +63,10 @@ internal static readonly @string parseComplexˢ = "ParseComplex"u8;
 // ParseComplex returns err.Err = ErrRange and c = ±Inf for the respective component.
 public static (complex128, error) ParseComplex(@string s, nint bitSize) {
     var (x, err) = strconv.ParseComplex(s, bitSize);
-    if (err != default!) {
+    if (err != nil) {
         return (x, toError(parseComplexˢ, s, 0, bitSize, err));
     }
-    return (x, default!);
+    return (x, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -101,10 +101,10 @@ internal static readonly @string parseFloatˢ = "ParseFloat"u8;
 // [floating-point literals]: https://go.dev/ref/spec#Floating-point_literals
 public static (float64, error) ParseFloat(@string s, nint bitSize) {
     var (x, err) = strconv.ParseFloat(s, bitSize);
-    if (err != default!) {
+    if (err != nil) {
         return (x, toError(parseFloatˢ, s, 0, bitSize, err));
     }
-    return (x, default!);
+    return (x, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -115,10 +115,10 @@ internal static readonly @string parseUintˢ = "ParseUint"u8;
 // A sign prefix is not permitted.
 public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
     var (x, err) = strconv.ParseUint(s, @base, bitSize);
-    if (err != default!) {
+    if (err != nil) {
         return (x, toError(parseUintˢ, s, @base, bitSize, err));
     }
-    return (x, default!);
+    return (x, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -150,13 +150,13 @@ internal static readonly @string parseIntˢ = "ParseInt"u8;
 //
 // [integer literals]: https://go.dev/ref/spec#Integer_literals
 public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize) {
-    error err = default!;
+    error err = default;
 
     (var x, err) = strconv.ParseInt(s, @base, bitSize);
-    if (err != default!) {
+    if (err != nil) {
         return (x, toError(parseIntˢ, s, @base, bitSize, err));
     }
-    return (x, default!);
+    return (x, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -165,10 +165,10 @@ internal static readonly @string atoiˢ = "Atoi"u8;
 // Atoi is equivalent to ParseInt(s, 10, 0), converted to type int.
 public static (nint, error) Atoi(@string s) {
     var (x, err) = strconv.Atoi(s);
-    if (err != default!) {
+    if (err != nil) {
         return (x, toError(atoiˢ, s, 0, 0, err));
     }
-    return (x, default!);
+    return (x, default);
 }
 
 // FormatComplex converts the complex number c to a string of the
@@ -249,19 +249,19 @@ public static slice<byte> AppendUint(slice<byte> dst, uint64 i, nint @base) {
 
 // toError converts from internal/strconv.Error to the error guaranteed by this package's APIs.
 internal static error toError(@string fn, @string s, nint @base, nint bitSize, error err) {
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, strconv.ErrSyntax)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, strconv.ErrSyntax): {
         return new NumErrorжerror(syntaxError(fn, s));
     }
-    if (AreEqual(exprᴛ1, strconv.ErrRange)) {
+    case var ᴛ when AreEqual(ᴛ, strconv.ErrRange): {
         return new NumErrorжerror(rangeError(fn, s));
     }
-    if (AreEqual(exprᴛ1, strconv.ErrBase)) {
+    case var ᴛ when AreEqual(ᴛ, strconv.ErrBase): {
         return new NumErrorжerror(baseError(fn, s, @base));
     }
-    if (AreEqual(exprᴛ1, strconv.ErrBitSize)) {
+    case var ᴛ when AreEqual(ᴛ, strconv.ErrBitSize): {
         return new NumErrorжerror(bitSizeError(fn, s, bitSize));
-    }
+    }}
     return err;
 }
 
@@ -274,8 +274,8 @@ public static error ErrSyntax = errors.New("invalid syntax"u8);
 // A NumError records a failed conversion.
 partial struct NumError {
     public @string Func; // the failing function (ParseBool, ParseInt, ParseUint, ParseFloat, ParseComplex)
-    public @string Num; // the input
-    public error Err;  // the reason the conversion failed (e.g. ErrRange, ErrSyntax, etc.)
+    public @string Num;  // the input
+    public error Err;    // the reason the conversion failed (e.g. ErrRange, ErrSyntax, etc.)
 }
 
 public static @string Error(this ref NumError e) {

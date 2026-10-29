@@ -77,8 +77,8 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
     var e = @new<errAccumulator>();
 
     // Validate timestamp order.
-    if (v.lastTs != 0){
-        if (ev.Time() <= v.lastTs){
+    if (v.lastTs != 0) {
+        if (ev.Time() <= v.lastTs) {
             e.Errorf("timestamp out-of-order (want > %v) for %+v"u8, v.lastTs, ev);
         } else {
             v.lastTs = ev.Time();
@@ -90,8 +90,8 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
     // Validate event stack.
     checkStack(e, ev.Stack());
 
-    var exprᴛ1 = ev.Kind();
-    if (exprᴛ1 == trace.EventSync) {
+    switch (ev.Kind()) {
+    case var ᴛ when ᴛ == trace.EventSync: {
         var s = ev.Sync();
         if (s.N != v.lastSync.N + 1) {
             e.Errorf("sync count is not sequential: expected %d, got %d"u8, v.lastSync.N + 1, s.N);
@@ -102,34 +102,35 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         //
         // TODO(felixge): Drop the synthetic syncs as discussed in CL 653576.
         if (v.GoVersion >= version.Go125 && !(s.N > 1 && s.ClockSnapshot == nil)) {
-            if (s.ClockSnapshot == nil){
+            if (s.ClockSnapshot == nil) {
                 e.Errorf("sync %d has no clock snapshot"u8, s.N);
             } else {
-                if ((~s.ClockSnapshot).Wall.IsZero()) {
+                if (s.ClockSnapshot.Wall.IsZero()) {
                     e.Errorf("sync %d has zero wall time"u8, s.N);
                 }
-                if ((~s.ClockSnapshot).Mono == 0) {
+                if (s.ClockSnapshot.Mono == 0) {
                     e.Errorf("sync %d has zero mono time"u8, s.N);
                 }
-                if ((~s.ClockSnapshot).Trace == 0) {
+                if (s.ClockSnapshot.Trace == 0) {
                     e.Errorf("sync %d has zero trace time"u8, s.N);
                 }
                 if (!v.skipClockSnapshotChecks) {
-                    if (s.N >= 2 && !(~s.ClockSnapshot).Wall.After((~v.lastSync.ClockSnapshot).Wall)) {
-                        e.Errorf("sync %d has non-increasing wall time: %v vs %v"u8, s.N, (~s.ClockSnapshot).Wall, (~v.lastSync.ClockSnapshot).Wall);
+                    if (s.N >= 2 && !s.ClockSnapshot.Wall.After(v.lastSync.ClockSnapshot.Wall)) {
+                        e.Errorf("sync %d has non-increasing wall time: %v vs %v"u8, s.N, s.ClockSnapshot.Wall, v.lastSync.ClockSnapshot.Wall);
                     }
-                    if (s.N >= 2 && !((~s.ClockSnapshot).Mono > (~v.lastSync.ClockSnapshot).Mono)) {
-                        e.Errorf("sync %d has non-increasing mono time: %v vs %v"u8, s.N, (~s.ClockSnapshot).Mono, (~v.lastSync.ClockSnapshot).Mono);
+                    if (s.N >= 2 && !(s.ClockSnapshot.Mono > v.lastSync.ClockSnapshot.Mono)) {
+                        e.Errorf("sync %d has non-increasing mono time: %v vs %v"u8, s.N, s.ClockSnapshot.Mono, v.lastSync.ClockSnapshot.Mono);
                     }
-                    if (s.N >= 2 && !((~s.ClockSnapshot).Trace > (~v.lastSync.ClockSnapshot).Trace)) {
-                        e.Errorf("sync %d has non-increasing trace time: %v vs %v"u8, s.N, (~s.ClockSnapshot).Trace, (~v.lastSync.ClockSnapshot).Trace);
+                    if (s.N >= 2 && !(s.ClockSnapshot.Trace > v.lastSync.ClockSnapshot.Trace)) {
+                        e.Errorf("sync %d has non-increasing trace time: %v vs %v"u8, s.N, s.ClockSnapshot.Trace, v.lastSync.ClockSnapshot.Trace);
                     }
                 }
             }
         }
         v.lastSync = s;
+        break;
     }
-    else if (exprᴛ1 == trace.EventMetric) {
+    case var ᴛ when ᴛ == trace.EventMetric: {
         var m = ev.Metric();
         if (!strings.Contains(m.Name, ":"u8)) {
             // Should have a ":" as per runtime/metrics convention.
@@ -139,13 +140,15 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         if (m.Value.Kind() == trace.ValueBad) {
             e.Errorf("invalid value"u8);
         }
-        var exprᴛ2 = m.Value.Kind();
-        if (exprᴛ2 == trace.ValueUint64) {
+        switch (m.Value.Kind()) {
+        case var ᴛ2 when ᴛ2 == trace.ValueUint64: {
             // Just make sure it doesn't panic.
             _ = m.Value.Uint64();
-        }
+            break;
+        }}
+        break;
     }
-    else if (exprᴛ1 == trace.EventLabel) {
+    case var ᴛ when ᴛ == trace.EventLabel: {
         var l = ev.Label();
 
         // Check label.
@@ -157,38 +160,43 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         if (l.Resource.Kind == trace.ResourceNone) {
             e.Errorf("label resource none"u8);
         }
-        var exprᴛ3 = l.Resource.Kind;
-        if (exprᴛ3 == trace.ResourceGoroutine) {
+        switch (l.Resource.Kind) {
+        case var ᴛ2 when ᴛ2 == trace.ResourceGoroutine: {
             var id = l.Resource.Goroutine();
             {
                 var (_, ok) = v.gs[id, ꟷ]; if (!ok) {
                     e.Errorf("label for invalid goroutine %d"u8, id);
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == trace.ResourceProc) {
+        case var ᴛ2 when ᴛ2 == trace.ResourceProc: {
             var id = l.Resource.Proc();
             {
                 var (_, ok) = v.ps[id, ꟷ]; if (!ok) {
                     e.Errorf("label for invalid proc %d"u8, id);
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == trace.ResourceThread) {
+        case var ᴛ2 when ᴛ2 == trace.ResourceThread: {
             var id = l.Resource.Thread();
             {
                 var (_, ok) = v.ms[id, ꟷ]; if (!ok) {
                     e.Errorf("label for invalid thread %d"u8, id);
                 }
             }
-        }
+            break;
+        }}
+        break;
     }
-    else if (exprᴛ1 == trace.EventStackSample) {
+    case var ᴛ when ᴛ == trace.EventStackSample: {
         // Not much to check here. It's basically a sched context and a stack.
         // The sched context is also not guaranteed to align with other events.
         // We already checked the stack above.
+        break;
     }
-    else if (exprᴛ1 == trace.EventStateTransition) {
+    case var ᴛ when ᴛ == trace.EventStateTransition: {
         // Validate state transitions.
         //
         // TODO(mknyszek): A lot of logic is duplicated between goroutines and procs.
@@ -197,8 +205,8 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         // code generic over resources and implementing validation just once.
         var tr = ev.StateTransition();
         checkStack(e, tr.Stack);
-        var exprᴛ4 = tr.Resource.Kind;
-        if (exprᴛ4 == trace.ResourceGoroutine) {
+        switch (tr.Resource.Kind) {
+        case var ᴛ2 when ᴛ2 == trace.ResourceGoroutine: {
             // Basic state transition validation.
             var id = tr.Resource.Goroutine();
             ref var newΔ5 = ref heap<trace.GoState>(out var ᏑnewΔ5);
@@ -213,11 +221,11 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 e.Errorf("goroutine %d died with active ranges"u8, id);
             }
             var (state, ok) = v.gs[id, ꟷ];
-            if (ok){
-                if (old != (~state).state) {
-                    e.Errorf("bad old state for goroutine %d: got %s, want %s"u8, id, old, (~state).state);
+            if (ok) {
+                if (old != state.state) {
+                    e.Errorf("bad old state for goroutine %d: got %s, want %s"u8, id, old, state.state);
                 }
-                state.Value.state = newΔ5;
+                state.state = newΔ5;
             } else {
                 if (old != trace.GoUndetermined && old != trace.GoNotExist) {
                     e.Errorf("bad old state for unregistered goroutine %d: %s"u8, id, old);
@@ -226,35 +234,35 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 v.gs[id] = state;
             }
             // Validate sched context.
-            if (newΔ5.Executing()){
+            if (newΔ5.Executing()) {
                 var ctx = Ꮡv.getOrCreateThread(e, ev, ev.Thread());
                 if (ctx != nil) {
-                    if ((~ctx).G != trace.NoGoroutine && (~ctx).G != id) {
-                        e.Errorf("tried to run goroutine %d when one was already executing (%d) on thread %d"u8, id, (~ctx).G, ev.Thread());
+                    if (ctx.G != trace.NoGoroutine && ctx.G != id) {
+                        e.Errorf("tried to run goroutine %d when one was already executing (%d) on thread %d"u8, id, ctx.G, ev.Thread());
                     }
-                    ctx.Value.G = id;
-                    state.Value.binding = ctx;
+                    ctx.G = id;
+                    state.binding = ctx;
                 }
-            } else 
-            if (old.Executing() && !newΔ5.Executing()) {
+            } else if (old.Executing() && !newΔ5.Executing()) {
                 if (tr.Stack != ev.Stack()) {
                     // This is a case where the transition is happening to a goroutine that is also executing, so
                     // these two stacks should always match.
                     e.Errorf("StateTransition.Stack doesn't match Event.Stack"u8);
                 }
-                var ctx = state.Value.binding;
-                if (ctx != nil){
-                    if ((~ctx).G != id) {
-                        e.Errorf("tried to stop goroutine %d when it wasn't currently executing (currently executing %d) on thread %d"u8, id, (~ctx).G, ev.Thread());
+                var ctx = state.binding;
+                if (ctx != nil) {
+                    if (ctx.G != id) {
+                        e.Errorf("tried to stop goroutine %d when it wasn't currently executing (currently executing %d) on thread %d"u8, id, ctx.G, ev.Thread());
                     }
-                    ctx.Value.G = trace.NoGoroutine;
-                    state.Value.binding = default!;
+                    ctx.G = trace.NoGoroutine;
+                    state.binding = default;
                 } else {
                     e.Errorf("stopping goroutine %d not bound to any active context"u8, id);
                 }
             }
+            break;
         }
-        else if (exprᴛ4 == trace.ResourceProc) {
+        case var ᴛ2 when ᴛ2 == trace.ResourceProc: {
             // Basic state transition validation.
             var id = tr.Resource.Proc();
             ref var newΔ6 = ref heap<trace.ProcState>(out var ᏑnewΔ6);
@@ -269,11 +277,11 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 e.Errorf("proc %d died with active ranges"u8, id);
             }
             var (state, ok) = v.ps[id, ꟷ];
-            if (ok){
-                if (old != (~state).state) {
-                    e.Errorf("bad old state for proc %d: got %s, want %s"u8, id, old, (~state).state);
+            if (ok) {
+                if (old != state.state) {
+                    e.Errorf("bad old state for proc %d: got %s, want %s"u8, id, old, state.state);
                 }
-                state.Value.state = newΔ6;
+                state.state = newΔ6;
             } else {
                 if (old != trace.ProcUndetermined && old != trace.ProcNotExist) {
                     e.Errorf("bad old state for unregistered proc %d: %s"u8, id, old);
@@ -282,53 +290,58 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 v.ps[id] = state;
             }
             // Validate sched context.
-            if (newΔ6.Executing()){
+            if (newΔ6.Executing()) {
                 var ctx = Ꮡv.getOrCreateThread(e, ev, ev.Thread());
                 if (ctx != nil) {
-                    if ((~ctx).P != trace.NoProc && (~ctx).P != id) {
-                        e.Errorf("tried to run proc %d when one was already executing (%d) on thread %d"u8, id, (~ctx).P, ev.Thread());
+                    if (ctx.P != trace.NoProc && ctx.P != id) {
+                        e.Errorf("tried to run proc %d when one was already executing (%d) on thread %d"u8, id, ctx.P, ev.Thread());
                     }
-                    ctx.Value.P = id;
-                    state.Value.binding = ctx;
+                    ctx.P = id;
+                    state.binding = ctx;
                 }
-            } else 
-            if (old.Executing() && !newΔ6.Executing()) {
-                var ctx = state.Value.binding;
-                if (ctx != nil){
-                    if ((~ctx).P != id) {
-                        e.Errorf("tried to stop proc %d when it wasn't currently executing (currently executing %d) on thread %d"u8, id, (~ctx).P, (~ctx).M);
+            } else if (old.Executing() && !newΔ6.Executing()) {
+                var ctx = state.binding;
+                if (ctx != nil) {
+                    if (ctx.P != id) {
+                        e.Errorf("tried to stop proc %d when it wasn't currently executing (currently executing %d) on thread %d"u8, id, ctx.P, ctx.M);
                     }
-                    ctx.Value.P = trace.NoProc;
-                    state.Value.binding = default!;
+                    ctx.P = trace.NoProc;
+                    state.binding = default;
                 } else {
                     e.Errorf("stopping proc %d not bound to any active context"u8, id);
                 }
             }
-        }
+            break;
+        }}
+        break;
     }
-    else if (exprᴛ1 == trace.EventRangeBegin || exprᴛ1 == trace.EventRangeActive || exprᴛ1 == trace.EventRangeEnd) {
+    case var ᴛ when ᴛ == trace.EventRangeBegin || ᴛ == trace.EventRangeActive || ᴛ == trace.EventRangeEnd: {
         // Validate ranges.
         var r = ev.Range();
-        var exprᴛ5 = ev.Kind();
-        if (exprᴛ5 == trace.EventRangeBegin) {
+        switch (ev.Kind()) {
+        case var ᴛ2 when ᴛ2 == trace.EventRangeBegin: {
             if (v.hasRange(r.Scope, r.Name)) {
                 e.Errorf("already active range %q on %v begun again"u8, r.Name, r.Scope);
             }
             v.addRange(r.Scope, r.Name);
+            break;
         }
-        else if (exprᴛ5 == trace.EventRangeActive) {
+        case var ᴛ2 when ᴛ2 == trace.EventRangeActive: {
             if (!v.hasRange(r.Scope, r.Name)) {
                 v.addRange(r.Scope, r.Name);
             }
+            break;
         }
-        else if (exprᴛ5 == trace.EventRangeEnd) {
+        case var ᴛ2 when ᴛ2 == trace.EventRangeEnd: {
             if (!v.hasRange(r.Scope, r.Name)) {
                 e.Errorf("inactive range %q on %v ended"u8, r.Name, r.Scope);
             }
             v.deleteRange(r.Scope, r.Name);
-        }
+            break;
+        }}
+        break;
     }
-    else if (exprᴛ1 == trace.EventTaskBegin) {
+    case var ᴛ when ᴛ == trace.EventTaskBegin: {
         // Validate task begin.
         var t = ev.Task();
         if (t.ID == trace.NoTask || t.ID == trace.BackgroundTask) {
@@ -341,8 +354,9 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         }
         // N.B. Don't check the task type. Empty string is a valid task type.
         v.tasks[t.ID] = t.Type;
+        break;
     }
-    else if (exprᴛ1 == trace.EventTaskEnd) {
+    case var ᴛ when ᴛ == trace.EventTaskEnd: {
         // Validate task end.
         // We can see a task end without a begin, so ignore a task without information.
         // Instead, if we've seen the task begin, just make sure the task end lines up.
@@ -355,15 +369,17 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 delete(v.tasks, t.ID);
             }
         }
+        break;
     }
-    else if (exprᴛ1 == trace.EventLog) {
+    case var ᴛ when ᴛ == trace.EventLog: {
         // There's really not much here to check, except that we can
         // generate a Log. The category and message are entirely user-created,
         // so we can't make any assumptions as to what they are. We also
         // can't validate the task, because proving the task's existence is very
         // much best-effort.
         _ = ev.Log();
-    }
+        break;
+    }}
     return e.Errors();
 }
 
@@ -420,7 +436,7 @@ internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<e
     }
     if (m == trace.NoThread && !lenient()) {
         e.Errorf("must have thread, but thread ID is none"u8);
-        return default!;
+        return default;
     }
     var (s, ok) = v.ms[m, ꟷ];
     if (!ok) {

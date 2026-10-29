@@ -21,44 +21,44 @@ private static readonly @string cloneˢ = "Clone"u8;
 
 // TestHash performs a set of tests on hash.Hash implementations, checking the
 // documented requirements of Write, Sum, Reset, Size, and BlockSize.
-public static void TestHash(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
-    TestHashWithoutClone(Ꮡt, mh);
+public static void TestHash(ж<testing.T> t, Func<hash.Hash> mh) {
+    TestHashWithoutClone(t, mh);
 
     // Test whether the results after cloning are consistent.
-    Ꮡt.Run(cloneˢ, (ж<testing.T> tΔ1) => {
+    t.Run(cloneˢ, (ж<testing.T> tΔ1) => {
         var (h, ok) = mh()._<hash.Cloner>(ᐧ);
         if (!ok) {
             tΔ1.Fatalf("%T does not implement hash.Cloner"u8, (mh).OrTypedNilFunc());
         }
         var (h3, err) = h.Clone();
-        if (err != default!) {
+        if (err != nil) {
             tΔ1.Fatalf("Clone failed: %v"u8, err);
         }
         var prefix = slice<byte>("tmp"u8);
         writeToHash(tΔ1, h, prefix);
         (var h2, err) = h.Clone();
-        if (err != default!) {
+        if (err != nil) {
             tΔ1.Fatalf("Clone failed: %v"u8, err);
         }
-        var prefixSum = h.Sum(default!);
-        if (!bytes.Equal(prefixSum, h2.Sum(default!))) {
+        var prefixSum = h.Sum(default);
+        if (!bytes.Equal(prefixSum, h2.Sum(default))) {
             tΔ1.Fatalf("%T Clone results are inconsistent"u8, h);
         }
         var suffix = slice<byte>("tmp2"u8);
         writeToHash(tΔ1, h, suffix);
         writeToHash(tΔ1, h3, appendꓸꓸꓸ(prefix, suffix));
-        var compositeSum = h3.Sum(default!);
-        if (!bytes.Equal(h.Sum(default!), compositeSum)) {
+        var compositeSum = h3.Sum(default);
+        if (!bytes.Equal(h.Sum(default), compositeSum)) {
             tΔ1.Fatalf("%T Clone results are inconsistent"u8, h);
         }
-        if (!bytes.Equal(h2.Sum(default!), prefixSum)) {
+        if (!bytes.Equal(h2.Sum(default), prefixSum)) {
             tΔ1.Fatalf("%T Clone results are inconsistent"u8, h);
         }
         writeToHash(tΔ1, h2, suffix);
-        if (!bytes.Equal(h.Sum(default!), compositeSum)) {
+        if (!bytes.Equal(h.Sum(default), compositeSum)) {
             tΔ1.Fatalf("%T Clone results are inconsistent"u8, h);
         }
-        if (!bytes.Equal(h2.Sum(default!), compositeSum)) {
+        if (!bytes.Equal(h2.Sum(default), compositeSum)) {
             tΔ1.Fatalf("%T Clone results are inconsistent"u8, h);
         }
     });
@@ -71,9 +71,9 @@ private static readonly @string resetStateˢ = "ResetState"u8;
 private static readonly @string outOfBoundsReadˢ = "OutOfBoundsRead"u8;
 private static readonly @string statefulWriteˢ = "StatefulWrite"u8;
 
-public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
+public static void TestHashWithoutClone(ж<testing.T> t, Func<hash.Hash> mh) {
     // Test that Sum returns an appended digest matching output of Size
-    Ꮡt.Run(sumAppendˢ, (ж<testing.T> tΔ1) => {
+    t.Run(sumAppendˢ, (ж<testing.T> tΔ1) => {
         var h = mh();
         var rng = newRandReader(tΔ1);
 
@@ -83,7 +83,7 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
         rng.Read(longBuff);
 
         // Set of example strings to append digest to
-        var prefixes = new slice<byte>[]{default!, emptyBuff, shortBuff, longBuff}.slice();
+        var prefixes = slice<slice<byte>>([default, emptyBuff, shortBuff, longBuff]);
 
         // Go to each string and check digest gets appended to and is correct size.
         foreach (var (_, prefix) in prefixes) {
@@ -98,7 +98,7 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
 
             // Check that the appended sum wasn't affected by the prefix
             {
-                var expectedSum = getSum(tΔ1, h, default!); if (!bytes.Equal(sum.slice(len(prefix)), expectedSum)) {
+                var expectedSum = getSum(tΔ1, h, default); if (!bytes.Equal(sum.slice(len(prefix)), expectedSum)) {
                     tΔ1.Errorf("Sum behavior affected by data in the input buffer; got %x, want %x"u8, sum.slice(len(prefix)), expectedSum);
                 }
             }
@@ -114,7 +114,7 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
     });
 
     // Test that Hash.Write never returns error.
-    Ꮡt.Run(writeWithoutErrorˢ, (ж<testing.T> tΔ2) => {
+    t.Run(writeWithoutErrorˢ, (ж<testing.T> tΔ2) => {
         var h = mh();
         var rng = newRandReader(tΔ2);
 
@@ -124,25 +124,25 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
         rng.Read(longSlice);
 
         // Set of example strings to append digest to
-        var slices = new slice<byte>[]{emptySlice, shortSlice, longSlice}.slice();
+        var slices = slice<slice<byte>>([emptySlice, shortSlice, longSlice]);
 
         foreach (var (_, Δslice) in slices) {
             writeToHash(tΔ2, h, Δslice); // Writes and checks Write doesn't error
         }
     });
 
-    Ꮡt.Run(resetStateˢ, (ж<testing.T> tΔ3) => {
+    t.Run(resetStateˢ, (ж<testing.T> tΔ3) => {
         var h = mh();
         var rng = newRandReader(tΔ3);
 
-        var emptySum = getSum(tΔ3, h, default!);
+        var emptySum = getSum(tΔ3, h, default);
 
         // Write to hash and then Reset it and see if Sum is same as emptySum
         var writeEx = new slice<byte>(h.BlockSize());
         rng.Read(writeEx);
         writeToHash(tΔ3, h, writeEx);
         h.Reset();
-        var resetSum = getSum(tΔ3, h, default!);
+        var resetSum = getSum(tΔ3, h, default);
 
         if (!bytes.Equal(emptySum, resetSum)) {
             tΔ3.Errorf("Reset hash yields different Sum than new hash; got %x, want %x"u8, emptySum, resetSum);
@@ -150,7 +150,7 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
     });
 
     // Check that Write isn't reading from beyond input slice's bounds
-    Ꮡt.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ4) => {
+    t.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ4) => {
         var h = mh();
         nint blockSize = h.BlockSize();
         var rng = newRandReader(tΔ4);
@@ -158,7 +158,7 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
         var msg = new slice<byte>(blockSize);
         rng.Read(msg);
         writeToHash(tΔ4, h, msg);
-        var expectedDigest = getSum(tΔ4, h, default!); // Record control digest
+        var expectedDigest = getSum(tΔ4, h, default); // Record control digest
 
         h.Reset();
 
@@ -172,7 +172,7 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
         rng.Read(buff.slice(startOfSuffix));
 
         writeToHash(tΔ4, h, buff.slice(endOfPrefix, startOfSuffix));
-        var testDigest = getSum(tΔ4, h, default!);
+        var testDigest = getSum(tΔ4, h, default);
 
         if (!bytes.Equal(testDigest, expectedDigest)) {
             tΔ4.Errorf("Write affected by data outside of input slice bounds; got %x, want %x"u8, testDigest, expectedDigest);
@@ -180,7 +180,7 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
     });
 
     // Test that multiple calls to Write is stateful
-    Ꮡt.Run(statefulWriteˢ, (ж<testing.T> tΔ5) => {
+    t.Run(statefulWriteˢ, (ж<testing.T> tΔ5) => {
         var h = mh();
         var rng = newRandReader(tΔ5);
 
@@ -191,13 +191,13 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
         // Write prefix then suffix sequentially and record resulting hash
         writeToHash(tΔ5, h, prefix);
         writeToHash(tΔ5, h, suffix);
-        var serialSum = getSum(tΔ5, h, default!);
+        var serialSum = getSum(tΔ5, h, default);
 
         h.Reset();
 
         // Write prefix and suffix at the same time and record resulting hash
         writeToHash(tΔ5, h, appendꓸꓸꓸ(prefix, suffix));
-        var compositeSum = getSum(tΔ5, h, default!);
+        var compositeSum = getSum(tΔ5, h, default);
 
         // Check that sequential writing results in the same as writing all at once
         if (!bytes.Equal(compositeSum, serialSum)) {
@@ -207,25 +207,25 @@ public static void TestHashWithoutClone(ж<testing.T> Ꮡt, Func<hash.Hash> mh) 
 }
 
 // Helper function for writing. Verifies that Write does not error.
-internal static void writeToHash(ж<testing.T> Ꮡt, hash.Hash h, slice<byte> p) {
-    Ꮡt.Helper();
+internal static void writeToHash(ж<testing.T> t, hash.Hash h, slice<byte> p) {
+    t.Helper();
 
     var before = new slice<byte>(len(p));
     copy(before, p);
 
     var (n, err) = h.Write(p);
-    if (err != default! || n != len(p)) {
-        Ꮡt.Errorf("Write returned error; got (%v, %v), want (nil, %v)"u8, err, n, len(p));
+    if (err != nil || n != len(p)) {
+        t.Errorf("Write returned error; got (%v, %v), want (nil, %v)"u8, err, n, len(p));
     }
 
     if (!bytes.Equal(p, before)) {
-        Ꮡt.Errorf("Write modified input slice; got %x, want %x"u8, p, before);
+        t.Errorf("Write modified input slice; got %x, want %x"u8, p, before);
     }
 }
 
 // Helper function for getting Sum. Checks that Sum doesn't change hash state.
-internal static slice<byte> getSum(ж<testing.T> Ꮡt, hash.Hash h, slice<byte> buff) {
-    Ꮡt.Helper();
+internal static slice<byte> getSum(ж<testing.T> t, hash.Hash h, slice<byte> buff) {
+    t.Helper();
 
     var testBuff = new slice<byte>(len(buff));
     copy(testBuff, buff);
@@ -235,15 +235,15 @@ internal static slice<byte> getSum(ж<testing.T> Ꮡt, hash.Hash h, slice<byte> 
 
     // Check that Sum doesn't change underlying hash state
     if (!bytes.Equal(sum, testSum)) {
-        Ꮡt.Errorf("successive calls to Sum yield different results; got %x, want %x"u8, sum, testSum);
+        t.Errorf("successive calls to Sum yield different results; got %x, want %x"u8, sum, testSum);
     }
 
     return sum;
 }
 
-internal static partial io.Reader newRandReader(ж<testing.T> Ꮡt) {
+internal static partial io.Reader newRandReader(ж<testing.T> t) {
     var seed = time.Now().UnixNano();
-    Ꮡt.Logf("Deterministic RNG seed: 0x%x"u8, seed);
+    t.Logf("Deterministic RNG seed: 0x%x"u8, seed);
     return new rand_RandжReader(rand.New(rand.NewSource(seed)));
 }
 

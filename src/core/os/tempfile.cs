@@ -6,7 +6,7 @@ namespace go;
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using strconv = @internal.strconv_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal;
 using fs = go.io.fs_package;
 
@@ -39,13 +39,13 @@ public static (ж<File>, error) CreateTemp(@string dir, @string pattern) {
     }
 
     var (prefix, suffix, err) = prefixAndSuffix(pattern);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "createtemp"u8, Path: pattern, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "createtemp"u8, Path: pattern, Err: err))));
     }
     prefix = joinPath(dir, prefix);
 
     nint @try = 0;
-    while (ᐧ) {
+    for (;;) {
         @string name = prefix + nextRandom() + suffix;
         var (f, errΔ1) = OpenFile(name, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_EXCL), 384);
         if (IsExist(errΔ1)) {
@@ -54,7 +54,7 @@ public static (ж<File>, error) CreateTemp(@string dir, @string pattern) {
                     continue;
                 }
             }
-            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "createtemp"u8, Path: prefix + "*"u8 + suffix, Err: ErrExist))));
+            return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "createtemp"u8, Path: prefix + "*"u8 + suffix, Err: ErrExist))));
         }
         return (f, errΔ1);
     }
@@ -65,8 +65,8 @@ internal static error errPatternHasSeparator = errors.New("pattern contains path
 // prefixAndSuffix splits pattern by the last wildcard "*", if applicable,
 // returning prefix as the part before "*" and suffix as the part after "*".
 internal static (@string prefix, @string suffix, error err) prefixAndSuffix(@string pattern) {
-    @string prefix = default!;
-    @string suffix = default!;
+    @string prefix = default;
+    @string suffix = default;
 
     for (nint i = 0; i < len(pattern); i++) {
         if (IsPathSeparator(pattern[i])) {
@@ -74,13 +74,13 @@ internal static (@string prefix, @string suffix, error err) prefixAndSuffix(@str
         }
     }
     {
-        nint pos = bytealg.LastIndexByteString(pattern, (rune)'*'); if (pos != -1){
+        nint pos = bytealg.LastIndexByteString(pattern, (byte)'*'); if (pos != -1) {
             (prefix, suffix) = (pattern.slice(0, pos), pattern.slice(pos + 1));
         } else {
             prefix = pattern;
         }
     }
-    return (prefix, suffix, default!);
+    return (prefix, suffix, default);
 }
 
 // MkdirTemp creates a new temporary directory in the directory dir
@@ -97,17 +97,17 @@ public static (@string, error) MkdirTemp(@string dir, @string pattern) {
     }
 
     var (prefix, suffix, err) = prefixAndSuffix(pattern);
-    if (err != default!) {
+    if (err != nil) {
         return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirtemp"u8, Path: pattern, Err: err))));
     }
     prefix = joinPath(dir, prefix);
 
     nint @try = 0;
-    while (ᐧ) {
+    for (;;) {
         @string name = prefix + nextRandom() + suffix;
         var errΔ1 = Mkdir(name, 448);
-        if (errΔ1 == default!) {
-            return (name, default!);
+        if (errΔ1 == nil) {
+            return (name, default);
         }
         if (IsExist(errΔ1)) {
             {

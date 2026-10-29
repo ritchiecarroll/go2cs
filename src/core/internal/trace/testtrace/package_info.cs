@@ -10,22 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using traceꓸEvent = go.@internal.trace_package.ΔEvent;
-global using traceꓸLabel = go.@internal.trace_package.ΔLabel;
-global using traceꓸLog = go.@internal.trace_package.ΔLog;
-global using traceꓸMetric = go.@internal.trace_package.ΔMetric;
-global using traceꓸRange = go.@internal.trace_package.ΔRange;
-global using traceꓸRegion = go.@internal.trace_package.ΔRegion;
 global using traceꓸStack = go.@internal.trace_package.ΔStack;
-global using traceꓸStateTransition = go.@internal.trace_package.ΔStateTransition;
 global using traceꓸSync = go.@internal.trace_package.ΔSync;
-global using traceꓸTask = go.@internal.trace_package.ΔTask;
 global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
 
@@ -68,6 +55,15 @@ using static go.@internal.trace.testtrace_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Expectation))]
+[assembly: go.GoFieldAccess(typeof(go.@internal.trace_package.ClockSnapshot))]
+[assembly: go.GoFieldAccess(typeof(go.@internal.txtar_package.Archive))]
+[assembly: go.GoFieldAccess(typeof(goState))]
+[assembly: go.GoFieldAccess(typeof(procState))]
+[assembly: go.GoFieldAccess(typeof(schedContext))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -76,11 +72,11 @@ using static go.@internal.trace.testtrace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABYukgACENKClIKUgpSokoKCgoK2goKUgoKUpJSUpoKCgpSCgpQ=")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABYukgACENKClIKUgpSokoKCgoLWgoKUgoKUtJSUpoKCgpSCgpQ=")]
 [assembly: go.GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAikoKClIKUgpSClIKClIKCgpSCgoKUgpSAgraCgpQ=")]
-[assembly: go.GoPositionMap("internal/trace/testtrace/helpers.go", "helpers.cs", "ABgokoKUuILulIK4uIKUgoKUgoKClIKCgpSClICCtqailIKCgpSSgIKk")]
-[assembly: go.GoPositionMap("internal/trace/testtrace/platforms.go", "platforms.cs", "AA4cooKUqqLKlA==")]
-[assembly: go.GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyqSClKaClKa2poK4gpSUgoCCxoKAgsaCgIIAEByCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgqSCppSCgoKUgpTagpKClIKUgpSCgoKUlIKUgqaCgoKClIKkgoKCgpSClOyClIKUpIK2gpTIgpSUlKbagoCCgpQACRCUpoKCpoKCgqaCgqaCgoKUgoKUpsLIgpSClIKClIKUgoKUgoKCgpSmtIK4lIIACBKipoI=", "368-384:1")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/helpers.go", "helpers.cs", "ABgokoKUuILulIK4uIKUgoKUgoKClIKCgpSClICCtqailIKCgpSSgIKk", "", "", "", "93:21")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/platforms.go", "platforms.cs", "AA4cooKUqqLalA==")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoCC1oKAgtaCgIIAExyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgpSCppSCgoKUgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKClIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgIKClAAKEKSmgoKmgoKCpoKCpoKCgpSCgpSmwsiClIKUgoKUgpSCgpSCgoKClKa0griUggAIEqKmgg==", "368-384:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

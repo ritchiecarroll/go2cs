@@ -31,7 +31,7 @@ partial class signal_package {
 }
 
 internal static void loop() {
-    while (ᐧ) {
+    for (;;) {
         process(new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)(nint)signal_recv())));
     }
 }

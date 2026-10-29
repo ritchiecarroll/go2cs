@@ -36,16 +36,16 @@ internal static UntypedInt invalidNodeValue => 0xffff;
 // Decode reads bits from the given bitReader and navigates the tree until a
 // symbol is found.
 internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) {
-    uint16 v = default!;
+    uint16 v = default;
     ref var br = ref Ꮡbr.DerefOrNull();
 
     var nodeIndex = (uint16)0; // node 0 is the root of the tree.
 
-    while (ᐧ) {
+    for (;;) {
         var node = Ꮡ(t.nodes, nodeIndex);
 
-        uint16 bit = default!;
-        if (br.bits > 0){
+        uint16 bit = default;
+        if (br.bits > 0) {
             // Get next bit - fast path.
             br.bits--;
             bit = (uint16)((uint16)(br.n >> (int)(br.bits & 63)) & 1);
@@ -58,9 +58,9 @@ internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr)
 
         // Trick a compiler into generating conditional move instead of branch,
         // by making both loads unconditional.
-        var (l, r) = (node.Value.left, node.Value.right);
+        var (l, r) = (node.left, node.right);
 
-        if (bit == 1){
+        if (bit == 1) {
             nodeIndex = l;
         } else {
             nodeIndex = r;
@@ -69,8 +69,8 @@ internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr)
         if (nodeIndex == invalidNodeValue) {
             // We found a leaf. Use the value of bit to decide
             // whether is a left or a right value.
-            var (lΔ1, rΔ1) = (node.Value.leftValue, node.Value.rightValue);
-            if (bit == 1){
+            var (lΔ1, rΔ1) = (node.leftValue, node.rightValue);
+            if (bit == 1) {
                 v = lΔ1;
             } else {
                 v = rΔ1;
@@ -164,8 +164,8 @@ internal static readonly @string equalSymbolsInHuffmanˢ = "equal symbols in Huf
 // the Huffman tree at the given level. It returns the index of the newly
 // constructed node.
 internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> Ꮡt, slice<huffmanCode> codes, uint32 level) {
-    uint16 nodeIndex = default!;
-    error err = default!;
+    uint16 nodeIndex = default;
+    error err = default;
     ref var t = ref Ꮡt.DerefOrNull();
 
     var test = ((uint32)1).Lsh((uint64)(31 - level));
@@ -220,24 +220,24 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
     var node = Ꮡ(t.nodes, t.nextNode);
     t.nextNode++;
 
-    if (len(left) == 1){
+    if (len(left) == 1) {
         // leaf node
-        node.Value.left = invalidNodeValue;
-        node.Value.leftValue = left[0].value;
+        node.left = invalidNodeValue;
+        node.leftValue = left[0].value;
     } else {
-        (node.Value.left, err) = buildHuffmanNode(Ꮡt, left, level + 1);
+        (node.left, err) = buildHuffmanNode(Ꮡt, left, level + 1);
     }
 
-    if (err != default!) {
+    if (err != nil) {
         return (nodeIndex, err);
     }
 
-    if (len(right) == 1){
+    if (len(right) == 1) {
         // leaf node
-        node.Value.right = invalidNodeValue;
-        node.Value.rightValue = right[0].value;
+        node.right = invalidNodeValue;
+        node.rightValue = right[0].value;
     } else {
-        (node.Value.right, err) = buildHuffmanNode(Ꮡt, right, level + 1);
+        (node.right, err) = buildHuffmanNode(Ꮡt, right, level + 1);
     }
 
     return (nodeIndex, err);

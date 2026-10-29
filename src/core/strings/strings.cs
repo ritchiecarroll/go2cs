@@ -51,7 +51,7 @@ public static nint Count(@string s, @string substr) {
         return bytealg.CountString(s, substr[0]);
     }
     nint n = 0;
-    while (ᐧ) {
+    for (;;) {
         nint i = Index(s, substr);
         if (i == -1) {
             return n;
@@ -103,7 +103,7 @@ public static nint LastIndex(@string s, @string substr) {
     // Rabin-Karp search from the end of the string
     var (hashss, pow) = bytealg.HashStrRev(substr);
     nint last = len(s) - n;
-    uint32 h = default!;
+    uint32 h = default;
     for (nint i = len(s) - 1; i >= last; i--) {
         h = h * (uint32)bytealg.PrimeRK + (uint32)s[i];
     }
@@ -180,7 +180,7 @@ next:
         return -1;
 
 fallback:
-        if (haveFastIndex){
+        if (haveFastIndex) {
             // see comment in ../bytes/bytes.go
             {
                 nint j = bytealg.IndexString(s.slice(i - last), (@string)r); if (j >= 0) {
@@ -306,7 +306,7 @@ public static nint LastIndexByte(@string s, byte c) {
 // including sepSave bytes of sep in the subarrays.
 internal static slice<@string> genSplit(@string s, @string sep, nint sepSave, nint n) {
     if (n == 0) {
-        return default!;
+        return default;
     }
     if (sep == ""u8) {
         return explode(s, n);
@@ -394,7 +394,7 @@ public static slice<@string> SplitAfter(@string s, @string sep) {
     return genSplit(s, sep, len(sep), -1);
 }
 
-[GoLazy] partial class lazyᴛasciiSpace { internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1}; }
+[GoLazy] partial class lazyᴛasciiSpace { internal static array<uint8> asciiSpace = new array<uint8>(256){['\t'] = 1, ['\n'] = 1, ['\v'] = 1, ['\f'] = 1, ['\r'] = 1, [' '] = 1}; }
 
 // Fields splits the string s around each instance of one or more consecutive white space
 // characters, as defined by [unicode.IsSpace], returning a slice of substrings of s or an
@@ -476,7 +476,7 @@ public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
     // more efficient, possibly due to cache effects.
     nint start = -1; // valid span start if >= 0
     foreach (var (end, rune) in s) {
-        if (f(rune)){
+        if (f(rune)) {
             if (start >= 0) {
                 spans = append(spansᴷ, spans, new FieldsFunc_span(start, end));
                 // Set start to a negative value.
@@ -516,7 +516,7 @@ public static @string Join(slice<@string> elems, @string sep) {
         return elems[0];
     }}
 
-    nint n = default!;
+    nint n = default;
     if (len(sep) > 0) {
         if (len(sep) >= maxInt / (len(elems) - 1)) {
             throw panic("strings: Join output length overflow");
@@ -570,8 +570,8 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
             continue;
         }
 
-        nint width = default!;
-        if (c == utf8.RuneError){
+        nint width = default;
+        if (c == utf8.RuneError) {
             (c, width) = utf8.DecodeRuneInString(s.slice(i));
             if (width != 1 && r == c) {
                 continue;
@@ -602,7 +602,7 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
             // common case
             // Due to inlining, it is more performant to determine if WriteByte should be
             // invoked rather than always call WriteRune
-            if (r < utf8.RuneSelf){
+            if (r < utf8.RuneSelf) {
                 Ꮡb.WriteByte((byte)r);
             } else {
                 // r is not an ASCII rune.
@@ -655,7 +655,7 @@ public static @string Repeat(@string s, nint count) {
 
     // Optimize for commonly repeated strings of relatively short length.
     switch (s[0]) {
-    case (rune)' ' or (rune)'-' or (rune)'0' or (rune)'=' or (rune)'\t': {
+    case (byte)' ' or (byte)'-' or (byte)'0' or (byte)'=' or (byte)'\t': {
         switch (ᐧ) {
         case {} when n <= len(repeatedSpaces) && HasPrefix(repeatedSpaces, s): {
             return repeatedSpaces.slice(0, n);
@@ -713,7 +713,7 @@ public static @string ToUpper(@string s) {
             isASCII = false;
             break;
         }
-        hasLower = hasLower || ((rune)'a' <= c && c <= (rune)'z');
+        hasLower = hasLower || ('a' <= c && c <= 'z');
     }
 
     if (isASCII) { // optimize for ASCII-only strings.
@@ -721,11 +721,11 @@ public static @string ToUpper(@string s) {
             return s;
         }
         ref var b = ref heap(new Builder(), out var Ꮡb);
-        nint pos = default!;
+        nint pos = default;
         Ꮡb.Grow(len(s));
         for (nint i = 0; i < len(s); i++) {
             var c = s[i];
-            if ((rune)'a' <= c && c <= (rune)'z') {
+            if ('a' <= c && c <= 'z') {
                 c -= (byte)((rune)'a' - (rune)'A');
                 if (pos < i) {
                     Ꮡb.WriteString(s.slice(pos, i));
@@ -751,7 +751,7 @@ public static @string ToLower(@string s) {
             isASCII = false;
             break;
         }
-        hasUpper = hasUpper || ((rune)'A' <= c && c <= (rune)'Z');
+        hasUpper = hasUpper || ('A' <= c && c <= 'Z');
     }
 
     if (isASCII) { // optimize for ASCII-only strings.
@@ -759,11 +759,11 @@ public static @string ToLower(@string s) {
             return s;
         }
         ref var b = ref heap(new Builder(), out var Ꮡb);
-        nint pos = default!;
+        nint pos = default;
         Ꮡb.Grow(len(s));
         for (nint i = 0; i < len(s); i++) {
             var c = s[i];
-            if ((rune)'A' <= c && c <= (rune)'Z') {
+            if ('A' <= c && c <= 'Z') {
                 c += (byte)((rune)'a' - (rune)'A');
                 if (pos < i) {
                     Ꮡb.WriteString(s.slice(pos, i));
@@ -863,16 +863,16 @@ internal static bool isSeparator(rune r) {
     // ASCII alphanumerics and underscore are not separators
     if (r <= 0x7F) {
         switch (ᐧ) {
-        case {} when (rune)'0' <= r && r <= (rune)'9': {
+        case {} when '0' <= r && r <= '9': {
             return false;
         }
-        case {} when (rune)'a' <= r && r <= (rune)'z': {
+        case {} when 'a' <= r && r <= 'z': {
             return false;
         }
-        case {} when (rune)'A' <= r && r <= (rune)'Z': {
+        case {} when 'A' <= r && r <= 'Z': {
             return false;
         }
-        case {} when r is (rune)'_': {
+        case {} when r is '_': {
             return false;
         }}
         return true;
@@ -921,7 +921,7 @@ public static @string TrimLeftFunc(@string s, Func<rune, bool> f) {
 // Unicode code points c satisfying f(c) removed.
 public static @string TrimRightFunc(@string s, Func<rune, bool> f) {
     nint i = lastIndexFunc(s, f, false);
-    if (i >= 0){
+    if (i >= 0) {
         var (_, wid) = utf8.DecodeRuneInString(s.slice(i));
         i += wid;
     } else {
@@ -987,7 +987,7 @@ partial struct asciiSet /*[8]uint32*/;
 // makeASCIISet creates a set of ASCII characters and reports whether all
 // characters in chars are ASCII.
 internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
-    asciiSet @as = default!;
+    asciiSet @as = default;
 
     for (nint i = 0; i < len(chars); i++) {
         var c = chars[i];
@@ -1183,10 +1183,9 @@ public static @string Replace(@string s, @string old, @string @new, nint n) {
 
     // Compute number of replacements.
     {
-        nint m = Count(s, old); if (m == 0){
+        nint m = Count(s, old); if (m == 0) {
             return s; // avoid allocation
-        } else 
-        if (n < 0 || m < n) {
+        } else if (n < 0 || m < n) {
             n = m;
         }
     }
@@ -1195,7 +1194,7 @@ public static @string Replace(@string s, @string old, @string @new, nint n) {
     ref var b = ref heap(new Builder(), out var Ꮡb);
     Ꮡb.Grow(len(s) + n * (len(@new) - len(old)));
     nint start = 0;
-    if (len(old) > 0){
+    if (len(old) > 0) {
         foreach (var _ᴛ1 in range(n)) {
             nint j = start + Index(s.slice(start), old);
             Ꮡb.WriteString(s.slice(start, j));
@@ -1248,7 +1247,7 @@ public static bool EqualFold(@string s, @string t) {
             (tr, sr) = (sr, tr);
         }
         // ASCII only, sr/tr must be upper/lower case
-        if ((rune)'A' <= sr && sr <= (rune)'Z' && tr == (byte)(sr + (rune)'a' - (rune)'A')) {
+        if ('A' <= sr && sr <= 'Z' && tr == (byte)(sr + 'a' - 'A')) {
             continue;
         }
         return false;
@@ -1285,7 +1284,7 @@ hasUnicode:
         // Fast check for ASCII.
         if (tr < utf8.RuneSelf) {
             // ASCII only, sr/tr must be upper/lower case
-            if ((rune)'A' <= sr && sr <= (rune)'Z' && tr == sr + (rune)'a' - (rune)'A') {
+            if ('A' <= sr && sr <= 'Z' && tr == sr + 'a' - 'A') {
                 continue;
             }
             return false;

@@ -4,7 +4,7 @@
 namespace go;
 
 using abi = @internal.abi_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using @unsafe = unsafe_package;
 
@@ -14,8 +14,8 @@ partial class runtime_package {
 partial struct inlinedCall {
     internal abi.FuncID funcID; // type of the called function
     internal array<byte> _ = new(3);
-    internal int32 nameOff; // offset into pclntab for name of called function
-    internal int32 parentPc; // position of an instruction whose source position is the call site (offset from entry)
+    internal int32 nameOff;   // offset into pclntab for name of called function
+    internal int32 parentPc;  // position of an instruction whose source position is the call site (offset from entry)
     internal int32 startLine; // line number of start of function (func keyword/TEXT directive)
 }
 
@@ -121,9 +121,9 @@ internal static ΔsrcFunc srcFunc(this ref inlineUnwinder u, inlineFrame uf) {
     var t = u.inlTree.at<inlinedCall>((nint)(uf.index));
     return new ΔsrcFunc(
         u.f.datap,
-        (~t).nameOff,
-        (~t).startLine,
-        (~t).funcID
+        t.nameOff,
+        t.startLine,
+        t.funcID
     );
 }
 
@@ -137,7 +137,7 @@ internal static partial ΔsrcFunc badSrcFunc(ж<inlineUnwinder> _Δp0, inlineFra
 //
 // It returns "?", 0 if something goes wrong.
 internal static (@string @file, nint line) fileLine(this ref inlineUnwinder u, inlineFrame uf) {
-    @string @file = default!;
+    @string @file = default;
 
     (@file, var line32) = funcline1(u.f, uf.pc, false);
     return (@file, (nint)line32);

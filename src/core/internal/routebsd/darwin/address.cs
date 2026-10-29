@@ -19,8 +19,8 @@ partial interface Addr {
 
 // A LinkAddr represents a link-layer address.
 partial struct LinkAddr {
-    public nint Index;   // interface index when attached
-    public @string Name; // interface name when attached
+    public nint Index;       // interface index when attached
+    public @string Name;     // interface name when attached
     public slice<byte> Addr; // link-layer address when attached
 }
 
@@ -31,14 +31,14 @@ public static nint Family(this ref LinkAddr a) {
 
 internal static (Addr, error) parseLinkAddr(slice<byte> b) {
     if (len(b) < 8) {
-        return (default!, errInvalidAddr);
+        return (default, errInvalidAddr);
     }
     var (_, a, err) = parseKernelLinkAddr(syscall.AF_LINK, b[4..]);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    a._<ж<LinkAddr>>().Value.Index = (nint)nativeEndian.Uint16(b[2..4]);
-    return (a, default!);
+    a._<ж<LinkAddr>>().Index = (nint)nativeEndian.Uint16(b[2..4]);
+    return (a, default);
 }
 
 // parseKernelLinkAddr parses b as a link-layer address in
@@ -73,11 +73,11 @@ internal static (nint, Addr, error) parseKernelLinkAddr(nint _, slice<byte> b) {
     }
     nint l = 4 + nlen + alen + slen;
     if (len(b) < l) {
-        return (0, default!, errInvalidAddr);
+        return (0, default, errInvalidAddr);
     }
     var data = b[4..];
     ref var name = ref heap(new @string(), out var Ꮡname);
-    slice<byte> addr = default!;
+    slice<byte> addr = default;
     if (nlen > 0) {
         name = (@string)(data.slice(0, nlen));
         data = data.slice(nlen);
@@ -86,7 +86,7 @@ internal static (nint, Addr, error) parseKernelLinkAddr(nint _, slice<byte> b) {
         addr = data.slice(0, alen);
         data = data.slice(alen);
     }
-    return (l, new LinkAddrжAddr(Ꮡ(new LinkAddr(Name: name, Addr: addr))), default!);
+    return (l, new LinkAddrжAddr(Ꮡ(new LinkAddr(Name: name, Addr: addr))), default);
 }
 
 // An InetAddr represent an internet address using IPv4 or IPv6.
@@ -95,7 +95,7 @@ partial struct InetAddr {
 }
 
 public static nint Family(this ref InetAddr a) {
-    if (a.IP.Is4()){
+    if (a.IP.Is4()) {
         return syscall.AF_INET;
     } else {
         return syscall.AF_INET6;
@@ -104,14 +104,14 @@ public static nint Family(this ref InetAddr a) {
 
 // parseInetAddr parses b as an internet address for IPv4 or IPv6.
 internal static (Addr, error) parseInetAddr(nint af, slice<byte> b) {
-    UntypedInt off4 = 4; // offset of in_addr
-    UntypedInt off6 = 8; // offset of in6_addr
-    UntypedInt ipv4Len = 4; // length of IPv4 address in bytes
+    UntypedInt off4 = 4;     // offset of in_addr
+    UntypedInt off6 = 8;     // offset of in6_addr
+    UntypedInt ipv4Len = 4;  // length of IPv4 address in bytes
     UntypedInt ipv6Len = 16; // length of IPv6 address in bytes
-    var exprᴛ1 = af;
-    if (exprᴛ1 == syscall.AF_INET) {
+    switch (af) {
+    case var ᴛ when ᴛ == syscall.AF_INET: {
         if (len(b) < (nint)(off4 + 1) || len(b) < (nint)b[0]) {
-            return (default!, errInvalidAddr);
+            return (default, errInvalidAddr);
         }
         nint sockAddrLen = (nint)b[0];
         array<byte> ip = new(4); /* ipv4Len */
@@ -127,11 +127,11 @@ internal static (Addr, error) parseInetAddr(nint af, slice<byte> b) {
         var a = Ꮡ(new InetAddr(
             IP: netip.AddrFrom4(ip)
         ));
-        return (new InetAddrжAddr(a), default!);
+        return (new InetAddrжAddr(a), default);
     }
-    if (exprᴛ1 == syscall.AF_INET6) {
+    case var ᴛ when ᴛ == syscall.AF_INET6: {
         if (len(b) < (nint)(off6 + 1) || len(b) < (nint)b[0]) {
-            return (default!, errInvalidAddr);
+            return (default, errInvalidAddr);
         }
         array<byte> ip = new(16); /* ipv6Len */
         nint sockAddrLen = (nint)b[0];
@@ -157,11 +157,11 @@ internal static (Addr, error) parseInetAddr(nint af, slice<byte> b) {
         var a = Ꮡ(new InetAddr(
             IP: netip.AddrFrom16(ip)
         ));
-        return (new InetAddrжAddr(a), default!);
+        return (new InetAddrжAddr(a), default);
     }
-    { /* default: */
-        return (default!, errInvalidAddr);
-    }
+    default: {
+        return (default, errInvalidAddr);
+    }}
 }
 
 // parseKernelInetAddr parses b as an internet address in conventional
@@ -187,7 +187,7 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
     //   to make the <length, prefix> tuple to be conformed with
     //   the routing message boundary
     nint l = (nint)b[0];
-    if (Δruntime.GOOS == "darwin"u8 || Δruntime.GOOS == "ios"u8){
+    if (Δruntime.GOOS == "darwin"u8 || Δruntime.GOOS == "ios"u8) {
         // On Darwin, an address in the kernel form is also
         // used as a message filler.
         if (l == 0 || len(b) > roundup(l)) {
@@ -197,7 +197,7 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
         l = roundup(l);
     }
     if (len(b) < l) {
-        return (0, default!, errInvalidAddr);
+        return (0, default, errInvalidAddr);
     }
     // Don't reorder case expressions.
     // The case expressions for IPv6 must come first.
@@ -208,11 +208,11 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
         var a = Ꮡ(new InetAddr(
             IP: netip.AddrFrom16(new array<byte>(b[(int)(off6)..(int)(off6 + 16)], 16))
         ));
-        return ((nint)b[0], new InetAddrжAddr(a), default!);
+        return ((nint)b[0], new InetAddrжAddr(a), default);
     }
     case {} when af == syscall.AF_INET6: {
         array<byte> ab = new(16);
-        if (l - 1 < off6){
+        if (l - 1 < off6) {
             copy(ab[..], b.slice(1, l));
         } else {
             copy(ab[..], b.slice(l - (nint)off6, l));
@@ -220,17 +220,17 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
         var a = Ꮡ(new InetAddr(
             IP: netip.AddrFrom16(ab)
         ));
-        return ((nint)b[0], new InetAddrжAddr(a), default!);
+        return ((nint)b[0], new InetAddrжAddr(a), default);
     }
     case {} when b[0] == syscall.SizeofSockaddrInet4: {
         var a = Ꮡ(new InetAddr(
             IP: netip.AddrFrom4(new array<byte>(b[(int)(off4)..(int)(off4 + 4)], 4))
         ));
-        return ((nint)b[0], new InetAddrжAddr(a), default!);
+        return ((nint)b[0], new InetAddrжAddr(a), default);
     }
     default: { // an old fashion, AF_UNSPEC or unknown means AF_INET
         array<byte> ab = new(4);
-        if (l - 1 < off4){
+        if (l - 1 < off4) {
             copy(ab[..], b.slice(1, l));
         } else {
             copy(ab[..], b.slice(l - (nint)off4, l));
@@ -238,7 +238,7 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
         var a = Ꮡ(new InetAddr(
             IP: netip.AddrFrom4(ab)
         ));
-        return ((nint)b[0], new InetAddrжAddr(a), default!);
+        return ((nint)b[0], new InetAddrжAddr(a), default);
     }}
 }
 
@@ -249,51 +249,54 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, slice<byte> b) {
         if ((attrs & (((nuint)1).Lsh(i))) == 0) {
             continue;
         }
-        if (i <= syscall.RTAX_BRD){
-            var exprᴛ1 = b[1];
-            if (exprᴛ1 == syscall.AF_LINK) {
+        if (i <= syscall.RTAX_BRD) {
+            switch (b[1]) {
+            case var ᴛ when ᴛ == syscall.AF_LINK: {
                 var (a, err) = parseLinkAddr(b);
-                if (err != default!) {
-                    return (default!, err);
+                if (err != nil) {
+                    return (default, err);
                 }
                 @as[i] = a;
                 nint l = roundup((nint)b[0]);
                 if (len(b) < l) {
-                    return (default!, errMessageTooShort);
+                    return (default, errMessageTooShort);
                 }
                 b = b.slice(l);
+                break;
             }
-            else if (exprᴛ1 == syscall.AF_INET || exprᴛ1 == syscall.AF_INET6) {
+            case var ᴛ when ᴛ == syscall.AF_INET || ᴛ == syscall.AF_INET6: {
                 af = (nint)b[1];
                 var (a, err) = parseInetAddr(af, b);
-                if (err != default!) {
-                    return (default!, err);
+                if (err != nil) {
+                    return (default, err);
                 }
                 @as[i] = a;
                 nint l = roundup((nint)b[0]);
                 if (len(b) < l) {
-                    return (default!, errMessageTooShort);
+                    return (default, errMessageTooShort);
                 }
                 b = b.slice(l);
+                break;
             }
-            else { /* default: */
+            default: {
                 var (l, a, err) = parseKernelInetAddr(af, b);
-                if (err != default!) {
-                    return (default!, err);
+                if (err != nil) {
+                    return (default, err);
                 }
                 @as[i] = a;
                 nint ll = roundup(l);
-                if (len(b) < ll){
+                if (len(b) < ll) {
                     b = b.slice(l);
                 } else {
                     b = b.slice(ll);
                 }
-            }
+                break;
+            }}
         } else {
             // Skip unknown addresses.
             nint l = roundup((nint)b[0]);
             if (len(b) < l) {
-                return (default!, errMessageTooShort);
+                return (default, errMessageTooShort);
             }
             b = b.slice(l);
         }
@@ -302,7 +305,7 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, slice<byte> b) {
     // However, under some circumstances DragonFly BSD appears to put
     // more addresses in the message than are indicated in the address
     // bitmask, so don't check for this.
-    return (@as[..], default!);
+    return (@as[..], default);
 }
 
 } // end routebsd_package

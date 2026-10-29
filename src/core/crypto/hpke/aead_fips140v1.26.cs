@@ -15,8 +15,8 @@ partial class hpke_package {
 
 internal static (cipher.AEAD, error) newAESGCM(slice<byte> key) {
     var (b, err) = aes.New(key);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var (ᴛ1, ᴛ2) = gcm.NewGCMForHPKE(b);
     return (new gcm_GCMWithXORCounterNonceжAEAD(ᴛ1), ᴛ2);

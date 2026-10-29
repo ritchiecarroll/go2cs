@@ -24,10 +24,11 @@ private static readonly @string srcˢ = "src"u8;
 // given goroot and compiler. readDir accepts OS filesystem paths.
 public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> readDir, @string goroot, @string compiler, @string path) {
     var exprᴛ1 = compiler;
-    if (exprᴛ1 == "gc"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "gc"u8: {
         @string dir = filepath.Join(goroot, srcˢ, path);
         var (dirents, err) = readDir(dir);
-        if (err != default!) {
+        if (err != nil) {
             return false;
         }
         foreach (var (_, dirent) in dirents) {
@@ -37,12 +38,13 @@ public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> 
         }
         return false;
     }
-    if (exprᴛ1 == "gccgo"u8) {
+    case {} when exprᴛ1 == "gccgo"u8: {
         return ᏑgccgoSearch.isStandard(path);
     }
-    { /* default: */
+    default: {
         throw panic("unknown compiler " + compiler);
-    }
+        break;
+    }}
 }
 
 // gccgoDirs holds the gccgo search directories.
@@ -75,28 +77,28 @@ internal static void init(this ref gccgoDirs gd) {
         gccgo = gccgoˢ2;
     }
     var (bin, err) = exec.LookPath(gccgo);
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
 
     (var allDirs, err) = exec.Command(bin, printSearchDirsˢ).Output();
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
     (var versionB, err) = exec.Command(bin, dumpversionˢ).Output();
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
     @string version = strings.TrimSpace((@string)versionB);
     (var machineB, err) = exec.Command(bin, dumpmachineˢ).Output();
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
     @string machine = strings.TrimSpace((@string)machineB);
 
     var dirsEntries = strings.Split((@string)allDirs, "\n"u8);
     @string prefix = prefixᶜ;
-    slice<@string> dirs = default!;
+    slice<@string> dirs = default;
     foreach (var (_, dirEntry) in dirsEntries) {
         {
             var (after, ok) = strings.CutPrefix(dirEntry, prefix); if (ok) {
@@ -109,22 +111,22 @@ internal static void init(this ref gccgoDirs gd) {
         return;
     }
 
-    slice<@string> lastDirs = default!;
+    slice<@string> lastDirs = default;
     foreach (var (_, dir) in dirs) {
         @string goDir = filepath.Join(dir, "go", version);
         {
-            var (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == default! && fi.IsDir()) {
+            var (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == nil && fi.IsDir()) {
                 gd.dirs = append(gd.dirs, goDir);
                 goDir = filepath.Join(goDir, machine);
                 {
-                    (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == default! && fi.IsDir()) {
+                    (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == nil && fi.IsDir()) {
                         gd.dirs = append(gd.dirs, goDir);
                     }
                 }
             }
         }
         {
-            var (fi, errΔ2) = os.Stat(dir); if (errΔ2 == default! && fi.IsDir()) {
+            var (fi, errΔ2) = os.Stat(dir); if (errΔ2 == nil && fi.IsDir()) {
                 lastDirs = append(lastDirsᴷ, lastDirs, dir);
             }
         }
@@ -152,7 +154,7 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
     }
 
     Ꮡgd.of(gccgoDirs.Ꮡonce).Do(Ꮡgd.init);
-    if (gd.dirs == default!) {
+    if (gd.dirs == nil) {
         // We couldn't find the gccgo search directories.
         // Best guess, since the first component did not contain
         // '.', is that this is a standard library package.
@@ -162,7 +164,7 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
     foreach (var (_, dir) in gd.dirs) {
         @string full = filepath.Join(dir, path) + ".gox"u8;
         {
-            var (fi, err) = os.Stat(full); if (err == default! && !fi.IsDir()) {
+            var (fi, err) = os.Stat(full); if (err == nil && !fi.IsDir()) {
                 return true;
             }
         }

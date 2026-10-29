@@ -17,6 +17,8 @@ partial interface ΔType :
     //
     // See https://go.dev/ref/spec#Underlying_types.
     ΔType Underlying();
+    // String returns a string representation of a type.
+    // String() string is provided by fmt.Stringer
 }
 
 } // end types_package

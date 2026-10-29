@@ -74,7 +74,7 @@ partial struct interlaceScan {
 
 // interlacing defines Adam7 interlacing, with 7 passes of reduced images.
 // See https://www.w3.org/TR/PNG/#8Interlace
-[GoLazy] partial class lazyᴛinterlacing { internal static slice<interlaceScan> interlacing = new interlaceScan[]{
+[GoLazy] partial class lazyᴛinterlacing { internal static slice<interlaceScan> interlacing = slice<interlaceScan>([
     new(8, 8, 0, 0),
     new(8, 8, 4, 0),
     new(4, 8, 0, 4),
@@ -82,7 +82,7 @@ partial struct interlaceScan {
     new(2, 4, 0, 2),
     new(2, 2, 1, 0),
     new(1, 2, 0, 1)
-}.slice(); }
+]); }
 
 // Decoding stage.
 // The PNG specification says that the IHDR, PLTE (if present), tRNS (if
@@ -146,7 +146,7 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
         return ((FormatError)(@string)badIhdrLengthˢ);
     }
     {
-        var (_, err) = io.ReadFull(d.r, d.tmp[..13]); if (err != default!) {
+        var (_, err) = io.ReadFull(d.r, d.tmp[..13]); if (err != nil) {
             return err;
         }
     }
@@ -181,68 +181,83 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
     d.depth = (nint)d.tmp[8];
     switch (d.depth) {
     case 1: {
-        var exprᴛ1 = d.tmp[9];
-        if (exprᴛ1 == ctGrayscale) {
+        switch (d.tmp[9]) {
+        case var ᴛ when ᴛ == ctGrayscale: {
             d.cb = cbG1;
+            break;
         }
-        else if (exprᴛ1 == ctPaletted) {
+        case var ᴛ when ᴛ == ctPaletted: {
             d.cb = cbP1;
-        }
+            break;
+        }}
         break;
     }
     case 2: {
-        var exprᴛ2 = d.tmp[9];
-        if (exprᴛ2 == ctGrayscale) {
+        switch (d.tmp[9]) {
+        case var ᴛ when ᴛ == ctGrayscale: {
             d.cb = cbG2;
+            break;
         }
-        else if (exprᴛ2 == ctPaletted) {
+        case var ᴛ when ᴛ == ctPaletted: {
             d.cb = cbP2;
-        }
+            break;
+        }}
         break;
     }
     case 4: {
-        var exprᴛ3 = d.tmp[9];
-        if (exprᴛ3 == ctGrayscale) {
+        switch (d.tmp[9]) {
+        case var ᴛ when ᴛ == ctGrayscale: {
             d.cb = cbG4;
+            break;
         }
-        else if (exprᴛ3 == ctPaletted) {
+        case var ᴛ when ᴛ == ctPaletted: {
             d.cb = cbP4;
-        }
+            break;
+        }}
         break;
     }
     case 8: {
-        var exprᴛ4 = d.tmp[9];
-        if (exprᴛ4 == ctGrayscale) {
+        switch (d.tmp[9]) {
+        case var ᴛ when ᴛ == ctGrayscale: {
             d.cb = cbG8;
+            break;
         }
-        else if (exprᴛ4 == ctTrueColor) {
+        case var ᴛ when ᴛ == ctTrueColor: {
             d.cb = cbTC8;
+            break;
         }
-        else if (exprᴛ4 == ctPaletted) {
+        case var ᴛ when ᴛ == ctPaletted: {
             d.cb = cbP8;
+            break;
         }
-        else if (exprᴛ4 == ctGrayscaleAlpha) {
+        case var ᴛ when ᴛ == ctGrayscaleAlpha: {
             d.cb = cbGA8;
+            break;
         }
-        else if (exprᴛ4 == ctTrueColorAlpha) {
+        case var ᴛ when ᴛ == ctTrueColorAlpha: {
             d.cb = cbTCA8;
-        }
+            break;
+        }}
         break;
     }
     case 16: {
-        var exprᴛ5 = d.tmp[9];
-        if (exprᴛ5 == ctGrayscale) {
+        switch (d.tmp[9]) {
+        case var ᴛ when ᴛ == ctGrayscale: {
             d.cb = cbG16;
+            break;
         }
-        else if (exprᴛ5 == ctTrueColor) {
+        case var ᴛ when ᴛ == ctTrueColor: {
             d.cb = cbTC16;
+            break;
         }
-        else if (exprᴛ5 == ctGrayscaleAlpha) {
+        case var ᴛ when ᴛ == ctGrayscaleAlpha: {
             d.cb = cbGA16;
+            break;
         }
-        else if (exprᴛ5 == ctTrueColorAlpha) {
+        case var ᴛ when ᴛ == ctTrueColorAlpha: {
             d.cb = cbTCA16;
-        }
+            break;
+        }}
         break;
     }}
     if (d.cb == cbInvalid) {
@@ -262,12 +277,12 @@ internal static error parsePLTE(this ref decoder d, uint32 length) {
         return ((FormatError)(@string)badPlteLengthˢ);
     }
     var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, 3 * np));
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     d.crc.Write(d.tmp.slice(0, n));
-    var exprᴛ1 = d.cb;
-    if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
+    switch (d.cb) {
+    case var ᴛ when ᴛ == cbP1 || ᴛ == cbP2 || ᴛ == cbP4 || ᴛ == cbP8: {
         d.palette = new color.Palette(256);
         for (nint i = 0; i < np; i++) {
             d.palette[i] = new colorꓸRGBA(d.tmp[3 * i + 0], d.tmp[3 * i + 1], d.tmp[3 * i + 2], 0xff);
@@ -281,14 +296,16 @@ internal static error parsePLTE(this ref decoder d, uint32 length) {
             d.palette[i] = new colorꓸRGBA(0x00, 0x00, 0x00, 0xff);
         }
         d.palette = d.palette.slice(0, np);
+        break;
     }
-    else if (exprᴛ1 == cbTC8 || exprᴛ1 == cbTCA8 || exprᴛ1 == cbTC16 || exprᴛ1 == cbTCA16) {
+    case var ᴛ when ᴛ == cbTC8 || ᴛ == cbTCA8 || ᴛ == cbTC16 || ᴛ == cbTCA16: {
         // As per the PNG spec, a PLTE chunk is optional (and for practical purposes,
         // ignorable) for the ctTrueColor and ctTrueColorAlpha color types (section 4.1.2).
+        break;
     }
-    else { /* default: */
+    default: {
         return ((FormatError)(@string)plteColorTypeMismatchˢ);
-    }
+    }}
     return d.verifyChecksum();
 }
 
@@ -297,49 +314,54 @@ internal static readonly @string badTRNSLengthˢ = "bad tRNS length"u8;
 internal static readonly @string tRNSColorTypeMismatchˢ = "tRNS, color type mismatch"u8;
 
 internal static error parsetRNS(this ref decoder d, uint32 length) {
-    var exprᴛ1 = d.cb;
-    if (exprᴛ1 == cbG1 || exprᴛ1 == cbG2 || exprᴛ1 == cbG4 || exprᴛ1 == cbG8 || exprᴛ1 == cbG16) {
+    switch (d.cb) {
+    case var ᴛ when ᴛ == cbG1 || ᴛ == cbG2 || ᴛ == cbG4 || ᴛ == cbG8 || ᴛ == cbG16: {
         if (length != 2) {
             return ((FormatError)(@string)badTRNSLengthˢ);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         d.crc.Write(d.tmp.slice(0, n));
 
         copy(d.transparent[..], d.tmp.slice(0, (nint)(length)));
-        var exprᴛ2 = d.cb;
-        if (exprᴛ2 == cbG1) {
+        switch (d.cb) {
+        case var ᴛ2 when ᴛ2 == cbG1: {
             d.transparent[1] *= 0xff;
+            break;
         }
-        else if (exprᴛ2 == cbG2) {
+        case var ᴛ2 when ᴛ2 == cbG2: {
             d.transparent[1] *= 0x55;
+            break;
         }
-        else if (exprᴛ2 == cbG4) {
+        case var ᴛ2 when ᴛ2 == cbG4: {
             d.transparent[1] *= 0x11;
-        }
+            break;
+        }}
         d.useTransparent = true;
+        break;
     }
-    else if (exprᴛ1 == cbTC8 || exprᴛ1 == cbTC16) {
+    case var ᴛ when ᴛ == cbTC8 || ᴛ == cbTC16: {
         if (length != 6) {
             return ((FormatError)(@string)badTRNSLengthˢ);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         d.crc.Write(d.tmp.slice(0, n));
 
         copy(d.transparent[..], d.tmp.slice(0, (nint)(length)));
         d.useTransparent = true;
+        break;
     }
-    else if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
+    case var ᴛ when ᴛ == cbP1 || ᴛ == cbP2 || ᴛ == cbP4 || ᴛ == cbP8: {
         if (length > 256) {
             return ((FormatError)(@string)badTRNSLengthˢ);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         d.crc.Write(d.tmp.slice(0, n));
@@ -351,10 +373,11 @@ internal static error parsetRNS(this ref decoder d, uint32 length) {
             var rgba = d.palette[i]._<colorꓸRGBA>();
             d.palette[i] = new color.NRGBA(rgba.R, rgba.G, rgba.B, d.tmp[i]);
         }
+        break;
     }
-    else { /* default: */
+    default: {
         return ((FormatError)(@string)tRNSColorTypeMismatchˢ);
-    }
+    }}
     return d.verifyChecksum();
 }
 
@@ -373,19 +396,19 @@ internal static readonly @string idatChunkLengthOverflowˢ = "IDAT chunk length 
 // call is that d.r is positioned between yy and crc1.
 internal static (nint, error) Read(this ref decoder d, slice<byte> p) {
     if (len(p) == 0) {
-        return (0, default!);
+        return (0, default);
     }
     while (d.idatLength == 0) {
         // We have exhausted an IDAT chunk. Verify the checksum of that chunk.
         {
-            var errΔ1 = d.verifyChecksum(); if (errΔ1 != default!) {
+            var errΔ1 = d.verifyChecksum(); if (errΔ1 != nil) {
                 return (0, errΔ1);
             }
         }
         // Read the length and chunk type of the next chunk, and check that
         // it is an IDAT chunk.
         {
-            var (_, errΔ2) = io.ReadFull(d.r, d.tmp[..8]); if (errΔ2 != default!) {
+            var (_, errΔ2) = io.ReadFull(d.r, d.tmp[..8]); if (errΔ2 != nil) {
                 return (0, errΔ2);
             }
         }
@@ -415,30 +438,29 @@ internal static (image.Image, error) decode(this ж<decoder> Ꮡd) {
         ref var d = ref Ꮡd.DerefOrNull();
 
         var (r, err) = zlib.NewReader(new decoderжReader(Ꮡd));
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
-        image.Image img = default!;
-        if (d.interlace == itNone){
+        image.Image img = default;
+        if (d.interlace == itNone) {
             (img, err) = d.readImagePass(r, 0, false);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
-        } else 
-        if (d.interlace == itAdam7) {
+        } else if (d.interlace == itAdam7) {
             // Allocate a blank image of the full size.
-            (img, err) = d.readImagePass(default!, 0, true);
-            if (err != default!) {
-                return (default!, err);
+            (img, err) = d.readImagePass(default, 0, true);
+            if (err != nil) {
+                return (default, err);
             }
             for (nint pass = 0; pass < 7; pass++) {
                 var (imagePass, errΔ1) = d.readImagePass(r, pass, false);
-                if (errΔ1 != default!) {
-                    return (default!, errΔ1);
+                if (errΔ1 != nil) {
+                    return (default, errΔ1);
                 }
-                if (imagePass != default!) {
+                if (imagePass != nil) {
                     d.mergePassInto(img, imagePass, pass);
                 }
             }
@@ -446,22 +468,22 @@ internal static (image.Image, error) decode(this ж<decoder> Ꮡd) {
 
         // Check for EOF, to verify the zlib checksum.
         nint n = 0;
-        for (nint i = 0; n == 0 && err == default!; i++) {
+        for (nint i = 0; n == 0 && err == nil; i++) {
             if (i == 100) {
-                return (default!, io.ErrNoProgress);
+                return (default, io.ErrNoProgress);
             }
             (n, err) = r.Read(d.tmp[..1]);
         }
-        if (err != default! && !AreEqual(err, io.EOF)) {
-            return (default!, ((FormatError)err.Error()));
+        if (err != nil && !AreEqual(err, io.EOF)) {
+            return (default, ((FormatError)err.Error()));
         }
         if (n != 0 || d.idatLength != 0) {
-            return (default!, ((FormatError)(@string)tooMuchPixelDataˢ));
+            return (default, ((FormatError)(@string)tooMuchPixelDataˢ));
         }
 
-        return (img, default!);
+        return (img, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -472,14 +494,14 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
 internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader r, nint pass, bool allocateOnly) {
     nint bitsPerPixel = 0;
     nint pixOffset = 0;
-    ж<image.Gray> gray = default!;
-    ж<imageꓸRGBA> rgba = default!;
-    ж<image.Paletted> paletted = default!;
-    ж<image.NRGBA> nrgba = default!;
-    ж<image.Gray16> gray16 = default!;
-    ж<image.RGBA64> rgba64 = default!;
-    ж<image.NRGBA64> nrgba64 = default!;
-    image.Image img = default!;
+    ж<image.Gray> gray = default;
+    ж<imageꓸRGBA> rgba = default;
+    ж<image.Paletted> paletted = default;
+    ж<image.NRGBA> nrgba = default;
+    ж<image.Gray16> gray16 = default;
+    ж<image.RGBA64> rgba64 = default;
+    ж<image.NRGBA64> nrgba64 = default;
+    image.Image img = default;
     nint width = d.width;
     nint height = d.height;
     if (d.interlace == itAdam7 && !allocateOnly) {
@@ -491,84 +513,93 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
         // image, an individual pass might have zero width or height. If so, we
         // shouldn't even read a per-row filter type byte, so return early.
         if (width == 0 || height == 0) {
-            return (default!, default!);
+            return (default, default);
         }
     }
-    var exprᴛ1 = d.cb;
-    if (exprᴛ1 == cbG1 || exprᴛ1 == cbG2 || exprᴛ1 == cbG4 || exprᴛ1 == cbG8) {
+    switch (d.cb) {
+    case var ᴛ when ᴛ == cbG1 || ᴛ == cbG2 || ᴛ == cbG4 || ᴛ == cbG8: {
         bitsPerPixel = d.depth;
-        if (d.useTransparent){
+        if (d.useTransparent) {
             nrgba = image.NewNRGBA(image.Rect(0, 0, width, height));
             img = new image.NRGBAжImage(nrgba);
         } else {
             gray = image.NewGray(image.Rect(0, 0, width, height));
             img = new image.GrayжImage(gray);
         }
+        break;
     }
-    else if (exprᴛ1 == cbGA8) {
+    case var ᴛ when ᴛ == cbGA8: {
         bitsPerPixel = 16;
         nrgba = image.NewNRGBA(image.Rect(0, 0, width, height));
         img = new image.NRGBAжImage(nrgba);
+        break;
     }
-    else if (exprᴛ1 == cbTC8) {
+    case var ᴛ when ᴛ == cbTC8: {
         bitsPerPixel = 24;
-        if (d.useTransparent){
+        if (d.useTransparent) {
             nrgba = image.NewNRGBA(image.Rect(0, 0, width, height));
             img = new image.NRGBAжImage(nrgba);
         } else {
             rgba = image.NewRGBA(image.Rect(0, 0, width, height));
             img = new image.ΔRGBAжImage(rgba);
         }
+        break;
     }
-    else if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
+    case var ᴛ when ᴛ == cbP1 || ᴛ == cbP2 || ᴛ == cbP4 || ᴛ == cbP8: {
         bitsPerPixel = d.depth;
         paletted = image.NewPaletted(image.Rect(0, 0, width, height), d.palette);
         img = new image.PalettedжImage(paletted);
+        break;
     }
-    else if (exprᴛ1 == cbTCA8) {
+    case var ᴛ when ᴛ == cbTCA8: {
         bitsPerPixel = 32;
         nrgba = image.NewNRGBA(image.Rect(0, 0, width, height));
         img = new image.NRGBAжImage(nrgba);
+        break;
     }
-    else if (exprᴛ1 == cbG16) {
+    case var ᴛ when ᴛ == cbG16: {
         bitsPerPixel = 16;
-        if (d.useTransparent){
+        if (d.useTransparent) {
             nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
             img = new image.NRGBA64жImage(nrgba64);
         } else {
             gray16 = image.NewGray16(image.Rect(0, 0, width, height));
             img = new image.Gray16жImage(gray16);
         }
+        break;
     }
-    else if (exprᴛ1 == cbGA16) {
+    case var ᴛ when ᴛ == cbGA16: {
         bitsPerPixel = 32;
         nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
         img = new image.NRGBA64жImage(nrgba64);
+        break;
     }
-    else if (exprᴛ1 == cbTC16) {
+    case var ᴛ when ᴛ == cbTC16: {
         bitsPerPixel = 48;
-        if (d.useTransparent){
+        if (d.useTransparent) {
             nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
             img = new image.NRGBA64жImage(nrgba64);
         } else {
             rgba64 = image.NewRGBA64(image.Rect(0, 0, width, height));
             img = new image.RGBA64жImage(rgba64);
         }
+        break;
     }
-    else if (exprᴛ1 == cbTCA16) {
+    case var ᴛ when ᴛ == cbTCA16: {
         bitsPerPixel = 64;
         nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
         img = new image.NRGBA64жImage(nrgba64);
-    }
+        break;
+    }}
     if (allocateOnly) {
-        return (img, default!);
+        return (img, default);
     }
     nint bytesPerPixel = (bitsPerPixel + 7) / 8;
 
     // The +1 is for the per-row filter type, which is at cr[0].
     var rowSize = 1 + ((int64)bitsPerPixel * (int64)width + 7) / 8;
     if (rowSize != (int64)(nint)rowSize) {
-        return (default!, ((UnsupportedError)(@string)dimensionOverflowˢ));
+        return (default, ((UnsupportedError)(@string)dimensionOverflowˢ));
     }
     // cr and pr are the bytes for the current and previous row.
     var cr = new slice<uint8>((nint)(rowSize));
@@ -577,31 +608,34 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
     for (nint y = 0; y < height; y++) {
         // Read the decompressed bytes.
         var (_, err) = io.ReadFull(r, cr);
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, io.EOF) || AreEqual(err, io.ErrUnexpectedEOF)) {
-                return (default!, ((FormatError)(@string)notEnoughPixelDataˢ));
+                return (default, ((FormatError)(@string)notEnoughPixelDataˢ));
             }
-            return (default!, err);
+            return (default, err);
         }
 
         // Apply the filter.
         var cdat = cr[1..];
         var pdat = pr[1..];
-        var exprᴛ2 = cr[0];
-        if (exprᴛ2 == ftNone) {
+        switch (cr[0]) {
+        case var ᴛ when ᴛ == ftNone: {
             // No-op.
+            break;
         }
-        else if (exprᴛ2 == ftSub) {
+        case var ᴛ when ᴛ == ftSub: {
             for (nint i = bytesPerPixel; i < len(cdat); i++) {
                 cdat[i] += cdat[i - bytesPerPixel];
             }
+            break;
         }
-        else if (exprᴛ2 == ftUp) {
+        case var ᴛ when ᴛ == ftUp: {
             foreach (var (i, p) in pdat) {
                 cdat[i] += p;
             }
+            break;
         }
-        else if (exprᴛ2 == ftAverage) {
+        case var ᴛ when ᴛ == ftAverage: {
             // The first column has no column to the left of it, so it is a
             // special case. We know that the first column exists because we
             // check above that width != 0, and so len(cdat) != 0.
@@ -611,18 +645,20 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             for (nint i = bytesPerPixel; i < len(cdat); i++) {
                 cdat[i] += (uint8)(((nint)cdat[i - bytesPerPixel] + (nint)pdat[i]) / 2);
             }
+            break;
         }
-        else if (exprᴛ2 == ftPaeth) {
+        case var ᴛ when ᴛ == ftPaeth: {
             filterPaeth(cdat, pdat, bytesPerPixel);
+            break;
         }
-        else { /* default: */
-            return (default!, ((FormatError)(@string)badFilterTypeˢ));
-        }
+        default: {
+            return (default, ((FormatError)(@string)badFilterTypeˢ));
+        }}
 
         // Convert from bytes to colors.
-        var exprᴛ3 = d.cb;
-        if (exprᴛ3 == cbG1) {
-            if (d.useTransparent){
+        switch (d.cb) {
+        case var ᴛ when ᴛ == cbG1: {
+            if (d.useTransparent) {
                 var ty = d.transparent[1];
                 for (nint x = 0; x < width; x += 8) {
                     var b = cdat[x / 8];
@@ -633,7 +669,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                             acol = 0x00;
                         }
                         nrgba.SetNRGBA(x + x2, y, new color.NRGBA(ycol, ycol, ycol, acol));
-                        b <<= (int)(1);
+                        b <<= 1;
                     }
                 }
             } else {
@@ -641,13 +677,14 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                     var b = cdat[x / 8];
                     for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
                         gray.SetGray(x + x2, y, new color.Gray((uint8)((b >> 7) * 0xff)));
-                        b <<= (int)(1);
+                        b <<= 1;
                     }
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == cbG2) {
-            if (d.useTransparent){
+        case var ᴛ when ᴛ == cbG2: {
+            if (d.useTransparent) {
                 var ty = d.transparent[1];
                 for (nint x = 0; x < width; x += 4) {
                     var b = cdat[x / 4];
@@ -658,7 +695,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                             acol = 0x00;
                         }
                         nrgba.SetNRGBA(x + x2, y, new color.NRGBA(ycol, ycol, ycol, acol));
-                        b <<= (int)(2);
+                        b <<= 2;
                     }
                 }
             } else {
@@ -666,13 +703,14 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                     var b = cdat[x / 4];
                     for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
                         gray.SetGray(x + x2, y, new color.Gray((uint8)((b >> 6) * 0x55)));
-                        b <<= (int)(2);
+                        b <<= 2;
                     }
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == cbG4) {
-            if (d.useTransparent){
+        case var ᴛ when ᴛ == cbG4: {
+            if (d.useTransparent) {
                 var ty = d.transparent[1];
                 for (nint x = 0; x < width; x += 2) {
                     var b = cdat[x / 2];
@@ -683,7 +721,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                             acol = 0x00;
                         }
                         nrgba.SetNRGBA(x + x2, y, new color.NRGBA(ycol, ycol, ycol, acol));
-                        b <<= (int)(4);
+                        b <<= 4;
                     }
                 }
             } else {
@@ -691,13 +729,14 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                     var b = cdat[x / 2];
                     for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
                         gray.SetGray(x + x2, y, new color.Gray((uint8)((b >> 4) * 0x11)));
-                        b <<= (int)(4);
+                        b <<= 4;
                     }
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == cbG8) {
-            if (d.useTransparent){
+        case var ᴛ when ᴛ == cbG8: {
+            if (d.useTransparent) {
                 var ty = d.transparent[1];
                 for (nint x = 0; x < width; x++) {
                     var ycol = cdat[x];
@@ -708,19 +747,21 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                     nrgba.SetNRGBA(x, y, new color.NRGBA(ycol, ycol, ycol, acol));
                 }
             } else {
-                copy((~gray).Pix.slice(pixOffset), cdat);
-                pixOffset += gray.Value.Stride;
+                copy(gray.Pix.slice(pixOffset), cdat);
+                pixOffset += gray.Stride;
             }
+            break;
         }
-        else if (exprᴛ3 == cbGA8) {
+        case var ᴛ when ᴛ == cbGA8: {
             for (nint x = 0; x < width; x++) {
                 var ycol = cdat[2 * x + 0];
                 nrgba.SetNRGBA(x, y, new color.NRGBA(ycol, ycol, ycol, cdat[2 * x + 1]));
             }
+            break;
         }
-        else if (exprᴛ3 == cbTC8) {
-            if (d.useTransparent){
-                var pix = nrgba.Value.Pix;
+        case var ᴛ when ᴛ == cbTC8: {
+            if (d.useTransparent) {
+                var pix = nrgba.Pix;
                 nint i = pixOffset;
                 nint j = 0;
                 var (tr, tg, tb) = (d.transparent[1], d.transparent[3], d.transparent[5]);
@@ -739,9 +780,9 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                     i += 4;
                     j += 3;
                 }
-                pixOffset += nrgba.Value.Stride;
+                pixOffset += nrgba.Stride;
             } else {
-                var pix = rgba.Value.Pix;
+                var pix = rgba.Pix;
                 nint i = pixOffset;
                 nint j = 0;
                 for (nint x = 0; x < width; x++) {
@@ -752,65 +793,71 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                     i += 4;
                     j += 3;
                 }
-                pixOffset += rgba.Value.Stride;
+                pixOffset += rgba.Stride;
             }
+            break;
         }
-        else if (exprᴛ3 == cbP1) {
+        case var ᴛ when ᴛ == cbP1: {
             for (nint x = 0; x < width; x += 8) {
                 var b = cdat[x / 8];
                 for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
                     var idx = (uint8)((b >> 7));
-                    if (len((~paletted).Palette) <= (nint)idx) {
-                        paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
+                    if (len(paletted.Palette) <= (nint)idx) {
+                        paletted.Palette = paletted.Palette.slice(0, (nint)idx + 1);
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
-                    b <<= (int)(1);
+                    b <<= 1;
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == cbP2) {
+        case var ᴛ when ᴛ == cbP2: {
             for (nint x = 0; x < width; x += 4) {
                 var b = cdat[x / 4];
                 for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
                     var idx = (uint8)((b >> 6));
-                    if (len((~paletted).Palette) <= (nint)idx) {
-                        paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
+                    if (len(paletted.Palette) <= (nint)idx) {
+                        paletted.Palette = paletted.Palette.slice(0, (nint)idx + 1);
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
-                    b <<= (int)(2);
+                    b <<= 2;
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == cbP4) {
+        case var ᴛ when ᴛ == cbP4: {
             for (nint x = 0; x < width; x += 2) {
                 var b = cdat[x / 2];
                 for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
                     var idx = (uint8)((b >> 4));
-                    if (len((~paletted).Palette) <= (nint)idx) {
-                        paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
+                    if (len(paletted.Palette) <= (nint)idx) {
+                        paletted.Palette = paletted.Palette.slice(0, (nint)idx + 1);
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
-                    b <<= (int)(4);
+                    b <<= 4;
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == cbP8) {
-            if (len((~paletted).Palette) != 256) {
+        case var ᴛ when ᴛ == cbP8: {
+            if (len(paletted.Palette) != 256) {
                 for (nint x = 0; x < width; x++) {
-                    if (len((~paletted).Palette) <= (nint)cdat[x]) {
-                        paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)cdat[x] + 1);
+                    if (len(paletted.Palette) <= (nint)cdat[x]) {
+                        paletted.Palette = paletted.Palette.slice(0, (nint)cdat[x] + 1);
                     }
                 }
             }
-            copy((~paletted).Pix.slice(pixOffset), cdat);
-            pixOffset += paletted.Value.Stride;
+            copy(paletted.Pix.slice(pixOffset), cdat);
+            pixOffset += paletted.Stride;
+            break;
         }
-        else if (exprᴛ3 == cbTCA8) {
-            copy((~nrgba).Pix.slice(pixOffset), cdat);
-            pixOffset += nrgba.Value.Stride;
+        case var ᴛ when ᴛ == cbTCA8: {
+            copy(nrgba.Pix.slice(pixOffset), cdat);
+            pixOffset += nrgba.Stride;
+            break;
         }
-        else if (exprᴛ3 == cbG16) {
-            if (d.useTransparent){
+        case var ᴛ when ᴛ == cbG16: {
+            if (d.useTransparent) {
                 var ty = (uint16)((uint16)((uint16)d.transparent[0] << 8) | (uint16)d.transparent[1]);
                 for (nint x = 0; x < width; x++) {
                     var ycol = (uint16)((uint16)((uint16)cdat[2 * x + 0] << 8) | (uint16)cdat[2 * x + 1]);
@@ -826,16 +873,18 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                     gray16.SetGray16(x, y, new color.Gray16(ycol));
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == cbGA16) {
+        case var ᴛ when ᴛ == cbGA16: {
             for (nint x = 0; x < width; x++) {
                 var ycol = (uint16)((uint16)((uint16)cdat[4 * x + 0] << 8) | (uint16)cdat[4 * x + 1]);
                 var acol = (uint16)((uint16)((uint16)cdat[4 * x + 2] << 8) | (uint16)cdat[4 * x + 3]);
                 nrgba64.SetNRGBA64(x, y, new color.NRGBA64(ycol, ycol, ycol, acol));
             }
+            break;
         }
-        else if (exprᴛ3 == cbTC16) {
-            if (d.useTransparent){
+        case var ᴛ when ᴛ == cbTC16: {
+            if (d.useTransparent) {
                 var tr = (uint16)((uint16)((uint16)d.transparent[0] << 8) | (uint16)d.transparent[1]);
                 var tg = (uint16)((uint16)((uint16)d.transparent[2] << 8) | (uint16)d.transparent[3]);
                 var tb = (uint16)((uint16)((uint16)d.transparent[4] << 8) | (uint16)d.transparent[5]);
@@ -857,8 +906,9 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                     rgba64.SetRGBA64(x, y, new color.RGBA64(rcol, gcol, bcol, 0xffff));
                 }
             }
+            break;
         }
-        else if (exprᴛ3 == cbTCA16) {
+        case var ᴛ when ᴛ == cbTCA16: {
             for (nint x = 0; x < width; x++) {
                 var rcol = (uint16)((uint16)((uint16)cdat[8 * x + 0] << 8) | (uint16)cdat[8 * x + 1]);
                 var gcol = (uint16)((uint16)((uint16)cdat[8 * x + 2] << 8) | (uint16)cdat[8 * x + 3]);
@@ -866,83 +916,84 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 var acol = (uint16)((uint16)((uint16)cdat[8 * x + 6] << 8) | (uint16)cdat[8 * x + 7]);
                 nrgba64.SetNRGBA64(x, y, new color.NRGBA64(rcol, gcol, bcol, acol));
             }
-        }
+            break;
+        }}
 
         // The current row for y is the previous row for y+1.
         (pr, cr) = (cr, pr);
     }
 
-    return (img, default!);
+    return (img, default);
 }
 
 // mergePassInto merges a single pass into a full sized image.
 internal static void mergePassInto(this ref decoder d, image.Image dst, image.Image src, nint pass) {
     var p = interlacing[pass];
-    slice<uint8> srcPix = default!;
-    slice<uint8> dstPix = default!;
-    nint stride = default!;
-    image.Rectangle rect = default!;
-    nint bytesPerPixel = default!;
+    slice<uint8> srcPix = default;
+    slice<uint8> dstPix = default;
+    nint stride = default;
+    image.Rectangle rect = default;
+    nint bytesPerPixel = default;
     switch (dst.type()) {
     case ж<image.Alpha> target: {
-        srcPix = src._<ж<image.Alpha>>().Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = src._<ж<image.Alpha>>().Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 1;
         break;
     }
     case ж<image.Alpha16> target: {
-        srcPix = src._<ж<image.Alpha16>>().Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = src._<ж<image.Alpha16>>().Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 2;
         break;
     }
     case ж<image.Gray> target: {
-        srcPix = src._<ж<image.Gray>>().Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = src._<ж<image.Gray>>().Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 1;
         break;
     }
     case ж<image.Gray16> target: {
-        srcPix = src._<ж<image.Gray16>>().Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = src._<ж<image.Gray16>>().Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 2;
         break;
     }
     case ж<image.NRGBA> target: {
-        srcPix = src._<ж<image.NRGBA>>().Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = src._<ж<image.NRGBA>>().Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 4;
         break;
     }
     case ж<image.NRGBA64> target: {
-        srcPix = src._<ж<image.NRGBA64>>().Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = src._<ж<image.NRGBA64>>().Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 8;
         break;
     }
     case ж<image.Paletted> target: {
         var source = src._<ж<image.Paletted>>();
-        srcPix = source.Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = source.Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 1;
-        if (len((~target).Palette) < len((~source).Palette)) {
+        if (len(target.Palette) < len(source.Palette)) {
             // readImagePass can return a paletted image whose implicit palette
             // length (one more than the maximum Pix value) is larger than the
             // explicit palette length (what's in the PLTE chunk). Make the
             // same adjustment here.
-            target.Value.Palette = source.Value.Palette;
+            target.Palette = source.Palette;
         }
         break;
     }
     case ж<imageꓸRGBA> target: {
-        srcPix = src._<ж<imageꓸRGBA>>().Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = src._<ж<imageꓸRGBA>>().Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 4;
         break;
     }
     case ж<image.RGBA64> target: {
-        srcPix = src._<ж<image.RGBA64>>().Value.Pix;
-        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
+        srcPix = src._<ж<image.RGBA64>>().Pix;
+        (dstPix, stride, rect) = (target.Pix, target.Stride, target.Rect);
         bytesPerPixel = 8;
         break;
     }}
@@ -959,12 +1010,12 @@ internal static void mergePassInto(this ref decoder d, image.Image dst, image.Im
 }
 
 internal static error /*err*/ parseIDAT(this ж<decoder> Ꮡd, uint32 length) {
-    error err = default!;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.idatLength = length;
     (d.img, err) = Ꮡd.decode();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return d.verifyChecksum();
@@ -985,7 +1036,7 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
 
     // Read the length and chunk type.
     {
-        var (_, err) = io.ReadFull(d.r, d.tmp[..8]); if (err != default!) {
+        var (_, err) = io.ReadFull(d.r, d.tmp[..8]); if (err != nil) {
             return err;
         }
     }
@@ -995,64 +1046,60 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
 
     // Read the chunk data.
     var exprᴛ1 = ((sstring)(d.tmp[4..8]));
-    if (exprᴛ1 == "IHDR"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "IHDR"u8: {
         if (d.stage != dsStart) {
             return chunkOrderError;
         }
         d.stage = dsSeenIHDR;
         return d.parseIHDR(length);
     }
-    if (exprᴛ1 == "PLTE"u8) {
+    case {} when exprᴛ1 == "PLTE"u8: {
         if (d.stage != dsSeenIHDR) {
             return chunkOrderError;
         }
         d.stage = dsSeenPLTE;
         return d.parsePLTE(length);
     }
-    if (exprᴛ1 == "tRNS"u8) {
-        if (cbPaletted(d.cb)){
+    case {} when exprᴛ1 == "tRNS"u8: {
+        if (cbPaletted(d.cb)) {
             if (d.stage != dsSeenPLTE) {
                 return chunkOrderError;
             }
-        } else 
-        if (cbTrueColor(d.cb)){
+        } else if (cbTrueColor(d.cb)) {
             if (d.stage != dsSeenIHDR && d.stage != dsSeenPLTE) {
                 return chunkOrderError;
             }
-        } else 
-        if (d.stage != dsSeenIHDR) {
+        } else if (d.stage != dsSeenIHDR) {
             return chunkOrderError;
         }
         d.stage = dsSeentRNS;
         return d.parsetRNS(length);
     }
-    if (exprᴛ1 == "IDAT"u8) {
-        do {
-            if (d.stage < dsSeenIHDR || d.stage > dsSeenIDAT || (d.stage == dsSeenIHDR && cbPaletted(d.cb))){
-                return chunkOrderError;
-            } else 
-            if (d.stage == dsSeenIDAT) {
-                // Ignore trailing zero-length or garbage IDAT chunks.
-                //
-                // This does not affect valid PNG images that contain multiple IDAT
-                // chunks, since the first call to parseIDAT below will consume all
-                // consecutive IDAT chunks required for decoding the image.
-                break;
-            }
-            d.stage = dsSeenIDAT;
-            if (configOnly) {
-                return default!;
-            }
-            return Ꮡd.parseIDAT(length);
-        } while (false);
+    case {} when exprᴛ1 == "IDAT"u8: {
+        if (d.stage < dsSeenIHDR || d.stage > dsSeenIDAT || (d.stage == dsSeenIHDR && cbPaletted(d.cb))) {
+            return chunkOrderError;
+        } else if (d.stage == dsSeenIDAT) {
+            // Ignore trailing zero-length or garbage IDAT chunks.
+            //
+            // This does not affect valid PNG images that contain multiple IDAT
+            // chunks, since the first call to parseIDAT below will consume all
+            // consecutive IDAT chunks required for decoding the image.
+            break;
+        }
+        d.stage = dsSeenIDAT;
+        if (configOnly) {
+            return default;
+        }
+        return Ꮡd.parseIDAT(length);
     }
-    else if (exprᴛ1 == "IEND"u8) {
+    case {} when exprᴛ1 == "IEND"u8: {
         if (d.stage != dsSeenIDAT) {
             return chunkOrderError;
         }
         d.stage = dsSeenIEND;
         return d.parseIEND(length);
-    }
+    }}
     if (length > 0x7fffffff) {
         return ((FormatError)fmt.Sprintf("Bad chunk length: %d"u8, length));
     }
@@ -1060,7 +1107,7 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
     array<byte> ignored = new(4096);
     while (length > 0) {
         var (n, err) = io.ReadFull(d.r, ignored.slice(0, min(len(ignored), (nint)length)));
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         d.crc.Write(ignored.slice(0, n));
@@ -1074,14 +1121,14 @@ internal static readonly @string invalidChecksumˢ = "invalid checksum"u8;
 
 internal static error verifyChecksum(this ref decoder d) {
     {
-        var (_, err) = io.ReadFull(d.r, d.tmp[..4]); if (err != default!) {
+        var (_, err) = io.ReadFull(d.r, d.tmp[..4]); if (err != nil) {
             return err;
         }
     }
     if (binary.BigEndian.Uint32(d.tmp[..4]) != d.crc.Sum32()) {
         return ((FormatError)(@string)invalidChecksumˢ);
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1089,13 +1136,13 @@ internal static readonly @string notAPngFileˢ = "not a PNG file"u8;
 
 internal static error checkHeader(this ref decoder d) {
     var (_, err) = io.ReadFull(d.r, d.tmp[..(int)(len(pngHeader))]);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (((sstring)(d.tmp[..(int)(len(pngHeader))])) != pngHeader) {
         return ((FormatError)(@string)notAPngFileˢ);
     }
-    return default!;
+    return default;
 }
 
 // Decode reads a PNG image from r and returns it as an [image.Image].
@@ -1106,24 +1153,24 @@ public static (image.Image, error) Decode(io.Reader r) {
         crc: crc32.NewIEEE()
     ));
     {
-        var err = d.checkHeader(); if (err != default!) {
+        var err = d.checkHeader(); if (err != nil) {
             if (AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
-            return (default!, err);
+            return (default, err);
         }
     }
-    while ((~d).stage != dsSeenIEND) {
+    while (d.stage != dsSeenIEND) {
         {
-            var err = d.parseChunk(false); if (err != default!) {
+            var err = d.parseChunk(false); if (err != nil) {
                 if (AreEqual(err, io.EOF)) {
                     err = io.ErrUnexpectedEOF;
                 }
-                return (default!, err);
+                return (default, err);
             }
         }
     }
-    return ((~d).img, default!);
+    return (d.img, default);
 }
 
 // DecodeConfig returns the color model and dimensions of a PNG image without
@@ -1134,69 +1181,78 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
         crc: crc32.NewIEEE()
     ));
     {
-        var err = d.checkHeader(); if (err != default!) {
+        var err = d.checkHeader(); if (err != nil) {
             if (AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
-            return (new image.Config(nil), err);
+            return (new image.Config(), err);
         }
     }
 
-    while (ᐧ) {
+    for (;;) {
         {
-            var err = d.parseChunk(true); if (err != default!) {
+            var err = d.parseChunk(true); if (err != nil) {
                 if (AreEqual(err, io.EOF)) {
                     err = io.ErrUnexpectedEOF;
                 }
-                return (new image.Config(nil), err);
+                return (new image.Config(), err);
             }
         }
 
-        if (cbPaletted((~d).cb)){
-            if ((~d).stage >= dsSeentRNS) {
+        if (cbPaletted(d.cb)) {
+            if (d.stage >= dsSeentRNS) {
                 break;
             }
         } else {
-            if ((~d).stage >= dsSeenIHDR) {
+            if (d.stage >= dsSeenIHDR) {
                 break;
             }
         }
     }
 
-    color.Model cm = default!;
-    var exprᴛ1 = (~d).cb;
-    if (exprᴛ1 == cbG1 || exprᴛ1 == cbG2 || exprᴛ1 == cbG4 || exprᴛ1 == cbG8) {
+    color.Model cm = default;
+    switch (d.cb) {
+    case var ᴛ when ᴛ == cbG1 || ᴛ == cbG2 || ᴛ == cbG4 || ᴛ == cbG8: {
         cm = color.GrayModel;
+        break;
     }
-    else if (exprᴛ1 == cbGA8) {
+    case var ᴛ when ᴛ == cbGA8: {
         cm = color.NRGBAModel;
+        break;
     }
-    else if (exprᴛ1 == cbTC8) {
+    case var ᴛ when ᴛ == cbTC8: {
         cm = color.RGBAModel;
+        break;
     }
-    else if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
-        cm = d.Value.palette;
+    case var ᴛ when ᴛ == cbP1 || ᴛ == cbP2 || ᴛ == cbP4 || ᴛ == cbP8: {
+        cm = d.palette;
+        break;
     }
-    else if (exprᴛ1 == cbTCA8) {
+    case var ᴛ when ᴛ == cbTCA8: {
         cm = color.NRGBAModel;
+        break;
     }
-    else if (exprᴛ1 == cbG16) {
+    case var ᴛ when ᴛ == cbG16: {
         cm = color.Gray16Model;
+        break;
     }
-    else if (exprᴛ1 == cbGA16) {
+    case var ᴛ when ᴛ == cbGA16: {
         cm = color.NRGBA64Model;
+        break;
     }
-    else if (exprᴛ1 == cbTC16) {
+    case var ᴛ when ᴛ == cbTC16: {
         cm = color.RGBA64Model;
+        break;
     }
-    else if (exprᴛ1 == cbTCA16) {
+    case var ᴛ when ᴛ == cbTCA16: {
         cm = color.NRGBA64Model;
-    }
+        break;
+    }}
     return (new image.Config(
         ColorModel: cm,
-        Width: (~d).width,
-        Height: (~d).height
-    ), default!);
+        Width: d.width,
+        Height: d.height
+    ), default);
 }
 
 [GoInit] internal static void init() {

@@ -18,7 +18,7 @@ public static error Fsync(this ж<FD> Ꮡfd) {
     bool ᒐd1 = false;
     try {
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
@@ -29,13 +29,13 @@ public static error Fsync(this ж<FD> Ꮡfd) {
             // There are scenarios such as SMB mounts where fcntl will fail
             // with ENOTSUP. In those cases fallback to fsync.
             // See #64215
-            if (err != default! && errors.Is(err, Δsyscall.ENOTSUP)) {
+            if (err != nil && errors.Is(err, Δsyscall.ENOTSUP)) {
                 err = Δsyscall.Fsync(Ꮡfd.Value.Sysfd);
             }
             return err;
         });
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 

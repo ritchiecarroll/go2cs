@@ -157,7 +157,7 @@ public static (nint, bool) BinarySearch<S, E>(S x, E target)
     while (i < j) {
         nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
-        if (cmp.Less(x[h], target)){
+        if (cmp.Less(x[h], target)) {
             i = h + 1; // preserves x[i-1] < target
         } else {
             j = h; // preserves x[j] >= target
@@ -185,7 +185,7 @@ public static (nint, bool) BinarySearchFunc<S, E, T>(S x, T target, Func<E, T, n
     while (i < j) {
         nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
-        if (cmp(x[h], target) < 0){
+        if (cmp(x[h], target) < 0) {
             i = h + 1; // preserves cmp(x[i - 1], target) < 0
         } else {
             j = h; // preserves cmp(x[j], target) >= 0
@@ -195,7 +195,7 @@ public static (nint, bool) BinarySearchFunc<S, E, T>(S x, T target, Func<E, T, n
     return (i, i < n && cmp(x[i], target) == 0);
 }
 
-partial struct sortedHint /*num:nint*/;
+partial struct sortedHint /*num:nint*/; // hint for pdqsort when choosing the pivot
 
 internal static sortedHint unknownHint => /* iota */ 0;
 internal static sortedHint increasingHint => 1;

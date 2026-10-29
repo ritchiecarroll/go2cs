@@ -20,13 +20,13 @@ partial class base32_package {
 // introduced for SASL GSSAPI and standardized in RFC 4648.
 // The alternate "base32hex" encoding is used in DNSSEC.
 partial struct Encoding {
-    internal array<byte> encode = new(32); // mapping of symbol index to symbol byte value
+    internal array<byte> encode = new(32);      // mapping of symbol index to symbol byte value
     internal array<uint8> decodeMap = new(256); // mapping of symbol byte value to symbol index
     internal rune padChar;
 }
 
 public const rune StdPadding = /* '=' */ 61; // Standard padding character
-public const rune NoPadding = -1;  // No padding
+public const rune NoPadding = -1;            // No padding
 
 internal static readonly @string decodeMapInitialize = ((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}));
 internal static UntypedInt invalidIndex => /* '\xff' */ 255;
@@ -44,24 +44,24 @@ public static ж<Encoding> NewEncoding(@string encoder) {
     }
 
     var e = @new<Encoding>();
-    e.Value.padChar = StdPadding;
-    copy((~e).encode[..], encoder);
-    copy((~e).decodeMap[..], decodeMapInitialize);
+    e.padChar = StdPadding;
+    copy(e.encode[..], encoder);
+    copy(e.decodeMap[..], decodeMapInitialize);
 
     for (nint i = 0; i < len(encoder); i++) {
         // Note: While we document that the alphabet cannot contain
         // the padding character, we do not enforce it since we do not know
         // if the caller intends to switch the padding from StdPadding later.
         switch (ᐧ) {
-        case {} when encoder[i] == (rune)'\n' || encoder[i] == (rune)'\r': {
+        case {} when encoder[i] == (byte)'\n' || encoder[i] == (byte)'\r': {
             throw panic("encoding alphabet contains newline character");
             break;
         }
-        case {} when (~e).decodeMap[encoder[i]] != invalidIndex: {
+        case {} when e.decodeMap[encoder[i]] != invalidIndex: {
             throw panic("encoding alphabet includes duplicate symbols");
             break;
         }}
-        e.Value.decodeMap[encoder[i]] = (uint8)i;
+        e.decodeMap[encoder[i]] = (uint8)i;
     }
     return e;
 }
@@ -84,7 +84,7 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
     ref var enc = ref heap(encʗp.ΔClone(), out var Ꮡenc);
 
     switch (ᐧ) {
-    case {} when padding < NoPadding || padding == (rune)'\r' || padding == (rune)'\n' || padding > 0xff: {
+    case {} when padding < NoPadding || padding == '\r' || padding == '\n' || padding > 0xff: {
         throw panic("invalid padding");
         break;
     }
@@ -199,22 +199,22 @@ partial struct encoder {
     internal error err;
     internal ж<Encoding> enc;
     internal io.Writer w;
-    internal array<byte> buf = new(5); // buffered data waiting to be encoded
-    internal nint nbuf;       // number of bytes in buf
+    internal array<byte> buf = new(5);     // buffered data waiting to be encoded
+    internal nint nbuf;                    // number of bytes in buf
     internal array<byte> @out = new(1024); // output buffer
 }
 
 internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    if (e.err != default!) {
+    if (e.err != nil) {
         return (0, e.err);
     }
 
     // Leading fringe.
     if (e.nbuf > 0) {
-        nint i = default!;
+        nint i = default;
         for (i = 0; i < len(p) && e.nbuf < 5; i++) {
             e.buf[e.nbuf] = p[i];
             e.nbuf++;
@@ -226,7 +226,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         }
         e.enc.Encode(e.@out[0..], e.buf[0..]);
         {
-            (_, e.err) = e.w.Write(e.@out[0..8]); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out[0..8]); if (e.err != nil) {
                 return (n, e.err);
             }
         }
@@ -242,7 +242,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         }
         e.enc.Encode(e.@out[0..], p.slice(0, nn));
         {
-            (_, e.err) = e.w.Write(e.@out.slice(0, nn / 5 * 8)); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out.slice(0, nn / 5 * 8)); if (e.err != nil) {
                 return (n, e.err);
             }
         }
@@ -261,7 +261,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
 // It is an error to call Write after calling Close.
 internal static error Close(this ref encoder e) {
     // If there's anything left in the buffer, flush it out
-    if (e.err == default! && e.nbuf > 0) {
+    if (e.err == nil && e.nbuf > 0) {
         e.enc.Encode(e.@out[0..], e.buf.slice(0, e.nbuf));
         nint encodedLen = e.enc.EncodedLen(e.nbuf);
         e.nbuf = 0;
@@ -275,8 +275,8 @@ internal static error Close(this ref encoder e) {
 // Base32 encodings operate in 5-byte blocks; when finished
 // writing, the caller must Close the returned encoder to flush any
 // partially written blocks.
-public static io.WriteCloser NewEncoder(ж<Encoding> Ꮡenc, io.Writer w) {
-    return new encoderжWriteCloser(Ꮡ(new encoder(enc: Ꮡenc, w: w)));
+public static io.WriteCloser NewEncoder(ж<Encoding> enc, io.Writer w) {
+    return new encoderжWriteCloser(Ꮡ(new encoder(enc: enc, w: w)));
 }
 
 // EncodedLen returns the length in bytes of the base32 encoding
@@ -302,8 +302,8 @@ public static @string Error(this CorruptInputError e) {
 // additional data is an error. This method assumes that src has been
 // stripped of all supported whitespace ('\r' and '\n').
 internal static (nint n, bool end, error err) decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
-    nint n = default!;
-    bool end = default!;
+    nint n = default;
+    bool end = default;
 
     // Lift the nil check outside of the loop.
     _ = enc.decodeMap;
@@ -388,7 +388,7 @@ internal static (nint n, bool end, error err) decode(this ref Encoding enc, slic
         }
         dsti += 5;
     }
-    return (n, end, default!);
+    return (n, end, default);
 }
 
 // Decode decodes src using the encoding enc. It writes at most
@@ -398,8 +398,8 @@ internal static (nint n, bool end, error err) decode(this ref Encoding enc, slic
 // number of bytes successfully written and [CorruptInputError].
 // Newline characters (\r and \n) are ignored.
 public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     var buf = new slice<byte>(len(src));
     nint l = stripNewlines(buf, src);
@@ -438,7 +438,7 @@ partial struct decoder {
     internal error err;
     internal ж<Encoding> enc;
     internal io.Reader r;
-    internal bool end;       // saw end of message
+    internal bool end;                    // saw end of message
     internal array<byte> buf = new(1024); // leftover input
     internal nint nbuf;
     internal slice<byte> @out; // leftover decoded output
@@ -446,11 +446,11 @@ partial struct decoder {
 }
 
 internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf, nint min, bool expectsPadding) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    while (n < min && err == default!) {
-        nint nn = default!;
+    while (n < min && err == nil) {
+        nint nn = default;
         (nn, err) = r.Read(buf.slice(n));
         n += nn;
     }
@@ -468,8 +468,8 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
 }
 
 internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     // Use leftover decoded output from last read.
     if (len(d.@out) > 0) {
@@ -478,10 +478,10 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         if (len(d.@out) == 0) {
             return (n, d.err);
         }
-        return (n, default!);
+        return (n, default);
     }
 
-    if (d.err != default!) {
+    if (d.err != nil) {
         return (0, d.err);
     }
 
@@ -495,9 +495,9 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     }
 
     // Minimum amount of bytes that needs to be read each cycle
-    nint min = default!;
-    bool expectsPadding = default!;
-    if ((~d.enc).padChar == NoPadding){
+    nint min = default;
+    bool expectsPadding = default;
+    if (d.enc.padChar == NoPadding) {
         min = 1;
         expectsPadding = false;
     } else {
@@ -515,15 +515,15 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     }
 
     // Decode chunk into p, or d.out and then p if p is too small.
-    nint nr = default!;
-    if ((~d.enc).padChar == NoPadding){
+    nint nr = default;
+    if (d.enc.padChar == NoPadding) {
         nr = d.nbuf;
     } else {
         nr = d.nbuf / 8 * 8;
     }
     nint nw = d.enc.DecodedLen(d.nbuf);
 
-    if (nw > len(p)){
+    if (nw > len(p)) {
         (nw, d.end, err) = d.enc.decode(d.outbuf[0..], d.buf.slice(0, nr));
         d.@out = d.outbuf.slice(0, nw);
         n = copy(p, d.@out);
@@ -536,7 +536,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         d.buf[i] = d.buf[i + nr];
     }
 
-    if (err != default! && (d.err == default! || AreEqual(d.err, io.EOF))) {
+    if (err != nil && (d.err == nil || AreEqual(d.err, io.EOF))) {
         d.err = err;
     }
 
@@ -545,7 +545,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         // invocation of Read, so we return a nil error to ensure that Read
         // will be called again.  The error stored in d.err, if any, will be
         // returned with the last set of decoded bytes.
-        return (n, default!);
+        return (n, default);
     }
 
     return (n, d.err);
@@ -560,7 +560,7 @@ partial struct newlineFilteringReader {
 internal static nint stripNewlines(slice<byte> dst, slice<byte> src) {
     nint offset = 0;
     foreach (var (_, b) in src) {
-        if (b == (rune)'\r' || b == (rune)'\n') {
+        if (b == '\r' || b == '\n') {
             continue;
         }
         dst[offset] = b;
@@ -574,7 +574,7 @@ internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte
     while (n > 0) {
         var s = p.slice(0, n);
         nint offset = stripNewlines(s, s);
-        if (err != default! || offset > 0) {
+        if (err != nil || offset > 0) {
             return (offset, err);
         }
         // Previous buffer entirely whitespace, read again
@@ -584,8 +584,8 @@ internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte
 }
 
 // NewDecoder constructs a new base32 stream decoder.
-public static io.Reader NewDecoder(ж<Encoding> Ꮡenc, io.Reader r) {
-    return new decoderжReader(Ꮡ(new decoder(enc: Ꮡenc, r: new newlineFilteringReaderжReader(Ꮡ(new newlineFilteringReader(r))))));
+public static io.Reader NewDecoder(ж<Encoding> enc, io.Reader r) {
+    return new decoderжReader(Ꮡ(new decoder(enc: enc, r: new newlineFilteringReaderжReader(Ꮡ(new newlineFilteringReader(r))))));
 }
 
 // DecodedLen returns the maximum length in bytes of the decoded data

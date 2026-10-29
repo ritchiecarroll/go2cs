@@ -28,12 +28,12 @@ public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string 
     for (; Ꮡs != nil; Ꮡs = s.parent) {
         s = ref Ꮡs.DerefOrNull();
         {
-            var obj = s.Lookup(name); if (obj != default! && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {
+            var obj = s.Lookup(name); if (obj != nil && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {
                 return (Ꮡs, obj);
             }
         }
     }
-    return (default!, default!);
+    return (default, default);
 }
 
 // Pos and End describe the scope's source code extent [pos, end).
@@ -83,7 +83,7 @@ public static ж<ΔScope> Innermost(this ж<ΔScope> Ꮡs, tokenꓸPos pos) {
         }
         return Ꮡs;
     }
-    return default!;
+    return default;
 }
 
 } // end types_package

@@ -59,7 +59,7 @@ public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) {
     }
 
     var (idx, nameValueMatch) = Ꮡe.searchTable(f);
-    if (nameValueMatch){
+    if (nameValueMatch) {
         e.buf = appendIndexed(e.buf, idx);
     } else {
         var indexing = e.shouldIndex(f);
@@ -67,14 +67,14 @@ public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) {
             e.dynTab.add(f);
         }
 
-        if (idx == 0){
+        if (idx == 0) {
             e.buf = appendNewName(e.buf, f, indexing);
         } else {
             e.buf = appendIndexedName(e.buf, f, idx, indexing);
         }
     }
     var (n, err) = e.w.Write(e.buf);
-    if (err == default! && n != builtin.len(e.buf)) {
+    if (err == nil && n != builtin.len(e.buf)) {
         err = io.ErrShortWrite;
     }
     return err;
@@ -88,8 +88,8 @@ public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) {
 // only name matches, i points to that index and nameValueMatch
 // becomes false.
 internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡe, HeaderField f) {
-    uint64 i = default!;
-    bool nameValueMatch = default!;
+    uint64 i = default;
+    bool nameValueMatch = default;
 
     (i, nameValueMatch) = staticTable.search(f);
     if (nameValueMatch) {
@@ -174,8 +174,8 @@ internal static slice<byte> appendNewName(slice<byte> dst, HeaderField f, bool i
 // representation is used.
 internal static slice<byte> appendIndexedName(slice<byte> dst, HeaderField f, uint64 i, bool indexing) {
     nint first = builtin.len(dst);
-    byte n = default!;
-    if (indexing){
+    byte n = default;
+    if (indexing) {
         n = 6;
     } else {
         n = 4;
@@ -206,7 +206,7 @@ internal static slice<byte> appendVarInt(slice<byte> dst, byte n, uint64 i) {
     }
     dst = append(dst, (byte)k);
     i -= k;
-    for (; i >= 128; i >>= (int)(7)) {
+    for (; i >= 128; i >>= 7) {
         dst = append(dst, (byte)(0x80 | (i & 0x7f)));
     }
     return append(dst, (byte)i);
@@ -219,7 +219,7 @@ internal static slice<byte> appendVarInt(slice<byte> dst, byte n, uint64 i) {
 // shorter byte string.
 internal static slice<byte> appendHpackString(slice<byte> dst, @string s) {
     var huffmanLength = HuffmanEncodeLength(s);
-    if (huffmanLength < (uint64)builtin.len(s)){
+    if (huffmanLength < (uint64)builtin.len(s)) {
         nint first = builtin.len(dst);
         dst = appendVarInt(dst, 7, huffmanLength);
         dst = AppendHuffmanString(dst, s);

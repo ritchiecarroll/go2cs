@@ -194,13 +194,11 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
 
     var a = f.Asm;
     Hint mh = HintNone;
-    if ((~a).Arch == Arch386 && addsrc != ""u8) {
+    if (a.Arch == Arch386 && addsrc != ""u8) {
         mh = HintMemOK; // too few registers otherwise
     }
-    ref var m = ref heap<ΔReg>(out var Ꮡm);
-    m = f.ArgHint("m"u8, mh);
-    ref var c = ref heap<ΔReg>(out var Ꮡc);
-    c = f.Arg("a"u8);
+    ref var m = ref heap<ΔReg>(f.ArgHint("m"u8, mh), out var Ꮡm);
+    ref var c = ref heap<ΔReg>(f.Arg("a"u8), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     var p = Ꮡf.Pipe();
@@ -208,17 +206,20 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
         p.SetHint(addsrc, HintMemOK);
     }
     p.SetHint(mulsrc, HintMulSrc);
-    var unroll = new nint[]{1, 4}.slice();
-    var exprᴛ1 = (~a).Arch;
-    if (exprᴛ1 == Arch386) {
-        unroll = new nint[]{1}.slice(); // too few registers
+    var unroll = slice<nint>([1, 4]);
+    switch (a.Arch) {
+    case var ᴛ when ᴛ == Arch386: {
+        unroll = slice<nint>([1]); // too few registers
+        break;
     }
-    else if (exprᴛ1 == ArchARM) {
+    case var ᴛ when ᴛ == ArchARM: {
         p.SetMaxColumns(2); // too few registers (but more than 386)
+        break;
     }
-    else if (exprᴛ1 == ArchARM64) {
-        unroll = new nint[]{1, 8}.slice(); // 5% speedup on c4as16
-    }
+    case var ᴛ when ᴛ == ArchARM64: {
+        unroll = slice<nint>([1, 8]); // 5% speedup on c4as16
+        break;
+    }}
 
     // See the large comment above for an explanation of the code being generated.
     // This is optimization strategy 1.
@@ -267,15 +268,12 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
-    ref var m = ref heap<ΔReg>(out var Ꮡm);
-    m = f.ArgHint("m"u8, HintMulSrc);
-    ref var c = ref heap<ΔReg>(out var Ꮡc);
-    c = f.Arg("a"u8);
+    ref var m = ref heap<ΔReg>(f.ArgHint("m"u8, HintMulSrc), out var Ꮡm);
+    ref var c = ref heap<ΔReg>(f.Arg("a"u8), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     // On amd64, we need a non-immediate for the AtUnrollEnd adds.
-    ref var r0 = ref heap<ΔReg>(out var Ꮡr0);
-    r0 = a.ZR();
+    ref var r0 = ref heap<ΔReg>(a.ZR(), out var Ꮡr0);
     if (!r0.Valid()) {
         r0 = a.Reg();
         a.Mov(a.Imm(0), r0);
@@ -285,15 +283,14 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
     p.SetLabel(altˢ);
     p.SetHint("x"u8, HintMemOK);
     p.SetHint("y"u8, HintMemOK);
-    if ((~a).Arch == ArchAMD64) {
+    if (a.Arch == ArchAMD64) {
         p.SetMaxColumns(2);
     }
 
     // See the large comment above for an explanation of the code being generated.
     // This is optimization strategy (2).
     ref var hi = ref heap(new ΔReg(), out var Ꮡhi);
-    ref var prev = ref heap<ΔReg>(out var Ꮡprev);
-    prev = c;
+    ref var prev = ref heap<ΔReg>(c, out var Ꮡprev);
     p.Start(n, 1, 8);
     var aʗ1 = a;
     p.AtUnrollStart(() => {
@@ -340,10 +337,8 @@ internal static void addMulVirtualCarry(ж<ΔFunc> Ꮡf, nint mulIndex) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
-    ref var m = ref heap<ΔReg>(out var Ꮡm);
-    m = f.Arg("m"u8);
-    ref var c = ref heap<ΔReg>(out var Ꮡc);
-    c = f.Arg("a"u8);
+    ref var m = ref heap<ΔReg>(f.Arg("m"u8), out var Ꮡm);
+    ref var c = ref heap<ΔReg>(f.Arg("a"u8), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     // See the large comment above for an explanation of the code being generated.

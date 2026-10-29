@@ -119,7 +119,7 @@ internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstr
     }
 
     T constraint = GoZero<T>();
-    if (i == 0){
+    if (i == 0) {
         constraint = nc.set[0];
     } else {
         constraint = nc.set[i - 1];
@@ -130,17 +130,17 @@ internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstr
     return (lowerBound, false);
 }
 
-internal static bool ipNetworkSubset(ж<net.IPNet> Ꮡa, ж<net.IPNet> Ꮡb) {
+internal static bool ipNetworkSubset(ж<net.IPNet> a, ж<net.IPNet> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    if (!Ꮡa.Contains(b.IP)) {
+    if (!a.Contains(b.IP)) {
         return false;
     }
     var broadcast = new net.IP(builtin.len(b.IP));
     foreach (var i in range(b.IP)) {
         broadcast[i] = (byte)(b.IP[i] | (((byte)(~b.Mask[i]))));
     }
-    return Ꮡa.Contains(broadcast);
+    return a.Contains(broadcast);
 }
 
 internal static nint ipNetworkCompare(ж<net.IPNet> Ꮡa, ж<net.IPNet> Ꮡb) {
@@ -160,8 +160,8 @@ internal static nint ipBinarySearch(ж<net.IPNet> Ꮡconstraint, net.IP target) 
     return bytes.Compare(constraint.IP, target);
 }
 
-internal static bool ipMatch(ж<net.IPNet> Ꮡconstraint, net.IP target) {
-    return Ꮡconstraint.Contains(target);
+internal static bool ipMatch(ж<net.IPNet> constraint, net.IP target) {
+    return constraint.Contains(target);
 }
 
 partial struct ipConstraints {
@@ -180,19 +180,19 @@ internal partial interface newIPNetConstraints_R0 /*dyn*/ {
 
 internal static newIPNetConstraints_R0 newIPNetConstraints(slice<ж<net.IPNet>> l) {
     if (builtin.len(l) == 0) {
-        return default!;
+        return default;
     }
-    slice<ж<net.IPNet>> ipv4 = default!;
-    slice<ж<net.IPNet>> ipv6 = default!;
+    slice<ж<net.IPNet>> ipv4 = default;
+    slice<ж<net.IPNet>> ipv6 = default;
     foreach (var (_, n) in l) {
-        if (builtin.len((~n).IP) == net.IPv4len){
+        if (builtin.len(n.IP) == net.IPv4len) {
             ipv4 = append(ipv4, n);
         } else {
             ipv6 = append(ipv6, n);
         }
     }
-    ж<nameConstraintsSet<ж<net.IPNet>, net.IP>> v4c = default!;
-    ж<nameConstraintsSet<ж<net.IPNet>, net.IP>> v6c = default!;
+    ж<nameConstraintsSet<ж<net.IPNet>, net.IP>> v4c = default;
+    ж<nameConstraintsSet<ж<net.IPNet>, net.IP>> v6c = default;
     if (builtin.len(ipv4) > 0) {
         v4c = Ꮡ(new nameConstraintsSet<ж<net.IPNet>, net.IP>(
             set: ipv4
@@ -209,14 +209,14 @@ internal static newIPNetConstraints_R0 newIPNetConstraints(slice<ж<net.IPNet>> 
 }
 
 internal static (ж<net.IPNet>, bool) query(this ref ipConstraints ipc, net.IP ip) {
-    ж<nameConstraintsSet<ж<net.IPNet>, net.IP>> c = default!;
-    if (builtin.len(ip) == net.IPv4len){
+    ж<nameConstraintsSet<ж<net.IPNet>, net.IP>> c = default;
+    if (builtin.len(ip) == net.IPv4len) {
         c = ipc.ipv4;
     } else {
         c = ipc.ipv6;
     }
     if (c == nil) {
-        return (default!, false);
+        return (default, false);
     }
     return c.search(ip, ipBinarySearch, ipMatch);
 }
@@ -248,13 +248,13 @@ internal static bool dnsHasSuffix(@string a, @string b) {
         if (br < ar) {
             (ar, br) = (br, ar);
         }
-        if ((rune)'A' <= ar && ar <= (rune)'Z' && br == (byte)(ar + (rune)'a' - (rune)'A')) {
+        if ('A' <= ar && ar <= 'Z' && br == (byte)(ar + 'a' - 'A')) {
             continue;
         }
         return false;
     }
 
-    if (a[0] != (rune)'.' && lenB > lenA && b[lenB - lenA - 1] != (rune)'.') {
+    if (a[0] != '.' && lenB > lenA && b[lenB - lenA - 1] != '.') {
         return false;
     }
 
@@ -271,7 +271,7 @@ internal static array<byte> dnsCompareTable = new(256);
     // having redundant characters.
     for (nint i = 0; i < 256; i++) {
         var c = (byte)i;
-        if ((rune)'A' <= c && c <= (rune)'Z') {
+        if ('A' <= c && c <= 'Z') {
             // Lowercase uppercase characters A-Z.
             c += (byte)((rune)'a' - (rune)'A');
         }
@@ -319,10 +319,9 @@ internal static nint dnsCompare(@string a, @string b) {
     }
 
     nint ret = 0;
-    if (idxA < idxB){
+    if (idxA < idxB) {
         ret = -1;
-    } else 
-    if (idxB < idxA) {
+    } else if (idxB < idxA) {
         ret = 1;
     }
     return ret;
@@ -349,7 +348,7 @@ internal partial interface newDNSConstraints_R0 /*dyn*/ {
 
 internal static newDNSConstraints_R0 newDNSConstraints(slice<@string> l, bool permitted) {
     if (builtin.len(l) == 0) {
-        return default!;
+        return default;
     }
     foreach (var (_, n) in l) {
         if (builtin.len(n) == 0) {
@@ -365,11 +364,11 @@ internal static newDNSConstraints_R0 newDNSConstraints(slice<@string> l, bool pe
         permitted: permitted
     ));
 
-    (~nc).constraints.sortAndPrune(dnsCompare, dnsHasSuffix);
+    nc.constraints.sortAndPrune(dnsCompare, dnsHasSuffix);
 
     if (!permitted) {
         var parentConstraints = new map<@string, @string>{};
-        foreach (var (_, vᴛ1) in (~(~nc).constraints).set) {
+        foreach (var (_, vᴛ1) in nc.constraints.set) {
             var name = vᴛ1;
 
             name = strings.ToLower(name);
@@ -380,7 +379,7 @@ internal static newDNSConstraints_R0 newDNSConstraints(slice<@string> l, bool pe
             parentConstraints[trimmedName] = name;
         }
         if (builtin.len(parentConstraints) > 0) {
-            nc.Value.parentConstraints = parentConstraints;
+            nc.parentConstraints = parentConstraints;
         }
     }
 
@@ -397,7 +396,7 @@ internal static (@string, bool) query(this ref dnsConstraints dnc, @string s) {
         return (constraint, true);
     }
 
-    if (!dnc.permitted && builtin.len(s) > 0 && s[0] == (rune)'*') {
+    if (!dnc.permitted && builtin.len(s) > 0 && s[0] == '*') {
         s = strings.ToLower(s);
         @string trimmed = trimFirstLabel(s);
         {
@@ -429,12 +428,12 @@ internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, boo
     var domainsᴷ = new stackAppend<@string>();
 
     if (builtin.len(l) == 0) {
-        return default!;
+        return default;
     }
     var exactMap = new map<rfc2821Mailbox, EmptyStruct>{};
-    slice<@string> domains = default!;
+    slice<@string> domains = default;
     foreach (var (_, c) in l) {
-        if (!strings.ContainsRune(c, (rune)'@')) {
+        if (!strings.ContainsRune(c, '@')) {
             domains = append(domainsᴷ, domains, c);
             continue;
         }
@@ -453,7 +452,7 @@ internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, boo
         fullEmails: exactMap
     ));
     if (builtin.len(domains) > 0) {
-        ec.Value.dnsConstraints = newDNSConstraints(domains, permitted);
+        ec.dnsConstraints = newDNSConstraints(domains, permitted);
     }
     return new emailConstraintsжnewEmailConstraints_R0(ec);
 }
@@ -466,7 +465,7 @@ internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailb
             }
         }
     }
-    if (ec.dnsConstraints == default!) {
+    if (ec.dnsConstraints == nil) {
         return ("", false);
     }
     var (constraint, found) = ec.dnsConstraints.query(s.domain);
@@ -490,21 +489,21 @@ partial struct constraints<T, V> {
 internal static error checkConstraints<T, V, P>(constraints<T, V> c, V s, P p)
     where P : /* string | net.IP | parsedURI | rfc2821Mailbox */ new()
 {
-    if (c.permitted != default!) {
+    if (c.permitted != nil) {
         {
             var (_, found) = c.permitted.query(s); if (!found) {
                 return fmt.Errorf("%s %q is not permitted by any constraint"u8, c.constraintType, p);
             }
         }
     }
-    if (c.excluded != default!) {
+    if (c.excluded != nil) {
         {
             var (constraint, found) = c.excluded.query(s); if (found) {
                 return fmt.Errorf("%s %q is excluded by constraint %q"u8, c.constraintType, p, (constraint).OrTypedNilOf());
             }
         }
     }
-    return default!;
+    return default;
 }
 
 partial struct chainConstraints {
@@ -519,7 +518,7 @@ partial struct chainConstraints {
 internal static error check(this ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) {
     foreach (var (_, ip) in ips) {
         {
-            var err = checkConstraints(cc.ip, ip, ip); if (err != default!) {
+            var err = checkConstraints(cc.ip, ip, ip); if (err != nil) {
                 return err;
             }
         }
@@ -529,7 +528,7 @@ internal static error check(this ref chainConstraints cc, slice<@string> dns, sl
             return fmt.Errorf("x509: cannot parse dnsName %q"u8, d);
         }
         {
-            var err = checkConstraints(cc.dns, d, d); if (err != default!) {
+            var err = checkConstraints(cc.dns, d, d); if (err != nil) {
                 return err;
             }
         }
@@ -539,7 +538,7 @@ internal static error check(this ref chainConstraints cc, slice<@string> dns, sl
             return fmt.Errorf("x509: internal error: URI SAN %q failed to parse"u8, u);
         }
         {
-            var err = checkConstraints(cc.uri, u.domain, u); if (err != default!) {
+            var err = checkConstraints(cc.uri, u.domain, u); if (err != nil) {
                 return err;
             }
         }
@@ -549,17 +548,17 @@ internal static error check(this ref chainConstraints cc, slice<@string> dns, sl
             return fmt.Errorf("x509: cannot parse rfc822Name %q"u8, e);
         }
         {
-            var err = checkConstraints(cc.email, e, e); if (err != default!) {
+            var err = checkConstraints(cc.email, e, e); if (err != nil) {
                 return err;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 internal static error checkChainConstraints(slice<ж<Certificate>> chain) {
-    ж<chainConstraints> currentConstraints = default!;
-    ж<chainConstraints> last = default!;
+    ж<chainConstraints> currentConstraints = default;
+    ж<chainConstraints> last = default;
     foreach (var (iᴛ1, c) in chain) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
@@ -568,57 +567,56 @@ internal static error checkChainConstraints(slice<ж<Certificate>> chain) {
             continue;
         }
         var cc = Ꮡ(new chainConstraints(
-            ip: new constraints<ж<net.IPNet>, net.IP>("IP address"u8, newIPNetConstraints((~c).PermittedIPRanges), newIPNetConstraints((~c).ExcludedIPRanges)),
-            dns: new constraints<@string, @string>("DNS name"u8, newDNSConstraints((~c).PermittedDNSDomains, true), newDNSConstraints((~c).ExcludedDNSDomains, false)),
-            uri: new constraints<@string, @string>("URI"u8, newDNSConstraints((~c).PermittedURIDomains, true), newDNSConstraints((~c).ExcludedURIDomains, false)),
-            email: new constraints<@string, rfc2821Mailbox>("email address"u8, newEmailConstraints((~c).PermittedEmailAddresses, true), newEmailConstraints((~c).ExcludedEmailAddresses, false)),
+            ip: new constraints<ж<net.IPNet>, net.IP>("IP address"u8, newIPNetConstraints(c.PermittedIPRanges), newIPNetConstraints(c.ExcludedIPRanges)),
+            dns: new constraints<@string, @string>("DNS name"u8, newDNSConstraints(c.PermittedDNSDomains, true), newDNSConstraints(c.ExcludedDNSDomains, false)),
+            uri: new constraints<@string, @string>("URI"u8, newDNSConstraints(c.PermittedURIDomains, true), newDNSConstraints(c.ExcludedURIDomains, false)),
+            email: new constraints<@string, rfc2821Mailbox>("email address"u8, newEmailConstraints(c.PermittedEmailAddresses, true), newEmailConstraints(c.ExcludedEmailAddresses, false)),
             index: i
         ));
-        if (currentConstraints == nil){
+        if (currentConstraints == nil) {
             currentConstraints = cc;
             last = cc;
-        } else 
-        if (last != nil) {
-            last.Value.next = cc;
+        } else if (last != nil) {
+            last.next = cc;
             last = cc;
         }
     }
     if (currentConstraints == nil) {
-        return default!;
+        return default;
     }
 
     foreach (var (i, c) in chain) {
         if (!c.hasSANExtension()) {
             continue;
         }
-        if (i >= (~currentConstraints).index) {
-            while ((~currentConstraints).index <= i) {
-                if ((~currentConstraints).next == nil) {
-                    return default!;
+        if (i >= currentConstraints.index) {
+            while (currentConstraints.index <= i) {
+                if (currentConstraints.next == nil) {
+                    return default;
                 }
-                currentConstraints = currentConstraints.Value.next;
+                currentConstraints = currentConstraints.next;
             }
         }
 
-        var (uris, err) = parseURIs((~c).URIs);
-        if (err != default!) {
+        var (uris, err) = parseURIs(c.URIs);
+        if (err != nil) {
             return err;
         }
-        (var emails, err) = parseMailboxes((~c).EmailAddresses);
-        if (err != default!) {
+        (var emails, err) = parseMailboxes(c.EmailAddresses);
+        if (err != nil) {
             return err;
         }
 
-        for (var n = currentConstraints; n != nil; n = n.Value.next) {
+        for (var n = currentConstraints; n != nil; n = n.next) {
             {
-                var errΔ1 = n.check((~c).DNSNames, uris, emails, (~c).IPAddresses); if (errΔ1 != default!) {
+                var errΔ1 = n.check(c.DNSNames, uris, emails, c.IPAddresses); if (errΔ1 != nil) {
                     return errΔ1;
                 }
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 partial struct parsedURI {
@@ -633,15 +631,15 @@ internal static @string String(this parsedURI u) {
 internal static (slice<parsedURI>, error) parseURIs(slice<ж<url.URL>> uris) {
     var parsed = new slice<parsedURI>(0, builtin.len(uris));
     foreach (var (_, uri) in uris) {
-        @string host = strings.ToLower((~uri).Host);
+        @string host = strings.ToLower(uri.Host);
         if (builtin.len(host) == 0) {
-            return (default!, fmt.Errorf("URI with empty host (%q) cannot be matched against constraints"u8, uri.String()));
+            return (default, fmt.Errorf("URI with empty host (%q) cannot be matched against constraints"u8, uri.String()));
         }
         if (strings.Contains(host, ":"u8) && !strings.HasSuffix(host, "]"u8)) {
-            error err = default!;
-            (host, _, err) = net.SplitHostPort((~uri).Host);
-            if (err != default!) {
-                return (default!, fmt.Errorf("cannot parse URI host %q: %v"u8, (~uri).Host, err));
+            error err = default;
+            (host, _, err) = net.SplitHostPort(uri.Host);
+            if (err != nil) {
+                return (default, fmt.Errorf("cannot parse URI host %q: %v"u8, uri.Host, err));
             }
         }
 
@@ -649,14 +647,14 @@ internal static (slice<parsedURI>, error) parseURIs(slice<ж<url.URL>> uris) {
         // check if _either_ the string parses as an IP, or if it is enclosed in
         // square brackets.
         {
-            var (_, err) = netip.ParseAddr(host); if (err == default! || (strings.HasPrefix(host, "["u8) && strings.HasSuffix(host, "]"u8))) {
-                return (default!, fmt.Errorf("URI with IP (%q) cannot be matched against constraints"u8, uri.String()));
+            var (_, err) = netip.ParseAddr(host); if (err == nil || (strings.HasPrefix(host, "["u8) && strings.HasSuffix(host, "]"u8))) {
+                return (default, fmt.Errorf("URI with IP (%q) cannot be matched against constraints"u8, uri.String()));
             }
         }
 
         parsed = append(parsed, new parsedURI(uri, host));
     }
-    return (parsed, default!);
+    return (parsed, default);
 }
 
 internal static (slice<rfc2821Mailbox>, error) parseMailboxes(slice<@string> emails) {
@@ -664,16 +662,16 @@ internal static (slice<rfc2821Mailbox>, error) parseMailboxes(slice<@string> ema
     foreach (var (_, email) in emails) {
         var (mailbox, ok) = parseRFC2821Mailbox(email);
         if (!ok) {
-            return (default!, fmt.Errorf("cannot parse rfc822Name %q"u8, email));
+            return (default, fmt.Errorf("cannot parse rfc822Name %q"u8, email));
         }
         mailbox.domain = strings.ToLower(mailbox.domain);
         parsed = append(parsed, mailbox);
     }
-    return (parsed, default!);
+    return (parsed, default);
 }
 
 internal static @string trimFirstLabel(@string dnsName) {
-    nint firstDotInd = strings.IndexByte(dnsName, (rune)'.');
+    nint firstDotInd = strings.IndexByte(dnsName, (byte)'.');
     if (firstDotInd < 0) {
         // Constraint is a single label, we cannot trim it.
         return ""u8;

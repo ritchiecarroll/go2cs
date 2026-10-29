@@ -13,7 +13,6 @@ using @internal.runtime;
 using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
 
-[GoFieldAccess(typeof(abi.Type))]
 partial class runtime_package {
 
 // traceTypeTable maps types to unique uint32 ids.
@@ -66,7 +65,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
     // lots of varint sizes.
     //
     // Add 1 because we might also write a traceAllocFreeTypesBatch byte.
-    bool flushed = default!;
+    bool flushed = default;
     (w, flushed) = w.ensure(1 + maxBytes);
     if (flushed) {
         // Annotate the batch as containing types.

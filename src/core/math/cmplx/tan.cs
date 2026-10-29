@@ -145,7 +145,7 @@ internal static float64 reducePi(float64 x) {
         // large integer values of t. The full precision PI3 ensures the
         // approximation of PI is accurate to 102 bits to handle cancellation
         // during subtraction.
-        const float64 PI1 = 3.141592502593994; // 0x400921fb40000000
+        const float64 PI1 = 3.141592502593994;      // 0x400921fb40000000
         const float64 PI2 = 1.5099578831723193e-07; // 0x3e84442d00000000
         const float64 PI3 = 1.0780605716316238e-14; // 0x3d08469898cc5170
         var t = x / (float64)math.Pi;
@@ -234,7 +234,7 @@ internal static float64 tanSeries(complex128 z) {
     var f = 1.0D;
     var rn = 0.0D;
     var d = 0.0D;
-    while (ᐧ) {
+    for (;;) {
         rn++;
         f *= rn;
         rn++;

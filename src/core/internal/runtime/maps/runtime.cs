@@ -66,15 +66,15 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abiꓸMapType> Ꮡtyp, ж<
         race.ReadObjectPC(typ.Key, key, callerpc, pc);
     }
     if (msan.Enabled && Ꮡm != nil) {
-        msan.Read(key, (~typ.Key).Size_);
+        msan.Read(key, typ.Key.Size_);
     }
     if (asan.Enabled && Ꮡm != nil) {
-        asan.Read(key, (~typ.Key).Size_);
+        asan.Read(key, typ.Key.Size_);
     }
 
     if (Ꮡm == nil || m.Used() == 0) {
         {
-            var err = mapKeyError(Ꮡtyp, key); if (err != default!) {
+            var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
                 throw panic(err); // see issue 23734
             }
         }
@@ -100,9 +100,9 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abiꓸMapType> Ꮡtyp, ж<
     var t = m.directoryAt(idx);
 
     // Probe table.
-    var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
+    var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
     var h2Hash = h2(hash);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
 
         var match = (~g.ctrls()).matchH2(h2Hash);
@@ -115,7 +115,7 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abiꓸMapType> Ꮡtyp, ж<
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
             }
-            if ((~typ.Key).Equal(key, slotKey)) {
+            if (typ.Key.Equal(key, slotKey)) {
                 @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKeyOrig + typ.ElemOff);
                 if (typ.IndirectElem()) {
                     slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
@@ -146,15 +146,15 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abiꓸMapType> Ꮡ
         race.ReadObjectPC(typ.Key, key, callerpc, pc);
     }
     if (msan.Enabled && Ꮡm != nil) {
-        msan.Read(key, (~typ.Key).Size_);
+        msan.Read(key, typ.Key.Size_);
     }
     if (asan.Enabled && Ꮡm != nil) {
-        asan.Read(key, (~typ.Key).Size_);
+        asan.Read(key, typ.Key.Size_);
     }
 
     if (Ꮡm == nil || m.Used() == 0) {
         {
-            var err = mapKeyError(Ꮡtyp, key); if (err != default!) {
+            var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
                 throw panic(err); // see issue 23734
             }
         }
@@ -180,9 +180,9 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abiꓸMapType> Ꮡ
     var t = m.directoryAt(idx);
 
     // Probe table.
-    var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
+    var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
     var h2Hash = h2(hash);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
 
         var match = (~g.ctrls()).matchH2(h2Hash);
@@ -195,7 +195,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abiꓸMapType> Ꮡ
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
             }
-            if ((~typ.Key).Equal(key, slotKey)) {
+            if (typ.Key.Equal(key, slotKey)) {
                 @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKeyOrig + typ.ElemOff);
                 if (typ.IndirectElem()) {
                     slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
@@ -229,10 +229,10 @@ internal static @unsafe.Pointer runtime_mapassign(ж<abiꓸMapType> Ꮡtyp, ж<�
         race.ReadObjectPC(typ.Key, key, callerpc, pc);
     }
     if (msan.Enabled) {
-        msan.Read(key, (~typ.Key).Size_);
+        msan.Read(key, typ.Key.Size_);
     }
     if (asan.Enabled) {
-        asan.Read(key, (~typ.Key).Size_);
+        asan.Read(key, typ.Key.Size_);
     }
     if (m.writing != 0) {
         fatal(concurrentMapWritesˢ);
@@ -264,23 +264,23 @@ internal static @unsafe.Pointer runtime_mapassign(ж<abiꓸMapType> Ꮡtyp, ж<�
         m.growToTable(Ꮡtyp);
     }
 
-    @unsafe.Pointer slotElem = default!;
+    @unsafe.Pointer slotElem = default;
 outer:
-    while (ᐧ) {
+    for (;;) {
         // Select table.
         var idx = m.directoryIndex(hash);
         var t = m.directoryAt(idx);
 
-        var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
+        var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
 
         // As we look for a match, keep track of the first deleted slot
         // we find, which we'll use to insert the new entry if
         // necessary.
-        groupReference firstDeletedGroup = default!;
-        uintptr firstDeletedSlot = default!;
+        groupReference firstDeletedGroup = default;
+        uintptr firstDeletedSlot = default;
 
         var h2Hash = h2(hash);
-        for (; ᐧ ; seq = seq.next()) {
+        for (; ; seq = seq.next()) {
             var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
             var match = (~g.ctrls()).matchH2(h2Hash);
 
@@ -293,7 +293,7 @@ outer:
                 if (typ.IndirectKey()) {
                     slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
                 }
-                if ((~typ.Key).Equal(key, slotKey)) {
+                if (typ.Key.Equal(key, slotKey)) {
                     if (typ.NeedKeyUpdate()) {
                         typedmemmove(typ.Key, slotKey, key);
                     }
@@ -316,21 +316,21 @@ outer:
                 // Finding an empty slot means we've reached the end of
                 // the probe sequence.
 
-                uintptr i = default!;
+                uintptr i = default;
 
                 // If we found a deleted slot along the way, we
                 // can replace it without consuming growthLeft.
-                if (firstDeletedGroup.data != nil){
+                if (firstDeletedGroup.data != nil) {
                     g = firstDeletedGroup;
                     i = firstDeletedSlot;
-                    t.Value.growthLeft++; // will be decremented below to become a no-op.
+                    t.growthLeft++; // will be decremented below to become a no-op.
                 } else {
                     // Otherwise, use the empty slot.
                     i = match.first();
                 }
 
                 // If there is room left to grow, just insert the new entry.
-                if ((~t).growthLeft > 0) {
+                if (t.growthLeft > 0) {
                     @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
                     @unsafe.Pointer slotKeyOrig = slotKey;
                     if (typ.IndirectKey()) {
@@ -348,8 +348,8 @@ outer:
                     }
 
                     g.ctrls().set(i, (ctrl)(uint8)h2Hash);
-                    t.Value.growthLeft--;
-                    t.Value.used++;
+                    t.growthLeft--;
+                    t.used++;
                     m.used++;
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);

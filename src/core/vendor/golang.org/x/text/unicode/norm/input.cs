@@ -28,18 +28,18 @@ internal static void setBytes(this ref input @in, slice<byte> str) {
 
 internal static void setString(this ref input @in, @string str) {
     @in.str = str;
-    @in.bytes = default!;
+    @in.bytes = default;
 }
 
 internal static byte _byte(this ref input @in, nint p) {
-    if (@in.bytes == default!) {
+    if (@in.bytes == nil) {
         return @in.str[p];
     }
     return @in.bytes[p];
 }
 
 internal static nint skipASCII(this ref input @in, nint p, nint max) {
-    if (@in.bytes == default!){
+    if (@in.bytes == nil) {
         for (; p < max && @in.str[p] < utf8.RuneSelf; p++) {
         }
     } else {
@@ -50,7 +50,7 @@ internal static nint skipASCII(this ref input @in, nint p, nint max) {
 }
 
 internal static nint skipContinuationBytes(this ref input @in, nint p) {
-    if (@in.bytes == default!){
+    if (@in.bytes == nil) {
         for (; p < len(@in.str) && !utf8.RuneStart(@in.str[p]); p++) {
         }
     } else {
@@ -61,7 +61,7 @@ internal static nint skipContinuationBytes(this ref input @in, nint p) {
 }
 
 internal static slice<byte> appendSlice(this ref input @in, slice<byte> buf, nint b, nint e) {
-    if (@in.bytes != default!) {
+    if (@in.bytes != nil) {
         return appendꓸꓸꓸ(buf, @in.bytes.slice(b, e));
     }
     for (nint i = b; i < e; i++) {
@@ -71,31 +71,31 @@ internal static slice<byte> appendSlice(this ref input @in, slice<byte> buf, nin
 }
 
 internal static nint copySlice(this ref input @in, slice<byte> buf, nint b, nint e) {
-    if (@in.bytes == default!) {
+    if (@in.bytes == nil) {
         return copy(buf, @in.str.slice(b, e));
     }
     return copy(buf, @in.bytes.slice(b, e));
 }
 
 internal static (uint16, nint) charinfoNFC(this ref input @in, nint p) {
-    if (@in.bytes == default!) {
+    if (@in.bytes == nil) {
         return nfcData.lookupString(@in.str.slice(p));
     }
     return nfcData.lookup(@in.bytes.slice(p));
 }
 
 internal static (uint16, nint) charinfoNFKC(this ref input @in, nint p) {
-    if (@in.bytes == default!) {
+    if (@in.bytes == nil) {
         return nfkcData.lookupString(@in.str.slice(p));
     }
     return nfkcData.lookup(@in.bytes.slice(p));
 }
 
 internal static rune /*r*/ hangul(this ref input @in, nint p) {
-    rune r = default!;
+    rune r = default;
 
-    nint size = default!;
-    if (@in.bytes == default!){
+    nint size = default;
+    if (@in.bytes == nil) {
         if (!isHangulString(@in.str.slice(p))) {
             return 0;
         }

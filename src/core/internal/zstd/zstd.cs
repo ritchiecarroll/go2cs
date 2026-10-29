@@ -110,13 +110,13 @@ public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     {
-        var err = Ꮡr.refillIfNeeded(); if (err != default!) {
+        var err = Ꮡr.refillIfNeeded(); if (err != nil) {
             return (0, err);
         }
     }
     nint n = copy(p, r.buffer.slice(r.off));
     r.off += n;
-    return (n, default!);
+    return (n, default);
 }
 
 // ReadByte implements [io.ByteReader].
@@ -124,13 +124,13 @@ public static (byte, error) ReadByte(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     {
-        var err = Ꮡr.refillIfNeeded(); if (err != default!) {
+        var err = Ꮡr.refillIfNeeded(); if (err != nil) {
             return (0, err);
         }
     }
     var ret = r.buffer[r.off];
     r.off++;
-    return (ret, default!);
+    return (ret, default);
 }
 
 // refillIfNeeded reads the next block if necessary.
@@ -139,13 +139,13 @@ internal static error refillIfNeeded(this ж<Reader> Ꮡr) {
 
     while (r.off >= builtin.len(r.buffer)) {
         {
-            var err = Ꮡr.refill(); if (err != default!) {
+            var err = Ꮡr.refill(); if (err != nil) {
                 return err;
             }
         }
         r.off = 0;
     }
-    return default!;
+    return default;
 }
 
 // refill reads and decompresses the next block.
@@ -154,7 +154,7 @@ internal static error refill(this ж<Reader> Ꮡr) {
 
     if (!r.sawFrameHeader) {
         {
-            var err = r.readFrameHeader(); if (err != default!) {
+            var err = r.readFrameHeader(); if (err != nil) {
                 return err;
             }
         }
@@ -175,7 +175,7 @@ retry:
 
     // Read magic number. RFC 3.1.1.
     {
-        var (_, err) = io.ReadFull(r.r, r.scratch[..4]); if (err != default!) {
+        var (_, err) = io.ReadFull(r.r, r.scratch[..4]); if (err != nil) {
             // We require that the stream contains at least one frame.
             if (AreEqual(err, io.EOF) && !r.readOneFrame) {
                 err = io.ErrUnexpectedEOF;
@@ -190,7 +190,7 @@ retry:
                 // This is a skippable frame.
                 r.blockOffset += (int64)relativeOffset + 4;
                 {
-                    var err = r.skipFrame(); if (err != default!) {
+                    var err = r.skipFrame(); if (err != nil) {
                         return err;
                     }
                 }
@@ -206,7 +206,7 @@ retry:
 
     // Read Frame_Header_Descriptor. RFC 3.1.1.1.1.
     {
-        var (_, err) = io.ReadFull(r.r, r.scratch[..1]); if (err != default!) {
+        var (_, err) = io.ReadFull(r.r, r.scratch[..1]); if (err != nil) {
             return r.wrapNonEOFError(relativeOffset, err);
         }
     }
@@ -219,8 +219,8 @@ retry:
         fcsFieldSize = 0;
     }
 
-    nint windowDescriptorSize = default!;
-    if (singleSegment){
+    nint windowDescriptorSize = default;
+    if (singleSegment) {
         windowDescriptorSize = 0;
     } else {
         windowDescriptorSize = 1;
@@ -248,14 +248,14 @@ retry:
     nint headerSize = windowDescriptorSize + dictionaryIdSize + fcsFieldSize;
 
     {
-        var (_, err) = io.ReadFull(r.r, r.scratch.slice(0, headerSize)); if (err != default!) {
+        var (_, err) = io.ReadFull(r.r, r.scratch.slice(0, headerSize)); if (err != nil) {
             return r.wrapNonEOFError(relativeOffset, err);
         }
     }
 
     // Figure out the maximum amount of data we need to retain
     // for backreferences.
-    uint64 windowSize = default!;
+    uint64 windowSize = default;
     if (!singleSegment) {
         // Window descriptor. RFC 3.1.1.1.2.
         var windowDescriptor = r.scratch[0];
@@ -338,11 +338,11 @@ retry:
     r.repeatedOffset3 = 8;
     r.huffmanTableBits = 0;
     r.window.reset((nint)windowSize);
-    r.seqTables[0] = default!;
-    r.seqTables[1] = default!;
-    r.seqTables[2] = default!;
+    r.seqTables[0] = default;
+    r.seqTables[1] = default;
+    r.seqTables[2] = default;
 
-    return default!;
+    return default;
 }
 
 // skipFrame skips a skippable frame. RFC 3.1.2.
@@ -350,7 +350,7 @@ internal static error skipFrame(this ref Reader r) {
     nint relativeOffset = 0;
 
     {
-        var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != default!) {
+        var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != nil) {
             return r.wrapNonEOFError(relativeOffset, errΔ1);
         }
     }
@@ -360,7 +360,7 @@ internal static error skipFrame(this ref Reader r) {
     var size = binary.LittleEndian.Uint32(r.scratch[..4]);
     if (size == 0) {
         r.blockOffset += (int64)relativeOffset;
-        return default!;
+        return default;
     }
 
     {
@@ -369,11 +369,11 @@ internal static error skipFrame(this ref Reader r) {
             // Implementations of Seeker do not always detect invalid offsets,
             // so check that the new offset is valid by comparing to the end.
             var (prev, errΔ2) = seeker.Seek(0, io.SeekCurrent);
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 return r.wrapError(0, errΔ2);
             }
             (var end, errΔ2) = seeker.Seek(0, io.SeekEnd);
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 return r.wrapError(0, errΔ2);
             }
             if (prev > end - (int64)size) {
@@ -383,21 +383,21 @@ internal static error skipFrame(this ref Reader r) {
 
             // The new offset is valid, so seek to it.
             (_, errΔ2) = seeker.Seek(prev + (int64)size, io.SeekStart);
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 return r.wrapError(0, errΔ2);
             }
             r.blockOffset += (int64)size;
-            return default!;
+            return default;
         }
     }
 
     var (n, err) = io.CopyN(io.Discard, r.r, (int64)size);
     relativeOffset += (nint)n;
-    if (err != default!) {
+    if (err != nil) {
         return r.wrapNonEOFError(relativeOffset, err);
     }
     r.blockOffset += (int64)relativeOffset;
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -414,7 +414,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
 
     // Read Block_Header. RFC 3.1.1.2.
     {
-        var (_, err) = io.ReadFull(r.r, r.scratch[..3]); if (err != default!) {
+        var (_, err) = io.ReadFull(r.r, r.scratch[..3]); if (err != nil) {
             return r.wrapNonEOFError(relativeOffset, err);
         }
     }
@@ -439,7 +439,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
     case 0: {
         r.setBufferSize(blockSize);
         {
-            var (_, err) = io.ReadFull(r.r, r.buffer); if (err != default!) {
+            var (_, err) = io.ReadFull(r.r, r.buffer); if (err != nil) {
                 return r.wrapNonEOFError(relativeOffset, err);
             }
         }
@@ -450,7 +450,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
     case 1: {
         r.setBufferSize(blockSize);
         {
-            var (_, err) = io.ReadFull(r.r, r.scratch[..1]); if (err != default!) {
+            var (_, err) = io.ReadFull(r.r, r.scratch[..1]); if (err != nil) {
                 return r.wrapNonEOFError(relativeOffset, err);
             }
         }
@@ -465,7 +465,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
     case 2: {
         r.blockOffset += (int64)relativeOffset;
         {
-            var err = Ꮡr.compressedBlock(blockSize); if (err != default!) {
+            var err = Ꮡr.compressedBlock(blockSize); if (err != nil) {
                 return err;
             }
         }
@@ -487,7 +487,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         r.checksum.update(r.buffer);
     }
 
-    if (!lastBlock){
+    if (!lastBlock) {
         r.window.save(r.buffer);
     } else {
         if (!r.frameSizeUnknown && r.remainingFrameSize != 0) {
@@ -496,7 +496,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         // Check for checksum at end of frame. RFC 3.1.1.
         if (r.hasChecksum) {
             {
-                var (_, err) = io.ReadFull(r.r, r.scratch[..4]); if (err != default!) {
+                var (_, err) = io.ReadFull(r.r, r.scratch[..4]); if (err != nil) {
                     return r.wrapNonEOFError(0, err);
                 }
             }
@@ -512,7 +512,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         r.sawFrameHeader = false;
     }
 
-    return default!;
+    return default;
 }
 
 // setBufferSize sets the decompressed buffer size.

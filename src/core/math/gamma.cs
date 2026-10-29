@@ -109,7 +109,7 @@ internal static (float64, float64) stirling(float64 x) {
     w = 1D + w * ((((_gamS[0] * w + _gamS[1]) * w + _gamS[2]) * w + _gamS[3]) * w + _gamS[4]);
     var y1 = Exp(x);
     var y2 = 1.0D;
-    if (x > MaxStirling){ // avoid Pow() overflow
+    if (x > MaxStirling) { // avoid Pow() overflow
         var v = Pow(x, 0.5D * x - 0.25D);
         (y1, y2) = (v, v / y1);
     } else {
@@ -172,7 +172,7 @@ public static float64 Gamma(float64 x) {
         var (sq1, sq2) = stirling(q);
         var absz = Abs(zΔ1);
         var d = absz * sq1 * sq2;
-        if (IsInf(d, 0)){
+        if (IsInf(d, 0)) {
             zΔ1 = (float64)Pi / absz / sq1 / sq2;
         } else {
             zΔ1 = (float64)Pi / d;

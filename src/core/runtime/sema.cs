@@ -39,7 +39,7 @@ partial class runtime_package {
 // BenchmarkSemTable/OneAddrCollision/* for a benchmark that exercises this.
 partial struct semaRoot {
     internal mutex @lock;
-    internal ж<sudog> treap;     // root of balanced tree of unique waiters.
+    internal ж<sudog> treap;      // root of balanced tree of unique waiters.
     internal atomic.Uint32 nwait; // Number of waiters. Read w/o the lock.
 }
 
@@ -57,8 +57,8 @@ partial struct semTableᴛ1 /*dyn*/ {
 /* [semTabSize]semTableᴛ1 */
 partial struct semTable /*[251]semTableᴛ1*/;
 
-internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> Ꮡaddr) {
-    return Ꮡ(t.Value, ((uintptr)Ꮡaddr >> 3) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
+internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> addr) {
+    return Ꮡ(t.Value, ((uintptr)addr >> 3) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
 }
 
 // sync_runtime_Semacquire should be an internal detail,
@@ -71,13 +71,13 @@ internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> Ꮡaddr) {
 // See go.dev/issue/67401.
 //
 //go:linkname sync_runtime_Semacquire sync.runtime_Semacquire
-internal static void sync_runtime_Semacquire(ж<uint32> Ꮡaddr) {
-    semacquire1(Ꮡaddr, false, semaBlockProfile, 0, waitReasonSemacquire);
+internal static void sync_runtime_Semacquire(ж<uint32> addr) {
+    semacquire1(addr, false, semaBlockProfile, 0, waitReasonSemacquire);
 }
 
 //go:linkname poll_runtime_Semacquire internal/poll.runtime_Semacquire
-internal static void poll_runtime_Semacquire(ж<uint32> Ꮡaddr) {
-    semacquire1(Ꮡaddr, false, semaBlockProfile, 0, waitReasonSemacquire);
+internal static void poll_runtime_Semacquire(ж<uint32> addr) {
+    semacquire1(addr, false, semaBlockProfile, 0, waitReasonSemacquire);
 }
 
 // sync_runtime_Semrelease should be an internal detail,
@@ -90,42 +90,42 @@ internal static void poll_runtime_Semacquire(ж<uint32> Ꮡaddr) {
 // See go.dev/issue/67401.
 //
 //go:linkname sync_runtime_Semrelease sync.runtime_Semrelease
-internal static void sync_runtime_Semrelease(ж<uint32> Ꮡaddr, bool handoff, nint skipframes) {
-    semrelease1(Ꮡaddr, handoff, skipframes);
+internal static void sync_runtime_Semrelease(ж<uint32> addr, bool handoff, nint skipframes) {
+    semrelease1(addr, handoff, skipframes);
 }
 
 //go:linkname internal_sync_runtime_SemacquireMutex internal/sync.runtime_SemacquireMutex
-internal static void internal_sync_runtime_SemacquireMutex(ж<uint32> Ꮡaddr, bool lifo, nint skipframes) {
-    semacquire1(Ꮡaddr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncMutexLock);
+internal static void internal_sync_runtime_SemacquireMutex(ж<uint32> addr, bool lifo, nint skipframes) {
+    semacquire1(addr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncMutexLock);
 }
 
 //go:linkname sync_runtime_SemacquireRWMutexR sync.runtime_SemacquireRWMutexR
-internal static void sync_runtime_SemacquireRWMutexR(ж<uint32> Ꮡaddr, bool lifo, nint skipframes) {
-    semacquire1(Ꮡaddr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncRWMutexRLock);
+internal static void sync_runtime_SemacquireRWMutexR(ж<uint32> addr, bool lifo, nint skipframes) {
+    semacquire1(addr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncRWMutexRLock);
 }
 
 //go:linkname sync_runtime_SemacquireRWMutex sync.runtime_SemacquireRWMutex
-internal static void sync_runtime_SemacquireRWMutex(ж<uint32> Ꮡaddr, bool lifo, nint skipframes) {
-    semacquire1(Ꮡaddr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncRWMutexLock);
+internal static void sync_runtime_SemacquireRWMutex(ж<uint32> addr, bool lifo, nint skipframes) {
+    semacquire1(addr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncRWMutexLock);
 }
 
 //go:linkname sync_runtime_SemacquireWaitGroup sync.runtime_SemacquireWaitGroup
-internal static void sync_runtime_SemacquireWaitGroup(ж<uint32> Ꮡaddr, bool synctestDurable) {
+internal static void sync_runtime_SemacquireWaitGroup(ж<uint32> addr, bool synctestDurable) {
     var reason = waitReasonSyncWaitGroupWait;
     if (synctestDurable) {
         reason = waitReasonSynctestWaitGroupWait;
     }
-    semacquire1(Ꮡaddr, false, semaBlockProfile, 0, reason);
+    semacquire1(addr, false, semaBlockProfile, 0, reason);
 }
 
 //go:linkname poll_runtime_Semrelease internal/poll.runtime_Semrelease
-internal static void poll_runtime_Semrelease(ж<uint32> Ꮡaddr) {
-    semrelease(Ꮡaddr);
+internal static void poll_runtime_Semrelease(ж<uint32> addr) {
+    semrelease(addr);
 }
 
 //go:linkname internal_sync_runtime_Semrelease internal/sync.runtime_Semrelease
-internal static void internal_sync_runtime_Semrelease(ж<uint32> Ꮡaddr, bool handoff, nint skipframes) {
-    semrelease1(Ꮡaddr, handoff, skipframes);
+internal static void internal_sync_runtime_Semrelease(ж<uint32> addr, bool handoff, nint skipframes) {
+    semrelease1(addr, handoff, skipframes);
 }
 
 internal static void readyWithTime(ref sudog s, nint traceskip) {
@@ -141,50 +141,50 @@ internal static semaProfileFlags semaBlockProfile => /* 1 << iota */ 1;
 internal static semaProfileFlags semaMutexProfile => 2;
 
 // Called from runtime.
-internal static void semacquire(ж<uint32> Ꮡaddr) {
-    semacquire1(Ꮡaddr, false, 0, 0, waitReasonSemacquire);
+internal static void semacquire(ж<uint32> addr) {
+    semacquire1(addr, false, 0, 0, waitReasonSemacquire);
 }
 
 // go2cs generated this placeholder — func semacquire1 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void semrelease(ж<uint32> Ꮡaddr) {
-    semrelease1(Ꮡaddr, false, 0);
+internal static void semrelease(ж<uint32> addr) {
+    semrelease1(addr, false, 0);
 }
 
 // go2cs generated this placeholder — func semrelease1 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool cansemacquire(ж<uint32> Ꮡaddr) {
-    while (ᐧ) {
-        var v = atomic.Load(Ꮡaddr);
+internal static bool cansemacquire(ж<uint32> addr) {
+    for (;;) {
+        var v = atomic.Load(addr);
         if (v == 0) {
             return false;
         }
-        if (atomic.Cas(Ꮡaddr, v, v - 1)) {
+        if (atomic.Cas(addr, v, v - 1)) {
             return true;
         }
     }
 }
 
 // queue adds s to the blocked goroutines in semaRoot.
-internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sudog> Ꮡs, bool lifo) {
+internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> addr, ж<sudog> Ꮡs, bool lifo) {
     ref var root = ref Ꮡroot.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.g = getg();
-    s.elem.set(@unsafe.Pointer.FromPinnedBox(Ꮡaddr));
+    s.elem.set(@unsafe.Pointer.FromPinnedBox(addr));
     // Storing this pointer so that we can trace the semaphore address
     // from the blocked goroutine when checking for goroutine leaks.
     s.g.Value.waiting = Ꮡs;
-    s.next = default!;
-    s.prev = default!;
+    s.next = default;
+    s.prev = default;
     s.waiters = 0;
 
-    ж<sudog> last = default!;
+    ж<sudog> last = default;
     var pt = Ꮡroot.of(semaRoot.Ꮡtreap);
     for (var t = pt.ValueSlot; t != nil; t = pt.ValueSlot) {
-        if ((uintptr)Ꮡaddr == t.of(sudog.Ꮡelem).uintptr()) {
+        if ((uintptr)addr == t.of(sudog.Ꮡelem).uintptr()) {
             // Already have addr in list.
-            if (lifo){
+            if (lifo) {
                 // Substitute s in t's place in treap.
                 pt.ValueSlot = Ꮡs;
                 s.ticket = t.Value.ticket;
@@ -208,19 +208,19 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
                 if ((uint16)(s.waiters + 1) != 0) {
                     s.waiters++;
                 }
-                t.Value.parent = default!;
-                t.Value.prev = default!;
-                t.Value.next = default!;
-                t.Value.waittail = default!;
+                t.Value.parent = default;
+                t.Value.prev = default;
+                t.Value.next = default;
+                t.Value.waittail = default;
             } else {
                 // Add s to end of t's wait list.
-                if ((~t).waittail == nil){
+                if ((~t).waittail == nil) {
                     t.Value.waitlink = Ꮡs;
                 } else {
                     t.Value.waittail.Value.waitlink = Ꮡs;
                 }
                 t.Value.waittail = Ꮡs;
-                s.waitlink = default!;
+                s.waitlink = default;
                 if ((uint16)((~t).waiters + 1) != 0) {
                     t.Value.waiters++;
                 }
@@ -228,7 +228,7 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
             return;
         }
         last = t;
-        if ((uintptr)Ꮡaddr < t.of(sudog.Ꮡelem).uintptr()){
+        if ((uintptr)addr < t.of(sudog.Ꮡelem).uintptr()) {
             pt = t.of(sudog.Ꮡprev);
         } else {
             pt = t.of(sudog.Ꮡnext);
@@ -252,7 +252,7 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
 
     // Rotate up into tree according to ticket (priority).
     while (s.parent != nil && (~s.parent).ticket > s.ticket) {
-        if ((~s.parent).prev == Ꮡs){
+        if ((~s.parent).prev == Ꮡs) {
             root.rotateRight(s.parent);
         } else {
             if ((~s.parent).next != Ꮡs) {
@@ -270,26 +270,26 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
 // If there are additional entries in the wait list, dequeue
 // returns tailtime set to the last entry's acquiretime.
 // Otherwise tailtime is found.acquiretime.
-internal static (ж<sudog> found, int64 now, int64 tailtime) dequeue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr) {
-    int64 now = default!;
-    int64 tailtime = default!;
+internal static (ж<sudog> found, int64 now, int64 tailtime) dequeue(this ж<semaRoot> Ꮡroot, ж<uint32> addr) {
+    int64 now = default;
+    int64 tailtime = default;
     ref var root = ref Ꮡroot.DerefOrNull();
 
     var ps = Ꮡroot.of(semaRoot.Ꮡtreap);
     var s = ps.ValueSlot;
 
     for (; s != nil; s = ps.ValueSlot) {
-        if ((uintptr)Ꮡaddr == s.of(sudog.Ꮡelem).uintptr()) {
+        if ((uintptr)addr == s.of(sudog.Ꮡelem).uintptr()) {
             goto Found;
         }
 
-        if ((uintptr)Ꮡaddr < s.of(sudog.Ꮡelem).uintptr()){
+        if ((uintptr)addr < s.of(sudog.Ꮡelem).uintptr()) {
             ps = s.of(sudog.Ꮡprev);
         } else {
             ps = s.of(sudog.Ꮡnext);
         }
     }
-    return (default!, 0, 0);
+    return (default, 0, 0);
 
 Found:
     now = (int64)0;
@@ -297,7 +297,7 @@ Found:
         now = cputicks();
     }
     {
-        var t = s.Value.waitlink; if (t != nil){
+        var t = s.Value.waitlink; if (t != nil) {
             // Substitute t, also waiting on addr, for s in root tree of unique addrs.
             ps.ValueSlot = t;
             t.Value.ticket = s.Value.ticket;
@@ -310,10 +310,10 @@ Found:
             if ((~t).next != nil) {
                 t.Value.next.Value.parent = t;
             }
-            if ((~t).waitlink != nil){
+            if ((~t).waitlink != nil) {
                 t.Value.waittail = s.Value.waittail;
             } else {
-                t.Value.waittail = default!;
+                t.Value.waittail = default;
             }
             t.Value.waiters = s.Value.waiters;
             if ((~t).waiters > 1) {
@@ -325,36 +325,36 @@ Found:
             t.Value.acquiretime = now;
             tailtime = s.Value.waittail.Value.acquiretime;
             s.Value.waittail.Value.acquiretime = now;
-            s.Value.waitlink = default!;
-            s.Value.waittail = default!;
+            s.Value.waitlink = default;
+            s.Value.waittail = default;
         } else {
             // Rotate s down to be leaf of tree for removal, respecting priorities.
             while ((~s).next != nil || (~s).prev != nil) {
-                if ((~s).next == nil || (~s).prev != nil && (~(~s).prev).ticket < (~(~s).next).ticket){
+                if ((~s).next == nil || (~s).prev != nil && (~(~s).prev).ticket < (~(~s).next).ticket) {
                     root.rotateRight(s);
                 } else {
                     root.rotateLeft(s);
                 }
             }
             // Remove s, now a leaf.
-            if ((~s).parent != nil){
-                if ((~(~s).parent).prev == s){
-                    s.Value.parent.Value.prev = default!;
+            if ((~s).parent != nil) {
+                if ((~(~s).parent).prev == s) {
+                    s.Value.parent.Value.prev = default;
                 } else {
-                    s.Value.parent.Value.next = default!;
+                    s.Value.parent.Value.next = default;
                 }
             } else {
-                root.treap = default!;
+                root.treap = default;
             }
             tailtime = s.Value.acquiretime;
         }
     }
     // Goroutine is no longer blocked. Clear the waiting pointer.
-    s.Value.g.Value.waiting = default!;
-    s.Value.parent = default!;
+    s.Value.g.Value.waiting = default;
+    s.Value.parent = default;
     s.of(sudog.Ꮡelem).set(nil);
-    s.Value.next = default!;
-    s.Value.prev = default!;
+    s.Value.next = default;
+    s.Value.prev = default;
     s.Value.ticket = 0;
     return (s, now, tailtime);
 }
@@ -380,10 +380,9 @@ internal static void rotateLeft(this ref semaRoot root, ж<sudog> Ꮡx) {
     }
 
     y.Value.parent = Δp;
-    if (Δp == nil){
+    if (Δp == nil) {
         root.treap = y;
-    } else 
-    if ((~Δp).prev == Ꮡx){
+    } else if ((~Δp).prev == Ꮡx) {
         Δp.Value.prev = y;
     } else {
         if ((~Δp).next != Ꮡx) {
@@ -414,10 +413,9 @@ internal static void rotateRight(this ref semaRoot root, ж<sudog> Ꮡy) {
     }
 
     x.Value.parent = Δp;
-    if (Δp == nil){
+    if (Δp == nil) {
         root.treap = x;
-    } else 
-    if ((~Δp).prev == Ꮡy){
+    } else if ((~Δp).prev == Ꮡy) {
         Δp.Value.prev = x;
     } else {
         if ((~Δp).next != Ꮡy) {
@@ -459,10 +457,10 @@ internal static bool less(uint32 a, uint32 b) {
 // such a notification, passing the returned ticket number.
 //
 //go:linkname notifyListAdd sync.runtime_notifyListAdd
-internal static uint32 notifyListAdd(ж<notifyList> Ꮡl) {
+internal static uint32 notifyListAdd(ж<notifyList> l) {
     // This may be called concurrently, for example, when called from
     // sync.Cond.Wait while holding a RWMutex in read mode.
-    return Ꮡl.of(notifyList.Ꮡwait).Add(1) - 1;
+    return l.of(notifyList.Ꮡwait).Add(1) - 1;
 }
 
 // notifyListWait waits for a notification. If one has been sent since
@@ -494,7 +492,7 @@ internal static void notifyListWait(ж<notifyList> Ꮡl, uint32 t) {
         t0 = cputicks();
         s.Value.releasetime = -1;
     }
-    if (l.tail == nil){
+    if (l.tail == nil) {
         l.head = s;
     } else {
         l.tail.Value.next = s;
@@ -506,7 +504,7 @@ internal static void notifyListWait(ж<notifyList> Ꮡl, uint32 t) {
     }
     // Goroutine is no longer blocked. Clear up its waiting pointer,
     // and clean up the sudog before releasing it.
-    s.Value.g.Value.waiting = default!;
+    s.Value.g.Value.waiting = default;
     s.of(sudog.Ꮡelem).set(nil);
     releaseSudog(s);
 }
@@ -530,8 +528,8 @@ internal static void notifyListNotifyAll(ж<notifyList> Ꮡl) {
     // outside the lock.
     lockWithRank(Ꮡl.of(notifyList.Ꮡlock), lockRankNotifyList);
     var s = l.head;
-    l.head = default!;
-    l.tail = default!;
+    l.head = default;
+    l.tail = default;
 
     // Update the next ticket to be notified. We can set it to the current
     // value of wait because any previous waiters are already in the list
@@ -543,7 +541,7 @@ internal static void notifyListNotifyAll(ж<notifyList> Ꮡl) {
     // Go through the local list and ready all waiters.
     while (s != nil) {
         var next = s.Value.next;
-        s.Value.next = default!;
+        s.Value.next = default;
         if ((~(~s).g).bubble != nil && (~getg()).bubble != (~(~s).g).bubble) {
             println((@string)"semaphore wake of synctest goroutine"u8, (~(~s).g).goid, (@string)"from outside bubble"u8);
             fatal(semaphoreWakeOfSynctestˢ);
@@ -593,7 +591,7 @@ internal static void notifyListNotifyOne(ж<notifyList> Ꮡl) {
     for (var (Δp, s) = ((ж<sudog>)nil, l.head); s != nil; (Δp, s) = (s, s.Value.next)) {
         if ((~s).ticket == t) {
             var n = s.Value.next;
-            if (Δp != nil){
+            if (Δp != nil) {
                 Δp.Value.next = n;
             } else {
                 l.head = n;
@@ -602,7 +600,7 @@ internal static void notifyListNotifyOne(ж<notifyList> Ꮡl) {
                 l.tail = Δp;
             }
             unlock(Ꮡl.of(notifyList.Ꮡlock));
-            s.Value.next = default!;
+            s.Value.next = default;
             if ((~(~s).g).bubble != nil && (~getg()).bubble != (~(~s).g).bubble) {
                 println((@string)"semaphore wake of synctest goroutine"u8, (~(~s).g).goid, (@string)"from outside bubble"u8);
                 fatal(semaphoreWakeOfSynctestˢ);

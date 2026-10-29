@@ -25,9 +25,9 @@ internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
 
 // Add adds a single sample to the histogram.
 public static void Add(this ref TimeHistogram h, time.Duration d) {
-    nint bucket = default!;
+    nint bucket = default;
     if (d > 0) {
-        bucket = (nint)(math.Log((float64)(int64)d) / logDiv);
+        bucket = (nint)(math.Log((float64)d) / logDiv);
     }
     if (len(h.Buckets) <= bucket) {
         h.Buckets = appendꓸꓸꓸ(h.Buckets, makeꓸꓸꓸ<nint>(bucket - len(h.Buckets) + 1));
@@ -69,7 +69,7 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     fmt.Fprintf(new strings_BuilderжWriter(w), @"<table>"u8);
     for (nint i = h.MinBucket; i <= h.MaxBucket; i++) {
         // Tick label.
-        if (h.Buckets[i] > 0){
+        if (h.Buckets[i] > 0) {
             fmt.Fprintf(new strings_BuilderжWriter(w), @"<tr><td class=""histoTime"" align=""right""><a href=%s>%s</a></td>"u8, urlmaker(h.BucketMin(i), h.BucketMin(i + 1)), h.BucketMin(i));
         } else {
             fmt.Fprintf(new strings_BuilderжWriter(w), @"<tr><td class=""histoTime"" align=""right"">%s</td>"u8, h.BucketMin(i));

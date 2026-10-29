@@ -76,13 +76,15 @@ internal static F forbits<F>(F xʗp, F yʗp)
     ref var x = ref heap(xʗp, out var Ꮡx);
     ref var y = ref heap(yʗp, out var Ꮡy);
 
-    var exprᴛ1 = @unsafe.Sizeof(x);
-    if (exprᴛ1 == 4) {
+    switch (@unsafe.Sizeof(x)) {
+    case var ᴛ when ᴛ == 4: {
         (Ꮡx.Reinterpret<F, uint32>()).Value |= (Ꮡy.Reinterpret<F, uint32>()).Value;
+        break;
     }
-    else if (exprᴛ1 == 8) {
+    case var ᴛ when ᴛ == 8: {
         (Ꮡx.Reinterpret<F, uint64>()).Value |= (Ꮡy.Reinterpret<F, uint64>()).Value;
-    }
+        break;
+    }}
     return x;
 }
 
@@ -92,13 +94,15 @@ internal static F fandbits<F>(F xʗp, F yʗp)
     ref var x = ref heap(xʗp, out var Ꮡx);
     ref var y = ref heap(yʗp, out var Ꮡy);
 
-    var exprᴛ1 = @unsafe.Sizeof(x);
-    if (exprᴛ1 == 4) {
+    switch (@unsafe.Sizeof(x)) {
+    case var ᴛ when ᴛ == 4: {
         (Ꮡx.Reinterpret<F, uint32>()).Value &= (Ꮡy.Reinterpret<F, uint32>()).Value;
+        break;
     }
-    else if (exprᴛ1 == 8) {
+    case var ᴛ when ᴛ == 8: {
         (Ꮡx.Reinterpret<F, uint64>()).Value &= (Ꮡy.Reinterpret<F, uint64>()).Value;
-    }
+        break;
+    }}
     return x;
 }
 

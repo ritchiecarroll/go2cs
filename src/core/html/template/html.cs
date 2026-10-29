@@ -70,23 +70,23 @@ internal static @string htmlEscaper(params ꓸꓸꓸany argsʗp) {
     // and similarly
     // https://www.w3.org/TR/html5/syntax.html#before-attribute-value-state
     [0] = "\uFFFD"u8,
-    [(rune)'"'] = "&#34;"u8,
-    [(rune)'&'] = "&amp;"u8,
-    [(rune)'\''] = "&#39;"u8,
-    [(rune)'+'] = "&#43;"u8,
-    [(rune)'<'] = "&lt;"u8,
-    [(rune)'>'] = "&gt;"u8
+    ['"'] = "&#34;"u8,
+    ['&'] = "&amp;"u8,
+    ['\''] = "&#39;"u8,
+    ['+'] = "&#43;"u8,
+    ['<'] = "&lt;"u8,
+    ['>'] = "&gt;"u8
 }; }
 
 // htmlNormReplacementTable is like htmlReplacementTable but without '&' to
 // avoid over-encoding existing entities.
 [GoLazy] partial class lazyᴛhtmlNormReplacementTable { internal static slice<@string> htmlNormReplacementTable = new slice<@string>(63){
     [0] = "\uFFFD"u8,
-    [(rune)'"'] = "&#34;"u8,
-    [(rune)'\''] = "&#39;"u8,
-    [(rune)'+'] = "&#43;"u8,
-    [(rune)'<'] = "&lt;"u8,
-    [(rune)'>'] = "&gt;"u8
+    ['"'] = "&#34;"u8,
+    ['\''] = "&#39;"u8,
+    ['+'] = "&#43;"u8,
+    ['<'] = "&lt;"u8,
+    ['>'] = "&gt;"u8
 }; }
 
 // htmlNospaceReplacementTable contains the runes that need to be escaped
@@ -108,45 +108,45 @@ internal static @string htmlEscaper(params ꓸꓸꓸany argsʗp) {
 // })()</script>
 [GoLazy] partial class lazyᴛhtmlNospaceReplacementTable { internal static slice<@string> htmlNospaceReplacementTable = new slice<@string>(97){
     [0] = "&#xfffd;"u8,
-    [(rune)'\t'] = "&#9;"u8,
-    [(rune)'\n'] = "&#10;"u8,
-    [(rune)'\v'] = "&#11;"u8,
-    [(rune)'\f'] = "&#12;"u8,
-    [(rune)'\r'] = "&#13;"u8,
-    [(rune)' '] = "&#32;"u8,
-    [(rune)'"'] = "&#34;"u8,
-    [(rune)'&'] = "&amp;"u8,
-    [(rune)'\''] = "&#39;"u8,
-    [(rune)'+'] = "&#43;"u8,
-    [(rune)'<'] = "&lt;"u8,
-    [(rune)'='] = "&#61;"u8,
-    [(rune)'>'] = "&gt;"u8,
+    ['\t'] = "&#9;"u8,
+    ['\n'] = "&#10;"u8,
+    ['\v'] = "&#11;"u8,
+    ['\f'] = "&#12;"u8,
+    ['\r'] = "&#13;"u8,
+    [' '] = "&#32;"u8,
+    ['"'] = "&#34;"u8,
+    ['&'] = "&amp;"u8,
+    ['\''] = "&#39;"u8,
+    ['+'] = "&#43;"u8,
+    ['<'] = "&lt;"u8,
+    ['='] = "&#61;"u8,
+    ['>'] = "&gt;"u8,
     // A parse error in the attribute value (unquoted) and
     // before attribute value states.
     // Treated as a quoting character by IE.
-    [(rune)'`'] = "&#96;"u8
+    ['`'] = "&#96;"u8
 }; }
 
 // htmlNospaceNormReplacementTable is like htmlNospaceReplacementTable but
 // without '&' to avoid over-encoding existing entities.
 [GoLazy] partial class lazyᴛhtmlNospaceNormReplacementTable { internal static slice<@string> htmlNospaceNormReplacementTable = new slice<@string>(97){
     [0] = "&#xfffd;"u8,
-    [(rune)'\t'] = "&#9;"u8,
-    [(rune)'\n'] = "&#10;"u8,
-    [(rune)'\v'] = "&#11;"u8,
-    [(rune)'\f'] = "&#12;"u8,
-    [(rune)'\r'] = "&#13;"u8,
-    [(rune)' '] = "&#32;"u8,
-    [(rune)'"'] = "&#34;"u8,
-    [(rune)'\''] = "&#39;"u8,
-    [(rune)'+'] = "&#43;"u8,
-    [(rune)'<'] = "&lt;"u8,
-    [(rune)'='] = "&#61;"u8,
-    [(rune)'>'] = "&gt;"u8,
+    ['\t'] = "&#9;"u8,
+    ['\n'] = "&#10;"u8,
+    ['\v'] = "&#11;"u8,
+    ['\f'] = "&#12;"u8,
+    ['\r'] = "&#13;"u8,
+    [' '] = "&#32;"u8,
+    ['"'] = "&#34;"u8,
+    ['\''] = "&#39;"u8,
+    ['+'] = "&#43;"u8,
+    ['<'] = "&lt;"u8,
+    ['='] = "&#61;"u8,
+    ['>'] = "&gt;"u8,
     // A parse error in the attribute value (unquoted) and
     // before attribute value states.
     // Treated as a quoting character by IE.
-    [(rune)'`'] = "&#96;"u8
+    ['`'] = "&#96;"u8
 }; }
 
 // htmlReplacer returns s with runes replaced according to replacementTable
@@ -161,7 +161,7 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
         // of the runes in the input. If we see a decoding error, the input
         // width will not be utf8.Runelen(r) and we will overrun the buffer.
         (r, w) = utf8.DecodeRuneInString(s.slice(i));
-        if ((nint)r < len(replacementTable)){
+        if ((nint)r < len(replacementTable)) {
             {
                 @string repl = replacementTable[r]; if (len(repl) != 0) {
                     if (written == 0) {
@@ -172,12 +172,10 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
                     written = i + w;
                 }
             }
-        } else 
-        if (badRunes){
+        } else if (badRunes) {
             // No-op.
             // IE does not allow these ranges in unquoted attrs.
-        } else 
-        if (0xfdd0 <= r && r <= 0xfdef || 0xfff0 <= r && r <= 0xffff) {
+        } else if (0xfdd0 <= r && r <= 0xfdef || 0xfff0 <= r && r <= 0xffff) {
             if (written == 0) {
                 b.Grow(len(s));
             }
@@ -197,7 +195,7 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
 internal static @string stripTags(@string html) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     var s = slice<byte>(html);
-    var c = new context(nil);
+    var c = new context();
     nint i = 0;
     var allText = true;
     // Using the transition funcs helps us avoid mangling
@@ -211,12 +209,12 @@ internal static @string stripTags(@string html) {
             }
             var (d, nread) = transitionFunc[st](c, s.slice(i));
             nint i1Δ1 = i + nread;
-            if (c.state == stateText || c.state == stateRCDATA){
+            if (c.state == stateText || c.state == stateRCDATA) {
                 // Emit text up to the start of the tag or comment.
                 nint j = i1Δ1;
                 if (d.state != c.state) {
                     for (nint j1 = j - 1; j1 >= i; j1--) {
-                        if (s[j1] == (rune)'<') {
+                        if (s[j1] == '<') {
                             j = j1;
                             break;
                         }
@@ -239,10 +237,9 @@ internal static @string stripTags(@string html) {
         }
         (c, i) = (new context(state: stateTag, element: c.element), i1);
     }
-    if (allText){
+    if (allText) {
         return html;
-    } else 
-    if (c.state == stateText || c.state == stateRCDATA) {
+    } else if (c.state == stateText || c.state == stateRCDATA) {
         Ꮡb.Write(s.slice(i));
     }
     return b.String();
@@ -274,10 +271,10 @@ internal static @string htmlNameFilter(params ꓸꓸꓸany argsʗp) {
     }
     foreach (var (_, r) in s) {
         switch (ᐧ) {
-        case {} when (rune)'0' <= r && r <= (rune)'9': {
+        case {} when '0' <= r && r <= '9': {
             break;
         }
-        case {} when (rune)'a' <= r && r <= (rune)'z': {
+        case {} when 'a' <= r && r <= 'z': {
             break;
         }
         default: {

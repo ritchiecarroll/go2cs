@@ -83,7 +83,7 @@ internal static int64 ticksPerSecond() {
     }
 
     // Compute the conversion rate.
-    while (ᐧ) {
+    for (;;) {
         @lock(Ꮡticks.of(ticksType.Ꮡlock));
         r = Ꮡticks.of(ticksType.Ꮡval).Load();
         if (r != 0) {
@@ -122,7 +122,7 @@ internal static slice<@string> argslice;
 
 //go:linkname syscall_runtime_envs syscall.runtime_envs
 public static slice<@string> syscall_runtime_envs() {
-    return appendꓸꓸꓸ(new @string[]{}.slice(), envs);
+    return appendꓸꓸꓸ(slice<@string>([]), envs);
 }
 
 //go:linkname syscall_Getpagesize syscall.Getpagesize
@@ -132,7 +132,7 @@ internal static nint syscall_Getpagesize() {
 
 //go:linkname os_runtime_args os.runtime_args
 public static slice<@string> os_runtime_args() {
-    return appendꓸꓸꓸ(new @string[]{}.slice(), argslice);
+    return appendꓸꓸꓸ(slice<@string>([]), argslice);
 }
 
 //go:linkname syscall_Exit syscall.Exit
@@ -147,7 +147,7 @@ internal static readonly ж<atomic.Pointer<Action<@string, @string>>> Ꮡgodebug
 internal static ref atomic.Pointer<Action<@string, @string>> godebugUpdate => ref ((StaticBox<atomic.Pointer<Action<@string, @string>>>)ᏑgodebugUpdate).ValueSlot;
 
 internal static readonly ж<atomic.Pointer<@string>> ᏑgodebugEnv = new StaticBox<atomic.Pointer<@string>>(default(atomic.Pointer<@string>));
-internal static ref atomic.Pointer<@string> godebugEnv => ref ((StaticBox<atomic.Pointer<@string>>)ᏑgodebugEnv).ValueSlot;                      // set by parsedebugvars
+internal static ref atomic.Pointer<@string> godebugEnv => ref ((StaticBox<atomic.Pointer<@string>>)ᏑgodebugEnv).ValueSlot; // set by parsedebugvars
 
 internal static readonly ж<atomic.Pointer<Func<@string, Action>>> ᏑgodebugNewIncNonDefault = new StaticBox<atomic.Pointer<Func<@string, Action>>>(default(atomic.Pointer<Func<@string, Action>>));
 internal static ref atomic.Pointer<Func<@string, Action>> godebugNewIncNonDefault => ref ((StaticBox<atomic.Pointer<Func<@string, Action>>>)ᏑgodebugNewIncNonDefault).ValueSlot;
@@ -202,7 +202,7 @@ internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
 
 internal static void godebugNotify(bool envChanged) {
     var update = ᏑgodebugUpdate.Load();
-    @string env = default!;
+    @string env = default;
     {
         var Δp = ᏑgodebugEnv.Load(); if (Δp != nil) {
             env = Δp.Value;

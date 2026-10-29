@@ -73,7 +73,7 @@ internal static bool op(this ж<Checker> Ꮡcheck, opPredicates m, ж<operand> �
     ref var x = ref Ꮡx.DerefOrNull();
 
     {
-        var pred = m[op]; if (pred != default!){
+        var pred = m[op]; if (pred != nil) {
             if (!pred(x.typ)) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UndefinedOp, invalidOp + "operator %s not defined on %s", op, Ꮡx.OrTypedNil());
                 return false;
@@ -94,7 +94,7 @@ internal static tokenꓸPos opPos(ast.Expr x) {
         return nopos; // don't crash
     }
     case ж<ast.BinaryExpr> op: {
-        return (~op).OpPos;
+        return op.OpPos;
     }
     default: {
         var op = x;
@@ -107,14 +107,14 @@ internal static tokenꓸPos opPos(ast.Expr x) {
 internal static @string opName(ast.Expr e) {
     switch (e.type()) {
     case ж<ast.BinaryExpr> eΔ1: {
-        if ((nint)(~eΔ1).Op < len(op2str2)) {
-            return op2str2[(~eΔ1).Op];
+        if ((nint)eΔ1.Op < len(op2str2)) {
+            return op2str2[eΔ1.Op];
         }
         break;
     }
     case ж<ast.UnaryExpr> eΔ1: {
-        if ((nint)(~eΔ1).Op < len(op2str1)) {
-            return op2str1[(~eΔ1).Op];
+        if ((nint)eΔ1.Op < len(op2str1)) {
+            return op2str1[eΔ1.Op];
         }
         break;
     }}
@@ -150,8 +150,8 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
     }
 
     token.Token op = e.Op;
-    var exprᴛ1 = op;
-    if (exprᴛ1 == token.AND) {
+    switch (op) {
+    case var ᴛ when ᴛ == token.AND: {
         // spec: "As an exception to the addressability
         // requirement x may also be a composite literal."
         {
@@ -165,9 +165,9 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
         x.typ = new PointerжΔType(Ꮡ(new Pointer(@base: x.typ)));
         return;
     }
-    if (exprᴛ1 == token.ARROW) {
+    case var ᴛ when ᴛ == token.ARROW: {
         {
-            var elem = Ꮡcheck.chanElem(new operandжpositioner(Ꮡx), Ꮡx, true); if (elem != default!) {
+            var elem = Ꮡcheck.chanElem(new operandжpositioner(Ꮡx), Ꮡx, true); if (elem != nil) {
                 x.mode = commaok;
                 x.typ = elem;
                 check.hasCallOrRecv = true;
@@ -177,7 +177,7 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
         x.mode = invalid;
         return;
     }
-    if (exprᴛ1 == token.TILDE) {
+    case var ᴛ when ᴛ == token.TILDE: {
         // Provide a better error position and message than what check.op below would do.
         if (!allInteger(x.typ)) {
             Ꮡcheck.error(new ast_UnaryExprжpositioner(Ꮡe), UndefinedOp, cannotUseOutsideOfˢ);
@@ -186,7 +186,8 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
         }
         Ꮡcheck.error(new ast_UnaryExprжpositioner(Ꮡe), UndefinedOp, cannotUseOutsideOfˢ2);
         op = token.XOR;
-    }
+        break;
+    }}
 
     if (!Ꮡcheck.op(unaryOpPredicates, Ꮡx, op)) {
         x.mode = invalid;
@@ -198,7 +199,7 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
             // nothing to do (and don't cause an error below in the overflow check)
             return;
         }
-        nuint prec = default!;
+        nuint prec = default;
         if (isUnsigned(x.typ)) {
             prec = (nuint)(check.conf.@sizeof(x.typ) * 8);
         }
@@ -219,43 +220,43 @@ internal static ΔType chanElem(this ж<Checker> Ꮡcheck, positioner pos, ж<op
     ref var x = ref Ꮡx.DerefOrNull();
 
     var (u, err) = commonUnder(x.typ, (ΔType t, ΔType uΔ1) => {
-        if (uΔ1 == default!) {
+        if (uΔ1 == nil) {
             return typeErrorf("no specific channel type"u8);
         }
         var (ch, _) = uΔ1._<ж<Chan>>(ᐧ);
         if (ch == nil) {
             return typeErrorf("non-channel %s"u8, t);
         }
-        if (recv && (~ch).dir == SendOnly) {
+        if (recv && ch.dir == SendOnly) {
             return typeErrorf("send-only channel %s"u8, t);
         }
-        if (!recv && (~ch).dir == RecvOnly) {
+        if (!recv && ch.dir == RecvOnly) {
             return typeErrorf("receive-only channel %s"u8, t);
         }
-        return default!;
+        return default;
     });
 
-    if (u != default!) {
-        return (~u._<ж<Chan>>()).elem;
+    if (u != nil) {
+        return u._<ж<Chan>>().elem;
     }
 
     @string cause = err.format(Ꮡcheck);
-    if (recv){
-        if (isTypeParam(x.typ)){
+    if (recv) {
+        if (isTypeParam(x.typ)) {
             Ꮡcheck.errorf(pos, InvalidReceive, invalidOp + "cannot receive from %s: %s", Ꮡx.OrTypedNil(), cause);
         } else {
             // In this case, only the non-channel and send-only channel error are possible.
             Ꮡcheck.errorf(pos, InvalidReceive, invalidOp + "cannot receive from %s %s", cause, Ꮡx.OrTypedNil());
         }
     } else {
-        if (isTypeParam(x.typ)){
+        if (isTypeParam(x.typ)) {
             Ꮡcheck.errorf(pos, InvalidSend, invalidOp + "cannot send to %s: %s", Ꮡx.OrTypedNil(), cause);
         } else {
             // In this case, only the non-channel and receive-only channel error are possible.
             Ꮡcheck.errorf(pos, InvalidSend, invalidOp + "cannot send to %s %s", cause, Ꮡx.OrTypedNil());
         }
     }
-    return default!;
+    return default;
 }
 
 internal static bool isShift(token.Token op) {
@@ -264,10 +265,10 @@ internal static bool isShift(token.Token op) {
 
 internal static bool isComparison(token.Token op) {
     // Note: tokens are not ordered well to make this much easier
-    var exprᴛ1 = op;
-    if (exprᴛ1 == token.EQL || exprᴛ1 == token.NEQ || exprᴛ1 == token.LSS || exprᴛ1 == token.LEQ || exprᴛ1 == token.GTR || exprᴛ1 == token.GEQ) {
+    switch (op) {
+    case var ᴛ when ᴛ == token.EQL || ᴛ == token.NEQ || ᴛ == token.LSS || ᴛ == token.LEQ || ᴛ == token.GTR || ᴛ == token.GEQ: {
         return true;
-    }
+    }}
     return false;
 }
 
@@ -333,7 +334,7 @@ internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, ΔTyp
         break;
     }
     case ж<ast.ParenExpr> xΔ1: {
-        Ꮡcheck.updateExprType((~xΔ1).X, typ, final);
+        Ꮡcheck.updateExprType(xΔ1.X, typ, final);
         break;
     }
     case ж<ast.UnaryExpr> xΔ1: {
@@ -342,28 +343,27 @@ internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, ΔTyp
         // never get "materialized" into a typed value. If
         // left in the untyped map, they will be processed
         // at the end of the type check.
-        if (old.val != default!) {
+        if (old.val != nil) {
             break;
         }
-        Ꮡcheck.updateExprType((~xΔ1).X, typ, final);
+        Ꮡcheck.updateExprType(xΔ1.X, typ, final);
         break;
     }
     case ж<ast.BinaryExpr> xΔ1: {
-        if (old.val != default!) {
+        if (old.val != nil) {
             break; // see comment for unary expressions
         }
-        if (isComparison((~xΔ1).Op)){
+        if (isComparison(xΔ1.Op)) {
             // The result type is independent of operand types
             // and the operand types must have final types.
-        } else 
-        if (isShift((~xΔ1).Op)){
+        } else if (isShift(xΔ1.Op)) {
             // The result type depends only on lhs operand.
             // The rhs type was updated when checking the shift.
-            Ꮡcheck.updateExprType((~xΔ1).X, typ, final);
+            Ꮡcheck.updateExprType(xΔ1.X, typ, final);
         } else {
             // The operand types match the result type.
-            Ꮡcheck.updateExprType((~xΔ1).X, typ, final);
-            Ꮡcheck.updateExprType((~xΔ1).Y, typ, final);
+            Ꮡcheck.updateExprType(xΔ1.X, typ, final);
+            Ꮡcheck.updateExprType(xΔ1.Y, typ, final);
         }
         break;
     }
@@ -397,10 +397,9 @@ internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, ΔTyp
         // still must check that it is representable as the specific
         // int type requested (was go.dev/issue/22969). Fall through here.
     }
-    if (old.val != default!) {
+    if (old.val != nil) {
         // If x is a constant, it must be representable as a value of typ.
-        ref var c = ref heap<operand>(out var Ꮡc);
-        c = new operand(old.mode, x, new BasicжΔType(old.typ), old.val, 0);
+        ref var c = ref heap<operand>(new operand(old.mode, x, new BasicжΔType(old.typ), old.val, 0), out var Ꮡc);
         Ꮡcheck.convertUntyped(Ꮡc, typ);
         if (c.mode == invalid) {
             return;
@@ -431,18 +430,18 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || isTyped(x.typ) || !isValid(target)) {
-        return (x.typ, default!, 0);
+        return (x.typ, default, 0);
     }
     // x is untyped
 
     if (isUntyped(target)) {
         // both x and target are untyped
         {
-            var m = maxType(x.typ, target); if (m != default!) {
-                return (m, default!, 0);
+            var m = maxType(x.typ, target); if (m != nil) {
+                return (m, default, 0);
             }
         }
-        return (default!, default!, InvalidUntypedConversion);
+        return (default, default, InvalidUntypedConversion);
     }
 
     var switchᴛ6 = target.Underlying();
@@ -451,7 +450,7 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
         if (x.mode == constant_) {
             var (v, code) = Ꮡcheck.representation(Ꮡx, u);
             if (code != 0) {
-                return (default!, default!, code);
+                return (default, default, code);
             }
             return (target, v, code);
         }
@@ -459,52 +458,55 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
         // result of comparisons (untyped bool), intermediate
         // (delayed-checked) rhs operands of shifts, and as
         // the value nil.
-        var exprᴛ1 = (~x.typ._<ж<Basic>>()).kind;
-        if (exprᴛ1 == UntypedBool) {
+        switch (x.typ._<ж<Basic>>().kind) {
+        case var ᴛ when ᴛ == UntypedBool: {
             if (!isBoolean(target)) {
-                return (default!, default!, InvalidUntypedConversion);
+                return (default, default, InvalidUntypedConversion);
             }
+            break;
         }
-        else if (exprᴛ1 == ΔUntypedInt || exprᴛ1 == UntypedRune || exprᴛ1 == ΔUntypedFloat || exprᴛ1 == ΔUntypedComplex) {
+        case var ᴛ when ᴛ == ΔUntypedInt || ᴛ == UntypedRune || ᴛ == ΔUntypedFloat || ᴛ == ΔUntypedComplex: {
             if (!isNumeric(target)) {
-                return (default!, default!, InvalidUntypedConversion);
+                return (default, default, InvalidUntypedConversion);
             }
+            break;
         }
-        else if (exprᴛ1 == UntypedString) {
+        case var ᴛ when ᴛ == UntypedString: {
             // Non-constant untyped string values are not permitted by the spec and
             // should not occur during normal typechecking passes, but this path is
             // reachable via the AssignableTo API.
             if (!isString(target)) {
-                return (default!, default!, InvalidUntypedConversion);
+                return (default, default, InvalidUntypedConversion);
             }
+            break;
         }
-        else if (exprᴛ1 == UntypedNil) {
+        case var ᴛ when ᴛ == UntypedNil: {
             // Unsafe.Pointer is a basic type that includes nil.
             if (!hasNil(target)) {
-                return (default!, default!, InvalidUntypedConversion);
+                return (default, default, InvalidUntypedConversion);
             }
             // Preserve the type of nil as UntypedNil: see go.dev/issue/13061.
-            return (new BasicжΔType(Typ[UntypedNil]), default!, 0);
+            return (new BasicжΔType(Typ[UntypedNil]), default, 0);
         }
-        else { /* default: */
-            return (default!, default!, InvalidUntypedConversion);
-        }
+        default: {
+            return (default, default, InvalidUntypedConversion);
+        }}
         break;
     }
     case ж<Interface> u: {
         if (isTypeParam(target)) {
             if (!underIs(target, (ΔType uΔ1) => {
-                if (uΔ1 == default!) {
+                if (uΔ1 == nil) {
                     return false;
                 }
                 var (t, _, _) = Ꮡcheck.implicitTypeAndValue(Ꮡx, uΔ1);
-                return t != default!;
+                return t != nil;
             })) {
-                return (default!, default!, InvalidUntypedConversion);
+                return (default, default, InvalidUntypedConversion);
             }
             // keep nil untyped (was bug go.dev/issue/39755)
             if (x.isNil()) {
-                return (new BasicжΔType(Typ[UntypedNil]), default!, 0);
+                return (new BasicжΔType(Typ[UntypedNil]), default, 0);
             }
             break;
         }
@@ -513,13 +515,13 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
         // need the dynamic type for argument checking of say, print
         // functions)
         if (x.isNil()) {
-            return (new BasicжΔType(Typ[UntypedNil]), default!, 0);
+            return (new BasicжΔType(Typ[UntypedNil]), default, 0);
         }
         // cannot assign untyped values to non-empty interfaces
         if (!u.Empty()) {
-            return (default!, default!, InvalidUntypedConversion);
+            return (default, default, InvalidUntypedConversion);
         }
-        return (Default(x.typ), default!, 0);
+        return (Default(x.typ), default, 0);
     }
     case ж<Pointer> _:
     case ж<ΔSignature> _:
@@ -528,16 +530,16 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
     case ж<Chan> _: {
         var u = switchᴛ6;
         if (!x.isNil()) {
-            return (default!, default!, InvalidUntypedConversion);
+            return (default, default, InvalidUntypedConversion);
         }
         // Keep nil untyped - see comment for interfaces, above.
-        return (new BasicжΔType(Typ[UntypedNil]), default!, 0);
+        return (new BasicжΔType(Typ[UntypedNil]), default, 0);
     }
     default: {
         var u = switchᴛ6;
-        return (default!, default!, InvalidUntypedConversion);
+        return (default, default, InvalidUntypedConversion);
     }}
-    return (target, default!, 0);
+    return (target, default, 0);
 }
 
 // If switchCase is true, the operator op is ignored.
@@ -555,7 +557,7 @@ internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
         op = token.EQL;
     }
 
-    var errOp = Ꮡx; // operand for which error is reported, if any
+    var errOp = Ꮡx;       // operand for which error is reported, if any
     @string cause = ""u8; // specific error cause, if any
 
     // spec: "In any comparison, the first operand must be assignable
@@ -576,8 +578,8 @@ internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
 
     // check if comparison is defined for operands
     code = UndefinedOp;
-    var exprᴛ1 = op;
-    if (exprᴛ1 == token.EQL || exprᴛ1 == token.NEQ) {
+    switch (op) {
+    case var ᴛ when ᴛ == token.EQL || ᴛ == token.NEQ: {
         // spec: "The equality operators == and != apply to operands that are comparable."
         switch (ᐧ) {
         case {} when x.isNil() || y.isNil(): {
@@ -608,8 +610,9 @@ internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
             goto ΔError;
             break;
         }}
+        break;
     }
-    else if (exprᴛ1 == token.LSS || exprᴛ1 == token.LEQ || exprᴛ1 == token.GTR || exprᴛ1 == token.GEQ) {
+    case var ᴛ when ᴛ == token.LSS || ᴛ == token.LEQ || ᴛ == token.GTR || ᴛ == token.GEQ: {
         // spec: The ordering operators <, <=, >, and >= apply to operands that are ordered."
         switch (ᐧ) {
         case {} when !allOrdered(x.typ): {
@@ -622,13 +625,15 @@ internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
             goto ΔError;
             break;
         }}
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("unreachable");
-    }
+        break;
+    }}
 
     // comparison is ok
-    if (x.mode == constant_ && y.mode == constant_){
+    if (x.mode == constant_ && y.mode == constant_) {
         x.val = constant.MakeBool(constant.Compare(x.val, op, y.val));
         // The operands are never materialized; no need to update
         // their types.
@@ -650,22 +655,22 @@ internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
 ΔError:
     if (cause == ""u8) {
         // We have an offending operand errOp and possibly an error cause.
-        if (isTypeParam(x.typ) || isTypeParam(y.typ)){
+        if (isTypeParam(x.typ) || isTypeParam(y.typ)) {
             // TODO(gri) should report the specific type causing the problem, if any
             if (!isTypeParam(x.typ)) {
                 errOp = Ꮡy;
             }
-            cause = Ꮡcheck.sprintf("type parameter %s cannot use operator %s"u8, (~errOp).typ, op);
+            cause = Ꮡcheck.sprintf("type parameter %s cannot use operator %s"u8, errOp.typ, op);
         } else {
             // catch-all neither x nor y is a type parameter
-            @string what = compositeKind((~errOp).typ);
+            @string what = compositeKind(errOp.typ);
             if (what == ""u8) {
-                what = Ꮡcheck.sprintf("%s"u8, (~errOp).typ);
+                what = Ꮡcheck.sprintf("%s"u8, errOp.typ);
             }
             cause = Ꮡcheck.sprintf("operator %s not defined on %s"u8, op, what);
         }
     }
-    if (switchCase){
+    if (switchCase) {
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "invalid case %s in switch on %s (%s)"u8, x.expr, y.expr, cause); // error position always at 1st operand
     } else {
         Ꮡcheck.errorf(new operandжpositioner(errOp), code, invalidOp + "%s %s %s (%s)", x.expr, op, y.expr, cause);
@@ -683,7 +688,7 @@ internal static @string incomparableCause(this ж<Checker> Ꮡcheck, ΔType typ)
         return compositeKind(typ) + " can only be compared to nil"u8;
     }}
     // see if we can extract a more specific error
-    return comparableType(typ, true, default!).format(Ꮡcheck);
+    return comparableType(typ, true, default).format(Ꮡcheck);
 }
 
 // If e != nil, it must be the shift expression; it may be nil for non-constant shifts.
@@ -694,12 +699,12 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
 
     // TODO(gri) This function seems overly complex. Revisit.
 
-    constant.Value xval = default!;
+    constant.Value xval = default;
     if (x.mode == constant_) {
         xval = constant.ToInt(x.val);
     }
 
-    if (allInteger(x.typ) || isUntyped(x.typ) && xval != default! && xval.Kind() == constant.Int){
+    if (allInteger(x.typ) || isUntyped(x.typ) && xval != nil && xval.Kind() == constant.Int) {
         // The lhs is of integer type or an untyped constant representable
         // as an integer. Nothing to do.
     } else {
@@ -714,8 +719,8 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
 
     // Check that constants are representable by uint, but do not convert them
     // (see also go.dev/issue/47243).
-    constant.Value yval = default!;
-    if (y.mode == constant_){
+    constant.Value yval = default;
+    if (y.mode == constant_) {
         // Provide a good error message for negative shift counts.
         yval = constant.ToInt(y.val); // consider -1, 1.0, but not -1.1
         if (yval.Kind() == constant.Int && constant.Sign(yval) < 0) {
@@ -896,10 +901,10 @@ internal static void binary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Exp
         // (otherwise we had an error reported elsewhere already)
         if (isValid(x.typ) && isValid(y.typ)) {
             positioner posn = new operandжpositioner(Ꮡx);
-            if (e != default!) {
+            if (e != nil) {
                 posn = new ast_Exprᴠpositioner(e);
             }
-            if (e != default!){
+            if (e != nil) {
                 Ꮡcheck.errorf(posn, MismatchedTypes, invalidOp + "%s (mismatched types %s and %s)", e, x.typ, y.typ);
             } else {
                 Ꮡcheck.errorf(posn, MismatchedTypes, invalidOp + "%s %s= %s (mismatched types %s and %s)", lhs, op, rhs, x.typ, y.typ);
@@ -972,38 +977,38 @@ internal static void matchTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
     // not compatible, we report a type mismatch error.
     bool mayConvert(ж<operand> xΔ1, ж<operand> yΔ1) {
         // If both operands are typed, there's no need for an implicit conversion.
-        if (isTyped((~xΔ1).typ) && isTyped((~yΔ1).typ)) {
+        if (isTyped(xΔ1.typ) && isTyped(yΔ1.typ)) {
             return false;
         }
         // A numeric type can only convert to another numeric type.
-        if (allNumeric((~xΔ1).typ) != allNumeric((~yΔ1).typ)) {
+        if (allNumeric(xΔ1.typ) != allNumeric(yΔ1.typ)) {
             return false;
         }
         // An untyped operand may convert to its default type when paired with an empty interface
         // TODO(gri) This should only matter for comparisons (the only binary operation that is
         //           valid with interfaces), but in that case the assignability check should take
         //           care of the conversion. Verify and possibly eliminate this extra test.
-        if (isNonTypeParamInterface((~xΔ1).typ) || isNonTypeParamInterface((~yΔ1).typ)) {
+        if (isNonTypeParamInterface(xΔ1.typ) || isNonTypeParamInterface(yΔ1.typ)) {
             return true;
         }
         // A boolean type can only convert to another boolean type.
-        if (allBoolean((~xΔ1).typ) != allBoolean((~yΔ1).typ)) {
+        if (allBoolean(xΔ1.typ) != allBoolean(yΔ1.typ)) {
             return false;
         }
         // A string type can only convert to another string type.
-        if (allString((~xΔ1).typ) != allString((~yΔ1).typ)) {
+        if (allString(xΔ1.typ) != allString(yΔ1.typ)) {
             return false;
         }
         // Untyped nil can only convert to a type that has a nil.
         if (xΔ1.isNil()) {
-            return hasNil((~yΔ1).typ);
+            return hasNil(yΔ1.typ);
         }
         if (yΔ1.isNil()) {
-            return hasNil((~xΔ1).typ);
+            return hasNil(xΔ1.typ);
         }
         // An untyped operand cannot convert to a pointer.
         // TODO(gri) generalize to type parameters
-        if (isPointer((~xΔ1).typ) || isPointer((~yΔ1).typ)) {
+        if (isPointer(xΔ1.typ) || isPointer(yΔ1.typ)) {
             return false;
         }
         return true;
@@ -1040,14 +1045,14 @@ partial struct target {
 // newTarget creates a new target for the given type and description.
 // The result is nil if typ is not a signature.
 internal static ж<target> newTarget(ΔType typ, @string desc) {
-    if (typ != default!) {
+    if (typ != nil) {
         {
             var (sig, _) = typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil) {
                 return Ꮡ(new target(sig, desc));
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1060,24 +1065,24 @@ internal static readonly @string exprSˢ = "-- expr %s"u8;
 // If hint != nil, it is the type of a composite literal element.
 // If allowGeneric is set, the operand type may be an uninstantiated
 // parameterized type or function value.
-internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, ΔType hint, bool allowGeneric) {
+internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e, ΔType hint, bool allowGeneric) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
 
-        if ((~check.conf)._Trace) {
+        if (check.conf._Trace) {
             Ꮡcheck.trace(e.Pos(), exprSˢ, e);
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
-                Ꮡcheck.trace(e.Pos(), "=> %s"u8, Ꮡx.OrTypedNil());
+                Ꮡcheck.trace(e.Pos(), "=> %s"u8, x.OrTypedNil());
             }, ref ᒐ);
         }
 
-        exprKind kind = Ꮡcheck.exprInternal(ᏑT, Ꮡx, e, hint);
+        exprKind kind = Ꮡcheck.exprInternal(T, x, e, hint);
 
         if (!allowGeneric) {
-            Ꮡcheck.nonGeneric(ᏑT, Ꮡx);
+            Ꮡcheck.nonGeneric(T, x);
         }
 
         // Here, x is a value, meaning it has a type. If that type is pending, then we have
@@ -1086,12 +1091,12 @@ internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<
         //  type T [unsafe.Sizeof(T{})]int
         //
         // has a cycle T->T which is deemed valid (by decl.go), but which is in fact invalid.
-        Ꮡcheck.pendingType(Ꮡx);
-        check.record(Ꮡx);
+        Ꮡcheck.pendingType(x);
+        check.record(x);
 
         return kind;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -1102,13 +1107,13 @@ internal static readonly @string functionˢ = "function"u8;
 // If x is a generic type, or a generic function whose type arguments cannot be inferred
 // from a non-nil target T, nonGeneric reports an error and invalidates x.mode and x.typ.
 // Otherwise it leaves x alone.
-internal static void nonGeneric(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx) {
+internal static void nonGeneric(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || x.mode == novalue) {
         return;
     }
-    @string what = default!;
+    @string what = default;
     switch (x.typ.type()) {
     case ж<Alias> _:
     case ж<Named> _: {
@@ -1119,9 +1124,9 @@ internal static void nonGeneric(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<o
         break;
     }
     case ж<ΔSignature> t: {
-        if ((~t).tparams != nil) {
-            if (enableReverseTypeInference && ᏑT != nil) {
-                Ꮡcheck.funcInst(ᏑT, x.Pos(), Ꮡx, nil, true);
+        if (t.tparams != nil) {
+            if (enableReverseTypeInference && T != nil) {
+                Ꮡcheck.funcInst(T, x.Pos(), Ꮡx, nil, true);
                 return;
             }
             what = functionˢ;
@@ -1206,7 +1211,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
     }
     case ж<ast.ParenExpr> eΔ1: {
         // type inference doesn't go past parentheses (target type T = nil)
-        exprKind kind = Ꮡcheck.rawExpr(nil, Ꮡx, (~eΔ1).X, default!, false);
+        exprKind kind = Ꮡcheck.rawExpr(nil, Ꮡx, eΔ1.X, default, false);
         x.expr = new ast.ParenExprжExpr(eΔ1);
         return kind;
     }
@@ -1220,7 +1225,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
         var ix = unpackIndexedExpr(eΔ1);
         if (Ꮡcheck.indexExpr(Ꮡx, ix)) {
             if (!enableReverseTypeInference) {
-                ᏑT = default!; T = ref ᏑT.DerefOrNull();
+                ᏑT = default; T = ref ᏑT.DerefOrNull();
             }
             Ꮡcheck.funcInst(ᏑT, eΔ1.Pos(), Ꮡx, ix, true);
         }
@@ -1237,12 +1242,12 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
         break;
     }
     case ж<ast.TypeAssertExpr> eΔ1: {
-        Ꮡcheck.expr(nil, Ꮡx, (~eΔ1).X);
+        Ꮡcheck.expr(nil, Ꮡx, eΔ1.X);
         if (x.mode == invalid) {
             goto ΔError;
         }
         // x.(type) expressions are handled explicitly in type switches
-        if ((~eΔ1).Type == default!) {
+        if (eΔ1.Type == nil) {
             // Don't use InvalidSyntaxTree because this can occur in the AST produced by
             // go/parser.
             Ꮡcheck.error(new ast_TypeAssertExprжpositioner(eΔ1), BadTypeKeyword, useOfTypeOutsideTypeˢ);
@@ -1258,7 +1263,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
                 goto ΔError;
             }
         }
-        var TΔ1 = Ꮡcheck.varType((~eΔ1).Type);
+        var TΔ1 = Ꮡcheck.varType(eΔ1.Type);
         if (!isValid(TΔ1)) {
             goto ΔError;
         }
@@ -1271,16 +1276,18 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
         return Ꮡcheck.callExpr(Ꮡx, eΔ1);
     }
     case ж<ast.StarExpr> eΔ1: {
-        Ꮡcheck.exprOrType(Ꮡx, (~eΔ1).X, false);
-        var exprᴛ1 = x.mode;
-        if (exprᴛ1 == invalid) {
+        Ꮡcheck.exprOrType(Ꮡx, eΔ1.X, false);
+        switch (x.mode) {
+        case var ᴛ when ᴛ == invalid: {
             goto ΔError;
+            break;
         }
-        else if (exprᴛ1 == typexpr) {
-            Ꮡcheck.validVarType((~eΔ1).X, x.typ);
+        case var ᴛ when ᴛ == typexpr: {
+            Ꮡcheck.validVarType(eΔ1.X, x.typ);
             x.typ = new PointerжΔType(Ꮡ(new Pointer(@base: x.typ)));
+            break;
         }
-        else { /* default: */
+        default: {
             ref var @base = ref heap<ΔType>(out var Ꮡbase);
             if (!underIs(x.typ, (ΔType u) => {
                 var (p, _) = u._<ж<Pointer>>(ᐧ);
@@ -1288,18 +1295,19 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidIndirection, invalidOp + "cannot indirect %s", Ꮡx.OrTypedNil());
                     return false;
                 }
-                if (Ꮡbase.ValueSlot != default! && !Identical((~p).@base, Ꮡbase.ValueSlot)) {
+                if (Ꮡbase.ValueSlot != nil && !Identical(p.@base, Ꮡbase.ValueSlot)) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidIndirection, invalidOp + "pointers of %s must have identical base types", Ꮡx.OrTypedNil());
                     return false;
                 }
-                Ꮡbase.ValueSlot = p.Value.@base;
+                Ꮡbase.ValueSlot = p.@base;
                 return true;
             })) {
                 goto ΔError;
             }
             x.mode = variable;
             x.typ = @base;
-        }
+            break;
+        }}
         break;
     }
     case ж<ast.UnaryExpr> eΔ1: {
@@ -1307,14 +1315,14 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
         if (x.mode == invalid) {
             goto ΔError;
         }
-        if ((~eΔ1).Op == token.ARROW) {
+        if (eΔ1.Op == token.ARROW) {
             x.expr = new ast.UnaryExprжExpr(eΔ1);
             return statement; // receive operations may appear in statement context
         }
         break;
     }
     case ж<ast.BinaryExpr> eΔ1: {
-        Ꮡcheck.binary(Ꮡx, new ast.BinaryExprжExpr(eΔ1), (~eΔ1).X, (~eΔ1).Y, (~eΔ1).Op, (~eΔ1).OpPos);
+        Ꮡcheck.binary(Ꮡx, new ast.BinaryExprжExpr(eΔ1), eΔ1.X, eΔ1.Y, eΔ1.Op, eΔ1.OpPos);
         if (x.mode == invalid) {
             goto ΔError;
         }
@@ -1431,17 +1439,17 @@ internal static void typeAssertion(this ж<Checker> Ꮡcheck, ast.Expr e, ж<ope
 // a function call, T is used to infer the type arguments for e.
 // The result must be a single value.
 // If an error occurred, x.mode is set to invalid.
-internal static void expr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e) {
-    Ꮡcheck.rawExpr(ᏑT, Ꮡx, e, default!, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
-    Ꮡcheck.singleValue(Ꮡx);
+internal static void expr(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e) {
+    Ꮡcheck.rawExpr(T, x, e, default, false);
+    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltinᴛ)) | (nuint)(1 << (int)(typexpr))));
+    Ꮡcheck.singleValue(x);
 }
 
 // genericExpr is like expr but the result may also be generic.
-internal static void genericExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e) {
-    Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, true);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
-    Ꮡcheck.singleValue(Ꮡx);
+internal static void genericExpr(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e) {
+    Ꮡcheck.rawExpr(nil, x, e, default, true);
+    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltinᴛ)) | (nuint)(1 << (int)(typexpr))));
+    Ꮡcheck.singleValue(x);
 }
 
 // multiExpr typechecks e and returns its value (or values) in list.
@@ -1450,18 +1458,18 @@ internal static void genericExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, as
 // of e, and an untyped bool value or an error value, respectively.
 // If an error occurred, list[0] is not valid.
 internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checker> Ꮡcheck, ast.Expr e, bool allowCommaOk) {
-    slice<ж<operand>> list = default!;
-    bool commaOk = default!;
+    slice<ж<operand>> list = default;
+    bool commaOk = default;
 
     ref var x = ref heap(new operand(), out var Ꮡx);
-    Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.rawExpr(nil, Ꮡx, e, default, false);
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltinᴛ)) | (nuint)(1 << (int)(typexpr))));
 
     {
         var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
             // multiple values
             list = new slice<ж<operand>>(t.Len());
-            foreach (var (i, v) in (~t).vars) {
+            foreach (var (i, v) in t.vars) {
                 list[i] = Ꮡ(new operand(mode: value, expr: e, typ: (~v).typ));
             }
             return (list, commaOk);
@@ -1469,11 +1477,11 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
     }
 
     // exactly one (possibly invalid or comma-ok) value
-    list = new ж<operand>[]{Ꮡx}.slice();
+    list = slice<ж<operand>>([Ꮡx]);
     if (allowCommaOk && (x.mode == mapindex || x.mode == commaok || x.mode == commaerr)) {
         var x2 = Ꮡ(new operand(mode: value, expr: e, typ: new BasicжΔType(Typ[UntypedBool])));
         if (x.mode == commaerr) {
-            x2.Value.typ = universeError;
+            x2.typ = universeError;
         }
         list = append(list, x2);
         commaOk = true;
@@ -1485,21 +1493,21 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
 // exprWithHint typechecks expression e and initializes x with the expression value;
 // hint is the type of a composite literal element.
 // If an error occurred, x.mode is set to invalid.
-internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ΔType hint) {
-    assert(hint != default!);
-    Ꮡcheck.rawExpr(nil, Ꮡx, e, hint, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
-    Ꮡcheck.singleValue(Ꮡx);
+internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, ΔType hint) {
+    assert(hint != nil);
+    Ꮡcheck.rawExpr(nil, x, e, hint, false);
+    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltinᴛ)) | (nuint)(1 << (int)(typexpr))));
+    Ꮡcheck.singleValue(x);
 }
 
 // exprOrType typechecks expression or type e and initializes x with the expression value or type.
 // If allowGeneric is set, the operand type may be an uninstantiated parameterized type or function
 // value.
 // If an error occurred, x.mode is set to invalid.
-internal static void exprOrType(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, bool allowGeneric) {
-    Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, allowGeneric);
-    Ꮡcheck.exclude(Ꮡx, (nuint)1 << (int)(byte)(novalue));
-    Ꮡcheck.singleValue(Ꮡx);
+internal static void exprOrType(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, bool allowGeneric) {
+    Ꮡcheck.rawExpr(nil, x, e, default, allowGeneric);
+    Ꮡcheck.exclude(x, (nuint)1 << (int)(novalue));
+    Ꮡcheck.singleValue(x);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1513,29 +1521,33 @@ internal static readonly @string sIsNotAnExpressionˢ = "%s is not an expression
 internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    if ((modeset & (((nuint)1).Lsh((uint64)(byte)(x.mode)))) != 0) {
-        @string msg = default!;
-        errors.Code code = default!;
-        var exprᴛ1 = x.mode;
-        if (exprᴛ1 == novalue) {
-            if ((modeset & (nuint)((nuint)1 << (int)(byte)(typexpr))) != 0){
+    if ((modeset & (((nuint)1).Lsh((uint64)(x.mode)))) != 0) {
+        @string msg = default;
+        errors.Code code = default;
+        switch (x.mode) {
+        case var ᴛ when ᴛ == novalue: {
+            if ((modeset & (nuint)((nuint)1 << (int)(typexpr))) != 0) {
                 msg = sUsedAsValueˢ;
             } else {
                 msg = sUsedAsValueOrTypeˢ;
             }
             code = TooManyValues;
+            break;
         }
-        else if (exprᴛ1 == Δbuiltinᴛ) {
+        case var ᴛ when ᴛ == Δbuiltinᴛ: {
             msg = sMustBeCalledˢ;
             code = UncalledBuiltin;
+            break;
         }
-        else if (exprᴛ1 == typexpr) {
+        case var ᴛ when ᴛ == typexpr: {
             msg = sIsNotAnExpressionˢ;
             code = NotAnExpr;
+            break;
         }
-        else { /* default: */
+        default: {
             throw panic("unreachable");
-        }
+            break;
+        }}
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, msg, Ꮡx.OrTypedNil());
         x.mode = invalid;
     }

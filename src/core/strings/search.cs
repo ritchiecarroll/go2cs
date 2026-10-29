@@ -54,14 +54,14 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
 
     // Build bad character table.
     // Bytes not in the pattern can skip one pattern's length.
-    foreach (var i in range((~f).badCharSkip)) {
-        f.Value.badCharSkip[i] = len(pattern);
+    foreach (var i in range(f.badCharSkip)) {
+        f.badCharSkip[i] = len(pattern);
     }
     // The loop condition is < instead of <= so that the last byte does not
     // have a zero distance to itself. Finding this byte out of place implies
     // that it is not in the last position.
     for (nint i = 0; i < last; i++) {
-        f.Value.badCharSkip[pattern[i]] = last - i;
+        f.badCharSkip[pattern[i]] = last - i;
     }
 
     // Build good suffix table.
@@ -73,14 +73,14 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
             lastPrefix = i + 1;
         }
         // lastPrefix is the shift, and (last-i) is len(suffix).
-        f.Value.goodSuffixSkip[i] = lastPrefix + last - i;
+        f.goodSuffixSkip[i] = lastPrefix + last - i;
     }
     // Second pass: find repeats of pattern's suffix starting from the front.
     for (nint i = 0; i < last; i++) {
         nint lenSuffix = longestCommonSuffix(pattern, pattern.slice(1, i + 1));
         if (pattern[i - lenSuffix] != pattern[last - lenSuffix]) {
             // (last-i) is the shift, and lenSuffix is len(suffix).
-            f.Value.goodSuffixSkip[last - lenSuffix] = lenSuffix + last - i;
+            f.goodSuffixSkip[last - lenSuffix] = lenSuffix + last - i;
         }
     }
 
@@ -88,7 +88,7 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
 }
 
 internal static nint /*i*/ longestCommonSuffix(@string a, @string b) {
-    nint i = default!;
+    nint i = default;
 
     for (; i < len(a) && i < len(b); i++) {
         if (a[len(a) - 1 - i] != b[len(b) - 1 - i]) {

@@ -39,10 +39,10 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
         if (d.timer != nil && !d.timer.Stop()) {
             ᐸꟷ(d.cancel); // Wait for the timer callback to finish and close cancel
         }
-        d.timer = default!;
+        d.timer = default;
 
         // Time is zero, then there is no deadline.
-        var closed = isClosedChan(d.cancel.WithDirection(GoChanDir.Recv));
+        var closed = isClosedChan(d.cancel.AsRecvOnly());
         if (t.IsZero()) {
             if (closed) {
                 d.cancel = new channel<EmptyStruct>(0);
@@ -83,7 +83,7 @@ internal static channel<EmptyStruct> wait(this ж<pipeDeadline> Ꮡd) {
         ᒐd1 = true;
         return d.cancel;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡd.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -160,16 +160,16 @@ public static (Conn, Conn) Pipe() {
 }
 
 internal static ΔAddr LocalAddr(this ref pipe _) {
-    return new pipeAddr(nil);
+    return new pipeAddr();
 }
 
 internal static ΔAddr RemoteAddr(this ref pipe _) {
-    return new pipeAddr(nil);
+    return new pipeAddr();
 }
 
 internal static (nint, error) Read(this ж<pipe> Ꮡp, slice<byte> b) {
     var (n, err) = Ꮡp.read(b);
-    if (err != default! && !AreEqual(err, Δio.EOF) && !AreEqual(err, Δio.ErrClosedPipe)) {
+    if (err != nil && !AreEqual(err, Δio.EOF) && !AreEqual(err, Δio.ErrClosedPipe)) {
         err = new OpErrorжerror(Ꮡ(new OpError(Op: "read"u8, Net: "pipe"u8, Err: err)));
     }
     return (n, err);
@@ -179,13 +179,13 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
-    case {} when isClosedChan(p.localDone.WithDirection(GoChanDir.Recv)): {
+    case {} when isClosedChan(p.localDone.AsRecvOnly()): {
         return (0, Δio.ErrClosedPipe);
     }
     case {} when isClosedChan(p.remoteDone): {
         return (0, Δio.EOF);
     }
-    case {} when isClosedChan(Ꮡp.of(pipe.ᏑreadDeadline).wait().WithDirection(GoChanDir.Recv)): {
+    case {} when isClosedChan(Ꮡp.of(pipe.ᏑreadDeadline).wait().AsRecvOnly()): {
         return (0, os.ErrDeadlineExceeded);
     }}
 
@@ -197,7 +197,7 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     case 0 when selᴛ21.ꟷᐳ(out var bw): {
         nint nr = copy(b, bw);
         p.rdTx.ᐸꟷ(nr);
-        return (nr, default!);
+        return (nr, default);
     }
     case 1 when selᴛ22.ꟷᐳ(out _): {
         return (0, Δio.ErrClosedPipe);
@@ -208,32 +208,32 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     case 3 when selᴛ24.ꟷᐳ(out _): {
         return (0, os.ErrDeadlineExceeded);
     }}
-    return default!;
+    return default;
 }
 
 internal static (nint, error) Write(this ж<pipe> Ꮡp, slice<byte> b) {
     var (n, err) = Ꮡp.write(b);
-    if (err != default! && !AreEqual(err, Δio.ErrClosedPipe)) {
+    if (err != nil && !AreEqual(err, Δio.ErrClosedPipe)) {
         err = new OpErrorжerror(Ꮡ(new OpError(Op: "write"u8, Net: "pipe"u8, Err: err)));
     }
     return (n, err);
 }
 
 internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
 
         switch (ᐧ) {
-        case {} when isClosedChan(p.localDone.WithDirection(GoChanDir.Recv)): {
+        case {} when isClosedChan(p.localDone.AsRecvOnly()): {
             (n, err) = (0, Δio.ErrClosedPipe); goto ᒐdone;
         }
         case {} when isClosedChan(p.remoteDone): {
             (n, err) = (0, Δio.ErrClosedPipe); goto ᒐdone;
         }
-        case {} when isClosedChan(Ꮡp.of(pipe.ᏑwriteDeadline).wait().WithDirection(GoChanDir.Recv)): {
+        case {} when isClosedChan(Ꮡp.of(pipe.ᏑwriteDeadline).wait().AsRecvOnly()): {
             (n, err) = (0, os.ErrDeadlineExceeded); goto ᒐdone;
         }}
 
@@ -261,7 +261,7 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
                 (n, err) = (n, os.ErrDeadlineExceeded); goto ᒐdone;
             }}
         }
-        (n, err) = (n, default!);
+        (n, err) = (n, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -271,39 +271,39 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
 internal static error SetDeadline(this ж<pipe> Ꮡp, time.Time t) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    if (isClosedChan(p.localDone.WithDirection(GoChanDir.Recv)) || isClosedChan(p.remoteDone)) {
+    if (isClosedChan(p.localDone.AsRecvOnly()) || isClosedChan(p.remoteDone)) {
         return Δio.ErrClosedPipe;
     }
     Ꮡp.of(pipe.ᏑreadDeadline).set(t);
     Ꮡp.of(pipe.ᏑwriteDeadline).set(t);
-    return default!;
+    return default;
 }
 
 internal static error SetReadDeadline(this ж<pipe> Ꮡp, time.Time t) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    if (isClosedChan(p.localDone.WithDirection(GoChanDir.Recv)) || isClosedChan(p.remoteDone)) {
+    if (isClosedChan(p.localDone.AsRecvOnly()) || isClosedChan(p.remoteDone)) {
         return Δio.ErrClosedPipe;
     }
     Ꮡp.of(pipe.ᏑreadDeadline).set(t);
-    return default!;
+    return default;
 }
 
 internal static error SetWriteDeadline(this ж<pipe> Ꮡp, time.Time t) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    if (isClosedChan(p.localDone.WithDirection(GoChanDir.Recv)) || isClosedChan(p.remoteDone)) {
+    if (isClosedChan(p.localDone.AsRecvOnly()) || isClosedChan(p.remoteDone)) {
         return Δio.ErrClosedPipe;
     }
     Ꮡp.of(pipe.ᏑwriteDeadline).set(t);
-    return default!;
+    return default;
 }
 
 internal static error Close(this ж<pipe> Ꮡp) {
     Ꮡp.of(pipe.Ꮡonce).Do(() => {
         builtin.close(Ꮡp.Value.localDone);
     });
-    return default!;
+    return default;
 }
 
 } // end net_package

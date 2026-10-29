@@ -162,9 +162,9 @@ public partial struct methodType {
 }
 
 public partial struct service {
-    internal @string name;                // name of service
-    internal reflectꓸValue rcvr;          // receiver of methods for the service
-    internal reflectꓸType typ;           // type of the receiver
+    internal @string name;                       // name of service
+    internal reflectꓸValue rcvr;                 // receiver of methods for the service
+    internal reflectꓸType typ;                   // type of the receiver
     internal map<@string, ж<methodType>> method; // registered methods
 }
 
@@ -172,25 +172,25 @@ public partial struct service {
 // but documented here as an aid to debugging, such as when analyzing
 // network traffic.
 partial struct Request {
-    public @string ServiceMethod;  // format: "Service.Method"
-    public uint64 Seq;   // sequence number chosen by client
-    internal ж<Request> next; // for free list in Server
+    public @string ServiceMethod; // format: "Service.Method"
+    public uint64 Seq;            // sequence number chosen by client
+    internal ж<Request> next;     // for free list in Server
 }
 
 // Response is a header written before every RPC return. It is used internally
 // but documented here as an aid to debugging, such as when analyzing
 // network traffic.
 partial struct Response {
-    public @string ServiceMethod;   // echoes that of the Request
-    public uint64 Seq;    // echoes that of the request
-    public @string Error;   // error, if any.
-    internal ж<Response> next; // for free list in Server
+    public @string ServiceMethod; // echoes that of the Request
+    public uint64 Seq;            // echoes that of the request
+    public @string Error;         // error, if any.
+    internal ж<Response> next;    // for free list in Server
 }
 
 // Server represents an RPC Server.
 partial struct Server {
-    internal sync.Map serviceMap;   // map[string]*service
-    internal sync.Mutex reqLock; // protects freeReq
+    internal sync.Map serviceMap; // map[string]*service
+    internal sync.Mutex reqLock;  // protects freeReq
     internal ж<Request> freeReq;
     internal sync.Mutex respLock; // protects freeResp
     internal ж<Response> freeResp;
@@ -198,7 +198,7 @@ partial struct Server {
 
 // NewServer returns a new [Server].
 public static ж<Server> NewServer() {
-    return Ꮡ(new Server(nil));
+    return Ꮡ(new Server());
 }
 
 // DefaultServer is the default instance of [*Server].
@@ -241,14 +241,14 @@ internal const bool logRegisterError = false;
 
 internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name, bool useName) {
     var s = @new<service>();
-    s.Value.typ = reflect.TypeOf(rcvr);
-    s.Value.rcvr = reflect.ValueOf(rcvr);
+    s.typ = reflect.TypeOf(rcvr);
+    s.rcvr = reflect.ValueOf(rcvr);
     @string sname = name;
     if (!useName) {
-        sname = reflect.Indirect((~s).rcvr).Type().Name();
+        sname = reflect.Indirect(s.rcvr).Type().Name();
     }
     if (sname == ""u8) {
-        @string sΔ1 = "rpc.Register: no service name for type "u8 + (~s).typ.String();
+        @string sΔ1 = "rpc.Register: no service name for type "u8 + s.typ.String();
         log.Print(sΔ1);
         return errors.New(sΔ1);
     }
@@ -257,17 +257,17 @@ internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name
         log.Print(sΔ2);
         return errors.New(sΔ2);
     }
-    s.Value.name = sname;
+    s.name = sname;
 
     // Install the methods
-    s.Value.method = suitableMethods((~s).typ, logRegisterError);
+    s.method = suitableMethods(s.typ, logRegisterError);
 
-    if (len((~s).method) == 0) {
+    if (len(s.method) == 0) {
         @string str = ""u8;
 
         // To help the user, see if a pointer receiver would work.
-        var method = suitableMethods(reflect.PointerTo((~s).typ), false);
-        if (len(method) != 0){
+        var method = suitableMethods(reflect.PointerTo(s.typ), false);
+        if (len(method) != 0) {
             str = "rpc.Register: type "u8 + sname + " has no exported methods of suitable type (hint: pass a pointer to value of that type)"u8;
         } else {
             str = "rpc.Register: type "u8 + sname + " has no exported methods of suitable type"u8;
@@ -281,7 +281,7 @@ internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name
             return errors.New("rpc: service already defined: "u8 + sname);
         }
     }
-    return default!;
+    return default;
 }
 
 // suitableMethods returns suitable Rpc methods of typ. It will log
@@ -289,8 +289,7 @@ internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name
 internal static map<@string, ж<methodType>> suitableMethods(reflectꓸType typ, bool logErr) {
     var methods = new map<@string, ж<methodType>>();
     for (nint m = 0; m < typ.NumMethod(); m++) {
-        ref var method = ref heap<reflectꓸMethod>(out var Ꮡmethod);
-        method = typ.Method(m);
+        ref var method = ref heap<reflectꓸMethod>(typ.Method(m), out var Ꮡmethod);
         var mtype = method.Type;
         @string mname = method.Name;
         // Method must be exported.
@@ -356,28 +355,28 @@ internal static EmptyStruct invalidRequest = new EmptyStruct();
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object rpcWritingResponseˢ = (@string)"rpc: writing response:"u8;
 
-internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> Ꮡsending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) {
+internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> sending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var resp = Ꮡserver.getResponse();
     // Encode the response header
-    resp.Value.ServiceMethod = req.ServiceMethod;
+    resp.ServiceMethod = req.ServiceMethod;
     if (errmsg != ""u8) {
-        resp.Value.Error = errmsg;
+        resp.Error = errmsg;
         reply = invalidRequest;
     }
-    resp.Value.Seq = req.Seq;
-    Ꮡsending.Lock();
+    resp.Seq = req.Seq;
+    sending.Lock();
     var err = codec.WriteResponse(resp, reply);
-    if (debugLog && err != default!) {
+    if (debugLog && err != nil) {
         log.Println(rpcWritingResponseˢ, err);
     }
-    Ꮡsending.Unlock();
+    sending.Unlock();
     Ꮡserver.freeResponse(resp);
 }
 
 public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) {
-    nuint n = default!;
+    nuint n = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
     Ꮡm.of(methodType.ᏑMutex).Lock();
@@ -386,29 +385,29 @@ public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) {
     return n;
 }
 
-internal static void call(this ж<service> Ꮡs, ж<Server> Ꮡserver, ж<sync.Mutex> Ꮡsending, ж<sync.WaitGroup> Ꮡwg, ж<methodType> Ꮡmtype, ж<Request> Ꮡreq, reflectꓸValue argv, reflectꓸValue replyv, ServerCodec codec) {
+internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mutex> sending, ж<sync.WaitGroup> wg, ж<methodType> Ꮡmtype, ж<Request> req, reflectꓸValue argv, reflectꓸValue replyv, ServerCodec codec) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
         ref var mtype = ref Ꮡmtype.DerefOrNull();
 
-        if (Ꮡwg != nil) {
-            defer(Ꮡwg.Done, ref ᒐ);
+        if (wg != nil) {
+            defer(wg.Done, ref ᒐ);
         }
         Ꮡmtype.of(methodType.ᏑMutex).Lock();
         mtype.numCalls++;
         Ꮡmtype.of(methodType.ᏑMutex).Unlock();
         var function = mtype.method.Func;
         // Invoke the method, providing a new value for the reply.
-        var returnValues = function.Call(new reflectꓸValue[]{s.rcvr, argv, replyv}.slice());
+        var returnValues = function.Call(slice<reflectꓸValue>([s.rcvr, argv, replyv]));
         // The return value for the method is an error.
         var errInter = returnValues[0].Interface();
         @string errmsg = ""u8;
-        if (errInter != default!) {
+        if (errInter != nil) {
             errmsg = errInter._<error>().Error();
         }
-        Ꮡserver.sendResponse(Ꮡsending, Ꮡreq, replyv.Interface(), codec, errmsg);
-        Ꮡserver.freeRequest(Ꮡreq);
+        server.sendResponse(sending, req, replyv.Interface(), codec, errmsg);
+        server.freeRequest(req);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -422,8 +421,8 @@ partial struct gobServerCodec {
     internal bool closed;
 }
 
-internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> Ꮡr) {
-    return c.dec.Decode(Ꮡr.OrTypedNil());
+internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> r) {
+    return c.dec.Decode(r.OrTypedNil());
 }
 
 internal static error ReadRequestBody(this ref gobServerCodec c, any body) {
@@ -434,12 +433,12 @@ internal static error ReadRequestBody(this ref gobServerCodec c, any body) {
 internal static readonly object rpcGobErrorEncodingˢ = (@string)"rpc: gob error encoding response:"u8;
 internal static readonly object rpcGobErrorEncodingBodyˢ = (@string)"rpc: gob error encoding body:"u8;
 
-internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> Ꮡr, any body) {
-    error err = default!;
+internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> r, any body) {
+    error err = default;
 
     {
-        err = c.enc.Encode(Ꮡr.OrTypedNil()); if (err != default!) {
-            if (c.encBuf.Flush() == default!) {
+        err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
+            if (c.encBuf.Flush() == nil) {
                 // Gob couldn't encode the header. Should not happen, so if it does,
                 // shut down the connection to signal that the connection is broken.
                 log.Println(rpcGobErrorEncodingˢ, err);
@@ -449,8 +448,8 @@ internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Respon
         }
     }
     {
-        err = c.enc.Encode(body); if (err != default!) {
-            if (c.encBuf.Flush() == default!) {
+        err = c.enc.Encode(body); if (err != nil) {
+            if (c.encBuf.Flush() == nil) {
                 // Was a gob problem encoding the body but the header has been written.
                 // Shut down the connection to signal that the connection is broken.
                 log.Println(rpcGobErrorEncodingBodyˢ, err);
@@ -465,7 +464,7 @@ internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Respon
 internal static error Close(this ref gobServerCodec c) {
     if (c.closed) {
         // Only call c.rwc.Close once; otherwise the semantics are undefined.
-        return default!;
+        return default;
     }
     c.closed = true;
     return c.rwc.Close();
@@ -496,11 +495,11 @@ internal static readonly object rpcˢ = (@string)"rpc:"u8;
 public static partial void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) {
     var sending = @new<sync.Mutex>();
     var wg = @new<sync.WaitGroup>();
-    while (ᐧ) {
+    for (;;) {
         ref var argv = ref heap<reflectꓸValue>(out var Ꮡargv);
         ref var replyv = ref heap<reflectꓸValue>(out var Ꮡreplyv);
         (var service, var mtype, var req, argv, replyv, var keepReading, var err) = Ꮡserver.readRequest(codec);
-        if (err != default!) {
+        if (err != nil) {
             if (debugLog && !AreEqual(err, io.EOF)) {
                 log.Println(rpcˢ, err);
             }
@@ -529,7 +528,7 @@ public static partial void ServeCodec(this ж<Server> Ꮡserver, ServerCodec cod
 public static error ServeRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
     var sending = @new<sync.Mutex>();
     var (service, mtype, req, argv, replyv, keepReading, err) = Ꮡserver.readRequest(codec);
-    if (err != default!) {
+    if (err != nil) {
         if (!keepReading) {
             return err;
         }
@@ -541,7 +540,7 @@ public static error ServeRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
         return err;
     }
     service.call(Ꮡserver, sending, nil, mtype, req, argv, replyv, codec);
-    return default!;
+    return default;
 }
 
 internal static ж<Request> getRequest(this ж<Server> Ꮡserver) {
@@ -549,11 +548,11 @@ internal static ж<Request> getRequest(this ж<Server> Ꮡserver) {
 
     server.reqLock.Lock();
     var req = server.freeReq;
-    if (req == nil){
+    if (req == nil) {
         req = @new<Request>();
     } else {
-        server.freeReq = req.Value.next;
-        req.Value = new Request(nil);
+        server.freeReq = req.next;
+        req.Value = new Request();
     }
     server.reqLock.Unlock();
     return req;
@@ -574,11 +573,11 @@ internal static ж<Response> getResponse(this ж<Server> Ꮡserver) {
 
     server.respLock.Lock();
     var resp = server.freeResp;
-    if (resp == nil){
+    if (resp == nil) {
         resp = @new<Response>();
     } else {
-        server.freeResp = resp.Value.next;
-        resp.Value = new Response(nil);
+        server.freeResp = resp.next;
+        resp.Value = new Response();
     }
     server.respLock.Unlock();
     return resp;
@@ -595,35 +594,35 @@ internal static void freeResponse(this ж<Server> Ꮡserver, ж<Response> Ꮡres
 }
 
 internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, reflectꓸValue argv, reflectꓸValue replyv, bool keepReading, error err) readRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
-    ж<service> service = default!;
-    ж<methodType> mtype = default!;
-    ж<Request> req = default!;
+    ж<service> service = default;
+    ж<methodType> mtype = default;
+    ж<Request> req = default;
     reflectꓸValue argv = new(nil);
     reflectꓸValue replyv = new(nil);
-    bool keepReading = default!;
-    error err = default!;
+    bool keepReading = default;
+    error err = default;
 
     (service, mtype, req, keepReading, err) = Ꮡserver.readRequestHeader(codec);
-    if (err != default!) {
+    if (err != nil) {
         if (!keepReading) {
             return (service, mtype, req, argv, replyv, keepReading, err);
         }
         // discard body
-        codec.ReadRequestBody(default!);
+        codec.ReadRequestBody(default);
         return (service, mtype, req, argv, replyv, keepReading, err);
     }
 
     // Decode the argument value.
     var argIsValue = false; // if true, need to indirect before calling.
-    if ((~mtype).ArgType.Kind() == reflect.ΔPointer){
-        argv = reflect.New((~mtype).ArgType.Elem());
+    if (mtype.ArgType.Kind() == reflect.ΔPointer) {
+        argv = reflect.New(mtype.ArgType.Elem());
     } else {
-        argv = reflect.New((~mtype).ArgType);
+        argv = reflect.New(mtype.ArgType);
         argIsValue = true;
     }
     // argv guaranteed to be a pointer now.
     {
-        err = codec.ReadRequestBody(argv.Interface()); if (err != default!) {
+        err = codec.ReadRequestBody(argv.Interface()); if (err != nil) {
             return (service, mtype, req, argv, replyv, keepReading, err);
         }
     }
@@ -631,31 +630,33 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
         argv = argv.Elem();
     }
 
-    replyv = reflect.New((~mtype).ReplyType.Elem());
+    replyv = reflect.New(mtype.ReplyType.Elem());
 
-    var exprᴛ1 = (~mtype).ReplyType.Elem().Kind();
-    if (exprᴛ1 == reflect.Map) {
-        replyv.Elem().Set(reflect.MakeMap((~mtype).ReplyType.Elem()));
+    switch (mtype.ReplyType.Elem().Kind()) {
+    case var ᴛ when ᴛ == reflect.Map: {
+        replyv.Elem().Set(reflect.MakeMap(mtype.ReplyType.Elem()));
+        break;
     }
-    else if (exprᴛ1 == reflect.ΔSlice) {
-        replyv.Elem().Set(reflect.MakeSlice((~mtype).ReplyType.Elem(), 0, 0));
-    }
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
+        replyv.Elem().Set(reflect.MakeSlice(mtype.ReplyType.Elem(), 0, 0));
+        break;
+    }}
     return (service, mtype, req, argv, replyv, keepReading, err);
 }
 
 internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool keepReading, error err) readRequestHeader(this ж<Server> Ꮡserver, ServerCodec codec) {
-    ж<service> svc = default!;
-    ж<methodType> mtype = default!;
-    ж<Request> req = default!;
-    bool keepReading = default!;
-    error err = default!;
+    ж<service> svc = default;
+    ж<methodType> mtype = default;
+    ж<Request> req = default;
+    bool keepReading = default;
+    error err = default;
     ref var server = ref Ꮡserver.DerefOrNull();
 
     // Grab the request header.
     req = Ꮡserver.getRequest();
     err = codec.ReadRequestHeader(req);
-    if (err != default!) {
-        req = default!;
+    if (err != nil) {
+        req = default;
         if (AreEqual(err, io.EOF) || AreEqual(err, io.ErrUnexpectedEOF)) {
             return (svc, mtype, req, keepReading, err);
         }
@@ -667,24 +668,24 @@ internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool ke
     // we can still recover and move on to the next request.
     keepReading = true;
 
-    nint dot = strings.LastIndex((~req).ServiceMethod, "."u8);
+    nint dot = strings.LastIndex(req.ServiceMethod, "."u8);
     if (dot < 0) {
-        err = errors.New("rpc: service/method request ill-formed: "u8 + (~req).ServiceMethod);
+        err = errors.New("rpc: service/method request ill-formed: "u8 + req.ServiceMethod);
         return (svc, mtype, req, keepReading, err);
     }
-    @string serviceName = (~req).ServiceMethod.slice(0, dot);
-    @string methodName = (~req).ServiceMethod.slice(dot + 1);
+    @string serviceName = req.ServiceMethod.slice(0, dot);
+    @string methodName = req.ServiceMethod.slice(dot + 1);
 
     // Look up the request.
     var (svci, ok) = Ꮡserver.of(Server.ᏑserviceMap).Load(serviceName);
     if (!ok) {
-        err = errors.New("rpc: can't find service "u8 + (~req).ServiceMethod);
+        err = errors.New("rpc: can't find service "u8 + req.ServiceMethod);
         return (svc, mtype, req, keepReading, err);
     }
     svc = svci._<ж<service>>();
-    mtype = (~svc).method[methodName];
+    mtype = svc.method[methodName];
     if (mtype == nil) {
-        err = errors.New("rpc: can't find method "u8 + (~req).ServiceMethod);
+        err = errors.New("rpc: can't find method "u8 + req.ServiceMethod);
     }
     return (svc, mtype, req, keepReading, err);
 }
@@ -697,9 +698,9 @@ internal static readonly object rpcServeAcceptˢ = (@string)"rpc.Serve: accept:"
 // returns a non-nil error. The caller typically invokes Accept in a
 // go statement.
 public static partial void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
-    while (ᐧ) {
+    for (;;) {
         var (conn, err) = lis.Accept();
-        if (err != default!) {
+        if (err != nil) {
             log.Print(rpcServeAcceptˢ, err.Error());
             return;
         }
@@ -732,6 +733,8 @@ partial interface ServerCodec :
     error ReadRequestHeader(ж<Request> _);
     error ReadRequestBody(any _);
     error WriteResponse(ж<Response> _Δp0, any _Δp1);
+    // Close can be called multiple times and must be idempotent.
+    // Close() error is provided by io.Closer
 }
 
 // ServeConn runs the [DefaultServer] on a single connection.
@@ -783,7 +786,7 @@ public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w,
         return;
     }
     var (conn, _, err) = w._<Δhttp.Hijacker>().Hijack();
-    if (err != default!) {
+    if (err != nil) {
         log.Print(rpcHijackingˢ, req.RemoteAddr, (@string)": "u8, err.Error());
         return;
     }

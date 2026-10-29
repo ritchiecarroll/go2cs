@@ -7,7 +7,7 @@ namespace go;
 partial class strconv_package {
 
 // (424+133+112)*2 + (508)*4 = 3370 bytes
-[GoLazy] partial class lazyᴛisPrint16 { internal static slice<uint16> isPrint16 = new uint16[]{
+[GoLazy] partial class lazyᴛisPrint16 { internal static slice<uint16> isPrint16 = slice<uint16>([
     0x0020, 0x007e,
     0x00a1, 0x0377,
     0x037a, 0x037f,
@@ -220,9 +220,9 @@ partial class strconv_package {
     0xffda, 0xffdc,
     0xffe0, 0xffee,
     0xfffc, 0xfffd
-}.slice(); }
+]); }
 
-[GoLazy] partial class lazyᴛisNotPrint16 { internal static slice<uint16> isNotPrint16 = new uint16[]{
+[GoLazy] partial class lazyᴛisNotPrint16 { internal static slice<uint16> isNotPrint16 = slice<uint16>([
     0x00ad,
     0x038b,
     0x038d,
@@ -356,9 +356,9 @@ partial class strconv_package {
     0xfe67,
     0xfe75,
     0xffe7
-}.slice(); }
+]); }
 
-[GoLazy] partial class lazyᴛisPrint32 { internal static slice<uint32> isPrint32 = new uint32[]{
+[GoLazy] partial class lazyᴛisPrint32 { internal static slice<uint32> isPrint32 = slice<uint32>([
     0x010000, 0x01004d,
     0x010050, 0x01005d,
     0x010080, 0x0100fa,
@@ -613,9 +613,9 @@ partial class strconv_package {
     0x030000, 0x03134a,
     0x031350, 0x0323af,
     0x0e0100, 0x0e01ef
-}.slice(); }
+]); }
 
-[GoLazy] partial class lazyᴛisNotPrint32 { internal static slice<uint16> isNotPrint32 = new uint16[]{ // add 0x10000 to each entry
+[GoLazy] partial class lazyᴛisNotPrint32 { internal static slice<uint16> isNotPrint32 = slice<uint16>([ // add 0x10000 to each entry
     0x000c,
     0x0027,
     0x003b,
@@ -728,10 +728,10 @@ partial class strconv_package {
     0xf0d0,
     0xfabe,
     0xfb93
-}.slice(); }
+]); }
 
 // isGraphic lists the graphic runes not matched by IsPrint.
-internal static slice<uint16> isGraphic = new uint16[]{
+internal static slice<uint16> isGraphic = slice<uint16>([
     0x00a0,
     0x1680,
     0x2000,
@@ -748,6 +748,6 @@ internal static slice<uint16> isGraphic = new uint16[]{
     0x202f,
     0x205f,
     0x3000
-}.slice();
+]);
 
 } // end strconv_package

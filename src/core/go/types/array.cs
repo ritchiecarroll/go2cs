@@ -35,7 +35,7 @@ public static ΔType Underlying(this ж<Array> Ꮡa) {
 }
 
 public static @string String(this ж<Array> Ꮡa) {
-    return TypeString(new ArrayжΔType(Ꮡa), default!);
+    return TypeString(new ArrayжΔType(Ꮡa), default);
 }
 
 } // end types_package

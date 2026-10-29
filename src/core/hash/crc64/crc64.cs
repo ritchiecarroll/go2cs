@@ -44,16 +44,16 @@ internal static void buildSlicing8Tables() {
 // The contents of this [Table] must not be modified.
 public static ж<Table> MakeTable(uint64 poly) {
     buildSlicing8TablesOnce();
-    var exprᴛ1 = poly;
-    if (exprᴛ1 == ISO) {
+    switch (poly) {
+    case var ᴛ when ᴛ == ISO: {
         return slicing8TableISO.at<Table>(0);
     }
-    if (exprᴛ1 == ECMA) {
+    case var ᴛ when ᴛ == ECMA: {
         return slicing8TableECMA.at<Table>(0);
     }
-    { /* default: */
+    default: {
         return makeTable(poly);
-    }
+    }}
 }
 
 internal static ж<Table> makeTable(uint64 poly) {
@@ -61,10 +61,10 @@ internal static ж<Table> makeTable(uint64 poly) {
     for (nint i = 0; i < 256; i++) {
         var crc = (uint64)i;
         for (nint j = 0; j < 8; j++) {
-            if ((crc & 1) == 1){
+            if ((crc & 1) == 1) {
                 crc = (crc >> 1) ^ poly;
             } else {
-                crc >>= (int)(1);
+                crc >>= 1;
             }
         }
         t.Value[i] = crc;
@@ -96,8 +96,8 @@ partial struct digest {
 // value out in big-endian byte order. The returned Hash64 also
 // implements [encoding.BinaryMarshaler] and [encoding.BinaryUnmarshaler] to
 // marshal and unmarshal the internal state of the hash.
-public static hash.Hash64 New(ж<Table> Ꮡtab) {
-    return new digestжHash64(Ꮡ(new digest(0, Ꮡtab)));
+public static hash.Hash64 New(ж<Table> tab) {
+    return new digestжHash64(Ꮡ(new digest(0, tab)));
 }
 
 internal static nint Size(this ref digest d) {
@@ -119,7 +119,7 @@ internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte>
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, tableSum(d.tab));
     b = byteorder.BEAppendUint64(b, d.crc);
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
@@ -142,13 +142,12 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
         return errors.New(hashCrc64TablesDoNotˢ);
     }
     d.crc = byteorder.BEUint64(b[12..]);
-    return default!;
+    return default;
 }
 
 internal static (hash.Cloner, error) Clone(this ref digest d) {
-    ref var r = ref heap<digest>(out var Ꮡr);
-    r = d;
-    return (new digestжCloner(Ꮡr), default!);
+    ref var r = ref heap<digest>(d, out var Ꮡr);
+    return (new digestжCloner(Ꮡr), default);
 }
 
 internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
@@ -156,15 +155,13 @@ internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
     crc = ~crc;
     // Table comparison is somewhat expensive, so avoid it for small sizes
     while (len(p) >= 64) {
-        ж<array<Table>> helperTable = default!;
-        if (tab == slicing8TableECMA.Value[0]){
+        ж<array<Table>> helperTable = default;
+        if (tab == slicing8TableECMA.Value[0]) {
             helperTable = slicing8TableECMA;
-        } else 
-        if (tab == slicing8TableISO.Value[0]){
+        } else if (tab == slicing8TableISO.Value[0]) {
             helperTable = slicing8TableISO;
             // For smaller sizes creating extended table takes too much time
-        } else 
-        if (len(p) >= 2048){
+        } else if (len(p) >= 2048) {
             // According to the tests between various x86 and arm CPUs, 2k is a reasonable
             // threshold for now. This may change in the future.
             helperTable = makeSlicingBy8Table(ref tab);
@@ -186,13 +183,13 @@ internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
 }
 
 // Update returns the result of adding the bytes in p to the crc.
-public static uint64 Update(uint64 crc, ж<Table> Ꮡtab, slice<byte> p) {
-    return update(crc, ref (Ꮡtab).DerefOrNull(), p);
+public static uint64 Update(uint64 crc, ж<Table> tab, slice<byte> p) {
+    return update(crc, ref (tab).DerefOrNull(), p);
 }
 
 internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
     d.crc = update(d.crc, ref (d.tab).DerefOrNull(), p);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 internal static uint64 Sum64(this ref digest d) {
@@ -206,8 +203,8 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 
 // Checksum returns the CRC-64 checksum of data
 // using the polynomial represented by the [Table].
-public static uint64 Checksum(slice<byte> data, ж<Table> Ꮡtab) {
-    return update(0, ref (Ꮡtab).DerefOrNull(), data);
+public static uint64 Checksum(slice<byte> data, ж<Table> tab) {
+    return update(0, ref (tab).DerefOrNull(), data);
 }
 
 // tableSum returns the ISO checksum of table t.

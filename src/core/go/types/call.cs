@@ -41,8 +41,8 @@ internal static slice<ΔType> funcInst(this ж<Checker> Ꮡcheck, ж<target> Ꮡ
 
     assert(ᏑT != nil || Ꮡix != nil);
 
-    positioner instErrPos = default!;
-    if (Ꮡix != nil){
+    positioner instErrPos = default;
+    if (Ꮡix != nil) {
         instErrPos = inNode(ix.orig, ix.lbrack);
         x.expr = ix.orig; // if we don't have an index expression, keep the existing expression of x
     } else {
@@ -51,14 +51,14 @@ internal static slice<ΔType> funcInst(this ж<Checker> Ꮡcheck, ж<target> Ꮡ
     var versionErr = !Ꮡcheck.verifyVersionf(instErrPos, go1_18, "function instantiation"u8);
 
     // targs and xlist are the type arguments and corresponding type expressions, or nil.
-    slice<ΔType> targs = default!;
-    slice<ast.Expr> xlist = default!;
+    slice<ΔType> targs = default;
+    slice<ast.Expr> xlist = default;
     if (Ꮡix != nil) {
         xlist = ix.indices;
         targs = Ꮡcheck.typeList(xlist);
-        if (targs == default!) {
+        if (targs == nil) {
             x.mode = invalid;
-            return default!;
+            return default;
         }
         assert(len(targs) == len(xlist));
     }
@@ -73,7 +73,7 @@ internal static slice<ΔType> funcInst(this ж<Checker> Ꮡcheck, ж<target> Ꮡ
         // Providing too many type arguments is always an error.
         Ꮡcheck.errorf(new ast_Exprᴠpositioner(ix.indices[got - 1]), WrongTypeArgCount, "got %d type arguments but want %d"u8, got, want);
         x.mode = invalid;
-        return default!;
+        return default;
     }
 
     if (got < want) {
@@ -91,25 +91,25 @@ internal static slice<ΔType> funcInst(this ж<Checker> Ꮡcheck, ж<target> Ꮡ
         //
         //    func g[type_parameters_of_x](func_type_of_x)
         //
-        slice<ж<operand>> args = default!;
-        slice<ж<Var>> @params = default!;
-        bool reverse = default!;
-        if (ᏑT != nil && (~sig).tparams != nil) {
+        slice<ж<operand>> args = default;
+        slice<ж<Var>> @params = default;
+        bool reverse = default;
+        if (ᏑT != nil && sig.tparams != nil) {
             if (!versionErr && !check.allowVersion(go1_21)) {
-                if (Ꮡix != nil){
+                if (Ꮡix != nil) {
                     Ꮡcheck.versionErrorf(instErrPos, go1_21, "partially instantiated function in assignment"u8);
                 } else {
                     Ꮡcheck.versionErrorf(instErrPos, go1_21, "implicitly instantiated function in assignment"u8);
                 }
             }
-            var gsig = NewSignatureType(nil, default!, default!, (~sig).@params, (~sig).results, (~sig).variadic);
-            @params = new ж<Var>[]{NewParam(x.Pos(), check.pkg, ""u8, new ΔSignatureжΔType(gsig))}.slice();
+            var gsig = NewSignatureType(nil, default, default, sig.@params, sig.results, sig.variadic);
+            @params = slice<ж<Var>>([NewParam(x.Pos(), check.pkg, ""u8, new ΔSignatureжΔType(gsig))]);
             // The type of the argument operand is tsig, which is the type of the LHS in an assignment
             // or the result type in a return statement. Create a pseudo-expression for that operand
             // that makes sense when reported in error messages from infer, below.
             var expr = ast.NewIdent(T.desc);
-            expr.Value.NamePos = x.Pos(); // correct position
-            args = new ж<operand>[]{Ꮡ(new operand(mode: value, expr: new ast.IdentжExpr(expr), typ: new ΔSignatureжΔType(T.sig)))}.slice();
+            expr.NamePos = x.Pos(); // correct position
+            args = slice<ж<operand>>([Ꮡ(new operand(mode: value, expr: new ast.IdentжExpr(expr), typ: new ΔSignatureжΔType(T.sig)))]);
             reverse = true;
         }
 
@@ -119,12 +119,12 @@ internal static slice<ΔType> funcInst(this ж<Checker> Ꮡcheck, ж<target> Ꮡ
 
         var err = Ꮡcheck.newError(CannotInferTypeArgs);
         targs = Ꮡcheck.infer((atPos)pos, tparams, targs, params2._<ж<Tuple>>(), args, reverse, err);
-        if (targs == default!) {
+        if (targs == nil) {
             if (!err.empty()) {
                 err.report();
             }
             x.mode = invalid;
-            return default!;
+            return default;
         }
         got = len(targs);
     }
@@ -134,7 +134,7 @@ internal static slice<ΔType> funcInst(this ж<Checker> Ꮡcheck, ж<target> Ꮡ
     sig = Ꮡcheck.instantiateSignature(x.Pos(), x.expr, sig, targs, xlist);
     x.typ = new ΔSignatureжΔType(sig);
     x.mode = value;
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -142,7 +142,7 @@ internal static readonly @string instantiatingSignatureSˢ = "-- instantiating s
 internal static readonly @string sUnderSˢ = "=> %s (under = %s)"u8;
 
 internal static ж<ΔSignature> /*res*/ instantiateSignature(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ast.Expr expr, ж<ΔSignature> Ꮡtyp, slice<ΔType> targs, slice<ast.Expr> xlist) {
-    ж<ΔSignature> res = default!;
+    ж<ΔSignature> res = default;
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -151,7 +151,7 @@ internal static ж<ΔSignature> /*res*/ instantiateSignature(this ж<Checker> �
         assert(Ꮡcheck != nil);
         assert(len(targs) == typ.TypeParams().Len());
 
-        if ((~check.conf)._Trace) {
+        if (check.conf._Trace) {
             Ꮡcheck.trace(pos, instantiatingSignatureSˢ, Ꮡtyp.OrTypedNil(), targs);
             check.indent++;
             defer(() => {
@@ -175,7 +175,7 @@ internal static ж<ΔSignature> /*res*/ instantiateSignature(this ж<Checker> �
             var tparams = Ꮡtyp.Value.TypeParams().list();
             // check type constraints
             {
-                var (i, err) = Ꮡcheck.verify(pos, tparams, targsʗ1, Ꮡcheck.Value.context()); if (err != default!){
+                var (i, err) = Ꮡcheck.verify(pos, tparams, targsʗ1, Ꮡcheck.Value.context()); if (err != nil) {
                     // best position for error reporting
                     tokenꓸPos posΔ1 = pos;
                     if (i < len(xlistʗ1)) {
@@ -201,14 +201,14 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     ref var call = ref Ꮡcall.DerefOrNull();
 
     var ix = unpackIndexedExpr(call.Fun);
-    if (ix != nil){
-        if (Ꮡcheck.indexExpr(Ꮡx, ix)){
+    if (ix != nil) {
+        if (Ꮡcheck.indexExpr(Ꮡx, ix)) {
             // Delay function instantiation to argument checking,
             // where we combine type and value arguments for type
             // inference.
             assert(x.mode == value);
         } else {
-            ix = default!;
+            ix = default;
         }
         x.expr = call.Fun;
         check.record(Ꮡx);
@@ -217,13 +217,13 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     }
     // x.typ may be generic
 
-    var exprᴛ1 = x.mode;
-    if (exprᴛ1 == invalid) {
+    switch (x.mode) {
+    case var ᴛ when ᴛ == invalid: {
         Ꮡcheck.use(call.Args.ꓸꓸꓸ);
         x.expr = new ast.CallExprжExpr(Ꮡcall);
         return statement;
     }
-    if (exprᴛ1 == typexpr) {
+    case var ᴛ when ᴛ == typexpr: {
         // conversion
         Ꮡcheck.nonGeneric(nil, Ꮡx);
         if (x.mode == invalid) {
@@ -266,7 +266,7 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         x.expr = new ast.CallExprжExpr(Ꮡcall);
         return Δconversion;
     }
-    if (exprᴛ1 == Δbuiltinᴛ) {
+    case var ᴛ when ᴛ == Δbuiltinᴛ: {
         // no need to check for non-genericity here
         builtinId id = x.id;
         if (!Ꮡcheck.Δbuiltin(Ꮡx, Ꮡcall, id)) {
@@ -278,7 +278,7 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             check.hasCallOrRecv = true;
         }
         return predeclaredFuncs[id].kind;
-    }
+    }}
 
     // ordinary function/method call
     // signature may be generic
@@ -288,11 +288,11 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     // must have a common underlying type, which must be a signature.
     var (u, err) = commonUnder(x.typ, (ΔType t, ΔType uΔ1) => {
         {
-            var (_, ok) = uΔ1._<ж<ΔSignature>>(ᐧ); if (uΔ1 != default! && !ok) {
+            var (_, ok) = uΔ1._<ж<ΔSignature>>(ᐧ); if (uΔ1 != nil && !ok) {
                 return typeErrorf("%s is not a function"u8, t);
             }
         }
-        return default!;
+        return default;
     });
     if (err != nil) {
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCall, invalidOp + "cannot call %s: %s", Ꮡx.OrTypedNil(), err.format(Ꮡcheck));
@@ -306,12 +306,12 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     var wasGeneric = sig.TypeParams().Len() > 0;
 
     // evaluate type arguments, if any
-    slice<ast.Expr> xlist = default!;
-    slice<ΔType> targs = default!;
+    slice<ast.Expr> xlist = default;
+    slice<ΔType> targs = default;
     if (ix != nil) {
-        xlist = ix.Value.indices;
+        xlist = ix.indices;
         targs = Ꮡcheck.typeList(xlist);
-        if (targs == default!) {
+        if (targs == nil) {
             Ꮡcheck.use(call.Args.ꓸꓸꓸ);
             x.mode = invalid;
             x.expr = new ast.CallExprжExpr(Ꮡcall);
@@ -336,12 +336,12 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         // is an error checking its arguments (for example, if an incorrect number
         // of arguments is supplied).
         if (got == want && want > 0) {
-            Ꮡcheck.verifyVersionf((atPos)(~ix).lbrack, go1_18, "function instantiation"u8);
-            sig = Ꮡcheck.instantiateSignature(ix.Pos(), (~ix).orig, sig, targs, xlist);
+            Ꮡcheck.verifyVersionf((atPos)ix.lbrack, go1_18, "function instantiation"u8);
+            sig = Ꮡcheck.instantiateSignature(ix.Pos(), ix.orig, sig, targs, xlist);
             // targs have been consumed; proceed with checking arguments of the
             // non-generic signature.
-            targs = default!;
-            xlist = default!;
+            targs = default;
+            xlist = default;
         }
     }
 
@@ -351,27 +351,27 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
 
     if (wasGeneric && sig.TypeParams().Len() == 0) {
         // Update the recorded type of call.Fun to its instantiated type.
-        check.recordTypeAndValue(call.Fun, value, new ΔSignatureжΔType(sig), default!);
+        check.recordTypeAndValue(call.Fun, value, new ΔSignatureжΔType(sig), default);
     }
 
     // determine result
-    switch ((~sig).results.Len()) {
+    switch (sig.results.Len()) {
     case 0: {
         x.mode = novalue;
         break;
     }
     case 1: {
-        if (cgocall){
+        if (cgocall) {
             x.mode = commaerr;
         } else {
             x.mode = value;
         }
-        x.typ = (~(~sig).results).vars[0].Value.typ; // unpack tuple
+        x.typ = sig.results.vars[0].Value.typ; // unpack tuple
         break;
     }
     default: {
         x.mode = value;
-        x.typ = new TupleжΔType(sig.Value.results);
+        x.typ = new TupleжΔType(sig.results);
         break;
     }}
     x.expr = new ast.CallExprжExpr(Ꮡcall);
@@ -389,13 +389,12 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
 // exprList evaluates a list of expressions and returns the corresponding operands.
 // A single-element expression list may evaluate to multiple operands.
 internal static slice<ж<operand>> /*xlist*/ exprList(this ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
-    slice<ж<operand>> xlist = default!;
+    slice<ж<operand>> xlist = default;
 
     {
-        nint n = len(elist); if (n == 1){
+        nint n = len(elist); if (n == 1) {
             (xlist, _) = Ꮡcheck.multiExpr(elist[0], false);
-        } else 
-        if (n > 1) {
+        } else if (n > 1) {
             // multiple (possibly invalid) values
             xlist = new slice<ж<operand>>(n);
             foreach (var (i, e) in elist) {
@@ -416,8 +415,8 @@ internal static slice<ж<operand>> /*xlist*/ exprList(this ж<Checker> Ꮡcheck,
 // For each partially instantiated generic function operand, the corresponding
 // targsList elements are the operand's partial type arguments.
 internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) genericExprList(this ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
-    slice<ж<operand>> resList = default!;
-    slice<slice<ΔType>> targsList = default!;
+    slice<ж<operand>> resList = default;
+    slice<slice<ΔType>> targsList = default;
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -430,7 +429,7 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
                         {
                             nint nΔ1 = len(targsList[i]); if (nΔ1 > 0) {
                                 // x must be a partially instantiated function
-                                assert(nΔ1 < (~x).typ._<ж<ΔSignature>>().TypeParams().Len());
+                                assert(nΔ1 < x.typ._<ж<ΔSignature>>().TypeParams().Len());
                             }
                         }
                     }
@@ -446,59 +445,58 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
             infer = false;
         }
 
-        if (n == 1){
+        if (n == 1) {
             // single value (possibly a partially instantiated function), or a multi-valued expression
             var e = elist[0];
             ref var x = ref heap(new operand(), out var Ꮡx);
             {
-                var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)){
+                var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)) {
                     // x is a generic function.
                     var targs = Ꮡcheck.funcInst(nil, x.Pos(), Ꮡx, ix, infer);
-                    if (targs != default!){
+                    if (targs != nil) {
                         // x was not instantiated: collect the (partial) type arguments.
-                        targsList = new slice<ΔType>[]{targs}.slice();
+                        targsList = slice<slice<ΔType>>([targs]);
                         // Update x.expr so that we can record the partially instantiated function.
-                        x.expr = ix.Value.orig;
+                        x.expr = ix.orig;
                     } else {
                         // x was instantiated: we must record it here because we didn't
                         // use the usual expression evaluators.
                         check.record(Ꮡx);
                     }
-                    resList = new ж<operand>[]{Ꮡx}.slice();
+                    resList = slice<ж<operand>>([Ꮡx]);
                 } else {
                     // x is not a function instantiation (it may still be a generic function).
-                    Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, true);
-                    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
+                    Ꮡcheck.rawExpr(nil, Ꮡx, e, default, true);
+                    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltinᴛ)) | (nuint)(1 << (int)(typexpr))));
                     {
-                        var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid){
+                        var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
                             // x is a function call returning multiple values; it cannot be generic.
                             resList = new slice<ж<operand>>(t.Len());
-                            foreach (var (i, v) in (~t).vars) {
+                            foreach (var (i, v) in t.vars) {
                                 resList[i] = Ꮡ(new operand(mode: value, expr: e, typ: (~v).typ));
                             }
                         } else {
                             // x is exactly one value (possibly invalid or uninstantiated generic function).
-                            resList = new ж<operand>[]{Ꮡx}.slice();
+                            resList = slice<ж<operand>>([Ꮡx]);
                         }
                     }
                 }
             }
-        } else 
-        if (n > 1) {
+        } else if (n > 1) {
             // multiple values
             resList = new slice<ж<operand>>(n);
             targsList = new slice<slice<ΔType>>(n);
             foreach (var (i, e) in elist) {
                 ref var x = ref heap(new operand(), out var Ꮡx);
                 {
-                    var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)){
+                    var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)) {
                         // x is a generic function.
                         var targs = Ꮡcheck.funcInst(nil, x.Pos(), Ꮡx, ix, infer);
-                        if (targs != default!){
+                        if (targs != nil) {
                             // x was not instantiated: collect the (partial) type arguments.
                             targsList[i] = targs;
                             // Update x.expr so that we can record the partially instantiated function.
-                            x.expr = ix.Value.orig;
+                            x.expr = ix.orig;
                         } else {
                             // x was instantiated: we must record it here because we didn't
                             // use the usual expression evaluators.
@@ -530,7 +528,7 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
 // The result signature is the (possibly adjusted and instantiated) function signature.
 // If an error occurred, the result signature is the incoming sig.
 internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж<ast.CallExpr> Ꮡcall, ж<ΔSignature> Ꮡsig, slice<ΔType> targs, slice<ast.Expr> xlist, slice<ж<operand>> args, slice<slice<ΔType>> atargs) {
-    ж<ΔSignature> rsig = default!;
+    ж<ΔSignature> rsig = default;
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var call = ref Ꮡcall.DerefOrNull();
     ref var sig = ref Ꮡsig.DerefOrNull();
@@ -553,9 +551,9 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
 
     // set up parameters
     var sigParams = sig.@params; // adjusted for variadic functions (may be nil for empty parameter lists!)
-    var adjusted = false; // indicates if sigParams is different from sig.params
-    if (sig.variadic){
-        if (ddd){
+    var adjusted = false;        // indicates if sigParams is different from sig.params
+    if (sig.variadic) {
+        if (ddd) {
             // variadic_func(a, b, c...)
             if (len(call.Args) == 1 && nargs > 1) {
                 // f()... is not permitted if f() is multi-valued
@@ -564,14 +562,14 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
             }
         } else {
             // variadic_func(a, b, c)
-            if (nargs >= npars - 1){
+            if (nargs >= npars - 1) {
                 // Create custom parameters for arguments: keep
                 // the first npars-1 parameters and add one for
                 // each argument mapping to the ... parameter.
                 var vars = new slice<ж<Var>>(npars - 1); // npars > 0 for variadic functions
-                copy(vars, (~sig.@params).vars);
-                var last = (~sig.@params).vars[npars - 1];
-                var typ = (~last).typ._<ж<Slice>>().Value.elem;
+                copy(vars, sig.@params.vars);
+                var last = sig.@params.vars[npars - 1];
+                var typ = (~last).typ._<ж<Slice>>().elem;
                 while (len(vars) < nargs) {
                     vars = append(vars, NewParam((~last).pos, (~last).pkg, (~last).name, typ));
                 }
@@ -596,16 +594,16 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     if (nargs != npars) {
         positioner at = new ast_CallExprжpositioner(Ꮡcall);
         @string qualifier = notEnoughˢ;
-        if (nargs > npars){
-            at = new ast_Exprᴠpositioner(args[npars].Value.expr); // report at first extra argument
+        if (nargs > npars) {
+            at = new ast_Exprᴠpositioner(args[npars].expr); // report at first extra argument
             qualifier = tooManyˢ;
         } else {
             at = ((atPos)call.Rparen); // report at closing )
         }
         // take care of empty parameter lists represented by nil tuples
-        slice<ж<Var>> @params = default!;
+        slice<ж<Var>> @params = default;
         if (sig.@params != nil) {
-            @params = sig.@params.Value.vars;
+            @params = sig.@params.vars;
         }
         var err = Ꮡcheck.newError(WrongArgCount);
         err.addf(at, "%s arguments in call to %s"u8, qualifier, call.Fun);
@@ -616,7 +614,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     }
 
     // collect type parameters of callee and generic function arguments
-    slice<ж<TypeParam>> tparams = default!;
+    slice<ж<TypeParam>> tparams = default;
 
     // collect type parameters of callee
     nint n = sig.TypeParams().Len();
@@ -626,7 +624,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
             case ж<ast.IndexExpr> _:
             case ж<ast.IndexListExpr> _: {
                 var ix = unpackIndexedExpr(call.Fun);
-                Ꮡcheck.versionErrorf(inNode(call.Fun, (~ix).lbrack), go1_18, "function instantiation"u8);
+                Ꮡcheck.versionErrorf(inNode(call.Fun, ix.lbrack), go1_18, "function instantiation"u8);
                 break;
             }
             default: {
@@ -635,23 +633,23 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
             }}
         }
         // rename type parameters to avoid problems with recursive calls
-        ΔType tmp = default!;
+        ΔType tmp = default;
         (tparams, tmp) = Ꮡcheck.renameTParams(call.Pos(), sig.TypeParams().list(), new TupleжΔType(sigParams));
         sigParams = tmp._<ж<Tuple>>();
         // make sure targs and tparams have the same length
         while (len(targs) < len(tparams)) {
-            targs = append(targs, (ΔType)(default!));
+            targs = append(targs, (ΔType)(default));
         }
     }
     assert(len(tparams) == len(targs));
 
     // collect type parameters from generic function arguments
-    slice<nint> genericArgs = default!; // indices of generic function arguments
+    slice<nint> genericArgs = default; // indices of generic function arguments
     if (enableReverseTypeInference) {
         foreach (var (i, arg) in args) {
             // generic arguments cannot have a defined (*Named) type - no need for underlying type below
             {
-                var (asig, _) = (~arg).typ._<ж<ΔSignature>>(ᐧ); if (asig != nil && asig.TypeParams().Len() > 0) {
+                var (asig, _) = arg.typ._<ж<ΔSignature>>(ᐧ); if (asig != nil && asig.TypeParams().Len() > 0) {
                     // The argument type is a generic function signature. This type is
                     // pointer-identical with (it's copied from) the type of the generic
                     // function argument and thus the function object.
@@ -665,8 +663,8 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
                     //           multiple times, which is rare (possible optimization).
                     var (atparams, tmp) = Ꮡcheck.renameTParams(call.Pos(), asig.TypeParams().list(), new ΔSignatureжΔType(asig));
                     asig = tmp._<ж<ΔSignature>>();
-                    asig.Value.tparams = Ꮡ(new TypeParamList(atparams)); // renameTParams doesn't touch associated type parameters
-                    arg.Value.typ = new ΔSignatureжΔType(asig); // new type identity for the function argument
+                    asig.tparams = Ꮡ(new TypeParamList(atparams)); // renameTParams doesn't touch associated type parameters
+                    arg.typ = new ΔSignatureжΔType(asig);          // new type identity for the function argument
                     tparams = appendꓸꓸꓸ(tparams, atparams);
                     // add partial list of type arguments, if any
                     if (i < len(atargs)) {
@@ -674,7 +672,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
                     }
                     // make sure targs and tparams have the same length
                     while (len(targs) < len(tparams)) {
-                        targs = append(targs, (ΔType)(default!));
+                        targs = append(targs, (ΔType)(default));
                     }
                     genericArgs = append(genericArgsᴷ, genericArgs, i);
                 }
@@ -694,7 +692,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     if (len(tparams) > 0) {
         var err = Ꮡcheck.newError(CannotInferTypeArgs);
         targs = Ꮡcheck.infer(new ast_CallExprжpositioner(Ꮡcall), tparams, targs, sigParams, args, false, err);
-        if (targs == default!) {
+        if (targs == nil) {
             // TODO(gri) If infer inferred the first targs[:n], consider instantiating
             //           the call signature for better error messages/gopls behavior.
             //           Perhaps instantiate as much as we can, also for arguments.
@@ -711,10 +709,10 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
             // If the callee's parameter list was adjusted we need to update (instantiate)
             // it separately. Otherwise we can simply use the result signature's parameter
             // list.
-            if (adjusted){
+            if (adjusted) {
                 sigParams = Ꮡcheck.subst(call.Pos(), new TupleжΔType(sigParams), makeSubstMap(tparams.slice(0, n), targs.slice(0, n)), nil, check.context())._<ж<Tuple>>();
             } else {
-                sigParams = rsig.Value.@params;
+                sigParams = rsig.@params;
             }
         }
 
@@ -723,11 +721,11 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
         genericArgs = move2heap(genericArgsᴷ, genericArgs);
         foreach (var (_, i) in genericArgs) {
             var arg = args[i];
-            var asig = (~arg).typ._<ж<ΔSignature>>();
+            var asig = arg.typ._<ж<ΔSignature>>();
             nint k = j + asig.TypeParams().Len();
             // targs[j:k] are the inferred type arguments for asig
-            arg.Value.typ = new ΔSignatureжΔType(Ꮡcheck.instantiateSignature(call.Pos(), (~arg).expr, asig, targs.slice(j, k), default!)); // TODO(gri) provide xlist if possible (partial instantiations)
-            check.record(arg); // record here because we didn't use the usual expr evaluators
+            arg.typ = new ΔSignatureжΔType(Ꮡcheck.instantiateSignature(call.Pos(), arg.expr, asig, targs.slice(j, k), default)); // TODO(gri) provide xlist if possible (partial instantiations)
+            check.record(arg);                                                                                                   // record here because we didn't use the usual expr evaluators
             j = k;
         }
     }
@@ -736,7 +734,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     if (len(args) > 0) {
         @string context = Ꮡcheck.sprintf("argument to %s"u8, call.Fun);
         foreach (var (i, a) in args) {
-            Ꮡcheck.assignment(a, (~(~sigParams).vars[i]).typ, context);
+            Ꮡcheck.assignment(a, (~sigParams.vars[i]).typ, context);
         }
     }
 
@@ -768,32 +766,32 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
     ref var e = ref Ꮡe.DerefOrNull();
 
     // these must be declared before the "goto Error" statements
-    Object obj = default!;
-    slice<nint> index = default!;
-    bool indirect = default!;
+    Object obj = default;
+    slice<nint> index = default;
+    bool indirect = default;
 
-    @string sel = e.Sel.Value.Name;
+    @string sel = e.Sel.Name;
     // If the identifier refers to a package, handle everything here
     // so we don't need a "package" mode for operands: package names
     // can only appear in qualified identifiers which are mapped to
     // selector expressions.
     {
         var (ident, ok) = e.X._<ж<ast.Ident>>(ᐧ); if (ok) {
-            var objΔ1 = Ꮡcheck.of(Checker.Ꮡenvironment).lookup((~ident).Name);
+            var objΔ1 = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(ident.Name);
             {
                 var (pname, _) = objΔ1._<ж<PkgName>>(ᐧ); if (pname != nil) {
                     assert((~pname).pkg == check.pkg);
                     check.recordUse(ident, new PkgNameжObject(pname));
                     check.usedPkgNames[pname] = true;
-                    var pkg = pname.Value.imported;
+                    var pkg = pname.imported;
 
-                    Object exp = default!;
+                    Object exp = default;
                     var funcMode = value;
-                    if ((~pkg).cgo){
+                    if (pkg.cgo) {
                         // cgo special cases C.malloc: it's
                         // rewritten to _CMalloc and does not
                         // support two-result calls.
-                        if (sel == "malloc"u8){
+                        if (sel == "malloc"u8) {
                             sel = cMallocˢ;
                         } else {
                             funcMode = cgofunc;
@@ -802,11 +800,11 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                             // cgo objects are part of the current package (in file
                             // _cgo_gotypes.go). Use regular lookup.
                             exp = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(prefix + sel);
-                            if (exp != default!) {
+                            if (exp != nil) {
                                 break;
                             }
                         }
-                        if (exp == default!) {
+                        if (exp == nil) {
                             if (isValidName(sel)) {
                                 Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s"u8, (ast.Expr)new ast.SelectorExprжExpr(Ꮡe)); // cast to ast.Expr to silence vet
                             }
@@ -814,12 +812,12 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                         }
                         Ꮡcheck.objDecl(exp);
                     } else {
-                        exp = (~pkg).scope.Lookup(sel);
-                        if (exp == default!) {
-                            if (!(~pkg).fake && isValidName(sel)) {
+                        exp = pkg.scope.Lookup(sel);
+                        if (exp == nil) {
+                            if (!pkg.fake && isValidName(sel)) {
                                 // Try to give a better error message when selector matches an object name ignoring case.
-                                var exps = (~pkg).scope.lookupIgnoringCase(sel, true);
-                                if (len(exps) >= 1){
+                                var exps = pkg.scope.lookupIgnoringCase(sel, true);
+                                if (len(exps) >= 1) {
                                     // report just the first one
                                     Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s (but have %s)"u8, (ast.Expr)new ast.SelectorExprжExpr(Ꮡe), exps[0].Name());
                                 } else {
@@ -829,7 +827,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                             goto ΔError;
                         }
                         if (!exp.Exported()) {
-                            Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UnexportedName, "name %s not exported by package %s"u8, sel, (~pkg).name);
+                            Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UnexportedName, "name %s not exported by package %s"u8, sel, pkg.name);
                             // ok to continue
                         }
                     }
@@ -839,10 +837,10 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                     // - imported objects are always fully initialized
                     switch (exp.type()) {
                     case ж<Const> expΔ1: {
-                        assert(expΔ1.Val() != default!);
+                        assert(expΔ1.Val() != nil);
                         x.mode = constant_;
                         x.typ = expΔ1.Value.typ;
-                        x.val = expΔ1.Value.val;
+                        x.val = expΔ1.val;
                         break;
                     }
                     case ж<TypeName> expΔ1: {
@@ -853,24 +851,24 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                     case ж<Var> expΔ1: {
                         x.mode = variable;
                         x.typ = expΔ1.Value.typ;
-                        if ((~pkg).cgo && strings.HasPrefix((~expΔ1).name, cvarˢ)) {
-                            x.typ = x.typ._<ж<Pointer>>().Value.@base;
+                        if (pkg.cgo && strings.HasPrefix((~expΔ1).name, cvarˢ)) {
+                            x.typ = x.typ._<ж<Pointer>>().@base;
                         }
                         break;
                     }
                     case ж<Func> expΔ1: {
                         x.mode = funcMode;
                         x.typ = expΔ1.Value.typ;
-                        if ((~pkg).cgo && strings.HasPrefix((~expΔ1).name, cmacroˢ)) {
+                        if (pkg.cgo && strings.HasPrefix((~expΔ1).name, cmacroˢ)) {
                             x.mode = value;
-                            x.typ = (~(~x.typ._<ж<ΔSignature>>()).results).vars[0].Value.typ;
+                            x.typ = x.typ._<ж<ΔSignature>>().results.vars[0].Value.typ;
                         }
                         break;
                     }
                     case ж<Builtin> expΔ1: {
                         x.mode = Δbuiltinᴛ;
                         x.typ = expΔ1.Value.typ;
-                        x.id = expΔ1.Value.id;
+                        x.id = expΔ1.id;
                         break;
                     }
                     default: {
@@ -887,15 +885,17 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
     }
 
     Ꮡcheck.exprOrType(Ꮡx, e.X, false);
-    var exprᴛ1 = x.mode;
-    if (exprᴛ1 == Δbuiltinᴛ) {
+    switch (x.mode) {
+    case var ᴛ when ᴛ == Δbuiltinᴛ: {
         // types2 uses the position of '.' for the error
         Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UncalledBuiltin, "invalid use of %s in selector expression"u8, Ꮡx.OrTypedNil());
         goto ΔError;
+        break;
     }
-    else if (exprᴛ1 == invalid) {
+    case var ᴛ when ᴛ == invalid: {
         goto ΔError;
-    }
+        break;
+    }}
 
     // Avoid crashing when checking an invalid selector in a method declaration
     // (i.e., where def is not set):
@@ -917,20 +917,20 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
     }
 
     (obj, index, indirect) = lookupFieldOrMethod(x.typ, x.mode == variable, check.pkg, sel, false);
-    if (obj == default!) {
+    if (obj == nil) {
         // Don't report another error if the underlying type was invalid (go.dev/issue/49541).
         if (!isValid(x.typ.Underlying())) {
             goto ΔError;
         }
 
-        if (index != default!) {
+        if (index != nil) {
             // TODO(gri) should provide actual type where the conflict happens
             Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), AmbiguousSelector, "ambiguous selector %s.%s"u8, x.expr, sel);
             goto ΔError;
         }
 
         if (indirect) {
-            if (x.mode == typexpr){
+            if (x.mode == typexpr) {
                 Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), InvalidMethodExpr, "invalid method expression %s.%s (needs pointer receiver (*%s).%s)"u8, x.typ, sel, x.typ, sel);
             } else {
                 Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), InvalidMethodExpr, "cannot call pointer method %s on %s"u8, sel, x.typ);
@@ -938,8 +938,8 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
             goto ΔError;
         }
 
-        @string why = default!;
-        if (isInterfacePtr(x.typ)){
+        @string why = default;
+        if (isInterfacePtr(x.typ)) {
             why = Ꮡcheck.interfacePtrError(x.typ);
         } else {
             var (alt, _, _) = lookupFieldOrMethod(x.typ, x.mode == variable, check.pkg, sel, true);
@@ -956,7 +956,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
         }
     }
 
-    if (x.mode == typexpr){
+    if (x.mode == typexpr) {
         // method expression
         var (m, _) = obj._<ж<Func>>(ᐧ);
         if (m == nil) {
@@ -967,16 +967,16 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
         check.recordSelection(Ꮡe, MethodExpr, x.typ, new FuncжObject(m), index, indirect);
 
         var sig = (~m).typ._<ж<ΔSignature>>();
-        if ((~sig).recv == nil) {
+        if (sig.recv == nil) {
             Ꮡcheck.error(new ast_SelectorExprжpositioner(Ꮡe), InvalidDeclCycle, illegalCycleInMethodˢ);
             goto ΔError;
         }
 
         // the receiver type becomes the type of the first function
         // argument of the method expression's function type
-        slice<ж<Var>> @params = default!;
-        if ((~sig).@params != nil) {
-            @params = sig.Value.@params.Value.vars;
+        slice<ж<Var>> @params = default;
+        if (sig.@params != nil) {
+            @params = sig.@params.vars;
         }
         // Be consistent about named/unnamed parameters. This is not needed
         // for type-checking, but the newly constructed signature may appear
@@ -987,18 +987,18 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
         @string name = ""u8;
         if (len(@params) > 0 && (~@params[0]).name != ""u8) {
             // name needed
-            name = sig.Value.recv.Value.name;
+            name = sig.recv.Value.name;
             if (name == ""u8) {
                 name = "_"u8;
             }
         }
-        @params = appendꓸꓸꓸ(new ж<Var>[]{NewParam((~(~sig).recv).pos, (~(~sig).recv).pkg, name, x.typ)}.slice(), @params);
+        @params = appendꓸꓸꓸ(slice<ж<Var>>([NewParam((~sig.recv).pos, (~sig.recv).pkg, name, x.typ)]), @params);
         x.mode = value;
         x.typ = new ΔSignatureжΔType(Ꮡ(new ΔSignature(
-            tparams: (~sig).tparams,
+            tparams: sig.tparams,
             @params: NewTuple(@params.ꓸꓸꓸ),
-            results: (~sig).results,
-            variadic: (~sig).variadic
+            results: sig.results,
+            variadic: sig.variadic
         )));
 
         check.addDeclDep(new FuncжObject(m));
@@ -1007,7 +1007,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
         switch (obj.type()) {
         case ж<Var> objΔ2: {
             check.recordSelection(Ꮡe, FieldVal, x.typ, new VarжObject(objΔ2), index, indirect);
-            if (x.mode == variable || indirect){
+            if (x.mode == variable || indirect) {
                 x.mode = variable;
             } else {
                 x.mode = value;
@@ -1056,7 +1056,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                 // lookup.
                 var mset = NewMethodSet(typ);
                 {
-                    var m = mset.Lookup(check.pkg, sel); if (m == nil || !AreEqual((~m).obj, objΔ2)) {
+                    var m = mset.Lookup(check.pkg, sel); if (m == nil || !AreEqual(m.obj, objΔ2)) {
                         Ꮡcheck.dump(vSVSˢ, e.Pos(), typ, (~objΔ2).name, m.OrTypedNil());
                         Ꮡcheck.dump("%s\n"u8, mset.OrTypedNil());
                         // Caution: MethodSets are supposed to be used externally
@@ -1072,9 +1072,8 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
             x.mode = value;
 
             // remove receiver
-            ref var sig = ref heap<ΔSignature>(out var Ꮡsig);
-            sig = (~objΔ2).typ._<ж<ΔSignature>>().Value;
-            sig.recv = default!;
+            ref var sig = ref heap<ΔSignature>((~objΔ2).typ._<ж<ΔSignature>>().Value, out var Ꮡsig);
+            sig.recv = default;
             x.typ = new ΔSignatureжΔType(Ꮡsig);
 
             check.addDeclDep(new FuncжObject(objΔ2));
@@ -1140,17 +1139,17 @@ internal static bool use1(this ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
     }
     case ж<ast.Ident> n: {
         // don't report an error evaluating blank
-        if ((~n).Name == "_"u8) {
+        if (n.Name == "_"u8) {
             break;
         }
         // If the lhs is an identifier denoting a variable v, this assignment
         // is not a 'use' of v. Remember current value of v.used and restore
         // after evaluating the lhs via check.rawExpr.
-        ж<Var> v = default!;
-        bool v_used = default!;
+        ж<Var> v = default;
+        bool v_used = default;
         if (lhs) {
             {
-                var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup((~n).Name); if (obj != default!) {
+                var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(n.Name); if (obj != nil) {
                     // It's ok to mark non-local variables, but ignore variables
                     // from other packages to avoid potential race conditions with
                     // dot-imported variables.
@@ -1171,7 +1170,7 @@ internal static bool use1(this ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
     }
     default: {
         var n = switchᴛ4;
-        Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, true);
+        Ꮡcheck.rawExpr(nil, Ꮡx, e, default, true);
         break;
     }}
     return x.mode != invalid;

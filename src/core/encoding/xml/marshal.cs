@@ -80,16 +80,16 @@ public static (slice<byte>, error) Marshal(any v) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var enc = NewEncoder(new bytes_BufferжWriter(Ꮡb));
     {
-        var err = enc.Encode(v); if (err != default!) {
-            return (default!, err);
+        var err = enc.Encode(v); if (err != nil) {
+            return (default, err);
         }
     }
     {
-        var err = enc.Close(); if (err != default!) {
-            return (default!, err);
+        var err = enc.Close(); if (err != nil) {
+            return (default, err);
         }
     }
-    return (b.Bytes(), default!);
+    return (b.Bytes(), default);
 }
 
 // Marshaler is the interface implemented by objects that can marshal
@@ -135,16 +135,16 @@ public static (slice<byte>, error) MarshalIndent(any v, @string prefix, @string 
     var enc = NewEncoder(new bytes_BufferжWriter(Ꮡb));
     enc.Indent(prefix, indent);
     {
-        var err = enc.Encode(v); if (err != default!) {
-            return (default!, err);
+        var err = enc.Encode(v); if (err != nil) {
+            return (default, err);
         }
     }
     {
-        var err = enc.Close(); if (err != default!) {
-            return (default!, err);
+        var err = enc.Close(); if (err != nil) {
+            return (default, err);
         }
     }
-    return (b.Bytes(), default!);
+    return (b.Bytes(), default);
 }
 
 // An Encoder writes XML data to an output stream.
@@ -155,7 +155,7 @@ partial struct Encoder {
 // NewEncoder returns a new encoder that writes to w.
 public static ж<Encoder> NewEncoder(io.Writer w) {
     var e = Ꮡ(new Encoder(new printer(w: bufio.NewWriter(w))));
-    e.Value.p.encoder = e;
+    e.p.encoder = e;
     return e;
 }
 
@@ -177,7 +177,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
     ref var enc = ref Ꮡenc.DerefOrNull();
 
     var err = Ꮡenc.of(Encoder.Ꮡp).marshalValue(reflect.ValueOf(v), nil, nil);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return enc.p.w.Flush();
@@ -195,7 +195,7 @@ public static error EncodeElement(this ж<Encoder> Ꮡenc, any v, StartElement s
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
     var err = Ꮡenc.of(Encoder.Ꮡp).marshalValue(reflect.ValueOf(v), nil, Ꮡstart);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return enc.p.w.Flush();
@@ -223,7 +223,7 @@ public static error EncodeToken(this ж<Encoder> Ꮡenc, ΔToken t) {
     case StartElement tΔ1ᴛ1: {
         ref var tΔ1 = ref heap(tΔ1ᴛ1, out var ᏑtΔ1);
         {
-            var err = p.writeStart(ᏑtΔ1); if (err != default!) {
+            var err = p.writeStart(ᏑtΔ1); if (err != nil) {
                 return err;
             }
         }
@@ -231,7 +231,7 @@ public static error EncodeToken(this ж<Encoder> Ꮡenc, ΔToken t) {
     }
     case EndElement tΔ1: {
         {
-            var err = p.writeEnd(tΔ1.Name); if (err != default!) {
+            var err = p.writeEnd(tΔ1.Name); if (err != nil) {
                 return err;
             }
         }
@@ -253,7 +253,7 @@ public static error EncodeToken(this ж<Encoder> Ꮡenc, ΔToken t) {
     case ProcInst tΔ1: {
         // First token to be encoded which is also a ProcInst with target of xml
         // is the xml declaration. The only ProcInst where target of xml is allowed.
-        if (tΔ1.Target == "xml"u8 && (~p).w.Buffered() != 0) {
+        if (tΔ1.Target == "xml"u8 && p.w.Buffered() != 0) {
             return fmt.Errorf("xml: EncodeToken of ProcInst xml target only valid for xml declaration, first token encoded"u8);
         }
         if (!isNameString(tΔ1.Target)) {
@@ -265,7 +265,7 @@ public static error EncodeToken(this ж<Encoder> Ꮡenc, ΔToken t) {
         p.WriteString("<?"u8);
         p.WriteString(tΔ1.Target);
         if (len(tΔ1.Inst) > 0) {
-            p.WriteByte((rune)' ');
+            p.WriteByte((byte)' ');
             p.Write(tΔ1.Inst);
         }
         p.WriteString("?>"u8);
@@ -290,13 +290,13 @@ public static error EncodeToken(this ж<Encoder> Ꮡenc, ΔToken t) {
 // isValidDirective reports whether dir is a valid directive text,
 // meaning angle brackets are matched, ignoring comments and strings.
 internal static bool isValidDirective(Directive dir) {
-    nint depth = default!;
-    uint8 inquote = default!;
-    bool incomment = default!;
+    nint depth = default;
+    uint8 inquote = default;
+    bool incomment = default;
     foreach (var (i, c) in dir) {
         switch (ᐧ) {
         case {} when incomment: {
-            if (c == (rune)'>') {
+            if (c == '>') {
                 {
                     nint n = 1 + i - len(endComment); if (n >= 0 && bytes.Equal(dir.slice(n, i + 1), endComment)) {
                         incomment = false;
@@ -313,19 +313,19 @@ internal static bool isValidDirective(Directive dir) {
             // Just ignore anything within quotes
             break;
         }
-        case {} when c == (rune)'\'' || c == (rune)'"': {
+        case {} when c == (byte)'\'' || c == (byte)'"': {
             inquote = c;
             break;
         }
-        case {} when c is (rune)'<': {
-            if (i + len(begComment) < len(dir) && bytes.Equal(dir.slice(i, i + len(begComment)), begComment)){
+        case {} when c is (byte)'<': {
+            if (i + len(begComment) < len(dir) && bytes.Equal(dir.slice(i, i + len(begComment)), begComment)) {
                 incomment = true;
             } else {
                 depth++;
             }
             break;
         }
-        case {} when c is (rune)'>': {
+        case {} when c is (byte)'>': {
             if (depth == 0) {
                 return false;
             }
@@ -358,7 +358,7 @@ partial struct printer {
     internal nint depth;
     internal bool indentedIn;
     internal bool putNewline;
-    internal map<@string, @string> attrNS; // map prefix -> name space
+    internal map<@string, @string> attrNS;     // map prefix -> name space
     internal map<@string, @string> attrPrefix; // map name space -> prefix
     internal slice<@string> prefixes;
     internal slice<Name> tags;
@@ -390,7 +390,7 @@ internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) {
     }
 
     // Need to define a new name space.
-    if (p.attrPrefix == default!) {
+    if (p.attrPrefix == nil) {
         p.attrPrefix = new map<@string, @string>();
         p.attrNS = new map<@string, @string>();
     }
@@ -415,7 +415,7 @@ internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) {
     }
     if (p.attrNS[prefix] != "") {
         // Name is taken. Find a better one.
-        for (p.seq++; ᐧ ; p.seq++) {
+        for (p.seq++; ; p.seq++) {
             {
                 @string id = prefix + "_"u8 + strconv.Itoa(p.seq); if (p.attrNS[id] == "") {
                     prefix = id;
@@ -472,10 +472,10 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     }
 
     if (!val.IsValid()) {
-        return default!;
+        return default;
     }
     if (Ꮡfinfo != nil && (fieldFlags)(finfo.flags & fOmitEmpty) != 0 && isEmptyValue(val)) {
-        return default!;
+        return default;
     }
 
     // Drill into interfaces and pointers.
@@ -483,7 +483,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     // but it matches the Go 1 behavior.
     while (val.Kind() == reflect.ΔInterface || val.Kind() == reflect.ΔPointer) {
         if (val.IsNil()) {
-            return default!;
+            return default;
         }
         val = val.Elem();
     }
@@ -533,16 +533,16 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     if ((kind == reflect.ΔSlice || kind == reflect.Array) && typ.Elem().Kind() != reflect.Uint8) {
         for ((nint i, nint n) = (0, val.Len()); i < n; i++) {
             {
-                var errΔ1 = Ꮡp.marshalValue(val.Index(i), Ꮡfinfo, ᏑstartTemplate); if (errΔ1 != default!) {
+                var errΔ1 = Ꮡp.marshalValue(val.Index(i), Ꮡfinfo, ᏑstartTemplate); if (errΔ1 != nil) {
                     return errΔ1;
                 }
             }
         }
-        return default!;
+        return default;
     }
 
     var (tinfo, err) = getTypeInfo(typ);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -554,14 +554,13 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     // 3. type name
     ref var start = ref heap(new StartElement(), out var Ꮡstart);
 
-    if (ᏑstartTemplate != nil){
+    if (ᏑstartTemplate != nil) {
         start.Name = startTemplate.Name;
         start.Attr = appendꓸꓸꓸ(start.Attr, startTemplate.Attr);
-    } else 
-    if ((~tinfo).xmlname != nil) {
-        var xmlname = tinfo.Value.xmlname;
-        if ((~xmlname).name != ""u8){
-            (start.Name.Space, start.Name.Local) = (xmlname.Value.xmlns, xmlname.Value.name);
+    } else if (tinfo.xmlname != nil) {
+        var xmlname = tinfo.xmlname;
+        if (xmlname.name != ""u8) {
+            (start.Name.Space, start.Name.Local) = (xmlname.xmlns, xmlname.name);
         } else {
             var fv = xmlname.value(val, dontInitNilPointers);
             {
@@ -577,7 +576,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     if (start.Name.Local == ""u8) {
         @string name = typ.Name();
         {
-            nint i = strings.IndexByte(name, (rune)'['); if (i >= 0) {
+            nint i = strings.IndexByte(name, (byte)'['); if (i >= 0) {
                 // Truncate generic instantiation name. See issue 48318.
                 name = name.slice(0, i);
             }
@@ -589,14 +588,14 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     }
 
     // Attributes
-    foreach (var i in range((~tinfo).fields)) {
-        var finfoΔ1 = Ꮡ((~tinfo).fields, i);
-        if ((fieldFlags)((~finfoΔ1).flags & fAttr) == 0) {
+    foreach (var i in range(tinfo.fields)) {
+        var finfoΔ1 = Ꮡ(tinfo.fields, i);
+        if ((fieldFlags)(finfoΔ1.flags & fAttr) == 0) {
             continue;
         }
         var fv = finfoΔ1.value(val, dontInitNilPointers);
 
-        if ((fieldFlags)((~finfoΔ1).flags & fOmitEmpty) != 0 && (!fv.IsValid() || isEmptyValue(fv))) {
+        if ((fieldFlags)(finfoΔ1.flags & fOmitEmpty) != 0 && (!fv.IsValid() || isEmptyValue(fv))) {
             continue;
         }
 
@@ -604,43 +603,42 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
             continue;
         }
 
-        var name = new Name(Space: (~finfoΔ1).xmlns, Local: (~finfoΔ1).name);
+        var name = new Name(Space: finfoΔ1.xmlns, Local: finfoΔ1.name);
         {
-            var errΔ2 = p.marshalAttr(Ꮡstart, name, fv); if (errΔ2 != default!) {
+            var errΔ2 = p.marshalAttr(Ꮡstart, name, fv); if (errΔ2 != nil) {
                 return errΔ2;
             }
         }
     }
 
     // If an empty name was found, namespace is overridden with an empty space
-    if ((~tinfo).xmlname != nil && start.Name.Space == ""u8 && (~(~tinfo).xmlname).xmlns == ""u8 && (~(~tinfo).xmlname).name == ""u8 && len(p.tags) != 0 && p.tags[len(p.tags) - 1].Space != ""u8) {
+    if (tinfo.xmlname != nil && start.Name.Space == ""u8 && tinfo.xmlname.xmlns == ""u8 && tinfo.xmlname.name == ""u8 && len(p.tags) != 0 && p.tags[len(p.tags) - 1].Space != ""u8) {
         start.Attr = append(start.Attr, new Attr(new Name(""u8, xmlnsPrefix), ""u8));
     }
     {
-        var errΔ3 = Ꮡp.writeStart(Ꮡstart); if (errΔ3 != default!) {
+        var errΔ3 = Ꮡp.writeStart(Ꮡstart); if (errΔ3 != nil) {
             return errΔ3;
         }
     }
 
-    if (val.Kind() == reflect.Struct){
+    if (val.Kind() == reflect.Struct) {
         err = Ꮡp.marshalStruct(tinfo, val);
     } else {
         var (s, b, err1) = p.marshalSimple(typ, val);
-        if (err1 != default!){
+        if (err1 != nil) {
             err = err1;
-        } else 
-        if (b != default!){
+        } else if (b != nil) {
             EscapeText(new printerжWriter(Ꮡp), b);
         } else {
             p.EscapeString(s);
         }
     }
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     {
-        var errΔ4 = p.writeEnd(start.Name); if (errΔ4 != default!) {
+        var errΔ4 = p.writeEnd(start.Name); if (errΔ4 != nil) {
             return errΔ4;
         }
     }
@@ -656,13 +654,13 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
         {
             var (marshaler, ok) = reflect.TypeAssert<MarshalerAttr>(val); if (ok) {
                 var (attr, errΔ1) = marshaler.MarshalXMLAttr(name);
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     return errΔ1;
                 }
                 if (attr.Name.Local != ""u8) {
                     start.Attr = append(start.Attr, attr);
                 }
-                return default!;
+                return default;
             }
         }
     }
@@ -673,13 +671,13 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
             {
                 var (marshaler, ok) = reflect.TypeAssert<MarshalerAttr>(pv); if (ok) {
                     var (attr, errΔ2) = marshaler.MarshalXMLAttr(name);
-                    if (errΔ2 != default!) {
+                    if (errΔ2 != nil) {
                         return errΔ2;
                     }
                     if (attr.Name.Local != ""u8) {
                         start.Attr = append(start.Attr, attr);
                     }
-                    return default!;
+                    return default;
                 }
             }
         }
@@ -689,11 +687,11 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
         {
             var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(val); if (ok) {
                 var (text, errΔ3) = textMarshaler.MarshalText();
-                if (errΔ3 != default!) {
+                if (errΔ3 != nil) {
                     return errΔ3;
                 }
                 start.Attr = append(start.Attr, new Attr(name, (@string)text));
-                return default!;
+                return default;
             }
         }
     }
@@ -704,53 +702,54 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
             {
                 var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(pv); if (ok) {
                     var (text, errΔ4) = textMarshaler.MarshalText();
-                    if (errΔ4 != default!) {
+                    if (errΔ4 != nil) {
                         return errΔ4;
                     }
                     start.Attr = append(start.Attr, new Attr(name, (@string)text));
-                    return default!;
+                    return default;
                 }
             }
         }
     }
 
     // Dereference or skip nil pointer, interface values.
-    var exprᴛ1 = val.Kind();
-    if (exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔInterface) {
+    switch (val.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔInterface: {
         if (val.IsNil()) {
-            return default!;
+            return default;
         }
         val = val.Elem();
-    }
+        break;
+    }}
 
     // Walk slices.
     if (val.Kind() == reflect.ΔSlice && val.Type().Elem().Kind() != reflect.Uint8) {
         nint n = val.Len();
         for (nint i = 0; i < n; i++) {
             {
-                var errΔ5 = p.marshalAttr(Ꮡstart, name, val.Index(i)); if (errΔ5 != default!) {
+                var errΔ5 = p.marshalAttr(Ꮡstart, name, val.Index(i)); if (errΔ5 != nil) {
                     return errΔ5;
                 }
             }
         }
-        return default!;
+        return default;
     }
 
     if (AreEqual(val.Type(), attrType)) {
         var (attr, _) = reflect.TypeAssert<Attr>(val);
         start.Attr = append(start.Attr, attr);
-        return default!;
+        return default;
     }
 
     var (s, b, err) = p.marshalSimple(val.Type(), val);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
-    if (b != default!) {
+    if (b != nil) {
         s = (@string)b;
     }
     start.Attr = append(start.Attr, new Attr(name, s));
-    return default!;
+    return default;
 }
 
 // defaultStart returns the default start element to use,
@@ -759,18 +758,16 @@ internal static StartElement defaultStart(reflectꓸType typ, ж<fieldInfo> Ꮡf
     ref var finfo = ref Ꮡfinfo.DerefOrNull();
     ref var startTemplate = ref ᏑstartTemplate.DerefOrNull();
 
-    StartElement start = default!;
+    StartElement start = default;
     // Precedence for the XML element name is as above,
     // except that we do not look inside structs for the first field.
-    if (ᏑstartTemplate != nil){
+    if (ᏑstartTemplate != nil) {
         start.Name = startTemplate.Name;
         start.Attr = appendꓸꓸꓸ(start.Attr, startTemplate.Attr);
-    } else 
-    if (Ꮡfinfo != nil && finfo.name != ""u8){
+    } else if (Ꮡfinfo != nil && finfo.name != ""u8) {
         start.Name.Local = finfo.name;
         start.Name.Space = finfo.xmlns;
-    } else 
-    if (typ.Name() != ""u8){
+    } else if (typ.Name() != ""u8) {
         start.Name.Local = typ.Name();
     } else {
         // Must be a pointer to a named type,
@@ -784,11 +781,11 @@ internal static StartElement defaultStart(reflectꓸType typ, ж<fieldInfo> Ꮡf
 internal static error marshalInterface(this ref printer p, Marshaler val, StartElement start) {
     // Push a marker onto the tag stack so that MarshalXML
     // cannot close the XML tags that it did not open.
-    p.tags = append(p.tags, new Name(nil));
+    p.tags = append(p.tags, new Name());
     nint n = len(p.tags);
 
     var err = val.MarshalXML(p.encoder, start);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -797,7 +794,7 @@ internal static error marshalInterface(this ref printer p, Marshaler val, StartE
         return fmt.Errorf("xml: %s.MarshalXML wrote invalid XML: <%s> not closed"u8, receiverType(val), p.tags[len(p.tags) - 1].Local);
     }
     p.tags = p.tags.slice(0, n - 1);
-    return default!;
+    return default;
 }
 
 // marshalTextInterface marshals a TextMarshaler interface value.
@@ -806,12 +803,12 @@ internal static error marshalTextInterface(this ж<printer> Ꮡp, encoding.TextM
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
     {
-        var errΔ1 = Ꮡp.writeStart(Ꮡstart); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡp.writeStart(Ꮡstart); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
     var (text, err) = val.MarshalText();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     EscapeText(new printerжWriter(Ꮡp), text);
@@ -834,13 +831,13 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
     p.markPrefix();
 
     p.writeIndent(1);
-    p.WriteByte((rune)'<');
+    p.WriteByte((byte)'<');
     p.WriteString(start.Name.Local);
 
     if (start.Name.Space != ""u8) {
         p.WriteString(xmlnsˢ2);
         p.EscapeString(start.Name.Space);
-        p.WriteByte((rune)'"');
+        p.WriteByte((byte)'"');
     }
 
     // Attributes
@@ -849,18 +846,18 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
         if (name.Local == ""u8) {
             continue;
         }
-        p.WriteByte((rune)' ');
+        p.WriteByte((byte)' ');
         if (name.Space != ""u8) {
             p.WriteString(Ꮡp.createAttrPrefix(name.Space));
-            p.WriteByte((rune)':');
+            p.WriteByte((byte)':');
         }
         p.WriteString(name.Local);
         p.WriteString(@"="""u8);
         p.EscapeString(attr.Value);
-        p.WriteByte((rune)'"');
+        p.WriteByte((byte)'"');
     }
-    p.WriteByte((rune)'>');
-    return default!;
+    p.WriteByte((byte)'>');
+    return default;
 }
 
 internal static error writeEnd(this ref printer p, Name name) {
@@ -881,57 +878,53 @@ internal static error writeEnd(this ref printer p, Name name) {
     p.tags = p.tags.slice(0, len(p.tags) - 1);
 
     p.writeIndent(-1);
-    p.WriteByte((rune)'<');
-    p.WriteByte((rune)'/');
+    p.WriteByte((byte)'<');
+    p.WriteByte((byte)'/');
     p.WriteString(name.Local);
-    p.WriteByte((rune)'>');
+    p.WriteByte((byte)'>');
     p.popPrefix();
-    return default!;
+    return default;
 }
 
 internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflectꓸType typ, reflectꓸValue val) {
-    var exprᴛ1 = val.Kind();
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
-        return (strconv.FormatInt(val.Int(), 10), default!, default!);
+    switch (val.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+        return (strconv.FormatInt(val.Int(), 10), default, default);
     }
-    if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
-        return (strconv.FormatUint(val.Uint(), 10), default!, default!);
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+        return (strconv.FormatUint(val.Uint(), 10), default, default);
     }
-    if (exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64) {
-        return (strconv.FormatFloat(val.Float(), (rune)'g', -1, val.Type().Bits()), default!, default!);
+    case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
+        return (strconv.FormatFloat(val.Float(), (byte)'g', -1, val.Type().Bits()), default, default);
     }
-    if (exprᴛ1 == reflect.ΔString) {
-        return (val.String(), default!, default!);
+    case var ᴛ when ᴛ == reflect.ΔString: {
+        return (val.String(), default, default);
     }
-    if (exprᴛ1 == reflect.ΔBool) {
-        return (strconv.FormatBool(val.Bool()), default!, default!);
+    case var ᴛ when ᴛ == reflect.ΔBool: {
+        return (strconv.FormatBool(val.Bool()), default, default);
     }
-    if (exprᴛ1 == reflect.Array) {
-        do {
-            if (typ.Elem().Kind() != reflect.Uint8) {
-                break;
-            }
-            // [...]byte
-            slice<byte> bytes = default!;
-            if (val.CanAddr()){
-                bytes = val.Bytes();
-            } else {
-                bytes = new slice<byte>(val.Len());
-                reflect.Copy(reflect.ValueOf(bytes), val);
-            }
-            return ("", bytes, default!);
-        } while (false);
+    case var ᴛ when ᴛ == reflect.Array: {
+        if (typ.Elem().Kind() != reflect.Uint8) {
+            break;
+        }
+        // [...]byte
+        slice<byte> bytes = default;
+        if (val.CanAddr()) {
+            bytes = val.Bytes();
+        } else {
+            bytes = new slice<byte>(val.Len());
+            reflect.Copy(reflect.ValueOf(bytes), val);
+        }
+        return ("", bytes, default);
     }
-    else if (exprᴛ1 == reflect.ΔSlice) {
-        do {
-            if (typ.Elem().Kind() != reflect.Uint8) {
-                break;
-            }
-            // []byte
-            return ("", val.Bytes(), default!);
-        } while (false);
-    }
-    return ("", default!, new UnsupportedTypeErrorжerror(Ꮡ(new UnsupportedTypeError(typ))));
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
+        if (typ.Elem().Kind() != reflect.Uint8) {
+            break;
+        }
+        // []byte
+        return ("", val.Bytes(), default);
+    }}
+    return ("", default, new UnsupportedTypeErrorжerror(Ꮡ(new UnsupportedTypeError(typ))));
 }
 
 internal static slice<byte> ddBytes = slice<byte>("--"u8);
@@ -957,7 +950,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
     var s = new parentStack(p: Ꮡp);
     foreach (var i in range(tinfo.fields)) {
         var finfo = Ꮡ(tinfo.fields, i);
-        if ((fieldFlags)((~finfo).flags & fAttr) != 0) {
+        if ((fieldFlags)(finfo.flags & fAttr) != 0) {
             continue;
         }
         var vf = finfo.value(val, dontInitNilPointers);
@@ -967,14 +960,14 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
             continue;
         }
 
-        var exprᴛ1 = (fieldFlags)((~finfo).flags & fMode);
-        if (exprᴛ1 == fCDATA || exprᴛ1 == fCharData) {
+        switch ((fieldFlags)(finfo.flags & fMode)) {
+        case var ᴛ when ᴛ == fCDATA || ᴛ == fCharData: {
             var emit = EscapeText;
-            if ((fieldFlags)((~finfo).flags & fMode) == fCDATA) {
+            if ((fieldFlags)(finfo.flags & fMode) == fCDATA) {
                 emit = emitCDATA;
             }
             {
-                var err = s.trim((~finfo).parents); if (err != default!) {
+                var err = s.trim(finfo.parents); if (err != nil) {
                     return err;
                 }
             }
@@ -982,11 +975,11 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 {
                     var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(vf); if (ok) {
                         var (data, err) = textMarshaler.MarshalText();
-                        if (err != default!) {
+                        if (err != nil) {
                             return err;
                         }
                         {
-                            var errΔ1 = emit(new printerжWriter(Ꮡp), data); if (errΔ1 != default!) {
+                            var errΔ1 = emit(new printerжWriter(Ꮡp), data); if (errΔ1 != nil) {
                                 return errΔ1;
                             }
                         }
@@ -1000,11 +993,11 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                     {
                         var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(pv); if (ok) {
                             var (data, err) = textMarshaler.MarshalText();
-                            if (err != default!) {
+                            if (err != nil) {
                                 return err;
                             }
                             {
-                                var errΔ1 = emit(new printerжWriter(Ꮡp), data); if (errΔ1 != default!) {
+                                var errΔ1 = emit(new printerжWriter(Ꮡp), data); if (errΔ1 != nil) {
                                     return errΔ1;
                                 }
                             }
@@ -1016,58 +1009,65 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
 
             array<byte> scratch = new(64);
             vf = indirect(vf);
-            var exprᴛ2 = vf.Kind();
-            if (exprᴛ2 == reflect.ΔInt || exprᴛ2 == reflect.Int8 || exprᴛ2 == reflect.Int16 || exprᴛ2 == reflect.Int32 || exprᴛ2 == reflect.Int64) {
+            switch (vf.Kind()) {
+            case var ᴛ2 when ᴛ2 == reflect.ΔInt || ᴛ2 == reflect.Int8 || ᴛ2 == reflect.Int16 || ᴛ2 == reflect.Int32 || ᴛ2 == reflect.Int64: {
                 {
-                    var err = emit(new printerжWriter(Ꮡp), strconv.AppendInt(scratch[..0], vf.Int(), 10)); if (err != default!) {
+                    var err = emit(new printerжWriter(Ꮡp), strconv.AppendInt(scratch[..0], vf.Int(), 10)); if (err != nil) {
                         return err;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == reflect.ΔUint || exprᴛ2 == reflect.Uint8 || exprᴛ2 == reflect.Uint16 || exprᴛ2 == reflect.Uint32 || exprᴛ2 == reflect.Uint64 || exprᴛ2 == reflect.Uintptr) {
+            case var ᴛ2 when ᴛ2 == reflect.ΔUint || ᴛ2 == reflect.Uint8 || ᴛ2 == reflect.Uint16 || ᴛ2 == reflect.Uint32 || ᴛ2 == reflect.Uint64 || ᴛ2 == reflect.Uintptr: {
                 {
-                    var err = emit(new printerжWriter(Ꮡp), strconv.AppendUint(scratch[..0], vf.Uint(), 10)); if (err != default!) {
+                    var err = emit(new printerжWriter(Ꮡp), strconv.AppendUint(scratch[..0], vf.Uint(), 10)); if (err != nil) {
                         return err;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == reflect.Float32 || exprᴛ2 == reflect.Float64) {
+            case var ᴛ2 when ᴛ2 == reflect.Float32 || ᴛ2 == reflect.Float64: {
                 {
-                    var err = emit(new printerжWriter(Ꮡp), strconv.AppendFloat(scratch[..0], vf.Float(), (rune)'g', -1, vf.Type().Bits())); if (err != default!) {
+                    var err = emit(new printerжWriter(Ꮡp), strconv.AppendFloat(scratch[..0], vf.Float(), (byte)'g', -1, vf.Type().Bits())); if (err != nil) {
                         return err;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == reflect.ΔBool) {
+            case var ᴛ2 when ᴛ2 == reflect.ΔBool: {
                 {
-                    var err = emit(new printerжWriter(Ꮡp), strconv.AppendBool(scratch[..0], vf.Bool())); if (err != default!) {
+                    var err = emit(new printerжWriter(Ꮡp), strconv.AppendBool(scratch[..0], vf.Bool())); if (err != nil) {
                         return err;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == reflect.ΔString) {
+            case var ᴛ2 when ᴛ2 == reflect.ΔString: {
                 {
-                    var err = emit(new printerжWriter(Ꮡp), slice<byte>(vf.String())); if (err != default!) {
+                    var err = emit(new printerжWriter(Ꮡp), slice<byte>(vf.String())); if (err != nil) {
                         return err;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == reflect.ΔSlice) {
+            case var ᴛ2 when ᴛ2 == reflect.ΔSlice: {
                 {
                     var (elem, ok) = reflect.TypeAssert<slice<byte>>(vf); if (ok) {
                         {
-                            var err = emit(new printerжWriter(Ꮡp), elem); if (err != default!) {
+                            var err = emit(new printerжWriter(Ꮡp), elem); if (err != nil) {
                                 return err;
                             }
                         }
                     }
                 }
-            }
+                break;
+            }}
             continue;
+            break;
         }
-        else if (exprᴛ1 == fComment) {
+        case var ᴛ when ᴛ == fComment: {
             {
-                var err = s.trim((~finfo).parents); if (err != default!) {
+                var err = s.trim(finfo.parents); if (err != nil) {
                     return err;
                 }
             }
@@ -1083,37 +1083,41 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
             p.WriteString("<!--"u8);
             var dashDash = false;
             var dashLast = false;
-            var exprᴛ3 = k;
-            if (exprᴛ3 == reflect.ΔString) {
+            switch (k) {
+            case var ᴛ2 when ᴛ2 == reflect.ΔString: {
                 @string sΔ4 = vf.String();
                 dashDash = strings.Contains(sΔ4, "--"u8);
-                dashLast = sΔ4[len(sΔ4) - 1] == (rune)'-';
+                dashLast = sΔ4[len(sΔ4) - 1] == '-';
                 if (!dashDash) {
                     p.WriteString(sΔ4);
                 }
+                break;
             }
-            else if (exprᴛ3 == reflect.ΔSlice) {
+            case var ᴛ2 when ᴛ2 == reflect.ΔSlice: {
                 var b = vf.Bytes();
                 dashDash = bytes.Contains(b, ddBytes);
-                dashLast = b[len(b) - 1] == (rune)'-';
+                dashLast = b[len(b) - 1] == '-';
                 if (!dashDash) {
                     p.Write(b);
                 }
+                break;
             }
-            else { /* default: */
+            default: {
                 throw panic("can't happen");
-            }
+                break;
+            }}
             if (dashDash) {
                 return fmt.Errorf(@"xml: comments must not contain ""--"""u8);
             }
             if (dashLast) {
                 // "--->" is invalid grammar. Make it "- -->"
-                p.WriteByte((rune)' ');
+                p.WriteByte((byte)' ');
             }
             p.WriteString("-->"u8);
             continue;
+            break;
         }
-        else if (exprᴛ1 == fInnerXML) {
+        case var ᴛ when ᴛ == fInnerXML: {
             vf = indirect(vf);
             var iface = vf.Interface();
             switch (iface.type()) {
@@ -1127,30 +1131,32 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 continue;
                 break;
             }}
+            break;
         }
-        else if (exprᴛ1 == fElement || exprᴛ1 == (fieldFlags)((fieldFlags)(fElement | fAny))) {
+        case var ᴛ when ᴛ == fElement || ᴛ == (fieldFlags)((fieldFlags)(fElement | fAny)): {
             {
-                var err = s.trim((~finfo).parents); if (err != default!) {
+                var err = s.trim(finfo.parents); if (err != nil) {
                     return err;
                 }
             }
-            if (len((~finfo).parents) > len(s.stack)) {
+            if (len(finfo.parents) > len(s.stack)) {
                 if (vf.Kind() != reflect.ΔPointer && vf.Kind() != reflect.ΔInterface || !vf.IsNil()) {
                     {
-                        var err = s.push((~finfo).parents.slice(len(s.stack))); if (err != default!) {
+                        var err = s.push(finfo.parents.slice(len(s.stack))); if (err != nil) {
                             return err;
                         }
                     }
                 }
             }
-        }
+            break;
+        }}
         {
-            var err = Ꮡp.marshalValue(vf, finfo, nil); if (err != default!) {
+            var err = Ꮡp.marshalValue(vf, finfo, nil); if (err != nil) {
                 return err;
             }
         }
     }
-    s.trim(default!);
+    s.trim(default);
     return p.cachedWriteError();
 }
 
@@ -1159,12 +1165,12 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
 
 // Write implements io.Writer
 internal static (nint n, error err) Write(this ref printer p, slice<byte> b) {
-    nint n = default!;
+    nint n = default;
 
-    if (p.closed && p.err == default!) {
+    if (p.closed && p.err == nil) {
         p.err = errors.New(useOfClosedEncoderˢ);
     }
-    if (p.err == default!) {
+    if (p.err == nil) {
         (n, p.err) = p.w.Write(b);
     }
     return (n, p.err);
@@ -1172,12 +1178,12 @@ internal static (nint n, error err) Write(this ref printer p, slice<byte> b) {
 
 // WriteString implements io.StringWriter
 internal static (nint n, error err) WriteString(this ref printer p, @string s) {
-    nint n = default!;
+    nint n = default;
 
-    if (p.closed && p.err == default!) {
+    if (p.closed && p.err == nil) {
         p.err = errors.New(useOfClosedEncoderˢ);
     }
-    if (p.err == default!) {
+    if (p.err == nil) {
         (n, p.err) = p.w.WriteString(s);
     }
     return (n, p.err);
@@ -1185,10 +1191,10 @@ internal static (nint n, error err) WriteString(this ref printer p, @string s) {
 
 // WriteByte implements io.ByteWriter
 internal static error WriteByte(this ref printer p, byte c) {
-    if (p.closed && p.err == default!) {
+    if (p.closed && p.err == nil) {
         p.err = errors.New(useOfClosedEncoderˢ);
     }
-    if (p.err == default!) {
+    if (p.err == nil) {
         p.err = p.w.WriteByte(c);
     }
     return p.err;
@@ -1199,23 +1205,23 @@ internal static error WriteByte(this ref printer p, byte c) {
 // written XML is invalid (e.g. by containing unclosed elements).
 internal static error Close(this ref printer p) {
     if (p.closed) {
-        return default!;
+        return default;
     }
     p.closed = true;
     {
-        var err = p.w.Flush(); if (err != default!) {
+        var err = p.w.Flush(); if (err != nil) {
             return err;
         }
     }
     if (len(p.tags) > 0) {
         return fmt.Errorf("unclosed tag <%s>"u8, p.tags[len(p.tags) - 1].Local);
     }
-    return default!;
+    return default;
 }
 
 // return the bufio Writer's cached write error
 internal static error cachedWriteError(this ref printer p) {
-    var (_, err) = p.Write(default!);
+    var (_, err) = p.Write(default);
     return err;
 }
 
@@ -1231,8 +1237,8 @@ internal static void writeIndent(this ref printer p, nint depthDelta) {
         }
         p.indentedIn = false;
     }
-    if (p.putNewline){
-        p.WriteByte((rune)'\n');
+    if (p.putNewline) {
+        p.WriteByte((byte)'\n');
     } else {
         p.putNewline = true;
     }
@@ -1267,26 +1273,26 @@ internal static error trim(this ref parentStack s, slice<@string> parents) {
     }
     for (nint i = len(s.stack) - 1; i >= split; i--) {
         {
-            var err = s.p.writeEnd(new Name(Local: s.stack[i])); if (err != default!) {
+            var err = s.p.writeEnd(new Name(Local: s.stack[i])); if (err != nil) {
                 return err;
             }
         }
     }
     s.stack = s.stack.slice(0, split);
-    return default!;
+    return default;
 }
 
 // push adds parent elements to the stack and writes open tags.
 internal static error push(this ref parentStack s, slice<@string> parents) {
     for (nint i = 0; i < len(parents); i++) {
         {
-            var err = s.p.writeStart(Ꮡ(new StartElement(Name: new Name(Local: parents[i])))); if (err != default!) {
+            var err = s.p.writeStart(Ꮡ(new StartElement(Name: new Name(Local: parents[i])))); if (err != nil) {
                 return err;
             }
         }
     }
     s.stack = appendꓸꓸꓸ(s.stack, parents);
-    return default!;
+    return default;
 }
 
 // UnsupportedTypeError is returned when [Marshal] encounters a type
@@ -1300,13 +1306,13 @@ public static @string Error(this ref UnsupportedTypeError e) {
 }
 
 internal static bool isEmptyValue(reflectꓸValue v) {
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.Map || exprᴛ1 == reflect.ΔSlice || exprᴛ1 == reflect.ΔString) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Map || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔString: {
         return v.Len() == 0;
     }
-    if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.ΔInterface || exprᴛ1 == reflect.ΔPointer) {
+    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔInterface || ᴛ == reflect.ΔPointer: {
         return v.IsZero();
-    }
+    }}
     return false;
 }
 

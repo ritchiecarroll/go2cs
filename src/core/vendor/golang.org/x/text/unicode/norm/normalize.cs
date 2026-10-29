@@ -51,8 +51,7 @@ public static slice<byte> Bytes(this Form f, slice<byte> b) {
     }
     var @out = new slice<byte>(n, len(b));
     copy(@out, b.slice(0, n));
-    ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(b), @out: @out, flushF: appendFlush);
+    ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: len(b), @out: @out, flushF: appendFlush), out var Ꮡrb);
     return doAppendInner(Ꮡrb, n);
 }
 
@@ -66,8 +65,7 @@ public static @string String(this Form f, @string s) {
     }
     var @out = new slice<byte>(n, len(s));
     copy(@out, s.slice(0, n));
-    ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(s), @out: @out, flushF: appendFlush);
+    ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: len(s), @out: @out, flushF: appendFlush), out var Ꮡrb);
     return (@string)doAppendInner(Ꮡrb, n);
 }
 
@@ -79,9 +77,8 @@ public static bool IsNormal(this Form f, slice<byte> b) {
     if (ok) {
         return true;
     }
-    ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(b));
-    rb.setFlusher(default!, cmpNormalBytes);
+    ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: len(b)), out var Ꮡrb);
+    rb.setFlusher(default, cmpNormalBytes);
     while (bp < len(b)) {
         rb.@out = b.slice(bp);
         {
@@ -123,18 +120,17 @@ public static bool IsNormalString(this Form f, @string s) {
     if (ok) {
         return true;
     }
-    ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(s));
-    rb.setFlusher(default!, (ж<reorderBuffer> rbΔ1) => {
-        for (nint i = 0; i < (~rbΔ1).nrune; i++) {
-            var info = (~rbΔ1).rune[i];
+    ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: len(s)), out var Ꮡrb);
+    rb.setFlusher(default, (ж<reorderBuffer> rbΔ1) => {
+        for (nint i = 0; i < rbΔ1.nrune; i++) {
+            var info = rbΔ1.rune[i];
             if (bp + (nint)info.size > len(s)) {
                 return false;
             }
             var p = info.pos;
             var pe = (uint8)(p + info.size);
             for (; p < pe; p++) {
-                if (s[bp] != (~rbΔ1).@byte[p]) {
+                if (s[bp] != rbΔ1.@byte[p]) {
                     return false;
                 }
                 bp++;
@@ -180,11 +176,10 @@ internal static bool patchTail(ж<reorderBuffer> Ꮡrb) {
     rb.@out = rb.@out.slice(0, p);
     decomposeToLastBoundary(Ꮡrb);
     {
-        ssState s = rb.ss.next(info); if (s == ssStarter){
+        ssState s = rb.ss.next(info); if (s == ssStarter) {
             Ꮡrb.doFlush();
             rb.ss.first(info);
-        } else 
-        if (s == ssOverflow) {
+        } else if (s == ssOverflow) {
             Ꮡrb.doFlush();
             rb.insertCGJ();
             rb.ss = 0;
@@ -225,12 +220,10 @@ internal static slice<byte> doAppend(this Form f, slice<byte> @out, input src, n
         if (p == n) {
             return @out;
         }
-        ref var rbΔ1 = ref heap<reorderBuffer>(out var ᏑrbΔ1);
-        rbΔ1 = new reorderBuffer(f: ft.Value, src: src, nsrc: n, @out: @out, flushF: appendFlush);
+        ref var rbΔ1 = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: n, @out: @out, flushF: appendFlush), out var ᏑrbΔ1);
         return doAppendInner(ᏑrbΔ1, p);
     }
-    ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: n);
+    ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: n), out var Ꮡrb);
     return doAppend(Ꮡrb, @out, 0);
 }
 
@@ -251,9 +244,9 @@ internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, 
     }
     var fd = Ꮡrb.of(reorderBuffer.Ꮡf);
     if (doMerge) {
-        ΔProperties info = default!;
+        ΔProperties info = default;
         if (p < n) {
-            info = (~fd).info(src, p);
+            info = fd.info(src, p);
             if (!info.BoundaryBefore() || info.nLeadingNonStarters() > 0) {
                 if (p == 0) {
                     decomposeToLastBoundary(Ꮡrb);
@@ -300,12 +293,12 @@ public static nint QuickSpan(this Form f, slice<byte> b) {
 // Span implements transform.SpanningTransformer. It returns a boundary n such
 // that b[0:n] == f(b[0:n]). It is not guaranteed to return the largest such n.
 public static (nint n, error err) Span(this Form f, slice<byte> b, bool atEOF) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, var ok) = formTable[f].quickSpan(inputBytes(b), 0, len(b), atEOF);
     if (n < len(b)) {
-        if (!ok){
+        if (!ok) {
             err = go.vendor.golang.org.x.text.transform_package.ErrEndOfSpan;
         } else {
             err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
@@ -317,12 +310,12 @@ public static (nint n, error err) Span(this Form f, slice<byte> b, bool atEOF) {
 // SpanString returns a boundary n such that s[0:n] == f(s[0:n]).
 // It is not guaranteed to return the largest such n.
 public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, var ok) = formTable[f].quickSpan(inputString(s), 0, len(s), atEOF);
     if (n < len(s)) {
-        if (!ok){
+        if (!ok) {
             err = go.vendor.golang.org.x.text.transform_package.ErrEndOfSpan;
         } else {
             err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
@@ -336,9 +329,9 @@ public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF)
 // not point past the last segment if this segment might be become
 // non-normalized by appending other runes.
 internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint i, nint end, bool atEOF) {
-    nint n = default!;
+    nint n = default;
 
-    uint8 lastCC = default!;
+    uint8 lastCC = default;
     var ss = (streamSafe)0;
     nint lastSegStart = i;
     for (n = end; i < n; ) {
@@ -361,19 +354,21 @@ internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint
         }
         // This block needs to be before the next, because it is possible to
         // have an overflow for runes that are starters (e.g. with U+FF9E).
-        var exprᴛ1 = ss.next(info);
-        if (exprᴛ1 == ssStarter) {
+        switch (ss.next(info)) {
+        case var ᴛ when ᴛ == ssStarter: {
             lastSegStart = i;
+            break;
         }
-        else if (exprᴛ1 == ssOverflow) {
+        case var ᴛ when ᴛ == ssOverflow: {
             return (lastSegStart, false);
         }
-        else if (exprᴛ1 == ssSuccess) {
+        case var ᴛ when ᴛ == ssSuccess: {
             if (lastCC > info.ccc) {
                 return (lastSegStart, false);
             }
-        }
-        if (f.composing){
+            break;
+        }}
+        if (f.composing) {
             if (!info.isYesC()) {
                 break;
             }
@@ -417,8 +412,8 @@ internal static nint firstBoundary(this Form f, input src, nint nsrc) {
     // We should call ss.first here, but we can't as the first rune is
     // skipped already. This means FirstBoundary can't really determine
     // CGJ insertion points correctly. Luckily it doesn't have to.
-    while (ᐧ) {
-        var info = (~fd).info(src, i);
+    for (;;) {
+        var info = fd.info(src, i);
         if (info.size == 0) {
             return -1;
         }
@@ -465,7 +460,7 @@ internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF)
         return -1;
     }
     var fd = formTable[f];
-    var info = (~fd).info(src, 0);
+    var info = fd.info(src, 0);
     if (info.size == 0) {
         if (atEOF) {
             return 1;
@@ -476,7 +471,7 @@ internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF)
     ss.first(info);
 
     for (nint i = (nint)info.size; i < nsrc; i += (nint)info.size) {
-        info = (~fd).info(src, i);
+        info = fd.info(src, i);
         if (info.size == 0) {
             if (atEOF) {
                 return i;
@@ -556,13 +551,12 @@ internal static nint decomposeSegment(ж<reorderBuffer> Ꮡrb, nint sp, bool atE
         return 0;
     }
     {
-        ssState s = rb.ss.next(info); if (s == ssStarter){
+        ssState s = rb.ss.next(info); if (s == ssStarter) {
             // TODO: this could be removed if we don't support merging.
             if (rb.nrune > 0) {
                 goto end;
             }
-        } else 
-        if (s == ssOverflow) {
+        } else if (s == ssOverflow) {
             rb.insertCGJ();
             goto end;
         }
@@ -572,7 +566,7 @@ internal static nint decomposeSegment(ж<reorderBuffer> Ꮡrb, nint sp, bool atE
             return (nint)err;
         }
     }
-    while (ᐧ) {
+    for (;;) {
         sp += (nint)info.size;
         if (sp >= rb.nsrc) {
             if (!atEOF && !info.BoundaryAfter()) {
@@ -588,10 +582,9 @@ internal static nint decomposeSegment(ж<reorderBuffer> Ꮡrb, nint sp, bool atE
             break;
         }
         {
-            ssState s = rb.ss.next(info); if (s == ssStarter){
+            ssState s = rb.ss.next(info); if (s == ssStarter) {
                 break;
-            } else 
-            if (s == ssOverflow) {
+            } else if (s == ssOverflow) {
                 rb.insertCGJ();
                 break;
             }
@@ -616,7 +609,7 @@ internal static (ΔProperties, nint) lastRuneStart(ref formInfo fd, slice<byte> 
     for (; p >= 0 && !utf8.RuneStart(buf[p]); p--) {
     }
     if (p < 0) {
-        return (new ΔProperties(nil), -1);
+        return (new ΔProperties(), -1);
     }
     return (fd.info(inputBytes(buf), p), p);
 }
@@ -635,11 +628,11 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
     if (info.BoundaryAfter()) {
         return;
     }
-    array<ΔProperties> add = new(31); /* maxNonStarters + 1 */                                             // stores runeInfo in reverse order
+    array<ΔProperties> add = new(31); /* maxNonStarters + 1 */ // stores runeInfo in reverse order
     nint padd = 0;
     var ss = (streamSafe)0;
     nint p = len(rb.@out);
-    while (ᐧ) {
+    for (;;) {
         add[padd] = info;
         ssState v = ss.backwards(info);
         if (v == ssOverflow) {

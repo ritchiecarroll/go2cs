@@ -13,14 +13,14 @@ partial class cpu_package {
 // This is a copy of the Go runtime's parseRelease from
 // https://golang.org/cl/209597.
 internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@string rel) {
-    nint major = default!;
-    nint minor = default!;
-    nint patch = default!;
-    bool ok = default!;
+    nint major = default;
+    nint minor = default;
+    nint patch = default;
+    bool ok = default;
 
     // Strip anything after a dash or plus.
     foreach (var i in range(len(rel))) {
-        if (rel[i] == (rune)'-' || rel[i] == (rune)'+') {
+        if (rel[i] == '-' || rel[i] == '+') {
             rel = rel.slice(0, i);
             break;
         }
@@ -28,15 +28,15 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
 
     (nint, bool) next() {
         foreach (var i in range(len(rel))) {
-            if (rel[i] == (rune)'.') {
+            if (rel[i] == '.') {
                 var (verΔ1, errΔ1) = strconv.Atoi(rel.slice(0, i));
                 rel = rel.slice(i + 1);
-                return (verΔ1, errΔ1 == default!);
+                return (verΔ1, errΔ1 == nil);
             }
         }
         var (ver, err) = strconv.Atoi(rel);
         rel = ""u8;
-        return (ver, err == default!);
+        return (ver, err == nil);
     }
     {
         (major, ok) = next(); if (!ok || rel == ""u8) {

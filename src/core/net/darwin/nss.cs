@@ -24,7 +24,7 @@ partial struct nsswitchConfig {
     // ch is used as a semaphore that only allows one lookup at a
     // time to recheck nsswitch.conf
     internal channel<EmptyStruct> ch; // guards lastChecked and modTime
-    internal time.Time lastChecked;     // last time nsswitch.conf was checked
+    internal time.Time lastChecked;   // last time nsswitch.conf was checked
     internal Δsync.Mutex mu; // protects nssConf
     internal ж<nssConf> nssConf;
 }
@@ -68,13 +68,13 @@ internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
         }
         conf.lastChecked = now;
 
-        time.Time mtime = default!;
+        time.Time mtime = default;
         {
-            var (fi, err) = os.Stat(nssConfigPath); if (err == default!) {
+            var (fi, err) = os.Stat(nssConfigPath); if (err == nil) {
                 mtime = fi.ModTime();
             }
         }
-        if (mtime.Equal((~conf.nssConf).mtime)) {
+        if (mtime.Equal(conf.nssConf.mtime)) {
             return;
         }
 
@@ -108,8 +108,8 @@ internal static void releaseSema(this ref nsswitchConfig conf) {
 
 // nssConf represents the state of the machine's /etc/nsswitch.conf file.
 partial struct nssConf {
-    internal time.Time mtime;              // time of nsswitch.conf modification
-    internal error err;                  // any error encountered opening or parsing the file
+    internal time.Time mtime;                        // time of nsswitch.conf modification
+    internal error err;                              // any error encountered opening or parsing the file
     internal map<@string, slice<nssSource>> sources; // keyed by database (e.g. "hosts")
 }
 
@@ -132,7 +132,7 @@ internal static bool standardCriteria(this nssSource s) {
 // nssCriterion is the parsed structure of one of the criteria in brackets
 // after an NSS source name.
 partial struct nssCriterion {
-    internal bool negate;   // if "!" was present
+    internal bool negate;    // if "!" was present
     internal @string status; // e.g. "success", "unavail" (lowercase)
     internal @string action; // e.g. "return", "continue" (lowercase)
 }
@@ -148,18 +148,21 @@ internal static bool standardStatusAction(this nssCriterion c, bool last) {
     if (c.negate) {
         return false;
     }
-    @string def = default!;
+    @string def = default;
     var exprᴛ1 = c.status;
-    if (exprᴛ1 == "success"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "success"u8: {
         def = returnˢ;
+        break;
     }
-    else if (exprᴛ1 == "notfound"u8 || exprᴛ1 == "unavail"u8 || exprᴛ1 == "tryagain"u8) {
+    case {} when exprᴛ1 == "notfound"u8 || exprᴛ1 == "unavail"u8 || exprᴛ1 == "tryagain"u8: {
         def = continueˢ;
+        break;
     }
-    else { /* default: */
+    default: {
         // Unknown status
         return false;
-    }
+    }}
     if (last && c.action == "return"u8) {
         return true;
     }
@@ -170,21 +173,21 @@ internal static ж<nssConf> parseNSSConfFile(@string Δfile) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = open(Δfile);
-        if (err != default!) {
+        if (err != nil) {
             return Ꮡ(new nssConf(err: err));
         }
         var fʗ1 = f;
         defer(fʗ1.close, ref ᒐ);
         (var mtime, _, err) = f.stat();
-        if (err != default!) {
+        if (err != nil) {
             return Ꮡ(new nssConf(err: err));
         }
 
         var conf = parseNSSConf(f);
-        conf.Value.mtime = mtime;
+        conf.mtime = mtime;
         return conf;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -201,47 +204,47 @@ internal static ж<nssConf> parseNSSConf(ж<Δfile> Ꮡf) {
         if (len(line) == 0) {
             continue;
         }
-        nint colon = bytealg.IndexByteString(line, (rune)':');
+        nint colon = bytealg.IndexByteString(line, (byte)':');
         if (colon == -1) {
-            conf.Value.err = errors.New(noColonOnLineˢ);
+            conf.err = errors.New(noColonOnLineˢ);
             return conf;
         }
         @string db = trimSpace(line.slice(0, colon));
         @string srcs = line.slice(colon + 1);
-        while (ᐧ) {
+        for (;;) {
             srcs = trimSpace(srcs);
             if (len(srcs) == 0) {
                 break;
             }
-            nint sp = bytealg.IndexByteString(srcs, (rune)' ');
-            @string src = default!;
-            if (sp == -1){
+            nint sp = bytealg.IndexByteString(srcs, (byte)' ');
+            @string src = default;
+            if (sp == -1) {
                 src = srcs;
                 srcs = ""u8; // done
             } else {
                 src = srcs.slice(0, sp);
                 srcs = trimSpace(srcs.slice(sp + 1));
             }
-            slice<nssCriterion> criteria = default!;
+            slice<nssCriterion> criteria = default;
             // See if there's a criteria block in brackets.
-            if (len(srcs) > 0 && srcs[0] == (rune)'[') {
-                nint bclose = bytealg.IndexByteString(srcs, (rune)']');
+            if (len(srcs) > 0 && srcs[0] == '[') {
+                nint bclose = bytealg.IndexByteString(srcs, (byte)']');
                 if (bclose == -1) {
-                    conf.Value.err = errors.New(unclosedCriterionBracketˢ);
+                    conf.err = errors.New(unclosedCriterionBracketˢ);
                     return conf;
                 }
-                error err = default!;
+                error err = default;
                 (criteria, err) = parseCriteria(srcs.slice(1, bclose));
-                if (err != default!) {
-                    conf.Value.err = errors.New("invalid criteria: " + srcs.slice(1, bclose));
+                if (err != nil) {
+                    conf.err = errors.New("invalid criteria: " + srcs.slice(1, bclose));
                     return conf;
                 }
                 srcs = srcs.slice(bclose + 1);
             }
-            if ((~conf).sources == default!) {
-                conf.Value.sources = new map<@string, slice<nssSource>>();
+            if (conf.sources == nil) {
+                conf.sources = new map<@string, slice<nssSource>>();
             }
-            conf.Value.sources[db] = append((~conf).sources[db], new nssSource(
+            conf.sources[db] = append(conf.sources[db], new nssSource(
                 source: src,
                 criteria: criteria
             ));
@@ -256,19 +259,19 @@ internal static readonly @string criterionLacksEqualSignˢ = "criterion lacks eq
 
 // parses "foo=bar !foo=bar"
 internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
-    slice<nssCriterion> c = default!;
-    error err = default!;
+    slice<nssCriterion> c = default;
+    error err = default;
 
     err = foreachField(x, error (@string f) => {
         var not = false;
-        if (len(f) > 0 && f[0] == (rune)'!') {
+        if (len(f) > 0 && f[0] == '!') {
             not = true;
             f = f[1..];
         }
         if (len(f) < 3) {
             return errors.New(criterionTooShortˢ);
         }
-        nint eq = bytealg.IndexByteString(f, (rune)'=');
+        nint eq = bytealg.IndexByteString(f, (byte)'=');
         if (eq == -1) {
             return errors.New(criterionLacksEqualSignˢ);
         }
@@ -282,7 +285,7 @@ internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
             status: f.slice(0, eq),
             action: f.slice(eq + 1)
         ));
-        return default!;
+        return default;
     });
     return (c, err);
 }

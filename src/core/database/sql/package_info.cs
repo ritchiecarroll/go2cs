@@ -10,17 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using driverꓸRowsAffected = go.database.sql.driver_package.ΔRowsAffected;
 global using driverꓸValue = object;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 using driver = go.database.sql.driver_package;
 // </ImportedTypeAliases>
 
@@ -81,6 +73,18 @@ using static go.database.sql_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(ColumnType))]
+[assembly: go.GoFieldAccess(typeof(DB))]
+[assembly: go.GoFieldAccess(typeof(Rows))]
+[assembly: go.GoFieldAccess(typeof(driverConn))]
+[assembly: go.GoFieldAccess(typeof(driverStmt))]
+[assembly: go.GoFieldAccess(typeof(go.database.sql.driver_package.NamedValue))]
+[assembly: go.GoFieldAccess(typeof(strconv_package.NumError))]
+[assembly: go.GoFieldAccess(typeof(time_package.Timer))]
+[assembly: go.GoFieldAccess(typeof(ΔStmt))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -89,9 +93,9 @@ using static go.database.sql_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("database/sql/convert.go", "convert.cs", "ABUslIKClKaCgpSCgpQAChaigsqCgtyAgoKClIKUAAMU8oKCgpSClKziggACEgAIAsqUgoKCgoLugoKUgoIAAhDSgqKCgIKAgqSCpIIADBqCgpSCxMaCgpSCpIKkgoKklKTcgqYAAh4ADAIABhAACASUlIKUgqSClIKkgpSCxpSClIKkgpSCpIKUgqSClILGlIKkgqSClIKkgpSCxpTWlIKUgqSClIKkgpSC2JSClIKU7IK2goKmyJSUgpqCxoKAgoLWgoCCgtaCgpSkgqaAgraCgpSCpoKmgoKUxKSmgoIABxCUgoKUgqSClIKCgoKUgqSClIKCgoKUgqSClIKCgoKUgqSClJSCpIK4poKAgqSmgpSklIKUpKSkpJSmspSkpKSkpIKUpgABGgALAoCGpA==", "340-340:1;345-352:2", "175=database/sql.ccChecker.CheckNamedValue;190=database/sql.ccChecker.CheckNamedValue")]
+[assembly: go.GoPositionMap("database/sql/convert.go", "convert.cs", "ABUslIKClKaCgpSCgpQAChaigsqCgtyAgoKClIKUAAMU8oKCgpSClKziggACEgAIAsqUgoKCgoLugoKUgoIAAhDSgqKCgIKAgqSCpIIADBqCgpSCxMaCgpSCtIK0goKklLTcgqYAAh4ADAIABhAACASUlIKUgqSClIKkgpSCxpSClIKkgpSCpIKUgqSClILGlIKkgqSClIKkgpSCxpTWlIKUgqSClIKkgpSC2JSClIKU7IK2goKmyJSUgpqCxoKAgoLWgoCCgtaCgpSkgqaAgraCgpSCpoKmgoKUxKSmgoIABxCUgoKUgqSClIKCgoKUgqSClIKCgoKUgqSClIKCgoKUgqSClJSCpILIpoKAgqSmgpSklIKUpKSkpJSmspSkpKSkpIKUpgABGgALAoCGpA==", "340-340:1;345-352:2", "175=database/sql.ccChecker.CheckNamedValue;190=database/sql.ccChecker.CheckNamedValue")]
 [assembly: go.GoPositionMap("database/sql/ctxutil.go", "ctxutil.cs", "AAwagoCCpIKCpoLWpoKClIKCpqbEpoKClIKCpqbEpoKAgqSCgqamxKaCgIKkgoKmpsTmooCCgoKClLamgsqCuIKmgoKmgtbWgoKCgpSU")]
-[assembly: go.GoPositionMap("database/sql/sql.go", "sql.cs", "ADZgpprSgoKClICCpKKkooKUoqaygoIAGkwAEAoAHCySlKSkpKSkpKSkACNKsoKClIKokoKUAAoYsoKClIKokoKUAAoYsoKClIKokoKUAAoYsoKClIKCqJKClAAKGLKCgpSCgqiSgpQAChiygoKUgqiSgpQAChiygoKUgqiSgpQAChiygoKUgqiSgpQAFSyigoKUgqaCgpSUgIKCgpS2AC9kAEyoAaKm0oKCoqSCgpSq8oKUgpSAgqTa8oKUgpSAgqTawoKClKaC7oKUgtjigoKClILWooKCgpSCpoKCgoKmopiigoKClJSClIKCgqaCgoKUggAMHvKCgoKUgoIAECDygoKipIKClIKCgpSu4oKCgqaCgoKmgpSmtoK2AA8ggqaCAAImABACgu6kAAIoABECgoKCgqaAgoKClLamooKAgpK2gqrCgpSCgqaCpgACENIAAhIACQKCgoKUgpSCgoKUgoKCgoKCgqaCgIKCgrbKgoKmpKS4goKUgpQAAhoADAKCgqamgpSCgoKCgpSCgoIAAxgACgKCgoKUgoKCAAMS8oKUlIIACAqCggACEAAKAoKUgqaCAAgKgqKmsoKCuKKUgpSUggAJCpSCgoKCpoKCgqaCpoIACAq+soKCpoKCgoKCgoKCgoK4goKAptqCgoKCgpSmgoKCkoCmtqYAESrilIKUAAwa3LKCgoKCpoKCgoKUurKCtKTcAAkIgoKCgoKUgpSCgoKClNyClIK0AAoUlrKCgoKmpoLEpoKmgoKCgoKCgpSmgIKCtsqmgoKClKbYgoKUuO6mgviklIIABxCCgoKCgpSCuICCgqTIgoKCgoKCgoKUgu6CggAFEgAJAoKCgoKmgoKCgsYABhDSgoKmgoKCgpSmgoKUgpSClIKUlMqCgoKUgpSClIKCAAMaAAwCgpSClICCgpS4koKCgoKUpAAHEIKClIK4AAIWAAoCgpSCgqYAAhYACAKm7oKClKzSgoKClIKUgpQACRSCgoKU2tKClJKCpgACEPKmooKClKbigpSCgoKUgoKCsoKClJSCgpS4goKUgpSCkurSgpSSgqYAAhDypqKCgqau4oKCgpSCgoKCsoKClJSCgoK4yoK4goKClIKCpoKCgoKCytyCAAISAAgCggACGAALAgACGgAMAoKUgoKmAAIQ0qaigoKUqNKCkoKCgoKUgoLKggAIEoKoksoAARIACQKClIKCpoKmuAAfTMKClIKUgqiygoKUqtKCgpSq0oKClAACEgAIAoIAAhYACgKCgpQAAhAACAKCpoKClIKCosqClJSChAAFGgAMAoKClKqigoK4gqbSgsqClIKCggAFENIAL3DmAAcQgqaCypqygoLuoqb6goKClIKUpoKuwqjigoKCtKbopoKUxILugoKUgoKUgpSCzsKCpoLugoKUgoKUgpSClIKokgACGgAMAoKCpoKClIKCggACGAAJAgAFJgAVApKClKSClIKCgu6CkpSCpqaCgoK4lIKCkpSClJSmAAkUgpSCgoIABSYAEAKq0oKClAACEPKowoKCpq7iAAISAAgCggACGAALAgAULoIAKmgACAKClIKSgoKmgoKmAAUQ8qbSgpSCgqaCgpTewoKClIKCpoKCgpSCgqaC3AAJAoCCpIKCgoLKgoKCgpSmgpSCgqaCgoKCpqaClIKCpqrCgoKUgoKCgqoACAKClIKUkoKCpoKm7riSgpSCgpSCpoKmAAUQ8qbSgoKCgpQABRIACAKCgpQAAiIAEAKo4oKUgpSCgoKUgoKUlIKmppTW0oKCgoKClJQALmiigpTuooKUgpSCggACENKCgpTEkrSS+gACEgALCJSCppKClIKUgpSm4oLKgpSCpoKUgpSCgsqClJQABhYADwiUgoKCpoKUgqaCgoKCyoKUgoKClNoACwqCgILIgoIABRIACAKUlKrClJSCgqaSmAAIAoKCgpSClIKU2gAIAoKCgpSClIKUABMokgACENKqoqyyqqIAAhLipoKUgoKmlICClKSAgqSAgqSAgqSAgrYAAn4APwKmpoKCgoKUlNaygpSCpoKUgqaCgoKmqsKCgriCgoCCtsqc+JSm4oKUgpSUgqaClICCpIKmgpSUggAPHgAKAoIADyCCgqaCgIKklIKCpt7CABUusoKC1rKCgtaCgqiygoKiABk4ooKClKiQAAgWsgAJEoKCrsKCgpSCppSmgoKCpoKssoKUgoKC", "654-654:1;683-689:1;693-697:2;792-792:1;885-887:1;899-902:1;1462-1464:1;1598-1601:1;1638-1640:1;1641-1643:2;1671-1674:1;1697-1699:1;1708-1714:2;1724-1726:3;1741-1744:1;1781-1787:1;1807-1809:2;1873-1876:1;1902-1907:1;1949-1952:1;2004-2006:1;2083-2093:1;2312-2314:1;2344-2346:1;2438-2440:1;2459-2461:2;2648-2657:1;2758-2760:1;2792-2827:1;2813-2816:1.1;3040-3042:1;3102-3106:1;3455-3457:1", "", "1481=Invoke/1/2/2,Invoke/2/2/3;1650=Invoke/1/2/2,Invoke/2/2/3")]
+[assembly: go.GoPositionMap("database/sql/sql.go", "sql.cs", "ADZgpprSgoKClICCpKKkooKUoqaygoIAGkwAEAoAHCySlKSkpKSkpKSkACNKsoKClIKokoKUAAoYsoKClIKokoKUAAoYsoKClIKokoKUAAoYsoKClIKCqJKClAAKGLKCgpSCgqiSgpQAChiygoKUgqiSgpQAChiygoKUgqiSgpQAChiygoKUgqiSgpQAFSyigoKUgqaCgpSUgIKCgpS2AC9kAEyoAaKm0oKCoqSCgpSq8oKUgpSAgqTa8oKUgpSAgqTawoKClKaC7oKUgtjigoKClILWooKCgpSCpoKCgoKmopiigoKClJSClIKCgqaCgoKUggAMHvKCgoKUgoIAECDygoKipIKClIKCgpSu4oKCgqaCgoKmgpSmxoK2AA8ggqaCAAImABACgu6kAAIoABECgoKCgqaAgoKClLamooKAgpK2gqrCgpSCgqaCpgACENIAAhIACQKCgoKUgpSCgoKUgoKCgoKCgqaCgIKCgrbKgoKmpKS4goKUgpQAAhoADAKCgqamgpSCgoKCgpSCgoIAAxgACgKCgoKUgoKCAAMS8oKUlIIACAqCggACEAAKAoKUgqaCAAgKgqKmsoKCuKKUgpSUggAJCpSCgoKCpoKCgqaCpoIACAq+soKCpoKCgoKCgoKCgoK4goKAptqCgoKCgpSmgoKCgoCmtqYAESrilIKUAAwa3LKCgoKCpoKCgoKUurKCtKTcAAkIgoKCgoKUgpSCgoKClNyClIK0AAoUlrKCgoKmpoLEpoKmgoKCgoKCgpSmgIKCtsqmgoKClKbYgoKUuO6mgviklIIABxCCgoKCgpSCuICCgqTIgoKCgoKCgoKUgu6CggAFEgAJAoKCgoKmgoKCgsYABhDSgoKmgoKCgpSmgoKUgpSClIKUlMqCgoKUgpSClIKCAAMaAAwCgpSClICCgpS4goKCgoKUpAAHEIKClIK4AAIWAAoCgpSCgqYAAhYACAKm7oKClKzSgoKClIKUgpQACRSCgoKU2tKClJKCpgACEPKmooKClKbigpSCgoKUgoKCsoKClJSCgpS4goKUgpSCkurSgpSSgqYAAhDypqKCgqau4oKCgpSCgoKCsoKClJSCgoK4yoK4goKClIKCpoKCgoKCytyCAAISAAgCggACGAALAgACGgAMAoKUgoKmAAIQ0qaigoKUqNKCgoKCgoKUgoLKggAIEoKoksoAARIACQKClIKCpoKmuAAfTMKClIKUgqiygoKUqtKCgpSq0oKClAACEgAIAoIAAhYACgKCgpQAAhAACAKCpoKClIKCosqClJSChAAFGgAMAoKClKqigoK4gqbSgsqClIKCggAFENIAL3DmAAcQgqaCypqygoLuoqb6goKClIKUpoKuwqjigoKCtKbopoKUxILugoKUgoKUgpSCzsKCpoLugoKUgoKUgpSClIKokgACGgAMAoKCpoKClIKCggACGAAJAgAFJgAVApKClKSClIKCgu6CkpSCpqaCgoK4lIKCkpSClJSmAAkUgpSCgoIABSYAEAKq0oKClAACEPKowoKCpq7iAAISAAgCggACGAALAgAULoIAKmgACAKClIKSgoKmgoKmAAUQ8qbSgpSCgqaCgpTewoKClIKCpoKCgpSCgqaC3AAJAoCCpIKCgoLKgoKCgpSmgpSCgqaCgoKCpqaClIKCpqrCgoKUgoKCgqoACAKClIKUkoKCpoKm7riSgpSCgpSCpoKmAAUQ8qbSgoKCgpQABRIACAKCgpQAAiIAEAKo4oKUgpSCgoKUgoKUlIKmppTW0oKCgoKClJQALmiigpTuooKUgpSCggACENKCgpTEgrSC+gACEgALCJSCppKClIKUgpSm4oLKgpSCpoKUgpSCgsqClJQABhYADwiUgoKCpoKUgqaCgoKCyoKUgoKClNoACwqCgILIgoIABRIACAKUlKrClJSCgqaSmAAIAoKCgpSClIKU2gAIAoKCgpSClIKUABMokgACENKqoqyyqqIAAhLipoKUgoKmlICClKSAgqSAgqSAgqSAgrYAAn4APwKmpoKCgoKUlNaygpSCpoKUgqaCgoKmqsKCgriCgoCCtsqc+JSm4oKUgpSUgqaClICCpIKmgpSUggAPHgAKAoIADyCCgqaCgIKklIKCpt7CABUusoKC1rKCgtaCgqiygoKiABk4ooKClKiQAAgWsgAIEoKCrsKCgpSCppSmgoKCpoKssoKUgoKC", "654-654:1;683-689:1;693-697:2;792-792:1;885-887:1;899-902:1;1462-1464:1;1598-1601:1;1638-1640:1;1641-1643:2;1671-1674:1;1697-1699:1;1708-1714:2;1724-1726:3;1741-1744:1;1781-1787:1;1807-1809:2;1873-1876:1;1902-1907:1;1949-1952:1;2004-2006:1;2083-2093:1;2312-2314:1;2344-2346:1;2438-2440:1;2459-2461:2;2648-2657:1;2758-2760:1;2792-2827:1;2813-2816:1.1;3040-3042:1;3102-3106:1;3455-3457:1", "", "1481=Invoke/1/2/2,Invoke/2/2/3;1650=Invoke/1/2/2,Invoke/2/2/3", "1983:21,4023:21")]
 // </GoSourcePositionMaps>
 
 namespace go.database;

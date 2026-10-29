@@ -28,43 +28,43 @@ internal static readonly @string dltˢ = "Dlt"u8;
 // values "MUI_Std" and "MUI_Dlt" or "Std" and "Dlt" in the kname key stored
 // under the open registry key zones.
 internal static (bool matched, error err2) matchZoneKey(registry.Key zones, @string kname, @string stdname, @string dstname) {
-    bool matched = default!;
-    error err2 = default!;
+    bool matched = default;
+    error err2 = default;
     GoFrame ᒐ = default;
     try {
         var (k, err) = registry.OpenKey(zones, kname, registry.READ);
-        if (err != default!) {
+        if (err != nil) {
             (matched, err2) = (false, err); goto ᒐdone;
         }
         defer(() => k.Close(), ref ᒐ);
 
-        @string std = default!;
-        @string dlt = default!;
+        @string std = default;
+        @string dlt = default;
         // Try MUI_Std and MUI_Dlt first, fallback to Std and Dlt if *any* error occurs
         (std, err) = k.GetMUIStringValue(muiStdˢ);
-        if (err == default!) {
+        if (err == nil) {
             (dlt, err) = k.GetMUIStringValue(muiDltˢ);
         }
-        if (err != default!) { // Fallback to Std and Dlt
+        if (err != nil) { // Fallback to Std and Dlt
             {
-                (std, _, err) = k.GetStringValue(stdˢ); if (err != default!) {
+                (std, _, err) = k.GetStringValue(stdˢ); if (err != nil) {
                     (matched, err2) = (false, err); goto ᒐdone;
                 }
             }
             {
-                (dlt, _, err) = k.GetStringValue(dltˢ); if (err != default!) {
+                (dlt, _, err) = k.GetStringValue(dltˢ); if (err != nil) {
                     (matched, err2) = (false, err); goto ᒐdone;
                 }
             }
         }
 
         if (std != stdname) {
-            (matched, err2) = (false, default!); goto ᒐdone;
+            (matched, err2) = (false, default); goto ᒐdone;
         }
         if (dlt != dstname && dstname != stdname) {
-            (matched, err2) = (false, default!); goto ᒐdone;
+            (matched, err2) = (false, default); goto ᒐdone;
         }
-        (matched, err2) = (true, default!);
+        (matched, err2) = (true, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -80,24 +80,24 @@ internal static (@string, error) toEnglishName(@string stdname, @string dstname)
     GoFrame ᒐ = default;
     try {
         var (k, err) = registry.OpenKey(registry.LOCAL_MACHINE, softwareMicrosoftWindowsˢ, (uint32)((uint32)registry.ENUMERATE_SUB_KEYS | (uint32)registry.QUERY_VALUE));
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         defer(() => k.Close(), ref ᒐ);
 
         (var names, err) = k.ReadSubKeyNames();
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         foreach (var (_, name) in names) {
             var (matched, errΔ1) = matchZoneKey(k, name, stdname, dstname);
-            if (errΔ1 == default! && matched) {
-                return (name, default!);
+            if (errΔ1 == nil && matched) {
+                return (name, default);
             }
         }
         return ("", errors.New(@"English name for time zone """u8 + stdname + @""" not found in registry"u8));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -105,9 +105,9 @@ internal static (@string, error) toEnglishName(@string stdname, @string dstname)
 internal static @string extractCAPS(@string desc) {
     var shortᴷ = new stackAppend<rune>();
 
-    slice<rune> @short = default!;
+    slice<rune> @short = default;
     foreach (var (_, c) in desc) {
-        if ((rune)'A' <= c && c <= (rune)'Z') {
+        if ('A' <= c && c <= 'Z') {
             @short = append(shortᴷ, @short, c);
         }
     }
@@ -122,7 +122,7 @@ internal static (@string std, @string dst) abbrev(ref syscall.Timezoneinformatio
         @string dstName = syscall.UTF16ToString(z.DaylightName[..]);
         // Perhaps stdName is not English. Try to convert it.
         var (englishName, err) = toEnglishName(stdName, dstName);
-        if (err == default!) {
+        if (err == nil) {
             (a, ok) = abbrs[englishName, ꟷ];
             if (ok) {
                 return (a.std, a.dst);
@@ -151,7 +151,7 @@ internal static int64 pseudoUnix(nint year, ref syscall.Systemtime d) {
     }
     day += i;
     {
-        nint week = (nint)d.Day - 1; if (week < 4){
+        nint week = (nint)d.Day - 1; if (week < 4) {
             day += week * 7;
         } else {
             // "Last" instance of the day.
@@ -172,39 +172,39 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
 
     var l = ᏑlocalLoc;
 
-    l.Value.name = localˢ;
+    l.name = localˢ;
 
     nint nzone = 1;
     if (i.StandardDate.Month > 0) {
         nzone++;
     }
-    l.Value.zone = new slice<zone>(nzone);
+    l.zone = new slice<zone>(nzone);
 
     var (stdname, dstname) = abbrev(ref (Ꮡi).DerefOrNull());
 
-    var std = Ꮡ((~l).zone, 0);
-    std.Value.name = stdname;
+    var std = Ꮡ(l.zone, 0);
+    std.name = stdname;
     if (nzone == 1) {
         // No daylight savings.
-        std.Value.offset = -(nint)i.Bias * 60;
-        l.Value.cacheStart = alpha;
-        l.Value.cacheEnd = omega;
-        l.Value.cacheZone = std;
-        l.Value.tx = new slice<zoneTrans>(1);
-        (~l).tx[0].when = l.Value.cacheStart;
-        (~l).tx[0].index = 0;
+        std.offset = -(nint)i.Bias * 60;
+        l.cacheStart = alpha;
+        l.cacheEnd = omega;
+        l.cacheZone = std;
+        l.tx = new slice<zoneTrans>(1);
+        l.tx[0].when = l.cacheStart;
+        l.tx[0].index = 0;
         return;
     }
 
     // StandardBias must be ignored if StandardDate is not set,
     // so this computation is delayed until after the nzone==1
     // return above.
-    std.Value.offset = -(nint)(i.Bias + i.StandardBias) * 60;
+    std.offset = -(nint)(i.Bias + i.StandardBias) * 60;
 
-    var dst = Ꮡ((~l).zone, 1);
-    dst.Value.name = dstname;
-    dst.Value.offset = -(nint)(i.Bias + i.DaylightBias) * 60;
-    dst.Value.isDST = true;
+    var dst = Ꮡ(l.zone, 1);
+    dst.name = dstname;
+    dst.offset = -(nint)(i.Bias + i.DaylightBias) * 60;
+    dst.isDST = true;
 
     // Arrange so that d0 is first transition date, d1 second,
     // i0 is index of zone after first transition, i1 second.
@@ -212,26 +212,26 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
     var d1 = Ꮡi.of(syscall.Timezoneinformation.ᏑDaylightDate);
     nint i0 = 0;
     nint i1 = 1;
-    if ((~d0).Month > (~d1).Month) {
+    if (d0.Month > d1.Month) {
         (d0, d1) = (d1, d0);
         (i0, i1) = (i1, i0);
     }
 
     // 2 tx per year, 100 years on each side of this year
-    l.Value.tx = new slice<zoneTrans>(400);
+    l.tx = new slice<zoneTrans>(400);
 
     var t = Now().UTC();
     nint year = t.Year();
     nint txi = 0;
     for (nint y = year - 100; y < year + 100; y++) {
-        var tx = Ꮡ((~l).tx, txi);
-        tx.Value.when = pseudoUnix(y, ref (d0).DerefOrNull()) - (int64)(~l).zone[i1].offset;
-        tx.Value.index = (uint8)i0;
+        var tx = Ꮡ(l.tx, txi);
+        tx.when = pseudoUnix(y, ref (d0).DerefOrNull()) - (int64)l.zone[i1].offset;
+        tx.index = (uint8)i0;
         txi++;
 
-        tx = Ꮡ((~l).tx, txi);
-        tx.Value.when = pseudoUnix(y, ref (d1).DerefOrNull()) - (int64)(~l).zone[i0].offset;
-        tx.Value.index = (uint8)i1;
+        tx = Ꮡ(l.tx, txi);
+        tx.when = pseudoUnix(y, ref (d1).DerefOrNull()) - (int64)l.zone[i0].offset;
+        tx.index = (uint8)i1;
         txi++;
     }
 }
@@ -239,11 +239,11 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
 [GoLazy] partial class lazyᴛusPacific { internal static readonly ж<syscall.Timezoneinformation> ᏑusPacific = new StaticBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
     Bias: 8 * 60,
     StandardName: new uint16[]{
-        (rune)'P', (rune)'a', (rune)'c', (rune)'i', (rune)'f', (rune)'i', (rune)'c', (rune)' ', (rune)'S', (rune)'t', (rune)'a', (rune)'n', (rune)'d', (rune)'a', (rune)'r', (rune)'d', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
+        'P', 'a', 'c', 'i', 'f', 'i', 'c', ' ', 'S', 't', 'a', 'n', 'd', 'a', 'r', 'd', ' ', 'T', 'i', 'm', 'e'
     }.array(32),
     StandardDate: new syscall.Systemtime(Month: 11, Day: 1, Hour: 2),
     DaylightName: new uint16[]{
-        (rune)'P', (rune)'a', (rune)'c', (rune)'i', (rune)'f', (rune)'i', (rune)'c', (rune)' ', (rune)'D', (rune)'a', (rune)'y', (rune)'l', (rune)'i', (rune)'g', (rune)'h', (rune)'t', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
+        'P', 'a', 'c', 'i', 'f', 'i', 'c', ' ', 'D', 'a', 'y', 'l', 'i', 'g', 'h', 't', ' ', 'T', 'i', 'm', 'e'
     }.array(32),
     DaylightDate: new syscall.Systemtime(Month: 3, Day: 2, Hour: 2),
     DaylightBias: -60
@@ -253,11 +253,11 @@ internal static ref syscall.Timezoneinformation usPacific => ref ((StaticBox<sys
 [GoLazy] partial class lazyᴛaus { internal static readonly ж<syscall.Timezoneinformation> Ꮡaus = new StaticBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
     Bias: -10 * 60,
     StandardName: new uint16[]{
-        (rune)'A', (rune)'U', (rune)'S', (rune)' ', (rune)'E', (rune)'a', (rune)'s', (rune)'t', (rune)'e', (rune)'r', (rune)'n', (rune)' ', (rune)'S', (rune)'t', (rune)'a', (rune)'n', (rune)'d', (rune)'a', (rune)'r', (rune)'d', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
+        'A', 'U', 'S', ' ', 'E', 'a', 's', 't', 'e', 'r', 'n', ' ', 'S', 't', 'a', 'n', 'd', 'a', 'r', 'd', ' ', 'T', 'i', 'm', 'e'
     }.array(32),
     StandardDate: new syscall.Systemtime(Month: 4, Day: 1, Hour: 3),
     DaylightName: new uint16[]{
-        (rune)'A', (rune)'U', (rune)'S', (rune)' ', (rune)'E', (rune)'a', (rune)'s', (rune)'t', (rune)'e', (rune)'r', (rune)'n', (rune)' ', (rune)'D', (rune)'a', (rune)'y', (rune)'l', (rune)'i', (rune)'g', (rune)'h', (rune)'t', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
+        'A', 'U', 'S', ' ', 'E', 'a', 's', 't', 'e', 'r', 'n', ' ', 'D', 'a', 'y', 'l', 'i', 'g', 'h', 't', ' ', 'T', 'i', 'm', 'e'
     }.array(32),
     DaylightDate: new syscall.Systemtime(Month: 10, Day: 1, Hour: 2),
     DaylightBias: -60
@@ -267,7 +267,7 @@ internal static ref syscall.Timezoneinformation aus => ref ((StaticBox<syscall.T
 internal static void initLocal() {
     ref var i = ref heap(new syscall.Timezoneinformation(), out var Ꮡi);
     {
-        var (_, err) = syscall.GetTimeZoneInformation(Ꮡi); if (err != default!) {
+        var (_, err) = syscall.GetTimeZoneInformation(Ꮡi); if (err != nil) {
             localLoc.name = utcˢ;
             return;
         }

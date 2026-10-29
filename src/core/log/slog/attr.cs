@@ -82,8 +82,8 @@ public static Attr GroupAttrs(@string key, params ꓸꓸꓸAttr attrsʗp) {
 }
 
 internal static slice<Attr> argsToAttrSlice(slice<any> args) {
-    Attr attr = default!;
-    slice<Attr> attrs = default!;
+    Attr attr = default;
+    slice<Attr> attrs = default;
     while (len(args) > 0) {
         (attr, args) = argsToAttr(args);
         attrs = builtin.append(attrs, attr);
@@ -109,7 +109,7 @@ public static @string String(this Attr a) {
 // isEmpty reports whether a has an empty key and a nil value.
 // That can be written as Attr{} or Any("", nil).
 internal static bool isEmpty(this Attr a) {
-    return a.Key == ""u8 && a.Value.num == 0 && a.Value.any == default!;
+    return a.Key == ""u8 && a.Value.num == 0 && a.Value.any == nil;
 }
 
 } // end slog_package

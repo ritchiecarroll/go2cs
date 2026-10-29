@@ -80,16 +80,16 @@ partial struct exprInfo {
 // An environment represents the environment within which an object is
 // type-checked.
 partial struct environment {
-    internal ж<declInfo> decl;           // package-level declaration whose init expression/function body is checked
-    internal ж<ΔScope> scope;              // top-most scope for lookups
-    internal goVersion version;              // current accepted language version; changes across files
-    internal constant.Value iota;         // value of iota in a constant declaration; nil otherwise
-    internal positioner errpos;             // if set, identifier position of a constant with inherited initializer
-    internal bool inTParamList;                   // set if inside a type parameter list
-    internal ж<ΔSignature> sig;          // function signature if inside a function; nil otherwise
+    internal ж<declInfo> decl;                   // package-level declaration whose init expression/function body is checked
+    internal ж<ΔScope> scope;                    // top-most scope for lookups
+    internal goVersion version;                  // current accepted language version; changes across files
+    internal constant.Value iota;                // value of iota in a constant declaration; nil otherwise
+    internal positioner errpos;                  // if set, identifier position of a constant with inherited initializer
+    internal bool inTParamList;                  // set if inside a type parameter list
+    internal ж<ΔSignature> sig;                  // function signature if inside a function; nil otherwise
     internal map<ж<ast.CallExpr>, bool> isPanic; // set of panic call expressions (used for termination check)
-    internal bool hasLabel;                   // set if a function makes use of labels (only ~1% of functions); unused outside functions
-    internal bool hasCallOrRecv;                   // set if an expression contains a function call or channel receive operation
+    internal bool hasLabel;                      // set if a function makes use of labels (only ~1% of functions); unused outside functions
+    internal bool hasCallOrRecv;                 // set if an expression contains a function call or channel receive operation
     // go/types only
     internal tokenꓸPos exprPos; // if valid, identifiers are looked up as if at position pos (used by CheckExpr, Eval)
 }
@@ -103,14 +103,14 @@ partial struct environment {
 // time (see Scope.Insert). This can only happen for dot-imported objects
 // whose parent is the scope of the package that exported them.
 internal static (ж<ΔScope>, Object) lookupScope(this ref environment env, @string name) {
-    for (var s = env.scope; s != nil; s = s.Value.parent) {
+    for (var s = env.scope; s != nil; s = s.parent) {
         {
-            var obj = s.Lookup(name); if (obj != default! && (!env.exprPos.IsValid() || cmpPos(obj.scopePos(), env.exprPos) <= 0)) {
+            var obj = s.Lookup(name); if (obj != nil && (!env.exprPos.IsValid() || cmpPos(obj.scopePos(), env.exprPos) <= 0)) {
                 return (s, obj);
             }
         }
     }
-    return (default!, default!);
+    return (default, default);
 }
 
 // lookup is like lookupScope but it only returns the object (or nil).
@@ -137,8 +137,8 @@ partial struct dotImportKey {
 
 // An action describes a (delayed) action.
 partial struct action {
-    internal goVersion version;   // applicable language version
-    internal Action f;      // action to be executed
+    internal goVersion version;  // applicable language version
+    internal Action f;           // action to be executed
     internal ж<actionDesc> desc; // action description; may be nil, requires debug to be set
 }
 
@@ -170,9 +170,9 @@ partial struct Checker {
     internal ж<token.FileSet> fset;
     internal ж<Package> pkg;
     /*embed*/ public ж<ΔInfo> Info;
-    internal uint64 nextID;                 // unique Id for type parameters (first valid Id is 1)
-    internal map<Object, ж<declInfo>> objMap; // maps package-level objects and (non-interface) methods to declaration info
-    internal slice<Object> objList;          // source-ordered keys of objMap
+    internal uint64 nextID;                     // unique Id for type parameters (first valid Id is 1)
+    internal map<Object, ж<declInfo>> objMap;   // maps package-level objects and (non-interface) methods to declaration info
+    internal slice<Object> objList;             // source-ordered keys of objMap
     internal map<importKey, ж<Package>> impMap; // maps (import path, source directory) to (complete or fake) package
 // see TODO in validtype.go
 // valids instanceLookup // valid *Named (incl. instantiated) types per the validType check
@@ -189,28 +189,28 @@ partial struct Checker {
     // information collected during type-checking of a set of package files
     // (initialized by Files, valid only for the duration of check.Files;
     // maps and lists are allocated on demand)
-    internal slice<ж<ast.File>> files;       // package files
-    internal map<ж<ast.File>, @string> versions; // maps files to goVersion strings (each file has an entry); shared with Info.FileVersions if present; may be unaltered Config.GoVersion
-    internal slice<ж<PkgName>> imports;        // list of imported packages
+    internal slice<ж<ast.File>> files;                   // package files
+    internal map<ж<ast.File>, @string> versions;         // maps files to goVersion strings (each file has an entry); shared with Info.FileVersions if present; may be unaltered Config.GoVersion
+    internal slice<ж<PkgName>> imports;                  // list of imported packages
     internal map<dotImportKey, ж<PkgName>> dotImportMap; // maps dot-imported objects to the package they were dot-imported through
-    internal map<ж<TypeName>, bool> brokenAliases;   // set of aliases with broken (not yet determined) types
-    internal map<ж<Union>, ж<_TypeSet>> unionTypeSets; // computed type sets for union types
-    internal map<ж<Var>, bool> usedVars;        // set of used variables
-    internal map<ж<PkgName>, bool> usedPkgNames;    // set of used package names
-    internal monoGraph mono;                 // graph for detecting non-monomorphizable instantiation loops
-    internal error firstErr;                 // first error encountered
+    internal map<ж<TypeName>, bool> brokenAliases;       // set of aliases with broken (not yet determined) types
+    internal map<ж<Union>, ж<_TypeSet>> unionTypeSets;   // computed type sets for union types
+    internal map<ж<Var>, bool> usedVars;                 // set of used variables
+    internal map<ж<PkgName>, bool> usedPkgNames;         // set of used package names
+    internal monoGraph mono;                             // graph for detecting non-monomorphizable instantiation loops
+    internal error firstErr;                           // first error encountered
     internal map<ж<TypeName>, slice<ж<Func>>> methods; // maps package scope type names to associated non-blank (non-interface) methods
-    internal map<ast.Expr, exprInfo> untyped; // map of expressions without final type
-    internal slice<action> delayed;         // stack of delayed action segments; segments are processed in FIFO order
-    internal slice<Object> objPath;         // path of object dependencies during type-checking (for cycle reporting)
-    internal map<Object, nint> objPathIdx;     // map of object to object path index during type-checking (for cycle reporting)
-    internal slice<cleaner> cleaners;        // list of types that may need a final cleanup at the end of type-checking
+    internal map<ast.Expr, exprInfo> untyped;          // map of expressions without final type
+    internal slice<action> delayed;                    // stack of delayed action segments; segments are processed in FIFO order
+    internal slice<Object> objPath;                    // path of object dependencies during type-checking (for cycle reporting)
+    internal map<Object, nint> objPathIdx;             // map of object to object path index during type-checking (for cycle reporting)
+    internal slice<cleaner> cleaners;                  // list of types that may need a final cleanup at the end of type-checking
     // environment within which the current object is type-checked (valid only
     // for the duration of type-checking a specific object)
     /*embed*/ internal environment environment;
     // debugging
     internal slice<positioner> posStack; // stack of source positions seen; used for panic tracing
-    internal nint indent;         // indentation for tracing
+    internal nint indent;                // indentation for tracing
 }
 
 // addDeclDep adds the dependency edge (check.decl -> to) if check.decl exists
@@ -236,8 +236,8 @@ internal static void addDeclDep(this ref Checker check, Object to) {
 internal static void brokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
-    assert(!(~check.conf)._EnableAlias);
-    if (check.brokenAliases == default!) {
+    assert(!check.conf._EnableAlias);
+    if (check.brokenAliases == nil) {
         check.brokenAliases = new map<ж<TypeName>, bool>();
     }
     check.brokenAliases[Ꮡalias] = true;
@@ -248,24 +248,24 @@ internal static void brokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) 
 internal static void validAlias(this ref Checker check, ж<TypeName> Ꮡalias, ΔType typ) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
-    assert(!(~check.conf)._EnableAlias);
+    assert(!check.conf._EnableAlias);
     delete(check.brokenAliases, Ꮡalias);
     alias.typ = typ;
 }
 
 // isBrokenAlias reports whether alias doesn't have a determined type yet.
-internal static bool isBrokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) {
-    assert(!(~check.conf)._EnableAlias);
-    return check.brokenAliases[Ꮡalias];
+internal static bool isBrokenAlias(this ref Checker check, ж<TypeName> alias) {
+    assert(!check.conf._EnableAlias);
+    return check.brokenAliases[alias];
 }
 
-internal static void rememberUntyped(this ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> Ꮡtyp, constant.Value val) {
+internal static void rememberUntyped(this ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> typ, constant.Value val) {
     var m = check.untyped;
-    if (m == default!) {
+    if (m == nil) {
         m = new map<ast.Expr, exprInfo>();
         check.untyped = m;
     }
-    m[e] = new exprInfo(lhs, mode, Ꮡtyp, val);
+    m[e] = new exprInfo(lhs, mode, typ, val);
 }
 
 // later pushes f on to the stack of actions that will be processed later;
@@ -282,7 +282,7 @@ internal static ж<action> later(this ref Checker check, Action f) {
 
 // push pushes obj onto the object path and records its index in the path index map.
 internal static void push(this ref Checker check, Object obj) {
-    if (check.objPathIdx == default!) {
+    if (check.objPathIdx == nil) {
         check.objPathIdx = new map<Object, nint>();
     }
     check.objPathIdx[obj] = len(check.objPath);
@@ -293,7 +293,7 @@ internal static void push(this ref Checker check, Object obj) {
 internal static void pop(this ref Checker check) {
     nint i = len(check.objPath) - 1;
     var obj = check.objPath[i];
-    check.objPath[i] = default!; // help the garbage collector
+    check.objPath[i] = default; // help the garbage collector
     check.objPath = check.objPath.slice(0, i);
     delete(check.objPathIdx, obj);
 }
@@ -310,7 +310,7 @@ internal static void needsCleanup(this ref Checker check, cleaner c) {
 
 // NewChecker returns a new [Checker] instance for a given package.
 // [Package] files may be added incrementally via checker.Files.
-public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, ж<ΔInfo> Ꮡinfo) {
+public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> fset, ж<Package> pkg, ж<ΔInfo> Ꮡinfo) {
     ref var conf = ref Ꮡconf.DerefOrNull();
     ref var info = ref Ꮡinfo.DerefOrNull();
 
@@ -336,8 +336,8 @@ public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> Ꮡfs
     return Ꮡ(new Checker(
         conf: Ꮡconf,
         ctxt: conf.Context,
-        fset: Ꮡfset,
-        pkg: Ꮡpkg,
+        fset: fset,
+        pkg: pkg,
         Info: Ꮡinfo,
         objMap: new map<Object, ж<declInfo>>(),
         impMap: new map<importKey, ж<Package>>(),
@@ -357,17 +357,17 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
     // start with a clean slate (check.Files may be called multiple times)
     // TODO(gri): what determines which fields are zeroed out here, vs at the end
     // of checkFiles?
-    check.files = default!;
-    check.imports = default!;
-    check.dotImportMap = default!;
+    check.files = default;
+    check.imports = default;
+    check.dotImportMap = default;
 
-    check.firstErr = default!;
-    check.methods = default!;
-    check.untyped = default!;
-    check.delayed = default!;
-    check.objPath = default!;
-    check.objPathIdx = default!;
-    check.cleaners = default!;
+    check.firstErr = default;
+    check.methods = default;
+    check.untyped = default;
+    check.delayed = default;
+    check.objPath = default;
+    check.objPathIdx = default;
+    check.cleaners = default;
 
     // We must initialize usedVars and usedPkgNames both here and in NewChecker,
     // because initFiles is not called in the CheckExpr or Eval codepaths, yet we
@@ -380,14 +380,14 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
     var pkg = check.pkg;
     foreach (var (_, @file) in files) {
         {
-            @string name = @file.Value.Name.Value.Name;
-            var exprᴛ1 = (~pkg).name;
+            @string name = @file.Name.Name;
+            var exprᴛ1 = pkg.name;
             var matchᴛ1 = false;
             if (exprᴛ1 == ""u8) { matchᴛ1 = true;
-                if (name != "_"u8){
-                    pkg.Value.name = name;
+                if (name != "_"u8) {
+                    pkg.name = name;
                 } else {
-                    Ꮡcheck.error(new ast_Identжpositioner((~@file).Name), BlankPkgName, invalidPackageNameˢ);
+                    Ꮡcheck.error(new ast_Identжpositioner(@file.Name), BlankPkgName, invalidPackageNameˢ);
                 }
                 fallthrough = true;
             }
@@ -395,20 +395,20 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
                 check.files = append(check.files, @file);
             }
             else if (!matchᴛ1) { /* default: */
-                Ꮡcheck.errorf((atPos)(~@file).Package, MismatchedPkgName, "package %s; expected package %s"u8, name, (~pkg).name);
+                Ꮡcheck.errorf((atPos)@file.Package, MismatchedPkgName, "package %s; expected package %s"u8, name, pkg.name);
                 // ignore this file
             }
         }
     }
 
     // reuse Info.FileVersions if provided
-    var versions = check.Info.Value.FileVersions;
-    if (versions == default!) {
+    var versions = check.Info.FileVersions;
+    if (versions == nil) {
         versions = new map<ж<ast.File>, @string>();
     }
     check.versions = versions;
 
-    goVersion pkgVersion = asGoVersion((~check.conf).GoVersion);
+    goVersion pkgVersion = asGoVersion(check.conf.GoVersion);
     if (pkgVersion.isValid() && len(files) > 0 && pkgVersion.cmp(go_current) > 0) {
         Ꮡcheck.errorf(new ast_Fileжpositioner(files[0]), TooNew, "package requires newer Go version %v (application built with %v)"u8,
             pkgVersion, go_current);
@@ -419,11 +419,11 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
         // use unaltered Config.GoVersion by default
         // (This version string may contain dot-release numbers as in go1.20.1,
         // unlike file versions which are Go language versions only, if valid.)
-        @string v = check.conf.Value.GoVersion;
+        @string v = check.conf.GoVersion;
 
         // If the file specifies a version, use max(fileVersion, go1.21).
         {
-            goVersion fileVersion = asGoVersion((~@file).GoVersion); if (fileVersion.isValid()) {
+            goVersion fileVersion = asGoVersion(@file.GoVersion); if (fileVersion.isValid()) {
                 // Go 1.21 introduced the feature of setting the go.mod
                 // go line to an early version of Go and allowing //go:build lines
                 // to set the Go version in a given file. Versions Go 1.21 and later
@@ -442,7 +442,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
                 if (fileVersion.cmp(go_current) > 0) {
                     // Use position of 'package [p]' for types/types2 consistency.
                     // (Ideally we would use the //build tag itself.)
-                    Ꮡcheck.errorf(new ast_Identжpositioner((~@file).Name), TooNew, "file requires newer Go version %v (application built with %v)"u8, fileVersion, go_current);
+                    Ꮡcheck.errorf(new ast_Identжpositioner(@file.Name), TooNew, "file requires newer Go version %v (application built with %v)"u8, fileVersion, go_current);
                 }
             }
         }
@@ -500,7 +500,7 @@ internal static void handleBailout(this ж<Checker> Ꮡcheck, ж<error> Ꮡerr) 
                 }
 
                 fmt.Fprintln(new os.FileжWriter(os.Stderr), theFollowingPanicˢ);
-                if (len(check.posStack) <= 10){
+                if (len(check.posStack) <= 10) {
                     doPrint(check.posStack);
                 } else {
                     // if it's long, truncate the middle; it's least likely to help
@@ -531,7 +531,7 @@ public static error /*err*/ Files(this ж<Checker> Ꮡcheck, slice<ж<ast.File>>
             // Defensive handling for Unsafe, which cannot be type checked, and must
             // not be mutated. See https://go.dev/issue/61212 for an example of where
             // Unsafe is passed to NewChecker.
-            err = default!; goto ᒐdone;
+            err = default; goto ᒐdone;
         }
 
         // Avoid early returns here! Nearly all errors can be
@@ -569,7 +569,7 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
 
         // Ensure that _EnableAlias is consistent among concurrent type checking
         // operations. See the documentation of [_aliasAny] for details.
-        if ((~check.conf)._EnableAlias){
+        if (check.conf._EnableAlias) {
             if (atomic.AddInt32(Ꮡ_aliasAny, 1) <= 0) {
                 throw panic("EnableAlias set while !EnableAlias type checking is ongoing");
             }
@@ -582,7 +582,7 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
         }
 
         void print(@string msg) {
-            if ((~Ꮡcheck.Value.conf)._Trace) {
+            if (Ꮡcheck.Value.conf._Trace) {
                 fmt.Println();
                 fmt.Println(msg);
             }
@@ -612,7 +612,7 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
         print(initOrderˢ);
         Ꮡcheck.initOrder();
 
-        if (!(~check.conf).DisableUnusedImportCheck) {
+        if (!check.conf.DisableUnusedImportCheck) {
             print(unusedImportsˢ);
             Ꮡcheck.unusedImports();
         }
@@ -620,24 +620,24 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
         print(recordUntypedˢ);
         Ꮡcheck.recordUntyped();
 
-        if (check.firstErr == default!) {
+        if (check.firstErr == nil) {
             // TODO(mdempsky): Ensure monomorph is safe when errors exist.
             Ꮡcheck.monomorph();
         }
 
-        check.pkg.Value.goVersion = check.conf.Value.GoVersion;
-        check.pkg.Value.complete = true;
+        check.pkg.goVersion = check.conf.GoVersion;
+        check.pkg.complete = true;
 
         // no longer needed - release memory
-        check.imports = default!;
-        check.dotImportMap = default!;
-        check.pkgPathMap = default!;
-        check.seenPkgMap = default!;
-        check.brokenAliases = default!;
-        check.unionTypeSets = default!;
-        check.usedVars = default!;
-        check.usedPkgNames = default!;
-        check.ctxt = default!;
+        check.imports = default;
+        check.dotImportMap = default;
+        check.pkgPathMap = default;
+        check.seenPkgMap = default;
+        check.brokenAliases = default;
+        check.unionTypeSets = default;
+        check.usedVars = default;
+        check.usedPkgNames = default;
+        check.ctxt = default;
 
         // TODO(gri): shouldn't the cleanup above occur after the bailout?
         // TODO(gri) There's more memory we should release at this point.
@@ -662,17 +662,17 @@ internal static void processDelayed(this ж<Checker> Ꮡcheck, nint top) {
     goVersion savedVersion = check.version;
     for (nint i = top; i < len(check.delayed); i++) {
         var a = Ꮡ(check.delayed, i);
-        if ((~check.conf)._Trace) {
-            if ((~a).desc != nil){
-                Ꮡcheck.trace((~(~a).desc).pos.Pos(), "-- "u8 + (~(~a).desc).format, (~(~a).desc).args.ꓸꓸꓸ);
+        if (check.conf._Trace) {
+            if (a.desc != nil) {
+                Ꮡcheck.trace(a.desc.pos.Pos(), "-- "u8 + a.desc.format, a.desc.args.ꓸꓸꓸ);
             } else {
-                Ꮡcheck.trace(nopos, delayedPˢ, ((~a).f).OrTypedNilFunc());
+                Ꮡcheck.trace(nopos, delayedPˢ, (a.f).OrTypedNilFunc());
             }
         }
-        check.version = a.Value.version; // reestablish the effective Go version captured earlier
-        (~a).f(); // may append to check.delayed
+        check.version = a.version; // reestablish the effective Go version captured earlier
+        a.f();                     // may append to check.delayed
 
-        if ((~check.conf)._Trace) {
+        if (check.conf._Trace) {
             fmt.Println();
         }
     }
@@ -687,7 +687,7 @@ internal static void cleanup(this ref Checker check) {
     for (nint i = 0; i < len(check.cleaners); i++) {
         check.cleaners[i].cleanup();
     }
-    check.cleaners = default!;
+    check.cleaners = default;
 }
 
 // go/types doesn't support recording of types directly in the AST.
@@ -705,14 +705,14 @@ internal static void recordCommaOkTypesInSyntax(this ref Checker check, ast.Expr
 // instantiatedIdent determines the identifier of the type instantiated in expr.
 // Helper function for recordInstance in recording.go.
 internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
-    ast.Expr selOrIdent = default!;
+    ast.Expr selOrIdent = default;
     switch (expr.type()) {
     case ж<ast.IndexExpr> e: {
-        selOrIdent = e.Value.X;
+        selOrIdent = e.X;
         break;
     }
     case ж<ast.IndexListExpr> e: { // only exists in go/ast, not syntax
-        selOrIdent = e.Value.X;
+        selOrIdent = e.X;
         break;
     }
     case ж<ast.SelectorExpr> _:
@@ -726,11 +726,11 @@ internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
         return x;
     }
     case ж<ast.SelectorExpr> x: {
-        return (~x).Sel;
+        return x.Sel;
     }}
 
     // extra debugging of go.dev/issue/63933
-    throw panic(sprintf(nil, default!, true, "instantiated ident not found; please report: %s"u8, expr));
+    throw panic(sprintf(nil, default, true, "instantiated ident not found; please report: %s"u8, expr));
 }
 
 } // end types_package

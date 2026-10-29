@@ -88,7 +88,7 @@ internal static readonly @string _SyncMarker_name = "EOFBoolInt64Uint64StringVal
 public static @string String(this SyncMarker i) {
     i -= 1;
     if (i < 0 || i >= ((SyncMarker)(len(_SyncMarker_index) - 1))) {
-        return "SyncMarker("u8 + strconv.FormatInt((int64)(nint)(i + 1), 10) + ")"u8;
+        return "SyncMarker("u8 + strconv.FormatInt((int64)(i + 1), 10) + ")"u8;
     }
     return _SyncMarker_name.slice(_SyncMarker_index[i], _SyncMarker_index[i + 1]);
 }

@@ -55,8 +55,8 @@ partial struct Directive {
 public static (Directive, bool) ParseDirective(tokenꓸPos pos, @string c) {
     // Fast path to eliminate most non-directive comments. Must be a line
     // comment starting with [a-z0-9]
-    if (!(len(c) >= 3 && c[0] == (rune)'/' && c[1] == (rune)'/' && isalnum(c[2]))) {
-        return (new Directive(nil), false);
+    if (!(len(c) >= 3 && c[0] == '/' && c[1] == '/' && isalnum(c[2]))) {
+        return (new Directive(), false);
     }
 
     var buf = new directiveScanner(c, pos);
@@ -68,14 +68,14 @@ public static (Directive, bool) ParseDirective(tokenꓸPos pos, @string c) {
     // itself is duplicated in several places.)
     nint colon = strings.Index(buf.str, ":"u8);
     if (colon <= 0 || colon + 1 >= len(buf.str)) {
-        return (new Directive(nil), false);
+        return (new Directive(), false);
     }
     for (nint i = 0; i <= colon + 1; i++) {
         if (i == colon) {
             continue;
         }
         if (!isalnum(buf.str[i])) {
-            return (new Directive(nil), false);
+            return (new Directive(), false);
         }
     }
     @string tool = buf.take(colon);
@@ -91,7 +91,7 @@ public static (Directive, bool) ParseDirective(tokenꓸPos pos, @string c) {
 }
 
 internal static bool isalnum(byte b) {
-    return (rune)'a' <= b && b <= (rune)'z' || (rune)'0' <= b && b <= (rune)'9';
+    return 'a' <= b && b <= 'z' || '0' <= b && b <= '9';
 }
 
 public static tokenꓸPos Pos(this ref Directive d) {
@@ -122,9 +122,9 @@ public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
 
     var args = new directiveScanner(d.Args, d.ArgsPos);
 
-    var list = new DirectiveArg[]{}.slice();
+    var list = slice<DirectiveArg>([]);
     for (args.skipSpace(); args.str != ""u8; args.skipSpace()) {
-        @string arg = default!;
+        @string arg = default;
         tokenꓸPos argPos = args.pos;
 
         switch (args.str[0]) {
@@ -132,10 +132,10 @@ public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
             arg = args.takeNonSpace();
             break;
         }
-        case (rune)'`' or (rune)'"': {
+        case (byte)'`' or (byte)'"': {
             var (q, err) = strconv.QuotedPrefix(args.str);
-            if (err != default!) { // Always strconv.ErrSyntax
-                return (default!, fmt.Errorf("invalid quoted string in //%s:%s: %s"u8, d.Tool, d.Name, args.str));
+            if (err != nil) { // Always strconv.ErrSyntax
+                return (default, fmt.Errorf("invalid quoted string in //%s:%s: %s"u8, d.Tool, d.Name, args.str));
             }
             // Any errors will have been returned by QuotedPrefix
             (arg, _) = strconv.Unquote(args.take(len(q)));
@@ -144,7 +144,7 @@ public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
             if (args.str != ""u8) {
                 var (r, _) = utf8.DecodeRuneInString(args.str);
                 if (!unicode.IsSpace(r)) {
-                    return (default!, fmt.Errorf("invalid quoted string in //%s:%s: %s"u8, d.Tool, d.Name, args.str));
+                    return (default, fmt.Errorf("invalid quoted string in //%s:%s: %s"u8, d.Tool, d.Name, args.str));
                 }
             }
             break;
@@ -153,7 +153,7 @@ public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
         list = append(listᴷ, list, new DirectiveArg(arg, argPos));
     }
     list = move2heap(listᴷ, list);
-    return (list, default!);
+    return (list, default);
 }
 
 // directiveScanner is a helper for parsing directive comments while maintaining

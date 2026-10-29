@@ -17,7 +17,7 @@ using unix = @internal.syscall.unix_package;
 using runtime = runtime_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal.syscall;
 
 partial class os_package {
@@ -40,8 +40,7 @@ internal static (ж<syscall.SysProcAttr>, bool) ensurePidfd(ж<syscall.SysProcAt
         )), false);
     }
     if (sysAttr.PidFD == nil) {
-        ref var newSys = ref heap<syscall.SysProcAttr>(out var ᏑnewSys);
-        newSys = sysAttr; // copy
+        ref var newSys = ref heap<syscall.SysProcAttr>(sysAttr, out var ᏑnewSys); // copy
         newSys.PidFD = Ꮡpidfd;
         return (ᏑnewSys, false);
     }
@@ -59,7 +58,7 @@ internal static (uintptr, bool) getPidfd(ref syscall.SysProcAttr sysAttr, bool n
     nint h = sysAttr.PidFD.Value;
     if (needDup) {
         var (dupH, e) = unix.Fcntl(h, syscall.F_DUPFD_CLOEXEC, 0);
-        if (e != default!) {
+        if (e != nil) {
             return (0, false);
         }
         h = dupH;
@@ -74,10 +73,10 @@ internal static (uintptr, error) pidfdFind(nint pid) {
     }
 
     var (h, err) = unix.PidFDOpen(pid, 0);
-    if (err != default!) {
+    if (err != nil) {
         return (0, convertESRCH(err));
     }
-    return (h, default!);
+    return (h, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -97,23 +96,23 @@ internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) {
         // We _do_ need to be careful about reuse of the pidfd FD number when
         // closing the pidfd. See handle for more details.
         var (handle, status) = Ꮡp.handleTransientAcquire();
-        var exprᴛ1 = status;
-        if (exprᴛ1 == statusDone) {
+        switch (status) {
+        case var ᴛ when ᴛ == statusDone: {
             // Process already completed Wait, or was not found by
             // pidfdFind. Return ECHILD for consistency with what the wait
             // syscall would return.
-            return (default!, NewSyscallError(waitˢ, syscall.ECHILD));
+            return (default, NewSyscallError(waitˢ, syscall.ECHILD));
         }
-        if (exprᴛ1 == statusReleased) {
-            return (default!, syscall.EINVAL);
-        }
+        case var ᴛ when ᴛ == statusReleased: {
+            return (default, syscall.EINVAL);
+        }}
         ᒐd1 = true;
 
         ref var info = ref heap(new unix.SiginfoChild(), out var Ꮡinfo);
         ref var rusage = ref heap(new syscall.Rusage(), out var Ꮡrusage);
         var err = ignoringEINTR(() => unix.Waitid(unix.P_PIDFD, (nint)handle, Ꮡinfo, syscall.WEXITED, Ꮡrusage));
-        if (err != default!) {
-            return (default!, NewSyscallError(waitidˢ, err));
+        if (err != nil) {
+            return (default, NewSyscallError(waitidˢ, err));
         }
 
         // Update the Process status to statusDone.
@@ -124,9 +123,9 @@ internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) {
             pid: (nint)info.Pid,
             status: info.WaitStatus(),
             rusage: Ꮡrusage
-        )), default!);
+        )), default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡp.DerefOrNull().handleTransientRelease(); ᒐ.Run(); }
 }
 
@@ -136,24 +135,24 @@ internal static error pidfdSendSignal(this ж<Process> Ꮡp, syscallꓸSignal s)
     bool ᒐd1 = false;
     try {
         var (handle, status) = Ꮡp.handleTransientAcquire();
-        var exprᴛ1 = status;
-        if (exprᴛ1 == statusDone) {
+        switch (status) {
+        case var ᴛ when ᴛ == statusDone: {
             return ErrProcessDone;
         }
-        if (exprᴛ1 == statusReleased) {
+        case var ᴛ when ᴛ == statusReleased: {
             return errProcessReleased;
-        }
+        }}
         ᒐd1 = true;
 
         return convertESRCH(unix.PidFDSendSignal(handle, s));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡp.DerefOrNull().handleTransientRelease(); ᒐ.Run(); }
 }
 
 // pidfdWorks returns whether we can use pidfd on this system.
 internal static bool pidfdWorks() {
-    return checkPidfdOnce() == default!;
+    return checkPidfdOnce() == nil;
 }
 
 // checkPidfdOnce is used to only check whether pidfd works once.
@@ -185,7 +184,7 @@ internal static error checkPidfd() {
         // Get a pidfd of the current process (opening of "/proc/self" won't
         // work for waitid).
         var (fd, err) = unix.PidFDOpen(syscall.Getpid(), 0);
-        if (err != default!) {
+        if (err != nil) {
             return NewSyscallError(pidfdOpenˢ, err);
         }
         defer(syscall.Close, (nint)fd, ref ᒐ);
@@ -204,7 +203,7 @@ internal static error checkPidfd() {
 
         // Check pidfd_send_signal works (should be able to send 0 to itself).
         {
-            var errΔ1 = unix.PidFDSendSignal(fd, 0); if (errΔ1 != default!) {
+            var errΔ1 = unix.PidFDSendSignal(fd, 0); if (errΔ1 != nil) {
                 return NewSyscallError(pidfdSendSignalˢ, errΔ1);
             }
         }
@@ -215,14 +214,14 @@ internal static error checkPidfd() {
         // after CLONE_PIDFD in Linux 5.2, but some alternative Linux
         // implementations may not adhere to this ordering.
         {
-            var errΔ2 = checkClonePidfd(); if (errΔ2 != default!) {
+            var errΔ2 = checkClonePidfd(); if (errΔ2 != nil) {
                 return errΔ2;
             }
         }
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

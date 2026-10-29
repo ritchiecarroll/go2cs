@@ -15,8 +15,8 @@ partial class ed25519_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string ed25519SignAndVerifyPctˢ = "Ed25519 sign and verify PCT"u8;
 
-internal static void fipsPCT(ж<PrivateKey> Ꮡk) {
-    fips140.PCT(ed25519SignAndVerifyPctˢ, () => pairwiseTest(Ꮡk));
+internal static void fipsPCT(ж<PrivateKey> k) {
+    fips140.PCT(ed25519SignAndVerifyPctˢ, () => pairwiseTest(k));
 }
 
 // pairwiseTest needs to be a top-level function declaration to let the calls
@@ -30,33 +30,32 @@ internal static error pairwiseTest(ж<PrivateKey> Ꮡk) {
     // in FIPS mode faster, we could reuse A from GenerateKey. But another thing
     // that could make it faster is just _not doing a useless self-test_.
     var (pub, err) = NewPublicKey(k.PublicKey());
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return Verify(pub, msg, sig);
 }
 
-internal static slice<byte> signWithoutSelfTest(ж<PrivateKey> Ꮡpriv, slice<byte> message) {
+internal static slice<byte> signWithoutSelfTest(ж<PrivateKey> priv, slice<byte> message) {
     var signature = new slice<byte>(signatureSize);
-    return signWithDom(signature, Ꮡpriv, message, domPrefixPure, ""u8);
+    return signWithDom(signature, priv, message, domPrefixPure, ""u8);
 }
 
-internal static error verifyWithoutSelfTest(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice<byte> sig) {
-    return verifyWithDom(Ꮡpub, message, sig, domPrefixPure, ""u8);
+internal static error verifyWithoutSelfTest(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig) {
+    return verifyWithDom(pub, message, sig, domPrefixPure, ""u8);
 }
 
 internal static Action fipsSelfTest;
 internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => {
     fips140.CAST("Ed25519 sign and verify"u8, () => {
-        ref var seed = ref heap<array<byte>>(out var Ꮡseed);
-        seed = new byte[]{
+        ref var seed = ref heap<array<byte>>(new byte[]{
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
             0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
             0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20
-        }.array();
+        }.array(), out var Ꮡseed);
         var msg = slice<byte>("CAST"u8);
-        var want = new byte[]{
+        var want = slice<byte>([
             0xbd, 0xe7, 0xa5, 0xf3, 0x40, 0x73, 0xb9, 0x5a,
             0x2e, 0x6d, 0x63, 0x20, 0x0a, 0xd5, 0x92, 0x9b,
             0xa2, 0x3d, 0x00, 0x44, 0xb4, 0xc5, 0xfd, 0x62,
@@ -65,11 +64,11 @@ internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => 
             0x2a, 0xf6, 0xcd, 0x0e, 0xdb, 0x9a, 0xd3, 0x1e,
             0x35, 0xdb, 0x0b, 0xcf, 0x58, 0x90, 0x4f, 0xd7,
             0x69, 0x38, 0xed, 0x30, 0x51, 0x0f, 0xaa, 0x03
-        }.slice();
+        ]);
         var k = Ꮡ(new PrivateKey(seed: seed.Clone()));
         precomputePrivateKey(k);
         var (pub, err) = NewPublicKey(k.PublicKey());
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var sig = signWithoutSelfTest(k, msg);

@@ -10,10 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using commentꓸText = go.go.doc.comment_package.ΔText;
-global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -51,6 +48,44 @@ using static go.go.doc_package;
 // the assembly.
 [assembly: global::go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: global::go.GoFieldAccess(typeof(Example))]
+[assembly: global::go.GoFieldAccess(typeof(Note))]
+[assembly: global::go.GoFieldAccess(typeof(Package))]
+[assembly: global::go.GoFieldAccess(typeof(Value))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.ArrayType))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.BasicLit))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.BinaryExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.Comment))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.CommentGroup))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.Field))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.FieldList))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.File))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.FuncDecl))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.FuncType))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.GenDecl))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.Ident))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.ImportSpec))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.IndexExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.IndexListExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.InterfaceType))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.KeyValueExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.MapType))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.ParenExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.SelectorExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.StarExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.StructType))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.TypeSpec))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.UnaryExpr))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.ValueSpec))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.doc.comment_package.Doc))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.doc.comment_package.Parser))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.doc.comment_package.Printer))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.doc_package.Func))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.doc_package.Type))]
+[assembly: global::go.GoFieldAccess(typeof(namedType))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -61,10 +96,10 @@ using static go.go.doc_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/doc/comment.go", "comment.cs", "AAtAABQCgoKCggACNAAXAoLK")]
 [assembly: global::go.GoPositionMap("go/doc/doc.go", "doc.cs", "AG/yAeKCgoKCABAigoKClKaCgoLKgoKUlIKCgoKCgriCgoKCgIKklAAEHAALAoKCgpSCgpSCgtyigoKClIKClIKCAAg4ABsEgpSC6IKClLS4uoKCgpSApLSCtAAKFIKCggACFPKClAACFPKAgoKUpIKUrsIABRTmAAIQ8gACEPIAAhQACQI=", "", "", "123=sortedKeys/1/1/4,noteBodies/1/1/7,sortedValues/1/2/8,sortedTypes/1/1/9,sortedValues/2/2/10,sortedFuncs/1/1/11")]
-[assembly: global::go.GoPositionMap("go/doc/example.go", "example.cs", "ACtkABICgoKCgoKCgIKCpIKClIKCgoKUgpSAgqSAgqSClIKClKIACxi4gpSmhqaWsoCUgoCCgpSUgoKUxqyygpSClILqwpSmuIKUgpSClIKCgtiClLSCAAkQmrLKgpKCgqamgoKClKaUgoKClIK2ppSSkoKCgsqCgtyCqJKCgILagoLcpoKUgsaC7Mqm3IKCgpSGqgAGHAAMDIKCgpSCwpSCkoCEgoKCttqC2oKUpoKCgtymgqaUgqaCxoKUgoK0gpSCAAgeAAgCgpS0hJKClILGgu6CgpSSgoKCgoKCuILIlIKmkoKUlNqmgqaAgraqooKCgpSoxIKUiqKCgoKUlIKm6tSCgqiSooCUkoKCpLiSgpKCqtSCgrjKgoKCqNKClJKCgpSClJQAAhwADQKCpoKCgoKUlIKClIKCgpSUgoKUyu6CgoKUgoKUgoLKggADFtKCgpSClJQAAhIACQKClIKUgqaCgqzSgoKC", "110-112:1;207-214:1;315-317:2;318-320:3;349-377:1;379-385:2;523-525:1;680-682:1", "", "108=playExample/1/1/4;349=NewIdent/1/1/1;364=NewIdent/1/1/1;663=Pos/1/1/3")]
-[assembly: global::go.GoPositionMap("go/doc/exports.go", "exports.cs", "AAwgooKCgoKmppSCgoKCuIKCgpS0gIKkgILGgpSqwoKClKaokoKCpqiSgoKCgoCUgILGgoKmgpSu8oKUgoKCgoCUgoKCkriCAAcQpoKClIK2goKCpoKUgqiygoIABBCy2LS0gsaCgsa0gsaCgrSCxoK0yIKmpILugoKmgoKC/ICCgpKCgpTGrLKUpICU/KaChqKCgpSUlJTKgoKCgqamgpSC7JSosoKCgoKm", "", "", "310=NewIdent/1/1/1")]
+[assembly: global::go.GoPositionMap("go/doc/example.go", "example.cs", "ACtkABICgoKCgoKCgIKCpIKClIKCgoKUgpSAgqSAgqSClIKClKIACxi4gpSmhqaWsoCUgoCCgpSUgoKUxqyygpSClILqwpSmuIKUgpSClIKCgtiClLSCAAkQmrLKgpKCgqamgoKClKaUgoKCpILGppSCgoKCgsqCgtyCqJKCgILagoLcpoKUgsaC7Mqm3IKCgpSGqgAGHAAMDIKCgpSCwpSCgoCEgoKCttqC2oKUpoKCgtymgqaUgqaCxoKUgoK0gpSCAAgeAAgCgpS0hJKClILGgu6CgpSCgoKCgoKCuILIlIKmgoKUlNqmgqaAgraqooKCgpSoxIKUiqKCgoKUlIKm6tSCgqiSooCUgoKCpLiCgpKCqtSCgrjKgoKCqNKClJKCgpSClJQAAhwADQKCpoKCgoKUlIKClIKCgpSUgoKUyu6CgoKUgoKUgoLKggADFtKCgpSClJQAAhIACQKClIKUgqaCgqzSgoKC", "110-112:1;207-214:1;315-317:2;318-320:3;349-377:1;379-385:2;523-525:1;680-682:1", "", "108=playExample/1/1/4;349=NewIdent/1/1/1;364=NewIdent/1/1/1;658=Pos/1/1/3")]
+[assembly: global::go.GoPositionMap("go/doc/exports.go", "exports.cs", "AAwgooKCgoKmppSCgoKCuIKCgpS0gIKkgILGgpSqwoKClKaokoKCpqiSgoKCgoCUgILGgoKmgpSu8oKUgoKCgoCUgoKCgriCAAcQpoKClIK2goKCpoKUgqiygoIABBCy2LS0gsaCgsa0gsaCgrSCxoK0yIKmpILugoKmgoKC/ICCgoKCgpTGrLKUpICU/KaChqKCgpSUlJTKgoKCgqamgpSC7JSosoKCgoKm", "", "", "308=NewIdent/1/1/1")]
 [assembly: global::go.GoPositionMap("go/doc/filter.go", "filter.cs", "AAwWooKCgoLKpoKClIKC2IK4lILGguqmgoKCgoKmpoKCgoKCpqaCgoKCgqaCgoKClIKCpqqigoKCgg==")]
-[assembly: global::go.GoPositionMap("go/doc/reader.go", "reader.cs", "ACJAopSktraCgoKCgoKClIK21oKAgqSu4pKA3LaSgpSAgqSU7oK+0oKCgpSUAAYY0pSkpKSAptaklAAycoKuwoKUgIK23IKu8oKClICCgoKkpqaCgoKUpoKClKaCgpSCpqgACAqCgoKCgoKClIKmgIL6pJSmgpSClIK4griCgpSAgsjcgtyowoKUgrSkgpSowoKCyqaClJSCgpSasoKCgsySqMSCuJSmlIKmlICC/sqCgoKCgoCmpICCppSAgoKCggAIDoKCyqrCgpSCgoK4uoKawoKCgoKClIKCuICCpKiSgoDKkoKCAAoe0oKCgoKCgpSmgszUgoKCyoKUpoKAgoCCgoKCgoKmgoKUgoKSggAKEMbcgIKklIKAygAKFgAKEIKCuMSCgoKCgoK4goKClKaCgoKUpoKCyoKCgIIABhLCgriSkoKCgoKClKaSppKmkoKUlKiygtyClIKmgqaokpSUAAgSgoIABBLCgoKU7pSmpoKUgILsggAEEKKCgoKClIKokoKAgramgoKCgoKCppSCgoKUpqaCgoKCAAgSppimgoKUpoKCgpT8graChqqigoKUrsKmABgyABQqAAYUsp6CgoCCgoLIgoCCpA==", "852-858:1;879-881:1;909-911:1;990-995:1", "", "112=Text/1/1/1;373=Text/1/1/1,specNames/1/1/2;596=Pos/1/1/1,End/1/1/2;708=Pos/1/1/7;969=sortedValues/1/2/4,sortedValues/2/2/5,sortedFuncs/1/2/6,sortedFuncs/2/2/7")]
+[assembly: global::go.GoPositionMap("go/doc/reader.go", "reader.cs", "ACJAopSktraCgoKCgoKClIK21oKAgqSu4oKA3LaCgpSAgqSU7oK+0oKCgpSUAAYY0pSkpKSAptaklAAycoKuwoKUgIK23IKu8oKClICCgoKkpqaCgoKUpoKClKaCgpSCpqgACAqCgoKCgoKClIKmgIL6pJSmgpSClIK4griCgpSAgsjcgtyowoKUgrSkgpSowoKCyqaClJSCgpSasoKCgsySqMSCuJSmlIKmlICC/sqCgoKCgoCmpICCppSAgoKCggAIDoKCyqrCgpSCgoK4uoKawoKCgoKClIKCuICCpKiSgoDKgoKCAAoe0oKCgoKCgpSmgszUgoKCyoKUpoKAgoCCgoKCgoKmgoKUgoKCggALEMbcgIKklIKAygAKFgAKEIKCuMSCgoKCgoK4goKClKaCgoKUpoKCyoKCgIIABhLCgriCgoKCgoKClKaCpoKmgoKUlKiygtyClIKmgqaokpSUAAgSgoIABBLCgoKU7pSmpoKUgILsggAEEKKCgoKClIKokoKAgramgoKCgoKCppSCgoKUpqaCgoKCAAgSppimgoKUpoKCgpT8graChqqigoKUrsKmABgyABQqAAYUsp6CgoCCgoLIgoCCpA==", "852-858:1;879-881:1;909-911:1;990-995:1", "", "110=Text/1/1/1;371=Text/1/1/1,specNames/1/1/2;593=Pos/1/1/1,End/1/1/2;705=Pos/1/1/7;961=sortedValues/1/2/4,sortedValues/2/2/5,sortedFuncs/1/2/6,sortedFuncs/2/2/7")]
 [assembly: global::go.GoPositionMap("go/doc/synopsis.go", "synopsis.cs", "AAwgsqKigpSClIKUlK7CggAHEAAGGAAIAoKCgoKmgoKCgpSAgqSC")]
 // </GoSourcePositionMaps>
 

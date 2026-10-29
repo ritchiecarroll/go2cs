@@ -46,52 +46,48 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
     // missing        x.foo   !=    foO    type X has no field or method foo
 
     UntypedInt ok = iota;
-    const nint missing = 1; // no object found
-    const nint misspelled = 2; // found object with different spelling
-    const nint unexported = 3; // found object with name differing only in first letter
+    const nint missing = 1;      // no object found
+    const nint misspelled = 2;   // found object with different spelling
+    const nint unexported = 3;   // found object with name differing only in first letter
     const nint inaccessible = 4; // found object with matching name but inaccessible from the current package
 
     // determine case
     nint e = missing;
-    @string alt = default!;           // alternative spelling of selector; if any
-    if (obj != default!) {
+    @string alt = default; // alternative spelling of selector; if any
+    if (obj != nil) {
         alt = obj.Name();
-        if (obj.Pkg() == check.pkg){
+        if (obj.Pkg() == check.pkg) {
             assert(alt != sel); // otherwise there is no lookup error
             e = misspelled;
-        } else 
-        if (isExported(sel)){
-            if (isExported(alt)){
+        } else if (isExported(sel)) {
+            if (isExported(alt)) {
                 e = misspelled;
-            } else 
-            if (tail(sel) == tail(alt)) {
+            } else if (tail(sel) == tail(alt)) {
                 e = unexported;
             }
-        } else 
-        if (isExported(alt)){
+        } else if (isExported(alt)) {
             if (tail(sel) == tail(alt)) {
                 e = misspelled;
             }
-        } else 
-        if (sel == alt) {
+        } else if (sel == alt) {
             e = inaccessible;
         }
     }
 
-    if (structLit){
-        var exprᴛ1 = e;
-        if (exprᴛ1 == missing) {
+    if (structLit) {
+        switch (e) {
+        case var ᴛ when ᴛ == missing: {
             return Ꮡcheck.sprintf("unknown field %s in struct literal of type %s"u8, sel, typ);
         }
-        if (exprᴛ1 == misspelled) {
+        case var ᴛ when ᴛ == misspelled: {
             return Ꮡcheck.sprintf("unknown field %s in struct literal of type %s, but does have %s"u8, sel, typ, alt);
         }
-        if (exprᴛ1 == unexported) {
+        case var ᴛ when ᴛ == unexported: {
             return Ꮡcheck.sprintf("unknown field %s in struct literal of type %s, but does have unexported %s"u8, sel, typ, alt);
         }
-        if (exprᴛ1 == inaccessible) {
+        case var ᴛ when ᴛ == inaccessible: {
             return Ꮡcheck.sprintf("cannot refer to unexported field %s in struct literal of type %s"u8, alt, typ);
-        }
+        }}
     } else {
         @string what = objectˢ;
         switch (obj.type()) {
@@ -103,19 +99,19 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
             what = methodˢ;
             break;
         }}
-        var exprᴛ2 = e;
-        if (exprᴛ2 == missing) {
+        switch (e) {
+        case var ᴛ when ᴛ == missing: {
             return Ꮡcheck.sprintf("type %s has no field or method %s"u8, typ, sel);
         }
-        if (exprᴛ2 == misspelled) {
+        case var ᴛ when ᴛ == misspelled: {
             return Ꮡcheck.sprintf("type %s has no field or method %s, but does have %s %s"u8, typ, sel, what, alt);
         }
-        if (exprᴛ2 == unexported) {
+        case var ᴛ when ᴛ == unexported: {
             return Ꮡcheck.sprintf("type %s has no field or method %s, but does have unexported %s %s"u8, typ, sel, what, alt);
         }
-        if (exprᴛ2 == inaccessible) {
+        case var ᴛ when ᴛ == inaccessible: {
             return Ꮡcheck.sprintf("cannot refer to unexported %s %s"u8, what, alt);
-        }
+        }}
     }
 
     throw panic("unreachable");

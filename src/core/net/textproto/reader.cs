@@ -12,7 +12,7 @@ using math = math_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 
 partial class textproto_package {
 
@@ -33,8 +33,8 @@ partial struct Reader {
 // To avoid denial of service attacks, the provided [bufio.Reader]
 // should be reading from an [io.LimitReader] or similar Reader to bound
 // the size of responses.
-public static ж<Reader> NewReader(ж<bufio.Reader> Ꮡr) {
-    return Ꮡ(new Reader(R: Ꮡr));
+public static ж<Reader> NewReader(ж<bufio.Reader> r) {
+    return Ꮡ(new Reader(R: r));
 }
 
 // ReadLine reads a single line from r,
@@ -47,7 +47,7 @@ public static (@string, error) ReadLine(this ref Reader r) {
 // ReadLineBytes is like [Reader.ReadLine] but returns a []byte instead of a string.
 public static (slice<byte>, error) ReadLineBytes(this ref Reader r) {
     var (line, err) = r.readLineSlice(-1);
-    if (line != default!) {
+    if (line != nil) {
         line = bytes.Clone(line);
     }
     return (line, err);
@@ -58,25 +58,25 @@ public static (slice<byte>, error) ReadLineBytes(this ref Reader r) {
 // eliding the final \r or \r\n from the returned string.
 internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim) {
     r.closeDot();
-    slice<byte> line = default!;
-    while (ᐧ) {
+    slice<byte> line = default;
+    for (;;) {
         var (l, more, err) = r.R.ReadLine();
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         if (lim >= 0 && (int64)len(line) + (int64)len(l) > lim) {
-            return (default!, errMessageTooLarge);
+            return (default, errMessageTooLarge);
         }
         // Avoid the copy if the first call produced a full line.
-        if (line == default! && !more) {
-            return (l, default!);
+        if (line == nil && !more) {
+            return (l, default);
         }
         line = appendꓸꓸꓸ(line, l);
         if (!more) {
             break;
         }
     }
-    return (line, default!);
+    return (line, default);
 }
 
 // ReadContinuedLine reads a possibly continued line from r,
@@ -106,12 +106,12 @@ public static (@string, error) ReadContinuedLine(this ref Reader r) {
 // It does not assume Unicode or UTF-8.
 internal static slice<byte> trim(slice<byte> s) {
     nint i = 0;
-    while (i < len(s) && (s[i] == (rune)' ' || s[i] == (rune)'\t')) {
+    while (i < len(s) && (s[i] == ' ' || s[i] == '\t')) {
         i++;
     }
     s = s.slice(i);
     nint n = len(s) - 1;
-    while (n >= 0 && (s[n] == (rune)' ' || s[n] == (rune)'\t')) {
+    while (n >= 0 && (s[n] == ' ' || s[n] == '\t')) {
         n--;
     }
     return s.slice(0, n + 1);
@@ -121,7 +121,7 @@ internal static slice<byte> trim(slice<byte> s) {
 // returns a []byte instead of a string.
 public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) {
     var (line, err) = r.readContinuedLineSlice(-1, noValidation);
-    if (line != default!) {
+    if (line != nil) {
         line = bytes.Clone(line);
     }
     return (line, err);
@@ -133,22 +133,22 @@ public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) {
 // error is returned from readContinuedLineSlice.
 // It reads up to lim bytes of data (or unlimited if lim is less than 0).
 internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, int64 lim, Func<slice<byte>, error> validateFirstLine) {
-    if (validateFirstLine == default!) {
-        return (default!, fmt.Errorf("missing validateFirstLine func"u8));
+    if (validateFirstLine == nil) {
+        return (default, fmt.Errorf("missing validateFirstLine func"u8));
     }
 
     // Read the first line.
     var (line, err) = r.readLineSlice(lim);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (len(line) == 0) { // blank line - no continuation
-        return (line, default!);
+        return (line, default);
     }
 
     {
-        var errΔ1 = validateFirstLine(line); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = validateFirstLine(line); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
@@ -158,8 +158,8 @@ internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, i
     // and skipping over non-existent whitespace.
     if (r.R.Buffered() > 1) {
         var (peek, _) = r.R.Peek(2);
-        if (len(peek) > 0 && (isASCIILetter(peek[0]) || peek[0] == (rune)'\n') || len(peek) == 2 && peek[0] == (rune)'\r' && peek[1] == (rune)'\n') {
-            return (trim(line), default!);
+        if (len(peek) > 0 && (isASCIILetter(peek[0]) || peek[0] == '\n') || len(peek) == 2 && peek[0] == '\r' && peek[1] == '\n') {
+            return (trim(line), default);
         }
     }
 
@@ -174,29 +174,29 @@ internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, i
 
     // Read continuation lines.
     while (r.skipSpace() > 0) {
-        r.buf = append(r.buf, (byte)((rune)' '));
+        r.buf = append(r.buf, (byte)' ');
         if ((int64)len(r.buf) >= lim) {
-            return (default!, errMessageTooLarge);
+            return (default, errMessageTooLarge);
         }
         var (lineΔ1, errΔ2) = r.readLineSlice(lim - (int64)len(r.buf));
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         r.buf = appendꓸꓸꓸ(r.buf, trim(lineΔ1));
     }
-    return (r.buf, default!);
+    return (r.buf, default);
 }
 
 // skipSpace skips R over all spaces and returns the number of bytes skipped.
 internal static nint skipSpace(this ref Reader r) {
     nint n = 0;
-    while (ᐧ) {
+    for (;;) {
         var (c, err) = r.R.ReadByte();
-        if (err != default!) {
+        if (err != nil) {
             // Bufio will keep err until next read.
             break;
         }
-        if (c != (rune)' ' && c != (rune)'\t') {
+        if (c != ' ' && c != '\t') {
             r.R.UnreadByte();
             break;
         }
@@ -206,31 +206,31 @@ internal static nint skipSpace(this ref Reader r) {
 }
 
 internal static (nint code, bool continued, @string message, error err) readCodeLine(this ref Reader r, nint expectCode) {
-    nint code = default!;
-    bool continued = default!;
-    @string message = default!;
-    error err = default!;
+    nint code = default;
+    bool continued = default;
+    @string message = default;
+    error err = default;
 
     (var line, err) = r.ReadLine();
-    if (err != default!) {
+    if (err != nil) {
         return (code, continued, message, err);
     }
     return parseCodeLine(line, expectCode);
 }
 
 internal static (nint code, bool continued, @string message, error err) parseCodeLine(@string line, nint expectCode) {
-    nint code = default!;
-    bool continued = default!;
-    @string message = default!;
-    error err = default!;
+    nint code = default;
+    bool continued = default;
+    @string message = default;
+    error err = default;
 
-    if (len(line) < 4 || line[3] != (rune)' ' && line[3] != (rune)'-') {
+    if (len(line) < 4 || line[3] != ' ' && line[3] != '-') {
         err = ((ProtocolError)fmt.Sprintf("short response: %q"u8, line));
         return (code, continued, message, err);
     }
-    continued = line[3] == (rune)'-';
+    continued = line[3] == '-';
     (code, err) = strconv.Atoi(line[0..3]);
-    if (err != default! || code < 100) {
+    if (err != nil || code < 100) {
         err = ((ProtocolError)fmt.Sprintf("invalid response code: %q"u8, line));
         return (code, continued, message, err);
     }
@@ -259,12 +259,12 @@ internal static (nint code, bool continued, @string message, error err) parseCod
 //
 // An expectCode <= 0 disables the check of the status code.
 public static (nint code, @string message, error err) ReadCodeLine(this ref Reader r, nint expectCode) {
-    nint code = default!;
-    @string message = default!;
-    error err = default!;
+    nint code = default;
+    @string message = default;
+    error err = default;
 
     (code, var continued, message, err) = r.readCodeLine(expectCode);
-    if (err == default! && continued) {
+    if (err == nil && continued) {
         err = ((ProtocolError)fmt.Sprintf("unexpected multi-line response: %q"u8, message));
     }
     return (code, message, err);
@@ -298,8 +298,8 @@ public static (nint code, @string message, error err) ReadCodeLine(this ref Read
 // An expectCode <= 0 disables the check of the status code.
 public static (nint code, @string message, error err) ReadResponse(this ref Reader r, nint expectCode) {
     ref var code = ref heap(new nint(), out var Ꮡcode);
-    @string message = default!;
-    error err = default!;
+    @string message = default;
+    error err = default;
 
     (code, var continued, var first, err) = r.readCodeLine(expectCode);
     var multi = continued;
@@ -307,24 +307,24 @@ public static (nint code, @string message, error err) ReadResponse(this ref Read
     ᏑmessageBuilder.WriteString(first);
     while (continued) {
         var (line, errΔ1) = r.ReadLine();
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return (0, "", errΔ1);
         }
 
-        nint code2 = default!;
-        @string moreMessage = default!;
+        nint code2 = default;
+        @string moreMessage = default;
         (code2, continued, moreMessage, errΔ1) = parseCodeLine(line, 0);
-        if (errΔ1 != default! || code2 != code) {
-            ᏑmessageBuilder.WriteByte((rune)'\n');
+        if (errΔ1 != nil || code2 != code) {
+            ᏑmessageBuilder.WriteByte((byte)'\n');
             ᏑmessageBuilder.WriteString(strings.TrimRight(line, "\r\n"u8));
             continued = true;
             continue;
         }
-        ᏑmessageBuilder.WriteByte((rune)'\n');
+        ᏑmessageBuilder.WriteByte((byte)'\n');
         ᏑmessageBuilder.WriteString(moreMessage);
     }
     message = messageBuilder.String();
-    if (err != default! && multi && message != ""u8) {
+    if (err != nil && multi && message != ""u8) {
         // replace one line error message with all lines (full message)
         err = new ΔErrorжerror(Ꮡ(new ΔError(code, message)));
     }
@@ -362,92 +362,95 @@ partial struct dotReader {
 
 // Read satisfies reads by decoding dot-encoded data read from d.r.
 internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Run data through a simple state machine to
     // elide leading dots, rewrite trailing \r\n into \n,
     // and detect ending .\r\n line.
     const nint stateBeginLine = iota; // beginning of line; initial state; must be zero
-    const nint stateDot = 1; // read . at beginning of line
-    const nint stateDotCR = 2; // read .\r at beginning of line
-    const nint stateCR = 3;  // read \r (possibly at end of line)
-    const nint stateData = 4; // reading data in middle of line
-    const nint stateEOF = 5; // reached .\r\n end marker line
-    var br = d.r.Value.R;
+    const nint stateDot = 1;          // read . at beginning of line
+    const nint stateDotCR = 2;        // read .\r at beginning of line
+    const nint stateCR = 3;           // read \r (possibly at end of line)
+    const nint stateData = 4;         // reading data in middle of line
+    const nint stateEOF = 5;          // reached .\r\n end marker line
+    var br = d.r.R;
     while (n < len(b) && d.state != stateEOF) {
-        byte c = default!;
+        byte c = default;
         (c, err) = br.ReadByte();
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
             break;
         }
-        var exprᴛ1 = d.state;
-        if (exprᴛ1 == stateBeginLine) {
-            if (c == (rune)'.') {
+        switch (d.state) {
+        case var ᴛ when ᴛ == stateBeginLine: {
+            if (c == '.') {
                 d.state = stateDot;
                 continue;
             }
-            if (c == (rune)'\r') {
+            if (c == '\r') {
                 d.state = stateCR;
                 continue;
             }
             d.state = stateData;
+            break;
         }
-        else if (exprᴛ1 == stateDot) {
-            if (c == (rune)'\r') {
+        case var ᴛ when ᴛ == stateDot: {
+            if (c == '\r') {
                 d.state = stateDotCR;
                 continue;
             }
-            if (c == (rune)'\n') {
+            if (c == '\n') {
                 d.state = stateEOF;
                 continue;
             }
             d.state = stateData;
+            break;
         }
-        else if (exprᴛ1 == stateDotCR) {
-            if (c == (rune)'\n') {
+        case var ᴛ when ᴛ == stateDotCR: {
+            if (c == '\n') {
                 d.state = stateEOF;
                 continue;
             }
             // Not part of .\r\n.
             // Consume leading dot and emit saved \r.
             br.UnreadByte();
-            c = (rune)'\r';
+            c = (byte)'\r';
             d.state = stateData;
+            break;
         }
-        else if (exprᴛ1 == stateCR) {
-            do {
-                if (c == (rune)'\n') {
-                    d.state = stateBeginLine;
-                    break;
-                }
-                // Not part of \r\n. Emit saved \r
-                br.UnreadByte();
-                c = (rune)'\r';
-                d.state = stateData;
-            } while (false);
+        case var ᴛ when ᴛ == stateCR: {
+            if (c == '\n') {
+                d.state = stateBeginLine;
+                break;
+            }
+            // Not part of \r\n. Emit saved \r
+            br.UnreadByte();
+            c = (byte)'\r';
+            d.state = stateData;
+            break;
         }
-        else if (exprᴛ1 == stateData) {
-            if (c == (rune)'\r') {
+        case var ᴛ when ᴛ == stateData: {
+            if (c == '\r') {
                 d.state = stateCR;
                 continue;
             }
-            if (c == (rune)'\n') {
+            if (c == '\n') {
                 d.state = stateBeginLine;
             }
-        }
+            break;
+        }}
         b[n] = c;
         n++;
     }
-    if (err == default! && d.state == stateEOF) {
+    if (err == nil && d.state == stateEOF) {
         err = io.EOF;
     }
-    if (err != default! && (~d.r).dot == Ꮡd) {
-        d.r.Value.dot = default!;
+    if (err != nil && d.r.dot == Ꮡd) {
+        d.r.dot = default;
     }
     return (n, err);
 }
@@ -483,12 +486,12 @@ public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
     // We could use ReadDotBytes and then Split it,
     // but reading a line at a time avoids needing a
     // large contiguous block of memory and is simpler.
-    slice<@string> v = default!;
-    error err = default!;
-    while (ᐧ) {
-        @string line = default!;
+    slice<@string> v = default;
+    error err = default;
+    for (;;) {
+        @string line = default;
         (line, err) = r.ReadLine();
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
@@ -496,7 +499,7 @@ public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
         }
 
         // Dot by itself marks end; otherwise cut one dot.
-        if (len(line) > 0 && line[0] == (rune)'.') {
+        if (len(line) > 0 && line[0] == '.') {
             if (len(line) == 1) {
                 break;
             }
@@ -542,13 +545,13 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (maxMemory < 0) {
-        return (default!, errMessageTooLarge);
+        return (default, errMessageTooLarge);
     }
 
     // Avoid lots of small slice allocations later by allocating one
     // large one ahead of time which we'll cut up into smaller
     // slices. If this isn't big enough later, we allocate small ones.
-    slice<@string> strs = default!;
+    slice<@string> strs = default;
     nint hint = r.upcomingHeaderKeys();
     if (hint > 0) {
         if (hint > 1000) {
@@ -561,17 +564,17 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
 
     // The first line cannot start with a leading space.
     {
-        var (buf, err) = r.R.Peek(1); if (err == default! && (buf[0] == (rune)' ' || buf[0] == (rune)'\t')) {
+        var (buf, err) = r.R.Peek(1); if (err == nil && (buf[0] == ' ' || buf[0] == '\t')) {
             const int64 errorLimit = 80; // arbitrary limit on how much of the line we'll quote
             var (line, errΔ1) = r.readLineSlice(errorLimit);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 return (m, errΔ1);
             }
             return (m, ((ProtocolError)fmt.Sprintf("malformed MIME header initial line: %q"u8, line)));
         }
     }
 
-    while (ᐧ) {
+    for (;;) {
         var (kv, err) = r.readContinuedLineSlice(maxMemory, mustHaveFieldNameColon);
         if (len(kv) == 0) {
             return (m, err);
@@ -594,14 +597,14 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
 
         maxHeaders--;
         if (maxHeaders < 0) {
-            return (default!, errMessageTooLarge);
+            return (default, errMessageTooLarge);
         }
 
         // Skip initial spaces in value.
         @string value = (@string)bytes.TrimLeft(v, " \t"u8);
 
         var vv = m[key];
-        if (vv == default!) {
+        if (vv == nil) {
             // Account for per-entry overhead.
             // 200 bytes is based on benchmarks circa Go 1.20.
             const int64 mapEntryOverhead = 200;
@@ -613,7 +616,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
         if (maxMemory < 0) {
             return (m, errMessageTooLarge);
         }
-        if (vv == default! && len(strs) > 0){
+        if (vv == nil && len(strs) > 0) {
             // More than likely this will be a single-element key.
             // Most headers aren't multi-valued.
             // Set the capacity on strs[0] to 1, so any future append
@@ -625,7 +628,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
             m[key] = append(vv, value);
         }
 
-        if (err != default!) {
+        if (err != nil) {
             return (m, err);
         }
     }
@@ -634,17 +637,17 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
 // noValidation is a no-op validation func for readContinuedLineSlice
 // that permits any lines.
 internal static error noValidation(slice<byte> _) {
-    return default!;
+    return default;
 }
 
 // mustHaveFieldNameColon ensures that, per RFC 7230, the
 // field-name is on a single line, so the first line must
 // contain a colon.
 internal static error mustHaveFieldNameColon(slice<byte> line) {
-    if (bytes.IndexByte(line, (rune)':') < 0) {
+    if (bytes.IndexByte(line, (byte)':') < 0) {
         return ((ProtocolError)fmt.Sprintf("malformed MIME header: missing colon: %q"u8, line));
     }
-    return default!;
+    return default;
 }
 
 internal static slice<byte> nl = slice<byte>("\n"u8);
@@ -652,7 +655,7 @@ internal static slice<byte> nl = slice<byte>("\n"u8);
 // upcomingHeaderKeys returns an approximation of the number of keys
 // that will be in this header. If it gets confused, it returns 0.
 internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
-    nint n = default!;
+    nint n = default;
 
     // Try to determine the 'hint' size.
     r.R.Peek(1); // force a buffer load if empty
@@ -662,13 +665,13 @@ internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
     }
     var (peek, _) = r.R.Peek(s);
     while (len(peek) > 0 && n < 1000) {
-        slice<byte> line = default!;
+        slice<byte> line = default;
         (line, peek, _) = bytes.Cut(peek, nl);
-        if (len(line) == 0 || (len(line) == 1 && line[0] == (rune)'\r')) {
+        if (len(line) == 0 || (len(line) == 1 && line[0] == '\r')) {
             // Blank line separating headers from the body.
             break;
         }
-        if (line[0] == (rune)' ' || line[0] == (rune)'\t') {
+        if (line[0] == ' ' || line[0] == '\t') {
             // Folded continuation of the previous line.
             continue;
         }
@@ -693,15 +696,15 @@ public static @string CanonicalMIMEHeaderKey(@string s) {
         if (!validHeaderFieldByte(c)) {
             return s;
         }
-        if (upper && (rune)'a' <= c && c <= (rune)'z') {
+        if (upper && 'a' <= c && c <= 'z') {
             (s, _) = canonicalMIMEHeaderKey(slice<byte>(s));
             return s;
         }
-        if (!upper && (rune)'A' <= c && c <= (rune)'Z') {
+        if (!upper && 'A' <= c && c <= 'Z') {
             (s, _) = canonicalMIMEHeaderKey(slice<byte>(s));
             return s;
         }
-        upper = c == (rune)'-';
+        upper = c == '-';
     }
     return s;
 }
@@ -800,7 +803,7 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
             continue;
         }
         // Don't canonicalize.
-        if (c == (rune)' ') {
+        if (c == ' ') {
             // We accept invalid headers with a space before the
             // colon, but must not canonicalize them.
             // See https://go.dev/issue/34540.
@@ -821,14 +824,13 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
         // and upper case after each dash.
         // (Host, User-Agent, If-Modified-Since).
         // MIME headers are ASCII only, so no Unicode issues.
-        if (upper && (rune)'a' <= c && c <= (rune)'z'){
+        if (upper && 'a' <= c && c <= 'z') {
             c -= toLower;
-        } else 
-        if (!upper && (rune)'A' <= c && c <= (rune)'Z') {
+        } else if (!upper && 'A' <= c && c <= 'Z') {
             c += toLower;
         }
         a[i] = c;
-        upper = c == (rune)'-'; // for next time
+        upper = c == '-'; // for next time
     }
     ᏑcommonHeaderOnce.Do(initCommonHeader);
     // The compiler recognizes m[string(byteSlice)] as a special
@@ -850,7 +852,7 @@ internal static ref sync.Once commonHeaderOnce => ref ((StaticBox<sync.Once>)Ꮡ
 
 internal static void initCommonHeader() {
     commonHeader = new map<@string, @string>();
-    foreach (var (_, v) in new @string[]{
+    foreach (var (_, v) in slice<@string>([
         "Accept"u8,
         "Accept-Charset"u8,
         "Accept-Encoding"u8,
@@ -890,7 +892,7 @@ internal static void initCommonHeader() {
         "X-Forwarded-For"u8,
         "X-Imforwards"u8,
         "X-Powered-By"u8
-    }.slice()) {
+    ])) {
         commonHeader[v] = v;
     }
 }

@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,6 +55,10 @@ using static go.io.fs_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(PathError))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -68,11 +69,11 @@ using static go.io.fs_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
 [assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaAooCigKKAooAAM16CgoKCgoKCpoKClIKCgpSUlKqiqqKokqiSAAkUgKSA5pKC")]
-[assembly: go.GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgsiAgqSCgIKkpoKUgriCpoKCgpSCgoKmqJKUpAADEPKCgoKmgoKCgpSCpqqigpSm")]
-[assembly: go.GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABk6AAgCgIK2goKUpIKCpoKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1")]
-[assembly: go.GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgIK2goKUpIKAgoKCyIKCgoKUgoKCgpQ=")]
+[assembly: go.GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgsiAgqSCgIKkpoKUgriCpoKCgpSCgoKmqJKkpAADEPKCgoKmgoKCgpSCpqqigpSm")]
+[assembly: go.GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABk6AAgCgIK2goKUpIKCpoKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1", "", "", "46:21")]
+[assembly: go.GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgIK2goKUpIKAgoKCyIKCgoKUgoKCgpQ=", "", "", "", "47:21")]
 [assembly: go.GoPositionMap("io/fs/readlink.go", "readlink.cs", "ABY0soKClAACENKCgpQ=")]
-[assembly: go.GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oCCtoKClJI=")]
+[assembly: go.GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oCCtoKClJI=", "", "", "", "35:21")]
 [assembly: go.GoPositionMap("io/fs/sub.go", "sub.cs", "ABJGAA8CgpSClICCpKaSkpKSAAYQkoKUqJKClIKUqJKAgoCCxtaCgoKUgtaCgoKUgqaCgoKUgtaCgoKUgoKU1oKCgpSCgpSmlICCpIKmgoKCgoKUlNaigpSSgpQ=")]
 [assembly: go.GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygAyaJKAgpSUtoKUgoKClLiCgoCCgpS2AAIeAAwCgoKUlIKU")]
 // </GoSourcePositionMaps>

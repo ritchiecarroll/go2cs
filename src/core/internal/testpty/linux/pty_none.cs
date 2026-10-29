@@ -9,7 +9,7 @@ using os = os_package;
 partial class testpty_package {
 
 internal static (ж<os.File> pty, @string processTTY, error err) open() {
-    return (default!, "", ErrNotSupported);
+    return (default, "", ErrNotSupported);
 }
 
 } // end testpty_package

@@ -38,7 +38,7 @@ internal static moveToFrontDecoder newMTFDecoderWithRange(nint n) {
 }
 
 internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) {
-    byte b = default!;
+    byte b = default;
 
     // Implement move-to-front with a simple copy. This approach
     // beats more sophisticated approaches in benchmarking, probably

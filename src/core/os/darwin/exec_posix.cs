@@ -26,7 +26,7 @@ public static ΔSignal ΔKill = new syscall_ΔSignalᴠΔSignal(((syscallꓸSign
 internal static readonly @string chdirˢ = "chdir"u8;
 
 internal static (ж<Process> p, error err) startProcess(@string name, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    error err = default!;
+    error err = default;
     ref var attr = ref Ꮡattr.DerefOrNull();
 
     // If there is no SysProcAttr (ie. no Chroot or changed
@@ -34,10 +34,10 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
     // to chdir into. We can make the error clearer this way.
     if (Ꮡattr != nil && attr.Sys == nil && attr.Dir != ""u8) {
         {
-            var (_, errΔ1) = Stat(attr.Dir); if (errΔ1 != default!) {
+            var (_, errΔ1) = Stat(attr.Dir); if (errΔ1 != nil) {
                 var pe = errΔ1._<ж<PathError>>();
-                pe.Value.Op = chdirˢ;
-                return (default!, new fs.PathErrorжerror(pe));
+                pe.Op = chdirˢ;
+                return (default, new fs.PathErrorжerror(pe));
             }
         }
     }
@@ -48,15 +48,15 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
         Env: attr.Env,
         Sys: attrSys
     ));
-    if ((~sysattr).Env == default!) {
-        (sysattr.Value.Env, err) = execenv.Default((~sysattr).Sys);
-        if (err != default!) {
-            return (default!, err);
+    if (sysattr.Env == nil) {
+        (sysattr.Env, err) = execenv.Default(sysattr.Sys);
+        if (err != nil) {
+            return (default, err);
         }
     }
-    sysattr.Value.Files = new slice<uintptr>(0, len(attr.Files));
+    sysattr.Files = new slice<uintptr>(0, len(attr.Files));
     foreach (var (_, f) in attr.Files) {
-        sysattr.Value.Files = append((~sysattr).Files, f.Fd());
+        sysattr.Files = append(sysattr.Files, f.Fd());
     }
 
     var (pid, h, e) = syscall.StartProcess(name, argv, sysattr);
@@ -64,20 +64,20 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
     // Make sure we don't run the finalizers of attr.Files.
     runtime.KeepAlive(Ꮡattr.OrTypedNil());
 
-    if (e != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "fork/exec"u8, Path: name, Err: e))));
+    if (e != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "fork/exec"u8, Path: name, Err: e))));
     }
 
     // For Windows, syscall.StartProcess above already returned a process handle.
     if (runtime.GOOS != "windows"u8) {
-        bool ok = default!;
-        (h, ok) = getPidfd((~sysattr).Sys, shouldDupPidfd);
+        bool ok = default;
+        (h, ok) = getPidfd(sysattr.Sys, shouldDupPidfd);
         if (!ok) {
-            return (newPIDProcess(pid), default!);
+            return (newPIDProcess(pid), default);
         }
     }
 
-    return (newHandleProcess(pid, h), default!);
+    return (newHandleProcess(pid, h), default);
 }
 
 internal static error kill(this ж<Process> Ꮡp) {
@@ -94,25 +94,25 @@ internal static error withHandle(this ж<Process> Ꮡp, Action<uintptr> f) {
             return ErrNoHandle;
         }
         var (handle, status) = Ꮡp.handleTransientAcquire();
-        var exprᴛ1 = status;
-        if (exprᴛ1 == statusDone) {
+        switch (status) {
+        case var ᴛ when ᴛ == statusDone: {
             return ErrProcessDone;
         }
-        if (exprᴛ1 == statusReleased) {
+        case var ᴛ when ᴛ == statusReleased: {
             return errProcessReleased;
-        }
+        }}
         ᒐd1 = true;
         f(handle);
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡp.DerefOrNull().handleTransientRelease(); ᒐ.Run(); }
 }
 
 // ProcessState stores information about a process, as reported by Wait.
 partial struct ProcessState {
-    internal nint pid;               // The process's id.
+    internal nint pid;                  // The process's id.
     internal syscall.WaitStatus status; // System-dependent status info.
     internal ж<syscall.Rusage> rusage;
 }
@@ -153,7 +153,7 @@ public static @string String(this ж<ProcessState> Ꮡp) {
     switch (ᐧ) {
     case {} when status.Exited(): {
         nint code = status.ExitStatus();
-        if (runtime.GOOS == "windows"u8 && (nuint)code >= (nuint)1 << 16){ // windows uses large hex numbers
+        if (runtime.GOOS == "windows"u8 && (nuint)code >= (nuint)1 << 16) { // windows uses large hex numbers
             res = "exit status 0x"u8 + strconv.FormatUint((uint64)code, 16);
         } else { // unix systems use small decimal integers
             res = "exit status "u8 + strconv.Itoa(code); // unix

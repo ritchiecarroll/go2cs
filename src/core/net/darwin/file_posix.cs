@@ -15,21 +15,21 @@ partial class net_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string getsocknameˢ = "getsockname"u8;
 
-internal static (ж<netFD>, error) newFileFD(ж<os.File> Ꮡf) {
-    var (s, err) = dupFileSocket(Ꮡf);
-    if (err != default!) {
-        return (default!, err);
+internal static (ж<netFD>, error) newFileFD(ж<os.File> f) {
+    var (s, err) = dupFileSocket(f);
+    if (err != nil) {
+        return (default, err);
     }
     nint family = syscall.AF_UNSPEC;
     (var sotype, err) = syscall.GetsockoptInt(s, syscall.SOL_SOCKET, _SO_TYPE);
-    if (err != default!) {
+    if (err != nil) {
         poll.CloseFunc(s);
-        return (default!, os.NewSyscallError(getsockoptˢ, err));
+        return (default, os.NewSyscallError(getsockoptˢ, err));
     }
     (var lsa, err) = syscall.Getsockname(s);
-    if (err != default!) {
+    if (err != nil) {
         poll.CloseFunc(s);
-        return (default!, os.NewSyscallError(getsocknameˢ, err));
+        return (default, os.NewSyscallError(getsocknameˢ, err));
     }
     var (rsa, _) = syscall.Getpeername(s);
     switch (lsa.type()) {
@@ -47,81 +47,81 @@ internal static (ж<netFD>, error) newFileFD(ж<os.File> Ꮡf) {
     }
     default: {
         poll.CloseFunc(s);
-        return (default!, syscall.EPROTONOSUPPORT);
+        return (default, syscall.EPROTONOSUPPORT);
     }}
     (var fd, err) = newFD(s, family, sotype, ""u8);
-    if (err != default!) {
+    if (err != nil) {
         poll.CloseFunc(s);
-        return (default!, err);
+        return (default, err);
     }
     var laddr = fd.addrFunc()(lsa);
     var raddr = fd.addrFunc()(rsa);
-    fd.Value.net = laddr.Network();
+    fd.net = laddr.Network();
     {
-        var errΔ1 = fd.init(); if (errΔ1 != default!) {
+        var errΔ1 = fd.init(); if (errΔ1 != nil) {
             fd.Close();
-            return (default!, errΔ1);
+            return (default, errΔ1);
         }
     }
     fd.setAddr(laddr, raddr);
-    return (fd, default!);
+    return (fd, default);
 }
 
-internal static (Conn, error) fileConn(ж<os.File> Ꮡf) {
-    var (fd, err) = newFileFD(Ꮡf);
-    if (err != default!) {
-        return (default!, err);
+internal static (Conn, error) fileConn(ж<os.File> f) {
+    var (fd, err) = newFileFD(f);
+    if (err != nil) {
+        return (default, err);
     }
-    switch ((~fd).laddr.type()) {
+    switch (fd.laddr.type()) {
     case ж<TCPAddr>: {
-        return (new TCPConnжConn(newTCPConn(fd, defaultTCPKeepAliveIdle, new KeepAliveConfig(nil), testPreHookSetKeepAlive, testHookSetKeepAlive)), default!);
+        return (new TCPConnжConn(newTCPConn(fd, defaultTCPKeepAliveIdle, new KeepAliveConfig(), testPreHookSetKeepAlive, testHookSetKeepAlive)), default);
     }
     case ж<UDPAddr>: {
-        return (new UDPConnжConn(newUDPConn(fd)), default!);
+        return (new UDPConnжConn(newUDPConn(fd)), default);
     }
     case ж<IPAddr>: {
-        return (new IPConnжConn(newIPConn(fd)), default!);
+        return (new IPConnжConn(newIPConn(fd)), default);
     }
     case ж<UnixAddr>: {
-        return (new UnixConnжConn(newUnixConn(fd)), default!);
+        return (new UnixConnжConn(newUnixConn(fd)), default);
     }}
     fd.Close();
-    return (default!, syscall.EINVAL);
+    return (default, syscall.EINVAL);
 }
 
-internal static (Listener, error) fileListener(ж<os.File> Ꮡf) {
-    var (fd, err) = newFileFD(Ꮡf);
-    if (err != default!) {
-        return (default!, err);
+internal static (Listener, error) fileListener(ж<os.File> f) {
+    var (fd, err) = newFileFD(f);
+    if (err != nil) {
+        return (default, err);
     }
-    switch ((~fd).laddr.type()) {
+    switch (fd.laddr.type()) {
     case ж<TCPAddr> laddr: {
-        return (new TCPListenerжListener(Ꮡ(new TCPListener(fd: fd))), default!);
+        return (new TCPListenerжListener(Ꮡ(new TCPListener(fd: fd))), default);
     }
     case ж<UnixAddr> laddr: {
-        return (new UnixListenerжListener(Ꮡ(new UnixListener(fd: fd, path: (~laddr).Name, unlink: false))), default!);
+        return (new UnixListenerжListener(Ꮡ(new UnixListener(fd: fd, path: laddr.Name, unlink: false))), default);
     }}
     fd.Close();
-    return (default!, syscall.EINVAL);
+    return (default, syscall.EINVAL);
 }
 
-internal static (PacketConn, error) filePacketConn(ж<os.File> Ꮡf) {
-    var (fd, err) = newFileFD(Ꮡf);
-    if (err != default!) {
-        return (default!, err);
+internal static (PacketConn, error) filePacketConn(ж<os.File> f) {
+    var (fd, err) = newFileFD(f);
+    if (err != nil) {
+        return (default, err);
     }
-    switch ((~fd).laddr.type()) {
+    switch (fd.laddr.type()) {
     case ж<UDPAddr>: {
-        return (new UDPConnжPacketConn(newUDPConn(fd)), default!);
+        return (new UDPConnжPacketConn(newUDPConn(fd)), default);
     }
     case ж<IPAddr>: {
-        return (new IPConnжPacketConn(newIPConn(fd)), default!);
+        return (new IPConnжPacketConn(newIPConn(fd)), default);
     }
     case ж<UnixAddr>: {
-        return (new UnixConnжPacketConn(newUnixConn(fd)), default!);
+        return (new UnixConnжPacketConn(newUnixConn(fd)), default);
     }}
     fd.Close();
-    return (default!, syscall.EINVAL);
+    return (default, syscall.EINVAL);
 }
 
 } // end net_package

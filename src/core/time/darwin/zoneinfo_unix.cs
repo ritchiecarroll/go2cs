@@ -15,12 +15,12 @@ partial class time_package {
 // Many systems use /usr/share/zoneinfo, Solaris 2 has
 // /usr/share/lib/zoneinfo, IRIX 6 has /usr/lib/locale/TZ,
 // NixOS has /etc/zoneinfo.
-internal static slice<@string> platformZoneSources = new @string[]{
+internal static slice<@string> platformZoneSources = slice<@string>([
     "/usr/share/zoneinfo/"u8,
     "/usr/share/lib/zoneinfo/"u8,
     "/usr/lib/locale/TZ/"u8,
     "/etc/zoneinfo"u8
-}.slice();
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string localtimeˢ = "localtime"u8;
@@ -37,8 +37,8 @@ internal static void initLocal() {
     var (tz, ok) = syscall.Getenv("TZ"u8);
     switch (ᐧ) {
     case {} when !ok: {
-        var (z, err) = loadLocation(localtimeˢ, new @string[]{"/etc"u8}.slice());
-        if (err == default!) {
+        var (z, err) = loadLocation(localtimeˢ, slice<@string>(["/etc"u8]));
+        if (err == nil) {
             localLoc = z.Value;
             localLoc.name = localˢ;
             return;
@@ -46,14 +46,14 @@ internal static void initLocal() {
         break;
     }
     case {} when tz != ""u8: {
-        if (tz[0] == (rune)':') {
+        if (tz[0] == ':') {
             tz = tz[1..];
         }
-        if (tz != ""u8 && tz[0] == (rune)'/'){
+        if (tz != ""u8 && tz[0] == '/') {
             {
-                var (z, err) = loadLocation(tz, new @string[]{""u8}.slice()); if (err == default!) {
+                var (z, err) = loadLocation(tz, slice<@string>([""u8])); if (err == nil) {
                     localLoc = z.Value;
-                    if (tz == "/etc/localtime"u8){
+                    if (tz == "/etc/localtime"u8) {
                         localLoc.name = localˢ;
                     } else {
                         localLoc.name = tz;
@@ -61,10 +61,9 @@ internal static void initLocal() {
                     return;
                 }
             }
-        } else 
-        if (tz != ""u8 && tz != "UTC"u8) {
+        } else if (tz != ""u8 && tz != "UTC"u8) {
             {
-                var (z, err) = loadLocation(tz, platformZoneSources); if (err == default!) {
+                var (z, err) = loadLocation(tz, platformZoneSources); if (err == nil) {
                     localLoc = z.Value;
                     return;
                 }

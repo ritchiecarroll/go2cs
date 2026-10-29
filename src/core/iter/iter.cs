@@ -271,8 +271,8 @@ internal partial struct Pull_pull<V> /*dyn*/ {
 // If the iterator panics during a call to next (or stop),
 // then next (or stop) itself panics with the same value.
 public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
-    Func<(V, bool)> next = default!;
-    Action stop = default!;
+    Func<(V, bool)> next = default;
+    Action stop = default;
 
     ref var pull = ref heap(new Pull_pull<V>(), out var Ꮡpull);
     var c = newcoro((ж<coro> cΔ1) => {
@@ -300,10 +300,9 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
             // Recover and propagate panics from seq.
             defer(() => {
                 {
-                    var p = recover(); if (p != default!){
+                    var p = recover(); if (p != nil) {
                         Ꮡpull.Value.panicValue = p;
-                    } else 
-                    if (!Ꮡpull.Value.seqDone) {
+                    } else if (!Ꮡpull.Value.seqDone) {
                         Ꮡpull.Value.panicValue = goexitPanicValue;
                     }
                 }
@@ -321,7 +320,7 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
     var cʗ1 = c;
     next = () => {
         V v1 = GoZero<V>();
-        bool ok1 = default!;
+        bool ok1 = default;
         race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer))); // detect races
 
         if (Ꮡpull.Value.done) {
@@ -336,8 +335,8 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
         race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
 
         // Propagate panics and goexits from seq.
-        if (Ꮡpull.Value.panicValue != default!) {
-            if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)){
+        if (Ꮡpull.Value.panicValue != nil) {
+            if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)) {
                 // Propagate runtime.Goexit from seq.
                 runtime.Goexit();
             } else {
@@ -357,8 +356,8 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
             race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
 
             // Propagate panics and goexits from seq.
-            if (Ꮡpull.Value.panicValue != default!) {
-                if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)){
+            if (Ꮡpull.Value.panicValue != nil) {
+                if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)) {
                     // Propagate runtime.Goexit from seq.
                     runtime.Goexit();
                 } else {
@@ -404,8 +403,8 @@ internal partial struct Pull2_pull<K, V> /*dyn*/ {
 // If the iterator panics during a call to next (or stop),
 // then next (or stop) itself panics with the same value.
 public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq) {
-    Func<(K, V, bool)> next = default!;
-    Action stop = default!;
+    Func<(K, V, bool)> next = default;
+    Action stop = default;
 
     ref var pull = ref heap(new Pull2_pull<K, V>(), out var Ꮡpull);
     var c = newcoro((ж<coro> cΔ1) => {
@@ -433,10 +432,9 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
             // Recover and propagate panics from seq.
             defer(() => {
                 {
-                    var p = recover(); if (p != default!){
+                    var p = recover(); if (p != nil) {
                         Ꮡpull.Value.panicValue = p;
-                    } else 
-                    if (!Ꮡpull.Value.seqDone) {
+                    } else if (!Ꮡpull.Value.seqDone) {
                         Ꮡpull.Value.panicValue = goexitPanicValue;
                     }
                 }
@@ -456,7 +454,7 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
     next = () => {
         K k1 = GoZero<K>();
         V v1 = GoZero<V>();
-        bool ok1 = default!;
+        bool ok1 = default;
         race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer))); // detect races
 
         if (Ꮡpull.Value.done) {
@@ -471,8 +469,8 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
         race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
 
         // Propagate panics and goexits from seq.
-        if (Ꮡpull.Value.panicValue != default!) {
-            if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)){
+        if (Ꮡpull.Value.panicValue != nil) {
+            if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)) {
                 // Propagate runtime.Goexit from seq.
                 runtime.Goexit();
             } else {
@@ -492,8 +490,8 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
             race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
 
             // Propagate panics and goexits from seq.
-            if (Ꮡpull.Value.panicValue != default!) {
-                if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)){
+            if (Ꮡpull.Value.panicValue != nil) {
+                if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)) {
                     // Propagate runtime.Goexit from seq.
                     runtime.Goexit();
                 } else {

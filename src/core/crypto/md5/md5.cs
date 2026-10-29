@@ -73,7 +73,7 @@ internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte>
     b = appendꓸꓸꓸ(b, d.x.slice(0, d.nx));
     b = appendꓸꓸꓸ(b, makeꓸꓸꓸ<byte>(len(d.x) - d.nx));
     b = byteorder.BEAppendUint64(b, d.len);
-    return (b, default!);
+    return (b, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -95,7 +95,7 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     b = b.slice(copy(d.x[..], b));
     (b, d.len) = consumeUint64(b);
     d.nx = (nint)(d.len % (uint64)ΔBlockSize);
-    return default!;
+    return default;
 }
 
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
@@ -107,9 +107,8 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
 }
 
 internal static (hash.Cloner, error) Clone(this ref digest d) {
-    ref var r = ref heap<digest>(out var Ꮡr);
-    r = d.ΔClone();
-    return (new digestжCloner(Ꮡr), default!);
+    ref var r = ref heap<digest>(d.ΔClone(), out var Ꮡr);
+    return (new digestжCloner(Ꮡr), default);
 }
 
 // New returns a new [hash.Hash] computing the MD5 checksum. The Hash
@@ -134,8 +133,8 @@ internal static nint BlockSize(this ref digest d) {
 internal static readonly @string cryptoMd5UseOfMd5IsNotˢ = "crypto/md5: use of MD5 is not allowed in FIPS 140-only mode"u8;
 
 internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
-    nint nn = default!;
-    error err = default!;
+    nint nn = default;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
@@ -150,7 +149,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
         nint n = copy(d.x.slice(d.nx), p);
         d.nx += n;
         if (d.nx == ΔBlockSize) {
-            if (haveAsm){
+            if (haveAsm) {
                 block(ref (Ꮡd).DerefOrNull(), d.x[..]);
             } else {
                 blockGeneric(ref (Ꮡd).DerefOrNull(), d.x[..]);
@@ -161,7 +160,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     }
     if (len(p) >= ΔBlockSize) {
         nint n = len(p) & ~(nint)(ΔBlockSize - 1);
-        if (haveAsm){
+        if (haveAsm) {
             while (n > maxAsmSize) {
                 block(ref (Ꮡd).DerefOrNull(), p[..(int)(maxAsmSize)]);
                 p = p[(int)(maxAsmSize)..];
@@ -181,8 +180,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     // Make a copy of d so that caller can keep writing and summing.
-    ref var d0 = ref heap<digest>(out var Ꮡd0);
-    d0 = d.ΔClone();
+    ref var d0 = ref heap<digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.checkSum();
     return appendꓸꓸꓸ(@in, hash[..]);
 }
@@ -200,7 +198,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     //
     // 1 byte end marker :: 0-63 padding bytes :: 8 byte length
     var tmp = new byte[]{0x80}.array(72);
-    var pad = (55 - d.len) % 64; // calculate number of padding bytes
+    var pad = (55 - d.len) % 64;                                   // calculate number of padding bytes
     byteorder.LEPutUint64(tmp.slice((nint)(1 + pad)), d.len << 3); // append length in bits
     Ꮡd.Write(tmp.slice(0, (nint)(1 + pad + 8)));
 

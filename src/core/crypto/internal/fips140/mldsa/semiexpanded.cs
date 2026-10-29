@@ -42,46 +42,49 @@ internal static readonly @string mldsaSemiExpandedPrivateˢ2 = "mldsa: semi-expa
 // [PrivateKey.Bytes] must NOT be called on the resulting key, as it will
 // produce a random value.
 public static (ж<PrivateKey>, error) TestingOnlyNewPrivateKeyFromSemiExpanded(slice<byte> sk) {
-    parameters p = default!;
-    var exprᴛ1 = len(sk);
-    if (exprᴛ1 == semiExpandedPrivKeySize(params44)) {
+    parameters p = default;
+    switch (len(sk)) {
+    case var ᴛ when ᴛ == semiExpandedPrivKeySize(params44): {
         p = params44;
+        break;
     }
-    else if (exprᴛ1 == semiExpandedPrivKeySize(params65)) {
+    case var ᴛ when ᴛ == semiExpandedPrivKeySize(params65): {
         p = params65;
+        break;
     }
-    else if (exprᴛ1 == semiExpandedPrivKeySize(params87)) {
+    case var ᴛ when ᴛ == semiExpandedPrivKeySize(params87): {
         p = params87;
+        break;
     }
-    else { /* default: */
-        return (default!, errors.New(mldsaInvalidSemiExpandedˢ));
-    }
+    default: {
+        return (default, errors.New(mldsaInvalidSemiExpandedˢ));
+    }}
     nint k = p.k;
     nint l = p.l;
 
     var (ρ, K, tr, s1, s2, t0, err) = skDecode(sk, p);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var priv = Ꮡ(new PrivateKey(pub: new ΔPublicKey(p: p)));
-    priv.Value.k = K.Clone();
-    priv.Value.pub.tr = tr.Clone();
-    var A = GoReflect.WithElemDims((~priv).pub.a.slice(0, k * l), 256);
+    priv.k = K.Clone();
+    priv.pub.tr = tr.Clone();
+    var A = GoReflect.WithElemDims(priv.pub.a.slice(0, k * l), 256);
     computeMatrixA(A, ρ[..], p);
     foreach (var r in range(l)) {
-        priv.Value.s1[r] = ntt(s1[r]);
+        priv.s1[r] = ntt(s1[r]);
     }
     foreach (var r in range(k)) {
-        priv.Value.s2[r] = ntt(s2[r]);
+        priv.s2[r] = ntt(s2[r]);
     }
     foreach (var r in range(k)) {
-        priv.Value.t0[r] = ntt(t0[r]);
+        priv.t0[r] = ntt(t0[r]);
     }
 
     // We need to put something in priv.seed, and putting random bytes feels
     // safer than putting anything predictable.
-    drbg.Read((~priv).seed[..]);
+    drbg.Read(priv.seed[..]);
 
     // Making this format *even more* annoying, we need to recompute t1 from ρ,
     // s1, and s2 if we want to generate the public key. This is essentially as
@@ -102,27 +105,27 @@ public static (ж<PrivateKey>, error) TestingOnlyNewPrivateKeyFromSemiExpanded(s
 
     var t1 = GoReflect.WithElemDims(new slice<array<uint16>>(k, () => new(256), maxK), 256);
     foreach (var i in range(k)) {
-        var tHat = (~priv).s2[i].Clone();
+        var tHat = priv.s2[i].Clone();
         foreach (var j in range(l)) {
-            tHat = polyAdd(tHat, nttMul(A[i * l + j], (~priv).s1[j]));
+            tHat = polyAdd(tHat, nttMul(A[i * l + j], priv.s1[j]));
         }
         var t = inverseNTT(tHat);
         foreach (var j in range(n)) {
             var (r1, r0) = power2Round(t[j]);
             t1[i][j] = r1;
             if (r0 != t0[i][j]) {
-                return (default!, errors.New(mldsaSemiExpandedPrivateˢ));
+                return (default, errors.New(mldsaSemiExpandedPrivateˢ));
             }
         }
     }
 
-    var pk = pkEncode((~priv).pub.raw[..0], ρ[..], t1, p);
+    var pk = pkEncode(priv.pub.raw[..0], ρ[..], t1, p);
     if (computePublicKeyHash(pk) != tr) {
-        return (default!, errors.New(mldsaSemiExpandedPrivateˢ2));
+        return (default, errors.New(mldsaSemiExpandedPrivateˢ2));
     }
-    computeT1Hat(GoReflect.WithElemDims((~priv).pub.t1.slice(0, k), 256), t1); // NTT(t₁ ⋅ 2ᵈ)
+    computeT1Hat(GoReflect.WithElemDims(priv.pub.t1.slice(0, k), 256), t1); // NTT(t₁ ⋅ 2ᵈ)
 
-    return (priv, default!);
+    return (priv, default);
 }
 
 public static slice<byte> TestingOnlyPrivateKeySemiExpandedBytes(ж<PrivateKey> Ꮡpriv) {
@@ -133,8 +136,8 @@ public static slice<byte> TestingOnlyPrivateKeySemiExpandedBytes(ж<PrivateKey> 
     nint η = priv.pub.p.η;
     var sk = new slice<byte>(0, semiExpandedPrivKeySize(priv.pub.p));
     sk = appendꓸꓸꓸ(sk, priv.pub.raw[..32]); // ρ
-    sk = appendꓸꓸꓸ(sk, priv.k[..]); // K
-    sk = appendꓸꓸꓸ(sk, priv.pub.tr[..]); // tr
+    sk = appendꓸꓸꓸ(sk, priv.k[..]);         // K
+    sk = appendꓸꓸꓸ(sk, priv.pub.tr[..]);    // tr
     foreach (var i in range(l)) {
         sk = bitPackSlow(sk, inverseNTT(priv.s1[i]), η, η);
     }
@@ -152,10 +155,10 @@ internal static (array<byte> ρ, array<byte> K, array<byte> tr, slice<ringElemen
     array<byte> ρ = new(32);
     array<byte> K = new(32);
     array<byte> tr = new(64);
-    slice<ringElement> s1 = default!;
-    slice<ringElement> s2 = default!;
-    slice<ringElement> t0 = default!;
-    error err = default!;
+    slice<ringElement> s1 = default;
+    slice<ringElement> s2 = default;
+    slice<ringElement> t0 = default;
+    error err = default;
 
     nint k = p.k;
     nint l = p.l;
@@ -175,7 +178,7 @@ internal static (array<byte> ρ, array<byte> K, array<byte> tr, slice<ringElemen
     foreach (var i in range(l)) {
         nint length = (nint)n * bits.Len((nuint)η * 2) / 8;
         (s1[i], err) = bitUnpackSlow(sk.slice(0, length), η, η);
-        if (err != default!) {
+        if (err != nil) {
             return (ρ, K, tr, s1, s2, t0, err);
         }
         sk = sk.slice(length);
@@ -185,7 +188,7 @@ internal static (array<byte> ρ, array<byte> K, array<byte> tr, slice<ringElemen
     foreach (var i in range(k)) {
         nint length = (nint)n * bits.Len((nuint)η * 2) / 8;
         (s2[i], err) = bitUnpackSlow(sk.slice(0, length), η, η);
-        if (err != default!) {
+        if (err != nil) {
             return (ρ, K, tr, s1, s2, t0, err);
         }
         sk = sk.slice(length);
@@ -196,7 +199,7 @@ internal static (array<byte> ρ, array<byte> K, array<byte> tr, slice<ringElemen
     foreach (var i in range(k)) {
         nint length = n * 13 / 8;
         (t0[i], err) = bitUnpackSlow(sk.slice(0, length), bound - 1, bound);
-        if (err != default!) {
+        if (err != nil) {
             return (ρ, K, tr, s1, s2, t0, err);
         }
         sk = sk.slice(length);
@@ -213,8 +216,8 @@ internal static slice<byte> bitPackSlow(slice<byte> buf, ringElement r, nint a, 
         throw panic("mldsa: internal error: invalid bitlen");
     }
     var (@out, v) = sliceForAppend(buf, (nint)n * bitlen / 8);
-    uint32 acc = default!;
-    nuint accBits = default!;
+    uint32 acc = default;
+    nuint accBits = default;
     foreach (var i in range(r)) {
         var w = (int32)b - fieldCenteredMod(r[i]);
         acc |= (uint32)(((uint32)w).Lsh(accBits));
@@ -222,7 +225,7 @@ internal static slice<byte> bitPackSlow(slice<byte> buf, ringElement r, nint a, 
         while (accBits >= 8) {
             v[0] = (byte)acc;
             v = v[1..];
-            acc >>= (int)(8);
+            acc >>= 8;
             accBits -= 8;
         }
     }
@@ -248,9 +251,9 @@ internal static (ringElement, error) bitUnpackSlow(slice<byte> v, nint a, nint b
     var mask = (uint32)((((uint32)1).Lsh((int64)(bitlen))) - 1);
     var maxValue = (uint32)(a + b);
 
-    ringElement r = default!;
-    uint32 acc = default!;
-    nuint accBits = default!;
+    ringElement r = default;
+    uint32 acc = default;
+    nuint accBits = default;
     nint vIdx = 0;
 
     foreach (var i in range(r)) {
@@ -270,7 +273,7 @@ internal static (ringElement, error) bitUnpackSlow(slice<byte> v, nint a, nint b
         accBits -= (nuint)bitlen;
     }
 
-    return (r.Clone(), default!);
+    return (r.Clone(), default);
 }
 
 } // end mldsa_package

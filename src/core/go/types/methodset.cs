@@ -47,25 +47,25 @@ public static ж<Selection> At(this ref MethodSet s, nint i) {
 }
 
 // Lookup returns the method with matching package and name, or nil if not found.
-public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> Ꮡpkg, @string name) {
+public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> pkg, @string name) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.Len() == 0) {
-        return default!;
+        return default;
     }
 
-    @string key = Id(Ꮡpkg, name);
+    @string key = Id(pkg, name);
     nint i = sort.Search(len(s.list), (nint iΔ1) => {
         var m = Ꮡs.Value.list[iΔ1];
-        return (~m).obj.Id() >= key;
+        return m.obj.Id() >= key;
     });
     if (i < len(s.list)) {
         var m = s.list[i];
-        if ((~m).obj.Id() == key) {
+        if (m.obj.Id() == key) {
             return m;
         }
     }
-    return default!;
+    return default;
 }
 
 // Shared empty method set.
@@ -97,7 +97,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     }
 
     // method set up to the current depth, allocated lazily
-    methodSet @base = default!;
+    methodSet @base = default;
 
     var (typ, isPtr) = deref(T);
 
@@ -107,7 +107,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     }
 
     // Start with typ as single entry at shallowest depth.
-    var current = new embeddedType[]{new(typ, default!, isPtr, false)}.slice();
+    var current = slice<embeddedType>([new(typ, default, isPtr, false)]);
 
     // seen tracks named types that we have seen already, allocated lazily.
     // Used to avoid endless searches in case of recursive types.
@@ -118,11 +118,11 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
 
     // collect methods at current depth
     while (len(current) > 0) {
-        slice<embeddedType> next = default!;                          // embedded types found at current depth
+        slice<embeddedType> next = default; // embedded types found at current depth
 
         // field and method sets at current depth, indexed by names (Id's), and allocated lazily
-        map<@string, bool> fset = default!;                            // we only care about the field names
-        methodSet mset = default!;
+        map<@string, bool> fset = default; // we only care about the field names
+        methodSet mset = default;
 
         foreach (var (_, e) in current) {
             var typΔ1 = e.typ;
@@ -151,8 +151,8 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
 
             switch (typΔ1.Underlying().type()) {
             case ж<Struct> t: {
-                foreach (var (i, f) in (~t).fields) {
-                    if (fset == default!) {
+                foreach (var (i, f) in t.fields) {
+                    if (fset == nil) {
                         fset = new map<@string, bool>();
                     }
                     fset[f.of(Var.Ꮡobject).Id()] = true;
@@ -161,7 +161,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                     // T is a type name. If typ appeared multiple times at
                     // this depth, f.Type appears multiple times at the next
                     // depth.
-                    if ((~f).embedded) {
+                    if (f.embedded) {
                         var (typΔ2, isPtrΔ1) = deref((~f).typ);
                         // TODO(gri) optimization: ignore types that can't
                         // have fields or methods (only Named, Struct, and
@@ -172,7 +172,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                 break;
             }
             case ж<Interface> t: {
-                mset = mset.add((~t.typeSet()).methods, e.index, true, e.multiples);
+                mset = mset.add(t.typeSet().methods, e.index, true, e.multiples);
                 break;
             }}
         }
@@ -186,9 +186,9 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                 var (_, found) = @base[k, ꟷ]; if (!found) {
                     // Fields collide with methods of the same name at this depth.
                     if (fset[k]) {
-                        m = default!; // collision
+                        m = default; // collision
                     }
-                    if (@base == default!) {
+                    if (@base == nil) {
                         @base = new methodSet(0);
                     }
                     @base[k] = m;
@@ -201,10 +201,10 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
         foreach (var (k, _) in fset) {
             {
                 var (_, found) = @base[k, ꟷ]; if (!found) {
-                    if (@base == default!) {
+                    if (@base == nil) {
                         @base = new methodSet(0);
                     }
-                    @base[k] = default!; // collision
+                    @base[k] = default; // collision
                 }
             }
         }
@@ -217,23 +217,23 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     }
 
     // collect methods
-    slice<ж<Selection>> list = default!;
+    slice<ж<Selection>> list = default;
     foreach (var (_, m) in @base) {
         if (m != nil) {
-            m.Value.recv = T;
+            m.recv = T;
             list = append(list, m);
         }
     }
     // sort by unique name
     var listʗ1 = list;
-    sort.Slice(list, (nint i, nint j) => (~listʗ1[i]).obj.Id() < (~listʗ1[j]).obj.Id());
+    sort.Slice(list, (nint i, nint j) => listʗ1[i].obj.Id() < listʗ1[j].obj.Id());
     return Ꮡ(new MethodSet(list));
 }
 
 // A methodSet is a set of methods and name collisions.
 // A collision indicates that multiple methods with the
 // same unique id, or a field with that id appeared.
-partial struct methodSet /*map[@string, ж<Selection>]*/;
+partial struct methodSet /*map[@string, ж<Selection>]*/; // a nil entry indicates a name collision
 
 // Add adds all functions in list to the method set s.
 // If multiples is set, every function in list appears multiple times
@@ -251,7 +251,7 @@ internal static methodSet add(this methodSet s, slice<ж<Func>> list, slice<nint
 internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> index, bool indirect, bool multiples) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    if (s == default!) {
+    if (s == nil) {
         s = new methodSet(0);
     }
     @string key = Ꮡf.of(Func.Ꮡobject).Id();
@@ -263,12 +263,12 @@ internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> in
         // Is that possible? Investigate.
         {
             var (_, found) = s[key, ꟷ]; if (!found && (indirect || !f.hasPtrRecv())) {
-                s[key] = Ꮡ(new Selection(MethodVal, default!, new FuncжObject(Ꮡf), index, indirect));
+                s[key] = Ꮡ(new Selection(MethodVal, default, new FuncжObject(Ꮡf), index, indirect));
                 return s;
             }
         }
     }
-    s[key] = default!; // collision
+    s[key] = default; // collision
     return s;
 }
 

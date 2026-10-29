@@ -46,7 +46,7 @@ public static @string String(this Op i) {
         return _Op_name_1;
     }
     default: {
-        return "Op("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "Op("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 

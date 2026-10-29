@@ -51,6 +51,11 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(options))]
+[assembly: go.GoFieldAccess(typeof(paragraph))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -59,9 +64,9 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADaKAQALAoIADzIACQKClIKClIKCgoKClIKCgpKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmpoKUgpSmgoKUlIKCgoKUgqaCgoKosoKmgpSCgpSCgqaUgqqigoKClIKCAAsesqiSqJLKABAkkqiSAAIS4qqirLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "ADVwgtyAooCigAACFAAIAtyCgpSCABxKogAEFPaWlJSmgoKmuIKCgoKUlIKUpgAGfAA3AqakpAADFvKCgoKClIKUpqqigoCCyKik3IKmlIKUAAcQpoKClIKCgpSmgoKClLqSgg==", "", "", "82=New/1/1/2")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADt6soKCpgAXSPKCgIKkgIKkgIKkgIK2AAgSgqaAqMLcgriCuAAJFKa4uLim3AACJAAPAoKUgqaClICCgoKAgpKCgIKCgtiCAAkW0qaCgIKCkoKCgtqmpKQADh6AooCigKSCgoKCpoKmgqaCqJKCxpSUlIKmgpSCgoK4gpSmpoKC3JSkpKaCyoKUgu6CkqaCgpSClMqUpIKSggAHEIKCgoKmgoIADiKAqMKCgoK4goKUgoKmgoKCpoKWgoKmkgAJHNa4goKCytyCgoKAgoKU/oKCABAigoKCgoKCkoLcopSCpoKClIKCgqaCpsqCgsqilIKCgoKCpoLeppSipoKW2IKUgoKmgpSCgriClMqmpsqCgriCgrqmlIKUgpSkgpS4lKYABRCigoK+0oKCgoKCprSqwoKCgoKmAAUU4oKClIKClIKCppS4gpSowqaCgoK4lJSigoKUlJSCgoKUpqa+woKCgu6ClIKCAAYiABUYlMqClKaCgpTugoKCgpSmpgACJAAPApSqopSCgoKUgpSUrLKUgtyCgoKClIK4goKUgoKCpoKmyqqilJSokpSUqJKClKaCgpSCgqamgoaUpoKCgoKUlIKUpoKClIK2pqaCgpSClA==", "", "", "506=typeForLevel/1/2/5,typeForLevel/2/2/6")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADaKAQALAoIADzIACQKClIKClIKCgoKClIKCgoKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmpoKUgpSmgoKUlIKCgoKUgqaCgoKosoKmgpSCgpSCgqaUgqqigoKClIKCAAsesqiSqJLKABAkkqiSAAIS4qqirLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "ADVwgtyAooCigAACFAAIAtyCgpSCABxKogAEFPaWlJSmgoKmyIKCgoKUlIKUpgAHfAA3AqakpAADFvKCgoKClIKUpqqigoCCyKik3IKmlIKUAAcQpoKClIKCgpSmgoKClLqSgg==", "", "", "82=New/1/1/2")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADt6soKCpgAXSPKCgIKkgIKkgIKkgIK2AAgSgqaAqMLcgriCuAAJFKa4uLim3AACJAAPAoKUgqaClICCgoKAgoKCgIKCgtiCAAkW0qaCgIKCgoKCgtqmpKQADh6AooCigKSCgoKCpoKmgqaCqJKCxpSUlIKmgpSCgoK4gpSmpoKC3JS0tLaCyoKUgv6CgqaCgpSClNqUlIKCggAIEIKCgoK2goIADyKAqMKCgoK4goKUgoKmgoKCpoKWgoKmggAJHNa4goKCytyCgoKAgoKU/oKCABAigoKCgoKCgoLcopSCpoKClIKCgqaCpsqCgsqilIKCgoKCpoLeppSipoKW2IKUgoKmgpSCgriClMqmptqCgriCgrqmlIKUgpSUgpS4lKYABRCigoK+0oKCgoKCprSqwoKCgoKmAAUU4oKClIKClIKCppS4gpSowqaCgoK4lJSigoKUlJSCgoKUpqa+woKCgu6ClIKCAAYiABUYlMqClKaCgpTugoKCgpSmpgACJAAPApSqopSCgoKUgpSUrLKUgtyCgoKClIK4goKUgoKCpoKmyqqilJSokpSUqJKClKaCgpSCgqamgoaUpoKCgoKUlIKUpoKClILGpqaCgpSClA==", "", "", "508=typeForLevel/1/2/5,typeForLevel/2/2/6")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/prop.go", "prop.cs", "ABAeAAEaAAsCgoKUqJCooKaSpgALGpKCggACKgASAoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKassoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKY=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/tables15.0.0.go", "tables15.0.0.cs", "AAsYvrKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpSssoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClOyCqJKU3ACwDeIa")]
 // </GoSourcePositionMaps>

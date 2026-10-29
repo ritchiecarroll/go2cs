@@ -66,7 +66,7 @@ public static @string String(this SignatureScheme i) {
         return _SignatureScheme_name_8.slice(_SignatureScheme_index_8[i], _SignatureScheme_index_8[i + 1]);
     }
     default: {
-        return "SignatureScheme("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
+        return "SignatureScheme("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 
@@ -104,7 +104,7 @@ public static @string String(this CurveID i) {
         return _CurveID_name_2.slice(_CurveID_index_2[i], _CurveID_index_2[i + 1]);
     }
     default: {
-        return "CurveID("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
+        return "CurveID("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 
@@ -125,7 +125,7 @@ internal static array<uint8> _ClientAuthType_index = new uint8[]{0, 12, 29, 49, 
 
 public static @string String(this ClientAuthType i) {
     if (i < 0 || i >= ((ClientAuthType)(len(_ClientAuthType_index) - 1))) {
-        return "ClientAuthType("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "ClientAuthType("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _ClientAuthType_name.slice(_ClientAuthType_index[i], _ClientAuthType_index[i + 1]);
 }

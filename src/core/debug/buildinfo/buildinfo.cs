@@ -30,7 +30,7 @@ using io = io_package;
 using fs = go.io.fs_package;
 using os = os_package;
 using debug = runtime.debug_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using encoding;
 using go.debug;
@@ -70,7 +70,7 @@ internal static UntypedInt buildInfoHeaderSize => 32;
 // file at the given path. Most information is only available for binaries built
 // with module support.
 public static (ж<BuildInfo> info, error err) ReadFile(@string name) {
-    ж<BuildInfo> info = default!;
+    ж<BuildInfo> info = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -78,18 +78,17 @@ public static (ж<BuildInfo> info, error err) ReadFile(@string name) {
 
         defer(() => {
             {
-                var (_, ok) = errors.AsType<ж<fs.PathError>>(Ꮡerr.ValueSlot); if (ok){
+                var (_, ok) = errors.AsType<ж<fs.PathError>>(Ꮡerr.ValueSlot); if (ok) {
                     Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info: %w"u8, Ꮡerr.ValueSlot);
-                } else 
-                if (Ꮡerr.ValueSlot != default!) {
+                } else if (Ꮡerr.ValueSlot != nil) {
                     Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info from %s: %w"u8, name, Ꮡerr.ValueSlot);
                 }
             }
         }, ref ᒐ);
 
         (var f, err) = os.Open(name);
-        if (err != default!) {
-            (info, err) = (default!, err); goto ᒐdone;
+        if (err != nil) {
+            (info, err) = (default, err); goto ᒐdone;
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
@@ -105,15 +104,15 @@ public static (ж<BuildInfo> info, error err) ReadFile(@string name) {
 // binaries built with module support.
 public static (ж<BuildInfo>, error) Read(io.ReaderAt r) {
     var (vers, mod, err) = readRawBuildInfo(r);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var bi, err) = debug.ParseBuildInfo(mod);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    bi.Value.GoVersion = vers;
-    return (bi, default!);
+    bi.GoVersion = vers;
+    return (bi, default);
 }
 
 partial interface exe {
@@ -130,24 +129,24 @@ partial interface exe {
 // strings from a Go binary. On success, vers should be non-empty. mod
 // is empty if the binary was not built with modules enabled.
 internal static (@string vers, @string mod, error err) readRawBuildInfo(io.ReaderAt r) {
-    @string vers = default!;
-    @string mod = default!;
-    error err = default!;
+    @string vers = default;
+    @string mod = default;
+    error err = default;
 
     // Read the first bytes of the file to identify the format, then delegate to
     // a format-specific function to load segment and section headers.
     var ident = new slice<byte>(16);
     {
-        var (n, errΔ1) = r.ReadAt(ident, 0); if (n < len(ident) || errΔ1 != default!) {
+        var (n, errΔ1) = r.ReadAt(ident, 0); if (n < len(ident) || errΔ1 != nil) {
             return ("", "", errUnrecognizedFormat);
         }
     }
 
-    exe x = default!;
+    exe x = default;
     switch (ᐧ) {
     case {} when bytes.HasPrefix(ident, slice<byte>(((@string)(new byte[]{0x7f, 0x45, 0x4c, 0x46})))): {
         var (f, errΔ3) = elf.NewFile(r);
-        if (errΔ3 != default!) {
+        if (errΔ3 != nil) {
             return ("", "", errUnrecognizedFormat);
         }
         x = new elfExeжexe(Ꮡ(new elfExe(f)));
@@ -155,7 +154,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     }
     case {} when bytes.HasPrefix(ident, slice<byte>("MZ"u8)): {
         var (f, errΔ4) = pe.NewFile(r);
-        if (errΔ4 != default!) {
+        if (errΔ4 != nil) {
             return ("", "", errUnrecognizedFormat);
         }
         x = new peExeжexe(Ꮡ(new peExe(f)));
@@ -163,7 +162,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     }
     case {} when bytes.HasPrefix(ident, slice<byte>(((@string)(new byte[]{0xfe, 0xed, 0xfa})))) || bytes.HasPrefix(ident[1..], slice<byte>(((@string)(new byte[]{0xfa, 0xed, 0xfe})))): {
         var (f, errΔ5) = macho.NewFile(r);
-        if (errΔ5 != default!) {
+        if (errΔ5 != nil) {
             return ("", "", errUnrecognizedFormat);
         }
         x = new machoExeжexe(Ꮡ(new machoExe(f)));
@@ -171,15 +170,15 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     }
     case {} when bytes.HasPrefix(ident, slice<byte>(((@string)(new byte[]{0xca, 0xfe, 0xba, 0xbe})))) || bytes.HasPrefix(ident, slice<byte>(((@string)(new byte[]{0xca, 0xfe, 0xba, 0xbf})))): {
         var (f, errΔ6) = macho.NewFatFile(r);
-        if (errΔ6 != default! || len((~f).Arches) == 0) {
+        if (errΔ6 != nil || len(f.Arches) == 0) {
             return ("", "", errUnrecognizedFormat);
         }
-        x = new machoExeжexe(Ꮡ(new machoExe((~f).Arches[0].File)));
+        x = new machoExeжexe(Ꮡ(new machoExe(f.Arches[0].File)));
         break;
     }
-    case {} when bytes.HasPrefix(ident, new byte[]{0x01, 0xDF}.slice()) || bytes.HasPrefix(ident, new byte[]{0x01, 0xF7}.slice()): {
+    case {} when bytes.HasPrefix(ident, slice<byte>([0x01, 0xDF])) || bytes.HasPrefix(ident, slice<byte>([0x01, 0xF7])): {
         var (f, errΔ7) = xcoff.NewFile(r);
-        if (errΔ7 != default!) {
+        if (errΔ7 != nil) {
             return ("", "", errUnrecognizedFormat);
         }
         x = new xcoffExeжexe(Ꮡ(new xcoffExe(f)));
@@ -187,7 +186,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     }
     case {} when hasPlan9Magic(ident): {
         var (f, errΔ8) = plan9obj.NewFile(r);
-        if (errΔ8 != default!) {
+        if (errΔ8 != nil) {
             return ("", "", errUnrecognizedFormat);
         }
         x = new plan9objExeжexe(Ꮡ(new plan9objExe(f)));
@@ -208,16 +207,15 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     }
 
     (var addr, err) = searchMagic(x, dataAddr, dataSize);
-    if (err != default!) {
+    if (err != nil) {
         return ("", "", err);
     }
 
     // Read in the full header first.
     (var header, err) = readData(x, addr, buildInfoHeaderSize);
-    if (AreEqual(err, io.EOF)){
+    if (AreEqual(err, io.EOF)) {
         return ("", "", errNotGoExe);
-    } else 
-    if (err != default!) {
+    } else if (err != nil) {
         return ("", "", err);
     }
     if (len(header) < buildInfoHeaderSize) {
@@ -260,31 +258,30 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     // length-prefixed (as varint) string contents. First is the version
     // string, followed immediately by the modinfo string.
     var flags = header[flagsOffset];
-    if ((byte)(flags & flagsVersionMask) == flagsVersionInl){
+    if ((byte)(flags & flagsVersionMask) == flagsVersionInl) {
         (vers, addr, err) = decodeString(x, addr + (uint64)buildInfoHeaderSize);
-        if (err != default!) {
+        if (err != nil) {
             return ("", "", err);
         }
         (mod, _, err) = decodeString(x, addr);
-        if (err != default!) {
+        if (err != nil) {
             return ("", "", err);
         }
     } else {
         // flagsVersionPtr (<1.18)
         nint ptrSize = (nint)header[ptrSizeOffset];
         var bigEndian = (byte)(flags & flagsEndianMask) == flagsEndianBig;
-        binary.ByteOrder bo = default!;
-        if (bigEndian){
+        binary.ByteOrder bo = default;
+        if (bigEndian) {
             bo = binary.BigEndian;
         } else {
             bo = binary.LittleEndian;
         }
-        Func<slice<byte>, uint64> readPtr = default!;
-        if (ptrSize == 4){
+        Func<slice<byte>, uint64> readPtr = default;
+        if (ptrSize == 4) {
             var boʗ1 = bo;
             readPtr = (slice<byte> b) => (uint64)boʗ1.Uint32(b);
-        } else 
-        if (ptrSize == 8){
+        } else if (ptrSize == 8) {
             var boʗ2 = bo;
                         readPtr = boʗ2.Uint64;
         } else {
@@ -296,7 +293,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     if (vers == ""u8) {
         return ("", "", errNotGoExe);
     }
-    if (len(mod) >= 33 && mod[len(mod) - 17] == (rune)'\n'){
+    if (len(mod) >= 33 && mod[len(mod) - 17] == '\n') {
         // Strip module framing: sentinel strings delimiting the module info.
         // These are cmd/go/internal/modload.infoStart and infoEnd.
         mod = mod.slice(16, len(mod) - 16);
@@ -304,16 +301,16 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
         mod = ""u8;
     }
 
-    return (vers, mod, default!);
+    return (vers, mod, default);
 }
 
 internal static bool hasPlan9Magic(slice<byte> magic) {
     if (len(magic) >= 4) {
         var m = binary.BigEndian.Uint32(magic);
-        var exprᴛ1 = m;
-        if (exprᴛ1 == plan9obj.Magic386 || exprᴛ1 == plan9obj.MagicAMD64 || exprᴛ1 == plan9obj.MagicARM) {
+        switch (m) {
+        case var ᴛ when ᴛ == plan9obj.Magic386 || ᴛ == plan9obj.MagicAMD64 || ᴛ == plan9obj.MagicARM: {
             return true;
-        }
+        }}
     }
     return false;
 }
@@ -325,10 +322,9 @@ internal static (@string, uint64, error) decodeString(exe x, uint64 addr) {
     // addr. So we don't need to check that size doesn't overflow the
     // section.
     var (b, err) = readData(x, addr, binary.MaxVarintLen64);
-    if (AreEqual(err, io.EOF)){
+    if (AreEqual(err, io.EOF)) {
         return ("", 0, errNotGoExe);
-    } else 
-    if (err != default!) {
+    } else if (err != nil) {
         return ("", 0, err);
     }
 
@@ -339,14 +335,12 @@ internal static (@string, uint64, error) decodeString(exe x, uint64 addr) {
     addr += (uint64)n;
 
     (b, err) = readData(x, addr, length);
-    if (AreEqual(err, io.EOF)){
+    if (AreEqual(err, io.EOF)) {
         return ("", 0, errNotGoExe);
-    } else 
-    if (AreEqual(err, io.ErrUnexpectedEOF)){
+    } else if (AreEqual(err, io.ErrUnexpectedEOF)) {
         // Length too large to allocate. Clearly bogus value.
         return ("", 0, errNotGoExe);
-    } else 
-    if (err != default!) {
+    } else if (err != nil) {
         return ("", 0, err);
     }
     if ((uint64)len(b) < length) {
@@ -354,19 +348,19 @@ internal static (@string, uint64, error) decodeString(exe x, uint64 addr) {
         return ("", 0, errNotGoExe);
     }
 
-    return ((@string)b, addr + length, default!);
+    return ((@string)b, addr + length, default);
 }
 
 // readString returns the string at address addr in the executable x.
 internal static @string readString(exe x, nint ptrSize, Func<slice<byte>, uint64> readPtr, uint64 addr) {
     var (hdr, err) = readData(x, addr, (uint64)(2 * ptrSize));
-    if (err != default! || len(hdr) < 2 * ptrSize) {
+    if (err != nil || len(hdr) < 2 * ptrSize) {
         return ""u8;
     }
     var dataAddr = readPtr(hdr);
     var dataLen = readPtr(hdr.slice(ptrSize));
     (var data, err) = readData(x, dataAddr, dataLen);
-    if (err != default! || (uint64)len(data) < dataLen) {
+    if (err != nil || (uint64)len(data) < dataLen) {
         return ""u8;
     }
     return (@string)data;
@@ -389,7 +383,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
         return (0, errNotGoExe);
     }
 
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     while (start < end) {
         // Read in chunks to avoid consuming too much memory if data is large.
         //
@@ -402,7 +396,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
             chunkSize = remaining;
         }
 
-        if (buf == default!){
+        if (buf == nil) {
             buf = new slice<byte>((nint)(chunkSize));
         } else {
             // N.B. chunkSize can only decrease, and only on the
@@ -412,11 +406,10 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
         }
 
         var (n, err) = readDataInto(x, start, buf);
-        if (AreEqual(err, io.EOF)){
+        if (AreEqual(err, io.EOF)) {
             // EOF before finding the magic; must not be a Go executable.
             return (0, errNotGoExe);
-        } else 
-        if (err != default!) {
+        } else if (err != nil) {
             return (0, err);
         }
 
@@ -443,7 +436,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
                 continue;
             }
             // Good match!
-            return (start + (uint64)i, default!);
+            return (start + (uint64)i, default);
         }
 
         start += chunkSize;
@@ -454,26 +447,26 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
 
 internal static (slice<byte>, error) readData(exe x, uint64 addr, uint64 size) {
     var (r, err) = x.DataReader(addr);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     (var b, err) = saferio.ReadDataAt(r, size, 0);
     if (len(b) > 0 && AreEqual(err, io.EOF)) {
-        err = default!;
+        err = default;
     }
     return (b, err);
 }
 
 internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
     var (r, err) = x.DataReader(addr);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
 
     (var n, err) = r.ReadAt(b, 0);
     if (n > 0 && AreEqual(err, io.EOF)) {
-        err = default!;
+        err = default;
     }
     return (n, err);
 }
@@ -484,22 +477,22 @@ partial struct elfExe {
 }
 
 internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) {
-    foreach (var (_, prog) in (~x.f).Progs) {
+    foreach (var (_, prog) in x.f.Progs) {
         if ((~prog).Vaddr <= addr && addr <= (~prog).Vaddr + (~prog).Filesz - 1) {
             var remaining = (~prog).Vaddr + (~prog).Filesz - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new elf_ProgжReaderAt(prog), (int64)(addr - (~prog).Vaddr), (int64)remaining)), default!);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new elf_ProgжReaderAt(prog), (int64)(addr - (~prog).Vaddr), (int64)remaining)), default);
         }
     }
-    return (default!, errUnrecognizedFormat);
+    return (default, errUnrecognizedFormat);
 }
 
 internal static (uint64, uint64) DataStart(this ref elfExe x) {
-    foreach (var (_, s) in (~x.f).Sections) {
+    foreach (var (_, s) in x.f.Sections) {
         if ((~s).Name == ".go.buildinfo"u8) {
             return ((~s).Addr, (~s).Size);
         }
     }
-    foreach (var (_, p) in (~x.f).Progs) {
+    foreach (var (_, p) in x.f.Progs) {
         if ((~p).Type == elf.PT_LOAD && (elf.ProgFlag)((~p).Flags & ((elf.ProgFlag)(elf.PF_X | elf.PF_W))) == elf.PF_W) {
             return ((~p).Vaddr, (~p).Memsz);
         }
@@ -513,25 +506,25 @@ partial struct peExe {
 }
 
 internal static uint64 imageBase(this ref peExe x) {
-    switch ((~x.f).OptionalHeader.type()) {
+    switch (x.f.OptionalHeader.type()) {
     case ж<pe.OptionalHeader32> oh: {
-        return (uint64)(~oh).ImageBase;
+        return (uint64)oh.ImageBase;
     }
     case ж<pe.OptionalHeader64> oh: {
-        return (~oh).ImageBase;
+        return oh.ImageBase;
     }}
     return 0;
 }
 
 internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) {
     addr -= x.imageBase();
-    foreach (var (_, sect) in (~x.f).Sections) {
+    foreach (var (_, sect) in x.f.Sections) {
         if ((uint64)(~sect).VirtualAddress <= addr && addr <= (uint64)((~sect).VirtualAddress + (~sect).Size - 1)) {
             var remaining = (uint64)((~sect).VirtualAddress + (~sect).Size) - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new pe_ΔSectionжReaderAt(sect), (int64)(addr - (uint64)(~sect).VirtualAddress), (int64)remaining)), default!);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new pe_ΔSectionжReaderAt(sect), (int64)(addr - (uint64)(~sect).VirtualAddress), (int64)remaining)), default);
         }
     }
-    return (default!, errUnrecognizedFormat);
+    return (default, errUnrecognizedFormat);
 }
 
 internal static (uint64, uint64) DataStart(this ref peExe x) {
@@ -545,7 +538,7 @@ internal static (uint64, uint64) DataStart(this ref peExe x) {
     UntypedInt IMAGE_SCN_MEM_DISCARDABLE = 0x2000000;
     UntypedInt IMAGE_SCN_LNK_NRELOC_OVFL = 0x1000000;
     const uint32 IMAGE_SCN_ALIGN_32BYTES = 0x600000;
-    foreach (var (_, sect) in (~x.f).Sections) {
+    foreach (var (_, sect) in x.f.Sections) {
         if ((~sect).VirtualAddress != 0 && (~sect).Size != 0 && (uint32)((~sect).Characteristics & ~IMAGE_SCN_ALIGN_32BYTES) == (uint32)((UntypedInt)(IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ) | (uint32)IMAGE_SCN_MEM_WRITE)) {
             return ((uint64)(~sect).VirtualAddress + x.imageBase(), (uint64)(~sect).VirtualSize);
         }
@@ -559,7 +552,7 @@ partial struct machoExe {
 }
 
 internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) {
-    foreach (var (_, load) in (~x.f).Loads) {
+    foreach (var (_, load) in x.f.Loads) {
         var (seg, ok) = load._<ж<machoꓸSegment>>(ᐧ);
         if (!ok) {
             continue;
@@ -569,22 +562,22 @@ internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr
                 continue;
             }
             var remaining = (~seg).Addr + (~seg).Filesz - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new macho_ΔSegmentжReaderAt(seg), (int64)(addr - (~seg).Addr), (int64)remaining)), default!);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new macho_ΔSegmentжReaderAt(seg), (int64)(addr - (~seg).Addr), (int64)remaining)), default);
         }
     }
-    return (default!, errUnrecognizedFormat);
+    return (default, errUnrecognizedFormat);
 }
 
 internal static (uint64, uint64) DataStart(this ref machoExe x) {
     // Look for section named "__go_buildinfo".
-    foreach (var (_, sec) in (~x.f).Sections) {
+    foreach (var (_, sec) in x.f.Sections) {
         if ((~sec).Name == "__go_buildinfo"u8) {
             return ((~sec).Addr, (~sec).Size);
         }
     }
     // Try the first non-empty writable segment.
     const uint32 RW = 3;
-    foreach (var (_, load) in (~x.f).Loads) {
+    foreach (var (_, load) in x.f.Loads) {
         var (seg, ok) = load._<ж<machoꓸSegment>>(ᐧ);
         if (ok && (~seg).Addr != 0 && (~seg).Filesz != 0 && (~seg).Prot == RW && (~seg).Maxprot == RW) {
             return ((~seg).Addr, (~seg).Memsz);
@@ -602,13 +595,13 @@ partial struct xcoffExe {
 internal static readonly @string addressNotMappedˢ = "address not mapped"u8;
 
 internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr) {
-    foreach (var (_, sect) in (~x.f).Sections) {
+    foreach (var (_, sect) in x.f.Sections) {
         if ((~sect).VirtualAddress <= addr && addr <= (~sect).VirtualAddress + (~sect).Size - 1) {
             var remaining = (~sect).VirtualAddress + (~sect).Size - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new xcoff_ΔSectionжReaderAt(sect), (int64)(addr - (~sect).VirtualAddress), (int64)remaining)), default!);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new xcoff_ΔSectionжReaderAt(sect), (int64)(addr - (~sect).VirtualAddress), (int64)remaining)), default);
         }
     }
-    return (default!, errors.New(addressNotMappedˢ));
+    return (default, errors.New(addressNotMappedˢ));
 }
 
 internal static (uint64, uint64) DataStart(this ref xcoffExe x) {
@@ -638,13 +631,13 @@ internal static (uint64, uint64) DataStart(this ref plan9objExe x) {
 }
 
 internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) {
-    foreach (var (_, sect) in (~x.f).Sections) {
+    foreach (var (_, sect) in x.f.Sections) {
         if ((uint64)(~sect).Offset <= addr && addr <= (uint64)((~sect).Offset + (~sect).Size - 1)) {
             var remaining = (uint64)((~sect).Offset + (~sect).Size) - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new plan9obj_ΔSectionжReaderAt(sect), (int64)(addr - (uint64)(~sect).Offset), (int64)remaining)), default!);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new plan9obj_ΔSectionжReaderAt(sect), (int64)(addr - (uint64)(~sect).Offset), (int64)remaining)), default);
         }
     }
-    return (default!, errors.New(addressNotMappedˢ));
+    return (default, errors.New(addressNotMappedˢ));
 }
 
 } // end buildinfo_package

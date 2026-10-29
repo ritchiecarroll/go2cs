@@ -72,7 +72,7 @@ partial interface Decl :
 // true source end position for comments containing carriage returns.
 partial struct Comment {
     public tokenꓸPos Slash; // position of "/" starting the comment
-    public @string Text;   // comment text (excluding '\n' for //-style comments)
+    public @string Text;    // comment text (excluding '\n' for //-style comments)
 }
 
 public static tokenꓸPos Pos(this ref Comment c) {
@@ -98,7 +98,7 @@ public static tokenꓸPos End(this ref CommentGroup g) {
 }
 
 internal static bool isWhitespace(byte ch) {
-    return ch == (rune)' ' || ch == (rune)'\t' || ch == (rune)'\n' || ch == (rune)'\r';
+    return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
 }
 
 internal static @string stripTrailingWhitespace(@string s) {
@@ -124,7 +124,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
     }
     var comments = new slice<@string>(len(g.List));
     foreach (var (i, c) in g.List) {
-        comments[i] = c.Value.Text;
+        comments[i] = c.Text;
     }
 
     var lines = new slice<@string>(0, 10); // most comments are less than 10 lines
@@ -134,14 +134,14 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
         // Remove comment markers.
         // The parser has given us exactly the comment text.
         switch (c[1]) {
-        case (rune)'/': {
+        case (byte)'/': {
             //-style comment (no newline at the end)
             c = c[2..];
             if (len(c) == 0) {
                 // empty line
                 break;
             }
-            if (c[0] == (rune)' ') {
+            if (c[0] == ' ') {
                 // strip first space - required for Example tests
                 c = c[1..];
                 break;
@@ -152,7 +152,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
             }
             break;
         }
-        case (rune)'*': {
+        case (byte)'*': {
             /*-style comment */
             c = c.slice(2, len(c) - 2);
             break;
@@ -213,7 +213,7 @@ internal static bool isDirective(@string c) {
             continue;
         }
         var b = c[i];
-        if (!((rune)'a' <= b && b <= (rune)'z' || (rune)'0' <= b && b <= (rune)'9')) {
+        if (!('a' <= b && b <= 'z' || '0' <= b && b <= '9')) {
             return false;
         }
     }
@@ -229,10 +229,10 @@ internal static bool isDirective(@string c) {
 // [Field.Names] is nil for unnamed parameters (parameter lists which only contain types)
 // and embedded struct fields. In the latter case, the field name is the type name.
 partial struct Field {
-    public ж<CommentGroup> Doc; // associated documentation; or nil
-    public slice<ж<Ident>> Names; // field/method/(type) parameter names; or nil
-    public Expr Type;          // field/method/parameter type; or nil
-    public ж<BasicLit> Tag;  // field tag; or nil
+    public ж<CommentGroup> Doc;     // associated documentation; or nil
+    public slice<ж<Ident>> Names;   // field/method/(type) parameter names; or nil
+    public Expr Type;               // field/method/parameter type; or nil
+    public ж<BasicLit> Tag;         // field tag; or nil
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
@@ -240,7 +240,7 @@ public static tokenꓸPos Pos(this ref Field f) {
     if (len(f.Names) > 0) {
         return f.Names[0].Pos();
     }
-    if (f.Type != default!) {
+    if (f.Type != nil) {
         return f.Type.Pos();
     }
     return token.NoPos;
@@ -250,7 +250,7 @@ public static tokenꓸPos End(this ref Field f) {
     if (f.Tag != nil) {
         return f.Tag.End();
     }
-    if (f.Type != default!) {
+    if (f.Type != nil) {
         return f.Type.End();
     }
     if (len(f.Names) > 0) {
@@ -262,9 +262,9 @@ public static tokenꓸPos End(this ref Field f) {
 // A FieldList represents a list of Fields, enclosed by parentheses,
 // curly braces, or square brackets.
 partial struct FieldList {
-    public tokenꓸPos Opening; // position of opening parenthesis/brace/bracket, if any
+    public tokenꓸPos Opening;    // position of opening parenthesis/brace/bracket, if any
     public slice<ж<Field>> List; // field list; or nil
-    public tokenꓸPos Closing; // position of closing parenthesis/brace/bracket, if any
+    public tokenꓸPos Closing;    // position of closing parenthesis/brace/bracket, if any
 }
 
 public static tokenꓸPos Pos(this ref FieldList f) {
@@ -300,7 +300,7 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
     nint n = 0;
     if (Ꮡf != nil) {
         foreach (var (_, g) in f.List) {
-            nint m = len((~g).Names);
+            nint m = len(g.Names);
             if (m == 0) {
                 m = 1;
             }
@@ -323,8 +323,8 @@ partial struct BadExpr {
 // An Ident node represents an identifier.
 partial struct Ident {
     public tokenꓸPos NamePos; // identifier position
-    public @string Name;   // identifier name
-    public ж<Object> Obj; // denoted object, or nil. Deprecated: see Object.
+    public @string Name;      // identifier name
+    public ж<Object> Obj;     // denoted object, or nil. Deprecated: see Object.
 }
 
 // An Ellipsis node stands for the "..." type in a
@@ -332,7 +332,7 @@ partial struct Ident {
 //
 partial struct Ellipsis {
     public tokenꓸPos ΔEllipsis; // position of "..."
-    public Expr Elt;      // ellipsis element type (parameter lists only); or nil
+    public Expr Elt;            // ellipsis element type (parameter lists only); or nil
 }
 
 // A BasicLit node represents a literal of basic type.
@@ -347,64 +347,64 @@ partial struct Ellipsis {
 // the Value field contains the string text without carriage returns (\r) that
 // may have been present in the source.
 partial struct BasicLit {
-    public tokenꓸPos ValuePos;   // literal position
-    public tokenꓸPos ValueEnd;   // position immediately after the literal
-    public token.Token Kind; // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
-    public @string Value;     // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
+    public tokenꓸPos ValuePos; // literal position
+    public tokenꓸPos ValueEnd; // position immediately after the literal
+    public token.Token Kind;   // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
+    public @string Value;      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 }
 
 // A FuncLit node represents a function literal.
 partial struct FuncLit {
-    public ж<FuncType> Type; // function type
+    public ж<FuncType> Type;  // function type
     public ж<BlockStmt> Body; // function body
 }
 
 // A CompositeLit node represents a composite literal.
 partial struct CompositeLit {
-    public Expr Type;      // literal type; or nil
+    public Expr Type;        // literal type; or nil
     public tokenꓸPos Lbrace; // position of "{"
     public slice<Expr> Elts; // list of composite elements; or nil
     public tokenꓸPos Rbrace; // position of "}"
-    public bool Incomplete;      // true if (source) expressions are missing in the Elts list
+    public bool Incomplete;  // true if (source) expressions are missing in the Elts list
 }
 
 // A ParenExpr node represents a parenthesized expression.
 partial struct ParenExpr {
     public tokenꓸPos Lparen; // position of "("
-    public Expr X;      // parenthesized expression
+    public Expr X;           // parenthesized expression
     public tokenꓸPos Rparen; // position of ")"
 }
 
 // A SelectorExpr node represents an expression followed by a selector.
 partial struct SelectorExpr {
-    public Expr X;   // expression
+    public Expr X;       // expression
     public ж<Ident> Sel; // field selector
 }
 
 // An IndexExpr node represents an expression followed by an index.
 partial struct IndexExpr {
-    public Expr X;      // expression
+    public Expr X;           // expression
     public tokenꓸPos Lbrack; // position of "["
-    public Expr Index;      // index expression
+    public Expr Index;       // index expression
     public tokenꓸPos Rbrack; // position of "]"
 }
 
 // An IndexListExpr node represents an expression followed by multiple
 // indices.
 partial struct IndexListExpr {
-    public Expr X;      // expression
-    public tokenꓸPos Lbrack; // position of "["
+    public Expr X;              // expression
+    public tokenꓸPos Lbrack;    // position of "["
     public slice<Expr> Indices; // index expressions
-    public tokenꓸPos Rbrack; // position of "]"
+    public tokenꓸPos Rbrack;    // position of "]"
 }
 
 // A SliceExpr node represents an expression followed by slice indices.
 partial struct SliceExpr {
-    public Expr X;      // expression
+    public Expr X;           // expression
     public tokenꓸPos Lbrack; // position of "["
-    public Expr Low;      // begin of slice range; or nil
-    public Expr High;      // end of slice range; or nil
-    public Expr Max;      // maximum capacity of slice; or nil
+    public Expr Low;         // begin of slice range; or nil
+    public Expr High;        // end of slice range; or nil
+    public Expr Max;         // maximum capacity of slice; or nil
     public bool Slice3;      // true if 3-index slice (2 colons present)
     public tokenꓸPos Rbrack; // position of "]"
 }
@@ -413,19 +413,19 @@ partial struct SliceExpr {
 // type assertion.
 //
 partial struct TypeAssertExpr {
-    public Expr X;      // expression
+    public Expr X;           // expression
     public tokenꓸPos Lparen; // position of "("
-    public Expr Type;      // asserted type; nil means type switch X.(type)
+    public Expr Type;        // asserted type; nil means type switch X.(type)
     public tokenꓸPos Rparen; // position of ")"
 }
 
 // A CallExpr node represents an expression followed by an argument list.
 partial struct CallExpr {
-    public Expr Fun;      // function expression
-    public tokenꓸPos Lparen; // position of "("
-    public slice<Expr> Args; // function arguments; or nil
+    public Expr Fun;           // function expression
+    public tokenꓸPos Lparen;   // position of "("
+    public slice<Expr> Args;   // function arguments; or nil
     public tokenꓸPos Ellipsis; // position of "..." (token.NoPos if there is no "...")
-    public tokenꓸPos Rparen; // position of ")"
+    public tokenꓸPos Rparen;   // position of ")"
 }
 
 // A StarExpr node represents an expression of the form "*" Expression.
@@ -433,24 +433,24 @@ partial struct CallExpr {
 //
 partial struct StarExpr {
     public tokenꓸPos Star; // position of "*"
-    public Expr X;      // operand
+    public Expr X;         // operand
 }
 
 // A UnaryExpr node represents a unary expression.
 // Unary "*" expressions are represented via StarExpr nodes.
 //
 partial struct UnaryExpr {
-    public tokenꓸPos OpPos;   // position of Op
-    public token.Token Op; // operator
-    public Expr X;        // operand
+    public tokenꓸPos OpPos; // position of Op
+    public token.Token Op;  // operator
+    public Expr X;          // operand
 }
 
 // A BinaryExpr node represents a binary expression.
 partial struct BinaryExpr {
-    public Expr X;        // left operand
-    public tokenꓸPos OpPos;   // position of Op
-    public token.Token Op; // operator
-    public Expr Y;        // right operand
+    public Expr X;          // left operand
+    public tokenꓸPos OpPos; // position of Op
+    public token.Token Op;  // operator
+    public Expr Y;          // right operand
 }
 
 // A KeyValueExpr node represents (key : value) pairs
@@ -475,32 +475,32 @@ public static ChanDir RECV => 2;
 // An ArrayType node represents an array or slice type.
 partial struct ArrayType {
     public tokenꓸPos Lbrack; // position of "["
-    public Expr Len;      // Ellipsis node for [...]T array types, nil for slice types
-    public Expr Elt;      // element type
+    public Expr Len;         // Ellipsis node for [...]T array types, nil for slice types
+    public Expr Elt;         // element type
 }
 
 // A StructType node represents a struct type.
 partial struct StructType {
-    public tokenꓸPos Struct;  // position of "struct" keyword
+    public tokenꓸPos Struct;    // position of "struct" keyword
     public ж<FieldList> Fields; // list of field declarations
-    public bool Incomplete;       // true if (source) fields are missing in the Fields list
+    public bool Incomplete;     // true if (source) fields are missing in the Fields list
 }
 
 // Pointer types are represented via StarExpr nodes.
 
 // A FuncType node represents a function type.
 partial struct FuncType {
-    public tokenꓸPos Func;  // position of "func" keyword (token.NoPos if there is no "func")
+    public tokenꓸPos Func;          // position of "func" keyword (token.NoPos if there is no "func")
     public ж<FieldList> TypeParams; // type parameters; or nil
-    public ж<FieldList> Params; // (incoming) parameters; non-nil
-    public ж<FieldList> Results; // (outgoing) results; or nil
+    public ж<FieldList> Params;     // (incoming) parameters; non-nil
+    public ж<FieldList> Results;    // (outgoing) results; or nil
 }
 
 // An InterfaceType node represents an interface type.
 partial struct InterfaceType {
     public tokenꓸPos Interface;  // position of "interface" keyword
     public ж<FieldList> Methods; // list of embedded interfaces, methods, or types
-    public bool Incomplete;       // true if (source) methods or types are missing in the Methods list
+    public bool Incomplete;      // true if (source) methods or types are missing in the Methods list
 }
 
 // A MapType node represents a map type.
@@ -514,7 +514,7 @@ partial struct MapType {
 partial struct ChanType {
     public tokenꓸPos Begin; // position of "chan" keyword or "<-" (whichever comes first)
     public tokenꓸPos Arrow; // position of "<-" (token.NoPos if there is no "<-")
-    public ChanDir Dir;   // channel direction
+    public ChanDir Dir;     // channel direction
     public Expr Value;      // value type
 }
 
@@ -540,7 +540,7 @@ public static tokenꓸPos Pos(this ref FuncLit x) {
 }
 
 public static tokenꓸPos Pos(this ref CompositeLit x) {
-    if (x.Type != default!) {
+    if (x.Type != nil) {
         return x.Type.Pos();
     }
     return x.Lbrace;
@@ -626,7 +626,7 @@ public static tokenꓸPos End(this ref Ident x) {
 }
 
 public static tokenꓸPos End(this ref Ellipsis x) {
-    if (x.Elt != default!) {
+    if (x.Elt != nil) {
         return x.Elt.End();
     }
     return x.ΔEllipsis + 3; // len("...")
@@ -847,7 +847,7 @@ partial struct DeclStmt {
 //
 partial struct EmptyStmt {
     public tokenꓸPos Semicolon; // position of following ";"
-    public bool Implicit;      // if set, ";" was omitted in the source
+    public bool Implicit;       // if set, ";" was omitted in the source
 }
 
 // A LabeledStmt node represents a labeled statement.
@@ -874,8 +874,8 @@ partial struct SendStmt {
 // An IncDecStmt node represents an increment or decrement statement.
 partial struct IncDecStmt {
     public Expr X;
-    public tokenꓸPos TokPos;   // position of Tok
-    public token.Token Tok; // INC or DEC
+    public tokenꓸPos TokPos; // position of Tok
+    public token.Token Tok;  // INC or DEC
 }
 
 // An AssignStmt node represents an assignment or
@@ -883,8 +883,8 @@ partial struct IncDecStmt {
 //
 partial struct AssignStmt {
     public slice<Expr> Lhs;
-    public tokenꓸPos TokPos;   // position of Tok
-    public token.Token Tok; // assignment token, DEFINE
+    public tokenꓸPos TokPos; // position of Tok
+    public token.Token Tok;  // assignment token, DEFINE
     public slice<Expr> Rhs;
 }
 
@@ -902,7 +902,7 @@ partial struct DeferStmt {
 
 // A ReturnStmt node represents a return statement.
 partial struct ReturnStmt {
-    public tokenꓸPos Return; // position of "return" keyword
+    public tokenꓸPos Return;    // position of "return" keyword
     public slice<Expr> Results; // result expressions; or nil
 }
 
@@ -910,8 +910,8 @@ partial struct ReturnStmt {
 // or fallthrough statement.
 //
 partial struct BranchStmt {
-    public tokenꓸPos TokPos;   // position of Tok
-    public token.Token Tok; // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
+    public tokenꓸPos TokPos; // position of Tok
+    public token.Token Tok;  // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
     public ж<Ident> Label;   // label name; or nil
 }
 
@@ -925,41 +925,41 @@ partial struct BlockStmt {
 // An IfStmt node represents an if statement.
 partial struct IfStmt {
     public tokenꓸPos If; // position of "if" keyword
-    public Stmt Init;      // initialization statement; or nil
-    public Expr Cond;      // condition
+    public Stmt Init;    // initialization statement; or nil
+    public Expr Cond;    // condition
     public ж<BlockStmt> Body;
     public Stmt Else; // else branch; or nil
 }
 
 // A CaseClause represents a case of an expression or type switch statement.
 partial struct CaseClause {
-    public tokenꓸPos Case; // position of "case" or "default" keyword
+    public tokenꓸPos Case;   // position of "case" or "default" keyword
     public slice<Expr> List; // list of expressions or types; nil means default case
-    public tokenꓸPos Colon; // position of ":"
+    public tokenꓸPos Colon;  // position of ":"
     public slice<Stmt> Body; // statement list; or nil
 }
 
 // A SwitchStmt node represents an expression switch statement.
 partial struct SwitchStmt {
     public tokenꓸPos Switch;  // position of "switch" keyword
-    public Stmt Init;       // initialization statement; or nil
-    public Expr Tag;       // tag expression; or nil
+    public Stmt Init;         // initialization statement; or nil
+    public Expr Tag;          // tag expression; or nil
     public ж<BlockStmt> Body; // CaseClauses only
 }
 
 // A TypeSwitchStmt node represents a type switch statement.
 partial struct TypeSwitchStmt {
     public tokenꓸPos Switch;  // position of "switch" keyword
-    public Stmt Init;       // initialization statement; or nil
+    public Stmt Init;         // initialization statement; or nil
     public Stmt Assign;       // x := y.(type) or y.(type)
     public ж<BlockStmt> Body; // CaseClauses only
 }
 
 // A CommClause node represents a case of a select statement.
 partial struct CommClause {
-    public tokenꓸPos Case; // position of "case" or "default" keyword
-    public Stmt Comm;      // send or receive statement; nil means default case
-    public tokenꓸPos Colon; // position of ":"
+    public tokenꓸPos Case;   // position of "case" or "default" keyword
+    public Stmt Comm;        // send or receive statement; nil means default case
+    public tokenꓸPos Colon;  // position of ":"
     public slice<Stmt> Body; // statement list; or nil
 }
 
@@ -972,20 +972,20 @@ partial struct SelectStmt {
 // A ForStmt represents a for statement.
 partial struct ForStmt {
     public tokenꓸPos For; // position of "for" keyword
-    public Stmt Init;      // initialization statement; or nil
-    public Expr Cond;      // condition; or nil
-    public Stmt Post;      // post iteration statement; or nil
+    public Stmt Init;     // initialization statement; or nil
+    public Expr Cond;     // condition; or nil
+    public Stmt Post;     // post iteration statement; or nil
     public ж<BlockStmt> Body;
 }
 
 // A RangeStmt represents a for statement with a range clause.
 partial struct RangeStmt {
-    public tokenꓸPos For;   // position of "for" keyword
-    public Expr Key, Value;        // Key, Value may be nil
-    public tokenꓸPos TokPos;   // position of Tok; invalid if Key == nil
-    public token.Token Tok; // ILLEGAL if Key == nil, ASSIGN, DEFINE
-    public tokenꓸPos Range;   // position of "range" keyword
-    public Expr X;        // value to range over
+    public tokenꓸPos For;    // position of "for" keyword
+    public Expr Key, Value;  // Key, Value may be nil
+    public tokenꓸPos TokPos; // position of Tok; invalid if Key == nil
+    public token.Token Tok;  // ILLEGAL if Key == nil, ASSIGN, DEFINE
+    public tokenꓸPos Range;  // position of "range" keyword
+    public Expr X;           // value to range over
     public ж<BlockStmt> Body;
 }
 
@@ -1146,7 +1146,7 @@ public static tokenꓸPos End(this ref BlockStmt s) {
 }
 
 public static tokenꓸPos End(this ref IfStmt s) {
-    if (s.Else != default!) {
+    if (s.Else != nil) {
         return s.Else.End();
     }
     return s.Body.End();
@@ -1269,31 +1269,31 @@ partial interface Spec :
 
 // An ImportSpec node represents a single package import.
 partial struct ImportSpec {
-    public ж<CommentGroup> Doc; // associated documentation; or nil
-    public ж<Ident> Name;     // local package name (including "."); or nil
-    public ж<BasicLit> Path;  // import path
+    public ж<CommentGroup> Doc;     // associated documentation; or nil
+    public ж<Ident> Name;           // local package name (including "."); or nil
+    public ж<BasicLit> Path;        // import path
     public ж<CommentGroup> Comment; // line comments; or nil
-    public tokenꓸPos EndPos;     // end of spec (overrides Path.Pos if nonzero)
+    public tokenꓸPos EndPos;        // end of spec (overrides Path.Pos if nonzero)
 }
 
 // A ValueSpec node represents a constant or variable declaration
 // (ConstSpec or VarSpec production).
 //
 partial struct ValueSpec {
-    public ж<CommentGroup> Doc; // associated documentation; or nil
-    public slice<ж<Ident>> Names; // value names (len(Names) > 0)
-    public Expr Type;          // value type; or nil
-    public slice<Expr> Values;   // initial values; or nil
+    public ж<CommentGroup> Doc;     // associated documentation; or nil
+    public slice<ж<Ident>> Names;   // value names (len(Names) > 0)
+    public Expr Type;               // value type; or nil
+    public slice<Expr> Values;      // initial values; or nil
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
 // A TypeSpec node represents a type declaration (TypeSpec production).
 partial struct TypeSpec {
-    public ж<CommentGroup> Doc; // associated documentation; or nil
-    public ж<Ident> Name;     // type name
+    public ж<CommentGroup> Doc;     // associated documentation; or nil
+    public ж<Ident> Name;           // type name
     public ж<FieldList> TypeParams; // type parameters; or nil
-    public tokenꓸPos Assign;     // position of '=', if any
-    public Expr Type;          // *Ident, *ParenExpr, *SelectorExpr, *StarExpr, or any of the *XxxTypes
+    public tokenꓸPos Assign;        // position of '=', if any
+    public Expr Type;               // *Ident, *ParenExpr, *SelectorExpr, *StarExpr, or any of the *XxxTypes
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
@@ -1326,7 +1326,7 @@ public static tokenꓸPos End(this ref ValueSpec s) {
             return s.Values[n - 1].End();
         }
     }
-    if (s.Type != default!) {
+    if (s.Type != nil) {
         return s.Type.End();
     }
     return s.Names[len(s.Names) - 1].End();
@@ -1369,9 +1369,9 @@ partial struct BadDecl {
 //
 partial struct GenDecl {
     public ж<CommentGroup> Doc; // associated documentation; or nil
-    public tokenꓸPos TokPos;     // position of Tok
-    public token.Token Tok;   // IMPORT, CONST, TYPE, or VAR
-    public tokenꓸPos Lparen;     // position of '(', if any
+    public tokenꓸPos TokPos;    // position of Tok
+    public token.Token Tok;     // IMPORT, CONST, TYPE, or VAR
+    public tokenꓸPos Lparen;    // position of '(', if any
     public slice<Spec> Specs;
     public tokenꓸPos Rparen; // position of ')', if any
 }
@@ -1379,10 +1379,10 @@ partial struct GenDecl {
 // A FuncDecl node represents a function declaration.
 partial struct FuncDecl {
     public ж<CommentGroup> Doc; // associated documentation; or nil
-    public ж<FieldList> Recv; // receiver (methods); or nil (functions)
-    public ж<Ident> Name;     // function/method name
-    public ж<FuncType> Type;  // function signature: type and value parameters, results, and position of "func" keyword
-    public ж<BlockStmt> Body; // function body; or nil for external (non-Go) function
+    public ж<FieldList> Recv;   // receiver (methods); or nil (functions)
+    public ж<Ident> Name;       // function/method name
+    public ж<FuncType> Type;    // function signature: type and value parameters, results, and position of "func" keyword
+    public ж<BlockStmt> Body;   // function body; or nil for external (non-Go) function
 }
 
 // Pos and End implementations for declaration nodes.
@@ -1453,15 +1453,15 @@ internal static void declNode(this ref FuncDecl _) {
 // [#20744]: https://go.dev/issue/20744
 partial struct File {
     public ж<CommentGroup> Doc; // associated documentation; or nil
-    public tokenꓸPos Package;     // position of "package" keyword
-    public ж<Ident> Name;     // package name
+    public tokenꓸPos Package;   // position of "package" keyword
+    public ж<Ident> Name;       // package name
     public slice<Decl> Decls;   // top-level declarations; or nil
-    public tokenꓸPos FileStart, FileEnd;       // start and end of entire file
-    public ж<Scope> Scope;       // package scope (this file only). Deprecated: see Object
-    public slice<ж<ImportSpec>> Imports; // imports in this file
-    public slice<ж<Ident>> Unresolved; // unresolved identifiers in this file. Deprecated: see Object
+    public tokenꓸPos FileStart, FileEnd;    // start and end of entire file
+    public ж<Scope> Scope;                  // package scope (this file only). Deprecated: see Object
+    public slice<ж<ImportSpec>> Imports;    // imports in this file
+    public slice<ж<Ident>> Unresolved;      // unresolved identifiers in this file. Deprecated: see Object
     public slice<ж<CommentGroup>> Comments; // comments in the file, in lexical order
-    public @string GoVersion;         // minimum Go version required by //go:build or // +build directives
+    public @string GoVersion;               // minimum Go version required by //go:build or // +build directives
 }
 
 // Pos returns the position of the package declaration.
@@ -1490,10 +1490,10 @@ public static tokenꓸPos End(this ref File f) {
 //
 // Deprecated: use the type checker [go/types] instead; see [Object].
 partial struct Package {
-    public @string Name;            // package name
-    public ж<Scope> Scope;          // package scope across all files
+    public @string Name;                    // package name
+    public ж<Scope> Scope;                  // package scope across all files
     public map<@string, ж<Object>> Imports; // map of package id -> package object
-    public map<@string, ж<File>> Files; // Go source files by filename
+    public map<@string, ж<File>> Files;     // Go source files by filename
 }
 
 public static tokenꓸPos Pos(this ref Package p) {
@@ -1514,8 +1514,8 @@ public static tokenꓸPos End(this ref Package p) {
 //	f, err := parser.ParseFile(fset, filename, src, parser.ParseComments|parser.PackageClauseOnly)
 //	if err != nil { ... }
 //	gen := ast.IsGenerated(f)
-public static bool IsGenerated(ж<File> Ꮡfile) {
-    var (_, ok) = generator(ref (Ꮡfile).DerefOrNull());
+public static bool IsGenerated(ж<File> @file) {
+    var (_, ok) = generator(ref (@file).DerefOrNull());
     return ok;
 }
 
@@ -1527,14 +1527,14 @@ internal static readonly @string prefixᶜ = "// Code generated "u8;
 
 internal static (@string, bool) generator(ref File @file) {
     foreach (var (_, group) in @file.Comments) {
-        foreach (var (_, comment) in (~group).List) {
+        foreach (var (_, comment) in group.List) {
             if (comment.Pos() > @file.Package) {
                 break; // after package declaration
             }
             // opt: check Contains first to avoid unnecessary array allocation in Split.
             @string prefix = prefixᶜ;
-            if (strings.Contains((~comment).Text, prefix)) {
-                foreach (var line in range<@string>(strings.SplitSeq((~comment).Text, "\n"u8).Invoke)) {
+            if (strings.Contains(comment.Text, prefix)) {
+                foreach (var line in range<@string>(strings.SplitSeq(comment.Text, "\n"u8).Invoke)) {
                     {
                         var (rest, ok) = strings.CutPrefix(line, prefix); if (ok) {
                             {
@@ -1553,12 +1553,12 @@ internal static (@string, bool) generator(ref File @file) {
 
 // Unparen returns the expression with any enclosing parentheses removed.
 public static Expr Unparen(Expr e) {
-    while (ᐧ) {
+    for (;;) {
         var (paren, ok) = e._<ж<ParenExpr>>(ᐧ);
         if (!ok) {
             return e;
         }
-        e = paren.Value.X;
+        e = paren.X;
     }
 }
 

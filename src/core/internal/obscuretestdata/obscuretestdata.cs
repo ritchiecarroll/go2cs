@@ -20,11 +20,11 @@ public static slice<byte> Rot13(slice<byte> data) {
     copy(@out, data);
     foreach (var (i, c) in @out) {
         switch (ᐧ) {
-        case {} when (rune)'A' <= c && c <= (rune)'M' || (rune)'a' <= c && c <= (rune)'m': {
+        case {} when (byte)'A' <= c && c <= (byte)'M' || (byte)'a' <= c && c <= (byte)'m': {
             @out[i] = (byte)(c + 13);
             break;
         }
-        case {} when (rune)'N' <= c && c <= (rune)'Z' || (rune)'n' <= c && c <= (rune)'z': {
+        case {} when (byte)'N' <= c && c <= (byte)'Z' || (byte)'n' <= c && c <= (byte)'z': {
             @out[i] = (byte)(c - 13);
             break;
         }}
@@ -39,35 +39,35 @@ private static readonly @string obscuretestdataDecodedˢ = "obscuretestdata-deco
 // If successful, it returns the path of the decoded file.
 // The caller is responsible for ensuring that the temporary file is removed.
 public static (@string path, error err) DecodeToTempFile(@string name) {
-    @string path = default!;
-    error err = default!;
+    @string path = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         (var f, err) = os.Open(name);
-        if (err != default!) {
+        if (err != nil) {
             (path, err) = ("", err); goto ᒐdone;
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         (var tmp, err) = os.CreateTemp(""u8, obscuretestdataDecodedˢ);
-        if (err != default!) {
+        if (err != nil) {
             (path, err) = ("", err); goto ᒐdone;
         }
         {
-            var (_, errΔ1) = io.Copy(new os.FileжWriter(tmp), base64.NewDecoder(base64.StdEncoding, new os_FileжReader(f))); if (errΔ1 != default!) {
+            var (_, errΔ1) = io.Copy(new os.FileжWriter(tmp), base64.NewDecoder(base64.StdEncoding, new os_FileжReader(f))); if (errΔ1 != nil) {
                 tmp.Close();
                 os.Remove(tmp.Name());
                 (path, err) = ("", errΔ1); goto ᒐdone;
             }
         }
         {
-            var errΔ2 = tmp.Close(); if (errΔ2 != default!) {
+            var errΔ2 = tmp.Close(); if (errΔ2 != nil) {
                 os.Remove(tmp.Name());
                 (path, err) = ("", errΔ2); goto ᒐdone;
             }
         }
-        (path, err) = (tmp.Name(), default!);
+        (path, err) = (tmp.Name(), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -79,14 +79,14 @@ public static (slice<byte>, error) ReadFile(@string name) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         return io.ReadAll(base64.NewDecoder(base64.StdEncoding, new os_FileжReader(f)));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

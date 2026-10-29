@@ -14,7 +14,7 @@ partial class json_package {
 // is identical to bytes.EqualFold(x, y).
 internal static slice<byte> foldName(slice<byte> @in) {
     // This is inlinable to take advantage of "function outlining".
-    array<byte> arr = new(32);               // large enough for most JSON names
+    array<byte> arr = new(32); // large enough for most JSON names
     return appendFoldedName(arr[..0], @in);
 }
 
@@ -23,7 +23,7 @@ internal static slice<byte> appendFoldedName(slice<byte> @out, slice<byte> @in) 
         // Handle single-byte ASCII.
         {
             var c = @in[i]; if (c < utf8.RuneSelf) {
-                if ((rune)'a' <= c && c <= (rune)'z') {
+                if ('a' <= c && c <= 'z') {
                     c -= (byte)((rune)'a' - (rune)'A');
                 }
                 @out = append(@out, c);
@@ -41,7 +41,7 @@ internal static slice<byte> appendFoldedName(slice<byte> @out, slice<byte> @in) 
 
 // foldRune is returns the smallest rune for all runes in the same fold set.
 internal static rune foldRune(rune r) {
-    while (ᐧ) {
+    for (;;) {
         var r2 = unicode.SimpleFold(r);
         if (r2 <= r) {
             return r2;

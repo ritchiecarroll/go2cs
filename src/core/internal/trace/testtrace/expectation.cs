@@ -31,16 +31,16 @@ public static ж<Expectation> ExpectSuccess() {
 // Conformance means that if failure is true, then err must be non-nil.
 // If err is non-nil, then it must match errorMatcher.
 public static error Check(this ref Expectation e, error err) {
-    if (!e.failure && err != default!) {
+    if (!e.failure && err != nil) {
         return fmt.Errorf("unexpected error while reading the trace: %v"u8, err);
     }
-    if (e.failure && err == default!) {
+    if (e.failure && err == nil) {
         return fmt.Errorf("expected error while reading the trace: want something matching %q, got none"u8, e.errorMatcher.OrTypedNil());
     }
-    if (e.failure && err != default! && !e.errorMatcher.MatchString(err.Error())) {
+    if (e.failure && err != nil && !e.errorMatcher.MatchString(err.Error())) {
         return fmt.Errorf("unexpected error while reading the trace: want something matching %q, got %s"u8, e.errorMatcher.OrTypedNil(), err.Error());
     }
-    return default!;
+    return default;
 }
 
 // ParseExpectation parses the serialized form of an Expectation.
@@ -50,37 +50,40 @@ public static (ж<Expectation>, error) ParseExpectation(slice<byte> data) {
     if (s.Scan()) {
         var c = strings.SplitN(s.Text(), " "u8, 2);
         var exprᴛ1 = c[0];
-        if (exprᴛ1 == "SUCCESS"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "SUCCESS"u8: {
+            break;
         }
-        else if (exprᴛ1 == "FAILURE"u8) {
-            exp.Value.failure = true;
+        case {} when exprᴛ1 == "FAILURE"u8: {
+            exp.failure = true;
             if (len(c) != 2) {
                 return (exp, fmt.Errorf("bad header line for FAILURE: %q"u8, s.Text()));
             }
             var (matcher, err) = parseMatcher(c[1]);
-            if (err != default!) {
+            if (err != nil) {
                 return (exp, err);
             }
-            exp.Value.errorMatcher = matcher;
+            exp.errorMatcher = matcher;
+            break;
         }
-        else { /* default: */
+        default: {
             return (exp, fmt.Errorf("bad header line: %q"u8, s.Text()));
-        }
-        return (exp, default!);
+        }}
+        return (exp, default);
     }
     return (exp, s.Err());
 }
 
 internal static (ж<regexp.Regexp>, error) parseMatcher(@string quoted) {
     var (pattern, err) = strconv.Unquote(quoted);
-    if (err != default!) {
-        return (default!, fmt.Errorf("malformed pattern: not correctly quoted: %s: %v"u8, quoted, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("malformed pattern: not correctly quoted: %s: %v"u8, quoted, err));
     }
     (var matcher, err) = regexp.Compile(pattern);
-    if (err != default!) {
-        return (default!, fmt.Errorf("malformed pattern: not a valid regexp: %s: %v"u8, pattern, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("malformed pattern: not a valid regexp: %s: %v"u8, pattern, err));
     }
-    return (matcher, default!);
+    return (matcher, default);
 }
 
 } // end testtrace_package

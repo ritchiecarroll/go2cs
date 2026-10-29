@@ -50,13 +50,13 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
     var fh = fips140hash.UnwrapNew(h);
     if (fips140only.Enforced()) {
         if (keyLength < 112 / 8) {
-            return (default!, errors.New(cryptoPbkdf2UseOfKeysˢ));
+            return (default, errors.New(cryptoPbkdf2UseOfKeysˢ));
         }
         if (len(salt) < 128 / 8) {
-            return (default!, errors.New(cryptoPbkdf2UseOfSaltsˢ));
+            return (default, errors.New(cryptoPbkdf2UseOfSaltsˢ));
         }
         if (!fips140only.ApprovedHash(fh())) {
-            return (default!, errors.New(cryptoPbkdf2UseOfHashˢ));
+            return (default, errors.New(cryptoPbkdf2UseOfHashˢ));
         }
     }
     return pbkdf2.Key(fh, password, salt, iter, keyLength);

@@ -6,7 +6,7 @@ namespace go.crypto.@internal;
 using godebug = go.crypto.@internal.fips140deps.godebug_package;
 using errors = errors_package;
 using strings = strings_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using go.crypto.@internal.fips140deps;
 
 partial class fips140_package {
@@ -51,7 +51,7 @@ public static void CAST(@string name, Func<error> f) {
     if (name == failfipscast) {
         err = errors.New(simulatedCastFailureˢ);
     }
-    if (err != default!) {
+    if (err != nil) {
         fatal("FIPS 140-3 self-test failed: "u8 + name + ": "u8 + err.Error());
         throw panic("unreachable");
     }
@@ -87,7 +87,7 @@ public static void PCT(@string name, Func<error> f) {
     if (name == failfipscast) {
         err = errors.New(simulatedPctFailureˢ);
     }
-    if (err != default!) {
+    if (err != nil) {
         fatal("FIPS 140-3 self-test failed: "u8 + name + ": "u8 + err.Error());
         throw panic("unreachable");
     }

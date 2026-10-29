@@ -64,7 +64,7 @@ using atomic = go.sync.atomic_package;
 
 using @unsafe = unsafe_package;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // go:linkname
 using go;
 using go.@internal;
 using go.sync;
@@ -110,7 +110,7 @@ public static ж<Setting> New(@string name) {
 
 // Name returns the name of the setting.
 public static @string Name(this ref Setting s) {
-    if (s.name != ""u8 && s.name[0] == (rune)'#') {
+    if (s.name != ""u8 && s.name[0] == '#') {
         return s.name[1..];
     }
     return s.name;
@@ -118,7 +118,7 @@ public static @string Name(this ref Setting s) {
 
 // Undocumented reports whether this is an undocumented setting.
 public static bool Undocumented(this ref Setting s) {
-    return s.name != ""u8 && s.name[0] == (rune)'#';
+    return s.name != ""u8 && s.name[0] == '#';
 }
 
 // String returns a printable form for the setting: name=value.
@@ -142,7 +142,7 @@ public static void IncNonDefault(this ж<Setting> Ꮡs) {
 internal static void register(this ж<Setting> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (s.info == nil || (~s.info).Opaque) {
+    if (s.info == nil || s.info.Opaque) {
         throw panic("godebug: unexpected IncNonDefault of " + s.name);
     }
     registerMetric("/godebug/non-default-behavior/"u8 + s.Name() + ":events"u8, Ꮡs.of(Setting.ᏑnonDefault).Load);
@@ -269,7 +269,7 @@ internal static void update(@string def, @string env) {
         var didʗ1 = did;
         Ꮡcache.Range((any name, any s) => {
             {
-                var info = s._<ж<setting>>().Value.info; if (info != nil && (~info).Immutable) {
+                var info = s._<ж<setting>>().Value.info; if (info != nil && info.Immutable) {
                     didʗ1[name._<@string>()] = true;
                 }
             }
@@ -308,7 +308,7 @@ internal static void parse(map<@string, bool> did, @string s) {
     nint end = len(s);
     nint eq = -1;
     for (nint i = end - 1; i >= -1; i--) {
-        if (i == -1 || s[i] == (rune)','){
+        if (i == -1 || s[i] == ',') {
             if (eq >= 0) {
                 @string name = s.slice(i + 1, eq);
                 ref var arg = ref heap<@string>(out var Ꮡarg);
@@ -317,7 +317,7 @@ internal static void parse(map<@string, bool> did, @string s) {
                     did[name] = true;
                     var v = Ꮡ(new value(text: arg));
                     for (nint j = 0; j < len(arg); j++) {
-                        if (arg[j] == (rune)'#') {
+                        if (arg[j] == '#') {
                             v.Value.text = arg.slice(0, j);
                             (v.Value.bisect, _) = bisect.New(arg.slice(j + 1));
                             break;
@@ -328,8 +328,7 @@ internal static void parse(map<@string, bool> did, @string s) {
             }
             eq = -1;
             end = i;
-        } else 
-        if (s[i] == (rune)'=') {
+        } else if (s[i] == '=') {
             eq = i;
         }
     }
@@ -345,7 +344,7 @@ internal static (nint, error) Write(this ref runtimeStderr _, slice<byte> b) {
     if (len(b) > 0) {
         write(2, @unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), (int32)len(b));
     }
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 // Since we cannot import os or syscall, use the runtime's write function

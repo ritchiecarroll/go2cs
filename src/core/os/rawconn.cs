@@ -19,7 +19,7 @@ internal static readonly @string syscallConnControlˢ = "SyscallConn.Control"u8;
 
 internal static error Control(this ref rawConn c, Action<uintptr> f) {
     {
-        var errΔ1 = c.@file.checkValid(syscallConnControlˢ); if (errΔ1 != default!) {
+        var errΔ1 = c.@file.checkValid(syscallConnControlˢ); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -33,7 +33,7 @@ internal static readonly @string syscallConnReadˢ = "SyscallConn.Read"u8;
 
 internal static error Read(this ref rawConn c, Func<uintptr, bool> f) {
     {
-        var errΔ1 = c.@file.checkValid(syscallConnReadˢ); if (errΔ1 != default!) {
+        var errΔ1 = c.@file.checkValid(syscallConnReadˢ); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -47,7 +47,7 @@ internal static readonly @string syscallConnWriteˢ = "SyscallConn.Write"u8;
 
 internal static error Write(this ref rawConn c, Func<uintptr, bool> f) {
     {
-        var errΔ1 = c.@file.checkValid(syscallConnWriteˢ); if (errΔ1 != default!) {
+        var errΔ1 = c.@file.checkValid(syscallConnWriteˢ); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -56,8 +56,8 @@ internal static error Write(this ref rawConn c, Func<uintptr, bool> f) {
     return err;
 }
 
-internal static (ж<rawConn>, error) newRawConn(ж<File> Ꮡfile) {
-    return (Ꮡ(new rawConn(@file: Ꮡfile)), default!);
+internal static (ж<rawConn>, error) newRawConn(ж<File> @file) {
+    return (Ꮡ(new rawConn(@file: @file)), default);
 }
 
 } // end os_package

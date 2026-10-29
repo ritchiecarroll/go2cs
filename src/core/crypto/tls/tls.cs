@@ -46,13 +46,13 @@ partial class tls_package {
 // using conn as the underlying transport.
 // The configuration config must be non-nil and must include
 // at least one certificate or else set GetCertificate.
-public static ж<Conn> Server(net.Conn conn, ж<Config> Ꮡconfig) {
+public static ж<Conn> Server(net.Conn conn, ж<Config> config) {
     var c = Ꮡ(new Conn(
         conn: conn,
-        config: Ꮡconfig
+        config: config
     ));
     var cʗ1 = c;
-        c.Value.handshakeFn = (context.Context p1) => cʗ1.serverHandshake(p1);
+        c.handshakeFn = (context.Context p1) => cʗ1.serverHandshake(p1);
     return c;
 }
 
@@ -60,14 +60,14 @@ public static ж<Conn> Server(net.Conn conn, ж<Config> Ꮡconfig) {
 // using conn as the underlying transport.
 // The config cannot be nil: users must set either ServerName or
 // InsecureSkipVerify in the config.
-public static ж<Conn> Client(net.Conn conn, ж<Config> Ꮡconfig) {
+public static ж<Conn> Client(net.Conn conn, ж<Config> config) {
     var c = Ꮡ(new Conn(
         conn: conn,
-        config: Ꮡconfig,
+        config: config,
         isClient: true
     ));
     var cʗ1 = c;
-        c.Value.handshakeFn = (context.Context p1) => cʗ1.clientHandshake(p1);
+        c.handshakeFn = (context.Context p1) => cʗ1.clientHandshake(p1);
     return c;
 }
 
@@ -89,10 +89,10 @@ internal static error Close(this listener recvᴛ) => recvᴛ.Listener.Close();
 // The returned connection is of type *Conn.
 internal static (net.Conn, error) Accept(this ref listener l) {
     var (c, err) = l.Listener.Accept();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (new ConnжConn(Server(c, l.config)), default!);
+    return (new ConnжConn(Server(c, l.config)), default);
 }
 
 // NewListener creates a Listener which accepts connections from an inner
@@ -103,8 +103,8 @@ public static net.Listener NewListener(net.Listener inner, ж<Config> Ꮡconfig)
     ref var config = ref Ꮡconfig.DerefOrNull();
 
     var l = @new<listener>();
-    l.Value.Listener = inner;
-    l.Value.config = Ꮡconfig;
+    l.Listener = inner;
+    l.config = Ꮡconfig;
     return new listenerжListener(l);
 }
 
@@ -119,14 +119,14 @@ public static (net.Listener, error) Listen(@string network, @string laddr, ж<Co
     ref var config = ref Ꮡconfig.DerefOrNull();
 
     // If this condition changes, consider updating http.Server.ServeTLS too.
-    if (Ꮡconfig == nil || len(config.Certificates) == 0 && config.GetCertificate == default! && config.GetConfigForClient == default!) {
-        return (default!, errors.New(tlsNeitherCertificatesˢ));
+    if (Ꮡconfig == nil || len(config.Certificates) == 0 && config.GetCertificate == nil && config.GetConfigForClient == nil) {
+        return (default, errors.New(tlsNeitherCertificatesˢ));
     }
     var (l, err) = net.Listen(network, laddr);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (NewListener(l, Ꮡconfig), default!);
+    return (NewListener(l, Ꮡconfig), default);
 }
 
 partial struct timeoutError {
@@ -157,8 +157,8 @@ internal static bool Temporary(this timeoutError _) {
 //
 // DialWithDialer uses context.Background internally; to specify the context,
 // use [Dialer.DialContext] with NetDialer set to the desired dialer.
-public static (ж<Conn>, error) DialWithDialer(ж<net.Dialer> Ꮡdialer, @string network, @string addr, ж<Config> Ꮡconfig) {
-    return dial(context.Background(), Ꮡdialer, network, addr, Ꮡconfig);
+public static (ж<Conn>, error) DialWithDialer(ж<net.Dialer> dialer, @string network, @string addr, ж<Config> config) {
+    return dial(context.Background(), dialer, network, addr, config);
 }
 
 internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> ᏑnetDialer, @string network, @string addr, ж<Config> Ꮡconfig) {
@@ -168,22 +168,22 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
         ref var config = ref Ꮡconfig.DerefOrNull();
 
         if (netDialer.Timeout != 0) {
-            Action cancel = default!;
+            Action cancel = default;
             (ctx, cancel) = context.WithTimeout(ctx, netDialer.Timeout);
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
         }
 
         if (!netDialer.Deadline.IsZero()) {
-            Action cancel = default!;
+            Action cancel = default;
             (ctx, cancel) = context.WithDeadline(ctx, netDialer.Deadline);
             var cancelʗ2 = cancel;
             defer(() => cancelʗ2(), ref ᒐ);
         }
 
         var (rawConn, err) = ᏑnetDialer.DialContext(ctx, network, addr);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
         nint colonPos = strings.LastIndex(addr, ":"u8);
@@ -200,20 +200,20 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
         if (config.ServerName == ""u8) {
             // Make a copy to avoid polluting argument or default.
             var c = Ꮡconfig.Clone();
-            c.Value.ServerName = hostname;
+            c.ServerName = hostname;
             Ꮡconfig = c; config = ref Ꮡconfig.DerefOrNull();
         }
 
         var conn = Client(rawConn, Ꮡconfig);
         {
-            var errΔ1 = conn.HandshakeContext(ctx); if (errΔ1 != default!) {
+            var errΔ1 = conn.HandshakeContext(ctx); if (errΔ1 != nil) {
                 rawConn.Close();
-                return (default!, errΔ1);
+                return (default, errΔ1);
             }
         }
-        return (conn, default!);
+        return (conn, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -223,8 +223,8 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
 // Dial interprets a nil configuration as equivalent to
 // the zero configuration; see the documentation of Config
 // for the defaults.
-public static (ж<Conn>, error) Dial(@string network, @string addr, ж<Config> Ꮡconfig) {
-    return DialWithDialer(@new<net.Dialer>(), network, addr, Ꮡconfig);
+public static (ж<Conn>, error) Dial(@string network, @string addr, ж<Config> config) {
+    return DialWithDialer(@new<net.Dialer>(), network, addr, config);
 }
 
 // Dialer dials TLS connections given a configuration and a Dialer for the
@@ -270,11 +270,11 @@ internal static ж<net.Dialer> netDialer(this ref Dialer d) {
 // The returned [Conn], if any, will always be of type *[Conn].
 public static (net.Conn, error) DialContext(this ref Dialer d, context.Context ctx, @string network, @string addr) {
     var (c, err) = dial(ctx, d.netDialer(), network, addr, d.Config);
-    if (err != default!) {
+    if (err != nil) {
         // Don't return c (a typed nil) in an interface.
-        return (default!, err);
+        return (default, err);
     }
-    return (new ConnжConn(c), default!);
+    return (new ConnжConn(c), default);
 }
 
 // LoadX509KeyPair reads and parses a public/private key pair from a pair of
@@ -287,12 +287,12 @@ public static (net.Conn, error) DialContext(this ref Dialer d, context.Context c
 // in the GODEBUG environment variable.
 public static (Certificate, error) LoadX509KeyPair(@string certFile, @string keyFile) {
     var (certPEMBlock, err) = os.ReadFile(certFile);
-    if (err != default!) {
-        return (new Certificate(nil), err);
+    if (err != nil) {
+        return (new Certificate(), err);
     }
     (var keyPEMBlock, err) = os.ReadFile(keyFile);
-    if (err != default!) {
-        return (new Certificate(nil), err);
+    if (err != nil) {
+        return (new Certificate(), err);
     }
     return X509KeyPair(certPEMBlock, keyPEMBlock);
 }
@@ -317,20 +317,20 @@ internal static readonly @string tlsUnknownPublicKeyˢ = "tls: unknown public ke
 // discarded. This behavior can be re-enabled by setting "x509keypairleaf=0"
 // in the GODEBUG environment variable.
 public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<byte> keyPEMBlock) {
-    (Certificate, error) fail(error errΔ1) => (new Certificate(nil), errΔ1);
+    (Certificate, error) fail(error errΔ1) => (new Certificate(), errΔ1);
 
-    Certificate cert = default!;
-    slice<@string> skippedBlockTypes = default!;
-    while (ᐧ) {
-        ж<pem.Block> certDERBlock = default!;
+    Certificate cert = default;
+    slice<@string> skippedBlockTypes = default;
+    for (;;) {
+        ж<pem.Block> certDERBlock = default;
         (certDERBlock, certPEMBlock) = pem.Decode(certPEMBlock);
         if (certDERBlock == nil) {
             break;
         }
-        if ((~certDERBlock).Type == "CERTIFICATE"u8){
-            cert.ΔCertificate = append(cert.ΔCertificate, (~certDERBlock).Bytes);
+        if (certDERBlock.Type == "CERTIFICATE"u8) {
+            cert.ΔCertificate = append(cert.ΔCertificate, certDERBlock.Bytes);
         } else {
-            skippedBlockTypes = append(skippedBlockTypes, (~certDERBlock).Type);
+            skippedBlockTypes = append(skippedBlockTypes, certDERBlock.Type);
         }
     }
 
@@ -345,8 +345,8 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
     }
 
     skippedBlockTypes = skippedBlockTypes[..0];
-    ж<pem.Block> keyDERBlock = default!;
-    while (ᐧ) {
+    ж<pem.Block> keyDERBlock = default;
+    for (;;) {
         (keyDERBlock, keyPEMBlock) = pem.Decode(keyPEMBlock);
         if (keyDERBlock == nil) {
             if (len(skippedBlockTypes) == 0) {
@@ -357,31 +357,31 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
             }
             return fail(fmt.Errorf("tls: failed to find PEM block with type ending in \"PRIVATE KEY\" in key input after skipping PEM blocks of the following types: %v"u8, skippedBlockTypes));
         }
-        if ((~keyDERBlock).Type == "PRIVATE KEY"u8 || strings.HasSuffix((~keyDERBlock).Type, privateKeyˢ2)) {
+        if (keyDERBlock.Type == "PRIVATE KEY"u8 || strings.HasSuffix(keyDERBlock.Type, privateKeyˢ2)) {
             break;
         }
-        skippedBlockTypes = append(skippedBlockTypes, (~keyDERBlock).Type);
+        skippedBlockTypes = append(skippedBlockTypes, keyDERBlock.Type);
     }
 
     // We don't need to parse the public key for TLS, but we so do anyway
     // to check that it looks sane and matches the private key.
     var (x509Cert, err) = Δx509.ParseCertificate(cert.ΔCertificate[0]);
-    if (err != default!) {
+    if (err != nil) {
         return fail(err);
     }
 
-    if (x509keypairleaf.Value() != "0"u8){
+    if (x509keypairleaf.Value() != "0"u8) {
         cert.Leaf = x509Cert;
     } else {
         x509keypairleaf.IncNonDefault();
     }
 
-    (cert.PrivateKey, err) = parsePrivateKey((~keyDERBlock).Bytes);
-    if (err != default!) {
+    (cert.PrivateKey, err) = parsePrivateKey(keyDERBlock.Bytes);
+    if (err != nil) {
         return fail(err);
     }
 
-    switch ((~x509Cert).PublicKey.type()) {
+    switch (x509Cert.PublicKey.type()) {
     case ж<rsa.PublicKey> pub: {
         var (priv, ok) = cert.PrivateKey._<ж<rsa.PrivateKey>>(ᐧ);
         if (!ok) {
@@ -413,11 +413,11 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
         break;
     }
     default: {
-        var pub = (~x509Cert).PublicKey;
+        var pub = x509Cert.PublicKey;
         return fail(errors.New(tlsUnknownPublicKeyˢ));
     }}
 
-    return (cert, default!);
+    return (cert, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -429,32 +429,32 @@ internal static readonly @string tlsFailedToParsePrivateˢ = "tls: failed to par
 // OpenSSL ecparam generates SEC1 EC private keys for ECDSA. We try all three.
 internal static (cryptoꓸPrivateKey, error) parsePrivateKey(slice<byte> der) {
     {
-        var (key, err) = Δx509.ParsePKCS1PrivateKey(der); if (err == default!) {
-            return (key.OrTypedNil(), default!);
+        var (key, err) = Δx509.ParsePKCS1PrivateKey(der); if (err == nil) {
+            return (key.OrTypedNil(), default);
         }
     }
     {
-        var (key, err) = Δx509.ParsePKCS8PrivateKey(der); if (err == default!) {
+        var (key, err) = Δx509.ParsePKCS8PrivateKey(der); if (err == nil) {
             switch (key.type()) {
             case ж<rsa.PrivateKey> _:
             case ж<ecdsa.PrivateKey> _:
             case ed25519.PrivateKey _: {
                 var keyΔ1 = key;
-                return (keyΔ1, default!);
+                return (keyΔ1, default);
             }
             default: {
                 var keyΔ1 = key;
-                return (default!, errors.New(tlsFoundUnknownPrivateˢ));
+                return (default, errors.New(tlsFoundUnknownPrivateˢ));
             }}
         }
     }
     {
-        var (key, err) = Δx509.ParseECPrivateKey(der); if (err == default!) {
-            return (key.OrTypedNil(), default!);
+        var (key, err) = Δx509.ParseECPrivateKey(der); if (err == nil) {
+            return (key.OrTypedNil(), default);
         }
     }
 
-    return (default!, errors.New(tlsFailedToParsePrivateˢ));
+    return (default, errors.New(tlsFailedToParsePrivateˢ));
 }
 
 } // end tls_package

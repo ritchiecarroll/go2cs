@@ -31,7 +31,7 @@ internal static void init(this ref Switch sw) {
 public static slice<Stat> Stats(this ж<Switch> Ꮡsw) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
-    slice<Stat> st = default!;
+    slice<Stat> st = default;
     Ꮡsw.of(Switch.Ꮡsmu).RLock();
     foreach (var (_, s) in sw.stats) {
         var ns = s.Value;
@@ -60,17 +60,17 @@ partial struct Cookie /*num:uint64*/;
 
 // Family returns an address family.
 public static nint Family(this Cookie c) {
-    return (nint)(uint64)((c >> 48));
+    return (nint)(c >> 48);
 }
 
 // Type returns a socket type.
 public static nint Type(this Cookie c) {
-    return (nint)(uint64)(((c << 16) >> 32));
+    return (nint)((c << 16) >> 32);
 }
 
 // Protocol returns a protocol number.
 public static nint Protocol(this Cookie c) {
-    return (nint)(uint64)((Cookie)(c & 0xff));
+    return (nint)((Cookie)(c & 0xff));
 }
 
 internal static Cookie cookie(nint family, nint sotype, nint proto) {
@@ -80,7 +80,7 @@ internal static Cookie cookie(nint family, nint sotype, nint proto) {
 // A Status represents the status of a socket.
 partial struct Status {
     public Cookie Cookie;
-    public error Err; // error status of socket system call
+    public error Err;       // error status of socket system call
     public error SocketErr; // error status of socket by SO_ERROR
 }
 
@@ -90,19 +90,19 @@ public static @string String(this Status so) {
 
 // A Stat represents a per-cookie socket statistics.
 partial struct Stat {
-    public nint Family; // address family
-    public nint Type; // socket type
+    public nint Family;   // address family
+    public nint Type;     // socket type
     public nint Protocol; // protocol number
-    public uint64 Opened; // number of sockets opened
+    public uint64 Opened;    // number of sockets opened
     public uint64 Connected; // number of sockets connected
-    public uint64 Listened; // number of sockets listened
-    public uint64 Accepted; // number of sockets accepted
-    public uint64 Closed; // number of sockets closed
-    public uint64 OpenFailed; // number of sockets open failed
+    public uint64 Listened;  // number of sockets listened
+    public uint64 Accepted;  // number of sockets accepted
+    public uint64 Closed;    // number of sockets closed
+    public uint64 OpenFailed;    // number of sockets open failed
     public uint64 ConnectFailed; // number of sockets connect failed
-    public uint64 ListenFailed; // number of sockets listen failed
-    public uint64 AcceptFailed; // number of sockets accept failed
-    public uint64 CloseFailed; // number of sockets close failed
+    public uint64 ListenFailed;  // number of sockets listen failed
+    public uint64 AcceptFailed;  // number of sockets accept failed
+    public uint64 CloseFailed;   // number of sockets close failed
 }
 
 public static @string String(this Stat st) {
@@ -123,12 +123,12 @@ internal static ж<Stat> getLocked(this stats st, Cookie c) {
 // A FilterType represents a filter type.
 partial struct FilterType /*num:nint*/;
 
-public static FilterType FilterSocket => /* iota */ 0;         // for Socket
-public static FilterType FilterConnect => 1;        // for Connect or ConnectEx
-public static FilterType FilterListen => 2;         // for Listen
-public static FilterType FilterAccept => 3;         // for Accept, Accept4 or AcceptEx
-public static FilterType FilterGetsockoptInt => 4;  // for GetsockoptInt
-public static FilterType FilterClose => 5;          // for Close or Closesocket
+public static FilterType FilterSocket => /* iota */ 0; // for Socket
+public static FilterType FilterConnect => 1;           // for Connect or ConnectEx
+public static FilterType FilterListen => 2;            // for Listen
+public static FilterType FilterAccept => 3;            // for Accept, Accept4 or AcceptEx
+public static FilterType FilterGetsockoptInt => 4;     // for GetsockoptInt
+public static FilterType FilterClose => 5;             // for Close or Closesocket
 
 // A Filter represents a socket system call filter.
 //
@@ -141,11 +141,11 @@ public static FilterType FilterClose => 5;          // for Close or Closesocket
 // execution of the system call.
 public delegate (AfterFilter, error) Filter(ж<Status> _);
 
-internal static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
-    if (f == default!) {
-        return (default!, default!);
+internal static (AfterFilter, error) apply(this Filter f, ж<Status> st) {
+    if (f == nil) {
+        return (default, default);
     }
-    return f(Ꮡst);
+    return f(st);
 }
 
 // An AfterFilter represents a socket system call filter after an
@@ -157,11 +157,11 @@ internal static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
 // returns the non-nil error.
 public delegate error AfterFilter(ж<Status> _);
 
-internal static error apply(this AfterFilter f, ж<Status> Ꮡst) {
-    if (f == default!) {
-        return default!;
+internal static error apply(this AfterFilter f, ж<Status> st) {
+    if (f == nil) {
+        return default;
     }
-    return f(Ꮡst);
+    return f(st);
 }
 
 // Set deploys the socket system call filter f for the filter type t.

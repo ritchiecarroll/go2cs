@@ -55,7 +55,7 @@ internal static readonly @string semasleepOnDarwinSignalˢ = "semasleep on Darwi
 
 //go:nosplit
 internal static int32 semasleep(int64 ns) {
-    int64 start = default!;
+    int64 start = default;
     if (ns >= 0) {
         start = nanotime();
     }
@@ -66,13 +66,13 @@ internal static int32 semasleep(int64 ns) {
         @throw(semasleepOnDarwinSignalˢ);
     }
     pthread_mutex_lock(mp.of(m.Ꮡmutex));
-    while (ᐧ) {
+    for (;;) {
         if ((~mp).count > 0) {
             mp.Value.count--;
             pthread_mutex_unlock(mp.of(m.Ꮡmutex));
             return 0;
         }
-        if (ns >= 0){
+        if (ns >= 0) {
             var spent = nanotime() - start;
             if (spent >= ns) {
                 pthread_mutex_unlock(mp.of(m.Ꮡmutex));
@@ -134,7 +134,7 @@ internal static void sigNoteSetup(ж<note> _) {
         // Generalizing this would require avoiding the pipe-fork-closeonexec race, which entangles syscall.
         @throw(duplicateSigNoteSetupˢ);
     }
-    int32 errno = default!;
+    int32 errno = default;
     (sigNoteRead, sigNoteWrite, errno) = pipe();
     if (errno != 0) {
         @throw(pipeFailedˢ);
@@ -157,7 +157,7 @@ internal static void sigNoteWakeup(ж<note> _) {
 
 // sigNoteSleep waits for a note created by sigNoteSetup to be woken.
 internal static void sigNoteSleep(ж<note> _) {
-    while (ᐧ) {
+    for (;;) {
         ref var b = ref heap(new byte(), out var Ꮡb);
         entersyscallblock();
         var n = read(sigNoteRead, @unsafe.Pointer.FromPinnedBox(Ꮡb), 1);
@@ -180,17 +180,14 @@ internal static void osinit() {
 }
 
 internal static (int32, int32) sysctlbynameInt32(slice<byte> name) {
-    ref var @out = ref heap<int32>(out var Ꮡout);
-    @out = (int32)0;
-    ref var nout = ref heap<uintptr>(out var Ꮡnout);
-    nout = /* unsafe.Sizeof(out) */ (uintptr)4;
+    ref var @out = ref heap<int32>((int32)0, out var Ꮡout);
+    ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
     var ret = sysctlbyname(Ꮡ(name, 0), Ꮡout.Reinterpret<int32, byte>(), Ꮡnout, nil, 0);
     return (ret, @out);
 }
 
 internal static int32 sysctlbynameBytes(slice<byte> name, slice<byte> @out) {
-    ref var nout = ref heap<uintptr>(out var Ꮡnout);
-    nout = (uintptr)len(@out);
+    ref var nout = ref heap<uintptr>((uintptr)len(@out), out var Ꮡnout);
     var ret = sysctlbyname(Ꮡ(name, 0), Ꮡ(@out, 0), Ꮡnout, nil, 0);
     return ret;
 }
@@ -211,12 +208,9 @@ internal static UntypedInt _HW_PAGESIZE => 7;
 
 internal static int32 getCPUCount() {
     // Use sysctl to fetch hw.ncpu.
-    ref var mib = ref heap<array<uint32>>(out var Ꮡmib);
-    mib = new uint32[]{_CTL_HW, _HW_NCPU}.array();
-    ref var @out = ref heap<uint32>(out var Ꮡout);
-    @out = (uint32)0;
-    ref var nout = ref heap<uintptr>(out var Ꮡnout);
-    nout = /* unsafe.Sizeof(out) */ (uintptr)4;
+    ref var mib = ref heap<array<uint32>>(new uint32[]{_CTL_HW, _HW_NCPU}.array(), out var Ꮡmib);
+    ref var @out = ref heap<uint32>((uint32)0, out var Ꮡout);
+    ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
     var ret = sysctl(Ꮡmib.at<uint32>(0), 2, Ꮡout.Reinterpret<uint32, byte>(), Ꮡnout, nil, 0);
     if (ret >= 0 && (int32)@out > 0) {
         return (int32)@out;
@@ -226,12 +220,9 @@ internal static int32 getCPUCount() {
 
 internal static uintptr getPageSize() {
     // Use sysctl to fetch hw.pagesize.
-    ref var mib = ref heap<array<uint32>>(out var Ꮡmib);
-    mib = new uint32[]{_CTL_HW, _HW_PAGESIZE}.array();
-    ref var @out = ref heap<uint32>(out var Ꮡout);
-    @out = (uint32)0;
-    ref var nout = ref heap<uintptr>(out var Ꮡnout);
-    nout = /* unsafe.Sizeof(out) */ (uintptr)4;
+    ref var mib = ref heap<array<uint32>>(new uint32[]{_CTL_HW, _HW_PAGESIZE}.array(), out var Ꮡmib);
+    ref var @out = ref heap<uint32>((uint32)0, out var Ꮡout);
+    ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
     var ret = sysctl(Ꮡmib.at<uint32>(0), 2, Ꮡout.Reinterpret<uint32, byte>(), Ꮡnout, nil, 0);
     if (ret >= 0 && (int32)@out > 0) {
         return (uintptr)@out;
@@ -262,7 +253,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
 
     // Initialize an attribute object.
     ref var attr = ref heap(new pthreadattr(), out var Ꮡattr);
-    int32 err = default!;
+    int32 err = default;
     err = pthread_attr_init(Ꮡattr);
     if (err != 0) {
         writeErrStr(failthreadcreate);
@@ -309,7 +300,7 @@ internal static void newosproc0(uintptr stacksizeʗp, uintptr fn) {
 
     // Initialize an attribute object.
     ref var attr = ref heap(new pthreadattr(), out var Ꮡattr);
-    int32 err = default!;
+    int32 err = default;
     err = pthread_attr_init(Ꮡattr);
     if (err != 0) {
         writeErrStr(failthreadcreate);
@@ -380,7 +371,7 @@ internal static void minit() {
         minitSignalStack();
     }
     minitSignalMask();
-    getg().Value.m.Value.procid = (uint64)(uintptr)pthread_self();
+    getg().Value.m.Value.procid = (uint64)pthread_self();
     libc_error_addr((~getg()).m.of(m.ᏑerrnoAddr));
 }
 
@@ -435,7 +426,7 @@ internal static void setsig(uint32 i, uintptr fn) {
     sa.sa_flags = (int32)((UntypedInt)(_SA_SIGINFO | _SA_ONSTACK) | (int32)_SA_RESTART);
     sa.sa_mask = ~(uint32)0;
     if (fn == abi.FuncPCABIInternal(sighandler)) { // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
-        if (iscgo){
+        if (iscgo) {
             fn = abi.FuncPCABI0(cgoSigtramp);
         } else {
             fn = abi.FuncPCABI0(sigtramp);
@@ -478,8 +469,8 @@ internal static uintptr getsig(uint32 i) {
 // setSignalstackSP sets the ss_sp field of a stackt.
 //
 //go:nosplit
-internal static void setSignalstackSP(ж<stackt> Ꮡs, uintptr sp) {
-    (Ꮡs.of(stackt.Ꮡss_sp).Reinterpret<ж<byte>, uintptr>()).Value = sp;
+internal static void setSignalstackSP(ж<stackt> s, uintptr sp) {
+    (s.of(stackt.Ꮡss_sp).Reinterpret<ж<byte>, uintptr>()).Value = sp;
 }
 
 //go:nosplit
@@ -507,13 +498,13 @@ public static @string executablePath;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string executablePathˢ = "executable_path="u8;
 
-internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
+internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
     // skip over argv, envv and the first string will be the path
     var n = argc + 1;
-    while (argv_index(Ꮡargv, n) != nil) {
+    while (argv_index(argv, n) != nil) {
         n++;
     }
-    executablePath = gostringnocopy(argv_index(Ꮡargv, n + 1));
+    executablePath = gostringnocopy(argv_index(argv, n + 1));
 
     // strip "executable_path=" prefix if available, it's added after OS X 10.11.
     executablePath = stringslite.TrimPrefix(executablePath, executablePathˢ);

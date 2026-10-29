@@ -19,18 +19,18 @@ internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> 
 internal static readonly @string sendfileˢ = "sendfile"u8;
 
 internal static (int64 written, bool handled, error err) writeTo(this ж<File> Ꮡf, Δio.Writer w) {
-    int64 written = default!;
-    bool handled = default!;
+    int64 written = default;
+    bool handled = default;
     ref var err = ref heap<error>(out var Ꮡerr);
 
     var (pfd, network) = getPollFDAndNetwork(w);
     // TODO(panjf2000): same as File.spliceToFile.
-    if (pfd == nil || !(~pfd).IsStream || !isUnixOrTCP((@string)network)) {
+    if (pfd == nil || !pfd.IsStream || !isUnixOrTCP((@string)network)) {
         return (written, handled, err);
     }
 
     (var sc, err) = Ꮡf.SyscallConn();
-    if (err != default!) {
+    if (err != nil) {
         return (written, handled, err);
     }
 
@@ -40,7 +40,7 @@ internal static (int64 written, bool handled, error err) writeTo(this ж<File> �
         return true;
     });
 
-    if (err == default!) {
+    if (err == nil) {
         err = rerr;
     }
 
@@ -48,9 +48,9 @@ internal static (int64 written, bool handled, error err) writeTo(this ж<File> �
 }
 
 internal static (int64 written, bool handled, error err) readFrom(this ж<File> Ꮡf, Δio.Reader r) {
-    int64 written = default!;
-    bool handled = default!;
-    error err = default!;
+    int64 written = default;
+    bool handled = default;
+    error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     // Neither copy_file_range(2) nor splice(2) supports destinations opened with
@@ -59,7 +59,7 @@ internal static (int64 written, bool handled, error err) readFrom(this ж<File> 
     // Visit https://man7.org/linux/man-pages/man2/copy_file_range.2.html#ERRORS and
     // https://man7.org/linux/man-pages/man2/splice.2.html#ERRORS for details.
     if (f.appendMode) {
-        return (0, false, default!);
+        return (0, false, default);
     }
 
     (written, handled, err) = Ꮡf.copyFileRange(r);
@@ -73,15 +73,15 @@ internal static (int64 written, bool handled, error err) readFrom(this ж<File> 
 internal static readonly @string spliceˢ = "splice"u8;
 
 internal static (int64 written, bool handled, error err) spliceToFile(this ж<File> Ꮡf, Δio.Reader r) {
-    int64 written = default!;
-    bool handled = default!;
-    error err = default!;
+    int64 written = default;
+    bool handled = default;
+    error err = default;
 
-    int64 remain = default!;
-    ж<Δio.LimitedReader> lr = default!;
+    int64 remain = default;
+    ж<Δio.LimitedReader> lr = default;
     {
         (lr, r, remain) = tryLimitedReader(r); if (remain <= 0) {
-            return (0, true, default!);
+            return (0, true, default);
         }
     }
 
@@ -93,14 +93,14 @@ internal static (int64 written, bool handled, error err) spliceToFile(this ж<Fi
     // and one splice call would result in one frame.
     // splice(2) is suitable for large data but the generation of fragments defeats its edge here.
     // Therefore, don't bother to try splice if the r is not a streaming descriptor.
-    if (pfd == nil || !(~pfd).IsStream) {
+    if (pfd == nil || !pfd.IsStream) {
         return (written, handled, err);
     }
 
     (written, handled, err) = pollSplice(Ꮡf.of(File.Ꮡpfd), pfd, remain);
 
     if (lr != nil) {
-        lr.Value.N = remain - written;
+        lr.N = remain - written;
     }
 
     return (written, handled, wrapSyscallError(spliceˢ, err));
@@ -111,19 +111,19 @@ internal static readonly @string readFromˢ = "ReadFrom"u8;
 internal static readonly @string copyFileRangeˢ = "copy_file_range"u8;
 
 internal static (int64 written, bool handled, error err) copyFileRange(this ж<File> Ꮡf, Δio.Reader r) {
-    int64 written = default!;
-    bool handled = default!;
-    error err = default!;
+    int64 written = default;
+    bool handled = default;
+    error err = default;
 
-    int64 remain = default!;
-    ж<Δio.LimitedReader> lr = default!;
+    int64 remain = default;
+    ж<Δio.LimitedReader> lr = default;
     {
         (lr, r, remain) = tryLimitedReader(r); if (remain <= 0) {
-            return (0, true, default!);
+            return (0, true, default);
         }
     }
 
-    ж<File> src = default!;
+    ж<File> src = default;
     switch (r.type()) {
     case ж<File> v: {
         src = v;
@@ -135,18 +135,18 @@ internal static (int64 written, bool handled, error err) copyFileRange(this ж<F
     }
     default: {
         var v = r;
-        return (0, false, default!);
+        return (0, false, default);
     }}
 
-    if (src.checkValid(readFromˢ) != default!) {
+    if (src.checkValid(readFromˢ) != nil) {
         // Avoid returning the error as we report handled as false,
         // leave further error handling as the responsibility of the caller.
-        return (0, false, default!);
+        return (0, false, default);
     }
 
     (written, handled, err) = pollCopyFileRange(Ꮡf.of(File.Ꮡpfd), src.of(File.Ꮡpfd), remain);
     if (lr != nil) {
-        lr.Value.N -= written;
+        lr.N -= written;
     }
     return (written, handled, wrapSyscallError(copyFileRangeˢ, err));
 }
@@ -162,27 +162,28 @@ internal partial interface getPollFDAndNetwork_type /*dyn*/ {
 internal static (ж<poll.FD>, poll.String) getPollFDAndNetwork(any i) {
     var (sc, ok) = i._<syscall.Conn>(ᐧ);
     if (!ok) {
-        return (default!, (@string)"");
+        return (default, (@string)"");
     }
     var (rc, err) = sc.SyscallConn();
-    if (err != default!) {
-        return (default!, (@string)"");
+    if (err != nil) {
+        return (default, (@string)"");
     }
     (var irc, ok) = rc._<getPollFDAndNetwork_type>(ᐧ);
     if (!ok) {
-        return (default!, (@string)"");
+        return (default, (@string)"");
     }
     return (irc.PollFD(), irc.Network());
 }
 
 internal static bool isUnixOrTCP(@string network) {
     var exprᴛ1 = network;
-    if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "unix"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "unix"u8: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 } // end os_package

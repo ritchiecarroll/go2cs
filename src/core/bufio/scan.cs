@@ -27,17 +27,17 @@ partial class bufio_package {
 // control over error handling or large tokens, or must run sequential scans
 // on a reader, should use [bufio.Reader] instead.
 partial struct Scanner {
-    internal io.Reader r; // The reader provided by the client.
+    internal io.Reader r;                                                                 // The reader provided by the client.
     internal Func<slice<byte>, bool, (nint advance, slice<byte> token, error err)> split; // The function to split the tokens.
-    internal nint maxTokenSize;      // Maximum size of a token; modified by tests.
-    internal slice<byte> token; // Last token returned by split.
-    internal slice<byte> buf; // Buffer used as argument to split.
-    internal nint start;      // First non-processed byte in buf.
-    internal nint end;      // End of data in buf.
-    internal error err;     // Sticky error.
-    internal nint empties;      // Count of successive empty tokens.
-    internal bool scanCalled;      // Scan has been called; buffer is in use.
-    internal bool done;      // Scan has finished.
+    internal nint maxTokenSize;                                                           // Maximum size of a token; modified by tests.
+    internal slice<byte> token;                                                           // Last token returned by split.
+    internal slice<byte> buf;                                                             // Buffer used as argument to split.
+    internal nint start;                                                                  // First non-processed byte in buf.
+    internal nint end;                                                                    // End of data in buf.
+    internal error err;                                                                   // Sticky error.
+    internal nint empties;                                                                // Count of successive empty tokens.
+    internal bool scanCalled;                                                             // Scan has been called; buffer is in use.
+    internal bool done;                                                                   // Scan has finished.
 }
 
 // SplitFunc is the signature of the split function used to tokenize the
@@ -93,7 +93,7 @@ public static ж<Scanner> NewScanner(io.Reader r) {
 // Err returns the first non-EOF error that was encountered by the [Scanner].
 public static error Err(this ref Scanner s) {
     if (AreEqual(s.err, io.EOF)) {
-        return default!;
+        return default;
     }
     return s.err;
 }
@@ -138,20 +138,20 @@ public static bool Scan(this ref Scanner s) {
     }
     s.scanCalled = true;
     // Loop until we have a token.
-    while (ᐧ) {
+    for (;;) {
         // See if we can get a token with what we already have.
         // If we've run out of data but have an error, give the split function
         // a chance to recover any remaining, possibly empty token.
-        if (s.end > s.start || s.err != default!) {
-            var (advance, token, err) = s.split(s.buf.slice(s.start, s.end), s.err != default!);
-            if (err != default!) {
+        if (s.end > s.start || s.err != nil) {
+            var (advance, token, err) = s.split(s.buf.slice(s.start, s.end), s.err != nil);
+            if (err != nil) {
                 if (AreEqual(err, ErrFinalToken)) {
                     s.token = token;
                     s.done = true;
                     // When token is not nil, it means the scanning stops
                     // with a trailing token, and thus the return value
                     // should be true to indicate the existence of the token.
-                    return token != default!;
+                    return token != nil;
                 }
                 s.setErr(err);
                 return false;
@@ -160,8 +160,8 @@ public static bool Scan(this ref Scanner s) {
                 return false;
             }
             s.token = token;
-            if (token != default!) {
-                if (s.err == default! || advance > 0){
+            if (token != nil) {
+                if (s.err == nil || advance > 0) {
                     s.empties = 0;
                 } else {
                     // Returning tokens not advancing input at EOF.
@@ -175,7 +175,7 @@ public static bool Scan(this ref Scanner s) {
         }
         // We cannot generate a token with what we are holding.
         // If we've already hit EOF or an I/O error, we are done.
-        if (s.err != default!) {
+        if (s.err != nil) {
             // Shut it down.
             s.start = 0;
             s.end = 0;
@@ -211,14 +211,14 @@ public static bool Scan(this ref Scanner s) {
         // Finally we can read some input. Make sure we don't get stuck with
         // a misbehaving Reader. Officially we don't need to do this, but let's
         // be extra careful: Scanner is for safe, simple jobs.
-        for (nint loop = 0; ᐧ ; ) {
+        for (nint loop = 0; ; ) {
             var (n, err) = s.r.Read(s.buf.slice(s.end, len(s.buf)));
             if (n < 0 || len(s.buf) - s.end < n) {
                 s.setErr(ErrBadReadCount);
                 break;
             }
             s.end += n;
-            if (err != default!) {
+            if (err != nil) {
                 s.setErr(err);
                 break;
             }
@@ -251,7 +251,7 @@ internal static bool advance(this ref Scanner s, nint n) {
 
 // setErr records the first error encountered.
 internal static void setErr(this ref Scanner s, error err) {
-    if (s.err == default! || AreEqual(s.err, io.EOF)) {
+    if (s.err == nil || AreEqual(s.err, io.EOF)) {
         s.err = err;
     }
 }
@@ -292,9 +292,9 @@ public static void Split(this ref Scanner s, Func<slice<byte>, bool, (nint, slic
 // ScanBytes is a split function for a [Scanner] that returns each byte as a token.
 public static (nint advance, slice<byte> token, error err) ScanBytes(slice<byte> data, bool atEOF) {
     if (atEOF && len(data) == 0) {
-        return (0, default!, default!);
+        return (0, default, default);
     }
-    return (1, data[0..1], default!);
+    return (1, data[0..1], default);
 }
 
 internal static slice<byte> errorRune = slice<byte>((@string)(rune)utf8.RuneError);
@@ -307,12 +307,12 @@ internal static slice<byte> errorRune = slice<byte>((@string)(rune)utf8.RuneErro
 // distinguish correctly encoded replacement runes from encoding errors.
 public static (nint advance, slice<byte> token, error err) ScanRunes(slice<byte> data, bool atEOF) {
     if (atEOF && len(data) == 0) {
-        return (0, default!, default!);
+        return (0, default, default);
     }
 
     // Fast path 1: ASCII.
     if (data[0] < utf8.RuneSelf) {
-        return (1, data[0..1], default!);
+        return (1, data[0..1], default);
     }
 
     // Fast path 2: Correct UTF-8 decode without error.
@@ -320,7 +320,7 @@ public static (nint advance, slice<byte> token, error err) ScanRunes(slice<byte>
     if (width > 1) {
         // It's a valid encoding. Width cannot be one for a correctly encoded
         // non-ASCII rune.
-        return (width, data.slice(0, width), default!);
+        return (width, data.slice(0, width), default);
     }
 
     // We know it's an error: we have width==1 and implicitly r==utf8.RuneError.
@@ -328,18 +328,18 @@ public static (nint advance, slice<byte> token, error err) ScanRunes(slice<byte>
     // FullRune distinguishes correctly between erroneous and incomplete encodings.
     if (!atEOF && !utf8.FullRune(data)) {
         // Incomplete; get more bytes.
-        return (0, default!, default!);
+        return (0, default, default);
     }
 
     // We have a real UTF-8 encoding error. Return a properly encoded error rune
     // but advance only one byte. This matches the behavior of a range loop over
     // an incorrectly encoded string.
-    return (1, errorRune, default!);
+    return (1, errorRune, default);
 }
 
 // dropCR drops a terminal \r from the data.
 internal static slice<byte> dropCR(slice<byte> data) {
-    if (len(data) > 0 && data[len(data) - 1] == (rune)'\r') {
+    if (len(data) > 0 && data[len(data) - 1] == '\r') {
         return data.slice(0, len(data) - 1);
     }
     return data;
@@ -353,43 +353,43 @@ internal static slice<byte> dropCR(slice<byte> data) {
 // newline.
 public static (nint advance, slice<byte> token, error err) ScanLines(slice<byte> data, bool atEOF) {
     if (atEOF && len(data) == 0) {
-        return (0, default!, default!);
+        return (0, default, default);
     }
     {
-        nint i = bytes.IndexByte(data, (rune)'\n'); if (i >= 0) {
+        nint i = bytes.IndexByte(data, (byte)'\n'); if (i >= 0) {
             // We have a full newline-terminated line.
-            return (i + 1, dropCR(data.slice(0, i)), default!);
+            return (i + 1, dropCR(data.slice(0, i)), default);
         }
     }
     // If we're at EOF, we have a final, non-terminated line. Return it.
     if (atEOF) {
-        return (len(data), dropCR(data), default!);
+        return (len(data), dropCR(data), default);
     }
     // Request more data.
-    return (0, default!, default!);
+    return (0, default, default);
 }
 
 // isSpace reports whether the character is a Unicode white space character.
 // We avoid dependency on the unicode package, but check validity of the implementation
 // in the tests.
 internal static bool isSpace(rune r) {
-    if (r <= (rune)'\u00FF') {
+    if (r <= '\u00FF') {
         // Obvious ASCII ones: \t through \r plus space. Plus two Latin-1 oddballs.
         switch (r) {
-        case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\v' or (rune)'\f' or (rune)'\r': {
+        case ' ' or '\t' or '\n' or '\v' or '\f' or '\r': {
             return true;
         }
-        case (rune)'\u0085' or (rune)'\u00A0': {
+        case '\u0085' or '\u00A0': {
             return true;
         }}
         return false;
     }
     // High-valued ones.
-    if ((rune)'\u2000' <= r && r <= (rune)'\u200a') {
+    if ('\u2000' <= r && r <= '\u200a') {
         return true;
     }
     switch (r) {
-    case (rune)'\u1680' or (rune)'\u2028' or (rune)'\u2029' or (rune)'\u202f' or (rune)'\u205f' or (rune)'\u3000': {
+    case '\u1680' or '\u2028' or '\u2029' or '\u202f' or '\u205f' or '\u3000': {
         return true;
     }}
     return false;
@@ -403,7 +403,7 @@ public static (nint advance, slice<byte> token, error err) ScanWords(slice<byte>
     // Skip leading spaces.
     nint start = 0;
     for (nint width = 0; start < len(data); start += width) {
-        rune r = default!;
+        rune r = default;
         (r, width) = utf8.DecodeRune(data.slice(start));
         if (!isSpace(r)) {
             break;
@@ -411,18 +411,18 @@ public static (nint advance, slice<byte> token, error err) ScanWords(slice<byte>
     }
     // Scan until space, marking end of word.
     for ((nint width, nint i) = (0, start); i < len(data); i += width) {
-        rune r = default!;
+        rune r = default;
         (r, width) = utf8.DecodeRune(data.slice(i));
         if (isSpace(r)) {
-            return (i + width, data.slice(start, i), default!);
+            return (i + width, data.slice(start, i), default);
         }
     }
     // If we're at EOF, we have a final, non-empty, non-terminated word. Return it.
     if (atEOF && len(data) > start) {
-        return (len(data), data.slice(start), default!);
+        return (len(data), data.slice(start), default);
     }
     // Request more data.
-    return (start, default!, default!);
+    return (start, default, default);
 }
 
 } // end bufio_package

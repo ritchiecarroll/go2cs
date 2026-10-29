@@ -93,7 +93,7 @@ public static (slice<byte>, error) MarshalJSON(this ΔLevel l) {
     // AppendQuote is sufficient for JSON-encoding all Level strings.
     // They don't contain any runes that would produce invalid JSON
     // when escaped.
-    return (strconv.AppendQuote(default!, l.String()), default!);
+    return (strconv.AppendQuote(default, l.String()), default);
 }
 
 // UnmarshalJSON implements [encoding/json.Unmarshaler]
@@ -103,7 +103,7 @@ public static (slice<byte>, error) MarshalJSON(this ΔLevel l) {
 // output. For example, "Error-8" would marshal as "INFO".
 public static error UnmarshalJSON(this ж<ΔLevel> Ꮡl, slice<byte> data) {
     var (s, err) = strconv.Unquote((@string)data);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return Ꮡl.parse(s);
@@ -112,13 +112,13 @@ public static error UnmarshalJSON(this ж<ΔLevel> Ꮡl, slice<byte> data) {
 // AppendText implements [encoding.TextAppender]
 // by calling [Level.String].
 public static (slice<byte>, error) AppendText(this ΔLevel l, slice<byte> b) {
-    return (builtin.append(b, l.String().ꓸꓸꓸ), default!);
+    return (builtin.append(b, l.String().ꓸꓸꓸ), default);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
 // by calling [Level.AppendText].
 public static (slice<byte>, error) MarshalText(this ΔLevel l) {
-    return l.AppendText(default!);
+    return l.AppendText(default);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler].
@@ -134,13 +134,13 @@ public static error UnmarshalText(this ж<ΔLevel> Ꮡl, slice<byte> data) {
 internal static readonly @string unknownNameˢ = "unknown name"u8;
 
 internal static error /*err*/ parse(this ж<ΔLevel> Ꮡl, @string s) {
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var l = ref Ꮡl.DerefOrNull();
 
         defer(() => {
-            if (err != default!) {
+            if (err != nil) {
                 err = fmt.Errorf("slog: level string %q: %w"u8, s, err);
             }
         }, ref ᒐ);
@@ -151,29 +151,34 @@ internal static error /*err*/ parse(this ж<ΔLevel> Ꮡl, @string s) {
             nint i = strings.IndexAny(s, "+-"u8); if (i >= 0) {
                 name = s.slice(0, i);
                 (offset, err) = strconv.Atoi(s.slice(i));
-                if (err != default!) {
+                if (err != nil) {
                     goto ᒐdone;
                 }
             }
         }
         var exprᴛ1 = strings.ToUpper(name);
-        if (exprᴛ1 == "DEBUG"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "DEBUG"u8: {
             l = LevelDebug;
+            break;
         }
-        else if (exprᴛ1 == "INFO"u8) {
+        case {} when exprᴛ1 == "INFO"u8: {
             l = LevelInfo;
+            break;
         }
-        else if (exprᴛ1 == "WARN"u8) {
+        case {} when exprᴛ1 == "WARN"u8: {
             l = LevelWarn;
+            break;
         }
-        else if (exprᴛ1 == "ERROR"u8) {
+        case {} when exprᴛ1 == "ERROR"u8: {
             l = LevelError;
+            break;
         }
-        else { /* default: */
+        default: {
             err = errors.New(unknownNameˢ); goto ᒐdone;
-        }
+        }}
         l += ((ΔLevel)offset);
-        err = default!;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -202,7 +207,7 @@ public static ΔLevel Level(this ж<LevelVar> Ꮡv) {
 
 // Set sets v's level to l.
 public static void Set(this ж<LevelVar> Ꮡv, ΔLevel l) {
-    Ꮡv.of(LevelVar.Ꮡval).Store((int64)(nint)l);
+    Ꮡv.of(LevelVar.Ꮡval).Store((int64)l);
 }
 
 public static @string String(this ж<LevelVar> Ꮡv) {
@@ -218,7 +223,7 @@ public static (slice<byte>, error) AppendText(this ж<LevelVar> Ꮡv, slice<byte
 // MarshalText implements [encoding.TextMarshaler]
 // by calling [LevelVar.AppendText].
 public static (slice<byte>, error) MarshalText(this ж<LevelVar> Ꮡv) {
-    return Ꮡv.AppendText(default!);
+    return Ꮡv.AppendText(default);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
@@ -226,12 +231,12 @@ public static (slice<byte>, error) MarshalText(this ж<LevelVar> Ꮡv) {
 public static error UnmarshalText(this ж<LevelVar> Ꮡv, slice<byte> data) {
     ref var l = ref heap(new ΔLevel(), out var Ꮡl);
     {
-        var err = Ꮡl.UnmarshalText(data); if (err != default!) {
+        var err = Ꮡl.UnmarshalText(data); if (err != nil) {
             return err;
         }
     }
     Ꮡv.Set(l);
-    return default!;
+    return default;
 }
 
 // A Leveler provides a [Level] value.

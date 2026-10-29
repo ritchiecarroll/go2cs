@@ -27,13 +27,13 @@ internal static @string String(this fileAddr f) {
 // It is the caller's responsibility to close f when finished.
 // Closing c does not affect f, and closing f does not affect c.
 public static (Conn c, error err) FileConn(ж<os.File> Ꮡf) {
-    Conn c = default!;
-    error err = default!;
+    Conn c = default;
+    error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     (c, err) = fileConn(Ꮡf);
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: "file+net"u8, Source: default!, Addr: ((fileAddr)f.Name()), Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: "file+net"u8, Source: default, Addr: ((fileAddr)f.Name()), Err: err)));
     }
     return (c, err);
 }
@@ -43,13 +43,13 @@ public static (Conn c, error err) FileConn(ж<os.File> Ꮡf) {
 // It is the caller's responsibility to close ln when finished.
 // Closing ln does not affect f, and closing f does not affect ln.
 public static (Listener ln, error err) FileListener(ж<os.File> Ꮡf) {
-    Listener ln = default!;
-    error err = default!;
+    Listener ln = default;
+    error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     (ln, err) = fileListener(Ꮡf);
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: "file+net"u8, Source: default!, Addr: ((fileAddr)f.Name()), Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: "file+net"u8, Source: default, Addr: ((fileAddr)f.Name()), Err: err)));
     }
     return (ln, err);
 }
@@ -59,13 +59,13 @@ public static (Listener ln, error err) FileListener(ж<os.File> Ꮡf) {
 // It is the caller's responsibility to close f when finished.
 // Closing c does not affect f, and closing f does not affect c.
 public static (PacketConn c, error err) FilePacketConn(ж<os.File> Ꮡf) {
-    PacketConn c = default!;
-    error err = default!;
+    PacketConn c = default;
+    error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     (c, err) = filePacketConn(Ꮡf);
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: "file+net"u8, Source: default!, Addr: ((fileAddr)f.Name()), Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: "file+net"u8, Source: default, Addr: ((fileAddr)f.Name()), Err: err)));
     }
     return (c, err);
 }

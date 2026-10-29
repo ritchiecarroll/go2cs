@@ -45,9 +45,9 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
 // least n. For best performance (avoiding function calls inside hot loops),
 // the caller is the one responsible for first checking that d.bits.n < n.
 internal static error ensureNBits(this ref decoder d, int32 n) {
-    while (ᐧ) {
+    for (;;) {
         var (c, err) = d.readByteStuffedByte();
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, io.ErrUnexpectedEOF)) {
                 return errShortHuffmanData;
             }
@@ -55,16 +55,16 @@ internal static error ensureNBits(this ref decoder d, int32 n) {
         }
         d.bits.a = d.bits.a << 8 | (uint32)c;
         d.bits.n += 8;
-        if (d.bits.m == 0){
+        if (d.bits.m == 0) {
             d.bits.m = (uint32)1 << 7;
         } else {
-            d.bits.m <<= (int)(8);
+            d.bits.m <<= 8;
         }
         if (d.bits.n >= n) {
             break;
         }
     }
-    return default!;
+    return default;
 }
 
 // receiveExtend is the composition of RECEIVE and EXTEND, specified in section
@@ -72,7 +72,7 @@ internal static error ensureNBits(this ref decoder d, int32 n) {
 internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) {
     if (d.bits.n < (int32)t) {
         {
-            var err = d.ensureNBits((int32)t); if (err != default!) {
+            var err = d.ensureNBits((int32)t); if (err != nil) {
                 return (0, err);
             }
         }
@@ -84,7 +84,7 @@ internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) {
     if (x < s >> 1) {
         x += ((-1).Lsh((uint64)(t))) + 1;
     }
-    return (x, default!);
+    return (x, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -102,7 +102,7 @@ internal static error processDHT(this ref decoder d, nint n) {
             return ((FormatError)(@string)dhtHasWrongLengthˢ);
         }
         {
-            var err = d.readFull(d.tmp[..17]); if (err != default!) {
+            var err = d.readFull(d.tmp[..17]); if (err != nil) {
                 return err;
             }
         }
@@ -120,34 +120,34 @@ internal static error processDHT(this ref decoder d, nint n) {
         // Read nCodes and h.vals (and derive h.nCodes).
         // nCodes[i] is the number of codes with code length i.
         // h.nCodes is the total number of codes.
-        h.Value.nCodes = 0;
+        h.nCodes = 0;
         array<int32> nCodes = new(16); /* maxCodeLength */
         foreach (var i in range(nCodes)) {
             nCodes[i] = (int32)d.tmp[i + 1];
-            h.Value.nCodes += nCodes[i];
+            h.nCodes += nCodes[i];
         }
-        if ((~h).nCodes == 0) {
+        if (h.nCodes == 0) {
             return ((FormatError)(@string)huffmanTableHasZeroˢ);
         }
-        if ((~h).nCodes > maxNCodes) {
+        if (h.nCodes > maxNCodes) {
             return ((FormatError)(@string)huffmanTableHasExcessiveˢ);
         }
-        n -= (nint)(~h).nCodes + 17;
+        n -= (nint)h.nCodes + 17;
         if (n < 0) {
             return ((FormatError)(@string)dhtHasWrongLengthˢ);
         }
         {
-            var err = d.readFull((~h).vals.slice(0, (~h).nCodes)); if (err != default!) {
+            var err = d.readFull(h.vals.slice(0, h.nCodes)); if (err != nil) {
                 return err;
             }
         }
 
         // Derive the look-up table.
-        clear((~h).lut[..]);
-        uint32 x = default!;
-        uint32 code = default!;
+        clear(h.lut[..]);
+        uint32 x = default;
+        uint32 code = default;
         for (var i = (uint32)0; i < lutSize; i++) {
-            code <<= (int)(1);
+            code <<= 1;
             for (var j = (int32)0; j < nCodes[i]; j++) {
                 // The codeLength is 1+i, so shift code by 8-(1+i) to
                 // calculate the high bits for every 8-bit sequence
@@ -155,9 +155,9 @@ internal static error processDHT(this ref decoder d, nint n) {
                 // The high 8 bits of lutValue are the encoded value.
                 // The low 8 bits are 1 plus the codeLength.
                 var @base = (uint8)(code.Lsh((uint64)(7 - i)));
-                var lutValue = (uint16)((uint16)((uint16)(~h).vals[x] << 8) | (uint16)(2 + i));
+                var lutValue = (uint16)((uint16)((uint16)h.vals[x] << 8) | (uint16)(2 + i));
                 for (var k = (uint8)0; k < (uint8)(((uint8)1).Lsh((uint64)(7 - i))); k++) {
-                    h.Value.lut[(uint8)(@base | k)] = lutValue;
+                    h.lut[(uint8)(@base | k)] = lutValue;
                 }
                 code++;
                 x++;
@@ -165,24 +165,24 @@ internal static error processDHT(this ref decoder d, nint n) {
         }
 
         // Derive minCodes, maxCodes, and valsIndices.
-        int32 c = default!;
-        int32 index = default!;
+        int32 c = default;
+        int32 index = default;
         foreach (var (i, nΔ1) in nCodes.ΔRangeSnapshot()) {
-            if (nΔ1 == 0){
-                h.Value.minCodes[i] = -1;
-                h.Value.maxCodes[i] = -1;
-                h.Value.valsIndices[i] = -1;
+            if (nΔ1 == 0) {
+                h.minCodes[i] = -1;
+                h.maxCodes[i] = -1;
+                h.valsIndices[i] = -1;
             } else {
-                h.Value.minCodes[i] = c;
-                h.Value.maxCodes[i] = c + nΔ1 - 1;
-                h.Value.valsIndices[i] = index;
+                h.minCodes[i] = c;
+                h.maxCodes[i] = c + nΔ1 - 1;
+                h.valsIndices[i] = index;
                 c += nΔ1;
                 index += nΔ1;
             }
-            c <<= (int)(1);
+            c <<= 1;
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -200,7 +200,7 @@ internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡ
 
     if (d.bits.n < 8) {
         {
-            var err = d.ensureNBits(8); if (err != default!) {
+            var err = d.ensureNBits(8); if (err != nil) {
                 if (!AreEqual(err, errMissingFF00) && !AreEqual(err, errShortHuffmanData)) {
                     return (0, err);
                 }
@@ -219,7 +219,7 @@ internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡ
             var n = (uint16)(((uint16)(v & 0xff)) - 1);
             d.bits.n -= (int32)n;
             d.bits.m.RshAssign((uint64)(n));
-            return ((uint8)(v >> 8), default!);
+            return ((uint8)(v >> 8), default);
         }
     }
 
@@ -227,7 +227,7 @@ slowPath:
     for ((nint i, var code) = (0, (int32)0); i < maxCodeLength; i++) {
         if (d.bits.n == 0) {
             {
-                var err = d.ensureNBits(1); if (err != default!) {
+                var err = d.ensureNBits(1); if (err != nil) {
                     return (0, err);
                 }
             }
@@ -236,11 +236,11 @@ slowPath:
             code |= (int32)(1);
         }
         d.bits.n--;
-        d.bits.m >>= (int)(1);
+        d.bits.m >>= 1;
         if (code <= h.maxCodes[i]) {
-            return (h.vals[h.valsIndices[i] + code - h.minCodes[i]], default!);
+            return (h.vals[h.valsIndices[i] + code - h.minCodes[i]], default);
         }
-        code <<= (int)(1);
+        code <<= 1;
 continue_slowPath:;
     }
 break_slowPath:;
@@ -250,21 +250,21 @@ break_slowPath:;
 internal static (bool, error) decodeBit(this ref decoder d) {
     if (d.bits.n == 0) {
         {
-            var err = d.ensureNBits(1); if (err != default!) {
+            var err = d.ensureNBits(1); if (err != nil) {
                 return (false, err);
             }
         }
     }
     var ret = (d.bits.a & d.bits.m) != 0;
     d.bits.n--;
-    d.bits.m >>= (int)(1);
-    return (ret, default!);
+    d.bits.m >>= 1;
+    return (ret, default);
 }
 
 internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
     if (d.bits.n < n) {
         {
-            var err = d.ensureNBits(n); if (err != default!) {
+            var err = d.ensureNBits(n); if (err != nil) {
                 return (0, err);
             }
         }
@@ -273,7 +273,7 @@ internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
     ret &= (uint32)((((uint32)1).Lsh((uint64)((uint32)n))) - 1);
     d.bits.n -= n;
     d.bits.m.RshAssign((uint64)((uint32)n));
-    return (ret, default!);
+    return (ret, default);
 }
 
 } // end jpeg_package

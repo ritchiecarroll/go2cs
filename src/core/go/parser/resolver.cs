@@ -30,10 +30,10 @@ internal partial interface resolveFile_type /*dyn*/ {
 //
 // If declErr is non-nil, it is used to report declaration errors during
 // resolution. tok is used to format position in error messages.
-internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> Ꮡhandle, Action<tokenꓸPos, @string> declErr) {
+internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> handle, Action<tokenꓸPos, @string> declErr) {
     var pkgScope = ast.NewScope(nil);
     var r = Ꮡ(new resolver(
-        handle: Ꮡhandle,
+        handle: handle,
         declErr: declErr,
         topScope: pkgScope,
         pkgScope: pkgScope,
@@ -45,26 +45,25 @@ internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> Ꮡhandle,
     }
 
     r.closeScope();
-    assert((~r).topScope == nil, unbalancedScopesˢ);
-    assert((~r).labelScope == nil, unbalancedLabelScopesˢ);
+    assert(r.topScope == nil, unbalancedScopesˢ);
+    assert(r.labelScope == nil, unbalancedLabelScopesˢ);
 
     // resolve global identifiers within the same file
     nint i = 0;
-    foreach (var (_, ident) in (~r).unresolved) {
+    foreach (var (_, ident) in r.unresolved) {
         // i <= index for current ident
-        assert((~ident).Obj == unresolved, objectAlreadyResolvedˢ);
-        ident.Value.Obj = (~r).pkgScope.Lookup((~ident).Name); // also removes unresolved sentinel
-        if ((~ident).Obj == nil){
-            r.Value.unresolved[i] = ident;
+        assert(ident.Obj == unresolved, objectAlreadyResolvedˢ);
+        ident.Obj = r.pkgScope.Lookup(ident.Name); // also removes unresolved sentinel
+        if (ident.Obj == nil) {
+            r.unresolved[i] = ident;
             i++;
-        } else 
-        if (debugResolve) {
-            tokenꓸPos pos = (~(~ident).Obj).Decl._<resolveFile_type>().Pos();
-            r.trace(resolvedSVToPackageˢ, (~ident).Name, ident.Pos(), pos);
+        } else if (debugResolve) {
+            tokenꓸPos pos = ident.Obj.Decl._<resolveFile_type>().Pos();
+            r.trace(resolvedSVToPackageˢ, ident.Name, ident.Pos(), pos);
         }
     }
-    @file.Scope = r.Value.pkgScope;
-    @file.Unresolved = (~r).unresolved.slice(0, i);
+    @file.Scope = r.pkgScope;
+    @file.Unresolved = r.unresolved.slice(0, i);
 }
 
 internal const nint maxScopeDepth = 1000;
@@ -73,13 +72,13 @@ partial struct resolver {
     internal ж<tokenꓸFile> handle;
     internal Action<tokenꓸPos, @string> declErr;
     // Ordinary identifier scopes
-    internal ж<ast.Scope> pkgScope; // pkgScope.Outer == nil
-    internal ж<ast.Scope> topScope; // top-most scope; may be pkgScope
+    internal ж<ast.Scope> pkgScope;          // pkgScope.Outer == nil
+    internal ж<ast.Scope> topScope;          // top-most scope; may be pkgScope
     internal slice<ж<ast.Ident>> unresolved; // unresolved identifiers
-    internal nint depth;         // scope depth
+    internal nint depth;                     // scope depth
     // Label scopes
     // (maintained by open/close LabelScope)
-    internal ж<ast.Scope> labelScope;  // label scope for current function
+    internal ж<ast.Scope> labelScope;                // label scope for current function
     internal slice<slice<ж<ast.Ident>>> targetStack; // stack of unresolved labels
 }
 
@@ -124,12 +123,12 @@ internal static void closeScope(this ref resolver r) {
     if (debugResolve) {
         r.trace(closingScopeˢ);
     }
-    r.topScope = r.topScope.Value.Outer;
+    r.topScope = r.topScope.Outer;
 }
 
 internal static void openLabelScope(this ref resolver r) {
     r.labelScope = ast.NewScope(r.labelScope);
-    r.targetStack = append(r.targetStack, (slice<ж<ast.Ident>>)(default!));
+    r.targetStack = append(r.targetStack, (slice<ж<ast.Ident>>)(default));
 }
 
 internal static void closeLabelScope(this ref resolver r) {
@@ -137,14 +136,14 @@ internal static void closeLabelScope(this ref resolver r) {
     nint n = len(r.targetStack) - 1;
     var scope = r.labelScope;
     foreach (var (_, ident) in r.targetStack[n]) {
-        ident.Value.Obj = scope.Lookup((~ident).Name);
-        if ((~ident).Obj == nil && r.declErr != default!) {
-            r.declErr(ident.Pos(), fmt.Sprintf("label %s undefined"u8, (~ident).Name));
+        ident.Obj = scope.Lookup(ident.Name);
+        if (ident.Obj == nil && r.declErr != nil) {
+            r.declErr(ident.Pos(), fmt.Sprintf("label %s undefined"u8, ident.Name));
         }
     }
     // pop label scope
     r.targetStack = r.targetStack.slice(0, n);
-    r.labelScope = r.labelScope.Value.Outer;
+    r.labelScope = r.labelScope.Outer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -155,34 +154,34 @@ internal static void declare(this ref resolver r, any decl, any data, ж<ast.Sco
     ref var scope = ref Ꮡscope.DerefOrNull();
 
     foreach (var (_, ident) in idents) {
-        if ((~ident).Obj != nil) {
-            throw panic(fmt.Sprintf("%v: identifier %s already declared or resolved"u8, ident.Pos(), (~ident).Name));
+        if (ident.Obj != nil) {
+            throw panic(fmt.Sprintf("%v: identifier %s already declared or resolved"u8, ident.Pos(), ident.Name));
         }
-        var obj = ast.NewObj(kind, (~ident).Name);
+        var obj = ast.NewObj(kind, ident.Name);
         // remember the corresponding declaration for redeclaration
         // errors and global variable resolution/typechecking phase
-        obj.Value.Decl = decl;
-        obj.Value.Data = data;
+        obj.Decl = decl;
+        obj.Data = data;
         // Identifiers (for receiver type parameters) are written to the scope, but
         // never set as the resolved object. See go.dev/issue/50956.
         {
             var (_, ok) = decl._<ж<ast.Ident>>(ᐧ); if (!ok) {
-                ident.Value.Obj = obj;
+                ident.Obj = obj;
             }
         }
-        if ((~ident).Name != "_"u8) {
+        if (ident.Name != "_"u8) {
             if (debugResolve) {
-                r.trace(declaringSVˢ, (~ident).Name, ident.Pos());
+                r.trace(declaringSVˢ, ident.Name, ident.Pos());
             }
             {
-                var alt = scope.Insert(obj); if (alt != nil && r.declErr != default!) {
+                var alt = scope.Insert(obj); if (alt != nil && r.declErr != nil) {
                     @string prevDecl = ""u8;
                     {
                         tokenꓸPos pos = alt.Pos(); if (pos.IsValid()) {
                             prevDecl = r.sprintf("\n\tprevious declaration at %v"u8, pos);
                         }
                     }
-                    r.declErr(ident.Pos(), fmt.Sprintf("%s redeclared in this block%s"u8, (~ident).Name, prevDecl));
+                    r.declErr(ident.Pos(), fmt.Sprintf("%s redeclared in this block%s"u8, ident.Name, prevDecl));
                 }
             }
         }
@@ -203,18 +202,18 @@ internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdec
     foreach (var (_, x) in decl.Lhs) {
         {
             var (ident, isIdent) = x._<ж<ast.Ident>>(ᐧ); if (isIdent) {
-                assert((~ident).Obj == nil, identifierAlreadyˢ);
-                var obj = ast.NewObj(ast.Var, (~ident).Name);
+                assert(ident.Obj == nil, identifierAlreadyˢ);
+                var obj = ast.NewObj(ast.Var, ident.Name);
                 // remember corresponding assignment for other tools
-                obj.Value.Decl = Ꮡdecl.OrTypedNil();
-                ident.Value.Obj = obj;
-                if ((~ident).Name != "_"u8) {
+                obj.Decl = Ꮡdecl.OrTypedNil();
+                ident.Obj = obj;
+                if (ident.Name != "_"u8) {
                     if (debugResolve) {
-                        r.trace(declaringSVˢ, (~ident).Name, ident.Pos());
+                        r.trace(declaringSVˢ, ident.Name, ident.Pos());
                     }
                     {
-                        var alt = r.topScope.Insert(obj); if (alt != nil){
-                            ident.Value.Obj = alt; // redeclaration
+                        var alt = r.topScope.Insert(obj); if (alt != nil) {
+                            ident.Obj = alt; // redeclaration
                         } else {
                             n++; // new declaration
                         }
@@ -223,7 +222,7 @@ internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdec
             }
         }
     }
-    if (n == 0 && r.declErr != default!) {
+    if (n == 0 && r.declErr != nil) {
         r.declErr(decl.Lhs[0].Pos(), noNewVariablesOnLeftSideˢ);
     }
 }
@@ -252,17 +251,17 @@ internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool c
     if (ident.Name == "_"u8) {
         return;
     }
-    for (var s = r.topScope; s != nil; s = s.Value.Outer) {
+    for (var s = r.topScope; s != nil; s = s.Outer) {
         {
             var obj = s.Lookup(ident.Name); if (obj != nil) {
                 if (debugResolve) {
                     r.trace(resolvedVSToVˢ, ident.Pos(), ident.Name, obj.OrTypedNil());
                 }
-                assert((~obj).Name != ""u8, objWithNoNameˢ);
+                assert(obj.Name != ""u8, objWithNoNameˢ);
                 // Identifiers (for receiver type parameters) are written to the scope,
                 // but never set as the resolved object. See go.dev/issue/50956.
                 {
-                    var (_, ok) = (~obj).Decl._<ж<ast.Ident>>(ᐧ); if (!ok) {
+                    var (_, ok) = obj.Decl._<ж<ast.Ident>>(ᐧ); if (!ok) {
                         ident.Obj = obj;
                     }
                 }
@@ -290,7 +289,7 @@ internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
     foreach (var (_, expr) in list) {
         var exprΔ1 = ast.Unparen(expr);
         {
-            var (_, ok) = exprΔ1._<ж<ast.Ident>>(ᐧ); if (!ok && exprΔ1 != default!) {
+            var (_, ok) = exprΔ1._<ж<ast.Ident>>(ᐧ); if (!ok && exprΔ1 != nil) {
                 ast.Walk(new resolverжVisitor(Ꮡr), exprΔ1);
             }
         }
@@ -311,7 +310,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
     try {
         ref var r = ref Ꮡr.DerefOrNull();
 
-        if (debugResolve && node != default!) {
+        if (debugResolve && node != nil) {
             r.trace(nodeTVˢ, node, node.Pos());
         }
 
@@ -324,12 +323,12 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
         case ж<ast.FuncLit> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            Ꮡr.walkFuncType((~n).Type);
-            Ꮡr.walkBody((~n).Body);
+            Ꮡr.walkFuncType(n.Type);
+            Ꮡr.walkBody(n.Body);
             break;
         }
         case ж<ast.SelectorExpr> n: {
-            ast.Walk(new resolverжVisitor(Ꮡr), (~n).X);
+            ast.Walk(new resolverжVisitor(Ꮡr), n.X);
             // Note: don't try to resolve n.Sel, as we don't support qualified
             // resolution.
             break;
@@ -337,7 +336,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
         case ж<ast.StructType> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            Ꮡr.walkFieldList((~n).Fields, ast.Var);
+            Ꮡr.walkFieldList(n.Fields, ast.Var);
             break;
         }
         case ж<ast.FuncType> n: {
@@ -347,20 +346,20 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
             break;
         }
         case ж<ast.CompositeLit> n: {
-            if ((~n).Type != default!) {
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Type);
+            if (n.Type != nil) {
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Type);
             }
-            foreach (var (_, e) in (~n).Elts) {
+            foreach (var (_, e) in n.Elts) {
                 {
-                    var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil){
+                    var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
                         // See go.dev/issue/45160: try to resolve composite lit keys, but don't
                         // collect them as unresolved if resolution failed. This replicates
                         // existing behavior when resolving during parsing.
                         {
-                            var (ident, _) = (~kv).Key._<ж<ast.Ident>>(ᐧ); if (ident != nil){
+                            var (ident, _) = kv.Key._<ж<ast.Ident>>(ᐧ); if (ident != nil) {
                                 r.resolve(ident, false);
                             } else {
-                                ast.Walk(new resolverжVisitor(Ꮡr), (~kv).Key);
+                                ast.Walk(new resolverжVisitor(Ꮡr), kv.Key);
                             }
                         }
                         ast.Walk(new resolverжVisitor(Ꮡr), (~kv).Value);
@@ -374,141 +373,141 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
         case ж<ast.InterfaceType> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            Ꮡr.walkFieldList((~n).Methods, ast.Fun);
+            Ꮡr.walkFieldList(n.Methods, ast.Fun);
             break;
         }
         // Statements
         case ж<ast.LabeledStmt> n: {
-            r.declare(n.OrTypedNil(), default!, r.labelScope, ast.Lbl, (~n).Label);
-            ast.Walk(new resolverжVisitor(Ꮡr), (~n).Stmt);
+            r.declare(n.OrTypedNil(), default, r.labelScope, ast.Lbl, n.Label);
+            ast.Walk(new resolverжVisitor(Ꮡr), n.Stmt);
             break;
         }
         case ж<ast.AssignStmt> n: {
-            Ꮡr.walkExprs((~n).Rhs);
-            if ((~n).Tok == token.DEFINE){
+            Ꮡr.walkExprs(n.Rhs);
+            if (n.Tok == token.DEFINE) {
                 r.shortVarDecl(n);
             } else {
-                Ꮡr.walkExprs((~n).Lhs);
+                Ꮡr.walkExprs(n.Lhs);
             }
             break;
         }
         case ж<ast.BranchStmt> n: {
             // add to list of unresolved targets
-            if ((~n).Tok != token.FALLTHROUGH && (~n).Label != nil) {
+            if (n.Tok != token.FALLTHROUGH && n.Label != nil) {
                 nint depth = len(r.targetStack) - 1;
-                r.targetStack[depth] = append(r.targetStack[depth], (~n).Label);
+                r.targetStack[depth] = append(r.targetStack[depth], n.Label);
             }
             break;
         }
         case ж<ast.BlockStmt> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            Ꮡr.walkStmts((~n).List);
+            Ꮡr.walkStmts(n.List);
             break;
         }
         case ж<ast.IfStmt> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            if ((~n).Init != default!) {
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Init);
+            if (n.Init != nil) {
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Init);
             }
-            ast.Walk(new resolverжVisitor(Ꮡr), (~n).Cond);
-            ast.Walk(new resolverжVisitor(Ꮡr), new ast.BlockStmtжNode((~n).Body));
-            if ((~n).Else != default!) {
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Else);
+            ast.Walk(new resolverжVisitor(Ꮡr), n.Cond);
+            ast.Walk(new resolverжVisitor(Ꮡr), new ast.BlockStmtжNode(n.Body));
+            if (n.Else != nil) {
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Else);
             }
             break;
         }
         case ж<ast.CaseClause> n: {
-            Ꮡr.walkExprs((~n).List);
+            Ꮡr.walkExprs(n.List);
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            Ꮡr.walkStmts((~n).Body);
+            Ꮡr.walkStmts(n.Body);
             break;
         }
         case ж<ast.SwitchStmt> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            if ((~n).Init != default!) {
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Init);
+            if (n.Init != nil) {
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Init);
             }
-            if ((~n).Tag != default!) {
+            if (n.Tag != nil) {
                 // The scope below reproduces some unnecessary behavior of the parser,
                 // opening an extra scope in case this is a type switch. It's not needed
                 // for expression switches.
                 // TODO: remove this once we've matched the parser resolution exactly.
-                if ((~n).Init != default!) {
-                    r.openScope((~n).Tag.Pos());
+                if (n.Init != nil) {
+                    r.openScope(n.Tag.Pos());
                     defer(Ꮡr.closeScope, ref ᒐ);
                 }
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Tag);
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Tag);
             }
-            if ((~n).Body != nil) {
-                Ꮡr.walkStmts((~(~n).Body).List);
+            if (n.Body != nil) {
+                Ꮡr.walkStmts(n.Body.List);
             }
             break;
         }
         case ж<ast.TypeSwitchStmt> n: {
-            if ((~n).Init != default!) {
+            if (n.Init != nil) {
                 r.openScope(n.Pos());
                 defer(Ꮡr.closeScope, ref ᒐ);
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Init);
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Init);
             }
-            r.openScope((~n).Assign.Pos());
+            r.openScope(n.Assign.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            ast.Walk(new resolverжVisitor(Ꮡr), (~n).Assign);
+            ast.Walk(new resolverжVisitor(Ꮡr), n.Assign);
             // s.Body consists only of case clauses, so does not get its own
             // scope.
-            if ((~n).Body != nil) {
-                Ꮡr.walkStmts((~(~n).Body).List);
+            if (n.Body != nil) {
+                Ꮡr.walkStmts(n.Body.List);
             }
             break;
         }
         case ж<ast.CommClause> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            if ((~n).Comm != default!) {
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Comm);
+            if (n.Comm != nil) {
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Comm);
             }
-            Ꮡr.walkStmts((~n).Body);
+            Ꮡr.walkStmts(n.Body);
             break;
         }
         case ж<ast.SelectStmt> n: {
             // as for switch statements, select statement bodies don't get their own
             // scope.
-            if ((~n).Body != nil) {
-                Ꮡr.walkStmts((~(~n).Body).List);
+            if (n.Body != nil) {
+                Ꮡr.walkStmts(n.Body.List);
             }
             break;
         }
         case ж<ast.ForStmt> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            if ((~n).Init != default!) {
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Init);
+            if (n.Init != nil) {
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Init);
             }
-            if ((~n).Cond != default!) {
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Cond);
+            if (n.Cond != nil) {
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Cond);
             }
-            if ((~n).Post != default!) {
-                ast.Walk(new resolverжVisitor(Ꮡr), (~n).Post);
+            if (n.Post != nil) {
+                ast.Walk(new resolverжVisitor(Ꮡr), n.Post);
             }
-            ast.Walk(new resolverжVisitor(Ꮡr), new ast.BlockStmtжNode((~n).Body));
+            ast.Walk(new resolverжVisitor(Ꮡr), new ast.BlockStmtжNode(n.Body));
             break;
         }
         case ж<ast.RangeStmt> n: {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
-            ast.Walk(new resolverжVisitor(Ꮡr), (~n).X);
-            slice<ast.Expr> lhs = default!;
-            if ((~n).Key != default!) {
-                lhs = append(lhs, (~n).Key);
+            ast.Walk(new resolverжVisitor(Ꮡr), n.X);
+            slice<ast.Expr> lhs = default;
+            if (n.Key != nil) {
+                lhs = append(lhs, n.Key);
             }
-            if ((~n).Value != default!) {
+            if ((~n).Value != nil) {
                 lhs = append(lhs, (~n).Value);
             }
             if (len(lhs) > 0) {
-                if ((~n).Tok == token.DEFINE){
+                if (n.Tok == token.DEFINE) {
                     // Note: we can't exactly match the behavior of object resolution
                     // during the parsing pass here, as it uses the position of the RANGE
                     // token for the RHS OpPos. That information is not contained within
@@ -516,8 +515,8 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
                     var @as = Ꮡ(new ast.AssignStmt(
                         Lhs: lhs,
                         Tok: token.DEFINE,
-                        TokPos: (~n).TokPos,
-                        Rhs: new ast.Expr[]{new ast.UnaryExprжExpr(Ꮡ(new ast.UnaryExpr(Op: token.RANGE, X: (~n).X)))}.slice()
+                        TokPos: n.TokPos,
+                        Rhs: slice<ast.Expr>([new ast.UnaryExprжExpr(Ꮡ(new ast.UnaryExpr(Op: token.RANGE, X: n.X)))])
                     ));
                     // TODO(rFindley): this walkLHS reproduced the parser resolution, but
                     // is it necessary? By comparison, for a normal AssignStmt we don't
@@ -528,41 +527,43 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
                     Ꮡr.walkExprs(lhs);
                 }
             }
-            ast.Walk(new resolverжVisitor(Ꮡr), new ast.BlockStmtжNode((~n).Body));
+            ast.Walk(new resolverжVisitor(Ꮡr), new ast.BlockStmtжNode(n.Body));
             break;
         }
         // Declarations
         case ж<ast.GenDecl> n: {
-            var exprᴛ1 = (~n).Tok;
-            if (exprᴛ1 == token.CONST || exprᴛ1 == token.VAR) {
-                foreach (var (i, spec) in (~n).Specs) {
+            switch (n.Tok) {
+            case var ᴛ when ᴛ == token.CONST || ᴛ == token.VAR: {
+                foreach (var (i, spec) in n.Specs) {
                     var specΔ1 = spec._<ж<ast.ValueSpec>>();
                     ast.ObjKind kind = ast.Con;
-                    if ((~n).Tok == token.VAR) {
+                    if (n.Tok == token.VAR) {
                         kind = ast.Var;
                     }
-                    Ꮡr.walkExprs((~specΔ1).Values);
-                    if ((~specΔ1).Type != default!) {
-                        ast.Walk(new resolverжVisitor(Ꮡr), (~specΔ1).Type);
+                    Ꮡr.walkExprs(specΔ1.Values);
+                    if (specΔ1.Type != nil) {
+                        ast.Walk(new resolverжVisitor(Ꮡr), specΔ1.Type);
                     }
-                    r.declare(specΔ1.OrTypedNil(), i, r.topScope, kind, (~specΔ1).Names.ꓸꓸꓸ);
+                    r.declare(specΔ1.OrTypedNil(), i, r.topScope, kind, specΔ1.Names.ꓸꓸꓸ);
                 }
+                break;
             }
-            else if (exprᴛ1 == token.TYPE) {
-                foreach (var (_, spec) in (~n).Specs) {
+            case var ᴛ when ᴛ == token.TYPE: {
+                foreach (var (_, spec) in n.Specs) {
                     var specΔ1 = spec._<ж<ast.TypeSpec>>();
                     // Go spec: The scope of a type identifier declared inside a function begins
                     // at the identifier in the TypeSpec and ends at the end of the innermost
                     // containing block.
-                    r.declare(specΔ1.OrTypedNil(), default!, r.topScope, ast.Typ, (~specΔ1).Name);
-                    if ((~specΔ1).TypeParams != nil) {
+                    r.declare(specΔ1.OrTypedNil(), default, r.topScope, ast.Typ, specΔ1.Name);
+                    if (specΔ1.TypeParams != nil) {
                         r.openScope(specΔ1.Pos());
                         defer(Ꮡr.closeScope, ref ᒐ);
-                        Ꮡr.walkTParams((~specΔ1).TypeParams);
+                        Ꮡr.walkTParams(specΔ1.TypeParams);
                     }
-                    ast.Walk(new resolverжVisitor(Ꮡr), (~specΔ1).Type);
+                    ast.Walk(new resolverжVisitor(Ꮡr), specΔ1.Type);
                 }
-            }
+                break;
+            }}
             break;
         }
         case ж<ast.FuncDecl> n: {
@@ -570,26 +571,26 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
             r.openScope(n.Pos());
             defer(Ꮡr.closeScope, ref ᒐ);
 
-            Ꮡr.walkRecv((~n).Recv);
+            Ꮡr.walkRecv(n.Recv);
 
             // Type parameters are walked normally: they can reference each other, and
             // can be referenced by normal parameters.
-            if ((~(~n).Type).TypeParams != nil) {
-                Ꮡr.walkTParams((~(~n).Type).TypeParams);
+            if (n.Type.TypeParams != nil) {
+                Ꮡr.walkTParams(n.Type.TypeParams);
                 // TODO(rFindley): need to address receiver type parameters.
             }
 
             // Resolve and declare parameters in a specific order to get duplicate
             // declaration errors in the correct location.
-            Ꮡr.resolveList((~(~n).Type).Params);
-            Ꮡr.resolveList((~(~n).Type).Results);
-            r.declareList((~n).Recv, ast.Var);
-            r.declareList((~(~n).Type).Params, ast.Var);
-            r.declareList((~(~n).Type).Results, ast.Var);
+            Ꮡr.resolveList(n.Type.Params);
+            Ꮡr.resolveList(n.Type.Results);
+            r.declareList(n.Recv, ast.Var);
+            r.declareList(n.Type.Params, ast.Var);
+            r.declareList(n.Type.Results, ast.Var);
 
-            Ꮡr.walkBody((~n).Body);
-            if ((~n).Recv == nil && (~(~n).Name).Name != "init"u8) {
-                r.declare(n.OrTypedNil(), default!, r.pkgScope, ast.Fun, (~n).Name);
+            Ꮡr.walkBody(n.Body);
+            if (n.Recv == nil && n.Name.Name != "init"u8) {
+                r.declare(n.OrTypedNil(), default, r.pkgScope, ast.Fun, n.Name);
             }
             break;
         }
@@ -598,9 +599,9 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
             return new resolverжVisitor(Ꮡr);
         }}
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -622,8 +623,8 @@ internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡli
         return;
     }
     foreach (var (_, f) in list.List) {
-        if ((~f).Type != default!) {
-            ast.Walk(new resolverжVisitor(Ꮡr), (~f).Type);
+        if (f.Type != nil) {
+            ast.Walk(new resolverжVisitor(Ꮡr), f.Type);
         }
     }
 }
@@ -635,7 +636,7 @@ internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist,
         return;
     }
     foreach (var (_, f) in list.List) {
-        r.declare(f.OrTypedNil(), default!, r.topScope, kind, (~f).Names.ꓸꓸꓸ);
+        r.declare(f.OrTypedNil(), default, r.topScope, kind, f.Names.ꓸꓸꓸ);
     }
 }
 
@@ -650,24 +651,24 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
     if (Ꮡrecv == nil || len(recv.List) == 0) {
         return; // nothing to do
     }
-    var typ = recv.List[0].Value.Type;
+    var typ = recv.List[0].Type;
     {
         var (ptr, ok) = typ._<ж<ast.StarExpr>>(ᐧ); if (ok) {
-            typ = ptr.Value.X;
+            typ = ptr.X;
         }
     }
 
-    slice<ast.Expr> declareExprs = default!;          // exprs to declare
-    slice<ast.Expr> resolveExprs = default!;          // exprs to resolve
+    slice<ast.Expr> declareExprs = default; // exprs to declare
+    slice<ast.Expr> resolveExprs = default; // exprs to resolve
     switch (typ.type()) {
     case ж<ast.IndexExpr> typΔ1: {
-        declareExprs = new ast.Expr[]{(~typΔ1).Index}.slice();
-        resolveExprs = append(resolveExprsᴷ, resolveExprs, (~typΔ1).X);
+        declareExprs = slice<ast.Expr>([typΔ1.Index]);
+        resolveExprs = append(resolveExprsᴷ, resolveExprs, typΔ1.X);
         break;
     }
     case ж<ast.IndexListExpr> typΔ1: {
-        declareExprs = typΔ1.Value.Indices;
-        resolveExprs = append(resolveExprs, (~typΔ1).X);
+        declareExprs = typΔ1.Indices;
+        resolveExprs = append(resolveExprs, typΔ1.X);
         break;
     }
     default: {
@@ -677,8 +678,8 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
     }}
     foreach (var (_, expr) in declareExprs) {
         {
-            var (id, _) = expr._<ж<ast.Ident>>(ᐧ); if (id != nil){
-                r.declare(expr, default!, r.topScope, ast.Typ, id);
+            var (id, _) = expr._<ж<ast.Ident>>(ᐧ); if (id != nil) {
+                r.declare(expr, default, r.topScope, ast.Typ, id);
             } else {
                 // The receiver type parameter expression is invalid, but try to resolve
                 // it anyway for consistency.
@@ -687,36 +688,36 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
         }
     }
     foreach (var (_, expr) in resolveExprs) {
-        if (expr != default!) {
+        if (expr != nil) {
             ast.Walk(new resolverжVisitor(Ꮡr), expr);
         }
     }
     // The receiver is invalid, but try to resolve it anyway for consistency.
     foreach (var (_, f) in recv.List[1..]) {
-        if ((~f).Type != default!) {
-            ast.Walk(new resolverжVisitor(Ꮡr), (~f).Type);
+        if (f.Type != nil) {
+            ast.Walk(new resolverжVisitor(Ꮡr), f.Type);
         }
     }
 }
 
-internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) {
+internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> list, ast.ObjKind kind) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    if (Ꮡlist == nil) {
+    if (list == nil) {
         return;
     }
-    Ꮡr.resolveList(Ꮡlist);
-    r.declareList(Ꮡlist, kind);
+    Ꮡr.resolveList(list);
+    r.declareList(list, kind);
 }
 
 // walkTParams is like walkFieldList, but declares type parameters eagerly so
 // that they may be resolved in the constraint expressions held in the field
 // Type.
-internal static void walkTParams(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist) {
+internal static void walkTParams(this ж<resolver> Ꮡr, ж<ast.FieldList> list) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    r.declareList(Ꮡlist, ast.Typ);
-    Ꮡr.resolveList(Ꮡlist);
+    r.declareList(list, ast.Typ);
+    Ꮡr.resolveList(list);
 }
 
 internal static void walkBody(this ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody) {

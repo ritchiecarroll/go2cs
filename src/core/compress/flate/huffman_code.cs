@@ -61,11 +61,11 @@ internal static ж<huffmanEncoder> newHuffmanEncoder(nint size) {
 // Generates a HuffmanCode corresponding to the fixed literal table.
 internal static ж<huffmanEncoder> generateFixedLiteralEncoding() {
     var h = newHuffmanEncoder(maxNumLit);
-    var codes = h.Value.codes;
-    uint16 ch = default!;
+    var codes = h.codes;
+    uint16 ch = default;
     for (ch = 0; ch < maxNumLit; ch++) {
-        uint16 bits = default!;
-        uint16 size = default!;
+        uint16 bits = default;
+        uint16 size = default;
         switch (ᐧ) {
         case {} when ch is < 144: {
             // size 8, 000110000  .. 10111111
@@ -98,7 +98,7 @@ internal static ж<huffmanEncoder> generateFixedLiteralEncoding() {
 
 internal static ж<huffmanEncoder> generateFixedOffsetEncoding() {
     var h = newHuffmanEncoder(30);
-    var codes = h.Value.codes;
+    var codes = h.codes;
     foreach (var ch in range(codes)) {
         codes[ch] = new hcode(code: reverseBits((uint16)ch, 5), len: 5);
     }
@@ -110,7 +110,7 @@ internal static ж<huffmanEncoder> fixedLiteralEncoding = generateFixedLiteralEn
 internal static ж<huffmanEncoder> fixedOffsetEncoding = generateFixedOffsetEncoding();
 
 internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) {
-    nint total = default!;
+    nint total = default;
     foreach (var (i, f) in freq) {
         if (f != 0) {
             total += (nint)f * (nint)h.codes[i].len;
@@ -179,48 +179,48 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
     levels[maxBits].needed = 2 * n - 4;
 
     var level = maxBits;
-    while (ᐧ) {
+    for (;;) {
         var l = Ꮡlevels.at<levelInfo>((nint)(level));
-        if ((~l).nextPairFreq == math.MaxInt32 && (~l).nextCharFreq == math.MaxInt32) {
+        if (l.nextPairFreq == math.MaxInt32 && l.nextCharFreq == math.MaxInt32) {
             // We've run out of both leaves and pairs.
             // End all calculations for this level.
             // To make sure we never come back to this level or any lower level,
             // set nextPairFreq impossibly large.
-            l.Value.needed = 0;
+            l.needed = 0;
             levels[level + 1].nextPairFreq = math.MaxInt32;
             level++;
             continue;
         }
 
-        var prevFreq = l.Value.lastFreq;
-        if ((~l).nextCharFreq < (~l).nextPairFreq){
+        var prevFreq = l.lastFreq;
+        if (l.nextCharFreq < l.nextPairFreq) {
             // The next item on this row is a leaf node.
             var nΔ1 = leafCounts[level][level] + 1;
-            l.Value.lastFreq = l.Value.nextCharFreq;
+            l.lastFreq = l.nextCharFreq;
             // Lower leafCounts are the same of the previous node.
             leafCounts[level][level] = nΔ1;
-            l.Value.nextCharFreq = list[nΔ1].freq;
+            l.nextCharFreq = list[nΔ1].freq;
         } else {
             // The next item on this row is a pair from the previous row.
             // nextPairFreq isn't valid until we generate two
             // more values in the level below
-            l.Value.lastFreq = l.Value.nextPairFreq;
+            l.lastFreq = l.nextPairFreq;
             // Take leaf counts from the lower level, except counts[level] remains the same.
             copy(leafCounts[level].slice(0, level), leafCounts[level - 1].slice(0, level));
-            levels[(~l).level - 1].needed = 2;
+            levels[l.level - 1].needed = 2;
         }
 
         {
-            l.Value.needed--; if ((~l).needed == 0){
+            l.needed--; if (l.needed == 0) {
                 // We've done everything we need to do for this level.
                 // Continue calculating one level up. Fill in nextPairFreq
                 // of that level with the sum of the two nodes we've just calculated on
                 // this level.
-                if ((~l).level == maxBits) {
+                if (l.level == maxBits) {
                     // All done!
                     break;
                 }
-                levels[(~l).level + 1].nextPairFreq = prevFreq + (~l).lastFreq;
+                levels[l.level + 1].nextPairFreq = prevFreq + l.lastFreq;
                 level++;
             } else {
                 // If we stole from below, move down temporarily to replenish it.
@@ -256,7 +256,7 @@ internal static void assignEncodingAndSize(this ж<huffmanEncoder> Ꮡh, slice<i
 
     var code = (uint16)0;
     foreach (var (n, bits) in bitCount) {
-        code <<= (int)(1);
+        code <<= 1;
         if (n == 0 || bits == 0) {
             continue;
         }
@@ -282,7 +282,7 @@ internal static void assignEncodingAndSize(this ж<huffmanEncoder> Ꮡh, slice<i
 internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, int32 maxBits) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    if (h.freqcache == default!) {
+    if (h.freqcache == nil) {
         // Allocate a reusable buffer with the longest possible frequency table.
         // Possible lengths are codegenCodeCount, offsetCodeCount and maxNumLit.
         // The largest of these is maxNumLit, so we allocate for that case.
@@ -293,7 +293,7 @@ internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, i
     nint count = 0;
     // Set list to be the set of all non-zero literals and their frequencies
     foreach (var (i, f) in freq) {
-        if (f != 0){
+        if (f != 0) {
             list[count] = new literalNode((uint16)i, f);
             count++;
         } else {

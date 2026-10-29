@@ -51,26 +51,26 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
     var bufᴷ = new stackAppend<byte>();
 
     // Reject paths which include a ? component (see above).
-    if (stringslite.IndexByte(s, (rune)'?') >= 0) {
+    if (stringslite.IndexByte(s, (byte)'?') >= 0) {
         return ("", windows.ERROR_INVALID_NAME);
     }
 
     @string fixedPrefix = fixedPrefixᶜ;
     var buf = slice<byte>(fixedPrefix);
     foreach (var (_, p) in prefix) {
-        buf = append(bufᴷ, buf, (byte)((rune)'\\'));
+        buf = append(bufᴷ, buf, (byte)'\\');
         buf = appendꓸꓸꓸ(buf, slice<byte>(p));
     }
-    buf = append(buf, (byte)((rune)'\\'));
+    buf = append(buf, (byte)'\\');
     buf = appendꓸꓸꓸ(buf, slice<byte>(s));
     foreach (var (_, p) in suffix) {
-        buf = append(buf, (byte)((rune)'\\'));
+        buf = append(buf, (byte)'\\');
         buf = appendꓸꓸꓸ(buf, slice<byte>(p));
     }
     s = (@string)buf;
 
     (s, var err) = syscall.FullPath(s);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
 
@@ -87,18 +87,18 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
         return ("", errPathEscapes);
     }
 
-    return (s, default!);
+    return (s, default);
 }
 
 // openRootNolog is OpenRoot.
 internal static (ж<Root>, error) openRootNolog(@string name) {
     if (name == ""u8) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: syscall.ENOENT))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: syscall.ENOENT))));
     }
     @string path = fixLongPath(name);
     var (fd, err) = syscall.Open(path, (nint)((nint)syscall.O_RDONLY | (nint)syscall.O_CLOEXEC), 0);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: err))));
     }
     return newRoot(fd, name);
 }
@@ -115,9 +115,9 @@ internal static (ж<Root>, error) newRoot(syscallꓸHandle fd, @string name) {
     // which returns errors when you try to use it.
     ref var fi = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡfi);
     var err = syscall.GetFileInformationByHandle(fd, Ꮡfi);
-    if (err == default! && (fi.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) == 0) {
+    if (err == nil && (fi.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) == 0) {
         syscall.CloseHandle(fd);
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: errors.New(notADirectoryˢ)))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: errors.New(notADirectoryˢ)))));
     }
 
     var r = Ꮡ(new Root(Ꮡ(new root(
@@ -125,17 +125,17 @@ internal static (ж<Root>, error) newRoot(syscallꓸHandle fd, @string name) {
         name: name
     ))
     ));
-    runtime.SetFinalizer((~r).root.OrTypedNil(), ((Func<ж<root>, error>)(Close)));
-    return (r, default!);
+    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(Close)));
+    return (r, default);
 }
 
 // openRootInRoot is Root.OpenRoot.
 internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default!, (syscallꓸHandle, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => rootOpenDir(parent, nameΔ1));
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat"u8, Path: name, Err: err))));
+    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default, (syscallꓸHandle, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => rootOpenDir(parent, nameΔ1));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat"u8, Path: name, Err: err))));
     }
     return newRoot(fd, joinPath(r.Name(), name));
 }
@@ -144,24 +144,24 @@ internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
 internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string name, nint flag, FileMode perm) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, doInRootNoHandleTerminalSlash, default!, (syscallꓸHandle, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => {
+    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, doInRootNoHandleTerminalSlash, default, (syscallꓸHandle, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => {
         if (endsInSlash) {
             flag |= (nint)(windows.O_DIRECTORY);
         }
         return openat(parent, nameΔ1, (uint64)flag, perm);
     });
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat"u8, Path: name, Err: err))));
     }
     var nonblocking = (flag & (nint)windows.O_FILE_FLAG_OVERLAPPED) != 0;
-    return (newFile(fd, joinPath(root.Name(), name), kindOpenFile, nonblocking), default!);
+    return (newFile(fd, joinPath(root.Name(), name), kindOpenFile, nonblocking), default);
 }
 
 internal static (syscallꓸHandle, error) openat(syscallꓸHandle dirfd, @string name, uint64 flag, FileMode perm) {
     var (h, err) = windows.Openat(dirfd, name, flag | (uint64)syscall.O_CLOEXEC | (uint64)windows.O_NOFOLLOW_ANY, syscallMode(perm));
     if (AreEqual(err, syscall.ELOOP) || AreEqual(err, syscall.ENOTDIR)) {
         {
-            var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == default!) {
+            var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == nil) {
                 return (syscall.InvalidHandle, ((errSymlink)link));
             }
         }
@@ -173,22 +173,22 @@ internal static (@string, error) readReparseLinkAt(syscallꓸHandle dirfd, @stri
     GoFrame ᒐ = default;
     try {
         var (objectName, err) = windows.NewNTUnicodeString(name);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         var objAttrs = Ꮡ(new windows.OBJECT_ATTRIBUTES(
             ObjectName: objectName
         ));
         if (dirfd != syscall.InvalidHandle) {
-            objAttrs.Value.RootDirectory = dirfd;
+            objAttrs.RootDirectory = dirfd;
         }
-        objAttrs.Value.Length = (uint32)/* unsafe.Sizeof(*objAttrs) */ (uintptr)48;
+        objAttrs.Length = (uint32)/* unsafe.Sizeof(*objAttrs) */ (uintptr)48;
         ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
         err = windows.NtCreateFile(
             Ꮡh,
             windows.FILE_GENERIC_READ,
             objAttrs,
-            Ꮡ(new windows.IO_STATUS_BLOCK(nil)),
+            Ꮡ(new windows.IO_STATUS_BLOCK()),
             nil,
             (uint32)syscall.FILE_ATTRIBUTE_NORMAL,
             (uint32)((UntypedInt)(syscall.FILE_SHARE_READ | syscall.FILE_SHARE_WRITE) | (uint32)syscall.FILE_SHARE_DELETE),
@@ -196,13 +196,13 @@ internal static (@string, error) readReparseLinkAt(syscallꓸHandle dirfd, @stri
             (uint32)((uint32)windows.FILE_SYNCHRONOUS_IO_NONALERT | (uint32)windows.FILE_OPEN_REPARSE_POINT),
             nil,
             0);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
         return readReparseLinkHandle(h);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -229,7 +229,7 @@ internal static (syscallꓸHandle, error) rootOpenDir(syscallꓸHandle parent, @
 }
 
 internal static (FileInfo, error) rootStat(ref Root r, @string name, bool lstat) {
-    nuint flags = default!;
+    nuint flags = default;
     if (lstat) {
         // Follow symlinks in the last path component when the path
         // ends with a path separator.
@@ -238,37 +238,37 @@ internal static (FileInfo, error) rootStat(ref Root r, @string name, bool lstat)
         // but empirically os.Lstat behaves this way.
         flags = doInRootAlwaysResolveTerminalSlash;
     }
-    var (fi, err) = doInRoot(ref r, name, flags, default!, (FileInfo, error) (syscallꓸHandle parent, @string n, bool endsInSlash) => {
+    var (fi, err) = doInRoot(ref r, name, flags, default, (FileInfo, error) (syscallꓸHandle parent, @string n, bool endsInSlash) => {
         GoFrame ᒐ = default;
         try {
             var (fd, errΔ1) = openat(parent, n, windows.O_FILE_FLAG_OPEN_REPARSE_POINT, 0);
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
             defer(syscall.CloseHandle, fd, ref ᒐ);
             (var fiΔ1, errΔ1) = statHandle(name, fd);
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
             if (!lstat && fiΔ1._<FileInfo, ж<fileStat>>().isReparseTagNameSurrogate()) {
                 var (link, errΔ2) = readReparseLinkHandle(fd);
-                if (errΔ2 != default!) {
-                    return (default!, errΔ2);
+                if (errΔ2 != nil) {
+                    return (default, errΔ2);
                 }
-                return (default!, ((errSymlink)link));
+                return (default, ((errSymlink)link));
             }
-            return (fiΔ1, default!);
+            return (fiΔ1, default);
         }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
         finally { ᒐ.Run(); }
     });
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "statat"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "statat"u8, Path: name, Err: err))));
     }
-    return (fi, default!);
+    return (fi, default);
 }
 
-internal static error rootSymlink(ж<Root> Ꮡr, @string oldname, @string newname) {
+internal static error rootSymlink(ж<Root> r, @string oldname, @string newname) {
     if (oldname == ""u8) {
         return syscall.EINVAL;
     }
@@ -277,14 +277,14 @@ internal static error rootSymlink(ж<Root> Ꮡr, @string oldname, @string newnam
     // Do the same.
     if (filepathlite.VolumeNameLen(oldname) > 0 && !filepathlite.IsAbs(oldname)) {
         var (p, errΔ1) = syscall.FullPath(oldname);
-        if (errΔ1 == default!) {
+        if (errΔ1 == nil) {
             oldname = p;
         }
     }
 
     // If oldname can be resolved to a directory in the root, create a directory link.
     // Otherwise, create a file link.
-    windows.SymlinkatFlags flags = default!;
+    windows.SymlinkatFlags flags = default;
     if (filepathlite.VolumeNameLen(oldname) == 0 && !IsPathSeparator(oldname[0])) {
         // oldname is a path relative to the directory containing newname.
         // Prepend newname's directory to it to make a path relative to the root.
@@ -295,8 +295,8 @@ internal static error rootSymlink(ж<Root> Ꮡr, @string oldname, @string newnam
                 destPath = dir + @"\"u8 + oldname;
             }
         }
-        var (fi, errΔ2) = Ꮡr.Stat(destPath);
-        if (errΔ2 == default! && fi.IsDir()) {
+        var (fi, errΔ2) = r.Stat(destPath);
+        if (errΔ2 == nil && fi.IsDir()) {
             flags |= (windows.SymlinkatFlags)(windows.SYMLINKAT_DIRECTORY);
         }
     }
@@ -307,11 +307,11 @@ internal static error rootSymlink(ж<Root> Ꮡr, @string oldname, @string newnam
         flags |= (windows.SymlinkatFlags)(windows.SYMLINKAT_RELATIVE);
     }
 
-    var (_, err) = doInRoot(ref (Ꮡr).DerefOrNull(), newname, 0, default!, (EmptyStruct, error) (syscallꓸHandle parent, @string name, bool endsInSlash) => (new EmptyStruct(), windows.Symlinkat(oldname, parent, name, flags)));
-    if (err != default!) {
+    var (_, err) = doInRoot(ref (r).DerefOrNull(), newname, 0, default, (EmptyStruct, error) (syscallꓸHandle parent, @string name, bool endsInSlash) => (new EmptyStruct(), windows.Symlinkat(oldname, parent, name, flags)));
+    if (err != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("symlinkat"u8, oldname, newname, err)));
     }
-    return default!;
+    return default;
 }
 
 internal static error chmodat(syscallꓸHandle parent, @string name, FileMode mode) {
@@ -335,33 +335,33 @@ internal static error chmodat(syscallꓸHandle parent, @string name, FileMode mo
         //         }
         //     }
         var (h, err) = windows.Openat(parent, name, (uint64)((UntypedInt)(syscall.O_CLOEXEC | windows.O_FILE_FLAG_OPEN_REPARSE_POINT) | (uint64)windows.O_WRITE_ATTRS), 0);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
 
         ref var d = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡd);
         {
-            var errΔ1 = syscall.GetFileInformationByHandle(h, Ꮡd); if (errΔ1 != default!) {
+            var errΔ1 = syscall.GetFileInformationByHandle(h, Ꮡd); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
         var attrs = d.FileAttributes;
 
-        if ((FileMode)(mode & (uint32)syscall.S_IWRITE) != 0){
+        if ((FileMode)(mode & (uint32)syscall.S_IWRITE) != 0) {
             attrs &= unchecked((uint32)~(uint32)(syscall.FILE_ATTRIBUTE_READONLY));
         } else {
             attrs |= (uint32)(syscall.FILE_ATTRIBUTE_READONLY);
         }
         if (attrs == d.FileAttributes) {
-            return default!;
+            return default;
         }
 
         ref var fbi = ref heap(new windows.FILE_BASIC_INFO(), out var Ꮡfbi);
         fbi.FileAttributes = attrs;
         return windows.SetFileInformationByHandle(h, windows.FileBasicInfo, @unsafe.Pointer.FromPinnedBox(Ꮡfbi), (uint32)/* unsafe.Sizeof(fbi) */ (uintptr)40);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -395,19 +395,17 @@ internal static error chtimesat(syscallꓸHandle dirfd, @string name, time.Time 
         var (h, err) = windows.Openat(dirfd, name, (uint64)(8590458880L | (uint64)windows.O_WRITE_ATTRS), 0);
         if (AreEqual(err, syscall.ELOOP) || AreEqual(err, syscall.ENOTDIR)) {
             {
-                var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == default!) {
+                var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == nil) {
                     return ((errSymlink)link);
                 }
             }
         }
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
-        ref var a = ref heap<syscall.Filetime>(out var Ꮡa);
-        a = new syscall.Filetime(nil);
-        ref var w = ref heap<syscall.Filetime>(out var Ꮡw);
-        w = new syscall.Filetime(nil);
+        ref var a = ref heap<syscall.Filetime>(new syscall.Filetime(), out var Ꮡa);
+        ref var w = ref heap<syscall.Filetime>(new syscall.Filetime(), out var Ꮡw);
         if (!atime.IsZero()) {
             a = syscall.NsecToFiletime(atime.UnixNano());
         }
@@ -416,7 +414,7 @@ internal static error chtimesat(syscallꓸHandle dirfd, @string name, time.Time 
         }
         return syscall.SetFileTime(h, nil, Ꮡa, Ꮡw);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -434,7 +432,7 @@ internal static error linkat(syscallꓸHandle oldfd, @string oldname, syscallꓸ
 // If name is not a symlink, return origError.
 internal static error checkSymlink(syscallꓸHandle parent, @string name, error origError) {
     var (link, err) = readlinkat(parent, name);
-    if (err != default!) {
+    if (err != nil) {
         return origError;
     }
     return ((errSymlink)link);
@@ -444,13 +442,13 @@ internal static (@string, error) readlinkat(syscallꓸHandle dirfd, @string name
     GoFrame ᒐ = default;
     try {
         var (fd, err) = openat(dirfd, name, windows.O_FILE_FLAG_OPEN_REPARSE_POINT, 0);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         defer(syscall.CloseHandle, fd, ref ᒐ);
         return readReparseLinkHandle(fd);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -458,17 +456,17 @@ internal static (FileInfo, error) lstatat(syscallꓸHandle parent, @string name)
     GoFrame ᒐ = default;
     try {
         var (fd, err) = openat(parent, name, windows.O_FILE_FLAG_OPEN_REPARSE_POINT, 0);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         defer(syscall.CloseHandle, fd, ref ᒐ);
         (var fi, err) = statHandle(name, fd);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        return (fi, default!);
+        return (fi, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -483,7 +481,7 @@ internal static bool isLink(FileInfo fi) {
 // between the two.
 internal static bool isDirectoryLink(FileInfo fi) {
     var (fs, ok) = fi._<ж<fileStat>>(ᐧ);
-    return ok && ((~fs).FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0;
+    return ok && (fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
 } // end os_package

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,7 +56,7 @@ using static go.crypto.@internal.fips140_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/cast.go", "cast.cs", "AA0iAAkKAAQeAA0CgpSCpoKClIKClIIABiAADAKClIKmgoKUgoKUgg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/fips140.go", "fips140.cs", "ABEigoKUpILGAAgK2oIABxCC3KqmgqbWgtrG")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/fips140.go", "fips140.cs", "ABEigoKktILmAAkK2oIABxCC3KqmgqbWgtrG")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/indicator.go", "indicator.cs", "AAkoAA4GAAgSkgACENIAAhTygryi")]
 // </GoSourcePositionMaps>
 

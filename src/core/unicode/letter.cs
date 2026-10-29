@@ -8,10 +8,10 @@ namespace go;
 
 partial class unicode_package {
 
-public static UntypedInt MaxRune => /* '\U0010FFFF' */ 1114111; // Maximum valid Unicode code point.
+public static UntypedInt MaxRune => /* '\U0010FFFF' */ 1114111;   // Maximum valid Unicode code point.
 public static UntypedInt ReplacementChar => /* '\uFFFD' */ 65533; // Represents invalid code points.
-public static UntypedInt MaxASCII => /* '\u007F' */ 127; // maximum ASCII value.
-public static UntypedInt MaxLatin1 => /* '\u00FF' */ 255; // maximum Latin-1 value.
+public static UntypedInt MaxASCII => /* '\u007F' */ 127;          // maximum ASCII value.
+public static UntypedInt MaxLatin1 => /* '\u00FF' */ 255;         // maximum Latin-1 value.
 
 // RangeTable defines a set of Unicode code points by listing the ranges of
 // code points within the set. The ranges are listed in two slices
@@ -89,11 +89,11 @@ internal static bool is16(slice<Range16> ranges, uint16 r) {
     if (len(ranges) <= linearMax || r <= MaxLatin1) {
         foreach (var i in range(ranges)) {
             var range_ = Ꮡ(ranges, i);
-            if (r < (~range_).Lo) {
+            if (r < range_.Lo) {
                 return false;
             }
-            if (r <= (~range_).Hi) {
-                return (~range_).Stride == 1 || (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
+            if (r <= range_.Hi) {
+                return range_.Stride == 1 || (uint16)((uint16)(r - range_.Lo) % range_.Stride) == 0;
             }
         }
         return false;
@@ -105,10 +105,10 @@ internal static bool is16(slice<Range16> ranges, uint16 r) {
     while (lo < hi) {
         nint m = (nint)((nuint)(lo + hi) >> 1);
         var range_ = Ꮡ(ranges, m);
-        if ((~range_).Lo <= r && r <= (~range_).Hi) {
-            return (~range_).Stride == 1 || (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
+        if (range_.Lo <= r && r <= range_.Hi) {
+            return range_.Stride == 1 || (uint16)((uint16)(r - range_.Lo) % range_.Stride) == 0;
         }
-        if (r < (~range_).Lo){
+        if (r < range_.Lo) {
             hi = m;
         } else {
             lo = m + 1;
@@ -122,11 +122,11 @@ internal static bool is32(slice<Range32> ranges, uint32 r) {
     if (len(ranges) <= linearMax) {
         foreach (var i in range(ranges)) {
             var range_ = Ꮡ(ranges, i);
-            if (r < (~range_).Lo) {
+            if (r < range_.Lo) {
                 return false;
             }
-            if (r <= (~range_).Hi) {
-                return (~range_).Stride == 1 || (r - (~range_).Lo) % (~range_).Stride == 0;
+            if (r <= range_.Hi) {
+                return range_.Stride == 1 || (r - range_.Lo) % range_.Stride == 0;
             }
         }
         return false;
@@ -141,7 +141,7 @@ internal static bool is32(slice<Range32> ranges, uint32 r) {
         if (range_.Lo <= r && r <= range_.Hi) {
             return range_.Stride == 1 || (r - range_.Lo) % range_.Stride == 0;
         }
-        if (r < range_.Lo){
+        if (r < range_.Lo) {
             hi = m;
         } else {
             lo = m + 1;
@@ -216,16 +216,16 @@ internal static ж<CaseRange> lookupCaseRange(rune r, slice<CaseRange> caseRange
     while (lo < hi) {
         nint m = (nint)((nuint)(lo + hi) >> 1);
         var cr = Ꮡ(caseRange, m);
-        if ((rune)(~cr).Lo <= r && r <= (rune)(~cr).Hi) {
+        if ((rune)cr.Lo <= r && r <= (rune)cr.Hi) {
             return cr;
         }
-        if (r < (rune)(~cr).Lo){
+        if (r < (rune)cr.Lo) {
             hi = m;
         } else {
             lo = m + 1;
         }
     }
-    return default!;
+    return default;
 }
 
 // convertCase converts r to _case using CaseRange cr.
@@ -270,7 +270,7 @@ public static rune To(nint _case, rune r) {
 // ToUpper maps the rune to upper case.
 public static rune ToUpper(rune r) {
     if (r <= MaxASCII) {
-        if ((rune)'a' <= r && r <= (rune)'z') {
+        if ('a' <= r && r <= 'z') {
             r -= (rune)'a' - (rune)'A';
         }
         return r;
@@ -281,7 +281,7 @@ public static rune ToUpper(rune r) {
 // ToLower maps the rune to lower case.
 public static rune ToLower(rune r) {
     if (r <= MaxASCII) {
-        if ((rune)'A' <= r && r <= (rune)'Z') {
+        if ('A' <= r && r <= 'Z') {
             r += (rune)'a' - (rune)'A';
         }
         return r;
@@ -292,7 +292,7 @@ public static rune ToLower(rune r) {
 // ToTitle maps the rune to title case.
 public static rune ToTitle(rune r) {
     if (r <= MaxASCII) {
-        if ((rune)'a' <= r && r <= (rune)'z') { // title case is upper case for ASCII
+        if ('a' <= r && r <= 'z') { // title case is upper case for ASCII
             r -= (rune)'a' - (rune)'A';
         }
         return r;
@@ -368,7 +368,7 @@ public static rune SimpleFold(rune r) {
     nint hi = len(caseOrbit);
     while (lo < hi) {
         nint m = (nint)((nuint)(lo + hi) >> 1);
-        if ((rune)caseOrbit[m].From < r){
+        if ((rune)caseOrbit[m].From < r) {
             lo = m + 1;
         } else {
             hi = m;

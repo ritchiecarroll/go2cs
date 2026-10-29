@@ -19,12 +19,12 @@ partial class scan_package {
 //
 // ScanSpanPacked is supposed to identify pointers by first filtering words by objMarks, where each bit of the mask
 // represents gc.SizeClassToSize[sizeClass] bytes of memory, and then filtering again by the bits in ptrMask.
-public static int32 /*count*/ ScanSpanPackedReference(@unsafe.Pointer mem, ж<uintptr> Ꮡbufp, ж<gc.ObjMask> ᏑobjMarks, uintptr sizeClass, ж<gc.PtrMask> ᏑptrMask) {
-    int32 count = default!;
+public static int32 /*count*/ ScanSpanPackedReference(@unsafe.Pointer mem, ж<uintptr> bufp, ж<gc.ObjMask> ᏑobjMarks, uintptr sizeClass, ж<gc.PtrMask> ᏑptrMask) {
+    int32 count = default;
     ref var objMarks = ref ᏑobjMarks.DerefOrNull();
     ref var ptrMask = ref ᏑptrMask.DerefOrNull();
 
-    var buf = @unsafe.Slice(Ꮡbufp, gc.PageWords);
+    var buf = @unsafe.Slice(bufp, gc.PageWords);
     var expandBy = (uintptr)gc.SizeClassToSize[sizeClass] / (uintptr)goarch.PtrSize;
     foreach (var word in range(gc.PageWords)) {
         var objI = (uintptr)word / expandBy;

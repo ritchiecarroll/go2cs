@@ -22,7 +22,7 @@ internal static (fieldElement, error) fieldCheckReduced(uint16 a) {
     if (a >= q) {
         return (0, errors.New(unreducedFieldElementˢ));
     }
-    return ((fieldElement)a, default!);
+    return ((fieldElement)a, default);
 }
 
 // fieldReduceOnce reduces a value a < 2q.
@@ -44,7 +44,7 @@ internal static fieldElement fieldSub(fieldElement a, fieldElement b) {
 }
 
 internal static UntypedInt barrettMultiplier => 5039; // 2¹² * 2¹² / q
-internal static UntypedInt barrettShift => 24; // log₂(2¹² * 2¹²)
+internal static UntypedInt barrettShift => 24;        // log₂(2¹² * 2¹²)
 
 // fieldReduce reduces a value a < 2q² using Barrett reduction, to avoid
 // potentially variable-time division.
@@ -54,22 +54,22 @@ internal static fieldElement fieldReduce(uint32 a) {
 }
 
 internal static fieldElement fieldMul(fieldElement a, fieldElement b) {
-    var x = (uint32)(uint16)a * (uint32)(uint16)b;
+    var x = (uint32)a * (uint32)b;
     return fieldReduce(x);
 }
 
 // fieldMulSub returns a * (b - c). This operation is fused to save a
 // fieldReduceOnce after the subtraction.
 internal static fieldElement fieldMulSub(fieldElement a, fieldElement b, fieldElement c) {
-    var x = (uint32)(uint16)a * (uint32)(uint16)(b - c + (uint16)q);
+    var x = (uint32)a * (uint32)(b - c + (uint16)q);
     return fieldReduce(x);
 }
 
 // fieldAddMul returns a * b + c * d. This operation is fused to save a
 // fieldReduceOnce and a fieldReduce.
 internal static fieldElement fieldAddMul(fieldElement a, fieldElement b, fieldElement c, fieldElement d) {
-    var x = (uint32)(uint16)a * (uint32)(uint16)b;
-    x += (uint32)(uint16)c * (uint32)(uint16)d;
+    var x = (uint32)a * (uint32)b;
+    x += (uint32)c * (uint32)d;
     return fieldReduce(x);
 }
 
@@ -81,7 +81,7 @@ internal static uint16 compress(fieldElement x, uint8 d) {
 
     // Barrett reduction produces a quotient and a remainder in the range [0, 2q),
     // such that dividend = quotient * q + remainder.
-    var dividend = ((uint32)(uint16)x).Lsh((uint64)(d)); // x * 2ᵈ
+    var dividend = ((uint32)x).Lsh((uint64)(d)); // x * 2ᵈ
     var quotient = (uint32)((uint64)dividend * (uint64)barrettMultiplier >> (int)(barrettShift));
     var remainder = dividend - quotient * (uint32)q;
 
@@ -160,7 +160,7 @@ internal static slice<byte> polyByteEncode<T>(slice<byte> b, T f)
 {
     var (@out, B) = sliceForAppend(b, encodingSize12);
     for (nint i = 0; i < n; i += 2) {
-        var x = (uint32)(uint16)f[i] | (uint32)(uint16)f[i + 1] << 12;
+        var x = (uint32)f[i] | (uint32)f[i + 1] << 12;
         B[0] = (uint8)x;
         B[1] = (uint8)(x >> 8);
         B[2] = (uint8)(x >> 16);
@@ -188,20 +188,20 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
     for (nint i = 0; i < n; i += 2) {
         var d = (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16;
         const uint32 mask12 = 0b1111_1111_1111;
-        error err = default!;
+        error err = default;
         {
-            (f[i], err) = fieldCheckReduced((uint16)((uint32)(d & mask12))); if (err != default!) {
+            (f[i], err) = fieldCheckReduced((uint16)((uint32)(d & mask12))); if (err != nil) {
                 return (new T{}, errors.New(mlkemInvalidPolynomialˢ));
             }
         }
         {
-            (f[i + 1], err) = fieldCheckReduced((uint16)(d >> 12)); if (err != default!) {
+            (f[i + 1], err) = fieldCheckReduced((uint16)(d >> 12)); if (err != nil) {
                 return (new T{}, errors.New(mlkemInvalidPolynomialˢ));
             }
         }
         b = b[3..];
     }
-    return (f, default!);
+    return (f, default);
 }
 
 // sliceForAppend takes a slice and a requested number of bytes. It returns a
@@ -209,11 +209,11 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
 // second slice that aliases into it and contains only the extra bytes. If the
 // original slice has sufficient capacity then no allocation is performed.
 internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> @in, nint n) {
-    slice<byte> head = default!;
-    slice<byte> tail = default!;
+    slice<byte> head = default;
+    slice<byte> tail = default;
 
     {
-        nint total = len(@in) + n; if (cap(@in) >= total){
+        nint total = len(@in) + n; if (cap(@in) >= total) {
             head = @in.slice(0, total);
         } else {
             head = new slice<byte>(total);
@@ -246,10 +246,10 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
 // It implements ByteDecode₁, according to FIPS 203, Algorithm 6,
 // followed by Decompress₁, according to FIPS 203, Definition 4.8.
 internal static ringElement ringDecodeAndDecompress1(ref array<byte> b) {
-    ringElement f = default!;
+    ringElement f = default;
     foreach (var i in range(f)) {
         var b_i = (byte)(b[i / 8].Rsh((int64)(i % 8)) & 1);
-        UntypedInt halfQ = /* (q + 1) / 2 */ 1665; // ⌈q/2⌋, rounded up per FIPS 203, Section 2.3
+        UntypedInt halfQ = /* (q + 1) / 2 */ 1665;                          // ⌈q/2⌋, rounded up per FIPS 203, Section 2.3
         f[i] = (fieldElement)(((fieldElement)(uint16)b_i) * (uint16)halfQ); // 0 decompresses to 0, and 1 to ⌈q/2⌋
     }
     return f.Clone();
@@ -276,7 +276,7 @@ internal static slice<byte> ringCompressAndEncode4(slice<byte> s, ringElement f)
 // It implements ByteDecode₄, according to FIPS 203, Algorithm 6,
 // followed by Decompress₄, according to FIPS 203, Definition 4.8.
 internal static ringElement ringDecodeAndDecompress4(ref array<byte> b) {
-    ringElement f = default!;
+    ringElement f = default;
     for (nint i = 0; i < n; i += 2) {
         f[i] = decompress((uint16)((byte)(b[i / 2] & 0b1111)), 4);
         f[i + 1] = decompress((uint16)(b[i / 2] >> 4), 4);
@@ -294,7 +294,7 @@ internal static slice<byte> ringCompressAndEncode10(slice<byte> s, ringElement f
 
     (s, var b) = sliceForAppend(s, encodingSize10);
     for (nint i = 0; i < n; i += 4) {
-        uint64 x = default!;
+        uint64 x = default;
         x |= (uint64)((uint64)compress(f[i], 10));
         x |= (uint64)(((uint64)compress(f[i + 1], 10) << 10));
         x |= (uint64)(((uint64)compress(f[i + 2], 10) << 20));
@@ -318,7 +318,7 @@ internal static ringElement ringDecodeAndDecompress10(/*[320]*/ ж<array<byte>> 
     ref var bb = ref Ꮡbb.DerefOrNull();
 
     var b = bb[..];
-    ringElement f = default!;
+    ringElement f = default;
     for (nint i = 0; i < n; i += 4) {
         var x = (uint64)b[0] | (uint64)b[1] << 8 | (uint64)b[2] << 16 | (uint64)b[3] << 24 | (uint64)b[4] << 32;
         b = b[5..];
@@ -339,11 +339,11 @@ internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, 
     f = f.Clone();
     var sᴷ = new stackAppend<byte>(moves: true);
 
-    byte b = default!;
-    uint8 bIdx = default!;
+    byte b = default;
+    uint8 bIdx = default;
     for (nint i = 0; i < n; i++) {
         var c = compress(f[i], d);
-        uint8 cIdx = default!;
+        uint8 cIdx = default;
         while (cIdx < d) {
             b |= (byte)(((byte)(c.Rsh((uint64)(cIdx)))).Lsh((uint64)(bIdx)));
             var bits = min((uint8)(8 - bIdx), (uint8)(d - cIdx));
@@ -369,11 +369,11 @@ internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, 
 // It implements ByteDecode, according to FIPS 203, Algorithm 6,
 // followed by Decompress, according to FIPS 203, Definition 4.8.
 internal static ringElement ringDecodeAndDecompress(slice<byte> b, uint8 d) {
-    ringElement f = default!;
-    uint8 bIdx = default!;
+    ringElement f = default;
+    uint8 bIdx = default;
     for (nint i = 0; i < n; i++) {
-        uint16 c = default!;
-        uint8 cIdx = default!;
+        uint16 c = default;
+        uint8 cIdx = default;
         while (cIdx < d) {
             c |= (uint16)(((uint16)(b[0].Rsh((uint64)(bIdx)))).Lsh((uint64)(cIdx)));
             c &= (uint16)((((uint16)1).Lsh((uint64)(d))) - 1);
@@ -443,14 +443,14 @@ internal static ringElement ringDecodeAndDecompress11(/*[352]*/ ж<array<byte>> 
 internal static ringElement samplePolyCBD(slice<byte> s, byte b) {
     var prf = sha3.NewShake256();
     prf.Write(s);
-    prf.Write(new byte[]{b}.slice());
+    prf.Write(slice<byte>([b]));
     var B = new slice<byte>(64 * 2); // η = 2
     prf.Read(B);
 
     // SamplePolyCBD simply draws four (2η) bits for each coefficient, and adds
     // the first two and subtracts the last two.
 
-    ringElement f = default!;
+    ringElement f = default;
     for (nint i = 0; i < n; i += 2) {
         var bΔ1 = B[i / 2];
         var (b_7, b_6, b_5, b_4) = ((byte)((bΔ1 >> 7)), (byte)(bΔ1 >> 6 & 1), (byte)(bΔ1 >> 5 & 1), (byte)(bΔ1 >> 4 & 1));
@@ -477,7 +477,7 @@ internal static nttElement nttMul(nttElement f, nttElement g) {
     f = f.Clone();
     g = g.Clone();
 
-    nttElement h = default!;
+    nttElement h = default;
     // We use i += 2 for bounds check elimination. See https://go.dev/issue/66826.
     for (nint i = 0; i < 256; i += 2) {
         var (a0, a1) = (f[i], f[i + 1]);
@@ -547,7 +547,7 @@ internal static ringElement inverseNTT(nttElement f) {
 internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
     var B = sha3.NewShake128();
     B.Write(rho);
-    B.Write(new byte[]{ii, jj}.slice());
+    B.Write(slice<byte>([ii, jj]));
 
     // SampleNTT essentially draws 12 bits at a time from r, interprets them in
     // little-endian, and rejects values higher than q, until it drew 256
@@ -573,11 +573,11 @@ internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
     // bits (dropped with a mask) and the leftmost bits are the least
     // significant bits (dropped with a right shift).
 
-    nttElement a = default!;
-    nint j = default!;              // index into a
-    array<byte> buf = new(24);               // buffered reads from B
-    nint off = len(buf); // index into buf, starts in a "buffer fully consumed" state
-    while (ᐧ) {
+    nttElement a = default;
+    nint j = default;          // index into a
+    array<byte> buf = new(24); // buffered reads from B
+    nint off = len(buf);       // index into buf, starts in a "buffer fully consumed" state
+    for (;;) {
         if (off >= len(buf)) {
             B.Read(buf[..]);
             off = 0;

@@ -64,16 +64,13 @@ internal static readonly @string badPruneˢ = "bad prune"u8;
 // either don't overlap at all, only overlap on one side, or are equal.
 // If b is strictly contained in a, thus forcing a split, it will throw.
 internal static addrRange subtract(this addrRange a, addrRange b) {
-    if (b.@base.lessEqual(a.@base) && a.limit.lessEqual(b.limit)){
-        return new addrRange(nil);
-    } else 
-    if (a.@base.lessThan(b.@base) && b.limit.lessThan(a.limit)){
+    if (b.@base.lessEqual(a.@base) && a.limit.lessEqual(b.limit)) {
+        return new addrRange();
+    } else if (a.@base.lessThan(b.@base) && b.limit.lessThan(a.limit)) {
         @throw(badPruneˢ);
-    } else 
-    if (b.limit.lessThan(a.limit) && a.@base.lessThan(b.limit)){
+    } else if (b.limit.lessThan(a.limit) && a.@base.lessThan(b.limit)) {
         a.@base = b.limit;
-    } else 
-    if (a.@base.lessThan(b.@base) && b.@base.lessThan(a.limit)) {
+    } else if (a.@base.lessThan(b.@base) && b.@base.lessThan(a.limit)) {
         a.limit = b.@base;
     }
     return a;
@@ -107,7 +104,7 @@ internal static (uintptr, bool) takeFromBack(this ref addrRange a, uintptr len, 
 // to addr and returns the new range.
 internal static addrRange removeGreaterEqual(this addrRange a, uintptr addr) {
     if ((new offAddr(addr)).lessEqual(a.@base)) {
-        return new addrRange(nil);
+        return new addrRange();
     }
     if (a.limit.lessEqual(new offAddr(addr))) {
         return a;
@@ -184,7 +181,7 @@ partial struct atomicOffAddr {
 // Clear attempts to store minOffAddr in atomicOffAddr. It may fail
 // if a marked value is placed in the box in the meanwhile.
 internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
-    while (ᐧ) {
+    for (;;) {
         var old = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
         if (old < 0) {
             return;
@@ -199,7 +196,7 @@ internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
 // offset address space if the current value is not marked.
 internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
     var @new = (int64)(addr - (uintptr)arenaBaseOffset);
-    while (ᐧ) {
+    for (;;) {
         var old = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
         if (old < @new) {
             return;
@@ -276,7 +273,7 @@ internal static nint findSucc(this ref addrRanges a, uintptr addr) {
             // its successor is the next index.
             return i + 1;
         }
-        if (@base.lessThan(a.ranges[i].@base)){
+        if (@base.lessThan(a.ranges[i].@base)) {
             // In this case i might actually be
             // the successor, but we can't be sure
             // until we check the ones before it.
@@ -336,7 +333,7 @@ internal static bool contains(this ref addrRanges a, uintptr addr) {
 // empty, it returns an empty range.
 internal static addrRange removeLast(this ref addrRanges a, uintptr nBytes) {
     if (len(a.ranges) == 0) {
-        return new addrRange(nil);
+        return new addrRange();
     }
     var r = a.ranges[len(a.ranges) - 1];
     var size = r.size();
@@ -369,7 +366,7 @@ internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
         var r = a.ranges[pivot - 1]; if (r.contains(addr)) {
             removed += r.size();
             r = r.removeGreaterEqual(addr);
-            if (r.size() == 0){
+            if (r.size() == 0) {
                 pivot--;
             } else {
                 removed -= r.size();

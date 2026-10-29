@@ -56,7 +56,7 @@ using strings = strings_package;
 using sync = sync_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @unsafe = unsafe_package;
 using go.encoding;
 using go.unicode;
@@ -211,14 +211,14 @@ public static (slice<byte>, error) Marshal(any v) {
         defer(ᏑencodeStatePool.Put, e.OrTypedNil(), ref ᒐ);
 
         var err = e.marshal(v, new encOpts(escapeHTML: true));
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        var buf = appendꓸꓸꓸ(slice<byte>(default!), e.of(encodeState.ᏑBuffer).Bytes());
+        var buf = appendꓸꓸꓸ(slice<byte>(default), e.of(encodeState.ᏑBuffer).Bytes());
 
-        return (buf, default!);
+        return (buf, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -227,15 +227,15 @@ public static (slice<byte>, error) Marshal(any v) {
 // followed by one or more copies of indent according to the indentation nesting.
 public static (slice<byte>, error) MarshalIndent(any v, @string prefix, @string indent) {
     var (b, err) = Marshal(v);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var b2 = new slice<byte>(0, (nint)indentGrowthFactor * len(b));
     (b2, err) = appendIndent(b2, b, prefix, indent);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (b2, default!);
+    return (b2, default);
 }
 
 // Marshaler is the interface implemented by types that
@@ -324,13 +324,13 @@ internal static ref sync.Pool encodeStatePool => ref ((StaticBox<sync.Pool>)Ꮡe
 
 internal static ж<encodeState> newEncodeState() {
     {
-        var v = ᏑencodeStatePool.Get(); if (v != default!) {
+        var v = ᏑencodeStatePool.Get(); if (v != nil) {
             var e = v._<ж<encodeState>>();
             e.of(encodeState.ᏑBuffer).Reset();
-            if (len((~e).ptrSeen) > 0) {
+            if (len(e.ptrSeen) > 0) {
                 throw panic("ptrEncoder.encode should have emptied ptrSeen via defers");
             }
-            e.Value.ptrLevel = 0;
+            e.ptrLevel = 0;
             return e;
         }
     }
@@ -345,15 +345,15 @@ partial struct jsonError {
 }
 
 internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) {
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     {
                         ref var je = ref heap<jsonError>(out var Ꮡje);
-                        (je, var ok) = r._<jsonError>(ᐧ); if (ok){
+                        (je, var ok) = r._<jsonError>(ᐧ); if (ok) {
                             err = je.error;
                         } else {
                             throw panic(r);
@@ -363,7 +363,7 @@ internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts 
             }
         }, ref ᒐ);
         Ꮡe.reflectValue(reflect.ValueOf(v), opts);
-        err = default!;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -376,13 +376,13 @@ internal static void error(this ref encodeState e, error err) {
 }
 
 internal static bool isEmptyValue(reflectꓸValue v) {
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.Map || exprᴛ1 == reflect.ΔSlice || exprᴛ1 == reflect.ΔString) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Map || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔString: {
         return v.Len() == 0;
     }
-    if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.ΔInterface || exprᴛ1 == reflect.ΔPointer) {
+    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔInterface || ᴛ == reflect.ΔPointer: {
         return v.IsZero();
-    }
+    }}
     return false;
 }
 
@@ -459,50 +459,50 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
         return textMarshalerEncoder;
     }
 
-    var exprᴛ1 = t.Kind();
-    if (exprᴛ1 == reflect.ΔBool) {
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
         return boolEncoder;
     }
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return intEncoder;
     }
-    if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return uintEncoder;
     }
-    if (exprᴛ1 == reflect.Float32) {
+    case var ᴛ when ᴛ == reflect.Float32: {
         return float32Encoder;
     }
-    if (exprᴛ1 == reflect.Float64) {
+    case var ᴛ when ᴛ == reflect.Float64: {
         return float64Encoder;
     }
-    if (exprᴛ1 == reflect.ΔString) {
+    case var ᴛ when ᴛ == reflect.ΔString: {
         return stringEncoder;
     }
-    if (exprᴛ1 == reflect.ΔInterface) {
+    case var ᴛ when ᴛ == reflect.ΔInterface: {
         return interfaceEncoder;
     }
-    if (exprᴛ1 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         return newStructEncoder(t);
     }
-    if (exprᴛ1 == reflect.Map) {
+    case var ᴛ when ᴛ == reflect.Map: {
         return newMapEncoder(t);
     }
-    if (exprᴛ1 == reflect.ΔSlice) {
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
         return newSliceEncoder(t);
     }
-    if (exprᴛ1 == reflect.Array) {
+    case var ᴛ when ᴛ == reflect.Array: {
         return newArrayEncoder(t);
     }
-    if (exprᴛ1 == reflect.ΔPointer) {
+    case var ᴛ when ᴛ == reflect.ΔPointer: {
         return newPtrEncoder(t);
     }
-    { /* default: */
+    default: {
         return unsupportedTypeEncoder;
-    }
+    }}
 }
 
-internal static void invalidValueEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
-    Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
+internal static void invalidValueEncoder(ж<encodeState> e, reflectꓸValue v, encOpts _) {
+    e.of(encodeState.ᏑBuffer).WriteString(nullˢ);
 }
 
 internal static void marshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
@@ -518,13 +518,13 @@ internal static void marshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, e
         return;
     }
     var (b, err) = m.MarshalJSON();
-    if (err == default!) {
+    if (err == nil) {
         Ꮡe.of(encodeState.ᏑBuffer).Grow(len(b));
         var @out = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
         (@out, err) = appendCompact(@out, b, opts.escapeHTML);
         e.Buffer.Write(@out);
     }
-    if (err != default!) {
+    if (err != nil) {
         e.error(new MarshalerErrorжerror(Ꮡ(new MarshalerError(v.Type(), err, "MarshalJSON"u8))));
     }
 }
@@ -539,13 +539,13 @@ internal static void addrMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue 
     }
     var (m, _) = reflect.TypeAssert<Marshaler>(va);
     var (b, err) = m.MarshalJSON();
-    if (err == default!) {
+    if (err == nil) {
         Ꮡe.of(encodeState.ᏑBuffer).Grow(len(b));
         var @out = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
         (@out, err) = appendCompact(@out, b, opts.escapeHTML);
         e.Buffer.Write(@out);
     }
-    if (err != default!) {
+    if (err != nil) {
         e.error(new MarshalerErrorжerror(Ꮡ(new MarshalerError(v.Type(), err, "MarshalJSON"u8))));
     }
 }
@@ -563,7 +563,7 @@ internal static void textMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue 
         return;
     }
     var (b, err) = m.MarshalText();
-    if (err != default!) {
+    if (err != nil) {
         e.error(new MarshalerErrorжerror(Ꮡ(new MarshalerError(v.Type(), err, "MarshalText"u8))));
     }
     Ꮡe.of(encodeState.ᏑBuffer).Write(appendString(Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer(), b, opts.escapeHTML));
@@ -579,44 +579,44 @@ internal static void addrTextMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸVa
     }
     var (m, _) = reflect.TypeAssert<encoding.TextMarshaler>(va);
     var (b, err) = m.MarshalText();
-    if (err != default!) {
+    if (err != nil) {
         e.error(new MarshalerErrorжerror(Ꮡ(new MarshalerError(v.Type(), err, "MarshalText"u8))));
     }
     Ꮡe.of(encodeState.ᏑBuffer).Write(appendString(Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer(), b, opts.escapeHTML));
 }
 
-internal static void boolEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
+internal static void boolEncoder(ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+    var b = e.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendBool(b, v.Bool());
     b = mayAppendQuote(b, opts.quoted);
-    Ꮡe.of(encodeState.ᏑBuffer).Write(b);
+    e.of(encodeState.ᏑBuffer).Write(b);
 }
 
-internal static void intEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
+internal static void intEncoder(ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+    var b = e.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendInt(b, v.Int(), 10);
     b = mayAppendQuote(b, opts.quoted);
-    Ꮡe.of(encodeState.ᏑBuffer).Write(b);
+    e.of(encodeState.ᏑBuffer).Write(b);
 }
 
-internal static void uintEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
+internal static void uintEncoder(ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+    var b = e.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendUint(b, v.Uint(), 10);
     b = mayAppendQuote(b, opts.quoted);
-    Ꮡe.of(encodeState.ᏑBuffer).Write(b);
+    e.of(encodeState.ᏑBuffer).Write(b);
 }
 
-partial struct floatEncoder /*num:nint*/;
+partial struct floatEncoder /*num:nint*/; // number of bits
 
 internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     var f = v.Float();
     if (math.IsInf(f, 0) || math.IsNaN(f)) {
-        e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, strconv.FormatFloat(f, (rune)'g', -1, (nint)bits)))));
+        e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, strconv.FormatFloat(f, (byte)'g', -1, (nint)bits)))));
     }
 
     // Convert as if by ES6 number to string conversion.
@@ -627,18 +627,18 @@ internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflec
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     var abs = math.Abs(f);
-    var fmt = (byte)(rune)'f';
+    var fmt = (byte)'f';
     // Note: Must use float32 comparisons for underlying float32 value to get precise cutoffs right.
     if (abs != 0D) {
         if (bits == 64 && (abs < 1e-6D || abs >= 1e21D) || bits == 32 && ((float32)abs < 1e-6F || (float32)abs >= 1e21F)) {
-            fmt = (rune)'e';
+            fmt = (byte)'e';
         }
     }
     b = strconv.AppendFloat(b, f, fmt, -1, (nint)bits);
-    if (fmt == (rune)'e') {
+    if (fmt == 'e') {
         // clean up e-09 to e-9
         nint n = len(b);
-        if (n >= 4 && b[n - 4] == (rune)'e' && b[n - 3] == (rune)'-' && b[n - 2] == (rune)'0') {
+        if (n >= 4 && b[n - 4] == 'e' && b[n - 3] == '-' && b[n - 2] == '0') {
             b[n - 2] = b[n - 1];
             b = b.slice(0, n - 1);
         }
@@ -670,8 +670,8 @@ internal static void stringEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encO
         Ꮡe.of(encodeState.ᏑBuffer).Write(b);
         return;
     }
-    if (opts.quoted){
-        var b = appendString(default!, v.String(), opts.escapeHTML);
+    if (opts.quoted) {
+        var b = appendString(default, v.String(), opts.escapeHTML);
         Ꮡe.of(encodeState.ᏑBuffer).Write(appendString(Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer(), b, false)); // no need to escape again since it is already escaped
     } else {
         Ꮡe.of(encodeState.ᏑBuffer).Write(appendString(Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer(), v.String(), opts.escapeHTML));
@@ -688,7 +688,7 @@ internal static bool isValidNumber(@string s) {
     }
 
     // Optional -
-    if (s[0] == (rune)'-') {
+    if (s[0] == '-') {
         s = s[1..];
         if (s == ""u8) {
             return false;
@@ -700,37 +700,37 @@ internal static bool isValidNumber(@string s) {
     default: {
         return false;
     }
-    case {} when s[0] is (rune)'0': {
+    case {} when s[0] is (byte)'0': {
         s = s[1..];
         break;
     }
-    case {} when (rune)'1' <= s[0] && s[0] <= (rune)'9': {
+    case {} when (byte)'1' <= s[0] && s[0] <= (byte)'9': {
         s = s[1..];
-        while (len(s) > 0 && (rune)'0' <= s[0] && s[0] <= (rune)'9') {
+        while (len(s) > 0 && '0' <= s[0] && s[0] <= '9') {
             s = s[1..];
         }
         break;
     }}
 
     // . followed by 1 or more digits.
-    if (len(s) >= 2 && s[0] == (rune)'.' && (rune)'0' <= s[1] && s[1] <= (rune)'9') {
+    if (len(s) >= 2 && s[0] == '.' && '0' <= s[1] && s[1] <= '9') {
         s = s[2..];
-        while (len(s) > 0 && (rune)'0' <= s[0] && s[0] <= (rune)'9') {
+        while (len(s) > 0 && '0' <= s[0] && s[0] <= '9') {
             s = s[1..];
         }
     }
 
     // e or E followed by an optional - or + and
     // 1 or more digits.
-    if (len(s) >= 2 && (s[0] == (rune)'e' || s[0] == (rune)'E')) {
+    if (len(s) >= 2 && (s[0] == 'e' || s[0] == 'E')) {
         s = s[1..];
-        if (s[0] == (rune)'+' || s[0] == (rune)'-') {
+        if (s[0] == '+' || s[0] == '-') {
             s = s[1..];
             if (s == ""u8) {
                 return false;
             }
         }
-        while (len(s) > 0 && (rune)'0' <= s[0] && s[0] <= (rune)'9') {
+        while (len(s) > 0 && '0' <= s[0] && s[0] <= '9') {
             s = s[1..];
         }
     }
@@ -739,12 +739,12 @@ internal static bool isValidNumber(@string s) {
     return s == ""u8;
 }
 
-internal static void interfaceEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+internal static void interfaceEncoder(ж<encodeState> e, reflectꓸValue v, encOpts opts) {
     if (v.IsNil()) {
-        Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
+        e.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    Ꮡe.reflectValue(v.Elem(), opts);
+    e.reflectValue(v.Elem(), opts);
 }
 
 internal static void unsupportedTypeEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
@@ -763,15 +763,15 @@ partial struct structFields {
     internal map<@string, ж<field>> byFoldedName;
 }
 
-internal static void encode(this structEncoder se, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    var next = (byte)(rune)'{';
+internal static void encode(this structEncoder se, ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+    var next = (byte)'{';
 FieldLoop:
     foreach (var i in range(se.fields.list)) {
         var f = Ꮡ(se.fields.list, i);
 
         // Find the nested struct field by following f.index.
         var fv = v;
-        foreach (var (_, iΔ1) in (~f).index) {
+        foreach (var (_, iΔ1) in f.index) {
             if (fv.Kind() == reflect.ΔPointer) {
                 if (fv.IsNil()) {
                     goto continue_FieldLoop;
@@ -781,25 +781,25 @@ FieldLoop:
             fv = fv.Field(iΔ1);
         }
 
-        if (((~f).omitEmpty && isEmptyValue(fv)) || ((~f).omitZero && ((~f).isZero == default! && fv.IsZero() || ((~f).isZero != default! && (~f).isZero(fv))))) {
+        if ((f.omitEmpty && isEmptyValue(fv)) || (f.omitZero && (f.isZero == nil && fv.IsZero() || (f.isZero != nil && f.isZero(fv))))) {
             continue;
         }
-        Ꮡe.of(encodeState.ᏑBuffer).WriteByte(next);
-        next = (rune)',';
-        if (opts.escapeHTML){
-            Ꮡe.of(encodeState.ᏑBuffer).WriteString((~f).nameEscHTML);
+        e.of(encodeState.ᏑBuffer).WriteByte(next);
+        next = (byte)',';
+        if (opts.escapeHTML) {
+            e.of(encodeState.ᏑBuffer).WriteString(f.nameEscHTML);
         } else {
-            Ꮡe.of(encodeState.ᏑBuffer).WriteString((~f).nameNonEsc);
+            e.of(encodeState.ᏑBuffer).WriteString(f.nameNonEsc);
         }
-        opts.quoted = f.Value.quoted;
-        (~f).encoder(Ꮡe, fv, opts);
+        opts.quoted = f.quoted;
+        f.encoder(e, fv, opts);
 continue_FieldLoop:;
     }
 break_FieldLoop:;
-    if (next == (rune)'{'){
-        Ꮡe.of(encodeState.ᏑBuffer).WriteString("{}"u8);
+    if (next == '{') {
+        e.of(encodeState.ᏑBuffer).WriteString("{}"u8);
     } else {
-        Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)'}');
+        e.of(encodeState.ᏑBuffer).WriteByte((byte)'}');
     }
 }
 
@@ -836,15 +836,15 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
                 defer((ᴛ1, ᴛ2) => delete(ᴛ1, ᴛ2), Ꮡe.Value.ptrSeen, @unsafe.Pointer.OrTypedNil(ptr), ref ᒐ);
             }
         }
-        Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)'{');
+        Ꮡe.of(encodeState.ᏑBuffer).WriteByte((byte)'{');
 
         // Extract and sort the keys.
         slice<reflectWithString> sv = new slice<reflectWithString>(v.Len(), () => new());
         ж<reflect.MapIter> mi = v.MapRange();
-        error err = default!;
+        error err = default;
         for (nint i = 0; mi.Next(); i++) {
             {
-                (sv[i].ks, err) = resolveKeyName(mi.Key()); if (err != default!) {
+                (sv[i].ks, err) = resolveKeyName(mi.Key()); if (err != nil) {
                     e.error(fmt.Errorf("json: encoding error for type %q: %q"u8, v.Type().String(), err.Error()));
                 }
             }
@@ -854,13 +854,13 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
 
         foreach (var (i, kv) in sv) {
             if (i > 0) {
-                Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)',');
+                Ꮡe.of(encodeState.ᏑBuffer).WriteByte((byte)',');
             }
             Ꮡe.of(encodeState.ᏑBuffer).Write(appendString(Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer(), kv.ks, opts.escapeHTML));
-            Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)':');
+            Ꮡe.of(encodeState.ᏑBuffer).WriteByte((byte)':');
             me.elemEnc(Ꮡe, kv.v, opts);
         }
-        Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)'}');
+        Ꮡe.of(encodeState.ᏑBuffer).WriteByte((byte)'}');
         e.ptrLevel--;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -868,33 +868,35 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
 }
 
 internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(reflectꓸType t) {
-    var exprᴛ1 = t.Key().Kind();
-    if (exprᴛ1 == reflect.ΔString || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
+    switch (t.Key().Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔString || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+        break;
     }
-    else { /* default: */
+    default: {
         if (!t.Key().Implements(textMarshalerType)) {
             return unsupportedTypeEncoder;
         }
-    }
+        break;
+    }}
     var me = new mapEncoder(typeEncoder(t.Elem()));
     var meʗ1 = me;
     return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => meʗ1.encode(p1, p2, p3);
 }
 
-internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
+internal static void encodeByteSlice(ж<encodeState> e, reflectꓸValue v, encOpts _) {
     var bᴷ = new stackAppend<byte>();
 
     if (v.IsNil()) {
-        Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
+        e.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
 
     var s = v.Bytes();
-    var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
-    b = append(bᴷ, b, (byte)((rune)'"'));
+    var b = e.of(encodeState.ᏑBuffer).AvailableBuffer();
+    b = append(bᴷ, b, (byte)'"');
     b = base64.StdEncoding.AppendEncode(b, s);
-    b = append(b, (byte)((rune)'"'));
-    Ꮡe.of(encodeState.ᏑBuffer).Write(b);
+    b = append(b, (byte)'"');
+    e.of(encodeState.ᏑBuffer).Write(b);
 }
 
 // sliceEncoder just wraps an arrayEncoder, checking to make sure the value isn't nil.
@@ -922,8 +924,7 @@ internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect�
                 // start checking if we've run into a pointer cycle.
                 // Here we use a struct to memorize the pointer to the first element of the slice
                 // and its length.
-                ref var ptr = ref heap<encode_ptr>(out var Ꮡptr);
-                ptr = new encode_ptr(@unsafe.Pointer.OrTypedNil((uintptr)v.UnsafePointer()), v.Len());
+                ref var ptr = ref heap<encode_ptr>(new encode_ptr(@unsafe.Pointer.OrTypedNil((uintptr)v.UnsafePointer()), v.Len()), out var Ꮡptr);
                 {
                     var (_, ok) = e.ptrSeen[ptr, ꟷ]; if (ok) {
                         e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
@@ -957,16 +958,16 @@ partial struct arrayEncoder {
     internal Action<ж<encodeState>, reflectꓸValue, encOpts> elemEnc;
 }
 
-internal static void encode(this arrayEncoder ae, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)'[');
+internal static void encode(this arrayEncoder ae, ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+    e.of(encodeState.ᏑBuffer).WriteByte((byte)'[');
     nint n = v.Len();
     for (nint i = 0; i < n; i++) {
         if (i > 0) {
-            Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)',');
+            e.of(encodeState.ᏑBuffer).WriteByte((byte)',');
         }
-        ae.elemEnc(Ꮡe, v.Index(i), opts);
+        ae.elemEnc(e, v.Index(i), opts);
     }
-    Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)']');
+    e.of(encodeState.ᏑBuffer).WriteByte((byte)']');
 }
 
 internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newArrayEncoder(reflectꓸType t) {
@@ -1019,11 +1020,11 @@ partial struct condAddrEncoder {
     internal Action<ж<encodeState>, reflectꓸValue, encOpts> canAddrEnc, elseEnc;
 }
 
-internal static void encode(this condAddrEncoder ce, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    if (v.CanAddr()){
-        ce.canAddrEnc(Ꮡe, v, opts);
+internal static void encode(this condAddrEncoder ce, ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+    if (v.CanAddr()) {
+        ce.canAddrEnc(e, v, opts);
     } else {
-        ce.elseEnc(Ꮡe, v, opts);
+        ce.elseEnc(e, v, opts);
     }
 }
 
@@ -1071,31 +1072,31 @@ partial struct reflectWithString {
 
 internal static (@string, error) resolveKeyName(reflectꓸValue k) {
     if (k.Kind() == reflect.ΔString) {
-        return (k.String(), default!);
+        return (k.String(), default);
     }
     {
         var (tm, ok) = reflect.TypeAssert<encoding.TextMarshaler>(k); if (ok) {
             if (k.Kind() == reflect.ΔPointer && k.IsNil()) {
-                return ("", default!);
+                return ("", default);
             }
             var (buf, err) = tm.MarshalText();
             return ((@string)buf, err);
         }
     }
-    var exprᴛ1 = k.Kind();
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
-        return (strconv.FormatInt(k.Int(), 10), default!);
+    switch (k.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+        return (strconv.FormatInt(k.Int(), 10), default);
     }
-    if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
-        return (strconv.FormatUint(k.Uint(), 10), default!);
-    }
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+        return (strconv.FormatUint(k.Uint(), 10), default);
+    }}
     throw panic("unexpected map key type");
 }
 
 internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool escapeHTML)
     where Bytes : /* []byte | string */ IByteSeq<Bytes, byte>, new()
 {
-    dst = append(dst, (byte)((rune)'"'));
+    dst = append(dst, (byte)'"');
     nint start = 0;
     for (nint i = 0; i < len(src); ) {
         {
@@ -1106,28 +1107,28 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
                 }
                 dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
                 switch (b) {
-                case (rune)'\\' or (rune)'"': {
-                    dst = append(dst, (byte)((rune)'\\'), b);
+                case (byte)'\\' or (byte)'"': {
+                    dst = append(dst, (byte)'\\', b);
                     break;
                 }
-                case (rune)'\b': {
-                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'b'));
+                case (byte)'\b': {
+                    dst = append(dst, (byte)'\\', (byte)'b');
                     break;
                 }
-                case (rune)'\f': {
-                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'f'));
+                case (byte)'\f': {
+                    dst = append(dst, (byte)'\\', (byte)'f');
                     break;
                 }
-                case (rune)'\n': {
-                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'n'));
+                case (byte)'\n': {
+                    dst = append(dst, (byte)'\\', (byte)'n');
                     break;
                 }
-                case (rune)'\r': {
-                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'r'));
+                case (byte)'\r': {
+                    dst = append(dst, (byte)'\\', (byte)'r');
                     break;
                 }
-                case (rune)'\t': {
-                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'t'));
+                case (byte)'\t': {
+                    dst = append(dst, (byte)'\\', (byte)'t');
                     break;
                 }
                 default: {
@@ -1136,7 +1137,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
                     // because they can lead to security holes when
                     // user-controlled strings are rendered into JSON
                     // and served to some browsers.
-                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> 4)], hex[(byte)(b & 0xF)]);
+                    dst = append(dst, (byte)'\\', (byte)'u', (byte)'0', (byte)'0', hex[(b >> 4)], hex[(byte)(b & 0xF)]);
                     break;
                 }}
                 i++;
@@ -1164,9 +1165,9 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         // and can lead to security holes there. It is valid JSON to
         // escape them, so we do so unconditionally.
         // See https://en.wikipedia.org/wiki/JSON#Safety.
-        if (c == (rune)'\u2028' || c == (rune)'\u2029') {
+        if (c == '\u2028' || c == '\u2029') {
             dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
-            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(c & 0xF)]);
+            dst = append(dst, (byte)'\\', (byte)'u', (byte)'2', (byte)'0', (byte)'2', hex[(c & 0xF)]);
             i += size;
             start = i;
             continue;
@@ -1174,7 +1175,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         i += size;
     }
     dst = append(dst, src.slice(start).ꓸꓸꓸ);
-    dst = append(dst, (byte)((rune)'"'));
+    dst = append(dst, (byte)'"');
     return dst;
 }
 
@@ -1182,7 +1183,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
 partial struct field {
     internal @string name;
     internal slice<byte> nameBytes; // []byte(name)
-    internal @string nameNonEsc; // `"` + name + `":`
+    internal @string nameNonEsc;  // `"` + name + `":`
     internal @string nameEscHTML; // `"` + HTMLEscape(name) + `":`
     internal bool tag;
     internal slice<nint> index;
@@ -1208,21 +1209,21 @@ internal static readonly @string omitzeroˢ = "omitzero"u8;
 
 internal static structFields typeFields(reflectꓸType t) {
     // Anonymous fields to explore at the current level and the next.
-    var current = new field[]{}.slice();
-    var next = new field[]{new(typ: t)}.slice();
+    var current = slice<field>([]);
+    var next = slice<field>([new(typ: t)]);
 
     // Count of queued names for current level and the next.
-    map<reflectꓸType, nint> count = default!;
-    map<reflectꓸType, nint> nextCount = default!;
+    map<reflectꓸType, nint> count = default;
+    map<reflectꓸType, nint> nextCount = default;
 
     // Types already visited at an earlier level.
     var visited = new map<reflectꓸType, bool>{};
 
     // Fields found.
-    slice<field> fields = default!;
+    slice<field> fields = default;
 
     // Buffer to run appendHTMLEscape on field names.
-    slice<byte> nameEscBuf = default!;
+    slice<byte> nameEscBuf = default;
 
     while (len(next) > 0) {
         (current, next) = (next, current[..0]);
@@ -1237,7 +1238,7 @@ internal static structFields typeFields(reflectꓸType t) {
             // Scan f.typ for fields to include.
             for (nint i = 0; i < f.typ.NumField(); i++) {
                 var sf = f.typ.Field(i);
-                if (sf.Anonymous){
+                if (sf.Anonymous) {
                     var tΔ1 = sf.Type;
                     if (tΔ1.Kind() == reflect.ΔPointer) {
                         tΔ1 = tΔ1.Elem();
@@ -1248,8 +1249,7 @@ internal static structFields typeFields(reflectꓸType t) {
                     }
                     // Do not ignore embedded fields of unexported struct types
                     // since they may have exported fields.
-                } else 
-                if (!sf.IsExported()) {
+                } else if (!sf.IsExported()) {
                     // Ignore unexported non-embedded fields.
                     continue;
                 }
@@ -1274,10 +1274,11 @@ internal static structFields typeFields(reflectꓸType t) {
                 // Only strings, floats, integers, and booleans can be quoted.
                 var quoted = false;
                 if (opts.Contains(stringˢ)) {
-                    var exprᴛ1 = ft.Kind();
-                    if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.ΔString) {
+                    switch (ft.Kind()) {
+                    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔString: {
                         quoted = true;
-                    }
+                        break;
+                    }}
                 }
 
                 // Record found field and index sequence.
@@ -1415,7 +1416,7 @@ internal static structFields typeFields(reflectꓸType t) {
 
     foreach (var i in range(fields)) {
         var f = Ꮡ(fields, i);
-        f.Value.encoder = typeEncoder(typeByIndex(t, (~f).index));
+        f.encoder = typeEncoder(typeByIndex(t, f.index));
     }
     var exactNameIndex = new map<@string, ж<field>>(len(fields));
     var foldedNameIndex = new map<@string, ж<field>>(len(fields));
@@ -1442,7 +1443,7 @@ internal static (field, bool) dominantField(slice<field> fields) {
     // That means that the first field is the dominant one. We need only check
     // for error cases: two fields at top level, either both tagged or neither tagged.
     if (len(fields) > 1 && len(fields[0].index) == len(fields[1].index) && fields[0].tag == fields[1].tag) {
-        return (new field(nil), false);
+        return (new field(), false);
     }
     return (fields[0], true);
 }
@@ -1463,7 +1464,7 @@ internal static structFields cachedTypeFields(reflectꓸType t) {
 
 internal static slice<byte> mayAppendQuote(slice<byte> b, bool quoted) {
     if (quoted) {
-        b = append(b, (byte)((rune)'"'));
+        b = append(b, (byte)'"');
     }
     return b;
 }

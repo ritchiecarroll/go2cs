@@ -10,21 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using netꓸAddr = go.net_package.ΔAddr;
 global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -73,6 +60,11 @@ using static go.vendor.golang.org.x.net.nettest_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(net_package.IPAddr))]
+[assembly: go.GoFieldAccess(typeof(net_package.IPNet))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -81,8 +73,8 @@ using static go.vendor.golang.org.x.net.nettest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/conntest.go", "conntest.cs", "ACc80oCSgJKAkoCSgJKAkoCSgJKAkoCSgAAICqKCgoKUgpCSkpKCppKi1pKClIKSgoCCpICCyJKCgIKkgIKkpoCCzMKClKKCgoKCgIKClLaCgoKUgoKmgIKCtoCCxKSCkraAgsSowpSClIKCgqKUgoKCgoKCgsbEqMKUgpSCgoKilIKCgoKCgoLGxKaSlIKCgoCCypKUgoKCgILMopSUgoKClIKCgpSU6sKCgpSCsoKCgoKikrKCgoKUgoK0krKCgoKUgoK0sqiigpSCooKCopKigoKClKKSlIKCqsKUgoKmgqKCgqKSooKCgoK0kqKCgoKCtLLYooKUmKKCgqKCopKigqKSooKikqKCopKigqKSooKikqKCoqSUgqqigoCCgoKUuPyigoCCtoKCgIKkgIKkgr6ygoKCkoKUgoKCgpSCgqaAggAMEMKCgg==", "31-31:1;32-32:2;33-33:3;34-34:4;35-35:5;36-36:6;37-37:7;38-38:8;39-39:9;40-40:10;41-41:11;53-53:1;54-59:2;55-58:2.1;70-78:1;80-89:2;102-132:1;155-168:1;183-196:1;254-260:1;261-271:2;272-282:3;292-296:1;297-304:2;323-327:1;328-335:2;336-343:3;359-362:1;363-366:2;367-370:3;371-374:4;375-378:5;379-382:6;383-386:7;439-442:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/nettest.go", "nettest.cs", "AB48gpSCAAgGgoCCpICCgqSAgqSAgoKkgriCgoKCtriCgqqigqqigqqigq7CgriUtpSkgsiUpLaUppSklKqigLaCtgACENKClIKAgraCtoK2graCgpSU7sKClIKAgraCtoK2graCgpSU6qKCgpSCgpSCgoKu4raUgpSCgpSqooKClLKCpq7CtpSCgpSygpSAgqSUpoKCgpSClICC1oCC2KaCgpSUgILGgpSAgsaAgqSAgrY=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/conntest.go", "conntest.cs", "ACc80oCSgJKAkoCSgJKAkoCSgJKAkoCSgAAICqKCgoKUgpCSkpKCppKi1pKClIKSgoCCpICCyJKCgIKkgIKkpoCCzMKClKKCgoKCgIKClLaCgoKUgoKmgIKCtoCCxKSCkraAgsSowpSClIKCgqKUgoKCgoKCgsbEqMKUgpSCgoKilIKCgoKCgoLGxKaSlIKCgoCCypKUgoKCgILMopSUgoKClIKCgpSU6sKCgpSCsoKCgoKikrKCgoKUgoK0krKCgoKUgoK0sqiigpSCooKCopKigoKClKKSlIKCqsKUgoKmgqKCgqKSooKCgoK0kqKCgoKCtLLYooKUmKKCgqKCopKigqKSooKikqKCopKigqKSooKikqKCoqSUgqqigoCCgoKUuPyigoCCtoKCgIKkgIKkgr6ygoKCkoKUgoKCgpSCgqaAggAMEMKCgg==", "31-31:1;32-32:2;33-33:3;34-34:4;35-35:5;36-36:6;37-37:7;38-38:8;39-39:9;40-40:10;41-41:11;53-53:1;54-59:2;55-58:2.1;70-78:1;80-89:2;102-132:1;155-168:1;183-196:1;254-260:1;261-271:2;272-282:3;292-296:1;297-304:2;323-327:1;328-335:2;336-343:3;359-362:1;363-366:2;367-370:3;371-374:4;375-378:5;379-382:6;383-386:7;439-442:1", "", "", "108:21,235:25,273:25,308:21,322:21,337:21,454:21,464:25,522:21")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/nettest.go", "nettest.cs", "AB48gpSCAAgGgoCCpICCgqSAgqSAgoKkgsiCgoKCxsiCgqqigqqigqqigq7CgsikxqSkguikpMaktqSklKqigMaCxgACENKCpIKAgraCxoLGgsaCgpSU7sKCpIKAgraCxoLGgsaCgpSU6qKCgpSCgpSCgoKu4taUgpSCgpSqooKClLKCpq7C1pSCgpSygpSAgqSUpoKCgpSClICC1oCC2KaCgpSkgILWgpSAgtaAgqSAgsY=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/nettest_windows.go", "nettest_windows.cs", "AAkSAAcQgoKClIKU")]
 // </GoSourcePositionMaps>
 

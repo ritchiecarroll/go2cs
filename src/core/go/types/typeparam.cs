@@ -29,9 +29,9 @@ internal static uint64 nextID() {
 // its [TypeName] object.
 partial struct TypeParam {
     internal ж<Checker> check; // for lazy type bound completion
-    internal uint64 id;    // unique id, for debugging only
-    internal ж<TypeName> obj; // corresponding type name
-    internal nint index;      // type parameter index in source order, starting at 0
+    internal uint64 id;        // unique id, for debugging only
+    internal ж<TypeName> obj;  // corresponding type name
+    internal nint index;       // type parameter index in source order, starting at 0
     internal ΔType bound;      // any type, but underlying is eventually *Interface for correct programs (see TypeParam.iface)
 }
 
@@ -41,8 +41,8 @@ partial struct TypeParam {
 //
 // The constraint argument can be nil, and set later via SetConstraint. If the
 // constraint is non-nil, it must be fully defined.
-public static ж<TypeParam> NewTypeParam(ж<TypeName> Ꮡobj, ΔType constraint) {
-    return (((ж<Checker>)nil)).newTypeParam(Ꮡobj, constraint);
+public static ж<TypeParam> NewTypeParam(ж<TypeName> obj, ΔType constraint) {
+    return (((ж<Checker>)nil)).newTypeParam(obj, constraint);
 }
 
 // check may be nil
@@ -51,22 +51,20 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     // Always increment lastID, even if it is not used.
-    ref var id = ref heap<uint64>(out var Ꮡid);
-    id = nextID();
+    ref var id = ref heap<uint64>(nextID(), out var Ꮡid);
     if (Ꮡcheck != nil) {
         check.nextID++;
         id = check.nextID;
     }
     var typ = Ꮡ(new TypeParam(check: Ꮡcheck, id: id, obj: Ꮡobj, index: -1, bound: constraint));
-    if (obj.typ == default!) {
+    if (obj.typ == nil) {
         obj.typ = new TypeParamжΔType(typ);
     }
     // iface may mutate typ.bound, so we must ensure that iface() is called
     // at least once before the resulting TypeParam escapes.
-    if (Ꮡcheck != nil){
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new TypeParamжcleaner(typ));
-    } else 
-    if (constraint != default!) {
+    } else if (constraint != nil) {
         typ.iface();
     }
     return typ;
@@ -95,7 +93,7 @@ public static ΔType Constraint(this ref TypeParam t) {
 // form other types. Once SetConstraint returns the receiver, t is safe for
 // concurrent use.
 public static void SetConstraint(this ref TypeParam t, ΔType bound) {
-    if (bound == default!) {
+    if (bound == nil) {
         throw panic("nil constraint");
     }
     t.bound = bound;
@@ -113,14 +111,14 @@ public static ΔType Underlying(this ref TypeParam t) {
 }
 
 public static @string String(this ж<TypeParam> Ꮡt) {
-    return TypeString(new TypeParamжΔType(Ꮡt), default!);
+    return TypeString(new TypeParamжΔType(Ꮡt), default);
 }
 
 // ----------------------------------------------------------------------------
 // Implementation
 internal static void cleanup(this ref TypeParam t) {
     t.iface();
-    t.check = default!;
+    t.check = default;
 }
 
 // iface returns the constraint interface of t.
@@ -128,7 +126,7 @@ internal static ж<Interface> iface(this ref TypeParam t) {
     var bound = t.bound;
 
     // determine constraint interface
-    ж<Interface> ityp = default!;
+    ж<Interface> ityp = default;
     switch (bound.Underlying().type()) {
     case ж<Basic> u: {
         if (!isValid(new BasicжΔType(u))) {
@@ -148,19 +146,19 @@ internal static ж<Interface> iface(this ref TypeParam t) {
 
     // If we don't have an interface, wrap constraint into an implicit interface.
     if (ityp == nil) {
-        ityp = NewInterfaceType(default!, new ΔType[]{bound}.slice());
-        ityp.Value.@implicit = true;
+        ityp = NewInterfaceType(default, slice<ΔType>([bound]));
+        ityp.@implicit = true;
         t.bound = new InterfaceжΔType(ityp); // update t.bound for next time (optimization)
     }
 
     // compute type set if necessary
-    if ((~ityp).tset == nil) {
+    if (ityp.tset == nil) {
         // pos is used for tracing output; start with the type parameter position.
         tokenꓸPos pos = t.obj.Value.pos;
         // use the (original or possibly instantiated) type bound position if we have one
         {
             var n = asNamed(bound); if (n != nil) {
-                pos = n.Value.obj.Value.pos;
+                pos = n.obj.Value.pos;
             }
         }
         computeInterfaceTypeSet(t.check, pos, ityp);

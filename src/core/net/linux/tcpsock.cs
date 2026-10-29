@@ -34,7 +34,7 @@ public static netip.AddrPort AddrPort(this ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return new netip.AddrPort(nil);
+        return new netip.AddrPort();
     }
     var (na, _) = netip.AddrFromSlice(a.IP);
     na = na.WithZone(a.Zone);
@@ -62,7 +62,7 @@ public static @string String(this ж<TCPAddr> Ꮡa) {
 internal static bool isWildcard(this ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    if (Ꮡa == nil || a.IP == default!) {
+    if (Ꮡa == nil || a.IP == nil) {
         return true;
     }
     return a.IP.IsUnspecified();
@@ -70,7 +70,7 @@ internal static bool isWildcard(this ж<TCPAddr> Ꮡa) {
 
 internal static ΔAddr opAddr(this ж<TCPAddr> Ꮡa) {
     if (Ꮡa == nil) {
-        return default!;
+        return default;
     }
     return new TCPAddrжΔAddr(Ꮡa);
 }
@@ -92,19 +92,22 @@ internal static ΔAddr opAddr(this ж<TCPAddr> Ꮡa) {
 // parameters.
 public static (ж<TCPAddr>, error) ResolveTCPAddr(@string network, @string address) {
     var exprᴛ1 = network;
-    if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+        break;
     }
-    else if (exprᴛ1 == ""u8) { // a hint wildcard for Go 1.0 undocumented behavior
+    case {} when exprᴛ1 == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
         network = tcpˢ;
+        break;
     }
-    else { /* default: */
-        return (default!, ((UnknownNetworkError)network));
-    }
+    default: {
+        return (default, ((UnknownNetworkError)network));
+    }}
     var (addrs, err) = DefaultResolver.internetAddrList(context.Background(), network, address);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (addrs.forResolve(network, address)._<ж<TCPAddr>>(), default!);
+    return (addrs.forResolve(network, address)._<ж<TCPAddr>>(), default);
 }
 
 // TCPAddrFromAddrPort returns addr as a [TCPAddr]. If addr.IsValid() is false,
@@ -162,9 +165,9 @@ public static (syscall.RawConn, error) SyscallConn(this ж<TCPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
-        return (default!, syscall.EINVAL);
+        return (default, syscall.EINVAL);
     }
-    return (new rawConnжRawConn(newRawConn(c.fd)), default!);
+    return (new rawConnжRawConn(newRawConn(c.fd)), default);
 }
 
 // ReadFrom implements the [io.ReaderFrom] ReadFrom method.
@@ -175,8 +178,8 @@ public static (int64, error) ReadFrom(this ж<TCPConn> Ꮡc, Δio.Reader r) {
         return (0, syscall.EINVAL);
     }
     var (n, err) = Ꮡc.readFrom(r);
-    if (err != default! && !AreEqual(err, Δio.EOF)) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "readfrom"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    if (err != nil && !AreEqual(err, Δio.EOF)) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "readfrom"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return (n, err);
 }
@@ -189,8 +192,8 @@ public static (int64, error) WriteTo(this ж<TCPConn> Ꮡc, Δio.Writer w) {
         return (0, syscall.EINVAL);
     }
     var (n, err) = Ꮡc.writeTo(w);
-    if (err != default! && !AreEqual(err, Δio.EOF)) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "writeto"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    if (err != nil && !AreEqual(err, Δio.EOF)) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "writeto"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return (n, err);
 }
@@ -204,11 +207,11 @@ public static error CloseRead(this ж<TCPConn> Ꮡc) {
         return syscall.EINVAL;
     }
     {
-        var err = c.fd.closeRead(); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+        var err = c.fd.closeRead(); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // CloseWrite shuts down the writing side of the TCP connection.
@@ -220,11 +223,11 @@ public static error CloseWrite(this ж<TCPConn> Ꮡc) {
         return syscall.EINVAL;
     }
     {
-        var err = c.fd.closeWrite(); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+        var err = c.fd.closeWrite(); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // SetLinger sets the behavior of Close on a connection which still
@@ -248,11 +251,11 @@ public static error SetLinger(this ж<TCPConn> Ꮡc, nint sec) {
         return syscall.EINVAL;
     }
     {
-        var err = setLinger(c.fd, sec); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+        var err = setLinger(c.fd, sec); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // SetKeepAlive sets whether the operating system should send
@@ -264,11 +267,11 @@ public static error SetKeepAlive(this ж<TCPConn> Ꮡc, bool keepalive) {
         return syscall.EINVAL;
     }
     {
-        var err = setKeepAlive(c.fd, keepalive); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+        var err = setKeepAlive(c.fd, keepalive); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // SetKeepAlivePeriod sets the duration the connection needs to
@@ -283,11 +286,11 @@ public static error SetKeepAlivePeriod(this ж<TCPConn> Ꮡc, time.Duration d) {
         return syscall.EINVAL;
     }
     {
-        var err = setKeepAliveIdle(c.fd, d); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+        var err = setKeepAliveIdle(c.fd, d); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // SetNoDelay controls whether the operating system should delay
@@ -301,11 +304,11 @@ public static error SetNoDelay(this ж<TCPConn> Ꮡc, bool noDelay) {
         return syscall.EINVAL;
     }
     {
-        var err = setNoDelay(c.fd, noDelay); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+        var err = setNoDelay(c.fd, noDelay); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // MultipathTCP reports whether the ongoing connection is using MPTCP.
@@ -323,24 +326,24 @@ public static (bool, error) MultipathTCP(this ж<TCPConn> Ꮡc) {
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return (false, syscall.EINVAL);
     }
-    return (isUsingMultipathTCP(c.fd), default!);
+    return (isUsingMultipathTCP(c.fd), default);
 }
 
-internal static ж<TCPConn> newTCPConn(ж<netFD> Ꮡfd, time.Duration keepAliveIdle, KeepAliveConfig keepAliveCfg, Action<ж<netFD>> preKeepAliveHook, Action<KeepAliveConfig> keepAliveHook) {
-    setNoDelay(Ꮡfd, true);
+internal static ж<TCPConn> newTCPConn(ж<netFD> fd, time.Duration keepAliveIdle, KeepAliveConfig keepAliveCfg, Action<ж<netFD>> preKeepAliveHook, Action<KeepAliveConfig> keepAliveHook) {
+    setNoDelay(fd, true);
     if (!keepAliveCfg.Enable && keepAliveIdle >= 0) {
         keepAliveCfg = new KeepAliveConfig(
             Enable: true,
             Idle: keepAliveIdle
         );
     }
-    var c = Ꮡ(new TCPConn(new conn(Ꮡfd)));
+    var c = Ꮡ(new TCPConn(new conn(fd)));
     if (keepAliveCfg.Enable) {
-        if (preKeepAliveHook != default!) {
-            preKeepAliveHook(Ꮡfd);
+        if (preKeepAliveHook != nil) {
+            preKeepAliveHook(fd);
         }
         c.SetKeepAliveConfig(keepAliveCfg);
-        if (keepAliveHook != default!) {
+        if (keepAliveHook != nil) {
             keepAliveHook(keepAliveCfg);
         }
     }
@@ -354,37 +357,39 @@ internal static ж<TCPConn> newTCPConn(ж<netFD> Ꮡfd, time.Duration keepAliveI
 // If laddr is nil, a local address is automatically chosen.
 // If the IP field of raddr is nil or an unspecified IP address, the
 // local system is assumed.
-public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
-    return dialTCP(context.Background(), nil, network, Ꮡladdr, Ꮡraddr);
+public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+    return dialTCP(context.Background(), nil, network, laddr, raddr);
 }
 
-internal static (ж<TCPConn>, error) dialTCP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
+internal static (ж<TCPConn>, error) dialTCP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     ref var dialer = ref Ꮡdialer.DerefOrNull();
 
     var exprᴛ1 = network;
-    if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+        break;
     }
-    else { /* default: */
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: ((UnknownNetworkError)network)))));
+    default: {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: laddr.opAddr(), Addr: raddr.opAddr(), Err: ((UnknownNetworkError)network)))));
+    }}
+    if (raddr == nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: laddr.opAddr(), Addr: default, Err: errMissingAddress))));
     }
-    if (Ꮡraddr == nil) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: default!, Err: errMissingAddress))));
-    }
-    var sd = Ꮡ(new sysDialer(network: network, address: Ꮡraddr.String()));
-    ж<TCPConn> c = default!;
-    error err = default!;
+    var sd = Ꮡ(new sysDialer(network: network, address: raddr.String()));
+    ж<TCPConn> c = default;
+    error err = default;
     if (Ꮡdialer != nil) {
-        sd.Value.Dialer = dialer;
+        sd.Dialer = dialer;
     }
-    if (sd.of(sysDialer.ᏑDialer).MultipathTCP()){
-        (c, err) = sd.dialMPTCP(ctx, Ꮡladdr, Ꮡraddr);
+    if (sd.of(sysDialer.ᏑDialer).MultipathTCP()) {
+        (c, err) = sd.dialMPTCP(ctx, laddr, raddr);
     } else {
-        (c, err) = sd.dialTCP(ctx, Ꮡladdr, Ꮡraddr);
+        (c, err) = sd.dialTCP(ctx, laddr, raddr);
     }
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: err))));
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: laddr.opAddr(), Addr: raddr.opAddr(), Err: err))));
     }
-    return (c, default!);
+    return (c, default);
 }
 
 // TCPListener is a TCP network listener. Clients should typically
@@ -403,9 +408,9 @@ public static (syscall.RawConn, error) SyscallConn(this ж<TCPListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
-        return (default!, syscall.EINVAL);
+        return (default, syscall.EINVAL);
     }
-    return (new rawListenerжRawConn(newRawListener(l.fd)), default!);
+    return (new rawListenerжRawConn(newRawListener(l.fd)), default);
 }
 
 // AcceptTCP accepts the next incoming call and returns the new
@@ -414,13 +419,13 @@ public static (ж<TCPConn>, error) AcceptTCP(this ж<TCPListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
-        return (default!, syscall.EINVAL);
+        return (default, syscall.EINVAL);
     }
     var (c, err) = l.accept();
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "accept"u8, Net: (~l.fd).net, Source: default!, Addr: (~l.fd).laddr, Err: err))));
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "accept"u8, Net: l.fd.net, Source: default, Addr: l.fd.laddr, Err: err))));
     }
-    return (c, default!);
+    return (c, default);
 }
 
 // Accept implements the Accept method in the [Listener] interface; it
@@ -429,13 +434,13 @@ public static (Conn, error) Accept(this ж<TCPListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
-        return (default!, syscall.EINVAL);
+        return (default, syscall.EINVAL);
     }
     var (c, err) = l.accept();
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "accept"u8, Net: (~l.fd).net, Source: default!, Addr: (~l.fd).laddr, Err: err))));
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "accept"u8, Net: l.fd.net, Source: default, Addr: l.fd.laddr, Err: err))));
     }
-    return (new TCPConnжConn(c), default!);
+    return (new TCPConnжConn(c), default);
 }
 
 // Close stops listening on the TCP address.
@@ -447,18 +452,18 @@ public static error Close(this ж<TCPListener> Ꮡl) {
         return syscall.EINVAL;
     }
     {
-        var err = l.close(); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: (~l.fd).net, Source: default!, Addr: (~l.fd).laddr, Err: err)));
+        var err = l.close(); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: l.fd.net, Source: default, Addr: l.fd.laddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // Addr returns the listener's network address, a [*TCPAddr].
 // The Addr returned is shared by all invocations of Addr, so
 // do not modify it.
 public static ΔAddr Addr(this ref TCPListener l) {
-    return (~l.fd).laddr;
+    return l.fd.laddr;
 }
 
 // SetDeadline sets the deadline associated with the listener.
@@ -483,16 +488,16 @@ public static error SetDeadline(this ж<TCPListener> Ꮡl, time.Time t) {
 // On Windows, the returned os.File's file descriptor is not
 // usable on other processes.
 public static (ж<os.File> f, error err) File(this ж<TCPListener> Ꮡl) {
-    ж<os.File> f = default!;
-    error err = default!;
+    ж<os.File> f = default;
+    error err = default;
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
-        return (default!, syscall.EINVAL);
+        return (default, syscall.EINVAL);
     }
     (f, err) = l.@file();
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: (~l.fd).net, Source: default!, Addr: (~l.fd).laddr, Err: err))));
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: l.fd.net, Source: default, Addr: l.fd.laddr, Err: err))));
     }
     return (f, err);
 }
@@ -510,26 +515,28 @@ public static (ж<TCPListener>, error) ListenTCP(@string network, ж<TCPAddr> �
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
     var exprᴛ1 = network;
-    if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+        break;
     }
-    else { /* default: */
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡladdr.opAddr(), Err: ((UnknownNetworkError)network)))));
-    }
+    default: {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default, Addr: Ꮡladdr.opAddr(), Err: ((UnknownNetworkError)network)))));
+    }}
     if (Ꮡladdr == nil) {
-        Ꮡladdr = Ꮡ(new TCPAddr(nil)); laddr = ref Ꮡladdr.DerefOrNull();
+        Ꮡladdr = Ꮡ(new TCPAddr()); laddr = ref Ꮡladdr.DerefOrNull();
     }
     var sl = Ꮡ(new sysListener(network: network, address: Ꮡladdr.String()));
-    ж<TCPListener> ln = default!;
-    error err = default!;
-    if (sl.of(sysListener.ᏑListenConfig).MultipathTCP()){
+    ж<TCPListener> ln = default;
+    error err = default;
+    if (sl.of(sysListener.ᏑListenConfig).MultipathTCP()) {
         (ln, err) = sl.listenMPTCP(context.Background(), Ꮡladdr);
     } else {
         (ln, err) = sl.listenTCP(context.Background(), Ꮡladdr);
     }
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡladdr.opAddr(), Err: err))));
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default, Addr: Ꮡladdr.opAddr(), Err: err))));
     }
-    return (ln, default!);
+    return (ln, default);
 }
 
 // roundDurationUp rounds d to the next multiple of to.

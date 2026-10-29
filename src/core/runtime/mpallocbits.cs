@@ -105,7 +105,7 @@ internal static void clearBlock64(this ref pageBits b, nuint i, uint64 v) {
 // popcntRange counts the number of set bits in the
 // range [i, i+n).
 internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) {
-    nuint s = default!;
+    nuint s = default;
 
     if (n == 1) {
         return (nuint)((b.Value[i / 64] >> (int)(i % 64)) & 1);
@@ -135,9 +135,9 @@ partial struct pallocBits /*pageBits*/;
 internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    nuint start = default!;
-    nuint most = default!;
-    nuint cur = default!;
+    nuint start = default;
+    nuint most = default;
+    nuint cur = default;
     nuint notSetYet = /* ^uint(0) */ unchecked((nuint)18446744073709551615); // sentinel for start value
     start = notSetYet;
     for (nint i = 0; i < 8; i++) {
@@ -188,9 +188,9 @@ outer:
 
         // Strategy: shrink all runs of zeros by max. If any runs of zero
         // remain, then we've identified a larger maximum zero run.
-        nuint Δp = most; // number of zeros we still need to shrink by.
+        nuint Δp = most;    // number of zeros we still need to shrink by.
         nuint k = (nuint)1; // current minimum length of runs of ones in x.
-        while (ᐧ) {
+        for (;;) {
             // Shrink all runs of zeros by p places (except the top zeros).
             while (Δp > 0) {
                 if (Δp <= k) {
@@ -214,11 +214,11 @@ outer:
 
             // The length of the lowest-order zero run is an increment to our maximum.
             nuint j = (nuint)sys.TrailingZeros64(~x); // count contiguous trailing ones
-            x >>= (int)((j & 63)); // remove trailing ones
-            j = (nuint)sys.TrailingZeros64(x); // count contiguous trailing zeros
-            x >>= (int)((j & 63)); // remove zeros
-            most += j; // we have a new maximum!
-            if ((x & (x + 1)) == 0) { // no more zeros (except at the top).
+            x >>= (int)((j & 63));                    // remove trailing ones
+            j = (nuint)sys.TrailingZeros64(x);        // count contiguous trailing zeros
+            x >>= (int)((j & 63));                    // remove zeros
+            most += j;                                // we have a new maximum!
+            if ((x & (x + 1)) == 0) {                 // no more zeros (except at the top).
                 goto continue_outer;
             }
             Δp = j; // remove j more zeros from each zero run.
@@ -239,11 +239,10 @@ break_outer:;
 //
 // Note that if npages == 1, the two returned values will always be identical.
 internal static (nuint, nuint) find(this ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
-    if (npages == 1){
+    if (npages == 1) {
         nuint addr = Ꮡb.find1(searchIdx);
         return (addr, addr);
-    } else 
-    if (npages <= 64) {
+    } else if (npages <= 64) {
         return Ꮡb.findSmallN(npages, searchIdx);
     }
     return Ꮡb.findLargeN(npages, searchIdx);
@@ -404,7 +403,7 @@ internal static nuint findBitRange64(uint64 c, nuint n) {
     // This implementation is based on shrinking the length of
     // runs of contiguous 1 bits. We remove the top n-1 1 bits
     // from each run of 1s, then look for the first remaining 1 bit.
-    nuint Δp = n - 1; // number of 1s we want to remove.
+    nuint Δp = n - 1;   // number of 1s we want to remove.
     nuint k = (nuint)1; // current minimum width of runs of 0 in c.
     while (Δp > 0) {
         if (Δp <= k) {

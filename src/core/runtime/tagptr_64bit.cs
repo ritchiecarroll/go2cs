@@ -74,17 +74,17 @@ internal static @unsafe.Pointer pointer(this taggedPointer tp) {
     if (GOARCH == "amd64"u8) {
         // amd64 systems can place the stack above the VA hole, so we need to sign extend
         // val before unpacking.
-        return (@unsafe.Pointer)(uintptr)(((int64)(uint64)tp >> (int)(tagBits)) << (int)(tagAlignBits));
+        return (@unsafe.Pointer)(uintptr)(((int64)tp >> (int)(tagBits)) << (int)(tagAlignBits));
     }
     if (GOOS == "aix"u8) {
-        return (@unsafe.Pointer)(uintptr)(uint64)((taggedPointer)(((tp >> (int)(tagBits)) << (int)(tagAlignBits)) | (taggedPointer)((uint64)0xa << 56)));
+        return (@unsafe.Pointer)(uintptr)((taggedPointer)(((tp >> (int)(tagBits)) << (int)(tagAlignBits)) | (taggedPointer)((uint64)0xa << 56)));
     }
-    return (@unsafe.Pointer)(uintptr)(uint64)(((tp >> (int)(tagBits)) << (int)(tagAlignBits)));
+    return (@unsafe.Pointer)(uintptr)((tp >> (int)(tagBits)) << (int)(tagAlignBits));
 }
 
 // Tag returns the tag from a taggedPointer.
 internal static uintptr tag(this taggedPointer tp) {
-    return (uintptr)(uint64)((taggedPointer)(tp & (uint64)((1 << (int)(tagBits)) - 1)));
+    return (uintptr)((taggedPointer)(tp & (uint64)((1 << (int)(tagBits)) - 1)));
 }
 
 } // end runtime_package

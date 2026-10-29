@@ -26,7 +26,7 @@ partial struct Decoder {
     internal io.Reader r;
     internal slice<byte> buf;
     internal decodeState d;
-    internal nint scanp;  // start of unread data in buf
+    internal nint scanp;    // start of unread data in buf
     internal int64 scanned; // amount of data already scanned
     internal scanner scan;
     internal error err;
@@ -63,12 +63,12 @@ public static void DisallowUnknownFields(this ref Decoder dec) {
 public static error Decode(this ж<Decoder> Ꮡdec, any v) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
-    if (dec.err != default!) {
+    if (dec.err != nil) {
         return dec.err;
     }
 
     {
-        var errΔ1 = dec.tokenPrepareForDecode(); if (errΔ1 != default!) {
+        var errΔ1 = dec.tokenPrepareForDecode(); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -79,7 +79,7 @@ public static error Decode(this ж<Decoder> Ꮡdec, any v) {
 
     // Read whole value into buffer.
     var (n, err) = Ꮡdec.readValue();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     Ꮡdec.of(Decoder.Ꮡd).init(dec.buf.slice(dec.scanp, dec.scanp + n));
@@ -110,7 +110,7 @@ internal static (nint, error) readValue(this ж<Decoder> Ꮡdec) {
     dec.scan.reset();
 
     nint scanp = dec.scanp;
-    error err = default!;
+    error err = default;
 Input:
     while (scanp >= 0) {
         // help the compiler see that scanp is never negative, so it can remove
@@ -120,34 +120,36 @@ Input:
         for (; scanp < len(dec.buf); scanp++) {
             var c = dec.buf[scanp];
             dec.scan.bytes++;
-            var exprᴛ1 = dec.scan.step(Ꮡdec.of(Decoder.Ꮡscan), c);
-            if (exprᴛ1 == scanEnd) {
+            switch (dec.scan.step(Ꮡdec.of(Decoder.Ꮡscan), c)) {
+            case var ᴛ when ᴛ == scanEnd: {
                 // scanEnd is delayed one byte so we decrement
                 // the scanner bytes count by 1 to ensure that
                 // this value is correct in the next call of Decode.
                 dec.scan.bytes--;
                 goto break_Input;
+                break;
             }
-            else if (exprᴛ1 == scanEndObject || exprᴛ1 == scanEndArray) {
+            case var ᴛ when ᴛ == scanEndObject || ᴛ == scanEndArray: {
                 // scanEnd is delayed one byte.
                 // We might block trying to get that byte from src,
                 // so instead invent a space byte.
-                if (stateEndValue(Ꮡdec.of(Decoder.Ꮡscan), (rune)' ') == scanEnd) {
+                if (stateEndValue(Ꮡdec.of(Decoder.Ꮡscan), (byte)' ') == scanEnd) {
                     scanp++;
                     goto break_Input;
                 }
+                break;
             }
-            else if (exprᴛ1 == scanError) {
+            case var ᴛ when ᴛ == scanError: {
                 dec.err = dec.scan.err;
                 return (0, dec.scan.err);
-            }
+            }}
         }
 
         // Did the last read have an error?
         // Delayed until now to allow buffer scan.
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, io.EOF)) {
-                if (dec.scan.step(Ꮡdec.of(Decoder.Ꮡscan), (rune)' ') == scanEnd) {
+                if (dec.scan.step(Ꮡdec.of(Decoder.Ꮡscan), (byte)' ') == scanEnd) {
                     goto break_Input;
                 }
                 if (nonSpace(dec.buf)) {
@@ -164,7 +166,7 @@ Input:
 continue_Input:;
     }
 break_Input:;
-    return (scanp - dec.scanp, default!);
+    return (scanp - dec.scanp, default);
 }
 
 internal static error refill(this ref Decoder dec) {
@@ -227,7 +229,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
     try {
         ref var enc = ref Ꮡenc.DerefOrNull();
 
-        if (enc.err != default!) {
+        if (enc.err != nil) {
             return enc.err;
         }
 
@@ -235,7 +237,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
         defer(ᏑencodeStatePool.Put, e.OrTypedNil(), ref ᒐ);
 
         var err = e.marshal(v, new encOpts(escapeHTML: enc.escapeHTML));
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
 
@@ -245,24 +247,24 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
         // is required if the encoded value was a number,
         // so that the reader knows there aren't more
         // digits coming.
-        e.of(encodeState.ᏑBuffer).WriteByte((rune)'\n');
+        e.of(encodeState.ᏑBuffer).WriteByte((byte)'\n');
 
         var b = e.of(encodeState.ᏑBuffer).Bytes();
         if (enc.indentPrefix != ""u8 || enc.indentValue != ""u8) {
             (enc.indentBuf, err) = appendIndent(enc.indentBuf[..0], b, enc.indentPrefix, enc.indentValue);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             b = enc.indentBuf;
         }
         {
-            (_, err) = enc.w.Write(b); if (err != default!) {
+            (_, err) = enc.w.Write(b); if (err != nil) {
                 enc.err = err;
             }
         }
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -292,10 +294,10 @@ partial struct RawMessage /*[]byte*/;
 
 // MarshalJSON returns m as the JSON encoding of m.
 public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
-    if (m == default!) {
-        return (slice<byte>("null"u8), default!);
+    if (m == nil) {
+        return (slice<byte>("null"u8), default);
     }
-    return (m, default!);
+    return (m, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -309,7 +311,7 @@ public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
         return errors.New(jsonRawMessageˢ);
     }
     m = appendꓸꓸꓸ((m)[0..0], data);
-    return default!;
+    return default;
 }
 
 internal static Marshaler _ᴛ1ʗ = new RawMessageжMarshaler(((ж<RawMessage>)nil));
@@ -331,48 +333,52 @@ internal static error tokenPrepareForDecode(this ref Decoder dec) {
     // Note: Not calling peek before switch, to avoid
     // putting peek into the standard Decode path.
     // peek is only called when using the Token API.
-    var exprᴛ1 = dec.tokenState;
-    if (exprᴛ1 == tokenArrayComma) {
+    switch (dec.tokenState) {
+    case var ᴛ when ᴛ == tokenArrayComma: {
         var (c, err) = dec.peek();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
-        if (c != (rune)',') {
+        if (c != ',') {
             return new SyntaxErrorжerror(Ꮡ(new SyntaxError("expected comma after array element"u8, dec.InputOffset())));
         }
         dec.scanp++;
         dec.tokenState = tokenArrayValue;
+        break;
     }
-    else if (exprᴛ1 == tokenObjectColon) {
+    case var ᴛ when ᴛ == tokenObjectColon: {
         var (c, err) = dec.peek();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
-        if (c != (rune)':') {
+        if (c != ':') {
             return new SyntaxErrorжerror(Ꮡ(new SyntaxError("expected colon after object key"u8, dec.InputOffset())));
         }
         dec.scanp++;
         dec.tokenState = tokenObjectValue;
-    }
-    return default!;
+        break;
+    }}
+    return default;
 }
 
 internal static bool tokenValueAllowed(this ref Decoder dec) {
-    var exprᴛ1 = dec.tokenState;
-    if (exprᴛ1 == tokenTopValue || exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue || exprᴛ1 == tokenObjectValue) {
+    switch (dec.tokenState) {
+    case var ᴛ when ᴛ == tokenTopValue || ᴛ == tokenArrayStart || ᴛ == tokenArrayValue || ᴛ == tokenObjectValue: {
         return true;
-    }
+    }}
     return false;
 }
 
 internal static void tokenValueEnd(this ref Decoder dec) {
-    var exprᴛ1 = dec.tokenState;
-    if (exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue) {
+    switch (dec.tokenState) {
+    case var ᴛ when ᴛ == tokenArrayStart || ᴛ == tokenArrayValue: {
         dec.tokenState = tokenArrayComma;
+        break;
     }
-    else if (exprᴛ1 == tokenObjectValue) {
+    case var ᴛ when ᴛ == tokenObjectValue: {
         dec.tokenState = tokenObjectComma;
-    }
+        break;
+    }}
 }
 
 // A Delim is a JSON array or object delimiter, one of [ ] { or }.
@@ -396,23 +402,23 @@ public static @string String(this Delim d) {
 public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         var (c, err) = dec.peek();
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var exprᴛ1 = c;
         var matchᴛ1 = false;
-        if (exprᴛ1 is (rune)'[') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)'[') { matchᴛ1 = true;
             if (!dec.tokenValueAllowed()) {
                 return dec.tokenError(c);
             }
             dec.scanp++;
             dec.tokenStack = append(dec.tokenStack, dec.tokenState);
             dec.tokenState = tokenArrayStart;
-            return ((Delim)(rune)'[', default!);
+            return ((Delim)(rune)'[', default);
         }
-        if (exprᴛ1 is (rune)']') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)']') { matchᴛ1 = true;
             if (dec.tokenState != tokenArrayStart && dec.tokenState != tokenArrayComma) {
                 return dec.tokenError(c);
             }
@@ -420,18 +426,18 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = dec.tokenStack[len(dec.tokenStack) - 1];
             dec.tokenStack = dec.tokenStack.slice(0, len(dec.tokenStack) - 1);
             dec.tokenValueEnd();
-            return ((Delim)(rune)']', default!);
+            return ((Delim)(rune)']', default);
         }
-        if (exprᴛ1 is (rune)'{') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)'{') { matchᴛ1 = true;
             if (!dec.tokenValueAllowed()) {
                 return dec.tokenError(c);
             }
             dec.scanp++;
             dec.tokenStack = append(dec.tokenStack, dec.tokenState);
             dec.tokenState = tokenObjectStart;
-            return ((Delim)(rune)'{', default!);
+            return ((Delim)(rune)'{', default);
         }
-        if (exprᴛ1 is (rune)'}') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)'}') { matchᴛ1 = true;
             if (dec.tokenState != tokenObjectStart && dec.tokenState != tokenObjectComma) {
                 return dec.tokenError(c);
             }
@@ -439,9 +445,9 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = dec.tokenStack[len(dec.tokenStack) - 1];
             dec.tokenStack = dec.tokenStack.slice(0, len(dec.tokenStack) - 1);
             dec.tokenValueEnd();
-            return ((Delim)(rune)'}', default!);
+            return ((Delim)(rune)'}', default);
         }
-        if (exprᴛ1 is (rune)':') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)':') { matchᴛ1 = true;
             if (dec.tokenState != tokenObjectColon) {
                 return dec.tokenError(c);
             }
@@ -449,7 +455,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = tokenObjectValue;
             continue;
         }
-        else if (exprᴛ1 is (rune)',') { matchᴛ1 = true;
+        else if (exprᴛ1 is (byte)',') { matchᴛ1 = true;
             if (dec.tokenState == tokenArrayComma) {
                 dec.scanp++;
                 dec.tokenState = tokenArrayValue;
@@ -462,18 +468,18 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             }
             return dec.tokenError(c);
         }
-        else if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
+        else if (exprᴛ1 is (byte)'"') { matchᴛ1 = true;
             if (dec.tokenState == tokenObjectStart || dec.tokenState == tokenObjectKey) {
                 ref var x = ref heap(new @string(), out var Ꮡx);
                 nint old = dec.tokenState;
                 dec.tokenState = tokenTopValue;
                 var errΔ3 = Ꮡdec.Decode(Ꮡx);
                 dec.tokenState = old;
-                if (errΔ3 != default!) {
-                    return (default!, errΔ3);
+                if (errΔ3 != nil) {
+                    return (default, errΔ3);
                 }
                 dec.tokenState = tokenObjectColon;
-                return (x, default!);
+                return (x, default);
             }
             fallthrough = true;
         }
@@ -483,11 +489,11 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             }
             ref var x = ref heap<any>(out var Ꮡx);
             {
-                var errΔ4 = Ꮡdec.Decode(Ꮡx); if (errΔ4 != default!) {
-                    return (default!, errΔ4);
+                var errΔ4 = Ꮡdec.Decode(Ꮡx); if (errΔ4 != nil) {
+                    return (default, errΔ4);
                 }
             }
-            return (x, default!);
+            return (x, default);
         }
     }
 }
@@ -500,49 +506,55 @@ internal static readonly @string afterObjectKeyˢ2 = " after object key"u8;
 internal static readonly @string afterObjectKeyValuePairˢ2 = " after object key:value pair"u8;
 
 internal static (ΔToken, error) tokenError(this ref Decoder dec, byte c) {
-    @string context = default!;
-    var exprᴛ1 = dec.tokenState;
-    if (exprᴛ1 == tokenTopValue) {
+    @string context = default;
+    switch (dec.tokenState) {
+    case var ᴛ when ᴛ == tokenTopValue: {
         context = lookingForBeginningOfˢ3;
+        break;
     }
-    else if (exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue || exprᴛ1 == tokenObjectValue) {
+    case var ᴛ when ᴛ == tokenArrayStart || ᴛ == tokenArrayValue || ᴛ == tokenObjectValue: {
         context = lookingForBeginningOfˢ3;
+        break;
     }
-    else if (exprᴛ1 == tokenArrayComma) {
+    case var ᴛ when ᴛ == tokenArrayComma: {
         context = afterArrayElementˢ2;
+        break;
     }
-    else if (exprᴛ1 == tokenObjectKey) {
+    case var ᴛ when ᴛ == tokenObjectKey: {
         context = lookingForBeginningOfˢ4;
+        break;
     }
-    else if (exprᴛ1 == tokenObjectColon) {
+    case var ᴛ when ᴛ == tokenObjectColon: {
         context = afterObjectKeyˢ2;
+        break;
     }
-    else if (exprᴛ1 == tokenObjectComma) {
+    case var ᴛ when ᴛ == tokenObjectComma: {
         context = afterObjectKeyValuePairˢ2;
-    }
-    return (default!, new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + context, dec.InputOffset()))));
+        break;
+    }}
+    return (default, new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + context, dec.InputOffset()))));
 }
 
 // More reports whether there is another element in the
 // current array or object being parsed.
 public static bool More(this ref Decoder dec) {
     var (c, err) = dec.peek();
-    return err == default! && c != (rune)']' && c != (rune)'}';
+    return err == nil && c != ']' && c != '}';
 }
 
 internal static (byte, error) peek(this ref Decoder dec) {
-    error err = default!;
-    while (ᐧ) {
+    error err = default;
+    for (;;) {
         for (nint i = dec.scanp; i < len(dec.buf); i++) {
             var c = dec.buf[i];
             if (isSpace(c)) {
                 continue;
             }
             dec.scanp = i;
-            return (c, default!);
+            return (c, default);
         }
         // buffer has been scanned, now report any error
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         err = dec.refill();

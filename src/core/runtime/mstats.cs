@@ -29,13 +29,13 @@ partial struct mstats {
     // Protected by mheap or worldsema during GC.
     internal uint64 last_gc_unix; // last gc (in unix time)
     internal uint64 pause_total_ns;
-    internal array<uint64> pause_ns = new(256); // circular buffer of recent gc pause lengths
+    internal array<uint64> pause_ns = new(256);  // circular buffer of recent gc pause lengths
     internal array<uint64> pause_end = new(256); // circular buffer of recent gc end times (nanoseconds since 1970)
     internal uint32 numgc;
-    internal uint32 numforcedgc;  // number of user-forced GCs
+    internal uint32 numforcedgc;      // number of user-forced GCs
     internal float64 gc_cpu_fraction; // fraction of CPU time used by GC
     internal uint64 last_gc_nanotime; // last gc (monotonic time)
-    internal uint64 lastHeapInUse; // heapInUse at mark termination of the previous GC
+    internal uint64 lastHeapInUse;    // heapInUse at mark termination of the previous GC
     internal array<sizeClassScanStats> lastScanStats = new(gc.NumSizeClasses);
     internal bool enablegc;
 }
@@ -516,9 +516,9 @@ internal static void readmemstats_m(ref MemStats stats) {
 }
 
 //go:linkname readGCStats runtime/debug.readGCStats
-internal static void readGCStats(ж<slice<uint64>> Ꮡpauses) {
+internal static void readGCStats(ж<slice<uint64>> pauses) {
     systemstack(() => {
-        readGCStats_m(ref (Ꮡpauses).DerefOrNull());
+        readGCStats_m(ref (pauses).DerefOrNull());
     });
 }
 
@@ -616,22 +616,22 @@ internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
 // consistent with one another.
 partial struct heapStatsDelta {
     // Memory stats.
-    internal int64 committed; // byte delta of memory committed
-    internal int64 released; // byte delta of released memory generated
-    internal int64 inHeap; // byte delta of memory placed in the heap
-    internal int64 inStacks; // byte delta of memory reserved for stacks
+    internal int64 committed;  // byte delta of memory committed
+    internal int64 released;   // byte delta of released memory generated
+    internal int64 inHeap;     // byte delta of memory placed in the heap
+    internal int64 inStacks;   // byte delta of memory reserved for stacks
     internal int64 inWorkBufs; // byte delta of memory reserved for work bufs
     // Allocator stats.
     //
     // These are all uint64 because they're cumulative, and could quickly wrap
     // around otherwise.
-    internal uint64 tinyAllocCount;                    // number of tiny allocations
-    internal uint64 largeAlloc;                    // bytes allocated for large objects
-    internal uint64 largeAllocCount;                    // number of large object allocations
+    internal uint64 tinyAllocCount;                                  // number of tiny allocations
+    internal uint64 largeAlloc;                                      // bytes allocated for large objects
+    internal uint64 largeAllocCount;                                 // number of large object allocations
     internal array<uint64> smallAllocCount = new(gc.NumSizeClasses); // number of allocs for small objects
-    internal uint64 largeFree;                    // bytes freed for large objects (>maxSmallSize)
-    internal uint64 largeFreeCount;                    // number of frees for large objects (>maxSmallSize)
-    internal array<uint64> smallFreeCount = new(gc.NumSizeClasses); // number of frees for small objects (<=maxSmallSize)
+    internal uint64 largeFree;                                       // bytes freed for large objects (>maxSmallSize)
+    internal uint64 largeFreeCount;                                  // number of frees for large objects (>maxSmallSize)
+    internal array<uint64> smallFreeCount = new(gc.NumSizeClasses);  // number of frees for small objects (<=maxSmallSize)
 }
 
 // NOTE: This struct must be a multiple of 8 bytes in size because it
@@ -726,7 +726,7 @@ internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     {
-        var pp = (~(~getg()).m).p.ptr(); if (pp != nil){
+        var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
             var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
             if (seq % 2 == 0) {
                 // Should have been incremented to odd.
@@ -759,7 +759,7 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     {
-        var pp = (~(~getg()).m).p.ptr(); if (pp != nil){
+        var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
             var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
             if (seq % 2 != 0) {
                 // Should have been incremented to even.
@@ -803,13 +803,13 @@ partial struct cpuStats {
 // calls of nanotime. This means they're all overestimates, because
 // they don't accurately compute on-CPU time (so some of the time
 // could be spent scheduled away by the OS).
-    public int64 GCAssistTime; // GC assists
+    public int64 GCAssistTime;    // GC assists
     public int64 GCDedicatedTime; // GC dedicated mark workers + pauses
-    public int64 GCIdleTime; // GC idle mark workers
-    public int64 GCPauseTime; // GC pauses (all GOMAXPROCS, even if just 1 is running)
+    public int64 GCIdleTime;      // GC idle mark workers
+    public int64 GCPauseTime;     // GC pauses (all GOMAXPROCS, even if just 1 is running)
     public int64 GCTotalTime;
     public int64 ScavengeAssistTime; // background scavenger
-    public int64 ScavengeBgTime; // scavenge assists
+    public int64 ScavengeBgTime;     // scavenge assists
     public int64 ScavengeTotalTime;
     public int64 IdleTime; // Time Ps spent in _Pidle.
     public int64 UserTime; // Time Ps spent in _Prunning that's not any of the above.
@@ -834,10 +834,10 @@ internal static void accumulateGCPauseTime(this ref cpuStats s, int64 dt, int32 
 internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase) {
     // N.B. Mark termination and sweep termination pauses are
     // accumulated in work.cpuStats at the end of their respective pauses.
-    int64 markAssistCpu = default!;
-    int64 markDedicatedCpu = default!;
-    int64 markFractionalCpu = default!;
-    int64 markIdleCpu = default!;
+    int64 markAssistCpu = default;
+    int64 markDedicatedCpu = default;
+    int64 markFractionalCpu = default;
+    int64 markIdleCpu = default;
     if (gcMarkPhase) {
         // N.B. These stats may have stale values if the GC is not
         // currently in the mark phase.

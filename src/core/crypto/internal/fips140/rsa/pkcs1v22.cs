@@ -58,7 +58,7 @@ internal static void incCounter(ref array<byte> c) {
 // specified in PKCS #1 v2.1.
 internal static void mgf1XOR(slice<byte> @out, hash.Hash hashΔ1, slice<byte> seed) {
     ref var counter = ref heap(new array<byte>(4), out var Ꮡcounter);
-    slice<byte> digest = default!;
+    slice<byte> digest = default;
 
     nint done = 0;
     while (done < len(@out)) {
@@ -92,13 +92,13 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
     // 2.  Let mHash = Hash(M), an octet string of length hLen.
 
     if (len(mHash) != hLen) {
-        return (default!, errors.New(cryptoRsaInputMustBeˢ));
+        return (default, errors.New(cryptoRsaInputMustBeˢ));
     }
 
     // 3.  If emLen < hLen + sLen + 2, output "encoding error" and stop.
 
     if (emLen < hLen + sLen + 2) {
-        return (default!, ErrMessageTooLong);
+        return (default, ErrMessageTooLong);
     }
 
     var em = new slice<byte>(emLen);
@@ -150,7 +150,7 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
     em[emLen - 1] = 0xbc;
 
     // 13. Output EM.
-    return (em, default!);
+    return (em, default);
 }
 
 internal static UntypedInt pssSaltLengthAutodetect => -1;
@@ -253,13 +253,13 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     hashΔ1.Write(mHash);
     hashΔ1.Write(salt);
 
-    var h0 = hashΔ1.Sum(default!);
+    var h0 = hashΔ1.Sum(default);
 
     // 14. If H = H', output "consistent." Otherwise, output "inconsistent."
     if (!bytes.Equal(h0, h)) {
         return ErrVerification;
     }
-    return default!;
+    return default;
 }
 
 // PSSMaxSaltLength returns the maximum salt length for a given public key and
@@ -274,9 +274,9 @@ public static (nint, error) PSSMaxSaltLength(ж<ΔPublicKey> Ꮡpub, hash.Hash h
     // FIPS 186-5, Section 5.4(g): "the length (in bytes) of the salt (sLen)
     // shall satisfy 0 ≤ sLen ≤ hLen".
     if (fips140.Enabled && saltLength > hashΔ1.Size()) {
-        return (hashΔ1.Size(), default!);
+        return (hashΔ1.Size(), default);
     }
-    return (saltLength, default!);
+    return (saltLength, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -297,7 +297,7 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
     // well-specified way.
 
     if (saltLength < 0) {
-        return (default!, errors.New(cryptoRsaSaltLengthˢ));
+        return (default, errors.New(cryptoRsaSaltLengthˢ));
     }
     // FIPS 186-5, Section 5.4(g): "the length (in bytes) of the salt (sLen)
     // shall satisfy 0 ≤ sLen ≤ hLen".
@@ -306,15 +306,15 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
     }
     var salt = new slice<byte>(saltLength);
     {
-        var errΔ1 = drbg.ReadWithReader(rand, salt); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = drbg.ReadWithReader(rand, salt); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
     nint emBits = priv.pub.N.BitLen() - 1;
     var (em, err) = emsaPSSEncode(hashed, emBits, salt, hashΔ1);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // RFC 8017: "Note that the octet length of EM will be one less than k if
@@ -337,16 +337,16 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
 }
 
 // VerifyPSS verifies sig with RSASSA-PSS automatically detecting the salt length.
-public static error VerifyPSS(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig) {
-    return verifyPSS(Ꮡpub, hashΔ1, digest, sig, pssSaltLengthAutodetect);
+public static error VerifyPSS(ж<ΔPublicKey> pub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig) {
+    return verifyPSS(pub, hashΔ1, digest, sig, pssSaltLengthAutodetect);
 }
 
 // VerifyPSSWithSaltLength verifies sig with RSASSA-PSS and an expected salt length.
-public static error VerifyPSSWithSaltLength(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
+public static error VerifyPSSWithSaltLength(ж<ΔPublicKey> pub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
     if (saltLength < 0) {
         return errors.New(cryptoRsaSaltLengthˢ);
     }
-    return verifyPSS(Ꮡpub, hashΔ1, digest, sig, saltLength);
+    return verifyPSS(pub, hashΔ1, digest, sig, saltLength);
 }
 
 internal static error verifyPSS(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
@@ -356,10 +356,9 @@ internal static error verifyPSS(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice
     fips140.RecordApproved();
     checkApprovedHash(hashΔ1);
     {
-        var (fipsApproved, errΔ1) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != default!){
+        var (fipsApproved, errΔ1) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
             return errΔ1;
-        } else 
-        if (!fipsApproved) {
+        } else if (!fipsApproved) {
             fips140.RecordNonApproved();
         }
     }
@@ -371,7 +370,7 @@ internal static error verifyPSS(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice
     nint emBits = pub.N.BitLen() - 1;
     nint emLen = (emBits + 7) / 8;
     var (em, err) = encrypt(ref (Ꮡpub).DerefOrNull(), sig);
-    if (err != default!) {
+    if (err != nil) {
         return ErrVerification;
     }
 
@@ -417,21 +416,20 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
     fips140.RecordApproved();
     checkApprovedHash(hashΔ1);
     {
-        var (fipsApproved, err) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (err != default!){
-            return (default!, err);
-        } else 
-        if (!fipsApproved) {
+        var (fipsApproved, err) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (err != nil) {
+            return (default, err);
+        } else if (!fipsApproved) {
             fips140.RecordNonApproved();
         }
     }
     nint k = pub.Size();
     if (len(msg) > k - 2 * hashΔ1.Size() - 2) {
-        return (default!, ErrMessageTooLong);
+        return (default, ErrMessageTooLong);
     }
 
     hashΔ1.Reset();
     hashΔ1.Write(label);
-    var lHash = hashΔ1.Sum(default!);
+    var lHash = hashΔ1.Sum(default);
 
     var em = new slice<byte>(k);
     var seed = em.slice(1, 1 + hashΔ1.Size());
@@ -442,8 +440,8 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
     copy(db.slice(len(db) - len(msg)), msg);
 
     {
-        var err = drbg.ReadWithReader(random, seed); if (err != default!) {
-            return (default!, err);
+        var err = drbg.ReadWithReader(random, seed); if (err != nil) {
+            return (default, err);
         }
     }
 
@@ -463,17 +461,17 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
 
     nint k = priv.pub.Size();
     if (len(ciphertext) > k || k < hashΔ1.Size() * 2 + 2) {
-        return (default!, ErrDecryption);
+        return (default, ErrDecryption);
     }
 
     var (em, err) = decrypt(ref (Ꮡpriv).DerefOrNull(), ciphertext, noCheck);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     hashΔ1.Reset();
     hashΔ1.Write(label);
-    var lHash = hashΔ1.Sum(default!);
+    var lHash = hashΔ1.Sum(default);
 
     nint firstByteIsZero = constanttime.ByteEq(em[0], 0);
 
@@ -496,9 +494,9 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
     //   lookingForIndex: 1 iff we are still looking for the 0x01
     //   index: the offset of the first 0x01 byte
     //   invalid: 1 iff we saw a non-zero byte before the 0x01.
-    nint lookingForIndex = default!;
-    nint index = default!;
-    nint invalid = default!;
+    nint lookingForIndex = default;
+    nint index = default;
+    nint invalid = default;
     lookingForIndex = 1;
     var rest = db.slice(hashΔ1.Size());
 
@@ -511,10 +509,10 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
     }
 
     if ((firstByteIsZero & lHash2Good & ~invalid & ~lookingForIndex) != 1) {
-        return (default!, ErrDecryption);
+        return (default, ErrDecryption);
     }
 
-    return (rest.slice(index + 1), default!);
+    return (rest.slice(index + 1), default);
 }
 
 } // end rsa_package

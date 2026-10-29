@@ -16,7 +16,7 @@ partial class pprof_package {
 // instead use the binary name and the last modified time for the buildid.
 internal static @string peBuildID(@string @file) {
     var (s, err) = os.Stat(@file);
-    if (err != default!) {
+    if (err != nil) {
         return @file;
     }
     return @file + s.ModTime().String();

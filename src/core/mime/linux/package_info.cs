@@ -10,11 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -65,9 +60,9 @@ using static go.mime_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABo6nLKClKaCgoKmqJK4lIKClJSUAAkYlpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClIK6koKApLS0goLskoKCgoKokqiSgoLWggAPIraClKaCgpSCgqaCgqaCgIKkqrSCgqaUgpSCgoKClJSCgpSClIKUgpSClJSCgpSClIKCgoKCyoKmgIK2gqaCpqaClKSkAAgIgpS0gsaCgpTYgpSCgpSAgsaqooLqpqiSgoKCgKS0gpSCgpSCtLSkpqiSkoKAgqSAgqSmgpSktpQ=")]
 [assembly: go.GoPositionMap("mime/grammar.go", "grammar.cs", "AAoSAAISABgg3AACEAAcKqyigpSCgqY=")]
-[assembly: go.GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABIq0oKAgoKUlIKUgoK2goKCgoKUlIKUlJSClIKCpoiClIKCpoKmgoKmgoKCgoKCgqaClKaCgoKUgpSCgIKkgoKUgpSogoKCzAABGAAOAoKUgoKmmsSCgoKClIKCpqamgoCCgpSAgoLGgJSkgqqigoKAgoCCpLaCgoKCgIKCgqSCgoKUgoKAgraCpoK4ppSCgoLKgoKUgsiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgIK2goKCgqaCgIKkgoKClIKmlIKCgoKUgoKUlIKmgoKClIKCtIKCtqaClKSklKaClKSklA==", "", "", "66=isTSpecial/1/1/2")]
+[assembly: go.GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABIq0oKAgoKUlIKUgoK2goKCgoKUlIKUlJSClIKCpoiClIKCpoKmgoKmgoKCgoKCgqaClKaCgoKUgpSCgIKkgoKUgpSogoKCzAABGAAOAoKUgoKmmsSCgoKClIKCpqamgoCCgpSAgoLGgJSkgqqigoKAgoCCpLaCgoKCgIKCgqSCgoKUgoKAgraCpoK4ppSCgoLKgoKUguiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgIK2goKCgqaCgIKkgoKClIKmlIKCgoKUgoKUlIKmgoKClIKCtIKCtqaClKSklKaClKSklA==", "", "", "66=isTSpecial/1/1/2")]
 [assembly: go.GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgIKktAANGgBIjgGCgIKUggAEMAAWAqaAgryygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSC5qKCgpSCgpSUgpSCgoKAgqSCgqaC")]
-[assembly: go.GoPositionMap("mime/type_unix.go", "type_unix.cs", "AA0egsrc7qKCgpSkgpSCgpKCpoIACRSUgLi2lICCpNaigoKUpIKCgoKUgoKClKaAgsSkgoKAgtqCuIKCgg==")]
+[assembly: go.GoPositionMap("mime/type_unix.go", "type_unix.cs", "AA0egsrc7qKCgpSkgpSCgoKCpoIACRSUgLi2lICCpNaigoKUpIKCgoKUgoKClKaAgsSkgoKAgtqCuIKCgg==", "", "", "", "41:21,96:21")]
 // </GoSourcePositionMaps>
 
 namespace go;

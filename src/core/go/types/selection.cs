@@ -49,9 +49,9 @@ partial class types_package {
 // called, so a T.f or (*T).f expression never panics.
 partial struct SelectionKind /*num:nint*/;
 
-public static SelectionKind FieldVal => /* iota */ 0;    // x.f is a struct field selector
-public static SelectionKind MethodVal => 1;   // x.f is a method selector
-public static SelectionKind MethodExpr => 2;  // x.f is a method expression
+public static SelectionKind FieldVal => /* iota */ 0; // x.f is a struct field selector
+public static SelectionKind MethodVal => 1;           // x.f is a method selector
+public static SelectionKind MethodExpr => 2;          // x.f is a method expression
 
 // A Selection describes a selector expression x.f.
 // For the declarations:
@@ -70,10 +70,10 @@ public static SelectionKind MethodExpr => 2;  // x.f is a method expression
 //	T.m         MethodExpr    T       m      func(T)    {1, 0}    false
 partial struct Selection {
     internal SelectionKind kind;
-    internal ΔType recv;   // type of x
-    internal Object obj; // object denoted by x.f
+    internal ΔType recv;        // type of x
+    internal Object obj;        // object denoted by x.f
     internal slice<nint> index; // path from x to x.f
-    internal bool indirect;   // set if there was any pointer indirection on the path
+    internal bool indirect;     // set if there was any pointer indirection on the path
 }
 
 // Kind returns the selection kind.
@@ -95,36 +95,32 @@ public static Object Obj(this ref Selection s) {
 // Type returns the type of x.f, which may be different from the type of f.
 // See Selection for more information.
 public static ΔType Type(this ref Selection s) {
-    var exprᴛ1 = s.kind;
-    if (exprᴛ1 == MethodVal) {
+    switch (s.kind) {
+    case var ᴛ when ᴛ == MethodVal: {
         // The type of x.f is a method with its receiver type set
         // to the type of x.
-        ref var sig = ref heap<ΔSignature>(out var Ꮡsig);
-        sig = (~s.obj._<ж<Func>>()).typ._<ж<ΔSignature>>().Value;
-        ref var recv = ref heap<Var>(out var Ꮡrecv);
-        recv = sig.recv.Value;
+        ref var sig = ref heap<ΔSignature>((~s.obj._<ж<Func>>()).typ._<ж<ΔSignature>>().Value, out var Ꮡsig);
+        ref var recv = ref heap<Var>(sig.recv.Value, out var Ꮡrecv);
         recv.typ = s.recv;
         sig.recv = Ꮡrecv;
         return new ΔSignatureжΔType(Ꮡsig);
     }
-    if (exprᴛ1 == MethodExpr) {
+    case var ᴛ when ᴛ == MethodExpr: {
         // The type of x.f is a function (without receiver)
         // and an additional first argument with the same type as x.
         // TODO(gri) Similar code is already in call.go - factor!
         // TODO(gri) Compute this eagerly to avoid allocations.
-        ref var sig = ref heap<ΔSignature>(out var Ꮡsig);
-        sig = (~s.obj._<ж<Func>>()).typ._<ж<ΔSignature>>().Value;
-        ref var arg0 = ref heap<Var>(out var Ꮡarg0);
-        arg0 = sig.recv.Value;
-        sig.recv = default!;
+        ref var sig = ref heap<ΔSignature>((~s.obj._<ж<Func>>()).typ._<ж<ΔSignature>>().Value, out var Ꮡsig);
+        ref var arg0 = ref heap<Var>(sig.recv.Value, out var Ꮡarg0);
+        sig.recv = default;
         arg0.typ = s.recv;
-        slice<ж<Var>> @params = default!;
+        slice<ж<Var>> @params = default;
         if (sig.@params != nil) {
-            @params = sig.@params.Value.vars;
+            @params = sig.@params.vars;
         }
-        sig.@params = NewTuple(appendꓸꓸꓸ(new ж<Var>[]{Ꮡarg0}.slice(), @params).ꓸꓸꓸ);
+        sig.@params = NewTuple(appendꓸꓸꓸ(slice<ж<Var>>([Ꮡarg0]), @params).ꓸꓸꓸ);
         return new ΔSignatureжΔType(Ꮡsig);
-    }
+    }}
 
     // In all other cases, the type of x.f is the type of x.
     return s.obj.Type();
@@ -156,7 +152,7 @@ public static bool Indirect(this ref Selection s) {
 }
 
 public static @string String(this ж<Selection> Ꮡs) {
-    return SelectionString(Ꮡs, default!);
+    return SelectionString(Ꮡs, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -176,28 +172,32 @@ internal static readonly @string methodExprˢ = "method expr "u8;
 public static @string SelectionString(ж<Selection> Ꮡs, Func<ж<Package>, @string> qf) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    @string k = default!;
-    var exprᴛ1 = s.kind;
-    if (exprᴛ1 == FieldVal) {
+    @string k = default;
+    switch (s.kind) {
+    case var ᴛ when ᴛ == FieldVal: {
         k = fieldˢ2;
+        break;
     }
-    else if (exprᴛ1 == MethodVal) {
+    case var ᴛ when ᴛ == MethodVal: {
         k = methodˢ2;
+        break;
     }
-    else if (exprᴛ1 == MethodExpr) {
+    case var ᴛ when ᴛ == MethodExpr: {
         k = methodExprˢ;
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("unreachable");
-    }
+        break;
+    }}
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     buf.WriteString(k);
-    buf.WriteByte((rune)'(');
+    buf.WriteByte((byte)'(');
     WriteType(Ꮡbuf, s.Recv(), qf);
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), ") %s"u8, s.obj.Name());
     {
-        var T = s.Type(); if (s.kind == FieldVal){
-            buf.WriteByte((rune)' ');
+        var T = s.Type(); if (s.kind == FieldVal) {
+            buf.WriteByte((byte)' ');
             WriteType(Ꮡbuf, T, qf);
         } else {
             WriteSignature(Ꮡbuf, T._<ж<ΔSignature>>(), qf);

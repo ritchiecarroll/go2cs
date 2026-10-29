@@ -35,18 +35,18 @@ partial struct testCase {
     internal slice<Func<map<@string, any>, @string>> checks;
 }
 
-internal static slice<testCase> cases = new testCase[]{
+internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "built-ins"u8,
         explanation: withSource("this test expects slog.TimeKey, slog.LevelKey and slog.MessageKey"u8),
         f: (ж<slog.Logger> l) => {
             l.Info("message"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
             hasAttr(slog.MessageKey, (@string)"message"u8)
-        }.slice()
+        ])
     ),
     new(
         name: "attrs"u8,
@@ -54,21 +54,21 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.Info("message"u8, (@string)"k"u8, (@string)"v"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasAttr("k"u8, (@string)"v"u8)
-        }.slice()
+        ])
     ),
     new(
         name: "empty-attr"u8,
         explanation: withSource("a Handler should ignore an empty Attr"u8),
         f: (ж<slog.Logger> l) => {
-            l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, (@string)""u8, (any)(default!), (@string)"c"u8, (@string)"d"u8);
+            l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, (@string)""u8, (any)(default), (@string)"c"u8, (@string)"d"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasAttr("a"u8, (@string)"b"u8),
             missingKey(""u8),
             hasAttr("c"u8, (@string)"d"u8)
-        }.slice()
+        ])
     ),
     new(
         name: "zero-time"u8,
@@ -77,11 +77,11 @@ internal static slice<testCase> cases = new testCase[]{
             l.Info("msg"u8, (@string)"k"u8, (@string)"v"u8);
         },
         mod: (ж<slog.Record> r) => {
-            r.Value.Time = new time.Time(nil);
+            r.Time = new time.Time();
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             missingKey(slog.TimeKey)
-        }.slice()
+        ])
     ),
     new(
         name: "WithAttrs"u8,
@@ -89,10 +89,10 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.With((@string)"a"u8, (@string)"b"u8).Info("msg"u8, (@string)"k"u8, (@string)"v"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasAttr("a"u8, (@string)"b"u8),
             hasAttr("k"u8, (@string)"v"u8)
-        }.slice()
+        ])
     ),
     new(
         name: "groups"u8,
@@ -100,11 +100,11 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, slog.Group("G"u8, slog.String("c"u8, "d"u8)), (@string)"e"u8, (@string)"f"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasAttr("a"u8, (@string)"b"u8),
             inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
             hasAttr("e"u8, (@string)"f"u8)
-        }.slice()
+        ])
     ),
     new(
         name: "empty-group"u8,
@@ -112,11 +112,11 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, slog.Group("G"u8), (@string)"e"u8, (@string)"f"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasAttr("a"u8, (@string)"b"u8),
             missingKey("G"u8),
             hasAttr("e"u8, (@string)"f"u8)
-        }.slice()
+        ])
     ),
     new(
         name: "inline-group"u8,
@@ -124,11 +124,11 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, slog.Group(""u8, slog.String("c"u8, "d"u8)), (@string)"e"u8, (@string)"f"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasAttr("a"u8, (@string)"b"u8),
             hasAttr("c"u8, (@string)"d"u8),
             hasAttr("e"u8, (@string)"f"u8)
-        }.slice()
+        ])
     ),
     new(
         name: "WithGroup"u8,
@@ -136,13 +136,13 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.WithGroup("G"u8).Info("msg"u8, (@string)"a"u8, (@string)"b"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
             hasAttr(slog.MessageKey, (@string)"msg"u8),
             missingKey("a"u8),
             inGroup("G"u8, hasAttr("a"u8, (@string)"b"u8))
-        }.slice()
+        ])
     ),
     new(
         name: "multi-With"u8,
@@ -150,14 +150,14 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.With((@string)"a"u8, (@string)"b"u8).WithGroup("G"u8).With((@string)"c"u8, (@string)"d"u8).WithGroup("H"u8).Info("msg"u8, (@string)"e"u8, (@string)"f"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
             hasAttr(slog.MessageKey, (@string)"msg"u8),
             hasAttr("a"u8, (@string)"b"u8),
             inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
             inGroup("G"u8, inGroup("H"u8, hasAttr("e"u8, (@string)"f"u8)))
-        }.slice()
+        ])
     ),
     new(
         name: "empty-group-record"u8,
@@ -165,14 +165,14 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.With((@string)"a"u8, (@string)"b"u8).WithGroup("G"u8).With((@string)"c"u8, (@string)"d"u8).WithGroup("H"u8).Info("msg"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
             hasAttr(slog.MessageKey, (@string)"msg"u8),
             hasAttr("a"u8, (@string)"b"u8),
             inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
             inGroup("G"u8, missingKey("H"u8))
-        }.slice()
+        ])
     ),
     new(
         name: "nested-empty-group-record"u8,
@@ -180,7 +180,7 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.With((@string)"a"u8, (@string)"b"u8).WithGroup("G"u8).With((@string)"c"u8, (@string)"d"u8).WithGroup("H"u8).WithGroup("I"u8).Info("msg"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
             hasAttr(slog.MessageKey, (@string)"msg"u8),
@@ -188,7 +188,7 @@ internal static slice<testCase> cases = new testCase[]{
             inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
             inGroup("G"u8, missingKey("H"u8)),
             inGroup("G"u8, missingKey("I"u8))
-        }.slice()
+        ])
     ),
     new(
         name: "resolve"u8,
@@ -196,7 +196,7 @@ internal static slice<testCase> cases = new testCase[]{
         f: (ж<slog.Logger> l) => {
             l.Info("msg"u8, (@string)"k"u8, Ꮡ(new replace((@string)"replaced"u8)));
         },
-        checks: new Func<map<@string, any>, @string>[]{hasAttr("k"u8, (@string)"replaced"u8)}.slice()
+        checks: slice<Func<map<@string, any>, @string>>([hasAttr("k"u8, (@string)"replaced"u8)])
     ),
     new(
         name: "resolve-groups"u8,
@@ -207,10 +207,10 @@ internal static slice<testCase> cases = new testCase[]{
                     slog.String("a"u8, "v1"u8),
                     slog.Any("b"u8, Ꮡ(new replace((@string)"v2"u8)))));
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             inGroup("G"u8, hasAttr("a"u8, (@string)"v1"u8)),
             inGroup("G"u8, hasAttr("b"u8, (@string)"v2"u8))
-        }.slice()
+        ])
     ),
     new(
         name: "resolve-WithAttrs"u8,
@@ -219,7 +219,7 @@ internal static slice<testCase> cases = new testCase[]{
             l = l.With((@string)"k"u8, Ꮡ(new replace((@string)"replaced"u8)));
             l.Info("msg"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{hasAttr("k"u8, (@string)"replaced"u8)}.slice()
+        checks: slice<Func<map<@string, any>, @string>>([hasAttr("k"u8, (@string)"replaced"u8)])
     ),
     new(
         name: "resolve-WithAttrs-groups"u8,
@@ -230,10 +230,10 @@ internal static slice<testCase> cases = new testCase[]{
                 slog.Any("b"u8, Ꮡ(new replace((@string)"v2"u8)))));
             l.Info("msg"u8);
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             inGroup("G"u8, hasAttr("a"u8, (@string)"v1"u8)),
             inGroup("G"u8, hasAttr("b"u8, (@string)"v2"u8))
-        }.slice()
+        ])
     ),
     new(
         name: "empty-PC"u8,
@@ -242,13 +242,13 @@ internal static slice<testCase> cases = new testCase[]{
             l.Info("message"u8);
         },
         mod: (ж<slog.Record> r) => {
-            r.Value.PC = 0;
+            r.PC = 0;
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             missingKey(slog.SourceKey)
-        }.slice()
+        ])
     )
-}.slice();
+]);
 
 // TestHandler tests a [slog.Handler].
 // If TestHandler finds any misbehaviors, it returns an error for each,
@@ -275,7 +275,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
     // Run the handler on the test cases.
     foreach (var (_, c) in cases) {
         var ht = h;
-        if (c.mod != default!) {
+        if (c.mod != nil) {
             ht = new wrapperжΔHandler(Ꮡ(new wrapper(h, c.mod)));
         }
         var l = slog.New(ht);
@@ -283,7 +283,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
     }
 
     // Collect and check the results.
-    slice<error> errs = default!;
+    slice<error> errs = default;
     var res = results();
     {
         nint g = len(res);
@@ -308,15 +308,15 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
 // runs each case in a subtest. For each test case, it first calls newHandler to
 // get an instance of the handler under test, then runs the test case, then
 // calls result to get the result. If the test case fails, it calls t.Error.
-public static void Run(ж<testing.T> Ꮡt, Func<ж<testing.T>, slogꓸHandler> newHandler, Func<ж<testing.T>, map<@string, any>> result) {
+public static void Run(ж<testing.T> t, Func<ж<testing.T>, slogꓸHandler> newHandler, Func<ж<testing.T>, map<@string, any>> result) {
     foreach (var (_, vᴛ1) in cases) {
         ref var c = ref heap(new testCase(), out var Ꮡc);
         c = vᴛ1;
 
         var cʗ1 = c;
-        Ꮡt.Run(c.name, (ж<testing.T> tΔ1) => {
+        t.Run(c.name, (ж<testing.T> tΔ1) => {
             var h = newHandler(tΔ1);
-            if (cʗ1.mod != default!) {
+            if (cʗ1.mod != nil) {
                 h = new wrapperжΔHandler(Ꮡ(new wrapper(h, cʗ1.mod)));
             }
             var l = slog.New(h);

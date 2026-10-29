@@ -53,7 +53,7 @@ internal static uint32 b32(bool b) {
 
 // For testing *Pointer[T]'s methods can be inlined.
 // Keep in sync with cmd/compile/internal/test/inl_test.go:TestIntendedInlining.
-internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
+internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>());
 
 // A Pointer is an atomic pointer of type *T. The zero value is a nil *T.
 //
@@ -73,18 +73,18 @@ public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx) {
 }
 
 // Store atomically stores val into x.
-public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡval) {
-    StorePointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(Ꮡval));
+public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> val) {
+    StorePointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(val));
 }
 
 // Swap atomically stores new into x and returns the previous value.
-public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡnew) {
-    return (ж<T>)(uintptr)(SwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(Ꮡnew)));
+public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> @new) {
+    return (ж<T>)(uintptr)(SwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(@new)));
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
-public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡold, ж<T> Ꮡnew) {
-    return CompareAndSwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(Ꮡold), @unsafe.Pointer.FromPinnedBox(Ꮡnew));
+public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T> old, ж<T> @new) {
+    return CompareAndSwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
 
 // An Int32 is an atomic int32. The zero value is zero.

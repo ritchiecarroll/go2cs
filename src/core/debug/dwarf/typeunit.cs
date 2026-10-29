@@ -16,9 +16,9 @@ partial class dwarf_package {
 // the same data as a compilation unit.
 partial struct typeUnit {
     /*embed*/ internal unit unit;
-    internal Offset toff; // Offset to signature type within data.
+    internal Offset toff;  // Offset to signature type within data.
     internal @string name; // Name of .debug_type section.
-    internal ΔType cache;   // Cache the type, nil to start.
+    internal ΔType cache;  // Cache the type, nil to start.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -29,7 +29,7 @@ internal static readonly @string typeUnitTypeOffsetˢ = "type unit type offset o
 internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    var b = makeBuf(Ꮡd, new unknownFormat(nil), name, 0, types);
+    var b = makeBuf(Ꮡd, new unknownFormat(), name, 0, types);
     while (len(b.data) > 0) {
         var @base = b.off;
         var (n, dwarf64) = b.unitLength();
@@ -43,21 +43,21 @@ internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> t
             b.error("unsupported DWARF version "u8 + strconv.Itoa(vers));
             return b.err;
         }
-        uint64 ao = default!;
-        if (!dwarf64){
+        uint64 ao = default;
+        if (!dwarf64) {
             ao = (uint64)b.uint32();
         } else {
             ao = b.uint64();
         }
         var (atable, err) = Ꮡd.parseAbbrev(ao, vers);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var asize = b.uint8();
         var sig = b.uint64();
 
-        uint32 toff = default!;
-        if (!dwarf64){
+        uint32 toff = default;
+        if (!dwarf64) {
             toff = b.uint32();
         } else {
             var to64 = b.uint64();
@@ -73,7 +73,7 @@ internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> t
             unit: new unit(
                 @base: @base,
                 off: boff,
-                data: b.bytes((nint)(uint32)(n - (b.off - hdroff))),
+                data: b.bytes((nint)(n - (b.off - hdroff))),
                 atable: atable,
                 asize: (nint)asize,
                 vers: vers,
@@ -82,11 +82,11 @@ internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> t
             toff: ((Offset)toff),
             name: name
         ));
-        if (b.err != default!) {
+        if (b.err != nil) {
             return b.err;
         }
     }
-    return default!;
+    return default;
 }
 
 // Return the type for a type signature.
@@ -95,22 +95,21 @@ internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
 
     var tu = d.typeSigs[sig];
     if (tu == nil) {
-        return (default!, fmt.Errorf("no type unit with signature %v"u8, sig));
+        return (default, fmt.Errorf("no type unit with signature %v"u8, sig));
     }
-    if ((~tu).cache != default!) {
-        return ((~tu).cache, default!);
+    if (tu.cache != nil) {
+        return (tu.cache, default);
     }
 
-    ref var b = ref heap<buf>(out var Ꮡb);
-    b = makeBuf(Ꮡd, new typeUnitжdataFormat(tu), (~tu).name, (~tu).off, (~tu).data);
+    ref var b = ref heap<buf>(makeBuf(Ꮡd, new typeUnitжdataFormat(tu), tu.name, (~tu).off, (~tu).data), out var Ꮡb);
     var r = Ꮡ(new typeUnitReader(d: Ꮡd, tu: tu, b: b));
-    var (t, err) = Ꮡd.readType((~tu).name, new typeUnitReaderжtypeReader(r), (~tu).toff, new map<Offset, ΔType>(), nil);
-    if (err != default!) {
-        return (default!, err);
+    var (t, err) = Ꮡd.readType(tu.name, new typeUnitReaderжtypeReader(r), tu.toff, new map<Offset, ΔType>(), nil);
+    if (err != nil) {
+        return (default, err);
     }
 
-    tu.Value.cache = t;
-    return (t, default!);
+    tu.cache = t;
+    return (t, default);
 }
 
 // typeUnitReader is a typeReader for a tagTypeUnit.
@@ -123,36 +122,36 @@ partial struct typeUnitReader {
 
 // Seek to a new position in the type unit.
 internal static void Seek(this ref typeUnitReader tur, Offset off) {
-    tur.err = default!;
+    tur.err = default;
     var doff = off - (~tur.tu).off;
     if (doff < 0 || doff >= ((Offset)(uint32)len((~tur.tu).data))) {
-        tur.err = fmt.Errorf("%s: offset %d out of range; max %d"u8, (~tur.tu).name, doff, len((~tur.tu).data));
+        tur.err = fmt.Errorf("%s: offset %d out of range; max %d"u8, tur.tu.name, doff, len((~tur.tu).data));
         return;
     }
-    tur.b = makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), (~tur.tu).name, off, (~tur.tu).data.slice((nint)(uint32)(doff)));
+    tur.b = makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), tur.tu.name, off, (~tur.tu).data.slice((nint)(doff)));
 }
 
 // AddressSize returns the size in bytes of addresses in the current type unit.
 internal static nint AddressSize(this ref typeUnitReader tur) {
-    return (~tur.tu).unit.asize;
+    return tur.tu.unit.asize;
 }
 
 // Next reads the next [Entry] from the type unit.
 internal static (ж<Entry>, error) Next(this ж<typeUnitReader> Ꮡtur) {
     ref var tur = ref Ꮡtur.DerefOrNull();
 
-    if (tur.err != default!) {
-        return (default!, tur.err);
+    if (tur.err != nil) {
+        return (default, tur.err);
     }
     if (len((~tur.tu).data) == 0) {
-        return (default!, default!);
+        return (default, default);
     }
     var e = Ꮡtur.of(typeUnitReader.Ꮡb).entry(nil, tur.tu.of(typeUnit.Ꮡunit));
-    if (tur.b.err != default!) {
+    if (tur.b.err != nil) {
         tur.err = tur.b.err;
-        return (default!, tur.err);
+        return (default, tur.err);
     }
-    return (e, default!);
+    return (e, default);
 }
 
 // clone returns a new reader for the type unit.
@@ -160,7 +159,7 @@ internal static typeReader clone(this ref typeUnitReader tur) {
     return new typeUnitReaderжtypeReader(Ꮡ(new typeUnitReader(
         d: tur.d,
         tu: tur.tu,
-        b: makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), (~tur.tu).name, (~tur.tu).off, (~tur.tu).data)
+        b: makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), tur.tu.name, (~tur.tu).off, (~tur.tu).data)
     )));
 }
 

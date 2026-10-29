@@ -68,7 +68,7 @@ internal static UntypedInt cpuid_RDTSCP => /* 1 << 27 */ 134217728;
 internal static uint32 maxExtendedFunctionInformation;
 
 internal static void doinit() {
-    options = new option[]{
+    options = slice<option>([
         new(Name: "adx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
         new(Name: "aes"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
         new(Name: "erms"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasERMS)),
@@ -77,7 +77,7 @@ internal static void doinit() {
         new(Name: "rdtscp"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDTSCP)),
         new(Name: "sha"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA)),
         new(Name: "vpclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPCLMULQDQ))
-    }.slice();
+    ]);
     var level = getGOAMD64level();
     if (level < 2) {
         // These options are required at level 2. At lower levels
@@ -195,7 +195,7 @@ internal static void doinit() {
 
     X86.HasFSRM = isSet(edx7, cpuid_FSRM);
 
-    uint32 maxExtendedInformation = default!;
+    uint32 maxExtendedInformation = default;
     (maxExtendedInformation, _, _, _) = cpuid(0x80000000U, 0);
 
     if (maxExtendedInformation < 0x80000001U) {
@@ -241,10 +241,10 @@ public static @string Name() {
 
     var data = new slice<byte>(0, 3 * 4 * 4);
 
-    uint32 eax = default!;
-    uint32 ebx = default!;
-    uint32 ecx = default!;
-    uint32 edx = default!;
+    uint32 eax = default;
+    uint32 ebx = default;
+    uint32 ecx = default;
+    uint32 edx = default;
     (eax, ebx, ecx, edx) = cpuid(0x80000002U, 0);
     data = appendBytes(data, eax, ebx, ecx, edx);
     (eax, ebx, ecx, edx) = cpuid(0x80000003U, 0);
@@ -253,13 +253,13 @@ public static @string Name() {
     data = appendBytes(data, eax, ebx, ecx, edx);
 
     // Trim leading spaces.
-    while (len(data) > 0 && data[0] == (rune)' ') {
+    while (len(data) > 0 && data[0] == ' ') {
         data = data[1..];
     }
 
     // Trim tail after and including the first null byte.
     foreach (var (i, c) in data) {
-        if (c == (rune)'\x00') {
+        if (c == '\x00') {
             data = data.slice(0, i);
             break;
         }

@@ -19,40 +19,42 @@ internal static readonly @string parsenetlinkrouteattrˢ = "parsenetlinkrouteatt
 // interface.
 internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
     var (tab, err) = syscall.NetlinkRIB(syscall.RTM_GETLINK, syscall.AF_UNSPEC);
-    if (err != default!) {
-        return (default!, os.NewSyscallError(netlinkribˢ, err));
+    if (err != nil) {
+        return (default, os.NewSyscallError(netlinkribˢ, err));
     }
     (var msgs, err) = syscall.ParseNetlinkMessage(tab);
-    if (err != default!) {
-        return (default!, os.NewSyscallError(parsenetlinkmessageˢ, err));
+    if (err != nil) {
+        return (default, os.NewSyscallError(parsenetlinkmessageˢ, err));
     }
-    slice<Interface> ift = default!;
+    slice<Interface> ift = default;
 loop:
     foreach (var (_, vᴛ1) in msgs) {
         ref var m = ref heap(new syscall.NetlinkMessage(), out var Ꮡm);
         m = vᴛ1;
 
-        var exprᴛ1 = m.Header.Type;
-        if (exprᴛ1 == syscall.NLMSG_DONE) {
+        switch (m.Header.Type) {
+        case var ᴛ when ᴛ == syscall.NLMSG_DONE: {
             goto break_loop;
+            break;
         }
-        else if (exprᴛ1 == syscall.RTM_NEWLINK) {
+        case var ᴛ when ᴛ == syscall.RTM_NEWLINK: {
             var ifim = Ꮡ(m.Data, 0).Reinterpret<byte, syscall.IfInfomsg>();
-            if (ifindex == 0 || ifindex == (nint)(~ifim).Index) {
+            if (ifindex == 0 || ifindex == (nint)ifim.Index) {
                 var (attrs, errΔ2) = syscall.ParseNetlinkRouteAttr(Ꮡm);
-                if (errΔ2 != default!) {
-                    return (default!, os.NewSyscallError(parsenetlinkrouteattrˢ, errΔ2));
+                if (errΔ2 != nil) {
+                    return (default, os.NewSyscallError(parsenetlinkrouteattrˢ, errΔ2));
                 }
                 ift = append(ift, newLink(ref (ifim).DerefOrNull(), attrs).Value);
-                if (ifindex == (nint)(~ifim).Index) {
+                if (ifindex == (nint)ifim.Index) {
                     goto break_loop;
                 }
             }
-        }
+            break;
+        }}
 continue_loop:;
     }
 break_loop:;
-    return (ift, default!);
+    return (ift, default);
 }
 
 // See linux/if_arp.h.
@@ -60,31 +62,35 @@ break_loop:;
 internal static UntypedInt sysARPHardwareIPv4IPv4 => 768; // IPv4 over IPv4 tunneling
 internal static UntypedInt sysARPHardwareIPv6IPv6 => 769; // IPv6 over IPv6 tunneling
 internal static UntypedInt sysARPHardwareIPv6IPv4 => 776; // IPv6 over IPv4 tunneling
-internal static UntypedInt sysARPHardwareGREIPv4 => 778; // any over GRE over IPv4 tunneling
-internal static UntypedInt sysARPHardwareGREIPv6 => 823; // any over GRE over IPv6 tunneling
+internal static UntypedInt sysARPHardwareGREIPv4 => 778;  // any over GRE over IPv4 tunneling
+internal static UntypedInt sysARPHardwareGREIPv6 => 823;  // any over GRE over IPv6 tunneling
 
 internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.NetlinkRouteAttr> attrs) {
     var ifi = Ꮡ(new Interface(Index: (nint)ifim.Index, Flags: linkFlags(ifim.Flags)));
     foreach (var (_, a) in attrs) {
-        var exprᴛ1 = a.Attr.Type;
-        if (exprᴛ1 == syscall.IFLA_ADDRESS) {
+        switch (a.Attr.Type) {
+        case var ᴛ when ᴛ == syscall.IFLA_ADDRESS: {
             // We never return any /32 or /128 IP address
             // prefix on any IP tunnel interface as the
             // hardware address.
-            var exprᴛ2 = len(a.Value);
-            if (exprᴛ2 == IPv4len) {
-                var exprᴛ3 = ifim.Type;
-                if (exprᴛ3 == sysARPHardwareIPv4IPv4 || exprᴛ3 == sysARPHardwareGREIPv4 || exprᴛ3 == sysARPHardwareIPv6IPv4) {
+            switch (len(a.Value)) {
+            case var ᴛ2 when ᴛ2 == IPv4len: {
+                switch (ifim.Type) {
+                case var ᴛ3 when ᴛ3 == sysARPHardwareIPv4IPv4 || ᴛ3 == sysARPHardwareGREIPv4 || ᴛ3 == sysARPHardwareIPv6IPv4: {
                     continue;
-                }
+                    break;
+                }}
+                break;
             }
-            else if (exprᴛ2 == IPv6len) {
-                var exprᴛ4 = ifim.Type;
-                if (exprᴛ4 == sysARPHardwareIPv6IPv6 || exprᴛ4 == sysARPHardwareGREIPv6) {
+            case var ᴛ2 when ᴛ2 == IPv6len: {
+                switch (ifim.Type) {
+                case var ᴛ3 when ᴛ3 == sysARPHardwareIPv6IPv6 || ᴛ3 == sysARPHardwareGREIPv6: {
                     continue;
-                }
-            }
-            bool nonzero = default!;
+                    break;
+                }}
+                break;
+            }}
+            bool nonzero = default;
             foreach (var (_, b) in a.Value) {
                 if (b != 0) {
                     nonzero = true;
@@ -92,21 +98,24 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
                 }
             }
             if (nonzero) {
-                ifi.Value.HardwareAddr = a.Value[..];
+                ifi.HardwareAddr = a.Value[..];
             }
+            break;
         }
-        else if (exprᴛ1 == syscall.IFLA_IFNAME) {
-            ifi.Value.Name = (@string)(a.Value.slice(0, len(a.Value) - 1));
+        case var ᴛ when ᴛ == syscall.IFLA_IFNAME: {
+            ifi.Name = (@string)(a.Value.slice(0, len(a.Value) - 1));
+            break;
         }
-        else if (exprᴛ1 == syscall.IFLA_MTU) {
-            ifi.Value.MTU = (nint)(~Ꮡ(a.Value[..4], 0).Reinterpret<byte, uint32>());
-        }
+        case var ᴛ when ᴛ == syscall.IFLA_MTU: {
+            ifi.MTU = (nint)(~Ꮡ(a.Value[..4], 0).Reinterpret<byte, uint32>());
+            break;
+        }}
     }
     return ifi;
 }
 
 internal static Flags linkFlags(uint32 rawFlags) {
-    Flags f = default!;
+    Flags f = default;
     if ((rawFlags & (uint32)syscall.IFF_UP) != 0) {
         f |= (Flags)(FlagUp);
     }
@@ -131,58 +140,60 @@ internal static Flags linkFlags(uint32 rawFlags) {
 // If the ifi is nil, interfaceAddrTable returns addresses for all
 // network interfaces. Otherwise it returns addresses for a specific
 // interface.
-internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) {
+internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> ifi) {
     var (tab, err) = syscall.NetlinkRIB(syscall.RTM_GETADDR, syscall.AF_UNSPEC);
-    if (err != default!) {
-        return (default!, os.NewSyscallError(netlinkribˢ, err));
+    if (err != nil) {
+        return (default, os.NewSyscallError(netlinkribˢ, err));
     }
     (var msgs, err) = syscall.ParseNetlinkMessage(tab);
-    if (err != default!) {
-        return (default!, os.NewSyscallError(parsenetlinkmessageˢ, err));
+    if (err != nil) {
+        return (default, os.NewSyscallError(parsenetlinkmessageˢ, err));
     }
-    (var ifat, err) = addrTable(Ꮡifi, msgs);
-    if (err != default!) {
-        return (default!, err);
+    (var ifat, err) = addrTable(ifi, msgs);
+    if (err != nil) {
+        return (default, err);
     }
-    return (ifat, default!);
+    return (ifat, default);
 }
 
 internal static (slice<ΔAddr>, error) addrTable(ж<Interface> Ꮡifi, slice<syscall.NetlinkMessage> msgs) {
     ref var ifi = ref Ꮡifi.DerefOrNull();
     var ifatᴷ = new stackAppend<ΔAddr>(moves: true);
 
-    slice<ΔAddr> ifat = default!;
+    slice<ΔAddr> ifat = default;
 loop:
     foreach (var (_, vᴛ1) in msgs) {
         ref var m = ref heap(new syscall.NetlinkMessage(), out var Ꮡm);
         m = vᴛ1;
 
-        var exprᴛ1 = m.Header.Type;
-        if (exprᴛ1 == syscall.NLMSG_DONE) {
+        switch (m.Header.Type) {
+        case var ᴛ when ᴛ == syscall.NLMSG_DONE: {
             goto break_loop;
+            break;
         }
-        else if (exprᴛ1 == syscall.RTM_NEWADDR) {
+        case var ᴛ when ᴛ == syscall.RTM_NEWADDR: {
             var ifam = Ꮡ(m.Data, 0).Reinterpret<byte, syscall.IfAddrmsg>();
-            if (Ꮡifi == nil || ifi.Index == (nint)(~ifam).Index) {
+            if (Ꮡifi == nil || ifi.Index == (nint)ifam.Index) {
                 var (attrs, err) = syscall.ParseNetlinkRouteAttr(Ꮡm);
-                if (err != default!) {
-                    return (default!, os.NewSyscallError(parsenetlinkrouteattrˢ, err));
+                if (err != nil) {
+                    return (default, os.NewSyscallError(parsenetlinkrouteattrˢ, err));
                 }
                 var ifa = newAddr(ref (ifam).DerefOrNull(), attrs);
-                if (ifa != default!) {
+                if (ifa != nil) {
                     ifat = append(ifatᴷ, ifat, ifa);
                 }
             }
-        }
+            break;
+        }}
 continue_loop:;
     }
 break_loop:;
     ifat = move2heap(ifatᴷ, ifat);
-    return (ifat, default!);
+    return (ifat, default);
 }
 
 internal static ΔAddr newAddr(ref syscall.IfAddrmsg ifam, slice<syscall.NetlinkRouteAttr> attrs) {
-    bool ipPointToPoint = default!;
+    bool ipPointToPoint = default;
     // Seems like we need to make sure whether the IP interface
     // stack consists of IP point-to-point numbered or unnumbered
     // addressing.
@@ -196,17 +207,17 @@ internal static ΔAddr newAddr(ref syscall.IfAddrmsg ifam, slice<syscall.Netlink
         if (ipPointToPoint && a.Attr.Type == syscall.IFA_ADDRESS) {
             continue;
         }
-        var exprᴛ1 = ifam.Family;
-        if (exprᴛ1 == syscall.AF_INET) {
+        switch (ifam.Family) {
+        case var ᴛ when ᴛ == syscall.AF_INET: {
             return new IPNetжΔAddr(Ꮡ(new IPNet(IP: IPv4(a.Value[0], a.Value[1], a.Value[2], a.Value[3]), Mask: CIDRMask((nint)ifam.Prefixlen, 8 * IPv4len))));
         }
-        if (exprᴛ1 == syscall.AF_INET6) {
+        case var ᴛ when ᴛ == syscall.AF_INET6: {
             var ifa = Ꮡ(new IPNet(IP: new IP(IPv6len), Mask: CIDRMask((nint)ifam.Prefixlen, 8 * IPv6len)));
-            copy((~ifa).IP, a.Value[..]);
+            copy(ifa.IP, a.Value[..]);
             return new IPNetжΔAddr(ifa);
-        }
+        }}
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -215,10 +226,10 @@ internal static readonly @string procNetIgmp6ˢ = "/proc/net/igmp6"u8;
 
 // interfaceMulticastAddrTable returns addresses for a specific
 // interface.
-internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ж<Interface> Ꮡifi) {
-    var ifmat4 = parseProcNetIGMP(procNetIgmpˢ, Ꮡifi);
-    var ifmat6 = parseProcNetIGMP6(procNetIgmp6ˢ, Ꮡifi);
-    return (appendꓸꓸꓸ(ifmat4, ifmat6), default!);
+internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ж<Interface> ifi) {
+    var ifmat4 = parseProcNetIGMP(procNetIgmpˢ, ifi);
+    var ifmat6 = parseProcNetIGMP6(procNetIgmp6ˢ, ifi);
+    return (appendꓸꓸꓸ(ifmat4, ifmat6), default);
 }
 
 internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡifi) {
@@ -228,13 +239,13 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
         var ifmatᴷ = new stackAppend<ΔAddr>(moves: true);
 
         var (fd, err) = open(path);
-        if (err != default!) {
-            return default!;
+        if (err != nil) {
+            return default;
         }
         var fdʗ1 = fd;
         defer(fdʗ1.close, ref ᒐ);
-        slice<ΔAddr> ifmat = default!;
-        @string name = default!;
+        slice<ΔAddr> ifmat = default;
+        @string name = default;
         fd.readLine(); // skip first line
         var b = new slice<byte>(IPv4len);
         for (var (l, ok) = fd.readLine(); ok; (l, ok) = fd.readLine()) {
@@ -243,7 +254,7 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
                 continue;
             }
             switch (ᐧ) {
-            case {} when l[0] != (rune)' ' && l[0] != (rune)'\t': { // new interface line
+            case {} when l[0] != (byte)' ' && l[0] != (byte)'\t': { // new interface line
                 name = f[1];
                 break;
             }
@@ -265,7 +276,7 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
         ifmat = move2heap(ifmatᴷ, ifmat);
         return ifmat;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -276,12 +287,12 @@ internal static slice<ΔAddr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡi
         var ifmatᴷ = new stackAppend<ΔAddr>(moves: true);
 
         var (fd, err) = open(path);
-        if (err != default!) {
-            return default!;
+        if (err != nil) {
+            return default;
         }
         var fdʗ1 = fd;
         defer(fdʗ1.close, ref ᒐ);
-        slice<ΔAddr> ifmat = default!;
+        slice<ΔAddr> ifmat = default;
         var b = new slice<byte>(IPv6len);
         for (var (l, ok) = fd.readLine(); ok; (l, ok) = fd.readLine()) {
             var f = splitAtBytes(l, " \r\t\n"u8);
@@ -299,7 +310,7 @@ internal static slice<ΔAddr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡi
         ifmat = move2heap(ifmatᴷ, ifmat);
         return ifmat;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

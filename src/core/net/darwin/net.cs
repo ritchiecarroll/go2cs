@@ -104,7 +104,7 @@ using os = os_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 
 partial class net_package {
@@ -116,7 +116,7 @@ partial class net_package {
 // and meaning of the strings is up to the implementation.
 partial interface ΔAddr {
     @string Network(); // name of the network (for example, "tcp", "udp")
-    @string String(); // string form of address (for example, "192.0.2.1:25", "[2001:db8::1]:80")
+    @string String();  // string form of address (for example, "192.0.2.1:25", "[2001:db8::1]:80")
 }
 
 // Conn is a generic stream-oriented network connection.
@@ -125,6 +125,19 @@ partial interface ΔAddr {
 partial interface Conn :
     Δio.ReadWriteCloser
 {
+    // Read reads data from the connection.
+    // Read can be made to time out and return an error after a fixed
+    // time limit; see SetDeadline and SetReadDeadline.
+    // Read(b []byte) (n int, err error) is provided by io.ReadWriteCloser
+    // Write writes data to the connection.
+    // Write can be made to time out and return an error after a fixed
+    // time limit; see SetDeadline and SetWriteDeadline.
+    // Write(b []byte) (n int, err error) is provided by io.ReadWriteCloser
+    // Close closes the connection.
+    // Any blocked Read or Write operations will be unblocked and return errors.
+    // Close may or may not block until any buffered data is sent;
+    // for TCP connections see [*TCPConn.SetLinger].
+    // Close() error is provided by io.ReadWriteCloser
     // LocalAddr returns the local network address, if known.
     ΔAddr LocalAddr();
     // RemoteAddr returns the remote network address, if known.
@@ -183,8 +196,8 @@ internal static (nint, error) Read(this ж<conn> Ꮡc, slice<byte> b) {
         return (0, syscall.EINVAL);
     }
     var (n, err) = c.fd.Read(b);
-    if (err != default! && !AreEqual(err, Δio.EOF)) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "read"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    if (err != nil && !AreEqual(err, Δio.EOF)) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "read"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return (n, err);
 }
@@ -197,8 +210,8 @@ internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
         return (0, syscall.EINVAL);
     }
     var (n, err) = c.fd.Write(b);
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return (n, err);
 }
@@ -211,8 +224,8 @@ internal static error Close(this ж<conn> Ꮡc) {
         return syscall.EINVAL;
     }
     var err = c.fd.Close();
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return err;
 }
@@ -224,9 +237,9 @@ internal static ΔAddr LocalAddr(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
-        return default!;
+        return default;
     }
-    return (~c.fd).laddr;
+    return c.fd.laddr;
 }
 
 // RemoteAddr returns the remote network address.
@@ -236,9 +249,9 @@ internal static ΔAddr RemoteAddr(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
-        return default!;
+        return default;
     }
-    return (~c.fd).raddr;
+    return c.fd.raddr;
 }
 
 // SetDeadline implements the Conn SetDeadline method.
@@ -249,11 +262,11 @@ internal static error SetDeadline(this ж<conn> Ꮡc, time.Time t) {
         return syscall.EINVAL;
     }
     {
-        var err = c.fd.SetDeadline(t); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
+        var err = c.fd.SetDeadline(t); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // SetReadDeadline implements the Conn SetReadDeadline method.
@@ -264,11 +277,11 @@ internal static error SetReadDeadline(this ж<conn> Ꮡc, time.Time t) {
         return syscall.EINVAL;
     }
     {
-        var err = c.fd.SetReadDeadline(t); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
+        var err = c.fd.SetReadDeadline(t); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // SetWriteDeadline implements the Conn SetWriteDeadline method.
@@ -279,11 +292,11 @@ internal static error SetWriteDeadline(this ж<conn> Ꮡc, time.Time t) {
         return syscall.EINVAL;
     }
     {
-        var err = c.fd.SetWriteDeadline(t); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
+        var err = c.fd.SetWriteDeadline(t); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // SetReadBuffer sets the size of the operating system's
@@ -295,11 +308,11 @@ internal static error SetReadBuffer(this ж<conn> Ꮡc, nint bytes) {
         return syscall.EINVAL;
     }
     {
-        var err = setReadBuffer(c.fd, bytes); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
+        var err = setReadBuffer(c.fd, bytes); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // SetWriteBuffer sets the size of the operating system's
@@ -311,11 +324,11 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
         return syscall.EINVAL;
     }
     {
-        var err = setWriteBuffer(c.fd, bytes); if (err != default!) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
+        var err = setWriteBuffer(c.fd, bytes); if (err != nil) {
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
         }
     }
-    return default!;
+    return default;
 }
 
 // File returns a copy of the underlying [os.File].
@@ -329,12 +342,12 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
 // On Windows, the returned os.File's file descriptor is not usable
 // on other processes.
 internal static (ж<os.File> f, error err) File(this ref conn c) {
-    ж<os.File> f = default!;
-    error err = default!;
+    ж<os.File> f = default;
+    error err = default;
 
     (f, err) = c.fd.dup();
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return (f, err);
 }
@@ -360,6 +373,9 @@ partial interface PacketConn :
     // fixed time limit; see SetDeadline and SetWriteDeadline.
     // On packet-oriented connections, write timeouts are rare.
     (nint n, error err) WriteTo(slice<byte> p, ΔAddr addr);
+    // Close closes the connection.
+    // Any blocked ReadFrom or WriteTo operations will be unblocked and return errors.
+    // Close() error is provided by io.Closer
     // LocalAddr returns the local network address, if known.
     ΔAddr LocalAddr();
     // SetDeadline sets the read and write deadlines associated
@@ -431,6 +447,9 @@ partial interface Listener :
 {
     // Accept waits for and returns the next connection to the listener.
     (Conn, error) Accept();
+    // Close closes the listener.
+    // Any blocked Accept operations will be unblocked and return errors.
+    // Close() error is provided by io.Closer
     // Addr returns the listener's network address.
     ΔAddr Addr();
 }
@@ -454,7 +473,7 @@ internal static error errNoSuitableAddress = errors.New("no suitable address fou
 internal static error errMissingAddress = errors.New("missing address"u8);
 
 // For both read and write operations.
-internal static canceledError errCanceled = new canceledError(nil);
+internal static canceledError errCanceled = new canceledError();
 public static error ErrWriteToConnected = errors.New("use of WriteTo with pre-connected connection"u8);
 
 // canceledError lets us return the same error string we have always
@@ -476,16 +495,16 @@ internal static bool Is(this canceledError _, error err) {
 // mapErr maps from the context errors to the historical internal net
 // error values.
 internal static error mapErr(error err) {
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, context.Canceled)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, context.Canceled): {
         return errCanceled;
     }
-    if (AreEqual(exprᴛ1, context.DeadlineExceeded)) {
+    case var ᴛ when AreEqual(ᴛ, context.DeadlineExceeded): {
         return errTimeout;
     }
-    { /* default: */
+    default: {
         return err;
-    }
+    }}
 }
 
 // OpError is the error type usually returned by functions in the net
@@ -528,11 +547,11 @@ public static @string Error(this ж<OpError> Ꮡe) {
     if (e.Net != ""u8) {
         s += " "u8 + e.Net;
     }
-    if (e.Source != default!) {
+    if (e.Source != nil) {
         s += " "u8 + e.Source.String();
     }
-    if (e.Addr != default!) {
-        if (e.Source != default!){
+    if (e.Addr != nil) {
+        if (e.Source != nil) {
             s += "->"u8;
         } else {
             s += " "u8;
@@ -549,8 +568,8 @@ internal static time.Time aLongTimeAgo = time.Unix(1, 0);
 
 // noDeadline and noCancel are just zero values for
 // readability with functions taking too many parameters.
-internal static time.Time noDeadline = new time.Time(nil);
-internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!);
+internal static time.Time noDeadline = new time.Time();
+internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default);
 
 partial interface timeout {
     bool Timeout();
@@ -559,7 +578,7 @@ partial interface timeout {
 public static bool Timeout(this ref OpError e) {
     {
         var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
-            var (tΔ1, okΔ2) = (~ne).Err._<timeout>(ᐧ);
+            var (tΔ1, okΔ2) = ne.Err._<timeout>(ᐧ);
             return okΔ2 && tΔ1.Timeout();
         }
     }
@@ -580,7 +599,7 @@ public static bool Temporary(this ref OpError e) {
 
     {
         var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
-            var (tΔ1, okΔ2) = (~ne).Err._<temporary>(ᐧ);
+            var (tΔ1, okΔ2) = ne.Err._<temporary>(ᐧ);
             return okΔ2 && tΔ1.Temporary();
         }
     }
@@ -674,7 +693,7 @@ public static bool Temporary(this InvalidAddrError e) {
 //	errors.Is(os.ErrDeadlineExceeded, context.DeadlineExceeded)
 //
 // return true.
-internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError(nil)));
+internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError()));
 
 partial struct timeoutError {
 }
@@ -755,11 +774,11 @@ internal static bool Timeout(this ref temporaryError e) {
 // DNSError represents a DNS lookup error.
 partial struct DNSError {
     public error UnwrapErr;  // error returned by the [DNSError.Unwrap] method, might be nil
-    public @string Err; // description of the error
-    public @string Name; // name looked for
-    public @string Server; // server used
+    public @string Err;      // description of the error
+    public @string Name;     // name looked for
+    public @string Server;   // server used
     public bool IsTimeout;   // if true, timed out; not all timeouts set this
-    public bool IsTemporary;   // if true, error is temporary; not all errors set this
+    public bool IsTemporary; // if true, error is temporary; not all errors set this
     // IsNotFound is set to true when the requested name does not
     // contain any records of the requested type (data not found),
     // or the name itself was not found (NXDOMAIN).
@@ -771,7 +790,7 @@ partial struct DNSError {
 internal static ж<DNSError> newDNSError(error err, @string name, @string server) {
     ref var isTimeout = ref heap(new bool(), out var ᏑisTimeout);
     ref var isTemporary = ref heap(new bool(), out var ᏑisTemporary);
-    error unwrapErr = default!;
+    error unwrapErr = default;
 
     {
         var (errΔ1, ok) = err._<ΔError>(ᐧ); if (ok) {
@@ -864,9 +883,9 @@ partial struct tcpConnWithoutReadFrom {
 
 // Fallback implementation of io.ReaderFrom's ReadFrom, when sendfile isn't
 // applicable.
-internal static (int64 n, error err) genericReadFrom(ж<TCPConn> Ꮡc, Δio.Reader r) {
+internal static (int64 n, error err) genericReadFrom(ж<TCPConn> c, Δio.Reader r) {
     // Use wrapper to hide existing r.ReadFrom from io.Copy.
-    return Δio.Copy(new tcpConnWithoutReadFrom(TCPConn: Ꮡc), r);
+    return Δio.Copy(new tcpConnWithoutReadFrom(TCPConn: c), r);
 }
 
 // noWriteTo can be embedded alongside another type to
@@ -889,9 +908,9 @@ partial struct tcpConnWithoutWriteTo {
 }
 
 // Fallback implementation of io.WriterTo's WriteTo, when zero-copy isn't applicable.
-internal static (int64 n, error err) genericWriteTo(ж<TCPConn> Ꮡc, Δio.Writer w) {
+internal static (int64 n, error err) genericWriteTo(ж<TCPConn> c, Δio.Writer w) {
     // Use wrapper to hide existing w.WriteTo from io.Copy.
-    return Δio.Copy(w, new tcpConnWithoutWriteTo(TCPConn: Ꮡc));
+    return Δio.Copy(w, new tcpConnWithoutWriteTo(TCPConn: c));
 }
 
 // Limit the number of concurrent cgo-using goroutines, because
@@ -912,12 +931,12 @@ internal static error acquireThread(context.Context ctx) {
     var selᴛ17 = ctx.Done();
     switch (select(selᴛ16, ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
     case 0: {
-        return default!;
+        return default;
     }
     case 1 when selᴛ17.ꟷᐳ(out _): {
         return ctx.Err();
     }}
-    return default!;
+    return default;
 }
 
 internal static void releaseThread() {
@@ -949,7 +968,7 @@ internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)nil));
 // WriteTo modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
 public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
-    int64 n = default!;
+    int64 n = default;
     ref var v = ref Ꮡv.DerefOrNull();
 
     {
@@ -960,13 +979,13 @@ public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w)
     foreach (var (_, b) in v) {
         var (nb, errΔ1) = w.Write(b);
         n += (int64)nb;
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             v.consume(n);
             return (n, errΔ1);
         }
     }
     v.consume(n);
-    return (n, default!);
+    return (n, default);
 }
 
 // Read from the buffers.
@@ -976,8 +995,8 @@ public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w)
 // Read modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
 public static (nint n, error err) Read(this ref Buffers v, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     while (len(p) > 0 && len(v) > 0) {
         nint n0 = copy(p, (v)[0]);
@@ -999,7 +1018,7 @@ internal static void consume(this ref Buffers v, int64 n) {
             return;
         }
         n -= ln0;
-        (v)[0] = default!;
+        (v)[0] = default;
         v = (v)[1..];
     }
 }

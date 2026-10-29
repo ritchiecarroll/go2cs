@@ -45,6 +45,10 @@ partial interface PublicSuffixList :
     // addresses, for leading and trailing dots, for case sensitivity, and
     // for IDN/Punycode.
     @string PublicSuffix(@string domain);
+    // String returns a description of the source of this public suffix
+    // list. The description will typically contain something like a time
+    // stamp or version number.
+    // String() string is provided by fmt.Stringer
 }
 
 // Options are the options for creating a new Jar.
@@ -80,9 +84,9 @@ public static (ж<Jar>, error) New(ж<Options> Ꮡo) {
         entries: new map<@string, map<@string, entry>>()
     ));
     if (Ꮡo != nil) {
-        jar.Value.psList = o.PublicSuffixList;
+        jar.psList = o.PublicSuffixList;
     }
-    return (jar, default!);
+    return (jar, default);
 }
 
 // entry is the internal representation of a cookie.
@@ -137,10 +141,9 @@ internal static bool pathMatch(this ref entry e, @string requestPath) {
         return true;
     }
     if (strings.HasPrefix(requestPath, e.Path)) {
-        if (e.Path[len(e.Path) - 1] == (rune)'/'){
+        if (e.Path[len(e.Path) - 1] == '/') {
             return true; // The "/any/" matches "/any/path" case.
-        } else 
-        if (requestPath[len(e.Path)] == (rune)'/') {
+        } else if (requestPath[len(e.Path)] == '/') {
             return true; // The "/any" matches "/any/path" case.
         }
     }
@@ -165,7 +168,7 @@ internal static bool secureMatch(this ref entry e, bool https) {
         return true;
     }
     var (ip, err) = netip.ParseAddr(e.Domain);
-    if (err == default! && ip.IsLoopback()) {
+    if (err == nil && ip.IsLoopback()) {
         return true;
     }
     return false;
@@ -186,19 +189,19 @@ internal static bool isLocalhost(@string host) {
 
 // hasDotSuffix reports whether s ends in "."+suffix.
 internal static bool hasDotSuffix(@string s, @string suffix) {
-    return len(s) > len(suffix) && s[len(s) - len(suffix) - 1] == (rune)'.' && s.slice(len(s) - len(suffix)) == suffix;
+    return len(s) > len(suffix) && s[len(s) - len(suffix) - 1] == '.' && s.slice(len(s) - len(suffix)) == suffix;
 }
 
 // Cookies implements the Cookies method of the [http.CookieJar] interface.
 //
 // It returns an empty slice if the URL's scheme is not HTTP or HTTPS.
-public static slice<ж<httpꓸCookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu) {
-    return Ꮡj.cookies(Ꮡu, time.Now());
+public static slice<ж<httpꓸCookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> u) {
+    return Ꮡj.cookies(u, time.Now());
 }
 
 // cookies is like Cookies but takes the current time as a parameter.
 internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
-    slice<ж<httpꓸCookie>> cookies = default!;
+    slice<ж<httpꓸCookie>> cookies = default;
     GoFrame ᒐ = default;
     try {
         ref var j = ref Ꮡj.DerefOrNull();
@@ -208,7 +211,7 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
             goto ᒐdone;
         }
         var (host, err) = canonicalHost(u.Host);
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone;
         }
         @string key = jarKey(host, j.psList);
@@ -217,7 +220,7 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
         defer(Ꮡj.of(Jar.Ꮡmu).Unlock, ref ᒐ);
 
         var submap = j.entries[key];
-        if (submap == default!) {
+        if (submap == nil) {
             goto ᒐdone;
         }
 
@@ -228,7 +231,7 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
         }
 
         var modified = false;
-        slice<entry> selected = default!;
+        slice<entry> selected = default;
         foreach (var (id, vᴛ1) in submap) {
             var e = vᴛ1;
 
@@ -246,7 +249,7 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
             modified = true;
         }
         if (modified) {
-            if (len(submap) == 0){
+            if (len(submap) == 0) {
                 delete(j.entries, key);
             } else {
                 j.entries[key] = submap;
@@ -280,8 +283,8 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
 // SetCookies implements the SetCookies method of the [http.CookieJar] interface.
 //
 // It does nothing if the URL's scheme is not HTTP or HTTPS.
-public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<httpꓸCookie>> cookies) {
-    Ꮡj.setCookies(Ꮡu, cookies, time.Now());
+public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<httpꓸCookie>> cookies) {
+    Ꮡj.setCookies(u, cookies, time.Now());
 }
 
 // setCookies is like SetCookies but takes the current time as parameter.
@@ -299,7 +302,7 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
             return;
         }
         var (host, err) = canonicalHost(u.Host);
-        if (err != default!) {
+        if (err != nil) {
             return;
         }
         @string key = jarKey(host, j.psList);
@@ -313,12 +316,12 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
         var modified = false;
         foreach (var (_, cookie) in cookies) {
             var (e, remove, errΔ1) = j.newEntry(cookie, now, defPath, host);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 continue;
             }
             @string id = e.id();
             if (remove) {
-                if (submap != default!) {
+                if (submap != nil) {
                     {
                         var (_, ok) = submap[id, ꟷ]; if (ok) {
                             delete(submap, id);
@@ -328,12 +331,12 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
                 }
                 continue;
             }
-            if (submap == default!) {
+            if (submap == nil) {
                 submap = new map<@string, entry>();
             }
 
             {
-                var (old, ok) = submap[id, ꟷ]; if (ok){
+                var (old, ok) = submap[id, ꟷ]; if (ok) {
                     e.Creation = old.Creation;
                     e.seqNum = old.seqNum;
                 } else {
@@ -348,7 +351,7 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
         }
 
         if (modified) {
-            if (len(submap) == 0){
+            if (len(submap) == 0) {
                 delete(j.entries, key);
             } else {
                 j.entries[key] = submap;
@@ -362,22 +365,22 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
 // canonicalHost strips port from host if present and returns the canonicalized
 // host name.
 internal static (@string, error) canonicalHost(@string host) {
-    error err = default!;
+    error err = default;
     if (hasPort(host)) {
         (host, _, err) = net.SplitHostPort(host);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
     }
     // Strip trailing dot from fully qualified domain names.
     host = strings.TrimSuffix(host, "."u8);
     (var encoded, err) = toASCII(host);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     // We know this is ascii, no need to check.
     var (lower, _) = ascii.ToLower(encoded);
-    return (lower, default!);
+    return (lower, default);
 }
 
 // hasPort reports whether host contains a port number. host may be a host
@@ -390,7 +393,7 @@ internal static bool hasPort(@string host) {
     if (colons == 1) {
         return true;
     }
-    return host[0] == (rune)'[' && strings.Contains(host, "]:"u8);
+    return host[0] == '[' && strings.Contains(host, "]:"u8);
 }
 
 // jarKey returns the key to use for a jar.
@@ -399,8 +402,8 @@ internal static @string jarKey(@string host, PublicSuffixList psl) {
         return host;
     }
 
-    nint i = default!;
-    if (psl == default!){
+    nint i = default;
+    if (psl == nil) {
         i = strings.LastIndex(host, "."u8);
         if (i <= 0) {
             return host;
@@ -411,7 +414,7 @@ internal static @string jarKey(@string host, PublicSuffixList psl) {
             return host;
         }
         i = len(host) - len(suffix);
-        if (i <= 0 || host[i - 1] != (rune)'.') {
+        if (i <= 0 || host[i - 1] != '.') {
             // The provided public suffix list psl is broken.
             // Storing cookies under host is a safe stopgap.
             return host;
@@ -433,13 +436,13 @@ internal static bool isIP(@string host) {
         // of interpreting ::1%.www.example.com as a subdomain of www.example.com.
         return true;
     }
-    return net.ParseIP(host) != default!;
+    return net.ParseIP(host) != nil;
 }
 
 // defaultPath returns the directory part of a URL's path according to
 // RFC 6265 section 5.1.4.
 internal static @string defaultPath(@string path) {
-    if (len(path) == 0 || path[0] != (rune)'/') {
+    if (len(path) == 0 || path[0] != '/') {
         return "/"u8; // Path is empty or malformed.
     }
 
@@ -465,37 +468,36 @@ internal static readonly @string sameSiteLaxˢ = "SameSite=Lax"u8;
 //
 // A malformed c.Domain will result in an error.
 internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<httpꓸCookie> Ꮡc, time.Time now, @string defPath, @string host) {
-    entry e = default!;
-    error err = default!;
+    entry e = default;
+    error err = default;
     ref var c = ref Ꮡc.DerefOrNull();
 
     e.Name = c.Name;
 
-    if (c.Path == ""u8 || c.Path[0] != (rune)'/'){
+    if (c.Path == ""u8 || c.Path[0] != '/') {
         e.Path = defPath;
     } else {
         e.Path = c.Path;
     }
 
     (e.Domain, e.HostOnly, err) = j.domainAndType(host, c.Domain);
-    if (err != default!) {
+    if (err != nil) {
         return (e, false, err);
     }
 
     // MaxAge takes precedence over Expires.
-    if (c.MaxAge < 0){
-        return (e, true, default!);
-    } else 
-    if (c.MaxAge > 0){
+    if (c.MaxAge < 0) {
+        return (e, true, default);
+    } else if (c.MaxAge > 0) {
         e.Expires = now.Add(((time.Duration)(int64)c.MaxAge) * time.ΔSecond);
         e.Persistent = true;
     } else {
-        if (c.Expires.IsZero()){
+        if (c.Expires.IsZero()) {
             e.Expires = endOfTime;
             e.Persistent = false;
         } else {
             if (!c.Expires.After(now)) {
-                return (e, true, default!);
+                return (e, true, default);
             }
             e.Expires = c.Expires;
             e.Persistent = true;
@@ -507,18 +509,21 @@ internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<ht
     e.Secure = c.Secure;
     e.HttpOnly = c.HttpOnly;
 
-    var exprᴛ1 = c.SameSite;
-    if (exprᴛ1 == http.SameSiteDefaultMode) {
+    switch (c.SameSite) {
+    case var ᴛ when ᴛ == http.SameSiteDefaultMode: {
         e.SameSite = sameSiteˢ;
+        break;
     }
-    else if (exprᴛ1 == http.SameSiteStrictMode) {
+    case var ᴛ when ᴛ == http.SameSiteStrictMode: {
         e.SameSite = sameSiteStrictˢ;
+        break;
     }
-    else if (exprᴛ1 == http.SameSiteLaxMode) {
+    case var ᴛ when ᴛ == http.SameSiteLaxMode: {
         e.SameSite = sameSiteLaxˢ;
-    }
+        break;
+    }}
 
-    return (e, false, default!);
+    return (e, false, default);
 }
 
 internal static error errIllegalDomain = errors.New("cookiejar: illegal cookie domain attribute"u8);
@@ -534,7 +539,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
     if (domain == ""u8) {
         // No domain attribute in the SetCookie header indicates a
         // host cookie.
-        return (host, true, default!);
+        return (host, true, default);
     }
 
     if (isIP(host)) {
@@ -567,7 +572,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
         // So do we as it just doesn't make sense to label them as
         // domain cookies when there is no domain; the whole notion of
         // domain cookies requires a domain name to be well defined.
-        return (host, true, default!);
+        return (host, true, default);
     }
 
     // From here on: If the cookie is valid, it is a domain cookie (with
@@ -575,7 +580,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
     // See RFC 6265 section 5.2.3.
     domain = strings.TrimPrefix(domain, "."u8);
 
-    if (len(domain) == 0 || domain[0] == (rune)'.') {
+    if (len(domain) == 0 || domain[0] == '.') {
         // Received either "Domain=." or "Domain=..some.thing",
         // both are illegal.
         return ("", false, errMalformedDomain);
@@ -587,7 +592,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
         return ("", false, errMalformedDomain);
     }
 
-    if (domain[len(domain) - 1] == (rune)'.') {
+    if (domain[len(domain) - 1] == '.') {
         // We received stuff like "Domain=www.example.com.".
         // Browsers do handle such stuff (actually differently) but
         // RFC 6265 seems to be clear here (e.g. section 4.1.2.3) in
@@ -598,13 +603,13 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
     }
 
     // See RFC 6265 section 5.3 #5.
-    if (j.psList != default!) {
+    if (j.psList != nil) {
         {
             @string ps = j.psList.PublicSuffix(domain); if (ps != ""u8 && !hasDotSuffix(domain, ps)) {
                 if (host == domain) {
                     // This is the one exception in which a cookie
                     // with a domain attribute is a host cookie.
-                    return (host, true, default!);
+                    return (host, true, default);
                 }
                 return ("", false, errIllegalDomain);
             }
@@ -617,7 +622,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
         return ("", false, errIllegalDomain);
     }
 
-    return (domain, false, default!);
+    return (domain, false, default);
 }
 
 } // end cookiejar_package

@@ -25,8 +25,8 @@ partial struct CounterKDF {
 }
 
 // NewCounterKDF creates a new CounterKDF with the given key.
-public static ж<CounterKDF> NewCounterKDF(ж<aes.Block> Ꮡb) {
-    return Ꮡ(new CounterKDF(mac: NewCMAC(Ꮡb).Value.ΔClone()));
+public static ж<CounterKDF> NewCounterKDF(ж<aes.Block> b) {
+    return Ꮡ(new CounterKDF(mac: NewCMAC(b).Value.ΔClone()));
 }
 
 // DeriveKey derives a key from the given label and context.

@@ -47,7 +47,7 @@ partial struct Archive {
 
 // A File is a single file in an archive.
 partial struct File {
-    public @string Name; // name of file ("foo/bar.txt")
+    public @string Name;     // name of file ("foo/bar.txt")
     public slice<byte> Data; // text content of file
 }
 
@@ -70,22 +70,22 @@ public static slice<byte> Format(ж<Archive> Ꮡa) {
 // ParseFile parses the named file as an archive.
 public static (ж<Archive>, error) ParseFile(@string @file) {
     var (data, err) = os.ReadFile(@file);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Parse(data), default!);
+    return (Parse(data), default);
 }
 
 // Parse parses the serialized form of an Archive.
 // The returned Archive holds slices of data.
 public static ж<Archive> Parse(slice<byte> data) {
     var a = @new<Archive>();
-    @string name = default!;
-    (a.Value.Comment, name, data) = findFileMarker(data);
+    @string name = default;
+    (a.Comment, name, data) = findFileMarker(data);
     while (name != ""u8) {
-        var f = new File(name, default!);
+        var f = new File(name, default);
         (f.Data, name, data) = findFileMarker(data);
-        a.Value.Files = append((~a).Files, f);
+        a.Files = append(a.Files, f);
     }
     return a;
 }
@@ -99,11 +99,11 @@ internal static slice<byte> markerEnd = slice<byte>(" --"u8);
 // the file name, and the data after the marker.
 // If there is no next marker, findFileMarker returns before = fixNL(data), name = "", after = nil.
 internal static (slice<byte> before, @string name, slice<byte> after) findFileMarker(slice<byte> data) {
-    @string name = default!;
-    slice<byte> after = default!;
+    @string name = default;
+    slice<byte> after = default;
 
-    nint i = default!;
-    while (ᐧ) {
+    nint i = default;
+    for (;;) {
         {
             (name, after) = isMarker(data.slice(i)); if (name != ""u8) {
                 return (data.slice(0, i), name, after);
@@ -111,7 +111,7 @@ internal static (slice<byte> before, @string name, slice<byte> after) findFileMa
         }
         nint j = bytes.Index(data.slice(i), newlineMarker);
         if (j < 0) {
-            return (fixNL(data), "", default!);
+            return (fixNL(data), "", default);
         }
         i += j + 1; // positioned at start of new possible marker
     }
@@ -121,18 +121,18 @@ internal static (slice<byte> before, @string name, slice<byte> after) findFileMa
 // If so, it returns the name from the line and the data after the line.
 // Otherwise it returns name == "" with an unspecified after.
 internal static (@string name, slice<byte> after) isMarker(slice<byte> data) {
-    slice<byte> after = default!;
+    slice<byte> after = default;
 
     if (!bytes.HasPrefix(data, marker)) {
-        return ("", default!);
+        return ("", default);
     }
     {
-        nint i = bytes.IndexByte(data, (rune)'\n'); if (i >= 0) {
+        nint i = bytes.IndexByte(data, (byte)'\n'); if (i >= 0) {
             (data, after) = (data.slice(0, i), data.slice(i + 1));
         }
     }
     if (!(bytes.HasSuffix(data, markerEnd) && len(data) >= len(marker) + len(markerEnd))) {
-        return ("", default!);
+        return ("", default);
     }
     return (strings.TrimSpace((@string)(data.slice(len(marker), len(data) - len(markerEnd)))), after);
 }
@@ -140,12 +140,12 @@ internal static (@string name, slice<byte> after) isMarker(slice<byte> data) {
 // If data is empty or ends in \n, fixNL returns data.
 // Otherwise fixNL returns a new slice consisting of data with a final \n added.
 internal static slice<byte> fixNL(slice<byte> data) {
-    if (len(data) == 0 || data[len(data) - 1] == (rune)'\n') {
+    if (len(data) == 0 || data[len(data) - 1] == '\n') {
         return data;
     }
     var d = new slice<byte>(len(data) + 1);
     copy(d, data);
-    d[len(data)] = (rune)'\n';
+    d[len(data)] = (byte)'\n';
     return d;
 }
 

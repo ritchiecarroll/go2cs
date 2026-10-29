@@ -18,7 +18,7 @@
 namespace go.math.rand;
 
 using bits = go.math.bits_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using go.math;
 
 partial class rand_package {
@@ -269,7 +269,7 @@ public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
 
 // globalRand is the source of random numbers for the top-level
 // convenience functions.
-internal static ж<Rand> globalRand = Ꮡ(new Rand(src: new runtimeSource(nil)));
+internal static ж<Rand> globalRand = Ꮡ(new Rand(src: new runtimeSource()));
 
 //go:linkname runtime_rand runtime.rand
 internal static partial uint64 runtime_rand();

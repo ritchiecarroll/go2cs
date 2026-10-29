@@ -14,14 +14,14 @@ public static error Fsync(this ж<FD> Ꮡfd) {
     bool ᒐd1 = false;
     try {
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
         ᒐd1 = true;
         return ignoringEINTR(() => Δsyscall.Fsync(Ꮡfd.Value.Sysfd));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 

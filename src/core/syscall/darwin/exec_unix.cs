@@ -73,7 +73,7 @@ public static slice<ж<byte>> StringSlicePtr(slice<@string> ss) {
     for (nint i = 0; i < len(ss); i++) {
         bb[i] = StringBytePtr(ss[i]);
     }
-    bb[len(ss)] = default!;
+    bb[len(ss)] = default;
     return bb;
 }
 
@@ -84,7 +84,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     nint n = 0;
     foreach (var (_, s) in ss) {
         if (bytealg.IndexByteString(s, 0) != -1) {
-            return (default!, EINVAL);
+            return (default, EINVAL);
         }
         n += len(s) + 1; // +1 for NUL
     }
@@ -96,7 +96,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
         copy(b.slice(n), s);
         n += len(s) + 1;
     }
-    return (bb, default!);
+    return (bb, default);
 }
 
 public static void CloseOnExec(nint fd) {
@@ -104,16 +104,16 @@ public static void CloseOnExec(nint fd) {
 }
 
 public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
-    error err = default!;
+    error err = default;
 
     (var flag, err) = fcntl(fd, F_GETFL, 0);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (((flag & (nint)O_NONBLOCK) != 0) == nonblocking) {
-        return default!;
+        return default;
     }
-    if (nonblocking){
+    if (nonblocking) {
         flag |= (nint)(O_NONBLOCK);
     } else {
         flag &= ~(nint)(O_NONBLOCK);
@@ -125,8 +125,8 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
 // Credential holds user and group identities to be assumed
 // by a child process started by [StartProcess].
 partial struct Credential {
-    public uint32 Uid;   // User ID.
-    public uint32 Gid;   // Group ID.
+    public uint32 Uid;           // User ID.
+    public uint32 Gid;           // Group ID.
     public slice<uint32> Groups; // Supplementary group IDs.
     public bool NoSetGroups;     // If true, don't set supplementary groups
 }
@@ -134,8 +134,8 @@ partial struct Credential {
 // ProcAttr holds attributes that will be applied to a new process started
 // by [StartProcess].
 partial struct ProcAttr {
-    public @string Dir;   // Current working directory.
-    public slice<@string> Env; // Environment.
+    public @string Dir;          // Current working directory.
+    public slice<@string> Env;   // Environment.
     public slice<uintptr> Files; // File descriptors.
     public ж<SysProcAttr> Sys;
 }
@@ -149,16 +149,16 @@ internal static ref SysProcAttr zeroSysProcAttr => ref ((StaticBox<SysProcAttr>)
 // go2cs generated this placeholder — func forkExec is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Combination of fork and exec, careful to be thread safe.
-public static (nint pid, error err) ForkExec(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    return forkExec(argv0, argv, Ꮡattr);
+public static (nint pid, error err) ForkExec(@string argv0, slice<@string> argv, ж<ProcAttr> attr) {
+    return forkExec(argv0, argv, attr);
 }
 
 // StartProcess wraps [ForkExec] for package os.
-public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    nint pid = default!;
-    error err = default!;
+public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> attr) {
+    nint pid = default;
+    error err = default;
 
-    (pid, err) = forkExec(argv0, argv, Ꮡattr);
+    (pid, err) = forkExec(argv0, argv, attr);
     return (pid, 0, err);
 }
 

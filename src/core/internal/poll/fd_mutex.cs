@@ -51,7 +51,7 @@ internal static readonly @string overflowMsg = "too many concurrent operations o
 // incref adds a reference to mu.
 // It reports whether mu is available for reading or writing.
 internal static bool incref(this ж<fdMutex> Ꮡmu) {
-    while (ᐧ) {
+    for (;;) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
         if ((old & (uint64)mutexClosed) != 0) {
             return false;
@@ -71,7 +71,7 @@ internal static bool incref(this ж<fdMutex> Ꮡmu) {
 // decref removes a reference from mu.
 // It reports whether there is no remaining reference.
 internal static bool decref(this ж<fdMutex> Ꮡmu) {
-    while (ᐧ) {
+    for (;;) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
         if ((old & (uint64)mutexRefMask) == 0) {
             throw panic("inconsistent poll.fdMutex");
@@ -100,7 +100,7 @@ internal static error incref(this ж<FD> Ꮡfd) {
     if (!Ꮡfd.of(FD.Ꮡfdmu).incref()) {
         return errClosing(fd.isFile);
     }
-    return default!;
+    return default;
 }
 
 // decref removes a reference from fd.
@@ -110,7 +110,7 @@ internal static error decref(this ж<FD> Ꮡfd) {
     if (Ꮡfd.of(FD.Ꮡfdmu).decref()) {
         return Ꮡfd.destroy();
     }
-    return default!;
+    return default;
 }
 
 // readLock adds a reference to fd and locks fd for reading.
@@ -121,7 +121,7 @@ internal static error readLock(this ж<FD> Ꮡfd) {
     if (!fd.fdmu.rwlock(true)) {
         return errClosing(fd.isFile);
     }
-    return default!;
+    return default;
 }
 
 // readUnlock removes a reference from fd and unlocks fd for reading.
@@ -143,7 +143,7 @@ internal static error writeLock(this ж<FD> Ꮡfd) {
     if (!fd.fdmu.rwlock(false)) {
         return errClosing(fd.isFile);
     }
-    return default!;
+    return default;
 }
 
 // writeUnlock removes a reference from fd and unlocks fd for writing.
@@ -165,7 +165,7 @@ internal static error readWriteLock(this ж<FD> Ꮡfd) {
     if (!fd.fdmu.rwlock(true) || !fd.fdmu.rwlock(false)) {
         return errClosing(fd.isFile);
     }
-    return default!;
+    return default;
 }
 
 // readWriteUnlock removes a reference from fd and unlocks fd for reading and writing.

@@ -10,7 +10,7 @@ partial class user_package {
 internal static readonly @string userFile = "/etc/passwd"u8;
 internal static readonly @string groupFile = "/etc/group"u8;
 
-internal static slice<byte> colon = new byte[]{(rune)':'}.slice();
+internal static slice<byte> colon = slice<byte>([(byte)':']);
 
 // Current returns the current user.
 //
@@ -21,12 +21,11 @@ public static (ж<User>, error) Current() {
     Ꮡcache.of(cacheᴛ1.ᏑOnce).Do(() => {
         (cache.u, cache.err) = current();
     });
-    if (cache.err != default!) {
-        return (default!, cache.err);
+    if (cache.err != nil) {
+        return (default, cache.err);
     }
-    ref var u = ref heap<User>(out var Ꮡu);
-    u = cache.u.Value; // copy
-    return (Ꮡu, default!);
+    ref var u = ref heap<User>(cache.u.Value, out var Ꮡu); // copy
+    return (Ꮡu, default);
 }
 
 // cache of the current user
@@ -42,7 +41,7 @@ internal static ref cacheᴛ1 cache => ref ((StaticBox<cacheᴛ1>)Ꮡcache).Valu
 // returned error is of type [UnknownUserError].
 public static (ж<User>, error) Lookup(@string username) {
     {
-        var (u, err) = Current(); if (err == default! && (~u).Username == username) {
+        var (u, err) = Current(); if (err == nil && u.Username == username) {
             return (u, err);
         }
     }
@@ -53,7 +52,7 @@ public static (ж<User>, error) Lookup(@string username) {
 // returned error is of type [UnknownUserIdError].
 public static (ж<User>, error) LookupId(@string uid) {
     {
-        var (u, err) = Current(); if (err == default! && (~u).Uid == uid) {
+        var (u, err) = Current(); if (err == nil && u.Uid == uid) {
             return (u, err);
         }
     }

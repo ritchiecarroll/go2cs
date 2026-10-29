@@ -116,15 +116,14 @@ internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, 
 
         var buf = buffer.New();
         buf.WriteString(r.Level.String());
-        buf.WriteByte((rune)' ');
+        buf.WriteByte((byte)' ');
         buf.WriteString(r.Message);
-        ref var state = ref heap<handleState>(out var Ꮡstate);
-        state = h.ch.newHandleState(buf, true, " "u8);
+        ref var state = ref heap<handleState>(h.ch.newHandleState(buf, true, " "u8), out var Ꮡstate);
         defer(Ꮡstate.free, ref ᒐ);
         Ꮡstate.appendNonBuiltIns(r);
         return h.output(r.PC, buf.ValueSlot);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -200,7 +199,7 @@ partial struct commonHandler {
     // a call to WithAttrs.
     internal @string groupPrefix;
     internal slice<@string> groups; // all groups started from WithGroup
-    internal nint nOpenGroups;     // the number of groups opened in preformattedAttrs
+    internal nint nOpenGroups;      // the number of groups opened in preformattedAttrs
     internal ж<sync.Mutex> mu;
     internal io.Writer w;
 }
@@ -223,7 +222,7 @@ internal static ж<commonHandler> clone(this ref commonHandler h) {
 // minimum level.
 internal static bool enabled(this ref commonHandler h, ΔLevel l) {
     ΔLevel minLevel = LevelInfo;
-    if (h.opts.Level != default!) {
+    if (h.opts.Level != nil) {
         minLevel = h.opts.Level.Level();
     }
     return l >= minLevel;
@@ -241,14 +240,13 @@ internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<A
         }
         var h2 = h.clone();
         // Pre-format the attributes as an optimization.
-        ref var state = ref heap<handleState>(out var Ꮡstate);
-        state = h2.newHandleState(h2.of(commonHandler.ᏑpreformattedAttrs).Reinterpret<slice<byte>, buffer.Buffer>(), false, ""u8);
+        ref var state = ref heap<handleState>(h2.newHandleState(h2.of(commonHandler.ᏑpreformattedAttrs).Reinterpret<slice<byte>, buffer.Buffer>(), false, ""u8), out var Ꮡstate);
         defer(Ꮡstate.free, ref ᒐ);
         state.prefix.WriteString(h.groupPrefix);
         {
-            var pfa = h2.Value.preformattedAttrs; if (len(pfa) > 0) {
+            var pfa = h2.preformattedAttrs; if (len(pfa) > 0) {
                 state.sep = h.attrSep();
-                if ((~h2).json && pfa[len(pfa) - 1] == (rune)'{') {
+                if (h2.json && pfa[len(pfa) - 1] == '{') {
                     state.sep = ""u8;
                 }
             }
@@ -256,24 +254,24 @@ internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<A
         // Remember the position in the buffer, in case all attrs are empty.
         nint pos = state.buf.Len();
         state.openGroups();
-        if (!Ꮡstate.appendAttrs(@as)){
+        if (!Ꮡstate.appendAttrs(@as)) {
             state.buf.SetLen(pos);
         } else {
             // Remember the new prefix for later keys.
-            h2.Value.groupPrefix = state.prefix.String();
+            h2.groupPrefix = state.prefix.String();
             // Remember how many opened groups are in preformattedAttrs,
             // so we don't open them again when we handle a Record.
-            h2.Value.nOpenGroups = len((~h2).groups);
+            h2.nOpenGroups = len(h2.groups);
         }
         return h2;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static ж<commonHandler> withGroup(this ref commonHandler h, @string name) {
     var h2 = h.clone();
-    h2.Value.groups = builtin.append((~h2).groups, name);
+    h2.groups = builtin.append(h2.groups, name);
     return h2;
 }
 
@@ -285,21 +283,20 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         r = r.ΔClone();
         ref var h = ref Ꮡh.DerefOrNull();
 
-        ref var state = ref heap<handleState>(out var Ꮡstate);
-        state = Ꮡh.newHandleState(buffer.New(), true, ""u8);
+        ref var state = ref heap<handleState>(Ꮡh.newHandleState(buffer.New(), true, ""u8), out var Ꮡstate);
         defer(Ꮡstate.free, ref ᒐ);
         if (h.json) {
-            state.buf.WriteByte((rune)'{');
+            state.buf.WriteByte((byte)'{');
         }
         // Built-in attributes. They are not in a group.
         var stateGroups = state.groups;
-        state.groups = default!; // So ReplaceAttrs sees no groups instead of the pre groups.
+        state.groups = default; // So ReplaceAttrs sees no groups instead of the pre groups.
         var rep = h.opts.ReplaceAttr;
         // time
         if (!r.Time.IsZero()) {
             @string keyΔ1 = TimeKey;
             var valΔ1 = r.Time.Round(0); // strip monotonic to match Attr behavior
-            if (rep == default!){
+            if (rep == nil) {
                 state.appendKey(keyΔ1);
                 Ꮡstate.appendTime(valΔ1);
             } else {
@@ -309,7 +306,7 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         // level
         @string key = LevelKey;
         ΔLevel val = r.Level;
-        if (rep == default!){
+        if (rep == nil) {
             state.appendKey(key);
             state.appendString(val.String());
         } else {
@@ -319,13 +316,13 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         if (h.opts.AddSource) {
             var src = r.Source();
             if (src == nil) {
-                src = Ꮡ(new ΔSource(nil));
+                src = Ꮡ(new ΔSource());
             }
             Ꮡstate.appendAttr(Any(SourceKey, src.OrTypedNil()));
         }
         key = MessageKey;
         @string msg = r.Message;
-        if (rep == default!){
+        if (rep == nil) {
             state.appendKey(key);
             state.appendString(msg);
         } else {
@@ -333,14 +330,14 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         }
         state.groups = stateGroups; // Restore groups passed to ReplaceAttrs.
         Ꮡstate.appendNonBuiltIns(r);
-        state.buf.WriteByte((rune)'\n');
+        state.buf.WriteByte((byte)'\n');
 
         h.mu.Lock();
         defer(Ꮡh.Value.mu.Unlock, ref ᒐ);
         var (_, err) = h.w.Write(state.buf.ValueSlot);
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -350,11 +347,11 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
 
     // preformatted Attrs
     {
-        var pfa = s.h.Value.preformattedAttrs; if (len(pfa) > 0) {
+        var pfa = s.h.preformattedAttrs; if (len(pfa) > 0) {
             s.buf.WriteString(s.sep);
             s.buf.Write(pfa);
             s.sep = s.h.attrSep();
-            if ((~s.h).json && pfa[len(pfa) - 1] == (rune)'{') {
+            if (s.h.json && pfa[len(pfa) - 1] == '{') {
                 s.sep = ""u8;
             }
         }
@@ -362,16 +359,16 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     // Attrs in Record -- unlike the built-in ones, they are in groups started
     // from WithGroup.
     // If the record has no Attrs, don't output any groups.
-    nint nOpenGroups = s.h.Value.nOpenGroups;
+    nint nOpenGroups = s.h.nOpenGroups;
     if (r.NumAttrs() > 0) {
-        s.prefix.WriteString((~s.h).groupPrefix);
+        s.prefix.WriteString(s.h.groupPrefix);
         // The group may turn out to be empty even though it has attrs (for
         // example, ReplaceAttr may delete all the attrs).
         // So remember where we are in the buffer, to restore the position
         // later if necessary.
         nint pos = s.buf.Len();
         s.openGroups();
-        nOpenGroups = len((~s.h).groups);
+        nOpenGroups = len(s.h.groups);
         var empty = true;
         r.Attrs((Attr a) => {
             if (Ꮡs.appendAttr(a)) {
@@ -381,16 +378,16 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
         });
         if (empty) {
             s.buf.SetLen(pos);
-            nOpenGroups = s.h.Value.nOpenGroups;
+            nOpenGroups = s.h.nOpenGroups;
         }
     }
-    if ((~s.h).json) {
+    if (s.h.json) {
         // Close all open groups.
-        foreach (var _ᴛ1 in range((~s.h).groups.slice(0, nOpenGroups))) {
-            s.buf.WriteByte((rune)'}');
+        foreach (var _ᴛ1 in range(s.h.groups.slice(0, nOpenGroups))) {
+            s.buf.WriteByte((byte)'}');
         }
         // Close the top-level object.
-        s.buf.WriteByte((rune)'}');
+        s.buf.WriteByte((byte)'}');
     }
 }
 
@@ -408,9 +405,9 @@ internal static @string attrSep(this ref commonHandler h) {
 partial struct handleState {
     internal ж<commonHandler> h;
     internal ж<buffer.Buffer> buf;
-    internal bool freeBuf;           // should buf be freed?
-    internal @string sep;        // separator to write before next key
-    internal ж<buffer.Buffer> prefix; // for text: key prefix
+    internal bool freeBuf;             // should buf be freed?
+    internal @string sep;              // separator to write before next key
+    internal ж<buffer.Buffer> prefix;  // for text: key prefix
     internal ж<slice<@string>> groups; // pool-allocated slice of active groups, for ReplaceAttr
 }
 
@@ -421,17 +418,17 @@ partial struct handleState {
 )); }
 internal static ref sync.Pool groupPool => ref ((StaticBox<sync.Pool>)ᏑgroupPool).ValueSlot;
 
-internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffer.Buffer> Ꮡbuf, bool freeBuf, @string sep) {
+internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffer.Buffer> buf, bool freeBuf, @string sep) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var s = new handleState(
         h: Ꮡh,
-        buf: Ꮡbuf,
+        buf: buf,
         freeBuf: freeBuf,
         sep: sep,
         prefix: buffer.New()
     );
-    if (h.opts.ReplaceAttr != default!) {
+    if (h.opts.ReplaceAttr != nil) {
         s.groups = ᏑgroupPool.Get()._<ж<slice<@string>>>();
         s.groups.ValueSlot = builtin.appendꓸꓸꓸ(s.groups.ValueSlot, h.groups.slice(0, h.nOpenGroups));
     }
@@ -452,7 +449,7 @@ internal static void free(this ref handleState s) {
 }
 
 internal static void openGroups(this ref handleState s) {
-    foreach (var (_, n) in (~s.h).groups.slice((~s.h).nOpenGroups)) {
+    foreach (var (_, n) in s.h.groups.slice(s.h.nOpenGroups)) {
         s.openGroup(n);
     }
 }
@@ -463,9 +460,9 @@ internal static UntypedInt keyComponentSep => /* '.' */ 46;
 // openGroup starts a new group of attributes
 // with the given name.
 internal static void openGroup(this ref handleState s, @string name) {
-    if ((~s.h).json){
+    if (s.h.json) {
         s.appendKey(name);
-        s.buf.WriteByte((rune)'{');
+        s.buf.WriteByte((byte)'{');
         s.sep = ""u8;
     } else {
         s.prefix.WriteString(name);
@@ -479,8 +476,8 @@ internal static void openGroup(this ref handleState s, @string name) {
 
 // closeGroup ends the group with the given name.
 internal static void closeGroup(this ref handleState s, @string name) {
-    if ((~s.h).json){
-        s.buf.WriteByte((rune)'}');
+    if (s.h.json) {
+        s.buf.WriteByte((byte)'}');
     } else {
         (s.prefix.ValueSlot) = (s.prefix.ValueSlot).slice(0, len(s.prefix.ValueSlot) - len(name) - 1);
         /* for keyComponentSep */
@@ -511,8 +508,8 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
 
     a.Value = a.Value.Resolve();
     {
-        var rep = s.h.Value.opts.ReplaceAttr; if (rep != default! && a.Value.Kind() != KindGroup) {
-            slice<@string> gs = default!;
+        var rep = s.h.opts.ReplaceAttr; if (rep != nil && a.Value.Kind() != KindGroup) {
+            slice<@string> gs = default;
             if (s.groups != nil) {
                 gs = s.groups.ValueSlot;
             }
@@ -534,16 +531,16 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
                     if (src.isEmpty()) {
                         return false;
                     }
-                    if ((~s.h).json){
+                    if (s.h.json) {
                         a.Value = src.group();
                     } else {
-                        a.Value = StringValue(fmt.Sprintf("%s:%d"u8, (~src).File, (~src).Line));
+                        a.Value = StringValue(fmt.Sprintf("%s:%d"u8, src.File, src.Line));
                     }
                 }
             }
         }
     }
-    if (a.Value.Kind() == KindGroup){
+    if (a.Value.Kind() == KindGroup) {
         var attrs = a.Value.Group();
         // Output only non-empty groups.
         if (len(attrs) > 0) {
@@ -577,15 +574,15 @@ internal static void appendError(this ref handleState s, error err) {
 
 internal static void appendKey(this ref handleState s, @string key) {
     s.buf.WriteString(s.sep);
-    if (s.prefix != nil && len(s.prefix.ValueSlot) > 0){
+    if (s.prefix != nil && len(s.prefix.ValueSlot) > 0) {
         s.appendTwoStrings((@string)(slice<byte>)s.prefix.ValueSlot, key);
     } else {
         s.appendString(key);
     }
-    if ((~s.h).json){
-        s.buf.WriteByte((rune)':');
+    if (s.h.json) {
+        s.buf.WriteByte((byte)':');
     } else {
-        s.buf.WriteByte((rune)'=');
+        s.buf.WriteByte((byte)'=');
     }
     s.sep = s.h.attrSep();
 }
@@ -594,11 +591,11 @@ internal static void appendKey(this ref handleState s, @string key) {
 internal static void appendTwoStrings(this ref handleState s, @string x, @string y) {
     var buf = s.buf.ValueSlot;
     switch (ᐧ) {
-    case {} when (~s.h).json: {
-        buf.WriteByte((rune)'"');
+    case {} when s.h.json: {
+        buf.WriteByte((byte)'"');
         buf = appendEscapedJSONString(buf, x);
         buf = appendEscapedJSONString(buf, y);
-        buf.WriteByte((rune)'"');
+        buf.WriteByte((byte)'"');
         break;
     }
     case {} when !needsQuoting(x) && !needsQuoting(y): {
@@ -614,13 +611,13 @@ internal static void appendTwoStrings(this ref handleState s, @string x, @string
 }
 
 internal static void appendString(this ref handleState s, @string str) {
-    if ((~s.h).json){
-        s.buf.WriteByte((rune)'"');
+    if (s.h.json) {
+        s.buf.WriteByte((byte)'"');
         s.buf.ValueSlot = appendEscapedJSONString(s.buf.ValueSlot, str);
-        s.buf.WriteByte((rune)'"');
+        s.buf.WriteByte((byte)'"');
     } else {
         // text
-        if (needsQuoting(str)){
+        if (needsQuoting(str)) {
             s.buf.ValueSlot = strconv.AppendQuote(s.buf.ValueSlot, str);
         } else {
             s.buf.WriteString(str);
@@ -639,15 +636,14 @@ internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
         var vʗ1 = v;
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     // If it panics with a nil pointer, the most likely cases are
                     // an encoding.TextMarshaler or error fails to guard against nil,
                     // in which case "<nil>" seems to be the feasible choice.
                     //
                     // Adapted from the code in fmt/print.go.
                     {
-                        ref var vΔ1 = ref heap<reflectꓸValue>(out var ᏑvΔ1);
-                        vΔ1 = reflect.ValueOf(vʗ1.any); if (vΔ1.Kind() == reflect.ΔPointer && vΔ1.IsNil()) {
+                        ref var vΔ1 = ref heap<reflectꓸValue>(reflect.ValueOf(vʗ1.any), out var ᏑvΔ1); if (vΔ1.Kind() == reflect.ΔPointer && vΔ1.IsNil()) {
                             Ꮡs.Value.appendString(nilˢ);
                             return;
                         }
@@ -659,13 +655,13 @@ internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
             }
         }, ref ᒐ);
 
-        error err = default!;
-        if ((~s.h).json){
+        error err = default;
+        if (s.h.json) {
             err = appendJSONValue(Ꮡs, v);
         } else {
             err = appendTextValue(Ꮡs, v);
         }
-        if (err != default!) {
+        if (err != nil) {
             s.appendError(err);
         }
     }
@@ -676,7 +672,7 @@ internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
 internal static void appendTime(this ж<handleState> Ꮡs, time.Time t) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((~s.h).json){
+    if (s.h.json) {
         appendJSONTime(Ꮡs, t);
     } else {
         s.buf.ValueSlot = appendRFC3339Millis(s.buf.ValueSlot, t);
@@ -698,7 +694,7 @@ internal static slice<byte> appendRFC3339Millis(slice<byte> b, time.Time t) {
 
 // DiscardHandler discards all log output.
 // DiscardHandler.Enabled returns false for all Levels.
-public static ΔHandler DiscardHandler = new discardHandler(nil);
+public static ΔHandler DiscardHandler = new discardHandler();
 
 partial struct discardHandler {
 }
@@ -708,7 +704,7 @@ internal static bool Enabled(this discardHandler dh, context.Context _Δp1, ΔLe
 }
 
 internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) {
-    return default!;
+    return default;
 }
 
 internal static ΔHandler WithAttrs(this discardHandler dh, slice<Attr> attrs) {

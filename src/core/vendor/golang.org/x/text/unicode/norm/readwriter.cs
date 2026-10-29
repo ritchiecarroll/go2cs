@@ -17,8 +17,8 @@ partial struct normWriter {
 // not at a normalization boundary, the bytes will be buffered for the next
 // write. The remaining bytes will be written on close.
 internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> data) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var w = ref Ꮡw.DerefOrNull();
 
     // Process data in pieces to keep w.buf size bounded.
@@ -44,7 +44,7 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
         }
         if (i > 0) {
             {
-                (_, err) = w.w.Write(w.buf.slice(0, i)); if (err != default!) {
+                (_, err) = w.w.Write(w.buf.slice(0, i)); if (err != nil) {
                     break;
                 }
             }
@@ -59,11 +59,11 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
 internal static error Close(this ref normWriter w) {
     if (len(w.buf) > 0) {
         var (_, err) = w.w.Write(w.buf);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
     }
-    return default!;
+    return default;
 }
 
 // Writer returns a new writer that implements Write(b)
@@ -71,8 +71,8 @@ internal static error Close(this ref normWriter w) {
 // internal buffer to maintain state across Write calls.
 // Calling its Close method writes any buffered data to w.
 public static io.WriteCloser Writer(this Form f, io.Writer w) {
-    var wr = Ꮡ(new normWriter(rb: new reorderBuffer(nil), w: w));
-    wr.of(normWriter.Ꮡrb).init(f, default!);
+    var wr = Ꮡ(new normWriter(rb: new reorderBuffer(), w: w));
+    wr.of(normWriter.Ꮡrb).init(f, default);
     return new normWriterжWriteCloser(wr);
 }
 
@@ -90,16 +90,16 @@ partial struct normReader {
 internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         if (r.lastBoundary - r.bufStart > 0) {
             nint nΔ1 = copy(p, r.outbuf.slice(r.bufStart, r.lastBoundary));
             r.bufStart += nΔ1;
             if (r.lastBoundary - r.bufStart > 0) {
-                return (nΔ1, default!);
+                return (nΔ1, default);
             }
             return (nΔ1, r.err);
         }
-        if (r.err != default!) {
+        if (r.err != nil) {
             return (0, r.err);
         }
         nint outn = copy(r.outbuf, r.outbuf.slice(r.lastBoundary));
@@ -112,7 +112,7 @@ internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
         if (n > 0) {
             r.outbuf = doAppend(Ꮡr.of(normReader.Ꮡrb), r.outbuf, 0);
         }
-        if (AreEqual(err, io.EOF)){
+        if (AreEqual(err, io.EOF)) {
             r.lastBoundary = len(r.outbuf);
         } else {
             r.lastBoundary = lastBoundary(ref nonnil(ref r).rb.f, r.outbuf);
@@ -128,7 +128,7 @@ internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
 public static io.Reader Reader(this Form f, io.Reader r) {
     const nint chunk = 4000;
     var buf = new slice<byte>(chunk);
-    var rr = Ꮡ(new normReader(rb: new reorderBuffer(nil), r: r, inbuf: buf));
+    var rr = Ꮡ(new normReader(rb: new reorderBuffer(), r: r, inbuf: buf));
     rr.of(normReader.Ꮡrb).init(f, buf);
     return new normReaderжReader(rr);
 }

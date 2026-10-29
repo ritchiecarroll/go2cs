@@ -67,16 +67,19 @@ public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
     //   √( z)·2**(½b)     if b is even
     //   √(2z)·2**(⌊½b⌋)   if b > 0 is odd
     //   √(½z)·2**(⌈½b⌉)   if b < 0 is odd
-    var exprᴛ1 = b % 2;
-    if (exprᴛ1 is 0) {
+    switch (b % 2) {
+    case 0: {
         // nothing to do
+        break;
     }
-    else if (exprᴛ1 is 1) {
+    case 1: {
         z.exp++;
+        break;
     }
-    else if (exprᴛ1 == -1) {
+    case var ᴛ when ᴛ == -1: {
         z.exp--;
-    }
+        break;
+    }}
     // 0.25 <= z < 2.0
 
     // Solving 1/x² - z = 0 avoids Quo calls and is faster, especially
@@ -92,7 +95,7 @@ public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
 //	1/t² - x = 0
 //
 // for t (using Newton's method), and then inverting.
-internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
+internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     // let
@@ -108,27 +111,27 @@ internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
     var uʗ1 = u;
     var vʗ1 = v;
     ж<Float> ng(ж<Float> t) {
-        uʗ1.Value.prec = t.Value.prec;
-        vʗ1.Value.prec = t.Value.prec;
-        uʗ1.Mul(t, t); // u = t²
-        uʗ1.Mul(Ꮡx, uʗ1); //   = xt²
+        uʗ1.prec = t.prec;
+        vʗ1.prec = t.prec;
+        uʗ1.Mul(t, t);         // u = t²
+        uʗ1.Mul(x, uʗ1);       //   = xt²
         vʗ1.Sub(threeʗ1, uʗ1); // v = 3 - xt²
-        uʗ1.Mul(t, vʗ1); // u = t(3 - xt²)
-        uʗ1.Value.exp--; //   = ½t(3 - xt²)
+        uʗ1.Mul(t, vʗ1);       // u = t(3 - xt²)
+        uʗ1.exp--;             //   = ½t(3 - xt²)
         return t.Set(uʗ1);
     }
 
-    var (xf, _) = Ꮡx.Float64();
+    var (xf, _) = x.Float64();
     var sqi = newFloat(z.prec);
     sqi.SetFloat64(1D / math.Sqrt(xf));
-    for (var prec = z.prec + 32; (~sqi).prec < prec; ) {
-        sqi.Value.prec *= 2;
+    for (var prec = z.prec + 32; sqi.prec < prec; ) {
+        sqi.prec *= 2;
         sqi = ng(sqi);
     }
     // sqi = 1/√x
 
     // x/√x = √x
-    Ꮡz.Mul(Ꮡx, sqi);
+    Ꮡz.Mul(x, sqi);
 }
 
 // newFloat returns a new *Float with space for twice the given
@@ -136,7 +139,7 @@ internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
 internal static ж<Float> newFloat(uint32 prec2) {
     var z = @new<Float>();
     // nat.make ensures the slice length is > 0
-    z.Value.mant = (~z).mant.make((nint)(prec2 / (uint32)_W) * 2);
+    z.mant = z.mant.make((nint)(prec2 / (uint32)_W) * 2);
     return z;
 }
 

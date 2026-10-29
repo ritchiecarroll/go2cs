@@ -36,7 +36,7 @@ partial struct fmtFlags {
 partial struct fmt {
     internal ж<buffer> buf;
     /*embed*/ internal fmtFlags fmtFlags;
-    internal nint wid; // width
+    internal nint wid;  // width
     internal nint prec; // precision
     // intbuf is large enough to store %b of an int64 with a sign and
     // avoids padding at the end of the struct on 32 bit architectures.
@@ -44,7 +44,7 @@ partial struct fmt {
 }
 
 internal static void clearflags(this ref fmt f) {
-    f.fmtFlags = new fmtFlags(nil);
+    f.fmtFlags = new fmtFlags();
     f.wid = 0;
     f.prec = 0;
 }
@@ -70,10 +70,10 @@ internal static void writePadding(this ref fmt f, nint n) {
         copy(buf, f.buf.ValueSlot);
     }
     // Decide which byte the padding should be filled with.
-    var padByte = (byte)(rune)' ';
+    var padByte = (byte)' ';
     // Zero padding is allowed only to the left.
     if (f.zero && !f.minus) {
-        padByte = (byte)(rune)'0';
+        padByte = (byte)'0';
     }
     // Fill padding with padByte.
     var padding = buf.slice(oldLen, newLen);
@@ -90,7 +90,7 @@ internal static void pad(this ref fmt f, slice<byte> b) {
         return;
     }
     nint width = f.wid - utf8.RuneCount(b);
-    if (!f.minus){
+    if (!f.minus) {
         // left padding
         f.writePadding(width);
         f.buf.write(b);
@@ -108,7 +108,7 @@ internal static void padString(this ref fmt f, sstring s) {
         return;
     }
     nint width = f.wid - utf8.RuneCountInString(s);
-    if (!f.minus){
+    if (!f.minus) {
         // left padding
         f.writePadding(width);
         f.buf.writeString(s);
@@ -125,7 +125,7 @@ internal static readonly @string falseˢ = "false"u8;
 
 // fmtBoolean formats a boolean.
 internal static void fmtBoolean(this ref fmt f, bool v) {
-    if (v){
+    if (v) {
         f.padString(trueˢ);
     } else {
         f.padString(falseˢ);
@@ -155,20 +155,20 @@ internal static void fmtUnicode(this ref fmt f, uint64 u) {
     // For %#U we want to add a space and a quoted character at the end of the buffer.
     if (f.sharp && u <= utf8.MaxRune && strconv.IsPrint((rune)u)) {
         i--;
-        buf[i] = (rune)'\'';
+        buf[i] = (byte)'\'';
         i -= utf8.RuneLen((rune)u);
         utf8.EncodeRune(buf.slice(i), (rune)u);
         i--;
-        buf[i] = (rune)'\'';
+        buf[i] = (byte)'\'';
         i--;
-        buf[i] = (rune)' ';
+        buf[i] = (byte)' ';
     }
     // Format the Unicode code point u as a hexadecimal number.
     while (u >= 16) {
         i--;
         buf[i] = udigits[(u & 0xF)];
         prec--;
-        u >>= (int)(4);
+        u >>= 4;
     }
     i--;
     buf[i] = udigits[u];
@@ -176,14 +176,14 @@ internal static void fmtUnicode(this ref fmt f, uint64 u) {
     // Add zeros in front of the number until requested precision is reached.
     while (prec > 0) {
         i--;
-        buf[i] = (rune)'0';
+        buf[i] = (byte)'0';
         prec--;
     }
     // Add a leading "U+".
     i--;
-    buf[i] = (rune)'+';
+    buf[i] = (byte)'+';
     i--;
-    buf[i] = (rune)'U';
+    buf[i] = (byte)'U';
 
     var oldZero = f.zero;
     f.zero = false;
@@ -214,7 +214,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     // If both are specified the f.zero flag is ignored and
     // padding with spaces is used instead.
     nint prec = 0;
-    if (f.precPresent){
+    if (f.precPresent) {
         prec = f.prec;
         // Precision of 0 and value of 0 means "print nothing" but padding.
         if (prec == 0 && u == 0) {
@@ -224,8 +224,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
             f.zero = oldZeroΔ1;
             return;
         }
-    } else 
-    if (f.zero && !f.minus && f.widPresent) { // Zero padding is allowed only to the left.
+    } else if (f.zero && !f.minus && f.widPresent) { // Zero padding is allowed only to the left.
         prec = f.wid;
         if (negative || f.plus || f.space) {
             prec--; // leave room for sign
@@ -243,7 +242,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
         while (u >= 10) {
             i--;
             var next = u / 10;
-            buf[i] = (byte)((rune)'0' + u - next * 10);
+            buf[i] = (byte)('0' + u - next * 10);
             u = next;
         }
         break;
@@ -252,23 +251,23 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
         while (u >= 16) {
             i--;
             buf[i] = digits[(u & 0xF)];
-            u >>= (int)(4);
+            u >>= 4;
         }
         break;
     }
     case 8: {
         while (u >= 8) {
             i--;
-            buf[i] = (byte)((rune)'0' + (u & 7));
-            u >>= (int)(3);
+            buf[i] = (byte)('0' + (u & 7));
+            u >>= 3;
         }
         break;
     }
     case 2: {
         while (u >= 2) {
             i--;
-            buf[i] = (byte)((rune)'0' + (u & 1));
-            u >>= (int)(1);
+            buf[i] = (byte)('0' + (u & 1));
+            u >>= 1;
         }
         break;
     }
@@ -280,7 +279,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     buf[i] = digits[u];
     while (i > 0 && prec > len(buf) - i) {
         i--;
-        buf[i] = (rune)'0';
+        buf[i] = (byte)'0';
     }
 
     // Various prefixes: 0x, -, etc.
@@ -289,15 +288,15 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
         case 2: {
             // Add a leading 0b.
             i--;
-            buf[i] = (rune)'b';
+            buf[i] = (byte)'b';
             i--;
-            buf[i] = (rune)'0';
+            buf[i] = (byte)'0';
             break;
         }
         case 8: {
-            if (buf[i] != (rune)'0') {
+            if (buf[i] != '0') {
                 i--;
-                buf[i] = (rune)'0';
+                buf[i] = (byte)'0';
             }
             break;
         }
@@ -306,28 +305,26 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
             i--;
             buf[i] = digits[16];
             i--;
-            buf[i] = (rune)'0';
+            buf[i] = (byte)'0';
             break;
         }}
     }
-    if (verb == (rune)'O') {
+    if (verb == 'O') {
         i--;
-        buf[i] = (rune)'o';
+        buf[i] = (byte)'o';
         i--;
-        buf[i] = (rune)'0';
+        buf[i] = (byte)'0';
     }
 
-    if (negative){
+    if (negative) {
         i--;
-        buf[i] = (rune)'-';
-    } else 
-    if (f.plus){
+        buf[i] = (byte)'-';
+    } else if (f.plus) {
         i--;
-        buf[i] = (rune)'+';
-    } else 
-    if (f.space) {
+        buf[i] = (byte)'+';
+    } else if (f.space) {
         i--;
-        buf[i] = (rune)' ';
+        buf[i] = (byte)' ';
     }
 
     // Left padding with zeros has already been handled like precision earlier
@@ -383,7 +380,7 @@ internal static void fmtBs(this ref fmt f, slice<byte> b) {
 // fmtSbx formats a string or byte slice as a hexadecimal encoding of its bytes.
 internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring digits) {
     nint length = len(b);
-    if (b == default!) {
+    if (b == nil) {
         // No byte slice present. Assume string s should be encoded.
         length = len(s);
     }
@@ -393,16 +390,15 @@ internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring di
     }
     // Compute width of the encoding taking into account the f.sharp and f.space flag.
     nint width = 2 * length;
-    if (width > 0){
-        if (f.space){
+    if (width > 0) {
+        if (f.space) {
             // Each element encoded by two hexadecimals will get a leading 0x or 0X.
             if (f.sharp) {
                 width *= 2;
             }
             // Elements will be separated by a space.
             width += length - 1;
-        } else 
-        if (f.sharp) {
+        } else if (f.sharp) {
             // Only a leading 0x or 0X will be added for the whole string.
             width += 2;
         }
@@ -420,19 +416,19 @@ internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring di
     var buf = f.buf.ValueSlot;
     if (f.sharp) {
         // Add leading 0x or 0X.
-        buf = append(buf, (byte)((rune)'0'), digits[16]);
+        buf = append(buf, (byte)'0', digits[16]);
     }
-    byte c = default!;
+    byte c = default;
     for (nint i = 0; i < length; i++) {
         if (f.space && i > 0) {
             // Separate elements with a space.
-            buf = append(buf, (byte)((rune)' '));
+            buf = append(buf, (byte)' ');
             if (f.sharp) {
                 // Add leading 0x or 0X for each element.
-                buf = append(buf, (byte)((rune)'0'), digits[16]);
+                buf = append(buf, (byte)'0', digits[16]);
             }
         }
-        if (b != default!){
+        if (b != nil) {
             c = b[i]; // Take a byte from the input byte slice.
         } else {
             c = s[i]; // Take a byte from the input string.
@@ -449,7 +445,7 @@ internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring di
 
 // fmtSx formats a string as a hexadecimal encoding of its bytes.
 internal static void fmtSx(this ref fmt f, sstring s, sstring digits) {
-    f.fmtSbx(s, default!, digits);
+    f.fmtSbx(s, default, digits);
 }
 
 // fmtBx formats a byte slice as a hexadecimal encoding of its bytes.
@@ -467,7 +463,7 @@ internal static void fmtQ(this ref fmt f, @string s) {
         return;
     }
     var buf = f.intbuf[..0];
-    if (f.plus){
+    if (f.plus) {
         f.pad(strconv.AppendQuoteToASCII(buf, s));
     } else {
         f.pad(strconv.AppendQuote(buf, s));
@@ -495,7 +491,7 @@ internal static void fmtQc(this ref fmt f, uint64 c) {
         r = utf8.RuneError;
     }
     var buf = f.intbuf[..0];
-    if (f.plus){
+    if (f.plus) {
         f.pad(strconv.AppendQuoteRuneToASCII(buf, r));
     } else {
         f.pad(strconv.AppendQuoteRune(buf, r));
@@ -513,23 +509,23 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
     }
     // Format number, reserving space for leading + sign if needed.
     var num = strconv.AppendFloat(f.intbuf[..1], v, (byte)verb, prec, size);
-    if (num[1] == (rune)'-' || num[1] == (rune)'+'){
+    if (num[1] == '-' || num[1] == '+') {
         num = num[1..];
     } else {
-        num[0] = (rune)'+';
+        num[0] = (byte)'+';
     }
     // f.space means to add a leading space instead of a "+" sign unless
     // the sign is explicitly asked for by f.plus.
-    if (f.space && num[0] == (rune)'+' && !f.plus) {
-        num[0] = (rune)' ';
+    if (f.space && num[0] == '+' && !f.plus) {
+        num[0] = (byte)' ';
     }
     // Special handling for infinities and NaN,
     // which don't look like a number so shouldn't be padded with zeros.
-    if (num[1] == (rune)'I' || num[1] == (rune)'N') {
+    if (num[1] == 'I' || num[1] == 'N') {
         var oldZero = f.zero;
         f.zero = false;
         // Remove sign before NaN if not asked for.
-        if (num[1] == (rune)'N' && !f.space && !f.plus) {
+        if (num[1] == 'N' && !f.space && !f.plus) {
             num = num[1..];
         }
         f.pad(num);
@@ -538,10 +534,10 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
     }
     // The sharp flag forces printing a decimal point for non-binary formats
     // and retains trailing zeros, which we may need to restore.
-    if (f.sharp && verb != (rune)'b') {
+    if (f.sharp && verb != 'b') {
         nint digits = 0;
         switch (verb) {
-        case (rune)'v' or (rune)'g' or (rune)'G' or (rune)'x': {
+        case 'v' or 'g' or 'G' or 'x': {
             digits = prec;
             // If no precision is set explicitly use a precision of 6.
             if (digits == -1) {
@@ -561,16 +557,16 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
         for (nint i = 1; i < len(num); i++) {
             var exprᴛ1 = num[i];
             var matchᴛ1 = false;
-            if (exprᴛ1 is (rune)'.') { matchᴛ1 = true;
+            if (exprᴛ1 is (byte)'.') { matchᴛ1 = true;
                 hasDecimalPoint = true;
             }
-            else if (exprᴛ1 is (rune)'p' or (rune)'P') { matchᴛ1 = true;
+            else if (exprᴛ1 is (byte)'p' or (byte)'P') { matchᴛ1 = true;
                 tail = appendꓸꓸꓸ(tail, num.slice(i));
                 num = num.slice(0, i);
             }
-            else if (exprᴛ1 is (rune)'e' or (rune)'E') { matchᴛ1 = true;
+            else if (exprᴛ1 is (byte)'e' or (byte)'E') { matchᴛ1 = true;
                 do {
-                    if (verb != (rune)'x' && verb != (rune)'X') {
+                    if (verb != 'x' && verb != 'X') {
                         tail = appendꓸꓸꓸ(tail, num.slice(i));
                         num = num.slice(0, i);
                         break;
@@ -579,7 +575,7 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
                 } while (false);
             }
             if (fallthrough || !matchᴛ1) { /* default: */
-                if (num[i] != (rune)'0') {
+                if (num[i] != '0') {
                     sawNonzeroDigit = true;
                 }
                 // Count significant digits after the first non-zero digit.
@@ -590,19 +586,19 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
         }
         if (!hasDecimalPoint) {
             // Leading digit 0 should contribute once to digits.
-            if (len(num) == 2 && num[1] == (rune)'0') {
+            if (len(num) == 2 && num[1] == '0') {
                 digits--;
             }
-            num = append(numᴷ, num, (byte)((rune)'.'));
+            num = append(numᴷ, num, (byte)'.');
         }
         while (digits > 0) {
-            num = append(num, (byte)((rune)'0'));
+            num = append(num, (byte)'0');
             digits--;
         }
         num = appendꓸꓸꓸ(num, tail);
     }
     // We want a sign if asked for and if the sign is not positive.
-    if (f.plus || num[0] != (rune)'+') {
+    if (f.plus || num[0] != '+') {
         // If we're zero padding to the left we want the sign before the leading zeros.
         // Achieve this by writing the sign out and then padding the unsigned number.
         // Zero padding is allowed only to the left.

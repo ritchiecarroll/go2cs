@@ -71,7 +71,7 @@ partial interface Resetter {
 //
 // The [io.ReadCloser] returned by NewReader also implements [Resetter].
 public static (io.ReadCloser, error) NewReader(io.Reader r) {
-    return NewReaderDict(r, default!);
+    return NewReaderDict(r, default);
 }
 
 // NewReaderDict is like [NewReader] but uses a preset dictionary.
@@ -82,18 +82,18 @@ public static (io.ReadCloser, error) NewReader(io.Reader r) {
 public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict) {
     var z = @new<reader>();
     var err = z.Reset(r, dict);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (new readerжReadCloser(z), default!);
+    return (new readerжReadCloser(z), default);
 }
 
 internal static (nint, error) Read(this ref reader z, slice<byte> p) {
-    if (z.err != default!) {
+    if (z.err != nil) {
         return (0, z.err);
     }
 
-    nint n = default!;
+    nint n = default;
     (n, z.err) = z.decompressor.Read(p);
     z.digest.Write(p.slice(0, n));
     if (!AreEqual(z.err, io.EOF)) {
@@ -103,7 +103,7 @@ internal static (nint, error) Read(this ref reader z, slice<byte> p) {
 
     // Finished file; check checksum.
     {
-        var (_, err) = io.ReadFull(new flate_ReaderᴠReader(z.r), z.scratch[0..4]); if (err != default!) {
+        var (_, err) = io.ReadFull(new flate_ReaderᴠReader(z.r), z.scratch[0..4]); if (err != nil) {
             if (AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
@@ -124,7 +124,7 @@ internal static (nint, error) Read(this ref reader z, slice<byte> p) {
 // In order for the ZLIB checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
 internal static error Close(this ref reader z) {
-    if (z.err != default! && !AreEqual(z.err, io.EOF)) {
+    if (z.err != nil && !AreEqual(z.err, io.EOF)) {
         return z.err;
     }
     z.err = z.decompressor.Close();
@@ -134,7 +134,7 @@ internal static error Close(this ref reader z) {
 internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
     z = new reader(decompressor: z.decompressor);
     {
-        var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok){
+        var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
             z.r = fr;
         } else {
             z.r = new bufio_ReaderжReader(bufio.NewReader(r));
@@ -143,7 +143,7 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
 
     // Read the header (RFC 1950 section 2.2.).
     (_, z.err) = io.ReadFull(z.r, z.scratch[0..2]);
-    if (z.err != default!) {
+    if (z.err != nil) {
         if (AreEqual(z.err, io.EOF)) {
             z.err = io.ErrUnexpectedEOF;
         }
@@ -157,7 +157,7 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
     var haveDict = (byte)(z.scratch[1] & 0x20) != 0;
     if (haveDict) {
         (_, z.err) = io.ReadFull(z.r, z.scratch[0..4]);
-        if (z.err != default!) {
+        if (z.err != nil) {
             if (AreEqual(z.err, io.EOF)) {
                 z.err = io.ErrUnexpectedEOF;
             }
@@ -170,8 +170,8 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
         }
     }
 
-    if (z.decompressor == default!){
-        if (haveDict){
+    if (z.decompressor == nil) {
+        if (haveDict) {
             z.decompressor = flate.NewReaderDict(z.r, dict);
         } else {
             z.decompressor = flate.NewReader(z.r);
@@ -180,7 +180,7 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
         z.decompressor._<flate.Resetter>().Reset(z.r, dict);
     }
     z.digest = adler32.New();
-    return default!;
+    return default;
 }
 
 } // end zlib_package

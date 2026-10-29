@@ -235,13 +235,13 @@ internal static void reflect_typedmemmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst,
 }
 
 //go:linkname reflectlite_typedmemmove internal/reflectlite.typedmemmove
-internal static void reflectlite_typedmemmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @unsafe.Pointer src) {
-    reflect_typedmemmove(Ꮡtyp, dst, src);
+internal static void reflectlite_typedmemmove(ж<_type> typ, @unsafe.Pointer dst, @unsafe.Pointer src) {
+    reflect_typedmemmove(typ, dst, src);
 }
 
 //go:linkname maps_typedmemmove internal/runtime/maps.typedmemmove
-internal static void maps_typedmemmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @unsafe.Pointer src) {
-    typedmemmove(Ꮡtyp, dst, src);
+internal static void maps_typedmemmove(ж<_type> typ, @unsafe.Pointer dst, @unsafe.Pointer src) {
+    typedmemmove(typ, dst, src);
 }
 
 // reflectcallmove is invoked by reflectcall to copy the return values
@@ -394,13 +394,13 @@ internal static void typedmemclr(ж<_type> Ꮡtyp, @unsafe.Pointer ptr) {
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_typedmemclr reflect.typedmemclr
-internal static void reflect_typedmemclr(ж<_type> Ꮡtyp, @unsafe.Pointer ptr) {
-    typedmemclr(Ꮡtyp, ptr);
+internal static void reflect_typedmemclr(ж<_type> typ, @unsafe.Pointer ptr) {
+    typedmemclr(typ, ptr);
 }
 
 //go:linkname maps_typedmemclr internal/runtime/maps.typedmemclr
-internal static void maps_typedmemclr(ж<_type> Ꮡtyp, @unsafe.Pointer ptr) {
-    typedmemclr(Ꮡtyp, ptr);
+internal static void maps_typedmemclr(ж<_type> typ, @unsafe.Pointer ptr) {
+    typedmemclr(typ, ptr);
 }
 
 //go:linkname reflect_typedmemclrpartial reflect.typedmemclrpartial

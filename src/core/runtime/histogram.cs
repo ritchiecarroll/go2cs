@@ -113,10 +113,10 @@ internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) {
     // bucket is the bucket index, which is the bucketBit minus the
     // highest bit of the minimum, plus one to leave room for the catch-all
     // bucket for samples lower than the minimum.
-    nuint bucketBit = default!;
-    nuint bucket = default!;
+    nuint bucketBit = default;
+    nuint bucket = default;
     {
-        nint l = sys.Len64((uint64)duration); if (l < timeHistMinBucketBits){
+        nint l = sys.Len64((uint64)duration); if (l < timeHistMinBucketBits) {
             bucketBit = timeHistMinBucketBits;
             bucket = 0; // bucketBit - timeHistMinBucketBits
         } else {
@@ -144,11 +144,11 @@ internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) 
     // The bottom-most bucket, containing negative values, is tracked
     // separately as underflow, so fill that in manually and then iterate
     // over the rest.
-    hist.Value.counts[0] = Ꮡh.of(timeHistogram.Ꮡunderflow).Load();
+    hist.counts[0] = Ꮡh.of(timeHistogram.Ꮡunderflow).Load();
     foreach (var i in range(h.counts)) {
-        hist.Value.counts[i + 1] = Ꮡ(h.counts, i).Load();
+        hist.counts[i + 1] = Ꮡ(h.counts, i).Load();
     }
-    hist.Value.counts[len((~hist).counts) - 1] = Ꮡh.of(timeHistogram.Ꮡoverflow).Load();
+    hist.counts[len(hist.counts) - 1] = Ꮡh.of(timeHistogram.Ꮡoverflow).Load();
 }
 
 internal static UntypedInt fInf => 0x7FF0000000000000;

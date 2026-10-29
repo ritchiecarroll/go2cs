@@ -12,9 +12,9 @@ partial class template_package {
 // missingKeyAction defines how to respond to indexing a map with a key that is not present.
 partial struct missingKeyAction /*num:nint*/;
 
-internal static missingKeyAction mapInvalid => /* iota */ 0;  // Return an invalid reflect.Value.
-internal static missingKeyAction mapZeroValue => 1; // Return the zero value for the map element.
-internal static missingKeyAction mapError => 2;    // Error out
+internal static missingKeyAction mapInvalid => /* iota */ 0; // Return an invalid reflect.Value.
+internal static missingKeyAction mapZeroValue => 1;          // Return the zero value for the map element.
+internal static missingKeyAction mapError => 2;              // Error out
 
 partial struct option {
     internal missingKeyAction missingKey;
@@ -57,21 +57,24 @@ internal static void setOption(this ref Template t, @string opt) {
     {
         var (key, value, ok) = strings.Cut(opt, "="u8); if (ok) {
             var exprᴛ1 = key;
-            if (exprᴛ1 == "missingkey"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "missingkey"u8: {
                 var exprᴛ2 = value;
-                if (exprᴛ2 == "invalid"u8 || exprᴛ2 == "default"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ2 == "invalid"u8 || exprᴛ2 == "default"u8: {
                     t.option.missingKey = mapInvalid;
                     return;
                 }
-                if (exprᴛ2 == "zero"u8) {
+                case {} when exprᴛ2 == "zero"u8: {
                     t.option.missingKey = mapZeroValue;
                     return;
                 }
-                if (exprᴛ2 == "error"u8) {
+                case {} when exprᴛ2 == "error"u8: {
                     t.option.missingKey = mapError;
                     return;
-                }
-            }
+                }}
+                break;
+            }}
         }
     }
     throw panic("unrecognized option: " + opt);

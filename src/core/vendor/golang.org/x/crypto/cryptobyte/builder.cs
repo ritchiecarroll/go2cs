@@ -59,16 +59,16 @@ public static void SetError(this ref Builder b, error err) {
 // Bytes returns the bytes written by the builder or an error if one has
 // occurred during building.
 public static (slice<byte>, error) Bytes(this ref Builder b) {
-    if (b.err != default!) {
-        return (default!, b.err);
+    if (b.err != nil) {
+        return (default, b.err);
     }
-    return (b.result.slice(b.offset), default!);
+    return (b.result.slice(b.offset), default);
 }
 
 // BytesOrPanic returns the bytes written by the builder or panics if an error
 // has occurred during building.
 public static slice<byte> BytesOrPanic(this ref Builder b) {
-    if (b.err != default!) {
+    if (b.err != nil) {
         throw panic(b.err);
     }
     return b.result.slice(b.offset);
@@ -161,7 +161,7 @@ public static void AddUint32LengthPrefixed(this ж<Builder> Ꮡb, Action<ж<Buil
     Ꮡb.addLengthPrefixed(4, false, f);
 }
 
-internal static void callContinuation(this ж<Builder> Ꮡb, Action<ж<Builder>> f, ж<Builder> Ꮡarg) {
+internal static void callContinuation(this ж<Builder> Ꮡb, Action<ж<Builder>> f, ж<Builder> arg) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -173,13 +173,13 @@ internal static void callContinuation(this ж<Builder> Ꮡb, Action<ж<Builder>>
                 Ꮡb.Value.inContinuation.Value = false;
 
                 var r = recover();
-                if (r == default!) {
+                if (r == nil) {
                     return;
                 }
 
                 {
                     ref var buildError = ref heap<BuildError>(out var ᏑbuildError);
-                    (buildError, var ok) = r._<BuildError>(ᐧ); if (ok){
+                    (buildError, var ok) = r._<BuildError>(ᐧ); if (ok) {
                         Ꮡb.Value.err = buildError.Err;
                     } else {
                         throw panic(r);
@@ -188,7 +188,7 @@ internal static void callContinuation(this ж<Builder> Ꮡb, Action<ж<Builder>>
             }, ref ᒐ);
         }
 
-        f(Ꮡarg);
+        f(arg);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -198,12 +198,11 @@ internal static void addLengthPrefixed(this ж<Builder> Ꮡb, nint lenLen, bool 
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Subsequent writes can be ignored if the builder has encountered an error.
-    if (b.err != default!) {
+    if (b.err != nil) {
         return;
     }
 
-    ref var offset = ref heap<nint>(out var Ꮡoffset);
-    offset = len(b.result);
+    ref var offset = ref heap<nint>(len(b.result), out var Ꮡoffset);
     b.add(new slice<byte>(lenLen).ꓸꓸꓸ);
 
     if (b.inContinuation == nil) {
@@ -235,45 +234,41 @@ internal static void flushChild(this ref Builder b) {
     }
     b.child.flushChild();
     var child = b.child;
-    b.child = default!;
+    b.child = default;
 
-    if ((~child).err != default!) {
-        b.err = child.Value.err;
+    if (child.err != nil) {
+        b.err = child.err;
         return;
     }
 
-    nint length = len((~child).result) - (~child).pendingLenLen - (~child).offset;
+    nint length = len(child.result) - child.pendingLenLen - child.offset;
 
     if (length < 0) {
         throw panic("cryptobyte: internal error"); // result unexpectedly shrunk
     }
 
-    if ((~child).pendingIsASN1) {
+    if (child.pendingIsASN1) {
         // For ASN.1, we reserved a single byte for the length. If that turned out
         // to be incorrect, we have to move the contents along in order to make
         // space.
-        if ((~child).pendingLenLen != 1) {
+        if (child.pendingLenLen != 1) {
             throw panic("cryptobyte: internal error");
         }
-        uint8 lenLen = default!;
-        uint8 lenByte = default!;
-        if ((int64)length > 0xfffffffeL){
+        uint8 lenLen = default;
+        uint8 lenByte = default;
+        if ((int64)length > 0xfffffffeL) {
             b.err = errors.New(pendingAsn1ChildTooLongˢ);
             return;
-        } else 
-        if (length > 0xffffff){
+        } else if (length > 0xffffff) {
             lenLen = 5;
             lenByte = (uint8)(0x80 | 4);
-        } else 
-        if (length > 0xffff){
+        } else if (length > 0xffff) {
             lenLen = 4;
             lenByte = (uint8)(0x80 | 3);
-        } else 
-        if (length > 0xff){
+        } else if (length > 0xff) {
             lenLen = 3;
             lenByte = (uint8)(0x80 | 2);
-        } else 
-        if (length > 0x7f){
+        } else if (length > 0x7f) {
             lenLen = 2;
             lenByte = (uint8)(0x80 | 1);
         } else {
@@ -284,32 +279,32 @@ internal static void flushChild(this ref Builder b) {
 
         // Insert the initial length byte, make space for successive length bytes,
         // and adjust the offset.
-        child.Value.result[(~child).offset] = lenByte;
+        child.result[child.offset] = lenByte;
         nint extraBytes = (nint)((uint8)(lenLen - 1));
         if (extraBytes != 0) {
             child.add(new slice<byte>(extraBytes).ꓸꓸꓸ);
-            nint childStart = (~child).offset + (~child).pendingLenLen;
-            copy((~child).result.slice(childStart + extraBytes), (~child).result.slice(childStart));
+            nint childStart = child.offset + child.pendingLenLen;
+            copy(child.result.slice(childStart + extraBytes), child.result.slice(childStart));
         }
-        child.Value.offset++;
-        child.Value.pendingLenLen = extraBytes;
+        child.offset++;
+        child.pendingLenLen = extraBytes;
     }
 
     nint l = length;
-    for (nint i = (~child).pendingLenLen - 1; i >= 0; i--) {
-        child.Value.result[(~child).offset + i] = (uint8)l;
-        l >>= (int)(8);
+    for (nint i = child.pendingLenLen - 1; i >= 0; i--) {
+        child.result[child.offset + i] = (uint8)l;
+        l >>= 8;
     }
     if (l != 0) {
-        b.err = fmt.Errorf("cryptobyte: pending child length %d exceeds %d-byte length prefix"u8, length, (~child).pendingLenLen);
+        b.err = fmt.Errorf("cryptobyte: pending child length %d exceeds %d-byte length prefix"u8, length, child.pendingLenLen);
         return;
     }
 
-    if (b.fixedSize && Ꮡelem(b.result, 0) != Ꮡelem((~child).result, 0)) {
+    if (b.fixedSize && Ꮡelem(b.result, 0) != Ꮡelem(child.result, 0)) {
         throw panic("cryptobyte: BuilderContinuation reallocated a fixed-size buffer");
     }
 
-    b.result = child.Value.result;
+    b.result = child.result;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -319,7 +314,7 @@ private static readonly @string cryptobyteBuilderIsˢ = "cryptobyte: Builder is 
 internal static void add(this ref Builder b, params ꓸꓸꓸbyte bytesʗp) {
     var bytes = bytesʗp.sslice();
 
-    if (b.err != default!) {
+    if (b.err != nil) {
         return;
     }
     if (b.child != nil) {
@@ -339,7 +334,7 @@ internal static void add(this ref Builder b, params ꓸꓸꓸbyte bytesʗp) {
 // An attempt by a child builder passed to a continuation to unwrite bytes
 // from its parent will panic.
 public static void Unwrite(this ref Builder b, nint n) {
-    if (b.err != default!) {
+    if (b.err != nil) {
         return;
     }
     if (b.child != nil) {
@@ -373,7 +368,7 @@ public static void AddValue(this ж<Builder> Ꮡb, MarshalingValue v) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var err = v.Marshal(Ꮡb);
-    if (err != default!) {
+    if (err != nil) {
         b.err = err;
     }
 }

@@ -10,25 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using constantꓸKind = go.go.constant_package.ΔKind;
-global using elfꓸData = go.debug.elf_package.ΔData;
-global using elfꓸSection = go.debug.elf_package.ΔSection;
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
-global using typesꓸError = go.go.types_package.ΔError;
-global using typesꓸInfo = go.go.types_package.ΔInfo;
-global using typesꓸScope = go.go.types_package.ΔScope;
 global using typesꓸSignature = go.go.types_package.ΔSignature;
-global using typesꓸTerm = go.go.types_package.ΔTerm;
 global using typesꓸType = go.go.types_package.ΔType;
-global using xcoffꓸSection = go.@internal.xcoff_package.ΔSection;
 // </ImportedTypeAliases>
 
 using go;
@@ -76,6 +60,11 @@ using static go.go.@internal.gccgoimporter_package;
 // the assembly.
 [assembly: global::go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: global::go.GoFieldAccess(typeof(go.@internal.xcoff_package.Archive))]
+[assembly: global::go.GoFieldAccess(typeof(go.text.scanner_package.Scanner))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -84,10 +73,10 @@ using static go.go.@internal.gccgoimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/ar.go", "ar.cs", "AC9q0oCCtoKAgraUpKSkupKCgoKAgqSUgqaCgqaCuIKCgriClIKAggAIDqKCgpSCgpSokoKCgqaCgoKUgoK4rLKAgqTugoCCpA==")]
+[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/ar.go", "ar.cs", "AC9q0oCCtoKAgrakpKSkupKCgoKAgqSUgqaCgqaCuIKCgriClIKAggAIDqKCgpSCgpSokoKCgqaCgoKUgoK4rLKAgqTugoCCpA==")]
 [assembly: global::go.GoPositionMap("go/internal/gccgoimporter/gccgoinstallation.go", "gccgoinstallation.cs", "ACI80oKCgoKmgoKmgoKClLaCgoLsgoKClJSosoKCgoKUlIKCgpSmlKqi")]
-[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/importer.go", "importer.cs", "AC1UooKClO6CgsoACSAACwKCgpSCkoK4goKCpoKmgqaCpqaCgoKCgpSCpoKCgoKClIKmggASGIIACgqCpoKCgoKAgqSCgqaCkoKClIKUgIK2goKmgoKUgqSmgoKCpoKCgpSCgriUgoKCggAWMqb8ooKAgqSAgqQ=", "83-87:1;146-247:1")]
-[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/parser.go", "parser.cs", "ADlwooKCgoKmooKAkoKCggAHEIKmgoCCtqaipoKCgpSCpoKClKaCgoK4goKClNqigpSCpoKClIKmgoKUpLiCpoKs4oKCppTGgsaCtqzEgpSCgoKUrvKCgoKUgoKUqJKUgqaCpoKAgqTY0oKCgoKUgIKUpLTE2IKClOjSlIKUlIKCgoKUgoKCgpSCgpSCgqiygoK4lNjSgoKCgoKCAAgKAAgGgoKCuJSCgoKmgrampqaCgoKmgoKCppSCgqaCgoKUuIKUgpSCpoK4gqaCgpSCpoKCgpSCgpSCpqaosoKCgpSCgoKUAAoQlgAIEIKClJSClAADEtKClIKUgpSClIKUtIKCgpSUxAAJENKCgoKCpoLugoKClIKCgpSCgoK4poKCgriClIKUgoKUpoKCgoKUuIKUgoKUgoKClIKUgoKCgoKCgpSCuKaCgoKClKaCgoKClKiygoKUgpSCpoKUgpSC2LKUgpSCgoKUgtiylIKUgpSCgsiCgoLIgtiylIKUgpSCgoKCgpSUgtiygpSCgoKUgoKCgpSmlKiylIKClIKCgqaCprqygpSClIKospSCgoKUgqaCgpTKptiylIKUgpSCgoKClIKCppSUgtiygoKCgoKmgpSUqLKUppSmpqa4pqamggAgPIIAAzjigoLY4pSClIKCgpSCgpSUgriCgoKmgqaCpoKsAAgCgoLaAAgGgoKSgpSmgoKUgpSUgoKCgpS09uKCgoScgoKCgqaClMqCgoKClJSUgpKmgrSm0oKCgqaCgoKCgpSClIKClIK0ppKCgoKClKiSggADEgAJApSmlIKCgqaCgqaCgpSmlIKClLiClIKCgqa0AAIaAA0ClKaUpoKCgoKClKaCgoKmgoKmgoKCgoKmgoKCgqaCgqaCgoKUpoKCpoKCgpSmgoKCprqygpSCgpSUgoKAgraC", "66-66:1;1014-1016:1;1048-1050:1;1078-1082:1;1162-1164:1", "", "1047=Lookup/1/4/18,Type/1/4/18,Lookup/2/4/19,Type/2/4/19,Lookup/3/4/20,Type/3/4/20,Lookup/4/4/21,Type/4/4/21")]
+[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/importer.go", "importer.cs", "AC1UooKClO6CgsoACSAACwKCgpSCkoK4goKCpoK2gqaCpraCgoKCgpSCpoKCgoKClIKmggASGIIACgqCpoKCgoKAgqSCgqaCkoKClIKUgIK2goKmgoKUgqSmgoKCpoKCgpSCgrikgoKCggAXMrb8ooKAgqSAgqQ=", "83-87:1;146-247:1", "", "", "198:29,223:33")]
+[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/parser.go", "parser.cs", "ADlwooKCgoKmooKAkoKCggAHEIKmgoCCtqaipoKCgpSCpoKClKaCgoK4goKClNqigpSCpoKClIKmgoKUtMiCpoKs4oKCppTGgsaCtqzEgpSCgoKUrvKCgoKUgoKUqJKUgqaCpoKAgqTY0oKCgoKUgIKUpLTE2IKClOjSlIKUlIKCgoKUgoKCgpSCgpSCgqiygoK4lNjSgoKCgoKCAAgKAAgGgoKCuJSCgoKmgta2praCgoKmgoKCppSCgqaCgoKUyIKUgpSCtoLIgraCgpSCpoKCgpSCgpSCtraosoKCgpSCgoKUAAoQlgAIEIKClJSClAADEtKClIKUgpSClIKUtIKCgpSUxAAJENKCgoKCpoLugoKClIKCgpSCgoK4poKCgriClIKUgoKUpoKCgoKUuIKUgoKUgoKClIKUgoKCgoKCgpSCuKaCgoKClKaCgoKClKiygoKUgpSCpoKUgpSC2LKUgpSCgoKUgtiylIKUgpSCgsiCgoLIgtiylIKUgpSCgoKCgpSUgtiygpSCgoKUgoKCgpSmlKiylIKClIKCgqaCprqygpSClIKospSCgoKUgqaCgpTKptiylIKUgpSCgoKClIKCppSUgtiygoKCgoKmgpSUqLKUpqSmpqbIpqamggAgPIIAAzjigoLY4pSClIKCgpSCgpSUgsiCgoK2gqaCpoKsAAgCgoLaAAgGgoKCgpSmgoKUgpSUgoKCgpS09uKCgoScgoKCgqaClMqCgoKClJSUgpKmgrSm0oKCgqaCgoKCgpSClIKClIK0ppKCgoKClKiSggADEgAJApSmpIKCgraCgraCgpS2lIKClMiClIKCgrbEAAIaAA0ClKaktoKCgoKClLaCgoK2goK2goKCgoK2goKCgraCgraCgoKUtoKCtoKCgpS2goKCtsqygpSCgpSUgoKAgraC", "66-66:1;1014-1016:1;1048-1050:1;1078-1082:1;1162-1164:1", "", "1061=Lookup/1/4/18,Type/1/4/18,Lookup/2/4/19,Type/2/4/19,Lookup/3/4/20,Type/3/4/20,Lookup/4/4/21,Type/4/4/21")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

@@ -25,13 +25,13 @@ public static (nint, error) HuffmanDecode(io.Writer w, slice<byte> v) {
         buf.Reset();
         defer(ᏑbufPool.Put, buf.OrTypedNil(), ref ᒐ);
         {
-            var err = huffmanDecode(buf, 0, v); if (err != default!) {
+            var err = huffmanDecode(buf, 0, v); if (err != nil) {
                 return (0, err);
             }
         }
         return w.Write(buf.Bytes());
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -43,13 +43,13 @@ public static (@string, error) HuffmanDecodeToString(slice<byte> v) {
         buf.Reset();
         defer(ᏑbufPool.Put, buf.OrTypedNil(), ref ᒐ);
         {
-            var err = huffmanDecode(buf, 0, v); if (err != default!) {
+            var err = huffmanDecode(buf, 0, v); if (err != nil) {
                 return ("", err);
             }
         }
-        return (buf.String(), default!);
+        return (buf.String(), default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -77,16 +77,16 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         sbits += 8;
         while (cbits >= 8) {
             var idx = (byte)(cur.Rsh((uint64)((uint8)(cbits - 8))));
-            n = (~n).children.Value[idx];
+            n = n.children.Value[idx];
             if (n == nil) {
                 return ErrInvalidHuffman;
             }
-            if ((~n).children == nil){
+            if (n.children == nil) {
                 if (maxLen != 0 && buf.Len() == maxLen) {
                     return ErrStringLength;
                 }
-                buf.WriteByte((~n).sym);
-                cbits -= n.Value.codeLen;
+                buf.WriteByte(n.sym);
+                cbits -= n.codeLen;
                 n = rootHuffmanNode;
                 sbits = cbits;
             } else {
@@ -95,18 +95,18 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         }
     }
     while (cbits > 0) {
-        n = (~n).children.Value[(byte)(cur.Lsh((uint64)((uint8)(8 - cbits))))];
+        n = n.children.Value[(byte)(cur.Lsh((uint64)((uint8)(8 - cbits))))];
         if (n == nil) {
             return ErrInvalidHuffman;
         }
-        if ((~n).children != nil || (~n).codeLen > cbits) {
+        if (n.children != nil || n.codeLen > cbits) {
             break;
         }
         if (maxLen != 0 && buf.Len() == maxLen) {
             return ErrStringLength;
         }
-        buf.WriteByte((~n).sym);
-        cbits -= n.Value.codeLen;
+        buf.WriteByte(n.sym);
+        cbits -= n.codeLen;
         n = rootHuffmanNode;
         sbits = cbits;
     }
@@ -122,7 +122,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         }
     }
 
-    return default!;
+    return default;
 }
 
 // incomparable is a zero-width, non-comparable type. Adding it to a struct
@@ -136,7 +136,7 @@ partial struct node {
     internal /*[256]*/ ж<array<ж<node>>> children;
     // The following are only valid if children is nil:
     internal uint8 codeLen; // number of bits that led to the output of sym
-    internal byte sym;  // output symbol
+    internal byte sym;      // output symbol
 }
 
 internal static ж<node> newInternalNode() {
@@ -167,10 +167,10 @@ internal static void buildRootHuffmanNode() {
         while (codeLen > 8) {
             codeLen -= 8;
             var i = (uint8)(code.Rsh((uint64)(codeLen)));
-            if ((~cur).children.Value[i] == nil) {
-                cur.Value.children.Value[i] = newInternalNode();
+            if (cur.children.Value[i] == nil) {
+                cur.children.Value[i] = newInternalNode();
             }
-            cur = (~cur).children.Value[i];
+            cur = cur.children.Value[i];
         }
         var shift = (uint8)(8 - codeLen);
         nint start = (nint)(uint8)(code.Lsh((uint64)(shift)));
@@ -179,7 +179,7 @@ internal static void buildRootHuffmanNode() {
         leaves.Value[sym].sym = (byte)sym;
         leaves.Value[sym].codeLen = codeLen;
         for (nint i = start; i < start + end; i++) {
-            cur.Value.children.Value[i] = leaves.at<node>(sym);
+            cur.children.Value[i] = leaves.at<node>(sym);
         }
     }
 }
@@ -189,15 +189,15 @@ internal static void buildRootHuffmanNode() {
 public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
     // This relies on the maximum huffman code length being 30 (See tables.go huffmanCodeLen array)
     // So if a uint64 buffer has less than 32 valid bits can always accommodate another huffmanCode.
-    uint64 x = default!;             // buffer
-    nuint n = default!;           // number valid of bits present in x
+    uint64 x = default; // buffer
+    nuint n = default;  // number valid of bits present in x
     for (nint i = 0; i < builtin.len(s); i++) {
         var c = s[i];
         n += (nuint)huffmanCodeLen[c];
         x <<= (int)(huffmanCodeLen[c] % 64);
         x |= (uint64)((uint64)huffmanCodes[c]);
         if (n >= 32) {
-            n %= 32; // Normally would be -= 32 but %= 32 informs compiler 0 <= n <= 31 for upcoming shift
+            n %= 32;                      // Normally would be -= 32 but %= 32 informs compiler 0 <= n <= 31 for upcoming shift
             var yΔ1 = (uint32)(x.Rsh(n)); // Compiler doesn't combine memory writes if y isn't uint32
             dst = append(dst, (byte)(yΔ1 >> 24), (byte)(yΔ1 >> 16), (byte)(yΔ1 >> 8), (byte)yΔ1);
         }

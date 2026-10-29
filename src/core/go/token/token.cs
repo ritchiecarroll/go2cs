@@ -25,11 +25,11 @@ public static Token COMMENT => 2;
 internal static Token literal_beg => 3;
 // Identifiers and basic type literals
 // (these tokens stand for classes of literals)
-public static Token IDENT => 4; // main
-public static Token INT => 5; // 12345
-public static Token FLOAT => 6; // 123.45
-public static Token IMAG => 7; // 123.45i
-public static Token CHAR => 8; // 'a'
+public static Token IDENT => 4;  // main
+public static Token INT => 5;    // 12345
+public static Token FLOAT => 6;  // 123.45
+public static Token IMAG => 7;   // 123.45i
+public static Token CHAR => 8;   // 'a'
 public static Token STRING => 9; // "abc"
 internal static Token literal_end => 10;
 
@@ -41,11 +41,11 @@ public static Token MUL => 14; // *
 public static Token QUO => 15; // /
 public static Token REM => 16; // %
 
-public static Token AND => 17; // &
-public static Token OR => 18; // |
-public static Token XOR => 19; // ^
-public static Token SHL => 20; // <<
-public static Token SHR => 21; // >>
+public static Token AND => 17;     // &
+public static Token OR => 18;      // |
+public static Token XOR => 19;     // ^
+public static Token SHL => 20;     // <<
+public static Token SHR => 21;     // >>
 public static Token AND_NOT => 22; // &^
 
 public static Token ADD_ASSIGN => 23; // +=
@@ -54,42 +54,42 @@ public static Token MUL_ASSIGN => 25; // *=
 public static Token QUO_ASSIGN => 26; // /=
 public static Token REM_ASSIGN => 27; // %=
 
-public static Token AND_ASSIGN => 28; // &=
-public static Token OR_ASSIGN => 29; // |=
-public static Token XOR_ASSIGN => 30; // ^=
-public static Token SHL_ASSIGN => 31; // <<=
-public static Token SHR_ASSIGN => 32; // >>=
+public static Token AND_ASSIGN => 28;     // &=
+public static Token OR_ASSIGN => 29;      // |=
+public static Token XOR_ASSIGN => 30;     // ^=
+public static Token SHL_ASSIGN => 31;     // <<=
+public static Token SHR_ASSIGN => 32;     // >>=
 public static Token AND_NOT_ASSIGN => 33; // &^=
 
-public static Token LAND => 34; // &&
-public static Token LOR => 35; // ||
+public static Token LAND => 34;  // &&
+public static Token LOR => 35;   // ||
 public static Token ARROW => 36; // <-
-public static Token INC => 37; // ++
-public static Token DEC => 38; // --
+public static Token INC => 37;   // ++
+public static Token DEC => 38;   // --
 
-public static Token EQL => 39; // ==
-public static Token LSS => 40; // <
-public static Token GTR => 41; // >
+public static Token EQL => 39;    // ==
+public static Token LSS => 40;    // <
+public static Token GTR => 41;    // >
 public static Token ASSIGN => 42; // =
-public static Token NOT => 43; // !
+public static Token NOT => 43;    // !
 
-public static Token NEQ => 44; // !=
-public static Token LEQ => 45; // <=
-public static Token GEQ => 46; // >=
-public static Token DEFINE => 47; // :=
+public static Token NEQ => 44;      // !=
+public static Token LEQ => 45;      // <=
+public static Token GEQ => 46;      // >=
+public static Token DEFINE => 47;   // :=
 public static Token ELLIPSIS => 48; // ...
 
 public static Token LPAREN => 49; // (
 public static Token LBRACK => 50; // [
 public static Token LBRACE => 51; // {
-public static Token COMMA => 52; // ,
+public static Token COMMA => 52;  // ,
 public static Token PERIOD => 53; // .
 
-public static Token RPAREN => 54; // )
-public static Token RBRACK => 55; // ]
-public static Token RBRACE => 56; // }
+public static Token RPAREN => 54;    // )
+public static Token RBRACK => 55;    // ]
+public static Token RBRACE => 56;    // }
 public static Token SEMICOLON => 57; // ;
-public static Token COLON => 58; // :
+public static Token COLON => 58;     // :
 internal static Token operator_end => 59;
 
 internal static Token keyword_beg => 60;
@@ -261,22 +261,22 @@ public static UntypedInt HighestPrec => 7;
 // operator op. If op is not a binary operator, the result
 // is LowestPrecedence.
 public static nint Precedence(this Token op) {
-    var exprᴛ1 = op;
-    if (exprᴛ1 == LOR) {
+    switch (op) {
+    case var ᴛ when ᴛ == LOR: {
         return 1;
     }
-    if (exprᴛ1 == LAND) {
+    case var ᴛ when ᴛ == LAND: {
         return 2;
     }
-    if (exprᴛ1 == EQL || exprᴛ1 == NEQ || exprᴛ1 == LSS || exprᴛ1 == LEQ || exprᴛ1 == GTR || exprᴛ1 == GEQ) {
+    case var ᴛ when ᴛ == EQL || ᴛ == NEQ || ᴛ == LSS || ᴛ == LEQ || ᴛ == GTR || ᴛ == GEQ: {
         return 3;
     }
-    if (exprᴛ1 == ADD || exprᴛ1 == SUB || exprᴛ1 == OR || exprᴛ1 == XOR) {
+    case var ᴛ when ᴛ == ADD || ᴛ == SUB || ᴛ == OR || ᴛ == XOR: {
         return 4;
     }
-    if (exprᴛ1 == MUL || exprᴛ1 == QUO || exprᴛ1 == REM || exprᴛ1 == SHL || exprᴛ1 == SHR || exprᴛ1 == AND || exprᴛ1 == AND_NOT) {
+    case var ᴛ when ᴛ == MUL || ᴛ == QUO || ᴛ == REM || ᴛ == SHL || ᴛ == SHR || ᴛ == AND || ᴛ == AND_NOT: {
         return 5;
-    }
+    }}
     return LowestPrec;
 }
 
@@ -340,7 +340,7 @@ public static bool IsIdentifier(@string name) {
         return false;
     }
     foreach (var (i, c) in name) {
-        if (!unicode.IsLetter(c) && c != (rune)'_' && (i == 0 || !unicode.IsDigit(c))) {
+        if (!unicode.IsLetter(c) && c != '_' && (i == 0 || !unicode.IsDigit(c))) {
             return false;
         }
     }

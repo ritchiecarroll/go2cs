@@ -45,13 +45,13 @@ internal static time.Duration testDuration = (time.Duration)(23000000000L);
 internal static error testError = errors.New("fail"u8);
 internal static @event testEvent = new @event("abcdefgh"u8, 65536, true);
 
-internal static slice<slog.Attr> testAttrs = new slog.Attr[]{
+internal static slice<slog.Attr> testAttrs = slice<slog.Attr>([
     slog.String("string"u8, testString),
     slog.Int("status"u8, testInt),
     slog.Duration("duration"u8, testDuration),
     slog.Time("time"u8, testTime),
     slog.Any("error"u8, testError)
-}.slice();
+]);
 
 internal static readonly @string wantText = "time=1651363200 level=0 msg=Test logging, but use a somewhat realistic message length. string=7e3b3b2aaeff56a7108fe11e154200dd/7819479873059528190 status=32768 duration=23000000000 time=1651363200 error=fail\n"u8;
 

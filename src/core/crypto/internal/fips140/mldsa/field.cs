@@ -13,12 +13,12 @@ using math;
 
 partial class mldsa_package {
 
-internal static UntypedInt q => 8380417; // 2²³ - 2¹³ + 1
-public static UntypedInt R => 4294967296; // 2³²
-public static UntypedInt RR => 2365951; // R² mod q, aka R in the Montgomery domain
+internal static UntypedInt q => 8380417;          // 2²³ - 2¹³ + 1
+public static UntypedInt R => 4294967296;         // 2³²
+public static UntypedInt RR => 2365951;           // R² mod q, aka R in the Montgomery domain
 internal static UntypedInt qNegInv => 4236238847; // -q⁻¹ mod R (q * qNegInv ≡ -1 mod R)
-internal static UntypedInt one => 4193792; // R mod q, aka 1 in the Montgomery domain
-internal static UntypedInt minusOne => 4186625; // (q - 1) * R mod q, aka -1 in the Montgomery domain
+internal static UntypedInt one => 4193792;        // R mod q, aka 1 in the Montgomery domain
+internal static UntypedInt minusOne => 4186625;   // (q - 1) * R mod q, aka -1 in the Montgomery domain
 
 // fieldElement is an element n of ℤ_q in the Montgomery domain, represented as
 // an integer x in [0, q) such that x ≡ n * R (mod q) where R = 2³².
@@ -33,7 +33,7 @@ internal static (fieldElement, error) fieldToMontgomery(uint32 a) {
         return (0, errUnreducedFieldElement);
     }
     // a * R² * R⁻¹ ≡ a * R (mod q)
-    return (fieldMontgomeryMul((fieldElement)a, RR), default!);
+    return (fieldMontgomeryMul((fieldElement)a, RR), default);
 }
 
 // fieldSubToMontgomery converts a difference a - b to Montgomery form.
@@ -47,7 +47,7 @@ internal static fieldElement fieldSubToMontgomery(uint32 a, uint32 b) {
 // standard representation.
 internal static uint32 fieldFromMontgomery(fieldElement a) {
     // (a * R) * 1 * R⁻¹ ≡ a (mod q)
-    return (uint32)fieldMontgomeryReduce((uint64)(uint32)a);
+    return (uint32)fieldMontgomeryReduce((uint64)a);
 }
 
 // fieldCenteredMod returns r mod± q, the value r reduced to the range
@@ -87,7 +87,7 @@ internal static fieldElement fieldSub(fieldElement a, fieldElement b) {
 
 // fieldMontgomeryMul returns a * b * R⁻¹ mod q.
 internal static fieldElement fieldMontgomeryMul(fieldElement a, fieldElement b) {
-    var x = (uint64)(uint32)a * (uint64)(uint32)b;
+    var x = (uint64)a * (uint64)b;
     return fieldMontgomeryReduce(x);
 }
 
@@ -101,15 +101,15 @@ internal static fieldElement fieldMontgomeryReduce(uint64 x) {
 // fieldMontgomeryMulSub returns a * (b - c). This operation is fused to save a
 // fieldReduceOnce after the subtraction.
 internal static fieldElement fieldMontgomeryMulSub(fieldElement a, fieldElement b, fieldElement c) {
-    var x = (uint64)(uint32)a * (uint64)(uint32)(b - c + (uint32)q);
+    var x = (uint64)a * (uint64)(b - c + (uint32)q);
     return fieldMontgomeryReduce(x);
 }
 
 // fieldMontgomeryAddMul returns a * b + c * d. This operation is fused to save
 // a fieldReduceOnce and a fieldReduce.
 internal static fieldElement fieldMontgomeryAddMul(fieldElement a, fieldElement b, fieldElement c, fieldElement d) {
-    var x = (uint64)(uint32)a * (uint64)(uint32)b;
-    x += (uint64)(uint32)c * (uint64)(uint32)d;
+    var x = (uint64)a * (uint64)b;
+    x += (uint64)c * (uint64)d;
     return fieldMontgomeryReduce(x);
 }
 
@@ -157,7 +157,7 @@ partial struct nttElement /*[256]fieldElement*/;
 internal static nttElement ntt(ringElement f) {
     f = f.Clone();
 
-    uint8 m = default!;
+    uint8 m = default;
 
     for (nint len = 128; len >= 8; len /= 2) {
         for (nint start = 0; start < 256; start += 2 * len) {
@@ -303,7 +303,7 @@ internal static ringElement inverseNTT(nttElement f) {
 
 // nttMul multiplies two nttElements.
 internal static nttElement /*p*/ nttMul(nttElement a, nttElement b) {
-    nttElement p = default!;
+    nttElement p = default;
     a = a.Clone();
     b = b.Clone();
 
@@ -319,12 +319,12 @@ internal static nttElement /*p*/ nttMul(nttElement a, nttElement b) {
 internal static nttElement sampleNTT(slice<byte> rho, byte s, byte r) {
     var G = sha3.NewShake128();
     G.Write(rho);
-    G.Write(new byte[]{s, r}.slice());
+    G.Write(slice<byte>([s, r]));
 
-    nttElement a = default!;
-    nint j = default!;               // index into a
-    array<byte> buf = new(168);                 // buffered reads from B, matching the rate of SHAKE-128
-    nint off = len(buf); // index into buf, starts in a "buffer fully consumed" state
+    nttElement a = default;
+    nint j = default;           // index into a
+    array<byte> buf = new(168); // buffered reads from B, matching the rate of SHAKE-128
+    nint off = len(buf);        // index into buf, starts in a "buffer fully consumed" state
     while (j < n) {
         if (off >= len(buf)) {
             G.Read(buf[..]);
@@ -333,7 +333,7 @@ internal static nttElement sampleNTT(slice<byte> rho, byte s, byte r) {
         var v = (uint32)buf[off] | (uint32)buf[off + 1] << 8 | (uint32)buf[off + 2] << 16;
         off += 3;
         var (f, err) = fieldToMontgomery(v & 0b01111111_11111111_11111111); // 23 bits
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
         a[j] = f;
@@ -348,13 +348,13 @@ internal static nttElement sampleNTT(slice<byte> rho, byte s, byte r) {
 internal static ringElement sampleBoundedPoly(slice<byte> rho, byte r, parameters p) {
     var H = sha3.NewShake256();
     H.Write(rho);
-    H.Write(new byte[]{r, 0}.slice()); // IntegerToBytes(r, 2)
+    H.Write(slice<byte>([r, 0])); // IntegerToBytes(r, 2)
 
-    ringElement a = default!;
-    nint j = default!;
-    array<byte> buf = new(136);                 // buffered reads from H, matching the rate of SHAKE-256
-    nint off = len(buf); // index into buf, starts in a "buffer fully consumed" state
-    while (ᐧ) {
+    ringElement a = default;
+    nint j = default;
+    array<byte> buf = new(136); // buffered reads from H, matching the rate of SHAKE-256
+    nint off = len(buf);        // index into buf, starts in a "buffer fully consumed" state
+    for (;;) {
         if (off >= len(buf)) {
             H.Read(buf[..]);
             off = 0;
@@ -390,7 +390,7 @@ internal static ringElement sampleInBall(slice<byte> rho, parameters p) {
     var s = new slice<byte>(8);
     H.Read(s);
 
-    ringElement c = default!;
+    ringElement c = default;
     for (nint i = 256 - p.τ; i < 256; i++) {
         var j = new slice<byte>(1);
         H.Read(j);
@@ -402,7 +402,7 @@ internal static ringElement sampleInBall(slice<byte> rho, parameters p) {
         // That is, -1⁰ = 1 if the bit is 0, -1¹ = -1 if it is 1.
         nint bitIdx = i + p.τ - 256;
         var bit = (byte)((s[bitIdx / 8].Rsh((int64)(bitIdx % 8))) & 1);
-        if (bit == 0){
+        if (bit == 0) {
             c[j[0]] = one;
         } else {
             c[j[0]] = minusOne;
@@ -439,7 +439,7 @@ internal static (fieldElement, bool) coeffFromHalfByte(byte b, parameters p) {
         // Calculate b % 5 with Barrett reduction, to avoid a potentially
         // variable-time division.
         const uint32 barrettMultiplier = 0x3334; // ⌈2¹⁶ / 5⌉
-        UntypedInt barrettShift = 16; // log₂(2¹⁶)
+        UntypedInt barrettShift = 16;            // log₂(2¹⁶)
         var quotient = ((uint32)b * barrettMultiplier) >> (int)(barrettShift);
         var remainder = (uint32)b - quotient * 5;
         return (fieldSubToMontgomery(2, remainder), true);
@@ -473,7 +473,7 @@ internal static (uint16 hi, fieldElement lo) power2Round(fieldElement r) {
     // Add 2¹² - 1 to round up r1 by one if r0 > 2¹².
     // r is at most 2²³ - 2¹³ + 1, so rr + (2¹² - 1) won't overflow 23 bits.
     var r1 = rr + ((uint32)1 << 12) - 1;
-    r1 >>= (int)(13);
+    r1 >>= 13;
     // r1 <= 2¹⁰ - 1
     // r1 * 2¹³ <= (2¹⁰ - 1) * 2¹³ = 2²³ - 2¹³ < q
     var r0 = fieldSubToMontgomery(rr, r1 << 13);
@@ -536,7 +536,7 @@ internal static array<byte> useHint(ringElement r, /*[256]*/ array<byte> h, para
 // makeHint implements MakeHint from FIPS 204.
 internal static (array<byte> h, nint count1s) makeHint(ringElement ct0, ringElement w, ringElement cs2, parameters p) {
     array<byte> h = new(256);
-    nint count1s = default!;
+    nint count1s = default;
     ct0 = ct0.Clone();
     w = w.Clone();
     cs2 = cs2.Clone();
@@ -579,8 +579,8 @@ internal static byte highBits32(uint32 x) {
 //
 // r1 is in [0, 15].
 internal static (byte r1, int32 r0) decompose32(fieldElement r) {
-    byte r1 = default!;
-    int32 r0 = default!;
+    byte r1 = default;
+    int32 r0 = default;
 
     var x = fieldFromMontgomery(r);
     r1 = highBits32(x);
@@ -597,7 +597,7 @@ internal static byte useHint32(fieldElement r, byte hint) {
     const byte m = 16; // (q − 1) / (2 * γ2)
     var (r1, r0) = decompose32(r);
     if (hint == 1) {
-        if (r0 > 0){
+        if (r0 > 0) {
             r1 = (byte)((byte)(r1 + 1) % m);
         } else {
             // Underflow is safe, because it operates modulo 256 (since the type
@@ -632,8 +632,8 @@ internal static byte highBits88(uint32 x) {
 //
 // r1 is in [0, 43].
 internal static (byte r1, int32 r0) decompose88(fieldElement r) {
-    byte r1 = default!;
-    int32 r0 = default!;
+    byte r1 = default;
+    int32 r0 = default;
 
     var x = fieldFromMontgomery(r);
     r1 = highBits88(x);
@@ -650,16 +650,16 @@ internal static byte useHint88(fieldElement r, byte hint) {
     UntypedInt m = 44; // (q − 1) / (2 * γ2)
     var (r1, r0) = decompose88(r);
     if (hint == 1) {
-        if (r0 > 0){
+        if (r0 > 0) {
             // (r1 + 1) mod m, for r1 in [0, m-1]
-            if (r1 == (byte)(m - 1)){
+            if (r1 == (byte)(m - 1)) {
                 r1 = 0;
             } else {
                 r1++;
             }
         } else {
             // (r1 - 1) % m, for r1 in [0, m-1]
-            if (r1 == 0){
+            if (r1 == 0) {
                 r1 = (byte)(m - 1);
             } else {
                 r1--;
@@ -781,7 +781,7 @@ internal static ringElement bitUnpack18(slice<byte> v) {
     }
     const uint32 b = /* 1 << 17 */ 131072;
     const uint32 mask18 = /* 1<<18 - 1 */ 262143;
-    ringElement r = default!;
+    ringElement r = default;
     for (nint i = 0; i < n; i += 4) {
         var w0 = (uint32)v[0] | (uint32)v[1] << 8 | (uint32)v[2] << 16;
         r[i + 0] = fieldSubToMontgomery(b, (uint32)(w0 & mask18));
@@ -804,7 +804,7 @@ internal static ringElement bitUnpack20(slice<byte> v) {
     }
     const uint32 b = /* 1 << 19 */ 524288;
     const uint32 mask20 = /* 1<<20 - 1 */ 1048575;
-    ringElement r = default!;
+    ringElement r = default;
     for (nint i = 0; i < n; i += 2) {
         var w0 = (uint32)v[0] | (uint32)v[1] << 8 | (uint32)v[2] << 16;
         r[i + 0] = fieldSubToMontgomery(b, (uint32)(w0 & mask20));
@@ -820,11 +820,11 @@ internal static ringElement bitUnpack20(slice<byte> v) {
 // second slice that aliases into it and contains only the extra bytes. If the
 // original slice has sufficient capacity then no allocation is performed.
 internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> @in, nint n) {
-    slice<byte> head = default!;
-    slice<byte> tail = default!;
+    slice<byte> head = default;
+    slice<byte> tail = default;
 
     {
-        nint total = len(@in) + n; if (cap(@in) >= total){
+        nint total = len(@in) + n; if (cap(@in) >= total) {
             head = @in.slice(0, total);
         } else {
             head = new slice<byte>(total);

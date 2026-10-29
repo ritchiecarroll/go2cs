@@ -10,14 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,6 +53,12 @@ using static go.strings_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(genericReplacer))]
+[assembly: go.GoFieldAccess(typeof(stringFinder))]
+[assembly: go.GoFieldAccess(typeof(trieNode))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -69,14 +67,14 @@ using static go.strings_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("strings/builder.go", "builder.cs", "ABlAAAgC3JKCupKokKqwppKCqqKCgqzSgoKUgrzCgoKqwoKCqsKCgoKqwoKC")]
+[assembly: go.GoPositionMap("strings/builder.go", "builder.cs", "ABlAAAgC3IKCupKokKqwppKCqqKCgqzSgoKUgrzCgoKqwoKCqsKCgoKqwoKC")]
 [assembly: go.GoPositionMap("strings/clone.go", "clone.cs", "AAoqAAoC")]
 [assembly: go.GoPositionMap("strings/compare.go", "compare.cs", "AAoe4g==")]
-[assembly: go.GoPositionMap("strings/iter.go", "iter.cs", "AAwk0oKCgoCClKSCAAUQooKCgoKClJSUgoKClIKClJQAAxDCrsKuwoKCgoKCgoKClIKCgpSkgpSUggAEEsKCgoKCgoKClKSClJSC", "19-31:1;37-60:1;84-109:1;117-136:1")]
-[assembly: go.GoPositionMap("strings/reader.go", "reader.cs", "ABYyooKUrsCmwoKUgoKC2NSClIKUgoKUqJKCgpSCgtiSgpSCgqjSgoKUgoKC6JKClIKUgoLokoKClKSkpJSClIKowoKClIKCgpSCgoKUqJCooA==")]
-[assembly: go.GoPositionMap("strings/replace.go", "replace.cs", "ABlAAAgCgpSmgoKmgoKCpoKCgpSCuIKSgriCgoKUpraCgpS4lJaosoKosoIANG6igoKClKaEkoKCpoKSiLKClMqCgoKCgoKmuIKCpJSCgpSUgoK49oKCgoKCgoKCpoKUgoKClIKCkoKCgpSmAA0cgpSCgoK4gqaCgoKUgriUgpTMkoKokoLugqaCgoKUpoKSgqbCgpKClIKCgoLKgoKCgoKClIKCgpSCgpSUgoKUAAoWgqaCgpKCgoKUgoKCgpSClIKmsoKSgoKClIKCgpSCgoKUlIKCAAcQgoKCgoKClKaClKaigoKCgoKUgoKCgqaCgoKCpoKCgoKmABcwgoKUgoKAlILKgoKUgriClIKCgoKClIKmprKCgoKCgpSCgoKCpoKCgoKmgoKClA==")]
+[assembly: go.GoPositionMap("strings/iter.go", "iter.cs", "AAwk0oKCgoCClKSCAAUQooKCgoKClJSUgoKClIKClJQAAxDCrsKuwoKCgoKCgoKClIKCgpSUgpSUggAEEsKCgoKCgoKClJSClJSC", "19-31:1;37-60:1;84-109:1;117-136:1")]
+[assembly: go.GoPositionMap("strings/reader.go", "reader.cs", "ABYyooKUrsCmwoKUgoKC2NSClIKUgoKUqJKCgpSCgtiSgpSCgqjSgoKUgoKC6JKClIKUgoLokoKClLS0tJSClIKowoKClIKCgpSCgoKUqJCooA==")]
+[assembly: go.GoPositionMap("strings/replace.go", "replace.cs", "ABlAAAgCgpSmgoKmgoKCpoKCgpSCuIKCgriCgoKUpqaCgpS4lJaosoKosoIANG6igoKClKaEkoKCpoKCiLKClMqCgoKCgoKmuIKClJSCgpSUgoK49oKCgoKCgoKCpoKUgoKClIKCgoKCgpSmAA0cgpSCgoK4gqaCgoKUgriUgpTMkoKokoLugqaCgoKUpoKCgqbCgpKClIKCgoLKgoKCgoKClIKCgpSCgpSUgoKUAAoWgqaCgpKCgoKUgoKCgpSClIKmsoKSgoKClIKCgpSCgoKUlIKCAAcQgoKCgoKClKaClKaigoKCgoKUgoKCgqaCgoKCpoKCgoKmABcwgoKUgoKAlILKgoKUgriClIKCgoKClIKmprKCgoKCgpSCgoKCpoKCgoKmgoKClA==")]
 [assembly: go.GoPositionMap("strings/search.go", "search.cs", "AC5ggsq4gsqC3IKCgqamgoKUuKaigoKmqqKClIKCgpSClJQ=")]
-[assembly: go.GoPositionMap("strings/strings.go", "strings.cs", "ABYusoKClIKCgoKUgpSqtIKUgpSCgoKClIK6kqiSqJKokqiSgpSkpIKUpKaCgoKClIKUgoKCgoKmqJKuwoKUpIKCpqTagoKCgoKCgoKUpoKCpoKCgoKEppSEkoCCtoKCgoKCgoKm2LyilJSUgoKUlIKAgoKCpraCgqasspSUgoKClIKUlIKAgoKCpraCgoKUgoKCgqaUgoKCgqaokqqigpSClIKmgpSCgoKCgoKUgoKUggACHgAMAAACGAAKAgACHgAMAAACGAAKAqae9oKUgoKCgoKCppSmgoKClIKUgoKCgpSCgpSClJSClAAJFgAKBgAFFIKCgoK4poLcgriCgqaqopSkpoKCgpSUgoKUpoKCgoKClKiSqJKs/rSigoKmgoKCgqamgoKCpoK4gqaClLiCpsoADDjClKTcgpSCgpSUgriUlKSkpKQABBwACgKCgoKCuIKCgoKClKiSgoKCgoKUpoKClJiCgoKCgoKUgqaClJSokoKCgoKClKaCgpSYgoKCgoKClIKmgpSUqqCoorqiuqK6opSCgqaCgoKCgsqCpoKCgoKCgoKUgoKCgoKUlIKCpqq0gpSkpKSUpoKmAAIQAAgIgpSCgpSCzqKCgpSqooKCgpSUqqKqoqqirLKCgqassoKCgoKmAAwewoKCgpSUqJKqooKUgpSAkqSuwoKUgpSAkqSmgoKUpqKCgpSUpoKCgoKUlK7CgpSClICSpKaCgpSmooKClJSmgoKSgpSClJSsxIKmlIKUlIKCgpS4uKqiqqIAAhLigriAgpKCuJKCgoKCgoKCpoKCgoKCgqaCAAIQ0qzEgoKCgoK4griCpoKUppSCgoK0griCyoK4gqaUgpTKgoKUgpS4qJKuwq7CrsI=", "874-881:1", "773=unicode.SpecialCase.ToUpper;779=unicode.SpecialCase.ToLower;785=unicode.SpecialCase.ToTitle")]
+[assembly: go.GoPositionMap("strings/strings.go", "strings.cs", "ABYusoKClIKCgoKUgpSqtIKUgpSCgoKClIK6kqiSqJKokqiSgpSkpIKUpKaCgoKClIKUgoKCgoKmqJKuwoKUpIKCpqTagoKCgoKCgoKUpoKCpoKCgoKEppSEkoCCtoKCgoKCgoKm2LyilJSUgoKUlIKAgoKCpraCgqasspSUgoKClIKUlIKAgoKCpraCgoKUgoKCgqaUgoKCgqaokqqigpSClIKmgpSCgoKCgoKUgoKUggACHgAMAAACGAAKAgACHgAMAAACGAAKAqae9oKUgoKCgoKCppSmgoKClIKUgoKCgpSCgpSClJSClAAJFgAKBgAFFIKCgoK4poLcgriCgqaqopSkpoKCgpSUgoKUpoKCgoKClKiSqJKs/rSigoKmgoKCgqamgoKCpoK4gqaClLiCpsoADDjClKTcgpSCgpSUgriUlKSkpKQABBwACgKCgoKCuIKCgoKClKiSgoKCgoKUpoKClJiCgoKCgoKUgqaClJSokoKCgoKClKaCgpSYgoKCgoKClIKmgpSUqqCoorqiuqK6opSCgqaCgoKCgsqCpoKCgoKCgoKUgoKCgoKUlIKCpqq0gpSkpKSUpoKmAAIQAAgIgpSCgpSCzqKCgpSqooKCgpSUqqKqoqqirLKCgqassoKCgoKmAAwewoKCgpSUqJKqooKUgpSAkqSuwoKUgpSAkqSmgoKUpqKCgpSUpoKCgoKUlK7CgpSClICSpKaCgpSmooKClJSmgoKSgpSClJSsxIKmlIKUlIKCgpS4uKqiqqIAAhLigriAgoKCuJKCgoKCgoKCpoKCgoKCgqaCAAIQ0qzEgoKCgoK4griCpoKUppSCgoK0griCyoK4gqaUgpTKgoKUgpS4qJKuwq7CrsI=", "874-881:1", "773=unicode.SpecialCase.ToUpper;779=unicode.SpecialCase.ToLower;785=unicode.SpecialCase.ToTitle")]
 // </GoSourcePositionMaps>
 
 namespace go;

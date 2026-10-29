@@ -17,15 +17,15 @@ partial class fuzz_package {
 partial struct sharedMemSys {
 }
 
-internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> Ꮡf, nint size, bool removeOnClose) {
+internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> f, nint size, bool removeOnClose) {
     nint prot = (nint)((nint)Δsyscall.PROT_READ | (nint)Δsyscall.PROT_WRITE);
     nint flags = (nint)((nint)Δsyscall.MAP_FILE | (nint)Δsyscall.MAP_SHARED);
-    var (region, err) = Δsyscall.Mmap((nint)Ꮡf.Fd(), 0, size, prot, flags);
-    if (err != default!) {
-        return (default!, err);
+    var (region, err) = Δsyscall.Mmap((nint)f.Fd(), 0, size, prot, flags);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (Ꮡ(new sharedMem(f: Ꮡf, region: region, removeOnClose: removeOnClose)), default!);
+    return (Ꮡ(new sharedMem(f: f, region: region, removeOnClose: removeOnClose)), default);
 }
 
 // Close unmaps the shared memory and closes the temporary file. If this
@@ -36,7 +36,7 @@ internal static error Close(this ref sharedMem m) {
     // Attempt all operations, even if we get an error for an earlier operation.
     // os.File.Close may fail due to I/O errors, but we still want to delete
     // the temporary file.
-    slice<error> errs = default!;
+    slice<error> errs = default;
     errs = append(errsᴷ, errs,
         Δsyscall.Munmap(m.region),
         m.f.Close());
@@ -44,20 +44,20 @@ internal static error Close(this ref sharedMem m) {
         errs = append(errs, os.Remove(m.f.Name()));
     }
     foreach (var (_, err) in errs) {
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
     }
-    return default!;
+    return default;
 }
 
 // setWorkerComm configures communication channels on the cmd that will
 // run a worker process.
 internal static void setWorkerComm(ref exec.Cmd cmd, workerComm comm) {
     var mem = ᐸꟷ(comm.memMu);
-    var memFile = mem.Value.f;
+    var memFile = mem.f;
     comm.memMu.ᐸꟷ(mem);
-    cmd.ExtraFiles = new ж<os.File>[]{comm.fuzzIn, comm.fuzzOut, memFile}.slice();
+    cmd.ExtraFiles = slice<ж<os.File>>([comm.fuzzIn, comm.fuzzOut, memFile]);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -67,27 +67,27 @@ internal static readonly @string fuzzMemˢ = "fuzz_mem"u8;
 
 // getWorkerComm returns communication channels in the worker process.
 internal static (workerComm comm, error err) getWorkerComm() {
-    error err = default!;
+    error err = default;
 
     var fuzzIn = os.NewFile(3, fuzzInˢ);
     var fuzzOut = os.NewFile(4, fuzzOutˢ);
     var memFile = os.NewFile(5, fuzzMemˢ);
     (var fi, err) = memFile.Stat();
-    if (err != default!) {
-        return (new workerComm(nil), err);
+    if (err != nil) {
+        return (new workerComm(), err);
     }
     nint size = (nint)fi.Size();
     if ((int64)size != fi.Size()) {
-        return (new workerComm(nil), fmt.Errorf("fuzz temp file exceeds maximum size"u8));
+        return (new workerComm(), fmt.Errorf("fuzz temp file exceeds maximum size"u8));
     }
     var removeOnClose = false;
     (var mem, err) = sharedMemMapFile(memFile, size, removeOnClose);
-    if (err != default!) {
-        return (new workerComm(nil), err);
+    if (err != nil) {
+        return (new workerComm(), err);
     }
     var memMu = new channel<ж<sharedMem>>(1);
     memMu.ᐸꟷ(mem);
-    return (new workerComm(fuzzIn: fuzzIn, fuzzOut: fuzzOut, memMu: memMu), default!);
+    return (new workerComm(fuzzIn: fuzzIn, fuzzOut: fuzzOut, memMu: memMu), default);
 }
 
 // isInterruptError returns whether an error was returned by a process that
@@ -125,8 +125,8 @@ internal static (osꓸSignal, bool) terminationSignal(error err) {
 // SIGSEGV is normally transformed into a panic that causes the process to exit
 // with status 2 if not recovered, which we handle as a crash.
 internal static bool isCrashSignal(osꓸSignal signal) {
-    var exprᴛ1 = signal;
-    if (AreEqual(exprᴛ1, Δsyscall.SIGILL) || AreEqual(exprᴛ1, Δsyscall.SIGTRAP) || AreEqual(exprᴛ1, Δsyscall.SIGABRT) || AreEqual(exprᴛ1, Δsyscall.SIGBUS) || AreEqual(exprᴛ1, Δsyscall.SIGFPE) || AreEqual(exprᴛ1, Δsyscall.SIGSEGV) || AreEqual(exprᴛ1, Δsyscall.SIGPIPE)) { // sent data to closed pipe or socket
+    switch (signal) {
+    case var ᴛ when AreEqual(ᴛ, Δsyscall.SIGILL) || AreEqual(ᴛ, Δsyscall.SIGTRAP) || AreEqual(ᴛ, Δsyscall.SIGABRT) || AreEqual(ᴛ, Δsyscall.SIGBUS) || AreEqual(ᴛ, Δsyscall.SIGFPE) || AreEqual(ᴛ, Δsyscall.SIGSEGV) || AreEqual(ᴛ, Δsyscall.SIGPIPE): { // sent data to closed pipe or socket
         // illegal instruction
         // breakpoint
         // abort() called
@@ -135,9 +135,9 @@ internal static bool isCrashSignal(osꓸSignal signal) {
         // invalid memory access (e.g., write to read-only)
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 } // end fuzz_package

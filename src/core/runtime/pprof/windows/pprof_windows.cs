@@ -16,7 +16,7 @@ internal static void addMaxRSS(io.Writer w) {
     ref var m = ref heap(new windows.PROCESS_MEMORY_COUNTERS(), out var Ꮡm);
     var (p, _) = syscall.GetCurrentProcess();
     var err = windows.GetProcessMemoryInfo(p, Ꮡm, (uint32)/* unsafe.Sizeof(m) */ (uintptr)72);
-    if (err == default!) {
+    if (err == nil) {
         fmt.Fprintf(w, "# MaxRSS = %d\n"u8, m.PeakWorkingSetSize);
     }
 }

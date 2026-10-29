@@ -22,18 +22,18 @@ partial class gcimporter_package {
 // Import imports a gc-generated package given its import path and srcDir, adds
 // the corresponding package object to the packages map, and returns the object.
 // The packages map must contain all packages already imported.
-public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfset, map<@string, ж<types.Package>> packages, @string path, @string srcDir, Func<@string, (io.ReadCloser, error)> lookup) {
-    ж<types.Package> pkg = default!;
-    error err = default!;
+public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> fset, map<@string, ж<types.Package>> packages, @string path, @string srcDir, Func<@string, (io.ReadCloser, error)> lookup) {
+    ж<types.Package> pkg = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
-        io.ReadCloser rc = default!;
-        @string id = default!;
-        if (lookup != default!){
+        io.ReadCloser rc = default;
+        @string id = default;
+        if (lookup != nil) {
             // With custom lookup specified, assume that caller has
             // converted path to a canonical import path for use in the map.
             if (path == "unsafe"u8) {
-                (pkg, err) = (types.Unsafe, default!); goto ᒐdone;
+                (pkg, err) = (types.Unsafe, default); goto ᒐdone;
             }
             id = path;
 
@@ -44,18 +44,18 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfse
                 }
             }
             var (f, errΔ1) = lookup(path);
-            if (errΔ1 != default!) {
-                (pkg, err) = (default!, errΔ1); goto ᒐdone;
+            if (errΔ1 != nil) {
+                (pkg, err) = (default, errΔ1); goto ᒐdone;
             }
             rc = f;
         } else {
-            @string filename = default!;
+            @string filename = default;
             (filename, id, err) = exportdata.FindPkg(path, srcDir);
             if (filename == ""u8) {
                 if (path == "unsafe"u8) {
-                    (pkg, err) = (types.Unsafe, default!); goto ᒐdone;
+                    (pkg, err) = (types.Unsafe, default); goto ᒐdone;
                 }
-                (pkg, err) = (default!, err); goto ᒐdone;
+                (pkg, err) = (default, err); goto ᒐdone;
             }
 
             // no need to re-import if the package was imported completely before
@@ -68,11 +68,11 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfse
             // open file
             ref var errΔ2 = ref heap<error>(out var ᏑerrΔ2);
             (var f, errΔ2) = os.Open(filename);
-            if (errΔ2 != default!) {
-                (pkg, err) = (default!, errΔ2); goto ᒐdone;
+            if (errΔ2 != nil) {
+                (pkg, err) = (default, errΔ2); goto ᒐdone;
             }
             defer(() => {
-                if (ᏑerrΔ2.ValueSlot != default!) {
+                if (ᏑerrΔ2.ValueSlot != nil) {
                     // add file name to error
                     ᏑerrΔ2.ValueSlot = fmt.Errorf("%s: %v"u8, filename, ᏑerrΔ2.ValueSlot);
                 }
@@ -84,14 +84,14 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfse
 
         var buf = bufio.NewReader(rc);
         (var data, err) = exportdata.ReadUnified(buf);
-        if (err != default!) {
+        if (err != nil) {
             err = fmt.Errorf("import %q: %v"u8, path, err);
             goto ᒐdone;
         }
         @string s = (@string)data;
 
         var input = pkgbits.NewPkgDecoder(id, s);
-        pkg = readUnifiedPackage(Ꮡfset, nil, packages, input);
+        pkg = readUnifiedPackage(fset, nil, packages, input);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

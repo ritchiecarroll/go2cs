@@ -30,16 +30,16 @@ partial class norm_package {
 // there is an additional leading ccc. The value of tccc itself is the
 // trailing CCC shifted left 2 bits. The two least-significant bits of tccc
 // are the number of trailing non-starters.
-internal static UntypedInt qcInfoMask => 0x3F; // to clear all but the relevant bits in a qcInfo
-internal static UntypedInt headerLenMask => 0x3F; // extract the length value from the header byte
+internal static UntypedInt qcInfoMask => 0x3F;      // to clear all but the relevant bits in a qcInfo
+internal static UntypedInt headerLenMask => 0x3F;   // extract the length value from the header byte
 internal static UntypedInt headerFlagsMask => 0xC0; // extract the qcInfo bits from the header byte
 
 // Properties provides access to normalization properties of a rune.
 partial struct ΔProperties {
-    internal uint8 pos;  // start position in reorderBuffer; used in composition.go
-    internal uint8 size;  // length of UTF-8 encoding of this rune
-    internal uint8 ccc;  // leading canonical combining class (ccc if not decomposition)
-    internal uint8 tccc;  // trailing canonical combining class (ccc if not decomposition)
+    internal uint8 pos;    // start position in reorderBuffer; used in composition.go
+    internal uint8 size;   // length of UTF-8 encoding of this rune
+    internal uint8 ccc;    // leading canonical combining class (ccc if not decomposition)
+    internal uint8 tccc;   // trailing canonical combining class (ccc if not decomposition)
     internal uint8 nLead;  // number of leading non-starters.
     internal qcInfo flags; // quick check flags
     internal uint16 index;
@@ -56,7 +56,7 @@ partial struct formInfo {
     internal Func<ж<Iter>, slice<byte>> nextMain;
 }
 
-[GoLazy] partial class lazyᴛformTable { internal static slice<ж<formInfo>> formTable = new ж<formInfo>[]{Ꮡ(new formInfo(
+[GoLazy] partial class lazyᴛformTable { internal static slice<ж<formInfo>> formTable = slice<ж<formInfo>>([Ꮡ(new formInfo(
     form: NFC,
     composing: true,
     compatibility: false,
@@ -77,7 +77,7 @@ partial struct formInfo {
     compatibility: true,
     info: lookupInfoNFKC,
     nextMain: nextDecomposed))
-}.slice(); }
+]); }
 
 // We do not distinguish between boundaries for NFC, NFD, etc. to avoid
 // unexpected behavior for the user.  For example, in NFD, there is a boundary
@@ -156,7 +156,7 @@ internal static uint8 nTrailingNonStarters(this ΔProperties p) {
 public static slice<byte> Decomposition(this ΔProperties p) {
     // TODO: create the decomposition for Hangul?
     if (p.index == 0) {
-        return default!;
+        return default;
     }
     var i = p.index;
     var n = (byte)(decomps[i] & (byte)headerLenMask);
@@ -213,7 +213,7 @@ internal static void buildRecompMap() {
 // recompMapOnce.Do(buildRecompMap) sometime before this is called.
 internal static rune combine(rune a, rune b) {
     var key = ((uint32)(uint16)a << 16) + (uint32)(uint16)b;
-    if (recompMap == default!) {
+    if (recompMap == nil) {
         throw panic("caller error"); // see func comment
     }
     return recompMap[key];
@@ -253,10 +253,9 @@ public static ΔProperties PropertiesString(this Form f, @string s) {
 // to a Properties.  See the comment at the top of the file
 // for more information on the format.
 internal static ΔProperties compInfo(uint16 v, nint sz) {
-    if (v == 0){
+    if (v == 0) {
         return new ΔProperties(size: (uint8)sz);
-    } else 
-    if (v >= 0x8000) {
+    } else if (v >= 0x8000) {
         var pΔ1 = new ΔProperties(
             size: (uint8)sz,
             ccc: (uint8)v,

@@ -57,7 +57,7 @@ public static @string String(this RDNSequence r) {
             var (typeName, ok) = attributeTypeNames[oidString, ꟷ];
             if (!ok) {
                 var (derBytes, err) = asn1.Marshal(tv.Value);
-                if (err == default!) {
+                if (err == nil) {
                     s += oidString + "=#"u8 + hex.EncodeToString(derBytes);
                     continue; // No value escaping necessary.
                 }
@@ -72,20 +72,20 @@ public static @string String(this RDNSequence r) {
                 var escape = false;
 
                 switch (c) {
-                case (rune)',' or (rune)'+' or (rune)'"' or (rune)'\\' or (rune)'<' or (rune)'>' or (rune)';': {
+                case ',' or '+' or '"' or '\\' or '<' or '>' or ';': {
                     escape = true;
                     break;
                 }
-                case (rune)' ': {
+                case ' ': {
                     escape = k == 0 || k == len(valueString) - 1;
                     break;
                 }
-                case (rune)'#': {
+                case '#': {
                     escape = k == 0;
                     break;
                 }}
 
-                if (escape){
+                if (escape) {
                     escaped = append(escapedᴷ, escaped, (rune)'\\', c);
                 } else {
                     escaped = append(escaped, c);
@@ -205,15 +205,15 @@ public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns)
     }
 }
 
-internal static slice<nint> oidCountry = new nint[]{2, 5, 4, 6}.slice();
-internal static slice<nint> oidOrganization = new nint[]{2, 5, 4, 10}.slice();
-internal static slice<nint> oidOrganizationalUnit = new nint[]{2, 5, 4, 11}.slice();
-internal static slice<nint> oidCommonName = new nint[]{2, 5, 4, 3}.slice();
-internal static slice<nint> oidSerialNumber = new nint[]{2, 5, 4, 5}.slice();
-internal static slice<nint> oidLocality = new nint[]{2, 5, 4, 7}.slice();
-internal static slice<nint> oidProvince = new nint[]{2, 5, 4, 8}.slice();
-internal static slice<nint> oidStreetAddress = new nint[]{2, 5, 4, 9}.slice();
-internal static slice<nint> oidPostalCode = new nint[]{2, 5, 4, 17}.slice();
+internal static slice<nint> oidCountry = slice<nint>([2, 5, 4, 6]);
+internal static slice<nint> oidOrganization = slice<nint>([2, 5, 4, 10]);
+internal static slice<nint> oidOrganizationalUnit = slice<nint>([2, 5, 4, 11]);
+internal static slice<nint> oidCommonName = slice<nint>([2, 5, 4, 3]);
+internal static slice<nint> oidSerialNumber = slice<nint>([2, 5, 4, 5]);
+internal static slice<nint> oidLocality = slice<nint>([2, 5, 4, 7]);
+internal static slice<nint> oidProvince = slice<nint>([2, 5, 4, 8]);
+internal static slice<nint> oidStreetAddress = slice<nint>([2, 5, 4, 9]);
+internal static slice<nint> oidPostalCode = slice<nint>([2, 5, 4, 17]);
 
 // appendRDNs appends a relativeDistinguishedNameSET to the given RDNSequence
 // and returns the new value. The relativeDistinguishedNameSET contains an
@@ -246,7 +246,7 @@ internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@stri
 //
 // Each ExtraNames entry is encoded as an individual RDN.
 public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
-    RDNSequence ret = default!;
+    RDNSequence ret = default;
 
     ret = n.appendRDNs(ret, n.Country, oidCountry);
     ret = n.appendRDNs(ret, n.Province, oidProvince);
@@ -256,13 +256,13 @@ public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
     ret = n.appendRDNs(ret, n.Organization, oidOrganization);
     ret = n.appendRDNs(ret, n.OrganizationalUnit, oidOrganizationalUnit);
     if (len(n.CommonName) > 0) {
-        ret = n.appendRDNs(ret, new @string[]{n.CommonName}.slice(), oidCommonName);
+        ret = n.appendRDNs(ret, slice<@string>([n.CommonName]), oidCommonName);
     }
     if (len(n.SerialNumber) > 0) {
-        ret = n.appendRDNs(ret, new @string[]{n.SerialNumber}.slice(), oidSerialNumber);
+        ret = n.appendRDNs(ret, slice<@string>([n.SerialNumber]), oidSerialNumber);
     }
     foreach (var (_, atv) in n.ExtraNames) {
-        ret = append(ret, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
+        ret = append(ret, (RelativeDistinguishedNameSET)(slice<AttributeTypeAndValue>([atv])));
     }
 
     return ret;
@@ -273,10 +273,10 @@ public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
 public static @string String(this Name n) {
     var rdnsᴷ = new stackAppend<RelativeDistinguishedNameSET>();
 
-    RDNSequence rdns = default!;
+    RDNSequence rdns = default;
     // If there are no ExtraNames, surface the parsed value (all entries in
     // Names) instead.
-    if (n.ExtraNames == default!) {
+    if (n.ExtraNames == nil) {
         foreach (var (_, atv) in n.Names) {
             var t = atv.Type;
             if (len(t) == 4 && t[0] == 2 && t[1] == 5 && t[2] == 4) {
@@ -289,7 +289,7 @@ public static @string String(this Name n) {
             }
             // Place non-standard parsed values at the beginning of the sequence
             // so they will be at the end of the string. See Issue 39924.
-            rdns = append(rdnsᴷ, rdns, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
+            rdns = append(rdnsᴷ, rdns, (RelativeDistinguishedNameSET)(slice<AttributeTypeAndValue>([atv])));
         }
     }
     rdns = appendꓸꓸꓸ(rdns, n.ToRDNSequence());

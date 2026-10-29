@@ -38,7 +38,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
     var (delta, n, bias) = ((int32)0, initialN, initialBias);
     var (b, remaining) = ((int32)0, (int32)0);
     foreach (var (_, r) in s) {
-        if (r < utf8.RuneSelf){
+        if (r < utf8.RuneSelf) {
             b++;
             output = append(outputᴷ, output, (byte)r);
         } else {
@@ -47,7 +47,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
     }
     var h = b;
     if (b > 0) {
-        output = append(output, (byte)((rune)'-'));
+        output = append(output, (byte)'-');
     }
     while (remaining != 0) {
         var m = (int32)0x7fffffff;
@@ -73,12 +73,11 @@ internal static (@string, error) encode(@string prefix, @string s) {
                 continue;
             }
             var q = delta;
-            for (var k = @base; ᐧ ; k += @base) {
+            for (var k = @base; ; k += @base) {
                 var t = k - bias;
-                if (t < tmin){
+                if (t < tmin) {
                     t = tmin;
-                } else 
-                if (t > tmax) {
+                } else if (t > tmax) {
                     t = tmax;
                 }
                 if (q < t) {
@@ -96,13 +95,13 @@ internal static (@string, error) encode(@string prefix, @string s) {
         delta++;
         n++;
     }
-    return ((@string)output, default!);
+    return ((@string)output, default);
 }
 
 internal static byte encodeDigit(int32 digit) {
     switch (ᐧ) {
     case {} when 0 <= digit && digit < 26: {
-        return (byte)(digit + (rune)'a');
+        return (byte)(digit + 'a');
     }
     case {} when 26 <= digit && digit < 36: {
         return (byte)(digit + ((rune)'0' - 26));
@@ -112,7 +111,7 @@ internal static byte encodeDigit(int32 digit) {
 
 // adapt is the bias adaptation function specified in section 6.1.
 internal static int32 adapt(int32 delta, int32 numPoints, bool firstTime) {
-    if (firstTime){
+    if (firstTime) {
         delta /= damp;
     } else {
         delta /= 2;
@@ -137,19 +136,19 @@ internal static readonly @string acePrefix = "xn--"u8;
 // toASCII("golang") is "golang".
 internal static (@string, error) toASCII(@string s) {
     if (ascii.Is(s)) {
-        return (s, default!);
+        return (s, default);
     }
     var labels = strings.Split(s, "."u8);
     foreach (var (i, label) in labels) {
         if (!ascii.Is(label)) {
             var (a, err) = encode(acePrefix, label);
-            if (err != default!) {
+            if (err != nil) {
                 return ("", err);
             }
             labels[i] = a;
         }
     }
-    return (strings.Join(labels, "."u8), default!);
+    return (strings.Join(labels, "."u8), default);
 }
 
 } // end cookiejar_package

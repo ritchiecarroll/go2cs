@@ -8,9 +8,9 @@ partial class uleb128_package {
 public static slice<byte> AppendUleb128(slice<byte> b, nuint v) {
     var bᴷ = new stackAppend<byte>(moves: true);
 
-    while (ᐧ) {
+    for (;;) {
         var c = (uint8)(v & 0x7f);
-        v >>= (int)(7);
+        v >>= 7;
         if (v != 0) {
             c |= (uint8)(0x80);
         }

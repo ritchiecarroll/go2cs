@@ -65,7 +65,7 @@ public static void SetUnencryptedHTTP2(this ref Protocols p, bool ok) {
 }
 
 internal static void setBit(this ref Protocols p, uint8 bit, bool ok) {
-    if (ok){
+    if (ok) {
         p.bits |= (uint8)(bit);
     } else {
         p.bits &= unchecked((uint8)~(uint8)(bit));
@@ -75,7 +75,7 @@ internal static void setBit(this ref Protocols p, uint8 bit, bool ok) {
 public static @string String(this Protocols p) {
     var sᴷ = new stackAppend<@string>();
 
-    slice<@string> s = default!;
+    slice<@string> s = default;
     if (p.HTTP1()) {
         s = append(sᴷ, s, "HTTP1"u8);
     }
@@ -144,7 +144,7 @@ internal static bool isToken(@string v) {
 internal static bool stringContainsCTLByte(@string s) {
     for (nint i = 0; i < builtin.len(s); i++) {
         var b = s[i];
-        if (b < (rune)' ' || b == 0x7f) {
+        if (b < ' ' || b == 0x7f) {
             return true;
         }
     }
@@ -156,7 +156,7 @@ internal static @string hexEscapeNonASCII(@string s) {
 
     nint newLen = 0;
     for (nint i = 0; i < builtin.len(s); i++) {
-        if (s[i] >= utf8.RuneSelf){
+        if (s[i] >= utf8.RuneSelf) {
             newLen += 3;
         } else {
             newLen++;
@@ -166,13 +166,13 @@ internal static @string hexEscapeNonASCII(@string s) {
         return s;
     }
     var b = new slice<byte>(0, newLen);
-    nint pos = default!;
+    nint pos = default;
     for (nint i = 0; i < builtin.len(s); i++) {
         if (s[i] >= utf8.RuneSelf) {
             if (pos < i) {
                 b = append(b, s.slice(pos, i).ꓸꓸꓸ);
             }
-            b = append(bᴷ, b, (byte)((rune)'%'));
+            b = append(bᴷ, b, (byte)'%');
             b = strconv.AppendInt(b, (int64)s[i], 16);
             pos = i + 1;
         }
@@ -187,7 +187,7 @@ internal static @string hexEscapeNonASCII(@string s) {
 // and Close always returns nil. It can be used in an outgoing client
 // request to explicitly signal that a request has zero bytes.
 // An alternative, however, is to simply set [Request.Body] to nil.
-public static readonly ж<noBody> ᏑNoBody = new StaticBox<noBody>(new noBody(nil));
+public static readonly ж<noBody> ᏑNoBody = new StaticBox<noBody>(new noBody());
 public static ref noBody NoBody => ref ((StaticBox<noBody>)ᏑNoBody).ValueSlot;
 
 public partial struct noBody {
@@ -198,11 +198,11 @@ public static (nint, error) Read(this noBody _Δp0, slice<byte> _Δp1) {
 }
 
 public static error Close(this noBody _) {
-    return default!;
+    return default;
 }
 
 public static (int64, error) WriteTo(this noBody _Δp0, io.Writer _Δp1) {
-    return (0, default!);
+    return (0, default);
 }
 
 // verify that an io.Copy from NoBody won't require a buffer:

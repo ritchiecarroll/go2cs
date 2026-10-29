@@ -10,9 +10,9 @@ partial class socktest_package {
 
 // Accept4 wraps syscall.Accept4.
 public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> Ꮡsw, nint s, nint flags) {
-    nint ns = default!;
-    syscall.Sockaddr sa = default!;
-    error err = default!;
+    nint ns = default;
+    syscall.Sockaddr sa = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var sw = ref Ꮡsw.DerefOrNull();
@@ -26,28 +26,28 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> 
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
 
         (var af, err) = f.apply(so);
-        if (err != default!) {
-            (ns, sa, err) = (-1, default!, err); goto ᒐdone;
+        if (err != nil) {
+            (ns, sa, err) = (-1, default, err); goto ᒐdone;
         }
-        (ns, sa, so.Value.Err) = syscall.Accept4(s, flags);
+        (ns, sa, so.Err) = syscall.Accept4(s, flags);
         {
-            err = af.apply(so); if (err != default!) {
-                if ((~so).Err == default!) {
+            err = af.apply(so); if (err != nil) {
+                if (so.Err == nil) {
                     syscall.Close(ns);
                 }
-                (ns, sa, err) = (-1, default!, err); goto ᒐdone;
+                (ns, sa, err) = (-1, default, err); goto ᒐdone;
             }
         }
 
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
-        if ((~so).Err != default!) {
-            sw.stats.getLocked((~so).Cookie).Value.AcceptFailed++;
-            (ns, sa, err) = (-1, default!, (~so).Err); goto ᒐdone;
+        if (so.Err != nil) {
+            sw.stats.getLocked(so.Cookie).AcceptFailed++;
+            (ns, sa, err) = (-1, default, so.Err); goto ᒐdone;
         }
-        var nso = Ꮡsw.addLocked(ns, (~so).Cookie.Family(), (~so).Cookie.Type(), (~so).Cookie.Protocol());
-        sw.stats.getLocked((~nso).Cookie).Value.Accepted++;
-        (ns, sa, err) = (ns, sa, default!);
+        var nso = Ꮡsw.addLocked(ns, so.Cookie.Family(), so.Cookie.Type(), so.Cookie.Protocol());
+        sw.stats.getLocked(nso.Cookie).Accepted++;
+        (ns, sa, err) = (ns, sa, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

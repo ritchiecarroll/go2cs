@@ -9,7 +9,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(mcache))]
 partial class runtime_package {
 
 // Per-thread (in Go, per-P) cache for small objects.
@@ -22,8 +21,8 @@ partial struct mcache {
     internal sys.NotInHeap _;
     // The following members are accessed on every malloc,
     // so they are grouped here for better caching.
-    internal int64 nextSample;   // trigger heap sample after allocating this many bytes
-    internal nint memProfRate;    // cached mem profile rate, used to detect changes
+    internal int64 nextSample;  // trigger heap sample after allocating this many bytes
+    internal nint memProfRate;  // cached mem profile rate, used to detect changes
     internal uintptr scanAlloc; // bytes of scannable heap allocated
 // Allocator cache for tiny objects w/o pointers.
 // See "Tiny allocator" comment in malloc.go.
@@ -112,10 +111,10 @@ internal static ж<mcache> allocmcache() {
 // In some cases there is no way to simply release
 // resources, such as statistics, so donate them to
 // a different mcache (the recipient).
-internal static void freemcache(ж<mcache> Ꮡc) {
+internal static void freemcache(ж<mcache> c) {
     systemstack(() => {
-        Ꮡc.Value.releaseAll();
-        stackcache_clear(ref (Ꮡc).DerefOrNull());
+        c.Value.releaseAll();
+        stackcache_clear(ref (c).DerefOrNull());
 
         // NOTE(rsc,rlh): If gcworkbuffree comes back, we need to coordinate
         // with the stealing of gcworkbufs during garbage collection to avoid
@@ -123,7 +122,7 @@ internal static void freemcache(ж<mcache> Ꮡc) {
         // gcworkbuffree(c.gcworkbuf)
 
         @lock(Ꮡmheap_.of(mheap.Ꮡlock));
-        Ꮡmheap_.of(mheap.Ꮡcachealloc).free(@unsafe.Pointer.FromPinnedBox(Ꮡc));
+        Ꮡmheap_.of(mheap.Ꮡcachealloc).free(@unsafe.Pointer.FromPinnedBox(c));
         unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     });
 }
@@ -135,8 +134,8 @@ internal static void freemcache(ж<mcache> Ꮡc) {
 internal static ж<mcache> getMCache(ref m mp) {
     // Grab the mcache, since that's where stats live.
     var pp = mp.p.ptr();
-    ж<mcache> c = default!;
-    if (pp == nil){
+    ж<mcache> c = default;
+    if (pp == nil) {
         // We will be called without a P while bootstrapping,
         // in which case we use mcache0, which is set in mallocinit.
         // mcache0 is cleared when bootstrapping is complete,
@@ -163,7 +162,7 @@ internal static void refill(this ref mcache c, spanClass spc) {
     // Return the current cached span to the central lists.
     var s = c.alloc[spc];
 
-    if ((~s).allocCount != (~s).nelems) {
+    if (s.allocCount != s.nelems) {
         @throw(refillOfSpanWithFreeˢ);
     }
 
@@ -178,14 +177,14 @@ internal static void refill(this ref mcache c, spanClass spc) {
 
     if (s != Ꮡemptymspan) {
         // Mark this span as no longer cached.
-        if ((~s).sweepgen != mheap_.sweepgen + 3) {
+        if (s.sweepgen != mheap_.sweepgen + 3) {
             @throw(badSweepgenInRefillˢ);
         }
         mheap_.central[spc].mcentral.uncacheSpan(s);
 
         // Count up how many slots were used and record it.
         var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
-        var slotsUsed = (int64)(~s).allocCount - (int64)(~s).allocCountBeforeCache;
+        var slotsUsed = (int64)s.allocCount - (int64)s.allocCountBeforeCache;
         atomic.Xadd64(stats.at(heapStatsDelta.ᏑsmallAllocCount, (nint)(spc.sizeclass())), slotsUsed);
 
         // Flush tinyAllocs.
@@ -196,11 +195,11 @@ internal static void refill(this ref mcache c, spanClass spc) {
         Ꮡmemstats.of(mstats.ᏑheapStats).release();
 
         // Count the allocs in inconsistent, internal stats.
-        var bytesAllocated = slotsUsed * (int64)(~s).elemsize;
+        var bytesAllocated = slotsUsed * (int64)s.elemsize;
         ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Add(bytesAllocated);
 
         // Clear the second allocCount just to be safe.
-        s.Value.allocCountBeforeCache = 0;
+        s.allocCountBeforeCache = 0;
     }
 
     // Get a new cached span from the central lists.
@@ -209,16 +208,16 @@ internal static void refill(this ref mcache c, spanClass spc) {
         @throw(outOfMemoryˢ);
     }
 
-    if ((~s).allocCount == (~s).nelems) {
+    if (s.allocCount == s.nelems) {
         @throw(spanHasNoFreeSpaceˢ);
     }
 
     // Indicate that this span is cached and prevent asynchronous
     // sweeping in the next sweep phase.
-    s.Value.sweepgen = mheap_.sweepgen + 3;
+    s.sweepgen = mheap_.sweepgen + 3;
 
     // Store the current alloc count for accounting later.
-    s.Value.allocCountBeforeCache = s.Value.allocCount;
+    s.allocCountBeforeCache = s.allocCount;
 
     // Update heapLive and flush scanAlloc.
     //
@@ -233,8 +232,8 @@ internal static void refill(this ref mcache c, spanClass spc) {
     // the pacer to believe that it's in better shape than it is,
     // which appears to lead to more memory used. See #53738 for
     // more details.
-    var usedBytes = (uintptr)(~s).allocCount * (~s).elemsize;
-    ᏑgcController.update((int64)((~s).npages * (uintptr)pageSize) - (int64)usedBytes, (int64)c.scanAlloc);
+    var usedBytes = (uintptr)s.allocCount * s.elemsize;
+    ᏑgcController.update((int64)(s.npages * (uintptr)pageSize) - (int64)usedBytes, (int64)c.scanAlloc);
     c.scanAlloc = 0;
 
     c.alloc[spc] = s;
@@ -271,7 +270,7 @@ internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool nosca
     ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Add((int64)(npages * (uintptr)pageSize));
 
     // Update heapLive.
-    ᏑgcController.update((int64)((~s).npages * (uintptr)pageSize), 0);
+    ᏑgcController.update((int64)(s.npages * (uintptr)pageSize), 0);
 
     // Put the large span in the mcentral swept list so that it's
     // visible to the background sweeper.
@@ -284,7 +283,7 @@ internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool nosca
     // conservative scanning, can temporarily observes an inflated
     // limit. It will simply mark the whole object or just skip it
     // since we're in the mark phase anyway.
-    s.Value.limit = s.@base() + size;
+    s.limit = s.@base() + size;
     s.initHeapBits();
     return s;
 }
@@ -299,8 +298,8 @@ internal static void releaseAll(this ref mcache c) {
     foreach (var i in range(c.alloc)) {
         var s = c.alloc[i];
         if (s != Ꮡemptymspan) {
-            var slotsUsed = (int64)(~s).allocCount - (int64)(~s).allocCountBeforeCache;
-            s.Value.allocCountBeforeCache = 0;
+            var slotsUsed = (int64)s.allocCount - (int64)s.allocCountBeforeCache;
+            s.allocCountBeforeCache = 0;
 
             // Adjust smallAllocCount for whatever was allocated.
             var statsΔ1 = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
@@ -309,15 +308,15 @@ internal static void releaseAll(this ref mcache c) {
 
             // Adjust the actual allocs in inconsistent, internal stats.
             // We assumed earlier that the full span gets allocated.
-            ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Add(slotsUsed * (int64)(~s).elemsize);
+            ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Add(slotsUsed * (int64)s.elemsize);
 
-            if ((~s).sweepgen != sg + 1) {
+            if (s.sweepgen != sg + 1) {
                 // refill conservatively counted unallocated slots in gcController.heapLive.
                 // Undo this.
                 //
                 // If this span was cached before sweep, then gcController.heapLive was totally
                 // recomputed since caching this span, so we don't do this for stale spans.
-                dHeapLive -= (int64)((uint16)((~s).nelems - (~s).allocCount)) * (int64)(~s).elemsize;
+                dHeapLive -= (int64)((uint16)(s.nelems - s.allocCount)) * (int64)s.elemsize;
             }
 
             // Release the span to the mcentral.
@@ -364,10 +363,9 @@ internal static void prepareForSweep(this ж<mcache> Ꮡc) {
     // to avoid spilling mark bits into the *next* GC cycle.
     var sg = mheap_.sweepgen;
     var flushGen = Ꮡc.of(mcache.ᏑflushGen).Load();
-    if (flushGen == sg){
+    if (flushGen == sg) {
         return;
-    } else 
-    if (flushGen != sg - 2) {
+    } else if (flushGen != sg - 2) {
         println((@string)"bad flushGen"u8, flushGen, (@string)"in prepareForSweep; sweepgen"u8, sg);
         @throw(badFlushGenˢ);
     }
@@ -385,7 +383,7 @@ internal static void addReusableNoscan(this ref mcache c, spanClass spc, uintptr
 
     // Add to the reusable pointers free list.
     var v = (gclinkptr)ptr;
-    v.ptr().Value.next = c.reusableNoscan[spc];
+    v.ptr().next = c.reusableNoscan[spc];
     c.reusableNoscan[spc] = v;
 }
 

@@ -34,8 +34,8 @@ partial struct PrivateKey {
     internal ж<bigmod.Modulus> p, q; // p × q = n
     // dP and dQ are used as exponents, so we store them as big-endian byte
     // slices to be passed to [bigmod.Nat.Exp].
-    internal slice<byte> dP; // d mod (p - 1)
-    internal slice<byte> dQ; // d mod (q - 1)
+    internal slice<byte> dP;     // d mod (p - 1)
+    internal slice<byte> dQ;     // d mod (q - 1)
     internal ж<bigmodꓸNat> qInv; // qInv = q⁻¹ mod p
     // fipsApproved is false if this key does not comply with FIPS 186-5 or
     // SP 800-56B Rev. 2.
@@ -52,20 +52,20 @@ public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
 // or be shorter if leading zeroes were trimmed.
 public static (ж<PrivateKey>, error) NewPrivateKey(slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q) {
     var (n, err) = bigmod.NewModulus(N);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var p, err) = bigmod.NewModulus(P);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var q, err) = bigmod.NewModulus(Q);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var dN, err) = bigmod.NewNat().SetBytes(d, n);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return newPrivateKey(n, e, dN, p, q);
 }
@@ -73,29 +73,29 @@ public static (ж<PrivateKey>, error) NewPrivateKey(slice<byte> N, nint e, slice
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cryptoRsaPIsEvenˢ = "crypto/rsa: p is even"u8;
 
-internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> Ꮡn, nint e, ж<bigmodꓸNat> Ꮡd, ж<bigmod.Modulus> Ꮡp, ж<bigmod.Modulus> Ꮡq) {
+internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> n, nint e, ж<bigmodꓸNat> d, ж<bigmod.Modulus> Ꮡp, ж<bigmod.Modulus> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
     var pMinusOne = p.Nat().SubOne(Ꮡp);
     var (pMinusOneMod, err) = bigmod.NewModulus(pMinusOne.Bytes(Ꮡp));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    var dP = bigmod.NewNat().Mod(Ꮡd, pMinusOneMod).Bytes(pMinusOneMod);
+    var dP = bigmod.NewNat().Mod(d, pMinusOneMod).Bytes(pMinusOneMod);
 
     var qMinusOne = q.Nat().SubOne(Ꮡq);
     (var qMinusOneMod, err) = bigmod.NewModulus(qMinusOne.Bytes(Ꮡq));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    var dQ = bigmod.NewNat().Mod(Ꮡd, qMinusOneMod).Bytes(qMinusOneMod);
+    var dQ = bigmod.NewNat().Mod(d, qMinusOneMod).Bytes(qMinusOneMod);
 
     // Constant-time modular inversion with prime modulus by Fermat's Little
     // Theorem: qInv = q⁻¹ mod p = q^(p-2) mod p.
     if (p.Nat().IsOdd() == 0) {
         // [bigmod.Nat.Exp] requires an odd modulus.
-        return (default!, errors.New(cryptoRsaPIsEvenˢ));
+        return (default, errors.New(cryptoRsaPIsEvenˢ));
     }
     var pMinusTwo = p.Nat().SubOne(Ꮡp).SubOne(Ꮡp).Bytes(Ꮡp);
     var qInv = bigmod.NewNat().Mod(q.Nat(), Ꮡp);
@@ -103,41 +103,41 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> Ꮡn, n
 
     var pk = Ꮡ(new PrivateKey(
         pub: new ΔPublicKey(
-            N: Ꮡn, E: e
+            N: n, E: e
         ),
-        d: Ꮡd, p: Ꮡp, q: Ꮡq,
+        d: d, p: Ꮡp, q: Ꮡq,
         dP: dP, dQ: dQ, qInv: qInv
     ));
     {
-        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
-    return (pk, default!);
+    return (pk, default);
 }
 
 // NewPrivateKeyWithPrecomputation creates a new RSA private key from the given
 // parameters, which include precomputed CRT values.
 public static (ж<PrivateKey>, error) NewPrivateKeyWithPrecomputation(slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) {
     var (n, err) = bigmod.NewModulus(N);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var p, err) = bigmod.NewModulus(P);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var q, err) = bigmod.NewModulus(Q);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var dN, err) = bigmod.NewNat().SetBytes(d, n);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var qInvNat, err) = bigmod.NewNat().SetBytes(qInv, p);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var pk = Ꮡ(new PrivateKey(
@@ -148,11 +148,11 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithPrecomputation(slice<byte
         dP: dP, dQ: dQ, qInv: qInvNat
     ));
     {
-        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
-    return (pk, default!);
+    return (pk, default);
 }
 
 // NewPrivateKeyWithoutCRT creates a new RSA private key from the given parameters.
@@ -160,12 +160,12 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithPrecomputation(slice<byte
 // This is meant for deprecated multi-prime keys, and is not FIPS 140 compliant.
 public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nint e, slice<byte> d) {
     var (n, err) = bigmod.NewModulus(N);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var dN, err) = bigmod.NewNat().SetBytes(d, n);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var pk = Ꮡ(new PrivateKey(
         pub: new ΔPublicKey(
@@ -174,11 +174,11 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
         d: dN
     ));
     {
-        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
-    return (pk, default!);
+    return (pk, default);
 }
 
 // Export returns the key parameters in big-endian byte slice format.
@@ -186,19 +186,19 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
 // P, Q, dP, dQ, and qInv may be nil if the key was created with
 // NewPrivateKeyWithoutCRT.
 public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export(this ref PrivateKey priv) {
-    slice<byte> N = default!;
-    nint e = default!;
-    slice<byte> d = default!;
-    slice<byte> P = default!;
-    slice<byte> Q = default!;
-    slice<byte> dP = default!;
-    slice<byte> dQ = default!;
-    slice<byte> qInv = default!;
+    slice<byte> N = default;
+    nint e = default;
+    slice<byte> d = default;
+    slice<byte> P = default;
+    slice<byte> Q = default;
+    slice<byte> dP = default;
+    slice<byte> dQ = default;
+    slice<byte> qInv = default;
 
     N = priv.pub.N.Nat().Bytes(priv.pub.N);
     e = priv.pub.E;
     d = priv.d.Bytes(priv.pub.N);
-    if (priv.dP == default!) {
+    if (priv.dP == nil) {
         return (N, e, d, P, Q, dP, dQ, qInv);
     }
     P = priv.p.Nat().Bytes(priv.p);
@@ -226,18 +226,17 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     priv.fipsApproved = true;
 
     {
-        var (fipsApproved, errΔ1) = checkPublicKey(ref nonnil(ref priv).pub); if (errΔ1 != default!){
+        var (fipsApproved, errΔ1) = checkPublicKey(ref nonnil(ref priv).pub); if (errΔ1 != nil) {
             return errΔ1;
-        } else 
-        if (!fipsApproved) {
+        } else if (!fipsApproved) {
             priv.fipsApproved = false;
         }
     }
 
-    if (priv.dP == default!) {
+    if (priv.dP == nil) {
         // Legacy and deprecated multi-prime keys.
         priv.fipsApproved = false;
-        return default!;
+        return default;
     }
 
     var N = priv.pub.N;
@@ -252,13 +251,13 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     // Check that pq ≡ 1 mod N (and that p < N and q < N).
     var pN = bigmod.NewNat().ExpandFor(N);
     {
-        var (_, errΔ2) = pN.SetBytes(p.Nat().Bytes(p), N); if (errΔ2 != default!) {
+        var (_, errΔ2) = pN.SetBytes(p.Nat().Bytes(p), N); if (errΔ2 != nil) {
             return errors.New(cryptoRsaInvalidPrimeˢ);
         }
     }
     var qN = bigmod.NewNat().ExpandFor(N);
     {
-        var (_, errΔ3) = qN.SetBytes(q.Nat().Bytes(q), N); if (errΔ3 != default!) {
+        var (_, errΔ3) = qN.SetBytes(q.Nat().Bytes(q), N); if (errΔ3 != nil) {
             return errors.New(cryptoRsaInvalidPrimeˢ);
         }
     }
@@ -275,11 +274,11 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     //
     // This checks dP, dQ, and e.
     var (pMinus1, err) = bigmod.NewModulus(p.Nat().SubOne(p).Bytes(p));
-    if (err != default!) {
+    if (err != nil) {
         return errors.New(cryptoRsaInvalidPrimeˢ);
     }
     (var dP, err) = bigmod.NewNat().SetBytes(priv.dP, pMinus1);
-    if (err != default!) {
+    if (err != nil) {
         return errors.New(cryptoRsaInvalidCrtˢ);
     }
     var de = bigmod.NewNat();
@@ -290,11 +289,11 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     }
 
     (var qMinus1, err) = bigmod.NewModulus(q.Nat().SubOne(q).Bytes(q));
-    if (err != default!) {
+    if (err != nil) {
         return errors.New(cryptoRsaInvalidPrimeˢ);
     }
     (var dQ, err) = bigmod.NewNat().SetBytes(priv.dQ, qMinus1);
-    if (err != default!) {
+    if (err != nil) {
         return errors.New(cryptoRsaInvalidCrtˢ);
     }
     de.SetUint((nuint)priv.pub.E).ExpandFor(qMinus1);
@@ -305,7 +304,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
 
     // Check that qInv * q ≡ 1 mod p.
     (var qP, err) = bigmod.NewNat().SetOverflowingBytes(q.Nat().Bytes(q), p);
-    if (err != default!) {
+    if (err != nil) {
         // q >= 2^⌈log2(p)⌉
         qP = bigmod.NewNat().Mod(q.Nat(), p);
     }
@@ -332,10 +331,10 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     // https://eprint.iacr.org/2023/026.pdf.
     var diff = bigmod.NewNat();
     {
-        var (qPΔ1, errΔ4) = bigmod.NewNat().SetBytes(q.Nat().Bytes(q), p); if (errΔ4 != default!){
+        var (qPΔ1, errΔ4) = bigmod.NewNat().SetBytes(q.Nat().Bytes(q), p); if (errΔ4 != nil) {
             // q > p
             var (pQ, errΔ5) = bigmod.NewNat().SetBytes(p.Nat().Bytes(p), q);
-            if (errΔ5 != default!) {
+            if (errΔ5 != nil) {
                 return errors.New(cryptoRsaPQˢ);
             }
             // diff = 0 - p mod q = q - p
@@ -362,7 +361,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
         return errors.New(cryptoRsaDTooSmallˢ);
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -373,7 +372,7 @@ internal static readonly @string cryptoRsaPublicExponentˢ2 = "crypto/rsa: publi
 internal static readonly @string cryptoRsaPublicExponentˢ3 = "crypto/rsa: public exponent too large"u8;
 
 internal static (bool fipsApproved, error err) checkPublicKey(ref ΔPublicKey pub) {
-    bool fipsApproved = default!;
+    bool fipsApproved = default;
 
     fipsApproved = true;
     if (pub.N == nil) {
@@ -411,26 +410,26 @@ internal static (bool fipsApproved, error err) checkPublicKey(ref ΔPublicKey pu
     if (pub.E > (nint)(2147483648L - 1)) {
         return (false, errors.New(cryptoRsaPublicExponentˢ3));
     }
-    return (fipsApproved, default!);
+    return (fipsApproved, default);
 }
 
 // Encrypt performs the RSA public key operation.
-public static (slice<byte>, error) Encrypt(ж<ΔPublicKey> Ꮡpub, slice<byte> plaintext) {
+public static (slice<byte>, error) Encrypt(ж<ΔPublicKey> pub, slice<byte> plaintext) {
     fips140.RecordNonApproved();
     {
-        var (_, err) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (err != default!) {
-            return (default!, err);
+        var (_, err) = checkPublicKey(ref (pub).DerefOrNull()); if (err != nil) {
+            return (default, err);
         }
     }
-    return encrypt(ref (Ꮡpub).DerefOrNull(), plaintext);
+    return encrypt(ref (pub).DerefOrNull(), plaintext);
 }
 
 internal static (slice<byte>, error) encrypt(ref ΔPublicKey pub, slice<byte> plaintext) {
     var (m, err) = bigmod.NewNat().SetBytes(plaintext, pub.N);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (bigmod.NewNat().ExpShortVarTime(m, (nuint)pub.E, pub.N).Bytes(pub.N), default!);
+    return (bigmod.NewNat().ExpShortVarTime(m, (nuint)pub.E, pub.N).Bytes(pub.N), default);
 }
 
 public static error ErrMessageTooLong = errors.New("crypto/rsa: message too long for RSA key size"u8);
@@ -444,16 +443,16 @@ internal const bool withCheck = true;
 internal const bool noCheck = false;
 
 // DecryptWithoutCheck performs the RSA private key operation.
-public static (slice<byte>, error) DecryptWithoutCheck(ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext) {
+public static (slice<byte>, error) DecryptWithoutCheck(ж<PrivateKey> priv, slice<byte> ciphertext) {
     fips140.RecordNonApproved();
-    return decrypt(ref (Ꮡpriv).DerefOrNull(), ciphertext, noCheck);
+    return decrypt(ref (priv).DerefOrNull(), ciphertext, noCheck);
 }
 
 // DecryptWithCheck performs the RSA private key operation and checks the
 // result to defend against errors in the CRT computation.
-public static (slice<byte>, error) DecryptWithCheck(ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext) {
+public static (slice<byte>, error) DecryptWithCheck(ж<PrivateKey> priv, slice<byte> ciphertext) {
     fips140.RecordNonApproved();
-    return decrypt(ref (Ꮡpriv).DerefOrNull(), ciphertext, withCheck);
+    return decrypt(ref (priv).DerefOrNull(), ciphertext, withCheck);
 }
 
 // decrypt performs an RSA decryption of ciphertext into out. If check is true,
@@ -464,16 +463,16 @@ internal static (slice<byte>, error) decrypt(ref PrivateKey priv, slice<byte> ci
         fips140.RecordNonApproved();
     }
 
-    ж<bigmodꓸNat> m = default!;
+    ж<bigmodꓸNat> m = default;
     var N = priv.pub.N;
     nint E = priv.pub.E;
 
     var (c, err) = bigmod.NewNat().SetBytes(ciphertext, N);
-    if (err != default!) {
-        return (default!, ErrDecryption);
+    if (err != nil) {
+        return (default, ErrDecryption);
     }
 
-    if (priv.dP == default!){
+    if (priv.dP == nil) {
         // Legacy codepath for deprecated multi-prime keys.
         fips140.RecordNonApproved();
         m = bigmod.NewNat().Exp(c, priv.d.Bytes(N), N);
@@ -497,11 +496,11 @@ internal static (slice<byte>, error) decrypt(ref PrivateKey priv, slice<byte> ci
     if (check) {
         var c1 = bigmod.NewNat().ExpShortVarTime(m, (nuint)E, N);
         if (c1.Equal(c) != 1) {
-            return (default!, ErrDecryption);
+            return (default, ErrDecryption);
         }
     }
 
-    return (m.Bytes(N), default!);
+    return (m.Bytes(N), default);
 }
 
 } // end rsa_package

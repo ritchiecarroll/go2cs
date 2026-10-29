@@ -11,7 +11,7 @@ partial class utf16_package {
 // maxRune==unicode.MaxRune are verified in the tests.
 // Defining them locally avoids this package depending on package unicode.
 internal static UntypedInt replacementChar => /* '\uFFFD' */ 65533; // Unicode replacement character
-internal static UntypedInt maxRune => /* '\U0010FFFF' */ 1114111; // Maximum valid Unicode code point.
+internal static UntypedInt maxRune => /* '\U0010FFFF' */ 1114111;   // Maximum valid Unicode code point.
 
 // 0xd800-0xdc00 encodes the high 10 bits of a pair.
 // 0xdc00-0xe000 encodes the low 10 bits of a pair.
@@ -131,7 +131,7 @@ internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
     var bufᴷ = new stackAppend<rune>(moves: true);
 
     for (nint i = 0; i < len(s); i++) {
-        rune ar = default!;
+        rune ar = default;
         {
             var r = s[i];
             switch (ᐧ) {

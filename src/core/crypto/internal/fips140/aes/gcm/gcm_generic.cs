@@ -11,15 +11,15 @@ using go.crypto.@internal.fips140deps;
 
 partial class gcm_package {
 
-internal static void sealGeneric(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static void sealGeneric(slice<byte> @out, ж<GCM> g, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     ref var H = ref heap(new array<byte>(16), out var ᏑH);
     ref var counter = ref heap(new array<byte>(16), out var Ꮡcounter);
     ref var tagMask = ref heap(new array<byte>(16), out var ᏑtagMask);
-    aes.EncryptBlockInternal(Ꮡg.of(GCM.Ꮡcipher), H[..], H[..]);
+    aes.EncryptBlockInternal(g.of(GCM.Ꮡcipher), H[..], H[..]);
     deriveCounterGeneric(ᏑH, Ꮡcounter, nonce);
-    gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), tagMask[..], tagMask[..], Ꮡcounter);
+    gcmCounterCryptGeneric(g.of(GCM.Ꮡcipher), tagMask[..], tagMask[..], Ꮡcounter);
 
-    gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), @out, plaintext, Ꮡcounter);
+    gcmCounterCryptGeneric(g.of(GCM.Ꮡcipher), @out, plaintext, Ꮡcounter);
 
     array<byte> tag = new(16); /* gcmTagSize */
     gcmAuthGeneric(tag[..], ᏑH, ᏑtagMask, @out.slice(0, len(plaintext)), additionalData);
@@ -47,13 +47,13 @@ internal static error openGeneric(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> no
 
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), @out, ciphertext, Ꮡcounter);
 
-    return default!;
+    return default;
 }
 
 // deriveCounterGeneric computes the initial GCM counter state from the given nonce.
 // See NIST SP 800-38D, section 7.1. This assumes that counter is filled with
 // zeros on entry.
-internal static void deriveCounterGeneric(/*[16]*/ ж<array<byte>> ᏑH, /*[16]*/ ж<array<byte>> Ꮡcounter, slice<byte> nonce) {
+internal static void deriveCounterGeneric(/*[16]*/ ж<array<byte>> H, /*[16]*/ ж<array<byte>> Ꮡcounter, slice<byte> nonce) {
     ref var counter = ref Ꮡcounter.DerefOrNull();
 
     // GCM has two modes of operation with respect to the initial counter
@@ -62,26 +62,26 @@ internal static void deriveCounterGeneric(/*[16]*/ ж<array<byte>> ᏑH, /*[16]*
     // with a four-byte big-endian counter starting at one, is used
     // directly as the starting counter. For other nonce sizes, the counter
     // is computed by passing it through the GHASH function.
-    if (len(nonce) == gcmStandardNonceSize){
+    if (len(nonce) == gcmStandardNonceSize) {
         copy(counter[..], nonce);
         counter[gcmBlockSize - 1] = 1;
     } else {
         var lenBlock = new slice<byte>(16);
         byteorder.BEPutUint64(lenBlock[8..], (uint64)len(nonce) * 8);
-        ghash(Ꮡcounter, ᏑH, nonce, lenBlock);
+        ghash(Ꮡcounter, H, nonce, lenBlock);
     }
 }
 
 // gcmCounterCryptGeneric encrypts src using AES in counter mode with 32-bit
 // wrapping (which is different from AES-CTR) and places the result into out.
 // counter is the initial value and will be updated with the next value.
-internal static void gcmCounterCryptGeneric(ж<aes.Block> Ꮡb, slice<byte> @out, slice<byte> src, /*[16]*/ ж<array<byte>> Ꮡcounter) {
+internal static void gcmCounterCryptGeneric(ж<aes.Block> b, slice<byte> @out, slice<byte> src, /*[16]*/ ж<array<byte>> Ꮡcounter) {
     ref var counter = ref Ꮡcounter.DerefOrNull();
 
     array<byte> mask = new(16); /* gcmBlockSize */
 
     while (len(src) >= gcmBlockSize) {
-        aes.EncryptBlockInternal(Ꮡb, mask[..], counter[..]);
+        aes.EncryptBlockInternal(b, mask[..], counter[..]);
         gcmInc32(Ꮡcounter);
 
         subtle.XORBytes(@out, src, mask[..]);
@@ -90,7 +90,7 @@ internal static void gcmCounterCryptGeneric(ж<aes.Block> Ꮡb, slice<byte> @out
     }
 
     if (len(src) > 0) {
-        aes.EncryptBlockInternal(Ꮡb, mask[..], counter[..]);
+        aes.EncryptBlockInternal(b, mask[..], counter[..]);
         gcmInc32(Ꮡcounter);
         subtle.XORBytes(@out, src, mask[..]);
     }
@@ -107,7 +107,7 @@ internal static void gcmInc32(/*[16]*/ ж<array<byte>> ᏑcounterBlock) {
 
 // gcmAuthGeneric calculates GHASH(additionalData, ciphertext), masks the result
 // with tagMask and writes the result to out.
-internal static void gcmAuthGeneric(slice<byte> @out, /*[16]*/ ж<array<byte>> ᏑH, /*[16]*/ ж<array<byte>> ᏑtagMask, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static void gcmAuthGeneric(slice<byte> @out, /*[16]*/ ж<array<byte>> H, /*[16]*/ ж<array<byte>> ᏑtagMask, slice<byte> ciphertext, slice<byte> additionalData) {
     ref var tagMask = ref ᏑtagMask.DerefOrNull();
 
     checkGenericIsExpected();
@@ -115,7 +115,7 @@ internal static void gcmAuthGeneric(slice<byte> @out, /*[16]*/ ж<array<byte>> �
     byteorder.BEPutUint64(lenBlock[..8], (uint64)len(additionalData) * 8);
     byteorder.BEPutUint64(lenBlock[8..], (uint64)len(ciphertext) * 8);
     ref var S = ref heap(new array<byte>(16), out var ᏑS);
-    ghash(ᏑS, ᏑH, additionalData, ciphertext, lenBlock);
+    ghash(ᏑS, H, additionalData, ciphertext, lenBlock);
     subtle.XORBytes(@out, S[..], tagMask[..]);
 }
 

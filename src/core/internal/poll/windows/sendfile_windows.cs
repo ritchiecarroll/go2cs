@@ -10,9 +10,9 @@ partial class poll_package {
 
 // SendFile wraps the TransmitFile call.
 public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, uintptr src, int64 size) {
-    int64 written = default!;
+    int64 written = default;
     heap<error>(out var Ꮡerr);
-    bool handled = default!;
+    bool handled = default;
     GoFrame ᒐ = default;
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
@@ -33,7 +33,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
         }
 
         {
-            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
+            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
                 (written, err, handled) = (0, errΔ1, false); goto ᒐdone;
             }
         }
@@ -42,17 +42,17 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
         // Get the file size so we don't read past the end of the file.
         ref var fi = ref heap(new Δsyscall.ByHandleFileInformation(), out var Ꮡfi);
         {
-            var errΔ2 = Δsyscall.GetFileInformationByHandle(hsrc, Ꮡfi); if (errΔ2 != default!) {
+            var errΔ2 = Δsyscall.GetFileInformationByHandle(hsrc, Ꮡfi); if (errΔ2 != nil) {
                 (written, err, handled) = (0, errΔ2, false); goto ᒐdone;
             }
         }
         var fileSize = ((int64)fi.FileSizeHigh << 32) + (int64)fi.FileSizeLow;
         (var startpos, err) = Δsyscall.Seek(hsrc, 0, io.SeekCurrent);
-        if (err != default!) {
+        if (err != nil) {
             (written, err, handled) = (0, err, false); goto ᒐdone;
         }
         var maxSize = fileSize - startpos;
-        if (size <= 0){
+        if (size <= 0) {
             size = maxSize;
         } else {
             size = min(size, maxSize);
@@ -64,7 +64,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
                 // file position after TransmitFile completes.
                 // So just use Seek to set file position.
                 var (_, serr) = Δsyscall.Seek(hsrc, startpos + written, io.SeekStart);
-                if (Ꮡerr.ValueSlot != default!) {
+                if (Ꮡerr.ValueSlot != nil) {
                     Ꮡerr.ValueSlot = serr;
                 }
             }
@@ -81,17 +81,17 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
                 chunkSize = size;
             }
 
-            var (n, errΔ3) = Ꮡfd.execIO((rune)'w', (ж<operation> o) => {
+            var (n, errΔ3) = Ꮡfd.execIO('w', (ж<operation> o) => {
                 var off = startpos + written;
-                o.Value.o.OffsetHigh = (uint32)(off >> 32);
-                o.Value.o.Offset = (uint32)off;
+                o.o.OffsetHigh = (uint32)(off >> 32);
+                o.o.Offset = (uint32)off;
                 var errΔ4 = Δsyscall.TransmitFile(Ꮡfd.Value.Sysfd, hsrc, (uint32)chunkSize, 0, o.of(operation.Ꮡo), nil, Δsyscall.TF_WRITE_BEHIND);
-                if (errΔ4 != default!) {
+                if (errΔ4 != nil) {
                     return ((uint32)(0), errΔ4);
                 }
-                return ((uint32)chunkSize, default!);
+                return ((uint32)chunkSize, default);
             });
-            if (errΔ3 != default!) {
+            if (errΔ3 != nil) {
                 (written, err, handled) = (written, errΔ3, written > 0); goto ᒐdone;
             }
 
@@ -99,7 +99,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
             written += (int64)n;
         }
 
-        (written, err, handled) = (written, default!, written > 0);
+        (written, err, handled) = (written, default, written > 0);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

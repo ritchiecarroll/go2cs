@@ -34,7 +34,7 @@ partial interface Interface :
     sort.Interface
 {
     void Push(any x); // add x as element Len()
-    any Pop();   // remove and return element Len() - 1.
+    any Pop();        // remove and return element Len() - 1.
 }
 
 // Init establishes the heap invariants required by the other routines in this package.
@@ -90,7 +90,7 @@ public static void Fix(Interface h, nint i) {
 }
 
 internal static void up(Interface h, nint j) {
-    while (ᐧ) {
+    for (;;) {
         nint i = (j - 1) / 2; // parent
         if (i == j || !h.Less(j, i)) {
             break;
@@ -102,7 +102,7 @@ internal static void up(Interface h, nint j) {
 
 internal static bool down(Interface h, nint i0, nint n) {
     nint i = i0;
-    while (ᐧ) {
+    for (;;) {
         nint j1 = 2 * i + 1;
         if (j1 >= n || j1 < 0) { // j1 < 0 after int overflow
             break;

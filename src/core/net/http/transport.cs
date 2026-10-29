@@ -105,13 +105,13 @@ public static UntypedInt DefaultMaxIdleConnsPerHost => 2;
 // header is not sent on the wire.
 partial struct Transport {
     internal sync.Mutex idleMu;
-    internal bool closeIdle;                                // user has requested to close all idle conns
+    internal bool closeIdle;                                        // user has requested to close all idle conns
     internal map<connectMethodKey, slice<ж<persistConn>>> idleConn; // most recently used at end
-    internal map<connectMethodKey, wantConnQueue> idleConnWait; // waiting getConns
+    internal map<connectMethodKey, wantConnQueue> idleConnWait;     // waiting getConns
     internal connLRU idleLRU;
     internal sync.Mutex reqMu;
     internal map<ж<Request>, Action<error>> reqCanceler;
-    internal sync.Mutex altMu;   // guards changing altProto only
+    internal sync.Mutex altMu;      // guards changing altProto only
     internal atomic.Value altProto; // of nil or map[string]RoundTripper, key is URI scheme
     internal sync.Mutex connsPerHostMu;
     internal map<connectMethodKey, nint> connsPerHost;
@@ -272,7 +272,7 @@ partial struct Transport {
     // h2transport (via onceSetNextProtoDefaults)
     internal sync.Once nextProtoOnce;
     internal h2Transport h2transport; // non-nil if http2 wired up
-    internal bool tlsNextProtoWasNil;        // whether TLSNextProto was nil when the Once fired
+    internal bool tlsNextProtoWasNil; // whether TLSNextProto was nil when the Once fired
     // ForceAttemptHTTP2 controls whether HTTP/2 is enabled when a non-zero
     // Dial, DialTLS, or DialContext func or TLSClientConfig is provided.
     // By default, use of any those fields conservatively disables HTTP/2.
@@ -342,22 +342,22 @@ public static ж<Transport> Clone(this ж<Transport> Ꮡt) {
         ReadBufferSize: t.ReadBufferSize
     ));
     if (t.TLSClientConfig != nil) {
-        t2.Value.TLSClientConfig = t.TLSClientConfig.Clone();
+        t2.TLSClientConfig = t.TLSClientConfig.Clone();
     }
     if (t.HTTP2 != nil) {
-        t2.Value.HTTP2 = Ꮡ(new HTTP2Config(nil));
-        (~t2).HTTP2.Value = t.HTTP2.Value;
+        t2.HTTP2 = Ꮡ(new HTTP2Config());
+        t2.HTTP2.Value = t.HTTP2.Value;
     }
     if (t.Protocols != nil) {
-        t2.Value.Protocols = Ꮡ(new Protocols(nil));
-        (~t2).Protocols.Value = t.Protocols.Value;
+        t2.Protocols = Ꮡ(new Protocols());
+        t2.Protocols.Value = t.Protocols.Value;
     }
     if (!t.tlsNextProtoWasNil) {
         var npm = maps.Clone<map<@string, Func<@string, ж<tls.Conn>, RoundTripper>>, @string, Func<@string, ж<tls.Conn>, RoundTripper>>(t.TLSNextProto);
-        if (npm == default!) {
+        if (npm == nil) {
             npm = new map<@string, Func<@string, ж<tls.Conn>, RoundTripper>>();
         }
-        t2.Value.TLSNextProto = npm;
+        t2.TLSNextProto = npm;
     }
     return t2;
 }
@@ -373,7 +373,7 @@ partial interface h2Transport {
 }
 
 internal static bool hasCustomTLSDialer(this ref Transport t) {
-    return t.DialTLS != default! || t.DialTLSContext != default!;
+    return t.DialTLS != nil || t.DialTLSContext != nil;
 }
 
 internal static ж<godebug.Setting> http2client = godebug.New("http2client"u8);
@@ -383,7 +383,7 @@ internal static ж<godebug.Setting> http2client = godebug.New("http2client"u8);
 internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    t.tlsNextProtoWasNil = (t.TLSNextProto == default!);
+    t.tlsNextProtoWasNil = (t.TLSNextProto == nil);
     if (http2client.Value() == "0"u8) {
         http2client.IncNonDefault();
         return;
@@ -424,7 +424,7 @@ internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) {
         return;
     }
     var (t2, err) = http2configureTransports(Ꮡt);
-    if (err != default!) {
+    if (err != nil) {
         log.Printf("Error enabling Transport HTTP/2 support: %v"u8, err);
         return;
     }
@@ -437,12 +437,12 @@ internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) {
     // TODO: also add this to x/net/http2.Configure Transport, behind
     // a +build go1.7 build tag:
     {
-        var limit1 = t.MaxResponseHeaderBytes; if (limit1 != 0 && (~t2).MaxHeaderListSize == 0) {
+        var limit1 = t.MaxResponseHeaderBytes; if (limit1 != 0 && t2.MaxHeaderListSize == 0) {
             UntypedInt h2max = /* 1<<32 - 1 */ 4294967295;
-            if (limit1 >= h2max){
-                t2.Value.MaxHeaderListSize = h2max;
+            if (limit1 >= h2max) {
+                t2.MaxHeaderListSize = h2max;
             } else {
-                t2.Value.MaxHeaderListSize = (uint32)limit1;
+                t2.MaxHeaderListSize = (uint32)limit1;
             }
         }
     }
@@ -452,25 +452,25 @@ internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) {
     //
     // http2configureTransport will have already set NextProtos, but adjust it again
     // here to remove HTTP/1.1 if the user has disabled it.
-    t.TLSClientConfig.Value.NextProtos = adjustNextProtos((~t.TLSClientConfig).NextProtos, protocols);
+    t.TLSClientConfig.NextProtos = adjustNextProtos(t.TLSClientConfig.NextProtos, protocols);
 }
 
 internal static Protocols protocols(this ref Transport t) {
     if (t.Protocols != nil) {
         return t.Protocols.Value; // user-configured set
     }
-    Protocols p = default!;
+    Protocols p = default;
     p.SetHTTP1(true); // default always includes HTTP/1
     switch (ᐧ) {
-    case {} when t.TLSNextProto != default!: {
+    case {} when t.TLSNextProto != nil: {
         // Setting TLSNextProto to an empty map is a documented way
         // to disable HTTP/2 on a Transport.
-        if (t.TLSNextProto["h2"u8] != default!) {
+        if (t.TLSNextProto["h2"u8] != nil) {
             p.SetHTTP2(true);
         }
         break;
     }
-    case {} when !t.ForceAttemptHTTP2 && (t.TLSClientConfig != nil || t.Dial != default! || t.DialContext != default! || t.hasCustomTLSDialer()): {
+    case {} when !t.ForceAttemptHTTP2 && (t.TLSClientConfig != nil || t.Dial != nil || t.DialContext != nil || t.hasCustomTLSDialer()): {
         // Be conservative and don't automatically enable
         // http2 if they've specified a custom TLS config or
         // custom dialers. Let them opt-in themselves via
@@ -513,25 +513,25 @@ public static (ж<url.URL>, error) ProxyFromEnvironment(ж<Request> Ꮡreq) {
 
 // ProxyURL returns a proxy function (for use in a [Transport])
 // that always returns the same URL.
-public static Func<ж<Request>, (ж<url.URL>, error)> ProxyURL(ж<url.URL> ᏑfixedURL) {
-    return (ж<Request> _) => (ᏑfixedURL, default!);
+public static Func<ж<Request>, (ж<url.URL>, error)> ProxyURL(ж<url.URL> fixedURL) {
+    return (ж<Request> _) => (fixedURL, default);
 }
 
 // transportRequest is a wrapper around a *Request that adds
 // optional extra headers to write and stores any error to return
 // from roundTrip.
 partial struct transportRequest {
-    /*embed*/ public ж<Request> Request;                     // original request, not to be mutated
-    internal ΔHeader extra;                 // extra headers to write, or nil
+    /*embed*/ public ж<Request> Request;     // original request, not to be mutated
+    internal ΔHeader extra;                  // extra headers to write, or nil
     internal ж<httptrace.ClientTrace> trace; // optional
     internal context.Context ctx; // canceled when we are done with the request
     internal Action<error> cancel;
     internal sync.Mutex mu; // guards err
-    internal error err;      // first setError value for mapRoundTripError to consider
+    internal error err;     // first setError value for mapRoundTripError to consider
 }
 
 internal static ΔHeader extraHeaders(this ref transportRequest tr) {
-    if (tr.extra == default!) {
+    if (tr.extra == nil) {
         tr.extra = new ΔHeader(0);
     }
     return tr.extra;
@@ -541,7 +541,7 @@ internal static void setError(this ж<transportRequest> Ꮡtr, error err) {
     ref var tr = ref Ꮡtr.DerefOrNull();
 
     tr.mu.Lock();
-    if (tr.err == default!) {
+    if (tr.err == nil) {
         tr.err = err;
     }
     tr.mu.Unlock();
@@ -552,7 +552,7 @@ internal static void setError(this ж<transportRequest> Ꮡtr, error err) {
 internal static bool useRegisteredProtocol(this ref Transport t, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
-    if ((~req.URL).Scheme == "https"u8 && req.requiresHTTP1()) {
+    if (req.URL.Scheme == "https"u8 && req.requiresHTTP1()) {
         // If this request requires HTTP/1, don't use the
         // "https" alternate protocol, which is used by the
         // HTTP/2 code to take over requests if there's an
@@ -570,10 +570,10 @@ internal static RoundTripper alternateRoundTripper(this ж<Transport> Ꮡt, ж<R
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (!t.useRegisteredProtocol(Ꮡreq)) {
-        return default!;
+        return default;
     }
     var (altProto, _) = Ꮡt.of(Transport.ᏑaltProto).Load()._<map<@string, RoundTripper>>(ᐧ);
-    return altProto[(~req.URL).Scheme];
+    return altProto[req.URL.Scheme];
 }
 
 internal static @string validateHeaders(ΔHeader hdrs) {
@@ -597,8 +597,8 @@ internal static readonly @string unsupportedProtocolˢ = "unsupported protocol s
 
 // roundTrip implements a RoundTripper over HTTP.
 internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
-    ж<Response> _ᴛ1 = default!;
-    error err = default!;
+    ж<Response> _ᴛ1 = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -610,20 +610,20 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
 
         if (req.URL == nil) {
             req.closeBody();
-            (_ᴛ1, err) = (default!, errors.New(httpNilRequestUrlˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(httpNilRequestUrlˢ)); goto ᒐdone;
         }
-        if (req.Header == default!) {
+        if (req.Header == nil) {
             req.closeBody();
-            (_ᴛ1, err) = (default!, errors.New(httpNilRequestHeaderˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(httpNilRequestHeaderˢ)); goto ᒐdone;
         }
-        @string scheme = req.URL.Value.Scheme;
+        @string scheme = req.URL.Scheme;
         var isHTTP = scheme == "http"u8 || scheme == "https"u8;
         if (isHTTP) {
             // Validate the outgoing headers.
             {
                 @string errΔ1 = validateHeaders(req.Header); if (errΔ1 != ""u8) {
                     req.closeBody();
-                    (_ᴛ1, err) = (default!, fmt.Errorf("net/http: invalid header %s"u8, errΔ1)); goto ᒐdone;
+                    (_ᴛ1, err) = (default, fmt.Errorf("net/http: invalid header %s"u8, errΔ1)); goto ᒐdone;
                 }
             }
 
@@ -631,7 +631,7 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
             {
                 @string errΔ2 = validateHeaders(req.Trailer); if (errΔ2 != ""u8) {
                     req.closeBody();
-                    (_ᴛ1, err) = (default!, fmt.Errorf("net/http: invalid trailer %s"u8, errΔ2)); goto ᒐdone;
+                    (_ᴛ1, err) = (default, fmt.Errorf("net/http: invalid trailer %s"u8, errΔ2)); goto ᒐdone;
                 }
             }
         }
@@ -640,30 +640,30 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
         Ꮡreq = setupRewindBody(Ꮡreq); req = ref Ꮡreq.DerefOrNull();
 
         {
-            var altRT = Ꮡt.alternateRoundTripper(Ꮡreq); if (altRT != default!) {
+            var altRT = Ꮡt.alternateRoundTripper(Ꮡreq); if (altRT != nil) {
                 {
                     var (resp, errΔ3) = altRT.RoundTrip(Ꮡreq); if (!AreEqual(errΔ3, ErrSkipAltProtocol)) {
                         (_ᴛ1, err) = (resp, errΔ3); goto ᒐdone;
                     }
                 }
-                error errΔ4 = default!;
+                error errΔ4 = default;
                 (Ꮡreq, errΔ4) = rewindBody(Ꮡreq); req = ref Ꮡreq.DerefOrNull();
-                if (errΔ4 != default!) {
-                    (_ᴛ1, err) = (default!, errΔ4); goto ᒐdone;
+                if (errΔ4 != nil) {
+                    (_ᴛ1, err) = (default, errΔ4); goto ᒐdone;
                 }
             }
         }
         if (!isHTTP) {
             req.closeBody();
-            (_ᴛ1, err) = (default!, badStringError(unsupportedProtocolˢ, scheme)); goto ᒐdone;
+            (_ᴛ1, err) = (default, badStringError(unsupportedProtocolˢ, scheme)); goto ᒐdone;
         }
         if (req.Method != ""u8 && !validMethod(req.Method)) {
             req.closeBody();
-            (_ᴛ1, err) = (default!, fmt.Errorf("net/http: invalid method %q"u8, req.Method)); goto ᒐdone;
+            (_ᴛ1, err) = (default, fmt.Errorf("net/http: invalid method %q"u8, req.Method)); goto ᒐdone;
         }
-        if ((~req.URL).Host == ""u8) {
+        if (req.URL.Host == ""u8) {
             req.closeBody();
-            (_ᴛ1, err) = (default!, errors.New(httpNoHostInRequestUrlˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(httpNoHostInRequestUrlˢ)); goto ᒐdone;
         }
 
         // Transport request context.
@@ -678,7 +678,7 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
         (ctx, var cancel) = context_package.WithCancelCause(req.Context());
 
         // Convert Request.Cancel into context cancelation.
-        if ((~origReq).Cancel != default!) {
+        if (origReq.Cancel != nil) {
             goǃ((ᴛ1, ᴛ2, ᴛ3) => awaitLegacyCancel(ᴛ1, ᴛ2, ref ᴛ3.DerefOrNull()), ctx, cancel, origReq);
         }
 
@@ -690,17 +690,17 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
 
         var cancelʗ1 = cancel;
         defer(() => {
-            if (err != default!) {
+            if (err != nil) {
                 cancelʗ1(err);
             }
         }, ref ᒐ);
 
-        while (ᐧ) {
+        for (;;) {
             var selᴛ98 = ctx.Done();
             switch (trySelect(ᐸꟷ(selᴛ98, ꓸꓸꓸ))) {
             case 0 when selᴛ98.ꟷᐳ(out _): {
                 req.closeBody();
-                (_ᴛ1, err) = (default!, context_package.Cause(ctx)); goto ᒐdone;
+                (_ᴛ1, err) = (default, context_package.Cause(ctx)); goto ᒐdone;
             }
             default: {
                 break;
@@ -709,9 +709,9 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
             // treq gets modified by roundTrip, so we need to recreate for each retry.
             var treq = Ꮡ(new transportRequest(Request: Ꮡreq, trace: trace, ctx: ctx, cancel: cancel));
             var (cm, errΔ5) = t.connectMethodForRequest(treq);
-            if (errΔ5 != default!) {
+            if (errΔ5 != nil) {
                 req.closeBody();
-                (_ᴛ1, err) = (default!, errΔ5); goto ᒐdone;
+                (_ᴛ1, err) = (default, errΔ5); goto ᒐdone;
             }
 
             // Get the cached or newly-created connection to either the
@@ -719,20 +719,20 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
             // pre-CONNECTed to https server. In any case, we'll be ready
             // to send it requests.
             (var pconn, errΔ5) = Ꮡt.getConn(treq, cm);
-            if (errΔ5 != default!) {
+            if (errΔ5 != nil) {
                 req.closeBody();
-                (_ᴛ1, err) = (default!, errΔ5); goto ᒐdone;
+                (_ᴛ1, err) = (default, errΔ5); goto ᒐdone;
             }
 
-            ж<Response> resp = default!;
-            if ((~pconn).alt != default!){
+            ж<Response> resp = default;
+            if (pconn.alt != nil) {
                 // HTTP/2 path.
-                (resp, errΔ5) = (~pconn).alt.RoundTrip(Ꮡreq);
+                (resp, errΔ5) = pconn.alt.RoundTrip(Ꮡreq);
             } else {
                 (resp, errΔ5) = pconn.roundTrip(treq);
             }
-            if (errΔ5 == default!) {
-                if ((~pconn).alt != default!) {
+            if (errΔ5 == nil) {
+                if (pconn.alt != nil) {
                     // HTTP/2 requests are not cancelable with CancelRequest,
                     // so we have no further need for the request context.
                     //
@@ -740,17 +740,16 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
                     // canceling the context after the response body is read.
                     cancel(errRequestDone);
                 }
-                resp.Value.Request = origReq;
-                (_ᴛ1, err) = (resp, default!); goto ᒐdone;
+                resp.Request = origReq;
+                (_ᴛ1, err) = (resp, default); goto ᒐdone;
             }
 
             // Failed. Clean up and determine whether to retry.
-            if (http2isNoCachedConnError(errΔ5)){
+            if (http2isNoCachedConnError(errΔ5)) {
                 if (Ꮡt.removeIdleConn(pconn)) {
-                    Ꮡt.decConnsPerHost((~pconn).cacheKey);
+                    Ꮡt.decConnsPerHost(pconn.cacheKey);
                 }
-            } else 
-            if (!pconn.shouldRetryRequest(Ꮡreq, errΔ5)) {
+            } else if (!pconn.shouldRetryRequest(Ꮡreq, errΔ5)) {
                 // Issue 16465: return underlying net.Conn.Read error from peek,
                 // as we've historically done.
                 {
@@ -771,14 +770,14 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
                         req.closeBody();
                     }
                 }
-                (_ᴛ1, err) = (default!, errΔ5); goto ᒐdone;
+                (_ᴛ1, err) = (default, errΔ5); goto ᒐdone;
             }
             testHookRoundTripRetried();
 
             // Rewind the body if we're able to.
             (Ꮡreq, errΔ5) = rewindBody(Ꮡreq); req = ref Ꮡreq.DerefOrNull();
-            if (errΔ5 != default!) {
-                (_ᴛ1, err) = (default!, errΔ5); goto ᒐdone;
+            if (errΔ5 != nil) {
+                (_ᴛ1, err) = (default, errΔ5); goto ᒐdone;
             }
         }
     }
@@ -817,7 +816,7 @@ internal static error Close(this ж<readTrackingBody> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!Ꮡr.of(readTrackingBody.ᏑdidClose).CompareAndSwap(false, true)) {
-        return default!;
+        return default;
     }
     return r.ReadCloser.Close();
 }
@@ -829,11 +828,10 @@ internal static error Close(this ж<readTrackingBody> Ꮡr) {
 internal static ж<Request> setupRewindBody(ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
-    if (req.Body == default! || AreEqual(req.Body, NoBody)) {
+    if (req.Body == nil || AreEqual(req.Body, NoBody)) {
         return Ꮡreq;
     }
-    ref var newReq = ref heap<Request>(out var ᏑnewReq);
-    newReq = req;
+    ref var newReq = ref heap<Request>(req, out var ᏑnewReq);
     newReq.Body = new readTrackingBodyжReadCloser(Ꮡ(new readTrackingBody(ReadCloser: req.Body)));
     return ᏑnewReq;
 }
@@ -843,26 +841,25 @@ internal static ж<Request> setupRewindBody(ж<Request> Ꮡreq) {
 // rewindBody takes care of closing req.Body when appropriate
 // (in all cases except when rewindBody returns req unmodified).
 internal static (ж<Request> rewound, error err) rewindBody(ж<Request> Ꮡreq) {
-    error err = default!;
+    error err = default;
     ref var req = ref Ꮡreq.DerefOrNull();
 
-    if (req.Body == default! || AreEqual(req.Body, NoBody) || (!(~req.Body._<ж<readTrackingBody>>()).didRead && !req.Body._<ж<readTrackingBody>>().of(readTrackingBody.ᏑdidClose).Load())) {
-        return (Ꮡreq, default!); // nothing to rewind
+    if (req.Body == nil || AreEqual(req.Body, NoBody) || (!req.Body._<ж<readTrackingBody>>().didRead && !req.Body._<ж<readTrackingBody>>().of(readTrackingBody.ᏑdidClose).Load())) {
+        return (Ꮡreq, default); // nothing to rewind
     }
     if (!req.Body._<ж<readTrackingBody>>().of(readTrackingBody.ᏑdidClose).Load()) {
         req.closeBody();
     }
-    if (req.GetBody == default!) {
-        return (default!, errCannotRewind);
+    if (req.GetBody == nil) {
+        return (default, errCannotRewind);
     }
     (var body, err) = req.GetBody();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    ref var newReq = ref heap<Request>(out var ᏑnewReq);
-    newReq = req;
+    ref var newReq = ref heap<Request>(req, out var ᏑnewReq);
     newReq.Body = new readTrackingBodyжReadCloser(Ꮡ(new readTrackingBody(ReadCloser: body)));
-    return (ᏑnewReq, default!);
+    return (ᏑnewReq, default);
 }
 
 // shouldRetryRequest reports whether we should retry sending a failed
@@ -898,7 +895,7 @@ internal static bool shouldRetryRequest(this ж<persistConn> Ꮡpc, ж<Request> 
         var (_, ok) = err._<nothingWrittenError>(ᐧ); if (ok) {
             // We never wrote anything, so it's safe to retry, if there's no body or we
             // can "rewind" the body with GetBody.
-            return req.outgoingLength() == 0 || req.GetBody != default!;
+            return req.outgoingLength() == 0 || req.GetBody != nil;
         }
     }
     if (!req.isReplayable()) {
@@ -949,7 +946,7 @@ public static void RegisterProtocol(this ж<Transport> Ꮡt, @string scheme, Rou
             }
         }
         var newMap = maps.Clone<map<@string, RoundTripper>, @string, RoundTripper>(oldMap);
-        if (newMap == default!) {
+        if (newMap == nil) {
             newMap = new map<@string, RoundTripper>();
         }
         newMap[scheme] = rt;
@@ -969,9 +966,9 @@ public static void CloseIdleConnections(this ж<Transport> Ꮡt) {
     Ꮡt.of(Transport.ᏑnextProtoOnce).Do(Ꮡt.onceSetNextProtoDefaults);
     t.idleMu.Lock();
     var m = t.idleConn;
-    t.idleConn = default!;
+    t.idleConn = default;
     t.closeIdle = true; // close newly idle connections
-    t.idleLRU = new connLRU(nil);
+    t.idleLRU = new connLRU();
     t.idleMu.Unlock();
     foreach (var (_, conns) in m) {
         foreach (var (_, pconn) in conns) {
@@ -980,20 +977,20 @@ public static void CloseIdleConnections(this ж<Transport> Ꮡt) {
     }
     t.connsPerHostMu.Lock();
     t.dialsInProgress.all((ж<wantConn> w) => {
-        if ((~w).cancelCtx != default! && !w.waiting()) {
-            (~w).cancelCtx();
+        if (w.cancelCtx != nil && !w.waiting()) {
+            w.cancelCtx();
         }
     });
     t.connsPerHostMu.Unlock();
     {
-        var t2 = t.h2transport; if (t2 != default!) {
+        var t2 = t.h2transport; if (t2 != nil) {
             t2.CloseIdleConnections();
         }
     }
 }
 
 // prepareTransportCancel sets up state to convert Transport.CancelRequest into context cancelation.
-internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж<Request> Ꮡreq, Action<error> origCancel) {
+internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж<Request> req, Action<error> origCancel) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Historically, RoundTrip has not modified the Request in any way.
@@ -1005,14 +1002,14 @@ internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж
     var cancel = (error err) => {
         origCancel(err);
         Ꮡt.Value.reqMu.Lock();
-        delete(Ꮡt.Value.reqCanceler, Ꮡreq);
+        delete(Ꮡt.Value.reqCanceler, req);
         Ꮡt.Value.reqMu.Unlock();
     };
     t.reqMu.Lock();
-    if (t.reqCanceler == default!) {
+    if (t.reqCanceler == nil) {
         t.reqCanceler = new map<ж<Request>, Action<error>>();
     }
-    t.reqCanceler[Ꮡreq] = cancel;
+    t.reqCanceler[req] = cancel;
     t.reqMu.Unlock();
     return cancel;
 }
@@ -1023,13 +1020,13 @@ internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж
 // Deprecated: Use [Request.WithContext] to create a request with a
 // cancelable context instead. CancelRequest cannot cancel HTTP/2
 // requests. This may become a no-op in a future release of Go.
-public static void CancelRequest(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
+public static void CancelRequest(this ж<Transport> Ꮡt, ж<Request> req) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.reqMu.Lock();
-    var cancel = t.reqCanceler[Ꮡreq];
+    var cancel = t.reqCanceler[req];
     t.reqMu.Unlock();
-    if (cancel != default!) {
+    if (cancel != nil) {
         cancel(errRequestCanceled);
     }
 }
@@ -1052,18 +1049,18 @@ internal static Func<ж<url.URL>, (ж<url.URL>, error)> envProxyFunc() {
 
 // resetProxyConfig is used by tests.
 internal static void resetProxyConfig() {
-    envProxyOnce = new sync.Once(nil);
-    envProxyFuncValue = default!;
+    envProxyOnce = new sync.Once();
+    envProxyFuncValue = default;
 }
 
 internal static (connectMethod cm, error err) connectMethodForRequest(this ref Transport t, ж<transportRequest> Ꮡtreq) {
-    connectMethod cm = default!;
-    error err = default!;
+    connectMethod cm = default;
+    error err = default;
     ref var treq = ref Ꮡtreq.DerefOrNull();
 
-    cm.targetScheme = treq.URL.Value.Scheme;
+    cm.targetScheme = treq.URL.Scheme;
     cm.targetAddr = canonicalAddr(treq.URL);
-    if (t.Proxy != default!) {
+    if (t.Proxy != nil) {
         (cm.proxyURL, err) = t.Proxy(treq.Request);
     }
     cm.onlyH1 = treq.requiresHTTP1();
@@ -1077,7 +1074,7 @@ internal static @string proxyAuth(this ref connectMethod cm) {
         return ""u8;
     }
     {
-        var u = cm.proxyURL.Value.User; if (u != nil) {
+        var u = cm.proxyURL.User; if (u != nil) {
             @string username = u.Username();
             var (password, _) = u.Password();
             return "Basic "u8 + basicAuth(username, password);
@@ -1122,10 +1119,10 @@ internal static @string Error(this transportReadFromServerError e) {
     return fmt.Sprintf("net/http: Transport failed to read from server: %v"u8, e.err);
 }
 
-internal static void putOrCloseIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) {
+internal static void putOrCloseIdleConn(this ж<Transport> Ꮡt, ж<persistConn> pconn) {
     {
-        var err = Ꮡt.tryPutIdleConn(Ꮡpconn); if (err != default!) {
-            Ꮡpconn.close(err);
+        var err = Ꮡt.tryPutIdleConn(pconn); if (err != nil) {
+            pconn.close(err);
         }
     }
 }
@@ -1175,7 +1172,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
                 throw panic("unable to make pconn available");
                 break;
             }}
-            return default!;
+            return default;
         }
 
         t.idleMu.Lock();
@@ -1184,8 +1181,8 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
         // HTTP/2 (pconn.alt != nil) connections do not come out of the idle list,
         // because multiple goroutines can use them simultaneously.
         // If this is an HTTP/2 connection being “returned,” we're done.
-        if (pconn.alt != default! && t.idleLRU.m[Ꮡpconn] != nil) {
-            return default!;
+        if (pconn.alt != nil && t.idleLRU.m[Ꮡpconn] != nil) {
+            return default;
         }
 
         // Deliver pconn to goroutine waiting for idle connection, if any.
@@ -1196,12 +1193,12 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
         {
             var (q, ok) = t.idleConnWait[key, ꟷ]; if (ok) {
                 var done = false;
-                if (pconn.alt == default!){
+                if (pconn.alt == nil) {
                     // HTTP/1.
                     // Loop over the waiting list until we find a w that isn't done already, and hand it pconn.
                     while (q.len() > 0) {
                         var w = q.popFront();
-                        if (w.tryDeliver(Ꮡpconn, default!, new time.Time(nil))) {
+                        if (w.tryDeliver(Ꮡpconn, default, new time.Time())) {
                             done = true;
                             break;
                         }
@@ -1213,16 +1210,16 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
                     // list unconditionally, for any future clients too.
                     while (q.len() > 0) {
                         var w = q.popFront();
-                        w.tryDeliver(Ꮡpconn, default!, new time.Time(nil));
+                        w.tryDeliver(Ꮡpconn, default, new time.Time());
                     }
                 }
-                if (q.len() == 0){
+                if (q.len() == 0) {
                     delete(t.idleConnWait, key);
                 } else {
                     t.idleConnWait[key] = q;
                 }
                 if (done) {
-                    return default!;
+                    return default;
                 }
             }
         }
@@ -1230,7 +1227,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
         if (t.closeIdle) {
             return errCloseIdle;
         }
-        if (t.idleConn == default!) {
+        if (t.idleConn == nil) {
             t.idleConn = new map<connectMethodKey, slice<ж<persistConn>>>();
         }
         var idles = t.idleConn[key];
@@ -1253,17 +1250,17 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
         // Set idle timer, but only for HTTP/1 (pconn.alt == nil).
         // The HTTP/2 implementation manages the idle timer itself
         // (see idleConnTimeout in h2_bundle.go).
-        if (t.IdleConnTimeout > 0 && pconn.alt == default!) {
-            if (pconn.idleTimer != nil){
+        if (t.IdleConnTimeout > 0 && pconn.alt == nil) {
+            if (pconn.idleTimer != nil) {
                 pconn.idleTimer.Reset(t.IdleConnTimeout);
             } else {
                 pconn.idleTimer = time.AfterFunc(t.IdleConnTimeout, Ꮡpconn.closeConnIfStillIdle);
             }
         }
         pconn.idleAt = time.Now();
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -1271,7 +1268,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
 // As an optimization hint to the caller, queueForIdleConn reports whether
 // it successfully delivered an already-idle connection.
 internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
-    bool delivered = default!;
+    bool delivered = default;
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1296,7 +1293,7 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
         // If IdleConnTimeout is set, calculate the oldest
         // persistConn.idleAt time we're willing to use a cached idle
         // conn.
-        time.Time oldTime = default!;
+        time.Time oldTime = default;
         if (t.IdleConnTimeout > 0) {
             oldTime = time.Now().Add(-t.IdleConnTimeout);
         }
@@ -1312,7 +1309,7 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
                     // See whether this connection has been idle too long, considering
                     // only the wall time (the Round(0)), in case this is a laptop or VM
                     // coming out of suspend with previously cached idle connections.
-                    var tooOld = !oldTime.IsZero() && (~pconn).idleAt.Round(0).Before(oldTime);
+                    var tooOld = !oldTime.IsZero() && pconn.idleAt.Round(0).Before(oldTime);
                     if (tooOld) {
                         // Async cleanup. Launch in its own goroutine (as if a
                         // time.AfterFunc called it); it acquires idleMu, which we're
@@ -1329,9 +1326,9 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
                         list = list.slice(0, builtin.len(list) - 1);
                         continue;
                     }
-                    deliveredΔ1 = Ꮡw.tryDeliver(pconn, default!, (~pconn).idleAt);
+                    deliveredΔ1 = Ꮡw.tryDeliver(pconn, default, pconn.idleAt);
                     if (deliveredΔ1) {
-                        if ((~pconn).alt != default!){
+                        if (pconn.alt != nil) {
                             // HTTP/2: multiple clients can share pconn.
                             // Leave it in the list.
                         } else {
@@ -1343,7 +1340,7 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
                     }
                     stop = true;
                 }
-                if (builtin.len(list) > 0){
+                if (builtin.len(list) > 0) {
                     t.idleConn[w.key] = list;
                 } else {
                     delete(t.idleConn, w.key);
@@ -1355,7 +1352,7 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
         }
 
         // Register to receive next connection that becomes idle.
-        if (t.idleConnWait == default!) {
+        if (t.idleConnWait == nil) {
             t.idleConnWait = new map<connectMethodKey, wantConnQueue>();
         }
         var q = t.idleConnWait[w.key];
@@ -1384,7 +1381,7 @@ internal static bool removeIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡ
         ᒐd1 = true;
         return t.removeIdleConnLocked(Ꮡpconn);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().idleMu.Unlock(); ᒐ.Run(); }
 }
 
@@ -1398,7 +1395,7 @@ internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> 
     t.idleLRU.remove(Ꮡpconn);
     var key = pconn.cacheKey;
     var pconns = t.idleConn[key];
-    bool removed = default!;
+    bool removed = default;
     switch (builtin.len(pconns)) {
     case 0: {
         // Nothing
@@ -1436,16 +1433,16 @@ internal static readonly @string netHttpTransportˢ = "net/http: Transport.DialC
 internal static readonly @string netHttpTransportDialHookˢ = "net/http: Transport.Dial hook returned (nil, nil)"u8;
 
 internal static (net.Conn, error) dial(this ref Transport t, context.Context ctx, @string network, @string addr) {
-    if (t.DialContext != default!) {
+    if (t.DialContext != nil) {
         var (c, err) = t.DialContext(ctx, network, addr);
-        if (c == default! && err == default!) {
+        if (c == nil && err == nil) {
             err = errors.New(netHttpTransportˢ);
         }
         return (c, err);
     }
-    if (t.Dial != default!) {
+    if (t.Dial != nil) {
         var (c, err) = t.Dial(network, addr);
-        if (c == default! && err == default!) {
+        if (c == nil && err == nil) {
             err = errors.New(netHttpTransportDialHookˢ);
         }
         return (c, err);
@@ -1467,10 +1464,10 @@ partial struct wantConn {
     // afterDial is called when the dial is completed or canceled.
     internal Action beforeDial;
     internal Action afterDial;
-    internal sync.Mutex mu;      // protects ctx, done and sending of the result
+    internal sync.Mutex mu;       // protects ctx, done and sending of the result
     internal context.Context ctx; // context for dial, cleared after delivered or canceled
     internal Action cancelCtx;
-    internal bool done;             // true after delivered or canceled
+    internal bool done;                   // true after delivered or canceled
     internal channel<connOrError> result; // channel to deliver connection or error
 }
 
@@ -1492,7 +1489,7 @@ internal static bool waiting(this ж<wantConn> Ꮡw) {
 
         return !w.done;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -1508,12 +1505,12 @@ internal static context.Context getCtxForDial(this ж<wantConn> Ꮡw) {
 
         return w.ctx;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
 // tryDeliver attempts to deliver pc, err to w and reports whether it succeeded.
-internal static bool tryDeliver(this ж<wantConn> Ꮡw, ж<persistConn> Ꮡpc, error err, time.Time idleAt) {
+internal static bool tryDeliver(this ж<wantConn> Ꮡw, ж<persistConn> pc, error err, time.Time idleAt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1525,29 +1522,29 @@ internal static bool tryDeliver(this ж<wantConn> Ꮡw, ж<persistConn> Ꮡpc, e
         if (w.done) {
             return false;
         }
-        if ((Ꮡpc == nil) == (err == default!)) {
+        if ((pc == nil) == (err == nil)) {
             throw panic("net/http: internal error: misuse of tryDeliver");
         }
-        w.ctx = default!;
+        w.ctx = default;
         w.done = true;
 
-        w.result.ᐸꟷ(new connOrError(pc: Ꮡpc, err: err, idleAt: idleAt));
+        w.result.ᐸꟷ(new connOrError(pc: pc, err: err, idleAt: idleAt));
         builtin.close(w.result);
 
         return true;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
 // cancel marks w as no longer wanting a result (for example, due to cancellation).
 // If a connection has been delivered already, cancel returns it with t.putOrCloseIdleConn.
-internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> Ꮡt) {
+internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> t) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.mu.Lock();
-    ж<persistConn> pc = default!;
-    if (w.done){
+    ж<persistConn> pc = default;
+    if (w.done) {
         {
             var (r, ok) = ᐸꟷ(w.result, ꟷ); if (ok) {
                 pc = r.pc;
@@ -1556,15 +1553,15 @@ internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> Ꮡt) {
     } else {
         builtin.close(w.result);
     }
-    w.ctx = default!;
+    w.ctx = default;
     w.done = true;
     w.mu.Unlock();
 
     // HTTP/2 connections (pc.alt != nil) aren't removed from the idle pool on use,
     // and should not be added back here. If the pconn isn't in the idle pool,
     // it's because we removed it due to an error.
-    if (pc != nil && (~pc).alt == default!) {
-        Ꮡt.putOrCloseIdleConn(pc);
+    if (pc != nil && pc.alt == nil) {
+        t.putOrCloseIdleConn(pc);
     }
 }
 
@@ -1591,21 +1588,21 @@ internal static nint len(this ref wantConnQueue q) {
 }
 
 // pushBack adds w to the back of the queue.
-internal static void pushBack(this ref wantConnQueue q, ж<wantConn> Ꮡw) {
-    q.tail = append(q.tail, Ꮡw);
+internal static void pushBack(this ref wantConnQueue q, ж<wantConn> w) {
+    q.tail = append(q.tail, w);
 }
 
 // popFront removes and returns the wantConn at the front of the queue.
 internal static ж<wantConn> popFront(this ref wantConnQueue q) {
     if (q.headPos >= builtin.len(q.head)) {
         if (builtin.len(q.tail) == 0) {
-            return default!;
+            return default;
         }
         // Pick up tail as new head, clear tail.
         (q.head, q.headPos, q.tail) = (q.tail, 0, q.head[..0]);
     }
     var w = q.head[q.headPos];
-    q.head[q.headPos] = default!;
+    q.head[q.headPos] = default;
     q.headPos++;
     return w;
 }
@@ -1618,15 +1615,15 @@ internal static ж<wantConn> peekFront(this ref wantConnQueue q) {
     if (builtin.len(q.tail) > 0) {
         return q.tail[0];
     }
-    return default!;
+    return default;
 }
 
 // cleanFrontNotWaiting pops any wantConns that are no longer waiting from the head of the
 // queue, reporting whether any were popped.
 internal static bool /*cleaned*/ cleanFrontNotWaiting(this ref wantConnQueue q) {
-    bool cleaned = default!;
+    bool cleaned = default;
 
-    while (ᐧ) {
+    for (;;) {
         var w = q.peekFront();
         if (w == nil || w.waiting()) {
             return cleaned;
@@ -1638,9 +1635,9 @@ internal static bool /*cleaned*/ cleanFrontNotWaiting(this ref wantConnQueue q) 
 
 // cleanFrontCanceled pops any wantConns with canceled dials from the head of the queue.
 internal static void cleanFrontCanceled(this ref wantConnQueue q) {
-    while (ᐧ) {
+    for (;;) {
         var w = q.peekFront();
-        if (w == nil || (~w).cancelCtx != default!) {
+        if (w == nil || w.cancelCtx != nil) {
             return;
         }
         q.popFront();
@@ -1662,15 +1659,15 @@ internal static void all(this ref wantConnQueue q, Action<ж<wantConn>> f) {
 internal static readonly @string netHttpTransportDialTLSˢ = "net/http: Transport.DialTLS or DialTLSContext returned (nil, nil)"u8;
 
 internal static (net.Conn conn, error err) customDialTLS(this ref Transport t, context.Context ctx, @string network, @string addr) {
-    net.Conn conn = default!;
-    error err = default!;
+    net.Conn conn = default;
+    error err = default;
 
-    if (t.DialTLSContext != default!){
+    if (t.DialTLSContext != nil) {
         (conn, err) = t.DialTLSContext(ctx, network, addr);
     } else {
         (conn, err) = t.DialTLS(network, addr);
     }
-    if (conn == default! && err == default!) {
+    if (conn == nil && err == nil) {
         err = errors.New(netHttpTransportDialTLSˢ);
     }
     return (conn, err);
@@ -1681,8 +1678,8 @@ internal static (net.Conn conn, error err) customDialTLS(this ref Transport t, c
 // and/or setting up TLS.  If this doesn't return an error, the persistConn
 // is ready to write requests to.
 internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж<transportRequest> Ꮡtreq, connectMethod cm) {
-    ж<persistConn> _ᴛ1 = default!;
-    error err = default!;
+    ж<persistConn> _ᴛ1 = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var treq = ref Ꮡtreq.DerefOrNull();
@@ -1690,8 +1687,8 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
         var req = treq.Request;
         var trace = treq.trace;
         var ctx = req.Context();
-        if (trace != nil && (~trace).GetConn != default!) {
-            (~trace).GetConn(cm.addr());
+        if (trace != nil && trace.GetConn != nil) {
+            trace.GetConn(cm.addr());
         }
 
         // Detach from the request context's cancellation signal.
@@ -1712,7 +1709,7 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
         ));
         var wʗ1 = w;
         defer(() => {
-            if (err != default!) {
+            if (err != nil) {
                 wʗ1.cancel(Ꮡt);
             }
         }, ref ᒐ);
@@ -1725,24 +1722,24 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
         }
 
         // Wait for completion or cancellation.
-        var selᴛ102 = (~w).result;
+        var selᴛ102 = w.result;
         var selᴛ103 = treq.ctx.Done();
         switch (select(ᐸꟷ(selᴛ102, ꓸꓸꓸ), ᐸꟷ(selᴛ103, ꓸꓸꓸ))) {
         case 0 when selᴛ102.ꟷᐳ(out var r): {
             // Trace success but only for HTTP/1.
             // HTTP/2 calls trace.GotConn itself.
-            if (r.pc != nil && (~r.pc).alt == default! && trace != nil && (~trace).GotConn != default!) {
+            if (r.pc != nil && r.pc.alt == nil && trace != nil && trace.GotConn != nil) {
                 var info = new httptrace.GotConnInfo(
-                    Conn: (~r.pc).conn,
+                    Conn: r.pc.conn,
                     Reused: r.pc.isReused()
                 );
                 if (!r.idleAt.IsZero()) {
                     info.WasIdle = true;
                     info.IdleTime = time.Since(r.idleAt);
                 }
-                (~trace).GotConn(info);
+                trace.GotConn(info);
             }
-            if (r.err != default!) {
+            if (r.err != nil) {
                 // If the request has been canceled, that's probably
                 // what caused r.err; if so, prefer to return the
                 // cancellation error (see golang.org/issue/16049).
@@ -1753,7 +1750,7 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
                     if (AreEqual(errΔ1, errRequestCanceled)) {
                         errΔ1 = errRequestCanceledConn;
                     }
-                    (_ᴛ1, err) = (default!, errΔ1); goto ᒐdone;
+                    (_ᴛ1, err) = (default, errΔ1); goto ᒐdone;
                 }
                 default: {
                     // return below
@@ -1767,7 +1764,7 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
             if (AreEqual(errΔ2, errRequestCanceled)) {
                 errΔ2 = errRequestCanceledConn;
             }
-            (_ᴛ1, err) = (default!, errΔ2); goto ᒐdone;
+            (_ᴛ1, err) = (default, errΔ2); goto ᒐdone;
         }}
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1796,7 +1793,7 @@ internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
 
         {
             nint n = t.connsPerHost[w.key]; if (n < t.MaxConnsPerHost) {
-                if (t.connsPerHost == default!) {
+                if (t.connsPerHost == nil) {
                     t.connsPerHost = new map<connectMethodKey, nint>();
                 }
                 t.connsPerHost[w.key] = n + 1;
@@ -1805,7 +1802,7 @@ internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
             }
         }
 
-        if (t.connsPerHostWait == default!) {
+        if (t.connsPerHostWait == nil) {
             t.connsPerHostWait = new map<connectMethodKey, wantConnQueue>();
         }
         var q = t.connsPerHostWait[w.key];
@@ -1819,18 +1816,18 @@ internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
 
 // startDialConnFor calls dialConn in a new goroutine.
 // t.connsPerHostMu must be held.
-internal static partial void startDialConnForLocked(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
+internal static partial void startDialConnForLocked(this ж<Transport> Ꮡt, ж<wantConn> w) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.dialsInProgress.cleanFrontCanceled();
-    t.dialsInProgress.pushBack(Ꮡw);
+    t.dialsInProgress.pushBack(w);
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
-            Ꮡt.dialConnFor(Ꮡw);
+            Ꮡt.dialConnFor(w);
             Ꮡt.Value.connsPerHostMu.Lock();
             defer(Ꮡt.of(Transport.ᏑconnsPerHostMu).Unlock, ref ᒐ);
-            Ꮡw.Value.cancelCtx = default!;
+            w.Value.cancelCtx = default;
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -1847,21 +1844,21 @@ internal static void dialConnFor(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
 
         defer(Ꮡw.Value.afterDial, ref ᒐ, recovers: true);
         var ctx = Ꮡw.getCtxForDial();
-        if (ctx == default!) {
+        if (ctx == nil) {
             Ꮡt.decConnsPerHost(w.key);
             return;
         }
 
         const bool isClientConn = false;
-        var (pc, err) = Ꮡt.dialConn(ctx, w.cm, isClientConn, default!);
-        var delivered = Ꮡw.tryDeliver(pc, err, new time.Time(nil));
-        if (err == default! && (!delivered || (~pc).alt != default!)) {
+        var (pc, err) = Ꮡt.dialConn(ctx, w.cm, isClientConn, default);
+        var delivered = Ꮡw.tryDeliver(pc, err, new time.Time());
+        if (err == nil && (!delivered || pc.alt != nil)) {
             // pconn was not passed to w,
             // or it is HTTP/2 and can be shared.
             // Add to the idle connection pool.
             Ꮡt.putOrCloseIdleConn(pc);
         }
-        if (err != default!) {
+        if (err != nil) {
             Ꮡt.decConnsPerHost(w.key);
         }
     }
@@ -1905,7 +1902,7 @@ internal static void decConnsPerHost(this ж<Transport> Ꮡt, connectMethodKey k
                         break;
                     }
                 }
-                if (q.len() == 0){
+                if (q.len() == 0) {
                     delete(t.connsPerHostWait, key);
                 } else {
                     // q is a value (like a slice), so we have to store
@@ -1920,7 +1917,7 @@ internal static void decConnsPerHost(this ж<Transport> Ꮡt, connectMethodKey k
 
         // Otherwise, decrement the recorded count.
         {
-            n--; if (n == 0){
+            n--; if (n == 0) {
                 delete(t.connsPerHost, key);
             } else {
                 t.connsPerHost[key] = n;
@@ -1938,22 +1935,22 @@ internal static partial error addTLS(this ref persistConn pconn, context.Context
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     // Initiate TLS and check remote host name against certificate.
-    var cfg = cloneTLSConfig((~pconn.t).TLSClientConfig);
-    if ((~cfg).ServerName == ""u8) {
-        cfg.Value.ServerName = name;
+    var cfg = cloneTLSConfig(pconn.t.TLSClientConfig);
+    if (cfg.ServerName == ""u8) {
+        cfg.ServerName = name;
     }
     if (pconn.cacheKey.onlyH1) {
-        cfg.Value.NextProtos = default!;
+        cfg.NextProtos = default;
     }
     var plainConn = pconn.conn;
     var tlsConn = tls.Client(plainConn, cfg);
     var errc = new channel<error>(2);
-    ж<time.Timer> timer = default!;                   // for canceling TLS handshake
+    ж<time.Timer> timer = default; // for canceling TLS handshake
     {
-        var d = pconn.t.Value.TLSHandshakeTimeout; if (d != 0) {
+        var d = pconn.t.TLSHandshakeTimeout; if (d != 0) {
             var errcʗ1 = errc;
             timer = time.AfterFunc(d, () => {
-                errcʗ1.ᐸꟷ(new tlsHandshakeTimeoutError(nil));
+                errcʗ1.ᐸꟷ(new tlsHandshakeTimeoutError());
             });
         }
     }
@@ -1961,7 +1958,7 @@ internal static partial error addTLS(this ref persistConn pconn, context.Context
     var timerʗ1 = timer;
     var tlsConnʗ1 = tlsConn;
     goǃ(() => {
-        if (Ꮡtrace != nil && Ꮡtrace.Value.TLSHandshakeStart != default!) {
+        if (Ꮡtrace != nil && Ꮡtrace.Value.TLSHandshakeStart != nil) {
             Ꮡtrace.Value.TLSHandshakeStart();
         }
         var err = tlsConnʗ1.HandshakeContext(ctx);
@@ -1971,27 +1968,26 @@ internal static partial error addTLS(this ref persistConn pconn, context.Context
         errcʗ2.ᐸꟷ(err);
     });
     {
-        var err = ᐸꟷ(errc); if (err != default!) {
+        var err = ᐸꟷ(errc); if (err != nil) {
             plainConn.Close();
-            if (AreEqual(err, (new tlsHandshakeTimeoutError(nil)))) {
+            if (AreEqual(err, (new tlsHandshakeTimeoutError()))) {
                 // Now that we have closed the connection,
                 // wait for the call to HandshakeContext to return.
                 ᐸꟷ(errc);
             }
-            if (Ꮡtrace != nil && trace.TLSHandshakeDone != default!) {
-                trace.TLSHandshakeDone(new tlsꓸConnectionState(nil), err);
+            if (Ꮡtrace != nil && trace.TLSHandshakeDone != nil) {
+                trace.TLSHandshakeDone(new tlsꓸConnectionState(), err);
             }
             return err;
         }
     }
-    ref var cs = ref heap<tlsꓸConnectionState>(out var Ꮡcs);
-    cs = tlsConn.ConnectionState();
-    if (Ꮡtrace != nil && trace.TLSHandshakeDone != default!) {
-        trace.TLSHandshakeDone(cs, default!);
+    ref var cs = ref heap<tlsꓸConnectionState>(tlsConn.ConnectionState(), out var Ꮡcs);
+    if (Ꮡtrace != nil && trace.TLSHandshakeDone != nil) {
+        trace.TLSHandshakeDone(cs, default);
     }
     pconn.tlsState = Ꮡcs;
     pconn.conn = new tls.ConnжConn(tlsConn);
-    return default!;
+    return default;
 }
 
 partial interface erringRoundTripper {
@@ -2007,8 +2003,8 @@ internal static readonly @string httpHttp2Implementationˢ = "http: HTTP/2 imple
 internal static readonly @string httpTransportDoesNotˢ = "http: Transport does not support unencrypted HTTP/2"u8;
 
 internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Transport> Ꮡt, context.Context ctx, connectMethod cm, bool isClientConn, Action internalStateHook) {
-    ж<persistConn> pconn = default!;
-    error err = default!;
+    ж<persistConn> pconn = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -2032,52 +2028,51 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             }
             return errΔ1;
         }
-        if (cm.scheme() == "https"u8 && t.hasCustomTLSDialer()){
-            error errΔ2 = default!;
-            (pconn.Value.conn, errΔ2) = t.customDialTLS(ctx, tcpˢ, cm.addr());
-            if (errΔ2 != default!) {
-                (pconn, err) = (default!, wrapErr(errΔ2)); goto ᒐdone;
+        if (cm.scheme() == "https"u8 && t.hasCustomTLSDialer()) {
+            error errΔ2 = default;
+            (pconn.conn, errΔ2) = t.customDialTLS(ctx, tcpˢ, cm.addr());
+            if (errΔ2 != nil) {
+                (pconn, err) = (default, wrapErr(errΔ2)); goto ᒐdone;
             }
             {
-                var (tc, ok) = (~pconn).conn._<ж<tls.Conn>>(ᐧ); if (ok) {
+                var (tc, ok) = pconn.conn._<ж<tls.Conn>>(ᐧ); if (ok) {
                     // Handshake here, in case DialTLS didn't. TLSNextProto below
                     // depends on it for knowing the connection state.
-                    if (trace != nil && (~trace).TLSHandshakeStart != default!) {
-                        (~trace).TLSHandshakeStart();
+                    if (trace != nil && trace.TLSHandshakeStart != nil) {
+                        trace.TLSHandshakeStart();
                     }
                     {
-                        var errΔ3 = tc.HandshakeContext(ctx); if (errΔ3 != default!) {
-                            goǃ(ᴛ0 => ᴛ0.Close(), (~pconn).conn);
-                            if (trace != nil && (~trace).TLSHandshakeDone != default!) {
-                                (~trace).TLSHandshakeDone(new tlsꓸConnectionState(nil), errΔ3);
+                        var errΔ3 = tc.HandshakeContext(ctx); if (errΔ3 != nil) {
+                            goǃ(ᴛ0 => ᴛ0.Close(), pconn.conn);
+                            if (trace != nil && trace.TLSHandshakeDone != nil) {
+                                trace.TLSHandshakeDone(new tlsꓸConnectionState(), errΔ3);
                             }
-                            (pconn, err) = (default!, errΔ3); goto ᒐdone;
+                            (pconn, err) = (default, errΔ3); goto ᒐdone;
                         }
                     }
-                    ref var cs = ref heap<tlsꓸConnectionState>(out var Ꮡcs);
-                    cs = tc.ConnectionState();
-                    if (trace != nil && (~trace).TLSHandshakeDone != default!) {
-                        (~trace).TLSHandshakeDone(cs, default!);
+                    ref var cs = ref heap<tlsꓸConnectionState>(tc.ConnectionState(), out var Ꮡcs);
+                    if (trace != nil && trace.TLSHandshakeDone != nil) {
+                        trace.TLSHandshakeDone(cs, default);
                     }
-                    pconn.Value.tlsState = Ꮡcs;
+                    pconn.tlsState = Ꮡcs;
                 }
             }
         } else {
             var (conn, errΔ4) = t.dial(ctx, tcpˢ, cm.addr());
-            if (errΔ4 != default!) {
-                (pconn, err) = (default!, wrapErr(errΔ4)); goto ᒐdone;
+            if (errΔ4 != nil) {
+                (pconn, err) = (default, wrapErr(errΔ4)); goto ᒐdone;
             }
-            pconn.Value.conn = conn;
+            pconn.conn = conn;
             if (cm.scheme() == "https"u8) {
-                @string firstTLSHost = default!;
+                @string firstTLSHost = default;
                 {
-                    (firstTLSHost, _, errΔ4) = net.SplitHostPort(cm.addr()); if (errΔ4 != default!) {
-                        (pconn, err) = (default!, wrapErr(errΔ4)); goto ᒐdone;
+                    (firstTLSHost, _, errΔ4) = net.SplitHostPort(cm.addr()); if (errΔ4 != nil) {
+                        (pconn, err) = (default, wrapErr(errΔ4)); goto ᒐdone;
                     }
                 }
                 {
-                    errΔ4 = pconn.addTLS(ctx, firstTLSHost, trace); if (errΔ4 != default!) {
-                        (pconn, err) = (default!, wrapErr(errΔ4)); goto ᒐdone;
+                    errΔ4 = pconn.addTLS(ctx, firstTLSHost, trace); if (errΔ4 != nil) {
+                        (pconn, err) = (default, wrapErr(errΔ4)); goto ᒐdone;
                     }
                 }
             }
@@ -2089,36 +2084,36 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             // Do nothing. Not using a proxy.
             break;
         }
-        case {} when (~cm.proxyURL).Scheme == "socks5"u8 || (~cm.proxyURL).Scheme == "socks5h"u8: {
-            var conn = pconn.Value.conn;
+        case {} when cm.proxyURL.Scheme == "socks5"u8 || cm.proxyURL.Scheme == "socks5h"u8: {
+            var conn = pconn.conn;
             var d = socksNewDialer(tcpˢ, conn.RemoteAddr().String());
             {
-                var u = cm.proxyURL.Value.User; if (u != nil) {
+                var u = cm.proxyURL.User; if (u != nil) {
                     var auth = Ꮡ(new socksUsernamePassword(
                         Username: u.Username()
                     ));
-                    (auth.Value.Password, _) = u.Password();
-                    d.Value.AuthMethods = new socksAuthMethod[]{
+                    (auth.Password, _) = u.Password();
+                    d.AuthMethods = slice<socksAuthMethod>([
                         socksAuthMethodNotRequired,
                         socksAuthMethodUsernamePassword
-                    }.slice();
+                    ]);
                     var authʗ1 = auth;
-                                        d.Value.Authenticate = (context.Context p1, io.ReadWriter p2, socksAuthMethod p3) => authʗ1.Authenticate(p1, p2, p3);
+                                        d.Authenticate = (context.Context p1, io.ReadWriter p2, socksAuthMethod p3) => authʗ1.Authenticate(p1, p2, p3);
                 }
             }
             {
-                var (_, errΔ8) = d.DialWithConn(ctx, conn, tcpˢ, cm.targetAddr); if (errΔ8 != default!) {
+                var (_, errΔ8) = d.DialWithConn(ctx, conn, tcpˢ, cm.targetAddr); if (errΔ8 != nil) {
                     conn.Close();
-                    (pconn, err) = (default!, errΔ8); goto ᒐdone;
+                    (pconn, err) = (default, errΔ8); goto ᒐdone;
                 }
             }
             break;
         }
         case {} when cm.targetScheme == "http"u8: {
-            pconn.Value.isProxy = true;
+            pconn.isProxy = true;
             {
                 @string pa = cm.proxyAuth(); if (pa != ""u8) {
-                    pconn.Value.mutateHeaderFunc = (ΔHeader h) => {
+                    pconn.mutateHeaderFunc = (ΔHeader h) => {
                         h.Set(proxyAuthorizationˢ, pa);
                     };
                 }
@@ -2126,19 +2121,19 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             break;
         }
         case {} when cm.targetScheme == "https"u8: {
-            var conn = pconn.Value.conn;
-            ΔHeader hdr = default!;
-            if (t.GetProxyConnectHeader != default!){
-                error errΔ9 = default!;
+            var conn = pconn.conn;
+            ΔHeader hdr = default;
+            if (t.GetProxyConnectHeader != nil) {
+                error errΔ9 = default;
                 (hdr, errΔ9) = t.GetProxyConnectHeader(ctx, cm.proxyURL, cm.targetAddr);
-                if (errΔ9 != default!) {
+                if (errΔ9 != nil) {
                     conn.Close();
-                    (pconn, err) = (default!, errΔ9); goto ᒐdone;
+                    (pconn, err) = (default, errΔ9); goto ᒐdone;
                 }
             } else {
                 hdr = t.ProxyConnectHeader;
             }
-            if (hdr == default!) {
+            if (hdr == nil) {
                 hdr = new ΔHeader(0);
             }
             {
@@ -2163,7 +2158,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
 
             var didReadResponse = new channel<EmptyStruct>(0); // closed after CONNECT write+read is done or fails
             ref var resp = ref heap<ж<Response>>(out var Ꮡresp);
-            ref var errΔ10 = ref heap<error>(out var ᏑerrΔ10);      // write or read error
+            ref var errΔ10 = ref heap<error>(out var ᏑerrΔ10); // write or read error
             // Write the CONNECT request & read the response.
             var connʗ1 = conn;
             var connectReqʗ1 = connectReq;
@@ -2173,7 +2168,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
                 try {
                     defer(ᴛ1 => builtin.close(ᴛ1), didReadResponseʗ1, ref ᒐ);
                     ᏑerrΔ10.ValueSlot = connectReqʗ1.Write(new net_ConnᴠWriter(connʗ1));
-                    if (ᏑerrΔ10.ValueSlot != default!) {
+                    if (ᏑerrΔ10.ValueSlot != nil) {
                         return;
                     }
                     // Okay to use and discard buffered reader here, because
@@ -2190,99 +2185,99 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             case 0 when selᴛ105.ꟷᐳ(out _): {
                 conn.Close();
                 ᐸꟷ(didReadResponse);
-                (pconn, err) = (default!, connectCtx.Err()); goto ᒐdone;
+                (pconn, err) = (default, connectCtx.Err()); goto ᒐdone;
             }
             case 1 when selᴛ106.ꟷᐳ(out _): {
                 // resp or err now set
                 break;
             }}
-            if (errΔ10 != default!) {
+            if (errΔ10 != nil) {
                 conn.Close();
-                (pconn, err) = (default!, errΔ10); goto ᒐdone;
+                (pconn, err) = (default, errΔ10); goto ᒐdone;
             }
 
-            if (t.OnProxyConnectResponse != default!) {
+            if (t.OnProxyConnectResponse != nil) {
                 errΔ10 = t.OnProxyConnectResponse(ctx, cm.proxyURL, connectReq, resp);
-                if (errΔ10 != default!) {
+                if (errΔ10 != nil) {
                     conn.Close();
-                    (pconn, err) = (default!, errΔ10); goto ᒐdone;
+                    (pconn, err) = (default, errΔ10); goto ᒐdone;
                 }
             }
 
-            if ((~resp).StatusCode != 200) {
-                var (_, text, ok) = strings.Cut((~resp).Status, " "u8);
+            if (resp.StatusCode != 200) {
+                var (_, text, ok) = strings.Cut(resp.Status, " "u8);
                 conn.Close();
                 if (!ok) {
-                    (pconn, err) = (default!, errors.New(unknownStatusCodeˢ)); goto ᒐdone;
+                    (pconn, err) = (default, errors.New(unknownStatusCodeˢ)); goto ᒐdone;
                 }
-                (pconn, err) = (default!, errors.New(text)); goto ᒐdone;
+                (pconn, err) = (default, errors.New(text)); goto ᒐdone;
             }
             break;
         }}
 
         if (cm.proxyURL != nil && cm.targetScheme == "https"u8) {
             {
-                var errΔ11 = pconn.addTLS(ctx, cm.tlsHost(), trace); if (errΔ11 != default!) {
-                    (pconn, err) = (default!, errΔ11); goto ᒐdone;
+                var errΔ11 = pconn.addTLS(ctx, cm.tlsHost(), trace); if (errΔ11 != nil) {
+                    (pconn, err) = (default, errΔ11); goto ᒐdone;
                 }
             }
         }
 
         // Possible unencrypted HTTP/2 with prior knowledge.
-        var unencryptedHTTP2 = (~pconn).tlsState == nil && t.Protocols != nil && (~t.Protocols).UnencryptedHTTP2() && !(~t.Protocols).HTTP1();
+        var unencryptedHTTP2 = pconn.tlsState == nil && t.Protocols != nil && (~t.Protocols).UnencryptedHTTP2() && !(~t.Protocols).HTTP1();
 
-        if (isClientConn && (unencryptedHTTP2 || ((~pconn).tlsState != nil && (~(~pconn).tlsState).NegotiatedProtocol == "h2"u8))) {
+        if (isClientConn && (unencryptedHTTP2 || (pconn.tlsState != nil && pconn.tlsState.NegotiatedProtocol == "h2"u8))) {
             var (altProto, _) = Ꮡt.of(Transport.ᏑaltProto).Load()._<map<@string, RoundTripper>>(ᐧ);
             var (h2, ok) = altProto[httpsˢ]._<newClientConner>(ᐧ);
             if (!ok) {
-                (pconn, err) = (default!, errors.New(httpHttp2Implementationˢ)); goto ᒐdone;
+                (pconn, err) = (default, errors.New(httpHttp2Implementationˢ)); goto ᒐdone;
             }
-            var (alt, errΔ12) = h2.NewClientConn((~pconn).conn, internalStateHook);
-            if (errΔ12 != default!) {
-                (~pconn).conn.Close();
-                (pconn, err) = (default!, errΔ12); goto ᒐdone;
+            var (alt, errΔ12) = h2.NewClientConn(pconn.conn, internalStateHook);
+            if (errΔ12 != nil) {
+                pconn.conn.Close();
+                (pconn, err) = (default, errΔ12); goto ᒐdone;
             }
-            (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: (~pconn).cacheKey, alt: alt, isClientConn: true)), default!); goto ᒐdone;
+            (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: pconn.cacheKey, alt: alt, isClientConn: true)), default); goto ᒐdone;
         }
 
         if (unencryptedHTTP2) {
             var (next, ok) = t.TLSNextProto[nextProtoUnencryptedHTTP2, ꟷ];
             if (!ok) {
-                (pconn, err) = (default!, errors.New(httpTransportDoesNotˢ)); goto ᒐdone;
+                (pconn, err) = (default, errors.New(httpTransportDoesNotˢ)); goto ᒐdone;
             }
-            var alt = next(cm.targetAddr, unencryptedTLSConn((~pconn).conn));
+            var alt = next(cm.targetAddr, unencryptedTLSConn(pconn.conn));
             {
                 var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
                     // pconn.conn was closed by next (http2configureTransports.upgradeFn).
-                    (pconn, err) = (default!, e.RoundTripErr()); goto ᒐdone;
+                    (pconn, err) = (default, e.RoundTripErr()); goto ᒐdone;
                 }
             }
-            (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: (~pconn).cacheKey, alt: alt)), default!); goto ᒐdone;
+            (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: pconn.cacheKey, alt: alt)), default); goto ᒐdone;
         }
 
         {
-            var s = pconn.Value.tlsState; if (s != nil && (~s).NegotiatedProtocolIsMutual && (~s).NegotiatedProtocol != ""u8) {
+            var s = pconn.tlsState; if (s != nil && s.NegotiatedProtocolIsMutual && s.NegotiatedProtocol != ""u8) {
                 {
-                    var (next, ok) = t.TLSNextProto[(~s).NegotiatedProtocol, ꟷ]; if (ok) {
-                        var alt = next(cm.targetAddr, (~pconn).conn._<ж<tls.Conn>>());
+                    var (next, ok) = t.TLSNextProto[s.NegotiatedProtocol, ꟷ]; if (ok) {
+                        var alt = next(cm.targetAddr, pconn.conn._<ж<tls.Conn>>());
                         {
                             var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
                                 // pconn.conn was closed by next (http2configureTransports.upgradeFn).
-                                (pconn, err) = (default!, e.RoundTripErr()); goto ᒐdone;
+                                (pconn, err) = (default, e.RoundTripErr()); goto ᒐdone;
                             }
                         }
-                        (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: (~pconn).cacheKey, alt: alt)), default!); goto ᒐdone;
+                        (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: pconn.cacheKey, alt: alt)), default); goto ᒐdone;
                     }
                 }
             }
         }
 
-        pconn.Value.br = bufio.NewReaderSize(new persistConnжReader(pconn), t.readBufferSize());
-        pconn.Value.bw = bufio.NewWriterSize(new persistConnWriter(pconn), t.writeBufferSize());
+        pconn.br = bufio.NewReaderSize(new persistConnжReader(pconn), t.readBufferSize());
+        pconn.bw = bufio.NewWriterSize(new persistConnWriter(pconn), t.writeBufferSize());
 
         goǃ(pconn.readLoop);
         goǃ(pconn.writeLoop);
-        (pconn, err) = (pconn, default!);
+        (pconn, err) = (pconn, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -2300,11 +2295,11 @@ partial struct persistConnWriter {
 }
 
 internal static (nint n, error err) Write(this persistConnWriter w, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    (n, err) = (~w.pc).conn.Write(p);
-    w.pc.Value.nwrite += (int64)n;
+    (n, err) = w.pc.conn.Write(p);
+    w.pc.nwrite += (int64)n;
     return (n, err);
 }
 
@@ -2312,11 +2307,11 @@ internal static (nint n, error err) Write(this persistConnWriter w, slice<byte> 
 // the Conn implements io.ReaderFrom, it can take advantage of optimizations
 // such as sendfile.
 internal static (int64 n, error err) ReadFrom(this persistConnWriter w, io.Reader r) {
-    int64 n = default!;
-    error err = default!;
+    int64 n = default;
+    error err = default;
 
-    (n, err) = io.Copy(new net_ConnᴠWriter((~w.pc).conn), r);
-    w.pc.Value.nwrite += n;
+    (n, err) = io.Copy(new net_ConnᴠWriter(w.pc.conn), r);
+    w.pc.nwrite += n;
     return (n, err);
 }
 
@@ -2340,8 +2335,8 @@ internal static io.ReaderFrom _ᴛ12ʗ = new persistConnWriterжReaderFrom(((ж<
 //	https://proxy.com|http            https to proxy, http to anywhere after that
 partial struct connectMethod {
     internal incomparable _;
-    internal ж<url.URL> proxyURL; // nil for no proxy, else full proxy URL
-    internal @string targetScheme;  // "http" or "https"
+    internal ж<url.URL> proxyURL;  // nil for no proxy, else full proxy URL
+    internal @string targetScheme; // "http" or "https"
     // If proxyURL specifies an http or https proxy, and targetScheme is http (not https),
     // then targetAddr is not included in the connect method key, because the socket can
     // be reused for different targetAddr values.
@@ -2354,7 +2349,7 @@ internal static connectMethodKey key(this ref connectMethod cm) {
     @string targetAddr = cm.targetAddr;
     if (cm.proxyURL != nil) {
         proxyStr = cm.proxyURL.String();
-        if (((~cm.proxyURL).Scheme == "http"u8 || (~cm.proxyURL).Scheme == "https"u8) && cm.targetScheme == "http"u8) {
+        if ((cm.proxyURL.Scheme == "http"u8 || cm.proxyURL.Scheme == "https"u8) && cm.targetScheme == "http"u8) {
             targetAddr = ""u8;
         }
     }
@@ -2369,7 +2364,7 @@ internal static connectMethodKey key(this ref connectMethod cm) {
 // scheme returns the first hop scheme: http, https, or socks5
 internal static @string scheme(this ref connectMethod cm) {
     if (cm.proxyURL != nil) {
-        return (~cm.proxyURL).Scheme;
+        return cm.proxyURL.Scheme;
     }
     return cm.targetScheme;
 }
@@ -2402,7 +2397,7 @@ partial struct connectMethodKey {
 
 internal static @string String(this connectMethodKey k) {
     // Only used by tests.
-    @string h1 = default!;
+    @string h1 = default;
     if (k.onlyH1) {
         h1 = ",h1"u8;
     }
@@ -2420,17 +2415,17 @@ partial struct persistConn {
     internal connectMethodKey cacheKey;
     internal net.Conn conn;
     internal ж<tlsꓸConnectionState> tlsState;
-    internal ж<bufio.Reader> br;    // from conn
-    internal ж<bufio.Writer> bw;    // to conn
-    internal int64 nwrite;               // bytes written
-    internal channel<requestAndChan> reqch; // written by roundTrip; read by readLoop
+    internal ж<bufio.Reader> br;             // from conn
+    internal ж<bufio.Writer> bw;             // to conn
+    internal int64 nwrite;                   // bytes written
+    internal channel<requestAndChan> reqch;  // written by roundTrip; read by readLoop
     internal channel<ΔwriteRequest> writech; // written by roundTrip; read by writeLoop
-    internal channel<EmptyStruct> closech; // closed when conn closed
-    internal channel<EmptyStruct> availch; // ClientConn only: contains a value when conn is usable
+    internal channel<EmptyStruct> closech;   // closed when conn closed
+    internal channel<EmptyStruct> availch;   // ClientConn only: contains a value when conn is usable
     internal bool isProxy;
-    internal bool sawEOF;  // whether we've seen EOF from conn; owned by readLoop
-    internal bool isClientConn;  // whether this is a ClientConn (outside any pool)
-    internal int64 readLimit; // bytes allowed to be read; owned by readLoop
+    internal bool sawEOF;       // whether we've seen EOF from conn; owned by readLoop
+    internal bool isClientConn; // whether this is a ClientConn (outside any pool)
+    internal int64 readLimit;   // bytes allowed to be read; owned by readLoop
     // writeErrCh passes the request write error (usually nil)
     // from the writeLoop goroutine to the readLoop which passes
     // it off to the res.Body reader, which then uses it to decide
@@ -2438,15 +2433,15 @@ partial struct persistConn {
     internal channel<error> writeErrCh;
     internal channel<EmptyStruct> writeLoopDone; // closed when write loop ends
     // Both guarded by Transport.idleMu:
-    internal time.Time idleAt;   // time it last become idle
+    internal time.Time idleAt;        // time it last become idle
     internal ж<time.Timer> idleTimer; // holding an AfterFunc to close it
     internal sync.Mutex mu; // guards following fields
     internal nint numExpectedResponses;
-    internal error closed;  // set non-nil when conn is closed, before closech is closed
-    internal error canceledErr;  // set non-nil if conn is canceled
-    internal bool reused;   // whether conn has had successful request/response and is being reused.
-    internal bool reserved;   // ClientConn only: concurrency slot reserved
-    internal bool inFlight;   // ClientConn only: request is in flight
+    internal error closed;             // set non-nil when conn is closed, before closech is closed
+    internal error canceledErr;        // set non-nil if conn is canceled
+    internal bool reused;              // whether conn has had successful request/response and is being reused.
+    internal bool reserved;            // ClientConn only: concurrency slot reserved
+    internal bool inFlight;            // ClientConn only: request is in flight
     internal Action internalStateHook; // ClientConn state hook
     // mutateHeaderFunc is an optional func to modify extra
     // headers on each outbound request before it's written. (the
@@ -2459,8 +2454,8 @@ internal static int64 maxHeaderResponseSize(this ref persistConn pc) {
 }
 
 internal static (nint n, error err) Read(this ref persistConn pc, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (pc.readLimit <= 0) {
         return (0, fmt.Errorf("read limit of %d bytes exhausted"u8, pc.maxHeaderResponseSize()));
@@ -2481,7 +2476,7 @@ internal static bool isBroken(this ж<persistConn> Ꮡpc) {
     ref var pc = ref Ꮡpc.DerefOrNull();
 
     pc.mu.Lock();
-    var b = pc.closed != default!;
+    var b = pc.closed != nil;
     pc.mu.Unlock();
     return b;
 }
@@ -2498,7 +2493,7 @@ internal static error canceled(this ж<persistConn> Ꮡpc) {
         ᒐd1 = true;
         return pc.canceledErr;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡpc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -2540,7 +2535,7 @@ internal static void closeConnIfStillIdle(this ж<persistConn> Ꮡpc) {
         var tʗ1 = t;
         defer(tʗ1.of(Transport.ᏑidleMu).Unlock, ref ᒐ);
         {
-            var (_, ok) = (~t).idleLRU.m[Ꮡpc, ꟷ]; if (!ok) {
+            var (_, ok) = t.idleLRU.m[Ꮡpc, ꟷ]; if (!ok) {
                 // Not idle.
                 return;
             }
@@ -2564,8 +2559,8 @@ internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transport
     ref var pc = ref Ꮡpc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
-    if (err == default!) {
-        return default!;
+    if (err == nil) {
+        return default;
     }
 
     // Wait for the writeLoop goroutine to terminate to avoid data
@@ -2581,7 +2576,7 @@ internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transport
     // failures that were likely the result of tearing down the
     // connection.
     {
-        var cerr = Ꮡpc.canceled(); if (cerr != default!) {
+        var cerr = Ꮡpc.canceled(); if (cerr != nil) {
             return cerr;
         }
     }
@@ -2590,7 +2585,7 @@ internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transport
     req.mu.Lock();
     var reqErr = req.err;
     req.mu.Unlock();
-    if (reqErr != default!) {
+    if (reqErr != nil) {
         return reqErr;
     }
 
@@ -2627,29 +2622,28 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
     try {
         ref var pc = ref Ꮡpc.DerefOrNull();
 
-        ref var closeErr = ref heap<error>(out var ᏑcloseErr);
-        closeErr = errReadLoopExiting; // default value, if not changed below
+        ref var closeErr = ref heap<error>(errReadLoopExiting, out var ᏑcloseErr); // default value, if not changed below
         defer(() => {
             Ꮡpc.close(ᏑcloseErr.ValueSlot);
             Ꮡpc.Value.t.removeIdleConn(Ꮡpc);
-            if (Ꮡpc.Value.internalStateHook != default!) {
+            if (Ꮡpc.Value.internalStateHook != nil) {
                 Ꮡpc.Value.internalStateHook();
             }
         }, ref ᒐ);
 
         bool tryPutIdleConn(ж<transportRequest> treq) {
-            var trace = treq.Value.trace;
+            var trace = treq.trace;
             {
-                var err = Ꮡpc.Value.t.tryPutIdleConn(Ꮡpc); if (err != default!) {
+                var err = Ꮡpc.Value.t.tryPutIdleConn(Ꮡpc); if (err != nil) {
                     ᏑcloseErr.ValueSlot = err;
-                    if (trace != nil && (~trace).PutIdleConn != default! && !AreEqual(err, errKeepAlivesDisabled)) {
-                        (~trace).PutIdleConn(err);
+                    if (trace != nil && trace.PutIdleConn != nil && !AreEqual(err, errKeepAlivesDisabled)) {
+                        trace.PutIdleConn(err);
                     }
                     return false;
                 }
             }
-            if (trace != nil && (~trace).PutIdleConn != default!) {
-                (~trace).PutIdleConn(default!);
+            if (trace != nil && trace.PutIdleConn != nil) {
+                trace.PutIdleConn(default);
             }
             return true;
         }
@@ -2679,17 +2673,17 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
             pc.mu.Unlock();
 
             var rc = ᐸꟷ(pc.reqch);
-            var trace = rc.treq.Value.trace;
+            var trace = rc.treq.trace;
 
-            ж<Response> resp = default!;
-            if (err == default!){
+            ж<Response> resp = default;
+            if (err == nil) {
                 (resp, err) = pc.readResponse(rc, trace);
             } else {
                 err = new transportReadFromServerError(err);
                 closeErr = err;
             }
 
-            if (err != default!) {
+            if (err != nil) {
                 if (pc.readLimit <= 0) {
                     err = fmt.Errorf("net/http: server response headers exceeded %d bytes; aborted"u8, pc.maxHeaderResponseSize());
                 }
@@ -2712,10 +2706,10 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
             pc.mu.Unlock();
 
             var bodyWritable = resp.bodyIsWritable();
-            var isConnect = (~(~rc.treq).Request).Method == "CONNECT"u8;
-            var hasBody = (~(~rc.treq).Request).Method != "HEAD"u8 && (~resp).ContentLength != 0;
+            var isConnect = rc.treq.Request.Method == "CONNECT"u8;
+            var hasBody = rc.treq.Request.Method != "HEAD"u8 && resp.ContentLength != 0;
 
-            if ((~resp).Close || (~(~rc.treq).Request).Close || (~resp).StatusCode <= 199 || bodyWritable || isConnect) {
+            if (resp.Close || rc.treq.Request.Close || resp.StatusCode <= 199 || bodyWritable || isConnect) {
                 // Don't do keep-alive on error if either party requested a close
                 // or we get an unexpected informational (1xx) response.
                 // StatusCode 100 is already handled above.
@@ -2748,7 +2742,7 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
                     return;
                 }}
 
-                (~rc.treq).cancel(errRequestDone);
+                rc.treq.cancel(errRequestDone);
 
                 // Now that they've read from the unbuffered channel, they're safely
                 // out of the select that also waits on this goroutine to die, so
@@ -2764,21 +2758,20 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
                 var eofcʗ2 = eofc;
                 var waitForBodyReadʗ2 = waitForBodyRead;
             var body = Ꮡ(new bodyEOFSignal(
-                body: (~resp).Body,
+                body: resp.Body,
                 earlyCloseFn: () => {
                     waitForBodyReadʗ1.ᐸꟷ(false);
                     ᐸꟷ(eofcʗ1); // will be closed by deferred call at the end of the function
-                    return default!;
+                    return default;
                 },
                 fn: (error errΔ1) => {
                     var isEOF = AreEqual(errΔ1, io.EOF);
                     waitForBodyReadʗ2.ᐸꟷ(isEOF);
-                    if (isEOF){
+                    if (isEOF) {
                         ᐸꟷ(eofcʗ2); // see comment above eofc declaration
-                    } else 
-                    if (errΔ1 != default!) {
+                    } else if (errΔ1 != nil) {
                         {
-                            var cerr = Ꮡpc.canceled(); if (cerr != default!) {
+                            var cerr = Ꮡpc.canceled(); if (cerr != nil) {
                                 return cerr;
                             }
                         }
@@ -2787,13 +2780,13 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
                 }
             ));
 
-            resp.Value.Body = new bodyEOFSignalжReadCloser(body);
-            if (rc.addedGzip && ascii.EqualFold((~resp).Header.Get(contentEncodingˢ), gzipˢ)) {
-                resp.Value.Body = new gzipReaderжReadCloser(Ꮡ(new gzipReader(body: body)));
-                (~resp).Header.Del(contentEncodingˢ);
-                (~resp).Header.Del(contentLengthˢ);
-                resp.Value.ContentLength = -1;
-                resp.Value.Uncompressed = true;
+            resp.Body = new bodyEOFSignalжReadCloser(body);
+            if (rc.addedGzip && ascii.EqualFold(resp.Header.Get(contentEncodingˢ), gzipˢ)) {
+                resp.Body = new gzipReaderжReadCloser(Ꮡ(new gzipReader(body: body)));
+                resp.Header.Del(contentEncodingˢ);
+                resp.Header.Del(contentLengthˢ);
+                resp.ContentLength = -1;
+                resp.Uncompressed = true;
             }
 
             var selᴛ111 = rc.ch.ᐸꟷ(new responseAndError(res: resp), ꓸꓸꓸ);
@@ -2810,7 +2803,7 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
             // the bufio.Reader, wait for the caller goroutine to finish
             // reading the response body. (or for cancellation or death)
             var selᴛ113 = waitForBodyRead;
-            var selᴛ114 = (~rc.treq).ctx.Done();
+            var selᴛ114 = rc.treq.ctx.Done();
             var selᴛ115 = pc.closech;
             switch (select(ᐸꟷ(selᴛ113, ꓸꓸꓸ), ᐸꟷ(selᴛ114, ꓸꓸꓸ), ᐸꟷ(selᴛ115, ꓸꓸꓸ))) {
             case 0 when selᴛ113.ꟷᐳ(out var bodyEOF): {
@@ -2822,7 +2815,7 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
             }
             case 1 when selᴛ114.ꟷᐳ(out _): {
                 alive = false;
-                Ꮡpc.cancelRequest(context_package.Cause((~rc.treq).ctx));
+                Ꮡpc.cancelRequest(context_package.Cause(rc.treq.ctx));
                 break;
             }
             case 2 when selᴛ115.ꟷᐳ(out _): {
@@ -2830,7 +2823,7 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
                 break;
             }}
 
-            (~rc.treq).cancel(errRequestDone);
+            rc.treq.cancel(errRequestDone);
             testHookReadLoopBeforeNextReadΔ1();
         }
     }
@@ -2839,13 +2832,13 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
 }
 
 internal static void readLoopPeekFailLocked(this ref persistConn pc, error peekErr) {
-    if (pc.closed != default!) {
+    if (pc.closed != nil) {
         return;
     }
     {
         nint n = pc.br.Buffered(); if (n > 0) {
             var (buf, _) = pc.br.Peek(n);
-            if (is408Message(buf)){
+            if (is408Message(buf)) {
                 pc.closeLocked(errServerClosedIdle);
                 return;
             } else {
@@ -2853,7 +2846,7 @@ internal static void readLoopPeekFailLocked(this ref persistConn pc, error peekE
             }
         }
     }
-    if (AreEqual(peekErr, io.EOF)){
+    if (AreEqual(peekErr, io.EOF)) {
         // common case.
         pc.closeLocked(errServerClosedIdle);
     } else {
@@ -2878,40 +2871,40 @@ internal static bool is408Message(slice<byte> buf) {
 // 100-continue") from the server. It returns the final non-100 one.
 // trace is optional.
 internal static (ж<Response> resp, error err) readResponse(this ref persistConn pc, requestAndChan rc, ж<httptrace.ClientTrace> Ꮡtrace) {
-    ж<Response> resp = default!;
-    error err = default!;
+    ж<Response> resp = default;
+    error err = default;
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
-    if (Ꮡtrace != nil && trace.GotFirstResponseByte != default!) {
+    if (Ꮡtrace != nil && trace.GotFirstResponseByte != nil) {
         {
-            var (peek, errΔ1) = pc.br.Peek(1); if (errΔ1 == default! && builtin.len(peek) == 1) {
+            var (peek, errΔ1) = pc.br.Peek(1); if (errΔ1 == nil && builtin.len(peek) == 1) {
                 trace.GotFirstResponseByte();
             }
         }
     }
 
     var continueCh = rc.continueCh;
-    while (ᐧ) {
-        (resp, err) = ReadResponse(pc.br, (~rc.treq).Request);
-        if (err != default!) {
+    for (;;) {
+        (resp, err) = ReadResponse(pc.br, rc.treq.Request);
+        if (err != nil) {
             return (resp, err);
         }
-        nint resCode = resp.Value.StatusCode;
-        if (continueCh != default! && resCode == StatusContinue) {
-            if (Ꮡtrace != nil && trace.Got100Continue != default!) {
+        nint resCode = resp.StatusCode;
+        if (continueCh != nil && resCode == StatusContinue) {
+            if (Ꮡtrace != nil && trace.Got100Continue != nil) {
                 trace.Got100Continue();
             }
             continueCh.ᐸꟷ(new EmptyStruct());
-            continueCh = default!;
+            continueCh = default;
         }
         var is1xx = 100 <= resCode && resCode <= 199;
         // treat 101 as a terminal status, see issue 26161
         var is1xxNonTerminal = is1xx && resCode != StatusSwitchingProtocols;
         if (is1xxNonTerminal) {
-            if (Ꮡtrace != nil && trace.Got1xxResponse != default!) {
+            if (Ꮡtrace != nil && trace.Got1xxResponse != nil) {
                 {
-                    var errΔ2 = trace.Got1xxResponse(resCode, (textproto.MIMEHeader)(map<@string, slice<@string>>)(~resp).Header); if (errΔ2 != default!) {
-                        return (default!, errΔ2);
+                    var errΔ2 = trace.Got1xxResponse(resCode, (textproto.MIMEHeader)(map<@string, slice<@string>>)resp.Header); if (errΔ2 != nil) {
+                        return (default, errΔ2);
                     }
                 }
                 // If the 1xx response was delivered to the user,
@@ -2928,9 +2921,9 @@ internal static (ж<Response> resp, error err) readResponse(this ref persistConn
         break;
     }
     if (resp.isProtocolSwitch()) {
-        resp.Value.Body = new io_ReadWriteCloserᴠReadCloser(newReadWriteCloserBody(pc.br, new net_ConnᴠReadWriteCloser(pc.conn)));
+        resp.Body = new io_ReadWriteCloserᴠReadCloser(newReadWriteCloserBody(pc.br, new net_ConnᴠReadWriteCloser(pc.conn)));
     }
-    if (continueCh != default!) {
+    if (continueCh != nil) {
         // We send an "Expect: 100-continue" header, but the server
         // responded with a terminal status and no 100 Continue.
         //
@@ -2943,14 +2936,14 @@ internal static (ж<Response> resp, error err) readResponse(this ref persistConn
         // Conceivably, it's one that doesn't need us to send the body.
         // Given that we'll send the body if ExpectContinueTimeout expires,
         // be consistent and always send it if we aren't closing the connection.
-        if ((~resp).Close || (~(~rc.treq).Request).Close){
+        if (resp.Close || rc.treq.Request.Close) {
             builtin.close(continueCh); // don't send the body; the connection will close
         } else {
             continueCh.ᐸꟷ(new EmptyStruct()); // send the body
         }
     }
 
-    resp.Value.TLS = pc.tlsState;
+    resp.TLS = pc.tlsState;
     return (resp, err);
 }
 
@@ -2958,19 +2951,19 @@ internal static (ж<Response> resp, error err) readResponse(this ref persistConn
 // any response, timeout or connection close. After any of them,
 // the function returns a bool which indicates if the body should be sent.
 internal static Func<bool> waitForContinue(this ж<persistConn> Ꮡpc, /*<-*/channel<EmptyStruct> continueCh) {
-    if (continueCh == default!) {
-        return default!;
+    if (continueCh == nil) {
+        return default;
     }
     var continueChʗ1 = continueCh;
     return () => {
         GoFrame ᒐ = default;
         try {
-            var timer = time.NewTimer((~Ꮡpc.Value.t).ExpectContinueTimeout);
+            var timer = time.NewTimer(Ꮡpc.Value.t.ExpectContinueTimeout);
             var timerʗ1 = timer;
             defer(() => timerʗ1.Stop(), ref ᒐ);
 
             var selᴛ116 = continueChʗ1;
-            var selᴛ117 = (~timer).C;
+            var selᴛ117 = timer.C;
             var selᴛ118 = Ꮡpc.Value.closech;
             switch (select(ᐸꟷ(selᴛ116, ꓸꓸꓸ), ᐸꟷ(selᴛ117, ꓸꓸꓸ), ᐸꟷ(selᴛ118, ꓸꓸꓸ))) {
             case 0 when selᴛ116.ꟷᐳ(out var _, out var ok): {
@@ -2982,9 +2975,9 @@ internal static Func<bool> waitForContinue(this ж<persistConn> Ꮡpc, /*<-*/cha
             case 2 when selᴛ118.ꟷᐳ(out _): {
                 return false;
             }}
-            return default!;
+            return default;
         }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
         finally { ᒐ.Run(); }
     };
 }
@@ -2994,7 +2987,7 @@ internal static io.ReadWriteCloser newReadWriteCloserBody(ж<bufio.Reader> Ꮡbr
 
     var body = Ꮡ(new readWriteCloserBody(ReadWriteCloser: rwc));
     if (br.Buffered() != 0) {
-        body.Value.br = Ꮡbr;
+        body.br = Ꮡbr;
     }
     return new readWriteCloserBodyжReadWriteCloser(body);
 }
@@ -3019,8 +3012,8 @@ internal static error Close(this readWriteCloserBody recvᴛ) => recvᴛ.ReadWri
 internal static (nint, error) Write(this readWriteCloserBody recvᴛ, slice<byte> p) => recvᴛ.ReadWriteCloser.Write(p);
 
 internal static (nint n, error err) Read(this ref readWriteCloserBody b, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (b.br != nil) {
         {
@@ -3030,7 +3023,7 @@ internal static (nint n, error err) Read(this ref readWriteCloserBody b, slice<b
         }
         (n, err) = b.br.Read(p);
         if (b.br.Buffered() == 0) {
-            b.br = default!;
+            b.br = default;
         }
         return (n, err);
     }
@@ -3065,13 +3058,13 @@ internal static void writeLoop(this ж<persistConn> Ꮡpc) {
         ref var pc = ref Ꮡpc.DerefOrNull();
 
         defer(ᴛ1 => builtin.close(ᴛ1), Ꮡpc.Value.writeLoopDone, ref ᒐ);
-        while (ᐧ) {
+        for (;;) {
             var selᴛ119 = pc.writech;
             var selᴛ120 = pc.closech;
             switch (select(ᐸꟷ(selᴛ119, ꓸꓸꓸ), ᐸꟷ(selᴛ120, ꓸꓸꓸ))) {
             case 0 when selᴛ119.ꟷᐳ(out var wr): {
                 var startBytesWritten = pc.nwrite;
-                var err = (~wr.req).Request.write(new bufio_WriterжWriter(pc.bw), pc.isProxy, (~wr.req).extra, Ꮡpc.waitForContinue(wr.continueCh));
+                var err = wr.req.Request.write(new bufio_WriterжWriter(pc.bw), pc.isProxy, wr.req.extra, Ꮡpc.waitForContinue(wr.continueCh));
                 {
                     var (bre, ok) = err._<requestBodyReadError>(ᐧ); if (ok) {
                         err = bre.error;
@@ -3085,17 +3078,17 @@ internal static void writeLoop(this ж<persistConn> Ꮡpc) {
                         wr.req.setError(err);
                     }
                 }
-                if (err == default!) {
+                if (err == nil) {
                     err = pc.bw.Flush();
                 }
-                if (err != default!) {
+                if (err != nil) {
                     if (pc.nwrite == startBytesWritten) {
                         err = new nothingWrittenError(err);
                     }
                 }
                 pc.writeErrCh.ᐸꟷ(err); // to the body reader, which might recycle us
-                wr.ch.ᐸꟷ(err); // to the roundTrip function
-                if (err != default!) {
+                wr.ch.ᐸꟷ(err);         // to the roundTrip function
+                if (err != nil) {
                     Ꮡpc.close(err);
                     return;
                 }
@@ -3131,7 +3124,7 @@ internal static bool wroteRequest(this ж<persistConn> Ꮡpc) {
         case 0 when selᴛ121.ꟷᐳ(out var err): {
             // Common case: the write happened well before the response, so
             // avoid creating a timer.
-            return err == default!;
+            return err == nil;
         }
         default: {
             // Rare case: the request was written in writeLoop above but
@@ -3148,19 +3141,19 @@ internal static bool wroteRequest(this ж<persistConn> Ꮡpc) {
             var tʗ1 = t;
             defer(() => tʗ1.Stop(), ref ᒐ);
             var selᴛ122 = pc.writeErrCh;
-            var selᴛ123 = (~t).C;
+            var selᴛ123 = t.C;
             switch (select(ᐸꟷ(selᴛ122, ꓸꓸꓸ), ᐸꟷ(selᴛ123, ꓸꓸꓸ))) {
             case 0 when selᴛ122.ꟷᐳ(out var errΔ1): {
-                return errΔ1 == default!;
+                return errΔ1 == nil;
             }
             case 1 when selᴛ123.ꟷᐳ(out _): {
                 return false;
             }}
-            return default!;
+            return default;
             break;
         }}
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -3248,7 +3241,7 @@ internal static ref Action testHookRoundTripRetried => ref ((StaticBox<Action>)�
 internal static Action testHookPrePendingDial = nop;
 internal static Action testHookPostPendingDial = nop;
 
-internal static sync.Locker testHookMu = new fakeLocker(nil); // guards following
+internal static sync.Locker testHookMu = new fakeLocker(); // guards following
 internal static Action testHookReadLoopBeforeNextRead = nop;
 
 internal static error waitForAvailability(this ref persistConn pc, context.Context ctx) {
@@ -3257,7 +3250,7 @@ internal static error waitForAvailability(this ref persistConn pc, context.Conte
     var selᴛ126 = ctx.Done();
     switch (select(ᐸꟷ(selᴛ124, ꓸꓸꓸ), ᐸꟷ(selᴛ125, ꓸꓸꓸ), ᐸꟷ(selᴛ126, ꓸꓸꓸ))) {
     case 0 when selᴛ124.ꟷᐳ(out _): {
-        return default!;
+        return default;
     }
     case 1 when selᴛ125.ꟷᐳ(out _): {
         return pc.closed;
@@ -3265,15 +3258,15 @@ internal static error waitForAvailability(this ref persistConn pc, context.Conte
     case 2 when selᴛ126.ꟷᐳ(out _): {
         return ctx.Err();
     }}
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string acceptEncodingˢ = "Accept-Encoding"u8;
 
 internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq) {
-    ж<Response> resp = default!;
-    error err = default!;
+    ж<Response> resp = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var pc = ref Ꮡpc.DerefOrNull();
@@ -3286,8 +3279,8 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
             if (!pc.reserved) {
                 pc.mu.Unlock();
                 {
-                    var errΔ1 = pc.waitForAvailability(req.ctx); if (errΔ1 != default!) {
-                        (resp, err) = (default!, errΔ1); goto ᒐdone;
+                    var errΔ1 = pc.waitForAvailability(req.ctx); if (errΔ1 != nil) {
+                        (resp, err) = (default, errΔ1); goto ᒐdone;
                     }
                 }
                 pc.mu.Lock();
@@ -3299,7 +3292,7 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
         var headerFn = pc.mutateHeaderFunc;
         pc.mu.Unlock();
 
-        if (headerFn != default!) {
+        if (headerFn != nil) {
             headerFn(req.extraHeaders());
         }
 
@@ -3308,7 +3301,7 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
         // uncompress the gzip stream if we were the layer that
         // requested it.
         var requestedGzip = false;
-        if (!(~pc.t).DisableCompression && req.Header.Get(acceptEncodingˢ) == ""u8 && req.Header.Get(rangeˢ) == ""u8 && req.Method != "HEAD"u8) {
+        if (!pc.t.DisableCompression && req.Header.Get(acceptEncodingˢ) == ""u8 && req.Header.Get(rangeˢ) == ""u8 && req.Method != "HEAD"u8) {
             // Request gzip only, not deflate. Deflate is ambiguous and
             // not as universally supported anyway.
             // See: https://zlib.net/zlib_faq.html#faq39
@@ -3325,12 +3318,12 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
             req.extraHeaders().Set(acceptEncodingˢ, gzipˢ);
         }
 
-        channel<EmptyStruct> continueCh = default!;
-        if (req.ProtoAtLeast(1, 1) && req.Body != default! && req.expectsContinue()) {
+        channel<EmptyStruct> continueCh = default;
+        if (req.ProtoAtLeast(1, 1) && req.Body != nil && req.expectsContinue()) {
             continueCh = new channel<EmptyStruct>(1);
         }
 
-        if ((~pc.t).DisableKeepAlives && !req.wantsClose() && !isProtocolSwitchHeader(req.Header)) {
+        if (pc.t.DisableKeepAlives && !req.wantsClose() && !isProtocolSwitchHeader(req.Header)) {
             req.extraHeaders().Set(connectionˢ, closeˢ);
         }
 
@@ -3356,22 +3349,22 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
         ));
 
         (ж<Response>, error) handleResponse(responseAndError re) {
-            if ((re.res == nil) == (re.err == default!)) {
+            if ((re.res == nil) == (re.err == nil)) {
                 throw panic(fmt.Sprintf("internal error: exactly one of res or err should be set; nil=%v"u8, re.res == nil));
             }
             if (debugRoundTrip) {
                 Ꮡreq.Value.logf("resc recv: %p, %T/%#v"u8, re.res.OrTypedNil(), re.err, re.err);
             }
-            if (re.err != default!) {
-                return (default!, Ꮡpc.mapRoundTripError(Ꮡreq, startBytesWritten, re.err));
+            if (re.err != nil) {
+                return (default, Ꮡpc.mapRoundTripError(Ꮡreq, startBytesWritten, re.err));
             }
-            return (re.res, default!);
+            return (re.res, default);
         }
 
         /*<-*/channel<time.Time> respHeaderTimer = /*<-*/channel<time.Time>.RecvOnly;
         var ctxDoneChan = req.ctx.Done();
         var pcClosed = pc.closech;
-        while (ᐧ) {
+        for (;;) {
             testHookWaitResLoop();
             var selᴛ127 = writeErrCh;
             var selᴛ128 = pcClosed;
@@ -3383,19 +3376,19 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
                 if (debugRoundTrip) {
                     req.logf("writeErrCh recv: %T/%#v"u8, errΔ2, errΔ2);
                 }
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     Ꮡpc.close(fmt.Errorf("write error: %w"u8, errΔ2));
-                    (resp, err) = (default!, Ꮡpc.mapRoundTripError(Ꮡreq, startBytesWritten, errΔ2)); goto ᒐdone;
+                    (resp, err) = (default, Ꮡpc.mapRoundTripError(Ꮡreq, startBytesWritten, errΔ2)); goto ᒐdone;
                 }
                 {
-                    var d = pc.t.Value.ResponseHeaderTimeout; if (d > 0) {
+                    var d = pc.t.ResponseHeaderTimeout; if (d > 0) {
                         if (debugRoundTrip) {
                             req.logf("starting timer for %v"u8, d);
                         }
                         var timer = time.NewTimer(d);
                         var timerʗ1 = timer;
                         defer(() => timerʗ1.Stop(), ref ᒐ); // prevent leaks
-                        respHeaderTimer = timer.Value.C;
+                        respHeaderTimer = timer.C;
                     }
                 }
                 break;
@@ -3415,14 +3408,14 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
                 if (debugRoundTrip) {
                     req.logf("closech recv: %T %#v"u8, pc.closed, pc.closed);
                 }
-                (resp, err) = (default!, Ꮡpc.mapRoundTripError(Ꮡreq, startBytesWritten, pc.closed)); goto ᒐdone;
+                (resp, err) = (default, Ꮡpc.mapRoundTripError(Ꮡreq, startBytesWritten, pc.closed)); goto ᒐdone;
             }
             case 2 when selᴛ129.ꟷᐳ(out _): {
                 if (debugRoundTrip) {
                     req.logf("timeout waiting for response headers."u8);
                 }
                 Ꮡpc.close(errTimeout);
-                (resp, err) = (default!, errTimeout); goto ᒐdone;
+                (resp, err) = (default, errTimeout); goto ᒐdone;
             }
             case 3 when selᴛ130.ꟷᐳ(out var re): {
                 (resp, err) = handleResponse(re); goto ᒐdone;
@@ -3458,7 +3451,7 @@ internal static void logf(this ref transportRequest tr, @string format, params �
     var args = argsʗp.sslice();
 
     {
-        var (logf, ok) = tr.Request.Context().Value(new tLogKey(nil))._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
+        var (logf, ok) = tr.Request.Context().Value(new tLogKey())._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
             logf(time.Now().Format(time.RFC3339Nano) + ": "u8 + format, args.ꓸꓸꓸ);
         }
     }
@@ -3494,38 +3487,39 @@ internal static void close(this ж<persistConn> Ꮡpc, error err) {
 }
 
 internal static void closeLocked(this ref persistConn pc, error err) {
-    if (err == default!) {
+    if (err == nil) {
         throw panic("nil error");
     }
-    if (pc.closed == default!) {
+    if (pc.closed == nil) {
         pc.closed = err;
         pc.t.decConnsPerHost(pc.cacheKey);
         // Close HTTP/1 (pc.alt == nil) connection.
         // HTTP/2 closes its connection itself.
-        if (pc.alt == default!) {
+        if (pc.alt == nil) {
             if (!AreEqual(err, errCallerOwnsConn)) {
                 pc.conn.Close();
             }
             builtin.close(pc.closech);
         }
     }
-    pc.mutateHeaderFunc = default!;
+    pc.mutateHeaderFunc = default;
 }
 
 internal static @string schemePort(@string scheme) {
     var exprᴛ1 = scheme;
-    if (exprᴛ1 == "http"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "http"u8: {
         return "80"u8;
     }
-    if (exprᴛ1 == "https"u8) {
+    case {} when exprᴛ1 == "https"u8: {
         return "443"u8;
     }
-    if (exprᴛ1 == "socks5"u8 || exprᴛ1 == "socks5h"u8) {
+    case {} when exprᴛ1 == "socks5"u8 || exprᴛ1 == "socks5h"u8: {
         return "1080"u8;
     }
-    { /* default: */
+    default: {
         return ""u8;
-    }
+    }}
 }
 
 internal static @string idnaASCIIFromURL(ж<url.URL> Ꮡurl) {
@@ -3533,7 +3527,7 @@ internal static @string idnaASCIIFromURL(ж<url.URL> Ꮡurl) {
 
     @string addr = urlΔ1.Hostname();
     {
-        var (v, err) = idnaASCII(addr); if (err == default!) {
+        var (v, err) = idnaASCII(addr); if (err == nil) {
             addr = v;
         }
     }
@@ -3564,11 +3558,11 @@ internal static @string canonicalAddr(ж<url.URL> Ꮡurl) {
 // the return value from Close.
 partial struct bodyEOFSignal {
     internal io.ReadCloser body;
-    internal sync.Mutex mu;        // guards following 4 fields
+    internal sync.Mutex mu;            // guards following 4 fields
     internal bool closed;              // whether Close has been called
-    internal error rerr;             // sticky Read error
-    internal Func<error, error> fn; // err will be nil on Read io.EOF
-    internal Func<error> earlyCloseFn;       // optional alt Close func used if io.EOF not seen
+    internal error rerr;               // sticky Read error
+    internal Func<error, error> fn;    // err will be nil on Read io.EOF
+    internal Func<error> earlyCloseFn; // optional alt Close func used if io.EOF not seen
 }
 
 internal static error errReadOnClosedResBody = errors.New("http: read on closed response body"u8);
@@ -3576,8 +3570,8 @@ internal static error errReadOnClosedResBody = errors.New("http: read on closed 
 internal static error errConcurrentReadOnResBody = errors.New("http: concurrent read on response body"u8);
 
 internal static (nint n, error err) Read(this ж<bodyEOFSignal> Ꮡes, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var es = ref Ꮡes.DerefOrNull();
@@ -3588,15 +3582,15 @@ internal static (nint n, error err) Read(this ж<bodyEOFSignal> Ꮡes, slice<byt
         if (closed) {
             (n, err) = (0, errReadOnClosedResBody); goto ᒐdone;
         }
-        if (rerr != default!) {
+        if (rerr != nil) {
             (n, err) = (0, rerr); goto ᒐdone;
         }
 
         (n, err) = es.body.Read(p);
-        if (err != default!) {
+        if (err != nil) {
             es.mu.Lock();
             defer(Ꮡes.of(bodyEOFSignal.Ꮡmu).Unlock, ref ᒐ);
-            if (es.rerr == default!) {
+            if (es.rerr == nil) {
                 es.rerr = err;
             }
             err = es.condfn(err);
@@ -3616,26 +3610,26 @@ internal static error Close(this ж<bodyEOFSignal> Ꮡes) {
         es.mu.Lock();
         ᒐd1 = true;
         if (es.closed) {
-            return default!;
+            return default;
         }
         es.closed = true;
-        if (es.earlyCloseFn != default! && !AreEqual(es.rerr, io.EOF)) {
+        if (es.earlyCloseFn != nil && !AreEqual(es.rerr, io.EOF)) {
             return es.earlyCloseFn();
         }
         var err = es.body.Close();
         return es.condfn(err);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡes.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
 // caller must hold es.mu.
 internal static error condfn(this ref bodyEOFSignal es, error err) {
-    if (es.fn == default!) {
+    if (es.fn == nil) {
         return err;
     }
     err = es.fn(err);
-    es.fn = default!;
+    es.fn = default;
     return err;
 }
 
@@ -3646,9 +3640,9 @@ internal static error condfn(this ref bodyEOFSignal es, error err) {
 partial struct gzipReader {
     internal incomparable _;
     internal ж<bodyEOFSignal> body; // underlying HTTP/1 response body framing
-    internal sync.Mutex mu;     // guards zr and zerr
-    internal ж<gzip.Reader> zr; // stores gzip reader from the pool between reads
-    internal error zerr;          // sticky gzip reader init error or sentinel value to detect concurrent read and read after close
+    internal sync.Mutex mu;         // guards zr and zerr
+    internal ж<gzip.Reader> zr;     // stores gzip reader from the pool between reads
+    internal error zerr;            // sticky gzip reader init error or sentinel value to detect concurrent read and read after close
 }
 
 partial struct eofReader {
@@ -3669,12 +3663,12 @@ internal static ref sync.Pool gzipPool => ref ((StaticBox<sync.Pool>)ᏑgzipPool
 internal static (ж<gzip.Reader>, error) gzipPoolGet(io.Reader r) {
     var zr = ᏑgzipPool.Get()._<ж<gzip.Reader>>();
     {
-        var err = zr.Reset(r); if (err != default!) {
+        var err = zr.Reset(r); if (err != nil) {
             gzipPoolPut(zr);
-            return (default!, err);
+            return (default, err);
         }
     }
-    return (zr, default!);
+    return (zr, default);
 }
 
 // gzipPoolPut puts a gzip.Reader back into the pool.
@@ -3683,7 +3677,7 @@ internal static void gzipPoolPut(ж<gzip.Reader> Ꮡzr) {
 
     // Reset will allocate bufio.Reader if we pass it anything
     // other than a flate.Reader, so ensure that it's getting one.
-    flate.Reader r = new eofReader(nil);
+    flate.Reader r = new eofReader();
     zr.Reset(r);
     ᏑgzipPool.Put(Ꮡzr.OrTypedNil());
 }
@@ -3698,20 +3692,20 @@ internal static (ж<gzip.Reader>, error) acquire(this ж<gzipReader> Ꮡgz) {
 
         gz.mu.Lock();
         ᒐd1 = true;
-        if (gz.zerr != default!) {
-            return (default!, gz.zerr);
+        if (gz.zerr != nil) {
+            return (default, gz.zerr);
         }
         if (gz.zr == nil) {
             (gz.zr, gz.zerr) = gzipPoolGet(new bodyEOFSignalжReader(gz.body));
-            if (gz.zerr != default!) {
-                return (default!, gz.zerr);
+            if (gz.zerr != nil) {
+                return (default, gz.zerr);
             }
         }
         var ret = gz.zr;
-        (gz.zr, gz.zerr) = (default!, errConcurrentReadOnResBody);
-        return (ret, default!);
+        (gz.zr, gz.zerr) = (default, errConcurrentReadOnResBody);
+        return (ret, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡgz.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -3725,8 +3719,8 @@ internal static void release(this ж<gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr) {
 
         gz.mu.Lock();
         ᒐd1 = true;
-        if (AreEqual(gz.zerr, errConcurrentReadOnResBody)){
-            (gz.zr, gz.zerr) = (Ꮡzr, default!);
+        if (AreEqual(gz.zerr, errConcurrentReadOnResBody)) {
+            (gz.zr, gz.zerr) = (Ꮡzr, default);
         } else { // errReadOnClosedResBody
             gzipPoolPut(Ꮡzr);
         }
@@ -3745,9 +3739,9 @@ internal static void close(this ж<gzipReader> Ꮡgz) {
 
         gz.mu.Lock();
         ᒐd1 = true;
-        if (gz.zerr == default! && gz.zr != nil) {
+        if (gz.zerr == nil && gz.zr != nil) {
             gzipPoolPut(gz.zr);
-            gz.zr = default!;
+            gz.zr = default;
         }
         gz.zerr = errReadOnClosedResBody;
     }
@@ -3756,12 +3750,12 @@ internal static void close(this ж<gzipReader> Ꮡgz) {
 }
 
 internal static (nint n, error err) Read(this ж<gzipReader> Ꮡgz, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         (var zr, err) = Ꮡgz.acquire();
-        if (err != default!) {
+        if (err != nil) {
             (n, err) = (0, err); goto ᒐdone;
         }
         defer(Ꮡgz.release, zr, ref ᒐ);
@@ -3824,11 +3818,11 @@ internal static void Unlock(this fakeLocker _) {
 // See go.dev/issue/67401.
 //
 //go:linkname cloneTLSConfig
-internal static ж<tls.Config> cloneTLSConfig(ж<tls.Config> Ꮡcfg) {
-    if (Ꮡcfg == nil) {
-        return Ꮡ(new tls.Config(nil));
+internal static ж<tls.Config> cloneTLSConfig(ж<tls.Config> cfg) {
+    if (cfg == nil) {
+        return Ꮡ(new tls.Config());
     }
-    return Ꮡcfg.Clone();
+    return cfg.Clone();
 }
 
 partial struct connLRU {
@@ -3837,18 +3831,18 @@ partial struct connLRU {
 }
 
 // add adds pc to the head of the linked list.
-internal static void add(this ref connLRU cl, ж<persistConn> Ꮡpc) {
+internal static void add(this ref connLRU cl, ж<persistConn> pc) {
     if (cl.ll == nil) {
         cl.ll = list.New();
         cl.m = new map<ж<persistConn>, ж<list.Element>>();
     }
-    var ele = cl.ll.PushFront(Ꮡpc.OrTypedNil());
+    var ele = cl.ll.PushFront(pc.OrTypedNil());
     {
-        var (_, ok) = cl.m[Ꮡpc, ꟷ]; if (ok) {
+        var (_, ok) = cl.m[pc, ꟷ]; if (ok) {
             throw panic("persistConn was already in LRU");
         }
     }
-    cl.m[Ꮡpc] = ele;
+    cl.m[pc] = ele;
 }
 
 internal static ж<persistConn> removeOldest(this ref connLRU cl) {
@@ -3860,11 +3854,11 @@ internal static ж<persistConn> removeOldest(this ref connLRU cl) {
 }
 
 // remove removes pc from cl.
-internal static void remove(this ref connLRU cl, ж<persistConn> Ꮡpc) {
+internal static void remove(this ref connLRU cl, ж<persistConn> pc) {
     {
-        var (ele, ok) = cl.m[Ꮡpc, ꟷ]; if (ok) {
+        var (ele, ok) = cl.m[pc, ꟷ]; if (ok) {
             cl.ll.Remove(ele);
-            delete(cl.m, Ꮡpc);
+            delete(cl.m, pc);
         }
     }
 }

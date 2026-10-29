@@ -29,32 +29,34 @@ partial interface Δsockaddr :
 }
 
 internal static Func<syscall.Sockaddr, ΔAddr> addrFunc(this ref netFD fd) {
-    var exprᴛ1 = fd.family;
-    if (exprᴛ1 == syscall.AF_INET || exprᴛ1 == syscall.AF_INET6) {
-        var exprᴛ2 = fd.sotype;
-        if (exprᴛ2 == syscall.SOCK_STREAM) {
+    switch (fd.family) {
+    case var ᴛ when ᴛ == syscall.AF_INET || ᴛ == syscall.AF_INET6: {
+        switch (fd.sotype) {
+        case var ᴛ2 when ᴛ2 == syscall.SOCK_STREAM: {
             return sockaddrToTCP;
         }
-        if (exprᴛ2 == syscall.SOCK_DGRAM) {
+        case var ᴛ2 when ᴛ2 == syscall.SOCK_DGRAM: {
             return sockaddrToUDP;
         }
-        if (exprᴛ2 == syscall.SOCK_RAW) {
+        case var ᴛ2 when ᴛ2 == syscall.SOCK_RAW: {
             return sockaddrToIP;
-        }
+        }}
+        break;
     }
-    else if (exprᴛ1 == syscall.AF_UNIX) {
-        var exprᴛ3 = fd.sotype;
-        if (exprᴛ3 == syscall.SOCK_STREAM) {
+    case var ᴛ when ᴛ == syscall.AF_UNIX: {
+        switch (fd.sotype) {
+        case var ᴛ2 when ᴛ2 == syscall.SOCK_STREAM: {
             return sockaddrToUnix;
         }
-        if (exprᴛ3 == syscall.SOCK_DGRAM) {
+        case var ᴛ2 when ᴛ2 == syscall.SOCK_DGRAM: {
             return sockaddrToUnixgram;
         }
-        if (exprᴛ3 == syscall.SOCK_SEQPACKET) {
+        case var ᴛ2 when ᴛ2 == syscall.SOCK_SEQPACKET: {
             return sockaddrToUnixpacket;
-        }
-    }
-    return (syscall.Sockaddr _) => default!;
+        }}
+        break;
+    }}
+    return (syscall.Sockaddr _) => default;
 }
 
 } // end net_package

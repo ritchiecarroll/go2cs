@@ -38,11 +38,11 @@ public static error Handle(this ref MultiHandler h, context.Context ctx, Record 
     r = r.ΔClone();
     var errsᴷ = new stackAppend<error>();
 
-    slice<error> errs = default!;
+    slice<error> errs = default;
     foreach (var i in range(h.multi)) {
         if (h.multi[i].Enabled(ctx, r.Level)) {
             {
-                var err = h.multi[i].Handle(ctx, r.Clone()); if (err != default!) {
+                var err = h.multi[i].Handle(ctx, r.Clone()); if (err != nil) {
                     errs = builtin.append(errsᴷ, errs, err);
                 }
             }

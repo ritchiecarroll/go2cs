@@ -74,12 +74,12 @@ partial interface Point<P> {
 internal static void precomputeParams<P>(ref Curve<P> c, slice<byte> order)
     where P : Point<P>
 {
-    error err = default!;
+    error err = default;
     (c.N, err) = bigmod.NewModulus(order);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
-    var (two, _) = bigmod.NewNat().SetBytes(new byte[]{2}.slice(), c.N);
+    var (two, _) = bigmod.NewNat().SetBytes(slice<byte>([2]), c.N);
     c.nMinus2 = bigmod.NewNat().ExpandFor(c.N).Sub(two, c.N).Bytes(c.N);
 }
 
@@ -97,12 +97,12 @@ internal static void initᴛ_P224() { _P224 = sync.OnceValue(ж<Curve<P224Point�
     return c;
 }); }
 
-[GoLazy] partial class lazyᴛp224Order { internal static slice<byte> p224Order = new byte[]{
+[GoLazy] partial class lazyᴛp224Order { internal static slice<byte> p224Order = slice<byte>([
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x16, 0xa2,
     0xe0, 0xb8, 0xf0, 0x3e, 0x13, 0xdd, 0x29, 0x45,
     0x5c, 0x5c, 0x2a, 0x3d
-}.slice(); }
+]); }
 
 public static ж<Curve<P256PointжPoint>> P256() {
     return _P256();
@@ -119,11 +119,11 @@ internal static void initᴛ_P256() { _P256 = sync.OnceValue(ж<Curve<P256Point�
     return c;
 }); }
 
-[GoLazy] partial class lazyᴛp256Order { internal static slice<byte> p256Order = new byte[]{
+[GoLazy] partial class lazyᴛp256Order { internal static slice<byte> p256Order = slice<byte>([
     0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xbc, 0xe6, 0xfa, 0xad, 0xa7, 0x17, 0x9e, 0x84,
-    0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51}.slice(); }
+    0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51]); }
 
 public static ж<Curve<P384PointжPoint>> P384() {
     return _P384();
@@ -139,13 +139,13 @@ internal static void initᴛ_P384() { _P384 = sync.OnceValue(ж<Curve<P384Point�
     return c;
 }); }
 
-[GoLazy] partial class lazyᴛp384Order { internal static slice<byte> p384Order = new byte[]{
+[GoLazy] partial class lazyᴛp384Order { internal static slice<byte> p384Order = slice<byte>([
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xc7, 0x63, 0x4d, 0x81, 0xf4, 0x37, 0x2d, 0xdf,
     0x58, 0x1a, 0x0d, 0xb2, 0x48, 0xb0, 0xa7, 0x7a,
-    0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73}.slice(); }
+    0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73]); }
 
 public static ж<Curve<P521PointжPoint>> P521() {
     return _P521();
@@ -161,7 +161,7 @@ internal static void initᴛ_P521() { _P521 = sync.OnceValue(ж<Curve<P521Point�
     return c;
 }); }
 
-[GoLazy] partial class lazyᴛp521Order { internal static slice<byte> p521Order = new byte[]{0x01, 0xff,
+[GoLazy] partial class lazyᴛp521Order { internal static slice<byte> p521Order = slice<byte>([0x01, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -169,7 +169,7 @@ internal static void initᴛ_P521() { _P521 = sync.OnceValue(ж<Curve<P521Point�
     0x51, 0x86, 0x87, 0x83, 0xbf, 0x2f, 0x96, 0x6b,
     0x7f, 0xcc, 0x01, 0x48, 0xf7, 0x09, 0xa5, 0xd0,
     0x3b, 0xb5, 0xc9, 0xb8, 0x89, 0x9c, 0x47, 0xae,
-    0xbb, 0x6f, 0xb7, 0x1e, 0x91, 0x38, 0x64, 0x09}.slice(); }
+    0xbb, 0x6f, 0xb7, 0x1e, 0x91, 0x38, 0x64, 0x09]); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ecdsaInvalidPrivateKeyˢ = "ecdsa: invalid private key length"u8;
@@ -185,21 +185,21 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
 
     fips140.RecordApproved();
     var (pub, err) = NewPublicKey(Ꮡc, Q);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (len(D) != c.N.Size()) {
-        return (default!, errors.New(ecdsaInvalidPrivateKeyˢ));
+        return (default, errors.New(ecdsaInvalidPrivateKeyˢ));
     }
     (var d, err) = bigmod.NewNat().SetBytes(D, c.N);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (d.IsZero() == 1) {
-        return (default!, errors.New(ecdsaPrivateKeyIsZeroˢ));
+        return (default, errors.New(ecdsaPrivateKeyIsZeroˢ));
     }
     var priv = Ꮡ(new PrivateKey(pub: pub.Value, d: d.Bytes(c.N)));
-    return (priv, default!);
+    return (priv, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -216,13 +216,13 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
     // coordinates are reduced modulo p, fulfilling the requirements of SP
     // 800-89, Section 5.3.2.
     if (len(Q) < 1 || Q[0] == 0) {
-        return (default!, errors.New(ecdsaInvalidPublicKeyˢ));
+        return (default, errors.New(ecdsaInvalidPublicKeyˢ));
     }
     var (_, err) = c.newPoint().SetBytes(Q);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new ΔPublicKey(curve: c.curve, q: Q)), default!);
+    return (Ꮡ(new ΔPublicKey(curve: c.curve, q: Q)), default);
 }
 
 // GenerateKey generates a new ECDSA private key pair for the specified curve.
@@ -234,8 +234,8 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
     fips140.RecordApproved();
 
     var (k, Q, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => drbg.ReadWithReader(rand, b));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var priv = Ꮡ(new PrivateKey(
@@ -246,7 +246,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
         d: k.Bytes(c.N)
     ));
     fipsPCT(Ꮡc, priv);
-    return (priv, default!);
+    return (priv, default);
 }
 
 // randomPoint returns a random scalar and the corresponding point using a
@@ -258,11 +258,11 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
 internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P> c, Func<slice<byte>, error> generate)
     where P : Point<P>
 {
-    while (ᐧ) {
+    for (;;) {
         var b = new slice<byte>(c.N.Size());
         {
-            var errΔ1 = generate(b); if (errΔ1 != default!) {
-                return (default!, default!, errΔ1);
+            var errΔ1 = generate(b); if (errΔ1 != nil) {
+                return (default, default, errΔ1);
             }
         }
 
@@ -292,13 +292,13 @@ internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P>
         // negative, this is strictly equivalent. None of this matters anyway
         // because the chance of selecting zero is cryptographically negligible.
         {
-            var (kΔ1, errΔ2) = bigmod.NewNat().SetBytes(b, c.N); if (errΔ2 == default! && kΔ1.IsZero() == 0) {
+            var (kΔ1, errΔ2) = bigmod.NewNat().SetBytes(b, c.N); if (errΔ2 == nil && kΔ1.IsZero() == 0) {
                 var (pΔ1, errΔ3) = c.newPoint().ScalarBaseMult(kΔ1.Bytes(c.N));
                 return (kΔ1, pΔ1, errΔ3);
             }
         }
 
-        if (testingOnlyRejectionSamplingLooped != default!) {
+        if (testingOnlyRejectionSamplingLooped != nil) {
             testingOnlyRejectionSamplingLooped();
         }
     }
@@ -329,7 +329,7 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     if (priv.pub.curve != c.curve) {
-        return (default!, errors.New(ecdsaPrivateKeyDoesNotˢ));
+        return (default, errors.New(ecdsaPrivateKeyDoesNotˢ));
     }
     fips140.RecordApproved();
     fipsSelfTest();
@@ -341,8 +341,8 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
 
     var Z = new slice<byte>(len(priv.d));
     {
-        var err = drbg.ReadWithReader(rand, Z); if (err != default!) {
-            return (default!, err);
+        var err = drbg.ReadWithReader(rand, Z); if (err != nil) {
+            return (default, err);
         }
     }
 
@@ -352,7 +352,7 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
     // per SP 800-90Ar1, Section 8.6.7, and the rest is a personalization
     // string, which per SP 800-90Ar1, Section 8.7.1 may contain secret
     // information.
-    var drbgΔ1 = newDRBG(h, Z, default!, new blockAlignedPersonalizationString(new slice<byte>[]{priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1)}.slice()));
+    var drbgΔ1 = newDRBG(h, Z, default, new blockAlignedPersonalizationString(new slice<byte>[]{priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1)}.slice()));
 
     return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbgΔ1, hashΔ1);
 }
@@ -370,11 +370,11 @@ public static (ж<Signature>, error) SignDeterministic<P, H>(ж<Curve<P>> Ꮡc, 
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     if (priv.pub.curve != c.curve) {
-        return (default!, errors.New(ecdsaPrivateKeyDoesNotˢ));
+        return (default, errors.New(ecdsaPrivateKeyDoesNotˢ));
     }
     fips140.RecordApproved();
     fipsSelfTestDeterministic();
-    var drbg = newDRBG(h, priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1), default!); // RFC 6979, Section 3.3
+    var drbg = newDRBG(h, priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1), default); // RFC 6979, Section 3.3
     return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbg, hashΔ1);
 }
 
@@ -392,17 +392,17 @@ internal static slice<byte> bits2octets<P>(ref Curve<P> c, slice<byte> hash)
 internal static readonly @string ecdsaInternalErrorRIsˢ = "ecdsa: internal error: r is zero"u8;
 internal static readonly @string ecdsaInternalErrorSIsˢ = "ecdsa: internal error: s is zero"u8;
 
-internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref PrivateKey priv, ж<hmacDRBG> Ꮡdrbg, slice<byte> hash)
+internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref PrivateKey priv, ж<hmacDRBG> drbg, slice<byte> hash)
     where P : Point<P>
 {
     // FIPS 186-5, Section 6.4.1
 
     var (k, R, err) = randomPoint(ref c, (slice<byte> b) => {
-        Ꮡdrbg.Value.Generate(b);
-        return default!;
+        drbg.Value.Generate(b);
+        return default;
     });
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // kInv = k⁻¹
@@ -410,27 +410,27 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
     inverse(ref c, kInv, k);
 
     (var Rx, err) = R.BytesX();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var r, err) = bigmod.NewNat().SetOverflowingBytes(Rx, c.N);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // The spec wants us to retry here, but the chance of hitting this condition
     // on a large prime-order group like the NIST curves we support is
     // cryptographically negligible. If we hit it, something is awfully wrong.
     if (r.IsZero() == 1) {
-        return (default!, errors.New(ecdsaInternalErrorRIsˢ));
+        return (default, errors.New(ecdsaInternalErrorRIsˢ));
     }
 
     var e = bigmod.NewNat();
     hashToNat(ref c, e, hash);
 
     (var s, err) = bigmod.NewNat().SetBytes(priv.d, c.N);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     s.Mul(r, c.N);
     s.Add(e, c.N);
@@ -438,24 +438,24 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
 
     // Again, the chance of this happening is cryptographically negligible.
     if (s.IsZero() == 1) {
-        return (default!, errors.New(ecdsaInternalErrorSIsˢ));
+        return (default, errors.New(ecdsaInternalErrorSIsˢ));
     }
 
-    return (Ꮡ(new Signature(r.Bytes(c.N), s.Bytes(c.N))), default!);
+    return (Ꮡ(new Signature(r.Bytes(c.N), s.Bytes(c.N))), default);
 }
 
 // inverse sets kInv to the inverse of k modulo the order of the curve.
-internal static void inverse<P>(ref Curve<P> c, ж<bigmodꓸNat> ᏑkInv, ж<bigmodꓸNat> Ꮡk)
+internal static void inverse<P>(ref Curve<P> c, ж<bigmodꓸNat> kInv, ж<bigmodꓸNat> Ꮡk)
     where P : Point<P>
 {
     ref var k = ref Ꮡk.DerefOrNull();
 
-    if (c.ordInverse != default!) {
+    if (c.ordInverse != nil) {
         var (kBytes, err) = c.ordInverse(k.Bytes(c.N));
         // Some platforms don't implement ordInverse, and always return an error.
-        if (err == default!) {
-            var (_, errΔ1) = ᏑkInv.SetBytes(kBytes, c.N);
-            if (errΔ1 != default!) {
+        if (err == nil) {
+            var (_, errΔ1) = kInv.SetBytes(kBytes, c.N);
+            if (errΔ1 != nil) {
                 throw panic("ecdsa: internal error: ordInverse produced an invalid value");
             }
             return;
@@ -464,12 +464,12 @@ internal static void inverse<P>(ref Curve<P> c, ж<bigmodꓸNat> ᏑkInv, ж<big
 
     // Calculate the inverse of s in GF(N) using Fermat's method
     // (exponentiation modulo P - 2, per Euler's theorem)
-    ᏑkInv.Exp(Ꮡk, c.nMinus2, c.N);
+    kInv.Exp(Ꮡk, c.nMinus2, c.N);
 }
 
 // hashToNat sets e to the left-most bits of hash, according to
 // FIPS 186-5, Section 6.4.1, point 2 and Section 6.4.2, point 3.
-internal static void hashToNat<P>(ref Curve<P> c, ж<bigmodꓸNat> Ꮡe, slice<byte> hash)
+internal static void hashToNat<P>(ref Curve<P> c, ж<bigmodꓸNat> e, slice<byte> hash)
     where P : Point<P>
 {
     // ECDSA asks us to take the left-most log2(N) bits of hash, and use them as
@@ -486,8 +486,8 @@ internal static void hashToNat<P>(ref Curve<P> c, ж<bigmodꓸNat> Ꮡe, slice<b
             }
         }
     }
-    var (_, err) = Ꮡe.SetOverflowingBytes(hash, c.N);
-    if (err != default!) {
+    var (_, err) = e.SetOverflowingBytes(hash, c.N);
+    if (err != nil) {
         throw panic("ecdsa: internal error: truncated hash is too long");
     }
 }
@@ -521,7 +521,7 @@ internal static readonly @string ecdsaPublicKeyDoesNotˢ = "ecdsa: public key do
 //
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
-public static error Verify<P>(ж<Curve<P>> Ꮡc, ж<ΔPublicKey> Ꮡpub, slice<byte> hash, ж<Signature> Ꮡsig)
+public static error Verify<P>(ж<Curve<P>> Ꮡc, ж<ΔPublicKey> Ꮡpub, slice<byte> hash, ж<Signature> sig)
     where P : Point<P>
 {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -532,7 +532,7 @@ public static error Verify<P>(ж<Curve<P>> Ꮡc, ж<ΔPublicKey> Ꮡpub, slice<b
     }
     fips140.RecordApproved();
     fipsSelfTest();
-    return verify(ref (Ꮡc).DerefOrNull(), ref (Ꮡpub).DerefOrNull(), hash, ref (Ꮡsig).DerefOrNull());
+    return verify(ref (Ꮡc).DerefOrNull(), ref (Ꮡpub).DerefOrNull(), hash, ref (sig).DerefOrNull());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -546,19 +546,19 @@ internal static error verifyGeneric<P>(ref Curve<P> c, ref ΔPublicKey pub, slic
     // FIPS 186-5, Section 6.4.2
 
     var (Q, err) = c.newPoint().SetBytes(pub.q);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     (var r, err) = bigmod.NewNat().SetBytes(sig.R, c.N);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (r.IsZero() == 1) {
         return errors.New(ecdsaInvalidSignatureRIsˢ);
     }
     (var s, err) = bigmod.NewNat().SetBytes(sig.S, c.N);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (s.IsZero() == 1) {
@@ -574,29 +574,29 @@ internal static error verifyGeneric<P>(ref Curve<P> c, ref ΔPublicKey pub, slic
 
     // p₁ = [e * s⁻¹]G
     (var p1, err) = c.newPoint().ScalarBaseMult(e.Mul(w, c.N).Bytes(c.N));
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     // p₂ = [r * s⁻¹]Q
     (var p2, err) = Q.ScalarMult(Q, w.Mul(r, c.N).Bytes(c.N));
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     // BytesX returns an error for the point at infinity.
     (var Rx, err) = p1.Add(p1, p2).BytesX();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     (var v, err) = bigmod.NewNat().SetOverflowingBytes(Rx, c.N);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     if (v.Equal(r) != 1) {
         return errors.New(ecdsaSignatureDidNotˢ);
     }
-    return default!;
+    return default;
 }
 
 } // end ecdsa_package

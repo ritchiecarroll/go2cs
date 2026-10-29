@@ -11,7 +11,7 @@ partial class asmgen_package {
     WordBytes: 8,
     CarrySafeLoop: true,
 
-    regs: new @string[]{
+    regs: slice<@string>([
         // R0 is 0 by convention in this code (see setup).
         // R10 is the assembler/linker temporary.
         // R11 is a second assembler/linker temporary, for wide multiply.
@@ -22,7 +22,7 @@ partial class asmgen_package {
         // R15 is SP.
         "R1"u8, "R2"u8, "R3"u8, "R4"u8, "R5"u8, "R6"u8, "R7"u8, "R8"u8, "R9"u8,
         "R10"u8, "R11"u8, "R12"u8
-    }.slice(),
+    ]),
     reg0: "R0"u8,
     regTmp: "R10"u8,
     setup: s390xSetup,
@@ -80,31 +80,31 @@ internal static readonly @string r11ˢ = "R11"u8;
 internal static readonly @string r10ˢ = "R10"u8;
 
 internal static @string s390xHint(ж<Asm> _, Hint h) {
-    var exprᴛ1 = h;
-    if (exprᴛ1 == HintMulSrc) {
+    switch (h) {
+    case var ᴛ when ᴛ == HintMulSrc: {
         return r11ˢ;
     }
-    if (exprᴛ1 == HintMulHi) {
+    case var ᴛ when ᴛ == HintMulHi: {
         return r10ˢ;
-    }
+    }}
     return ""u8;
 }
 
-internal static void s390MulWide(ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
+internal static void s390MulWide(ж<Asm> a, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
     if (src1.name != "R11"u8 && src2.name != "R11"u8) {
-        Ꮡa.Fatalf("mulWide src1 or src2 must be R11"u8);
+        a.Fatalf("mulWide src1 or src2 must be R11"u8);
     }
     if (dstlo.name != "R11"u8) {
-        Ꮡa.Fatalf("mulWide dstlo must be R11"u8);
+        a.Fatalf("mulWide dstlo must be R11"u8);
     }
     if (dsthi.name != "R10"u8) {
-        Ꮡa.Fatalf("mulWide dsthi must be R10"u8);
+        a.Fatalf("mulWide dsthi must be R10"u8);
     }
     var src = src1;
     if (src.name == "R11"u8) {
         src = src2;
     }
-    Ꮡa.Printf("\tMLGR %s, R10\n"u8, src);
+    a.Printf("\tMLGR %s, R10\n"u8, src);
 }
 
 } // end asmgen_package

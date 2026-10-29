@@ -79,12 +79,12 @@ public static ж<Curve<P224PointжPoint>> P224() {
     ));
 }
 
-[GoLazy] partial class lazyᴛp224Order { internal static slice<byte> p224Order = new byte[]{
+[GoLazy] partial class lazyᴛp224Order { internal static slice<byte> p224Order = slice<byte>([
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x16, 0xa2,
     0xe0, 0xb8, 0xf0, 0x3e, 0x13, 0xdd, 0x29, 0x45,
     0x5c, 0x5c, 0x2a, 0x3d
-}.slice(); }
+]); }
 
 public static ж<Curve<P256PointжPoint>> P256() {
     return Ꮡ(new Curve<P256PointжPoint>(
@@ -94,12 +94,12 @@ public static ж<Curve<P256PointжPoint>> P256() {
     ));
 }
 
-[GoLazy] partial class lazyᴛp256Order { internal static slice<byte> p256Order = new byte[]{
+[GoLazy] partial class lazyᴛp256Order { internal static slice<byte> p256Order = slice<byte>([
     0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xbc, 0xe6, 0xfa, 0xad, 0xa7, 0x17, 0x9e, 0x84,
     0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51
-}.slice(); }
+]); }
 
 public static ж<Curve<P384PointжPoint>> P384() {
     return Ꮡ(new Curve<P384PointжPoint>(
@@ -109,14 +109,14 @@ public static ж<Curve<P384PointжPoint>> P384() {
     ));
 }
 
-[GoLazy] partial class lazyᴛp384Order { internal static slice<byte> p384Order = new byte[]{
+[GoLazy] partial class lazyᴛp384Order { internal static slice<byte> p384Order = slice<byte>([
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xc7, 0x63, 0x4d, 0x81, 0xf4, 0x37, 0x2d, 0xdf,
     0x58, 0x1a, 0x0d, 0xb2, 0x48, 0xb0, 0xa7, 0x7a,
     0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73
-}.slice(); }
+]); }
 
 public static ж<Curve<P521PointжPoint>> P521() {
     return Ꮡ(new Curve<P521PointжPoint>(
@@ -126,7 +126,7 @@ public static ж<Curve<P521PointжPoint>> P521() {
     ));
 }
 
-[GoLazy] partial class lazyᴛp521Order { internal static slice<byte> p521Order = new byte[]{0x01, 0xff,
+[GoLazy] partial class lazyᴛp521Order { internal static slice<byte> p521Order = slice<byte>([0x01, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -135,7 +135,7 @@ public static ж<Curve<P521PointжPoint>> P521() {
     0x7f, 0xcc, 0x01, 0x48, 0xf7, 0x09, 0xa5, 0xd0,
     0x3b, 0xb5, 0xc9, 0xb8, 0x89, 0x9c, 0x47, 0xae,
     0xbb, 0x6f, 0xb7, 0x1e, 0x91, 0x38, 0x64, 0x09
-}.slice(); }
+]); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ecdhPctˢ = "ECDH PCT"u8;
@@ -151,11 +151,11 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
     // This procedure is equivalent to Key Pair Generation by Testing
     // Candidates, specified in NIST SP 800-56A Rev. 3, Section 5.6.1.2.2.
 
-    while (ᐧ) {
+    for (;;) {
         var key = new slice<byte>(len(c.N));
         {
-            var errΔ1 = drbg.ReadWithReader(rand, key); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var errΔ1 = drbg.ReadWithReader(rand, key); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
         // In tests, rand will return all zeros and NewPrivateKey will reject
@@ -170,7 +170,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
         }
 
         var (privateKey, err) = NewPrivateKey(Ꮡc, key);
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
 
@@ -185,17 +185,17 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
         // PCT". So we do it. And make ECDH nearly 50% slower (only) in FIPS mode.
         var privateKeyʗ1 = privateKey;
         fips140.PCT(ecdhPctˢ, error () => {
-            var (p1, errΔ1) = Ꮡc.Value.newPoint().ScalarBaseMult((~privateKeyʗ1).d);
-            if (errΔ1 != default!) {
+            var (p1, errΔ1) = Ꮡc.Value.newPoint().ScalarBaseMult(privateKeyʗ1.d);
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
-            if (!bytes.Equal(p1.Bytes(), (~privateKeyʗ1).pub.q)) {
+            if (!bytes.Equal(p1.Bytes(), privateKeyʗ1.pub.q)) {
                 return errors.New(cryptoEcdhPublicKeyDoesˢ);
             }
-            return default!;
+            return default;
         });
 
-        return (privateKey, default!);
+        return (privateKey, default);
     }
 }
 
@@ -211,11 +211,11 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
     // returns d = c + 1. Note that it follows that 0 < d < n. Equivalently,
     // we check that 0 < d < n, and return d.
     if (len(key) != len(c.N) || isZero(key) || !isLess(key, c.N)) {
-        return (default!, errors.New(cryptoEcdhInvalidPrivateˢ));
+        return (default, errors.New(cryptoEcdhInvalidPrivateˢ));
     }
 
     var (p, err) = c.newPoint().ScalarBaseMult(key);
-    if (err != default!) {
+    if (err != nil) {
         // This is unreachable because the only error condition of
         // ScalarBaseMult is if the input is not the right size.
         throw panic("crypto/ecdh: internal error: nistec ScalarBaseMult failed for a fixed-size input");
@@ -230,7 +230,7 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
     }
 
     var k = Ꮡ(new PrivateKey(d: bytes.Clone(key), pub: new ΔPublicKey(curve: c.curve, q: publicKey)));
-    return (k, default!);
+    return (k, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -243,7 +243,7 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
 
     // Reject the point at infinity and compressed encodings.
     if (len(key) == 0 || key[0] != 4) {
-        return (default!, errors.New(cryptoEcdhInvalidPublicˢ));
+        return (default, errors.New(cryptoEcdhInvalidPublicˢ));
     }
 
     // SetBytes checks that x and y are in the interval [0, p - 1], and that
@@ -251,20 +251,20 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
     // infinity (the identity element) above, this fulfills the requirements
     // of NIST SP 800-56A Rev. 3, Section 5.6.2.3.4.
     {
-        var (_, err) = c.newPoint().SetBytes(key); if (err != default!) {
-            return (default!, err);
+        var (_, err) = c.newPoint().SetBytes(key); if (err != nil) {
+            return (default, err);
         }
     }
 
-    return (Ꮡ(new ΔPublicKey(curve: c.curve, q: bytes.Clone(key))), default!);
+    return (Ꮡ(new ΔPublicKey(curve: c.curve, q: bytes.Clone(key))), default);
 }
 
-public static (slice<byte>, error) ECDH<P>(ж<Curve<P>> Ꮡc, ж<PrivateKey> Ꮡk, ж<ΔPublicKey> Ꮡpeer)
+public static (slice<byte>, error) ECDH<P>(ж<Curve<P>> c, ж<PrivateKey> k, ж<ΔPublicKey> peer)
     where P : Point<P>
 {
     fipsSelfTest();
     fips140.RecordApproved();
-    return ecdh(ref (Ꮡc).DerefOrNull(), ref (Ꮡk).DerefOrNull(), ref (Ꮡpeer).DerefOrNull());
+    return ecdh(ref (c).DerefOrNull(), ref (k).DerefOrNull(), ref (peer).DerefOrNull());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -275,10 +275,10 @@ internal static (slice<byte>, error) ecdh<P>(ref Curve<P> c, ref PrivateKey k, r
     where P : Point<P>
 {
     if (c.curve != k.pub.curve) {
-        return (default!, errors.New(cryptoEcdhMismatchedˢ));
+        return (default, errors.New(cryptoEcdhMismatchedˢ));
     }
     if (k.pub.curve != peer.curve) {
-        return (default!, errors.New(cryptoEcdhMismatchedˢ));
+        return (default, errors.New(cryptoEcdhMismatchedˢ));
     }
 
     // This applies the Shared Secret Computation of the Ephemeral Unified Model
@@ -286,20 +286,20 @@ internal static (slice<byte>, error) ecdh<P>(ref Curve<P> c, ref PrivateKey k, r
 
     // Per Section 5.6.2.3.4, Step 1, reject the identity element (0x00).
     if (len(k.pub.q) == 1) {
-        return (default!, errors.New(cryptoEcdhPublicKeyIsTheˢ));
+        return (default, errors.New(cryptoEcdhPublicKeyIsTheˢ));
     }
 
     // SetBytes checks that (x, y) are reduced modulo p, and that they are on
     // the curve, performing Steps 2-3 of Section 5.6.2.3.4.
     var (p, err) = c.newPoint().SetBytes(peer.q);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // Compute P according to Section 5.7.1.2.
     {
-        var (_, errΔ1) = p.ScalarMult(p, k.d); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var (_, errΔ1) = p.ScalarMult(p, k.d); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
@@ -310,7 +310,7 @@ internal static (slice<byte>, error) ecdh<P>(ref Curve<P> c, ref PrivateKey k, r
 
 // isZero reports whether x is all zeroes in constant time.
 internal static bool isZero(slice<byte> x) {
-    byte acc = default!;
+    byte acc = default;
     foreach (var (_, b) in x) {
         acc |= (byte)(b);
     }
@@ -336,7 +336,7 @@ internal static bool isLess(slice<byte> a, slice<byte> b) {
     }
 
     // Perform a subtraction with borrow.
-    uint64 borrow = default!;
+    uint64 borrow = default;
     for (nint i = 0; i < len(bufA); i += 8) {
         var (limbA, limbB) = (byteorder.LEUint64(bufA.slice(i)), byteorder.LEUint64(bufB.slice(i)));
         (_, borrow) = bits.Sub64(limbA, limbB, borrow);

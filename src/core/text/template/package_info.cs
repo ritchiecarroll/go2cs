@@ -10,18 +10,10 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
 global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,6 +53,19 @@ using static go.text.template_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Template))]
+[assembly: go.GoFieldAccess(typeof(common))]
+[assembly: go.GoFieldAccess(typeof(go.text.template.parse_package.ActionNode))]
+[assembly: go.GoFieldAccess(typeof(go.text.template.parse_package.BoolNode))]
+[assembly: go.GoFieldAccess(typeof(go.text.template.parse_package.ListNode))]
+[assembly: go.GoFieldAccess(typeof(go.text.template.parse_package.NumberNode))]
+[assembly: go.GoFieldAccess(typeof(go.text.template.parse_package.PipeNode))]
+[assembly: go.GoFieldAccess(typeof(go.text.template.parse_package.StringNode))]
+[assembly: go.GoFieldAccess(typeof(go.text.template.parse_package.TextNode))]
+[assembly: go.GoFieldAccess(typeof(go.text.template.parse_package.VariableNode))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -69,10 +74,10 @@ using static go.text.template_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/template/exec.go", "exec.cs", "ABgslIKClAATKpKokqiSqqKCgoKmqJKokoKCpoL+lJSCqJKqogAOHoKmgqiygoKUgpQADRyCzuKCgpS0tMTWAAISAAkCgoKUAAIaAAoCpuKCgoKUyoKUggAIDgAJAoKUgoKCgoKUgpSUlOqCmsKCuIKCxua0tILGtLSAgtbEzOKCgoKClIKClKSCtKqyprKUlJSkpKSkpKSkpJSm0oKCgIK2gpSCooKmgpTKpoKCuKaClICCtqKStoKClIKClJSClMSClIKUxIKUgoKUxIKUgoKUgoKCgpSUgpTExIKCgpSCgqaUgpSUgoKCgoLKpoKUlLSUgrSkooKCgpSCpoKSgpSCAAIWAAsCgpSCgoKUgqaCgpSmpoKCuKKClKS2toKklIKClKSktKSUgt4ACQiClKqmgoKUpqSmgqaCpqKCpqKCgpSCpoKmtIKCgoKUrLKCgqamooKCgoKUrLKCgpSUgoKmgsqCgpSAgqSUlIKCgoKUgqaClMiCgoKUgoLIpKbGgoKApraCtoKogoKcsoKUgoKClIKCgoKkgpSAgraCgpS4goKCgoKmpu6UuJSCgqaCgoK4goKCprimyoKClJSUgqamgoKUqJKUpJSokoKUlJSUlIKUgoKCggAHEJSCgsa0tqaCgpSkgpS0pKSkpJSUpKSkpIK2graklIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoCCgoKkgqaCgpSkpKS2tKSkpJSCrLKCgqauwoKUgpSqooKCgpSCguyigpSCpoKClJS4", "354-358:1;363-396:2;389-394:2.1;794-799:1", "", "149=Name/1/1/1,Errorf/1/1/2")]
-[assembly: go.GoPositionMap("text/template/funcs.go", "funcs.cs", "ACVOwgAaNIKCgoKokoKClIKClICCpLyigrqkgKSkpKTKkoKUgsakpqgACAKCgoKAgraAgqTqooKClJSClIKClKaClKSUqJKClKSkpJSClAACEPKCgpSigoKAgqSUgoKUpIKClICClNikpgACEgAIAoKClIKAgqSClIKUgpSkpKaCgoKClKaClIKmgpSssoKClJSUqrKqwoKClIKCpoCCpIKCgoKUlIKmgqKUgoKmgoCCtqrigoCCgIKU2IKClOqSgqrCqsKokgAEEIIACx6ClKSkpKSklKiSgpSUlKqigoKCpqiygoKUgqKCgoKUlLS0gsiUpKSkpKSkgpSClIKUuIKmqKSCqJKCgoKUgoKClIKUlLS0ppSkpKSkpKaopIKClKikgoKUqKSCgpS8goKCgoKYkoKCgpS0tLS0tLSkgoKUqKSClIKCqsK8gpSCgoKCgoKYkoKClJSUlKaUtLS0tLS0tIKCgsiCgpSUlJSopIKUgoKmgpSUqsKqwgACFPKClIKUgoKCgqaU", "357-365:1")]
+[assembly: go.GoPositionMap("text/template/exec.go", "exec.cs", "ABgslIKClAATKpKokqiSqqKCgoKmqJKokoKCpoL+lJSCqJKqogAOHoKmgqiygoKUgpQADRyCzuKCgpS0tMTWAAISAAkCgoKUAAIaAAoCpuKCgoKUyoKUggAIDgAJAoKUgoKCgoKUgpSUlOqCmsKCuIKCxua0tILGtLSAgtbEzOKCgoKClIKClJSCtKqyprKUlJS0tLS0tLS0tJSm0oKCgIK2gpSCooKmgpTKpoKCuKaClICCtqKStoKClIKClJSClMSClIKUxIKUgoKUxIKUgoKUgoKCgpSUgpTExIKCgpSCgqaUgpSUgoKCgoLKpoKUlLSUgrSkooKCgpSCpoKCgpSCAAIWAAsCgpSCgoKUgqaCgpSmpoKCuKKClKS2toKklIKClKSktKSUgt4ACQiClKqmgoKUpqSmgqaCpqKCpqKCgpSCpoKmtIKCgoKUrLKCgqamooKCgoKUrLKCgpSUgoKmgsqCgpSAgqSUlIKCgoKUgqaClNiCgoKUgoLYtLbGgoKApraCtoKogoKcsoKUgoKClIKCgoKUgpSAgraCgpS4goKCgoKmpu6UuJSCgqaCgoK4goKCprimyoKClJSUgqamgoKUqJKUpJSokoKUlJSUlIKUgoKCggAHEJSCgsa0tqaCgpSkgpS0pKSkpJSUpKSkpILGgsaklIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoCCgoKkgqaCgpSkpKS2tKSkpJSCrLKCgqauwoKUgpSqooKCgpSCguyigpSCpoKClJS4", "354-358:1;363-396:2;389-394:2.1;794-799:1", "", "149=Name/1/1/1,Errorf/1/1/2", "240:21")]
+[assembly: go.GoPositionMap("text/template/funcs.go", "funcs.cs", "ACVOwgAaNIKCgoKokoKClIKClICCpLyigrqkgKSkpKTKkoKUgsakpqgACAKCgoKAgraAgqTqooKClJSClIKClKaClKSUqJKClLS0pJSClAACEPKCgpSigoKAgqSUgoKUtIKClICClOi0pgACEgAIAoKClIKAgqSClIKUgpS0tKaCgoKClKaClIKmgpSssoKClJSUqrKqwoKClIKCpoCCpIKCgoKUlIKmgqKUgoKmgoCCtqrigoCCgIKU2IKClOqSgqrCqsKokgAEEIIACx6ClKSkpKSklKiSgpSUlKqigoKCpqiygoKUgqKCgoKUlLS0gsiUtLS0tLS0gpSClIKUyIKmqKSCqJKCgoKUgoKClIKUlLS0ppSktLS0tLaopIKClKikgoKUqKSCgpS8goKCgoKYkoKCgpS0tLS0tLSkgoKUqKSClIKCqsK8gpSCgoKCgoKYkoKClJSUlKaUtLS0tLS0tIKCgsiCgpSUlJSopIKUgoKmgpSUqsKqwgACFPKClIKUgoKCgqaU", "357-365:1")]
 [assembly: go.GoPositionMap("text/template/helper.go", "helper.cs", "ABEw8oKUAAIYAAsCAAIcAA4CgqrSlJSCgoKUjuKClIKUlIKCpgACGAAJAgACFgAKAoKokoKClIKUruKu8oKmgoKCgoKUgpSUpsKCgqaCsoKC", "173-177:1")]
-[assembly: go.GoPositionMap("text/template/option.go", "option.cs", "ABZUABUCgoKUpoKCpoCClJSCpIKkgsg=")]
+[assembly: go.GoPositionMap("text/template/option.go", "option.cs", "ABZUABUCgoKUpoKCpoCCpKSCpIKkgtg=")]
 [assembly: go.GoPositionMap("text/template/template.go", "template.cs", "ACVOkqaCqJIAAhTygtyokoKCgoKCAAMUAAwCgoKClIKCgoKCgqaClIKCgoLYkgAIGgAJAoKCgoKCpoKU2OKCpoKCgoKUAAUQ8oKCggACEgALAoKCgoKC2vKClIKCAAUaAAwCgoKCgoKmgoCCtqzigpSApqSC")]
 // </GoSourcePositionMaps>
 

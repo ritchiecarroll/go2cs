@@ -6,7 +6,7 @@
 // used by the Go standard library.
 namespace go.@internal;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 
 partial class cpu_package {
 
@@ -103,9 +103,9 @@ public static ref ARM64ᴛ1 ARM64 => ref ((StaticBox<ARM64ᴛ1>)ᏑARM64).ValueS
 // The struct is padded to avoid false sharing.
 partial struct Loong64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
-    public bool HasLSX; // support 128-bit vector extension
-    public bool HasLASX; // support 256-bit vector extension
-    public bool HasCRC32; // support CRC instruction
+    public bool HasLSX;    // support 128-bit vector extension
+    public bool HasLASX;   // support 256-bit vector extension
+    public bool HasCRC32;  // support CRC instruction
     public bool HasLAMCAS; // support AMCAS[_DB].{B/H/W/D}
     public bool HasLAM_BH; // support AM{SWAP/ADD}[_DB].{B/H} instruction
     internal CacheLinePad __;
@@ -128,10 +128,10 @@ public static ref MIPS64Xᴛ1 MIPS64X => ref ((StaticBox<MIPS64Xᴛ1>)ᏑMIPS64X
 // The struct is padded to avoid false sharing.
 partial struct PPC64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
-    public bool HasDARN; // Hardware random number generator (requires kernel enablement)
-    public bool HasSCV; // Syscall vectored (requires kernel enablement)
-    public bool IsPOWER8; // ISA v2.07 (POWER8)
-    public bool IsPOWER9; // ISA v3.00 (POWER9)
+    public bool HasDARN;   // Hardware random number generator (requires kernel enablement)
+    public bool HasSCV;    // Syscall vectored (requires kernel enablement)
+    public bool IsPOWER8;  // ISA v2.07 (POWER8)
+    public bool IsPOWER9;  // ISA v3.00 (POWER9)
     public bool IsPOWER10; // ISA v3.1  (POWER10)
     internal CacheLinePad __;
 }
@@ -140,27 +140,27 @@ public static ref PPC64ᴛ1 PPC64 => ref ((StaticBox<PPC64ᴛ1>)ᏑPPC64).ValueS
 
 partial struct S390Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
-    public bool HasZARCH; // z architecture mode is active [mandatory]
-    public bool HasSTFLE; // store facility list extended [mandatory]
-    public bool HasLDISP; // long (20-bit) displacements [mandatory]
-    public bool HasEIMM; // 32-bit immediates [mandatory]
-    public bool HasDFP; // decimal floating point
+    public bool HasZARCH;  // z architecture mode is active [mandatory]
+    public bool HasSTFLE;  // store facility list extended [mandatory]
+    public bool HasLDISP;  // long (20-bit) displacements [mandatory]
+    public bool HasEIMM;   // 32-bit immediates [mandatory]
+    public bool HasDFP;    // decimal floating point
     public bool HasETF3EH; // ETF-3 enhanced
-    public bool HasMSA; // message security assist (CPACF)
-    public bool HasAES; // KM-AES{128,192,256} functions
+    public bool HasMSA;    // message security assist (CPACF)
+    public bool HasAES;    // KM-AES{128,192,256} functions
     public bool HasAESCBC; // KMC-AES{128,192,256} functions
     public bool HasAESCTR; // KMCTR-AES{128,192,256} functions
     public bool HasAESGCM; // KMA-GCM-AES{128,192,256} functions
-    public bool HasGHASH; // KIMD-GHASH function
-    public bool HasSHA1; // K{I,L}MD-SHA-1 functions
+    public bool HasGHASH;  // KIMD-GHASH function
+    public bool HasSHA1;   // K{I,L}MD-SHA-1 functions
     public bool HasSHA256; // K{I,L}MD-SHA-256 functions
     public bool HasSHA512; // K{I,L}MD-SHA-512 functions
-    public bool HasSHA3; // K{I,L}MD-SHA3-{224,256,384,512} and K{I,L}MD-SHAKE-{128,256} functions
-    public bool HasVX; // vector facility. Note: the runtime sets this when it processes auxv records.
-    public bool HasVXE; // vector-enhancements facility 1
-    public bool HasKDSA; // elliptic curve functions
-    public bool HasECDSA; // NIST curves
-    public bool HasEDDSA; // Edwards curves
+    public bool HasSHA3;   // K{I,L}MD-SHA3-{224,256,384,512} and K{I,L}MD-SHAKE-{128,256} functions
+    public bool HasVX;     // vector facility. Note: the runtime sets this when it processes auxv records.
+    public bool HasVXE;    // vector-enhancements facility 1
+    public bool HasKDSA;   // elliptic curve functions
+    public bool HasECDSA;  // NIST curves
+    public bool HasEDDSA;  // Edwards curves
     internal CacheLinePad __;
 }
 public static readonly ж<S390Xᴛ1> ᏑS390X = new StaticBox<S390Xᴛ1>(default(S390Xᴛ1));
@@ -173,8 +173,8 @@ public static ref S390Xᴛ1 S390X => ref ((StaticBox<S390Xᴛ1>)ᏑS390X).ValueS
 partial struct RISCV64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasFastMisaligned; // Fast misaligned accesses
-    public bool HasV; // Vector extension compatible with RVV 1.0
-    public bool HasZbb; // Basic bit-manipulation extension
+    public bool HasV;              // Vector extension compatible with RVV 1.0
+    public bool HasZbb;            // Basic bit-manipulation extension
     internal CacheLinePad __;
 }
 public static readonly ж<RISCV64ᴛ1> ᏑRISCV64 = new StaticBox<RISCV64ᴛ1>(default(RISCV64ᴛ1));
@@ -201,7 +201,7 @@ internal static Action doDerived;
 public static void Initialize(@string env) {
     doinit();
     processOptions(env);
-    if (doDerived != default!) {
+    if (doDerived != nil) {
         doDerived();
     }
 }
@@ -217,7 +217,7 @@ partial struct option {
     public @string Name;
     public ж<bool> Feature;
     public bool Specified; // whether feature value was specified in GODEBUG
-    public bool Enable; // whether feature should be enabled
+    public bool Enable;    // whether feature should be enabled
 }
 
 // processOptions enables or disables CPU feature values based on the parsed env string.
@@ -230,8 +230,8 @@ internal static void processOptions(@string env) {
 field:
     while (env != ""u8) {
         @string field = ""u8;
-        nint i = indexByte(env, (rune)',');
-        if (i < 0){
+        nint i = indexByte(env, (byte)',');
+        if (i < 0) {
             (field, env) = (env, "");
         } else {
             (field, env) = (env.slice(0, i), env.slice(i + 1));
@@ -239,7 +239,7 @@ field:
         if (len(field) < 4 || field[..4] != "cpu.") {
             continue;
         }
-        i = indexByte(field, (rune)'=');
+        i = indexByte(field, (byte)'=');
         if (i < 0) {
             print((@string)"GODEBUG: no value specified for \""u8, field, (@string)"\"\n"u8);
             continue;
@@ -247,18 +247,22 @@ field:
         @string key = field.slice(4, i);
         @string value = field.slice(i + 1); // e.g. "SSE2", "on"
 
-        bool enable = default!;
+        bool enable = default;
         var exprᴛ1 = value;
-        if (exprᴛ1 == "on"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "on"u8: {
             enable = true;
+            break;
         }
-        else if (exprᴛ1 == "off"u8) {
+        case {} when exprᴛ1 == "off"u8: {
             enable = false;
+            break;
         }
-        else { /* default: */
+        default: {
             print((@string)"GODEBUG: value \""u8, value, (@string)"\" not supported for cpu option \""u8, key, (@string)"\"\n"u8);
             goto continue_field;
-        }
+            break;
+        }}
 
         if (key == "all"u8) {
             foreach (var iΔ1 in range(options)) {

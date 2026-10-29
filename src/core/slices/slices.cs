@@ -393,7 +393,7 @@ public static S Clone<S, E>(S s)
 {
     // Preserve nilness in case it matters.
     if (s.IsNil) {
-        return default!;
+        return default;
     }
     // Avoid s[:0:0] as it leads to unwanted liveness when cloning a
     // zero-length slice of a large array; see https://go.dev/issue/68488.
@@ -541,7 +541,7 @@ public static S Concat<S, E>(params Span<S> slicesʗp)
     // Use Grow, not make, to round up to the size class:
     // the extra space is otherwise unused and helps
     // callers that append a few elements to the result.
-    var newslice = Grow<S, E>((S)(default!), size);
+    var newslice = Grow<S, E>((S)(default), size);
     foreach (var (_, s) in slices) {
         newslice = appendꓸꓸꓸ<S, E>(newslice, s);
     }

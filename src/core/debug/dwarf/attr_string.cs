@@ -264,7 +264,7 @@ public static @string String(this Attr i) {
             return str;
         }
     }
-    return "Attr("u8 + strconv.FormatInt((int64)(uint32)i, 10) + ")"u8;
+    return "Attr("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
 }
 
 } // end dwarf_package

@@ -23,9 +23,9 @@ partial struct Scope {
 }
 
 // NewScope creates a new scope nested in the outer scope.
-public static ж<Scope> NewScope(ж<Scope> Ꮡouter) {
+public static ж<Scope> NewScope(ж<Scope> outer) {
     const nint n = 4; // initial scope capacity
-    return Ꮡ(new Scope(Ꮡouter, new map<@string, ж<Object>>(n)));
+    return Ꮡ(new Scope(outer, new map<@string, ж<Object>>(n)));
 }
 
 // Lookup returns the object with the given name if it is
@@ -40,7 +40,7 @@ public static ж<Object> Lookup(this ref Scope s, @string name) {
 // Insert leaves the scope unchanged and returns alt. Otherwise
 // it inserts obj and returns nil.
 public static ж<Object> /*alt*/ Insert(this ref Scope s, ж<Object> Ꮡobj) {
-    ж<Object> alt = default!;
+    ж<Object> alt = default;
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     {
@@ -60,7 +60,7 @@ public static @string String(this ж<Scope> Ꮡs) {
     if (Ꮡs != nil && len(s.Objects) > 0) {
         fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf));
         foreach (var (_, obj) in s.Objects) {
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%s %s\n"u8, (~obj).Kind, (~obj).Name);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%s %s\n"u8, obj.Kind, obj.Name);
         }
     }
     fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "}\n"u8);
@@ -94,9 +94,9 @@ public static @string String(this ж<Scope> Ꮡs) {
 partial struct Object {
     public ObjKind Kind;
     public @string Name; // declared name
-    public any Decl;    // corresponding Field, XxxSpec, FuncDecl, LabeledStmt, AssignStmt, Scope; or nil
-    public any Data;    // object-specific data; or nil
-    public any Type;    // placeholder for type information; may be nil
+    public any Decl;     // corresponding Field, XxxSpec, FuncDecl, LabeledStmt, AssignStmt, Scope; or nil
+    public any Data;     // object-specific data; or nil
+    public any Type;     // placeholder for type information; may be nil
 }
 
 // NewObj creates a new object of a given kind and name.
@@ -111,49 +111,49 @@ public static tokenꓸPos Pos(this ref Object obj) {
     @string name = obj.Name;
     switch (obj.Decl.type()) {
     case ж<Field> d: {
-        foreach (var (_, n) in (~d).Names) {
-            if ((~n).Name == name) {
+        foreach (var (_, n) in d.Names) {
+            if (n.Name == name) {
                 return n.Pos();
             }
         }
         break;
     }
     case ж<ImportSpec> d: {
-        if ((~d).Name != nil && (~(~d).Name).Name == name) {
-            return (~d).Name.Pos();
+        if (d.Name != nil && d.Name.Name == name) {
+            return d.Name.Pos();
         }
-        return (~d).Path.Pos();
+        return d.Path.Pos();
     }
     case ж<ValueSpec> d: {
-        foreach (var (_, n) in (~d).Names) {
-            if ((~n).Name == name) {
+        foreach (var (_, n) in d.Names) {
+            if (n.Name == name) {
                 return n.Pos();
             }
         }
         break;
     }
     case ж<TypeSpec> d: {
-        if ((~(~d).Name).Name == name) {
-            return (~d).Name.Pos();
+        if (d.Name.Name == name) {
+            return d.Name.Pos();
         }
         break;
     }
     case ж<FuncDecl> d: {
-        if ((~(~d).Name).Name == name) {
-            return (~d).Name.Pos();
+        if (d.Name.Name == name) {
+            return d.Name.Pos();
         }
         break;
     }
     case ж<LabeledStmt> d: {
-        if ((~(~d).Label).Name == name) {
-            return (~d).Label.Pos();
+        if (d.Label.Name == name) {
+            return d.Label.Pos();
         }
         break;
     }
     case ж<AssignStmt> d: {
-        foreach (var (_, x) in (~d).Lhs) {
+        foreach (var (_, x) in d.Lhs) {
             {
-                var (ident, isIdent) = x._<ж<Ident>>(ᐧ); if (isIdent && (~ident).Name == name) {
+                var (ident, isIdent) = x._<ж<Ident>>(ᐧ); if (isIdent && ident.Name == name) {
                     return ident.Pos();
                 }
             }
@@ -171,13 +171,13 @@ public static tokenꓸPos Pos(this ref Object obj) {
 partial struct ObjKind /*num:nint*/;
 
 // The list of possible [Object] kinds.
-public static ObjKind Bad => /* iota */ 0;  // for error handling
-public static ObjKind Pkg => 1;  // package
-public static ObjKind Con => 2;  // constant
-public static ObjKind Typ => 3;  // type
-public static ObjKind Var => 4;  // variable
-public static ObjKind Fun => 5;  // function or method
-public static ObjKind Lbl => 6;  // label
+public static ObjKind Bad => /* iota */ 0; // for error handling
+public static ObjKind Pkg => 1;            // package
+public static ObjKind Con => 2;            // constant
+public static ObjKind Typ => 3;            // type
+public static ObjKind Var => 4;            // variable
+public static ObjKind Fun => 5;            // function or method
+public static ObjKind Lbl => 6;            // label
 
 [GoLazy] partial class lazyᴛobjKindStrings { internal static array<@string> objKindStrings = new golib.SparseArray<@string>{
     [(int)Bad] = "bad"u8,

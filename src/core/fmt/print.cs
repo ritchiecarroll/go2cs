@@ -40,6 +40,8 @@ internal static readonly @string invReflectString = "<invalid reflect.Value>"u8;
 partial interface State :
     Δio.Writer
 {
+    // Write is the function to call to emit formatted output to be printed.
+    // Write(b []byte) (n int, err error) is provided by io.Writer
     // Width returns the value of the width option and whether it has been set.
     (nint wid, bool ok) Width();
     // Precision returns the value of the precision option and whether it has been set.
@@ -81,8 +83,8 @@ partial interface GoStringer {
 public static @string FormatString(State state, rune verb) {
     var bᴷ = new stackAppend<byte>();
 
-    array<byte> tmp = new(16);               // Use a local buffer.
-    var b = append(tmp[..0], (byte)((rune)'%'));
+    array<byte> tmp = new(16); // Use a local buffer.
+    var b = append(tmp[..0], (byte)'%');
     foreach (var (_, c) in (@string)" +-#0"u8) { // All known flags
         if (state.Flag((nint)c)) { // The argument is an int for historical reasons.
             b = append(bᴷ, b, (byte)c);
@@ -95,7 +97,7 @@ public static @string FormatString(State state, rune verb) {
     }
     {
         var (p, ok) = state.Precision(); if (ok) {
-            b = append(b, (byte)((rune)'.'));
+            b = append(b, (byte)'.');
             b = strconv.AppendInt(b, (int64)p, 10);
         }
     }
@@ -153,9 +155,9 @@ internal static ref Δsync.Pool ppFree => ref ((StaticBox<Δsync.Pool>)ᏑppFree
 // newPrinter allocates a new pp struct or grabs a cached one.
 internal static ж<pp> newPrinter() {
     var p = ᏑppFree.Get()._<ж<pp>>();
-    p.Value.panicking = false;
-    p.Value.erroring = false;
-    p.Value.wrapErrs = false;
+    p.panicking = false;
+    p.erroring = false;
+    p.wrapErrs = false;
     p.of(pp.Ꮡfmt).init(p.of(pp.Ꮡbuf));
     return p;
 }
@@ -171,17 +173,17 @@ internal static void free(this ж<pp> Ꮡp) {
     // limit, we drop the buffer and recycle just the printer.
     //
     // See https://golang.org/issue/23199.
-    if (cap(p.buf) > 64 * 1024){
-        p.buf = default!;
+    if (cap(p.buf) > 64 * 1024) {
+        p.buf = default;
     } else {
         p.buf = p.buf[..0];
     }
     if (cap(p.wrappedErrs) > 8) {
-        p.wrappedErrs = default!;
+        p.wrappedErrs = default;
     }
 
-    p.arg = default!;
-    p.value = new reflectꓸValue(nil);
+    p.arg = default;
+    p.value = new reflectꓸValue();
     p.wrappedErrs = p.wrappedErrs[..0];
     ᏑppFree.Put(Ꮡp.OrTypedNil());
 }
@@ -196,19 +198,19 @@ internal static (nint prec, bool ok) Precision(this ref pp p) {
 
 internal static bool Flag(this ref pp p, nint b) {
     switch (b) {
-    case (rune)'-': {
+    case '-': {
         return p.fmt.minus;
     }
-    case (rune)'+': {
+    case '+': {
         return p.fmt.plus || p.fmt.plusV;
     }
-    case (rune)'#': {
+    case '#': {
         return p.fmt.sharp || p.fmt.sharpV;
     }
-    case (rune)' ': {
+    case ' ': {
         return p.fmt.space;
     }
-    case (rune)'0': {
+    case '0': {
         return p.fmt.zero;
     }}
     return false;
@@ -218,14 +220,14 @@ internal static bool Flag(this ref pp p, nint b) {
 // recursive use in custom verbs.
 internal static (nint ret, error err) Write(this ref pp p, slice<byte> b) {
     p.buf.write(b);
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 // WriteString implements [io.StringWriter] so that we can call [io.WriteString]
 // on a pp (through state), for efficiency.
 internal static (nint ret, error err) WriteString(this ref pp p, @string s) {
     p.buf.writeString(s);
-    return (len(s), default!);
+    return (len(s), default);
 }
 
 // These routines end in 'f' and take a format string.
@@ -233,13 +235,13 @@ internal static (nint ret, error err) WriteString(this ref pp p, @string s) {
 // Fprintf formats according to a format specifier and writes to w.
 // It returns the number of bytes written and any write error encountered.
 public static (nint n, error err) Fprintf(Δio.Writer w, sstring format, params ꓸꓸꓸany aʗp) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     var a = aʗp.slice();
 
     var p = newPrinter();
     p.doPrintf(format, a);
-    (n, err) = w.Write((~p).buf);
+    (n, err) = w.Write(p.buf);
     p.free();
     return (n, err);
 }
@@ -258,7 +260,7 @@ public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintf(format, a);
-    @string s = (@string)(slice<byte>)(~p).buf;
+    @string s = (@string)(slice<byte>)p.buf;
     p.free();
     return s;
 }
@@ -270,7 +272,7 @@ public static slice<byte> Appendf(slice<byte> b, sstring format, params ꓸꓸ�
 
     var p = newPrinter();
     p.doPrintf(format, a);
-    b = appendꓸꓸꓸ(b, (~p).buf);
+    b = appendꓸꓸꓸ(b, p.buf);
     p.free();
     return b;
 }
@@ -281,13 +283,13 @@ public static slice<byte> Appendf(slice<byte> b, sstring format, params ꓸꓸ�
 // Spaces are added between operands when neither is a string.
 // It returns the number of bytes written and any write error encountered.
 public static (nint n, error err) Fprint(Δio.Writer w, params ꓸꓸꓸany aʗp) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     var a = aʗp.slice();
 
     var p = newPrinter();
     p.doPrint(a);
-    (n, err) = w.Write((~p).buf);
+    (n, err) = w.Write(p.buf);
     p.free();
     return (n, err);
 }
@@ -308,7 +310,7 @@ public static @string Sprint(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrint(a);
-    @string s = (@string)(slice<byte>)(~p).buf;
+    @string s = (@string)(slice<byte>)p.buf;
     p.free();
     return s;
 }
@@ -321,7 +323,7 @@ public static slice<byte> Append(slice<byte> b, params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrint(a);
-    b = appendꓸꓸꓸ(b, (~p).buf);
+    b = appendꓸꓸꓸ(b, p.buf);
     p.free();
     return b;
 }
@@ -334,13 +336,13 @@ public static slice<byte> Append(slice<byte> b, params ꓸꓸꓸany aʗp) {
 // Spaces are always added between operands and a newline is appended.
 // It returns the number of bytes written and any write error encountered.
 public static (nint n, error err) Fprintln(Δio.Writer w, params ꓸꓸꓸany aʗp) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     var a = aʗp.slice();
 
     var p = newPrinter();
     p.doPrintln(a);
-    (n, err) = w.Write((~p).buf);
+    (n, err) = w.Write(p.buf);
     p.free();
     return (n, err);
 }
@@ -361,7 +363,7 @@ public static @string Sprintln(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintln(a);
-    @string s = (@string)(slice<byte>)(~p).buf;
+    @string s = (@string)(slice<byte>)p.buf;
     p.free();
     return s;
 }
@@ -374,7 +376,7 @@ public static slice<byte> Appendln(slice<byte> b, params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintln(a);
-    b = appendꓸꓸꓸ(b, (~p).buf);
+    b = appendꓸꓸꓸ(b, p.buf);
     p.free();
     return b;
 }
@@ -399,18 +401,18 @@ internal static bool tooLarge(nint x) {
 
 // parsenum converts ASCII to integer.  num is 0 (and isnum is false) if no number present.
 internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start, nint end) {
-    nint num = default!;
-    bool isnum = default!;
-    nint newi = default!;
+    nint num = default;
+    bool isnum = default;
+    nint newi = default;
 
     if (start >= end) {
         return (0, false, end);
     }
-    for (newi = start; newi < end && (rune)'0' <= s[newi] && s[newi] <= (rune)'9'; newi++) {
+    for (newi = start; newi < end && '0' <= s[newi] && s[newi] <= '9'; newi++) {
         if (tooLarge(num)) {
             return (0, false, end); // Overflow; crazy long number most likely.
         }
-        num = num * 10 + (nint)((byte)(s[newi] - (rune)'0'));
+        num = num * 10 + (nint)((byte)(s[newi] - '0'));
         isnum = true;
     }
     return (num, isnum, newi);
@@ -421,9 +423,9 @@ internal static void unknownType(this ref pp p, reflectꓸValue v) {
         p.buf.writeString(nilAngleString);
         return;
     }
-    p.buf.writeByte((rune)'?');
+    p.buf.writeByte((byte)'?');
     p.buf.writeString(v.Type().String());
-    p.buf.writeByte((rune)'?');
+    p.buf.writeByte((byte)'?');
 }
 
 internal static void badVerb(this ж<pp> Ꮡp, rune verb) {
@@ -432,25 +434,25 @@ internal static void badVerb(this ж<pp> Ꮡp, rune verb) {
     p.erroring = true;
     p.buf.writeString(percentBangString);
     p.buf.writeRune(verb);
-    p.buf.writeByte((rune)'(');
+    p.buf.writeByte((byte)'(');
     switch (ᐧ) {
-    case {} when p.arg != default!: {
+    case {} when p.arg != nil: {
         p.buf.writeString(reflect.TypeOf(p.arg).String());
-        p.buf.writeByte((rune)'=');
-        Ꮡp.printArg(p.arg, (rune)'v');
+        p.buf.writeByte((byte)'=');
+        Ꮡp.printArg(p.arg, 'v');
         break;
     }
     case {} when p.value.IsValid(): {
         p.buf.writeString(p.value.Type().String());
-        p.buf.writeByte((rune)'=');
-        Ꮡp.printValue(p.value, (rune)'v', 0);
+        p.buf.writeByte((byte)'=');
+        Ꮡp.printValue(p.value, 'v', 0);
         break;
     }
     default: {
         p.buf.writeString(nilAngleString);
         break;
     }}
-    p.buf.writeByte((rune)')');
+    p.buf.writeByte((byte)')');
     p.erroring = false;
 }
 
@@ -458,7 +460,7 @@ internal static void fmtBool(this ж<pp> Ꮡp, bool v, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
-    case (rune)'t' or (rune)'v': {
+    case 't' or 'v': {
         p.fmt.fmtBoolean(v);
         break;
     }
@@ -473,7 +475,7 @@ internal static void fmtBool(this ж<pp> Ꮡp, bool v, rune verb) {
 internal static void fmt0x64(this ref pp p, uint64 v, bool leading0x) {
     var sharp = p.fmt.sharp;
     p.fmt.sharp = leading0x;
-    p.fmt.fmtInteger(v, 16, unsigned, (rune)'v', ldigits);
+    p.fmt.fmtInteger(v, 16, unsigned, 'v', ldigits);
     p.fmt.sharp = sharp;
 }
 
@@ -482,43 +484,43 @@ internal static void fmtInteger(this ж<pp> Ꮡp, uint64 v, bool isSigned, rune 
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
-    case (rune)'v': {
-        if (p.fmt.sharpV && !isSigned){
+    case 'v': {
+        if (p.fmt.sharpV && !isSigned) {
             p.fmt0x64(v, true);
         } else {
             p.fmt.fmtInteger(v, 10, isSigned, verb, ldigits);
         }
         break;
     }
-    case (rune)'d': {
+    case 'd': {
         p.fmt.fmtInteger(v, 10, isSigned, verb, ldigits);
         break;
     }
-    case (rune)'b': {
+    case 'b': {
         p.fmt.fmtInteger(v, 2, isSigned, verb, ldigits);
         break;
     }
-    case (rune)'o' or (rune)'O': {
+    case 'o' or 'O': {
         p.fmt.fmtInteger(v, 8, isSigned, verb, ldigits);
         break;
     }
-    case (rune)'x': {
+    case 'x': {
         p.fmt.fmtInteger(v, 16, isSigned, verb, ldigits);
         break;
     }
-    case (rune)'X': {
+    case 'X': {
         p.fmt.fmtInteger(v, 16, isSigned, verb, udigits);
         break;
     }
-    case (rune)'c': {
+    case 'c': {
         p.fmt.fmtC(v);
         break;
     }
-    case (rune)'q': {
+    case 'q': {
         p.fmt.fmtQc(v);
         break;
     }
-    case (rune)'U': {
+    case 'U': {
         p.fmt.fmtUnicode(v);
         break;
     }
@@ -534,20 +536,20 @@ internal static void fmtFloat(this ж<pp> Ꮡp, float64 v, nint size, rune verb)
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
-    case (rune)'v': {
-        p.fmt.fmtFloat(v, size, (rune)'g', -1);
+    case 'v': {
+        p.fmt.fmtFloat(v, size, 'g', -1);
         break;
     }
-    case (rune)'b' or (rune)'g' or (rune)'G' or (rune)'x' or (rune)'X': {
+    case 'b' or 'g' or 'G' or 'x' or 'X': {
         p.fmt.fmtFloat(v, size, verb, -1);
         break;
     }
-    case (rune)'f' or (rune)'e' or (rune)'E': {
+    case 'f' or 'e' or 'E': {
         p.fmt.fmtFloat(v, size, verb, 6);
         break;
     }
-    case (rune)'F': {
-        p.fmt.fmtFloat(v, size, (rune)'f', 6);
+    case 'F': {
+        p.fmt.fmtFloat(v, size, 'f', 6);
         break;
     }
     default: {
@@ -565,9 +567,9 @@ internal static void fmtComplex(this ж<pp> Ꮡp, complex128 v, nint size, rune 
     // Make sure any unsupported verbs are found before the
     // calls to fmtFloat to not generate an incorrect error string.
     switch (verb) {
-    case (rune)'v' or (rune)'b' or (rune)'g' or (rune)'G' or (rune)'x' or (rune)'X' or (rune)'f' or (rune)'F' or (rune)'e' or (rune)'E': {
+    case 'v' or 'b' or 'g' or 'G' or 'x' or 'X' or 'f' or 'F' or 'e' or 'E': {
         var oldPlus = p.fmt.plus;
-        p.buf.writeByte((rune)'(');
+        p.buf.writeByte((byte)'(');
         Ꮡp.fmtFloat(real(v), size / 2, verb);
         // Imaginary part always has a sign.
         p.fmt.plus = true;
@@ -586,27 +588,27 @@ internal static void fmtString(this ж<pp> Ꮡp, @string v, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
-    case (rune)'v': {
-        if (p.fmt.sharpV){
+    case 'v': {
+        if (p.fmt.sharpV) {
             p.fmt.fmtQ(v);
         } else {
             p.fmt.fmtS(v);
         }
         break;
     }
-    case (rune)'s': {
+    case 's': {
         p.fmt.fmtS(v);
         break;
     }
-    case (rune)'x': {
+    case 'x': {
         p.fmt.fmtSx(v, ldigits);
         break;
     }
-    case (rune)'X': {
+    case 'X': {
         p.fmt.fmtSx(v, udigits);
         break;
     }
-    case (rune)'q': {
+    case 'q': {
         p.fmt.fmtQ(v);
         break;
     }
@@ -620,46 +622,46 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
-    case (rune)'v' or (rune)'d': {
-        if (p.fmt.sharpV){
+    case 'v' or 'd': {
+        if (p.fmt.sharpV) {
             p.buf.writeString(typeString);
-            if (v == default!) {
+            if (v == nil) {
                 p.buf.writeString(nilParenString);
                 return;
             }
-            p.buf.writeByte((rune)'{');
+            p.buf.writeByte((byte)'{');
             foreach (var (i, c) in v) {
                 if (i > 0) {
                     p.buf.writeString(commaSpaceString);
                 }
                 p.fmt0x64((uint64)c, true);
             }
-            p.buf.writeByte((rune)'}');
+            p.buf.writeByte((byte)'}');
         } else {
-            p.buf.writeByte((rune)'[');
+            p.buf.writeByte((byte)'[');
             foreach (var (i, c) in v) {
                 if (i > 0) {
-                    p.buf.writeByte((rune)' ');
+                    p.buf.writeByte((byte)' ');
                 }
                 p.fmt.fmtInteger((uint64)c, 10, unsigned, verb, ldigits);
             }
-            p.buf.writeByte((rune)']');
+            p.buf.writeByte((byte)']');
         }
         break;
     }
-    case (rune)'s': {
+    case 's': {
         p.fmt.fmtBs(v);
         break;
     }
-    case (rune)'x': {
+    case 'x': {
         p.fmt.fmtBx(v, ldigits);
         break;
     }
-    case (rune)'X': {
+    case 'X': {
         p.fmt.fmtBx(v, udigits);
         break;
     }
-    case (rune)'q': {
+    case 'q': {
         p.fmt.fmtQ((@string)v);
         break;
     }
@@ -672,30 +674,31 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
 internal static void fmtPointer(this ж<pp> Ꮡp, reflectꓸValue value, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    uintptr u = default!;
-    var exprᴛ1 = value.Kind();
-    if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.Map || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔSlice || exprᴛ1 == reflect.ΔUnsafePointer) {
+    uintptr u = default;
+    switch (value.Kind()) {
+    case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func || ᴛ == reflect.Map || ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔUnsafePointer: {
         u = (uintptr)(uintptr)value.UnsafePointer();
+        break;
     }
-    else { /* default: */
+    default: {
         Ꮡp.badVerb(verb);
         return;
-    }
+    }}
 
     switch (verb) {
-    case (rune)'v': {
-        if (p.fmt.sharpV){
-            p.buf.writeByte((rune)'(');
+    case 'v': {
+        if (p.fmt.sharpV) {
+            p.buf.writeByte((byte)'(');
             p.buf.writeString(value.Type().String());
             p.buf.writeString(")("u8);
-            if (u == 0){
+            if (u == 0) {
                 p.buf.writeString(nilString);
             } else {
                 p.fmt0x64((uint64)u, true);
             }
-            p.buf.writeByte((rune)')');
+            p.buf.writeByte((byte)')');
         } else {
-            if (u == 0){
+            if (u == 0) {
                 p.fmt.padString(nilAngleString);
             } else {
                 p.fmt0x64((uint64)u, !p.fmt.sharp);
@@ -703,11 +706,11 @@ internal static void fmtPointer(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
         }
         break;
     }
-    case (rune)'p': {
+    case 'p': {
         p.fmt0x64((uint64)u, !p.fmt.sharp);
         break;
     }
-    case (rune)'b' or (rune)'o' or (rune)'d' or (rune)'x' or (rune)'X': {
+    case 'b' or 'o' or 'd' or 'x' or 'X': {
         Ꮡp.fmtInteger((uint64)u, unsigned, verb);
         break;
     }
@@ -727,7 +730,7 @@ internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string me
         ref var p = ref Ꮡp.DerefOrNull();
 
         {
-            var err = recover(calledByDefer); if (err != default!) {
+            var err = recover(calledByDefer); if (err != nil) {
                 // If it's a nil pointer, just say "<nil>". The likeliest causes are a
                 // Stringer that fails to guard against nil or a nil pointer for a
                 // value receiver, and in either case, "<nil>" is a nice result.
@@ -754,9 +757,9 @@ internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string me
                 p.buf.writeString(method);
                 p.buf.writeString(methodˢ);
                 p.panicking = true;
-                Ꮡp.printArg(err, (rune)'v');
+                Ꮡp.printArg(err, 'v');
                 p.panicking = false;
-                p.buf.writeByte((rune)')');
+                p.buf.writeByte((byte)')');
 
                 p.fmt.fmtFlags = oldFlags;
             }
@@ -773,7 +776,7 @@ internal static readonly @string errorˢ = "Error"u8;
 internal static readonly @string stringˢ = "String"u8;
 
 internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
-    bool handled = default!;
+    bool handled = default;
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -781,7 +784,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
         if (p.erroring) {
             goto ᒐdone;
         }
-        if (verb == (rune)'w') {
+        if (verb == 'w') {
             // It is invalid to use %w other than with Errorf or with a non-error arg.
             var (_, ok) = p.arg._<error>(ᐧ);
             if (!ok || !p.wrapErrs) {
@@ -789,7 +792,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
                 handled = true; goto ᒐdone;
             }
             // If the arg is a Formatter, pass 'v' as the verb to it.
-            verb = (rune)'v';
+            verb = 'v';
         }
 
         // Is it a Formatter?
@@ -803,7 +806,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
         }
 
         // If we're doing Go syntax and the argument knows how to supply it, take care of it now.
-        if (p.fmt.sharpV){
+        if (p.fmt.sharpV) {
             {
                 var (stringer, ok) = p.arg._<GoStringer>(ᐧ); if (ok) {
                     handled = true;
@@ -818,7 +821,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
             // the value satisfies one of the string-valued interfaces.
             // Println etc. set verb to %v, which is "stringable".
             switch (verb) {
-            case (rune)'v' or (rune)'s' or (rune)'x' or (rune)'X' or (rune)'q': {
+            case 'v' or 's' or 'x' or 'X' or 'q': {
                 // Is it an error or Stringer?
                 // The duplication in the bodies is necessary:
                 // setting handled and deferring catchPanic
@@ -853,11 +856,11 @@ internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.arg = arg;
-    p.value = new reflectꓸValue(nil);
+    p.value = new reflectꓸValue();
 
-    if (arg == default!) {
+    if (arg == nil) {
         switch (verb) {
-        case (rune)'T' or (rune)'v': {
+        case 'T' or 'v': {
             p.fmt.padString(nilAngleString);
             break;
         }
@@ -871,12 +874,12 @@ internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) {
     // Special processing considerations.
     // %T (the value's type) and %p (its address) are special; we always do them first.
     switch (verb) {
-    case (rune)'T': {
+    case 'T': {
         p.fmt.fmtS(reflect.TypeOf(arg).String());
         return;
     }
-    case (rune)'p': {
-        Ꮡp.fmtPointer(reflect.ValueOf(arg), (rune)'p');
+    case 'p': {
+        Ꮡp.fmtPointer(reflect.ValueOf(arg), 'p');
         return;
     }}
 
@@ -990,7 +993,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
             return;
         }
     }
-    p.arg = default!;
+    p.arg = default;
     p.value = value;
 
     {
@@ -998,11 +1001,11 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
         var exprᴛ1 = value.Kind();
         var matchᴛ1 = false;
         if (exprᴛ1 == reflect.Invalid) { matchᴛ1 = true;
-            if (depth == 0){
+            if (depth == 0) {
                 p.buf.writeString(invReflectString);
             } else {
                 switch (verb) {
-                case (rune)'v': {
+                case 'v': {
                     p.buf.writeString(nilAngleString);
                     break;
                 }
@@ -1037,64 +1040,64 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
             Ꮡp.fmtString(f.String(), verb);
         }
         else if (exprᴛ1 == reflect.Map) { matchᴛ1 = true;
-            if (p.fmt.sharpV){
+            if (p.fmt.sharpV) {
                 p.buf.writeString(f.Type().String());
                 if (f.IsNil()) {
                     p.buf.writeString(nilParenString);
                     return;
                 }
-                p.buf.writeByte((rune)'{');
+                p.buf.writeByte((byte)'{');
             } else {
                 p.buf.writeString(mapString);
             }
             var sorted = fmtsort.Sort(f);
             foreach (var (i, m) in sorted) {
                 if (i > 0) {
-                    if (p.fmt.sharpV){
+                    if (p.fmt.sharpV) {
                         p.buf.writeString(commaSpaceString);
                     } else {
-                        p.buf.writeByte((rune)' ');
+                        p.buf.writeByte((byte)' ');
                     }
                 }
                 Ꮡp.printValue(m.Key, verb, depth + 1);
-                p.buf.writeByte((rune)':');
+                p.buf.writeByte((byte)':');
                 Ꮡp.printValue(m.Value, verb, depth + 1);
             }
-            if (p.fmt.sharpV){
-                p.buf.writeByte((rune)'}');
+            if (p.fmt.sharpV) {
+                p.buf.writeByte((byte)'}');
             } else {
-                p.buf.writeByte((rune)']');
+                p.buf.writeByte((byte)']');
             }
         }
         else if (exprᴛ1 == reflect.Struct) { matchᴛ1 = true;
             if (p.fmt.sharpV) {
                 p.buf.writeString(f.Type().String());
             }
-            p.buf.writeByte((rune)'{');
+            p.buf.writeByte((byte)'{');
             for (nint i = 0; i < f.NumField(); i++) {
                 if (i > 0) {
-                    if (p.fmt.sharpV){
+                    if (p.fmt.sharpV) {
                         p.buf.writeString(commaSpaceString);
                     } else {
-                        p.buf.writeByte((rune)' ');
+                        p.buf.writeByte((byte)' ');
                     }
                 }
                 if (p.fmt.plusV || p.fmt.sharpV) {
                     {
                         @string name = f.Type().Field(i).Name; if (name != ""u8) {
                             p.buf.writeString(name);
-                            p.buf.writeByte((rune)':');
+                            p.buf.writeByte((byte)':');
                         }
                     }
                 }
                 Ꮡp.printValue(getField(f, i), verb, depth + 1);
             }
-            p.buf.writeByte((rune)'}');
+            p.buf.writeByte((byte)'}');
         }
         else if (exprᴛ1 == reflect.ΔInterface) { matchᴛ1 = true;
             var valueΔ2 = f.Elem();
-            if (!valueΔ2.IsValid()){
-                if (p.fmt.sharpV){
+            if (!valueΔ2.IsValid()) {
+                if (p.fmt.sharpV) {
                     p.buf.writeString(f.Type().String());
                     p.buf.writeString(nilParenString);
                 } else {
@@ -1106,12 +1109,12 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
         }
         else if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { matchᴛ1 = true;
             switch (verb) {
-            case (rune)'s' or (rune)'q' or (rune)'x' or (rune)'X': {
+            case 's' or 'q' or 'x' or 'X': {
                 // Handle byte and uint8 slices and arrays special for the above verbs.
                 var t = f.Type();
                 if (t.Elem().Kind() == reflect.Uint8) {
-                    slice<byte> bytes = default!;
-                    if (f.Kind() == reflect.ΔSlice || f.CanAddr()){
+                    slice<byte> bytes = default;
+                    if (f.Kind() == reflect.ΔSlice || f.CanAddr()) {
                         bytes = f.Bytes();
                     } else {
                         // We have an array, but we cannot Bytes() a non-addressable array,
@@ -1127,29 +1130,29 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
                 }
                 break;
             }}
-            if (p.fmt.sharpV){
+            if (p.fmt.sharpV) {
                 p.buf.writeString(f.Type().String());
                 if (f.Kind() == reflect.ΔSlice && f.IsNil()) {
                     p.buf.writeString(nilParenString);
                     return;
                 }
-                p.buf.writeByte((rune)'{');
+                p.buf.writeByte((byte)'{');
                 for (nint i = 0; i < f.Len(); i++) {
                     if (i > 0) {
                         p.buf.writeString(commaSpaceString);
                     }
                     Ꮡp.printValue(f.Index(i), verb, depth + 1);
                 }
-                p.buf.writeByte((rune)'}');
+                p.buf.writeByte((byte)'}');
             } else {
-                p.buf.writeByte((rune)'[');
+                p.buf.writeByte((byte)'[');
                 for (nint i = 0; i < f.Len(); i++) {
                     if (i > 0) {
-                        p.buf.writeByte((rune)' ');
+                        p.buf.writeByte((byte)' ');
                     }
                     Ꮡp.printValue(f.Index(i), verb, depth + 1);
                 }
-                p.buf.writeByte((rune)']');
+                p.buf.writeByte((byte)']');
             }
         }
         else if (exprᴛ1 == reflect.ΔPointer) { matchᴛ1 = true;
@@ -1158,12 +1161,12 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
             if (depth == 0 && (uintptr)f.UnsafePointer() != nil) {
                 {
                     var a = f.Elem();
-                    var exprᴛ2 = a.Kind();
-                    if (exprᴛ2 == reflect.Array || exprᴛ2 == reflect.ΔSlice || exprᴛ2 == reflect.Struct || exprᴛ2 == reflect.Map) {
-                        p.buf.writeByte((rune)'&');
+                    switch (a.Kind()) {
+                    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice || ᴛ == reflect.Struct || ᴛ == reflect.Map: {
+                        p.buf.writeByte((byte)'&');
                         Ꮡp.printValue(a, verb, depth + 1);
                         return;
-                    }
+                    }}
                 }
             }
             fallthrough = true;
@@ -1179,9 +1182,9 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
 
 // intFromArg gets the argNumth element of a. On return, isInt reports whether the argument has integer type.
 internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, nint argNum) {
-    nint num = default!;
-    bool isInt = default!;
-    nint newArgNum = default!;
+    nint num = default;
+    bool isInt = default;
+    nint newArgNum = default;
 
     newArgNum = argNum;
     if (argNum < len(a)) {
@@ -1190,24 +1193,27 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
             // Work harder.
             {
                 var v = reflect.ValueOf(a[argNum]);
-                var exprᴛ1 = v.Kind();
-                if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+                switch (v.Kind()) {
+                case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
                     var n = v.Int();
                     if ((int64)(nint)n == n) {
                         num = (nint)n;
                         isInt = true;
                     }
+                    break;
                 }
-                else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
+                case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
                     var n = v.Uint();
                     if ((int64)n >= 0 && (uint64)(nint)n == n) {
                         num = (nint)n;
                         isInt = true;
                     }
+                    break;
                 }
-                else { /* default: */
+                default: {
                     // Already 0, false.
-                }
+                    break;
+                }}
             }
         }
         newArgNum = argNum + 1;
@@ -1233,7 +1239,7 @@ internal static (nint index, nint wid, bool ok) parseArgNumber(sstring format) {
 
     // Find closing bracket.
     for (nint i = 1; i < len(format); i++) {
-        if (format[i] == (rune)']') {
+        if (format[i] == ']') {
             var (width, okΔ1, newi) = parsenum(format, 1, i);
             if (!okΔ1 || newi != i) {
                 return (0, i + 1, false);
@@ -1248,7 +1254,7 @@ internal static (nint index, nint wid, bool ok) parseArgNumber(sstring format) {
 // argNum or the value of the bracketed integer that begins format[i:]. It also returns
 // the new value of i, that is, the index of the next byte of the format to process.
 internal static (nint newArgNum, nint newi, bool found) argNumber(this ref pp p, nint argNum, sstring format, nint i, nint numArgs) {
-    if (len(format) <= i || format[i] != (rune)'[') {
+    if (len(format) <= i || format[i] != '[') {
         return (argNum, i, false);
     }
     p.reordered = true;
@@ -1276,14 +1282,14 @@ internal static void doPrintf(this ж<pp> Ꮡp, sstring format, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     nint end = len(format);
-    nint argNum = 0; // we process one argument per non-trivial format
+    nint argNum = 0;        // we process one argument per non-trivial format
     var afterIndex = false; // previous item in format was an index like [3].
     p.reordered = false;
 formatLoop:
     for (nint i = 0; i < end; ) {
         p.goodArgNum = true;
         nint lasti = i;
-        while (i < end && format[i] != (rune)'%') {
+        while (i < end && format[i] != '%') {
             i++;
         }
         if (i > lasti) {
@@ -1303,37 +1309,37 @@ simpleFormat:
         for (; i < end; i++) {
             var c = format[i];
             switch (c) {
-            case (rune)'#': {
+            case (byte)'#': {
                 p.fmt.sharp = true;
                 break;
             }
-            case (rune)'0': {
+            case (byte)'0': {
                 p.fmt.zero = true;
                 break;
             }
-            case (rune)'+': {
+            case (byte)'+': {
                 p.fmt.plus = true;
                 break;
             }
-            case (rune)'-': {
+            case (byte)'-': {
                 p.fmt.minus = true;
                 break;
             }
-            case (rune)' ': {
+            case (byte)' ': {
                 p.fmt.space = true;
                 break;
             }
             default: {
                 // Fast path for common case of ascii lower case simple verbs
                 // without precision or width or argument indices.
-                if ((rune)'a' <= c && c <= (rune)'z' && argNum < len(a)) {
+                if ('a' <= c && c <= 'z' && argNum < len(a)) {
                     var exprᴛ1 = c;
                     var matchᴛ1 = false;
-                    if (exprᴛ1 is (rune)'w') {
+                    if (exprᴛ1 is (byte)'w') {
                         p.wrappedErrs = append(p.wrappedErrs, argNum);
                         fallthrough = true;
                     }
-                    if (fallthrough || !matchᴛ1 && exprᴛ1 is (rune)'v') { matchᴛ1 = true;
+                    if (fallthrough || !matchᴛ1 && exprᴛ1 is (byte)'v') { matchᴛ1 = true;
                         // Go syntax
                         p.fmt.sharpV = p.fmt.sharp;
                         p.fmt.sharp = false;
@@ -1358,7 +1364,7 @@ break_simpleFormat:;
         (argNum, i, afterIndex) = p.argNumber(argNum, format, i, len(a));
 
         // Do we have width?
-        if (i < end && format[i] == (rune)'*'){
+        if (i < end && format[i] == '*') {
             i++;
             (p.fmt.wid, p.fmt.widPresent, argNum) = intFromArg(a, argNum);
 
@@ -1382,13 +1388,13 @@ break_simpleFormat:;
         }
 
         // Do we have precision?
-        if (i + 1 < end && format[i] == (rune)'.') {
+        if (i + 1 < end && format[i] == '.') {
             i++;
             if (afterIndex) { // "%[3].2d"
                 p.goodArgNum = false;
             }
             (argNum, i, afterIndex) = p.argNumber(argNum, format, i, len(a));
-            if (i < end && format[i] == (rune)'*'){
+            if (i < end && format[i] == '*') {
                 i++;
                 (p.fmt.prec, p.fmt.precPresent, argNum) = intFromArg(a, argNum);
                 // Negative precision arguments don't make sense
@@ -1422,8 +1428,8 @@ break_simpleFormat:;
         i += size;
 
         var matchᴛ2 = false;
-        if (verb is (rune)'%') { matchᴛ2 = true; // Percent does not absorb operands and ignores f.wid and f.prec.
-            p.buf.writeByte((rune)'%');
+        if (verb is '%') { matchᴛ2 = true; // Percent does not absorb operands and ignores f.wid and f.prec.
+            p.buf.writeByte((byte)'%');
         }
         else if (!p.goodArgNum) { matchᴛ2 = true;
             p.badArgNum(verb);
@@ -1431,11 +1437,11 @@ break_simpleFormat:;
         else if (argNum >= len(a)) { matchᴛ2 = true; // No argument left over to print for the current verb.
             p.missingArg(verb);
         }
-        else if (verb is (rune)'w') { matchᴛ2 = true;
+        else if (verb is 'w') { matchᴛ2 = true;
             p.wrappedErrs = append(p.wrappedErrs, argNum);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ2 && verb is (rune)'v') { matchᴛ2 = true;
+        if (fallthrough || !matchᴛ2 && verb is 'v') { matchᴛ2 = true;
             // Go syntax
             p.fmt.sharpV = p.fmt.sharp;
             p.fmt.sharp = false;
@@ -1462,15 +1468,15 @@ break_formatLoop:;
             if (i > 0) {
                 p.buf.writeString(commaSpaceString);
             }
-            if (arg == default!){
+            if (arg == nil) {
                 p.buf.writeString(nilAngleString);
             } else {
                 p.buf.writeString(reflect.TypeOf(arg).String());
-                p.buf.writeByte((rune)'=');
-                Ꮡp.printArg(arg, (rune)'v');
+                p.buf.writeByte((byte)'=');
+                Ꮡp.printArg(arg, 'v');
             }
         }
-        p.buf.writeByte((rune)')');
+        p.buf.writeByte((byte)')');
     }
 }
 
@@ -1479,12 +1485,12 @@ internal static void doPrint(this ж<pp> Ꮡp, slice<any> a) {
 
     var prevString = false;
     foreach (var (argNum, arg) in a) {
-        var isString = arg != default! && reflect.TypeOf(arg).Kind() == reflect.ΔString;
+        var isString = arg != nil && reflect.TypeOf(arg).Kind() == reflect.ΔString;
         // Add a space between two non-string arguments.
         if (argNum > 0 && !isString && !prevString) {
-            p.buf.writeByte((rune)' ');
+            p.buf.writeByte((byte)' ');
         }
-        Ꮡp.printArg(arg, (rune)'v');
+        Ꮡp.printArg(arg, 'v');
         prevString = isString;
     }
 }
@@ -1496,11 +1502,11 @@ internal static void doPrintln(this ж<pp> Ꮡp, slice<any> a) {
 
     foreach (var (argNum, arg) in a) {
         if (argNum > 0) {
-            p.buf.writeByte((rune)' ');
+            p.buf.writeByte((byte)' ');
         }
-        Ꮡp.printArg(arg, (rune)'v');
+        Ꮡp.printArg(arg, 'v');
     }
-    p.buf.writeByte((rune)'\n');
+    p.buf.writeByte((byte)'\n');
 }
 
 } // end fmt_package

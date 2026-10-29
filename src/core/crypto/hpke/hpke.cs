@@ -59,23 +59,23 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
         secrets = appendꓸꓸꓸ(secrets, sharedSecret);
 
         var ksContextΔ1 = new slice<byte>(0, 1 + 2 + 2 + len(info));
-        ksContextΔ1 = append(ksContextΔ1, (byte)0); // mode 0
+        ksContextΔ1 = append(ksContextΔ1, (byte)0);             // mode 0
         ksContextΔ1 = byteorder.BEAppendUint16(ksContextΔ1, 0); // empty psk_id
         ksContextΔ1 = byteorder.BEAppendUint16(ksContextΔ1, (uint16)len(info));
         ksContextΔ1 = appendꓸꓸꓸ(ksContextΔ1, info);
 
         var (secretΔ1, errΔ1) = kdf.labeledDerive(sid, secrets, secretˢ, ksContextΔ1,
             (uint16)(Δaead.keySize() + Δaead.nonceSize() + kdf.size()));
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         var keyΔ1 = secretΔ1.slice(0, Δaead.keySize());
         var baseNonceΔ1 = secretΔ1.slice(Δaead.keySize(), Δaead.keySize() + Δaead.nonceSize());
         var expSecretΔ1 = secretΔ1.slice(Δaead.keySize() + Δaead.nonceSize());
 
         (var aΔ1, errΔ1) = Δaead.aead(keyΔ1);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         var expSecretʗ1 = expSecretΔ1;
         var sidʗ1 = sid;
@@ -86,39 +86,39 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
             suiteID: sid,
             export: exportΔ1,
             baseNonce: baseNonceΔ1
-        )), default!);
+        )), default);
     }
 
-    var (pskIDHash, err) = kdf.labeledExtract(sid, default!, pskIdHashˢ, default!);
-    if (err != default!) {
-        return (default!, err);
+    var (pskIDHash, err) = kdf.labeledExtract(sid, default, pskIdHashˢ, default);
+    if (err != nil) {
+        return (default, err);
     }
-    (var infoHash, err) = kdf.labeledExtract(sid, default!, infoHashˢ, info);
-    if (err != default!) {
-        return (default!, err);
+    (var infoHash, err) = kdf.labeledExtract(sid, default, infoHashˢ, info);
+    if (err != nil) {
+        return (default, err);
     }
-    var ksContext = appendꓸꓸꓸ(new byte[]{0}.slice(), pskIDHash);
+    var ksContext = appendꓸꓸꓸ(slice<byte>([0]), pskIDHash);
     ksContext = appendꓸꓸꓸ(ksContext, infoHash);
 
-    (var secret, err) = kdf.labeledExtract(sid, sharedSecret, secretˢ, default!);
-    if (err != default!) {
-        return (default!, err);
+    (var secret, err) = kdf.labeledExtract(sid, sharedSecret, secretˢ, default);
+    if (err != nil) {
+        return (default, err);
     }
     (var key, err) = kdf.labeledExpand(sid, secret, keyˢ, ksContext, (uint16)Δaead.keySize());
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var a, err) = Δaead.aead(key);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var baseNonce, err) = kdf.labeledExpand(sid, secret, baseNonceˢ, ksContext, (uint16)Δaead.nonceSize());
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var expSecret, err) = kdf.labeledExpand(sid, secret, expˢ, ksContext, (uint16)kdf.size());
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var expSecretʗ2 = expSecret;
     var sidʗ2 = sid;
@@ -129,7 +129,7 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
         suiteID: sid,
         export: export,
         baseNonce: baseNonce
-    )), default!);
+    )), default);
 }
 
 // NewSender returns a sending HPKE context for the provided KEM encapsulation
@@ -142,17 +142,17 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
 // The returned enc ciphertext can be used to instantiate a matching receiving
 // HPKE context with the corresponding KEM decapsulation key.
 public static (slice<byte> enc, ж<Sender> s, error err) NewSender(ΔPublicKey pk, KDF kdf, AEAD Δaead, slice<byte> info) {
-    error err = default!;
+    error err = default;
 
     (var sharedSecret, var encapsulatedKey, err) = pk.encap();
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
     (var context, err) = newContext(sharedSecret, pk.KEM().ID(), kdf, Δaead, info);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
-    return (encapsulatedKey, Ꮡ(new Sender(context)), default!);
+    return (encapsulatedKey, Ꮡ(new Sender(context)), default);
 }
 
 // NewRecipient returns a receiving HPKE context for the provided KEM
@@ -164,14 +164,14 @@ public static (slice<byte> enc, ж<Sender> s, error err) NewSender(ΔPublicKey p
 // additional public information that must match between sender and recipient.
 public static (ж<Recipient>, error) NewRecipient(slice<byte> enc, PrivateKey k, KDF kdf, AEAD Δaead, slice<byte> info) {
     var (sharedSecret, err) = k.decap(enc);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var context, err) = newContext(sharedSecret, k.KEM().ID(), kdf, Δaead, info);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new Recipient(context)), default!);
+    return (Ꮡ(new Recipient(context)), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -183,12 +183,12 @@ internal static readonly @string exportOnlyInstantiationˢ = "export-only instan
 // Seal uses incrementing counters for each call, and Open on the receiving side
 // must be called in the same order as Seal.
 public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slice<byte> plaintext) {
-    if (s.aead == default!) {
-        return (default!, errors.New(exportOnlyInstantiationˢ));
+    if (s.aead == nil) {
+        return (default, errors.New(exportOnlyInstantiationˢ));
     }
-    var ciphertext = s.aead.Seal(default!, s.nextNonce(), plaintext, aad);
+    var ciphertext = s.aead.Seal(default, s.nextNonce(), plaintext, aad);
     s.seqNum++;
-    return (ciphertext, default!);
+    return (ciphertext, default);
 }
 
 // Seal instantiates a single-use HPKE sending HPKE context like [NewSender],
@@ -196,14 +196,14 @@ public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slic
 // Seal returns the concatenation of the encapsulated key and the ciphertext.
 public static (slice<byte>, error) Seal(ΔPublicKey pk, KDF kdf, AEAD Δaead, slice<byte> info, slice<byte> plaintext) {
     var (enc, s, err) = NewSender(pk, kdf, Δaead, info);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    (var ct, err) = s.Seal(default!, plaintext);
-    if (err != default!) {
-        return (default!, err);
+    (var ct, err) = s.Seal(default, plaintext);
+    if (err != nil) {
+        return (default, err);
     }
-    return (appendꓸꓸꓸ(enc, ct), default!);
+    return (appendꓸꓸꓸ(enc, ct), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -213,7 +213,7 @@ internal static readonly @string invalidLengthˢ = "invalid length"u8;
 // recipient. length must be at most 65,535.
 public static (slice<byte>, error) Export(this ref Sender s, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
-        return (default!, errors.New(invalidLengthˢ));
+        return (default, errors.New(invalidLengthˢ));
     }
     return s.export(exporterContext, (uint16)length);
 }
@@ -224,15 +224,15 @@ public static (slice<byte>, error) Export(this ref Sender s, @string exporterCon
 // Open uses incrementing counters for each successful call, and must be called
 // in the same order as Seal on the sending side.
 public static (slice<byte>, error) Open(this ref Recipient r, slice<byte> aad, slice<byte> ciphertext) {
-    if (r.aead == default!) {
-        return (default!, errors.New(exportOnlyInstantiationˢ));
+    if (r.aead == nil) {
+        return (default, errors.New(exportOnlyInstantiationˢ));
     }
-    var (plaintext, err) = r.aead.Open(default!, r.nextNonce(), ciphertext, aad);
-    if (err != default!) {
-        return (default!, err);
+    var (plaintext, err) = r.aead.Open(default, r.nextNonce(), ciphertext, aad);
+    if (err != nil) {
+        return (default, err);
     }
     r.seqNum++;
-    return (plaintext, default!);
+    return (plaintext, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -244,22 +244,22 @@ internal static readonly @string ciphertextTooShortˢ = "ciphertext too short"u8
 public static (slice<byte>, error) Open(PrivateKey k, KDF kdf, AEAD Δaead, slice<byte> info, slice<byte> ciphertext) {
     nint encSize = k.KEM().encSize();
     if (len(ciphertext) < encSize) {
-        return (default!, errors.New(ciphertextTooShortˢ));
+        return (default, errors.New(ciphertextTooShortˢ));
     }
     var enc = ciphertext.slice(0, encSize);
     ciphertext = ciphertext.slice(encSize);
     var (r, err) = NewRecipient(enc, k, kdf, Δaead, info);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return r.Open(default!, ciphertext);
+    return r.Open(default, ciphertext);
 }
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
 public static (slice<byte>, error) Export(this ref Recipient r, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
-        return (default!, errors.New(invalidLengthˢ));
+        return (default, errors.New(invalidLengthˢ));
     }
     return r.export(exporterContext, (uint16)length);
 }

@@ -10,11 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,7 +56,7 @@ using static go.text.scanner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/scanner/scanner.go", "scanner.cs", "ACRIkNSCgoKUgpQAJ1gAChiSgIKkAD2WAdK4goKmgoKCgrimpoKCgoKU7uKklKaCgriC3IKCgoKCgoKUgpSUgty4gpSClIKCgoLcgoKmprSCgrYAAhIACAKCgoKClKzSlIKCpqaigoKCgpSCgpSmoqaCgpSmtIKClKaAooCigAACEAAKAoKCgoKCgpKClIKmgoKClIKm9qKCgoKmkoKCgoKClIK0grSCtIK2goKCgsqCgoKUgqaCuICClLSkgoKClIKCgqSCtoKmgoKAgsgACAaClKSkpLqSgoKmgoKCgsqCgoKUgsa0gpS2gqamgpSklNaCgoKUgpSmgoKmpKSkpKSU1qKCgoKClIKUlJSmgoKCgoKU6IKC6JSUgoKUuIKCgoKUgoKCgqYAAhDypoKUhJLYgriClILKgriClIKClMaClMaktIKClKSCgpSkgoK2goKCgoKUgraCgpSk2pSCruKCgqaCxoLGgqSqwpSmlLiUyoKC")]
+[assembly: go.GoPositionMap("text/scanner/scanner.go", "scanner.cs", "ACRIkNSCgoKUgpQAJ1gAChiSgIKkAD2WAdK4goKmgoKCgrimpoKCgoKU7uKklKaCgriC3IKCgoKCgoKUgpSUgty4gpSClIKCgoLcgoKmprSCgrYAAhIACAKCgoKClKzSlIKCpqaigoKCgpSCgpSmoqaCgpSmtIKClKaAooCigAACEAAKAoKCgoKCgoKClIKmgoKClIKm9qKCgoKWkoKCgoKClIK0grSCtIK2goKCgsqCgoKUgqaCuICClLSkgoKClIKCgpSCtoKmgoKAgsgACAaClKSkpLqSgoKmgoKCgsqCgoKUgsa0gpS2gqamgpSklNaCgoKUgpSmgoKmtLS0tLSk1qKCgoKClIKUlJSmgoKCgoKU6IKC6JSUgoKUuIKCgoKUgoKCgqYAAhDypoKUhJLYgriClILKgriClIKClMaClMaUtIKClLSCgpS0goLGgoKCgoKUgsaCgpS06pSCruKCgqaCxoLGgqSqwpSmlLiUyoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

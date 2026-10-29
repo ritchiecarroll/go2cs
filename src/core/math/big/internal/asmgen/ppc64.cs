@@ -23,7 +23,7 @@ partial class asmgen_package {
     // ordinary integer instructions is much faster than the vector code was,
     // at least on the power10 gomote.
 
-    regs: new @string[]{
+    regs: slice<@string>([
         // R0 is 0 by convention.
         // R1 is SP.
         // R2 is TOC.
@@ -32,7 +32,7 @@ partial class asmgen_package {
         "R3"u8, "R4"u8, "R5"u8, "R6"u8, "R7"u8, "R8"u8, "R9"u8,
         "R10"u8, "R11"u8, "R12"u8, /*R13 is TLS*/ "R14"u8, "R15"u8, "R16"u8, "R17"u8, "R18"u8, "R19"u8,
         "R20"u8, "R21"u8, "R22"u8, "R23"u8, "R24"u8, "R25"u8, "R26"u8, "R27"u8, "R28"u8, "R29"u8
-    }.slice(),
+    ]),
     reg0: "R0"u8,
     regTmp: "R31"u8,
 

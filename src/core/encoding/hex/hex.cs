@@ -54,7 +54,7 @@ public static error ErrLength = errors.New("encoding/hex: odd length hex string"
 partial struct InvalidByteError /*num:byte*/;
 
 public static @string Error(this InvalidByteError e) {
-    return fmt.Sprintf("encoding/hex: invalid byte: %#U"u8, (rune)(byte)e);
+    return fmt.Sprintf("encoding/hex: invalid byte: %#U"u8, (rune)e);
 }
 
 // DecodedLen returns the length of a decoding of x source bytes.
@@ -96,7 +96,7 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
         }
         return (i, ErrLength);
     }
-    return (i, default!);
+    return (i, default);
 }
 
 // AppendDecode appends the hexadecimally decoded src to dst
@@ -162,15 +162,15 @@ public static io.Writer NewEncoder(io.Writer w) {
 }
 
 internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
 
-    while (len(p) > 0 && e.err == default!) {
+    while (len(p) > 0 && e.err == nil) {
         nint chunkSize = bufferSize / 2;
         if (len(p) < chunkSize) {
             chunkSize = len(p);
         }
 
-        nint written = default!;
+        nint written = default;
         nint encoded = Encode(e.@out[..], p.slice(0, chunkSize));
         (written, e.err) = e.w.Write(e.@out.slice(0, encoded));
         n += written / 2;
@@ -182,7 +182,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
 partial struct decoder {
     internal io.Reader r;
     internal error err;
-    internal slice<byte> @in;      // input buffer (encoded form)
+    internal slice<byte> @in;                   // input buffer (encoded form)
     internal array<byte> arr = new(bufferSize); // backing array for in
 }
 
@@ -193,18 +193,18 @@ public static io.Reader NewDecoder(io.Reader r) {
 }
 
 internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
-    error err = default!;
+    error err = default;
 
     // Fill internal buffer with sufficient bytes to decode
-    if (len(d.@in) < 2 && d.err == default!) {
-        nint numCopy = default!;
-        nint numRead = default!;
+    if (len(d.@in) < 2 && d.err == nil) {
+        nint numCopy = default;
+        nint numRead = default;
         numCopy = copy(d.arr[..], d.@in); // Copies either 0 or 1 bytes
         (numRead, d.err) = d.r.Read(d.arr.slice(numCopy));
         d.@in = d.arr.slice(0, numCopy + numRead);
         if (AreEqual(d.err, io.EOF) && len(d.@in) % 2 != 0) {
             {
-                var a = reverseHexTable[d.@in[len(d.@in) - 1]]; if (a > 0x0f){
+                var a = reverseHexTable[d.@in[len(d.@in) - 1]]; if (a > 0x0f) {
                     d.err = ((InvalidByteError)d.@in[len(d.@in) - 1]);
                 } else {
                     d.err = io.ErrUnexpectedEOF;
@@ -221,14 +221,14 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     }
     (var numDec, err) = Decode(p, d.@in.slice(0, len(p) * 2));
     d.@in = d.@in.slice(2 * numDec);
-    if (err != default!) {
-        (d.@in, d.err) = (default!, err); // Decode error; discard input remainder
+    if (err != nil) {
+        (d.@in, d.err) = (default, err); // Decode error; discard input remainder
     }
 
     if (len(d.@in) < 2) {
         return (numDec, d.err); // Only expose errors when buffer fully consumed
     }
-    return (numDec, default!);
+    return (numDec, default);
 }
 
 // Dumper returns a [io.WriteCloser] that writes a hex dump of all written data to
@@ -243,13 +243,13 @@ partial struct dumper {
     internal array<byte> rightChars = new(18);
     internal array<byte> buf = new(14);
     internal nint used; // number of bytes in the current line
-    internal nuint n; // number of bytes, total
+    internal nuint n;   // number of bytes, total
     internal bool closed;
 }
 
 internal static byte toChar(byte b) {
     if (b < 32 || b > 126) {
-        return (rune)'.';
+        return (byte)'.';
     }
     return b;
 }
@@ -258,8 +258,8 @@ internal static byte toChar(byte b) {
 internal static readonly @string encodingHexDumperClosedˢ = "encoding/hex: dumper closed"u8;
 
 internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (h.closed) {
         return (0, errors.New(encodingHexDumperClosedˢ));
@@ -277,30 +277,29 @@ internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
             h.buf[2] = (byte)(h.n >> 8);
             h.buf[3] = (byte)h.n;
             Encode(h.buf[4..], h.buf[..4]);
-            h.buf[12] = (rune)' ';
-            h.buf[13] = (rune)' ';
+            h.buf[12] = (byte)' ';
+            h.buf[13] = (byte)' ';
             (_, err) = h.w.Write(h.buf[4..]);
-            if (err != default!) {
+            if (err != nil) {
                 return (n, err);
             }
         }
         Encode(h.buf[..], data.slice(i, i + 1));
-        h.buf[2] = (rune)' ';
+        h.buf[2] = (byte)' ';
         nint l = 3;
-        if (h.used == 7){
+        if (h.used == 7) {
             // There's an additional space after the 8th byte.
-            h.buf[3] = (rune)' ';
+            h.buf[3] = (byte)' ';
             l = 4;
-        } else 
-        if (h.used == 15) {
+        } else if (h.used == 15) {
             // At the end of the line there's an extra space and
             // the bar for the right column.
-            h.buf[3] = (rune)' ';
-            h.buf[4] = (rune)'|';
+            h.buf[3] = (byte)' ';
+            h.buf[4] = (byte)'|';
             l = 5;
         }
         (_, err) = h.w.Write(h.buf.slice(0, l));
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
         n++;
@@ -308,10 +307,10 @@ internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
         h.used++;
         h.n++;
         if (h.used == 16) {
-            h.rightChars[16] = (rune)'|';
-            h.rightChars[17] = (rune)'\n';
+            h.rightChars[16] = (byte)'|';
+            h.rightChars[17] = (byte)'\n';
             (_, err) = h.w.Write(h.rightChars[..]);
-            if (err != default!) {
+            if (err != nil) {
                 return (n, err);
             }
             h.used = 0;
@@ -321,7 +320,7 @@ internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
 }
 
 internal static error /*err*/ Close(this ref dumper h) {
-    error err = default!;
+    error err = default;
 
     // See the comments in Write() for the details of this format.
     if (h.closed) {
@@ -331,28 +330,27 @@ internal static error /*err*/ Close(this ref dumper h) {
     if (h.used == 0) {
         return err;
     }
-    h.buf[0] = (rune)' ';
-    h.buf[1] = (rune)' ';
-    h.buf[2] = (rune)' ';
-    h.buf[3] = (rune)' ';
-    h.buf[4] = (rune)'|';
+    h.buf[0] = (byte)' ';
+    h.buf[1] = (byte)' ';
+    h.buf[2] = (byte)' ';
+    h.buf[3] = (byte)' ';
+    h.buf[4] = (byte)'|';
     nint nBytes = h.used;
     while (h.used < 16) {
         nint l = 3;
-        if (h.used == 7){
+        if (h.used == 7) {
             l = 4;
-        } else 
-        if (h.used == 15) {
+        } else if (h.used == 15) {
             l = 5;
         }
         (_, err) = h.w.Write(h.buf.slice(0, l));
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         h.used++;
     }
-    h.rightChars[nBytes] = (rune)'|';
-    h.rightChars[nBytes + 1] = (rune)'\n';
+    h.rightChars[nBytes] = (byte)'|';
+    h.rightChars[nBytes + 1] = (byte)'\n';
     (_, err) = h.w.Write(h.rightChars.slice(0, nBytes + 2));
     return err;
 }

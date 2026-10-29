@@ -13,8 +13,8 @@ partial class math_package {
 //	Modf(±Inf) = ±Inf, NaN
 //	Modf(NaN) = NaN, NaN
 public static (float64 integer, float64 fractional) Modf(float64 f) {
-    float64 integer = default!;
-    float64 fractional = default!;
+    float64 integer = default;
+    float64 fractional = default;
 
     integer = Trunc(f);
     fractional = Copysign(f - integer, f);

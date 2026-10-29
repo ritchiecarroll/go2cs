@@ -37,7 +37,7 @@ internal static nint maxListenerBacklog() {
     GoFrame ᒐ = default;
     try {
         var (fd, err) = open(procSysNetCoreSomaxconnˢ);
-        if (err != default!) {
+        if (err != nil) {
             return syscall.SOMAXCONN;
         }
         var fdʗ1 = fd;
@@ -57,7 +57,7 @@ internal static nint maxListenerBacklog() {
         }
         return n;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

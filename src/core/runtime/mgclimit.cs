@@ -225,25 +225,28 @@ internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) {
         var mp = acquirem();
         foreach (var (_, pp) in allp) {
             var (typ, duration) = pp.of(runtime_package.Δp.ᏑlimiterEvent).consume(now);
-            var exprᴛ1 = typ;
-            if (exprᴛ1 == limiterEventIdle) {
+            switch (typ) {
+            case var ᴛ when ᴛ == limiterEventIdle: {
                 Ꮡsched.of(schedt.ᏑidleTime).Add(duration);
                 idleTime += duration;
+                break;
             }
-            else if (exprᴛ1 == limiterEventIdleMarkWork) {
+            case var ᴛ when ᴛ == limiterEventIdleMarkWork: {
                 idleTime += duration;
+                break;
             }
-            else if (exprᴛ1 == limiterEventMarkAssist || exprᴛ1 == limiterEventScavengeAssist) {
+            case var ᴛ when ᴛ == limiterEventMarkAssist || ᴛ == limiterEventScavengeAssist: {
                 assistTime += duration;
+                break;
             }
-            else if (exprᴛ1 == limiterEventNone) {
-                do {
-                    break;
-                } while (false);
+            case var ᴛ when ᴛ == limiterEventNone: {
+                break;
+                break;
             }
-            else { /* default: */
+            default: {
                 @throw(invalidLimiterEventTypeˢ);
-            }
+                break;
+            }}
         }
         releasem(ref (mp).DerefOrNull());
     }
@@ -309,7 +312,7 @@ internal static void accumulate(this ж<gcCPULimiterState> Ꮡl, int64 mutatorTi
     }
 
     // Handle non-limiting cases.
-    if (change < 0 && l.bucket.fill <= (uint64)(-change)){
+    if (change < 0 && l.bucket.fill <= (uint64)(-change)) {
         // Bucket emptied.
         l.bucket.fill = 0;
     } else {
@@ -360,12 +363,11 @@ internal static void resetCapacity(this ж<gcCPULimiterState> Ꮡl, int64 now, i
     l.nprocs = nprocs;
 
     l.bucket.capacity = (uint64)nprocs * (uint64)capacityPerProc;
-    if (l.bucket.fill > l.bucket.capacity){
+    if (l.bucket.fill > l.bucket.capacity) {
         l.bucket.fill = l.bucket.capacity;
         Ꮡl.of(gcCPULimiterState.Ꮡenabled).Store(true);
         Ꮡl.of(gcCPULimiterState.ᏑlastEnabledCycle).Store(memstats.numgc + 1);
-    } else 
-    if (l.bucket.fill < l.bucket.capacity) {
+    } else if (l.bucket.fill < l.bucket.capacity) {
         Ꮡl.of(gcCPULimiterState.Ꮡenabled).Store(false);
     }
     Ꮡl.unlock();
@@ -379,11 +381,11 @@ internal static void resetCapacity(this ж<gcCPULimiterState> Ꮡl, int64 now, i
 // This type may use no more than limiterEventBits bits of information.
 partial struct limiterEventType /*num:uint8*/;
 
-internal static limiterEventType limiterEventNone => /* iota */ 0;          // None of the following events.
-internal static limiterEventType limiterEventIdleMarkWork => 1;  // Refers to an idle mark worker (see gcMarkWorkerMode).
-internal static limiterEventType limiterEventMarkAssist => 2;    // Refers to mark assist (see gcAssistAlloc).
-internal static limiterEventType limiterEventScavengeAssist => 3; // Refers to a scavenge assist (see allocSpan).
-internal static limiterEventType limiterEventIdle => 4;          // Refers to time a P spent on the idle list.
+internal static limiterEventType limiterEventNone => /* iota */ 0; // None of the following events.
+internal static limiterEventType limiterEventIdleMarkWork => 1;    // Refers to an idle mark worker (see gcMarkWorkerMode).
+internal static limiterEventType limiterEventMarkAssist => 2;      // Refers to mark assist (see gcAssistAlloc).
+internal static limiterEventType limiterEventScavengeAssist => 3;  // Refers to a scavenge assist (see allocSpan).
+internal static limiterEventType limiterEventIdle => 4;            // Refers to time a P spent on the idle list.
 
 internal static UntypedInt limiterEventBits => 3;
 
@@ -397,7 +399,7 @@ partial struct limiterEventStamp /*num:uint64*/;
 
 // makeLimiterEventStamp creates a new stamp from the event type and the current timestamp.
 internal static limiterEventStamp makeLimiterEventStamp(limiterEventType typ, int64 now) {
-    return (limiterEventStamp)((uint64)(uint8)typ << (int)(64 - limiterEventBits) | ((uint64)now & ~limiterEventTypeMask));
+    return (limiterEventStamp)((uint64)typ << (int)(64 - limiterEventBits) | ((uint64)now & ~limiterEventTypeMask));
 }
 
 // duration computes the difference between now and the start time stored in the stamp.
@@ -416,7 +418,7 @@ internal static int64 duration(this limiterEventStamp s, int64 now) {
 
 // type extracts the event type from the stamp.
 internal static limiterEventType typ(this limiterEventStamp s) {
-    return (limiterEventType)(uint8)((uint64)(s >> (int)(64 - limiterEventBits)));
+    return (limiterEventType)(uint8)((s >> (int)(64 - limiterEventBits)));
 }
 
 // limiterEvent represents tracking state for an event tracked by the GC CPU limiter.
@@ -448,11 +450,11 @@ internal static bool start(this ж<limiterEvent> Ꮡe, limiterEventType typ, int
 // Returns the type of the in-flight event, as well as how long it's currently been
 // executing for. Returns limiterEventNone if no event is active.
 internal static (limiterEventType typ, int64 duration) consume(this ж<limiterEvent> Ꮡe, int64 now) {
-    limiterEventType typ = default!;
-    int64 duration = default!;
+    limiterEventType typ = default;
+    int64 duration = default;
 
     // Read the limiter event timestamp and update it to now.
-    while (ᐧ) {
+    for (;;) {
         var old = (limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load();
         typ = old.typ();
         if (typ == limiterEventNone) {
@@ -482,8 +484,8 @@ internal static readonly @string limiterEventStopInvalidˢ = "limiterEvent.stop:
 //
 // The caller must be non-preemptible across the event. See start as to why.
 internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) {
-    limiterEventStamp stamp = default!;
-    while (ᐧ) {
+    limiterEventStamp stamp = default;
+    for (;;) {
         stamp = (limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load();
         if (stamp.typ() != typ) {
             print((@string)"runtime: want="u8, typ, (@string)" got="u8, stamp.typ(), (@string)"\n"u8);
@@ -504,20 +506,24 @@ internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int6
         return;
     }
     // Account for the event.
-    var exprᴛ1 = typ;
-    if (exprᴛ1 == limiterEventIdle) {
+    switch (typ) {
+    case var ᴛ when ᴛ == limiterEventIdle: {
         Ꮡsched.of(schedt.ᏑidleTime).Add(duration);
         ᏑgcCPULimiter.addIdleTime(duration);
+        break;
     }
-    else if (exprᴛ1 == limiterEventIdleMarkWork) {
+    case var ᴛ when ᴛ == limiterEventIdleMarkWork: {
         ᏑgcCPULimiter.addIdleTime(duration);
+        break;
     }
-    else if (exprᴛ1 == limiterEventMarkAssist || exprᴛ1 == limiterEventScavengeAssist) {
+    case var ᴛ when ᴛ == limiterEventMarkAssist || ᴛ == limiterEventScavengeAssist: {
         ᏑgcCPULimiter.addAssistTime(duration);
+        break;
     }
-    else { /* default: */
+    default: {
         @throw(limiterEventStopInvalidˢ);
-    }
+        break;
+    }}
 }
 
 } // end runtime_package

@@ -11,46 +11,43 @@ using @internal;
 
 partial class net_package {
 
-internal static error setKeepAliveIdle(ж<netFD> Ꮡfd, time.Duration d) {
-    if (d == 0){
+internal static error setKeepAliveIdle(ж<netFD> fd, time.Duration d) {
+    if (d == 0) {
         d = defaultTCPKeepAliveIdle;
-    } else 
-    if (d < 0) {
-        return default!;
+    } else if (d < 0) {
+        return default;
     }
 
     // The kernel expects seconds so round to next highest second.
-    nint secs = (nint)(int64)roundDurationUp(d, time.ΔSecond);
-    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, secs);
-    runtime.KeepAlive(Ꮡfd.OrTypedNil());
+    nint secs = (nint)roundDurationUp(d, time.ΔSecond);
+    var err = fd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, secs);
+    runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
 }
 
-internal static error setKeepAliveInterval(ж<netFD> Ꮡfd, time.Duration d) {
-    if (d == 0){
+internal static error setKeepAliveInterval(ж<netFD> fd, time.Duration d) {
+    if (d == 0) {
         d = defaultTCPKeepAliveInterval;
-    } else 
-    if (d < 0) {
-        return default!;
+    } else if (d < 0) {
+        return default;
     }
 
     // The kernel expects seconds so round to next highest second.
-    nint secs = (nint)(int64)roundDurationUp(d, time.ΔSecond);
-    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPINTVL, secs);
-    runtime.KeepAlive(Ꮡfd.OrTypedNil());
+    nint secs = (nint)roundDurationUp(d, time.ΔSecond);
+    var err = fd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPINTVL, secs);
+    runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
 }
 
-internal static error setKeepAliveCount(ж<netFD> Ꮡfd, nint n) {
-    if (n == 0){
+internal static error setKeepAliveCount(ж<netFD> fd, nint n) {
+    if (n == 0) {
         n = defaultTCPKeepAliveCount;
-    } else 
-    if (n < 0) {
-        return default!;
+    } else if (n < 0) {
+        return default;
     }
 
-    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPCNT, n);
-    runtime.KeepAlive(Ꮡfd.OrTypedNil());
+    var err = fd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPCNT, n);
+    runtime.KeepAlive(fd.OrTypedNil());
     return wrapSyscallError(setsockoptˢ, err);
 }
 

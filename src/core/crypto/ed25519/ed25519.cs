@@ -102,20 +102,20 @@ internal static readonly @string ed25519ExpectedOptsˢ = "ed25519: expected opts
 // A value of type [Options] can be used as opts, or crypto.Hash(0) or
 // crypto.SHA512 directly to select plain Ed25519 or Ed25519ph, respectively.
 public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) {
-    error err = default!;
+    error err = default;
 
     var privʗ1 = priv;
 
     var privʗ2 = priv;
     (var k, err) = ᏑprivateKeyCache.Get(Ꮡ(priv, 0), () => ed25519.NewPrivateKey(privʗ1), (ж<ed25519.PrivateKey> kΔ1) => subtle.ConstantTimeCompare(privʗ2, kΔ1.Bytes()) == 1);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     crypto.Hash hash = opts.HashFunc();
     @string context = ""u8;
     {
         var (optsΔ1, ok) = opts._<ж<Options>>(ᐧ); if (ok) {
-            context = optsΔ1.Value.Context;
+            context = optsΔ1.Context;
         }
     }
     switch (ᐧ) {
@@ -124,15 +124,15 @@ public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.R
     }
     case {} when hash == ((crypto.Hash)0) && context != ""u8: { // Ed25519ctx
         if (fips140only.Enforced()) {
-            return (default!, errors.New(cryptoEd25519UseOfˢ));
+            return (default, errors.New(cryptoEd25519UseOfˢ));
         }
         return ed25519.SignCtx(k, message, context);
     }
     case {} when hash == ((crypto.Hash)0): { // Ed25519
-        return (ed25519.Sign(k, message), default!);
+        return (ed25519.Sign(k, message), default);
     }
     default: {
-        return (default!, errors.New(ed25519ExpectedOptsˢ));
+        return (default, errors.New(ed25519ExpectedOptsˢ));
     }}
 }
 
@@ -163,8 +163,8 @@ internal static ж<godebug.Setting> cryptocustomrand = godebug.New("cryptocustom
 // The output of this function is deterministic, and equivalent to reading
 // [SeedSize] bytes from random, and passing them to [NewKeyFromSeed].
 public static (PublicKey, PrivateKey, error) GenerateKey(io.Reader random) {
-    if (random == default!) {
-        if (cryptocustomrand.Value() == "1"u8){
+    if (random == nil) {
+        if (cryptocustomrand.Value() == "1"u8) {
             random = cryptorand.Reader;
             if (!rand.IsDefaultReader(random)) {
                 cryptocustomrand.IncNonDefault();
@@ -176,14 +176,14 @@ public static (PublicKey, PrivateKey, error) GenerateKey(io.Reader random) {
 
     var seed = new slice<byte>(SeedSize);
     {
-        var (_, err) = io.ReadFull(random, seed); if (err != default!) {
-            return (default!, default!, err);
+        var (_, err) = io.ReadFull(random, seed); if (err != nil) {
+            return (default, default, err);
         }
     }
 
     var privateKey = NewKeyFromSeed(seed);
     var publicKey = privateKey.Public()._<PublicKey>();
-    return (publicKey, privateKey, default!);
+    return (publicKey, privateKey, default);
 }
 
 // NewKeyFromSeed calculates a private key from a seed. It will panic if
@@ -199,7 +199,7 @@ public static PrivateKey NewKeyFromSeed(slice<byte> seed) {
 
 internal static void newKeyFromSeed(slice<byte> privateKey, slice<byte> seed) {
     var (k, err) = ed25519.NewPrivateKeyFromSeed(seed);
-    if (err != default!) {
+    if (err != nil) {
         // NewPrivateKeyFromSeed only returns an error if the seed length is incorrect.
         throw panic("ed25519: bad seed length: " + strconv.Itoa(len(seed)));
     }
@@ -221,7 +221,7 @@ internal static void sign(slice<byte> signature, PrivateKey privateKey, slice<by
 
     var privateKeyʗ2 = privateKey;
     var (k, err) = ᏑprivateKeyCache.Get(Ꮡ(privateKey, 0), () => ed25519.NewPrivateKey(privateKeyʗ1), (ж<ed25519.PrivateKey> kΔ1) => subtle.ConstantTimeCompare(privateKeyʗ2, kΔ1.Bytes()) == 1);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("ed25519: bad private key: " + err.Error());
     }
     var sig = ed25519.Sign(k, message);
@@ -234,7 +234,7 @@ internal static void sign(slice<byte> signature, PrivateKey privateKey, slice<by
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
 public static bool Verify(PublicKey publicKey, slice<byte> message, slice<byte> sig) {
-    return VerifyWithOptions(publicKey, message, sig, Ꮡ(new Options(Hash: ((crypto.Hash)0)))) == default!;
+    return VerifyWithOptions(publicKey, message, sig, Ꮡ(new Options(Hash: ((crypto.Hash)0)))) == nil;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -260,7 +260,7 @@ public static error VerifyWithOptions(PublicKey publicKey, slice<byte> message, 
         }
     }
     var (k, err) = ed25519.NewPublicKey(publicKey);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     switch (ᐧ) {

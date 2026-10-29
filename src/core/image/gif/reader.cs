@@ -51,10 +51,10 @@ internal static UntypedInt sImageDescriptor => 0x2C;
 internal static UntypedInt sTrailer => 0x3B;
 
 // Extensions.
-internal static UntypedInt eText => 0x01; // Plain Text
+internal static UntypedInt eText => 0x01;           // Plain Text
 internal static UntypedInt eGraphicControl => 0xF9; // Graphic Control
-internal static UntypedInt eComment => 0xFE; // Comment
-internal static UntypedInt eApplication => 0xFF; // Application
+internal static UntypedInt eComment => 0xFE;        // Comment
+internal static UntypedInt eApplication => 0xFF;    // Application
 
 internal static error readFull(io.Reader r, slice<byte> b) {
     var (_, err) = io.ReadFull(r, b);
@@ -112,20 +112,20 @@ partial struct blockReader {
 }
 
 internal static void fill(this ref blockReader b) {
-    if (b.err != default!) {
+    if (b.err != nil) {
         return;
     }
-    (b.j, b.err) = readByte((~b.d).r);
-    if (b.j == 0 && b.err == default!) {
+    (b.j, b.err) = readByte(b.d.r);
+    if (b.j == 0 && b.err == nil) {
         b.err = io.EOF;
     }
-    if (b.err != default!) {
+    if (b.err != nil) {
         return;
     }
 
     b.i = 0;
-    b.err = readFull((~b.d).r, (~b.d).tmp.slice(0, b.j));
-    if (b.err != default!) {
+    b.err = readFull(b.d.r, b.d.tmp.slice(0, b.j));
+    if (b.err != nil) {
         b.j = 0;
     }
 }
@@ -133,32 +133,32 @@ internal static void fill(this ref blockReader b) {
 internal static (byte, error) ReadByte(this ref blockReader b) {
     if (b.i == b.j) {
         b.fill();
-        if (b.err != default!) {
+        if (b.err != nil) {
             return (0, b.err);
         }
     }
 
-    var c = (~b.d).tmp[b.i];
+    var c = b.d.tmp[b.i];
     b.i++;
-    return (c, default!);
+    return (c, default);
 }
 
 // blockReader must implement io.Reader, but its Read shouldn't ever actually
 // be called in practice. The compress/lzw package will only call [blockReader.ReadByte].
 internal static (nint, error) Read(this ref blockReader b, slice<byte> p) {
-    if (len(p) == 0 || b.err != default!) {
+    if (len(p) == 0 || b.err != nil) {
         return (0, b.err);
     }
     if (b.i == b.j) {
         b.fill();
-        if (b.err != default!) {
+        if (b.err != nil) {
             return (0, b.err);
         }
     }
 
-    nint n = copy(p, (~b.d).tmp.slice(b.i, b.j));
+    nint n = copy(p, b.d.tmp.slice(b.i, b.j));
     b.i += (uint8)n;
-    return (n, default!);
+    return (n, default);
 }
 
 // close primarily detects whether or not a block terminator was encountered
@@ -170,11 +170,10 @@ internal static (nint, error) Read(this ref blockReader b, slice<byte> p) {
 // These accommodations allow us to support GIFs created by less strict encoders.
 // See https://golang.org/issue/16146.
 internal static error close(this ref blockReader b) {
-    if (AreEqual(b.err, io.EOF)){
+    if (AreEqual(b.err, io.EOF)) {
         // A clean block-sequence terminator was encountered while reading.
-        return default!;
-    } else 
-    if (b.err != default!) {
+        return default;
+    } else if (b.err != nil) {
         // Some other error was encountered while reading.
         return b.err;
     }
@@ -183,13 +182,11 @@ internal static error close(this ref blockReader b) {
         // We reached the end of a sub block reading LZW data. We'll allow at
         // most one more sub block of data with a length of 1 byte.
         b.fill();
-        if (AreEqual(b.err, io.EOF)){
-            return default!;
-        } else 
-        if (b.err != default!){
+        if (AreEqual(b.err, io.EOF)) {
+            return default;
+        } else if (b.err != nil) {
             return b.err;
-        } else 
-        if (b.j > 1) {
+        } else if (b.j > 1) {
             return errTooMuch;
         }
     }
@@ -197,10 +194,9 @@ internal static error close(this ref blockReader b) {
     // Part of a sub-block remains buffered. We expect that the next attempt to
     // buffer a sub-block will reach the block terminator.
     b.fill();
-    if (AreEqual(b.err, io.EOF)){
-        return default!;
-    } else 
-    if (b.err != default!) {
+    if (AreEqual(b.err, io.EOF)) {
+        return default;
+    } else if (b.err != nil) {
         return b.err;
     }
 
@@ -213,7 +209,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
 
     // Add buffering if r does not provide ReadByte.
     {
-        var (rr, ok) = r._<reader>(ᐧ); if (ok){
+        var (rr, ok) = r._<reader>(ᐧ); if (ok) {
             d.r = rr;
         } else {
             d.r = new bufio_Readerжreader(bufio.NewReader(r));
@@ -223,52 +219,54 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     d.loopCount = -1;
 
     var err = d.readHeaderAndScreenDescriptor();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (configOnly) {
-        return default!;
+        return default;
     }
 
-    while (ᐧ) {
+    for (;;) {
         var (c, errΔ1) = readByte(d.r);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return fmt.Errorf("gif: reading frames: %v"u8, errΔ1);
         }
-        var exprᴛ1 = c;
-        if (exprᴛ1 == sExtension) {
+        switch (c) {
+        case var ᴛ when ᴛ == sExtension: {
             {
-                errΔ1 = d.readExtension(); if (errΔ1 != default!) {
+                errΔ1 = d.readExtension(); if (errΔ1 != nil) {
                     return errΔ1;
                 }
             }
+            break;
         }
-        else if (exprᴛ1 == sImageDescriptor) {
+        case var ᴛ when ᴛ == sImageDescriptor: {
             {
-                errΔ1 = Ꮡd.readImageDescriptor(keepAllFrames); if (errΔ1 != default!) {
+                errΔ1 = Ꮡd.readImageDescriptor(keepAllFrames); if (errΔ1 != nil) {
                     return errΔ1;
                 }
             }
 
             if (!keepAllFrames && len(d.image) == 1) {
-                return default!;
+                return default;
             }
+            break;
         }
-        else if (exprᴛ1 == sTrailer) {
+        case var ᴛ when ᴛ == sTrailer: {
             if (len(d.image) == 0) {
                 return fmt.Errorf("gif: missing image data"u8);
             }
-            return default!;
+            return default;
         }
-        else { /* default: */
+        default: {
             return fmt.Errorf("gif: unknown block type: 0x%.2x"u8, c);
-        }
+        }}
     }
 }
 
 internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
     var err = readFull(d.r, d.tmp[..13]);
-    if (err != default!) {
+    if (err != nil) {
         return fmt.Errorf("gif: reading header: %v"u8, err);
     }
     d.vers = (@string)(d.tmp[..6]);
@@ -282,21 +280,21 @@ internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
             d.backgroundIndex = d.tmp[11];
             // readColorTable overwrites the contents of d.tmp, but that's OK.
             {
-                (d.globalColorTable, err) = d.readColorTable(fields); if (err != default!) {
+                (d.globalColorTable, err) = d.readColorTable(fields); if (err != nil) {
                     return err;
                 }
             }
         }
     }
     // d.tmp[12] is the Pixel Aspect Ratio, which is ignored.
-    return default!;
+    return default;
 }
 
 internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) {
     nint n = ((nint)1).Lsh((1 + (nuint)((byte)(fields & (byte)fColorTableBitsMask))));
     var err = readFull(d.r, d.tmp.slice(0, 3 * n));
-    if (err != default!) {
-        return (default!, fmt.Errorf("gif: reading color table: %s"u8, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("gif: reading color table: %s"u8, err));
     }
     nint j = 0;
     var p = new Δcolor.Palette(n);
@@ -304,39 +302,42 @@ internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte
         p[i] = new colorꓸRGBA(d.tmp[j + 0], d.tmp[j + 1], d.tmp[j + 2], 0xFF);
         j += 3;
     }
-    return (p, default!);
+    return (p, default);
 }
 
 internal static error readExtension(this ref decoder d) {
     var (extension, err) = readByte(d.r);
-    if (err != default!) {
+    if (err != nil) {
         return fmt.Errorf("gif: reading extension: %v"u8, err);
     }
     nint size = 0;
-    var exprᴛ1 = extension;
-    if (exprᴛ1 == eText) {
+    switch (extension) {
+    case var ᴛ when ᴛ == eText: {
         size = 13;
+        break;
     }
-    else if (exprᴛ1 == eGraphicControl) {
+    case var ᴛ when ᴛ == eGraphicControl: {
         return d.readGraphicControl();
     }
-    else if (exprᴛ1 == eComment) {
+    case var ᴛ when ᴛ == eComment: {
         // nothing to do but read the data.
+        break;
     }
-    else if (exprᴛ1 == eApplication) {
+    case var ᴛ when ᴛ == eApplication: {
         var (b, errΔ2) = readByte(d.r);
-        if (errΔ2 != default!) {
+        if (errΔ2 != nil) {
             return fmt.Errorf("gif: reading extension: %v"u8, errΔ2);
         }
         // The spec requires size be 11, but Adobe sometimes uses 10.
         size = (nint)b;
+        break;
     }
-    else { /* default: */
+    default: {
         return fmt.Errorf("gif: unknown extension 0x%.2x"u8, extension);
-    }
+    }}
     if (size > 0) {
         {
-            var errΔ3 = readFull(d.r, d.tmp.slice(0, size)); if (errΔ3 != default!) {
+            var errΔ3 = readFull(d.r, d.tmp.slice(0, size)); if (errΔ3 != nil) {
                 return fmt.Errorf("gif: reading extension: %v"u8, errΔ3);
             }
         }
@@ -346,30 +347,30 @@ internal static error readExtension(this ref decoder d) {
     // this extension defines a loop count.
     if (extension == eApplication && ((sstring)(d.tmp.slice(0, size))) == "NETSCAPE2.0"u8) {
         var (n, errΔ4) = d.readBlock();
-        if (errΔ4 != default!) {
+        if (errΔ4 != nil) {
             return fmt.Errorf("gif: reading extension: %v"u8, errΔ4);
         }
         if (n == 0) {
-            return default!;
+            return default;
         }
         if (n == 3 && d.tmp[0] == 1) {
             d.loopCount = (nint)d.tmp[1] | (nint)d.tmp[2] << 8;
         }
     }
-    while (ᐧ) {
+    for (;;) {
         var (n, errΔ5) = d.readBlock();
-        if (errΔ5 != default!) {
+        if (errΔ5 != nil) {
             return fmt.Errorf("gif: reading extension: %v"u8, errΔ5);
         }
         if (n == 0) {
-            return default!;
+            return default;
         }
     }
 }
 
 internal static error readGraphicControl(this ref decoder d) {
     {
-        var err = readFull(d.r, d.tmp[..6]); if (err != default!) {
+        var err = readFull(d.r, d.tmp[..6]); if (err != nil) {
             return fmt.Errorf("gif: can't read graphic control: %s"u8, err);
         }
     }
@@ -386,7 +387,7 @@ internal static error readGraphicControl(this ref decoder d) {
     if (d.tmp[5] != 0) {
         return fmt.Errorf("gif: invalid graphic control extension block terminator: %d"u8, d.tmp[5]);
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -398,45 +399,45 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         ref var d = ref Ꮡd.DerefOrNull();
 
         var (m, err) = d.newImageFromDescriptor();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var useLocalColorTable = (byte)(d.imageFields & (byte)fColorTable) != 0;
-        if (useLocalColorTable){
-            (m.Value.Palette, err) = d.readColorTable(d.imageFields);
-            if (err != default!) {
+        if (useLocalColorTable) {
+            (m.Palette, err) = d.readColorTable(d.imageFields);
+            if (err != nil) {
                 return err;
             }
         } else {
-            if (d.globalColorTable == default!) {
+            if (d.globalColorTable == nil) {
                 return errors.New(gifNoColorTableˢ);
             }
-            m.Value.Palette = d.globalColorTable;
+            m.Palette = d.globalColorTable;
         }
         if (d.hasTransparentIndex) {
             if (!useLocalColorTable) {
                 // Clone the global color table.
-                m.Value.Palette = appendꓸꓸꓸ((Δcolor.Palette)default!, d.globalColorTable);
+                m.Palette = appendꓸꓸꓸ((Δcolor.Palette)default, d.globalColorTable);
             }
             {
-                nint ti = (nint)d.transparentIndex; if (ti < len((~m).Palette)){
-                    m.Value.Palette[ti] = new colorꓸRGBA(nil);
+                nint ti = (nint)d.transparentIndex; if (ti < len(m.Palette)) {
+                    m.Palette[ti] = new colorꓸRGBA();
                 } else {
                     // The transparentIndex is out of range, which is an error
                     // according to the spec, but Firefox and Google Chrome
                     // seem OK with this, so we enlarge the palette with
                     // transparent colors. See golang.org/issue/15059.
                     var p = new Δcolor.Palette(ti + 1);
-                    copy(p, (~m).Palette);
-                    for (nint i = len((~m).Palette); i < len(p); i++) {
-                        p[i] = new colorꓸRGBA(nil);
+                    copy(p, m.Palette);
+                    for (nint i = len(m.Palette); i < len(p); i++) {
+                        p[i] = new colorꓸRGBA();
                     }
-                    m.Value.Palette = p;
+                    m.Palette = p;
                 }
             }
         }
         (var litWidth, err) = readByte(d.r);
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("gif: reading image data: %v"u8, err);
         }
         if (litWidth < 2 || litWidth > 8) {
@@ -448,7 +449,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         var lzwrʗ1 = lzwr;
         defer(() => lzwrʗ1.Close(), ref ᒐ);
         {
-            err = readFull(lzwr, (~m).Pix); if (err != default!) {
+            err = readFull(lzwr, m.Pix); if (err != nil) {
                 if (!AreEqual(err, io.ErrUnexpectedEOF)) {
                     return fmt.Errorf("gif: reading image data: %v"u8, err);
                 }
@@ -468,7 +469,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         // See https://golang.org/issue/9856 for an example GIF.
         {
             var (n, errΔ1) = lzwr.Read(d.tmp[256..257]); if (n != 0 || (!AreEqual(errΔ1, io.EOF) && !AreEqual(errΔ1, io.ErrUnexpectedEOF))) {
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     return fmt.Errorf("gif: reading image data: %v"u8, errΔ1);
                 }
                 return errTooMuch;
@@ -478,18 +479,17 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         // In practice, some GIFs have an extra byte in the data sub-block
         // stream, which we ignore. See https://golang.org/issue/16146.
         {
-            var errΔ2 = br.close(); if (AreEqual(errΔ2, errTooMuch)){
+            var errΔ2 = br.close(); if (AreEqual(errΔ2, errTooMuch)) {
                 return errTooMuch;
-            } else 
-            if (errΔ2 != default!) {
+            } else if (errΔ2 != nil) {
                 return fmt.Errorf("gif: reading image data: %v"u8, errΔ2);
             }
         }
 
         // Check that the color indexes are inside the palette.
-        if (len((~m).Palette) < 256) {
-            foreach (var (_, pixel) in (~m).Pix) {
-                if ((nint)pixel >= len((~m).Palette)) {
+        if (len(m.Palette) < 256) {
+            foreach (var (_, pixel) in m.Pix) {
+                if ((nint)pixel >= len(m.Palette)) {
                     return errBadPixel;
                 }
             }
@@ -510,9 +510,9 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         // to follow." We therefore reset the GCE fields to zero.
         d.delayTime = 0;
         d.hasTransparentIndex = false;
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -521,8 +521,8 @@ internal static readonly @string gifFrameBoundsLargerThanˢ = "gif: frame bounds
 
 internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) {
     {
-        var err = readFull(d.r, d.tmp[..9]); if (err != default!) {
-            return (default!, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
+        var err = readFull(d.r, d.tmp[..9]); if (err != nil) {
+            return (default, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
         }
     }
     nint left = (nint)d.tmp[0] + ((nint)d.tmp[1] << 8);
@@ -548,25 +548,25 @@ internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref deco
     // imageBounds.Max (d.width, d.height) and not frameBounds.Min (left, top)
     // against imageBounds.Min (0, 0).
     if (left + width > d.width || top + height > d.height) {
-        return (default!, errors.New(gifFrameBoundsLargerThanˢ));
+        return (default, errors.New(gifFrameBoundsLargerThanˢ));
     }
     return (image.NewPaletted(new image.Rectangle(
         Min: new image.Point(left, top),
         Max: new image.Point(left + width, top + height)
-    ), default!), default!);
+    ), default), default);
 }
 
 internal static (nint, error) readBlock(this ref decoder d) {
     var (n, err) = readByte(d.r);
-    if (n == 0 || err != default!) {
+    if (n == 0 || err != nil) {
         return (0, err);
     }
     {
-        var errΔ1 = readFull(d.r, d.tmp.slice(0, n)); if (errΔ1 != default!) {
+        var errΔ1 = readFull(d.r, d.tmp.slice(0, n)); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
-    return ((nint)n, default!);
+    return ((nint)n, default);
 }
 
 // interlaceScan defines the ordering for a pass of the interlace algorithm.
@@ -575,18 +575,18 @@ partial struct interlaceScan {
 }
 
 // interlacing represents the set of scans in an interlaced GIF image.
-internal static slice<interlaceScan> interlacing = new interlaceScan[]{
+internal static slice<interlaceScan> interlacing = slice<interlaceScan>([
     new(8, 0), // Group 1 : Every 8th. row, starting with row 0.
     new(8, 4), // Group 2 : Every 8th. row, starting with row 4.
     new(4, 2), // Group 3 : Every 4th. row, starting with row 2.
-    new(2, 1) // Group 4 : Every 2nd. row, starting with row 1.
-}.slice();
+    new(2, 1)  // Group 4 : Every 2nd. row, starting with row 1.
+]);
 
 // uninterlace rearranges the pixels in m to account for interlaced input.
 internal static void uninterlace(ж<image.Paletted> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    slice<uint8> nPix = default!;
+    slice<uint8> nPix = default;
     nint dx = m.Bounds().Dx();
     nint dy = m.Bounds().Dy();
     nPix = new slice<uint8>(dx * dy);
@@ -607,17 +607,17 @@ internal static void uninterlace(ж<image.Paletted> Ꮡm) {
 public static (image.Image, error) Decode(io.Reader r) {
     ref var d = ref heap(new decoder(), out var Ꮡd);
     {
-        var err = Ꮡd.decode(r, false, false); if (err != default!) {
-            return (default!, err);
+        var err = Ꮡd.decode(r, false, false); if (err != nil) {
+            return (default, err);
         }
     }
-    return (new image.PalettedжImage(d.image[0]), default!);
+    return (new image.PalettedжImage(d.image[0]), default);
 }
 
 // GIF represents the possibly multiple images stored in a GIF file.
 partial struct GIF {
     public slice<ж<image.Paletted>> Image; // The successive images.
-    public slice<nint> Delay;       // The successive delay times, one per frame, in 100ths of a second.
+    public slice<nint> Delay;              // The successive delay times, one per frame, in 100ths of a second.
     // LoopCount controls the number of times an animation will be
     // restarted during display.
     // A LoopCount of 0 means to loop forever.
@@ -649,8 +649,8 @@ partial struct GIF {
 public static (ж<GIF>, error) DecodeAll(io.Reader r) {
     ref var d = ref heap(new decoder(), out var Ꮡd);
     {
-        var err = Ꮡd.decode(r, false, true); if (err != default!) {
-            return (default!, err);
+        var err = Ꮡd.decode(r, false, true); if (err != nil) {
+            return (default, err);
         }
     }
     var gif = Ꮡ(new GIF(
@@ -665,7 +665,7 @@ public static (ж<GIF>, error) DecodeAll(io.Reader r) {
         ),
         BackgroundIndex: d.backgroundIndex
     ));
-    return (gif, default!);
+    return (gif, default);
 }
 
 // DecodeConfig returns the global color model and dimensions of a GIF image
@@ -673,15 +673,15 @@ public static (ж<GIF>, error) DecodeAll(io.Reader r) {
 public static (image.Config, error) DecodeConfig(io.Reader r) {
     ref var d = ref heap(new decoder(), out var Ꮡd);
     {
-        var err = Ꮡd.decode(r, true, false); if (err != default!) {
-            return (new image.Config(nil), err);
+        var err = Ꮡd.decode(r, true, false); if (err != nil) {
+            return (new image.Config(), err);
         }
     }
     return (new image.Config(
         ColorModel: d.globalColorTable,
         Width: d.width,
         Height: d.height
-    ), default!);
+    ), default);
 }
 
 [GoInit] internal static void init() {

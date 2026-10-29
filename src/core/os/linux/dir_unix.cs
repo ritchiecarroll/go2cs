@@ -21,8 +21,8 @@ partial class os_package {
 partial struct dirInfo {
     internal Δsync.Mutex mu;
     internal ж<slice<byte>> buf; // buffer for directory I/O
-    internal nint nbuf;    // length of buf; return value from Getdirentries
-    internal nint bufp;    // location of next record in buf.
+    internal nint nbuf;          // length of buf; return value from Getdirentries
+    internal nint bufp;          // location of next record in buf.
 }
 
 // More than 5760 to work around https://golang.org/issue/24015.
@@ -40,22 +40,22 @@ internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)Ꮡdi
 internal static void close(this ref dirInfo d) {
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
-        d.buf = default!;
+        d.buf = default;
     }
 }
 
 internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdir(this ж<File> Ꮡf, nint n, readdirMode mode) {
-    slice<@string> names = default!;
-    slice<DirEntry> dirents = default!;
-    slice<FileInfo> infos = default!;
-    error err = default!;
+    slice<@string> names = default;
+    slice<DirEntry> dirents = default;
+    slice<FileInfo> infos = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var f = ref Ꮡf.DerefOrNull();
 
         // If this file has no dirInfo, create one.
-        ж<dirInfo> d = default!;
-        while (ᐧ) {
+        ж<dirInfo> d = default;
+        for (;;) {
             d = Ꮡf.of(File.Ꮡdirinfo).Load();
             if (d != nil) {
                 break;
@@ -70,8 +70,8 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
         d.of(dirInfo.Ꮡmu).Lock();
         var dʗ1 = d;
         defer(dʗ1.of(dirInfo.Ꮡmu).Unlock, ref ᒐ);
-        if ((~d).buf == nil) {
-            d.Value.buf = ᏑdirBufPool.Get()._<ж<slice<byte>>>();
+        if (d.buf == nil) {
+            d.buf = ᏑdirBufPool.Get()._<ж<slice<byte>>>();
         }
 
         // Change the meaning of n for the implementation below.
@@ -89,30 +89,30 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
 
         while (n != 0) {
             // Refill the buffer if necessary
-            if ((~d).bufp >= (~d).nbuf) {
-                d.Value.bufp = 0;
-                error errno = default!;
-                (d.Value.nbuf, errno) = Ꮡf.of(File.Ꮡpfd).ReadDirent((~d).buf.ValueSlot);
+            if (d.bufp >= d.nbuf) {
+                d.bufp = 0;
+                error errno = default;
+                (d.nbuf, errno) = Ꮡf.of(File.Ꮡpfd).ReadDirent(d.buf.ValueSlot);
                 runtime.KeepAlive(Ꮡf.OrTypedNil());
-                if (errno != default!) {
+                if (errno != nil) {
                     (names, dirents, infos, err) = (names, dirents, infos, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdirent"u8, Path: f.name, Err: errno)))); goto ᒐdone;
                 }
-                if ((~d).nbuf <= 0) {
+                if (d.nbuf <= 0) {
                     // Optimization: we can return the buffer to the pool, there is nothing else to read.
-                    ᏑdirBufPool.Put((~d).buf.OrTypedNil());
-                    d.Value.buf = default!;
+                    ᏑdirBufPool.Put(d.buf.OrTypedNil());
+                    d.buf = default;
                     break; // EOF
                 }
             }
 
             // Drain the buffer
-            var buf = ((~d).buf.ValueSlot).slice((~d).bufp, (~d).nbuf);
+            var buf = (d.buf.ValueSlot).slice(d.bufp, d.nbuf);
             var (reclen, ok) = direntReclen(buf);
             if (!ok || reclen > (uint64)len(buf)) {
                 break;
             }
             var rec = buf.slice(0, (nint)(reclen));
-            d.Value.bufp += (nint)reclen;
+            d.bufp += (nint)reclen;
             (var ino, ok) = direntIno(rec);
             if (!ok) {
                 break;
@@ -144,18 +144,17 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
             if (n > 0) { // see 'n == 0' comment above
                 n--;
             }
-            if (mode == readdirName){
+            if (mode == readdirName) {
                 names = append(names, (@string)name);
-            } else 
-            if (mode == readdirDirEntry){
+            } else if (mode == readdirDirEntry) {
                 var (de, errΔ1) = newUnixDirent(Ꮡf, (@string)name, direntType(rec));
                 if (IsNotExist(errΔ1)) {
                     // File disappeared between readdir and stat.
                     // Treat as if it didn't exist.
                     continue;
                 }
-                if (errΔ1 != default!) {
-                    (names, dirents, infos, err) = (default!, dirents, default!, errΔ1); goto ᒐdone;
+                if (errΔ1 != nil) {
+                    (names, dirents, infos, err) = (default, dirents, default, errΔ1); goto ᒐdone;
                 }
                 dirents = append(dirents, de);
             } else {
@@ -165,17 +164,17 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
                     // Treat as if it didn't exist.
                     continue;
                 }
-                if (errΔ2 != default!) {
-                    (names, dirents, infos, err) = (default!, default!, infos, errΔ2); goto ᒐdone;
+                if (errΔ2 != nil) {
+                    (names, dirents, infos, err) = (default, default, infos, errΔ2); goto ᒐdone;
                 }
                 infos = append(infos, info);
             }
         }
 
         if (n > 0 && len(names) + len(dirents) + len(infos) == 0) {
-            (names, dirents, infos, err) = (default!, default!, default!, Δio.EOF); goto ᒐdone;
+            (names, dirents, infos, err) = (default, default, default, Δio.EOF); goto ᒐdone;
         }
-        (names, dirents, infos, err) = (names, dirents, infos, default!);
+        (names, dirents, infos, err) = (names, dirents, infos, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -194,41 +193,43 @@ internal static (uint64 u, bool ok) readInt(slice<byte> b, uintptr off, uintptr 
 }
 
 internal static uint64 readIntBE(slice<byte> b, uintptr size) {
-    var exprᴛ1 = size;
-    if (exprᴛ1 == 1) {
+    switch (size) {
+    case var ᴛ when ᴛ == 1: {
         return (uint64)b[0];
     }
-    if (exprᴛ1 == 2) {
+    case var ᴛ when ᴛ == 2: {
         return (uint64)byteorder.BEUint16(b);
     }
-    if (exprᴛ1 == 4) {
+    case var ᴛ when ᴛ == 4: {
         return (uint64)byteorder.BEUint32(b);
     }
-    if (exprᴛ1 == 8) {
+    case var ᴛ when ᴛ == 8: {
         return (uint64)byteorder.BEUint64(b);
     }
-    { /* default: */
+    default: {
         throw panic("syscall: readInt with unsupported size");
-    }
+        break;
+    }}
 }
 
 internal static uint64 readIntLE(slice<byte> b, uintptr size) {
-    var exprᴛ1 = size;
-    if (exprᴛ1 == 1) {
+    switch (size) {
+    case var ᴛ when ᴛ == 1: {
         return (uint64)b[0];
     }
-    if (exprᴛ1 == 2) {
+    case var ᴛ when ᴛ == 2: {
         return (uint64)byteorder.LEUint16(b);
     }
-    if (exprᴛ1 == 4) {
+    case var ᴛ when ᴛ == 4: {
         return (uint64)byteorder.LEUint32(b);
     }
-    if (exprᴛ1 == 8) {
+    case var ᴛ when ᴛ == 8: {
         return (uint64)byteorder.LEUint64(b);
     }
-    { /* default: */
+    default: {
         throw panic("syscall: readInt with unsupported size");
-    }
+        break;
+    }}
 }
 
 } // end os_package

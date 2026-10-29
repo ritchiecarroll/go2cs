@@ -19,21 +19,21 @@ internal static readonly @string spliceˢ = "splice"u8;
 // Currently, spliceFrom is only enabled if r is a TCP or a stream-oriented Unix connection.
 //
 // If spliceFrom returns handled == false, it has performed no work.
-internal static (int64 written, error err, bool handled) spliceFrom(ж<netFD> Ꮡc, Δio.Reader r) {
-    int64 written = default!;
-    error err = default!;
-    bool handled = default!;
+internal static (int64 written, error err, bool handled) spliceFrom(ж<netFD> c, Δio.Reader r) {
+    int64 written = default;
+    error err = default;
+    bool handled = default;
 
     int64 remain = 9223372036854775807L; // by default, copy until EOF
     var (lr, ok) = r._<ж<Δio.LimitedReader>>(ᐧ);
     if (ok) {
-        (remain, r) = (lr.Value.N, lr.Value.R);
+        (remain, r) = (lr.N, lr.R);
         if (remain <= 0) {
-            return (0, default!, true);
+            return (0, default, true);
         }
     }
 
-    ж<netFD> s = default!;
+    ж<netFD> s = default;
     switch (r.type()) {
     case ж<TCPConn> v: {
         s = v.Value.fd;
@@ -44,20 +44,20 @@ internal static (int64 written, error err, bool handled) spliceFrom(ж<netFD> �
         break;
     }
     case ж<UnixConn> v: {
-        if ((~(~v).fd).net != "unix"u8) {
-            return (0, default!, false);
+        if ((~v).fd.net != "unix"u8) {
+            return (0, default, false);
         }
         s = v.Value.fd;
         break;
     }
     default: {
         var v = r;
-        return (0, default!, false);
+        return (0, default, false);
     }}
 
-    (written, handled, err) = pollSplice(Ꮡc.of(netFD.Ꮡpfd), s.of(netFD.Ꮡpfd), remain);
+    (written, handled, err) = pollSplice(c.of(netFD.Ꮡpfd), s.of(netFD.Ꮡpfd), remain);
     if (lr != nil) {
-        lr.Value.N -= written;
+        lr.N -= written;
     }
     return (written, wrapSyscallError(spliceˢ, err), handled);
 }
@@ -67,17 +67,17 @@ internal static (int64 written, error err, bool handled) spliceFrom(ж<netFD> �
 // Currently, spliceTo is only enabled if w is a stream-oriented Unix connection.
 //
 // If spliceTo returns handled == false, it has performed no work.
-internal static (int64 written, error err, bool handled) spliceTo(Δio.Writer w, ж<netFD> Ꮡc) {
-    int64 written = default!;
-    error err = default!;
-    bool handled = default!;
+internal static (int64 written, error err, bool handled) spliceTo(Δio.Writer w, ж<netFD> c) {
+    int64 written = default;
+    error err = default;
+    bool handled = default;
 
     var (uc, ok) = w._<ж<UnixConn>>(ᐧ);
-    if (!ok || (~(~uc).fd).net != "unix"u8) {
+    if (!ok || (~uc).fd.net != "unix"u8) {
         return (written, err, handled);
     }
 
-    (written, handled, err) = pollSplice((~uc).fd.of(netFD.Ꮡpfd), Ꮡc.of(netFD.Ꮡpfd), 9223372036854775807L);
+    (written, handled, err) = pollSplice((~uc).fd.of(netFD.Ꮡpfd), c.of(netFD.Ꮡpfd), 9223372036854775807L);
     return (written, wrapSyscallError(spliceˢ, err), handled);
 }
 

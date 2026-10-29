@@ -23,30 +23,30 @@ private static readonly object skippingAllocationsTestˢ4 = (@string)"skipping a
 
 // SkipTestAllocations skips the test if there are any factors that interfere
 // with allocation optimizations.
-public static void SkipTestAllocations(ж<testing.T> Ꮡt) {
+public static void SkipTestAllocations(ж<testing.T> t) {
     // Go+BoringCrypto uses cgo.
     if (Δboring.Enabled) {
-        Ꮡt.Skip(skippingAllocationsTestˢ);
+        t.Skip(skippingAllocationsTestˢ);
     }
 
     // The sanitizers sometimes cause allocations.
     if (race.Enabled || msan.Enabled || asan.Enabled) {
-        Ꮡt.Skip(skippingAllocationsTestˢ2);
+        t.Skip(skippingAllocationsTestˢ2);
     }
 
     // The plan9 crypto/rand allocates.
     if (runtime.GOOS == "plan9"u8) {
-        Ꮡt.Skip(skippingAllocationsTestˢ3);
+        t.Skip(skippingAllocationsTestˢ3);
     }
 
     // s390x deviates from other assembly implementations and is very hard to
     // test due to the lack of LUCI builders. See #67307.
     if (runtime.GOARCH == "s390x"u8) {
-        Ꮡt.Skip(skippingAllocationsTestˢ4);
+        t.Skip(skippingAllocationsTestˢ4);
     }
 
     // Some APIs rely on inliner and devirtualization to allocate on the stack.
-    testenv.SkipIfOptimizationOff(new testing_TжTB(Ꮡt));
+    testenv.SkipIfOptimizationOff(new testing_TжTB(t));
 }
 
 } // end cryptotest_package

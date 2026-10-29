@@ -51,7 +51,7 @@ internal static Func<uintptr, @unsafe.Pointer, int32, int32> overrideWrite;
 //
 //go:nosplit
 internal static int32 write(uintptr fd, @unsafe.Pointer Δp, int32 n) {
-    if (overrideWrite != default!) {
+    if (overrideWrite != nil) {
         return overrideWrite(fd, (uintptr)noescape(Δp), n);
     }
     return write1(fd, Δp, n);

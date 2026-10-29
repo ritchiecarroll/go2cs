@@ -20,7 +20,7 @@ namespace go.math;
 using godebug = @internal.godebug_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal;
 using go.sync;
 
@@ -110,7 +110,7 @@ public static uint32 Uint32(this ref Rand r) {
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
 public static uint64 Uint64(this ref Rand r) {
-    if (r.s64 != default!) {
+    if (r.s64 != nil) {
         return r.s64.Uint64();
     }
     return (uint64)r.Int63() >> 31 | (uint64)r.Int63() << 32;
@@ -295,15 +295,15 @@ public static (nint n, error err) Read(this ж<Rand> Ꮡr, slice<byte> p) {
 }
 
 internal static (nint n, error err) read(slice<byte> p, Source src, ref int64 readVal, ref int8 readPos) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     var pos = readPos;
     var val = readVal;
     var (rng, _) = src._<ж<rngSource>>(ᐧ);
     for (n = 0; n < len(p); n++) {
         if (pos == 0) {
-            if (rng != nil){
+            if (rng != nil) {
                 val = rng.Int63();
             } else {
                 val = src.Int63();
@@ -311,7 +311,7 @@ internal static (nint n, error err) read(slice<byte> p, Source src, ref int64 re
             pos = 7;
         }
         p[n] = (byte)val;
-        val >>= (int)(8);
+        val >>= 8;
         pos--;
     }
     readPos = pos;
@@ -345,15 +345,15 @@ internal static ж<Rand> globalRand() {
     }
 
     // This is the first call. Initialize based on GODEBUG.
-    ж<Rand> r = default!;
-    if (randautoseed.Value() == "0"u8){
+    ж<Rand> r = default;
+    if (randautoseed.Value() == "0"u8) {
         randautoseed.IncNonDefault();
         r = New(new lockedSourceжSource(@new<lockedSource>()));
         r.Seed(1);
     } else {
         r = Ꮡ(new Rand(
-            src: new runtimeSourceжSource(Ꮡ(new runtimeSource(nil))),
-            s64: new runtimeSourceжSource64(Ꮡ(new runtimeSource(nil)))
+            src: new runtimeSourceжSource(Ꮡ(new runtimeSource())),
+            s64: new runtimeSourceжSource64(Ꮡ(new runtimeSource()))
         ));
     }
 
@@ -392,13 +392,13 @@ internal static uint64 Uint64(this ref runtimeSource _) {
     return runtime_rand();
 }
 
-internal static (nint n, error err) read(this ж<runtimeSource> Ꮡfs, slice<byte> p, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
-    nint n = default!;
-    error err = default!;
+internal static (nint n, error err) read(this ж<runtimeSource> Ꮡfs, slice<byte> p, ж<int64> readVal, ж<int8> readPos) {
+    nint n = default;
+    error err = default;
     ref var fs = ref Ꮡfs.DerefOrNull();
 
     fs.mu.Lock();
-    (n, err) = read(p, new runtimeSourceжSource(Ꮡfs), ref (ᏑreadVal).DerefOrNull(), ref (ᏑreadPos).DerefOrNull());
+    (n, err) = read(p, new runtimeSourceжSource(Ꮡfs), ref (readVal).DerefOrNull(), ref (readPos).DerefOrNull());
     fs.mu.Unlock();
     return (n, err);
 }
@@ -433,7 +433,7 @@ public static void Seed(int64 seed) {
     // If we are already using a lockedSource, we can just re-seed it.
     if (orig != nil) {
         {
-            var (_, ok) = (~orig).src._<ж<lockedSource>>(ᐧ); if (ok) {
+            var (_, ok) = orig.src._<ж<lockedSource>>(ᐧ); if (ok) {
                 orig.Seed(seed);
                 return;
             }
@@ -570,7 +570,7 @@ partial struct lockedSource {
 }
 
 internal static int64 /*n*/ Int63(this ж<lockedSource> Ꮡr) {
-    int64 n = default!;
+    int64 n = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.lk.Lock();
@@ -580,7 +580,7 @@ internal static int64 /*n*/ Int63(this ж<lockedSource> Ꮡr) {
 }
 
 internal static uint64 /*n*/ Uint64(this ж<lockedSource> Ꮡr) {
-    uint64 n = default!;
+    uint64 n = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.lk.Lock();
@@ -611,7 +611,7 @@ internal static void seedPos(this ж<lockedSource> Ꮡr, int64 seed, ж<int8> �
 // seed seeds the underlying source.
 // The caller must have locked r.lk.
 internal static void seed(this ref lockedSource r, int64 seed) {
-    if (r.s == nil){
+    if (r.s == nil) {
         r.s = newSource(seed);
     } else {
         r.s.Seed(seed);
@@ -619,13 +619,13 @@ internal static void seed(this ref lockedSource r, int64 seed) {
 }
 
 // read implements Read for a lockedSource without a race condition.
-internal static (nint n, error err) read(this ж<lockedSource> Ꮡr, slice<byte> p, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
-    nint n = default!;
-    error err = default!;
+internal static (nint n, error err) read(this ж<lockedSource> Ꮡr, slice<byte> p, ж<int64> readVal, ж<int8> readPos) {
+    nint n = default;
+    error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.lk.Lock();
-    (n, err) = read(p, new rngSourceжSource(r.s), ref (ᏑreadVal).DerefOrNull(), ref (ᏑreadPos).DerefOrNull());
+    (n, err) = read(p, new rngSourceжSource(r.s), ref (readVal).DerefOrNull(), ref (readPos).DerefOrNull());
     r.lk.Unlock();
     return (n, err);
 }

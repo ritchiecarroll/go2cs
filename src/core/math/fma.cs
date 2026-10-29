@@ -27,8 +27,8 @@ internal static uint64 nonzero(uint64 x) {
 }
 
 internal static (uint64 r1, uint64 r2) shl(uint64 u1, uint64 u2, nuint n) {
-    uint64 r1 = default!;
-    uint64 r2 = default!;
+    uint64 r1 = default;
+    uint64 r2 = default;
 
     r1 = u1.Lsh(n) | u2.Rsh((64 - n)) | u2.Lsh((n - 64));
     r2 = u2.Lsh(n);
@@ -36,8 +36,8 @@ internal static (uint64 r1, uint64 r2) shl(uint64 u1, uint64 u2, nuint n) {
 }
 
 internal static (uint64 r1, uint64 r2) shr(uint64 u1, uint64 u2, nuint n) {
-    uint64 r1 = default!;
-    uint64 r2 = default!;
+    uint64 r1 = default;
+    uint64 r2 = default;
 
     r2 = u2.Rsh(n) | u1.Lsh((64 - n)) | u1.Rsh((n - 64));
     r1 = u1.Rsh(n);
@@ -49,8 +49,8 @@ internal static (uint64 r1, uint64 r2) shr(uint64 u1, uint64 u2, nuint n) {
 // shifted to the right by n, except the result's 0th bit is
 // set to the bitwise OR of the bottom n+1 bits.
 internal static (uint64 r1, uint64 r2) shrcompress(uint64 u1, uint64 u2, nuint n) {
-    uint64 r1 = default!;
-    uint64 r2 = default!;
+    uint64 r1 = default;
+    uint64 r2 = default;
 
     // TODO: Performance here is really sensitive to the
     // order/placement of these branches. n == 0 is common
@@ -80,7 +80,7 @@ internal static (uint64 r1, uint64 r2) shrcompress(uint64 u1, uint64 u2, nuint n
 }
 
 internal static int32 /*l*/ lz(uint64 u1, uint64 u2) {
-    int32 l = default!;
+    int32 l = default;
 
     l = (int32)bits.LeadingZeros64(u1);
     if (l == 64) {
@@ -93,15 +93,15 @@ internal static int32 /*l*/ lz(uint64 u1, uint64 u2) {
 // It adds the implicit 1 bit to the mantissa for normal values,
 // and normalizes subnormal values.
 internal static (uint32 sign, int32 exp, uint64 mantissa) split(uint64 b) {
-    uint32 sign = default!;
-    int32 exp = default!;
-    uint64 mantissa = default!;
+    uint32 sign = default;
+    int32 exp = default;
+    uint64 mantissa = default;
 
     sign = (uint32)(b >> 63);
     exp = (int32)(b >> 52) & (int32)mask;
     mantissa = b & (uint64)fracMask;
 
-    if (exp == 0){
+    if (exp == 0) {
         // Normalize value if subnormal.
         nuint shift = (nuint)(bits.LeadingZeros64(mantissa) - 11);
         mantissa.LshAssign(shift);
@@ -171,9 +171,9 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
     (zm1, zm2) = shrcompress(zm1, zm2, (nuint)(pe - ze));
 
     // Compute resulting significands, normalizing if necessary.
-    uint64 m = default!;
-    uint64 c = default!;
-    if (ps == zs){
+    uint64 m = default;
+    uint64 c = default;
+    if (ps == zs) {
         // Adding (pm1:pm2) + (zm1:zm2)
         (pm2, c) = bits.Add64(pm2, zm2, 0);
         (pm1, _) = bits.Add64(pm1, zm1, c);

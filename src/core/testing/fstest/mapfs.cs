@@ -34,44 +34,44 @@ partial struct MapFS /*map[@string, ж<MapFile>]*/;
 
 // A MapFile describes a single file in a [MapFS].
 partial struct MapFile {
-    public slice<byte> Data; // file content or symlink destination
-    public fs.FileMode Mode; // fs.FileInfo.Mode
-    public time.Time ModTime;   // fs.FileInfo.ModTime
-    public any Sys;         // fs.FileInfo.Sys
+    public slice<byte> Data;  // file content or symlink destination
+    public fs.FileMode Mode;  // fs.FileInfo.Mode
+    public time.Time ModTime; // fs.FileInfo.ModTime
+    public any Sys;           // fs.FileInfo.Sys
 }
 
-internal static fs.FS _ᴛ1ʗ = ((MapFS)default!);
+internal static fs.FS _ᴛ1ʗ = ((MapFS)default);
 
-internal static fs.ReadLinkFS _ᴛ2ʗ = ((MapFS)default!);
+internal static fs.ReadLinkFS _ᴛ2ʗ = ((MapFS)default);
 
 internal static fs.File _ᴛ3ʗ = new openMapFileжFile(((ж<openMapFile>)nil));
 
 // Open opens the named file after following any symbolic links.
 public static (fs.File, error) Open(this MapFS fsys, @string name) {
     if (!fs.ValidPath(name)) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
     }
     var (realName, ok) = fsys.resolveSymlinks(name);
     if (!ok) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
     }
 
     var @file = fsys[realName];
-    if (@file != nil && (fs.FileMode)((~@file).Mode & fs.ModeDir) == 0) {
+    if (@file != nil && (fs.FileMode)(@file.Mode & fs.ModeDir) == 0) {
         // Ordinary file
-        return (new openMapFileжFile(Ꮡ(new openMapFile(name, new mapFileInfo(path.Base(name), @file), 0))), default!);
+        return (new openMapFileжFile(Ꮡ(new openMapFile(name, new mapFileInfo(path.Base(name), @file), 0))), default);
     }
 
     // Directory, possibly synthesized.
     // Note that file can be nil here: the map need not contain explicit parent directories for all its files.
     // But file can also be non-nil, in case the user wants to set metadata for the directory explicitly.
     // Either way, we need to construct the list of children of this directory.
-    slice<mapFileInfo> list = default!;
+    slice<mapFileInfo> list = default;
     map<@string, bool> need = new map<@string, bool>();
-    if (realName == "."u8){
+    if (realName == "."u8) {
         foreach (var (fname, f) in fsys) {
             nint i = strings.Index(fname, "/"u8);
-            if (i < 0){
+            if (i < 0) {
                 if (fname != "."u8) {
                     list = append(list, new mapFileInfo(fname, f));
                 }
@@ -85,7 +85,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
             if (strings.HasPrefix(fname, prefix)) {
                 @string felem = fname.slice(len(prefix));
                 nint i = strings.Index(felem, "/"u8);
-                if (i < 0){
+                if (i < 0) {
                     list = append(list, new mapFileInfo(felem, f));
                 } else {
                     need[fname.slice(len(prefix), len(prefix) + i)] = true;
@@ -95,8 +95,8 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
         // If the directory name is not in the map,
         // and there are no children of the name in the map,
         // then the directory is treated as not existing.
-        if (@file == nil && list == default! && len(need) == 0) {
-            return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
+        if (@file == nil && list == nil && len(need) == 0) {
+            return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
         }
     }
     foreach (var (_, fi) in list) {
@@ -110,20 +110,20 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
     if (@file == nil) {
         @file = Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365)));
     }
-    @string elem = default!;
-    if (name == "."u8){
+    @string elem = default;
+    if (name == "."u8) {
         elem = "."u8;
     } else {
         elem = name.slice(strings.LastIndex(name, "/"u8) + 1);
     }
-    return (new mapDirжFile(Ꮡ(new mapDir(name, new mapFileInfo(elem, @file), list, 0))), default!);
+    return (new mapDirжFile(Ꮡ(new mapDir(name, new mapFileInfo(elem, @file), list, 0))), default);
 }
 
 internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name) {
     // Fast path: if a symlink is in the map, resolve it.
     {
-        var @file = fsys[name]; if (@file != nil && (~@file).Mode.Type() == fs.ModeSymlink) {
-            @string target = (@string)(~@file).Data;
+        var @file = fsys[name]; if (@file != nil && @file.Mode.Type() == fs.ModeSymlink) {
+            @string target = (@string)@file.Data;
             if (path.IsAbs(target)) {
                 return ("", false);
             }
@@ -134,8 +134,8 @@ internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name
     // Check if each parent directory (starting at root) is a symlink.
     for (nint i = 0; i < len(name); ) {
         nint j = strings.Index(name.slice(i), "/"u8);
-        @string dir = default!;
-        if (j < 0){
+        @string dir = default;
+        if (j < 0) {
             dir = name;
             i = len(name);
         } else {
@@ -143,8 +143,8 @@ internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name
             i += j;
         }
         {
-            var @file = fsys[dir]; if (@file != nil && (~@file).Mode.Type() == fs.ModeSymlink) {
-                @string target = (@string)(~@file).Data;
+            var @file = fsys[dir]; if (@file != nil && @file.Mode.Type() == fs.ModeSymlink) {
+                @string target = (@string)@file.Data;
                 if (path.IsAbs(target)) {
                     return ("", false);
                 }
@@ -159,13 +159,13 @@ internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name
 // ReadLink returns the destination of the named symbolic link.
 public static (@string, error) ReadLink(this MapFS fsys, @string name) {
     var (info, err) = fsys.lstat(name);
-    if (err != default!) {
+    if (err != nil) {
         return ("", new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "readlink"u8, Path: name, Err: err))));
     }
-    if ((~(~info).f).Mode.Type() != fs.ModeSymlink) {
+    if (info.f.Mode.Type() != fs.ModeSymlink) {
         return ("", new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "readlink"u8, Path: name, Err: fs.ErrInvalid))));
     }
-    return ((@string)(~(~info).f).Data, default!);
+    return ((@string)info.f.Data, default);
 }
 
 // Lstat returns a FileInfo describing the named file.
@@ -173,43 +173,42 @@ public static (@string, error) ReadLink(this MapFS fsys, @string name) {
 // Lstat makes no attempt to follow the link.
 public static (fs.FileInfo, error) Lstat(this MapFS fsys, @string name) {
     var (info, err) = fsys.lstat(name);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "lstat"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "lstat"u8, Path: name, Err: err))));
     }
-    return (new mapFileInfoжFileInfo(info), default!);
+    return (new mapFileInfoжFileInfo(info), default);
 }
 
 internal static (ж<mapFileInfo>, error) lstat(this MapFS fsys, @string name) {
     if (!fs.ValidPath(name)) {
-        return (default!, fs.ErrNotExist);
+        return (default, fs.ErrNotExist);
     }
     var (realDir, ok) = fsys.resolveSymlinks(path.Dir(name));
     if (!ok) {
-        return (default!, fs.ErrNotExist);
+        return (default, fs.ErrNotExist);
     }
-    ref var elem = ref heap<@string>(out var Ꮡelem);
-    elem = path.Base(name);
+    ref var elem = ref heap<@string>(path.Base(name), out var Ꮡelem);
     @string realName = path.Join(realDir, elem);
 
     var @file = fsys[realName];
     if (@file != nil) {
-        return (Ꮡ(new mapFileInfo(elem, @file)), default!);
+        return (Ꮡ(new mapFileInfo(elem, @file)), default);
     }
 
     if (realName == "."u8) {
-        return (Ꮡ(new mapFileInfo(elem, Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365))))), default!);
+        return (Ꮡ(new mapFileInfo(elem, Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365))))), default);
     }
     // Maybe a directory.
     @string prefix = realName + "/"u8;
     foreach (var (fname, _) in fsys) {
         if (strings.HasPrefix(fname, prefix)) {
-            return (Ꮡ(new mapFileInfo(elem, Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365))))), default!);
+            return (Ꮡ(new mapFileInfo(elem, Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365))))), default);
         }
     }
     // If the directory name is not in the map,
     // and there are no children of the name in the map,
     // then the directory is treated as not existing.
-    return (default!, fs.ErrNotExist);
+    return (default, fs.ErrNotExist);
 }
 
 // fsOnly is a wrapper that hides all but the fs.FS methods,
@@ -261,31 +260,31 @@ internal static @string Name(this ref mapFileInfo i) {
 }
 
 internal static int64 Size(this ref mapFileInfo i) {
-    return (int64)len((~i.f).Data);
+    return (int64)len(i.f.Data);
 }
 
 internal static fs.FileMode Mode(this ref mapFileInfo i) {
-    return (~i.f).Mode;
+    return i.f.Mode;
 }
 
 internal static fs.FileMode Type(this ref mapFileInfo i) {
-    return (~i.f).Mode.Type();
+    return i.f.Mode.Type();
 }
 
 internal static time.Time ModTime(this ref mapFileInfo i) {
-    return (~i.f).ModTime;
+    return i.f.ModTime;
 }
 
 internal static bool IsDir(this ref mapFileInfo i) {
-    return (fs.FileMode)((~i.f).Mode & fs.ModeDir) != 0;
+    return (fs.FileMode)(i.f.Mode & fs.ModeDir) != 0;
 }
 
 internal static any Sys(this ref mapFileInfo i) {
-    return (~i.f).Sys;
+    return i.f.Sys;
 }
 
 internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) {
-    return (new mapFileInfoжFileInfo(Ꮡi), default!);
+    return (new mapFileInfoжFileInfo(Ꮡi), default);
 }
 
 internal static @string String(this ж<mapFileInfo> Ꮡi) {
@@ -300,23 +299,23 @@ partial struct openMapFile {
 }
 
 internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) {
-    return (new mapFileInfoжFileInfo(Ꮡf.of(openMapFile.ᏑmapFileInfo)), default!);
+    return (new mapFileInfoжFileInfo(Ꮡf.of(openMapFile.ᏑmapFileInfo)), default);
 }
 
 internal static error Close(this ref openMapFile f) {
-    return default!;
+    return default;
 }
 
 internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) {
-    if (f.offset >= (int64)len((~f.f).Data)) {
+    if (f.offset >= (int64)len(f.f.Data)) {
         return (0, io.EOF);
     }
     if (f.offset < 0) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: f.path, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, (~f.f).Data.slice((nint)(f.offset)));
+    nint n = copy(b, f.f.Data.slice((nint)(f.offset)));
     f.offset += (int64)n;
-    return (n, default!);
+    return (n, default);
 }
 
 internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint whence) {
@@ -330,25 +329,25 @@ internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint w
         break;
     }
     case 2: {
-        offset += (int64)len((~f.f).Data);
+        offset += (int64)len(f.f.Data);
         break;
     }}
-    if (offset < 0 || offset > (int64)len((~f.f).Data)) {
+    if (offset < 0 || offset > (int64)len(f.f.Data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "seek"u8, Path: f.path, Err: fs.ErrInvalid))));
     }
     f.offset = offset;
-    return (offset, default!);
+    return (offset, default);
 }
 
 internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int64 offset) {
-    if (offset < 0 || offset > (int64)len((~f.f).Data)) {
+    if (offset < 0 || offset > (int64)len(f.f.Data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: f.path, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, (~f.f).Data.slice((nint)(offset)));
+    nint n = copy(b, f.f.Data.slice((nint)(offset)));
     if (n < len(b)) {
         return (n, io.EOF);
     }
-    return (n, default!);
+    return (n, default);
 }
 
 // A mapDir is a directory fs.File (so also an fs.ReadDirFile) open for reading.
@@ -360,11 +359,11 @@ partial struct mapDir {
 }
 
 internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) {
-    return (new mapFileInfoжFileInfo(Ꮡd.of(mapDir.ᏑmapFileInfo)), default!);
+    return (new mapFileInfoжFileInfo(Ꮡd.of(mapDir.ᏑmapFileInfo)), default);
 }
 
 internal static error Close(this ref mapDir d) {
-    return default!;
+    return default;
 }
 
 internal static (nint, error) Read(this ref mapDir d, slice<byte> b) {
@@ -374,7 +373,7 @@ internal static (nint, error) Read(this ref mapDir d, slice<byte> b) {
 internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint count) {
     nint n = len(d.entry) - d.offset;
     if (n == 0 && count > 0) {
-        return (default!, io.EOF);
+        return (default, io.EOF);
     }
     if (count > 0 && n > count) {
         n = count;
@@ -384,7 +383,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint coun
         list[i] = new mapFileInfoжDirEntry(Ꮡ(d.entry, d.offset + i));
     }
     d.offset += n;
-    return (list, default!);
+    return (list, default);
 }
 
 } // end fstest_package

@@ -35,8 +35,8 @@ internal static error Control(this ж<rawConn> Ꮡc, Action<uintptr> f) {
     }
     var err = c.fd.of(netFD.Ꮡpfd).RawControl(f);
     runtime.KeepAlive(c.fd.OrTypedNil());
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-control"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-control"u8, Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
     }
     return err;
 }
@@ -49,8 +49,8 @@ internal static error Read(this ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
     }
     var err = c.fd.of(netFD.Ꮡpfd).RawRead(f);
     runtime.KeepAlive(c.fd.OrTypedNil());
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-read"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-read"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return err;
 }
@@ -63,8 +63,8 @@ internal static error Write(this ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
     }
     var err = c.fd.of(netFD.Ꮡpfd).RawWrite(f);
     runtime.KeepAlive(c.fd.OrTypedNil());
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-write"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-write"u8, Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return err;
 }
@@ -80,13 +80,13 @@ internal static ж<poll.FD> PollFD(this ж<rawConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
-        return default!;
+        return default;
     }
     return c.fd.of(netFD.Ꮡpfd);
 }
 
-internal static ж<rawConn> newRawConn(ж<netFD> Ꮡfd) {
-    return Ꮡ(new rawConn(fd: Ꮡfd));
+internal static ж<rawConn> newRawConn(ж<netFD> fd) {
+    return Ꮡ(new rawConn(fd: fd));
 }
 
 // Network returns the network type of the underlying connection.
@@ -97,7 +97,7 @@ internal static ж<rawConn> newRawConn(ж<netFD> Ꮡfd) {
 //
 // Network is not intended for use outside the standard library.
 internal static poll.String Network(this ref rawConn c) {
-    return (poll.String)(~c.fd).net;
+    return (poll.String)c.fd.net;
 }
 
 partial struct rawListener {
@@ -112,8 +112,8 @@ internal static error Write(this ref rawListener l, Func<uintptr, bool> _) {
     return syscall.EINVAL;
 }
 
-internal static ж<rawListener> newRawListener(ж<netFD> Ꮡfd) {
-    return Ꮡ(new rawListener(new rawConn(fd: Ꮡfd)));
+internal static ж<rawListener> newRawListener(ж<netFD> fd) {
+    return Ꮡ(new rawListener(new rawConn(fd: fd)));
 }
 
 } // end net_package

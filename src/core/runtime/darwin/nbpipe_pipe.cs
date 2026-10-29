@@ -7,9 +7,9 @@ namespace go;
 partial class runtime_package {
 
 internal static (int32 r, int32 w, int32 errno) nonblockingPipe() {
-    int32 r = default!;
-    int32 w = default!;
-    int32 errno = default!;
+    int32 r = default;
+    int32 w = default;
+    int32 errno = default;
 
     (r, w, errno) = pipe();
     if (errno != 0) {

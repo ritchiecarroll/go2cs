@@ -124,23 +124,25 @@ public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, con
         Ꮡt.of(Transport.ᏑnextProtoOnce).Do(Ꮡt.onceSetNextProtoDefaults);
 
         var exprᴛ1 = scheme;
-        if (exprᴛ1 == "http"u8 || exprᴛ1 == "https"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "http"u8 || exprᴛ1 == "https"u8: {
+            break;
         }
-        else { /* default: */
-            return (default!, fmt.Errorf("net/http: invalid scheme %q"u8, scheme));
-        }
+        default: {
+            return (default, fmt.Errorf("net/http: invalid scheme %q"u8, scheme));
+        }}
 
         ref var host = ref heap<@string>(out var Ꮡhost);
         (host, var port, var err) = net.SplitHostPort(address);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         if (port == ""u8) {
             port = schemePort(scheme);
         }
 
-        ж<url.URL> proxyURL = default!;
-        if (t.Proxy != default!) {
+        ж<url.URL> proxyURL = default;
+        if (t.Proxy != nil) {
             // Transport.Proxy takes a *Request, so create a fake one to pass it.
             var req = Ꮡ(new Request(
                 ctx: ctx,
@@ -157,10 +159,10 @@ public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, con
                 Body: NoBody,
                 Host: host
             ));
-            error errΔ1 = default!;
+            error errΔ1 = default;
             (proxyURL, errΔ1) = t.Proxy(req);
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
 
@@ -178,11 +180,11 @@ public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, con
         // HTTP/1 and HTTP/2.
         //
         // Since there's no need to change the persistConn's hook, we set it at creation time.
-        var cc = Ꮡ(new ClientConn(nil));
+        var cc = Ꮡ(new ClientConn());
         const bool isClientConn = true;
         (var pconn, err) = Ꮡt.dialConn(ctx, cm, isClientConn, cc.maybeRunStateHook);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
         // Note that cc.maybeRunStateHook may have been called
@@ -191,25 +193,25 @@ public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, con
         cc.of(ClientConn.ᏑstateHookMu).Lock();
         var ccʗ1 = cc;
         defer(ccʗ1.of(ClientConn.ᏑstateHookMu).Unlock, ref ᒐ);
-        if ((~pconn).alt != default!){
+        if (pconn.alt != nil) {
             // If pconn.alt is set, this is a connection implemented in another package
             // (probably x/net/http2) or the bundled copy in h2_bundle.go.
-            var (gc, ok) = (~pconn).alt._<genericClientConn>(ᐧ);
+            var (gc, ok) = pconn.alt._<genericClientConn>(ᐧ);
             if (!ok) {
-                return (default!, errors.New(httpNewClientConnˢ));
+                return (default, errors.New(httpNewClientConnˢ));
             }
-            cc.Value.cc = gc;
-            cc.Value.lastAvailable = gc.Available();
+            cc.cc = gc;
+            cc.lastAvailable = gc.Available();
         } else {
             // This is an HTTP/1 connection.
-            pconn.Value.availch = new channel<EmptyStruct>(1);
-            (~pconn).availch.ᐸꟷ(new EmptyStruct());
-            cc.Value.cc = new http1ClientConn(pconn);
-            cc.Value.lastAvailable = 1;
+            pconn.availch = new channel<EmptyStruct>(1);
+            pconn.availch.ᐸꟷ(new EmptyStruct());
+            cc.cc = new http1ClientConn(pconn);
+            cc.lastAvailable = 1;
         }
-        return (cc, default!);
+        return (cc, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -223,7 +225,7 @@ public static error Close(this ж<ClientConn> Ꮡcc) {
         defer(Ꮡcc.maybeRunStateHook, ref ᒐ);
         return cc.cc.Close();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -242,7 +244,7 @@ internal static error validateClientConnRequest(ref Request req) {
     if (req.URL == nil) {
         return errors.New(httpNilRequestUrlˢ);
     }
-    if (req.Header == default!) {
+    if (req.Header == nil) {
         return errors.New(httpNilRequestHeaderˢ);
     }
     // Validate the outgoing headers.
@@ -260,10 +262,10 @@ internal static error validateClientConnRequest(ref Request req) {
     if (req.Method != ""u8 && !validMethod(req.Method)) {
         return fmt.Errorf("http: invalid method %q"u8, req.Method);
     }
-    if ((~req.URL).Host == ""u8) {
+    if (req.URL.Host == ""u8) {
         return errors.New(httpNoHostInRequestUrlˢ);
     }
-    return default!;
+    return default;
 }
 
 // RoundTrip implements the [RoundTripper] interface.
@@ -274,21 +276,21 @@ internal static error validateClientConnRequest(ref Request req) {
 // If the connection is at its concurrency limit,
 // RoundTrip waits for the connection to become available
 // before sending the request.
-public static (ж<Response>, error) RoundTrip(this ж<ClientConn> Ꮡcc, ж<Request> Ꮡreq) {
+public static (ж<Response>, error) RoundTrip(this ж<ClientConn> Ꮡcc, ж<Request> req) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
 
         defer(Ꮡcc.maybeRunStateHook, ref ᒐ);
         {
-            var err = validateClientConnRequest(ref (Ꮡreq).DerefOrNull()); if (err != default!) {
+            var err = validateClientConnRequest(ref (req).DerefOrNull()); if (err != nil) {
                 Ꮡcc.Release();
-                return (default!, err);
+                return (default, err);
             }
         }
-        return cc.cc.RoundTrip(Ꮡreq);
+        return cc.cc.RoundTrip(req);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -327,7 +329,7 @@ public static error Reserve(this ж<ClientConn> Ꮡcc) {
         defer(Ꮡcc.maybeRunStateHook, ref ᒐ);
         return cc.cc.Reserve();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -355,22 +357,22 @@ internal static Action<ж<ClientConn>> shouldRunStateHook(this ж<ClientConn> �
 
         cc.stateHookMu.Lock();
         ᒐd1 = true;
-        if (cc.cc == default!) {
-            return default!;
+        if (cc.cc == nil) {
+            return default;
         }
         if (stopRunning) {
             cc.stateHookRunning = false;
         }
-        if (cc.userStateHook == default!) {
-            return default!;
+        if (cc.userStateHook == nil) {
+            return default;
         }
         if (cc.stateHookRunning) {
-            return default!;
+            return default;
         }
         nint available = cc.Available();
         nint inFlight = cc.InFlight();
-        bool closed = cc.Err() != default!;
-        Action<ж<ClientConn>> hook = default!;
+        bool closed = cc.Err() != nil;
+        Action<ж<ClientConn>> hook = default;
         if (available > cc.lastAvailable || inFlight < cc.lastInFlight || closed != cc.lastClosed) {
             hook = cc.userStateHook;
             cc.stateHookRunning = true;
@@ -380,14 +382,13 @@ internal static Action<ж<ClientConn>> shouldRunStateHook(this ж<ClientConn> �
         cc.lastClosed = closed;
         return hook;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡcc.DerefOrNull().stateHookMu.Unlock(); ᒐ.Run(); }
 }
 
 internal static partial void maybeRunStateHook(this ж<ClientConn> Ꮡcc) {
-    ref var hook = ref heap<Action<ж<ClientConn>>>(out var Ꮡhook);
-    hook = Ꮡcc.shouldRunStateHook(false);
-    if (hook == default!) {
+    ref var hook = ref heap<Action<ж<ClientConn>>>(Ꮡcc.shouldRunStateHook(false), out var Ꮡhook);
+    if (hook == nil) {
         return;
     }
     // Run the hook synchronously.
@@ -402,9 +403,9 @@ internal static partial void maybeRunStateHook(this ж<ClientConn> Ꮡcc) {
     // If we do need to run the hook again, do so in a new goroutine to avoid blocking
     // the current goroutine indefinitely.
     hook = Ꮡcc.shouldRunStateHook(true);
-    if (hook != default!) {
+    if (hook != nil) {
         goǃ(() => {
-            while (Ꮡhook.ValueSlot != default!) {
+            while (Ꮡhook.ValueSlot != nil) {
                 Ꮡhook.ValueSlot(Ꮡcc);
                 Ꮡhook.ValueSlot = Ꮡcc.shouldRunStateHook(true);
             }
@@ -447,17 +448,17 @@ internal static partial (ж<Response>, error) RoundTrip(this http1ClientConn cc,
 
     // Convert Request.Cancel into context cancelation.
     (ctx, var cancel) = context_package.WithCancelCause(req.Context());
-    if (req.Cancel != default!) {
+    if (req.Cancel != nil) {
         goǃ((ᴛ1, ᴛ2, ᴛ3) => awaitLegacyCancel(ᴛ1, ᴛ2, ref ᴛ3.DerefOrNull()), ctx, cancel, Ꮡreq);
     }
 
     var treq = Ꮡ(new transportRequest(Request: Ꮡreq, trace: trace, ctx: ctx, cancel: cancel));
     var (resp, err) = cc.pconn.roundTrip(treq);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    resp.Value.Request = Ꮡreq;
-    return (resp, default!);
+    resp.Request = Ꮡreq;
+    return (resp, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -465,17 +466,17 @@ internal static readonly @string clientConnClosedˢ = "ClientConn closed"u8;
 
 internal static error Close(this http1ClientConn cc) {
     cc.pconn.close(errors.New(clientConnClosedˢ));
-    return default!;
+    return default;
 }
 
 internal static error Err(this http1ClientConn cc) {
-    var selᴛ4 = (~cc.pconn).closech;
+    var selᴛ4 = cc.pconn.closech;
     switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out _): {
-        return (~cc.pconn).closed;
+        return cc.pconn.closed;
     }
     default: {
-        return default!;
+        return default;
     }}
 }
 
@@ -485,12 +486,12 @@ internal static nint Available(this http1ClientConn cc) {
         cc.pconn.of(persistConn.Ꮡmu).Lock();
         var ccʗ1 = cc;
         defer(ccʗ1.pconn.of(persistConn.Ꮡmu).Unlock, ref ᒐ);
-        if ((~cc.pconn).closed != default! || (~cc.pconn).reserved || (~cc.pconn).inFlight) {
+        if (cc.pconn.closed != nil || cc.pconn.reserved || cc.pconn.inFlight) {
             return 0;
         }
         return 1;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -500,12 +501,12 @@ internal static nint InFlight(this http1ClientConn cc) {
         cc.pconn.of(persistConn.Ꮡmu).Lock();
         var ccʗ1 = cc;
         defer(ccʗ1.pconn.of(persistConn.Ꮡmu).Unlock, ref ᒐ);
-        if ((~cc.pconn).closed == default! && ((~cc.pconn).reserved || (~cc.pconn).inFlight)) {
+        if (cc.pconn.closed == nil && (cc.pconn.reserved || cc.pconn.inFlight)) {
             return 1;
         }
         return 0;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -518,10 +519,10 @@ internal static error Reserve(this http1ClientConn cc) {
         cc.pconn.of(persistConn.Ꮡmu).Lock();
         var ccʗ1 = cc;
         defer(ccʗ1.pconn.of(persistConn.Ꮡmu).Unlock, ref ᒐ);
-        if ((~cc.pconn).closed != default!) {
-            return (~cc.pconn).closed;
+        if (cc.pconn.closed != nil) {
+            return cc.pconn.closed;
         }
-        var selᴛ5 = (~cc.pconn).availch;
+        var selᴛ5 = cc.pconn.availch;
         switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
         case 0 when selᴛ5.ꟷᐳ(out _): {
             break;
@@ -529,10 +530,10 @@ internal static error Reserve(this http1ClientConn cc) {
         default: {
             return errors.New(connectionIsUnavailableˢ);
         }}
-        cc.pconn.Value.reserved = true;
-        return default!;
+        cc.pconn.reserved = true;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -542,8 +543,8 @@ internal static void Release(this http1ClientConn cc) {
         cc.pconn.of(persistConn.Ꮡmu).Lock();
         var ccʗ1 = cc;
         defer(ccʗ1.pconn.of(persistConn.Ꮡmu).Unlock, ref ᒐ);
-        if ((~cc.pconn).reserved) {
-            var selᴛ6 = (~cc.pconn).availch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
+        if (cc.pconn.reserved) {
+            var selᴛ6 = cc.pconn.availch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
             switch (trySelect(selᴛ6)) {
             case 0: {
                 break;
@@ -552,7 +553,7 @@ internal static void Release(this http1ClientConn cc) {
                 throw panic("cannot release reservation");
                 break;
             }}
-            cc.pconn.Value.reserved = false;
+            cc.pconn.reserved = false;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

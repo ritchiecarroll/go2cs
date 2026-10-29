@@ -143,13 +143,12 @@ internal static readonly @string urlˢ = "url"u8;
 // attrType returns a conservative (upper-bound on authority) guess at the
 // type of the lowercase named attribute.
 internal static contentType attrType(@string name) {
-    if (strings.HasPrefix(name, dataˢ)){
+    if (strings.HasPrefix(name, dataˢ)) {
         // Strip data- so that custom attribute heuristics below are
         // widely applied.
         // Treat data-action as URL below.
         name = name[5..];
-    } else 
-    {
+    } else {
         var (prefix, @short, ok) = strings.Cut(name, ":"u8); if (ok) {
             if (prefix == "xmlns"u8) {
                 return contentTypeURL;

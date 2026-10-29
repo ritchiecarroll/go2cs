@@ -143,18 +143,17 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
 // Read implements the io.Reader interface.
 public static (nint, error) Read(this ref Reader r, slice<byte> p) {
     nint n = 0;
-    var err = ((error)default!);
-    while (ᐧ) {
+    var err = ((error)default);
+    for (;;) {
         // Copy out any transformed bytes and return the final error if we are done.
-        if (r.dst0 != r.dst1){
+        if (r.dst0 != r.dst1) {
             n = copy(p, r.dst.slice(r.dst0, r.dst1));
             r.dst0 += n;
             if (r.dst0 == r.dst1 && r.transformComplete) {
                 return (n, r.err);
             }
-            return (n, default!);
-        } else 
-        if (r.transformComplete) {
+            return (n, default);
+        } else if (r.transformComplete) {
             return (0, r.err);
         }
 
@@ -162,19 +161,19 @@ public static (nint, error) Read(this ref Reader r, slice<byte> p) {
         // are out of source bytes. We do this even if r.r.Read returned an error.
         // As the io.Reader documentation says, "process the n > 0 bytes returned
         // before considering the error".
-        if (r.src0 != r.src1 || r.err != default!) {
+        if (r.src0 != r.src1 || r.err != nil) {
             r.dst0 = 0;
             (r.dst1, n, err) = r.t.Transform(r.dst, r.src.slice(r.src0, r.src1), AreEqual(r.err, io.EOF));
             r.src0 += n;
 
             switch (ᐧ) {
-            case {} when err == default!: {
+            case {} when err == nil: {
                 if (r.src0 != r.src1) {
                     r.err = errInconsistentByteCount;
                 }
                 // The Transform call was successful; we are complete if we
                 // cannot read more bytes into src.
-                r.transformComplete = r.err != default!;
+                r.transformComplete = r.err != nil;
                 continue;
                 break;
             }
@@ -183,7 +182,7 @@ public static (nint, error) Read(this ref Reader r, slice<byte> p) {
                 continue;
                 break;
             }
-            case {} when AreEqual(err, ErrShortSrc) && r.src1 - r.src0 != len(r.src) && r.err == default!: {
+            case {} when AreEqual(err, ErrShortSrc) && r.src1 - r.src0 != len(r.src) && r.err == nil: {
                 // Read more bytes into src via the code below, and try again.
                 break;
             }
@@ -191,7 +190,7 @@ public static (nint, error) Read(this ref Reader r, slice<byte> p) {
                 r.transformComplete = true;
                 // The reader error (r.err) takes precedence over the
                 // transformer error (err) unless r.err is nil or io.EOF.
-                if (r.err == default! || AreEqual(r.err, io.EOF)) {
+                if (r.err == nil || AreEqual(r.err, io.EOF)) {
                     r.err = err;
                 }
                 continue;
@@ -239,7 +238,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
 // bytes available to complete a Transform, the bytes will be buffered
 // for the next write. Call Close to convert the remaining bytes.
 public static (nint n, error err) Write(this ref Writer w, slice<byte> data) {
-    nint n = default!;
+    nint n = default;
 
     var src = data;
     if (w.n > 0) {
@@ -249,36 +248,36 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> data) {
         w.n += n;
         src = w.src.slice(0, w.n);
     }
-    while (ᐧ) {
+    for (;;) {
         var (nDst, nSrc, errΔ1) = w.t.Transform(w.dst, src, false);
         {
-            var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != default!) {
+            var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != nil) {
                 return (n, werr);
             }
         }
         src = src.slice(nSrc);
-        if (w.n == 0){
+        if (w.n == 0) {
             n += nSrc;
-        } else 
-        if (len(src) <= n) {
+        } else if (len(src) <= n) {
             // Enough bytes from w.src have been consumed. We make src point
             // to data instead to reduce the copying.
             w.n = 0;
             n -= len(src);
             src = data.slice(n);
-            if (n < len(data) && (errΔ1 == default! || AreEqual(errΔ1, ErrShortSrc))) {
+            if (n < len(data) && (errΔ1 == nil || AreEqual(errΔ1, ErrShortSrc))) {
                 continue;
             }
         }
-        var exprᴛ1 = errΔ1;
-        if (AreEqual(exprᴛ1, ErrShortDst)) {
+        switch (errΔ1) {
+        case var ᴛ when AreEqual(ᴛ, ErrShortDst): {
             // This error is okay as long as we are making progress.
             if (nDst > 0 || nSrc > 0) {
                 continue;
             }
+            break;
         }
-        else if (AreEqual(exprᴛ1, ErrShortSrc)) {
-            if (len(src) < len(w.src)){
+        case var ᴛ when AreEqual(ᴛ, ErrShortSrc): {
+            if (len(src) < len(w.src)) {
                 nint m = copy(w.src, src);
                 // If w.n > 0, bytes from data were already copied to w.src and n
                 // was already set to the number of bytes consumed.
@@ -286,9 +285,8 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> data) {
                     n += m;
                 }
                 w.n = m;
-                errΔ1 = default!;
-            } else 
-            if (nDst > 0 || nSrc > 0) {
+                errΔ1 = default;
+            } else if (nDst > 0 || nSrc > 0) {
                 // Not enough buffer to store the remainder. Keep processing as
                 // long as there is progress. Without this case, transforms that
                 // require a lookahead larger than the buffer may result in an
@@ -297,12 +295,14 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> data) {
                 // sizes during testing.
                 continue;
             }
+            break;
         }
-        else if (AreEqual(exprᴛ1, default!)) {
+        case var ᴛ when AreEqual(ᴛ, default): {
             if (w.n > 0) {
                 errΔ1 = errInconsistentByteCount;
             }
-        }
+            break;
+        }}
         return (n, errΔ1);
     }
 }
@@ -310,10 +310,10 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> data) {
 // Close implements the io.Closer interface.
 public static error Close(this ref Writer w) {
     var src = w.src.slice(0, w.n);
-    while (ᐧ) {
+    for (;;) {
         var (nDst, nSrc, err) = w.t.Transform(w.dst, src, true);
         {
-            var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != default!) {
+            var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != nil) {
                 return werr;
             }
         }
@@ -329,7 +329,7 @@ partial struct nop {
 }
 
 internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
-    error err = default!;
+    error err = default;
 
     nint n = copy(dst, src);
     if (n < len(src)) {
@@ -339,7 +339,7 @@ internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<by
 }
 
 internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF) {
-    return (len(src), default!);
+    return (len(src), default);
 }
 
 partial struct discard {
@@ -347,15 +347,15 @@ partial struct discard {
 }
 
 internal static (nint nDst, nint nSrc, error err) Transform(this discard _, slice<byte> dst, slice<byte> src, bool atEOF) {
-    return (0, len(src), default!);
+    return (0, len(src), default);
 }
 
 // Discard is a Transformer for which all Transform calls succeed
 // by consuming all bytes and writing nothing.
-public static Transformer Discard = new discard(nil);
+public static Transformer Discard = new discard();
 
 // Nop is a SpanningTransformer that copies src to dst.
-public static SpanningTransformer Nop = new nop(nil);
+public static SpanningTransformer Nop = new nop();
 
 // chain is a sequence of links. A chain with N Transformers has N+1 links and
 // N+1 buffers. Of those N+1 buffers, the first and last are the src and dst
@@ -402,16 +402,16 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
     var t = tʗp.sslice();
 
     if (len(t) == 0) {
-        return new nop(nil);
+        return new nop();
     }
     var c = Ꮡ(new chain(link: new slice<link>(len(t) + 1)));
     foreach (var (i, tt) in t) {
-        (~c).link[i].t = tt;
+        c.link[i].t = tt;
     }
     // Allocate intermediate buffers.
     var b = GoReflect.WithElemDims(new slice<array<byte>>(len(t) - 1, () => new(4096)), 4096);
     foreach (var i in range(b)) {
-        (~c).link[i + 1].b = b[i][..];
+        c.link[i + 1].b = b[i][..];
     }
     return new chainжTransformer(c);
 }
@@ -419,7 +419,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
 // Reset resets the state of Chain. It calls Reset on all the Transformers.
 internal static void Reset(this ref chain c) {
     foreach (var (i, l) in c.link) {
-        if (l.t != default!) {
+        if (l.t != nil) {
             l.t.Reset();
         }
         (c.link[i].p, c.link[i].n) = (0, 0);
@@ -430,15 +430,15 @@ internal static void Reset(this ref chain c) {
 
 // Transform applies the transformers of c in sequence.
 internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) {
-    error err = default!;
+    error err = default;
 
     // Set up src and dst in the chain.
     var srcL = Ꮡ(c.link, 0);
     var dstL = Ꮡ(c.link, len(c.link) - 1);
-    (srcL.Value.b, srcL.Value.p, srcL.Value.n) = (src, 0, len(src));
-    (dstL.Value.b, dstL.Value.n) = (dst, 0);
-    bool lastFull = default!;                // for detecting progress
-    bool needProgress = default!;
+    (srcL.b, srcL.p, srcL.n) = (src, 0, len(src));
+    (dstL.b, dstL.n) = (dst, 0);
+    bool lastFull = default; // for detecting progress
+    bool needProgress = default;
 
     // i is the index of the next Transformer to apply, for i in [low, high].
     // low is the lowest index for which c.link[low] may still produce bytes.
@@ -447,11 +447,11 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
     // decrease i. We try to completely fill a buffer before converting it.
     for ((nint low, nint i, nint high) = (c.errStart, c.errStart, len(c.link) - 2); low <= i && i <= high; ) {
         var (@in, @out) = (Ꮡ(c.link, i), Ꮡ(c.link, i + 1));
-        var (nDstΔ1, nSrcΔ1, err0) = (~@in).t.Transform(@out.dst(), @in.src(), atEOF && low == i);
-        @out.Value.n += nDstΔ1;
-        @in.Value.p += nSrcΔ1;
-        if (i > 0 && (~@in).p == (~@in).n) {
-            (@in.Value.p, @in.Value.n) = (0, 0);
+        var (nDstΔ1, nSrcΔ1, err0) = @in.t.Transform(@out.dst(), @in.src(), atEOF && low == i);
+        @out.n += nDstΔ1;
+        @in.p += nSrcΔ1;
+        if (i > 0 && @in.p == @in.n) {
+            (@in.p, @in.n) = (0, 0);
         }
         (needProgress, lastFull) = (lastFull, false);
         var exprᴛ1 = err0;
@@ -460,9 +460,9 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
             // Process the destination buffer next. Return if we are already
             // at the high index.
             if (i == high) {
-                return ((~dstL).n, (~srcL).p, ErrShortDst);
+                return (dstL.n, srcL.p, ErrShortDst);
             }
-            if ((~@out).n != 0) {
+            if (@out.n != 0) {
                 i++;
                 // If the Transformer at the next index is not able to process any
                 // source bytes there is nothing that can be done to make progress
@@ -485,7 +485,7 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
                 // Source bytes were depleted before filling up the destination buffer.
                 // Verify we made some progress, move the remaining bytes to the errStart
                 // and try to get more source bytes.
-                if (needProgress && nSrcΔ1 == 0 || (~@in).n - (~@in).p == len((~@in).b)) {
+                if (needProgress && nSrcΔ1 == 0 || @in.n - @in.p == len(@in.b)) {
                     // There were not enough source bytes to proceed while the source
                     // buffer cannot hold any more bytes. Return a fatal error as this
                     // transformation can never complete.
@@ -493,11 +493,11 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
                     break;
                 }
                 // in.b is an internal buffer and we can make progress.
-                (@in.Value.p, @in.Value.n) = (0, copy((~@in).b, @in.src()));
+                (@in.p, @in.n) = (0, copy(@in.b, @in.src()));
                 fallthrough = true;
             } while (false);
         }
-        if (fallthrough || !matchᴛ1 && AreEqual(exprᴛ1, default!)) {
+        if (fallthrough || !matchᴛ1 && AreEqual(exprᴛ1, default)) {
             // if i == low, we have depleted the bytes at index i or any lower levels.
             // In that case we increase low and i. In all other cases we decrease i to
             // fetch more bytes before proceeding to the next index.
@@ -522,9 +522,9 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
         for (nint i = 1; i < c.errStart; i++) {
             (c.link[i].p, c.link[i].n) = (0, 0);
         }
-        (err, c.errStart, c.err) = (c.err, 0, default!);
+        (err, c.errStart, c.err) = (c.err, 0, default);
     }
-    return ((~dstL).n, (~srcL).p, err);
+    return (dstL.n, srcL.p, err);
 }
 
 // Deprecated: Use runes.Remove instead.
@@ -539,13 +539,13 @@ internal static void Reset(this removeF _) {
 
 // Transform implements the Transformer interface.
 internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slice<byte> dst, slice<byte> src, bool atEOF) {
-    nint nDst = default!;
-    nint nSrc = default!;
-    error err = default!;
+    nint nDst = default;
+    nint nSrc = default;
+    error err = default;
 
     for ((var r, nint sz) = ((rune)0, 0); len(src) > 0; src = src.slice(sz)) {
         {
-            r = (rune)src[0]; if (r < utf8.RuneSelf){
+            r = (rune)src[0]; if (r < utf8.RuneSelf) {
                 sz = 1;
             } else {
                 (r, sz) = utf8.DecodeRune(src);
@@ -589,10 +589,9 @@ internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slic
 // of b to the start of the new slice.
 internal static slice<byte> grow(slice<byte> b, nint n) {
     nint m = len(b);
-    if (m <= 32){
+    if (m <= 32) {
         m = 64;
-    } else 
-    if (m <= 256){
+    } else if (m <= 256) {
         m *= 2;
     } else {
         m += (m >> 1);
@@ -607,15 +606,15 @@ internal static UntypedInt initialBufSize => 128;
 // String returns a string with the result of converting s[:n] using t, where
 // n <= len(s). If err == nil, n will be len(s). It calls Reset on t.
 public static (@string result, nint n, error err) String(Transformer t, @string s) {
-    error err = default!;
+    error err = default;
 
     t.Reset();
     if (s == ""u8) {
         // Fast path for the common case for empty input. Results in about a
         // 86% reduction of running time for BenchmarkStringLowerEmpty.
         {
-            var (_, _, errΔ1) = t.Transform(default!, default!, true); if (errΔ1 == default!) {
-                return ("", 0, default!);
+            var (_, _, errΔ1) = t.Transform(default, default, true); if (errΔ1 == nil) {
+                return ("", 0, default);
             }
         }
     }
@@ -641,7 +640,7 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
     // being true returned nil error) then we don't need to allocate a new
     // result string.
     nint pPrefix = 0;
-    while (ᐧ) {
+    for (;;) {
         // Invariant: pDst == pPrefix && pSrc == pPrefix.
 
         nint nΔ1 = copy(src, s.slice(pSrc));
@@ -655,18 +654,16 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
             break;
         }
         pPrefix = pSrc;
-        if (AreEqual(err, ErrShortDst)){
+        if (AreEqual(err, ErrShortDst)) {
             // A buffer can only be short if a transformer modifies its input.
             break;
-        } else 
-        if (AreEqual(err, ErrShortSrc)){
+        } else if (AreEqual(err, ErrShortSrc)) {
             if (nSrc == 0) {
                 // No progress was made.
                 break;
             }
             // Equal so far and !atEOF, so continue checking.
-        } else 
-        if (err != default! || pPrefix == len(s)) {
+        } else if (err != nil || pPrefix == len(s)) {
             return ((@string)(s.slice(0, pPrefix)), pPrefix, err);
         }
     }
@@ -689,12 +686,12 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
 
     // Prevent duplicate Transform calls with atEOF being true at the end of
     // the input. Also return if we have an unrecoverable error.
-    if ((err == default! && pSrc == len(s)) || (err != default! && !AreEqual(err, ErrShortDst) && !AreEqual(err, ErrShortSrc))) {
+    if ((err == nil && pSrc == len(s)) || (err != nil && !AreEqual(err, ErrShortDst) && !AreEqual(err, ErrShortSrc))) {
         return ((@string)(dst.slice(0, pDst)), pSrc, err);
     }
 
     // Transform the remaining input, growing dst and src buffers as necessary.
-    while (ᐧ) {
+    for (;;) {
         nint nΔ2 = copy(src, s.slice(pSrc));
         var atEOF = pSrc + nΔ2 == len(s);
         var (nDstΔ1, nSrcΔ1, errΔ2) = t.Transform(dst.slice(pDst), src.slice(0, nΔ2), atEOF);
@@ -703,20 +700,18 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
 
         // If we got ErrShortDst or ErrShortSrc, do not grow as long as we can
         // make progress. This may avoid excessive allocations.
-        if (AreEqual(errΔ2, ErrShortDst)){
+        if (AreEqual(errΔ2, ErrShortDst)) {
             if (nDstΔ1 == 0) {
                 dst = grow(dst, pDst);
             }
-        } else 
-        if (AreEqual(errΔ2, ErrShortSrc)){
+        } else if (AreEqual(errΔ2, ErrShortSrc)) {
             if (atEOF) {
                 return ((@string)(dst.slice(0, pDst)), pSrc, errΔ2);
             }
             if (nSrcΔ1 == 0) {
                 src = grow(src, 0);
             }
-        } else 
-        if (errΔ2 != default! || pSrc == len(s)) {
+        } else if (errΔ2 != nil || pSrc == len(s)) {
             return ((@string)(dst.slice(0, pDst)), pSrc, errΔ2);
         }
     }
@@ -742,7 +737,7 @@ public static (slice<byte> result, nint n, error err) Append(Transformer t, slic
 internal static (slice<byte> result, nint n, error err) doAppend(Transformer t, nint pDst, slice<byte> dst, slice<byte> src) {
     t.Reset();
     nint pSrc = 0;
-    while (ᐧ) {
+    for (;;) {
         var (nDst, nSrc, errΔ1) = t.Transform(dst.slice(pDst), src.slice(pSrc), true);
         pDst += nDst;
         pSrc += nSrc;

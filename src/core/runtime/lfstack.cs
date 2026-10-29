@@ -25,7 +25,7 @@ internal static void push(this ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
 
     node.pushcnt++;
     var @new = lfstackPack(Ꮡnode, node.pushcnt);
-    while (ᐧ) {
+    for (;;) {
         var old = atomic.Load64(Ꮡhead.Reinterpret<lfstack, uint64>());
         node.next = old;
         if (atomic.Cas64(Ꮡhead.Reinterpret<lfstack, uint64>(), old, @new)) {
@@ -35,15 +35,15 @@ internal static void push(this ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
 }
 
 internal static @unsafe.Pointer pop(this ж<lfstack> Ꮡhead) {
-    uint32 backoff = default!;
+    uint32 backoff = default;
     // TODO: tweak backoff parameters on other architectures.
     if (GOARCH == "arm64"u8) {
         backoff = 128;
     }
-    while (ᐧ) {
+    for (;;) {
         var old = atomic.Load64(Ꮡhead.Reinterpret<lfstack, uint64>());
         if (old == 0) {
-            return default!;
+            return default;
         }
         var node = lfstackUnpack(old);
         var next = atomic.Load64(node.of(lfnode.Ꮡnext));
@@ -71,17 +71,17 @@ internal static readonly @string lfstackNodeAllocatedFromˢ = "lfstack node allo
 
 // lfnodeValidate panics if node is not a valid address for use with
 // lfstack.push. This only needs to be called when node is allocated.
-internal static void lfnodeValidate(ж<lfnode> Ꮡnode) {
+internal static void lfnodeValidate(ж<lfnode> node) {
     {
-        var (@base, _, _) = findObject((uintptr)Ꮡnode, 0, 0); if (@base != 0) {
+        var (@base, _, _) = findObject((uintptr)node, 0, 0); if (@base != 0) {
             @throw(lfstackNodeAllocatedFromˢ);
         }
     }
-    lfstackPack(Ꮡnode, ~(uintptr)0);
+    lfstackPack(node, ~(uintptr)0);
 }
 
-internal static uint64 lfstackPack(ж<lfnode> Ꮡnode, uintptr cnt) {
-    return (uint64)taggedPointerPack(@unsafe.Pointer.FromPinnedBox(Ꮡnode), (uintptr)(cnt & (uintptr)((1 << (int)(tagBits)) - 1)));
+internal static uint64 lfstackPack(ж<lfnode> node, uintptr cnt) {
+    return (uint64)taggedPointerPack(@unsafe.Pointer.FromPinnedBox(node), (uintptr)(cnt & (uintptr)((1 << (int)(tagBits)) - 1)));
 }
 
 internal static ж<lfnode> lfstackUnpack(uint64 val) {

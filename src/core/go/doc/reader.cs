@@ -37,27 +37,27 @@ internal static readonly @string badrecvˢ = "BADRECV"u8;
 internal static @string recvString(ast.Expr recv) {
     switch (recv.type()) {
     case ж<ast.Ident> t: {
-        return (~t).Name;
+        return t.Name;
     }
     case ж<ast.StarExpr> t: {
-        return "*"u8 + recvString((~t).X);
+        return "*"u8 + recvString(t.X);
     }
     case ж<ast.IndexExpr> t: {
         // Generic type with one parameter.
-        return fmt.Sprintf("%s[%s]"u8, recvString((~t).X), recvParam((~t).Index));
+        return fmt.Sprintf("%s[%s]"u8, recvString(t.X), recvParam(t.Index));
     }
     case ж<ast.IndexListExpr> t: {
         // Generic type with multiple parameters.
-        if (len((~t).Indices) > 0) {
+        if (len(t.Indices) > 0) {
             ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-            Ꮡb.WriteString(recvString((~t).X));
-            Ꮡb.WriteByte((rune)'[');
-            Ꮡb.WriteString(recvParam((~t).Indices[0]));
-            foreach (var (_, e) in (~t).Indices[1..]) {
+            Ꮡb.WriteString(recvString(t.X));
+            Ꮡb.WriteByte((byte)'[');
+            Ꮡb.WriteString(recvParam(t.Indices[0]));
+            foreach (var (_, e) in t.Indices[1..]) {
                 Ꮡb.WriteString(", "u8);
                 Ꮡb.WriteString(recvParam(e));
             }
-            Ꮡb.WriteByte((rune)']');
+            Ꮡb.WriteByte((byte)']');
             return b.String();
         }
         break;
@@ -71,7 +71,7 @@ internal static readonly @string badparamˢ = "BADPARAM"u8;
 internal static @string recvParam(ast.Expr p) {
     {
         var (id, ok) = p._<ж<ast.Ident>>(ᐧ); if (ok) {
-            return (~id).Name;
+            return id.Name;
         }
     }
     return badparamˢ;
@@ -84,10 +84,9 @@ internal static @string recvParam(ast.Expr p) {
 internal static void set(this methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preserveAST) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    ref var name = ref heap<@string>(out var Ꮡname);
-    name = f.Name.Value.Name;
+    ref var name = ref heap<@string>(f.Name.Name, out var Ꮡname);
     {
-        var g = mset[name]; if (g != nil && (~g).Doc != ""u8) {
+        var g = mset[name]; if (g != nil && g.Doc != ""u8) {
             // A function with the same name has already been registered;
             // since it has documentation, assume f is simply another
             // implementation and ignore it. This does not happen if the
@@ -97,14 +96,13 @@ internal static void set(this methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preser
         }
     }
     // function doesn't exist or has no documentation; use f
-    ref var recv = ref heap<@string>(out var Ꮡrecv);
-    recv = ""u8;
+    ref var recv = ref heap<@string>(""u8, out var Ꮡrecv);
     if (f.Recv != nil) {
-        ast.Expr typ = default!;
+        ast.Expr typ = default;
         // be careful in case of incorrect ASTs
         {
-            var list = f.Recv.Value.List; if (len(list) == 1) {
-                typ = list[0].Value.Type;
+            var list = f.Recv.List; if (len(list) == 1) {
+                typ = list[0].Type;
             }
         }
         recv = recvString(typ);
@@ -117,7 +115,7 @@ internal static void set(this methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preser
         Orig: recv
     ));
     if (!preserveAST) {
-        f.Doc = default!; // doc consumed - remove from AST
+        f.Doc = default; // doc consumed - remove from AST
     }
 }
 
@@ -128,11 +126,11 @@ internal static void add(this methodSet mset, ж<Func> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var old = mset[m.Name];
-    if (old == nil || m.Level < (~old).Level) {
+    if (old == nil || m.Level < old.Level) {
         mset[m.Name] = Ꮡm;
         return;
     }
-    if (m.Level == (~old).Level) {
+    if (m.Level == old.Level) {
         // conflict - mark it using a method with nil Decl
         mset[m.Name] = Ꮡ(new Func(
             Name: m.Name,
@@ -149,29 +147,29 @@ internal static void add(this methodSet mset, ж<Func> Ꮡm) {
 internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
     switch (x.type()) {
     case ж<ast.Ident> t: {
-        return ((~t).Name, false);
+        return (t.Name, false);
     }
     case ж<ast.IndexExpr> t: {
-        return baseTypeName((~t).X);
+        return baseTypeName(t.X);
     }
     case ж<ast.IndexListExpr> t: {
-        return baseTypeName((~t).X);
+        return baseTypeName(t.X);
     }
     case ж<ast.SelectorExpr> t: {
         {
-            var (_, ok) = (~t).X._<ж<ast.Ident>>(ᐧ); if (ok) {
+            var (_, ok) = t.X._<ж<ast.Ident>>(ᐧ); if (ok) {
                 // only possible for qualified type names;
                 // assume type is imported
-                return ((~(~t).Sel).Name, true);
+                return (t.Sel.Name, true);
             }
         }
         break;
     }
     case ж<ast.ParenExpr> t: {
-        return baseTypeName((~t).X);
+        return baseTypeName(t.X);
     }
     case ж<ast.StarExpr> t: {
-        return baseTypeName((~t).X);
+        return baseTypeName(t.X);
     }}
     return ("", false);
 }
@@ -183,10 +181,10 @@ partial struct embeddedSet /*map[ж<namedType>, bool]*/;
 // predeclared) type. The namedType for a type name is always found via
 // reader.lookupType.
 partial struct namedType {
-    internal @string doc;      // doc comment for type
-    internal @string name;      // type name
+    internal @string doc;         // doc comment for type
+    internal @string name;        // type name
     internal ж<ast.GenDecl> decl; // nil if declaration hasn't been seen yet
-    internal bool isEmbedded;        // true if this type is embedded
+    internal bool isEmbedded;      // true if this type is embedded
     internal bool isStruct;        // true if this type is a struct
     internal embeddedSet embedded; // true if the embedded type is a pointer
     // associated declarations
@@ -216,7 +214,7 @@ partial struct reader {
     internal map<@string, @string> importByName;
     // declarations
     internal slice<ж<Value>> values; // consts and vars
-    internal nint order;     // sort order of const and var declarations (when we can't use a name)
+    internal nint order;             // sort order of const and var declarations (when we can't use a name)
     internal map<@string, ж<namedType>> types;
     internal methodSet funcs;
     // support for package-local shadowing of predeclared types
@@ -234,7 +232,7 @@ internal static bool isVisible(this ref reader r, @string name) {
 // is added to the type map.
 internal static ж<namedType> lookupType(this ref reader r, @string name) {
     if (name == ""u8 || name == "_"u8) {
-        return default!; // no type docs for anonymous types
+        return default; // no type docs for anonymous types
     }
     {
         var (typΔ1, found) = r.types[name, ꟷ]; if (found) {
@@ -257,7 +255,7 @@ internal static ж<namedType> lookupType(this ref reader r, @string name) {
 // (qualified name) or the parent is nil, the field is ignored.
 // The function returns the field name.
 internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<namedType> Ꮡparent, ast.Expr fieldType) {
-    @string fname = default!;
+    @string fname = default;
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     (fname, var imp) = baseTypeName(fieldType);
@@ -266,7 +264,7 @@ internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<nam
     }
     {
         var ftype = r.lookupType(fname); if (ftype != nil) {
-            ftype.Value.isEmbedded = true;
+            ftype.isEmbedded = true;
             var (_, ptr) = fieldType._<ж<ast.StarExpr>>(ᐧ);
             parent.embedded[ftype] = ptr;
         }
@@ -274,10 +272,10 @@ internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<nam
     return fname;
 }
 
-internal static void readDoc(this ref reader r, ж<ast.CommentGroup> Ꮡcomment) {
+internal static void readDoc(this ref reader r, ж<ast.CommentGroup> comment) {
     // By convention there should be only one package comment
     // but collect all of them if there are more than one.
-    @string text = Ꮡcomment.Text();
+    @string text = comment.Text();
     if (r.doc == ""u8) {
         r.doc = text;
         return;
@@ -285,19 +283,19 @@ internal static void readDoc(this ref reader r, ж<ast.CommentGroup> Ꮡcomment)
     r.doc += "\n"u8 + text;
 }
 
-internal static void remember(this ref reader r, @string predecl, ж<ast.InterfaceType> Ꮡtyp) {
-    if (r.fixmap == default!) {
+internal static void remember(this ref reader r, @string predecl, ж<ast.InterfaceType> typ) {
+    if (r.fixmap == nil) {
         r.fixmap = new map<@string, slice<ж<ast.InterfaceType>>>();
     }
-    r.fixmap[predecl] = append(r.fixmap[predecl], Ꮡtyp);
+    r.fixmap[predecl] = append(r.fixmap[predecl], typ);
 }
 
 internal static slice<@string> specNames(slice<ast.Spec> specs) {
     var names = new slice<@string>(0, len(specs)); // reasonable estimate
     foreach (var (_, s) in specs) {
         // s guaranteed to be an *ast.ValueSpec by readValue
-        foreach (var (_, ident) in (~s._<ж<ast.ValueSpec>>()).Names) {
-            names = append(names, (~ident).Name);
+        foreach (var (_, ident) in s._<ж<ast.ValueSpec>>().Names) {
+            names = append(names, ident.Name);
         }
     }
     return names;
@@ -323,16 +321,16 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
         }
         @string name = ""u8;
         switch (ᐧ) {
-        case {} when (~s).Type != default!: {
+        case {} when s.Type != nil: {
             // a type is present; determine its name
             {
-                var (nΔ2, imp) = baseTypeName((~s).Type); if (!imp) {
+                var (nΔ2, imp) = baseTypeName(s.Type); if (!imp) {
                     name = nΔ2;
                 }
             }
             break;
         }
-        case {} when decl.Tok == token.CONST && len((~s).Values) == 0: {
+        case {} when decl.Tok == token.CONST && len(s.Values) == 0: {
             // no type or value is present but we have a constant declaration;
             // use the previous type name (possibly the empty string)
             name = prev;
@@ -377,7 +375,7 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
         order: r.order
     )));
     if ((Mode)(r.mode & PreserveAST) == 0) {
-        decl.Doc = default!; // doc consumed - remove from AST
+        decl.Doc = default; // doc consumed - remove from AST
     }
     // Note: It's important that the order used here is global because the cleanupTypes
     // methods may move values associated with types back into the global list. If the
@@ -388,22 +386,22 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
 
 // fields returns a struct's fields or an interface's methods.
 internal static (slice<ж<ast.Field>> list, bool isStruct) fields(ast.Expr typ) {
-    slice<ж<ast.Field>> list = default!;
-    bool isStruct = default!;
+    slice<ж<ast.Field>> list = default;
+    bool isStruct = default;
 
-    ж<ast.FieldList> fields = default!;
+    ж<ast.FieldList> fields = default;
     switch (typ.type()) {
     case ж<ast.StructType> t: {
-        fields = t.Value.Fields;
+        fields = t.Fields;
         isStruct = true;
         break;
     }
     case ж<ast.InterfaceType> t: {
-        fields = t.Value.Methods;
+        fields = t.Methods;
         break;
     }}
     if (fields != nil) {
-        list = fields.Value.List;
+        list = fields.List;
     }
     return (list, isStruct);
 }
@@ -413,14 +411,14 @@ internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast
     ref var decl = ref Ꮡdecl.DerefOrNull();
     ref var spec = ref Ꮡspec.DerefOrNull();
 
-    var typ = r.lookupType((~spec.Name).Name);
+    var typ = r.lookupType(spec.Name.Name);
     if (typ == nil) {
         return; // no name or blank name - ignore the type
     }
 
     // A type should be added at most once, so typ.decl
     // should be nil - if it is not, simply overwrite it.
-    typ.Value.decl = Ꮡdecl;
+    typ.decl = Ꮡdecl;
 
     // compute documentation
     var doc = spec.Doc;
@@ -429,19 +427,19 @@ internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast
         doc = decl.Doc;
     }
     if ((Mode)(r.mode & PreserveAST) == 0) {
-        spec.Doc = default!; // doc consumed - remove from AST
-        decl.Doc = default!; // doc consumed - remove from AST
+        spec.Doc = default; // doc consumed - remove from AST
+        decl.Doc = default; // doc consumed - remove from AST
     }
-    typ.Value.doc = doc.Text();
+    typ.doc = doc.Text();
 
     // record anonymous fields (they may contribute methods)
     // (some fields may have been recorded already when filtering
     // exports, but that's ok)
-    slice<ж<ast.Field>> list = default!;
-    (list, typ.Value.isStruct) = fields(spec.Type);
+    slice<ж<ast.Field>> list = default;
+    (list, typ.isStruct) = fields(spec.Type);
     foreach (var (_, field) in list) {
-        if (len((~field).Names) == 0) {
-            r.recordAnonymousField(typ, (~field).Type);
+        if (len(field.Names) == 0) {
+            r.recordAnonymousField(typ, field.Type);
         }
     }
 }
@@ -457,18 +455,18 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
 
     // strip function body if requested.
     if ((Mode)(r.mode & PreserveAST) == 0) {
-        fun.Body = default!;
+        fun.Body = default;
     }
 
     // associate methods with the receiver type, if any
     if (fun.Recv != nil) {
         // method
-        if (len((~fun.Recv).List) == 0) {
+        if (len(fun.Recv.List) == 0) {
             // should not happen (incorrect AST); (See issue 17788)
             // don't show this method
             return;
         }
-        var (recvTypeName, imp) = baseTypeName((~(~fun.Recv).List[0]).Type);
+        var (recvTypeName, imp) = baseTypeName(fun.Recv.List[0].Type);
         if (imp) {
             // should not happen (incorrect AST);
             // don't show this method
@@ -476,7 +474,7 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
         }
         {
             var typ = r.lookupType(recvTypeName); if (typ != nil) {
-                (~typ).methods.set(Ꮡfun, (Mode)(r.mode & PreserveAST) != 0);
+                typ.methods.set(Ꮡfun, (Mode)(r.mode & PreserveAST) != 0);
             }
         }
         // otherwise ignore the method
@@ -489,21 +487,21 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
 
     // Associate factory functions with the first visible result type, as long as
     // others are predeclared types.
-    if ((~fun.Type).Results.NumFields() >= 1) {
-        ж<namedType> typ = default!;                   // type to associate the function with
+    if (fun.Type.Results.NumFields() >= 1) {
+        ж<namedType> typ = default; // type to associate the function with
         nint numResultTypes = 0;
-        foreach (var (_, res) in (~(~fun.Type).Results).List) {
-            var factoryType = res.Value.Type;
+        foreach (var (_, res) in fun.Type.Results.List) {
+            var factoryType = res.Type;
             {
                 var (t, ok) = factoryType._<ж<ast.ArrayType>>(ᐧ); if (ok) {
                     // We consider functions that return slices or arrays of type
                     // T (or pointers to T) as factory functions of T.
-                    factoryType = t.Value.Elt;
+                    factoryType = t.Elt;
                 }
             }
             {
                 var (n, imp) = baseTypeName(factoryType); if (!imp && r.isVisible(n) && !r.isPredeclared(n)) {
-                    if (lookupTypeParam(n, (~fun.Type).TypeParams) != nil) {
+                    if (lookupTypeParam(n, fun.Type.TypeParams) != nil) {
                         // Issue #49477: don't associate fun with its type parameter result.
                         // A type parameter is not a defined type.
                         continue;
@@ -523,7 +521,7 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
         // If there is exactly one result type,
         // associate the function with that type.
         if (numResultTypes == 1) {
-            (~typ).funcs.set(Ꮡfun, (Mode)(r.mode & PreserveAST) != 0);
+            typ.funcs.set(Ꮡfun, (Mode)(r.mode & PreserveAST) != 0);
             return;
         }
     }
@@ -538,42 +536,42 @@ internal static ж<ast.Ident> lookupTypeParam(@string name, ж<ast.FieldList> �
     ref var tparams = ref Ꮡtparams.DerefOrNull();
 
     if (Ꮡtparams == nil) {
-        return default!;
+        return default;
     }
     foreach (var (_, field) in tparams.List) {
-        foreach (var (_, id) in (~field).Names) {
-            if ((~id).Name == name) {
+        foreach (var (_, id) in field.Names) {
+            if (id.Name == name) {
                 return id;
             }
         }
     }
-    return default!;
+    return default;
 }
 
-internal static @string noteMarker = @"([A-Z][A-Z]+)\(([^)]+)\):?"u8; // MARKER(uid), MARKER at least 2 chars, uid at least 1 char
-internal static ж<lazyregexp.Regexp> noteMarkerRx = lazyregexp.New(@"^[ \t]*"u8 + noteMarker);          // MARKER(uid) at text start
-internal static ж<lazyregexp.Regexp> noteCommentRx = lazyregexp.New(@"^/[/*][ \t]*"u8 + noteMarker);     // MARKER(uid) at comment start
+internal static @string noteMarker = @"([A-Z][A-Z]+)\(([^)]+)\):?"u8;                                // MARKER(uid), MARKER at least 2 chars, uid at least 1 char
+internal static ж<lazyregexp.Regexp> noteMarkerRx = lazyregexp.New(@"^[ \t]*"u8 + noteMarker);       // MARKER(uid) at text start
+internal static ж<lazyregexp.Regexp> noteCommentRx = lazyregexp.New(@"^/[/*][ \t]*"u8 + noteMarker); // MARKER(uid) at comment start
 
 // clean replaces each sequence of space, \r, or \t characters
 // with a single space and removes any trailing and leading spaces.
 internal static @string clean(@string s) {
     var bᴷ = new stackAppend<byte>();
 
-    slice<byte> b = default!;
-    var p = (byte)(rune)' ';
+    slice<byte> b = default;
+    var p = (byte)' ';
     for (nint i = 0; i < len(s); i++) {
         var q = s[i];
-        if (q == (rune)'\r' || q == (rune)'\t') {
-            q = (rune)' ';
+        if (q == '\r' || q == '\t') {
+            q = (byte)' ';
         }
-        if (q != (rune)' ' || p != (rune)' ') {
+        if (q != ' ' || p != ' ') {
             b = append(bᴷ, b, q);
             p = q;
         }
     }
     // remove trailing blank, if any
     {
-        nint n = len(b); if (n > 0 && p == (rune)' ') {
+        nint n = len(b); if (n > 0 && p == ' ') {
             b = b.slice(0, n - 1);
         }
     }
@@ -584,13 +582,12 @@ internal static @string clean(@string s) {
 internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
     @string text = (Ꮡ(new ast.CommentGroup(List: list))).Text();
     {
-        var m = noteMarkerRx.FindStringSubmatchIndex(text); if (m != default!) {
+        var m = noteMarkerRx.FindStringSubmatchIndex(text); if (m != nil) {
             // The note body starts after the marker.
             // We remove any formatting so that we don't
             // get spurious line breaks/indentation when
             // showing the TODO body.
-            ref var body = ref heap<@string>(out var Ꮡbody);
-            body = clean(text.slice(m[1]));
+            ref var body = ref heap<@string>(clean(text.slice(m[1])), out var Ꮡbody);
             if (body != ""u8) {
                 @string marker = text.slice(m[2], m[3]);
                 r.notes[marker] = append(r.notes[marker], Ꮡ(new Note(
@@ -612,9 +609,9 @@ internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
 internal static void readNotes(this ref reader r, slice<ж<ast.CommentGroup>> comments) {
     foreach (var (_, group) in comments) {
         nint i = -1; // comment index of most recent note start, valid if >= 0
-        var list = group.Value.List;
+        var list = group.List;
         foreach (var (j, c) in list) {
-            if (noteCommentRx.MatchString((~c).Text)) {
+            if (noteCommentRx.MatchString(c.Text)) {
                 if (i >= 0) {
                     r.readNote(list.slice(i, j));
                 }
@@ -636,7 +633,7 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
     if (src.Doc != nil) {
         r.readDoc(src.Doc);
         if ((Mode)(r.mode & PreserveAST) == 0) {
-            src.Doc = default!; // doc consumed - remove from AST
+            src.Doc = default; // doc consumed - remove from AST
         }
     }
 
@@ -644,18 +641,18 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
     foreach (var (_, decl) in src.Decls) {
         switch (decl.type()) {
         case ж<ast.GenDecl> d: {
-            var exprᴛ1 = (~d).Tok;
-            if (exprᴛ1 == token.IMPORT) {
+            switch (d.Tok) {
+            case var ᴛ when ᴛ == token.IMPORT: {
                 // imports are handled individually
-                foreach (var (_, spec) in (~d).Specs) {
+                foreach (var (_, spec) in d.Specs) {
                     {
                         var (s, ok) = spec._<ж<ast.ImportSpec>>(ᐧ); if (ok) {
                             {
-                                var (import_, err) = strconv.Unquote((~(~s).Path).Value); if (err == default!) {
+                                var (import_, err) = strconv.Unquote((~s.Path).Value); if (err == nil) {
                                     r.imports[import_] = 1;
-                                    @string name = default!;
-                                    if ((~s).Name != nil) {
-                                        name = s.Value.Name.Value.Name;
+                                    @string name = default;
+                                    if (s.Name != nil) {
+                                        name = s.Name.Name;
                                         if (name == "."u8) {
                                             r.hasDotImp = true;
                                         }
@@ -665,10 +662,9 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
                                             name = assumedPackageName(import_);
                                         }
                                         var (old, okΔ1) = r.importByName[name, ꟷ];
-                                        if (!okΔ1){
+                                        if (!okΔ1) {
                                             r.importByName[name] = import_;
-                                        } else 
-                                        if (old != import_ && old != ""u8) {
+                                        } else if (old != import_ && old != ""u8) {
                                             r.importByName[name] = ""u8; // ambiguous
                                         }
                                     }
@@ -677,51 +673,52 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
                         }
                     }
                 }
+                break;
             }
-            else if (exprᴛ1 == token.CONST || exprᴛ1 == token.VAR) {
+            case var ᴛ when ᴛ == token.CONST || ᴛ == token.VAR: {
                 // constants and variables are always handled as a group
                 Ꮡr.readValue(d);
+                break;
             }
-            else if (exprᴛ1 == token.TYPE) {
-                do {
-                    // types are handled individually
-                    if (len((~d).Specs) == 1 && !(~d).Lparen.IsValid()) {
-                        // common case: single declaration w/o parentheses
-                        // (if a single declaration is parenthesized,
-                        // create a new fake declaration below, so that
-                        // go/doc type declarations always appear w/o
-                        // parentheses)
-                        {
-                            var (s, ok) = (~d).Specs[0]._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
-                                r.readType(d, s);
-                            }
-                        }
-                        break;
-                    }
-                    foreach (var (_, spec) in (~d).Specs) {
-                        {
-                            var (s, ok) = spec._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
-                                // use an individual (possibly fake) declaration
-                                // for each type; this also ensures that each type
-                                // gets to (re-)use the declaration documentation
-                                // if there's none associated with the spec itself
-                                var fake = Ꮡ(new ast.GenDecl(
-                                    Doc: (~d).Doc,
-                                    // don't use the existing TokPos because it
-                                    // will lead to the wrong selection range for
-                                    // the fake declaration if there are more
-                                    // than one type in the group (this affects
-                                    // src/cmd/godoc/godoc.go's posLink_urlFunc)
-                                    TokPos: s.Pos(),
-                                    Tok: token.TYPE,
-                                    Specs: new ast.Spec[]{new ast.TypeSpecжSpec(s)}.slice()
-                                ));
-                                r.readType(fake, s);
-                            }
+            case var ᴛ when ᴛ == token.TYPE: {
+                // types are handled individually
+                if (len(d.Specs) == 1 && !d.Lparen.IsValid()) {
+                    // common case: single declaration w/o parentheses
+                    // (if a single declaration is parenthesized,
+                    // create a new fake declaration below, so that
+                    // go/doc type declarations always appear w/o
+                    // parentheses)
+                    {
+                        var (s, ok) = d.Specs[0]._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
+                            r.readType(d, s);
                         }
                     }
-                } while (false);
-            }
+                    break;
+                }
+                foreach (var (_, spec) in d.Specs) {
+                    {
+                        var (s, ok) = spec._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
+                            // use an individual (possibly fake) declaration
+                            // for each type; this also ensures that each type
+                            // gets to (re-)use the declaration documentation
+                            // if there's none associated with the spec itself
+                            var fake = Ꮡ(new ast.GenDecl(
+                                Doc: d.Doc,
+                                // don't use the existing TokPos because it
+                                // will lead to the wrong selection range for
+                                // the fake declaration if there are more
+                                // than one type in the group (this affects
+                                // src/cmd/godoc/godoc.go's posLink_urlFunc)
+                                TokPos: s.Pos(),
+                                Tok: token.TYPE,
+                                Specs: slice<ast.Spec>([new ast.TypeSpecжSpec(s)])
+                            ));
+                            r.readType(fake, s);
+                        }
+                    }
+                }
+                break;
+            }}
             break;
         }}
     }
@@ -729,7 +726,7 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
     // collect MARKER(...): annotations
     r.readNotes(src.Comments);
     if ((Mode)(r.mode & PreserveAST) == 0) {
-        src.Comments = default!; // consumed unassociated comments - remove from AST
+        src.Comments = default; // consumed unassociated comments - remove from AST
     }
 }
 
@@ -772,7 +769,7 @@ internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, M
 
     // process functions now that we have better type information
     foreach (var (_, f) in pkg.Files) {
-        foreach (var (_, decl) in (~f).Decls) {
+        foreach (var (_, decl) in f.Decls) {
             {
                 var (d, ok) = decl._<ж<ast.FuncDecl>>(ᐧ); if (ok) {
                     r.readFunc(d);
@@ -787,37 +784,32 @@ internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, M
 internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool embeddedIsPtr, nint level) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    if (Ꮡf == nil || f.Decl == nil || (~f.Decl).Recv == nil || len((~(~f.Decl).Recv).List) != 1) {
+    if (Ꮡf == nil || f.Decl == nil || f.Decl.Recv == nil || len(f.Decl.Recv.List) != 1) {
         return Ꮡf; // shouldn't happen, but be safe
     }
 
     // copy existing receiver field and set new type
-    ref var newField = ref heap<ast.Field>(out var ᏑnewField);
-    newField = (~(~f.Decl).Recv).List[0].Value;
-    ref var origPos = ref heap<tokenꓸPos>(out var ᏑorigPos);
-    origPos = newField.Type.Pos();
+    ref var newField = ref heap<ast.Field>(f.Decl.Recv.List[0].Value, out var ᏑnewField);
+    ref var origPos = ref heap<tokenꓸPos>(newField.Type.Pos(), out var ᏑorigPos);
     var (_, origRecvIsPtr) = newField.Type._<ж<ast.StarExpr>>(ᐧ);
     var newIdent = Ꮡ(new ast.Ident(NamePos: origPos, Name: recvTypeName));
     ast.Expr typ = new ast.IdentжExpr(newIdent);
     if (!embeddedIsPtr && origRecvIsPtr) {
-        newIdent.Value.NamePos++; // '*' is one character
+        newIdent.NamePos++; // '*' is one character
         typ = new ast.StarExprжExpr(Ꮡ(new ast.StarExpr(Star: origPos, X: new ast.IdentжExpr(newIdent))));
     }
     newField.Type = typ;
 
     // copy existing receiver field list and set new receiver field
-    ref var newFieldList = ref heap<ast.FieldList>(out var ᏑnewFieldList);
-    newFieldList = (~f.Decl).Recv.Value;
-    newFieldList.List = new ж<ast.Field>[]{ᏑnewField}.slice();
+    ref var newFieldList = ref heap<ast.FieldList>(f.Decl.Recv.Value, out var ᏑnewFieldList);
+    newFieldList.List = slice<ж<ast.Field>>([ᏑnewField]);
 
     // copy existing function declaration and set new receiver field list
-    ref var newFuncDecl = ref heap<ast.FuncDecl>(out var ᏑnewFuncDecl);
-    newFuncDecl = f.Decl.Value;
+    ref var newFuncDecl = ref heap<ast.FuncDecl>(f.Decl.Value, out var ᏑnewFuncDecl);
     newFuncDecl.Recv = ᏑnewFieldList;
 
     // copy existing function documentation and set new declaration
-    ref var newF = ref heap<Func>(out var ᏑnewF);
-    newF = f;
+    ref var newF = ref heap<Func>(f, out var ᏑnewF);
     newF.Decl = ᏑnewFuncDecl;
     newF.Recv = recvString(typ);
     // the Orig field never changes
@@ -838,9 +830,9 @@ internal static void collectEmbeddedMethods(this ref reader r, methodSet mset, �
         // computation; i.e., embeddedIsPtr is sticky for this
         // embedding hierarchy.
         var thisEmbeddedIsPtr = embeddedIsPtr || isPtr;
-        foreach (var (_, m) in (~embedded).methods) {
+        foreach (var (_, m) in embedded.methods) {
             // only top-level methods are embedded
-            if ((~m).Level == 0) {
+            if (m.Level == 0) {
                 mset.add(customizeRecv(m, recvTypeName, thisEmbeddedIsPtr, level));
             }
         }
@@ -855,9 +847,9 @@ internal static void collectEmbeddedMethods(this ref reader r, methodSet mset, �
 internal static void computeMethodSets(this ref reader r) {
     foreach (var (_, t) in r.types) {
         // collect embedded methods for t
-        if ((~t).isStruct){
+        if (t.isStruct) {
             // struct
-            r.collectEmbeddedMethods((~t).methods, t, (~t).name, false, 1, new embeddedSet(0));
+            r.collectEmbeddedMethods(t.methods, t, t.name, false, 1, new embeddedSet(0));
         } else {
             // interface
             // TODO(gri) fix this
@@ -879,26 +871,26 @@ internal static void computeMethodSets(this ref reader r) {
 // declarations or which are not visible.
 internal static void cleanupTypes(this ref reader r) {
     foreach (var (_, t) in r.types) {
-        var visible = r.isVisible((~t).name);
-        var predeclared = predeclaredTypes[(~t).name];
+        var visible = r.isVisible(t.name);
+        var predeclared = predeclaredTypes[t.name];
 
-        if ((~t).decl == nil && (predeclared || visible && ((~t).isEmbedded || r.hasDotImp))) {
+        if (t.decl == nil && (predeclared || visible && (t.isEmbedded || r.hasDotImp))) {
             // t.name is a predeclared type (and was not redeclared in this package),
             // or it was embedded somewhere but its declaration is missing (because
             // the AST is incomplete), or we have a dot-import (and all bets are off):
             // move any associated values, funcs, and methods back to the top-level so
             // that they are not lost.
             // 1) move values
-            r.values = appendꓸꓸꓸ(r.values, (~t).values);
+            r.values = appendꓸꓸꓸ(r.values, t.values);
             // 2) move factory functions
-            foreach (var (name, f) in (~t).funcs) {
+            foreach (var (name, f) in t.funcs) {
                 // in a correct AST, package-level function names
                 // are all different - no need to check for conflicts
                 r.funcs[name] = f;
             }
             // 3) move methods
             if (!predeclared) {
-                foreach (var (name, m) in (~t).methods) {
+                foreach (var (name, m) in t.methods) {
                     // don't overwrite functions with the same name - drop them
                     {
                         var (_, found) = r.funcs[name, ꟷ]; if (!found) {
@@ -909,8 +901,8 @@ internal static void cleanupTypes(this ref reader r) {
             }
         }
         // remove types w/o declaration or which are not visible
-        if ((~t).decl == nil || !visible) {
-            delete(r.types, (~t).name);
+        if (t.decl == nil || !visible) {
+            delete(r.types, t.name);
         }
     }
 }
@@ -933,7 +925,7 @@ internal static @string sortingName(ref ast.GenDecl d) {
     if (len(d.Specs) == 1) {
         {
             var (s, ok) = d.Specs[0]._<ж<ast.ValueSpec>>(ᐧ); if (ok) {
-                return (~(~s).Names[0]).Name;
+                return s.Names[0].Name;
             }
         }
     }
@@ -944,7 +936,7 @@ internal static slice<ж<Value>> sortedValues(slice<ж<Value>> m, token.Token to
     var list = new slice<ж<Value>>(len(m)); // big enough in any case
     nint i = 0;
     foreach (var (_, val) in m) {
-        if ((~(~val).Decl).Tok == tok) {
+        if (val.Decl.Tok == tok) {
             list[i] = val;
             i++;
         }
@@ -952,11 +944,11 @@ internal static slice<ж<Value>> sortedValues(slice<ж<Value>> m, token.Token to
     list = list.slice(0, i);
 
     slices.SortFunc(list, (ж<Value> a, ж<Value> b) => {
-        nint r = strings.Compare(sortingName(ref ((~a).Decl).DerefOrNull()), sortingName(ref ((~b).Decl).DerefOrNull()));
+        nint r = strings.Compare(sortingName(ref (a.Decl).DerefOrNull()), sortingName(ref (b.Decl).DerefOrNull()));
         if (r != 0) {
             return r;
         }
-        return cmp.Compare((~a).order, (~b).order);
+        return cmp.Compare(a.order, b.order);
     });
 
     return list;
@@ -967,24 +959,24 @@ internal static slice<ж<Type>> sortedTypes(map<@string, ж<namedType>> m, bool 
     nint i = 0;
     foreach (var (_, t) in m) {
         list[i] = Ꮡ(new Type(
-            Doc: (~t).doc,
-            Name: (~t).name,
-            Decl: (~t).decl,
-            Consts: sortedValues((~t).values, token.CONST),
-            Vars: sortedValues((~t).values, token.VAR),
-            Funcs: sortedFuncs((~t).funcs, true),
-            Methods: sortedFuncs((~t).methods, allMethods)
+            Doc: t.doc,
+            Name: t.name,
+            Decl: t.decl,
+            Consts: sortedValues(t.values, token.CONST),
+            Vars: sortedValues(t.values, token.VAR),
+            Funcs: sortedFuncs(t.funcs, true),
+            Methods: sortedFuncs(t.methods, allMethods)
         ));
         i++;
     }
 
-    slices.SortFunc(list, (ж<Type> a, ж<Type> b) => strings.Compare((~a).Name, (~b).Name));
+    slices.SortFunc(list, (ж<Type> a, ж<Type> b) => strings.Compare(a.Name, b.Name));
 
     return list;
 }
 
 internal static @string removeStar(@string s) {
-    if (len(s) > 0 && s[0] == (rune)'*') {
+    if (len(s) > 0 && s[0] == '*') {
         return s[1..];
     }
     return s;
@@ -996,11 +988,11 @@ internal static slice<ж<Func>> sortedFuncs(methodSet m, bool allMethods) {
     foreach (var (_, mΔ1) in m) {
         // determine which methods to include
         switch (ᐧ) {
-        case {} when (~mΔ1).Decl == nil: {
+        case {} when mΔ1.Decl == nil: {
             // exclude conflict entry
             break;
         }
-        case {} when (allMethods) || ((~mΔ1).Level == 0) || (!token.IsExported(removeStar((~mΔ1).Orig))): {
+        case {} when (allMethods) || (mΔ1.Level == 0) || (!token.IsExported(removeStar(mΔ1.Orig))): {
             // forced inclusion, method not embedded, or method
             // embedded but original receiver type not exported
             list[i] = mΔ1;
@@ -1009,16 +1001,16 @@ internal static slice<ж<Func>> sortedFuncs(methodSet m, bool allMethods) {
         }}
     }
     list = list.slice(0, i);
-    slices.SortFunc(list, (ж<Func> a, ж<Func> b) => strings.Compare((~a).Name, (~b).Name));
+    slices.SortFunc(list, (ж<Func> a, ж<Func> b) => strings.Compare(a.Name, b.Name));
     return list;
 }
 
 // noteBodies returns a list of note body strings given a list of notes.
 // This is only used to populate the deprecated Package.Bugs field.
 internal static slice<@string> noteBodies(slice<ж<Note>> notes) {
-    slice<@string> list = default!;
+    slice<@string> list = default;
     foreach (var (_, n) in notes) {
-        list = append(list, (~n).Body);
+        list = append(list, n.Body);
     }
     return list;
 }
@@ -1088,12 +1080,12 @@ internal static map<@string, bool> predeclaredConstants = new map<@string, bool>
 // for a given import path. This is a copy of
 // golang.org/x/tools/internal/imports.ImportPathToAssumedName.
 internal static @string assumedPackageName(@string importPath) {
-    var notIdentifier = (rune ch) => !((rune)'a' <= ch && ch <= (rune)'z' || (rune)'A' <= ch && ch <= (rune)'Z' || (rune)'0' <= ch && ch <= (rune)'9' || ch == (rune)'_' || ch >= utf8.RuneSelf && (unicode.IsLetter(ch) || unicode.IsDigit(ch)));
+    var notIdentifier = (rune ch) => !('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || '0' <= ch && ch <= '9' || ch == '_' || ch >= utf8.RuneSelf && (unicode.IsLetter(ch) || unicode.IsDigit(ch)));
 
     @string @base = path.Base(importPath);
     if (strings.HasPrefix(@base, "v"u8)) {
         {
-            var (_, err) = strconv.Atoi(@base[1..]); if (err == default!) {
+            var (_, err) = strconv.Atoi(@base[1..]); if (err == nil) {
                 @string dir = path.Dir(importPath);
                 if (dir != "."u8) {
                     @base = path.Base(dir);

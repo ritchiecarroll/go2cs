@@ -25,12 +25,12 @@ partial struct gcmFieldElement {
 // GHASH is exposed to allow crypto/cipher to implement non-AES GCM modes.
 // It is not allowed as a stand-alone operation in FIPS mode because it
 // is not ACVP tested.
-public static slice<byte> GHASH(/*[16]*/ ж<array<byte>> Ꮡkey, params Span<slice<byte>> inputsʗp) {
+public static slice<byte> GHASH(/*[16]*/ ж<array<byte>> key, params Span<slice<byte>> inputsʗp) {
     var inputs = inputsʗp.sslice();
 
     fips140.RecordNonApproved();
     ref var @out = ref heap(new array<byte>(16), out var Ꮡout);
-    ghash(Ꮡout, Ꮡkey, inputs.ꓸꓸꓸ);
+    ghash(Ꮡout, key, inputs.ꓸꓸꓸ);
     return @out[..];
 }
 
@@ -63,7 +63,7 @@ internal static void ghash(/*[16]*/ ж<array<byte>> Ꮡout, /*[16]*/ ж<array<by
         productTable[reverseBits(i + 1)] = ghashAdd(ref productTable[reverseBits(i)], ref x);
     }
 
-    gcmFieldElement y = default!;
+    gcmFieldElement y = default;
     foreach (var (_, input) in inputs) {
         ghashUpdate(ref productTable, ref y, input);
     }
@@ -87,7 +87,7 @@ internal static gcmFieldElement ghashAdd(ref gcmFieldElement x, ref gcmFieldElem
 
 // ghashDouble returns the result of doubling an element of GF(2¹²⁸).
 internal static gcmFieldElement /*double*/ ghashDouble(ref gcmFieldElement x) {
-    gcmFieldElement @double = default!;
+    gcmFieldElement @double = default;
 
     var msbSet = (x.high & 1) == 1;
 
@@ -110,14 +110,14 @@ internal static gcmFieldElement /*double*/ ghashDouble(ref gcmFieldElement x) {
     return @double;
 }
 
-internal static slice<uint16> ghashReductionTable = new uint16[]{
+internal static slice<uint16> ghashReductionTable = slice<uint16>([
     0x0000, 0x1c20, 0x3840, 0x2460, 0x7080, 0x6ca0, 0x48c0, 0x54e0,
     0xe100, 0xfd20, 0xd940, 0xc560, 0x9180, 0x8da0, 0xa9c0, 0xb5e0
-}.slice();
+]);
 
 // ghashMul sets y to y*H, where H is the GCM key, fixed during New.
 internal static void ghashMul(ref array<gcmFieldElement> productTable, ref gcmFieldElement y) {
-    gcmFieldElement z = default!;
+    gcmFieldElement z = default;
 
     for (nint i = 0; i < 2; i++) {
         var word = y.high;
@@ -129,9 +129,9 @@ internal static void ghashMul(ref array<gcmFieldElement> productTable, ref gcmFi
         // one of the precomputed multiples of H.
         for (nint j = 0; j < 64; j += 4) {
             var msw = z.high & 0xf;
-            z.high >>= (int)(4);
+            z.high >>= 4;
             z.high |= (uint64)((z.low << 60));
-            z.low >>= (int)(4);
+            z.low >>= 4;
             z.low ^= (uint64)(((uint64)ghashReductionTable[msw] << 48));
 
             // the values in |table| are ordered for little-endian bit
@@ -140,7 +140,7 @@ internal static void ghashMul(ref array<gcmFieldElement> productTable, ref gcmFi
 
             z.low ^= (uint64)(t.low);
             z.high ^= (uint64)(t.high);
-            word >>= (int)(4);
+            word >>= 4;
         }
     }
 

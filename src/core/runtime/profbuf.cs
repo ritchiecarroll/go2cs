@@ -110,8 +110,8 @@ partial struct profAtomic /*num:uint64*/;
 // A profIndex is the packet tag and data counts and flags bits, described above.
 partial struct profIndex /*num:uint64*/;
 
-internal static profIndex profReaderSleeping => /* 1 << 32 */ unchecked((profIndex)4294967296);   // reader is sleeping and must be woken up
-internal static profIndex profWriteExtra => /* 1 << 33 */ unchecked((profIndex)8589934592);       // overflow or eof waiting
+internal static profIndex profReaderSleeping => /* 1 << 32 */ unchecked((profIndex)4294967296); // reader is sleeping and must be woken up
+internal static profIndex profWriteExtra => /* 1 << 33 */ unchecked((profIndex)8589934592);     // overflow or eof waiting
 
 internal static profIndex load(this ж<profAtomic> Ꮡx) {
     return (profIndex)atomic.Load64(Ꮡx.Reinterpret<profAtomic, uint64>());
@@ -126,11 +126,11 @@ internal static bool cas(this ж<profAtomic> Ꮡx, profIndex old, profIndex @new
 }
 
 internal static uint32 dataCount(this profIndex x) {
-    return (uint32)(uint64)x;
+    return (uint32)x;
 }
 
 internal static uint32 tagCount(this profIndex x) {
-    return (uint32)(uint64)((x >> 34));
+    return (uint32)(x >> 34);
 }
 
 // countSub subtracts two counts obtained from profIndex.dataCount or profIndex.tagCount,
@@ -145,7 +145,7 @@ internal static nint countSub(uint32 x, uint32 y) {
 
 // addCountsAndClearFlags returns the packed form of "x + (data, tag) - all flags".
 internal static profIndex addCountsAndClearFlags(this profIndex x, nint data, nint tag) {
-    return (profIndex)((((uint64)x >> 34) + (uint64)(((uint32)tag << 2) >> 2)) << 34 | (uint64)((uint32)(uint64)x + (uint32)data));
+    return (profIndex)((((uint64)x >> 34) + (uint64)(((uint32)tag << 2) >> 2)) << 34 | (uint64)((uint32)x + (uint32)data));
 }
 
 // hasOverflow reports whether b has any overflow records pending.
@@ -157,12 +157,12 @@ internal static bool hasOverflow(this ж<profBuf> Ꮡb) {
 // and the time of the first overflow.
 // When called by the reader, it is racing against incrementOverflow.
 internal static (uint32 count, uint64 time) takeOverflow(this ж<profBuf> Ꮡb) {
-    uint32 count = default!;
-    uint64 time = default!;
+    uint32 count = default;
+    uint64 time = default;
 
     var overflow = Ꮡb.of(profBuf.Ꮡoverflow).Load();
     time = Ꮡb.of(profBuf.ᏑoverflowTime).Load();
-    while (ᐧ) {
+    for (;;) {
         count = (uint32)overflow;
         if (count == 0) {
             time = 0;
@@ -181,7 +181,7 @@ internal static (uint32 count, uint64 time) takeOverflow(this ж<profBuf> Ꮡb) 
 // incrementOverflow records a single overflow at time now.
 // It is racing against a possible takeOverflow in the reader.
 internal static void incrementOverflow(this ж<profBuf> Ꮡb, int64 now) {
-    while (ᐧ) {
+    for (;;) {
         var overflow = Ꮡb.of(profBuf.Ꮡoverflow).Load();
 
         // Once we see b.overflow reach 0, it's stable: no one else is changing it underfoot.
@@ -224,19 +224,19 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
     if (bufwords >= 1 << 28 || tags >= 1 << 28) {
         @throw(newProfBufBufferTooLargeˢ);
     }
-    nint i = default!;
-    for (i = 1; i < bufwords; i <<= (int)(1)) {
+    nint i = default;
+    for (i = 1; i < bufwords; i <<= 1) {
     }
     bufwords = i;
-    for (i = 1; i < tags; i <<= (int)(1)) {
+    for (i = 1; i < tags; i <<= 1) {
     }
     tags = i;
 
     var b = @new<profBuf>();
-    b.Value.hdrsize = (uintptr)hdrsize;
-    b.Value.data = new slice<uint64>(bufwords);
-    b.Value.tags = new slice<@unsafe.Pointer>(tags);
-    b.Value.overflowBuf = new slice<uint64>((nint)(2 + (~b).hdrsize + 1));
+    b.hdrsize = (uintptr)hdrsize;
+    b.data = new slice<uint64>(bufwords);
+    b.tags = new slice<@unsafe.Pointer>(tags);
+    b.overflowBuf = new slice<uint64>((nint)(2 + b.hdrsize + 1));
     return b;
 }
 
@@ -326,7 +326,7 @@ internal static void close(this ж<profBuf> Ꮡb) {
 // atomic fields b.overflow or b.eof.
 // It records the change in b.w and wakes up the reader if needed.
 internal static void wakeupExtra(this ж<profBuf> Ꮡb) {
-    while (ᐧ) {
+    for (;;) {
         var old = Ꮡb.of(profBuf.Ꮡw).load();
         var @new = (profIndex)(old | profWriteExtra);
         // Clear profReaderSleeping. We're going to wake up the reader
@@ -350,19 +350,19 @@ public partial struct profBufReadMode /*num:nint*/;
 internal static profBufReadMode profBufBlocking => /* iota */ 0;
 internal static profBufReadMode profBufNonBlocking => 1;
 
-internal static array<@unsafe.Pointer> overflowTag = new(1);           // always nil
+internal static array<@unsafe.Pointer> overflowTag = new(1); // always nil
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string runtimeMalformedProfBufˢ = "runtime: malformed profBuf buffer - tag and data out of sync"u8;
 internal static readonly @string runtimeMalformedProfBufˢ2 = "runtime: malformed profBuf buffer - invalid size"u8;
 
 internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read(this ж<profBuf> Ꮡb, profBufReadMode mode) {
-    slice<uint64> data = default!;
-    slice<@unsafe.Pointer> tags = default!;
+    slice<uint64> data = default;
+    slice<@unsafe.Pointer> tags = default;
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
-        return (default!, default!, true);
+        return (default, default, true);
     }
 
     var br = b.rNext;
@@ -377,7 +377,7 @@ internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read
         nint ntagΔ1 = countSub(br.tagCount(), rPrev.tagCount());
         nint tiΔ1 = (nint)(rPrev.tagCount() % (uint32)len(b.tags));
         for (nint i = 0; i < ntagΔ1; i++) {
-            b.tags[tiΔ1] = default!;
+            b.tags[tiΔ1] = default;
             {
                 tiΔ1++; if (tiΔ1 == len(b.tags)) {
                     tiΔ1 = 0;
@@ -409,7 +409,7 @@ Read:
         }
         if (Ꮡb.of(profBuf.Ꮡeof).Load() > 0) {
             // No data, no overflow, EOF set: done.
-            return (default!, default!, true);
+            return (default, default, true);
         }
         if ((profIndex)(bw & profWriteExtra) != 0) {
             // Writer claims to have published extra information (overflow or eof).
@@ -424,7 +424,7 @@ Read:
         // Return or sleep according to mode.
         if (mode == profBufNonBlocking) {
             // Necessary on Darwin, notetsleepg below does not work in signal handler, root cause of #61768.
-            return (default!, default!, false);
+            return (default, default, false);
         }
         if (!Ꮡb.of(profBuf.Ꮡw).cas(bw, (profIndex)(bw | profReaderSleeping))) {
             goto Read;
@@ -435,7 +435,7 @@ Read:
         goto Read;
     }
     data = b.data.slice((nint)(br.dataCount() % (uint32)len(b.data)));
-    if (len(data) > numData){
+    if (len(data) > numData) {
         data = data.slice(0, numData);
     } else {
         numData -= len(data); // available in case of wraparound

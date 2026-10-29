@@ -65,18 +65,18 @@ internal static readonly @string len8tab = "\x00\x01\x02\x02\x03\x03\x03\x03\x04
 //
 //go:nosplit
 public static nint /*n*/ Len64(uint64 x) {
-    nint n = default!;
+    nint n = default;
 
     if (x >= (uint64)1 << 32) {
-        x >>= (int)(32);
+        x >>= 32;
         n = 32;
     }
     if (x >= (uint64)1 << 16) {
-        x >>= (int)(16);
+        x >>= 16;
         n += 16;
     }
     if (x >= (uint64)1 << 8) {
-        x >>= (int)(8);
+        x >>= 8;
         n += 8;
     }
     return n + (nint)len8tab[(uint8)x];

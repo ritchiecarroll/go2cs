@@ -30,7 +30,7 @@ internal static readonly @string gotracebackˢ2 = "GOTRACEBACK="u8;
 internal static readonly @string gotracebackNoneˢ = "GOTRACEBACK=none"u8;
 
 internal static void secureEnv() {
-    bool hasTraceback = default!;
+    bool hasTraceback = default;
     for (nint i = 0; i < len(envs); i++) {
         if (stringslite.HasPrefix(envs[i], gotracebackˢ2)) {
             hasTraceback = true;

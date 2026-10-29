@@ -96,7 +96,7 @@ internal static nint abs8(uint8 d) {
 }
 
 internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) {
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
     var n = (uint32)len(b);
@@ -115,11 +115,11 @@ internal static void writeChunk(this ref encoder e, slice<byte> b, @string name)
     binary.BigEndian.PutUint32(e.footer[..4], crc.Sum32());
 
     (_, e.err) = e.w.Write(e.header[..8]);
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
     (_, e.err) = e.w.Write(b);
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
     (_, e.err) = e.w.Write(e.footer[..4]);
@@ -133,47 +133,57 @@ internal static void writeIHDR(this ref encoder e) {
     binary.BigEndian.PutUint32(e.tmp[0..4], (uint32)b.Dx());
     binary.BigEndian.PutUint32(e.tmp[4..8], (uint32)b.Dy());
     // Set bit depth and color type.
-    var exprᴛ1 = e.cb;
-    if (exprᴛ1 == cbG8) {
+    switch (e.cb) {
+    case var ᴛ when ᴛ == cbG8: {
         e.tmp[8] = 8;
         e.tmp[9] = ctGrayscale;
+        break;
     }
-    else if (exprᴛ1 == cbTC8) {
+    case var ᴛ when ᴛ == cbTC8: {
         e.tmp[8] = 8;
         e.tmp[9] = ctTrueColor;
+        break;
     }
-    else if (exprᴛ1 == cbP8) {
+    case var ᴛ when ᴛ == cbP8: {
         e.tmp[8] = 8;
         e.tmp[9] = ctPaletted;
+        break;
     }
-    else if (exprᴛ1 == cbP4) {
+    case var ᴛ when ᴛ == cbP4: {
         e.tmp[8] = 4;
         e.tmp[9] = ctPaletted;
+        break;
     }
-    else if (exprᴛ1 == cbP2) {
+    case var ᴛ when ᴛ == cbP2: {
         e.tmp[8] = 2;
         e.tmp[9] = ctPaletted;
+        break;
     }
-    else if (exprᴛ1 == cbP1) {
+    case var ᴛ when ᴛ == cbP1: {
         e.tmp[8] = 1;
         e.tmp[9] = ctPaletted;
+        break;
     }
-    else if (exprᴛ1 == cbTCA8) {
+    case var ᴛ when ᴛ == cbTCA8: {
         e.tmp[8] = 8;
         e.tmp[9] = ctTrueColorAlpha;
+        break;
     }
-    else if (exprᴛ1 == cbG16) {
+    case var ᴛ when ᴛ == cbG16: {
         e.tmp[8] = 16;
         e.tmp[9] = ctGrayscale;
+        break;
     }
-    else if (exprᴛ1 == cbTC16) {
+    case var ᴛ when ᴛ == cbTC16: {
         e.tmp[8] = 16;
         e.tmp[9] = ctTrueColor;
+        break;
     }
-    else if (exprᴛ1 == cbTCA16) {
+    case var ᴛ when ᴛ == cbTCA16: {
         e.tmp[8] = 16;
         e.tmp[9] = ctTrueColorAlpha;
-    }
+        break;
+    }}
     e.tmp[10] = 0; // default compression method
     e.tmp[11] = 0; // default filter method
     e.tmp[12] = 0; // non-interlaced
@@ -217,10 +227,10 @@ internal static readonly @string idatˢ = "IDAT"u8;
 // No other code should treat an encoder as an io.Writer.
 public static (nint, error) Write(this ref encoder e, slice<byte> b) {
     e.writeChunk(b, idatˢ);
-    if (e.err != default!) {
+    if (e.err != nil) {
         return (0, e.err);
     }
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 // Chooses the filter to use for encoding the current row, and applies it.
@@ -322,9 +332,9 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
     try {
         ref var e = ref Ꮡe.DerefOrNull();
 
-        if (e.zw == nil || e.zwLevel != level){
+        if (e.zw == nil || e.zwLevel != level) {
             var (zw, err) = zlib.NewWriterLevel(w, level);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             e.zw = zw;
@@ -336,37 +346,47 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
 
         nint bitsPerPixel = 0;
 
-        var exprᴛ1 = cb;
-        if (exprᴛ1 == cbG8) {
+        switch (cb) {
+        case var ᴛ when ᴛ == cbG8: {
             bitsPerPixel = 8;
+            break;
         }
-        else if (exprᴛ1 == cbTC8) {
+        case var ᴛ when ᴛ == cbTC8: {
             bitsPerPixel = 24;
+            break;
         }
-        else if (exprᴛ1 == cbP8) {
+        case var ᴛ when ᴛ == cbP8: {
             bitsPerPixel = 8;
+            break;
         }
-        else if (exprᴛ1 == cbP4) {
+        case var ᴛ when ᴛ == cbP4: {
             bitsPerPixel = 4;
+            break;
         }
-        else if (exprᴛ1 == cbP2) {
+        case var ᴛ when ᴛ == cbP2: {
             bitsPerPixel = 2;
+            break;
         }
-        else if (exprᴛ1 == cbP1) {
+        case var ᴛ when ᴛ == cbP1: {
             bitsPerPixel = 1;
+            break;
         }
-        else if (exprᴛ1 == cbTCA8) {
+        case var ᴛ when ᴛ == cbTCA8: {
             bitsPerPixel = 32;
+            break;
         }
-        else if (exprᴛ1 == cbTC16) {
+        case var ᴛ when ᴛ == cbTC16: {
             bitsPerPixel = 48;
+            break;
         }
-        else if (exprᴛ1 == cbTCA16) {
+        case var ᴛ when ᴛ == cbTCA16: {
             bitsPerPixel = 64;
+            break;
         }
-        else if (exprᴛ1 == cbG16) {
+        case var ᴛ when ᴛ == cbG16: {
             bitsPerPixel = 16;
-        }
+            break;
+        }}
 
         // cr[*] and pr are the bytes for the current and previous row.
         // cr[0] is unfiltered (or equivalently, filtered with the ftNone filter).
@@ -376,7 +396,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
         var b = m.Bounds();
         nint sz = 1 + (bitsPerPixel * b.Dx() + 7) / 8;
         foreach (var i in range(e.cr)) {
-            if (cap(e.cr[i]) < sz){
+            if (cap(e.cr[i]) < sz) {
                 e.cr[i] = new slice<uint8>(sz);
             } else {
                 e.cr[i] = e.cr[i].slice(0, sz);
@@ -384,7 +404,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             e.cr[i][0] = (uint8)i;
         }
         var cr = e.cr.Clone();
-        if (cap(e.pr) < sz){
+        if (cap(e.pr) < sz) {
             e.pr = new slice<uint8>(sz);
         } else {
             e.pr = e.pr.slice(0, sz);
@@ -400,11 +420,11 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
         for (nint y = b.Min.Y; y < b.Max.Y; y++) {
             // Convert from colors to bytes.
             nint i = 1;
-            var exprᴛ2 = cb;
-            if (exprᴛ2 == cbG8) {
-                if (gray != nil){
-                    nint offset = (y - b.Min.Y) * (~gray).Stride;
-                    copy(cr[0][1..], (~gray).Pix.slice(offset, offset + b.Dx()));
+            switch (cb) {
+            case var ᴛ when ᴛ == cbG8: {
+                if (gray != nil) {
+                    nint offset = (y - b.Min.Y) * gray.Stride;
+                    copy(cr[0][1..], gray.Pix.slice(offset, offset + b.Dx()));
                 } else {
                     for (nint x = b.Min.X; x < b.Max.X; x++) {
                         var c = color.GrayModel.Convert(m.At(x, y))._<color.Gray>();
@@ -412,19 +432,19 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                         i++;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == cbTC8) {
+            case var ᴛ when ᴛ == cbTC8: {
                 // We have previously verified that the alpha value is fully opaque.
                 var cr0 = cr[0];
                 nint stride = 0;
-                var pix = slice<byte>(default!);
-                if (rgba != nil){
-                    (stride, pix) = (rgba.Value.Stride, rgba.Value.Pix);
-                } else 
-                if (nrgba != nil) {
-                    (stride, pix) = (nrgba.Value.Stride, nrgba.Value.Pix);
+                var pix = slice<byte>(default);
+                if (rgba != nil) {
+                    (stride, pix) = (rgba.Stride, rgba.Pix);
+                } else if (nrgba != nil) {
+                    (stride, pix) = (nrgba.Stride, nrgba.Pix);
                 }
-                if (stride != 0){
+                if (stride != 0) {
                     nint j0 = (y - b.Min.Y) * stride;
                     nint j1 = j0 + b.Dx() * 4;
                     for (nint j = j0; j < j1; j += 4) {
@@ -442,11 +462,12 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                         i += 3;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == cbP8) {
-                if (paletted != nil){
-                    nint offset = (y - b.Min.Y) * (~paletted).Stride;
-                    copy(cr[0][1..], (~paletted).Pix.slice(offset, offset + b.Dx()));
+            case var ᴛ when ᴛ == cbP8: {
+                if (paletted != nil) {
+                    nint offset = (y - b.Min.Y) * paletted.Stride;
+                    copy(cr[0][1..], paletted.Pix.slice(offset, offset + b.Dx()));
                 } else {
                     var pi = m._<image.PalettedImage>();
                     for (nint x = b.Min.X; x < b.Max.X; x++) {
@@ -454,12 +475,13 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                         i += 1;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == cbP4 || exprᴛ2 == cbP2 || exprᴛ2 == cbP1) {
+            case var ᴛ when ᴛ == cbP4 || ᴛ == cbP2 || ᴛ == cbP1: {
                 var pi = m._<image.PalettedImage>();
 
-                uint8 a = default!;
-                nint c = default!;
+                uint8 a = default;
+                nint c = default;
                 nint pixelsPerByte = 8 / bitsPerPixel;
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     a = (uint8)(a.Lsh((nuint)bitsPerPixel) | pi.ColorIndexAt(x, y));
@@ -478,25 +500,24 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                     }
                     cr[0][i] = a;
                 }
+                break;
             }
-            else if (exprᴛ2 == cbTCA8) {
-                if (nrgba != nil){
-                    nint offset = (y - b.Min.Y) * (~nrgba).Stride;
-                    copy(cr[0][1..], (~nrgba).Pix.slice(offset, offset + b.Dx() * 4));
-                } else 
-                if (rgba != nil){
+            case var ᴛ when ᴛ == cbTCA8: {
+                if (nrgba != nil) {
+                    nint offset = (y - b.Min.Y) * nrgba.Stride;
+                    copy(cr[0][1..], nrgba.Pix.slice(offset, offset + b.Dx() * 4));
+                } else if (rgba != nil) {
                     var dst = cr[0][1..];
-                    var src = (~rgba).Pix.slice(rgba.PixOffset(b.Min.X, y), rgba.PixOffset(b.Max.X, y));
+                    var src = rgba.Pix.slice(rgba.PixOffset(b.Min.X, y), rgba.PixOffset(b.Max.X, y));
                     for (; len(src) >= 4; (dst, src) = (dst[4..], src[4..])) {
                         var d = Ꮡ(array<byte>.Alias(dst, 4));
                         var s = Ꮡ(array<byte>.Alias(src, 4));
-                        if (s.Value[3] == 0x00){
+                        if (s.Value[3] == 0x00) {
                             d.Value[0] = 0;
                             d.Value[1] = 0;
                             d.Value[2] = 0;
                             d.Value[3] = 0;
-                        } else 
-                        if (s.Value[3] == 0xff){
+                        } else if (s.Value[3] == 0xff) {
                             copy(d.slice(), s.slice());
                         } else {
                             // This code does the same as color.NRGBAModel.Convert(
@@ -526,16 +547,18 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                         i += 4;
                     }
                 }
+                break;
             }
-            else if (exprᴛ2 == cbG16) {
+            case var ᴛ when ᴛ == cbG16: {
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     var c = color.Gray16Model.Convert(m.At(x, y))._<color.Gray16>();
                     cr[0][i + 0] = (uint8)(c.Y >> 8);
                     cr[0][i + 1] = (uint8)c.Y;
                     i += 2;
                 }
+                break;
             }
-            else if (exprᴛ2 == cbTC16) {
+            case var ᴛ when ᴛ == cbTC16: {
                 // We have previously verified that the alpha value is fully opaque.
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     var (r, g, bΔ4, _) = m.At(x, y).RGBA();
@@ -547,8 +570,9 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                     cr[0][i + 5] = (uint8)bΔ4;
                     i += 6;
                 }
+                break;
             }
-            else if (exprᴛ2 == cbTCA16) {
+            case var ᴛ when ᴛ == cbTCA16: {
                 // Convert from image.Image (which is alpha-premultiplied) to PNG's non-alpha-premultiplied.
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     var c = color.NRGBA64Model.Convert(m.At(x, y))._<color.NRGBA64>();
@@ -562,7 +586,8 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                     cr[0][i + 7] = (uint8)c.A;
                     i += 8;
                 }
-            }
+                break;
+            }}
 
             // Apply the filter.
             // Skip filter for NoCompression and paletted images (cbP8) as
@@ -578,7 +603,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
 
             // Write the compressed bytes.
             {
-                var (_, err) = e.zw.Write(cr[f]); if (err != default!) {
+                var (_, err) = e.zw.Write(cr[f]); if (err != nil) {
                     return err;
                 }
             }
@@ -586,9 +611,9 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             // The current row for y is the previous row for y+1.
             (pr, cr[0]) = (cr[0], pr);
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡe.DerefOrNull().zw.Close(); ᒐ.Run(); }
 }
 
@@ -596,16 +621,16 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
 internal static void writeIDATs(this ж<encoder> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
-    if (e.bw == nil){
+    if (e.bw == nil) {
         e.bw = bufio.NewWriterSize(new encoderжWriter(Ꮡe), 1 << 15);
     } else {
         e.bw.Reset(new encoderжWriter(Ꮡe));
     }
-    e.err = Ꮡe.writeImage(new bufio_WriterжWriter(e.bw), e.m, e.cb, levelToZlib((~e.enc).CompressionLevel));
-    if (e.err != default!) {
+    e.err = Ꮡe.writeImage(new bufio_WriterжWriter(e.bw), e.m, e.cb, levelToZlib(e.enc.CompressionLevel));
+    if (e.err != nil) {
         return;
     }
     e.err = e.bw.Flush();
@@ -614,29 +639,29 @@ internal static void writeIDATs(this ж<encoder> Ꮡe) {
 // This function is required because we want the zero value of
 // Encoder.CompressionLevel to map to zlib.DefaultCompression.
 internal static nint levelToZlib(CompressionLevel l) {
-    var exprᴛ1 = l;
-    if (exprᴛ1 == DefaultCompression) {
+    switch (l) {
+    case var ᴛ when ᴛ == DefaultCompression: {
         return zlib.DefaultCompression;
     }
-    if (exprᴛ1 == NoCompression) {
+    case var ᴛ when ᴛ == NoCompression: {
         return zlib.NoCompression;
     }
-    if (exprᴛ1 == BestSpeed) {
+    case var ᴛ when ᴛ == BestSpeed: {
         return zlib.BestSpeed;
     }
-    if (exprᴛ1 == BestCompression) {
+    case var ᴛ when ᴛ == BestCompression: {
         return zlib.BestCompression;
     }
-    { /* default: */
+    default: {
         return zlib.DefaultCompression;
-    }
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string iendˢ = "IEND"u8;
 
 internal static void writeIEND(this ref encoder e) {
-    e.writeChunk(default!, iendˢ);
+    e.writeChunk(default, iendˢ);
 }
 
 // Encode writes the Image m to w in PNG format. Any Image may be
@@ -660,75 +685,77 @@ public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) 
             return ((FormatError)("invalid image size: "u8 + strconv.FormatInt(mw, 10) + "x"u8 + strconv.FormatInt(mh, 10)));
         }
 
-        ж<encoder> e = default!;
-        if (enc.BufferPool != default!) {
+        ж<encoder> e = default;
+        if (enc.BufferPool != nil) {
             var buffer = enc.BufferPool.Get();
             e = buffer.Reinterpret<EncoderBuffer, encoder>();
         }
         if (e == nil) {
-            e = Ꮡ(new encoder(nil));
+            e = Ꮡ(new encoder());
         }
-        if (enc.BufferPool != default!) {
+        if (enc.BufferPool != nil) {
             defer(Ꮡenc.Value.BufferPool.Put, e.Reinterpret<encoder, EncoderBuffer>(), ref ᒐ);
         }
 
-        e.Value.enc = Ꮡenc;
-        e.Value.w = w;
-        e.Value.m = m;
+        e.enc = Ꮡenc;
+        e.w = w;
+        e.m = m;
 
-        color.Palette pal = default!;
+        color.Palette pal = default;
         // cbP8 encoding needs PalettedImage's ColorIndexAt method.
         {
             var (_, ok) = m._<image.PalettedImage>(ᐧ); if (ok) {
                 (pal, _) = m.ColorModel()._<color.Palette>(ᐧ);
             }
         }
-        if (pal != default!){
-            if (len(pal) <= 2){
-                e.Value.cb = cbP1;
-            } else 
-            if (len(pal) <= 4){
-                e.Value.cb = cbP2;
-            } else 
-            if (len(pal) <= 16){
-                e.Value.cb = cbP4;
+        if (pal != nil) {
+            if (len(pal) <= 2) {
+                e.cb = cbP1;
+            } else if (len(pal) <= 4) {
+                e.cb = cbP2;
+            } else if (len(pal) <= 16) {
+                e.cb = cbP4;
             } else {
-                e.Value.cb = cbP8;
+                e.cb = cbP8;
             }
         } else {
-            var exprᴛ1 = m.ColorModel();
-            if (AreEqual(exprᴛ1, color.GrayModel)) {
-                e.Value.cb = cbG8;
+            switch (m.ColorModel()) {
+            case var ᴛ when AreEqual(ᴛ, color.GrayModel): {
+                e.cb = cbG8;
+                break;
             }
-            else if (AreEqual(exprᴛ1, color.Gray16Model)) {
-                e.Value.cb = cbG16;
+            case var ᴛ when AreEqual(ᴛ, color.Gray16Model): {
+                e.cb = cbG16;
+                break;
             }
-            else if (AreEqual(exprᴛ1, color.RGBAModel) || AreEqual(exprᴛ1, color.NRGBAModel) || AreEqual(exprᴛ1, color.AlphaModel)) {
-                if (opaque(m)){
-                    e.Value.cb = cbTC8;
+            case var ᴛ when AreEqual(ᴛ, color.RGBAModel) || AreEqual(ᴛ, color.NRGBAModel) || AreEqual(ᴛ, color.AlphaModel): {
+                if (opaque(m)) {
+                    e.cb = cbTC8;
                 } else {
-                    e.Value.cb = cbTCA8;
+                    e.cb = cbTCA8;
                 }
+                break;
             }
-            else { /* default: */
-                if (opaque(m)){
-                    e.Value.cb = cbTC16;
+            default: {
+                if (opaque(m)) {
+                    e.cb = cbTC16;
                 } else {
-                    e.Value.cb = cbTCA16;
+                    e.cb = cbTCA16;
                 }
-            }
+                break;
+            }}
         }
 
-        (_, e.Value.err) = io.WriteString(w, pngHeader);
+        (_, e.err) = io.WriteString(w, pngHeader);
         e.writeIHDR();
-        if (pal != default!) {
+        if (pal != nil) {
             e.writePLTEAndTRNS(pal);
         }
         e.writeIDATs();
         e.writeIEND();
-        return (~e).err;
+        return e.err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

@@ -43,12 +43,13 @@ internal static uint64 Uint64(this bigEndian _Δp0, slice<byte> b) {
 // bigEndian on big-endian machines.
 internal static byteOrder hostByteOrder() {
     var exprᴛ1 = runtime.GOARCH;
-    if (exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8 || exprᴛ1 == "amd64p32"u8 || exprᴛ1 == "alpha"u8 || exprᴛ1 == "arm"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "mips64p32le"u8 || exprᴛ1 == "nios2"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "sh"u8) {
-        return new littleEndian(nil);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8 || exprᴛ1 == "amd64p32"u8 || exprᴛ1 == "alpha"u8 || exprᴛ1 == "arm"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "mips64p32le"u8 || exprᴛ1 == "nios2"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "sh"u8: {
+        return new littleEndian();
     }
-    if (exprᴛ1 == "armbe"u8 || exprᴛ1 == "arm64be"u8 || exprᴛ1 == "m68k"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64p32"u8 || exprᴛ1 == "ppc"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "s390"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "shbe"u8 || exprᴛ1 == "sparc"u8 || exprᴛ1 == "sparc64"u8) {
-        return new bigEndian(nil);
-    }
+    case {} when exprᴛ1 == "armbe"u8 || exprᴛ1 == "arm64be"u8 || exprᴛ1 == "m68k"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64p32"u8 || exprᴛ1 == "ppc"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "s390"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "shbe"u8 || exprᴛ1 == "sparc"u8 || exprᴛ1 == "sparc64"u8: {
+        return new bigEndian();
+    }}
     throw panic("unknown architecture");
 }
 

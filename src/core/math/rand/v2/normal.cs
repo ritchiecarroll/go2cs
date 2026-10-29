@@ -31,7 +31,7 @@ internal static uint32 absInt32(int32 i) {
 //
 //	sample = NormFloat64() * desiredStdDev + desiredMean
 public static float64 NormFloat64(this ref Rand r) {
-    while (ᐧ) {
+    for (;;) {
         var u = r.Uint64();
         var j = (int32)u; // Possibly negative
         var i = u >> 32 & 0x7F;
@@ -43,7 +43,7 @@ public static float64 NormFloat64(this ref Rand r) {
 
         if (i == 0) {
             // This extra work is only required for the base strip.
-            while (ᐧ) {
+            for (;;) {
                 x = -math.Log(r.Float64()) * /* (1.0 / rn) */ 0.29047645161474317D;
                 var y = -math.Log(r.Float64());
                 if (y + y >= x * x) {

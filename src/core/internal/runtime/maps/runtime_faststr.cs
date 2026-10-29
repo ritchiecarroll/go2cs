@@ -46,14 +46,14 @@ internal static @unsafe.Pointer getWithoutKeySmallFastStr(this ref ΔMap m, ж<a
         }
         if (j == abi.MapGroupSlots) {
             // No slot passed the quick test.
-            return default!;
+            return default;
         }
         // There's exactly one slot that passed the quick test. Do the single expensive comparison.
         slotKey = (uintptr)g.key(Ꮡtyp, (uintptr)j);
         if (key == ~(ж<@string>)(uintptr)(slotKey)) {
             return (@unsafe.Pointer)((uintptr)slotKey + (uintptr)(2 * goarch.PtrSize));
         }
-        return default!;
+        return default;
     }
 
 dohash:
@@ -65,13 +65,13 @@ dohash:
     slotKey = (uintptr)g.key(Ꮡtyp, 0);
 
     foreach (var _ᴛ1 in range(abi.MapGroupSlots)) {
-        if ((uint8)(uint64)ctrls == h2Δ1 && key == ~(ж<@string>)(uintptr)(slotKey)) {
+        if ((uint8)ctrls == h2Δ1 && key == ~(ж<@string>)(uintptr)(slotKey)) {
             return (@unsafe.Pointer)((uintptr)slotKey + (uintptr)(2 * goarch.PtrSize));
         }
         slotKey = (@unsafe.Pointer)((uintptr)slotKey + slotSize);
         ctrls >>= (int)(8);
     }
-    return default!;
+    return default;
 }
 
 // Returns true if a and b might be equal.
@@ -124,7 +124,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_faststr(ж<abiꓸMapType> Ꮡ
 
     if (m.writing != 0) {
         fatal(concurrentMapReadAndMapˢ);
-        return default!;
+        return default;
     }
 
     if (m.dirLen <= 0) {
@@ -135,8 +135,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_faststr(ж<abiꓸMapType> Ꮡ
         return elem;
     }
 
-    ref var k = ref heap<@string>(out var Ꮡk);
-    k = key;
+    ref var k = ref heap<@string>(key, out var Ꮡk);
     var hash = typ.Hasher((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
     System.GC.KeepAlive(Ꮡk);
 
@@ -145,9 +144,9 @@ internal static @unsafe.Pointer runtime_mapaccess1_faststr(ж<abiꓸMapType> Ꮡ
     var t = m.directoryAt(idx);
 
     // Probe table.
-    var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
+    var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
     var h2Hash = h2(hash);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
 
         var match = (~g.ctrls()).matchH2(h2Hash);
@@ -189,7 +188,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abiꓸMapT
 
     if (m.writing != 0) {
         fatal(concurrentMapReadAndMapˢ);
-        return (default!, false);
+        return (default, false);
     }
 
     if (m.dirLen <= 0) {
@@ -200,8 +199,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abiꓸMapT
         return (elem, true);
     }
 
-    ref var k = ref heap<@string>(out var Ꮡk);
-    k = key;
+    ref var k = ref heap<@string>(key, out var Ꮡk);
     var hash = typ.Hasher((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
     System.GC.KeepAlive(Ꮡk);
 
@@ -210,9 +208,9 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abiꓸMapT
     var t = m.directoryAt(idx);
 
     // Probe table.
-    var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
+    var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
     var h2Hash = h2(hash);
-    for (; ᐧ ; seq = seq.next()) {
+    for (; ; seq = seq.next()) {
         var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
 
         var match = (~g.ctrls()).matchH2(h2Hash);
@@ -237,7 +235,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abiꓸMapT
     }
 }
 
-internal static @unsafe.Pointer putSlotSmallFastStr(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @string key) {
+internal static @unsafe.Pointer putSlotSmallFastStr(this ref ΔMap m, ж<abiꓸMapType> typ, uintptr hash, @string key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -248,11 +246,11 @@ internal static @unsafe.Pointer putSlotSmallFastStr(this ref ΔMap m, ж<abiꓸM
     while (match != 0) {
         var iΔ1 = match.first();
 
-        @unsafe.Pointer slotKeyΔ1 = (uintptr)g.key(Ꮡtyp, iΔ1);
+        @unsafe.Pointer slotKeyΔ1 = (uintptr)g.key(typ, iΔ1);
         if (key == ~(ж<@string>)(uintptr)(slotKeyΔ1)) {
             // Key needs update, as the backing storage may differ.
             ((ж<@string>)(uintptr)(slotKeyΔ1)).Value = key;
-            @unsafe.Pointer slotElemΔ1 = (uintptr)g.elem(Ꮡtyp, iΔ1);
+            @unsafe.Pointer slotElemΔ1 = (uintptr)g.elem(typ, iΔ1);
             return slotElemΔ1;
         }
         match = match.removeFirst();
@@ -268,10 +266,10 @@ internal static @unsafe.Pointer putSlotSmallFastStr(this ref ΔMap m, ж<abiꓸM
 
     var i = match.first();
 
-    @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
+    @unsafe.Pointer slotKey = (uintptr)g.key(typ, i);
     ((ж<@string>)(uintptr)(slotKey)).Value = key;
 
-    @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
+    @unsafe.Pointer slotElem = (uintptr)g.elem(typ, i);
 
     g.ctrls().set(i, (ctrl)(uint8)h2(hash));
     m.used++;
@@ -296,8 +294,7 @@ internal static @unsafe.Pointer runtime_mapassign_faststr(ж<abiꓸMapType> Ꮡt
         fatal(concurrentMapWritesˢ);
     }
 
-    ref var k = ref heap<@string>(out var Ꮡk);
-    k = key;
+    ref var k = ref heap<@string>(key, out var Ꮡk);
     var hash = typ.Hasher((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡk)), m.seed);
     System.GC.KeepAlive(Ꮡk);
 
@@ -325,23 +322,23 @@ internal static @unsafe.Pointer runtime_mapassign_faststr(ж<abiꓸMapType> Ꮡt
         m.growToTable(Ꮡtyp);
     }
 
-    @unsafe.Pointer slotElem = default!;
+    @unsafe.Pointer slotElem = default;
 outer:
-    while (ᐧ) {
+    for (;;) {
         // Select table.
         var idx = m.directoryIndex(hash);
         var t = m.directoryAt(idx);
 
-        var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
+        var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
 
         // As we look for a match, keep track of the first deleted slot
         // we find, which we'll use to insert the new entry if
         // necessary.
-        groupReference firstDeletedGroup = default!;
-        uintptr firstDeletedSlot = default!;
+        groupReference firstDeletedGroup = default;
+        uintptr firstDeletedSlot = default;
 
         var h2Hash = h2(hash);
-        for (; ᐧ ; seq = seq.next()) {
+        for (; ; seq = seq.next()) {
             var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
             var match = (~g.ctrls()).matchH2(h2Hash);
 
@@ -386,24 +383,24 @@ outer:
             if (firstDeletedGroup.data != nil) {
                 g = firstDeletedGroup;
                 i = firstDeletedSlot;
-                t.Value.growthLeft++; // will be decremented below to become a no-op.
+                t.growthLeft++; // will be decremented below to become a no-op.
             }
 
             // If we have no space left, first try to remove some tombstones.
-            if ((~t).growthLeft == 0) {
+            if (t.growthLeft == 0) {
                 t.pruneTombstones(Ꮡtyp, Ꮡm);
             }
 
             // If there is room left to grow, just insert the new entry.
-            if ((~t).growthLeft > 0) {
+            if (t.growthLeft > 0) {
                 @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
                 ((ж<@string>)(uintptr)(slotKey)).Value = key;
 
                 slotElem = (uintptr)g.elem(Ꮡtyp, i);
 
                 g.ctrls().set(i, (ctrl)(uint8)h2Hash);
-                t.Value.growthLeft--;
-                t.Value.used++;
+                t.growthLeft--;
+                t.used++;
                 m.used++;
 
                 t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -426,7 +423,7 @@ break_outer:;
 }
 
 //go:linkname runtime_mapdelete_faststr runtime.mapdelete_faststr
-internal static void runtime_mapdelete_faststr(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @string keyʗp) {
+internal static void runtime_mapdelete_faststr(ж<abiꓸMapType> typ, ж<ΔMap> Ꮡm, @string keyʗp) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
@@ -440,7 +437,7 @@ internal static void runtime_mapdelete_faststr(ж<abiꓸMapType> Ꮡtyp, ж<ΔMa
         return;
     }
 
-    Ꮡm.Delete(Ꮡtyp, (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)));
+    Ꮡm.Delete(typ, (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)));
     System.GC.KeepAlive(Ꮡkey);
 }
 

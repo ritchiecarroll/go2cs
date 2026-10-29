@@ -57,8 +57,8 @@ internal static void atomicstorep(@unsafe.Pointer ptr, @unsafe.Pointer @new) {
 //
 //go:nosplit
 //go:linkname atomic_storePointer internal/runtime/atomic.storePointer
-internal static void atomic_storePointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer @new) {
-    atomicstorep(@unsafe.Pointer.FromPinnedBox(Ꮡptr), @new);
+internal static void atomic_storePointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer @new) {
+    atomicstorep(@unsafe.Pointer.FromPinnedBox(ptr), @new);
 }
 
 // atomic_casPointer is the implementation of internal/runtime/atomic.UnsafePointer.CompareAndSwap
@@ -66,14 +66,14 @@ internal static void atomic_storePointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Poi
 //
 //go:nosplit
 //go:linkname atomic_casPointer internal/runtime/atomic.casPointer
-internal static bool atomic_casPointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer old, @unsafe.Pointer @new) {
+internal static bool atomic_casPointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer old, @unsafe.Pointer @new) {
     if (writeBarrier.enabled) {
-        atomicwb(Ꮡptr, @new);
+        atomicwb(ptr, @new);
     }
     if (goexperiment.CgoCheck2) {
-        cgoCheckPtrWrite(Ꮡptr, @new);
+        cgoCheckPtrWrite(ptr, @new);
     }
-    return atomic.Casp1(Ꮡptr, old, @new);
+    return atomic.Casp1(ptr, old, @new);
 }
 
 // Like above, but implement in terms of sync/atomic's uintptr operations.
@@ -85,14 +85,14 @@ internal static partial void sync_atomic_StoreUintptr(ж<uintptr> ptr, uintptr @
 
 //go:linkname sync_atomic_StorePointer sync/atomic.StorePointer
 //go:nosplit
-internal static void sync_atomic_StorePointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer @new) {
+internal static void sync_atomic_StorePointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer @new) {
     if (writeBarrier.enabled) {
-        atomicwb(Ꮡptr, @new);
+        atomicwb(ptr, @new);
     }
     if (goexperiment.CgoCheck2) {
-        cgoCheckPtrWrite(Ꮡptr, @new);
+        cgoCheckPtrWrite(ptr, @new);
     }
-    sync_atomic_StoreUintptr(Ꮡptr.Reinterpret<@unsafe.Pointer, uintptr>(), (uintptr)@new);
+    sync_atomic_StoreUintptr(ptr.Reinterpret<@unsafe.Pointer, uintptr>(), (uintptr)@new);
 }
 
 //go:linkname sync_atomic_SwapUintptr sync/atomic.SwapUintptr
@@ -100,14 +100,14 @@ internal static partial uintptr sync_atomic_SwapUintptr(ж<uintptr> ptr, uintptr
 
 //go:linkname sync_atomic_SwapPointer sync/atomic.SwapPointer
 //go:nosplit
-internal static @unsafe.Pointer sync_atomic_SwapPointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer @new) {
+internal static @unsafe.Pointer sync_atomic_SwapPointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer @new) {
     if (writeBarrier.enabled) {
-        atomicwb(Ꮡptr, @new);
+        atomicwb(ptr, @new);
     }
     if (goexperiment.CgoCheck2) {
-        cgoCheckPtrWrite(Ꮡptr, @new);
+        cgoCheckPtrWrite(ptr, @new);
     }
-    @unsafe.Pointer old = (@unsafe.Pointer)sync_atomic_SwapUintptr(Ꮡptr.Reinterpret<@unsafe.Pointer, uintptr>(), (uintptr)@new);
+    @unsafe.Pointer old = (@unsafe.Pointer)sync_atomic_SwapUintptr(ptr.Reinterpret<@unsafe.Pointer, uintptr>(), (uintptr)@new);
     return old;
 }
 
@@ -116,14 +116,14 @@ internal static partial bool sync_atomic_CompareAndSwapUintptr(ж<uintptr> ptr, 
 
 //go:linkname sync_atomic_CompareAndSwapPointer sync/atomic.CompareAndSwapPointer
 //go:nosplit
-internal static bool sync_atomic_CompareAndSwapPointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer old, @unsafe.Pointer @new) {
+internal static bool sync_atomic_CompareAndSwapPointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer old, @unsafe.Pointer @new) {
     if (writeBarrier.enabled) {
-        atomicwb(Ꮡptr, @new);
+        atomicwb(ptr, @new);
     }
     if (goexperiment.CgoCheck2) {
-        cgoCheckPtrWrite(Ꮡptr, @new);
+        cgoCheckPtrWrite(ptr, @new);
     }
-    return sync_atomic_CompareAndSwapUintptr(Ꮡptr.Reinterpret<@unsafe.Pointer, uintptr>(), (uintptr)old, (uintptr)@new);
+    return sync_atomic_CompareAndSwapUintptr(ptr.Reinterpret<@unsafe.Pointer, uintptr>(), (uintptr)old, (uintptr)@new);
 }
 
 } // end runtime_package

@@ -39,7 +39,7 @@ public static bool Temporary(this errNetClosing e) {
 
 // ErrNetClosing is returned when a network descriptor is used after
 // it has been closed.
-public static readonly ж<errNetClosing> ᏑErrNetClosing = new StaticBox<errNetClosing>(new errNetClosing(nil));
+public static readonly ж<errNetClosing> ᏑErrNetClosing = new StaticBox<errNetClosing>(new errNetClosing());
 public static ref errNetClosing ErrNetClosing => ref ((StaticBox<errNetClosing>)ᏑErrNetClosing).ValueSlot;
 
 // ErrFileClosing is returned when a file descriptor is used after it
@@ -60,7 +60,7 @@ internal static error errClosing(bool isFile) {
 
 // ErrDeadlineExceeded is returned for an expired deadline.
 // This is exported by the os package as os.ErrDeadlineExceeded.
-public static error ErrDeadlineExceeded = new DeadlineExceededErrorжerror(Ꮡ(new DeadlineExceededError(nil)));
+public static error ErrDeadlineExceeded = new DeadlineExceededErrorжerror(Ꮡ(new DeadlineExceededError()));
 
 // DeadlineExceededError is returned for an expired deadline.
 partial struct DeadlineExceededError {
@@ -98,7 +98,7 @@ internal static void consume(ref slice<slice<byte>> v, int64 n) {
             return;
         }
         n -= ln0;
-        (v)[0] = default!;
+        (v)[0] = default;
         v = (v)[1..];
     }
 }

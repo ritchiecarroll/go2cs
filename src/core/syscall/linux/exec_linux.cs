@@ -16,34 +16,34 @@ partial class syscall_package {
 
 // Linux unshare/clone/clone2/clone3 flags, architecture-independent,
 // copied from linux/sched.h.
-public static UntypedInt CLONE_VM => 0x00000100; // set if VM shared between processes
-public static UntypedInt CLONE_FS => 0x00000200; // set if fs info shared between processes
-public static UntypedInt CLONE_FILES => 0x00000400; // set if open files shared between processes
-public static UntypedInt CLONE_SIGHAND => 0x00000800; // set if signal handlers and blocked signals shared
-public static UntypedInt CLONE_PIDFD => 0x00001000; // set if a pidfd should be placed in parent
-public static UntypedInt CLONE_PTRACE => 0x00002000; // set if we want to let tracing continue on the child too
-public static UntypedInt CLONE_VFORK => 0x00004000; // set if the parent wants the child to wake it up on mm_release
-public static UntypedInt CLONE_PARENT => 0x00008000; // set if we want to have the same parent as the cloner
-public static UntypedInt CLONE_THREAD => 0x00010000; // Same thread group?
-public static UntypedInt CLONE_NEWNS => 0x00020000; // New mount namespace group
-public static UntypedInt CLONE_SYSVSEM => 0x00040000; // share system V SEM_UNDO semantics
-public static UntypedInt CLONE_SETTLS => 0x00080000; // create a new TLS for the child
-public static UntypedInt CLONE_PARENT_SETTID => 0x00100000; // set the TID in the parent
+public static UntypedInt CLONE_VM => 0x00000100;             // set if VM shared between processes
+public static UntypedInt CLONE_FS => 0x00000200;             // set if fs info shared between processes
+public static UntypedInt CLONE_FILES => 0x00000400;          // set if open files shared between processes
+public static UntypedInt CLONE_SIGHAND => 0x00000800;        // set if signal handlers and blocked signals shared
+public static UntypedInt CLONE_PIDFD => 0x00001000;          // set if a pidfd should be placed in parent
+public static UntypedInt CLONE_PTRACE => 0x00002000;         // set if we want to let tracing continue on the child too
+public static UntypedInt CLONE_VFORK => 0x00004000;          // set if the parent wants the child to wake it up on mm_release
+public static UntypedInt CLONE_PARENT => 0x00008000;         // set if we want to have the same parent as the cloner
+public static UntypedInt CLONE_THREAD => 0x00010000;         // Same thread group?
+public static UntypedInt CLONE_NEWNS => 0x00020000;          // New mount namespace group
+public static UntypedInt CLONE_SYSVSEM => 0x00040000;        // share system V SEM_UNDO semantics
+public static UntypedInt CLONE_SETTLS => 0x00080000;         // create a new TLS for the child
+public static UntypedInt CLONE_PARENT_SETTID => 0x00100000;  // set the TID in the parent
 public static UntypedInt CLONE_CHILD_CLEARTID => 0x00200000; // clear the TID in the child
-public static UntypedInt CLONE_DETACHED => 0x00400000; // Unused, ignored
-public static UntypedInt CLONE_UNTRACED => 0x00800000; // set if the tracing process can't force CLONE_PTRACE on this clone
-public static UntypedInt CLONE_CHILD_SETTID => 0x01000000; // set the TID in the child
-public static UntypedInt CLONE_NEWCGROUP => 0x02000000; // New cgroup namespace
-public static UntypedInt CLONE_NEWUTS => 0x04000000; // New utsname namespace
-public static UntypedInt CLONE_NEWIPC => 0x08000000; // New ipc namespace
-public static UntypedInt CLONE_NEWUSER => 0x10000000; // New user namespace
-public static UntypedInt CLONE_NEWPID => 0x20000000; // New pid namespace
-public static UntypedInt CLONE_NEWNET => 0x40000000; // New network namespace
-public static UntypedInt CLONE_IO => 0x80000000; // Clone io context
+public static UntypedInt CLONE_DETACHED => 0x00400000;       // Unused, ignored
+public static UntypedInt CLONE_UNTRACED => 0x00800000;       // set if the tracing process can't force CLONE_PTRACE on this clone
+public static UntypedInt CLONE_CHILD_SETTID => 0x01000000;   // set the TID in the child
+public static UntypedInt CLONE_NEWCGROUP => 0x02000000;      // New cgroup namespace
+public static UntypedInt CLONE_NEWUTS => 0x04000000;         // New utsname namespace
+public static UntypedInt CLONE_NEWIPC => 0x08000000;         // New ipc namespace
+public static UntypedInt CLONE_NEWUSER => 0x10000000;        // New user namespace
+public static UntypedInt CLONE_NEWPID => 0x20000000;         // New pid namespace
+public static UntypedInt CLONE_NEWNET => 0x40000000;         // New network namespace
+public static UntypedInt CLONE_IO => 0x80000000;             // Clone io context
 
 // Flags for the clone3() syscall.
 public static UntypedInt CLONE_CLEAR_SIGHAND => 0x100000000; // Clear any signal handler and reset to SIG_DFL.
-public static UntypedInt CLONE_INTO_CGROUP => 0x200000000; // Clone into a specific cgroup given the right permissions.
+public static UntypedInt CLONE_INTO_CGROUP => 0x200000000;   // Clone into a specific cgroup given the right permissions.
 
 // Cloning flags intersect with CSIGNAL so can be used with unshare and clone3
 // syscalls only:
@@ -57,12 +57,12 @@ public static UntypedInt CLONE_NEWTIME => 0x00000080; // New time namespace
 // restrictions like in Ubuntu 24.04.
 partial struct SysProcIDMap {
     public nint ContainerID; // Container ID.
-    public nint HostID; // Host ID.
-    public nint Size; // Size.
+    public nint HostID;      // Host ID.
+    public nint Size;        // Size.
 }
 
 partial struct SysProcAttr {
-    public @string Chroot;     // Chroot.
+    public @string Chroot;           // Chroot.
     public ж<Credential> Credential; // Credential.
     // Ptrace tells the child to call ptrace(PTRACE_TRACEME).
     // Call runtime.LockOSThread before starting a process with this set,
@@ -78,7 +78,7 @@ partial struct SysProcAttr {
     // This is only meaningful if Setsid is true.
     public bool Setctty;
     public bool Noctty; // Detach fd 0 from controlling terminal.
-    public nint Ctty; // Controlling TTY fd.
+    public nint Ctty;   // Controlling TTY fd.
     // Foreground places the child process group in the foreground.
     // This implies Setpgid. The Ctty field must be set to
     // the descriptor of the controlling TTY.
@@ -91,8 +91,8 @@ partial struct SysProcAttr {
     // is sent on thread termination, which may happen before process termination.
     // There are more details at https://go.dev/issue/27505.
     public ΔSignal Pdeathsig;
-    public uintptr Cloneflags;        // Flags for clone calls.
-    public uintptr Unshareflags;        // Flags for unshare calls.
+    public uintptr Cloneflags;              // Flags for clone calls.
+    public uintptr Unshareflags;            // Flags for unshare calls.
     public slice<SysProcIDMap> UidMappings; // User ID mappings for user namespaces.
     public slice<SysProcIDMap> GidMappings; // Group ID mappings for user namespaces.
     // GidMappingsEnableSetgroups enabling setgroups syscall.
@@ -101,17 +101,17 @@ partial struct SysProcAttr {
     // users this should be set to false for mappings work.
     public bool GidMappingsEnableSetgroups;
     public slice<uintptr> AmbientCaps; // Ambient capabilities.
-    public bool UseCgroupFD;      // Whether to make use of the CgroupFD field.
-    public nint CgroupFD;      // File descriptor of a cgroup to put the new process into.
+    public bool UseCgroupFD;           // Whether to make use of the CgroupFD field.
+    public nint CgroupFD;              // File descriptor of a cgroup to put the new process into.
     // PidFD, if not nil, is used to store the pidfd of a child, if the
     // functionality is supported by the kernel, or -1. Note *PidFD is
     // changed only if the process starts successfully.
     public ж<nint> PidFD;
 }
 
-internal static readonly ж<array<byte>> Ꮡnone = new StaticBox<array<byte>>(new byte[]{(rune)'n', (rune)'o', (rune)'n', (rune)'e', 0}.array());
+internal static readonly ж<array<byte>> Ꮡnone = new StaticBox<array<byte>>(new byte[]{(byte)'n', (byte)'o', (byte)'n', (byte)'e', 0}.array());
 internal static ref array<byte> none => ref ((StaticBox<array<byte>>)Ꮡnone).ValueSlot;
-internal static readonly ж<array<byte>> Ꮡslash = new StaticBox<array<byte>>(new byte[]{(rune)'/', 0}.array());
+internal static readonly ж<array<byte>> Ꮡslash = new StaticBox<array<byte>>(new byte[]{(byte)'/', 0}.array());
 internal static ref array<byte> slash => ref ((StaticBox<array<byte>>)Ꮡslash).ValueSlot;
 
 internal static readonly ж<bool> ᏑforceClone3 = new StaticBox<bool>(false);
@@ -135,13 +135,13 @@ internal static partial void runtime_AfterForkInChild();
 // functions that do not grow the stack.
 //
 //go:norace
-internal static (nint pid, Errno err) forkAndExecInChild(ж<byte> Ꮡargv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> Ꮡchroot, ж<byte> Ꮡdir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
-    nint pid = default!;
-    Errno err = default!;
+internal static (nint pid, Errno err) forkAndExecInChild(ж<byte> argv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> chroot, ж<byte> dir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
+    nint pid = default;
+    Errno err = default;
 
     // Set up and fork. This returns immediately in the parent or
     // if there's an error.
-    (var upid, var pidfd, err, var mapPipe, var locked) = forkAndExecInChild1(Ꮡargv0, argv, envv, Ꮡchroot, Ꮡdir, ref attr, ref sys, pipe);
+    (var upid, var pidfd, err, var mapPipe, var locked) = forkAndExecInChild1(argv0, argv, envv, chroot, dir, ref attr, ref sys, pipe);
     if (locked) {
         runtime_AfterFork();
     }
@@ -155,14 +155,14 @@ internal static (nint pid, Errno err) forkAndExecInChild(ж<byte> Ꮡargv0, slic
         sys.PidFD.Value = (nint)pidfd;
     }
 
-    if (sys.UidMappings != default! || sys.GidMappings != default!) {
+    if (sys.UidMappings != nil || sys.GidMappings != nil) {
         Close(mapPipe[0]);
         ref var err2 = ref heap(new Errno(), out var Ꮡerr2);
         // uid/gid mappings will be written after fork and unshare(2) for user
         // namespaces.
         if ((uintptr)(sys.Unshareflags & (uintptr)CLONE_NEWUSER) == 0) {
             {
-                var errΔ1 = writeUidGidMappings(pid, ref sys); if (errΔ1 != default!) {
+                var errΔ1 = writeUidGidMappings(pid, ref sys); if (errΔ1 != nil) {
                     err2 = errΔ1._<Errno>();
                 }
             }
@@ -206,17 +206,17 @@ internal static uint32 capToMask(uintptr cap) {
 
 // cloneArgs holds arguments for clone3 Linux syscall.
 partial struct cloneArgs {
-    internal uint64 flags; // Flags bit mask
-    internal uint64 pidFD; // Where to store PID file descriptor (int *)
-    internal uint64 childTID; // Where to store child TID, in child's memory (pid_t *)
-    internal uint64 parentTID; // Where to store child TID, in parent's memory (pid_t *)
+    internal uint64 flags;      // Flags bit mask
+    internal uint64 pidFD;      // Where to store PID file descriptor (int *)
+    internal uint64 childTID;   // Where to store child TID, in child's memory (pid_t *)
+    internal uint64 parentTID;  // Where to store child TID, in parent's memory (pid_t *)
     internal uint64 exitSignal; // Signal to deliver to parent on child termination
-    internal uint64 stack; // Pointer to lowest byte of stack
-    internal uint64 stackSize; // Size of stack
-    internal uint64 tls; // Location of new TLS
-    internal uint64 setTID; // Pointer to a pid_t array (since Linux 5.5)
+    internal uint64 stack;      // Pointer to lowest byte of stack
+    internal uint64 stackSize;  // Size of stack
+    internal uint64 tls;        // Location of new TLS
+    internal uint64 setTID;     // Pointer to a pid_t array (since Linux 5.5)
     internal uint64 setTIDSize; // Number of elements in set_tid (since Linux 5.5)
-    internal uint64 cgroup; // File descriptor for target cgroup of child (since Linux 5.7)
+    internal uint64 cgroup;     // File descriptor for target cgroup of child (since Linux 5.7)
 }
 
 // forkAndExecInChild1 implements the body of forkAndExecInChild up to
@@ -230,12 +230,12 @@ partial struct cloneArgs {
 //go:noinline
 //go:norace
 //go:nocheckptr
-internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPipe, bool locked) forkAndExecInChild1(ж<byte> Ꮡargv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> Ꮡchroot, ж<byte> Ꮡdir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
-    uintptr pid = default!;
+internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPipe, bool locked) forkAndExecInChild1(ж<byte> argv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> chroot, ж<byte> dir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
+    uintptr pid = default;
     ref var pidfd = ref heap(new int32(), out var Ꮡpidfd);
     ref var err1 = ref heap(new Errno(), out var Ꮡerr1);
     array<nint> mapPipe = new(2);
-    bool locked = default!;
+    bool locked = default;
 
     // Defined in linux/prctl.h starting with Linux 4.3.
     uintptr PR_CAP_AMBIENT = 0x2f;
@@ -256,41 +256,41 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     // seems to lack a corresponding test, and it may be rendered invalid
     // by an otherwise-correct change in the compiler.
     ref var err2 = ref heap(new Errno(), out var Ꮡerr2);
-    nint nextfd = default!;
-    nint i = default!;
+    nint nextfd = default;
+    nint i = default;
     ref var caps = ref heap(new caps(), out var Ꮡcaps);
-    uintptr fd1 = default!;
-    uintptr flags = default!;
-    uintptr ppid = default!;
-    slice<byte> puid = default!;
-    slice<byte> psetgroups = default!;
-    slice<byte> pgid = default!;
-    slice<byte> uidmap = default!;
-    slice<byte> setgroups = default!;
-    slice<byte> gidmap = default!;
-    ж<cloneArgs> clone3 = default!;
+    uintptr fd1 = default;
+    uintptr flags = default;
+    uintptr ppid = default;
+    slice<byte> puid = default;
+    slice<byte> psetgroups = default;
+    slice<byte> pgid = default;
+    slice<byte> uidmap = default;
+    slice<byte> setgroups = default;
+    slice<byte> gidmap = default;
+    ж<cloneArgs> clone3 = default;
     ref var pgrp = ref heap(new int32(), out var Ꮡpgrp);
-    nint dirfd = default!;
-    ж<Credential> cred = default!;
-    uintptr ngroups = default!;
-    uintptr groups = default!;
-    uintptr c = default!;
-    ж<Rlimit> rlim = default!;
+    nint dirfd = default;
+    ж<Credential> cred = default;
+    uintptr ngroups = default;
+    uintptr groups = default;
+    uintptr c = default;
+    ж<Rlimit> rlim = default;
     ref var lim = ref heap(new Rlimit(), out var Ꮡlim);
     pidfd = -1;
 
     rlim = ᏑorigRlimitNofile.Load();
 
-    if (sys.UidMappings != default!) {
+    if (sys.UidMappings != nil) {
         puid = slice<byte>("/proc/self/uid_map\u0000"u8);
         uidmap = formatIDMappings(sys.UidMappings);
     }
 
-    if (sys.GidMappings != default!) {
+    if (sys.GidMappings != nil) {
         psetgroups = slice<byte>("/proc/self/setgroups\u0000"u8);
         pgid = slice<byte>("/proc/self/gid_map\u0000"u8);
 
-        if (sys.GidMappingsEnableSetgroups){
+        if (sys.GidMappingsEnableSetgroups) {
             setgroups = slice<byte>("allow\u0000"u8);
         } else {
             setgroups = slice<byte>("deny\u0000"u8);
@@ -318,9 +318,9 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
 
     // Allocate another pipe for parent to child communication for
     // synchronizing writing of User ID/Group ID mappings.
-    if (sys.UidMappings != default! || sys.GidMappings != default!) {
+    if (sys.UidMappings != nil || sys.GidMappings != nil) {
         {
-            var err = forkExecPipe(mapPipe[..]); if (err != default!) {
+            var err = forkExecPipe(mapPipe[..]); if (err != nil) {
                 err1 = err._<Errno>();
                 return (pid, pidfd, err1, mapPipe, locked);
             }
@@ -338,14 +338,14 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     if (sys.UseCgroupFD || (uintptr)(flags & (uintptr)CLONE_NEWTIME) != 0 || forceClone3) {
         clone3 = Ꮡ(new cloneArgs(
             flags: (uint64)flags,
-            exitSignal: (uint64)(nint)SIGCHLD
+            exitSignal: (uint64)SIGCHLD
         ));
         if (sys.UseCgroupFD) {
-            clone3.Value.flags |= (uint64)(CLONE_INTO_CGROUP);
-            clone3.Value.cgroup = (uint64)sys.CgroupFD;
+            clone3.flags |= (uint64)(CLONE_INTO_CGROUP);
+            clone3.cgroup = (uint64)sys.CgroupFD;
         }
         if (sys.PidFD != nil) {
-            clone3.Value.pidFD = (uint64)(uintptr)Ꮡpidfd;
+            clone3.pidFD = (uint64)(uintptr)Ꮡpidfd;
         }
     }
 
@@ -353,12 +353,12 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     // No more allocation or calls of non-assembly functions.
     runtime_BeforeFork();
     locked = true;
-    if (clone3 != nil){
+    if (clone3 != nil) {
         (pid, err1) = rawVforkSyscall(_SYS_clone3, (uintptr)clone3, /* unsafe.Sizeof(*clone3) */ (uintptr)88, 0);
     } else {
         // N.B. Keep in sync with doCheckClonePidfd.
-        flags |= (uintptr)((uintptr)(nint)SIGCHLD);
-        if (runtime.GOARCH == "s390x"u8){
+        flags |= (uintptr)((uintptr)SIGCHLD);
+        if (runtime.GOARCH == "s390x"u8) {
             // On Linux/s390, the first two arguments of clone(2) are swapped.
             (pid, err1) = rawVforkSyscall(SYS_CLONE, 0, flags, (uintptr)Ꮡpidfd);
         } else {
@@ -386,7 +386,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     }
 
     // Wait for User ID/Group ID mappings to be written.
-    if (sys.UidMappings != default! || sys.GidMappings != default!) {
+    if (sys.UidMappings != nil || sys.GidMappings != nil) {
         {
             (_, _, err1) = RawSyscall(SYS_CLOSE, (uintptr)mapPipe[1], 0, 0); if (err1 != 0) {
                 goto childerror;
@@ -453,7 +453,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             goto childerror;
         }
 
-        if ((uintptr)(sys.Unshareflags & (uintptr)CLONE_NEWUSER) != 0 && sys.GidMappings != default!) {
+        if ((uintptr)(sys.Unshareflags & (uintptr)CLONE_NEWUSER) != 0 && sys.GidMappings != nil) {
             dirfd = (nint)_AT_FDCWD;
             {
                 var ᴋ3 = Ꮡ(psetgroups, 0);
@@ -494,7 +494,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             }
         }
 
-        if ((uintptr)(sys.Unshareflags & (uintptr)CLONE_NEWUSER) != 0 && sys.UidMappings != default!) {
+        if ((uintptr)(sys.Unshareflags & (uintptr)CLONE_NEWUSER) != 0 && sys.UidMappings != nil) {
             dirfd = (nint)_AT_FDCWD;
             {
                 var ᴋ7 = Ꮡ(puid, 0);
@@ -536,8 +536,8 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     }
 
     // Chroot
-    if (Ꮡchroot != nil) {
-        var ᴋ11 = Ꮡchroot;
+    if (chroot != nil) {
+        var ᴋ11 = chroot;
                 (_, _, err1) = RawSyscall(SYS_CHROOT, (uintptr)ᴋ11, 0, 0);
         System.GC.KeepAlive(ᴋ11);
         if (err1 != 0) {
@@ -553,7 +553,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             if (ngroups > 0) {
                 groups = (uintptr)Ꮡ((~cred).Groups, 0);
             }
-            if (!(sys.GidMappings != default! && !sys.GidMappingsEnableSetgroups && ngroups == 0) && !(~cred).NoSetGroups) {
+            if (!(sys.GidMappings != nil && !sys.GidMappingsEnableSetgroups && ngroups == 0) && !(~cred).NoSetGroups) {
                 (_, _, err1) = RawSyscall(_SYS_setgroups, ngroups, groups, 0);
                 if (err1 != 0) {
                     goto childerror;
@@ -615,8 +615,8 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     }
 
     // Chdir
-    if (Ꮡdir != nil) {
-        var ᴋ16 = Ꮡdir;
+    if (dir != nil) {
+        var ᴋ16 = dir;
                 (_, _, err1) = RawSyscall(SYS_CHDIR, (uintptr)ᴋ16, 0, 0);
         System.GC.KeepAlive(ᴋ16);
         if (err1 != 0) {
@@ -626,7 +626,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
 
     // Parent death signal
     if (sys.Pdeathsig != 0) {
-        (_, _, err1) = RawSyscall6(SYS_PRCTL, PR_SET_PDEATHSIG, (uintptr)(nint)sys.Pdeathsig, 0, 0, 0, 0);
+        (_, _, err1) = RawSyscall6(SYS_PRCTL, PR_SET_PDEATHSIG, (uintptr)sys.Pdeathsig, 0, 0, 0, 0);
         if (err1 != 0) {
             goto childerror;
         }
@@ -637,7 +637,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
         (pid, _) = rawSyscallNoError(SYS_GETPPID, 0, 0, 0);
         if (pid != ppid) {
             (pid, _) = rawSyscallNoError(SYS_GETPID, 0, 0, 0);
-            (_, _, err1) = RawSyscall(SYS_KILL, pid, (uintptr)(nint)sys.Pdeathsig, 0);
+            (_, _, err1) = RawSyscall(SYS_KILL, pid, (uintptr)sys.Pdeathsig, 0);
             if (err1 != 0) {
                 goto childerror;
             }
@@ -730,7 +730,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
         var ᴋ17 = Ꮡlim;
                 (_, _, err1) = RawSyscall6(SYS_PRLIMIT64, 0, RLIMIT_NOFILE, 0, (uintptr)ᴋ17, 0, 0);
         System.GC.KeepAlive(ᴋ17);
-        if (err1 != 0 || (lim.Cur == (~rlim).Max - 1 && lim.Max == (~rlim).Max)) {
+        if (err1 != 0 || (lim.Cur == rlim.Max - 1 && lim.Max == rlim.Max)) {
             var ᴋ18 = rlim;
                         RawSyscall6(SYS_PRLIMIT64, 0, RLIMIT_NOFILE, (uintptr)ᴋ18, 0, 0, 0);
             System.GC.KeepAlive(ᴋ18);
@@ -748,7 +748,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     }
 
     // Time to exec.
-    var ᴋ19 = Ꮡargv0;
+    var ᴋ19 = argv0;
     var ᴋ20 = @unsafe.Pointer.FromBox(Ꮡ(argv, 0));
     var ᴋ21 = @unsafe.Pointer.FromBox(Ꮡ(envv, 0));
         (_, _, err1) = RawSyscall(SYS_EXECVE, (uintptr)ᴋ19, (uintptr)ᴋ20, (uintptr)ᴋ21);
@@ -761,13 +761,13 @@ childerror:
         RawSyscall(SYS_WRITE, (uintptr)pipe, (uintptr)ᴋ22, /* unsafe.Sizeof(err1) */ (uintptr)8);
     System.GC.KeepAlive(ᴋ22);
     // send error code on pipe
-    while (ᐧ) {
+    for (;;) {
         RawSyscall(SYS_EXIT, 253, 0, 0);
     }
 }
 
 internal static slice<byte> formatIDMappings(slice<SysProcIDMap> idMap) {
-    slice<byte> data = default!;
+    slice<byte> data = default;
     foreach (var (_, im) in idMap) {
         data = append(data, ((@string)(strconv.Itoa(im.ContainerID) + " "u8 + strconv.Itoa(im.HostID) + " "u8 + strconv.Itoa(im.Size) + "\n"u8)).ꓸꓸꓸ);
     }
@@ -777,24 +777,24 @@ internal static slice<byte> formatIDMappings(slice<SysProcIDMap> idMap) {
 // writeIDMappings writes the user namespace User ID or Group ID mappings to the specified path.
 internal static error writeIDMappings(@string path, slice<SysProcIDMap> idMap) {
     var (fd, err) = Open(path, O_RDWR, 0);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     {
-        var (_, errΔ1) = Write(fd, formatIDMappings(idMap)); if (errΔ1 != default!) {
+        var (_, errΔ1) = Write(fd, formatIDMappings(idMap)); if (errΔ1 != nil) {
             Close(fd);
             return errΔ1;
         }
     }
 
     {
-        var errΔ2 = Close(fd); if (errΔ2 != default!) {
+        var errΔ2 = Close(fd); if (errΔ2 != nil) {
             return errΔ2;
         }
     }
 
-    return default!;
+    return default;
 }
 
 // writeSetgroups writes to /proc/PID/setgroups "deny" if enable is false
@@ -804,19 +804,19 @@ internal static error writeIDMappings(@string path, slice<SysProcIDMap> idMap) {
 internal static error writeSetgroups(nint pid, bool enable) {
     @string sgf = "/proc/"u8 + strconv.Itoa(pid) + "/setgroups"u8;
     var (fd, err) = Open(sgf, O_RDWR, 0);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
-    slice<byte> data = default!;
-    if (enable){
+    slice<byte> data = default;
+    if (enable) {
         data = slice<byte>("allow"u8);
     } else {
         data = slice<byte>("deny"u8);
     }
 
     {
-        var (_, errΔ1) = Write(fd, data); if (errΔ1 != default!) {
+        var (_, errΔ1) = Write(fd, data); if (errΔ1 != nil) {
             Close(fd);
             return errΔ1;
         }
@@ -828,31 +828,31 @@ internal static error writeSetgroups(nint pid, bool enable) {
 // writeUidGidMappings writes User ID and Group ID mappings for user namespaces
 // for a process and it is called from the parent process.
 internal static error writeUidGidMappings(nint pid, ref SysProcAttr sys) {
-    if (sys.UidMappings != default!) {
+    if (sys.UidMappings != nil) {
         @string uidf = "/proc/"u8 + strconv.Itoa(pid) + "/uid_map"u8;
         {
-            var err = writeIDMappings(uidf, sys.UidMappings); if (err != default!) {
+            var err = writeIDMappings(uidf, sys.UidMappings); if (err != nil) {
                 return err;
             }
         }
     }
 
-    if (sys.GidMappings != default!) {
+    if (sys.GidMappings != nil) {
         // If the kernel is too old to support /proc/PID/setgroups, writeSetGroups will return ENOENT; this is OK.
         {
-            var err = writeSetgroups(pid, sys.GidMappingsEnableSetgroups); if (err != default! && !AreEqual(err, ENOENT)) {
+            var err = writeSetgroups(pid, sys.GidMappingsEnableSetgroups); if (err != nil && !AreEqual(err, ENOENT)) {
                 return err;
             }
         }
         @string gidf = "/proc/"u8 + strconv.Itoa(pid) + "/gid_map"u8;
         {
-            var err = writeIDMappings(gidf, sys.GidMappings); if (err != default!) {
+            var err = writeIDMappings(gidf, sys.GidMappings); if (err != nil) {
                 return err;
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 // forkAndExecFailureCleanup cleans up after an exec failure.
@@ -891,8 +891,7 @@ internal partial struct os_checkClonePidfd_sigInfo /*dyn*/ {
 internal static error os_checkClonePidfd() {
     GoFrame ᒐ = default;
     try {
-        ref var pidfd = ref heap<int32>(out var Ꮡpidfd);
-        pidfd = (int32)(-1);
+        ref var pidfd = ref heap<int32>((int32)(-1), out var Ꮡpidfd);
         var (pid, errno) = doCheckClonePidfd(Ꮡpidfd);
         if (errno != 0) {
             return errno;
@@ -902,8 +901,8 @@ internal static error os_checkClonePidfd() {
             // Bad: CLONE_PIDFD failed to provide a pidfd. Reap the process
             // before returning.
 
-            error err = default!;
-            while (ᐧ) {
+            error err = default;
+            for (;;) {
                 ref var status = ref heap(new WaitStatus(), out var Ꮡstatus);
                 // WCLONE is an untyped constant that sets bit 31, so
                 // it cannot convert directly to int on 32-bit
@@ -915,7 +914,7 @@ internal static error os_checkClonePidfd() {
                     break;
                 }
             }
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
 
@@ -933,7 +932,7 @@ internal static error os_checkClonePidfd() {
 
         const nuint is64bit = /* ^uint(0) >> 63 */ 1; // 0 for 32-bit hosts, 1 for 64-bit ones.
 
-        while (ᐧ) {
+        for (;;) {
             uintptr _P_PIDFD = 3;
             ref var info = ref heap(new os_checkClonePidfd_sigInfo(), out var Ꮡinfo);
             var ᴋ23 = Ꮡinfo;
@@ -947,9 +946,9 @@ internal static error os_checkClonePidfd() {
             return errno;
         }
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -961,16 +960,16 @@ internal static error os_checkClonePidfd() {
 // and os_checkClonePidfd separate.
 //
 //go:noinline
-internal static partial (uintptr pid, Errno errno) doCheckClonePidfd(ж<int32> Ꮡpidfd) {
-    uintptr pid = default!;
-    Errno errno = default!;
+internal static partial (uintptr pid, Errno errno) doCheckClonePidfd(ж<int32> pidfd) {
+    uintptr pid = default;
+    Errno errno = default;
 
     var flags = (uintptr)((uintptr)((uintptr)(UntypedInt)(CLONE_VFORK | CLONE_VM) | (uintptr)CLONE_PIDFD));
-    if (runtime.GOARCH == "s390x"u8){
+    if (runtime.GOARCH == "s390x"u8) {
         // On Linux/s390, the first two arguments of clone(2) are swapped.
-        (pid, errno) = rawVforkSyscall(SYS_CLONE, 0, flags, (uintptr)Ꮡpidfd);
+        (pid, errno) = rawVforkSyscall(SYS_CLONE, 0, flags, (uintptr)pidfd);
     } else {
-        (pid, errno) = rawVforkSyscall(SYS_CLONE, flags, 0, (uintptr)Ꮡpidfd);
+        (pid, errno) = rawVforkSyscall(SYS_CLONE, flags, 0, (uintptr)pidfd);
     }
     if (errno != 0 || pid != 0) {
         // If we're in the parent, we must return immediately
@@ -982,7 +981,7 @@ internal static partial (uintptr pid, Errno errno) doCheckClonePidfd(ж<int32> �
         return (pid, errno);
     }
 
-    while (ᐧ) {
+    for (;;) {
         RawSyscall(SYS_EXIT_GROUP, 0, 0, 0);
     }
 }

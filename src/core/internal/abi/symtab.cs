@@ -64,7 +64,7 @@ partial struct FuncID /*num:uint8*/;
 
 // If you add a FuncID, you probably also want to add an entry to the map in
 // ../../cmd/internal/objabi/funcid.go
-public static FuncID FuncIDNormal => /* iota */ 0;  // not a special function
+public static FuncID FuncIDNormal => /* iota */ 0; // not a special function
 public static FuncID FuncID_abort => 1;
 public static FuncID FuncID_asmcgocall => 2;
 public static FuncID FuncID_asyncPreempt => 3;
@@ -114,7 +114,7 @@ public static UntypedInt FUNCDATA_ArgLiveInfo => 6;
 public static UntypedInt FUNCDATA_WrapInfo => 7;
 
 // Special values for the PCDATA_UnsafePoint table.
-public static UntypedInt UnsafePointSafe => -1; // Safe for async preemption
+public static UntypedInt UnsafePointSafe => -1;   // Safe for async preemption
 public static UntypedInt UnsafePointUnsafe => -2; // Unsafe for async preemption
 
 // UnsafePointRestart1(2) apply on a sequence of instructions, within

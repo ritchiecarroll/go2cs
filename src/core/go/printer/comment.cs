@@ -17,12 +17,12 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
     var directivesᴷ = new stackAppend<ж<ast.Comment>>(moves: true);
 
     // Extract comment text (removing comment markers).
-    @string kind = default!;
-    @string text = default!;
-    slice<ж<ast.Comment>> directives = default!;
-    if (len(list) == 1 && strings.HasPrefix((~list[0]).Text, "/*"u8)){
+    @string kind = default;
+    @string text = default;
+    slice<ж<ast.Comment>> directives = default;
+    if (len(list) == 1 && strings.HasPrefix(list[0].Text, "/*"u8)) {
         kind = "/*"u8;
-        text = list[0].Value.Text;
+        text = list[0].Text;
         if (!strings.Contains(text, "\n"u8) || allStars(text)) {
             // Single-line /* .. */ comment in doc comment position,
             // or multiline old-style comment like
@@ -36,12 +36,11 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
             return list;
         }
         text = text.slice(2, len(text) - 2); // cut /* and */
-    } else 
-    if (strings.HasPrefix((~list[0]).Text, "//"u8)){
+    } else if (strings.HasPrefix(list[0].Text, "//"u8)) {
         kind = "//"u8;
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         foreach (var (_, c) in list) {
-            var (after, found) = strings.CutPrefix((~c).Text, "//"u8);
+            var (after, found) = strings.CutPrefix(c.Text, "//"u8);
             if (!found) {
                 return list;
             }
@@ -71,25 +70,23 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
     text = (@string)Ꮡpr.Comment(d);
 
     // For /* */ comment, return one big comment with text inside.
-    ref var slash = ref heap<tokenꓸPos>(out var Ꮡslash);
-    slash = list[0].Value.Slash;
+    ref var slash = ref heap<tokenꓸPos>(list[0].Slash, out var Ꮡslash);
     if (kind == "/*"u8) {
         var c = Ꮡ(new ast.Comment(
             Slash: slash,
             Text: "/*\n"u8 + text + "*/"u8
         ));
-        return new ж<ast.Comment>[]{c}.slice();
+        return slice<ж<ast.Comment>>([c]);
     }
 
     // For // comment, return sequence of // lines.
-    slice<ж<ast.Comment>> @out = default!;
+    slice<ж<ast.Comment>> @out = default;
     while (text != ""u8) {
         ref var line = ref heap(new @string(), out var Ꮡline);
         (line, text, _) = strings.Cut(text, "\n"u8);
-        if (line == ""u8){
+        if (line == ""u8) {
             line = "//"u8;
-        } else 
-        if (strings.HasPrefix(line, "\t"u8)){
+        } else if (strings.HasPrefix(line, "\t"u8)) {
             line = "//"u8 + line;
         } else {
             line = "// "u8 + line;
@@ -108,7 +105,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
         foreach (var (_, c) in directives) {
             @out = append(@out, Ꮡ(new ast.Comment(
                 Slash: slash,
-                Text: (~c).Text
+                Text: c.Text
             )));
         }
     }
@@ -143,7 +140,7 @@ internal static bool isDirective(@string c) {
             continue;
         }
         var b = c[i];
-        if (!((rune)'a' <= b && b <= (rune)'z' || (rune)'0' <= b && b <= (rune)'9')) {
+        if (!('a' <= b && b <= 'z' || '0' <= b && b <= '9')) {
             return false;
         }
     }
@@ -154,12 +151,12 @@ internal static bool isDirective(@string c) {
 // old-style /* */ comment with a star at the start of each line.
 internal static bool allStars(@string text) {
     for (nint i = 0; i < len(text); i++) {
-        if (text[i] == (rune)'\n') {
+        if (text[i] == '\n') {
             nint j = i + 1;
-            while (j < len(text) && (text[j] == (rune)' ' || text[j] == (rune)'\t')) {
+            while (j < len(text) && (text[j] == ' ' || text[j] == '\t')) {
                 j++;
             }
-            if (j < len(text) && text[j] != (rune)'*') {
+            if (j < len(text) && text[j] != '*') {
                 return false;
             }
         }

@@ -15,7 +15,7 @@ partial class doc_package {
 internal static slice<ж<ast.Ident>> filterIdentList(slice<ж<ast.Ident>> list) {
     nint j = 0;
     foreach (var (_, x) in list) {
-        if (token.IsExported((~x).Name)) {
+        if (token.IsExported(x.Name)) {
             list[j] = x;
             j++;
         }
@@ -43,7 +43,7 @@ internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Func<@strin
         }
         case ж<ast.KeyValueExpr> x: {
             {
-                var (xΔ1, ok) = (~x).Key._<ж<ast.Ident>>(ᐧ); if (ok && !filter((~xΔ1).Name)) {
+                var (xΔ1, ok) = x.Key._<ж<ast.Ident>>(ᐧ); if (ok && !filter(xΔ1.Name)) {
                     continue;
                 }
             }
@@ -63,10 +63,10 @@ internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Func<@strin
 // updateIdentList replaces all unexported identifiers with underscore
 // and reports whether at least one exported name exists.
 internal static bool /*hasExported*/ updateIdentList(slice<ж<ast.Ident>> list) {
-    bool hasExported = default!;
+    bool hasExported = default;
 
     foreach (var (i, x) in list) {
-        if (token.IsExported((~x).Name)){
+        if (token.IsExported(x.Name)) {
             hasExported = true;
         } else {
             list[i] = underscore;
@@ -87,15 +87,15 @@ internal static bool hasExportedName(slice<ж<ast.Ident>> list) {
 
 // removeAnonymousField removes anonymous fields named name from an interface.
 internal static void removeAnonymousField(@string name, ref ast.InterfaceType ityp) {
-    var list = ityp.Methods.Value.List; // we know that ityp.Methods != nil
+    var list = ityp.Methods.List; // we know that ityp.Methods != nil
     nint j = 0;
     foreach (var (_, field) in list) {
         var keepField = true;
         {
-            nint n = len((~field).Names); if (n == 0) {
+            nint n = len(field.Names); if (n == 0) {
                 // anonymous field
                 {
-                    var (fname, _) = baseTypeName((~field).Type); if (fname == name) {
+                    var (fname, _) = baseTypeName(field.Type); if (fname == name) {
                         keepField = false;
                     }
                 }
@@ -109,15 +109,15 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
     if (j < len(list)) {
         ityp.Incomplete = true;
     }
-    ityp.Methods.Value.List = list.slice(0, j);
+    ityp.Methods.List = list.slice(0, j);
 }
 
 // filterFieldList removes unexported fields (field names) from the field list
 // in place and reports whether fields were removed. Anonymous fields are
 // recorded with the parent type. filterType is called with the types of
 // all remaining fields.
-internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> Ꮡparent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> Ꮡityp) {
-    bool removedFields = default!;
+internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> parent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> ityp) {
+    bool removedFields = default;
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields == nil) {
@@ -128,19 +128,18 @@ internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<nam
     foreach (var (_, field) in list) {
         var keepField = false;
         {
-            nint n = len((~field).Names); if (n == 0){
+            nint n = len(field.Names); if (n == 0) {
                 // anonymous field or embedded type or union element
-                @string fname = r.recordAnonymousField(Ꮡparent, (~field).Type);
-                if (fname != ""u8){
-                    if (token.IsExported(fname)){
+                @string fname = r.recordAnonymousField(parent, field.Type);
+                if (fname != ""u8) {
+                    if (token.IsExported(fname)) {
                         keepField = true;
-                    } else 
-                    if (Ꮡityp != nil && predeclaredTypes[fname]) {
+                    } else if (ityp != nil && predeclaredTypes[fname]) {
                         // possibly an embedded predeclared type; keep it for now but
                         // remember this interface so that it can be fixed if name is also
                         // defined locally
                         keepField = true;
-                        r.remember(fname, Ꮡityp);
+                        r.remember(fname, ityp);
                     }
                 } else {
                     // If we're operating on an interface, assume that this is an embedded
@@ -148,20 +147,20 @@ internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<nam
                     //
                     // TODO(rfindley): consider traversing into approximation/unions
                     // elements to see if they are entirely unexported.
-                    keepField = Ꮡityp != nil;
+                    keepField = ityp != nil;
                 }
             } else {
-                field.Value.Names = filterIdentList((~field).Names);
-                if (len((~field).Names) < n) {
+                field.Names = filterIdentList(field.Names);
+                if (len(field.Names) < n) {
                     removedFields = true;
                 }
-                if (len((~field).Names) > 0) {
+                if (len(field.Names) > 0) {
                     keepField = true;
                 }
             }
         }
         if (keepField) {
-            r.filterType(nil, (~field).Type);
+            r.filterType(nil, field.Type);
             list[j] = field;
             j++;
         }
@@ -179,7 +178,7 @@ internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfie
 
     if (Ꮡfields != nil) {
         foreach (var (_, f) in fields.List) {
-            r.filterType(nil, (~f).Type);
+            r.filterType(nil, f.Type);
         }
     }
 }
@@ -187,57 +186,57 @@ internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfie
 // filterType strips any unexported struct fields or method types from typ
 // in place. If fields (or methods) have been removed, the corresponding
 // struct or interface type has the Incomplete field set to true.
-internal static void filterType(this ref reader r, ж<namedType> Ꮡparent, ast.Expr typ) {
+internal static void filterType(this ref reader r, ж<namedType> parent, ast.Expr typ) {
     switch (typ.type()) {
     case ж<ast.Ident> t: {
         // nothing to do
         break;
     }
     case ж<ast.ParenExpr> t: {
-        r.filterType(nil, (~t).X);
+        r.filterType(nil, t.X);
         break;
     }
     case ж<ast.StarExpr> t: { // possibly an embedded type literal
-        r.filterType(nil, (~t).X);
+        r.filterType(nil, t.X);
         break;
     }
     case ж<ast.UnaryExpr> t: {
-        if ((~t).Op == token.TILDE) { // approximation element
-            r.filterType(nil, (~t).X);
+        if (t.Op == token.TILDE) { // approximation element
+            r.filterType(nil, t.X);
         }
         break;
     }
     case ж<ast.BinaryExpr> t: {
-        if ((~t).Op == token.OR) { // union
-            r.filterType(nil, (~t).X);
-            r.filterType(nil, (~t).Y);
+        if (t.Op == token.OR) { // union
+            r.filterType(nil, t.X);
+            r.filterType(nil, t.Y);
         }
         break;
     }
     case ж<ast.ArrayType> t: {
-        r.filterType(nil, (~t).Elt);
+        r.filterType(nil, t.Elt);
         break;
     }
     case ж<ast.StructType> t: {
-        if (r.filterFieldList(Ꮡparent, (~t).Fields, nil)) {
-            t.Value.Incomplete = true;
+        if (r.filterFieldList(parent, t.Fields, nil)) {
+            t.Incomplete = true;
         }
         break;
     }
     case ж<ast.FuncType> t: {
-        r.filterParamList((~t).TypeParams);
-        r.filterParamList((~t).Params);
-        r.filterParamList((~t).Results);
+        r.filterParamList(t.TypeParams);
+        r.filterParamList(t.Params);
+        r.filterParamList(t.Results);
         break;
     }
     case ж<ast.InterfaceType> t: {
-        if (r.filterFieldList(Ꮡparent, (~t).Methods, t)) {
-            t.Value.Incomplete = true;
+        if (r.filterFieldList(parent, t.Methods, t)) {
+            t.Incomplete = true;
         }
         break;
     }
     case ж<ast.MapType> t: {
-        r.filterType(nil, (~t).Key);
+        r.filterType(nil, t.Key);
         r.filterType(nil, (~t).Value);
         break;
     }
@@ -254,22 +253,22 @@ internal static bool filterSpec(this ref reader r, ast.Spec spec) {
         return true;
     }
     case ж<ast.ValueSpec> s: {
-        s.Value.Values = filterExprList((~s).Values, new Func<@string, bool>(token.IsExported), true);
-        if (len((~s).Values) > 0 || (~s).Type == default! && len((~s).Values) == 0){
+        s.Values = filterExprList(s.Values, new Func<@string, bool>(token.IsExported), true);
+        if (len(s.Values) > 0 || s.Type == nil && len(s.Values) == 0) {
             // If there are values declared on RHS, just replace the unexported
             // identifiers on the LHS with underscore, so that it matches
             // the sequence of expression on the RHS.
             //
             // Similarly, if there are no type and values, then this expression
             // must be following an iota expression, where order matters.
-            if (updateIdentList((~s).Names)) {
-                r.filterType(nil, (~s).Type);
+            if (updateIdentList(s.Names)) {
+                r.filterType(nil, s.Type);
                 return true;
             }
         } else {
-            s.Value.Names = filterIdentList((~s).Names);
-            if (len((~s).Names) > 0) {
-                r.filterType(nil, (~s).Type);
+            s.Names = filterIdentList(s.Names);
+            if (len(s.Names) > 0) {
+                r.filterType(nil, s.Type);
                 return true;
             }
         }
@@ -279,12 +278,11 @@ internal static bool filterSpec(this ref reader r, ast.Spec spec) {
         // Don't filter type parameters here, by analogy with function parameters
         // which are not filtered for top-level function declarations.
         {
-            @string name = s.Value.Name.Value.Name; if (token.IsExported(name)){
-                r.filterType(r.lookupType((~(~s).Name).Name), (~s).Type);
+            @string name = s.Name.Name; if (token.IsExported(name)) {
+                r.filterType(r.lookupType(s.Name.Name), s.Type);
                 return true;
-            } else 
-            if (IsPredeclared(name)) {
-                if (r.shadowedPredecl == default!) {
+            } else if (IsPredeclared(name)) {
+                if (r.shadowedPredecl == nil) {
                     r.shadowedPredecl = new map<@string, bool>();
                 }
                 r.shadowedPredecl[name] = true;
@@ -301,39 +299,39 @@ internal static bool filterSpec(this ref reader r, ast.Spec spec) {
 internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
     switch (typ.type()) {
     case ж<ast.Ident> typΔ1: {
-        return new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: (~typΔ1).Name, NamePos: pos)));
+        return new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: typΔ1.Name, NamePos: pos)));
     }
     case ж<ast.SelectorExpr> typΔ1: {
         {
-            var (id, ok) = (~typΔ1).X._<ж<ast.Ident>>(ᐧ); if (ok) {
+            var (id, ok) = typΔ1.X._<ж<ast.Ident>>(ᐧ); if (ok) {
                 // presumably a qualified identifier
                 return new ast.SelectorExprжExpr(Ꮡ(new ast.SelectorExpr(
-                    Sel: ast.NewIdent((~(~typΔ1).Sel).Name),
-                    X: new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: (~id).Name, NamePos: pos)))
+                    Sel: ast.NewIdent(typΔ1.Sel.Name),
+                    X: new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: id.Name, NamePos: pos)))
                 )));
             }
         }
         break;
     }}
-    return default!; // shouldn't happen, but be conservative and don't panic
+    return default; // shouldn't happen, but be conservative and don't panic
 }
 
 internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec> list, token.Token tok) {
     if (tok == token.CONST) {
         // Propagate any type information that would get lost otherwise
         // when unexported constants are filtered.
-        ast.Expr prevType = default!;
+        ast.Expr prevType = default;
         foreach (var (_, spec) in list) {
             var specΔ1 = spec._<ж<ast.ValueSpec>>();
-            if ((~specΔ1).Type == default! && len((~specΔ1).Values) == 0 && prevType != default!) {
+            if (specΔ1.Type == nil && len(specΔ1.Values) == 0 && prevType != nil) {
                 // provide current spec with an explicit type
-                specΔ1.Value.Type = copyConstType(prevType, specΔ1.Pos());
+                specΔ1.Type = copyConstType(prevType, specΔ1.Pos());
             }
-            if (hasExportedName((~specΔ1).Names)){
+            if (hasExportedName(specΔ1.Names)) {
                 // exported names are preserved so there's no need to propagate the type
-                prevType = default!;
+                prevType = default;
             } else {
-                prevType = specΔ1.Value.Type;
+                prevType = specΔ1.Type;
             }
         }
     }
@@ -351,15 +349,15 @@ internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec
 internal static bool filterDecl(this ref reader r, ast.Decl decl) {
     switch (decl.type()) {
     case ж<ast.GenDecl> d: {
-        d.Value.Specs = r.filterSpecList((~d).Specs, (~d).Tok);
-        return len((~d).Specs) > 0;
+        d.Specs = r.filterSpecList(d.Specs, d.Tok);
+        return len(d.Specs) > 0;
     }
     case ж<ast.FuncDecl> d: {
         // ok to filter these methods early because any
         // conflicting method will be filtered here, too -
         // thus, removing these methods early will not lead
         // to the false removal of possible conflicts
-        return token.IsExported((~(~d).Name).Name);
+        return token.IsExported(d.Name.Name);
     }}
     return false;
 }

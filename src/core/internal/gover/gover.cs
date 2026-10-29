@@ -24,8 +24,8 @@ partial struct Version {
     public @string Major; // decimal
     public @string Minor; // decimal or ""
     public @string Patch; // decimal or ""
-    public @string Kind; // "", "alpha", "beta", "rc"
-    public @string Pre; // decimal or ""
+    public @string Kind;  // "", "alpha", "beta", "rc"
+    public @string Pre;   // decimal or ""
 }
 
 // Compare returns -1, 0, or +1 depending on whether
@@ -86,7 +86,7 @@ public static @string Max(@string x, @string y) {
 // say "go 1.21", but Go 1.21rc1 will not handle files that say "go 1.21.0".
 public static bool IsLang(@string x) {
     var v = Parse(x);
-    return v != new Version(nil) && v.Patch == ""u8 && v.Kind == ""u8 && v.Pre == ""u8;
+    return v != new Version() && v.Patch == ""u8 && v.Kind == ""u8 && v.Pre == ""u8;
 }
 
 // Lang returns the Go language version. For example, Lang("1.2.3") == "1.2".
@@ -100,19 +100,19 @@ public static @string Lang(@string x) {
 
 // IsValid reports whether the version x is valid.
 public static bool IsValid(@string x) {
-    return Parse(x) != new Version(nil);
+    return Parse(x) != new Version();
 }
 
 // Parse parses the Go version string x into a version.
 // It returns the zero version if x is malformed.
 public static Version Parse(@string x) {
-    Version v = default!;
+    Version v = default;
 
     // Parse major version.
-    bool ok = default!;
+    bool ok = default;
     (v.Major, x, ok) = cutInt(x);
     if (!ok) {
-        return new Version(nil);
+        return new Version();
     }
     if (x == ""u8) {
         // Interpret "1" as "1.0.0".
@@ -122,14 +122,14 @@ public static Version Parse(@string x) {
     }
 
     // Parse . before minor version.
-    if (x[0] != (rune)'.') {
-        return new Version(nil);
+    if (x[0] != '.') {
+        return new Version();
     }
 
     // Parse minor version.
     (v.Minor, x, ok) = cutInt(x[1..]);
     if (!ok) {
-        return new Version(nil);
+        return new Version();
     }
     if (x == ""u8) {
         // Patch missing is same as "0" for older versions.
@@ -141,7 +141,7 @@ public static Version Parse(@string x) {
     }
 
     // Parse patch if present.
-    if (x[0] == (rune)'.') {
+    if (x[0] == '.') {
         (v.Patch, x, ok) = cutInt(x[1..]);
         if (!ok || x != ""u8) {
             // Note that we are disallowing prereleases (alpha, beta, rc) for patch releases here (x != "").
@@ -150,21 +150,21 @@ public static Version Parse(@string x) {
             // But a prerelease of a patch would have the opposite effect:
             //	1.21.3rc1 < 1.21.3
             // We've never needed them before, so let's not start now.
-            return new Version(nil);
+            return new Version();
         }
         return v;
     }
 
     // Parse prerelease.
     nint i = 0;
-    while (i < len(x) && (x[i] < (rune)'0' || (rune)'9' < x[i])) {
-        if (x[i] < (rune)'a' || (rune)'z' < x[i]) {
-            return new Version(nil);
+    while (i < len(x) && (x[i] < '0' || '9' < x[i])) {
+        if (x[i] < 'a' || 'z' < x[i]) {
+            return new Version();
         }
         i++;
     }
     if (i == 0) {
-        return new Version(nil);
+        return new Version();
     }
     (v.Kind, x) = (x.slice(0, i), x.slice(i));
     if (x == ""u8) {
@@ -172,7 +172,7 @@ public static Version Parse(@string x) {
     }
     (v.Pre, x, ok) = cutInt(x);
     if (!ok || x != ""u8) {
-        return new Version(nil);
+        return new Version();
     }
 
     return v;
@@ -182,10 +182,10 @@ public static Version Parse(@string x) {
 // and returns that value and the rest of the string.
 internal static (@string n, @string rest, bool ok) cutInt(@string x) {
     nint i = 0;
-    while (i < len(x) && (rune)'0' <= x[i] && x[i] <= (rune)'9') {
+    while (i < len(x) && '0' <= x[i] && x[i] <= '9') {
         i++;
     }
-    if (i == 0 || x[0] == (rune)'0' && i != 1) { // no digits or unnecessary leading zero
+    if (i == 0 || x[0] == '0' && i != 1) { // no digits or unnecessary leading zero
         return ("", "", false);
     }
     return (x.slice(0, i), x.slice(i), true);
@@ -203,7 +203,7 @@ public static nint CmpInt(@string x, @string y) {
     if (len(x) > len(y)) {
         return +1;
     }
-    if (x < y){
+    if (x < y) {
         return -1;
     } else {
         return +1;
@@ -217,14 +217,14 @@ public static @string DecInt(@string @decimal) {
     // Scan right to left turning 0s to 9s until you find a digit to decrement.
     var digits = slice<byte>(@decimal);
     nint i = len(digits) - 1;
-    for (; i >= 0 && digits[i] == (rune)'0'; i--) {
-        digits[i] = (rune)'9';
+    for (; i >= 0 && digits[i] == '0'; i--) {
+        digits[i] = (byte)'9';
     }
     if (i < 0) {
         // decimal is all zeros
         return ""u8;
     }
-    if (i == 0 && digits[i] == (rune)'1' && len(digits) > 1){
+    if (i == 0 && digits[i] == '1' && len(digits) > 1) {
         digits = digits[1..];
     } else {
         digits[i]--;

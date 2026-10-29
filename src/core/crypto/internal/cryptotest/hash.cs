@@ -22,17 +22,17 @@ partial class cryptotest_package {
 
 // TestHash performs a set of tests on hash.Hash implementations, checking the
 // documented requirements of Write, Sum, Reset, Size, and BlockSize.
-public static void TestHash(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
+public static void TestHash(ж<testing.T> t, Func<hash.Hash> mh) {
     if (Δboring.Enabled || Δfips140.Version() == "v1.0.0"u8) {
-        testhash.TestHashWithoutClone(Ꮡt, NilSafeDelegateConversion<Func<hash.Hash>, Func<hash.Hash>>(mh));
+        testhash.TestHashWithoutClone(t, NilSafeDelegateConversion<Func<hash.Hash>, Func<hash.Hash>>(mh));
         return;
     }
-    testhash.TestHash(Ꮡt, NilSafeDelegateConversion<Func<hash.Hash>, Func<hash.Hash>>(mh));
+    testhash.TestHash(t, NilSafeDelegateConversion<Func<hash.Hash>, Func<hash.Hash>>(mh));
 }
 
-internal static partial io.Reader newRandReader(ж<testing.T> Ꮡt) {
+internal static partial io.Reader newRandReader(ж<testing.T> t) {
     var seed = time.Now().UnixNano();
-    Ꮡt.Logf("Deterministic RNG seed: 0x%x"u8, seed);
+    t.Logf("Deterministic RNG seed: 0x%x"u8, seed);
     return new rand_RandжReader(rand.New(rand.NewSource(seed)));
 }
 

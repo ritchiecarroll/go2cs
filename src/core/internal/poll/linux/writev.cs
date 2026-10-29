@@ -19,18 +19,18 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
         ref var v = ref Ꮡv.DerefOrNull();
 
         {
-            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
+            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
                 return (0, errΔ1);
             }
         }
         ᒐd1 = true;
         {
-            var errΔ2 = fd.pd.prepareWrite(fd.isFile); if (errΔ2 != default!) {
+            var errΔ2 = fd.pd.prepareWrite(fd.isFile); if (errΔ2 != nil) {
                 return (0, errΔ2);
             }
         }
 
-        slice<Δsyscall.Iovec> iovecs = default!;
+        slice<Δsyscall.Iovec> iovecs = default;
         if (fd.iovecs != nil) {
             iovecs = fd.iovecs.ValueSlot;
         }
@@ -43,8 +43,8 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
             maxVec = 16;
         }
 
-        int64 n = default!;
-        error err = default!;
+        int64 n = default;
+        error err = default;
         while (len(v) > 0) {
             iovecs = iovecs[..0];
             foreach (var (_, chunk) in v) {
@@ -69,7 +69,7 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
             }
             fd.iovecs.ValueSlot = iovecs; // cache
 
-            uintptr wrote = default!;
+            uintptr wrote = default;
             (wrote, err) = writev(fd.Sysfd, iovecs);
             if (wrote == ~(uintptr)0) {
                 wrote = 0;
@@ -78,13 +78,13 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
             n += (int64)wrote;
             consume(ref (Ꮡv).DerefOrNull(), (int64)wrote);
             clear(iovecs);
-            if (err != default!) {
+            if (err != nil) {
                 if (AreEqual(err, Δsyscall.EINTR)) {
                     continue;
                 }
                 if (AreEqual(err, Δsyscall.EAGAIN)) {
                     {
-                        err = fd.pd.waitWrite(fd.isFile); if (err == default!) {
+                        err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
                             continue;
                         }
                     }
@@ -98,7 +98,7 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
         }
         return (n, err);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.writeUnlock(); ᒐ.Run(); }
 }
 

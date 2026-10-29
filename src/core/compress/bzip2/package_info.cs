@@ -50,6 +50,12 @@ using static go.compress.bzip2_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(bitReader))]
+[assembly: go.GoFieldAccess(typeof(huffmanNode))]
+[assembly: go.GoFieldAccess(typeof(reader))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -59,7 +65,7 @@ using static go.compress.bzip2_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABUyooKClKzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
-[assembly: go.GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggANELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAgGooKCgoK4goK4gqyCgsqCgpSCgtyClIKCgoKUgoKUgoKClIKUgpSAggAEXwASbsKCgoKCgoKUyoKCgoKCgoKCgtyUuIKCyoK4goKCgoKClJSClMqCgoKCgqaUgqaClIKCgoKUgpSClKaUgoK4goKUgpSCyoKmlIKCgoKUgpSCgqaClJSClIK4gpSmpoKUgoKCgpSmuAAIEoKClIKCpoLKgoKCgoKUAAIaAAoCgoKCpoKCgqYABhCCgoKCgoKUpryigoKU")]
+[assembly: go.GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggANELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAgGooKCgoK4goK4gpS4goLagoKUgoLcgpSCgoKClIKClIKCgpSClIKUgIIAFQ7CgoKCgoKClMqCgoKCgoKCgoLclLiCgsqCuIKCgoKCgpSUgpTKgoKCgoKmlIKmgpSCgoKClIKUgpSmlIKCuIKClIKUgsqCppSCgoKClIKUgoKmgpSUgpSCuIKUpqaClIKCgoKUprgACBKCgpSCgqaCyoKCgoKClAACGgAKAoKCgqaCgoKmAAYQgoKCgoKClKa8ooKClA==")]
 [assembly: go.GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0pSClIKUgsrKlIKUpqaCgpSUzgAKEoKmuIKCgqaCgIKk7oKUgoKClIKCpsqYgoIAEybypoKCgoK4gpQADBqC3MqmgpSmgoKUlIKUpoKmlIKUpg==", "106-111:1;135-137:2")]
 [assembly: go.GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABAkooKUqqKCpoKClKbqgoKCqJI=")]
 // </GoSourcePositionMaps>

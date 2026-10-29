@@ -19,15 +19,15 @@ public static (ж<File> r, ж<File> w, error err) Pipe() {
     // See ../syscall/exec.go for description of lock.
     syscall.ᏑForkLock.RLock();
     var e = syscall.Pipe(p[0..]);
-    if (e != default!) {
+    if (e != nil) {
         syscall.ᏑForkLock.RUnlock();
-        return (default!, default!, NewSyscallError(pipeˢ, e));
+        return (default, default, NewSyscallError(pipeˢ, e));
     }
     syscall.CloseOnExec(p[0]);
     syscall.CloseOnExec(p[1]);
     syscall.ᏑForkLock.RUnlock();
 
-    return (newFile(p[0], "|0"u8, kindPipe, false), newFile(p[1], "|1"u8, kindPipe, false), default!);
+    return (newFile(p[0], "|0"u8, kindPipe, false), newFile(p[1], "|1"u8, kindPipe, false), default);
 }
 
 } // end os_package

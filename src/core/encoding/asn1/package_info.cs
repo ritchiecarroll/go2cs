@@ -11,16 +11,9 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
 global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -70,6 +63,10 @@ using static go.encoding.asn1_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(taggedEncoder))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -78,9 +75,9 @@ using static go.encoding.asn1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/asn1/asn1.go", "asn1.cs", "AC1YgP6ArNKCgtyUtLS2rsKClIKUgpSq0oKClJSClIKCuIKCqqKAgqSCgpSClKaYooCCpIKUgoKUgoKClIIADB6igpSCgqqigoKmgoKCgqaowoKClIKGgpSCgty2AAcQkqaCgpSCgoKUpqzigoLK3IKClIKClIKmgoKCgpSUggAMHuKCgqaCgpSCpoKClIKCgpSClKaCqsKUgoKCgpSCpoCCgraUptrSgpSAgraAgrauwoKCpqiSAAIQ8oKCgqaCAAwisgALMPKCgoKmgq4ADRSClJTewoKU3gAOEoK4gIK2goK4hpSCpgASLAAKAqaCgpSCgoKCuIKCgqaCgqaCgpSCgpSmgoKClIKCgoKUgoKmgpSCgpSCuIKCuKzigoKCyoKCgoKClMq2poKClIKClIKUgoKCgpSCgoKCgoKCpqiCgoKCgoKCmqLc4oKYgpSCpoKClLiAgoKCgpSCgpSCgoKUpKSkpKSkpKSkpKSk2oKClIKUtoKClIKCgpSCgpSCpIKCgqaCgpSCuIKClJS4goKC7oKClKSCAAgSgoKCpIK4gqaCgpSCgoKmgoKCpoKCgriWgoKUlJSCgpSCppSCpIKkgqSCgpSCpIKClIKkgqSCgpSClICkgoKUgqSCgoKUlIKClJS2lIKCgriEgqaCgoKClIKC3KSCgoKClIKClIKkgpSkpKSk7KSmlIKUpIKqopSmrNKClIKClIKUAAKeAQBMAgALEoKCpoKUqsKCgpSCgpQ=", "", "", "1064=Field/1/1/1")]
+[assembly: go.GoPositionMap("encoding/asn1/asn1.go", "asn1.cs", "AC1YgP6ArNKCgtyUtLS2rsKClIKUgpSq0oKClJSClIKCuIKCqqKAgqSCgpSClKaYooCCpIKUgoKUgoKClIIADB6igpSCgqqigoKmgoKCgqaowoKClIKGgpSCgty2AAcQkqaCgpSCgoKUpqzigoLK3IKClIKClIKmgoKCgpSUggAMHuKCgqaCgpSCpoKClIKCgpSClKaCqsKUgoKCgpSCpoCCgraUptrSgpSAgraAgrauwoKCpqiSAAIQ8oKCgqaCAAwisgALMPKCgoKmgq4ADRSClJTewoKU3gAOEoK4gIK2goK4hpSCpgASLAAKAqaCgpSCgoKCuIKCgqaCgqaCgpSCgpSmgoKClIKCgoKUgoKmgpSCgpSCuIKCuKzigoKCyoKCgoKClMrGtoKClIKClIKUgoKCgpSCgoKCgoKCpqiCgoKCgoKCmqLc4oKYgpSCpoKClLiAgoKCgpSCgpSCgoKUtLS0tLS0tLS0tLS0+oKClIKUtoKClIKCgpSCgpSClIKCgqaCgpSCuIKClJS4goKC7oKClKSCAAgSgoKClIK4gqaCgpSCgoKmgoKCpoKCgriWgoKUlJSCgpSCppSCpIKkgqSCgpSCpIKClIKkgqSCgpSClICkgoKUgqSCgoKUlIKClJS2lIKCgriEgqaCgoKClIKC3KSCgoKClIKClIKkgpS0tLS0/LS2pIKUpIKqopSmrNKClIKClIKUAAKeAQBMAgALEoKCpoKUqsKCgpSCgpQ=", "", "", "1078=Field/1/1/1")]
 [assembly: go.GoPositionMap("encoding/asn1/common.go", "common.cs", "AFW8AQAIAoKCgpS0goLGtLS0tLS0goKCxoKCgsa0goLGgoLGttqilKSkpKSklJSkpKSClIKUpJQ=")]
-[assembly: go.GoPositionMap("encoding/asn1/marshal.go", "marshal.cs", "AB9CgqaCyoKmgoLcgqaCgtyCgoKUpoKCgoLcgoKClKYACBKCgoIACBKUgoKCAAsYgqaCgsqClIKCpoKCpqaClIK4goKmgoKmpoKUgoKCgqampqKCpsqCgoKClIKUkpSUgqaUuIKUgqamooKCgpSmgoKClIKCgpSCpoKCgpSmyoKmgoKC3IKCgpSmgoKCuIKCpqaC7oK4poKCgrimgoKCuKaCpoKmgu6CgqailIKCpqailIKCpqaClJS0tKamgoKCppSmgpSClJSCgpSUlKS0toKCpoKUpoKCgpSmopSkgoKUpIKkgqSCpoCkgpSkpJSCgriUgoLKgoKCyqamgKSkpIKCgoK4xoKCppSApKSklIKCgriClMaUpKSkyNaigqaCpoKmgoKUgu6CgriCgoKmlIKUpoKCpoKmgqaUuIKCgpSCuLaCgriCgpQABxCCppSCgqaUgoKCkoKUpoKUlJTuuKaUAAIeAAwCqqKCgpSCgg==", "", "", "753=Len/1/1/3")]
+[assembly: go.GoPositionMap("encoding/asn1/marshal.go", "marshal.cs", "AB9CgqaCyoKmgoLcgqaCgtyCgoKUpoKCgoLcgoKClKYACBKCgoIACBKUgoKCAAsYgqaCgsqClIKCpoKCpqaClIK4goKmgoKmpoKUgoKCgqampqKCpsqCgoKClIKUgpSUgqaUuIKUgqamooKCgpSmgoKClIKCgpSCpoKCgpSmyoKmgoKC3IKCgpSmgoKCuIKCpqaC7oK4poKCgrimgoKCuKaCpoKmgu6CgqailIKCpqailIKCpqaClJS0tKamgoKCppSmgpSClJSCgpSUlKS0toKCpoKUpoKCgpSmopSkgoKUpIKkgqSCpoCkgpSkpJSCgriUgoLKgoKCyqamgKSkpIKCgoK41oKCppSApKSklIKCgriClNaUpKSk2NaigqaCpoKmgoKUgu6CgriCgoKmlIKUpoKCpoKmgqaUuIKCgpSCuMaCgsiCgpQABxCCppSCgqaUgoKCgoKUpoKUlJTuuKaUAAIeAAwCqqKCgpSCgg==", "", "", "756=Len/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

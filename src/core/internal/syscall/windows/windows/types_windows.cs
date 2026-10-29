@@ -114,7 +114,7 @@ internal static error init(this ref OBJECT_ATTRIBUTES o, syscallꓸHandle root, 
         name = ""u8;
     }
     var (objectName, err) = NewNTUnicodeString(name);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     o.ObjectName = objectName;
@@ -122,7 +122,7 @@ internal static error init(this ref OBJECT_ATTRIBUTES o, syscallꓸHandle root, 
         o.RootDirectory = root;
     }
     o.Length = (uint32)/* unsafe.Sizeof(*o) */ (uintptr)48;
-    return default!;
+    return default;
 }
 
 // Values for the Attributes member of OBJECT_ATTRIBUTES.
@@ -156,7 +156,7 @@ partial struct SECURITY_DESCRIPTOR_CONTROL /*num:uint16*/;
 partial struct SECURITY_QUALITY_OF_SERVICE {
     public uint32 Length;
     public uint32 ImpersonationLevel; // type SECURITY_IMPERSONATION_LEVEL
-    public byte ContextTrackingMode;   // type SECURITY_CONTEXT_TRACKING_MODE
+    public byte ContextTrackingMode;  // type SECURITY_CONTEXT_TRACKING_MODE
     public byte EffectiveOnly;
 }
 

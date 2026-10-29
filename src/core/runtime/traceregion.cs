@@ -9,14 +9,13 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(traceRegionAllocBlock))]
 partial class runtime_package {
 
 // traceRegionAlloc is a thread-safe region allocator.
 // It holds a linked list of traceRegionAllocBlock.
 partial struct traceRegionAlloc {
     internal mutex @lock;
-    internal atomic.Bool dropping;          // For checking invariants.
+    internal atomic.Bool dropping;         // For checking invariants.
     internal atomic.UnsafePointer current; // *traceRegionAllocBlock
     internal ж<traceRegionAllocBlock> full;
 }
@@ -56,8 +55,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
     }
 
     // Try to bump-pointer allocate into the current block.
-    ref var block = ref heap<ж<traceRegionAllocBlock>>(out var Ꮡblock);
-    block = (ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Load());
+    ref var block = ref heap<ж<traceRegionAllocBlock>>((ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Load()), out var Ꮡblock);
     if (block != nil) {
         var r = block.of(traceRegionAllocBlock.Ꮡoff).Add(n);
         if (r <= (uintptr)len(block.data)) {

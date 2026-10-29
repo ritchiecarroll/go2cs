@@ -111,7 +111,7 @@ internal static float64 sqrt(float64 x) {
     nint exp = (nint)((ix >> (int)(shift)) & (uint64)mask);
     if (exp == 0) { // subnormal x
         while ((uint64)(ix & ((uint64)1 << (int)(shift))) == 0) {
-            ix <<= (int)(1);
+            ix <<= 1;
             exp--;
         }
         exp++;
@@ -120,13 +120,13 @@ internal static float64 sqrt(float64 x) {
     ix &= unchecked((uint64)~(uint64)(((uint64)mask << (int)(shift))));
     ix |= (uint64)(((uint64)1 << (int)(shift)));
     if ((exp & 1) == 1) { // odd exp, double x to make it even
-        ix <<= (int)(1);
+        ix <<= 1;
     }
-    exp >>= (int)(1); // exp = exp/2, exponent of square root
+    exp >>= 1; // exp = exp/2, exponent of square root
     // generate sqrt(x) bit by bit
-    ix <<= (int)(1);
-    uint64 q = default!;                              // q = sqrt(x)
-    uint64 s = default!;
+    ix <<= 1;
+    uint64 q = default;                              // q = sqrt(x)
+    uint64 s = default;
     var r = (uint64)((uint64)1 << (int)(shift + 1)); // r = moving bit from MSB to LSB
     while (r != 0) {
         var t = s + r;
@@ -135,8 +135,8 @@ internal static float64 sqrt(float64 x) {
             ix -= t;
             q += r;
         }
-        ix <<= (int)(1);
-        r >>= (int)(1);
+        ix <<= 1;
+        r >>= 1;
     }
     // final rounding
     if (ix != 0) { // remainder, result not exact

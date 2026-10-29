@@ -12,7 +12,7 @@ internal static UntypedInt maxNonStarters => 30;
 // The maximum number of characters needed for a buffer is
 // maxNonStarters + 1 for the starter + 1 for the GCJ
 internal static UntypedInt maxBufferSize => /* maxNonStarters + 2 */ 32;
-internal static UntypedInt maxNFCExpansion => 3; // NFC(0x1D160)
+internal static UntypedInt maxNFCExpansion => 3;   // NFC(0x1D160)
 internal static UntypedInt maxNFKCExpansion => 18; // NFKC(0xFDFA)
 
 internal static UntypedInt maxByteBufferSize => /* utf8.UTFMax * maxBufferSize */ 128; // 128
@@ -97,10 +97,10 @@ public static readonly @string GraphemeJoiner = "\u034F"u8;
 // order. flush writes the resulting segment to a byte array.
 partial struct reorderBuffer {
     internal array<ΔProperties> rune = new(maxBufferSize); // Per character info.
-    internal array<byte> @byte = new(maxByteBufferSize); // UTF-8 buffer. Referenced by runeInfo.pos.
-    internal uint8 nbyte;                     // Number or bytes.
-    internal streamSafe ss;                // For limiting length of non-starter sequence.
-    internal nint nrune;                      // Number of runeInfos.
+    internal array<byte> @byte = new(maxByteBufferSize);   // UTF-8 buffer. Referenced by runeInfo.pos.
+    internal uint8 nbyte;                                  // Number or bytes.
+    internal streamSafe ss;                                // For limiting length of non-starter sequence.
+    internal nint nrune;                                   // Number of runeInfos.
     internal formInfo f;
     internal input src;
     internal nint nsrc;
@@ -243,7 +243,7 @@ internal static void insertUnsafe(this ж<reorderBuffer> Ꮡrb, input src, nint 
             rb.decomposeHangul(rune);
         }
     }
-    if (info.hasDecomposition()){
+    if (info.hasDecomposition()) {
         // TODO: inline.
         Ꮡrb.insertDecomposed(info.Decomposition());
     } else {
@@ -444,7 +444,7 @@ internal static void combineHangul(this ref reorderBuffer rb, nint s, nint i, ni
         if (cccB == 0) {
             s = k - 1;
         }
-        if (s != k - 1 && cccB >= cccC){
+        if (s != k - 1 && cccB >= cccC) {
             // b[i] is blocked by greater-equal cccX below it
             b[k] = b[i];
             k++;
@@ -507,7 +507,7 @@ internal static void compose(this ref reorderBuffer rb) {
             var cccB = b[k - 1].ccc;
             var cccC = ii.ccc;
             var blocked = false; // b[i] blocked by starter or greater or equal CCC?
-            if (cccB == 0){
+            if (cccB == 0) {
                 s = k - 1;
             } else {
                 blocked = s != k - 1 && cccB >= cccC;

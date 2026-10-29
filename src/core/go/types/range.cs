@@ -49,10 +49,10 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         check.hasCallOrRecv = false;
         Ꮡcheck.expr(nil, Ꮡx, rangeVar);
 
-        if (isTypes2 && x.mode != invalid && sValue == default! && !check.hasCallOrRecv) {
+        if (isTypes2 && x.mode != invalid && sValue == nil && !check.hasCallOrRecv) {
             {
                 var (t, ok) = arrayPtrDeref(x.typ.Underlying())._<ж<Array>>(ᐧ); if (ok) {
-                    while (ᐧ) {
+                    for (;;) {
                         // Put constant info on the thing inside parentheses.
                         // That's where (*../noder/writer).expr expects it.
                         // See issue 73476.
@@ -60,7 +60,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                         if (!okΔ1) {
                             break;
                         }
-                        rangeVar = p.Value.X;
+                        rangeVar = p.X;
                     }
                     // Override type of rangeVar to be a constant
                     // (and thus side-effects will not be computed
@@ -69,7 +69,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                         mode: constant_,
                         expr: rangeVar,
                         typ: new BasicжΔType(Typ[Int]),
-                        val: constant.MakeInt64((~t).len),
+                        val: constant.MakeInt64(t.len),
                         id: x.id
                     )));
                 }
@@ -77,8 +77,8 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         }
 
         // determine key/value types
-        ΔType key = default!;
-        ΔType val = default!;
+        ΔType key = default;
+        ΔType val = default;
         if (x.mode != invalid) {
             var (k, v, cause, ok) = rangeKeyVal(Ꮡcheck, x.typ, (goVersion vΔ1) => Ꮡcheck.Value.allowVersion(vΔ1));
             switch (ᐧ) {
@@ -90,15 +90,15 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                 Ꮡcheck.softErrorf(new operandжpositioner(Ꮡx), InvalidRangeExpr, "cannot range over %s"u8, Ꮡx);
                 break;
             }
-            case {} when k == default! && sKey != default!: {
+            case {} when k == nil && sKey != nil: {
                 Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(sKey), InvalidIterVar, "range over %s permits no iteration variables"u8, Ꮡx);
                 break;
             }
-            case {} when v == default! && sValue != default!: {
+            case {} when v == nil && sValue != nil: {
                 Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(sValue), InvalidIterVar, "range over %s permits only one iteration variable"u8, Ꮡx);
                 break;
             }
-            case {} when sExtra != default!: {
+            case {} when sExtra != nil: {
                 Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(sExtra), InvalidIterVar, "range clause permits at most two iteration variables"u8);
                 break;
             }}
@@ -115,25 +115,25 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
 
         // lhs expressions and initialization value (rhs) types
         var lhs = new ast.Expr[]{sKey, sValue}.array(); // sKey, sValue may be nil
-        var rhs = new ΔType[]{key, val}.array(); // key, val may be nil
+        var rhs = new ΔType[]{key, val}.array();        // key, val may be nil
 
         var rangeOverInt = isInteger(x.typ);
 
-        if (isDef){
+        if (isDef) {
             // short variable declaration
-            slice<ж<Var>> vars = default!;
+            slice<ж<Var>> vars = default;
             foreach (var (i, lhsΔ1) in lhs.ΔRangeSnapshot()) {
-                if (lhsΔ1 == default!) {
+                if (lhsΔ1 == nil) {
                     continue;
                 }
 
                 // determine lhs variable
-                ж<Var> obj = default!;
+                ж<Var> obj = default;
                 {
-                    var (ident, _) = lhsΔ1._<ж<ast.Ident>>(ᐧ); if (ident != nil){
+                    var (ident, _) = lhsΔ1._<ж<ast.Ident>>(ᐧ); if (ident != nil) {
                         // declare new variable
-                        @string name = ident.Value.Name;
-                        obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default!);
+                        @string name = ident.Name;
+                        obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default);
                         check.recordDef(ident, new VarжObject(obj));
                         // _ variables don't count as new variables
                         if (name != "_"u8) {
@@ -141,21 +141,21 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                         }
                     } else {
                         Ꮡcheck.errorf(new ast_Exprᴠpositioner(lhsΔ1), InvalidSyntaxTree, "cannot declare %s"u8, lhsΔ1);
-                        obj = newVar(LocalVar, lhsΔ1.Pos(), check.pkg, "_"u8, default!); // dummy variable
+                        obj = newVar(LocalVar, lhsΔ1.Pos(), check.pkg, "_"u8, default); // dummy variable
                     }
                 }
-                assert((~obj).typ == default!);
+                assert((~obj).typ == nil);
 
                 // initialize lhs iteration variable, if any
                 var typ = rhs[i];
-                if (typ == default! || AreEqual(typ, Typ[Invalid])) {
+                if (typ == nil || AreEqual(typ, Typ[Invalid])) {
                     // typ == Typ[Invalid] can happen if allowVersion fails.
                     obj.Value.typ = new BasicжΔType(Typ[Invalid]);
                     check.usedVars[obj] = true; // don't complain about unused variable
                     continue;
                 }
 
-                if (rangeOverInt){
+                if (rangeOverInt) {
                     assert(i == 0); // at most one iteration variable (rhs[1] == nil or Typ[Invalid] for rangeOverInt)
                     Ꮡcheck.initVar(obj, Ꮡx, rangeClauseˢ);
                 } else {
@@ -165,11 +165,11 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                     y.typ = typ;
                     Ꮡcheck.initVar(obj, Ꮡy, assignmentˢ); // error is on variable, use "assignment" not "range clause"
                 }
-                assert((~obj).typ != default!);
+                assert((~obj).typ != nil);
             }
 
             // declare variables
-            if (len(vars) > 0){
+            if (len(vars) > 0) {
                 tokenꓸPos scopePos = rangeStmt.Body.Pos();
                 vars = move2heap(varsᴷ, vars);
                 foreach (var (_, obj) in vars) {
@@ -178,24 +178,23 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
             } else {
                 Ꮡcheck.error(noNewVarPos, NoNewVar, noNewVariablesOnLeftSideˢ);
             }
-        } else 
-        if (sKey != default!){
+        } else if (sKey != nil) {
             /* lhs[0] != nil */
             // ordinary assignment
             foreach (var (i, lhsΔ2) in lhs.ΔRangeSnapshot()) {
-                if (lhsΔ2 == default!) {
+                if (lhsΔ2 == nil) {
                     continue;
                 }
 
                 // assign to lhs iteration variable, if any
                 var typ = rhs[i];
-                if (typ == default! || AreEqual(typ, Typ[Invalid])) {
+                if (typ == nil || AreEqual(typ, Typ[Invalid])) {
                     continue;
                 }
 
-                if (rangeOverInt){
+                if (rangeOverInt) {
                     assert(i == 0); // at most one iteration variable (rhs[1] == nil or Typ[Invalid] for rangeOverInt)
-                    Ꮡcheck.assignVar(lhsΔ2, default!, Ꮡx, rangeClauseˢ);
+                    Ꮡcheck.assignVar(lhsΔ2, default, Ꮡx, rangeClauseˢ);
                     // If the assignment succeeded, if x was untyped before, it now
                     // has a type inferred via the assignment. It must be an integer.
                     // (go.dev/issues/67027)
@@ -207,18 +206,17 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                     y.mode = value;
                     y.expr = lhsΔ2; // we don't have a better rhs expression to use here
                     y.typ = typ;
-                    Ꮡcheck.assignVar(lhsΔ2, default!, Ꮡy, assignmentˢ); // error is on variable, use "assignment" not "range clause"
+                    Ꮡcheck.assignVar(lhsΔ2, default, Ꮡy, assignmentˢ); // error is on variable, use "assignment" not "range clause"
                 }
             }
-        } else 
-        if (rangeOverInt) {
+        } else if (rangeOverInt) {
             // If we don't have any iteration variables, we still need to
             // check that a (possibly untyped) integer range expression x
             // is valid.
             // We do this by checking the assignment _ = x. This ensures
             // that an untyped x can be converted to a value of its default
             // type (rune or int).
-            Ꮡcheck.assignment(Ꮡx, default!, rangeClauseˢ);
+            Ꮡcheck.assignment(Ꮡx, default, rangeClauseˢ);
         }
 
         Ꮡcheck.stmt(inner, new ast.BlockStmtжStmt(rangeStmt.Body));
@@ -243,25 +241,25 @@ internal static readonly @string funcMustBeFuncYieldFuncˢ6 = "func must be func
 // If the range clause is not permitted, rangeKeyVal returns ok = false.
 // When ok = false, rangeKeyVal may also return a reason in cause.
 // The check parameter is only used in case of an error; it may be nil.
-internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<Checker> Ꮡcheck, ΔType orig, Func<goVersion, bool> allowVersion) {
-    ΔType key = default!;
-    ΔType val = default!;
-    @string cause = default!;
-    bool ok = default!;
+internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<Checker> check, ΔType orig, Func<goVersion, bool> allowVersion) {
+    ΔType key = default;
+    ΔType val = default;
+    @string cause = default;
+    bool ok = default;
 
     (ΔType, ΔType, @string, bool) bad(@string causeΔ1) => (new BasicжΔType(Typ[Invalid]), new BasicжΔType(Typ[Invalid]), causeΔ1, false);
 
     var (rtyp, err) = commonUnder(orig, (ΔType t, ΔType u) => {
         // A channel must permit receive operations.
         {
-            var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil && (~ch).dir == SendOnly) {
+            var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil && ch.dir == SendOnly) {
                 return typeErrorf("receive from send-only channel %s"u8, t);
             }
         }
-        return default!;
+        return default;
     });
-    if (rtyp == default!) {
-        return bad(err.format(Ꮡcheck));
+    if (rtyp == nil) {
+        return bad(err.format(check));
     }
 
     switch (arrayPtrDeref(rtyp).type()) {
@@ -270,28 +268,28 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<
             return (new BasicжΔType(Typ[Int]), universeRune, "", true); // use 'rune' name
         }
         if (isInteger(new BasicжΔType(typ))) {
-            if (allowVersion != default! && !allowVersion(go1_22)) {
+            if (allowVersion != nil && !allowVersion(go1_22)) {
                 return bad(requiresGo122OrLaterˢ);
             }
-            return (orig, default!, "", true);
+            return (orig, default, "", true);
         }
         break;
     }
     case ж<Array> typ: {
-        return (new BasicжΔType(Typ[Int]), (~typ).elem, "", true);
+        return (new BasicжΔType(Typ[Int]), typ.elem, "", true);
     }
     case ж<Slice> typ: {
-        return (new BasicжΔType(Typ[Int]), (~typ).elem, "", true);
+        return (new BasicжΔType(Typ[Int]), typ.elem, "", true);
     }
     case ж<Map> typ: {
-        return ((~typ).key, (~typ).elem, "", true);
+        return (typ.key, typ.elem, "", true);
     }
     case ж<Chan> typ: {
-        assert((~typ).dir != SendOnly);
-        return ((~typ).elem, default!, "", true);
+        assert(typ.dir != SendOnly);
+        return (typ.elem, default, "", true);
     }
     case ж<ΔSignature> typ: {
-        if (allowVersion != default! && !allowVersion(go1_23)) {
+        if (allowVersion != nil && !allowVersion(go1_23)) {
             return bad(requiresGo123OrLaterˢ);
         }
         // check iterator arity
@@ -304,12 +302,12 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<
         }}
         assert(typ.Recv() == nil);
         // check iterator argument type
-        var (u, errΔ1) = commonUnder(typ.Params().At(0).of(Var.Ꮡobject).Type(), default!);
+        var (u, errΔ1) = commonUnder(typ.Params().At(0).of(Var.Ꮡobject).Type(), default);
         var (cb, _) = u._<ж<ΔSignature>>(ᐧ);
         switch (ᐧ) {
         case {} when cb == nil: {
-            if (errΔ1 != nil){
-                return bad(Ꮡcheck.sprintf("func must be func(yield func(...) bool): in yield type, %s"u8, errΔ1.format(Ꮡcheck)));
+            if (errΔ1 != nil) {
+                return bad(check.sprintf("func must be func(yield func(...) bool): in yield type, %s"u8, errΔ1.format(check)));
             } else {
                 return bad(funcMustBeFuncYieldFuncˢ3);
             }
@@ -320,7 +318,7 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<
         }
         case {} when cb.Results().Len() != 1 || !Identical(cb.Results().At(0).of(Var.Ꮡobject).Type(), universeBool): {
             // see go.dev/issues/71131, go.dev/issues/71164
-            if (cb.Results().Len() == 1 && isBoolean(cb.Results().At(0).of(Var.Ꮡobject).Type())){
+            if (cb.Results().Len() == 1 && isBoolean(cb.Results().At(0).of(Var.Ꮡobject).Type())) {
                 return bad(funcMustBeFuncYieldFuncˢ5);
             } else {
                 return bad(funcMustBeFuncYieldFuncˢ6);

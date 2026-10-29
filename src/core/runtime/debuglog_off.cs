@@ -18,7 +18,7 @@ partial struct dlogPerM {
 }
 
 internal static ж<dloggerImpl> getCachedDlogger() {
-    return default!;
+    return default;
 }
 
 internal static bool putCachedDlogger(ref dloggerImpl l) {

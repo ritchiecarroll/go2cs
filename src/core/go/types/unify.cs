@@ -77,7 +77,7 @@ partial struct unifier {
     // automatically infer the same type for all other parameters
     // unified (joined) with P.
     internal map<ж<TypeParam>, ж<ΔType>> handles;
-    internal nint depth; // recursion depth during unification
+    internal nint depth;                    // recursion depth during unification
     internal bool enableInterfaceInference; // use shared methods for better inference
 }
 
@@ -125,19 +125,19 @@ internal static readonly @string exactˢ = "exact"u8;
 internal static readonly @string assignExactˢ = "assign, exact"u8;
 
 internal static @string String(this unifyMode m) {
-    var exprᴛ1 = m;
-    if (exprᴛ1 == (unifyMode)(0)) {
+    switch (m) {
+    case var ᴛ when ᴛ == (unifyMode)(0): {
         return inexactˢ;
     }
-    if (exprᴛ1 == Δassign) {
+    case var ᴛ when ᴛ == Δassign: {
         return assignˢ;
     }
-    if (exprᴛ1 == exact) {
+    case var ᴛ when ᴛ == exact: {
         return exactˢ;
     }
-    if (exprᴛ1 == (unifyMode)((unifyMode)(Δassign | exact))) {
+    case var ᴛ when ᴛ == (unifyMode)((unifyMode)(Δassign | exact)): {
         return assignExactˢ;
-    }
+    }}
     return fmt.Sprintf("mode %d"u8, m);
 }
 
@@ -151,7 +151,7 @@ internal static bool unify(this ж<unifier> Ꮡu, ΔType x, ΔType y, unifyMode 
 internal static void tracef(this ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    fmt.Println(strings.Repeat(".  "u8, u.depth) + sprintf(nil, default!, true, format, args.ꓸꓸꓸ));
+    fmt.Println(strings.Repeat(".  "u8, u.depth) + sprintf(nil, default, true, format, args.ꓸꓸꓸ));
 }
 
 // String returns a string representation of the current mapping
@@ -167,8 +167,8 @@ internal static @string String(this ref unifier u) {
     sort.Sort(tparams);
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    var w = newTypeWriter(Ꮡbuf, default!);
-    w.@byte((rune)'[');
+    var w = newTypeWriter(Ꮡbuf, default);
+    w.@byte((byte)'[');
     foreach (var (iΔ1, x) in tparams) {
         if (iΔ1 > 0) {
             w.@string(", "u8);
@@ -177,7 +177,7 @@ internal static @string String(this ref unifier u) {
         w.@string(": "u8);
         w.typ(u.at(x));
     }
-    w.@byte((rune)']');
+    w.@byte((byte)']');
     return Ꮡbuf.String();
 }
 
@@ -188,7 +188,7 @@ internal static nint Len(this typeParamsById s) {
 }
 
 internal static bool Less(this typeParamsById s, nint i, nint j) {
-    return (~s[i]).id < (~s[j]).id;
+    return s[i].id < s[j].id;
 }
 
 internal static void Swap(this typeParamsById s, nint i, nint j) {
@@ -198,24 +198,24 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 // join unifies the given type parameters x and y.
 // If both type parameters already have a type associated with them
 // and they are not joined, join fails and returns false.
-internal static bool join(this ref unifier u, ж<TypeParam> Ꮡx, ж<TypeParam> Ꮡy) {
+internal static bool join(this ref unifier u, ж<TypeParam> x, ж<TypeParam> y) {
     if (traceInference) {
-        u.tracef("%s ⇄ %s"u8, Ꮡx.OrTypedNil(), Ꮡy.OrTypedNil());
+        u.tracef("%s ⇄ %s"u8, x.OrTypedNil(), y.OrTypedNil());
     }
     {
-        var (hx, hy) = (u.handles[Ꮡx], u.handles[Ꮡy]);
+        var (hx, hy) = (u.handles[x], u.handles[y]);
         switch (ᐧ) {
         case {} when hx == hy: {
             // Both type parameters already share the same handle. Nothing to do.
             break;
         }
-        case {} when hx.ValueSlot != default! && hy.ValueSlot != default!: {
+        case {} when hx.ValueSlot != nil && hy.ValueSlot != nil: {
             // Both type parameters have (possibly different) inferred types. Cannot join.
             return false;
         }
-        case {} when hx.ValueSlot != default!: {
+        case {} when hx.ValueSlot != nil: {
             // Only type parameter x has an inferred type. Use handle of x.
-            u.setHandle(Ꮡy, hx);
+            u.setHandle(y, hx);
             break;
         }
         // This case is treated like the default case.
@@ -224,7 +224,7 @@ internal static bool join(this ref unifier u, ж<TypeParam> Ꮡx, ж<TypeParam> 
         //	u.setHandle(x, hy)
         default: {
             // Neither type parameter has an inferred type. Use handle of y.
-            u.setHandle(Ꮡx, hy);
+            u.setHandle(x, hy);
             break;
         }}
     }
@@ -243,41 +243,41 @@ internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, ΔType x) {
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // setHandle sets the handle for type parameter x
 // (and all its joined type parameters) to h.
-internal static void setHandle(this ref unifier u, ж<TypeParam> Ꮡx, ж<ΔType> Ꮡh) {
-    var hx = u.handles[Ꮡx];
+internal static void setHandle(this ref unifier u, ж<TypeParam> x, ж<ΔType> h) {
+    var hx = u.handles[x];
     assert(hx != nil);
     foreach (var (y, hy) in u.handles) {
         if (hy == hx) {
-            u.handles[y] = Ꮡh;
+            u.handles[y] = h;
         }
     }
 }
 
 // at returns the (possibly nil) type for type parameter x.
-internal static ΔType at(this ref unifier u, ж<TypeParam> Ꮡx) {
-    return u.handles[Ꮡx].ValueSlot;
+internal static ΔType at(this ref unifier u, ж<TypeParam> x) {
+    return u.handles[x].ValueSlot;
 }
 
 // set sets the type t for type parameter x;
 // t must not be nil.
-internal static void set(this ref unifier u, ж<TypeParam> Ꮡx, ΔType t) {
-    assert(t != default!);
+internal static void set(this ref unifier u, ж<TypeParam> x, ΔType t) {
+    assert(t != nil);
     if (traceInference) {
-        u.tracef("%s ➞ %s"u8, Ꮡx.OrTypedNil(), t);
+        u.tracef("%s ➞ %s"u8, x.OrTypedNil(), t);
     }
-    u.handles[Ꮡx].ValueSlot = t;
+    u.handles[x].ValueSlot = t;
 }
 
 // unknowns returns the number of type parameters for which no type has been set yet.
 internal static nint unknowns(this ref unifier u) {
     nint n = 0;
     foreach (var (_, h) in u.handles) {
-        if (h.ValueSlot == default!) {
+        if (h.ValueSlot == nil) {
             n++;
         }
     }
@@ -299,7 +299,7 @@ internal static slice<ΔType> inferred(this ref unifier u, slice<ж<TypeParam>> 
 // asInterface returns the underlying type of x as an interface if
 // it is a non-type parameter interface. Otherwise it returns nil.
 internal static ж<Interface> /*i*/ asInterface(ΔType x) {
-    ж<Interface> i = default!;
+    ж<Interface> i = default;
 
     {
         var (_, ok) = Unalias(x)._<ж<TypeParam>>(ᐧ); if (!ok) {
@@ -314,7 +314,7 @@ internal static ж<Interface> /*i*/ asInterface(ΔType x) {
 // code the corresponding changes should be made here.
 // Must not be called directly from outside the unifier.
 internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
-    bool result = default!;
+    bool result = default;
     GoFrame ᒐ = default;
     try {
         ref var u = ref Ꮡu.DerefOrNull();
@@ -413,7 +413,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             case {} when px != nil: {
                 // x is a type parameter, y is not
                 {
-                    var xΔ2 = u.at(px); if (xΔ2 != default!) {
+                    var xΔ2 = u.at(px); if (xΔ2 != nil) {
                         // x has an inferred type which must match y
                         if (Ꮡu.nify(xΔ2, y, mode, Ꮡp)) {
                             // We have a match, possibly through underlying types.
@@ -423,7 +423,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                             var yn = asNamed(y) != nil;
                             // If we have two interfaces, what to do depends on
                             // whether they are named and their method sets.
-                            if (xi != nil && yi != nil){
+                            if (xi != nil && yi != nil) {
                                 // Both types are interfaces.
                                 // If both types are defined types, they must be identical
                                 // because unification doesn't know which type has the "right" name.
@@ -438,11 +438,10 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                                 // type, it's not clear how to choose and whether we introduce
                                 // an order dependency or not. Requiring the same method set
                                 // is conservative.
-                                if (len((~xi.typeSet()).methods) != len((~yi.typeSet()).methods)) {
+                                if (len(xi.typeSet().methods) != len(yi.typeSet().methods)) {
                                     result = false; goto ᒐdone;
                                 }
-                            } else 
-                            if (xi != nil || yi != nil) {
+                            } else if (xi != nil || yi != nil) {
                                 // One but not both of them are interfaces.
                                 // In this case, either x or y could be viable matches for the corresponding
                                 // type parameter, which means choosing either introduces an order dependence.
@@ -483,7 +482,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                                 default: {
                                     // Neither x nor y are defined types.
                                     {
-                                        var (yc, _) = y.Underlying()._<ж<Chan>>(ᐧ); if (yc != nil && (~yc).dir != SendRecv) {
+                                        var (yc, _) = y.Underlying()._<ж<Chan>>(ᐧ); if (yc != nil && yc.dir != SendRecv) {
                                             // y is a directed channel type: select y.
                                             u.set(px, y);
                                         }
@@ -520,12 +519,12 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             if (xi != nil && yi != nil) {
                 var xset = xi.typeSet();
                 var yset = yi.typeSet();
-                if ((~xset).comparable != (~yset).comparable) {
+                if (xset.comparable != yset.comparable) {
                     result = false; goto ᒐdone;
                 }
                 // For now we require terms to be equal.
                 // We should be able to relax this as well, eventually.
-                if (!(~xset).terms.equal((~yset).terms)) {
+                if (!xset.terms.equal(yset.terms)) {
                     result = false; goto ᒐdone;
                 }
                 // Interface types are the only types where cycles can occur
@@ -559,8 +558,8 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 }
                 // The method set of x must be a subset of the method set
                 // of y or vice versa, and the common methods must unify.
-                var xmethods = xset.Value.methods;
-                var ymethods = yset.Value.methods;
+                var xmethods = xset.methods;
+                var ymethods = yset.methods;
                 // The smaller method set must be the subset, if it exists.
                 if (len(xmethods) > len(ymethods)) {
                     (xmethods, ymethods) = (ymethods, xmethods);
@@ -593,7 +592,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             // the non-interface type, otherwise unification fails.
             if (xi != nil) {
                 // All xi methods must exist in y and corresponding signatures must unify.
-                var xmethods = xi.typeSet().Value.methods;
+                var xmethods = xi.typeSet().methods;
                 foreach (var (_, xm) in xmethods) {
                     var (obj, _, _) = LookupFieldOrMethod(y, false, (~xm).pkg, (~xm).name);
                     {
@@ -644,7 +643,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             // above. See also comment in TypeName.IsAlias.
             {
                 var (yΔ1, ok) = y._<ж<Basic>>(ᐧ); if (ok) {
-                    result = (~xΔ3).kind == (~yΔ1).kind; goto ᒐdone;
+                    result = xΔ3.kind == yΔ1.kind; goto ᒐdone;
                 }
             }
             break;
@@ -656,7 +655,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 var (yΔ2, ok) = y._<ж<Array>>(ᐧ); if (ok) {
                     // If one or both array lengths are unknown (< 0) due to some error,
                     // assume they are the same to avoid spurious follow-on errors.
-                    result = ((~xΔ3).len < 0 || (~yΔ2).len < 0 || (~xΔ3).len == (~yΔ2).len) && Ꮡu.nify((~xΔ3).elem, (~yΔ2).elem, emode, Ꮡp); goto ᒐdone;
+                    result = (xΔ3.len < 0 || yΔ2.len < 0 || xΔ3.len == yΔ2.len) && Ꮡu.nify(xΔ3.elem, yΔ2.elem, emode, Ꮡp); goto ᒐdone;
                 }
             }
             break;
@@ -665,7 +664,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             // Two slice types unify if their element types unify.
             {
                 var (yΔ3, ok) = y._<ж<Slice>>(ᐧ); if (ok) {
-                    result = Ꮡu.nify((~xΔ3).elem, (~yΔ3).elem, emode, Ꮡp); goto ᒐdone;
+                    result = Ꮡu.nify(xΔ3.elem, yΔ3.elem, emode, Ꮡp); goto ᒐdone;
                 }
             }
             break;
@@ -678,9 +677,9 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             {
                 var (yΔ4, ok) = y._<ж<Struct>>(ᐧ); if (ok) {
                     if (xΔ3.NumFields() == yΔ4.NumFields()) {
-                        foreach (var (i, f) in (~xΔ3).fields) {
-                            var g = (~yΔ4).fields[i];
-                            if ((~f).embedded != (~g).embedded || xΔ3.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId((~g).pkg, (~g).name, false) || !Ꮡu.nify((~f).typ, (~g).typ, emode, Ꮡp)) {
+                        foreach (var (i, f) in xΔ3.fields) {
+                            var g = yΔ4.fields[i];
+                            if (f.embedded != g.embedded || xΔ3.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId((~g).pkg, (~g).name, false) || !Ꮡu.nify((~f).typ, (~g).typ, emode, Ꮡp)) {
                                 result = false; goto ᒐdone;
                             }
                         }
@@ -694,7 +693,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             // Two pointer types unify if their base types unify.
             {
                 var (yΔ5, ok) = y._<ж<Pointer>>(ᐧ); if (ok) {
-                    result = Ꮡu.nify((~xΔ3).@base, (~yΔ5).@base, emode, Ꮡp); goto ᒐdone;
+                    result = Ꮡu.nify(xΔ3.@base, yΔ5.@base, emode, Ꮡp); goto ᒐdone;
                 }
             }
             break;
@@ -706,8 +705,8 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 var (yΔ6, ok) = y._<ж<Tuple>>(ᐧ); if (ok) {
                     if (xΔ3.Len() == yΔ6.Len()) {
                         if (xΔ3 != nil) {
-                            foreach (var (i, v) in (~xΔ3).vars) {
-                                var w = (~yΔ6).vars[i];
+                            foreach (var (i, v) in xΔ3.vars) {
+                                var w = yΔ6.vars[i];
                                 if (!Ꮡu.nify((~v).typ, (~w).typ, mode, Ꮡp)) {
                                     result = false; goto ᒐdone;
                                 }
@@ -727,7 +726,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             // TODO(gri) handle type parameters or document why we can ignore them.
             {
                 var (yΔ7, ok) = y._<ж<ΔSignature>>(ᐧ); if (ok) {
-                    result = (~xΔ3).variadic == (~yΔ7).variadic && Ꮡu.nify(new TupleжΔType((~xΔ3).@params), new TupleжΔType((~yΔ7).@params), emode, Ꮡp) && Ꮡu.nify(new TupleжΔType((~xΔ3).results), new TupleжΔType((~yΔ7).results), emode, Ꮡp); goto ᒐdone;
+                    result = xΔ3.variadic == yΔ7.variadic && Ꮡu.nify(new TupleжΔType(xΔ3.@params), new TupleжΔType(yΔ7.@params), emode, Ꮡp) && Ꮡu.nify(new TupleжΔType(xΔ3.results), new TupleжΔType(yΔ7.results), emode, Ꮡp); goto ᒐdone;
                 }
             }
             break;
@@ -743,14 +742,14 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 var (yΔ8, ok) = y._<ж<Interface>>(ᐧ); if (ok) {
                     var xset = xΔ3.typeSet();
                     var yset = yΔ8.typeSet();
-                    if ((~xset).comparable != (~yset).comparable) {
+                    if (xset.comparable != yset.comparable) {
                         result = false; goto ᒐdone;
                     }
-                    if (!(~xset).terms.equal((~yset).terms)) {
+                    if (!xset.terms.equal(yset.terms)) {
                         result = false; goto ᒐdone;
                     }
-                    var a = xset.Value.methods;
-                    var b = yset.Value.methods;
+                    var a = xset.methods;
+                    var b = yset.methods;
                     if (len(a) == len(b)) {
                         // Interface types are the only types where cycles can occur
                         // that are not "terminated" via named types; and such cycles
@@ -801,7 +800,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             // Two map types unify if their key and value types unify.
             {
                 var (yΔ9, ok) = y._<ж<Map>>(ᐧ); if (ok) {
-                    result = Ꮡu.nify((~xΔ3).key, (~yΔ9).key, emode, Ꮡp) && Ꮡu.nify((~xΔ3).elem, (~yΔ9).elem, emode, Ꮡp); goto ᒐdone;
+                    result = Ꮡu.nify(xΔ3.key, yΔ9.key, emode, Ꮡp) && Ꮡu.nify(xΔ3.elem, yΔ9.elem, emode, Ꮡp); goto ᒐdone;
                 }
             }
             break;
@@ -812,7 +811,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             // The channel direction is ignored for inexact unification.
             {
                 var (yΔ10, ok) = y._<ж<Chan>>(ᐧ); if (ok) {
-                    result = ((unifyMode)(mode & exact) == 0 || (~xΔ3).dir == (~yΔ10).dir) && Ꮡu.nify((~xΔ3).elem, (~yΔ10).elem, emode, Ꮡp); goto ᒐdone;
+                    result = ((unifyMode)(mode & exact) == 0 || xΔ3.dir == yΔ10.dir) && Ꮡu.nify(xΔ3.elem, yΔ10.elem, emode, Ꮡp); goto ᒐdone;
                 }
             }
             break;
@@ -865,7 +864,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 // up here again with x and y swapped, so we don't
                 // need to take care of that case separately.
                 {
-                    var (cx, _) = commonUnder(new TypeParamжΔType(xΔ3), default!); if (cx != default!) {
+                    var (cx, _) = commonUnder(new TypeParamжΔType(xΔ3), default); if (cx != nil) {
                         if (traceInference) {
                             u.tracef("core %s ≡ %s"u8, xorig, yorig);
                         }
@@ -886,7 +885,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
         }
         default: {
             var xΔ3 = x;
-            throw panic(sprintf(nil, default!, true, "u.nify(%s, %s, %d)"u8, xorig, yorig, mode));
+            throw panic(sprintf(nil, default, true, "u.nify(%s, %s, %d)"u8, xorig, yorig, mode));
             break;
         }}
 

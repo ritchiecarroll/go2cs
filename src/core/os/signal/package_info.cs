@@ -10,14 +10,12 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using osꓸSignal = go.os_package.ΔSignal;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
-using static go.time.tzdata_package;
+using static go.os.signal_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -31,6 +29,7 @@ using static go.time.tzdata_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("7374727563747b73796e632e4d757465783b206d206d61705b6368616e3c2d206f732e5369676e616c5d2a6f732f7369676e616c2e68616e646c65723b20726566205b36355d696e7436343b2073746f7070696e67205b5d6f732f7369676e616c2e73746f7070696e677d", "handlersᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -40,6 +39,10 @@ using static go.time.tzdata_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
+[assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
+[assembly: GoImplement<signalError, error>]
+[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -51,6 +54,11 @@ using static go.time.tzdata_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(handler))]
+[assembly: go.GoFieldAccess(typeof(signalCtx))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -59,13 +67,14 @@ using static go.time.tzdata_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("time/tzdata/tzdata.go", "tzdata.cs", "ABtA5IKokoKUqJKClN7CAAgWlIKClJSClIKCgoKCgoKCgpSCuIKIlIKCpg==", "", "", "100=get2s/1/2/1,get2s/2/2/2")]
+[assembly: go.GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAkWgoLuoqaCgoKCgoKCgqaUgsqCpoKClA==", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
+[assembly: go.GoPositionMap("os/signal/signal_unix.go", "signal_unix.cs", "AAsewrKysrSCgriCzoKUgoKUtLiCpoKmgqaC")]
 // </GoSourcePositionMaps>
 
-namespace go.time;
+namespace go.os;
 
-[GoPackage("tzdata")]
-public static partial class tzdata_package
+[GoPackage("signal")]
+public static partial class signal_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -74,6 +83,12 @@ public static partial class tzdata_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface stringer {}
+    [GoValueClone("mask")] internal partial struct handler {}
+    [GoValueClone("@ref")] internal partial struct handlersᴛ1 {}
+    internal partial struct signalCtx {}
+    internal partial struct signalError {}
+    internal partial struct stopping {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -83,7 +98,10 @@ public static partial class tzdata_package
     // item of the project guarantees.
 
     // <ImportInitializers>
-    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸcontext() => builtin.initPackage(typeof(context_package));
+    [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }

@@ -123,7 +123,7 @@ partial class hpack_package {
         [new(name: "via"u8, value: ""u8)] = 60,
         [new(name: "www-authenticate"u8, value: ""u8)] = 61
     },
-    ents: new HeaderField[]{
+    ents: slice<HeaderField>([
         new(Name: ":authority"u8, Value: ""u8, Sensitive: false),
         new(Name: ":method"u8, Value: "GET"u8, Sensitive: false),
         new(Name: ":method"u8, Value: "POST"u8, Sensitive: false),
@@ -185,7 +185,7 @@ partial class hpack_package {
         new(Name: "vary"u8, Value: ""u8, Sensitive: false),
         new(Name: "via"u8, Value: ""u8, Sensitive: false),
         new(Name: "www-authenticate"u8, Value: ""u8, Sensitive: false)
-    }.slice()
+    ])
 )); }
 
 } // end hpack_package

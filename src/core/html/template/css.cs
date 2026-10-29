@@ -41,7 +41,7 @@ internal static bool isCSSNmchar(rune r) {
     // Based on the CSS3 nmchar production but ignores multi-rune escape
     // sequences.
     // https://www.w3.org/TR/css3-syntax/#SUBTOK-nmchar
-    return (rune)'a' <= r && r <= (rune)'z' || (rune)'A' <= r && r <= (rune)'Z' || (rune)'0' <= r && r <= (rune)'9' || r == (rune)'-' || r == (rune)'_' ||
+    return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || '0' <= r && r <= '9' || r == '-' || r == '_' ||
         // Non-ASCII cases below.
         0x80 <= r && r <= 0xd7ff || 0xe000 <= r && r <= 0xfffd || 0x10000 <= r && r <= 0x10ffff;
 }
@@ -51,7 +51,7 @@ internal static bool isCSSNmchar(rune r) {
 // backed by a new array.
 // https://www.w3.org/TR/css3-syntax/#SUBTOK-stringchar defines stringchar.
 internal static slice<byte> decodeCSS(slice<byte> s) {
-    nint i = bytes.IndexByte(s, (rune)'\\');
+    nint i = bytes.IndexByte(s, (byte)'\\');
     if (i == -1) {
         return s;
     }
@@ -60,7 +60,7 @@ internal static slice<byte> decodeCSS(slice<byte> s) {
     // upper bound on the output length.
     var b = new slice<byte>(0, len(s));
     while (len(s) != 0) {
-        nint iΔ1 = bytes.IndexByte(s, (rune)'\\');
+        nint iΔ1 = bytes.IndexByte(s, (byte)'\\');
         if (iΔ1 == -1) {
             iΔ1 = len(s);
         }
@@ -70,7 +70,7 @@ internal static slice<byte> decodeCSS(slice<byte> s) {
         }
         // https://www.w3.org/TR/css3-syntax/#SUBTOK-escape
         // escape ::= unicode | '\' [#x20-#x7E#x80-#xD7FF#xE000-#xFFFD#x10000-#x10FFFF]
-        if (isHex(s[1])){
+        if (isHex(s[1])) {
             // https://www.w3.org/TR/css3-syntax/#SUBTOK-unicode
             //   unicode ::= '\' [0-9a-fA-F]{1,6} wc?
             nint j = 2;
@@ -97,25 +97,25 @@ internal static slice<byte> decodeCSS(slice<byte> s) {
 
 // isHex reports whether the given character is a hex digit.
 internal static bool isHex(byte c) {
-    return (rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F';
+    return '0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F';
 }
 
 // hexDecode decodes a short hex digit sequence: "10" -> 16.
 internal static rune hexDecode(slice<byte> s) {
     var n = (rune)'\x00';
     foreach (var (_, c) in s) {
-        n <<= (int)(4);
+        n <<= 4;
         switch (ᐧ) {
-        case {} when (rune)'0' <= c && c <= (rune)'9': {
-            n |= (rune)((rune)((byte)(c - (rune)'0')));
+        case {} when (byte)'0' <= c && c <= (byte)'9': {
+            n |= (rune)((rune)((byte)(c - '0')));
             break;
         }
-        case {} when (rune)'a' <= c && c <= (rune)'f': {
-            n |= (rune)((rune)((byte)(c - (rune)'a')) + 10);
+        case {} when (byte)'a' <= c && c <= (byte)'f': {
+            n |= (rune)((rune)((byte)(c - 'a')) + 10);
             break;
         }
-        case {} when (rune)'A' <= c && c <= (rune)'F': {
-            n |= (rune)((rune)((byte)(c - (rune)'A')) + 10);
+        case {} when (byte)'A' <= c && c <= (byte)'F': {
+            n |= (rune)((rune)((byte)(c - 'A')) + 10);
             break;
         }
         default: {
@@ -133,14 +133,14 @@ internal static slice<byte> skipCSSSpace(slice<byte> c) {
     }
     // wc ::= #x9 | #xA | #xC | #xD | #x20
     switch (c[0]) {
-    case (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)' ': {
+    case (byte)'\t' or (byte)'\n' or (byte)'\f' or (byte)' ': {
         return c[1..];
     }
-    case (rune)'\r': {
+    case (byte)'\r': {
         // This differs from CSS3's wc production because it contains a
         // probable spec error whereby wc contains all the single byte
         // sequences in nl (newline) but not CRLF.
-        if (len(c) >= 2 && c[1] == (rune)'\n') {
+        if (len(c) >= 2 && c[1] == '\n') {
             return c[2..];
         }
         return c[1..];
@@ -151,7 +151,7 @@ internal static slice<byte> skipCSSSpace(slice<byte> c) {
 // isCSSSpace reports whether b is a CSS space char as defined in wc.
 internal static bool isCSSSpace(byte b) {
     switch (b) {
-    case (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r' or (rune)' ': {
+    case (byte)'\t' or (byte)'\n' or (byte)'\f' or (byte)'\r' or (byte)' ': {
         return true;
     }}
     return false;
@@ -169,7 +169,7 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
     for (nint i = 0; i < len(s); i += w) {
         // See comment in htmlEscaper.
         (r, w) = utf8.DecodeRuneInString(s.slice(i));
-        @string repl = default!;
+        @string repl = default;
         switch (ᐧ) {
         case {} when (nint)r < len(cssReplacementTable) && cssReplacementTable[r] != "": {
             repl = cssReplacementTable[r];
@@ -186,7 +186,7 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
         Ꮡb.WriteString(repl);
         written = i + w;
         if (repl != @"\\"u8 && (written == len(s) || isHex(s[written]) || isCSSSpace(s[written]))) {
-            Ꮡb.WriteByte((rune)' ');
+            Ꮡb.WriteByte((byte)' ');
         }
     }
     if (written == 0) {
@@ -198,26 +198,26 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
 
 [GoLazy] partial class lazyᴛcssReplacementTable { internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [0] = @"\0"u8,
-    [(rune)'\t'] = @"\9"u8,
-    [(rune)'\n'] = @"\a"u8,
-    [(rune)'\f'] = @"\c"u8,
-    [(rune)'\r'] = @"\d"u8,
+    ['\t'] = @"\9"u8,
+    ['\n'] = @"\a"u8,
+    ['\f'] = @"\c"u8,
+    ['\r'] = @"\d"u8,
     // Encode HTML specials as hex so the output can be embedded
     // in HTML attributes without further encoding.
-    [(rune)'"'] = @"\22"u8,
-    [(rune)'&'] = @"\26"u8,
-    [(rune)'\''] = @"\27"u8,
-    [(rune)'('] = @"\28"u8,
-    [(rune)')'] = @"\29"u8,
-    [(rune)'+'] = @"\2b"u8,
-    [(rune)'/'] = @"\2f"u8,
-    [(rune)':'] = @"\3a"u8,
-    [(rune)';'] = @"\3b"u8,
-    [(rune)'<'] = @"\3c"u8,
-    [(rune)'>'] = @"\3e"u8,
-    [(rune)'\\'] = @"\\"u8,
-    [(rune)'{'] = @"\7b"u8,
-    [(rune)'}'] = @"\7d"u8
+    ['"'] = @"\22"u8,
+    ['&'] = @"\26"u8,
+    ['\''] = @"\27"u8,
+    ['('] = @"\28"u8,
+    [')'] = @"\29"u8,
+    ['+'] = @"\2b"u8,
+    ['/'] = @"\2f"u8,
+    [':'] = @"\3a"u8,
+    [';'] = @"\3b"u8,
+    ['<'] = @"\3c"u8,
+    ['>'] = @"\3e"u8,
+    ['\\'] = @"\\"u8,
+    ['{'] = @"\7b"u8,
+    ['}'] = @"\7d"u8
 }; }
 
 internal static slice<byte> expressionBytes = slice<byte>("expression"u8);
@@ -252,13 +252,13 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     // inside a string that might embed JavaScript source.
     foreach (var (i, c) in b) {
         switch (c) {
-        case 0 or (rune)'"' or (rune)'\'' or (rune)'(' or (rune)')' or (rune)'/' or (rune)';' or (rune)'@' or (rune)'[' or (rune)'\\' or (rune)']' or (rune)'`' or (rune)'{' or (rune)'}' or (rune)'<' or (rune)'>': {
+        case 0 or (byte)'"' or (byte)'\'' or (byte)'(' or (byte)')' or (byte)'/' or (byte)';' or (byte)'@' or (byte)'[' or (byte)'\\' or (byte)']' or (byte)'`' or (byte)'{' or (byte)'}' or (byte)'<' or (byte)'>': {
             return filterFailsafe;
         }
-        case (rune)'-': {
+        case (byte)'-': {
             // Disallow <!-- or -->.
             // -- should not appear in valid identifiers.
-            if (i != 0 && b[i - 1] == (rune)'-') {
+            if (i != 0 && b[i - 1] == '-') {
                 return filterFailsafe;
             }
             break;

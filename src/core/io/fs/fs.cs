@@ -75,9 +75,9 @@ public static bool ValidPath(@string name) {
     }
 
     // Iterate over elements in name, checking each.
-    while (ᐧ) {
+    for (;;) {
         nint i = 0;
-        while (i < len(name) && name[i] != (rune)'/') {
+        while (i < len(name) && name[i] != '/') {
             i++;
         }
         @string elem = name.slice(0, i);
@@ -150,11 +150,11 @@ partial interface ReadDirFile :
 // Generic file system errors.
 // Errors returned by file systems can be tested against these errors
 // using [errors.Is].
-public static error ErrInvalid = errInvalid(); // "invalid argument"
+public static error ErrInvalid = errInvalid();       // "invalid argument"
 public static error ErrPermission = errPermission(); // "permission denied"
-public static error ErrExist = errExist(); // "file already exists"
-public static error ErrNotExist = errNotExist(); // "file does not exist"
-public static error ErrClosed = errClosed(); // "file already closed"
+public static error ErrExist = errExist();           // "file already exists"
+public static error ErrNotExist = errNotExist();     // "file does not exist"
+public static error ErrClosed = errClosed();         // "file already closed"
 
 internal static error errInvalid() {
     return oserror.ErrInvalid;
@@ -200,24 +200,24 @@ partial struct FileMode /*num:uint32*/;
 // changed, although new bits might be added.
 // The single letters are the abbreviations
 // used by the String method's formatting.
-public static FileMode ModeDir => /* 1 << (32 - 1 - iota) */ 2147483648;                         // d: is a directory
-public static FileMode ModeAppend => 1073741824;                      // a: append-only
-public static FileMode ModeExclusive => 536870912;                   // l: exclusive use
-public static FileMode ModeTemporary => 268435456;                   // T: temporary file; Plan 9 only
-public static FileMode ModeSymlink => 134217728;                     // L: symbolic link
-public static FileMode ModeDevice => 67108864;                      // D: device file
-public static FileMode ModeNamedPipe => 33554432;                   // p: named pipe (FIFO)
-public static FileMode ModeSocket => 16777216;                      // S: Unix domain socket
-public static FileMode ModeSetuid => 8388608;                      // u: setuid
-public static FileMode ModeSetgid => 4194304;                      // g: setgid
-public static FileMode ModeCharDevice => 2097152;                  // c: Unix character device, when ModeDevice is set
-public static FileMode ModeSticky => 1048576;                      // t: sticky
-public static FileMode ModeIrregular => 524288;                   // ?: non-regular file; nothing else is known about this file
+public static FileMode ModeDir => /* 1 << (32 - 1 - iota) */ 2147483648; // d: is a directory
+public static FileMode ModeAppend => 1073741824;                         // a: append-only
+public static FileMode ModeExclusive => 536870912;                       // l: exclusive use
+public static FileMode ModeTemporary => 268435456;                       // T: temporary file; Plan 9 only
+public static FileMode ModeSymlink => 134217728;                         // L: symbolic link
+public static FileMode ModeDevice => 67108864;                           // D: device file
+public static FileMode ModeNamedPipe => 33554432;                        // p: named pipe (FIFO)
+public static FileMode ModeSocket => 16777216;                           // S: Unix domain socket
+public static FileMode ModeSetuid => 8388608;                            // u: setuid
+public static FileMode ModeSetgid => 4194304;                            // g: setgid
+public static FileMode ModeCharDevice => 2097152;                        // c: Unix character device, when ModeDevice is set
+public static FileMode ModeSticky => 1048576;                            // t: sticky
+public static FileMode ModeIrregular => 524288;                          // ?: non-regular file; nothing else is known about this file
 
 // Mask for the type bits. For regular files, none will be set.
 public static FileMode ModeType => /* ModeDir | ModeSymlink | ModeNamedPipe | ModeSocket | ModeDevice | ModeCharDevice | ModeIrregular */ 2401763328;
 
-public static FileMode ModePerm => /* 0777 */ 511;  // Unix permission bits
+public static FileMode ModePerm => /* 0777 */ 511; // Unix permission bits
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static readonly @string strᶜ = "dalTLDpSugct?"u8;
@@ -227,7 +227,7 @@ private static readonly @string rwxᶜ = "rwxrwxrwx"u8;
 
 public static @string String(this FileMode m) {
     @string str = strᶜ;
-    array<byte> buf = new(32);               // Mode is uint32.
+    array<byte> buf = new(32); // Mode is uint32.
     nint w = 0;
     foreach (var (i, c) in (@string)str) {
         if ((FileMode)(m & ((FileMode)((uint32)1 << (int)((nuint)(32 - 1 - i))))) != 0) {
@@ -236,15 +236,15 @@ public static @string String(this FileMode m) {
         }
     }
     if (w == 0) {
-        buf[w] = (rune)'-';
+        buf[w] = (byte)'-';
         w++;
     }
     @string rwx = rwxᶜ;
     foreach (var (i, c) in (@string)rwx) {
-        if ((FileMode)(m & ((FileMode)((uint32)1 << (int)((nuint)(9 - 1 - i))))) != 0){
+        if ((FileMode)(m & ((FileMode)((uint32)1 << (int)((nuint)(9 - 1 - i))))) != 0) {
             buf[w] = (byte)c;
         } else {
-            buf[w] = (rune)'-';
+            buf[w] = (byte)'-';
         }
         w++;
     }

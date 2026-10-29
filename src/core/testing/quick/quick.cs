@@ -63,8 +63,8 @@ internal static UntypedInt complexSize => 50;
 // Value returns an arbitrary value of the given type.
 // If the type implements the [Generator] interface, that will be used.
 // Note: To create arbitrary values for structs, all the fields must be exported.
-public static (reflectꓸValue value, bool ok) Value(reflectꓸType t, ж<rand.Rand> Ꮡrand) {
-    return sizedValue(t, Ꮡrand, complexSize);
+public static (reflectꓸValue value, bool ok) Value(reflectꓸType t, ж<rand.Rand> randΔ1) {
+    return sizedValue(t, randΔ1, complexSize);
 }
 
 // sizedValue returns an arbitrary value of the given type. The size
@@ -82,129 +82,150 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
     var v = reflect.New(t).Elem();
     {
         var concrete = t;
-        var exprᴛ1 = concrete.Kind();
-        if (exprᴛ1 == reflect.ΔBool) {
+        switch (concrete.Kind()) {
+        case var ᴛ when ᴛ == reflect.ΔBool: {
             v.SetBool((randΔ1.Int() & 1) == 0);
+            break;
         }
-        else if (exprᴛ1 == reflect.Float32) {
+        case var ᴛ when ᴛ == reflect.Float32: {
             v.SetFloat((float64)randFloat32(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Float64) {
+        case var ᴛ when ᴛ == reflect.Float64: {
             v.SetFloat(randFloat64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Complex64) {
+        case var ᴛ when ᴛ == reflect.Complex64: {
             v.SetComplex(complex((float64)randFloat32(Ꮡrand), (float64)randFloat32(Ꮡrand)));
+            break;
         }
-        else if (exprᴛ1 == reflect.Complex128) {
+        case var ᴛ when ᴛ == reflect.Complex128: {
             v.SetComplex(complex(randFloat64(Ꮡrand), randFloat64(Ꮡrand)));
+            break;
         }
-        else if (exprᴛ1 == reflect.Int16) {
+        case var ᴛ when ᴛ == reflect.Int16: {
             v.SetInt(randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Int32) {
+        case var ᴛ when ᴛ == reflect.Int32: {
             v.SetInt(randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Int64) {
+        case var ᴛ when ᴛ == reflect.Int64: {
             v.SetInt(randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Int8) {
+        case var ᴛ when ᴛ == reflect.Int8: {
             v.SetInt(randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.ΔInt) {
+        case var ᴛ when ᴛ == reflect.ΔInt: {
             v.SetInt(randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Uint16) {
+        case var ᴛ when ᴛ == reflect.Uint16: {
             v.SetUint((uint64)randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Uint32) {
+        case var ᴛ when ᴛ == reflect.Uint32: {
             v.SetUint((uint64)randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Uint64) {
+        case var ᴛ when ᴛ == reflect.Uint64: {
             v.SetUint((uint64)randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Uint8) {
+        case var ᴛ when ᴛ == reflect.Uint8: {
             v.SetUint((uint64)randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.ΔUint) {
+        case var ᴛ when ᴛ == reflect.ΔUint: {
             v.SetUint((uint64)randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Uintptr) {
+        case var ᴛ when ᴛ == reflect.Uintptr: {
             v.SetUint((uint64)randInt64(Ꮡrand));
+            break;
         }
-        else if (exprᴛ1 == reflect.Map) {
+        case var ᴛ when ᴛ == reflect.Map: {
             nint numElems = randΔ1.Intn(size);
             v.Set(reflect.MakeMap(concrete));
             for (nint i = 0; i < numElems; i++) {
                 var (key, ok1) = sizedValue(concrete.Key(), Ꮡrand, size);
                 var (valueΔ2, ok2) = sizedValue(concrete.Elem(), Ꮡrand, size);
                 if (!ok1 || !ok2) {
-                    return (new reflectꓸValue(nil), false);
+                    return (new reflectꓸValue(), false);
                 }
                 v.SetMapIndex(key, valueΔ2);
             }
+            break;
         }
-        else if (exprᴛ1 == reflect.ΔPointer) {
-            if (randΔ1.Intn(size) == 0){
+        case var ᴛ when ᴛ == reflect.ΔPointer: {
+            if (randΔ1.Intn(size) == 0) {
                 v.SetZero(); // Generate nil pointer.
             } else {
                 var (elem, okΔ6) = sizedValue(concrete.Elem(), Ꮡrand, size);
                 if (!okΔ6) {
-                    return (new reflectꓸValue(nil), false);
+                    return (new reflectꓸValue(), false);
                 }
                 v.Set(reflect.New(concrete.Elem()));
                 v.Elem().Set(elem);
             }
+            break;
         }
-        else if (exprᴛ1 == reflect.ΔSlice) {
+        case var ᴛ when ᴛ == reflect.ΔSlice: {
             nint numElems = randΔ1.Intn(size);
             nint sizeLeft = size - numElems;
             v.Set(reflect.MakeSlice(concrete, numElems, numElems));
             for (nint i = 0; i < numElems; i++) {
                 var (elem, okΔ7) = sizedValue(concrete.Elem(), Ꮡrand, sizeLeft);
                 if (!okΔ7) {
-                    return (new reflectꓸValue(nil), false);
+                    return (new reflectꓸValue(), false);
                 }
                 v.Index(i).Set(elem);
             }
+            break;
         }
-        else if (exprᴛ1 == reflect.Array) {
+        case var ᴛ when ᴛ == reflect.Array: {
             for (nint i = 0; i < v.Len(); i++) {
                 var (elem, okΔ8) = sizedValue(concrete.Elem(), Ꮡrand, size);
                 if (!okΔ8) {
-                    return (new reflectꓸValue(nil), false);
+                    return (new reflectꓸValue(), false);
                 }
                 v.Index(i).Set(elem);
             }
+            break;
         }
-        else if (exprᴛ1 == reflect.ΔString) {
+        case var ᴛ when ᴛ == reflect.ΔString: {
             nint numChars = randΔ1.Intn(complexSize);
             var codePoints = new slice<rune>(numChars);
             for (nint i = 0; i < numChars; i++) {
                 codePoints[i] = (rune)randΔ1.Intn(0x10ffff);
             }
             v.SetString((@string)codePoints);
+            break;
         }
-        else if (exprᴛ1 == reflect.Struct) {
+        case var ᴛ when ᴛ == reflect.Struct: {
             nint n = v.NumField();
             // Divide sizeLeft evenly among the struct fields.
             nint sizeLeft = size;
-            if (n > sizeLeft){
+            if (n > sizeLeft) {
                 sizeLeft = 1;
-            } else 
-            if (n > 0) {
+            } else if (n > 0) {
                 sizeLeft = quo(sizeLeft, n);
             }
             for (nint i = 0; i < n; i++) {
                 var (elem, okΔ9) = sizedValue(concrete.Field(i).Type, Ꮡrand, sizeLeft);
                 if (!okΔ9) {
-                    return (new reflectꓸValue(nil), false);
+                    return (new reflectꓸValue(), false);
                 }
                 v.Field(i).Set(elem);
             }
+            break;
         }
-        else { /* default: */
-            return (new reflectꓸValue(nil), false);
-        }
+        default: {
+            return (new reflectꓸValue(), false);
+        }}
     }
 
     return (v, true);
@@ -244,11 +265,11 @@ internal static ж<rand.Rand> getRand(this ref Config c) {
 // getMaxCount returns the maximum number of iterations to run for a given
 // Config.
 internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
-    nint maxCount = default!;
+    nint maxCount = default;
 
     maxCount = c.MaxCount;
     if (maxCount == 0) {
-        if (c.MaxCountScale != 0D){
+        if (c.MaxCountScale != 0D) {
             maxCount = (nint)(c.MaxCountScale * (float64)(defaultMaxCount.Value));
         } else {
             maxCount = defaultMaxCount.Value;
@@ -332,7 +353,7 @@ public static error Check(any f, ж<Config> Ꮡconfig) {
 
     for (nint i = 0; i < maxCount; i++) {
         var err = arbitraryValues(arguments, fType, ref (Ꮡconfig).DerefOrNull(), rand);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
 
@@ -341,7 +362,7 @@ public static error Check(any f, ж<Config> Ꮡconfig) {
         }
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -379,7 +400,7 @@ public static error CheckEqual(any f, any g, ж<Config> Ꮡconfig) {
 
     for (nint i = 0; i < maxCount; i++) {
         var err = arbitraryValues(arguments, xType, ref (Ꮡconfig).DerefOrNull(), rand);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
 
@@ -391,22 +412,22 @@ public static error CheckEqual(any f, any g, ж<Config> Ꮡconfig) {
         }
     }
 
-    return default!;
+    return default;
 }
 
 // arbitraryValues writes Values to args such that args contains Values
 // suitable for calling f.
-internal static error /*err*/ arbitraryValues(slice<reflectꓸValue> args, reflectꓸType f, ref Config config, ж<rand.Rand> Ꮡrand) {
-    error err = default!;
+internal static error /*err*/ arbitraryValues(slice<reflectꓸValue> args, reflectꓸType f, ref Config config, ж<rand.Rand> randΔ1) {
+    error err = default;
 
-    if (config.Values != default!) {
-        config.Values(args, Ꮡrand);
+    if (config.Values != nil) {
+        config.Values(args, randΔ1);
         return err;
     }
 
     for (nint j = 0; j < len(args); j++) {
-        bool ok = default!;
-        (args[j], ok) = Value(f.In(j), Ꮡrand);
+        bool ok = default;
+        (args[j], ok) = Value(f.In(j), randΔ1);
         if (!ok) {
             err = ((SetupError)fmt.Sprintf("cannot create arbitrary value of type %s for argument %d"u8, f.In(j), j));
             return err;
@@ -418,8 +439,8 @@ internal static error /*err*/ arbitraryValues(slice<reflectꓸValue> args, refle
 
 internal static (reflectꓸValue v, reflectꓸType t, bool ok) functionAndType(any f) {
     reflectꓸValue v = new(nil);
-    reflectꓸType t = default!;
-    bool ok = default!;
+    reflectꓸType t = default;
+    bool ok = default;
 
     v = reflect.ValueOf(f);
     ok = v.Kind() == reflect.Func;

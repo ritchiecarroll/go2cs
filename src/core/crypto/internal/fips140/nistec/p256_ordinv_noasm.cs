@@ -12,7 +12,7 @@ partial class nistec_package {
 internal static readonly @string unimplementedˢ = "unimplemented"u8;
 
 public static (slice<byte>, error) P256OrdInverse(slice<byte> k) {
-    return (default!, errors.New(unimplementedˢ));
+    return (default, errors.New(unimplementedˢ));
 }
 
 } // end nistec_package

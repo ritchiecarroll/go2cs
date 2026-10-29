@@ -49,7 +49,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
     var ctextᴷ = new stackAppend<@string>();
 
     if (bytes.Equal(old, @new)) {
-        return default!;
+        return default;
     }
     var x = lines(old);
     var y = lines(@new);
@@ -66,10 +66,10 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
     // To avoid setup/teardown cases outside the loop,
     // tgs returns a leading {0,0} and trailing {len(x), len(y)} pair
     // in the sequence of matches.
-    pair done = default!;           // printed up to x[:done.x] and y[:done.y]
-    pair chunk = default!;         // start lines of current chunk
-    pair count = default!;         // number of lines from each side in current chunk
-    slice<@string> ctext = default!;             // lines for current chunk
+    pair done = default;            // printed up to x[:done.x] and y[:done.y]
+    pair chunk = default;           // start lines of current chunk
+    pair count = default;           // number of lines from each side in current chunk
+    slice<@string> ctext = default; // lines for current chunk
     foreach (var (_, m) in tgs(x, y)) {
         if (m.x < done.x) {
             // Already handled scanning forward from earlier match.
@@ -169,7 +169,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
 // along with a warning about the missing newline.
 internal static slice<@string> lines(slice<byte> x) {
     var l = strings.SplitAfter((@string)x, "\n"u8);
-    if (l[len(l) - 1] == ""){
+    if (l[len(l) - 1] == "") {
         l = l.slice(0, len(l) - 1);
     } else {
         // Treat last line as having a message about the missing newline attached,
@@ -218,9 +218,9 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     //	xi[i] = increasing indexes of unique strings in x.
     //	yi[i] = increasing indexes of unique strings in y.
     //	inv[i] = index j such that x[xi[i]] = y[yi[j]].
-    slice<nint> xi = default!;
-    slice<nint> yi = default!;
-    slice<nint> inv = default!;
+    slice<nint> xi = default;
+    slice<nint> yi = default;
+    slice<nint> inv = default;
     foreach (var (i, s) in y) {
         if (m[s] == -1 + -4) {
             m[s] = len(yi);

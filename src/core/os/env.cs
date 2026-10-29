@@ -15,21 +15,20 @@ partial class os_package {
 public static @string Expand(@string s, Func<@string, @string> mapping) {
     var bufᴷ = new stackAppend<byte>();
 
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     // ${} is all ASCII, so bytes are fine for this operation.
     nint i = 0;
     for (nint j = 0; j < len(s); j++) {
-        if (s[j] == (rune)'$' && j + 1 < len(s)) {
-            if (buf == default!) {
+        if (s[j] == '$' && j + 1 < len(s)) {
+            if (buf == nil) {
                 buf = new slice<byte>(0, 2 * len(s));
             }
             buf = append(buf, s.slice(i, j).ꓸꓸꓸ);
             var (name, w) = getShellName(s.slice(j + 1));
-            if (name == ""u8 && w > 0){
+            if (name == ""u8 && w > 0) {
                 // Encountered invalid syntax; eat the
                 // characters.
-            } else 
-            if (name == ""u8){
+            } else if (name == ""u8) {
                 // Valid syntax, but $ was not followed by a
                 // name. Leave the dollar character untouched.
                 buf = append(bufᴷ, buf, s[j]);
@@ -40,7 +39,7 @@ public static @string Expand(@string s, Func<@string, @string> mapping) {
             i = j + 1;
         }
     }
-    if (buf == default!) {
+    if (buf == nil) {
         return s;
     }
     return ((sstring)buf) + s.slice(i);
@@ -57,7 +56,7 @@ public static @string ExpandEnv(@string s) {
 // shell variable such as $*.
 internal static bool isShellSpecialVar(uint8 c) {
     switch (c) {
-    case (rune)'*' or (rune)'#' or (rune)'$' or (rune)'@' or (rune)'!' or (rune)'?' or (rune)'-' or (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7' or (rune)'8' or (rune)'9': {
+    case (uint8)'*' or (uint8)'#' or (uint8)'$' or (uint8)'@' or (uint8)'!' or (uint8)'?' or (uint8)'-' or (uint8)'0' or (uint8)'1' or (uint8)'2' or (uint8)'3' or (uint8)'4' or (uint8)'5' or (uint8)'6' or (uint8)'7' or (uint8)'8' or (uint8)'9': {
         return true;
     }}
     return false;
@@ -65,7 +64,7 @@ internal static bool isShellSpecialVar(uint8 c) {
 
 // isAlphaNum reports whether the byte is an ASCII letter, number, or underscore.
 internal static bool isAlphaNum(uint8 c) {
-    return c == (rune)'_' || (rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'z' || (rune)'A' <= c && c <= (rune)'Z';
+    return c == '_' || '0' <= c && c <= '9' || 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z';
 }
 
 // getShellName returns the name that begins the string and the number of bytes
@@ -73,13 +72,13 @@ internal static bool isAlphaNum(uint8 c) {
 // expansion and two more bytes are needed than the length of the name.
 internal static (@string, nint) getShellName(@string s) {
     switch (ᐧ) {
-    case {} when s[0] is (rune)'{': {
-        if (len(s) > 2 && isShellSpecialVar(s[1]) && s[2] == (rune)'}') {
+    case {} when s[0] is (byte)'{': {
+        if (len(s) > 2 && isShellSpecialVar(s[1]) && s[2] == '}') {
             return (s[1..2], 3);
         }
         // Scan to closing brace
         for (nint iΔ2 = 1; iΔ2 < len(s); iΔ2++) {
-            if (s[iΔ2] == (rune)'}') {
+            if (s[iΔ2] == '}') {
                 if (iΔ2 == 1) {
                     return ("", 2); // Bad syntax; eat "${}"
                 }
@@ -92,7 +91,7 @@ internal static (@string, nint) getShellName(@string s) {
         return (s[0..1], 1);
     }}
     // Scan alphanumerics.
-    nint i = default!;
+    nint i = default;
     for (i = 0; i < len(s) && isAlphaNum(s[i]); i++) {
     }
     return (s.slice(0, i), i);
@@ -124,10 +123,10 @@ internal static readonly @string setenvˢ = "setenv"u8;
 // It returns an error, if any.
 public static error Setenv(@string key, @string value) {
     var err = syscall.Setenv(key, value);
-    if (err != default!) {
+    if (err != nil) {
         return NewSyscallError(setenvˢ, err);
     }
-    return default!;
+    return default;
 }
 
 // Unsetenv unsets a single environment variable.

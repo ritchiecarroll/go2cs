@@ -13,25 +13,25 @@ partial class version_package {
 // Version represents the version of a trace file.
 partial struct Version /*num:uint32*/;
 
-public static Version Go111 => 11;  // v1
-public static Version Go119 => 19;  // v1
-public static Version Go121 => 21;  // v1
-public static Version Go122 => 22;  // v2
-public static Version Go123 => 23;  // v2
-public static Version Go125 => 25;  // v2
-public static Version Go126 => 26;  // v2
+public static Version Go111 => 11; // v1
+public static Version Go119 => 19; // v1
+public static Version Go121 => 21; // v1
+public static Version Go122 => 22; // v2
+public static Version Go123 => 23; // v2
+public static Version Go125 => 25; // v2
+public static Version Go126 => 26; // v2
 public static Version Current => /* Go126 */ 26;
 
 internal static map<Version, slice<tracev2.EventSpec>> versions = new map<Version, slice<tracev2.EventSpec>>{
     // Go 1.11–1.21 use a different parser and are only set here for the sake of
     // Version.Valid.
-    [Go111] = default!,
-    [Go119] = default!,
-    [Go121] = default!,
+    [Go111] = default,
+    [Go119] = default,
+    [Go121] = default,
 
-    [Go122] = tracev2.Specs()[..(int)(uint8)(tracev2.EvUserLog + 1)], // All events after are Go 1.23+.
-    [Go123] = tracev2.Specs()[..(int)(uint8)(tracev2.EvExperimentalBatch + 1)], // All events after are Go 1.25+.
-    [Go125] = tracev2.Specs()[..(int)(uint8)(tracev2.EvClockSnapshot + 1)], // All events after are Go 1.26+.
+    [Go122] = tracev2.Specs()[..(int)(tracev2.EvUserLog + 1)],           // All events after are Go 1.23+.
+    [Go123] = tracev2.Specs()[..(int)(tracev2.EvExperimentalBatch + 1)], // All events after are Go 1.25+.
+    [Go125] = tracev2.Specs()[..(int)(tracev2.EvClockSnapshot + 1)],     // All events after are Go 1.26+.
     [Go126] = tracev2.Specs()
 };
 
@@ -54,7 +54,7 @@ public static @string EventName(this Version v, tracev2.EventType typ) {
     if (len(s) == 0) {
         return v1TraceEventTypeˢ;
     }
-    if ((nint)(uint8)typ < len(s) && s[typ].Name != ""u8) {
+    if ((nint)typ < len(s) && s[typ].Name != ""u8) {
         return s[typ].Name;
     }
     return fmt.Sprintf("Invalid(%d)"u8, typ);
@@ -73,13 +73,13 @@ internal static readonly @string headerFmt = "go 1.%d trace\x00\x00\x00"u8;
 public static (Version, error) ReadHeader(io.Reader r) {
     ref var v = ref heap(new Version(), out var Ꮡv);
     var (_, err) = fmt.Fscanf(r, headerFmt, Ꮡv);
-    if (err != default!) {
+    if (err != nil) {
         return (v, fmt.Errorf("bad file format: not a Go execution trace?"u8));
     }
     if (!v.Valid()) {
         return (v, fmt.Errorf("unknown or unsupported trace version go 1.%d"u8, v));
     }
-    return (v, default!);
+    return (v, default);
 }
 
 // WriteHeader writes a header for a trace version v to w.

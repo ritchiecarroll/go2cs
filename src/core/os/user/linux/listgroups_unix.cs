@@ -19,27 +19,27 @@ internal static readonly @string userListGroupsEmptyˢ = "user: list groups: emp
 
 internal static (slice<@string>, error) listGroupsFromReader(ref User u, io.Reader r) {
     if (u.Username == ""u8) {
-        return (default!, errors.New(userListGroupsEmptyˢ));
+        return (default, errors.New(userListGroupsEmptyˢ));
     }
     var (primaryGid, err) = strconv.Atoi(u.Gid);
-    if (err != default!) {
-        return (default!, fmt.Errorf("user: list groups for %s: invalid gid %q"u8, u.Username, u.Gid));
+    if (err != nil) {
+        return (default, fmt.Errorf("user: list groups for %s: invalid gid %q"u8, u.Username, u.Gid));
     }
 
-    var userCommas = slice<byte>("," + u.Username + ","); // ,john,
-    var userFirst = userCommas[1..]; // john,
+    var userCommas = slice<byte>("," + u.Username + ",");    // ,john,
+    var userFirst = userCommas[1..];                         // john,
     var userLast = userCommas.slice(0, len(userCommas) - 1); // ,john
     var userOnly = userCommas.slice(1, len(userCommas) - 1); // john
 
     // Add primary Gid first.
-    var groups = new @string[]{u.Gid}.slice();
+    var groups = slice<@string>([u.Gid]);
 
     var rd = bufio.NewReader(r);
     var done = false;
     while (!done) {
-        var (line, errΔ1) = rd.ReadBytes((rune)'\n');
-        if (errΔ1 != default!) {
-            if (AreEqual(errΔ1, io.EOF)){
+        var (line, errΔ1) = rd.ReadBytes((byte)'\n');
+        if (errΔ1 != nil) {
+            if (AreEqual(errΔ1, io.EOF)) {
                 done = true;
             } else {
                 return (groups, errΔ1);
@@ -53,11 +53,11 @@ internal static (slice<@string>, error) listGroupsFromReader(ref User u, io.Read
         // the same rules as the glibc parser, which allows comments and blank
         // space at the beginning of a line.
         line = bytes.TrimSpace(line);
-        if (len(line) == 0 || line[0] == (rune)'#' ||
+        if (len(line) == 0 || line[0] == '#' ||
             // If you search for a gid in a row where the group
             // name (the first field) starts with "+" or "-",
             // glibc fails to find the record, and so should we.
-            line[0] == (rune)'+' || line[0] == (rune)'-') {
+            line[0] == '+' || line[0] == '-') {
             continue;
         }
 
@@ -66,7 +66,7 @@ internal static (slice<@string>, error) listGroupsFromReader(ref User u, io.Read
         // for example
         // 	wheel:x:10:john,paul,jack
         //	tcpdump:x:72:
-        nint listIdx = bytes.LastIndexByte(line, (rune)':');
+        nint listIdx = bytes.LastIndexByte(line, (byte)':');
         if (listIdx == -1 || listIdx == len(line) - 1) {
             // No commas, or empty group list.
             continue;
@@ -89,29 +89,29 @@ internal static (slice<@string>, error) listGroupsFromReader(ref User u, io.Read
         @string gid = (@string)parts[2];
         // Make sure it's numeric and not the same as primary GID.
         (var numGid, errΔ1) = strconv.Atoi(gid);
-        if (errΔ1 != default! || numGid == primaryGid) {
+        if (errΔ1 != nil || numGid == primaryGid) {
             continue;
         }
 
         groups = append(groups, gid);
     }
 
-    return (groups, default!);
+    return (groups, default);
 }
 
 internal static (slice<@string>, error) listGroups(ref User u) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(groupFile);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         return listGroupsFromReader(ref u, new os_FileжReader(f));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

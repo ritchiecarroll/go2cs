@@ -11,12 +11,12 @@ partial class godebugs_package {
 
 // An Info describes a single known GODEBUG setting.
 partial struct Info {
-    public @string Name; // name of the setting ("panicnil")
+    public @string Name;    // name of the setting ("panicnil")
     public @string Package; // package that uses the setting ("runtime")
-    public nint Changed;   // minor version when default changed, if any; 21 means Go 1.21
-    public @string Old; // value that restores behavior prior to Changed
-    public bool Opaque;   // setting does not export information to runtime/metrics using [internal/godebug.Setting.IncNonDefault]
-    public bool Immutable;   // setting cannot be changed after program start
+    public nint Changed;    // minor version when default changed, if any; 21 means Go 1.21
+    public @string Old;     // value that restores behavior prior to Changed
+    public bool Opaque;     // setting does not export information to runtime/metrics using [internal/godebug.Setting.IncNonDefault]
+    public bool Immutable;  // setting cannot be changed after program start
 }
 
 // All is the table of known settings, sorted by Name.
@@ -27,7 +27,7 @@ partial struct Info {
 //
 // Note: After adding entries to this table, update the list in doc/godebug.md as well.
 // (Otherwise the test in this package will fail.)
-[GoLazy] partial class lazyᴛAll { public static readonly ж<slice<Info>> ᏑAll = new StaticBox<slice<Info>>(new Info[]{
+[GoLazy] partial class lazyᴛAll { public static readonly ж<slice<Info>> ᏑAll = new StaticBox<slice<Info>>(slice<Info>([
     new(Name: "allowmultiplevcs"u8, Package: "cmd/go"u8),
     new(Name: "asynctimerchan"u8, Package: "time"u8, Changed: 23, Old: "1"u8),
     new(Name: "containermaxprocs"u8, Package: "runtime"u8, Changed: 25, Old: "0"u8),
@@ -85,18 +85,18 @@ partial struct Info {
     new(Name: "x509usefallbackroots"u8, Package: "crypto/x509"u8),
     new(Name: "x509usepolicies"u8, Package: "crypto/x509"u8, Changed: 24, Old: "0"u8),
     new(Name: "zipinsecurepath"u8, Package: "archive/zip"u8)
-}.slice()); }
+])); }
 public static ref slice<Info> All => ref ((StaticBox<slice<Info>>)ᏑAll).ValueSlot;
 
 partial struct RemovedInfo {
     public @string Name; // name of the removed GODEBUG setting.
-    public nint Removed;   // minor version of Go, when the removal happened
+    public nint Removed; // minor version of Go, when the removal happened
 }
 
 // Removed contains all GODEBUGs that we have removed.
-public static readonly ж<slice<RemovedInfo>> ᏑRemoved = new StaticBox<slice<RemovedInfo>>(new RemovedInfo[]{
+public static readonly ж<slice<RemovedInfo>> ᏑRemoved = new StaticBox<slice<RemovedInfo>>(slice<RemovedInfo>([
     new(Name: "x509sha1"u8, Removed: 24)
-}.slice());
+]));
 public static ref slice<RemovedInfo> Removed => ref ((StaticBox<slice<RemovedInfo>>)ᏑRemoved).ValueSlot;
 
 // Lookup returns the Info with the given name.
@@ -110,13 +110,13 @@ public static ж<Info> Lookup(@string name) {
         if (name == mid) {
             return Ꮡ(All, m);
         }
-        if (name < mid){
+        if (name < mid) {
             hi = m;
         } else {
             lo = m + 1;
         }
     }
-    return default!;
+    return default;
 }
 
 } // end godebugs_package

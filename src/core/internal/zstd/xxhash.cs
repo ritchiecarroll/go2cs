@@ -18,10 +18,10 @@ internal static UntypedInt xxhPrime64c5 => 0x27d4eb2f165667c5;
 
 // xxhash64 is the state of a xxHash-64 checksum.
 partial struct xxhash64 {
-    internal uint64 len;    // total length hashed
-    internal array<uint64> v = new(4); // accumulators
+    internal uint64 len;                // total length hashed
+    internal array<uint64> v = new(4);  // accumulators
     internal array<byte> buf = new(32); // buffer
-    internal nint cnt;      // number of bytes in buffer
+    internal nint cnt;                  // number of bytes in buffer
 }
 
 // reset discards the current state and prepares to compute a new hash.
@@ -80,8 +80,8 @@ internal static void update(this ref xxhash64 xh, slice<byte> b) {
 
 // digest returns the final hash value.
 internal static uint64 digest(this ref xxhash64 xh) {
-    uint64 h64 = default!;
-    if (xh.len < 32){
+    uint64 h64 = default;
+    if (xh.len < 32) {
         h64 = xh.v[2] + (uint64)xxhPrime64c5;
     } else {
         h64 = bits.RotateLeft64(xh.v[0], 1) + bits.RotateLeft64(xh.v[1], 7) + bits.RotateLeft64(xh.v[2], 12) + bits.RotateLeft64(xh.v[3], 18);

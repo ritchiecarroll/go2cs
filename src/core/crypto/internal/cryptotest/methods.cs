@@ -19,19 +19,19 @@ partial class cryptotest_package {
 // of the API even if undocumented per Hyrum's Law.
 //
 // ms must be a pointer to a non-nil interface.
-public static void NoExtraMethods(ж<testing.T> Ꮡt, any ms, params ꓸꓸꓸstring allowedʗp) {
+public static void NoExtraMethods(ж<testing.T> t, any ms, params ꓸꓸꓸstring allowedʗp) {
     var allowed = allowedʗp.slice();
 
-    Ꮡt.Helper();
+    t.Helper();
     var (extraMethodsΔ1, err) = extraMethods(ms);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     foreach (var (_, m) in extraMethodsΔ1) {
         if (slices.Contains(allowed, m)) {
             continue;
         }
-        Ꮡt.Errorf("unexpected method %q"u8, m);
+        t.Errorf("unexpected method %q"u8, m);
     }
 }
 
@@ -40,7 +40,7 @@ internal static (slice<@string>, error) extraMethods(any ip) {
 
     var v = reflect.ValueOf(ip);
     if (v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.ΔInterface || v.Elem().IsNil()) {
-        return (default!, fmt.Errorf("argument must be a pointer to a non-nil interface"u8));
+        return (default, fmt.Errorf("argument must be a pointer to a non-nil interface"u8));
     }
 
     var interfaceType = v.Elem().Type();
@@ -51,7 +51,7 @@ internal static (slice<@string>, error) extraMethods(any ip) {
         interfaceMethods[interfaceType.Method(i).Name] = true;
     }
 
-    slice<@string> extraMethods = default!;
+    slice<@string> extraMethods = default;
     foreach (var i in range(concreteType.NumMethod())) {
         var m = concreteType.Method(i);
         if (!m.IsExported()) {
@@ -63,7 +63,7 @@ internal static (slice<@string>, error) extraMethods(any ip) {
     }
 
     extraMethods = move2heap(extraMethodsᴷ, extraMethods);
-    return (extraMethods, default!);
+    return (extraMethods, default);
 }
 
 } // end cryptotest_package

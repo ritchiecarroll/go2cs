@@ -58,9 +58,9 @@ partial class sync_package {
 partial struct Pool {
     internal noCopy noCopy;
     internal @unsafe.Pointer local; // local fixed-size per-P pool, actual type is [P]poolLocal
-    internal uintptr localSize;        // size of the local array
+    internal uintptr localSize;     // size of the local array
     internal @unsafe.Pointer victim; // local from previous cycle
-    internal uintptr victimSize;        // size of victims array
+    internal uintptr victimSize;     // size of victims array
     // New optionally specifies a function to generate
     // a value when Get would otherwise return nil.
     // It may not be changed concurrently with calls to Get.
@@ -69,7 +69,7 @@ partial struct Pool {
 
 // Local per-P Pool appendix.
 partial struct poolLocalInternal {
-    internal any @private;       // Can be used only by the respective P.
+    internal any @private;     // Can be used only by the respective P.
     internal poolChain shared; // Local P can pushHead/popHead; any P can popTail.
 }
 
@@ -103,7 +103,7 @@ internal static @unsafe.Pointer poolRaceAddr(any xʗp) {
 
 // Put adds x to the pool.
 public static void Put(this ж<Pool> Ꮡp, any x) {
-    if (x == default!) {
+    if (x == nil) {
         return;
     }
     if (race.Enabled) {
@@ -115,7 +115,7 @@ public static void Put(this ж<Pool> Ꮡp, any x) {
         race.Disable();
     }
     var (l, _) = Ꮡp.pin();
-    if ((~l).@private == default!){
+    if ((~l).@private == nil) {
         l.Value.@private = x;
     } else {
         l.of(poolLocal.Ꮡshared).pushHead(x);
@@ -142,24 +142,24 @@ public static any Get(this ж<Pool> Ꮡp) {
     }
     var (l, pid) = Ꮡp.pin();
     var x = l.Value.@private;
-    l.Value.@private = default!;
-    if (x == default!) {
+    l.Value.@private = default;
+    if (x == nil) {
         // Try to pop the head of the local shard. We prefer
         // the head over the tail for temporal locality of
         // reuse.
         (x, _) = l.of(poolLocal.Ꮡshared).popHead();
-        if (x == default!) {
+        if (x == nil) {
             x = Ꮡp.getSlow(pid);
         }
     }
     runtime_procUnpin();
     if (race.Enabled) {
         race.Enable();
-        if (x != default!) {
+        if (x != nil) {
             race.Acquire((uintptr)poolRaceAddr(x));
         }
     }
-    if (x == default! && p.New != default!) {
+    if (x == nil && p.New != nil) {
         x = p.New();
     }
     return x;
@@ -170,12 +170,12 @@ internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
 
     // See the comment in pin regarding ordering of the loads.
     var size = runtime_LoadAcquintptr(Ꮡp.of(Pool.ᏑlocalSize)); // load-acquire
-    @unsafe.Pointer locals = p.local; // load-consume
+    @unsafe.Pointer locals = p.local;                          // load-consume
     // Try to steal one element from other procs.
     for (nint i = 0; i < (nint)size; i++) {
         var lΔ1 = indexLocal(locals, rem((pid + i + 1), (nint)size));
         {
-            var (x, _) = lΔ1.of(poolLocal.Ꮡshared).popTail(); if (x != default!) {
+            var (x, _) = lΔ1.of(poolLocal.Ꮡshared).popTail(); if (x != nil) {
                 return x;
             }
         }
@@ -186,20 +186,20 @@ internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
     // victim cache to age out if at all possible.
     size = atomic.LoadUintptr(Ꮡp.of(Pool.ᏑvictimSize));
     if ((uintptr)pid >= size) {
-        return default!;
+        return default;
     }
     locals = p.victim;
     var l = indexLocal(locals, pid);
     {
-        var x = l.Value.@private; if (x != default!) {
-            l.Value.@private = default!;
+        var x = l.Value.@private; if (x != nil) {
+            l.Value.@private = default;
             return x;
         }
     }
     for (nint i = 0; i < (nint)size; i++) {
         var lΔ2 = indexLocal(locals, rem((pid + i), (nint)size));
         {
-            var (x, _) = lΔ2.of(poolLocal.Ꮡshared).popTail(); if (x != default!) {
+            var (x, _) = lΔ2.of(poolLocal.Ꮡshared).popTail(); if (x != nil) {
                 return x;
             }
         }
@@ -209,7 +209,7 @@ internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
     // with it.
     atomic.StoreUintptr(Ꮡp.of(Pool.ᏑvictimSize), 0);
 
-    return default!;
+    return default;
 }
 
 // pin pins the current goroutine to P, disables preemption and
@@ -231,7 +231,7 @@ internal static (ж<poolLocal>, nint) pin(this ж<Pool> Ꮡp) {
     // Thus here we must observe local at least as large localSize.
     // We can observe a newer/larger local, it is fine (we must observe its zero-initialized-ness).
     var s = runtime_LoadAcquintptr(Ꮡp.of(Pool.ᏑlocalSize)); // load-acquire
-    @unsafe.Pointer l = p.local; // load-consume
+    @unsafe.Pointer l = p.local;                            // load-consume
     if ((uintptr)pid < s) {
         return (indexLocal(l, pid), pid);
     }
@@ -262,10 +262,10 @@ internal static (ж<poolLocal>, nint) pinSlow(this ж<Pool> Ꮡp) {
         nint size = runtime.GOMAXPROCS(0);
         var local = new slice<poolLocal>(size, () => new(nil));
         atomic.StorePointer(Ꮡp.of(Pool.Ꮡlocal), @unsafe.Pointer.FromPinnedBox(Ꮡ(local, 0))); // store-release
-        runtime_StoreReluintptr(Ꮡp.of(Pool.ᏑlocalSize), (uintptr)size); // store-release
+        runtime_StoreReluintptr(Ꮡp.of(Pool.ᏑlocalSize), (uintptr)size);                      // store-release
         return (Ꮡ(local, pid), pid);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -288,7 +288,7 @@ internal static void poolCleanup() {
 
     // Drop victim caches from all pools.
     foreach (var (_, p) in oldPools) {
-        p.Value.victim = default!;
+        p.Value.victim = default;
         p.Value.victimSize = 0;
     }
 
@@ -296,13 +296,13 @@ internal static void poolCleanup() {
     foreach (var (_, p) in allPools) {
         p.Value.victim = p.Value.local;
         p.Value.victimSize = p.Value.localSize;
-        p.Value.local = default!;
+        p.Value.local = default;
         p.Value.localSize = 0;
     }
 
     // The pools with non-empty primary caches now have non-empty
     // victim caches and no pools have primary caches.
-    (oldPools, allPools) = (allPools, default!);
+    (oldPools, allPools) = (allPools, default);
 }
 
 internal static readonly ж<Mutex> ᏑallPoolsMu = new StaticBox<Mutex>(default(Mutex));

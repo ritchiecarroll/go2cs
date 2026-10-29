@@ -23,7 +23,7 @@ internal static array<uint8> _Kind_index = new uint8[]{0, 7, 11, 17, 20, 25, 32}
 
 public static @string String(this ΔKind i) {
     if (i < 0 || i >= ((ΔKind)(len(_Kind_index) - 1))) {
-        return "Kind("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "Kind("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _Kind_name.slice(_Kind_index[i], _Kind_index[i + 1]);
 }

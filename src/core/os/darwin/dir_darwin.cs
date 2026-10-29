@@ -27,28 +27,28 @@ internal static void close(this ref dirInfo d) {
 // go2cs generated this placeholder — func readdir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static FileMode dtToType(uint8 typ) {
-    var exprᴛ1 = typ;
-    if (exprᴛ1 == syscall.DT_BLK) {
+    switch (typ) {
+    case var ᴛ when ᴛ == syscall.DT_BLK: {
         return ModeDevice;
     }
-    if (exprᴛ1 == syscall.DT_CHR) {
+    case var ᴛ when ᴛ == syscall.DT_CHR: {
         return (fs.FileMode)(ModeDevice | ModeCharDevice);
     }
-    if (exprᴛ1 == syscall.DT_DIR) {
+    case var ᴛ when ᴛ == syscall.DT_DIR: {
         return ModeDir;
     }
-    if (exprᴛ1 == syscall.DT_FIFO) {
+    case var ᴛ when ᴛ == syscall.DT_FIFO: {
         return ModeNamedPipe;
     }
-    if (exprᴛ1 == syscall.DT_LNK) {
+    case var ᴛ when ᴛ == syscall.DT_LNK: {
         return ModeSymlink;
     }
-    if (exprᴛ1 == syscall.DT_REG) {
+    case var ᴛ when ᴛ == syscall.DT_REG: {
         return 0;
     }
-    if (exprᴛ1 == syscall.DT_SOCK) {
+    case var ᴛ when ᴛ == syscall.DT_SOCK: {
         return ModeSocket;
-    }
+    }}
     return ~((fs.FileMode)((fs.FileMode)0));
 }
 

@@ -65,14 +65,14 @@ internal static error writeLSB(this ref Writer w, uint32 c) {
     w.nBits += w.width;
     while (w.nBits >= 8) {
         {
-            var err = w.w.WriteByte((uint8)w.bits); if (err != default!) {
+            var err = w.w.WriteByte((uint8)w.bits); if (err != nil) {
                 return err;
             }
         }
-        w.bits >>= (int)(8);
+        w.bits >>= 8;
         w.nBits -= 8;
     }
-    return default!;
+    return default;
 }
 
 // writeMSB writes the code c for "Most Significant Bits first" data.
@@ -81,14 +81,14 @@ internal static error writeMSB(this ref Writer w, uint32 c) {
     w.nBits += w.width;
     while (w.nBits >= 8) {
         {
-            var err = w.w.WriteByte((uint8)(w.bits >> 24)); if (err != default!) {
+            var err = w.w.WriteByte((uint8)(w.bits >> 24)); if (err != nil) {
                 return err;
             }
         }
-        w.bits <<= (int)(8);
+        w.bits <<= 8;
         w.nBits -= 8;
     }
-    return default!;
+    return default;
 }
 
 // errOutOfCodes is an internal error that means that the writer has run out
@@ -104,12 +104,12 @@ internal static error incHi(this ж<Writer> Ꮡw) {
     w.hi++;
     if (w.hi == w.overflow) {
         w.width++;
-        w.overflow <<= (int)(1);
+        w.overflow <<= 1;
     }
     if (w.hi == maxCode) {
         var clear = ((uint32)1).Lsh(w.litWidth);
         {
-            var err = w.write(Ꮡw, clear); if (err != default!) {
+            var err = w.write(Ꮡw, clear); if (err != nil) {
                 return err;
             }
         }
@@ -121,7 +121,7 @@ internal static error incHi(this ж<Writer> Ꮡw) {
         }
         return errOutOfCodes;
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -129,14 +129,14 @@ internal static readonly @string lzwInputByteTooLargeForˢ = "lzw: input byte to
 
 // Write writes a compressed representation of p to w's underlying writer.
 public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
     ref var w = ref Ꮡw.DerefOrNull();
 
-    if (w.err != default!) {
+    if (w.err != nil) {
         return (0, w.err);
     }
     if (len(p) == 0) {
-        return (0, default!);
+        return (0, default);
     }
     {
         var maxLit = (uint8)(((uint8)1).Lsh(w.litWidth) - 1); if (maxLit != 0xff) {
@@ -160,7 +160,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
         // that directive unconditionally.
         var clear = ((uint32)1).Lsh(w.litWidth);
         {
-            var errΔ1 = w.write(Ꮡw, clear); if (errΔ1 != default!) {
+            var errΔ1 = w.write(Ꮡw, clear); if (errΔ1 != nil) {
                 return (0, errΔ1);
             }
         }
@@ -186,7 +186,7 @@ loop:
         // Otherwise, write the current code, and literal becomes the start of
         // the next emitted code.
         {
-            w.err = w.write(Ꮡw, code); if (w.err != default!) {
+            w.err = w.write(Ꮡw, code); if (w.err != nil) {
                 return (0, w.err);
             }
         }
@@ -194,7 +194,7 @@ loop:
         // Increment e.hi, the next implied code. If we run out of codes, reset
         // the writer state (including clearing the hash table) and continue.
         {
-            var err1 = Ꮡw.incHi(); if (err1 != default!) {
+            var err1 = Ꮡw.incHi(); if (err1 != nil) {
                 if (AreEqual(err1, errOutOfCodes)) {
                     continue;
                 }
@@ -203,7 +203,7 @@ loop:
             }
         }
         // Otherwise, insert key -> e.hi into the map that e.table represents.
-        while (ᐧ) {
+        for (;;) {
             if (w.table[hash] == invalidEntry) {
                 w.table[hash] = (key << 12) | w.hi;
                 break;
@@ -214,7 +214,7 @@ continue_loop:;
     }
 break_loop:;
     w.savedCode = code;
-    return (n, default!);
+    return (n, default);
 }
 
 // Close closes the [Writer], flushing any pending output. It does not close
@@ -222,23 +222,23 @@ break_loop:;
 public static error Close(this ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
-    if (w.err != default!) {
+    if (w.err != nil) {
         if (AreEqual(w.err, errClosed)) {
-            return default!;
+            return default;
         }
         return w.err;
     }
     // Make any future calls to Write return errClosed.
     w.err = errClosed;
     // Write the savedCode if valid.
-    if (w.savedCode != invalidCode){
+    if (w.savedCode != invalidCode) {
         {
-            var err = w.write(Ꮡw, w.savedCode); if (err != default!) {
+            var err = w.write(Ꮡw, w.savedCode); if (err != nil) {
                 return err;
             }
         }
         {
-            var err = Ꮡw.incHi(); if (err != default! && !AreEqual(err, errOutOfCodes)) {
+            var err = Ꮡw.incHi(); if (err != nil && !AreEqual(err, errOutOfCodes)) {
                 return err;
             }
         }
@@ -246,7 +246,7 @@ public static error Close(this ж<Writer> Ꮡw) {
         // Write the starting clear code, as w.Write did not.
         var clear = ((uint32)1).Lsh(w.litWidth);
         {
-            var err = w.write(Ꮡw, clear); if (err != default!) {
+            var err = w.write(Ꮡw, clear); if (err != nil) {
                 return err;
             }
         }
@@ -254,17 +254,17 @@ public static error Close(this ж<Writer> Ꮡw) {
     // Write the eof code.
     var eof = ((uint32)1).Lsh(w.litWidth) + 1;
     {
-        var err = w.write(Ꮡw, eof); if (err != default!) {
+        var err = w.write(Ꮡw, eof); if (err != nil) {
             return err;
         }
     }
     // Write the final bits.
     if (w.nBits > 0) {
         if (w.order == MSB) {
-            w.bits >>= (int)(24);
+            w.bits >>= 24;
         }
         {
-            var err = w.w.WriteByte((uint8)w.bits); if (err != default!) {
+            var err = w.w.WriteByte((uint8)w.bits); if (err != nil) {
                 return err;
             }
         }
@@ -275,7 +275,7 @@ public static error Close(this ж<Writer> Ꮡw) {
 // Reset clears the [Writer]'s state and allows it to be reused again
 // as a new [Writer].
 public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
-    w = new Writer(nil);
+    w = new Writer();
     w.init(dst, order, litWidth);
 }
 
@@ -299,23 +299,25 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
 }
 
 internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
-    var exprᴛ1 = order;
-    if (exprᴛ1 == LSB) {
+    switch (order) {
+    case var ᴛ when ᴛ == LSB: {
         w.write = ((Func<ж<Writer>, uint32, error>)(writeLSB));
+        break;
     }
-    else if (exprᴛ1 == MSB) {
+    case var ᴛ when ᴛ == MSB: {
         w.write = ((Func<ж<Writer>, uint32, error>)(writeMSB));
+        break;
     }
-    else { /* default: */
+    default: {
         w.err = errors.New(lzwUnknownOrderˢ);
         return;
-    }
+    }}
     if (litWidth < 2 || 8 < litWidth) {
         w.err = fmt.Errorf("lzw: litWidth %d out of range"u8, litWidth);
         return;
     }
     var (bw, ok) = dst._<writer>(ᐧ);
-    if (!ok && dst != default!) {
+    if (!ok && dst != nil) {
         bw = new bufio_Writerжwriter(bufio.NewWriter(dst));
     }
     w.w = bw;

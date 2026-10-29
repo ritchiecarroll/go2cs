@@ -504,13 +504,13 @@ partial class big_package {
 // rem returns r such that r = u%v.
 // It uses z as the storage for r.
 internal static Δnat /*r*/ rem(this Δnat z, ж<stack> Ꮡstk, Δnat u, Δnat v) {
-    Δnat r = default!;
+    Δnat r = default;
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
 
         if (alias(z, u)) {
-            z = default!;
+            z = default;
         }
         defer(Ꮡstk.restore, Ꮡstk.Value.save(), ref ᒐ);
         var q = stk.nat(max(1, len(u) - (len(v) - 1)));
@@ -525,8 +525,8 @@ internal static Δnat /*r*/ rem(this Δnat z, ж<stack> Ꮡstk, Δnat u, Δnat v
 // It uses z and z2 as the storage for q and r.
 // The caller may pass stk == nil to request that div obtain and release one itself.
 internal static (Δnat q, Δnat r) div(this Δnat z, ж<stack> Ꮡstk, Δnat z2, Δnat u, Δnat v) {
-    Δnat q = default!;
-    Δnat r = default!;
+    Δnat q = default;
+    Δnat r = default;
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -538,7 +538,7 @@ internal static (Δnat q, Δnat r) div(this Δnat z, ж<stack> Ꮡstk, Δnat z2,
         if (len(v) == 1) {
             // Short division: long optimized for a single-word divisor.
             // In that case, the 2-by-1 guess is all we need at each step.
-            Word r2 = default!;
+            Word r2 = default;
             (q, r2) = z.divW(u, v[0]);
             r = z2.setWord(r2);
             goto ᒐdone;
@@ -566,8 +566,8 @@ internal static (Δnat q, Δnat r) div(this Δnat z, ж<stack> Ꮡstk, Δnat z2,
 // It uses z as the storage for q.
 // Note that y is a single digit (Word), not a big number.
 internal static (Δnat q, Word r) divW(this Δnat z, Δnat x, Word y) {
-    Δnat q = default!;
-    Word r = default!;
+    Δnat q = default;
+    Word r = default;
 
     nint m = len(x);
     switch (ᐧ) {
@@ -593,7 +593,7 @@ internal static (Δnat q, Word r) divW(this Δnat z, Δnat x, Word y) {
 // modW returns x % d.
 internal static Word /*r*/ modW(this Δnat x, Word d) {
     // TODO(agl): we don't actually need to store the q value.
-    Δnat q = default!;
+    Δnat q = default;
     q = q.make(len(x));
     return divWVW(q, 0, x, d);
 }
@@ -601,7 +601,7 @@ internal static Word /*r*/ modW(this Δnat x, Word d) {
 // divWVW overwrites z with ⌊x/y⌋, returning the remainder r.
 // The caller must ensure that len(z) = len(x).
 internal static Word /*r*/ divWVW(slice<Word> z, Word xn, slice<Word> x, Word y) {
-    Word r = default!;
+    Word r = default;
 
     r = xn;
     if (len(x) == 1) {
@@ -621,8 +621,8 @@ internal static Word /*r*/ divWVW(slice<Word> z, Word xn, slice<Word> x, Word y)
 // The caller must ensure that len(vIn) ≥ 2 (use divW otherwise)
 // and that len(uIn) ≥ len(vIn) (the answer is 0, uIn otherwise).
 internal static (Δnat q, Δnat r) divLarge(this Δnat z, ж<stack> Ꮡstk, Δnat u, Δnat uIn, Δnat vIn) {
-    Δnat q = default!;
-    Δnat r = default!;
+    Δnat q = default;
+    Δnat r = default;
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -638,7 +638,7 @@ internal static (Δnat q, Δnat r) divLarge(this Δnat z, ж<stack> Ꮡstk, Δna
         nuint shift = nlz(vIn[n - 1]);
         var v = stk.nat(n);
         u = u.make(len(uIn) + 1);
-        if (shift == 0){
+        if (shift == 0) {
             copy(v, vIn);
             copy(u.slice(0, len(uIn)), uIn);
             u[len(uIn)] = 0;
@@ -650,12 +650,12 @@ internal static (Δnat q, Δnat r) divLarge(this Δnat z, ж<stack> Ꮡstk, Δna
         // The caller should not pass aliased z and u, since those are
         // the two different outputs, but correct just in case.
         if (alias(z, u)) {
-            z = default!;
+            z = default;
         }
         q = z.make(m + 1);
 
         // Use basic or recursive long division depending on size.
-        if (n < divRecursiveThreshold){
+        if (n < divRecursiveThreshold) {
             q.divBasic(Ꮡstk, u, v);
         } else {
             q.divRecursive(Ꮡstk, u, v);
@@ -705,7 +705,7 @@ internal static void divBasic(this Δnat q, ж<stack> Ꮡstk, Δnat u, Δnat v) 
             // For ujn == vn1, we set q̂ to the max digit M above.
             // Otherwise, we compute the 2-by-1 guess.
             if (ujn != vn1) {
-                Word rhat = default!;
+                Word rhat = default;
                 (qhat, rhat) = divWW(ujn, u[j + n - 1], vn1, rec);
 
                 // Refine q̂ to a 3-by-2 guess. See “Refining Guesses” above.
@@ -778,9 +778,9 @@ internal static nint divRecursiveThreshold = 40; // see calibrate_test.go
 // z must be large enough to hold ⌊u/v⌋.
 // This function is just for allocating and freeing temporaries
 // around divRecursiveStep, the real implementation.
-internal static void divRecursive(this Δnat z, ж<stack> Ꮡstk, Δnat u, Δnat v) {
+internal static void divRecursive(this Δnat z, ж<stack> stk, Δnat u, Δnat v) {
     clear(z);
-    z.divRecursiveStep(Ꮡstk, u, v, 0);
+    z.divRecursiveStep(stk, u, v, 0);
 }
 
 // divRecursiveStep is the actual implementation of recursive division.

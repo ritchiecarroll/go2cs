@@ -43,13 +43,13 @@ partial class log_package {
 // while flags Ldate | Ltime | Lmicroseconds | Llongfile produce,
 //
 //	2009/01/23 01:23:23.123123 /a/b/c/d.go:23: message
-public static UntypedInt Ldate => /* 1 << iota */ 1; // the date in the local time zone: 2009/01/23
-public static UntypedInt Ltime => 2;        // the time in the local time zone: 01:23:23
-public static UntypedInt Lmicroseconds => 4; // microsecond resolution: 01:23:23.123123.  assumes Ltime.
-public static UntypedInt Llongfile => 8;    // full file name and line number: /a/b/c/d.go:23
-public static UntypedInt Lshortfile => 16;   // final file name element and line number: d.go:23. overrides Llongfile
-public static UntypedInt LUTC => 32;         // if Ldate or Ltime is set, use UTC rather than the local time zone
-public static UntypedInt Lmsgprefix => 64;   // move the "prefix" from the beginning of the line to before the message
+public static UntypedInt Ldate => /* 1 << iota */ 1;         // the date in the local time zone: 2009/01/23
+public static UntypedInt Ltime => 2;                         // the time in the local time zone: 01:23:23
+public static UntypedInt Lmicroseconds => 4;                 // microsecond resolution: 01:23:23.123123.  assumes Ltime.
+public static UntypedInt Llongfile => 8;                     // full file name and line number: /a/b/c/d.go:23
+public static UntypedInt Lshortfile => 16;                   // final file name element and line number: d.go:23. overrides Llongfile
+public static UntypedInt LUTC => 32;                         // if Ldate or Ltime is set, use UTC rather than the local time zone
+public static UntypedInt Lmsgprefix => 64;                   // move the "prefix" from the beginning of the line to before the message
 public static UntypedInt LstdFlags => /* Ldate | Ltime */ 3; // initial values for the standard logger
 
 // A Logger represents an active logging object that generates lines of
@@ -60,7 +60,7 @@ partial struct Logger {
     internal Δsync.Mutex outMu;
     internal Δio.Writer @out; // destination for output
     internal atomic.Pointer<@string> prefix; // prefix on each line to identify the logger (but see Lmsgprefix)
-    internal atomic.Int32 flag;           // properties
+    internal atomic.Int32 flag;              // properties
     internal atomic.Bool isDiscard;
 }
 
@@ -108,12 +108,12 @@ internal static void itoa(ref slice<byte> buf, nint i, nint wid) {
     while (i >= 10 || wid > 1) {
         wid--;
         nint q = i / 10;
-        b[bp] = (byte)((rune)'0' + i - q * 10);
+        b[bp] = (byte)('0' + i - q * 10);
         bp--;
         i = q;
     }
     // i < 10
-    b[bp] = (byte)((rune)'0' + i);
+    b[bp] = (byte)('0' + i);
     buf = appendꓸꓸꓸ(buf, b.slice(bp));
 }
 
@@ -133,31 +133,31 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
         if ((flag & (nint)Ldate) != 0) {
             var (year, month, day) = t.Date();
             itoa(ref buf, year, 4);
-            buf = append(buf, (byte)((rune)'/'));
+            buf = append(buf, (byte)'/');
             itoa(ref buf, (nint)month, 2);
-            buf = append(buf, (byte)((rune)'/'));
+            buf = append(buf, (byte)'/');
             itoa(ref buf, day, 2);
-            buf = append(buf, (byte)((rune)' '));
+            buf = append(buf, (byte)' ');
         }
         if ((flag & (nint)((nint)((nint)Ltime | (nint)Lmicroseconds))) != 0) {
             var (hour, min, sec) = t.Clock();
             itoa(ref buf, hour, 2);
-            buf = append(buf, (byte)((rune)':'));
+            buf = append(buf, (byte)':');
             itoa(ref buf, min, 2);
-            buf = append(buf, (byte)((rune)':'));
+            buf = append(buf, (byte)':');
             itoa(ref buf, sec, 2);
             if ((flag & (nint)Lmicroseconds) != 0) {
-                buf = append(buf, (byte)((rune)'.'));
+                buf = append(buf, (byte)'.');
                 itoa(ref buf, t.Nanosecond() / 1000, 6);
             }
-            buf = append(buf, (byte)((rune)' '));
+            buf = append(buf, (byte)' ');
         }
     }
     if ((flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
         if ((flag & (nint)Lshortfile) != 0) {
             @string @short = @file;
             for (nint i = len(@file) - 1; i > 0; i--) {
-                if (@file[i] == (rune)'/') {
+                if (@file[i] == '/') {
                     @short = @file.slice(i + 1);
                     break;
                 }
@@ -165,7 +165,7 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
             @file = @short;
         }
         buf = append(buf, @file.ꓸꓸꓸ);
-        buf = append(buf, (byte)((rune)':'));
+        buf = append(buf, (byte)':');
         itoa(ref buf, line, -1);
         buf = append(buf, ((@string)": "u8).ꓸꓸꓸ);
     }
@@ -193,7 +193,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
     //
     // See https://go.dev/issue/23199
     if (cap(p) > 64 << 10) {
-        p = default!;
+        p = default;
     }
     ᏑbufferPool.Put(Ꮡp.OrTypedNil());
 }
@@ -218,7 +218,7 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
         ref var l = ref Ꮡl.DerefOrNull();
 
         if (Ꮡl.of(Logger.ᏑisDiscard).Load()) {
-            return default!;
+            return default;
         }
 
         var now = time.Now(); // get this early.
@@ -228,18 +228,18 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
         @string prefix = Ꮡl.Prefix();
         nint flag = Ꮡl.Flags();
 
-        @string @file = default!;
-        nint line = default!;
+        @string @file = default;
+        nint line = default;
         if ((flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
-            if (pc == 0){
-                bool ok = default!;
+            if (pc == 0) {
+                bool ok = default;
                 (_, @file, line, ok) = runtime.Caller(calldepth);
                 if (!ok) {
                     @file = "???"u8;
                     line = 0;
                 }
             } else {
-                var fs = runtime.CallersFrames(new uintptr[]{pc}.slice());
+                var fs = runtime.CallersFrames(slice<uintptr>([pc]));
                 var (f, _) = fs.Next();
                 @file = f.File;
                 if (@file == ""u8) {
@@ -253,8 +253,8 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
         defer(putBuffer, buf, ref ᒐ);
         formatHeader(ref (buf).DerefOrNull(), now, prefix, flag, @file, line);
         buf.ValueSlot = appendOutput(buf.ValueSlot);
-        if (len(buf.ValueSlot) == 0 || (buf.ValueSlot)[len(buf.ValueSlot) - 1] != (rune)'\n') {
-            buf.ValueSlot = append(buf.ValueSlot, (byte)((rune)'\n'));
+        if (len(buf.ValueSlot) == 0 || (buf.ValueSlot)[len(buf.ValueSlot) - 1] != '\n') {
+            buf.ValueSlot = append(buf.ValueSlot, (byte)'\n');
         }
 
         l.outMu.Lock();
@@ -262,7 +262,7 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
         var (_, err) = l.@out.Write(buf.ValueSlot);
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -394,7 +394,7 @@ public static Δio.Writer Writer(this ж<Logger> Ꮡl) {
         ᒐd1 = true;
         return l.@out;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡl.DerefOrNull().outMu.Unlock(); ᒐ.Run(); }
 }
 

@@ -18,7 +18,7 @@ internal const bool debugSelect = false;
 // Known to compiler.
 // Changes here must also be made in src/cmd/compile/internal/walk/select.go's scasetype.
 partial struct scase {
-    internal ж<Δhchan> c;      // chan
+    internal ж<Δhchan> c;          // chan
     internal @unsafe.Pointer elem; // data element
 }
 
@@ -32,7 +32,7 @@ internal static void selectsetpc(ref uintptr pc) {
 }
 
 internal static void sellock(slice<scase> scases, slice<uint16> lockorder) {
-    ж<Δhchan> c = default!;
+    ж<Δhchan> c = default;
     foreach (var (_, o) in lockorder) {
         var c0 = scases[o].c;
         if (c0 != c) {
@@ -83,7 +83,7 @@ internal static bool selparkcommit(ж<g> Ꮡgp, @unsafe.Pointer _) {
     // particular, it must not access the *hselect. That's okay,
     // because by the time this is called, gp.waiting has all
     // channels in lock order.
-    ж<Δhchan> lastc = default!;
+    ж<Δhchan> lastc = default;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
         if (sg.of(sudog.Ꮡc).get() != lastc && lastc != nil) {
             // As soon as we unlock the channel, fields in
@@ -103,7 +103,7 @@ internal static bool selparkcommit(ж<g> Ꮡgp, @unsafe.Pointer _) {
 }
 
 internal static void block() {
-    gopark(default!, nil, waitReasonSelectNoCases, traceBlockForever, 1); // forever
+    gopark(default, nil, waitReasonSelectNoCases, traceBlockForever, 1); // forever
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -127,7 +127,7 @@ internal static readonly @string selectgoBadWakeupˢ = "selectgo: bad wakeup"u8;
 // ordinal position of its respective select{recv,send,default} call.
 // Also, if the chosen scase was a receive operation, it reports whether
 // a value was received.
-internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, ж<uintptr> Ꮡpc0, nint nsends, nint nrecvs, bool block) {
+internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> order0, ж<uintptr> pc0, nint nsends, nint nrecvs, bool block) {
     ref var cas0 = ref Ꮡcas0.DerefOrNull();
 
     var gp = getg();
@@ -138,7 +138,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     // NOTE: In order to maintain a lean stack size, the number of scases
     // is capped at 65536.
     var cas1 = array<scase>.AliasPointer(Ꮡcas0, 65536);
-    var order1 = array<uint16>.AliasPointer(Ꮡorder0, 131072);
+    var order1 = array<uint16>.AliasPointer(order0, 131072);
 
     nint ncases = nsends + nrecvs;
     var scases = cas1.slice(0, ncases, ncases);
@@ -149,20 +149,20 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     // Even when raceenabled is true, there might be select
     // statements in packages compiled without -race (e.g.,
     // ensureSigM in runtime/signal_unix.go).
-    slice<uintptr> pcs = default!;
-    if (raceenabled && Ꮡpc0 != nil) {
-        var pc1 = array<uintptr>.AliasPointer(Ꮡpc0, 65536);
+    slice<uintptr> pcs = default;
+    if (raceenabled && pc0 != nil) {
+        var pc1 = array<uintptr>.AliasPointer(pc0, 65536);
         pcs = pc1.slice(0, ncases, ncases);
     }
     var pcsʗ1 = pcs;
     uintptr casePC(nint casiΔ1) {
-        if (pcsʗ1 == default!) {
+        if (pcsʗ1 == nil) {
             return (uintptr)(0);
         }
         return pcsʗ1[casiΔ1];
     }
 
-    int64 t0 = default!;
+    int64 t0 = default;
     if (blockprofilerate > 0) {
         t0 = cputicks();
     }
@@ -182,21 +182,21 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         var casΔ1 = Ꮡ(scases, i);
 
         // Omit cases without channels from the poll and lock orders.
-        if ((~casΔ1).c == nil) {
-            casΔ1.Value.elem = default!; // allow GC
+        if (casΔ1.c == nil) {
+            casΔ1.elem = default; // allow GC
             continue;
         }
 
-        if ((~(~casΔ1).c).bubble != nil){
-            if ((~getg()).bubble != (~(~casΔ1).c).bubble) {
+        if (casΔ1.c.bubble != nil) {
+            if ((~getg()).bubble != casΔ1.c.bubble) {
                 fatal(selectOnSynctestChannelˢ);
             }
         } else {
             allSynctest = false;
         }
 
-        if ((~(~casΔ1).c).timer != nil) {
-            (~(~casΔ1).c).timer.maybeRunChan((~casΔ1).c);
+        if (casΔ1.c.timer != nil) {
+            casΔ1.c.timer.maybeRunChan(casΔ1.c);
         }
 
         var j = cheaprandn((uint32)(norder + 1));
@@ -232,7 +232,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         var cΔ2 = scases[o].c;
         lockorder[i] = lockorder[0];
         nint j = 0;
-        while (ᐧ) {
+        for (;;) {
             nint kΔ2 = j * 2 + 1;
             if (kΔ2 >= i) {
                 break;
@@ -262,48 +262,48 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     // lock all the channels involved in the select
     sellock(scases, lockorder);
 
-    ж<sudog> sg = default!;
-    ж<Δhchan> c = default!;
-    ж<scase> k = default!;
-    ж<sudog> sglist = default!;
-    ж<sudog> sgnext = default!;
-    @unsafe.Pointer qp = default!;
-    ж<ж<sudog>> nextp = default!;
+    ж<sudog> sg = default;
+    ж<Δhchan> c = default;
+    ж<scase> k = default;
+    ж<sudog> sglist = default;
+    ж<sudog> sgnext = default;
+    @unsafe.Pointer qp = default;
+    ж<ж<sudog>> nextp = default;
 
     // pass 1 - look for something already waiting
-    nint casi = default!;
-    ж<scase> cas = default!;
-    bool caseSuccess = default!;
+    nint casi = default;
+    ж<scase> cas = default;
+    bool caseSuccess = default;
     int64 caseReleaseTime = -1;
-    bool recvOK = default!;
+    bool recvOK = default;
     foreach (var (_, casei) in pollorder) {
         casi = (nint)casei;
         cas = Ꮡ(scases, casi);
-        c = cas.Value.c;
+        c = cas.c;
 
-        if (casi >= nsends){
+        if (casi >= nsends) {
             sg = c.of(runtime_package.Δhchan.Ꮡsendq).dequeue();
             if (sg != nil) {
                 goto recv;
             }
-            if ((~c).qcount > 0) {
+            if (c.qcount > 0) {
                 goto bufrecv;
             }
-            if ((~c).closed != 0) {
+            if (c.closed != 0) {
                 goto rclose;
             }
         } else {
             if (raceenabled) {
                 racereadpc((uintptr)c.raceaddr(), casePC(casi), chansendpc);
             }
-            if ((~c).closed != 0) {
+            if (c.closed != 0) {
                 goto sclose;
             }
             sg = c.of(runtime_package.Δhchan.Ꮡrecvq).dequeue();
             if (sg != nil) {
                 goto send;
             }
-            if ((~c).qcount < (~c).dataqsiz) {
+            if (c.qcount < c.dataqsiz) {
                 goto bufsend;
             }
         }
@@ -323,13 +323,13 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     foreach (var (_, casei) in lockorder) {
         casi = (nint)casei;
         cas = Ꮡ(scases, casi);
-        c = cas.Value.c;
+        c = cas.c;
         var sgΔ1 = acquireSudog();
         sgΔ1.Value.g = gp;
         sgΔ1.Value.isSelect = true;
         // No stack splits between assigning elem and enqueuing
         // sg on gp.waiting where copystack can find it.
-        sgΔ1.of(sudog.Ꮡelem).set((~cas).elem);
+        sgΔ1.of(sudog.Ꮡelem).set(cas.elem);
         sgΔ1.Value.releasetime = 0;
         if (t0 != 0) {
             sgΔ1.Value.releasetime = -1;
@@ -339,19 +339,19 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         nextp.ValueSlot = sgΔ1;
         nextp = sgΔ1.of(sudog.Ꮡwaitlink);
 
-        if (casi < nsends){
+        if (casi < nsends) {
             c.of(runtime_package.Δhchan.Ꮡsendq).enqueue(sgΔ1);
         } else {
             c.of(runtime_package.Δhchan.Ꮡrecvq).enqueue(sgΔ1);
         }
 
-        if ((~c).timer != nil) {
+        if (c.timer != nil) {
             blockTimerChan(ref (c).DerefOrNull());
         }
     }
 
     // wait for someone to wake us up
-    gp.Value.param = default!;
+    gp.Value.param = default;
     // Signal to anyone trying to shrink our stack that we're about
     // to park on a channel. The window between when this G's status
     // changes and when we set gp.activeStackChans is not safe for
@@ -364,14 +364,14 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
 
     gp.of(g.ᏑselectDone).Store(0);
     sg = (ж<sudog>)(uintptr)((~gp).param);
-    gp.Value.param = default!;
+    gp.Value.param = default;
 
     // pass 3 - dequeue from unsuccessful chans
     // otherwise they stack up on quiet channels
     // record the successful case, if any.
     // We singly-linked up the SudoGs in lock order.
     casi = -1;
-    cas = default!;
+    cas = default;
     caseSuccess = false;
     sglist = gp.Value.waiting;
     // Clear all elem before unlinking from gp.waiting.
@@ -380,14 +380,14 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         sg1.of(sudog.Ꮡelem).set(nil);
         sg1.of(sudog.Ꮡc).set(nil);
     }
-    gp.Value.waiting = default!;
+    gp.Value.waiting = default;
 
     foreach (var (_, casei) in lockorder) {
         k = Ꮡ(scases, casei);
-        if ((~(~k).c).timer != nil) {
-            unblockTimerChan(ref ((~k).c).DerefOrNull());
+        if (k.c.timer != nil) {
+            unblockTimerChan(ref (k.c).DerefOrNull());
         }
-        if (sg == sglist){
+        if (sg == sglist) {
             // sg has already been dequeued by the G that woke us up.
             casi = (nint)casei;
             cas = k;
@@ -396,15 +396,15 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
                 caseReleaseTime = sglist.Value.releasetime;
             }
         } else {
-            c = k.Value.c;
-            if ((nint)casei < nsends){
+            c = k.c;
+            if ((nint)casei < nsends) {
                 c.of(runtime_package.Δhchan.Ꮡsendq).dequeueSudoG(sglist);
             } else {
                 c.of(runtime_package.Δhchan.Ꮡrecvq).dequeueSudoG(sglist);
             }
         }
         sgnext = sglist.Value.waitlink;
-        sglist.Value.waitlink = default!;
+        sglist.Value.waitlink = default;
         releaseSudog(sglist);
         sglist = sgnext;
     }
@@ -413,13 +413,13 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         @throw(selectgoBadWakeupˢ);
     }
 
-    c = cas.Value.c;
+    c = cas.c;
 
     if (debugSelect) {
         print((@string)"wait-return: cas0="u8, Ꮡcas0.OrTypedNil(), (@string)" c="u8, c.OrTypedNil(), (@string)" cas="u8, cas.OrTypedNil(), (@string)" send="u8, casi < nsends, (@string)"\n"u8);
     }
 
-    if (casi < nsends){
+    if (casi < nsends) {
         if (!caseSuccess) {
             goto sclose;
         }
@@ -428,27 +428,24 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     }
 
     if (raceenabled) {
-        if (casi < nsends){
-            raceReadObjectPC(ref ((~c).elemtype).DerefOrNull(), (~cas).elem, casePC(casi), chansendpc);
-        } else 
-        if ((~cas).elem != nil) {
-            raceWriteObjectPC(ref ((~c).elemtype).DerefOrNull(), (~cas).elem, casePC(casi), chanrecvpc);
+        if (casi < nsends) {
+            raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chansendpc);
+        } else if (cas.elem != nil) {
+            raceWriteObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chanrecvpc);
         }
     }
     if (msanenabled) {
-        if (casi < nsends){
-            msanread((~cas).elem, (~(~c).elemtype).Size_);
-        } else 
-        if ((~cas).elem != nil) {
-            msanwrite((~cas).elem, (~(~c).elemtype).Size_);
+        if (casi < nsends) {
+            msanread(cas.elem, c.elemtype.Size_);
+        } else if (cas.elem != nil) {
+            msanwrite(cas.elem, c.elemtype.Size_);
         }
     }
     if (asanenabled) {
-        if (casi < nsends){
-            asanread((~cas).elem, (~(~c).elemtype).Size_);
-        } else 
-        if ((~cas).elem != nil) {
-            asanwrite((~cas).elem, (~(~c).elemtype).Size_);
+        if (casi < nsends) {
+            asanread(cas.elem, c.elemtype.Size_);
+        } else if (cas.elem != nil) {
+            asanwrite(cas.elem, c.elemtype.Size_);
         }
     }
 
@@ -458,56 +455,56 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
 bufrecv:
     if (raceenabled) {
         // can receive from buffer
-        if ((~cas).elem != nil) {
-            raceWriteObjectPC(ref ((~c).elemtype).DerefOrNull(), (~cas).elem, casePC(casi), chanrecvpc);
+        if (cas.elem != nil) {
+            raceWriteObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chanrecvpc);
         }
-        racenotify(c, (~c).recvx, nil);
+        racenotify(c, c.recvx, nil);
     }
-    if (msanenabled && (~cas).elem != nil) {
-        msanwrite((~cas).elem, (~(~c).elemtype).Size_);
+    if (msanenabled && cas.elem != nil) {
+        msanwrite(cas.elem, c.elemtype.Size_);
     }
-    if (asanenabled && (~cas).elem != nil) {
-        asanwrite((~cas).elem, (~(~c).elemtype).Size_);
+    if (asanenabled && cas.elem != nil) {
+        asanwrite(cas.elem, c.elemtype.Size_);
     }
     recvOK = true;
-    qp = (uintptr)chanbuf(c, (~c).recvx);
-    if ((~cas).elem != nil) {
-        typedmemmove((~c).elemtype, (~cas).elem, qp);
+    qp = (uintptr)chanbuf(c, c.recvx);
+    if (cas.elem != nil) {
+        typedmemmove(c.elemtype, cas.elem, qp);
     }
-    typedmemclr((~c).elemtype, qp);
-    c.Value.recvx++;
-    if ((~c).recvx == (~c).dataqsiz) {
-        c.Value.recvx = 0;
+    typedmemclr(c.elemtype, qp);
+    c.recvx++;
+    if (c.recvx == c.dataqsiz) {
+        c.recvx = 0;
     }
-    c.Value.qcount--;
+    c.qcount--;
     selunlock(scases, lockorder);
     goto retc;
 
 bufsend:
     if (raceenabled) {
         // can send to buffer
-        racenotify(c, (~c).sendx, nil);
-        raceReadObjectPC(ref ((~c).elemtype).DerefOrNull(), (~cas).elem, casePC(casi), chansendpc);
+        racenotify(c, c.sendx, nil);
+        raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chansendpc);
     }
     if (msanenabled) {
-        msanread((~cas).elem, (~(~c).elemtype).Size_);
+        msanread(cas.elem, c.elemtype.Size_);
     }
     if (asanenabled) {
-        asanread((~cas).elem, (~(~c).elemtype).Size_);
+        asanread(cas.elem, c.elemtype.Size_);
     }
-    typedmemmove((~c).elemtype, (uintptr)chanbuf(c, (~c).sendx), (~cas).elem);
-    c.Value.sendx++;
-    if ((~c).sendx == (~c).dataqsiz) {
-        c.Value.sendx = 0;
+    typedmemmove(c.elemtype, (uintptr)chanbuf(c, c.sendx), cas.elem);
+    c.sendx++;
+    if (c.sendx == c.dataqsiz) {
+        c.sendx = 0;
     }
-    c.Value.qcount++;
+    c.qcount++;
     selunlock(scases, lockorder);
     goto retc;
 
 recv:
     var lockorderʗ1 = lockorder;
     var scasesʗ1 = scases;
-    recv(c, sg, (~cas).elem, () => {
+    recv(c, sg, cas.elem, () => {
         // can receive from sleeping sender (sg)
         selunlock(scasesʗ1, lockorderʗ1);
     }, 2);
@@ -521,8 +518,8 @@ rclose:
     selunlock(scases, lockorder);
     // read at end of closed channel
     recvOK = false;
-    if ((~cas).elem != nil) {
-        typedmemclr((~c).elemtype, (~cas).elem);
+    if (cas.elem != nil) {
+        typedmemclr(c.elemtype, cas.elem);
     }
     if (raceenabled) {
         raceacquire((uintptr)c.raceaddr());
@@ -532,17 +529,17 @@ rclose:
 send:
     if (raceenabled) {
         // can send to a sleeping receiver (sg)
-        raceReadObjectPC(ref ((~c).elemtype).DerefOrNull(), (~cas).elem, casePC(casi), chansendpc);
+        raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chansendpc);
     }
     if (msanenabled) {
-        msanread((~cas).elem, (~(~c).elemtype).Size_);
+        msanread(cas.elem, c.elemtype.Size_);
     }
     if (asanenabled) {
-        asanread((~cas).elem, (~(~c).elemtype).Size_);
+        asanread(cas.elem, c.elemtype.Size_);
     }
     var lockorderʗ2 = lockorder;
     var scasesʗ2 = scases;
-    send(c, sg, (~cas).elem, () => {
+    send(c, sg, cas.elem, () => {
         selunlock(scasesʗ2, lockorderʗ2);
     }, 2);
     if (debugSelect) {
@@ -573,7 +570,7 @@ internal static uintptr sortkey(this ж<Δhchan> Ꮡc) {
 partial struct runtimeSelect {
     internal selectDir dir;
     internal @unsafe.Pointer typ; // channel type (not used here)
-    internal ж<Δhchan> ch;      // channel
+    internal ж<Δhchan> ch;        // channel
     internal @unsafe.Pointer val; // ptr to data (SendDir) or ptr to receive buffer (RecvDir)
 }
 
@@ -581,8 +578,8 @@ partial struct runtimeSelect {
 partial struct selectDir /*num:nint*/;
 
 internal static selectDir _ᴛ1ʗ => /* iota */ 0;
-internal static selectDir selectSend => 1; // case Chan <- Send
-internal static selectDir selectRecv => 2; // case <-Chan:
+internal static selectDir selectSend => 1;    // case Chan <- Send
+internal static selectDir selectRecv => 2;    // case <-Chan:
 internal static selectDir selectDefault => 3; // default
 
 //go:linkname reflect_rselect reflect.rselect
@@ -596,20 +593,23 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     nint nrecvs = 0;
     nint dflt = -1;
     foreach (var (i, rc) in cases) {
-        nint j = default!;
-        var exprᴛ1 = rc.dir;
-        if (exprᴛ1 == selectDefault) {
+        nint j = default;
+        switch (rc.dir) {
+        case var ᴛ when ᴛ == selectDefault: {
             dflt = i;
             continue;
+            break;
         }
-        else if (exprᴛ1 == selectSend) {
+        case var ᴛ when ᴛ == selectSend: {
             j = nsends;
             nsends++;
+            break;
         }
-        else if (exprᴛ1 == selectRecv) {
+        case var ᴛ when ᴛ == selectRecv: {
             nrecvs++;
             j = len(cases) - nrecvs;
-        }
+            break;
+        }}
 
         sel[j] = new scase(c: rc.ch, elem: rc.val);
         orig[j] = i;
@@ -627,7 +627,7 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     }
 
     var order = new slice<uint16>(2 * (nsends + nrecvs));
-    ж<uintptr> pc0 = default!;
+    ж<uintptr> pc0 = default;
     if (raceenabled) {
         var pcs = new slice<uintptr>(nsends + nrecvs);
         foreach (var i in range(pcs)) {
@@ -639,7 +639,7 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     var (chosen, recvOK) = selectgo(Ꮡ(sel, 0), Ꮡ(order, 0), pc0, nsends, nrecvs, dflt == -1);
 
     // Translate chosen back to caller's ordering.
-    if (chosen < 0){
+    if (chosen < 0) {
         chosen = dflt;
     } else {
         chosen = orig[chosen];
@@ -657,29 +657,29 @@ internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
             // middle of queue
             x.Value.next = y;
             y.Value.prev = x;
-            sgp.next = default!;
-            sgp.prev = default!;
+            sgp.next = default;
+            sgp.prev = default;
             return;
         }
         // end of queue
-        x.Value.next = default!;
+        x.Value.next = default;
         q.last = x;
-        sgp.prev = default!;
+        sgp.prev = default;
         return;
     }
     if (y != nil) {
         // start of queue
-        y.Value.prev = default!;
+        y.Value.prev = default;
         q.first = y;
-        sgp.next = default!;
+        sgp.next = default;
         return;
     }
 
     // x==y==nil. Either sgp is the only element in the queue,
     // or it has already been removed. Use q.first to disambiguate.
     if (q.first == Ꮡsgp) {
-        q.first = default!;
-        q.last = default!;
+        q.first = default;
+        q.last = default;
     }
 }
 

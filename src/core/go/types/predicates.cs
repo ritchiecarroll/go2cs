@@ -61,7 +61,7 @@ internal static bool isConstType(ΔType t) {
 // isBasic does not look inside a type parameter.
 internal static bool isBasic(ΔType t, BasicInfo info) {
     var (u, _) = t.Underlying()._<ж<Basic>>(ᐧ);
-    return u != nil && (BasicInfo)((~u).info & info) != 0;
+    return u != nil && (BasicInfo)(u.info & info) != 0;
 }
 
 // The allX predicates below report whether t is an X.
@@ -101,7 +101,7 @@ internal static bool allNumericOrString(ΔType t) {
 internal static bool allBasic(ΔType t, BasicInfo info) {
     {
         var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
-            return tpar.@is((ж<Δterm> tΔ1) => tΔ1 != nil && isBasic((~tΔ1).typ, info));
+            return tpar.@is((ж<Δterm> tΔ1) => tΔ1 != nil && isBasic(tΔ1.typ, info));
         }
     }
     return isBasic(t, info);
@@ -139,7 +139,7 @@ internal static bool isTyped(ΔType t) {
     // Alias and named types cannot denote untyped types
     // so there's no need to call Unalias or Underlying, below.
     var (b, _) = t._<ж<Basic>>(ᐧ);
-    return b == nil || (BasicInfo)((~b).info & IsUntyped) == 0;
+    return b == nil || (BasicInfo)(b.info & IsUntyped) == 0;
 }
 
 // isUntyped(t) is the same as !isTyped(t).
@@ -154,7 +154,7 @@ internal static bool isUntypedNumeric(ΔType t) {
     // Alias and named types cannot denote untyped types
     // so there's no need to call Unalias or Underlying, below.
     var (b, _) = t._<ж<Basic>>(ᐧ);
-    return b != nil && (BasicInfo)((~b).info & IsUntyped) != 0 && (BasicInfo)((~b).info & IsNumeric) != 0;
+    return b != nil && (BasicInfo)(b.info & IsUntyped) != 0 && (BasicInfo)(b.info & IsNumeric) != 0;
 }
 
 // IsInterface reports whether t is an interface type.
@@ -180,9 +180,9 @@ internal static bool isTypeParam(ΔType t) {
 // computed yet.
 internal static bool hasEmptyTypeset(ΔType t) {
     {
-        var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil && (~tpar).bound != default!) {
-            var (iface, _) = safeUnderlying((~tpar).bound)._<ж<Interface>>(ᐧ);
-            return iface != nil && (~iface).tset != nil && (~iface).tset.IsEmpty();
+        var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil && tpar.bound != nil) {
+            var (iface, _) = safeUnderlying(tpar.bound)._<ж<Interface>>(ᐧ);
+            return iface != nil && iface.tset != nil && iface.tset.IsEmpty();
         }
     }
     return false;
@@ -194,17 +194,17 @@ internal static bool hasEmptyTypeset(ΔType t) {
 internal static bool isGeneric(ΔType t) {
     // A parameterized type is only generic if it doesn't have an instantiation already.
     {
-        var (alias, _) = t._<ж<Alias>>(ᐧ); if (alias != nil && (~alias).tparams != nil && (~alias).targs == nil) {
+        var (alias, _) = t._<ж<Alias>>(ᐧ); if (alias != nil && alias.tparams != nil && alias.targs == nil) {
             return true;
         }
     }
     var named = asNamed(t);
-    return named != nil && (~named).obj != nil && (~named).inst == nil && named.TypeParams().Len() > 0;
+    return named != nil && named.obj != nil && named.inst == nil && named.TypeParams().Len() > 0;
 }
 
 // Comparable reports whether values of type T are comparable.
 public static bool Comparable(ΔType T) {
-    return comparableType(T, true, default!) == nil;
+    return comparableType(T, true, default) == nil;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -216,9 +216,9 @@ internal static readonly @string incomparableTypesInTypeˢ = "incomparable types
 // If dynamic is set, non-type parameter interfaces are always comparable.
 internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType, bool> seen) {
     if (seen[T]) {
-        return default!;
+        return default;
     }
-    if (seen == default!) {
+    if (seen == nil) {
         seen = new map<ΔType, bool>();
     }
     seen[T] = true;
@@ -227,7 +227,7 @@ internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType,
     switch (switchᴛ10.type()) {
     case ж<Basic> t: {
         // assume invalid types to be comparable to avoid follow-up errors
-        if ((~t).kind == UntypedNil) {
+        if (t.kind == UntypedNil) {
             return typeErrorf(""u8);
         }
         break;
@@ -239,7 +239,7 @@ internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType,
         break;
     }
     case ж<Struct> t: {
-        foreach (var (_, f) in (~t).fields) {
+        foreach (var (_, f) in t.fields) {
             if (comparableType((~f).typ, dynamic, seen) != nil) {
                 return typeErrorf("struct containing %s cannot be compared"u8, (~f).typ);
             }
@@ -247,17 +247,17 @@ internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType,
         break;
     }
     case ж<Array> t: {
-        if (comparableType((~t).elem, dynamic, seen) != nil) {
+        if (comparableType(t.elem, dynamic, seen) != nil) {
             return typeErrorf("%s cannot be compared"u8, T);
         }
         break;
     }
     case ж<Interface> t: {
         if (dynamic && !isTypeParam(T) || t.typeSet().IsComparable(seen)) {
-            return default!;
+            return default;
         }
-        @string cause = default!;
-        if (t.typeSet().IsEmpty()){
+        @string cause = default;
+        if (t.typeSet().IsEmpty()) {
             cause = emptyTypeSetˢ;
         } else {
             cause = incomparableTypesInTypeˢ;
@@ -269,7 +269,7 @@ internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType,
         return typeErrorf(""u8);
     }}
 
-    return default!;
+    return default;
 }
 
 // hasNil reports whether type t includes the nil value.
@@ -277,7 +277,7 @@ internal static bool hasNil(ΔType t) {
     var switchᴛ11 = t.Underlying();
     switch (switchᴛ11.type()) {
     case ж<Basic> u: {
-        return (~u).kind == UnsafePointer;
+        return u.kind == UnsafePointer;
     }
     case ж<Slice> _:
     case ж<Pointer> _:
@@ -288,7 +288,7 @@ internal static bool hasNil(ΔType t) {
         return true;
     }
     case ж<Interface> u: {
-        return !isTypeParam(t) || underIs(t, (ΔType uΔ1) => uΔ1 != default! && hasNil(uΔ1));
+        return !isTypeParam(t) || underIs(t, (ΔType uΔ1) => uΔ1 != nil && hasNil(uΔ1));
     }}
     return false;
 }
@@ -320,7 +320,7 @@ internal static bool identical(this ref ifacePair p, ж<ifacePair> Ꮡq) {
 
 // A comparer is used to compare types.
 partial struct comparer {
-    internal bool ignoreTags; // if set, identical ignores struct tags
+    internal bool ignoreTags;     // if set, identical ignores struct tags
     internal bool ignoreInvalids; // if set, identical treats an invalid type as identical to any type
 }
 
@@ -347,7 +347,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // above. See also comment in TypeName.IsAlias.
         {
             var (yΔ1, ok) = y._<ж<Basic>>(ᐧ); if (ok) {
-                return (~xΔ1).kind == (~yΔ1).kind;
+                return xΔ1.kind == yΔ1.kind;
             }
         }
         break;
@@ -359,7 +359,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var (yΔ2, ok) = y._<ж<Array>>(ᐧ); if (ok) {
                 // If one or both array lengths are unknown (< 0) due to some error,
                 // assume they are the same to avoid spurious follow-on errors.
-                return ((~xΔ1).len < 0 || (~yΔ2).len < 0 || (~xΔ1).len == (~yΔ2).len) && c.identical((~xΔ1).elem, (~yΔ2).elem, Ꮡp);
+                return (xΔ1.len < 0 || yΔ2.len < 0 || xΔ1.len == yΔ2.len) && c.identical(xΔ1.elem, yΔ2.elem, Ꮡp);
             }
         }
         break;
@@ -368,7 +368,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // Two slice types are identical if they have identical element types.
         {
             var (yΔ3, ok) = y._<ж<Slice>>(ᐧ); if (ok) {
-                return c.identical((~xΔ1).elem, (~yΔ3).elem, Ꮡp);
+                return c.identical(xΔ1.elem, yΔ3.elem, Ꮡp);
             }
         }
         break;
@@ -381,9 +381,9 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         {
             var (yΔ4, ok) = y._<ж<Struct>>(ᐧ); if (ok) {
                 if (xΔ1.NumFields() == yΔ4.NumFields()) {
-                    foreach (var (i, f) in (~xΔ1).fields) {
-                        var g = (~yΔ4).fields[i];
-                        if ((~f).embedded != (~g).embedded || !c.ignoreTags && xΔ1.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId((~g).pkg, (~g).name, false) || !c.identical((~f).typ, (~g).typ, Ꮡp)) {
+                    foreach (var (i, f) in xΔ1.fields) {
+                        var g = yΔ4.fields[i];
+                        if (f.embedded != g.embedded || !c.ignoreTags && xΔ1.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId((~g).pkg, (~g).name, false) || !c.identical((~f).typ, (~g).typ, Ꮡp)) {
                             return false;
                         }
                     }
@@ -397,7 +397,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // Two pointer types are identical if they have identical base types.
         {
             var (yΔ5, ok) = y._<ж<Pointer>>(ᐧ); if (ok) {
-                return c.identical((~xΔ1).@base, (~yΔ5).@base, Ꮡp);
+                return c.identical(xΔ1.@base, yΔ5.@base, Ꮡp);
             }
         }
         break;
@@ -409,8 +409,8 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var (yΔ6, ok) = y._<ж<Tuple>>(ᐧ); if (ok) {
                 if (xΔ1.Len() == yΔ6.Len()) {
                     if (xΔ1 != nil) {
-                        foreach (var (i, v) in (~xΔ1).vars) {
-                            var w = (~yΔ6).vars[i];
+                        foreach (var (i, v) in xΔ1.vars) {
+                            var w = yΔ6.vars[i];
                             if (!c.identical((~v).typ, (~w).typ, Ꮡp)) {
                                 return false;
                             }
@@ -440,8 +440,8 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
 
         // In the case of generic signatures, we will substitute in yparams and
         // yresults.
-        var yparams = yΔ7.Value.@params;
-        var yresults = yΔ7.Value.results;
+        var yparams = yΔ7.@params;
+        var yresults = yΔ7.results;
 
         if (xΔ1.TypeParams().Len() > 0) {
             // We must ignore type parameter names when comparing x and y. The
@@ -449,28 +449,28 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var xtparams = xΔ1.TypeParams().list();
             var ytparams = yΔ7.TypeParams().list();
 
-            slice<ΔType> targs = default!;
+            slice<ΔType> targs = default;
             foreach (var i in range(xtparams)) {
                 targs = append(targsᴷ, targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
             }
             var smap = makeSubstMap(ytparams, targs);
 
-            ж<Checker> check = default!;               // ok to call subst on a nil *Checker
-            var ctxt = NewContext(); // need a non-nil Context for the substitution below
+            ж<Checker> check = default; // ok to call subst on a nil *Checker
+            var ctxt = NewContext();    // need a non-nil Context for the substitution below
 
             // Constraints must be pair-wise identical, after substitution.
             foreach (var (i, xtparam) in xtparams) {
-                var ybound = check.subst(nopos, (~ytparams[i]).bound, smap, nil, ctxt);
-                if (!c.identical((~xtparam).bound, ybound, Ꮡp)) {
+                var ybound = check.subst(nopos, ytparams[i].bound, smap, nil, ctxt);
+                if (!c.identical(xtparam.bound, ybound, Ꮡp)) {
                     return false;
                 }
             }
 
-            yparams = check.subst(nopos, new TupleжΔType((~yΔ7).@params), smap, nil, ctxt)._<ж<Tuple>>();
-            yresults = check.subst(nopos, new TupleжΔType((~yΔ7).results), smap, nil, ctxt)._<ж<Tuple>>();
+            yparams = check.subst(nopos, new TupleжΔType(yΔ7.@params), smap, nil, ctxt)._<ж<Tuple>>();
+            yresults = check.subst(nopos, new TupleжΔType(yΔ7.results), smap, nil, ctxt)._<ж<Tuple>>();
         }
 
-        return (~xΔ1).variadic == (~yΔ7).variadic && c.identical(new TupleжΔType((~xΔ1).@params), new TupleжΔType(yparams), Ꮡp) && c.identical(new TupleжΔType((~xΔ1).results), new TupleжΔType(yresults), Ꮡp);
+        return xΔ1.variadic == yΔ7.variadic && c.identical(new TupleжΔType(xΔ1.@params), new TupleжΔType(yparams), Ꮡp) && c.identical(new TupleжΔType(xΔ1.results), new TupleжΔType(yresults), Ꮡp);
     }
     case ж<Union> xΔ1: {
         {
@@ -480,7 +480,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
                 var unionSets = new map<ж<Union>, ж<_TypeSet>>();
                 var xset = computeUnionTypeSet(nil, unionSets, nopos, xΔ1);
                 var yset = computeUnionTypeSet(nil, unionSets, nopos, yΔ8);
-                return (~xset).terms.equal((~yset).terms);
+                return xset.terms.equal(yset.terms);
             }
         }
         break;
@@ -497,14 +497,14 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var (yΔ9, ok) = y._<ж<Interface>>(ᐧ); if (ok) {
                 var xset = xΔ1.typeSet();
                 var yset = yΔ9.typeSet();
-                if ((~xset).comparable != (~yset).comparable) {
+                if (xset.comparable != yset.comparable) {
                     return false;
                 }
-                if (!(~xset).terms.equal((~yset).terms)) {
+                if (!xset.terms.equal(yset.terms)) {
                     return false;
                 }
-                var a = xset.Value.methods;
-                var b = yset.Value.methods;
+                var a = xset.methods;
+                var b = yset.methods;
                 if (len(a) == len(b)) {
                     // Interface types are the only types where cycles can occur
                     // that are not "terminated" via named types; and such cycles
@@ -555,7 +555,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // Two map types are identical if they have identical key and value types.
         {
             var (yΔ10, ok) = y._<ж<Map>>(ᐧ); if (ok) {
-                return c.identical((~xΔ1).key, (~yΔ10).key, Ꮡp) && c.identical((~xΔ1).elem, (~yΔ10).elem, Ꮡp);
+                return c.identical(xΔ1.key, yΔ10.key, Ꮡp) && c.identical(xΔ1.elem, yΔ10.elem, Ꮡp);
             }
         }
         break;
@@ -565,7 +565,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // and the same direction.
         {
             var (yΔ11, ok) = y._<ж<Chan>>(ᐧ); if (ok) {
-                return (~xΔ1).dir == (~yΔ11).dir && c.identical((~xΔ1).elem, (~yΔ11).elem, Ꮡp);
+                return xΔ1.dir == yΔ11.dir && c.identical(xΔ1.elem, yΔ11.elem, Ꮡp);
             }
         }
         break;
@@ -612,9 +612,9 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
 }
 
 // identicalOrigin reports whether x and y originated in the same declaration.
-internal static bool identicalOrigin(ж<Named> Ꮡx, ж<Named> Ꮡy) {
+internal static bool identicalOrigin(ж<Named> x, ж<Named> y) {
     // TODO(gri) is this correct?
-    return (~Ꮡx.Origin()).obj == (~Ꮡy.Origin()).obj;
+    return x.Origin().obj == y.Origin().obj;
 }
 
 // identicalInstance reports if two type instantiations are identical.
@@ -636,25 +636,25 @@ public static ΔType Default(ΔType t) {
     // so there's no need to call Unalias or Underlying, below.
     {
         var (tΔ1, _) = t._<ж<Basic>>(ᐧ); if (tΔ1 != nil) {
-            var exprᴛ1 = (~tΔ1).kind;
-            if (exprᴛ1 == UntypedBool) {
+            switch (tΔ1.kind) {
+            case var ᴛ when ᴛ == UntypedBool: {
                 return new BasicжΔType(Typ[Bool]);
             }
-            if (exprᴛ1 == ΔUntypedInt) {
+            case var ᴛ when ᴛ == ΔUntypedInt: {
                 return new BasicжΔType(Typ[Int]);
             }
-            if (exprᴛ1 == UntypedRune) {
+            case var ᴛ when ᴛ == UntypedRune: {
                 return universeRune; // use 'rune' name
             }
-            if (exprᴛ1 == ΔUntypedFloat) {
+            case var ᴛ when ᴛ == ΔUntypedFloat: {
                 return new BasicжΔType(Typ[Float64]);
             }
-            if (exprᴛ1 == ΔUntypedComplex) {
+            case var ᴛ when ᴛ == ΔUntypedComplex: {
                 return new BasicжΔType(Typ[Complex128]);
             }
-            if (exprᴛ1 == UntypedString) {
+            case var ᴛ when ᴛ == UntypedString: {
                 return new BasicжΔType(Typ[ΔString]);
-            }
+            }}
         }
     }
     return t;
@@ -672,12 +672,12 @@ internal static ΔType maxType(ΔType x, ΔType y) {
     }
     if (isUntypedNumeric(x) && isUntypedNumeric(y)) {
         // untyped types are basic types
-        if ((~x._<ж<Basic>>()).kind > (~y._<ж<Basic>>()).kind) {
+        if (x._<ж<Basic>>().kind > y._<ж<Basic>>().kind) {
             return x;
         }
         return y;
     }
-    return default!;
+    return default;
 }
 
 // clone makes a "flat copy" of *p and returns a pointer to the copy.
@@ -686,15 +686,14 @@ internal static ж<T> clone<T>(ж<T> Ꮡp)
 {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    ref var c = ref heap<T>(out var Ꮡc);
-    c = p;
+    ref var c = ref heap<T>(p, out var Ꮡc);
     return Ꮡc;
 }
 
 // isValidName reports whether s is a valid Go identifier.
 internal static bool isValidName(@string s) {
     foreach (var (i, ch) in s) {
-        if (!(unicode.IsLetter(ch) || ch == (rune)'_' || i > 0 && unicode.IsDigit(ch))) {
+        if (!(unicode.IsLetter(ch) || ch == '_' || i > 0 && unicode.IsDigit(ch))) {
             return false;
         }
     }

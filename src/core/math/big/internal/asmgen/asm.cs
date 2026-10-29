@@ -21,9 +21,9 @@ partial class asmgen_package {
 
 // An Asm is an assembly file being written.
 partial struct Asm {
-    public ж<Arch> Arch;        // architecture
-    internal bytes.Buffer @out;    // output buffer
-    internal uint64 regavail;          // bitmap of available registers
+    public ж<Arch> Arch;                // architecture
+    internal bytes.Buffer @out;         // output buffer
+    internal uint64 regavail;           // bitmap of available registers
     internal map<Option, bool> enabled; // enabled optional CPU features
 }
 
@@ -72,29 +72,29 @@ public static void Fatalf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany
     @string text = Ꮡa.of(Asm.Ꮡout).String();
     nint i = strings.LastIndex(text, textˢ);
     text = text.slice(i + 1);
-    throw panic("[" + (~a.Arch).Name + "] asmgen internal error: " + fmt.Sprintf(format, args.ꓸꓸꓸ) + "\n" + text);
+    throw panic("[" + a.Arch.Name + "] asmgen internal error: " + fmt.Sprintf(format, args.ꓸꓸꓸ) + "\n" + text);
 }
 
 // hint returns the register name for the given hint.
 internal static @string hint(this ж<Asm> Ꮡa, Hint h) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    if (h == HintCarry && (~a.Arch).regCarry != ""u8) {
-        return (~a.Arch).regCarry;
+    if (h == HintCarry && a.Arch.regCarry != ""u8) {
+        return a.Arch.regCarry;
     }
-    if (h == HintAltCarry && (~a.Arch).regAltCarry != ""u8) {
-        return (~a.Arch).regAltCarry;
+    if (h == HintAltCarry && a.Arch.regAltCarry != ""u8) {
+        return a.Arch.regAltCarry;
     }
-    if (h == HintNone || (~a.Arch).hint == default!) {
+    if (h == HintNone || a.Arch.hint == nil) {
         return ""u8;
     }
-    return (~a.Arch).hint(Ꮡa, h);
+    return a.Arch.hint(Ꮡa, h);
 }
 
 // ZR returns the zero register (the specific register guaranteed to hold the integer 0),
 // or else the zero Reg (Reg{}, which has r.Valid() == false).
 public static ΔReg ZR(this ref Asm a) {
-    return new ΔReg((~a.Arch).reg0);
+    return new ΔReg(a.Arch.reg0);
 }
 
 // tmp returns the temporary register, or else the zero Reg.
@@ -107,30 +107,30 @@ public static ΔReg ZR(this ref Asm a) {
 // not to suggest the use of any such pseudo-instructions in situations
 // where they would cause problems.
 internal static ΔReg tmp(this ref Asm a) {
-    return new ΔReg((~a.Arch).regTmp);
+    return new ΔReg(a.Arch.regTmp);
 }
 
 // Carry returns the carry register, or else the zero Reg.
 public static ΔReg Carry(this ref Asm a) {
-    return new ΔReg((~a.Arch).regCarry);
+    return new ΔReg(a.Arch.regCarry);
 }
 
 // AltCarry returns the secondary carry register, or else the zero Reg.
 public static ΔReg AltCarry(this ref Asm a) {
-    return new ΔReg((~a.Arch).regAltCarry);
+    return new ΔReg(a.Arch.regAltCarry);
 }
 
 // Imm returns a Reg representing an immediate (constant) value.
 public static ΔReg Imm(this ref Asm a, nint x) {
-    if (x == 0 && (~a.Arch).reg0 != ""u8) {
-        return new ΔReg((~a.Arch).reg0);
+    if (x == 0 && a.Arch.reg0 != ""u8) {
+        return new ΔReg(a.Arch.reg0);
     }
     return new ΔReg(fmt.Sprintf("$%d"u8, x));
 }
 
 // IsZero reports whether r is a zero immediate or the zero register.
 public static bool IsZero(this ref Asm a, ΔReg r) {
-    return r.name == "$0"u8 || (~a.Arch).reg0 != ""u8 && r.name == (~a.Arch).reg0;
+    return r.name == "$0"u8 || a.Arch.reg0 != ""u8 && r.name == a.Arch.reg0;
 }
 
 // Reg allocates a new register.
@@ -142,7 +142,7 @@ public static ΔReg Reg(this ж<Asm> Ꮡa) {
         Ꮡa.Fatalf("out of registers"u8);
     }
     a.regavail ^= (uint64)(((uint64)1).Lsh((int64)(i)));
-    return new ΔReg((~a.Arch).regs[i]);
+    return new ΔReg(a.Arch.regs[i]);
 }
 
 // RegHint allocates a new register, with a hint as to its purpose.
@@ -151,7 +151,7 @@ public static ΔReg RegHint(this ж<Asm> Ꮡa, Hint hint) {
 
     {
         @string name = Ꮡa.hint(hint); if (name != ""u8) {
-            nint i = slices.Index((~a.Arch).regs, name);
+            nint i = slices.Index(a.Arch.regs, name);
             if (i < 0) {
                 return new ΔReg(name);
             }
@@ -170,7 +170,7 @@ public static ΔReg RegHint(this ж<Asm> Ꮡa, Hint hint) {
 public static void Free(this ж<Asm> Ꮡa, ΔReg r) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    nint i = slices.Index((~a.Arch).regs, r.name);
+    nint i = slices.Index(a.Arch.regs, r.name);
     if (i < 0) {
         return;
     }
@@ -188,7 +188,7 @@ public static void Free(this ж<Asm> Ꮡa, ΔReg r) {
 public static void Unfree(this ж<Asm> Ꮡa, ΔReg r) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    nint i = slices.Index((~a.Arch).regs, r.name);
+    nint i = slices.Index(a.Arch.regs, r.name);
     if (i < 0) {
         return;
     }
@@ -218,7 +218,7 @@ public static void SetRegsUsed(this ref Asm a, ΔRegsUsed used) {
 
 // FreeAll frees all known registers.
 public static void FreeAll(this ref Asm a) {
-    a.regavail = ((uint64)1).Lsh((int64)(len((~a.Arch).regs))) - 1;
+    a.regavail = ((uint64)1).Lsh((int64)(len(a.Arch.regs))) - 1;
 }
 
 // Printf emits to the assembly output.
@@ -246,7 +246,7 @@ public static void EOL(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany ar
     ref var a = ref Ꮡa.DerefOrNull();
 
     var bytes = a.@out.Bytes();
-    if (len(bytes) > 0 && bytes[len(bytes) - 1] == (rune)'\n') {
+    if (len(bytes) > 0 && bytes[len(bytes) - 1] == '\n') {
         a.@out.Truncate(a.@out.Len() - 1);
     }
     Ꮡa.Comment(format, args.ꓸꓸꓸ);
@@ -257,8 +257,8 @@ public static void EOL(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany ar
 public static bool JmpEnable(this ж<Asm> Ꮡa, Option option, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    var jmpEnable = (~a.Arch).options[option];
-    if (jmpEnable == default!) {
+    var jmpEnable = a.Arch.options[option];
+    if (jmpEnable == nil) {
         return false;
     }
     jmpEnable(Ꮡa, label);
@@ -286,11 +286,10 @@ internal static void op3(this ж<Asm> Ꮡa, @string op, ΔReg src1, ΔReg src2, 
     if (op == ""u8) {
         Ꮡa.Fatalf("missing instruction"u8);
     }
-    if (src2 == dst){
+    if (src2 == dst) {
         // src2 and dst are same; print as 2-op form.
         Ꮡa.Printf("\t%s %s, %s\n"u8, op, src1, dst);
-    } else 
-    if ((~a.Arch).op3 != default! && !(~a.Arch).op3(op)){
+    } else if (a.Arch.op3 != nil && !a.Arch.op3(op)) {
         // Machine does not have 3-op form for op; convert to 2-op.
         if (src1 == dst) {
             Ꮡa.Fatalf("implicit mov %s, %s would smash src1"u8, src2, dst);
@@ -308,7 +307,7 @@ public static void Mov(this ж<Asm> Ꮡa, ΔReg src, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (src != dst) {
-        Ꮡa.Printf("\t%s %s, %s\n"u8, (~a.Arch).mov, src, dst);
+        Ꮡa.Printf("\t%s %s, %s\n"u8, a.Arch.mov, src, dst);
     }
 }
 
@@ -317,16 +316,16 @@ public static void Mov(this ж<Asm> Ꮡa, ΔReg src, ΔReg dst) {
 public static void AddWords(this ж<Asm> Ꮡa, ΔReg src1, RegPtr src2, RegPtr dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    if ((~a.Arch).addWords == ""u8) {
+    if (a.Arch.addWords == ""u8) {
         // Note: Assuming that Lsh does not clobber the carry flag.
         // Architectures where this is not true (x86) need to provide Arch.addWords.
         var t = Ꮡa.Reg();
-        Ꮡa.Lsh(a.Imm(bits.TrailingZeros((nuint)(~a.Arch).WordBytes)), src1, t);
+        Ꮡa.Lsh(a.Imm(bits.TrailingZeros((nuint)a.Arch.WordBytes)), src1, t);
         Ꮡa.Add(t, (ΔReg)src2, (ΔReg)dst, KeepCarry);
         Ꮡa.Free(t);
         return;
     }
-    Ꮡa.Printf("\t"u8 + (~a.Arch).addWords + "\n"u8, src1, src2, dst);
+    Ꮡa.Printf("\t"u8 + a.Arch.addWords + "\n"u8, src1, src2, dst);
 }
 
 // And emits dst = src1 & src2
@@ -334,7 +333,7 @@ public static void AddWords(this ж<Asm> Ꮡa, ΔReg src1, RegPtr src2, RegPtr d
 public static void And(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    Ꮡa.op3((~a.Arch).and, src1, src2, dst);
+    Ꮡa.op3(a.Arch.and, src1, src2, dst);
 }
 
 // Or emits dst = src1 | src2
@@ -342,7 +341,7 @@ public static void And(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst) {
 public static void Or(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    Ꮡa.op3((~a.Arch).or, src1, src2, dst);
+    Ꮡa.op3(a.Arch.or, src1, src2, dst);
 }
 
 // Xor emits dst = src1 ^ src2
@@ -350,7 +349,7 @@ public static void Or(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst) {
 public static void Xor(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    Ꮡa.op3((~a.Arch).xor, src1, src2, dst);
+    Ꮡa.op3(a.Arch.xor, src1, src2, dst);
 }
 
 // Neg emits dst = -src.
@@ -358,27 +357,27 @@ public static void Xor(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst) {
 public static void Neg(this ж<Asm> Ꮡa, ΔReg src, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    if ((~a.Arch).neg == ""u8) {
-        if ((~a.Arch).rsb != ""u8) {
-            Ꮡa.Printf("\t%s $0, %s, %s\n"u8, (~a.Arch).rsb, src, dst);
+    if (a.Arch.neg == ""u8) {
+        if (a.Arch.rsb != ""u8) {
+            Ꮡa.Printf("\t%s $0, %s, %s\n"u8, a.Arch.rsb, src, dst);
             return;
         }
-        if ((~a.Arch).sub != ""u8 && (~a.Arch).reg0 != ""u8) {
-            Ꮡa.Printf("\t%s %s, %s, %s\n"u8, (~a.Arch).sub, src, (~a.Arch).reg0, dst);
+        if (a.Arch.sub != ""u8 && a.Arch.reg0 != ""u8) {
+            Ꮡa.Printf("\t%s %s, %s, %s\n"u8, a.Arch.sub, src, a.Arch.reg0, dst);
             return;
         }
         Ꮡa.Fatalf("missing neg"u8);
     }
-    if (src == dst){
-        Ꮡa.Printf("\t%s %s\n"u8, (~a.Arch).neg, dst);
+    if (src == dst) {
+        Ꮡa.Printf("\t%s %s\n"u8, a.Arch.neg, dst);
     } else {
-        Ꮡa.Printf("\t%s %s, %s\n"u8, (~a.Arch).neg, src, dst);
+        Ꮡa.Printf("\t%s %s, %s\n"u8, a.Arch.neg, src, dst);
     }
 }
 
 // HasRegShift reports whether the architecture can use shift expressions as operands.
 public static bool HasRegShift(this ref Asm a) {
-    return (~a.Arch).regShift;
+    return a.Arch.regShift;
 }
 
 // LshReg returns a shift-expression operand src<<shift.
@@ -406,7 +405,7 @@ public static void Lsh(this ж<Asm> Ꮡa, ΔReg shift, ΔReg src, ΔReg dst) {
         Ꮡa.Mov(Ꮡa.LshReg(shift, src), dst);
         return;
     }
-    Ꮡa.op3((~a.Arch).lsh, shift, src, dst);
+    Ꮡa.op3(a.Arch.lsh, shift, src, dst);
 }
 
 // LshWide emits dst = src << shift with low bits shifted from adj.
@@ -414,15 +413,15 @@ public static void Lsh(this ж<Asm> Ꮡa, ΔReg shift, ΔReg src, ΔReg dst) {
 public static void LshWide(this ж<Asm> Ꮡa, ΔReg shift, ΔReg adj, ΔReg src, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    if ((~a.Arch).lshd == ""u8) {
-        Ꮡa.Fatalf("no lshwide on %s"u8, (~a.Arch).Name);
+    if (a.Arch.lshd == ""u8) {
+        Ꮡa.Fatalf("no lshwide on %s"u8, a.Arch.Name);
     }
     {
         @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
             Ꮡa.Fatalf("shift count not in %s"u8, need);
         }
     }
-    Ꮡa.op3(fmt.Sprintf("%s %s,"u8, (~a.Arch).lshd, shift), adj, src, dst);
+    Ꮡa.op3(fmt.Sprintf("%s %s,"u8, a.Arch.lshd, shift), adj, src, dst);
 }
 
 // RshReg returns a shift-expression operand src>>shift.
@@ -450,7 +449,7 @@ public static void Rsh(this ж<Asm> Ꮡa, ΔReg shift, ΔReg src, ΔReg dst) {
         Ꮡa.Mov(Ꮡa.RshReg(shift, src), dst);
         return;
     }
-    Ꮡa.op3((~a.Arch).rsh, shift, src, dst);
+    Ꮡa.op3(a.Arch.rsh, shift, src, dst);
 }
 
 // RshWide emits dst = src >> shift with high bits shifted from adj.
@@ -458,15 +457,15 @@ public static void Rsh(this ж<Asm> Ꮡa, ΔReg shift, ΔReg src, ΔReg dst) {
 public static void RshWide(this ж<Asm> Ꮡa, ΔReg shift, ΔReg adj, ΔReg src, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    if ((~a.Arch).lshd == ""u8) {
-        Ꮡa.Fatalf("no rshwide on %s"u8, (~a.Arch).Name);
+    if (a.Arch.lshd == ""u8) {
+        Ꮡa.Fatalf("no rshwide on %s"u8, a.Arch.Name);
     }
     {
         @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
             Ꮡa.Fatalf("shift count not in %s"u8, need);
         }
     }
-    Ꮡa.op3(fmt.Sprintf("%s %s,"u8, (~a.Arch).rshd, shift), adj, src, dst);
+    Ꮡa.op3(fmt.Sprintf("%s %s,"u8, a.Arch.rshd, shift), adj, src, dst);
 }
 
 // SLTU emits dst = src2 < src1 (0 or 1), using an unsigned comparison.
@@ -478,12 +477,12 @@ public static void SLTU(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst) {
         Ꮡa.Fatalf("arch has no sltu/sgtu"u8);
         break;
     }
-    case {} when (~a.Arch).sltu != ""u8: {
-        Ꮡa.Printf("\t%s %s, %s, %s\n"u8, (~a.Arch).sltu, src1, src2, dst);
+    case {} when a.Arch.sltu != ""u8: {
+        Ꮡa.Printf("\t%s %s, %s, %s\n"u8, a.Arch.sltu, src1, src2, dst);
         break;
     }
-    case {} when (~a.Arch).sgtu != ""u8: {
-        Ꮡa.Printf("\t%s %s, %s, %s\n"u8, (~a.Arch).sgtu, src2, src1, dst);
+    case {} when a.Arch.sgtu != ""u8: {
+        Ꮡa.Printf("\t%s %s, %s, %s\n"u8, a.Arch.sgtu, src2, src1, dst);
         break;
     }}
 }
@@ -506,40 +505,40 @@ public static void Add(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst, ΔC
         Ꮡa.Fatalf("unsupported carry behavior"u8);
         break;
     }
-    case {} when (~a.Arch).addF != default! && (~a.Arch).addF(Ꮡa, src1, src2, dst, carry): {
+    case {} when a.Arch.addF != nil && a.Arch.addF(Ꮡa, src1, src2, dst, carry): {
         // handled
         break;
     }
-    case {} when (~a.Arch).add != ""u8 && (carry == KeepCarry || carry == SmashCarry): {
-        Ꮡa.op3((~a.Arch).add, src1, src2, dst);
+    case {} when a.Arch.add != ""u8 && (carry == KeepCarry || carry == SmashCarry): {
+        Ꮡa.op3(a.Arch.add, src1, src2, dst);
         break;
     }
-    case {} when (~a.Arch).adds != ""u8 && (carry == SetCarry || carry == SmashCarry): {
-        Ꮡa.op3((~a.Arch).adds, src1, src2, dst);
+    case {} when a.Arch.adds != ""u8 && (carry == SetCarry || carry == SmashCarry): {
+        Ꮡa.op3(a.Arch.adds, src1, src2, dst);
         break;
     }
-    case {} when (~a.Arch).adc != ""u8 && (carry == UseCarry || carry == (ΔCarry)(UseCarry | SmashCarry)): {
-        Ꮡa.op3((~a.Arch).adc, src1, src2, dst);
+    case {} when a.Arch.adc != ""u8 && (carry == UseCarry || carry == (ΔCarry)(UseCarry | SmashCarry)): {
+        Ꮡa.op3(a.Arch.adc, src1, src2, dst);
         break;
     }
-    case {} when (~a.Arch).adcs != ""u8 && (carry == (ΔCarry)(UseCarry | SetCarry) || carry == (ΔCarry)(UseCarry | SmashCarry)): {
-        Ꮡa.op3((~a.Arch).adcs, src1, src2, dst);
+    case {} when a.Arch.adcs != ""u8 && (carry == (ΔCarry)(UseCarry | SetCarry) || carry == (ΔCarry)(UseCarry | SmashCarry)): {
+        Ꮡa.op3(a.Arch.adcs, src1, src2, dst);
         break;
     }
-    case {} when (~a.Arch).lea != ""u8 && (carry == KeepCarry || carry == SmashCarry): {
-        if (src1.IsImm()){
-            Ꮡa.Printf("\t%s %s(%s), %s\n"u8, (~a.Arch).lea, src1.name[1..], src2, dst); // name[1:] removes $
+    case {} when a.Arch.lea != ""u8 && (carry == KeepCarry || carry == SmashCarry): {
+        if (src1.IsImm()) {
+            Ꮡa.Printf("\t%s %s(%s), %s\n"u8, a.Arch.lea, src1.name[1..], src2, dst); // name[1:] removes $
         } else {
-            Ꮡa.Printf("\t%s (%s)(%s), %s\n"u8, (~a.Arch).lea, src1, src2, dst);
+            Ꮡa.Printf("\t%s (%s)(%s), %s\n"u8, a.Arch.lea, src1, src2, dst);
         }
-        if (src2 == dst){
+        if (src2 == dst) {
             Ꮡa.EOL(addSSˢ, src1, dst);
         } else {
             Ꮡa.EOL(addSSSˢ, src1, src2, dst);
         }
         break;
     }
-    case {} when (~a.Arch).add != ""u8 && (~a.Arch).regCarry != ""u8: {
+    case {} when a.Arch.add != ""u8 && a.Arch.regCarry != ""u8: {
         // Machine has no carry flag; instead we've dedicated a register
         // and use SLTU/SGTU (set less-than/greater-than unsigned)
         // to compute the carry flags as needed.
@@ -561,104 +560,102 @@ public static void Add(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst, ΔC
         if (!tmp.Valid()) {
             Ꮡa.Fatalf("cannot simulate sub carry without regTmp"u8);
         }
-        var exprᴛ1 = carry;
-        if (exprᴛ1 == UseCarry || exprᴛ1 == (ΔCarry)((ΔCarry)(UseCarry | SmashCarry))) {
-            do {
-                // Easy case, just add the carry afterward.
-                if (a.IsZero(src1)) {
-                    // Only here to use the carry.
-                    Ꮡa.Add(cr, src2, dst, KeepCarry);
-                    Ꮡa.EOL(adc0SSˢ, src2, dst);
-                    break;
-                }
-                Ꮡa.Add(src1, src2, dst, KeepCarry);
-                Ꮡa.EOL(adcSSSCrSˢ, src1, src2, dst, cr);
-                Ꮡa.Add(cr, dst, dst, KeepCarry);
-                Ꮡa.EOL("..."u8);
-            } while (false);
-        }
-        else if (exprᴛ1 == SetCarry) {
-            do {
-                if (a.IsZero(src1) && src2 == dst) {
-                    // Only here to clear the carry flag. (Caller will comment.)
-                    Ꮡa.Xor(cr, cr, cr);
-                    break;
-                }
-                ΔReg old = default!;       // old is a src distinct from dst
-                switch (ᐧ) {
-                case {} when dst != src1: {
-                    old = src1;
-                    break;
-                }
-                case {} when dst != src2: {
-                    old = src2;
-                    break;
-                }
-                default: {
-                    // src1 == src2 == dst.
-                    // Overflows if and only if the high bit is set, so copy high bit to carry.
-                    Ꮡa.Rsh(a.Imm((~a.Arch).WordBits - 1), src1, cr);
-                    Ꮡa.EOL(addsSSSCrSˢ, src1, src2, dst, cr);
-                    Ꮡa.Add(src1, src2, dst, KeepCarry);
-                    Ꮡa.EOL("..."u8);
-                    return;
-                }}
-                Ꮡa.Add(src1, src2, dst, KeepCarry);
-                Ꮡa.EOL(addsSSSCrSˢ, src1, src2, dst, cr);
-                Ꮡa.SLTU(old, dst, cr); // dst < old (one of the src) implies carry
-                Ꮡa.EOL("..."u8);
-            } while (false);
-        }
-        else if (exprᴛ1 == (ΔCarry)((ΔCarry)(UseCarry | SetCarry))) {
-            do {
-                if (a.IsZero(src1)) {
-                    // Only here to use and then set the carry.
-                    // Easy since carry is not aliased to dst.
-                    Ꮡa.Add(cr, src2, dst, KeepCarry);
-                    Ꮡa.EOL(adcs0SSCrSˢ, src2, dst, cr);
-                    Ꮡa.SLTU(cr, dst, cr); // dst < cr implies carry
-                    Ꮡa.EOL("..."u8);
-                    break;
-                }
-                // General case. Need to do two different adds (src1 + src2 + cr),
-                // computing carry bits for both, and add'ing them together.
-                // Start with src1+src2.
-                ΔReg old = default!;       // old is a src distinct from dst
-                switch (ᐧ) {
-                case {} when dst != src1: {
-                    old = src1;
-                    break;
-                }
-                case {} when dst != src2: {
-                    old = src2;
-                    break;
-                }}
-                if (old.Valid()){
-                    Ꮡa.Add(src1, src2, dst, KeepCarry);
-                    Ꮡa.EOL(adcsSSSCrSˢ, src1, src2, dst, cr);
-                    Ꮡa.SLTU(old, dst, tmp); // // dst < old (one of the src) implies carry
-                    Ꮡa.EOL("..."u8);
-                } else {
-                    // src1 == src2 == dst, like above. Sign bit is carry bit,
-                    // but we copy it into tmp, not cr.
-                    Ꮡa.Rsh(a.Imm((~a.Arch).WordBits - 1), src1, tmp);
-                    Ꮡa.EOL(adcsSSSCrSˢ, src1, src2, dst, cr);
-                    Ꮡa.Add(src1, src2, dst, KeepCarry);
-                    Ꮡa.EOL("..."u8);
-                }
-                // Add cr to dst.
-                Ꮡa.Add(cr, dst, dst, KeepCarry);
-                Ꮡa.EOL("..."u8);
-                Ꮡa.SLTU(cr, dst, cr); // sum < cr implies carry
-                Ꮡa.EOL("..."u8);
-                // Add the two carry bits (at most one can be set, because (2⁶⁴-1)+(2⁶⁴-1)+1 < 2·2⁶⁴).
-                Ꮡa.Add(tmp, cr, cr, KeepCarry);
-                Ꮡa.EOL("..."u8);
-            } while (false);
-        }
-        else { /* default: */
+        switch (carry) {
+        default: {
             Ꮡa.Fatalf("unsupported carry behavior"u8);
+            break;
         }
+        case var ᴛ when ᴛ == UseCarry || ᴛ == (ΔCarry)((ΔCarry)(UseCarry | SmashCarry)): {
+            // Easy case, just add the carry afterward.
+            if (a.IsZero(src1)) {
+                // Only here to use the carry.
+                Ꮡa.Add(cr, src2, dst, KeepCarry);
+                Ꮡa.EOL(adc0SSˢ, src2, dst);
+                break;
+            }
+            Ꮡa.Add(src1, src2, dst, KeepCarry);
+            Ꮡa.EOL(adcSSSCrSˢ, src1, src2, dst, cr);
+            Ꮡa.Add(cr, dst, dst, KeepCarry);
+            Ꮡa.EOL("..."u8);
+            break;
+        }
+        case var ᴛ when ᴛ == SetCarry: {
+            if (a.IsZero(src1) && src2 == dst) {
+                // Only here to clear the carry flag. (Caller will comment.)
+                Ꮡa.Xor(cr, cr, cr);
+                break;
+            }
+            ΔReg old = default; // old is a src distinct from dst
+            switch (ᐧ) {
+            case {} when dst != src1: {
+                old = src1;
+                break;
+            }
+            case {} when dst != src2: {
+                old = src2;
+                break;
+            }
+            default: {
+                // src1 == src2 == dst.
+                // Overflows if and only if the high bit is set, so copy high bit to carry.
+                Ꮡa.Rsh(a.Imm(a.Arch.WordBits - 1), src1, cr);
+                Ꮡa.EOL(addsSSSCrSˢ, src1, src2, dst, cr);
+                Ꮡa.Add(src1, src2, dst, KeepCarry);
+                Ꮡa.EOL("..."u8);
+                return;
+            }}
+            Ꮡa.Add(src1, src2, dst, KeepCarry);
+            Ꮡa.EOL(addsSSSCrSˢ, src1, src2, dst, cr);
+            Ꮡa.SLTU(old, dst, cr); // dst < old (one of the src) implies carry
+            Ꮡa.EOL("..."u8);
+            break;
+        }
+        case var ᴛ when ᴛ == (ΔCarry)((ΔCarry)(UseCarry | SetCarry)): {
+            if (a.IsZero(src1)) {
+                // Only here to use and then set the carry.
+                // Easy since carry is not aliased to dst.
+                Ꮡa.Add(cr, src2, dst, KeepCarry);
+                Ꮡa.EOL(adcs0SSCrSˢ, src2, dst, cr);
+                Ꮡa.SLTU(cr, dst, cr); // dst < cr implies carry
+                Ꮡa.EOL("..."u8);
+                break;
+            }
+            // General case. Need to do two different adds (src1 + src2 + cr),
+            // computing carry bits for both, and add'ing them together.
+            // Start with src1+src2.
+            ΔReg old = default; // old is a src distinct from dst
+            switch (ᐧ) {
+            case {} when dst != src1: {
+                old = src1;
+                break;
+            }
+            case {} when dst != src2: {
+                old = src2;
+                break;
+            }}
+            if (old.Valid()) {
+                Ꮡa.Add(src1, src2, dst, KeepCarry);
+                Ꮡa.EOL(adcsSSSCrSˢ, src1, src2, dst, cr);
+                Ꮡa.SLTU(old, dst, tmp); // // dst < old (one of the src) implies carry
+                Ꮡa.EOL("..."u8);
+            } else {
+                // src1 == src2 == dst, like above. Sign bit is carry bit,
+                // but we copy it into tmp, not cr.
+                Ꮡa.Rsh(a.Imm(a.Arch.WordBits - 1), src1, tmp);
+                Ꮡa.EOL(adcsSSSCrSˢ, src1, src2, dst, cr);
+                Ꮡa.Add(src1, src2, dst, KeepCarry);
+                Ꮡa.EOL("..."u8);
+            }
+            // Add cr to dst.
+            Ꮡa.Add(cr, dst, dst, KeepCarry);
+            Ꮡa.EOL("..."u8);
+            Ꮡa.SLTU(cr, dst, cr); // sum < cr implies carry
+            Ꮡa.EOL("..."u8);
+            // Add the two carry bits (at most one can be set, because (2⁶⁴-1)+(2⁶⁴-1)+1 < 2·2⁶⁴).
+            Ꮡa.Add(tmp, cr, cr, KeepCarry);
+            Ꮡa.EOL("..."u8);
+            break;
+        }}
         break;
     }}
 }
@@ -679,31 +676,31 @@ public static void Sub(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst, ΔC
         Ꮡa.Fatalf("unsupported carry behavior"u8);
         break;
     }
-    case {} when (~a.Arch).subF != default! && (~a.Arch).subF(Ꮡa, src1, src2, dst, carry): {
+    case {} when a.Arch.subF != nil && a.Arch.subF(Ꮡa, src1, src2, dst, carry): {
         // handled
         break;
     }
-    case {} when (~a.Arch).sub != ""u8 && (carry == KeepCarry || carry == SmashCarry): {
-        Ꮡa.op3((~a.Arch).sub, src1, src2, dst);
+    case {} when a.Arch.sub != ""u8 && (carry == KeepCarry || carry == SmashCarry): {
+        Ꮡa.op3(a.Arch.sub, src1, src2, dst);
         break;
     }
-    case {} when (~a.Arch).subs != ""u8 && (carry == SetCarry || carry == SmashCarry): {
-        Ꮡa.op3((~a.Arch).subs, src1, src2, dst);
+    case {} when a.Arch.subs != ""u8 && (carry == SetCarry || carry == SmashCarry): {
+        Ꮡa.op3(a.Arch.subs, src1, src2, dst);
         break;
     }
-    case {} when (~a.Arch).sbc != ""u8 && (carry == UseCarry || carry == (ΔCarry)(UseCarry | SmashCarry)): {
-        Ꮡa.op3((~a.Arch).sbc, src1, src2, dst);
+    case {} when a.Arch.sbc != ""u8 && (carry == UseCarry || carry == (ΔCarry)(UseCarry | SmashCarry)): {
+        Ꮡa.op3(a.Arch.sbc, src1, src2, dst);
         break;
     }
-    case {} when (~a.Arch).sbcs != ""u8 && (carry == (ΔCarry)(UseCarry | SetCarry) || carry == (ΔCarry)(UseCarry | SmashCarry)): {
-        Ꮡa.op3((~a.Arch).sbcs, src1, src2, dst);
+    case {} when a.Arch.sbcs != ""u8 && (carry == (ΔCarry)(UseCarry | SetCarry) || carry == (ΔCarry)(UseCarry | SmashCarry)): {
+        Ꮡa.op3(a.Arch.sbcs, src1, src2, dst);
         break;
     }
     case {} when strings.HasPrefix(src1.name, "$"u8) && (carry == KeepCarry || carry == SmashCarry): {
         // Running out of options; if this is an immediate
         // and we don't need to worry about carry semantics,
         // try adding the negation.
-        if (strings.HasPrefix(src1.name, "$-"u8)){
+        if (strings.HasPrefix(src1.name, "$-"u8)) {
             src1.name = "$" + src1.name[2..];
         } else {
             src1.name = "$-" + src1.name[1..];
@@ -711,7 +708,7 @@ public static void Sub(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst, ΔC
         Ꮡa.Add(src1, src2, dst, carry);
         break;
     }
-    case {} when (~a.Arch).sub != ""u8 && (~a.Arch).regCarry != ""u8: {
+    case {} when a.Arch.sub != ""u8 && a.Arch.regCarry != ""u8: {
         // Machine has no carry flag; instead we've dedicated a register
         // and use SLTU/SGTU (set less-than/greater-than unsigned)
         // to compute the carry bits as needed.
@@ -729,77 +726,75 @@ public static void Sub(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst, ΔC
         if (!tmp.Valid()) {
             Ꮡa.Fatalf("cannot simulate carry without regTmp"u8);
         }
-        var exprᴛ1 = carry;
-        if (exprᴛ1 == UseCarry || exprᴛ1 == (ΔCarry)((ΔCarry)(UseCarry | SmashCarry))) {
-            do {
-                // Easy case, just subtract the carry afterward.
-                if (a.IsZero(src1)) {
-                    // Only here to use the carry.
-                    Ꮡa.Sub(cr, src2, dst, KeepCarry);
-                    Ꮡa.EOL(sbc0SSˢ, src2, dst);
-                    break;
-                }
-                Ꮡa.Sub(src1, src2, dst, KeepCarry);
-                Ꮡa.EOL(sbcSSSˢ, src1, src2, dst);
-                Ꮡa.Sub(cr, dst, dst, KeepCarry);
-                Ꮡa.EOL("..."u8);
-            } while (false);
-        }
-        else if (exprᴛ1 == SetCarry) {
-            do {
-                if (a.IsZero(src1) && src2 == dst) {
-                    // Only here to clear the carry flag.
-                    Ꮡa.Xor(cr, cr, cr);
-                    break;
-                }
-                // Compute the new carry first, in case dst is src1 or src2.
-                Ꮡa.SLTU(src1, src2, cr);
-                Ꮡa.EOL(subsSSSˢ, src1, src2, dst);
-                Ꮡa.Sub(src1, src2, dst, KeepCarry);
-                Ꮡa.EOL("..."u8);
-            } while (false);
-        }
-        else if (exprᴛ1 == (ΔCarry)((ΔCarry)(UseCarry | SetCarry))) {
-            do {
-                if (a.IsZero(src1)) {
-                    // Only here to use and then set the carry.
-                    if (src2 == dst) {
-                        // Unfortunate case. Using src2==dst is common (think x -= y)
-                        // and also more efficient on two-operand machines (like x86),
-                        // but here subtracting from dst will smash src2, making it
-                        // impossible to recover the carry information after the SUB.
-                        // But we want to use the carry, so we can't compute it before
-                        // the SUB either. Compute into a temporary and MOV.
-                        Ꮡa.SLTU(cr, src2, tmp);
-                        Ꮡa.EOL(sbcs0SSˢ, src2, dst);
-                        Ꮡa.Sub(cr, src2, dst, KeepCarry);
-                        Ꮡa.EOL("..."u8);
-                        Ꮡa.Mov(tmp, cr);
-                        Ꮡa.EOL("..."u8);
-                        break;
-                    }
-                    Ꮡa.Sub(cr, src2, dst, KeepCarry); // src2 not dst, so src2 preserved
-                    Ꮡa.SLTU(cr, src2, cr);
-                    break;
-                }
-                // General case. Need to do two different subtracts (src2 - cr - src1),
-                // computing carry bits for both, and add'ing them together.
-                // Doing src2 - cr first frees up cr to store the carry from the sub of src1.
-                Ꮡa.SLTU(cr, src2, tmp);
-                Ꮡa.EOL(sbcsSSSˢ, src1, src2, dst);
-                Ꮡa.Sub(cr, src2, dst, KeepCarry);
-                Ꮡa.EOL("..."u8);
-                Ꮡa.SLTU(src1, dst, cr);
-                Ꮡa.EOL("..."u8);
-                Ꮡa.Sub(src1, dst, dst, KeepCarry);
-                Ꮡa.EOL("..."u8);
-                Ꮡa.Add(tmp, cr, cr, KeepCarry);
-                Ꮡa.EOL("..."u8);
-            } while (false);
-        }
-        else { /* default: */
+        switch (carry) {
+        default: {
             Ꮡa.Fatalf("unsupported carry behavior"u8);
+            break;
         }
+        case var ᴛ when ᴛ == UseCarry || ᴛ == (ΔCarry)((ΔCarry)(UseCarry | SmashCarry)): {
+            // Easy case, just subtract the carry afterward.
+            if (a.IsZero(src1)) {
+                // Only here to use the carry.
+                Ꮡa.Sub(cr, src2, dst, KeepCarry);
+                Ꮡa.EOL(sbc0SSˢ, src2, dst);
+                break;
+            }
+            Ꮡa.Sub(src1, src2, dst, KeepCarry);
+            Ꮡa.EOL(sbcSSSˢ, src1, src2, dst);
+            Ꮡa.Sub(cr, dst, dst, KeepCarry);
+            Ꮡa.EOL("..."u8);
+            break;
+        }
+        case var ᴛ when ᴛ == SetCarry: {
+            if (a.IsZero(src1) && src2 == dst) {
+                // Only here to clear the carry flag.
+                Ꮡa.Xor(cr, cr, cr);
+                break;
+            }
+            // Compute the new carry first, in case dst is src1 or src2.
+            Ꮡa.SLTU(src1, src2, cr);
+            Ꮡa.EOL(subsSSSˢ, src1, src2, dst);
+            Ꮡa.Sub(src1, src2, dst, KeepCarry);
+            Ꮡa.EOL("..."u8);
+            break;
+        }
+        case var ᴛ when ᴛ == (ΔCarry)((ΔCarry)(UseCarry | SetCarry)): {
+            if (a.IsZero(src1)) {
+                // Only here to use and then set the carry.
+                if (src2 == dst) {
+                    // Unfortunate case. Using src2==dst is common (think x -= y)
+                    // and also more efficient on two-operand machines (like x86),
+                    // but here subtracting from dst will smash src2, making it
+                    // impossible to recover the carry information after the SUB.
+                    // But we want to use the carry, so we can't compute it before
+                    // the SUB either. Compute into a temporary and MOV.
+                    Ꮡa.SLTU(cr, src2, tmp);
+                    Ꮡa.EOL(sbcs0SSˢ, src2, dst);
+                    Ꮡa.Sub(cr, src2, dst, KeepCarry);
+                    Ꮡa.EOL("..."u8);
+                    Ꮡa.Mov(tmp, cr);
+                    Ꮡa.EOL("..."u8);
+                    break;
+                }
+                Ꮡa.Sub(cr, src2, dst, KeepCarry); // src2 not dst, so src2 preserved
+                Ꮡa.SLTU(cr, src2, cr);
+                break;
+            }
+            // General case. Need to do two different subtracts (src2 - cr - src1),
+            // computing carry bits for both, and add'ing them together.
+            // Doing src2 - cr first frees up cr to store the carry from the sub of src1.
+            Ꮡa.SLTU(cr, src2, tmp);
+            Ꮡa.EOL(sbcsSSSˢ, src1, src2, dst);
+            Ꮡa.Sub(cr, src2, dst, KeepCarry);
+            Ꮡa.EOL("..."u8);
+            Ꮡa.SLTU(src1, dst, cr);
+            Ꮡa.EOL("..."u8);
+            Ꮡa.Sub(src1, dst, dst, KeepCarry);
+            Ꮡa.EOL("..."u8);
+            Ꮡa.Add(tmp, cr, cr, KeepCarry);
+            Ꮡa.EOL("..."u8);
+            break;
+        }}
         break;
     }}
 }
@@ -813,17 +808,20 @@ internal static readonly @string clearCarryˢ = "clear carry"u8;
 public static void ClearCarry(this ж<Asm> Ꮡa, ΔCarry which) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    var dst = new ΔReg((~a.Arch).regs[0]); // not actually modified
-    var exprᴛ1 = (ΔCarry)(which & ((ΔCarry)(AddCarry | SubCarry)));
-    if (exprᴛ1 == AddCarry) {
-        Ꮡa.Add(a.Imm(0), dst, dst, (ΔCarry)(SetCarry | (ΔCarry)(which & ΔAltCarry)));
-    }
-    else if (exprᴛ1 == SubCarry) {
-        Ꮡa.Sub(a.Imm(0), dst, dst, (ΔCarry)(SetCarry | (ΔCarry)(which & ΔAltCarry)));
-    }
-    else { /* default: */
+    var dst = new ΔReg(a.Arch.regs[0]); // not actually modified
+    switch ((ΔCarry)(which & ((ΔCarry)(AddCarry | SubCarry)))) {
+    default: {
         Ꮡa.Fatalf("bad carry"u8);
+        break;
     }
+    case var ᴛ when ᴛ == AddCarry: {
+        Ꮡa.Add(a.Imm(0), dst, dst, (ΔCarry)(SetCarry | (ΔCarry)(which & ΔAltCarry)));
+        break;
+    }
+    case var ᴛ when ᴛ == SubCarry: {
+        Ꮡa.Sub(a.Imm(0), dst, dst, (ΔCarry)(SetCarry | (ΔCarry)(which & ΔAltCarry)));
+        break;
+    }}
     Ꮡa.EOL(clearCarryˢ);
 }
 
@@ -840,7 +838,7 @@ public static void SaveCarry(this ж<Asm> Ꮡa, ΔReg dst) {
     // but we say it is in an undefined state in case that changes in the future.
     // (The SmashCarry could be changed to SetCarry if so.)
     {
-        var cr = a.Carry(); if (cr.Valid()){
+        var cr = a.Carry(); if (cr.Valid()) {
             if (cr == dst) {
                 return; // avoid EOL
             }
@@ -861,13 +859,12 @@ public static void RestoreCarry(this ж<Asm> Ꮡa, ΔReg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     {
-        var cr = a.Carry(); if (cr.Valid()){
+        var cr = a.Carry(); if (cr.Valid()) {
             if (cr == src) {
                 return; // avoid EOL
             }
             Ꮡa.Mov(src, cr);
-        } else 
-        if ((~a.Arch).subCarryIsBorrow){
+        } else if (a.Arch.subCarryIsBorrow) {
             Ꮡa.Add(src, src, src, SetCarry);
         } else {
             // SaveCarry saved the sub carry flag with an encoding of 0, 1 -> 0, ^0.
@@ -892,19 +889,21 @@ public static void ConvertCarry(this ж<Asm> Ꮡa, ΔCarry which, ΔReg dst) {
     if (a.Carry().Valid()) { // already 0 or 1
         return;
     }
-    var exprᴛ1 = which;
-    if (exprᴛ1 == AddCarry) {
-        if ((~a.Arch).subCarryIsBorrow){
+    switch (which) {
+    case var ᴛ when ᴛ == AddCarry: {
+        if (a.Arch.subCarryIsBorrow) {
             Ꮡa.Neg(dst, dst);
         } else {
             Ꮡa.Add(a.Imm(1), dst, dst, SmashCarry);
         }
         Ꮡa.EOL(convertAddCarryˢ);
+        break;
     }
-    else if (exprᴛ1 == SubCarry) {
+    case var ᴛ when ᴛ == SubCarry: {
         Ꮡa.Neg(dst, dst);
         Ꮡa.EOL(convertSubCarryˢ);
-    }
+        break;
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -915,20 +914,23 @@ internal static readonly @string saveConvertAddCarryˢ = "save & convert add car
 public static void SaveConvertCarry(this ж<Asm> Ꮡa, ΔCarry which, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    var exprᴛ1 = which;
-    if (exprᴛ1 == AddCarry) {
-        if (((~a.Arch).adc != ""u8 || (~a.Arch).adcs != ""u8) && a.ZR().Valid()) {
+    switch (which) {
+    default: {
+        Ꮡa.Fatalf("bad carry"u8);
+        break;
+    }
+    case var ᴛ when ᴛ == AddCarry: {
+        if ((a.Arch.adc != ""u8 || a.Arch.adcs != ""u8) && a.ZR().Valid()) {
             Ꮡa.Add(a.ZR(), a.ZR(), dst, (ΔCarry)(UseCarry | SmashCarry));
             Ꮡa.EOL(saveConvertAddCarryˢ);
             return;
         }
+        break;
     }
-    else if (exprᴛ1 == SubCarry) {
+    case var ᴛ when ᴛ == SubCarry: {
         // no special cases
-    }
-    else { /* default: */
-        Ꮡa.Fatalf("bad carry"u8);
-    }
+        break;
+    }}
     Ꮡa.SaveCarry(dst);
     Ꮡa.ConvertCarry(which, dst);
 }
@@ -944,26 +946,26 @@ public static void MulWide(this ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dstl
         Ꮡa.Fatalf("mulwide not available"u8);
         break;
     }
-    case {} when (~a.Arch).mulWideF != default!: {
-        (~a.Arch).mulWideF(Ꮡa, src1, src2, dstlo, dsthi);
+    case {} when a.Arch.mulWideF != nil: {
+        a.Arch.mulWideF(Ꮡa, src1, src2, dstlo, dsthi);
         break;
     }
-    case {} when (~a.Arch).mul != ""u8 && !dsthi.Valid(): {
-        Ꮡa.op3((~a.Arch).mul, src1, src2, dstlo);
+    case {} when a.Arch.mul != ""u8 && !dsthi.Valid(): {
+        Ꮡa.op3(a.Arch.mul, src1, src2, dstlo);
         break;
     }
-    case {} when (~a.Arch).mulhi != ""u8 && !dstlo.Valid(): {
-        Ꮡa.op3((~a.Arch).mulhi, src1, src2, dsthi);
+    case {} when a.Arch.mulhi != ""u8 && !dstlo.Valid(): {
+        Ꮡa.op3(a.Arch.mulhi, src1, src2, dsthi);
         break;
     }
-    case {} when (~a.Arch).mul != ""u8 && (~a.Arch).mulhi != ""u8 && dstlo != src1 && dstlo != src2: {
-        Ꮡa.op3((~a.Arch).mul, src1, src2, dstlo);
-        Ꮡa.op3((~a.Arch).mulhi, src1, src2, dsthi);
+    case {} when a.Arch.mul != ""u8 && a.Arch.mulhi != ""u8 && dstlo != src1 && dstlo != src2: {
+        Ꮡa.op3(a.Arch.mul, src1, src2, dstlo);
+        Ꮡa.op3(a.Arch.mulhi, src1, src2, dsthi);
         break;
     }
-    case {} when (~a.Arch).mul != ""u8 && (~a.Arch).mulhi != ""u8 && dsthi != src1 && dsthi != src2: {
-        Ꮡa.op3((~a.Arch).mulhi, src1, src2, dsthi);
-        Ꮡa.op3((~a.Arch).mul, src1, src2, dstlo);
+    case {} when a.Arch.mul != ""u8 && a.Arch.mulhi != ""u8 && dsthi != src1 && dsthi != src2: {
+        Ꮡa.op3(a.Arch.mulhi, src1, src2, dsthi);
+        Ꮡa.op3(a.Arch.mul, src1, src2, dstlo);
         break;
     }}
 }
@@ -979,7 +981,7 @@ public static void Jmp(this ж<Asm> Ꮡa, @string label) {
 public static void JmpZero(this ж<Asm> Ꮡa, ΔReg src, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    Ꮡa.Printf("\t"u8 + (~a.Arch).jmpZero + "\n"u8, src, label);
+    Ꮡa.Printf("\t"u8 + a.Arch.jmpZero + "\n"u8, src, label);
 }
 
 // JmpNonZero jumps to the label if src is non-zero.
@@ -987,7 +989,7 @@ public static void JmpZero(this ж<Asm> Ꮡa, ΔReg src, @string label) {
 public static void JmpNonZero(this ж<Asm> Ꮡa, ΔReg src, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    Ꮡa.Printf("\t"u8 + (~a.Arch).jmpNonZero + "\n"u8, src, label);
+    Ꮡa.Printf("\t"u8 + a.Arch.jmpNonZero + "\n"u8, src, label);
 }
 
 // Label emits a label with the given name.

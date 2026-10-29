@@ -16,14 +16,14 @@ public static error SetsockoptInt(this ж<FD> Ꮡfd, nint level, nint name, nint
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptInt(fd.Sysfd, level, name, arg);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
@@ -36,33 +36,33 @@ public static error SetsockoptInet4Addr(this ж<FD> Ꮡfd, nint level, nint name
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptInet4Addr(fd.Sysfd, level, name, arg);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
 // SetsockoptLinger wraps the setsockopt network call with a Linger argument.
-public static error SetsockoptLinger(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.Linger> Ꮡl) {
+public static error SetsockoptLinger(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.Linger> l) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
         ᒐd1 = true;
-        return Δsyscall.SetsockoptLinger(fd.Sysfd, level, name, Ꮡl);
+        return Δsyscall.SetsockoptLinger(fd.Sysfd, level, name, l);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
@@ -74,14 +74,14 @@ public static (nint, error) GetsockoptInt(this ж<FD> Ꮡfd, nint level, nint na
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return (-1, err);
             }
         }
         ᒐd1 = true;
         return Δsyscall.GetsockoptInt(fd.Sysfd, level, name);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 

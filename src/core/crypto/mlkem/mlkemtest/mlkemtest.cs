@@ -25,23 +25,23 @@ private static readonly @string cryptoMlkemMlkemtestUseˢ = "crypto/mlkem/mlkemt
 //
 // It must only be used for known-answer tests.
 public static (slice<byte> sharedKey, slice<byte> ciphertext, error err) Encapsulate768(ж<mlkem.EncapsulationKey768> Ꮡek, slice<byte> random) {
-    slice<byte> sharedKey = default!;
-    slice<byte> ciphertext = default!;
-    error err = default!;
+    slice<byte> sharedKey = default;
+    slice<byte> ciphertext = default;
+    error err = default;
     ref var ek = ref Ꮡek.DerefOrNull();
 
     if (len(random) != 32) {
-        return (default!, default!, errors.New(mlkemtestEncapsulate768ˢ));
+        return (default, default, errors.New(mlkemtestEncapsulate768ˢ));
     }
     if (fips140only.Enforced()) {
-        return (default!, default!, errors.New(cryptoMlkemMlkemtestUseˢ));
+        return (default, default, errors.New(cryptoMlkemMlkemtestUseˢ));
     }
     (var k, err) = fips140mlkem.NewEncapsulationKey768(ek.Bytes());
-    if (err != default!) {
-        return (default!, default!, errors.New("mlkemtest: Encapsulate768: failed to reconstruct key: "u8 + err.Error()));
+    if (err != nil) {
+        return (default, default, errors.New("mlkemtest: Encapsulate768: failed to reconstruct key: "u8 + err.Error()));
     }
     (sharedKey, ciphertext) = k.EncapsulateInternal(Ꮡ(array<byte>.Alias(random, 32)));
-    return (sharedKey, ciphertext, default!);
+    return (sharedKey, ciphertext, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -53,23 +53,23 @@ private static readonly @string mlkemtestEncapsulate1024ˢ = "mlkemtest: Encapsu
 //
 // It must only be used for known-answer tests.
 public static (slice<byte> sharedKey, slice<byte> ciphertext, error err) Encapsulate1024(ж<mlkem.EncapsulationKey1024> Ꮡek, slice<byte> random) {
-    slice<byte> sharedKey = default!;
-    slice<byte> ciphertext = default!;
-    error err = default!;
+    slice<byte> sharedKey = default;
+    slice<byte> ciphertext = default;
+    error err = default;
     ref var ek = ref Ꮡek.DerefOrNull();
 
     if (len(random) != 32) {
-        return (default!, default!, errors.New(mlkemtestEncapsulate1024ˢ));
+        return (default, default, errors.New(mlkemtestEncapsulate1024ˢ));
     }
     if (fips140only.Enforced()) {
-        return (default!, default!, errors.New(cryptoMlkemMlkemtestUseˢ));
+        return (default, default, errors.New(cryptoMlkemMlkemtestUseˢ));
     }
     (var k, err) = fips140mlkem.NewEncapsulationKey1024(ek.Bytes());
-    if (err != default!) {
-        return (default!, default!, errors.New("mlkemtest: Encapsulate1024: failed to reconstruct key: "u8 + err.Error()));
+    if (err != nil) {
+        return (default, default, errors.New("mlkemtest: Encapsulate1024: failed to reconstruct key: "u8 + err.Error()));
     }
     (sharedKey, ciphertext) = k.EncapsulateInternal(Ꮡ(array<byte>.Alias(random, 32)));
-    return (sharedKey, ciphertext, default!);
+    return (sharedKey, ciphertext, default);
 }
 
 } // end mlkemtest_package

@@ -21,11 +21,10 @@ partial struct Reader {
 }
 
 public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
-    ref var r = ref heap<Reader>(out var Ꮡr);
-    r = new Reader(
+    ref var r = ref heap<Reader>(new Reader(
         b: b,
         @readonly: @readonly
-    );
+    ), out var Ꮡr);
     return Ꮡr;
 }
 
@@ -37,34 +36,34 @@ public static (nint, error) Read(this ref Reader r, slice<byte> b) {
     }
     copy(b, toread);
     r.off += (int64)amt;
-    return (amt, default!);
+    return (amt, default);
 }
 
 public static (int64 ret, error err) Seek(this ref Reader r, int64 offset, nint whence) {
-    var exprᴛ1 = whence;
-    if (exprᴛ1 == io.SeekStart) {
+    switch (whence) {
+    case var ᴛ when ᴛ == io.SeekStart: {
         if (offset < 0 || offset > (int64)len(r.b)) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, offset, len(r.b)));
         }
         r.off = offset;
-        return (offset, default!);
+        return (offset, default);
     }
-    if (exprᴛ1 == io.SeekCurrent) {
+    case var ᴛ when ᴛ == io.SeekCurrent: {
         var newoff = r.off + offset;
         if (newoff < 0 || newoff > (int64)len(r.b)) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, newoff, len(r.b)));
         }
         r.off = newoff;
-        return (r.off, default!);
+        return (r.off, default);
     }
-    if (exprᴛ1 == io.SeekEnd) {
+    case var ᴛ when ᴛ == io.SeekEnd: {
         var newoff = (int64)len(r.b) + offset;
         if (newoff < 0 || newoff > (int64)len(r.b)) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, newoff, len(r.b)));
         }
         r.off = newoff;
-        return (r.off, default!);
-    }
+        return (r.off, default);
+    }}
     // other modes are not supported
     return (0, fmt.Errorf("unsupported seek mode %d"u8, whence));
 }
@@ -94,11 +93,11 @@ public static uint64 ReadUint64(this ref Reader r) {
 }
 
 public static uint64 /*value*/ ReadULEB128(this ref Reader r) {
-    uint64 value = default!;
+    uint64 value = default;
 
-    nuint shift = default!;
+    nuint shift = default;
 
-    while (ᐧ) {
+    for (;;) {
         var b = r.b[(nint)(r.off)];
         r.off++;
         value |= (uint64)((((uint64)((byte)(b & 0x7F))).Lsh(shift)));

@@ -31,26 +31,26 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
             attempts: 2
         ));
         var (Δfile, err) = open(filename);
-        if (err != default!) {
-            conf.Value.servers = defaultNS;
-            conf.Value.search = dnsDefaultSearch();
-            conf.Value.err = err;
+        if (err != nil) {
+            conf.servers = defaultNS;
+            conf.search = dnsDefaultSearch();
+            conf.err = err;
             return conf;
         }
         var fileʗ1 = Δfile;
         defer(fileʗ1.close, ref ᒐ);
         {
-            var (fi, errΔ1) = (~Δfile).ΔΔfile.Stat(); if (errΔ1 == default!){
-                conf.Value.mtime = fi.ModTime();
+            var (fi, errΔ1) = Δfile.ΔΔfile.Stat(); if (errΔ1 == nil) {
+                conf.mtime = fi.ModTime();
             } else {
-                conf.Value.servers = defaultNS;
-                conf.Value.search = dnsDefaultSearch();
-                conf.Value.err = errΔ1;
+                conf.servers = defaultNS;
+                conf.search = dnsDefaultSearch();
+                conf.err = errΔ1;
                 return conf;
             }
         }
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
-            if (len(line) > 0 && (line[0] == (rune)';' || line[0] == (rune)'#')) {
+            if (len(line) > 0 && (line[0] == ';' || line[0] == '#')) {
                 // comment.
                 continue;
             }
@@ -59,45 +59,48 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                 continue;
             }
             var exprᴛ1 = f[0];
-            if (exprᴛ1 == "nameserver"u8) { // add one name server
-                if (len(f) > 1 && len((~conf).servers) < 3) { // small, but the standard limit
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "nameserver"u8: { // add one name server
+                if (len(f) > 1 && len(conf.servers) < 3) { // small, but the standard limit
                     // One more check: make sure server name is
                     // just an IP address. Otherwise we need DNS
                     // to look it up.
                     {
-                        var (_, errΔ3) = netip.ParseAddr(f[1]); if (errΔ3 == default!) {
-                            conf.Value.servers = append((~conf).servers, JoinHostPort(f[1], "53"u8));
+                        var (_, errΔ3) = netip.ParseAddr(f[1]); if (errΔ3 == nil) {
+                            conf.servers = append(conf.servers, JoinHostPort(f[1], "53"u8));
                         }
                     }
                 }
+                break;
             }
-            else if (exprᴛ1 == "domain"u8) { // set search path to just this domain
+            case {} when exprᴛ1 == "domain"u8: { // set search path to just this domain
                 if (len(f) > 1) {
-                    conf.Value.search = new @string[]{ensureRooted(f[1])}.slice();
+                    conf.search = slice<@string>([ensureRooted(f[1])]);
                 }
+                break;
             }
-            else if (exprᴛ1 == "search"u8) { // set search path to given servers
-                conf.Value.search = new slice<@string>(0, len(f) - 1);
+            case {} when exprᴛ1 == "search"u8: { // set search path to given servers
+                conf.search = new slice<@string>(0, len(f) - 1);
                 for (nint i = 1; i < len(f); i++) {
                     @string name = ensureRooted(f[i]);
                     if (name == "."u8) {
                         continue;
                     }
-                    conf.Value.search = append((~conf).search, name);
+                    conf.search = append(conf.search, name);
                 }
+                break;
             }
-            else if (exprᴛ1 == "options"u8) { // magic options
+            case {} when exprᴛ1 == "options"u8: { // magic options
                 foreach (var (_, s) in f[1..]) {
                     switch (ᐧ) {
                     case {} when stringslite.HasPrefix(s, ndotsˢ): {
                         var (n, _, _) = dtoi(s[6..]);
-                        if (n < 0){
+                        if (n < 0) {
                             n = 0;
-                        } else 
-                        if (n > 15) {
+                        } else if (n > 15) {
                             n = 15;
                         }
-                        conf.Value.ndots = n;
+                        conf.ndots = n;
                         break;
                     }
                     case {} when stringslite.HasPrefix(s, timeoutˢ): {
@@ -105,7 +108,7 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         if (n < 1) {
                             n = 1;
                         }
-                        conf.Value.timeout = ((time.Duration)(int64)n) * time.ΔSecond;
+                        conf.timeout = ((time.Duration)(int64)n) * time.ΔSecond;
                         break;
                     }
                     case {} when stringslite.HasPrefix(s, attemptsˢ): {
@@ -113,11 +116,11 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         if (n < 1) {
                             n = 1;
                         }
-                        conf.Value.attempts = n;
+                        conf.attempts = n;
                         break;
                     }
                     case {} when s == "rotate"u8: {
-                        conf.Value.rotate = true;
+                        conf.rotate = true;
                         break;
                     }
                     case {} when s == "single-request"u8 || s == "single-request-reopen"u8: {
@@ -126,7 +129,7 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         // "By default, glibc performs IPv4 and IPv6 lookups in parallel [...]
                         //  This option disables the behavior and makes glibc
                         //  perform the IPv6 and IPv4 requests sequentially."
-                        conf.Value.singleRequest = true;
+                        conf.singleRequest = true;
                         break;
                     }
                     case {} when s == "use-vc"u8 || s == "usevc"u8 || s == "tcp"u8: {
@@ -136,11 +139,11 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         //  This option forces the use of TCP for DNS resolutions."
                         // https://www.freebsd.org/cgi/man.cgi?query=resolv.conf&sektion=5&manpath=freebsd-release-ports
                         // https://man.openbsd.org/resolv.conf.5
-                        conf.Value.useTCP = true;
+                        conf.useTCP = true;
                         break;
                     }
                     case {} when s == "trust-ad"u8: {
-                        conf.Value.trustAD = true;
+                        conf.trustAD = true;
                         break;
                     }
                     case {} when s == "edns0"u8: {
@@ -149,53 +152,56 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         break;
                     }
                     case {} when s == "no-reload"u8: {
-                        conf.Value.noReload = true;
+                        conf.noReload = true;
                         break;
                     }
                     default: {
-                        conf.Value.unknownOpt = true;
+                        conf.unknownOpt = true;
                         break;
                     }}
                 }
+                break;
             }
-            else if (exprᴛ1 == "lookup"u8) {
+            case {} when exprᴛ1 == "lookup"u8: {
                 // OpenBSD option:
                 // https://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/resolv.conf.5
                 // "the legal space-separated values are: bind, file, yp"
-                conf.Value.lookup = f[1..];
+                conf.lookup = f[1..];
+                break;
             }
-            else { /* default: */
-                conf.Value.unknownOpt = true;
-            }
+            default: {
+                conf.unknownOpt = true;
+                break;
+            }}
         }
-        if (len((~conf).servers) == 0) {
-            conf.Value.servers = defaultNS;
+        if (len(conf.servers) == 0) {
+            conf.servers = defaultNS;
         }
-        if (len((~conf).search) == 0) {
-            conf.Value.search = dnsDefaultSearch();
+        if (len(conf.search) == 0) {
+            conf.search = dnsDefaultSearch();
         }
         return conf;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static slice<@string> dnsDefaultSearch() {
     var (hn, err) = getHostname();
-    if (err != default!) {
+    if (err != nil) {
         // best effort
-        return default!;
+        return default;
     }
     {
-        nint i = bytealg.IndexByteString(hn, (rune)'.'); if (i >= 0 && i < len(hn) - 1) {
-            return new @string[]{ensureRooted(hn.slice(i + 1))}.slice();
+        nint i = bytealg.IndexByteString(hn, (byte)'.'); if (i >= 0 && i < len(hn) - 1) {
+            return slice<@string>([ensureRooted(hn.slice(i + 1))]);
         }
     }
-    return default!;
+    return default;
 }
 
 internal static @string ensureRooted(@string s) {
-    if (len(s) > 0 && s[len(s) - 1] == (rune)'.') {
+    if (len(s) > 0 && s[len(s) - 1] == '.') {
         return s;
     }
     return s + "."u8;

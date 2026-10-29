@@ -14,8 +14,8 @@ partial class types_package {
 // producing a cycle in the type graph.
 // (Cycles involving alias types, as in "type A = [10]A" are detected
 // earlier, via the objDecl cycle detection mechanism.)
-internal static void validType(this ж<Checker> Ꮡcheck, ж<Named> Ꮡtyp) {
-    Ꮡcheck.validType0(nopos, new NamedжΔType(Ꮡtyp), default!, default!);
+internal static void validType(this ж<Checker> Ꮡcheck, ж<Named> typ) {
+    Ꮡcheck.validType0(nopos, new NamedжΔType(typ), default, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -40,11 +40,11 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
 
         typ = Unalias(typ);
 
-        if ((~check.conf)._Trace) {
+        if (check.conf._Trace) {
             {
-                var (t, _) = typ._<ж<Named>>(ᐧ); if (t != nil && (~t).obj != nil) {
+                var (t, _) = typ._<ж<Named>>(ᐧ); if (t != nil && t.obj != nil) {
                     /* obj should always exist but be conservative */
-                    pos = t.Value.obj.Value.pos;
+                    pos = t.obj.Value.pos;
                 }
             }
             check.indent++;
@@ -64,10 +64,10 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             break;
         }
         case ж<Array> t: {
-            return Ꮡcheck.validType0(pos, (~t).elem, nest, path);
+            return Ꮡcheck.validType0(pos, t.elem, nest, path);
         }
         case ж<Struct> t: {
-            foreach (var (_, f) in (~t).fields) {
+            foreach (var (_, f) in t.fields) {
                 if (!Ꮡcheck.validType0(pos, (~f).typ, nest, path)) {
                     return false;
                 }
@@ -75,7 +75,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             break;
         }
         case ж<Union> t: {
-            foreach (var (_, tΔ1) in (~t).terms) {
+            foreach (var (_, tΔ1) in t.terms) {
                 if (!Ꮡcheck.validType0(pos, (~tΔ1).typ, nest, path)) {
                     return false;
                 }
@@ -83,7 +83,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             break;
         }
         case ж<Interface> t: {
-            foreach (var (_, etyp) in (~t).embeddeds) {
+            foreach (var (_, etyp) in t.embeddeds) {
                 if (!Ꮡcheck.validType0(pos, etyp, nest, path)) {
                     return false;
                 }
@@ -136,11 +136,11 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                     // Therefore it is safe to change their underlying types; there is
                     // no chance for a race condition (the types of the current package
                     // are not yet available to other goroutines).
-                    assert((~(~t).obj).pkg == check.pkg);
-                    assert((~(~t.Origin()).obj).pkg == check.pkg);
+                    assert((~t.obj).pkg == check.pkg);
+                    assert((~t.Origin().obj).pkg == check.pkg);
 
                     // let t become invalid when it is unpacked
-                    t.Origin().Value.fromRHS = new BasicжΔType(Typ[Invalid]);
+                    t.Origin().fromRHS = new BasicжΔType(Typ[Invalid]);
 
                     // Find the starting point of the cycle and report it.
                     // Because each type in nest must also appear in path (see invariant below),
@@ -205,7 +205,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
 
         return true;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -214,7 +214,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
 internal static slice<Object> makeObjList(slice<ж<Named>> tlist) {
     var olist = new slice<Object>(len(tlist));
     foreach (var (i, t) in tlist) {
-        olist[i] = new TypeNameжObject(t.Value.obj);
+        olist[i] = new TypeNameжObject(t.obj);
     }
     return olist;
 }

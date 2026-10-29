@@ -19,7 +19,7 @@ internal static error setDefaultSockopts(syscallꓸHandle s, nint family, nint s
         // Allow broadcast.
         return os.NewSyscallError(setsockoptˢ, syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_BROADCAST, 1));
     }
-    return default!;
+    return default;
 }
 
 internal static error setDefaultListenerSockopts(syscallꓸHandle s) {
@@ -29,7 +29,7 @@ internal static error setDefaultListenerSockopts(syscallꓸHandle s) {
     // This could lead to a non-deterministic behavior, where
     // connection requests over the port cannot be guaranteed
     // to be handled by the correct socket.
-    return default!;
+    return default;
 }
 
 internal static error setDefaultMulticastSockopts(syscallꓸHandle s) {

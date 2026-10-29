@@ -39,7 +39,7 @@ partial class syscall_package {
 // Deprecated: Use ByteSliceFromString instead.
 public static slice<byte> StringByteSlice(@string s) {
     var (a, err) = ByteSliceFromString(s);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("syscall: string with NUL passed to StringByteSlice");
     }
     return a;
@@ -50,11 +50,11 @@ public static slice<byte> StringByteSlice(@string s) {
 // location, it returns (nil, [EINVAL]).
 public static (slice<byte>, error) ByteSliceFromString(@string s) {
     if (bytealg.IndexByteString(s, 0) != -1) {
-        return (default!, EINVAL);
+        return (default, EINVAL);
     }
     var a = new slice<byte>(len(s) + 1);
     copy(a, s);
-    return (a, default!);
+    return (a, default);
 }
 
 // StringBytePtr returns a pointer to a NUL-terminated array of bytes.
@@ -71,10 +71,10 @@ public static ж<byte> StringBytePtr(@string s) {
 // location, it returns (nil, [EINVAL]).
 public static (ж<byte>, error) BytePtrFromString(@string s) {
     var (a, err) = ByteSliceFromString(s);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(a, 0), default!);
+    return (Ꮡ(a, 0), default);
 }
 
 // Single-word zero for use when we need a valid pointer to 0 bytes.

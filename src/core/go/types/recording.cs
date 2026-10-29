@@ -19,25 +19,29 @@ internal static void record(this ref Checker check, ж<operand> Ꮡx) {
 
     // convert x into a user-friendly set of values
     // TODO(gri) this code can be simplified
-    ΔType typ = default!;
-    constant.Value val = default!;
-    var exprᴛ1 = x.mode;
-    if (exprᴛ1 == invalid) {
+    ΔType typ = default;
+    constant.Value val = default;
+    switch (x.mode) {
+    case var ᴛ when ᴛ == invalid: {
         typ = new BasicжΔType(Typ[Invalid]);
+        break;
     }
-    else if (exprᴛ1 == novalue) {
+    case var ᴛ when ᴛ == novalue: {
         typ = new TupleжΔType(((ж<Tuple>)nil));
+        break;
     }
-    else if (exprᴛ1 == constant_) {
+    case var ᴛ when ᴛ == constant_: {
         typ = x.typ;
         val = x.val;
+        break;
     }
-    else { /* default: */
+    default: {
         typ = x.typ;
-    }
-    assert(x.expr != default! && typ != default!);
+        break;
+    }}
+    assert(x.expr != nil && typ != nil);
 
-    if (isUntyped(typ)){
+    if (isUntyped(typ)) {
         // delay type and value recording until we know the type
         // or until the end of type checking
         check.rememberUntyped(x.expr, false, x.mode, typ._<ж<Basic>>(), val);
@@ -66,32 +70,32 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
 }
 
 internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, operandMode mode, ΔType typ, constant.Value val) {
-    assert(x != default!);
-    assert(typ != default!);
+    assert(x != nil);
+    assert(typ != nil);
     if (mode == invalid) {
         return; // omit
     }
     if (mode == constant_) {
-        assert(val != default!);
+        assert(val != nil);
         // We check allBasic(typ, IsConstType) here as constant expressions may be
         // recorded as type parameters.
         assert(!isValid(typ) || allBasic(typ, IsConstType));
     }
     {
-        var m = check.Types; if (m != default!) {
+        var m = check.Types; if (m != nil) {
             m[x] = new TypeAndValue(mode, typ, val);
         }
     }
     check.recordTypeAndValueInSyntax(x, mode, typ, val);
 }
 
-internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<ΔSignature> Ꮡsig) {
+internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<ΔSignature> sig) {
     // f must be a (possibly parenthesized, possibly qualified)
     // identifier denoting a built-in (including unsafe's non-constant
     // functions Add and Slice): record the signature for f and possible
     // children.
-    while (ᐧ) {
-        check.recordTypeAndValue(f, Δbuiltinᴛ, new ΔSignatureжΔType(Ꮡsig), default!);
+    for (;;) {
+        check.recordTypeAndValue(f, Δbuiltinᴛ, new ΔSignatureжΔType(sig), default);
         switch (f.type()) {
         case ж<ast.Ident> _:
         case ж<ast.SelectorExpr> _: {
@@ -99,7 +103,7 @@ internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<Δ
             return; // we're done
         }
         case ж<ast.ParenExpr> p: {
-            f = p.Value.X;
+            f = p.X;
             break;
         }
         default: {
@@ -113,18 +117,18 @@ internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<Δ
 // recordCommaOkTypes updates recorded types to reflect that x is used in a commaOk context
 // (and therefore has tuple type).
 internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slice<ж<operand>> a) {
-    assert(x != default!);
+    assert(x != nil);
     assert(len(a) == 2);
-    if ((~a[0]).mode == invalid) {
+    if (a[0].mode == invalid) {
         return;
     }
-    var (t0, t1) = (a[0].Value.typ, a[1].Value.typ);
+    var (t0, t1) = (a[0].typ, a[1].typ);
     assert(isTyped(t0) && isTyped(t1) && (allBoolean(t1) || AreEqual(t1, universeError)));
     {
-        var m = check.Types; if (m != default!) {
-            while (ᐧ) {
+        var m = check.Types; if (m != nil) {
+            for (;;) {
                 var tv = m[x];
-                assert(tv.Type != default!); // should have been recorded already
+                assert(tv.Type != nil); // should have been recorded already
                 tokenꓸPos pos = x.Pos();
                 tv.Type = new TupleжΔType(NewTuple(
                     newVar(LocalVar, pos, check.pkg, ""u8, t0),
@@ -135,7 +139,7 @@ internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slic
                 if (p == nil) {
                     break;
                 }
-                x = p.Value.X;
+                x = p.X;
             }
         }
     }
@@ -151,38 +155,38 @@ internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slic
 internal static void recordInstance(this ref Checker check, ast.Expr expr, slice<ΔType> targs, ΔType typ) {
     var ident = instantiatedIdent(expr);
     assert(ident != nil);
-    assert(typ != default!);
+    assert(typ != nil);
     {
-        var m = check.Instances; if (m != default!) {
+        var m = check.Instances; if (m != nil) {
             m[ident] = new Instance(newTypeList(targs), typ);
         }
     }
 }
 
-internal static void recordDef(this ref Checker check, ж<ast.Ident> Ꮡid, Object obj) {
-    assert(Ꮡid != nil);
+internal static void recordDef(this ref Checker check, ж<ast.Ident> id, Object obj) {
+    assert(id != nil);
     {
-        var m = check.Defs; if (m != default!) {
-            m[Ꮡid] = obj;
+        var m = check.Defs; if (m != nil) {
+            m[id] = obj;
         }
     }
 }
 
-internal static void recordUse(this ref Checker check, ж<ast.Ident> Ꮡid, Object obj) {
-    assert(Ꮡid != nil);
-    assert(obj != default!);
+internal static void recordUse(this ref Checker check, ж<ast.Ident> id, Object obj) {
+    assert(id != nil);
+    assert(obj != nil);
     {
-        var m = check.Uses; if (m != default!) {
-            m[Ꮡid] = obj;
+        var m = check.Uses; if (m != nil) {
+            m[id] = obj;
         }
     }
 }
 
 internal static void recordImplicit(this ref Checker check, ast.Node node, Object obj) {
-    assert(node != default!);
-    assert(obj != default!);
+    assert(node != nil);
+    assert(obj != nil);
     {
-        var m = check.Implicits; if (m != default!) {
+        var m = check.Implicits; if (m != nil) {
             m[node] = obj;
         }
     }
@@ -191,21 +195,21 @@ internal static void recordImplicit(this ref Checker check, ast.Node node, Objec
 internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, ΔType recv, Object obj, slice<nint> index, bool indirect) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    assert(obj != default! && (recv == default! || len(index) > 0));
+    assert(obj != nil && (recv == nil || len(index) > 0));
     check.recordUse(x.Sel, obj);
     {
-        var m = check.Selections; if (m != default!) {
+        var m = check.Selections; if (m != nil) {
             m[Ꮡx] = Ꮡ(new Selection(kind, recv, obj, index, indirect));
         }
     }
 }
 
-internal static void recordScope(this ref Checker check, ast.Node node, ж<ΔScope> Ꮡscope) {
-    assert(node != default!);
-    assert(Ꮡscope != nil);
+internal static void recordScope(this ref Checker check, ast.Node node, ж<ΔScope> scope) {
+    assert(node != nil);
+    assert(scope != nil);
     {
-        var m = check.Scopes; if (m != default!) {
-            m[node] = Ꮡscope;
+        var m = check.Scopes; if (m != nil) {
+            m[node] = scope;
         }
     }
 }

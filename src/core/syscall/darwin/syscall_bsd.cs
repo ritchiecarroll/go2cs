@@ -19,14 +19,14 @@ public const bool ImplementsGetwd = true;
 public static (@string, error) Getwd() {
     array<byte> buf = new(1024); /* pathMax */
     var (_, err) = getcwd(buf[..]);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     nint n = clen(buf[..]);
     if (n < 1) {
         return ("", EINVAL);
     }
-    return ((@string)(buf.slice(0, n)), default!);
+    return ((@string)(buf.slice(0, n)), default);
 }
 
 /*
@@ -35,30 +35,30 @@ public static (@string, error) Getwd() {
 //sysnb	getgroups(ngid int, gid *_Gid_t) (n int, err error)
 //sysnb	setgroups(ngid int, gid *_Gid_t) (err error)
 public static (slice<nint> gids, error err) Getgroups() {
-    slice<nint> gids = default!;
-    error err = default!;
+    slice<nint> gids = default;
+    error err = default;
 
     (var n, err) = getgroups(0, nil);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (n == 0) {
-        return (default!, default!);
+        return (default, default);
     }
 
     // Sanity check group count. Max is 16 on BSD.
     if (n < 0 || n > 1000) {
-        return (default!, EINVAL);
+        return (default, EINVAL);
     }
 
     var a = new slice<_Gid_t>(n);
     (n, err) = getgroups(n, Ꮡ(a, 0));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     gids = new slice<nint>(n);
     foreach (var (i, v) in a.slice(0, n)) {
-        gids[i] = (nint)(uint32)v;
+        gids[i] = (nint)v;
     }
     return (gids, err);
 }
@@ -106,7 +106,7 @@ public static nint ExitStatus(this WaitStatus w) {
     if ((WaitStatus)(w & (uint32)mask) != exited) {
         return -1;
     }
-    return (nint)(uint32)((w >> (int)(shift)));
+    return (nint)(w >> (int)(shift));
 }
 
 public static bool Signaled(this WaitStatus w) {
@@ -114,7 +114,7 @@ public static bool Signaled(this WaitStatus w) {
 }
 
 public static ΔSignal Signal(this WaitStatus w) {
-    ΔSignal sig = (ΔSignal)(nint)((uint32)((WaitStatus)(w & (uint32)mask)));
+    ΔSignal sig = (ΔSignal)(nint)((WaitStatus)(w & (uint32)mask));
     if (sig == stopped || sig == 0) {
         return -1;
     }
@@ -126,18 +126,18 @@ public static bool CoreDump(this WaitStatus w) {
 }
 
 public static bool Stopped(this WaitStatus w) {
-    return (WaitStatus)(w & (uint32)mask) == stopped && ((ΔSignal)(nint)((uint32)(w >> (int)(shift)))) != SIGSTOP;
+    return (WaitStatus)(w & (uint32)mask) == stopped && ((ΔSignal)(nint)((w >> (int)(shift)))) != SIGSTOP;
 }
 
 public static bool Continued(this WaitStatus w) {
-    return (WaitStatus)(w & (uint32)mask) == stopped && ((ΔSignal)(nint)((uint32)(w >> (int)(shift)))) == SIGSTOP;
+    return (WaitStatus)(w & (uint32)mask) == stopped && ((ΔSignal)(nint)((w >> (int)(shift)))) == SIGSTOP;
 }
 
 public static ΔSignal StopSignal(this WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
-    return (ΔSignal)(((ΔSignal)(nint)((uint32)(w >> (int)(shift)))) & 0xFF);
+    return (ΔSignal)(((ΔSignal)(nint)((w >> (int)(shift)))) & 0xFF);
 }
 
 public static nint TrapCause(this WaitStatus w) {
@@ -145,15 +145,15 @@ public static nint TrapCause(this WaitStatus w) {
 }
 
 //sys	wait4(pid int, wstatus *_C_int, options int, rusage *Rusage) (wpid int, err error)
-public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> Ꮡrusage) {
-    nint wpid = default!;
-    error err = default!;
+public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> rusage) {
+    nint wpid = default;
+    error err = default;
     ref var wstatus = ref Ꮡwstatus.DerefOrNull();
 
     ref var status = ref heap(new _C_int(), out var Ꮡstatus);
-    (wpid, err) = wait4(pid, Ꮡstatus, options, Ꮡrusage);
+    (wpid, err) = wait4(pid, Ꮡstatus, options, rusage);
     if (Ꮡwstatus != nil) {
-        wstatus = (WaitStatus)(uint32)(int32)status;
+        wstatus = (WaitStatus)(uint32)status;
     }
     return (wpid, err);
 }
@@ -177,21 +177,21 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     @string name = sa.Name;
     nint n = len(name);
     if (n >= len(sa.raw.Path) || n == 0) {
-        return (default!, 0, EINVAL);
+        return (default, 0, EINVAL);
     }
     sa.raw.Len = (byte)(3 + n); // 2 for Family, Len; 1 for NUL
     sa.raw.Family = AF_UNIX;
     for (nint i = 0; i < n; i++) {
         sa.raw.Path[i] = (int8)name[i];
     }
-    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), (_Socklen)(uint32)sa.raw.Len, default!);
+    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), (_Socklen)(uint32)sa.raw.Len, default);
 }
 
 internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrDatalink> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     if (sa.Index == 0) {
-        return (default!, 0, EINVAL);
+        return (default, 0, EINVAL);
     }
     sa.raw.Len = sa.Len;
     sa.raw.Family = AF_LINK;
@@ -201,7 +201,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrData
     sa.raw.Alen = sa.Alen;
     sa.raw.Slen = sa.Slen;
     sa.raw.Data = sa.Data.Clone();
-    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrDatalink.Ꮡraw)), SizeofSockaddrDatalink, default!);
+    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrDatalink.Ꮡraw)), SizeofSockaddrDatalink, default);
 }
 
 // go2cs generated this placeholder — func anyToSockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -212,53 +212,47 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrData
 
 //sysnb socketpair(domain int, typ int, proto int, fd *[2]int32) (err error)
 public static (byte value, error err) GetsockoptByte(nint fd, nint level, nint opt) {
-    error err = default!;
+    error err = default;
 
     ref var n = ref heap(new byte(), out var Ꮡn);
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)1;
+    ref var vallen = ref heap<_Socklen>((_Socklen)1, out var Ꮡvallen);
     err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡn), Ꮡvallen);
     return (n, err);
 }
 
 public static (array<byte> value, error err) GetsockoptInet4Addr(nint fd, nint level, nint opt) {
     ref var value = ref heap(new array<byte>(4), out var Ꮡvalue);
-    error err = default!;
+    error err = default;
 
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)4;
+    ref var vallen = ref heap<_Socklen>((_Socklen)4, out var Ꮡvallen);
     err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue.at<byte>(0)), Ꮡvallen);
     return (value.Clone(), err);
 }
 
 public static (ж<IPMreq>, error) GetsockoptIPMreq(nint fd, nint level, nint opt) {
     ref var value = ref heap(new IPMreq(), out var Ꮡvalue);
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)SizeofIPMreq;
+    ref var vallen = ref heap<_Socklen>((_Socklen)SizeofIPMreq, out var Ꮡvallen);
     var err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue), Ꮡvallen);
     return (Ꮡvalue, err);
 }
 
 public static (ж<IPv6Mreq>, error) GetsockoptIPv6Mreq(nint fd, nint level, nint opt) {
     ref var value = ref heap(new IPv6Mreq(), out var Ꮡvalue);
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)SizeofIPv6Mreq;
+    ref var vallen = ref heap<_Socklen>((_Socklen)SizeofIPv6Mreq, out var Ꮡvallen);
     var err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue), Ꮡvallen);
     return (Ꮡvalue, err);
 }
 
 public static (ж<IPv6MTUInfo>, error) GetsockoptIPv6MTUInfo(nint fd, nint level, nint opt) {
     ref var value = ref heap(new IPv6MTUInfo(), out var Ꮡvalue);
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)SizeofIPv6MTUInfo;
+    ref var vallen = ref heap<_Socklen>((_Socklen)SizeofIPv6MTUInfo, out var Ꮡvallen);
     var err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue), Ꮡvallen);
     return (Ꮡvalue, err);
 }
 
 public static (ж<ICMPv6Filter>, error) GetsockoptICMPv6Filter(nint fd, nint level, nint opt) {
     ref var value = ref heap(new ICMPv6Filter(), out var Ꮡvalue);
-    ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = (_Socklen)SizeofICMPv6Filter;
+    ref var vallen = ref heap<_Socklen>((_Socklen)SizeofICMPv6Filter, out var Ꮡvallen);
     var err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue), Ꮡvallen);
     return (Ꮡvalue, err);
 }
@@ -270,8 +264,8 @@ public static (ж<ICMPv6Filter>, error) GetsockoptICMPv6Filter(nint fd, nint lev
 
 //sys	sendmsg(s int, msg *Msghdr, flags int) (n int, err error)
 internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte> oob, @unsafe.Pointer ptr, _Socklen salen, nint flags) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     ref var msg = ref heap(new Msghdr(), out var Ꮡmsg);
     msg.Name = (ж<byte>)(uintptr)(ptr);
@@ -294,87 +288,85 @@ internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte>
     msg.Iov = Ꮡiov;
     msg.Iovlen = 1;
     {
-        (n, err) = sendmsg(fd, Ꮡmsg, flags); if (err != default!) {
+        (n, err) = sendmsg(fd, Ꮡmsg, flags); if (err != nil) {
             return (0, err);
         }
     }
     if (len(oob) > 0 && len(p) == 0) {
         n = 0;
     }
-    return (n, default!);
+    return (n, default);
 }
 
 //sys	kevent(kq int, change unsafe.Pointer, nchange int, event unsafe.Pointer, nevent int, timeout *Timespec) (n int, err error)
-public static (nint n, error err) Kevent(nint kq, slice<Kevent_t> changes, slice<Kevent_t> events, ж<Timespec> Ꮡtimeout) {
-    @unsafe.Pointer change = default!;
-    @unsafe.Pointer @event = default!;
+public static (nint n, error err) Kevent(nint kq, slice<Kevent_t> changes, slice<Kevent_t> events, ж<Timespec> timeout) {
+    @unsafe.Pointer change = default;
+    @unsafe.Pointer @event = default;
     if (len(changes) > 0) {
         change = @unsafe.Pointer.FromPinnedBox(Ꮡ(changes, 0));
     }
     if (len(events) > 0) {
         @event = @unsafe.Pointer.FromPinnedBox(Ꮡ(events, 0));
     }
-    return kevent(kq, change, len(changes), @event, len(events), Ꮡtimeout);
+    return kevent(kq, change, len(changes), @event, len(events), timeout);
 }
 
 public static (@string value, error err) Sysctl(@string name) {
-    error err = default!;
+    error err = default;
 
     // Translate name to mib number.
     (var mib, err) = nametomib(name);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
 
     // Find size.
-    ref var n = ref heap<uintptr>(out var Ꮡn);
-    n = (uintptr)0;
+    ref var n = ref heap<uintptr>((uintptr)0, out var Ꮡn);
     {
-        err = sysctl(mib, nil, Ꮡn, nil, 0); if (err != default!) {
+        err = sysctl(mib, nil, Ꮡn, nil, 0); if (err != nil) {
             return ("", err);
         }
     }
     if (n == 0) {
-        return ("", default!);
+        return ("", default);
     }
 
     // Read into buffer of that size.
     var buf = new slice<byte>((nint)(n));
     {
-        err = sysctl(mib, Ꮡ(buf, 0), Ꮡn, nil, 0); if (err != default!) {
+        err = sysctl(mib, Ꮡ(buf, 0), Ꮡn, nil, 0); if (err != nil) {
             return ("", err);
         }
     }
 
     // Throw away terminating NUL.
-    if (n > 0 && buf[n - 1] == (rune)'\x00') {
+    if (n > 0 && buf[n - 1] == '\x00') {
         n--;
     }
-    return ((@string)(buf.slice(0, (nint)(n))), default!);
+    return ((@string)(buf.slice(0, (nint)(n))), default);
 }
 
 public static (uint32 value, error err) SysctlUint32(@string name) {
-    error err = default!;
+    error err = default;
 
     // Translate name to mib number.
     (var mib, err) = nametomib(name);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
 
     // Read into buffer of that size.
-    ref var n = ref heap<uintptr>(out var Ꮡn);
-    n = (uintptr)4;
+    ref var n = ref heap<uintptr>((uintptr)4, out var Ꮡn);
     var buf = new slice<byte>(4);
     {
-        err = sysctl(mib, Ꮡ(buf, 0), Ꮡn, nil, 0); if (err != default!) {
+        err = sysctl(mib, Ꮡ(buf, 0), Ꮡn, nil, 0); if (err != nil) {
             return (0, err);
         }
     }
     if (n != 4) {
         return (0, EIO);
     }
-    return (~Ꮡ(buf, 0).Reinterpret<byte, uint32>(), default!);
+    return (~Ꮡ(buf, 0).Reinterpret<byte, uint32>(), default);
 }
 
 //sys	utimes(path string, timeval *[2]Timeval) (err error)
@@ -395,11 +387,10 @@ public static error UtimesNano(@string path, slice<Timespec> ts) {
     }
     // Not as efficient as it could be because Timespec and
     // Timeval have different types in the different OSes
-    ref var tv = ref heap<array<Timeval>>(out var Ꮡtv);
-    tv = new Timeval[]{
+    ref var tv = ref heap<array<Timeval>>(new Timeval[]{
         NsecToTimeval(TimespecToNsec(ts[0])),
         NsecToTimeval(TimespecToNsec(ts[1]))
-    }.array();
+    }.array(), out var Ꮡtv);
     return utimes(path, array<Timeval>.AliasPointer(Ꮡtv.at<Timeval>(0), 2));
 }
 

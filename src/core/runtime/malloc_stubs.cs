@@ -54,13 +54,13 @@ internal static @unsafe.Pointer malloc0(uintptr size, ref _type typ, bool needze
     return @unsafe.Pointer.FromBox(Ꮡzerobase);
 }
 
-internal static @unsafe.Pointer mallocPanic(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocPanic(uintptr size, ж<_type> typ, bool needzero) {
     throw panic("not defined for sizeclass");
 }
 
 // WARNING: mallocStub does not do any work for sanitizers so callers need
 // to steer out of this codepath early if sanitizers are enabled.
-internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> typ, bool needzero) {
     if (isTiny_) {
         // secret code, need to avoid the tiny allocator since it might keep
         // co-located values alive longer and prevent timely zero-ing
@@ -69,7 +69,7 @@ internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> Ꮡtyp, bool 
         // See go.dev/issue/76356
         var gp = getg();
         if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-            return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+            return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
         }
     }
     if (doubleCheckMalloc) {
@@ -86,7 +86,7 @@ internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> Ꮡtyp, bool 
     // Pre-malloc debug hooks.
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -99,7 +99,7 @@ internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> Ꮡtyp, bool 
     }
 
     // Actually do the allocation.
-    var (x, elemsize) = inlinedMalloc(size, ref (Ꮡtyp).DerefOrNull(), needzero);
+    var (x, elemsize) = inlinedMalloc(size, ref (typ).DerefOrNull(), needzero);
 
     if (!isTiny_) {
         var gp = getg();
@@ -128,7 +128,7 @@ internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> Ꮡtyp, bool 
 
     // Post-malloc debug hooks.
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
@@ -160,38 +160,38 @@ internal static void doubleCheckSmallScanNoHeader(uintptr size, ж<_type> Ꮡtyp
     }
 }
 
-internal static (@unsafe.Pointer, uintptr) smallScanNoHeaderStub(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static (@unsafe.Pointer, uintptr) smallScanNoHeaderStub(uintptr size, ж<_type> typ, bool needzero) {
     UntypedInt sizeclass = /* sizeclass_ */ 0;
     UntypedInt elemsize = /* elemsize_ */ 8;
 
     // Set mp.mallocing to keep from being preempted by GC.
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallScanNoHeader(size, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallScanNoHeader(size, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(noscanint_) */ 0;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
     var v = nextFreeFastStub(span);
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
         // initHeapBits already set the pointer bits for the 8-byte sizeclass
         // on 64-bit platforms.
-        c.Value.scanAlloc += 8;
+        c.scanAlloc += 8;
     } else {
         var dataSize = size; // make the inliner happy
         var xΔ1 = (uintptr)x;
-        var scanSize = heapSetTypeNoHeaderStub(xΔ1, dataSize, Ꮡtyp, span);
-        c.Value.scanAlloc += scanSize;
+        var scanSize = heapSetTypeNoHeaderStub(xΔ1, dataSize, typ, span);
+        c.scanAlloc += scanSize;
     }
 
     // Ensure that the stores above that initialize x to
@@ -202,7 +202,7 @@ internal static (@unsafe.Pointer, uintptr) smallScanNoHeaderStub(uintptr size, �
     // but see uninitialized memory or stale heap bits.
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         // Allocate black during GC.
         // All slots hold nil so no scanning is needed.
         // This may be racing with GC so do it atomically if there can be
@@ -217,7 +217,7 @@ internal static (@unsafe.Pointer, uintptr) smallScanNoHeaderStub(uintptr size, �
         // scanner produces pointers out of thin air, so without additional
         // synchronization it might otherwise observe a partially-initialized
         // object, which could crash the program.
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
     // Note cache c only valid while m acquired; see #47302
@@ -229,8 +229,8 @@ internal static (@unsafe.Pointer, uintptr) smallScanNoHeaderStub(uintptr size, �
     // of gc_sys or something. The code below just pretends it is
     // internal fragmentation and matches the GC's accounting by
     // using the whole allocation slot.
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -261,7 +261,7 @@ internal static void doubleCheckSmallNoScan(ж<_type> Ꮡtyp, ref m mp) {
     }
 }
 
-internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_type> typ, bool needzero) {
     // TODO(matloob): Add functionality to mkmalloc to allow us to inline a non-constant
     // sizeclass_ and elemsize_ value (instead just set to the expressions to look up the size class
     // and elemsize. We'd also need to teach mkmalloc that values that are touched by these (specifically
@@ -273,14 +273,14 @@ internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_typ
     // Set mp.mallocing to keep from being preempted by GC.
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(noscanint_) */ 0;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     // First, check for a reusable object.
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
@@ -303,7 +303,7 @@ internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_typ
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
@@ -315,7 +315,7 @@ internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_typ
     // but see uninitialized memory or stale heap bits.
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         // Allocate black during GC.
         // All slots hold nil so no scanning is needed.
         // This may be racing with GC so do it atomically if there can be
@@ -330,7 +330,7 @@ internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_typ
         // scanner produces pointers out of thin air, so without additional
         // synchronization it might otherwise observe a partially-initialized
         // object, which could crash the program.
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
     // Note cache c only valid while m acquired; see #47302
@@ -342,8 +342,8 @@ internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_typ
     // of gc_sys or something. The code below just pretends it is
     // internal fragmentation and matches the GC's accounting by
     // using the whole allocation slot.
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -373,14 +373,14 @@ internal static void doubleCheckTiny(uintptr size, ж<_type> Ꮡtyp, ref m mp) {
     }
 }
 
-internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> typ, bool needzero) {
     UntypedInt constsize = /* size_ */ 0;
     UntypedInt elemsize = /* elemsize_ */ 8;
 
     // Set mp.mallocing to keep from being preempted by GC.
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
@@ -414,12 +414,11 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> Ꮡt
     // the allocator reduces number of allocations by ~12% and
     // reduces heap size by ~20%.
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
     // Align tiny pointer for required (conservative) alignment.
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         // Conservatively align 12-byte objects to 8 bytes on 32-bit
         // systems so that objects whose first field is a 64-bit
         // value is aligned to 8 bytes and does not cause a fault on
@@ -427,25 +426,23 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> Ꮡt
         // TODO(mknyszek): Remove this workaround if/when issue 36606
         // is resolved.
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
         // The object fits into existing tiny block.
-        @unsafe.Pointer xΔ1 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+        @unsafe.Pointer xΔ1 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         return (xΔ1, 0);
     }
     // Allocate a new maxTinySize block.
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
     var v = nextFreeFastTiny(span);
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
@@ -455,10 +452,10 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> Ꮡt
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
     // See if we need to replace the existing tiny block with the new one
     // based on amount of remaining free space.
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
         // Note: disabled when race detector is on, see comment near end of this function.
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     // Ensure that the stores above that initialize x to
@@ -469,7 +466,7 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> Ꮡt
     // but see uninitialized memory or stale heap bits.
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         // Allocate black during GC.
         // All slots hold nil so no scanning is needed.
         // This may be racing with GC so do it atomically if there can be
@@ -484,7 +481,7 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> Ꮡt
         // scanner produces pointers out of thin air, so without additional
         // synchronization it might otherwise observe a partially-initialized
         // object, which could crash the program.
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
     // Note cache c only valid while m acquired; see #47302
@@ -496,8 +493,8 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> Ꮡt
     // of gc_sys or something. The code below just pretends it is
     // internal fragmentation and matches the GC's accounting by
     // using the whole allocation slot.
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -536,7 +533,7 @@ internal static gclinkptr nextFreeFastTiny(ж<mspan> Ꮡspan) {
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) / elemsize_) */ 1008;
-    gclinkptr nextFreeFastResult = default!;
+    gclinkptr nextFreeFastResult = default;
     if (span.allocCache != 0) {
         nint theBit = sys.TrailingZeros64(span.allocCache); // Is there a free object in the allocCache?
         var result = (uint16)(span.freeindex + (uint16)theBit);
@@ -556,7 +553,7 @@ internal static gclinkptr nextFreeFastTiny(ж<mspan> Ꮡspan) {
 internal static gclinkptr nextFreeFastStub(ж<mspan> Ꮡspan) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
-    gclinkptr nextFreeFastResult = default!;
+    gclinkptr nextFreeFastResult = default;
     if (span.allocCache != 0) {
         nint theBit = sys.TrailingZeros64(span.allocCache); // Is there a free object in the allocCache?
         var result = (uint16)(span.freeindex + (uint16)theBit);
@@ -573,13 +570,13 @@ internal static gclinkptr nextFreeFastStub(ж<mspan> Ꮡspan) {
     return nextFreeFastResult;
 }
 
-internal static uintptr heapSetTypeNoHeaderStub(uintptr x, uintptr dataSize, ж<_type> Ꮡtyp, ж<mspan> Ꮡspan) {
+internal static uintptr heapSetTypeNoHeaderStub(uintptr x, uintptr dataSize, ж<_type> typ, ж<mspan> span) {
     if (doubleCheckHeapSetType && (!heapBitsInSpan(dataSize) || !heapBitsInSpan(elemsize_))) {
         @throw(triedToWriteHeapBitsButˢ);
     }
-    var scanSize = writeHeapBitsSmallStub(Ꮡspan, x, dataSize, Ꮡtyp);
+    var scanSize = writeHeapBitsSmallStub(span, x, dataSize, typ);
     if (doubleCheckHeapSetType) {
-        doubleCheckHeapType(x, dataSize, Ꮡtyp, nil, Ꮡspan);
+        doubleCheckHeapType(x, dataSize, typ, nil, span);
     }
     return scanSize;
 }
@@ -603,7 +600,7 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
     // Create repetitions of the bitmap if we have a small slice backing store.
     var scanSize = typ.PtrBytes;
     var src = src0;
-    if (typ.Size_ == goarch.PtrSize){
+    if (typ.Size_ == goarch.PtrSize) {
         src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
     } else {
         // N.B. We rely on dataSize being an exact multiple of the type size.
@@ -635,7 +632,7 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
     // 'two writes' branch of the if statement and always do only one write without
     // the check.
     const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ true;
-    if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+    if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
         // Two writes.
         var bits0 = (uintptr)ptrBits - j;
         var bits1 = bits - bits0;

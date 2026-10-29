@@ -25,18 +25,18 @@ internal static slice<@string> splitList(@string path) {
     // consider changing os/exec when changing this.
 
     if (path == ""u8) {
-        return new @string[]{}.slice();
+        return slice<@string>([]);
     }
 
     // Split path, respecting but preserving quotes.
-    var list = new @string[]{}.slice();
+    var list = slice<@string>([]);
     nint start = 0;
     var quo = false;
     for (nint i = 0; i < len(path); i++) {
         {
             var c = path[i];
             switch (ᐧ) {
-            case {} when c is (rune)'"': {
+            case {} when c is (byte)'"': {
                 quo = !quo;
                 break;
             }
@@ -65,15 +65,15 @@ internal static (@string, error) abs(@string path) {
         path = "."u8;
     }
     var (fullPath, err) = syscall.FullPath(path);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
-    return (Clean(fullPath), default!);
+    return (Clean(fullPath), default);
 }
 
 internal static @string join(slice<@string> elem) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    byte lastChar = default!;
+    byte lastChar = default;
     foreach (var (_, vᴛ1) in elem) {
         var e = vᴛ1;
 
@@ -101,7 +101,7 @@ internal static @string join(slice<@string> elem) {
             }
             break;
         }
-        case {} when lastChar is (rune)':': {
+        case {} when lastChar is (byte)':': {
             // If the path ends in a colon, keep the path relative to the current directory
             // on a drive and don't add a separator. Preserve leading slashes in the next
             // path element, which may make the path absolute.
@@ -112,8 +112,8 @@ internal static @string join(slice<@string> elem) {
         }
         default: {
             // In all other cases, add a separator between elements.
-            Ꮡb.WriteByte((rune)'\\');
-            lastChar = (rune)'\\';
+            Ꮡb.WriteByte((byte)'\\');
+            lastChar = (byte)'\\';
             break;
         }}
         if (len(e) > 0) {

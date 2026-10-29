@@ -78,7 +78,7 @@ public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) {
 internal static byte shiftLeft(/*[16]*/ ж<array<byte>> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    byte msb = default!;
+    byte msb = default;
     for (nint i = 16 - 1; i >= 0; i--) {
         (msb, x[i]) = ((byte)((x[i] >> 7)), (byte)((byte)(x[i] << 1) | msb));
     }

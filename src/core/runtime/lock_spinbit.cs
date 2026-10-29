@@ -49,7 +49,7 @@ partial class runtime_package {
 // offset is due to mallocgc's allocation headers.) The main program thread uses
 // a static M value, m0. We check for m0 specifically and add a known offset
 // otherwise.
-internal static UntypedInt active_spin => 4; // referenced in proc.go for sync.Mutex implementation
+internal static UntypedInt active_spin => 4;      // referenced in proc.go for sync.Mutex implementation
 internal static UntypedInt active_spin_cnt => 30; // referenced in proc.go for sync.Mutex implementation
 
 internal static UntypedInt mutexLocked => 0x001;
@@ -66,11 +66,11 @@ internal static UntypedInt mutexPassiveSpinCount => 1;
 internal static UntypedInt mutexTailWakePeriod => 16;
 
 //go:nosplit
-internal static ж<uint8> key8(ж<uintptr> Ꮡp) {
+internal static ж<uint8> key8(ж<uintptr> Δp) {
     if (goarch.BigEndian) {
-        return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡp))).at<uint8>(goarch.PtrSize / 1 - 1);
+        return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Δp))).at<uint8>(goarch.PtrSize / 1 - 1);
     }
-    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡp))).at<uint8>(0);
+    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Δp))).at<uint8>(0);
 }
 
 // mWaitList is part of the M struct, and holds the list of Ms that are waiting
@@ -81,8 +81,8 @@ internal static ж<uint8> key8(ж<uintptr> Ꮡp) {
 // forming a singly-linked list with the mutex's key field pointing to the head
 // of the list.
 partial struct mWaitList {
-    internal muintptr next; // next m waiting for lock
-    internal int64 startTicks;    // when this m started waiting for the current lock holder, in cputicks
+    internal muintptr next;    // next m waiting for lock
+    internal int64 startTicks; // when this m started waiting for the current lock holder, in cputicks
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -108,11 +108,10 @@ internal static void lockVerifyMSize() {
 //go:nosplit
 internal static muintptr mutexWaitListHead(uintptr v) {
     {
-        var highBits = (uintptr)(v & ~(uintptr)(uintptr)mutexMMask); if (highBits == 0){
+        var highBits = (uintptr)(v & ~(uintptr)(uintptr)mutexMMask); if (highBits == 0) {
             return 0;
-        } else 
-        {
-            var m0bits = new muintptr(Ꮡm0); if (highBits == (uintptr)((uintptr)m0bits & ~(uintptr)(uintptr)mutexMMask)){
+        } else {
+            var m0bits = new muintptr(Ꮡm0); if (highBits == (uintptr)((uintptr)m0bits & ~(uintptr)(uintptr)mutexMMask)) {
                 return m0bits;
             } else {
                 return (muintptr)(highBits + (uintptr)mutexMOffset);
@@ -134,30 +133,30 @@ internal static muintptr mutexWaitListHead(uintptr v) {
 // additional storage on the M for each lock held.
 //
 //go:nosplit
-internal static bool mutexPreferLowLatency(ж<mutex> Ꮡl) {
-    var exprᴛ1 = Ꮡl;
-    if (exprᴛ1 == Ꮡsched.of(schedt.Ꮡlock)) {
+internal static bool mutexPreferLowLatency(ж<mutex> l) {
+    switch (l) {
+    default: {
+        return false;
+    }
+    case var ᴛ when ᴛ == Ꮡsched.of(schedt.Ꮡlock): {
         // We often expect sched.lock to pass quickly between Ms in a way that
         // each M has unique work to do: for instance when we stop-the-world
         // (bringing each P to idle) or add new netpoller-triggered work to the
         // global run queue.
         return true;
-    }
-    { /* default: */
-        return false;
-    }
+    }}
 }
 
 // go2cs generated this placeholder — func mutexContended is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void @lock(ж<mutex> Ꮡl) {
-    lockWithRank(Ꮡl, getLockRank(Ꮡl));
+internal static void @lock(ж<mutex> l) {
+    lockWithRank(l, getLockRank(l));
 }
 
 // go2cs generated this placeholder — func lock2 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static partial void unlock(ж<mutex> Ꮡl) {
-    unlockWithRank(Ꮡl);
+internal static partial void unlock(ж<mutex> l) {
+    unlockWithRank(l);
 }
 
 // go2cs generated this placeholder — func unlock2 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -166,7 +165,7 @@ internal static partial void unlock(ж<mutex> Ꮡl) {
 // report any contention it discovers.
 internal static bool mutexSampleContention() {
     {
-        var rate = (int64)atomic.Load64(Ꮡmutexprofilerate); if (rate <= 0){
+        var rate = (int64)atomic.Load64(Ꮡmutexprofilerate); if (rate <= 0) {
             return false;
         } else {
             // TODO: have SetMutexProfileFraction do the clamping

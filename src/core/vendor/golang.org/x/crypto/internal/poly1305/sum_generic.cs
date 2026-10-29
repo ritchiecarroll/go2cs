@@ -27,16 +27,15 @@ partial class poly1305_package {
 //
 // All the complexity is about doing performant constant-time math on numbers
 // larger than any available numeric type.
-internal static void sumGeneric(/*[16]*/ ж<array<byte>> Ꮡout, slice<byte> msg, /*[32]*/ ж<array<byte>> Ꮡkey) {
-    ref var h = ref heap<macGeneric>(out var Ꮡh);
-    h = newMACGeneric(Ꮡkey);
+internal static void sumGeneric(/*[16]*/ ж<array<byte>> @out, slice<byte> msg, /*[32]*/ ж<array<byte>> key) {
+    ref var h = ref heap<macGeneric>(newMACGeneric(key), out var Ꮡh);
     Ꮡh.Write(msg);
-    h.Sum(Ꮡout);
+    h.Sum(@out);
 }
 
-internal static macGeneric newMACGeneric(/*[32]*/ ж<array<byte>> Ꮡkey) {
-    var m = new macGeneric(nil);
-    initialize(Ꮡkey, ref m.macState);
+internal static macGeneric newMACGeneric(/*[32]*/ ж<array<byte>> key) {
+    var m = new macGeneric();
+    initialize(key, ref m.macState);
     return m.ΔClone();
 }
 
@@ -68,7 +67,7 @@ internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
         nint n = copy(h.buffer.slice(h.offset), p);
         if (h.offset + n < TagSize) {
             h.offset += n;
-            return (nn, default!);
+            return (nn, default);
         }
         p = p.slice(n);
         h.offset = 0;
@@ -83,18 +82,18 @@ internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
     if (len(p) > 0) {
         h.offset += copy(h.buffer.slice(h.offset), p);
     }
-    return (nn, default!);
+    return (nn, default);
 }
 
 // Sum flushes the last incomplete chunk from the buffer, if any, and generates
 // the MAC output. It does not modify its state, in order to allow for multiple
 // calls to Sum, even if no Write is allowed after Sum.
-internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> Ꮡout) {
+internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> @out) {
     var state = h.macState.ΔClone();
     if (h.offset > 0) {
         updateGeneric(ref state, h.buffer.slice(0, h.offset));
     }
-    finalize(Ꮡout, ref state.h, ref state.s);
+    finalize(@out, ref state.h, ref state.s);
 }
 
 // [rMask0, rMask1] is the specified Poly1305 clamping mask in little-endian. It
@@ -151,7 +150,7 @@ internal static void updateGeneric(ref macState state, slice<byte> msg) {
     var (r0, r1) = (state.r[0], state.r[1]);
 
     while (len(msg) > 0) {
-        uint64 c = default!;
+        uint64 c = default;
 
         // For the first step, h + m, we use a chain of bits.Add64 intrinsics.
         // The resulting value of h might exceed 2¹³⁰ - 5, but will be partially
@@ -160,7 +159,7 @@ internal static void updateGeneric(ref macState state, slice<byte> msg) {
         // The spec requires us to set a bit just above the message size, not to
         // hide leading zeroes. For full chunks, that's 1 << 128, so we can just
         // add 1 to the most significant (2¹²⁸) limb, h2.
-        if (len(msg) >= TagSize){
+        if (len(msg) >= TagSize) {
             (h0, c) = bits.Add64(h0, binary.LittleEndian.Uint64(msg[0..8]), 0);
             (h1, c) = bits.Add64(h1, binary.LittleEndian.Uint64(msg[8..16]), c);
             h2 += c + 1;
@@ -175,7 +174,7 @@ internal static void updateGeneric(ref macState state, slice<byte> msg) {
             (h1, c) = bits.Add64(h1, binary.LittleEndian.Uint64(buf[8..16]), c);
             h2 += c;
 
-            msg = default!;
+            msg = default;
         }
 
         // Multiplication of big number limbs is similar to elementary school

@@ -64,8 +64,8 @@ partial struct monoGraph {
 
 partial struct monoVertex {
     internal nint weight; // weight of heaviest known path to this vertex
-    internal nint pre; // previous edge (if any) in the above path
-    internal nint len; // length of the above path
+    internal nint pre;    // previous edge (if any) in the above path
+    internal nint len;    // length of the above path
     // obj is the defined type or type parameter represented by this
     // vertex.
     internal ж<TypeName> obj;
@@ -97,19 +97,19 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
 
             // N.B., we're looking for the greatest weight paths, unlike
             // typical Bellman-Ford.
-            nint w = (~src).weight + edge.weight;
-            if (w <= (~dst).weight) {
+            nint w = src.weight + edge.weight;
+            if (w <= dst.weight) {
                 continue;
             }
 
-            dst.Value.pre = i;
-            dst.Value.len = (~src).len + 1;
-            if ((~dst).len == len(check.mono.vertices)) {
+            dst.pre = i;
+            dst.len = src.len + 1;
+            if (dst.len == len(check.mono.vertices)) {
                 Ꮡcheck.reportInstanceLoop(edge.dst);
                 return;
             }
 
-            dst.Value.weight = w;
+            dst.weight = w;
             again = true;
         }
     }
@@ -119,7 +119,7 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     var stackᴷ = new stackAppend<nint>(moves: true, capacityUsed: true);
 
-    slice<nint> stack = default!;
+    slice<nint> stack = default;
     var seen = new slice<bool>(len(check.mono.vertices));
 
     // We have a path that contains a cycle and ends at v, but v may
@@ -170,27 +170,27 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
 
 // recordCanon records that tpar is the canonical type parameter
 // corresponding to method type parameter mpar.
-internal static void recordCanon(this ref monoGraph w, ж<TypeParam> Ꮡmpar, ж<TypeParam> Ꮡtpar) {
-    if (w.canon == default!) {
+internal static void recordCanon(this ref monoGraph w, ж<TypeParam> mpar, ж<TypeParam> tpar) {
+    if (w.canon == nil) {
         w.canon = new map<ж<TypeParam>, ж<TypeParam>>();
     }
-    w.canon[Ꮡmpar] = Ꮡtpar;
+    w.canon[mpar] = tpar;
 }
 
 // recordInstance records that the given type parameters were
 // instantiated with the corresponding type arguments.
-internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, slice<ast.Expr> xlist) {
+internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, slice<ast.Expr> xlist) {
     foreach (var (i, tpar) in tparams) {
         tokenꓸPos posΔ1 = pos;
         if (i < len(xlist)) {
             posΔ1 = startPos(xlist[i]);
         }
-        Ꮡw.assign(Ꮡpkg, posΔ1, tpar, targs[i]);
+        Ꮡw.assign(pkg, posΔ1, tpar, targs[i]);
     }
 }
 
 // assign records that tpar was instantiated as targ at pos.
-internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, tokenꓸPos pos, ж<TypeParam> Ꮡtpar, ΔType targ) {
+internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPos pos, ж<TypeParam> Ꮡtpar, ΔType targ) {
     ref var tpar = ref Ꮡtpar.DerefOrNull();
 
     // Go generics do not have an analog to C++`s template-templates,
@@ -201,7 +201,7 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
     //
     // TODO(mdempsky): Push this check up into recordInstance? All type
     // parameters in a list will appear in the same package.
-    if (tpar.Obj().of(TypeName.Ꮡobject).Pkg() != Ꮡpkg) {
+    if (tpar.Obj().of(TypeName.Ꮡobject).Pkg() != pkg) {
         return;
     }
 
@@ -228,13 +228,13 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
             break;
         }
         case ж<TypeParam> typΔ1: {
-            assert(typΔ1.Obj().of(TypeName.Ꮡobject).Pkg() == Ꮡpkg);
+            assert(typΔ1.Obj().of(TypeName.Ꮡobject).Pkg() == pkg);
             flowʗ1(Ꮡw.Value.typeParamVertex(typΔ1), new TypeParamжΔType(typΔ1));
             break;
         }
         case ж<Named> typΔ1: {
             {
-                nint src = Ꮡw.Value.localNamedVertex(Ꮡpkg, typΔ1.Origin()); if (src >= 0) {
+                nint src = Ꮡw.Value.localNamedVertex(pkg, typΔ1.Origin()); if (src >= 0) {
                     flowʗ1(src, new NamedжΔType(typΔ1));
                 }
             }
@@ -298,15 +298,15 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
 
 // localNamedVertex returns the index of the vertex representing
 // named, or -1 if named doesn't need representation.
-internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, ж<Named> Ꮡnamed) {
+internal static nint localNamedVertex(this ref monoGraph w, ж<Package> pkg, ж<Named> Ꮡnamed) {
     ref var named = ref Ꮡnamed.DerefOrNull();
 
     var obj = named.Obj();
-    if (obj.of(TypeName.Ꮡobject).Pkg() != Ꮡpkg) {
+    if (obj.of(TypeName.Ꮡobject).Pkg() != pkg) {
         return -1; // imported type
     }
 
-    var root = Ꮡpkg.Scope();
+    var root = pkg.Scope();
     if (obj.of(TypeName.Ꮡobject).Parent() == root) {
         return -1; // package scope, no ambient type parameters
     }
@@ -322,7 +322,7 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, 
     // Walk the type definition's scope to find any ambient type
     // parameters that it's implicitly parameterized by.
     for (var scope = obj.of(TypeName.Ꮡobject).Parent(); scope != root; scope = scope.Parent()) {
-        foreach (var (_, elem) in (~scope).elems) {
+        foreach (var (_, elem) in scope.elems) {
             {
                 var (elemΔ1, ok) = elem._<ж<TypeName>>(ᐧ); if (ok && !elemΔ1.IsAlias() && cmpPos(elemΔ1.of(TypeName.Ꮡobject).Pos(), obj.of(TypeName.Ꮡobject).Pos()) < 0) {
                     {
@@ -340,7 +340,7 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, 
         }
     }
 
-    if (w.nameIdx == default!) {
+    if (w.nameIdx == nil) {
         w.nameIdx = new map<ж<TypeName>, nint>();
     }
     w.nameIdx[obj] = idx;
@@ -365,7 +365,7 @@ internal static nint typeParamVertex(this ref monoGraph w, ж<TypeParam> Ꮡtpar
         }
     }
 
-    if (w.nameIdx == default!) {
+    if (w.nameIdx == nil) {
         w.nameIdx = new map<ж<TypeName>, nint>();
     }
 

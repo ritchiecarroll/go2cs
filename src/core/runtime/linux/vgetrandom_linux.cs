@@ -64,7 +64,7 @@ internal static uintptr vgetrandomGetState() {
         }
         setVMAName(Δp, allocSize, getrandomStatesˢ);
         var newBlock = (uintptr)Δp;
-        if (vgetrandomAlloc.states == default!) {
+        if (vgetrandomAlloc.states == nil) {
             vgetrandomAlloc.states = new slice<uintptr>(0, (nint)(num));
         }
         for (var i = (uintptr)0; i < num; i++) {

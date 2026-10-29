@@ -21,7 +21,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(traceMapNode))]
 partial class runtime_package {
 
 // traceMap is a map of a variable-sized array of bytes to a unique ID.
@@ -77,10 +76,10 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
     }
     var hash = memhash(data, 0, size);
 
-    ж<traceMapNode> newNode = default!;
+    ж<traceMapNode> newNode = default;
     var m = Ꮡtab.of(traceMap.Ꮡroot);
     var hashIter = hash;
-    while (ᐧ) {
+    for (;;) {
         var n = (ж<traceMapNode>)(uintptr)(m.Load());
         if (n == nil) {
             // Try to insert a new map node. We may end up discarding
@@ -102,7 +101,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
                 newNode = Ꮡtab.newTraceMapNode(data, size, hash, Ꮡtab.of(traceMap.Ꮡseq).Add(1));
             }
             if (m.CompareAndSwapNoWB(nil, @unsafe.Pointer.FromPinnedBox(newNode))) {
-                return ((~newNode).id, true);
+                return (newNode.id, true);
             }
             // Reload n. Because pointers are only stored once,
             // we must have lost the race, and therefore n is not nil
@@ -115,7 +114,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
             }
         }
         m = n.at(traceMapNode.Ꮡchildren, (ulong)((hashIter >> (int)(8 * goarch.PtrSize - 2))));
-        hashIter <<= (int)(2);
+        hashIter <<= 2;
     }
 }
 

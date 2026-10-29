@@ -52,36 +52,35 @@ internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, 
 // addSegments adds the given segments to the tree rooted at n.
 // If there are no segments, then n is a leaf node that holds
 // the given pattern and handler.
-internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> Ꮡp, ΔHandler h) {
+internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> p, ΔHandler h) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (builtin.len(segs) == 0) {
-        n.set(Ꮡp, h);
+        n.set(p, h);
         return;
     }
     var seg = segs[0];
-    if (seg.multi){
+    if (seg.multi) {
         if (builtin.len(segs) != 1) {
             throw panic("multi wildcard not last");
         }
-        var c = Ꮡ(new routingNode(nil));
+        var c = Ꮡ(new routingNode());
         n.multiChild = c;
-        c.set(Ꮡp, h);
-    } else 
-    if (seg.wild){
-        Ꮡn.addChild(""u8).addSegments(segs[1..], Ꮡp, h);
+        c.set(p, h);
+    } else if (seg.wild) {
+        Ꮡn.addChild(""u8).addSegments(segs[1..], p, h);
     } else {
-        Ꮡn.addChild(seg.s).addSegments(segs[1..], Ꮡp, h);
+        Ꮡn.addChild(seg.s).addSegments(segs[1..], p, h);
     }
 }
 
 // set sets the pattern and handler for n, which
 // must be a leaf node.
-internal static void set(this ref routingNode n, ж<pattern> Ꮡp, ΔHandler h) {
-    if (n.pattern != nil || n.handler != default!) {
+internal static void set(this ref routingNode n, ж<pattern> p, ΔHandler h) {
+    if (n.pattern != nil || n.handler != nil) {
         throw panic("non-nil leaf fields");
     }
-    n.pattern = Ꮡp;
+    n.pattern = p;
     n.handler = h;
 }
 
@@ -92,7 +91,7 @@ internal static ж<routingNode> addChild(this ж<routingNode> Ꮡn, @string key)
 
     if (key == ""u8) {
         if (n.emptyChild == nil) {
-            n.emptyChild = Ꮡ(new routingNode(nil));
+            n.emptyChild = Ꮡ(new routingNode());
         }
         return n.emptyChild;
     }
@@ -101,7 +100,7 @@ internal static ж<routingNode> addChild(this ж<routingNode> Ꮡn, @string key)
             return cΔ1;
         }
     }
-    var c = Ꮡ(new routingNode(nil));
+    var c = Ꮡ(new routingNode());
     n.children.add(key, c);
     return c;
 }
@@ -145,10 +144,10 @@ internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<rou
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
-        return (default!, default!);
+        return (default, default);
     }
     {
-        var (l, m) = Ꮡn.findChild(method).matchPath(path, default!); if (l != nil) {
+        var (l, m) = Ꮡn.findChild(method).matchPath(path, default); if (l != nil) {
             // Exact match of method name.
             return (l, m);
         }
@@ -156,13 +155,13 @@ internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<rou
     if (method == "HEAD"u8) {
         // GET matches HEAD too.
         {
-            var (l, m) = Ꮡn.findChild(getˢ).matchPath(path, default!); if (l != nil) {
+            var (l, m) = Ꮡn.findChild(getˢ).matchPath(path, default); if (l != nil) {
                 return (l, m);
             }
         }
     }
     // No exact match; try patterns with no method.
-    return n.emptyChild.matchPath(path, default!);
+    return n.emptyChild.matchPath(path, default);
 }
 
 // matchPath matches a path.
@@ -173,7 +172,7 @@ internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode>
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
-        return (default!, default!);
+        return (default, default);
     }
     // If path is empty, then we are done.
     // If n is a leaf node, we found a match; return it.
@@ -181,7 +180,7 @@ internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode>
     // then we failed to match.
     if (path == ""u8) {
         if (n.pattern == nil) {
-            return (default!, default!);
+            return (default, default);
         }
         return (Ꮡn, matches);
     }
@@ -215,13 +214,13 @@ internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode>
         var c = n.multiChild; if (c != nil) {
             // Don't record a match for a nameless wildcard (which arises from a
             // trailing slash in the pattern).
-            if ((~c).pattern.lastSegment().s != ""u8) {
+            if (c.pattern.lastSegment().s != ""u8) {
                 matches = append(matches, pathUnescape(path[1..])); // remove initial slash
             }
             return (c, matches);
         }
     }
-    return (default!, default!);
+    return (default, default);
 }
 
 // firstSegment splits path into its first segment, and the rest.
@@ -233,7 +232,7 @@ internal static (@string seg, @string rest) firstSegment(@string path) {
         return ("/", "");
     }
     path = path[1..]; // drop initial slash
-    nint i = strings.IndexByte(path, (rune)'/');
+    nint i = strings.IndexByte(path, (byte)'/');
     if (i < 0) {
         i = builtin.len(path);
     }
@@ -261,7 +260,7 @@ internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path
     var setʗ1 = set;
     Ꮡn.of(routingNode.Ꮡchildren).eachPair((@string method, ж<routingNode> c) => {
         {
-            var (p, _) = c.matchPath(path, default!); if (p != nil) {
+            var (p, _) = c.matchPath(path, default); if (p != nil) {
                 setʗ1[method] = true;
             }
         }

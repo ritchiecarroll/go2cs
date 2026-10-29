@@ -10,13 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using scannerꓸError = go.go.scanner_package.ΔError;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
@@ -63,6 +56,19 @@ using static go.go.build_package;
 // the assembly.
 [assembly: global::go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: global::go.GoFieldAccess(typeof(Package))]
+[assembly: global::go.GoFieldAccess(typeof(fileInfo))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.Comment))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.CommentGroup))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.File))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.GenDecl))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.Ident))]
+[assembly: global::go.GoFieldAccess(typeof(go.go.ast_package.ImportSpec))]
+[assembly: global::go.GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: global::go.GoFieldAccess(typeof(importReader))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -71,9 +77,9 @@ using static go.go.build_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/build.go", "build.cs", "AHLuAbKAgqSokoCCpKiSgIKkqJKAgqSCqtKAgsiAguyClICCpICCpNiSgoKClIKCgpSopICCgoKUgoKUpKiSgIK2goKUrLKCgpSCqLKCgsqUAAwalJTssoKCgoKmgoKCpvzmkoKCkoKUgIKCppSkABwygpSCgoCCpIKClAAIEoKmlIKClJSkxoKClLamgoKClAB3hgKyqqIACRSCAAoWlKaCgoKUpgAWIgATAqaCpoKCgoKClJSktpSSlIKkppSCgoKClILKhoKCgIKCgoKCtoKCgoC4goCCgraCgIKC7IKCguyCpoCCkoK2lr6CooKClIKCgoKCgoKCgoKUlIKClJSUgpSCgtzKgoKUgoKCgoKCgoKCppS4goKCpoKCgoKCgoKU3IKCgoKCgoKCgqaokoKCgpSClJSCgoKUgpSmgoKCgoKmpoKClAAJFIKUuKaClIKmlKaCgqaCgqKClIKCuIKSgoKCgoKCgoKCgpSClLiClIKCgpSCpIKSgpS42oKkgIKkpqSCyoKCgoKCuIKCgoKmgoKSuO6CpoKCgoKCkoKCkoLcgoKCgoKUgoKAguyCkoKUgoKCgoKmxoKCgrSCgoK0goKCpIKCgqaCgqaCuIKUlIKClIKCyoKClIKmgpSClKaClKSkpKSkpKSklKaCgpSCgoKCgoKmpgAHGAAPCITcgu6ClNqCgoKSgpiigoLugILagILagpiCgpSmgqamgoCCgoKClLaCgpS4gpSCppKClIKClAAGEICCtoKClIKCptyCgoKCruKCgoKmprSCgri4gqaClLSCgpSUgramgoKmgqiCgoKYkoKUgrSCgoKUgpSCgoKClIK2lKzipoKCgoKClKaCgqYAAhIACAKCABxQAA8ChKaCgpSUlKaCpoKUpoKCpoKCgqaClIKCuIKClIKmgqamgoKClIKokqiSqJSUloKClIKC3AABJgAXCIKCypSCgpS2goKCgoCClKSCgpSCgpSAgoL8AAIYAAwCgoKClIKCgoCClKSCAAgSgpSCpoKClJSCpoKCgoCCgoKklIKUgoKCpvis4oKSyoKCuICCyIKCuIKCppKCgoKCgqaCuIKClKKAgqSmpqaUpKSkpKSkptrYlIKClIKClIKCAAIcAAsCgoKCgpSSgoKUggAPIIKClIKAgrYABiQAEQKCgoKCgoKClLSCtIKCxoKCtIKCgpSkgpSClIKSgpQAAhDSgpSUgoKUpoIABiIADgKCuIKUgpSClIKUgpSClIK4AAImAA8CAAgSgoKUlIKAgqSCgpSUlIKUuKiiAAUS0g==", "600-608:1;623-625:2;688-714:3;866-874:4;1930-1930:1", "", "1259=Equal/1/2/1,Equal/2/2/1;1593=HasPrefix/2/2/1;2178=Contains/3/3/1;2239=HasPrefix/1/2/1,HasPrefix/2/2/1")]
+[assembly: global::go.GoPositionMap("go/build/build.go", "build.cs", "AHLuAbKAgqSokoCCpKiSgIKkqJKAgqSCqtKAgsiAguyClICCpICCpNiSgoKClIKCgpSopICCgoKUgoKUpKiSgIK2goKUrLKCgpSCqLKCgsqUAAwalJTssoKCgoKmgoKCpvzmkoKCgoKUgIKCppSkABwygpSCgoCCpIKClAAIEoKmlIKClKS0xoKClLamgoKClAB3hgKyqqIACRSCAAoWlKaCgoKUpgAWIgATAqaCpoKCgoKClKS0xqSSpIK0tpSCgoKClILKhoKCgIKCgoKCtoKCgoC4goCCgraCgIKC7IKCguyCpoCCgoK2lr6CooKClIKCgoKCgoKCgoKUlIKClJSUgpSCgtzKgoKUgoKCgoKCgoKCppS4goKCpoKCgoKCgoKU3IKCgoKCgoKCgqaokoKCgpSClJSCgoKUgpSmgoKCgoKmpoKClAAJFIKUuKaClIKmlKaCgqaCgqKClIKCuIKSgoKCgoKCgoKCgpSClLiClIKCgpSClIKCgpS4+oK0gIKktqSCyoKCgoKCuIKCgoKmgoKCuO6CpoKCgoKCgoKCgoLcgoKCgoKUgoKAguyCkoKUgoKCgoKmxoKCgrSCgoK0goKCpIKCgqaCgqaCuIKUlIKClIKCyoKClIKmgpSClKaCpKSkpKSkpKSklKaCgpSCgoKCgoKmpgAHGAAPCITcgu6CpOqCgoKCgpiigoLugILagILagpiCgpSmgqamgoCCgoKClLaCgpS4gpSCppKClIKClAAGEICCtoKClIKCptyCgoKCruKCgoKmprSCgri4gqaClLSCgpSUgramgoKmgqiCgoKYkoKUgrSCgoKUgpSCgoKClIK2lKzipoKCgoKClKaCgqYAAhIACAKCABxQAA8ChKaCgpSUlKaCpoKUpoKCpoKCgqaClIKCuIKClIKmgqamgoKClIKokqiSqJSUloKClIKC3AABJgAXCIKCypSCgpS2goKCgoCClKSCgpSCgpSAgoL8AAIYAAwCgoKClIKCgoCClKSCAAgSgpSCpoKClJSCpoKCgoCCgoKklIKUgoKCpvis4oKSyoKCuICCyIKCuIKCppKCgoKCgqaCuIKClKKAgqSmtraktLS0tLS0ptrYlIKClIKClIKCAAIcAAsCgoKCgpSCgoKUggAPIIKClIKAgrYABiQAEQKCgoKCgoKClLSCtIKCxoKCtIKCgpSkgpSClIKCgpQAAhDSgpSUgoKUpoIABiIADgKCuIKUgpSClIKUgpSClIK4AAImAA8CAAgSgoKUlIKAgqSCgpSUlIKUuKiiAAUS0g==", "600-608:1;623-625:2;688-714:3;866-874:4;1930-1930:1", "", "1266=Equal/1/2/1,Equal/2/2/1;1601=HasPrefix/2/2/1;2193=Contains/3/3/1;2254=HasPrefix/1/2/1,HasPrefix/2/2/1")]
 [assembly: global::go.GoPositionMap("go/build/gc.go", "gc.cs", "AAwekg==")]
-[assembly: global::go.GoPositionMap("go/build/read.go", "read.cs", "ACJElILKgIKkAAkUgqiCmJKCvKKCgoKCpoKCkoKUlKiSgpSUgoKCgpKClM6igoCCpNyCgpSCppSCtoKCgqSCgoKClKaUgraUgqiSgoKqooKCgoKmgryigoKClIK8opSCgpSC2IKCgpSClILYzKKCgpKClAACHgAMAoKClJQABxTylIKCgoKCgoKUlLi4gsqCgoKUgqaCuIKCpoKCgoKUgoKClIKCgpSmgoKUgqaCgpTKgoKUgoIADBqCgoKCgoKCgoKUpoKC3N7CgoKCpqyygoKUgoKUgoKU")]
+[assembly: global::go.GoPositionMap("go/build/read.go", "read.cs", "ACJElILKgIKkAAkUgqiCmJKCvKKCgoKCpoKCgoKUlKiSgpSUgoKCgoKClM6igoCCpNyCgpSCppSCtoKCgpSCgoKClKaUgraUgqiSgoKqooKCgoKmgryigoKClIK8opSCgpSC2IKCgpSClILYzKKCgoKClAACHgAMAoKClJQABxTylIKCgoKCgoKUlLi4gsqCgoKUgqaCuIKCpoKCgoKUgoKClIKCgpSmgoKUgqaCgpTKgoKUgoIADBqCgoKCgoKCgoKUpoKC3N7CgoKCpqyygoKUgoKUgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

@@ -21,89 +21,89 @@ internal static ж<sigcontext> regs(this ref sigctxt c) {
 }
 
 internal static uint64 rax(this ref sigctxt c) {
-    return (~c.regs()).rax;
+    return c.regs().rax;
 }
 
 internal static uint64 rbx(this ref sigctxt c) {
-    return (~c.regs()).rbx;
+    return c.regs().rbx;
 }
 
 internal static uint64 rcx(this ref sigctxt c) {
-    return (~c.regs()).rcx;
+    return c.regs().rcx;
 }
 
 internal static uint64 rdx(this ref sigctxt c) {
-    return (~c.regs()).rdx;
+    return c.regs().rdx;
 }
 
 internal static uint64 rdi(this ref sigctxt c) {
-    return (~c.regs()).rdi;
+    return c.regs().rdi;
 }
 
 internal static uint64 rsi(this ref sigctxt c) {
-    return (~c.regs()).rsi;
+    return c.regs().rsi;
 }
 
 internal static uint64 rbp(this ref sigctxt c) {
-    return (~c.regs()).rbp;
+    return c.regs().rbp;
 }
 
 internal static uint64 rsp(this ref sigctxt c) {
-    return (~c.regs()).rsp;
+    return c.regs().rsp;
 }
 
 internal static uint64 r8(this ref sigctxt c) {
-    return (~c.regs()).r8;
+    return c.regs().r8;
 }
 
 internal static uint64 r9(this ref sigctxt c) {
-    return (~c.regs()).r9;
+    return c.regs().r9;
 }
 
 internal static uint64 r10(this ref sigctxt c) {
-    return (~c.regs()).r10;
+    return c.regs().r10;
 }
 
 internal static uint64 r11(this ref sigctxt c) {
-    return (~c.regs()).r11;
+    return c.regs().r11;
 }
 
 internal static uint64 r12(this ref sigctxt c) {
-    return (~c.regs()).r12;
+    return c.regs().r12;
 }
 
 internal static uint64 r13(this ref sigctxt c) {
-    return (~c.regs()).r13;
+    return c.regs().r13;
 }
 
 internal static uint64 r14(this ref sigctxt c) {
-    return (~c.regs()).r14;
+    return c.regs().r14;
 }
 
 internal static uint64 r15(this ref sigctxt c) {
-    return (~c.regs()).r15;
+    return c.regs().r15;
 }
 
 //go:nosplit
 //go:nowritebarrierrec
 internal static uint64 rip(this ref sigctxt c) {
-    return (~c.regs()).rip;
+    return c.regs().rip;
 }
 
 internal static uint64 rflags(this ref sigctxt c) {
-    return (~c.regs()).eflags;
+    return c.regs().eflags;
 }
 
 internal static uint64 cs(this ref sigctxt c) {
-    return (uint64)(~c.regs()).cs;
+    return (uint64)c.regs().cs;
 }
 
 internal static uint64 fs(this ref sigctxt c) {
-    return (uint64)(~c.regs()).fs;
+    return (uint64)c.regs().fs;
 }
 
 internal static uint64 gs(this ref sigctxt c) {
-    return (uint64)(~c.regs()).gs;
+    return (uint64)c.regs().gs;
 }
 
 internal static uint64 sigcode(this ref sigctxt c) {
@@ -115,11 +115,11 @@ internal static uint64 sigaddr(this ref sigctxt c) {
 }
 
 internal static void set_rip(this ref sigctxt c, uint64 x) {
-    c.regs().Value.rip = x;
+    c.regs().rip = x;
 }
 
 internal static void set_rsp(this ref sigctxt c, uint64 x) {
-    c.regs().Value.rsp = x;
+    c.regs().rsp = x;
 }
 
 internal static void set_sigcode(this ref sigctxt c, uint64 x) {
@@ -138,25 +138,28 @@ internal static void dumpSigStack(@string s, uintptr sp, uintptr stackhi, uintpt
     println((@string)"ctx:\t"u8, (Δhex)(uint64)ctx);
     var fpfield = ctx + /* unsafe.Offsetof(ucontext{}.uc_mcontext) */ (uintptr)40 + /* unsafe.Offsetof(mcontext{}.fpregs) */ (uintptr)184;
     println((@string)"fpfield:\t"u8, (Δhex)(uint64)fpfield);
-    var fpbegin = (uintptr)(~(Ꮡ(new sigctxt(nil, (@unsafe.Pointer)ctx))).regs()).fpstate;
+    var fpbegin = (uintptr)(Ꮡ(new sigctxt(nil, (@unsafe.Pointer)ctx))).regs().fpstate;
     println((@string)"fpstate:\t"u8, (Δhex)(uint64)fpbegin);
     hexdumpWords(sp, stackhi, (uintptr Δp, hexdumpMarker hm) => {
-        var exprᴛ1 = Δp;
-        if (exprᴛ1 == ctx) {
+        switch (Δp) {
+        case var ᴛ when ᴛ == ctx: {
             hm.start();
             print((@string)"C"u8);
             println();
+            break;
         }
-        else if (exprᴛ1 == fpfield) {
+        case var ᴛ when ᴛ == fpfield: {
             hm.start();
             print((@string)"F"u8);
             println();
+            break;
         }
-        else if (exprᴛ1 == fpbegin) {
+        case var ᴛ when ᴛ == fpbegin: {
             hm.start();
             print((@string)"S"u8);
             println();
-        }
+            break;
+        }}
     });
 }
 

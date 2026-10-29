@@ -20,13 +20,13 @@ public static error ErrNotFound = errors.New("executable file not found in %PATH
 
 internal static error chkStat(@string @file) {
     var (d, err) = os.Stat(@file);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (d.IsDir()) {
         return fs.ErrPermission;
     }
-    return default!;
+    return default;
 }
 
 internal static bool hasExt(@string @file) {
@@ -42,16 +42,16 @@ internal static (@string, error) findExecutable(@string @file, slice<@string> ex
         return (@file, chkStat(@file));
     }
     if (hasExt(@file)) {
-        if (chkStat(@file) == default!) {
-            return (@file, default!);
+        if (chkStat(@file) == nil) {
+            return (@file, default);
         }
         // Keep checking exts below, so that programs with weird names
         // like "foo.bat.exe" will resolve instead of failing.
     }
     foreach (var (_, e) in exts) {
         {
-            @string f = @file + e; if (chkStat(f) == default!) {
-                return (f, default!);
+            @string f = @file + e; if (chkStat(f) == nil) {
+                return (f, default);
             }
         }
     }
@@ -63,7 +63,7 @@ internal static (@string, error) findExecutable(@string @file, slice<@string> ex
 
 internal static (@string, error) lookPath(@string @file) {
     {
-        var err = validateLookPath(@file); if (err != default!) {
+        var err = validateLookPath(@file); if (err != nil) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
         }
     }
@@ -82,7 +82,7 @@ internal static (@string, error) lookPath(@string @file) {
 // program is actually "C:\foo\example.com.exe".
 internal static (@string, error) lookExtensions(@string path, @string dir) {
     {
-        var errΔ1 = validateLookPath(path); if (errΔ1 != default!) {
+        var errΔ1 = validateLookPath(path); if (errΔ1 != nil) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(path, errΔ1))));
         }
     }
@@ -96,7 +96,7 @@ internal static (@string, error) lookExtensions(@string path, @string dir) {
             foreach (var (_, e) in exts) {
                 if (strings.EqualFold(extΔ1, e)) {
                     // Assume that path has already been resolved.
-                    return (path, default!);
+                    return (path, default);
                 }
             }
         }
@@ -113,32 +113,32 @@ internal static (@string, error) lookExtensions(@string path, @string dir) {
     @string dirandpath = filepath.Join(dir, path);
     // We assume that LookPath will only add file extension.
     var (lp, err) = lookPathExts(dirandpath, exts);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     @string ext = strings.TrimPrefix(lp, dirandpath);
-    return (path + ext, default!);
+    return (path + ext, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string pathextˢ = @"PATHEXT"u8;
 
 internal static slice<@string> pathExt() {
-    slice<@string> exts = default!;
+    slice<@string> exts = default;
     @string x = os.Getenv(pathextˢ);
-    if (x != ""u8){
+    if (x != ""u8) {
         foreach (var iᴛ1 in range<@string>(strings.SplitSeq(strings.ToLower(x), @";"u8).Invoke)) {
             var e = iᴛ1;
             if (e == ""u8) {
                 continue;
             }
-            if (e[0] != (rune)'.') {
+            if (e[0] != '.') {
                 e = "."u8 + e;
             }
             exts = append(exts, e);
         }
     } else {
-        exts = new @string[]{".com"u8, ".exe"u8, ".bat"u8, ".cmd"u8}.slice();
+        exts = slice<@string>([".com"u8, ".exe"u8, ".bat"u8, ".cmd"u8]);
     }
     return exts;
 }
@@ -150,8 +150,8 @@ internal static readonly @string pathˢ = "path"u8;
 internal static (@string, error) lookPathExts(@string @file, slice<@string> exts) {
     if (strings.ContainsAny(@file, @":\/"u8)) {
         var (f, err) = findExecutable(@file, exts);
-        if (err == default!) {
-            return (f, default!);
+        if (err == nil) {
+            return (f, default);
         }
         return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
     }
@@ -165,15 +165,15 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
     // have configured their environment this way!
     // https://docs.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-needcurrentdirectoryforexepathw
     // See also go.dev/issue/43947.
-    @string dotf = default!;
-    error dotErr = default!;
+    @string dotf = default;
+    error dotErr = default;
     {
         var (_, found) = os.LookupEnv("NoDefaultCurrentDirectoryInExePath"u8); if (!found) {
             {
-                var (f, err) = findExecutable(filepath.Join("."u8, @file), exts); if (err == default!) {
+                var (f, err) = findExecutable(filepath.Join("."u8, @file), exts); if (err == nil) {
                     if (execerrdot.Value() == "0"u8) {
                         execerrdot.IncNonDefault();
-                        return (f, default!);
+                        return (f, default);
                     }
                     (dotf, dotErr) = (f, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
                 }
@@ -190,8 +190,8 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
         }
 
         {
-            var (f, err) = findExecutable(filepath.Join(dir, @file), exts); if (err == default!) {
-                if (dotErr != default!) {
+            var (f, err) = findExecutable(filepath.Join(dir, @file), exts); if (err == nil) {
+                if (dotErr != nil) {
                     // https://go.dev/issue/53536: if we resolved a relative path implicitly,
                     // and it is the same executable that would be resolved from the explicit %PATH%,
                     // prefer the explicit name for the executable (and, likely, no error) instead
@@ -201,7 +201,7 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
                     // out that the explicit one doesn't match.
                     var (dotfi, dotfiErr) = os.Lstat(dotf);
                     var (fi, fiErr) = os.Lstat(f);
-                    if (dotfiErr != default! || fiErr != default! || !os.SameFile(dotfi, fi)) {
+                    if (dotfiErr != nil || fiErr != nil || !os.SameFile(dotfi, fi)) {
                         return (dotf, dotErr);
                     }
                 }
@@ -212,19 +212,19 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
                         // dotErr is non-nil and we already checked it above.
                         // Otherwise, record this path as the one to which we must resolve,
                         // with or without a dotErr.
-                        if (dotErr == default!) {
+                        if (dotErr == nil) {
                             (dotf, dotErr) = (f, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
                         }
                         continue;
                     }
                     execerrdot.IncNonDefault();
                 }
-                return (f, default!);
+                return (f, default);
             }
         }
     }
 
-    if (dotErr != default!) {
+    if (dotErr != nil) {
         return (dotf, dotErr);
     }
     return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrNotFound))));

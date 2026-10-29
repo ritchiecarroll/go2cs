@@ -18,9 +18,9 @@ using Δsync = sync_package;
 partial class io_package {
 
 // Seek whence values.
-public static UntypedInt SeekStart => 0; // seek relative to the origin of the file
+public static UntypedInt SeekStart => 0;   // seek relative to the origin of the file
 public static UntypedInt SeekCurrent => 1; // seek relative to the current offset
-public static UntypedInt SeekEnd => 2; // seek relative to the end
+public static UntypedInt SeekEnd => 2;     // seek relative to the end
 
 // ErrShortWrite means that a write accepted fewer bytes than requested
 // but failed to return an explicit error.
@@ -337,21 +337,20 @@ public static (nint n, error err) WriteString(Writer w, @string s) {
 // On return, n >= min if and only if err == nil.
 // If r returns an error having read at least min bytes, the error is dropped.
 public static (nint n, error err) ReadAtLeast(Reader r, slice<byte> buf, nint min) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (len(buf) < min) {
         return (0, ErrShortBuffer);
     }
-    while (n < min && err == default!) {
-        nint nn = default!;
+    while (n < min && err == nil) {
+        nint nn = default;
         (nn, err) = r.Read(buf.slice(n));
         n += nn;
     }
-    if (n >= min){
-        err = default!;
-    } else 
-    if (n > 0 && AreEqual(err, EOF)) {
+    if (n >= min) {
+        err = default;
+    } else if (n > 0 && AreEqual(err, EOF)) {
         err = ErrUnexpectedEOF;
     }
     return (n, err);
@@ -375,14 +374,14 @@ public static (nint n, error err) ReadFull(Reader r, slice<byte> buf) {
 //
 // If dst implements [ReaderFrom], the copy is implemented using it.
 public static (int64 written, error err) CopyN(Writer dst, Reader src, int64 n) {
-    int64 written = default!;
-    error err = default!;
+    int64 written = default;
+    error err = default;
 
     (written, err) = Copy(dst, LimitReader(src, n));
     if (written == n) {
-        return (n, default!);
+        return (n, default);
     }
-    if (written < n && err == default!) {
+    if (written < n && err == nil) {
         // src stopped early; must have been EOF.
         err = EOF;
     }
@@ -402,7 +401,7 @@ public static (int64 written, error err) CopyN(Writer dst, Reader src, int64 n) 
 // Otherwise, if dst implements [ReaderFrom],
 // the copy is implemented by calling dst.ReadFrom(src).
 public static (int64 written, error err) Copy(Writer dst, Reader src) {
-    return copyBuffer(dst, src, default!);
+    return copyBuffer(dst, src, default);
 }
 
 // CopyBuffer is identical to Copy except that it stages through the
@@ -413,7 +412,7 @@ public static (int64 written, error err) Copy(Writer dst, Reader src) {
 // If either src implements [WriterTo] or dst implements [ReaderFrom],
 // buf will not be used to perform the copy.
 public static (int64 written, error err) CopyBuffer(Writer dst, Reader src, slice<byte> buf) {
-    if (buf != default! && len(buf) == 0) {
+    if (buf != nil && len(buf) == 0) {
         throw panic("empty buffer in CopyBuffer");
     }
     return copyBuffer(dst, src, buf);
@@ -422,8 +421,8 @@ public static (int64 written, error err) CopyBuffer(Writer dst, Reader src, slic
 // copyBuffer is the actual implementation of Copy and CopyBuffer.
 // if buf is nil, one is allocated.
 internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, slice<byte> buf) {
-    int64 written = default!;
-    error err = default!;
+    int64 written = default;
+    error err = default;
 
     // If the reader has a WriteTo method, use it to do the copy.
     // Avoids an allocation and a copy.
@@ -438,31 +437,31 @@ internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, sl
             return rf.ReadFrom(src);
         }
     }
-    if (buf == default!) {
+    if (buf == nil) {
         nint size = 32 * 1024;
         {
-            var (l, ok) = src._<ж<LimitedReader>>(ᐧ); if (ok && (int64)size > (~l).N) {
-                if ((~l).N < 1){
+            var (l, ok) = src._<ж<LimitedReader>>(ᐧ); if (ok && (int64)size > l.N) {
+                if (l.N < 1) {
                     size = 1;
                 } else {
-                    size = (nint)(~l).N;
+                    size = (nint)l.N;
                 }
             }
         }
         buf = new slice<byte>(size);
     }
-    while (ᐧ) {
+    for (;;) {
         var (nr, er) = src.Read(buf);
         if (nr > 0) {
             var (nw, ew) = dst.Write(buf.slice(0, nr));
             if (nw < 0 || nr < nw) {
                 nw = 0;
-                if (ew == default!) {
+                if (ew == nil) {
                     ew = errInvalidWrite;
                 }
             }
             written += (int64)nw;
-            if (ew != default!) {
+            if (ew != nil) {
                 err = ew;
                 break;
             }
@@ -471,7 +470,7 @@ internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, sl
                 break;
             }
         }
-        if (er != default!) {
+        if (er != nil) {
             if (!AreEqual(er, EOF)) {
                 err = er;
             }
@@ -498,8 +497,8 @@ partial struct LimitedReader {
 }
 
 public static (nint n, error err) Read(this ref LimitedReader l, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (l.N <= 0) {
         return (0, EOF);
@@ -517,7 +516,7 @@ public static (nint n, error err) Read(this ref LimitedReader l, slice<byte> p) 
 public static ж<SectionReader> NewSectionReader(ReaderAt r, int64 off, int64 n) {
     ref var remaining = ref heap(new int64(), out var Ꮡremaining);
     const int64 maxint64 = /* 1<<63 - 1 */ 9223372036854775807;
-    if (off <= maxint64 - n){
+    if (off <= maxint64 - n) {
         remaining = n + off;
     } else {
         // Overflow, with no way to return error.
@@ -530,16 +529,16 @@ public static ж<SectionReader> NewSectionReader(ReaderAt r, int64 off, int64 n)
 // SectionReader implements Read, Seek, and ReadAt on a section
 // of an underlying [ReaderAt].
 partial struct SectionReader {
-    internal ReaderAt r; // constant after creation
-    internal int64 @base;    // constant after creation
+    internal ReaderAt r;  // constant after creation
+    internal int64 @base; // constant after creation
     internal int64 off;
     internal int64 limit; // constant after creation
-    internal int64 n; // constant after creation
+    internal int64 n;     // constant after creation
 }
 
 public static (nint n, error err) Read(this ref SectionReader s, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (s.off >= s.limit) {
         return (0, EOF);
@@ -559,29 +558,32 @@ internal static error errWhence = errors.New("Seek: invalid whence"u8);
 internal static error errOffset = errors.New("Seek: invalid offset"u8);
 
 public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint whence) {
-    var exprᴛ1 = whence;
-    if (exprᴛ1 == SeekStart) {
-        offset += s.@base;
-    }
-    else if (exprᴛ1 == SeekCurrent) {
-        offset += s.off;
-    }
-    else if (exprᴛ1 == SeekEnd) {
-        offset += s.limit;
-    }
-    else { /* default: */
+    switch (whence) {
+    default: {
         return (0, errWhence);
     }
+    case var ᴛ when ᴛ == SeekStart: {
+        offset += s.@base;
+        break;
+    }
+    case var ᴛ when ᴛ == SeekCurrent: {
+        offset += s.off;
+        break;
+    }
+    case var ᴛ when ᴛ == SeekEnd: {
+        offset += s.limit;
+        break;
+    }}
     if (offset < s.@base) {
         return (0, errOffset);
     }
     s.off = offset;
-    return (offset - s.@base, default!);
+    return (offset - s.@base, default);
 }
 
 public static (nint n, error err) ReadAt(this ref SectionReader s, slice<byte> p, int64 off) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (off < 0 || off >= s.Size()) {
         return (0, EOF);
@@ -591,7 +593,7 @@ public static (nint n, error err) ReadAt(this ref SectionReader s, slice<byte> p
         var max = s.limit - off; if ((int64)len(p) > max) {
             p = p.slice(0, (nint)(max));
             (n, err) = s.r.ReadAt(p, off);
-            if (err == default!) {
+            if (err == nil) {
                 err = EOF;
             }
             return (n, err);
@@ -617,7 +619,7 @@ public static (ReaderAt r, int64 off, int64 n) Outer(this ref SectionReader s) {
 partial struct OffsetWriter {
     internal WriterAt w;
     internal int64 @base; // the original offset
-    internal int64 off; // the current offset
+    internal int64 off;   // the current offset
 }
 
 // NewOffsetWriter returns an [OffsetWriter] that writes to w
@@ -627,8 +629,8 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
 }
 
 public static (nint n, error err) Write(this ref OffsetWriter o, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = o.w.WriteAt(p, o.off);
     o.off += (int64)n;
@@ -645,21 +647,23 @@ public static (nint n, error err) WriteAt(this ref OffsetWriter o, slice<byte> p
 }
 
 public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint whence) {
-    var exprᴛ1 = whence;
-    if (exprᴛ1 == SeekStart) {
-        offset += o.@base;
-    }
-    else if (exprᴛ1 == SeekCurrent) {
-        offset += o.off;
-    }
-    else { /* default: */
+    switch (whence) {
+    default: {
         return (0, errWhence);
     }
+    case var ᴛ when ᴛ == SeekStart: {
+        offset += o.@base;
+        break;
+    }
+    case var ᴛ when ᴛ == SeekCurrent: {
+        offset += o.off;
+        break;
+    }}
     if (offset < o.@base) {
         return (0, errOffset);
     }
     o.off = offset;
-    return (offset - o.@base, default!);
+    return (offset - o.@base, default);
 }
 
 // TeeReader returns a [Reader] that writes to w what it reads from r.
@@ -677,13 +681,13 @@ partial struct teeReader {
 }
 
 internal static (nint n, error err) Read(this ref teeReader t, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = t.r.Read(p);
     if (n > 0) {
         {
-            var (nΔ1, errΔ1) = t.w.Write(p.slice(0, n)); if (errΔ1 != default!) {
+            var (nΔ1, errΔ1) = t.w.Write(p.slice(0, n)); if (errΔ1 != nil) {
                 return (nΔ1, errΔ1);
             }
         }
@@ -693,21 +697,21 @@ internal static (nint n, error err) Read(this ref teeReader t, slice<byte> p) {
 
 // Discard is a [Writer] on which all Write calls succeed
 // without doing anything.
-public static Writer Discard = new discard(nil);
+public static Writer Discard = new discard();
 
 partial struct discard {
 }
 
 // discard implements ReaderFrom as an optimization so Copy to
 // io.Discard can avoid doing unnecessary work.
-internal static ReaderFrom _ᴛ1ʗ = new discard(nil);
+internal static ReaderFrom _ᴛ1ʗ = new discard();
 
 internal static (nint, error) Write(this discard _, slice<byte> p) {
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 internal static (nint, error) WriteString(this discard _, @string s) {
-    return (len(s), default!);
+    return (len(s), default);
 }
 
 [GoLazy] partial class lazyᴛblackHolePool { internal static readonly ж<Δsync.Pool> ᏑblackHolePool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
@@ -719,18 +723,18 @@ internal static (nint, error) WriteString(this discard _, @string s) {
 internal static ref Δsync.Pool blackHolePool => ref ((StaticBox<Δsync.Pool>)ᏑblackHolePool).ValueSlot;
 
 internal static (int64 n, error err) ReadFrom(this discard _, Reader r) {
-    int64 n = default!;
-    error err = default!;
+    int64 n = default;
+    error err = default;
 
     var bufp = ᏑblackHolePool.Get()._<ж<slice<byte>>>();
     nint readSize = 0;
-    while (ᐧ) {
+    for (;;) {
         (readSize, err) = r.Read(bufp.ValueSlot);
         n += (int64)readSize;
-        if (err != default!) {
+        if (err != nil) {
             ᏑblackHolePool.Put(bufp.OrTypedNil());
             if (AreEqual(err, EOF)) {
-                return (n, default!);
+                return (n, default);
             }
             return (n, err);
         }
@@ -755,7 +759,7 @@ partial struct nopCloser {
 }
 
 internal static error Close(this nopCloser _) {
-    return default!;
+    return default;
 }
 
 partial struct nopCloserWriterTo {
@@ -763,7 +767,7 @@ partial struct nopCloserWriterTo {
 }
 
 internal static error Close(this nopCloserWriterTo _) {
-    return default!;
+    return default;
 }
 
 internal static (int64 n, error err) WriteTo(this nopCloserWriterTo c, Writer w) {
@@ -787,13 +791,13 @@ public static (slice<byte>, error) ReadAll(Reader r) {
     nint next = 256;
     var chunks = new slice<slice<byte>>(0, 4);
     // Invariant: finalSize = sum(len(c) for c in chunks)
-    nint finalSize = default!;
-    while (ᐧ) {
+    nint finalSize = default;
+    for (;;) {
         var (n, err) = r.Read(b.slice(len(b), cap(b)));
         b = b.slice(0, len(b) + n);
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, EOF)) {
-                err = default!;
+                err = default;
             }
             if (len(chunks) == 0) {
                 return (b, err);
@@ -801,7 +805,7 @@ public static (slice<byte>, error) ReadAll(Reader r) {
 
             // Build our final right-sized slice.
             finalSize += len(b);
-            var final = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(finalSize))[..0];
+            var final = appendꓸꓸꓸ(slice<byte>(default), makeꓸꓸꓸ<byte>(finalSize))[..0];
             foreach (var (_, chunk) in chunks) {
                 final = appendꓸꓸꓸ(final, chunk);
             }
@@ -813,7 +817,7 @@ public static (slice<byte>, error) ReadAll(Reader r) {
             // Move to the next intermediate slice.
             chunks = append(chunksᴷ, chunks, b);
             finalSize += len(b);
-            b = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(next))[..0];
+            b = appendꓸꓸꓸ(slice<byte>(default), makeꓸꓸꓸ<byte>(next))[..0];
             next += next / 2;
         }
     }

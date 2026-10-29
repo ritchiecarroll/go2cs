@@ -35,18 +35,18 @@ internal static readonly @string targetˢ = "Target: "u8;
 // Ask the driver at the given path for information for this GccgoInstallation.
 // The given arguments are passed directly to the call of the driver.
 public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) {
-    error err = default!;
+    error err = default;
     var args = argsʗp.sslice();
 
-    var argv = appendꓸꓸꓸ(new @string[]{"-###"u8, "-S"u8, "-x"u8, "go"u8, "-"u8}.slice(), args);
+    var argv = appendꓸꓸꓸ(slice<@string>(["-###"u8, "-S"u8, "-x"u8, "go"u8, "-"u8]), args);
     var cmd = exec.Command(gccgoPath, argv.ꓸꓸꓸ);
     (var stderr, err) = cmd.StderrPipe();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     err = cmd.Start();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -58,7 +58,7 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
             inst.TargetTriple = line[8..];
             break;
         }
-        case {} when line[0] is (rune)' ': {
+        case {} when line[0] is (byte)' ': {
             var argsΔ2 = strings.Fields(line);
             foreach (var (_, arg) in argsΔ2[1..]) {
                 if (strings.HasPrefix(arg, "-L"u8)) {
@@ -69,9 +69,9 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
         }}
     }
 
-    argv = appendꓸꓸꓸ(new @string[]{"-dumpversion"u8}.slice(), args);
+    argv = appendꓸꓸꓸ(slice<@string>(["-dumpversion"u8]), args);
     (var stdout, err) = exec.Command(gccgoPath, argv.ꓸꓸꓸ).Output();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     inst.GccVersion = strings.TrimSpace((@string)stdout);
@@ -81,19 +81,19 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
 
 // Return the list of export search paths for this GccgoInstallation.
 public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) {
-    slice<@string> paths = default!;
+    slice<@string> paths = default;
 
     foreach (var (_, lpath) in inst.LibPaths) {
         @string spath = filepath.Join(lpath, "go", inst.GccVersion);
         var (fi, err) = os.Stat(spath);
-        if (err != default! || !fi.IsDir()) {
+        if (err != nil || !fi.IsDir()) {
             continue;
         }
         paths = append(paths, spath);
 
         spath = filepath.Join(spath, inst.TargetTriple);
         (fi, err) = os.Stat(spath);
-        if (err != default! || !fi.IsDir()) {
+        if (err != nil || !fi.IsDir()) {
             continue;
         }
         paths = append(paths, spath);

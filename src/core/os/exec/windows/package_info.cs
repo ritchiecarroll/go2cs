@@ -10,18 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -70,6 +58,13 @@ using static go.os.exec_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Cmd))]
+[assembly: go.GoFieldAccess(typeof(ExitError))]
+[assembly: go.GoFieldAccess(typeof(go.io.fs_package.PathError))]
+[assembly: go.GoFieldAccess(typeof(time_package.Timer))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -78,7 +73,7 @@ using static go.os.exec_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/exec/exec.go", "exec.cs", "AH3uAYKmgNoABxCCpoIA2gHcA5IABTAAGALKgIKmgoKCgoKUpoCCpKaCgoKClIKCgpTagoK4lIKkAAgSgIKUtgACGAALAoKUgoKWrsKUpoKCgoKUqsKClNaCgpSmooKCgpSCpoCCtoKCpoKCkoKClICCpJSmgqaCgpSuwoKCgpSCpoCCtoKCpoKCkoKClKaCggADIgANAoCCpAAMEgANCIKmgoKClIKCgriClIKClJSCgrgAASAADgKCgriClIKk6oKCgpSCgoKUgoKClIKUgoKm3IKUpoKChIqCgqKUkoKUgoKUuAAIEoKCgqYABRTytNiCgoC4ksrsgoKmgtjYgoDKkoLsgsiCAA0YpoKC7KYAEiiCAAYoABMCgpSCpoKClJSCgoK4griAuKSClAACFAAMAoKClKaCpoKCprb8prSmgqYAChLygpSClIKCpoKCgIK22sKClIKUgoKCggAGEuKClIKUgoKUgoKCAAUWAAgCgpSClIKClIKCggAFFgAIAoKUgpSCgpSCgoIADSjygqaAgoKkpoKCgoKCgqaqwoCCgoKk5oKClIKUgoKCgoKCgoKsspSCgoKCuIIADRqAgpKC7IKClKq0ggACENLctqKCgoK4goKmgriUgriUlIKClIKmgriCgqbcsoKUgoKClJSmAAkUmKKUlA==", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1")]
+[assembly: go.GoPositionMap("os/exec/exec.go", "exec.cs", "AH3uAYKmgNoABxCCpoIA2gHcA5IABTAAGALKgIKmgoKCgoKUpoCCpKaCgoKClIKCgpTagoK4lIKUAAgSgIKUtgACGAALAoKUgoKWrsKUpoKCgoKUqsKClNaCgpSmooKCgpSCpoCCtoKCpoKCkoKClICCpJSmgqaCgpSuwoKCgpSCpoCCtoKCpoKCkoKClKaCggADIgANAoCCpAAMEgANCIKmgoKClIKCgriClIKClJSCgrgAASAADgKCgriClIKk6oKCgpSCgoKUgoKClIKUgoKm3IKUpoKChIqCgqKUgoKUgoKUuAAIEoKCgqYABRTytNiCgoC4gsrsgoKmgtjYgoDKgoLsgsiCAA0YpoKC7KYAEiiCAAYoABMCgpSCpoKClJSCgoK4griAuKSClAACFAAMAoKClKaCpoKCprb8prSmgqYAChLygpSClIKCpoKCgIK22sKClIKUgoKCggAGEuKClIKUgoKUgoKCAAUWAAgCgpSClIKClIKCggAFFgAIAoKUgpSCgpSCgoIADSjygqaAgoKkpoKCgoKCgqaqwoCCgoKk5oKClIKUgoKCgoKCgoKsspSCgoKCuIIADxqAgoKC/IKClKq0ggACENLctqKCgoK4goKmgriUgriUlIKClIKmgriCgqbcsoKUgoKClJSmAAkUmKKklA==", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1")]
 [assembly: go.GoPositionMap("os/exec/exec_windows.go", "exec_windows.cs", "AAscqLKC")]
 [assembly: go.GoPositionMap("os/exec/lookpath.go", "lookpath.cs", "AAc4ABUC")]
 [assembly: go.GoPositionMap("os/exec/lp_windows.go", "lp_windows.cs", "ABIglIKCgpSClKaCgoKUpoKClIKCyoKAgraClKaCgIK2AAIYAAkCgIK2gpSCgIKClMiClIKUgpSUgoKUgtaCgoKCkoKUgpSmlNiSgoKClAACGAAKCICCgIKCgpTYgoKmpoCCAAcQgoKCuILKgpSUlMiClA==")]

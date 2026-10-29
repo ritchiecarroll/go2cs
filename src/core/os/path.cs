@@ -21,9 +21,9 @@ partial class os_package {
 public static error MkdirAll(@string path, FileMode perm) {
     // Fast path: if we can tell whether path is a directory or file, stop with success or error.
     var (dir, err) = Stat(path);
-    if (err == default!) {
+    if (err == nil) {
         if (dir.IsDir()) {
-            return default!;
+            return default;
         }
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir"u8, Path: path, Err: syscall.ENOTDIR)));
     }
@@ -49,7 +49,7 @@ public static error MkdirAll(@string path, FileMode perm) {
     {
         @string parent = path.slice(0, i); if (len(parent) > len(filepathlite.VolumeName(path))) {
             err = MkdirAll(parent, perm);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
         }
@@ -57,16 +57,16 @@ public static error MkdirAll(@string path, FileMode perm) {
 
     // Parent now exists; invoke Mkdir and use its result.
     err = Mkdir(path, perm);
-    if (err != default!) {
+    if (err != nil) {
         // Handle arguments like "foo/." by
         // double-checking that directory doesn't exist.
         var (dirΔ1, err1) = Lstat(path);
-        if (err1 == default! && dirΔ1.IsDir()) {
-            return default!;
+        if (err1 == nil && dirΔ1.IsDir()) {
+            return default;
         }
         return err;
     }
-    return default!;
+    return default;
 }
 
 // RemoveAll removes path and any children it contains.
@@ -83,7 +83,7 @@ internal static bool endsWithDot(@string path) {
     if (path == "."u8) {
         return true;
     }
-    if (len(path) >= 2 && path[len(path) - 1] == (rune)'.' && IsPathSeparator(path[len(path) - 2])) {
+    if (len(path) >= 2 && path[len(path) - 1] == '.' && IsPathSeparator(path[len(path) - 2])) {
         return true;
     }
     return false;

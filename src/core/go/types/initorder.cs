@@ -28,12 +28,11 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
 
     // An InitOrder may already have been computed if a package is
     // built from several calls to (*Checker).Files. Clear it.
-    check.Info.Value.InitOrder = (~check.Info).InitOrder[..0];
+    check.Info.InitOrder = check.Info.InitOrder[..0];
 
     // Compute the object dependency graph and initialize
     // a priority queue with the list of graph nodes.
-    ref var pq = ref heap<nodeQueue>(out var Ꮡpq);
-    pq = (nodeQueue)dependencyGraph(check.objMap);
+    ref var pq = ref heap<nodeQueue>((nodeQueue)dependencyGraph(check.objMap), out var Ꮡpq);
     heap.Init(new nodeQueueжInterface(Ꮡpq));
 
     const bool debug = false;
@@ -43,10 +42,10 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
         foreach (var (obj, d) in check.objMap) {
             // only print objects that may appear in the dependency graph
             {
-                var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != default!) {
-                    if (len((~d).deps) > 0){
+                var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
+                    if (len(d.deps) > 0) {
                         fmt.Printf("\t%s depends on\n"u8, objΔ1.Name());
-                        foreach (var (dep, _) in (~d).deps) {
+                        foreach (var (dep, _) in d.deps) {
                             fmt.Printf("\t\t%s\n"u8, dep.Name());
                         }
                     } else {
@@ -59,9 +58,9 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
 
         fmt.Println(transposedObjectˢ);
         foreach (var (_, n) in pq) {
-            fmt.Printf("\t%s depends on %d nodes\n"u8, (~n).obj.Name(), (~n).ndeps);
-            foreach (var (p, _) in (~n).pred) {
-                fmt.Printf("\t\t%s is dependent\n"u8, (~p).obj.Name());
+            fmt.Printf("\t%s depends on %d nodes\n"u8, n.obj.Name(), n.ndeps);
+            foreach (var (p, _) in n.pred) {
+                fmt.Printf("\t\t%s is dependent\n"u8, p.obj.Name());
             }
         }
         fmt.Println();
@@ -82,12 +81,12 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
 
         if (debug) {
             fmt.Printf("\t%s (src pos %d) depends on %d nodes now\n"u8,
-                (~n).obj.Name(), (~n).obj.order(), (~n).ndeps);
+                n.obj.Name(), n.obj.order(), n.ndeps);
         }
 
         // if n still depends on other nodes, we have a cycle
-        if ((~n).ndeps > 0) {
-            var cycle = findPath(check.objMap, (~n).obj, (~n).obj, new map<Object, bool>());
+        if (n.ndeps > 0) {
+            var cycle = findPath(check.objMap, n.obj, n.obj, new map<Object, bool>());
             // If n.obj is not part of the cycle (e.g., n.obj->b->c->d->c),
             // cycle will be nil. Don't report anything in that case since
             // the cycle is reported when the algorithm gets to an object
@@ -96,7 +95,7 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
             // the cycle will be broken (dependency count will be reduced
             // below), and so the remaining nodes in the cycle don't trigger
             // another error (unless they are part of multiple cycles).
-            if (cycle != default!) {
+            if (cycle != nil) {
                 Ꮡcheck.reportCycle(cycle);
             }
             // Ok to continue, but the variable initialization order
@@ -106,13 +105,13 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
 
         // reduce dependency count of all dependent nodes
         // and update priority queue
-        foreach (var (p, _) in (~n).pred) {
-            p.Value.ndeps--;
-            heap.Fix(new nodeQueueжInterface(Ꮡpq), (~p).index);
+        foreach (var (p, _) in n.pred) {
+            p.ndeps--;
+            heap.Fix(new nodeQueueжInterface(Ꮡpq), p.index);
         }
 
         // record the init order for variables with initializers only
-        var (v, _) = (~n).obj._<ж<Var>>(ᐧ);
+        var (v, _) = n.obj._<ж<Var>>(ᐧ);
         var info = check.objMap[new VarжObject(v)];
         if (v == nil || !info.hasInitializer()) {
             continue;
@@ -127,18 +126,18 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
         }
         emitted[info] = true;
 
-        var infoLhs = info.Value.lhs; // possibly nil (see declInfo.lhs field comment)
-        if (infoLhs == default!) {
-            infoLhs = new ж<Var>[]{v}.slice();
+        var infoLhs = info.lhs; // possibly nil (see declInfo.lhs field comment)
+        if (infoLhs == nil) {
+            infoLhs = slice<ж<Var>>([v]);
         }
-        var init = Ꮡ(new Initializer(infoLhs, (~info).init));
-        check.Info.Value.InitOrder = append((~check.Info).InitOrder, init);
+        var init = Ꮡ(new Initializer(infoLhs, info.init));
+        check.Info.InitOrder = append(check.Info.InitOrder, init);
     }
 
     if (debug) {
         fmt.Println();
         fmt.Println(initializationOrderˢ);
-        foreach (var (_, init) in (~check.Info).InitOrder) {
+        foreach (var (_, init) in check.Info.InitOrder) {
             fmt.Printf("\t%s\n"u8, init.OrTypedNil());
         }
         fmt.Println();
@@ -150,13 +149,13 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
 // If there is no such path, the result is nil.
 internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object from, Object to, map<Object, bool> seen) {
     if (seen[from]) {
-        return default!;
+        return default;
     }
     seen[from] = true;
 
     // sort deps for deterministic result
-    slice<Object> deps = default!;
-    foreach (var (d, _) in (~objMap[from]).deps) {
+    slice<Object> deps = default;
+    foreach (var (d, _) in objMap[from].deps) {
         deps = append(deps, d);
     }
     var depsʗ1 = deps;
@@ -164,16 +163,16 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
 
     foreach (var (_, d) in deps) {
         if (AreEqual(d, to)) {
-            return new Object[]{d}.slice();
+            return slice<Object>([d]);
         }
         {
-            var P = findPath(objMap, d, to, seen); if (P != default!) {
+            var P = findPath(objMap, d, to, seen); if (P != nil) {
                 return append(P, d);
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 // reportCycle reports an error for the given cycle.
@@ -215,10 +214,10 @@ partial interface dependency :
 // s in n.succ represents an edge n->s; with a->b indicating that
 // a depends on b.
 partial struct graphNode {
-    internal dependency obj; // object represented by this node
-    internal nodeSet pred, succ;    // consumers and dependencies of this node (lazily initialized)
-    internal nint index;       // node index in graph slice/priority queue
-    internal nint ndeps;       // number of outstanding dependencies before this object can be initialized
+    internal dependency obj;     // object represented by this node
+    internal nodeSet pred, succ; // consumers and dependencies of this node (lazily initialized)
+    internal nint index;         // node index in graph slice/priority queue
+    internal nint ndeps;         // number of outstanding dependencies before this object can be initialized
 }
 
 // cost returns the cost of removing this node, which involves copying each
@@ -229,11 +228,11 @@ internal static nint cost(this ref graphNode n) {
 
 partial struct nodeSet /*map[ж<graphNode>, bool]*/;
 
-internal static void add(this ref nodeSet s, ж<graphNode> Ꮡp) {
-    if (s == default!) {
+internal static void add(this ref nodeSet s, ж<graphNode> p) {
+    if (s == nil) {
         s = new nodeSet(0);
     }
-    (s)[Ꮡp] = true;
+    (s)[p] = true;
 }
 
 // dependencyGraph computes the object dependency graph from the given objMap,
@@ -247,7 +246,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     foreach (var (obj, _) in objMap) {
         // only consider nodes that may be an initialization dependency
         {
-            var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != default!) {
+            var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
                 M[objΔ1] = Ꮡ(new graphNode(obj: objΔ1));
             }
         }
@@ -258,10 +257,10 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     // to be scheduled for initialization in correct order relative to other nodes.)
     foreach (var (obj, n) in M) {
         // for each dependency obj -> d (= deps[i]), create graph edges n->s and s->n
-        foreach (var (d, _) in (~objMap[obj]).deps) {
+        foreach (var (d, _) in objMap[obj].deps) {
             // only consider nodes that may be an initialization dependency
             {
-                var (dΔ1, _) = d._<dependency>(ᐧ); if (dΔ1 != default!) {
+                var (dΔ1, _) = d._<dependency>(ᐧ); if (dΔ1 != nil) {
                     var dΔ2 = M[dΔ1];
                     n.of(graphNode.Ꮡsucc).add(dΔ2);
                     dΔ2.of(graphNode.Ꮡpred).add(n);
@@ -270,11 +269,11 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
         }
     }
 
-    slice<ж<graphNode>> G = default!;                                // separate non-functions and functions
-    slice<ж<graphNode>> funcG = default!;
+    slice<ж<graphNode>> G = default; // separate non-functions and functions
+    slice<ж<graphNode>> funcG = default;
     foreach (var (_, n) in M) {
         {
-            var (_, ok) = (~n).obj._<ж<Func>>(ᐧ); if (ok){
+            var (_, ok) = n.obj._<ж<Func>>(ᐧ); if (ok) {
                 funcG = append(funcGᴷ, funcG, n);
             } else {
                 G = append(G, n);
@@ -296,30 +295,30 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     foreach (var (_, n) in funcG) {
         // connect each predecessor p of n with each successor s
         // and drop the function node (don't collect it in G)
-        foreach (var (p, _) in (~n).pred) {
+        foreach (var (p, _) in n.pred) {
             // ignore self-cycles
             if (p != n) {
                 // Each successor s of n becomes a successor of p, and
                 // each predecessor p of n becomes a predecessor of s.
-                foreach (var (s, _) in (~n).succ) {
+                foreach (var (s, _) in n.succ) {
                     // ignore self-cycles
                     if (s != n) {
                         p.of(graphNode.Ꮡsucc).add(s);
                         s.of(graphNode.Ꮡpred).add(p);
                     }
                 }
-                delete((~p).succ, n); // remove edge to n
+                delete(p.succ, n); // remove edge to n
             }
         }
-        foreach (var (s, _) in (~n).succ) {
-            delete((~s).pred, n); // remove edge to n
+        foreach (var (s, _) in n.succ) {
+            delete(s.pred, n); // remove edge to n
         }
     }
 
     // fill in index and ndeps fields
     foreach (var (i, n) in G) {
-        n.Value.index = i;
-        n.Value.ndeps = len((~n).succ);
+        n.index = i;
+        n.ndeps = len(n.succ);
     }
 
     return G;
@@ -339,22 +338,22 @@ internal static nint Len(this nodeQueue a) {
 internal static void Swap(this nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);
     (a[i], a[j]) = (y, x);
-    (x.Value.index, y.Value.index) = (j, i);
+    (x.index, y.index) = (j, i);
 }
 
 internal static bool Less(this nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);
 
     // Prioritize all constants before non-constants. See go.dev/issue/66575/.
-    var (_, xConst) = (~x).obj._<ж<Const>>(ᐧ);
-    var (_, yConst) = (~y).obj._<ж<Const>>(ᐧ);
+    var (_, xConst) = x.obj._<ж<Const>>(ᐧ);
+    var (_, yConst) = y.obj._<ж<Const>>(ᐧ);
     if (xConst != yConst) {
         return xConst;
     }
 
     // nodes are prioritized by number of incoming dependencies (1st key)
     // and source order (2nd key)
-    return (~x).ndeps < (~y).ndeps || (~x).ndeps == (~y).ndeps && (~x).obj.order() < (~y).obj.order();
+    return x.ndeps < y.ndeps || x.ndeps == y.ndeps && x.obj.order() < y.obj.order();
 }
 
 internal static void Push(this ref nodeQueue a, any x) {
@@ -364,7 +363,7 @@ internal static void Push(this ref nodeQueue a, any x) {
 internal static any Pop(this ref nodeQueue a) {
     nint n = len(a);
     var x = (a)[n - 1];
-    x.Value.index = -1; // for safety
+    x.index = -1; // for safety
     a = (a).slice(0, n - 1);
     return x.OrTypedNil();
 }

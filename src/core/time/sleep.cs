@@ -118,7 +118,7 @@ public static bool Stop(this ж<Timer> Ꮡt) {
 public static ж<Timer> NewTimer(Duration d) {
     var c = new channel<Time>(1);
     var t = newTimer(when(d), 0, sendTime, c, (uintptr)syncTimer(c));
-    t.Value.C = c.WithDirection(GoChanDir.Recv);
+    t.C = c.AsRecvOnly();
     return t;
 }
 
@@ -181,7 +181,7 @@ internal static void sendTime(any c, uintptr seq, int64 delta) {
 // As of Go 1.23, the garbage collector can recover unreferenced,
 // unstopped timers. There is no reason to prefer NewTimer when After will do.
 public static /*<-*/channel<Time> After(Duration d) {
-    return (~NewTimer(d)).C;
+    return NewTimer(d).C;
 }
 
 // AfterFunc waits for the duration to elapse and then calls f

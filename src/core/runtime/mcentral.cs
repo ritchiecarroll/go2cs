@@ -40,7 +40,7 @@ partial struct mcentral {
     // sweeper and mcentral that do consume from the unswept list may
     // encounter swept spans, and these should be ignored.
     internal array<spanSet> partial = new(2, () => new()); // list of spans with a free object
-    internal array<spanSet> full = new(2, () => new()); // list of spans with no free objects
+    internal array<spanSet> full = new(2, () => new());    // list of spans with no free objects
 }
 
 // Initialize a single central free list.
@@ -107,8 +107,8 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
     // allocation if the budget runs low.
     nint spanBudget = 100;
 
-    ж<mspan> s = default!;
-    sweepLocker sl = default!;
+    ж<mspan> s = default;
+    sweepLocker sl = default;
 
     // Try partial swept spans first.
     var sg = mheap_.sweepgen;
@@ -177,7 +177,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
     // We failed to get a span from the mcentral so get one from mheap.
     s = c.grow();
     if (s == nil) {
-        return default!;
+        return default;
     }
 
     // At this point s is a span that should have free slots.
@@ -189,18 +189,18 @@ havespan:
             traceRelease(traceΔ1);
         }
     }
-    nint n = (nint)(~s).nelems - (nint)(~s).allocCount;
-    if (n == 0 || (~s).freeindex == (~s).nelems || (~s).allocCount == (~s).nelems) {
+    nint n = (nint)s.nelems - (nint)s.allocCount;
+    if (n == 0 || s.freeindex == s.nelems || s.allocCount == s.nelems) {
         @throw(spanHasNoFreeObjectsˢ);
     }
-    var freeByteBase = (uint16)((~s).freeindex & ~(64 - 1));
+    var freeByteBase = (uint16)(s.freeindex & ~(64 - 1));
     var whichByte = (uint16)(freeByteBase / 8);
     // Init alloc bits cache.
     s.refillAllocCache(whichByte);
 
     // Adjust the allocCache so that s.freeindex corresponds to the low bit in
     // s.allocCache.
-    s.Value.allocCache >>= (int)((~s).freeindex % 64);
+    s.allocCache >>= (int)(s.freeindex % 64);
 
     return s;
 }
@@ -223,7 +223,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
     var stale = s.sweepgen == sg + 1;
 
     // Fix up sweepgen.
-    if (stale){
+    if (stale) {
         // Span was cached before sweep began. It's our
         // responsibility to sweep it.
         //
@@ -237,7 +237,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
     }
 
     // Put the span in the appropriate place.
-    if (stale){
+    if (stale) {
         // It's stale, so just sweep it. Sweeping will put it on
         // the right list.
         //
@@ -248,7 +248,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
         var ss = new sweepLocked(Ꮡs);
         ss.sweep(false);
     } else {
-        if ((nint)s.nelems - (nint)s.allocCount > 0){
+        if ((nint)s.nelems - (nint)s.allocCount > 0) {
             // Put it back on the partial swept list.
             c.partialSwept(sg).push(Ꮡs);
         } else {
@@ -264,7 +264,7 @@ internal static ж<mspan> grow(this ref mcentral c) {
     var npages = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()];
     var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {
-        return default!;
+        return default;
     }
     s.initHeapBits();
     return s;

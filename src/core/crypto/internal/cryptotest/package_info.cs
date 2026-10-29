@@ -10,23 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -66,6 +49,10 @@ using static go.crypto.@internal.cryptotest_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(go.os.exec_package.ExitError))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -74,16 +61,16 @@ using static go.crypto.@internal.cryptotest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/aead.go", "aead.cs", "AA4cABQUooKCpqaCgpKUgpSCgpSClILupoKCkpKUgpSCgpSClIKCuJKUgpSCgriCgpSCggAHEKaCgpSCkpKUgriCgpSCppKSsLaCgrC2kpSCpoKCgoK4ppKCkrC2gsqCgrD+poKClJKUgpSCgoKmgoKCgqaCpoKUgILskpSClIKCgqaCgoKClKaCppSCAAgSkoKmgoKSlIKUgoKUpoKCgpSC7qaCgoKmkpSClIKClKaCgoKUgu6mgoSSlIKUgoKUpoKCgpSCAAcUopSUlLiCpqa4goKCgoKsspSCgqY=", "30-54:1;35-51:1.1;56-105:2;61-102:2.1;62-79:2.1.1;81-101:2.1.2;107-179:3;115-176:3.1;116-140:3.1.1;134-134:3.1.1.1;139-139:3.1.1.2;142-175:3.1.2;163-163:3.1.2.1;174-174:3.1.2.2;181-256:4;186-253:4.1;188-219:4.1.1;221-252:4.1.2;258-289:5;265-286:5.1;291-324:6;300-321:6.1;326-356:7;332-353:7.1")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/aead.go", "aead.cs", "AA4cABQUooKCpqaCgpKUgpSCgpSClILupoKCkpKUgpSCgpSClIKCuJKUgpSCgriCgpSCggAHEKaCgpSCkpKUgriCgpSCpoKCsLaCgrC2kpSCpoKCgoK4poKCgrC2gsqCgrD+poKClJKUgpSCgoKmgoKCgqaCpoKUgILskpSClIKCgqaCgoKClKaCppSCAAgSkoKmgoKSlIKUgoKUpoKCgpSC7qaCgoKmkpSClIKClKaCgoKUgu6mgoSSlIKUgoKUpoKCgpSCAAcUopSUlLiCpqa4goKCgoKsspSCgqY=", "30-54:1;35-51:1.1;56-105:2;61-102:2.1;62-79:2.1.1;81-101:2.1.2;107-179:3;115-176:3.1;116-140:3.1.1;134-134:3.1.1.1;139-139:3.1.1.2;142-175:3.1.2;163-163:3.1.2.1;174-174:3.1.2.2;181-256:4;186-253:4.1;188-219:4.1.1;221-252:4.1.2;258-289:5;265-286:5.1;291-324:6;300-321:6.1;326-356:7;332-353:7.1")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/allocations.go", "allocations.cs", "ABcmtIK4griCyoK4")]
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/block.go", "block.cs", "ABMitIKClIKCppSSppLckqaUlIKUgri0lIKUggAODIKCuIKClJSCgriClKaCuIKCuIKUgqaCkoKCpoKCuIKClILKgoKC7oKUgoKCpoKkgoKUgoKCyoKCuIKmgoKUpoKmlIKCuIKUgqaSkoC2goKAtoKCgOy4ppCSkLaQkpCSkMiilIKUlIKmog==", "30-32:1;34-36:2;41-67:3;72-87:1;89-104:2;106-141:3;146-174:4;176-197:5;199-219:6;208-208:6.1;213-213:6.2;218-218:6.3;224-238:7;228-228:7.1;231-231:7.2;232-232:7.3;235-235:7.4;236-236:7.5;237-237:7.6;244-252:1")]
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/blockmode.go", "blockmode.cs", "ABEmooKClKaCkqaSppKUgoCCtoKUgoKCAA0KgpSCgpC2kpSCgpSCgriSlJSCgpSCgsqSlJSUgriCgsqSlJKmgpKCgraCgriCgpSCyoKCgriClJKmgpSC3JKUgoKCpoKkgoKUgpSCuJKUgqaSkpC2goKQtoKCkMikgoKCsMiSlIKUkoKUlII=", "28-30:1;32-34:2;36-52:3;58-61:1;60-60:1.1;63-74:2;76-90:3;92-109:4;111-161:5;151-153:5.1;165-187:6;189-209:7;198-198:7.1;203-203:7.2;208-208:7.3;212-219:8;217-217:8.1;221-236:9")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/block.go", "block.cs", "ABMitIKClIKCppSSppLckqaUlIKUgri0lIKUggAODIKCuIKClJSCgriClKaCuIKCuIKUgqaCkoKCpoKCuIKClILKgoKC7oKUgoKCpoKkgoKUgoKCyoKCuIKmgoKUpoKmlIKCuIKUgqaCgoC2goKAtoKCgOy4ppCSkLaQkpCSkMiilIKUlIKmog==", "30-32:1;34-36:2;41-67:3;72-87:1;89-104:2;106-141:3;146-174:4;176-197:5;199-219:6;208-208:6.1;213-213:6.2;218-218:6.3;224-238:7;228-228:7.1;231-231:7.2;232-232:7.3;235-235:7.4;236-236:7.5;237-237:7.6;244-252:1")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/blockmode.go", "blockmode.cs", "ABEmooKClKaCkqaSppKUgoCCtoKUgoKCAA0KgpSCgpC2kpSCgpSCgriSlJSCgpSCgsqSlJSUgriCgsqSlIKmgpKCgqaCgriCgpSCyoKCgriClJKmgpSC3JKUgoKCpoKkgoKUgpSCuJKUgqaCgpC2goKQtoKCkMikgoKCsMiSlIKUkoKUlII=", "28-30:1;32-34:2;36-52:3;58-61:1;60-60:1.1;63-74:2;76-90:3;92-109:4;111-161:5;151-153:5.1;165-187:6;189-209:7;198-198:7.1;203-203:7.2;208-208:7.3;212-219:8;217-217:8.1;221-236:9")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/fetchmodule.go", "fetchmodule.cs", "AB4msriCgoKAgqSUgoCCgILGgpSmlIKClIaAgrY=")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/fips140.go", "fips140.cs", "AAsYgoKAgg==")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/hash.go", "hash.cs", "ABYsooKClKaCgoI=")]
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/implementations.go", "implementations.cs", "ABYoxIKCpoKCgqaApIKAgpSmgpT+gtaCgoKUlLa2", "33-33:1;39-47:2")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/implementations.go", "implementations.cs", "ABYoxIKCpoKCgqaApIKAgpSmgpT+gtaCgoKUpLa2", "33-33:1;39-47:2")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/methods.go", "methods.cs", "AA0sAAoCgoKClIKClLiigoKmgpSCgqaCgoKClIK4")]
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/stream.go", "stream.cs", "ABEkAA4YpIKmuISCgpSClIKUgoKCAAcQhIKClIKmgpSmgoKC7oKUgoKUgoK4goKClISylIKC3IKUlJSCuIKCyoKUgoKUgpSioKSC3IKUgpSCgqakkpKAtoKCgLaCgoDagpSCgqaUgoKUlKaCgoKClJSCAAkUxIKUgoKCkLaCgoKUyIKUgpQ=", "32-87:1;40-59:1.1;43-57:1.1.1;63-86:1.2;66-84:1.2.1;89-100:2;102-118:3;109-116:3.1;120-137:4;139-157:5;149-155:5.1;150-150:5.1.1;159-187:6;170-185:6.1;174-174:6.1.1;179-179:6.1.2;184-184:6.1.3;189-220:7;229-236:1;235-235:1.1;238-244:2;243-243:2.1")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/stream.go", "stream.cs", "ABEkAA4YpIKmuISCgpSClIKUgoKCAAcQhIKClIKmgpSmgoKC7oKUgoKUgoK4goKClISylIKC3IKUlJSCuIKCyoKUgoKUgpSioKSC3IKUgpSCgqakgoKAtoKCgLaCgoDagpSCgqaUgoKUlKaCgoKClJSCAAkUxIKUgoKCkLaCgoKUyIKUgpQ=", "32-87:1;40-59:1.1;43-57:1.1.1;63-86:1.2;66-84:1.2.1;89-100:2;102-118:3;109-116:3.1;120-137:4;139-157:5;149-155:5.1;150-150:5.1.1;159-187:6;170-185:6.1;174-174:6.1.1;179-179:6.1.2;184-184:6.1.3;189-220:7;229-236:1;235-235:1.1;238-244:2;243-243:2.1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

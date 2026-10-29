@@ -79,10 +79,10 @@ internal static readonly @string errorˢ2 = "Error"u8;
 
 internal static void defPredeclaredTypes() {
     foreach (var (_, t) in Typ) {
-        def(new TypeNameжObject(NewTypeName(nopos, nil, (~t).name, new BasicжΔType(t))));
+        def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжΔType(t))));
     }
     foreach (var (_, t) in basicAliases.ΔRangeSnapshot()) {
-        def(new TypeNameжObject(NewTypeName(nopos, nil, (~t).name, new BasicжΔType(t))));
+        def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжΔType(t))));
     }
 
     // type any = interface{}
@@ -110,40 +110,40 @@ internal static void defPredeclaredTypes() {
         // It shouldn't matter which representation of any is actually inserted
         // into the Universe, but we lean toward the future and insert the Alias
         // representation.
-        universeAnyAlias = NewTypeName(nopos, nil, anyˢ, default!);
+        universeAnyAlias = NewTypeName(nopos, nil, anyˢ, default);
         _ = NewAlias(universeAnyAlias, universeAnyNoAlias.of(TypeName.Ꮡobject).Type().Underlying()); // Link TypeName and Alias
         def(new TypeNameжObject(universeAnyAlias));
     }
 
     // type error interface{ Error() string }
     {
-        var obj = NewTypeName(nopos, nil, errorˢ, default!);
-        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
+        var obj = NewTypeName(nopos, nil, errorˢ, default);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default, default);
 
         // error.Error() string
         var recv = newVar(RecvVar, nopos, nil, ""u8, new NamedжΔType(typ));
         var res = newVar(ResultVar, nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
-        var sig = NewSignatureType(recv, default!, default!, nil, NewTuple(res), false);
+        var sig = NewSignatureType(recv, default, default, nil, NewTuple(res), false);
         var err = NewFunc(nopos, nil, errorˢ2, sig);
 
         // interface{ Error() string }
-        var ityp = Ꮡ(new Interface(methods: new ж<Func>[]{err}.slice(), complete: true));
+        var ityp = Ꮡ(new Interface(methods: slice<ж<Func>>([err]), complete: true));
         computeInterfaceTypeSet(nil, nopos, ityp); // prevent races due to lazy computation of tset
 
-        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.fromRHS = new InterfaceжΔType(ityp);
         typ.Underlying();
         def(new TypeNameжObject(obj));
     }
 
     // type comparable interface{} // marked as comparable
     {
-        var obj = NewTypeName(nopos, nil, comparableˢ, default!);
-        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
+        var obj = NewTypeName(nopos, nil, comparableˢ, default);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default, default);
 
         // interface{} // marked as comparable
-        var ityp = Ꮡ(new Interface(complete: true, tset: Ꮡ(new _TypeSet(default!, allTermlist, true))));
+        var ityp = Ꮡ(new Interface(complete: true, tset: Ꮡ(new _TypeSet(default, allTermlist, true))));
 
-        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.fromRHS = new InterfaceжΔType(ityp);
         typ.Underlying();
         def(new TypeNameжObject(obj));
     }
@@ -264,7 +264,7 @@ internal static readonly @string assertˢ = "assert"u8;
 // These built-ins are intended for debugging and testing of this
 // package only.
 public static void DefPredeclaredTestFuncs() {
-    if (Universe.Lookup(assertˢ) != default!) {
+    if (Universe.Lookup(assertˢ) != nil) {
         return; // already defined
     }
     def(new BuiltinжObject(newBuiltin(_Assert)));
@@ -274,7 +274,7 @@ public static void DefPredeclaredTestFuncs() {
 [GoInit] internal static void initΔ2() {
     Universe = NewScope(nil, nopos, nopos, "universe"u8);
     Unsafe = NewPackage("unsafe"u8, "unsafe"u8);
-    Unsafe.Value.complete = true;
+    Unsafe.complete = true;
 
     defPredeclaredTypes();
     defPredeclaredConsts();
@@ -293,7 +293,7 @@ public static void DefPredeclaredTestFuncs() {
 // a scope. Objects with exported names are inserted in the unsafe package
 // scope; other objects are inserted in the universe scope.
 internal static void def(Object obj) {
-    assert(obj.Type() != default!);
+    assert(obj.Type() != nil);
     @string name = obj.Name();
     if (strings.Contains(name, " "u8)) {
         return; // nothing to do
@@ -301,13 +301,13 @@ internal static void def(Object obj) {
     // fix Obj link for named types
     {
         var typ = asNamed(obj.Type()); if (typ != nil) {
-            typ.Value.obj = obj._<ж<TypeName>>();
+            typ.obj = obj._<ж<TypeName>>();
         }
     }
     // exported identifiers go into package unsafe
     var scope = Universe;
     if (obj.Exported()) {
-        scope = Unsafe.Value.scope;
+        scope = Unsafe.scope;
         // set Pkg field
         switch (obj.type()) {
         case ж<TypeName> objΔ1: {
@@ -324,7 +324,7 @@ internal static void def(Object obj) {
             break;
         }}
     }
-    if (scope.Insert(obj) != default!) {
+    if (scope.Insert(obj) != nil) {
         throw panic("double declaration of predeclared identifier");
     }
 }

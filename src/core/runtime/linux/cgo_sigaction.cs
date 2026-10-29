@@ -19,7 +19,7 @@ internal static @unsafe.Pointer _cgo_sigaction;
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactiont> Ꮡold) {
+internal static void sigaction(uint32 sigʗp, ж<sigactiont> @new, ж<sigactiont> old) {
     ref var sig = ref heap(sigʗp, out var Ꮡsig);
 
     // racewalk.go avoids adding sanitizing instrumentation to package runtime,
@@ -28,14 +28,14 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
     //
     // Mark the input as having been written before the call
     // and the output as read after.
-    if (msanenabled && Ꮡnew != nil) {
-        msanwrite(@unsafe.Pointer.FromPinnedBox(Ꮡnew), /* unsafe.Sizeof(*new) */ (uintptr)32);
+    if (msanenabled && @new != nil) {
+        msanwrite(@unsafe.Pointer.FromPinnedBox(@new), /* unsafe.Sizeof(*new) */ (uintptr)32);
     }
-    if (asanenabled && Ꮡnew != nil) {
-        asanwrite(@unsafe.Pointer.FromPinnedBox(Ꮡnew), /* unsafe.Sizeof(*new) */ (uintptr)32);
+    if (asanenabled && @new != nil) {
+        asanwrite(@unsafe.Pointer.FromPinnedBox(@new), /* unsafe.Sizeof(*new) */ (uintptr)32);
     }
-    if (_cgo_sigaction == nil || inForkedChild){
-        sysSigaction(sig, Ꮡnew, Ꮡold);
+    if (_cgo_sigaction == nil || inForkedChild) {
+        sysSigaction(sig, @new, old);
     } else {
         // We need to call _cgo_sigaction, which means we need a big enough stack
         // for C.  To complicate matters, we may be in libpreinit (before the
@@ -43,11 +43,11 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
         // the current thread in transition between goroutines, or with the g0
         // system stack already in use).
 
-        int32 ret = default!;
+        int32 ret = default;
 
-        fixSigactionForCgo(Ꮡnew);
+        fixSigactionForCgo(@new);
 
-        ж<g> g = default!;
+        ж<g> g = default;
         if (mainStarted) {
             g = getg();
         }
@@ -55,14 +55,14 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
         switch (ᐧ) {
         case {} when g == nil: {
             // No g: we're on a C stack or a signal stack.
-            ret = callCgoSigaction((uintptr)sig, Ꮡnew, Ꮡold);
+            ret = callCgoSigaction((uintptr)sig, @new, old);
             break;
         }
         case {} when sp < (~g).stack.lo || sp >= (~g).stack.hi: {
             // We're no longer on g's stack, so we must be handling a signal.  It's
             // possible that we interrupted the thread during a transition between g
             // and g0, so we should stay on the current stack to avoid corrupting g0.
-            ret = callCgoSigaction((uintptr)sig, Ꮡnew, Ꮡold);
+            ret = callCgoSigaction((uintptr)sig, @new, old);
             break;
         }
         default: {
@@ -75,7 +75,7 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
             // that's ok: we'll be running on a fresh, clean system stack so the stack
             // check will always succeed anyway.
             systemstack(() => {
-                ret = callCgoSigaction((uintptr)Ꮡsig.Value, Ꮡnew, Ꮡold);
+                ret = callCgoSigaction((uintptr)Ꮡsig.Value, @new, old);
             });
             break;
         }}
@@ -85,15 +85,15 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
             // libc reserves certain signals — normally 32-33 — for pthreads, and
             // returns EINVAL for sigaction calls on those signals.  If we get EINVAL,
             // fall back to making the syscall directly.
-            sysSigaction(sig, Ꮡnew, Ꮡold);
+            sysSigaction(sig, @new, old);
         }
     }
 
-    if (msanenabled && Ꮡold != nil) {
-        msanread(@unsafe.Pointer.FromPinnedBox(Ꮡold), /* unsafe.Sizeof(*old) */ (uintptr)32);
+    if (msanenabled && old != nil) {
+        msanread(@unsafe.Pointer.FromPinnedBox(old), /* unsafe.Sizeof(*old) */ (uintptr)32);
     }
-    if (asanenabled && Ꮡold != nil) {
-        asanread(@unsafe.Pointer.FromPinnedBox(Ꮡold), /* unsafe.Sizeof(*old) */ (uintptr)32);
+    if (asanenabled && old != nil) {
+        asanread(@unsafe.Pointer.FromPinnedBox(old), /* unsafe.Sizeof(*old) */ (uintptr)32);
     }
 }
 

@@ -36,10 +36,10 @@ internal static UntypedInt windowMask => /* windowSize - 1 */ 32767;
 // 256 legitimate lengths: those in the range [3, 258]. This package's
 // compressor uses a higher minimum match length, enabling optimizations
 // such as finding matches via 32-bit loads and compares.
-internal static UntypedInt baseMatchLength => 3; // The smallest match length per the RFC section 3.2.5
-internal static UntypedInt minMatchLength => 4; // The smallest match length that the compressor actually emits
-internal static UntypedInt maxMatchLength => 258; // The largest match length
-internal static UntypedInt baseMatchOffset => 1; // The smallest match offset
+internal static UntypedInt baseMatchLength => 3;                  // The smallest match length per the RFC section 3.2.5
+internal static UntypedInt minMatchLength => 4;                   // The smallest match length that the compressor actually emits
+internal static UntypedInt maxMatchLength => 258;                 // The largest match length
+internal static UntypedInt baseMatchOffset => 1;                  // The smallest match offset
 internal static UntypedInt maxMatchOffset => /* 1 << 15 */ 32768; // The largest match offset
 
 // The maximum number of tokens we put into a single flate block, just to
@@ -57,7 +57,7 @@ partial struct compressionLevel {
     internal nint level, good, lazy, nice, chain, fastSkipHashing;
 }
 
-[GoLazy] partial class lazyᴛlevels { internal static slice<compressionLevel> levels = new compressionLevel[]{
+[GoLazy] partial class lazyᴛlevels { internal static slice<compressionLevel> levels = slice<compressionLevel>([
     new(0, 0, 0, 0, 0, 0), // NoCompression.
     new(1, 0, 0, 0, 0, 0), // BestSpeed uses a custom algorithm; see deflatefast.go.
     // For levels 2-3 we don't bother trying with lazy matches.
@@ -71,7 +71,7 @@ partial struct compressionLevel {
     new(7, 8, 32, 128, 256, skipNever),
     new(8, 32, 128, 258, 1024, skipNever),
     new(9, 32, 258, 258, 4096, skipNever)
-}.slice(); }
+]); }
 
 partial struct compressor {
     /*embed*/ internal compressionLevel compressionLevel;
@@ -79,13 +79,13 @@ partial struct compressor {
     internal Action<slice<byte>, slice<uint32>> bulkHasher;
     // compression algorithm
     internal Func<ж<compressor>, slice<byte>, nint> fill; // copy data to window
-    internal Action<ж<compressor>> step;        // process window
-    internal ж<deflateFast> bestSpeed;               // Encoder for BestSpeed
+    internal Action<ж<compressor>> step;                  // process window
+    internal ж<deflateFast> bestSpeed;                    // Encoder for BestSpeed
     // input window: unprocessed data is window[index:windowEnd]
     internal nint index;
     internal slice<byte> window;
     internal nint windowEnd;
-    internal nint blockStart; // window index where current tokens start
+    internal nint blockStart;    // window index where current tokens start
     internal bool byteAvailable; // if true, still need to process window[index-1].
     internal bool sync; // requesting flush
     // queued output tokens
@@ -116,7 +116,7 @@ internal static nint fillDeflate(this ref compressor d, slice<byte> b) {
         copy(d.window, d.window[(int)(windowSize)..(int)(2 * windowSize)]);
         d.index -= windowSize;
         d.windowEnd -= windowSize;
-        if (d.blockStart >= windowSize){
+        if (d.blockStart >= windowSize) {
             d.blockStart -= windowSize;
         } else {
             d.blockStart = math.MaxInt32;
@@ -130,14 +130,14 @@ internal static nint fillDeflate(this ref compressor d, slice<byte> b) {
             // Iterate over slices instead of arrays to avoid copying
             // the entire table onto the stack (Issue #18625).
             foreach (var (i, v) in d.hashPrev[..]) {
-                if ((nint)v > delta){
+                if ((nint)v > delta) {
                     d.hashPrev[i] = (uint32)((nint)v - delta);
                 } else {
                     d.hashPrev[i] = 0;
                 }
             }
             foreach (var (i, v) in d.hashHead[..]) {
-                if ((nint)v > delta){
+                if ((nint)v > delta) {
                     d.hashHead[i] = (uint32)((nint)v - delta);
                 } else {
                     d.hashHead[i] = 0;
@@ -152,15 +152,15 @@ internal static nint fillDeflate(this ref compressor d, slice<byte> b) {
 
 internal static error writeBlock(this ref compressor d, slice<token> tokens, nint index) {
     if (index > 0) {
-        slice<byte> window = default!;
+        slice<byte> window = default;
         if (d.blockStart <= index) {
             window = d.window.slice(d.blockStart, index);
         }
         d.blockStart = index;
         d.w.writeBlock(tokens, false, window);
-        return (~d.w).err;
+        return d.w.err;
     }
-    return default!;
+    return default;
 }
 
 // fillWindow will fill the current window with the supplied
@@ -218,9 +218,9 @@ internal static void fillWindow(this ref compressor d, slice<byte> b) {
 // Try to find a match starting at index whose length is greater than prevSize.
 // We only look at chainCount possibilities before giving up.
 internal static (nint length, nint offset, bool ok) findMatch(this ref compressor d, nint pos, nint prevHead, nint prevLength, nint lookahead) {
-    nint length = default!;
-    nint offset = default!;
-    bool ok = default!;
+    nint length = default;
+    nint offset = default;
+    bool ok = default;
 
     nint minMatchLook = maxMatchLength;
     if (lookahead < minMatchLook) {
@@ -239,7 +239,7 @@ internal static (nint length, nint offset, bool ok) findMatch(this ref compresso
     nint tries = d.chain;
     length = prevLength;
     if (length >= d.good) {
-        tries >>= (int)(2);
+        tries >>= 2;
     }
 
     var wEnd = win[pos + length];
@@ -275,12 +275,12 @@ internal static (nint length, nint offset, bool ok) findMatch(this ref compresso
 
 internal static error writeStoredBlock(this ref compressor d, slice<byte> buf) {
     {
-        d.w.writeStoredHeader(len(buf), false); if ((~d.w).err != default!) {
-            return (~d.w).err;
+        d.w.writeStoredHeader(len(buf), false); if (d.w.err != nil) {
+            return d.w.err;
         }
     }
     d.w.writeBytes(buf);
-    return (~d.w).err;
+    return d.w.err;
 }
 
 internal static UntypedInt hashmul => 0x1e35a7bd;
@@ -343,7 +343,7 @@ internal static void encSpeed(this ref compressor d) {
             }
             default: {
                 d.w.writeBlockHuff(false, d.window.slice(0, d.windowEnd));
-                d.err = d.w.Value.err;
+                d.err = d.w.err;
                 break;
             }}
             d.windowEnd = 0;
@@ -355,12 +355,12 @@ internal static void encSpeed(this ref compressor d) {
     d.tokens = d.bestSpeed.encode(d.tokens[..0], d.window.slice(0, d.windowEnd));
 
     // If we removed less than 1/16th, Huffman compress the block.
-    if (len(d.tokens) > d.windowEnd - (d.windowEnd >> 4)){
+    if (len(d.tokens) > d.windowEnd - (d.windowEnd >> 4)) {
         d.w.writeBlockHuff(false, d.window.slice(0, d.windowEnd));
     } else {
         d.w.writeBlockDynamic(d.tokens, false, d.window.slice(0, d.windowEnd));
     }
-    d.err = d.w.Value.err;
+    d.err = d.w.err;
     d.windowEnd = 0;
 }
 
@@ -384,7 +384,7 @@ internal static void deflate(this ref compressor d) {
     d.maxInsertIndex = d.windowEnd - (nint)(minMatchLength - 1);
 
 Loop:
-    while (ᐧ) {
+    for (;;) {
         if (d.index > d.windowEnd) {
             throw panic("index > windowEnd");
         }
@@ -405,7 +405,7 @@ Loop:
                 }
                 if (len(d.tokens) > 0) {
                     {
-                        d.err = d.writeBlock(d.tokens, d.index); if (d.err != default!) {
+                        d.err = d.writeBlock(d.tokens, d.index); if (d.err != nil) {
                             return;
                         }
                     }
@@ -439,10 +439,10 @@ Loop:
                 }
             }
         }
-        if (d.fastSkipHashing != skipNever && d.length >= minMatchLength || d.fastSkipHashing == skipNever && prevLength >= minMatchLength && d.length <= prevLength){
+        if (d.fastSkipHashing != skipNever && d.length >= minMatchLength || d.fastSkipHashing == skipNever && prevLength >= minMatchLength && d.length <= prevLength) {
             // There was a match at the previous step, and the current match is
             // not better. Output the previous match.
-            if (d.fastSkipHashing != skipNever){
+            if (d.fastSkipHashing != skipNever) {
                 d.tokens = append(d.tokens, matchToken((uint32)(d.length - (nint)baseMatchLength), (uint32)(d.offset - (nint)baseMatchOffset)));
             } else {
                 d.tokens = append(d.tokens, matchToken((uint32)(prevLength - (nint)baseMatchLength), (uint32)(prevOffset - (nint)baseMatchOffset)));
@@ -451,9 +451,9 @@ Loop:
             // index and index-1 are already inserted. If there is not enough
             // lookahead, the last two strings are not inserted into the hash
             // table.
-            if (d.length <= d.fastSkipHashing){
-                nint newIndex = default!;
-                if (d.fastSkipHashing != skipNever){
+            if (d.length <= d.fastSkipHashing) {
+                nint newIndex = default;
+                if (d.fastSkipHashing != skipNever) {
                     newIndex = d.index + d.length;
                 } else {
                     newIndex = d.index + prevLength - 1;
@@ -484,7 +484,7 @@ Loop:
             if (len(d.tokens) == maxFlateBlockTokens) {
                 // The block includes the current character
                 {
-                    d.err = d.writeBlock(d.tokens, d.index); if (d.err != default!) {
+                    d.err = d.writeBlock(d.tokens, d.index); if (d.err != nil) {
                         return;
                     }
                 }
@@ -499,7 +499,7 @@ Loop:
                 d.tokens = append(d.tokens, literalToken((uint32)d.window[i]));
                 if (len(d.tokens) == maxFlateBlockTokens) {
                     {
-                        d.err = d.writeBlock(d.tokens, i + 1); if (d.err != default!) {
+                        d.err = d.writeBlock(d.tokens, i + 1); if (d.err != nil) {
                             return;
                         }
                     }
@@ -537,40 +537,40 @@ internal static void storeHuff(this ref compressor d) {
         return;
     }
     d.w.writeBlockHuff(false, d.window.slice(0, d.windowEnd));
-    d.err = d.w.Value.err;
+    d.err = d.w.err;
     d.windowEnd = 0;
 }
 
 internal static (nint n, error err) write(this ж<compressor> Ꮡd, slice<byte> b) {
-    nint n = default!;
+    nint n = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (d.err != default!) {
+    if (d.err != nil) {
         return (0, d.err);
     }
     n = len(b);
     while (len(b) > 0) {
         d.step(Ꮡd);
         b = b.slice(d.fill(Ꮡd, b));
-        if (d.err != default!) {
+        if (d.err != nil) {
             return (0, d.err);
         }
     }
-    return (n, default!);
+    return (n, default);
 }
 
 internal static error syncFlush(this ж<compressor> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (d.err != default!) {
+    if (d.err != nil) {
         return d.err;
     }
     d.sync = true;
     d.step(Ꮡd);
-    if (d.err == default!) {
+    if (d.err == nil) {
         d.w.writeStoredHeader(0, false);
         d.w.flush();
-        d.err = d.w.Value.err;
+        d.err = d.w.err;
     }
     d.sync = false;
     return d.err;
@@ -611,23 +611,25 @@ internal static error /*err*/ init(this ref compressor d, io.Writer w, nint leve
     else if (!matchᴛ1) { /* default: */
         return fmt.Errorf("flate: invalid compression level %d: want value in range [-2, 9]"u8, level);
     }
-    return default!;
+    return default;
 }
 
 internal static void reset(this ref compressor d, io.Writer w) {
     d.w.reset(w);
     d.sync = false;
-    d.err = default!;
-    var exprᴛ1 = d.compressionLevel.level;
-    if (exprᴛ1 == NoCompression) {
+    d.err = default;
+    switch (d.compressionLevel.level) {
+    case var ᴛ when ᴛ == NoCompression: {
         d.windowEnd = 0;
+        break;
     }
-    else if (exprᴛ1 == BestSpeed) {
+    case var ᴛ when ᴛ == BestSpeed: {
         d.windowEnd = 0;
         d.tokens = d.tokens[..0];
         d.bestSpeed.reset();
+        break;
     }
-    else { /* default: */
+    default: {
         d.chainHead = -1;
         clear(d.hashHead[..]);
         clear(d.hashPrev[..]);
@@ -638,34 +640,35 @@ internal static void reset(this ref compressor d, io.Writer w) {
         d.length = minMatchLength - 1;
         d.offset = 0;
         d.maxInsertIndex = 0;
-    }
+        break;
+    }}
 }
 
 internal static error close(this ж<compressor> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (AreEqual(d.err, errWriterClosed)) {
-        return default!;
+        return default;
     }
-    if (d.err != default!) {
+    if (d.err != nil) {
         return d.err;
     }
     d.sync = true;
     d.step(Ꮡd);
-    if (d.err != default!) {
+    if (d.err != nil) {
         return d.err;
     }
     {
-        d.w.writeStoredHeader(0, true); if ((~d.w).err != default!) {
-            return (~d.w).err;
+        d.w.writeStoredHeader(0, true); if (d.w.err != nil) {
+            return d.w.err;
         }
     }
     d.w.flush();
-    if ((~d.w).err != default!) {
-        return (~d.w).err;
+    if (d.w.err != nil) {
+        return d.w.err;
     }
     d.err = errWriterClosed;
-    return default!;
+    return default;
 }
 
 // NewWriter returns a new [Writer] compressing data at the given level.
@@ -683,11 +686,11 @@ internal static error close(this ж<compressor> Ꮡd) {
 public static (ж<Writer>, error) NewWriter(io.Writer w, nint level) {
     ref var dw = ref heap(new Writer(), out var Ꮡdw);
     {
-        var err = dw.d.init(w, level); if (err != default!) {
-            return (default!, err);
+        var err = dw.d.init(w, level); if (err != nil) {
+            return (default, err);
         }
     }
-    return (Ꮡdw, default!);
+    return (Ꮡdw, default);
 }
 
 // NewWriterDict is like [NewWriter] but initializes the new
@@ -699,12 +702,12 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, nint level) {
 public static (ж<Writer>, error) NewWriterDict(io.Writer w, nint level, slice<byte> dict) {
     var dw = Ꮡ(new dictWriter(w));
     var (zw, err) = NewWriter(new dictWriterжWriter(dw), level);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     zw.of(Writer.Ꮡd).fillWindow(dict);
-    zw.Value.dict = appendꓸꓸꓸ((~zw).dict, dict); // duplicate dictionary for Reset method.
-    return (zw, default!);
+    zw.dict = appendꓸꓸꓸ(zw.dict, dict); // duplicate dictionary for Reset method.
+    return (zw, default);
 }
 
 partial struct dictWriter {
@@ -755,9 +758,9 @@ public static error Close(this ж<Writer> Ꮡw) {
 // and w's level and dictionary.
 public static void Reset(this ref Writer w, io.Writer dst) {
     {
-        var (dw, ok) = (~w.d.w).writer._<ж<dictWriter>>(ᐧ); if (ok){
+        var (dw, ok) = w.d.w.writer._<ж<dictWriter>>(ᐧ); if (ok) {
             // w was created with NewWriterDict
-            dw.Value.w = dst;
+            dw.w = dst;
             w.d.reset(new dictWriterжWriter(dw));
             w.d.fillWindow(w.dict);
         } else {

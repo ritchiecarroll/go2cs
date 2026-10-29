@@ -18,7 +18,7 @@ public static bool HasPrefix(@string p, @string prefix) {
 
 internal static slice<@string> splitList(@string path) {
     if (path == ""u8) {
-        return new @string[]{}.slice();
+        return slice<@string>([]);
     }
     return strings.Split(path, (@string)(rune)ListSeparator);
 }

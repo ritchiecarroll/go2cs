@@ -26,14 +26,14 @@ internal static void fixGoBuildLines(this ref printer p) {
     // begins and ends with a tabwriter.Escape byte.
     // And some newlines have turned into \f bytes.
     nint insert = 0;
-    for (nint pos = 0; ᐧ ; ) {
+    for (nint pos = 0; ; ) {
         // Skip leading space at beginning of line.
         var blank = true;
-        while (pos < len(p.output) && (p.output[pos] == (rune)' ' || p.output[pos] == (rune)'\t')) {
+        while (pos < len(p.output) && (p.output[pos] == ' ' || p.output[pos] == '\t')) {
             pos++;
         }
         // Skip over // comment if any.
-        if (pos + 3 < len(p.output) && p.output[pos] == tabwriter.Escape && p.output[pos + 1] == (rune)'/' && p.output[pos + 2] == (rune)'/') {
+        if (pos + 3 < len(p.output) && p.output[pos] == tabwriter.Escape && p.output[pos + 1] == '/' && p.output[pos + 2] == '/') {
             blank = false;
             while (pos < len(p.output) && !isNL(p.output[pos])) {
                 pos++;
@@ -52,24 +52,23 @@ internal static void fixGoBuildLines(this ref printer p) {
 
     // If there is a //go:build comment before the place we identified,
     // use that point instead. (Earlier in the file is always fine.)
-    if (len(p.goBuild) > 0 && p.goBuild[0] < insert){
+    if (len(p.goBuild) > 0 && p.goBuild[0] < insert) {
         insert = p.goBuild[0];
-    } else 
-    if (len(p.plusBuild) > 0 && p.plusBuild[0] < insert) {
+    } else if (len(p.plusBuild) > 0 && p.plusBuild[0] < insert) {
         insert = p.plusBuild[0];
     }
 
-    constraint.Expr x = default!;
+    constraint.Expr x = default;
     switch (len(p.goBuild)) {
     case 0: {
         // Synthesize //go:build expression from // +build lines.
         foreach (var (_, pos) in p.plusBuild) {
             var (y, err) = constraint.Parse(p.commentTextAt(pos));
-            if (err != default!) {
-                x = default!;
+            if (err != nil) {
+                x = default;
                 break;
             }
-            if (x == default!){
+            if (x == nil) {
                 x = y;
             } else {
                 x = new constraint.AndExprжExpr(Ꮡ(new constraint.AndExpr(X: x, Y: y)));
@@ -83,8 +82,8 @@ internal static void fixGoBuildLines(this ref printer p) {
         break;
     }}
 
-    slice<byte> block = default!;
-    if (x == default!){
+    slice<byte> block = default;
+    if (x == nil) {
         // Don't have a valid //go:build expression to treat as truth.
         // Bring all the lines together but leave them alone.
         // Note that these are already tabwriter-escaped.
@@ -98,27 +97,27 @@ internal static void fixGoBuildLines(this ref printer p) {
         block = append(blockᴷ, block, (byte)(tabwriter.Escape));
         block = append(block, ((@string)"//go:build "u8).ꓸꓸꓸ);
         block = append(block, x.String().ꓸꓸꓸ);
-        block = append(block, (byte)(tabwriter.Escape), (byte)((rune)'\n'));
+        block = append(block, (byte)(tabwriter.Escape), (byte)'\n');
         if (len(p.plusBuild) > 0) {
             var (lines, err) = constraint.PlusBuildLines(x);
-            if (err != default!) {
-                lines = new @string[]{"// +build error: "u8 + err.Error()}.slice();
+            if (err != nil) {
+                lines = slice<@string>(["// +build error: "u8 + err.Error()]);
             }
             foreach (var (_, line) in lines) {
                 block = append(block, (byte)(tabwriter.Escape));
                 block = append(block, line.ꓸꓸꓸ);
-                block = append(block, (byte)(tabwriter.Escape), (byte)((rune)'\n'));
+                block = append(block, (byte)(tabwriter.Escape), (byte)'\n');
             }
         }
     }
-    block = append(block, (byte)((rune)'\n'));
+    block = append(block, (byte)'\n');
 
     // Build sorted list of lines to delete from remainder of output.
     var toDelete = appendꓸꓸꓸ(p.goBuild, p.plusBuild);
     slices.Sort<slice<nint>, nint>(toDelete);
 
     // Collect output after insertion point, with lines deleted, into after.
-    slice<byte> after = default!;
+    slice<byte> after = default;
     nint start = insert;
     foreach (var (_, end) in toDelete) {
         if (end < start) {
@@ -175,7 +174,7 @@ internal static @string commentTextAt(this ref printer p, nint start) {
 }
 
 internal static bool isNL(byte b) {
-    return b == (rune)'\n' || b == (rune)'\f';
+    return b == '\n' || b == '\f';
 }
 
 } // end printer_package

@@ -62,7 +62,7 @@ public static error WriteEvent(this ref Writer w, Event e) {
     // Write out varint events.
     var (_, err) = w.w.Write(w.buf);
     w.buf = w.buf[..0];
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -71,7 +71,7 @@ public static error WriteEvent(this ref Writer w, Event e) {
         var (_, errΔ1) = w.w.Write(e.Data);
         return errΔ1;
     }
-    return default!;
+    return default;
 }
 
 } // end raw_package

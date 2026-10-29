@@ -34,9 +34,9 @@ internal static UnsupportedError errUnsupportedSubsamplingRatio = ((UnsupportedE
 
 // Component specification, specified in section B.2.2.
 partial struct component {
-    internal nint h;  // Horizontal sampling factor.
-    internal nint v;  // Vertical sampling factor.
-    internal uint8 c; // Component identifier.
+    internal nint h;   // Horizontal sampling factor.
+    internal nint v;   // Vertical sampling factor.
+    internal uint8 c;  // Component identifier.
     internal uint8 tq; // Quantization table destination selector.
 }
 
@@ -51,15 +51,15 @@ internal static UntypedInt maxComponents => 4;
 internal static UntypedInt sof0Marker => 0xc0; // Start Of Frame (Baseline Sequential).
 internal static UntypedInt sof1Marker => 0xc1; // Start Of Frame (Extended Sequential).
 internal static UntypedInt sof2Marker => 0xc2; // Start Of Frame (Progressive).
-internal static UntypedInt dhtMarker => 0xc4; // Define Huffman Table.
+internal static UntypedInt dhtMarker => 0xc4;  // Define Huffman Table.
 internal static UntypedInt rst0Marker => 0xd0; // ReSTart (0).
 internal static UntypedInt rst7Marker => 0xd7; // ReSTart (7).
-internal static UntypedInt soiMarker => 0xd8; // Start Of Image.
-internal static UntypedInt eoiMarker => 0xd9; // End Of Image.
-internal static UntypedInt sosMarker => 0xda; // Start Of Scan.
-internal static UntypedInt dqtMarker => 0xdb; // Define Quantization Table.
-internal static UntypedInt driMarker => 0xdd; // Define Restart Interval.
-internal static UntypedInt comMarker => 0xfe; // COMment.
+internal static UntypedInt soiMarker => 0xd8;  // Start Of Image.
+internal static UntypedInt eoiMarker => 0xd9;  // End Of Image.
+internal static UntypedInt sosMarker => 0xda;  // Start Of Scan.
+internal static UntypedInt dqtMarker => 0xdb;  // Define Quantization Table.
+internal static UntypedInt driMarker => 0xdd;  // Define Restart Interval.
+internal static UntypedInt comMarker => 0xfe;  // COMment.
 // "APPlication specific" markers aren't part of the JPEG spec per se,
 // but in practice, their use is described at
 // https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html
@@ -162,7 +162,7 @@ internal static error fill(this ref decoder d) {
     var (n, err) = d.r.Read(d.bytes.buf.slice(d.bytes.j));
     d.bytes.j += n;
     if (n > 0) {
-        return default!;
+        return default;
     }
     if (AreEqual(err, io.EOF)) {
         err = io.ErrUnexpectedEOF;
@@ -179,21 +179,21 @@ internal static void unreadByteStuffedByte(this ref decoder d) {
     d.bytes.i -= d.bytes.nUnreadable;
     d.bytes.nUnreadable = 0;
     if (d.bits.n >= 8) {
-        d.bits.a >>= (int)(8);
+        d.bits.a >>= 8;
         d.bits.n -= 8;
-        d.bits.m >>= (int)(8);
+        d.bits.m >>= 8;
     }
 }
 
 // readByte returns the next byte, whether buffered or not buffered. It does
 // not care about byte stuffing.
 internal static (byte x, error err) readByte(this ref decoder d) {
-    byte x = default!;
-    error err = default!;
+    byte x = default;
+    error err = default;
 
     while (d.bytes.i == d.bytes.j) {
         {
-            err = d.fill(); if (err != default!) {
+            err = d.fill(); if (err != nil) {
                 return (0, err);
             }
         }
@@ -201,7 +201,7 @@ internal static (byte x, error err) readByte(this ref decoder d) {
     x = d.bytes.buf[d.bytes.i];
     d.bytes.i++;
     d.bytes.nUnreadable = 0;
-    return (x, default!);
+    return (x, default);
 }
 
 // errMissingFF00 means that readByteStuffedByte encountered an 0xff byte (a
@@ -210,8 +210,8 @@ internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xf
 
 // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
 internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
-    byte x = default!;
-    error err = default!;
+    byte x = default;
+    error err = default;
 
     // Take the fast path if d.bytes.buf contains at least two bytes.
     if (d.bytes.i + 2 <= d.bytes.j) {
@@ -226,29 +226,29 @@ internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
         }
         d.bytes.i++;
         d.bytes.nUnreadable = 2;
-        return (0xff, default!);
+        return (0xff, default);
     }
 
     d.bytes.nUnreadable = 0;
 
     (x, err) = d.readByte();
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
     d.bytes.nUnreadable = 1;
     if (x != 0xff) {
-        return (x, default!);
+        return (x, default);
     }
 
     (x, err) = d.readByte();
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
     d.bytes.nUnreadable = 2;
     if (x != 0x00) {
         return (0, errMissingFF00);
     }
-    return (0xff, default!);
+    return (0xff, default);
 }
 
 // readFull reads exactly len(p) bytes into p. It does not care about byte
@@ -262,7 +262,7 @@ internal static error readFull(this ref decoder d, slice<byte> p) {
         d.bytes.nUnreadable = 0;
     }
 
-    while (ᐧ) {
+    for (;;) {
         nint n = copy(p, d.bytes.buf.slice(d.bytes.i, d.bytes.j));
         p = p.slice(n);
         d.bytes.i += n;
@@ -270,12 +270,12 @@ internal static error readFull(this ref decoder d, slice<byte> p) {
             break;
         }
         {
-            var err = d.fill(); if (err != default!) {
+            var err = d.fill(); if (err != nil) {
                 return err;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // ignore ignores the next n bytes.
@@ -288,7 +288,7 @@ internal static error ignore(this ref decoder d, nint n) {
         d.bytes.nUnreadable = 0;
     }
 
-    while (ᐧ) {
+    for (;;) {
         nint m = d.bytes.j - d.bytes.i;
         if (m > n) {
             m = n;
@@ -299,12 +299,12 @@ internal static error ignore(this ref decoder d, nint n) {
             break;
         }
         {
-            var err = d.fill(); if (err != default!) {
+            var err = d.fill(); if (err != nil) {
                 return err;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -321,21 +321,24 @@ internal static error processSOF(this ref decoder d, nint n) {
     if (d.nComp != 0) {
         return ((FormatError)(@string)multipleSofMarkersˢ);
     }
-    var exprᴛ1 = n;
-    if (exprᴛ1 == 6 + 3 * 1) { // Grayscale image.
+    switch (n) {
+    case var ᴛ when ᴛ == 6 + 3 * 1: { // Grayscale image.
         d.nComp = 1;
+        break;
     }
-    else if (exprᴛ1 == 6 + 3 * 3) { // YCbCr or RGB image.
+    case var ᴛ when ᴛ == 6 + 3 * 3: { // YCbCr or RGB image.
         d.nComp = 3;
+        break;
     }
-    else if (exprᴛ1 == 6 + 3 * 4) { // YCbCrK or CMYK image.
+    case var ᴛ when ᴛ == 6 + 3 * 4: { // YCbCrK or CMYK image.
         d.nComp = 4;
+        break;
     }
-    else { /* default: */
+    default: {
         return ((UnsupportedError)(@string)numberOfComponentsˢ);
-    }
+    }}
     {
-        var err = d.readFull(d.tmp.slice(0, n)); if (err != default!) {
+        var err = d.readFull(d.tmp.slice(0, n)); if (err != nil) {
             return err;
         }
     }
@@ -456,7 +459,7 @@ internal static error processSOF(this ref decoder d, nint n) {
         d.comp[i].h = h;
         d.comp[i].v = v;
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -469,7 +472,7 @@ loop:
     while (n > 0) {
         n--;
         var (x, err) = d.readByte();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var tq = (byte)(x & 0x0f);
@@ -486,7 +489,7 @@ loop:
             }
             n -= blockSize;
             {
-                var errΔ3 = d.readFull(d.tmp[..(int)(blockSize)]); if (errΔ3 != default!) {
+                var errΔ3 = d.readFull(d.tmp[..(int)(blockSize)]); if (errΔ3 != nil) {
                     return errΔ3;
                 }
             }
@@ -501,7 +504,7 @@ loop:
             }
             n -= 2 * blockSize;
             {
-                var errΔ4 = d.readFull(d.tmp[..(int)(2 * blockSize)]); if (errΔ4 != default!) {
+                var errΔ4 = d.readFull(d.tmp[..(int)(2 * blockSize)]); if (errΔ4 != nil) {
                     return errΔ4;
                 }
             }
@@ -516,7 +519,7 @@ break_loop:;
     if (n != 0) {
         return ((FormatError)(@string)dqtHasWrongLengthˢ);
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -528,12 +531,12 @@ internal static error processDRI(this ref decoder d, nint n) {
         return ((FormatError)(@string)driHasWrongLengthˢ);
     }
     {
-        var err = d.readFull(d.tmp[..2]); if (err != default!) {
+        var err = d.readFull(d.tmp[..2]); if (err != nil) {
             return err;
         }
     }
     d.ri = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1];
-    return default!;
+    return default;
 }
 
 internal static error processApp0Marker(this ref decoder d, nint n) {
@@ -541,18 +544,18 @@ internal static error processApp0Marker(this ref decoder d, nint n) {
         return d.ignore(n);
     }
     {
-        var err = d.readFull(d.tmp[..5]); if (err != default!) {
+        var err = d.readFull(d.tmp[..5]); if (err != nil) {
             return err;
         }
     }
     n -= 5;
 
-    d.jfif = d.tmp[0] == (rune)'J' && d.tmp[1] == (rune)'F' && d.tmp[2] == (rune)'I' && d.tmp[3] == (rune)'F' && d.tmp[4] == (rune)'\x00';
+    d.jfif = d.tmp[0] == 'J' && d.tmp[1] == 'F' && d.tmp[2] == 'I' && d.tmp[3] == 'F' && d.tmp[4] == '\x00';
 
     if (n > 0) {
         return d.ignore(n);
     }
-    return default!;
+    return default;
 }
 
 internal static error processApp14Marker(this ref decoder d, nint n) {
@@ -560,13 +563,13 @@ internal static error processApp14Marker(this ref decoder d, nint n) {
         return d.ignore(n);
     }
     {
-        var err = d.readFull(d.tmp[..12]); if (err != default!) {
+        var err = d.readFull(d.tmp[..12]); if (err != nil) {
             return err;
         }
     }
     n -= 12;
 
-    if (d.tmp[0] == (rune)'A' && d.tmp[1] == (rune)'d' && d.tmp[2] == (rune)'o' && d.tmp[3] == (rune)'b' && d.tmp[4] == (rune)'e') {
+    if (d.tmp[0] == 'A' && d.tmp[1] == 'd' && d.tmp[2] == 'o' && d.tmp[3] == 'b' && d.tmp[4] == 'e') {
         d.adobeTransformValid = true;
         d.adobeTransform = d.tmp[11];
     }
@@ -574,7 +577,7 @@ internal static error processApp14Marker(this ref decoder d, nint n) {
     if (n > 0) {
         return d.ignore(n);
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -589,19 +592,19 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
 
     // Check for the Start Of Image marker.
     {
-        var err = d.readFull(d.tmp[..2]); if (err != default!) {
-            return (default!, err);
+        var err = d.readFull(d.tmp[..2]); if (err != nil) {
+            return (default, err);
         }
     }
     if (d.tmp[0] != 0xff || d.tmp[1] != soiMarker) {
-        return (default!, ((FormatError)(@string)missingSoiMarkerˢ));
+        return (default, ((FormatError)(@string)missingSoiMarkerˢ));
     }
 
     // Process the remaining segments until the End Of Image marker.
-    while (ᐧ) {
+    for (;;) {
         var err = d.readFull(d.tmp[..2]);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         while (d.tmp[0] != 0xff) {
             // Strictly speaking, this is a format error. However, libjpeg is
@@ -626,8 +629,8 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
             // "\xff\x00", and so are detected a little further down below.
             d.tmp[0] = d.tmp[1];
             (d.tmp[1], err) = d.readByte();
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
         }
         var marker = d.tmp[1];
@@ -639,8 +642,8 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
             // Section B.1.1.2 says, "Any marker may optionally be preceded by any
             // number of fill bytes, which are bytes assigned code X'FF'".
             (marker, err) = d.readByte();
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
         }
         if (marker == eoiMarker) { // End Of Image.
@@ -659,92 +662,98 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
         // Read the 16-bit length of the segment. The value includes the 2 bytes for the
         // length itself, so we subtract 2 to get the number of remaining bytes.
         {
-            err = d.readFull(d.tmp[..2]); if (err != default!) {
-                return (default!, err);
+            err = d.readFull(d.tmp[..2]); if (err != nil) {
+                return (default, err);
             }
         }
         nint n = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1] - 2;
         if (n < 0) {
-            return (default!, ((FormatError)(@string)shortSegmentLengthˢ));
+            return (default, ((FormatError)(@string)shortSegmentLengthˢ));
         }
 
-        var exprᴛ1 = marker;
-        if (exprᴛ1 == sof0Marker || exprᴛ1 == sof1Marker || exprᴛ1 == sof2Marker) {
+        switch (marker) {
+        case var ᴛ when ᴛ == sof0Marker || ᴛ == sof1Marker || ᴛ == sof2Marker: {
             d.baseline = marker == sof0Marker;
             d.progressive = marker == sof2Marker;
             err = d.processSOF(n);
             if (configOnly && d.jfif) {
-                return (default!, err);
+                return (default, err);
             }
+            break;
         }
-        else if (exprᴛ1 == dhtMarker) {
-            if (configOnly){
+        case var ᴛ when ᴛ == dhtMarker: {
+            if (configOnly) {
                 err = d.ignore(n);
             } else {
                 err = d.processDHT(n);
             }
+            break;
         }
-        else if (exprᴛ1 == dqtMarker) {
-            if (configOnly){
+        case var ᴛ when ᴛ == dqtMarker: {
+            if (configOnly) {
                 err = d.ignore(n);
             } else {
                 err = d.processDQT(n);
             }
+            break;
         }
-        else if (exprᴛ1 == sosMarker) {
+        case var ᴛ when ᴛ == sosMarker: {
             if (configOnly) {
-                return (default!, default!);
+                return (default, default);
             }
             err = d.processSOS(n);
+            break;
         }
-        else if (exprᴛ1 == driMarker) {
-            if (configOnly){
+        case var ᴛ when ᴛ == driMarker: {
+            if (configOnly) {
                 err = d.ignore(n);
             } else {
                 err = d.processDRI(n);
             }
+            break;
         }
-        else if (exprᴛ1 == app0Marker) {
+        case var ᴛ when ᴛ == app0Marker: {
             err = d.processApp0Marker(n);
+            break;
         }
-        else if (exprᴛ1 == app14Marker) {
+        case var ᴛ when ᴛ == app14Marker: {
             err = d.processApp14Marker(n);
+            break;
         }
-        else { /* default: */
-            if (app0Marker <= marker && marker <= app15Marker || marker == comMarker){
+        default: {
+            if (app0Marker <= marker && marker <= app15Marker || marker == comMarker) {
                 err = d.ignore(n);
-            } else 
-            if (marker < 0xc0){ // See Table B.1 "Marker code assignments".
+            } else if (marker < 0xc0) { // See Table B.1 "Marker code assignments".
                 err = ((FormatError)(@string)unknownMarkerˢ);
             } else {
                 err = ((UnsupportedError)(@string)unknownMarkerˢ);
             }
-        }
-        if (err != default!) {
-            return (default!, err);
+            break;
+        }}
+        if (err != nil) {
+            return (default, err);
         }
     }
 
     if (d.progressive) {
         {
-            var err = d.reconstructProgressiveImage(); if (err != default!) {
-                return (default!, err);
+            var err = d.reconstructProgressiveImage(); if (err != nil) {
+                return (default, err);
             }
         }
     }
     if (d.img1 != nil) {
-        return (new image.GrayжImage(d.img1), default!);
+        return (new image.GrayжImage(d.img1), default);
     }
     if (d.img3 != nil) {
-        if (d.blackPix != default!){
+        if (d.blackPix != nil) {
             return d.applyBlack();
-        } else 
-        if (d.isRGB()) {
+        } else if (d.isRGB()) {
             return d.convertToRGB();
         }
-        return (new image.YCbCrжImage(d.img3), default!);
+        return (new image.YCbCrжImage(d.img3), default);
     }
-    return (default!, ((FormatError)(@string)missingSosMarkerˢ));
+    return (default, ((FormatError)(@string)missingSosMarkerˢ));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -764,7 +773,7 @@ internal partial struct applyBlack_translations /*dyn*/ {
 // inversion is a no-op, so inversions might be implicit in the code below.
 internal static (image.Image, error) applyBlack(this ref decoder d) {
     if (!d.adobeTransformValid) {
-        return (default!, ((UnsupportedError)(@string)unknownColorModel4ˢ));
+        return (default, ((UnsupportedError)(@string)unknownColorModel4ˢ));
     }
 
     // If the 4-component JPEG image isn't explicitly marked as "Unknown (RGB
@@ -779,16 +788,16 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
         var boundsΔ1 = d.img3.Bounds();
         var imgΔ1 = image.NewRGBA(boundsΔ1);
         imageutil.DrawYCbCr(imgΔ1, boundsΔ1, d.img3, boundsΔ1.Min);
-        for ((nint iBase, nint y) = (0, boundsΔ1.Min.Y); y < boundsΔ1.Max.Y; (iBase, y) = (iBase + (~imgΔ1).Stride, y + 1)) {
+        for ((nint iBase, nint y) = (0, boundsΔ1.Min.Y); y < boundsΔ1.Max.Y; (iBase, y) = (iBase + imgΔ1.Stride, y + 1)) {
             for ((nint i, nint x) = (iBase + 3, boundsΔ1.Min.X); x < boundsΔ1.Max.X; (i, x) = (i + 4, x + 1)) {
-                imgΔ1.Value.Pix[i] = (uint8)(255 - d.blackPix[(y - boundsΔ1.Min.Y) * d.blackStride + (x - boundsΔ1.Min.X)]);
+                imgΔ1.Pix[i] = (uint8)(255 - d.blackPix[(y - boundsΔ1.Min.Y) * d.blackStride + (x - boundsΔ1.Min.X)]);
             }
         }
         return (new image.CMYKжImage(Ꮡ(new image.CMYK(
-            Pix: (~imgΔ1).Pix,
-            Stride: (~imgΔ1).Stride,
-            Rect: (~imgΔ1).Rect
-        ))), default!);
+            Pix: imgΔ1.Pix,
+            Stride: imgΔ1.Stride,
+            Rect: imgΔ1.Rect
+        ))), default);
     }
 
     // The first three channels (cyan, magenta, yellow) of the CMYK
@@ -800,14 +809,14 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
     var img = image.NewCMYK(bounds);
 
     var translations = new applyBlack_translations[]{
-        new((~d.img3).Y, (~d.img3).YStride),
-        new((~d.img3).Cb, (~d.img3).CStride),
-        new((~d.img3).Cr, (~d.img3).CStride),
+        new(d.img3.Y, d.img3.YStride),
+        new(d.img3.Cb, d.img3.CStride),
+        new(d.img3.Cr, d.img3.CStride),
         new(d.blackPix, d.blackStride)
     }.array();
     foreach (var (t, translation) in translations.ΔRangeSnapshot()) {
         var subsample = d.comp[t].h != d.comp[0].h || d.comp[t].v != d.comp[0].v;
-        for ((nint iBase, nint y) = (0, bounds.Min.Y); y < bounds.Max.Y; (iBase, y) = (iBase + (~img).Stride, y + 1)) {
+        for ((nint iBase, nint y) = (0, bounds.Min.Y); y < bounds.Max.Y; (iBase, y) = (iBase + img.Stride, y + 1)) {
             nint sy = y - bounds.Min.Y;
             if (subsample) {
                 sy /= 2;
@@ -817,11 +826,11 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
                 if (subsample) {
                     sx /= 2;
                 }
-                img.Value.Pix[i] = (uint8)(255 - translation.src[sy * translation.stride + sx]);
+                img.Pix[i] = (uint8)(255 - translation.src[sy * translation.stride + sx]);
             }
         }
     }
-    return (new image.CMYKжImage(img), default!);
+    return (new image.CMYKжImage(img), default);
 }
 
 internal static bool isRGB(this ref decoder d) {
@@ -833,7 +842,7 @@ internal static bool isRGB(this ref decoder d) {
         // says that 0 means Unknown (and in practice RGB) and 1 means YCbCr.
         return true;
     }
-    return d.comp[0].c == (rune)'R' && d.comp[1].c == (rune)'G' && d.comp[2].c == (rune)'B';
+    return d.comp[0].c == 'R' && d.comp[1].c == 'G' && d.comp[2].c == 'B';
 }
 
 internal static (image.Image, error) convertToRGB(this ref decoder d) {
@@ -845,13 +854,13 @@ internal static (image.Image, error) convertToRGB(this ref decoder d) {
         nint yo = d.img3.YOffset(bounds.Min.X, y);
         nint co = d.img3.COffset(bounds.Min.X, y);
         for ((nint i, nint iMax) = (0, bounds.Max.X - bounds.Min.X); i < iMax; i++) {
-            img.Value.Pix[po + 4 * i + 0] = (~d.img3).Y[yo + i];
-            img.Value.Pix[po + 4 * i + 1] = (~d.img3).Cb[co + quo(i, cScale)];
-            img.Value.Pix[po + 4 * i + 2] = (~d.img3).Cr[co + quo(i, cScale)];
-            img.Value.Pix[po + 4 * i + 3] = 255;
+            img.Pix[po + 4 * i + 0] = d.img3.Y[yo + i];
+            img.Pix[po + 4 * i + 1] = d.img3.Cb[co + quo(i, cScale)];
+            img.Pix[po + 4 * i + 2] = d.img3.Cr[co + quo(i, cScale)];
+            img.Pix[po + 4 * i + 3] = 255;
         }
     }
-    return (new image.ΔRGBAжImage(img), default!);
+    return (new image.ΔRGBAжImage(img), default);
 }
 
 // Decode reads a JPEG image from r and returns it as an [image.Image].
@@ -868,8 +877,8 @@ internal static readonly @string missingSofMarkerˢ = "missing SOF marker"u8;
 public static (image.Config, error) DecodeConfig(io.Reader r) {
     decoder d = new();
     {
-        var (_, err) = d.decode(r, true); if (err != default!) {
-            return (new image.Config(nil), err);
+        var (_, err) = d.decode(r, true); if (err != nil) {
+            return (new image.Config(), err);
         }
     }
     switch (d.nComp) {
@@ -878,7 +887,7 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
             ColorModel: color.GrayModel,
             Width: d.width,
             Height: d.height
-        ), default!);
+        ), default);
     }
     case 3: {
         var cm = color.YCbCrModel;
@@ -889,16 +898,16 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
             ColorModel: cm,
             Width: d.width,
             Height: d.height
-        ), default!);
+        ), default);
     }
     case 4: {
         return (new image.Config(
             ColorModel: color.CMYKModel,
             Width: d.width,
             Height: d.height
-        ), default!);
+        ), default);
     }}
-    return (new image.Config(nil), ((FormatError)(@string)missingSofMarkerˢ));
+    return (new image.Config(), ((FormatError)(@string)missingSofMarkerˢ));
 }
 
 [GoInit] internal static void init() {

@@ -12,7 +12,7 @@ internal static UntypedInt readMsgFlags => 0;
 
 internal static void setReadMsgCloseOnExec(slice<byte> oob) {
     var (scms, err) = syscall.ParseSocketControlMessage(oob);
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
 
@@ -22,7 +22,7 @@ internal static void setReadMsgCloseOnExec(slice<byte> oob) {
 
         if (scm.Header.Level == syscall.SOL_SOCKET && scm.Header.Type == syscall.SCM_RIGHTS) {
             var (fds, errΔ1) = syscall.ParseUnixRights(Ꮡscm);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 continue;
             }
             foreach (var (_, fd) in fds) {

@@ -24,7 +24,7 @@ partial struct oneByteReader {
 
 internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) {
     if (len(p) == 0) {
-        return (0, default!);
+        return (0, default);
     }
     return r.r.Read(p[0..1]);
 }
@@ -49,7 +49,7 @@ internal static (nint, error) Read(this ref halfReader r, slice<byte> p) {
 // behavior so the final error is returned along with the final data, instead
 // of in the first call after the final data.
 public static io.Reader DataErrReader(io.Reader r) {
-    return new dataErrReaderжReader(Ꮡ(new dataErrReader(r, default!, new slice<byte>(1024))));
+    return new dataErrReaderжReader(Ꮡ(new dataErrReader(r, default, new slice<byte>(1024))));
 }
 
 partial struct dataErrReader {
@@ -59,18 +59,18 @@ partial struct dataErrReader {
 }
 
 internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     // loop because first call needs two reads:
     // one to get data and a second to look for an error.
-    while (ᐧ) {
+    for (;;) {
         if (len(r.unread) == 0) {
             var (n1, err1) = r.r.Read(r.data);
             r.unread = r.data.slice(0, n1);
             err = err1;
         }
-        if (n > 0 || err != default!) {
+        if (n > 0 || err != nil) {
             break;
         }
         n = copy(p, r.unread);
@@ -122,7 +122,7 @@ partial struct smallByteReader {
 
 internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) {
     if (len(p) == 0) {
-        return (0, default!);
+        return (0, default);
     }
     r.n = r.n % 3 + 1;
     nint n = r.n;
@@ -130,7 +130,7 @@ internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) {
         n = len(p);
     }
     (n, var err) = r.r.Read(p.slice(0, n));
-    if (err != default! && !AreEqual(err, io.EOF)) {
+    if (err != nil && !AreEqual(err, io.EOF)) {
         err = fmt.Errorf("Read(%d bytes at offset %d): %v"u8, n, r.off, err);
     }
     r.off += n;
@@ -150,14 +150,14 @@ internal static readonly @string nilOrEofˢ = "nil or EOF"u8;
 // The error text may span multiple lines.
 public static error TestReader(io.Reader r, slice<byte> content) {
     if (len(content) > 0) {
-        var (nΔ1, errΔ1) = r.Read(default!);
-        if (nΔ1 != 0 || errΔ1 != default!) {
+        var (nΔ1, errΔ1) = r.Read(default);
+        if (nΔ1 != 0 || errΔ1 != nil) {
             return fmt.Errorf("Read(0) = %d, %v, want 0, nil"u8, nΔ1, errΔ1);
         }
     }
 
     var (data, err) = io.ReadAll(new smallByteReaderжReader(Ꮡ(new smallByteReader(r: r))));
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (!bytes.Equal(data, content)) {
@@ -172,7 +172,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
         var (rΔ1, ok) = r._<io.ReadSeeker>(ᐧ); if (ok) {
             // Seek(0, 1) should report the current file position (EOF).
             {
-                var (off, errΔ2) = rΔ1.Seek(0, 1); if (off != (int64)len(content) || errΔ2 != default!) {
+                var (off, errΔ2) = rΔ1.Seek(0, 1); if (off != (int64)len(content) || errΔ2 != nil) {
                     return fmt.Errorf("Seek(0, 1) from EOF = %d, %v, want %d, nil"u8, off, errΔ2, len(content));
                 }
             }
@@ -182,17 +182,17 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             nint middle = len(content) - len(content) / 3;
             if (middle > 0) {
                 {
-                    var (off, errΔ3) = rΔ1.Seek(-1, 1); if (off != (int64)(len(content) - 1) || errΔ3 != default!) {
+                    var (off, errΔ3) = rΔ1.Seek(-1, 1); if (off != (int64)(len(content) - 1) || errΔ3 != nil) {
                         return fmt.Errorf("Seek(-1, 1) from EOF = %d, %v, want %d, nil"u8, -off, errΔ3, len(content) - 1);
                     }
                 }
                 {
-                    var (off, errΔ4) = rΔ1.Seek((int64)(-len(content) / 3), 1); if (off != (int64)(middle - 1) || errΔ4 != default!) {
+                    var (off, errΔ4) = rΔ1.Seek((int64)(-len(content) / 3), 1); if (off != (int64)(middle - 1) || errΔ4 != nil) {
                         return fmt.Errorf("Seek(%d, 1) from %d = %d, %v, want %d, nil"u8, -len(content) / 3, len(content) - 1, off, errΔ4, middle - 1);
                     }
                 }
                 {
-                    var (off, errΔ5) = rΔ1.Seek(+1, 1); if (off != (int64)middle || errΔ5 != default!) {
+                    var (off, errΔ5) = rΔ1.Seek(+1, 1); if (off != (int64)middle || errΔ5 != nil) {
                         return fmt.Errorf("Seek(+1, 1) from %d = %d, %v, want %d, nil"u8, middle - 1, off, errΔ5, middle);
                     }
                 }
@@ -200,14 +200,14 @@ public static error TestReader(io.Reader r, slice<byte> content) {
 
             // Seek(0, 1) should report the current file position (middle).
             {
-                var (off, errΔ6) = rΔ1.Seek(0, 1); if (off != (int64)middle || errΔ6 != default!) {
+                var (off, errΔ6) = rΔ1.Seek(0, 1); if (off != (int64)middle || errΔ6 != nil) {
                     return fmt.Errorf("Seek(0, 1) from %d = %d, %v, want %d, nil"u8, middle, off, errΔ6, middle);
                 }
             }
 
             // Reading forward should return the last part of the file.
             var (dataΔ1, errΔ7) = io.ReadAll(new smallByteReaderжReader(Ꮡ(new smallByteReader(r: rΔ1))));
-            if (errΔ7 != default!) {
+            if (errΔ7 != nil) {
                 return fmt.Errorf("ReadAll from offset %d: %v"u8, middle, errΔ7);
             }
             if (!bytes.Equal(dataΔ1, content.slice(middle))) {
@@ -216,19 +216,19 @@ public static error TestReader(io.Reader r, slice<byte> content) {
 
             // Seek relative to end of file, but start elsewhere.
             {
-                var (off, errΔ8) = rΔ1.Seek((int64)(middle / 2), 0); if (off != (int64)(middle / 2) || errΔ8 != default!) {
+                var (off, errΔ8) = rΔ1.Seek((int64)(middle / 2), 0); if (off != (int64)(middle / 2) || errΔ8 != nil) {
                     return fmt.Errorf("Seek(%d, 0) from EOF = %d, %v, want %d, nil"u8, middle / 2, off, errΔ8, middle / 2);
                 }
             }
             {
-                var (off, errΔ9) = rΔ1.Seek((int64)(-len(content) / 3), 2); if (off != (int64)middle || errΔ9 != default!) {
+                var (off, errΔ9) = rΔ1.Seek((int64)(-len(content) / 3), 2); if (off != (int64)middle || errΔ9 != nil) {
                     return fmt.Errorf("Seek(%d, 2) from %d = %d, %v, want %d, nil"u8, -len(content) / 3, middle / 2, off, errΔ9, middle);
                 }
             }
 
             // Reading forward should return the last part of the file (again).
             (dataΔ1, errΔ7) = io.ReadAll(new smallByteReaderжReader(Ꮡ(new smallByteReader(r: rΔ1))));
-            if (errΔ7 != default!) {
+            if (errΔ7 != nil) {
                 return fmt.Errorf("ReadAll from offset %d: %v"u8, middle, errΔ7);
             }
             if (!bytes.Equal(dataΔ1, content.slice(middle))) {
@@ -237,12 +237,12 @@ public static error TestReader(io.Reader r, slice<byte> content) {
 
             // Absolute seek & read forward.
             {
-                var (off, errΔ10) = rΔ1.Seek((int64)(middle / 2), 0); if (off != (int64)(middle / 2) || errΔ10 != default!) {
+                var (off, errΔ10) = rΔ1.Seek((int64)(middle / 2), 0); if (off != (int64)(middle / 2) || errΔ10 != nil) {
                     return fmt.Errorf("Seek(%d, 0) from EOF = %d, %v, want %d, nil"u8, middle / 2, off, errΔ10, middle / 2);
                 }
             }
             (dataΔ1, errΔ7) = io.ReadAll(rΔ1);
-            if (errΔ7 != default!) {
+            if (errΔ7 != nil) {
                 return fmt.Errorf("ReadAll from offset %d: %v"u8, middle / 2, errΔ7);
             }
             if (!bytes.Equal(dataΔ1, content.slice(middle / 2))) {
@@ -258,7 +258,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
                 dataΔ2[i] = 0xfe;
             }
             var (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2, 0);
-            if (nΔ2 != len(dataΔ2) || errΔ11 != default! && !AreEqual(errΔ11, io.EOF)) {
+            if (nΔ2 != len(dataΔ2) || errΔ11 != nil && !AreEqual(errΔ11, io.EOF)) {
                 return fmt.Errorf("ReadAt(%d, 0) = %v, %v, want %d, nil or EOF"u8, len(dataΔ2), nΔ2, errΔ11, len(dataΔ2));
             }
             if (!bytes.Equal(dataΔ2, content)) {
@@ -286,7 +286,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             }
             foreach (var i in range(dataΔ2)) {
                 (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(i, i + 1), (int64)i);
-                if (nΔ2 != 1 || errΔ11 != default! && (i != len(dataΔ2) - 1 || !AreEqual(errΔ11, io.EOF))) {
+                if (nΔ2 != 1 || errΔ11 != nil && (i != len(dataΔ2) - 1 || !AreEqual(errΔ11, io.EOF))) {
                     @string want = nilˢ;
                     if (i == len(dataΔ2) - 1) {
                         want = nilOrEofˢ;
@@ -299,7 +299,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             }
         }
     }
-    return default!;
+    return default;
 }
 
 } // end iotest_package

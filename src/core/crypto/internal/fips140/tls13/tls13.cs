@@ -48,7 +48,7 @@ public static slice<byte> ExpandLabel<H>(Func<H> hashΔ1, slice<byte> secret, @s
 internal static slice<byte> extract<H>(Func<H> hashΔ1, slice<byte> newSecret, slice<byte> currentSecret)
     where H : hash.Hash
 {
-    if (newSecret == default!) {
+    if (newSecret == nil) {
         newSecret = new slice<byte>(hashΔ1().Size());
     }
     return hkdf.Extract(hashΔ1, newSecret, currentSecret);
@@ -57,10 +57,10 @@ internal static slice<byte> extract<H>(Func<H> hashΔ1, slice<byte> newSecret, s
 internal static slice<byte> deriveSecret<H>(Func<H> hashΔ1, slice<byte> secret, @string label, hash.Hash transcript)
     where H : hash.Hash
 {
-    if (transcript == default!) {
+    if (transcript == nil) {
         transcript = hashΔ1();
     }
-    return ExpandLabel(hashΔ1, secret, label, transcript.Sum(default!), transcript.Size());
+    return ExpandLabel(hashΔ1, secret, label, transcript.Sum(default), transcript.Size());
 }
 
 internal static readonly @string resumptionBinderLabel = "res binder"u8;
@@ -82,13 +82,13 @@ public static ж<EarlySecret> NewEarlySecret<H>(Func<H> h, slice<byte> psk)
     where H : hash.Hash
 {
     return Ꮡ(new EarlySecret(
-        secret: extract(h, psk, default!),
+        secret: extract(h, psk, default),
         hash: () => h()
     ));
 }
 
 public static slice<byte> ResumptionBinderKey(this ref EarlySecret s) {
-    return deriveSecret(s.hash, s.secret, resumptionBinderLabel, default!);
+    return deriveSecret(s.hash, s.secret, resumptionBinderLabel, default);
 }
 
 // ClientEarlyTrafficSecret derives the client_early_traffic_secret from the
@@ -106,7 +106,7 @@ partial struct ΔHandshakeSecret {
 private static readonly @string derivedˢ = "derived"u8;
 
 public static ж<ΔHandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<byte> sharedSecret) {
-    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default!);
+    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default);
     return Ꮡ(new ΔHandshakeSecret(
         secret: extract(s.hash, sharedSecret, derived),
         hash: s.hash
@@ -131,9 +131,9 @@ partial struct ΔMasterSecret {
 }
 
 public static ж<ΔMasterSecret> MasterSecret(this ref ΔHandshakeSecret s) {
-    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default!);
+    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default);
     return Ꮡ(new ΔMasterSecret(
-        secret: extract(s.hash, default!, derived),
+        secret: extract(s.hash, default, derived),
         hash: s.hash
     ));
 }
@@ -183,10 +183,10 @@ public static ж<ΔExporterMasterSecret> EarlyExporterMasterSecret(this ref Earl
 private static readonly @string exporterˢ = "exporter"u8;
 
 public static slice<byte> Exporter(this ref ΔExporterMasterSecret s, @string label, slice<byte> context, nint length) {
-    var secret = deriveSecret(s.hash, s.secret, label, default!);
+    var secret = deriveSecret(s.hash, s.secret, label, default);
     var h = s.hash();
     h.Write(context);
-    return ExpandLabel(s.hash, secret, exporterˢ, h.Sum(default!), length);
+    return ExpandLabel(s.hash, secret, exporterˢ, h.Sum(default), length);
 }
 
 public static slice<byte> TestingOnlyExporterSecret(ж<ΔExporterMasterSecret> Ꮡs) {

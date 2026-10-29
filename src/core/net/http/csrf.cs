@@ -43,7 +43,7 @@ partial struct CrossOriginProtection {
 
 // NewCrossOriginProtection returns a new [CrossOriginProtection] value.
 public static ж<CrossOriginProtection> NewCrossOriginProtection() {
-    return Ꮡ(new CrossOriginProtection(nil));
+    return Ꮡ(new CrossOriginProtection());
 }
 
 // AddTrustedOrigin allows all requests with an [Origin] header
@@ -62,27 +62,27 @@ public static error AddTrustedOrigin(this ж<CrossOriginProtection> Ꮡc, @strin
         ref var c = ref Ꮡc.DerefOrNull();
 
         var (u, err) = url.Parse(origin);
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("invalid origin %q: %w"u8, origin, err);
         }
-        if ((~u).Scheme == ""u8) {
+        if (u.Scheme == ""u8) {
             return fmt.Errorf("invalid origin %q: scheme is required"u8, origin);
         }
-        if ((~u).Host == ""u8) {
+        if (u.Host == ""u8) {
             return fmt.Errorf("invalid origin %q: host is required"u8, origin);
         }
-        if ((~u).Path != ""u8 || (~u).RawQuery != ""u8 || (~u).Fragment != ""u8) {
+        if (u.Path != ""u8 || u.RawQuery != ""u8 || u.Fragment != ""u8) {
             return fmt.Errorf("invalid origin %q: path, query, and fragment are not allowed"u8, origin);
         }
         Ꮡc.of(CrossOriginProtection.ᏑtrustedMu).Lock();
         ᒐd1 = true;
-        if (c.trusted == default!) {
+        if (c.trusted == nil) {
             c.trusted = new map<@string, bool>();
         }
         c.trusted[origin] = true;
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.of(CrossOriginProtection.ᏑtrustedMu).Unlock(); ᒐ.Run(); }
 }
 
@@ -92,7 +92,7 @@ partial struct noopHandler {
 internal static void ServeHTTP(this noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) {
 }
 
-internal static ΔHandler sentinelHandler = new noopHandlerжΔHandler(Ꮡ(new noopHandler(nil)));
+internal static ΔHandler sentinelHandler = new noopHandlerжΔHandler(Ꮡ(new noopHandler()));
 
 // AddInsecureBypassPattern permits all requests that match the given pattern.
 //
@@ -108,10 +108,10 @@ internal static ΔHandler sentinelHandler = new noopHandlerжΔHandler(Ꮡ(new n
 // AddInsecureBypassPattern can be called concurrently with other methods or
 // request handling, and applies to future requests.
 public static void AddInsecureBypassPattern(this ж<CrossOriginProtection> Ꮡc, @string pattern) {
-    ж<ServeMux> bypass = default!;
+    ж<ServeMux> bypass = default;
 
     // Lazily initialize c.bypass
-    while (ᐧ) {
+    for (;;) {
         bypass = Ꮡc.of(CrossOriginProtection.Ꮡbypass).Load();
         if (bypass != nil) {
             break;
@@ -135,7 +135,7 @@ public static void AddInsecureBypassPattern(this ж<CrossOriginProtection> Ꮡc,
 public static void SetDenyHandler(this ж<CrossOriginProtection> Ꮡc, ΔHandler hʗp) {
     ref var h = ref heap(hʗp, out var Ꮡh);
 
-    if (h == default!) {
+    if (h == nil) {
         Ꮡc.of(CrossOriginProtection.Ꮡdeny).Store(nil);
         return;
     }
@@ -152,47 +152,50 @@ public static error Check(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡre
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var exprᴛ1 = req.Method;
-    if (exprᴛ1 == "GET"u8 || exprᴛ1 == "HEAD"u8 || exprᴛ1 == "OPTIONS"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "GET"u8 || exprᴛ1 == "HEAD"u8 || exprᴛ1 == "OPTIONS"u8: {
         // Safe methods are always allowed.
-        return default!;
-    }
+        return default;
+    }}
 
     var exprᴛ2 = req.Header.Get(secFetchSiteˢ);
-    if (exprᴛ2 == ""u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ2 == ""u8: {
         // No Sec-Fetch-Site header is present.
         // Fallthrough to check the Origin header.
+        break;
     }
-    else if (exprᴛ2 == "same-origin"u8 || exprᴛ2 == "none"u8) {
-        return default!;
+    case {} when exprᴛ2 == "same-origin"u8 || exprᴛ2 == "none"u8: {
+        return default;
     }
-    else { /* default: */
+    default: {
         if (Ꮡc.isRequestExempt(Ꮡreq)) {
-            return default!;
+            return default;
         }
         return errCrossOriginRequest;
-    }
+    }}
 
     @string origin = req.Header.Get(originˢ);
     if (origin == ""u8) {
         // Neither Sec-Fetch-Site nor Origin headers are present.
         // Either the request is same-origin or not a browser request.
-        return default!;
+        return default;
     }
 
     {
-        var (o, err) = url.Parse(origin); if (err == default! && (~o).Host == req.Host) {
+        var (o, err) = url.Parse(origin); if (err == nil && o.Host == req.Host) {
             // The Origin header matches the Host header. Note that the Host header
             // doesn't include the scheme, so we don't know if this might be an
             // HTTP→HTTPS cross-origin request. We fail open, since all modern
             // browsers support Sec-Fetch-Site since 2023, and running an older
             // browser makes a clear security trade-off already. Sites can mitigate
             // this with HTTP Strict Transport Security (HSTS).
-            return default!;
+            return default;
         }
     }
 
     if (Ꮡc.isRequestExempt(Ꮡreq)) {
-        return default!;
+        return default;
     }
     return errCrossOriginRequestFromOldBrowser;
 }
@@ -226,7 +229,7 @@ internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Req
         // The request matches a trusted origin.
         return origin != ""u8 && c.trusted[origin];
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.of(CrossOriginProtection.ᏑtrustedMu).RUnlock(); ᒐ.Run(); }
 }
 
@@ -239,7 +242,7 @@ internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Req
 public static ΔHandler Handler(this ж<CrossOriginProtection> Ꮡc, ΔHandler h) {
     return new HandlerFuncᴠΔHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
         {
-            var err = Ꮡc.Check(r); if (err != default!) {
+            var err = Ꮡc.Check(r); if (err != nil) {
                 {
                     var deny = Ꮡc.of(CrossOriginProtection.Ꮡdeny).Load(); if (deny != nil) {
                         (deny.ValueSlot).ServeHTTP(w, r);

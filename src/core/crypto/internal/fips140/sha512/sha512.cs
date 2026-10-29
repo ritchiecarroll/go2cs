@@ -76,8 +76,8 @@ partial struct Digest {
 }
 
 public static void Reset(this ref Digest d) {
-    var exprᴛ1 = d.size;
-    if (exprᴛ1 == size384) {
+    switch (d.size) {
+    case var ᴛ when ᴛ == size384: {
         d.h[0] = init0_384;
         d.h[1] = init1_384;
         d.h[2] = init2_384;
@@ -86,8 +86,9 @@ public static void Reset(this ref Digest d) {
         d.h[5] = init5_384;
         d.h[6] = init6_384;
         d.h[7] = init7_384;
+        break;
     }
-    else if (exprᴛ1 == size224) {
+    case var ᴛ when ᴛ == size224: {
         d.h[0] = init0_224;
         d.h[1] = init1_224;
         d.h[2] = init2_224;
@@ -96,8 +97,9 @@ public static void Reset(this ref Digest d) {
         d.h[5] = init5_224;
         d.h[6] = init6_224;
         d.h[7] = init7_224;
+        break;
     }
-    else if (exprᴛ1 == size256) {
+    case var ᴛ when ᴛ == size256: {
         d.h[0] = init0_256;
         d.h[1] = init1_256;
         d.h[2] = init2_256;
@@ -106,8 +108,9 @@ public static void Reset(this ref Digest d) {
         d.h[5] = init5_256;
         d.h[6] = init6_256;
         d.h[7] = init7_256;
+        break;
     }
-    else if (exprᴛ1 == size512) {
+    case var ᴛ when ᴛ == size512: {
         d.h[0] = init0;
         d.h[1] = init1;
         d.h[2] = init2;
@@ -116,10 +119,12 @@ public static void Reset(this ref Digest d) {
         d.h[5] = init5;
         d.h[6] = init6;
         d.h[7] = init7;
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("unknown size");
-    }
+        break;
+    }}
     d.nx = 0;
     d.len = 0;
 }
@@ -135,22 +140,27 @@ public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
 }
 
 public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) {
-    var exprᴛ1 = d.size;
-    if (exprᴛ1 == size384) {
+    switch (d.size) {
+    case var ᴛ when ᴛ == size384: {
         b = append(b, magic384.ꓸꓸꓸ);
+        break;
     }
-    else if (exprᴛ1 == size224) {
+    case var ᴛ when ᴛ == size224: {
         b = append(b, magic512_224.ꓸꓸꓸ);
+        break;
     }
-    else if (exprᴛ1 == size256) {
+    case var ᴛ when ᴛ == size256: {
         b = append(b, magic512_256.ꓸꓸꓸ);
+        break;
     }
-    else if (exprᴛ1 == size512) {
+    case var ᴛ when ᴛ == size512: {
         b = append(b, magic512.ꓸꓸꓸ);
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("unknown size");
-    }
+        break;
+    }}
     b = byteorder.BEAppendUint64(b, d.h[0]);
     b = byteorder.BEAppendUint64(b, d.h[1]);
     b = byteorder.BEAppendUint64(b, d.h[2]);
@@ -162,7 +172,7 @@ public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b
     b = appendꓸꓸꓸ(b, d.x.slice(0, d.nx));
     b = appendꓸꓸꓸ(b, makeꓸꓸꓸ<byte>(len(d.x) - d.nx));
     b = byteorder.BEAppendUint64(b, d.len);
-    return (b, default!);
+    return (b, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -204,7 +214,7 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     b = b.slice(copy(d.x[..], b));
     (b, d.len) = consumeUint64(b);
     d.nx = (nint)(d.len % (uint64)chunk);
-    return default!;
+    return default;
 }
 
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
@@ -212,9 +222,8 @@ internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
 }
 
 public static (hash.Cloner, error) Clone(this ref Digest d) {
-    ref var r = ref heap<Digest>(out var Ꮡr);
-    r = d.ΔClone();
-    return (new DigestжCloner(Ꮡr), default!);
+    ref var r = ref heap<Digest>(d.ΔClone(), out var Ꮡr);
+    return (new DigestжCloner(Ꮡr), default);
 }
 
 // New returns a new Digest computing the SHA-512 hash.
@@ -254,8 +263,8 @@ public static nint BlockSize(this ref Digest d) {
 }
 
 public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
-    nint nn = default!;
-    error err = default!;
+    nint nn = default;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     nn = len(p);
@@ -294,17 +303,17 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
 
     // Padding. Add a 1 bit and 0 bits until 112 bytes mod 128.
     var len = d.len;
-    array<byte> tmp = new(144); /* 128 + 16 */                      // padding + length buffer
+    array<byte> tmp = new(144); /* 128 + 16 */ // padding + length buffer
     tmp[0] = 0x80;
-    uint64 t = default!;
-    if (len % 128 < 112){
+    uint64 t = default;
+    if (len % 128 < 112) {
         t = 112 - len % 128;
     } else {
         t = 128 + 112 - len % 128;
     }
 
     // Length in bits.
-    len <<= (int)(3);
+    len <<= 3;
     var padlen = tmp.slice(0, (nint)(t + 16));
     // Upper 64 bits are always zero, because len variable has type uint64,
     // and tmp is already zeroed at that index, so we can skip updating it.

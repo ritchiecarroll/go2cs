@@ -124,7 +124,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
         if (len(v) > maxPerVal) {
             throw panic(fmt.Sprintf("cannot mutate bytes of length %d"u8, len(v)));
         }
-        if (builtin.cap(m.scratch) < maxPerVal){
+        if (builtin.cap(m.scratch) < maxPerVal) {
             m.scratch = append(new slice<byte>(0, maxPerVal), v.ꓸꓸꓸ);
         } else {
             m.scratch = m.scratch.slice(0, len(v));
@@ -138,7 +138,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
         if (len(v) > maxPerVal) {
             throw panic(fmt.Sprintf("cannot mutate bytes of length %d"u8, len(v)));
         }
-        if (builtin.cap(m.scratch) < maxPerVal){
+        if (builtin.cap(m.scratch) < maxPerVal) {
             m.scratch = appendꓸꓸꓸ(new slice<byte>(0, maxPerVal), v);
         } else {
             m.scratch = m.scratch.slice(0, len(v));
@@ -156,8 +156,8 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
 }
 
 internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) {
-    int64 max = default!;
-    while (ᐧ) {
+    int64 max = default;
+    for (;;) {
         max = 100;
         switch (m.rand(2)) {
         case 0: {
@@ -188,8 +188,8 @@ internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) {
 }
 
 internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue) {
-    uint64 max = default!;
-    while (ᐧ) {
+    uint64 max = default;
+    for (;;) {
         max = 100;
         switch (m.rand(2)) {
         case 0: {
@@ -221,8 +221,8 @@ internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue)
 }
 
 internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxValue) {
-    float64 max = default!;
-    while (ᐧ) {
+    float64 max = default;
+    for (;;) {
         switch (m.rand(4)) {
         case 0: {
             // Add a random number
@@ -277,7 +277,7 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
 
 // type byteSliceMutator is a methodless func type — rendered inline as its base delegate
 
-[GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = new Func<ж<mutator>, slice<byte>, slice<byte>>[]{
+[GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = slice<Func<ж<mutator>, slice<byte>, slice<byte>>>([
     byteSliceRemoveBytes,
     byteSliceInsertRandomBytes,
     byteSliceDuplicateBytes,
@@ -296,7 +296,7 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
     byteSliceOverwriteConstantBytes,
     byteSliceShuffleBytes,
     byteSliceSwapBytes
-}.slice(); }
+]); }
 
 internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) {
     GoFrame ᒐ = default;
@@ -304,8 +304,7 @@ internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB)
         ref var m = ref Ꮡm.DerefOrNull();
         ref var ptrB = ref ᏑptrB.DerefOrNull();
 
-        ref var b = ref heap<slice<byte>>(out var Ꮡb);
-        b = ptrB;
+        ref var b = ref heap<slice<byte>>(ptrB, out var Ꮡb);
         defer(() => {
             if (@unsafe.SliceData(ᏑptrB.ValueSlot) != @unsafe.SliceData(Ꮡb.ValueSlot)) {
                 throw panic("data moved to new address");
@@ -313,10 +312,10 @@ internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB)
             ᏑptrB.ValueSlot = Ꮡb.ValueSlot;
         }, ref ᒐ);
 
-        while (ᐧ) {
+        for (;;) {
             var mut = byteSliceMutators[m.rand(len(byteSliceMutators))];
             {
-                var mutated = mut(Ꮡm, b); if (mutated != default!) {
+                var mutated = mut(Ꮡm, b); if (mutated != nil) {
                     b = mutated;
                     return;
                 }
@@ -327,9 +326,9 @@ internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB)
     finally { ᒐ.Run(); }
 }
 
-internal static slice<int8> interesting8 = new int8[]{(int8)(-128), (int8)(-1), 0, 1, 16, 32, 64, 100, 127}.slice();
-internal static slice<int16> interesting16 = new int16[]{(int16)(-32768), (int16)(-129), 128, 255, 256, 512, 1000, 1024, 4096, 32767}.slice();
-internal static slice<int32> interesting32 = new int32[]{-2147483648, -100663046, -32769, 32768, 65535, 65536, 100663045, 2147483647}.slice();
+internal static slice<int8> interesting8 = slice<int8>([(int8)(-128), (int8)(-1), 0, 1, 16, 32, 64, 100, 127]);
+internal static slice<int16> interesting16 = slice<int16>([(int16)(-32768), (int16)(-129), 128, 255, 256, 512, 1000, 1024, 4096, 32767]);
+internal static slice<int32> interesting32 = slice<int32>([-2147483648, -100663046, -32769, 32768, 65535, 65536, 100663045, 2147483647]);
 
 internal const uint64 maxUint = /* uint64(^uint(0)) */ 18446744073709551615;
 internal const int64 maxInt = /* int64(maxUint >> 1) */ 9223372036854775807;

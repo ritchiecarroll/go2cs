@@ -9,7 +9,7 @@ using syscall = syscall_package;
 partial class os_package {
 
 internal static (ж<File>, error) newDirFile(syscallꓸHandle fd, @string name) {
-    return (newFile(fd, name, kindOpenFile, false), default!);
+    return (newFile(fd, name, kindOpenFile, false), default);
 }
 
 } // end os_package

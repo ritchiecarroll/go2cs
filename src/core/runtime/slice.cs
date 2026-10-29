@@ -46,10 +46,10 @@ internal static void panicmakeslicecap() {
 internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint fromlen, @unsafe.Pointer from) {
     ref var et = ref Ꮡet.DerefOrNull();
 
-    uintptr tomem = default!;
-    uintptr copymem = default!;
-    if ((uintptr)tolen > (uintptr)fromlen){
-        bool overflow = default!;
+    uintptr tomem = default;
+    uintptr copymem = default;
+    if ((uintptr)tolen > (uintptr)fromlen) {
+        bool overflow = default;
         (tomem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)tolen);
         if (overflow || tomem > maxAlloc || tolen < 0) {
             panicmakeslicelen();
@@ -63,8 +63,8 @@ internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint 
         copymem = tomem;
     }
 
-    @unsafe.Pointer to = default!;
-    if (!et.Pointers()){
+    @unsafe.Pointer to = default;
+    if (!et.Pointers()) {
         to = (uintptr)mallocgc(tomem, nil, false);
         if (copymem < tomem) {
             memclrNoHeapPointers((uintptr)add(to, copymem), tomem - copymem);
@@ -129,7 +129,7 @@ internal static @unsafe.Pointer makeslice(ж<_type> Ꮡet, nint len, nint cap) {
     return (uintptr)mallocgc(mem, Ꮡet, true);
 }
 
-internal static @unsafe.Pointer makeslice64(ж<_type> Ꮡet, int64 len64, int64 cap64) {
+internal static @unsafe.Pointer makeslice64(ж<_type> et, int64 len64, int64 cap64) {
     nint len = (nint)len64;
     if ((int64)len != len64) {
         panicmakeslicelen();
@@ -140,7 +140,7 @@ internal static @unsafe.Pointer makeslice64(ж<_type> Ꮡet, int64 len64, int64 
         panicmakeslicecap();
     }
 
-    return (uintptr)makeslice(Ꮡet, len, cap);
+    return (uintptr)makeslice(et, len, cap);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -217,10 +217,10 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
 
     nint newcap = nextslicecap(newLen, oldCap);
 
-    bool overflow = default!;
-    uintptr lenmem = default!;
-    uintptr newlenmem = default!;
-    uintptr capmem = default!;
+    bool overflow = default;
+    uintptr lenmem = default;
+    uintptr newlenmem = default;
+    uintptr capmem = default;
     // Specialize for common values of et.Size.
     // For 1 we don't need any division/multiplication.
     // For goarch.PtrSize, compiler will optimize division/multiplication into a shift by a constant.
@@ -244,8 +244,8 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
         break;
     }
     case {} when isPowerOfTwo(et.Size_): {
-        uintptr shift = default!;
-        if (goarch.PtrSize == 8){
+        uintptr shift = default;
+        if (goarch.PtrSize == 8) {
             // Mask shift for better code generation.
             shift = (uintptr)((uintptr)sys.TrailingZeros64((uint64)et.Size_) & 63);
         } else {
@@ -286,8 +286,8 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
         throw panic(((errorString)(@string)growsliceLenOutOfRangeˢ));
     }
 
-    @unsafe.Pointer Δp = default!;
-    if (!et.Pointers()){
+    @unsafe.Pointer Δp = default;
+    if (!et.Pointers()) {
         Δp = (uintptr)mallocgc(capmem, nil, false);
         // The append() that calls growslice is going to overwrite from oldLen to newLen.
         // Only clear the part that will not be overwritten.
@@ -364,7 +364,7 @@ internal static nint nextslicecap(nint newLen, nint oldCap) {
     if (oldCap < threshold) {
         return doublecap;
     }
-    while (ᐧ) {
+    for (;;) {
         // Transition from growing 2x for small slices
         // to growing 1.25x for large slices. This formula
         // gives a smooth-ish transition between the two.
@@ -451,7 +451,7 @@ internal static nint slicecopy(@unsafe.Pointer toPtr, nint toLen, @unsafe.Pointe
         asanwrite(toPtr, size);
     }
 
-    if (size == 1){ // common case worth about 2x to do here
+    if (size == 1) { // common case worth about 2x to do here
         // TODO: is this still worth it with new memmove impl?
         ((ж<byte>)(uintptr)(toPtr)).Value = ((ж<byte>)(uintptr)(fromPtr)).Value; // known to be a byte pointer
     } else {

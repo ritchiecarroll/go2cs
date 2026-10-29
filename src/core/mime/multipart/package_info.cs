@@ -10,12 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using textprotoꓸError = go.net.textproto_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -68,6 +62,14 @@ using static go.mime.multipart_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(FileHeader))]
+[assembly: go.GoFieldAccess(typeof(Form))]
+[assembly: go.GoFieldAccess(typeof(Part))]
+[assembly: go.GoFieldAccess(typeof(Reader))]
+[assembly: go.GoFieldAccess(typeof(Writer))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -76,7 +78,7 @@ using static go.mime.multipart_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACQbigpiCgoKmgoCCgIKCxpSSgoCCtoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSqsoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgIKkgpaEgpSCgoKCgoCCpKaCgoKUpuaigoKCgoKmAAwckoKCgoKCgsoADSCSgIKCpIKCgpSClAAVKIKClA==", "62-81:1")]
+[assembly: go.GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACQbigpiCgoKmgoCCgIKCxpSSgoCCtoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSasoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgIKkgpaEgpSCgoKCgoCCpKaCgoKUpuaigoKCgoKmAAwckoKCgoKCgsoADSCSgIKCpIKCgpSClAAVKIKClA==", "62-81:1")]
 [assembly: go.GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "AC9YABxAxoKUgpTcsoKUgoK41oKCgoKCAAMU4oIAEiaigpSCAAgGgriAgqSmgoKCgqamgoKCgqaClKqiAAgSgoK4goKClIKC3IKUgoKUgoKCgpQAAhoACgKUgpSkpKaCyoCClKSktoLugoKUAAIeAAwCgoKUlJSCuIKClJSUgrimgoIAFzSUgoCCgIKCxgACEuIAAhDSpqKClIKUgoKU3JSCpoKCgoKUgqaUpoKmlO6Cgqa+soKUgoKm7oKUgsqCgpSuwoKU", "", "", "130=NewReaderSize/1/1/1")]
 [assembly: go.GoPositionMap("mime/multipart/readmimeheader.go", "readmimeheader.cs", "AAse")]
 [assembly: go.GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABs4ot6SAAcS4oKmgpSCgoKUlLSCtpSCqqKmgpSmgoKCgpSu4oKAgraCgpSmgoKmgoKClKaCpgABHAAMAuqigoKCqqKClKqiupKCgpSCqqKCgIKklIIACBKCgtaygpSCgpQ=", "", "", "31=randomBoundary/1/1/2;177=escapeQuotes/1/1/1,Sprintf/1/1/1;185=escapeQuotes/1/2/1,escapeQuotes/2/2/1")]

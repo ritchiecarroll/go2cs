@@ -5,30 +5,29 @@ namespace go;
 
 using @unsafe = unsafe_package;
 
-[GoFieldAccess(typeof(RouteMessage), typeof(InterfaceMessage), typeof(InterfaceAddrMessage), typeof(InterfaceMulticastAddrMessage), typeof(RawSockaddr))]
 partial class syscall_package {
 
 internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slice<byte> b) {
     ref var any = ref Ꮡany.DerefOrNull();
 
-    var exprᴛ1 = any.Type;
-    if (exprᴛ1 == RTM_ADD || exprᴛ1 == RTM_DELETE || exprᴛ1 == RTM_CHANGE || exprᴛ1 == RTM_GET || exprᴛ1 == RTM_LOSING || exprᴛ1 == RTM_REDIRECT || exprᴛ1 == RTM_MISS || exprᴛ1 == RTM_LOCK || exprᴛ1 == RTM_RESOLVE) {
+    switch (any.Type) {
+    case var ᴛ when ᴛ == RTM_ADD || ᴛ == RTM_DELETE || ᴛ == RTM_CHANGE || ᴛ == RTM_GET || ᴛ == RTM_LOSING || ᴛ == RTM_REDIRECT || ᴛ == RTM_MISS || ᴛ == RTM_LOCK || ᴛ == RTM_RESOLVE: {
         var p = Ꮡany.Reinterpret<anyMessage, RouteMessage>();
         return new RouteMessageжRoutingMessage(Ꮡ(new RouteMessage(Header: p.Header.ΔClone(), Data: b.slice(SizeofRtMsghdr, any.Msglen))));
     }
-    if (exprᴛ1 == RTM_IFINFO) {
+    case var ᴛ when ᴛ == RTM_IFINFO: {
         var p = Ꮡany.Reinterpret<anyMessage, InterfaceMessage>();
         return new InterfaceMessageжRoutingMessage(Ꮡ(new InterfaceMessage(Header: p.Header.ΔClone(), Data: b.slice(SizeofIfMsghdr, any.Msglen))));
     }
-    if (exprᴛ1 == RTM_NEWADDR || exprᴛ1 == RTM_DELADDR) {
+    case var ᴛ when ᴛ == RTM_NEWADDR || ᴛ == RTM_DELADDR: {
         var p = Ꮡany.Reinterpret<anyMessage, InterfaceAddrMessage>();
         return new InterfaceAddrMessageжRoutingMessage(Ꮡ(new InterfaceAddrMessage(Header: p.Header.ΔClone(), Data: b.slice(SizeofIfaMsghdr, any.Msglen))));
     }
-    if (exprᴛ1 == RTM_NEWMADDR2 || exprᴛ1 == RTM_DELMADDR) {
+    case var ᴛ when ᴛ == RTM_NEWMADDR2 || ᴛ == RTM_DELMADDR: {
         var p = Ꮡany.Reinterpret<anyMessage, InterfaceMulticastAddrMessage>();
         return new InterfaceMulticastAddrMessageжRoutingMessage(Ꮡ(new InterfaceMulticastAddrMessage(Header: p.Header.ΔClone(), Data: b.slice(SizeofIfmaMsghdr2, any.Msglen))));
-    }
-    return default!;
+    }}
+    return default;
 }
 
 // InterfaceMulticastAddrMessage represents a routing message
@@ -48,33 +47,36 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAdd
             continue;
         }
         var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddr>();
-        var exprᴛ1 = rsa.Family;
-        if (exprᴛ1 == AF_LINK) {
+        switch (rsa.Family) {
+        case var ᴛ when ᴛ == AF_LINK: {
             var (sa, err) = parseSockaddrLink(b);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
             b = b.slice(rsaAlignOf((nint)rsa.Len));
+            break;
         }
-        else if (exprᴛ1 == AF_INET || exprᴛ1 == AF_INET6) {
+        case var ᴛ when ᴛ == AF_INET || ᴛ == AF_INET6: {
             var (sa, err) = parseSockaddrInet(b, rsa.Family);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
             sas[i] = sa;
             b = b.slice(rsaAlignOf((nint)rsa.Len));
+            break;
         }
-        else { /* default: */
+        default: {
             var (sa, l, err) = parseLinkLayerAddr(b);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
             b = b.slice(l);
-        }
+            break;
+        }}
     }
-    return (sas[..], default!);
+    return (sas[..], default);
 }
 
 } // end syscall_package

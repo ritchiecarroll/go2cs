@@ -43,14 +43,14 @@ internal static readdirMode readdirFileInfo => 2;
 // Most clients are better served by the more efficient ReadDir method.
 public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
     if (Ꮡf == nil) {
-        return (default!, ErrInvalid);
+        return (default, ErrInvalid);
     }
     var (_, _, infos, err) = Ꮡf.readdir(n, readdirFileInfo);
-    if (infos == default!) {
+    if (infos == nil) {
         // Readdir has historically always returned a non-nil empty slice, never nil,
         // even on error (except misuse with nil receiver above).
         // Keep it that way to avoid breaking overly sensitive callers.
-        infos = new FileInfo[]{}.slice();
+        infos = slice<FileInfo>([]);
     }
     return (infos, err);
 }
@@ -71,18 +71,18 @@ public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
 // directory, Readdirnames returns the names read until that point and
 // a non-nil error.
 public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf, nint n) {
-    slice<@string> names = default!;
-    error err = default!;
+    slice<@string> names = default;
+    error err = default;
 
     if (Ꮡf == nil) {
-        return (default!, ErrInvalid);
+        return (default, ErrInvalid);
     }
     (names, _, _, err) = Ꮡf.readdir(n, readdirName);
-    if (names == default!) {
+    if (names == nil) {
         // Readdirnames has historically always returned a non-nil empty slice, never nil,
         // even on error (except misuse with nil receiver above).
         // Keep it that way to avoid breaking overly sensitive callers.
-        names = new @string[]{}.slice();
+        names = slice<@string>([]);
     }
     return (names, err);
 }
@@ -99,12 +99,12 @@ public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf,
 // When it succeeds, it returns a nil error (not io.EOF).
 public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) {
     if (Ꮡf == nil) {
-        return (default!, ErrInvalid);
+        return (default, ErrInvalid);
     }
     var (_, dirents, _, err) = Ꮡf.readdir(n, readdirDirEntry);
-    if (dirents == default!) {
+    if (dirents == nil) {
         // Match Readdir and Readdirnames: don't return nil slices.
-        dirents = new DirEntry[]{}.slice();
+        dirents = slice<DirEntry>([]);
     }
     return (dirents, err);
 }
@@ -118,8 +118,8 @@ public static (slice<DirEntry>, error) ReadDir(@string name) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = openDir(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
@@ -128,7 +128,7 @@ public static (slice<DirEntry>, error) ReadDir(@string name) {
         slices.SortFunc(dirs, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (dirs, err);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -153,57 +153,56 @@ public static error CopyFS(@string dir, fs.FS fsys) {
     return fs.WalkDir(fsys, "."u8, error (@string path, fs.DirEntry d, error err) => {
         GoFrame ᒐ = default;
         try {
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
 
             (var fpath, err) = filepathlite.Localize(path);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
-            ref var newPath = ref heap<@string>(out var ᏑnewPath);
-            newPath = joinPath(dir, fpath);
+            ref var newPath = ref heap<@string>(joinPath(dir, fpath), out var ᏑnewPath);
 
-            var exprᴛ1 = d.Type();
-            if (exprᴛ1 == ModeDir) {
+            switch (d.Type()) {
+            case var ᴛ when ᴛ == ModeDir: {
                 return MkdirAll(newPath, 511);
             }
-            if (exprᴛ1 == ModeSymlink) {
+            case var ᴛ when ᴛ == ModeSymlink: {
                 var (target, errΔ3) = fs.ReadLink(fsys, path);
-                if (errΔ3 != default!) {
+                if (errΔ3 != nil) {
                     return errΔ3;
                 }
                 return Symlink(target, newPath);
             }
-            if (exprᴛ1 == (fs.FileMode)(0)) {
+            case var ᴛ when ᴛ == (fs.FileMode)(0): {
                 var (r, errΔ4) = fsys.Open(path);
-                if (errΔ4 != default!) {
+                if (errΔ4 != nil) {
                     return errΔ4;
                 }
                 var rʗ1 = r;
                 defer(() => rʗ1.Close(), ref ᒐ);
                 (var info, errΔ4) = r.Stat();
-                if (errΔ4 != default!) {
+                if (errΔ4 != nil) {
                     return errΔ4;
                 }
                 (var w, errΔ4) = OpenFile(newPath, (nint)((nint)(nint)(O_CREATE | O_EXCL) | O_WRONLY), (fs.FileMode)(438 | (fs.FileMode)(info.Mode() & 511)));
-                if (errΔ4 != default!) {
+                if (errΔ4 != nil) {
                     return errΔ4;
                 }
 
                 {
-                    var (_, errΔ5) = Δio.Copy(new FileжWriter(w), new fs_FileᴠReader(r)); if (errΔ5 != default!) {
+                    var (_, errΔ5) = Δio.Copy(new FileжWriter(w), new fs_FileᴠReader(r)); if (errΔ5 != nil) {
                         w.Close();
                         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "Copy"u8, Path: newPath, Err: errΔ5)));
                     }
                 }
                 return w.Close();
             }
-            { /* default: */
+            default: {
                 return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "CopyFS"u8, Path: path, Err: ErrInvalid)));
-            }
+            }}
         }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
         finally { ᒐ.Run(); }
     });
 }

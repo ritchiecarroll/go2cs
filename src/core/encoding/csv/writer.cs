@@ -30,7 +30,7 @@ partial class csv_package {
 // the underlying [io.Writer].  Any errors that occurred should
 // be checked by calling the [Writer.Error] method.
 partial struct Writer {
-    public rune Comma; // Field delimiter (set to ',' by NewWriter)
+    public rune Comma;   // Field delimiter (set to ',' by NewWriter)
     public bool UseCRLF; // True to use \r\n as the line terminator
     internal ж<bufio.Writer> w;
 }
@@ -38,7 +38,7 @@ partial struct Writer {
 // NewWriter returns a new Writer that writes to w.
 public static ж<Writer> NewWriter(io.Writer w) {
     return Ꮡ(new Writer(
-        Comma: (rune)',',
+        Comma: ',',
         w: bufio.NewWriter(w)
     ));
 }
@@ -57,7 +57,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
 
         if (n > 0) {
             {
-                var (_, errΔ1) = w.w.WriteRune(w.Comma); if (errΔ1 != default!) {
+                var (_, errΔ1) = w.w.WriteRune(w.Comma); if (errΔ1 != nil) {
                     return errΔ1;
                 }
             }
@@ -67,7 +67,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
         // write out the field and continue to the next field.
         if (!w.fieldNeedsQuotes(field)) {
             {
-                var (_, errΔ2) = w.w.WriteString(field); if (errΔ2 != default!) {
+                var (_, errΔ2) = w.w.WriteString(field); if (errΔ2 != nil) {
                     return errΔ2;
                 }
             }
@@ -75,7 +75,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
         }
 
         {
-            var errΔ3 = w.w.WriteByte((rune)'"'); if (errΔ3 != default!) {
+            var errΔ3 = w.w.WriteByte((byte)'"'); if (errΔ3 != nil) {
                 return errΔ3;
             }
         }
@@ -88,7 +88,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
 
             // Copy verbatim everything before the special character.
             {
-                var (_, errΔ4) = w.w.WriteString(field.slice(0, i)); if (errΔ4 != default!) {
+                var (_, errΔ4) = w.w.WriteString(field.slice(0, i)); if (errΔ4 != nil) {
                     return errΔ4;
                 }
             }
@@ -96,43 +96,43 @@ public static error Write(this ref Writer w, slice<@string> record) {
 
             // Encode the special character.
             if (len(field) > 0) {
-                error errΔ5 = default!;
+                error errΔ5 = default;
                 switch (field[0]) {
-                case (rune)'"': {
+                case (byte)'"': {
                     (_, errΔ5) = w.w.WriteString(@""""""u8);
                     break;
                 }
-                case (rune)'\r': {
+                case (byte)'\r': {
                     if (!w.UseCRLF) {
-                        errΔ5 = w.w.WriteByte((rune)'\r');
+                        errΔ5 = w.w.WriteByte((byte)'\r');
                     }
                     break;
                 }
-                case (rune)'\n': {
-                    if (w.UseCRLF){
+                case (byte)'\n': {
+                    if (w.UseCRLF) {
                         (_, errΔ5) = w.w.WriteString("\r\n"u8);
                     } else {
-                        errΔ5 = w.w.WriteByte((rune)'\n');
+                        errΔ5 = w.w.WriteByte((byte)'\n');
                     }
                     break;
                 }}
                 field = field[1..];
-                if (errΔ5 != default!) {
+                if (errΔ5 != nil) {
                     return errΔ5;
                 }
             }
         }
         {
-            var errΔ6 = w.w.WriteByte((rune)'"'); if (errΔ6 != default!) {
+            var errΔ6 = w.w.WriteByte((byte)'"'); if (errΔ6 != nil) {
                 return errΔ6;
             }
         }
     }
-    error err = default!;
-    if (w.UseCRLF){
+    error err = default;
+    if (w.UseCRLF) {
         (_, err) = w.w.WriteString("\r\n"u8);
     } else {
-        err = w.w.WriteByte((rune)'\n');
+        err = w.w.WriteByte((byte)'\n');
     }
     return err;
 }
@@ -146,7 +146,7 @@ public static void Flush(this ref Writer w) {
 // Error reports any error that has occurred during
 // a previous [Writer.Write] or [Writer.Flush].
 public static error Error(this ref Writer w) {
-    var (_, err) = w.w.Write(default!);
+    var (_, err) = w.w.Write(default);
     return err;
 }
 
@@ -155,7 +155,7 @@ public static error Error(this ref Writer w) {
 public static error WriteAll(this ref Writer w, slice<slice<@string>> records) {
     foreach (var (_, record) in records) {
         var err = w.Write(record);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
     }
@@ -183,10 +183,10 @@ internal static bool fieldNeedsQuotes(this ref Writer w, @string field) {
         return true;
     }
 
-    if (w.Comma < utf8.RuneSelf){
+    if (w.Comma < utf8.RuneSelf) {
         for (nint i = 0; i < len(field); i++) {
             var c = field[i];
-            if (c == (rune)'\n' || c == (rune)'\r' || c == (rune)'"' || c == (byte)w.Comma) {
+            if (c == '\n' || c == '\r' || c == '"' || c == (byte)w.Comma) {
                 return true;
             }
         }

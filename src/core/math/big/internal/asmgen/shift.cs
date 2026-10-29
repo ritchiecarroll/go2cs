@@ -34,21 +34,19 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
     Ꮡa.JmpZero(n, ret0ˢ);
 
     // Start loop by reading first input word.
-    ref var s = ref heap<ΔReg>(out var Ꮡs);
-    s = f.ArgHint("s"u8, HintShiftCount);
+    ref var s = ref heap<ΔReg>(f.ArgHint("s"u8, HintShiftCount), out var Ꮡs);
     var p = f.Pipe();
     if (name == "lshVU"u8) {
         p.SetBackward();
     }
-    var unroll = new nint[]{1, 4}.slice();
+    var unroll = slice<nint>([1, 4]);
     if (a.Arch == Arch386) {
-        unroll = new nint[]{1}.slice(); // too few registers for more
+        unroll = slice<nint>([1]); // too few registers for more
         p.SetUseIndexCounter();
     }
     p.LoadPtrs(n);
     Ꮡa.Comment(shiftFirstWordIntoCarryˢ);
-    ref var prev = ref heap<ΔReg>(out var Ꮡprev);
-    prev = p.LoadN(1)[0][0];
+    ref var prev = ref heap<ΔReg>(p.LoadN(1)[0][0], out var Ꮡprev);
 
     // Decide how to shift. On systems with a wide shift (x86), use that.
     // Otherwise, we need shift by s and negative (reverse) shift by 64-s or 32-s.
@@ -62,7 +60,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         negShift = (ΔReg p1, ΔReg p2, ΔReg p3) => Ꮡa.Lsh(p1, p2, p3);
         negShiftReg = (ΔReg p1, ΔReg p2) => Ꮡa.LshReg(p1, p2);
     }
-    if (a.Arch.HasShiftWide()){
+    if (a.Arch.HasShiftWide()) {
         // Use wide shift to avoid needing negative shifts.
         // The invariant is that prev holds the previous word (not shifted at all),
         // to be used as input into the wide shift.
@@ -98,9 +96,8 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         // prev holds x << s, to be used as the high bits of the next output word,
         // once we find the low bits after reading the next input word.
         // After the loop finishes, prev holds the final output word to be written.
-        ref var sNeg = ref heap<ΔReg>(out var ᏑsNeg);
-        sNeg = Ꮡa.Reg();
-        Ꮡa.Mov(a.Imm((~a.Arch).WordBits), sNeg);
+        ref var sNeg = ref heap<ΔReg>(Ꮡa.Reg(), out var ᏑsNeg);
+        Ꮡa.Mov(a.Imm(a.Arch.WordBits), sNeg);
         Ꮡa.Sub(s, sNeg, sNeg, SmashCarry);
         var c = Ꮡa.Reg();
         negShift(sNeg, prev, c);
@@ -146,7 +143,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         });
         Ꮡa.Comment(storeFinalShiftedBitsˢ);
     }
-    p.StoreN(new slice<ΔReg>[]{new ΔReg[]{prev}.slice()}.slice());
+    p.StoreN(slice<slice<ΔReg>>([slice<ΔReg>([prev])]));
     p.Done();
     Ꮡa.Free(s);
     Ꮡa.Ret();

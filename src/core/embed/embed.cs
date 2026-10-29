@@ -190,18 +190,18 @@ partial struct FS {
 // comment in the FS struct above. isDir reports whether the
 // final trailing slash was present, indicating that name is a directory.
 internal static (@string dir, @string elem, bool isDir) split(@string name) {
-    bool isDir = default!;
+    bool isDir = default;
 
     (name, isDir) = stringslite.CutSuffix(name, "/"u8);
-    nint i = bytealg.LastIndexByteString(name, (rune)'/');
+    nint i = bytealg.LastIndexByteString(name, (byte)'/');
     if (i < 0) {
         return (".", name, isDir);
     }
     return (name.slice(0, i), name.slice(i + 1), isDir);
 }
 
-internal static fs.ReadDirFS _ᴛ1ʗ = new FS(nil);
-internal static fs.ReadFileFS _ᴛ2ʗ = new FS(nil);
+internal static fs.ReadDirFS _ᴛ1ʗ = new FS();
+internal static fs.ReadFileFS _ᴛ2ʗ = new FS();
 
 // A file is a single file in the FS.
 // It implements fs.FileInfo and fs.DirEntry.
@@ -226,7 +226,7 @@ internal static int64 Size(this ref @file f) {
 }
 
 internal static time.Time ModTime(this ref @file f) {
-    return new time.Time(nil);
+    return new time.Time();
 }
 
 internal static bool IsDir(this ref @file f) {
@@ -235,7 +235,7 @@ internal static bool IsDir(this ref @file f) {
 }
 
 internal static any Sys(this ref @file f) {
-    return default!;
+    return default;
 }
 
 internal static fs.FileMode Type(this ref @file f) {
@@ -243,7 +243,7 @@ internal static fs.FileMode Type(this ref @file f) {
 }
 
 internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) {
-    return (new fileжFileInfo(Ꮡf), default!);
+    return (new fileжFileInfo(Ꮡf), default);
 }
 
 internal static fs.FileMode Mode(this ref @file f) {
@@ -267,13 +267,13 @@ internal static ж<@file> lookup(this FS f, @string name) {
         // The compiler should never emit a file with an invalid name,
         // so this check is not strictly necessary (if name is invalid,
         // we shouldn't find a match below), but it's a good backstop anyway.
-        return default!;
+        return default;
     }
     if (name == "."u8) {
         return dotFile;
     }
     if (f.files == nil) {
-        return default!;
+        return default;
     }
 
     // Binary search to find where name would be in the list,
@@ -288,13 +288,13 @@ internal static ж<@file> lookup(this FS f, @string name) {
     if (i < len(files) && stringslite.TrimSuffix(files[i].name, "/"u8) == name) {
         return Ꮡ(files, i);
     }
-    return default!;
+    return default;
 }
 
 // readDir returns the list of files corresponding to the directory dir.
 internal static slice<@file> readDir(this FS f, @string dir) {
     if (f.files == nil) {
-        return default!;
+        return default;
     }
     // Binary search to find where dir starts and ends in the list
     // and then return that slice of the list.
@@ -318,12 +318,12 @@ internal static slice<@file> readDir(this FS f, @string dir) {
 public static (fs.File, error) Open(this FS f, @string name) {
     var @file = f.lookup(name);
     if (@file == nil) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
     }
     if (@file.IsDir()) {
-        return (new openDirжFile(Ꮡ(new openDir(@file, f.readDir(name), 0))), default!);
+        return (new openDirжFile(Ꮡ(new openDir(@file, f.readDir(name), 0))), default);
     }
-    return (new openFileжFile(Ꮡ(new openFile(@file, 0))), default!);
+    return (new openFileжFile(Ꮡ(new openFile(@file, 0))), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -332,18 +332,18 @@ private static readonly @string notADirectoryˢ = "not a directory"u8;
 // ReadDir reads and returns the entire named directory.
 public static (slice<fs.DirEntry>, error) ReadDir(this FS f, @string name) {
     var (@file, err) = f.Open(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var (dir, ok) = @file._<ж<openDir>>(ᐧ);
     if (!ok) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: name, Err: errors.New(notADirectoryˢ)))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: name, Err: errors.New(notADirectoryˢ)))));
     }
-    var list = new slice<fs.DirEntry>(len((~dir).files));
+    var list = new slice<fs.DirEntry>(len(dir.files));
     foreach (var i in range(list)) {
-        list[i] = new fileжDirEntry(Ꮡ((~dir).files, i));
+        list[i] = new fileжDirEntry(Ꮡ(dir.files, i));
     }
-    return (list, default!);
+    return (list, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -352,19 +352,19 @@ private static readonly @string isADirectoryˢ = "is a directory"u8;
 // ReadFile reads and returns the content of the named file.
 public static (slice<byte>, error) ReadFile(this FS f, @string name) {
     var (@file, err) = f.Open(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var (ofile, ok) = @file._<ж<openFile>>(ᐧ);
     if (!ok) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: name, Err: errors.New(isADirectoryˢ)))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: name, Err: errors.New(isADirectoryˢ)))));
     }
-    return (slice<byte>((~(~ofile).f).data), default!);
+    return (slice<byte>(ofile.f.data), default);
 }
 
 // An openFile is a regular file open for reading.
 partial struct openFile {
-    internal ж<@file> f; // the file itself
+    internal ж<@file> f;   // the file itself
     internal int64 offset; // current read offset
 }
 
@@ -372,23 +372,23 @@ internal static Δio.Seeker _ᴛ5ʗ = new openFileжSeeker(((ж<openFile>)nil));
 internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)nil));
 
 internal static error Close(this ref openFile f) {
-    return default!;
+    return default;
 }
 
 internal static (fs.FileInfo, error) Stat(this ref openFile f) {
-    return (new fileжFileInfo(f.f), default!);
+    return (new fileжFileInfo(f.f), default);
 }
 
 internal static (nint, error) Read(this ref openFile f, slice<byte> b) {
-    if (f.offset >= (int64)len((~f.f).data)) {
+    if (f.offset >= (int64)len(f.f.data)) {
         return (0, Δio.EOF);
     }
     if (f.offset < 0) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: (~f.f).name, Err: fs.ErrInvalid))));
+        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: f.f.name, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, (~f.f).data.slice((nint)(f.offset)));
+    nint n = copy(b, f.f.data.slice((nint)(f.offset)));
     f.offset += (int64)n;
-    return (n, default!);
+    return (n, default);
 }
 
 internal static (int64, error) Seek(this ref openFile f, int64 offset, nint whence) {
@@ -402,53 +402,53 @@ internal static (int64, error) Seek(this ref openFile f, int64 offset, nint when
         break;
     }
     case 2: {
-        offset += (int64)len((~f.f).data);
+        offset += (int64)len(f.f.data);
         break;
     }}
-    if (offset < 0 || offset > (int64)len((~f.f).data)) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "seek"u8, Path: (~f.f).name, Err: fs.ErrInvalid))));
+    if (offset < 0 || offset > (int64)len(f.f.data)) {
+        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "seek"u8, Path: f.f.name, Err: fs.ErrInvalid))));
     }
     f.offset = offset;
-    return (offset, default!);
+    return (offset, default);
 }
 
 internal static (nint, error) ReadAt(this ref openFile f, slice<byte> b, int64 offset) {
-    if (offset < 0 || offset > (int64)len((~f.f).data)) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: (~f.f).name, Err: fs.ErrInvalid))));
+    if (offset < 0 || offset > (int64)len(f.f.data)) {
+        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: f.f.name, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, (~f.f).data.slice((nint)(offset)));
+    nint n = copy(b, f.f.data.slice((nint)(offset)));
     if (n < len(b)) {
         return (n, Δio.EOF);
     }
-    return (n, default!);
+    return (n, default);
 }
 
 // An openDir is a directory open for reading.
 partial struct openDir {
-    internal ж<@file> f; // the directory file itself
+    internal ж<@file> f;         // the directory file itself
     internal slice<@file> files; // the directory contents
-    internal nint offset;   // the read offset, an index into the files slice
+    internal nint offset;        // the read offset, an index into the files slice
 }
 
 internal static error Close(this ref openDir d) {
-    return default!;
+    return default;
 }
 
 internal static (fs.FileInfo, error) Stat(this ref openDir d) {
-    return (new fileжFileInfo(d.f), default!);
+    return (new fileжFileInfo(d.f), default);
 }
 
 internal static (nint, error) Read(this ref openDir d, slice<byte> _) {
-    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: (~d.f).name, Err: errors.New(isADirectoryˢ)))));
+    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: d.f.name, Err: errors.New(isADirectoryˢ)))));
 }
 
 internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint count) {
     nint n = len(d.files) - d.offset;
     if (n == 0) {
         if (count <= 0) {
-            return (default!, default!);
+            return (default, default);
         }
-        return (default!, Δio.EOF);
+        return (default, Δio.EOF);
     }
     if (count > 0 && n > count) {
         n = count;
@@ -458,7 +458,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
         list[i] = new fileжDirEntry(Ꮡ(d.files, d.offset + i));
     }
     d.offset += n;
-    return (list, default!);
+    return (list, default);
 }
 
 // sortSearch is like sort.Search, avoiding an import.
@@ -470,7 +470,7 @@ internal static nint sortSearch(nint n, Func<nint, bool> f) {
     while (i < j) {
         nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
-        if (!f(h)){
+        if (!f(h)) {
             i = h + 1; // preserves f(i-1) == false
         } else {
             j = h; // preserves f(j) == true

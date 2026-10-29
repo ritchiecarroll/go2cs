@@ -4,7 +4,7 @@
 namespace go.@internal;
 
 using sync = go.sync_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go;
 
 partial class testlog_package {
@@ -21,7 +21,7 @@ public static bool PanicOnExit0() {
         defer(ᏑpanicOnExit0.of(panicOnExit0ᴛ1.Ꮡmu).Unlock, ref ᒐ);
         return panicOnExit0.val;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

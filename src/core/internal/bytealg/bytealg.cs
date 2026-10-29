@@ -42,7 +42,7 @@ public static (uint32, uint32) HashStr<T>(T sep)
     }
     uint32 pow = 1;
     uint32 sq = PrimeRK;
-    for (nint i = len(sep); i > 0; i >>= (int)(1)) {
+    for (nint i = len(sep); i > 0; i >>= 1) {
         if ((i & 1) != 0) {
             pow *= sq;
         }
@@ -62,7 +62,7 @@ public static (uint32, uint32) HashStrRev<T>(T sep)
     }
     uint32 pow = 1;
     uint32 sq = PrimeRK;
-    for (nint i = len(sep); i > 0; i >>= (int)(1)) {
+    for (nint i = len(sep); i > 0; i >>= 1) {
         if ((i & 1) != 0) {
             pow *= sq;
         }
@@ -79,7 +79,7 @@ public static nint IndexRabinKarp<T>(T s, T sep)
     // Rabin-Karp search
     var (hashss, pow) = HashStr(sep);
     nint n = len(sep);
-    uint32 h = default!;
+    uint32 h = default;
     for (nint i = 0; i < n; i++) {
         h = h * (uint32)PrimeRK + (uint32)s[i];
     }
@@ -107,7 +107,7 @@ public static nint LastIndexRabinKarp<T>(T s, T sep)
     var (hashss, pow) = HashStrRev(sep);
     nint n = len(sep);
     nint last = len(s) - n;
-    uint32 h = default!;
+    uint32 h = default;
     for (nint i = len(s) - 1; i >= last; i--) {
         h = h * (uint32)PrimeRK + (uint32)s[i];
     }

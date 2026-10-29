@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,7 +59,7 @@ using static go.strconv_package;
 [assembly: go.GoPositionMap("strconv/bytealg.go", "bytealg.cs", "AAsYkg==")]
 [assembly: go.GoPositionMap("strconv/isprint.go", "isprint.cs", "AAkWANYBrgMAhwGQAgCAAoIEAHPoAQ==")]
 [assembly: go.GoPositionMap("strconv/number.go", "number.cs", "ABImsoKClKiSqqIABS4AFAKCgpQABTwAGwKCgpTcsoKClAAFOAAbAoKClNiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAIEoKmgAACFPKmgqaCpoI=")]
-[assembly: go.GoPositionMap("strconv/quote.go", "quote.cs", "AA4mkqaCpoKmpoKCgpSCgoKCgoKClJSCpoKCgpSCgqaCgoKClIKCgqSClJS0tLS0tLS0lIKCpIKkgoK2goLIrsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpJQAAiIAFASCgpSApIKkgqTIgoKUgpSUtLS0tLS0tIKUtLSkgoKClIKCgoKUlIKUgpSCgpSCtIKCgpSCgoKClJSCgoKUtLSCgpS0gpSCqqKCAAIS4oKClK4ACQSClIKCgpSUlJS02IKCgqb+toKClLSCpIKCgpS6koKCgpSmgoKUpoKClMqCyoKUlIKUpLzSgpKCgoKUpgACGAAKBIKUlJSUAAgSgoKCgpSCpoKCgpSClIKCrLKClKzEgpSC")]
+[assembly: go.GoPositionMap("strconv/quote.go", "quote.cs", "AA4mkqaCpoKmpoKCgpSCgoKCgoKClJSCpoKCgpSCgqaCgoKClIKCgpSClJS0tLS0tLS0lIKCpIKkgoK2goLIrsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpJQAAiIAFASCgpSApIKkgqTIgoKUgpSUtLS0tLS0tIKUtLSkgoKClIKCgoKUlIKUgpSCgpSCtIKCgpSCgoKClJSCgoKUtLSCgpS0gpSCqqKCAAIS4oKClK4ACQSClIKCgpSUlJS02IKCgqb+toKClLSCpIKCgpS6koKCgpSmgoKUpoKClMqCyoKUlIKUpLzSgpKCgoKUpgACGAAKBIKUlJSUAAgSgoKCgpSCpoKCgpSClIKCrLKClKzEgpSC")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -29,20 +29,22 @@ internal static error readHWCAP() {
                 var tag = a[0];
                 nuint val = (nuint)a[1];
                 a = a[2..];
-                var exprᴛ1 = tag;
-                if (exprᴛ1 == _AT_HWCAP) {
+                switch (tag) {
+                case var ᴛ when ᴛ == _AT_HWCAP: {
                     hwCap = val;
+                    break;
                 }
-                else if (exprᴛ1 == _AT_HWCAP2) {
+                case var ᴛ when ᴛ == _AT_HWCAP2: {
                     hwCap2 = val;
-                }
+                    break;
+                }}
             }
-            return default!;
+            return default;
         }
     }
 
     var (buf, err) = os.ReadFile(procAuxv);
-    if (err != default!) {
+    if (err != nil) {
         // e.g. on android /proc/self/auxv is not accessible, so silently
         // ignore the error and leave Initialized = false. On some
         // architectures (e.g. arm64) doinit() implements a fallback
@@ -51,8 +53,8 @@ internal static error readHWCAP() {
     }
     var bo = hostByteOrder();
     while (len(buf) >= 2 * (uintSize / 8)) {
-        nuint tag = default!;
-        nuint val = default!;
+        nuint tag = default;
+        nuint val = default;
         switch (uintSize) {
         case 32: {
             tag = (nuint)bo.Uint32(buf[0..]);
@@ -66,15 +68,17 @@ internal static error readHWCAP() {
             buf = buf[16..];
             break;
         }}
-        var exprᴛ2 = tag;
-        if (exprᴛ2 == _AT_HWCAP) {
+        switch (tag) {
+        case var ᴛ when ᴛ == _AT_HWCAP: {
             hwCap = val;
+            break;
         }
-        else if (exprᴛ2 == _AT_HWCAP2) {
+        case var ᴛ when ᴛ == _AT_HWCAP2: {
             hwCap2 = val;
-        }
+            break;
+        }}
     }
-    return default!;
+    return default;
 }
 
 } // end cpu_package

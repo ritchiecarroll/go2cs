@@ -27,7 +27,7 @@ partial struct RegArgs {
     // directly represented, but some architectures treat narrow
     // width floating point values specially (e.g. they're promoted
     // first, or they need to be NaN-boxed).
-    public array<uintptr> Ints = new(IntArgRegs); // untyped integer registers
+    public array<uintptr> Ints = new(IntArgRegs);    // untyped integer registers
     public array<uint64> Floats = new(FloatArgRegs); // untyped float registers
 // Fields above this point are known to assembly.
 

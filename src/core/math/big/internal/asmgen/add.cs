@@ -29,7 +29,7 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
     p.SetHint("y"u8, HintMemOK); // allow y to be used from memory on x86
     p.Start(n, 1, 4);
     ref var c = ref heap(new ΔReg(), out var Ꮡc);
-    if (!(~a.Arch).CarrySafeLoop){
+    if (!a.Arch.CarrySafeLoop) {
         // Carry smashed by loop tests; allocate and save in register
         // around unrolled blocks.
         c = Ꮡa.Reg();
@@ -60,7 +60,7 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
     p.Done();
 
     // Copy carry to output.
-    if (c.Valid()){
+    if (c.Valid()) {
         Ꮡa.ConvertCarry(which, c);
     } else {
         c = Ꮡa.RegHint(HintCarry);

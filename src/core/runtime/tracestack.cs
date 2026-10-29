@@ -33,13 +33,13 @@ internal static readonly @string attemptedToTraceStackOfAˢ = "attempted to trac
 // from stack traces, see CL 5523.
 //
 // Avoid calling this function directly. Prefer traceEventWriter.stack.
-internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackTable> Ꮡtab) {
+internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackTable> tab) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var pcBuf = getg().Value.m.Value.profStack;
 
     // Figure out gp and mp for the backtrace.
-    ж<m> mp = default!;
+    ж<m> mp = default;
     if (Ꮡgp == nil) {
         mp = getg().Value.m;
         Ꮡgp = mp.Value.curg; gp = ref Ꮡgp.DerefOrNull();
@@ -77,7 +77,7 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackT
         mp = gp.lockedm.ptr();
     }
     nint nstk = 1;
-    if (tracefpunwindoff() || (mp != nil && mp.hasCgoOnStack())){
+    if (tracefpunwindoff() || (mp != nil && mp.hasCgoOnStack())) {
         // Slow path: Unwind using default unwinder. Used when frame pointer
         // unwinding is unavailable or disabled (tracefpunwindoff), or might
         // produce incomplete results or crashes (hasCgoOnStack). Note that no
@@ -85,19 +85,17 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackT
         // motivation is to take advantage of a potentially registered cgo
         // symbolizer.
         pcBuf[0] = logicalStackSentinel;
-        if (getg() == Ꮡgp){
+        if (getg() == Ꮡgp) {
             nstk += callers(skip + 1, pcBuf[1..]);
-        } else 
-        if (Ꮡgp != nil) {
+        } else if (Ꮡgp != nil) {
             nstk += gcallers(Ꮡgp, skip, pcBuf[1..]);
         }
     } else {
         // Fast path: Unwind using frame pointers.
         pcBuf[0] = (uintptr)skip;
-        if (getg() == Ꮡgp){
+        if (getg() == Ꮡgp) {
             nstk += fpTracebackPCs((@unsafe.Pointer)getfp(), pcBuf[1..]);
-        } else 
-        if (Ꮡgp != nil) {
+        } else if (Ꮡgp != nil) {
             // Three cases:
             //
             // (1) We're called on the g0 stack through mcall(fn) or systemstack(fn). To
@@ -114,19 +112,19 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackT
             // (3) We're called against a gp that we're not currently executing on, but that is in
             // a syscall, in which case gp.syscallsp != 0. gp.syscall* contains the most up-to-date
             // information about where it stopped, and like case (1), we match gcallers here.
-            if (gp.syscallsp != 0){
+            if (gp.syscallsp != 0) {
                 pcBuf[1] = gp.syscallpc;
                 nstk += 1 + fpTracebackPCs((@unsafe.Pointer)gp.syscallbp, pcBuf[2..]);
             } else {
                 pcBuf[1] = gp.sched.pc;
-                if (gp.syncSafePoint){
+                if (gp.syncSafePoint) {
                     // We're stopped in morestack, which is an odd state because gp.sched.bp
                     // refers to our parent frame, since we haven't had the chance to push our
                     // frame pointer to the stack yet. If we just start walking from gp.sched.bp,
                     // we'll skip a frame as a result. Luckily, we can find the PC we want right
                     // at gp.sched.sp on non-LR platforms, and we have it directly on LR platforms.
                     // See issue go.dev/issue/68090.
-                    if (usesLR){
+                    if (usesLR) {
                         pcBuf[2] = gp.sched.lr;
                     } else {
                         pcBuf[2] = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)gp.sched.sp);
@@ -144,7 +142,7 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackT
     if (nstk > 0 && gp.goid == 1) {
         nstk--; // skip runtime.main
     }
-    var id = Ꮡtab.put(pcBuf.slice(0, nstk));
+    var id = tab.put(pcBuf.slice(0, nstk));
     return id;
 }
 
@@ -201,7 +199,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     // lots of varint sizes.
     //
     // Add 1 because we might also write tracev2.EvStacks.
-    bool flushed = default!;
+    bool flushed = default;
     (w, flushed) = w.ensure(1 + maxBytes);
     if (flushed) {
         w.@byte((byte)tracev2.EvStacks);
@@ -234,7 +232,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
 internal static slice<traceFrame> makeTraceFrames(uintptr gen, slice<uintptr> pcs) {
     var frames = new slice<traceFrame>(0, len(pcs));
     var ci = CallersFrames(pcs);
-    while (ᐧ) {
+    for (;;) {
         var (f, more) = ci.Next();
         frames = append(frames, makeTraceFrame(gen, f));
         if (!more) {
@@ -252,7 +250,7 @@ partial struct traceFrame {
 
 // makeTraceFrame sets up a traceFrame for a frame.
 internal static traceFrame makeTraceFrame(uintptr gen, Frame f) {
-    traceFrame frame = default!;
+    traceFrame frame = default;
     frame.PC = f.PC;
 
     @string fn = f.Function;
@@ -281,7 +279,7 @@ internal static bool tracefpunwindoff() {
 // "physical frames" rather than "logical frames"; that is if A is inlined into
 // B, this will return a PC for only B.
 internal static nint /*i*/ fpTracebackPCs(@unsafe.Pointer fp, slice<uintptr> pcBuf) {
-    nint i = default!;
+    nint i = default;
 
     for (i = 0; i < len(pcBuf) && fp != nil; i++) {
         // return addr sits one word above the frame pointer
@@ -307,16 +305,15 @@ public static nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src) 
 // sentinel. Physical frames are turned into logical frames via inline unwinding
 // and by applying the skip value that's stored in pcBuf[0].
 internal static nint fpunwindExpand(slice<uintptr> dst, slice<uintptr> pcBuf) {
-    if (len(pcBuf) == 0){
+    if (len(pcBuf) == 0) {
         return 0;
-    } else 
-    if (len(pcBuf) > 0 && pcBuf[0] == logicalStackSentinel) {
+    } else if (len(pcBuf) > 0 && pcBuf[0] == logicalStackSentinel) {
         // pcBuf contains logical rather than inlined frames, skip has already been
         // applied, just return it without the sentinel value in pcBuf[0].
         return copy(dst, pcBuf[1..]);
     }
 
-    nint n = default!;
+    nint n = default;
     abi.FuncID lastFuncID = abi.FuncIDNormal;
     uintptr skip = pcBuf[0];
     // skipOrAdd skips or appends retPC to newPCBuf and returns true if more
@@ -324,10 +321,9 @@ internal static nint fpunwindExpand(slice<uintptr> dst, slice<uintptr> pcBuf) {
 
     var dstʗ1 = dst;
     Func<uintptr, bool> skipOrAdd = (uintptr retPC) => {
-        if (skip > 0){
+        if (skip > 0) {
             skip--;
-        } else 
-        if (n < len(dstʗ1)) {
+        } else if (n < len(dstʗ1)) {
             dstʗ1[n] = retPC;
             n++;
         }
@@ -352,10 +348,9 @@ outer:
         var (u, uf) = newInlineUnwinder(fi, callPC);
         for (; uf.valid(); uf = u.next(uf)) {
             var sf = u.srcFunc(uf);
-            if (sf.funcID == abi.FuncIDWrapper && elideWrapperCalling(lastFuncID)){
+            if (sf.funcID == abi.FuncIDWrapper && elideWrapperCalling(lastFuncID)) {
                 // ignore wrappers
-            } else 
-            {
+            } else {
                 var more = skipOrAdd(uf.pc + 1); if (!more) {
                     goto break_outer;
                 }

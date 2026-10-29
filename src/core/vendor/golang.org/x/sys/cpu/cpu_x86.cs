@@ -11,7 +11,7 @@ partial class cpu_package {
 internal static UntypedInt cacheLineSize => 64;
 
 internal static void initOptions() {
-    options = new option[]{
+    options = slice<option>([
         new(Name: "adx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
         new(Name: "aes"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
         new(Name: "avx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX)),
@@ -59,7 +59,7 @@ internal static void initOptions() {
 
         // These capabilities should always be enabled on amd64:
         new(Name: "sse2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE2), Required: runtime.GOARCH == "amd64"u8)
-    }.slice();
+    ]);
 }
 
 internal static void archInit() {
@@ -86,15 +86,15 @@ internal static void archInit() {
     X86.HasOSXSAVE = isSet(27, ecx1);
     X86.HasRDRAND = isSet(30, ecx1);
 
-    bool osSupportsAVX = default!;
-    bool osSupportsAVX512 = default!;
+    bool osSupportsAVX = default;
+    bool osSupportsAVX512 = default;
     // For XGETBV, OSXSAVE bit is required and sufficient.
     if (X86.HasOSXSAVE) {
         var (eax, _) = xgetbv();
         // Check if XMM and YMM registers have OS support.
         osSupportsAVX = isSet(1, eax) && isSet(2, eax);
 
-        if (runtime.GOOS == "darwin"u8){
+        if (runtime.GOOS == "darwin"u8) {
             // Darwin requires special AVX512 checks, see cpu_darwin_x86.go
             osSupportsAVX512 = osSupportsAVX && darwinSupportsAVX512();
         } else {

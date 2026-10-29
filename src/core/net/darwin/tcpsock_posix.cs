@@ -15,12 +15,12 @@ partial class net_package {
 internal static ΔAddr sockaddrToTCP(syscall.Sockaddr sa) {
     switch (sa.type()) {
     case ж<syscall.SockaddrInet4> saΔ1: {
-        return new TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: (~saΔ1).Addr[0..], Port: (~saΔ1).Port)));
+        return new TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port)));
     }
     case ж<syscall.SockaddrInet6> saΔ1: {
-        return new TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: (~saΔ1).Addr[0..], Port: (~saΔ1).Port, Zone: zoneCache.name((nint)(~saΔ1).ZoneId))));
+        return new TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port, Zone: zoneCache.name((nint)saΔ1.ZoneId))));
     }}
-    return default!;
+    return default;
 }
 
 internal static nint family(this ж<TCPAddr> Ꮡa) {
@@ -29,7 +29,7 @@ internal static nint family(this ж<TCPAddr> Ꮡa) {
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
         return syscall.AF_INET;
     }
-    if (a.IP.To4() != default!) {
+    if (a.IP.To4() != nil) {
         return syscall.AF_INET;
     }
     return syscall.AF_INET6;
@@ -39,7 +39,7 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<TCPAddr> Ꮡa, nint f
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return (default!, default!);
+        return (default, default);
     }
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
@@ -75,35 +75,35 @@ internal static (int64, error) writeTo(this ж<TCPConn> Ꮡc, Δio.Writer w) {
     return genericWriteTo(Ꮡc, w);
 }
 
-internal static (ж<TCPConn>, error) dialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
+internal static (ж<TCPConn>, error) dialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     {
-        var h = sd.testHookDialTCP; if (h != default!) {
-            return h(ctx, sd.network, Ꮡladdr, Ꮡraddr);
+        var h = sd.testHookDialTCP; if (h != nil) {
+            return h(ctx, sd.network, laddr, raddr);
         }
     }
     {
-        var h = testHookDialTCP; if (h != default!) {
-            return h(ctx, sd.network, Ꮡladdr, Ꮡraddr);
+        var h = testHookDialTCP; if (h != nil) {
+            return h(ctx, sd.network, laddr, raddr);
         }
     }
-    return Ꮡsd.doDialTCP(ctx, Ꮡladdr, Ꮡraddr);
+    return Ꮡsd.doDialTCP(ctx, laddr, raddr);
 }
 
-internal static (ж<TCPConn>, error) doDialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
-    return Ꮡsd.doDialTCPProto(ctx, Ꮡladdr, Ꮡraddr, 0);
+internal static (ж<TCPConn>, error) doDialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+    return Ꮡsd.doDialTCPProto(ctx, laddr, raddr, 0);
 }
 
-internal static (ж<TCPConn>, error) doDialTCPProto(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr, nint proto) {
+internal static (ж<TCPConn>, error) doDialTCPProto(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> raddr, nint proto) {
     ref var sd = ref Ꮡsd.DerefOrNull();
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
-    if (ctrlCtxFn == default! && sd.Dialer.Control != default!) {
+    if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжΔsockaddr(Ꮡladdr), new TCPAddrжΔsockaddr(Ꮡraddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжΔsockaddr(Ꮡladdr), new TCPAddrжΔsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
 
     // TCP has a rarely used mechanism called a 'simultaneous connection' in
     // which Dial("tcp", addr1, addr2) run on the machine at addr1 can
@@ -130,21 +130,21 @@ internal static (ж<TCPConn>, error) doDialTCPProto(this ж<sysDialer> Ꮡsd, co
     //
     // The kernel socket code is no doubt enjoying watching us squirm.
     for (nint i = 0; i < 2 && (Ꮡladdr == nil || laddr.Port == 0) && (selfConnect(ref (fd).DerefOrNull(), err) || spuriousENOTAVAIL(err)); i++) {
-        if (err == default!) {
+        if (err == nil) {
             fd.Close();
         }
-        (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжΔsockaddr(Ꮡladdr), new TCPAddrжΔsockaddr(Ꮡraddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
+        (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжΔsockaddr(Ꮡladdr), new TCPAddrжΔsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
     }
 
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (newTCPConn(fd, sd.Dialer.KeepAlive, sd.Dialer.KeepAliveConfig, testPreHookSetKeepAlive, testHookSetKeepAlive), default!);
+    return (newTCPConn(fd, sd.Dialer.KeepAlive, sd.Dialer.KeepAliveConfig, testPreHookSetKeepAlive, testHookSetKeepAlive), default);
 }
 
 internal static bool selfConnect(ref netFD fd, error err) {
     // If the connect failed, we clearly didn't connect to ourselves.
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
 
@@ -156,23 +156,23 @@ internal static bool selfConnect(ref netFD fd, error err) {
     // a problem, we make sure if this happens we recognize trouble and
     // ask the DialTCP routine to try again.
     // TODO: try to understand what's really going on.
-    if (fd.laddr == default! || fd.raddr == default!) {
+    if (fd.laddr == nil || fd.raddr == nil) {
         return true;
     }
     var l = fd.laddr._<ж<TCPAddr>>();
     var r = fd.raddr._<ж<TCPAddr>>();
-    return (~l).Port == (~r).Port && (~l).IP.Equal((~r).IP);
+    return l.Port == r.Port && l.IP.Equal(r.IP);
 }
 
 internal static bool spuriousENOTAVAIL(error err) {
     {
         var (op, ok) = err._<ж<OpError>>(ᐧ); if (ok) {
-            err = op.Value.Err;
+            err = op.Err;
         }
     }
     {
         var (sys, ok) = err._<ж<os.SyscallError>>(ᐧ); if (ok) {
-            err = sys.Value.Err;
+            err = sys.Err;
         }
     }
     return AreEqual(err, syscall.EADDRNOTAVAIL);
@@ -186,10 +186,10 @@ internal static bool ok(this ж<TCPListener> Ꮡln) {
 
 internal static (ж<TCPConn>, error) accept(this ref TCPListener ln) {
     var (fd, err) = ln.fd.accept();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (newTCPConn(fd, ln.lc.KeepAlive, ln.lc.KeepAliveConfig, testPreHookSetKeepAlive, testHookSetKeepAlive), default!);
+    return (newTCPConn(fd, ln.lc.KeepAlive, ln.lc.KeepAliveConfig, testPreHookSetKeepAlive, testHookSetKeepAlive), default);
 }
 
 internal static error close(this ref TCPListener ln) {
@@ -198,28 +198,28 @@ internal static error close(this ref TCPListener ln) {
 
 internal static (ж<os.File>, error) @file(this ref TCPListener ln) {
     var (f, err) = ln.fd.dup();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (f, default!);
+    return (f, default);
 }
 
-internal static (ж<TCPListener>, error) listenTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> Ꮡladdr) {
-    return Ꮡsl.listenTCPProto(ctx, Ꮡladdr, 0);
+internal static (ж<TCPListener>, error) listenTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
+    return Ꮡsl.listenTCPProto(ctx, laddr, 0);
 }
 
-internal static (ж<TCPListener>, error) listenTCPProto(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> Ꮡladdr, nint proto) {
+internal static (ж<TCPListener>, error) listenTCPProto(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr, nint proto) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
-    Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default!;
-    if (sl.ListenConfig.Control != default!) {
+    Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
+    if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new TCPAddrжΔsockaddr(Ꮡladdr), default!, syscall.SOCK_STREAM, proto, listenˢ, ctrlCtxFn);
-    if (err != default!) {
-        return (default!, err);
+    var (fd, err) = internetSocket(ctx, sl.network, new TCPAddrжΔsockaddr(laddr), default, syscall.SOCK_STREAM, proto, listenˢ, ctrlCtxFn);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new TCPListener(fd: fd, lc: sl.ListenConfig)), default!);
+    return (Ꮡ(new TCPListener(fd: fd, lc: sl.ListenConfig)), default);
 }
 
 } // end net_package

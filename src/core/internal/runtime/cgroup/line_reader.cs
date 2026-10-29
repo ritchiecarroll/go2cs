@@ -37,7 +37,7 @@ partial struct lineReader {
     internal Func<nint, slice<byte>, (nint, uintptr)> read;
     internal nint fd;
     internal slice<byte> scratch;
-    internal nint n; // bytes of scratch in use.
+    internal nint n;       // bytes of scratch in use.
     internal nint newline; // index of the first newline in scratch.
     internal bool eof; // read reached EOF.
 }
@@ -87,16 +87,16 @@ internal static error next(this ref lineReader r) {
     var prevComplete = r.newline >= 0;
     var firstCall = r.n == 0;
 
-    while (ᐧ) {
+    for (;;) {
         if (prevComplete) {
             // Drop the previous line.
             copy(r.scratch, r.scratch.slice(r.newline + 1, r.n));
             r.n -= r.newline + 1;
 
-            r.newline = bytealg.IndexByte(r.scratch.slice(0, r.n), (rune)'\n');
+            r.newline = bytealg.IndexByte(r.scratch.slice(0, r.n), (byte)'\n');
             if (r.newline >= 0) {
                 // We have another line already in scratch. Done.
-                return default!;
+                return default;
             }
         }
 
@@ -124,8 +124,8 @@ internal static error next(this ref lineReader r) {
             return errEOF;
         }
 
-        r.newline = bytealg.IndexByte(r.scratch.slice(0, r.n), (rune)'\n');
-        if (prevComplete || firstCall){
+        r.newline = bytealg.IndexByte(r.scratch.slice(0, r.n), (byte)'\n');
+        if (prevComplete || firstCall) {
             // Already have the start of the line, just need to find the end.
 
             if (r.newline < 0) {
@@ -135,7 +135,7 @@ internal static error next(this ref lineReader r) {
             }
 
             // Found the end of the line. Done.
-            return default!;
+            return default;
         } else {
             // Don't have the start of the line. We are currently
             // looking for the end of the previous line.

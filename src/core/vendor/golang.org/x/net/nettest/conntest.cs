@@ -42,38 +42,38 @@ private static readonly @string concurrentMethodsˢ = "ConcurrentMethods"u8;
 // false negatives. Thus, some issues may only be detected when the test is
 // run multiple times. For maximal effectiveness, run the tests under the
 // race detector.
-public static void TestConn(ж<testing.T> Ꮡt, Func<(net.Conn, net.Conn, Action, error)> mp) {
-    Ꮡt.Run(basicIOˢ, (ж<testing.T> tΔ1) => {
+public static void TestConn(ж<testing.T> t, Func<(net.Conn, net.Conn, Action, error)> mp) {
+    t.Run(basicIOˢ, (ж<testing.T> tΔ1) => {
         timeoutWrapper(tΔ1, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testBasicIO));
     });
-    Ꮡt.Run(pingPongˢ, (ж<testing.T> tΔ2) => {
+    t.Run(pingPongˢ, (ж<testing.T> tΔ2) => {
         timeoutWrapper(tΔ2, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPingPong));
     });
-    Ꮡt.Run(racyReadˢ, (ж<testing.T> tΔ3) => {
+    t.Run(racyReadˢ, (ж<testing.T> tΔ3) => {
         timeoutWrapper(tΔ3, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testRacyRead));
     });
-    Ꮡt.Run(racyWriteˢ, (ж<testing.T> tΔ4) => {
+    t.Run(racyWriteˢ, (ж<testing.T> tΔ4) => {
         timeoutWrapper(tΔ4, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testRacyWrite));
     });
-    Ꮡt.Run(readTimeoutˢ, (ж<testing.T> tΔ5) => {
+    t.Run(readTimeoutˢ, (ж<testing.T> tΔ5) => {
         timeoutWrapper(tΔ5, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testReadTimeout));
     });
-    Ꮡt.Run(writeTimeoutˢ, (ж<testing.T> tΔ6) => {
+    t.Run(writeTimeoutˢ, (ж<testing.T> tΔ6) => {
         timeoutWrapper(tΔ6, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testWriteTimeout));
     });
-    Ꮡt.Run(pastTimeoutˢ, (ж<testing.T> tΔ7) => {
+    t.Run(pastTimeoutˢ, (ж<testing.T> tΔ7) => {
         timeoutWrapper(tΔ7, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPastTimeout));
     });
-    Ꮡt.Run(presentTimeoutˢ, (ж<testing.T> tΔ8) => {
+    t.Run(presentTimeoutˢ, (ж<testing.T> tΔ8) => {
         timeoutWrapper(tΔ8, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPresentTimeout));
     });
-    Ꮡt.Run(futureTimeoutˢ, (ж<testing.T> tΔ9) => {
+    t.Run(futureTimeoutˢ, (ж<testing.T> tΔ9) => {
         timeoutWrapper(tΔ9, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testFutureTimeout));
     });
-    Ꮡt.Run(closeTimeoutˢ, (ж<testing.T> tΔ10) => {
+    t.Run(closeTimeoutˢ, (ж<testing.T> tΔ10) => {
         timeoutWrapper(tΔ10, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testCloseTimeout));
     });
-    Ꮡt.Run(concurrentMethodsˢ, (ж<testing.T> tΔ11) => {
+    t.Run(concurrentMethodsˢ, (ж<testing.T> tΔ11) => {
         timeoutWrapper(tΔ11, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testConcurrentMethods));
     });
 }
@@ -83,13 +83,13 @@ public static void TestConn(ж<testing.T> Ꮡt, Func<(net.Conn, net.Conn, Action
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object testTimedOutTerminatingˢ = (@string)"test timed out; terminating pipe"u8;
 
-internal static void timeoutWrapper(ж<testing.T> Ꮡt, Func<(net.Conn, net.Conn, Action, error)> mp, Action<ж<testing.T>, net.Conn, net.Conn> f) {
+internal static void timeoutWrapper(ж<testing.T> t, Func<(net.Conn, net.Conn, Action, error)> mp, Action<ж<testing.T>, net.Conn, net.Conn> f) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Helper();
+        t.Helper();
         var (c1, c2, stop, err) = mp();
-        if (err != default!) {
-            Ꮡt.Fatalf("unable to make pipe: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("unable to make pipe: %v"u8, err);
         }
         ref var once = ref heap(new sync.Once(), out var Ꮡonce);
         var stopʗ1 = stop;
@@ -100,13 +100,13 @@ internal static void timeoutWrapper(ж<testing.T> Ꮡt, Func<(net.Conn, net.Conn
         var timer = time.AfterFunc(time.ΔMinute, () => {
             var stopʗ3 = stopʗ2;
             Ꮡonce.Do(() => {
-                Ꮡt.Error(testTimedOutTerminatingˢ);
+                t.Error(testTimedOutTerminatingˢ);
                 stopʗ3();
             });
         });
         var timerʗ1 = timer;
         defer(() => timerʗ1.Stop(), ref ᒐ);
-        f(Ꮡt, c1, c2);
+        f(t, c1, c2);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -116,7 +116,7 @@ internal static void timeoutWrapper(ж<testing.T> Ꮡt, Func<(net.Conn, net.Conn
 private static readonly object transmittedDataDiffersˢ = (@string)"transmitted data differs"u8;
 
 // testBasicIO tests that the data sent on c1 is properly received on c2.
-internal static partial void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testBasicIO(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     var want = new slice<byte>((1 << 20));
     rand.New(rand.NewSource(0)).Read(want);
 
@@ -125,13 +125,13 @@ internal static partial void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Co
     goǃ(() => {
         var rd = bytes.NewReader(wantʗ1);
         {
-            var err = chunkedCopy(new net_ConnᴠWriter(c1), new bytes_ReaderжReader(rd)); if (err != default!) {
-                Ꮡt.Errorf("unexpected c1.Write error: %v"u8, err);
+            var err = chunkedCopy(new net_ConnᴠWriter(c1), new bytes_ReaderжReader(rd)); if (err != nil) {
+                t.Errorf("unexpected c1.Write error: %v"u8, err);
             }
         }
         {
-            var err = c1.Close(); if (err != default!) {
-                Ꮡt.Errorf("unexpected c1.Close error: %v"u8, err);
+            var err = c1.Close(); if (err != nil) {
+                t.Errorf("unexpected c1.Close error: %v"u8, err);
             }
         }
     });
@@ -140,13 +140,13 @@ internal static partial void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Co
     goǃ(() => {
         var wr = @new<bytes.Buffer>();
         {
-            var err = chunkedCopy(new bytes_BufferжWriter(wr), new net_ConnᴠReader(c2)); if (err != default!) {
-                Ꮡt.Errorf("unexpected c2.Read error: %v"u8, err);
+            var err = chunkedCopy(new bytes_BufferжWriter(wr), new net_ConnᴠReader(c2)); if (err != nil) {
+                t.Errorf("unexpected c2.Read error: %v"u8, err);
             }
         }
         {
-            var err = c2.Close(); if (err != default!) {
-                Ꮡt.Errorf("unexpected c2.Close error: %v"u8, err);
+            var err = c2.Close(); if (err != nil) {
+                t.Errorf("unexpected c2.Close error: %v"u8, err);
             }
         }
         dataChʗ1.ᐸꟷ(wr.Bytes());
@@ -154,14 +154,14 @@ internal static partial void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Co
 
     {
         var got = ᐸꟷ(dataCh); if (!bytes.Equal(got, want)) {
-            Ꮡt.Error(transmittedDataDiffersˢ);
+            t.Error(transmittedDataDiffersˢ);
         }
     }
 }
 
 // testPingPong tests that the two endpoints can synchronously send data to
 // each other in a typical request-response pattern.
-internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testPingPong(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -172,21 +172,21 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 var buf = new slice<byte>(8);
-                uint64 prev = default!;
-                while (ᐧ) {
+                uint64 prev = default;
+                for (;;) {
                     {
-                        var (_, err) = io.ReadFull(new net_ConnᴠReader(c), buf); if (err != default!) {
+                        var (_, err) = io.ReadFull(new net_ConnᴠReader(c), buf); if (err != nil) {
                             if (AreEqual(err, io.EOF)) {
                                 break;
                             }
-                            Ꮡt.Errorf("unexpected Read error: %v"u8, err);
+                            t.Errorf("unexpected Read error: %v"u8, err);
                         }
                     }
 
                     var v = binary.LittleEndian.Uint64(buf);
                     binary.LittleEndian.PutUint64(buf, v + 1);
                     if (prev != 0 && prev + 2 != v) {
-                        Ꮡt.Errorf("mismatching value: got %d, want %d"u8, v, prev + 2);
+                        t.Errorf("mismatching value: got %d, want %d"u8, v, prev + 2);
                     }
                     prev = v;
                     if (v == 1000) {
@@ -194,15 +194,15 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
                     }
 
                     {
-                        var (_, err) = c.Write(buf); if (err != default!) {
-                            Ꮡt.Errorf("unexpected Write error: %v"u8, err);
+                        var (_, err) = c.Write(buf); if (err != nil) {
+                            t.Errorf("unexpected Write error: %v"u8, err);
                             break;
                         }
                     }
                 }
                 {
-                    var err = c.Close(); if (err != default!) {
-                        Ꮡt.Errorf("unexpected Close error: %v"u8, err);
+                    var err = c.Close(); if (err != nil) {
+                        t.Errorf("unexpected Close error: %v"u8, err);
                     }
                 }
             }
@@ -218,8 +218,8 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
 
         // Start off the chain reaction.
         {
-            var (_, err) = c1.Write(new slice<byte>(8)); if (err != default!) {
-                Ꮡt.Errorf("unexpected c1.Write error: %v"u8, err);
+            var (_, err) = c1.Write(new slice<byte>(8)); if (err != nil) {
+                t.Errorf("unexpected c1.Write error: %v"u8, err);
             }
         }
     }
@@ -229,7 +229,7 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
 
 // testRacyRead tests that it is safe to mutate the input Read buffer
 // immediately after cancellation has occurred.
-internal static partial void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testRacyRead(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new rand_RandжReader(rand.New(rand.NewSource(0))));
@@ -250,8 +250,8 @@ internal static partial void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.C
                     for (nint j = 0; j < 100; j++) {
                         var (_, err) = c1.Read(b1);
                         copy(b1, b2); // Mutate b1 to trigger potential race
-                        if (err != default!) {
-                            checkForTimeoutError(Ꮡt, err);
+                        if (err != nil) {
+                            checkForTimeoutError(t, err);
                             c1.SetReadDeadline(time.Now().Add(time.Millisecond));
                         }
                     }
@@ -267,7 +267,7 @@ internal static partial void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.C
 
 // testRacyWrite tests that it is safe to mutate the input Write buffer
 // immediately after cancellation has occurred.
-internal static partial void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testRacyWrite(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), io.Discard, new net_ConnᴠReader(c2));
@@ -288,8 +288,8 @@ internal static partial void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.
                     for (nint j = 0; j < 100; j++) {
                         var (_, err) = c1.Write(b1);
                         copy(b1, b2); // Mutate b1 to trigger potential race
-                        if (err != default!) {
-                            checkForTimeoutError(Ꮡt, err);
+                        if (err != nil) {
+                            checkForTimeoutError(t, err);
                             c1.SetWriteDeadline(time.Now().Add(time.Millisecond));
                         }
                     }
@@ -304,53 +304,53 @@ internal static partial void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.
 }
 
 // testReadTimeout tests that Read timeouts do not affect Write.
-internal static partial void testReadTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testReadTimeout(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), io.Discard, new net_ConnᴠReader(c2));
 
     c1.SetReadDeadline(aLongTimeAgo);
     var (_, err) = c1.Read(new slice<byte>(1024));
-    checkForTimeoutError(Ꮡt, err);
+    checkForTimeoutError(t, err);
     {
-        var (_, errΔ1) = c1.Write(new slice<byte>(1024)); if (errΔ1 != default!) {
-            Ꮡt.Errorf("unexpected Write error: %v"u8, errΔ1);
+        var (_, errΔ1) = c1.Write(new slice<byte>(1024)); if (errΔ1 != nil) {
+            t.Errorf("unexpected Write error: %v"u8, errΔ1);
         }
     }
 }
 
 // testWriteTimeout tests that Write timeouts do not affect Read.
-internal static partial void testWriteTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testWriteTimeout(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new rand_RandжReader(rand.New(rand.NewSource(0))));
 
     c1.SetWriteDeadline(aLongTimeAgo);
     var (_, err) = c1.Write(new slice<byte>(1024));
-    checkForTimeoutError(Ꮡt, err);
+    checkForTimeoutError(t, err);
     {
-        var (_, errΔ1) = c1.Read(new slice<byte>(1024)); if (errΔ1 != default!) {
-            Ꮡt.Errorf("unexpected Read error: %v"u8, errΔ1);
+        var (_, errΔ1) = c1.Read(new slice<byte>(1024)); if (errΔ1 != nil) {
+            t.Errorf("unexpected Read error: %v"u8, errΔ1);
         }
     }
 }
 
 // testPastTimeout tests that a deadline set in the past immediately times out
 // Read and Write requests.
-internal static partial void testPastTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testPastTimeout(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
 
-    testRoundtrip(Ꮡt, c1);
+    testRoundtrip(t, c1);
 
     c1.SetDeadline(aLongTimeAgo);
     var (n, err) = c1.Write(new slice<byte>(1024));
     if (n != 0) {
-        Ꮡt.Errorf("unexpected Write count: got %d, want 0"u8, n);
+        t.Errorf("unexpected Write count: got %d, want 0"u8, n);
     }
-    checkForTimeoutError(Ꮡt, err);
+    checkForTimeoutError(t, err);
     (n, err) = c1.Read(new slice<byte>(1024));
     if (n != 0) {
-        Ꮡt.Errorf("unexpected Read count: got %d, want 0"u8, n);
+        t.Errorf("unexpected Read count: got %d, want 0"u8, n);
     }
-    checkForTimeoutError(Ꮡt, err);
+    checkForTimeoutError(t, err);
 
-    testRoundtrip(Ꮡt, c1);
+    testRoundtrip(t, c1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -359,7 +359,7 @@ private static readonly object writeTimedOutBeforeˢ = (@string)"Write timed out
 
 // testPresentTimeout tests that a past deadline set while there are pending
 // Read and Write operations immediately times out those operations.
-internal static partial void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testPresentTimeout(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -387,11 +387,11 @@ internal static partial void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1,
                 defer(Ꮡwg.Done, ref ᒐ);
                 var (n, err) = c1.Read(new slice<byte>(1024));
                 if (n != 0) {
-                    Ꮡt.Errorf("unexpected Read count: got %d, want 0"u8, n);
+                    t.Errorf("unexpected Read count: got %d, want 0"u8, n);
                 }
-                checkForTimeoutError(Ꮡt, err);
+                checkForTimeoutError(t, err);
                 if (len(deadlineSetʗ2) == 0) {
-                    Ꮡt.Error(readTimedOutBeforeˢ);
+                    t.Error(readTimedOutBeforeˢ);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -402,13 +402,13 @@ internal static partial void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1,
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                error err = default!;
-                while (err == default!) {
+                error err = default;
+                while (err == nil) {
                     (_, err) = c1.Write(new slice<byte>(1024));
                 }
-                checkForTimeoutError(Ꮡt, err);
+                checkForTimeoutError(t, err);
                 if (len(deadlineSetʗ3) == 0) {
-                    Ꮡt.Error(writeTimedOutBeforeˢ);
+                    t.Error(writeTimedOutBeforeˢ);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -421,7 +421,7 @@ internal static partial void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1,
 
 // testFutureTimeout tests that a future deadline will eventually time out
 // Read and Write operations.
-internal static partial void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testFutureTimeout(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(2);
 
@@ -431,7 +431,7 @@ internal static partial void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, 
         try {
             defer(Ꮡwg.Done, ref ᒐ);
             var (_, err) = c1.Read(new slice<byte>(1024));
-            checkForTimeoutError(Ꮡt, err);
+            checkForTimeoutError(t, err);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -440,11 +440,11 @@ internal static partial void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, 
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
-            error err = default!;
-            while (err == default!) {
+            error err = default;
+            while (err == nil) {
                 (_, err) = c1.Write(new slice<byte>(1024));
             }
-            checkForTimeoutError(Ꮡt, err);
+            checkForTimeoutError(t, err);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -452,13 +452,13 @@ internal static partial void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, 
     Ꮡwg.Wait();
 
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
-    resyncConn(Ꮡt, c1);
-    testRoundtrip(Ꮡt, c1);
+    resyncConn(t, c1);
+    testRoundtrip(t, c1);
 }
 
 // testCloseTimeout tests that calling Close immediately times out pending
 // Read and Write operations.
-internal static partial void testCloseTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testCloseTimeout(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
@@ -483,9 +483,9 @@ internal static partial void testCloseTimeout(ж<testing.T> Ꮡt, net.Conn c1, n
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                error err = default!;
+                error err = default;
                 var buf = new slice<byte>(1024);
-                while (err == default!) {
+                while (err == nil) {
                     (_, err) = c1.Read(buf);
                 }
             }
@@ -496,9 +496,9 @@ internal static partial void testCloseTimeout(ж<testing.T> Ꮡt, net.Conn c1, n
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                error err = default!;
+                error err = default;
                 var buf = new slice<byte>(1024);
-                while (err == default!) {
+                while (err == nil) {
                     (_, err) = c1.Write(buf);
                 }
             }
@@ -515,9 +515,9 @@ private static readonly object skippingOnPlan9SeeHttpsˢ = (@string)"skipping on
 
 // testConcurrentMethods tests that the methods of net.Conn can safely
 // be called concurrently.
-internal static partial void testConcurrentMethods(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
+internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1, net.Conn c2) {
     if (runtime.GOOS == "plan9"u8) {
-        Ꮡt.Skip(skippingOnPlan9SeeHttpsˢ);
+        t.Skip(skippingOnPlan9SeeHttpsˢ);
     }
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
 
@@ -592,25 +592,25 @@ internal static partial void testConcurrentMethods(ж<testing.T> Ꮡt, net.Conn 
     }
     Ꮡwg.Wait(); // At worst, the deadline is set 10ms into the future
 
-    resyncConn(Ꮡt, c1);
-    testRoundtrip(Ꮡt, c1);
+    resyncConn(t, c1);
+    testRoundtrip(t, c1);
 }
 
 // checkForTimeoutError checks that the error satisfies the Error interface
 // and that Timeout returns true.
-internal static void checkForTimeoutError(ж<testing.T> Ꮡt, error err) {
-    Ꮡt.Helper();
+internal static void checkForTimeoutError(ж<testing.T> t, error err) {
+    t.Helper();
     {
-        var (nerr, ok) = err._<netꓸError>(ᐧ); if (ok){
+        var (nerr, ok) = err._<netꓸError>(ᐧ); if (ok) {
             if (!nerr.Timeout()) {
-                if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8 && Ꮡt.Name() == "TestTestConn/TCP/RacyRead"u8){
-                    Ꮡt.Logf("ignoring known failure mode on windows/arm64; see https://go.dev/issue/52893"u8);
+                if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8 && t.Name() == "TestTestConn/TCP/RacyRead"u8) {
+                    t.Logf("ignoring known failure mode on windows/arm64; see https://go.dev/issue/52893"u8);
                 } else {
-                    Ꮡt.Errorf("got error: %v, want err.Timeout() = true"u8, nerr);
+                    t.Errorf("got error: %v, want err.Timeout() = true"u8, nerr);
                 }
             }
         } else {
-            Ꮡt.Errorf("got %T: %v, want net.Error"u8, err, err);
+            t.Errorf("got %T: %v, want net.Error"u8, err, err);
         }
     }
 }
@@ -620,57 +620,57 @@ private static readonly @string sᶜ = "Hello, world!"u8;
 
 // testRoundtrip writes something into c and reads it back.
 // It assumes that everything written into c is echoed back to itself.
-internal static void testRoundtrip(ж<testing.T> Ꮡt, net.Conn c) {
-    Ꮡt.Helper();
+internal static void testRoundtrip(ж<testing.T> t, net.Conn c) {
+    t.Helper();
     {
-        var err = c.SetDeadline(neverTimeout); if (err != default!) {
-            Ꮡt.Errorf("roundtrip SetDeadline error: %v"u8, err);
+        var err = c.SetDeadline(neverTimeout); if (err != nil) {
+            t.Errorf("roundtrip SetDeadline error: %v"u8, err);
         }
     }
 
     @string s = sᶜ;
     var buf = slice<byte>(s);
     {
-        var (_, err) = c.Write(buf); if (err != default!) {
-            Ꮡt.Errorf("roundtrip Write error: %v"u8, err);
+        var (_, err) = c.Write(buf); if (err != nil) {
+            t.Errorf("roundtrip Write error: %v"u8, err);
         }
     }
     {
-        var (_, err) = io.ReadFull(new net_ConnᴠReader(c), buf); if (err != default!) {
-            Ꮡt.Errorf("roundtrip Read error: %v"u8, err);
+        var (_, err) = io.ReadFull(new net_ConnᴠReader(c), buf); if (err != nil) {
+            t.Errorf("roundtrip Read error: %v"u8, err);
         }
     }
     if (((sstring)buf) != s) {
-        Ꮡt.Errorf("roundtrip data mismatch: got %q, want %q"u8, buf, s);
+        t.Errorf("roundtrip data mismatch: got %q, want %q"u8, buf, s);
     }
 }
 
 // resyncConn resynchronizes the connection into a sane state.
 // It assumes that everything written into c is echoed back to itself.
 // It assumes that 0xff is not currently on the wire or in the read buffer.
-internal static partial void resyncConn(ж<testing.T> Ꮡt, net.Conn c) {
-    Ꮡt.Helper();
+internal static partial void resyncConn(ж<testing.T> t, net.Conn c) {
+    t.Helper();
     c.SetDeadline(neverTimeout);
     var errCh = new channel<error>(0);
     var errChʗ1 = errCh;
     goǃ(() => {
-        var (_, err) = c.Write(new byte[]{0xff}.slice());
+        var (_, err) = c.Write(slice<byte>([0xff]));
         errChʗ1.ᐸꟷ(err);
     });
     var buf = new slice<byte>(1024);
-    while (ᐧ) {
+    for (;;) {
         var (n, err) = c.Read(buf);
         if (n > 0 && bytes.IndexByte(buf.slice(0, n), 0xff) == n - 1) {
             break;
         }
-        if (err != default!) {
-            Ꮡt.Errorf("unexpected Read error: %v"u8, err);
+        if (err != nil) {
+            t.Errorf("unexpected Read error: %v"u8, err);
             break;
         }
     }
     {
-        var err = ᐸꟷ(errCh); if (err != default!) {
-            Ꮡt.Errorf("unexpected Write error: %v"u8, err);
+        var err = ᐸꟷ(errCh); if (err != nil) {
+            t.Errorf("unexpected Write error: %v"u8, err);
         }
     }
 }

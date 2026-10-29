@@ -23,7 +23,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class printer_package {
 
 internal static UntypedInt maxNewlines => 2; // max. number of newlines between source text
-internal const bool debug = false; // enable for debugging
+internal const bool debug = false;           // enable for debugging
 internal static UntypedInt infinity => /* 1 << 30 */ 1073741824;
 
 partial struct whiteSpace /*num:byte*/;
@@ -39,14 +39,14 @@ internal static whiteSpace unindent => /* whiteSpace('<') */ 60;
 // A pmode value represents the current printer mode.
 partial struct pmode /*num:nint*/;
 
-internal static pmode noExtraBlank => /* 1 << iota */ 1;         // disables extra blank after /*-style comment
-internal static pmode noExtraLinebreak => 2;     // disables extra line break after /*-style comment
+internal static pmode noExtraBlank => /* 1 << iota */ 1; // disables extra blank after /*-style comment
+internal static pmode noExtraLinebreak => 2;             // disables extra line break after /*-style comment
 
 partial struct commentInfo {
-    internal nint cindex;              // index of the next comment
+    internal nint cindex;                 // index of the next comment
     internal ж<ast.CommentGroup> comment; // = printer.comments[cindex-1]; or nil
-    internal nint commentOffset;              // = printer.posFor(printer.comments[cindex-1].List[0].Pos()).Offset; or infinity
-    internal bool commentNewline;              // true if the comment group contains newlines
+    internal nint commentOffset;          // = printer.posFor(printer.comments[cindex-1].List[0].Pos()).Offset; or infinity
+    internal bool commentNewline;         // true if the comment group contains newlines
 }
 
 partial struct printer {
@@ -54,28 +54,28 @@ partial struct printer {
     /*embed*/ public Config Config;
     internal ж<token.FileSet> fset;
     // Current state
-    internal slice<byte> output;  // raw printer result
-    internal nint indent;         // current indentation
-    internal nint level;         // level == 0: outside composite literal; level > 0: inside composite literal
-    internal pmode mode;        // current printer mode
-    internal bool endAlignment;         // if set, terminate alignment immediately
-    internal bool impliedSemi;         // if set, a linebreak implies a semicolon
-    internal token.Token lastTok;  // last token printed (token.ILLEGAL if it's whitespace)
-    internal token.Token prevOpen;  // previous non-brace "open" token (, [, or token.ILLEGAL
+    internal slice<byte> output;      // raw printer result
+    internal nint indent;             // current indentation
+    internal nint level;              // level == 0: outside composite literal; level > 0: inside composite literal
+    internal pmode mode;              // current printer mode
+    internal bool endAlignment;       // if set, terminate alignment immediately
+    internal bool impliedSemi;        // if set, a linebreak implies a semicolon
+    internal token.Token lastTok;     // last token printed (token.ILLEGAL if it's whitespace)
+    internal token.Token prevOpen;    // previous non-brace "open" token (, [, or token.ILLEGAL
     internal slice<whiteSpace> wsbuf; // delayed white space
-    internal slice<nint> goBuild;  // start index of all //go:build comments in output
-    internal slice<nint> plusBuild;  // start index of all // +build comments in output
+    internal slice<nint> goBuild;     // start index of all //go:build comments in output
+    internal slice<nint> plusBuild;   // start index of all // +build comments in output
     // Positions
     // The out position differs from the pos position when the result
     // formatting differs from the source formatting (in the amount of
     // white space). If there's a difference and SourcePos is set in
     // ConfigMode, //line directives are used in the output to restore
     // original source positions for a reader.
-    internal tokenꓸPosition pos; // current position in AST (source) space
+    internal tokenꓸPosition pos;  // current position in AST (source) space
     internal tokenꓸPosition @out; // current position in output space
     internal tokenꓸPosition last; // value of pos after calling writeString
-    internal ж<nint> linePtr;       // if set, record out.Line for the next token in *linePtr
-    internal error sourcePosErr;          // if non-nil, the first error emitting a //line directive
+    internal ж<nint> linePtr;     // if set, record out.Line for the next token in *linePtr
+    internal error sourcePosErr;  // if non-nil, the first error emitting a //line directive
     // The list of all source comments, in order of appearance.
     internal slice<ж<ast.CommentGroup>> comments; // may be nil
     internal bool useNodeComments;                // if not set, ignore lead and line comments of nodes
@@ -110,7 +110,7 @@ internal static bool commentsHaveNewline(this ref printer p, slice<ж<ast.Commen
             return true;
         }
         {
-            @string t = c.Value.Text; if (len(t) >= 2 && (t[1] == (rune)'/' || strings.Contains(t, "\n"u8))) {
+            @string t = c.Text; if (len(t) >= 2 && (t[1] == '/' || strings.Contains(t, "\n"u8))) {
                 return true;
             }
         }
@@ -124,7 +124,7 @@ internal static void nextComment(this ref printer p) {
         var c = p.comments[p.cindex];
         p.cindex++;
         {
-            var list = c.Value.List; if (len(list) > 0) {
+            var list = c.List; if (len(list) > 0) {
                 p.comment = c;
                 p.commentOffset = p.posFor(list[0].Pos()).Offset;
                 p.commentNewline = p.commentsHaveNewline(list);
@@ -159,14 +159,14 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 
         nint size = 0;
         while (p.commentBefore(next)) {
-            foreach (var (_, c) in (~p.comment).List) {
-                size += len((~c).Text);
+            foreach (var (_, c) in p.comment.List) {
+                size += len(c.Text);
             }
             p.nextComment();
         }
         return size;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -205,7 +205,7 @@ internal static nint lineFor(this ref printer p, tokenꓸPos pos) {
 internal static void writeLineDirective(this ref printer p, tokenꓸPosition pos) {
     if (pos.IsValid() && (p.@out.Line != pos.Line || p.@out.Filename != pos.Filename)) {
         if (strings.ContainsAny(pos.Filename, "\r\n"u8)) {
-            if (p.sourcePosErr == default!) {
+            if (p.sourcePosErr == nil) {
                 p.sourcePosErr = fmt.Errorf("go/printer: source filename contains unexpected newline character: %q"u8, pos.Filename);
             }
             return;
@@ -226,7 +226,7 @@ internal static void writeIndent(this ref printer p) {
     // must not be discarded by the tabwriter
     nint n = p.Config.Indent + p.indent; // include base indentation
     for (nint i = 0; i < n; i++) {
-        p.output = append(p.output, (byte)((rune)'\t'));
+        p.output = append(p.output, (byte)'\t');
     }
 
     // update positions
@@ -244,12 +244,12 @@ internal static void writeByte(this ref printer p, byte ch, nint n) {
         // a formfeed to indicate termination of
         // existing columns.
         switch (ch) {
-        case (rune)'\t' or (rune)'\v': {
-            ch = (rune)' ';
+        case (byte)'\t' or (byte)'\v': {
+            ch = (byte)' ';
             break;
         }
-        case (rune)'\n' or (rune)'\f': {
-            ch = (rune)'\f';
+        case (byte)'\n' or (byte)'\f': {
+            ch = (byte)'\f';
             p.endAlignment = false;
             break;
         }}
@@ -266,7 +266,7 @@ internal static void writeByte(this ref printer p, byte ch, nint n) {
 
     // update positions
     p.pos.Offset += n;
-    if (ch == (rune)'\n' || ch == (rune)'\f') {
+    if (ch == '\n' || ch == '\f') {
         p.pos.Line += n;
         p.@out.Line += n;
         p.pos.Column = 1;
@@ -318,11 +318,11 @@ internal static void writeString(this ref printer p, tokenꓸPosition pos, @stri
 
     // update positions
     nint nlines = 0;
-    nint li = default!;      // index of last newline; valid if nlines > 0
+    nint li = default; // index of last newline; valid if nlines > 0
     for (nint i = 0; i < len(s); i++) {
         // Raw string literals may contain any character except back quote (`).
         {
-            var ch = s[i]; if (ch == (rune)'\n' || ch == (rune)'\f') {
+            var ch = s[i]; if (ch == '\n' || ch == '\f') {
                 // account for line break
                 nlines++;
                 li = i;
@@ -334,7 +334,7 @@ internal static void writeString(this ref printer p, tokenꓸPosition pos, @stri
         }
     }
     p.pos.Offset += len(s);
-    if (nlines > 0){
+    if (nlines > 0) {
         p.pos.Line += nlines;
         p.@out.Line += nlines;
         nint c = len(s) - li;
@@ -368,11 +368,11 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
 
     if (pos.IsValid() && pos.Filename != p.last.Filename) {
         // comment in a different file - separate with newlines
-        p.writeByte((rune)'\f', maxNewlines);
+        p.writeByte((byte)'\f', maxNewlines);
         return;
     }
 
-    if (pos.Line == p.last.Line && (Ꮡprev == nil || prev.Text[1] != (rune)'/')){
+    if (pos.Line == p.last.Line && (Ꮡprev == nil || prev.Text[1] != '/')) {
         // comment on the same line as last item:
         // separate with at least one separator
         var hasSep = false;
@@ -380,22 +380,25 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
             // first comment of a comment group
             nint j = 0;
             foreach (var (i, ch) in p.wsbuf) {
-                var exprᴛ1 = ch;
-                if (exprᴛ1 == blank) {
+                switch (ch) {
+                case var ᴛ when ᴛ == blank: {
                     // ignore any blanks before a comment
                     p.wsbuf[i] = ignore;
                     continue;
+                    break;
                 }
-                else if (exprᴛ1 == vtab) {
+                case var ᴛ when ᴛ == vtab: {
                     // respect existing tabs - important
                     // for proper formatting of commented structs
                     hasSep = true;
                     continue;
+                    break;
                 }
-                else if (exprᴛ1 == indent) {
+                case var ᴛ when ᴛ == indent: {
                     // apply pending indentation
                     continue;
-                }
+                    break;
+                }}
                 j = i;
                 break;
             }
@@ -403,12 +406,12 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
         }
         // make sure there is at least one separator
         if (!hasSep) {
-            var sep = (byte)(rune)'\t';
+            var sep = (byte)'\t';
             if (pos.Line == next.Line) {
                 // next item is on the same line as the comment
                 // (which must be a /*-style comment): separate
                 // with a blank instead of a tab
-                sep = (rune)' ';
+                sep = (byte)' ';
             }
             p.writeByte(sep, 1);
         }
@@ -418,17 +421,19 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
         var droppedLinebreak = false;
         nint j = 0;
         foreach (var (i, ch) in p.wsbuf) {
-            var exprᴛ2 = ch;
-            if (exprᴛ2 == blank || exprᴛ2 == vtab) {
+            switch (ch) {
+            case var ᴛ when ᴛ == blank || ᴛ == vtab: {
                 // ignore any horizontal whitespace before line breaks
                 p.wsbuf[i] = ignore;
                 continue;
+                break;
             }
-            else if (exprᴛ2 == indent) {
+            case var ᴛ when ᴛ == indent: {
                 // apply pending indentation
                 continue;
+                break;
             }
-            else if (exprᴛ2 == unindent) {
+            case var ᴛ when ᴛ == unindent: {
                 // if this is not the last unindent, apply it
                 // as it is (likely) belonging to the last
                 // construct (e.g., a multi-line expression list)
@@ -445,11 +450,13 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
                 if (tok != token.RBRACE && pos.Column == next.Column) {
                     continue;
                 }
+                break;
             }
-            else if (exprᴛ2 == newline || exprᴛ2 == formfeed) {
+            case var ᴛ when ᴛ == newline || ᴛ == formfeed: {
                 p.wsbuf[i] = ignore;
                 droppedLinebreak = Ꮡprev == nil; // record only if first comment of a group
-            }
+                break;
+            }}
             j = i;
             break;
         }
@@ -474,7 +481,7 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
 
         // make sure there is at least one line break
         // if the previous comment was a line comment
-        if (n == 0 && Ꮡprev != nil && prev.Text[1] == (rune)'/') {
+        if (n == 0 && Ꮡprev != nil && prev.Text[1] == '/') {
             n = 1;
         }
 
@@ -482,7 +489,7 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
             // use formfeeds to break columns before a comment;
             // this is analogous to using formfeeds to separate
             // individual lines of /*-style comments
-            p.writeByte((rune)'\f', nlimit(n));
+            p.writeByte((byte)'\f', nlimit(n));
         }
     }
 }
@@ -491,7 +498,7 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
 // (only tabs and blanks can appear in the printer's context).
 internal static bool isBlank(@string s) {
     for (nint i = 0; i < len(s); i++) {
-        if (s[i] > (rune)' ') {
+        if (s[i] > ' ') {
             return false;
         }
     }
@@ -501,7 +508,7 @@ internal static bool isBlank(@string s) {
 // commonPrefix returns the common prefix of a and b.
 internal static @string commonPrefix(@string a, @string b) {
     nint i = 0;
-    while (i < len(a) && i < len(b) && a[i] == b[i] && (a[i] <= (rune)' ' || a[i] == (rune)'*')) {
+    while (i < len(a) && i < len(b) && a[i] == b[i] && (a[i] <= ' ' || a[i] == '*')) {
         i++;
     }
     return a.slice(0, i);
@@ -546,7 +553,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
     var prefixSet = false;
     if (len(lines) > 2) {
         foreach (var (i, line) in lines.slice(1, len(lines) - 1)) {
-            if (isBlank(line)){
+            if (isBlank(line)) {
                 lines[1 + i] = ""u8; // range starts with lines[1]
             } else {
                 if (!prefixSet) {
@@ -568,7 +575,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
 	 */
     var lineOfStars = false;
     {
-        var (p, _, ok) = strings.Cut(prefix, "*"u8); if (ok){
+        var (p, _, ok) = strings.Cut(prefix, "*"u8); if (ok) {
             // remove trailing blank from prefix so stars remain aligned
             prefix = strings.TrimSuffix(p, " "u8);
             lineOfStars = true;
@@ -581,17 +588,17 @@ internal static void stripCommonPrefix(slice<@string> lines) {
             // for the opening /*, assume up to 3 blanks or a tab. This
             // whitespace may be found as suffix in the common prefix.
             @string first = lines[0];
-            if (isBlank(first[2..])){
+            if (isBlank(first[2..])) {
                 // no comment text on the first line:
                 // reduce prefix by up to 3 blanks or a tab
                 // if present - this keeps comment text indented
                 // relative to the /* and */'s if it was indented
                 // in the first place
                 nint i = len(prefix);
-                for (nint n = 0; n < 3 && i > 0 && prefix[i - 1] == (rune)' '; n++) {
+                for (nint n = 0; n < 3 && i > 0 && prefix[i - 1] == ' '; n++) {
                     i--;
                 }
-                if (i == len(prefix) && i > 0 && prefix[i - 1] == (rune)'\t') {
+                if (i == len(prefix) && i > 0 && prefix[i - 1] == '\t') {
                     i--;
                 }
                 prefix = prefix.slice(0, i);
@@ -599,16 +606,16 @@ internal static void stripCommonPrefix(slice<@string> lines) {
                 // comment text on the first line
                 var suffix = new slice<byte>(len(first));
                 nint n = 2; // start after opening /*
-                while (n < len(first) && first[n] <= (rune)' ') {
+                while (n < len(first) && first[n] <= ' ') {
                     suffix[n] = first[n];
                     n++;
                 }
-                if (n > 2 && suffix[2] == (rune)'\t'){
+                if (n > 2 && suffix[2] == '\t') {
                     // assume the '\t' compensates for the /*
                     suffix = suffix.slice(2, n);
                 } else {
                     // otherwise assume two blanks
-                    (suffix[0], suffix[1]) = ((rune)' ', (rune)' ');
+                    (suffix[0], suffix[1]) = ((byte)' ', (byte)' ');
                     suffix = suffix.slice(0, n);
                 }
                 // Shorten the computed common prefix by the length of
@@ -624,7 +631,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
     @string last = lines[len(lines) - 1];
     @string closing = "*/"u8;
     var (before, _, _) = strings.Cut(last, closing); // closing always present
-    if (isBlank(before)){
+    if (isBlank(before)) {
         // last line only contains closing */
         if (lineOfStars) {
             closing = " */"u8; // add blank to align final star
@@ -668,11 +675,10 @@ internal static void writeComment(this ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomm
         }
 
         // shortcut common case of //-style comments
-        if (text[1] == (rune)'/') {
-            if (constraint.IsGoBuild(text)){
+        if (text[1] == '/') {
+            if (constraint.IsGoBuild(text)) {
                 p.goBuild = append(p.goBuild, len(p.output));
-            } else 
-            if (constraint.IsPlusBuild(text)) {
+            } else if (constraint.IsPlusBuild(text)) {
                 p.plusBuild = append(p.plusBuild, len(p.output));
             }
             p.writeString(pos, trimRight(text), true);
@@ -701,7 +707,7 @@ internal static void writeComment(this ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomm
         // without a line break after the last line
         foreach (var (i, line) in lines) {
             if (i > 0) {
-                p.writeByte((rune)'\f', 1);
+                p.writeByte((byte)'\f', 1);
                 pos = p.pos;
             }
             if (len(line) > 0) {
@@ -720,22 +726,24 @@ internal static void writeComment(this ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomm
 // newline was written or if a formfeed was dropped from the whitespace
 // buffer.
 internal static (bool wroteNewline, bool droppedFF) writeCommentSuffix(this ref printer p, bool needsLinebreak) {
-    bool wroteNewline = default!;
-    bool droppedFF = default!;
+    bool wroteNewline = default;
+    bool droppedFF = default;
 
     foreach (var (i, ch) in p.wsbuf) {
-        var exprᴛ1 = ch;
-        if (exprᴛ1 == blank || exprᴛ1 == vtab) {
+        switch (ch) {
+        case var ᴛ when ᴛ == blank || ᴛ == vtab: {
             // ignore trailing whitespace
             p.wsbuf[i] = ignore;
+            break;
         }
-        else if (exprᴛ1 == indent || exprᴛ1 == unindent) {
+        case var ᴛ when ᴛ == indent || ᴛ == unindent: {
             // don't lose indentation information
+            break;
         }
-        else if (exprᴛ1 == newline || exprᴛ1 == formfeed) {
+        case var ᴛ when ᴛ == newline || ᴛ == formfeed: {
             // if we need a line break, keep exactly one
             // but remember if we dropped any formfeeds
-            if (needsLinebreak){
+            if (needsLinebreak) {
                 needsLinebreak = false;
                 wroteNewline = true;
             } else {
@@ -744,13 +752,14 @@ internal static (bool wroteNewline, bool droppedFF) writeCommentSuffix(this ref 
                 }
                 p.wsbuf[i] = ignore;
             }
-        }
+            break;
+        }}
     }
     p.writeWhitespace(len(p.wsbuf));
 
     // make sure we have a line break
     if (needsLinebreak) {
-        p.writeByte((rune)'\n', 1);
+        p.writeByte((byte)'\n', 1);
         wroteNewline = true;
     }
 
@@ -776,13 +785,13 @@ internal static readonly object intersperseCommentsˢ = (@string)"intersperseCom
 // the comments and whitespace. The intersperseComments result indicates if a
 // newline was written or if a formfeed was dropped from the whitespace buffer.
 internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<printer> Ꮡp, tokenꓸPosition next, token.Token tok) {
-    bool wroteNewline = default!;
-    bool droppedFF = default!;
+    bool wroteNewline = default;
+    bool droppedFF = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
-    ж<ast.Comment> last = default!;
+    ж<ast.Comment> last = default;
     while (p.commentBefore(next)) {
-        var list = p.comment.Value.List;
+        var list = p.comment.List;
         var changed = false;
         if (p.lastTok != token.IMPORT && // do not rewrite cgo's import "C" comments
             p.posFor(p.comment.Pos()).Column == 1 && p.posFor(p.comment.End() + 1) == next) {
@@ -791,7 +800,7 @@ internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<
             list = formatDocComment(list);
             changed = true;
 
-            if (len((~p.comment).List) > 0 && len(list) == 0) {
+            if (len(p.comment.List) > 0 && len(list) == 0) {
                 // The doc comment was removed entirely.
                 // Keep preceding whitespace.
                 p.writeCommentPrefix(p.posFor(p.comment.Pos()), next, last, tok);
@@ -810,8 +819,8 @@ internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<
         }
         // In case list was rewritten, change print state to where
         // the original list would have ended.
-        if (len((~p.comment).List) > 0 && changed) {
-            last = (~p.comment).List[len((~p.comment).List) - 1];
+        if (len(p.comment.List) > 0 && changed) {
+            last = p.comment.List[len(p.comment.List) - 1];
             p.pos = p.posFor(last.End());
             p.last = p.pos;
         }
@@ -830,16 +839,16 @@ internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<
         // to track whether we're inside an expression or statement and
         // use that information to decide more directly.
         var needsLinebreak = false;
-        if ((pmode)(p.mode & noExtraBlank) == 0 && (~last).Text[1] == (rune)'*' && p.lineFor(last.Pos()) == next.Line && tok != token.COMMA && (tok != token.RPAREN || p.prevOpen == token.LPAREN) && (tok != token.RBRACK || p.prevOpen == token.LBRACK)) {
-            if (p.containsLinebreak() && (pmode)(p.mode & noExtraLinebreak) == 0 && p.level == 0){
+        if ((pmode)(p.mode & noExtraBlank) == 0 && last.Text[1] == '*' && p.lineFor(last.Pos()) == next.Line && tok != token.COMMA && (tok != token.RPAREN || p.prevOpen == token.LPAREN) && (tok != token.RBRACK || p.prevOpen == token.LBRACK)) {
+            if (p.containsLinebreak() && (pmode)(p.mode & noExtraLinebreak) == 0 && p.level == 0) {
                 needsLinebreak = true;
             } else {
-                p.writeByte((rune)' ', 1);
+                p.writeByte((byte)' ', 1);
             }
         }
         // Ensure that there is a line break after a //-style comment,
         // before EOF, and before a closing '}' unless explicitly disabled.
-        if ((~last).Text[1] == (rune)'/' || tok == token.EOF || tok == token.RBRACE && (pmode)(p.mode & noExtraLinebreak) == 0) {
+        if (last.Text[1] == '/' || tok == token.EOF || tok == token.RBRACE && (pmode)(p.mode & noExtraLinebreak) == 0) {
             needsLinebreak = true;
         }
         return p.writeCommentSuffix(needsLinebreak);
@@ -914,27 +923,33 @@ internal static nint nlimit(nint n) {
 }
 
 internal static bool /*b*/ mayCombine(token.Token prev, byte next) {
-    bool b = default!;
+    bool b = default;
 
-    var exprᴛ1 = prev;
-    if (exprᴛ1 == token.INT) {
-        b = next == (rune)'.'; // 1.
+    switch (prev) {
+    case var ᴛ when ᴛ == token.INT: {
+        b = next == '.'; // 1.
+        break;
     }
-    else if (exprᴛ1 == token.ADD) {
-        b = next == (rune)'+'; // ++
+    case var ᴛ when ᴛ == token.ADD: {
+        b = next == '+'; // ++
+        break;
     }
-    else if (exprᴛ1 == token.SUB) {
-        b = next == (rune)'-'; // --
+    case var ᴛ when ᴛ == token.SUB: {
+        b = next == '-'; // --
+        break;
     }
-    else if (exprᴛ1 == token.QUO) {
-        b = next == (rune)'*'; // /*
+    case var ᴛ when ᴛ == token.QUO: {
+        b = next == '*'; // /*
+        break;
     }
-    else if (exprᴛ1 == token.LSS) {
-        b = next == (rune)'-' || next == (rune)'<'; // <- or <<
+    case var ᴛ when ᴛ == token.LSS: {
+        b = next == '-' || next == '<'; // <- or <<
+        break;
     }
-    else if (exprᴛ1 == token.AND) {
-        b = next == (rune)'&' || next == (rune)'^'; // && or &^
-    }
+    case var ᴛ when ᴛ == token.AND: {
+        b = next == '&' || next == '^'; // && or &^
+        break;
+    }}
     return b;
 }
 
@@ -963,22 +978,25 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
 
     foreach (var (_, arg) in args) {
         // information about the current arg
-        @string data = default!;
-        bool isLit = default!;
-        bool impliedSemi = default!; // value for p.impliedSemi after this arg
+        @string data = default;
+        bool isLit = default;
+        bool impliedSemi = default; // value for p.impliedSemi after this arg
 
         // record previous opening token, if any
-        var exprᴛ1 = p.lastTok;
-        if (exprᴛ1 == token.ILLEGAL) {
+        switch (p.lastTok) {
+        case var ᴛ when ᴛ == token.ILLEGAL: {
             // ignore (white space)
+            break;
         }
-        else if (exprᴛ1 == token.LPAREN || exprᴛ1 == token.LBRACK) {
+        case var ᴛ when ᴛ == token.LPAREN || ᴛ == token.LBRACK: {
             p.prevOpen = p.lastTok;
+            break;
         }
-        else { /* default: */
+        default: {
             // other tokens followed any opening token
             p.prevOpen = token.ILLEGAL;
-        }
+            break;
+        }}
 
         switch (arg.type()) {
         case pmode x: {
@@ -1016,7 +1034,7 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
             break;
         }
         case ж<ast.Ident> x: {
-            data = x.Value.Name;
+            data = x.Name;
             impliedSemi = true;
             p.lastTok = token.IDENT;
             break;
@@ -1025,7 +1043,7 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
             data = x.Value.Value;
             isLit = true;
             impliedSemi = true;
-            p.lastTok = x.Value.Kind;
+            p.lastTok = x.Kind;
             break;
         }
         case token.Token x: {
@@ -1045,10 +1063,11 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
             }
             data = s;
             // some keywords followed by a newline imply a semicolon
-            var exprᴛ2 = x;
-            if (exprᴛ2 == token.BREAK || exprᴛ2 == token.CONTINUE || exprᴛ2 == token.FALLTHROUGH || exprᴛ2 == token.RETURN || exprᴛ2 == token.INC || exprᴛ2 == token.DEC || exprᴛ2 == token.RPAREN || exprᴛ2 == token.RBRACK || exprᴛ2 == token.RBRACE) {
+            switch (x) {
+            case var ᴛ when ᴛ == token.BREAK || ᴛ == token.CONTINUE || ᴛ == token.FALLTHROUGH || ᴛ == token.RETURN || ᴛ == token.INC || ᴛ == token.DEC || ᴛ == token.RPAREN || ᴛ == token.RBRACK || ᴛ == token.RBRACE: {
                 impliedSemi = true;
-            }
+                break;
+            }}
             p.lastTok = x;
             break;
         }
@@ -1081,9 +1100,9 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
                 n = maxNewlines - 1;
             }
             if (n > 0) {
-                var ch = (byte)(rune)'\n';
+                var ch = (byte)'\n';
                 if (droppedFF) {
-                    ch = (rune)'\f'; // use formfeed since we dropped one before
+                    ch = (byte)'\f'; // use formfeed since we dropped one before
                 }
                 p.writeByte(ch, n);
                 impliedSemi = false;
@@ -1093,7 +1112,7 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
         // the next token starts now - record its line number if requested
         if (p.linePtr != nil) {
             p.linePtr.Value = p.@out.Line;
-            p.linePtr = default!;
+            p.linePtr = default;
         }
 
         p.writeString(next, data, isLit);
@@ -1106,11 +1125,11 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
 // if a newline was written or if a formfeed was dropped from the whitespace
 // buffer.
 internal static (bool wroteNewline, bool droppedFF) flush(this ж<printer> Ꮡp, tokenꓸPosition next, token.Token tok) {
-    bool wroteNewline = default!;
-    bool droppedFF = default!;
+    bool wroteNewline = default;
+    bool droppedFF = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
-    if (p.commentBefore(next)){
+    if (p.commentBefore(next)) {
         // if there are comments before the next item, intersperse them
         (wroteNewline, droppedFF) = Ꮡp.intersperseComments(next, tok);
     } else {
@@ -1124,71 +1143,71 @@ internal static (bool wroteNewline, bool droppedFF) flush(this ж<printer> Ꮡp,
 internal static ж<ast.CommentGroup> getDoc(ast.Node n) {
     switch (n.type()) {
     case ж<ast.Field> nΔ1: {
-        return (~nΔ1).Doc;
+        return nΔ1.Doc;
     }
     case ж<ast.ImportSpec> nΔ1: {
-        return (~nΔ1).Doc;
+        return nΔ1.Doc;
     }
     case ж<ast.ValueSpec> nΔ1: {
-        return (~nΔ1).Doc;
+        return nΔ1.Doc;
     }
     case ж<ast.TypeSpec> nΔ1: {
-        return (~nΔ1).Doc;
+        return nΔ1.Doc;
     }
     case ж<ast.GenDecl> nΔ1: {
-        return (~nΔ1).Doc;
+        return nΔ1.Doc;
     }
     case ж<ast.FuncDecl> nΔ1: {
-        return (~nΔ1).Doc;
+        return nΔ1.Doc;
     }
     case ж<ast.File> nΔ1: {
-        return (~nΔ1).Doc;
+        return nΔ1.Doc;
     }}
-    return default!;
+    return default;
 }
 
 internal static ж<ast.CommentGroup> getLastComment(ast.Node n) {
     switch (n.type()) {
     case ж<ast.Field> nΔ1: {
-        return (~nΔ1).Comment;
+        return nΔ1.Comment;
     }
     case ж<ast.ImportSpec> nΔ1: {
-        return (~nΔ1).Comment;
+        return nΔ1.Comment;
     }
     case ж<ast.ValueSpec> nΔ1: {
-        return (~nΔ1).Comment;
+        return nΔ1.Comment;
     }
     case ж<ast.TypeSpec> nΔ1: {
-        return (~nΔ1).Comment;
+        return nΔ1.Comment;
     }
     case ж<ast.GenDecl> nΔ1: {
-        if (len((~nΔ1).Specs) > 0) {
-            return getLastComment((~nΔ1).Specs[len((~nΔ1).Specs) - 1]);
+        if (len(nΔ1.Specs) > 0) {
+            return getLastComment(nΔ1.Specs[len(nΔ1.Specs) - 1]);
         }
         break;
     }
     case ж<ast.File> nΔ1: {
-        if (len((~nΔ1).Comments) > 0) {
-            return (~nΔ1).Comments[len((~nΔ1).Comments) - 1];
+        if (len(nΔ1.Comments) > 0) {
+            return nΔ1.Comments[len(nΔ1.Comments) - 1];
         }
         break;
     }}
-    return default!;
+    return default;
 }
 
 internal static error printNode(this ж<printer> Ꮡp, any node) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // unpack *CommentedNode, if any
-    slice<ж<ast.CommentGroup>> comments = default!;
+    slice<ж<ast.CommentGroup>> comments = default;
     {
         var (cnode, ok) = node._<ж<CommentedNode>>(ᐧ); if (ok) {
-            node = cnode.Value.Node;
-            comments = cnode.Value.Comments;
+            node = cnode.Node;
+            comments = cnode.Comments;
         }
     }
 
-    if (comments != default!){
+    if (comments != nil) {
         // commented node - restrict comment list to relevant range
         var (n, ok) = node._<ast.Node>(ᐧ);
         if (!ok) {
@@ -1227,16 +1246,15 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
         if (i < j) {
             p.comments = comments.slice(i, j);
         }
-    } else 
-    {
+    } else {
         var (n, ok) = node._<ж<ast.File>>(ᐧ); if (ok) {
             // use ast.File comments, if any
-            p.comments = n.Value.Comments;
+            p.comments = n.Comments;
         }
     }
 
     // if there are no comments, use node comments
-    p.useNodeComments = p.comments == default!;
+    p.useNodeComments = p.comments == nil;
 
     // get comments ready for use
     p.nextComment();
@@ -1318,8 +1336,8 @@ partial struct trimmer {
 // trimmer is implemented as a state machine.
 // It can be in one of the following states:
 internal static UntypedInt inSpace => iota; // inside space
-internal static UntypedInt inEscape => 1; // inside text bracketed by tabwriter.Escapes
-internal static UntypedInt inText => 2; // inside text
+internal static UntypedInt inEscape => 1;   // inside text bracketed by tabwriter.Escapes
+internal static UntypedInt inText => 2;     // inside text
 
 internal static void resetSpace(this ref trimmer p) {
     p.state = inSpace;
@@ -1334,8 +1352,8 @@ internal static void resetSpace(this ref trimmer p) {
 internal static slice<byte> aNewline = slice<byte>("\n"u8);
 
 internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) {
-    nint nΔ1 = default!;
-    error err = default!;
+    nint nΔ1 = default;
+    error err = default;
 
     // invariants:
     // p.state == inSpace:
@@ -1343,75 +1361,87 @@ internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) 
     // p.state == inEscape, inText:
     //	data[m:n] is unwritten
     nint m = 0;
-    byte b = default!;
+    byte b = default;
     foreach (var (iᴛ1, vᴛ1) in data) {
         nΔ1 = iᴛ1;
         b = vᴛ1;
 
-        if (b == (rune)'\v') {
-            b = (rune)'\t'; // convert to htab
+        if (b == '\v') {
+            b = (byte)'\t'; // convert to htab
         }
-        var exprᴛ1 = p.state;
-        if (exprᴛ1 == inSpace) {
-            var exprᴛ2 = b;
-            if (exprᴛ2 is (rune)'\t' or (rune)' ') {
+        switch (p.state) {
+        case var ᴛ when ᴛ == inSpace: {
+            switch (b) {
+            case (byte)'\t' or (byte)' ': {
                 p.space = append(p.space, b);
+                break;
             }
-            else if (exprᴛ2 is (rune)'\n' or (rune)'\f') {
+            case (byte)'\n' or (byte)'\f': {
                 p.resetSpace(); // discard trailing space
                 (_, err) = p.output.Write(aNewline);
+                break;
             }
-            else if (exprᴛ2 == tabwriter.Escape) {
+            case var ᴛ2 when ᴛ2 == tabwriter.Escape: {
                 (_, err) = p.output.Write(p.space);
                 p.state = inEscape;
                 m = nΔ1 + 1; // +1: skip tabwriter.Escape
+                break;
             }
-            else { /* default: */
+            default: {
                 (_, err) = p.output.Write(p.space);
                 p.state = inText;
                 m = nΔ1;
-            }
+                break;
+            }}
+            break;
         }
-        else if (exprᴛ1 == inEscape) {
+        case var ᴛ when ᴛ == inEscape: {
             if (b == tabwriter.Escape) {
                 (_, err) = p.output.Write(data.slice(m, nΔ1));
                 p.resetSpace();
             }
+            break;
         }
-        else if (exprᴛ1 == inText) {
-            var exprᴛ3 = b;
-            if (exprᴛ3 is (rune)'\t' or (rune)' ') {
+        case var ᴛ when ᴛ == inText: {
+            switch (b) {
+            case (byte)'\t' or (byte)' ': {
                 (_, err) = p.output.Write(data.slice(m, nΔ1));
                 p.resetSpace();
                 p.space = append(p.space, b);
+                break;
             }
-            else if (exprᴛ3 is (rune)'\n' or (rune)'\f') {
+            case (byte)'\n' or (byte)'\f': {
                 (_, err) = p.output.Write(data.slice(m, nΔ1));
                 p.resetSpace();
-                if (err == default!) {
+                if (err == nil) {
                     (_, err) = p.output.Write(aNewline);
                 }
+                break;
             }
-            else if (exprᴛ3 == tabwriter.Escape) {
+            case var ᴛ2 when ᴛ2 == tabwriter.Escape: {
                 (_, err) = p.output.Write(data.slice(m, nΔ1));
                 p.state = inEscape;
                 m = nΔ1 + 1; // +1: skip tabwriter.Escape
-            }
+                break;
+            }}
+            break;
         }
-        else { /* default: */
+        default: {
             throw panic("unreachable");
-        }
-        if (err != default!) {
+            break;
+        }}
+        if (err != nil) {
             return (nΔ1, err);
         }
     }
     nΔ1 = len(data);
 
-    var exprᴛ4 = p.state;
-    if (exprᴛ4 == inEscape || exprᴛ4 == inText) {
+    switch (p.state) {
+    case var ᴛ when ᴛ == inEscape || ᴛ == inText: {
         (_, err) = p.output.Write(data.slice(m, nΔ1));
         p.resetSpace();
-    }
+        break;
+    }}
 
     return (nΔ1, err);
 }
@@ -1422,10 +1452,10 @@ internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) 
 // A Mode value is a set of flags (or 0). They control printing.
 partial struct Mode /*num:nuint*/;
 
-public static Mode RawFormat => /* 1 << iota */ 1;       // do not use a tabwriter; if set, UseSpaces is ignored
-public static Mode TabIndent => 2;       // use tabs for indentation independent of UseSpaces
-public static Mode UseSpaces => 4;       // use spaces instead of tabs for alignment
-public static Mode SourcePos => 8;       // emit //line directives to preserve original source positions
+public static Mode RawFormat => /* 1 << iota */ 1; // do not use a tabwriter; if set, UseSpaces is ignored
+public static Mode TabIndent => 2;                 // use tabs for indentation independent of UseSpaces
+public static Mode UseSpaces => 4;                 // use spaces instead of tabs for alignment
+public static Mode SourcePos => 8;                 // emit //line directives to preserve original source positions
 
 // The mode below is not included in printer's public API because
 // editing code text is deemed out of scope. Because this mode is
@@ -1443,9 +1473,9 @@ internal static Mode normalizeNumbers => /* 1 << 30 */ 1073741824;
 
 // A Config node controls the output of Fprint.
 partial struct Config {
-    public Mode Mode; // default: 0
+    public Mode Mode;     // default: 0
     public nint Tabwidth; // default: 8
-    public nint Indent; // default: 0 (all code is indented at least by this much)
+    public nint Indent;   // default: 0 (all code is indented at least by this much)
 }
 
 [GoLazy] partial class lazyᴛprinterPool { internal static readonly ж<sync.Pool> ᏑprinterPool = new StaticBox<sync.Pool>(new sync.Pool(
@@ -1459,17 +1489,17 @@ partial struct Config {
 )); }
 internal static ref sync.Pool printerPool => ref ((StaticBox<sync.Pool>)ᏑprinterPool).ValueSlot;
 
-internal static ж<printer> newPrinter(ref Config cfg, ж<token.FileSet> Ꮡfset, map<ast.Node, nint> nodeSizes) {
+internal static ж<printer> newPrinter(ref Config cfg, ж<token.FileSet> fset, map<ast.Node, nint> nodeSizes) {
     var p = ᏑprinterPool.Get()._<ж<printer>>();
     p.Value = new printer(
         Config: cfg,
-        fset: Ꮡfset,
+        fset: fset,
         pos: new tokenꓸPosition(Line: 1, Column: 1),
         @out: new tokenꓸPosition(Line: 1, Column: 1),
-        wsbuf: (~p).wsbuf[..0],
+        wsbuf: p.wsbuf[..0],
         nodeSizes: nodeSizes,
         cachedPos: -1,
-        output: (~p).output[..0]
+        output: p.output[..0]
     );
     return p;
 }
@@ -1486,23 +1516,23 @@ internal static void free(this ж<printer> Ꮡp) {
 }
 
 // fprint implements Fprint and takes a nodesSizes map for setting up the printer state.
-internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> Ꮡfset, any node, map<ast.Node, nint> nodeSizes) {
-    error err = default!;
+internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node, map<ast.Node, nint> nodeSizes) {
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var cfg = ref Ꮡcfg.DerefOrNull();
 
         // print node
-        var p = newPrinter(ref (Ꮡcfg).DerefOrNull(), Ꮡfset, nodeSizes);
+        var p = newPrinter(ref (Ꮡcfg).DerefOrNull(), fset, nodeSizes);
         var pʗ1 = p;
         defer(pʗ1.free, ref ᒐ);
         {
-            err = p.printNode(node); if (err != default!) {
+            err = p.printNode(node); if (err != nil) {
                 goto ᒐdone;
             }
         }
         // print outstanding comments
-        p.Value.impliedSemi = false; // EOF acts like a newline
+        p.impliedSemi = false; // EOF acts like a newline
         p.flush(new tokenꓸPosition(Offset: infinity, Line: infinity), token.EOF);
 
         // output is buffered in p.output now.
@@ -1519,9 +1549,9 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
         if ((Mode)(cfg.Mode & RawFormat) == 0) {
             nint minwidth = cfg.Tabwidth;
 
-            var padchar = (byte)(rune)'\t';
+            var padchar = (byte)'\t';
             if ((Mode)(cfg.Mode & UseSpaces) != 0) {
-                padchar = (rune)' ';
+                padchar = (byte)' ';
             }
 
             nuint twmode = tabwriter.DiscardEmptyColumns;
@@ -1535,7 +1565,7 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
 
         // write printer result via tabwriter/trimmer to output
         {
-            (_, err) = output.Write((~p).output); if (err != default!) {
+            (_, err) = output.Write(p.output); if (err != nil) {
                 goto ᒐdone;
             }
         }
@@ -1563,16 +1593,16 @@ partial struct CommentedNode {
 // Position information is interpreted relative to the file set fset.
 // The node type must be *[ast.File], *[CommentedNode], [][ast.Decl], [][ast.Stmt],
 // or assignment-compatible to [ast.Expr], [ast.Decl], [ast.Spec], or [ast.Stmt].
-public static error Fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> Ꮡfset, any node) {
-    return Ꮡcfg.fprint(output, Ꮡfset, node, new map<ast.Node, nint>());
+public static error Fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node) {
+    return Ꮡcfg.fprint(output, fset, node, new map<ast.Node, nint>());
 }
 
 // Fprint "pretty-prints" an AST node to output.
 // It calls [Config.Fprint] with default settings.
 // Note that gofmt uses tabs for indentation but spaces for alignment;
 // use format.Node (package go/format) for output that matches gofmt.
-public static error Fprint(io.Writer output, ж<token.FileSet> Ꮡfset, any node) {
-    return (Ꮡ(new Config(Tabwidth: 8))).Fprint(output, Ꮡfset, node);
+public static error Fprint(io.Writer output, ж<token.FileSet> fset, any node) {
+    return (Ꮡ(new Config(Tabwidth: 8))).Fprint(output, fset, node);
 }
 
 } // end printer_package

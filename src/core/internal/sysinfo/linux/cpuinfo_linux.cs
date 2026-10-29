@@ -18,20 +18,20 @@ internal static error readLinuxProcCPUInfo(slice<byte> buf) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(procCpuinfoˢ);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         (_, err) = io.ReadFull(new os_FileжReader(f), buf);
-        if (err != default! && !AreEqual(err, io.ErrUnexpectedEOF)) {
+        if (err != nil && !AreEqual(err, io.ErrUnexpectedEOF)) {
             return err;
         }
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -42,7 +42,7 @@ internal static @string osCPUInfoName() {
     // The 512-byte buffer is enough to hold the contents of CPU0
     var buf = new slice<byte>(512);
     var err = readLinuxProcCPUInfo(buf);
-    if (err != default!) {
+    if (err != nil) {
         return ""u8;
     }
 
@@ -53,12 +53,15 @@ internal static @string osCPUInfoName() {
             continue;
         }
         var exprᴛ1 = strings.TrimSpace(key);
-        if (exprᴛ1 == "Model Name"u8 || exprᴛ1 == "model name"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "Model Name"u8 || exprᴛ1 == "model name"u8: {
             modelName = value;
+            break;
         }
-        else if (exprᴛ1 == "CPU MHz"u8 || exprᴛ1 == "cpu MHz"u8) {
+        case {} when exprᴛ1 == "CPU MHz"u8 || exprᴛ1 == "cpu MHz"u8: {
             cpuMHz = value;
-        }
+            break;
+        }}
     }
 
     if (modelName == ""u8) {

@@ -55,12 +55,12 @@ internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line
     if (line > maxlines) {
         line = 1;
     }
-    if (line > (~f).lastline) {
-        f.Value.lastline = line;
+    if (line > f.lastline) {
+        f.lastline = line;
     }
 
     // Return a fake position assuming that f.file consists only of newlines.
-    return (tokenꓸPos)((~f).@file.Base() + line - 1);
+    return (tokenꓸPos)(f.@file.Base() + line - 1);
 }
 
 internal static void setLines(this ref fakeFileSet s) {
@@ -71,7 +71,7 @@ internal static void setLines(this ref fakeFileSet s) {
         }
     });
     foreach (var (_, f) in s.files) {
-        (~f).@file.SetLines(fakeLines.slice(0, (~f).lastline));
+        f.@file.SetLines(fakeLines.slice(0, f.lastline));
     }
 }
 
@@ -97,7 +97,7 @@ private static readonly @string dotᶜ = "·"u8;
 // See cmd/compile/internal/types.SplitVargenSuffix.
 internal static (@string @base, @string suffix) splitVargenSuffix(@string name) {
     nint i = len(name);
-    while (i > 0 && name[i - 1] >= (rune)'0' && name[i - 1] <= (rune)'9') {
+    while (i > 0 && name[i - 1] >= '0' && name[i - 1] <= '9') {
         i--;
     }
     @string dot = dotᶜ;

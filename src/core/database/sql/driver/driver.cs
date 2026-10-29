@@ -529,7 +529,7 @@ public static (int64, error) LastInsertId(this ΔRowsAffected _) {
 }
 
 public static (int64, error) RowsAffected(this ΔRowsAffected v) {
-    return ((int64)v, default!);
+    return ((int64)v, default);
 }
 
 // ResultNoRows is a pre-defined [Result] for drivers to return when a DDL
@@ -541,7 +541,7 @@ public static ref noRows ResultNoRows => ref ((StaticBox<noRows>)ᏑResultNoRows
 public partial struct noRows {
 }
 
-internal static Result _ᴛ2ʗ = new noRows(nil);
+internal static Result _ᴛ2ʗ = new noRows();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string noLastInsertIdAvailableˢ = "no LastInsertId available after DDL statement"u8;

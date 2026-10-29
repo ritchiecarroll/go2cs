@@ -19,7 +19,7 @@ internal static void makeImg(this ref decoder d, nint mxx, nint myy) {
     nint v0 = d.comp[0].v;
     nint hRatio = quo(h0, d.comp[1].h);
     nint vRatio = quo(v0, d.comp[1].v);
-    image.YCbCrSubsampleRatio subsampleRatio = default!;
+    image.YCbCrSubsampleRatio subsampleRatio = default;
     switch ((hRatio << 4 | vRatio)) {
     case 0x11: {
         subsampleRatio = image.YCbCrSubsampleRatio444;
@@ -88,7 +88,7 @@ internal static error processSOS(this ref decoder d, nint n) {
         return ((FormatError)(@string)sosHasWrongLengthˢ);
     }
     {
-        var err = d.readFull(d.tmp.slice(0, n)); if (err != default!) {
+        var err = d.readFull(d.tmp.slice(0, n)); if (err != nil) {
             return err;
         }
     }
@@ -187,13 +187,13 @@ internal static error processSOS(this ref decoder d, nint n) {
     if (d.progressive) {
         for (nint i = 0; i < nComp; i++) {
             var compIndex = scan[i].compIndex;
-            if (d.progCoeffs[compIndex] == default!) {
+            if (d.progCoeffs[compIndex] == nil) {
                 d.progCoeffs[compIndex] = GoReflect.WithElemDims(new slice<block>(mxx * myy * d.comp[compIndex].h * d.comp[compIndex].v), 64);
             }
         }
     }
 
-    d.bits = new bits(nil);
+    d.bits = new bits();
     nint mcu = 0;
     var expectedRST = (uint8)rst0Marker;
     // b is the decoded coefficients, in natural (not zig-zag) order.
@@ -201,9 +201,9 @@ internal static error processSOS(this ref decoder d, nint n) {
     array<int32> dc = new(4); /* maxComponents */
     // bx and by are the location of the current block, in units of 8x8
     // blocks: the third block in the first row has (bx, by) = (2, 0).
-    nint bx = default!;
-    nint by = default!;
-    nint blockCount = default!;
+    nint bx = default;
+    nint by = default;
+    nint blockCount = default;
     for (nint my = 0; my < myy; my++) {
         for (nint mx = 0; mx < mxx; mx++) {
             for (nint i = 0; i < nComp; i++) {
@@ -236,7 +236,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                     // The non-interleaved scans will process only 6 Y blocks:
                     //	0 1 2
                     //	3 4 5
-                    if (nComp != 1){
+                    if (nComp != 1) {
                         bx = hi * mx + rem(j, hi);
                         by = vi * my + quo(j, hi);
                     } else {
@@ -250,15 +250,15 @@ internal static error processSOS(this ref decoder d, nint n) {
                     }
 
                     // Load the previous partially decoded coefficients, if applicable.
-                    if (d.progressive){
+                    if (d.progressive) {
                         b = d.progCoeffs[compIndex][by * mxx * hi + bx].Clone();
                     } else {
                         b = new block(new int32[64].array());
                     }
 
-                    if (ah != 0){
+                    if (ah != 0) {
                         {
-                            var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable], scan[i].ta), zigStart, zigEnd, ((int32)1).Lsh((uint64)(al))); if (err != default!) {
+                            var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable], scan[i].ta), zigStart, zigEnd, ((int32)1).Lsh((uint64)(al))); if (err != nil) {
                                 return err;
                             }
                         }
@@ -268,39 +268,39 @@ internal static error processSOS(this ref decoder d, nint n) {
                             zig++;
                             // Decode the DC coefficient, as specified in section F.2.2.1.
                             var (value, err) = d.decodeHuffman(Ꮡ(d.huff[dcTable], scan[i].td));
-                            if (err != default!) {
+                            if (err != nil) {
                                 return err;
                             }
                             if (value > 16) {
                                 return ((UnsupportedError)(@string)excessiveDcComponentˢ);
                             }
                             (var dcDelta, err) = d.receiveExtend(value);
-                            if (err != default!) {
+                            if (err != nil) {
                                 return err;
                             }
                             dc[compIndex] += dcDelta;
                             b[0] = dc[compIndex].Lsh((uint64)(al));
                         }
 
-                        if (zig <= zigEnd && d.eobRun > 0){
+                        if (zig <= zigEnd && d.eobRun > 0) {
                             d.eobRun--;
                         } else {
                             // Decode the AC coefficients, as specified in section F.2.2.2.
                             var huff = Ꮡ(d.huff[acTable], scan[i].ta);
                             for (; zig <= zigEnd; zig++) {
                                 var (value, err) = d.decodeHuffman(huff);
-                                if (err != default!) {
+                                if (err != nil) {
                                     return err;
                                 }
                                 var val0 = (uint8)((value >> 4));
                                 var val1 = (uint8)(value & 0x0f);
-                                if (val1 != 0){
+                                if (val1 != 0) {
                                     zig += (int32)val0;
                                     if (zig > zigEnd) {
                                         break;
                                     }
                                     var (ac, errΔ1) = d.receiveExtend(val1);
-                                    if (errΔ1 != default!) {
+                                    if (errΔ1 != nil) {
                                         return errΔ1;
                                     }
                                     b[unzig[zig]] = ac.Lsh((uint64)(al));
@@ -309,7 +309,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                                         d.eobRun = (uint16)(((uint16)1).Lsh((uint64)(val0)));
                                         if (val0 != 0) {
                                             var (bits, errΔ2) = d.decodeBits((int32)val0);
-                                            if (errΔ2 != default!) {
+                                            if (errΔ2 != nil) {
                                                 return errΔ2;
                                             }
                                             d.eobRun |= (uint16)((uint16)bits);
@@ -336,7 +336,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                         continue;
                     }
                     {
-                        var err = d.reconstructBlock(Ꮡb, bx, by, (nint)compIndex); if (err != default!) {
+                        var err = d.reconstructBlock(Ꮡb, bx, by, (nint)compIndex); if (err != nil) {
                             return err;
                         }
                     }
@@ -348,12 +348,11 @@ internal static error processSOS(this ref decoder d, nint n) {
                 // immediately. For corrupt input, call findRST to try to
                 // resynchronize.
                 {
-                    var err = d.readFull(d.tmp[..2]); if (err != default!){
+                    var err = d.readFull(d.tmp[..2]); if (err != nil) {
                         return err;
-                    } else 
-                    if (d.tmp[0] != 0xff || d.tmp[1] != expectedRST) {
+                    } else if (d.tmp[0] != 0xff || d.tmp[1] != expectedRST) {
                         {
-                            var errΔ1 = d.findRST(expectedRST); if (errΔ1 != default!) {
+                            var errΔ1 = d.findRST(expectedRST); if (errΔ1 != nil) {
                                 return errΔ1;
                             }
                         }
@@ -364,7 +363,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                     expectedRST = rst0Marker;
                 }
                 // Reset the Huffman decoder.
-                d.bits = new bits(nil);
+                d.bits = new bits();
                 // Reset the DC components, as per section F.2.1.3.1.
                 dc = new int32[]{}.array(4);
                 // Reset the progressive decoder state, as per section G.1.2.2.
@@ -373,7 +372,7 @@ internal static error processSOS(this ref decoder d, nint n) {
         } // for mx
     } // for my
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -382,7 +381,7 @@ internal static readonly @string tooManyCoefficientsˢ = "too many coefficients"
 
 // refine decodes a successive approximation refinement block, as specified in
 // section G.1.2.
-internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> Ꮡh, int32 zigStart, int32 zigEnd, int32 delta) {
+internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> h, int32 zigStart, int32 zigEnd, int32 delta) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Refining a DC component is trivial.
@@ -391,13 +390,13 @@ internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> Ꮡ
             throw panic("unreachable");
         }
         var (bit, err) = d.decodeBit();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (bit) {
             b[0] |= (int32)(delta);
         }
-        return default!;
+        return default;
     }
 
     // Refining AC components is more complicated; see sections G.1.2.2 and G.1.2.3.
@@ -406,8 +405,8 @@ internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> Ꮡ
 loop:
         for (; zig <= zigEnd; zig++) {
             var z = (int32)0;
-            var (value, err) = d.decodeHuffman(Ꮡh);
-            if (err != default!) {
+            var (value, err) = d.decodeHuffman(h);
+            if (err != nil) {
                 return err;
             }
             var val0 = (uint8)((value >> 4));
@@ -419,7 +418,7 @@ loop:
                     d.eobRun = (uint16)(((uint16)1).Lsh((uint64)(val0)));
                     if (val0 != 0) {
                         var (bits, errΔ3) = d.decodeBits((int32)val0);
-                        if (errΔ3 != default!) {
+                        if (errΔ3 != nil) {
                             return errΔ3;
                         }
                         d.eobRun |= (uint16)((uint16)bits);
@@ -431,7 +430,7 @@ loop:
             case 1: {
                 z = delta;
                 var (bit, errΔ4) = d.decodeBit();
-                if (errΔ4 != default!) {
+                if (errΔ4 != nil) {
                     return errΔ4;
                 }
                 if (!bit) {
@@ -444,7 +443,7 @@ loop:
             }}
 
             (zig, err) = d.refineNonZeroes(Ꮡb, zig, zigEnd, (int32)val0, delta);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             if (zig > zigEnd) {
@@ -460,12 +459,12 @@ break_loop:;
     if (d.eobRun > 0) {
         d.eobRun--;
         {
-            var (_, err) = d.refineNonZeroes(Ꮡb, zig, zigEnd, -1, delta); if (err != default!) {
+            var (_, err) = d.refineNonZeroes(Ꮡb, zig, zigEnd, -1, delta); if (err != nil) {
                 return err;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // refineNonZeroes refines non-zero entries of b in zig-zag order. If nz >= 0,
@@ -483,19 +482,19 @@ internal static (int32, error) refineNonZeroes(this ref decoder d, ж<block> Ꮡ
             continue;
         }
         var (bit, err) = d.decodeBit();
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         if (!bit) {
             continue;
         }
-        if (b[u] >= 0){
+        if (b[u] >= 0) {
             b[u] += delta;
         } else {
             b[u] -= delta;
         }
     }
-    return (zig, default!);
+    return (zig, default);
 }
 
 internal static error reconstructProgressiveImage(this ref decoder d) {
@@ -504,7 +503,7 @@ internal static error reconstructProgressiveImage(this ref decoder d) {
     nint h0 = d.comp[0].h;
     nint mxx = quo((d.width + 8 * h0 - 1), (8 * h0));
     for (nint i = 0; i < d.nComp; i++) {
-        if (d.progCoeffs[i] == default!) {
+        if (d.progCoeffs[i] == nil) {
             continue;
         }
         nint v = quo(8 * d.comp[0].v, d.comp[i].v);
@@ -513,14 +512,14 @@ internal static error reconstructProgressiveImage(this ref decoder d) {
         for (nint by = 0; by * v < d.height; by++) {
             for (nint bx = 0; bx * h < d.width; bx++) {
                 {
-                    var err = d.reconstructBlock(Ꮡ(d.progCoeffs[i], by * stride + bx), bx, by, i); if (err != default!) {
+                    var err = d.reconstructBlock(Ꮡ(d.progCoeffs[i], by * stride + bx), bx, by, i); if (err != nil) {
                         return err;
                     }
                 }
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -536,22 +535,22 @@ internal static error reconstructBlock(this ref decoder d, ж<block> Ꮡb, nint 
         b[unzig[zig]] *= qt.Value[zig];
     }
     idct(Ꮡb);
-    var dst = slice<byte>(default!);
+    var dst = slice<byte>(default);
     nint stride = 0;
-    if (d.nComp == 1){
-        (dst, stride) = ((~d.img1).Pix.slice(8 * (by * (~d.img1).Stride + bx)), d.img1.Value.Stride);
+    if (d.nComp == 1) {
+        (dst, stride) = (d.img1.Pix.slice(8 * (by * d.img1.Stride + bx)), d.img1.Stride);
     } else {
         switch (compIndex) {
         case 0: {
-            (dst, stride) = ((~d.img3).Y.slice(8 * (by * (~d.img3).YStride + bx)), d.img3.Value.YStride);
+            (dst, stride) = (d.img3.Y.slice(8 * (by * d.img3.YStride + bx)), d.img3.YStride);
             break;
         }
         case 1: {
-            (dst, stride) = ((~d.img3).Cb.slice(8 * (by * (~d.img3).CStride + bx)), d.img3.Value.CStride);
+            (dst, stride) = (d.img3.Cb.slice(8 * (by * d.img3.CStride + bx)), d.img3.CStride);
             break;
         }
         case 2: {
-            (dst, stride) = ((~d.img3).Cr.slice(8 * (by * (~d.img3).CStride + bx)), d.img3.Value.CStride);
+            (dst, stride) = (d.img3.Cr.slice(8 * (by * d.img3.CStride + bx)), d.img3.CStride);
             break;
         }
         case 3: {
@@ -568,10 +567,9 @@ internal static error reconstructBlock(this ref decoder d, ж<block> Ꮡb, nint 
         nint yStride = y * stride;
         for (nint x = 0; x < 8; x++) {
             var c = b[y8 + x];
-            if (c < -128){
+            if (c < -128) {
                 c = 0;
-            } else 
-            if (c > 127){
+            } else if (c > 127) {
                 c = 255;
             } else {
                 c += 128;
@@ -579,7 +577,7 @@ internal static error reconstructBlock(this ref decoder d, ж<block> Ꮡb, nint 
             dst[yStride + x] = (uint8)c;
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -595,21 +593,19 @@ internal static readonly @string badRstMarkerˢ = "bad RST marker"u8;
 // Precondition: d.tmp[:2] holds the next two bytes of JPEG-encoded input
 // (input in the d.readFull sense).
 internal static error findRST(this ref decoder d, uint8 expectedRST) {
-    while (ᐧ) {
+    for (;;) {
         // i is the index such that, at the bottom of the loop, we read 2-i
         // bytes into d.tmp[i:2], maintaining the invariant that d.tmp[:2]
         // holds the next two bytes of JPEG-encoded input. It is either 0 or 1,
         // so that each iteration advances by 1 or 2 bytes (or returns).
         nint i = 0;
 
-        if (d.tmp[0] == 0xff){
-            if (d.tmp[1] == expectedRST){
-                return default!;
-            } else 
-            if (d.tmp[1] == 0xff){
+        if (d.tmp[0] == 0xff) {
+            if (d.tmp[1] == expectedRST) {
+                return default;
+            } else if (d.tmp[1] == 0xff) {
                 i = 1;
-            } else 
-            if (d.tmp[1] != 0x00) {
+            } else if (d.tmp[1] != 0x00) {
                 // libjpeg's jdmarker.c's jpeg_resync_to_restart does something
                 // fancy here, treating RST markers within two (modulo 8) of
                 // expectedRST differently from RST markers that are 'more
@@ -619,14 +615,13 @@ internal static error findRST(this ref decoder d, uint8 expectedRST) {
                 // or expectedRST is a fatal FormatError.
                 return ((FormatError)(@string)badRstMarkerˢ);
             }
-        } else 
-        if (d.tmp[1] == 0xff) {
+        } else if (d.tmp[1] == 0xff) {
             d.tmp[0] = 0xff;
             i = 1;
         }
 
         {
-            var err = d.readFull(d.tmp.slice(i, 2)); if (err != default!) {
+            var err = d.readFull(d.tmp.slice(i, 2)); if (err != nil) {
                 return err;
             }
         }

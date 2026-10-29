@@ -15,11 +15,11 @@ partial class math_package {
 //	Sincos(±Inf) = NaN, NaN
 //	Sincos(NaN) = NaN, NaN
 public static (float64 sin, float64 cos) Sincos(float64 x) {
-    float64 sin = default!;
-    float64 cos = default!;
+    float64 sin = default;
+    float64 cos = default;
 
-    const float64 PI4A = 7.85398125648498535156e-1; // 0x3fe921fb40000000, Pi/4 split into three parts
-    const float64 PI4B = 3.77489470793079817668e-8; // 0x3e64442d00000000,
+    const float64 PI4A = 7.85398125648498535156e-1;  // 0x3fe921fb40000000, Pi/4 split into three parts
+    const float64 PI4B = 3.77489470793079817668e-8;  // 0x3e64442d00000000,
     const float64 PI4C = 2.69515142907905952645e-15; // 0x3ce8469898cc5170,
     // special cases
     switch (ᐧ) {
@@ -37,20 +37,20 @@ public static (float64 sin, float64 cos) Sincos(float64 x) {
         sinSign = true;
     }
 
-    uint64 j = default!;
-    float64 y = default!;
-    float64 z = default!;
-    if (x >= reduceThreshold){
+    uint64 j = default;
+    float64 y = default;
+    float64 z = default;
+    if (x >= reduceThreshold) {
         (j, z) = trigReduce(x);
     } else {
         j = (uint64)(x * /* (4 / Pi) */ 1.2732395447351628D); // integer part of x/(Pi/4), as integer for tests on the phase angle
-        y = (float64)j; // integer part of x/(Pi/4), as float
+        y = (float64)j;                                       // integer part of x/(Pi/4), as float
 
         if ((j & 1) == 1) { // map zeros to origin
             j++;
             y++;
         }
-        j &= (uint64)(7); // octant modulo 2Pi radians (360 degrees)
+        j &= (uint64)(7);                           // octant modulo 2Pi radians (360 degrees)
         z = ((x - y * PI4A) - y * PI4B) - y * PI4C; // Extended precision modular arithmetic
     }
     if (j > 3) { // reflect in x axis

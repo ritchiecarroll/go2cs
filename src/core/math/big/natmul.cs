@@ -36,7 +36,7 @@ internal static Δnat mul(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y) {
 
         // determine if z can be reused
         if (alias(z, x) || alias(z, y)) {
-            z = default!; // z is an alias for x or y - cannot reuse
+            z = default; // z is an alias for x or y - cannot reuse
         }
         z = z.make(m + n);
 
@@ -68,7 +68,7 @@ internal static Δnat mul(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y) {
 
         return z.norm();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -76,7 +76,7 @@ internal static Δnat mul(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y) {
 // "grade school" multiplication; for operands longer than karatsubaSqrThreshold
 // we use the Karatsuba algorithm optimized for x == y.
 internal static readonly ж<nint> ᏑbasicSqrThreshold = new StaticBox<nint>(12);
-internal static ref nint basicSqrThreshold => ref ((StaticBox<nint>)ᏑbasicSqrThreshold).ValueSlot; // see calibrate_test.go
+internal static ref nint basicSqrThreshold => ref ((StaticBox<nint>)ᏑbasicSqrThreshold).ValueSlot;         // see calibrate_test.go
 
 internal static readonly ж<nint> ᏑkaratsubaSqrThreshold = new StaticBox<nint>(80);
 internal static ref nint karatsubaSqrThreshold => ref ((StaticBox<nint>)ᏑkaratsubaSqrThreshold).ValueSlot; // see calibrate_test.go
@@ -101,7 +101,7 @@ internal static Δnat sqr(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
         }}
 
         if (alias(z, x)) {
-            z = default!; // z is an alias for x - cannot reuse
+            z = default; // z is an alias for x - cannot reuse
         }
         z = z.make(2 * n);
 
@@ -123,7 +123,7 @@ internal static Δnat sqr(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
         karatsubaSqr(Ꮡstk, z, x);
         return z.norm();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -154,7 +154,7 @@ internal static void basicSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
             t[2 * i] = addMulVVWW(t.slice(i, 2 * i), t.slice(i, 2 * i), x.slice(0, i), d, 0);
         }
         t[2 * n - 1] = lshVU(t.slice(1, 2 * n - 1), t.slice(1, 2 * n - 1), 1); // double the j < i products
-        addVV(z, z, t); // combine the result
+        addVV(z, z, t);                                                        // combine the result
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -246,7 +246,7 @@ internal static void karatsuba(ж<stack> Ꮡstk, Δnat z, Δnat x, Δnat y) {
         z2.mul(Ꮡstk, x1, y1);
         z1.Add(z1, z0);
         z1.Add(z1, z2);
-        addTo(z.slice(n2), (~z1).abs);
+        addTo(z.slice(n2), z1.abs);
 
         // Debug mode: double-check answer and print trace on failure.
         const bool debug = false;
@@ -331,15 +331,15 @@ internal static void karatsubaSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
         var tx = Ꮡ(new ΔInt(abs: z.slice(0, n2)));
 
         tx.Sub(x0, x1);
-        z1.Value.abs = (~z1).abs.sqr(Ꮡstk, (~tx).abs);
-        z1.Value.neg = true;
+        z1.abs = z1.abs.sqr(Ꮡstk, tx.abs);
+        z1.neg = true;
 
         clear(z);
-        z0.Value.abs = (~z0).abs.sqr(Ꮡstk, (~x0).abs);
-        z2.Value.abs = (~z2).abs.sqr(Ꮡstk, (~x1).abs);
+        z0.abs = z0.abs.sqr(Ꮡstk, x0.abs);
+        z2.abs = z2.abs.sqr(Ꮡstk, x1.abs);
         z1.Add(z1, z0);
         z1.Add(z1, z2);
-        addTo(z.slice(n2), (~z1).abs);
+        addTo(z.slice(n2), z1.abs);
 
         // Debug mode: double-check answer and print trace on failure.
         const bool debug = false;
@@ -373,14 +373,14 @@ internal static void karatsubaSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
 }
 
 // ifmt returns the debug formatting of the Int x: 0xHEX.
-internal static @string ifmt(ж<ΔInt> Ꮡx) {
+internal static @string ifmt(ж<ΔInt> x) {
     @string neg = ""u8;
-    @string s = Ꮡx.Text(16);
+    @string s = x.Text(16);
     @string t = ""u8;
     if (s == ""u8) { // happens for denormalized zero
         s = "0x0"u8;
     }
-    if (s[0] == (rune)'-') {
+    if (s[0] == '-') {
         (neg, s) = ("-", s[1..]);
     }
 
@@ -393,8 +393,8 @@ internal static @string ifmt(ж<ΔInt> Ꮡx) {
 }
 
 // trace prints a single debug value.
-internal static void trace(@string name, ж<ΔInt> Ꮡx) {
-    print(name, (@string)"="u8, ifmt(Ꮡx), (@string)"\n"u8);
+internal static void trace(@string name, ж<ΔInt> x) {
+    print(name, (@string)"="u8, ifmt(x), (@string)"\n"u8);
 }
 
 } // end big_package

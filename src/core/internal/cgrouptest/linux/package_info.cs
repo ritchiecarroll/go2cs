@@ -10,12 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,7 +55,7 @@ using static go.@internal.cgrouptest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/cgrouptest/cgrouptest_linux.go", "cgrouptest_linux.cs", "AB00gtiS2JKCgpSCAAcUAAkCkqaCgpTKppKC3JKApsiClLiippiygoKClIKUqAAUXAAaAoKCpoKCgoKCgoKmlKaCpoK42JKCgII=", "77-83:1")]
+[assembly: go.GoPositionMap("internal/cgrouptest/cgrouptest_linux.go", "cgrouptest_linux.cs", "AB00gtiS2JKCgpSCAAcUAAkCgqaCgpTKppKC3JKApsiClLiippiygoKClIKUqAAUXAAaAoKCpoKCgoKCgoKmlKaCpoK42JKCgII=", "77-83:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

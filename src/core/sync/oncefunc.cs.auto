@@ -24,16 +24,15 @@ internal partial struct OnceFunc_d /*dyn*/ {
 // If f panics, the returned function will panic with the same value on every call.
 public static Action OnceFunc(Action f) {
     // Use a struct so that there's a single heap allocation.
-    ref var d = ref heap<OnceFunc_d>(out var Ꮡd);
-    d = new OnceFunc_d(
+    ref var d = ref heap<OnceFunc_d>(new OnceFunc_d(
         f: f
-    );
+    ), out var Ꮡd);
     return () => {
         Ꮡd.of(OnceFunc_d.Ꮡonce).Do(() => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
-                    Ꮡd.Value.f = default!; // Do not keep f alive after invoking it.
+                    Ꮡd.Value.f = default; // Do not keep f alive after invoking it.
                     Ꮡd.Value.p = recover();
                     if (!Ꮡd.Value.valid) {
                         // Re-panic immediately so on the first
@@ -68,16 +67,15 @@ internal partial struct OnceValue_d<T> /*dyn*/ {
 // If f panics, the returned function will panic with the same value on every call.
 public static Func<T> OnceValue<T>(Func<T> f) {
     // Use a struct so that there's a single heap allocation.
-    ref var d = ref heap<OnceValue_d<T>>(out var Ꮡd);
-    d = new OnceValue_d<T>(
+    ref var d = ref heap<OnceValue_d<T>>(new OnceValue_d<T>(
         f: f
-    );
+    ), out var Ꮡd);
     return () => {
         Ꮡd.of(OnceValue_d<T>.Ꮡonce).Do(() => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
-                    Ꮡd.Value.f = default!;
+                    Ꮡd.Value.f = default;
                     Ꮡd.Value.p = recover();
                     if (!Ꮡd.Value.valid) {
                         throw panic(Ꮡd.Value.p);
@@ -111,16 +109,15 @@ internal partial struct OnceValues_d<T1, T2> /*dyn*/ {
 // If f panics, the returned function will panic with the same value on every call.
 public static Func<(T1, T2)> OnceValues<T1, T2>(Func<(T1, T2)> f) {
     // Use a struct so that there's a single heap allocation.
-    ref var d = ref heap<OnceValues_d<T1, T2>>(out var Ꮡd);
-    d = new OnceValues_d<T1, T2>(
+    ref var d = ref heap<OnceValues_d<T1, T2>>(new OnceValues_d<T1, T2>(
         f: f
-    );
+    ), out var Ꮡd);
     return () => {
         Ꮡd.of(OnceValues_d<T1, T2>.Ꮡonce).Do(() => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
-                    Ꮡd.Value.f = default!;
+                    Ꮡd.Value.f = default;
                     Ꮡd.Value.p = recover();
                     if (!Ꮡd.Value.valid) {
                         throw panic(Ꮡd.Value.p);

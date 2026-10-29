@@ -52,62 +52,63 @@ internal static readonly @string unsupportedThinArchiveˢ = "unsupported thin ar
 // for all the objects in the file.  In practice that case does not arise.
 internal static (io.ReadSeeker, error) arExportData(io.ReadSeeker archive) {
     {
-        var (_, err) = archive.Seek(0, io.SeekStart); if (err != default!) {
-            return (default!, err);
+        var (_, err) = archive.Seek(0, io.SeekStart); if (err != nil) {
+            return (default, err);
         }
     }
 
     array<byte> buf = new(8); /* len(armag) */
     {
-        var (_, err) = archive.Read(buf[..]); if (err != default!) {
-            return (default!, err);
+        var (_, err) = archive.Read(buf[..]); if (err != nil) {
+            return (default, err);
         }
     }
 
     var exprᴛ1 = ((sstring)(buf[..]));
-    if (exprᴛ1 == armag) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == armag: {
         return standardArExportData(archive);
     }
-    if (exprᴛ1 == armagt) {
-        return (default!, errors.New(unsupportedThinArchiveˢ));
+    case {} when exprᴛ1 == armagt: {
+        return (default, errors.New(unsupportedThinArchiveˢ));
     }
-    if (exprᴛ1 == armagb) {
+    case {} when exprᴛ1 == armagb: {
         return aixBigArExportData(archive);
     }
-    { /* default: */
-        return (default!, fmt.Errorf("unrecognized archive file format %q"u8, buf[..]));
-    }
+    default: {
+        return (default, fmt.Errorf("unrecognized archive file format %q"u8, buf[..]));
+    }}
 }
 
 // standardArExportData returns export data from a standard archive.
 internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archive) {
     var off = (int64)len(armag);
-    while (ᐧ) {
+    for (;;) {
         array<byte> hdrBuf = new(60); /* arHdrSize */
         {
-            var (_, errΔ1) = archive.Read(hdrBuf[..]); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var (_, errΔ1) = archive.Read(hdrBuf[..]); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
         off += arHdrSize;
 
         if (!bytes.Equal(hdrBuf[(int)(arFmagOff)..(int)(arFmagOff + arFmagSize)], slice<byte>(arfmag))) {
-            return (default!, fmt.Errorf("archive header format header (%q)"u8, hdrBuf[..]));
+            return (default, fmt.Errorf("archive header format header (%q)"u8, hdrBuf[..]));
         }
 
         var (size, err) = strconv.ParseInt(strings.TrimSpace((@string)(hdrBuf[(int)(arSizeOff)..(int)(arSizeOff + arSizeSize)])), 10, 64);
-        if (err != default!) {
-            return (default!, fmt.Errorf("error parsing size in archive header (%q): %v"u8, hdrBuf[..], err));
+        if (err != nil) {
+            return (default, fmt.Errorf("error parsing size in archive header (%q): %v"u8, hdrBuf[..], err));
         }
 
         var fn = hdrBuf[(int)(arNameOff)..(int)(arNameOff + arNameSize)];
-        if (fn[0] == (rune)'/' && (fn[1] == (rune)' ' || fn[1] == (rune)'/' || ((sstring)(fn[..8])) == "/SYM64/ "u8)){
+        if (fn[0] == '/' && (fn[1] == ' ' || fn[1] == '/' || ((sstring)(fn[..8])) == "/SYM64/ "u8)) {
             // Archive symbol table or extended name table,
             // which we don't care about.
         } else {
             var archiveAt = readerAtFromSeeker(archive);
             var (ret, errΔ1) = elfFromAr(io.NewSectionReader(archiveAt, off, size));
-            if (ret != default! || errΔ1 != default!) {
+            if (ret != nil || errΔ1 != nil) {
                 return (ret, errΔ1);
             }
         }
@@ -117,8 +118,8 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
         }
         off += size;
         {
-            var (_, errΔ2) = archive.Seek(off, io.SeekStart); if (errΔ2 != default!) {
-                return (default!, errΔ2);
+            var (_, errΔ2) = archive.Seek(off, io.SeekStart); if (errΔ2 != nil) {
+                return (default, errΔ2);
             }
         }
     }
@@ -129,38 +130,38 @@ internal static readonly @string goExportˢ = ".go_export"u8;
 
 // elfFromAr tries to get export data from an archive member as an ELF file.
 // If there is no export data, this returns nil, nil.
-internal static (io.ReadSeeker, error) elfFromAr(ж<io.SectionReader> Ꮡmember) {
-    var (ef, err) = elf.NewFile(new io.SectionReaderжReaderAt(Ꮡmember));
-    if (err != default!) {
-        return (default!, err);
+internal static (io.ReadSeeker, error) elfFromAr(ж<io.SectionReader> member) {
+    var (ef, err) = elf.NewFile(new io.SectionReaderжReaderAt(member));
+    if (err != nil) {
+        return (default, err);
     }
     var sec = ef.Section(goExportˢ);
     if (sec == nil) {
-        return (default!, default!);
+        return (default, default);
     }
-    return (sec.Open(), default!);
+    return (sec.Open(), default);
 }
 
 // aixBigArExportData returns export data from an AIX big archive.
 internal static (io.ReadSeeker, error) aixBigArExportData(io.ReadSeeker archive) {
     var archiveAt = readerAtFromSeeker(archive);
     var (arch, err) = xcoff.NewArchive(archiveAt);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    foreach (var (_, mem) in (~arch).Members) {
+    foreach (var (_, mem) in arch.Members) {
         var (f, errΔ1) = arch.GetFile((~mem).Name);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         var sdat = f.CSect(goExportˢ);
-        if (sdat != default!) {
-            return (new bytes_ReaderжReadSeeker(bytes.NewReader(sdat)), default!);
+        if (sdat != nil) {
+            return (new bytes_ReaderжReadSeeker(bytes.NewReader(sdat)), default);
         }
     }
 
-    return (default!, fmt.Errorf(".go_export not found in this archive"u8));
+    return (default, fmt.Errorf(".go_export not found in this archive"u8));
 }
 
 // readerAtFromSeeker turns an io.ReadSeeker into an io.ReaderAt.
@@ -181,7 +182,7 @@ partial struct seekerReadAt {
 
 internal static (nint, error) ReadAt(this seekerReadAt sra, slice<byte> p, int64 off) {
     {
-        var (_, err) = sra.seeker.Seek(off, io.SeekStart); if (err != default!) {
+        var (_, err) = sra.seeker.Seek(off, io.SeekStart); if (err != nil) {
             return (0, err);
         }
     }

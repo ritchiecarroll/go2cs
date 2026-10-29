@@ -24,24 +24,24 @@ partial class httputil_package {
 // It returns an error if the initial slurp of all bytes fails. It does not attempt
 // to make the returned ReadClosers have identical error-matching behavior.
 internal static (io.ReadCloser r1, io.ReadCloser r2, error err) drainBody(io.ReadCloser b) {
-    error err = default!;
+    error err = default;
 
-    if (b == default! || AreEqual(b, http.NoBody)) {
+    if (b == nil || AreEqual(b, http.NoBody)) {
         // No copying needed. Preserve the magic sentinel meaning of NoBody.
-        return (http.NoBody, http.NoBody, default!);
+        return (http.NoBody, http.NoBody, default);
     }
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        (_, err) = buf.ReadFrom(b); if (err != default!) {
-            return (default!, b, err);
+        (_, err) = buf.ReadFrom(b); if (err != nil) {
+            return (default, b, err);
         }
     }
     {
-        err = b.Close(); if (err != default!) {
-            return (default!, b, err);
+        err = b.Close(); if (err != nil) {
+            return (default, b, err);
         }
     }
-    return (io.NopCloser(new bytes_BufferжReader(Ꮡbuf)), io.NopCloser(new bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))), default!);
+    return (io.NopCloser(new bytes_BufferжReader(Ꮡbuf)), io.NopCloser(new bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))), default);
 }
 
 // dumpConn is a net.Conn which writes to Writer and reads from Reader
@@ -51,27 +51,27 @@ partial struct dumpConn {
 }
 
 internal static error Close(this ref dumpConn c) {
-    return default!;
+    return default;
 }
 
 internal static netꓸAddr LocalAddr(this ref dumpConn c) {
-    return default!;
+    return default;
 }
 
 internal static netꓸAddr RemoteAddr(this ref dumpConn c) {
-    return default!;
+    return default;
 }
 
 internal static error SetDeadline(this ref dumpConn c, time.Time t) {
-    return default!;
+    return default;
 }
 
 internal static error SetReadDeadline(this ref dumpConn c, time.Time t) {
-    return default!;
+    return default;
 }
 
 internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) {
-    return default!;
+    return default;
 }
 
 partial struct neverEnding /*num:byte*/;
@@ -80,13 +80,13 @@ internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     foreach (var i in range(p)) {
         p[i] = (byte)b;
     }
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 // outgoingLength is a copy of the unexported
 // (*http.Request).outgoingLength method.
 internal static int64 outgoingLength(ref http.Request req) {
-    if (req.Body == default! || AreEqual(req.Body, http.NoBody)) {
+    if (req.Body == nil || AreEqual(req.Body, http.NoBody)) {
         return 0;
     }
     if (req.ContentLength != 0) {
@@ -109,17 +109,17 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
 
         var save = req.Body;
         var dummyBody = false;
-        if (!body){
+        if (!body) {
             var contentLength = outgoingLength(ref (Ꮡreq).DerefOrNull());
             if (contentLength != 0) {
                 req.Body = io.NopCloser(io.LimitReader((neverEnding)(rune)'x', contentLength));
                 dummyBody = true;
             }
         } else {
-            error errΔ1 = default!;
+            error errΔ1 = default;
             (save, req.Body, errΔ1) = drainBody(req.Body);
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
 
@@ -128,12 +128,12 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         // negotiation with our dumpConn and its bytes.Buffer & pipe.
         // The wire format for https and http are the same, anyway.
         var reqSend = Ꮡreq;
-        if ((~req.URL).Scheme == "https"u8) {
+        if (req.URL.Scheme == "https"u8) {
             reqSend = @new<http.Request>();
             reqSend.Value = req;
-            reqSend.Value.URL = @new<url.URL>();
-            (~reqSend).URL.Value = req.URL.Value;
-            reqSend.Value.URL.Value.Scheme = httpˢ;
+            reqSend.URL = @new<url.URL>();
+            reqSend.URL.Value = req.URL.Value;
+            reqSend.URL.Scheme = httpˢ;
         }
 
         // Use the actual Transport code to record what we would send
@@ -141,7 +141,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         // custom dialer that returns a fake net.Conn that waits
         // for the full input (and recording it), and then responds
         // with a dummy response.
-        ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);                       // records the output
+        ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf); // records the output
         var (pr, pw) = io.Pipe();
         var prʗ1 = pr;
         defer(() => prʗ1.Close(), ref ᒐ);
@@ -152,7 +152,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
             var drʗ1 = dr;
             var pwʗ2 = pw;
         var t = Ꮡ(new http.Transport(
-            Dial: (@string netΔ1, @string addr) => (new dumpConnжConn(Ꮡ(new dumpConn(io.MultiWriter(new bytes_BufferжWriter(Ꮡbuf), new io.PipeWriterжWriter(pwʗ2)), new delegateReaderжReader(drʗ1)))), default!)
+            Dial: (@string netΔ1, @string addr) => (new dumpConnжConn(Ꮡ(new dumpConn(io.MultiWriter(new bytes_BufferжWriter(Ꮡbuf), new io.PipeWriterжWriter(pwʗ2)), new delegateReaderжReader(drʗ1)))), default)
         ));
         var tʗ1 = t;
         defer(tʗ1.CloseIdleConnections, ref ᒐ);
@@ -167,13 +167,13 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         var quitReadChʗ1 = quitReadCh;
         goǃ(() => {
             var (reqΔ1, errΔ2) = http.ReadRequest(bufio.NewReader(new io.PipeReaderжReader(prʗ2)));
-            if (errΔ2 == default!) {
+            if (errΔ2 == nil) {
                 // Ensure all the body is read; otherwise
                 // we'll get a partial dump.
-                io.Copy(io.Discard, (~reqΔ1).Body);
-                (~reqΔ1).Body.Close();
+                io.Copy(io.Discard, reqΔ1.Body);
+                reqΔ1.Body.Close();
             }
-            var selᴛ1 = (~drʗ2).c.ᐸꟷ(new strings_ReaderжReader(strings.NewReader(http11204NoContentˢ)), ꓸꓸꓸ);
+            var selᴛ1 = drʗ2.c.ᐸꟷ(new strings_ReaderжReader(strings.NewReader(http11204NoContentˢ)), ꓸꓸꓸ);
             var selᴛ2 = quitReadChʗ1;
             switch (select(selᴛ1, ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
             case 0: {
@@ -181,7 +181,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
             }
             case 1 when selᴛ2.ꟷᐳ(out _): {
                 // Ensure delegateReader.Read doesn't block forever if we get an error.
-                close((~drʗ2).c);
+                close(drʗ2.c);
                 break;
             }}
         });
@@ -189,10 +189,10 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         var (_, err) = t.RoundTrip(reqSend);
 
         req.Body = save;
-        if (err != default!) {
-            dr.Value.err = err;
+        if (err != nil) {
+            dr.err = err;
             close(quitReadCh);
-            return (default!, err);
+            return (default, err);
         }
         var dump = buf.Bytes();
 
@@ -208,9 +208,9 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
                 }
             }
         }
-        return (dump, default!);
+        return (dump, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -218,13 +218,13 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
 // once it arrives on a channel.
 partial struct delegateReader {
     internal channel<io.Reader> c;
-    internal error err;     // only used if r is nil and c is closed.
+    internal error err;   // only used if r is nil and c is closed.
     internal io.Reader r; // nil until received from c
 }
 
 internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
-    if (r.r == default!) {
-        bool ok = default!;
+    if (r.r == nil) {
+        bool ok = default;
         {
             (r.r, ok) = ᐸꟷ(r.c, ꟷ); if (!ok) {
                 return (0, r.err);
@@ -272,14 +272,14 @@ internal static readonly @string httpsˢ = "https://"u8;
 public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool body) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
-    error err = default!;
+    error err = default;
     var save = req.Body;
-    if (!body || req.Body == default!){
-        req.Body = default!;
+    if (!body || req.Body == nil) {
+        req.Body = default;
     } else {
         (save, req.Body, err) = drainBody(req.Body);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
     }
 
@@ -303,7 +303,7 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
     if (!absRequestURI) {
         @string host = req.Host;
         if (host == ""u8 && req.URL != nil) {
-            host = req.URL.Value.Host;
+            host = req.URL.Host;
         }
         if (host != ""u8) {
             fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "Host: %s\r\n"u8, host);
@@ -316,13 +316,13 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
     }
 
     err = req.Header.WriteSubset(new bytes_BufferжWriter(Ꮡb), reqWriteExcludeHeaderDump);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     io.WriteString(new bytes_BufferжWriter(Ꮡb), "\r\n"u8);
 
-    if (req.Body != default!) {
+    if (req.Body != nil) {
         io.Writer dest = new bytes_BufferжWriter(Ꮡb);
         if (chunked) {
             dest = new io_WriteCloserᴠWriter(NewChunkedWriter(dest));
@@ -335,10 +335,10 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
     }
 
     req.Body = save;
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (b.Bytes(), default!);
+    return (b.Bytes(), default);
 }
 
 // errNoBody is a sentinel error value used by failureToReadBody so we
@@ -357,7 +357,7 @@ internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δ
 }
 
 internal static error Close(this failureToReadBody _) {
-    return default!;
+    return default;
 }
 
 // emptyBody is an instance of empty reader.
@@ -368,37 +368,36 @@ public static (slice<byte>, error) DumpResponse(ж<http.Response> Ꮡresp, bool 
     ref var resp = ref Ꮡresp.DerefOrNull();
 
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-    error err = default!;
+    error err = default;
     var save = resp.Body;
     var savecl = resp.ContentLength;
 
-    if (!body){
+    if (!body) {
         // For content length of zero. Make sure the body is an empty
         // reader, instead of returning error through failureToReadBody{}.
-        if (resp.ContentLength == 0){
+        if (resp.ContentLength == 0) {
             resp.Body = emptyBody;
         } else {
-            resp.Body = new failureToReadBody(nil);
+            resp.Body = new failureToReadBody();
         }
-    } else 
-    if (resp.Body == default!){
+    } else if (resp.Body == nil) {
         resp.Body = emptyBody;
     } else {
         (save, resp.Body, err) = drainBody(resp.Body);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
     }
     err = resp.Write(new bytes_BufferжWriter(Ꮡb));
     if (AreEqual(err, errNoBody)) {
-        err = default!;
+        err = default;
     }
     resp.Body = save;
     resp.ContentLength = savecl;
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (b.Bytes(), default!);
+    return (b.Bytes(), default);
 }
 
 } // end httputil_package

@@ -20,51 +20,51 @@ partial class profile_package {
 // profile.TimeNanos will be the earliest nonzero one.
 public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
     if (len(srcs) == 0) {
-        return (default!, fmt.Errorf("no profiles to merge"u8));
+        return (default, fmt.Errorf("no profiles to merge"u8));
     }
     var (p, err) = combineHeaders(srcs);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var pm = Ꮡ(new profileMerger(
         p: p,
-        samples: new map<sampleKey, ж<Sample>>(len((~srcs[0]).Sample)),
-        locations: new map<locationKey, ж<Location>>(len((~srcs[0]).Location)),
-        functions: new map<functionKey, ж<Function>>(len((~srcs[0]).Function)),
-        mappings: new map<mappingKey, ж<Mapping>>(len((~srcs[0]).Mapping))
+        samples: new map<sampleKey, ж<Sample>>(len(srcs[0].Sample)),
+        locations: new map<locationKey, ж<Location>>(len(srcs[0].Location)),
+        functions: new map<functionKey, ж<Function>>(len(srcs[0].Function)),
+        mappings: new map<mappingKey, ж<Mapping>>(len(srcs[0].Mapping))
     ));
 
     foreach (var (_, src) in srcs) {
         // Clear the profile-specific hash tables
-        pm.Value.locationsByID = new map<uint64, ж<Location>>(len((~src).Location));
-        pm.Value.functionsByID = new map<uint64, ж<Function>>(len((~src).Function));
-        pm.Value.mappingsByID = new map<uint64, mapInfo>(len((~src).Mapping));
+        pm.locationsByID = new map<uint64, ж<Location>>(len(src.Location));
+        pm.functionsByID = new map<uint64, ж<Function>>(len(src.Function));
+        pm.mappingsByID = new map<uint64, mapInfo>(len(src.Mapping));
 
-        if (len((~pm).mappings) == 0 && len((~src).Mapping) > 0) {
+        if (len(pm.mappings) == 0 && len(src.Mapping) > 0) {
             // The Mapping list has the property that the first mapping
             // represents the main binary. Take the first Mapping we see,
             // otherwise the operations below will add mappings in an
             // arbitrary order.
-            pm.mapMapping((~src).Mapping[0]);
+            pm.mapMapping(src.Mapping[0]);
         }
 
-        foreach (var (_, s) in (~src).Sample) {
+        foreach (var (_, s) in src.Sample) {
             if (!isZeroSample(ref (s).DerefOrNull())) {
                 pm.mapSample(s);
             }
         }
     }
 
-    foreach (var (_, s) in (~p).Sample) {
+    foreach (var (_, s) in p.Sample) {
         if (isZeroSample(ref (s).DerefOrNull())) {
             // If there are any zero samples, re-merge the profile to GC
             // them.
-            return Merge(new ж<Profile>[]{p}.slice());
+            return Merge(slice<ж<Profile>>([p]));
         }
     }
 
-    return (p, default!);
+    return (p, default);
 }
 
 // Normalize normalizes the source profile by multiplying each value in profile by the
@@ -74,7 +74,7 @@ public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     {
-        var err = p.compatible(Ꮡpb); if (err != default!) {
+        var err = p.compatible(Ꮡpb); if (err != nil) {
             return err;
         }
     }
@@ -95,14 +95,14 @@ public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
 
     var normScale = new slice<float64>(len(baseVals));
     foreach (var i in range(baseVals)) {
-        if (srcVals[i] == 0){
+        if (srcVals[i] == 0) {
             normScale[i] = 0.0D;
         } else {
             normScale[i] = (float64)baseVals[i] / (float64)srcVals[i];
         }
     }
     p.ScaleN(normScale);
-    return default!;
+    return default;
 }
 
 internal static bool isZeroSample(ref Sample s) {
@@ -143,12 +143,12 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
         NumUnit: new map<@string, slice<@string>>(len(src.NumLabel))
     ));
     foreach (var (i, l) in src.Location) {
-        s.Value.Location[i] = pm.mapLocation(l);
+        s.Location[i] = pm.mapLocation(l);
     }
     foreach (var (kΔ1, v) in src.Label) {
         var vv = new slice<@string>(len(v));
         copy(vv, v);
-        s.Value.Label[kΔ1] = vv;
+        s.Label[kΔ1] = vv;
     }
     foreach (var (kΔ2, v) in src.NumLabel) {
         var u = src.NumUnit[kΔ2];
@@ -156,8 +156,8 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
         var uu = new slice<@string>(len(u));
         copy(vv, v);
         copy(uu, u);
-        s.Value.NumLabel[kΔ2] = vv;
-        s.Value.NumUnit[kΔ2] = uu;
+        s.NumLabel[kΔ2] = vv;
+        s.NumUnit[kΔ2] = uu;
     }
     // Check memoization table. Must be done on the remapped location to
     // account for the remapped mapping. Add current values to the
@@ -173,7 +173,7 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
     }
     copy((~s).Value, src.Value);
     pm.samples[k] = s;
-    pm.p.Value.Sample = append((~pm.p).Sample, s);
+    pm.p.Sample = append(pm.p.Sample, s);
     return s;
 }
 
@@ -184,7 +184,7 @@ internal static sampleKey key(this ref Sample sample) {
 
     var ids = new slice<@string>(len(sample.Location));
     foreach (var (i, l) in sample.Location) {
-        ids[i] = strconv.FormatUint((~l).ID, 16);
+        ids[i] = strconv.FormatUint(l.ID, 16);
     }
 
     var labels = new slice<@string>(0, len(sample.Label));
@@ -216,7 +216,7 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
-        return default!;
+        return default;
     }
 
     {
@@ -228,14 +228,14 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
 
     var mi = pm.mapMapping(src.Mapping);
     var l = Ꮡ(new Location(
-        ID: (uint64)(len((~pm.p).Location) + 1),
+        ID: (uint64)(len(pm.p.Location) + 1),
         Mapping: mi.m,
         Address: (uint64)((int64)src.Address + mi.offset),
         Line: new slice<Line>(len(src.Line)),
         IsFolded: src.IsFolded
     ));
     foreach (var (i, ln) in src.Line) {
-        l.Value.Line[i] = pm.mapLine(ln);
+        l.Line[i] = pm.mapLine(ln);
     }
     // Check memoization table. Must be done on the remapped location to
     // account for the remapped mapping ID.
@@ -248,7 +248,7 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
     }
     pm.locationsByID[src.ID] = l;
     pm.locations[k] = l;
-    pm.p.Value.Location = append((~pm.p).Location, l);
+    pm.p.Location = append(pm.p.Location, l);
     return l;
 }
 
@@ -260,13 +260,13 @@ internal static locationKey key(this ref Location l) {
     );
     if (l.Mapping != nil) {
         // Normalizes address to handle address space randomization.
-        key.addr -= l.Mapping.Value.Start;
-        key.mappingID = l.Mapping.Value.ID;
+        key.addr -= l.Mapping.Start;
+        key.mappingID = l.Mapping.ID;
     }
     var lines = new slice<@string>(len(l.Line) * 2);
     foreach (var (i, line) in l.Line) {
         if (line.Function != nil) {
-            lines[i * 2] = strconv.FormatUint((~line.Function).ID, 16);
+            lines[i * 2] = strconv.FormatUint(line.Function.ID, 16);
         }
         lines[i * 2 + 1] = strconv.FormatInt(line.ΔLine, 16);
     }
@@ -284,7 +284,7 @@ internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
-        return new mapInfo(nil);
+        return new mapInfo();
     }
 
     {
@@ -297,13 +297,13 @@ internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc
     var mk = src.key();
     {
         var (mΔ1, ok) = pm.mappings[mk, ꟷ]; if (ok) {
-            var miΔ2 = new mapInfo(mΔ1, (int64)(~mΔ1).Start - (int64)src.Start);
+            var miΔ2 = new mapInfo(mΔ1, (int64)mΔ1.Start - (int64)src.Start);
             pm.mappingsByID[src.ID] = miΔ2;
             return miΔ2;
         }
     }
     var m = Ꮡ(new Mapping(
-        ID: (uint64)(len((~pm.p).Mapping) + 1),
+        ID: (uint64)(len(pm.p.Mapping) + 1),
         Start: src.Start,
         Limit: src.Limit,
         Offset: src.Offset,
@@ -314,7 +314,7 @@ internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc
         HasLineNumbers: src.HasLineNumbers,
         HasInlineFrames: src.HasInlineFrames
     ));
-    pm.p.Value.Mapping = append((~pm.p).Mapping, m);
+    pm.p.Mapping = append(pm.p.Mapping, m);
 
     // Update memoization tables.
     pm.mappings[mk] = m;
@@ -373,7 +373,7 @@ internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function>
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
-        return default!;
+        return default;
     }
     {
         var (fΔ1, ok) = pm.functionsByID[src.ID, ꟷ]; if (ok) {
@@ -388,7 +388,7 @@ internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function>
         }
     }
     var f = Ꮡ(new Function(
-        ID: (uint64)(len((~pm.p).Function) + 1),
+        ID: (uint64)(len(pm.p.Function) + 1),
         Name: src.Name,
         SystemName: src.SystemName,
         Filename: src.Filename,
@@ -396,7 +396,7 @@ internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function>
     ));
     pm.functions[k] = f;
     pm.functionsByID[src.ID] = f;
-    pm.p.Value.Function = append((~pm.p).Function, f);
+    pm.p.Function = append(pm.p.Function, f);
     return f;
 }
 
@@ -420,8 +420,8 @@ partial struct functionKey {
 internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
     foreach (var (_, s) in srcs[1..]) {
         {
-            var err = srcs[0].compatible(s); if (err != default!) {
-                return (default!, err);
+            var err = srcs[0].compatible(s); if (err != nil) {
+                return (default, err);
             }
         }
     }
@@ -429,18 +429,18 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
     ref var timeNanos = ref heap(new int64(), out var ᏑtimeNanos);
     ref var durationNanos = ref heap(new int64(), out var ᏑdurationNanos);
     ref var period = ref heap(new int64(), out var Ꮡperiod);
-    slice<@string> comments = default!;
+    slice<@string> comments = default;
     var seenComments = new map<@string, bool>{};
     ref var defaultSampleType = ref heap(new @string(), out var ᏑdefaultSampleType);
     foreach (var (_, s) in srcs) {
-        if (timeNanos == 0 || (~s).TimeNanos < timeNanos) {
-            timeNanos = s.Value.TimeNanos;
+        if (timeNanos == 0 || s.TimeNanos < timeNanos) {
+            timeNanos = s.TimeNanos;
         }
-        durationNanos += s.Value.DurationNanos;
-        if (period == 0 || period < (~s).Period) {
-            period = s.Value.Period;
+        durationNanos += s.DurationNanos;
+        if (period == 0 || period < s.Period) {
+            period = s.Period;
         }
-        foreach (var (_, c) in (~s).Comments) {
+        foreach (var (_, c) in s.Comments) {
             {
                 var seen = seenComments[c]; if (!seen) {
                     comments = append(comments, c);
@@ -449,26 +449,26 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
             }
         }
         if (defaultSampleType == ""u8) {
-            defaultSampleType = s.Value.DefaultSampleType;
+            defaultSampleType = s.DefaultSampleType;
         }
     }
 
     var p = Ꮡ(new Profile(
-        SampleType: new slice<ж<ValueType>>(len((~srcs[0]).SampleType)),
+        SampleType: new slice<ж<ValueType>>(len(srcs[0].SampleType)),
 
-        DropFrames: (~srcs[0]).DropFrames,
-        KeepFrames: (~srcs[0]).KeepFrames,
+        DropFrames: srcs[0].DropFrames,
+        KeepFrames: srcs[0].KeepFrames,
 
         TimeNanos: timeNanos,
         DurationNanos: durationNanos,
-        PeriodType: (~srcs[0]).PeriodType,
+        PeriodType: srcs[0].PeriodType,
         Period: period,
 
         Comments: comments,
         DefaultSampleType: defaultSampleType
     ));
-    copy((~p).SampleType, (~srcs[0]).SampleType);
-    return (p, default!);
+    copy(p.SampleType, srcs[0].SampleType);
+    return (p, default);
 }
 
 // compatible determines if two profiles can be compared/merged.
@@ -490,7 +490,7 @@ internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
         }
     }
-    return default!;
+    return default;
 }
 
 // equalValueType returns true if the two value types are semantically

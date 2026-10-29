@@ -31,7 +31,7 @@ partial interface mutatorRand {
 // creation and use, no reproducibility, no concurrency safety, just the
 // necessary methods, optimized for speed.
 internal static readonly ж<atomic.Uint64> ᏑglobalInc = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
-internal static ref atomic.Uint64 globalInc => ref ((StaticBox<atomic.Uint64>)ᏑglobalInc).ValueSlot;     // PCG stream
+internal static ref atomic.Uint64 globalInc => ref ((StaticBox<atomic.Uint64>)ᏑglobalInc).ValueSlot; // PCG stream
 
 internal const uint64 multiplier = 6364136223846793005;
 
@@ -53,13 +53,13 @@ internal static ж<nint> godebugSeed() {
         if (strings.HasPrefix(f, fuzzseedˢ)) {
             ref var seed = ref heap<nint>(out var Ꮡseed);
             (seed, var err) = strconv.Atoi(strings.TrimPrefix(f, fuzzseedˢ));
-            if (err != default!) {
+            if (err != nil) {
                 throw panic("malformed fuzzseed");
             }
             return Ꮡseed;
         }
     }
-    return default!;
+    return default;
 }
 
 // newPcgRand generates a new, seeded Rand, ready for use.
@@ -72,10 +72,10 @@ internal static ж<pcgRand> newPcgRand() {
         }
     }
     var inc = ᏑglobalInc.Add(1);
-    r.Value.state = now;
-    r.Value.inc = (inc << 1) | 1;
+    r.state = now;
+    r.inc = (inc << 1) | 1;
     r.step();
-    r.Value.state += now;
+    r.state += now;
     r.step();
     return r;
 }

@@ -76,7 +76,7 @@ internal static void evictOldest(this ref headerFieldTable t, nint n) {
     }
     copy(t.ents, t.ents.slice(n));
     for (nint k = t.len() - n; k < t.len(); k++) {
-        t.ents[k] = new HeaderField(nil); // so strings can be garbage collected
+        t.ents[k] = new HeaderField(); // so strings can be garbage collected
     }
     t.ents = t.ents.slice(0, t.len() - n);
     if (t.evictCount + (uint64)n < t.evictCount) {

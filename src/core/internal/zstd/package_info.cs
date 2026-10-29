@@ -48,6 +48,13 @@ using static go.@internal.zstd_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(fseBaselineEntry))]
+[assembly: go.GoFieldAccess(typeof(fseEntry))]
+[assembly: go.GoFieldAccess(typeof(reverseBitReader))]
+[assembly: go.GoFieldAccess(typeof(seqCodeInfoData))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -57,7 +64,7 @@ using static go.@internal.zstd_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/zstd/bits.go", "bits.cs", "ABg0kgAGEqKCgpSCgoKUqJKCgoKokoKCupIADyDSgoKUAAcQqJKCpoKCrLKCgpSCgoKClKiS", "", "", "93=LeadingZeros8/1/1/6")]
-[assembly: go.GoPositionMap("internal/zstd/block.go", "block.cs", "AA8i0oK4gqaAgraCgpSCgpSUlIKCppSCppSmABcyABo20oKmgoKCpoKCkoKClIKUgpSCyoKUgoKUuIKCgqaCgqaCgqbc0oKmgoK4gpSCuO6ClIKAgraCgriClJSCgpSUgpSUgIK2goK4gpSU+NaSgqaCgqaCgqaCgsqCgoKmgoKUgoKUlIKClJSCgpS4goKClIKUlLSCgrSCgoK0goKCyIKUgoKUlIKClJSCgpTKgriClIKCpoKAgtqUgqbosoIABxCCgoKCgoKUgoKUgpTKgoKClIKU")]
+[assembly: go.GoPositionMap("internal/zstd/block.go", "block.cs", "AA8i0oK4gqaAgraCgpSCgpSUlIKCppSCppSmABcyABo20oKmgoKCpoKCgoKClIKUgpSCyoKUgoKUuIKCgqaCgqaCgqbc0oKmgoK4gpSCuO6ClIKAgraCgriClJSCgpSUgpSUgIK2goK4gpSU+NaSgqaCgqaCgqaCgsqCgoKmgoKUgoKUlIKClJSCgpS4goKClIKUlLSCgrSCgoK0goKCyIKUgoKUlIKClJSCgpTKgriClIKCpoKAgtqUgqbosoIABxCCgoKCgoKUgoKUgpTKgoKClIKU")]
 [assembly: go.GoPositionMap("internal/zstd/fse.go", "fse.cs", "ABcwAAgCgoCCtoKCysqmpqaUlIKAgra4goKCgoKAgraCgoKCgIL+lIKmgqaCpoKClIKCpoKClIKmgoKUlIKUgpSUgoK4gqaCppSAgrbssoKUlIKClIKCuIKCgoKCgoKCuIKmgoKClIKmlIKCpgAULAAZMJKCuIKClIKUgoKClJTYkoK4ggAUKoKClIKUAAcSABcykoK4goKUgpSCgoKUlNwAGzgAECI=")]
 [assembly: go.GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABQuAAsCgqaClIKClIKUgoKUlIKmgoKmgoKmgoLcgoKCgpSCgoKmgoKUlIKmgpSUgoKUgoKCpoKClJSCpoKmuIKClIKCgoLcgoKCgpSCgqaCpoKCpoLKgoKUgoKUgpSCgpSC3IKCgoKmgoKUgoKCgpSm")]
 [assembly: go.GoPositionMap("internal/zstd/literals.go", "literals.cs", "AAoc0oK4gpSClAAIDMKUgpS0gpSCtIKUguyCppSClIKmgpSCgoK4+sKqlIKUgoKCgpTGgpSCgoK0gpSCgoLsgqaCgqaCuIKmgoKUlIKUgriC7oKClKaCptjmgoKmgoKUgoKmgoKCgqb65oKUgtyCgqaCgoKUgoKUlIKClIKUgpSCypKCppKCppKCppKCpoKCgpSUlIKClIKUkoKUgqaCgqaCgqaCgqaCgoKUgoKmgoKUgoKUgoKm", "289-295:1")]

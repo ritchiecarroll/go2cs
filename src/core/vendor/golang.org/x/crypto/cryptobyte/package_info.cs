@@ -11,15 +11,7 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,6 +49,10 @@ using static go.vendor.golang.org.x.crypto.cryptobyte_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Builder))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -65,8 +61,8 @@ using static go.vendor.golang.org.x.crypto.cryptobyte_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1.go", "asn1.cs", "ABAswqqiqJKmgoKCgqaCgsySgoKCpoKCzLKCpoLKgoKCgpSClJKClIKClMySkt6ygoKUkrqStoKClLyikoK4goKClIK4goKCgqa4goKmgqaCgrimgpKCgqaCgsqCgoKUyoKq2IKUgoKClK7igriCgpSCAAIQ8oKCppS0tKYAAhLi5IKClIL0goKUgqSktMiClJSClJSUppSCgoKUlIKClIKClJSmooKClIKUgpSCpoKCgpSmgoKClIKCpoKCpoKCgpSmgoKUlJSUgoKUrLKCqsKCgoKUgpSCpqKCgoK4gpSCyoKmgoKCpqrCgoLKnMKClIKClIKmgoKClJSCqsKCgpSCgoKUgIKkgs7CgoKUlIKCgriClIKmgIK2uJSCqsKChKaCgoamgoKs0oKCpoKClIKssgACENKCgpQAAhDSgoKUAAIQ0gACENKqooKUqqKCruKCgpSClKqigpSCrsKCgoKUggALBrSAgpTWpJSClK7ygoKClIKUgoKClJSUruKCgoKmgoKmprKClJTcpoKu0pSCuIKUgqaCgsqUlJSmgpSUpoKUgqY=", "38-48:1;53-63:1;72-97:1;102-104:1;115-117:1;122-130:1;136-139:1;182-192:1;196-202:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/builder.go", "builder.cs", "ACFKsgAEELIABRCiqqKClKqigpSokqiSqqKokqiSqJKokgAhRpKokqiSqJKmwoKUgpSCgqaAkpTaoqS0gqaSlIKmAAgSgoKC6IKClIKClIKCppSCpriClJKCgpKCgpKCgpKCgpKCgpSCgsqCgoKCgpSCpoKCgpSCgqaCpuaigpSClIKUgoKUrLKClIKUgoKUgpSClAAKHNKCgg==", "168-181:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1.go", "asn1.cs", "ABAswqqiqJKmgoKCgqaCgsySgoKCpoKCzLKCpoLKgoKCgpSClIKClIKClMySkt6ygoKUkrqStoKClLyikoK4goKClIK4goKCgqa4goKmgqaCgrimgpKCgqaCgsqCgoKUyoKq2IKUgoKClK7igriCgpSCAAIQ8oKCppS0tKYAAhLi5IKClIL0goKUgqSktMiClJSClJSUppSCgoKUlIKClIKClJSmooKClIKUgpSCpoKCgpSmgoKClIKCpoKCpoKCgpSmgoKUlJSUgoKUrLKCqsKCgoKUgpSCpqKCgoK4gpSCyoKmgoKCpqrCgoLKnMKClIKClIKmgoKClJSCqsKCgpSCgoKUgIKkgs7CgoKUlIKCgriClIKmgIK2uJSCqsKChKaCgoamgoKs0oKCpoKClIKssgACENKCgpQAAhDSgoKUAAIQ0gACENKqooKUqqKCruKCgpSClKqigpSCrsKCgoKUggALBrSAgpTWpJSClK7ygoKClIKUgoKClJSUruKCgoKmgoKmprKClJTcpoKu0pSCuIKUgqaCgsqUlJSmgpSUpoKUgqY=", "38-48:1;53-63:1;72-97:1;102-104:1;115-117:1;122-130:1;136-139:1;182-192:1;196-202:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/builder.go", "builder.cs", "ACFKsgAEELIABRCiqqKClKqigpSokqiSqqKokqiSqJKokgAhRpKokqiSqJKmwoKUgpSCgqaAkpTaoqS0gqaClIKmAAgSgoKC6IKClIKClIKCppSCpriClJKCgoKCgoKCgoKCgoKCgpSCgsqCgoKCgpSCpoKCgpSCgqaCpuaigpSClIKUgoKUrLKClIKUgoKUgpSClAAKHNKCgg==", "168-181:1")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/string.go", "string.cs", "ABk0ooKUgoKokqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqaigoKUgoKClIKmooKClIKCgpSCgpSCqqKssqyyqsKCgpSCqqKCgoKUqJI=")]
 // </GoSourcePositionMaps>
 

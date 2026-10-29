@@ -66,29 +66,29 @@ partial struct blockWriter {
 }
 
 internal static void setup(this blockWriter b) {
-    b.e.Value.buf[0] = 0;
+    b.e.buf[0] = 0;
 }
 
 internal static error Flush(this blockWriter b) {
-    return (~b.e).err;
+    return b.e.err;
 }
 
 internal static error WriteByte(this blockWriter b, byte c) {
-    if ((~b.e).err != default!) {
-        return (~b.e).err;
+    if (b.e.err != nil) {
+        return b.e.err;
     }
 
     // Append c to buffered sub-block.
-    b.e.Value.buf[0]++;
-    b.e.Value.buf[(~b.e).buf[0]] = c;
-    if ((~b.e).buf[0] < 255) {
-        return default!;
+    b.e.buf[0]++;
+    b.e.buf[b.e.buf[0]] = c;
+    if (b.e.buf[0] < 255) {
+        return default;
     }
 
     // Flush block
-    b.e.write((~b.e).buf[..256]);
-    b.e.Value.buf[0] = 0;
-    return (~b.e).err;
+    b.e.write(b.e.buf[..256]);
+    b.e.buf[0] = 0;
+    return b.e.err;
 }
 
 // blockWriter must be an io.Writer for lzw.NewWriter, but this is never
@@ -96,43 +96,43 @@ internal static error WriteByte(this blockWriter b, byte c) {
 internal static (nint, error) Write(this blockWriter b, slice<byte> data) {
     foreach (var (i, c) in data) {
         {
-            var err = b.WriteByte(c); if (err != default!) {
+            var err = b.WriteByte(c); if (err != nil) {
                 return (i, err);
             }
         }
     }
-    return (len(data), default!);
+    return (len(data), default);
 }
 
 internal static void close(this blockWriter b) {
     // Write the block terminator (0x00), either by itself, or along with a
     // pending sub-block.
-    if ((~b.e).buf[0] == 0){
+    if (b.e.buf[0] == 0) {
         b.e.writeByte(0);
     } else {
-        nuint n = (nuint)(~b.e).buf[0];
-        b.e.Value.buf[n + 1] = 0;
-        b.e.write((~b.e).buf.slice(0, (nint)(n + 2)));
+        nuint n = (nuint)b.e.buf[0];
+        b.e.buf[n + 1] = 0;
+        b.e.write(b.e.buf.slice(0, (nint)(n + 2)));
     }
     b.e.flush();
 }
 
 internal static void flush(this ref encoder e) {
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
     e.err = e.w.Flush();
 }
 
 internal static void write(this ref encoder e, slice<byte> p) {
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
     (_, e.err) = e.w.Write(p);
 }
 
 internal static void writeByte(this ref encoder e, byte b) {
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
     e.err = e.w.WriteByte(b);
@@ -143,11 +143,11 @@ internal static readonly @string gif89aˢ = "GIF89a"u8;
 internal static readonly @string netscape20ˢ = "NETSCAPE2.0"u8;
 
 internal static void writeHeader(this ref encoder e) {
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
     (_, e.err) = io.WriteString(e.w, gif89aˢ);
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
 
@@ -157,15 +157,15 @@ internal static void writeHeader(this ref encoder e) {
     e.write(e.buf[..4]);
 
     {
-        var (p, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(p) > 0){
+        var (p, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(p) > 0) {
             nint paddedSize = log2(len(p)); // Size of Global Color Table: 2^(1+n).
             e.buf[0] = (byte)((uint8)((uint8)fColorTable | (uint8)paddedSize));
             e.buf[1] = e.g.BackgroundIndex;
             e.buf[2] = 0x00; // Pixel Aspect Ratio.
             e.write(e.buf[..3]);
-            error err = default!;
+            error err = default;
             (e.globalCT, err) = encodeColorTable(e.globalColorTable[..], p, paddedSize);
-            if (err != default! && e.err == default!) {
+            if (err != nil && e.err == nil) {
                 e.err = err;
                 return;
             }
@@ -187,7 +187,7 @@ internal static void writeHeader(this ref encoder e) {
         e.buf[2] = 0x0b; // Block Size.
         e.write(e.buf[..3]);
         var (_, err) = io.WriteString(e.w, netscape20ˢ); // Application Identifier.
-        if (err != default! && e.err == default!) {
+        if (err != nil && e.err == nil) {
             e.err = err;
             return;
         }
@@ -208,16 +208,16 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
         return (0, errors.New(gifCannotEncodeColorˢ));
     }
     foreach (var (i, c) in p) {
-        if (c == default!) {
+        if (c == nil) {
             return (0, errors.New(gifCannotEncodeColorˢ2));
         }
-        uint8 r = default!;
-        uint8 g = default!;
-        uint8 b = default!;
+        uint8 r = default;
+        uint8 g = default;
+        uint8 b = default;
         // It is most likely that the palette is full of color.RGBAs, so they
         // get a fast path.
         {
-            var (rgba, ok) = c._<colorꓸRGBA>(ᐧ); if (ok){
+            var (rgba, ok) = c._<colorꓸRGBA>(ᐧ); if (ok) {
                 (r, g, b) = (rgba.R, rgba.G, rgba.B);
             } else {
                 var (rr, gg, bb, _) = c.RGBA();
@@ -233,7 +233,7 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
         // Pad with black.
         clear(dst.slice(3 * len(p), 3 * n));
     }
-    return (3 * n, default!);
+    return (3 * n, default);
 }
 
 internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) {
@@ -254,7 +254,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     ref var e = ref Ꮡe.DerefOrNull();
     ref var pm = ref Ꮡpm.DerefOrNull();
 
-    if (e.err != default!) {
+    if (e.err != nil) {
         return;
     }
 
@@ -275,7 +275,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
 
     nint transparentIndex = -1;
     foreach (var (i, c) in pm.Palette) {
-        if (c == default!) {
+        if (c == nil) {
             e.err = errors.New(gifCannotEncodeColorˢ2);
             return;
         }
@@ -288,10 +288,10 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     }
 
     if (delay > 0 || disposal != 0 || transparentIndex != -1) {
-        e.buf[0] = sExtension; // Extension Introducer.
-        e.buf[1] = gcLabel; // Graphic Control Label.
+        e.buf[0] = sExtension;  // Extension Introducer.
+        e.buf[1] = gcLabel;     // Graphic Control Label.
         e.buf[2] = gcBlockSize; // Block Size.
-        if (transparentIndex != -1){
+        if (transparentIndex != -1) {
             e.buf[3] = (byte)(0x01 | (byte)(disposal << 2));
         } else {
             e.buf[3] = (byte)(0x00 | (byte)(disposal << 2));
@@ -299,7 +299,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
         byteorder.LEPutUint16(e.buf[4..6], (uint16)delay); // Delay Time (1/100ths of a second)
 
         // Transparent color index.
-        if (transparentIndex != -1){
+        if (transparentIndex != -1) {
             e.buf[6] = (uint8)transparentIndex;
         } else {
             e.buf[6] = 0x00;
@@ -320,12 +320,12 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     // frame's palette is not longer than the global palette...
     nint paddedSize = log2(len(pm.Palette)); // Size of Local Color Table: 2^(1+n).
     {
-        var (gp, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(pm.Palette) <= len(gp) && Ꮡelem<Δcolor.Color>(gp, 0) == Ꮡelem<Δcolor.Color>(pm.Palette, 0)){
+        var (gp, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(pm.Palette) <= len(gp) && Ꮡelem<Δcolor.Color>(gp, 0) == Ꮡelem<Δcolor.Color>(pm.Palette, 0)) {
             e.writeByte(0); // Use the global color table.
         } else {
             var (ct, err) = encodeColorTable(e.localColorTable[..], pm.Palette, paddedSize);
-            if (err != default!) {
-                if (e.err == default!) {
+            if (err != nil) {
+                if (e.err == nil) {
                     e.err = err;
                 }
                 return;
@@ -333,7 +333,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
             // This frame's palette is not the very same slice as the global
             // palette, but it might be a copy, possibly with one value turned into
             // transparency by DecodeAll.
-            if (ct <= e.globalCT && e.colorTablesMatch(len(pm.Palette), transparentIndex)){
+            if (ct <= e.globalCT && e.colorTablesMatch(len(pm.Palette), transparentIndex)) {
                 e.writeByte(0); // Use the global color table.
             } else {
                 // Use a local color table.
@@ -353,16 +353,16 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     bw.setup();
     var lzww = lzw.NewWriter(bw, lzw.LSB, litWidth);
     {
-        nint dx = b.Dx(); if (dx == pm.Stride){
+        nint dx = b.Dx(); if (dx == pm.Stride) {
             (_, e.err) = lzww.Write(pm.Pix.slice(0, dx * b.Dy()));
-            if (e.err != default!) {
+            if (e.err != nil) {
                 lzww.Close();
                 return;
             }
         } else {
             for ((nint i, nint y) = (0, b.Min.Y); y < b.Max.Y; (i, y) = (i + pm.Stride, y + 1)) {
                 (_, e.err) = lzww.Write(pm.Pix.slice(i, i + dx));
-                if (e.err != default!) {
+                if (e.err != nil) {
                     lzww.Close();
                     return;
                 }
@@ -370,7 +370,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
         }
     }
     lzww.Close(); // flush to bw
-    bw.close(); // flush to e.w
+    bw.close();   // flush to e.w
 }
 
 // Options are the encoding parameters.
@@ -405,20 +405,18 @@ public static error EncodeAll(io.Writer w, ж<GIF> Ꮡg) {
         return errors.New(gifMismatchedImageAndˢ);
     }
 
-    ref var e = ref heap<encoder>(out var Ꮡe);
-    e = new encoder(g: g);
+    ref var e = ref heap<encoder>(new encoder(g: g), out var Ꮡe);
     // The GIF.Disposal, GIF.Config and GIF.BackgroundIndex fields were added
     // in Go 1.5. Valid Go 1.4 code, such as when the Disposal field is omitted
     // in a GIF struct literal, should still produce valid GIFs.
-    if (e.g.Disposal != default! && len(e.g.Image) != len(e.g.Disposal)) {
+    if (e.g.Disposal != nil && len(e.g.Image) != len(e.g.Disposal)) {
         return errors.New(gifMismatchedImageAndˢ2);
     }
-    if (e.g.Config == (new image.Config(nil))){
+    if (e.g.Config == (new image.Config())) {
         var p = g.Image[0].Bounds().Max;
         e.g.Config.Width = p.X;
         e.g.Config.Height = p.Y;
-    } else 
-    if (e.g.Config.ColorModel != default!) {
+    } else if (e.g.Config.ColorModel != nil) {
         {
             var (_, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (!ok) {
                 return errors.New(gifGifColorModelMustBeAˢ);
@@ -427,7 +425,7 @@ public static error EncodeAll(io.Writer w, ж<GIF> Ꮡg) {
     }
 
     {
-        var (ww, ok) = w._<writer>(ᐧ); if (ok){
+        var (ww, ok) = w._<writer>(ᐧ); if (ok) {
             e.w = ww;
         } else {
             e.w = new bufio_Writerжwriter(bufio.NewWriter(w));
@@ -437,7 +435,7 @@ public static error EncodeAll(io.Writer w, ж<GIF> Ꮡg) {
     e.writeHeader();
     foreach (var (i, pm) in g.Image) {
         var disposal = (uint8)0;
-        if (g.Disposal != default!) {
+        if (g.Disposal != nil) {
             disposal = g.Disposal[i];
         }
         Ꮡe.writeImageBlock(pm, g.Delay[i], disposal);
@@ -460,14 +458,14 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         return errors.New(gifImageIsTooLargeToˢ);
     }
 
-    var opts = new Options(nil);
+    var opts = new Options();
     if (Ꮡo != nil) {
         opts = o;
     }
     if (opts.NumColors < 1 || 256 < opts.NumColors) {
         opts.NumColors = 256;
     }
-    if (opts.Drawer == default!) {
+    if (opts.Drawer == nil) {
         opts.Drawer = draw.FloydSteinberg;
     }
 
@@ -484,14 +482,14 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
             }
         }
     }
-    if (pm == nil || len((~pm).Palette) > opts.NumColors) {
+    if (pm == nil || len(pm.Palette) > opts.NumColors) {
         // Set pm to be a palettedized copy of m, including its bounds, which
         // might not start at (0, 0).
         //
         // TODO: Pick a better sub-sample of the Plan 9 palette.
         pm = image.NewPaletted(b, palette.Plan9.slice(0, opts.NumColors));
-        if (opts.Quantizer != default!) {
-            pm.Value.Palette = opts.Quantizer.Quantize(new Δcolor.Palette(0, opts.NumColors), m);
+        if (opts.Quantizer != nil) {
+            pm.Palette = opts.Quantizer.Quantize(new Δcolor.Palette(0, opts.NumColors), m);
         }
         opts.Drawer.Draw(new image_PalettedжImage(pm), b, m, b.Min);
     }
@@ -499,18 +497,17 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     // When calling Encode instead of EncodeAll, the single-frame image is
     // translated such that its top-left corner is (0, 0), so that the single
     // frame completely fills the overall GIF's bounds.
-    if ((~pm).Rect.Min != (new image.Point(nil))) {
-        ref var dup = ref heap<image.Paletted>(out var Ꮡdup);
-        dup = pm.Value;
+    if (pm.Rect.Min != (new image.Point())) {
+        ref var dup = ref heap<image.Paletted>(pm.Value, out var Ꮡdup);
         dup.Rect = dup.Rect.Sub(dup.Rect.Min);
         pm = Ꮡdup;
     }
 
     return EncodeAll(w, Ꮡ(new GIF(
-        Image: new ж<image.Paletted>[]{pm}.slice(),
-        Delay: new nint[]{0}.slice(),
+        Image: slice<ж<image.Paletted>>([pm]),
+        Delay: slice<nint>([0]),
         Config: new image.Config(
-            ColorModel: (~pm).Palette,
+            ColorModel: pm.Palette,
             Width: b.Dx(),
             Height: b.Dy()
         )

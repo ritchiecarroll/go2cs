@@ -17,12 +17,12 @@ internal static readonly @string pluginNewModuleDataˢ = "plugin: new module dat
 
 //go:linkname plugin_lastmoduleinit plugin.lastmoduleinit
 internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initTasks, @string errstr) plugin_lastmoduleinit() {
-    map<@string, any> syms = default!;
+    map<@string, any> syms = default;
 
-    ж<moduledata> md = default!;
-    for (var pmd = firstmoduledata.next; pmd != nil; pmd = pmd.Value.next) {
-        if ((~pmd).bad) {
-            md = default!; // we only want the last module
+    ж<moduledata> md = default;
+    for (var pmd = firstmoduledata.next; pmd != nil; pmd = pmd.next) {
+        if (pmd.bad) {
+            md = default; // we only want the last module
             continue;
         }
         md = pmd;
@@ -30,36 +30,36 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     if (md == nil) {
         @throw(runtimeNoPluginModuleˢ);
     }
-    if ((~md).pluginpath == ""u8) {
+    if (md.pluginpath == ""u8) {
         @throw(runtimePluginHasEmptyˢ);
     }
-    if ((~md).typemap != default!) {
-        return ("", default!, default!, pluginAlreadyLoadedˢ);
+    if (md.typemap != nil) {
+        return ("", default, default, pluginAlreadyLoadedˢ);
     }
 
     foreach (var (_, pmd) in activeModules()) {
-        if ((~pmd).pluginpath == (~md).pluginpath) {
-            md.Value.bad = true;
-            return ("", default!, default!, pluginAlreadyLoadedˢ);
+        if (pmd.pluginpath == md.pluginpath) {
+            md.bad = true;
+            return ("", default, default, pluginAlreadyLoadedˢ);
         }
 
-        if (inRange((~pmd).text, (~pmd).etext, (~md).text, (~md).etext) || inRange((~pmd).bss, (~pmd).ebss, (~md).bss, (~md).ebss) || inRange((~pmd).data, (~pmd).edata, (~md).data, (~md).edata) || inRange((~pmd).types, (~pmd).etypes, (~md).types, (~md).etypes)) {
+        if (inRange(pmd.text, pmd.etext, md.text, md.etext) || inRange(pmd.bss, pmd.ebss, md.bss, md.ebss) || inRange(pmd.data, pmd.edata, md.data, md.edata) || inRange(pmd.types, pmd.etypes, md.types, md.etypes)) {
             println((@string)"plugin: new module data overlaps with previous moduledata"u8);
-            println((@string)"\tpmd.text-etext="u8, (Δhex)(uint64)(~pmd).text, (@string)"-"u8, (Δhex)(uint64)(~pmd).etext);
-            println((@string)"\tpmd.bss-ebss="u8, (Δhex)(uint64)(~pmd).bss, (@string)"-"u8, (Δhex)(uint64)(~pmd).ebss);
-            println((@string)"\tpmd.data-edata="u8, (Δhex)(uint64)(~pmd).data, (@string)"-"u8, (Δhex)(uint64)(~pmd).edata);
-            println((@string)"\tpmd.types-etypes="u8, (Δhex)(uint64)(~pmd).types, (@string)"-"u8, (Δhex)(uint64)(~pmd).etypes);
-            println((@string)"\tmd.text-etext="u8, (Δhex)(uint64)(~md).text, (@string)"-"u8, (Δhex)(uint64)(~md).etext);
-            println((@string)"\tmd.bss-ebss="u8, (Δhex)(uint64)(~md).bss, (@string)"-"u8, (Δhex)(uint64)(~md).ebss);
-            println((@string)"\tmd.data-edata="u8, (Δhex)(uint64)(~md).data, (@string)"-"u8, (Δhex)(uint64)(~md).edata);
-            println((@string)"\tmd.types-etypes="u8, (Δhex)(uint64)(~md).types, (@string)"-"u8, (Δhex)(uint64)(~md).etypes);
+            println((@string)"\tpmd.text-etext="u8, (Δhex)(uint64)pmd.text, (@string)"-"u8, (Δhex)(uint64)pmd.etext);
+            println((@string)"\tpmd.bss-ebss="u8, (Δhex)(uint64)pmd.bss, (@string)"-"u8, (Δhex)(uint64)pmd.ebss);
+            println((@string)"\tpmd.data-edata="u8, (Δhex)(uint64)pmd.data, (@string)"-"u8, (Δhex)(uint64)pmd.edata);
+            println((@string)"\tpmd.types-etypes="u8, (Δhex)(uint64)pmd.types, (@string)"-"u8, (Δhex)(uint64)pmd.etypes);
+            println((@string)"\tmd.text-etext="u8, (Δhex)(uint64)md.text, (@string)"-"u8, (Δhex)(uint64)md.etext);
+            println((@string)"\tmd.bss-ebss="u8, (Δhex)(uint64)md.bss, (@string)"-"u8, (Δhex)(uint64)md.ebss);
+            println((@string)"\tmd.data-edata="u8, (Δhex)(uint64)md.data, (@string)"-"u8, (Δhex)(uint64)md.edata);
+            println((@string)"\tmd.types-etypes="u8, (Δhex)(uint64)md.types, (@string)"-"u8, (Δhex)(uint64)md.etypes);
             @throw(pluginNewModuleDataˢ);
         }
     }
-    foreach (var (_, pkghash) in (~md).pkghashes) {
+    foreach (var (_, pkghash) in md.pkghashes) {
         if (pkghash.linktimehash != pkghash.runtimehash.Value) {
-            md.Value.bad = true;
-            return ("", default!, default!, "plugin was built with a different version of package " + pkghash.modulename);
+            md.bad = true;
+            return ("", default, default, "plugin was built with a different version of package " + pkghash.modulename);
         }
     }
 
@@ -71,7 +71,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     moduledataverify1(md);
 
     @lock(ᏑitabLock);
-    foreach (var (_, i) in (~md).itablinks) {
+    foreach (var (_, i) in md.itablinks) {
         itabAdd(i);
     }
     unlock(ᏑitabLock);
@@ -84,10 +84,10 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     // Because functions are handled specially in the plugin package,
     // function symbol names are prefixed here with '.' to avoid
     // a dependency on the reflect package.
-    syms = new map<@string, any>(len((~md).ptab));
-    foreach (var (_, ptab) in (~md).ptab) {
-        var symName = resolveNameOff((@unsafe.Pointer)(~md).types, ptab.name);
-        var t = toRType((ж<_type>)(uintptr)((@unsafe.Pointer)(~md).types)).typeOff(ptab.typ); // TODO can this stack of conversions be simpler?
+    syms = new map<@string, any>(len(md.ptab));
+    foreach (var (_, ptab) in md.ptab) {
+        var symName = resolveNameOff((@unsafe.Pointer)md.types, ptab.name);
+        var t = toRType((ж<_type>)(uintptr)((@unsafe.Pointer)md.types)).typeOff(ptab.typ); // TODO can this stack of conversions be simpler?
         ref var val = ref heap<any>(out var Ꮡval);
         var valp = (ж<array<@unsafe.Pointer>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡval));
         (valp.Value)[0] = @unsafe.Pointer.FromPinnedBox(t);
@@ -98,7 +98,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
         }
         syms[name] = val;
     }
-    return ((~md).pluginpath, syms, (~md).inittasks, "");
+    return (md.pluginpath, syms, md.inittasks, "");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

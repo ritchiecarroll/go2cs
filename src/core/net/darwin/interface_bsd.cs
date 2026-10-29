@@ -16,8 +16,8 @@ partial class net_package {
 // interface.
 internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
     var (msgs, err) = interfaceMessages(ifindex);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     nint n = len(msgs);
     if (ifindex != 0) {
@@ -28,31 +28,31 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
     foreach (var (_, m) in msgs) {
         switch (m.type()) {
         case ж<routebsd.InterfaceMessage> mΔ1: {
-            if (ifindex != 0 && ifindex != (~mΔ1).Index) {
+            if (ifindex != 0 && ifindex != mΔ1.Index) {
                 continue;
             }
-            ift[n].Index = mΔ1.Value.Index;
-            ift[n].Name = mΔ1.Value.Name;
-            ift[n].Flags = linkFlags((~mΔ1).Flags);
+            ift[n].Index = mΔ1.Index;
+            ift[n].Name = mΔ1.Name;
+            ift[n].Flags = linkFlags(mΔ1.Flags);
             {
-                var (sa, ok) = (~mΔ1).Addrs[syscall.RTAX_IFP]._<ж<routebsd.LinkAddr>>(ᐧ); if (ok && len((~sa).Addr) > 0) {
-                    ift[n].HardwareAddr = new slice<byte>(len((~sa).Addr));
-                    copy(ift[n].HardwareAddr, (~sa).Addr);
+                var (sa, ok) = mΔ1.Addrs[syscall.RTAX_IFP]._<ж<routebsd.LinkAddr>>(ᐧ); if (ok && len(sa.Addr) > 0) {
+                    ift[n].HardwareAddr = new slice<byte>(len(sa.Addr));
+                    copy(ift[n].HardwareAddr, sa.Addr);
                 }
             }
             ift[n].MTU = mΔ1.MTU();
             n++;
-            if (ifindex == (~mΔ1).Index) {
-                return (ift.slice(0, n), default!);
+            if (ifindex == mΔ1.Index) {
+                return (ift.slice(0, n), default);
             }
             break;
         }}
     }
-    return (ift.slice(0, n), default!);
+    return (ift.slice(0, n), default);
 }
 
 internal static Flags linkFlags(nint rawFlags) {
-    Flags f = default!;
+    Flags f = default;
     if ((rawFlags & (nint)syscall.IFF_UP) != 0) {
         f |= (Flags)(FlagUp);
     }
@@ -85,51 +85,49 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
         index = ifi.Index;
     }
     var (msgs, err) = interfaceMessages(index);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var ifat = new slice<ΔAddr>(0, len(msgs));
     foreach (var (_, m) in msgs) {
         switch (m.type()) {
         case ж<routebsd.InterfaceAddrMessage> mΔ1: {
-            if (index != 0 && index != (~mΔ1).Index) {
+            if (index != 0 && index != mΔ1.Index) {
                 continue;
             }
-            IPMask mask = default!;
-            switch ((~mΔ1).Addrs[syscall.RTAX_NETMASK].type()) {
+            IPMask mask = default;
+            switch (mΔ1.Addrs[syscall.RTAX_NETMASK].type()) {
             case ж<routebsd.InetAddr> sa: {
-                if ((~sa).IP.Is4()){
-                    var a = (~sa).IP.As4();
+                if (sa.IP.Is4()) {
+                    var a = sa.IP.As4();
                     mask = IPv4Mask(a[0], a[1], a[2], a[3]);
-                } else 
-                if ((~sa).IP.Is6()) {
-                    var a = (~sa).IP.As16();
+                } else if (sa.IP.Is6()) {
+                    var a = sa.IP.As16();
                     mask = new IPMask(IPv6len);
                     copy(mask, a[..]);
                 }
                 break;
             }}
-            IP ip = default!;
-            switch ((~mΔ1).Addrs[syscall.RTAX_IFA].type()) {
+            IP ip = default;
+            switch (mΔ1.Addrs[syscall.RTAX_IFA].type()) {
             case ж<routebsd.InetAddr> sa: {
-                if ((~sa).IP.Is4()){
-                    var a = (~sa).IP.As4();
+                if (sa.IP.Is4()) {
+                    var a = sa.IP.As4();
                     ip = IPv4(a[0], a[1], a[2], a[3]);
-                } else 
-                if ((~sa).IP.Is6()) {
-                    var a = (~sa).IP.As16();
+                } else if (sa.IP.Is6()) {
+                    var a = sa.IP.As16();
                     ip = new IP(IPv6len);
                     copy(ip, a[..]);
                 }
                 break;
             }}
-            if (ip != default! && mask != default!) { // NetBSD may contain routebsd.LinkAddr
+            if (ip != nil && mask != nil) { // NetBSD may contain routebsd.LinkAddr
                 ifat = append(ifat, (ΔAddr)(new IPNetжΔAddr(Ꮡ(new IPNet(IP: ip, Mask: mask)))));
             }
             break;
         }}
     }
-    return (ifat, default!);
+    return (ifat, default);
 }
 
 } // end net_package

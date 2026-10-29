@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
-global using cryptoꓸPublicKey = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,7 +59,7 @@ using static go.crypto.md5_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/md5/md5.go", "md5.cs", "ABUqggAbOoKCgoKCggAFEIKmgoKCgoKCgoKC5oKClIKUgoKCgoKCgoKmgqaCpoKSrsKCgqaApIDUwoLKgoKCgoKCgpSUlJSCgoKCgoKUlJSUgpSmlJKCpqKCAAcQgoKCuIKmgoKCgoKokoKCgg==")]
+[assembly: go.GoPositionMap("crypto/md5/md5.go", "md5.cs", "ABUqggAbOoKCgoKCggAFEIKmgoKCgoKCgoKC5oKClIKUgoKCgoKCgoKmgqaCpoKCrsKCgqaApIDUwoLKgoKCgoKCgpSUlJSCgoKCgoKUlJSUgpSmlIKCpqKCAAcQgoKCuIKmgoKCgoKokoKCgg==")]
 [assembly: go.GoPositionMap("crypto/md5/md5block.go", "md5block.cs", "AA0clJSUgqamgoKCgoKCgoKCgoKCgoKCpoKCgoKCgoKCgoKCgoKCgqaCgoKCgoKCgoKCgoKCgoKmgoKCgoKCgoKCgoKCgoKCpoKCgoKCgoKCgoKCgoKCgqaCgoK4")]
 [assembly: go.GoPositionMap("crypto/md5/md5block_generic.go", "md5block_generic.cs", "AAoWgg==")]
 // </GoSourcePositionMaps>

@@ -46,15 +46,15 @@ partial struct ΔLocation {
 // A zone represents a single time zone such as CET.
 partial struct zone {
     internal @string name; // abbreviated name, "CET"
-    internal nint offset;   // seconds east of UTC
+    internal nint offset;  // seconds east of UTC
     internal bool isDST;   // is this zone Daylight Savings Time?
 }
 
 // A zoneTrans represents a single time zone transition.
 partial struct zoneTrans {
-    internal int64 when; // transition time, in seconds since 1970 GMT
-    internal uint8 index; // the index of the zone that goes into effect at that time
-    internal bool isstd, isutc;  // ignored - no idea what these mean
+    internal int64 when;        // transition time, in seconds since 1970 GMT
+    internal uint8 index;       // the index of the zone that goes into effect at that time
+    internal bool isstd, isutc; // ignored - no idea what these mean
 }
 
 // alpha and omega are the beginning and end of time for zone
@@ -102,7 +102,7 @@ internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
 // String returns a descriptive name for the time zone information,
 // corresponding to the name argument to [LoadLocation] or [FixedZone].
 public static @string String(this ж<ΔLocation> Ꮡl) {
-    return (~Ꮡl.get()).name;
+    return Ꮡl.get().name;
 }
 
 internal static slice<ж<ΔLocation>> unnamedFixedZones;
@@ -133,12 +133,12 @@ public static ж<ΔLocation> FixedZone(@string name, nint offset) {
 internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
     var l = Ꮡ(new ΔLocation(
         name: name,
-        zone: new zone[]{new(name, offset, false)}.slice(),
-        tx: new zoneTrans[]{new(alpha, 0, false, false)}.slice(),
+        zone: slice<zone>([new(name, offset, false)]),
+        tx: slice<zoneTrans>([new(alpha, 0, false, false)]),
         cacheStart: alpha,
         cacheEnd: omega
     ));
-    l.Value.cacheZone = Ꮡ((~l).zone, 0);
+    l.cacheZone = Ꮡ(l.zone, 0);
     return l;
 }
 
@@ -150,11 +150,11 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
 // the offset in seconds east of UTC (such as -5*60*60), and whether
 // the daylight savings is being observed at that time.
 internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ж<ΔLocation> Ꮡl, int64 sec) {
-    @string name = default!;
-    nint offset = default!;
-    int64 start = default!;
-    int64 end = default!;
-    bool isDST = default!;
+    @string name = default;
+    nint offset = default;
+    int64 start = default;
+    int64 end = default;
+    bool isDST = default;
     ref var l = ref Ꮡl.DerefOrNull();
 
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
@@ -170,26 +170,26 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
 
     {
         var zoneΔ1 = l.cacheZone; if (zoneΔ1 != nil && l.cacheStart <= sec && sec < l.cacheEnd) {
-            name = zoneΔ1.Value.name;
-            offset = zoneΔ1.Value.offset;
+            name = zoneΔ1.name;
+            offset = zoneΔ1.offset;
             start = l.cacheStart;
             end = l.cacheEnd;
-            isDST = zoneΔ1.Value.isDST;
+            isDST = zoneΔ1.isDST;
             return (name, offset, start, end, isDST);
         }
     }
 
     if (len(l.tx) == 0 || sec < l.tx[0].when) {
         var zoneΔ2 = Ꮡ(l.zone, l.lookupFirstZone());
-        name = zoneΔ2.Value.name;
-        offset = zoneΔ2.Value.offset;
+        name = zoneΔ2.name;
+        offset = zoneΔ2.offset;
         start = alpha;
-        if (len(l.tx) > 0){
+        if (len(l.tx) > 0) {
             end = l.tx[0].when;
         } else {
             end = omega;
         }
-        isDST = zoneΔ2.Value.isDST;
+        isDST = zoneΔ2.isDST;
         return (name, offset, start, end, isDST);
     }
 
@@ -202,7 +202,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     while (hi - lo > 1) {
         nint m = (nint)((nuint)(lo + hi) >> 1);
         var lim = tx[m].when;
-        if (sec < lim){
+        if (sec < lim) {
             end = lim;
             hi = m;
         } else {
@@ -210,11 +210,11 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
         }
     }
     var zone = Ꮡ(l.zone, tx[lo].index);
-    name = zone.Value.name;
-    offset = zone.Value.offset;
+    name = zone.name;
+    offset = zone.offset;
     start = tx[lo].when;
     // end = maintained during the search
-    isDST = zone.Value.isDST;
+    isDST = zone.isDST;
 
     // If we're at the end of the known zone transitions,
     // try the extend string.
@@ -291,12 +291,12 @@ internal static readonly @string m320M1110ˢ = ",M3.2.0,M11.1.0"u8;
 // The return values are as for lookup, plus ok which reports whether the
 // parse succeeded.
 internal static (@string name, nint offset, int64 start, int64 end, bool isDST, bool ok) tzset(@string s, int64 lastTxSec, int64 sec) {
-    bool ok = default!;
+    bool ok = default;
 
-    @string stdName = default!;
-    @string dstName = default!;
-    nint stdOffset = default!;
-    nint dstOffset = default!;
+    @string stdName = default;
+    @string dstName = default;
+    nint stdOffset = default;
+    nint dstOffset = default;
 
     (stdName, s, ok) = tzsetName(s);
     if (ok) {
@@ -311,14 +311,14 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
     // so we negate the number we see here.
     stdOffset = -stdOffset;
 
-    if (len(s) == 0 || s[0] == (rune)',') {
+    if (len(s) == 0 || s[0] == ',') {
         // No daylight savings time.
         return (stdName, stdOffset, lastTxSec, omega, false, true);
     }
 
     (dstName, s, ok) = tzsetName(s);
     if (ok) {
-        if (len(s) == 0 || s[0] == (rune)','){
+        if (len(s) == 0 || s[0] == ',') {
             dstOffset = stdOffset + (nint)secondsPerHour;
         } else {
             (dstOffset, s, ok) = tzsetOffset(s);
@@ -334,15 +334,15 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
         s = m320M1110ˢ;
     }
     // The TZ definition does not mention ';' here but tzcode accepts it.
-    if (s[0] != (rune)',' && s[0] != (rune)';') {
+    if (s[0] != ',' && s[0] != ';') {
         return ("", 0, 0, 0, false, false);
     }
     s = s[1..];
 
-    rule startRule = default!;
-    rule endRule = default!;
+    rule startRule = default;
+    rule endRule = default;
     (startRule, s, ok) = tzsetRule(s);
-    if (!ok || len(s) == 0 || s[0] != (rune)',') {
+    if (!ok || len(s) == 0 || s[0] != ',') {
         return ("", 0, 0, 0, false, false);
     }
     s = s[1..];
@@ -374,10 +374,9 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
     // close to a daylight savings transition, but are otherwise
     // just the start and end of the year. That suffices for
     // the only caller that cares, which is Date.
-    if (ysec < startSec){
+    if (ysec < startSec) {
         return (stdName, stdOffset, ystart, startSec + ystart, stdIsDST, true);
-    } else 
-    if (ysec >= endSec){
+    } else if (ysec >= endSec) {
         return (stdName, stdOffset, endSec + ystart, ystart + (int64)(365 * secondsPerDay), stdIsDST, true);
     } else {
         return (dstName, dstOffset, startSec + ystart, endSec + ystart, dstIsDST, true);
@@ -390,10 +389,10 @@ internal static (@string, @string, bool) tzsetName(@string s) {
     if (len(s) == 0) {
         return ("", "", false);
     }
-    if (s[0] != (rune)'<'){
+    if (s[0] != '<') {
         foreach (var (i, r) in s) {
             switch (r) {
-            case (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7' or (rune)'8' or (rune)'9' or (rune)',' or (rune)'-' or (rune)'+': {
+            case '0' or '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9' or ',' or '-' or '+': {
                 if (i < 3) {
                     return ("", "", false);
                 }
@@ -406,7 +405,7 @@ internal static (@string, @string, bool) tzsetName(@string s) {
         return (s, "", true);
     } else {
         foreach (var (i, r) in s) {
-            if (r == (rune)'>') {
+            if (r == '>') {
                 return (s.slice(1, i), s.slice(i + 1), true);
             }
         }
@@ -418,49 +417,48 @@ internal static (@string, @string, bool) tzsetName(@string s) {
 // and the remainder of s, and reports whether the parsing is OK.
 // The timezone offset is returned as a number of seconds.
 internal static (nint offset, @string rest, bool ok) tzsetOffset(@string s) {
-    bool ok = default!;
+    bool ok = default;
 
     if (len(s) == 0) {
         return (0, "", false);
     }
     var neg = false;
-    if (s[0] == (rune)'+'){
+    if (s[0] == '+') {
         s = s[1..];
-    } else 
-    if (s[0] == (rune)'-') {
+    } else if (s[0] == '-') {
         s = s[1..];
         neg = true;
     }
 
     // The tzdata code permits values up to 24 * 7 here,
     // although POSIX does not.
-    nint hours = default!;
+    nint hours = default;
     (hours, s, ok) = tzsetNum(s, 0, 24 * 7);
     if (!ok) {
         return (0, "", false);
     }
     nint off = hours * (nint)secondsPerHour;
-    if (len(s) == 0 || s[0] != (rune)':') {
+    if (len(s) == 0 || s[0] != ':') {
         if (neg) {
             off = -off;
         }
         return (off, s, true);
     }
 
-    nint mins = default!;
+    nint mins = default;
     (mins, s, ok) = tzsetNum(s[1..], 0, 59);
     if (!ok) {
         return (0, "", false);
     }
     off += mins * (nint)secondsPerMinute;
-    if (len(s) == 0 || s[0] != (rune)':') {
+    if (len(s) == 0 || s[0] != ':') {
         if (neg) {
             off = -off;
         }
         return (off, s, true);
     }
 
-    nint secs = default!;
+    nint secs = default;
     (secs, s, ok) = tzsetNum(s[1..], 0, 59);
     if (!ok) {
         return (0, "", false);
@@ -492,58 +490,57 @@ partial struct rule {
 // tzsetRule parses a rule from a tzset string.
 // It returns the rule, and the remainder of the string, and reports success.
 internal static (rule, @string, bool) tzsetRule(@string s) {
-    rule r = default!;
+    rule r = default;
     if (len(s) == 0) {
-        return (new rule(nil), "", false);
+        return (new rule(), "", false);
     }
     var ok = false;
-    if (s[0] == (rune)'J'){
-        nint jday = default!;
+    if (s[0] == 'J') {
+        nint jday = default;
         (jday, s, ok) = tzsetNum(s[1..], 1, 365);
         if (!ok) {
-            return (new rule(nil), "", false);
+            return (new rule(), "", false);
         }
         r.kind = ruleJulian;
         r.day = jday;
-    } else 
-    if (s[0] == (rune)'M'){
-        nint mon = default!;
+    } else if (s[0] == 'M') {
+        nint mon = default;
         (mon, s, ok) = tzsetNum(s[1..], 1, 12);
-        if (!ok || len(s) == 0 || s[0] != (rune)'.') {
-            return (new rule(nil), "", false);
+        if (!ok || len(s) == 0 || s[0] != '.') {
+            return (new rule(), "", false);
         }
-        nint week = default!;
+        nint week = default;
         (week, s, ok) = tzsetNum(s[1..], 1, 5);
-        if (!ok || len(s) == 0 || s[0] != (rune)'.') {
-            return (new rule(nil), "", false);
+        if (!ok || len(s) == 0 || s[0] != '.') {
+            return (new rule(), "", false);
         }
-        nint day = default!;
+        nint day = default;
         (day, s, ok) = tzsetNum(s[1..], 0, 6);
         if (!ok) {
-            return (new rule(nil), "", false);
+            return (new rule(), "", false);
         }
         r.kind = ruleMonthWeekDay;
         r.day = day;
         r.week = week;
         r.mon = mon;
     } else {
-        nint day = default!;
+        nint day = default;
         (day, s, ok) = tzsetNum(s, 0, 365);
         if (!ok) {
-            return (new rule(nil), "", false);
+            return (new rule(), "", false);
         }
         r.kind = ruleDOY;
         r.day = day;
     }
 
-    if (len(s) == 0 || s[0] != (rune)'/') {
+    if (len(s) == 0 || s[0] != '/') {
         r.time = 2 * secondsPerHour; // 2am is the default
         return (r, s, true);
     }
 
     (var offset, s, ok) = tzsetOffset(s[1..]);
     if (!ok) {
-        return (new rule(nil), "", false);
+        return (new rule(), "", false);
     }
     r.time = offset;
 
@@ -554,21 +551,21 @@ internal static (rule, @string, bool) tzsetRule(@string s) {
 // It returns the number, and the remainder of the string, and reports success.
 // The number must be between min and max.
 internal static (nint num, @string rest, bool ok) tzsetNum(@string s, nint min, nint max) {
-    nint num = default!;
+    nint num = default;
 
     if (len(s) == 0) {
         return (0, "", false);
     }
     num = 0;
     foreach (var (i, r) in s) {
-        if (r < (rune)'0' || r > (rune)'9') {
+        if (r < '0' || r > '9') {
             if (i == 0 || num < min) {
                 return (0, "", false);
             }
             return (num, s.slice(i), true);
         }
         num *= 10;
-        num += (nint)r - (rune)'0';
+        num += (nint)r - '0';
         if (num > max) {
             return (0, "", false);
         }
@@ -583,18 +580,20 @@ internal static (nint num, @string rest, bool ok) tzsetNum(@string s, nint min, 
 // and returns the number of seconds since the start of the year
 // that the rule takes effect.
 internal static nint tzruleTime(nint year, rule r, nint off) {
-    nint s = default!;
-    var exprᴛ1 = r.kind;
-    if (exprᴛ1 == ruleJulian) {
+    nint s = default;
+    switch (r.kind) {
+    case var ᴛ when ᴛ == ruleJulian: {
         s = (r.day - 1) * (nint)secondsPerDay;
         if (isLeap(year) && r.day >= 60) {
             s += secondsPerDay;
         }
+        break;
     }
-    else if (exprᴛ1 == ruleDOY) {
+    case var ᴛ when ᴛ == ruleDOY: {
         s = r.day * (nint)secondsPerDay;
+        break;
     }
-    else if (exprᴛ1 == ruleMonthWeekDay) {
+    case var ᴛ when ᴛ == ruleMonthWeekDay: {
         // Zeller's Congruence.
         nint m1 = (r.mon + 9) % 12 + 1;
         nint yy0 = year;
@@ -624,7 +623,8 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
             d++;
         }
         s = d * (nint)secondsPerDay;
-    }
+        break;
+    }}
 
     return s + r.time - off;
 }
@@ -633,8 +633,8 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
 // the given name (such as "EST") at the given pseudo-Unix time
 // (what the given time of day would be in UTC).
 internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @string name, int64 unix) {
-    nint offset = default!;
-    bool ok = default!;
+    nint offset = default;
+    bool ok = default;
     ref var l = ref Ꮡl.DerefOrNull();
 
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
@@ -647,9 +647,9 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     // either one.)
     foreach (var i in range(l.zone)) {
         var zone = Ꮡ(l.zone, i);
-        if ((~zone).name == name) {
-            var (nam, offsetΔ1, _, _, _) = Ꮡl.lookup(unix - (int64)(~zone).offset);
-            if (nam == (~zone).name) {
+        if (zone.name == name) {
+            var (nam, offsetΔ1, _, _, _) = Ꮡl.lookup(unix - (int64)zone.offset);
+            if (nam == zone.name) {
                 return (offsetΔ1, true);
             }
         }
@@ -658,8 +658,8 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     // Otherwise fall back to an ordinary name match.
     foreach (var i in range(l.zone)) {
         var zone = Ꮡ(l.zone, i);
-        if ((~zone).name == name) {
-            return ((~zone).offset, true);
+        if (zone.name == name) {
+            return (zone.offset, true);
         }
     }
 
@@ -696,46 +696,44 @@ internal static readonly @string zoneinfoˢ = "ZONEINFO"u8;
 //   - the time/tzdata package, if it was imported
 public static (ж<ΔLocation>, error) LoadLocation(@string name) {
     if (name == ""u8 || name == "UTC"u8) {
-        return (ΔUTC, default!);
+        return (ΔUTC, default);
     }
     if (name == "Local"u8) {
-        return (ΔLocal, default!);
+        return (ΔLocal, default);
     }
-    if (containsDotDot(name) || name[0] == (rune)'/' || name[0] == (rune)'\\') {
+    if (containsDotDot(name) || name[0] == '/' || name[0] == '\\') {
         // No valid IANA Time Zone name contains a single dot,
         // much less dot dot. Likewise, none begin with a slash.
-        return (default!, errLocation);
+        return (default, errLocation);
     }
     ᏑzoneinfoOnce.Do(() => {
         ref var env = ref heap<@string>(out var Ꮡenv);
         (env, _) = syscall.Getenv(zoneinfoˢ);
         zoneinfo = Ꮡenv;
     });
-    error firstErr = default!;
+    error firstErr = default;
     if (zoneinfo.Value != ""u8) {
         {
-            var (zoneData, err) = loadTzinfoFromDirOrZip(zoneinfo.Value, name); if (err == default!){
+            var (zoneData, err) = loadTzinfoFromDirOrZip(zoneinfo.Value, name); if (err == nil) {
                 {
-                    var (z, errΔ1) = LoadLocationFromTZData(name, zoneData); if (errΔ1 == default!) {
-                        return (z, default!);
+                    var (z, errΔ1) = LoadLocationFromTZData(name, zoneData); if (errΔ1 == nil) {
+                        return (z, default);
                     }
                 }
                 firstErr = err;
-            } else 
-            if (!AreEqual(err, syscall.ENOENT)) {
+            } else if (!AreEqual(err, syscall.ENOENT)) {
                 firstErr = err;
             }
         }
     }
     {
-        var (z, err) = loadLocation(name, platformZoneSources); if (err == default!){
-            return (z, default!);
-        } else 
-        if (firstErr == default!) {
+        var (z, err) = loadLocation(name, platformZoneSources); if (err == nil) {
+            return (z, default);
+        } else if (firstErr == nil) {
             firstErr = err;
         }
     }
-    return (default!, firstErr);
+    return (default, firstErr);
 }
 
 // containsDotDot reports whether s contains "..".
@@ -744,7 +742,7 @@ internal static bool containsDotDot(@string s) {
         return false;
     }
     for (nint i = 0; i < len(s) - 1; i++) {
-        if (s[i] == (rune)'.' && s[i + 1] == (rune)'.') {
+        if (s[i] == '.' && s[i + 1] == '.') {
             return true;
         }
     }

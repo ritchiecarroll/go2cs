@@ -10,14 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -73,6 +67,17 @@ using static go.archive.zip_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(File))]
+[assembly: go.GoFieldAccess(typeof(FileHeader))]
+[assembly: go.GoFieldAccess(typeof(ReadCloser))]
+[assembly: go.GoFieldAccess(typeof(countWriter))]
+[assembly: go.GoFieldAccess(typeof(directoryEnd))]
+[assembly: go.GoFieldAccess(typeof(fileListEntry))]
+[assembly: go.GoFieldAccess(typeof(fileWriter))]
+[assembly: go.GoFieldAccess(typeof(header))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -81,10 +86,10 @@ using static go.archive.zip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("archive/zip/reader.go", "reader.cs", "AB00loKCggAhXAAJAoKClIKCgpSCgIKCpIIABRoACgKClIKCgIKkpqKCgpSC7oKUgoKAgqTcgoKCgpSClIKUppSCgpS4goK4rLKClKaCgoKUqJIAAhAACAKCgpSqwoKClAAJFIKUpoKCgoKUgoKClNyqooKClILugqaCAAsYgqaygpSCgoKClIKUgoKUgoCCgpSkguyCuIKmgKiigoCCpIKAgqSCgoKssoKAgqSCgIKkgoKCgoKCgoKCgoKCgoKCgoKCgIKkgoKmgoKmxvy2goKasoKCgoKClJSU3IKCgpSUgoKClJSCgoKUtoKUgoKCgoKUgoKmgoKCgoK2gpSCgqSClILYgoKCAAkUggALGJSCpqaCAAoWgIKkgoKmlICCpIKCAAgS1qSSgqKClIKAgqSAgoKCpILKggAIEoKClKaCgoKClIK4goKmpoCCAAgQgoKCkrissoKClIKAgqSCgIKkgpSCgpSqooKAgraCgIK2goKCgoKClKaClJSCuJSmyoKCgqaCgoKmgoKCpoKCgqaCgoIAESKigpSClKiQgKKAooCigKKAooCkgoKUpoCkgqiSgpSUgqamgqa4griUgoKCgqaAgoKkgIKCtoKCgIKUpIKUpoLKgoKUpoKAgoCClMrqvIKCgoKUruKUgpSCgpSClIKClKaigoKClKaUgoKmgoKCgoKUlIKCgqamgoKCgoKmlIKCgqaUAAgSgKKA1IKmgoKClIKClJSCgoKCkoLclII=", "807-881:1;878-880:1.1;935-941:1;953-960:1;961-968:2", "", "266=NewIEEE/1/1/2;651=uint16/1/5/1,uint16/2/5/2,uint16/3/5/3,uint16/4/5/4,uint32/1/2/5,uint32/2/2/6,uint16/5/5/7;1116=Errorf/1/1/3")]
+[assembly: go.GoPositionMap("archive/zip/reader.go", "reader.cs", "AB00loKCggAhXAAJAoKClIKCgpSCgIKCpIIABRoACgKClIKCgIKkpqKCgpSC7oKUgoKAgqTcgoKCgpSClIKUppSCgpS4goK4rLKClKaCgoKUqJIAAhAACAKCgpSqwoKClAAJFIKUpoKCgoKUgoKClNyqooKClILugqaCAAsYgqaygpSCgoKClIKUgoKUgoCCgpSUguyCuIKmgKiigoCCpIKAgqSCgoKssoKAgqSCgIKkgoKCgoKCgoKCgoKCgoKCgoKCgIKkgoKmgoKmxvy2goKasoKCgoKClJSU3IKCgpSUgoKClJSCgoKUxoKUgoKCgoKUgoKmgoKCgoLGgpSCgrSClILogoKCAAkUggALGJSCpqaCAAoWgIKkgoKmlICCpIKCAAgS1qSSgqKClIKAgqSAgoKCpILKggAIEoKClKaCgoKClIK4goKmpoCCAAgQgoKCkrissoKClIKAgqSCgIKkgpSCgpSqooKAgraCgIK2goKCgoKClKaClJSCuJSmyoKCgqaCgoKmgoKCpoKCgqaCgoIAESKigpSClKiQgKKAooCigKKAooCkgoKUpoCkgqiSgpSUgqamgqa4griUgoKCgqaAgoKkgIKCtoKCgIKUpIKUpoLKgoKUpoKAgoCClMrqvIKCgoKUruKUgpSCgpSClIKClKaigoKClKaUgoKmgoKCgoKUlIKCgqamgoKCgoKmlIKCgqaUAAgSgKKA1IKmgoKClIKClJSCgoKCgoLclII=", "807-881:1;878-880:1.1;935-941:1;953-960:1;961-968:2", "", "266=NewIEEE/1/1/2;654=uint16/1/5/1,uint16/2/5/2,uint16/3/5/3,uint16/4/5/4,uint32/1/2/5,uint32/2/2/6,uint16/5/5/7;1118=Errorf/1/1/3")]
 [assembly: go.GoPositionMap("archive/zip/register.go", "register.cs", "AB48goKClJQAChDigoKClObSgoKCgoKClAAICoKCgpSUAAoQ4oKCgpTm0oKCgoKCgpQAChCCgpSCqqKAgsyigILIgoKClKaCgoKU", "110-110:1;111-111:2")]
-[assembly: go.GoPositionMap("archive/zip/struct.go", "struct.cs", "AJIByAKSAAcQgKKCgpSkgKKCgpSkgKKAooCkgKSCAAIU8oK4goKClJQADSCiqoKClKyyAA4m4oKCrsKuwoKCABMuspSklIKUqJKCpoKUgrqSpoKmooKUlIKUpoKCmKSkpKSkAAIXAAEcgpSClIKUpoKClKSkpKTYlIKUgpSClA==", "", "", "208=Name/1/1/1")]
-[assembly: go.GoPositionMap("archive/zip/writer.go", "writer.cs", "ABYoggAUMJKuwoKUqqLaooKUgtqigoCCpJSClKaCgoKCgoKCgoKCgoK4gpaSgoKCgoKClIKmgoKCgoKClJSAgqSAgqSAgqSAgraUgoKUgIK2goKmgoKCgoKCgoKCpoKCgpSAgtqCgqiSgoKCgoKCgoKAgqSAgrYAAhoACgK4rNKCgu6CgpSm2qKCgIK2lJQAAhQACQKAggATJoKClLS2gqYACBIAARDigoKCgoKCppjKyoKmgoKClJSUyoKClIKCgpSCgpSCgIK2gqaigoKUgqaCgoKCgoKCuIKCgriCgpSCgoCCpICCpIIAAhoADAKAgraClMqCgIK2goKmuIKqwoKCuJKCgpSCrLKClNyyooKUgpSCgpSClIKClIKClIKCgpSClIKClJKC6IKCgpQACAqCgpQADxqCgpSClILWgoKUgoKUgILIgoKClIKCgpSCpqaCgp7SgpSUgoKCgoKUgpSCAAcQgoKC7oLKgoKmgoKmgoKmgoI=", "504-541:1", "", "398=NewIEEE/1/1/3")]
+[assembly: go.GoPositionMap("archive/zip/struct.go", "struct.cs", "AJIByAKSAAcQgKKCgpSkgKKCgpSkgKKAooCkgKSCAAIU8oK4goKClJQADSCiqoKClKyyAA4m4oKCrsKuwoKCABMuspS0pIKUqJKCpoKUgrqSpoKmooKUlIKUpoKClLS0tLS0tKSClIKUgpSmgoKUtLS0tPikgpSClIKU", "", "", "208=Name/1/1/1")]
+[assembly: go.GoPositionMap("archive/zip/writer.go", "writer.cs", "ABYoggAUMJKuwoKUqqLaooKUgtqigoCCpJSClKaCgoKCgoKCgoKCgoK4gpaSgoKCgoKClIKmgoKCgoKClJSAgqSAgqSAgqSAgraUgoKUgIK2goKmgoKCgoKCgoKCpoKCgpSAgtqCgqiSgoKCgoKCgoKAgqSAgrYAAhoACgK4rNKCgu6CgpSm2qKCgIK2lJQAAhQACQKAggATJoKClLS2gqYACBIAARDigoKCgoKCppjKyoKmgoKClJSUyoKClIKCgpSCgpSCgIK2gqaigoKUgqaCgoKCgoKCuIKCgriCgpSCgoCCpICCpIIAAhoADAKAgraClMqCgIK2goKmuIKqwoKCuIKCgpSCrLKClNyyooKUgpSCgpSClIKClIKClIKCgpSClIKClJKC6IKCgpQACAqCgpQADxqCgpSClILWgoKUgoKUgILIgoKClIKCgpSCpqaCgp7SgpSUgoKCgoKUgpSCAAcQgoKC7oLKgoKmgoKmgoKmgoI=", "504-541:1", "", "398=NewIEEE/1/1/3", "597:25")]
 // </GoSourcePositionMaps>
 
 namespace go.archive;

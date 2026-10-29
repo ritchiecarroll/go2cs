@@ -54,7 +54,7 @@ public static void Sort(Interface data) {
     pdqsort(data, 0, n, limit);
 }
 
-partial struct sortedHint /*num:nint*/;
+partial struct sortedHint /*num:nint*/; // hint for pdqsort when choosing the pivot
 
 internal static sortedHint unknownHint => /* iota */ 0;
 internal static sortedHint increasingHint => 1;

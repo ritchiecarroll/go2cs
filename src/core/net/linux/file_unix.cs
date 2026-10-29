@@ -16,21 +16,21 @@ internal static UntypedInt _SO_TYPE => /* syscall.SO_TYPE */ 3;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string setnonblockˢ = "setnonblock"u8;
 
-internal static (nint, error) dupFileSocket(ж<os.File> Ꮡf) {
-    var (s, call, err) = poll.DupCloseOnExec((nint)Ꮡf.Fd());
-    if (err != default!) {
+internal static (nint, error) dupFileSocket(ж<os.File> f) {
+    var (s, call, err) = poll.DupCloseOnExec((nint)f.Fd());
+    if (err != nil) {
         if (call != ""u8) {
             err = os.NewSyscallError(call, err);
         }
         return (-1, err);
     }
     {
-        var errΔ1 = syscall.SetNonblock(s, true); if (errΔ1 != default!) {
+        var errΔ1 = syscall.SetNonblock(s, true); if (errΔ1 != nil) {
             poll.CloseFunc(s);
             return (-1, os.NewSyscallError(setnonblockˢ, errΔ1));
         }
     }
-    return (s, default!);
+    return (s, default);
 }
 
 } // end net_package

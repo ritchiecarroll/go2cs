@@ -43,17 +43,17 @@ internal static @string matchPat;
 internal static ж<regexp.Regexp> matchRe;
 
 public static (bool result, error err) MatchString(this TestDeps _, @string pat, @string str) {
-    bool result = default!;
-    error err = default!;
+    bool result = default;
+    error err = default;
 
     if (matchRe == nil || matchPat != pat) {
         matchPat = pat;
         (matchRe, err) = regexp.Compile(matchPat);
-        if (err != default!) {
+        if (err != nil) {
             return (result, err);
         }
     }
-    return (matchRe.MatchString(str), default!);
+    return (matchRe.MatchString(str), default);
 }
 
 public static error StartCPUProfile(this TestDeps _, io.Writer w) {
@@ -135,9 +135,9 @@ internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
             return;
         }
         l.w.WriteString(op);
-        l.w.WriteByte((rune)' ');
+        l.w.WriteByte((byte)' ');
         l.w.WriteString(name);
-        l.w.WriteByte((rune)'\n');
+        l.w.WriteByte((byte)'\n');
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡl.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
@@ -170,10 +170,10 @@ public static error StopTestLog(this TestDeps _) {
         Ꮡlog.of(testLog.Ꮡmu).Lock();
         defer(Ꮡlog.of(testLog.Ꮡmu).Unlock, ref ᒐ);
         var err = log.w.Flush();
-        log.w = default!;
+        log.w = default;
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -183,7 +183,7 @@ public static void SetPanicOnExit0(this TestDeps _, bool v) {
 }
 
 public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflectꓸType> types, @string corpusDir, @string cacheDir) {
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         // Fuzzing may be interrupted with a timeout or if the user presses ^C.
@@ -205,7 +205,7 @@ public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration tim
             CacheDir: cacheDir
         ));
         if (AreEqual(err, ctx.Err())) {
-            err = default!; goto ᒐdone;
+            err = default; goto ᒐdone;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -227,11 +227,11 @@ public static error RunFuzzWorker(this TestDeps _, Func<fuzzꓸCorpusEntry, erro
         defer(() => cancelʗ1(), ref ᒐ);
         var err = fuzz.RunFuzzWorker(ctx, fn);
         if (AreEqual(err, ctx.Err())) {
-            return default!;
+            return default;
         }
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -272,9 +272,9 @@ public static readonly ж<Action<bool>> ᏑCoverMarkProfileEmittedFunc = new Sta
 public static ref Action<bool> CoverMarkProfileEmittedFunc => ref ((StaticBox<Action<bool>>)ᏑCoverMarkProfileEmittedFunc).ValueSlot;
 
 public static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) {
-    @string mode = default!;
-    Func<@string, @string, (@string, error)> tearDown = default!;
-    Func<float64> snapcov = default!;
+    @string mode = default;
+    Func<@string, @string, (@string, error)> tearDown = default;
+    Func<float64> snapcov = default;
 
     if (CoverMode == ""u8) {
         return (mode, tearDown, snapcov);
@@ -290,10 +290,10 @@ private static readonly @string errorGeneratingCoverageˢ = "error generating co
 internal static (@string, error) coverTearDown(@string coverprofile, @string gocoverdir) {
     GoFrame ᒐ = default;
     try {
-        error err = default!;
+        error err = default;
         if (gocoverdir == ""u8) {
             (gocoverdir, err) = os.MkdirTemp(""u8, gocoverdirˢ);
-            if (err != default!) {
+            if (err != nil) {
                 return (errorSettingGocoverdirˢ, err);
             }
             defer(os.RemoveAll, gocoverdir, ref ᒐ);
@@ -301,13 +301,13 @@ internal static (@string, error) coverTearDown(@string coverprofile, @string goc
         CoverMarkProfileEmittedFunc(true);
         @string cmode = CoverMode;
         {
-            var errΔ1 = CoverProcessTestDirFunc(gocoverdir, coverprofile, cmode, Covered, new os.FileжWriter(os.Stdout), CoverSelectedPackages); if (errΔ1 != default!) {
+            var errΔ1 = CoverProcessTestDirFunc(gocoverdir, coverprofile, cmode, Covered, new os.FileжWriter(os.Stdout), CoverSelectedPackages); if (errΔ1 != nil) {
                 return (errorGeneratingCoverageˢ, errΔ1);
             }
         }
-        return ("", default!);
+        return ("", default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

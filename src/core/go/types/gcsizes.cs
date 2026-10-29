@@ -15,7 +15,7 @@ partial struct gcSizes {
 }
 
 internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
-    int64 result = default!;
+    int64 result = default;
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -31,10 +31,10 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
         case ж<Array> t: {
             // spec: "For a variable x of array type: unsafe.Alignof(x)
             // is the same as unsafe.Alignof(x[0]), but at least 1."
-            result = Ꮡs.Alignof((~t).elem); goto ᒐdone;
+            result = Ꮡs.Alignof(t.elem); goto ᒐdone;
         }
         case ж<Struct> t: {
-            if (len((~t).fields) == 0 && _IsSyncAtomicAlign64(T)) {
+            if (len(t.fields) == 0 && _IsSyncAtomicAlign64(T)) {
                 // Special case: sync/atomic.align64 is an
                 // empty struct we recognize as a signal that
                 // the struct it contains must be
@@ -49,7 +49,7 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
             // is the largest of the values unsafe.Alignof(x.f) for each
             // field f of x, but at least 1."
             var max = (int64)1;
-            foreach (var (_, f) in (~t).fields) {
+            foreach (var (_, f) in t.fields) {
                 {
                     var aΔ1 = Ꮡs.Alignof((~f).typ); if (aΔ1 > max) {
                         max = aΔ1;
@@ -102,7 +102,7 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
 
 internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
-    int64 offs = default!;
+    int64 offs = default;
     foreach (var (i, f) in fields) {
         if (offs < 0) {
             // all remaining offsets are too large
@@ -114,7 +114,7 @@ internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fie
         offs = align(offs, a); // possibly < 0 if align overflows
         offsets[i] = offs;
         {
-            var d = Ꮡs.Sizeof((~f).typ); if (d >= 0 && offs >= 0){
+            var d = Ꮡs.Sizeof((~f).typ); if (d >= 0 && offs >= 0) {
                 offs += d; // ok to overflow to < 0
             } else {
                 offs = -1; // f.typ or offs is too large
@@ -131,7 +131,7 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
     switch (switchᴛ8.type()) {
     case ж<Basic> t: {
         assert(isTyped(T));
-        BasicKind k = t.Value.kind;
+        BasicKind k = t.kind;
         if ((nint)k < len(basicSizes)) {
             {
                 var sΔ1 = basicSizes[k]; if (sΔ1 > 0) {
@@ -145,12 +145,12 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
         break;
     }
     case ж<Array> t: {
-        var n = t.Value.len;
+        var n = t.len;
         if (n <= 0) {
             return 0;
         }
         // n > 0
-        var esize = Ꮡs.Sizeof((~t).elem);
+        var esize = Ꮡs.Sizeof(t.elem);
         if (esize < 0) {
             return -1; // element too large
         }
@@ -173,9 +173,9 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
         if (n == 0) {
             return 0;
         }
-        var offsets = Ꮡs.Offsetsof((~t).fields);
+        var offsets = Ꮡs.Offsetsof(t.fields);
         var offs = offsets[n - 1];
-        var size = Ꮡs.Sizeof((~(~t).fields[n - 1]).typ);
+        var size = Ꮡs.Sizeof((~t.fields[n - 1]).typ);
         if (offs < 0 || size < 0) {
             return -1; // type too large
         }
@@ -207,7 +207,7 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
 // if a compiler/architecture pair is not known.
 internal static ж<gcSizes> gcSizesFor(@string compiler, @string arch) {
     if (compiler != "gc"u8) {
-        return default!;
+        return default;
     }
     return gcArchSizes[arch];
 }

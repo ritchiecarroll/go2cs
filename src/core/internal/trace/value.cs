@@ -51,10 +51,10 @@ public static @string String(this Value v) {
     if (v.kind == ValueString) {
         return @unsafe.String((ж<byte>)(uintptr)(v.pointer), (nint)v.scalar);
     }
-    var exprᴛ1 = v.kind;
-    if (exprᴛ1 == ValueUint64) {
+    switch (v.kind) {
+    case var ᴛ when ᴛ == ValueUint64: {
         return fmt.Sprintf("Value{Uint64(%d)}"u8, v.Uint64());
-    }
+    }}
     return valueBadˢ;
 }
 

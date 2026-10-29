@@ -48,6 +48,10 @@ using static go.@internal.dag_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Graph))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,7 +60,7 @@ using static go.@internal.dag_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/dag/alg.go", "alg.cs", "AAcQkpSCgqaCgsyykpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
+[assembly: go.GoPositionMap("internal/dag/alg.go", "alg.cs", "AAcQkpSCgqaCgsyygpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
 [assembly: go.GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgIKkgoKCpoKmgqaCpqKCgpSGrLKClIKCqJKSlIKCgpSCgoKUgpSCgpSAgpT+goKC3IKCgoK4lO6CgoKC3IKmAAsYgujSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAMFpLYsoKCpIKUpJSUgoL+ooKClKSCgqaClIKmgoKUgqaCpIKmgoKUgoKC", "88-90:1;108-110:1;196-206:1")]
 // </GoSourcePositionMaps>
 

@@ -22,9 +22,9 @@ internal static ж<Δkind> kind(this Uint64 _) {
     return kindUint64;
 }
 
-internal static Uint64 wrap(this Uint64 _, ж<op> Ꮡx) {
+internal static Uint64 wrap(this Uint64 _, ж<op> x) {
     Uint64 y = new(nil);
-    y.valGP.valAny.initOp(Ꮡx);
+    y.valGP.valAny.initOp(x);
     return y;
 }
 

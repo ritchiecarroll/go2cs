@@ -180,7 +180,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
     // scavenger for the memory limit. This may seems worrisome at first, but note
     // that the allocator will assist the background scavenger in the face of a memory
     // limit, so we'll be safe even if we stop the scavenger when we shouldn't have.
-    if (mappedReady <= memoryLimitGoal){
+    if (mappedReady <= memoryLimitGoal) {
         ᏑΔscavenge.of(Δscavengeᴛ1.ᏑmemoryLimitGoal).Store(~(uint64)0);
     } else {
         ᏑΔscavenge.of(Δscavengeᴛ1.ᏑmemoryLimitGoal).Store(memoryLimitGoal);
@@ -224,7 +224,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
     // If we're already below our goal, or within one page of our goal, then indicate
     // that we don't need the background scavenger for maintaining a memory overhead
     // proportional to the heap goal.
-    if (heapRetainedNow <= gcPercentGoal || heapRetainedNow - gcPercentGoal < (uint64)physPageSize){
+    if (heapRetainedNow <= gcPercentGoal || heapRetainedNow - gcPercentGoal < (uint64)physPageSize) {
         ᏑΔscavenge.of(Δscavengeᴛ1.ᏑgcPercentGoal).Store(~(uint64)0);
     } else {
         ᏑΔscavenge.of(Δscavengeᴛ1.ᏑgcPercentGoal).Store(gcPercentGoal);
@@ -377,10 +377,10 @@ internal static void init(this ж<scavengerState> Ꮡs) {
     s.sleepRatio = startingScavSleepRatio;
 
     // Install real functions if stubs aren't present.
-    if (s.scavenge == default!) {
+    if (s.scavenge == nil) {
         s.scavenge = (uintptr n) => {
             var start = nanotime();
-            var r = Ꮡmheap_.of(mheap.Ꮡpages).scavenge(n, default!, false);
+            var r = Ꮡmheap_.of(mheap.Ꮡpages).scavenge(n, default, false);
             var end = nanotime();
             if (start >= end) {
                 return (r, 0);
@@ -389,13 +389,13 @@ internal static void init(this ж<scavengerState> Ꮡs) {
             return (r, end - start);
         };
     }
-    if (s.shouldStop == default!) {
+    if (s.shouldStop == nil) {
         s.shouldStop = () => {
             // If background scavenging is disabled or if there's no work to do just stop.
             return heapRetained() <= ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑgcPercentGoal).Load() && ᏑgcController.of(gcControllerState.ᏑmappedReady).Load() <= ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑmemoryLimitGoal).Load();
         };
     }
-    if (s.gomaxprocs == default!) {
+    if (s.gomaxprocs == nil) {
         s.gomaxprocs = () => gomaxprocs;
     }
 }
@@ -486,8 +486,8 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
     // of time we worked, and the sleepRatio.
     var sleepTime = (int64)(worked / s.sleepRatio);
 
-    int64 slept = default!;
-    if (s.sleepStub == default!){
+    int64 slept = default;
+    if (s.sleepStub == nil) {
         // Set the timer.
         //
         // This must happen here instead of inside gopark
@@ -521,7 +521,7 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
         // worked and slept aren't exact measures of time, but it's OK to be a bit
         // sloppy here. We're just hoping we're avoiding some transient bad behavior.
         var t = slept + (int64)worked;
-        if (t > s.controllerCooldown){
+        if (t > s.controllerCooldown) {
             s.controllerCooldown = 0;
         } else {
             s.controllerCooldown -= t;
@@ -542,7 +542,7 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
     var cpuFraction = worked / (((float64)slept + worked) * (float64)s.gomaxprocs());
 
     // Update the critSleepRatio, adjusting until we reach our ideal fraction.
-    bool ok = default!;
+    bool ok = default;
     (s.sleepRatio, ok) = s.sleepController.next(cpuFraction, idealFraction, (float64)slept + worked);
     if (!ok) {
         // The core assumption of the controller, that we can get a proportional
@@ -577,8 +577,8 @@ internal static readonly @string releasedLessThanOneˢ = "released less than one
 //
 // Must be run on the scavenger goroutine.
 internal static (uintptr released, float64 worked) run(this ж<scavengerState> Ꮡs) {
-    uintptr released = default!;
-    float64 worked = default!;
+    uintptr released = default;
+    float64 worked = default;
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.of(scavengerState.Ꮡlock));
@@ -616,7 +616,7 @@ internal static (uintptr released, float64 worked) run(this ж<scavengerState> �
         // (determined empirically), and conservatively ignore the impact of huge pages
         // on timing.
         const float64 approxWorkedNSPerPhysicalPage = 10e3;
-        if (duration == 0){
+        if (duration == 0) {
             worked += approxWorkedNSPerPhysicalPage * (float64)(r / physPageSize);
         } else {
             // TODO(mknyszek): If duration is small compared to worked, it could be
@@ -659,7 +659,7 @@ internal static void bgscavenge(channel<nint> c) {
     c.ᐸꟷ(1);
     Ꮡscavenger.park();
 
-    while (ᐧ) {
+    for (;;) {
         var (released, workTime) = Ꮡscavenger.run();
         if (released == 0) {
             Ꮡscavenger.park();
@@ -689,7 +689,7 @@ internal static uintptr scavenge(this ж<pageAlloc> Ꮡp, uintptr nbytes, Func<b
         systemstack(() => {
             released += Ꮡp.Value.scavengeOne(ci, pageIdx, nbytes - released);
         });
-        if (shouldStop != default! && shouldStop()) {
+        if (shouldStop != nil && shouldStop()) {
             break;
         }
     }
@@ -712,10 +712,9 @@ internal static void printScavTrace(uintptr releasedBg, uintptr releasedEager, b
         releasedEager >> 10, (@string)" KiB work (eager), "u8,
         ᏑgcController.of(gcControllerState.ᏑheapReleased).load() >> 10, (@string)" KiB now, "u8,
         (ᏑgcController.of(gcControllerState.ᏑheapInUse).load() * 100) / heapRetained(), (@string)"% util"u8);
-    if (forced){
+    if (forced) {
         print((@string)" (forced)"u8);
-    } else 
-    if (scavenger.printControllerReset) {
+    } else if (scavenger.printControllerReset) {
         print((@string)" [controller reset]"u8);
         scavenger.printControllerReset = false;
     }
@@ -922,11 +921,10 @@ internal static readonly @string minTooLargeˢ = "min too large"u8;
 // to be equal to max. max is allowed to be less than min, in which case it is as if
 // max == min.
 internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) {
-    if ((uintptr)(minimum & (minimum - 1)) != 0 || minimum == 0){
+    if ((uintptr)(minimum & (minimum - 1)) != 0 || minimum == 0) {
         print((@string)"runtime: min = "u8, minimum, (@string)"\n"u8);
         @throw(minMustBeANonZeroPowerOfˢ);
-    } else 
-    if (minimum > maxPagesPerPhysPage) {
+    } else if (minimum > maxPagesPerPhysPage) {
         print((@string)"runtime: min = "u8, minimum, (@string)"\n"u8);
         @throw(minTooLargeˢ);
     }
@@ -935,7 +933,7 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
     // To prevent this, align max up to a multiple of min (which is always
     // a power of 2). This also prevents max from ever being less than
     // min, unless it's zero, so handle that explicitly.
-    if (max == 0){
+    if (max == 0) {
         max = minimum;
     } else {
         max = alignUp(max, minimum);
@@ -962,7 +960,7 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
     nuint z1 = (nuint)sys.LeadingZeros64(~x);
     nuint run = (nuint)0;
     nuint end = (nuint)i * 64 + (64 - z1);
-    if (x.Lsh(z1) != 0){
+    if (x.Lsh(z1) != 0) {
         // After shifting out z1 bits, we still have 1s,
         // so the run ends inside this word.
         run = (nuint)sys.LeadingZeros64(x.Lsh(z1));
@@ -1080,29 +1078,29 @@ partial struct scavengeIndex {
 // init initializes the scavengeIndex.
 //
 // Returns the amount added to sysStat.
-internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> ᏑsysStat) {
+internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> sysStat) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.of(scavengeIndex.ᏑsearchAddrBg).Clear();
     Ꮡs.of(scavengeIndex.ᏑsearchAddrForce).Clear();
     s.freeHWM = minOffAddr;
     s.test = test;
-    return s.sysInit(test, ᏑsysStat);
+    return s.sysInit(test, sysStat);
 }
 
 // sysGrow updates the index's backing store in response to a heap growth.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> ᏑsysStat) {
+internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
     // Update minHeapIdx. Note that even if there's no mapping work to do,
     // we may still have a new, lower minimum heap address.
     var minHeapIdx = Ꮡs.of(scavengeIndex.ᏑminHeapIdx).Load();
     {
-        var baseIdx = (uintptr)(nuint)chunkIndex(@base); if (minHeapIdx == 0 || baseIdx < minHeapIdx) {
+        var baseIdx = (uintptr)chunkIndex(@base); if (minHeapIdx == 0 || baseIdx < minHeapIdx) {
             Ꮡs.of(scavengeIndex.ᏑminHeapIdx).Store(baseIdx);
         }
     }
-    return Ꮡs.sysGrow(@base, limit, ᏑsysStat);
+    return Ꮡs.sysGrow(@base, limit, sysStat);
 }
 
 // find returns the highest chunk index that may contain pages available to scavenge.
@@ -1136,7 +1134,7 @@ internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) 
         }
         // Try to reduce searchAddr to newSearchAddr.
         var newSearchAddr = chunkBase(i) + (uintptr)pallocChunkBytes - (uintptr)pageSize;
-        if (marked){
+        if (marked) {
             // Attempt to be the first one to decrease the searchAddr
             // after an increase. If we fail, that means there was another
             // increase, or somebody else got to it before us. Either way,
@@ -1281,7 +1279,7 @@ internal static scavChunkData unpackScavChunkData(uint64 sc) {
 
 // pack returns sc packed into a uint64.
 internal static uint64 pack(this scavChunkData sc) {
-    return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)(uint8)sc.scavChunkFlags << (int)(16 + logScavChunkInUseMax)) | ((uint64)sc.gen << 32);
+    return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)sc.scavChunkFlags << (int)(16 + logScavChunkInUseMax)) | ((uint64)sc.gen << 32);
 }
 
 // scavChunkHasFree indicates whether the chunk has anything left to
@@ -1389,7 +1387,7 @@ partial struct piController {
 // PI controller state.
     internal float64 errIntegral; // Integral of the error from t=0 to now.
     // Error flags.
-    internal bool errOverflow; // Set if errIntegral ever overflowed.
+    internal bool errOverflow;   // Set if errIntegral ever overflowed.
     internal bool inputOverflow; // Set if an operation with the input overflowed.
 }
 
@@ -1419,10 +1417,9 @@ internal static (float64, bool) next(this ref piController c, float64 input, flo
         c.inputOverflow = true;
         return (c.min, false);
     }
-    if (output < c.min){
+    if (output < c.min) {
         output = c.min;
-    } else 
-    if (output > c.max) {
+    } else if (output > c.max) {
         output = c.max;
     }
 

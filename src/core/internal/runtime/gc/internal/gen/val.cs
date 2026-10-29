@@ -53,9 +53,9 @@ partial struct Ptr<T>
 }
 
 // Ptr is a Word
-internal static Word _ᴛ1ʗ = new Ptr<@void>(nil);
+internal static Word _ᴛ1ʗ = new Ptr<@void>();
 
-internal static readonly ж<sync.Map> ᏑptrKinds = new StaticBox<sync.Map>(new sync.Map(nil));
+internal static readonly ж<sync.Map> ᏑptrKinds = new StaticBox<sync.Map>(new sync.Map());
 internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).ValueSlot; // *kind -> *kind
 
 internal static ж<Δkind> kind<T>(this Ptr<T> _Δp0)
@@ -65,17 +65,17 @@ internal static ж<Δkind> kind<T>(this Ptr<T> _Δp0)
     var xk = x.kind();
     var (pk, ok) = ᏑptrKinds.Load(xk.OrTypedNil());
     if (!ok) {
-        var k = Ꮡ(new Δkind(typ: "Ptr["u8 + (~x.kind()).typ + "]"u8, reg: regClassGP));
+        var k = Ꮡ(new Δkind(typ: "Ptr["u8 + x.kind().typ + "]"u8, reg: regClassGP));
         (pk, _) = ᏑptrKinds.LoadOrStore(xk.OrTypedNil(), k.OrTypedNil());
     }
     return pk._<ж<Δkind>>();
 }
 
-internal static Ptr<T> wrap<T>(this Ptr<T> _, ж<op> Ꮡx)
+internal static Ptr<T> wrap<T>(this Ptr<T> _, ж<op> x)
     where T : Value
 {
     Ptr<T> y = new(nil);
-    y.valGP.valAny.initOp(Ꮡx);
+    y.valGP.valAny.initOp(x);
     return y;
 }
 
@@ -85,11 +85,11 @@ public static Ptr<T> /*y*/ AddConst<T>(this Ptr<T> x, nint off)
     Ptr<T> y = new(nil);
 
     var @base = x.op;
-    while ((~@base).Δop == "addConst"u8) {
-        off += (~(~@base).args[1]).c._<nint>();
-        @base = (~@base).args[0];
+    while (@base.Δop == "addConst"u8) {
+        off += @base.args[1].c._<nint>();
+        @base = @base.args[0];
     }
-    y.valGP.valAny.initOp(Ꮡ(new op(Δop: "addConst"u8, kind: y.kind(), args: new ж<op>[]{@base, imm(off)}.slice())));
+    y.valGP.valAny.initOp(Ꮡ(new op(Δop: "addConst"u8, kind: y.kind(), args: slice<ж<op>>([@base, imm(off)]))));
     return y;
 }
 
@@ -99,13 +99,13 @@ public static T Deref<W, T>(Ptr<W> ptr)
 {
     ref var off = ref heap(new nint(), out var Ꮡoff);
     var @base = ptr.op;
-    while ((~@base).Δop == "addConst"u8) {
-        off += (~(~@base).args[1]).c._<nint>();
-        @base = (~@base).args[0];
+    while (@base.Δop == "addConst"u8) {
+        off += @base.args[1].c._<nint>();
+        @base = @base.args[0];
     }
 
     W y = GoZero<W>();
-    return y.wrap(Ꮡ(new op(Δop: "deref"u8, kind: y.kind(), args: new ж<op>[]{@base}.slice(), c: off)));
+    return y.wrap(Ꮡ(new op(Δop: "deref"u8, kind: y.kind(), args: slice<ж<op>>([@base]), c: off)));
 }
 
 partial struct Array<T>
@@ -130,7 +130,7 @@ internal static ж<Δkind> kind<T>(this Array<T> _)
 {
     // TODO: Cache this like Ptr.kind.
     T x = GoZero<T>();
-    return Ꮡ(new Δkind(typ: "Array["u8 + (~x.kind()).typ + "]"u8, reg: regClassNone));
+    return Ꮡ(new Δkind(typ: "Array["u8 + x.kind().typ + "]"u8, reg: regClassNone));
 }
 
 partial struct valGP {
@@ -158,7 +158,7 @@ internal static void initOp(this ref valAny v, ж<op> Ꮡx) {
     // Figure out this value's function.
     foreach (var (_, arg) in x.args) {
         {
-            var fn = arg.Value.fn; if (fn != nil) {
+            var fn = arg.fn; if (fn != nil) {
                 fn.attach(Ꮡx);
                 break;
             }

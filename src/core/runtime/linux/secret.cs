@@ -8,7 +8,6 @@ using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
 
-[GoFieldAccess(typeof(specialSecret))]
 partial class runtime_package {
 
 //go:linkname secret_count runtime/secret.count

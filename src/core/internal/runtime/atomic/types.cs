@@ -537,15 +537,15 @@ public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡp) {
 // Prefer Store instead.
 //
 //go:nosplit
-public static void StoreNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡvalue) {
-    Ꮡp.of(Pointer<T>.Ꮡu).StoreNoWB(@unsafe.Pointer.FromPinnedBox(Ꮡvalue));
+public static void StoreNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) {
+    Ꮡp.of(Pointer<T>.Ꮡu).StoreNoWB(@unsafe.Pointer.FromPinnedBox(value));
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡvalue) {
-    Ꮡp.of(Pointer<T>.Ꮡu).Store(@unsafe.Pointer.FromPinnedBox(Ꮡvalue));
+public static void Store<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) {
+    Ꮡp.of(Pointer<T>.Ꮡu).Store(@unsafe.Pointer.FromPinnedBox(value));
 }
 
 // CompareAndSwapNoWB atomically (with respect to other methods)
@@ -560,16 +560,16 @@ public static void Store<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡvalue) {
 // Prefer CompareAndSwap instead.
 //
 //go:nosplit
-public static bool CompareAndSwapNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡold, ж<T> Ꮡnew) {
-    return Ꮡp.of(Pointer<T>.Ꮡu).CompareAndSwapNoWB(@unsafe.Pointer.FromPinnedBox(Ꮡold), @unsafe.Pointer.FromPinnedBox(Ꮡnew));
+public static bool CompareAndSwapNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
+    return Ꮡp.of(Pointer<T>.Ꮡu).CompareAndSwapNoWB(@unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
 
 // CompareAndSwap atomically (with respect to other methods)
 // compares u's value with old, and if they're equal,
 // swaps u's value with new.
 // It reports whether the swap ran.
-public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡold, ж<T> Ꮡnew) {
-    return Ꮡp.of(Pointer<T>.Ꮡu).CompareAndSwap(@unsafe.Pointer.FromPinnedBox(Ꮡold), @unsafe.Pointer.FromPinnedBox(Ꮡnew));
+public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
+    return Ꮡp.of(Pointer<T>.Ꮡu).CompareAndSwap(@unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
 
 // noCopy may be embedded into structs which must not be copied

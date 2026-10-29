@@ -41,17 +41,17 @@ public static ж<Zipf> NewZipf(ж<Rand> Ꮡr, float64 s, float64 v, uint64 imax)
 
     var z = @new<Zipf>();
     if (s <= 1.0D || v < 1D) {
-        return default!;
+        return default;
     }
-    z.Value.r = Ꮡr;
-    z.Value.imax = (float64)imax;
-    z.Value.v = v;
-    z.Value.q = s;
-    z.Value.oneminusQ = 1.0D - (~z).q;
-    z.Value.oneminusQinv = 1.0D / (~z).oneminusQ;
-    z.Value.hxm = z.h((~z).imax + 0.5D);
-    z.Value.hx0minusHxm = z.h(0.5D) - math.Exp(math.Log((~z).v) * (-(~z).q)) - (~z).hxm;
-    z.Value.s = 1D - z.hinv(z.h(1.5D) - math.Exp(-(~z).q * math.Log((~z).v + 1.0D)));
+    z.r = Ꮡr;
+    z.imax = (float64)imax;
+    z.v = v;
+    z.q = s;
+    z.oneminusQ = 1.0D - z.q;
+    z.oneminusQinv = 1.0D / z.oneminusQ;
+    z.hxm = z.h(z.imax + 0.5D);
+    z.hx0minusHxm = z.h(0.5D) - math.Exp(math.Log(z.v) * (-z.q)) - z.hxm;
+    z.s = 1D - z.hinv(z.h(1.5D) - math.Exp(-z.q * math.Log(z.v + 1.0D)));
     return z;
 }
 
@@ -65,7 +65,7 @@ public static uint64 Uint64(this ж<Zipf> Ꮡz) {
     }
     var k = 0.0D;
 
-    while (ᐧ) {
+    for (;;) {
         var r = z.r.Float64(); // r on [0,1]
         var ur = z.hxm + r * z.hx0minusHxm;
         var x = z.hinv(ur);

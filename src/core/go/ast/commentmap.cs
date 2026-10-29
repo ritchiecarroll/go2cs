@@ -24,12 +24,12 @@ internal static void sortComments(slice<ж<CommentGroup>> list) {
 // the association.
 partial struct CommentMap /*map[Node, slice<ж<CommentGroup>>]*/;
 
-internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> Ꮡc) {
+internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> c) {
     var list = cmap[n];
-    if (len(list) == 0){
-        list = new ж<CommentGroup>[]{Ꮡc}.slice();
+    if (len(list) == 0) {
+        list = slice<ж<CommentGroup>>([c]);
     } else {
-        list = append(list, Ꮡc);
+        list = append(list, c);
     }
     cmap[n] = list;
 }
@@ -101,7 +101,7 @@ internal static void push(this ref nodeStack s, Node n) {
 // (i.e., whose lexical extent has ended before or at pos).
 // It returns the last node popped.
 internal static Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
-    Node top = default!;
+    Node top = default;
 
     nint i = len(s);
     while (i > 0 && (s)[i - 1].End() <= pos) {
@@ -127,11 +127,11 @@ internal static Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
 // node possible: For instance, if the comment is a line comment
 // trailing an assignment, the comment is associated with the entire
 // assignment rather than just the last operand in the assignment.
-public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, slice<ж<CommentGroup>> comments) {
+public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<ж<CommentGroup>> comments) {
     var nodesᴷ = new stackAppend<Node>();
 
     if (len(comments) == 0) {
-        return default!; // no comments to map
+        return default; // no comments to map
     }
 
     var cmap = new CommentMap(0);
@@ -140,24 +140,24 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
     var tmp = new slice<ж<CommentGroup>>(len(comments));
     copy(tmp, comments); // don't change incoming comments
     sortComments(tmp);
-    var r = new commentListReader(fset: Ꮡfset, list: tmp); // !r.eol() because len(comments) > 0
+    var r = new commentListReader(fset: fset, list: tmp); // !r.eol() because len(comments) > 0
     r.next();
 
     // create node list in lexical order
     var nodes = nodeList(node);
-    nodes = append(nodesᴷ, nodes, (Node)(default!)); // append sentinel
+    nodes = append(nodesᴷ, nodes, (Node)(default)); // append sentinel
 
     // set up iteration variables
-    Node p = default!;                       // previous node
-    tokenꓸPosition pend = default!;                           // end of p
-    Node pg = default!;                     // previous node group (enclosing nodes of "importance")
-    tokenꓸPosition pgend = default!;                         // end of pg
-    nodeStack stack = default!;                    // stack of node groups
+    Node p = default;               // previous node
+    tokenꓸPosition pend = default;  // end of p
+    Node pg = default;              // previous node group (enclosing nodes of "importance")
+    tokenꓸPosition pgend = default; // end of pg
+    nodeStack stack = default;      // stack of node groups
 
     foreach (var (_, q) in nodes) {
-        tokenꓸPosition qpos = default!;
-        if (q != default!){
-            qpos = Ꮡfset.Position(q.Pos()); // current node position
+        tokenꓸPosition qpos = default;
+        if (q != nil) {
+            qpos = fset.Position(q.Pos()); // current node position
         } else {
             // set fake sentinel position to infinity so that
             // all comments get processed before the sentinel
@@ -170,9 +170,9 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
         while (r.end.Offset <= qpos.Offset) {
             // determine recent node group
             {
-                var top = stack.pop(r.comment.Pos()); if (top != default!) {
+                var top = stack.pop(r.comment.Pos()); if (top != nil) {
                     pg = top;
-                    pgend = Ꮡfset.Position(pg.End());
+                    pgend = fset.Position(pg.End());
                 }
             }
             // Try to associate a comment first with a node group
@@ -180,9 +180,9 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
             // if that fails, try to associate it with the most recent
             // node.
             // TODO(gri) try to simplify the logic below
-            Node assoc = default!;
+            Node assoc = default;
             switch (ᐧ) {
-            case {} when pg != default! && (pgend.Line == r.pos.Line || pgend.Line + 1 == r.pos.Line && r.end.Line + 1 < qpos.Line): {
+            case {} when pg != nil && (pgend.Line == r.pos.Line || pgend.Line + 1 == r.pos.Line && r.end.Line + 1 < qpos.Line): {
                 // 1) comment starts on same line as previous node group ends, or
                 // 2) comment starts on the line immediately after the
                 //    previous node group and there is an empty line before
@@ -191,7 +191,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
                 assoc = pg;
                 break;
             }
-            case {} when p != default! && (pend.Line == r.pos.Line || pend.Line + 1 == r.pos.Line && r.end.Line + 1 < qpos.Line || q == default!): {
+            case {} when p != nil && (pend.Line == r.pos.Line || pend.Line + 1 == r.pos.Line && r.end.Line + 1 < qpos.Line || q == nil): {
                 // same rules apply as above for p rather than pg,
                 // but also associate with p if we are at the end (q == nil)
                 assoc = p;
@@ -199,7 +199,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
             }
             default: {
                 // otherwise, associate comment with current node
-                if (q == default!) {
+                if (q == nil) {
                     // we can only reach here if there was no p
                     // which would imply that there were no nodes
                     throw panic("internal error: no comments should be associated with sentinel");
@@ -216,7 +216,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
 
         // update previous node
         p = q;
-        pend = Ꮡfset.Position(p.End());
+        pend = fset.Position(p.End());
 
         // update previous node group if we see an "important" node
         switch (q.type()) {
@@ -277,7 +277,7 @@ public static slice<ж<CommentGroup>> Comments(this CommentMap cmap) {
 
 internal static @string summary(slice<ж<CommentGroup>> list) {
     UntypedInt maxLen = 40;
-    bytes.Buffer buf = default!;
+    bytes.Buffer buf = default;
 
     // collect comments text
 loop:
@@ -285,11 +285,11 @@ loop:
         // Note: CommentGroup.Text() does too much work for what we
         //       need and would only replace this innermost loop.
         //       Just do it explicitly.
-        foreach (var (_, comment) in (~group).List) {
+        foreach (var (_, comment) in group.List) {
             if (buf.Len() >= maxLen) {
                 goto break_loop;
             }
-            buf.WriteString((~comment).Text);
+            buf.WriteString(comment.Text);
         }
 continue_loop:;
     }
@@ -305,8 +305,8 @@ break_loop:;
     var bytesΔ1 = buf.Bytes();
     foreach (var (i, b) in bytesΔ1) {
         switch (b) {
-        case (rune)'\t' or (rune)'\n' or (rune)'\r': {
-            bytesΔ1[i] = (rune)' ';
+        case (byte)'\t' or (byte)'\n' or (byte)'\r': {
+            bytesΔ1[i] = (byte)' ';
             break;
         }}
     }
@@ -321,7 +321,7 @@ public static @string String(this CommentMap cmap) {
     var nodesᴷ = new stackAppend<Node>();
 
     // print map entries in sorted order
-    slice<Node> nodes = default!;
+    slice<Node> nodes = default;
     foreach (var (node, _) in cmap) {
         nodes = append(nodesᴷ, nodes, node);
     }
@@ -338,10 +338,10 @@ public static @string String(this CommentMap cmap) {
     foreach (var (_, node) in nodes) {
         var comment = cmap[node];
         // print name of identifiers; print node type for other nodes
-        @string s = default!;
+        @string s = default;
         {
-            var (ident, ok) = node._<ж<Ident>>(ᐧ); if (ok){
-                s = ident.Value.Name;
+            var (ident, ok) = node._<ж<Ident>>(ᐧ); if (ok) {
+                s = ident.Name;
             } else {
                 s = fmt.Sprintf("%T"u8, node);
             }

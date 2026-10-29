@@ -48,6 +48,10 @@ using static go.@internal.coverage.cformat_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(pstate))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,7 +60,7 @@ using static go.@internal.coverage.cformat_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgoCmyKzSgoKCuIKCgJS0goCCtqaCkoKCgpSClIKCgoKmgoCCpICCyIKAgsgABhQADAKClIKClJSCkoKmgoKClIKC7oKCgoKCkpKCgoKU1oKAlLaCgoKCgpSCgpSUgILIgoKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "371=Invoke/1/1/1;410=Invoke/1/1/1")]
+[assembly: go.GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgoCmyKzSgoKCuIKCgJSkgoCCtqaCkoKCgpSClIKCgoKmgoCCpICCyIKAgsgABhQADAKClIKClJSCkoKmgoKClIKC7oKCgoKCkpKCgoKU1oKAlLaCgoKCgpSCgpSUgILIgoKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "370=Invoke/1/1/1;409=Invoke/1/1/1", "329:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

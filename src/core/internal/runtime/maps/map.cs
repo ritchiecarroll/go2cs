@@ -13,7 +13,6 @@ using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
 
-[GoFieldAccess(typeof(abiꓸInterfaceType), typeof(abi.EmptyInterface), typeof(abi.NonEmptyInterface), typeof(abiꓸStructType))]
 partial class maps_package {
 
 // This package contains the implementation of Go's builtin map type.
@@ -302,7 +301,7 @@ public static ж<ΔMap> NewMap(ж<abiꓸMapType> Ꮡmt, uintptr hint, ж<ΔMap> 
 
     // Reject hints that are obviously too large.
     (var groups, overflow) = math.MulUintptr((uintptr)dirSize, maxTableCapacity);
-    if (overflow){
+    if (overflow) {
         return Ꮡm; // return an empty map.
     } else {
         var (mem, overflowΔ1) = math.MulUintptr(groups, mt.GroupSize);
@@ -329,7 +328,7 @@ public static ж<ΔMap> NewMap(ж<abiꓸMapType> Ꮡmt, uintptr hint, ж<ΔMap> 
 
 public static ж<ΔMap> NewEmptyMap() {
     var m = @new<ΔMap>();
-    m.Value.seed = (uintptr)rand();
+    m.seed = (uintptr)rand();
     // See comment in NewMap. No need to eager allocate a group.
     return m;
 }
@@ -345,8 +344,8 @@ internal static ж<table> directoryAt(this ref ΔMap m, uintptr i) {
     return ~(ж<ж<table>>)(uintptr)((@unsafe.Pointer)((uintptr)m.dirPtr + (uintptr)goarch.PtrSize * i));
 }
 
-internal static void directorySet(this ref ΔMap m, uintptr i, ж<table> Ꮡnt) {
-    ((ж<ж<table>>)(uintptr)((@unsafe.Pointer)((uintptr)m.dirPtr + (uintptr)goarch.PtrSize * i))).ValueSlot = Ꮡnt;
+internal static void directorySet(this ref ΔMap m, uintptr i, ж<table> nt) {
+    ((ж<ж<table>>)(uintptr)((@unsafe.Pointer)((uintptr)m.dirPtr + (uintptr)goarch.PtrSize * i))).ValueSlot = nt;
 }
 
 internal static void replaceTable(this ref ΔMap m, ж<table> Ꮡnt) {
@@ -378,8 +377,8 @@ internal static void installTableSplit(this ref ΔMap m, ж<table> Ꮡold, ж<ta
             // only update t.index once. Since the index must
             // increase, seeing the original index means this must
             // be the first time we've encountered this table.
-            if ((~t).index == i) {
-                t.Value.index = 2 * i;
+            if (t.index == i) {
+                t.index = 2 * i;
             }
         }
         m.globalDepth++;
@@ -405,8 +404,8 @@ public static uint64 Used(this ref ΔMap m) {
 
 // Get performs a lookup of the key that key points to. It returns a pointer to
 // the element, or false if the key doesn't exist.
-public static (@unsafe.Pointer, bool) Get(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key) {
-    return m.getWithoutKey(Ꮡtyp, key);
+public static (@unsafe.Pointer, bool) Get(this ref ΔMap m, ж<abiꓸMapType> typ, @unsafe.Pointer key) {
+    return m.getWithoutKey(typ, key);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -416,7 +415,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref ΔM
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.Used() == 0) {
-        return (default!, default!, false);
+        return (default, default, false);
     }
 
     if (m.writing != 0) {
@@ -437,7 +436,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref ΔMap m, ж<abi�
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.Used() == 0) {
-        return (default!, false);
+        return (default, false);
     }
 
     if (m.writing != 0) {
@@ -472,7 +471,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
             slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
         }
 
-        if ((~typ.Key).Equal(key, slotKey)) {
+        if (typ.Key.Equal(key, slotKey)) {
             @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
                 slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
@@ -485,7 +484,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
 
     // No match here means key is not in the map.
     // (A single group means no need to probe or check for empty).
-    return (default!, default!, false);
+    return (default, default, false);
 }
 
 public static void Put(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key, @unsafe.Pointer elem) {
@@ -539,7 +538,7 @@ public static @unsafe.Pointer PutSlot(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡ
         m.growToTable(Ꮡtyp);
     }
 
-    while (ᐧ) {
+    for (;;) {
         var idx = m.directoryIndex(hash);
         var (elem, ok) = m.directoryAt(idx).PutSlot(Ꮡtyp, Ꮡm, hash, key);
         if (!ok) {
@@ -575,7 +574,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
         if (typ.IndirectKey()) {
             slotKeyΔ1 = ((ж<@unsafe.Pointer>)(uintptr)(slotKeyΔ1)).Value;
         }
-        if ((~typ.Key).Equal(key, slotKeyΔ1)) {
+        if (typ.Key.Equal(key, slotKeyΔ1)) {
             if (typ.NeedKeyUpdate()) {
                 typedmemmove(typ.Key, slotKeyΔ1, key);
             }
@@ -596,7 +595,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
     match = (~g.ctrls()).matchEmptyOrDeleted();
     if (match == 0) {
         fatal(smallMapWithNoEmptySlotˢ);
-        return default!;
+        return default;
     }
 
     var i = match.first();
@@ -622,8 +621,8 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
     return slotElem;
 }
 
-internal static void growToSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
-    var grp = newGroups(ref (Ꮡtyp).DerefOrNull(), 1);
+internal static void growToSmall(this ref ΔMap m, ж<abiꓸMapType> typ) {
+    var grp = newGroups(ref (typ).DerefOrNull(), 1);
     m.dirPtr = grp.data;
 
     var g = new groupReference(
@@ -679,7 +678,7 @@ public static void Delete(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp, @unsafe
 
     if (Ꮡm == nil || m.Used() == 0) {
         {
-            var err = mapKeyError(Ꮡtyp, key); if (err != default!) {
+            var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
                 throw panic(err); // see issue 23734
             }
         }
@@ -696,7 +695,7 @@ public static void Delete(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp, @unsafe
     // case we have not actually done a write.
     m.writing ^= (uint8)(1); // toggle, see comment on writing
 
-    if (m.dirLen == 0){
+    if (m.dirLen == 0) {
         m.deleteSmall(Ꮡtyp, hash, key);
     } else {
         var idx = m.directoryIndex(hash);
@@ -734,22 +733,21 @@ internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uin
         if (typ.IndirectKey()) {
             slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
         }
-        if ((~typ.Key).Equal(key, slotKey)) {
+        if (typ.Key.Equal(key, slotKey)) {
             m.used--;
 
-            if (typ.IndirectKey()){
+            if (typ.IndirectKey()) {
                 // Clearing the pointer is sufficient.
-                ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default!;
-            } else 
-            if (typ.Key.Pointers()) {
+                ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default;
+            } else if (typ.Key.Pointers()) {
                 // Only bother clearing if there are pointers.
                 typedmemclr(typ.Key, slotKey);
             }
 
             @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
-            if (typ.IndirectElem()){
+            if (typ.IndirectElem()) {
                 // Clearing the pointer is sufficient.
-                ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = default!;
+                ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = default;
             } else {
                 // Unlike keys, always clear the elem (even if
                 // it contains no pointers), as compound
@@ -769,7 +767,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uin
 }
 
 // Clear deletes all entries from the map resulting in an empty map.
-public static void Clear(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp) {
+public static void Clear(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> typ) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil || m.Used() == 0 && !m.tombstonePossible) {
@@ -781,16 +779,16 @@ public static void Clear(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp) {
     }
     m.writing ^= (uint8)(1); // toggle, see comment on writing
 
-    if (m.dirLen == 0){
-        m.clearSmall(Ꮡtyp);
+    if (m.dirLen == 0) {
+        m.clearSmall(typ);
     } else {
-        ж<table> lastTab = default!;
+        ж<table> lastTab = default;
         foreach (var i in range(m.dirLen)) {
             var t = m.directoryAt((uintptr)i);
             if (t == lastTab) {
                 continue;
             }
-            t.Clear(Ꮡtyp);
+            t.Clear(typ);
             lastTab = t;
         }
         m.used = 0;
@@ -825,7 +823,7 @@ internal static void clearSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string concurrentMapCloneAndMapˢ = "concurrent map clone and map write"u8;
 
-public static ж<ΔMap> Clone(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp) {
+public static ж<ΔMap> Clone(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> typ) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Note: this should never be called with a nil map.
@@ -839,14 +837,13 @@ public static ж<ΔMap> Clone(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp) {
     Ꮡm = m2; m = ref Ꮡm.DerefOrNull();
 
     // We need to just deep copy the dirPtr field.
-    if (m.dirPtr == nil){
+    if (m.dirPtr == nil) {
         // delayed group allocation, nothing to do.
-    } else 
-    if (m.dirLen == 0){
+    } else if (m.dirLen == 0) {
         // Clone one group.
         var oldGroup = new groupReference(data: m.dirPtr);
-        var newGroup = new groupReference(data: newGroups(ref (Ꮡtyp).DerefOrNull(), 1).data);
-        cloneGroup(Ꮡtyp, newGroup, oldGroup);
+        var newGroup = new groupReference(data: newGroups(ref (typ).DerefOrNull(), 1).data);
+        cloneGroup(typ, newGroup, oldGroup);
         m.dirPtr = newGroup.data;
     } else {
         // Clone each (different) table.
@@ -857,7 +854,7 @@ public static ж<ΔMap> Clone(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp) {
                 newDir[i] = newDir[i - 1];
                 continue;
             }
-            newDir[i] = t.clone(Ꮡtyp);
+            newDir[i] = t.clone(typ);
         }
         m.dirPtr = @unsafe.Pointer.FromBox(Ꮡ(newDir, 0));
     }
@@ -869,7 +866,7 @@ internal static error mapKeyError(ж<abiꓸMapType> Ꮡt, @unsafe.Pointer p) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.HashMightPanic()) {
-        return default!;
+        return default;
     }
     return mapKeyError2(t.Key, p);
 }
@@ -878,71 +875,72 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if ((abi.TFlag)(t.TFlag & abi.TFlagRegularMemory) != 0) {
-        return default!;
+        return default;
     }
-    var exprᴛ1 = t.Kind();
-    if (exprᴛ1 == abi.Float32 || exprᴛ1 == abi.Float64 || exprᴛ1 == abi.Complex64 || exprᴛ1 == abi.Complex128 || exprᴛ1 == abi.ΔString) {
-        return default!;
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == abi.Float32 || ᴛ == abi.Float64 || ᴛ == abi.Complex64 || ᴛ == abi.Complex128 || ᴛ == abi.ΔString: {
+        return default;
     }
-    if (exprᴛ1 == abi.Interface) {
+    case var ᴛ when ᴛ == abi.Interface: {
         var i = Ꮡt.Reinterpret<abi.Type, abiꓸInterfaceType>();
-        ж<abi.Type> tΔ2 = default!;
-        ж<@unsafe.Pointer> pdata = default!;
-        if (len(i.Methods) == 0){
+        ж<abi.Type> tΔ2 = default;
+        ж<@unsafe.Pointer> pdata = default;
+        if (len(i.Methods) == 0) {
             var a = (ж<abi.EmptyInterface>)(uintptr)(p);
             tΔ2 = a.Type;
             if (tΔ2 == nil) {
-                return default!;
+                return default;
             }
             pdata = a.of(abi.EmptyInterface.ᏑData);
         } else {
             var a = (ж<abi.NonEmptyInterface>)(uintptr)(p);
             if (a.ITab == nil) {
-                return default!;
+                return default;
             }
-            tΔ2 = a.ITab.Value.Type;
+            tΔ2 = a.ITab.Type;
             pdata = a.of(abi.NonEmptyInterface.ᏑData);
         }
 
-        if ((~tΔ2).Equal == default!) {
+        if (tΔ2.Equal == nil) {
             return new unhashableTypeError(tΔ2);
         }
 
-        if (tΔ2.IsDirectIface()){
+        if (tΔ2.IsDirectIface()) {
             return mapKeyError2(tΔ2, @unsafe.Pointer.FromBox(pdata));
         } else {
             return mapKeyError2(tΔ2, pdata.Value);
         }
+        break;
     }
-    if (exprᴛ1 == abi.Array) {
+    case var ᴛ when ᴛ == abi.Array: {
         var a = Ꮡt.Reinterpret<abi.Type, abiꓸArrayType>();
         for (var i = (uintptr)0; i < a.of(abiꓸArrayType.ᏑLen).Value; i++) {
             {
-                var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, (@unsafe.Pointer)((uintptr)p + i * (~a.of(abiꓸArrayType.ᏑElem).Value).Size_)); if (err != default!) {
+                var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, (@unsafe.Pointer)((uintptr)p + i * a.of(abiꓸArrayType.ᏑElem).Value.Size_)); if (err != nil) {
                     return err;
                 }
             }
         }
-        return default!;
+        return default;
     }
-    if (exprᴛ1 == abi.Struct) {
+    case var ᴛ when ᴛ == abi.Struct: {
         var s = Ꮡt.Reinterpret<abi.Type, abiꓸStructType>();
         foreach (var (_, f) in s.Fields) {
             if (f.Name.IsBlank()) {
                 continue;
             }
             {
-                var err = mapKeyError2(f.Typ, (@unsafe.Pointer)((uintptr)p + f.Offset)); if (err != default!) {
+                var err = mapKeyError2(f.Typ, (@unsafe.Pointer)((uintptr)p + f.Offset)); if (err != nil) {
                     return err;
                 }
             }
         }
-        return default!;
+        return default;
     }
-    { /* default: */
+    default: {
         // Should never happen, keep this case for robustness.
         return new unhashableTypeError(Ꮡt);
-    }
+    }}
 }
 
 partial struct unhashableTypeError {

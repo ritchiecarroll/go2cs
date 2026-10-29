@@ -27,7 +27,7 @@ partial struct String /*[]byte*/;
 // remain, it returns nil.
 internal static slice<byte> read(this ref String s, nint n) {
     if (len(s) < n || n < 0) {
-        return default!;
+        return default;
     }
     var v = (s).slice(0, n);
     s = (s).slice(n);
@@ -36,7 +36,7 @@ internal static slice<byte> read(this ref String s, nint n) {
 
 // Skip advances the String by n byte and reports whether it was successful.
 public static bool Skip(this ref String s, nint n) {
-    return s.read(n) != default!;
+    return s.read(n) != nil;
 }
 
 // ReadUint8 decodes an 8-bit value into out and advances over it.
@@ -45,7 +45,7 @@ public static bool ReadUint8(this ref String s, ж<uint8> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(1);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     @out = (uint8)v[0];
@@ -58,7 +58,7 @@ public static bool ReadUint16(this ref String s, ж<uint16> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(2);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     @out = (uint16)((uint16)((uint16)v[0] << 8) | (uint16)v[1]);
@@ -71,7 +71,7 @@ public static bool ReadUint24(this ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(3);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     @out = (uint32)v[0] << 16 | (uint32)v[1] << 8 | (uint32)v[2];
@@ -84,7 +84,7 @@ public static bool ReadUint32(this ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(4);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     @out = (uint32)v[0] << 24 | (uint32)v[1] << 16 | (uint32)v[2] << 8 | (uint32)v[3];
@@ -97,7 +97,7 @@ public static bool ReadUint48(this ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(6);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     @out = (uint64)v[0] << 40 | (uint64)v[1] << 32 | (uint64)v[2] << 24 | (uint64)v[3] << 16 | (uint64)v[4] << 8 | (uint64)v[5];
@@ -110,7 +110,7 @@ public static bool ReadUint64(this ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(8);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     @out = (uint64)v[0] << 56 | (uint64)v[1] << 48 | (uint64)v[2] << 40 | (uint64)v[3] << 32 | (uint64)v[4] << 24 | (uint64)v[5] << 16 | (uint64)v[6] << 8 | (uint64)v[7];
@@ -121,12 +121,12 @@ internal static bool readUnsigned(this ref String s, ж<uint32> Ꮡout, nint len
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(length);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
-    uint32 result = default!;
+    uint32 result = default;
     for (nint i = 0; i < length; i++) {
-        result <<= (int)(8);
+        result <<= 8;
         result |= (uint32)((uint32)v[i]);
     }
     @out = result;
@@ -137,16 +137,16 @@ internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<Strin
     ref var outChild = ref ᏑoutChild.DerefOrNull();
 
     var lenBytes = s.read(lenLen);
-    if (lenBytes == default!) {
+    if (lenBytes == nil) {
         return false;
     }
-    uint32 length = default!;
+    uint32 length = default;
     foreach (var (_, b) in lenBytes) {
         length = length << 8;
         length = length | (uint32)b;
     }
     var v = s.read((nint)length);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     outChild = v;
@@ -155,22 +155,22 @@ internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<Strin
 
 // ReadUint8LengthPrefixed reads the content of an 8-bit length-prefixed value
 // into out and advances over it. It reports whether the read was successful.
-public static bool ReadUint8LengthPrefixed(this ref String s, ж<String> Ꮡout) {
-    return s.readLengthPrefixed(1, Ꮡout);
+public static bool ReadUint8LengthPrefixed(this ref String s, ж<String> @out) {
+    return s.readLengthPrefixed(1, @out);
 }
 
 // ReadUint16LengthPrefixed reads the content of a big-endian, 16-bit
 // length-prefixed value into out and advances over it. It reports whether the
 // read was successful.
-public static bool ReadUint16LengthPrefixed(this ref String s, ж<String> Ꮡout) {
-    return s.readLengthPrefixed(2, Ꮡout);
+public static bool ReadUint16LengthPrefixed(this ref String s, ж<String> @out) {
+    return s.readLengthPrefixed(2, @out);
 }
 
 // ReadUint24LengthPrefixed reads the content of a big-endian, 24-bit
 // length-prefixed value into out and advances over it. It reports whether
 // the read was successful.
-public static bool ReadUint24LengthPrefixed(this ref String s, ж<String> Ꮡout) {
-    return s.readLengthPrefixed(3, Ꮡout);
+public static bool ReadUint24LengthPrefixed(this ref String s, ж<String> @out) {
+    return s.readLengthPrefixed(3, @out);
 }
 
 // ReadBytes reads n bytes into out and advances over them. It reports
@@ -179,7 +179,7 @@ public static bool ReadBytes(this ref String s, ж<slice<byte>> Ꮡout, nint n) 
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(n);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     @out = v;
@@ -191,7 +191,7 @@ public static bool ReadBytes(this ref String s, ж<slice<byte>> Ꮡout, nint n) 
 public static bool CopyBytes(this ref String s, slice<byte> @out) {
     nint n = len(@out);
     var v = s.read(n);
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     return copy(@out, v) == n;

@@ -7,7 +7,7 @@ using cmp = cmp_package;
 using bytealg = @internal.bytealg_package;
 using strconv = @internal.strconv_package;
 using slices = slices_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
 using vendor.golang.org.x.net.dns;
@@ -34,11 +34,11 @@ internal static (@string arpa, error err) reverseaddr(@string addr) {
     var bufᴷ = new stackAppend<byte>();
 
     var ip = ParseIP(addr);
-    if (ip == default!) {
+    if (ip == nil) {
         return ("", new DNSErrorжerror(Ꮡ(new DNSError(Err: "unrecognized address"u8, Name: addr))));
     }
-    if (ip.To4() != default!) {
-        return (strconv.Itoa((nint)ip[15]) + "." + strconv.Itoa((nint)ip[14]) + "." + strconv.Itoa((nint)ip[13]) + "." + strconv.Itoa((nint)ip[12]) + ".in-addr.arpa.", default!);
+    if (ip.To4() != nil) {
+        return (strconv.Itoa((nint)ip[15]) + "." + strconv.Itoa((nint)ip[14]) + "." + strconv.Itoa((nint)ip[13]) + "." + strconv.Itoa((nint)ip[12]) + ".in-addr.arpa.", default);
     }
     // Must be IPv6
     var buf = new slice<byte>(0, len(ip) * 4 + len("ip6.arpa."));
@@ -46,13 +46,13 @@ internal static (@string arpa, error err) reverseaddr(@string addr) {
     for (nint i = len(ip) - 1; i >= 0; i--) {
         var v = ip[i];
         buf = append(bufᴷ, buf, hexDigit[(byte)(v & 0xF)],
-            (byte)((rune)'.'),
+            (byte)'.',
             hexDigit[(v >> 4)],
-            (byte)((rune)'.'));
+            (byte)'.');
     }
     // Append "ip6.arpa." and return (buf already has the final .)
     buf = append(buf, ((@string)"ip6.arpa."u8).ꓸꓸꓸ);
-    return ((@string)buf, default!);
+    return ((@string)buf, default);
 }
 
 internal static bool equalASCIIName(dnsmessage.Name x, dnsmessage.Name y) {
@@ -65,10 +65,10 @@ internal static bool equalASCIIName(dnsmessage.Name x, dnsmessage.Name y) {
     for (nint i = 0; i < (nint)x.Length; i++) {
         var a = x.Data[i];
         var b = y.Data[i];
-        if ((rune)'A' <= a && a <= (rune)'Z') {
+        if ('A' <= a && a <= 'Z') {
             a += 0x20;
         }
-        if ((rune)'A' <= b && b <= (rune)'Z') {
+        if ('A' <= b && b <= 'Z') {
             b += 0x20;
         }
         if (a != b) {
@@ -106,11 +106,11 @@ internal static bool isDomainName(@string s) {
     // So our _effective_ maximum is 253, but 254 is not rejected if the last
     // character is a dot.
     nint l = len(s);
-    if (l == 0 || l > 254 || l == 254 && s[l - 1] != (rune)'.') {
+    if (l == 0 || l > 254 || l == 254 && s[l - 1] != '.') {
         return false;
     }
 
-    var last = (byte)(rune)'.';
+    var last = (byte)'.';
     var nonNumeric = false; // true once we've seen a letter or hyphen
     nint partlen = 0;
     for (nint i = 0; i < len(s); i++) {
@@ -119,28 +119,28 @@ internal static bool isDomainName(@string s) {
         default: {
             return false;
         }
-        case {} when (rune)'a' <= c && c <= (rune)'z' || (rune)'A' <= c && c <= (rune)'Z' || c == (rune)'_': {
+        case {} when (byte)'a' <= c && c <= (byte)'z' || (byte)'A' <= c && c <= (byte)'Z' || c == (byte)'_': {
             nonNumeric = true;
             partlen++;
             break;
         }
-        case {} when (rune)'0' <= c && c <= (rune)'9': {
+        case {} when (byte)'0' <= c && c <= (byte)'9': {
             // fine
             partlen++;
             break;
         }
-        case {} when c is (rune)'-': {
+        case {} when c is (byte)'-': {
             // Byte before dash cannot be dot.
-            if (last == (rune)'.') {
+            if (last == '.') {
                 return false;
             }
             partlen++;
             nonNumeric = true;
             break;
         }
-        case {} when c is (rune)'.': {
+        case {} when c is (byte)'.': {
             // Byte before dot cannot be dot, dash.
-            if (last == (rune)'.' || last == (rune)'-') {
+            if (last == '.' || last == '-') {
                 return false;
             }
             if (partlen > 63 || partlen == 0) {
@@ -151,7 +151,7 @@ internal static bool isDomainName(@string s) {
         }}
         last = c;
     }
-    if (last == (rune)'-' || partlen > 63) {
+    if (last == '-' || partlen > 63) {
         return false;
     }
 
@@ -167,7 +167,7 @@ internal static bool isDomainName(@string s) {
 // (like "localhost" or "myhost") do not get trailing dots, but any other
 // names do.
 internal static @string absDomainName(@string s) {
-    if (bytealg.IndexByteString(s, (rune)'.') != -1 && s[len(s) - 1] != (rune)'.') {
+    if (bytealg.IndexByteString(s, (byte)'.') != -1 && s[len(s) - 1] != '.') {
         s += "."u8;
     }
     return s;
@@ -189,13 +189,13 @@ partial struct byPriorityWeight /*[]ж<SRV>*/;
 internal static void shuffleByWeight(this byPriorityWeight addrs) {
     nint sum = 0;
     foreach (var (_, addr) in addrs) {
-        sum += (nint)(~addr).Weight;
+        sum += (nint)addr.Weight;
     }
     while (sum > 0 && len(addrs) > 1) {
         nint s = 0;
         nint n = randIntn(sum);
         foreach (var i in range(addrs)) {
-            s += (nint)(~addrs[i]).Weight;
+            s += (nint)addrs[i].Weight;
             if (s > n) {
                 if (i > 0) {
                     (addrs[0], addrs[i]) = (addrs[i], addrs[0]);
@@ -203,7 +203,7 @@ internal static void shuffleByWeight(this byPriorityWeight addrs) {
                 break;
             }
         }
-        sum -= (nint)(~addrs[0]).Weight;
+        sum -= (nint)addrs[0].Weight;
         addrs = addrs[1..];
     }
 }
@@ -212,15 +212,15 @@ internal static void shuffleByWeight(this byPriorityWeight addrs) {
 internal static void sort(this byPriorityWeight addrs) {
     slices.SortFunc(addrs, (ж<SRV> a, ж<SRV> b) => {
         {
-            nint r = cmp.Compare((~a).Priority, (~b).Priority); if (r != 0) {
+            nint r = cmp.Compare(a.Priority, b.Priority); if (r != 0) {
                 return r;
             }
         }
-        return cmp.Compare((~a).Weight, (~b).Weight);
+        return cmp.Compare(a.Weight, b.Weight);
     });
     nint i = 0;
     for (nint j = 1; j < len(addrs); j++) {
-        if ((~addrs[i]).Priority != (~addrs[j]).Priority) {
+        if (addrs[i].Priority != addrs[j].Priority) {
             addrs.slice(i, j).shuffleByWeight();
             i = j;
         }
@@ -243,7 +243,7 @@ internal static void sort(this byPref s) {
         nint j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);
     }
-    slices.SortFunc(s, (ж<MX> a, ж<MX> b) => cmp.Compare((~a).Pref, (~b).Pref));
+    slices.SortFunc(s, (ж<MX> a, ж<MX> b) => cmp.Compare(a.Pref, b.Pref));
 }
 
 // An NS represents a single DNS NS record.

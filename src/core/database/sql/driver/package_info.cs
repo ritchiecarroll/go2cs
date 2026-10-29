@@ -10,14 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
 global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -78,7 +72,7 @@ using static go.database.sql.driver_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("database/sql/driver/driver.go", "driver.cs", "AJIBqgIADRwA2AG+AwCUAaACgqaCAAsUxILWgg==")]
-[assembly: go.GoPositionMap("database/sql/driver/types.go", "types.cs", "AD9+xICkgpSkgoKUpIKClKaClIKClKSCgpSmAAoSlIKClIKClKSCgpSkgoKUlAAMFoKklAAIEoKClAAIEoKClKiSgpTkpJSqogAWKpQAARoACwKAhqSmgoKmlIKClIKUuKaCpoKUtqSkgoKUpKSkgoKUpJQ=")]
+[assembly: go.GoPositionMap("database/sql/driver/types.go", "types.cs", "AD9+xICkgpSkgoKUpIKClKaClIKClKSCgpSmAAoSlIKClIKClKSCgpSkgoKUlAAMFoKklAAIEoKClAAIEoKClKiSgpTkpJSqogAWKpQAARoACwKAhqSmgoKmlIKClIKUuKaCpoKUxqSkgoKUpKSkgoKUpJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.database.sql;

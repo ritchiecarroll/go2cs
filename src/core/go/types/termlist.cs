@@ -57,7 +57,7 @@ internal static bool isAll(this termlist xl) {
     // If the termlist is in normal form, this requires at most
     // one iteration.
     foreach (var (_, x) in xl) {
-        if (x != nil && (~x).typ == default!) {
+        if (x != nil && x.typ == nil) {
             return true;
         }
     }
@@ -71,7 +71,7 @@ internal static termlist norm(this termlist xl) {
     // Quadratic algorithm, but good enough for now.
     // TODO(gri) fix asymptotic performance
     var used = new slice<bool>(len(xl));
-    termlist rl = default!;
+    termlist rl = default;
     foreach (var (i, vᴛ1) in xl) {
         var xi = vᴛ1;
 
@@ -91,7 +91,7 @@ internal static termlist norm(this termlist xl) {
                     // if we continue, we may end up with a 𝓤 term
                     // and other terms and the result would not be
                     // in normal form.)
-                    if ((~u1).typ == default!) {
+                    if (u1.typ == nil) {
                         return allTermlist;
                     }
                     xi = u1;
@@ -115,12 +115,12 @@ internal static termlist intersect(this termlist xl, termlist yl) {
     var rlᴷ = new stackAppend<ж<Δterm>>();
 
     if (xl.isEmpty() || yl.isEmpty()) {
-        return default!;
+        return default;
     }
 
     // Quadratic algorithm, but good enough for now.
     // TODO(gri) fix asymptotic performance
-    termlist rl = default!;
+    termlist rl = default;
     foreach (var (_, x) in xl) {
         foreach (var (_, y) in yl) {
             {
@@ -150,9 +150,9 @@ internal static bool includes(this termlist xl, ΔType t) {
 }
 
 // supersetOf reports whether y ⊆ xl.
-internal static bool supersetOf(this termlist xl, ж<Δterm> Ꮡy) {
+internal static bool supersetOf(this termlist xl, ж<Δterm> y) {
     foreach (var (_, x) in xl) {
-        if (Ꮡy.subsetOf(x)) {
+        if (y.subsetOf(x)) {
             return true;
         }
     }

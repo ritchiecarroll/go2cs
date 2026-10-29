@@ -14,7 +14,7 @@ partial class template_package {
 // common holds the information shared by related templates.
 partial struct common {
     internal map<@string, ж<Template>> tmpl; // Map from name to defined templates.
-    internal sync.RWMutex muTmpl;         // protects tmpl
+    internal sync.RWMutex muTmpl;            // protects tmpl
     internal option option;
     // We use two maps, one for parsing and one for execution.
     // This separation makes the API cleaner since it doesn't
@@ -71,9 +71,9 @@ public static ж<Template> New(this ref Template t, @string name) {
 internal static void init(this ref Template t) {
     if (t.common == nil) {
         var c = @new<common>();
-        c.Value.tmpl = new map<@string, ж<Template>>();
-        c.Value.parseFuncs = new FuncMap(0);
-        c.Value.execFuncs = new map<@string, reflectꓸValue>();
+        c.tmpl = new map<@string, ж<Template>>();
+        c.parseFuncs = new FuncMap(0);
+        c.execFuncs = new map<@string, reflectꓸValue>();
         t.common = c;
     }
 }
@@ -94,7 +94,7 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
         var nt = t.copy(nil);
         nt.init();
         if (t.common == nil) {
-            return (nt, default!);
+            return (nt, default);
         }
         nt.Value.option = t.option;
         Ꮡt.of(Template.ᏑmuTmpl).RLock();
@@ -105,25 +105,25 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
                 continue;
             }
             // The associated templates share nt's common structure.
-            var tmpl = v.copy((~nt).common);
+            var tmpl = v.copy(nt.common);
             nt.Value.tmpl[k] = tmpl;
         }
         Ꮡt.of(Template.ᏑmuFuncs).RLock();
         ᒐd2 = true;
         maps.Copy<FuncMap, FuncMap, @string, any>((~nt).parseFuncs, t.parseFuncs);
         maps.Copy<map<@string, reflectꓸValue>, map<@string, reflectꓸValue>, @string, reflectꓸValue>((~nt).execFuncs, t.execFuncs);
-        return (nt, default!);
+        return (nt, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd2) Ꮡt.of(Template.ᏑmuFuncs).RUnlock(); if (ᒐd1) Ꮡt.of(Template.ᏑmuTmpl).RUnlock(); ᒐ.Run(); }
 }
 
 // copy returns a shallow copy of t, with common set to the argument.
-internal static ж<Template> copy(this ref Template t, ж<common> Ꮡc) {
+internal static ж<Template> copy(this ref Template t, ж<common> c) {
     return Ꮡ(new Template(
         name: t.name,
         Tree: t.Tree,
-        common: Ꮡc,
+        common: c,
         leftDelim: t.leftDelim,
         rightDelim: t.rightDelim
     ));
@@ -133,7 +133,7 @@ internal static ж<Template> copy(this ref Template t, ж<common> Ꮡc) {
 // it the specified name. If the template has not been defined, this tree becomes
 // its definition. If it has been defined and already has that name, the existing
 // definition is replaced; otherwise a new template is created, defined, and returned.
-public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> Ꮡtree) {
+public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -147,12 +147,12 @@ public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string
             nt = t.New(name);
         }
         // Even if nt == t, we need to install it in the common.tmpl map.
-        if (t.associate(nt, Ꮡtree) || (~nt).Tree == nil) {
-            nt.Value.Tree = Ꮡtree;
+        if (t.associate(nt, tree) || nt.Tree == nil) {
+            nt.Tree = tree;
         }
-        return (nt, default!);
+        return (nt, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.of(Template.ᏑmuTmpl).Unlock(); ᒐ.Run(); }
 }
 
@@ -164,7 +164,7 @@ public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         if (t.common == nil) {
-            return default!;
+            return default;
         }
         // Return a slice so we don't expose the map.
         Ꮡt.of(Template.ᏑmuTmpl).RLock();
@@ -175,7 +175,7 @@ public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) {
         }
         return m;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.of(Template.ᏑmuTmpl).RUnlock(); ᒐ.Run(); }
 }
 
@@ -212,7 +212,7 @@ public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) {
         addFuncs(t.parseFuncs, funcMap);
         return Ꮡt;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.of(Template.ᏑmuFuncs).Unlock(); ᒐ.Run(); }
 }
 
@@ -225,13 +225,13 @@ public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         if (t.common == nil) {
-            return default!;
+            return default;
         }
         Ꮡt.of(Template.ᏑmuTmpl).RLock();
         ᒐd1 = true;
         return t.tmpl[name];
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.of(Template.ᏑmuTmpl).RUnlock(); ᒐ.Run(); }
 }
 
@@ -252,18 +252,18 @@ public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) 
     Ꮡt.of(Template.ᏑmuFuncs).RLock();
     var (trees, err) = parse.Parse(t.name, text, t.leftDelim, t.rightDelim, t.parseFuncs, builtins());
     Ꮡt.of(Template.ᏑmuFuncs).RUnlock();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     // Add the newly parsed trees, including the one for t, into our common structure.
     foreach (var (name, tree) in trees) {
         {
-            var (_, errΔ1) = Ꮡt.AddParseTree(name, tree); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var (_, errΔ1) = Ꮡt.AddParseTree(name, tree); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
     }
-    return (Ꮡt, default!);
+    return (Ꮡt, default);
 }
 
 // associate installs the new template into the group of templates associated
@@ -277,7 +277,7 @@ internal static bool associate(this ref Template t, ж<Template> Ꮡnew, ж<pars
         throw panic("internal error: associate not common");
     }
     {
-        var old = t.tmpl[@new.name]; if (old != nil && parse.IsEmptyTree(new parse.ListNodeжNode(tree.Root)) && (~old).Tree != nil) {
+        var old = t.tmpl[@new.name]; if (old != nil && parse.IsEmptyTree(new parse.ListNodeжNode(tree.Root)) && old.Tree != nil) {
             // If a template by that name exists,
             // don't replace it with an empty template.
             return false;

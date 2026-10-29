@@ -33,7 +33,7 @@ internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref ((Sta
 // returns v.
 //
 // The scalar multiplication is done in constant time.
-public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
+public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> x) {
     var basepointTableΔ1 = basepointTable();
 
     // Write x = sum(x_i * 16^i) so  x*B = sum( B*x_i*16^i )
@@ -47,11 +47,11 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
     //
     // We use a lookup table for each i to get x_i*16^(2*i)*B
     // and do four doublings to multiply by 16.
-    var digits = Ꮡx.signedRadix16();
+    var digits = x.signedRadix16();
 
-    var multiple = Ꮡ(new affineCached(nil));
-    var tmp1 = Ꮡ(new projP1xP1(nil));
-    var tmp2 = Ꮡ(new projP2(nil));
+    var multiple = Ꮡ(new affineCached());
+    var tmp1 = Ꮡ(new projP1xP1());
+    var tmp2 = Ꮡ(new projP2());
 
     // Accumulate the odd components first
     Ꮡv.Set(NewIdentityPoint());
@@ -62,15 +62,15 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
     }
 
     // Multiply by 16
-    tmp2.FromP3(Ꮡv); // tmp2 =    v in P2 coords
-    tmp1.Double(tmp2); // tmp1 =  2*v in P1xP1 coords
+    tmp2.FromP3(Ꮡv);      // tmp2 =    v in P2 coords
+    tmp1.Double(tmp2);    // tmp1 =  2*v in P1xP1 coords
     tmp2.FromP1xP1(tmp1); // tmp2 =  2*v in P2 coords
-    tmp1.Double(tmp2); // tmp1 =  4*v in P1xP1 coords
+    tmp1.Double(tmp2);    // tmp1 =  4*v in P1xP1 coords
     tmp2.FromP1xP1(tmp1); // tmp2 =  4*v in P2 coords
-    tmp1.Double(tmp2); // tmp1 =  8*v in P1xP1 coords
+    tmp1.Double(tmp2);    // tmp1 =  8*v in P1xP1 coords
     tmp2.FromP1xP1(tmp1); // tmp2 =  8*v in P2 coords
-    tmp1.Double(tmp2); // tmp1 = 16*v in P1xP1 coords
-    Ꮡv.fromP1xP1(tmp1); // now v = 16*(odd components)
+    tmp1.Double(tmp2);    // tmp1 = 16*v in P1xP1 coords
+    Ꮡv.fromP1xP1(tmp1);   // now v = 16*(odd components)
 
     // Accumulate the even components
     for (nint i = 0; i < 64; i += 2) {
@@ -85,11 +85,11 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
 // ScalarMult sets v = x * q, and returns v.
 //
 // The scalar multiplication is done in constant time.
-public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx, ж<Point> Ꮡq) {
-    checkInitialized(Ꮡq);
+public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) {
+    checkInitialized(q);
 
     projLookupTable table = new();
-    table.FromP3(Ꮡq);
+    table.FromP3(q);
 
     // Write x = sum(x_i * 16^i)
     // so  x*Q = sum( Q*x_i*16^i )
@@ -98,26 +98,26 @@ public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx, ж<Poin
     //
     // We use the lookup table to get the x_i*Q values
     // and do four doublings to compute 16*Q
-    var digits = Ꮡx.signedRadix16();
+    var digits = x.signedRadix16();
 
     // Unwrap first loop iteration to save computing 16*identity
-    var multiple = Ꮡ(new projCached(nil));
-    var tmp1 = Ꮡ(new projP1xP1(nil));
-    var tmp2 = Ꮡ(new projP2(nil));
+    var multiple = Ꮡ(new projCached());
+    var tmp1 = Ꮡ(new projP1xP1());
+    var tmp2 = Ꮡ(new projP2());
     table.SelectInto(multiple, digits[63]);
 
     Ꮡv.Set(NewIdentityPoint());
     tmp1.Add(Ꮡv, multiple); // tmp1 = x_63*Q in P1xP1 coords
     for (nint i = 62; i >= 0; i--) {
         tmp2.FromP1xP1(tmp1); // tmp2 =    (prev) in P2 coords
-        tmp1.Double(tmp2); // tmp1 =  2*(prev) in P1xP1 coords
+        tmp1.Double(tmp2);    // tmp1 =  2*(prev) in P1xP1 coords
         tmp2.FromP1xP1(tmp1); // tmp2 =  2*(prev) in P2 coords
-        tmp1.Double(tmp2); // tmp1 =  4*(prev) in P1xP1 coords
+        tmp1.Double(tmp2);    // tmp1 =  4*(prev) in P1xP1 coords
         tmp2.FromP1xP1(tmp1); // tmp2 =  4*(prev) in P2 coords
-        tmp1.Double(tmp2); // tmp1 =  8*(prev) in P1xP1 coords
+        tmp1.Double(tmp2);    // tmp1 =  8*(prev) in P1xP1 coords
         tmp2.FromP1xP1(tmp1); // tmp2 =  8*(prev) in P2 coords
-        tmp1.Double(tmp2); // tmp1 = 16*(prev) in P1xP1 coords
-        Ꮡv.fromP1xP1(tmp1); //    v = 16*(prev) in P3 coords
+        tmp1.Double(tmp2);    // tmp1 = 16*(prev) in P1xP1 coords
+        Ꮡv.fromP1xP1(tmp1);   //    v = 16*(prev) in P3 coords
         table.SelectInto(multiple, digits[i]);
         tmp1.Add(Ꮡv, multiple); // tmp1 = x_i*Q + 16*(prev) in P1xP1 coords
     }
@@ -145,8 +145,8 @@ internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref
 // generator, and returns v.
 //
 // Execution time depends on the inputs.
-public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡa, ж<Point> ᏑA, ж<Scalar> Ꮡb) {
-    checkInitialized(ᏑA);
+public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) {
+    checkInitialized(A);
 
     // Similarly to the single variable-base approach, we compute
     // digits and use them with a lookup table.  However, because
@@ -164,11 +164,11 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
 
     var basepointNafTableΔ1 = basepointNafTable();
     nafLookupTable5 aTable = new();
-    aTable.FromP3(ᏑA);
+    aTable.FromP3(A);
     // Because the basepoint is fixed, we can use a wider NAF
     // corresponding to a bigger table.
-    var aNaf = Ꮡa.nonAdjacentForm(5);
-    var bNaf = Ꮡb.nonAdjacentForm(8);
+    var aNaf = a.nonAdjacentForm(5);
+    var bNaf = b.nonAdjacentForm(8);
 
     // Find the first nonzero coefficient.
     nint i = 255;
@@ -178,10 +178,10 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
         }
     }
 
-    var multA = Ꮡ(new projCached(nil));
-    var multB = Ꮡ(new affineCached(nil));
-    var tmp1 = Ꮡ(new projP1xP1(nil));
-    var tmp2 = Ꮡ(new projP2(nil));
+    var multA = Ꮡ(new projCached());
+    var multB = Ꮡ(new affineCached());
+    var tmp1 = Ꮡ(new projP1xP1());
+    var tmp2 = Ꮡ(new projP2());
     tmp2.Zero();
 
     // Move from high to low bits, doubling the accumulator
@@ -191,23 +191,21 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
         tmp1.Double(tmp2);
 
         // Only update v if we have a nonzero coeff to add in.
-        if (aNaf[i] > 0){
+        if (aNaf[i] > 0) {
             Ꮡv.fromP1xP1(tmp1);
             aTable.SelectInto(multA, aNaf[i]);
             tmp1.Add(Ꮡv, multA);
-        } else 
-        if (aNaf[i] < 0) {
+        } else if (aNaf[i] < 0) {
             Ꮡv.fromP1xP1(tmp1);
             aTable.SelectInto(multA, (int8)(-aNaf[i]));
             tmp1.Sub(Ꮡv, multA);
         }
 
-        if (bNaf[i] > 0){
+        if (bNaf[i] > 0) {
             Ꮡv.fromP1xP1(tmp1);
             basepointNafTableΔ1.SelectInto(multB, bNaf[i]);
             tmp1.AddAffine(Ꮡv, multB);
-        } else 
-        if (bNaf[i] < 0) {
+        } else if (bNaf[i] < 0) {
             Ꮡv.fromP1xP1(tmp1);
             basepointNafTableΔ1.SelectInto(multB, (int8)(-bNaf[i]));
             tmp1.SubAffine(Ꮡv, multB);

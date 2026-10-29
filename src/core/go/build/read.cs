@@ -16,7 +16,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using global::go.go;
 using global::go.unicode;
 
@@ -32,7 +32,7 @@ partial struct importReader {
     internal tokenꓸPosition pos;
 }
 
-internal static slice<byte> bom = new byte[]{0xef, 0xbb, 0xbf}.slice();
+internal static slice<byte> bom = slice<byte>([0xef, 0xbb, 0xbf]);
 
 internal static ж<importReader> newImportReader(@string name, io.Reader r) {
     var b = bufio.NewReader(r);
@@ -41,7 +41,7 @@ internal static ж<importReader> newImportReader(@string name, io.Reader r) {
     // a compiler may ignore a UTF-8-encoded byte order mark (U+FEFF)
     // if it is the first Unicode code point in the source text.
     {
-        var (leadingBytes, err) = b.Peek(3); if (err == default! && bytes.Equal(leadingBytes, bom)) {
+        var (leadingBytes, err) = b.Peek(3); if (err == nil && bytes.Equal(leadingBytes, bom)) {
             b.Discard(3);
         }
     }
@@ -56,7 +56,7 @@ internal static ж<importReader> newImportReader(@string name, io.Reader r) {
 }
 
 internal static bool isIdent(byte c) {
-    return (rune)'A' <= c && c <= (rune)'Z' || (rune)'a' <= c && c <= (rune)'z' || (rune)'0' <= c && c <= (rune)'9' || c == (rune)'_' || c >= utf8.RuneSelf;
+    return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '_' || c >= utf8.RuneSelf;
 }
 
 internal static error errSyntax = errors.New("syntax error"u8);
@@ -64,7 +64,7 @@ internal static error errNUL = errors.New("unexpected NUL in input"u8);
 
 // syntaxError records a syntax error, but only if an I/O error has not already been recorded.
 internal static void syntaxError(this ref importReader r) {
-    if (r.err == default!) {
+    if (r.err == nil) {
         r.err = errSyntax;
     }
 }
@@ -73,17 +73,16 @@ internal static void syntaxError(this ref importReader r) {
 // If an error occurs, readByte records the error in r.err and returns 0.
 internal static byte readByte(this ref importReader r) {
     var (c, err) = r.b.ReadByte();
-    if (err == default!) {
+    if (err == nil) {
         r.buf = append(r.buf, c);
         if (c == 0) {
             err = errNUL;
         }
     }
-    if (err != default!) {
-        if (AreEqual(err, io.EOF)){
+    if (err != nil) {
+        if (AreEqual(err, io.EOF)) {
             r.eof = true;
-        } else 
-        if (r.err == default!) {
+        } else if (r.err == nil) {
             r.err = err;
         }
         c = 0;
@@ -93,18 +92,17 @@ internal static byte readByte(this ref importReader r) {
 
 // readRest reads the entire rest of the file into r.buf.
 internal static void readRest(this ref importReader r) {
-    while (ᐧ) {
+    for (;;) {
         if (len(r.buf) == cap(r.buf)) {
             // Grow the buffer
             r.buf = append(r.buf, (byte)0).slice(0, len(r.buf));
         }
         var (n, err) = r.b.Read(r.buf.slice(len(r.buf), cap(r.buf)));
         r.buf = r.buf.slice(0, len(r.buf) + n);
-        if (err != default!) {
-            if (AreEqual(err, io.EOF)){
+        if (err != nil) {
+            if (AreEqual(err, io.EOF)) {
                 r.eof = true;
-            } else 
-            if (r.err == default!) {
+            } else if (r.err == nil) {
                 r.err = err;
             }
             break;
@@ -115,7 +113,7 @@ internal static void readRest(this ref importReader r) {
 // peekByte returns the next byte from the input reader but does not advance beyond it.
 // If skipSpace is set, peekByte skips leading spaces and comments.
 internal static byte peekByte(this ref importReader r, bool skipSpace) {
-    if (r.err != default!) {
+    if (r.err != nil) {
         {
             r.nerr++; if (r.nerr > 10000) {
                 throw panic("go/build: import reader looping");
@@ -131,26 +129,25 @@ internal static byte peekByte(this ref importReader r, bool skipSpace) {
     if (c == 0) {
         c = r.readByte();
     }
-    while (r.err == default! && !r.eof) {
+    while (r.err == nil && !r.eof) {
         if (skipSpace) {
             // For the purposes of this reader, semicolons are never necessary to
             // understand the input and are treated as spaces.
             switch (c) {
-            case (rune)' ' or (rune)'\f' or (rune)'\t' or (rune)'\r' or (rune)'\n' or (rune)';': {
+            case (byte)' ' or (byte)'\f' or (byte)'\t' or (byte)'\r' or (byte)'\n' or (byte)';': {
                 c = r.readByte();
                 continue;
                 break;
             }
-            case (rune)'/': {
+            case (byte)'/': {
                 c = r.readByte();
-                if (c == (rune)'/'){
-                    while (c != (rune)'\n' && r.err == default! && !r.eof) {
+                if (c == '/') {
+                    while (c != '\n' && r.err == nil && !r.eof) {
                         c = r.readByte();
                     }
-                } else 
-                if (c == (rune)'*'){
-                    byte c1 = default!;
-                    while ((c != (rune)'*' || c1 != (rune)'/') && r.err == default!) {
+                } else if (c == '*') {
+                    byte c1 = default;
+                    while ((c != '*' || c1 != '/') && r.err == nil) {
                         if (r.eof) {
                             r.syntaxError();
                         }
@@ -209,9 +206,9 @@ internal static void readIdent(this ref importReader r) {
 // If an identifier is not present, readString records a syntax error.
 internal static void readString(this ref importReader r) {
     switch (r.nextByte(true)) {
-    case (rune)'`': {
-        while (r.err == default!) {
-            if (r.nextByte(false) == (rune)'`') {
+    case (byte)'`': {
+        while (r.err == nil) {
+            if (r.nextByte(false) == '`') {
                 break;
             }
             if (r.eof) {
@@ -220,16 +217,16 @@ internal static void readString(this ref importReader r) {
         }
         break;
     }
-    case (rune)'"': {
-        while (r.err == default!) {
+    case (byte)'"': {
+        while (r.err == nil) {
             var c = r.nextByte(false);
-            if (c == (rune)'"') {
+            if (c == '"') {
                 break;
             }
-            if (r.eof || c == (rune)'\n') {
+            if (r.eof || c == '\n') {
                 r.syntaxError();
             }
-            if (c == (rune)'\\') {
+            if (c == '\\') {
                 r.nextByte(false);
             }
         }
@@ -245,10 +242,9 @@ internal static void readString(this ref importReader r) {
 // from the input.
 internal static void readImport(this ref importReader r) {
     var c = r.peekByte(true);
-    if (c == (rune)'.'){
+    if (c == '.') {
         r.peek = 0;
-    } else 
-    if (isIdent(c)) {
+    } else if (isIdent(c)) {
         r.readIdent();
     }
     r.readString();
@@ -269,11 +265,11 @@ internal static void readImport(this ref importReader r) {
 internal static (slice<byte>, error) readComments(io.Reader f) {
     var r = newImportReader(""u8, f);
     r.peekByte(true);
-    if ((~r).err == default! && !(~r).eof) {
+    if (r.err == nil && !r.eof) {
         // Didn't reach EOF, so must have found a non-space byte. Remove it.
-        r.Value.buf = (~r).buf.slice(0, len((~r).buf) - 1);
+        r.buf = r.buf.slice(0, len(r.buf) - 1);
     }
-    return ((~r).buf, (~r).err);
+    return (r.buf, r.err);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -293,11 +289,11 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
 
     r.readKeyword(packageˢ);
     r.readIdent();
-    while (r.peekByte(true) == (rune)'i') {
+    while (r.peekByte(true) == 'i') {
         r.readKeyword(importˢ);
-        if (r.peekByte(true) == (rune)'('){
+        if (r.peekByte(true) == '(') {
             r.nextByte(false);
-            while (r.peekByte(true) != (rune)')' && (~r).err == default!) {
+            while (r.peekByte(true) != ')' && r.err == nil) {
                 r.readImport();
             }
             r.nextByte(false);
@@ -306,78 +302,78 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
         }
     }
 
-    info.header = r.Value.buf;
+    info.header = r.buf;
 
     // If we stopped successfully before EOF, we read a byte that told us we were done.
     // Return all but that last byte, which would cause a syntax error if we let it through.
-    if ((~r).err == default! && !(~r).eof) {
-        info.header = (~r).buf.slice(0, len((~r).buf) - 1);
+    if (r.err == nil && !r.eof) {
+        info.header = r.buf.slice(0, len(r.buf) - 1);
     }
 
     // If we stopped for a syntax error, consume the whole file so that
     // we are sure we don't change the errors that go/parser returns.
-    if (AreEqual((~r).err, errSyntax)) {
-        r.Value.err = default!;
+    if (AreEqual(r.err, errSyntax)) {
+        r.err = default;
         r.readRest();
-        info.header = r.Value.buf;
+        info.header = r.buf;
     }
-    if ((~r).err != default!) {
-        return (~r).err;
+    if (r.err != nil) {
+        return r.err;
     }
 
     if (info.fset == nil) {
-        return default!;
+        return default;
     }
 
     // Parse file header & record imports.
     (info.parsed, info.parseErr) = parser.ParseFile(info.fset, info.name, info.header, (parser.Mode)(parser.ImportsOnly | parser.ParseComments));
-    if (info.parseErr != default!) {
-        return default!;
+    if (info.parseErr != nil) {
+        return default;
     }
 
     var hasEmbed = false;
-    foreach (var (_, decl) in (~info.parsed).Decls) {
+    foreach (var (_, decl) in info.parsed.Decls) {
         var (d, ok) = decl._<ж<ast.GenDecl>>(ᐧ);
         if (!ok) {
             continue;
         }
-        foreach (var (_, dspec) in (~d).Specs) {
+        foreach (var (_, dspec) in d.Specs) {
             var (spec, okΔ1) = dspec._<ж<ast.ImportSpec>>(ᐧ);
             if (!okΔ1) {
                 continue;
             }
-            @string quoted = spec.Value.Path.Value.Value;
+            @string quoted = spec.Path.Value.Value;
             var (path, err) = strconv.Unquote(quoted);
-            if (err != default!) {
+            if (err != nil) {
                 return fmt.Errorf("parser returned invalid quoted string: <%s>"u8, quoted);
             }
             if (!isValidImport(path)) {
                 // The parser used to return a parse error for invalid import paths, but
                 // no longer does, so check for and create the error here instead.
                 info.parseErr = new scanner_ΔErrorᴠerror(new scannerꓸError(Pos: info.fset.Position(spec.Pos()), Msg: "invalid import path: "u8 + path));
-                info.imports = default!;
-                return default!;
+                info.imports = default;
+                return default;
             }
             if (path == "embed"u8) {
                 hasEmbed = true;
             }
 
-            var doc = spec.Value.Doc;
-            if (doc == nil && len((~d).Specs) == 1) {
-                doc = d.Value.Doc;
+            var doc = spec.Doc;
+            if (doc == nil && len(d.Specs) == 1) {
+                doc = d.Doc;
             }
             info.imports = append(info.imports, new fileImport(path, spec.Pos(), doc));
         }
     }
 
     // Extract directives.
-    foreach (var (_, group) in (~info.parsed).Comments) {
-        if (group.Pos() >= (~info.parsed).Package) {
+    foreach (var (_, group) in info.parsed.Comments) {
+        if (group.Pos() >= info.parsed.Package) {
             break;
         }
-        foreach (var (_, c) in (~group).List) {
-            if (strings.HasPrefix((~c).Text, "//go:"u8)) {
-                info.directives = append(info.directives, new Directive((~c).Text, info.fset.Position((~c).Slash)));
+        foreach (var (_, c) in group.List) {
+            if (strings.HasPrefix(c.Text, "//go:"u8)) {
+                info.directives = append(info.directives, new Directive(c.Text, info.fset.Position(c.Slash)));
             }
         }
     }
@@ -393,10 +389,10 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
     if (hasEmbed) {
         r.readRest();
         var fset = token.NewFileSet();
-        var @file = fset.AddFile((~r).pos.Filename, -1, len((~r).buf));
-        scanner.Scanner sc = default!;
-        sc.Init(@file, (~r).buf, default!, scanner.ScanComments);
-        while (ᐧ) {
+        var @file = fset.AddFile(r.pos.Filename, -1, len(r.buf));
+        scanner.Scanner sc = default;
+        sc.Init(@file, r.buf, default, scanner.ScanComments);
+        for (;;) {
             var (pos, tok, lit) = sc.Scan();
             if (tok == token.EOF) {
                 break;
@@ -405,14 +401,14 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
                 // Ignore badly-formed lines - the compiler will report them when it finds them,
                 // and we can pretend they are not there to help go list succeed with what it knows.
                 var (embs, err) = parseGoEmbed(fset, pos, lit);
-                if (err == default!) {
+                if (err == nil) {
                     info.embeds = appendꓸꓸꓸ(info.embeds, embs);
                 }
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -435,20 +431,20 @@ internal static bool isValidImport(@string s) {
 // parseGoEmbed parses a "//go:embed" to extract the glob patterns.
 // It accepts unquoted space-separated patterns as well as double-quoted and back-quoted Go strings.
 // This must match the behavior of cmd/compile/internal/noder.go.
-internal static (slice<fileEmbed>, error) parseGoEmbed(ж<token.FileSet> Ꮡfset, tokenꓸPos pos, @string comment) {
+internal static (slice<fileEmbed>, error) parseGoEmbed(ж<token.FileSet> fset, tokenꓸPos pos, @string comment) {
     var (dir, ok) = ast.ParseDirective(pos, comment);
     if (!ok || dir.Tool != "go"u8 || dir.Name != "embed"u8) {
-        return (default!, default!);
+        return (default, default);
     }
     var (args, err) = dir.ParseArgs();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    slice<fileEmbed> list = default!;
+    slice<fileEmbed> list = default;
     foreach (var (_, arg) in args) {
-        list = append(list, new fileEmbed(arg.Arg, Ꮡfset.Position(arg.Pos)));
+        list = append(list, new fileEmbed(arg.Arg, fset.Position(arg.Pos)));
     }
-    return (list, default!);
+    return (list, default);
 }
 
 } // end build_package

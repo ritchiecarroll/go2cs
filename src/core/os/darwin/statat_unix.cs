@@ -19,12 +19,12 @@ internal static (FileInfo, error) lstatatNolog(this ж<File> Ꮡf, @string name)
 
     ref var fs = ref heap(new fileStat(), out var Ꮡfs);
     {
-        var err = Ꮡf.of(File.Ꮡpfd).Fstatat(name, Ꮡfs.of(fileStat.Ꮡsys), unix.AT_SYMLINK_NOFOLLOW); if (err != default!) {
-            return (default!, f.wrapErr(fstatatˢ, err));
+        var err = Ꮡf.of(File.Ꮡpfd).Fstatat(name, Ꮡfs.of(fileStat.Ꮡsys), unix.AT_SYMLINK_NOFOLLOW); if (err != nil) {
+            return (default, f.wrapErr(fstatatˢ, err));
         }
     }
     fillFileStatFromSys(Ꮡfs, name);
-    return (new fileStatжFileInfo(Ꮡfs), default!);
+    return (new fileStatжFileInfo(Ꮡfs), default);
 }
 
 } // end os_package

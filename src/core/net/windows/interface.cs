@@ -26,30 +26,30 @@ internal static error errNoSuchMulticastInterface = errors.New("no such multicas
 // and index. It also represents network interface facility
 // information.
 partial struct Interface {
-    public nint Index;         // positive integer that starts at one, zero is never used
-    public nint MTU;         // maximum transmission unit
-    public @string Name;      // e.g., "en0", "lo0", "eth0.100"; may be the empty string
+    public nint Index;                // positive integer that starts at one, zero is never used
+    public nint MTU;                  // maximum transmission unit
+    public @string Name;              // e.g., "en0", "lo0", "eth0.100"; may be the empty string
     public HardwareAddr HardwareAddr; // IEEE MAC-48, EUI-48 and EUI-64 form
-    public Flags Flags;        // e.g., FlagUp, FlagLoopback, FlagMulticast
+    public Flags Flags;               // e.g., FlagUp, FlagLoopback, FlagMulticast
 }
 
 partial struct Flags /*num:nuint*/;
 
-public static Flags FlagUp => /* 1 << iota */ 1;                 // interface is administratively up
+public static Flags FlagUp => /* 1 << iota */ 1; // interface is administratively up
 public static Flags FlagBroadcast => 2;          // interface supports broadcast access capability
 public static Flags FlagLoopback => 4;           // interface is a loopback interface
 public static Flags FlagPointToPoint => 8;       // interface belongs to a point-to-point link
-public static Flags FlagMulticast => 16;          // interface supports multicast access capability
-public static Flags FlagRunning => 32;            // interface is in running state
+public static Flags FlagMulticast => 16;         // interface supports multicast access capability
+public static Flags FlagRunning => 32;           // interface is in running state
 
-internal static slice<@string> flagNames = new @string[]{
+internal static slice<@string> flagNames = slice<@string>([
     "up"u8,
     "broadcast"u8,
     "loopback"u8,
     "pointtopoint"u8,
     "multicast"u8,
     "running"u8
-}.slice();
+]);
 
 public static @string String(this Flags f) {
     @string s = ""u8;
@@ -71,11 +71,11 @@ public static @string String(this Flags f) {
 // interface.
 public static (slice<ΔAddr>, error) Addrs(this ж<Interface> Ꮡifi) {
     if (Ꮡifi == nil) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterface))));
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: errInvalidInterface))));
     }
     var (ifat, err) = interfaceAddrTable(Ꮡifi);
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: err)));
     }
     return (ifat, err);
 }
@@ -84,11 +84,11 @@ public static (slice<ΔAddr>, error) Addrs(this ж<Interface> Ꮡifi) {
 // for a specific interface.
 public static (slice<ΔAddr>, error) MulticastAddrs(this ж<Interface> Ꮡifi) {
     if (Ꮡifi == nil) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterface))));
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: errInvalidInterface))));
     }
     var (ifat, err) = interfaceMulticastAddrTable(Ꮡifi);
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: err)));
     }
     return (ifat, err);
 }
@@ -96,13 +96,13 @@ public static (slice<ΔAddr>, error) MulticastAddrs(this ж<Interface> Ꮡifi) {
 // Interfaces returns a list of the system's network interfaces.
 public static (slice<Interface>, error) Interfaces() {
     var (ift, err) = interfaceTable(0);
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err))));
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: err))));
     }
     if (len(ift) != 0) {
         ᏑzoneCache.update(ift, false);
     }
-    return (ift, default!);
+    return (ift, default);
 }
 
 // InterfaceAddrs returns a list of the system's unicast interface
@@ -112,8 +112,8 @@ public static (slice<Interface>, error) Interfaces() {
 // Interfaces and [Interface.Addrs] for more detail.
 public static (slice<ΔAddr>, error) InterfaceAddrs() {
     var (ifat, err) = interfaceAddrTable(nil);
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: err)));
     }
     return (ifat, err);
 }
@@ -125,15 +125,15 @@ public static (slice<ΔAddr>, error) InterfaceAddrs() {
 // [InterfaceByName].
 public static (ж<Interface>, error) InterfaceByIndex(nint index) {
     if (index <= 0) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterfaceIndex))));
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: errInvalidInterfaceIndex))));
     }
     var (ift, err) = interfaceTable(index);
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err))));
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: err))));
     }
     (var ifi, err) = interfaceByIndex(ift, index);
-    if (err != default!) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err)));
+    if (err != nil) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: err)));
     }
     return (ifi, err);
 }
@@ -144,20 +144,20 @@ internal static (ж<Interface>, error) interfaceByIndex(slice<Interface> ift, ni
         ifi = vᴛ1;
 
         if (index == ifi.Index) {
-            return (Ꮡifi, default!);
+            return (Ꮡifi, default);
         }
     }
-    return (default!, errNoSuchInterface);
+    return (default, errNoSuchInterface);
 }
 
 // InterfaceByName returns the interface specified by name.
 public static (ж<Interface>, error) InterfaceByName(@string name) {
     if (name == ""u8) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterfaceName))));
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: errInvalidInterfaceName))));
     }
     var (ift, err) = interfaceTable(0);
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err))));
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: err))));
     }
     if (len(ift) != 0) {
         ᏑzoneCache.update(ift, false);
@@ -167,10 +167,10 @@ public static (ж<Interface>, error) InterfaceByName(@string name) {
         ifi = vᴛ1;
 
         if (name == ifi.Name) {
-            return (Ꮡifi, default!);
+            return (Ꮡifi, default);
         }
     }
-    return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errNoSuchInterface))));
+    return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default, Addr: default, Err: errNoSuchInterface))));
 }
 
 // An ipv6ZoneCache represents a cache holding partial network
@@ -180,10 +180,10 @@ public static (ж<Interface>, error) InterfaceByName(@string name) {
 // Multiple names sharing the index are managed by first-come
 // first-served basis for consistency.
 partial struct ipv6ZoneCache {
-    /*embed*/ public sync_package.RWMutex RWMutex;                // guard the following
-    internal time.Time lastFetched;      // last time routing information was fetched
-    internal map<@string, nint> toIndex; // interface name to its index
-    internal map<nint, @string> toName; // interface index to its name
+    /*embed*/ public sync_package.RWMutex RWMutex; // guard the following
+    internal time.Time lastFetched;                // last time routing information was fetched
+    internal map<@string, nint> toIndex;           // interface name to its index
+    internal map<nint, @string> toName;            // interface index to its name
 }
 
 internal static readonly ж<ipv6ZoneCache> ᏑzoneCache = new StaticBox<ipv6ZoneCache>(new ipv6ZoneCache(
@@ -196,7 +196,7 @@ internal static ref ipv6ZoneCache zoneCache => ref ((StaticBox<ipv6ZoneCache>)�
 // updated more than 1 minute ago, or if force is set. It reports whether the
 // cache was updated.
 internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) {
-    bool updated = default!;
+    bool updated = default;
     GoFrame ᒐ = default;
     try {
         ref var zc = ref Ꮡzc.DerefOrNull();
@@ -209,9 +209,9 @@ internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Inte
         }
         zc.lastFetched = now;
         if (len(ift) == 0) {
-            error err = default!;
+            error err = default;
             {
-                (ift, err) = interfaceTable(0); if (err != default!) {
+                (ift, err) = interfaceTable(0); if (err != nil) {
                     updated = false; goto ᒐdone;
                 }
             }
@@ -239,12 +239,12 @@ internal static @string name(this ref ipv6ZoneCache zc, nint index) {
     if (index == 0) {
         return ""u8;
     }
-    var updated = ᏑzoneCache.update(default!, false);
+    var updated = ᏑzoneCache.update(default, false);
     ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RLock();
     var (name, ok) = zoneCache.toName[index, ꟷ];
     ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     if (!ok && !updated) {
-        ᏑzoneCache.update(default!, true);
+        ᏑzoneCache.update(default, true);
         ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RLock();
         (name, ok) = zoneCache.toName[index, ꟷ];
         ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
@@ -259,12 +259,12 @@ internal static nint index(this ref ipv6ZoneCache zc, @string name) {
     if (name == ""u8) {
         return 0;
     }
-    var updated = ᏑzoneCache.update(default!, false);
+    var updated = ᏑzoneCache.update(default, false);
     ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RLock();
     var (index, ok) = zoneCache.toIndex[name, ꟷ];
     ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     if (!ok && !updated) {
-        ᏑzoneCache.update(default!, true);
+        ᏑzoneCache.update(default, true);
         ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RLock();
         (index, ok) = zoneCache.toIndex[name, ꟷ];
         ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();

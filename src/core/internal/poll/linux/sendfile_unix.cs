@@ -25,17 +25,17 @@ partial class poll_package {
 // If handled is false, sendfile was unable to perform the copy,
 // has not modified the source or destination,
 // and the caller should perform the copy using a fallback implementation.
-public static (int64 n, error err, bool handled) SendFile(ж<FD> ᏑdstFD, uintptr src, int64 size) {
-    int64 n = default!;
-    error err = default!;
-    bool handled = default!;
+public static (int64 n, error err, bool handled) SendFile(ж<FD> dstFD, uintptr src, int64 size) {
+    int64 n = default;
+    error err = default;
+    bool handled = default;
 
     {
         @string goos = Δruntime.GOOS; if (goos == "linux"u8 || goos == "android"u8) {
             // Linux's sendfile doesn't require any setup:
             // It sends from the current position of the source file and
             // updates the position of the source after sending.
-            return sendFile(ᏑdstFD, (nint)src, nil, size);
+            return sendFile(dstFD, (nint)src, nil, size);
         }
     }
 
@@ -43,13 +43,12 @@ public static (int64 n, error err, bool handled) SendFile(ж<FD> ᏑdstFD, uintp
     // so we need to look up the position, pass it explicitly, and adjust it after
     // sendfile returns.
     (var start, err) = ignoringEINTR2((int64, error) () => Δsyscall.Seek((nint)src, 0, io.SeekCurrent));
-    if (err != default!) {
+    if (err != nil) {
         return (0, err, false);
     }
 
-    ref var pos = ref heap<int64>(out var Ꮡpos);
-    pos = start;
-    (n, err, handled) = sendFile(ᏑdstFD, (nint)src, Ꮡpos, size);
+    ref var pos = ref heap<int64>(start, out var Ꮡpos);
+    (n, err, handled) = sendFile(dstFD, (nint)src, Ꮡpos, size);
     if (n > 0) {
         ignoringEINTR2((int64, error) () => Δsyscall.Seek((nint)src, start + n, io.SeekStart));
     }
@@ -57,10 +56,10 @@ public static (int64 n, error err, bool handled) SendFile(ж<FD> ᏑdstFD, uintp
 }
 
 // sendFile wraps the sendfile system call.
-internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstFD, nint src, ж<int64> Ꮡoffset, int64 size) {
-    int64 written = default!;
-    error err = default!;
-    bool handled = default!;
+internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstFD, nint src, ж<int64> offset, int64 size) {
+    int64 written = default;
+    error err = default;
+    bool handled = default;
     GoFrame ᒐ = default;
     try {
         ref var dstFD = ref ᏑdstFD.DerefOrNull();
@@ -69,20 +68,20 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
             TestHookDidSendFile(ᏑdstFD, (uintptr)src, written, err, handled);
         }, ref ᒐ);
         {
-            var errΔ1 = ᏑdstFD.writeLock(); if (errΔ1 != default!) {
+            var errΔ1 = ᏑdstFD.writeLock(); if (errΔ1 != nil) {
                 (written, err, handled) = (0, errΔ1, false); goto ᒐdone;
             }
         }
         defer(ᏑdstFD.writeUnlock, ref ᒐ);
 
         {
-            var errΔ2 = dstFD.pd.prepareWrite(dstFD.isFile); if (errΔ2 != default!) {
+            var errΔ2 = dstFD.pd.prepareWrite(dstFD.isFile); if (errΔ2 != nil) {
                 (written, err, handled) = (0, errΔ2, false); goto ᒐdone;
             }
         }
 
         nint dst = dstFD.Sysfd;
-        while (ᐧ) {
+        for (;;) {
             // Some platforms support passing 0 to read to the end of the source,
             // but all platforms support just writing a large value.
             //
@@ -91,13 +90,13 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
             if (size > 0) {
                 chunk = (nint)min(size - written, (int64)chunk);
             }
-            nint n = default!;
-            (n, err) = sendFileChunk(dst, src, Ꮡoffset, chunk, written);
+            nint n = default;
+            (n, err) = sendFileChunk(dst, src, offset, chunk, written);
             if (n > 0) {
                 written += (int64)n;
             }
-            var exprᴛ1 = err;
-            if (AreEqual(exprᴛ1, default!)) {
+            switch (err) {
+            case var ᴛ when AreEqual(ᴛ, default): {
                 // We're done if sendfile copied no bytes
                 // (we're at the end of the source)
                 // or if we have a size limit and have reached it.
@@ -105,27 +104,30 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
                 // If sendfile copied some bytes and we don't have a size limit,
                 // try again to see if there is more data to copy.
                 if (n == 0 || (size > 0 && written >= size)) {
-                    (written, err, handled) = (written, default!, true); goto ᒐdone;
+                    (written, err, handled) = (written, default, true); goto ᒐdone;
                 }
+                break;
             }
-            else if (AreEqual(exprᴛ1, Δsyscall.EAGAIN)) {
+            case var ᴛ when AreEqual(ᴛ, Δsyscall.EAGAIN): {
                 // *BSD and Darwin can return EAGAIN with n > 0,
                 // so check to see if the write has completed.
                 // So far as we know all other platforms only
                 // return EAGAIN when n == 0, but checking is harmless.
                 if (size > 0 && written >= size) {
-                    (written, err, handled) = (written, default!, true); goto ᒐdone;
+                    (written, err, handled) = (written, default, true); goto ᒐdone;
                 }
                 {
-                    err = dstFD.pd.waitWrite(dstFD.isFile); if (err != default!) {
+                    err = dstFD.pd.waitWrite(dstFD.isFile); if (err != nil) {
                         (written, err, handled) = (written, err, true); goto ᒐdone;
                     }
                 }
+                break;
             }
-            else if (AreEqual(exprᴛ1, Δsyscall.EINTR)) {
+            case var ᴛ when AreEqual(ᴛ, Δsyscall.EINTR): {
                 // Retry.
+                break;
             }
-            else if (AreEqual(exprᴛ1, Δsyscall.ENOSYS) || AreEqual(exprᴛ1, Δsyscall.EOPNOTSUPP) || AreEqual(exprᴛ1, Δsyscall.EINVAL)) {
+            case var ᴛ when AreEqual(ᴛ, Δsyscall.ENOSYS) || AreEqual(ᴛ, Δsyscall.EOPNOTSUPP) || AreEqual(ᴛ, Δsyscall.EINVAL): {
                 // ENOSYS indicates no kernel support for sendfile.
                 // EINVAL indicates a FD type that does not support sendfile.
                 //
@@ -133,7 +135,7 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
                 // to a NFS file (issue #40731); check for it here just in case.
                 (written, err, handled) = (written, err, written > 0); goto ᒐdone;
             }
-            else { /* default: */
+            default: {
                 // We want to handle ENOTSUP like EOPNOTSUPP.
                 // It's a pain to put it as a switch case
                 // because on Linux systems ENOTSUP == EOPNOTSUPP,
@@ -144,7 +146,7 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
 
                 // Not a retryable error.
                 (written, err, handled) = (written, err, true); goto ᒐdone;
-            }
+            }}
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -153,16 +155,18 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
 }
 
 internal static (nint n, error err) sendFileChunk(nint dst, nint src, ж<int64> Ꮡoffset, nint size, int64 written) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var offset = ref Ꮡoffset.DerefOrNull();
 
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "linux"u8 || exprᴛ1 == "android"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "linux"u8 || exprᴛ1 == "android"u8: {
         // The offset is always nil on Linux.
         (n, err) = Δsyscall.Sendfile(dst, src, Ꮡoffset, size);
+        break;
     }
-    else if (exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8) {
+    case {} when exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8: {
         // Trust the offset, not the return value from sendfile.
         var start = offset;
         (n, err) = Δsyscall.Sendfile(dst, src, Ꮡoffset, size);
@@ -180,10 +184,11 @@ internal static (nint n, error err) sendFileChunk(nint dst, nint src, ж<int64> 
         // To handle these cases we ignore EINVAL if any call to sendfile was
         // able to send data.
         if (AreEqual(err, Δsyscall.EINVAL) && (n > 0 || written > 0)) {
-            err = default!;
+            err = default;
         }
+        break;
     }
-    else { /* default: */
+    default: {
         var start = offset;
         (n, err) = Δsyscall.Sendfile(dst, src, Ꮡoffset, size);
         if (n > 0) {
@@ -193,7 +198,8 @@ internal static (nint n, error err) sendFileChunk(nint dst, nint src, ж<int64> 
             // Trust the return value from sendfile, not the offset.
             offset = start + (int64)n;
         }
-    }
+        break;
+    }}
     return (n, err);
 }
 

@@ -16,22 +16,23 @@ using path;
 partial class testenv_package {
 
 internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool ok, @string reason) () => {
-    bool ok = default!;
-    @string reason = default!;
+    bool ok = default;
+    @string reason = default;
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "plan9"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "plan9"u8: {
             (ok, reason) = (false, ""); goto ᒐdone;
         }
-        if (exprᴛ1 == "android"u8 || exprᴛ1 == "wasip1"u8) {
+        case {} when exprᴛ1 == "android"u8 || exprᴛ1 == "wasip1"u8: {
             // For wasip1, some runtimes forbid absolute symlinks,
             // or symlinks that escape the current working directory.
             // Perform a simple test to see whether the runtime
             // supports symlinks or not. If we get a permission
             // error, the runtime does not support symlinks.
             var (dir, err) = os.MkdirTemp(""u8, ""u8);
-            if (err != default!) {
+            if (err != nil) {
                 (ok, reason) = (false, ""); goto ᒐdone;
             }
             defer(() => {
@@ -39,19 +40,20 @@ internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool ok, @st
             }, ref ᒐ);
             @string fpath = filepath.Join(dir, "testfile.txt");
             {
-                var errΔ1 = os.WriteFile(fpath, default!, 420); if (errΔ1 != default!) {
+                var errΔ1 = os.WriteFile(fpath, default, 420); if (errΔ1 != nil) {
                     (ok, reason) = (false, ""); goto ᒐdone;
                 }
             }
             {
-                var errΔ2 = os.Symlink(fpath, filepath.Join(dir, "testlink")); if (errΔ2 != default!) {
+                var errΔ2 = os.Symlink(fpath, filepath.Join(dir, "testlink")); if (errΔ2 != nil) {
                     if (SyscallIsNotSupported(errΔ2)) {
                         (ok, reason) = (false, fmt.Sprintf("symlinks unsupported: %s"u8, errΔ2.Error())); goto ᒐdone;
                     }
                     (ok, reason) = (false, ""); goto ᒐdone;
                 }
             }
-        }
+            break;
+        }}
 
         (ok, reason) = (true, ""); goto ᒐdone;
     }

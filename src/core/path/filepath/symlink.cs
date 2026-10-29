@@ -42,27 +42,25 @@ internal static (@string, error) walkSymlinks(@string path) {
         var isWindowsDot = runtime.GOOS == "windows"u8 && path.slice(filepathlite.VolumeNameLen(path)) == ".";
 
         // The next path component is in path[start:end].
-        if (end == start){
+        if (end == start) {
             // No more path components.
             break;
-        } else 
-        if (path.slice(start, end) == "." && !isWindowsDot){
+        } else if (path.slice(start, end) == "." && !isWindowsDot) {
             // Ignore path component ".".
             continue;
-        } else 
-        if (path.slice(start, end) == "..") {
+        } else if (path.slice(start, end) == "..") {
             // Back up to previous component if possible.
             // Note that volLen includes any leading slash.
 
             // Set r to the index of the last slash in dest,
             // after the volume.
-            nint r = default!;
+            nint r = default;
             for (r = len(dest) - 1; r >= volLen; r--) {
                 if (os.IsPathSeparator(dest[r])) {
                     break;
                 }
             }
-            if (r < volLen || dest.slice(r + 1) == ".."){
+            if (r < volLen || dest.slice(r + 1) == "..") {
                 // Either path has no slashes
                 // (it's empty or just "C:")
                 // or it ends in a ".." we had to keep.
@@ -89,7 +87,7 @@ internal static (@string, error) walkSymlinks(@string path) {
         // Resolve symlink.
 
         var (fi, err) = os.Lstat(dest);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
 
@@ -108,7 +106,7 @@ internal static (@string, error) walkSymlinks(@string path) {
         }
 
         (var link, err) = os.Readlink(dest);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
 
@@ -121,7 +119,7 @@ internal static (@string, error) walkSymlinks(@string path) {
         path = link + path.slice(end);
 
         nint v = filepathlite.VolumeNameLen(link);
-        if (v > 0){
+        if (v > 0) {
             // Symlink to drive name is an absolute path.
             if (v < len(link) && os.IsPathSeparator(link[v])) {
                 v++;
@@ -129,8 +127,7 @@ internal static (@string, error) walkSymlinks(@string path) {
             vol = link.slice(0, v);
             dest = vol;
             end = len(vol);
-        } else 
-        if (len(link) > 0 && os.IsPathSeparator(link[0])){
+        } else if (len(link) > 0 && os.IsPathSeparator(link[0])) {
             // Symlink to absolute path.
             dest = link[..1];
             end = 1;
@@ -139,13 +136,13 @@ internal static (@string, error) walkSymlinks(@string path) {
         } else {
             // Symlink to relative path; replace last
             // path component in dest.
-            nint r = default!;
+            nint r = default;
             for (r = len(dest) - 1; r >= volLen; r--) {
                 if (os.IsPathSeparator(dest[r])) {
                     break;
                 }
             }
-            if (r < volLen){
+            if (r < volLen) {
                 dest = vol;
             } else {
                 dest = dest.slice(0, r);
@@ -153,7 +150,7 @@ internal static (@string, error) walkSymlinks(@string path) {
             end = 0;
         }
     }
-    return (Clean(dest), default!);
+    return (Clean(dest), default);
 }
 
 } // end filepath_package

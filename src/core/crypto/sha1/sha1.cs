@@ -61,7 +61,7 @@ internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte>
     b = appendꓸꓸꓸ(b, d.x.slice(0, d.nx));
     b = appendꓸꓸꓸ(b, makeꓸꓸꓸ<byte>(len(d.x) - d.nx));
     b = byteorder.BEAppendUint64(b, d.len);
-    return (b, default!);
+    return (b, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -84,7 +84,7 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     b = b.slice(copy(d.x[..], b));
     (b, d.len) = consumeUint64(b);
     d.nx = (nint)(d.len % (uint64)chunk);
-    return default!;
+    return default;
 }
 
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
@@ -96,9 +96,8 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
 }
 
 internal static (hash.Cloner, error) Clone(this ref digest d) {
-    ref var r = ref heap<digest>(out var Ꮡr);
-    r = d.ΔClone();
-    return (new digestжCloner(Ꮡr), default!);
+    ref var r = ref heap<digest>(d.ΔClone(), out var Ꮡr);
+    return (new digestжCloner(Ꮡr), default);
 }
 
 internal static void Reset(this ref digest d) {
@@ -136,8 +135,8 @@ internal static nint BlockSize(this ref digest d) {
 internal static readonly @string cryptoSha1UseOfSha1IsNotˢ = "crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode"u8;
 
 internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
-    nint nn = default!;
-    error err = default!;
+    nint nn = default;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
@@ -169,8 +168,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     boring.Unreachable();
     // Make a copy of d so that caller can keep writing and summing.
-    ref var d0 = ref heap<digest>(out var Ꮡd0);
-    d0 = d.ΔClone();
+    ref var d0 = ref heap<digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.checkSum();
     return appendꓸꓸꓸ(@in, hash[..]);
 }
@@ -184,17 +182,17 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
 
     var len = d.len;
     // Padding.  Add a 1 bit and 0 bits until 56 bytes mod 64.
-    array<byte> tmp = new(72); /* 64 + 8 */                   // padding + length buffer
+    array<byte> tmp = new(72); /* 64 + 8 */ // padding + length buffer
     tmp[0] = 0x80;
-    uint64 t = default!;
-    if (len % 64 < 56){
+    uint64 t = default;
+    if (len % 64 < 56) {
         t = 56 - len % 64;
     } else {
         t = 64 + 56 - len % 64;
     }
 
     // Length in bits.
-    len <<= (int)(3);
+    len <<= 3;
     var padlen = tmp.slice(0, (nint)(t + 8));
     byteorder.BEPutUint64(padlen.slice((nint)(t)), len);
     Ꮡd.Write(padlen);
@@ -216,8 +214,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
 
 // ConstantTimeSum computes the same result of [Sum] but in constant time
 internal static slice<byte> ConstantTimeSum(this ref digest d, slice<byte> @in) {
-    ref var d0 = ref heap<digest>(out var Ꮡd0);
-    d0 = d.ΔClone();
+    ref var d0 = ref heap<digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.constSum();
     return appendꓸꓸꓸ(@in, hash[..]);
 }
@@ -236,7 +233,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
     }
 
     var nx = (byte)d.nx;
-    var t = (byte)(nx - 56); // if nx < 56 then the MSB of t is one
+    var t = (byte)(nx - 56);           // if nx < 56 then the MSB of t is one
     var mask1b = (byte)((int8)t >> 7); // mask1b is 0xFF iff one block is enough
 
     var separator = (byte)0x80; // gets reset to 0x00 once used
@@ -268,7 +265,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
 
     for (var i = (byte)0; i < chunk; i++) {
         // second block, it's always past the end of data, might start with 0x80
-        if (i < 56){
+        if (i < 56) {
             d.x[i] = separator;
             separator = 0;
         } else {

@@ -40,7 +40,7 @@ using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
@@ -52,9 +52,9 @@ partial class types_package {
 // behavior if ignored.
 partial struct ΔError {
     public ж<token.FileSet> Fset; // file set for interpretation of Pos
-    public tokenꓸPos Pos;      // error position
-    public @string Msg;        // error message
-    public bool Soft;           // if set, error is "soft"
+    public tokenꓸPos Pos;         // error position
+    public @string Msg;           // error message
+    public bool Soft;             // if set, error is "soft"
     // go116code is a future API, unexported as the set of error codes is large
     // and likely to change significantly during experimentation. Tools wishing
     // to preview this feature may read go116code using reflection (see
@@ -106,6 +106,12 @@ partial struct ImportMode /*num:nint*/;
 partial interface ImporterFrom :
     Importer
 {
+    // Importer is present for backward-compatibility. Calling
+    // Import(path) is the same as calling ImportFrom(path, "", 0);
+    // i.e., locally vendored packages may not be found.
+    // The types package does not call Import if an ImporterFrom
+    // is present.
+    // Importer is inherited
     // ImportFrom returns the imported package for the given import
     // path when imported by a package file located in dir.
     // If the import failed, besides returning an error, ImportFrom
@@ -321,7 +327,7 @@ partial struct ΔInfo {
 }
 
 internal static bool recordTypes(this ref ΔInfo info) {
-    return info.Types != default!;
+    return info.Types != nil;
 }
 
 // TypeOf returns the type of expression e, or nil if not found.
@@ -335,13 +341,13 @@ public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
     {
         var (id, _) = e._<ж<ast.Ident>>(ᐧ); if (id != nil) {
             {
-                var obj = info.ObjectOf(id); if (obj != default!) {
+                var obj = info.ObjectOf(id); if (obj != nil) {
                     return obj.Type();
                 }
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // ObjectOf returns the object denoted by the specified id,
@@ -351,13 +357,13 @@ public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
 // it defines, not the type (*[TypeName]) it uses.
 //
 // Precondition: the Uses and Defs maps are populated.
-public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> Ꮡid) {
+public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> id) {
     {
-        var obj = info.Defs[Ꮡid]; if (obj != default!) {
+        var obj = info.Defs[id]; if (obj != nil) {
             return obj;
         }
     }
-    return info.Uses[Ꮡid];
+    return info.Uses[id];
 }
 
 // PkgNameOf returns the local package name defined by the import,
@@ -369,8 +375,8 @@ public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> Ꮡid) {
 public static ж<PkgName> PkgNameOf(this ref ΔInfo info, ж<ast.ImportSpec> Ꮡimp) {
     ref var imp = ref Ꮡimp.DerefOrNull();
 
-    Object obj = default!;
-    if (imp.Name != nil){
+    Object obj = default;
+    if (imp.Name != nil) {
         obj = info.Defs[imp.Name];
     } else {
         obj = info.Implicits[new ast.ImportSpecжNode(Ꮡimp)];
@@ -408,10 +414,10 @@ public static bool IsBuiltin(this TypeAndValue tv) {
 // Builtins are not considered values. Constant values have a non-
 // nil Value.
 public static bool IsValue(this TypeAndValue tv) {
-    var exprᴛ1 = tv.mode;
-    if (exprᴛ1 == constant_ || exprᴛ1 == variable || exprᴛ1 == mapindex || exprᴛ1 == value || exprᴛ1 == commaok || exprᴛ1 == commaerr) {
+    switch (tv.mode) {
+    case var ᴛ when ᴛ == constant_ || ᴛ == variable || ᴛ == mapindex || ᴛ == value || ᴛ == commaok || ᴛ == commaerr: {
         return true;
-    }
+    }}
     return false;
 }
 
@@ -480,9 +486,9 @@ public static @string String(this ref Initializer init) {
 // The package is specified by a list of *ast.Files and corresponding
 // file set, and the package path the package is identified with.
 // The clean path must not be empty or dot (".").
-public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, ж<token.FileSet> Ꮡfset, slice<ж<ast.File>> files, ж<ΔInfo> Ꮡinfo) {
+public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, ж<token.FileSet> fset, slice<ж<ast.File>> files, ж<ΔInfo> info) {
     var pkg = NewPackage(path, ""u8);
-    return (pkg, NewChecker(Ꮡconf, Ꮡfset, pkg, Ꮡinfo).Files(files));
+    return (pkg, NewChecker(Ꮡconf, fset, pkg, info).Files(files));
 }
 
 } // end types_package

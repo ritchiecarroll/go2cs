@@ -15,12 +15,12 @@ partial struct gcmPlatformData {
 internal static void initGCM(ref GCM g) {
 }
 
-internal static void seal(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
-    sealGeneric(@out, Ꮡg, nonce, plaintext, data);
+internal static void seal(slice<byte> @out, ж<GCM> g, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+    sealGeneric(@out, g, nonce, plaintext, data);
 }
 
-internal static error open(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
-    return openGeneric(@out, Ꮡg, nonce, ciphertext, data);
+internal static error open(slice<byte> @out, ж<GCM> g, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
+    return openGeneric(@out, g, nonce, ciphertext, data);
 }
 
 } // end gcm_package

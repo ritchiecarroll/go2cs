@@ -74,9 +74,9 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
         CMode: mode,
         CGranularity: granularity
     );
-    error err = default!;
+    error err = default;
     {
-        err = binary.Write(new bufio_WriterжWriter(m.w), binary.LittleEndian, mh); if (err != default!) {
+        err = binary.Write(new bufio_WriterжWriter(m.w), binary.LittleEndian, mh); if (err != nil) {
             return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
         }
     }
@@ -92,7 +92,7 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
     foreach (var (_, blob) in blobs) {
         binary.LittleEndian.PutUint64(buf, off);
         {
-            (_, err) = m.w.Write(buf); if (err != default!) {
+            (_, err) = m.w.Write(buf); if (err != nil) {
                 return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
             }
         }
@@ -106,7 +106,7 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
         var bl = (uint64)len(blob);
         binary.LittleEndian.PutUint64(buf, bl);
         {
-            (_, err) = m.w.Write(buf); if (err != default!) {
+            (_, err) = m.w.Write(buf); if (err != nil) {
                 return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
             }
         }
@@ -118,7 +118,7 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
 
     // Emit string table
     {
-        err = Ꮡm.of(CoverageMetaFileWriter.Ꮡstab).Write(new bufio_WriterжWriter(m.w)); if (err != default!) {
+        err = Ꮡm.of(CoverageMetaFileWriter.Ꮡstab).Write(new bufio_WriterжWriter(m.w)); if (err != nil) {
             return err;
         }
     }
@@ -128,10 +128,10 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
         if (m.debug) {
             var h = fnv.New128a();
             h.Write(blob);
-            fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= writing blob %d len %d at off=%d hash %s\n"u8, k, len(blob), off2, fmt.Sprintf("%x"u8, h.Sum(default!)));
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= writing blob %d len %d at off=%d hash %s\n"u8, k, len(blob), off2, fmt.Sprintf("%x"u8, h.Sum(default)));
         }
         {
-            (_, err) = m.w.Write(blob); if (err != default!) {
+            (_, err) = m.w.Write(blob); if (err != nil) {
                 return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
             }
         }
@@ -144,11 +144,11 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
 
     // Flush writer, and we're done.
     {
-        err = m.w.Flush(); if (err != default!) {
+        err = m.w.Flush(); if (err != nil) {
             return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
         }
     }
-    return default!;
+    return default;
 }
 
 } // end encodemeta_package

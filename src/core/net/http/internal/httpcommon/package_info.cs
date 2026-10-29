@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using textprotoꓸError = go.net.textproto_package.ΔError;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,6 +47,11 @@ using static go.net.http.@internal.httpcommon_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(go.net.http.httptrace_package.ClientTrace))]
+[assembly: go.GoFieldAccess(typeof(go.net.url_package.URL))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -57,7 +60,7 @@ using static go.net.http.@internal.httpcommon_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/internal/httpcommon/httpcommon.go", "httpcommon.cs", "ABc44oKUgoKmqJKClKqigoKmqqKClAAHEoKmggA6doKCgoKCvKKCgIKkqJKCgIKkqJKCgqgAN1LitoCCtoKmgoKUgoKUgriCgoCCpIKSgqiSgoKCgoKCgpQACBKAgqSAgraCgqb8goKClIKCgpSClIKmgqKmkgAEEpLKgoKUgoKkuKKCgoKUgpSClJSCppKUpoKmgpSClIIABxCCgoKCpoK4ppKCpqaUgriCguq0AAwglAAIFPKAgqSAgqSAgqSmooKigpSUlIKClAACIAANAqaCgoKUgqa4AAIQ0oKUgriUpAAfOIKCgqaAgriSgqKC2oKUuMqCyoKCgoKUgoKCuKY=", "283-376:1;384-387:2;397-410:3")]
+[assembly: go.GoPositionMap("net/http/internal/httpcommon/httpcommon.go", "httpcommon.cs", "ABc44oKUgoKmqJKClKqigoKmqqKClAAHEoKmggA6doKCgoKCvKKCgIKkqJKCgIKkqJKCgqgAN1LipoCCtoKmgoKUgoKUgriCgoCCpIKCgqiSgoKCgoKCgpQACBKAgqSAgraCgqb8goKClIKCgpSClIKmgqKmggAEEoLKgoKUgoKUuKKCgoKUgpSClJSCpoKUpoKmgpSClIIABxCCgoKCpoK4ppKCpqaUgriCguq0AAwglAAIFPKAgqSAgqSAgqSmooKigqSUlIKClAACIAANAqaCgoKUgqa4AAIQ0oKUgrikpAAfOIKCgqaAgriSgqKC+oKUyMqCyoKCgoKUgoKCuKY=", "283-376:1;384-387:2;397-410:3")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http.@internal;

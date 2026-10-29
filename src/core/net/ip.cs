@@ -42,7 +42,7 @@ partial struct IPMask /*[]byte*/;
 
 // An IPNet represents an IP network.
 partial struct IPNet {
-    public IP IP;     // network number
+    public IP IP;       // network number
     public IPMask Mask; // network mask
 }
 
@@ -58,7 +58,7 @@ public static IP IPv4(byte a, byte b, byte c, byte d) {
     return p;
 }
 
-internal static slice<byte> v4InV6Prefix = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff}.slice();
+internal static slice<byte> v4InV6Prefix = slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff]);
 
 // IPv4Mask returns the IP mask (in 4-byte form) of the
 // IPv4 mask a.b.c.d.
@@ -76,10 +76,10 @@ public static IPMask IPv4Mask(byte a, byte b, byte c, byte d) {
 // For a mask of this form, CIDRMask is the inverse of [IPMask.Size].
 public static IPMask CIDRMask(nint ones, nint bits) {
     if (bits != (nint)(8 * IPv4len) && bits != (nint)(8 * IPv6len)) {
-        return default!;
+        return default;
     }
     if (ones < 0 || ones > bits) {
-        return default!;
+        return default;
     }
     nint l = bits / 8;
     var m = new IPMask(l);
@@ -98,13 +98,13 @@ public static IPMask CIDRMask(nint ones, nint bits) {
 
 // Well-known IPv4 addresses
 public static readonly ж<IP> ᏑIPv4bcast = new StaticBox<IP>(IPv4(255, 255, 255, 255));
-public static ref IP IPv4bcast => ref ((StaticBox<IP>)ᏑIPv4bcast).ValueSlot; // limited broadcast
+public static ref IP IPv4bcast => ref ((StaticBox<IP>)ᏑIPv4bcast).ValueSlot;         // limited broadcast
 public static readonly ж<IP> ᏑIPv4allsys = new StaticBox<IP>(IPv4(224, 0, 0, 1));
-public static ref IP IPv4allsys => ref ((StaticBox<IP>)ᏑIPv4allsys).ValueSlot; // all systems
+public static ref IP IPv4allsys => ref ((StaticBox<IP>)ᏑIPv4allsys).ValueSlot;       // all systems
 public static readonly ж<IP> ᏑIPv4allrouter = new StaticBox<IP>(IPv4(224, 0, 0, 2));
 public static ref IP IPv4allrouter => ref ((StaticBox<IP>)ᏑIPv4allrouter).ValueSlot; // all routers
 public static readonly ж<IP> ᏑIPv4zero = new StaticBox<IP>(IPv4(0, 0, 0, 0));
-public static ref IP IPv4zero => ref ((StaticBox<IP>)ᏑIPv4zero).ValueSlot; // all zeros
+public static ref IP IPv4zero => ref ((StaticBox<IP>)ᏑIPv4zero).ValueSlot;           // all zeros
 
 // Well-known IPv6 addresses
 public static readonly ж<IP> ᏑIPv6zero = new StaticBox<IP>(new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice()));
@@ -129,7 +129,7 @@ public static bool IsUnspecified(this IP ip) {
 // IsLoopback reports whether ip is a loopback address.
 public static bool IsLoopback(this IP ip) {
     {
-        var ip4 = ip.To4(); if (ip4 != default!) {
+        var ip4 = ip.To4(); if (ip4 != nil) {
             return ip4[0] == 127;
         }
     }
@@ -140,7 +140,7 @@ public static bool IsLoopback(this IP ip) {
 // RFC 1918 (IPv4 addresses) and RFC 4193 (IPv6 addresses).
 public static bool IsPrivate(this IP ip) {
     {
-        var ip4 = ip.To4(); if (ip4 != default!) {
+        var ip4 = ip.To4(); if (ip4 != nil) {
             // Following RFC 1918, Section 3. Private Address Space which says:
             //   The Internet Assigned Numbers Authority (IANA) has reserved the
             //   following three blocks of the IP address space for private internets:
@@ -158,7 +158,7 @@ public static bool IsPrivate(this IP ip) {
 // IsMulticast reports whether ip is a multicast address.
 public static bool IsMulticast(this IP ip) {
     {
-        var ip4 = ip.To4(); if (ip4 != default!) {
+        var ip4 = ip.To4(); if (ip4 != nil) {
             return (byte)(ip4[0] & 0xf0) == 0xe0;
         }
     }
@@ -175,7 +175,7 @@ public static bool IsInterfaceLocalMulticast(this IP ip) {
 // multicast address.
 public static bool IsLinkLocalMulticast(this IP ip) {
     {
-        var ip4 = ip.To4(); if (ip4 != default!) {
+        var ip4 = ip.To4(); if (ip4 != nil) {
             return ip4[0] == 224 && ip4[1] == 0 && ip4[2] == 0;
         }
     }
@@ -186,7 +186,7 @@ public static bool IsLinkLocalMulticast(this IP ip) {
 // unicast address.
 public static bool IsLinkLocalUnicast(this IP ip) {
     {
-        var ip4 = ip.To4(); if (ip4 != default!) {
+        var ip4 = ip.To4(); if (ip4 != nil) {
             return ip4[0] == 169 && ip4[1] == 254;
         }
     }
@@ -224,7 +224,7 @@ public static IP To4(this IP ip) {
     if (len(ip) == IPv6len && isZeros(ip[0..10]) && ip[10] == 0xff && ip[11] == 0xff) {
         return ip[12..16];
     }
-    return default!;
+    return default;
 }
 
 // To16 converts the IP address ip to a 16-byte representation.
@@ -236,7 +236,7 @@ public static IP To16(this IP ip) {
     if (len(ip) == IPv6len) {
         return ip;
     }
-    return default!;
+    return default;
 }
 
 // Default route masks for IPv4.
@@ -249,8 +249,8 @@ internal static IPMask classCMask = IPv4Mask(0xff, 0xff, 0xff, 0);
 // nil if ip is not a valid IPv4 address.
 public static IPMask DefaultMask(this IP ip) {
     {
-        ip = ip.To4(); if (ip == default!) {
-            return default!;
+        ip = ip.To4(); if (ip == nil) {
+            return default;
         }
     }
     switch (ᐧ) {
@@ -284,7 +284,7 @@ public static IP Mask(this IP ip, IPMask mask) {
     }
     nint n = len(ip);
     if (n != len(mask)) {
-        return default!;
+        return default;
     }
     var @out = new IP(n);
     for (nint i = 0; i < n; i++) {
@@ -311,16 +311,18 @@ public static @string String(this IP ip) {
         return "?"u8 + hexString(ip);
     }
 
-    slice<byte> buf = default!;
-    var exprᴛ1 = len(ip);
-    if (exprᴛ1 == IPv4len) {
+    slice<byte> buf = default;
+    switch (len(ip)) {
+    case var ᴛ when ᴛ == IPv4len: {
         const nint maxCap = /* len("255.255.255.255") */ 15;
         buf = new slice<byte>(0, maxCap);
+        break;
     }
-    else if (exprᴛ1 == IPv6len) {
+    case var ᴛ when ᴛ == IPv6len: {
         const nint maxCap = /* len("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff") */ 39;
         buf = new slice<byte>(0, maxCap);
-    }
+        break;
+    }}
     buf = ip.appendTo(buf);
     return (@string)buf;
 }
@@ -360,13 +362,13 @@ internal static slice<byte> appendTo(this IP ip, slice<byte> b) {
 // When len(ip) is zero, it appends nothing.
 public static (slice<byte>, error) AppendText(this IP ip, slice<byte> b) {
     if (len(ip) == 0) {
-        return (b, default!);
+        return (b, default);
     }
     if (len(ip) != IPv4len && len(ip) != IPv6len) {
         return (b, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid IP address"u8, Addr: hexString(ip)))));
     }
 
-    return (ip.appendTo(b), default!);
+    return (ip.appendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -375,27 +377,26 @@ public static (slice<byte>, error) AppendText(this IP ip, slice<byte> b) {
 public static (slice<byte>, error) MarshalText(this IP ip) {
     // 24 is satisfied with all IPv4 addresses and short IPv6 addresses
     var (b, err) = ip.AppendText(new slice<byte>(0, 24));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (b, default!);
+    return (b, default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 // The IP address is expected in a form accepted by [ParseIP].
 public static error UnmarshalText(this ref IP ip, slice<byte> text) {
     if (len(text) == 0) {
-        ip = default!;
-        return default!;
+        ip = default;
+        return default;
     }
-    ref var s = ref heap<@string>(out var Ꮡs);
-    s = (@string)text;
+    ref var s = ref heap<@string>((@string)text, out var Ꮡs);
     var x = ParseIP(s);
-    if (x == default!) {
+    if (x == nil) {
         return new ParseErrorжerror(Ꮡ(new ParseError(Type: "IP address"u8, Text: s)));
     }
     ip = x;
-    return default!;
+    return default;
 }
 
 // Equal reports whether ip and x are the same IP address.
@@ -415,13 +416,13 @@ public static bool Equal(this IP ip, IP x) {
 }
 
 internal static bool matchAddrFamily(this IP ip, IP x) {
-    return ip.To4() != default! && x.To4() != default! || ip.To16() != default! && ip.To4() == default! && x.To16() != default! && x.To4() == default!;
+    return ip.To4() != nil && x.To4() != nil || ip.To16() != nil && ip.To4() == nil && x.To16() != nil && x.To4() == nil;
 }
 
 // If mask is a sequence of 1 bits followed by 0 bits,
 // return the number of 1 bits.
 internal static nint simpleMaskLength(IPMask mask) {
-    nint n = default!;
+    nint n = default;
     foreach (var (iᴛ1, vᴛ1) in mask) {
         var i = iᴛ1;
         var v = vᴛ1;
@@ -434,7 +435,7 @@ internal static nint simpleMaskLength(IPMask mask) {
         // count 1 bits
         while ((byte)(v & 0x80) != 0) {
             n++;
-            v <<= (int)(1);
+            v <<= 1;
         }
         // rest must be 0 bits
         if (v != 0) {
@@ -454,8 +455,8 @@ internal static nint simpleMaskLength(IPMask mask) {
 // If the mask is not in the canonical form--ones followed by zeros--then
 // Size returns 0, 0.
 public static (nint ones, nint bits) Size(this IPMask m) {
-    nint ones = default!;
-    nint bits = default!;
+    nint ones = default;
+    nint bits = default;
 
     (ones, bits) = (simpleMaskLength(m), len(m) * 8);
     if (ones == -1) {
@@ -473,32 +474,34 @@ public static @string String(this IPMask m) {
 }
 
 internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
-    IP ip = default!;
-    IPMask m = default!;
+    IP ip = default;
+    IPMask m = default;
 
     {
-        ip = n.IP.To4(); if (ip == default!) {
+        ip = n.IP.To4(); if (ip == nil) {
             ip = n.IP;
             if (len(ip) != IPv6len) {
-                return (default!, default!);
+                return (default, default);
             }
         }
     }
     m = n.Mask;
-    var exprᴛ1 = len(m);
-    if (exprᴛ1 == IPv4len) {
+    switch (len(m)) {
+    case var ᴛ when ᴛ == IPv4len: {
         if (len(ip) != IPv4len) {
-            return (default!, default!);
+            return (default, default);
         }
+        break;
     }
-    else if (exprᴛ1 == IPv6len) {
+    case var ᴛ when ᴛ == IPv6len: {
         if (len(ip) == IPv4len) {
             m = m[12..];
         }
+        break;
     }
-    else { /* default: */
-        return (default!, default!);
-    }
+    default: {
+        return (default, default);
+    }}
     return (ip, m);
 }
 
@@ -506,7 +509,7 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
 public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
     var (nn, m) = networkNumberAndMask(ref (Ꮡn).DerefOrNull());
     {
-        var x = ip.To4(); if (x != default!) {
+        var x = ip.To4(); if (x != nil) {
             ip = x;
         }
     }
@@ -541,7 +544,7 @@ public static @string String(this ж<IPNet> Ꮡn) {
         return nilˢ;
     }
     var (nn, m) = networkNumberAndMask(ref (Ꮡn).DerefOrNull());
-    if (nn == default! || m == default!) {
+    if (nn == nil || m == nil) {
         return nilˢ;
     }
     nint l = simpleMaskLength(m);
@@ -563,12 +566,12 @@ public static IP ParseIP(@string s) {
             return (IP)(addr[..]);
         }
     }
-    return default!;
+    return default;
 }
 
 internal static (array<byte>, bool) parseIP(@string s) {
     var (ip, err) = netip.ParseAddr(s);
-    if (err != default! || ip.Zone() != ""u8) {
+    if (err != nil || ip.Zone() != ""u8) {
         return (new byte[]{}.array(16), false);
     }
     return (ip.As16(), true);
@@ -585,21 +588,21 @@ internal static (array<byte>, bool) parseIP(@string s) {
 public static (IP, ж<IPNet>, error) ParseCIDR(@string s) {
     var (addr, mask, found) = stringslite.Cut(s, "/"u8);
     if (!found) {
-        return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
+        return (default, default, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
     }
 
     var (ipAddr, err) = netip.ParseAddr(addr);
-    if (err != default! || ipAddr.Zone() != ""u8) {
-        return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
+    if (err != nil || ipAddr.Zone() != ""u8) {
+        return (default, default, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
     }
 
     var (n, i, ok) = dtoi(mask);
     if (!ok || i != len(mask) || n < 0 || n > ipAddr.BitLen()) {
-        return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
+        return (default, default, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
     }
     var m = CIDRMask(n, ipAddr.BitLen());
     var addr16 = ipAddr.As16();
-    return ((IP)(addr16[..]), Ꮡ(new IPNet(IP: ((IP)(addr16[..])).Mask(m), Mask: m)), default!);
+    return ((IP)(addr16[..]), Ꮡ(new IPNet(IP: ((IP)(addr16[..])).Mask(m), Mask: m)), default);
 }
 
 internal static IP copyIP(IP x) {

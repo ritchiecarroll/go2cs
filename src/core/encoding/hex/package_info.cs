@@ -60,7 +60,7 @@ using static go.encoding.hex_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/hex/hex.go", "hex.cs", "ABJOoKzCgoKCgpSqooKCgtzKgqqgAAIS8pKCgpSCgoKUgpSClKaClJSssoKCgqiSgoIAAhLigoKqooKmuJSCgoIACxqSpqKCgoKmgoKCgpQACRiiprSCkoKCgoSAgpTsgIKkgoKCpoKUrLIACxiCgpTWsoLcgqaCgoKCgoKCgoKmgoKClIKSpoKClIKClIKCgoKCgoKCgpSmprSClIKClIKCgoKCgoKCgpKClIKClJSCgoI=")]
+[assembly: go.GoPositionMap("encoding/hex/hex.go", "hex.cs", "ABJOoKzCgoKCgpSqooKCgtzKgqqgAAIS8pKCgpSCgoKUgpSClKaClJSssoKCgqiSgoIAAhLigoKqooKmuJSCgoIACxqSpqKCgoKmgoKCgpQACRiiprSCkoKCgoSAgpTsgIKkgoKCpoKUrLIACxiCgpTWsoLcgqaCgoKCgoKCgoKmgoKClIKCpoKClIKClIKCgoKCgoKCgpSmprSClIKClIKCgoKCgoKCgoKClIKClJSCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

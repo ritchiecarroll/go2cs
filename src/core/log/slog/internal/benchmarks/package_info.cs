@@ -11,13 +11,9 @@
 
 // <ImportedTypeAliases>
 global using slogꓸHandler = go.log.slog_package.ΔHandler;
-global using slogꓸKind = go.log.slog_package.ΔKind;
 global using slogꓸLevel = go.log.slog_package.ΔLevel;
-global using slogꓸLogValuer = go.log.slog_package.ΔLogValuer;
-global using slogꓸSource = go.log.slog_package.ΔSource;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -66,7 +62,7 @@ using static go.log.slog.@internal.benchmarks_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "AChSuIKW", "", "", "48=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
-[assembly: go.GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqaA9NKCpIKCgpSCgoKCgpKCgoKClIKC1qKUpKSkpKSkpIKUxMa4oqaCpoIADyCCpoCkooKCpoKmguyAooCkgqaC", "50-56:1")]
+[assembly: go.GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqaA9NKCpIKCgpSCgoKCgpKCgoKClIKC1qKUtLS0tLS0tIKUxNbIoqaCpoIADyCCpoCkooKCpoKmguyAooCkgqaC", "50-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;

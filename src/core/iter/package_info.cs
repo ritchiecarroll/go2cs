@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +55,7 @@ using static go.iter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("iter/iter.go", "iter.cs", "AOoB1AOmAAwwABkCAAASooKCgpSCgpSClIKCgoKCpoKAgpKCpIKUgoKCopKylIKUgpSCgoKmgpSUppSSlIKCgoKmgpSUygANMgAZAgAAFKKCgoKUgoKUgpSCgoKCgqaCgIKSgqSClIKCgoKiksKUgpSClIKCgqaClJSmlJKUgoKCgqaClJTKyg==", "271-305:1;277-290:1.1;292-300:1.2;306-330:2;331-350:3;387-422:1;393-406:1.1;408-416:1.2;423-447:2;448-467:3")]
+[assembly: go.GoPositionMap("iter/iter.go", "iter.cs", "AOoB1AOmAAwwABkCAAASooKCgpSCgpSClIKCgoKCpoKAgoKCpIKUgoKCopKylIKUgpSCgoKmgpSUppSSlIKCgoKmgpSUygANMgAZAgAAFKKCgoKUgoKUgpSCgoKCgqaCgIKCgqSClIKCgoKiksKUgpSClIKCgqaClJSmlJKUgoKCgqaClJTKyg==", "271-305:1;277-290:1.1;292-300:1.2;306-330:2;331-350:3;387-422:1;393-406:1.1;408-416:1.2;423-447:2;448-467:3")]
 // </GoSourcePositionMaps>
 
 namespace go;

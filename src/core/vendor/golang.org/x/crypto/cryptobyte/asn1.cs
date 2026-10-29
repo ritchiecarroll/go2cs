@@ -36,7 +36,7 @@ public static void AddASN1Enum(this ж<Builder> Ꮡb, int64 v) {
 internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v) {
     Ꮡb.AddASN1(tag, (ж<Builder> c) => {
         nint length = 1;
-        for (var i = v; i >= 0x80 || i < -0x80; i >>= (int)(8)) {
+        for (var i = v; i >= 0x80 || i < -0x80; i >>= 8) {
             length++;
         }
 
@@ -51,7 +51,7 @@ internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v)
 public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
     Ꮡb.AddASN1(asn1.INTEGER, (ж<Builder> c) => {
         nint length = 1;
-        for (var i = v; i >= 0x80; i >>= (int)(8)) {
+        for (var i = v; i >= 0x80; i >>= 8) {
             length++;
         }
 
@@ -63,20 +63,20 @@ public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
 }
 
 // AddASN1BigInt appends a DER-encoded ASN.1 INTEGER.
-public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> Ꮡn) {
+public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    if (b.err != default!) {
+    if (b.err != nil) {
         return;
     }
 
     Ꮡb.AddASN1(asn1.INTEGER, (ж<Builder> c) => {
-        if (Ꮡn.Value.Sign() < 0){
+        if (n.Value.Sign() < 0) {
             // A negative number has to be converted to two's-complement form. So we
             // invert and subtract 1. If the most-significant-bit isn't set then
             // we'll need to pad the beginning with 0xff in order to keep the number
             // negative.
-            var nMinus1 = @new<bigꓸInt>().Neg(Ꮡn);
+            var nMinus1 = @new<bigꓸInt>().Neg(n);
             nMinus1.Sub(nMinus1, bigOne);
             var bytes = nMinus1.Bytes();
             foreach (var i in range(bytes)) {
@@ -86,11 +86,10 @@ public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> Ꮡn) {
                 c.add(0xff);
             }
             c.add(bytes.ꓸꓸꓸ);
-        } else 
-        if (Ꮡn.Value.Sign() == 0){
+        } else if (n.Value.Sign() == 0) {
             c.add(0);
         } else {
-            var bytes = Ꮡn.Value.Bytes();
+            var bytes = n.Value.Bytes();
             if ((byte)(bytes[0] & 0x80) != 0) {
                 c.add(0);
             }
@@ -148,11 +147,11 @@ public static void AddASN1BitString(this ж<Builder> Ꮡb, slice<byte> data) {
 }
 
 internal static void addBase128Int(this ref Builder b, int64 n) {
-    nint length = default!;
-    if (n == 0){
+    nint length = default;
+    if (n == 0) {
         length = 1;
     } else {
-        for (var i = n; i > 0; i >>= (int)(7)) {
+        for (var i = n; i > 0; i >>= 7) {
             length++;
         }
     }
@@ -190,7 +189,7 @@ public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.
     var oidʗ1 = oid;
     Ꮡb.AddASN1(asn1.OBJECT_IDENTIFIER, (ж<Builder> bΔ1) => {
         if (!isValidOID(oidʗ1)) {
-            bΔ1.Value.err = fmt.Errorf("cryptobyte: invalid OID: %v"u8, oidʗ1);
+            bΔ1.err = fmt.Errorf("cryptobyte: invalid OID: %v"u8, oidʗ1);
             return;
         }
 
@@ -203,7 +202,7 @@ public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.
 
 public static void AddASN1Boolean(this ж<Builder> Ꮡb, bool v) {
     Ꮡb.AddASN1(asn1.BOOLEAN, (ж<Builder> bΔ1) => {
-        if (v){
+        if (v) {
             bΔ1.AddUint8(0xff);
         } else {
             bΔ1.AddUint8(0);
@@ -221,11 +220,11 @@ public static void MarshalASN1(this ref Builder b, any v) {
     // NOTE(martinkr): This is somewhat of a hack to allow propagation of
     // encoding_asn1.Marshal errors into Builder.err. N.B. if you call MarshalASN1 with a
     // value embedded into a struct, its tag information is lost.
-    if (b.err != default!) {
+    if (b.err != nil) {
         return;
     }
     var (bytes, err) = encoding_asn1.Marshal(v);
-    if (err != default!) {
+    if (err != nil) {
         b.err = err;
         return;
     }
@@ -239,7 +238,7 @@ public static void MarshalASN1(this ref Builder b, any v) {
 public static void AddASN1(this ж<Builder> Ꮡb, asn1.Tag tag, Action<ж<Builder>> f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    if (b.err != default!) {
+    if (b.err != nil) {
         return;
     }
     // Identifiers with the low five bits set indicate high-tag-number format
@@ -345,22 +344,22 @@ internal static bool checkASN1Integer(slice<byte> bytes) {
 
 internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 
-internal static bool readASN1BigInt(this ref String s, ж<bigꓸInt> Ꮡout) {
+internal static bool readASN1BigInt(this ref String s, ж<bigꓸInt> @out) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes)) {
         return false;
     }
-    if ((byte)(bytes[0] & 0x80) == 0x80){
+    if ((byte)(bytes[0] & 0x80) == 0x80) {
         // Negative number.
         var neg = new slice<byte>(len(bytes));
         foreach (var (i, b) in bytes) {
             neg[i] = (byte)(((byte)(~b)));
         }
-        Ꮡout.SetBytes(neg);
-        Ꮡout.Add(Ꮡout, bigOne);
-        Ꮡout.Neg(Ꮡout);
+        @out.SetBytes(neg);
+        @out.Add(@out, bigOne);
+        @out.Neg(@out);
     } else {
-        Ꮡout.SetBytes(bytes);
+        @out.SetBytes(bytes);
     }
     return true;
 }
@@ -382,9 +381,9 @@ internal static bool readASN1Bytes(this ref String s, ж<slice<byte>> Ꮡout) {
     return true;
 }
 
-internal static bool readASN1Int64(this ref String s, ж<int64> Ꮡout) {
+internal static bool readASN1Int64(this ref String s, ж<int64> @out) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
-    if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Signed(ref (Ꮡout).DerefOrNull(), bytes)) {
+    if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Signed(ref (@out).DerefOrNull(), bytes)) {
         return false;
     }
     return true;
@@ -396,7 +395,7 @@ internal static bool asn1Signed(ref int64 @out, slice<byte> n) {
         return false;
     }
     for (nint i = 0; i < length; i++) {
-        @out <<= (int)(8);
+        @out <<= 8;
         @out |= (int64)((int64)n[i]);
     }
     // Shift up and down in order to sign extend the result.
@@ -405,9 +404,9 @@ internal static bool asn1Signed(ref int64 @out, slice<byte> n) {
     return true;
 }
 
-internal static bool readASN1Uint64(this ref String s, ж<uint64> Ꮡout) {
+internal static bool readASN1Uint64(this ref String s, ж<uint64> @out) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
-    if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Unsigned(ref (Ꮡout).DerefOrNull(), bytes)) {
+    if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Unsigned(ref (@out).DerefOrNull(), bytes)) {
         return false;
     }
     return true;
@@ -424,7 +423,7 @@ internal static bool asn1Unsigned(ref uint64 @out, slice<byte> n) {
         return false;
     }
     for (nint i = 0; i < length; i++) {
-        @out <<= (int)(8);
+        @out <<= 8;
         @out |= (uint64)((uint64)n[i]);
     }
     return true;
@@ -433,9 +432,9 @@ internal static bool asn1Unsigned(ref uint64 @out, slice<byte> n) {
 // ReadASN1Int64WithTag decodes an ASN.1 INTEGER with the given tag into out
 // and advances. It reports whether the read was successful and resulted in a
 // value that can be represented in an int64.
-public static bool ReadASN1Int64WithTag(this ref String s, ж<int64> Ꮡout, asn1.Tag tag) {
+public static bool ReadASN1Int64WithTag(this ref String s, ж<int64> @out, asn1.Tag tag) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
-    return s.ReadASN1(Ꮡbytes, tag) && checkASN1Integer(bytes) && asn1Signed(ref (Ꮡout).DerefOrNull(), bytes);
+    return s.ReadASN1(Ꮡbytes, tag) && checkASN1Integer(bytes) && asn1Signed(ref (@out).DerefOrNull(), bytes);
 }
 
 // ReadASN1Enum decodes an ASN.1 ENUMERATION into out and advances. It reports
@@ -444,7 +443,7 @@ public static bool ReadASN1Enum(this ref String s, ж<nint> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
-    int64 i = default!;
+    int64 i = default;
     if (!s.ReadASN1(Ꮡbytes, asn1.ENUM) || !checkASN1Integer(bytes) || !asn1Signed(ref i, bytes)) {
         return false;
     }
@@ -468,7 +467,7 @@ internal static bool readBase128Int(this ref String s, ж<nint> Ꮡout) {
         if (ret >= 1 << (int)(31 - 7)) {
             return false;
         }
-        ret <<= (int)(7);
+        ret <<= 7;
         var b = s.read(1)[0];
 
         // ITU-T X.690, section 8.19.2:
@@ -509,7 +508,7 @@ public static bool ReadASN1ObjectIdentifier(this ref String s, ж<encoding_asn1.
     if (!bytes.readBase128Int(Ꮡv)) {
         return false;
     }
-    if (v < 80){
+    if (v < 80) {
         components[0] = v / 40;
         components[1] = v % 40;
     } else {
@@ -539,7 +538,7 @@ public static bool ReadASN1GeneralizedTime(this ref String s, ж<time.Time> Ꮡo
     }
     @string t = (@string)(slice<byte>)bytes;
     var (res, err) = time.Parse(generalizedTimeFormatStr, t);
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
     {
@@ -565,16 +564,16 @@ public static bool ReadASN1UTCTime(this ref String s, ж<time.Time> Ꮡout) {
     @string t = (@string)(slice<byte>)bytes;
 
     @string formatStr = defaultUTCTimeFormatStr;
-    error err = default!;
+    error err = default;
     (var res, err) = time.Parse(formatStr, t);
-    if (err != default!) {
+    if (err != nil) {
         // Fallback to minute precision if we can't parse second
         // precision. If we are following X.509 or X.690 we shouldn't
         // support this, but we do.
         formatStr = "0601021504Z0700"u8;
         (res, err) = time.Parse(formatStr, t);
     }
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
 
@@ -637,8 +636,8 @@ public static bool ReadASN1BitStringAsBytes(this ref String s, ж<slice<byte>> �
 // ReadASN1Bytes reads the contents of a DER-encoded ASN.1 element (not including
 // tag and length bytes) into out, and advances. The element must match the
 // given tag. It reports whether the read was successful.
-public static bool ReadASN1Bytes(this ref String s, ж<slice<byte>> Ꮡout, asn1.Tag tag) {
-    return s.ReadASN1(Ꮡout.Reinterpret<slice<byte>, String>(), tag);
+public static bool ReadASN1Bytes(this ref String s, ж<slice<byte>> @out, asn1.Tag tag) {
+    return s.ReadASN1(@out.Reinterpret<slice<byte>, String>(), tag);
 }
 
 // ReadASN1 reads the contents of a DER-encoded ASN.1 element (not including
@@ -646,9 +645,9 @@ public static bool ReadASN1Bytes(this ref String s, ж<slice<byte>> Ꮡout, asn1
 // given tag. It reports whether the read was successful.
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
-public static bool ReadASN1(this ref String s, ж<String> Ꮡout, asn1.Tag tag) {
+public static bool ReadASN1(this ref String s, ж<String> @out, asn1.Tag tag) {
     ref var t = ref heap(new golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡt);
-    if (!s.ReadAnyASN1(Ꮡout, Ꮡt) || t != tag) {
+    if (!s.ReadAnyASN1(@out, Ꮡt) || t != tag) {
         return false;
     }
     return true;
@@ -659,9 +658,9 @@ public static bool ReadASN1(this ref String s, ж<String> Ꮡout, asn1.Tag tag) 
 // given tag. It reports whether the read was successful.
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
-public static bool ReadASN1Element(this ref String s, ж<String> Ꮡout, asn1.Tag tag) {
+public static bool ReadASN1Element(this ref String s, ж<String> @out, asn1.Tag tag) {
     ref var t = ref heap(new golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡt);
-    if (!s.ReadAnyASN1Element(Ꮡout, Ꮡt) || t != tag) {
+    if (!s.ReadAnyASN1Element(@out, Ꮡt) || t != tag) {
         return false;
     }
     return true;
@@ -672,8 +671,8 @@ public static bool ReadASN1Element(this ref String s, ж<String> Ꮡout, asn1.Ta
 // It reports whether the read was successful.
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
-public static bool ReadAnyASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag> ᏑoutTag) {
-    return s.readASN1(Ꮡout, ᏑoutTag, true /* skip header */);
+public static bool ReadAnyASN1(this ref String s, ж<String> @out, ж<asn1.Tag> outTag) {
+    return s.readASN1(@out, outTag, true /* skip header */);
 }
 
 // ReadAnyASN1Element reads the contents of a DER-encoded ASN.1 element
@@ -681,8 +680,8 @@ public static bool ReadAnyASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag
 // advances. It reports whether the read was successful.
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
-public static bool ReadAnyASN1Element(this ref String s, ж<String> Ꮡout, ж<asn1.Tag> ᏑoutTag) {
-    return s.readASN1(Ꮡout, ᏑoutTag, false /* include header */);
+public static bool ReadAnyASN1Element(this ref String s, ж<String> @out, ж<asn1.Tag> outTag) {
+    return s.readASN1(@out, outTag, false /* include header */);
 }
 
 // PeekASN1Tag reports whether the next ASN.1 value on the string starts with
@@ -705,14 +704,14 @@ public static bool SkipASN1(this ref String s, asn1.Tag tag) {
 // element (not including tag and length bytes) tagged with the given tag into
 // out. It stores whether an element with the tag was found in outPresent,
 // unless outPresent is nil. It reports whether the read was successful.
-public static bool ReadOptionalASN1(this ref String s, ж<String> Ꮡout, ж<bool> ᏑoutPresent, asn1.Tag tag) {
+public static bool ReadOptionalASN1(this ref String s, ж<String> @out, ж<bool> ᏑoutPresent, asn1.Tag tag) {
     ref var outPresent = ref ᏑoutPresent.DerefOrNull();
 
     var present = s.PeekASN1Tag(tag);
     if (ᏑoutPresent != nil) {
         outPresent = present;
     }
-    if (present && !s.ReadASN1(Ꮡout, tag)) {
+    if (present && !s.ReadASN1(@out, tag)) {
         return false;
     }
     return true;
@@ -756,7 +755,7 @@ public static bool ReadOptionalASN1Integer(this ref String s, any @out, asn1.Tag
         }
         case ж<bigꓸInt>: {
             {
-                var (defaultValueΔ1, ok) = defaultValue._<ж<bigꓸInt>>(ᐧ); if (ok){
+                var (defaultValueΔ1, ok) = defaultValue._<ж<bigꓸInt>>(ᐧ); if (ok) {
                     @out._<ж<bigꓸInt>>().Set(defaultValueΔ1);
                 } else {
                     throw panic("out points to big.Int, but defaultValue does not");
@@ -792,14 +791,14 @@ public static bool ReadOptionalASN1OctetString(this ref String s, ж<slice<byte>
     if (ᏑoutPresent != nil) {
         outPresent = present;
     }
-    if (present){
+    if (present) {
         ref var oct = ref heap<String>(out var Ꮡoct);
         if (!child.ReadASN1(Ꮡoct, asn1.OCTET_STRING) || !child.Empty()) {
             return false;
         }
         @out = oct;
     } else {
-        @out = default!;
+        @out = default;
     }
     return true;
 }
@@ -851,9 +850,9 @@ internal static bool readASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag>
     //
     // Bit 8 of the first length byte indicates whether the length is short- or
     // long-form.
-    uint32 length = default!;                   // length includes headerLen
-    uint32 headerLen = default!;
-    if ((byte)(lenByte & 0x80) == 0){
+    uint32 length = default; // length includes headerLen
+    uint32 headerLen = default;
+    if ((byte)(lenByte & 0x80) == 0) {
         // Short-form length (section 8.1.3.4), encoded in bits 1-7.
         length = (uint32)lenByte + 2;
         headerLen = 2;

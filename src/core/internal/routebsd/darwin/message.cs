@@ -16,31 +16,31 @@ partial interface Message {
 internal static (slice<Message>, error) parseRIB(slice<byte> b) {
     var msgsᴷ = new stackAppend<Message>(moves: true);
 
-    slice<Message> msgs = default!;
+    slice<Message> msgs = default;
     nint nmsgs = 0;
     nint nskips = 0;
     while (len(b) > 4) {
         nmsgs++;
         nint l = (nint)nativeEndian.Uint16(b[..2]);
         if (l == 0) {
-            return (default!, errInvalidMessage);
+            return (default, errInvalidMessage);
         }
         if (len(b) < l) {
-            return (default!, errMessageTooShort);
+            return (default, errMessageTooShort);
         }
         if (b[2] != rtmVersion) {
             b = b.slice(l);
             continue;
         }
         {
-            var (w, ok) = wireFormats[(nint)b[3], ꟷ]; if (!ok){
+            var (w, ok) = wireFormats[(nint)b[3], ꟷ]; if (!ok) {
                 nskips++;
             } else {
-                var (m, err) = (~w).parse(b.slice(0, l));
-                if (err != default!) {
-                    return (default!, err);
+                var (m, err) = w.parse(b.slice(0, l));
+                if (err != nil) {
+                    return (default, err);
                 }
-                if (m == default!){
+                if (m == nil) {
                     nskips++;
                 } else {
                     msgs = append(msgsᴷ, msgs, m);
@@ -52,10 +52,10 @@ internal static (slice<Message>, error) parseRIB(slice<byte> b) {
 
     // We failed to parse any of the messages - version mismatch?
     if (nmsgs != len(msgs) + nskips) {
-        return (default!, errMessageMismatch);
+        return (default, errMessageMismatch);
     }
     msgs = move2heap(msgsᴷ, msgs);
-    return (msgs, default!);
+    return (msgs, default);
 }
 
 } // end routebsd_package

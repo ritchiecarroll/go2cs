@@ -8,22 +8,22 @@ partial class routebsd_package {
 
 // An InterfaceMessage represents an interface message.
 partial struct InterfaceMessage {
-    public nint Version;   // message version
-    public nint Type;   // message type
-    public nint Flags;   // interface flags
-    public nint Index;   // interface index
-    public @string Name; // interface name
+    public nint Version;      // message version
+    public nint Type;         // message type
+    public nint Flags;        // interface flags
+    public nint Index;        // interface index
+    public @string Name;      // interface name
     public slice<Addr> Addrs; // addresses
-    internal nint extOff;   // offset of header extension
+    internal nint extOff;     // offset of header extension
     internal slice<byte> raw; // raw message
 }
 
 // An InterfaceAddrMessage represents an interface address message.
 partial struct InterfaceAddrMessage {
-    public nint Version;   // message version
-    public nint Type;   // message type
-    public nint Flags;   // interface flags
-    public nint Index;   // interface index
+    public nint Version;      // message version
+    public nint Type;         // message type
+    public nint Flags;        // interface flags
+    public nint Index;        // interface index
     public slice<Addr> Addrs; // addresses
     internal slice<byte> raw; // raw message
 }
@@ -31,10 +31,10 @@ partial struct InterfaceAddrMessage {
 // An InterfaceMulticastAddrMessage represents an interface multicast
 // address message.
 partial struct InterfaceMulticastAddrMessage {
-    public nint Version;   // message version
-    public nint Type;   // message type
-    public nint Flags;   // interface flags
-    public nint Index;   // interface index
+    public nint Version;      // message version
+    public nint Type;         // message type
+    public nint Flags;        // interface flags
+    public nint Index;        // interface index
     public slice<Addr> Addrs; // addresses
     internal slice<byte> raw; // raw message
 }

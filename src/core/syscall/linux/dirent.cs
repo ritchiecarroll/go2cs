@@ -24,41 +24,43 @@ internal static (uint64 u, bool ok) readInt(slice<byte> b, uintptr off, uintptr 
 }
 
 internal static uint64 readIntBE(slice<byte> b, uintptr size) {
-    var exprᴛ1 = size;
-    if (exprᴛ1 == 1) {
+    switch (size) {
+    case var ᴛ when ᴛ == 1: {
         return (uint64)b[0];
     }
-    if (exprᴛ1 == 2) {
+    case var ᴛ when ᴛ == 2: {
         return (uint64)byteorder.BEUint16(b);
     }
-    if (exprᴛ1 == 4) {
+    case var ᴛ when ᴛ == 4: {
         return (uint64)byteorder.BEUint32(b);
     }
-    if (exprᴛ1 == 8) {
+    case var ᴛ when ᴛ == 8: {
         return byteorder.BEUint64(b);
     }
-    { /* default: */
+    default: {
         throw panic("syscall: readInt with unsupported size");
-    }
+        break;
+    }}
 }
 
 internal static uint64 readIntLE(slice<byte> b, uintptr size) {
-    var exprᴛ1 = size;
-    if (exprᴛ1 == 1) {
+    switch (size) {
+    case var ᴛ when ᴛ == 1: {
         return (uint64)b[0];
     }
-    if (exprᴛ1 == 2) {
+    case var ᴛ when ᴛ == 2: {
         return (uint64)byteorder.LEUint16(b);
     }
-    if (exprᴛ1 == 4) {
+    case var ᴛ when ᴛ == 4: {
         return (uint64)byteorder.LEUint32(b);
     }
-    if (exprᴛ1 == 8) {
+    case var ᴛ when ᴛ == 8: {
         return byteorder.LEUint64(b);
     }
-    { /* default: */
+    default: {
         throw panic("syscall: readInt with unsupported size");
-    }
+        break;
+    }}
 }
 
 // ParseDirent parses up to max directory entries in buf,
@@ -66,7 +68,7 @@ internal static uint64 readIntLE(slice<byte> b, uintptr size) {
 // bytes consumed from buf, the number of entries added
 // to names, and the new names slice.
 public static (nint consumed, nint count, slice<@string> newnames) ParseDirent(slice<byte> buf, nint max, slice<@string> names) {
-    nint count = default!;
+    nint count = default;
 
     nint origlen = len(buf);
     count = 0;

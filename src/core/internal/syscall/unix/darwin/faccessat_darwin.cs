@@ -15,14 +15,14 @@ internal static partial void libc_faccessat_trampoline();
 //go:cgo_import_dynamic libc_faccessat faccessat "/usr/lib/libSystem.B.dylib"
 internal static error faccessat(nint dirfd, @string path, uint32 mode, nint flags) {
     var (p, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var (_, _, errno) = syscall_syscall6(abi.FuncPCABI0(libc_faccessat_trampoline), (uintptr)dirfd, (uintptr)p, (uintptr)mode, (uintptr)flags, 0, 0);
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 } // end unix_package

@@ -6,7 +6,7 @@ namespace go.net;
 using multipart = go.mime.multipart_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.mime;
 using go.net;
 
@@ -22,8 +22,8 @@ partial class http_package {
 //
 //go:linkname cloneURLValues
 internal static url.Values cloneURLValues(url.Values v) {
-    if (v == default!) {
-        return default!;
+    if (v == nil) {
+        return default;
     }
     // http.Header and url.Values have the same representation, so temporarily
     // treat it like http.Header, which does have a clone:
@@ -43,13 +43,13 @@ internal static ж<url.URL> cloneURL(ж<url.URL> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
-        return default!;
+        return default;
     }
     var u2 = @new<url.URL>();
     u2.Value = u;
     if (u.User != nil) {
-        u2.Value.User = @new<url.Userinfo>();
-        (~u2).User.Value = u.User.Value;
+        u2.User = @new<url.Userinfo>();
+        u2.User.Value = u.User.Value;
     }
     return u2;
 }
@@ -67,12 +67,12 @@ internal static ж<multipart.Form> cloneMultipartForm(ж<multipart.Form> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
-        return default!;
+        return default;
     }
     var f2 = Ꮡ(new multipart.Form(
         Value: ((map<@string, slice<@string>>)((ΔHeader)f.Value).Clone())
     ));
-    if (f.File != default!) {
+    if (f.File != nil) {
         var m = new map<@string, slice<ж<multipart.FileHeader>>>(builtin.len(f.File));
         foreach (var (k, vv) in f.File) {
             var vv2 = new slice<ж<multipart.FileHeader>>(builtin.len(vv));
@@ -81,7 +81,7 @@ internal static ж<multipart.Form> cloneMultipartForm(ж<multipart.Form> Ꮡf) {
             }
             m[k] = vv2;
         }
-        f2.Value.File = m;
+        f2.File = m;
     }
     return f2;
 }
@@ -99,11 +99,11 @@ internal static ж<multipart.FileHeader> cloneMultipartFileHeader(ж<multipart.F
     ref var fh = ref Ꮡfh.DerefOrNull();
 
     if (Ꮡfh == nil) {
-        return default!;
+        return default;
     }
     var fh2 = @new<multipart.FileHeader>();
     fh2.Value = fh;
-    fh2.Value.Header = (textproto.MIMEHeader)(map<@string, slice<@string>>)((ΔHeader)(map<@string, slice<@string>>)fh.Header).Clone();
+    fh2.Header = (textproto.MIMEHeader)(map<@string, slice<@string>>)((ΔHeader)(map<@string, slice<@string>>)fh.Header).Clone();
     return fh2;
 }
 
@@ -121,7 +121,7 @@ internal static ж<multipart.FileHeader> cloneMultipartFileHeader(ж<multipart.F
 //go:linkname cloneOrMakeHeader
 internal static ΔHeader cloneOrMakeHeader(ΔHeader hdr) {
     var clone = hdr.Clone();
-    if (clone == default!) {
+    if (clone == nil) {
         clone = new ΔHeader(0);
     }
     return clone;

@@ -196,7 +196,7 @@ partial class bisect_package {
 // when they recognize the nil Matcher.
 public static (ж<Matcher>, error) New(@string pattern) {
     if (pattern == ""u8) {
-        return (default!, default!);
+        return (default, default);
     }
 
     var m = @new<Matcher>();
@@ -204,37 +204,37 @@ public static (ж<Matcher>, error) New(@string pattern) {
     @string p = pattern;
     // Special case for leading 'q' so that 'qn' quietly disables, e.g. fmahash=qn to disable fma
     // Any instance of 'v' disables 'q'.
-    if (len(p) > 0 && p[0] == (rune)'q') {
-        m.Value.quiet = true;
+    if (len(p) > 0 && p[0] == 'q') {
+        m.quiet = true;
         p = p[1..];
         if (p == ""u8) {
-            return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
+            return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
         }
     }
     // Allow multiple v, so that “bisect cmd vPATTERN” can force verbose all the time.
-    while (len(p) > 0 && p[0] == (rune)'v') {
-        m.Value.verbose = true;
-        m.Value.quiet = false;
+    while (len(p) > 0 && p[0] == 'v') {
+        m.verbose = true;
+        m.quiet = false;
         p = p[1..];
         if (p == ""u8) {
-            return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
+            return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
         }
     }
 
     // Allow multiple !, each negating the last, so that “bisect cmd !PATTERN” works
     // even when bisect chooses to add its own !.
-    m.Value.enable = true;
-    while (len(p) > 0 && p[0] == (rune)'!') {
-        m.Value.enable = !(~m).enable;
+    m.enable = true;
+    while (len(p) > 0 && p[0] == '!') {
+        m.enable = !m.enable;
         p = p[1..];
         if (p == ""u8) {
-            return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
+            return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
         }
     }
 
     if (p == "n"u8) {
         // n is an alias for !y.
-        m.Value.enable = !(~m).enable;
+        m.enable = !m.enable;
         p = "y"u8;
     }
 
@@ -245,82 +245,81 @@ public static (ж<Matcher>, error) New(@string pattern) {
     nint wid = 1; // 1-bit (binary); sometimes 4-bit (hex)
     for (nint i = 0; i <= len(p); i++) {
         // Imagine a trailing - at the end of the pattern to flush final suffix
-        var c = (byte)(rune)'-';
+        var c = (byte)'-';
         if (i < len(p)) {
             c = p[i];
         }
-        if (i == start && wid == 1 && c == (rune)'x') { // leading x for hex
+        if (i == start && wid == 1 && c == 'x') { // leading x for hex
             start = i + 1;
             wid = 4;
             continue;
         }
         var exprᴛ1 = c;
         var matchᴛ1 = false;
-        var matchᴛ2 = (exprᴛ1 is (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7' or (rune)'8' or (rune)'9') || (exprᴛ1 is (rune)'0' or (rune)'1') || (exprᴛ1 is (rune)'a' or (rune)'b' or (rune)'c' or (rune)'d' or (rune)'e' or (rune)'f' or (rune)'A' or (rune)'B' or (rune)'C' or (rune)'D' or (rune)'E' or (rune)'F') || exprᴛ1 is (rune)'y' || (exprᴛ1 is (rune)'+' or (rune)'-');
+        var matchᴛ2 = (exprᴛ1 is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') || (exprᴛ1 is (byte)'0' or (byte)'1') || (exprᴛ1 is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') || exprᴛ1 is (byte)'y' || (exprᴛ1 is (byte)'+' or (byte)'-');
         if (!matchᴛ2) { /* default: */
-            return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
+            return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
         }
-        if (exprᴛ1 is (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7' or (rune)'8' or (rune)'9') { matchᴛ1 = true;
+        if (exprᴛ1 is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') { matchᴛ1 = true;
             if (wid != 4) {
-                return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
+                return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 is (rune)'0' or (rune)'1')) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && (exprᴛ1 is (byte)'0' or (byte)'1')) { matchᴛ1 = true;
             bits.LshAssign((int64)(wid));
-            bits |= (uint64)((uint64)((byte)(c - (rune)'0')));
+            bits |= (uint64)((uint64)((byte)(c - '0')));
         }
-        else if (exprᴛ1 is (rune)'a' or (rune)'b' or (rune)'c' or (rune)'d' or (rune)'e' or (rune)'f' or (rune)'A' or (rune)'B' or (rune)'C' or (rune)'D' or (rune)'E' or (rune)'F') { matchᴛ1 = true;
+        else if (exprᴛ1 is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') { matchᴛ1 = true;
             if (wid != 4) {
-                return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
+                return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
-            bits <<= (int)(4);
-            bits |= (uint64)((uint64)((byte)((byte)(c & ~0x20) - (rune)'A' + 10)));
+            bits <<= 4;
+            bits |= (uint64)((uint64)((byte)((byte)(c & ~0x20) - 'A' + 10)));
         }
-        else if (exprᴛ1 is (rune)'y') {
-            if (i + 1 < len(p) && (p[i + 1] == (rune)'0' || p[i + 1] == (rune)'1')) {
-                return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
+        else if (exprᴛ1 is (byte)'y') {
+            if (i + 1 < len(p) && (p[i + 1] == '0' || p[i + 1] == '1')) {
+                return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
             bits = 0;
         }
-        else if (exprᴛ1 is (rune)'+' or (rune)'-') { matchᴛ1 = true;
-            if (c == (rune)'+' && result == false) {
+        else if (exprᴛ1 is (byte)'+' or (byte)'-') { matchᴛ1 = true;
+            if (c == '+' && result == false) {
                 // Have already seen a -. Should be - from here on.
-                return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax (+ after -): "u8 + pattern))));
+                return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax (+ after -): "u8 + pattern))));
             }
-            if (i > 0){
+            if (i > 0) {
                 nint n = (i - start) * wid;
                 if (n > 64) {
-                    return (default!, new parseErrorжerror(Ꮡ(new parseError("pattern bits too long: "u8 + pattern))));
+                    return (default, new parseErrorжerror(Ꮡ(new parseError("pattern bits too long: "u8 + pattern))));
                 }
                 if (n <= 0) {
-                    return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
+                    return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
                 }
-                if (p[start] == (rune)'y') {
+                if (p[start] == 'y') {
                     n = 0;
                 }
                 var mask = ((uint64)1).Lsh((int64)(n)) - 1;
-                m.Value.list = append((~m).list, new cond(mask, bits, result));
-            } else 
-            if (c == (rune)'-') {
+                m.list = append(m.list, new cond(mask, bits, result));
+            } else if (c == '-') {
                 // leading - subtracts from complete set
-                m.Value.list = append((~m).list, new cond(0, 0, true));
+                m.list = append(m.list, new cond(0, 0, true));
             }
             bits = 0;
-            result = c == (rune)'+';
+            result = c == '+';
             start = i + 1;
             wid = 1;
         }
     }
-    return (m, default!);
+    return (m, default);
 }
 
 // A Matcher is the parsed, compiled form of a PATTERN string.
 // The nil *Matcher is valid: it has all changes enabled but none reported.
 partial struct Matcher {
-    internal bool verbose;   // annotate reporting with human-helpful information
-    internal bool quiet;   // disables all reporting.  reset if verbose is true. use case is -d=fmahash=qn
-    internal bool enable;   // when true, list is for “enable and report” (when false, “disable and report”)
+    internal bool verbose;     // annotate reporting with human-helpful information
+    internal bool quiet;       // disables all reporting.  reset if verbose is true. use case is -d=fmahash=qn
+    internal bool enable;      // when true, list is for “enable and report” (when false, “disable and report”)
     internal slice<cond> list; // conditions; later ones win over earlier ones
     internal atomic.Pointer<dedup> dedup;
 }
@@ -365,8 +364,8 @@ public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
 internal static bool matchResult(this ref Matcher m, uint64 id) {
     for (nint i = len(m.list) - 1; i >= 0; i--) {
         var c = Ꮡ(m.list, i);
-        if ((id & (~c).mask) == (~c).bits) {
-            return (~c).result;
+        if ((id & c.mask) == c.bits) {
+            return c.result;
         }
     }
     return false;
@@ -388,7 +387,7 @@ internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, ni
 
     var h = Hash(@file, line);
     if (Ꮡm.ShouldPrint(h)) {
-        if (m.MarkerOnly()){
+        if (m.MarkerOnly()) {
             PrintMarker(w, h);
         } else {
             printFileLine(w, h, @file, line);
@@ -403,7 +402,7 @@ internal static error printFileLine(Writer w, uint64 h, @string @file, nint line
     var b = new slice<byte>(0, markerLen + len(@file) + 24);
     b = AppendMarker(b, h);
     b = appendFileLine(b, @file, line);
-    b = append(b, (byte)((rune)'\n'));
+    b = append(b, (byte)'\n');
     var (_, err) = w.Write(b);
     return err;
 }
@@ -411,17 +410,17 @@ internal static error printFileLine(Writer w, uint64 h, @string @file, nint line
 // appendFileLine appends file:line to dst, returning the extended slice.
 internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint line) {
     dst = append(dst, @file.ꓸꓸꓸ);
-    dst = append(dst, (byte)((rune)':'));
+    dst = append(dst, (byte)':');
     nuint u = (nuint)line;
     if (line < 0) {
-        dst = append(dst, (byte)((rune)'-'));
+        dst = append(dst, (byte)'-');
         u = ((nuint)0 - u);
     }
     array<byte> buf = new(24);
     nint i = len(buf);
     while (i == len(buf) || u > 0) {
         i--;
-        buf[i] = (byte)((rune)'0' + (byte)(u % 10));
+        buf[i] = (byte)('0' + (byte)(u % 10));
         u /= 10;
     }
     dst = appendꓸꓸꓸ(dst, buf.slice(i));
@@ -459,8 +458,8 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
 
     var h = Hash(stk.slice(0, n));
     if (Ꮡm.ShouldPrint(h)) {
-        ж<dedup> d = default!;
-        while (ᐧ) {
+        ж<dedup> d = default;
+        for (;;) {
             d = Ꮡm.of(Matcher.Ꮡdedup).Load();
             if (d != nil) {
                 break;
@@ -471,7 +470,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
             }
         }
 
-        if (m.MarkerOnly()){
+        if (m.MarkerOnly()) {
             if (!d.seenLossy(h)) {
                 PrintMarker(w, h);
             }
@@ -499,7 +498,7 @@ partial interface Writer {
 public static error PrintMarker(Writer w, uint64 h) {
     array<byte> buf = new(50);
     var b = AppendMarker(buf[..0], h);
-    b = append(b, (byte)((rune)'\n'));
+    b = append(b, (byte)'\n');
     var (_, err) = w.Write(b);
     return err;
 }
@@ -513,21 +512,21 @@ internal static error printStack(Writer w, uint64 h, slice<uintptr> stk) {
     var prefix = AppendMarker(prefixBuf[..0], h);
 
     var frames = Δruntime.CallersFrames(stk);
-    while (ᐧ) {
+    for (;;) {
         var (f, more) = frames.Next();
         buf = appendꓸꓸꓸ(buf, prefix);
         buf = append(buf, f.Function.ꓸꓸꓸ);
         buf = append(buf, ((@string)"()\n"u8).ꓸꓸꓸ);
         buf = appendꓸꓸꓸ(buf, prefix);
-        buf = append(buf, (byte)((rune)'\t'));
+        buf = append(buf, (byte)'\t');
         buf = appendFileLine(buf, f.File, f.Line);
-        buf = append(buf, (byte)((rune)'\n'));
+        buf = append(buf, (byte)'\n');
         if (!more) {
             break;
         }
     }
     buf = appendꓸꓸꓸ(buf, prefix);
-    buf = append(buf, (byte)((rune)'\n'));
+    buf = append(buf, (byte)'\n');
     var (_, err) = w.Write(buf);
     return err;
 }
@@ -536,7 +535,7 @@ internal static error printStack(Writer w, uint64 h, slice<uintptr> stk) {
 // about a match of the given ID.
 // It always returns the hexadecimal format.
 public static @string Marker(uint64 id) {
-    return (@string)AppendMarker(default!, id);
+    return (@string)AppendMarker(default, id);
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -549,9 +548,9 @@ public static slice<byte> AppendMarker(slice<byte> dst, uint64 id) {
     copy(buf[..], prefix);
     for (nint i = 0; i < 16; i++) {
         buf[len(prefix) + i] = LiteralByteAt("0123456789abcdef"u8, (id >> 60));
-        id <<= (int)(4);
+        id <<= 4;
     }
-    buf[len(prefix) + 16] = (rune)']';
+    buf[len(prefix) + 16] = (byte)']';
     return appendꓸꓸꓸ(dst, buf[..]);
 }
 
@@ -564,24 +563,24 @@ private static readonly @string bisectMatchˢ = "[bisect-match "u8;
 // and whether a marker was found at all.
 // If there is no marker, CutMarker returns line, 0, false.
 public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
-    @string @short = default!;
-    uint64 id = default!;
+    @string @short = default;
+    uint64 id = default;
 
     // Find first instance of prefix.
     @string prefix = bisectMatchˢ;
     nint i = 0;
-    for (; ᐧ ; i++) {
+    for (; ; i++) {
         if (i >= len(line) - len(prefix)) {
             return (line, 0, false);
         }
-        if (line[i] == (rune)'[' && line.slice(i, i + len(prefix)) == prefix) {
+        if (line[i] == '[' && line.slice(i, i + len(prefix)) == prefix) {
             break;
         }
     }
 
     // Scan to ].
     nint j = i + len(prefix);
-    while (j < len(line) && line[j] != (rune)']') {
+    while (j < len(line) && line[j] != ']') {
         j++;
     }
     if (j >= len(line)) {
@@ -590,26 +589,26 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
 
     // Parse id.
     @string idstr = line.slice(i + len(prefix), j);
-    if (len(idstr) >= 3 && idstr[..2] == "0x"){
+    if (len(idstr) >= 3 && idstr[..2] == "0x") {
         // parse hex
         if (len(idstr) > 2 + 16) { // max 0x + 16 digits
             return (line, 0, false);
         }
         for (nint iΔ1 = 2; iΔ1 < len(idstr); iΔ1++) {
-            id <<= (int)(4);
+            id <<= 4;
             {
                 var c = idstr[iΔ1];
                 switch (ᐧ) {
-                case {} when (rune)'0' <= c && c <= (rune)'9': {
-                    id |= (uint64)((uint64)((byte)(c - (rune)'0')));
+                case {} when (byte)'0' <= c && c <= (byte)'9': {
+                    id |= (uint64)((uint64)((byte)(c - '0')));
                     break;
                 }
-                case {} when (rune)'a' <= c && c <= (rune)'f': {
-                    id |= (uint64)((uint64)((byte)(c - (rune)'a' + 10)));
+                case {} when (byte)'a' <= c && c <= (byte)'f': {
+                    id |= (uint64)((uint64)((byte)(c - 'a' + 10)));
                     break;
                 }
-                case {} when (rune)'A' <= c && c <= (rune)'F': {
-                    id |= (uint64)((uint64)((byte)(c - (rune)'A' + 10)));
+                case {} when (byte)'A' <= c && c <= (byte)'F': {
+                    id |= (uint64)((uint64)((byte)(c - 'A' + 10)));
                     break;
                 }}
             }
@@ -620,15 +619,15 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
         }
         // parse binary
         for (nint iΔ2 = 0; iΔ2 < len(idstr); iΔ2++) {
-            id <<= (int)(1);
+            id <<= 1;
             {
                 var c = idstr[iΔ2];
                 switch (c) {
                 default: {
                     return (line, 0, false);
                 }
-                case (rune)'0' or (rune)'1': {
-                    id |= (uint64)((uint64)((byte)(c - (rune)'0')));
+                case (byte)'0' or (byte)'1': {
+                    id |= (uint64)((uint64)((byte)(c - '0')));
                     break;
                 }}
             }
@@ -639,10 +638,9 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
     // Remove at most one space from around the marker,
     // so that "foo [marker] bar" shortens to "foo bar".
     j++; // skip ]
-    if (i > 0 && line[i - 1] == (rune)' '){
+    if (i > 0 && line[i - 1] == ' ') {
         i--;
-    } else 
-    if (j < len(line) && line[j] == (rune)' ') {
+    } else if (j < len(line) && line[j] == ' ') {
         j++;
     }
     @short = line.slice(0, i) + line.slice(j);
@@ -796,7 +794,7 @@ internal static uint64 fnvString(uint64 h, @string x) {
 internal static uint64 fnvUint64(uint64 h, uint64 x) {
     for (nint i = 0; i < 8; i++) {
         h ^= (uint64)((x & 0xFF));
-        x >>= (int)(8);
+        x >>= 8;
         h *= prime64;
     }
     return h;
@@ -805,7 +803,7 @@ internal static uint64 fnvUint64(uint64 h, uint64 x) {
 internal static uint64 fnvUint32(uint64 h, uint32 x) {
     for (nint i = 0; i < 4; i++) {
         h ^= (uint64)((uint64)(x & 0xFF));
-        x >>= (int)(8);
+        x >>= 8;
         h *= prime64;
     }
     return h;
@@ -832,7 +830,7 @@ internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.mu.Lock();
-    if (d.m == default!) {
+    if (d.m == nil) {
         d.m = new map<uint64, bool>();
     }
     var seen = d.m[h];

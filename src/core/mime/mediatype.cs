@@ -24,7 +24,7 @@ internal static readonly @string utf8ˢ3 = "utf-8''"u8;
 public static @string FormatMediaType(@string t, map<@string, @string> param) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     {
-        var (major, sub, ok) = strings.Cut(t, "/"u8); if (!ok){
+        var (major, sub, ok) = strings.Cut(t, "/"u8); if (!ok) {
             if (!isToken(t)) {
                 return ""u8;
             }
@@ -34,15 +34,15 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
                 return ""u8;
             }
             Ꮡb.WriteString(strings.ToLower(major));
-            Ꮡb.WriteByte((rune)'/');
+            Ꮡb.WriteByte((byte)'/');
             Ꮡb.WriteString(strings.ToLower(sub));
         }
     }
 
     foreach (var (_, attribute) in slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(param))) {
         @string value = param[attribute];
-        Ꮡb.WriteByte((rune)';');
-        Ꮡb.WriteByte((rune)' ');
+        Ꮡb.WriteByte((byte)';');
+        Ꮡb.WriteByte((byte)' ');
         if (!isToken(attribute)) {
             return ""u8;
         }
@@ -51,9 +51,9 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
         var needEnc = needsEncoding(value);
         if (needEnc) {
             // RFC 2231 section 4
-            Ꮡb.WriteByte((rune)'*');
+            Ꮡb.WriteByte((byte)'*');
         }
-        Ꮡb.WriteByte((rune)'=');
+        Ꮡb.WriteByte((byte)'=');
 
         if (needEnc) {
             Ꮡb.WriteString(utf8ˢ3);
@@ -63,11 +63,11 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
                 var ch = value[index];
                 // {RFC 2231 section 7}
                 // attribute-char := <any (US-ASCII) CHAR except SPACE, CTLs, "*", "'", "%", or tspecials>
-                if (ch <= (rune)' ' || ch >= 0x7F || ch == (rune)'*' || ch == (rune)'\'' || ch == (rune)'%' || isTSpecial(ch)) {
+                if (ch <= ' ' || ch >= 0x7F || ch == '*' || ch == '\'' || ch == '%' || isTSpecial(ch)) {
                     Ꮡb.WriteString(value.slice(offsetΔ1, index));
                     offsetΔ1 = index + 1;
 
-                    Ꮡb.WriteByte((rune)'%');
+                    Ꮡb.WriteByte((byte)'%');
                     Ꮡb.WriteByte(upperhex[(ch >> 4)]);
                     Ꮡb.WriteByte(upperhex[(byte)(ch & 0x0F)]);
                 }
@@ -81,18 +81,18 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
             continue;
         }
 
-        Ꮡb.WriteByte((rune)'"');
+        Ꮡb.WriteByte((byte)'"');
         nint offset = 0;
         for (nint index = 0; index < len(value); index++) {
             var character = value[index];
-            if (character == (rune)'"' || character == (rune)'\\') {
+            if (character == '"' || character == '\\') {
                 Ꮡb.WriteString(value.slice(offset, index));
                 offset = index;
-                Ꮡb.WriteByte((rune)'\\');
+                Ꮡb.WriteByte((byte)'\\');
             }
         }
         Ꮡb.WriteString(value.slice(offset));
-        Ꮡb.WriteByte((rune)'"');
+        Ꮡb.WriteByte((byte)'"');
     }
     return b.String();
 }
@@ -103,9 +103,9 @@ internal static error checkMediaTypeDisposition(@string s) {
         return errNoMediaType;
     }
     if (rest == ""u8) {
-        return default!;
+        return default;
     }
-    bool ok = default!;
+    bool ok = default;
     {
         (rest, ok) = strings.CutPrefix(rest, "/"u8); if (!ok) {
             return errNoSlashAfterFirstToken;
@@ -118,7 +118,7 @@ internal static error checkMediaTypeDisposition(@string s) {
     if (rest != ""u8) {
         return errUnexpectedContentAfterMediaSubtype;
     }
-    return default!;
+    return default;
 }
 
 internal static error errNoMediaType = errors.New("mime: no media type"u8);
@@ -142,16 +142,16 @@ public static error ErrInvalidMediaParameter = errors.New("mime: invalid media p
 // The returned map, params, maps from the lowercase
 // attribute to the attribute value with its case preserved.
 public static (@string mediatype, map<@string, @string> @params, error err) ParseMediaType(@string v) {
-    @string mediatype = default!;
-    map<@string, @string> @params = default!;
-    error err = default!;
+    @string mediatype = default;
+    map<@string, @string> @params = default;
+    error err = default;
 
     var (@base, _, _) = strings.Cut(v, ";"u8);
     mediatype = strings.TrimSpace(strings.ToLower(@base));
 
     err = checkMediaTypeDisposition(mediatype);
-    if (err != default!) {
-        return ("", default!, err);
+    if (err != nil) {
+        return ("", default, err);
     }
 
     @params = new map<@string, @string>();
@@ -159,7 +159,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
     // Map of base parameter name -> parameter name -> value
     // for parameters containing a '*' character.
     // Lazily initialized.
-    map<@string, map<@string, @string>> continuation = default!;
+    map<@string, map<@string, @string>> continuation = default;
 
     v = v.slice(len(@base));
     while (len(v) > 0) {
@@ -175,13 +175,13 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
                 break;
             }
             // Parse error.
-            return (mediatype, default!, ErrInvalidMediaParameter);
+            return (mediatype, default, ErrInvalidMediaParameter);
         }
 
         var pmap = @params;
         {
             var (baseName, _, ok) = strings.Cut(key, "*"u8); if (ok) {
-                if (continuation == default!) {
+                if (continuation == nil) {
                     continuation = new map<@string, map<@string, @string>>();
                 }
                 {
@@ -195,7 +195,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
         {
             var (vΔ1, exists) = pmap[key, ꟷ]; if (exists && vΔ1 != value) {
                 // Duplicate parameter names are incorrect, but we allow them if they are equal.
-                return ("", default!, errDuplicateParamName);
+                return ("", default, errDuplicateParamName);
             }
         }
         pmap[key] = value;
@@ -220,7 +220,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
 
         buf.Reset();
         var valid = false;
-        for (nint n = 0; ᐧ ; n++) {
+        for (nint n = 0; ; n++) {
             @string simplePart = fmt.Sprintf("%s*%d"u8, key, n);
             {
                 var (vΔ3, okΔ2) = pieceMap[simplePart, ꟷ]; if (okΔ2) {
@@ -235,7 +235,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
                 break;
             }
             valid = true;
-            if (n == 0){
+            if (n == 0) {
                 {
                     var (decv, okΔ3) = decode2231Enc(vΔ4); if (okΔ3) {
                         Ꮡbuf.WriteString(decv);
@@ -270,12 +270,14 @@ internal static (@string, bool) decode2231Enc(@string v) {
     }
     charset = strings.ToLower(charset);
     var exprᴛ1 = charset;
-    if (exprᴛ1 == "us-ascii"u8 || exprᴛ1 == "utf-8"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "us-ascii"u8 || exprᴛ1 == "utf-8"u8: {
+        break;
     }
-    else { /* default: */
+    default: {
         // Empty or unsupported encoding.
         return ("", false);
-    }
+    }}
     return percentHexUnescape(extOtherVals);
 }
 
@@ -298,13 +300,13 @@ internal static (@string token, @string rest) consumeToken(@string v) {
 // quoted-string) and the rest of the string. On failure, returns
 // ("", v).
 internal static (@string value, @string rest) consumeValue(@string v) {
-    @string value = default!;
-    @string rest = default!;
+    @string value = default;
+    @string rest = default;
 
     if (v == ""u8) {
         return (value, rest);
     }
-    if (v[0] != (rune)'"') {
+    if (v[0] != '"') {
         return consumeToken(v);
     }
 
@@ -312,7 +314,7 @@ internal static (@string value, @string rest) consumeValue(@string v) {
     var buffer = @new<strings.Builder>();
     for (nint i = 1; i < len(v); i++) {
         var r = v[i];
-        if (r == (rune)'"') {
+        if (r == '"') {
             return (buffer.String(), v.slice(i + 1));
         }
         // When MSIE sends a full file path (in "intranet mode"), it does not
@@ -325,12 +327,12 @@ internal static (@string value, @string rest) consumeValue(@string v) {
         // and intended as a literal backslash. This makes Go servers deal better
         // with MSIE without affecting the way they handle conforming MIME
         // generators.
-        if (r == (rune)'\\' && i + 1 < len(v) && isTSpecial(v[i + 1])) {
+        if (r == '\\' && i + 1 < len(v) && isTSpecial(v[i + 1])) {
             buffer.WriteByte(v[i + 1]);
             i++;
             continue;
         }
-        if (r == (rune)'\r' || r == (rune)'\n') {
+        if (r == '\r' || r == '\n') {
             return ("", v);
         }
         buffer.WriteByte(v[i]);
@@ -340,12 +342,12 @@ internal static (@string value, @string rest) consumeValue(@string v) {
 }
 
 internal static (@string param, @string value, @string rest) consumeMediaParam(@string v) {
-    @string param = default!;
-    @string value = default!;
-    @string rest = default!;
+    @string param = default;
+    @string value = default;
+    @string rest = default;
 
     rest = strings.TrimLeftFunc(v, Δunicode.IsSpace);
-    bool ok = default!;
+    bool ok = default;
     {
         (rest, ok) = strings.CutPrefix(rest, ";"u8); if (!ok) {
             return ("", "", v);
@@ -378,7 +380,7 @@ internal static (@string, bool) percentHexUnescape(@string s) {
     // Count %, check that they're well-formed.
     nint percents = 0;
     for (nint i = 0; i < len(s); ) {
-        if (s[i] != (rune)'%') {
+        if (s[i] != '%') {
             i++;
             continue;
         }
@@ -396,7 +398,7 @@ internal static (@string, bool) percentHexUnescape(@string s) {
     nint j = 0;
     for (nint i = 0; i < len(s); ) {
         switch (s[i]) {
-        case (rune)'%': {
+        case (byte)'%': {
             t[j] = (byte)((byte)(unhex(s[i + 1]) << 4) | unhex(s[i + 2]));
             j++;
             i += 3;
@@ -414,13 +416,13 @@ internal static (@string, bool) percentHexUnescape(@string s) {
 
 internal static bool ishex(byte c) {
     switch (ᐧ) {
-    case {} when (rune)'0' <= c && c <= (rune)'9': {
+    case {} when (byte)'0' <= c && c <= (byte)'9': {
         return true;
     }
-    case {} when (rune)'a' <= c && c <= (rune)'f': {
+    case {} when (byte)'a' <= c && c <= (byte)'f': {
         return true;
     }
-    case {} when (rune)'A' <= c && c <= (rune)'F': {
+    case {} when (byte)'A' <= c && c <= (byte)'F': {
         return true;
     }}
     return false;
@@ -428,14 +430,14 @@ internal static bool ishex(byte c) {
 
 internal static byte unhex(byte c) {
     switch (ᐧ) {
-    case {} when (rune)'0' <= c && c <= (rune)'9': {
-        return (byte)(c - (rune)'0');
+    case {} when (byte)'0' <= c && c <= (byte)'9': {
+        return (byte)(c - '0');
     }
-    case {} when (rune)'a' <= c && c <= (rune)'f': {
-        return (byte)(c - (rune)'a' + 10);
+    case {} when (byte)'a' <= c && c <= (byte)'f': {
+        return (byte)(c - 'a' + 10);
     }
-    case {} when (rune)'A' <= c && c <= (rune)'F': {
-        return (byte)(c - (rune)'A' + 10);
+    case {} when (byte)'A' <= c && c <= (byte)'F': {
+        return (byte)(c - 'A' + 10);
     }}
     return 0;
 }

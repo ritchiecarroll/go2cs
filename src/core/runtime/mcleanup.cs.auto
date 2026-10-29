@@ -117,13 +117,13 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
         // debug.sbrk never frees memory, so no cleanup will ever run
         // (and we don't have the data structures to record them).
         // Return a noop cleanup.
-        return new Cleanup(nil);
+        return new Cleanup();
     }
 
     // Create new storage for the argument.
-    ж<S> argv = default!;
+    ж<S> argv = default;
     {
-        var size = @unsafe.Sizeof(arg); if (size < maxTinySize && (~argType).PtrBytes == 0){
+        var size = @unsafe.Sizeof(arg); if (size < maxTinySize && argType.PtrBytes == 0) {
             // Side-step the tiny allocator to avoid liveness issues, since this box
             // will be treated like a root by the GC. We model the box as an array of
             // uintptrs to guarantee maximum allocator alignment.
@@ -145,7 +145,7 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
     if (@base == 0) {
         if (isGoPointerWithoutSpan(@unsafe.Pointer.FromPinnedBox(Ꮡptr))) {
             // Cleanup is a noop.
-            return new Cleanup(nil);
+            return new Cleanup();
         }
         throw panic("runtime.AddCleanup: ptr not in allocated block");
     }
@@ -153,14 +153,14 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
     // Check that arg is not within ptr.
     if (kind == abi.Pointer || kind == abi.UnsafePointer) {
         var argPtr = (uintptr)(~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡarg)));
-        if (argPtr >= @base && argPtr < @base + (~span).elemsize) {
+        if (argPtr >= @base && argPtr < @base + span.elemsize) {
             // It's possible that both pointers are separate
             // parts of a tiny allocation, which is OK.
             // We side-stepped the tiny allocator above for
             // the allocation for the cleanup,
             // but the argument itself can still overlap
             // with the value to which the cleanup is attached.
-            if ((~span).spanclass != tinySpanClass) {
+            if (span.spanclass != tinySpanClass) {
                 throw panic("runtime.AddCleanup: ptr is within arg, cleanup will never run");
             }
         }
@@ -171,15 +171,15 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
     var (cBase, cSpan, _) = findObject((uintptr)cleanupFV, 0, 0);
     if (cBase != 0) {
         var tp = cSpan.typePointersOfUnchecked(cBase);
-        while (ᐧ) {
-            uintptr addr = default!;
+        for (;;) {
+            uintptr addr = default;
             {
-                (tp, addr) = tp.next(cBase + (~cSpan).elemsize); if (addr == 0) {
+                (tp, addr) = tp.next(cBase + cSpan.elemsize); if (addr == 0) {
                     break;
                 }
             }
             var ptrΔ1 = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
-            if (ptrΔ1 >= @base && ptrΔ1 < @base + (~span).elemsize) {
+            if (ptrΔ1 >= @base && ptrΔ1 < @base + span.elemsize) {
                 throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
             }
         }
@@ -253,24 +253,24 @@ public static void Stop(this Cleanup c) {
 
     var offset = c.ptr - span.@base();
 
-    ж<special> found = default!;
+    ж<special> found = default;
     @lock(span.of(mspan.Ꮡspeciallock));
 
     var (iter, exists) = span.specialFindSplicePoint(offset, _KindSpecialCleanup);
     if (exists) {
-        while (ᐧ) {
+        for (;;) {
             var s = iter.ValueSlot;
             if (s == nil) {
                 // Reached the end of the linked list. Stop searching at this point.
                 break;
             }
-            if (offset == (~s).offset && _KindSpecialCleanup == (~s).kind && (s.Reinterpret<special, specialCleanup>()).Value.id == c.id) {
+            if (offset == s.offset && _KindSpecialCleanup == s.kind && (s.Reinterpret<special, specialCleanup>()).Value.id == c.id) {
                 // The special is a cleanup and contains a matching cleanup id.
-                iter.ValueSlot = s.Value.next;
+                iter.ValueSlot = s.next;
                 found = s;
                 break;
             }
-            if (offset < (~s).offset || (offset == (~s).offset && _KindSpecialCleanup < (~s).kind)) {
+            if (offset < s.offset || (offset == s.offset && _KindSpecialCleanup < s.kind)) {
                 // The special is outside the region specified for that kind of
                 // special. The specials are sorted by kind.
                 break;
@@ -279,7 +279,7 @@ public static void Stop(this Cleanup c) {
             iter = s.of(special.Ꮡnext);
         }
     }
-    if ((~span).specials == nil) {
+    if (span.specials == nil) {
         spanHasNoSpecials(span);
     }
     unlock(span.of(mspan.Ꮡspeciallock));
@@ -316,7 +316,7 @@ internal static ref array<uint8> cleanupFnPtrMask => ref ((StaticBox<array<uint8
 partial struct cleanupFn {
     // call is an adapter function that understands how to safely call fn(*arg).
     internal Action<ж<funcval>, @unsafe.Pointer> call;
-    internal ж<funcval> fn;    // cleanup function passed to AddCleanup.
+    internal ж<funcval> fn;       // cleanup function passed to AddCleanup.
     internal @unsafe.Pointer arg; // pointer to argument to pass to cleanup function.
 }
 
@@ -367,7 +367,7 @@ internal static void take(this ref cleanupBlock a, ж<cleanupBlock> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var dst = a.cleanups.slice((nint)(a.n));
-    if ((uint32)len(dst) >= b.n){
+    if ((uint32)len(dst) >= b.n) {
         // Take all.
         copy(dst, b.cleanups[..]);
         a.n += b.n;
@@ -451,7 +451,7 @@ internal static void addWork(this ж<cleanupQueue> Ꮡq, nint n) {
 // tryTakeWork is an attempt to dequeue some work by a cleanup goroutine.
 // This might fail if there's no work to do.
 internal static bool tryTakeWork(this ж<cleanupQueue> Ꮡq) {
-    while (ᐧ) {
+    for (;;) {
         var wu = Ꮡq.of(cleanupQueue.ᏑworkUnits).Load();
         if (wu == 0) {
             return false;
@@ -477,7 +477,7 @@ internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
         b = (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡfree).pop());
         if (b == nil) {
             b = (ж<cleanupBlock>)(uintptr)(persistentalloc(cleanupBlockSize, tagAlign, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
-            while (ᐧ) {
+            for (;;) {
                 var next = (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡall).Load());
                 b.Value.alllink = next;
                 if (Ꮡq.of(cleanupQueue.Ꮡall).CompareAndSwap(@unsafe.Pointer.FromPinnedBox(next), @unsafe.Pointer.FromPinnedBox(b))) {
@@ -490,7 +490,7 @@ internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
     {
         var full = b.enqueue(c); if (full) {
             Ꮡq.of(cleanupQueue.Ꮡfull).push(b.of(cleanupBlock.Ꮡlfnode));
-            pp.Value.cleanups = default!;
+            pp.Value.cleanups = default;
             Ꮡq.addWork(1);
         }
     }
@@ -503,7 +503,7 @@ internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
 internal static ж<cleanupBlock> dequeue(this ж<cleanupQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         if (Ꮡq.tryTakeWork()) {
             // Guaranteed to be non-nil.
             return (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡfull).pop());
@@ -550,7 +550,7 @@ internal static void flush(this ж<cleanupQueue> Ꮡq) {
     // Coalesce the partially-filled blocks to present a more accurate picture of demand.
     // We use the number of coalesced blocks to process as a signal for demand to create
     // new cleanup goroutines.
-    ж<cleanupBlock> cb = default!;
+    ж<cleanupBlock> cb = default;
     foreach (var (_, pp) in allp) {
         if (pp == nil) {
             // This function is reachable via mallocgc in the
@@ -564,7 +564,7 @@ internal static void flush(this ж<cleanupQueue> Ꮡq) {
             missing++;
             continue;
         }
-        pp.Value.cleanups = default!;
+        pp.Value.cleanups = default;
         if (cb == nil) {
             cb = b;
             continue;
@@ -575,7 +575,7 @@ internal static void flush(this ж<cleanupQueue> Ꮡq) {
             Ꮡq.of(cleanupQueue.Ꮡfull).push(cb.of(cleanupBlock.Ꮡlfnode));
             flushed++;
             cb = b;
-            b = default!;
+            b = default;
         }
         if (b != nil && b.empty()) {
             Ꮡq.of(cleanupQueue.Ꮡfree).push(b.of(cleanupBlock.Ꮡlfnode));
@@ -611,13 +611,13 @@ internal static void wake(this ж<cleanupQueue> Ꮡq) {
 
     // Figure out how many goroutines to wake, and how many extra goroutines to create.
     // Wake one goroutine for each work unit.
-    uint32 wake = default!;
-    uint32 extra = default!;
+    uint32 wake = default;
+    uint32 extra = default;
     var work = Ꮡq.of(cleanupQueue.ᏑworkUnits).Load();
     var asleep = (uint64)Ꮡq.of(cleanupQueue.Ꮡasleep).Load();
-    if (work > asleep){
+    if (work > asleep) {
         wake = (uint32)asleep;
-        if (work > (uint64)Δmath.MaxUint32){
+        if (work > (uint64)Δmath.MaxUint32) {
             // Protect against overflow.
             extra = Δmath.MaxUint32;
         } else {
@@ -707,8 +707,8 @@ internal static void endRunningCleanups(this ж<cleanupQueue> Ꮡq) {
 }
 
 internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQueue> Ꮡq) {
-    uint64 queued = default!;
-    uint64 executed = default!;
+    uint64 queued = default;
+    uint64 executed = default;
     ref var q = ref Ꮡq.DerefOrNull();
 
     executed = Ꮡq.of(cleanupQueue.Ꮡexecuted).Load();
@@ -734,7 +734,7 @@ internal static ref cleanupQueue gcCleanups => ref ((StaticBox<cleanupQueue>)Ꮡ
 
 // runCleanups is the entrypoint for all cleanup-running goroutines.
 internal static void runCleanups() {
-    while (ᐧ) {
+    for (;;) {
         var b = ᏑgcCleanups.dequeue();
         if (raceenabled) {
             // Approximately: adds a happens-before edge between the cleanup
@@ -745,9 +745,9 @@ internal static void runCleanups() {
         ᏑgcCleanups.beginRunningCleanups();
         for (nint i = 0; i < (nint)(~b).n; i++) {
             var c = (~b).cleanups[i];
-            b.Value.cleanups[i] = new cleanupFn(nil);
+            b.Value.cleanups[i] = new cleanupFn();
 
-            uintptr racectx = default!;
+            uintptr racectx = default;
             if (raceenabled) {
                 // Enter a new race context so the race detector can catch
                 // potential races between cleanups, even if they execute on

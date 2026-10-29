@@ -23,19 +23,19 @@ internal static (nint, Δsyscall.Sockaddr, @string, error) accept(nint s) {
     // However, a call to the File method will put it back into
     // blocking mode. We can't take that risk, so no use of ForkLock here.
     var (ns, sa, err) = AcceptFunc(s);
-    if (err == default!) {
+    if (err == nil) {
         Δsyscall.CloseOnExec(ns);
     }
-    if (err != default!) {
-        return (-1, default!, acceptˢ, err);
+    if (err != nil) {
+        return (-1, default, acceptˢ, err);
     }
     {
-        err = Δsyscall.SetNonblock(ns, true); if (err != default!) {
+        err = Δsyscall.SetNonblock(ns, true); if (err != nil) {
             CloseFunc(ns);
-            return (-1, default!, setnonblockˢ, err);
+            return (-1, default, setnonblockˢ, err);
         }
     }
-    return (ns, sa, "", default!);
+    return (ns, sa, "", default);
 }
 
 } // end poll_package

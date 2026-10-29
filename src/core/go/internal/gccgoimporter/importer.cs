@@ -26,9 +26,9 @@ partial class gccgoimporter_package {
 
 // A PackageInit describes an imported package that needs initialization.
 partial struct PackageInit {
-    public @string Name; // short package name
+    public @string Name;     // short package name
     public @string InitFunc; // name of init function
-    public nint Priority;   // priority of init function, see InitData.Priority
+    public nint Priority;    // priority of init function, see InitData.Priority
 }
 
 // The gccgo-specific init data for a package.
@@ -58,8 +58,8 @@ internal static (@string, error) findExportFile(slice<@string> searchpaths, @str
             pkgfullpath + ".o"u8
         }.array()) {
             var (fi, err) = os.Stat(filepathΔ1);
-            if (err == default! && !fi.IsDir()) {
-                return (filepathΔ1, default!);
+            if (err == nil && !fi.IsDir()) {
+                return (filepathΔ1, default);
             }
         }
     }
@@ -79,48 +79,50 @@ internal static readonly @string aixbigafMagic = "<big"u8;
 // reads the export data from the first member, which is assumed to be an ELF file.
 // This is intended to replicate the logic in gofrontend.
 internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFile(@string fpath) {
-    io.ReadSeeker reader = default!;
-    io.Closer closer = default!;
+    io.ReadSeeker reader = default;
+    io.Closer closer = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
         ref var err = ref Ꮡerr.ValueSlot;
 
         (var f, err) = os.Open(fpath);
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone;
         }
         closer = new os_FileжCloser(f);
         var fʗ1 = f;
         defer(() => {
-            if (Ꮡerr.ValueSlot != default! && closer != default!) {
+            if (Ꮡerr.ValueSlot != nil && closer != nil) {
                 fʗ1.Close();
             }
         }, ref ᒐ);
 
         array<byte> magic = new(4);
         (_, err) = f.ReadAt(magic[..], 0);
-        if (err != default!) {
+        if (err != nil) {
             goto ᒐdone;
         }
 
-        io.ReaderAt objreader = default!;
+        io.ReaderAt objreader = default;
         var exprᴛ1 = ((sstring)(magic[..]));
-        if (exprᴛ1 == gccgov1Magic || exprᴛ1 == gccgov2Magic || exprᴛ1 == gccgov3Magic || exprᴛ1 == goimporterMagic) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == gccgov1Magic || exprᴛ1 == gccgov2Magic || exprᴛ1 == gccgov3Magic || exprᴛ1 == goimporterMagic: {
             // Raw export data.
             reader = new os_FileжReadSeeker(f);
             goto ᒐdone;
         }
-        if (exprᴛ1 == archiveMagic || exprᴛ1 == aixbigafMagic) {
+        case {} when exprᴛ1 == archiveMagic || exprᴛ1 == aixbigafMagic: {
             (reader, err) = arExportData(new os_FileжReadSeeker(f));
             goto ᒐdone;
         }
-        { /* default: */
+        default: {
             objreader = new os_FileжReaderAt(f);
-        }
+            break;
+        }}
 
         (var ef, err) = elf.NewFile(objreader);
-        if (err == default!) {
+        if (err == nil) {
             var sec = ef.Section(goExportˢ);
             if (sec == nil) {
                 err = fmt.Errorf("%s: .go_export section not found"u8, fpath);
@@ -131,9 +133,9 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
         }
 
         (var xf, err) = xcoff.NewFile(objreader);
-        if (err == default!) {
+        if (err == nil) {
             var sdat = xf.CSect(goExportˢ);
-            if (sdat == default!) {
+            if (sdat == nil) {
                 err = fmt.Errorf("%s: .go_export section not found"u8, fpath);
                 goto ᒐdone;
             }
@@ -165,8 +167,8 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
     var initmapʗ1 = initmap;
     var searchpathsʗ1 = searchpaths;
     return (map<@string, ж<types.Package>> imports, @string pkgpath, @string srcDir, Func<@string, (io.ReadCloser, error)> lookup) => {
-        ж<types.Package> pkg = default!;
-        error err = default!;
+        ж<types.Package> pkg = default;
+        error err = default;
         GoFrame ᒐ = default;
         try {
             // TODO(gri): Use srcDir.
@@ -174,29 +176,29 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
             // the go command and other tools provide a translation table
             // for relative imports (like ./foo or vendored imports).
             if (pkgpath == "unsafe"u8) {
-                (pkg, err) = (types.Unsafe, default!); goto ᒐdone;
+                (pkg, err) = (types.Unsafe, default); goto ᒐdone;
             }
 
-            io.ReadSeeker reader = default!;
-            @string fpath = default!;
-            io.ReadCloser rc = default!;
-            if (lookup != default!) {
+            io.ReadSeeker reader = default;
+            @string fpath = default;
+            io.ReadCloser rc = default;
+            if (lookup != nil) {
                 {
                     var p = imports[pkgpath]; if (p != nil && p.Complete()) {
-                        (pkg, err) = (p, default!); goto ᒐdone;
+                        (pkg, err) = (p, default); goto ᒐdone;
                     }
                 }
                 (rc, err) = lookup(pkgpath);
-                if (err != default!) {
-                    (pkg, err) = (default!, err); goto ᒐdone;
+                if (err != nil) {
+                    (pkg, err) = (default, err); goto ᒐdone;
                 }
             }
-            if (rc != default!){
+            if (rc != nil) {
                 var rcʗ1 = rc;
                 defer(() => rcʗ1.Close(), ref ᒐ);
                 var (rs, ok) = rc._<io.ReadSeeker>(ᐧ);
                 if (!ok) {
-                    (pkg, err) = (default!, fmt.Errorf("gccgo importer requires lookup to return an io.ReadSeeker, have %T"u8, rc)); goto ᒐdone;
+                    (pkg, err) = (default, fmt.Errorf("gccgo importer requires lookup to return an io.ReadSeeker, have %T"u8, rc)); goto ᒐdone;
                 }
                 reader = rs;
                 fpath = "<lookup "u8 + pkgpath + ">"u8;
@@ -208,46 +210,48 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
                 }
             } else {
                 (fpath, err) = findExportFile(searchpathsʗ1, pkgpath);
-                if (err != default!) {
-                    (pkg, err) = (default!, err); goto ᒐdone;
+                if (err != nil) {
+                    (pkg, err) = (default, err); goto ᒐdone;
                 }
 
                 var (r, closer, errΔ1) = openExportFile(fpath);
-                if (errΔ1 != default!) {
-                    (pkg, err) = (default!, errΔ1); goto ᒐdone;
+                if (errΔ1 != nil) {
+                    (pkg, err) = (default, errΔ1); goto ᒐdone;
                 }
-                if (closer != default!) {
+                if (closer != nil) {
                     var closerʗ1 = closer;
                     defer(() => closerʗ1.Close(), ref ᒐ);
                 }
                 reader = r;
             }
 
-            @string magics = default!;
+            @string magics = default;
             (magics, err) = readMagic(reader);
-            if (err != default!) {
+            if (err != nil) {
                 goto ᒐdone;
             }
 
             if (magics == archiveMagic || magics == aixbigafMagic) {
                 (reader, err) = arExportData(reader);
-                if (err != default!) {
+                if (err != nil) {
                     goto ᒐdone;
                 }
                 (magics, err) = readMagic(reader);
-                if (err != default!) {
+                if (err != nil) {
                     goto ᒐdone;
                 }
             }
 
             var exprᴛ1 = magics;
-            if (exprᴛ1 == gccgov1Magic || exprᴛ1 == gccgov2Magic || exprᴛ1 == gccgov3Magic) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == gccgov1Magic || exprᴛ1 == gccgov2Magic || exprᴛ1 == gccgov3Magic: {
                 ref var p = ref heap(new parser(), out var Ꮡp);
                 Ꮡp.init(fpath, reader, imports);
                 pkg = Ꮡp.parsePackage();
-                if (initmapʗ1 != default!) {
+                if (initmapʗ1 != nil) {
                     initmapʗ1[pkg] = p.initdata;
                 }
+                break;
             }
             // Excluded for now: Standard gccgo doesn't support this import format currently.
             // case goimporterMagic:
@@ -268,9 +272,10 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
             // 		p.parseInitData()
             // 		initmap[pkg] = p.initdata
             // 	}
-            else { /* default: */
+            default: {
                 err = fmt.Errorf("unrecognized magic string: %q"u8, magics);
-            }
+                break;
+            }}
 
             goto ᒐdone;
         }
@@ -285,16 +290,16 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
 internal static (@string, error) readMagic(io.ReadSeeker reader) {
     array<byte> magic = new(4);
     {
-        var (_, err) = reader.Read(magic[..]); if (err != default!) {
+        var (_, err) = reader.Read(magic[..]); if (err != nil) {
             return ("", err);
         }
     }
     {
-        var (_, err) = reader.Seek(0, io.SeekStart); if (err != default!) {
+        var (_, err) = reader.Seek(0, io.SeekStart); if (err != nil) {
             return ("", err);
         }
     }
-    return ((@string)(magic[..]), default!);
+    return ((@string)(magic[..]), default);
 }
 
 } // end gccgoimporter_package

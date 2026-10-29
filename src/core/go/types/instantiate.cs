@@ -63,18 +63,18 @@ public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slic
         var tparams = orig_.TypeParams().list();
         assert(len(tparams) > 0);
         if (len(targs) != len(tparams)) {
-            return (default!, fmt.Errorf("got %d type arguments but %s has %d type parameters"u8, len(targs), orig, len(tparams)));
+            return (default, fmt.Errorf("got %d type arguments but %s has %d type parameters"u8, len(targs), orig, len(tparams)));
         }
         {
             ref var i = ref heap<nint>(out var Ꮡi);
-            (i, var err) = (((ж<Checker>)nil)).verify(nopos, tparams, targs, Ꮡctxt); if (err != default!) {
-                return (default!, new ArgumentErrorжerror(Ꮡ(new ArgumentError(i, err))));
+            (i, var err) = (((ж<Checker>)nil)).verify(nopos, tparams, targs, Ꮡctxt); if (err != nil) {
+                return (default, new ArgumentErrorжerror(Ꮡ(new ArgumentError(i, err))));
             }
         }
     }
 
     var inst = (((ж<Checker>)nil)).instance(nopos, orig_, targs, nil, Ꮡctxt);
-    return (inst, default!);
+    return (inst, default);
 }
 
 // instance instantiates the given original (generic) function or type with the
@@ -92,7 +92,7 @@ public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slic
 //
 // check may be nil (when not type-checking syntax); pos is used only if check is non-nil.
 internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔgenericType orig, slice<ΔType> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
-    ΔType res = default!;
+    ΔType res = default;
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     var ctxtsᴷ = new stackAppend<ж<Context>>();
@@ -102,9 +102,9 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     //
     // Invariant: if expanding != nil, the returned instance will be the instance
     // recorded in expanding.inst.ctxt.
-    slice<ж<Context>> ctxts = default!;
+    slice<ж<Context>> ctxts = default;
     if (Ꮡexpanding != nil) {
-        ctxts = append(ctxtsᴷ, ctxts, (~expanding.inst).ctxt);
+        ctxts = append(ctxtsᴷ, ctxts, expanding.inst.ctxt);
     }
     if (Ꮡctxt != nil) {
         ctxts = append(ctxts, Ꮡctxt);
@@ -135,7 +135,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     // that case, re-use the existing instance.
     foreach (var (i, ctxtΔ2) in ctxts) {
         {
-            var inst = ctxtΔ2.lookup(hashes[i], orig, targs); if (inst != default!) {
+            var inst = ctxtΔ2.lookup(hashes[i], orig, targs); if (inst != nil) {
                 return updateContexts(inst);
             }
         }
@@ -149,7 +149,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     case ж<Alias> origΔ1: {
         // verify type parameter count (see go.dev/issue/71198 for a test case)
         var tparams = origΔ1.TypeParams();
-        if (!Ꮡcheck.validateTArgLen(pos, (~origΔ1).obj.of(TypeName.Ꮡobject).Name(), tparams.Len(), len(targs))) {
+        if (!Ꮡcheck.validateTArgLen(pos, origΔ1.obj.of(TypeName.Ꮡobject).Name(), tparams.Len(), len(targs))) {
             // TODO(gri) Consider returning a valid alias instance with invalid
             //           underlying (aliased) type to match behavior of *Named
             //           types. Then this function will never return an invalid
@@ -179,13 +179,12 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
         // will not make a copy. In that case, make a copy now (so
         // we can set tparams to nil w/o causing side-effects).
         if (sig == origΔ1) {
-            ref var copy = ref heap<ΔSignature>(out var Ꮡcopy);
-            copy = sig.Value;
+            ref var copy = ref heap<ΔSignature>(sig.Value, out var Ꮡcopy);
             sig = Ꮡcopy;
         }
         // After instantiating a generic signature, it is not generic
         // anymore; we need to set tparams to nil.
-        sig.Value.tparams = default!;
+        sig.tparams = default;
         res = new ΔSignatureжΔType(sig);
         break;
     }
@@ -204,7 +203,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
 // number of type parameters (want); if they don't match an error is reported.
 // If validation fails and check is nil, validateTArgLen panics.
 internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos, @string name, nint want, nint got) {
-    @string qual = default!;
+    @string qual = default;
     switch (ᐧ) {
     case {} when got < want: {
         qual = notEnoughˢ;
@@ -228,7 +227,7 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
 }
 
 // check may be nil; pos is used only if check is non-nil.
-internal static (nint, error) verify(this ж<Checker> Ꮡcheck, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, ж<Context> Ꮡctxt) {
+internal static (nint, error) verify(this ж<Checker> Ꮡcheck, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, ж<Context> ctxt) {
     var smap = makeSubstMap(tparams, targs);
     foreach (var (i, tpar) in tparams) {
         // Ensure that we have a (possibly implicit) interface as type bound (go.dev/issue/51048).
@@ -237,13 +236,13 @@ internal static (nint, error) verify(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
         // as the instantiated type; before we can use it for bounds checking we
         // need to instantiate it with the type arguments with which we instantiated
         // the parameterized type.
-        var bound = Ꮡcheck.subst(pos, (~tpar).bound, smap, nil, Ꮡctxt);
+        var bound = Ꮡcheck.subst(pos, tpar.bound, smap, nil, ctxt);
         ref var cause = ref heap(new @string(), out var Ꮡcause);
         if (!Ꮡcheck.implements(targs[i], bound, true, Ꮡcause)) {
             return (i, errors.New(cause));
         }
     }
-    return (-1, default!);
+    return (-1, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -265,7 +264,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
         return true; // avoid follow-on errors
     }
     {
-        var (p, _) = Vu._<ж<Pointer>>(ᐧ); if (p != nil && !isValid((~p).@base.Underlying())) {
+        var (p, _) = Vu._<ж<Pointer>>(ᐧ); if (p != nil && !isValid(p.@base.Underlying())) {
             return true; // avoid follow-on errors (see go.dev/issue/49541 for an example)
         }
     }
@@ -278,8 +277,8 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
     var (Ti, _) = Tu._<ж<Interface>>(ᐧ);
     if (Ti == nil) {
         if (Ꮡcause != nil) {
-            @string detail = default!;
-            if (isInterfacePtr(Tu)){
+            @string detail = default;
+            if (isInterfacePtr(Tu)) {
                 detail = Ꮡcheck.sprintf("type %s is pointer to interface, not interface"u8, T);
             } else {
                 detail = Ꮡcheck.sprintf("%s is not an interface"u8, T);
@@ -328,12 +327,12 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
         }
         // If T is comparable, V must be comparable.
         // If V is strictly comparable, we're done.
-        if (comparableType(V, false, /* strict comparability */ default!) == nil) {
+        if (comparableType(V, false, /* strict comparability */ default) == nil) {
             return true;
         }
         // For constraint satisfaction, use dynamic (spec) comparability
         // so that ordinary, non-type parameter interfaces implement comparable.
-        if (constraint && comparableType(V, true, /* spec comparability */ default!) == nil) {
+        if (constraint && comparableType(V, true, /* spec comparability */ default) == nil) {
             // V is comparable if we are at Go 1.20 or higher.
             if (Ꮡcheck == nil || Ꮡcheck.Value.allowVersion(go1_20)) {
                 return true;
@@ -376,12 +375,11 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
             // If V ∉ t.typ but V ∈ ~t.typ then remember this type
             // so we can suggest it as an alternative in the error
             // message.
-            if (Ꮡalt.ValueSlot == default! && !(~t).tilde && Identical((~t).typ, (~t).typ.Underlying())) {
-                ref var tt = ref heap<Δterm>(out var Ꮡtt);
-                tt = t.Value;
+            if (Ꮡalt.ValueSlot == nil && !t.tilde && Identical(t.typ, t.typ.Underlying())) {
+                ref var tt = ref heap<Δterm>(t.Value, out var Ꮡtt);
                 tt.tilde = true;
                 if (Ꮡtt.includes(V)) {
-                    Ꮡalt.ValueSlot = t.Value.typ;
+                    Ꮡalt.ValueSlot = t.typ;
                 }
             }
             return true;
@@ -389,9 +387,9 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
         return false;
     })) {
         if (Ꮡcause != nil) {
-            @string detail = default!;
+            @string detail = default;
             switch (ᐧ) {
-            case {} when alt != default!: {
+            case {} when alt != nil: {
                 detail = Ꮡcheck.sprintf("possibly missing ~ for %s in %s"u8, alt, T);
                 break;
             }
@@ -400,7 +398,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
                 break;
             }
             default: {
-                detail = Ꮡcheck.sprintf("%s missing in %s"u8, V, (~Ti.typeSet()).terms);
+                detail = Ꮡcheck.sprintf("%s missing in %s"u8, V, Ti.typeSet().terms);
                 break;
             }}
             cause = Ꮡcheck.sprintf("%s does not %s %s (%s)"u8, V, verb, T, detail);
@@ -416,7 +414,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
 internal static bool mentions(ΔType T, ΔType typ) {
     switch (T.type()) {
     case ж<Interface> TΔ1: {
-        foreach (var (_, e) in (~TΔ1).embeddeds) {
+        foreach (var (_, e) in TΔ1.embeddeds) {
             if (mentions(e, typ)) {
                 return true;
             }
@@ -424,7 +422,7 @@ internal static bool mentions(ΔType T, ΔType typ) {
         break;
     }
     case ж<Union> TΔ1: {
-        foreach (var (_, t) in (~TΔ1).terms) {
+        foreach (var (_, t) in TΔ1.terms) {
             if (mentions((~t).typ, typ)) {
                 return true;
             }

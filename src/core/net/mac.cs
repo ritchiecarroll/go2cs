@@ -19,7 +19,7 @@ public static @string String(this HardwareAddr a) {
     var buf = new slice<byte>(0, len(a) * 3 - 1);
     foreach (var (i, b) in a) {
         if (i > 0) {
-            buf = append(bufᴷ, buf, (byte)((rune)':'));
+            buf = append(bufᴷ, buf, (byte)':');
         }
         buf = append(buf, hexDigit[(b >> 4)]);
         buf = append(buf, hexDigit[(byte)(b & 0xF)]);
@@ -41,13 +41,13 @@ public static @string String(this HardwareAddr a) {
 //	0000.0000.fe80.0000.0000.0000.0200.5e10.0000.0001
 //	00005e005301
 public static (HardwareAddr hw, error err) ParseMAC(@string s) {
-    HardwareAddr hw = default!;
+    HardwareAddr hw = default;
 
     if (len(s) < 12) {
         goto error;
     }
 
-    if (s[2] == (rune)':' || s[2] == (rune)'-'){
+    if (s[2] == ':' || s[2] == '-') {
         if ((len(s) + 1) % 3 != 0) {
             goto error;
         }
@@ -57,7 +57,7 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
         }
         hw = new HardwareAddr(n);
         for ((nint x, nint i) = (0, 0); i < n; i++) {
-            bool ok = default!;
+            bool ok = default;
             {
                 (hw[i], ok) = xtoi2(s.slice(x), s[2]); if (!ok) {
                     goto error;
@@ -65,8 +65,7 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
             }
             x += 3;
         }
-    } else 
-    if (s[4] == (rune)'.'){
+    } else if (s[4] == '.') {
         if ((len(s) + 1) % 5 != 0) {
             goto error;
         }
@@ -76,7 +75,7 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
         }
         hw = new HardwareAddr(n);
         for ((nint x, nint i) = (0, 0); i < n; i += 2) {
-            bool ok = default!;
+            bool ok = default;
             {
                 (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
                     goto error;
@@ -101,7 +100,7 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
 
         hw = new HardwareAddr(len(s) / 2);
         for ((nint x, nint i) = (0, 0); i < n; i++) {
-            bool ok = default!;
+            bool ok = default;
             {
                 (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
                     goto error;
@@ -110,10 +109,10 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
             x += 2;
         }
     }
-    return (hw, default!);
+    return (hw, default);
 
 error:
-    return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid MAC address"u8, Addr: s))));
+    return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid MAC address"u8, Addr: s))));
 }
 
 } // end net_package

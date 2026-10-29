@@ -28,7 +28,7 @@ internal static bool Contains(this tagOptions o, @string optionName) {
     }
     @string s = (@string)o;
     while (s != ""u8) {
-        @string name = default!;
+        @string name = default;
         (name, s, _) = strings.Cut(s, ","u8);
         if (name == optionName) {
             return true;

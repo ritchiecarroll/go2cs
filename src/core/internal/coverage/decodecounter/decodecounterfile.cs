@@ -26,7 +26,7 @@ partial struct CounterDataReader {
     internal map<@string, @string> args;
     internal slice<@string> osargs;
     internal @string goarch; // GOARCH setting from run that produced counter data
-    internal @string goos; // GOOS setting from run that produced counter data
+    internal @string goos;   // GOOS setting from run that produced counter data
     internal io.ReadSeeker mr;
     internal coverage.CounterFileHeader hdr;
     internal coverage.CounterFileFooter ftr;
@@ -46,40 +46,40 @@ public static (ж<CounterDataReader>, error) NewCounterDataReader(@string fn, io
     ));
     // Read header
     {
-        var err = binary.Read(rs, binary.LittleEndian, cdr.of(CounterDataReader.Ꮡhdr)); if (err != default!) {
-            return (default!, err);
+        var err = binary.Read(rs, binary.LittleEndian, cdr.of(CounterDataReader.Ꮡhdr)); if (err != nil) {
+            return (default, err);
         }
     }
-    if ((~cdr).debug) {
-        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= counter file header: %+v\n"u8, (~cdr).hdr);
+    if (cdr.debug) {
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= counter file header: %+v\n"u8, cdr.hdr);
     }
-    if (!checkMagic((~cdr).hdr.Magic)) {
-        return (default!, fmt.Errorf("invalid magic string: not a counter data file"u8));
+    if (!checkMagic(cdr.hdr.Magic)) {
+        return (default, fmt.Errorf("invalid magic string: not a counter data file"u8));
     }
-    if ((~cdr).hdr.Version > coverage.CounterFileVersion) {
-        return (default!, fmt.Errorf("version data incompatibility: reader is %d data is %d"u8, (nint)(coverage.CounterFileVersion), (~cdr).hdr.Version));
+    if (cdr.hdr.Version > coverage.CounterFileVersion) {
+        return (default, fmt.Errorf("version data incompatibility: reader is %d data is %d"u8, (nint)(coverage.CounterFileVersion), cdr.hdr.Version));
     }
 
     // Read footer.
     {
-        var err = cdr.readFooter(); if (err != default!) {
-            return (default!, err);
+        var err = cdr.readFooter(); if (err != nil) {
+            return (default, err);
         }
     }
     // Seek back to just past the file header.
     var hsz = (int64)/* unsafe.Sizeof(cdr.hdr) */ (uintptr)32;
     {
-        var (_, err) = (~cdr).mr.Seek(hsz, io.SeekStart); if (err != default!) {
-            return (default!, err);
+        var (_, err) = cdr.mr.Seek(hsz, io.SeekStart); if (err != nil) {
+            return (default, err);
         }
     }
     // Read preamble for first segment.
     {
-        var err = cdr.readSegmentPreamble(); if (err != default!) {
-            return (default!, err);
+        var err = cdr.readSegmentPreamble(); if (err != nil) {
+            return (default, err);
         }
     }
-    return (cdr, default!);
+    return (cdr, default);
 }
 
 internal static bool checkMagic(/*[4]*/ array<byte> v) {
@@ -94,12 +94,12 @@ internal static error readFooter(this ж<CounterDataReader> Ꮡcdr) {
 
     var ftrSize = (int64)/* unsafe.Sizeof(cdr.ftr) */ (uintptr)16;
     {
-        var (_, err) = cdr.mr.Seek(-ftrSize, io.SeekEnd); if (err != default!) {
+        var (_, err) = cdr.mr.Seek(-ftrSize, io.SeekEnd); if (err != nil) {
             return err;
         }
     }
     {
-        var err = binary.Read(cdr.mr, binary.LittleEndian, Ꮡcdr.of(CounterDataReader.Ꮡftr)); if (err != default!) {
+        var err = binary.Read(cdr.mr, binary.LittleEndian, Ꮡcdr.of(CounterDataReader.Ꮡftr)); if (err != nil) {
             return err;
         }
     }
@@ -109,7 +109,7 @@ internal static error readFooter(this ж<CounterDataReader> Ꮡcdr) {
     if (cdr.ftr.NumSegments == 0) {
         return fmt.Errorf("invalid counter data file (no segments)"u8);
     }
-    return default!;
+    return default;
 }
 
 // readSegmentPreamble reads and consumes the segment header, segment string
@@ -119,7 +119,7 @@ internal static error readSegmentPreamble(this ж<CounterDataReader> Ꮡcdr) {
 
     // Read segment header.
     {
-        var err = binary.Read(cdr.mr, binary.LittleEndian, Ꮡcdr.of(CounterDataReader.Ꮡshdr)); if (err != default!) {
+        var err = binary.Read(cdr.mr, binary.LittleEndian, Ꮡcdr.of(CounterDataReader.Ꮡshdr)); if (err != nil) {
             return err;
         }
     }
@@ -131,38 +131,38 @@ internal static error readSegmentPreamble(this ж<CounterDataReader> Ꮡcdr) {
 
     // Read string table and args.
     {
-        var err = cdr.readStringTable(); if (err != default!) {
+        var err = cdr.readStringTable(); if (err != nil) {
             return err;
         }
     }
     {
-        var err = Ꮡcdr.readArgs(); if (err != default!) {
+        var err = Ꮡcdr.readArgs(); if (err != nil) {
             return err;
         }
     }
     // Seek past any padding to bring us up to a 4-byte boundary.
     {
-        var (of, err) = cdr.mr.Seek(0, io.SeekCurrent); if (err != default!){
+        var (of, err) = cdr.mr.Seek(0, io.SeekCurrent); if (err != nil) {
             return err;
         } else {
             var rem = of % 4;
             if (rem != 0) {
                 var pad = 4 - rem;
                 {
-                    var (_, errΔ1) = cdr.mr.Seek(pad, io.SeekCurrent); if (errΔ1 != default!) {
+                    var (_, errΔ1) = cdr.mr.Seek(pad, io.SeekCurrent); if (errΔ1 != nil) {
                         return errΔ1;
                     }
                 }
             }
         }
     }
-    return default!;
+    return default;
 }
 
 internal static error readStringTable(this ref CounterDataReader cdr) {
     var b = new slice<byte>((nint)(cdr.shdr.StrTabLen));
     var (nr, err) = cdr.mr.Read(b);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (nr != (nint)cdr.shdr.StrTabLen) {
@@ -171,7 +171,7 @@ internal static error readStringTable(this ref CounterDataReader cdr) {
     var slr = slicereader.NewReader(b, false /* not readonly */);
     cdr.stab = stringtab.NewReader(slr);
     cdr.stab.Read();
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -184,7 +184,7 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
 
     var b = new slice<byte>((nint)(cdr.shdr.ArgsLen));
     var (nr, err) = cdr.mr.Read(b);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (nr != (nint)cdr.shdr.ArgsLen) {
@@ -197,17 +197,17 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
         if ((nint)kidx >= Ꮡcdr.Value.stab.Entries()) {
             return ("", fmt.Errorf("malformed string table ref"u8));
         }
-        return (Ꮡcdr.Value.stab.Get((uint32)kidx), default!);
+        return (Ꮡcdr.Value.stab.Get((uint32)kidx), default);
     }
     var nents = slr.ReadULEB128();
     cdr.args = new map<@string, @string>((nint)nents);
     for (var i = (uint64)0; i < nents; i++) {
         var (k, errk) = sget();
-        if (errk != default!) {
+        if (errk != nil) {
             return errk;
         }
         var (v, errv) = sget();
-        if (errv != default!) {
+        if (errv != nil) {
             return errv;
         }
         {
@@ -220,7 +220,7 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
     {
         var (argcs, ok) = cdr.args[argcˢ, ꟷ]; if (ok) {
             var (argc, errΔ1) = strconv.Atoi(argcs);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 return fmt.Errorf("malformed argc in counter data file args section"u8);
             }
             cdr.osargs = new slice<@string>(0, argc);
@@ -240,7 +240,7 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
             cdr.goarch = goarch;
         }
     }
-    return default!;
+    return default;
 }
 
 // OsArgs returns the program arguments (saved from os.Args during
@@ -290,24 +290,24 @@ public static (bool, error) BeginNextSegment(this ж<CounterDataReader> Ꮡcdr) 
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     if (cdr.segCount >= cdr.ftr.NumSegments) {
-        return (false, default!);
+        return (false, default);
     }
     cdr.segCount++;
     cdr.fcnCount = 0;
     // Seek past footer from last segment.
     var ftrSize = (int64)/* unsafe.Sizeof(cdr.ftr) */ (uintptr)16;
     {
-        var (_, err) = cdr.mr.Seek(ftrSize, io.SeekCurrent); if (err != default!) {
+        var (_, err) = cdr.mr.Seek(ftrSize, io.SeekCurrent); if (err != nil) {
             return (false, err);
         }
     }
     // Read preamble for this segment.
     {
-        var err = Ꮡcdr.readSegmentPreamble(); if (err != default!) {
+        var err = Ꮡcdr.readSegmentPreamble(); if (err != nil) {
             return (false, err);
         }
     }
-    return (true, default!);
+    return (true, default);
 }
 
 // NumFunctionsInSegment returns the number of live functions
@@ -328,17 +328,17 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (cdr.fcnCount >= (uint32)cdr.shdr.FcnEntries) {
-        return (false, default!);
+        return (false, default);
     }
     cdr.fcnCount++;
-    Func<(uint32, error)> rdu32 = default!;
-    if (cdr.hdr.CFlavor == coverage.CtrULeb128){
+    Func<(uint32, error)> rdu32 = default;
+    if (cdr.hdr.CFlavor == coverage.CtrULeb128) {
         rdu32 = (uint32, error) () => {
-            nuint shift = default!;
-            uint64 value = default!;
-            while (ᐧ) {
+            nuint shift = default;
+            uint64 value = default;
+            for (;;) {
                 var (_, errΔ1) = Ꮡcdr.Value.mr.Read(Ꮡcdr.Value.u8b);
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     return ((uint32)(0), errΔ1);
                 }
                 var b = Ꮡcdr.Value.u8b[0];
@@ -348,31 +348,30 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
                 }
                 shift += 7;
             }
-            return ((uint32)value, default!);
+            return ((uint32)value, default);
         };
-    } else 
-    if (cdr.hdr.CFlavor == coverage.CtrRaw){
-        if (cdr.hdr.BigEndian){
+    } else if (cdr.hdr.CFlavor == coverage.CtrRaw) {
+        if (cdr.hdr.BigEndian) {
             rdu32 = (uint32, error) () => {
                 var (n, errΔ2) = Ꮡcdr.Value.mr.Read(Ꮡcdr.Value.u32b);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return ((uint32)(0), errΔ2);
                 }
                 if (n != 4) {
                     return ((uint32)(0), io.EOF);
                 }
-                return (binary.BigEndian.Uint32(Ꮡcdr.Value.u32b), default!);
+                return (binary.BigEndian.Uint32(Ꮡcdr.Value.u32b), default);
             };
         } else {
             rdu32 = (uint32, error) () => {
                 var (n, errΔ3) = Ꮡcdr.Value.mr.Read(Ꮡcdr.Value.u32b);
-                if (errΔ3 != default!) {
+                if (errΔ3 != nil) {
                     return ((uint32)(0), errΔ3);
                 }
                 if (n != 4) {
                     return ((uint32)(0), io.EOF);
                 }
-                return (binary.LittleEndian.Uint32(Ꮡcdr.Value.u32b), default!);
+                return (binary.LittleEndian.Uint32(Ꮡcdr.Value.u32b), default);
             };
         }
     } else {
@@ -384,15 +383,14 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
     // out to a file, meaning that a region in the counter memory
     // corresponding to a dead (never-executed) function would just be
     // zeroes. The code path below handles this case.
-    uint32 nc = default!;
-    error err = default!;
-    if (supportDeadFunctionsInCounterData){
-        while (ᐧ) {
+    uint32 nc = default;
+    error err = default;
+    if (supportDeadFunctionsInCounterData) {
+        for (;;) {
             (nc, err) = rdu32();
-            if (AreEqual(err, io.EOF)){
+            if (AreEqual(err, io.EOF)) {
                 return (false, io.EOF);
-            } else 
-            if (err != default!) {
+            } else if (err != nil) {
                 break;
             }
             if (nc != 0) {
@@ -402,17 +400,17 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
     } else {
         (nc, err) = rdu32();
     }
-    if (err != default!) {
+    if (err != nil) {
         return (false, err);
     }
 
     // Read package and func indices.
     (p.PkgIdx, err) = rdu32();
-    if (err != default!) {
+    if (err != nil) {
         return (false, err);
     }
     (p.FuncIdx, err) = rdu32();
-    if (err != default!) {
+    if (err != nil) {
         return (false, err);
     }
     if (cap(p.Counters) < 1024) {
@@ -421,12 +419,12 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
     p.Counters = p.Counters[..0];
     for (var i = (uint32)0; i < nc; i++) {
         var (v, errΔ4) = rdu32();
-        if (errΔ4 != default!) {
+        if (errΔ4 != nil) {
             return (false, errΔ4);
         }
         p.Counters = append(p.Counters, v);
     }
-    return (true, default!);
+    return (true, default);
 }
 
 } // end decodecounter_package

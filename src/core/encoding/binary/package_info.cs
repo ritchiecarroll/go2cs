@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
@@ -66,7 +63,7 @@ using static go.encoding.binary_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACBCACVIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA0YgNSA2pKCqJKCgqiSzpKCqJKCgoKCqJIABhKSgqqSgoKCgoKCgoKokgANGIDUgNSA1IAAAiQAEQSAgoKAgraC2oKClIKklIKmgoCCpIKuwoCCgqaC2oKClIKklIKmgpSCgqaClLS0tLS0tLS0tLS0gsaCxrSCxoLGgsaCxoLGgsaCxoLWlAACFgAJBICCgoKmgsiCgoKmgoKCgq7UgIKCpoLIgoKCpoKUgoKu1ICCgoLIgoKCpoKCgqaClIKUxoKUxoKClNi0tILGtLS0tLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCxrS0ggAFELLEpIKUpIKUpIKUpKSkxKSClKSClKSkxKSClKSClKSkxKSClKSClKSkpKSClKSkgpSkpJQABRLClIKAgraCgoKUuIKAgqSCgqaCuKiSlICCyIKCgoKUlKymAAwYgoKCpoKClJSmgoKCpoKCpoKCgqaCgqaCgoKmgoKmgoKCpoKCpoCkgKSApICkgKSApICkgKSClIKCuIKC3ICClNqCgrimpKSkpqSkpKakpsregpSCgriCgpSAgpTagoK4pqSkpKakpKSmpKaCgqSCgriCpoKCgqyy9KSkpOSkpOSkpOSkpMTEpKSUqqKCgg==", "", "", "1120=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1125=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
+[assembly: go.GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACBCACVIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA0YgNSA2pKCqJKCgqiSzpKCqJKCgoKCqJIABhKSgqqSgoKCgoKCgoKokgANGIDUgNSA1IAAAiQAEQSAgoKAgraC2oKClIK0pIKmgoCCpIKuwoCCgqaC2oKClIK0pIKmgpSCgqaClLS0tLS0tLS0tLS0gsaCxrSCxoLGgsaCxoLGgsaCxoLWlAACFgAJBICCgoKmgsiCgoKmgoKCgq7UgIKCpoLIgoKCpoKUgoKu1ICCgoLIgoKCpoKCgqaClIKUxoKUxoKClNi0tILGtLS0tLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCxrS0ggAFELLEpIKUpIKUpIKUpKSkxKSClKSClKSkxKSClKSClKSkxKSClKSClKSkpKSClKSkgpSkpJQABRLClIKAgraCgoKUyIKAgqSCgqaCyKiSlICC2IKCgoKUlKymAAwYgoKCpoKClJSmgoKCpoKCpoKCgqaCgqaCgoKmgoKmgoKCpoKCpoCkgKSApICkgKSApICkgKSClIKCyIKC3ICClOqCgsi2tLS0trS0tLa0ttrugpSCgsiCgpSAgpTqgoLItrS0tLa0tLS2tLaCgrSCgsiCpoKCgqyy9KSkpOSkpOSkpOSkpMTEpKSUqqKCgg==", "", "", "1141=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1147=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
 [assembly: go.GoPositionMap("encoding/binary/varint.go", "varint.cs", "ACJSooKClKqigoKCgpSCAAIS4oKCgqaUgoKUlIKUqqKCgpSqooKClAACEuKCgoKUppzCgoKCgoKClJSCgpSUgpSuwoKCgpQ=")]
 // </GoSourcePositionMaps>
 

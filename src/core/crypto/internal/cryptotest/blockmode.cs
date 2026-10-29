@@ -17,27 +17,27 @@ partial class cryptotest_package {
 
 // TestBlockMode performs a set of tests on cipher.BlockMode implementations,
 // checking the documented requirements of CryptBlocks.
-public static void TestBlockMode(ж<testing.T> Ꮡt, cipher.Block block, Func<cipher.Block, slice<byte>, cipher.BlockMode> makeEncrypter, Func<cipher.Block, slice<byte>, cipher.BlockMode> makeDecrypter) {
-    var rng = newRandReader(Ꮡt);
+public static void TestBlockMode(ж<testing.T> t, cipher.Block block, Func<cipher.Block, slice<byte>, cipher.BlockMode> makeEncrypter, Func<cipher.Block, slice<byte>, cipher.BlockMode> makeDecrypter) {
+    var rng = newRandReader(t);
     var iv = new slice<byte>(block.BlockSize());
     rng.Read(iv);
 
-    testBlockModePair(Ꮡt, block, makeEncrypter, makeDecrypter, iv);
+    testBlockModePair(t, block, makeEncrypter, makeDecrypter, iv);
 }
 
-internal static void testBlockModePair(ж<testing.T> Ꮡt, cipher.Block b, Func<cipher.Block, slice<byte>, cipher.BlockMode> enc, Func<cipher.Block, slice<byte>, cipher.BlockMode> dec, slice<byte> iv) {
+internal static void testBlockModePair(ж<testing.T> t, cipher.Block b, Func<cipher.Block, slice<byte>, cipher.BlockMode> enc, Func<cipher.Block, slice<byte>, cipher.BlockMode> dec, slice<byte> iv) {
     var ivʗ1 = iv;
-    Ꮡt.Run(encryptionˢ, (ж<testing.T> tΔ1) => {
+    t.Run(encryptionˢ, (ж<testing.T> tΔ1) => {
         testBlockMode(tΔ1, enc, b, ivʗ1);
     });
 
     var ivʗ2 = iv;
-    Ꮡt.Run(decryptionˢ, (ж<testing.T> tΔ2) => {
+    t.Run(decryptionˢ, (ж<testing.T> tΔ2) => {
         testBlockMode(tΔ2, dec, b, ivʗ2);
     });
 
     var ivʗ3 = iv;
-    Ꮡt.Run(roundtripˢ, (ж<testing.T> tΔ3) => {
+    t.Run(roundtripˢ, (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         nint blockSize = enc(b, ivʗ3).BlockSize();
@@ -67,10 +67,10 @@ private static readonly @string partialBlocksˢ = "PartialBlocks"u8;
 private static readonly @string inputNotFullBlocksˢ = "input not full blocks"u8;
 private static readonly @string keepStateˢ = "KeepState"u8;
 
-internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<byte>, cipher.BlockMode> bm, cipher.Block b, slice<byte> iv) {
+internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byte>, cipher.BlockMode> bm, cipher.Block b, slice<byte> iv) {
     nint blockSize = bm(b, iv).BlockSize();
 
-    Ꮡt.Run(wrongIVLenˢ, (ж<testing.T> tΔ1) => {
+    t.Run(wrongIVLenˢ, (ж<testing.T> tΔ1) => {
         var ivΔ1 = new slice<byte>(b.BlockSize() + 1);
         var ivʗ1 = ivΔ1;
         mustPanic(tΔ1, ivLengthMustEqualBlockˢ, () => {
@@ -79,7 +79,7 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
     });
 
     var ivʗ2 = iv;
-    Ꮡt.Run(emptyInputˢ, (ж<testing.T> tΔ2) => {
+    t.Run(emptyInputˢ, (ж<testing.T> tΔ2) => {
         var rng = newRandReader(tΔ2);
 
         var (src, dst) = (new slice<byte>(blockSize), new slice<byte>(blockSize));
@@ -93,12 +93,12 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
     });
 
     var ivʗ3 = iv;
-    Ꮡt.Run(alterInputˢ, (ж<testing.T> tΔ3) => {
+    t.Run(alterInputˢ, (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         var (src, dst, before) = (new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2));
 
-        foreach (var (_, length) in new nint[]{0, blockSize, blockSize * 2}.slice()) {
+        foreach (var (_, length) in slice<nint>([0, blockSize, blockSize * 2])) {
             rng.Read(src);
             copy(before, src);
 
@@ -110,12 +110,12 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
     });
 
     var ivʗ4 = iv;
-    Ꮡt.Run(aliasingˢ, (ж<testing.T> tΔ4) => {
+    t.Run(aliasingˢ, (ж<testing.T> tΔ4) => {
         var rng = newRandReader(tΔ4);
 
         var (buff, expectedOutput) = (new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2));
 
-        foreach (var (_, length) in new nint[]{0, blockSize, blockSize * 2}.slice()) {
+        foreach (var (_, length) in slice<nint>([0, blockSize, blockSize * 2])) {
             // Record what output is when src and dst are different
             rng.Read(buff);
             bm(b, ivʗ4).CryptBlocks(expectedOutput.slice(0, length), buff.slice(0, length));
@@ -130,11 +130,10 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
     });
 
     var ivʗ5 = iv;
-    Ꮡt.Run(outOfBoundsWriteˢ, (ж<testing.T> tΔ5) => { // Issue 21104
+    t.Run(outOfBoundsWriteˢ, (ж<testing.T> tΔ5) => { // Issue 21104
         var rng = newRandReader(tΔ5);
 
-        ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
-        Ꮡsrc.ValueSlot = new slice<byte>(blockSize);
+        ref var src = ref heap<slice<byte>>(new slice<byte>(blockSize), out var Ꮡsrc);
         rng.Read(Ꮡsrc.ValueSlot);
 
         // Make a buffer with dst in the middle and data on either end
@@ -143,8 +142,7 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
         nint startOfSuffix = blockSize * 2;
         rng.Read(buff.slice(0, endOfPrefix));
         rng.Read(buff.slice(startOfSuffix));
-        ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-        Ꮡdst.ValueSlot = buff.slice(endOfPrefix, startOfSuffix);
+        ref var dst = ref heap<slice<byte>>(buff.slice(endOfPrefix, startOfSuffix), out var Ꮡdst);
 
         // Record the prefix and suffix data to make sure they aren't written to
         var (initPrefix, initSuffix) = (new slice<byte>(blockSize), new slice<byte>(blockSize));
@@ -189,7 +187,7 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
     // Check that output of cipher isn't affected by adjacent data beyond input
     // slice scope
     var ivʗ7 = iv;
-    Ꮡt.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ6) => {
+    t.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ6) => {
         var rng = newRandReader(tΔ6);
 
         var src = new slice<byte>(blockSize);
@@ -215,17 +213,15 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
     });
 
     var ivʗ8 = iv;
-    Ꮡt.Run(bufferOverlapˢ, (ж<testing.T> tΔ7) => {
+    t.Run(bufferOverlapˢ, (ж<testing.T> tΔ7) => {
         var rng = newRandReader(tΔ7);
 
         var buff = new slice<byte>(blockSize * 2);
         rng.Read(buff);
 
         // Make src and dst slices point to same array with inexact overlap
-        ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
-        Ꮡsrc.ValueSlot = buff.slice(0, blockSize);
-        ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-        Ꮡdst.ValueSlot = buff.slice(1, blockSize + 1);
+        ref var src = ref heap<slice<byte>>(buff.slice(0, blockSize), out var Ꮡsrc);
+        ref var dst = ref heap<slice<byte>>(buff.slice(1, blockSize + 1), out var Ꮡdst);
         var ivʗ9 = ivʗ8;
         mustPanic(tΔ7, invalidBufferOverlapˢ, () => {
             bm(b, ivʗ9).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
@@ -250,9 +246,9 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
 
     // Input to CryptBlocks should be a multiple of BlockSize
     var ivʗ12 = iv;
-    Ꮡt.Run(partialBlocksˢ, (ж<testing.T> tΔ8) => {
+    t.Run(partialBlocksˢ, (ж<testing.T> tΔ8) => {
         // Check a few cases of not being a multiple of BlockSize
-        foreach (var (_, srcSize) in new nint[]{blockSize - 1, blockSize + 1, 2 * blockSize - 1, 2 * blockSize + 1}.slice()) {
+        foreach (var (_, srcSize) in slice<nint>([blockSize - 1, blockSize + 1, 2 * blockSize - 1, 2 * blockSize + 1])) {
             var src = new slice<byte>(srcSize);
             var dst = new slice<byte>(3 * blockSize); // Make a dst large enough for all src
             var dstʗ1 = dst;
@@ -265,7 +261,7 @@ internal static void testBlockMode(ж<testing.T> Ꮡt, Func<cipher.Block, slice<
     });
 
     var ivʗ14 = iv;
-    Ꮡt.Run(keepStateˢ, (ж<testing.T> tΔ9) => {
+    t.Run(keepStateˢ, (ж<testing.T> tΔ9) => {
         var rng = newRandReader(tΔ9);
 
         var (src, serialDst, compositeDst) = (new slice<byte>(blockSize * 4), new slice<byte>(blockSize * 4), new slice<byte>(blockSize * 4));

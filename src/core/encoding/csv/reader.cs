@@ -66,10 +66,10 @@ partial class csv_package {
 // A ParseError is returned for parsing errors.
 // Line and column numbers are 1-indexed.
 partial struct ParseError {
-    public nint StartLine;  // Line where the record starts
-    public nint Line;  // Line where the error occurred
-    public nint Column;  // Column (1-based byte index) where the error occurred
-    public error Err; // The actual error
+    public nint StartLine; // Line where the record starts
+    public nint Line;      // Line where the error occurred
+    public nint Column;    // Column (1-based byte index) where the error occurred
+    public error Err;      // The actual error
 }
 
 public static @string Error(this ref ParseError e) {
@@ -97,7 +97,7 @@ public static error ErrTrailingComma = errors.New("extra delimiter at end of lin
 internal static error errInvalidDelim = errors.New("csv: invalid field or comment delimiter"u8);
 
 internal static bool validDelim(rune r) {
-    return r != 0 && r != (rune)'"' && r != (rune)'\r' && r != (rune)'\n' && utf8.ValidRune(r) && r != utf8.RuneError;
+    return r != 0 && r != '"' && r != '\r' && r != '\n' && utf8.ValidRune(r) && r != utf8.RuneError;
 }
 
 // A Reader reads records from a CSV-encoded file.
@@ -167,7 +167,7 @@ partial struct Reader {
 // NewReader returns a new Reader that reads from r.
 public static ж<Reader> NewReader(io.Reader r) {
     return Ꮡ(new Reader(
-        Comma: (rune)',',
+        Comma: ',',
         r: bufio.NewReader(r)
     ));
 }
@@ -182,14 +182,14 @@ public static ж<Reader> NewReader(io.Reader r) {
 // If [Reader.ReuseRecord] is true, the returned slice may be shared
 // between multiple calls to Read.
 public static (slice<@string> record, error err) Read(this ref Reader r) {
-    slice<@string> record = default!;
-    error err = default!;
+    slice<@string> record = default;
+    error err = default;
 
-    if (r.ReuseRecord){
+    if (r.ReuseRecord) {
         (record, err) = r.readRecord(r.lastRecord);
         r.lastRecord = record;
     } else {
-        (record, err) = r.readRecord(default!);
+        (record, err) = r.readRecord(default);
     }
     return (record, err);
 }
@@ -205,7 +205,7 @@ public static (nint line, nint column) FieldPos(this ref Reader r, nint field) {
         throw panic("out of range index passed to FieldPos");
     }
     var p = Ꮡ(r.fieldPositions, field);
-    return ((~p).line, (~p).col);
+    return (p.line, p.col);
 }
 
 // InputOffset returns the input stream byte offset of the current reader
@@ -226,15 +226,15 @@ partial struct position {
 // defined to read until EOF, it does not treat end of file as an error to be
 // reported.
 public static (slice<slice<@string>> records, error err) ReadAll(this ref Reader r) {
-    slice<slice<@string>> records = default!;
+    slice<slice<@string>> records = default;
 
-    while (ᐧ) {
-        var (record, errΔ1) = r.readRecord(default!);
+    for (;;) {
+        var (record, errΔ1) = r.readRecord(default);
         if (AreEqual(errΔ1, io.EOF)) {
-            return (records, default!);
+            return (records, default);
         }
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         records = append(records, record);
     }
@@ -245,20 +245,20 @@ public static (slice<slice<@string>> records, error err) ReadAll(this ref Reader
 // If some bytes were read, then the error is never [io.EOF].
 // The result is only valid until the next call to readLine.
 internal static (slice<byte>, error) readLine(this ref Reader r) {
-    var (line, err) = r.r.ReadSlice((rune)'\n');
+    var (line, err) = r.r.ReadSlice((byte)'\n');
     if (AreEqual(err, bufio.ErrBufferFull)) {
         r.rawBuffer = appendꓸꓸꓸ(r.rawBuffer[..0], line);
         while (AreEqual(err, bufio.ErrBufferFull)) {
-            (line, err) = r.r.ReadSlice((rune)'\n');
+            (line, err) = r.r.ReadSlice((byte)'\n');
             r.rawBuffer = appendꓸꓸꓸ(r.rawBuffer, line);
         }
         line = r.rawBuffer;
     }
     nint readSize = len(line);
     if (readSize > 0 && AreEqual(err, io.EOF)) {
-        err = default!;
+        err = default;
         // For backwards compatibility, drop trailing \r before EOF.
-        if (line[readSize - 1] == (rune)'\r') {
+        if (line[readSize - 1] == '\r') {
             line = line.slice(0, readSize - 1);
         }
     }
@@ -266,8 +266,8 @@ internal static (slice<byte>, error) readLine(this ref Reader r) {
     r.offset += (int64)readSize;
     // Normalize \r\n to \n on all input lines.
     {
-        nint n = len(line); if (n >= 2 && line[n - 2] == (rune)'\r' && line[n - 1] == (rune)'\n') {
-            line[n - 2] = (rune)'\n';
+        nint n = len(line); if (n >= 2 && line[n - 2] == '\r' && line[n - 1] == '\n') {
+            line[n - 2] = (byte)'\n';
             line = line.slice(0, n - 1);
         }
     }
@@ -276,7 +276,7 @@ internal static (slice<byte>, error) readLine(this ref Reader r) {
 
 // lengthNL reports the number of bytes for the trailing \n.
 internal static nint lengthNL(slice<byte> b) {
-    if (len(b) > 0 && b[len(b) - 1] == (rune)'\n') {
+    if (len(b) > 0 && b[len(b) - 1] == '\n') {
         return 1;
     }
     return 0;
@@ -290,40 +290,39 @@ internal static rune nextRune(slice<byte> b) {
 
 internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@string> dst) {
     if (r.Comma == r.Comment || !validDelim(r.Comma) || (r.Comment != 0 && !validDelim(r.Comment))) {
-        return (default!, errInvalidDelim);
+        return (default, errInvalidDelim);
     }
 
     // Read line (automatically skipping past empty lines and any comments).
-    slice<byte> line = default!;
-    error errRead = default!;
-    while (errRead == default!) {
+    slice<byte> line = default;
+    error errRead = default;
+    while (errRead == nil) {
         (line, errRead) = r.readLine();
         if (r.Comment != 0 && nextRune(line) == r.Comment) {
-            line = default!;
+            line = default;
             continue; // Skip comment lines
         }
-        if (errRead == default! && len(line) == lengthNL(line)) {
-            line = default!;
+        if (errRead == nil && len(line) == lengthNL(line)) {
+            line = default;
             continue; // Skip empty lines
         }
         break;
     }
     if (AreEqual(errRead, io.EOF)) {
-        return (default!, errRead);
+        return (default, errRead);
     }
 
     // Parse each field in the record.
-    error err = default!;
+    error err = default;
     const nint quoteLen = /* len(`"`) */ 1;
     nint commaLen = utf8.RuneLen(r.Comma);
-    ref var recLine = ref heap<nint>(out var ᏑrecLine);
-    recLine = r.numLine; // Starting line for record
+    ref var recLine = ref heap<nint>(r.numLine, out var ᏑrecLine); // Starting line for record
     r.recordBuffer = r.recordBuffer[..0];
     r.fieldIndexes = r.fieldIndexes[..0];
     r.fieldPositions = r.fieldPositions[..0];
     var pos = new position(line: r.numLine, col: 1);
 parseField:
-    while (ᐧ) {
+    for (;;) {
         if (r.TrimLeadingSpace) {
             nint i = bytes.IndexFunc(line, (rune rΔ1) => !unicode.IsSpace(rΔ1));
             if (i < 0) {
@@ -333,11 +332,11 @@ parseField:
             line = line.slice(i);
             pos.col += i;
         }
-        if (len(line) == 0 || line[0] != (rune)'"'){
+        if (len(line) == 0 || line[0] != '"') {
             // Non-quoted string field
             nint i = bytes.IndexRune(line, r.Comma);
             var field = line;
-            if (i >= 0){
+            if (i >= 0) {
                 field = field.slice(0, i);
             } else {
                 field = field.slice(0, len(field) - lengthNL(field));
@@ -345,9 +344,8 @@ parseField:
             // Check to make sure a quote does not appear in field.
             if (!r.LazyQuotes) {
                 {
-                    nint j = bytes.IndexByte(field, (rune)'"'); if (j >= 0) {
-                        ref var col = ref heap<nint>(out var Ꮡcol);
-                        col = pos.col + j;
+                    nint j = bytes.IndexByte(field, (byte)'"'); if (j >= 0) {
+                        ref var col = ref heap<nint>(pos.col + j, out var Ꮡcol);
                         err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: r.numLine, Column: col, Err: ErrBareQuote)));
                         goto break_parseField;
                     }
@@ -367,9 +365,9 @@ parseField:
             var fieldPos = pos;
             line = line[(int)(quoteLen)..];
             pos.col += quoteLen;
-            while (ᐧ) {
-                nint i = bytes.IndexByte(line, (rune)'"');
-                if (i >= 0){
+            for (;;) {
+                nint i = bytes.IndexByte(line, (byte)'"');
+                if (i >= 0) {
                     // Hit next quote.
                     r.recordBuffer = appendꓸꓸꓸ(r.recordBuffer, line.slice(0, i));
                     line = line.slice(i + quoteLen);
@@ -377,9 +375,9 @@ parseField:
                     {
                         var rn = nextRune(line);
                         switch (ᐧ) {
-                        case {} when rn is (rune)'"': {
+                        case {} when rn is '"': {
                             // `""` sequence (append quote).
-                            r.recordBuffer = append(r.recordBuffer, (byte)((rune)'"'));
+                            r.recordBuffer = append(r.recordBuffer, (byte)'"');
                             line = line[(int)(quoteLen)..];
                             pos.col += quoteLen;
                             break;
@@ -402,7 +400,7 @@ parseField:
                         }
                         case {} when r.LazyQuotes: {
                             // `"` sequence (bare quote).
-                            r.recordBuffer = append(r.recordBuffer, (byte)((rune)'"'));
+                            r.recordBuffer = append(r.recordBuffer, (byte)'"');
                             break;
                         }
                         default: {
@@ -412,11 +410,10 @@ parseField:
                             break;
                         }}
                     }
-                } else 
-                if (len(line) > 0){
+                } else if (len(line) > 0) {
                     // Hit end of line (copy all data so far).
                     r.recordBuffer = appendꓸꓸꓸ(r.recordBuffer, line);
-                    if (errRead != default!) {
+                    if (errRead != nil) {
                         goto break_parseField;
                     }
                     pos.col += len(line);
@@ -426,11 +423,11 @@ parseField:
                         pos.col = 1;
                     }
                     if (AreEqual(errRead, io.EOF)) {
-                        errRead = default!;
+                        errRead = default;
                     }
                 } else {
                     // Abrupt end of file (EOF or error).
-                    if (!r.LazyQuotes && errRead == default!) {
+                    if (!r.LazyQuotes && errRead == nil) {
                         err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: pos.line, Column: pos.col, Err: ErrQuote)));
                         goto break_parseField;
                     }
@@ -443,7 +440,7 @@ parseField:
 continue_parseField:;
     }
 break_parseField:;
-    if (err == default!) {
+    if (err == nil) {
         err = errRead;
     }
 
@@ -455,15 +452,15 @@ break_parseField:;
         dst = new slice<@string>(len(r.fieldIndexes));
     }
     dst = dst.slice(0, len(r.fieldIndexes));
-    nint preIdx = default!;
+    nint preIdx = default;
     foreach (var (i, idx) in r.fieldIndexes) {
         dst[i] = str.slice(preIdx, idx);
         preIdx = idx;
     }
 
     // Check or update the expected fields per record.
-    if (r.FieldsPerRecord > 0){
-        if (len(dst) != r.FieldsPerRecord && err == default!) {
+    if (r.FieldsPerRecord > 0) {
+        if (len(dst) != r.FieldsPerRecord && err == nil) {
             err = new ParseErrorжerror(Ꮡ(new ParseError(
                 StartLine: recLine,
                 Line: recLine,
@@ -471,8 +468,7 @@ break_parseField:;
                 Err: ErrFieldCount
             )));
         }
-    } else 
-    if (r.FieldsPerRecord == 0) {
+    } else if (r.FieldsPerRecord == 0) {
         r.FieldsPerRecord = len(dst);
     }
     return (dst, err);

@@ -9,7 +9,7 @@
 namespace go.math;
 
 using bits = go.math.bits_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using go.math;
 
 partial class big_package {
@@ -19,8 +19,8 @@ partial struct Word /*num:nuint*/;
 
 internal static UntypedInt _S => /* _W / 8 */ 8; // word size in bytes
 
-internal static UntypedInt _W => /* bits.UintSize */ 64; // word size in bits
-internal static readonly GoBigConst _B = /* 1 << _W */    // digit base
+internal static UntypedInt _W => /* bits.UintSize */ 64;            // word size in bits
+internal static readonly GoBigConst _B = /* 1 << _W */              // digit base
     GoBigConst.Parse("18446744073709551616");
 internal static UntypedInt _M => /* _B - 1 */ 18446744073709551615; // digit mask
 
@@ -45,7 +45,7 @@ internal static (Word z1, Word z0) mulWW(Word x, Word y) {
 // z1<<_W + z0 = x*y + c
 internal static (Word z1, Word z0) mulAddWWW_g(Word x, Word y, Word c) {
     var (hi, lo) = bits.Mul((nuint)x, (nuint)y);
-    nuint cc = default!;
+    nuint cc = default;
     (lo, cc) = bits.Add(lo, (nuint)c, 0);
     return ((Word)(hi + cc), (Word)lo);
 }
@@ -58,7 +58,7 @@ internal static nuint nlz(Word x) {
 
 // The resulting carry c is either 0 or 1.
 internal static Word /*c*/ addVV_g(slice<Word> z, slice<Word> x, slice<Word> y) {
-    Word c = default!;
+    Word c = default;
 
     if (len(x) != len(z) || len(y) != len(z)) {
         throw panic("addVV len");
@@ -74,7 +74,7 @@ internal static Word /*c*/ addVV_g(slice<Word> z, slice<Word> x, slice<Word> y) 
 
 // The resulting carry c is either 0 or 1.
 internal static Word /*c*/ subVV_g(slice<Word> z, slice<Word> x, slice<Word> y) {
-    Word c = default!;
+    Word c = default;
 
     if (len(x) != len(z) || len(y) != len(z)) {
         throw panic("subVV len");
@@ -133,7 +133,7 @@ internal static Word /*c*/ addVW(slice<Word> z, slice<Word> x, Word y) {
 
 // addVW_ref is the reference implementation for addVW, used only for testing.
 internal static Word /*c*/ addVW_ref(slice<Word> z, slice<Word> x, Word y) {
-    Word c = default!;
+    Word c = default;
 
     c = y;
     foreach (var i in range(z)) {
@@ -189,7 +189,7 @@ internal static Word /*c*/ subVW(slice<Word> z, slice<Word> x, Word y) {
 
 // subVW_ref is the reference implementation for subVW, used only for testing.
 internal static Word /*c*/ subVW_ref(slice<Word> z, slice<Word> x, Word y) {
-    Word c = default!;
+    Word c = default;
 
     c = y;
     foreach (var i in range(z)) {
@@ -201,7 +201,7 @@ internal static Word /*c*/ subVW_ref(slice<Word> z, slice<Word> x, Word y) {
 }
 
 internal static Word /*c*/ lshVU_g(slice<Word> z, slice<Word> x, nuint s) {
-    Word c = default!;
+    Word c = default;
 
     if (len(x) != len(z)) {
         throw panic("lshVU len");
@@ -226,7 +226,7 @@ internal static Word /*c*/ lshVU_g(slice<Word> z, slice<Word> x, nuint s) {
 }
 
 internal static Word /*c*/ rshVU_g(slice<Word> z, slice<Word> x, nuint s) {
-    Word c = default!;
+    Word c = default;
 
     if (len(x) != len(z)) {
         throw panic("rshVU len");
@@ -251,7 +251,7 @@ internal static Word /*c*/ rshVU_g(slice<Word> z, slice<Word> x, nuint s) {
 }
 
 internal static Word /*c*/ mulAddVWW_g(slice<Word> z, slice<Word> x, Word y, Word r) {
-    Word c = default!;
+    Word c = default;
 
     if (len(x) != len(z)) {
         throw panic("mulAddVWW len");
@@ -264,7 +264,7 @@ internal static Word /*c*/ mulAddVWW_g(slice<Word> z, slice<Word> x, Word y, Wor
 }
 
 internal static Word /*c*/ addMulVVWW_g(slice<Word> z, slice<Word> x, slice<Word> y, Word m, Word a) {
-    Word c = default!;
+    Word c = default;
 
     if (len(x) != len(z) || len(y) != len(z)) {
         throw panic("rshVU len");

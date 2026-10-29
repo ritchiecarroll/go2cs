@@ -29,7 +29,7 @@ partial struct clientCodec {
     // Package rpc expects both.
     // We save the request method in pending when sending a request
     // and then look it up by request ID when filling out the rpc Response.
-    internal sync.Mutex mutex;        // protects pending
+    internal sync.Mutex mutex;             // protects pending
     internal map<uint64, @string> pending; // map request id to method name
 }
 
@@ -70,8 +70,8 @@ partial struct clientResponse {
 
 internal static void reset(this ref clientResponse r) {
     r.Id = 0;
-    r.Result = default!;
-    r.Error = default!;
+    r.Result = default;
+    r.Error = default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -83,7 +83,7 @@ internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Respo
 
     c.resp.reset();
     {
-        var err = c.dec.Decode(Ꮡc.of(clientCodec.Ꮡresp)); if (err != default!) {
+        var err = c.dec.Decode(Ꮡc.of(clientCodec.Ꮡresp)); if (err != nil) {
             return err;
         }
     }
@@ -95,7 +95,7 @@ internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Respo
 
     r.Error = ""u8;
     r.Seq = c.resp.Id;
-    if (c.resp.Error != default! || c.resp.Result == nil) {
+    if (c.resp.Error != nil || c.resp.Result == nil) {
         var (x, ok) = c.resp.Error._<@string>(ᐧ);
         if (!ok) {
             return fmt.Errorf("invalid error %v"u8, c.resp.Error);
@@ -105,12 +105,12 @@ internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Respo
         }
         r.Error = x;
     }
-    return default!;
+    return default;
 }
 
 internal static error ReadResponseBody(this ref clientCodec c, any x) {
-    if (x == default!) {
-        return default!;
+    if (x == nil) {
+        return default;
     }
     return json.Unmarshal(c.resp.Result.ValueSlot, x);
 }
@@ -128,10 +128,10 @@ public static ж<rpc.Client> NewClient(io.ReadWriteCloser conn) {
 // Dial connects to a JSON-RPC server at the specified network address.
 public static (ж<rpc.Client>, error) Dial(@string network, @string address) {
     var (conn, err) = net.Dial(network, address);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default!);
+    return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default);
 }
 
 } // end jsonrpc_package

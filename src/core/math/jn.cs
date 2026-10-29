@@ -56,7 +56,7 @@ private static readonly GoBigConst Two302ᶜ = GoBigConst.Parse("814814390533794
 //	Jn(n, NaN) = NaN
 public static float64 Jn(nint n, float64 x) {
     const float64 TwoM29 = /* 1.0 / (1 << 29) */ 1.862645149230957e-09; // 2**-29 0x3e10000000000000
-    GoBigConst Two302 = /* 1 << 302 */       // 2**302 0x52D0000000000000
+    GoBigConst Two302 = /* 1 << 302 */                                  // 2**302 0x52D0000000000000
             Two302ᶜ;
     // special cases
     switch (ᐧ) {
@@ -88,10 +88,10 @@ public static float64 Jn(nint n, float64 x) {
             sign = true; // odd n and negative x
         }
     }
-    float64 b = default!;
-    if ((float64)n <= x){
+    float64 b = default;
+    if ((float64)n <= x) {
         // Safe to use J(n+1,x)=2n/x *J(n,x)-J(n-1,x)
-        if (x >= (float64)Two302){ // x > 2**302
+        if (x >= (float64)Two302) { // x > 2**302
             // (x >> n**2)
             //          Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
             //          Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
@@ -105,7 +105,7 @@ public static float64 Jn(nint n, float64 x) {
             //                 2    -s+c            -c-s
             //                 3     s+c             c-s
 
-            float64 temp = default!;
+            float64 temp = default;
             {
                 var (s, c) = Sincos(x);
                 switch ((n & 3)) {
@@ -134,11 +134,11 @@ public static float64 Jn(nint n, float64 x) {
             }
         }
     } else {
-        if (x < TwoM29){ // x < 2**-29
+        if (x < TwoM29) { // x < 2**-29
             // x is tiny, return the first Taylor expansion of J(n,x)
             // J(n,x) = 1/n!*(x/2)**n  - ...
 
-            if (n > 33){ // underflow
+            if (n > 33) { // underflow
                 b = 0D;
             } else {
                 var temp = x * 0.5D;
@@ -146,7 +146,7 @@ public static float64 Jn(nint n, float64 x) {
                 var a = 1.0D;
                 for (nint i = 2; i <= n; i++) {
                     a *= (float64)i; // a = n!
-                    b *= temp; // b = (x/2)**n
+                    b *= temp;       // b = (x/2)**n
                 }
                 b /= a;
             }
@@ -209,7 +209,7 @@ public static float64 Jn(nint n, float64 x) {
             var tmp = (float64)n;
             var v = 2D / x;
             tmp = tmp * Log(Abs(v * tmp));
-            if (tmp < 7.09782712893383973096e+02D){
+            if (tmp < 7.09782712893383973096e+02D) {
                 for (nint i = n - 1; i > 0; i--) {
                     var di = (float64)(i + i);
                     (a, b) = (b, b * di / x - a);
@@ -281,8 +281,8 @@ public static float64 Yn(nint n, float64 x) {
         }
         return Y1(x);
     }
-    float64 b = default!;
-    if (x >= (float64)Two302){ // x > 2**302
+    float64 b = default;
+    if (x >= (float64)Two302) { // x > 2**302
         // (x >> n**2)
         //	    Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
         //	    Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
@@ -296,7 +296,7 @@ public static float64 Yn(nint n, float64 x) {
         //		   2	-s+c		-c-s
         //		   3	 s+c		 c-s
 
-        float64 temp = default!;
+        float64 temp = default;
         {
             var (s, c) = Sincos(x);
             switch ((n & 3)) {

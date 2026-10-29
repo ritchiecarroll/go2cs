@@ -58,11 +58,11 @@ internal static partial void initSlow<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
 
         // Set up root node, derive the hash function for the key, and the
         // equal function for the value, if any.
-        map<K, V> m = default!;
+        map<K, V> m = default;
         var mapType = abi.TypeOf(m).MapType();
         Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Store(newIndirectNode<K, V>(nil));
-        ht.keyHash = mapType.Value.Hasher;
-        ht.valEqual = mapType.Value.Elem.Value.Equal;
+        ht.keyHash = mapType.Hasher;
+        ht.valEqual = mapType.Value.Elem.Equal;
         ht.seed = (uintptr)runtime_rand();
 
         Ꮡht.of(HashTrieMap<K, V>.Ꮡinited).Store(1);
@@ -108,7 +108,7 @@ public static (V value, bool ok) Load<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K 
 // The loaded result is true if the value was loaded, false if stored.
 public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V value) {
     V result = GoZero<V>();
-    bool loaded = default!;
+    bool loaded = default;
     GoFrame ᒐ = default;
     try {
         ref var ht = ref Ꮡht.DerefOrNull();
@@ -117,11 +117,11 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
         Ꮡht.init();
         var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
         System.GC.KeepAlive(Ꮡkey);
-        ж<Δindirect<K, V>> i = default!;
-        nuint hashShift = default!;
-        ж<atomic.Pointer<node<K, V>>> slot = default!;
-        ж<node<K, V>> n = default!;
-        while (ᐧ) {
+        ж<Δindirect<K, V>> i = default;
+        nuint hashShift = default;
+        ж<atomic.Pointer<node<K, V>>> slot = default;
+        ж<node<K, V>> n = default;
+        for (;;) {
             // Find the key or a candidate location for insertion.
             i = Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load();
             hashShift = 8 * goarch.PtrSize;
@@ -172,7 +172,7 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
         var iʗ1 = i;
         defer(iʗ1.of(sync_package.Δindirect<K, V>.Ꮡmu).Unlock, ref ᒐ);
 
-        ж<Δentry<K, V>> oldEntry = default!;
+        ж<Δentry<K, V>> oldEntry = default;
         if (n != nil) {
             oldEntry = n.entry();
             {
@@ -183,7 +183,7 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
             }
         }
         var newEntry = newEntryNode(key, value);
-        if (oldEntry == nil){
+        if (oldEntry == nil) {
             // Easy case: create a new entry and store it.
             slot.Store(newEntry.of(sync_package.Δentry<K, V>.Ꮡnode));
         } else {
@@ -202,19 +202,19 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
 
 // expand takes oldEntry and newEntry whose hashes conflict from bit 64 down to hashShift and
 // produces a subtree of indirect nodes to hold the two new entries.
-internal static ж<node<K, V>> expand<K, V>(this ref HashTrieMap<K, V> ht, ж<Δentry<K, V>> ᏑoldEntry, ж<Δentry<K, V>> ᏑnewEntry, uintptr newHash, nuint hashShift, ж<Δindirect<K, V>> Ꮡparent) {
+internal static ж<node<K, V>> expand<K, V>(this ref HashTrieMap<K, V> ht, ж<Δentry<K, V>> oldEntry, ж<Δentry<K, V>> newEntry, uintptr newHash, nuint hashShift, ж<Δindirect<K, V>> parent) {
     // Check for a hash collision.
-    var oldHash = ht.keyHash(@unsafe.Pointer.FromPinnedBox(ᏑoldEntry.of(sync_package.Δentry<K, V>.Ꮡkey)), ht.seed);
+    var oldHash = ht.keyHash(@unsafe.Pointer.FromPinnedBox(oldEntry.of(sync_package.Δentry<K, V>.Ꮡkey)), ht.seed);
     if (oldHash == newHash) {
         // Store the old entry in the new entry's overflow list, then store
         // the new entry.
-        ᏑnewEntry.of(sync_package.Δentry<K, V>.Ꮡoverflow).Store(ᏑoldEntry);
-        return ᏑnewEntry.of(sync_package.Δentry<K, V>.Ꮡnode);
+        newEntry.of(sync_package.Δentry<K, V>.Ꮡoverflow).Store(oldEntry);
+        return newEntry.of(sync_package.Δentry<K, V>.Ꮡnode);
     }
     // We have to add an indirect node. Worse still, we may need to add more than one.
-    var newIndirect = newIndirectNode(Ꮡparent);
+    var newIndirect = newIndirectNode(parent);
     var top = newIndirect;
-    while (ᐧ) {
+    for (;;) {
         if (hashShift == 0) {
             throw panic("internal/sync.HashTrieMap: ran out of hash bits while inserting (incorrect use of unsafe or cgo, or data race?)");
         }
@@ -222,8 +222,8 @@ internal static ж<node<K, V>> expand<K, V>(this ref HashTrieMap<K, V> ht, ж<Δ
         var oi = (uintptr)((oldHash.Rsh(hashShift)) & (uintptr)nChildrenMask);
         var ni = (uintptr)((newHash.Rsh(hashShift)) & (uintptr)nChildrenMask);
         if (oi != ni) {
-            newIndirect.at(sync_package.Δindirect<K, V>.Ꮡchildren, (ulong)(oi)).Store(ᏑoldEntry.of(sync_package.Δentry<K, V>.Ꮡnode));
-            newIndirect.at(sync_package.Δindirect<K, V>.Ꮡchildren, (ulong)(ni)).Store(ᏑnewEntry.of(sync_package.Δentry<K, V>.Ꮡnode));
+            newIndirect.at(sync_package.Δindirect<K, V>.Ꮡchildren, (ulong)(oi)).Store(oldEntry.of(sync_package.Δentry<K, V>.Ꮡnode));
+            newIndirect.at(sync_package.Δindirect<K, V>.Ꮡchildren, (ulong)(ni)).Store(newEntry.of(sync_package.Δentry<K, V>.Ꮡnode));
             break;
         }
         var nextIndirect = newIndirectNode(newIndirect);
@@ -242,7 +242,7 @@ public static void Store<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K key, V @new) 
 // The loaded result reports whether the key was present.
 public static (V previous, bool loaded) Swap<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V @new) {
     V previous = GoZero<V>();
-    bool loaded = default!;
+    bool loaded = default;
     GoFrame ᒐ = default;
     try {
         ref var ht = ref Ꮡht.DerefOrNull();
@@ -251,11 +251,11 @@ public static (V previous, bool loaded) Swap<K, V>(this ж<HashTrieMap<K, V>> �
         Ꮡht.init();
         var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
         System.GC.KeepAlive(Ꮡkey);
-        ж<Δindirect<K, V>> i = default!;
-        nuint hashShift = default!;
-        ж<atomic.Pointer<node<K, V>>> slot = default!;
-        ж<node<K, V>> n = default!;
-        while (ᐧ) {
+        ж<Δindirect<K, V>> i = default;
+        nuint hashShift = default;
+        ж<atomic.Pointer<node<K, V>>> slot = default;
+        ж<node<K, V>> n = default;
+        for (;;) {
             // Find the key or a candidate location for insertion.
             i = Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load();
             hashShift = 8 * goarch.PtrSize;
@@ -296,7 +296,7 @@ public static (V previous, bool loaded) Swap<K, V>(this ж<HashTrieMap<K, V>> �
         defer(iʗ1.of(sync_package.Δindirect<K, V>.Ꮡmu).Unlock, ref ᒐ);
 
         V zero = GoZero<V>();
-        ж<Δentry<K, V>> oldEntry = default!;
+        ж<Δentry<K, V>> oldEntry = default;
         if (n != nil) {
             // Swap if the keys compare.
             oldEntry = n.entry();
@@ -308,7 +308,7 @@ public static (V previous, bool loaded) Swap<K, V>(this ж<HashTrieMap<K, V>> �
         }
         // The keys didn't compare, so we're doing an insertion.
         var newEntry = newEntryNode(key, @new);
-        if (oldEntry == nil){
+        if (oldEntry == nil) {
             // Easy case: create a new entry and store it.
             slot.Store(newEntry.of(sync_package.Δentry<K, V>.Ꮡnode));
         } else {
@@ -329,14 +329,14 @@ public static (V previous, bool loaded) Swap<K, V>(this ж<HashTrieMap<K, V>> �
 // if the value stored in the map is equal to old.
 // The value type must be of a comparable type, otherwise CompareAndSwap will panic.
 public static bool /*swapped*/ CompareAndSwap<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V old, V @new) {
-    bool swapped = default!;
+    bool swapped = default;
     GoFrame ᒐ = default;
     try {
         ref var ht = ref Ꮡht.DerefOrNull();
         ref var key = ref heap(keyʗp, out var Ꮡkey);
 
         Ꮡht.init();
-        if (ht.valEqual == default!) {
+        if (ht.valEqual == nil) {
             throw panic("called CompareAndSwap when value is not of comparable type");
         }
         var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
@@ -370,7 +370,7 @@ public static bool /*swapped*/ CompareAndSwap<K, V>(this ж<HashTrieMap<K, V>> �
 // LoadAndDelete deletes the value for a key, returning the previous value if any.
 // The loaded result reports whether the key was present.
 public static (V value, bool loaded) LoadAndDelete<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp) {
-    bool loaded = default!;
+    bool loaded = default;
     ref var ht = ref Ꮡht.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
@@ -379,7 +379,7 @@ public static (V value, bool loaded) LoadAndDelete<K, V>(this ж<HashTrieMap<K, 
     System.GC.KeepAlive(Ꮡkey);
 
     // Find a node with the key and compare with it. n != nil if we found the node.
-    var (i, hashShift, slot, n) = Ꮡht.find(key, hash, default!, @new<V>().ValueSlot);
+    var (i, hashShift, slot, n) = Ꮡht.find(key, hash, default, @new<V>().ValueSlot);
     if (n == nil) {
         if (i != nil) {
             i.of(sync_package.Δindirect<K, V>.Ꮡmu).Unlock();
@@ -434,19 +434,19 @@ public static void Delete<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K key) {
 // If there is no current value for key in the map, CompareAndDelete returns false
 // (even if the old value is the nil interface value).
 public static bool /*deleted*/ CompareAndDelete<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V old) {
-    bool deleted = default!;
+    bool deleted = default;
     ref var ht = ref Ꮡht.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
     Ꮡht.init();
-    if (ht.valEqual == default!) {
+    if (ht.valEqual == nil) {
         throw panic("called CompareAndDelete when value is not of comparable type");
     }
     var hash = ht.keyHash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), ht.seed);
     System.GC.KeepAlive(Ꮡkey);
 
     // Find a node with the key. n != nil if we found the node.
-    var (i, hashShift, slot, n) = Ꮡht.find(key, hash, default!, @new<V>().ValueSlot);
+    var (i, hashShift, slot, n) = Ꮡht.find(key, hash, default, @new<V>().ValueSlot);
     if (n == nil) {
         if (i != nil) {
             i.of(sync_package.Δindirect<K, V>.Ꮡmu).Unlock();
@@ -497,12 +497,12 @@ public static bool /*deleted*/ CompareAndDelete<K, V>(this ж<HashTrieMap<K, V>>
 //
 // If i != nil then i.mu is locked, and it is the caller's responsibility to unlock it.
 internal static (ж<Δindirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node<K, V>>> slot, ж<node<K, V>> n) find<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K key, uintptr hash, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual, V value) {
-    ж<Δindirect<K, V>> i = default!;
-    nuint hashShift = default!;
-    ж<atomic.Pointer<node<K, V>>> slot = default!;
-    ж<node<K, V>> n = default!;
+    ж<Δindirect<K, V>> i = default;
+    nuint hashShift = default;
+    ж<atomic.Pointer<node<K, V>>> slot = default;
+    ж<node<K, V>> n = default;
 
-    while (ᐧ) {
+    for (;;) {
         // Find the key or return if it's not there.
         i = Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load();
         hashShift = 8 * goarch.PtrSize;
@@ -514,7 +514,7 @@ internal static (ж<Δindirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node
             n = slot.Load();
             if (n == nil) {
                 // Nothing to compare with. Give up.
-                i = default!;
+                i = default;
                 return (i, hashShift, slot, n);
             }
             if ((~n).isEntry) {
@@ -522,8 +522,8 @@ internal static (ж<Δindirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node
                 {
                     var (_, ok) = n.entry().lookupWithValue(key, value, valEqual); if (!ok) {
                         // No match, comparison failed.
-                        i = default!;
-                        n = default!;
+                        i = default;
+                        n = default;
                         return (i, hashShift, slot, n);
                     }
                 }
@@ -628,8 +628,8 @@ internal static UntypedInt nChildrenMask => /* nChildren - 1 */ 15;
     internal array<atomic.Pointer<node<K, V>>> children = new(nChildren);
 }
 
-internal static ж<Δindirect<K, V>> newIndirectNode<K, V>(ж<Δindirect<K, V>> Ꮡparent) {
-    return Ꮡ(new Δindirect<K, V>(node: new node<K, V>(isEntry: false), parent: Ꮡparent));
+internal static ж<Δindirect<K, V>> newIndirectNode<K, V>(ж<Δindirect<K, V>> parent) {
+    return Ꮡ(new Δindirect<K, V>(node: new node<K, V>(isEntry: false), parent: parent));
 }
 
 internal static bool empty<K, V>(this ref Δindirect<K, V> i) {
@@ -675,7 +675,7 @@ internal static (V, bool) lookupWithValue<K, V>(this ж<Δentry<K, V>> Ꮡe, K k
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
     while (Ꮡe != nil) {
-        if (AreEqual(e.key, key) && (valEqual == default! || valEqual(@unsafe.Pointer.FromPinnedBox(Ꮡe.of(sync_package.Δentry<K, V>.Ꮡvalue)), (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡvalue))))) {
+        if (AreEqual(e.key, key) && (valEqual == nil || valEqual(@unsafe.Pointer.FromPinnedBox(Ꮡe.of(sync_package.Δentry<K, V>.Ꮡvalue)), (uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡvalue))))) {
             System.GC.KeepAlive(Ꮡvalue);
             return (e.value, true);
         }

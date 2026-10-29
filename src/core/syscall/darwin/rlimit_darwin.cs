@@ -14,7 +14,7 @@ internal static void adjustFileLimit(ref Rlimit lim) {
     // On older macOS, setrlimit(RLIMIT_NOFILE, lim) with lim.Cur = infinity fails.
     // Set to the value of kern.maxfilesperproc instead.
     var (n, err) = SysctlUint32(kernMaxfilesperprocˢ);
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
     if (lim.Cur > (uint64)n) {

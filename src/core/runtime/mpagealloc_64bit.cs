@@ -83,8 +83,7 @@ internal static void sysInit(this ref pageAlloc Δp, bool test) {
         }
 
         // Put this reservation into a slice.
-        ref var sl = ref heap<notInHeapSlice>(out var Ꮡsl);
-        sl = new notInHeapSlice((ж<notInHeap>)(uintptr)(r), 0, entries);
+        ref var sl = ref heap<notInHeapSlice>(new notInHeapSlice((ж<notInHeap>)(uintptr)(r), 0, entries), out var Ꮡsl);
         Δp.summary[l] = ~Ꮡsl.Reinterpret<notInHeapSlice, slice<pallocSum>>();
     }
 }
@@ -198,7 +197,7 @@ internal static readonly @string scavengeIndexˢ = "scavenge index"u8;
 // sysGrow increases the index's backing store in response to a heap growth.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> ᏑsysStat) {
+internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
@@ -219,8 +218,8 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
     // index.
     var haveMin = Ꮡs.of(scavengeIndex.Ꮡmin).Load();
     var haveMax = Ꮡs.of(scavengeIndex.Ꮡmax).Load();
-    var needMin = alignDown((uintptr)(nuint)chunkIndex(@base), physPageSize / scSize);
-    var needMax = alignUp((uintptr)(nuint)chunkIndex(limit), physPageSize / scSize);
+    var needMin = alignDown((uintptr)chunkIndex(@base), physPageSize / scSize);
+    var needMax = alignUp((uintptr)chunkIndex(limit), physPageSize / scSize);
 
     // We need a contiguous range, so extend the range if there's no overlap.
     if (needMax < haveMin) {
@@ -241,7 +240,7 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 
     // If we've got something to map, map it, and update the slice bounds.
     if (need.size() != 0) {
-        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), ᏑsysStat, scavengeIndexˢ);
+        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), sysStat, scavengeIndexˢ);
         sysUsed((@unsafe.Pointer)need.@base.addr(), need.size(), need.size());
         // Update the indices only after the new memory is valid.
         if (haveMax == 0 || needMin < haveMin) {
@@ -257,12 +256,11 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 // sysInit initializes the scavengeIndex' chunks array.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> ᏑsysStat) {
+internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> sysStat) {
     var n = (uintptr)((uintptr)1 << (int)(heapAddrBits)) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
     @unsafe.Pointer r = (uintptr)sysReserve(nil, nbytes, scavengeIndexˢ);
-    ref var sl = ref heap<notInHeapSlice>(out var Ꮡsl);
-    sl = new notInHeapSlice((ж<notInHeap>)(uintptr)(r), (nint)n, (nint)n);
+    ref var sl = ref heap<notInHeapSlice>(new notInHeapSlice((ж<notInHeap>)(uintptr)(r), (nint)n, (nint)n), out var Ꮡsl);
     s.chunks = ~Ꮡsl.Reinterpret<notInHeapSlice, slice<atomicScavChunkData>>();
     return 0; // All memory above is mapped Reserved.
 }

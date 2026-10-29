@@ -20,7 +20,7 @@ internal static array<uint8> _jsCtx_index = new uint8[]{0, 11, 21, 33}.array();
 
 internal static @string String(this jsCtx i) {
     if (i >= ((jsCtx)(uint8)(len(_jsCtx_index) - 1))) {
-        return "jsCtx("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "jsCtx("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _jsCtx_name.slice(_jsCtx_index[i], _jsCtx_index[i + 1]);
 }

@@ -17,24 +17,24 @@ partial class mime_package {
 
 // See https://specifications.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-0.21.html
 // for the FreeDesktop Shared MIME-info Database specification.
-internal static slice<@string> mimeGlobs = new @string[]{
+internal static slice<@string> mimeGlobs = slice<@string>([
     "/usr/local/share/mime/globs2"u8,
     "/usr/share/mime/globs2"u8
-}.slice();
+]);
 
 // Common locations for mime.types files on unix.
-internal static slice<@string> typeFiles = new @string[]{
+internal static slice<@string> typeFiles = slice<@string>([
     "/etc/mime.types"u8,
     "/etc/apache2/mime.types"u8,
     "/etc/apache/mime.types"u8,
     "/etc/httpd/conf/mime.types"u8
-}.slice();
+]);
 
 internal static error loadMimeGlobsFile(@string filename) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(filename);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var fʗ1 = f;
@@ -44,10 +44,9 @@ internal static error loadMimeGlobsFile(@string filename) {
         while (scanner.Scan()) {
             // Each line should be of format: weight:mimetype:glob[:morefields...]
             var fields = strings.Split(scanner.Text(), ":"u8);
-            if (len(fields) < 3 || len(fields[0]) < 1 || len(fields[2]) < 3){
+            if (len(fields) < 3 || len(fields[0]) < 1 || len(fields[2]) < 3) {
                 continue;
-            } else 
-            if (fields[0][0] == (rune)'#' || fields[2][0] != (rune)'*' || fields[2][1] != (rune)'.') {
+            } else if (fields[0][0] == '#' || fields[2][0] != '*' || fields[2][1] != '.') {
                 continue;
             }
 
@@ -76,13 +75,13 @@ internal static error loadMimeGlobsFile(@string filename) {
             setExtensionType(extension, fields[1]);
         }
         {
-            var errΔ1 = scanner.Err(); if (errΔ1 != default!) {
+            var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
                 throw panic(errΔ1);
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -90,7 +89,7 @@ internal static void loadMimeFile(@string filename) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(filename);
-        if (err != default!) {
+        if (err != nil) {
             return;
         }
         var fʗ1 = f;
@@ -99,19 +98,19 @@ internal static void loadMimeFile(@string filename) {
         var scanner = bufio.NewScanner(new os_FileжReader(f));
         while (scanner.Scan()) {
             var fields = strings.Fields(scanner.Text());
-            if (len(fields) <= 1 || fields[0][0] == (rune)'#') {
+            if (len(fields) <= 1 || fields[0][0] == '#') {
                 continue;
             }
             @string mimeType = fields[0];
             foreach (var (_, ext) in fields[1..]) {
-                if (ext[0] == (rune)'#') {
+                if (ext[0] == '#') {
                     break;
                 }
                 setExtensionType("."u8 + ext, mimeType);
             }
         }
         {
-            var errΔ1 = scanner.Err(); if (errΔ1 != default!) {
+            var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
                 throw panic(errΔ1);
             }
         }
@@ -123,7 +122,7 @@ internal static void loadMimeFile(@string filename) {
 internal static void initMimeUnix() {
     foreach (var (_, filename) in mimeGlobs) {
         {
-            var err = loadMimeGlobsFile(filename); if (err == default!) {
+            var err = loadMimeGlobsFile(filename); if (err == nil) {
                 return; // Stop checking more files if mimetype database is found.
             }
         }
@@ -136,8 +135,8 @@ internal static void initMimeUnix() {
 }
 
 internal static map<@string, @string> initMimeForTests() {
-    mimeGlobs = new @string[]{""u8}.slice();
-    typeFiles = new @string[]{"testdata/test.types"u8}.slice();
+    mimeGlobs = slice<@string>([""u8]);
+    typeFiles = slice<@string>(["testdata/test.types"u8]);
     return new map<@string, @string>{
         [".T1"u8] = "application/test"u8,
         [".t2"u8] = "text/test; charset=utf-8"u8,

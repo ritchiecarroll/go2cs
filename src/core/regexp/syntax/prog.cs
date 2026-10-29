@@ -18,7 +18,7 @@ partial class syntax_package {
 // A Prog is a compiled regular expression program.
 partial struct Prog {
     public slice<Inst> Inst;
-    public nint Start; // index of start instruction
+    public nint Start;  // index of start instruction
     public nint NumCap; // number of InstCapture insts in re
 }
 
@@ -37,7 +37,7 @@ public static InstOp InstRune1 => 8;
 public static InstOp InstRuneAny => 9;
 public static InstOp InstRuneAnyNotNL => 10;
 
-internal static slice<@string> instOpNames = new @string[]{
+internal static slice<@string> instOpNames = slice<@string>([
     "InstAlt"u8,
     "InstAltMatch"u8,
     "InstCapture"u8,
@@ -49,10 +49,10 @@ internal static slice<@string> instOpNames = new @string[]{
     "InstRune1"u8,
     "InstRuneAny"u8,
     "InstRuneAnyNotNL"u8
-}.slice();
+]);
 
 public static @string String(this InstOp i) {
-    if ((nuint)(uint8)i >= (nuint)len(instOpNames)) {
+    if ((nuint)i >= (nuint)len(instOpNames)) {
         return ""u8;
     }
     return instOpNames[i];
@@ -76,13 +76,13 @@ public static EmptyOp EmptyNoWordBoundary => 32;
 // at the end of the text.
 public static EmptyOp EmptyOpContext(rune r1, rune r2) {
     EmptyOp op = EmptyNoWordBoundary;
-    byte boundary = default!;
+    byte boundary = default;
     switch (ᐧ) {
     case {} when IsWordChar(r1): {
         boundary = 1;
         break;
     }
-    case {} when r1 is (rune)'\n': {
+    case {} when r1 is '\n': {
         op |= (EmptyOp)(EmptyBeginLine);
         break;
     }
@@ -95,7 +95,7 @@ public static EmptyOp EmptyOpContext(rune r1, rune r2) {
         boundary ^= (byte)(1);
         break;
     }
-    case {} when r2 is (rune)'\n': {
+    case {} when r2 is '\n': {
         op |= (EmptyOp)(EmptyEndLine);
         break;
     }
@@ -115,7 +115,7 @@ public static EmptyOp EmptyOpContext(rune r1, rune r2) {
 public static bool IsWordChar(rune r) {
     // Test for lowercase letters first, as these occur more
     // frequently than uppercase letters in common cases.
-    return (rune)'a' <= r && r <= (rune)'z' || (rune)'A' <= r && r <= (rune)'Z' || (rune)'0' <= r && r <= (rune)'9' || r == (rune)'_';
+    return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || '0' <= r && r <= '9' || r == '_';
 }
 
 // An Inst is a single instruction in a regular expression program.
@@ -135,8 +135,8 @@ public static @string String(this ж<Prog> Ꮡp) {
 // skipNop follows any no-op or capturing instructions.
 internal static ж<Inst> skipNop(this ref Prog p, uint32 pc) {
     var i = Ꮡ(p.Inst, pc);
-    while ((~i).Op == InstNop || (~i).Op == InstCapture) {
-        i = Ꮡ(p.Inst, (~i).Out);
+    while (i.Op == InstNop || i.Op == InstCapture) {
+        i = Ꮡ(p.Inst, i.Out);
     }
     return i;
 }
@@ -144,10 +144,11 @@ internal static ж<Inst> skipNop(this ref Prog p, uint32 pc) {
 // op returns i.Op but merges all the Rune special cases into InstRune
 internal static InstOp op(this ref Inst i) {
     var op = i.Op;
-    var exprᴛ1 = op;
-    if (exprᴛ1 == InstRune1 || exprᴛ1 == InstRuneAny || exprᴛ1 == InstRuneAnyNotNL) {
+    switch (op) {
+    case var ᴛ when ᴛ == InstRune1 || ᴛ == InstRuneAny || ᴛ == InstRuneAnyNotNL: {
         op = InstRune;
-    }
+        break;
+    }}
     return op;
 }
 
@@ -158,41 +159,44 @@ public static (@string prefix, bool complete) Prefix(this ref Prog p) {
     var i = p.skipNop((uint32)p.Start);
 
     // Avoid allocation of buffer if prefix is empty.
-    if (i.op() != InstRune || len((~i).Rune) != 1) {
-        return ("", (~i).Op == InstMatch);
+    if (i.op() != InstRune || len(i.Rune) != 1) {
+        return ("", i.Op == InstMatch);
     }
 
     // Have prefix; gather characters.
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    while (i.op() == InstRune && len((~i).Rune) == 1 && (Flags)(((Flags)(uint16)(~i).Arg) & FoldCase) == 0 && (~i).Rune[0] != utf8.RuneError) {
-        Ꮡbuf.WriteRune((~i).Rune[0]);
-        i = p.skipNop((~i).Out);
+    while (i.op() == InstRune && len(i.Rune) == 1 && (Flags)(((Flags)(uint16)i.Arg) & FoldCase) == 0 && i.Rune[0] != utf8.RuneError) {
+        Ꮡbuf.WriteRune(i.Rune[0]);
+        i = p.skipNop(i.Out);
     }
-    return (buf.String(), (~i).Op == InstMatch);
+    return (buf.String(), i.Op == InstMatch);
 }
 
 // StartCond returns the leading empty-width conditions that must
 // be true in any match. It returns ^EmptyOp(0) if no matches are possible.
 public static EmptyOp StartCond(this ref Prog p) {
-    EmptyOp flag = default!;
+    EmptyOp flag = default;
     var pc = (uint32)p.Start;
     var i = Ꮡ(p.Inst, pc);
 Loop:
-    while (ᐧ) {
-        var exprᴛ1 = (~i).Op;
-        if (exprᴛ1 == InstEmptyWidth) {
-            flag |= (EmptyOp)(((EmptyOp)(uint8)(~i).Arg));
+    for (;;) {
+        switch (i.Op) {
+        case var ᴛ when ᴛ == InstEmptyWidth: {
+            flag |= (EmptyOp)(((EmptyOp)(uint8)i.Arg));
+            break;
         }
-        else if (exprᴛ1 == InstFail) {
+        case var ᴛ when ᴛ == InstFail: {
             return (EmptyOp)(~((EmptyOp)((EmptyOp)0)));
         }
-        else if (exprᴛ1 == InstCapture || exprᴛ1 == InstNop) {
+        case var ᴛ when ᴛ == InstCapture || ᴛ == InstNop: {
             // skip
+            break;
         }
-        else { /* default: */
+        default: {
             goto break_Loop;
-        }
-        pc = i.Value.Out;
+            break;
+        }}
+        pc = i.Out;
         i = Ꮡ(p.Inst, pc);
 continue_Loop:;
     }
@@ -261,7 +265,7 @@ public static nint MatchRunePos(this ref Inst i, rune r) {
     while (lo < hi) {
         nint m = (nint)((nuint)(lo + hi) >> 1);
         {
-            var c = rune[2 * m]; if (c <= r){
+            var c = rune[2 * m]; if (c <= r) {
                 if (r <= rune[2 * m + 1]) {
                     return m;
                 }
@@ -278,25 +282,25 @@ public static nint MatchRunePos(this ref Inst i, rune r) {
 // an empty string between the runes before and after.
 // It should only be called when i.Op == [InstEmptyWidth].
 public static bool MatchEmptyWidth(this ref Inst i, rune before, rune after) {
-    var exprᴛ1 = ((EmptyOp)(uint8)i.Arg);
-    if (exprᴛ1 == EmptyBeginLine) {
-        return before == (rune)'\n' || before == -1;
+    switch (((EmptyOp)(uint8)i.Arg)) {
+    case var ᴛ when ᴛ == EmptyBeginLine: {
+        return before == '\n' || before == -1;
     }
-    if (exprᴛ1 == EmptyEndLine) {
-        return after == (rune)'\n' || after == -1;
+    case var ᴛ when ᴛ == EmptyEndLine: {
+        return after == '\n' || after == -1;
     }
-    if (exprᴛ1 == EmptyBeginText) {
+    case var ᴛ when ᴛ == EmptyBeginText: {
         return before == -1;
     }
-    if (exprᴛ1 == EmptyEndText) {
+    case var ᴛ when ᴛ == EmptyEndText: {
         return after == -1;
     }
-    if (exprᴛ1 == EmptyWordBoundary) {
+    case var ᴛ when ᴛ == EmptyWordBoundary: {
         return IsWordChar(before) != IsWordChar(after);
     }
-    if (exprᴛ1 == EmptyNoWordBoundary) {
+    case var ᴛ when ᴛ == EmptyNoWordBoundary: {
         return IsWordChar(before) == IsWordChar(after);
-    }
+    }}
     throw panic("unknown empty width arg");
 }
 
@@ -306,29 +310,29 @@ public static @string String(this ж<Inst> Ꮡi) {
     return b.String();
 }
 
-internal static void bw(ж<strings.Builder> Ꮡb, params ꓸꓸꓸstring argsʗp) {
+internal static void bw(ж<strings.Builder> b, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();
 
     foreach (var (_, s) in args) {
-        Ꮡb.WriteString(s);
+        b.WriteString(s);
     }
 }
 
-internal static void dumpProg(ж<strings.Builder> Ꮡb, ж<Prog> Ꮡp) {
+internal static void dumpProg(ж<strings.Builder> b, ж<Prog> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     foreach (var j in range(p.Inst)) {
         var i = Ꮡ(p.Inst, j);
         @string pc = strconv.Itoa(j);
         if (len(pc) < 3) {
-            Ꮡb.WriteString("   "u8.slice(len(pc)));
+            b.WriteString("   "u8.slice(len(pc)));
         }
         if (j == p.Start) {
             pc += "*"u8;
         }
-        bw(Ꮡb, pc, "\t");
-        dumpInst(Ꮡb, ref (i).DerefOrNull());
-        bw(Ꮡb, "\n"u8);
+        bw(b, pc, "\t");
+        dumpInst(b, ref (i).DerefOrNull());
+        bw(b, "\n"u8);
     }
 }
 
@@ -350,49 +354,60 @@ internal static readonly @string rune1ˢ = "rune1 "u8;
 internal static readonly @string anyˢ = "any -> "u8;
 internal static readonly @string anynotnlˢ = "anynotnl -> "u8;
 
-internal static void dumpInst(ж<strings.Builder> Ꮡb, ref Inst i) {
-    var exprᴛ1 = i.Op;
-    if (exprᴛ1 == InstAlt) {
-        bw(Ꮡb, altˢ, u32(i.Out), ", ", u32(i.Arg));
+internal static void dumpInst(ж<strings.Builder> b, ref Inst i) {
+    switch (i.Op) {
+    case var ᴛ when ᴛ == InstAlt: {
+        bw(b, altˢ, u32(i.Out), ", ", u32(i.Arg));
+        break;
     }
-    else if (exprᴛ1 == InstAltMatch) {
-        bw(Ꮡb, altmatchˢ, u32(i.Out), ", ", u32(i.Arg));
+    case var ᴛ when ᴛ == InstAltMatch: {
+        bw(b, altmatchˢ, u32(i.Out), ", ", u32(i.Arg));
+        break;
     }
-    else if (exprᴛ1 == InstCapture) {
-        bw(Ꮡb, capˢ, u32(i.Arg), " -> ", u32(i.Out));
+    case var ᴛ when ᴛ == InstCapture: {
+        bw(b, capˢ, u32(i.Arg), " -> ", u32(i.Out));
+        break;
     }
-    else if (exprᴛ1 == InstEmptyWidth) {
-        bw(Ꮡb, emptyˢ, u32(i.Arg), " -> ", u32(i.Out));
+    case var ᴛ when ᴛ == InstEmptyWidth: {
+        bw(b, emptyˢ, u32(i.Arg), " -> ", u32(i.Out));
+        break;
     }
-    else if (exprᴛ1 == InstMatch) {
-        bw(Ꮡb, matchˢ);
+    case var ᴛ when ᴛ == InstMatch: {
+        bw(b, matchˢ);
+        break;
     }
-    else if (exprᴛ1 == InstFail) {
-        bw(Ꮡb, failˢ);
+    case var ᴛ when ᴛ == InstFail: {
+        bw(b, failˢ);
+        break;
     }
-    else if (exprᴛ1 == InstNop) {
-        bw(Ꮡb, nopˢ, u32(i.Out));
+    case var ᴛ when ᴛ == InstNop: {
+        bw(b, nopˢ, u32(i.Out));
+        break;
     }
-    else if (exprᴛ1 == InstRune) {
-        if (i.Rune == default!) {
+    case var ᴛ when ᴛ == InstRune: {
+        if (i.Rune == nil) {
             // shouldn't happen
-            bw(Ꮡb, runeNilˢ);
+            bw(b, runeNilˢ);
         }
-        bw(Ꮡb, runeˢ, strconv.QuoteToASCII((@string)i.Rune));
+        bw(b, runeˢ, strconv.QuoteToASCII((@string)i.Rune));
         if ((Flags)(((Flags)(uint16)i.Arg) & FoldCase) != 0) {
-            bw(Ꮡb, "/i"u8);
+            bw(b, "/i"u8);
         }
-        bw(Ꮡb, " -> "u8, u32(i.Out));
+        bw(b, " -> "u8, u32(i.Out));
+        break;
     }
-    else if (exprᴛ1 == InstRune1) {
-        bw(Ꮡb, rune1ˢ, strconv.QuoteToASCII((@string)i.Rune), " -> ", u32(i.Out));
+    case var ᴛ when ᴛ == InstRune1: {
+        bw(b, rune1ˢ, strconv.QuoteToASCII((@string)i.Rune), " -> ", u32(i.Out));
+        break;
     }
-    else if (exprᴛ1 == InstRuneAny) {
-        bw(Ꮡb, anyˢ, u32(i.Out));
+    case var ᴛ when ᴛ == InstRuneAny: {
+        bw(b, anyˢ, u32(i.Out));
+        break;
     }
-    else if (exprᴛ1 == InstRuneAnyNotNL) {
-        bw(Ꮡb, anynotnlˢ, u32(i.Out));
-    }
+    case var ᴛ when ᴛ == InstRuneAnyNotNL: {
+        bw(b, anynotnlˢ, u32(i.Out));
+        break;
+    }}
 }
 
 } // end syntax_package

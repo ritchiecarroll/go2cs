@@ -53,7 +53,7 @@ internal static @string Error(this headerError he) {
     var ssᴷ = new stackAppend<@string>();
 
     @string prefix = prefixᶜ;
-    slice<@string> ss = default!;
+    slice<@string> ss = default;
     foreach (var (_, s) in he) {
         if (s != ""u8) {
             ss = append(ssᴷ, ss, s);
@@ -73,12 +73,12 @@ public static UntypedInt TypeReg => /* '0' */ 48;
 public static UntypedInt TypeRegA => /* '\x00' */ 0;
 
 // Type '1' to '6' are header-only flags and may not have a data body.
-public static UntypedInt TypeLink => /* '1' */ 49; // Hard link
+public static UntypedInt TypeLink => /* '1' */ 49;    // Hard link
 public static UntypedInt TypeSymlink => /* '2' */ 50; // Symbolic link
-public static UntypedInt TypeChar => /* '3' */ 51; // Character device node
-public static UntypedInt TypeBlock => /* '4' */ 52; // Block device node
-public static UntypedInt TypeDir => /* '5' */ 53; // Directory
-public static UntypedInt TypeFifo => /* '6' */ 54; // FIFO node
+public static UntypedInt TypeChar => /* '3' */ 51;    // Character device node
+public static UntypedInt TypeBlock => /* '4' */ 52;   // Block device node
+public static UntypedInt TypeDir => /* '5' */ 53;     // Directory
+public static UntypedInt TypeFifo => /* '6' */ 54;    // FIFO node
 
 // Type '7' is reserved.
 public static UntypedInt TypeCont => /* '7' */ 55;
@@ -114,7 +114,7 @@ internal static readonly @string paxUname = "uname"u8;
 internal static readonly @string paxGname = "gname"u8;
 internal static readonly @string paxMtime = "mtime"u8;
 internal static readonly @string paxAtime = "atime"u8;
-internal static readonly @string paxCtime = "ctime"u8; // Removed from later revision of PAX spec, but was valid
+internal static readonly @string paxCtime = "ctime"u8;     // Removed from later revision of PAX spec, but was valid
 internal static readonly @string paxCharset = "charset"u8; // Currently unused
 internal static readonly @string paxComment = "comment"u8; // Currently unused
 
@@ -153,12 +153,12 @@ partial struct Header {
     // The zero value is automatically promoted to either TypeReg or TypeDir
     // depending on the presence of a trailing slash in Name.
     public byte Typeflag;
-    public @string Name; // Name of file entry
+    public @string Name;     // Name of file entry
     public @string Linkname; // Target name of link (valid for TypeLink or TypeSymlink)
-    public int64 Size;  // Logical file size in bytes
-    public int64 Mode;  // Permission and mode bits
-    public nint Uid;   // User ID of owner
-    public nint Gid;   // Group ID of owner
+    public int64 Size;    // Logical file size in bytes
+    public int64 Mode;    // Permission and mode bits
+    public nint Uid;      // User ID of owner
+    public nint Gid;      // Group ID of owner
     public @string Uname; // User name of owner
     public @string Gname; // Group name of owner
     // If the Format is unspecified, then Writer.WriteHeader rounds ModTime
@@ -166,7 +166,7 @@ partial struct Header {
     //
     // To use AccessTime or ChangeTime, specify the Format as PAX or GNU.
     // To use sub-second resolution, specify the Format as PAX.
-    public time.Time ModTime; // Modification time
+    public time.Time ModTime;    // Modification time
     public time.Time AccessTime; // Access time (requires either PAX or GNU support)
     public time.Time ChangeTime; // Change time (requires either PAX or GNU support)
     public int64 Devmajor; // Major device number (valid for TypeChar or TypeBlock)
@@ -259,7 +259,7 @@ internal static bool validateSparseEntries(slice<sparseEntry> sp, int64 size) {
     if (size < 0) {
         return false;
     }
-    sparseEntry pre = default!;
+    sparseEntry pre = default;
     foreach (var (_, cur) in sp) {
         switch (ᐧ) {
         case {} when cur.Offset < 0 || cur.Length < 0: {
@@ -311,7 +311,7 @@ internal static slice<sparseEntry> alignSparseEntries(slice<sparseEntry> src, in
 //   - the endOffset of the last fragment is the total size
 internal static slice<sparseEntry> invertSparseEntries(slice<sparseEntry> src, int64 size) {
     var dst = src[..0];
-    sparseEntry pre = default!;
+    sparseEntry pre = default;
     foreach (var (_, cur) in src) {
         if (cur.Length == 0) {
             continue; // Skip empty fragments
@@ -362,17 +362,17 @@ internal static readonly @string onlyPaxSupportsˢ2 = "only PAX supports PAXReco
 // contain all fields that could not be directly encoded.
 // A value receiver ensures that this method does not mutate the source Header.
 internal static (Format format, map<@string, @string> paxHdrs, error err) allowedFormats(this Header h) {
-    Format format = default!;
-    map<@string, @string> paxHdrs = default!;
-    error err = default!;
+    Format format = default;
+    map<@string, @string> paxHdrs = default;
+    error err = default;
 
     format = (Format)((Format)(FormatUSTAR | FormatPAX) | FormatGNU);
     paxHdrs = new map<@string, @string>();
 
-    @string whyNoUSTAR = default!;
-    @string whyNoPAX = default!;
-    @string whyNoGNU = default!;
-    bool preferPAX = default!; // Prefer PAX over USTAR
+    @string whyNoUSTAR = default;
+    @string whyNoPAX = default;
+    @string whyNoGNU = default;
+    bool preferPAX = default; // Prefer PAX over USTAR
     var hʗ1 = h;
     var paxHdrsʗ1 = paxHdrs;
     void verifyString(@string s, nint size, @string name, @string paxKey) {
@@ -393,7 +393,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
                     format.mustNotBe(FormatUSTAR);
                 }
             }
-            if (paxKey == paxNone){
+            if (paxKey == paxNone) {
                 whyNoPAX = fmt.Sprintf("PAX cannot encode %s=%q"u8, name, s);
                 format.mustNotBe(FormatPAX);
             } else {
@@ -416,7 +416,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
         if (!fitsInOctal(size, n)) {
             whyNoUSTAR = fmt.Sprintf("USTAR cannot encode %s=%d"u8, name, n);
             format.mustNotBe(FormatUSTAR);
-            if (paxKey == paxNone){
+            if (paxKey == paxNone) {
                 whyNoPAX = fmt.Sprintf("PAX cannot encode %s=%d"u8, name, n);
                 format.mustNotBe(FormatPAX);
             } else {
@@ -448,7 +448,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
         var needsNano = ts.Nanosecond() != 0;
         if (!isMtime || !fitsOctal || needsNano) {
             preferPAX = true; // USTAR may truncate sub-second measurements
-            if (paxKey == paxNone){
+            if (paxKey == paxNone) {
                 whyNoPAX = fmt.Sprintf("PAX cannot encode %s=%v"u8, name, ts);
                 format.mustNotBe(FormatPAX);
             } else {
@@ -482,28 +482,30 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     verifyTime(h.ChangeTime, len(gnu.changeTime()), changeTimeˢ, paxCtime);
 
     // Check for header-only types.
-    @string whyOnlyPAX = default!;
-    @string whyOnlyGNU = default!;
-    var exprᴛ1 = h.Typeflag;
-    if (exprᴛ1 == TypeReg || exprᴛ1 == TypeChar || exprᴛ1 == TypeBlock || exprᴛ1 == TypeFifo || exprᴛ1 == TypeGNUSparse) {
+    @string whyOnlyPAX = default;
+    @string whyOnlyGNU = default;
+    switch (h.Typeflag) {
+    case var ᴛ when ᴛ == TypeReg || ᴛ == TypeChar || ᴛ == TypeBlock || ᴛ == TypeFifo || ᴛ == TypeGNUSparse: {
         // Exclude TypeLink and TypeSymlink, since they may reference directories.
         if (strings.HasSuffix(h.Name, "/"u8)) {
-            return (FormatUnknown, default!, new headerError(new @string[]{"filename may not have trailing slash"u8}.slice()));
+            return (FormatUnknown, default, new headerError(new @string[]{"filename may not have trailing slash"u8}.slice()));
         }
+        break;
     }
-    else if (exprᴛ1 == TypeXHeader || exprᴛ1 == TypeGNULongName || exprᴛ1 == TypeGNULongLink) {
-        return (FormatUnknown, default!, new headerError(new @string[]{"cannot manually encode TypeXHeader, TypeGNULongName, or TypeGNULongLink headers"u8}.slice()));
+    case var ᴛ when ᴛ == TypeXHeader || ᴛ == TypeGNULongName || ᴛ == TypeGNULongLink: {
+        return (FormatUnknown, default, new headerError(new @string[]{"cannot manually encode TypeXHeader, TypeGNULongName, or TypeGNULongLink headers"u8}.slice()));
     }
-    else if (exprᴛ1 == TypeXGlobalHeader) {
+    case var ᴛ when ᴛ == TypeXGlobalHeader: {
         var h2 = new Header(Name: h.Name, Typeflag: h.Typeflag, Xattrs: h.Xattrs, PAXRecords: h.PAXRecords, Format: h.Format);
         if (!reflect.DeepEqual(h, h2)) {
-            return (FormatUnknown, default!, new headerError(new @string[]{"only PAXRecords should be set for TypeXGlobalHeader"u8}.slice()));
+            return (FormatUnknown, default, new headerError(new @string[]{"only PAXRecords should be set for TypeXGlobalHeader"u8}.slice()));
         }
         whyOnlyPAX = onlyPaxSupportsˢ;
         format.mayOnlyBe(FormatPAX);
-    }
+        break;
+    }}
     if (!isHeaderOnlyType(h.Typeflag) && h.Size < 0) {
-        return (FormatUnknown, default!, new headerError(new @string[]{"negative size on header-only type"u8}.slice()));
+        return (FormatUnknown, default, new headerError(new @string[]{"negative size on header-only type"u8}.slice()));
     }
 
     // Check PAX records.
@@ -538,7 +540,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     }
     foreach (var (k, v) in paxHdrs) {
         if (!validPAXRecord(k, v)) {
-            return (FormatUnknown, default!, new headerError(new @string[]{fmt.Sprintf("invalid PAX record: %q"u8, k + " = " + v)}.slice()));
+            return (FormatUnknown, default, new headerError(new @string[]{fmt.Sprintf("invalid PAX record: %q"u8, k + " = " + v)}.slice()));
         }
     }
 
@@ -575,19 +577,23 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
         }
     }
     if (format == FormatUnknown) {
-        var exprᴛ2 = h.Format;
-        if (exprᴛ2 == FormatUSTAR) {
+        switch (h.Format) {
+        case var ᴛ when ᴛ == FormatUSTAR: {
             err = new headerError(new @string[]{"Format specifies USTAR"u8, whyNoUSTAR, whyOnlyPAX, whyOnlyGNU}.slice());
+            break;
         }
-        else if (exprᴛ2 == FormatPAX) {
+        case var ᴛ when ᴛ == FormatPAX: {
             err = new headerError(new @string[]{"Format specifies PAX"u8, whyNoPAX, whyOnlyGNU}.slice());
+            break;
         }
-        else if (exprᴛ2 == FormatGNU) {
+        case var ᴛ when ᴛ == FormatGNU: {
             err = new headerError(new @string[]{"Format specifies GNU"u8, whyNoGNU, whyOnlyPAX}.slice());
+            break;
         }
-        else { /* default: */
+        default: {
             err = new headerError(new @string[]{whyNoUSTAR, whyNoPAX, whyNoGNU, whyOnlyPAX, whyOnlyGNU}.slice());
-        }
+            break;
+        }}
     }
     return (format, paxHdrs, err);
 }
@@ -603,7 +609,7 @@ partial struct headerFileInfo {
 }
 
 internal static int64 Size(this headerFileInfo fi) {
-    return (~fi.h).Size;
+    return fi.h.Size;
 }
 
 internal static bool IsDir(this headerFileInfo fi) {
@@ -611,7 +617,7 @@ internal static bool IsDir(this headerFileInfo fi) {
 }
 
 internal static time.Time ModTime(this headerFileInfo fi) {
-    return (~fi.h).ModTime;
+    return fi.h.ModTime;
 }
 
 internal static any Sys(this headerFileInfo fi) {
@@ -621,71 +627,82 @@ internal static any Sys(this headerFileInfo fi) {
 // Name returns the base name of the file.
 internal static @string Name(this headerFileInfo fi) {
     if (fi.IsDir()) {
-        return path.Base(path.Clean((~fi.h).Name));
+        return path.Base(path.Clean(fi.h.Name));
     }
-    return path.Base((~fi.h).Name);
+    return path.Base(fi.h.Name);
 }
 
 // Mode returns the permission and mode bits for the headerFileInfo.
 internal static fs.FileMode /*mode*/ Mode(this headerFileInfo fi) {
-    fs.FileMode mode = default!;
+    fs.FileMode mode = default;
 
     // Set file permission bits.
-    mode = ((fs.FileMode)(uint32)(~fi.h).Mode).Perm();
+    mode = ((fs.FileMode)(uint32)fi.h.Mode).Perm();
 
     // Set setuid, setgid and sticky bits.
-    if (((~fi.h).Mode & (int64)c_ISUID) != 0) {
+    if ((fi.h.Mode & (int64)c_ISUID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetuid);
     }
-    if (((~fi.h).Mode & (int64)c_ISGID) != 0) {
+    if ((fi.h.Mode & (int64)c_ISGID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetgid);
     }
-    if (((~fi.h).Mode & (int64)c_ISVTX) != 0) {
+    if ((fi.h.Mode & (int64)c_ISVTX) != 0) {
         mode |= (fs.FileMode)(fs.ModeSticky);
     }
 
     // Set file mode bits; clear perm, setuid, setgid, and sticky bits.
     {
-        var m = (fs.FileMode)(((fs.FileMode)(uint32)(~fi.h).Mode) & ~4095);
-        var exprᴛ1 = m;
-        if (exprᴛ1 == c_ISDIR) {
+        var m = (fs.FileMode)(((fs.FileMode)(uint32)fi.h.Mode) & ~4095);
+        switch (m) {
+        case var ᴛ when ᴛ == c_ISDIR: {
             mode |= (fs.FileMode)(fs.ModeDir);
+            break;
         }
-        else if (exprᴛ1 == c_ISFIFO) {
+        case var ᴛ when ᴛ == c_ISFIFO: {
             mode |= (fs.FileMode)(fs.ModeNamedPipe);
+            break;
         }
-        else if (exprᴛ1 == c_ISLNK) {
+        case var ᴛ when ᴛ == c_ISLNK: {
             mode |= (fs.FileMode)(fs.ModeSymlink);
+            break;
         }
-        else if (exprᴛ1 == c_ISBLK) {
+        case var ᴛ when ᴛ == c_ISBLK: {
             mode |= (fs.FileMode)(fs.ModeDevice);
+            break;
         }
-        else if (exprᴛ1 == c_ISCHR) {
+        case var ᴛ when ᴛ == c_ISCHR: {
             mode |= (fs.FileMode)(fs.ModeDevice);
             mode |= (fs.FileMode)(fs.ModeCharDevice);
+            break;
         }
-        else if (exprᴛ1 == c_ISSOCK) {
+        case var ᴛ when ᴛ == c_ISSOCK: {
             mode |= (fs.FileMode)(fs.ModeSocket);
-        }
+            break;
+        }}
     }
 
-    var exprᴛ2 = (~fi.h).Typeflag;
-    if (exprᴛ2 == TypeSymlink) {
+    switch (fi.h.Typeflag) {
+    case var ᴛ when ᴛ == TypeSymlink: {
         mode |= (fs.FileMode)(fs.ModeSymlink);
+        break;
     }
-    else if (exprᴛ2 == TypeChar) {
+    case var ᴛ when ᴛ == TypeChar: {
         mode |= (fs.FileMode)(fs.ModeDevice);
         mode |= (fs.FileMode)(fs.ModeCharDevice);
+        break;
     }
-    else if (exprᴛ2 == TypeBlock) {
+    case var ᴛ when ᴛ == TypeBlock: {
         mode |= (fs.FileMode)(fs.ModeDevice);
+        break;
     }
-    else if (exprᴛ2 == TypeDir) {
+    case var ᴛ when ᴛ == TypeDir: {
         mode |= (fs.FileMode)(fs.ModeDir);
+        break;
     }
-    else if (exprᴛ2 == TypeFifo) {
+    case var ᴛ when ᴛ == TypeFifo: {
         mode |= (fs.FileMode)(fs.ModeNamedPipe);
-    }
+        break;
+    }}
 
     return mode;
 }
@@ -701,16 +718,16 @@ internal static Func<fs.FileInfo, ж<Header>, bool, error> sysStat;
 // See http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06
 internal static UntypedInt c_ISUID => /* 04000 */ 2048; // Set uid
 internal static UntypedInt c_ISGID => /* 02000 */ 1024; // Set gid
-internal static UntypedInt c_ISVTX => /* 01000 */ 512; // Save text (sticky bit)
+internal static UntypedInt c_ISVTX => /* 01000 */ 512;  // Save text (sticky bit)
 
 // Common Unix mode constants; these are not defined in any common tar standard.
 // Header.FileInfo understands these, but FileInfoHeader will never produce these.
-internal static UntypedInt c_ISDIR => /* 040000 */ 16384; // Directory
-internal static UntypedInt c_ISFIFO => /* 010000 */ 4096; // FIFO
-internal static UntypedInt c_ISREG => /* 0100000 */ 32768; // Regular file
-internal static UntypedInt c_ISLNK => /* 0120000 */ 40960; // Symbolic link
-internal static UntypedInt c_ISBLK => /* 060000 */ 24576; // Block special file
-internal static UntypedInt c_ISCHR => /* 020000 */ 8192; // Character special file
+internal static UntypedInt c_ISDIR => /* 040000 */ 16384;   // Directory
+internal static UntypedInt c_ISFIFO => /* 010000 */ 4096;   // FIFO
+internal static UntypedInt c_ISREG => /* 0100000 */ 32768;  // Regular file
+internal static UntypedInt c_ISLNK => /* 0120000 */ 40960;  // Symbolic link
+internal static UntypedInt c_ISBLK => /* 060000 */ 24576;   // Block special file
+internal static UntypedInt c_ISCHR => /* 020000 */ 8192;    // Character special file
 internal static UntypedInt c_ISSOCK => /* 0140000 */ 49152; // Socket
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -728,57 +745,57 @@ internal static readonly @string archiveTarFileInfoIsNilˢ = "archive/tar: FileI
 // Header.Gname and Header.Uname
 // are provided by the methods of the interface.
 public static (ж<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) {
-    if (fi == default!) {
-        return (default!, errors.New(archiveTarFileInfoIsNilˢ));
+    if (fi == nil) {
+        return (default, errors.New(archiveTarFileInfoIsNilˢ));
     }
     var fm = fi.Mode();
     var h = Ꮡ(new Header(
         Name: fi.Name(),
         ModTime: fi.ModTime(),
-        Mode: (int64)(uint32)fm.Perm() // or'd with c_IS* constants later
+        Mode: (int64)fm.Perm() // or'd with c_IS* constants later
     ));
     switch (ᐧ) {
     case {} when fm.IsRegular(): {
-        h.Value.Typeflag = TypeReg;
-        h.Value.Size = fi.Size();
+        h.Typeflag = TypeReg;
+        h.Size = fi.Size();
         break;
     }
     case {} when fi.IsDir(): {
-        h.Value.Typeflag = TypeDir;
-        h.Value.Name += "/"u8;
+        h.Typeflag = TypeDir;
+        h.Name += "/"u8;
         break;
     }
     case {} when (fs.FileMode)(fm & fs.ModeSymlink) != 0: {
-        h.Value.Typeflag = TypeSymlink;
-        h.Value.Linkname = link;
+        h.Typeflag = TypeSymlink;
+        h.Linkname = link;
         break;
     }
     case {} when (fs.FileMode)(fm & fs.ModeDevice) != 0: {
-        if ((fs.FileMode)(fm & fs.ModeCharDevice) != 0){
-            h.Value.Typeflag = TypeChar;
+        if ((fs.FileMode)(fm & fs.ModeCharDevice) != 0) {
+            h.Typeflag = TypeChar;
         } else {
-            h.Value.Typeflag = TypeBlock;
+            h.Typeflag = TypeBlock;
         }
         break;
     }
     case {} when (fs.FileMode)(fm & fs.ModeNamedPipe) != 0: {
-        h.Value.Typeflag = TypeFifo;
+        h.Typeflag = TypeFifo;
         break;
     }
     case {} when (fs.FileMode)(fm & fs.ModeSocket) != 0: {
-        return (default!, fmt.Errorf("archive/tar: sockets not supported"u8));
+        return (default, fmt.Errorf("archive/tar: sockets not supported"u8));
     }
     default: {
-        return (default!, fmt.Errorf("archive/tar: unknown file mode %v"u8, fm));
+        return (default, fmt.Errorf("archive/tar: unknown file mode %v"u8, fm));
     }}
     if ((fs.FileMode)(fm & fs.ModeSetuid) != 0) {
-        h.Value.Mode |= (int64)(c_ISUID);
+        h.Mode |= (int64)(c_ISUID);
     }
     if ((fs.FileMode)(fm & fs.ModeSetgid) != 0) {
-        h.Value.Mode |= (int64)(c_ISGID);
+        h.Mode |= (int64)(c_ISGID);
     }
     if ((fs.FileMode)(fm & fs.ModeSticky) != 0) {
-        h.Value.Mode |= (int64)(c_ISVTX);
+        h.Mode |= (int64)(c_ISVTX);
     }
     // If possible, populate additional fields from OS-specific
     // FileInfo fields.
@@ -786,41 +803,41 @@ public static (ж<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) {
         var (sys, ok) = fi.Sys()._<ж<Header>>(ᐧ); if (ok) {
             // This FileInfo came from a Header (not the OS). Use the
             // original Header to populate all remaining fields.
-            h.Value.Uid = sys.Value.Uid;
-            h.Value.Gid = sys.Value.Gid;
-            h.Value.Uname = sys.Value.Uname;
-            h.Value.Gname = sys.Value.Gname;
-            h.Value.AccessTime = sys.Value.AccessTime;
-            h.Value.ChangeTime = sys.Value.ChangeTime;
-            h.Value.Xattrs = maps.Clone<map<@string, @string>, @string, @string>((~sys).Xattrs);
-            if ((~sys).Typeflag == TypeLink) {
+            h.Uid = sys.Uid;
+            h.Gid = sys.Gid;
+            h.Uname = sys.Uname;
+            h.Gname = sys.Gname;
+            h.AccessTime = sys.AccessTime;
+            h.ChangeTime = sys.ChangeTime;
+            h.Xattrs = maps.Clone<map<@string, @string>, @string, @string>(sys.Xattrs);
+            if (sys.Typeflag == TypeLink) {
                 // hard link
-                h.Value.Typeflag = TypeLink;
-                h.Value.Size = 0;
-                h.Value.Linkname = sys.Value.Linkname;
+                h.Typeflag = TypeLink;
+                h.Size = 0;
+                h.Linkname = sys.Linkname;
             }
-            h.Value.PAXRecords = maps.Clone<map<@string, @string>, @string, @string>((~sys).PAXRecords);
+            h.PAXRecords = maps.Clone<map<@string, @string>, @string, @string>(sys.PAXRecords);
         }
     }
     bool doNameLookups = true;
     {
         var (iface, ok) = fi._<FileInfoNames>(ᐧ); if (ok) {
             doNameLookups = false;
-            error err = default!;
-            (h.Value.Gname, err) = iface.Gname();
-            if (err != default!) {
-                return (default!, err);
+            error err = default;
+            (h.Gname, err) = iface.Gname();
+            if (err != nil) {
+                return (default, err);
             }
-            (h.Value.Uname, err) = iface.Uname();
-            if (err != default!) {
-                return (default!, err);
+            (h.Uname, err) = iface.Uname();
+            if (err != nil) {
+                return (default, err);
             }
         }
     }
-    if (sysStat != default!) {
+    if (sysStat != nil) {
         return (h, sysStat(fi, h, doNameLookups));
     }
-    return (h, default!);
+    return (h, default);
 }
 
 // FileInfoNames extends [fs.FileInfo].
@@ -838,13 +855,13 @@ partial interface FileInfoNames :
 // isHeaderOnlyType checks if the given type flag is of the type that has no
 // data section even if a size is specified.
 internal static bool isHeaderOnlyType(byte flag) {
-    var exprᴛ1 = flag;
-    if (exprᴛ1 == TypeLink || exprᴛ1 == TypeSymlink || exprᴛ1 == TypeChar || exprᴛ1 == TypeBlock || exprᴛ1 == TypeDir || exprᴛ1 == TypeFifo) {
+    switch (flag) {
+    case var ᴛ when ᴛ == TypeLink || ᴛ == TypeSymlink || ᴛ == TypeChar || ᴛ == TypeBlock || ᴛ == TypeDir || ᴛ == TypeFifo: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 } // end tar_package

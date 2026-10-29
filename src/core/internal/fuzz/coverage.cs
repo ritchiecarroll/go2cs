@@ -41,7 +41,7 @@ internal static slice<byte> diffCoverage(slice<byte> @base, slice<byte> snapshot
         }
     }
     if (!found) {
-        return default!;
+        return default;
     }
     var diff = new slice<byte>(len(snapshot));
     foreach (var i in range(diff)) {

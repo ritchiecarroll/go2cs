@@ -16,11 +16,11 @@ internal static partial void libc_readlinkat_trampoline();
 //go:cgo_import_dynamic libc_readlinkat readlinkat "/usr/lib/libSystem.B.dylib"
 public static (nint, error) Readlinkat(nint dirfd, @string path, slice<byte> buf) {
     var (p0, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
-    @unsafe.Pointer p1 = default!;
-    if (len(buf) > 0){
+    @unsafe.Pointer p1 = default;
+    if (len(buf) > 0) {
         p1 = @unsafe.Pointer.FromPinnedBox(Ꮡ(buf, 0));
     } else {
         p1 = @unsafe.Pointer.FromBox(Ꮡ_zero);
@@ -35,7 +35,7 @@ public static (nint, error) Readlinkat(nint dirfd, @string path, slice<byte> buf
     if (errno != 0) {
         return (0, errno);
     }
-    return ((nint)n, default!);
+    return ((nint)n, default);
 }
 
 internal static partial void libc_mkdirat_trampoline();
@@ -43,7 +43,7 @@ internal static partial void libc_mkdirat_trampoline();
 //go:cgo_import_dynamic libc_mkdirat mkdirat "/usr/lib/libSystem.B.dylib"
 public static error Mkdirat(nint dirfd, @string path, uint32 mode) {
     var (p, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var (_, _, errno) = syscall_syscall(abi.FuncPCABI0(libc_mkdirat_trampoline),
@@ -53,7 +53,7 @@ public static error Mkdirat(nint dirfd, @string path, uint32 mode) {
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 internal static partial void libc_fchmodat_trampoline();
@@ -61,7 +61,7 @@ internal static partial void libc_fchmodat_trampoline();
 //go:cgo_import_dynamic libc_fchmodat fchmodat "/usr/lib/libSystem.B.dylib"
 public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) {
     var (p, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var (_, _, errno) = syscall_syscall6(abi.FuncPCABI0(libc_fchmodat_trampoline),
@@ -74,7 +74,7 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 internal static partial void libc_fchownat_trampoline();
@@ -82,7 +82,7 @@ internal static partial void libc_fchownat_trampoline();
 //go:cgo_import_dynamic libc_fchownat fchownat "/usr/lib/libSystem.B.dylib"
 public static error Fchownat(nint dirfd, @string path, nint uid, nint gid, nint flags) {
     var (p, err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var (_, _, errno) = syscall_syscall6(abi.FuncPCABI0(libc_fchownat_trampoline),
@@ -95,7 +95,7 @@ public static error Fchownat(nint dirfd, @string path, nint uid, nint gid, nint 
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 internal static partial void libc_renameat_trampoline();
@@ -103,11 +103,11 @@ internal static partial void libc_renameat_trampoline();
 //go:cgo_import_dynamic libc_renameat renameat "/usr/lib/libSystem.B.dylib"
 public static error Renameat(nint olddirfd, @string oldpath, nint newdirfd, @string newpath) {
     var (oldp, err) = syscall.BytePtrFromString(oldpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var newp, err) = syscall.BytePtrFromString(newpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var (_, _, errno) = syscall_syscall6(abi.FuncPCABI0(libc_renameat_trampoline),
@@ -120,7 +120,7 @@ public static error Renameat(nint olddirfd, @string oldpath, nint newdirfd, @str
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 internal static partial void libc_linkat_trampoline();
@@ -128,11 +128,11 @@ internal static partial void libc_linkat_trampoline();
 //go:cgo_import_dynamic libc_linkat linkat "/usr/lib/libSystem.B.dylib"
 public static error Linkat(nint olddirfd, @string oldpath, nint newdirfd, @string newpath, nint flag) {
     var (oldp, err) = syscall.BytePtrFromString(oldpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var newp, err) = syscall.BytePtrFromString(newpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var (_, _, errno) = syscall_syscall6(abi.FuncPCABI0(libc_linkat_trampoline),
@@ -145,7 +145,7 @@ public static error Linkat(nint olddirfd, @string oldpath, nint newdirfd, @strin
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 internal static partial void libc_symlinkat_trampoline();
@@ -153,11 +153,11 @@ internal static partial void libc_symlinkat_trampoline();
 //go:cgo_import_dynamic libc_symlinkat symlinkat "/usr/lib/libSystem.B.dylib"
 public static error Symlinkat(@string oldpath, nint newdirfd, @string newpath) {
     var (oldp, err) = syscall.BytePtrFromString(oldpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var newp, err) = syscall.BytePtrFromString(newpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var (_, _, errno) = syscall_syscall6(abi.FuncPCABI0(libc_symlinkat_trampoline),
@@ -170,7 +170,7 @@ public static error Symlinkat(@string oldpath, nint newdirfd, @string newpath) {
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 } // end unix_package

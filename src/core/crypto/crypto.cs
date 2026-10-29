@@ -70,88 +70,88 @@ private static readonly @string blake2b384ˢ = "BLAKE2b-384"u8;
 private static readonly @string blake2b512ˢ = "BLAKE2b-512"u8;
 
 public static @string String(this Hash h) {
-    var exprᴛ1 = h;
-    if (exprᴛ1 == MD4) {
+    switch (h) {
+    case var ᴛ when ᴛ == MD4: {
         return md4ˢ;
     }
-    if (exprᴛ1 == MD5) {
+    case var ᴛ when ᴛ == MD5: {
         return md5ˢ;
     }
-    if (exprᴛ1 == SHA1) {
+    case var ᴛ when ᴛ == SHA1: {
         return sha1ˢ;
     }
-    if (exprᴛ1 == SHA224) {
+    case var ᴛ when ᴛ == SHA224: {
         return sha224ˢ;
     }
-    if (exprᴛ1 == SHA256) {
+    case var ᴛ when ᴛ == SHA256: {
         return sha256ˢ;
     }
-    if (exprᴛ1 == SHA384) {
+    case var ᴛ when ᴛ == SHA384: {
         return sha384ˢ;
     }
-    if (exprᴛ1 == SHA512) {
+    case var ᴛ when ᴛ == SHA512: {
         return sha512ˢ;
     }
-    if (exprᴛ1 == MD5SHA1) {
+    case var ᴛ when ᴛ == MD5SHA1: {
         return md5Sha1ˢ;
     }
-    if (exprᴛ1 == RIPEMD160) {
+    case var ᴛ when ᴛ == RIPEMD160: {
         return ripemd160ˢ;
     }
-    if (exprᴛ1 == SHA3_224) {
+    case var ᴛ when ᴛ == SHA3_224: {
         return sha3224ˢ;
     }
-    if (exprᴛ1 == SHA3_256) {
+    case var ᴛ when ᴛ == SHA3_256: {
         return sha3256ˢ;
     }
-    if (exprᴛ1 == SHA3_384) {
+    case var ᴛ when ᴛ == SHA3_384: {
         return sha3384ˢ;
     }
-    if (exprᴛ1 == SHA3_512) {
+    case var ᴛ when ᴛ == SHA3_512: {
         return sha3512ˢ;
     }
-    if (exprᴛ1 == SHA512_224) {
+    case var ᴛ when ᴛ == SHA512_224: {
         return sha512224ˢ;
     }
-    if (exprᴛ1 == SHA512_256) {
+    case var ᴛ when ᴛ == SHA512_256: {
         return sha512256ˢ;
     }
-    if (exprᴛ1 == BLAKE2s_256) {
+    case var ᴛ when ᴛ == BLAKE2s_256: {
         return blake2s256ˢ;
     }
-    if (exprᴛ1 == BLAKE2b_256) {
+    case var ᴛ when ᴛ == BLAKE2b_256: {
         return blake2b256ˢ;
     }
-    if (exprᴛ1 == BLAKE2b_384) {
+    case var ᴛ when ᴛ == BLAKE2b_384: {
         return blake2b384ˢ;
     }
-    if (exprᴛ1 == BLAKE2b_512) {
+    case var ᴛ when ᴛ == BLAKE2b_512: {
         return blake2b512ˢ;
     }
-    { /* default: */
-        return "unknown hash value "u8 + strconv.Itoa((nint)(nuint)h);
-    }
+    default: {
+        return "unknown hash value "u8 + strconv.Itoa((nint)h);
+    }}
 }
 
-public static Hash MD4 => /* 1 + iota */ 1;              // import golang.org/x/crypto/md4
-public static Hash MD5 => 2;              // import crypto/md5
-public static Hash SHA1 => 3;             // import crypto/sha1
-public static Hash SHA224 => 4;           // import crypto/sha256
-public static Hash SHA256 => 5;           // import crypto/sha256
-public static Hash SHA384 => 6;           // import crypto/sha512
-public static Hash SHA512 => 7;           // import crypto/sha512
-public static Hash MD5SHA1 => 8;          // no implementation; MD5+SHA1 used for TLS RSA
-public static Hash RIPEMD160 => 9;        // import golang.org/x/crypto/ripemd160
-public static Hash SHA3_224 => 10;         // import crypto/sha3
-public static Hash SHA3_256 => 11;         // import crypto/sha3
-public static Hash SHA3_384 => 12;         // import crypto/sha3
-public static Hash SHA3_512 => 13;         // import crypto/sha3
-public static Hash SHA512_224 => 14;       // import crypto/sha512
-public static Hash SHA512_256 => 15;       // import crypto/sha512
-public static Hash BLAKE2s_256 => 16;      // import golang.org/x/crypto/blake2s
-public static Hash BLAKE2b_256 => 17;      // import golang.org/x/crypto/blake2b
-public static Hash BLAKE2b_384 => 18;      // import golang.org/x/crypto/blake2b
-public static Hash BLAKE2b_512 => 19;      // import golang.org/x/crypto/blake2b
+public static Hash MD4 => /* 1 + iota */ 1; // import golang.org/x/crypto/md4
+public static Hash MD5 => 2;                // import crypto/md5
+public static Hash SHA1 => 3;               // import crypto/sha1
+public static Hash SHA224 => 4;             // import crypto/sha256
+public static Hash SHA256 => 5;             // import crypto/sha256
+public static Hash SHA384 => 6;             // import crypto/sha512
+public static Hash SHA512 => 7;             // import crypto/sha512
+public static Hash MD5SHA1 => 8;            // no implementation; MD5+SHA1 used for TLS RSA
+public static Hash RIPEMD160 => 9;          // import golang.org/x/crypto/ripemd160
+public static Hash SHA3_224 => 10;          // import crypto/sha3
+public static Hash SHA3_256 => 11;          // import crypto/sha3
+public static Hash SHA3_384 => 12;          // import crypto/sha3
+public static Hash SHA3_512 => 13;          // import crypto/sha3
+public static Hash SHA512_224 => 14;        // import crypto/sha512
+public static Hash SHA512_256 => 15;        // import crypto/sha512
+public static Hash BLAKE2s_256 => 16;       // import golang.org/x/crypto/blake2s
+public static Hash BLAKE2b_256 => 17;       // import golang.org/x/crypto/blake2b
+public static Hash BLAKE2b_384 => 18;       // import golang.org/x/crypto/blake2b
+public static Hash BLAKE2b_512 => 19;       // import golang.org/x/crypto/blake2b
 internal static Hash maxHash => 20;
 
 [GoLazy] partial class lazyᴛdigestSizes { internal static slice<uint8> digestSizes = new golib.SparseArray<uint8>{
@@ -186,23 +186,23 @@ public static nint Size(this Hash h) {
     throw panic("crypto: Size of unknown hash function");
 }
 
-internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>((nint)(nuint)(maxHash));
+internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>((nint)(maxHash));
 
 // New returns a new hash.Hash calculating the given hash function. New panics
 // if the hash function is not linked into the binary.
 public static hash.Hash New(this Hash h) {
     if (h > 0 && h < maxHash) {
         var f = hashes[h];
-        if (f != default!) {
+        if (f != nil) {
             return f();
         }
     }
-    throw panic("crypto: requested hash function #" + strconv.Itoa((nint)(nuint)h) + " is unavailable");
+    throw panic("crypto: requested hash function #" + strconv.Itoa((nint)h) + " is unavailable");
 }
 
 // Available reports whether the given hash function is linked into the binary.
 public static bool Available(this Hash h) {
-    return h < maxHash && hashes[h] != default!;
+    return h < maxHash && hashes[h] != nil;
 }
 
 // RegisterHash registers a function that returns a new instance of the given
@@ -288,7 +288,7 @@ public static (slice<byte> signature, error err) SignMessage(Signer signer, io.R
     if (opts.HashFunc() != 0) {
         var h = opts.HashFunc().New();
         h.Write(msg);
-        msg = h.Sum(default!);
+        msg = h.Sum(default);
     }
     return signer.Sign(rand, msg, opts);
 }

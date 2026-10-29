@@ -31,7 +31,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
     setServiceIndicator(salt, keyLength);
 
     if (keyLength <= 0) {
-        return (default!, errors.New(pkbdf2KeyLengthMustBeˢ));
+        return (default, errors.New(pkbdf2KeyLengthMustBeˢ));
     }
 
     var prf = hmac.New(h, slice<byte>(password));
@@ -40,7 +40,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
     nint numBlocks = divRoundUp(keyLength, hashLen);
     const int64 maxBlocks = /* int64(1<<32 - 1) */ 4294967295;
     if (keyLength + hashLen < keyLength || (int64)numBlocks > maxBlocks) {
-        return (default!, errors.New(pbkdf2KeyLengthTooLongˢ));
+        return (default, errors.New(pbkdf2KeyLengthTooLongˢ));
     }
 
     array<byte> buf = new(4);
@@ -72,7 +72,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
             }
         }
     }
-    return (dk.slice(0, keyLength), default!);
+    return (dk.slice(0, keyLength), default);
 }
 
 internal static void setServiceIndicator(slice<byte> salt, nint keyLength) {

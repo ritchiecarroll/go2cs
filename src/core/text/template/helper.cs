@@ -22,11 +22,11 @@ partial class template_package {
 // initializations such as
 //
 //	var t = template.Must(template.New("name").Parse("text"))
-public static ж<Template> Must(ж<Template> Ꮡt, error err) {
-    if (err != default!) {
+public static ж<Template> Must(ж<Template> t, error err) {
+    if (err != nil) {
         throw panic(err);
     }
-    return Ꮡt;
+    return t;
 }
 
 // ParseFiles creates a new [Template] and parses the template definitions from
@@ -71,12 +71,12 @@ internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string
 
     if (len(filenames) == 0) {
         // Not really a problem, but be consistent.
-        return (default!, fmt.Errorf("template: no files named in call to ParseFiles"u8));
+        return (default, fmt.Errorf("template: no files named in call to ParseFiles"u8));
     }
     foreach (var (_, filename) in filenames) {
         var (name, b, err) = readFile(filename);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         @string s = (@string)b;
         // First template becomes return value if not already defined,
@@ -85,21 +85,21 @@ internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string
         // as t, this file becomes the contents of t, so
         //  t, err := New(name).Funcs(xxx).ParseFiles(name)
         // works. Otherwise we create a new template associated with t.
-        ж<Template> tmpl = default!;
+        ж<Template> tmpl = default;
         if (Ꮡt == nil) {
             Ꮡt = New(name); t = ref Ꮡt.DerefOrNull();
         }
-        if (name == t.Name()){
+        if (name == t.Name()) {
             tmpl = Ꮡt;
         } else {
             tmpl = t.New(name);
         }
         (_, err) = tmpl.Parse(s);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
     }
-    return (Ꮡt, default!);
+    return (Ꮡt, default);
 }
 
 // ParseGlob creates a new [Template] and parses the template definitions from
@@ -131,15 +131,15 @@ public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pa
 }
 
 // parseGlob is the implementation of the function and method ParseGlob.
-internal static (ж<Template>, error) parseGlob(ж<Template> Ꮡt, @string pattern) {
+internal static (ж<Template>, error) parseGlob(ж<Template> t, @string pattern) {
     var (filenames, err) = filepath.Glob(pattern);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (len(filenames) == 0) {
-        return (default!, fmt.Errorf("template: pattern matches no files: %#q"u8, pattern));
+        return (default, fmt.Errorf("template: pattern matches no files: %#q"u8, pattern));
     }
-    return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
+    return parseFiles(t, readFileOS, filenames.ꓸꓸꓸ);
 }
 
 // ParseFS is like [Template.ParseFiles] or [Template.ParseGlob] but reads from the file system fsys
@@ -164,25 +164,25 @@ public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsys, 
     return parseFS(Ꮡt, fsys, patterns);
 }
 
-internal static (ж<Template>, error) parseFS(ж<Template> Ꮡt, fs.FS fsys, slice<@string> patterns) {
-    slice<@string> filenames = default!;
+internal static (ж<Template>, error) parseFS(ж<Template> t, fs.FS fsys, slice<@string> patterns) {
+    slice<@string> filenames = default;
     foreach (var (_, pattern) in patterns) {
         var (list, err) = fs.Glob(fsys, pattern);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         if (len(list) == 0) {
-            return (default!, fmt.Errorf("template: pattern matches no files: %#q"u8, pattern));
+            return (default, fmt.Errorf("template: pattern matches no files: %#q"u8, pattern));
         }
         filenames = appendꓸꓸꓸ(filenames, list);
     }
-    return parseFiles(Ꮡt, readFileFS(fsys), filenames.ꓸꓸꓸ);
+    return parseFiles(t, readFileFS(fsys), filenames.ꓸꓸꓸ);
 }
 
 internal static (@string name, slice<byte> b, error err) readFileOS(@string @file) {
-    @string name = default!;
-    slice<byte> b = default!;
-    error err = default!;
+    @string name = default;
+    slice<byte> b = default;
+    error err = default;
 
     name = filepath.Base(@file);
     (b, err) = os.ReadFile(@file);
@@ -191,9 +191,9 @@ internal static (@string name, slice<byte> b, error err) readFileOS(@string @fil
 
 internal static Func<@string, (@string, slice<byte>, error)> readFileFS(fs.FS fsys) {
     return (@string @file) => {
-        @string name = default!;
-        slice<byte> b = default!;
-        error err = default!;
+        @string name = default;
+        slice<byte> b = default;
+        error err = default;
         name = path.Base(@file);
         (b, err) = fs.ReadFile(fsys, @file);
         return (name, b, err);

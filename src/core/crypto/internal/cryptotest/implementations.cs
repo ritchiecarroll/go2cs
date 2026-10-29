@@ -23,32 +23,32 @@ private static readonly @string baseˢ = "Base"u8;
 // TestAllImplementations runs the provided test function with each available
 // implementation of the package registered with crypto/internal/impl. If there
 // are no alternative implementations for pkg, f is invoked directly once.
-public static void TestAllImplementations(ж<testing.T> Ꮡt, @string pkg, Action<ж<testing.T>> f) {
+public static void TestAllImplementations(ж<testing.T> t, @string pkg, Action<ж<testing.T>> f) {
     // BoringCrypto bypasses the multiple Go implementations.
     if (Δboring.Enabled) {
-        f(Ꮡt);
+        f(t);
         return;
     }
 
     var impls = impl.List(pkg);
     if (len(impls) == 0) {
-        f(Ꮡt);
+        f(t);
         return;
     }
 
-    Ꮡt.Cleanup(() => {
+    t.Cleanup(() => {
         impl.Reset(pkg);
     });
 
     foreach (var (_, name) in impls) {
         {
-            var available = impl.Select(pkg, name); if (available){
-                Ꮡt.Run(name, f);
+            var available = impl.Select(pkg, name); if (available) {
+                t.Run(name, f);
             } else {
-                Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+                t.Run(name, (ж<testing.T> tΔ1) => {
                     // Report an error if we're on the most capable builder for the
                     // architecture and the builder can't test this implementation.
-                    if (flagshipBuilder()){
+                    if (flagshipBuilder()) {
                         tΔ1.Error(builderDoesnTSupportCpuˢ);
                     } else {
                         tΔ1.Skip(implementationNotˢ);
@@ -60,7 +60,7 @@ public static void TestAllImplementations(ж<testing.T> Ꮡt, @string pkg, Actio
 
     // Test the generic implementation.
     impl.Select(pkg, ""u8);
-    Ꮡt.Run(baseˢ, f);
+    t.Run(baseˢ, f);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -72,17 +72,18 @@ internal static bool flagshipBuilder() {
         return false;
     }
     var exprᴛ1 = goarch.GOARCH;
-    if (exprᴛ1 == "amd64"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "amd64"u8: {
         return strings.Contains(builder, avx512ˢ);
     }
-    if (exprᴛ1 == "arm64"u8) {
+    case {} when exprᴛ1 == "arm64"u8: {
         // Apple M chips support everything we use.
         return goos.GOOS == "darwin";
     }
-    { /* default: */
+    default: {
         // Presumably the Linux builders are the most capable.
         return goos.GOOS == "linux";
-    }
+    }}
 }
 
 } // end cryptotest_package

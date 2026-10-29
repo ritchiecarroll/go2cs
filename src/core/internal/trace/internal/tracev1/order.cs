@@ -32,32 +32,32 @@ internal const uint64 seqinc = /* ^uint64(0) - 1 */ 18446744073709551614;
 // stateTransition returns goroutine state (sequence and status) when the event
 // becomes ready for merging (init) and the goroutine state after the event (next).
 internal static (uint64 g, gState init, gState next) stateTransition(ref Event ev) {
-    uint64 g = default!;
-    gState init = default!;
-    gState next = default!;
+    uint64 g = default;
+    gState init = default;
+    gState next = default;
 
     // Note that we have an explicit return in each case, as that produces slightly better code (tested on Go 1.19).
 
-    var exprᴛ1 = ev.Type;
-    if (exprᴛ1 == EvGoCreate) {
+    switch (ev.Type) {
+    case var ᴛ when ᴛ == EvGoCreate: {
         g = ev.Args[0];
         init = new gState(0, gDead);
         next = new gState(1, gRunnable);
         return (g, init, next);
     }
-    if (exprᴛ1 == EvGoWaiting || exprᴛ1 == EvGoInSyscall) {
+    case var ᴛ when ᴛ == EvGoWaiting || ᴛ == EvGoInSyscall: {
         g = ev.G;
         init = new gState(1, gRunnable);
         next = new gState(2, gWaiting);
         return (g, init, next);
     }
-    if (exprᴛ1 == EvGoStart || exprᴛ1 == EvGoStartLabel) {
+    case var ᴛ when ᴛ == EvGoStart || ᴛ == EvGoStartLabel: {
         g = ev.G;
         init = new gState(ev.Args[1], gRunnable);
         next = new gState(ev.Args[1] + 1, gRunning);
         return (g, init, next);
     }
-    if (exprᴛ1 == EvGoStartLocal) {
+    case var ᴛ when ᴛ == EvGoStartLocal: {
         // noseq means that this event is ready for merging as soon as
         // frontier reaches it (EvGoStartLocal is emitted on the same P
         // as the corresponding EvGoCreate/EvGoUnblock, and thus the latter
@@ -69,41 +69,41 @@ internal static (uint64 g, gState init, gState next) stateTransition(ref Event e
         next = new gState(seqinc, gRunning);
         return (g, init, next);
     }
-    if (exprᴛ1 == EvGoBlock || exprᴛ1 == EvGoBlockSend || exprᴛ1 == EvGoBlockRecv || exprᴛ1 == EvGoBlockSelect || exprᴛ1 == EvGoBlockSync || exprᴛ1 == EvGoBlockCond || exprᴛ1 == EvGoBlockNet || exprᴛ1 == EvGoSleep || exprᴛ1 == EvGoSysBlock || exprᴛ1 == EvGoBlockGC) {
+    case var ᴛ when ᴛ == EvGoBlock || ᴛ == EvGoBlockSend || ᴛ == EvGoBlockRecv || ᴛ == EvGoBlockSelect || ᴛ == EvGoBlockSync || ᴛ == EvGoBlockCond || ᴛ == EvGoBlockNet || ᴛ == EvGoSleep || ᴛ == EvGoSysBlock || ᴛ == EvGoBlockGC: {
         g = ev.G;
         init = new gState(noseq, gRunning);
         next = new gState(noseq, gWaiting);
         return (g, init, next);
     }
-    if (exprᴛ1 == EvGoSched || exprᴛ1 == EvGoPreempt) {
+    case var ᴛ when ᴛ == EvGoSched || ᴛ == EvGoPreempt: {
         g = ev.G;
         init = new gState(noseq, gRunning);
         next = new gState(noseq, gRunnable);
         return (g, init, next);
     }
-    if (exprᴛ1 == EvGoUnblock || exprᴛ1 == EvGoSysExit) {
+    case var ᴛ when ᴛ == EvGoUnblock || ᴛ == EvGoSysExit: {
         g = ev.Args[0];
         init = new gState(ev.Args[1], gWaiting);
         next = new gState(ev.Args[1] + 1, gRunnable);
         return (g, init, next);
     }
-    if (exprᴛ1 == EvGoUnblockLocal || exprᴛ1 == EvGoSysExitLocal) {
+    case var ᴛ when ᴛ == EvGoUnblockLocal || ᴛ == EvGoSysExitLocal: {
         g = ev.Args[0];
         init = new gState(noseq, gWaiting);
         next = new gState(seqinc, gRunnable);
         return (g, init, next);
     }
-    if (exprᴛ1 == EvGCStart) {
+    case var ᴛ when ᴛ == EvGCStart: {
         g = garbage;
         init = new gState(ev.Args[0], gDead);
         next = new gState(ev.Args[0] + 1, gDead);
         return (g, init, next);
     }
-    { /* default: */
+    default: {
         // no ordering requirements
         g = unordered;
         return (g, init, next);
-    }
+    }}
 }
 
 internal static bool transitionReady(uint64 g, gState curr, gState init) {
@@ -115,7 +115,7 @@ internal static readonly @string encounteredImpossibleˢ = "encountered impossib
 
 internal static error transition(map<uint64, gState> gs, uint64 g, gState init, gState next) {
     if (g == unordered) {
-        return default!;
+        return default;
     }
     var curr = gs[g];
     if (!transitionReady(g, curr, init)) {
@@ -133,7 +133,7 @@ internal static error transition(map<uint64, gState> gs, uint64 g, gState init, 
         break;
     }}
     gs[g] = next;
-    return default!;
+    return default;
 }
 
 partial struct orderEventList /*[]orderEvent*/;
@@ -164,7 +164,7 @@ internal static orderEvent Pop(this ж<orderEventList> Ꮡh) {
 internal static void heapUp(ж<orderEventList> Ꮡh, nint j) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         nint i = (j - 1) / 2; // parent
         if (i == j || !h.Less(j, i)) {
             break;
@@ -178,7 +178,7 @@ internal static bool heapDown(ж<orderEventList> Ꮡh, nint i0, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint i = i0;
-    while (ᐧ) {
+    for (;;) {
         nint j1 = 2 * i + 1;
         if (j1 >= n || j1 < 0) { // j1 < 0 after int overflow
             break;

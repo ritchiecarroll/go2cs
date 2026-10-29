@@ -42,7 +42,7 @@ partial struct Writer {
 // It is the caller's responsibility to call Close on the Writer when done.
 // Writes may be buffered and not flushed until Close.
 public static ж<Writer> NewWriter(io.Writer w) {
-    var (z, _) = NewWriterLevelDict(w, DefaultCompression, default!);
+    var (z, _) = NewWriterLevelDict(w, DefaultCompression, default);
     return z;
 }
 
@@ -53,7 +53,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // or any integer value between [BestSpeed] and [BestCompression] inclusive.
 // The error returned will be nil if the level is valid.
 public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
-    return NewWriterLevelDict(w, level, default!);
+    return NewWriterLevelDict(w, level, default);
 }
 
 // NewWriterLevelDict is like [NewWriterLevel] but specifies a dictionary to
@@ -63,13 +63,13 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
 // the Writer is closed.
 public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, slice<byte> dict) {
     if (level < HuffmanOnly || level > BestCompression) {
-        return (default!, fmt.Errorf("zlib: invalid compression level: %d"u8, level));
+        return (default, fmt.Errorf("zlib: invalid compression level: %d"u8, level));
     }
     return (Ꮡ(new Writer(
         w: w,
         level: level,
         dict: dict
-    )), default!);
+    )), default);
 }
 
 // Reset clears the state of the [Writer] z such that it is equivalent to its
@@ -81,17 +81,17 @@ public static void Reset(this ref Writer z, io.Writer w) {
     if (z.compressor != nil) {
         z.compressor.Reset(w);
     }
-    if (z.digest != default!) {
+    if (z.digest != nil) {
         z.digest.Reset();
     }
-    z.err = default!;
+    z.err = default;
     z.scratch = new byte[]{}.array(4);
     z.wroteHeader = false;
 }
 
 // writeHeader writes the ZLIB header.
 internal static error /*err*/ writeHeader(this ref Writer z) {
-    error err = default!;
+    error err = default;
 
     z.wroteHeader = true;
     // ZLIB has a two-byte header (as documented in RFC 1950).
@@ -102,36 +102,41 @@ internal static error /*err*/ writeHeader(this ref Writer z) {
     // 0=fastest, 1=fast, 2=default, 3=best.
     // The next bit, FDICT, is set if a dictionary is given.
     // The final five FCHECK bits form a mod-31 checksum.
-    var exprᴛ1 = z.level;
-    if (exprᴛ1 == -2 || exprᴛ1 == 0 || exprᴛ1 == 1) {
+    switch (z.level) {
+    case var ᴛ when ᴛ == -2 || ᴛ == 0 || ᴛ == 1: {
         z.scratch[1] = (byte)(0 << 6);
+        break;
     }
-    else if (exprᴛ1 is 2 or 3 or 4 or 5) {
+    case 2 or 3 or 4 or 5: {
         z.scratch[1] = (byte)(1 << 6);
+        break;
     }
-    else if (exprᴛ1 == 6 || exprᴛ1 == -1) {
+    case var ᴛ when ᴛ == 6 || ᴛ == -1: {
         z.scratch[1] = (byte)(2 << 6);
+        break;
     }
-    else if (exprᴛ1 is 7 or 8 or 9) {
+    case 7 or 8 or 9: {
         z.scratch[1] = (byte)(3 << 6);
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("unreachable");
-    }
-    if (z.dict != default!) {
+        break;
+    }}
+    if (z.dict != nil) {
         z.scratch[1] |= (byte)((byte)(1 << 5));
     }
     z.scratch[1] += (uint8)(31 - binary.BigEndian.Uint16(z.scratch[..2]) % 31);
     {
-        (_, err) = z.w.Write(z.scratch[0..2]); if (err != default!) {
+        (_, err) = z.w.Write(z.scratch[0..2]); if (err != nil) {
             return err;
         }
     }
-    if (z.dict != default!) {
+    if (z.dict != nil) {
         // The next four bytes are the Adler-32 checksum of the dictionary.
         binary.BigEndian.PutUint32(z.scratch[..], adler32.Checksum(z.dict));
         {
-            (_, err) = z.w.Write(z.scratch[0..4]); if (err != default!) {
+            (_, err) = z.w.Write(z.scratch[0..4]); if (err != nil) {
                 return err;
             }
         }
@@ -140,32 +145,32 @@ internal static error /*err*/ writeHeader(this ref Writer z) {
         // Initialize deflater unless the Writer is being reused
         // after a Reset call.
         (z.compressor, err) = flate.NewWriterDict(z.w, z.level, z.dict);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         z.digest = adler32.New();
     }
-    return default!;
+    return default;
 }
 
 // Write writes a compressed form of p to the underlying [io.Writer]. The
 // compressed bytes are not necessarily flushed until the [Writer] is closed or
 // explicitly flushed.
 public static (nint n, error err) Write(this ref Writer z, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }
-    if (z.err != default!) {
+    if (z.err != nil) {
         return (0, z.err);
     }
     if (len(p) == 0) {
-        return (0, default!);
+        return (0, default);
     }
     (n, err) = z.compressor.Write(p);
-    if (err != default!) {
+    if (err != nil) {
         z.err = err;
         return (n, err);
     }
@@ -178,7 +183,7 @@ public static error Flush(this ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }
-    if (z.err != default!) {
+    if (z.err != nil) {
         return z.err;
     }
     z.err = z.compressor.Flush();
@@ -191,11 +196,11 @@ public static error Close(this ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }
-    if (z.err != default!) {
+    if (z.err != nil) {
         return z.err;
     }
     z.err = z.compressor.Close();
-    if (z.err != default!) {
+    if (z.err != nil) {
         return z.err;
     }
     var checksum = z.digest.Sum32();

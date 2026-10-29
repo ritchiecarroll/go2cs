@@ -39,22 +39,22 @@ public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) {
         }
 
         var (@file, err) = fsys.Open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fileʗ1 = @file;
         defer(() => fileʗ1.Close(), ref ᒐ);
 
         var (dir, ok) = @file._<ReadDirFile>(ᐧ);
         if (!ok) {
-            return (default!, new PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: errors.New(notImplementedˢ)))));
+            return (default, new PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: errors.New(notImplementedˢ)))));
         }
 
         (var list, err) = dir.ReadDir(-1);
         slices.SortFunc(list, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (list, err);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -72,7 +72,7 @@ internal static FileMode Type(this dirInfo di) {
 }
 
 internal static (FileInfo, error) Info(this dirInfo di) {
-    return (di.fileInfo, default!);
+    return (di.fileInfo, default);
 }
 
 internal static @string Name(this dirInfo di) {
@@ -86,8 +86,8 @@ internal static @string String(this dirInfo di) {
 // FileInfoToDirEntry returns a [DirEntry] that returns information from info.
 // If info is nil, FileInfoToDirEntry returns nil.
 public static DirEntry FileInfoToDirEntry(FileInfo info) {
-    if (info == default!) {
-        return default!;
+    if (info == nil) {
+        return default;
     }
     return new dirInfo(fileInfo: info);
 }

@@ -128,7 +128,7 @@ public static color.Color At(this ref ΔRGBA p, nint x, nint y) {
 
 public static color.RGBA64 RGBA64At(this ref ΔRGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.RGBA64(nil);
+        return new color.RGBA64();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -146,7 +146,7 @@ public static color.RGBA64 RGBA64At(this ref ΔRGBA p, nint x, nint y) {
 
 public static colorꓸRGBA RGBAAt(this ref ΔRGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new colorꓸRGBA(nil);
+        return new colorꓸRGBA();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -204,7 +204,7 @@ public static Image SubImage(this ref ΔRGBA p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new ΔRGBAжImage(Ꮡ(new ΔRGBA(nil)));
+        return new ΔRGBAжImage(Ꮡ(new ΔRGBA()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new ΔRGBAжImage(Ꮡ(new ΔRGBA(
@@ -270,7 +270,7 @@ public static color.Color At(this ref RGBA64 p, nint x, nint y) {
 
 public static color.RGBA64 RGBA64At(this ref RGBA64 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.RGBA64(nil);
+        return new color.RGBA64();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
@@ -329,7 +329,7 @@ public static Image SubImage(this ref RGBA64 p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new RGBA64жImage(Ꮡ(new RGBA64(nil)));
+        return new RGBA64жImage(Ꮡ(new RGBA64()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new RGBA64жImage(Ꮡ(new RGBA64(
@@ -400,7 +400,7 @@ public static color.RGBA64 RGBA64At(this ref NRGBA p, nint x, nint y) {
 
 public static color.NRGBA NRGBAAt(this ref NRGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.NRGBA(nil);
+        return new color.NRGBA();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -464,7 +464,7 @@ public static Image SubImage(this ref NRGBA p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new NRGBAжImage(Ꮡ(new NRGBA(nil)));
+        return new NRGBAжImage(Ꮡ(new NRGBA()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new NRGBAжImage(Ꮡ(new NRGBA(
@@ -535,7 +535,7 @@ public static color.RGBA64 RGBA64At(this ref NRGBA64 p, nint x, nint y) {
 
 public static color.NRGBA64 NRGBA64At(this ref NRGBA64 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.NRGBA64(nil);
+        return new color.NRGBA64();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
@@ -616,7 +616,7 @@ public static Image SubImage(this ref NRGBA64 p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new NRGBA64жImage(Ꮡ(new NRGBA64(nil)));
+        return new NRGBA64жImage(Ꮡ(new NRGBA64()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new NRGBA64жImage(Ꮡ(new NRGBA64(
@@ -688,7 +688,7 @@ public static color.RGBA64 RGBA64At(this ref Alpha p, nint x, nint y) {
 
 public static color.Alpha AlphaAt(this ref Alpha p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.Alpha(nil);
+        return new color.Alpha();
     }
     nint i = p.PixOffset(x, y);
     return new color.Alpha(p.Pix[i]);
@@ -732,7 +732,7 @@ public static Image SubImage(this ref Alpha p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new AlphaжImage(Ꮡ(new Alpha(nil)));
+        return new AlphaжImage(Ꮡ(new Alpha()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new AlphaжImage(Ꮡ(new Alpha(
@@ -803,7 +803,7 @@ public static color.RGBA64 RGBA64At(this ref Alpha16 p, nint x, nint y) {
 
 public static color.Alpha16 Alpha16At(this ref Alpha16 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.Alpha16(nil);
+        return new color.Alpha16();
     }
     nint i = p.PixOffset(x, y);
     return new color.Alpha16((uint16)((uint16)((uint16)p.Pix[i + 0] << 8) | (uint16)p.Pix[i + 1]));
@@ -851,7 +851,7 @@ public static Image SubImage(this ref Alpha16 p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new Alpha16жImage(Ꮡ(new Alpha16(nil)));
+        return new Alpha16жImage(Ꮡ(new Alpha16()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new Alpha16жImage(Ꮡ(new Alpha16(
@@ -923,7 +923,7 @@ public static color.RGBA64 RGBA64At(this ref Gray p, nint x, nint y) {
 
 public static color.Gray GrayAt(this ref Gray p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.Gray(nil);
+        return new color.Gray();
     }
     nint i = p.PixOffset(x, y);
     return new color.Gray(p.Pix[i]);
@@ -969,7 +969,7 @@ public static Image SubImage(this ref Gray p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new GrayжImage(Ꮡ(new Gray(nil)));
+        return new GrayжImage(Ꮡ(new Gray()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new GrayжImage(Ꮡ(new Gray(
@@ -1026,7 +1026,7 @@ public static color.RGBA64 RGBA64At(this ref Gray16 p, nint x, nint y) {
 
 public static color.Gray16 Gray16At(this ref Gray16 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.Gray16(nil);
+        return new color.Gray16();
     }
     nint i = p.PixOffset(x, y);
     return new color.Gray16((uint16)((uint16)((uint16)p.Pix[i + 0] << 8) | (uint16)p.Pix[i + 1]));
@@ -1076,7 +1076,7 @@ public static Image SubImage(this ref Gray16 p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new Gray16жImage(Ꮡ(new Gray16(nil)));
+        return new Gray16жImage(Ꮡ(new Gray16()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new Gray16жImage(Ꮡ(new Gray16(
@@ -1133,7 +1133,7 @@ public static color.RGBA64 RGBA64At(this ref CMYK p, nint x, nint y) {
 
 public static color.CMYK CMYKAt(this ref CMYK p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.CMYK(nil);
+        return new color.CMYK();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -1192,7 +1192,7 @@ public static Image SubImage(this ref CMYK p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new CMYKжImage(Ꮡ(new CMYK(nil)));
+        return new CMYKжImage(Ꮡ(new CMYK()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new CMYKжImage(Ꮡ(new CMYK(
@@ -1242,7 +1242,7 @@ public static Rectangle Bounds(this ref Paletted p) {
 
 public static color.Color At(this ref Paletted p, nint x, nint y) {
     if (len(p.Palette) == 0) {
-        return default!;
+        return default;
     }
     if (!(new Point(x, y).In(p.Rect))) {
         return p.Palette[0];
@@ -1253,10 +1253,10 @@ public static color.Color At(this ref Paletted p, nint x, nint y) {
 
 public static color.RGBA64 RGBA64At(this ref Paletted p, nint x, nint y) {
     if (len(p.Palette) == 0) {
-        return new color.RGBA64(nil);
+        return new color.RGBA64();
     }
-    var c = ((color.Color)default!);
-    if (!(new Point(x, y).In(p.Rect))){
+    var c = ((color.Color)default);
+    if (!(new Point(x, y).In(p.Rect))) {
         c = p.Palette[0];
     } else {
         nint i = p.PixOffset(x, y);

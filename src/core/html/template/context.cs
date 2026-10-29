@@ -34,7 +34,7 @@ partial struct context {
 }
 
 internal static @string String(this context c) {
-    error err = default!;
+    error err = default;
     if (c.err != nil) {
         err = new ΔErrorжerror(c.err);
     }
@@ -63,7 +63,7 @@ internal static @string mangle(this context c, @string templateName) {
     if (c.jsCtx != jsCtxRegexp) {
         s += "_"u8 + c.jsCtx.String();
     }
-    if (c.jsBraceDepth != default!) {
+    if (c.jsBraceDepth != nil) {
         s += fmt.Sprintf("_jsBraceDepth(%v)"u8, c.jsBraceDepth);
     }
     if (c.attr != attrNone) {
@@ -170,19 +170,19 @@ internal static state stateDead => 30;
 // isComment is true for any state that contains content meant for template
 // authors & maintainers, not for end-users or machines.
 internal static bool isComment(state s) {
-    var exprᴛ1 = s;
-    if (exprᴛ1 == stateHTMLCmt || exprᴛ1 == stateJSBlockCmt || exprᴛ1 == stateJSLineCmt || exprᴛ1 == stateJSHTMLOpenCmt || exprᴛ1 == stateJSHTMLCloseCmt || exprᴛ1 == stateCSSBlockCmt || exprᴛ1 == stateCSSLineCmt) {
+    switch (s) {
+    case var ᴛ when ᴛ == stateHTMLCmt || ᴛ == stateJSBlockCmt || ᴛ == stateJSLineCmt || ᴛ == stateJSHTMLOpenCmt || ᴛ == stateJSHTMLCloseCmt || ᴛ == stateCSSBlockCmt || ᴛ == stateCSSLineCmt: {
         return true;
-    }
+    }}
     return false;
 }
 
 // isInTag return whether s occurs solely inside an HTML tag.
 internal static bool isInTag(state s) {
-    var exprᴛ1 = s;
-    if (exprᴛ1 == stateTag || exprᴛ1 == stateAttrName || exprᴛ1 == stateAfterName || exprᴛ1 == stateBeforeValue || exprᴛ1 == stateAttr) {
+    switch (s) {
+    case var ᴛ when ᴛ == stateTag || ᴛ == stateAttrName || ᴛ == stateAfterName || ᴛ == stateBeforeValue || ᴛ == stateAttr: {
         return true;
-    }
+    }}
     return false;
 }
 
@@ -193,10 +193,10 @@ internal static bool isInScriptLiteral(state s) {
     // Ignore the comment states (stateJSBlockCmt, stateJSLineCmt,
     // stateJSHTMLOpenCmt, stateJSHTMLCloseCmt) because their content is already
     // omitted from the output.
-    var exprᴛ1 = s;
-    if (exprᴛ1 == stateJSDqStr || exprᴛ1 == stateJSSqStr || exprᴛ1 == stateJSTmplLit || exprᴛ1 == stateJSRegexp) {
+    switch (s) {
+    case var ᴛ when ᴛ == stateJSDqStr || ᴛ == stateJSSqStr || ᴛ == stateJSTmplLit || ᴛ == stateJSRegexp: {
         return true;
-    }
+    }}
     return false;
 }
 

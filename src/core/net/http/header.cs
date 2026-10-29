@@ -90,14 +90,14 @@ public static error Write(this ΔHeader h, io.Writer w) {
     return h.write(w, nil);
 }
 
-internal static error write(this ΔHeader h, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
-    return h.writeSubset(w, default!, Ꮡtrace);
+internal static error write(this ΔHeader h, io.Writer w, ж<httptrace.ClientTrace> trace) {
+    return h.writeSubset(w, default, trace);
 }
 
 // Clone returns a copy of h or nil if h is nil.
 public static ΔHeader Clone(this ΔHeader h) {
-    if (h == default!) {
-        return default!;
+    if (h == nil) {
+        return default;
     }
 
     // Find total number of values.
@@ -108,10 +108,10 @@ public static ΔHeader Clone(this ΔHeader h) {
     var sv = new slice<@string>(nv); // shared backing array for headers' values
     var h2 = new ΔHeader(builtin.len(h));
     foreach (var (k, vv) in h) {
-        if (vv == default!) {
+        if (vv == nil) {
             // Preserve nil values. ReverseProxy distinguishes
             // between nil and zero-length header values.
-            h2[k] = default!;
+            h2[k] = default;
             continue;
         }
         nint n = copy(sv, vv);
@@ -122,22 +122,22 @@ public static ΔHeader Clone(this ΔHeader h) {
 }
 
 internal static slice<@string> timeFormats;
-internal static void initᴛtimeFormats() { timeFormats = new @string[]{
+internal static void initᴛtimeFormats() { timeFormats = slice<@string>([
     TimeFormat,
     time.RFC850,
     time.ANSIC
-}.slice(); }
+]); }
 
 // ParseTime parses a time header (such as the Date: header),
 // trying each of the three formats allowed by HTTP/1.1:
 // [TimeFormat], [time.RFC850], and [time.ANSIC].
 public static (time.Time t, error err) ParseTime(@string text) {
-    time.Time t = default!;
-    error err = default!;
+    time.Time t = default;
+    error err = default;
 
     foreach (var (_, layout) in timeFormats) {
         (t, err) = time.Parse(layout, text);
-        if (err == default!) {
+        if (err == nil) {
             return (t, err);
         }
     }
@@ -174,21 +174,21 @@ internal static ref sync.Pool headerSorterPool => ref ((StaticBox<sync.Pool>)Ꮡ
 // slice. The headerSorter used to sort is also returned, for possible
 // return to headerSorterCache.
 internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues(this ΔHeader h, map<@string, bool> exclude) {
-    slice<keyValues> kvs = default!;
-    ж<headerSorter> hs = default!;
+    slice<keyValues> kvs = default;
+    ж<headerSorter> hs = default;
 
     hs = ᏑheaderSorterPool.Get()._<ж<headerSorter>>();
-    if (cap((~hs).kvs) < builtin.len(h)) {
-        hs.Value.kvs = new slice<keyValues>(0, builtin.len(h));
+    if (cap(hs.kvs) < builtin.len(h)) {
+        hs.kvs = new slice<keyValues>(0, builtin.len(h));
     }
-    kvs = (~hs).kvs[..0];
+    kvs = hs.kvs[..0];
     foreach (var (k, vv) in h) {
         if (!exclude[k]) {
             kvs = append(kvs, new keyValues(k, vv));
         }
     }
-    hs.Value.kvs = kvs;
-    slices.SortFunc((~hs).kvs, (keyValues a, keyValues b) => strings.Compare(a.key, b.key));
+    hs.kvs = kvs;
+    slices.SortFunc(hs.kvs, (keyValues a, keyValues b) => strings.Compare(a.key, b.key));
     return (kvs, hs);
 }
 
@@ -207,7 +207,7 @@ internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, boo
         ws = new stringWriter(w);
     }
     var (kvs, sorter) = h.sortedKeyValues(exclude);
-    slice<@string> formattedVals = default!;
+    slice<@string> formattedVals = default;
     foreach (var (_, kv) in kvs) {
         if (!httpguts.ValidHeaderFieldName(kv.key)) {
             // This could be an error. In the common case of
@@ -221,25 +221,25 @@ internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, boo
 
             v = headerNewlineToSpace.Replace(v);
             v = textproto.TrimString(v);
-            foreach (var (_, s) in new @string[]{kv.key, ": "u8, v, "\r\n"u8}.slice()) {
+            foreach (var (_, s) in slice<@string>([kv.key, ": "u8, v, "\r\n"u8])) {
                 {
-                    var (_, err) = ws.WriteString(s); if (err != default!) {
+                    var (_, err) = ws.WriteString(s); if (err != nil) {
                         ᏑheaderSorterPool.Put(sorter.OrTypedNil());
                         return err;
                     }
                 }
             }
-            if (Ꮡtrace != nil && trace.WroteHeaderField != default!) {
+            if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
                 formattedVals = append(formattedVals, v);
             }
         }
-        if (Ꮡtrace != nil && trace.WroteHeaderField != default!) {
+        if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
             trace.WroteHeaderField(kv.key, formattedVals);
-            formattedVals = default!;
+            formattedVals = default;
         }
     }
     ᏑheaderSorterPool.Put(sorter.OrTypedNil());
-    return default!;
+    return default;
 }
 
 // CanonicalHeaderKey returns the canonical format of the
@@ -294,7 +294,7 @@ internal static bool hasToken(@string v, @string token) {
 }
 
 internal static bool isTokenBoundary(byte b) {
-    return b == (rune)' ' || b == (rune)',' || b == (rune)'\t';
+    return b == ' ' || b == ',' || b == '\t';
 }
 
 } // end http_package

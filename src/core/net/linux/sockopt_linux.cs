@@ -22,7 +22,7 @@ internal static error setDefaultSockopts(nint s, nint family, nint sotype, bool 
         // Allow broadcast.
         return os.NewSyscallError(setsockoptˢ, syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_BROADCAST, 1));
     }
-    return default!;
+    return default;
 }
 
 internal static error setDefaultListenerSockopts(nint s) {

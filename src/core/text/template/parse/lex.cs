@@ -17,7 +17,7 @@ partial struct item {
     internal itemType typ; // The type of this item.
     internal Pos pos;      // The starting position, in bytes, of this item in the input string.
     internal @string val;  // The value of this item.
-    internal nint line;     // The line number at the start of this item.
+    internal nint line;    // The line number at the start of this item.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -43,42 +43,42 @@ internal static @string String(this item i) {
 // itemType identifies the type of lex items.
 partial struct itemType /*num:nint*/;
 
-internal static itemType itemError => /* iota */ 0;       // error occurred; value is text of error
-internal static itemType itemBool => 1;        // boolean constant
-internal static itemType itemChar => 2;        // printable ASCII character; grab bag for comma etc.
-internal static itemType itemCharConstant => 3; // character constant
-internal static itemType itemComment => 4;     // comment text
-internal static itemType itemComplex => 5;     // complex constant (1+2i); imaginary is just a number
-internal static itemType itemAssign => 6;      // equals ('=') introducing an assignment
-internal static itemType itemDeclare => 7;     // colon-equals (':=') introducing a declaration
+internal static itemType itemError => /* iota */ 0; // error occurred; value is text of error
+internal static itemType itemBool => 1;             // boolean constant
+internal static itemType itemChar => 2;             // printable ASCII character; grab bag for comma etc.
+internal static itemType itemCharConstant => 3;     // character constant
+internal static itemType itemComment => 4;          // comment text
+internal static itemType itemComplex => 5;          // complex constant (1+2i); imaginary is just a number
+internal static itemType itemAssign => 6;           // equals ('=') introducing an assignment
+internal static itemType itemDeclare => 7;          // colon-equals (':=') introducing a declaration
 internal static itemType itemEOF => 8;
-internal static itemType itemField => 9; // alphanumeric identifier starting with '.'
+internal static itemType itemField => 9;       // alphanumeric identifier starting with '.'
 internal static itemType itemIdentifier => 10; // alphanumeric identifier not starting with '.'
-internal static itemType itemLeftDelim => 11; // left action delimiter
-internal static itemType itemLeftParen => 12; // '(' inside action
-internal static itemType itemNumber => 13; // simple number, including imaginary
-internal static itemType itemPipe => 14; // pipe symbol
-internal static itemType itemRawString => 15; // raw quoted string (includes quotes)
+internal static itemType itemLeftDelim => 11;  // left action delimiter
+internal static itemType itemLeftParen => 12;  // '(' inside action
+internal static itemType itemNumber => 13;     // simple number, including imaginary
+internal static itemType itemPipe => 14;       // pipe symbol
+internal static itemType itemRawString => 15;  // raw quoted string (includes quotes)
 internal static itemType itemRightDelim => 16; // right action delimiter
 internal static itemType itemRightParen => 17; // ')' inside action
-internal static itemType itemSpace => 18; // run of spaces separating arguments
-internal static itemType itemString => 19; // quoted string (includes quotes)
-internal static itemType itemText => 20; // plain text
-internal static itemType itemVariable => 21; // variable starting with '$', such as '$' or  '$1' or '$hello'
+internal static itemType itemSpace => 18;      // run of spaces separating arguments
+internal static itemType itemString => 19;     // quoted string (includes quotes)
+internal static itemType itemText => 20;       // plain text
+internal static itemType itemVariable => 21;   // variable starting with '$', such as '$' or  '$1' or '$hello'
 // Keywords appear after all the rest.
-internal static itemType itemKeyword => 22; // used only to delimit the keywords
-internal static itemType itemBlock => 23; // block keyword
-internal static itemType itemBreak => 24; // break keyword
+internal static itemType itemKeyword => 22;  // used only to delimit the keywords
+internal static itemType itemBlock => 23;    // block keyword
+internal static itemType itemBreak => 24;    // break keyword
 internal static itemType itemContinue => 25; // continue keyword
-internal static itemType itemDot => 26; // the cursor, spelled '.'
-internal static itemType itemDefine => 27; // define keyword
-internal static itemType itemElse => 28; // else keyword
-internal static itemType itemEnd => 29; // end keyword
-internal static itemType itemIf => 30; // if keyword
-internal static itemType itemNil => 31; // the untyped nil constant, easiest to treat as a keyword
-internal static itemType itemRange => 32; // range keyword
+internal static itemType itemDot => 26;      // the cursor, spelled '.'
+internal static itemType itemDefine => 27;   // define keyword
+internal static itemType itemElse => 28;     // else keyword
+internal static itemType itemEnd => 29;      // end keyword
+internal static itemType itemIf => 30;       // if keyword
+internal static itemType itemNil => 31;      // the untyped nil constant, easiest to treat as a keyword
+internal static itemType itemRange => 32;    // range keyword
 internal static itemType itemTemplate => 33; // template keyword
-internal static itemType itemWith => 34; // with keyword
+internal static itemType itemWith => 34;     // with keyword
 
 [GoLazy] partial class lazyᴛkey { internal static map<@string, itemType> key = new map<@string, itemType>{
     ["."u8] = itemDot,
@@ -106,34 +106,34 @@ internal static UntypedInt eof => -1;
 // better with the space present anyway. For simplicity, only ASCII
 // does the job.
 internal static readonly @string spaceChars = " \t\r\n"u8; // These are the space characters defined by Go itself.
-internal static UntypedInt trimMarker => /* '-' */ 45; // Attached to left/right delimiter, trims trailing spaces from preceding/following text.
-internal static Pos trimMarkerLen => /* Pos(1 + 1) */ 2; // marker plus space before or after
+internal static UntypedInt trimMarker => /* '-' */ 45;     // Attached to left/right delimiter, trims trailing spaces from preceding/following text.
+internal static Pos trimMarkerLen => /* Pos(1 + 1) */ 2;   // marker plus space before or after
 
 // stateFn represents the state of the scanner as a function that returns the next state.
 internal delegate stateFn stateFn(ж<lexer> _);
 
 // lexer holds the state of the scanner.
 partial struct lexer {
-    internal @string name; // the name of the input; used only for error reports
-    internal @string input; // the string being scanned
-    internal @string leftDelim; // start of action marker
+    internal @string name;       // the name of the input; used only for error reports
+    internal @string input;      // the string being scanned
+    internal @string leftDelim;  // start of action marker
     internal @string rightDelim; // end of action marker
-    internal Pos pos;    // current position in the input
-    internal Pos start;    // start position of this item
-    internal bool atEOF;   // we have hit the end of input and returned eof
-    internal nint parenDepth;   // nesting depth of ( ) exprs
-    internal nint line;   // 1+number of newlines seen
-    internal nint startLine;   // start line of this item
-    internal item item;   // item to return to parser
-    internal bool insideAction;   // are we inside an action?
+    internal Pos pos;            // current position in the input
+    internal Pos start;          // start position of this item
+    internal bool atEOF;         // we have hit the end of input and returned eof
+    internal nint parenDepth;    // nesting depth of ( ) exprs
+    internal nint line;          // 1+number of newlines seen
+    internal nint startLine;     // start line of this item
+    internal item item;          // item to return to parser
+    internal bool insideAction;  // are we inside an action?
     internal lexOptions options;
 }
 
 // lexOptions control behavior of the lexer. All default to false.
 partial struct lexOptions {
     internal bool emitComment; // emit itemComment tokens.
-    internal bool breakOK; // break keyword allowed
-    internal bool continueOK; // continue keyword allowed
+    internal bool breakOK;     // break keyword allowed
+    internal bool continueOK;  // continue keyword allowed
 }
 
 // next returns the next rune in the input.
@@ -144,7 +144,7 @@ internal static rune next(this ref lexer l) {
     }
     var (r, w) = utf8.DecodeRuneInString(l.input.slice(l.pos));
     l.pos += ((Pos)w);
-    if (r == (rune)'\n') {
+    if (r == '\n') {
         l.line++;
     }
     return r;
@@ -163,7 +163,7 @@ internal static void backup(this ref lexer l) {
         var (r, w) = utf8.DecodeLastRuneInString(l.input.slice(0, l.pos));
         l.pos -= ((Pos)w);
         // Correct newline count.
-        if (r == (rune)'\n') {
+        if (r == '\n') {
             l.line--;
         }
     }
@@ -186,7 +186,7 @@ internal static stateFn emit(this ref lexer l, itemType t) {
 // emitItem passes the specified item to the parser.
 internal static stateFn emitItem(this ref lexer l, item i) {
     l.item = i;
-    return default!;
+    return default;
 }
 
 // ignore skips over the pending input before this point.
@@ -223,7 +223,7 @@ internal static stateFn errorf(this ref lexer l, @string format, params ꓸꓸ�
     l.start = 0;
     l.pos = 0;
     l.input = l.input[..0];
-    return default!;
+    return default;
 }
 
 // nextItem returns the next item from the input.
@@ -236,9 +236,9 @@ internal static item nextItem(this ж<lexer> Ꮡl) {
     if (l.insideAction) {
         state = lexInsideAction;
     }
-    while (ᐧ) {
+    for (;;) {
         state = state(Ꮡl);
-        if (state == default!) {
+        if (state == nil) {
             return l.item;
         }
     }
@@ -423,41 +423,41 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
             l.backup(); // Put space back in case we have " -}}".
             return lexSpace;
         }
-        if (r is (rune)'=') { matchᴛ1 = true;
+        if (r is '=') { matchᴛ1 = true;
             return l.emit(itemAssign);
         }
-        if (r is (rune)':') { matchᴛ1 = true;
-            if (l.next() != (rune)'=') {
+        if (r is ':') { matchᴛ1 = true;
+            if (l.next() != '=') {
                 return l.errorf("expected :="u8);
             }
             return l.emit(itemDeclare);
         }
-        if (r is (rune)'|') { matchᴛ1 = true;
+        if (r is '|') { matchᴛ1 = true;
             return l.emit(itemPipe);
         }
-        if (r is (rune)'"') { matchᴛ1 = true;
+        if (r is '"') { matchᴛ1 = true;
             return lexQuote;
         }
-        if (r is (rune)'`') { matchᴛ1 = true;
+        if (r is '`') { matchᴛ1 = true;
             return lexRawQuote;
         }
-        if (r is (rune)'$') { matchᴛ1 = true;
+        if (r is '$') { matchᴛ1 = true;
             return lexVariable;
         }
-        if (r is (rune)'\'') { matchᴛ1 = true;
+        if (r is '\'') { matchᴛ1 = true;
             return lexChar;
         }
-        if (r is (rune)'.') { matchᴛ1 = true;
+        if (r is '.') { matchᴛ1 = true;
             // special look-ahead for ".field" so we don't break l.backup().
             if (l.pos < ((Pos)len(l.input))) {
                 var rΔ2 = l.input[l.pos];
-                if (rΔ2 < (rune)'0' || (rune)'9' < rΔ2) {
+                if (rΔ2 < '0' || '9' < rΔ2) {
                     return lexField;
                 }
             } // '.' can start a number.
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (r == (rune)'+' || r == (rune)'-' || ((rune)'0' <= r && r <= (rune)'9'))) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && (r == '+' || r == '-' || ('0' <= r && r <= '9'))) { matchᴛ1 = true;
             l.backup();
             return lexNumber;
         }
@@ -465,11 +465,11 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
             l.backup();
             return lexIdentifier;
         }
-        if (r is (rune)'(') { matchᴛ1 = true;
+        if (r is '(') { matchᴛ1 = true;
             l.parenDepth++;
             return l.emit(itemLeftParen);
         }
-        if (r is (rune)')') { matchᴛ1 = true;
+        if (r is ')') { matchᴛ1 = true;
             l.parenDepth--;
             if (l.parenDepth < 0) {
                 return l.errorf("unexpected right paren"u8);
@@ -482,7 +482,7 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
         if (!matchᴛ1) { /* default: */
             return l.errorf("unrecognized character in action: %#U"u8, r);
         }
-        return default!;
+        return default;
     }
 }
 
@@ -492,9 +492,9 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
 internal static stateFn lexSpace(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
-    rune r = default!;
-    nint numSpaces = default!;
-    while (ᐧ) {
+    rune r = default;
+    nint numSpaces = default;
+    for (;;) {
         r = l.peek();
         if (!isSpace(r)) {
             break;
@@ -517,7 +517,7 @@ internal static stateFn lexSpace(ж<lexer> Ꮡl) {
 internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         {
             var r = l.next();
             switch (ᐧ) {
@@ -539,7 +539,7 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
                     }
                     return l.emit(item);
                 }
-                case {} when word[0] is (rune)'.': {
+                case {} when word[0] is (byte)'.': {
                     return l.emit(itemField);
                 }
                 case {} when (word == "true"u8) || (word == "false"u8): {
@@ -556,8 +556,8 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
 
 // lexField scans a field: .Alphanumeric.
 // The . has been scanned.
-internal static stateFn lexField(ж<lexer> Ꮡl) {
-    return lexFieldOrVariable(Ꮡl, itemField);
+internal static stateFn lexField(ж<lexer> l) {
+    return lexFieldOrVariable(l, itemField);
 }
 
 // lexVariable scans a Variable: $Alphanumeric.
@@ -582,8 +582,8 @@ internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
         }
         return l.emit(itemDot);
     }
-    rune r = default!;
-    while (ᐧ) {
+    rune r = default;
+    for (;;) {
         r = l.next();
         if (!isAlphaNumeric(r)) {
             l.backup();
@@ -605,10 +605,10 @@ internal static bool atTerminator(this ref lexer l) {
     if (isSpace(r)) {
         return true;
     }
-    var exprᴛ1 = r;
-    if (exprᴛ1 == eof || exprᴛ1 == (rune)'.' || exprᴛ1 == (rune)',' || exprᴛ1 == (rune)'|' || exprᴛ1 == (rune)':' || exprᴛ1 == (rune)')' || exprᴛ1 == (rune)'(') {
+    switch (r) {
+    case var ᴛ when ᴛ == eof || ᴛ == '.' || ᴛ == ',' || ᴛ == '|' || ᴛ == ':' || ᴛ == ')' || ᴛ == '(': {
         return true;
-    }
+    }}
     return strings.HasPrefix(l.input.slice(l.pos), l.rightDelim);
 }
 
@@ -618,23 +618,23 @@ internal static stateFn lexChar(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
 Loop:
-    while (ᐧ) {
+    for (;;) {
         var exprᴛ1 = l.next();
         var matchᴛ1 = false;
-        if (exprᴛ1 is (rune)'\\') { matchᴛ1 = true;
+        if (exprᴛ1 is '\\') { matchᴛ1 = true;
             do {
                 {
-                    var r = l.next(); if (r != eof && r != (rune)'\n') {
+                    var r = l.next(); if (r != eof && r != '\n') {
                         break;
                     }
                 }
                 fallthrough = true;
             } while (false);
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == (rune)'\n')) {
+        if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == '\n')) {
             return l.errorf("unterminated character constant"u8);
         }
-        else if (exprᴛ1 is (rune)'\'') { matchᴛ1 = true;
+        else if (exprᴛ1 is '\'') { matchᴛ1 = true;
             goto break_Loop;
         }
 continue_Loop:;
@@ -654,9 +654,9 @@ internal static stateFn lexNumber(ж<lexer> Ꮡl) {
         return l.errorf("bad number syntax: %q"u8, l.input.slice(l.start, l.pos));
     }
     {
-        var sign = l.peek(); if (sign == (rune)'+' || sign == (rune)'-') {
+        var sign = l.peek(); if (sign == '+' || sign == '-') {
             // Complex: 1+2i. No spaces, must end in 'i'.
-            if (!l.scanNumber() || l.input[l.pos - 1] != (rune)'i') {
+            if (!l.scanNumber() || l.input[l.pos - 1] != 'i') {
                 return l.errorf("bad number syntax: %q"u8, l.input.slice(l.start, l.pos));
             }
             return l.emit(itemComplex);
@@ -672,13 +672,11 @@ internal static bool scanNumber(this ref lexer l) {
     @string digits = "0123456789_"u8;
     if (l.accept("0"u8)) {
         // Note: Leading 0 does not mean octal in floats.
-        if (l.accept("xX"u8)){
+        if (l.accept("xX"u8)) {
             digits = "0123456789abcdefABCDEF_"u8;
-        } else 
-        if (l.accept("oO"u8)){
+        } else if (l.accept("oO"u8)) {
             digits = "01234567_"u8;
-        } else 
-        if (l.accept("bB"u8)) {
+        } else if (l.accept("bB"u8)) {
             digits = "01_"u8;
         }
     }
@@ -709,23 +707,23 @@ internal static stateFn lexQuote(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
 Loop:
-    while (ᐧ) {
+    for (;;) {
         var exprᴛ1 = l.next();
         var matchᴛ1 = false;
-        if (exprᴛ1 is (rune)'\\') { matchᴛ1 = true;
+        if (exprᴛ1 is '\\') { matchᴛ1 = true;
             do {
                 {
-                    var r = l.next(); if (r != eof && r != (rune)'\n') {
+                    var r = l.next(); if (r != eof && r != '\n') {
                         break;
                     }
                 }
                 fallthrough = true;
             } while (false);
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == (rune)'\n')) {
+        if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == '\n')) {
             return l.errorf("unterminated quoted string"u8);
         }
-        else if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
+        else if (exprᴛ1 is '"') { matchᴛ1 = true;
             goto break_Loop;
         }
 continue_Loop:;
@@ -739,14 +737,15 @@ internal static stateFn lexRawQuote(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
 Loop:
-    while (ᐧ) {
-        var exprᴛ1 = l.next();
-        if (exprᴛ1 == eof) {
+    for (;;) {
+        switch (l.next()) {
+        case var ᴛ when ᴛ == eof: {
             return l.errorf("unterminated raw quoted string"u8);
         }
-        if (exprᴛ1 is (rune)'`') {
+        case '`': {
             goto break_Loop;
-        }
+            break;
+        }}
 continue_Loop:;
     }
 break_Loop:;
@@ -755,12 +754,12 @@ break_Loop:;
 
 // isSpace reports whether r is a space character.
 internal static bool isSpace(rune r) {
-    return r == (rune)' ' || r == (rune)'\t' || r == (rune)'\r' || r == (rune)'\n';
+    return r == ' ' || r == '\t' || r == '\r' || r == '\n';
 }
 
 // isAlphaNumeric reports whether r is an alphabetic, digit, or underscore.
 internal static bool isAlphaNumeric(rune r) {
-    return r == (rune)'_' || unicode.IsLetter(r) || unicode.IsDigit(r);
+    return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r);
 }
 
 internal static bool hasLeftTrimMarker(@string s) {

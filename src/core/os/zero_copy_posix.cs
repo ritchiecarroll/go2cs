@@ -28,11 +28,11 @@ internal static (ж<Δio.LimitedReader>, Δio.Reader, int64) tryLimitedReader(Δ
 
     var (lr, ok) = r._<ж<Δio.LimitedReader>>(ᐧ);
     if (!ok) {
-        return (default!, r, remain);
+        return (default, r, remain);
     }
 
-    remain = lr.Value.N;
-    return (lr, (~lr).R, remain);
+    remain = lr.N;
+    return (lr, lr.R, remain);
 }
 
 } // end os_package

@@ -63,21 +63,24 @@ public static bool ProbablyPrime(this ж<ΔInt> Ꮡx, nint n) {
         UntypedInt primesA = /* 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 37 */ 4127218095;
         UntypedInt primesB = /* 29 * 31 * 41 * 43 * 47 * 53 */ 3948078067;
 
-        uint32 rA = default!;
-        uint32 rB = default!;
-        var exprᴛ1 = _W;
-        if (exprᴛ1 == 32) {
-            rA = (uint32)(nuint)x.abs.modW(primesA);
-            rB = (uint32)(nuint)x.abs.modW(primesB);
+        uint32 rA = default;
+        uint32 rB = default;
+        switch (_W) {
+        case var ᴛ when ᴛ == 32: {
+            rA = (uint32)x.abs.modW(primesA);
+            rB = (uint32)x.abs.modW(primesB);
+            break;
         }
-        else if (exprᴛ1 == 64) {
+        case var ᴛ when ᴛ == 64: {
             Word r = x.abs.modW(unchecked((nuint)(16294579238595022365UL)));
-            rA = (uint32)(nuint)(r % (nuint)primesA);
-            rB = (uint32)(nuint)(r % (nuint)primesB);
+            rA = (uint32)(r % (nuint)primesA);
+            rB = (uint32)(r % (nuint)primesB);
+            break;
         }
-        else { /* default: */
+        default: {
             throw panic("math/big: invalid word size");
-        }
+            break;
+        }}
 
         if (rA % 3 == 0 || rA % 5 == 0 || rA % 7 == 0 || rA % 11 == 0 || rA % 13 == 0 || rA % 17 == 0 || rA % 19 == 0 || rA % 23 == 0 || rA % 37 == 0 || rB % 29 == 0 || rB % 31 == 0 || rB % 41 == 0 || rB % 43 == 0 || rB % 47 == 0 || rB % 53 == 0) {
             return false;
@@ -88,7 +91,7 @@ public static bool ProbablyPrime(this ж<ΔInt> Ꮡx, nint n) {
         defer(stkʗ1.free, ref ᒐ);
         return x.abs.probablyPrimeMillerRabin(stk, n + 1, true) && x.abs.probablyPrimeLucas(stk);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -97,35 +100,35 @@ public static bool ProbablyPrime(this ж<ΔInt> Ꮡx, nint n) {
 // If force2 is true, one of the rounds is forced to use base 2.
 // See Handbook of Applied Cryptography, p. 139, Algorithm 4.24.
 // The number n is known to be non-zero.
-internal static bool probablyPrimeMillerRabin(this Δnat n, ж<stack> Ꮡstk, nint reps, bool force2) {
-    var nm1 = ((Δnat)default!).sub(n, natOne);
+internal static bool probablyPrimeMillerRabin(this Δnat n, ж<stack> stk, nint reps, bool force2) {
+    var nm1 = ((Δnat)default).sub(n, natOne);
     // determine q, k such that nm1 = q << k
     nuint k = nm1.trailingZeroBits();
-    var q = ((Δnat)default!).rsh(nm1, k);
+    var q = ((Δnat)default).rsh(nm1, k);
 
-    var nm3 = ((Δnat)default!).sub(nm1, natTwo);
-    var randΔ1 = rand.New(rand.NewSource((int64)(nuint)n[0]));
+    var nm3 = ((Δnat)default).sub(nm1, natTwo);
+    var randΔ1 = rand.New(rand.NewSource((int64)n[0]));
 
-    Δnat x = default!;
-    Δnat y = default!;
-    Δnat quotient = default!;
+    Δnat x = default;
+    Δnat y = default;
+    Δnat quotient = default;
     nint nm3Len = nm3.bitLen();
 
 NextRandom:
     for (nint i = 0; i < reps; i++) {
-        if (i == reps - 1 && force2){
+        if (i == reps - 1 && force2) {
             x = x.set(natTwo);
         } else {
             x = x.random(randΔ1, nm3, nm3Len);
             x = x.add(x, natTwo);
         }
-        y = y.expNN(Ꮡstk, x, q, n, false);
+        y = y.expNN(stk, x, q, n, false);
         if (y.cmp(natOne) == 0 || y.cmp(nm1) == 0) {
             continue;
         }
         for (nuint j = (nuint)1; j < k; j++) {
-            y = y.sqr(Ꮡstk, y);
-            (quotient, y) = quotient.div(Ꮡstk, y, y, n);
+            y = y.sqr(stk, y);
+            (quotient, y) = quotient.div(stk, y, y, n);
             if (y.cmp(nm1) == 0) {
                 goto continue_NextRandom;
             }
@@ -165,7 +168,7 @@ break_NextRandom:;
 //
 // Crandall and Pomerance, Prime Numbers: A Computational Perspective, 2nd ed.
 // Springer, 2005.
-internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
+internal static bool probablyPrimeLucas(this Δnat n, ж<stack> stk) {
     // Discard 0, 1.
     if (len(n) == 0 || n.cmp(natOne) == 0) {
         return false;
@@ -185,10 +188,10 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
     // (which would cause Jacobi(D, n) = 1 for all D not dividing n).
     Word p = (Word)3;
     var d = new Δnat(new Word[]{1}.slice());
-    var t1 = (Δnat)default!; // temp
+    var t1 = (Δnat)default; // temp
     var intD = Ꮡ(new ΔInt(abs: d));
     var intN = Ꮡ(new ΔInt(abs: n));
-    for (; ᐧ ; p++) {
+    for (; ; p++) {
         if (p > 10000) {
             // This is widely believed to be impossible.
             // If we get a report, we'll want the exact number n.
@@ -211,8 +214,8 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
             // We'll never find (d/n) = -1 if n is a square.
             // If n is a non-square we expect to find a d in just a few attempts on average.
             // After 40 attempts, take a moment to check if n is indeed a square.
-            t1 = t1.sqrt(Ꮡstk, n);
-            t1 = t1.sqr(Ꮡstk, t1);
+            t1 = t1.sqrt(stk, n);
+            t1 = t1.sqr(stk, t1);
             if (t1.cmp(n) == 0) {
                 return false;
             }
@@ -231,10 +234,10 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
     // We know gcd(n, 2) = 1 because n is odd.
     //
     // Arrange s = (n - Jacobi(Δ, n)) / 2^r = (n+1) / 2^r.
-    var s = ((Δnat)default!).add(n, natOne);
+    var s = ((Δnat)default).add(n, natOne);
     nint r = (nint)s.trailingZeroBits();
     s = s.rsh(s, (nuint)r);
-    var nm2 = ((Δnat)default!).sub(n, natTwo); // n-2
+    var nm2 = ((Δnat)default).sub(n, natTwo); // n-2
 
     // We apply the "almost extra strong" test, which checks the above conditions
     // except for U_s ≡ 0 mod n, which allows us to avoid computing any U_k values.
@@ -264,33 +267,33 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
     //	V(2k+1) = V(k) V(k+1) - P
     //
     // We can therefore start with k=0 and build up to k=s in log₂(s) steps.
-    var natP = ((Δnat)default!).setWord(p);
-    var vk = ((Δnat)default!).setWord(2);
-    var vk1 = ((Δnat)default!).setWord(p);
-    var t2 = (Δnat)default!; // temp
+    var natP = ((Δnat)default).setWord(p);
+    var vk = ((Δnat)default).setWord(2);
+    var vk1 = ((Δnat)default).setWord(p);
+    var t2 = (Δnat)default; // temp
     for (nint i = (nint)s.bitLen(); i >= 0; i--) {
-        if (s.bit((nuint)i) != 0){
+        if (s.bit((nuint)i) != 0) {
             // k' = 2k+1
             // V(k') = V(2k+1) = V(k) V(k+1) - P.
-            t1 = t1.mul(Ꮡstk, vk, vk1);
+            t1 = t1.mul(stk, vk, vk1);
             t1 = t1.add(t1, n);
             t1 = t1.sub(t1, natP);
-            (t2, vk) = t2.div(Ꮡstk, vk, t1, n);
+            (t2, vk) = t2.div(stk, vk, t1, n);
             // V(k'+1) = V(2k+2) = V(k+1)² - 2.
-            t1 = t1.sqr(Ꮡstk, vk1);
+            t1 = t1.sqr(stk, vk1);
             t1 = t1.add(t1, nm2);
-            (t2, vk1) = t2.div(Ꮡstk, vk1, t1, n);
+            (t2, vk1) = t2.div(stk, vk1, t1, n);
         } else {
             // k' = 2k
             // V(k'+1) = V(2k+1) = V(k) V(k+1) - P.
-            t1 = t1.mul(Ꮡstk, vk, vk1);
+            t1 = t1.mul(stk, vk, vk1);
             t1 = t1.add(t1, n);
             t1 = t1.sub(t1, natP);
-            (t2, vk1) = t2.div(Ꮡstk, vk1, t1, n);
+            (t2, vk1) = t2.div(stk, vk1, t1, n);
             // V(k') = V(2k) = V(k)² - 2
-            t1 = t1.sqr(Ꮡstk, vk);
+            t1 = t1.sqr(stk, vk);
             t1 = t1.add(t1, nm2);
-            (t2, vk) = t2.div(Ꮡstk, vk, t1, n);
+            (t2, vk) = t2.div(stk, vk, t1, n);
         }
     }
 
@@ -303,16 +306,16 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
         //
         // Since we are checking for U(k) == 0 it suffices to check 2 V(k+1) == P V(k) mod n,
         // or P V(k) - 2 V(k+1) == 0 mod n.
-        var t1Δ1 = t1.mul(Ꮡstk, vk, natP);
+        var t1Δ1 = t1.mul(stk, vk, natP);
         var t2Δ1 = t2.lsh(vk1, 1);
         if (t1Δ1.cmp(t2Δ1) < 0) {
             (t1Δ1, t2Δ1) = (t2Δ1, t1Δ1);
         }
         t1Δ1 = t1Δ1.sub(t1Δ1, t2Δ1);
         var t3 = vk1; // steal vk1, no longer needed below
-        vk1 = default!;
+        vk1 = default;
         _ = vk1;
-        (t2Δ1, t3) = t2Δ1.div(Ꮡstk, t3, t1Δ1, n);
+        (t2Δ1, t3) = t2Δ1.div(stk, t3, t1Δ1, n);
         if (len(t3) == 0) {
             return true;
         }
@@ -330,9 +333,9 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
         }
         // k' = 2k
         // V(k') = V(2k) = V(k)² - 2
-        t1 = t1.sqr(Ꮡstk, vk);
+        t1 = t1.sqr(stk, vk);
         t1 = t1.sub(t1, natTwo);
-        (t2, vk) = t2.div(Ꮡstk, vk, t1, n);
+        (t2, vk) = t2.div(stk, vk, t1, n);
     }
     return false;
 }

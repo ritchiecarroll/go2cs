@@ -198,7 +198,7 @@ public static @string String(this Code i) {
         return _Code_name_5.slice(_Code_index_5[i], _Code_index_5[i + 1]);
     }
     default: {
-        return "Code("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "Code("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 

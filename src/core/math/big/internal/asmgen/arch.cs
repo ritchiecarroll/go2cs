@@ -14,17 +14,17 @@ partial class asmgen_package {
 
 // An Arch defines how to generate assembly for a specific architecture.
 partial struct Arch {
-    public @string Name; // name of architecture
-    public @string Build; // build tag
-    public nint WordBits;   // length of word in bits (32 or 64)
-    public nint WordBytes;   // length of word in bytes (4 or 8)
-    public bool CarrySafeLoop;   // whether loops preserve carry flag across iterations
+    public @string Name;       // name of architecture
+    public @string Build;      // build tag
+    public nint WordBits;      // length of word in bits (32 or 64)
+    public nint WordBytes;     // length of word in bytes (4 or 8)
+    public bool CarrySafeLoop; // whether loops preserve carry flag across iterations
     // Registers.
     internal slice<@string> regs; // usable general registers, in allocation order
-    internal @string reg0;  // dedicated zero register
-    internal @string regCarry;  // dedicated carry register, for systems with no hardware carry bits
-    internal @string regAltCarry;  // dedicated secondary carry register, for systems with no hardware carry bits
-    internal @string regTmp;  // dedicated temporary register
+    internal @string reg0;        // dedicated zero register
+    internal @string regCarry;    // dedicated carry register, for systems with no hardware carry bits
+    internal @string regAltCarry; // dedicated secondary carry register, for systems with no hardware carry bits
+    internal @string regTmp;      // dedicated temporary register
     // regShift indicates that the architecture supports
     // using REG1>>REG2 and REG1<<REG2 as the first source
     // operand in an arithmetic instruction. (32-bit ARM does this.)
@@ -51,29 +51,29 @@ partial struct Arch {
     // [Pipe.SetMaxColumns] overrides this.
     internal nint maxColumns;
     // Instruction names.
-    internal @string mov; // move (word-sized)
-    internal @string add; // add with no carry involvement
-    internal @string adds; // add, setting but not using carry
-    internal @string adc; // add, using but not setting carry
-    internal @string adcs; // add, setting and using carry
-    internal @string sub; // sub with no carry involvement
-    internal @string subs; // sub, setting but not using carry
-    internal @string sbc; // sub, using but not setting carry
-    internal @string sbcs; // sub, setting and using carry
-    internal @string mul; // multiply
+    internal @string mov;   // move (word-sized)
+    internal @string add;   // add with no carry involvement
+    internal @string adds;  // add, setting but not using carry
+    internal @string adc;   // add, using but not setting carry
+    internal @string adcs;  // add, setting and using carry
+    internal @string sub;   // sub with no carry involvement
+    internal @string subs;  // sub, setting but not using carry
+    internal @string sbc;   // sub, using but not setting carry
+    internal @string sbcs;  // sub, setting and using carry
+    internal @string mul;   // multiply
     internal @string mulhi; // multiply producing high bits
-    internal @string lsh; // left shift
-    internal @string lshd; // double-width left shift
-    internal @string rsh; // right shift
-    internal @string rshd; // double-width right shift
-    internal @string and; // bitwise and
-    internal @string or; // bitwise or
-    internal @string xor; // bitwise xor
-    internal @string neg; // negate
-    internal @string rsb; // reverse subtract
-    internal @string sltu; // set less-than unsigned (dst = src2 < src1), for carry-less systems
-    internal @string sgtu; // set greater-than unsigned (dst = src2 > src1), for carry-less systems
-    internal @string lea; // load effective address
+    internal @string lsh;   // left shift
+    internal @string lshd;  // double-width left shift
+    internal @string rsh;   // right shift
+    internal @string rshd;  // double-width right shift
+    internal @string and;   // bitwise and
+    internal @string or;    // bitwise or
+    internal @string xor;   // bitwise xor
+    internal @string neg;   // negate
+    internal @string rsb;   // reverse subtract
+    internal @string sltu;  // set less-than unsigned (dst = src2 < src1), for carry-less systems
+    internal @string sgtu;  // set greater-than unsigned (dst = src2 > src1), for carry-less systems
+    internal @string lea;   // load effective address
     // addF and subF implement a.Add and a.Sub
     // on systems where the situation is more complicated than
     // the six basic instructions (add, adds, adcs, sub, subs, sbcs).
@@ -145,11 +145,11 @@ partial struct Hint /*num:nuint*/;
 
 public static Hint HintNone => /* iota */ 0;
 public static Hint HintShiftCount => 1; // shift count (CX on x86)
-public static Hint HintMulSrc => 2; // mul source operand (AX on x86)
-public static Hint HintMulHi => 3; // wide mul high output (DX on x86)
-public static Hint HintMemOK => 4; // a memory reference is okay
-public static Hint HintCarry => 5; // carry flag
-public static Hint HintAltCarry => 6; // secondary carry flag
+public static Hint HintMulSrc => 2;     // mul source operand (AX on x86)
+public static Hint HintMulHi => 3;      // wide mul high output (DX on x86)
+public static Hint HintMemOK => 4;      // a memory reference is okay
+public static Hint HintCarry => 5;      // carry flag
+public static Hint HintAltCarry => 6;   // secondary carry flag
 
 // A Reg is an allocated register or other assembly operand.
 // (For example, a constant might have name "$123"
@@ -206,14 +206,14 @@ internal static ΔReg mem(this ж<RegPtr> Ꮡr, nint off) {
 // ClearCarry, SaveCarry, and ConvertCarry expect: AddCarry or SubCarry; and AltCarry or 0.
 partial struct ΔCarry /*num:nuint*/;
 
-public static ΔCarry SetCarry => /* 1 << iota */ 1;       // sets carry
-public static ΔCarry UseCarry => 2;       // uses carry
-public static ΔCarry KeepCarry => 4;      // must preserve carry
-public static ΔCarry SmashCarry => 8;     // can modify carry or not, whatever is easiest
+public static ΔCarry SetCarry => /* 1 << iota */ 1; // sets carry
+public static ΔCarry UseCarry => 2;                 // uses carry
+public static ΔCarry KeepCarry => 4;                // must preserve carry
+public static ΔCarry SmashCarry => 8;               // can modify carry or not, whatever is easiest
 
 public static ΔCarry ΔAltCarry => 16; // use the secondary carry flag
-public static ΔCarry AddCarry => 32; // use add carry flag semantics (for ClearCarry, ConvertCarry)
-public static ΔCarry SubCarry => 64; // use sub carry flag semantics (for ClearCarry, ConvertCarry)
+public static ΔCarry AddCarry => 32;  // use add carry flag semantics (for ClearCarry, ConvertCarry)
+public static ΔCarry SubCarry => 64;  // use sub carry flag semantics (for ClearCarry, ConvertCarry)
 
 // An Option denotes an optional CPU feature that can be tested at runtime.
 partial struct Option /*num:nint*/;

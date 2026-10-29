@@ -65,7 +65,7 @@ public partial struct options {
 // overridden if the text contains directional characters.
 public static Action<ж<options>> DefaultDirection(ΔDirection d) {
     return (ж<options> opts) => {
-        opts.Value.defaultDirection = d;
+        opts.defaultDirection = d;
     };
 }
 
@@ -94,23 +94,22 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
     p.runes = bytes.Runes(p.p);
     nint bytecount = 0;
     // clear slices from previous SetString or SetBytes
-    p.pairTypes = default!;
-    p.pairValues = default!;
-    p.types = default!;
+    p.pairTypes = default;
+    p.pairValues = default;
+    p.types = default;
 
     foreach (var (_, r) in p.runes) {
         var (props, i) = LookupRune(r);
         bytecount += i;
         ΔClass cls = props.Class();
         if (cls == B) {
-            return (bytecount, default!);
+            return (bytecount, default);
         }
         p.types = append(p.types, cls);
-        if (props.IsOpeningBracket()){
+        if (props.IsOpeningBracket()) {
             p.pairTypes = append(p.pairTypes, bpOpen);
             p.pairValues = append(p.pairValues, r);
-        } else 
-        if (props.IsBracket()){
+        } else if (props.IsBracket()) {
             // this must be a closing bracket,
             // since IsOpeningBracket is not true
             p.pairTypes = append(p.pairTypes, bpClose);
@@ -120,7 +119,7 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
             p.pairValues = append(p.pairValues, (rune)0);
         }
     }
-    return (bytecount, default!);
+    return (bytecount, default);
 }
 
 // SetBytes configures p for the given paragraph text. It replaces text
@@ -181,16 +180,16 @@ public static ΔRun RunAt(this ref Paragraph p, nint pos) {
 }
 
 internal static Ordering calculateOrdering(slice<level> levels, slice<rune> runes) {
-    ΔDirection curDir = default!;
+    ΔDirection curDir = default;
 
     ΔDirection prevDir = Neutral;
     nint prevI = 0;
 
-    var o = new Ordering(nil);
+    var o = new Ordering();
     // lvl = 0,2,4,...: left to right
     // lvl = 1,3,5,...: right to left
     foreach (var (i, lvl) in levels) {
-        if ((level)(lvl % 2) == 0){
+        if ((level)(lvl % 2) == 0) {
             curDir = LeftToRight;
         } else {
             curDir = RightToLeft;
@@ -216,7 +215,7 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(p.types) == 0) {
-        return (new Ordering(nil), default!);
+        return (new Ordering(), default);
     }
 
     foreach (var (_, fn) in p.opts) {
@@ -227,14 +226,14 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
         lvl = 1;
     }
     var (para, err) = newParagraph(p.types, p.pairTypes, p.pairValues, lvl);
-    if (err != default!) {
-        return (new Ordering(nil), err);
+    if (err != nil) {
+        return (new Ordering(), err);
     }
 
-    var levels = para.getLevels(new nint[]{len(p.types)}.slice());
+    var levels = para.getLevels(slice<nint>([len(p.types)]));
 
     p.o = calculateOrdering(levels, p.runes);
-    return (p.o, default!);
+    return (p.o, default);
 }
 
 // Line computes the visual ordering of runs for a single line starting and
@@ -242,12 +241,12 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
 public static (Ordering, error) Line(this ref Paragraph p, nint start, nint end) {
     var lineTypes = p.types.slice(start, end);
     var (para, err) = newParagraph(lineTypes, p.pairTypes.slice(start, end), p.pairValues.slice(start, end), (level)(-1));
-    if (err != default!) {
-        return (new Ordering(nil), err);
+    if (err != nil) {
+        return (new Ordering(), err);
     }
-    var levels = para.getLevels(new nint[]{len(lineTypes)}.slice());
+    var levels = para.getLevels(slice<nint>([len(lineTypes)]));
     var o = calculateOrdering(levels, p.runes.slice(start, end));
-    return (o, default!);
+    return (o, default);
 }
 
 // An Ordering holds the computed visual order of runs of a Paragraph. Calling
@@ -353,7 +352,7 @@ public static @string ReverseString(@string s) {
     var ret = new slice<rune>(li);
     foreach (var (i, r) in input) {
         var (prop, _) = LookupRune(r);
-        if (prop.IsBracket()){
+        if (prop.IsBracket()) {
             ret[li - i - 1] = prop.reverseBracket(r);
         } else {
             ret[li - i - 1] = r;

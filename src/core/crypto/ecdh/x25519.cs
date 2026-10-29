@@ -27,7 +27,7 @@ public static ΔCurve X25519() {
     return new x25519CurveжΔCurve(x25519);
 }
 
-internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve(nil));
+internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve());
 
 partial struct x25519Curve {
 }
@@ -44,13 +44,13 @@ private static readonly @string cryptoEcdhUseOfX25519Isˢ = "crypto/ecdh: use of
 
 internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, io.Reader r) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoEcdhUseOfX25519Isˢ));
+        return (default, errors.New(cryptoEcdhUseOfX25519Isˢ));
     }
     r = rand.CustomReader(r);
     var key = new slice<byte>(x25519PrivateKeySize);
     {
-        var (_, err) = io.ReadFull(r, key); if (err != default!) {
-            return (default!, err);
+        var (_, err) = io.ReadFull(r, key); if (err != nil) {
+            return (default, err);
         }
     }
     return Ꮡc.NewPrivateKey(key);
@@ -61,10 +61,10 @@ private static readonly @string cryptoEcdhInvalidPrivateˢ2 = "crypto/ecdh: inva
 
 internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoEcdhUseOfX25519Isˢ));
+        return (default, errors.New(cryptoEcdhUseOfX25519Isˢ));
     }
     if (len(key) != x25519PrivateKeySize) {
-        return (default!, errors.New(cryptoEcdhInvalidPrivateˢ2));
+        return (default, errors.New(cryptoEcdhInvalidPrivateˢ2));
     }
     var publicKey = new slice<byte>(x25519PublicKeySize);
     var x25519Basepoint = new byte[]{9}.array(32);
@@ -76,20 +76,20 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc,
         curve: new x25519CurveжΔCurve(Ꮡc),
         privateKey: bytes.Clone(key),
         publicKey: Ꮡ(new ΔPublicKey(curve: new x25519CurveжΔCurve(Ꮡc), publicKey: publicKey))
-    )), default!);
+    )), default);
 }
 
 internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoEcdhUseOfX25519Isˢ));
+        return (default, errors.New(cryptoEcdhUseOfX25519Isˢ));
     }
     if (len(key) != x25519PublicKeySize) {
-        return (default!, errors.New(cryptoEcdhInvalidPublicˢ));
+        return (default, errors.New(cryptoEcdhInvalidPublicˢ));
     }
     return (Ꮡ(new ΔPublicKey(
         curve: new x25519CurveжΔCurve(Ꮡc),
         publicKey: bytes.Clone(key)
-    )), default!);
+    )), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -102,9 +102,9 @@ internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey>
     var @out = new slice<byte>(x25519SharedSecretSize);
     x25519ScalarMult(@out, local.privateKey, remote.publicKey);
     if (isZero(@out)) {
-        return (default!, errors.New(cryptoEcdhBadX25519ˢ));
+        return (default, errors.New(cryptoEcdhBadX25519ˢ));
     }
-    return (@out, default!);
+    return (@out, default);
 }
 
 internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice<byte> point) {
@@ -167,7 +167,7 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
 
 // isZero reports whether x is all zeroes in constant time.
 internal static bool isZero(slice<byte> x) {
-    byte acc = default!;
+    byte acc = default;
     foreach (var (_, b) in x) {
         acc |= (byte)(b);
     }

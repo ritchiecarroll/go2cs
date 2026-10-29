@@ -48,8 +48,8 @@ partial class runtime_package {
 // which prevents us from allocating more stack.
 //
 //go:nosplit
-internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> ᏑsysStat, @string vmaName) {
-    ᏑsysStat.add((int64)n);
+internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> sysStat, @string vmaName) {
+    sysStat.add((int64)n);
     ᏑgcController.of(gcControllerState.ᏑmappedReady).Add((int64)n);
     @unsafe.Pointer Δp = (uintptr)sysAllocOS(n, vmaName);
 
@@ -130,7 +130,7 @@ internal static void sysHugePageCollapse(@unsafe.Pointer v, uintptr n) {
 // which prevents us from allocating more stack.
 //
 //go:nosplit
-internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> ᏑsysStat) {
+internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> sysStat) {
     // When using ASAN leak detection, the memory being freed is known by
     // the sanitizer. We need to unregister it so it's not accessed by it.
     //
@@ -141,7 +141,7 @@ internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> Ꮡsys
         lsanunregisterrootregion(v, n);
     }
 
-    ᏑsysStat.add(-(int64)n);
+    sysStat.add(-(int64)n);
     ᏑgcController.of(gcControllerState.ᏑmappedReady).Add(-(int64)n);
     sysFreeOS(v, n);
 }
@@ -207,7 +207,7 @@ retry:
     var Δp = (uintptr)(uintptr)sysReserve(v, size + align, vmaName);
     switch (ᐧ) {
     case {} when Δp == 0: {
-        return (default!, 0);
+        return (default, 0);
     }
     case {} when (uintptr)(Δp & (align - 1)) == 0: {
         return ((@unsafe.Pointer)Δp, size + align);
@@ -285,8 +285,8 @@ internal static void sysUnreserve(@unsafe.Pointer v, uintptr n) {
 // memory region can be efficiently transitioned to Ready.
 //
 // sysStat must be non-nil.
-internal static void sysMap(@unsafe.Pointer v, uintptr n, ж<sysMemStat> ᏑsysStat, @string vmaName) {
-    ᏑsysStat.add((int64)n);
+internal static void sysMap(@unsafe.Pointer v, uintptr n, ж<sysMemStat> sysStat, @string vmaName) {
+    sysStat.add((int64)n);
     sysMapOS(v, n, vmaName);
 }
 

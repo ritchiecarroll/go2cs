@@ -69,10 +69,9 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     if (GOOS == "darwin"u8 && sig == _SIGFPE && gp.sigcode0 == 0) {
         var pcΔ1 = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)gp.sigpc);
         nint i = 0;
-        if ((byte)(pcΔ1.Value[i] & 0xF0) == 0x40){ // 64-bit REX prefix
+        if ((byte)(pcΔ1.Value[i] & 0xF0) == 0x40) { // 64-bit REX prefix
             i++;
-        } else 
-        if (pcΔ1.Value[i] == 0x66) { // 16-bit instruction prefix
+        } else if (pcΔ1.Value[i] == 0x66) { // 16-bit instruction prefix
             i++;
         }
         if (pcΔ1.Value[i] == 0xF6 || pcΔ1.Value[i] == 0xF7) {
@@ -86,7 +85,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     // In case we are panicking from external code, we need to initialize
     // Go special registers. We inject sigpanic0 (instead of sigpanic),
     // which takes care of that.
-    if (shouldPushSigpanic(ref (Ꮡgp).DerefOrNull(), pc, ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)sp))){
+    if (shouldPushSigpanic(ref (Ꮡgp).DerefOrNull(), pc, ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)sp))) {
         c.pushCall(abi.FuncPCABI0(sigpanic0), pc);
     } else {
         // Not safe to push the call. Just clobber the frame.

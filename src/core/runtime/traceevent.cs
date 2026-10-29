@@ -81,10 +81,10 @@ internal static traceArg stack(this traceLocker tl, nint skip) {
 // passed to write.
 internal static traceArg startPC(this traceLocker tl, uintptr pc) {
     // +PCQuantum because makeTraceFrame expects return PCs and subtracts PCQuantum.
-    return (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(tl.gen % 2)).put(new uintptr[]{
+    return (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(tl.gen % 2)).put(slice<uintptr>([
         logicalStackSentinel,
         startPCForTrace(pc) + (uintptr)sys.PCQuantum
-    }.slice());
+    ]));
 }
 
 // string returns a traceArg representing s which may be passed to write.
@@ -102,8 +102,8 @@ internal static traceArg uniqueString(this traceLocker tl, @string s) {
 }
 
 // rtype returns a traceArg representing typ which may be passed to write.
-internal static traceArg rtype(this traceLocker tl, ж<abi.Type> Ꮡtyp) {
-    return (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (ulong)(tl.gen % 2)).put(Ꮡtyp);
+internal static traceArg rtype(this traceLocker tl, ж<abi.Type> typ) {
+    return (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (ulong)(tl.gen % 2)).put(typ);
 }
 
 } // end runtime_package

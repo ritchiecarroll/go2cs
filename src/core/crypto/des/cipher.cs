@@ -36,16 +36,16 @@ internal static readonly @string cryptoDesUseOfDesIsNotˢ = "crypto/des: use of 
 // NewCipher creates and returns a new [cipher.Block].
 public static (cipher.Block, error) NewCipher(slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoDesUseOfDesIsNotˢ));
+        return (default, errors.New(cryptoDesUseOfDesIsNotˢ));
     }
 
     if (len(key) != 8) {
-        return (default!, ((KeySizeError)len(key)));
+        return (default, ((KeySizeError)len(key)));
     }
 
     var c = @new<desCipher>();
     c.generateSubkeys(key);
-    return (new desCipherжBlock(c), default!);
+    return (new desCipherжBlock(c), default);
 }
 
 internal static nint BlockSize(this ref desCipher c) {
@@ -89,18 +89,18 @@ internal static readonly @string cryptoDesUseOfTripleDESˢ = "crypto/des: use of
 // NewTripleDESCipher creates and returns a new [cipher.Block].
 public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoDesUseOfTripleDESˢ));
+        return (default, errors.New(cryptoDesUseOfTripleDESˢ));
     }
 
     if (len(key) != 24) {
-        return (default!, ((KeySizeError)len(key)));
+        return (default, ((KeySizeError)len(key)));
     }
 
     var c = @new<tripleDESCipher>();
     c.of(tripleDESCipher.Ꮡcipher1).generateSubkeys(key[..8]);
     c.of(tripleDESCipher.Ꮡcipher2).generateSubkeys(key[8..16]);
     c.of(tripleDESCipher.Ꮡcipher3).generateSubkeys(key[16..]);
-    return (new tripleDESCipherжBlock(c), default!);
+    return (new tripleDESCipherжBlock(c), default);
 }
 
 internal static nint BlockSize(this ref tripleDESCipher c) {

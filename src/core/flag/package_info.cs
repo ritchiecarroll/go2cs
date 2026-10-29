@@ -10,20 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -74,6 +62,12 @@ using static go.flag_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Flag))]
+[assembly: go.GoFieldAccess(typeof(FlagSet))]
+[assembly: go.GoFieldAccess(typeof(strconv_package.NumError))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -82,7 +76,7 @@ using static go.flag_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("flag/flag.go", "flag.cs", "AGbKAbi4lIKCgpSClIKU3KKCpoKCgpSCpoCkgKSAAA0YooKmgoKClIKmgKSA2qKCpoKCgpSCpoCkgNqigqaCgoKUgqaApIDaooKmgoKClIKmgKSA2qKCpoKCpoCkgNqigqaCgoKUgqaApIDaooKmgoKClIKmgKSA+oKCgpSCgpSClIKmgqaCpoKAgoCCxtyApIDagKSApIAAQogBkoKCgoKUhqqigpSokqiSqqKqooK8oqqigryiqJKqoqiSpIKCAAgSgoKClIKUlJSCgpSClIKokqoACwiSgoKUyoKAgoKUtgAOEAAKBIKCgoKCgoKmuIKUgsa01LTUpKzSgoKCgoKCgriCuJS4gIKSgoCUlMbKgIKCggAFPgAaAqiygpSUAA8ggoK4kKaQqrKClKyyqJCmkKaQppCooqqiqqKCgqqiqqKqoqqigoKqoqqiqqKqooKCqqKqoqqiqqKCgqqiqqKqoqqigoKqoqqiqqKqooKCqqKqoqqiqqKCgqqirLKssqyygoKssgACENIAAhDSrLKssqyyrLIAAhL0gpKCuIKCgoKClJSUgIKkgpQAAhLiqLKCgqrSgoKqwoKU6rKClIKClIKCgoKCpoKCuIKCgoKCgoKCuIKCgoKUpoCCgoCCtoCC2pSClIKUgILGgpSCruKCgoKCgpSClJSkgpSkpqiSqrSokgAHEJSClO6mgqyyuJKssoI=", "423-425:1;552-559:1;609-641:1")]
+[assembly: go.GoPositionMap("flag/flag.go", "flag.cs", "AGbKAbi4lIKCgpSClIKU3KKCpoKCgpSCpoCkgKSAAA0YooKmgoKClIKmgKSA2qKCpoKCgpSCpoCkgNqigqaCgoKUgqaApIDaooKmgoKClIKmgKSA2qKCpoKCpoCkgNqigqaCgoKUgqaApIDaooKmgoKClIKmgKSA+oKCgpSCgpSClIKmgqaCpoKAgoCCxtyApIDagKSApIAAQogBkoKCgoKUhqqigpSokqiSqqKqooK8oqqigryiqJKqoqiSpIKCAAgSgoKClIKUlJSCgpSClIKokqoACwiCgoKUyoKAgoKUtgAOEAAKBIKCgoKCgoKmuIKUgsa01LTUpKzSgoKCgoKCgriCuJS4gIKCgoCUlMbKgIKCggAFPgAaAqiygpSUAA8ggoK4kKaQqrKClKyyqJCmkKaQppCooqqiqqKCgqqiqqKqoqqigoKqoqqiqqKqooKCqqKqoqqiqqKCgqqiqqKqoqqigoKqoqqiqqKqooKCqqKqoqqiqqKCgqqirLKssqyygoKssgACENIAAhDSrLKssqyyrLIAAhL0goKCuIKCgoKClJSUgIKkgpQAAhLiqLKCgqrSgoKqwoKU6rKClIKClIKCgoKCpoKCuIKCgoKCgoKCuIKCgoKUpoCCgoCCtoCC2pSClIKUgILGgpSCruKCgoKCgpSClJSkgpS0tqiSqrSokgAHEJSClO6mgqyyuJKssoI=", "423-425:1;552-559:1;609-641:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

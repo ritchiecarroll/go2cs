@@ -21,7 +21,6 @@ using System.Runtime.CompilerServices;
 using net;
 using vendor.golang.org.x.net.dns;
 
-[GoFieldAccess(typeof(syscall.RawSockaddrInet6))]
 partial class net_package {
 
 // cgoAvailable set to true to indicate that the cgo resolver
@@ -63,13 +62,13 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
     GoFrame ᒐ = default;
     try {
         {
-            var err = acquireThread(ctx); if (err != default!) {
+            var err = acquireThread(ctx); if (err != nil) {
                 T zero = GoZero<T>();
                 return (zero, new DNSErrorжerror(newDNSError(mapErr(err), lookupName, ""u8)));
             }
         }
 
-        if (ctx.Done() == default!) {
+        if (ctx.Done() == nil) {
             defer(releaseThread, ref ᒐ);
             return blocking();
         }
@@ -98,20 +97,20 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
             T zero = GoZero<T>();
             return (zero, new DNSErrorжerror(newDNSError(mapErr(ctx.Err()), lookupName, ""u8)));
         }}
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static (slice<@string> hosts, error err) cgoLookupHost(context.Context ctx, @string name) {
-    slice<@string> hosts = default!;
-    error err = default!;
+    slice<@string> hosts = default;
+    error err = default;
     var hostsᴷ = new stackAppend<@string>(moves: true);
 
     (var addrs, err) = cgoLookupIP(ctx, "ip"u8, name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     foreach (var (_, vᴛ1) in addrs) {
         ref var addr = ref heap(new IPAddr(), out var Ꮡaddr);
@@ -120,31 +119,35 @@ internal static (slice<@string> hosts, error err) cgoLookupHost(context.Context 
         hosts = append(hostsᴷ, hosts, Ꮡaddr.String());
     }
     hosts = move2heap(hostsᴷ, hosts);
-    return (hosts, default!);
+    return (hosts, default);
 }
 
 internal static (nint port, error err) cgoLookupPort(context.Context ctx, @string network, @string service) {
     ref var hints = ref heap(new _C_struct_addrinfo(), out var Ꮡhints);
     var exprᴛ1 = network;
-    if (exprᴛ1 == "ip"u8) { // no hints
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "ip"u8: { // no hints
+        break;
     }
-    else if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
+    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
         _C_ai_socktype(Ꮡhints).Value = _C_SOCK_STREAM;
         _C_ai_protocol(Ꮡhints).Value = _C_IPPROTO_TCP;
+        break;
     }
-    else if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
+    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
         _C_ai_socktype(Ꮡhints).Value = _C_SOCK_DGRAM;
         _C_ai_protocol(Ꮡhints).Value = _C_IPPROTO_UDP;
+        break;
     }
-    else { /* default: */
+    default: {
         return (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: "unknown network"u8, Name: network + "/"u8 + service))));
-    }
+    }}
     switch (ipVersion(network)) {
-    case (rune)'4': {
+    case (byte)'4': {
         _C_ai_family(Ꮡhints).Value = _C_AF_INET;
         break;
     }
-    case (rune)'6': {
+    case (byte)'6': {
         _C_ai_family(Ꮡhints).Value = _C_AF_INET6;
         break;
     }}
@@ -152,13 +155,13 @@ internal static (nint port, error err) cgoLookupPort(context.Context ctx, @strin
     return doBlockingWithCtx(ctx, network + "/"u8 + service, (nint, error) () => cgoLookupServicePort(Ꮡhints, network, service));
 }
 
-internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinfo> Ꮡhints, @string network, @string service) {
-    nint port = default!;
-    error err = default!;
+internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinfo> hints, @string network, @string service) {
+    nint port = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         (var cservice, err) = syscall.ByteSliceFromString(service);
-        if (err != default!) {
+        if (err != nil) {
             (port, err) = (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: err.Error(), Name: network + "/"u8 + service)))); goto ᒐdone;
         }
         // Lowercase the C service name.
@@ -166,36 +169,36 @@ internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinf
             cservice[i] = lowerASCII(b);
         }
         ref var res = ref heap<ж<_C_struct_addrinfo>>(out var Ꮡres);
-        (var gerrno, err) = _C_getaddrinfo(nil, Ꮡ(cservice, 0), Ꮡhints, Ꮡres);
+        (var gerrno, err) = _C_getaddrinfo(nil, Ꮡ(cservice, 0), hints, Ꮡres);
         if (gerrno != 0) {
-            var exprᴛ1 = gerrno;
-            if (exprᴛ1 == _C_EAI_SYSTEM) {
-                if (err == default!) { // see golang.org/issue/6232
+            switch (gerrno) {
+            case var ᴛ when ᴛ == _C_EAI_SYSTEM: {
+                if (err == nil) { // see golang.org/issue/6232
                     err = syscall.EMFILE;
                 }
                 (port, err) = (0, new DNSErrorжerror(newDNSError(err, network + "/"u8 + service, ""u8))); goto ᒐdone;
             }
-            if (exprᴛ1 == _C_EAI_SERVICE || exprᴛ1 == _C_EAI_NONAME) { // Darwin returns EAI_NONAME.
+            case var ᴛ when ᴛ == _C_EAI_SERVICE || ᴛ == _C_EAI_NONAME: { // Darwin returns EAI_NONAME.
                 (port, err) = (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), network + "/"u8 + service, ""u8))); goto ᒐdone;
             }
-            { /* default: */
+            default: {
                 (port, err) = (0, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, network + "/"u8 + service, ""u8))); goto ᒐdone;
-            }
+            }}
         }
         defer(_C_freeaddrinfo, res, ref ᒐ);
 
         for (var r = res; r != nil; r = _C_ai_next(r).ValueSlot) {
-            var exprᴛ2 = _C_ai_family(r).Value;
-            if (exprᴛ2 == _C_AF_INET) {
+            switch (_C_ai_family(r).Value) {
+            case var ᴛ when ᴛ == _C_AF_INET: {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet4>();
                 var p = @unsafe.ArrayPointer<byte>.Of(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2);
-                (port, err) = ((nint)p.ElementRef(0) << 8 | (nint)p.ElementRef(1), default!); goto ᒐdone;
+                (port, err) = ((nint)p.ElementRef(0) << 8 | (nint)p.ElementRef(1), default); goto ᒐdone;
             }
-            if (exprᴛ2 == _C_AF_INET6) {
+            case var ᴛ when ᴛ == _C_AF_INET6: {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet6>();
                 var p = @unsafe.ArrayPointer<byte>.Of(sa.of(syscall.RawSockaddrInet6.ᏑPort), 2);
-                (port, err) = ((nint)p.ElementRef(0) << 8 | (nint)p.ElementRef(1), default!); goto ᒐdone;
-            }
+                (port, err) = ((nint)p.ElementRef(0) << 8 | (nint)p.ElementRef(1), default); goto ᒐdone;
+            }}
         }
         (port, err) = (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), network + "/"u8 + service, ""u8)));
     }
@@ -205,8 +208,8 @@ internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinf
 }
 
 internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network, @string name) {
-    slice<IPAddr> addrs = default!;
-    error err = default!;
+    slice<IPAddr> addrs = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var hints = ref heap(new _C_struct_addrinfo(), out var Ꮡhints);
@@ -214,18 +217,18 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
         _C_ai_socktype(Ꮡhints).Value = _C_SOCK_STREAM;
         _C_ai_family(Ꮡhints).Value = _C_AF_UNSPEC;
         switch (ipVersion(network)) {
-        case (rune)'4': {
+        case (byte)'4': {
             _C_ai_family(Ꮡhints).Value = _C_AF_INET;
             break;
         }
-        case (rune)'6': {
+        case (byte)'6': {
             _C_ai_family(Ꮡhints).Value = _C_AF_INET6;
             break;
         }}
 
         (var h, err) = syscall.BytePtrFromString(name);
-        if (err != default!) {
-            (addrs, err) = (default!, new DNSErrorжerror(Ꮡ(new DNSError(Err: err.Error(), Name: name)))); goto ᒐdone;
+        if (err != nil) {
+            (addrs, err) = (default, new DNSErrorжerror(Ꮡ(new DNSError(Err: err.Error(), Name: name)))); goto ᒐdone;
         }
         ref var res = ref heap<ж<_C_struct_addrinfo>>(out var Ꮡres);
         (var gerrno, err) = _C_getaddrinfo(h, nil, Ꮡhints, Ꮡres);
@@ -233,7 +236,7 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
             var exprᴛ1 = gerrno;
             var matchᴛ1 = false;
             if (exprᴛ1 == _C_EAI_SYSTEM) { matchᴛ1 = true;
-                if (err == default!) {
+                if (err == nil) {
                     // err should not be nil, but sometimes getaddrinfo returns
                     // gerrno == _C_EAI_SYSTEM with err == nil on Linux.
                     // The report claims that it happens when we have too many
@@ -243,10 +246,10 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
                     // comes up again. golang.org/issue/6232.
                     err = syscall.EMFILE;
                 }
-                (addrs, err) = (default!, new DNSErrorжerror(newDNSError(err, name, ""u8))); goto ᒐdone;
+                (addrs, err) = (default, new DNSErrorжerror(newDNSError(err, name, ""u8))); goto ᒐdone;
             }
             if (exprᴛ1 == _C_EAI_NONAME || exprᴛ1 == _C_EAI_NODATA) { matchᴛ1 = true;
-                (addrs, err) = (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8))); goto ᒐdone;
+                (addrs, err) = (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8))); goto ᒐdone;
             }
             if (exprᴛ1 == _C_EAI_ADDRFAMILY) { matchᴛ1 = true;
                 if (runtime.GOOS == "freebsd"u8) {
@@ -255,12 +258,12 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
                     // this case.
                     //
                     // https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=273912
-                    (addrs, err) = (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8))); goto ᒐdone;
+                    (addrs, err) = (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8))); goto ᒐdone;
                 }
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ1) { /* default: */
-                (addrs, err) = (default!, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, name, ""u8))); goto ᒐdone;
+                (addrs, err) = (default, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, name, ""u8))); goto ᒐdone;
             }
         }
         defer(_C_freeaddrinfo, res, ref ᒐ);
@@ -270,19 +273,21 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
             if (_C_ai_socktype(r).Value != _C_SOCK_STREAM) {
                 continue;
             }
-            var exprᴛ2 = _C_ai_family(r).Value;
-            if (exprᴛ2 == _C_AF_INET) {
+            switch (_C_ai_family(r).Value) {
+            case var ᴛ when ᴛ == _C_AF_INET: {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet4>();
                 var addr = new IPAddr(IP: copyIP(sa.of(syscall.RawSockaddrInet4.ᏑAddr).slice()));
                 addrs = append(addrs, addr);
+                break;
             }
-            else if (exprᴛ2 == _C_AF_INET6) {
+            case var ᴛ when ᴛ == _C_AF_INET6: {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet6>();
                 var addr = new IPAddr(IP: copyIP(sa.of(syscall.RawSockaddrInet6.ᏑAddr).slice()), Zone: zoneCache.name((nint)sa.Scope_id));
                 addrs = append(addrs, addr);
-            }
+                break;
+            }}
         }
-        (addrs, err) = (addrs, default!);
+        (addrs, err) = (addrs, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -305,83 +310,83 @@ internal static UntypedInt nameinfoLen => 64;
 internal static UntypedInt maxNameinfoLen => 4096;
 
 internal static (slice<@string> names, error err) cgoLookupPTR(context.Context ctx, @string addr) {
-    error err = default!;
+    error err = default;
 
     (var ip, err) = netip.ParseAddr(addr);
-    if (err != default!) {
-        return (default!, new DNSErrorжerror(Ꮡ(new DNSError(Err: "invalid address"u8, Name: addr))));
+    if (err != nil) {
+        return (default, new DNSErrorжerror(Ꮡ(new DNSError(Err: "invalid address"u8, Name: addr))));
     }
     var (sa, salen) = cgoSockaddr((IP)ip.AsSlice(), ip.Zone());
     if (sa == nil) {
-        return (default!, new DNSErrorжerror(Ꮡ(new DNSError(Err: "invalid address "u8 + ip.String(), Name: addr))));
+        return (default, new DNSErrorжerror(Ꮡ(new DNSError(Err: "invalid address "u8 + ip.String(), Name: addr))));
     }
 
     var saʗ1 = sa;
     return doBlockingWithCtx(ctx, addr, (slice<@string>, error) () => cgoLookupAddrPTR(addr, saʗ1, salen));
 }
 
-internal static (slice<@string> names, error err) cgoLookupAddrPTR(@string addr, ж<_C_struct_sockaddr> Ꮡsa, _C_socklen_t salen) {
-    error err = default!;
+internal static (slice<@string> names, error err) cgoLookupAddrPTR(@string addr, ж<_C_struct_sockaddr> sa, _C_socklen_t salen) {
+    error err = default;
 
-    nint gerrno = default!;
-    slice<byte> b = default!;
+    nint gerrno = default;
+    slice<byte> b = default;
     for (nint l = nameinfoLen; l <= maxNameinfoLen; l *= 2) {
         b = new slice<byte>(l);
-        (gerrno, err) = cgoNameinfoPTR(b, Ꮡsa, salen);
+        (gerrno, err) = cgoNameinfoPTR(b, sa, salen);
         if (gerrno == 0 || gerrno != _C_EAI_OVERFLOW) {
             break;
         }
     }
     if (gerrno != 0) {
-        var exprᴛ1 = gerrno;
-        if (exprᴛ1 == _C_EAI_SYSTEM) {
-            if (err == default!) { // see golang.org/issue/6232
+        switch (gerrno) {
+        case var ᴛ when ᴛ == _C_EAI_SYSTEM: {
+            if (err == nil) { // see golang.org/issue/6232
                 err = syscall.EMFILE;
             }
-            return (default!, new DNSErrorжerror(newDNSError(err, addr, ""u8)));
+            return (default, new DNSErrorжerror(newDNSError(err, addr, ""u8)));
         }
-        if (exprᴛ1 == _C_EAI_NONAME) {
-            return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), addr, ""u8)));
+        case var ᴛ when ᴛ == _C_EAI_NONAME: {
+            return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), addr, ""u8)));
         }
-        { /* default: */
-            return (default!, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, addr, ""u8)));
-        }
+        default: {
+            return (default, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, addr, ""u8)));
+        }}
     }
     {
         nint i = bytealg.IndexByte(b, 0); if (i != -1) {
             b = b.slice(0, i);
         }
     }
-    return (new @string[]{absDomainName((@string)b)}.slice(), default!);
+    return (slice<@string>([absDomainName((@string)b)]), default);
 }
 
 internal static (ж<_C_struct_sockaddr>, _C_socklen_t) cgoSockaddr(IP ip, @string zone) {
     {
-        var ip4 = ip.To4(); if (ip4 != default!) {
+        var ip4 = ip.To4(); if (ip4 != nil) {
             return (cgoSockaddrInet4(ip4), (_C_socklen_t)syscall.SizeofSockaddrInet4);
         }
     }
     {
-        var ip6 = ip.To16(); if (ip6 != default!) {
+        var ip6 = ip.To16(); if (ip6 != nil) {
             return (cgoSockaddrInet6(ip6, zoneCache.index(zone)), (_C_socklen_t)syscall.SizeofSockaddrInet6);
         }
     }
-    return (default!, 0);
+    return (default, 0);
 }
 
 internal static (@string cname, error err) cgoLookupCNAME(context.Context ctx, @string name) {
-    @string cname = default!;
-    error err = default!;
+    @string cname = default;
+    error err = default;
 
-    (var resources, err) = resSearch(ctx, name, (nint)(uint16)dnsmessage.TypeCNAME, (nint)(uint16)dnsmessage.ClassINET);
-    if (err != default!) {
+    (var resources, err) = resSearch(ctx, name, (nint)dnsmessage.TypeCNAME, (nint)dnsmessage.ClassINET);
+    if (err != nil) {
         return ("", err);
     }
     (cname, err) = parseCNAMEFromResources(resources);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
-    return (cname, default!);
+    return (cname, default);
 }
 
 // resSearch will make a call to the 'res_nsearch' routine in the C library
@@ -397,7 +402,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
     GoFrame ᒐ = default;
     try {
         var resStateSize = /* unsafe.Sizeof(_C_struct___res_state{}) */ (uintptr)552;
-        ж<_C_struct___res_state> state = default!;
+        ж<_C_struct___res_state> state = default;
         if (resStateSize > 0) {
             @unsafe.Pointer mem = (uintptr)_C_malloc(resStateSize);
             defer(_C_free, mem, ref ᒐ);
@@ -406,8 +411,8 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
             state = Ꮡ(memSlice, 0).Reinterpret<byte, _C_struct___res_state>();
         }
         {
-            var errΔ1 = _C_res_ninit(state); if (errΔ1 != default!) {
-                return (default!, errors.New("res_ninit failure: "u8 + errΔ1.Error()));
+            var errΔ1 = _C_res_ninit(state); if (errΔ1 != nil) {
+                return (default, errors.New("res_ninit failure: "u8 + errΔ1.Error()));
             }
         }
         defer(_C_res_nclose, state, ref ᒐ);
@@ -421,23 +426,22 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         // For now, we are willing to take res_search's word that there's nothing
         // useful in the response, even though there *is* a response.
         nint bufSize = maxDNSPacketSize;
-        ref var buf = ref heap<ж<_C_uchar>>(out var Ꮡbuf);
-        buf = (ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize));
+        ref var buf = ref heap<ж<_C_uchar>>((ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize)), out var Ꮡbuf);
         defer(() => {
             // Free in a closure which captures buf to pick up a reallocated buffer from below.
             _C_free(@unsafe.Pointer.FromPinnedBox(Ꮡbuf.ValueSlot));
         }, ref ᒐ);
 
         var (s, err) = syscall.BytePtrFromString(hostname);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
-        nint size = default!;
-        while (ᐧ) {
+        nint size = default;
+        for (;;) {
             size = _C_res_nsearch(state, s, @class, rtype, buf, bufSize);
             if (size <= 0 || size > 0xffff) {
-                return (default!, errors.New(resNsearchFailureˢ));
+                return (default, errors.New(resNsearchFailureˢ));
             }
             if (size <= bufSize) {
                 break;
@@ -449,20 +453,20 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
             buf = (ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize));
         }
 
-        dnsmessage.Parser p = default!;
+        dnsmessage.Parser p = default;
         {
-            var (_, errΔ2) = p.Start(@unsafe.Slice(buf, size)); if (errΔ2 != default!) {
-                return (default!, errΔ2);
+            var (_, errΔ2) = p.Start(@unsafe.Slice(buf, size)); if (errΔ2 != nil) {
+                return (default, errΔ2);
             }
         }
         p.SkipAllQuestions();
         (var resources, err) = p.AllAnswers();
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        return (resources, default!);
+        return (resources, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

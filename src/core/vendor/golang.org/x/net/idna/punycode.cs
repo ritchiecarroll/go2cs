@@ -33,14 +33,14 @@ internal static (@string, error) decode(@string encoded) {
     var outputᴷ = new stackAppend<rune>();
 
     if (encoded == ""u8) {
-        return ("", default!);
+        return ("", default);
     }
     nint pos = 1 + strings.LastIndex(encoded, "-"u8);
     if (pos == 1) {
         return ("", punyError(encoded));
     }
     if (pos == len(encoded)) {
-        return (encoded.slice(0, len(encoded) - 1), default!);
+        return (encoded.slice(0, len(encoded) - 1), default);
     }
     var output = new slice<rune>(0, len(encoded));
     if (pos != 0) {
@@ -52,7 +52,7 @@ internal static (@string, error) decode(@string encoded) {
     var overflow = false;
     while (pos < len(encoded)) {
         var (oldI, w) = (i, (int32)1);
-        for (var k = @base; ᐧ ; k += @base) {
+        for (var k = @base; ; k += @base) {
             if (pos == len(encoded)) {
                 return ("", punyError(encoded));
             }
@@ -66,10 +66,9 @@ internal static (@string, error) decode(@string encoded) {
                 return ("", punyError(encoded));
             }
             var t = k - bias;
-            if (k <= bias){
+            if (k <= bias) {
                 t = tmin;
-            } else 
-            if (k >= bias + tmax) {
+            } else if (k >= bias + tmax) {
                 t = tmax;
             }
             if (digit < t) {
@@ -95,7 +94,7 @@ internal static (@string, error) decode(@string encoded) {
         output[i] = n;
         i++;
     }
-    return ((@string)output, default!);
+    return ((@string)output, default);
 }
 
 // encode encodes a string as specified in section 6.3 and prepends prefix to
@@ -111,7 +110,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
     var (delta, n, bias) = ((int32)0, initialN, initialBias);
     var (b, remaining) = ((int32)0, (int32)0);
     foreach (var (_, r) in s) {
-        if (r < 0x80){
+        if (r < 0x80) {
             b++;
             output = append(outputᴷ, output, (byte)r);
         } else {
@@ -120,7 +119,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
     }
     var h = b;
     if (b > 0) {
-        output = append(output, (byte)((rune)'-'));
+        output = append(output, (byte)'-');
     }
     var overflow = false;
     while (remaining != 0) {
@@ -147,12 +146,11 @@ internal static (@string, error) encode(@string prefix, @string s) {
                 continue;
             }
             var q = delta;
-            for (var k = @base; ᐧ ; k += @base) {
+            for (var k = @base; ; k += @base) {
                 var t = k - bias;
-                if (k <= bias){
+                if (k <= bias) {
                     t = tmin;
-                } else 
-                if (k >= bias + tmax) {
+                } else if (k >= bias + tmax) {
                     t = tmax;
                 }
                 if (q < t) {
@@ -170,7 +168,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
         delta++;
         n++;
     }
-    return ((@string)output, default!);
+    return ((@string)output, default);
 }
 
 // madd computes a + (b * c), detecting overflow.
@@ -184,14 +182,14 @@ internal static (int32 next, bool overflow) madd(int32 a, int32 b, int32 c) {
 
 internal static (int32 digit, bool ok) decodeDigit(byte x) {
     switch (ᐧ) {
-    case {} when (rune)'0' <= x && x <= (rune)'9': {
+    case {} when (byte)'0' <= x && x <= (byte)'9': {
         return ((int32)((byte)(x - ((rune)'0' - 26))), true);
     }
-    case {} when (rune)'A' <= x && x <= (rune)'Z': {
-        return ((int32)((byte)(x - (rune)'A')), true);
+    case {} when (byte)'A' <= x && x <= (byte)'Z': {
+        return ((int32)((byte)(x - 'A')), true);
     }
-    case {} when (rune)'a' <= x && x <= (rune)'z': {
-        return ((int32)((byte)(x - (rune)'a')), true);
+    case {} when (byte)'a' <= x && x <= (byte)'z': {
+        return ((int32)((byte)(x - 'a')), true);
     }}
     return (0, false);
 }
@@ -199,7 +197,7 @@ internal static (int32 digit, bool ok) decodeDigit(byte x) {
 internal static byte encodeDigit(int32 digit) {
     switch (ᐧ) {
     case {} when 0 <= digit && digit < 26: {
-        return (byte)(digit + (rune)'a');
+        return (byte)(digit + 'a');
     }
     case {} when 26 <= digit && digit < 36: {
         return (byte)(digit + ((rune)'0' - 26));
@@ -209,7 +207,7 @@ internal static byte encodeDigit(int32 digit) {
 
 // adapt is the bias adaptation function specified in section 6.1.
 internal static int32 adapt(int32 delta, int32 numPoints, bool firstTime) {
-    if (firstTime){
+    if (firstTime) {
         delta /= damp;
     } else {
         delta /= 2;

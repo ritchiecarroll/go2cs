@@ -237,9 +237,9 @@ internal static ref uint32 gcphase => ref ((StaticBox<uint32>)Ꮡgcphase).ValueS
 //
 //go:linkname writeBarrier
 partial struct writeBarrierᴛ1 /*dyn*/ {
-    internal bool enabled;    // compiler emits a check of this before calling write barrier
+    internal bool enabled;             // compiler emits a check of this before calling write barrier
     internal array<byte> pad = new(3); // compiler uses 32-bit load for "enabled" field
-    internal uint64 alignme;  // guarantee alignment so that compiler can use a 32 or 64-bit load
+    internal uint64 alignme;           // guarantee alignment so that compiler can use a 32 or 64-bit load
 }
 internal static writeBarrierᴛ1 writeBarrier = new();
 
@@ -249,8 +249,8 @@ internal static writeBarrierᴛ1 writeBarrier = new();
 internal static readonly ж<uint32> ᏑgcBlackenEnabled = new StaticBox<uint32>(default(uint32));
 internal static ref uint32 gcBlackenEnabled => ref ((StaticBox<uint32>)ᏑgcBlackenEnabled).ValueSlot;
 
-internal static UntypedInt _GCoff => iota; // GC not running; sweeping in background, write barrier disabled
-internal static UntypedInt _GCmark => 1; // GC marking roots and workbufs: allocate black, write barrier ENABLED
+internal static UntypedInt _GCoff => iota;          // GC not running; sweeping in background, write barrier disabled
+internal static UntypedInt _GCmark => 1;            // GC marking roots and workbufs: allocate black, write barrier ENABLED
 internal static UntypedInt _GCmarktermination => 2; // GC mark termination: allocate black, P's help GC, write barrier ENABLED
 
 //go:nosplit
@@ -387,9 +387,9 @@ partial struct workType_strongFromWeak /*dyn*/ {
 }
 
 partial struct workType {
-    internal lfstack full;          // lock-free list of full blocks workbuf
-    internal cpu.CacheLinePad _; // prevents false-sharing between full and empty
-    internal lfstack empty;          // lock-free list of empty blocks workbuf
+    internal lfstack full;        // lock-free list of full blocks workbuf
+    internal cpu.CacheLinePad _;  // prevents false-sharing between full and empty
+    internal lfstack empty;       // lock-free list of empty blocks workbuf
     internal cpu.CacheLinePad __; // prevents false-sharing between empty and wbufSpans
     internal workType_wbufSpans wbufSpans;
     internal cpu.CacheLinePad ___; // prevents false-sharing between wbufSpans and spanWorkMask
@@ -558,7 +558,7 @@ internal static void goroutineLeakGC() {
 // gcWaitOnMark blocks until GC finishes the Nth mark phase. If GC has
 // already completed this mark phase, it returns immediately.
 internal static void gcWaitOnMark(uint32 n) {
-    while (ᐧ) {
+    for (;;) {
         // Disable phase transitions.
         @lock(Ꮡwork.of(workType.ᏑsweepWaiters).of(workType_sweepWaiters.Ꮡlock));
         var nMarks = Ꮡwork.of(workType.Ꮡcycles).Load();
@@ -583,15 +583,15 @@ internal static void gcWaitOnMark(uint32 n) {
 partial struct gcMode /*num:nint*/;
 
 internal static gcMode gcBackgroundMode => /* iota */ 0; // concurrent GC and sweep
-internal static gcMode gcForceMode => 1;     // stop-the-world GC now, concurrent sweep
-internal static gcMode gcForceBlockMode => 2; // stop-the-world GC now and STW sweep (forced by user)
+internal static gcMode gcForceMode => 1;                 // stop-the-world GC now, concurrent sweep
+internal static gcMode gcForceBlockMode => 2;            // stop-the-world GC now and STW sweep (forced by user)
 
 // A gcTrigger is a predicate for starting a GC cycle. Specifically,
 // it is an exit condition for the _GCoff phase.
 partial struct gcTrigger {
     internal gcTriggerKind kind;
-    internal int64 now;  // gcTriggerTime: current time
-    internal uint32 n; // gcTriggerCycle: cycle number to start
+    internal int64 now; // gcTriggerTime: current time
+    internal uint32 n;  // gcTriggerCycle: cycle number to start
 }
 
 partial struct gcTriggerKind /*num:nint*/;
@@ -618,22 +618,22 @@ internal static bool test(this gcTrigger t) {
     if (!memstats.enablegc || Ꮡpanicking.Load() != 0 || gcphase != _GCoff) {
         return false;
     }
-    var exprᴛ1 = t.kind;
-    if (exprᴛ1 == gcTriggerHeap) {
+    switch (t.kind) {
+    case var ᴛ when ᴛ == gcTriggerHeap: {
         var (trigger, _) = ᏑgcController.trigger();
         return ᏑgcController.of(gcControllerState.ᏑheapLive).Load() >= trigger;
     }
-    if (exprᴛ1 == gcTriggerTime) {
+    case var ᴛ when ᴛ == gcTriggerTime: {
         if (ᏑgcController.of(gcControllerState.ᏑgcPercent).Load() < 0) {
             return false;
         }
         var lastgc = (int64)atomic.Load64(Ꮡmemstats.of(mstats.Ꮡlast_gc_nanotime));
         return lastgc != 0 && t.now - lastgc > forcegcperiod;
     }
-    if (exprᴛ1 == gcTriggerCycle) {
+    case var ᴛ when ᴛ == gcTriggerCycle: {
         // t.n > work.cycles, but accounting for wraparound.
         return (int32)(t.n - Ꮡwork.of(workType.Ꮡcycles).Load()) > 0;
-    }
+    }}
     return true;
 }
 
@@ -661,7 +661,7 @@ internal static void gcStart(gcTrigger trigger) {
             }
         }
         releasem(ref (mp).DerefOrNull());
-        mp = default!;
+        mp = default;
 
         {
             var gp = getg(); if ((~gp).bubble != nil) {
@@ -669,7 +669,7 @@ internal static void gcStart(gcTrigger trigger) {
                 // This is less elegant than incrementing the group's active count,
                 // but avoids any contamination between GC and synctest.
                 var bubble = gp.Value.bubble;
-                gp.Value.bubble = default!;
+                gp.Value.bubble = default;
                 var bubbleʗ1 = bubble;
                 var gpʗ1 = gp;
                 defer(() => {
@@ -705,10 +705,9 @@ internal static void gcStart(gcTrigger trigger) {
         // that multiple goroutines that detect the heap trigger don't
         // start multiple STW GCs.
         gcMode mode = gcBackgroundMode;
-        if (debug.gcstoptheworld == 1){
+        if (debug.gcstoptheworld == 1) {
             mode = gcForceMode;
-        } else 
-        if (debug.gcstoptheworld == 2) {
+        } else if (debug.gcstoptheworld == 2) {
             mode = gcForceBlockMode;
         }
 
@@ -1048,7 +1047,7 @@ top:
     // Check whether we need to resume the marking phase because of issue #27993
     // or because of goroutine leak detection.
     if (restart || (work.goroutineLeak.enabled && !work.goroutineLeak.done)) {
-        if (restart){
+        if (restart) {
             // Restart because of issue #27993.
             gcDebugMarkDone.restartedDueTo27993 = true;
         } else {
@@ -1121,13 +1120,13 @@ internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
         return true;
     }
 
-    var exprᴛ1 = gp.waitreason;
-    if (exprᴛ1 == waitReasonSelectNoCases || exprᴛ1 == waitReasonChanSendNilChan || exprᴛ1 == waitReasonChanReceiveNilChan) {
+    switch (gp.waitreason) {
+    case var ᴛ when ᴛ == waitReasonSelectNoCases || ᴛ == waitReasonChanSendNilChan || ᴛ == waitReasonChanReceiveNilChan: {
         // Select with no cases or communicating on nil channels
         // make goroutines unrunnable by definition.
         return false;
     }
-    if (exprᴛ1 == waitReasonChanReceive || exprᴛ1 == waitReasonSelect || exprᴛ1 == waitReasonChanSend) {
+    case var ᴛ when ᴛ == waitReasonChanReceive || ᴛ == waitReasonSelect || ᴛ == waitReasonChanSend: {
         // Cycle all through all *sudog to check whether
         // the goroutine is waiting on a marked channel.
         for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
@@ -1137,13 +1136,14 @@ internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
         }
         return false;
     }
-    if (exprᴛ1 == waitReasonSyncCondWait || exprᴛ1 == waitReasonSyncWaitGroupWait || exprᴛ1 == waitReasonSyncMutexLock || exprᴛ1 == waitReasonSyncRWMutexLock || exprᴛ1 == waitReasonSyncRWMutexRLock) {
+    case var ᴛ when ᴛ == waitReasonSyncCondWait || ᴛ == waitReasonSyncWaitGroupWait || ᴛ == waitReasonSyncMutexLock || ᴛ == waitReasonSyncRWMutexLock || ᴛ == waitReasonSyncRWMutexRLock: {
         // If waiting on mutexes, wait groups, or condition variables,
         // check if the synchronization primitive attached to the sudog is marked.
         if (gp.waiting != nil) {
             return isMarkedOrNotInHeap((uintptr)gp.waiting.of(sudog.Ꮡelem).get());
         }
-    }
+        break;
+    }}
     return true;
 }
 
@@ -1318,7 +1318,7 @@ internal static void gcMarkTermination(worldStop stw) {
         // before continuing.
     });
 
-    bool stwSwept = default!;
+    bool stwSwept = default;
     systemstack(() => {
         work.heap2 = work.bytesMarked;
         if (debug.gccheckmark > 0) {
@@ -1432,10 +1432,9 @@ internal static void gcMarkTermination(worldStop stw) {
     // fine as all that work is idempotent within a GC cycle, and
     // we're still holding worldsema so a new cycle can't start.
     var sl = ᏑΔsweep.of(sweepdata.Ꮡactive).begin();
-    if (!stwSwept && !sl.valid){
+    if (!stwSwept && !sl.valid) {
         @throw(failedToSetSweepBarrierˢ);
-    } else 
-    if (stwSwept && sl.valid) {
+    } else if (stwSwept && sl.valid) {
         @throw(nonConcurrentSweepFailedˢ);
     }
 
@@ -1444,7 +1443,7 @@ internal static void gcMarkTermination(worldStop stw) {
         gcRestoreSyncObjects();
     }
 
-    bool goroutineLeakDone = default!;
+    bool goroutineLeakDone = default;
     var stwʗ1 = stw;
     systemstack(() => {
         // Pull the GC out of goroutine leak detection mode.
@@ -1503,7 +1502,7 @@ internal static void gcMarkTermination(worldStop stw) {
         if (debug.gctrace > 1) {
             pp.of(runtime_package.Δp.Ꮡgcw).flushScanStats(Ꮡmemstats.of(mstats.ᏑlastScanStats));
         }
-        pp.Value.pinnerCache = default!;
+        pp.Value.pinnerCache = default;
     });
     if (sl.valid) {
         // Now that we've swept stale spans in mcaches, they don't
@@ -1531,7 +1530,7 @@ internal static void gcMarkTermination(worldStop stw) {
         }
         print((@string)": "u8);
         var prev = work.tSweepTerm;
-        foreach (var (i, ns) in new int64[]{work.tMark, work.tMarkTerm, work.tEnd}.slice()) {
+        foreach (var (i, ns) in slice<int64>([work.tMark, work.tMarkTerm, work.tEnd])) {
             if (i != 0) {
                 print((@string)"+"u8);
             }
@@ -1539,18 +1538,17 @@ internal static void gcMarkTermination(worldStop stw) {
             prev = ns;
         }
         print((@string)" ms clock, "u8);
-        foreach (var (i, ns) in new int64[]{
+        foreach (var (i, ns) in slice<int64>([
             (int64)work.stwprocs * (work.tMark - work.tSweepTerm),
             ᏑgcController.of(gcControllerState.ᏑassistTime).Load(),
             ᏑgcController.of(gcControllerState.ᏑdedicatedMarkTime).Load() + ᏑgcController.of(gcControllerState.ᏑfractionalMarkTime).Load(),
             ᏑgcController.of(gcControllerState.ᏑidleMarkTime).Load(),
             (int64)work.stwprocs * (work.tEnd - work.tMarkTerm)
-        }.slice()) {
-            if (i == 2 || i == 3){
+        ])) {
+            if (i == 2 || i == 3) {
                 // Separate mark time components with /.
                 print((@string)"/"u8);
-            } else 
-            if (i != 0) {
+            } else if (i != 0) {
                 print((@string)"+"u8);
             }
             print((@string)fmtNSAsMS(sbuf[..], (uint64)ns));
@@ -1588,7 +1586,7 @@ internal static void gcMarkTermination(worldStop stw) {
     // Set any arena chunks that were deferred to fault.
     @lock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
     var faultList = userArenaState.fault;
-    userArenaState.fault = default!;
+    userArenaState.fault = default;
     unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
     foreach (var (_, lc) in faultList) {
         lc.mspan.setUserArenaChunkToFault();
@@ -1606,7 +1604,7 @@ internal static void gcMarkTermination(worldStop stw) {
     // Careful: another GC cycle may start now.
 
     releasem(ref (mp).DerefOrNull());
-    mp = default!;
+    mp = default;
 
     // now that gc is done, kick off finalizer thread if needed
     if (!concurrentSweep) {
@@ -1740,14 +1738,14 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
     // This isn't strictly necessary, but it reduces latency between
     // _GCmark starting and the workers starting.
 
-    while (ᐧ) {
+    for (;;) {
         // Go to sleep until woken by
         // gcController.findRunnableGCWorker.
         gopark((ж<g> g, @unsafe.Pointer nodep) => {
             var nodeΔ1 = (ж<gcBgMarkWorkerNode>)(uintptr)(nodep);
 
             {
-                var mp = (~nodeΔ1).m.ptr(); if (mp != nil) {
+                var mp = nodeΔ1.m.ptr(); if (mp != nil) {
                     // The worker G is no longer running; release
                     // the M.
                     //
@@ -1794,7 +1792,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
 
         var startTime = nanotime();
         pp.Value.gcMarkWorkerStartTime = startTime;
-        bool trackLimiterEvent = default!;
+        bool trackLimiterEvent = default;
         if ((~pp).gcMarkWorkerMode == gcMarkWorkerIdleMode) {
             trackLimiterEvent = pp.of(runtime_package.Δp.ᏑlimiterEvent).start(limiterEventIdleMarkWork, startTime);
         }
@@ -1814,8 +1812,12 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
             // N.B. The execution tracer is not aware of this status transition and
             // handles it specially based on the wait reason.
             casGToWaitingForSuspendG(gpʗ1, _Grunning, waitReasonGCWorkerActive);
-            var exprᴛ1 = (~ppʗ1).gcMarkWorkerMode;
-            if (exprᴛ1 == gcMarkWorkerDedicatedMode) {
+            switch ((~ppʗ1).gcMarkWorkerMode) {
+            default: {
+                @throw(gcBgMarkWorkerUnexpectedˢ);
+                break;
+            }
+            case var ᴛ when ᴛ == gcMarkWorkerDedicatedMode: {
                 gcDrainMarkWorkerDedicated(ppʗ1.of(runtime_package.Δp.Ꮡgcw), true);
                 if ((~gpʗ1).preempt) {
                     // We were preempted. This is
@@ -1824,8 +1826,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
                     // queue so it can run
                     // somewhere else.
                     {
-                        ref var drainQ = ref heap<gQueue>(out var ᏑdrainQ);
-                        drainQ = runqdrain(ppʗ1); if (!drainQ.empty()) {
+                        ref var drainQ = ref heap<gQueue>(runqdrain(ppʗ1), out var ᏑdrainQ); if (!drainQ.empty()) {
                             @lock(Ꮡsched.of(schedt.Ꮡlock));
                             globrunqputbatch(ref (ᏑdrainQ).DerefOrNull());
                             unlock(Ꮡsched.of(schedt.Ꮡlock));
@@ -1835,16 +1836,16 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
                 // Go back to draining, this time
                 // without preemption.
                 gcDrainMarkWorkerDedicated(ppʗ1.of(runtime_package.Δp.Ꮡgcw), false);
+                break;
             }
-            else if (exprᴛ1 == gcMarkWorkerFractionalMode) {
+            case var ᴛ when ᴛ == gcMarkWorkerFractionalMode: {
                 gcDrainMarkWorkerFractional(ppʗ1.of(runtime_package.Δp.Ꮡgcw));
+                break;
             }
-            else if (exprᴛ1 == gcMarkWorkerIdleMode) {
+            case var ᴛ when ᴛ == gcMarkWorkerIdleMode: {
                 gcDrainMarkWorkerIdle(ppʗ1.of(runtime_package.Δp.Ꮡgcw));
-            }
-            else { /* default: */
-                @throw(gcBgMarkWorkerUnexpectedˢ);
-            }
+                break;
+            }}
             casgstatus(gpʗ1, _Gwaiting, _Grunning);
         });
 
@@ -1871,7 +1872,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
             // We don't need the P-local buffers here, allow
             // preemption because we may schedule like a regular
             // goroutine in gcMarkDone (block on locks, etc).
-            releasem(ref ((~node).m.ptr()).DerefOrNull());
+            releasem(ref (node.m.ptr()).DerefOrNull());
             node.of(gcBgMarkWorkerNode.Ꮡm).set(nil);
 
             gcMarkDone();
@@ -1953,7 +1954,7 @@ internal static void gcMark(int64 startTime) {
     // Drop allg snapshot. allgs may have grown, in which case
     // this is the only reference to the old backing store and
     // there's no need to keep it around.
-    work.stackRoots = default!;
+    work.stackRoots = default;
 
     // Clear out buffers and double-check that all gcWork caches
     // are empty. This should be ensured by gcMarkDone before we
@@ -1967,7 +1968,7 @@ internal static void gcMark(int64 startTime) {
         // ensured all reachable objects were marked, all of
         // these must be pointers to black objects. Hence we
         // can just discard the write barrier buffer.
-        if (debug.gccheckmark > 0){
+        if (debug.gccheckmark > 0) {
             // For debugging, flush the buffer and make
             // sure it really was all marked.
             wbBufFlush1(Δp);
@@ -1978,16 +1979,16 @@ internal static void gcMark(int64 startTime) {
         var gcw = Δp.of(runtime_package.Δp.Ꮡgcw);
         if (!gcw.empty()) {
             printlock();
-            print((@string)"runtime: P "u8, (~Δp).id, (@string)" flushedWork "u8, (~gcw).flushedWork);
-            if ((~gcw).wbuf1 == nil){
+            print((@string)"runtime: P "u8, (~Δp).id, (@string)" flushedWork "u8, gcw.flushedWork);
+            if (gcw.wbuf1 == nil) {
                 print((@string)" wbuf1=<nil>"u8);
             } else {
-                print((@string)" wbuf1.n="u8, (~(~gcw).wbuf1).nobj);
+                print((@string)" wbuf1.n="u8, (~gcw.wbuf1).nobj);
             }
-            if ((~gcw).wbuf2 == nil){
+            if (gcw.wbuf2 == nil) {
                 print((@string)" wbuf2=<nil>"u8);
             } else {
-                print((@string)" wbuf2.n="u8, (~(~gcw).wbuf2).nobj);
+                print((@string)" wbuf2.n="u8, (~gcw.wbuf2).nobj);
             }
             print((@string)"\n"u8);
             @throw(pHasCachedGcWorkAtEndOfˢ);
@@ -2010,7 +2011,7 @@ internal static void gcMark(int64 startTime) {
         if (c == nil) {
             continue;
         }
-        c.Value.scanAlloc = 0;
+        c.scanAlloc = 0;
     }
 
     // Reset controller state.
@@ -2107,7 +2108,7 @@ internal static void gcResetMarkState() {
     unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     foreach (var (_, ai) in arenas) {
         var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
-        builtin.clear((~ha).pageMarks[..]);
+        builtin.clear(ha.pageMarks[..]);
     }
 
     work.bytesMarked = 0;
@@ -2117,7 +2118,7 @@ internal static void gcResetMarkState() {
 // Hooks for other packages
 internal static Action poolcleanup;
 
-internal static slice<@unsafe.Pointer> boringCaches;        // for crypto/internal/boring
+internal static slice<@unsafe.Pointer> boringCaches; // for crypto/internal/boring
 
 // sync_runtime_registerPoolCleanup should be an internal detail,
 // but widely used packages access it using linkname.
@@ -2140,7 +2141,7 @@ internal static void boring_registerCache(@unsafe.Pointer Δp) {
 
 internal static void clearpools() {
     // clear sync.Pools
-    if (poolcleanup != default!) {
+    if (poolcleanup != nil) {
         poolcleanup();
     }
 
@@ -2154,13 +2155,13 @@ internal static void clearpools() {
     // Disconnect cached list before dropping it on the floor,
     // so that a dangling ref to one entry does not pin all of them.
     @lock(Ꮡsched.of(schedt.Ꮡsudoglock));
-    ж<sudog> sg = default!;
-    ж<sudog> sgnext = default!;
+    ж<sudog> sg = default;
+    ж<sudog> sgnext = default;
     for (sg = sched.sudogcache; sg != nil; sg = sgnext) {
         sgnext = sg.Value.next;
-        sg.Value.next = default!;
+        sg.Value.next = default;
     }
-    sched.sudogcache = default!;
+    sched.sudogcache = default;
     unlock(Ꮡsched.of(schedt.Ꮡsudoglock));
 
     // Clear central defer pool.
@@ -2168,13 +2169,13 @@ internal static void clearpools() {
     @lock(Ꮡsched.of(schedt.Ꮡdeferlock));
     // disconnect cached list before dropping it on the floor,
     // so that a dangling ref to one entry does not pin all of them.
-    ж<_defer> d = default!;
-    ж<_defer> dlink = default!;
+    ж<_defer> d = default;
+    ж<_defer> dlink = default;
     for (d = sched.deferpool; d != nil; d = dlink) {
         dlink = d.Value.link;
-        d.Value.link = default!;
+        d.Value.link = default;
     }
-    sched.deferpool = default!;
+    sched.deferpool = default;
     unlock(Ꮡsched.of(schedt.Ꮡdeferlock));
 }
 
@@ -2185,15 +2186,15 @@ internal static slice<byte> itoaDiv(slice<byte> buf, uint64 val, nint dec) {
     nint i = len(buf) - 1;
     nint idec = i - dec;
     while (val >= 10 || i >= idec) {
-        buf[i] = (byte)(val % 10 + (rune)'0');
+        buf[i] = (byte)(val % 10 + '0');
         i--;
         if (i == idec) {
-            buf[i] = (rune)'.';
+            buf[i] = (byte)'.';
             i--;
         }
         val /= 10;
     }
-    buf[i] = (byte)(val + (rune)'0');
+    buf[i] = (byte)(val + '0');
     return buf.slice(i);
 }
 
@@ -2206,7 +2207,7 @@ internal static slice<byte> fmtNSAsMS(slice<byte> buf, uint64 ns) {
     // Format two digits of precision, with at most three decimal places.
     var x = ns / 1000;
     if (x == 0) {
-        buf[0] = (rune)'0';
+        buf[0] = (byte)'0';
         return buf[..1];
     }
     nint dec = 3;
@@ -2260,10 +2261,10 @@ internal static @string gcTestPointerClass(@unsafe.Pointer Δp) {
         }
     }
     foreach (var (_, datap) in activeModules()) {
-        if ((~datap).data <= p2 && p2 < (~datap).edata || (~datap).noptrdata <= p2 && p2 < (~datap).enoptrdata) {
+        if (datap.data <= p2 && p2 < datap.edata || datap.noptrdata <= p2 && p2 < datap.enoptrdata) {
             return dataˢ;
         }
-        if ((~datap).bss <= p2 && p2 < (~datap).ebss || (~datap).noptrbss <= p2 && p2 <= (~datap).enoptrbss) {
+        if (datap.bss <= p2 && p2 < datap.ebss || datap.noptrbss <= p2 && p2 <= datap.enoptrbss) {
             return bssˢ;
         }
     }

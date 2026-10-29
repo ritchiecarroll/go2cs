@@ -143,7 +143,7 @@ const TypedNilBoxAccessor = "OrTypedNil()"
 // nil one needs a carrier (golib's NilFuncValue, interned by GoReflect.CanonicalNilFunc).
 //
 // Unlike the pointer arm, a nil CONVERSION is not exempt: `(*T)(nil)` already renders the
-// canonical box, while `(func())(nil)` renders `(Action)(default)` - a cast of null, which is
+// canonical box, while `(func())(nil)` renders `(Action)(default!)` - a cast of null, which is
 // exactly the shape that loses the word. Only a func LITERAL or a method group - plain or
 // QUALIFIED - is provably non-null. Includes `()` as it is a method call.
 const TypedNilFuncAccessor = "OrTypedNilFunc()"

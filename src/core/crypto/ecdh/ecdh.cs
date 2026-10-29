@@ -84,7 +84,7 @@ public static bool Equal(this ref ΔPublicKey k, cryptoꓸPublicKey x) {
     if (!ok) {
         return false;
     }
-    return AreEqual(k.curve, (~xx).curve) && subtle.ConstantTimeCompare(k.publicKey, (~xx).publicKey) == 1;
+    return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.publicKey, xx.publicKey) == 1;
 }
 
 public static ΔCurve Curve(this ref ΔPublicKey k) {
@@ -135,7 +135,7 @@ public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<ΔPublicKey
     ref var remote = ref Ꮡremote.DerefOrNull();
 
     if (!AreEqual(k.curve, remote.curve)) {
-        return (default!, errors.New(cryptoEcdhPrivateKeyAndˢ));
+        return (default, errors.New(cryptoEcdhPrivateKeyAndˢ));
     }
     return k.curve.ecdh(Ꮡk, Ꮡremote);
 }
@@ -160,7 +160,7 @@ public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
     if (!ok) {
         return false;
     }
-    return AreEqual(k.curve, (~xx).curve) && subtle.ConstantTimeCompare(k.privateKey, (~xx).privateKey) == 1;
+    return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.privateKey, xx.privateKey) == 1;
 }
 
 public static ΔCurve Curve(this ref PrivateKey k) {

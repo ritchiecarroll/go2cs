@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,6 +59,19 @@ using static go.@internal.profile_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Edge))]
+[assembly: go.GoFieldAccess(typeof(Function))]
+[assembly: go.GoFieldAccess(typeof(Location))]
+[assembly: go.GoFieldAccess(typeof(Mapping))]
+[assembly: go.GoFieldAccess(typeof(Node))]
+[assembly: go.GoFieldAccess(typeof(NodeInfo))]
+[assembly: go.GoFieldAccess(typeof(Profile))]
+[assembly: go.GoFieldAccess(typeof(Sample))]
+[assembly: go.GoFieldAccess(typeof(go.@internal.profile_package.ValueType))]
+[assembly: go.GoFieldAccess(typeof(profileMerger))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -74,8 +84,8 @@ using static go.@internal.profile_package;
 [assembly: go.GoPositionMap("internal/profile/filter.go", "filter.cs", "AAse4oKCgoKCgqaCqtKCgoKClIK4goKClIK4")]
 [assembly: go.GoPositionMap("internal/profile/graph.go", "graph.cs", "AD2KAaKClKqigpSqoqrSgIKCgoKUgpS2goIACRaSqJKCgpSAgramAAgKpAATLrKCgILIgIK2poKmgqaCgoLcgoKCpqaCpoKCgoKCABAoooKUqMKCgoKCkoKClIKUgoKUAAgSgoCCpIKCgoKCgoKmgoKCpoKCpoKmlLimlIKCgpSClIKUlAAGEqKUpKQACBKCgpS4goKUvtKCgoKCgpSCgpSUpoKCgpSmsoKAgraAgqSmgoKUyoKowoKClKaUgoKUgrqylJSCpoKCpIKUgpSUrLKCgqaCqJKCgpTKgqaCgqaCgoKmgpSmgqaCgpQ=")]
 [assembly: go.GoPositionMap("internal/profile/merge.go", "merge.cs", "AA0q8oKUgoKmAAcQlIKClMqmgoLKgqa4rNSAgraCgoK4goKCuIKCgpSmgqaCgoKmABQuou6ClIKCgpSCgoKCgoKCyoKAgoKUpIKCgqjCgoKmgoKUlIKClJQADBqigqaAgoK2gu6CuIKAgoKkgoKCqJK4lIKUgoKClJSCAAgSooKmgILIgoCCgoKkAAsYpoKCgqqmtIKCgsqUtAAIDAAHEIK4pqKClICCpIKAgoKk7oKCgqiSAAweooKAgsiigoKCgoKUgoKUgoCCgraCuAANHIKs0oKmgqaCgqaqog==", "", "", "202=Join/1/3/1,Join/2/3/2,Join/3/3/3;365=mapFunction/1/1/1")]
-[assembly: go.GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgqaCgoKUgoKUpoKCpoCCpKaSlIKCpoKAgraAgrao0oKCgpKC3tSCgpSCgtyCgoKUgpSUgoKClIKUlIKCgpSClIKAgoK2goCCgtqssoKCgoK4goKCgpSC3IKCgpSCgqaCytrEgoCCpIKClIKmgoKClIKCgoKUgoKUgoKCgoKUlIKCgpS4goKCgIKkgpSCgoCCyoK2lLiCgoKClIKUgpSClAAHEK7igIK2poKmlIKClIKClIKCpoKCgriCrNKCpoKmgoK4qqKCgqaqooKCpqaygpSosoKUgoCCpICCtgAHFrSSgriCgpSCgIK2qJKokoKUgoKUqJKClIKCgoKmgpSCgoK4")]
-[assembly: go.GoPositionMap("internal/profile/proto.go", "proto.cs", "ACpagoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCkqaCpoKmooKCgIK21oKCgoKClIKCAAgKgoKClIKCgoKUgoLGgpSCtIKCgpSClIK0gpSCtKbWgoKUpqKAgqSCgoSSgoKUgpSAgramooCCpIKmopSClIKCgpSAgqSUlIKAgqSCpqKAgqSCpqKUgpSCgoKUgIKklJSCgIKkgqaCgIKkgqaigoCCpIKmooCCpIKUlA==")]
+[assembly: go.GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgqaCgoKUgoKUpoKCpoCCpKaSlIKCpoKAgraAgrao0oKCgpKC3tSCgpSCgtyCgoKUgpSUgoKClIKUlIKCgpSClIKAgoK2goCCgtqssoKCgoK4goKCgpSC3IKCgpSCgqaCytrEgoCCpIKClIKmgoKClIKCgoKUgoKUgoKCgoKUlIKCgpS4goKCgIKkgpSCgoCCyoK2lLiCgoKClIKUgpSClAAHEK7igIK2poKmlIKClIKClIKCpoKCgriCrNKCpoKmgoK4qqKCgqaqooKCpqaygpSosoKUgoCCpICCtgAHFrSSgriCgpSCgIK2qJKokoKUgoKUqJKClIKCgoKmgpSCgoK4", "", "", "", "182:21")]
+[assembly: go.GoPositionMap("internal/profile/proto.go", "proto.cs", "ACpagoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCgqaCpoKmooKCgIK21oKCgoKClIKCAAgKgoKClIKCgoKUgoLGgpSCtIKCgpSClIK0gpSCtKbWgoKUpqKAgqSCgoSSgoKUgpSAgramooCCpIKmopSClIKCgpSAgqSUlIKAgqSCpqKAgqSCpqKUgpSCgoKUgIKklJSCgIKkgqaCgIKkgqaigoCCpIKmooCCpIKUlA==")]
 [assembly: go.GoPositionMap("internal/profile/prune.go", "prune.cs", "AAsisoKUgoKCgIKUgpSCguyUppSU3LiCgoKCgpSClIKClIKCAAUQopKUgoCCpIKAgraU")]
 // </GoSourcePositionMaps>
 

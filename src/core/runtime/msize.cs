@@ -15,7 +15,7 @@ partial class runtime_package {
 // Returns size of the memory block that mallocgc will allocate if you ask for the size,
 // minus any inline space for metadata.
 internal static uintptr /*reqSize*/ roundupsize(uintptr size, bool noscan) {
-    uintptr reqSize = default!;
+    uintptr reqSize = default;
 
     reqSize = size;
     if (reqSize <= (uintptr)(maxSmallSize - gc.MallocHeaderSize)) {

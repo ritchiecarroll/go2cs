@@ -10,11 +10,11 @@ partial class asmgen_package {
     WordBits: 64,
     WordBytes: 8,
 
-    regs: new @string[]{
+    regs: slice<@string>([
         "BX"u8, "SI"u8, "DI"u8,
         "R8"u8, "R9"u8, "R10"u8, "R11"u8, "R12"u8, "R13"u8, "R14"u8, "R15"u8,
         "AX"u8, "DX"u8, "CX"u8 // last to leave available for hinted allocation
-    }.slice(),
+    ]),
     op3: x86Op3,
     hint: x86Hint,
     memOK: true,
@@ -53,8 +53,8 @@ partial class asmgen_package {
     loopBottomNeg: "ADDQ $1, %[1]s; JNZ %[2]s"u8
 )); }
 
-internal static void amd64JmpADX(ж<Asm> Ꮡa, @string label) {
-    Ꮡa.Printf("\tCMPB ·hasADX(SB), $0; JNZ %s\n"u8, label);
+internal static void amd64JmpADX(ж<Asm> a, @string label) {
+    a.Printf("\tCMPB ·hasADX(SB), $0; JNZ %s\n"u8, label);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -71,7 +71,7 @@ internal static bool amd64Add(ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst, �
         // Using regular ADD/ADC would smash both carry flags,
         // so we reject anything we can't handled with ADCX/ADOX.
         if ((ΔCarry)(carry & UseCarry) != 0 && (ΔCarry)(carry & ((ΔCarry)(SetCarry | SmashCarry))) != 0) {
-            if ((ΔCarry)(carry & ΔAltCarry) != 0){
+            if ((ΔCarry)(carry & ΔAltCarry) != 0) {
                 Ꮡa.op3(adoxqˢ, src1, src2, dst);
             } else {
                 Ꮡa.op3(adcxqˢ, src1, src2, dst);
@@ -100,28 +100,28 @@ internal static bool x86Op3(@string name) {
 internal static @string x86Hint(ж<Asm> Ꮡa, Hint h) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    var exprᴛ1 = h;
-    if (exprᴛ1 == HintShiftCount) {
+    switch (h) {
+    case var ᴛ when ᴛ == HintShiftCount: {
         return "CX"u8;
     }
-    if (exprᴛ1 == HintMulSrc) {
+    case var ᴛ when ᴛ == HintMulSrc: {
         if (a.Enabled(OptionAltCarry)) { // using MULX
             return "DX"u8;
         }
         return "AX"u8;
     }
-    if (exprᴛ1 == HintMulHi) {
+    case var ᴛ when ᴛ == HintMulHi: {
         if (a.Enabled(OptionAltCarry)) { // using MULX
             return ""u8;
         }
         return "DX"u8;
-    }
+    }}
     return ""u8;
 }
 
 internal static @string x86Suffix(ref Asm a) {
     // Note: Not using a.Arch == Arch386 to avoid init cycle.
-    if ((~a.Arch).Name == "386"u8) {
+    if (a.Arch.Name == "386"u8) {
         return "L"u8;
     }
     return "Q"u8;

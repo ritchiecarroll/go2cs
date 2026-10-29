@@ -12,11 +12,11 @@ internal static readonly @string getenvBeforeEnvInitˢ = "getenv before env init
 
 internal static @string gogetenv(@string key) {
     var env = environ();
-    if (env == default!) {
+    if (env == nil) {
         @throw(getenvBeforeEnvInitˢ);
     }
     foreach (var (_, s) in env) {
-        if (len(s) > len(key) && s[len(key)] == (rune)'=' && envKeyEqual(s.slice(0, len(key)), key)) {
+        if (len(s) > len(key) && s[len(key)] == '=' && envKeyEqual(s.slice(0, len(key)), key)) {
             return s.slice(len(key) + 1);
         }
     }
@@ -40,7 +40,7 @@ internal static bool envKeyEqual(@string a, @string b) {
 }
 
 internal static byte lowerASCII(byte c) {
-    if ((rune)'A' <= c && c <= (rune)'Z') {
+    if ('A' <= c && c <= 'Z') {
         return (byte)(c + ((rune)'a' - (rune)'A'));
     }
     return c;
@@ -55,7 +55,7 @@ internal static byte lowerASCII(byte c) {
 // See go.dev/issue/67401.
 //
 //go:linkname _cgo_setenv
-public static @unsafe.Pointer _cgo_setenv;       // pointer to C function
+public static @unsafe.Pointer _cgo_setenv; // pointer to C function
 
 // _cgo_unsetenv should be an internal detail,
 // but widely used packages access it using linkname.
@@ -66,15 +66,14 @@ public static @unsafe.Pointer _cgo_setenv;       // pointer to C function
 // See go.dev/issue/67401.
 //
 //go:linkname _cgo_unsetenv
-public static @unsafe.Pointer _cgo_unsetenv;     // pointer to C function
+public static @unsafe.Pointer _cgo_unsetenv; // pointer to C function
 
 // Update the C environment if cgo is loaded.
 internal static void setenv_c(@string k, @string v) {
     if (_cgo_setenv == nil) {
         return;
     }
-    ref var arg = ref heap<array<@unsafe.Pointer>>(out var Ꮡarg);
-    arg = new @unsafe.Pointer[]{(uintptr)cstring(k), (uintptr)cstring(v)}.array();
+    ref var arg = ref heap<array<@unsafe.Pointer>>(new @unsafe.Pointer[]{(uintptr)cstring(k), (uintptr)cstring(v)}.array(), out var Ꮡarg);
     asmcgocall(_cgo_setenv, @unsafe.Pointer.FromPinnedBox(Ꮡarg));
 }
 
@@ -83,8 +82,7 @@ internal static void unsetenv_c(@string k) {
     if (_cgo_unsetenv == nil) {
         return;
     }
-    ref var arg = ref heap<array<@unsafe.Pointer>>(out var Ꮡarg);
-    arg = new @unsafe.Pointer[]{(uintptr)cstring(k)}.array();
+    ref var arg = ref heap<array<@unsafe.Pointer>>(new @unsafe.Pointer[]{(uintptr)cstring(k)}.array(), out var Ꮡarg);
     asmcgocall(_cgo_unsetenv, @unsafe.Pointer.FromPinnedBox(Ꮡarg));
 }
 

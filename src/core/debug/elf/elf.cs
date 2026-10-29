@@ -69,17 +69,17 @@ partial struct Version /*num:byte*/;
 public static Version EV_NONE => 0;
 public static Version EV_CURRENT => 1;
 
-internal static slice<intName> versionStrings = new intName[]{
+internal static slice<intName> versionStrings = slice<intName>([
     new(0, "EV_NONE"u8),
     new(1, "EV_CURRENT"u8)
-}.slice();
+]);
 
 public static @string String(this Version i) {
-    return stringName((uint32)(byte)i, versionStrings, false);
+    return stringName((uint32)i, versionStrings, false);
 }
 
 public static @string GoString(this Version i) {
-    return stringName((uint32)(byte)i, versionStrings, true);
+    return stringName((uint32)i, versionStrings, true);
 }
 
 // Class is found in Header.Ident[EI_CLASS] and Header.Class.
@@ -89,18 +89,18 @@ public static Class ELFCLASSNONE => 0; /* Unknown class. */
 public static Class ELFCLASS32 => 1; /* 32-bit architecture. */
 public static Class ELFCLASS64 => 2; /* 64-bit architecture. */
 
-internal static slice<intName> classStrings = new intName[]{
+internal static slice<intName> classStrings = slice<intName>([
     new(0, "ELFCLASSNONE"u8),
     new(1, "ELFCLASS32"u8),
     new(2, "ELFCLASS64"u8)
-}.slice();
+]);
 
 public static @string String(this Class i) {
-    return stringName((uint32)(byte)i, classStrings, false);
+    return stringName((uint32)i, classStrings, false);
 }
 
 public static @string GoString(this Class i) {
-    return stringName((uint32)(byte)i, classStrings, true);
+    return stringName((uint32)i, classStrings, true);
 }
 
 // Data is found in Header.Ident[EI_DATA] and Header.Data.
@@ -110,18 +110,18 @@ public static ΔData ELFDATANONE => 0; /* Unknown data format. */
 public static ΔData ELFDATA2LSB => 1; /* 2's complement little-endian. */
 public static ΔData ELFDATA2MSB => 2; /* 2's complement big-endian. */
 
-internal static slice<intName> dataStrings = new intName[]{
+internal static slice<intName> dataStrings = slice<intName>([
     new(0, "ELFDATANONE"u8),
     new(1, "ELFDATA2LSB"u8),
     new(2, "ELFDATA2MSB"u8)
-}.slice();
+]);
 
 public static @string String(this ΔData i) {
-    return stringName((uint32)(byte)i, dataStrings, false);
+    return stringName((uint32)i, dataStrings, false);
 }
 
 public static @string GoString(this ΔData i) {
-    return stringName((uint32)(byte)i, dataStrings, true);
+    return stringName((uint32)i, dataStrings, true);
 }
 
 // OSABI is found in Header.Ident[EI_OSABI] and Header.OSABI.
@@ -148,7 +148,7 @@ public static OSABI ELFOSABI_CLOUDABI => 17;   /* Nuxi CloudABI */
 public static OSABI ELFOSABI_ARM => 97;        /* ARM */
 public static OSABI ELFOSABI_STANDALONE => 255; /* Standalone (embedded) application */
 
-[GoLazy] partial class lazyᴛosabiStrings { internal static slice<intName> osabiStrings = new intName[]{
+[GoLazy] partial class lazyᴛosabiStrings { internal static slice<intName> osabiStrings = slice<intName>([
     new(0, "ELFOSABI_NONE"u8),
     new(1, "ELFOSABI_HPUX"u8),
     new(2, "ELFOSABI_NETBSD"u8),
@@ -169,14 +169,14 @@ public static OSABI ELFOSABI_STANDALONE => 255; /* Standalone (embedded) applica
     new(17, "ELFOSABI_CLOUDABI"u8),
     new(97, "ELFOSABI_ARM"u8),
     new(255, "ELFOSABI_STANDALONE"u8)
-}.slice(); }
+]); }
 
 public static @string String(this OSABI i) {
-    return stringName((uint32)(byte)i, osabiStrings, false);
+    return stringName((uint32)i, osabiStrings, false);
 }
 
 public static @string GoString(this OSABI i) {
-    return stringName((uint32)(byte)i, osabiStrings, true);
+    return stringName((uint32)i, osabiStrings, true);
 }
 
 // Type is found in Header.Type.
@@ -192,7 +192,7 @@ public static Type ET_HIOS => 0xfeff;      /* Last operating system-specific. */
 public static Type ET_LOPROC => 0xff00;    /* First processor-specific. */
 public static Type ET_HIPROC => 0xffff;    /* Last processor-specific. */
 
-[GoLazy] partial class lazyᴛtypeStrings { internal static slice<intName> typeStrings = new intName[]{
+[GoLazy] partial class lazyᴛtypeStrings { internal static slice<intName> typeStrings = slice<intName>([
     new(0, "ET_NONE"u8),
     new(1, "ET_REL"u8),
     new(2, "ET_EXEC"u8),
@@ -202,14 +202,14 @@ public static Type ET_HIPROC => 0xffff;    /* Last processor-specific. */
     new(0xfeff, "ET_HIOS"u8),
     new(0xff00, "ET_LOPROC"u8),
     new(0xffff, "ET_HIPROC"u8)
-}.slice(); }
+]); }
 
 public static @string String(this Type i) {
-    return stringName((uint32)(uint16)i, typeStrings, false);
+    return stringName((uint32)i, typeStrings, false);
 }
 
 public static @string GoString(this Type i) {
-    return stringName((uint32)(uint16)i, typeStrings, true);
+    return stringName((uint32)i, typeStrings, true);
 }
 
 // Machine is found in Header.Machine.
@@ -405,7 +405,7 @@ public static Machine EM_MIPS_RS4_BE => 10;    /* MIPS R4000 Big-Endian */
 public static Machine EM_ALPHA_STD => 41;      /* Digital Alpha (standard value). */
 public static Machine EM_ALPHA => 0x9026;          /* Alpha (written in the absence of an ABI) */
 
-[GoLazy] partial class lazyᴛmachineStrings { internal static slice<intName> machineStrings = new intName[]{
+[GoLazy] partial class lazyᴛmachineStrings { internal static slice<intName> machineStrings = slice<intName>([
     new(0, "EM_NONE"u8),
     new(1, "EM_M32"u8),
     new(2, "EM_SPARC"u8),
@@ -595,14 +595,14 @@ public static Machine EM_ALPHA => 0x9026;          /* Alpha (written in the abse
     new(10, "EM_MIPS_RS4_BE"u8),
     new(41, "EM_ALPHA_STD"u8),
     new(0x9026, "EM_ALPHA"u8)
-}.slice(); }
+]); }
 
 public static @string String(this Machine i) {
-    return stringName((uint32)(uint16)i, machineStrings, false);
+    return stringName((uint32)i, machineStrings, false);
 }
 
 public static @string GoString(this Machine i) {
-    return stringName((uint32)(uint16)i, machineStrings, true);
+    return stringName((uint32)i, machineStrings, true);
 }
 
 // Special section indices.
@@ -619,21 +619,21 @@ public static SectionIndex SHN_COMMON => 0xfff2;       /* Common data. */
 public static SectionIndex SHN_XINDEX => 0xffff;       /* Escape; index stored elsewhere. */
 public static SectionIndex SHN_HIRESERVE => 0xffff;    /* Last of reserved range. */
 
-[GoLazy] partial class lazyᴛshnStrings { internal static slice<intName> shnStrings = new intName[]{
+[GoLazy] partial class lazyᴛshnStrings { internal static slice<intName> shnStrings = slice<intName>([
     new(0, "SHN_UNDEF"u8),
     new(0xff00, "SHN_LOPROC"u8),
     new(0xff20, "SHN_LOOS"u8),
     new(0xfff1, "SHN_ABS"u8),
     new(0xfff2, "SHN_COMMON"u8),
     new(0xffff, "SHN_XINDEX"u8)
-}.slice(); }
+]); }
 
 public static @string String(this SectionIndex i) {
-    return stringName((uint32)(nint)i, shnStrings, false);
+    return stringName((uint32)i, shnStrings, false);
 }
 
 public static @string GoString(this SectionIndex i) {
-    return stringName((uint32)(nint)i, shnStrings, true);
+    return stringName((uint32)i, shnStrings, true);
 }
 
 // Section type.
@@ -671,7 +671,7 @@ public static SectionType SHT_HIPROC => 0x7fffffff;                  /* specific
 public static SectionType SHT_LOUSER => 0x80000000;                  /* reserved range for application */
 public static SectionType SHT_HIUSER => 0xffffffff;                  /* specific indexes */
 
-[GoLazy] partial class lazyᴛshtStrings { internal static slice<intName> shtStrings = new intName[]{
+[GoLazy] partial class lazyᴛshtStrings { internal static slice<intName> shtStrings = slice<intName>([
     new(0, "SHT_NULL"u8),
     new(1, "SHT_PROGBITS"u8),
     new(2, "SHT_SYMTAB"u8),
@@ -703,7 +703,7 @@ public static SectionType SHT_HIUSER => 0xffffffff;                  /* specific
     new(0x7fffffff, "SHT_HIPROC"u8),
     new(0x80000000U, "SHT_LOUSER"u8),
     new(0xffffffffU, "SHT_HIUSER"u8)
-}.slice(); }
+]); }
 
 public static @string String(this SectionType i) {
     return stringName((uint32)i, shtStrings, false);
@@ -730,7 +730,7 @@ public static SectionFlag SHF_COMPRESSED => 0x800;              /* Section is co
 public static SectionFlag SHF_MASKOS => 0x0ff00000;                  /* OS-specific semantics. */
 public static SectionFlag SHF_MASKPROC => 0xf0000000;                /* Processor-specific semantics. */
 
-[GoLazy] partial class lazyᴛshfStrings { internal static slice<intName> shfStrings = new intName[]{
+[GoLazy] partial class lazyᴛshfStrings { internal static slice<intName> shfStrings = slice<intName>([
     new(0x1, "SHF_WRITE"u8),
     new(0x2, "SHF_ALLOC"u8),
     new(0x4, "SHF_EXECINSTR"u8),
@@ -742,7 +742,7 @@ public static SectionFlag SHF_MASKPROC => 0xf0000000;                /* Processo
     new(0x200, "SHF_GROUP"u8),
     new(0x400, "SHF_TLS"u8),
     new(0x800, "SHF_COMPRESSED"u8)
-}.slice(); }
+]); }
 
 public static @string String(this SectionFlag i) {
     return flagName((uint32)i, shfStrings, false);
@@ -762,21 +762,21 @@ public static CompressionType COMPRESS_HIOS => 0x6fffffff;          /* Last OS-s
 public static CompressionType COMPRESS_LOPROC => 0x70000000;        /* First processor-specific type. */
 public static CompressionType COMPRESS_HIPROC => 0x7fffffff;        /* Last processor-specific type. */
 
-[GoLazy] partial class lazyᴛcompressionStrings { internal static slice<intName> compressionStrings = new intName[]{
+[GoLazy] partial class lazyᴛcompressionStrings { internal static slice<intName> compressionStrings = slice<intName>([
     new(1, "COMPRESS_ZLIB"u8),
     new(2, "COMPRESS_ZSTD"u8),
     new(0x60000000, "COMPRESS_LOOS"u8),
     new(0x6fffffff, "COMPRESS_HIOS"u8),
     new(0x70000000, "COMPRESS_LOPROC"u8),
     new(0x7fffffff, "COMPRESS_HIPROC"u8)
-}.slice(); }
+]); }
 
 public static @string String(this CompressionType i) {
-    return stringName((uint32)(nint)i, compressionStrings, false);
+    return stringName((uint32)i, compressionStrings, false);
 }
 
 public static @string GoString(this CompressionType i) {
-    return stringName((uint32)(nint)i, compressionStrings, true);
+    return stringName((uint32)i, compressionStrings, true);
 }
 
 // Prog.Type
@@ -831,7 +831,7 @@ public static ProgType PT_S390_PGSTE => 0x70000000;        /* 4k page table size
 
 public static ProgType PT_HIPROC => 0x7fffffff;        /* Last processor-specific type. */
 
-[GoLazy] partial class lazyᴛptStrings { internal static slice<intName> ptStrings = new intName[]{
+[GoLazy] partial class lazyᴛptStrings { internal static slice<intName> ptStrings = slice<intName>([
     new(0, "PT_NULL"u8),
     new(1, "PT_LOAD"u8),
     new(2, "PT_DYNAMIC"u8),
@@ -855,14 +855,14 @@ public static ProgType PT_HIPROC => 0x7fffffff;        /* Last processor-specifi
     // We don't list the processor-dependent ProgTypes,
     // as the values overlap.
     new(0x7fffffff, "PT_HIPROC"u8)
-}.slice(); }
+]); }
 
 public static @string String(this ProgType i) {
-    return stringName((uint32)(nint)i, ptStrings, false);
+    return stringName((uint32)i, ptStrings, false);
 }
 
 public static @string GoString(this ProgType i) {
-    return stringName((uint32)(nint)i, ptStrings, true);
+    return stringName((uint32)i, ptStrings, true);
 }
 
 // Prog.Flag
@@ -874,11 +874,11 @@ public static ProgFlag PF_R => 0x4;               /* Readable. */
 public static ProgFlag PF_MASKOS => 0x0ff00000;          /* Operating system-specific. */
 public static ProgFlag PF_MASKPROC => 0xf0000000;        /* Processor-specific. */
 
-internal static slice<intName> pfStrings = new intName[]{
+internal static slice<intName> pfStrings = slice<intName>([
     new(0x1, "PF_X"u8),
     new(0x2, "PF_W"u8),
     new(0x4, "PF_R"u8)
-}.slice();
+]);
 
 public static @string String(this ProgFlag i) {
     return flagName((uint32)i, pfStrings, false);
@@ -1036,7 +1036,7 @@ public static DynTag DT_FILTER => 0x7fffffff;
 
 public static DynTag DT_HIPROC => 0x7fffffff;        /* Last processor-specific type. */
 
-[GoLazy] partial class lazyᴛdtStrings { internal static slice<intName> dtStrings = new intName[]{
+[GoLazy] partial class lazyᴛdtStrings { internal static slice<intName> dtStrings = slice<intName>([
     new(0, "DT_NULL"u8),
     new(1, "DT_NEEDED"u8),
     new(2, "DT_PLTRELSZ"u8),
@@ -1114,14 +1114,14 @@ public static DynTag DT_HIPROC => 0x7fffffff;        /* Last processor-specific 
     new(0x7ffffffd, "DT_AUXILIARY"u8),
     new(0x7ffffffe, "DT_USED"u8),
     new(0x7fffffff, "DT_FILTER"u8)
-}.slice(); }
+]); }
 
 public static @string String(this DynTag i) {
-    return stringName((uint32)(nint)i, dtStrings, false);
+    return stringName((uint32)i, dtStrings, false);
 }
 
 public static @string GoString(this DynTag i) {
-    return stringName((uint32)(nint)i, dtStrings, true);
+    return stringName((uint32)i, dtStrings, true);
 }
 
 // DT_FLAGS values.
@@ -1140,20 +1140,20 @@ public static DynFlag DF_STATIC_TLS => 0x0010;    /* Indicates that the shared o
 	   executable contains code using a static
 	   thread-local storage scheme. */
 
-internal static slice<intName> dflagStrings = new intName[]{
+internal static slice<intName> dflagStrings = slice<intName>([
     new(0x0001, "DF_ORIGIN"u8),
     new(0x0002, "DF_SYMBOLIC"u8),
     new(0x0004, "DF_TEXTREL"u8),
     new(0x0008, "DF_BIND_NOW"u8),
     new(0x0010, "DF_STATIC_TLS"u8)
-}.slice();
+]);
 
 public static @string String(this DynFlag i) {
-    return flagName((uint32)(nint)i, dflagStrings, false);
+    return flagName((uint32)i, dflagStrings, false);
 }
 
 public static @string GoString(this DynFlag i) {
-    return flagName((uint32)(nint)i, dflagStrings, true);
+    return flagName((uint32)i, dflagStrings, true);
 }
 
 // DT_FLAGS_1 values.
@@ -1235,7 +1235,7 @@ public static DynFlag1 DF_1_WEAKFILTER => 0x20000000;
 // Unused.
 public static DynFlag1 DF_1_NOCOMMON => 0x40000000;
 
-[GoLazy] partial class lazyᴛdflag1Strings { internal static slice<intName> dflag1Strings = new intName[]{
+[GoLazy] partial class lazyᴛdflag1Strings { internal static slice<intName> dflag1Strings = slice<intName>([
     new(0x00000001, "DF_1_NOW"u8),
     new(0x00000002, "DF_1_GLOBAL"u8),
     new(0x00000004, "DF_1_GROUP"u8),
@@ -1267,7 +1267,7 @@ public static DynFlag1 DF_1_NOCOMMON => 0x40000000;
     new(0x10000000, "DF_1_KMOD"u8),
     new(0x20000000, "DF_1_WEAKFILTER"u8),
     new(0x40000000, "DF_1_NOCOMMON"u8)
-}.slice(); }
+]); }
 
 public static @string String(this DynFlag1 i) {
     return flagName((uint32)i, dflag1Strings, false);
@@ -1284,18 +1284,18 @@ public static NType NT_PRSTATUS => 1; /* Process status. */
 public static NType NT_FPREGSET => 2; /* Floating point registers. */
 public static NType NT_PRPSINFO => 3; /* Process state info. */
 
-internal static slice<intName> ntypeStrings = new intName[]{
+internal static slice<intName> ntypeStrings = slice<intName>([
     new(1, "NT_PRSTATUS"u8),
     new(2, "NT_FPREGSET"u8),
     new(3, "NT_PRPSINFO"u8)
-}.slice();
+]);
 
 public static @string String(this NType i) {
-    return stringName((uint32)(nint)i, ntypeStrings, false);
+    return stringName((uint32)i, ntypeStrings, false);
 }
 
 public static @string GoString(this NType i) {
-    return stringName((uint32)(nint)i, ntypeStrings, true);
+    return stringName((uint32)i, ntypeStrings, true);
 }
 
 /* Symbol Binding - ELFNN_ST_BIND - st_info */
@@ -1309,7 +1309,7 @@ public static SymBind STB_HIOS => 12;  /*   specific semantics. */
 public static SymBind STB_LOPROC => 13; /* reserved range for processor */
 public static SymBind STB_HIPROC => 15; /*   specific semantics. */
 
-[GoLazy] partial class lazyᴛstbStrings { internal static slice<intName> stbStrings = new intName[]{
+[GoLazy] partial class lazyᴛstbStrings { internal static slice<intName> stbStrings = slice<intName>([
     new(0, "STB_LOCAL"u8),
     new(1, "STB_GLOBAL"u8),
     new(2, "STB_WEAK"u8),
@@ -1317,14 +1317,14 @@ public static SymBind STB_HIPROC => 15; /*   specific semantics. */
     new(12, "STB_HIOS"u8),
     new(13, "STB_LOPROC"u8),
     new(15, "STB_HIPROC"u8)
-}.slice(); }
+]); }
 
 public static @string String(this SymBind i) {
-    return stringName((uint32)(nint)i, stbStrings, false);
+    return stringName((uint32)i, stbStrings, false);
 }
 
 public static @string GoString(this SymBind i) {
-    return stringName((uint32)(nint)i, stbStrings, true);
+    return stringName((uint32)i, stbStrings, true);
 }
 
 /* Symbol type - ELFNN_ST_TYPE - st_info */
@@ -1347,7 +1347,7 @@ public static SymType STT_RELC => 8;     /* Complex relocation expression. */
 public static SymType STT_SRELC => 9;    /* Signed complex relocation expression. */
 public static SymType STT_GNU_IFUNC => 10; /* Indirect code object. */
 
-[GoLazy] partial class lazyᴛsttStrings { internal static slice<intName> sttStrings = new intName[]{
+[GoLazy] partial class lazyᴛsttStrings { internal static slice<intName> sttStrings = slice<intName>([
     new(0, "STT_NOTYPE"u8),
     new(1, "STT_OBJECT"u8),
     new(2, "STT_FUNC"u8),
@@ -1361,14 +1361,14 @@ public static SymType STT_GNU_IFUNC => 10; /* Indirect code object. */
     new(12, "STT_HIOS"u8),
     new(13, "STT_LOPROC"u8),
     new(15, "STT_HIPROC"u8)
-}.slice(); }
+]); }
 
 public static @string String(this SymType i) {
-    return stringName((uint32)(nint)i, sttStrings, false);
+    return stringName((uint32)i, sttStrings, false);
 }
 
 public static @string GoString(this SymType i) {
-    return stringName((uint32)(nint)i, sttStrings, true);
+    return stringName((uint32)i, sttStrings, true);
 }
 
 /* Symbol visibility - ELFNN_ST_VISIBILITY - st_other */
@@ -1379,19 +1379,19 @@ public static SymVis STV_INTERNAL => 0x1;  /* Special meaning in relocatable obj
 public static SymVis STV_HIDDEN => 0x2;    /* Not visible. */
 public static SymVis STV_PROTECTED => 0x3; /* Visible but not preemptible. */
 
-internal static slice<intName> stvStrings = new intName[]{
+internal static slice<intName> stvStrings = slice<intName>([
     new(0x0, "STV_DEFAULT"u8),
     new(0x1, "STV_INTERNAL"u8),
     new(0x2, "STV_HIDDEN"u8),
     new(0x3, "STV_PROTECTED"u8)
-}.slice();
+]);
 
 public static @string String(this SymVis i) {
-    return stringName((uint32)(nint)i, stvStrings, false);
+    return stringName((uint32)i, stvStrings, false);
 }
 
 public static @string GoString(this SymVis i) {
-    return stringName((uint32)(nint)i, stvStrings, true);
+    return stringName((uint32)i, stvStrings, true);
 }
 
 /*
@@ -1445,7 +1445,7 @@ public static R_X86_64 R_X86_64_PLT32_BND => 40;
 public static R_X86_64 R_X86_64_GOTPCRELX => 41;
 public static R_X86_64 R_X86_64_REX_GOTPCRELX => 42;
 
-[GoLazy] partial class lazyᴛrx86_64Strings { internal static slice<intName> rx86_64Strings = new intName[]{
+[GoLazy] partial class lazyᴛrx86_64Strings { internal static slice<intName> rx86_64Strings = slice<intName>([
     new(0, "R_X86_64_NONE"u8),
     new(1, "R_X86_64_64"u8),
     new(2, "R_X86_64_PC32"u8),
@@ -1489,14 +1489,14 @@ public static R_X86_64 R_X86_64_REX_GOTPCRELX => 42;
     new(40, "R_X86_64_PLT32_BND"u8),
     new(41, "R_X86_64_GOTPCRELX"u8),
     new(42, "R_X86_64_REX_GOTPCRELX"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_X86_64 i) {
-    return stringName((uint32)(nint)i, rx86_64Strings, false);
+    return stringName((uint32)i, rx86_64Strings, false);
 }
 
 public static @string GoString(this R_X86_64 i) {
-    return stringName((uint32)(nint)i, rx86_64Strings, true);
+    return stringName((uint32)i, rx86_64Strings, true);
 }
 
 // Relocation types for AArch64 (aka arm64)
@@ -1633,7 +1633,7 @@ public static R_AARCH64 R_AARCH64_TLS_TPREL64 => 1030;
 public static R_AARCH64 R_AARCH64_TLSDESC => 1031;
 public static R_AARCH64 R_AARCH64_IRELATIVE => 1032;
 
-[GoLazy] partial class lazyᴛraarch64Strings { internal static slice<intName> raarch64Strings = new intName[]{
+[GoLazy] partial class lazyᴛraarch64Strings { internal static slice<intName> raarch64Strings = slice<intName>([
     new(0, "R_AARCH64_NONE"u8),
     new(1, "R_AARCH64_P32_ABS32"u8),
     new(2, "R_AARCH64_P32_ABS16"u8),
@@ -1764,14 +1764,14 @@ public static R_AARCH64 R_AARCH64_IRELATIVE => 1032;
     new(1030, "R_AARCH64_TLS_TPREL64"u8),
     new(1031, "R_AARCH64_TLSDESC"u8),
     new(1032, "R_AARCH64_IRELATIVE"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_AARCH64 i) {
-    return stringName((uint32)(nint)i, raarch64Strings, false);
+    return stringName((uint32)i, raarch64Strings, false);
 }
 
 public static @string GoString(this R_AARCH64 i) {
-    return stringName((uint32)(nint)i, raarch64Strings, true);
+    return stringName((uint32)i, raarch64Strings, true);
 }
 
 // Relocation types for Alpha.
@@ -1806,7 +1806,7 @@ public static R_ALPHA R_ALPHA_GLOB_DAT => 25;      /* Create GOT entry */
 public static R_ALPHA R_ALPHA_JMP_SLOT => 26;      /* Create PLT entry */
 public static R_ALPHA R_ALPHA_RELATIVE => 27;      /* Adjust by program base */
 
-[GoLazy] partial class lazyᴛralphaStrings { internal static slice<intName> ralphaStrings = new intName[]{
+[GoLazy] partial class lazyᴛralphaStrings { internal static slice<intName> ralphaStrings = slice<intName>([
     new(0, "R_ALPHA_NONE"u8),
     new(1, "R_ALPHA_REFLONG"u8),
     new(2, "R_ALPHA_REFQUAD"u8),
@@ -1835,14 +1835,14 @@ public static R_ALPHA R_ALPHA_RELATIVE => 27;      /* Adjust by program base */
     new(25, "R_ALPHA_GLOB_DAT"u8),
     new(26, "R_ALPHA_JMP_SLOT"u8),
     new(27, "R_ALPHA_RELATIVE"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_ALPHA i) {
-    return stringName((uint32)(nint)i, ralphaStrings, false);
+    return stringName((uint32)i, ralphaStrings, false);
 }
 
 public static @string GoString(this R_ALPHA i) {
-    return stringName((uint32)(nint)i, ralphaStrings, true);
+    return stringName((uint32)i, ralphaStrings, true);
 }
 
 // Relocation types for ARM.
@@ -1993,7 +1993,7 @@ public static R_ARM R_ARM_RABS32 => 253;
 public static R_ARM R_ARM_RPC24 => 254;
 public static R_ARM R_ARM_RBASE => 255;
 
-[GoLazy] partial class lazyᴛrarmStrings { internal static slice<intName> rarmStrings = new intName[]{
+[GoLazy] partial class lazyᴛrarmStrings { internal static slice<intName> rarmStrings = slice<intName>([
     new(0, "R_ARM_NONE"u8),
     new(1, "R_ARM_PC24"u8),
     new(2, "R_ARM_ABS32"u8),
@@ -2138,14 +2138,14 @@ public static R_ARM R_ARM_RBASE => 255;
     new(253, "R_ARM_RABS32"u8),
     new(254, "R_ARM_RPC24"u8),
     new(255, "R_ARM_RBASE"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_ARM i) {
-    return stringName((uint32)(nint)i, rarmStrings, false);
+    return stringName((uint32)i, rarmStrings, false);
 }
 
 public static @string GoString(this R_ARM i) {
-    return stringName((uint32)(nint)i, rarmStrings, true);
+    return stringName((uint32)i, rarmStrings, true);
 }
 
 // Relocation types for 386.
@@ -2194,7 +2194,7 @@ public static R_386 R_386_TLS_DESC => 41;
 public static R_386 R_386_IRELATIVE => 42;
 public static R_386 R_386_GOT32X => 43;
 
-[GoLazy] partial class lazyᴛr386Strings { internal static slice<intName> r386Strings = new intName[]{
+[GoLazy] partial class lazyᴛr386Strings { internal static slice<intName> r386Strings = slice<intName>([
     new(0, "R_386_NONE"u8),
     new(1, "R_386_32"u8),
     new(2, "R_386_PC32"u8),
@@ -2237,14 +2237,14 @@ public static R_386 R_386_GOT32X => 43;
     new(41, "R_386_TLS_DESC"u8),
     new(42, "R_386_IRELATIVE"u8),
     new(43, "R_386_GOT32X"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_386 i) {
-    return stringName((uint32)(nint)i, r386Strings, false);
+    return stringName((uint32)i, r386Strings, false);
 }
 
 public static @string GoString(this R_386 i) {
-    return stringName((uint32)(nint)i, r386Strings, true);
+    return stringName((uint32)i, r386Strings, true);
 }
 
 // Relocation types for MIPS.
@@ -2302,7 +2302,7 @@ public static R_MIPS R_MIPS_TLS_TPREL_LO16 => 50; /* TP-relative offset, low 16 
 
 public static R_MIPS R_MIPS_PC32 => 248; /* 32 bit PC relative reference */
 
-[GoLazy] partial class lazyᴛrmipsStrings { internal static slice<intName> rmipsStrings = new intName[]{
+[GoLazy] partial class lazyᴛrmipsStrings { internal static slice<intName> rmipsStrings = slice<intName>([
     new(0, "R_MIPS_NONE"u8),
     new(1, "R_MIPS_16"u8),
     new(2, "R_MIPS_32"u8),
@@ -2352,14 +2352,14 @@ public static R_MIPS R_MIPS_PC32 => 248; /* 32 bit PC relative reference */
     new(49, "R_MIPS_TLS_TPREL_HI16"u8),
     new(50, "R_MIPS_TLS_TPREL_LO16"u8),
     new(248, "R_MIPS_PC32"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_MIPS i) {
-    return stringName((uint32)(nint)i, rmipsStrings, false);
+    return stringName((uint32)i, rmipsStrings, false);
 }
 
 public static @string GoString(this R_MIPS i) {
-    return stringName((uint32)(nint)i, rmipsStrings, true);
+    return stringName((uint32)i, rmipsStrings, true);
 }
 
 // Relocation types for LoongArch.
@@ -2483,7 +2483,7 @@ public static R_LARCH R_LARCH_TLS_LD_PCREL20_S2 => 124;
 public static R_LARCH R_LARCH_TLS_GD_PCREL20_S2 => 125;
 public static R_LARCH R_LARCH_TLS_DESC_PCREL20_S2 => 126;
 
-[GoLazy] partial class lazyᴛrlarchStrings { internal static slice<intName> rlarchStrings = new intName[]{
+[GoLazy] partial class lazyᴛrlarchStrings { internal static slice<intName> rlarchStrings = slice<intName>([
     new(0, "R_LARCH_NONE"u8),
     new(1, "R_LARCH_32"u8),
     new(2, "R_LARCH_64"u8),
@@ -2601,14 +2601,14 @@ public static R_LARCH R_LARCH_TLS_DESC_PCREL20_S2 => 126;
     new(124, "R_LARCH_TLS_LD_PCREL20_S2"u8),
     new(125, "R_LARCH_TLS_GD_PCREL20_S2"u8),
     new(126, "R_LARCH_TLS_DESC_PCREL20_S2"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_LARCH i) {
-    return stringName((uint32)(nint)i, rlarchStrings, false);
+    return stringName((uint32)i, rlarchStrings, false);
 }
 
 public static @string GoString(this R_LARCH i) {
-    return stringName((uint32)(nint)i, rlarchStrings, true);
+    return stringName((uint32)i, rlarchStrings, true);
 }
 
 // Relocation types for PowerPC.
@@ -2619,15 +2619,15 @@ public static @string GoString(this R_LARCH i) {
 // The original name follows the value in a comment.
 partial struct R_PPC /*num:nint*/;
 
-public static R_PPC R_PPC_NONE => 0;           // R_POWERPC_NONE
-public static R_PPC R_PPC_ADDR32 => 1;         // R_POWERPC_ADDR32
-public static R_PPC R_PPC_ADDR24 => 2;         // R_POWERPC_ADDR24
-public static R_PPC R_PPC_ADDR16 => 3;         // R_POWERPC_ADDR16
-public static R_PPC R_PPC_ADDR16_LO => 4;      // R_POWERPC_ADDR16_LO
-public static R_PPC R_PPC_ADDR16_HI => 5;      // R_POWERPC_ADDR16_HI
-public static R_PPC R_PPC_ADDR16_HA => 6;      // R_POWERPC_ADDR16_HA
-public static R_PPC R_PPC_ADDR14 => 7;         // R_POWERPC_ADDR14
-public static R_PPC R_PPC_ADDR14_BRTAKEN => 8; // R_POWERPC_ADDR14_BRTAKEN
+public static R_PPC R_PPC_NONE => 0;            // R_POWERPC_NONE
+public static R_PPC R_PPC_ADDR32 => 1;          // R_POWERPC_ADDR32
+public static R_PPC R_PPC_ADDR24 => 2;          // R_POWERPC_ADDR24
+public static R_PPC R_PPC_ADDR16 => 3;          // R_POWERPC_ADDR16
+public static R_PPC R_PPC_ADDR16_LO => 4;       // R_POWERPC_ADDR16_LO
+public static R_PPC R_PPC_ADDR16_HI => 5;       // R_POWERPC_ADDR16_HI
+public static R_PPC R_PPC_ADDR16_HA => 6;       // R_POWERPC_ADDR16_HA
+public static R_PPC R_PPC_ADDR14 => 7;          // R_POWERPC_ADDR14
+public static R_PPC R_PPC_ADDR14_BRTAKEN => 8;  // R_POWERPC_ADDR14_BRTAKEN
 public static R_PPC R_PPC_ADDR14_BRNTAKEN => 9; // R_POWERPC_ADDR14_BRNTAKEN
 public static R_PPC R_PPC_REL24 => 10;          // R_POWERPC_REL24
 public static R_PPC R_PPC_REL14 => 11;          // R_POWERPC_REL14
@@ -2638,19 +2638,19 @@ public static R_PPC R_PPC_GOT16_LO => 15;       // R_POWERPC_GOT16_LO
 public static R_PPC R_PPC_GOT16_HI => 16;       // R_POWERPC_GOT16_HI
 public static R_PPC R_PPC_GOT16_HA => 17;       // R_POWERPC_GOT16_HA
 public static R_PPC R_PPC_PLTREL24 => 18;
-public static R_PPC R_PPC_COPY => 19;           // R_POWERPC_COPY
-public static R_PPC R_PPC_GLOB_DAT => 20;       // R_POWERPC_GLOB_DAT
-public static R_PPC R_PPC_JMP_SLOT => 21;       // R_POWERPC_JMP_SLOT
-public static R_PPC R_PPC_RELATIVE => 22;       // R_POWERPC_RELATIVE
+public static R_PPC R_PPC_COPY => 19;     // R_POWERPC_COPY
+public static R_PPC R_PPC_GLOB_DAT => 20; // R_POWERPC_GLOB_DAT
+public static R_PPC R_PPC_JMP_SLOT => 21; // R_POWERPC_JMP_SLOT
+public static R_PPC R_PPC_RELATIVE => 22; // R_POWERPC_RELATIVE
 public static R_PPC R_PPC_LOCAL24PC => 23;
-public static R_PPC R_PPC_UADDR32 => 24;        // R_POWERPC_UADDR32
-public static R_PPC R_PPC_UADDR16 => 25;        // R_POWERPC_UADDR16
-public static R_PPC R_PPC_REL32 => 26;          // R_POWERPC_REL32
-public static R_PPC R_PPC_PLT32 => 27;          // R_POWERPC_PLT32
-public static R_PPC R_PPC_PLTREL32 => 28;       // R_POWERPC_PLTREL32
-public static R_PPC R_PPC_PLT16_LO => 29;       // R_POWERPC_PLT16_LO
-public static R_PPC R_PPC_PLT16_HI => 30;       // R_POWERPC_PLT16_HI
-public static R_PPC R_PPC_PLT16_HA => 31;       // R_POWERPC_PLT16_HA
+public static R_PPC R_PPC_UADDR32 => 24;  // R_POWERPC_UADDR32
+public static R_PPC R_PPC_UADDR16 => 25;  // R_POWERPC_UADDR16
+public static R_PPC R_PPC_REL32 => 26;    // R_POWERPC_REL32
+public static R_PPC R_PPC_PLT32 => 27;    // R_POWERPC_PLT32
+public static R_PPC R_PPC_PLTREL32 => 28; // R_POWERPC_PLTREL32
+public static R_PPC R_PPC_PLT16_LO => 29; // R_POWERPC_PLT16_LO
+public static R_PPC R_PPC_PLT16_HI => 30; // R_POWERPC_PLT16_HI
+public static R_PPC R_PPC_PLT16_HA => 31; // R_POWERPC_PLT16_HA
 public static R_PPC R_PPC_SDAREL16 => 32;
 public static R_PPC R_PPC_SECTOFF => 33;        // R_POWERPC_SECTOFF
 public static R_PPC R_PPC_SECTOFF_LO => 34;     // R_POWERPC_SECTOFF_LO
@@ -2697,7 +2697,7 @@ public static R_PPC R_PPC_EMB_RELST_HA => 114;
 public static R_PPC R_PPC_EMB_BIT_FLD => 115;
 public static R_PPC R_PPC_EMB_RELSDA => 116;
 
-[GoLazy] partial class lazyᴛrppcStrings { internal static slice<intName> rppcStrings = new intName[]{
+[GoLazy] partial class lazyᴛrppcStrings { internal static slice<intName> rppcStrings = slice<intName>([
     new(0, "R_PPC_NONE"u8),
     new(1, "R_PPC_ADDR32"u8),
     new(2, "R_PPC_ADDR24"u8),
@@ -2775,14 +2775,14 @@ public static R_PPC R_PPC_EMB_RELSDA => 116;
     new(114, "R_PPC_EMB_RELST_HA"u8),
     new(115, "R_PPC_EMB_BIT_FLD"u8),
     new(116, "R_PPC_EMB_RELSDA"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_PPC i) {
-    return stringName((uint32)(nint)i, rppcStrings, false);
+    return stringName((uint32)i, rppcStrings, false);
 }
 
 public static @string GoString(this R_PPC i) {
-    return stringName((uint32)(nint)i, rppcStrings, true);
+    return stringName((uint32)i, rppcStrings, true);
 }
 
 // Relocation types for 64-bit PowerPC or Power Architecture processors.
@@ -2793,41 +2793,41 @@ public static @string GoString(this R_PPC i) {
 // The original name follows the value in a comment.
 partial struct R_PPC64 /*num:nint*/;
 
-public static R_PPC64 R_PPC64_NONE => 0;              // R_POWERPC_NONE
-public static R_PPC64 R_PPC64_ADDR32 => 1;            // R_POWERPC_ADDR32
-public static R_PPC64 R_PPC64_ADDR24 => 2;            // R_POWERPC_ADDR24
-public static R_PPC64 R_PPC64_ADDR16 => 3;            // R_POWERPC_ADDR16
-public static R_PPC64 R_PPC64_ADDR16_LO => 4;         // R_POWERPC_ADDR16_LO
-public static R_PPC64 R_PPC64_ADDR16_HI => 5;         // R_POWERPC_ADDR16_HI
-public static R_PPC64 R_PPC64_ADDR16_HA => 6;         // R_POWERPC_ADDR16_HA
-public static R_PPC64 R_PPC64_ADDR14 => 7;            // R_POWERPC_ADDR14
-public static R_PPC64 R_PPC64_ADDR14_BRTAKEN => 8;    // R_POWERPC_ADDR14_BRTAKEN
-public static R_PPC64 R_PPC64_ADDR14_BRNTAKEN => 9;   // R_POWERPC_ADDR14_BRNTAKEN
-public static R_PPC64 R_PPC64_REL24 => 10;             // R_POWERPC_REL24
-public static R_PPC64 R_PPC64_REL14 => 11;             // R_POWERPC_REL14
-public static R_PPC64 R_PPC64_REL14_BRTAKEN => 12;     // R_POWERPC_REL14_BRTAKEN
-public static R_PPC64 R_PPC64_REL14_BRNTAKEN => 13;    // R_POWERPC_REL14_BRNTAKEN
-public static R_PPC64 R_PPC64_GOT16 => 14;             // R_POWERPC_GOT16
-public static R_PPC64 R_PPC64_GOT16_LO => 15;          // R_POWERPC_GOT16_LO
-public static R_PPC64 R_PPC64_GOT16_HI => 16;          // R_POWERPC_GOT16_HI
-public static R_PPC64 R_PPC64_GOT16_HA => 17;          // R_POWERPC_GOT16_HA
-public static R_PPC64 R_PPC64_COPY => 19;              // R_POWERPC_COPY
-public static R_PPC64 R_PPC64_GLOB_DAT => 20;          // R_POWERPC_GLOB_DAT
-public static R_PPC64 R_PPC64_JMP_SLOT => 21;          // R_POWERPC_JMP_SLOT
-public static R_PPC64 R_PPC64_RELATIVE => 22;          // R_POWERPC_RELATIVE
-public static R_PPC64 R_PPC64_UADDR32 => 24;           // R_POWERPC_UADDR32
-public static R_PPC64 R_PPC64_UADDR16 => 25;           // R_POWERPC_UADDR16
-public static R_PPC64 R_PPC64_REL32 => 26;             // R_POWERPC_REL32
-public static R_PPC64 R_PPC64_PLT32 => 27;             // R_POWERPC_PLT32
-public static R_PPC64 R_PPC64_PLTREL32 => 28;          // R_POWERPC_PLTREL32
-public static R_PPC64 R_PPC64_PLT16_LO => 29;          // R_POWERPC_PLT16_LO
-public static R_PPC64 R_PPC64_PLT16_HI => 30;          // R_POWERPC_PLT16_HI
-public static R_PPC64 R_PPC64_PLT16_HA => 31;          // R_POWERPC_PLT16_HA
-public static R_PPC64 R_PPC64_SECTOFF => 33;           // R_POWERPC_SECTOFF
-public static R_PPC64 R_PPC64_SECTOFF_LO => 34;        // R_POWERPC_SECTOFF_LO
-public static R_PPC64 R_PPC64_SECTOFF_HI => 35;        // R_POWERPC_SECTOFF_HI
-public static R_PPC64 R_PPC64_SECTOFF_HA => 36;        // R_POWERPC_SECTOFF_HA
-public static R_PPC64 R_PPC64_REL30 => 37;             // R_POWERPC_ADDR30
+public static R_PPC64 R_PPC64_NONE => 0;            // R_POWERPC_NONE
+public static R_PPC64 R_PPC64_ADDR32 => 1;          // R_POWERPC_ADDR32
+public static R_PPC64 R_PPC64_ADDR24 => 2;          // R_POWERPC_ADDR24
+public static R_PPC64 R_PPC64_ADDR16 => 3;          // R_POWERPC_ADDR16
+public static R_PPC64 R_PPC64_ADDR16_LO => 4;       // R_POWERPC_ADDR16_LO
+public static R_PPC64 R_PPC64_ADDR16_HI => 5;       // R_POWERPC_ADDR16_HI
+public static R_PPC64 R_PPC64_ADDR16_HA => 6;       // R_POWERPC_ADDR16_HA
+public static R_PPC64 R_PPC64_ADDR14 => 7;          // R_POWERPC_ADDR14
+public static R_PPC64 R_PPC64_ADDR14_BRTAKEN => 8;  // R_POWERPC_ADDR14_BRTAKEN
+public static R_PPC64 R_PPC64_ADDR14_BRNTAKEN => 9; // R_POWERPC_ADDR14_BRNTAKEN
+public static R_PPC64 R_PPC64_REL24 => 10;          // R_POWERPC_REL24
+public static R_PPC64 R_PPC64_REL14 => 11;          // R_POWERPC_REL14
+public static R_PPC64 R_PPC64_REL14_BRTAKEN => 12;  // R_POWERPC_REL14_BRTAKEN
+public static R_PPC64 R_PPC64_REL14_BRNTAKEN => 13; // R_POWERPC_REL14_BRNTAKEN
+public static R_PPC64 R_PPC64_GOT16 => 14;          // R_POWERPC_GOT16
+public static R_PPC64 R_PPC64_GOT16_LO => 15;       // R_POWERPC_GOT16_LO
+public static R_PPC64 R_PPC64_GOT16_HI => 16;       // R_POWERPC_GOT16_HI
+public static R_PPC64 R_PPC64_GOT16_HA => 17;       // R_POWERPC_GOT16_HA
+public static R_PPC64 R_PPC64_COPY => 19;           // R_POWERPC_COPY
+public static R_PPC64 R_PPC64_GLOB_DAT => 20;       // R_POWERPC_GLOB_DAT
+public static R_PPC64 R_PPC64_JMP_SLOT => 21;       // R_POWERPC_JMP_SLOT
+public static R_PPC64 R_PPC64_RELATIVE => 22;       // R_POWERPC_RELATIVE
+public static R_PPC64 R_PPC64_UADDR32 => 24;        // R_POWERPC_UADDR32
+public static R_PPC64 R_PPC64_UADDR16 => 25;        // R_POWERPC_UADDR16
+public static R_PPC64 R_PPC64_REL32 => 26;          // R_POWERPC_REL32
+public static R_PPC64 R_PPC64_PLT32 => 27;          // R_POWERPC_PLT32
+public static R_PPC64 R_PPC64_PLTREL32 => 28;       // R_POWERPC_PLTREL32
+public static R_PPC64 R_PPC64_PLT16_LO => 29;       // R_POWERPC_PLT16_LO
+public static R_PPC64 R_PPC64_PLT16_HI => 30;       // R_POWERPC_PLT16_HI
+public static R_PPC64 R_PPC64_PLT16_HA => 31;       // R_POWERPC_PLT16_HA
+public static R_PPC64 R_PPC64_SECTOFF => 33;        // R_POWERPC_SECTOFF
+public static R_PPC64 R_PPC64_SECTOFF_LO => 34;     // R_POWERPC_SECTOFF_LO
+public static R_PPC64 R_PPC64_SECTOFF_HI => 35;     // R_POWERPC_SECTOFF_HI
+public static R_PPC64 R_PPC64_SECTOFF_HA => 36;     // R_POWERPC_SECTOFF_HA
+public static R_PPC64 R_PPC64_REL30 => 37;          // R_POWERPC_ADDR30
 public static R_PPC64 R_PPC64_ADDR64 => 38;
 public static R_PPC64 R_PPC64_ADDR16_HIGHER => 39;
 public static R_PPC64 R_PPC64_ADDR16_HIGHERA => 40;
@@ -2857,34 +2857,34 @@ public static R_PPC64 R_PPC64_TOC16_DS => 63;
 public static R_PPC64 R_PPC64_TOC16_LO_DS => 64;
 public static R_PPC64 R_PPC64_PLTGOT16_DS => 65;
 public static R_PPC64 R_PPC64_PLTGOT_LO_DS => 66;
-public static R_PPC64 R_PPC64_TLS => 67;               // R_POWERPC_TLS
-public static R_PPC64 R_PPC64_DTPMOD64 => 68;          // R_POWERPC_DTPMOD64
-public static R_PPC64 R_PPC64_TPREL16 => 69;           // R_POWERPC_TPREL16
-public static R_PPC64 R_PPC64_TPREL16_LO => 70;        // R_POWERPC_TPREL16_LO
-public static R_PPC64 R_PPC64_TPREL16_HI => 71;        // R_POWERPC_TPREL16_HI
-public static R_PPC64 R_PPC64_TPREL16_HA => 72;        // R_POWERPC_TPREL16_HA
-public static R_PPC64 R_PPC64_TPREL64 => 73;           // R_POWERPC_TPREL64
-public static R_PPC64 R_PPC64_DTPREL16 => 74;          // R_POWERPC_DTPREL16
-public static R_PPC64 R_PPC64_DTPREL16_LO => 75;       // R_POWERPC_DTPREL16_LO
-public static R_PPC64 R_PPC64_DTPREL16_HI => 76;       // R_POWERPC_DTPREL16_HI
-public static R_PPC64 R_PPC64_DTPREL16_HA => 77;       // R_POWERPC_DTPREL16_HA
-public static R_PPC64 R_PPC64_DTPREL64 => 78;          // R_POWERPC_DTPREL64
-public static R_PPC64 R_PPC64_GOT_TLSGD16 => 79;       // R_POWERPC_GOT_TLSGD16
-public static R_PPC64 R_PPC64_GOT_TLSGD16_LO => 80;    // R_POWERPC_GOT_TLSGD16_LO
-public static R_PPC64 R_PPC64_GOT_TLSGD16_HI => 81;    // R_POWERPC_GOT_TLSGD16_HI
-public static R_PPC64 R_PPC64_GOT_TLSGD16_HA => 82;    // R_POWERPC_GOT_TLSGD16_HA
-public static R_PPC64 R_PPC64_GOT_TLSLD16 => 83;       // R_POWERPC_GOT_TLSLD16
-public static R_PPC64 R_PPC64_GOT_TLSLD16_LO => 84;    // R_POWERPC_GOT_TLSLD16_LO
-public static R_PPC64 R_PPC64_GOT_TLSLD16_HI => 85;    // R_POWERPC_GOT_TLSLD16_HI
-public static R_PPC64 R_PPC64_GOT_TLSLD16_HA => 86;    // R_POWERPC_GOT_TLSLD16_HA
-public static R_PPC64 R_PPC64_GOT_TPREL16_DS => 87;    // R_POWERPC_GOT_TPREL16_DS
-public static R_PPC64 R_PPC64_GOT_TPREL16_LO_DS => 88; // R_POWERPC_GOT_TPREL16_LO_DS
-public static R_PPC64 R_PPC64_GOT_TPREL16_HI => 89;    // R_POWERPC_GOT_TPREL16_HI
-public static R_PPC64 R_PPC64_GOT_TPREL16_HA => 90;    // R_POWERPC_GOT_TPREL16_HA
-public static R_PPC64 R_PPC64_GOT_DTPREL16_DS => 91;   // R_POWERPC_GOT_DTPREL16_DS
+public static R_PPC64 R_PPC64_TLS => 67;                // R_POWERPC_TLS
+public static R_PPC64 R_PPC64_DTPMOD64 => 68;           // R_POWERPC_DTPMOD64
+public static R_PPC64 R_PPC64_TPREL16 => 69;            // R_POWERPC_TPREL16
+public static R_PPC64 R_PPC64_TPREL16_LO => 70;         // R_POWERPC_TPREL16_LO
+public static R_PPC64 R_PPC64_TPREL16_HI => 71;         // R_POWERPC_TPREL16_HI
+public static R_PPC64 R_PPC64_TPREL16_HA => 72;         // R_POWERPC_TPREL16_HA
+public static R_PPC64 R_PPC64_TPREL64 => 73;            // R_POWERPC_TPREL64
+public static R_PPC64 R_PPC64_DTPREL16 => 74;           // R_POWERPC_DTPREL16
+public static R_PPC64 R_PPC64_DTPREL16_LO => 75;        // R_POWERPC_DTPREL16_LO
+public static R_PPC64 R_PPC64_DTPREL16_HI => 76;        // R_POWERPC_DTPREL16_HI
+public static R_PPC64 R_PPC64_DTPREL16_HA => 77;        // R_POWERPC_DTPREL16_HA
+public static R_PPC64 R_PPC64_DTPREL64 => 78;           // R_POWERPC_DTPREL64
+public static R_PPC64 R_PPC64_GOT_TLSGD16 => 79;        // R_POWERPC_GOT_TLSGD16
+public static R_PPC64 R_PPC64_GOT_TLSGD16_LO => 80;     // R_POWERPC_GOT_TLSGD16_LO
+public static R_PPC64 R_PPC64_GOT_TLSGD16_HI => 81;     // R_POWERPC_GOT_TLSGD16_HI
+public static R_PPC64 R_PPC64_GOT_TLSGD16_HA => 82;     // R_POWERPC_GOT_TLSGD16_HA
+public static R_PPC64 R_PPC64_GOT_TLSLD16 => 83;        // R_POWERPC_GOT_TLSLD16
+public static R_PPC64 R_PPC64_GOT_TLSLD16_LO => 84;     // R_POWERPC_GOT_TLSLD16_LO
+public static R_PPC64 R_PPC64_GOT_TLSLD16_HI => 85;     // R_POWERPC_GOT_TLSLD16_HI
+public static R_PPC64 R_PPC64_GOT_TLSLD16_HA => 86;     // R_POWERPC_GOT_TLSLD16_HA
+public static R_PPC64 R_PPC64_GOT_TPREL16_DS => 87;     // R_POWERPC_GOT_TPREL16_DS
+public static R_PPC64 R_PPC64_GOT_TPREL16_LO_DS => 88;  // R_POWERPC_GOT_TPREL16_LO_DS
+public static R_PPC64 R_PPC64_GOT_TPREL16_HI => 89;     // R_POWERPC_GOT_TPREL16_HI
+public static R_PPC64 R_PPC64_GOT_TPREL16_HA => 90;     // R_POWERPC_GOT_TPREL16_HA
+public static R_PPC64 R_PPC64_GOT_DTPREL16_DS => 91;    // R_POWERPC_GOT_DTPREL16_DS
 public static R_PPC64 R_PPC64_GOT_DTPREL16_LO_DS => 92; // R_POWERPC_GOT_DTPREL16_LO_DS
-public static R_PPC64 R_PPC64_GOT_DTPREL16_HI => 93;   // R_POWERPC_GOT_DTPREL16_HI
-public static R_PPC64 R_PPC64_GOT_DTPREL16_HA => 94;   // R_POWERPC_GOT_DTPREL16_HA
+public static R_PPC64 R_PPC64_GOT_DTPREL16_HI => 93;    // R_POWERPC_GOT_DTPREL16_HI
+public static R_PPC64 R_PPC64_GOT_DTPREL16_HA => 94;    // R_POWERPC_GOT_DTPREL16_HA
 public static R_PPC64 R_PPC64_TPREL16_DS => 95;
 public static R_PPC64 R_PPC64_TPREL16_LO_DS => 96;
 public static R_PPC64 R_PPC64_TPREL16_HIGHER => 97;
@@ -2945,17 +2945,17 @@ public static R_PPC64 R_PPC64_REL16_HIGHER => 242;
 public static R_PPC64 R_PPC64_REL16_HIGHERA => 243;
 public static R_PPC64 R_PPC64_REL16_HIGHEST => 244;
 public static R_PPC64 R_PPC64_REL16_HIGHESTA => 245;
-public static R_PPC64 R_PPC64_REL16DX_HA => 246;         // R_POWERPC_REL16DX_HA
+public static R_PPC64 R_PPC64_REL16DX_HA => 246; // R_POWERPC_REL16DX_HA
 public static R_PPC64 R_PPC64_JMP_IREL => 247;
-public static R_PPC64 R_PPC64_IRELATIVE => 248;          // R_POWERPC_IRELATIVE
-public static R_PPC64 R_PPC64_REL16 => 249;              // R_POWERPC_REL16
-public static R_PPC64 R_PPC64_REL16_LO => 250;           // R_POWERPC_REL16_LO
-public static R_PPC64 R_PPC64_REL16_HI => 251;           // R_POWERPC_REL16_HI
-public static R_PPC64 R_PPC64_REL16_HA => 252;           // R_POWERPC_REL16_HA
+public static R_PPC64 R_PPC64_IRELATIVE => 248; // R_POWERPC_IRELATIVE
+public static R_PPC64 R_PPC64_REL16 => 249;     // R_POWERPC_REL16
+public static R_PPC64 R_PPC64_REL16_LO => 250;  // R_POWERPC_REL16_LO
+public static R_PPC64 R_PPC64_REL16_HI => 251;  // R_POWERPC_REL16_HI
+public static R_PPC64 R_PPC64_REL16_HA => 252;  // R_POWERPC_REL16_HA
 public static R_PPC64 R_PPC64_GNU_VTINHERIT => 253;
 public static R_PPC64 R_PPC64_GNU_VTENTRY => 254;
 
-[GoLazy] partial class lazyᴛrppc64Strings { internal static slice<intName> rppc64Strings = new intName[]{
+[GoLazy] partial class lazyᴛrppc64Strings { internal static slice<intName> rppc64Strings = slice<intName>([
     new(0, "R_PPC64_NONE"u8),
     new(1, "R_PPC64_ADDR32"u8),
     new(2, "R_PPC64_ADDR24"u8),
@@ -3117,14 +3117,14 @@ public static R_PPC64 R_PPC64_GNU_VTENTRY => 254;
     new(252, "R_PPC64_REL16_HA"u8),
     new(253, "R_PPC64_GNU_VTINHERIT"u8),
     new(254, "R_PPC64_GNU_VTENTRY"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_PPC64 i) {
-    return stringName((uint32)(nint)i, rppc64Strings, false);
+    return stringName((uint32)i, rppc64Strings, false);
 }
 
 public static @string GoString(this R_PPC64 i) {
-    return stringName((uint32)(nint)i, rppc64Strings, true);
+    return stringName((uint32)i, rppc64Strings, true);
 }
 
 // Relocation types for RISC-V processors.
@@ -3185,7 +3185,7 @@ public static R_RISCV R_RISCV_SET16 => 55;        /* Local label subtraction */
 public static R_RISCV R_RISCV_SET32 => 56;        /* Local label subtraction */
 public static R_RISCV R_RISCV_32_PCREL => 57;     /* 32-bit PC relative */
 
-[GoLazy] partial class lazyᴛrriscvStrings { internal static slice<intName> rriscvStrings = new intName[]{
+[GoLazy] partial class lazyᴛrriscvStrings { internal static slice<intName> rriscvStrings = slice<intName>([
     new(0, "R_RISCV_NONE"u8),
     new(1, "R_RISCV_32"u8),
     new(2, "R_RISCV_64"u8),
@@ -3240,14 +3240,14 @@ public static R_RISCV R_RISCV_32_PCREL => 57;     /* 32-bit PC relative */
     new(55, "R_RISCV_SET16"u8),
     new(56, "R_RISCV_SET32"u8),
     new(57, "R_RISCV_32_PCREL"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_RISCV i) {
-    return stringName((uint32)(nint)i, rriscvStrings, false);
+    return stringName((uint32)i, rriscvStrings, false);
 }
 
 public static @string GoString(this R_RISCV i) {
-    return stringName((uint32)(nint)i, rriscvStrings, true);
+    return stringName((uint32)i, rriscvStrings, true);
 }
 
 // Relocation types for s390x processors.
@@ -3315,7 +3315,7 @@ public static R_390 R_390_GOT20 => 58;
 public static R_390 R_390_GOTPLT20 => 59;
 public static R_390 R_390_TLS_GOTIE20 => 60;
 
-[GoLazy] partial class lazyᴛr390Strings { internal static slice<intName> r390Strings = new intName[]{
+[GoLazy] partial class lazyᴛr390Strings { internal static slice<intName> r390Strings = slice<intName>([
     new(0, "R_390_NONE"u8),
     new(1, "R_390_8"u8),
     new(2, "R_390_12"u8),
@@ -3377,14 +3377,14 @@ public static R_390 R_390_TLS_GOTIE20 => 60;
     new(58, "R_390_GOT20"u8),
     new(59, "R_390_GOTPLT20"u8),
     new(60, "R_390_TLS_GOTIE20"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_390 i) {
-    return stringName((uint32)(nint)i, r390Strings, false);
+    return stringName((uint32)i, r390Strings, false);
 }
 
 public static @string GoString(this R_390 i) {
-    return stringName((uint32)(nint)i, r390Strings, true);
+    return stringName((uint32)i, r390Strings, true);
 }
 
 // Relocation types for SPARC.
@@ -3447,7 +3447,7 @@ public static R_SPARC R_SPARC_REGISTER => 53;
 public static R_SPARC R_SPARC_UA64 => 54;
 public static R_SPARC R_SPARC_UA16 => 55;
 
-[GoLazy] partial class lazyᴛrsparcStrings { internal static slice<intName> rsparcStrings = new intName[]{
+[GoLazy] partial class lazyᴛrsparcStrings { internal static slice<intName> rsparcStrings = slice<intName>([
     new(0, "R_SPARC_NONE"u8),
     new(1, "R_SPARC_8"u8),
     new(2, "R_SPARC_16"u8),
@@ -3504,14 +3504,14 @@ public static R_SPARC R_SPARC_UA16 => 55;
     new(53, "R_SPARC_REGISTER"u8),
     new(54, "R_SPARC_UA64"u8),
     new(55, "R_SPARC_UA16"u8)
-}.slice(); }
+]); }
 
 public static @string String(this R_SPARC i) {
-    return stringName((uint32)(nint)i, rsparcStrings, false);
+    return stringName((uint32)i, rsparcStrings, false);
 }
 
 public static @string GoString(this R_SPARC i) {
-    return stringName((uint32)(nint)i, rsparcStrings, true);
+    return stringName((uint32)i, rsparcStrings, true);
 }
 
 // Magic number for the elf trampoline, chosen wisely to be an immediate value.
@@ -3624,7 +3624,7 @@ public static SymType ST_TYPE(uint8 info) {
 }
 
 public static uint8 ST_INFO(SymBind bind, SymType typ) {
-    return (uint8)((uint8)((uint8)(nint)bind << 4) | (uint8)((uint8)(nint)typ & 0xf));
+    return (uint8)((uint8)((uint8)bind << 4) | (uint8)((uint8)typ & 0xf));
 }
 
 public static SymVis ST_VISIBILITY(uint8 other) {

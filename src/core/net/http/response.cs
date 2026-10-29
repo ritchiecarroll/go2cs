@@ -34,11 +34,11 @@ internal static map<@string, bool> respExcludeHeader = new map<@string, bool>{
 // the response headers have been received. The response body
 // is streamed on demand as the Body field is read.
 partial struct Response {
-    public @string Status; // e.g. "200 OK"
-    public nint StatusCode;   // e.g. 200
-    public @string Proto; // e.g. "HTTP/1.0"
-    public nint ProtoMajor;   // e.g. 1
-    public nint ProtoMinor;   // e.g. 0
+    public @string Status;  // e.g. "200 OK"
+    public nint StatusCode; // e.g. 200
+    public @string Proto;   // e.g. "HTTP/1.0"
+    public nint ProtoMajor; // e.g. 1
+    public nint ProtoMinor; // e.g. 0
     // Header maps header keys to values. If the response had multiple
     // headers with the same key, they may be concatenated, with comma
     // delimiters.  (RFC 7230, section 3.2.2 requires that multiple headers
@@ -129,10 +129,10 @@ public static error ErrNoLocation = errors.New("http: no Location header in resp
 public static (ж<url.URL>, error) Location(this ref Response r) {
     @string lv = r.Header.Get(locationˢ);
     if (lv == ""u8) {
-        return (default!, ErrNoLocation);
+        return (default, ErrNoLocation);
     }
-    if (r.Request != nil && (~r.Request).URL != nil) {
-        return (~r.Request).URL.Parse(lv);
+    if (r.Request != nil && r.Request.URL != nil) {
+        return r.Request.URL.Parse(lv);
     }
     return url.Parse(lv);
 }
@@ -147,59 +147,59 @@ internal static readonly @string malformedHttpStatusCodeˢ = "malformed HTTP sta
 // Clients must call resp.Body.Close when finished reading resp.Body.
 // After that call, clients can inspect resp.Trailer to find key/value
 // pairs included in the response trailer.
-public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Request> Ꮡreq) {
-    var tp = textproto.NewReader(Ꮡr);
+public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> r, ж<Request> req) {
+    var tp = textproto.NewReader(r);
     var resp = Ꮡ(new Response(
-        Request: Ꮡreq
+        Request: req
     ));
 
     // Parse the first line of the response.
     var (line, err) = tp.ReadLine();
-    if (err != default!) {
+    if (err != nil) {
         if (AreEqual(err, io.EOF)) {
             err = io.ErrUnexpectedEOF;
         }
-        return (default!, err);
+        return (default, err);
     }
     var (proto, status, ok) = strings.Cut(line, " "u8);
     if (!ok) {
-        return (default!, badStringError(malformedHttpResponseˢ, line));
+        return (default, badStringError(malformedHttpResponseˢ, line));
     }
-    resp.Value.Proto = proto;
-    resp.Value.Status = strings.TrimLeft(status, " "u8);
+    resp.Proto = proto;
+    resp.Status = strings.TrimLeft(status, " "u8);
 
-    var (statusCode, _, _) = strings.Cut((~resp).Status, " "u8);
+    var (statusCode, _, _) = strings.Cut(resp.Status, " "u8);
     if (builtin.len(statusCode) != 3) {
-        return (default!, badStringError(malformedHttpStatusCodeˢ, statusCode));
+        return (default, badStringError(malformedHttpStatusCodeˢ, statusCode));
     }
-    (resp.Value.StatusCode, err) = strconv.Atoi(statusCode);
-    if (err != default! || (~resp).StatusCode < 0) {
-        return (default!, badStringError(malformedHttpStatusCodeˢ, statusCode));
+    (resp.StatusCode, err) = strconv.Atoi(statusCode);
+    if (err != nil || resp.StatusCode < 0) {
+        return (default, badStringError(malformedHttpStatusCodeˢ, statusCode));
     }
     {
-        (resp.Value.ProtoMajor, resp.Value.ProtoMinor, ok) = ParseHTTPVersion((~resp).Proto); if (!ok) {
-            return (default!, badStringError(malformedHttpVersionˢ, (~resp).Proto));
+        (resp.ProtoMajor, resp.ProtoMinor, ok) = ParseHTTPVersion(resp.Proto); if (!ok) {
+            return (default, badStringError(malformedHttpVersionˢ, resp.Proto));
         }
     }
 
     // Parse the response headers.
     (var mimeHeader, err) = tp.ReadMIMEHeader();
-    if (err != default!) {
+    if (err != nil) {
         if (AreEqual(err, io.EOF)) {
             err = io.ErrUnexpectedEOF;
         }
-        return (default!, err);
+        return (default, err);
     }
-    resp.Value.Header = (ΔHeader)(map<@string, slice<@string>>)mimeHeader;
+    resp.Header = (ΔHeader)(map<@string, slice<@string>>)mimeHeader;
 
-    fixPragmaCacheControl((~resp).Header);
+    fixPragmaCacheControl(resp.Header);
 
-    err = readTransfer(resp.OrTypedNil(), Ꮡr);
-    if (err != default!) {
-        return (default!, err);
+    err = readTransfer(resp.OrTypedNil(), r);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (resp, default!);
+    return (resp, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -218,7 +218,7 @@ internal static void fixPragmaCacheControl(ΔHeader header) {
         var (hp, ok) = header[pragmaˢ, ꟷ]; if (ok && builtin.len(hp) > 0 && hp[0] == "no-cache") {
             {
                 var (_, presentcc) = header[cacheControlˢ, ꟷ]; if (!presentcc) {
-                    header[cacheControlˢ] = new @string[]{"no-cache"u8}.slice();
+                    header[cacheControlˢ] = slice<@string>(["no-cache"u8]);
                 }
             }
         }
@@ -258,7 +258,7 @@ internal partial struct Write_r1 /*dyn*/ {
 public static error Write(this ref Response r, io.Writer w) {
     // Status line
     @string text = r.Status;
-    if (text == ""u8){
+    if (text == ""u8) {
         text = StatusText(r.StatusCode);
         if (text == ""u8) {
             text = "status code "u8 + strconv.Itoa(r.StatusCode);
@@ -270,7 +270,7 @@ public static error Write(this ref Response r, io.Writer w) {
     }
 
     {
-        var (_, errΔ1) = fmt.Fprintf(w, "HTTP/%d.%d %03d %s\r\n"u8, r.ProtoMajor, r.ProtoMinor, r.StatusCode, text); if (errΔ1 != default!) {
+        var (_, errΔ1) = fmt.Fprintf(w, "HTTP/%d.%d %03d %s\r\n"u8, r.ProtoMajor, r.ProtoMinor, r.StatusCode, text); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -278,20 +278,20 @@ public static error Write(this ref Response r, io.Writer w) {
     // Clone it, so we can modify r1 as needed.
     var r1 = @new<Response>();
     r1.Value = r;
-    if ((~r1).ContentLength == 0 && (~r1).Body != default!) {
+    if (r1.ContentLength == 0 && r1.Body != nil) {
         // Is it actually 0 length? Or just unknown?
         array<byte> buf = new(1);
-        var (n, errΔ2) = (~r1).Body.Read(buf[..]);
-        if (errΔ2 != default! && !AreEqual(errΔ2, io.EOF)) {
+        var (n, errΔ2) = r1.Body.Read(buf[..]);
+        if (errΔ2 != nil && !AreEqual(errΔ2, io.EOF)) {
             return errΔ2;
         }
-        if (n == 0){
+        if (n == 0) {
             // Reset it to a known zero reader, in case underlying one
             // is unhappy being read repeatedly.
-            r1.Value.Body = NoBody;
+            r1.Body = NoBody;
         } else {
-            r1.Value.ContentLength = -1;
-            r1.Value.Body = new Write_r1(
+            r1.ContentLength = -1;
+            r1.Body = new Write_r1(
                 io.MultiReader(new bytes_ReaderжReader(bytes.NewReader(buf[..1])), r.Body),
                 r.Body
             );
@@ -301,32 +301,32 @@ public static error Write(this ref Response r, io.Writer w) {
     // content-length, the only way to do that is the old HTTP/1.0
     // way, by noting the EOF with a connection close, so we need
     // to set Close.
-    if ((~r1).ContentLength == -1 && !(~r1).Close && r1.ProtoAtLeast(1, 1) && !chunked((~r1).TransferEncoding) && !(~r1).Uncompressed) {
-        r1.Value.Close = true;
+    if (r1.ContentLength == -1 && !r1.Close && r1.ProtoAtLeast(1, 1) && !chunked(r1.TransferEncoding) && !r1.Uncompressed) {
+        r1.Close = true;
     }
 
     // Process Body,ContentLength,Close,Trailer
     var (tw, err) = newTransferWriter(r1.OrTypedNil());
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     err = tw.writeHeader(w, nil);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     // Rest of header
     err = r.Header.WriteSubset(w, respExcludeHeader);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     // contentLengthAlreadySent may have been already sent for
     // POST/PUT requests, even if zero length. See Issue 8180.
     var contentLengthAlreadySent = tw.shouldSendContentLength();
-    if ((~r1).ContentLength == 0 && !chunked((~r1).TransferEncoding) && !contentLengthAlreadySent && bodyAllowedForStatus(r.StatusCode)) {
+    if (r1.ContentLength == 0 && !chunked(r1.TransferEncoding) && !contentLengthAlreadySent && bodyAllowedForStatus(r.StatusCode)) {
         {
-            var (_, errΔ3) = io.WriteString(w, contentLength0ˢ); if (errΔ3 != default!) {
+            var (_, errΔ3) = io.WriteString(w, contentLength0ˢ); if (errΔ3 != nil) {
                 return errΔ3;
             }
         }
@@ -334,23 +334,23 @@ public static error Write(this ref Response r, io.Writer w) {
 
     // End-of-header
     {
-        var (_, errΔ4) = io.WriteString(w, "\r\n"u8); if (errΔ4 != default!) {
+        var (_, errΔ4) = io.WriteString(w, "\r\n"u8); if (errΔ4 != nil) {
             return errΔ4;
         }
     }
 
     // Write body and trailer
     err = tw.writeBody(w);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     // Success
-    return default!;
+    return default;
 }
 
 internal static void closeBody(this ref Response r) {
-    if (r.Body != default!) {
+    if (r.Body != nil) {
         r.Body.Close();
     }
 }

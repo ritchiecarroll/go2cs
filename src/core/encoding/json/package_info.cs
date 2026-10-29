@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
@@ -65,6 +62,14 @@ using static go.encoding.json_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(UnmarshalTypeError))]
+[assembly: go.GoFieldAccess(typeof(encodeState))]
+[assembly: go.GoFieldAccess(typeof(errorContext))]
+[assembly: go.GoFieldAccess(typeof(field))]
+[assembly: go.GoFieldAccess(typeof(scanner))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -73,12 +78,12 @@ using static go.encoding.json_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/json/decode.go", "decode.cs", "ABfMAQBNCLKCgqaCABUsgoKUAAwaggALEoKCpoKUpqKCgqaCpoKClN6QppKokgAULJIABxCigoKCgpSUqqKCurKClIKCgpS2qLKigoKCgoKCgsyygoKUgrzCooKCgoKCgriCAAIWAAoCkoKUgpS0guiCyOi0tLSClJSs0pqCgIK2lKaCgIK2lLiClIKAggAFOQABQgAFEuKagqaCpAADEwABGgACEAAQGILKgoKUpoKCgoKCuIKmgtyCgpSClIKAgqSCgILagoKUpqrUgoKCgpSCgoKUpqSUgoKmpIKCtLaClIKCuIKClIK4lICCyICCtqaClIKUgriCgoKmpoKUppKY1IKCgoKUgoKClIKmgoKCpty4uoKCgqaCtraCgqaCgoKmlIKUlIK4goKCgoKokpSCgoKUlJSCgpSCgoKClIKC3IKmgoKUlJSCupSCkoLKgpSClJSCpICC1oCC5raAguyCgoKCgoCCpJSUgrSCgoKClILEgoKCgpSCtKaCyoKUuIKUgpSCpqqigpSCgpSm7uSUgpSCgoKUgoKCgpSSlLSkgpSCgoKUlKaUgMiCgpSU2KaCgpQAARCkgpQAAxWClAAFGoKCgpSUqIKClIKCgoKUtIKClKSClAADLQAEOIKClJQAAhqCgoKUgoKUxoKCgpTGgoKClMaCgoKUAARXpoKUgpQABUwAAhAACAKYgqSCpK8AARSosoKUgoKmpoKUgpSCpqiygpSClJSCuIKCgoKCuIKUgpSmpoKUgpSCpqzkgpSUgKSmpoKClKaClIKClMyigpSCopS0tLSUlKrSgoKmsoKUyoKCgoKUgoKUlIKmgoK4goKClICkgoKUlKSCgrSCgrSCgrSCgrSCgrSCgrSCgoKUgoKCgJSCgraU6riCgsiCgsY=", "", "", "800=Type/1/1/2,Field/1/1/2")]
-[assembly: go.GoPositionMap("encoding/json/encode.go", "encode.cs", "AEGaAwCPAQKClIKClJTcsoKClIKCgpQADh6CAAkUggAMGoIADRaCgoKUrJAAFSqCgIKCgoKUgqQACRCygoCCgJKU2ILokqaClKyUpoIADhyCgpSmgoCCAAkShpKUgqaCgqiCmuqClIKUgpSCppSkpKSkpKSkpKSkpKS4gqaigoKUgoKClIKCgoKClIK4ooKCgpSCgoKCgoKUgriigoKUgoKClIKClKaigoKClIKCgpSmgoKCgoKmgoKCgoKmgoKCgoLKooKCAAcQgoKClIKCpoKUgoKCpoKogpaigqaClIKUgoKCgoKUgoKUuMqCuIKCgsqUpraCgtqCgoLcgoKCgoKmgsqmgoKClKaiAAwagoKCgqaCgoKClJSmhJSCgoKUlIK0gpS4goL+woKClICmgoCCpIKklrqCgIKklJiCgpSCgpSCoqSCuoKmgraigoKmgoKCgoIADBDCgoKUgMqYgIKkgqSCoqSUgoKCpoL+goKCgoKUlKaCgv7CgoKUgKaCgIKkgqSCoqSCgv6CgpS8ooK2goKUgvympoKCgpSUAAcQgoKUgIKClIKklKSUpqKCgoKAgoKClIKUtLS0tLQACA6kgoLsgoKCgoKCggAIEoKCgoKClJSCggAWNPSUgpbGlqakgoKUgoKUpoKCgoKClJTIlJSCgpSCgpSCgpSClLiCgpzKgoKClAAIEqaCgpSClJSmypTGuIKUgoKU2oLKlLiCgty4gIKkgIKkgoKUlAAIEoKmgoKCgoKmgoKUgoK4gpiCgpSCgoKUgIK2AAISAAkIgpTckoCCpIKmgoKU", "334-342:1;399-401:1;402-404:2;794-796:1;1196-1202:1;1204-1207:2;1209-1211:3;1213-1221:4;1245-1262:5;1293-1295:6", "758=encoding/json.structEncoder.encode;821=encoding/json.mapEncoder.encode;876=encoding/json.sliceEncoder.encode;897=encoding/json.arrayEncoder.encode;925=encoding/json.ptrEncoder.encode;944=encoding/json.condAddrEncoder.encode", "298=String/1/1/1,Error/1/1/2;784=IsZero/1/1/1,Invoke/1/1/1;925=UnsafePointer/1/1/3,Len/1/1/3;1289=Contains/1/2/5,Contains/2/2/6;1313=Elem/1/2/1,Kind/1/1/1,Elem/2/2/1,IsNil/2/2/1,Interface/1/1/2,IsZero/1/1/2")]
+[assembly: go.GoPositionMap("encoding/json/decode.go", "decode.cs", "ABfMAQBNCLKCgqaCABUsgoKUAAwaggALEoKCpoKUpqKCgqaCpoKClN6QppKokgAULJIABxCigoKCgpSUqqKCurKClIKCgpS2qLKigoKCgoKCgsyygoKUgrzCooKCgoKCgriCAAIWAAoCkoKUgpS0guiCyOi0tLSClJSs0pS2goCCtpS2goCCtpTIgpSCgILYAAUS4pS2graCpLYAAhAAEBiCyoKClKaCgoKCgriCpoLcgoKUgpSCgIKkgoCC2oKClKaq1IKCgoKUgoKClKaklIKCpqSCgrS2gpSCgriCgpSCuJSAgsiAgramgpSClIK4goKCpqaClKaSmNSCgoKClIKCgpSCpoKCgqbcuMqCgoK2gsbGgoKmgoKCppSClJSCuIKCgoKCqJKUgoKClJSUgoKUgoKCgpSCgtyCpoKClJSUgrqUgoKCyoKUgpSUgqSAgtaAgua2gILsgoKCgoKAgqSUlIK0goKCgpSCtIKCgoKUgrS2gsqClLiClIKUgqaqooKUgoKUpu7klIKUgoKClIKCgoKUgpS0pIKUgoKClJSmlIDIgoKUlOimgoKUlIKUxrSClOqCgoKUlJS0goKUgoKCgpS0goKUtIKU6oKClJSUpoKUgpS0goKClIKClLaCgoKUtoKCgpS2goKClNYAAhAACAKUtIK0grSkqLKClIKCpqaClIKUgqaosoKUgpSUgriCgoKCgriClIKUpqaClIKUgqas5IKUlICkpqaCgpSmgpSCgpTMooKUgqKUtLS0lJSq0oKCprKClMqCgoKClIKClJSCpoKCuIKCgpSApIKClJSkgoK0goK0goK0goK0goK0goK0goKClIKCgoCUgoK2lOq4goLIgoLG", "", "", "811=Type/1/1/2,Field/1/1/2")]
+[assembly: go.GoPositionMap("encoding/json/encode.go", "encode.cs", "AEGaAwCPAQKClIKClJTcsoKClIKCgpQADh6CAAkUggAMGoIADRaCgoKUrJAAFSqCgIKCgoKUgqQACRCygoCCgJKU2ILokqaClKyUpoIADhyCgpSmgoCCAAkShpKUgqaCgqiCmuqClIKUgpSCppSkpKSkpKSkpKSkpKS4gqaigoKUgoKClIKCgoKClIK4ooKCgpSCgoKCgoKUgriigoKUgoKClIKClKaigoKClIKCgpSmgoKCgoKmgoKCgoKmgoKCgoLKooKCAAcQgoKClIKCpoKUgoKCpoKogpaigqaClIKUgoKCgoKUgoKUuMqCuIKCgsqUpraCgtqCgoLcgoKCgoKmgsqmgoKClKaiAAwagoKCgqaCgoKClJSmhJSCgoKUlIK0gpS4goL+woKClICmgoCCpIKklrqCgIKklJiCgpSCgpSCoqSCyoK2graigoKmgoKCgoIADBDCgoKUgMqIgIKkgqSCoqSUgoKCpoL+goKCgoKUlKaCgv7CgoKUgKaCgIKkgqSCoqSCgv6CgpS8ooK2goKUgvympoKCgpSUAAcQgoKUgIKClIKklKSUpqKCgoKAgoKClIKUtLS0tLQACA6kgoLsgoKCgoKCggAIEoKCgoKClJSCggAWNPSUgpbGlqakgoKUgoKUpoKCgoKClJS4lJSCgpSCgpSCgpSClLiCgpzagoKClAAIEqaCgpSClJSmypTGuIKUgoKU2oLKlLiCgty4gIKkgIKkgoKUlAAIEoKmgoKCgoKmgoKUgoK4gpiCgpSCgoKUgIK2AAISAAkIgpTckoCCpIKmgoKU", "334-342:1;399-401:1;402-404:2;794-796:1;1196-1202:1;1204-1207:2;1209-1211:3;1213-1221:4;1245-1262:5;1293-1295:6", "758=encoding/json.structEncoder.encode;821=encoding/json.mapEncoder.encode;876=encoding/json.sliceEncoder.encode;897=encoding/json.arrayEncoder.encode;925=encoding/json.ptrEncoder.encode;944=encoding/json.condAddrEncoder.encode", "298=String/1/1/1,Error/1/1/2;784=IsZero/1/1/1,Invoke/1/1/1;927=UnsafePointer/1/1/3,Len/1/1/3;1290=Contains/1/2/5,Contains/2/2/6;1314=Elem/1/2/1,Kind/1/1/1,Elem/2/2/1,IsNil/2/2/1,Interface/1/1/2,IsZero/1/1/2", "836:35,934:35,1003:35")]
 [assembly: go.GoPositionMap("encoding/json/fold.go", "fold.cs", "AAwgpJKmgpSAgoKUgoK2goKUqJKCgoKU")]
 [assembly: go.GoPositionMap("encoding/json/indent.go", "indent.cs", "AAog8oKmpoKCgoKCpoKCgqaqwoKCgoKmooKCgoKCgoKUgqaCgpSClIKCgpSClKaClIKU1oKCgoKUAAosAA0CgoKCgqaigoKCgoKCgoKClIKUgoKCyoKCuKaCtIK0tJSUgpS0toKU")]
 [assembly: go.GoPositionMap("encoding/json/scanner.go", "scanner.cs", "ABMwsoKC3NKCgoKCpoKUAAkUgAAfRsyClIKCprSClAAlWKKCgoKqwoKUgpSCgpSClNqigoKUqqKCgoKClLiCqJKClIKU2LKClJSCpIKkgqSCpIKkgqSCpIKUgoKUqLKClIKCgpTYsoKUgoKU+sKClIKClIKClIKUgoKClKSCgoKUgoKUpIKClIKClJTc0pSU2LKCgpSCgpSClNiylIKkgpTYsoKCpqiygoKmqLKCgqaosoKCptiygoKUgoKUqsKCgpSosoKClIKClNrCgoKUqsKClIKClKrCgoKU2sKCgpSssoKU2LKCgpTYsoKClNiygoKU2LKCgpTYsoKClNiygoKU2LKCgpTYsoKClNiygoKUqLKCgpSqoqiSgoKopIKUgriC")]
-[assembly: go.GoPositionMap("encoding/json/stream.go", "stream.cs", "ACRCwqqgqrCu8oKmgIK2griCgpSCyqaUqqKqwpSCgobGgoKCyoLagoK2gtyCgoKUgqaCpoKCtKamgoKCgqiSgoKCuIKUpoKCgqYADB6SAAISAAoCgqaClIKCAAgSlIKCgoKUlICCpNyyggACFPIABxKSgpTYsoKUgqaSAAsyyJSCgpSClIKkgoKUgpSClKaClJSmgpSk7oIAAhwADQKCgoKUpIKUgoKCpoKUgoKCgqaClIKCgqaClIKCgoKmgpSCgqaCgoKUgoKClKaCgoKCgoKClIKUpoKUgoCCpAALCoKClKSkpKSklKqigqaCgoKCgoKUgqaClL6y")]
+[assembly: go.GoPositionMap("encoding/json/stream.go", "stream.cs", "ACRCwqqgqrCu8oKmgIK2griCgpSCyqaUqqKqwpSCgobGgoKCyoLqgoLGgtyCgoKUgqaCpoKCtKamgoKCgqiSgoKCuIKUpoKCgqYADB6SAAISAAoCgqaClIKCAAgSlIKCgoKUlICCpNyyggACFPIABxKSgpTYsoKUgqaSAAsyyJSCgpSClIK0goKUgpSCpKaClJSmgpS0/oIAAhwADQKCgoKUpIKUgoKCpoKUgoKCgqaClIKCgqaClIKCgoKmgpSCgqaCgoKUgoKClKaCgoKCgoKClIKUpoKUgoCCpAALCoKClLS0tLS0pKqigqaCgoKCgoKUgqaClL6y")]
 [assembly: go.GoPositionMap("encoding/json/tables.go", "tables.cs", "ABEiAGnUAQ==")]
 [assembly: go.GoPositionMap("encoding/json/tags.go", "tags.cs", "AA4mooKssoKUgoKCgoKm")]
 // </GoSourcePositionMaps>

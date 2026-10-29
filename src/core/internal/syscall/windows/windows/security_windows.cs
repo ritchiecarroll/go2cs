@@ -39,8 +39,8 @@ partial struct TOKEN_PRIVILEGES {
 //sys	OpenThreadToken(h syscall.Handle, access uint32, openasself bool, token *syscall.Token) (err error) = advapi32.OpenThreadToken
 //sys	LookupPrivilegeValue(systemname *uint16, name *uint16, luid *LUID) (err error) = advapi32.LookupPrivilegeValueW
 //sys	adjustTokenPrivileges(token syscall.Token, disableAllPrivileges bool, newstate *TOKEN_PRIVILEGES, buflen uint32, prevstate *TOKEN_PRIVILEGES, returnlen *uint32) (ret uint32, err error) [true] = advapi32.AdjustTokenPrivileges
-public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPrivileges, ж<TOKEN_PRIVILEGES> Ꮡnewstate, uint32 buflen, ж<TOKEN_PRIVILEGES> Ꮡprevstate, ж<uint32> Ꮡreturnlen) {
-    var (ret, err) = adjustTokenPrivileges(token, disableAllPrivileges, Ꮡnewstate, buflen, Ꮡprevstate, Ꮡreturnlen);
+public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPrivileges, ж<TOKEN_PRIVILEGES> newstate, uint32 buflen, ж<TOKEN_PRIVILEGES> prevstate, ж<uint32> returnlen) {
+    var (ret, err) = adjustTokenPrivileges(token, disableAllPrivileges, newstate, buflen, prevstate, returnlen);
     if (ret == 0) {
         // AdjustTokenPrivileges call failed
         return err;
@@ -48,7 +48,7 @@ public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPr
     // AdjustTokenPrivileges call succeeded
     if (AreEqual(err, syscall.EINVAL)) {
         // GetLastError returned ERROR_SUCCESS
-        return default!;
+        return default;
     }
     return err;
 }
@@ -148,13 +148,12 @@ partial struct UserInfo4 {
 // GetUserName retrieves the user name of the current thread
 // in the specified format.
 public static (@string, error) GetUserName(uint32 format) {
-    ref var n = ref heap<uint32>(out var Ꮡn);
-    n = (uint32)50;
-    while (ᐧ) {
+    ref var n = ref heap<uint32>((uint32)50, out var Ꮡn);
+    for (;;) {
         var b = new slice<uint16>((nint)(n));
         var e = syscall.GetUserNameEx(format, Ꮡ(b, 0), Ꮡn);
-        if (e == default!) {
-            return (syscall.UTF16ToString(b.slice(0, (nint)(n))), default!);
+        if (e == nil) {
+            return (syscall.UTF16ToString(b.slice(0, (nint)(n))), default);
         }
         if (!AreEqual(e, syscall.ERROR_MORE_DATA)) {
             return ("", e);
@@ -209,24 +208,24 @@ public static ref SID_IDENTIFIER_AUTHORITY SECURITY_NT_AUTHORITY => ref ((Static
 // go2cs generated this placeholder — func GetSidIdentifierAuthority is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:nocheckptr
-public static uint32 GetSidSubAuthority(ж<syscall.SID> Ꮡsid, uint32 subAuthorityIdx) {
+public static uint32 GetSidSubAuthority(ж<syscall.SID> sid, uint32 subAuthorityIdx) {
     GoFrame ᒐ = default;
     try {
-        defer(runtime.KeepAlive, Ꮡsid.OrTypedNil(), ref ᒐ);
-        return ~(ж<uint32>)(uintptr)((@unsafe.Pointer)getSidSubAuthority(Ꮡsid, subAuthorityIdx));
+        defer(runtime.KeepAlive, sid.OrTypedNil(), ref ᒐ);
+        return ~(ж<uint32>)(uintptr)((@unsafe.Pointer)getSidSubAuthority(sid, subAuthorityIdx));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 //go:nocheckptr
-public static uint8 GetSidSubAuthorityCount(ж<syscall.SID> Ꮡsid) {
+public static uint8 GetSidSubAuthorityCount(ж<syscall.SID> sid) {
     GoFrame ᒐ = default;
     try {
-        defer(runtime.KeepAlive, Ꮡsid.OrTypedNil(), ref ᒐ);
-        return ~(ж<uint8>)(uintptr)((@unsafe.Pointer)getSidSubAuthorityCount(Ꮡsid));
+        defer(runtime.KeepAlive, sid.OrTypedNil(), ref ᒐ);
+        return ~(ж<uint8>)(uintptr)((@unsafe.Pointer)getSidSubAuthorityCount(sid));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

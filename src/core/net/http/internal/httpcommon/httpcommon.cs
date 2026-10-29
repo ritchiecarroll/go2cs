@@ -41,7 +41,7 @@ internal static bool asciiEqualFold(@string s, @string t) {
 
 // lower returns the ASCII lowercase version of b.
 internal static byte lower(byte b) {
-    if ((rune)'A' <= b && b <= (rune)'Z') {
+    if ('A' <= b && b <= 'Z') {
         return (byte)(b + ((rune)'a' - (rune)'A'));
     }
     return b;
@@ -51,7 +51,7 @@ internal static byte lower(byte b) {
 // https://tools.ietf.org/html/rfc20#section-4.2.
 internal static bool isASCIIPrint(@string s) {
     for (nint i = 0; i < len(s); i++) {
-        if (s[i] < (rune)' ' || s[i] > (rune)'~') {
+        if (s[i] < ' ' || s[i] > '~') {
             return false;
         }
     }
@@ -69,15 +69,15 @@ internal static (@string lower, bool ok) asciiToLower(@string s) {
 
 internal static readonly ж<sync.Once> ᏑcommonBuildOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once commonBuildOnce => ref ((StaticBox<sync.Once>)ᏑcommonBuildOnce).ValueSlot;
-internal static map<@string, @string> commonLowerHeader;     // Go-Canonical-Case -> lower-case
-internal static map<@string, @string> commonCanonHeader;     // lower-case -> Go-Canonical-Case
+internal static map<@string, @string> commonLowerHeader; // Go-Canonical-Case -> lower-case
+internal static map<@string, @string> commonCanonHeader; // lower-case -> Go-Canonical-Case
 
 internal static void buildCommonHeaderMapsOnce() {
     ᏑcommonBuildOnce.Do(buildCommonHeaderMaps);
 }
 
 internal static void buildCommonHeaderMaps() {
-    var common = new @string[]{
+    var common = slice<@string>([
         "accept"u8,
         "accept-charset"u8,
         "accept-encoding"u8,
@@ -135,7 +135,7 @@ internal static void buildCommonHeaderMaps() {
         "www-authenticate"u8,
         "x-forwarded-for"u8,
         "x-forwarded-proto"u8
-    }.slice();
+    ]);
     commonLowerHeader = new map<@string, @string>(len(common));
     commonCanonHeader = new map<@string, @string>(len(common));
     foreach (var (_, v) in common) {
@@ -236,14 +236,13 @@ private static readonly @string gzipˢ = "gzip"u8;
 // for the request.
 // The headerf function is called with the validated, canonicalized header name.
 public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx, EncodeHeadersParam param, Action<@string, @string> headerf) {
-    EncodeHeadersResult res = default!;
+    EncodeHeadersResult res = default;
 
-    ref var req = ref heap<Request>(out var Ꮡreq);
-    req = param.Request;
+    ref var req = ref heap<Request>(param.Request, out var Ꮡreq);
 
     // Check for invalid connection-level headers.
     {
-        var errΔ1 = checkConnHeaders(req.Header); if (errΔ1 != default!) {
+        var errΔ1 = checkConnHeaders(req.Header); if (errΔ1 != nil) {
             return (res, errΔ1);
         }
     }
@@ -254,10 +253,10 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
 
     @string host = req.Host;
     if (host == ""u8) {
-        host = req.URL.Value.Host;
+        host = req.URL.Host;
     }
     (host, var err) = httpguts.PunycodeHostPort(host);
-    if (err != default!) {
+    if (err != nil) {
         return (res, err);
     }
     if (!httpguts.ValidHostHeader(host)) {
@@ -266,29 +265,28 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
 
     // isNormalConnect is true if this is a non-extended CONNECT request.
     var isNormalConnect = false;
-    @string protocol = default!;
+    @string protocol = default;
     {
         var vv = req.Header[protocolˢ]; if (len(vv) > 0) {
             protocol = vv[0];
         }
     }
-    if (req.Method == "CONNECT"u8 && protocol == ""u8){
+    if (req.Method == "CONNECT"u8 && protocol == ""u8) {
         isNormalConnect = true;
-    } else 
-    if (protocol != ""u8 && req.Method != "CONNECT"u8) {
+    } else if (protocol != ""u8 && req.Method != "CONNECT"u8) {
         return (res, errors.New(invalidProtocolHeaderInˢ));
     }
 
     // Validate the path, except for non-extended CONNECT requests which have no path.
-    @string path = default!;
+    @string path = default;
     if (!isNormalConnect) {
         path = req.URL.RequestURI();
         if (!validPseudoPath(path)) {
             @string orig = path;
-            path = strings.TrimPrefix(path, (~req.URL).Scheme + "://"u8 + host);
+            path = strings.TrimPrefix(path, req.URL.Scheme + "://"u8 + host);
             if (!validPseudoPath(path)) {
-                if ((~req.URL).Opaque != ""u8){
-                    return (res, fmt.Errorf("invalid request :path %q from URL.Opaque = %q"u8, orig, (~req.URL).Opaque));
+                if (req.URL.Opaque != ""u8) {
+                    return (res, fmt.Errorf("invalid request :path %q from URL.Opaque = %q"u8, orig, req.URL.Opaque));
                 } else {
                     return (res, fmt.Errorf("invalid request :path %q"u8, orig));
                 }
@@ -311,7 +309,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
     }
 
     (var trailers, err) = commaSeparatedTrailers(req.Trailer);
-    if (err != default!) {
+    if (err != nil) {
         return (res, err);
     }
 
@@ -331,7 +329,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
         f(methodˢ, m);
         if (!isNormalConnect) {
             f(pathˢ, path);
-            f(schemeˢ, (~reqʗ1.URL).Scheme);
+            f(schemeˢ, reqʗ1.URL.Scheme);
         }
         if (protocol != ""u8) {
             f(protocolˢ, protocol);
@@ -340,23 +338,21 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
             f(trailerˢ, trailers);
         }
 
-        bool didUA = default!;
+        bool didUA = default;
         foreach (var (k, vᴛ1) in reqʗ1.Header) {
             var vv = vᴛ1;
 
-            if (asciiEqualFold(k, hostˢ) || asciiEqualFold(k, contentLengthˢ)){
+            if (asciiEqualFold(k, hostˢ) || asciiEqualFold(k, contentLengthˢ)) {
                 // Host is :authority, already sent.
                 // Content-Length is automatic, set below.
                 continue;
-            } else 
-            if (asciiEqualFold(k, connectionˢ) || asciiEqualFold(k, proxyConnectionˢ) || asciiEqualFold(k, transferEncodingˢ) || asciiEqualFold(k, upgradeˢ) || asciiEqualFold(k, keepAliveˢ)){
+            } else if (asciiEqualFold(k, connectionˢ) || asciiEqualFold(k, proxyConnectionˢ) || asciiEqualFold(k, transferEncodingˢ) || asciiEqualFold(k, upgradeˢ) || asciiEqualFold(k, keepAliveˢ)) {
                 // Per 8.1.2.2 Connection-Specific Header
                 // Fields, don't send connection-specific
                 // fields. We have already checked if any
                 // are error-worthy so just ignore the rest.
                 continue;
-            } else 
-            if (asciiEqualFold(k, userAgentˢ)){
+            } else if (asciiEqualFold(k, userAgentˢ)) {
                 // Match Go's http1 behavior: at most one
                 // User-Agent. If set to nil or empty string,
                 // then omit it. Otherwise if not mentioned,
@@ -369,23 +365,22 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
                 if (vv[0] == "") {
                     continue;
                 }
-            } else 
-            if (asciiEqualFold(k, cookieˢ)){
+            } else if (asciiEqualFold(k, cookieˢ)) {
                 // Per 8.1.2.5 To allow for better compression efficiency, the
                 // Cookie header field MAY be split into separate header fields,
                 // each with one or more cookie-pairs.
                 foreach (var (_, vᴛ2) in vv) {
                     var v = vᴛ2;
 
-                    while (ᐧ) {
-                        nint p = strings.IndexByte(v, (rune)';');
+                    for (;;) {
+                        nint p = strings.IndexByte(v, (byte)';');
                         if (p < 0) {
                             break;
                         }
                         f(cookieˢ, v.slice(0, p));
                         p++;
                         // strip space after semicolon if any.
-                        while (p + 1 <= len(v) && v[p] == (rune)' ') {
+                        while (p + 1 <= len(v) && v[p] == ' ') {
                             p++;
                         }
                         v = v.slice(p);
@@ -395,8 +390,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
                     }
                 }
                 continue;
-            } else 
-            if (k == ":protocol"u8) {
+            } else if (k == ":protocol"u8) {
                 // :protocol pseudo-header was already sent above.
                 continue;
             }
@@ -446,14 +440,14 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
 
         headerf(name, value);
 
-        if (traceʗ1 != nil && (~traceʗ1).WroteHeaderField != default!) {
-            (~traceʗ1).WroteHeaderField(name, new @string[]{value}.slice());
+        if (traceʗ1 != nil && traceʗ1.WroteHeaderField != nil) {
+            traceʗ1.WroteHeaderField(name, slice<@string>([value]));
         }
     });
 
     res.HasBody = req.ActualContentLength != 0;
     res.HasTrailers = trailers != ""u8;
-    return (res, default!);
+    return (res, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -511,7 +505,7 @@ internal static error checkConnHeaders(map<@string, slice<@string>> h) {
             return fmt.Errorf("invalid Connection request header: %q"u8, vv);
         }
     }
-    return default!;
+    return default;
 }
 
 internal static (@string, error) commaSeparatedTrailers(map<@string, slice<@string>> trailer) {
@@ -523,16 +517,17 @@ internal static (@string, error) commaSeparatedTrailers(map<@string, slice<@stri
 
         k = CanonicalHeader(k);
         var exprᴛ1 = k;
-        if (exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8: {
             return ("", fmt.Errorf("invalid Trailer key %q"u8, k));
-        }
+        }}
         keys = append(keysᴷ, keys, k);
     }
     if (len(keys) > 0) {
         sort.Strings(keys);
-        return (strings.Join(keys, ","u8), default!);
+        return (strings.Join(keys, ","u8), default);
     }
-    return ("", default!);
+    return ("", default);
 }
 
 // validPseudoPath reports whether v is a valid :path pseudo-header
@@ -549,7 +544,7 @@ internal static (@string, error) commaSeparatedTrailers(map<@string, slice<@stri
 // Google's GFE accepts such paths and Chrome sends them, so ignore
 // that part of the spec. See golang.org/issue/19103.
 internal static bool validPseudoPath(@string v) {
-    return (len(v) > 0 && v[0] == (rune)'/') || v == "*"u8;
+    return (len(v) > 0 && v[0] == '/') || v == "*"u8;
 }
 
 internal static @string validateHeaders(map<@string, slice<@string>> hdrs) {
@@ -583,12 +578,13 @@ internal static bool shouldSendReqContentLength(@string method, int64 contentLen
     // For zero bodies, whether we send a content-length depends on the method.
     // It also kinda doesn't matter for http2 either way, with END_STREAM.
     var exprᴛ1 = method;
-    if (exprᴛ1 == "POST"u8 || exprᴛ1 == "PUT"u8 || exprᴛ1 == "PATCH"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "POST"u8 || exprᴛ1 == "PUT"u8 || exprᴛ1 == "PATCH"u8: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 // ServerRequestParam is parameters to NewServerRequest.
@@ -627,28 +623,31 @@ public static ServerRequestResult NewServerRequest(ServerRequestParam rp) {
     // Merge Cookie headers into one "; "-delimited value.
     {
         var cookies = rp.Header[cookieˢ2]; if (len(cookies) > 1) {
-            rp.Header[cookieˢ2] = new @string[]{strings.Join(cookies, "; "u8)}.slice();
+            rp.Header[cookieˢ2] = slice<@string>([strings.Join(cookies, "; "u8)]);
         }
     }
 
     // Setup Trailers
-    map<@string, slice<@string>> trailer = default!;
+    map<@string, slice<@string>> trailer = default;
     foreach (var (_, v) in rp.Header[trailerˢ2]) {
         foreach (var (_, vᴛ1) in strings.Split(v, ","u8)) {
             var key = vᴛ1;
 
             key = textproto.CanonicalMIMEHeaderKey(textproto.TrimString(key));
             var exprᴛ1 = key;
-            if (exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8: {
                 // Bogus. (copy of http1 rules)
                 // Ignore.
+                break;
             }
-            else { /* default: */
-                if (trailer == default!) {
+            default: {
+                if (trailer == nil) {
                     trailer = new map<@string, slice<@string>>();
                 }
-                trailer[key] = default!;
-            }
+                trailer[key] = default;
+                break;
+            }}
         }
     }
     delete(rp.Header, "Trailer"u8);
@@ -656,21 +655,21 @@ public static ServerRequestResult NewServerRequest(ServerRequestParam rp) {
     // "':authority' MUST NOT include the deprecated userinfo subcomponent
     // for "http" or "https" schemed URIs."
     // https://www.rfc-editor.org/rfc/rfc9113.html#section-8.3.1-2.3.8
-    if (strings.IndexByte(rp.Authority, (rune)'@') != -1 && (rp.Scheme == "http"u8 || rp.Scheme == "https"u8)) {
+    if (strings.IndexByte(rp.Authority, (byte)'@') != -1 && (rp.Scheme == "http"u8 || rp.Scheme == "https"u8)) {
         return new ServerRequestResult(
             InvalidReason: "userinfo_in_authority"u8
         );
     }
 
-    ж<url.URL> url_ = default!;
-    @string requestURI = default!;
-    if (rp.Method == "CONNECT"u8 && rp.Protocol == ""u8){
+    ж<url.URL> url_ = default;
+    @string requestURI = default;
+    if (rp.Method == "CONNECT"u8 && rp.Protocol == ""u8) {
         url_ = Ꮡ(new url.URL(Host: rp.Authority));
         requestURI = rp.Authority; // mimic HTTP/1 server behavior
     } else {
-        error err = default!;
+        error err = default;
         (url_, err) = url.ParseRequestURI(rp.Path);
-        if (err != default!) {
+        if (err != nil) {
             return new ServerRequestResult(
                 InvalidReason: "bad_path"u8
             );

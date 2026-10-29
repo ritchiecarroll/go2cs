@@ -81,7 +81,7 @@ partial struct processHandle {
 internal static (uintptr, bool) acquire(this ж<processHandle> Ꮡph) {
     ref var ph = ref Ꮡph.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         var refs = Ꮡph.of(processHandle.Ꮡrefs).Load();
         if (refs < 0) {
             throw panic("internal error: negative process handle reference count");
@@ -99,7 +99,7 @@ internal static (uintptr, bool) acquire(this ж<processHandle> Ꮡph) {
 internal static void release(this ж<processHandle> Ꮡph) {
     ref var ph = ref Ꮡph.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         var refs = Ꮡph.of(processHandle.Ꮡrefs).Load();
         if (refs <= 0) {
             throw panic("internal error: too many releases of process handle");
@@ -136,7 +136,7 @@ internal static ж<Process> newHandleProcess(nint pid, uintptr handle) {
         handle: ph
     ));
 
-    p.Value.cleanup = runtime.AddCleanup<Process, ж<processHandle>>(p, ((Action<ж<processHandle>>)(release)), ph);
+    p.cleanup = runtime.AddCleanup<Process, ж<processHandle>>(p, ((Action<ж<processHandle>>)(release)), ph);
 
     return p;
 }
@@ -270,9 +270,9 @@ public static (ж<Process>, error) FindProcess(nint pid) {
 // higher-level interfaces.
 //
 // If there is an error, it will be of type [*PathError].
-public static (ж<Process>, error) StartProcess(@string name, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
+public static (ж<Process>, error) StartProcess(@string name, slice<@string> argv, ж<ProcAttr> attr) {
     testlog.Open(name);
-    return startProcess(name, argv, Ꮡattr);
+    return startProcess(name, argv, attr);
 }
 
 // Release releases any resources associated with the [Process] p,
@@ -299,7 +299,7 @@ public static error Release(this ж<Process> Ꮡp) {
         }
     }
 
-    return default!;
+    return default;
 }
 
 // doRelease releases a [Process], setting the status to newStatus.
@@ -308,7 +308,7 @@ public static error Release(this ж<Process> Ꮡp) {
 internal static processStatus doRelease(this ж<Process> Ꮡp, processStatus newStatus) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         var state = Ꮡp.of(Process.Ꮡstate).Load();
         var oldStatus = (processStatus)state;
         if (oldStatus != statusOK) {

@@ -53,17 +53,16 @@ internal static slice<byte> commentEnd = slice<byte>("-->"u8);
 // tText is the context transition function for the text state.
 internal static (context, nint) tText(context c, slice<byte> s) {
     nint k = 0;
-    while (ᐧ) {
-        nint i = k + bytes.IndexByte(s.slice(k), (rune)'<');
-        if (i < k || i + 1 == len(s)){
+    for (;;) {
+        nint i = k + bytes.IndexByte(s.slice(k), (byte)'<');
+        if (i < k || i + 1 == len(s)) {
             return (c, len(s));
-        } else 
-        if (i + 4 <= len(s) && bytes.Equal(commentStart, s.slice(i, i + 4))) {
+        } else if (i + 4 <= len(s) && bytes.Equal(commentStart, s.slice(i, i + 4))) {
             return (new context(state: stateHTMLCmt), i + 4);
         }
         i++;
         var end = false;
-        if (s[i] == (rune)'/') {
+        if (s[i] == '/') {
             if (i + 1 == len(s)) {
                 return (c, len(s));
             }
@@ -97,7 +96,7 @@ internal static (context, nint) tTag(context c, slice<byte> s) {
     if (i == len(s)) {
         return (c, len(s));
     }
-    if (s[i] == (rune)'>') {
+    if (s[i] == '>') {
         // Treat <meta> specially, because it doesn't have an end tag, and we
         // want to transition into the correct state/element for it.
         if (c.element == elementMeta) {
@@ -116,33 +115,36 @@ internal static (context, nint) tTag(context c, slice<byte> s) {
     if (i == j) {
         return (new context(
             state: stateError,
-            err: errorf(ErrBadHTML, default!, 0, "expected space, attr name, or end of tag, but got %q"u8, s.slice(i))
+            err: errorf(ErrBadHTML, default, 0, "expected space, attr name, or end of tag, but got %q"u8, s.slice(i))
         ), len(s));
     }
 
     @string attrName = strings.ToLower((@string)(s.slice(i, j)));
-    if (c.element == elementScript && attrName == "type"u8){
+    if (c.element == elementScript && attrName == "type"u8) {
         attr = attrScriptType;
-    } else 
-    if (c.element == elementMeta && attrName == "content"u8){
+    } else if (c.element == elementMeta && attrName == "content"u8) {
         attr = attrMetaContent;
     } else {
-        var exprᴛ1 = attrType(attrName);
-        if (exprᴛ1 == contentTypeURL) {
+        switch (attrType(attrName)) {
+        case var ᴛ when ᴛ == contentTypeURL: {
             attr = attrURL;
+            break;
         }
-        else if (exprᴛ1 == contentTypeCSS) {
+        case var ᴛ when ᴛ == contentTypeCSS: {
             attr = attrStyle;
+            break;
         }
-        else if (exprᴛ1 == contentTypeJS) {
+        case var ᴛ when ᴛ == contentTypeJS: {
             attr = attrScript;
+            break;
         }
-        else if (exprᴛ1 == contentTypeSrcset) {
+        case var ᴛ when ᴛ == contentTypeSrcset: {
             attr = attrSrcset;
-        }
+            break;
+        }}
     }
 
-    if (j == len(s)){
+    if (j == len(s)) {
         state = stateAttrName;
     } else {
         state = stateAfterName;
@@ -153,10 +155,9 @@ internal static (context, nint) tTag(context c, slice<byte> s) {
 // tAttrName is the context transition function for stateAttrName.
 internal static (context, nint) tAttrName(context c, slice<byte> s) {
     var (i, err) = eatAttrName(s, 0);
-    if (err != nil){
+    if (err != nil) {
         return (new context(state: stateError, err: err), len(s));
-    } else 
-    if (i != len(s)) {
+    } else if (i != len(s)) {
         c.state = stateAfterName;
     }
     return (c, i);
@@ -166,10 +167,9 @@ internal static (context, nint) tAttrName(context c, slice<byte> s) {
 internal static (context, nint) tAfterName(context c, slice<byte> s) {
     // Look for the start of the value.
     nint i = eatWhiteSpace(s, 0);
-    if (i == len(s)){
+    if (i == len(s)) {
         return (c, len(s));
-    } else 
-    if (s[i] != (rune)'=') {
+    } else if (s[i] != '=') {
         // Occurs due to tag ending '>', and valueless attribute.
         c.state = stateTag;
         return (c, i);
@@ -198,11 +198,11 @@ internal static (context, nint) tBeforeValue(context c, slice<byte> s) {
     // Find the attribute delimiter.
     var delim = delimSpaceOrTagEnd;
     switch (s[i]) {
-    case (rune)'\'': {
+    case (byte)'\'': {
         (delim, i) = (delimSingleQuote, i + 1);
         break;
     }
-    case (rune)'"': {
+    case (byte)'"': {
         (delim, i) = (delimDoubleQuote, i + 1);
         break;
     }}
@@ -214,7 +214,7 @@ internal static (context, nint) tBeforeValue(context c, slice<byte> s) {
 internal static (context, nint) tHTMLCmt(context c, slice<byte> s) {
     {
         nint i = bytes.Index(s, commentEnd); if (i != -1) {
-            return (new context(nil), i + 3);
+            return (new context(), i + 3);
         }
     }
     return (c, len(s));
@@ -244,7 +244,7 @@ internal static (context, nint) tSpecialTagEnd(context c, slice<byte> s) {
         }
         {
             nint i = indexTagEnd(s, specialTagEndMarkers[c.element]); if (i != -1) {
-                return (new context(nil), i);
+                return (new context(), i);
             }
         }
     }
@@ -283,10 +283,9 @@ internal static (context, nint) tAttr(context c, slice<byte> s) {
 
 // tURL is the context transition function for the URL state.
 internal static (context, nint) tURL(context c, slice<byte> s) {
-    if (bytes.ContainsAny(s, "#?"u8)){
+    if (bytes.ContainsAny(s, "#?"u8)) {
         c.urlPart = urlPartQueryOrFrag;
-    } else 
-    if (len(s) != eatWhiteSpace(s, 0) && c.urlPart == urlPartNone) {
+    } else if (len(s) != eatWhiteSpace(s, 0) && c.urlPart == urlPartNone) {
         // HTML5 uses "Valid URL potentially surrounded by spaces" for
         // attrs: https://www.w3.org/TR/html5/index.html#attributes-1
         c.urlPart = urlPartPreQuery;
@@ -304,25 +303,25 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
     }
     c.jsCtx = nextJSCtx(s.slice(0, i), c.jsCtx);
     switch (s[i]) {
-    case (rune)'"': {
+    case (byte)'"': {
         (c.state, c.jsCtx) = (stateJSDqStr, jsCtxRegexp);
         break;
     }
-    case (rune)'\'': {
+    case (byte)'\'': {
         (c.state, c.jsCtx) = (stateJSSqStr, jsCtxRegexp);
         break;
     }
-    case (rune)'`': {
+    case (byte)'`': {
         (c.state, c.jsCtx) = (stateJSTmplLit, jsCtxRegexp);
         break;
     }
-    case (rune)'/': {
+    case (byte)'/': {
         switch (ᐧ) {
-        case {} when i + 1 < len(s) && s[i + 1] == (rune)'/': {
+        case {} when i + 1 < len(s) && s[i + 1] == (byte)'/': {
             (c.state, i) = (stateJSLineCmt, i + 1);
             break;
         }
-        case {} when i + 1 < len(s) && s[i + 1] == (rune)'*': {
+        case {} when i + 1 < len(s) && s[i + 1] == (byte)'*': {
             (c.state, i) = (stateJSBlockCmt, i + 1);
             break;
         }
@@ -337,7 +336,7 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
         default: {
             return (new context(
                 state: stateError,
-                err: errorf(ErrSlashAmbig, default!, 0, "'/' could start a division or regexp: %.32q"u8, s.slice(i))
+                err: errorf(ErrSlashAmbig, default, 0, "'/' could start a division or regexp: %.32q"u8, s.slice(i))
             ), len(s));
         }}
         break;
@@ -349,21 +348,21 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
     // anything following the opening or closing token, on the same line, is
     // ignored. As such we simply treat any line prefixed with "<!--" or "-->"
     // as if it were actually prefixed with "//" and move on.
-    case (rune)'<': {
+    case (byte)'<': {
         if (i + 3 < len(s) && bytes.Equal(commentStart, s.slice(i, i + 4))) {
             (c.state, i) = (stateJSHTMLOpenCmt, i + 3);
         }
         break;
     }
-    case (rune)'-': {
+    case (byte)'-': {
         if (i + 2 < len(s) && bytes.Equal(commentEnd, s.slice(i, i + 3))) {
             (c.state, i) = (stateJSHTMLCloseCmt, i + 2);
         }
         break;
     }
     // ECMAScript also supports "hashbang" comment lines, see Section 12.5.
-    case (rune)'#': {
-        if (i + 1 < len(s) && s[i + 1] == (rune)'!') {
+    case (byte)'#': {
+        if (i + 1 < len(s) && s[i + 1] == '!') {
             (c.state, i) = (stateJSLineCmt, i + 1);
             break;
         }
@@ -375,7 +374,7 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
         c.jsCtx = jsCtxDivOp;
         break;
     }
-    case (rune)'{': {
+    case (byte)'{': {
         // We only care about tracking brace depth if we are inside of a
         // template literal.
         if (len(c.jsBraceDepth) == 0) {
@@ -386,7 +385,7 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
         c.jsCtx = nextJSCtx(s.slice(i, i + 1), c.jsCtx);
         break;
     }
-    case (rune)'}': {
+    case (byte)'}': {
         if (len(c.jsBraceDepth) == 0) {
             c.jsCtx = nextJSCtx(s.slice(i, i + 1), c.jsCtx);
             return (c, i + 1);
@@ -412,32 +411,32 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
 }
 
 internal static (context, nint) tJSTmpl(context c, slice<byte> s) {
-    nint k = default!;
-    while (ᐧ) {
+    nint k = default;
+    for (;;) {
         nint i = k + bytes.IndexAny(s.slice(k), "`\\$"u8);
         if (i < k) {
             break;
         }
         switch (s[i]) {
-        case (rune)'\\': {
+        case (byte)'\\': {
             i++;
             if (i == len(s)) {
                 return (new context(
                     state: stateError,
-                    err: errorf(ErrPartialEscape, default!, 0, "unfinished escape sequence in JS string: %q"u8, s)
+                    err: errorf(ErrPartialEscape, default, 0, "unfinished escape sequence in JS string: %q"u8, s)
                 ), len(s));
             }
             break;
         }
-        case (rune)'$': {
-            if (len(s) >= i + 2 && s[i + 1] == (rune)'{') {
+        case (byte)'$': {
+            if (len(s) >= i + 2 && s[i + 1] == '{') {
                 c.jsBraceDepth = append(c.jsBraceDepth, (nint)0);
                 (c.state, c.jsCtx) = (stateJS, jsCtxRegexp);
                 return (c, i + 2);
             }
             break;
         }
-        case (rune)'`': {
+        case (byte)'`': {
             // end
             c.state = stateJS;
             return (c, i + 1);
@@ -452,48 +451,49 @@ internal static (context, nint) tJSTmpl(context c, slice<byte> s) {
 // states.
 internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
     @string specials = @"\"""u8;
-    var exprᴛ1 = c.state;
-    if (exprᴛ1 == stateJSSqStr) {
+    switch (c.state) {
+    case var ᴛ when ᴛ == stateJSSqStr: {
         specials = @"\'"u8;
+        break;
     }
-    else if (exprᴛ1 == stateJSRegexp) {
+    case var ᴛ when ᴛ == stateJSRegexp: {
         specials = @"\/[]"u8;
-    }
+        break;
+    }}
 
     nint k = 0;
     var inCharset = false;
-    while (ᐧ) {
+    for (;;) {
         nint i = k + bytes.IndexAny(s.slice(k), specials);
         if (i < k) {
             break;
         }
         switch (s[i]) {
-        case (rune)'\\': {
+        case (byte)'\\': {
             i++;
             if (i == len(s)) {
                 return (new context(
                     state: stateError,
-                    err: errorf(ErrPartialEscape, default!, 0, "unfinished escape sequence in JS string: %q"u8, s)
+                    err: errorf(ErrPartialEscape, default, 0, "unfinished escape sequence in JS string: %q"u8, s)
                 ), len(s));
             }
             break;
         }
-        case (rune)'[': {
+        case (byte)'[': {
             inCharset = true;
             break;
         }
-        case (rune)']': {
+        case (byte)']': {
             inCharset = false;
             break;
         }
-        case (rune)'/': {
+        case (byte)'/': {
             // If "</script" appears in a regex literal, the '/' should not
             // close the regex literal, and it will later be escaped to
             // "\x3C/script" in escapeText.
-            if (i > 0 && i + 7 <= len(s) && bytes.Equal(bytes.ToLower(s.slice(i - 1, i + 7)), slice<byte>("</script"u8))){
+            if (i > 0 && i + 7 <= len(s) && bytes.Equal(bytes.ToLower(s.slice(i - 1, i + 7)), slice<byte>("</script"u8))) {
                 i++;
-            } else 
-            if (!inCharset) {
+            } else if (!inCharset) {
                 (c.state, c.jsCtx) = (stateJS, jsCtxDivOp);
                 return (c, i + 1);
             }
@@ -515,7 +515,7 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
         // into charsets is desired.
         return (new context(
             state: stateError,
-            err: errorf(ErrPartialCharset, default!, 0, "unfinished JS regexp charset: %q"u8, s)
+            err: errorf(ErrPartialCharset, default, 0, "unfinished JS regexp charset: %q"u8, s)
         ), len(s));
     }
 
@@ -530,28 +530,32 @@ internal static (context, nint) tBlockCmt(context c, slice<byte> s) {
     if (i == -1) {
         return (c, len(s));
     }
-    var exprᴛ1 = c.state;
-    if (exprᴛ1 == stateJSBlockCmt) {
+    switch (c.state) {
+    case var ᴛ when ᴛ == stateJSBlockCmt: {
         c.state = stateJS;
+        break;
     }
-    else if (exprᴛ1 == stateCSSBlockCmt) {
+    case var ᴛ when ᴛ == stateCSSBlockCmt: {
         c.state = stateCSS;
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic(c.state.String());
-    }
+        break;
+    }}
     return (c, i + 2);
 }
 
 // tLineCmt is the context transition function for //comment states, and the JS HTML-like comment state.
 internal static (context, nint) tLineCmt(context c, slice<byte> s) {
-    @string lineTerminators = default!;
-    state endState = default!;
-    var exprᴛ1 = c.state;
-    if (exprᴛ1 == stateJSLineCmt || exprᴛ1 == stateJSHTMLOpenCmt || exprᴛ1 == stateJSHTMLCloseCmt) {
+    @string lineTerminators = default;
+    state endState = default;
+    switch (c.state) {
+    case var ᴛ when ᴛ == stateJSLineCmt || ᴛ == stateJSHTMLOpenCmt || ᴛ == stateJSHTMLCloseCmt: {
         (lineTerminators, endState) = ("\n\r\u2028\u2029", stateJS);
+        break;
     }
-    else if (exprᴛ1 == stateCSSLineCmt) {
+    case var ᴛ when ᴛ == stateCSSLineCmt: {
         (lineTerminators, endState) = ("\n\f\r", stateCSS);
         // Line comments are not part of any published CSS standard but
         // are supported by the 4 major browsers.
@@ -560,10 +564,12 @@ internal static (context, nint) tLineCmt(context c, slice<byte> s) {
         // since https://www.w3.org/TR/css3-syntax/#SUBTOK-nl defines
         // newlines:
         //     nl ::= #xA | #xD #xA | #xD | #xC
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic(c.state.String());
-    }
+        break;
+    }}
 
     nint i = bytes.IndexAny(s, lineTerminators);
     if (i == -1) {
@@ -608,23 +614,23 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
     // proves problematic for real code.
 
     nint k = 0;
-    while (ᐧ) {
+    for (;;) {
         nint i = k + bytes.IndexAny(s.slice(k), @"(""'/"u8);
         if (i < k) {
             return (c, len(s));
         }
         switch (s[i]) {
-        case (rune)'(': {
+        case (byte)'(': {
             // Look for url to the left.
             var p = bytes.TrimRight(s.slice(0, i), "\t\n\f\r "u8);
             if (endsWithCSSKeyword(p, urlˢ)) {
                 nint j = len(s) - len(bytes.TrimLeft(s.slice(i + 1), "\t\n\f\r "u8));
                 switch (ᐧ) {
-                case {} when j != len(s) && s[j] == (rune)'"': {
+                case {} when j != len(s) && s[j] == (byte)'"': {
                     (c.state, j) = (stateCSSDqURL, j + 1);
                     break;
                 }
-                case {} when j != len(s) && s[j] == (rune)'\'': {
+                case {} when j != len(s) && s[j] == (byte)'\'': {
                     (c.state, j) = (stateCSSSqURL, j + 1);
                     break;
                 }
@@ -636,25 +642,25 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
             }
             break;
         }
-        case (rune)'/': {
+        case (byte)'/': {
             if (i + 1 < len(s)) {
                 switch (s[i + 1]) {
-                case (rune)'/': {
+                case (byte)'/': {
                     c.state = stateCSSLineCmt;
                     return (c, i + 2);
                 }
-                case (rune)'*': {
+                case (byte)'*': {
                     c.state = stateCSSBlockCmt;
                     return (c, i + 2);
                 }}
             }
             break;
         }
-        case (rune)'"': {
+        case (byte)'"': {
             c.state = stateCSSDqStr;
             return (c, i + 1);
         }
-        case (rune)'\'': {
+        case (byte)'\'': {
             c.state = stateCSSSqStr;
             return (c, i + 1);
         }}
@@ -664,36 +670,40 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
 
 // tCSSStr is the context transition function for the CSS string and URL states.
 internal static (context, nint) tCSSStr(context c, slice<byte> s) {
-    @string endAndEsc = default!;
-    var exprᴛ1 = c.state;
-    if (exprᴛ1 == stateCSSDqStr || exprᴛ1 == stateCSSDqURL) {
+    @string endAndEsc = default;
+    switch (c.state) {
+    case var ᴛ when ᴛ == stateCSSDqStr || ᴛ == stateCSSDqURL: {
         endAndEsc = @"\"""u8;
+        break;
     }
-    else if (exprᴛ1 == stateCSSSqStr || exprᴛ1 == stateCSSSqURL) {
+    case var ᴛ when ᴛ == stateCSSSqStr || ᴛ == stateCSSSqURL: {
         endAndEsc = @"\'"u8;
+        break;
     }
-    else if (exprᴛ1 == stateCSSURL) {
+    case var ᴛ when ᴛ == stateCSSURL: {
         // Unquoted URLs end with a newline or close parenthesis.
         // The below includes the wc (whitespace character) and nl.
         endAndEsc = "\\\t\n\f\r )"u8;
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic(c.state.String());
-    }
+        break;
+    }}
 
     nint k = 0;
-    while (ᐧ) {
+    for (;;) {
         nint i = k + bytes.IndexAny(s.slice(k), endAndEsc);
         if (i < k) {
             var (cΔ1, nread) = tURL(c, decodeCSS(s.slice(k)));
             return (cΔ1, k + nread);
         }
-        if (s[i] == (rune)'\\'){
+        if (s[i] == '\\') {
             i++;
             if (i == len(s)) {
                 return (new context(
                     state: stateError,
-                    err: errorf(ErrPartialEscape, default!, 0, "unfinished escape sequence in CSS string: %q"u8, s)
+                    err: errorf(ErrPartialEscape, default, 0, "unfinished escape sequence in CSS string: %q"u8, s)
                 ), len(s));
             }
         } else {
@@ -715,7 +725,7 @@ internal static (context, nint) tMetaContent(context c, slice<byte> s) {
     foreach (var i in range(len(s))) {
         if (i + 3 <= len(s) - 1 && bytes.EqualFold(s.slice(i, i + 3), slice<byte>("url"u8))) {
             {
-                nint j = eatWhiteSpace(s, i + 3); if (j < len(s) && s[j] == (rune)'=') {
+                nint j = eatWhiteSpace(s, i + 3); if (j < len(s) && s[j] == '=') {
                     c.state = stateMetaContentURL;
                     return (c, j + 1);
                 }
@@ -728,7 +738,7 @@ internal static (context, nint) tMetaContent(context c, slice<byte> s) {
 // tMetaContentURL is the context transition function for the "url=" part of a meta content attribute state.
 internal static (context, nint) tMetaContentURL(context c, slice<byte> s) {
     foreach (var i in range(len(s))) {
-        if (s[i] == (rune)';') {
+        if (s[i] == ';') {
             c.state = stateMetaContent;
             return (c, i + 1);
         }
@@ -743,21 +753,21 @@ internal static (context, nint) tMetaContentURL(context c, slice<byte> s) {
 internal static (nint, ж<ΔError>) eatAttrName(slice<byte> s, nint i) {
     for (nint j = i; j < len(s); j++) {
         switch (s[j]) {
-        case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r' or (rune)'=' or (rune)'>': {
-            return (j, default!);
+        case (byte)' ' or (byte)'\t' or (byte)'\n' or (byte)'\f' or (byte)'\r' or (byte)'=' or (byte)'>': {
+            return (j, default);
         }
-        case (rune)'\'' or (rune)'"' or (rune)'<': {
+        case (byte)'\'' or (byte)'"' or (byte)'<': {
             // These result in a parse warning in HTML5 and are
             // indicative of serious problems if seen in an attr
             // name in a template.
-            return (-1, errorf(ErrBadHTML, default!, 0, "%q in attribute name: %.32q"u8, s.slice(j, j + 1), s));
+            return (-1, errorf(ErrBadHTML, default, 0, "%q in attribute name: %.32q"u8, s.slice(j, j + 1), s));
         }
         default: {
             // No-op.
             break;
         }}
     }
-    return (len(s), default!);
+    return (len(s), default);
 }
 
 internal static map<@string, element> elementNameMap = new map<@string, element>{
@@ -770,12 +780,12 @@ internal static map<@string, element> elementNameMap = new map<@string, element>
 
 // asciiAlpha reports whether c is an ASCII letter.
 internal static bool asciiAlpha(byte c) {
-    return (rune)'A' <= c && c <= (rune)'Z' || (rune)'a' <= c && c <= (rune)'z';
+    return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z';
 }
 
 // asciiAlphaNum reports whether c is an ASCII letter or digit.
 internal static bool asciiAlphaNum(byte c) {
-    return asciiAlpha(c) || (rune)'0' <= c && c <= (rune)'9';
+    return asciiAlpha(c) || '0' <= c && c <= '9';
 }
 
 // eatTagName returns the largest j such that s[i:j] is a tag name and the tag type.
@@ -791,7 +801,7 @@ internal static (nint, element) eatTagName(slice<byte> s, nint i) {
             continue;
         }
         // Allow "x-y" or "x:y" but not "x-", "-y", or "x--y".
-        if ((x == (rune)':' || x == (rune)'-') && j + 1 < len(s) && asciiAlphaNum(s[j + 1])) {
+        if ((x == ':' || x == '-') && j + 1 < len(s) && asciiAlphaNum(s[j + 1])) {
             j += 2;
             continue;
         }
@@ -804,7 +814,7 @@ internal static (nint, element) eatTagName(slice<byte> s, nint i) {
 internal static nint eatWhiteSpace(slice<byte> s, nint i) {
     for (nint j = i; j < len(s); j++) {
         switch (s[j]) {
-        case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r': {
+        case (byte)' ' or (byte)'\t' or (byte)'\n' or (byte)'\f' or (byte)'\r': {
             // No-op.
             break;
         }

@@ -9,7 +9,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(specialPinCounter))]
 partial class runtime_package {
 
 // A Pinner is a set of Go objects each pinned to a fixed location in memory. The
@@ -52,7 +51,7 @@ partial struct pinner {
 internal static void unpin(this ж<pinner> Ꮡp) {
     ref var Δp = ref Ꮡp.DerefOrNull();
 
-    if (Ꮡp == nil || Δp.refs == default!) {
+    if (Ꮡp == nil || Δp.refs == nil) {
         return;
     }
     foreach (var i in range(Δp.refs)) {
@@ -69,8 +68,8 @@ internal static void unpin(this ж<pinner> Ꮡp) {
 internal static readonly @string runtimePinnerArgumentIsˢ = "runtime.Pinner: argument is nil"u8;
 internal static readonly @string runtimePinnerObjectWasˢ = "runtime.Pinner: object was allocated into an arena"u8;
 
-internal static @unsafe.Pointer pinnerGetPtr(ж<any> Ꮡi) {
-    var e = efaceOf(Ꮡi);
+internal static @unsafe.Pointer pinnerGetPtr(ж<any> i) {
+    var e = efaceOf(i);
     var etyp = e.Value._type;
     if (etyp == nil) {
         throw panic(((errorString)(@string)runtimePinnerArgumentIsˢ));
@@ -124,15 +123,15 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
         span.setPinnerBits(pinnerBits);
     }
     var pinState = pinnerBits.ofObject(objIndex);
-    if (pin){
-        if (pinState.isPinned()){
+    if (pin) {
+        if (pinState.isPinned()) {
             // multiple pins on same object, set multipin bit
             pinState.setMultiPinned(true);
             // and increase the pin counter
             // TODO(mknyszek): investigate if systemstack is necessary here
             var spanʗ1 = span;
             systemstack(() => {
-                var offset = objIndex * (~spanʗ1).elemsize;
+                var offset = objIndex * spanʗ1.elemsize;
                 spanʗ1.incPinCounter(offset);
             });
         } else {
@@ -141,13 +140,13 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
         }
     } else {
         // unpin
-        if (pinState.isPinned()){
-            if (pinState.isMultiPinned()){
-                bool exists = default!;
+        if (pinState.isPinned()) {
+            if (pinState.isMultiPinned()) {
+                bool exists = default;
                 // TODO(mknyszek): investigate if systemstack is necessary here
                 var spanʗ2 = span;
                 systemstack(() => {
-                    var offset = objIndex * (~spanʗ2).elemsize;
+                    var offset = objIndex * spanʗ2.elemsize;
                     exists = spanʗ2.decPinCounter(offset);
                 });
                 if (!exists) {
@@ -198,9 +197,9 @@ internal static void setMultiPinned(this ref pinState v, bool val) {
 internal static void set(this ref pinState v, bool val, bool multipin) {
     var mask = v.mask;
     if (multipin) {
-        mask <<= (int)(1);
+        mask <<= 1;
     }
-    if (val){
+    if (val) {
         atomic.Or8(v.bytep, mask);
     } else {
         atomic.And8(v.bytep, (uint8)((uint8)(~mask)));
@@ -238,8 +237,8 @@ internal static ж<pinnerBits> getPinnerBits(this ж<mspan> Ꮡs) {
     return (ж<pinnerBits>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.of(mspan.ᏑpinnerBits))));
 }
 
-internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> Ꮡp) {
-    atomicstorep(@unsafe.Pointer.FromBox(Ꮡs.of(mspan.ᏑpinnerBits)), @unsafe.Pointer.FromPinnedBox(Ꮡp));
+internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> Δp) {
+    atomicstorep(@unsafe.Pointer.FromBox(Ꮡs.of(mspan.ᏑpinnerBits)), @unsafe.Pointer.FromPinnedBox(Δp));
 }
 
 // refreshPinnerBits replaces pinnerBits with a fresh copy in the arenas for the
@@ -267,7 +266,7 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
         }
     }
 
-    if (hasPins){
+    if (hasPins) {
         var newPinnerBits = s.newPinnerBits();
         memmove(@unsafe.Pointer.FromPinnedBox(newPinnerBits.of(pinnerBits.Ꮡx)), @unsafe.Pointer.FromPinnedBox(Δp.of(pinnerBits.Ꮡx)), bytes);
         Ꮡs.setPinnerBits(newPinnerBits);
@@ -279,9 +278,9 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
 // incPinCounter is only called for multiple pins of the same object and records
 // the _additional_ pins.
 internal static void incPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
-    ж<specialPinCounter> rec = default!;
+    ж<specialPinCounter> rec = default;
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
-    if (!exists){
+    if (!exists) {
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         rec = (ж<specialPinCounter>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialPinCounterAlloc).alloc());
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));

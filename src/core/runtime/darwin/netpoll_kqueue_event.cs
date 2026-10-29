@@ -16,13 +16,12 @@ internal static UntypedInt kqIdent => 0xee1eb9f4;
 internal static readonly @string runtimeKeventFailedˢ = "runtime: kevent failed"u8;
 
 internal static void addWakeupEvent(int32 kq) {
-    ref var ev = ref heap<keventt>(out var Ꮡev);
-    ev = new keventt(
+    ref var ev = ref heap<keventt>(new keventt(
         ident: kqIdent,
         filter: _EVFILT_USER,
         flags: (uint16)((uint16)_EV_ADD | (uint16)_EV_CLEAR)
-    );
-    while (ᐧ) {
+    ), out var Ꮡev);
+    for (;;) {
         var n = kevent(kq, Ꮡev, 1, nil, 0, nil);
         if (n == 0) {
             break;
@@ -42,13 +41,12 @@ internal static void addWakeupEvent(int32 kq) {
 internal static readonly @string runtimeNetpollBreakWriteˢ = "runtime: netpollBreak write failed"u8;
 
 internal static void wakeNetpoll(int32 kq) {
-    ref var ev = ref heap<keventt>(out var Ꮡev);
-    ev = new keventt(
+    ref var ev = ref heap<keventt>(new keventt(
         ident: kqIdent,
         filter: _EVFILT_USER,
         fflags: _NOTE_TRIGGER
-    );
-    while (ᐧ) {
+    ), out var Ꮡev);
+    for (;;) {
         var n = kevent(kq, Ꮡev, 1, nil, 0, nil);
         if (n == 0) {
             break;

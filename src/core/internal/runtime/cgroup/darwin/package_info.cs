@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,7 +56,7 @@ using static go.@internal.runtime.cgroup_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/cgroup/cgroup.go", "cgroup.cs", "ADFwlIKClJSCgqamgoKCpoKUppSCgpSUgoKmgoKmrgAVJKaUgoLckoKSgqYABxCCgqaClIKCpoKUgpSUpqaUyqbKlLiokoKClKaClIKmpu4AKEqUgoL+gpKCpqaCgoKUuIKClIKUlKaCgpSCpoKCgpSClIKCgpS4goKUgpSUgqaCgqamgraCtoLcgoKUgoK4gpSUAAkUyoKClIKCgpSClLimgoKClIKUAAUQggACHgAMApKCuJSCgoKCgu6CpoKCgoKmgqaClIKUpg==")]
+[assembly: go.GoPositionMap("internal/runtime/cgroup/cgroup.go", "cgroup.cs", "ADFwlIKClJSCgqamgoKCpoKUppSCgpSUgoKmgoKmrgAVJKaUgoLcgoKCgqYABxCCgqaClIKCpoKUgpSUpqaUyqbKlLiokoKClKaClIKmpu4AKEqUgoLugoKCpqaCgoKUuIKClIKUlKaCgpSCpoKCgpSClIKCgpS4goKUgpSUgqaCgqamgsaCxoLsgoKUgoK4gpSUAAkUyoKClIKCgpSClLimgoKClIKUAAUQggACHgAMApKCuJSCgoKCgu6CpoKCgoKmgqaClIKUpg==")]
 [assembly: go.GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "AA4eggAcWAALAgAIKgAUEoKUgpSClIKU3LimgoKUlNymgqamuMqUlJTcAAQaAAgClKY=")]
 [assembly: go.GoPositionMap("internal/runtime/cgroup/runtime.go", "runtime.cs", "AAkc")]
 // </GoSourcePositionMaps>

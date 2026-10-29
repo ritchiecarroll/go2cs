@@ -23,16 +23,16 @@ partial class doc_package {
 
 // An Example represents an example function found in a test source file.
 partial struct Example {
-    public @string Name; // name of the item being exemplified (including optional suffix)
+    public @string Name;   // name of the item being exemplified (including optional suffix)
     public @string Suffix; // example suffix, without leading '_' (only populated by NewFromFiles)
-    public @string Doc; // example function doc string
+    public @string Doc;    // example function doc string
     public ast.Node Code;
     public ж<ast.File> Play; // a whole program version of the example
     public slice<ж<ast.CommentGroup>> Comments;
     public @string Output; // expected output
     public bool Unordered;
     public bool EmptyOutput; // expect empty output
-    public nint Order; // original source code order
+    public nint Order;       // original source code order
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -60,24 +60,24 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
     var testFiles = testFilesʗp.sslice();
     var flistᴷ = new stackAppend<ж<Example>>();
 
-    slice<ж<Example>> list = default!;
+    slice<ж<Example>> list = default;
     foreach (var (_, @file) in testFiles) {
         var hasTests = false; // file contains tests, fuzz test, or benchmarks
-        nint numDecl = 0; // number of non-import declarations in the file
-        slice<ж<Example>> flist = default!;
-        foreach (var (_, decl) in (~@file).Decls) {
+        nint numDecl = 0;     // number of non-import declarations in the file
+        slice<ж<Example>> flist = default;
+        foreach (var (_, decl) in @file.Decls) {
             {
-                var (g, okΔ1) = decl._<ж<ast.GenDecl>>(ᐧ); if (okΔ1 && (~g).Tok != token.IMPORT) {
+                var (g, okΔ1) = decl._<ж<ast.GenDecl>>(ᐧ); if (okΔ1 && g.Tok != token.IMPORT) {
                     numDecl++;
                     continue;
                 }
             }
             var (f, ok) = decl._<ж<ast.FuncDecl>>(ᐧ);
-            if (!ok || (~f).Recv != nil) {
+            if (!ok || f.Recv != nil) {
                 continue;
             }
             numDecl++;
-            @string name = f.Value.Name.Value.Name;
+            @string name = f.Name.Name;
             if (isTest(name, testˢ) || isTest(name, benchmarkˢ) || isTest(name, fuzzˢ)) {
                 hasTests = true;
                 continue;
@@ -86,31 +86,31 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
                 continue;
             }
             {
-                var @params = f.Value.Type.Value.Params; if (len((~@params).List) != 0) {
+                var @params = f.Type.Params; if (len(@params.List) != 0) {
                     continue; // function has params; not a valid example
                 }
             }
             {
-                var results = f.Value.Type.Value.Results; if (results != nil && len((~results).List) != 0) {
+                var results = f.Type.Results; if (results != nil && len(results.List) != 0) {
                     continue; // function has results; not a valid example
                 }
             }
-            if ((~f).Body == nil) { // ast.File.Body nil dereference (see issue 28044)
+            if (f.Body == nil) { // ast.File.Body nil dereference (see issue 28044)
                 continue;
             }
             ref var doc = ref heap(new @string(), out var Ꮡdoc);
-            if ((~f).Doc != nil) {
-                doc = (~f).Doc.Text();
+            if (f.Doc != nil) {
+                doc = f.Doc.Text();
             }
             ref var output = ref heap<@string>(out var Ꮡoutput);
             ref var unordered = ref heap<bool>(out var Ꮡunordered);
-            (output, unordered, var hasOutput) = exampleOutput((~f).Body, (~@file).Comments);
+            (output, unordered, var hasOutput) = exampleOutput(f.Body, @file.Comments);
             flist = append(flistᴷ, flist, Ꮡ(new Example(
                 Name: name[(int)(len("Example"))..],
                 Doc: doc,
-                Code: new ast.BlockStmtжNode((~f).Body),
+                Code: new ast.BlockStmtжNode(f.Body),
                 Play: playExample(ref (@file).DerefOrNull(), ref (f).DerefOrNull()),
-                Comments: (~@file).Comments,
+                Comments: @file.Comments,
                 Output: output,
                 Unordered: unordered,
                 EmptyOutput: output == ""u8 && hasOutput,
@@ -121,35 +121,35 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             // If this file only has one example function, some
             // other top-level declarations, and no tests or
             // benchmarks, use the whole file as the example.
-            flist[0].Value.Code = new ast.FileжNode(@file);
-            flist[0].Value.Play = playExampleFile(ref (@file).DerefOrNull());
+            flist[0].Code = new ast.FileжNode(@file);
+            flist[0].Play = playExampleFile(ref (@file).DerefOrNull());
         }
         list = appendꓸꓸꓸ(list, flist);
     }
     // sort by name
-    slices.SortFunc(list, (ж<Example> a, ж<Example> b) => cmp.Compare((~a).Name, (~b).Name));
+    slices.SortFunc(list, (ж<Example> a, ж<Example> b) => cmp.Compare(a.Name, b.Name));
     return list;
 }
 
 internal static ж<lazyregexp.Regexp> outputPrefix = lazyregexp.New(@"(?i)^[[:space:]]*(unordered )?output:"u8);
 
 // Extracts the expected output and whether there was a valid output comment.
-internal static (@string output, bool unordered, bool ok) exampleOutput(ж<ast.BlockStmt> Ꮡb, slice<ж<ast.CommentGroup>> comments) {
-    bool unordered = default!;
+internal static (@string output, bool unordered, bool ok) exampleOutput(ж<ast.BlockStmt> b, slice<ж<ast.CommentGroup>> comments) {
+    bool unordered = default;
 
     {
-        var (_, last) = lastComment(Ꮡb, comments); if (last != nil) {
+        var (_, last) = lastComment(b, comments); if (last != nil) {
             // test that it begins with the correct prefix
             @string text = last.Text();
             {
-                var loc = outputPrefix.FindStringSubmatchIndex(text); if (loc != default!) {
+                var loc = outputPrefix.FindStringSubmatchIndex(text); if (loc != nil) {
                     if (loc[2] != -1) {
                         unordered = true;
                     }
                     text = text.slice(loc[1]);
                     // Strip zero or more spaces followed by \n or a single space.
                     text = strings.TrimLeft(text, " "u8);
-                    if (len(text) > 0 && text[0] == (rune)'\n') {
+                    if (len(text) > 0 && text[0] == '\n') {
                         text = text[1..];
                     }
                     return (text, unordered, true);
@@ -185,10 +185,10 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
 
     var body = f.Body;
 
-    if (!strings.HasSuffix((~@file.Name).Name, testˢ2)) {
+    if (!strings.HasSuffix(@file.Name.Name, testˢ2)) {
         // We don't support examples that are part of the
         // greater package (yet).
-        return default!;
+        return default;
     }
 
     // Collect top-level declarations in the file.
@@ -198,11 +198,11 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     foreach (var (_, decl) in @file.Decls) {
         switch (decl.type()) {
         case ж<ast.FuncDecl> d: {
-            if ((~d).Recv == nil){
-                topDecls[(~(~d).Name).Obj] = new ast.FuncDeclжDecl(d);
+            if (d.Recv == nil) {
+                topDecls[d.Name.Obj] = new ast.FuncDeclжDecl(d);
             } else {
-                if (len((~(~d).Recv).List) == 1) {
-                    var t = (~(~d).Recv).List[0].Value.Type;
+                if (len(d.Recv.List) == 1) {
+                    var t = d.Recv.List[0].Type;
                     var (tname, _) = baseTypeName(t);
                     typMethods[tname] = append(typMethods[tname], (ast.Decl)(new ast.FuncDeclжDecl(d)));
                 }
@@ -210,15 +210,15 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             break;
         }
         case ж<ast.GenDecl> d: {
-            foreach (var (_, spec) in (~d).Specs) {
+            foreach (var (_, spec) in d.Specs) {
                 switch (spec.type()) {
                 case ж<ast.TypeSpec> s: {
-                    topDecls[(~(~s).Name).Obj] = new ast.GenDeclжDecl(d);
+                    topDecls[s.Name.Obj] = new ast.GenDeclжDecl(d);
                     break;
                 }
                 case ж<ast.ValueSpec> s: {
-                    foreach (var (_, name) in (~s).Names) {
-                        topDecls[(~name).Obj] = new ast.GenDeclжDecl(d);
+                    foreach (var (_, name) in s.Names) {
+                        topDecls[name.Obj] = new ast.GenDeclжDecl(d);
                     }
                     break;
                 }}
@@ -233,8 +233,8 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     // Use unresolved identifiers to determine the imports used by this
     // example. The heuristic assumes package names match base import
     // paths for imports w/o renames (should be good enough most of the time).
-    slice<ast.Spec> namedImports = default!;
-    slice<ast.Spec> blankImports = default!;          // _ imports
+    slice<ast.Spec> namedImports = default;
+    slice<ast.Spec> blankImports = default; // _ imports
 
     // To preserve the blank lines between groups of imports, find the
     // start position of each group, and assign that position to all
@@ -243,7 +243,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     var groupStartsʗ1 = groupStarts;
     tokenꓸPos groupStart(ж<ast.ImportSpec> s) {
         foreach (var (i, start) in groupStartsʗ1) {
-            if ((~(~s).Path).ValuePos < start) {
+            if (s.Path.ValuePos < start) {
                 return groupStartsʗ1[i - 1];
             }
         }
@@ -251,34 +251,34 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     }
 
     foreach (var (_, s) in @file.Imports) {
-        var (p, err) = strconv.Unquote((~(~s).Path).Value);
-        if (err != default!) {
+        var (p, err) = strconv.Unquote((~s.Path).Value);
+        if (err != nil) {
             continue;
         }
         if (p == "syscall/js"u8) {
             // We don't support examples that import syscall/js,
             // because the package syscall/js is not available in the playground.
-            return default!;
+            return default;
         }
         @string n = assumedPackageName(p);
-        if ((~s).Name != nil) {
-            n = s.Value.Name.Value.Name;
+        if (s.Name != nil) {
+            n = s.Name.Name;
             var exprᴛ1 = n;
-            if (exprᴛ1 == "_"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "_"u8: {
                 blankImports = append(blankImportsᴷ, blankImports, (ast.Spec)(new ast.ImportSpecжSpec(s)));
                 continue;
+                break;
             }
-            else if (exprᴛ1 == "."u8) {
+            case {} when exprᴛ1 == "."u8: {
                 // We can't resolve dot imports (yet).
-                return default!;
-            }
+                return default;
+            }}
         }
         if (unresolved[n]) {
             // Copy the spec and its path to avoid modifying the original.
-            ref var spec = ref heap<ast.ImportSpec>(out var Ꮡspec);
-            spec = s.Value;
-            ref var path = ref heap<ast.BasicLit>(out var Ꮡpath);
-            path = (~s).Path.Value;
+            ref var spec = ref heap<ast.ImportSpec>(s.Value, out var Ꮡspec);
+            ref var path = ref heap<ast.BasicLit>(s.Path.Value, out var Ꮡpath);
             spec.Path = Ꮡpath;
             updateBasicLitPos(spec.Path, groupStart(Ꮡspec));
             namedImports = append(namedImports, (ast.Spec)(new ast.ImportSpecжSpec(Ꮡspec)));
@@ -296,14 +296,14 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     // If there are other unresolved identifiers, give up because this
     // synthesized file is not going to build.
     if (len(unresolved) > 0) {
-        return default!;
+        return default;
     }
 
     // Include documentation belonging to blank imports.
-    slice<ж<ast.CommentGroup>> comments = default!;
+    slice<ж<ast.CommentGroup>> comments = default;
     foreach (var (_, s) in blankImports) {
         {
-            var c = s._<ж<ast.ImportSpec>>().Value.Doc; if (c != nil) {
+            var c = s._<ж<ast.ImportSpec>>().Doc; if (c != nil) {
                 comments = append(comments, c);
             }
         }
@@ -324,14 +324,14 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     foreach (var (_, d) in depDecls) {
         switch (d.type()) {
         case ж<ast.GenDecl> dΔ1: {
-            if ((~dΔ1).Doc != nil) {
-                comments = append(comments, (~dΔ1).Doc);
+            if (dΔ1.Doc != nil) {
+                comments = append(comments, dΔ1.Doc);
             }
             break;
         }
         case ж<ast.FuncDecl> dΔ1: {
-            if ((~dΔ1).Doc != nil) {
-                comments = append(comments, (~dΔ1).Doc);
+            if (dΔ1.Doc != nil) {
+                comments = append(comments, dΔ1.Doc);
             }
             break;
         }}
@@ -341,9 +341,9 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     var importDecl = Ꮡ(new ast.GenDecl(
         Tok: token.IMPORT,
         Lparen: 1, // Need non-zero Lparen and Rparen so that printer
-        Rparen: 1 // treats this as a factored import.
+        Rparen: 1  // treats this as a factored import.
     ));
-    importDecl.Value.Specs = appendꓸꓸꓸ(namedImports, blankImports);
+    importDecl.Specs = appendꓸꓸꓸ(namedImports, blankImports);
 
     // Synthesize main function.
     var funcDecl = Ꮡ(new ast.FuncDecl(
@@ -383,7 +383,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
 
     var unresolved = new map<@string, bool>();
     ref var depDecls = ref heap<slice<ast.Decl>>(out var ᏑdepDecls);
-    var usedDecls = new map<ast.Decl, bool>(); // set of top-level decls reachable from the body
+    var usedDecls = new map<ast.Decl, bool>();     // set of top-level decls reachable from the body
     var usedObjs = new map<ж<ast.Object>, bool>(); // set of objects reachable from the body (each declared by a usedDecl)
 
     ref var inspectFunc = ref heap<Func<ast.Node, bool>>(out var ᏑinspectFunc);
@@ -394,12 +394,11 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
     inspectFunc = (ast.Node n) => {
         switch (n.type()) {
         case ж<ast.Ident> e: {
-            if ((~e).Obj == nil && (~e).Name != "_"u8){
-                unresolvedʗ1[(~e).Name] = true;
-            } else 
-            {
-                var d = topDeclsʗ1[(~e).Obj]; if (d != default!) {
-                    usedObjsʗ1[(~e).Obj] = true;
+            if (e.Obj == nil && e.Name != "_"u8) {
+                unresolvedʗ1[e.Name] = true;
+            } else {
+                var d = topDeclsʗ1[e.Obj]; if (d != nil) {
+                    usedObjsʗ1[e.Obj] = true;
                     if (!usedDeclsʗ1[d]) {
                         usedDeclsʗ1[d] = true;
                         ᏑdepDecls.ValueSlot = append(ᏑdepDecls.ValueSlot, d);
@@ -412,7 +411,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
             // For selector expressions, only inspect the left hand side.
             // (For an expression like fmt.Println, only add "fmt" to the
             // set of unresolved names, not "Println".)
-            ast.Inspect((~e).X, ᏑinspectFunc.ValueSlot);
+            ast.Inspect(e.X, ᏑinspectFunc.ValueSlot);
             return false;
         }
         case ж<ast.KeyValueExpr> e: {
@@ -427,8 +426,8 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
 
     void inspectFieldList(ж<ast.FieldList> fl) {
         if (fl != nil) {
-            foreach (var (_, f) in (~fl).List) {
-                ast.Inspect((~f).Type, ᏑinspectFunc.ValueSlot);
+            foreach (var (_, f) in fl.List) {
+                ast.Inspect(f.Type, ᏑinspectFunc.ValueSlot);
             }
         }
     }
@@ -441,31 +440,31 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
         switch (depDecls[i].type()) {
         case ж<ast.FuncDecl> d: {
             // Inspect type parameters.
-            inspectFieldList((~(~d).Type).TypeParams);
+            inspectFieldList(d.Type.TypeParams);
             // Inspect types of parameters and results. See #28492.
-            inspectFieldList((~(~d).Type).Params);
-            inspectFieldList((~(~d).Type).Results);
+            inspectFieldList(d.Type.Params);
+            inspectFieldList(d.Type.Results);
 
             // Functions might not have a body. See #42706.
-            if ((~d).Body != nil) {
-                ast.Inspect(new ast.BlockStmtжNode((~d).Body), inspectFunc);
+            if (d.Body != nil) {
+                ast.Inspect(new ast.BlockStmtжNode(d.Body), inspectFunc);
             }
             break;
         }
         case ж<ast.GenDecl> d: {
-            foreach (var (_, spec) in (~d).Specs) {
+            foreach (var (_, spec) in d.Specs) {
                 switch (spec.type()) {
                 case ж<ast.TypeSpec> s: {
-                    inspectFieldList((~s).TypeParams);
-                    ast.Inspect((~s).Type, inspectFunc);
-                    depDecls = appendꓸꓸꓸ(depDecls, typMethods[(~(~s).Name).Name]);
+                    inspectFieldList(s.TypeParams);
+                    ast.Inspect(s.Type, inspectFunc);
+                    depDecls = appendꓸꓸꓸ(depDecls, typMethods[s.Name.Name]);
                     break;
                 }
                 case ж<ast.ValueSpec> s: {
-                    if ((~s).Type != default!) {
-                        ast.Inspect((~s).Type, inspectFunc);
+                    if (s.Type != nil) {
+                        ast.Inspect(s.Type, inspectFunc);
                     }
-                    foreach (var (_, val) in (~s).Values) {
+                    foreach (var (_, val) in s.Values) {
                         ast.Inspect(val, inspectFunc);
                     }
                     break;
@@ -483,7 +482,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
     // on their own, and removing any constant from the group could change the
     // values of subsequent ones.
     // See testdata/examples/iota.go for a minimal example.
-    slice<ast.Decl> ds = default!;
+    slice<ast.Decl> ds = default;
     foreach (var (_, d) in depDecls) {
         switch (d.type()) {
         case ж<ast.FuncDecl> dΔ1: {
@@ -493,11 +492,11 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
         case ж<ast.GenDecl> dΔ1: {
             var containsIota = false; // does any spec have iota?
             // Collect all Specs that were mentioned in the example.
-            slice<ast.Spec> specs = default!;
-            foreach (var (_, s) in (~dΔ1).Specs) {
+            slice<ast.Spec> specs = default;
+            foreach (var (_, s) in dΔ1.Specs) {
                 switch (s.type()) {
                 case ж<ast.TypeSpec> sΔ1: {
-                    if (usedObjs[(~(~sΔ1).Name).Obj]) {
+                    if (usedObjs[sΔ1.Name.Obj]) {
                         specs = append(specs, (ast.Spec)(new ast.TypeSpecжSpec(sΔ1)));
                     }
                     break;
@@ -511,19 +510,18 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
                     // Exception: the multiple names have a single initializer (which
                     // would be a function call with multiple return values). In that
                     // case, keep everything.
-                    if (len((~sΔ1).Names) > 1 && len((~sΔ1).Values) == 1) {
+                    if (len(sΔ1.Names) > 1 && len(sΔ1.Values) == 1) {
                         specs = append(specs, (ast.Spec)(new ast.ValueSpecжSpec(sΔ1)));
                         continue;
                     }
-                    ref var ns = ref heap<ast.ValueSpec>(out var Ꮡns);
-                    ns = sΔ1.Value;
-                    ns.Names = default!;
-                    ns.Values = default!;
-                    foreach (var (i, n) in (~sΔ1).Names) {
-                        if (usedObjs[(~n).Obj]) {
+                    ref var ns = ref heap<ast.ValueSpec>(sΔ1.Value, out var Ꮡns);
+                    ns.Names = default;
+                    ns.Values = default;
+                    foreach (var (i, n) in sΔ1.Names) {
+                        if (usedObjs[n.Obj]) {
                             ns.Names = append(ns.Names, n);
-                            if ((~sΔ1).Values != default!) {
-                                ns.Values = append(ns.Values, (~sΔ1).Values[i]);
+                            if (sΔ1.Values != nil) {
+                                ns.Values = append(ns.Values, sΔ1.Values[i]);
                             }
                         }
                     }
@@ -535,12 +533,11 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
             }
             if (len(specs) > 0) {
                 // Constant with iota? Keep it all.
-                if ((~dΔ1).Tok == token.CONST && containsIota){
+                if (dΔ1.Tok == token.CONST && containsIota) {
                     ds = append(ds, (ast.Decl)(new ast.GenDeclжDecl(dΔ1)));
                 } else {
                     // Synthesize a GenDecl with just the Specs we need.
-                    ref var nd = ref heap<ast.GenDecl>(out var Ꮡnd);
-                    nd = dΔ1.Value; // copy the GenDecl
+                    ref var nd = ref heap<ast.GenDecl>(dΔ1.Value, out var Ꮡnd); // copy the GenDecl
                     nd.Specs = specs;
                     if (len(specs) == 1) {
                         // Remove grouping parens if there is only one spec.
@@ -560,7 +557,7 @@ internal static bool hasIota(ast.Spec s) {
         // Check that this is the special built-in "iota" identifier, not
         // a user-defined shadow.
         {
-            var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && (~id).Name == "iota"u8 && (~id).Obj == nil) {
+            var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && id.Name == "iota"u8 && id.Obj == nil) {
                 return true;
             }
         }
@@ -590,7 +587,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
     slices.SortFunc(imps, (ж<ast.ImportSpec> a, ж<ast.ImportSpec> b) => cmp.Compare(a.Pos(), b.Pos()));
     // Assume gofmt has been applied, so there is a blank line between adjacent imps
     // if and only if they are more than 2 positions apart (newline, tab).
-    slice<ж<ast.ImportSpec>> groupStarts = default!;
+    slice<ж<ast.ImportSpec>> groupStarts = default;
     tokenꓸPos prevEnd = (tokenꓸPos)(-2);
     foreach (var (_, imp) in imps) {
         if (imp.Pos() - prevEnd > 2) {
@@ -598,8 +595,8 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
         }
         prevEnd = imp.End();
         // Account for end-of-line comments.
-        if ((~imp).Comment != nil) {
-            prevEnd = (~imp).Comment.End();
+        if (imp.Comment != nil) {
+            prevEnd = imp.Comment.End();
         }
     }
     groupStarts = move2heap(groupStartsᴷ, groupStarts);
@@ -621,17 +618,16 @@ internal static ж<ast.File> playExampleFile(ref ast.File @file) {
     }
 
     // Copy declaration slice, rewriting the ExampleX function to main.
-    slice<ast.Decl> decls = default!;
+    slice<ast.Decl> decls = default;
     foreach (var (_, vᴛ1) in @file.Decls) {
         var d = vᴛ1;
 
         {
-            var (fΔ1, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && isTest((~(~fΔ1).Name).Name, exampleˢ)) {
+            var (fΔ1, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && isTest(fΔ1.Name.Name, exampleˢ)) {
                 // Copy the FuncDecl, as it may be used elsewhere.
-                ref var newF = ref heap<ast.FuncDecl>(out var ᏑnewF);
-                newF = fΔ1.Value;
+                ref var newF = ref heap<ast.FuncDecl>(fΔ1.Value, out var ᏑnewF);
                 newF.Name = ast.NewIdent(mainˢ);
-                (newF.Body, comments) = stripOutputComment((~fΔ1).Body, comments);
+                (newF.Body, comments) = stripOutputComment(fΔ1.Body, comments);
                 d = new ast.FuncDeclжDecl(ᏑnewF);
             }
         }
@@ -639,8 +635,7 @@ internal static ж<ast.File> playExampleFile(ref ast.File @file) {
     }
 
     // Copy the File, as it may be used elsewhere.
-    ref var f = ref heap<ast.File>(out var Ꮡf);
-    f = @file;
+    ref var f = ref heap<ast.File>(@file, out var Ꮡf);
     f.Name = ast.NewIdent(mainˢ);
     decls = move2heap(declsᴷ, decls);
     f.Decls = decls;
@@ -673,8 +668,8 @@ internal static (ж<ast.BlockStmt>, slice<ж<ast.CommentGroup>>) stripOutputComm
 
 // lastComment returns the last comment inside the provided block.
 internal static (nint i, ж<ast.CommentGroup> last) lastComment(ж<ast.BlockStmt> Ꮡb, slice<ж<ast.CommentGroup>> c) {
-    nint i = default!;
-    ж<ast.CommentGroup> last = default!;
+    nint i = default;
+    ж<ast.CommentGroup> last = default;
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
@@ -715,27 +710,27 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
     var ids = new map<@string, ж<slice<ж<Example>>>>();
     ids[""u8] = Ꮡp.of(Package.ᏑExamples); // package-level examples have an empty name
     foreach (var (_, f) in p.Funcs) {
-        if (!token.IsExported((~f).Name)) {
+        if (!token.IsExported(f.Name)) {
             continue;
         }
-        ids[(~f).Name] = f.of(Func.ᏑExamples);
+        ids[f.Name] = f.of(Func.ᏑExamples);
     }
     foreach (var (_, t) in p.Types) {
-        if (!token.IsExported((~t).Name)) {
+        if (!token.IsExported(t.Name)) {
             continue;
         }
-        ids[(~t).Name] = t.of(Type.ᏑExamples);
-        foreach (var (_, f) in (~t).Funcs) {
-            if (!token.IsExported((~f).Name)) {
+        ids[t.Name] = t.of(Type.ᏑExamples);
+        foreach (var (_, f) in t.Funcs) {
+            if (!token.IsExported(f.Name)) {
                 continue;
             }
-            ids[(~f).Name] = f.of(Func.ᏑExamples);
+            ids[f.Name] = f.of(Func.ᏑExamples);
         }
-        foreach (var (_, m) in (~t).Methods) {
-            if (!token.IsExported((~m).Name)) {
+        foreach (var (_, m) in t.Methods) {
+            if (!token.IsExported(m.Name)) {
                 continue;
             }
-            ids[strings.TrimPrefix(nameWithoutInst((~m).Recv), "*"u8) + "_"u8 + (~m).Name] = m.of(Func.ᏑExamples);
+            ids[strings.TrimPrefix(nameWithoutInst(m.Recv), "*"u8) + "_"u8 + m.Name] = m.of(Func.ᏑExamples);
         }
     }
 
@@ -747,8 +742,8 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
         //
         // An association is made on the first successful match.
         // Examples with malformed names that match nothing are skipped.
-        for (nint i = len((~ex).Name); i >= 0; i = strings.LastIndexByte((~ex).Name.slice(0, i), (rune)'_')) {
-            var (prefix, suffix, ok) = splitExampleName((~ex).Name, i);
+        for (nint i = len(ex.Name); i >= 0; i = strings.LastIndexByte(ex.Name.slice(0, i), (byte)'_')) {
+            var (prefix, suffix, ok) = splitExampleName(ex.Name, i);
             if (!ok) {
                 continue;
             }
@@ -756,7 +751,7 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
             if (!ok) {
                 continue;
             }
-            ex.Value.Suffix = suffix;
+            ex.Suffix = suffix;
             exs.ValueSlot = append(exs.ValueSlot, ex);
             break;
         }
@@ -764,7 +759,7 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
 
     // Sort list of example according to the user-specified suffix name.
     foreach (var (_, exs) in ids) {
-        slices.SortFunc(exs.ValueSlot, (ж<Example> a, ж<Example> b) => cmp.Compare((~a).Suffix, (~b).Suffix));
+        slices.SortFunc(exs.ValueSlot, (ж<Example> a, ж<Example> b) => cmp.Compare(a.Suffix, b.Suffix));
     }
 }
 
@@ -793,8 +788,8 @@ internal static @string nameWithoutInst(@string name) {
 //
 // One of i == len(s) or s[i] == '_' must be true.
 internal static (@string prefix, @string suffix, bool ok) splitExampleName(@string s, nint i) {
-    @string prefix = default!;
-    @string suffix = default!;
+    @string prefix = default;
+    @string suffix = default;
 
     if (i == len(s)) {
         return (s, "", true);

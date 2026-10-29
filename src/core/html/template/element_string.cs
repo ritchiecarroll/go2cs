@@ -23,7 +23,7 @@ internal static array<uint8> _element_index = new uint8[]{0, 11, 24, 36, 51, 63,
 
 internal static @string String(this element i) {
     if (i >= ((element)(uint8)(len(_element_index) - 1))) {
-        return "element("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "element("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _element_name.slice(_element_index[i], _element_index[i + 1]);
 }

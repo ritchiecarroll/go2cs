@@ -64,7 +64,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
     }
 
     // Add the edges.
-    if (l == r){
+    if (l == r) {
         d.unsorted = builtin.append(d.unsorted, new edge(l, 0D, area));
     } else {
         var delta = area / (r - l);
@@ -78,7 +78,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
     if (lb >= mudDegree) {
         (lb, lf) = (mudDegree - 1, 1D);
     }
-    if (l == r){
+    if (l == r) {
         h.Value[lb] += area;
     } else {
         var (rbFloat, rf) = math.Modf(r * (float64)mudDegree);
@@ -86,7 +86,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
         if (rb >= mudDegree) {
             (rb, rf) = (mudDegree - 1, 1D);
         }
-        if (lb == rb){
+        if (lb == rb) {
             h.Value[lb] += area;
         } else {
             var perBucket = area / (r - l) / (float64)mudDegree;
@@ -101,7 +101,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
     // Update mass tracking.
     {
         var thresh = (float64)d.trackBucket / (float64)mudDegree; if (l < thresh) {
-            if (r < thresh){
+            if (r < thresh) {
                 d.trackSum += area;
             } else {
                 d.trackSum += area * (thresh - l) / (r - l);
@@ -168,8 +168,8 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
     var edges = d.unsorted;
     slices.SortFunc(edges, (edge a, edge b) => cmp.Compare(a.x, b.x));
     // Merge with sorted edges.
-    d.unsorted = default!;
-    if (d.sorted == default!){
+    d.unsorted = default;
+    if (d.sorted == nil) {
         d.sorted = edges;
     } else {
         var oldSorted = d.sorted;
@@ -177,15 +177,13 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
         nint i = 0;
         nint j = 0;
         foreach (var o in range(newSorted)) {
-            if (i >= len(oldSorted)){
+            if (i >= len(oldSorted)) {
                 copy(newSorted.slice(o), edges.slice(j));
                 break;
-            } else 
-            if (j >= len(edges)){
+            } else if (j >= len(edges)) {
                 copy(newSorted.slice(o), oldSorted.slice(i));
                 break;
-            } else 
-            if (oldSorted[i].x < edges[j].x){
+            } else if (oldSorted[i].x < edges[j].x) {
                 newSorted[o] = oldSorted[i];
                 i++;
             } else {

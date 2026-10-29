@@ -10,7 +10,7 @@ using bytealg = @internal.bytealg_package;
 using bits = math.bits_package;
 using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using go.unicode;
 using math;
@@ -39,7 +39,7 @@ internal static slice<slice<byte>> explode(slice<byte> s, nint n) {
         n = len(s);
     }
     var a = new slice<slice<byte>>(n);
-    nint size = default!;
+    nint size = default;
     nint na = 0;
     while (len(s) > 0) {
         if (na + 1 >= n) {
@@ -66,7 +66,7 @@ public static nint Count(slice<byte> s, slice<byte> sep) {
         return bytealg.Count(s, sep[0]);
     }
     nint n = 0;
-    while (ᐧ) {
+    for (;;) {
         nint i = Index(s, sep);
         if (i == -1) {
             return n;
@@ -195,7 +195,7 @@ next:
         return -1;
 
 fallback:
-        if (haveFastIndex){
+        if (haveFastIndex) {
             // Switch to bytealg.Index, if available, or a brute force search when
             // IndexByte returns too many false positives.
             {
@@ -272,7 +272,7 @@ public static nint IndexAny(slice<byte> s, @string chars) {
             }
         }
     }
-    nint width = default!;
+    nint width = default;
     for (nint i = 0; i < len(s); i += width) {
         var r = (rune)s[i];
         if (r < utf8.RuneSelf) {
@@ -400,7 +400,7 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
 // including sepSave bytes of sep in the subslices.
 internal static slice<slice<byte>> genSplit(slice<byte> s, slice<byte> sep, nint sepSave, nint n) {
     if (n == 0) {
-        return default!;
+        return default;
     }
     if (len(sep) == 0) {
         return explode(s, n);
@@ -470,7 +470,7 @@ public static slice<slice<byte>> SplitAfter(slice<byte> s, slice<byte> sep) {
     return genSplit(s, sep, len(sep), -1);
 }
 
-[GoLazy] partial class lazyᴛasciiSpace { internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1}; }
+[GoLazy] partial class lazyᴛasciiSpace { internal static array<uint8> asciiSpace = new array<uint8>(256){['\t'] = 1, ['\n'] = 1, ['\v'] = 1, ['\f'] = 1, ['\r'] = 1, [' '] = 1}; }
 
 // Fields interprets s as a sequence of UTF-8-encoded code points.
 // It splits the slice s around each instance of one or more consecutive white space
@@ -556,7 +556,7 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
     nint start = -1; // valid span start if >= 0
     for (nint i = 0; i < len(s); ) {
         var (r, size) = utf8.DecodeRune(s.slice(i));
-        if (f(r)){
+        if (f(r)) {
             if (start >= 0) {
                 spans = append(spansᴷ, spans, new FieldsFunc_span(start, i));
                 start = -1;
@@ -587,14 +587,14 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
 // sep is placed between elements in the resulting slice.
 public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
     if (len(s) == 0) {
-        return new byte[]{}.slice();
+        return slice<byte>([]);
     }
     if (len(s) == 1) {
         // Just return a copy.
-        return appendꓸꓸꓸ(slice<byte>(default!), s[0]);
+        return appendꓸꓸꓸ(slice<byte>(default), s[0]);
     }
 
-    nint n = default!;
+    nint n = default;
     if (len(sep) > 0) {
         if (len(sep) >= maxInt / (len(s) - 1)) {
             throw panic("bytes: Join output length overflow");
@@ -665,7 +665,7 @@ public static slice<byte> Map(Func<rune, rune> mapping, slice<byte> s) {
 // overflows.
 public static slice<byte> Repeat(slice<byte> b, nint count) {
     if (count == 0) {
-        return new byte[]{}.slice();
+        return slice<byte>([]);
     }
 
     // Since we cannot return an error on overflow,
@@ -681,7 +681,7 @@ public static slice<byte> Repeat(slice<byte> b, nint count) {
     nint n = (nint)lo; // lo = len(b) * count
 
     if (len(b) == 0) {
-        return new byte[]{}.slice();
+        return slice<byte>([]);
     }
 
     // Past a certain chunk size it is counterproductive to use
@@ -721,7 +721,7 @@ public static slice<byte> ToUpper(slice<byte> s) {
             isASCII = false;
             break;
         }
-        hasLower = hasLower || ((rune)'a' <= c && c <= (rune)'z');
+        hasLower = hasLower || ('a' <= c && c <= 'z');
     }
 
     if (isASCII) { // optimize for ASCII-only byte slices.
@@ -732,7 +732,7 @@ public static slice<byte> ToUpper(slice<byte> s) {
         var b = bytealg.MakeNoZero(len(s)).slice(0, len(s), len(s));
         for (nint i = 0; i < len(s); i++) {
             var c = s[i];
-            if ((rune)'a' <= c && c <= (rune)'z') {
+            if ('a' <= c && c <= 'z') {
                 c -= (byte)((rune)'a' - (rune)'A');
             }
             b[i] = c;
@@ -752,7 +752,7 @@ public static slice<byte> ToLower(slice<byte> s) {
             isASCII = false;
             break;
         }
-        hasUpper = hasUpper || ((rune)'A' <= c && c <= (rune)'Z');
+        hasUpper = hasUpper || ('A' <= c && c <= 'Z');
     }
 
     if (isASCII) { // optimize for ASCII-only byte slices.
@@ -762,7 +762,7 @@ public static slice<byte> ToLower(slice<byte> s) {
         var b = bytealg.MakeNoZero(len(s)).slice(0, len(s), len(s));
         for (nint i = 0; i < len(s); i++) {
             var c = s[i];
-            if ((rune)'A' <= c && c <= (rune)'Z') {
+            if ('A' <= c && c <= 'Z') {
                 c += (byte)((rune)'a' - (rune)'A');
             }
             b[i] = c;
@@ -833,16 +833,16 @@ internal static bool isSeparator(rune r) {
     // ASCII alphanumerics and underscore are not separators
     if (r <= 0x7F) {
         switch (ᐧ) {
-        case {} when (rune)'0' <= r && r <= (rune)'9': {
+        case {} when '0' <= r && r <= '9': {
             return false;
         }
-        case {} when (rune)'a' <= r && r <= (rune)'z': {
+        case {} when 'a' <= r && r <= 'z': {
             return false;
         }
-        case {} when (rune)'A' <= r && r <= (rune)'Z': {
+        case {} when 'A' <= r && r <= 'Z': {
             return false;
         }
-        case {} when r is (rune)'_': {
+        case {} when r is '_': {
             return false;
         }}
         return true;
@@ -882,7 +882,7 @@ public static slice<byte> Title(slice<byte> s) {
 public static slice<byte> TrimLeftFunc(slice<byte> s, Func<rune, bool> f) {
     nint i = indexFunc(s, f, false);
     if (i == -1) {
-        return default!;
+        return default;
     }
     return s.slice(i);
 }
@@ -891,7 +891,7 @@ public static slice<byte> TrimLeftFunc(slice<byte> s, Func<rune, bool> f) {
 // UTF-8-encoded code points c that satisfy f(c).
 public static slice<byte> TrimRightFunc(slice<byte> s, Func<rune, bool> f) {
     nint i = lastIndexFunc(s, f, false);
-    if (i >= 0 && s[i] >= utf8.RuneSelf){
+    if (i >= 0 && s[i] >= utf8.RuneSelf) {
         var (_, wid) = utf8.DecodeRune(s.slice(i));
         i += wid;
     } else {
@@ -984,7 +984,7 @@ partial struct asciiSet /*[8]uint32*/;
 // makeASCIISet creates a set of ASCII characters and reports whether all
 // characters in chars are ASCII.
 internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
-    asciiSet @as = default!;
+    asciiSet @as = default;
 
     for (nint i = 0; i < len(chars); i++) {
         var c = chars[i];
@@ -1018,7 +1018,7 @@ internal static bool containsRune(@string s, rune r) {
 public static slice<byte> Trim(slice<byte> s, @string cutset) {
     if (len(s) == 0) {
         // This is what we've historically done.
-        return default!;
+        return default;
     }
     if (cutset == ""u8) {
         return s;
@@ -1040,7 +1040,7 @@ public static slice<byte> Trim(slice<byte> s, @string cutset) {
 public static slice<byte> TrimLeft(slice<byte> s, @string cutset) {
     if (len(s) == 0) {
         // This is what we've historically done.
-        return default!;
+        return default;
     }
     if (cutset == ""u8) {
         return s;
@@ -1063,7 +1063,7 @@ internal static slice<byte> trimLeftByte(slice<byte> s, byte c) {
     }
     if (len(s) == 0) {
         // This is what we've historically done.
-        return default!;
+        return default;
     }
     return s;
 }
@@ -1079,7 +1079,7 @@ internal static slice<byte> trimLeftASCII(slice<byte> s, ж<asciiSet> Ꮡas) {
     }
     if (len(s) == 0) {
         // This is what we've historically done.
-        return default!;
+        return default;
     }
     return s;
 }
@@ -1094,7 +1094,7 @@ internal static slice<byte> trimLeftUnicode(slice<byte> s, @string cutset) {
     }
     if (len(s) == 0) {
         // This is what we've historically done.
-        return default!;
+        return default;
     }
     return s;
 }
@@ -1181,7 +1181,7 @@ public static slice<byte> TrimSpace(slice<byte> s) {
     }
     // Special case to preserve previous TrimLeftFunc behavior,
     // returning nil instead of empty slice if all spaces.
-    return default!;
+    return default;
 }
 
 // Runes interprets s as a sequence of UTF-8-encoded code points.
@@ -1212,7 +1212,7 @@ public static slice<byte> Replace(slice<byte> s, slice<byte> old, slice<byte> @n
     }
     if (m == 0) {
         // Just return a copy.
-        return appendꓸꓸꓸ(slice<byte>(default!), s);
+        return appendꓸꓸꓸ(slice<byte>(default), s);
     }
     if (n < 0 || m < n) {
         n = m;
@@ -1222,7 +1222,7 @@ public static slice<byte> Replace(slice<byte> s, slice<byte> old, slice<byte> @n
     var t = new slice<byte>(len(s) + n * (len(@new) - len(old)));
     nint w = 0;
     nint start = 0;
-    if (len(old) > 0){
+    if (len(old) > 0) {
         foreach (var _ᴛ1 in range(n)) {
             nint j = start + Index(s.slice(start), old);
             w += copy(t.slice(w), s.slice(start, j));
@@ -1275,7 +1275,7 @@ public static bool EqualFold(slice<byte> s, slice<byte> t) {
             (tr, sr) = (sr, tr);
         }
         // ASCII only, sr/tr must be upper/lower case
-        if ((rune)'A' <= sr && sr <= (rune)'Z' && tr == (byte)(sr + (rune)'a' - (rune)'A')) {
+        if ('A' <= sr && sr <= 'Z' && tr == (byte)(sr + 'a' - 'A')) {
             continue;
         }
         return false;
@@ -1307,7 +1307,7 @@ hasUnicode:
         // Fast check for ASCII.
         if (tr < utf8.RuneSelf) {
             // ASCII only, sr/tr must be upper/lower case
-            if ((rune)'A' <= sr && sr <= (rune)'Z' && tr == sr + (rune)'a' - (rune)'A') {
+            if ('A' <= sr && sr <= 'Z' && tr == sr + 'a' - 'A') {
                 continue;
             }
             return false;
@@ -1433,17 +1433,17 @@ public static (slice<byte> before, slice<byte> after, bool found) Cut(slice<byte
             return (s.slice(0, i), s.slice(i + len(sep)), true);
         }
     }
-    return (s, default!, false);
+    return (s, default, false);
 }
 
 // Clone returns a copy of b[:len(b)].
 // The result may have additional unused capacity.
 // Clone(nil) returns nil.
 public static slice<byte> Clone(slice<byte> b) {
-    if (b == default!) {
-        return default!;
+    if (b == nil) {
+        return default;
     }
-    return appendꓸꓸꓸ(new byte[]{}.slice(), b);
+    return appendꓸꓸꓸ(slice<byte>([]), b);
 }
 
 // CutPrefix returns s without the provided leading prefix byte slice

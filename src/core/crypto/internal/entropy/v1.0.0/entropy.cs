@@ -37,13 +37,13 @@ partial struct ScratchBuffer /*[33554432]byte*/;
 //
 // Seed returns an error if the entropy source startup health tests fail, which
 // has a non-negligible chance of happening.
-public static (array<byte>, error) Seed(ж<ScratchBuffer> Ꮡmemory) {
+public static (array<byte>, error) Seed(ж<ScratchBuffer> memory) {
     // Collect w = 1024 samples, each certified to provide no less than h = 0.5
     // bits of entropy, for a total of hᵢₙ = w × h = 512 bits of entropy, over
     // nᵢₙ = w × n = 8192 bits of input data.
     ref var samples = ref heap(new array<byte>(1024), out var Ꮡsamples);
     {
-        var err = Samples(samples[..], Ꮡmemory); if (err != default!) {
+        var err = Samples(samples[..], memory); if (err != nil) {
             return (new byte[]{}.array(48), err);
         }
     }
@@ -73,7 +73,7 @@ public static (array<byte>, error) Seed(ж<ScratchBuffer> Ꮡmemory) {
     //   - nₒᵤₜ ≤ security strength of SHA-384 = 384 (per SP 800-107 Rev. 1, Table 1),
     //
     // we can claim the output has full entropy.
-    return (SHA384(Ꮡsamples), default!);
+    return (SHA384(Ꮡsamples), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -84,11 +84,11 @@ private static readonly @string entropyAtLeast1024ˢ = "entropy: at least 1024 s
 // if the health tests fail.
 //
 // The health tests have a non-negligible chance of failing.
-public static error Samples(slice<uint8> samples, ж<ScratchBuffer> Ꮡmemory) {
+public static error Samples(slice<uint8> samples, ж<ScratchBuffer> memory) {
     if (len(samples) < 1024) {
         return errors.New(entropyAtLeast1024ˢ);
     }
-    var s = newSource(Ꮡmemory);
+    var s = newSource(memory);
     foreach (var _ᴛ1 in range(4)) {
         // Warm up the source to avoid any initial bias.
         _ = s.Sample();
@@ -97,16 +97,16 @@ public static error Samples(slice<uint8> samples, ж<ScratchBuffer> Ꮡmemory) {
         samples[i] = s.Sample();
     }
     {
-        var err = RepetitionCountTest(samples); if (err != default!) {
+        var err = RepetitionCountTest(samples); if (err != nil) {
             return err;
         }
     }
     {
-        var err = AdaptiveProportionTest(samples); if (err != default!) {
+        var err = AdaptiveProportionTest(samples); if (err != nil) {
             return err;
         }
     }
-    return default!;
+    return default;
 }
 
 partial struct source {
@@ -115,9 +115,9 @@ partial struct source {
     internal int64 previous;
 }
 
-internal static ж<source> newSource(ж<ScratchBuffer> Ꮡmemory) {
+internal static ж<source> newSource(ж<ScratchBuffer> memory) {
     return Ꮡ(new source(
-        memory: Ꮡmemory,
+        memory: memory,
         lcgState: (uint32)time.HighPrecisionNow(),
         previous: time.HighPrecisionNow()
     ));
@@ -127,9 +127,9 @@ internal static ж<source> newSource(ж<ScratchBuffer> Ꮡmemory) {
 //
 // The memory slice is passed in and may be shared across sources e.g. to avoid
 // the significant (~500µs) cost of zeroing a new allocation on every [Seed] call.
-internal static void touchMemory(ж<ScratchBuffer> Ꮡmemory, uint32 idx) {
+internal static void touchMemory(ж<ScratchBuffer> memory, uint32 idx) {
     idx = idx / 4 * 4; // align to 32 bits
-    var u32 = Ꮡmemory.at<byte>((ulong)(idx)).Reinterpret<byte, uint32>();
+    var u32 = memory.at<byte>((ulong)(idx)).Reinterpret<byte, uint32>();
     var last = atomic.LoadUint32(u32);
     atomic.SwapUint32(u32, last + 13);
 }
@@ -178,7 +178,7 @@ public static error RepetitionCountTest(slice<uint8> samples) {
     var x = samples[0];
     nint count = 1;
     foreach (var (_, y) in samples[1..]) {
-        if (y == x){
+        if (y == x) {
             count++;
             if (count >= 41) {
                 return errors.New(entropyRepetitionCountˢ);
@@ -188,7 +188,7 @@ public static error RepetitionCountTest(slice<uint8> samples) {
             count = 1;
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -221,7 +221,7 @@ public static error AdaptiveProportionTest(slice<uint8> samples) {
             return errors.New(entropyAdaptiveˢ);
         }
     }
-    return default!;
+    return default;
 }
 
 } // end entropy_package

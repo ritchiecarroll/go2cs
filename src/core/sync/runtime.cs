@@ -54,7 +54,7 @@ internal static partial void runtime_notifyListNotifyOne(ж<notifyList> l);
 internal static partial void runtime_notifyListCheck(uintptr size);
 
 [GoInit] internal static void initΔ1() {
-    notifyList n = default!;
+    notifyList n = default;
     runtime_notifyListCheck(/* unsafe.Sizeof(n) */ (uintptr)32);
 }
 

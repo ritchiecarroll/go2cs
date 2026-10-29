@@ -47,6 +47,10 @@ using static go.crypto.@internal.fips140.sha3_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(Digest))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -58,9 +62,9 @@ using static go.crypto.@internal.fips140.sha3_package;
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha3/cast.go", "cast.cs", "AAwagoK43IKCgIKk", "14-31:1")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha3/hashes.go", "hashes.cs", "AAcQkqiSqJKokgAPKKKqog==")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha3/keccakf.go", "keccakf.cs", "AA8e")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADNwkKaQpqSCgqaCkqiygqoACAq4lIKokKLCgqaUgoKCpoK4qOSCpqaUgqaCgqaqooKmgoLKgoKCAAkYgqaClKSkpKSmgoKC9oKCpoKCAA0MpoKCgqaClJKClIKClJQ=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADNwkKaQpqSCgqaCgqiygqoACAq4lIKokKLCgqaUgoKCpoK4qOSCpqaUgqaCgqaqooKmgoLKgoKCAAkYgqaClLS0tLS2goKC9oKCpoKCAA0MpoKCgqaClJKClIKClJQ=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha3/sha3_noasm.go", "sha3_noasm.cs", "AAgSgqaCpIKkgg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABo0goKCgoCCgsiUgoKmgoKCgqaigoKCgoKCgqaAooCswKigpIKmqLKCgrqSkqaCpoKCgpSCpoKClICCpIKokqiSAAIQ5IKmooKClAACEOSCpqKCgpQ=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABo0goKCgoCCgsiUgoKmgoKCgqaigoKCgoKCgqaAooCswKigpIKmqLKCgrqSgqaCpoKCgpSCpoKClICCpIKokqiSAAIQ5IKmooKClAACEOSCpqKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

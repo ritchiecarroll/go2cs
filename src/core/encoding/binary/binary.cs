@@ -287,13 +287,13 @@ public static error Read(io.Reader r, ByteOrder order, any data) {
         var (n, _) = intDataSize(data); if (n != 0) {
             var bs = new slice<byte>(n);
             {
-                var (_, err) = io.ReadFull(r, bs); if (err != default!) {
+                var (_, err) = io.ReadFull(r, bs); if (err != nil) {
                     return err;
                 }
             }
 
             if (decodeFast(bs, order, data)) {
-                return default!;
+                return default;
             }
         }
     }
@@ -301,26 +301,28 @@ public static error Read(io.Reader r, ByteOrder order, any data) {
     // Fallback to reflect-based decoding.
     var v = reflect.ValueOf(data);
     nint size = -1;
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == reflect.ΔPointer) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔPointer: {
         v = v.Elem();
         size = dataSize(v);
+        break;
     }
-    else if (exprᴛ1 == reflect.ΔSlice) {
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
         size = dataSize(v);
-    }
+        break;
+    }}
     if (size < 0) {
         return errors.New("binary.Read: invalid type "u8 + reflect.TypeOf(data).String());
     }
 
     var d = Ꮡ(new decoder(new coder(order: order, buf: new slice<byte>(size))));
     {
-        var (_, err) = io.ReadFull(r, (~d).buf); if (err != default!) {
+        var (_, err) = io.ReadFull(r, (~d).buf); if (err != nil) {
             return err;
         }
     }
     d.value(v);
-    return default!;
+    return default;
 }
 
 // Decode decodes binary data from buf into data according to
@@ -335,7 +337,7 @@ public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
             }
 
             if (decodeFast(buf, order, data)) {
-                return (n, default!);
+                return (n, default);
             }
         }
     }
@@ -343,14 +345,16 @@ public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
     // Fallback to reflect-based decoding.
     var v = reflect.ValueOf(data);
     nint size = -1;
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == reflect.ΔPointer) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔPointer: {
         v = v.Elem();
         size = dataSize(v);
+        break;
     }
-    else if (exprᴛ1 == reflect.ΔSlice) {
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
         size = dataSize(v);
-    }
+        break;
+    }}
     if (size < 0) {
         return (0, errors.New("binary.Decode: invalid type "u8 + reflect.TypeOf(data).String()));
     }
@@ -360,7 +364,7 @@ public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
     }
     var d = Ꮡ(new decoder(new coder(order: order, buf: buf.slice(0, size))));
     d.value(v);
-    return (size, default!);
+    return (size, default);
 }
 
 internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
@@ -492,7 +496,7 @@ public static error Write(io.Writer w, ByteOrder order, any data) {
     // Fast path for basic types and slices.
     {
         var (n, bs) = intDataSize(data); if (n != 0) {
-            if (bs == default!) {
+            if (bs == nil) {
                 bs = new slice<byte>(n);
                 encodeFast(bs, order, data);
             }
@@ -529,7 +533,7 @@ public static (nint, error) Encode(slice<byte> buf, ByteOrder order, any data) {
             }
 
             encodeFast(buf, order, data);
-            return (n, default!);
+            return (n, default);
         }
     }
 
@@ -545,7 +549,7 @@ public static (nint, error) Encode(slice<byte> buf, ByteOrder order, any data) {
     }
     var e = Ꮡ(new encoder(new coder(order: order, buf: buf)));
     e.value(v);
-    return (size, default!);
+    return (size, default);
 }
 
 // Append appends the binary representation of data to buf.
@@ -558,7 +562,7 @@ public static (slice<byte>, error) Append(slice<byte> buf, ByteOrder order, any 
         var (n, _) = intDataSize(data); if (n != 0) {
             var (bufΔ1, posΔ1) = ensure(buf, n);
             encodeFast(posΔ1, order, data);
-            return (bufΔ1, default!);
+            return (bufΔ1, default);
         }
     }
 
@@ -566,19 +570,19 @@ public static (slice<byte>, error) Append(slice<byte> buf, ByteOrder order, any 
     var v = reflect.Indirect(reflect.ValueOf(data));
     nint size = dataSize(v);
     if (size < 0) {
-        return (default!, errors.New("binary.Append: some values are not fixed-sized in type "u8 + reflect.TypeOf(data).String()));
+        return (default, errors.New("binary.Append: some values are not fixed-sized in type "u8 + reflect.TypeOf(data).String()));
     }
 
     (buf, var pos) = ensure(buf, size);
     var e = Ꮡ(new encoder(new coder(order: order, buf: pos)));
     e.value(v);
-    return (buf, default!);
+    return (buf, default);
 }
 
 internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     switch (data.type()) {
     case ж<bool> v: {
-        if (v.Value){
+        if (v.Value) {
             bs[0] = 1;
         } else {
             bs[0] = 0;
@@ -586,7 +590,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case bool v: {
-        if (v){
+        if (v) {
             bs[0] = 1;
         } else {
             bs[0] = 0;
@@ -595,7 +599,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     }
     case slice<bool> v: {
         foreach (var (i, x) in v) {
-            if (x){
+            if (x) {
                 bs[i] = 1;
             } else {
                 bs[i] = 0;
@@ -885,8 +889,8 @@ internal static ref sync.Map structSize => ref ((StaticBox<sync.Map>)ᏑstructSi
 // it returns the length of the slice times the element size and does not count the memory
 // occupied by the header. If the type of v is not acceptable, dataSize returns -1.
 internal static nint dataSize(reflectꓸValue v) {
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == reflect.ΔSlice || exprᴛ1 == reflect.Array) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔSlice || ᴛ == reflect.Array: {
         var t = v.Type().Elem();
         {
             var (sizeΔ2, ok) = ᏑstructSize.Load(t); if (ok) {
@@ -901,8 +905,9 @@ internal static nint dataSize(reflectꓸValue v) {
             }
             return size * v.Len();
         }
+        break;
     }
-    else if (exprᴛ1 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         var t = v.Type();
         {
             var (sizeΔ1, ok) = ᏑstructSize.Load(t); if (ok) {
@@ -913,26 +918,28 @@ internal static nint dataSize(reflectꓸValue v) {
         ᏑstructSize.Store(t, size);
         return size;
     }
-    else { /* default: */
+    default: {
         if (v.IsValid()) {
             return @sizeof(v.Type());
         }
-    }
+        break;
+    }}
 
     return -1;
 }
 
 // sizeof returns the size >= 0 of variables for the given type or -1 if the type is not acceptable.
 internal static nint @sizeof(reflectꓸType t) {
-    var exprᴛ1 = t.Kind();
-    if (exprᴛ1 == reflect.Array) {
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == reflect.Array: {
         {
             nint s = @sizeof(t.Elem()); if (s >= 0) {
                 return s * t.Len();
             }
         }
+        break;
     }
-    else if (exprᴛ1 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         nint sum = 0;
         for ((nint i, nint n) = (0, t.NumField()); i < n; i++) {
             nint s = @sizeof(t.Field(i).Type);
@@ -943,9 +950,9 @@ internal static nint @sizeof(reflectꓸType t) {
         }
         return sum;
     }
-    else if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
+    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
         return (nint)t.Size();
-    }
+    }}
 
     return -1;
 }
@@ -967,7 +974,7 @@ internal static bool @bool(this ref decoder d) {
 }
 
 internal static void @bool(this ref encoder e, bool x) {
-    if (x){
+    if (x) {
         e.buf[e.offset] = 1;
     } else {
         e.buf[e.offset] = 0;
@@ -1052,14 +1059,15 @@ internal static void int64(this ref encoder e, int64 x) {
 }
 
 internal static void value(this ref decoder d, reflectꓸValue v) {
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == reflect.Array) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == reflect.Array: {
         nint l = v.Len();
         for (nint i = 0; i < l; i++) {
             d.value(v.Index(i));
         }
+        break;
     }
-    else if (exprᴛ1 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         var t = v.Type();
         nint l = v.NumField();
         for (nint i = 0; i < l; i++) {
@@ -1069,136 +1077,167 @@ internal static void value(this ref decoder d, reflectꓸValue v) {
             // costly (run "go test -bench=ReadStruct" and compare
             // results when making changes to this code).
             {
-                var vΔ2 = v.Field(i); if (vΔ2.CanSet() || t.Field(i).Name != "_"u8){
+                var vΔ2 = v.Field(i); if (vΔ2.CanSet() || t.Field(i).Name != "_"u8) {
                     d.value(vΔ2);
                 } else {
                     d.skip(vΔ2);
                 }
             }
         }
+        break;
     }
-    else if (exprᴛ1 == reflect.ΔSlice) {
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
         nint l = v.Len();
         for (nint i = 0; i < l; i++) {
             d.value(v.Index(i));
         }
+        break;
     }
-    else if (exprᴛ1 == reflect.ΔBool) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
         v.SetBool(d.@bool());
+        break;
     }
-    else if (exprᴛ1 == reflect.Int8) {
+    case var ᴛ when ᴛ == reflect.Int8: {
         v.SetInt((int64)d.int8());
+        break;
     }
-    else if (exprᴛ1 == reflect.Int16) {
+    case var ᴛ when ᴛ == reflect.Int16: {
         v.SetInt((int64)d.int16());
+        break;
     }
-    else if (exprᴛ1 == reflect.Int32) {
+    case var ᴛ when ᴛ == reflect.Int32: {
         v.SetInt((int64)d.int32());
+        break;
     }
-    else if (exprᴛ1 == reflect.Int64) {
+    case var ᴛ when ᴛ == reflect.Int64: {
         v.SetInt(d.int64());
+        break;
     }
-    else if (exprᴛ1 == reflect.Uint8) {
+    case var ᴛ when ᴛ == reflect.Uint8: {
         v.SetUint((uint64)d.uint8());
+        break;
     }
-    else if (exprᴛ1 == reflect.Uint16) {
+    case var ᴛ when ᴛ == reflect.Uint16: {
         v.SetUint((uint64)d.uint16());
+        break;
     }
-    else if (exprᴛ1 == reflect.Uint32) {
+    case var ᴛ when ᴛ == reflect.Uint32: {
         v.SetUint((uint64)d.uint32());
+        break;
     }
-    else if (exprᴛ1 == reflect.Uint64) {
+    case var ᴛ when ᴛ == reflect.Uint64: {
         v.SetUint(d.uint64());
+        break;
     }
-    else if (exprᴛ1 == reflect.Float32) {
+    case var ᴛ when ᴛ == reflect.Float32: {
         v.SetFloat((float64)math.Float32frombits(d.uint32()));
+        break;
     }
-    else if (exprᴛ1 == reflect.Float64) {
+    case var ᴛ when ᴛ == reflect.Float64: {
         v.SetFloat(math.Float64frombits(d.uint64()));
+        break;
     }
-    else if (exprᴛ1 == reflect.Complex64) {
+    case var ᴛ when ᴛ == reflect.Complex64: {
         v.SetComplex(complex(
             (float64)math.Float32frombits(d.uint32()),
             (float64)math.Float32frombits(d.uint32())));
+        break;
     }
-    else if (exprᴛ1 == reflect.Complex128) {
+    case var ᴛ when ᴛ == reflect.Complex128: {
         v.SetComplex(complex(
             math.Float64frombits(d.uint64()),
             math.Float64frombits(d.uint64())));
-    }
+        break;
+    }}
 }
 
 internal static void value(this ref encoder e, reflectꓸValue v) {
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == reflect.Array) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == reflect.Array: {
         nint l = v.Len();
         for (nint i = 0; i < l; i++) {
             e.value(v.Index(i));
         }
+        break;
     }
-    else if (exprᴛ1 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         var t = v.Type();
         nint l = v.NumField();
         for (nint i = 0; i < l; i++) {
             // see comment for corresponding code in decoder.value()
             {
-                var vΔ2 = v.Field(i); if (vΔ2.CanSet() || t.Field(i).Name != "_"u8){
+                var vΔ2 = v.Field(i); if (vΔ2.CanSet() || t.Field(i).Name != "_"u8) {
                     e.value(vΔ2);
                 } else {
                     e.skip(vΔ2);
                 }
             }
         }
+        break;
     }
-    else if (exprᴛ1 == reflect.ΔSlice) {
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
         nint l = v.Len();
         for (nint i = 0; i < l; i++) {
             e.value(v.Index(i));
         }
+        break;
     }
-    else if (exprᴛ1 == reflect.ΔBool) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
         e.@bool(v.Bool());
+        break;
     }
-    else if (exprᴛ1 == reflect.Int8) {
+    case var ᴛ when ᴛ == reflect.Int8: {
         e.int8((int8)v.Int());
+        break;
     }
-    else if (exprᴛ1 == reflect.Int16) {
+    case var ᴛ when ᴛ == reflect.Int16: {
         e.int16((int16)v.Int());
+        break;
     }
-    else if (exprᴛ1 == reflect.Int32) {
+    case var ᴛ when ᴛ == reflect.Int32: {
         e.int32((int32)v.Int());
+        break;
     }
-    else if (exprᴛ1 == reflect.Int64) {
+    case var ᴛ when ᴛ == reflect.Int64: {
         e.int64(v.Int());
+        break;
     }
-    else if (exprᴛ1 == reflect.Uint8) {
+    case var ᴛ when ᴛ == reflect.Uint8: {
         e.uint8((uint8)v.Uint());
+        break;
     }
-    else if (exprᴛ1 == reflect.Uint16) {
+    case var ᴛ when ᴛ == reflect.Uint16: {
         e.uint16((uint16)v.Uint());
+        break;
     }
-    else if (exprᴛ1 == reflect.Uint32) {
+    case var ᴛ when ᴛ == reflect.Uint32: {
         e.uint32((uint32)v.Uint());
+        break;
     }
-    else if (exprᴛ1 == reflect.Uint64) {
+    case var ᴛ when ᴛ == reflect.Uint64: {
         e.uint64(v.Uint());
+        break;
     }
-    else if (exprᴛ1 == reflect.Float32) {
+    case var ᴛ when ᴛ == reflect.Float32: {
         e.uint32(math.Float32bits((float32)v.Float()));
+        break;
     }
-    else if (exprᴛ1 == reflect.Float64) {
+    case var ᴛ when ᴛ == reflect.Float64: {
         e.uint64(math.Float64bits(v.Float()));
+        break;
     }
-    else if (exprᴛ1 == reflect.Complex64) {
+    case var ᴛ when ᴛ == reflect.Complex64: {
         var x = v.Complex();
         e.uint32(math.Float32bits((float32)real(x)));
         e.uint32(math.Float32bits((float32)imag(x)));
+        break;
     }
-    else if (exprᴛ1 == reflect.Complex128) {
+    case var ᴛ when ᴛ == reflect.Complex128: {
         var x = v.Complex();
         e.uint64(math.Float64bits(real(x)));
         e.uint64(math.Float64bits(imag(x)));
-    }
+        break;
+    }}
 }
 
 internal static void skip(this ref decoder d, reflectꓸValue v) {
@@ -1223,13 +1262,13 @@ internal static (nint, slice<byte>) intDataSize(any data) {
     case ж<int8> _:
     case ж<uint8> _: {
         var dataΔ1 = data;
-        return (1, default!);
+        return (1, default);
     }
     case slice<bool> dataΔ1: {
-        return (len(dataΔ1), default!);
+        return (len(dataΔ1), default);
     }
     case slice<int8> dataΔ1: {
-        return (len(dataΔ1), default!);
+        return (len(dataΔ1), default);
     }
     case slice<uint8> dataΔ1: {
         return (len(dataΔ1), dataΔ1);
@@ -1239,57 +1278,57 @@ internal static (nint, slice<byte>) intDataSize(any data) {
     case ж<int16> _:
     case ж<uint16> _: {
         var dataΔ1 = data;
-        return (2, default!);
+        return (2, default);
     }
     case slice<int16> dataΔ1: {
-        return (2 * len(dataΔ1), default!);
+        return (2 * len(dataΔ1), default);
     }
     case slice<uint16> dataΔ1: {
-        return (2 * len(dataΔ1), default!);
+        return (2 * len(dataΔ1), default);
     }
     case int32 _:
     case uint32 _:
     case ж<int32> _:
     case ж<uint32> _: {
         var dataΔ1 = data;
-        return (4, default!);
+        return (4, default);
     }
     case slice<int32> dataΔ1: {
-        return (4 * len(dataΔ1), default!);
+        return (4 * len(dataΔ1), default);
     }
     case slice<uint32> dataΔ1: {
-        return (4 * len(dataΔ1), default!);
+        return (4 * len(dataΔ1), default);
     }
     case int64 _:
     case uint64 _:
     case ж<int64> _:
     case ж<uint64> _: {
         var dataΔ1 = data;
-        return (8, default!);
+        return (8, default);
     }
     case slice<int64> dataΔ1: {
-        return (8 * len(dataΔ1), default!);
+        return (8 * len(dataΔ1), default);
     }
     case slice<uint64> dataΔ1: {
-        return (8 * len(dataΔ1), default!);
+        return (8 * len(dataΔ1), default);
     }
     case float32 _:
     case ж<float32> _: {
         var dataΔ1 = data;
-        return (4, default!);
+        return (4, default);
     }
     case float64 _:
     case ж<float64> _: {
         var dataΔ1 = data;
-        return (8, default!);
+        return (8, default);
     }
     case slice<float32> dataΔ1: {
-        return (4 * len(dataΔ1), default!);
+        return (4 * len(dataΔ1), default);
     }
     case slice<float64> dataΔ1: {
-        return (8 * len(dataΔ1), default!);
+        return (8 * len(dataΔ1), default);
     }}
-    return (0, default!);
+    return (0, default);
 }
 
 // ensure grows buf to length len(buf) + n and returns the grown buffer

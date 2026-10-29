@@ -9,20 +9,20 @@ using go.@internal;
 partial class x509_package {
 
 // Possible certificate files; stop after finding one.
-internal static slice<@string> certFiles = new @string[]{
-    "/etc/ssl/certs/ca-certificates.crt"u8, // Debian/Ubuntu/Gentoo etc.
-    "/etc/pki/tls/certs/ca-bundle.crt"u8, // Fedora/RHEL 6
-    "/etc/ssl/ca-bundle.pem"u8, // OpenSUSE
-    "/etc/pki/tls/cacert.pem"u8, // OpenELEC
+internal static slice<@string> certFiles = slice<@string>([
+    "/etc/ssl/certs/ca-certificates.crt"u8,                // Debian/Ubuntu/Gentoo etc.
+    "/etc/pki/tls/certs/ca-bundle.crt"u8,                  // Fedora/RHEL 6
+    "/etc/ssl/ca-bundle.pem"u8,                            // OpenSUSE
+    "/etc/pki/tls/cacert.pem"u8,                           // OpenELEC
     "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"u8, // CentOS/RHEL 7
-    "/etc/ssl/cert.pem"u8 // Alpine Linux
-}.slice();
+    "/etc/ssl/cert.pem"u8                                  // Alpine Linux
+]);
 
 // Possible directories with certificate files; all will be read.
-internal static slice<@string> certDirectories = new @string[]{
-    "/etc/ssl/certs"u8, // SLES10/SLES11, https://golang.org/issue/12139
+internal static slice<@string> certDirectories = slice<@string>([
+    "/etc/ssl/certs"u8,    // SLES10/SLES11, https://golang.org/issue/12139
     "/etc/pki/tls/certs"u8 // Fedora/RHEL
-}.slice();
+]);
 
 [GoInit] internal static void initΔ1() {
     if (goos.IsAndroid == 1) {

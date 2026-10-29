@@ -20,7 +20,7 @@ partial struct ΔLineReader {
     internal buf buf;
     // Original .debug_line section data. Used by Seek.
     internal slice<byte> section;
-    internal slice<byte> str; // .debug_str
+    internal slice<byte> str;     // .debug_str
     internal slice<byte> lineStr; // .debug_line_str
     // Header information
     internal uint16 version;
@@ -36,11 +36,11 @@ partial struct ΔLineReader {
     internal slice<@string> directories;
     internal slice<ж<LineFile>> fileEntries;
     internal Offset programOffset; // section offset of line number program
-    internal Offset endOffset; // section offset of byte following program
+    internal Offset endOffset;     // section offset of byte following program
     internal nint initialFileEntries; // initial length of fileEntries
     // Current line number program state machine registers
     internal LineEntry state; // public state
-    internal nint fileIndex;      // private state
+    internal nint fileIndex;  // private state
 }
 
 // A LineEntry is a row in a DWARF line table.
@@ -115,7 +115,7 @@ partial struct LineEntry {
 partial struct LineFile {
     public @string Name;
     public uint64 Mtime; // Implementation defined modification time, or 0 if unknown
-    public nint Length;   // File length, or 0 if unknown
+    public nint Length;  // File length, or 0 if unknown
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -130,19 +130,19 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
     ref var d = ref Ꮡd.DerefOrNull();
     ref var cu = ref Ꮡcu.DerefOrNull();
 
-    if (d.line == default!) {
+    if (d.line == nil) {
         // No line tables available.
-        return (default!, default!);
+        return (default, default);
     }
 
     // Get line table information from cu.
     var (off, ok) = cu.Val(AttrStmtList)._<int64>(ᐧ);
     if (!ok) {
         // cu has no line table.
-        return (default!, default!);
+        return (default, default);
     }
     if (off < 0 || off > (int64)len(d.line)) {
-        return (default!, errors.New(attrStmtListValueOutOfˢ));
+        return (default, errors.New(attrStmtListValueOutOfˢ));
     }
     // AttrCompDir is optional if all file names are absolute. Use
     // the empty string if it's not present.
@@ -152,25 +152,24 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
     var u = Ꮡ(d.unit, Ꮡd.offsetToUnit(cu.Offset));
     var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, (Offset)(uint32)off, d.line.slice((nint)(off)));
     // The compilation directory is implicitly directories[0].
-    ref var r = ref heap<ΔLineReader>(out var Ꮡr);
-    r = new ΔLineReader(
+    ref var r = ref heap<ΔLineReader>(new ΔLineReader(
         buf: buf,
         section: d.line,
         str: d.str,
         lineStr: d.lineStr
-    );
+    ), out var Ꮡr);
 
     // Read the header.
     {
-        var err = Ꮡr.readHeader(compDir); if (err != default!) {
-            return (default!, err);
+        var err = Ꮡr.readHeader(compDir); if (err != nil) {
+            return (default, err);
         }
     }
 
     // Initialize line reader state.
     r.Reset();
 
-    return (Ꮡr, default!);
+    return (Ꮡr, default);
 }
 
 // readHeader reads the line number program header from r.buf and sets
@@ -181,14 +180,14 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     var buf = Ꮡr.of(dwarf_package.ΔLineReader.Ꮡbuf);
 
     // Read basic header fields [DWARF2 6.2.4].
-    var hdrOffset = buf.Value.off;
+    var hdrOffset = buf.off;
     var (unitLength, dwarf64) = buf.unitLength();
-    r.endOffset = (~buf).off + unitLength;
-    if (r.endOffset > (~buf).off + ((Offset)(uint32)len((~buf).data))) {
-        return new DecodeError("line"u8, hdrOffset, fmt.Sprintf("line table end %d exceeds section size %d"u8, r.endOffset, (~buf).off + ((Offset)(uint32)len((~buf).data))));
+    r.endOffset = buf.off + unitLength;
+    if (r.endOffset > buf.off + ((Offset)(uint32)len(buf.data))) {
+        return new DecodeError("line"u8, hdrOffset, fmt.Sprintf("line table end %d exceeds section size %d"u8, r.endOffset, buf.off + ((Offset)(uint32)len(buf.data))));
     }
     r.version = buf.uint16();
-    if ((~buf).err == default! && (r.version < 2 || r.version > 5)) {
+    if (buf.err == nil && (r.version < 2 || r.version > 5)) {
         // DWARF goes to all this effort to make new opcodes
         // backward-compatible, and then adds fields right in
         // the middle of the header in new versions, so we're
@@ -196,26 +195,26 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         // versions.
         return new DecodeError("line"u8, hdrOffset, fmt.Sprintf("unknown line table version %d"u8, r.version));
     }
-    if (r.version >= 5){
+    if (r.version >= 5) {
         r.addrsize = (nint)buf.uint8();
         r.segmentSelectorSize = (nint)buf.uint8();
     } else {
-        r.addrsize = (~buf).format.addrsize();
+        r.addrsize = buf.format.addrsize();
         r.segmentSelectorSize = 0;
     }
-    Offset headerLength = default!;
-    if (dwarf64){
+    Offset headerLength = default;
+    if (dwarf64) {
         headerLength = (Offset)(uint32)buf.uint64();
     } else {
         headerLength = (Offset)buf.uint32();
     }
-    var programOffset = (~buf).off + headerLength;
+    var programOffset = buf.off + headerLength;
     if (programOffset > r.endOffset) {
         return new DecodeError("line"u8, hdrOffset, fmt.Sprintf("malformed line table: program offset %d exceeds end offset %d"u8, programOffset, r.endOffset));
     }
     r.programOffset = programOffset;
     r.minInstructionLength = (nint)buf.uint8();
-    if (r.version >= 4){
+    if (r.version >= 4) {
         // [DWARF4 6.2.4]
         r.maxOpsPerInstruction = (nint)buf.uint8();
     } else {
@@ -226,8 +225,8 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     r.lineRange = (nint)buf.uint8();
 
     // Validate header.
-    if ((~buf).err != default!) {
-        return (~buf).err;
+    if (buf.err != nil) {
+        return buf.err;
     }
     if (r.maxOpsPerInstruction == 0) {
         return new DecodeError("line"u8, hdrOffset, "invalid maximum operations per instruction: 0"u8);
@@ -244,8 +243,8 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     }
 
     // Validate opcode lengths.
-    if ((~buf).err != default!) {
-        return (~buf).err;
+    if (buf.err != nil) {
+        return buf.err;
     }
     foreach (var (i, length) in r.opcodeLengths) {
         {
@@ -255,13 +254,13 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         }
     }
 
-    if (r.version < 5){
+    if (r.version < 5) {
         // Read include directories table.
-        r.directories = new @string[]{compDir}.slice();
-        while (ᐧ) {
+        r.directories = slice<@string>([compDir]);
+        for (;;) {
             @string directory = buf.@string();
-            if ((~buf).err != default!) {
-                return (~buf).err;
+            if (buf.err != nil) {
+                return buf.err;
             }
             if (len(directory) == 0) {
                 break;
@@ -277,12 +276,11 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         // Read file name list. File numbering starts with 1,
         // so leave the first entry nil.
         r.fileEntries = new slice<ж<LineFile>>(1);
-        while (ᐧ) {
+        for (;;) {
             {
-                var (done, err) = r.readFileEntry(); if (err != default!){
+                var (done, err) = r.readFileEntry(); if (err != nil) {
                     return err;
-                } else 
-                if (done) {
+                } else if (done) {
                     break;
                 }
             }
@@ -293,7 +291,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         r.directories = new slice<@string>((nint)(c));
         foreach (var i in range(r.directories)) {
             var (dir, _, _, err) = r.readLNCT(dirFormat, dwarf64);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             r.directories[i] = dir;
@@ -305,7 +303,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
             ref var name = ref heap<@string>(out var Ꮡname);
             ref var mtime = ref heap<uint64>(out var Ꮡmtime);
             (name, mtime, var size, var err) = r.readLNCT(fileFormat, dwarf64);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             r.fileEntries[i] = Ꮡ(new LineFile(name, mtime, (nint)size));
@@ -314,7 +312,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
 
     r.initialFileEntries = len(r.fileEntries);
 
-    return (~buf).err;
+    return buf.err;
 }
 
 // lnctForm is a pair of an LNCT code and a form. This represents an
@@ -338,21 +336,22 @@ internal static slice<lnctForm> readLNCTFormat(this ref ΔLineReader r) {
 
 // readLNCT reads a sequence of LNCT entries and returns path information.
 internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(this ref ΔLineReader r, slice<lnctForm> s, bool dwarf64) {
-    @string path = default!;
-    uint64 mtime = default!;
-    uint64 size = default!;
+    @string path = default;
+    uint64 mtime = default;
+    uint64 size = default;
 
-    @string dir = default!;
+    @string dir = default;
     foreach (var (_, lf) in s) {
-        @string str = default!;
-        uint64 val = default!;
-        var exprᴛ1 = lf.form;
-        if (exprᴛ1 == formString) {
+        @string str = default;
+        uint64 val = default;
+        switch (lf.form) {
+        case var ᴛ when ᴛ == formString: {
             str = r.buf.@string();
+            break;
         }
-        else if (exprᴛ1 == formStrp || exprᴛ1 == formLineStrp) {
-            uint64 off = default!;
-            if (dwarf64){
+        case var ᴛ when ᴛ == formStrp || ᴛ == formLineStrp: {
+            uint64 off = default;
+            if (dwarf64) {
                 off = r.buf.uint64();
             } else {
                 off = (uint64)r.buf.uint32();
@@ -360,103 +359,121 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(th
             if ((uint64)(nint)off != off) {
                 return ("", 0, 0, new DecodeError("line"u8, r.buf.off, "strp/line_strp offset out of range"u8));
             }
-            buf b1 = default!;
-            if (lf.form == formStrp){
+            buf b1 = default;
+            if (lf.form == formStrp) {
                 b1 = makeBuf(r.buf.dwarf, r.buf.format, strˢ, 0, r.str);
             } else {
                 b1 = makeBuf(r.buf.dwarf, r.buf.format, lineStrˢ, 0, r.lineStr);
             }
             b1.skip((nint)off);
             str = b1.@string();
-            if (b1.err != default!) {
+            if (b1.err != nil) {
                 return ("", 0, 0, new DecodeError("line"u8, r.buf.off, b1.err.Error()));
             }
+            break;
         }
-        else if (exprᴛ1 == formStrpSup) {
+        case var ᴛ when ᴛ == formStrpSup: {
             // Supplemental sections not yet supported.
-            if (dwarf64){
+            if (dwarf64) {
                 r.buf.uint64();
             } else {
                 r.buf.uint32();
             }
+            break;
         }
-        else if (exprᴛ1 == formStrx) {
+        case var ᴛ when ᴛ == formStrx: {
             // .debug_line.dwo sections not yet supported.
             r.buf.@uint();
+            break;
         }
-        else if (exprᴛ1 == formStrx1) {
+        case var ᴛ when ᴛ == formStrx1: {
             r.buf.uint8();
+            break;
         }
-        else if (exprᴛ1 == formStrx2) {
+        case var ᴛ when ᴛ == formStrx2: {
             r.buf.uint16();
+            break;
         }
-        else if (exprᴛ1 == formStrx3) {
+        case var ᴛ when ᴛ == formStrx3: {
             r.buf.uint24();
+            break;
         }
-        else if (exprᴛ1 == formStrx4) {
+        case var ᴛ when ᴛ == formStrx4: {
             r.buf.uint32();
+            break;
         }
-        else if (exprᴛ1 == formData1) {
+        case var ᴛ when ᴛ == formData1: {
             val = (uint64)r.buf.uint8();
+            break;
         }
-        else if (exprᴛ1 == formData2) {
+        case var ᴛ when ᴛ == formData2: {
             val = (uint64)r.buf.uint16();
+            break;
         }
-        else if (exprᴛ1 == formData4) {
+        case var ᴛ when ᴛ == formData4: {
             val = (uint64)r.buf.uint32();
+            break;
         }
-        else if (exprᴛ1 == formData8) {
+        case var ᴛ when ᴛ == formData8: {
             val = r.buf.uint64();
+            break;
         }
-        else if (exprᴛ1 == formData16) {
+        case var ᴛ when ᴛ == formData16: {
             r.buf.bytes(16);
+            break;
         }
-        else if (exprᴛ1 == formDwarfBlock) {
+        case var ᴛ when ᴛ == formDwarfBlock: {
             r.buf.bytes((nint)r.buf.@uint());
+            break;
         }
-        else if (exprᴛ1 == formUdata) {
+        case var ᴛ when ᴛ == formUdata: {
             val = r.buf.@uint();
-        }
+            break;
+        }}
 
-        var exprᴛ2 = lf.lnct;
-        if (exprᴛ2 == lnctPath) {
+        switch (lf.lnct) {
+        case var ᴛ when ᴛ == lnctPath: {
             path = str;
+            break;
         }
-        else if (exprᴛ2 == lnctDirectoryIndex) {
+        case var ᴛ when ᴛ == lnctDirectoryIndex: {
             if (val >= (uint64)len(r.directories)) {
                 return ("", 0, 0, new DecodeError("line"u8, r.buf.off, "directory index out of range"u8));
             }
             dir = r.directories[val];
+            break;
         }
-        else if (exprᴛ2 == lnctTimestamp) {
+        case var ᴛ when ᴛ == lnctTimestamp: {
             mtime = val;
+            break;
         }
-        else if (exprᴛ2 == lnctSize) {
+        case var ᴛ when ᴛ == lnctSize: {
             size = val;
+            break;
         }
-        else if (exprᴛ2 == lnctMD5) {
+        case var ᴛ when ᴛ == lnctMD5: {
             // Ignored.
-        }
+            break;
+        }}
     }
 
     if (dir != ""u8 && path != ""u8) {
         path = pathJoin(dir, path);
     }
 
-    return (path, mtime, size, default!);
+    return (path, mtime, size, default);
 }
 
 // readFileEntry reads a file entry from either the header or a
 // DW_LNE_define_file extended opcode and adds it to r.fileEntries. A
 // true return value indicates that there are no more entries to read.
 internal static (bool, error) readFileEntry(this ref ΔLineReader r) {
-    ref var name = ref heap<@string>(out var Ꮡname);
-    name = r.buf.@string();
-    if (r.buf.err != default!) {
+    ref var name = ref heap<@string>(r.buf.@string(), out var Ꮡname);
+    if (r.buf.err != nil) {
         return (false, r.buf.err);
     }
     if (len(name) == 0) {
-        return (true, default!);
+        return (true, default);
     }
     var off = r.buf.off;
     nint dirIndex = (nint)r.buf.@uint();
@@ -466,10 +483,8 @@ internal static (bool, error) readFileEntry(this ref ΔLineReader r) {
         }
         name = pathJoin(r.directories[dirIndex], name);
     }
-    ref var mtime = ref heap<uint64>(out var Ꮡmtime);
-    mtime = r.buf.@uint();
-    ref var length = ref heap<nint>(out var Ꮡlength);
-    length = (nint)r.buf.@uint();
+    ref var mtime = ref heap<uint64>(r.buf.@uint(), out var Ꮡmtime);
+    ref var length = ref heap<nint>((nint)r.buf.@uint(), out var Ꮡlength);
 
     // If this is a dynamically added path and the cursor was
     // backed up, we may have already added this entry. Avoid
@@ -481,20 +496,20 @@ internal static (bool, error) readFileEntry(this ref ΔLineReader r) {
         if (fe[len(fe) - 1] != nil) {
             // We already processed this addition.
             r.fileEntries = fe;
-            return (false, default!);
+            return (false, default);
         }
     }
     r.fileEntries = append(r.fileEntries, Ꮡ(new LineFile(name, mtime, length)));
-    return (false, default!);
+    return (false, default);
 }
 
 // updateFile updates r.state.File after r.fileIndex has
 // changed or r.fileEntries has changed.
 internal static void updateFile(this ref ΔLineReader r) {
-    if (r.fileIndex < len(r.fileEntries)){
+    if (r.fileIndex < len(r.fileEntries)) {
         r.state.File = r.fileEntries[r.fileIndex];
     } else {
-        r.state.File = default!;
+        r.state.File = default;
     }
 }
 
@@ -504,23 +519,23 @@ internal static void updateFile(this ref ΔLineReader r) {
 //
 // Rows are always in order of increasing entry.Address, but
 // entry.Line may go forward or backward.
-public static error Next(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
-    if (r.buf.err != default!) {
+public static error Next(this ref ΔLineReader r, ж<LineEntry> entry) {
+    if (r.buf.err != nil) {
         return r.buf.err;
     }
 
     // Execute opcodes until we reach an opcode that emits a line
     // table entry.
-    while (ᐧ) {
+    for (;;) {
         if (len(r.buf.data) == 0) {
             return io.EOF;
         }
-        var emit = r.step(Ꮡentry);
-        if (r.buf.err != default!) {
+        var emit = r.step(entry);
+        if (r.buf.err != nil) {
             return r.buf.err;
         }
         if (emit) {
-            return default!;
+            return default;
         }
     }
 }
@@ -560,20 +575,21 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
         goto emit;
     }
 
-    var exprᴛ1 = opcode;
-    if (exprᴛ1 is 0) {
+    switch (opcode) {
+    case 0: {
         // Extended opcode [DWARF2 6.2.5.3]
         var length = (Offset)(uint32)r.buf.@uint();
         var startOff = r.buf.off;
         var opcodeΔ2 = r.buf.uint8();
 
-        var exprᴛ2 = opcodeΔ2;
-        if (exprᴛ2 == lneEndSequence) {
+        switch (opcodeΔ2) {
+        case var ᴛ2 when ᴛ2 == lneEndSequence: {
             r.state.EndSequence = true;
             entry = r.state;
             r.resetState();
+            break;
         }
-        else if (exprᴛ2 == lneSetAddress) {
+        case var ᴛ2 when ᴛ2 == lneSetAddress: {
             switch (r.addrsize) {
             case 1: {
                 r.state.Address = (uint64)r.buf.uint8();
@@ -595,77 +611,93 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
                 r.buf.error(unknownAddressSizeˢ);
                 break;
             }}
+            break;
         }
-        else if (exprᴛ2 == lneDefineFile) {
+        case var ᴛ2 when ᴛ2 == lneDefineFile: {
             {
-                var (done, err) = r.readFileEntry(); if (err != default!){
+                var (done, err) = r.readFileEntry(); if (err != nil) {
                     r.buf.err = err;
                     return false;
-                } else 
-                if (done) {
+                } else if (done) {
                     r.buf.err = new DecodeError("line"u8, startOff, "malformed DW_LNE_define_file operation"u8);
                     return false;
                 }
             }
             r.updateFile();
+            break;
         }
-        else if (exprᴛ2 == lneSetDiscriminator) {
+        case var ᴛ2 when ᴛ2 == lneSetDiscriminator: {
             // [DWARF4 6.2.5.3]
             r.state.Discriminator = (nint)r.buf.@uint();
-        }
+            break;
+        }}
 
-        r.buf.skip((nint)(uint32)(startOff + length - r.buf.off));
+        r.buf.skip((nint)(startOff + length - r.buf.off));
 
         if (opcodeΔ2 == lneEndSequence) {
             return true;
         }
+        break;
     }
     // Standard opcodes [DWARF2 6.2.5.2]
-    else if (exprᴛ1 == lnsCopy) {
+    case var ᴛ when ᴛ == lnsCopy: {
         goto emit;
+        break;
     }
-    else if (exprᴛ1 == lnsAdvancePC) {
+    case var ᴛ when ᴛ == lnsAdvancePC: {
         r.advancePC((nint)r.buf.@uint());
+        break;
     }
-    else if (exprᴛ1 == lnsAdvanceLine) {
+    case var ᴛ when ᴛ == lnsAdvanceLine: {
         r.state.Line += (nint)r.buf.@int();
+        break;
     }
-    else if (exprᴛ1 == lnsSetFile) {
+    case var ᴛ when ᴛ == lnsSetFile: {
         r.fileIndex = (nint)r.buf.@uint();
         r.updateFile();
+        break;
     }
-    else if (exprᴛ1 == lnsSetColumn) {
+    case var ᴛ when ᴛ == lnsSetColumn: {
         r.state.Column = (nint)r.buf.@uint();
+        break;
     }
-    else if (exprᴛ1 == lnsNegateStmt) {
+    case var ᴛ when ᴛ == lnsNegateStmt: {
         r.state.IsStmt = !r.state.IsStmt;
+        break;
     }
-    else if (exprᴛ1 == lnsSetBasicBlock) {
+    case var ᴛ when ᴛ == lnsSetBasicBlock: {
         r.state.BasicBlock = true;
+        break;
     }
-    else if (exprᴛ1 == lnsConstAddPC) {
+    case var ᴛ when ᴛ == lnsConstAddPC: {
         r.advancePC(quo((255 - r.opcodeBase), r.lineRange));
+        break;
     }
-    else if (exprᴛ1 == lnsFixedAdvancePC) {
+    case var ᴛ when ᴛ == lnsFixedAdvancePC: {
         r.state.Address += (uint64)r.buf.uint16();
+        break;
     }
     // DWARF3 standard opcodes [DWARF3 6.2.5.2]
-    else if (exprᴛ1 == lnsSetPrologueEnd) {
+    case var ᴛ when ᴛ == lnsSetPrologueEnd: {
         r.state.PrologueEnd = true;
+        break;
     }
-    else if (exprᴛ1 == lnsSetEpilogueBegin) {
+    case var ᴛ when ᴛ == lnsSetEpilogueBegin: {
         r.state.EpilogueBegin = true;
+        break;
     }
-    else if (exprᴛ1 == lnsSetISA) {
+    case var ᴛ when ᴛ == lnsSetISA: {
         r.state.ISA = (nint)r.buf.@uint();
+        break;
     }
-    else { /* default: */
+    default: {
         // Unhandled standard opcode. Skip the number of
         // arguments that the prologue says this opcode has.
         for (nint i = 0; i < r.opcodeLengths[opcode]; i++) {
             r.buf.@uint();
         }
-    }
+        break;
+    }}
     return false;
 
 emit:
@@ -708,7 +740,7 @@ public static LineReaderPos Tell(this ref ΔLineReader r) {
 // line table.
 public static void Seek(this ref ΔLineReader r, LineReaderPos pos) {
     r.buf.off = pos.off;
-    r.buf.data = r.section.slice((nint)(uint32)(r.buf.off), (nint)(uint32)(r.endOffset));
+    r.buf.data = r.section.slice((nint)(r.buf.off), (nint)(r.endOffset));
     r.fileEntries = r.fileEntries.slice(0, pos.numFileEntries);
     r.state = pos.state;
     r.fileIndex = pos.fileIndex;
@@ -719,7 +751,7 @@ public static void Seek(this ref ΔLineReader r, LineReaderPos pos) {
 public static void Reset(this ref ΔLineReader r) {
     // Reset buffer to the line number program offset.
     r.buf.off = r.programOffset;
-    r.buf.data = r.section.slice((nint)(uint32)(r.buf.off), (nint)(uint32)(r.endOffset));
+    r.buf.data = r.section.slice((nint)(r.buf.off), (nint)(r.endOffset));
 
     // Reset file entries list.
     r.fileEntries = r.fileEntries.slice(0, r.initialFileEntries);
@@ -785,7 +817,7 @@ public static error SeekPC(this ref ΔLineReader r, uint64 pc, ж<LineEntry> Ꮡ
     ref var entry = ref Ꮡentry.DerefOrNull();
 
     {
-        var err = r.Next(Ꮡentry); if (err != default!) {
+        var err = r.Next(Ꮡentry); if (err != nil) {
             return err;
         }
     }
@@ -793,7 +825,7 @@ public static error SeekPC(this ref ΔLineReader r, uint64 pc, ж<LineEntry> Ꮡ
         // We're too far. Start at the beginning of the table.
         r.Reset();
         {
-            var err = r.Next(Ꮡentry); if (err != default!) {
+            var err = r.Next(Ꮡentry); if (err != nil) {
                 return err;
             }
         }
@@ -805,11 +837,11 @@ public static error SeekPC(this ref ΔLineReader r, uint64 pc, ж<LineEntry> Ꮡ
     }
 
     // Scan until we pass pc, then back up one.
-    while (ᐧ) {
+    for (;;) {
         ref var next = ref heap(new LineEntry(), out var Ꮡnext);
         var pos = r.Tell();
         {
-            var err = r.Next(Ꮡnext); if (err != default!) {
+            var err = r.Next(Ꮡnext); if (err != nil) {
                 if (AreEqual(err, io.EOF)) {
                     return ErrUnknownPC;
                 }
@@ -824,7 +856,7 @@ public static error SeekPC(this ref ΔLineReader r, uint64 pc, ж<LineEntry> Ꮡ
             // entry is the desired entry. Back up the
             // cursor to "next" and return success.
             r.Seek(pos);
-            return default!;
+            return default;
         }
         entry = next;
     }
@@ -838,7 +870,7 @@ public static error SeekPC(this ref ΔLineReader r, uint64 pc, ж<LineEntry> Ꮡ
 // don't know what system the paths came from.
 internal static bool pathIsAbs(@string path) {
     (_, path) = splitDrive(path);
-    return len(path) > 0 && (path[0] == (rune)'/' || path[0] == (rune)'\\');
+    return len(path) > 0 && (path[0] == '/' || path[0] == '\\');
 }
 
 // pathJoin joins dirname and filename. filename must be relative.
@@ -878,21 +910,21 @@ internal static @string pathJoin(@string dirname, @string filename) {
 // splitDrive splits the DOS drive letter or UNC share point from
 // path, if any. path == drive + rest
 internal static (@string drive, @string rest) splitDrive(@string path) {
-    if (len(path) >= 2 && path[1] == (rune)':') {
+    if (len(path) >= 2 && path[1] == ':') {
         {
-            var c = path[0]; if ((rune)'a' <= c && c <= (rune)'z' || (rune)'A' <= c && c <= (rune)'Z') {
+            var c = path[0]; if ('a' <= c && c <= 'z' || 'A' <= c && c <= 'Z') {
                 return (path[..2], path[2..]);
             }
         }
     }
-    if (len(path) > 3 && (path[0] == (rune)'\\' || path[0] == (rune)'/') && (path[1] == (rune)'\\' || path[1] == (rune)'/')) {
+    if (len(path) > 3 && (path[0] == '\\' || path[0] == '/') && (path[1] == '\\' || path[1] == '/')) {
         // Normalize the path so we can search for just \ below.
         @string npath = strings.ReplaceAll(path, "/"u8, @"\"u8);
         // Get the host part, which must be non-empty.
-        nint slash1 = strings.IndexByte(npath[2..], (rune)'\\') + 2;
+        nint slash1 = strings.IndexByte(npath[2..], (byte)'\\') + 2;
         if (slash1 > 2) {
             // Get the mount-point part, which must be non-empty.
-            nint slash2 = strings.IndexByte(npath.slice(slash1 + 1), (rune)'\\') + slash1 + 1;
+            nint slash2 = strings.IndexByte(npath.slice(slash1 + 1), (byte)'\\') + slash1 + 1;
             if (slash2 > slash1) {
                 return (path.slice(0, slash2), path.slice(slash2));
             }

@@ -91,7 +91,7 @@ public static complex128 Asin(complex128 x) {
     var ct = complex(-imag(x), real(x)); // i * x
     var xx = x * x;
     var x1 = complex(1D - real(xx), -imag(xx)); // 1 - x*x
-    var x2 = Sqrt(x1); // x2 = sqrt(1 - x*x)
+    var x2 = Sqrt(x1);                          // x2 = sqrt(1 - x*x)
     var w = Log(ct + x2);
     return complex(imag(w), -real(w)); // -i * w
 }
@@ -139,7 +139,7 @@ public static complex128 Asinh(complex128 x) {
     }
     var xx = x * x;
     var x1 = complex(1D + real(xx), imag(xx)); // 1 + x*x
-    return Log(x + Sqrt(x1)); // log(x + sqrt(1 + x*x))
+    return Log(x + Sqrt(x1));                  // log(x + sqrt(1 + x*x))
 }
 
 // Complex circular arc cosine

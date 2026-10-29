@@ -23,16 +23,16 @@ public static readonly ж<Direction> ᏑClientKeys = new StaticBox<Direction>(de
 public static ref Direction ClientKeys => ref ((StaticBox<Direction>)ᏑClientKeys).ValueSlot;
 
 [GoInit] internal static void init() {
-    ServerKeys = new Direction(new byte[]{(rune)'B'}.slice(), new byte[]{(rune)'D'}.slice(), new byte[]{(rune)'F'}.slice());
-    ClientKeys = new Direction(new byte[]{(rune)'A'}.slice(), new byte[]{(rune)'C'}.slice(), new byte[]{(rune)'E'}.slice());
+    ServerKeys = new Direction(slice<byte>([(byte)'B']), slice<byte>([(byte)'D']), slice<byte>([(byte)'F']));
+    ClientKeys = new Direction(slice<byte>([(byte)'A']), slice<byte>([(byte)'C']), slice<byte>([(byte)'E']));
 }
 
 public static (slice<byte> ivKey, slice<byte> key, slice<byte> macKey) Keys<Hash>(Func<Hash> hashΔ1, Direction d, slice<byte> K, slice<byte> H, slice<byte> sessionID, nint ivKeyLen, nint keyLen, nint macKeyLen)
     where Hash : hash.Hash
 {
-    slice<byte> ivKey = default!;
-    slice<byte> key = default!;
-    slice<byte> macKey = default!;
+    slice<byte> ivKey = default;
+    slice<byte> key = default;
+    slice<byte> macKey = default;
 
     var h = hashΔ1();
     var Hʗ1 = H;
@@ -40,12 +40,12 @@ public static (slice<byte> ivKey, slice<byte> key, slice<byte> macKey) Keys<Hash
     var hʗ1 = h;
     var sessionIDʗ1 = sessionID;
     slice<byte> generateKeyMaterial(slice<byte> tag, nint length) {
-        slice<byte> keyΔ1 = default!;
+        slice<byte> keyΔ1 = default;
         while (len(keyΔ1) < length) {
             hʗ1.Reset();
             hʗ1.Write(Kʗ1);
             hʗ1.Write(Hʗ1);
-            if (len(keyΔ1) == 0){
+            if (len(keyΔ1) == 0) {
                 hʗ1.Write(tag);
                 hʗ1.Write(sessionIDʗ1);
             } else {

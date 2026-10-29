@@ -102,7 +102,7 @@ internal static readonly @string addAttrsUnsafelyCalledOnˢ = "AddAttrs unsafely
 public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.slice();
 
-    nint i = default!;
+    nint i = default;
     for (i = 0; i < len(attrs) && r.nFront < len(r.front); i++) {
         var a = attrs[i];
         if (a.Value.isEmptyGroup()) {
@@ -136,17 +136,17 @@ public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
 public static void Add(this ref Record r, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    Attr a = default!;
+    Attr a = default;
     while (len(args) > 0) {
         (a, args) = argsToAttr(args);
         if (a.Value.isEmptyGroup()) {
             continue;
         }
-        if (r.nFront < len(r.front)){
+        if (r.nFront < len(r.front)) {
             r.front[r.nFront] = a;
             r.nFront++;
         } else {
-            if (r.back == default!) {
+            if (r.back == nil) {
                 r.back = new slice<Attr>(0, countAttrs(args) + 1);
             }
             r.back = builtin.append(r.back, a);
@@ -180,7 +180,7 @@ internal static (Attr, slice<any>) argsToAttr(slice<any> args) {
     switch (args[0].type()) {
     case @string x: {
         if (len(args) == 1) {
-            return (String(badKey, x), default!);
+            return (String(badKey, x), default);
         }
         return (Any(x, args[1]), args[2..]);
     }
@@ -215,7 +215,7 @@ internal static readonly @string lineˢ = "line"u8;
 // to implement LogValuer because it would be resolved before
 // the ReplaceAttr function was called.
 internal static Value group(this ref ΔSource s) {
-    slice<Attr> @as = default!;
+    slice<Attr> @as = default;
     if (s.Function != ""u8) {
         @as = builtin.append(@as, String(functionˢ, s.Function));
     }
@@ -232,7 +232,7 @@ internal static Value group(this ref ΔSource s) {
 internal static bool isEmpty(this ж<ΔSource> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    return Ꮡs == nil || s == new ΔSource(nil);
+    return Ꮡs == nil || s == new ΔSource();
 }
 
 // Source returns a new Source for the log event using r's PC.
@@ -242,10 +242,10 @@ public static ж<ΔSource> Source(this Record r) {
     r = r.ΔClone();
 
     if (r.PC == 0) {
-        return default!;
+        return default;
     }
 
-    var fs = runtime.CallersFrames(new uintptr[]{r.PC}.slice());
+    var fs = runtime.CallersFrames(slice<uintptr>([r.PC]));
     var (f, _) = fs.Next();
     return Ꮡ(new ΔSource(
         Function: f.Function,

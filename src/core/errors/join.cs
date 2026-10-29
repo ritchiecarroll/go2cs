@@ -22,19 +22,19 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
 
     nint n = 0;
     foreach (var (_, err) in errs) {
-        if (err != default!) {
+        if (err != nil) {
             n++;
         }
     }
     if (n == 0) {
-        return default!;
+        return default;
     }
     var e = Ꮡ(new joinError(
         errs: new slice<error>(0, n)
     ));
     foreach (var (_, err) in errs) {
-        if (err != default!) {
-            e.Value.errs = append((~e).errs, err);
+        if (err != nil) {
+            e.errs = append(e.errs, err);
         }
     }
     return new joinErrorжerror(e);
@@ -53,7 +53,7 @@ internal static @string Error(this ref joinError e) {
 
     var b = slice<byte>(e.errs[0].Error());
     foreach (var (_, err) in e.errs[1..]) {
-        b = append(b, (byte)((rune)'\n'));
+        b = append(b, (byte)'\n');
         b = append(b, err.Error().ꓸꓸꓸ);
     }
     // At this point, b has at least one byte '\n'.

@@ -30,10 +30,10 @@ internal static void simplePopulateTable(uint32 poly, ref Table t) {
     for (nint i = 0; i < 256; i++) {
         var crc = (uint32)i;
         for (nint j = 0; j < 8; j++) {
-            if ((crc & 1) == 1){
+            if ((crc & 1) == 1) {
                 crc = (crc >> 1) ^ poly;
             } else {
-                crc >>= (int)(1);
+                crc >>= 1;
             }
         }
         t[i] = crc;

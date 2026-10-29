@@ -38,12 +38,11 @@ partial struct traceContextKey {
 //	    trace.WithRegion(ctx, "remainingWork", remainingWork)
 //	}()
 public static (context.Context ctx, ж<Task> task) NewTask(context.Context pctx, @string taskType) {
-    var pid = fromContext(pctx).Value.id;
-    ref var id = ref heap<uint64>(out var Ꮡid);
-    id = newID();
+    var pid = fromContext(pctx).id;
+    ref var id = ref heap<uint64>(newID(), out var Ꮡid);
     userTaskCreate(id, pid, taskType);
     var s = Ꮡ(new Task(id: id));
-    return (context.WithValue(pctx, new traceContextKey(nil), s.OrTypedNil()), s);
+    return (context.WithValue(pctx, new traceContextKey(), s.OrTypedNil()), s);
 
     // We allocate a new task even when
     // the tracing is disabled because the context and task
@@ -67,7 +66,7 @@ public static (context.Context ctx, ж<Task> task) NewTask(context.Context pctx,
 
 internal static ж<Task> fromContext(context.Context ctx) {
     {
-        var (s, ok) = ctx.Value(new traceContextKey(nil))._<ж<Task>>(ᐧ); if (ok) {
+        var (s, ok) = ctx.Value(new traceContextKey())._<ж<Task>>(ᐧ); if (ok) {
             return s;
         }
     }
@@ -101,7 +100,7 @@ internal static ref Task bgTask => ref ((StaticBox<Task>)ᏑbgTask).ValueSlot;
 // Category can be empty and the API assumes there are only a handful of
 // unique categories in the system.
 public static void Log(context.Context ctx, @string category, @string message) {
-    var id = fromContext(ctx).Value.id;
+    var id = fromContext(ctx).id;
     userLog(id, category, message);
 }
 
@@ -112,7 +111,7 @@ public static void Logf(context.Context ctx, @string category, @string format, p
     if (IsEnabled()) {
         // Ideally this should be just Log, but that will
         // add one more frame in the stack trace.
-        var id = fromContext(ctx).Value.id;
+        var id = fromContext(ctx).id;
         userLog(id, category, fmt.Sprintf(format, args.ꓸꓸꓸ));
     }
 }
@@ -145,7 +144,7 @@ public static void WithRegion(context.Context ctx, @string regionType, Action fn
         // This causes more churns in code than I hoped, and sometimes
         // makes the code less readable.
 
-        var id = fromContext(ctx).Value.id;
+        var id = fromContext(ctx).id;
         userRegion(id, regionStartCode, regionType);
         defer(userRegion, id, regionEndCode, regionType, ref ᒐ);
         fn();
@@ -166,8 +165,7 @@ public static ж<Region> StartRegion(context.Context ctx, @string regionType) {
     if (!IsEnabled()) {
         return noopRegion;
     }
-    ref var id = ref heap<uint64>(out var Ꮡid);
-    id = fromContext(ctx).Value.id;
+    ref var id = ref heap<uint64>(fromContext(ctx).id, out var Ꮡid);
     userRegion(id, regionStartCode, regionType);
     return Ꮡ(new Region(id, regionType));
 }
@@ -178,7 +176,7 @@ partial struct Region {
     internal @string regionType;
 }
 
-internal static ж<Region> noopRegion = Ꮡ(new Region(nil));
+internal static ж<Region> noopRegion = Ꮡ(new Region());
 
 // End marks the end of the traced code region.
 public static void End(this ж<Region> Ꮡr) {

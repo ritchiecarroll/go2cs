@@ -15,13 +15,13 @@ internal static error errERROR_IO_PENDING = ((Δsyscall.Errno)Δsyscall.ERROR_IO
 // errnoErr returns common boxed Errno values, to prevent
 // allocations at runtime.
 internal static error errnoErr(Δsyscall.Errno e) {
-    var exprᴛ1 = e;
-    if (exprᴛ1 == (Δsyscall.Errno)(0)) {
-        return default!;
+    switch (e) {
+    case var ᴛ when ᴛ == (Δsyscall.Errno)(0): {
+        return default;
     }
-    if (exprᴛ1 == Δsyscall.ERROR_IO_PENDING) {
+    case var ᴛ when ᴛ == Δsyscall.ERROR_IO_PENDING: {
         return errERROR_IO_PENDING;
-    }
+    }}
     // TODO: add more here, after collecting data on the common
     // error values see on Windows. (perhaps when running
     // all.bat?)

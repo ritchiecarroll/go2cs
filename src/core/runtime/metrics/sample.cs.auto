@@ -9,7 +9,7 @@
 // license that can be found in the LICENSE file.
 namespace go.runtime;
 
-// blank import: runtime_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // depends on the runtime via a linkname'd function
+/* blank import: runtime_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // depends on the runtime via a linkname'd function
 using @unsafe = unsafe_package;
 
 partial class metrics_package {

@@ -21,51 +21,50 @@ internal static readonly @string getProcessTimesˢ = "GetProcessTimes"u8;
 // Note that Process.handle is never nil because Windows always requires
 // a handle. A manually-created Process literal is not valid.
 internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
-    ж<ProcessState> ps = default!;
-    error err = default!;
+    ж<ProcessState> ps = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
 
         var (handle, status) = Ꮡp.handleTransientAcquire();
-        var exprᴛ1 = status;
-        if (exprᴛ1 == statusDone) {
-            (ps, err) = (default!, ErrProcessDone); goto ᒐdone;
+        switch (status) {
+        case var ᴛ when ᴛ == statusDone: {
+            (ps, err) = (default, ErrProcessDone); goto ᒐdone;
         }
-        if (exprᴛ1 == statusReleased) {
-            (ps, err) = (default!, syscall.EINVAL); goto ᒐdone;
-        }
+        case var ᴛ when ᴛ == statusReleased: {
+            (ps, err) = (default, syscall.EINVAL); goto ᒐdone;
+        }}
         defer(Ꮡp.handleTransientRelease, ref ᒐ);
 
         var (s, e) = syscall.WaitForSingleObject((syscallꓸHandle)handle, syscall.INFINITE);
-        var exprᴛ2 = s;
-        if (exprᴛ2 == syscall.WAIT_OBJECT_0) {
-            do {
-                break;
-            } while (false);
+        switch (s) {
+        case var ᴛ when ᴛ == syscall.WAIT_OBJECT_0: {
+            break;
+            break;
         }
-        else if (exprᴛ2 == syscall.WAIT_FAILED) {
-            (ps, err) = (default!, NewSyscallError(waitForSingleObjectˢ, e)); goto ᒐdone;
+        case var ᴛ when ᴛ == syscall.WAIT_FAILED: {
+            (ps, err) = (default, NewSyscallError(waitForSingleObjectˢ, e)); goto ᒐdone;
         }
-        else { /* default: */
-            (ps, err) = (default!, errors.New(osUnexpectedResultFromˢ)); goto ᒐdone;
-        }
+        default: {
+            (ps, err) = (default, errors.New(osUnexpectedResultFromˢ)); goto ᒐdone;
+        }}
         ref var ec = ref heap(new uint32(), out var Ꮡec);
         e = syscall.GetExitCodeProcess((syscallꓸHandle)handle, Ꮡec);
-        if (e != default!) {
-            (ps, err) = (default!, NewSyscallError(getExitCodeProcessˢ, e)); goto ᒐdone;
+        if (e != nil) {
+            (ps, err) = (default, NewSyscallError(getExitCodeProcessˢ, e)); goto ᒐdone;
         }
         ref var u = ref heap(new syscall.Rusage(), out var Ꮡu);
         e = syscall.GetProcessTimes((syscallꓸHandle)handle, Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
-        if (e != default!) {
-            (ps, err) = (default!, NewSyscallError(getProcessTimesˢ, e)); goto ᒐdone;
+        if (e != nil) {
+            (ps, err) = (default, NewSyscallError(getProcessTimesˢ, e)); goto ᒐdone;
         }
 
         // For compatibility we use statusReleased here rather
         // than statusDone.
         Ꮡp.doRelease(statusReleased);
 
-        (ps, err) = (Ꮡ(new ProcessState(p.Pid, new syscall.WaitStatus(ExitCode: ec), Ꮡu)), default!);
+        (ps, err) = (Ꮡ(new ProcessState(p.Pid, new syscall.WaitStatus(ExitCode: ec), Ꮡu)), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -80,19 +79,19 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
     GoFrame ᒐ = default;
     try {
         var (handle, status) = Ꮡp.handleTransientAcquire();
-        var exprᴛ1 = status;
-        if (exprᴛ1 == statusDone) {
+        switch (status) {
+        case var ᴛ when ᴛ == statusDone: {
             return ErrProcessDone;
         }
-        if (exprᴛ1 == statusReleased) {
+        case var ᴛ when ᴛ == statusReleased: {
             return syscall.EINVAL;
-        }
+        }}
         defer(Ꮡp.handleTransientRelease, ref ᒐ);
 
         if (AreEqual(sig, ΔKill)) {
             ref var terminationHandle = ref heap(new syscallꓸHandle(), out var ᏑterminationHandle);
             var e = syscall.DuplicateHandle(~((syscallꓸHandle)((syscallꓸHandle)0)), (syscallꓸHandle)handle, ~((syscallꓸHandle)((syscallꓸHandle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
-            if (e != default!) {
+            if (e != nil) {
                 return NewSyscallError(duplicateHandleˢ, e);
             }
             runtime.KeepAlive(Ꮡp.OrTypedNil());
@@ -103,7 +102,7 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
         // TODO(rsc): Handle Interrupt too?
         return ((syscall.Errno)syscall.EWINDOWS);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -118,17 +117,17 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
     const uint32 da = /* syscall.STANDARD_RIGHTS_READ |
 	syscall.PROCESS_QUERY_INFORMATION | syscall.SYNCHRONIZE */ 1180672;
     var (h, e) = syscall.OpenProcess(da, false, (uint32)pid);
-    if (e != default!) {
-        return (default!, NewSyscallError(openProcessˢ, e));
+    if (e != nil) {
+        return (default, NewSyscallError(openProcessˢ, e));
     }
-    return (newHandleProcess(pid, (uintptr)h), default!);
+    return (newHandleProcess(pid, (uintptr)h), default);
 }
 
 [GoInit] internal static void init() {
     @string cmd = windows.UTF16PtrToString(syscall.GetCommandLine());
-    if (len(cmd) == 0){
+    if (len(cmd) == 0) {
         var (arg0, _) = Executable();
-        Args = new @string[]{arg0}.slice();
+        Args = slice<@string>([arg0]);
     } else {
         Args = commandLineToArgv(cmd);
     }
@@ -137,7 +136,7 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
 // appendBSBytes appends n '\\' bytes to b and returns the resulting slice.
 internal static slice<byte> appendBSBytes(slice<byte> b, nint n) {
     for (; n > 0; n--) {
-        b = append(b, (byte)((rune)'\\'));
+        b = append(b, (byte)'\\');
     }
     return b;
 }
@@ -145,25 +144,25 @@ internal static slice<byte> appendBSBytes(slice<byte> b, nint n) {
 // readNextArg splits command line string cmd into next
 // argument and command line remainder.
 internal static (slice<byte> arg, @string rest) readNextArg(@string cmd) {
-    slice<byte> b = default!;
-    bool inquote = default!;
-    nint nslash = default!;
+    slice<byte> b = default;
+    bool inquote = default;
+    nint nslash = default;
     for (; len(cmd) > 0; cmd = cmd[1..]) {
         var c = cmd[0];
         switch (c) {
-        case (rune)' ' or (rune)'\t': {
+        case (byte)' ' or (byte)'\t': {
             if (!inquote) {
                 return (appendBSBytes(b, nslash), cmd[1..]);
             }
             break;
         }
-        case (rune)'"': {
+        case (byte)'"': {
             b = appendBSBytes(b, nslash / 2);
-            if (nslash % 2 == 0){
+            if (nslash % 2 == 0) {
                 // use "Prior to 2008" rule from
                 // http://daviddeley.com/autohotkey/parameters/parameters.htm
                 // section 5.2 to deal with double double quotes
-                if (inquote && len(cmd) > 1 && cmd[1] == (rune)'"') {
+                if (inquote && len(cmd) > 1 && cmd[1] == '"') {
                     b = append(b, c);
                     cmd = cmd[1..];
                 }
@@ -175,7 +174,7 @@ internal static (slice<byte> arg, @string rest) readNextArg(@string cmd) {
             continue;
             break;
         }
-        case (rune)'\\': {
+        case (byte)'\\': {
             nslash++;
             continue;
             break;
@@ -193,13 +192,13 @@ internal static (slice<byte> arg, @string rest) readNextArg(@string cmd) {
 internal static slice<@string> commandLineToArgv(@string cmd) {
     var argsᴷ = new stackAppend<@string>(moves: true);
 
-    slice<@string> args = default!;
+    slice<@string> args = default;
     while (len(cmd) > 0) {
-        if (cmd[0] == (rune)' ' || cmd[0] == (rune)'\t') {
+        if (cmd[0] == ' ' || cmd[0] == '\t') {
             cmd = cmd[1..];
             continue;
         }
-        slice<byte> arg = default!;
+        slice<byte> arg = default;
         (arg, cmd) = readNextArg(cmd);
         args = append(argsᴷ, args, (@string)arg);
     }

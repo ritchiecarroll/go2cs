@@ -21,9 +21,9 @@ partial struct GCM {
     /*embed*/ internal gcmPlatformData gcmPlatformData;
 }
 
-public static (ж<GCM>, error) New(ж<aes.Block> Ꮡcipher, nint nonceSize, nint tagSize) {
+public static (ж<GCM>, error) New(ж<aes.Block> cipher, nint nonceSize, nint tagSize) {
     // This function is outlined to let the allocation happen on the parent stack.
-    return newGCM(Ꮡ(new GCM(nil)), Ꮡcipher, nonceSize, tagSize);
+    return newGCM(Ꮡ(new GCM()), cipher, nonceSize, tagSize);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -40,19 +40,19 @@ internal static partial (ж<GCM>, error) newGCM(ж<GCM> Ꮡg, ж<aes.Block> Ꮡc
     ref var cipher = ref Ꮡcipher.DerefOrNull();
 
     if (tagSize < gcmMinimumTagSize || tagSize > gcmBlockSize) {
-        return (default!, errors.New(cipherIncorrectTagSizeˢ));
+        return (default, errors.New(cipherIncorrectTagSizeˢ));
     }
     if (nonceSize <= 0) {
-        return (default!, errors.New(cipherTheNonceCanTHaveˢ));
+        return (default, errors.New(cipherTheNonceCanTHaveˢ));
     }
     if (cipher.BlockSize() != gcmBlockSize) {
-        return (default!, errors.New(cipherNewGCMRequires128ˢ));
+        return (default, errors.New(cipherNewGCMRequires128ˢ));
     }
     g.cipher = cipher;
     g.nonceSize = nonceSize;
     g.tagSize = tagSize;
     initGCM(ref (Ꮡg).DerefOrNull());
-    return (Ꮡg, default!);
+    return (Ꮡg, default);
 }
 
 internal static UntypedInt gcmBlockSize => 16;
@@ -113,10 +113,10 @@ public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slic
     }
 
     if (len(ciphertext) < g.tagSize) {
-        return (default!, errOpen);
+        return (default, errOpen);
     }
     if ((uint64)len(ciphertext) > (uint64)((uint64)((4294967296L) - 2) * (uint64)gcmBlockSize) + (uint64)g.tagSize) {
-        return (default!, errOpen);
+        return (default, errOpen);
     }
 
     var (ret, @out) = sliceForAppend(dst, len(ciphertext) - g.tagSize);
@@ -129,16 +129,16 @@ public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slic
 
     fips140.RecordApproved();
     {
-        var err = open(@out, Ꮡg, nonce, ciphertext, data); if (err != default!) {
+        var err = open(@out, Ꮡg, nonce, ciphertext, data); if (err != nil) {
             // We sometimes decrypt and authenticate concurrently, so we overwrite
             // dst in the event of a tag mismatch. To be consistent across platforms
             // and to avoid releasing unauthenticated plaintext, we clear the buffer
             // in the event of an error.
             clear(@out);
-            return (default!, err);
+            return (default, err);
         }
     }
-    return (ret, default!);
+    return (ret, default);
 }
 
 // sliceForAppend takes a slice and a requested number of bytes. It returns a
@@ -146,11 +146,11 @@ public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slic
 // second slice that aliases into it and contains only the extra bytes. If the
 // original slice has sufficient capacity then no allocation is performed.
 internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> @in, nint n) {
-    slice<byte> head = default!;
-    slice<byte> tail = default!;
+    slice<byte> head = default;
+    slice<byte> tail = default;
 
     {
-        nint total = len(@in) + n; if (cap(@in) >= total){
+        nint total = len(@in) + n; if (cap(@in) >= total) {
             head = @in.slice(0, total);
         } else {
             head = new slice<byte>(total);

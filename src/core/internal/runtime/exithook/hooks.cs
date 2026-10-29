@@ -14,7 +14,7 @@
 namespace go.@internal.runtime;
 
 using atomic = go.@internal.runtime.atomic_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.@internal.runtime;
 
 partial class exithook_package {
@@ -24,8 +24,8 @@ partial class exithook_package {
 // Hooks are run in reverse order of registration:
 // the first hook added is the last one run.
 partial struct Hook {
-    public Action F; // func to run
-    public bool RunOnFailure;   // whether to run on non-zero exit code
+    public Action F;          // func to run
+    public bool RunOnFailure; // whether to run on non-zero exit code
 }
 
 internal static readonly ж<atomic.Int32> Ꮡlocked = new StaticBox<atomic.Int32>(default(atomic.Int32));
@@ -76,7 +76,7 @@ public static void Run(nint code) {
 
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(); if (e != nil) {
                     Throw(exitHookInvokedPanicˢ);
                 }
             }

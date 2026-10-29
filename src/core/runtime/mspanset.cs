@@ -34,8 +34,8 @@ partial struct spanSet {
 // anyway. (In principle, we could do this during STW.)
     internal mutex spineLock;
     internal atomicSpanSetSpinePointer spine; // *[N]atomic.Pointer[spanSetBlock]
-    internal atomic.Uintptr spineLen;            // Spine array length
-    internal uintptr spineCap;                   // Spine array cap, accessed under spineLock
+    internal atomic.Uintptr spineLen;         // Spine array length
+    internal uintptr spineCap;                // Spine array cap, accessed under spineLock
     // index is the head and tail of the spanSet in a single field.
     // The head and the tail both represent an index into the logical
     // concatenation of all blocks, with the head always behind or
@@ -75,7 +75,7 @@ partial struct spanSetBlock {
 
 // push adds span s to buffer b. push is safe to call concurrently
 // with other push and pop operations.
-internal static void push(this ж<spanSet> Ꮡb, ж<mspan> Ꮡs) {
+internal static void push(this ж<spanSet> Ꮡb, ж<mspan> s) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Obtain our slot.
@@ -84,9 +84,9 @@ internal static void push(this ж<spanSet> Ꮡb, ж<mspan> Ꮡs) {
 
     // Do we need to add a block?
     var spineLen = Ꮡb.of(spanSet.ᏑspineLen).Load();
-    ж<spanSetBlock> block = default!;
+    ж<spanSetBlock> block = default;
 retry:
-    if (top < spineLen){
+    if (top < spineLen) {
         block = Ꮡb.of(spanSet.Ꮡspine).Load().lookup(top).Load();
     } else {
         // Add a new block to the spine, potentially growing
@@ -139,26 +139,26 @@ retry:
 
     // We have a block. Insert the span atomically, since there may be
     // concurrent readers via the block API.
-    block.at(spanSetBlock.Ꮡspans, (ulong)(bottom)).StoreNoWB(Ꮡs);
+    block.at(spanSetBlock.Ꮡspans, (ulong)(bottom)).StoreNoWB(s);
 }
 
 // pop removes and returns a span from buffer b, or nil if b is empty.
 // pop is safe to call concurrently with other pop and push operations.
 internal static ж<mspan> pop(this ж<spanSet> Ꮡb) {
-    uint32 head = default!;
-    uint32 tail = default!;
-    uint32 backoff = default!;
+    uint32 head = default;
+    uint32 tail = default;
+    uint32 backoff = default;
     // TODO: tweak backoff parameters on other architectures.
     if (GOARCH == "arm64"u8) {
         backoff = 128;
     }
 claimLoop:
-    while (ᐧ) {
+    for (;;) {
         var headtail = Ꮡb.of(spanSet.Ꮡindex).load();
         (head, tail) = headtail.split();
         if (head >= tail) {
             // The buf is empty, as far as we can tell.
-            return default!;
+            return default;
         }
         // Check if the head position we want to claim is actually
         // backed by a block.
@@ -170,7 +170,7 @@ claimLoop:
             // Instead of spinning, let's just notify the caller that
             // there's nothing currently here. Spinning on this is
             // almost definitely not worth it.
-            return default!;
+            return default;
         }
         // Try to claim the current head by CASing in an updated head.
         // This may fail transiently due to a push which modifies the
@@ -347,9 +347,9 @@ internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
 }
 
 // free returns a spanSetBlock back to the pool.
-internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> Ꮡblock) {
-    Ꮡblock.of(spanSetBlock.Ꮡpopped).Store(0);
-    Ꮡp.of(spanSetBlockAlloc.Ꮡstack).push(Ꮡblock.of(spanSetBlock.Ꮡlfnode));
+internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> block) {
+    block.of(spanSetBlock.Ꮡpopped).Store(0);
+    Ꮡp.of(spanSetBlockAlloc.Ꮡstack).push(block.of(spanSetBlock.Ꮡlfnode));
 }
 
 // headTailIndex represents a combined 32-bit head and 32-bit tail
@@ -364,12 +364,12 @@ internal static headTailIndex makeHeadTailIndex(uint32 head, uint32 tail) {
 
 // head returns the head of a headTailIndex value.
 internal static uint32 head(this headTailIndex h) {
-    return (uint32)(uint64)((h >> 32));
+    return (uint32)(h >> 32);
 }
 
 // tail returns the tail of a headTailIndex value.
 internal static uint32 tail(this headTailIndex h) {
-    return (uint32)(uint64)h;
+    return (uint32)h;
 }
 
 // split splits the headTailIndex value into its parts.
@@ -432,8 +432,8 @@ internal static ж<mspan> Load(this ж<atomicMSpanPointer> Ꮡp) {
 }
 
 // StoreNoWB stores an *mspan.
-internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> Ꮡs) {
-    Ꮡp.of(atomicMSpanPointer.Ꮡp).StoreNoWB(@unsafe.Pointer.FromPinnedBox(Ꮡs));
+internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> s) {
+    Ꮡp.of(atomicMSpanPointer.Ꮡp).StoreNoWB(@unsafe.Pointer.FromPinnedBox(s));
 }
 
 } // end runtime_package

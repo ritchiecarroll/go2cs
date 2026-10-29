@@ -60,19 +60,19 @@ internal static readonly @string fuzzˢ = "fuzz-*"u8;
 // sharedMemTempFile creates a new temporary file of the given size, then maps
 // it into memory. The file will be removed when the Close method is called.
 internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
-    ж<sharedMem> m = default!;
-    error err = default!;
+    ж<sharedMem> m = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         // Create a temporary file.
         (var f, err) = os.CreateTemp(""u8, fuzzˢ);
-        if (err != default!) {
-            (m, err) = (default!, err); goto ᒐdone;
+        if (err != nil) {
+            (m, err) = (default, err); goto ᒐdone;
         }
         var errʗ1 = err;
         var fʗ1 = f;
         defer(() => {
-            if (errʗ1 != default!) {
+            if (errʗ1 != nil) {
                 fʗ1.Close();
                 os.Remove(fʗ1.Name());
             }
@@ -81,8 +81,8 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
         // Resize it to the correct size.
         nint totalSize = sharedMemSize(size);
         {
-            var errΔ1 = f.Truncate((int64)totalSize); if (errΔ1 != default!) {
-                (m, err) = (default!, errΔ1); goto ᒐdone;
+            var errΔ1 = f.Truncate((int64)totalSize); if (errΔ1 != nil) {
+                (m, err) = (default, errΔ1); goto ᒐdone;
             }
         }
 
@@ -103,7 +103,7 @@ internal static ж<sharedMemHeader> header(this ref sharedMem m) {
 // valueRef returns the value currently stored in shared memory. The returned
 // slice points to shared memory; it is not a copy.
 internal static slice<byte> valueRef(this ref sharedMem m) {
-    nint length = m.header().Value.valueLen;
+    nint length = m.header().valueLen;
     nint valueOffset = (nint)/* unsafe.Sizeof(sharedMemHeader{}) */ (uintptr)40;
     return m.region.slice(valueOffset, valueOffset + length);
 }
@@ -122,7 +122,7 @@ internal static void setValue(this ref sharedMem m, slice<byte> b) {
     if (len(b) > builtin.cap(v)) {
         throw panic(fmt.Sprintf("value length %d larger than shared memory capacity %d"u8, len(b), builtin.cap(v)));
     }
-    m.header().Value.valueLen = len(b);
+    m.header().valueLen = len(b);
     copy(v.slice(0, builtin.cap(v)), b);
 }
 
@@ -137,7 +137,7 @@ internal static void setValueLen(this ref sharedMem m, nint n) {
     if (n > builtin.cap(v)) {
         throw panic(fmt.Sprintf("length %d larger than shared memory capacity %d"u8, n, builtin.cap(v)));
     }
-    m.header().Value.valueLen = n;
+    m.header().valueLen = n;
 }
 
 // TODO(jayconrod): add method to resize the buffer. We'll need that when the

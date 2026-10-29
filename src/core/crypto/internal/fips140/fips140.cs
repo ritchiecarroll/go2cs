@@ -18,18 +18,23 @@ internal static bool debug;
 [GoInit] internal static void init() {
     @string v = godebug.Value("#fips140"u8);
     var exprᴛ1 = v;
-    if (exprᴛ1 == "on"u8 || exprᴛ1 == "only"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "on"u8 || exprᴛ1 == "only"u8: {
         Enabled = true;
+        break;
     }
-    else if (exprᴛ1 == "debug"u8) {
+    case {} when exprᴛ1 == "debug"u8: {
         Enabled = true;
         debug = true;
+        break;
     }
-    else if (exprᴛ1 == "off"u8 || exprᴛ1 == ""u8) {
+    case {} when exprᴛ1 == "off"u8 || exprᴛ1 == ""u8: {
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("fips140: unknown GODEBUG setting fips140=" + v);
-    }
+        break;
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -69,7 +74,7 @@ public static error Supported() {
         return errors.New(fips1403ModeIsˢ3);
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

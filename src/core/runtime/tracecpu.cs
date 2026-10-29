@@ -67,8 +67,7 @@ internal static partial void traceStartReadCPU() {
             // reads to avoid frequent wakeups.
             Δtrace.cpuSleep.sleep(100_000_000);
 
-            ref var tl = ref heap<traceLocker>(out var Ꮡtl);
-            tl = traceAcquire();
+            ref var tl = ref heap<traceLocker>(traceAcquire(), out var Ꮡtl);
             if (!tl.ok()) {
                 // Tracing disabled.
                 break;
@@ -81,7 +80,7 @@ internal static partial void traceStartReadCPU() {
         }
         doneʗ1.ᐸꟷ(new EmptyStruct());
     });
-    Δtrace.cpuLogDone = done.WithDirection(GoChanDir.Recv);
+    Δtrace.cpuLogDone = done.AsRecvOnly();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -112,9 +111,9 @@ internal static void traceStopReadCPU() {
     ᐸꟷ(Δtrace.cpuLogDone);
 
     // Clear state for the next trace.
-    Δtrace.cpuLogDone = default!;
-    Δtrace.cpuLogRead[0] = default!;
-    Δtrace.cpuLogRead[1] = default!;
+    Δtrace.cpuLogDone = default;
+    Δtrace.cpuLogRead[0] = default;
+    Δtrace.cpuLogRead[1] = default;
     Δtrace.cpuSleep.close();
 }
 
@@ -139,7 +138,7 @@ internal static bool traceReadCPU(uintptr gen) {
         if (len(data) < 4 || data[0] > (uint64)len(data)) {
             break; // truncated profile
         }
-        if (data[0] < 4 || tags != default! && len(tags) < 1) {
+        if (data[0] < 4 || tags != nil && len(tags) < 1) {
             break; // malformed profile
         }
         if (len(tags) < 1) {
@@ -188,7 +187,7 @@ internal static bool traceReadCPU(uintptr gen) {
         var w = unsafeTraceWriter(gen, Δtrace.cpuBuf[gen % 2]);
 
         // Ensure we have a place to write to.
-        bool flushed = default!;
+        bool flushed = default;
         (w, flushed) = w.ensure(2 + 5 * traceBytesPerNumber /* tracev2.EvCPUSamples + tracev2.EvCPUSample + timestamp + g + m + p + stack ID */);
         if (flushed) {
             // Annotate the batch as containing strings.
@@ -222,7 +221,7 @@ internal static void traceCPUFlush(uintptr gen) {
                 @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
                 traceBufFlush(bufʗ1, gen);
                 unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-                Δtrace.cpuBuf[gen % 2] = default!;
+                Δtrace.cpuBuf[gen % 2] = default;
             });
         }
     }
@@ -273,7 +272,7 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
     // usually the number of samples with the given stack.) Near syscalls, pp
     // may be nil. Reporting goid of 0 is fine for either g0 or a nil gp.
     array<uint64> hdr = new(3);
-    if (Ꮡpp != nil){
+    if (Ꮡpp != nil) {
         // Overflow records in profBuf have all header values set to zero. Make
         // sure that real headers have at least one bit set.
         hdr[0] = (uint64)pp.id << 1 | 0b1;
@@ -296,7 +295,7 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
             // Note: we don't pass a tag pointer here (how should profiling tags
             // interact with the execution tracer?), but if we did we'd need to be
             // careful about write barriers. See the long comment in profBuf.write.
-            log.write(nil, (int64)(uint64)now, hdr[..], stk);
+            log.write(nil, (int64)now, hdr[..], stk);
         }
     }
 

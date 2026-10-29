@@ -31,7 +31,7 @@ public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     foreach (var (i, x) in d.Content) {
         if (i > 0) {
-            @out.WriteByte((rune)'\n');
+            @out.WriteByte((byte)'\n');
         }
         mp.block(Ꮡout, x);
     }
@@ -53,13 +53,13 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
         break;
     }
     case ж<Paragraph> xΔ1: {
-        Ꮡp.text(Ꮡout, (~xΔ1).Text);
+        Ꮡp.text(Ꮡout, xΔ1.Text);
         @out.WriteString("\n"u8);
         break;
     }
     case ж<Heading> xΔ1: {
         @out.WriteString(p.headingPrefix);
-        Ꮡp.text(Ꮡout, (~xΔ1).Text);
+        Ꮡp.text(Ꮡout, xΔ1.Text);
         {
             @string id = p.headingID(xΔ1); if (id != ""u8) {
                 @out.WriteString(" {#"u8);
@@ -71,9 +71,9 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
         break;
     }
     case ж<Code> xΔ1: {
-        @string md = xΔ1.Value.Text;
+        @string md = xΔ1.Text;
         while (md != ""u8) {
-            @string line = default!;
+            @string line = default;
             (line, md, _) = strings.Cut(md, "\n"u8);
             if (line != ""u8) {
                 @out.WriteString("\t"u8);
@@ -85,12 +85,12 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
     }
     case ж<List> xΔ1: {
         var loose = xΔ1.BlankBetween();
-        foreach (var (i, item) in (~xΔ1).Items) {
+        foreach (var (i, item) in xΔ1.Items) {
             if (i > 0 && loose) {
                 @out.WriteString("\n"u8);
             }
             {
-                @string n = item.Value.Number; if (n != ""u8){
+                @string n = item.Number; if (n != ""u8) {
                     @out.WriteString(" "u8);
                     @out.WriteString(n);
                     @out.WriteString(". "u8);
@@ -98,12 +98,12 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
                     @out.WriteString("  - "u8); // SP SP - SP
                 }
             }
-            foreach (var (iΔ1, blk) in (~item).Content) {
+            foreach (var (iΔ1, blk) in item.Content) {
                 @string fourSpace = fourSpaceᶜ;
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
                 }
-                Ꮡp.text(Ꮡout, (~blk._<ж<Paragraph>>()).Text);
+                Ꮡp.text(Ꮡout, blk._<ж<Paragraph>>().Text);
                 @out.WriteString("\n"u8);
             }
         }
@@ -123,20 +123,20 @@ internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slic
         return;
     }
     switch (line[0]) {
-    case (rune)'+' or (rune)'-' or (rune)'*' or (rune)'#': {
+    case (byte)'+' or (byte)'-' or (byte)'*' or (byte)'#': {
         // Escape what would be the start of an unordered list or heading.
-        @out.WriteByte((rune)'\\');
+        @out.WriteByte((byte)'\\');
         break;
     }
-    case (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7' or (rune)'8' or (rune)'9': {
+    case (byte)'0' or (byte)'1' or (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9': {
         nint i = 1;
-        while (i < len(line) && (rune)'0' <= line[i] && line[i] <= (rune)'9') {
+        while (i < len(line) && '0' <= line[i] && line[i] <= '9') {
             i++;
         }
-        if (i < len(line) && (line[i] == (rune)'.' || line[i] == (rune)')')) {
+        if (i < len(line) && (line[i] == '.' || line[i] == ')')) {
             // Escape what would be the start of an ordered list.
             @out.Write(line.slice(0, i));
-            @out.WriteByte((rune)'\\');
+            @out.WriteByte((byte)'\\');
             line = line.slice(i);
         }
         break;
@@ -164,9 +164,9 @@ internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slic
         }
         case ж<Link> tΔ1: {
             @out.WriteString("["u8);
-            p.rawText(Ꮡout, (~tΔ1).Text);
+            p.rawText(Ꮡout, tΔ1.Text);
             @out.WriteString("]("u8);
-            @out.WriteString((~tΔ1).URL);
+            @out.WriteString(tΔ1.URL);
             @out.WriteString(")"u8);
             break;
         }
@@ -175,7 +175,7 @@ internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slic
             if (url != ""u8) {
                 @out.WriteString("["u8);
             }
-            p.rawText(Ꮡout, (~tΔ1).Text);
+            p.rawText(Ꮡout, tΔ1.Text);
             if (url != ""u8) {
                 @out.WriteString("]("u8);
                 url = strings.ReplaceAll(url, "("u8, "%28"u8);
@@ -197,19 +197,19 @@ internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @stri
     nint start = 0;
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
-        case (rune)'\n': {
+        case (byte)'\n': {
             // Turn all \n into spaces, for a few reasons:
             //   - Avoid introducing paragraph breaks accidentally.
             //   - Avoid the need to reindent after the newline.
             //   - Avoid problems with Markdown renderers treating
             //     every mid-paragraph newline as a <br>.
             @out.WriteString(s.slice(start, i));
-            @out.WriteByte((rune)' ');
+            @out.WriteByte((byte)' ');
             start = i + 1;
             continue;
             break;
         }
-        case (rune)'`' or (rune)'_' or (rune)'*' or (rune)'[' or (rune)'<' or (rune)'\\': {
+        case (byte)'`' or (byte)'_' or (byte)'*' or (byte)'[' or (byte)'<' or (byte)'\\': {
             // Not all of these need to be escaped all the time,
             // but is valid and easy to do so.
             // We assume the Markdown is being passed to a
@@ -217,7 +217,7 @@ internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @stri
             // so it's fine to have escapes that are not strictly
             // necessary in some cases.
             @out.WriteString(s.slice(start, i));
-            @out.WriteByte((rune)'\\');
+            @out.WriteByte((byte)'\\');
             @out.WriteByte(s[i]);
             start = i + 1;
             break;

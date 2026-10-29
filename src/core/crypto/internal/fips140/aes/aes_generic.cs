@@ -58,10 +58,10 @@ internal static void encryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
 
     // Middle rounds shuffle using tables.
     nint k = 4;
-    uint32 t0 = default!;
-    uint32 t1 = default!;
-    uint32 t2 = default!;
-    uint32 t3 = default!;
+    uint32 t0 = default;
+    uint32 t1 = default;
+    uint32 t2 = default;
+    uint32 t3 = default;
     for (nint r = 0; r < c.rounds - 1; r++) {
         t0 = xk[k + 0] ^ te0[(uint8)(s0 >> 24)] ^ te1[(uint8)(s1 >> 16)] ^ te2[(uint8)(s2 >> 8)] ^ te3[(uint8)s3];
         t1 = xk[k + 1] ^ te0[(uint8)(s1 >> 24)] ^ te1[(uint8)(s2 >> 16)] ^ te2[(uint8)(s3 >> 8)] ^ te3[(uint8)s0];
@@ -108,10 +108,10 @@ internal static void decryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
 
     // Middle rounds shuffle using tables.
     nint k = 4;
-    uint32 t0 = default!;
-    uint32 t1 = default!;
-    uint32 t2 = default!;
-    uint32 t3 = default!;
+    uint32 t0 = default;
+    uint32 t1 = default;
+    uint32 t2 = default;
+    uint32 t3 = default;
     for (nint r = 0; r < c.rounds - 1; r++) {
         t0 = xk[k + 0] ^ td0[(uint8)(s0 >> 24)] ^ td1[(uint8)(s3 >> 16)] ^ td2[(uint8)(s2 >> 8)] ^ td3[(uint8)s1];
         t1 = xk[k + 1] ^ td0[(uint8)(s1 >> 24)] ^ td1[(uint8)(s0 >> 16)] ^ td2[(uint8)(s3 >> 8)] ^ td3[(uint8)s2];
@@ -157,17 +157,16 @@ internal static void expandKeyGeneric(ж<blockExpanded> Ꮡc, slice<byte> key) {
     checkGenericIsExpected();
 
     // Encryption key setup.
-    nint i = default!;
+    nint i = default;
     nint nk = len(key) / 4;
     for (i = 0; i < nk; i++) {
         c.enc[i] = byteorder.BEUint32(key.slice(4 * i));
     }
     for (; i < c.roundKeysSize(); i++) {
         var t = c.enc[i - 1];
-        if (rem(i, nk) == 0){
+        if (rem(i, nk) == 0) {
             t = subw(rotw(t)) ^ ((uint32)powx[quo(i, nk) - 1] << 24);
-        } else 
-        if (nk > 6 && rem(i, nk) == 4) {
+        } else if (nk > 6 && rem(i, nk) == 4) {
             t = subw(t);
         }
         c.enc[i] = c.enc[i - nk] ^ t;

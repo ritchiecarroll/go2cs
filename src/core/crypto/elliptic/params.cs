@@ -15,12 +15,12 @@ partial class elliptic_package {
 // (those not returned by [P224], [P256], [P384], and [P521]) is not guaranteed
 // to provide any security property.
 partial struct CurveParams {
-    public ж<bigꓸInt> P; // the order of the underlying field
-    public ж<bigꓸInt> N; // the order of the base point
-    public ж<bigꓸInt> B; // the constant of the curve equation
+    public ж<bigꓸInt> P;      // the order of the underlying field
+    public ж<bigꓸInt> N;      // the order of the base point
+    public ж<bigꓸInt> B;      // the constant of the curve equation
     public ж<bigꓸInt> Gx, Gy; // (x,y) of the base point
-    public nint BitSize;     // the size of the underlying field
-    public @string Name;  // the canonical name of the curve
+    public nint BitSize;      // the size of the underlying field
+    public @string Name;      // the canonical name of the curve
 }
 
 public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) {
@@ -35,12 +35,12 @@ public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) {
 // reverse the transform than to operate in affine coordinates.
 
 // polynomial returns x³ - 3x + b.
-internal static ж<bigꓸInt> polynomial(this ref CurveParams curve, ж<bigꓸInt> Ꮡx) {
-    var x3 = @new<bigꓸInt>().Mul(Ꮡx, Ꮡx);
-    x3.Mul(x3, Ꮡx);
+internal static ж<bigꓸInt> polynomial(this ref CurveParams curve, ж<bigꓸInt> x) {
+    var x3 = @new<bigꓸInt>().Mul(x, x);
+    x3.Mul(x3, x);
 
-    var threeX = @new<bigꓸInt>().Lsh(Ꮡx, 1);
-    threeX.Add(threeX, Ꮡx);
+    var threeX = @new<bigꓸInt>().Lsh(x, 1);
+    threeX.Add(threeX, x);
 
     x3.Sub(x3, threeX);
     x3.Add(x3, curve.B);
@@ -95,9 +95,9 @@ internal static ж<bigꓸInt> zForAffine(ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
 
 // affineFromJacobian reverses the Jacobian transform. See the comment at the
 // top of the file. If the point is ∞ it returns 0, 0.
-internal static (ж<bigꓸInt> xOut, ж<bigꓸInt> yOut) affineFromJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy, ж<bigꓸInt> Ꮡz) {
-    ж<bigꓸInt> xOut = default!;
-    ж<bigꓸInt> yOut = default!;
+internal static (ж<bigꓸInt> xOut, ж<bigꓸInt> yOut) affineFromJacobian(this ref CurveParams curve, ж<bigꓸInt> x, ж<bigꓸInt> y, ж<bigꓸInt> Ꮡz) {
+    ж<bigꓸInt> xOut = default;
+    ж<bigꓸInt> yOut = default;
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (z.Sign() == 0) {
@@ -107,10 +107,10 @@ internal static (ж<bigꓸInt> xOut, ж<bigꓸInt> yOut) affineFromJacobian(this
     var zinv = @new<bigꓸInt>().ModInverse(Ꮡz, curve.P);
     var zinvsq = @new<bigꓸInt>().Mul(zinv, zinv);
 
-    xOut = @new<bigꓸInt>().Mul(Ꮡx, zinvsq);
+    xOut = @new<bigꓸInt>().Mul(x, zinvsq);
     xOut.Mod(xOut, curve.P);
     zinvsq.Mul(zinvsq, zinv);
-    yOut = @new<bigꓸInt>().Mul(Ꮡy, zinvsq);
+    yOut = @new<bigꓸInt>().Mul(y, zinvsq);
     yOut.Mod(yOut, curve.P);
     return (xOut, yOut);
 }
@@ -121,42 +121,42 @@ internal static (ж<bigꓸInt> xOut, ж<bigꓸInt> yOut) affineFromJacobian(this
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-public static (ж<bigꓸInt>, ж<bigꓸInt>) Add(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1, ж<bigꓸInt> Ꮡx2, ж<bigꓸInt> Ꮡy2) {
+public static (ж<bigꓸInt>, ж<bigꓸInt>) Add(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> x1, ж<bigꓸInt> y1, ж<bigꓸInt> x2, ж<bigꓸInt> y2) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
     {
         var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
-            return specific.Add(Ꮡx1, Ꮡy1, Ꮡx2, Ꮡy2);
+            return specific.Add(x1, y1, x2, y2);
         }
     }
-    panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), Ꮡx1, Ꮡy1);
-    panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), Ꮡx2, Ꮡy2);
+    panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), x1, y1);
+    panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), x2, y2);
 
-    var z1 = zForAffine(Ꮡx1, Ꮡy1);
-    var z2 = zForAffine(Ꮡx2, Ꮡy2);
-    var (ᴛ1, ᴛ2, ᴛ3) = curve.addJacobian(Ꮡx1, Ꮡy1, z1, Ꮡx2, Ꮡy2, z2);
+    var z1 = zForAffine(x1, y1);
+    var z2 = zForAffine(x2, y2);
+    var (ᴛ1, ᴛ2, ᴛ3) = curve.addJacobian(x1, y1, z1, x2, y2, z2);
     return curve.affineFromJacobian(ᴛ1, ᴛ2, ᴛ3);
 }
 
 // addJacobian takes two points in Jacobian coordinates, (x1, y1, z1) and
 // (x2, y2, z2) and returns their sum, also in Jacobian form.
-internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1, ж<bigꓸInt> Ꮡz1, ж<bigꓸInt> Ꮡx2, ж<bigꓸInt> Ꮡy2, ж<bigꓸInt> Ꮡz2) {
+internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this ref CurveParams curve, ж<bigꓸInt> x1, ж<bigꓸInt> y1, ж<bigꓸInt> Ꮡz1, ж<bigꓸInt> x2, ж<bigꓸInt> y2, ж<bigꓸInt> Ꮡz2) {
     ref var z1 = ref Ꮡz1.DerefOrNull();
     ref var z2 = ref Ꮡz2.DerefOrNull();
 
     // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#addition-add-2007-bl
     var (x3, y3, z3) = (@new<bigꓸInt>(), @new<bigꓸInt>(), @new<bigꓸInt>());
     if (z1.Sign() == 0) {
-        x3.Set(Ꮡx2);
-        y3.Set(Ꮡy2);
+        x3.Set(x2);
+        y3.Set(y2);
         z3.Set(Ꮡz2);
         return (x3, y3, z3);
     }
     if (z2.Sign() == 0) {
-        x3.Set(Ꮡx1);
-        y3.Set(Ꮡy1);
+        x3.Set(x1);
+        y3.Set(y1);
         z3.Set(Ꮡz1);
         return (x3, y3, z3);
     }
@@ -166,9 +166,9 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this r
     var z2z2 = @new<bigꓸInt>().Mul(Ꮡz2, Ꮡz2);
     z2z2.Mod(z2z2, curve.P);
 
-    var u1 = @new<bigꓸInt>().Mul(Ꮡx1, z2z2);
+    var u1 = @new<bigꓸInt>().Mul(x1, z2z2);
     u1.Mod(u1, curve.P);
-    var u2 = @new<bigꓸInt>().Mul(Ꮡx2, z1z1);
+    var u2 = @new<bigꓸInt>().Mul(x2, z1z1);
     u2.Mod(u2, curve.P);
     var h = @new<bigꓸInt>().Sub(u2, u1);
     var xEqual = h.Sign() == 0;
@@ -179,10 +179,10 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this r
     i.Mul(i, i);
     var j = @new<bigꓸInt>().Mul(h, i);
 
-    var s1 = @new<bigꓸInt>().Mul(Ꮡy1, Ꮡz2);
+    var s1 = @new<bigꓸInt>().Mul(y1, Ꮡz2);
     s1.Mul(s1, z2z2);
     s1.Mod(s1, curve.P);
-    var s2 = @new<bigꓸInt>().Mul(Ꮡy2, Ꮡz1);
+    var s2 = @new<bigꓸInt>().Mul(y2, Ꮡz1);
     s2.Mul(s2, z1z1);
     s2.Mod(s2, curve.P);
     var r = @new<bigꓸInt>().Sub(s2, s1);
@@ -191,7 +191,7 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this r
     }
     var yEqual = r.Sign() == 0;
     if (xEqual && yEqual) {
-        return curve.doubleJacobian(Ꮡx1, Ꮡy1, Ꮡz1);
+        return curve.doubleJacobian(x1, y1, Ꮡz1);
     }
     r.Lsh(r, 1);
     var v = @new<bigꓸInt>().Mul(u1, i);
@@ -227,42 +227,42 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this r
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-public static (ж<bigꓸInt>, ж<bigꓸInt>) Double(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1) {
+public static (ж<bigꓸInt>, ж<bigꓸInt>) Double(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> x1, ж<bigꓸInt> y1) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
     {
         var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
-            return specific.Double(Ꮡx1, Ꮡy1);
+            return specific.Double(x1, y1);
         }
     }
-    panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), Ꮡx1, Ꮡy1);
+    panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), x1, y1);
 
-    var z1 = zForAffine(Ꮡx1, Ꮡy1);
-    var (ᴛ4, ᴛ5, ᴛ6) = curve.doubleJacobian(Ꮡx1, Ꮡy1, z1);
+    var z1 = zForAffine(x1, y1);
+    var (ᴛ4, ᴛ5, ᴛ6) = curve.doubleJacobian(x1, y1, z1);
     return curve.affineFromJacobian(ᴛ4, ᴛ5, ᴛ6);
 }
 
 // doubleJacobian takes a point in Jacobian coordinates, (x, y, z), and
 // returns its double, also in Jacobian form.
-internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy, ж<bigꓸInt> Ꮡz) {
+internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(this ref CurveParams curve, ж<bigꓸInt> x, ж<bigꓸInt> y, ж<bigꓸInt> z) {
     // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
-    var delta = @new<bigꓸInt>().Mul(Ꮡz, Ꮡz);
+    var delta = @new<bigꓸInt>().Mul(z, z);
     delta.Mod(delta, curve.P);
-    var gamma = @new<bigꓸInt>().Mul(Ꮡy, Ꮡy);
+    var gamma = @new<bigꓸInt>().Mul(y, y);
     gamma.Mod(gamma, curve.P);
-    var alpha = @new<bigꓸInt>().Sub(Ꮡx, delta);
+    var alpha = @new<bigꓸInt>().Sub(x, delta);
     if (alpha.Sign() == -1) {
         alpha.Add(alpha, curve.P);
     }
-    var alpha2 = @new<bigꓸInt>().Add(Ꮡx, delta);
+    var alpha2 = @new<bigꓸInt>().Add(x, delta);
     alpha.Mul(alpha, alpha2);
     alpha2.Set(alpha);
     alpha.Lsh(alpha, 1);
     alpha.Add(alpha, alpha2);
 
-    var beta = alpha2.Mul(Ꮡx, gamma);
+    var beta = alpha2.Mul(x, gamma);
 
     var x3 = @new<bigꓸInt>().Mul(alpha, alpha);
     var beta8 = @new<bigꓸInt>().Lsh(beta, 3);
@@ -273,7 +273,7 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(thi
     }
     x3.Mod(x3, curve.P);
 
-    var z3 = @new<bigꓸInt>().Add(Ꮡy, Ꮡz);
+    var z3 = @new<bigꓸInt>().Add(y, z);
     z3.Mul(z3, z3);
     z3.Sub(z3, gamma);
     if (z3.Sign() == -1) {
@@ -311,17 +311,17 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(thi
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> ᏑBx, ж<bigꓸInt> ᏑBy, slice<byte> k) {
+public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> Bx, ж<bigꓸInt> By, slice<byte> k) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
     {
         var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
-            return specific.ScalarMult(ᏑBx, ᏑBy, k);
+            return specific.ScalarMult(Bx, By, k);
         }
     }
-    panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), ᏑBx, ᏑBy);
+    panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), Bx, By);
 
     var Bz = @new<bigꓸInt>().SetInt64(1);
     var (x, y, z) = (@new<bigꓸInt>(), @new<bigꓸInt>(), @new<bigꓸInt>());
@@ -332,9 +332,9 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult(this ж<CurveParams> Ꮡ
         foreach (var _ᴛ1 in range(8)) {
             (x, y, z) = curve.doubleJacobian(x, y, z);
             if ((byte)(b & 0x80) == 0x80) {
-                (x, y, z) = curve.addJacobian(ᏑBx, ᏑBy, Bz, x, y, z);
+                (x, y, z) = curve.addJacobian(Bx, By, Bz, x, y, z);
             }
-            b <<= (int)(1);
+            b <<= 1;
         }
     }
 
@@ -361,13 +361,13 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult(this ж<CurveParams>
     return Ꮡcurve.ScalarMult(curve.Gx, curve.Gy, k);
 }
 
-internal static (Curve, bool) matchesSpecificCurve(ж<CurveParams> Ꮡparams) {
-    foreach (var (_, c) in new Curve[]{new nistCurveжCurve<P224PointжnistPoint>(p224), new nistCurveжCurve<P256PointжnistPoint>(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)}.slice()) {
-        if (Ꮡparams == c.Params()) {
+internal static (Curve, bool) matchesSpecificCurve(ж<CurveParams> @params) {
+    foreach (var (_, c) in slice<Curve>([new nistCurveжCurve<P224PointжnistPoint>(p224), new nistCurveжCurve<P256PointжnistPoint>(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)])) {
+        if (@params == c.Params()) {
             return (c, true);
         }
     }
-    return (default!, false);
+    return (default, false);
 }
 
 } // end elliptic_package

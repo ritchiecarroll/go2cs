@@ -10,12 +10,13 @@ partial class strconv_package {
 // Any other value returns an error.
 public static (bool, error) ParseBool(@string str) {
     var exprᴛ1 = str;
-    if (exprᴛ1 == "1"u8 || exprᴛ1 == "t"u8 || exprᴛ1 == "T"u8 || exprᴛ1 == "true"u8 || exprᴛ1 == "TRUE"u8 || exprᴛ1 == "True"u8) {
-        return (true, default!);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "1"u8 || exprᴛ1 == "t"u8 || exprᴛ1 == "T"u8 || exprᴛ1 == "true"u8 || exprᴛ1 == "TRUE"u8 || exprᴛ1 == "True"u8: {
+        return (true, default);
     }
-    if (exprᴛ1 == "0"u8 || exprᴛ1 == "f"u8 || exprᴛ1 == "F"u8 || exprᴛ1 == "false"u8 || exprᴛ1 == "FALSE"u8 || exprᴛ1 == "False"u8) {
-        return (false, default!);
-    }
+    case {} when exprᴛ1 == "0"u8 || exprᴛ1 == "f"u8 || exprᴛ1 == "F"u8 || exprᴛ1 == "false"u8 || exprᴛ1 == "FALSE"u8 || exprᴛ1 == "False"u8: {
+        return (false, default);
+    }}
     return (false, ErrSyntax);
 }
 

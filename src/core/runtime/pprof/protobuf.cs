@@ -15,7 +15,7 @@ partial struct protobuf {
 internal static void varint(this ref protobuf b, uint64 x) {
     while (x >= 128) {
         b.data = append(b.data, (byte)((byte)x | 0x80));
-        x >>= (int)(7);
+        x >>= 7;
     }
     b.data = append(b.data, (byte)x);
 }
@@ -109,7 +109,7 @@ internal static void stringOpt(this ref protobuf b, nint tag, @string x) {
 }
 
 internal static void @bool(this ref protobuf b, nint tag, bool x) {
-    if (x){
+    if (x) {
         b.uint64(tag, 1);
     } else {
         b.uint64(tag, 0);

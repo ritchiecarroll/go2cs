@@ -7,7 +7,7 @@ using fmt = fmt_package;
 using io = io_package;
 using sync = sync_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // added for go linkname usage
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // added for go linkname usage
 
 partial class trace_package {
 
@@ -42,16 +42,16 @@ partial struct FlightRecorder {
 // NewFlightRecorder creates a new flight recorder from the provided configuration.
 public static ж<FlightRecorder> NewFlightRecorder(FlightRecorderConfig cfg) {
     var fr = @new<FlightRecorder>();
-    if (cfg.MaxBytes != 0){
-        fr.Value.targetSize = cfg.MaxBytes;
+    if (cfg.MaxBytes != 0) {
+        fr.targetSize = cfg.MaxBytes;
     } else {
-        fr.Value.targetSize = (uint64)10 << 20; // 10 MiB.
+        fr.targetSize = (uint64)10 << 20; // 10 MiB.
     }
 
-    if (cfg.MinAge != 0){
-        fr.Value.targetPeriod = cfg.MinAge;
+    if (cfg.MinAge != 0) {
+        fr.targetPeriod = cfg.MinAge;
     } else {
-        fr.Value.targetPeriod = (time.Duration)(10000000000L);
+        fr.targetPeriod = (time.Duration)(10000000000L);
     }
     return fr;
 }
@@ -68,19 +68,19 @@ public static error Start(this ж<FlightRecorder> Ꮡfr) {
     }
     fr.wantSize = fr.targetSize;
     fr.wantDur = fr.targetPeriod;
-    fr.err = default!;
+    fr.err = default;
     fr.freq = (frequency)(1.0D / ((float64)runtime_traceClockUnitsPerSecond() / 1e9D));
 
     // Start tracing, data is sent to a recorder which forwards it to our own
     // storage.
     {
-        var err = Ꮡtracing.subscribeFlightRecorder(Ꮡ(new recorder(r: Ꮡfr))); if (err != default!) {
+        var err = Ꮡtracing.subscribeFlightRecorder(Ꮡ(new recorder(r: Ꮡfr))); if (err != nil) {
             return err;
         }
     }
 
     fr.enabled = true;
-    return default!;
+    return default;
 }
 
 // Stop ends recording of trace data. It blocks until any concurrent WriteTo calls complete.
@@ -92,8 +92,8 @@ public static void Stop(this ref FlightRecorder fr) {
     Ꮡtracing.unsubscribeFlightRecorder();
 
     // Reset all state. No need to lock because the reader has already exited.
-    fr.active = new rawGeneration(nil);
-    fr.ring = default!;
+    fr.active = new rawGeneration();
+    fr.ring = default;
 }
 
 // Enabled returns true if the flight recorder is active.
@@ -110,8 +110,8 @@ public static bool Enabled(this ref FlightRecorder fr) {
 // An error is returned upon failure to write to w, if another WriteTo call is already in-progress,
 // or if the flight recorder is inactive.
 public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Writer w) {
-    int64 n = default!;
-    error err = default!;
+    int64 n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var fr = ref Ꮡfr.DerefOrNull();
@@ -141,7 +141,7 @@ public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Wri
 
         // Write the header.
         (var nw, err) = w.Write(fr.header[..]);
-        if (err != default!) {
+        if (err != nil) {
             (n, err) = ((int64)nw, err); goto ᒐdone;
         }
         n += (int64)nw;
@@ -152,12 +152,12 @@ public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Wri
                 // Write batch data.
                 (nw, err) = w.Write(data);
                 n += (int64)nw;
-                if (err != default!) {
+                if (err != nil) {
                     goto ᒐdone;
                 }
             }
         }
-        (n, err) = (n, default!);
+        (n, err) = (n, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

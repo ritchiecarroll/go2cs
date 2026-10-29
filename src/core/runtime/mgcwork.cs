@@ -12,7 +12,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(workbuf))]
 partial class runtime_package {
 
 internal static UntypedInt _WorkbufSize => 2048; // in bytes; larger values result in less contention
@@ -154,15 +153,14 @@ internal static void putObj(this ref gcWork w, uintptr obj) {
     // allocate a workbuf.
     lockWithRankMayAcquire(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock), lockRankWbufSpans);
     lockWithRankMayAcquire(Ꮡmheap_.of(mheap.Ꮡlock), lockRankMheap);
-    if (wbuf == nil){
+    if (wbuf == nil) {
         w.init();
         wbuf = w.wbuf1;
         // wbuf is empty at this point.
-    } else 
-    if ((~wbuf).nobj == len((~wbuf).obj)) {
+    } else if ((~wbuf).nobj == len(wbuf.obj)) {
         (w.wbuf1, w.wbuf2) = (w.wbuf2, w.wbuf1);
         wbuf = w.wbuf1;
-        if ((~wbuf).nobj == len((~wbuf).obj)) {
+        if ((~wbuf).nobj == len(wbuf.obj)) {
             putfull(wbuf);
             w.flushedWork = true;
             wbuf = getempty();
@@ -171,7 +169,7 @@ internal static void putObj(this ref gcWork w, uintptr obj) {
         }
     }
 
-    wbuf.Value.obj[(~wbuf).nobj] = obj;
+    wbuf.obj[(~wbuf).nobj] = obj;
     wbuf.Value.nobj++;
 
     // If we put a buffer on full, let the GC controller know so
@@ -179,7 +177,7 @@ internal static void putObj(this ref gcWork w, uintptr obj) {
     // the end of put so that w is in a consistent state, since
     // enlistWorker may itself manipulate w.
     if (flushed && gcphase == _GCmark) {
-        if (goexperiment.GreenTeaGC){
+        if (goexperiment.GreenTeaGC) {
             w.mayNeedWorker = true;
         } else {
             ᏑgcController.enlistWorker();
@@ -193,11 +191,11 @@ internal static void putObj(this ref gcWork w, uintptr obj) {
 //go:nowritebarrierrec
 internal static bool putObjFast(this ref gcWork w, uintptr obj) {
     var wbuf = w.wbuf1;
-    if (wbuf == nil || (~wbuf).nobj == len((~wbuf).obj)) {
+    if (wbuf == nil || (~wbuf).nobj == len(wbuf.obj)) {
         return false;
     }
 
-    wbuf.Value.obj[(~wbuf).nobj] = obj;
+    wbuf.obj[(~wbuf).nobj] = obj;
     wbuf.Value.nobj++;
     return true;
 }
@@ -219,20 +217,20 @@ internal static void putObjBatch(this ref gcWork w, slice<uintptr> obj) {
     }
 
     while (len(obj) > 0) {
-        while ((~wbuf).nobj == len((~wbuf).obj)) {
+        while ((~wbuf).nobj == len(wbuf.obj)) {
             putfull(wbuf);
             w.flushedWork = true;
             (w.wbuf1, w.wbuf2) = (w.wbuf2, getempty());
             wbuf = w.wbuf1;
             flushed = true;
         }
-        nint n = copy((~wbuf).obj.slice((~wbuf).nobj), obj);
+        nint n = copy(wbuf.obj.slice((~wbuf).nobj), obj);
         wbuf.Value.nobj += n;
         obj = obj.slice(n);
     }
 
     if (flushed && gcphase == _GCmark) {
-        if (goexperiment.GreenTeaGC){
+        if (goexperiment.GreenTeaGC) {
             w.mayNeedWorker = true;
         } else {
             ᏑgcController.enlistWorker();
@@ -269,7 +267,7 @@ internal static uintptr tryGetObj(this ref gcWork w) {
     }
 
     wbuf.Value.nobj--;
-    return (~wbuf).obj[(~wbuf).nobj];
+    return wbuf.obj[(~wbuf).nobj];
 }
 
 // tryGetObjFast dequeues a pointer for the garbage collector to trace
@@ -284,7 +282,7 @@ internal static uintptr tryGetObjFast(this ref gcWork w) {
     }
 
     wbuf.Value.nobj--;
-    return (~wbuf).obj[(~wbuf).nobj];
+    return wbuf.obj[(~wbuf).nobj];
 }
 
 // dispose returns any cached pointers to the global queue.
@@ -299,22 +297,22 @@ internal static void dispose(this ж<gcWork> Ꮡw) {
 
     {
         var wbuf = w.wbuf1; if (wbuf != nil) {
-            if ((~wbuf).nobj == 0){
+            if ((~wbuf).nobj == 0) {
                 putempty(wbuf);
             } else {
                 putfull(wbuf);
                 w.flushedWork = true;
             }
-            w.wbuf1 = default!;
+            w.wbuf1 = default;
 
             wbuf = w.wbuf2;
-            if ((~wbuf).nobj == 0){
+            if ((~wbuf).nobj == 0) {
                 putempty(wbuf);
             } else {
                 putfull(wbuf);
                 w.flushedWork = true;
             }
-            w.wbuf2 = default!;
+            w.wbuf2 = default;
         }
     }
     if (!Ꮡw.of(gcWork.Ꮡspanq).empty()) {
@@ -354,13 +352,12 @@ internal static void balance(this ref gcWork w) {
         return;
     }
     {
-        var wbuf = w.wbuf2; if ((~wbuf).nobj != 0){
+        var wbuf = w.wbuf2; if ((~wbuf).nobj != 0) {
             putfull(wbuf);
             w.flushedWork = true;
             w.wbuf2 = getempty();
-        } else 
-        {
-            var wbufΔ1 = w.wbuf1; if ((~wbufΔ1).nobj > 4){
+        } else {
+            var wbufΔ1 = w.wbuf1; if ((~wbufΔ1).nobj > 4) {
                 w.wbuf1 = handoff(wbufΔ1);
                 w.flushedWork = true; // handoff did putfull
             } else {
@@ -370,7 +367,7 @@ internal static void balance(this ref gcWork w) {
     }
     // We flushed a buffer to the full list, so wake a worker.
     if (gcphase == _GCmark) {
-        if (goexperiment.GreenTeaGC){
+        if (goexperiment.GreenTeaGC) {
             w.mayNeedWorker = true;
         } else {
             ᏑgcController.enlistWorker();
@@ -429,7 +426,7 @@ internal static void checkempty(this ref workbuf b) {
 //
 //go:nowritebarrier
 internal static ж<workbuf> getempty() {
-    ж<workbuf> b = default!;
+    ж<workbuf> b = default;
     if (work.empty != 0) {
         b = (ж<workbuf>)(uintptr)(Ꮡwork.of(workType.Ꮡempty).pop());
         if (b != nil) {
@@ -470,7 +467,7 @@ internal static ж<workbuf> getempty() {
             var newb = (ж<workbuf>)(uintptr)((@unsafe.Pointer)(s.@base() + i));
             newb.workbufhdr.nobj = 0;
             lfnodeValidate(newb.of(workbuf.Ꮡnode));
-            if (i == 0){
+            if (i == 0) {
                 b = newb;
             } else {
                 putempty(newb);

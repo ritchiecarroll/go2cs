@@ -16,13 +16,13 @@ partial class runtime_package {
 // Like mutex, rwmutex blocks the calling M.
 // It does not interact with the goroutine scheduler.
 partial struct rwmutex {
-    internal mutex rLock;    // protects readers, readerPass, writer
-    internal muintptr readers; // list of pending readers
-    internal uint32 readerPass;   // number of pending readers to skip readers list
-    internal mutex wLock;    // serializes writers
+    internal mutex rLock;       // protects readers, readerPass, writer
+    internal muintptr readers;  // list of pending readers
+    internal uint32 readerPass; // number of pending readers to skip readers list
+    internal mutex wLock;     // serializes writers
     internal muintptr writer; // pending writer waiting for completing readers
     internal atomic.Int32 readerCount; // number of pending readers
-    internal atomic.Int32 readerWait; // number of departing readers
+    internal atomic.Int32 readerWait;  // number of departing readers
     internal lockRank readRank; // semantic lock rank for read locking
 }
 
@@ -80,7 +80,7 @@ internal static void rlock(this ж<rwmutex> Ꮡrw) {
         // A writer is pending. Park on the reader queue.
         systemstack(() => {
             @lock(Ꮡrw.of(rwmutex.ᏑrLock));
-            if (Ꮡrw.Value.readerPass > 0){
+            if (Ꮡrw.Value.readerPass > 0) {
                 // Writer finished.
                 Ꮡrw.Value.readerPass -= 1;
                 unlock(Ꮡrw.of(rwmutex.ᏑrLock));
@@ -134,7 +134,7 @@ internal static void @lock(this ж<rwmutex> Ꮡrw) {
     var r = Ꮡrw.of(rwmutex.ᏑreaderCount).Add(-rwmutexMaxReaders) + (int32)rwmutexMaxReaders;
     // Wait for any active readers to complete.
     @lock(Ꮡrw.of(rwmutex.ᏑrLock));
-    if (r != 0 && Ꮡrw.of(rwmutex.ᏑreaderWait).Add(r) != 0){
+    if (r != 0 && Ꮡrw.of(rwmutex.ᏑreaderWait).Add(r) != 0) {
         // Wait for reader to wake us up.
         var mʗ1 = m;
         systemstack(() => {

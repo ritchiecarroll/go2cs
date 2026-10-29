@@ -14,7 +14,7 @@ partial class runtime_package {
 internal static @unsafe.Pointer sysAllocOS(uintptr n, @string _) {
     var (v, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
-        return default!;
+        return default;
     }
     return v;
 }
@@ -56,7 +56,7 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
 internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string _) {
     var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
-        return default!;
+        return default;
     }
     return Δp;
 }

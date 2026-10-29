@@ -11,26 +11,9 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -87,6 +70,28 @@ using static go.crypto.x509_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(CertPool))]
+[assembly: go.GoFieldAccess(typeof(Certificate))]
+[assembly: go.GoFieldAccess(typeof(CertificateRequest))]
+[assembly: go.GoFieldAccess(typeof(RevocationList))]
+[assembly: go.GoFieldAccess(typeof(chainConstraints))]
+[assembly: go.GoFieldAccess(typeof(dnsConstraints))]
+[assembly: go.GoFieldAccess(typeof(emailConstraints))]
+[assembly: go.GoFieldAccess(typeof(go.crypto.dsa_package.PublicKey))]
+[assembly: go.GoFieldAccess(typeof(go.crypto.ecdsa_package.PublicKey))]
+[assembly: go.GoFieldAccess(typeof(go.crypto.elliptic_package.CurveParams))]
+[assembly: go.GoFieldAccess(typeof(go.crypto.rsa_package.PrivateKey))]
+[assembly: go.GoFieldAccess(typeof(go.crypto.rsa_package.PublicKey))]
+[assembly: go.GoFieldAccess(typeof(go.encoding.pem_package.Block))]
+[assembly: go.GoFieldAccess(typeof(go.net.url_package.URL))]
+[assembly: go.GoFieldAccess(typeof(nameConstraintsSet<,>))]
+[assembly: go.GoFieldAccess(typeof(net_package.IPNet))]
+[assembly: go.GoFieldAccess(typeof(pkcs1PublicKey))]
+[assembly: go.GoFieldAccess(typeof(policyGraphNode))]
+[assembly: go.GoFieldAccess(typeof(rfc1423Algo))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -95,10 +100,10 @@ using static go.crypto.x509_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/x509/cert_pool.go", "cert_pool.cs", "ADuAAZIABRDCgpSokoKoktyCgoKUopSCAAIcAAsCgIK2AAcUAAgCggACEgAIAoKCgpSClLa0yIKClIKCgoKmsoKUqLKClAACFPKCuIKmgsoABxIACAKCgoKClIKmkoKClIiClIKUlKYAAhDygoKUqMKClIKUooKmAAIQ8oKU", "184-186:1;239-246:1;240-244:1.1;291-293:1")]
-[assembly: go.GoPositionMap("crypto/x509/constraints.go", "constraints.cs", "AEeUAdKCppSClIKCgoKmAAIQAAkCgqaUgqaCpoKClJSClKaigpSCgpSmsoKClKaipoIAEByGgpSSgoKUppKCppSCppSmgoKClJSClAACHAALAoKCgpSCgoKCgpSClIKUpoKm7riCgpSUAAwaAAIWAAgCgpSCgoKCgoKUgoKUpoKCkoKUABUqgoKUgoKmlO6UgoKigoKClJSCuKaCgqaCgqaCgoKAgrYAEh6mgpSCgoKCgpSCypSClKaClKaCgoCCtoKUggAQEqKCgIK2goCCtgALGoKCgIK2goKUgIK2goKUgIK2goKUgIK2poKCgrKClO6CgpKCgqaCpoKClIKCgpS4goKUgoKmgoCC2gAHEIKmgoKCgoKUgoKCgu6AgraUpoKCgoKClIKUpoKClJQ=", "", "", "570=newIPNetConstraints/1/2/1,newIPNetConstraints/2/2/1,newDNSConstraints/1/4/2,newDNSConstraints/2/4/2,newDNSConstraints/3/4/3,newDNSConstraints/4/4/3,newEmailConstraints/1/2/4,newEmailConstraints/2/2/4")]
+[assembly: go.GoPositionMap("crypto/x509/cert_pool.go", "cert_pool.cs", "ADuAAZIABRDCgpSokoKoktyCgoKUopSCAAIcAAsCgIK2AAcUAAgCggACEgAIAoKCgpSClLa0yIKClIKCgoKmsoKUqLKClAACFPKCuIKmgsoABxIACAKCgoKClIKmgoKClIiClIKUlKYAAhDygoKUqMKClIKUooKmAAIQ8oKU", "184-186:1;239-246:1;240-244:1.1;291-293:1")]
+[assembly: go.GoPositionMap("crypto/x509/constraints.go", "constraints.cs", "AEeUAdKCppSClIKCgoKmAAIQAAkCgqaUgqaCpoKClJSClKaigpSCgpSmsoKClKaipoIAEByGgpSSgoKUppKCppSCppSmgoKClJSClAACHAALAoKCgpSCgoKCgpSClIKUpoKm7riCgpSUAAwaAAIWAAgCgpSCgoKCgoKUgoKUpoKCgoKUABUqgoKUgoKmlO6UgoKigoKClJSCuKaCgqaCgqaCgoKAgrYAEh6mgpSCgoKCgpSCypSClKaClKaCgoCCtoKUggAQEqKCgIK2goCCtgALGoKCgIK2goKUgIK2goKUgIK2goKUgIK2poKCgrKClO6CgoKCgqaCpoKClIKCgpS4goKUgoKmgoCC2gAHEIKmgoKCgoKUgoKCgu6AgraUpoKCgoKClIKUpoKClJQ=", "", "", "569=newIPNetConstraints/1/2/1,newIPNetConstraints/2/2/1,newDNSConstraints/1/4/2,newDNSConstraints/2/4/2,newDNSConstraints/3/4/3,newDNSConstraints/4/4/3,newEmailConstraints/1/2/4,newEmailConstraints/2/2/4")]
 [assembly: go.GoPositionMap("crypto/x509/oid.go", "oid.cs", "ABImAAYSkoK2goKmgriClIK4qJKCpoKCpoKCgpSmgoKUpoKCgoKClJSmooKUpoKCpoKCgoKUlKiSqJKokqa4goKCuKqCgoKUlKqAgqSAgraCpoKUlIKCgoKClKaCqJKokqiSgoKUgqi2psKCgqaCgpSCpoKClIKCgpSClKaCrLKClIKmlIKSgqaSgriCgoKmlIK4qJKCgqrOgoKCgoKmgoKUgpSCgoKCgpSCgoKCgpSUgoKCgoKCgpSCppSCpqaClLyUgoKmgpSCgoKClIKUgpSCuNiygoKClJQ=")]
-[assembly: go.GoPositionMap("crypto/x509/parser.go", "parser.cs", "AChGogASMOIAChaClJSkgoKmpIKUAAoUgriAgraCgriGlIKmpIKClKSCgqaUAAgKwoKmgoKCgoKUgoKClIKClIKCgpSCgoKUpqbmgpKClIKUgoKClIKC9qKClILGgsaUpqKCgpSCgqb2goKClIKCpoKClIIAEwaCgoKCuIKmkoKClIKUgqaClIKmuKSCgoKUgoKU2IKUgpTIgpS0goKClAAHEJKIlISUpOiCgoKmgoKCptaigoKUgoK4goKCgpSm5qKClIKCgoKUgILI9uKClIKAgqSkgoCCpKSCgIKkgoKUgpSklKS4puaUlJSCgoKUgoKUlNbCgoKClIKCgpSAgpS29rKCgoKUgoKCgpSClIKCgpSUuJKUgoKCpqaU5rjmABIggqKSiqbKpgAIAoKSgoSmzpSCgIK2gpSmgqSUgraCtqaCpqaCgILagoCCtoKmpoKAgraCpoKUprjmgIKkgIKklAAPBqKCgpSClIKCxoKClIK0goKmlMiCggAQIJKClIKCgpSCgoKUgpSClIKClIKClNqCgsaSgpSCgoKUlIKUlIKCgpSUgpTGgoLGlJSCgoKUtIKClIKCgILokoKUgoKShpTGgoKUxrSUlJSSgpSCgoKUgoKUgpSClJS02qaCuKYAFgSClMiClIKCpqaClIKCpoKUgriCgqaCgpSCgpSmlIKCmrKClIKUgoKUlIKClIKCgpSUgoKUgoKmgoKUgoKClJSCgpSCgpSCgpSSgpSCgoKUgsiCuIKClIKUgoKCgpSCgoKUgoKClIKClIKClIKUgoLcgoKUlAAFENKCgpSClKrCgoKCgpSClAANEqKUyIKUgoKmpoKUgoKmgoKUgpSCpoKCmrKClIKUgoKUlIKClJSCgpSCgoKUlIKClIKCgriCgoKUgqSCgpSCgqaCgpSCgpSCgoKUgoKCgpSCgpSCgoKmuILKuIKCgpSCgpSCgoKUgoKUgoKCpIKCgoKmuKoADRiCyoIACBKCgqaClJSCgoKUgty4", "401-438:1;568-659:1", "", "398=ReadASN1Integer/1/3/1,ReadASN1Integer/2/3/2,ReadASN1Integer/3/3/3;401=Sign/3/4/1,Sign/4/4/1;692=Empty/1/2/1,ContextSpecific/1/2/2,Constructed/1/2/2,ReadOptionalASN1/1/2/2,ContextSpecific/2/2/3,Constructed/2/2/3,ReadOptionalASN1/2/2/3,Empty/2/2/4;717=ReadAnyASN1/1/1/1;1021=ReadASN1/2/3/1,ReadASN1/3/3/2")]
+[assembly: go.GoPositionMap("crypto/x509/parser.go", "parser.cs", "AChGogASMOIAChaClJSkgoKmpIKUAAoUgriAgraCgriGlIKmpIKClKSCgqaUAAgKwoKmgoKCgoKUgoKClIKClIKCgpSCgoKUpqbmgoKClIKUgoKClIKC9qKClILGgsaUpqKCgpSCgqb2goKClIKCpoKClIIAEwaCgoKCuIKmgoKClIKUgqaClIKmuKSCgoKUgoKU2IKUgpTIgpS0goKClAAHEIKIlISUpOiCgoKmgoKCptaigoKUgoK4goKCgpSm5qKClIKCgoKUgILI9uKClIKAgqS0goCCpLSCgIKkgoKUgpS0lLTIpuaUlJSCgoKUgoKUlNbCgoKClIKCgpSAgpS29rKCgoKUgoKCgpSClIKCgpSUuJKUgoKCpqaU5rjmABIggqKSiqbKpgAIAoKSgoSmzpSCgIK2gpS2gqSUgraCtqaCpraCgILagoCCtoKmtoKAgraCpoKUtsjmgIKkgIKklAAPBqKCgpSClIKCxoKClIK0goKmlMiCggAQIIKClIKCgpSCgoKUgpSClIKClIKClNqCgsaCgpSCgoKUlIKUlIKCgpSUgpTGgoLGlJSCgoKUtIKClIKCgILogoKUgoKShpTGgoKUxqSUlJSCgpSCgoKUgoKUgpSClJS02qaCuKYAFgSClLiClIKCpqaClIKCpoKUgriCgqaCgpSCgpSmlIKCmrKClIKUgoKUlIKClIKCgpSUgoKUgoKmgoKUgoKClJSCgpSCgpSCgpSSgpSCgoKUgsiCuIKClIKUgoKCgpSCgoKUgoKClIKClIKClIKUgoLcgoKUlAAFENKCgpSClKrCgoKCgpSClAANEqKUuIKUgoKmpoKUgoKmgoKUgpSCpoKCmrKClIKUgoKUlIKClJSCgpSCgoKUlIKClIKCgriCgoKUgpSCgpSCgqaCgpSCgpSCgoKUgoKCgpSCgpSCgoKmuILKuIKCgpSCgpSCgoKUgoKUgoKClIKCgoKmuKoADRiCyoIACBKCgqaClJSCgoKUgty4", "401-438:1;568-659:1", "", "395=ReadASN1Integer/1/3/1,ReadASN1Integer/2/3/2,ReadASN1Integer/3/3/3;398=Sign/3/4/1,Sign/4/4/1;694=Empty/1/2/1,ContextSpecific/1/2/2,Constructed/1/2/2,ReadOptionalASN1/1/2/2,ContextSpecific/2/2/3,Constructed/2/2/3,ReadOptionalASN1/2/2/3,Empty/2/2/4;719=ReadAnyASN1/1/1/1;1025=ReadASN1/2/3/1,ReadASN1/3/3/2")]
 [assembly: go.GoPositionMap("crypto/x509/pem_decrypt.go", "pem_decrypt.cs", "ACxcACFIsoKClIKCgoKCgpQABRIACAKCuAAJHAAOAoKCpoKCpoKClIKClILKgoKCpoKmgoIABxCCgpSCgpSClIKCpgACFPKCgpSCgILIgoKClIKCuJSClJQACRSCgoKCpqaCgoKCpg==", "", "", "241=EncodeToString/1/1/4")]
 [assembly: go.GoPositionMap("crypto/x509/pkcs1.go", "pkcs1.cs", "AC5cAAgQ4oKCgpSCgIKkgIKkpoKmiKaCyoKCgoKCgoKCgpTKgoCmgoKCgoKAgoLItgACGAALApSCgqYACxiCgoKCpoL8soKCgoCCpJSCpoKUgqYABRLSuA==", "", "", "86=Sign/5/7/1,Sign/6/7/2,Sign/7/7/3")]
 [assembly: go.GoPositionMap("crypto/x509/pkcs8.go", "pkcs8.cs", "ACJMAA8CgoCCgIKkgIKkpJSCgpSmgoKAgqSCgpSmgIKkgoCCpICCpKaAgqSCgIKktgAGGgAJApSUuIKAgqS2goKUgoKU3ICC2KaCgpS2gqaCgIK2goKUgoKU3ICC+qY=")]
@@ -106,8 +111,8 @@ using static go.crypto.x509_package;
 [assembly: go.GoPositionMap("crypto/x509/root_linux.go", "root_linux.cs", "AAsUAAkUyoKC")]
 [assembly: go.GoPositionMap("crypto/x509/root_unix.go", "root_unix.cs", "ABk4gqaClIKAgraCgoKCgpSCuIKAyraCgoKClJSCgoLKgqaqooKClIKCgqaqooKUgg==")]
 [assembly: go.GoPositionMap("crypto/x509/sec1.go", "sec1.cs", "ACJIsgAFEPKCgqaqooKClIKClAAHFMIACRbigoCCgIKkgIKkpIKmgoKUlIKmgriCgpTclA==", "", "", "85=Bytes/1/2/2,PublicKey/1/1/3,Bytes/2/2/3")]
-[assembly: go.GoPositionMap("crypto/x509/verify.go", "verify.cs", "AFWUAYKUpKSkpKSkpKSkgoKUlAAMFIKClIKmgoCUgpSClIKClKaClLaClAAQHIKCgoKCgpSmlAAKEIKCgpSmgMgAOIYBgq7ygqaUAAoWgoKCgpSClJTIgpSIgpQACyS26oKUlO6CgpQAAhSCptiC7oKGuIKUyoCCtoKCqsKCgoCCgpSCgqbalKaClKaClMra0oKmgoKCuIKClILagu6CggAUKoKmgoKCuAACRgAmBoKUgoKClILKpoKClIK4gsqCgoK4goKmgoKCuIKClIKCuIKClIK4gqaCgoKCgoK4goKUgIKClKSClKaCgpSCgoKUlIKUgqamgoKCggAGENKKsoKCuIKCyoKUgrKCgqaCkoKUgqYACBLkwqqSgpSCgoKmgqaAgoKClLaCgoKClKaCgIKCgpTIlKSCgriCvoKCguqClIKmpoCigKqygpSClKamgpSUuJSCgpSClIKUgpSmlLimgoKUpoKUgqaUgqaCgpSCuKzEgoKmgpSCgriCpoKCgqYAAhgADASCgpSApoKCpraCgpTcgoKmgsqmgqaCgpSCptyCgoKUpoKUuJSCgoKmgoK4goKCAAgKpoKCgpQAChiC3IKClAAKFJSC7NyipoKClKaCgpSmgoKUpoKmgqaCgoKUgpSClKaigoKCgqaCgoLctoKCgoKClNyCgoKCuIKmAAwWgriUgqKClIKUgqaCgriCpoKUpoK4gqaClKaClIK4gpSAgraCAAgSgoKCgoKCyoLKlJSUlIKClJSmypSUgIKSgJSCggAIDpSCgpSClILKgpSCpoLcgriCqKSClICC2oKCppSUgoK4goLKgqbcAAoaooKCgIK2", "624-645:1;736-785:1", "", "395=Contains/1/1/2;489=Format/1/2/3,Format/2/2/3,Sprintf/1/1/3;496=Format/1/2/3,Format/2/2/3,Sprintf/1/1/3")]
-[assembly: go.GoPositionMap("crypto/x509/x509.go", "x509.cs", "AEiQAQAIAoKAgoCCpJKCpKbClLiClKa0goKUgoKUgoKCgpS0grSCgpSCgpSCgoKClNamAAIYAAkCgoKUgIK2AAcQggA/hgGCgoKmpoKCgqamgoKCpgAKGu6CgpQAMmiCgoKCgoKCgoKCgoKUgoKUygALBgASNgAIFIKCAA0egqaCuIKCgqbcgoCCtoKAggAIEIqmlKSkpgALGoLKyoKcspSkpKSUABIogoKCloKUpKSklKaClKSkpKamgpSkpKSmAB9IgoKCgoKCgoKCgoKCggAZMgAQKLKCgqamsoKCpqiSgoKUgoKUAK0BhAPcggALEIKmsoKUpoKuAAsMhKaCpoKmAAIU8qaCpoKCgqamgurCgpSCgoKCuKSCtraClKSClIKCppSClIKUxoKUgpSkgpSClJSs0oIACAqCACROgoKCgqyylIKUgoKUuKiCgoKCgoKCgoKCgpiCmqKCgqaqooKCgIKklIKAgqSUlIKClJSCgoCCpJSmgpSCuKaUspKUhIKClKaEgoKUpoKCgpSmgoKCgpSmgoKCgpSmhIKCgsqCyoKClKaEuIKCgpSmgoSCgpSmioKUgoKCgoKmopSCgIK2goLKgqKiyoKAgraCgsqCgIK2goLKpoKCpoKCpoKigpK4gpLKgoKUpoSUgoLupoKClO6mgpSCgpSCgqaCgoLWgpSCgoCClMiUgoKmgriClIKC1oKUgqKCgrKSkoKClMqCktyCgqaClISCgqbcpoKCpgAIDLKCgpSkgraClKSkpMiCxqaCpoKCgpSCpu6mgqSCgtyCgriAgrbKAAmCAQBCAoKCpoK4goCC7IIABxCCpoKmgqaCgqaCgpSCpoKCpoKCpoKCpoKCgsqC3IKqhoKSgraCgqaCAAoWgoKUlIKCpu64AAQW4oKCgqbcsoKAgpKCpAACEPKCgqaCgriCooKmAAkUgoKCgoKUpoKClJSCgqYAPo4ByKKCgoKUgoKUgpSokoKCgqaCpgALCqSMgoKCgJS2gqaCgIKkgoKClJSmAAcsABYCgoKmgoKmgoKCgqaCgriCgoKC3IKUgoLKlIKCuIKUgqamAAcQgoK4goLKggAEEIKCpoKAgramgoKCgrgADBqCgpSUgoKmAAYSopSCgpKCptaCAA4egoKCgriCgIKSgraUgIK2gpSCgtqokgB+lAIAEAKClIKUgpSClIKUgqaCgqamlIKigsqCgoKUgqbugoKClMqCgoKm3IKUuIKCpoCCpIKCuIKCpgAQIoKmgqaCgsqUgoKmAAYSwoSmgqaCpg==", "1302-1308:1;1310-1358:2;1318-1322:2.1;1319-1321:2.1.1;1326-1330:2.2;1327-1329:2.2.1;1338-1342:2.3;1339-1341:2.3.1;1350-1354:2.4;1351-1353:2.4.1;1371-1383:3;1373-1375:3.1;1379-1381:3.2;1476-1497:1;1480-1488:1.1;1481-1487:1.1.1;1492-1494:1.2", "", "478=Equal/2/4/1,Equal/3/4/2,Equal/4/4/3;1246=oidInExtensions/1/1/1;1254=oidInExtensions/1/1/1;1288=oidInExtensions/1/1/1;1310=oidInExtensions/1/1/1;1324=oidInExtensions/1/1/1;1332=oidInExtensions/1/1/4;1442=oidInExtensions/1/1/1;1572=oidInExtensions/1/1/1;1875=UTC/1/2/5,UTC/2/2/5;1975=ToRDNSequence/1/1/3,UTC/1/2/4,UTC/2/2/5;2343=RightAlign/1/1/6,getSignatureAlgorithmFromAI/1/1/7,getPublicKeyAlgorithmFromOID/1/1/9,parseRawAttributes/1/1/12;2592=UTC/1/1/2;2649=UTC/1/2/4,UTC/2/2/5")]
+[assembly: go.GoPositionMap("crypto/x509/verify.go", "verify.cs", "AFWUAYKUpKSkpKSkpKSkgoKUlAAMFIKClIKmgoCUgpSClIKClKaClLaClAAQHIKCgoKCgpSmlAAKEIKCgpSmgMgAOIYBgq7ygqaUAAoWgoKCgpSClJTIgpSIgpQACyS26oKUlO6CgpQAAhSCptiC7oKGuIKUyoCCtoKCqsKCgoCCgpSCgqbalKaClKaClMra0oKmgoKCuIKClILKgu6CggAUKoKmgoKCuAACRgAmBoKUgoKClILKpoKClIK4gsqCgoK4goKmgoKCuIKClIKCuIKClIK4gqaCgoKCgoK4goKUgIKClKSClKaCgpSCgoKUlIKUgqamgoKCggAGENKKsoKCuIKCyoKUgrKCgqaCgoKUgqYACBLkwqqSgpSCgoKmgqaAgoKClLaCgoKClKaCgIKCgpTIlLSCgsiCvoKCguqClIKmpoCigKqygpSClKamgpSUuJSCgpSClIKUgpSmlLimgoKUpoKUgqaUgqaCgpSCuKzEgoKmgpSCgriCpoKCgqYAAhgADASCgpSApoKCpraCgpTcgoKmgsqmgqaCgpSCptyCgoKUpoKUuJSCgoKmgoK4goKCAAgKpoKCgpQAChiC3IKClAAKFJSC3NyipoKClKaCgpSmgoKUpoKmgqaCgoKUgpSClKaigoKCgqaCgoLctoKCgoKClNyCgoKCuIKmAAwWgriUgqKClIKUgqaCgriCpoKUpoK4gqaClKaClIK4gpSAgraCAAgSgoKCgoKCyoLKlJSUlIKClJSmypSUgIKCgJSCggAIDpSCgpSClILKgpSCpoLcgriCqKSClICC2oKCppSUgoK4goLKgqbcAAoaooKCgIK2", "624-645:1;736-785:1", "", "395=Contains/1/1/2;489=Format/1/2/3,Format/2/2/3,Sprintf/1/1/3;495=Format/1/2/3,Format/2/2/3,Sprintf/1/1/3")]
+[assembly: go.GoPositionMap("crypto/x509/x509.go", "x509.cs", "AEiQAQAIAoKAgoCCpIKCpKbClLiClKa0goKUgoKUgoKCgpS0grSCgpSCgpSCgoKClNamAAIYAAkCgoKUgIK2AAcQggA/hgGCgoKmpoKCgqamgoKCpgAKGu6CgpQAMmiCgoKCgoKCgoKCgoKUgoKUygALBgASNgAIFIKCAA0egqaCuIKCgqbcgoCCtoKAggAIEIqmlKSkpgALGoLKyoKcspSkpKSUABIogoKCloKUpKSklKaClKSkpKamgpSkpKSmAB9IgoKCgoKCgoKCgoKCggAZMgAQKLKCgqamsoKCpqiSgoKUgoKUAK0BhAPcggALEIKmsoKUpoKuAAsMhKaCpoKmAAIU8qaCpoKCgqamgurCgpSCgoKCuKSCtraClKSClIKCppSClIKUxoKUgpSkgpSClJSs0oIACAqCACROgoKCgqyylIKUgoKUuKiCgoKCgoKCgoKCgpiCmqKCgqaqooKCgIKklIKAgqSUlIKClJSCgoCCpJSmgpSCuKaUspKUhIKClKaEgoKUpoKCgpSmgoKCgpSmgoKCgpSmhIKCgsqCyoKClKaEuIKCgpSmgoSCgpSmioKUgoKCgoKmopSCgIK2goLKgqKiyoKAgraCgsqCgIK2goLKpoKCpoKCpoKigpK4gpLKgoKUpoSUgoLupoKClO6mgpSCgpSCgqaCgoLWgpSCgoCClMiUgoKmgriClIKC1oKUgqKCgrKSkoKClMqCktyCgqaClISCgqbcpoKCpgAIDLKCgpSkgraClLS0tMiCxqaCpoKCgpSCpu6mgpSCgtyCgriAgrbKAAmCAQBCAoKCpoK4goCC7IIABxCCpoKmgqaCgqaCgpSCpoKCpoKCpoKCpoKCgsqC3IKqhoKCgraCgqaCAAoWgoKUlIKCpu64AAQW4oKCgqbcsoKAgoKCpAACEPKCgqaCgriCooKmAAkUgoKCgoKUpoKClJSCgqYAPo4ByKKCgoKUgoKUgpSokoKCgqaCpgALCqSMgoKCgJS2gqaCgIKkgoKClJSmAAcsABYCgoKmgoKmgoKCgqaCgriCgoKC3IKUgoLKlIKCuIKUgqamAAcQgoK4goLKggAEEIKCpoKAgramgoKCgrgADBqCgpSUgoKmAAYSopSCgoKCptaCAA4egoKCgriCgIKCgraUgIK2gpSCgtqokgB+lAIAEAKClIKUgpSClIKUgqaCgqamlIKigsqCgoKUgqbugoKClMqCgoKm3IKUuIKCpoCCpIKCuIKCpgAQIoKmgqaCgsqUgoKmAAYSwoSmgqaCpg==", "1302-1308:1;1310-1358:2;1318-1322:2.1;1319-1321:2.1.1;1326-1330:2.2;1327-1329:2.2.1;1338-1342:2.3;1339-1341:2.3.1;1350-1354:2.4;1351-1353:2.4.1;1371-1383:3;1373-1375:3.1;1379-1381:3.2;1476-1497:1;1480-1488:1.1;1481-1487:1.1.1;1492-1494:1.2", "", "477=Equal/2/4/1,Equal/3/4/2,Equal/4/4/3;1245=oidInExtensions/1/1/1;1253=oidInExtensions/1/1/1;1287=oidInExtensions/1/1/1;1309=oidInExtensions/1/1/1;1323=oidInExtensions/1/1/1;1331=oidInExtensions/1/1/4;1441=oidInExtensions/1/1/1;1571=oidInExtensions/1/1/1;1875=UTC/1/2/5,UTC/2/2/5;1974=ToRDNSequence/1/1/3,UTC/1/2/4,UTC/2/2/5;2341=RightAlign/1/1/6,getSignatureAlgorithmFromAI/1/1/7,getPublicKeyAlgorithmFromOID/1/1/9,parseRawAttributes/1/1/12;2589=UTC/1/1/2;2646=UTC/1/2/4,UTC/2/2/5")]
 [assembly: go.GoPositionMap("crypto/x509/x509_string.go", "x509_string.cs", "/oaigoKCgoKCgoIACx6WgpSCpKSkpKSkpKS2hqKCgoKCgoKCgoKCgoKCypSCgoKU")]
 // </GoSourcePositionMaps>
 

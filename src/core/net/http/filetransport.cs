@@ -51,23 +51,23 @@ public static RoundTripper NewFileTransportFS(fs.FS fsys) {
     return NewFileTransport(FS(fsys));
 }
 
-internal static partial (ж<Response> resp, error err) RoundTrip(this fileTransport t, ж<Request> Ꮡreq) {
+internal static partial (ж<Response> resp, error err) RoundTrip(this fileTransport t, ж<Request> req) {
     // We start ServeHTTP in a goroutine, which may take a long
     // time if the file is large. The newPopulateResponseWriter
     // call returns a channel which either ServeHTTP or finish()
     // sends our *Response on, once the *Response itself has been
     // populated (even if the body itself is still being
     // written to the res.Body, a pipe)
-    var (rw, resc) = newPopulateResponseWriter(Ꮡreq);
+    var (rw, resc) = newPopulateResponseWriter(req);
     var rwʗ1 = rw;
     goǃ(() => {
-        t.fh.ServeHTTP(new populateResponseжResponseWriter(rwʗ1), Ꮡreq);
+        t.fh.ServeHTTP(new populateResponseжResponseWriter(rwʗ1), req);
         rwʗ1.finish();
     });
-    return (ᐸꟷ(resc), default!);
+    return (ᐸꟷ(resc), default);
 }
 
-internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateResponseWriter(ж<Request> Ꮡreq) {
+internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateResponseWriter(ж<Request> req) {
     var (pr, pw) = io.Pipe();
     var rw = Ꮡ(new populateResponse(
         ch: new channel<ж<Response>>(0),
@@ -78,10 +78,10 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
             Header: new ΔHeader(0),
             Close: true,
             Body: new io.PipeReaderжReadCloser(pr),
-            Request: Ꮡreq
+            Request: req
         ))
     ));
-    return (rw, (~rw).ch.WithDirection(GoChanDir.Recv));
+    return (rw, rw.ch.AsRecvOnly());
 }
 
 // populateResponse is a ResponseWriter that populates the *Response
@@ -114,13 +114,13 @@ internal static void sendResponse(this ref populateResponse pr) {
     pr.sentResponse = true;
 
     if (pr.hasContent) {
-        pr.res.Value.ContentLength = -1;
+        pr.res.ContentLength = -1;
     }
     pr.ch.ᐸꟷ(pr.res);
 }
 
 internal static ΔHeader Header(this ref populateResponse pr) {
-    return (~pr.res).Header;
+    return pr.res.Header;
 }
 
 internal static void WriteHeader(this ref populateResponse pr, nint code) {
@@ -129,8 +129,8 @@ internal static void WriteHeader(this ref populateResponse pr, nint code) {
     }
     pr.wroteHeader = true;
 
-    pr.res.Value.StatusCode = code;
-    pr.res.Value.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
+    pr.res.StatusCode = code;
+    pr.res.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
 }
 
 internal static (nint n, error err) Write(this ref populateResponse pr, slice<byte> p) {

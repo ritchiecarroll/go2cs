@@ -63,13 +63,13 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
     var K = new slice<byte>(size);
 
     // V = 0x01 0x01 0x01 ... 0x01
-    d.Value.V = bytes.Repeat(new byte[]{0x01}.slice(), size);
+    d.V = bytes.Repeat(slice<byte>([0x01]), size);
 
     // HMAC_DRBG_Update, per Section 10.1.2.2.
     // K = HMAC (K, V || 0x00 || provided_data)
     var h = hmac.New(hashΔ1, K);
-    h.Write((~d).V);
-    h.Write(new byte[]{0x00}.slice());
+    h.Write(d.V);
+    h.Write(slice<byte>([0x00]));
     h.Write(entropy);
     h.Write(nonce);
     switch (s.type()) {
@@ -78,7 +78,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
         break;
     }
     case blockAlignedPersonalizationString sΔ1: {
-        nint l = len((~d).V) + 1 + len(entropy) + len(nonce);
+        nint l = len(d.V) + 1 + len(entropy) + len(nonce);
         foreach (var (_, b) in sΔ1) {
             pad000(h, l);
             h.Write(b);
@@ -89,12 +89,12 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
     K = h.Sum(K[..0]);
     // V = HMAC (K, V)
     h = hmac.New(hashΔ1, K);
-    h.Write((~d).V);
-    d.Value.V = h.Sum((~d).V[..0]);
+    h.Write(d.V);
+    d.V = h.Sum(d.V[..0]);
     // K = HMAC (K, V || 0x01 || provided_data).
     h.Reset();
-    h.Write((~d).V);
-    h.Write(new byte[]{0x01}.slice());
+    h.Write(d.V);
+    h.Write(slice<byte>([0x01]));
     h.Write(entropy);
     h.Write(nonce);
     switch (s.type()) {
@@ -103,7 +103,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
         break;
     }
     case blockAlignedPersonalizationString sΔ2: {
-        nint l = len((~d).V) + 1 + len(entropy) + len(nonce);
+        nint l = len(d.V) + 1 + len(entropy) + len(nonce);
         foreach (var (_, b) in sΔ2) {
             pad000(h, l);
             h.Write(b);
@@ -114,11 +114,11 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
     K = h.Sum(K[..0]);
     // V = HMAC (K, V)
     h = hmac.New(hashΔ1, K);
-    h.Write((~d).V);
-    d.Value.V = h.Sum((~d).V[..0]);
+    h.Write(d.V);
+    d.V = h.Sum(d.V[..0]);
 
-    d.Value.hK = h;
-    d.Value.reseedCounter = 1;
+    d.hK = h;
+    d.reseedCounter = 1;
     return d;
 }
 
@@ -175,8 +175,8 @@ public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     // K = HMAC (K, V || 0x00)
     d.hK.Reset();
     d.hK.Write(d.V);
-    d.hK.Write(new byte[]{0x00}.slice());
-    var K = d.hK.Sum(default!);
+    d.hK.Write(slice<byte>([0x00]));
+    var K = d.hK.Sum(default);
     // V = HMAC (K, V)
     d.hK = d.newHMAC(K);
     d.hK.Write(d.V);

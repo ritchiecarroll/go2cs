@@ -18,7 +18,7 @@ internal static UntypedInt smallBufferSize => 64;
 // The zero value for Buffer is an empty buffer ready to use.
 partial struct Buffer {
     internal slice<byte> buf; // contents are the bytes buf[off : len(buf)]
-    internal nint off;   // read at &buf[off], write at &buf[len(buf)]
+    internal nint off;        // read at &buf[off], write at &buf[len(buf)]
     internal readOp lastRead; // last read operation, so that Unread* can work correctly.
 }
 
@@ -36,8 +36,8 @@ partial struct readOp /*num:int8*/;
 
 // Don't use iota for these, as the values need to correspond with the
 // names and comments, which is easier to see when being explicit.
-internal static readOp opRead => -1;   // Any other read operation.
-internal static readOp opInvalid => 0; // Non-read operation.
+internal static readOp opRead => -1;     // Any other read operation.
+internal static readOp opInvalid => 0;   // Non-read operation.
 internal static readOp opReadRune1 => 1; // Read rune of size 1.
 internal static readOp opReadRune2 => 2; // Read rune of size 2.
 internal static readOp opReadRune3 => 3; // Read rune of size 3.
@@ -93,7 +93,7 @@ public static (slice<byte>, error) Peek(this ref Buffer b, nint n) {
     if (b.Len() < n) {
         return (b.buf.slice(b.off), io.EOF);
     }
-    return (b.buf.slice(b.off, b.off + n), default!);
+    return (b.buf.slice(b.off, b.off + n), default);
 }
 
 // empty reports whether the unread portion of the buffer is empty.
@@ -170,19 +170,18 @@ internal static nint grow(this ref Buffer b, nint n) {
             return i;
         }
     }
-    if (b.buf == default! && n <= smallBufferSize) {
+    if (b.buf == nil && n <= smallBufferSize) {
         b.buf = new slice<byte>(n, smallBufferSize);
         return 0;
     }
     nint c = cap(b.buf);
-    if (n <= c / 2 - m){
+    if (n <= c / 2 - m) {
         // We can slide things down instead of allocating a new
         // slice. We only need m+n <= c to slide, but
         // we instead let capacity get twice as large so we
         // don't spend all our time copying.
         copy(b.buf, b.buf.slice(b.off));
-    } else 
-    if (c > maxInt - c - n){
+    } else if (c > maxInt - c - n) {
         throw panic(ErrTooLarge);
     } else {
         // Add b.off to account for b.buf[:b.off] being sliced off the front.
@@ -216,7 +215,7 @@ public static (nint n, error err) Write(this ref Buffer b, slice<byte> p) {
     if (!ok) {
         m = b.grow(len(p));
     }
-    return (copy(b.buf.slice(m), p), default!);
+    return (copy(b.buf.slice(m), p), default);
 }
 
 // WriteString appends the contents of s to the buffer, growing the buffer as
@@ -228,7 +227,7 @@ public static (nint n, error err) WriteString(this ref Buffer b, @string s) {
     if (!ok) {
         m = b.grow(len(s));
     }
-    return (copy(b.buf.slice(m), s), default!);
+    return (copy(b.buf.slice(m), s), default);
 }
 
 // MinRead is the minimum slice size passed to a [Buffer.Read] call by
@@ -242,10 +241,10 @@ public static UntypedInt MinRead => 512;
 // error except io.EOF encountered during the read is also returned. If the
 // buffer becomes too large, ReadFrom will panic with [ErrTooLarge].
 public static (int64 n, error err) ReadFrom(this ref Buffer b, io.Reader r) {
-    int64 n = default!;
+    int64 n = default;
 
     b.lastRead = opInvalid;
-    while (ᐧ) {
+    for (;;) {
         nint i = b.grow(MinRead);
         b.buf = b.buf.slice(0, i);
         var (m, e) = r.Read(b.buf.slice(i, cap(b.buf)));
@@ -256,9 +255,9 @@ public static (int64 n, error err) ReadFrom(this ref Buffer b, io.Reader r) {
         b.buf = b.buf.slice(0, i + m);
         n += (int64)m;
         if (AreEqual(e, io.EOF)) {
-            return (n, default!); // e is EOF, so return nil explicitly
+            return (n, default); // e is EOF, so return nil explicitly
         }
-        if (e != default!) {
+        if (e != nil) {
             return (n, e);
         }
     }
@@ -270,7 +269,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            if (recover() != default!) {
+            if (recover() != nil) {
                 throw panic(ErrTooLarge);
             }
         }, ref ᒐ);
@@ -288,11 +287,11 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
             // we could rely purely on append to determine the growth rate.
             c = 2 * cap(b);
         }
-        var b2 = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(c));
+        var b2 = appendꓸꓸꓸ(slice<byte>(default), makeꓸꓸꓸ<byte>(c));
         nint i = copy(b2, b);
         return b2.slice(0, i);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -301,7 +300,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
 // int, but it is int64 to match the [io.WriterTo] interface. Any error
 // encountered during the write is also returned.
 public static (int64 n, error err) WriteTo(this ref Buffer b, io.Writer w) {
-    int64 n = default!;
+    int64 n = default;
 
     b.lastRead = opInvalid;
     {
@@ -312,7 +311,7 @@ public static (int64 n, error err) WriteTo(this ref Buffer b, io.Writer w) {
             }
             b.off += m;
             n = (int64)m;
-            if (e != default!) {
+            if (e != nil) {
                 return (n, e);
             }
             // all bytes should have been written, by definition of
@@ -324,7 +323,7 @@ public static (int64 n, error err) WriteTo(this ref Buffer b, io.Writer w) {
     }
     // Buffer is now empty; reset.
     b.Reset();
-    return (n, default!);
+    return (n, default);
 }
 
 // WriteByte appends the byte c to the buffer, growing the buffer as needed.
@@ -338,7 +337,7 @@ public static error WriteByte(this ref Buffer b, byte c) {
         m = b.grow(1);
     }
     b.buf[m] = c;
-    return default!;
+    return default;
 }
 
 // WriteRune appends the UTF-8 encoding of Unicode code point r to the
@@ -349,7 +348,7 @@ public static (nint n, error err) WriteRune(this ref Buffer b, rune r) {
     // Compare as uint32 to correctly handle negative runes.
     if ((uint32)r < utf8.RuneSelf) {
         b.WriteByte((byte)r);
-        return (1, default!);
+        return (1, default);
     }
     b.lastRead = opInvalid;
     var (m, ok) = b.tryGrowByReslice(utf8.UTFMax);
@@ -357,7 +356,7 @@ public static (nint n, error err) WriteRune(this ref Buffer b, rune r) {
         m = b.grow(utf8.UTFMax);
     }
     b.buf = utf8.AppendRune(b.buf.slice(0, m), r);
-    return (len(b.buf) - m, default!);
+    return (len(b.buf) - m, default);
 }
 
 // Read reads the next len(p) bytes from the buffer or until the buffer
@@ -365,14 +364,14 @@ public static (nint n, error err) WriteRune(this ref Buffer b, rune r) {
 // buffer has no data to return, err is [io.EOF] (unless len(p) is zero);
 // otherwise it is nil.
 public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
 
     b.lastRead = opInvalid;
     if (b.empty()) {
         // Buffer is empty, reset to recover space.
         b.Reset();
         if (len(p) == 0) {
-            return (0, default!);
+            return (0, default);
         }
         return (0, io.EOF);
     }
@@ -381,7 +380,7 @@ public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
     if (n > 0) {
         b.lastRead = opRead;
     }
-    return (n, default!);
+    return (n, default);
 }
 
 // Next returns a slice containing the next n bytes from the buffer,
@@ -413,7 +412,7 @@ public static (byte, error) ReadByte(this ref Buffer b) {
     var c = b.buf[b.off];
     b.off++;
     b.lastRead = opRead;
-    return (c, default!);
+    return (c, default);
 }
 
 // ReadRune reads and returns the next UTF-8-encoded
@@ -422,7 +421,7 @@ public static (byte, error) ReadByte(this ref Buffer b) {
 // If the bytes are an erroneous UTF-8 encoding, it
 // consumes one byte and returns U+FFFD, 1.
 public static (rune r, nint size, error err) ReadRune(this ref Buffer b) {
-    rune r = default!;
+    rune r = default;
 
     if (b.empty()) {
         // Buffer is empty, reset to recover space.
@@ -433,12 +432,12 @@ public static (rune r, nint size, error err) ReadRune(this ref Buffer b) {
     if (c < utf8.RuneSelf) {
         b.off++;
         b.lastRead = opReadRune1;
-        return ((rune)c, 1, default!);
+        return ((rune)c, 1, default);
     }
     (r, var n) = utf8.DecodeRune(b.buf.slice(b.off));
     b.off += n;
     b.lastRead = (readOp)(int8)n;
-    return (r, n, default!);
+    return (r, n, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -453,11 +452,11 @@ public static error UnreadRune(this ref Buffer b) {
     if (b.lastRead <= opInvalid) {
         return errors.New(bytesBufferUnreadRuneˢ);
     }
-    if (b.off >= (nint)(int8)b.lastRead) {
-        b.off -= (nint)(int8)b.lastRead;
+    if (b.off >= (nint)b.lastRead) {
+        b.off -= (nint)b.lastRead;
     }
     b.lastRead = opInvalid;
-    return default!;
+    return default;
 }
 
 internal static error errUnreadByte = errors.New("bytes.Buffer: UnreadByte: previous operation was not a successful read"u8);
@@ -474,7 +473,7 @@ public static error UnreadByte(this ref Buffer b) {
     if (b.off > 0) {
         b.off--;
     }
-    return default!;
+    return default;
 }
 
 // ReadBytes reads until the first occurrence of delim in the input,
@@ -484,8 +483,8 @@ public static error UnreadByte(this ref Buffer b) {
 // ReadBytes returns err != nil if and only if the returned data does not end in
 // delim.
 public static (slice<byte> line, error err) ReadBytes(this ref Buffer b, byte delim) {
-    slice<byte> line = default!;
-    error err = default!;
+    slice<byte> line = default;
+    error err = default;
 
     (var Δslice, err) = b.readSlice(delim);
     // return a copy of slice. The buffer's backing array may
@@ -496,8 +495,8 @@ public static (slice<byte> line, error err) ReadBytes(this ref Buffer b, byte de
 
 // readSlice is like ReadBytes but returns a reference to internal buffer data.
 internal static (slice<byte> line, error err) readSlice(this ref Buffer b, byte delim) {
-    slice<byte> line = default!;
-    error err = default!;
+    slice<byte> line = default;
+    error err = default;
 
     nint i = IndexByte(b.buf.slice(b.off), delim);
     nint end = b.off + i + 1;
@@ -518,7 +517,7 @@ internal static (slice<byte> line, error err) readSlice(this ref Buffer b, byte 
 // ReadString returns err != nil if and only if the returned data does not end
 // in delim.
 public static (@string line, error err) ReadString(this ref Buffer b, byte delim) {
-    error err = default!;
+    error err = default;
 
     (var Δslice, err) = b.readSlice(delim);
     return ((@string)Δslice, err);

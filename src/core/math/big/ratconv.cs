@@ -30,7 +30,7 @@ internal static readonly @string ratScanInvalidSyntaxˢ = "Rat.Scan: invalid syn
 // 'e', 'E', 'f', 'F', 'g', 'G', and 'v'. All formats are equivalent.
 public static error Scan(this ж<ΔRat> Ꮡz, fmt.ScanState s, rune ch) {
     var (tok, err) = s.Token(true, ratTok);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (!strings.ContainsRune(efgEFGvˢ, ch)) {
@@ -41,7 +41,7 @@ public static error Scan(this ж<ΔRat> Ꮡz, fmt.ScanState s, rune ch) {
             return errors.New(ratScanInvalidSyntaxˢ);
         }
     }
-    return default!;
+    return default;
 }
 
 // SetString sets z to the value of s and returns z and a boolean indicating
@@ -68,7 +68,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
         ref var z = ref Ꮡz.DerefOrNull();
 
         if (len(s) == 0) {
-            return (default!, false);
+            return (default, false);
         }
         // len(s) > 0
 
@@ -77,24 +77,24 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
             nint sep = strings.Index(s, "/"u8); if (sep >= 0) {
                 {
                     var (_, ok) = Ꮡz.of(big_package.ΔRat.Ꮡa).SetString(s.slice(0, sep), 0); if (!ok) {
-                        return (default!, false);
+                        return (default, false);
                     }
                 }
                 var rΔ1 = strings.NewReader(s.slice(sep + 1));
-                error errΔ1 = default!;
+                error errΔ1 = default;
                 {
-                    (z.b.abs, _, _, errΔ1) = z.b.abs.scan(new strings_ReaderжByteScanner(rΔ1), 0, false); if (errΔ1 != default!) {
-                        return (default!, false);
+                    (z.b.abs, _, _, errΔ1) = z.b.abs.scan(new strings_ReaderжByteScanner(rΔ1), 0, false); if (errΔ1 != nil) {
+                        return (default, false);
                     }
                 }
                 // entire string must have been consumed
                 {
                     (_, errΔ1) = rΔ1.ReadByte(); if (!AreEqual(errΔ1, io.EOF)) {
-                        return (default!, false);
+                        return (default, false);
                     }
                 }
                 if (len(z.b.abs) == 0) {
-                    return (default!, false);
+                    return (default, false);
                 }
                 return (Ꮡz.norm(), true);
             }
@@ -105,30 +105,30 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
 
         // sign
         var (neg, err) = scanSign(new strings_ReaderжByteScanner(r));
-        if (err != default!) {
-            return (default!, false);
+        if (err != nil) {
+            return (default, false);
         }
 
         // mantissa
-        nint @base = default!;
-        nint fcount = default!;  // fractional digit count; valid if <= 0
+        nint @base = default;
+        nint fcount = default; // fractional digit count; valid if <= 0
         (z.a.abs, @base, fcount, err) = z.a.abs.scan(new strings_ReaderжByteScanner(r), 0, true);
-        if (err != default!) {
-            return (default!, false);
+        if (err != nil) {
+            return (default, false);
         }
 
         // exponent
-        int64 exp = default!;
-        nint ebase = default!;
+        int64 exp = default;
+        nint ebase = default;
         (exp, ebase, err) = scanExponent(new strings_ReaderжByteScanner(r), true, true);
-        if (err != default!) {
-            return (default!, false);
+        if (err != nil) {
+            return (default, false);
         }
 
         // there should be no unread characters left
         {
             (_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
-                return (default!, false);
+                return (default, false);
             }
         }
 
@@ -150,8 +150,8 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
         // on the actual floating-point value.
 
         // determine binary or decimal exponent contribution of radix point
-        int64 exp2 = default!;
-        int64 exp5 = default!;
+        int64 exp2 = default;
+        int64 exp5 = default;
         if (fcount < 0) {
             // The mantissa has a radix point ddd.dddd; and
             // -fcount is the number of digits to the right
@@ -199,21 +199,21 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
 
         // apply exp5 contributions
         // (start with exp5 so the numbers to multiply are smaller)
-        if (exp5 != 0){
+        if (exp5 != 0) {
             var n = exp5;
             if (n < 0) {
                 n = -n;
                 if (n < 0) {
                     // This can occur if -n overflows. -(-1 << 63) would become
                     // -1 << 63, which is still negative.
-                    return (default!, false);
+                    return (default, false);
                 }
             }
             if (n > 1000000) {
-                return (default!, false); // avoid excessively large exponents
+                return (default, false); // avoid excessively large exponents
             }
-            var pow5 = z.b.abs.expNN(stk, natFive, ((Δnat)default!).setWord((Word)(nuint)n), default!, false); // use underlying array of z.b.abs
-            if (exp5 > 0){
+            var pow5 = z.b.abs.expNN(stk, natFive, ((Δnat)default).setWord((Word)(nuint)n), default, false); // use underlying array of z.b.abs
+            if (exp5 > 0) {
                 z.a.abs = z.a.abs.mul(stk, z.a.abs, pow5);
                 z.b.abs = z.b.abs.setWord(1);
             } else {
@@ -225,12 +225,11 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
 
         // apply exp2 contributions
         if (exp2 < -10000000 || exp2 > 10000000) {
-            return (default!, false); // avoid excessively large exponents
+            return (default, false); // avoid excessively large exponents
         }
-        if (exp2 > 0){
+        if (exp2 > 0) {
             z.a.abs = z.a.abs.lsh(z.a.abs, (nuint)exp2);
-        } else 
-        if (exp2 < 0) {
+        } else if (exp2 < 0) {
             z.b.abs = z.b.abs.lsh(z.b.abs, (nuint)(-exp2));
         }
 
@@ -238,7 +237,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
 
         return (Ꮡz.norm(), true);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -259,16 +258,16 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
 //
 // A base 2 exponent is only permitted if base2ok is set.
 internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r, bool base2ok, bool sepOk) {
-    int64 exp = default!;
-    nint @base = default!;
-    error err = default!;
+    int64 exp = default;
+    nint @base = default;
+    error err = default;
     var digitsᴷ = new stackAppend<byte>();
 
     // one char look-ahead
     (var ch, err) = r.ReadByte();
-    if (err != default!) {
+    if (err != nil) {
         if (AreEqual(err, io.EOF)) {
-            err = default!;
+            err = default;
         }
         return (0, 10, err);
     }
@@ -276,10 +275,10 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     // exponent char
     var exprᴛ1 = ch;
     var matchᴛ1 = false;
-    if (exprᴛ1 is (rune)'e' or (rune)'E') { matchᴛ1 = true;
+    if (exprᴛ1 is (byte)'e' or (byte)'E') { matchᴛ1 = true;
         @base = 10;
     }
-    else if (exprᴛ1 is (rune)'p' or (rune)'P') { matchᴛ1 = true;
+    else if (exprᴛ1 is (byte)'p' or (byte)'P') { matchᴛ1 = true;
         do {
             if (base2ok) {
                 @base = 2;
@@ -290,15 +289,15 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     }
     if (fallthrough || !matchᴛ1) { /* default: */
         r.UnreadByte(); // ch does not belong to exponent anymore
-        return (0, 10, default!);
+        return (0, 10, default);
     }
 
     // sign
-    slice<byte> digits = default!;
+    slice<byte> digits = default;
     (ch, err) = r.ReadByte();
-    if (err == default! && (ch == (rune)'+' || ch == (rune)'-')) {
-        if (ch == (rune)'-') {
-            digits = append(digitsᴷ, digits, (byte)((rune)'-'));
+    if (err == nil && (ch == '+' || ch == '-')) {
+        if (ch == '-') {
+            digits = append(digitsᴷ, digits, (byte)'-');
         }
         (ch, err) = r.ReadByte();
     }
@@ -311,17 +310,16 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 
     // exponent value
     var hasDigits = false;
-    while (err == default!) {
-        if ((rune)'0' <= ch && ch <= (rune)'9'){
+    while (err == nil) {
+        if ('0' <= ch && ch <= '9') {
             digits = append(digits, ch);
-            prev = (rune)'0';
+            prev = '0';
             hasDigits = true;
-        } else 
-        if (ch == (rune)'_' && sepOk){
-            if (prev != (rune)'0') {
+        } else if (ch == '_' && sepOk) {
+            if (prev != '0') {
                 invalSep = true;
             }
-            prev = (rune)'_';
+            prev = '_';
         } else {
             r.UnreadByte(); // ch does not belong to number anymore
             break;
@@ -330,16 +328,16 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     }
 
     if (AreEqual(err, io.EOF)) {
-        err = default!;
+        err = default;
     }
-    if (err == default! && !hasDigits) {
+    if (err == nil && !hasDigits) {
         err = errNoDigits;
     }
-    if (err == default!) {
+    if (err == nil) {
         (exp, err) = strconv.ParseInt((@string)digits, 10, 64);
     }
     // other errors take precedence over invalid separators
-    if (err == default! && (invalSep || prev == (rune)'_')) {
+    if (err == nil && (invalSep || prev == '_')) {
         err = errInvalSep;
     }
 
@@ -348,7 +346,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 
 // String returns a string representation of x in the form "a/b" (even if b == 1).
 public static @string String(this ж<ΔRat> Ꮡx) {
-    return (@string)Ꮡx.marshal(default!);
+    return (@string)Ꮡx.marshal(default);
 }
 
 // marshal implements [Rat.String] returning a slice of bytes.
@@ -358,11 +356,11 @@ internal static slice<byte> marshal(this ж<ΔRat> Ꮡx, slice<byte> buf) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     buf = Ꮡx.of(big_package.ΔRat.Ꮡa).Append(buf, 10);
-    buf = append(buf, (byte)((rune)'/'));
-    if (len(x.b.abs) != 0){
+    buf = append(buf, (byte)'/');
+    if (len(x.b.abs) != 0) {
         buf = Ꮡx.of(big_package.ΔRat.Ꮡb).Append(buf, 10);
     } else {
-        buf = append(buf, (byte)((rune)'1'));
+        buf = append(buf, (byte)'1');
     }
     return buf;
 }
@@ -387,14 +385,14 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
         ref var x = ref Ꮡx.DerefOrNull();
         var bufᴷ = new stackAppend<byte>();
 
-        slice<byte> buf = default!;
+        slice<byte> buf = default;
 
         if (x.IsInt()) {
             buf = Ꮡx.of(big_package.ΔRat.Ꮡa).Append(buf, 10);
             if (prec > 0) {
-                buf = append(bufᴷ, buf, (byte)((rune)'.'));
+                buf = append(bufᴷ, buf, (byte)'.');
                 for (nint i = prec; i > 0; i--) {
-                    buf = append(buf, (byte)((rune)'0'));
+                    buf = append(buf, (byte)'0');
                 }
             }
             return (@string)buf;
@@ -404,43 +402,43 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
         var stk = getStack();
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
-        var (q, r) = ((Δnat)default!).div(stk, (Δnat)default!, x.a.abs, x.b.abs);
+        var (q, r) = ((Δnat)default).div(stk, (Δnat)default, x.a.abs, x.b.abs);
 
         var p = natOne;
         if (prec > 0) {
-            p = ((Δnat)default!).expNN(stk, natTen, ((Δnat)default!).setUint64((uint64)prec), default!, false);
+            p = ((Δnat)default).expNN(stk, natTen, ((Δnat)default).setUint64((uint64)prec), default, false);
         }
 
         r = r.mul(stk, r, p);
-        (r, var r2) = r.div(stk, (Δnat)default!, r, x.b.abs);
+        (r, var r2) = r.div(stk, (Δnat)default, r, x.b.abs);
 
         // see if we need to round up
         r2 = r2.add(r2, r2);
         if (x.b.abs.cmp(r2) <= 0) {
             r = r.add(r, natOne);
             if (r.cmp(p) >= 0) {
-                q = ((Δnat)default!).add(q, natOne);
-                r = ((Δnat)default!).sub(r, p);
+                q = ((Δnat)default).add(q, natOne);
+                r = ((Δnat)default).sub(r, p);
             }
         }
 
         if (x.a.neg) {
-            buf = append(buf, (byte)((rune)'-'));
+            buf = append(buf, (byte)'-');
         }
         buf = appendꓸꓸꓸ(buf, q.utoa(10)); // itoa ignores sign if q == 0
 
         if (prec > 0) {
-            buf = append(buf, (byte)((rune)'.'));
+            buf = append(buf, (byte)'.');
             var rs = r.utoa(10);
             for (nint i = prec - len(rs); i > 0; i--) {
-                buf = append(buf, (byte)((rune)'0'));
+                buf = append(buf, (byte)'0');
             }
             buf = appendꓸꓸꓸ(buf, rs);
         }
 
         return (@string)buf;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -462,8 +460,8 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
 //	1/4    2    true     0.25
 //	1/6    1    false    0.2     (0.166... rounded)
 public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
-    nint n = default!;
-    bool exact = default!;
+    nint n = default;
+    bool exact = default;
     GoFrame ᒐ = default;
     try {
         var tabᴷ = new stackAppend<Δnat>();
@@ -480,12 +478,12 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         //
         // For details see:
         // https://en.wikipedia.org/wiki/Repeating_decimal#Reciprocals_of_integers_not_coprime_to_10
-        var d = Ꮡx.Denom().Value.abs; // d >= 1
+        var d = Ꮡx.Denom().abs; // d >= 1
 
         // Determine p2 by counting factors of 2.
         // p2 corresponds to the trailing zero bits in d.
         // Do this first to reduce q as much as possible.
-        Δnat q = default!;
+        Δnat q = default;
         nuint p2 = d.trailingZeroBits();
         q = q.rsh(d, p2);
 
@@ -494,19 +492,19 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         // and use repeated squaring until the factor doesn't
         // divide q anymore. Then use the table to determine
         // the power of 5 in q.
-        const nuint fp = 13; // f == 5^fp
-        slice<Δnat> tab = default!;                  // tab[i] == (5^fp)^(2^i) == 5^(fp·2^i)
+        const nuint fp = 13;                              // f == 5^fp
+        slice<Δnat> tab = default;                        // tab[i] == (5^fp)^(2^i) == 5^(fp·2^i)
         var f = new Δnat(new Word[]{1220703125}.slice()); // == 5^fp (must fit into a uint32 Word)
-        Δnat t = default!;                    // temporaries
-        Δnat r = default!;
-        while (ᐧ) {
+        Δnat t = default;                                 // temporaries
+        Δnat r = default;
+        for (;;) {
             {
                 (_, r) = t.div(stk, r, q, f); if (len(r) != 0) {
                     break; // f doesn't divide q evenly
                 }
             }
             tab = append(tabᴷ, tab, f);
-            f = ((Δnat)default!).sqr(stk, f); // nat(nil) to ensure a new f for each table entry
+            f = ((Δnat)default).sqr(stk, f); // nat(nil) to ensure a new f for each table entry
         }
 
         // Factor q using the table entries, if any.
@@ -516,7 +514,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         // because f·f is the next higher table entry, contradicting
         // how f was chosen in the first place.
         // The same reasoning applies to the subsequent factors.
-        nuint p5 = default!;
+        nuint p5 = default;
         for (nint i = len(tab) - 1; i >= 0; i--) {
             {
                 (t, r) = t.div(stk, r, q, tab[i]); if (len(r) == 0) {
@@ -527,7 +525,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         }
 
         // If fp != 1, we may still have multiples of 5 left.
-        while (ᐧ) {
+        for (;;) {
             {
                 (t, r) = t.div(stk, r, q, natFive); if (len(r) != 0) {
                     break;

@@ -45,7 +45,7 @@ partial struct Digest {
     //     "Draft FIPS 202: SHA-3 Standard: Permutation-Based Hash and
     //      Extendable-Output Functions (May 2014)"
     internal byte dsbyte;
-    internal nint outputLen;            // the default output size in bytes
+    internal nint outputLen;        // the default output size in bytes
     internal spongeDirection state; // whether the sponge is absorbing or squeezing
 }
 
@@ -68,8 +68,7 @@ public static void Reset(this ref Digest d) {
 }
 
 public static ж<Digest> Clone(this ref Digest d) {
-    ref var ret = ref heap<Digest>(out var Ꮡret);
-    ret = d.ΔClone();
+    ref var ret = ref heap<Digest>(d.ΔClone(), out var Ꮡret);
     return Ꮡret;
 }
 
@@ -106,8 +105,8 @@ public static (nint n, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
 }
 
 internal static (nint n, error err) writeGeneric(this ж<Digest> Ꮡd, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (d.state != spongeAbsorbing) {
@@ -132,8 +131,8 @@ internal static (nint n, error err) writeGeneric(this ж<Digest> Ꮡd, slice<byt
 
 // read squeezes an arbitrary number of bytes from the sponge.
 internal static (nint n, error err) readGeneric(this ж<Digest> Ꮡd, slice<byte> @out) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     // If we're still absorbing, pad and apply the permutation.
@@ -173,7 +172,7 @@ internal static slice<byte> sumGeneric(this ref Digest d, slice<byte> b) {
     // Make a copy of the original hash so that caller can keep writing
     // and summing.
     var dup = d.Clone();
-    var hash = new slice<byte>((~dup).outputLen, 64); // explicit cap to allow stack allocation
+    var hash = new slice<byte>(dup.outputLen, 64); // explicit cap to allow stack allocation
     dup.read(hash);
     return appendꓸꓸꓸ(b, hash);
 }
@@ -190,27 +189,32 @@ public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
 }
 
 public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) {
-    var exprᴛ1 = d.dsbyte;
-    if (exprᴛ1 == dsbyteSHA3) {
+    switch (d.dsbyte) {
+    case var ᴛ when ᴛ == dsbyteSHA3: {
         b = append(b, magicSHA3.ꓸꓸꓸ);
+        break;
     }
-    else if (exprᴛ1 == dsbyteShake) {
+    case var ᴛ when ᴛ == dsbyteShake: {
         b = append(b, magicShake.ꓸꓸꓸ);
+        break;
     }
-    else if (exprᴛ1 == dsbyteCShake) {
+    case var ᴛ when ᴛ == dsbyteCShake: {
         b = append(b, magicCShake.ꓸꓸꓸ);
+        break;
     }
-    else if (exprᴛ1 == dsbyteKeccak) {
+    case var ᴛ when ᴛ == dsbyteKeccak: {
         b = append(b, magicKeccak.ꓸꓸꓸ);
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("unknown dsbyte");
-    }
+        break;
+    }}
     // rate is at most 168, and n is at most rate.
     b = append(b, (byte)d.rate);
     b = appendꓸꓸꓸ(b, d.a[..]);
-    b = append(b, (byte)d.n, (byte)(nint)d.state);
-    return (b, default!);
+    b = append(b, (byte)d.n, (byte)d.state);
+    return (b, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -262,7 +266,7 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     }
     d.state = state;
 
-    return default!;
+    return default;
 }
 
 } // end sha3_package

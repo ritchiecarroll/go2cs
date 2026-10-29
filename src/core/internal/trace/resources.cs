@@ -37,12 +37,12 @@ public static GoID NoGoroutine => /* GoID(-1) */ -1;
 // to that possibility.
 partial struct GoState /*num:uint8*/;
 
-public static GoState GoUndetermined => /* iota */ 0;  // No information is known about the goroutine.
-public static GoState GoNotExist => 1;      // Goroutine does not exist.
-public static GoState GoRunnable => 2;      // Goroutine is runnable but not running.
-public static GoState GoRunning => 3;       // Goroutine is running.
-public static GoState GoWaiting => 4;       // Goroutine is waiting on something to happen.
-public static GoState GoSyscall => 5;       // Goroutine is in a system call.
+public static GoState GoUndetermined => /* iota */ 0; // No information is known about the goroutine.
+public static GoState GoNotExist => 1;                // Goroutine does not exist.
+public static GoState GoRunnable => 2;                // Goroutine is runnable but not running.
+public static GoState GoRunning => 3;                 // Goroutine is running.
+public static GoState GoWaiting => 4;                 // Goroutine is waiting on something to happen.
+public static GoState GoSyscall => 5;                 // Goroutine is in a system call.
 
 // Executing returns true if the state indicates that the goroutine is executing
 // and bound to its thread.
@@ -60,25 +60,25 @@ internal static readonly @string syscallˢ = "Syscall"u8;
 //
 // The format of the returned string is for debugging purposes and is subject to change.
 public static @string String(this GoState s) {
-    var exprᴛ1 = s;
-    if (exprᴛ1 == GoUndetermined) {
+    switch (s) {
+    case var ᴛ when ᴛ == GoUndetermined: {
         return undeterminedˢ;
     }
-    if (exprᴛ1 == GoNotExist) {
+    case var ᴛ when ᴛ == GoNotExist: {
         return notExistˢ;
     }
-    if (exprᴛ1 == GoRunnable) {
+    case var ᴛ when ᴛ == GoRunnable: {
         return runnableˢ;
     }
-    if (exprᴛ1 == GoRunning) {
+    case var ᴛ when ᴛ == GoRunning: {
         return runningˢ;
     }
-    if (exprᴛ1 == GoWaiting) {
+    case var ᴛ when ᴛ == GoWaiting: {
         return waitingˢ;
     }
-    if (exprᴛ1 == GoSyscall) {
+    case var ᴛ when ᴛ == GoSyscall: {
         return syscallˢ;
-    }
+    }}
     return badˢ;
 }
 
@@ -88,10 +88,10 @@ public static @string String(this GoState s) {
 // to that possibility.
 partial struct ProcState /*num:uint8*/;
 
-public static ProcState ProcUndetermined => /* iota */ 0;  // No information is known about the proc.
-public static ProcState ProcNotExist => 1;      // Proc does not exist.
-public static ProcState ProcRunning => 2;       // Proc is running.
-public static ProcState ProcIdle => 3;          // Proc is idle.
+public static ProcState ProcUndetermined => /* iota */ 0; // No information is known about the proc.
+public static ProcState ProcNotExist => 1;                // Proc does not exist.
+public static ProcState ProcRunning => 2;                 // Proc is running.
+public static ProcState ProcIdle => 3;                    // Proc is idle.
 
 // Executing returns true if the state indicates that the proc is executing
 // and bound to its thread.
@@ -106,19 +106,19 @@ internal static readonly @string idleˢ = "Idle"u8;
 //
 // The format of the returned string is for debugging purposes and is subject to change.
 public static @string String(this ProcState s) {
-    var exprᴛ1 = s;
-    if (exprᴛ1 == ProcUndetermined) {
+    switch (s) {
+    case var ᴛ when ᴛ == ProcUndetermined: {
         return undeterminedˢ;
     }
-    if (exprᴛ1 == ProcNotExist) {
+    case var ᴛ when ᴛ == ProcNotExist: {
         return notExistˢ;
     }
-    if (exprᴛ1 == ProcRunning) {
+    case var ᴛ when ᴛ == ProcRunning: {
         return runningˢ;
     }
-    if (exprᴛ1 == ProcIdle) {
+    case var ᴛ when ᴛ == ProcIdle: {
         return idleˢ;
-    }
+    }}
     return badˢ;
 }
 
@@ -128,10 +128,10 @@ public static @string String(this ProcState s) {
 // to that possibility.
 partial struct ResourceKind /*num:uint8*/;
 
-public static ResourceKind ResourceNone => /* iota */ 0;       // No resource.
-public static ResourceKind ResourceGoroutine => 1;  // Goroutine.
-public static ResourceKind ResourceProc => 2;       // Proc.
-public static ResourceKind ResourceThread => 3;     // Thread.
+public static ResourceKind ResourceNone => /* iota */ 0; // No resource.
+public static ResourceKind ResourceGoroutine => 1;       // Goroutine.
+public static ResourceKind ResourceProc => 2;            // Proc.
+public static ResourceKind ResourceThread => 3;          // Thread.
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string noneˢ = "None"u8;
@@ -143,19 +143,19 @@ internal static readonly @string threadˢ = "Thread"u8;
 //
 // The format of the returned string is for debugging purposes and is subject to change.
 public static @string String(this ResourceKind r) {
-    var exprᴛ1 = r;
-    if (exprᴛ1 == ResourceNone) {
+    switch (r) {
+    case var ᴛ when ᴛ == ResourceNone: {
         return noneˢ;
     }
-    if (exprᴛ1 == ResourceGoroutine) {
+    case var ᴛ when ᴛ == ResourceGoroutine: {
         return goroutineˢ;
     }
-    if (exprᴛ1 == ResourceProc) {
+    case var ᴛ when ᴛ == ResourceProc: {
         return procˢ;
     }
-    if (exprᴛ1 == ResourceThread) {
+    case var ᴛ when ᴛ == ResourceThread: {
         return threadˢ;
-    }
+    }}
     return badˢ;
 }
 
@@ -170,7 +170,7 @@ partial struct ResourceID {
 public static ResourceID MakeResourceID<T>(T id)
     where T : /* interface{internal/trace.GoID | internal/trace.ProcID | internal/trace.ThreadID} */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    ResourceID rd = default!;
+    ResourceID rd = default;
     any a = id;
     switch (a.type()) {
     case GoID: {

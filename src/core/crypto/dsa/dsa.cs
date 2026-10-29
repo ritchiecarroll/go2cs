@@ -78,28 +78,32 @@ public static error GenerateParameters(ж<Parameters> Ꮡparams, io.Reader rand,
     // seed doesn't appear to be exported or used by other code and
     // omitting it makes the code cleaner.
 
-    nint L = default!;
-    nint N = default!;
-    var exprᴛ1 = sizes;
-    if (exprᴛ1 == L1024N160) {
+    nint L = default;
+    nint N = default;
+    switch (sizes) {
+    case var ᴛ when ᴛ == L1024N160: {
         L = 1024;
         N = 160;
+        break;
     }
-    else if (exprᴛ1 == L2048N224) {
+    case var ᴛ when ᴛ == L2048N224: {
         L = 2048;
         N = 224;
+        break;
     }
-    else if (exprᴛ1 == L2048N256) {
+    case var ᴛ when ᴛ == L2048N256: {
         L = 2048;
         N = 256;
+        break;
     }
-    else if (exprᴛ1 == L3072N256) {
+    case var ᴛ when ᴛ == L3072N256: {
         L = 3072;
         N = 256;
+        break;
     }
-    else { /* default: */
+    default: {
         return errors.New(cryptoDsaInvalidˢ);
-    }
+    }}
 
     var qBytes = new slice<byte>(N / 8);
     var pBytes = new slice<byte>(L / 8);
@@ -111,9 +115,9 @@ public static error GenerateParameters(ж<Parameters> Ꮡparams, io.Reader rand,
     one.SetInt64(1);
 
 GeneratePrimes:
-    while (ᐧ) {
+    for (;;) {
         {
-            var (_, err) = io.ReadFull(rand, qBytes); if (err != default!) {
+            var (_, err) = io.ReadFull(rand, qBytes); if (err != nil) {
                 return err;
             }
         }
@@ -128,7 +132,7 @@ GeneratePrimes:
 
         for (nint i = 0; i < 4 * L; i++) {
             {
-                var (_, err) = io.ReadFull(rand, pBytes); if (err != default!) {
+                var (_, err) = io.ReadFull(rand, pBytes); if (err != nil) {
                     return err;
                 }
             }
@@ -163,7 +167,7 @@ break_GeneratePrimes:;
     var pm1 = @new<bigꓸInt>().Sub(p, one);
     var e = @new<bigꓸInt>().Div(pm1, q);
 
-    while (ᐧ) {
+    for (;;) {
         g.Exp(h, e, p);
         if (g.Cmp(one) == 0) {
             h.Add(h, one);
@@ -171,7 +175,7 @@ break_GeneratePrimes:;
         }
 
         @params.G = g;
-        return default!;
+        return default;
     }
 }
 
@@ -194,9 +198,9 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
     var x = @new<bigꓸInt>();
     var xBytes = new slice<byte>(priv.Q.BitLen() / 8);
 
-    while (ᐧ) {
+    for (;;) {
         var (_, err) = io.ReadFull(rand, xBytes);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         x.SetBytes(xBytes);
@@ -208,17 +212,17 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
     priv.X = x;
     priv.Y = @new<bigꓸInt>();
     priv.Y.Exp(priv.G, x, priv.P);
-    return default!;
+    return default;
 }
 
 // fermatInverse calculates the inverse of k in GF(P) using Fermat's method.
 // This has better constant-time properties than Euclid's method (implemented
 // in math/big.Int.ModInverse) although math/big itself isn't strictly
 // constant-time so it's not perfect.
-internal static ж<bigꓸInt> fermatInverse(ж<bigꓸInt> Ꮡk, ж<bigꓸInt> ᏑP) {
+internal static ж<bigꓸInt> fermatInverse(ж<bigꓸInt> k, ж<bigꓸInt> P) {
     var two = big.NewInt(2);
-    var pMinus2 = @new<bigꓸInt>().Sub(ᏑP, two);
-    return @new<bigꓸInt>().Exp(Ꮡk, pMinus2, ᏑP);
+    var pMinus2 = @new<bigꓸInt>().Sub(P, two);
+    return @new<bigꓸInt>().Exp(k, pMinus2, P);
 }
 
 // Sign signs an arbitrary length hash (which should be the result of hashing a
@@ -237,13 +241,13 @@ internal static ж<bigꓸInt> fermatInverse(ж<bigꓸInt> Ꮡk, ж<bigꓸInt> �
 // Be aware that calling Sign with an attacker-controlled [PrivateKey] may
 // require an arbitrary amount of CPU.
 public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
-    ж<bigꓸInt> r = default!;
-    ж<bigꓸInt> s = default!;
-    error err = default!;
+    ж<bigꓸInt> r = default;
+    ж<bigꓸInt> s = default;
+    error err = default;
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     if (fips140only.Enforced()) {
-        return (default!, default!, errors.New(cryptoDsaUseOfDsaIsNotˢ));
+        return (default, default, errors.New(cryptoDsaUseOfDsaIsNotˢ));
     }
 
     random = rand.CustomReader(random);
@@ -255,15 +259,15 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rando
         err = ErrInvalidPublicKey;
         return (r, s, err);
     }
-    n >>= (int)(3);
+    n >>= 3;
 
-    nint attempts = default!;
+    nint attempts = default;
     for (attempts = 10; attempts > 0; attempts--) {
         var k = @new<bigꓸInt>();
         var buf = new slice<byte>(n);
-        while (ᐧ) {
+        for (;;) {
             (_, err) = io.ReadFull(random, buf);
-            if (err != default!) {
+            if (err != nil) {
                 return (r, s, err);
             }
             k.SetBytes(buf);
@@ -301,7 +305,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rando
     // Only degenerate private keys will require more than a handful of
     // attempts.
     if (attempts == 0) {
-        return (default!, default!, ErrInvalidPublicKey);
+        return (default, default, ErrInvalidPublicKey);
     }
 
     return (r, s, err);

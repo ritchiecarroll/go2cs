@@ -11,9 +11,6 @@
 
 // <ImportedTypeAliases>
 global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -59,6 +56,14 @@ using static go.@internal.routebsd_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(InterfaceAddrMessage))]
+[assembly: go.GoFieldAccess(typeof(InterfaceMessage))]
+[assembly: go.GoFieldAccess(typeof(InterfaceMulticastAddrMessage))]
+[assembly: go.GoFieldAccess(typeof(LinkAddr))]
+[assembly: go.GoFieldAccess(typeof(wireFormat))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -67,7 +72,7 @@ using static go.@internal.routebsd_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/routebsd/address.go", "address.cs", "ABo6kKSCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQABxCCgpS6kryUgpSCgqaCgpSUpqSClIKCgoKClILKgoLcpqS8ABUogqaCppSCmLiUpqSCgpSUpqSmpIKClJSmuIKCgoKClIKUgoKUgoKClKSCgoKUgoKClKSCgpSCgoKUyoKClO4=", "", "", "127=AddrFrom4/1/1/1;157=AddrFrom16/1/1/1;208=AddrFrom16/1/1/1;220=AddrFrom16/1/1/1;226=AddrFrom4/1/1/1;238=AddrFrom4/1/1/1")]
+[assembly: go.GoPositionMap("internal/routebsd/address.go", "address.cs", "ABo6kKSCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQABxCCgpS6kryUgpSCgqaCgpSUpqSClIKCgoKClILKgoLcpqS8ABUogqaCppSCmLiUpqSCgpSUpqSmpIKClJSmuIKCgoKClIKUgoKUgoKClLSCgoKUgoKClLSCgpSCgoKU2oKClO4=", "", "", "127=AddrFrom4/1/1/1;157=AddrFrom16/1/1/1;208=AddrFrom16/1/1/1;220=AddrFrom16/1/1/1;226=AddrFrom4/1/1/1;238=AddrFrom4/1/1/1")]
 [assembly: go.GoPositionMap("internal/routebsd/binary.go", "binary.cs", "ABw8gqaCpoLagqaCpoI=")]
 [assembly: go.GoPositionMap("internal/routebsd/interface.go", "interface.cs", "AClesqI=")]
 [assembly: go.GoPositionMap("internal/routebsd/interface_classic.go", "interface_classic.cs", "AAscgoKUgoKUlAAMGoKCgpSCuIK4poKClIKClNyClJSCgoKU", "", "", "22=Uint32/1/1/4,Uint16/1/1/5;61=Uint32/1/1/3")]

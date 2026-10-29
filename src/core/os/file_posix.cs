@@ -30,8 +30,8 @@ public static error Close(this ж<File> Ꮡf) {
 // read reads up to len(b) bytes from the File.
 // It returns the number of bytes read and an error, if any.
 internal static (nint n, error err) read(this ж<File> Ꮡf, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = Ꮡf.of(File.Ꮡpfd).Read(b);
     runtime.KeepAlive(Ꮡf.OrTypedNil());
@@ -42,8 +42,8 @@ internal static (nint n, error err) read(this ж<File> Ꮡf, slice<byte> b) {
 // It returns the number of bytes read and the error, if any.
 // EOF is signaled by a zero count with err set to nil.
 internal static (nint n, error err) pread(this ж<File> Ꮡf, slice<byte> b, int64 off) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = Ꮡf.of(File.Ꮡpfd).Pread(b, off);
     runtime.KeepAlive(Ꮡf.OrTypedNil());
@@ -53,8 +53,8 @@ internal static (nint n, error err) pread(this ж<File> Ꮡf, slice<byte> b, int
 // write writes len(b) bytes to the File.
 // It returns the number of bytes written and an error, if any.
 internal static (nint n, error err) write(this ж<File> Ꮡf, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = Ꮡf.of(File.Ꮡpfd).Write(b);
     runtime.KeepAlive(Ꮡf.OrTypedNil());
@@ -64,8 +64,8 @@ internal static (nint n, error err) write(this ж<File> Ꮡf, slice<byte> b) {
 // pwrite writes len(b) bytes to the File starting at byte offset off.
 // It returns the number of bytes written and an error, if any.
 internal static (nint n, error err) pwrite(this ж<File> Ꮡf, slice<byte> b, int64 off) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = Ꮡf.of(File.Ꮡpfd).Pwrite(b, off);
     runtime.KeepAlive(Ꮡf.OrTypedNil());
@@ -74,7 +74,7 @@ internal static (nint n, error err) pwrite(this ж<File> Ꮡf, slice<byte> b, in
 
 // syscallMode returns the syscall-specific mode bits from Go's portable mode bits.
 internal static uint32 /*o*/ syscallMode(FileMode i) {
-    uint32 o = default!;
+    uint32 o = default;
 
     o |= (uint32)((uint32)i.Perm());
     if ((FileMode)(i & ModeSetuid) != 0) {
@@ -94,10 +94,10 @@ internal static uint32 /*o*/ syscallMode(FileMode i) {
 internal static error chmod(@string name, FileMode mode) {
     @string longName = fixLongPath(name);
     var e = ignoringEINTR(() => syscall.Chmod(longName, syscallMode(mode)));
-    if (e != default!) {
+    if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chmod"u8, Path: name, Err: e)));
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -108,16 +108,16 @@ internal static error chmod(this ж<File> Ꮡf, FileMode mode) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var err = Ꮡf.checkValid(chmodˢ); if (err != default!) {
+        var err = Ꮡf.checkValid(chmodˢ); if (err != nil) {
             return err;
         }
     }
     {
-        var e = Ꮡf.of(File.Ꮡpfd).Fchmod(syscallMode(mode)); if (e != default!) {
+        var e = Ꮡf.of(File.Ꮡpfd).Fchmod(syscallMode(mode)); if (e != nil) {
             return f.wrapErr(chmodˢ, e);
         }
     }
-    return default!;
+    return default;
 }
 
 // Chown changes the numeric uid and gid of the named file.
@@ -129,10 +129,10 @@ internal static error chmod(this ж<File> Ꮡf, FileMode mode) {
 // [syscall.EPLAN9] error, wrapped in [*PathError].
 public static error Chown(@string name, nint uid, nint gid) {
     var e = ignoringEINTR(() => syscall.Chown(name, uid, gid));
-    if (e != default!) {
+    if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chown"u8, Path: name, Err: e)));
     }
-    return default!;
+    return default;
 }
 
 // Lchown changes the numeric uid and gid of the named file.
@@ -143,10 +143,10 @@ public static error Chown(@string name, nint uid, nint gid) {
 // in [*PathError].
 public static error Lchown(@string name, nint uid, nint gid) {
     var e = ignoringEINTR(() => syscall.Lchown(name, uid, gid));
-    if (e != default!) {
+    if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lchown"u8, Path: name, Err: e)));
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -161,16 +161,16 @@ public static error Chown(this ж<File> Ꮡf, nint uid, nint gid) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var err = Ꮡf.checkValid(chownˢ); if (err != default!) {
+        var err = Ꮡf.checkValid(chownˢ); if (err != nil) {
             return err;
         }
     }
     {
-        var e = Ꮡf.of(File.Ꮡpfd).Fchown(uid, gid); if (e != default!) {
+        var e = Ꮡf.of(File.Ꮡpfd).Fchown(uid, gid); if (e != nil) {
             return f.wrapErr(chownˢ, e);
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -183,16 +183,16 @@ public static error Truncate(this ж<File> Ꮡf, int64 size) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var err = Ꮡf.checkValid(truncateˢ); if (err != default!) {
+        var err = Ꮡf.checkValid(truncateˢ); if (err != nil) {
             return err;
         }
     }
     {
-        var e = Ꮡf.of(File.Ꮡpfd).Ftruncate(size); if (e != default!) {
+        var e = Ꮡf.of(File.Ꮡpfd).Ftruncate(size); if (e != nil) {
             return f.wrapErr(truncateˢ, e);
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -205,16 +205,16 @@ public static error Sync(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var err = Ꮡf.checkValid(syncˢ); if (err != default!) {
+        var err = Ꮡf.checkValid(syncˢ); if (err != nil) {
             return err;
         }
     }
     {
-        var e = Ꮡf.of(File.Ꮡpfd).Fsync(); if (e != default!) {
+        var e = Ꮡf.of(File.Ꮡpfd).Fsync(); if (e != nil) {
             return f.wrapErr(syncˢ, e);
         }
     }
-    return default!;
+    return default;
 }
 
 // Chtimes changes the access and modification times of the named
@@ -227,17 +227,17 @@ public static error Sync(this ж<File> Ꮡf) {
 public static error Chtimes(@string name, time.Time atime, time.Time mtime) {
     var utimes = chtimesUtimes(atime, mtime);
     {
-        var e = syscall.UtimesNano(fixLongPath(name), utimes[0..]); if (e != default!) {
+        var e = syscall.UtimesNano(fixLongPath(name), utimes[0..]); if (e != nil) {
             return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chtimes"u8, Path: name, Err: e)));
         }
     }
-    return default!;
+    return default;
 }
 
 internal static array<syscall.Timespec> chtimesUtimes(time.Time atime, time.Time mtime) {
     ref var utimes = ref heap(new array<syscall.Timespec>(2), out var Ꮡutimes);
     void set(nint i, time.Time t) {
-        if (t.IsZero()){
+        if (t.IsZero()) {
             Ꮡutimes.Value[i] = new syscall.Timespec(Sec: _UTIME_OMIT, Nsec: _UTIME_OMIT);
         } else {
             Ꮡutimes.Value[i] = syscall.NsecToTimespec(t.UnixNano());
@@ -255,24 +255,24 @@ public static error Chdir(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var err = Ꮡf.checkValid(chdirˢ); if (err != default!) {
+        var err = Ꮡf.checkValid(chdirˢ); if (err != nil) {
             return err;
         }
     }
     {
-        var e = Ꮡf.of(File.Ꮡpfd).Fchdir(); if (e != default!) {
+        var e = Ꮡf.of(File.Ꮡpfd).Fchdir(); if (e != nil) {
             return f.wrapErr(chdirˢ, e);
         }
     }
     {
-        var log = testlog.Logger(); if (log != default!) {
+        var log = testlog.Logger(); if (log != nil) {
             var (wd, err) = Getwd();
-            if (err == default!) {
+            if (err == nil) {
                 log.Chdir(wd);
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -281,7 +281,7 @@ internal static readonly @string setDeadlineˢ = "SetDeadline"u8;
 // setDeadline sets the read and write deadline.
 internal static error setDeadline(this ж<File> Ꮡf, time.Time t) {
     {
-        var err = Ꮡf.checkValid(setDeadlineˢ); if (err != default!) {
+        var err = Ꮡf.checkValid(setDeadlineˢ); if (err != nil) {
             return err;
         }
     }
@@ -294,7 +294,7 @@ internal static readonly @string setReadDeadlineˢ = "SetReadDeadline"u8;
 // setReadDeadline sets the read deadline.
 internal static error setReadDeadline(this ж<File> Ꮡf, time.Time t) {
     {
-        var err = Ꮡf.checkValid(setReadDeadlineˢ); if (err != default!) {
+        var err = Ꮡf.checkValid(setReadDeadlineˢ); if (err != nil) {
             return err;
         }
     }
@@ -307,7 +307,7 @@ internal static readonly @string setWriteDeadlineˢ = "SetWriteDeadline"u8;
 // setWriteDeadline sets the write deadline.
 internal static error setWriteDeadline(this ж<File> Ꮡf, time.Time t) {
     {
-        var err = Ꮡf.checkValid(setWriteDeadlineˢ); if (err != default!) {
+        var err = Ꮡf.checkValid(setWriteDeadlineˢ); if (err != nil) {
             return err;
         }
     }
@@ -320,7 +320,7 @@ internal static error checkValid(this ж<File> Ꮡf, @string op) {
     if (Ꮡf == nil) {
         return ErrInvalid;
     }
-    return default!;
+    return default;
 }
 
 // ignoringEINTR makes a function call and repeats it if it returns an
@@ -331,7 +331,7 @@ internal static error checkValid(this ж<File> Ꮡf, @string op) {
 // but there are enough of them that it seems that we can't avoid
 // an EINTR loop.
 internal static error ignoringEINTR(Func<error> fn) {
-    while (ᐧ) {
+    for (;;) {
         var err = fn();
         if (!AreEqual(err, syscall.EINTR)) {
             return err;
@@ -341,7 +341,7 @@ internal static error ignoringEINTR(Func<error> fn) {
 
 // ignoringEINTR2 is ignoringEINTR, but returning an additional value.
 internal static (T, error) ignoringEINTR2<T>(Func<(T, error)> fn) {
-    while (ᐧ) {
+    for (;;) {
         var (v, err) = fn();
         if (!AreEqual(err, syscall.EINTR)) {
             return (v, err);

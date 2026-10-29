@@ -51,13 +51,13 @@ internal static mptcpStatusDial mptcpEnabledDial => 1;
 internal static mptcpStatusDial mptcpDisabledDial => 2;
 
 internal static bool get(this ref mptcpStatusDial m) {
-    var exprᴛ1 = m;
-    if (exprᴛ1 == mptcpEnabledDial) {
+    switch (m) {
+    case var ᴛ when ᴛ == mptcpEnabledDial: {
         return true;
     }
-    if (exprᴛ1 == mptcpDisabledDial) {
+    case var ᴛ when ᴛ == mptcpDisabledDial: {
         return false;
-    }
+    }}
 
     // If MPTCP is forced via GODEBUG=multipathtcp=1
     if (multipathtcp.Value() == "1"u8 || multipathtcp.Value() == "3"u8) {
@@ -70,7 +70,7 @@ internal static bool get(this ref mptcpStatusDial m) {
 }
 
 internal static void set(this ref mptcpStatusDial m, bool use) {
-    if (use){
+    if (use) {
         m = mptcpEnabledDial;
     } else {
         m = mptcpDisabledDial;
@@ -87,13 +87,13 @@ internal static mptcpStatusListen mptcpEnabledListen => 1;
 internal static mptcpStatusListen mptcpDisabledListen => 2;
 
 internal static bool get(this ref mptcpStatusListen m) {
-    var exprᴛ1 = m;
-    if (exprᴛ1 == mptcpEnabledListen) {
+    switch (m) {
+    case var ᴛ when ᴛ == mptcpEnabledListen: {
         return true;
     }
-    if (exprᴛ1 == mptcpDisabledListen) {
+    case var ᴛ when ᴛ == mptcpDisabledListen: {
         return false;
-    }
+    }}
 
     // If MPTCP is disabled via GODEBUG=multipathtcp=0 or only
     // enabled on dialers, but not on listeners.
@@ -107,7 +107,7 @@ internal static bool get(this ref mptcpStatusListen m) {
 }
 
 internal static void set(this ref mptcpStatusListen m, bool use) {
-    if (use){
+    if (use) {
         m = mptcpEnabledListen;
     } else {
         m = mptcpDisabledListen;
@@ -238,7 +238,7 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
 //
 // Or zero, if none of Timeout, Deadline, or context's deadline is set.
 internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Context ctx, time.Time now) {
-    time.Time earliest = default!;
+    time.Time earliest = default;
 
     if (d.Timeout != 0) { // including negative, for historical reasons
         earliest = now.Add(d.Timeout);
@@ -262,28 +262,28 @@ internal static ж<Resolver> resolver(this ref Dialer d) {
 // when multiple addresses are pending.
 internal static (time.Time, error) partialDeadline(time.Time now, time.Time deadline, nint addrsRemaining) {
     if (deadline.IsZero()) {
-        return (deadline, default!);
+        return (deadline, default);
     }
     var timeRemaining = deadline.Sub(now);
     if (timeRemaining <= 0) {
-        return (new time.Time(nil), errTimeout);
+        return (new time.Time(), errTimeout);
     }
     // Tentatively allocate equal time to each remaining address.
     var timeout = timeRemaining / ((time.Duration)(int64)addrsRemaining);
     // If the time per address is too short, steal from the end of the list.
     time.Duration saneMinimum = /* 2 * time.Second */ 2000000000;
     if (timeout < saneMinimum) {
-        if (timeRemaining < saneMinimum){
+        if (timeRemaining < saneMinimum) {
             timeout = timeRemaining;
         } else {
             timeout = saneMinimum;
         }
     }
-    return (now.Add(timeout), default!);
+    return (now.Add(timeout), default);
 }
 
 internal static time.Duration fallbackDelay(this ref Dialer d) {
-    if (d.FallbackDelay > 0){
+    if (d.FallbackDelay > 0) {
         return d.FallbackDelay;
     } else {
         return 300 * time.Millisecond;
@@ -291,41 +291,47 @@ internal static time.Duration fallbackDelay(this ref Dialer d) {
 }
 
 internal static (@string afnet, nint proto, error err) parseNetwork(context.Context ctx, @string network, bool needsProto) {
-    @string afnet = default!;
-    error err = default!;
+    @string afnet = default;
+    error err = default;
 
-    nint i = bytealg.LastIndexByteString(network, (rune)':');
+    nint i = bytealg.LastIndexByteString(network, (byte)':');
     if (i < 0) { // no colon
         var exprᴛ1 = network;
-        if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+            break;
         }
-        else if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
+        case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+            break;
         }
-        else if (exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8) {
+        case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
             if (needsProto) {
                 return ("", 0, ((UnknownNetworkError)network));
             }
+            break;
         }
-        else if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
+        case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+            break;
         }
-        else { /* default: */
+        default: {
             return ("", 0, ((UnknownNetworkError)network));
-        }
-        return (network, 0, default!);
+        }}
+        return (network, 0, default);
     }
     afnet = network.slice(0, i);
     var exprᴛ2 = afnet;
-    if (exprᴛ2 == "ip"u8 || exprᴛ2 == "ip4"u8 || exprᴛ2 == "ip6"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ2 == "ip"u8 || exprᴛ2 == "ip4"u8 || exprᴛ2 == "ip6"u8: {
         @string protostr = network.slice(i + 1);
         var (protoΔ2, iΔ2, ok) = dtoi(protostr);
         if (!ok || iΔ2 != len(protostr)) {
             (protoΔ2, err) = lookupProtocol(ctx, protostr);
-            if (err != default!) {
+            if (err != nil) {
                 return ("", 0, err);
             }
         }
-        return (afnet, protoΔ2, default!);
-    }
+        return (afnet, protoΔ2, default);
+    }}
     return ("", 0, ((UnknownNetworkError)network));
 }
 
@@ -334,31 +340,32 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
 // nil.
 internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, ΔAddr hint) {
     var (afnet, _, err) = parseNetwork(ctx, network, true);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (op == "dial"u8 && addr == ""u8) {
-        return (default!, errMissingAddress);
+        return (default, errMissingAddress);
     }
     var exprᴛ1 = afnet;
-    if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
         var (addrΔ2, errΔ2) = ResolveUnixAddr(afnet, addr);
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
-        if (op == "dial"u8 && hint != default! && addrΔ2.Network() != hint.Network()) {
-            return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "mismatched local address type"u8, Addr: hint.String()))));
+        if (op == "dial"u8 && hint != nil && addrΔ2.Network() != hint.Network()) {
+            return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: "mismatched local address type"u8, Addr: hint.String()))));
         }
-        return (new addrList(new ΔAddr[]{new UnixAddrжΔAddr(addrΔ2)}.slice()), default!);
-    }
+        return (new addrList(new ΔAddr[]{new UnixAddrжΔAddr(addrΔ2)}.slice()), default);
+    }}
     (var addrs, err) = Ꮡr.internetAddrList(ctx, afnet, addr);
-    if (err != default! || op != "dial"u8 || hint == default!) {
+    if (err != nil || op != "dial"u8 || hint == nil) {
         return (addrs, err);
     }
-    ж<TCPAddr> tcp = default!;
-    ж<UDPAddr> udp = default!;
-    ж<IPAddr> ip = default!;
-    bool wildcard = default!;
+    ж<TCPAddr> tcp = default;
+    ж<UDPAddr> udp = default;
+    ж<IPAddr> ip = default;
+    bool wildcard = default;
     switch (hint.type()) {
     case ж<TCPAddr> hintΔ1: {
         tcp = hintΔ1;
@@ -378,25 +385,25 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
     var naddrs = addrs[..0];
     foreach (var (_, addrΔ3) in addrs) {
         if (addrΔ3.Network() != hint.Network()) {
-            return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "mismatched local address type"u8, Addr: hint.String()))));
+            return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: "mismatched local address type"u8, Addr: hint.String()))));
         }
         switch (addrΔ3.type()) {
         case ж<TCPAddr> addrΔ4: {
-            if (!wildcard && !addrΔ4.isWildcard() && !(~addrΔ4).IP.matchAddrFamily((~tcp).IP)) {
+            if (!wildcard && !addrΔ4.isWildcard() && !addrΔ4.IP.matchAddrFamily(tcp.IP)) {
                 continue;
             }
             naddrs = append(naddrs, (ΔAddr)(new TCPAddrжΔAddr(addrΔ4)));
             break;
         }
         case ж<UDPAddr> addrΔ4: {
-            if (!wildcard && !addrΔ4.isWildcard() && !(~addrΔ4).IP.matchAddrFamily((~udp).IP)) {
+            if (!wildcard && !addrΔ4.isWildcard() && !addrΔ4.IP.matchAddrFamily(udp.IP)) {
                 continue;
             }
             naddrs = append(naddrs, (ΔAddr)(new UDPAddrжΔAddr(addrΔ4)));
             break;
         }
         case ж<IPAddr> addrΔ4: {
-            if (!wildcard && !addrΔ4.isWildcard() && !(~addrΔ4).IP.matchAddrFamily((~ip).IP)) {
+            if (!wildcard && !addrΔ4.isWildcard() && !addrΔ4.IP.matchAddrFamily(ip.IP)) {
                 continue;
             }
             naddrs = append(naddrs, (ΔAddr)(new IPAddrжΔAddr(addrΔ4)));
@@ -404,9 +411,9 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
         }}
     }
     if (len(naddrs) == 0) {
-        return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: hint.String()))));
+        return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: hint.String()))));
     }
-    return (naddrs, default!);
+    return (naddrs, default);
 }
 
 // MultipathTCP reports whether MPTCP will be used.
@@ -491,8 +498,7 @@ public static (Conn, error) Dial(@string network, @string address) {
 // See func Dial for a description of the network and address
 // parameters.
 public static (Conn, error) DialTimeout(@string network, @string address, time.Duration timeout) {
-    ref var d = ref heap<Dialer>(out var Ꮡd);
-    d = new Dialer(Timeout: timeout);
+    ref var d = ref heap<Dialer>(new Dialer(Timeout: timeout), out var Ꮡd);
     return Ꮡd.Dial(network, address);
 }
 
@@ -547,18 +553,17 @@ public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ct
         // Shadow the nettrace (if any) during resolve so Connect events don't fire for DNS lookups.
         var resolveCtx = ctx;
         {
-            var (trace, _) = ctx.Value(new nettrace.TraceKey(nil))._<ж<nettrace.Trace>>(ᐧ); if (trace != nil) {
-                ref var shadow = ref heap<nettrace.Trace>(out var Ꮡshadow);
-                shadow = trace.Value;
-                shadow.ConnectStart = default!;
-                shadow.ConnectDone = default!;
-                resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(nil), Ꮡshadow);
+            var (trace, _) = ctx.Value(new nettrace.TraceKey())._<ж<nettrace.Trace>>(ᐧ); if (trace != nil) {
+                ref var shadow = ref heap<nettrace.Trace>(trace.Value, out var Ꮡshadow);
+                shadow.ConnectStart = default;
+                shadow.ConnectDone = default;
+                resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(), Ꮡshadow);
             }
         }
 
         var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, dialˢ, network, address, d.LocalAddr);
-        if (err != default!) {
-            return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: default!, Addr: default!, Err: err))));
+        if (err != nil) {
+            return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: default, Addr: default, Err: err))));
         }
 
         var sd = Ꮡ(new sysDialer(
@@ -567,9 +572,9 @@ public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ct
             address: address
         ));
 
-        addrList primaries = default!;
-        addrList fallbacks = default!;
-        if (d.dualStack() && network == "tcp"u8){
+        addrList primaries = default;
+        addrList fallbacks = default;
+        if (d.dualStack() && network == "tcp"u8) {
             (primaries, fallbacks) = addrs.partition(isIPv4);
         } else {
             primaries = addrs;
@@ -577,29 +582,29 @@ public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ct
 
         return sd.dialParallel(ctx, primaries, fallbacks);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static partial (context.Context, Action) dialCtx(this ref Dialer d, context.Context ctx) {
-    if (ctx == default!) {
+    if (ctx == nil) {
         throw panic("nil context");
     }
     var deadline = d.deadline(ctx, time.Now());
-    Action cancel1 = default!;
-    Action cancel2 = default!;
+    Action cancel1 = default;
+    Action cancel2 = default;
     if (!deadline.IsZero()) {
         testHookStepTime();
         {
             var (dΔ1, ok) = ctx.Deadline(); if (!ok || deadline.Before(dΔ1)) {
-                context.Context subCtx = default!;
+                context.Context subCtx = default;
                 (subCtx, cancel1) = context.WithDeadline(ctx, deadline);
                 ctx = subCtx;
             }
         }
     }
     {
-        var oldCancel = d.Cancel; if (oldCancel != default!) {
+        var oldCancel = d.Cancel; if (oldCancel != nil) {
             var (subCtx, cancel2Δ1) = context.WithCancel(ctx);
             var cancel2ʗ1 = cancel2Δ1;
             var oldCancelʗ1 = oldCancel;
@@ -622,10 +627,10 @@ internal static partial (context.Context, Action) dialCtx(this ref Dialer d, con
     var cancel1ʗ1 = cancel1;
     var cancel2ʗ2 = cancel2;
     return (ctx, () => {
-        if (cancel1ʗ1 != default!) {
+        if (cancel1ʗ1 != nil) {
             cancel1ʗ1();
         }
-        if (cancel2ʗ2 != default!) {
+        if (cancel2ʗ2 != nil) {
             cancel2ʗ2();
         }
     });
@@ -649,7 +654,7 @@ public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context
         defer(() => cancelʗ1(), ref ᒐ);
         return dialTCP(ctx, Ꮡd, network, TCPAddrFromAddrPort(laddr), TCPAddrFromAddrPort(raddr));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -671,7 +676,7 @@ public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context
         defer(() => cancelʗ1(), ref ᒐ);
         return dialUDP(ctx, Ꮡd, network, UDPAddrFromAddrPort(laddr), UDPAddrFromAddrPort(raddr));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -693,7 +698,7 @@ public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context c
         defer(() => cancelʗ1(), ref ᒐ);
         return dialIP(ctx, Ꮡd, network, ipAddrFromAddr(laddr), ipAddrFromAddr(raddr));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -705,7 +710,7 @@ public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context c
 // connection.
 //
 // The network must be a Unix network name; see func Dial for details.
-public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> Ꮡladdr, ж<UnixAddr> Ꮡraddr) {
+public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -713,9 +718,9 @@ public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Conte
         (ctx, var cancel) = d.dialCtx(ctx);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        return dialUnix(ctx, Ꮡd, network, Ꮡladdr, Ꮡraddr);
+        return dialUnix(ctx, Ꮡd, network, laddr, raddr);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -758,15 +763,15 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
                 break;
             }
             case 1 when selᴛ4.ꟷᐳ(out _): {
-                if (c != default!) {
+                if (c != nil) {
                     c.Close();
                 }
                 break;
             }}
         }
 
-        dialParallel_dialResult primary = default!;
-        dialParallel_dialResult fallback = default!;
+        dialParallel_dialResult primary = default;
+        dialParallel_dialResult fallback = default;
 
         // Start the main racer.
         var (primaryCtx, primaryCancel) = context.WithCancel(ctx);
@@ -780,8 +785,8 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
         var fallbackTimerʗ1 = fallbackTimer;
         defer(() => fallbackTimerʗ1.Stop(), ref ᒐ);
 
-        while (ᐧ) {
-            var selᴛ5 = (~fallbackTimer).C;
+        for (;;) {
+            var selᴛ5 = fallbackTimer.C;
             var selᴛ6 = results;
             switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
             case 0 when selᴛ5.ꟷᐳ(out _): {
@@ -793,16 +798,16 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
                 break;
             }
             case 1 when selᴛ6.ꟷᐳ(out var res): {
-                if (res.error == default!) {
-                    return (res.Conn, default!);
+                if (res.error == nil) {
+                    return (res.Conn, default);
                 }
-                if (res.primary){
+                if (res.primary) {
                     primary = res;
                 } else {
                     fallback = res;
                 }
                 if (primary.done && fallback.done) {
-                    return (default!, primary.error);
+                    return (default, primary.error);
                 }
                 if (res.primary && fallbackTimer.Stop()) {
                     // If we were able to stop the timer, that means it
@@ -815,7 +820,7 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
             }}
         }
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -826,13 +831,13 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
     try {
         ref var sd = ref Ꮡsd.DerefOrNull();
 
-        error firstErr = default!;    // The error from the first address is most relevant.
+        error firstErr = default; // The error from the first address is most relevant.
 
         foreach (var (i, ra) in ras) {
             var selᴛ7 = ctx.Done();
             switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
             case 0 when selᴛ7.ꟷᐳ(out _): {
-                return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: sd.LocalAddr, Addr: ra, Err: mapErr(ctx.Err())))));
+                return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: sd.LocalAddr, Addr: ra, Err: mapErr(ctx.Err())))));
             }
             default: {
                 break;
@@ -842,15 +847,15 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
             {
                 var (deadline, hasDeadline) = ctx.Deadline(); if (hasDeadline) {
                     var (partialDeadlineΔ1, errΔ1) = partialDeadline(time.Now(), deadline, len(ras) - i);
-                    if (errΔ1 != default!) {
+                    if (errΔ1 != nil) {
                         // Ran out of time.
-                        if (firstErr == default!) {
+                        if (firstErr == nil) {
                             firstErr = new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: sd.LocalAddr, Addr: ra, Err: errΔ1)));
                         }
                         break;
                     }
                     if (partialDeadlineΔ1.Before(deadline)) {
-                        Action cancel = default!;
+                        Action cancel = default;
                         (dialCtx, cancel) = context.WithDeadline(ctx, partialDeadlineΔ1);
                         var cancelʗ1 = cancel;
                         defer(() => cancelʗ1(), ref ᒐ);
@@ -859,42 +864,42 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
             }
 
             var (c, err) = Ꮡsd.dialSingle(dialCtx, ra);
-            if (err == default!) {
-                return (c, default!);
+            if (err == nil) {
+                return (c, default);
             }
-            if (firstErr == default!) {
+            if (firstErr == nil) {
                 firstErr = err;
             }
         }
 
-        if (firstErr == default!) {
-            firstErr = new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: default!, Addr: default!, Err: errMissingAddress)));
+        if (firstErr == nil) {
+            firstErr = new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: default, Addr: default, Err: errMissingAddress)));
         }
-        return (default!, firstErr);
+        return (default, firstErr);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // dialSingle attempts to establish and returns a single connection to
 // the destination address.
 internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context.Context ctx, ΔAddr ra) {
-    Conn c = default!;
-    error err = default!;
+    Conn c = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var sd = ref Ꮡsd.DerefOrNull();
 
-        var (trace, _) = ctx.Value(new nettrace.TraceKey(nil))._<ж<nettrace.Trace>>(ᐧ);
+        var (trace, _) = ctx.Value(new nettrace.TraceKey())._<ж<nettrace.Trace>>(ᐧ);
         if (trace != nil) {
             @string raStr = ra.String();
-            if ((~trace).ConnectStart != default!) {
-                (~trace).ConnectStart(sd.network, raStr);
+            if (trace.ConnectStart != nil) {
+                trace.ConnectStart(sd.network, raStr);
             }
-            if ((~trace).ConnectDone != default!) {
+            if (trace.ConnectDone != nil) {
                 var traceʗ1 = trace;
                 defer(() => {
-                    (~traceʗ1).ConnectDone(Ꮡsd.Value.network, raStr, err);
+                    traceʗ1.ConnectDone(Ꮡsd.Value.network, raStr, err);
                 }, ref ᒐ);
             }
         }
@@ -902,7 +907,7 @@ internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context
         switch (ra.type()) {
         case ж<TCPAddr> raΔ1: {
             var (laΔ1, _) = la._<ж<TCPAddr>>(ᐧ);
-            if (Ꮡsd.of(sysDialer.ᏑDialer).MultipathTCP()){
+            if (Ꮡsd.of(sysDialer.ᏑDialer).MultipathTCP()) {
                 var (ᴛ1, ᴛ2) = Ꮡsd.dialMPTCP(ctx, laΔ1, raΔ1);
                 (c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);
             } else {
@@ -931,12 +936,12 @@ internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context
         }
         default: {
             var raΔ1 = ra;
-            (c, err) = (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: la, Addr: raΔ1, Err: new AddrErrorжerror(Ꮡ(new AddrError(Err: "unexpected address type"u8, Addr: sd.address))))))); goto ᒐdone;
+            (c, err) = (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: la, Addr: raΔ1, Err: new AddrErrorжerror(Ꮡ(new AddrError(Err: "unexpected address type"u8, Addr: sd.address))))))); goto ᒐdone;
         }}
-        if (err != default!) {
-            (c, err) = (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: la, Addr: ra, Err: err)))); goto ᒐdone; // c is non-nil interface containing nil pointer
+        if (err != nil) {
+            (c, err) = (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: la, Addr: ra, Err: err)))); goto ᒐdone; // c is non-nil interface containing nil pointer
         }
-        (c, err) = (c, default!);
+        (c, err) = (c, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -1007,20 +1012,20 @@ internal static readonly @string listenˢ = "listen"u8;
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned Listener.
 public static (Listener, error) Listen(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
-    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default!);
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: default!, Err: err))));
+    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default);
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default, Addr: default, Err: err))));
     }
     var sl = Ꮡ(new sysListener(
         ListenConfig: lc,
         network: network,
         address: address
     ));
-    Listener l = default!;
+    Listener l = default;
     var la = addrs.first(isIPv4);
     switch (la.type()) {
     case ж<TCPAddr> laΔ1: {
-        if (sl.of(sysListener.ᏑListenConfig).MultipathTCP()){
+        if (sl.of(sysListener.ᏑListenConfig).MultipathTCP()) {
             var (ᴛ1, ᴛ2) = sl.listenMPTCP(ctx, laΔ1);
             (l, err) = (new TCPListenerжListener(ᴛ1), ᴛ2);
         } else {
@@ -1036,12 +1041,12 @@ public static (Listener, error) Listen(this ref ListenConfig lc, context.Context
     }
     default: {
         var laΔ1 = la;
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: (~sl).network, Source: default!, Addr: laΔ1, Err: new AddrErrorжerror(Ꮡ(new AddrError(Err: "unexpected address type"u8, Addr: address)))))));
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: sl.network, Source: default, Addr: laΔ1, Err: new AddrErrorжerror(Ꮡ(new AddrError(Err: "unexpected address type"u8, Addr: address)))))));
     }}
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: (~sl).network, Source: default!, Addr: la, Err: err)))); // l is non-nil interface containing nil pointer
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: sl.network, Source: default, Addr: la, Err: err)))); // l is non-nil interface containing nil pointer
     }
-    return (l, default!);
+    return (l, default);
 }
 
 // ListenPacket announces on the local network address.
@@ -1052,16 +1057,16 @@ public static (Listener, error) Listen(this ref ListenConfig lc, context.Context
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned PacketConn.
 public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
-    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default!);
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: default!, Err: err))));
+    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default);
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default, Addr: default, Err: err))));
     }
     var sl = Ꮡ(new sysListener(
         ListenConfig: lc,
         network: network,
         address: address
     ));
-    PacketConn c = default!;
+    PacketConn c = default;
     var la = addrs.first(isIPv4);
     switch (la.type()) {
     case ж<UDPAddr> laΔ1: {
@@ -1081,12 +1086,12 @@ public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context
     }
     default: {
         var laΔ1 = la;
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: (~sl).network, Source: default!, Addr: laΔ1, Err: new AddrErrorжerror(Ꮡ(new AddrError(Err: "unexpected address type"u8, Addr: address)))))));
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: sl.network, Source: default, Addr: laΔ1, Err: new AddrErrorжerror(Ꮡ(new AddrError(Err: "unexpected address type"u8, Addr: address)))))));
     }}
-    if (err != default!) {
-        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: (~sl).network, Source: default!, Addr: la, Err: err)))); // c is non-nil interface containing nil pointer
+    if (err != nil) {
+        return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: sl.network, Source: default, Addr: la, Err: err)))); // c is non-nil interface containing nil pointer
     }
-    return (c, default!);
+    return (c, default);
 }
 
 // sysListener contains a Listen's parameters and configuration.
@@ -1117,7 +1122,7 @@ partial struct sysListener {
 // Listen uses context.Background internally; to specify the context, use
 // [ListenConfig.Listen].
 public static (Listener, error) Listen(@string network, @string address) {
-    ListenConfig lc = default!;
+    ListenConfig lc = default;
     return lc.Listen(context.Background(), network, address);
 }
 
@@ -1147,7 +1152,7 @@ public static (Listener, error) Listen(@string network, @string address) {
 // ListenPacket uses context.Background internally; to specify the context, use
 // [ListenConfig.ListenPacket].
 public static (PacketConn, error) ListenPacket(@string network, @string address) {
-    ListenConfig lc = default!;
+    ListenConfig lc = default;
     return lc.ListenPacket(context.Background(), network, address);
 }
 

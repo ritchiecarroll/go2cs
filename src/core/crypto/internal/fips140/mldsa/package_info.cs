@@ -48,6 +48,11 @@ using static go.crypto.@internal.fips140.mldsa_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(PrivateKey))]
+[assembly: go.GoFieldAccess(typeof(ΔPublicKey))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -58,8 +63,8 @@ using static go.crypto.@internal.fips140.mldsa_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/mldsa/cast.go", "cast.cs", "ABMggoKCgoKUyIIABhT07AAJFNzcgoKCgpSCgoKCgpQ=", "17-24:1")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/mldsa/field.go", "field.cs", "ABo2mKKCpqqigqq0qqKUqqKmqJKCqJKCqJKCqJKCqJKCgqqigqqigoIACBLSgpSo0oKUAAgQmtKUgoKCpoKCgoKmgoLcgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKmrNKmgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKmgoKCpoKCgpSmgoLKgpSo0oKUrLKCgpSCgoKCgoKClIKCgoKUgpSssoKClIKCgoKCgoKUgoKCgoKClIKUgoKClIKmqqKCgoKUgoKCgoKUpoKCgpS4rLKClAANHIKYooKCggAKFIKUpAAEEMKmgqaCqLKClILGgsakrOKClILGgsakqPKUgoLGgoLGpKjagoKCrOKCpoKUqJKCgoKCuKaopIKUlKikgoKCrOKCpoKUqJKCgoKUgpS4gpS4qKSCgoIAAhDylKSkAAQS8oKClIKCgoKCgoKCgoKCgoKCgoKUAAIQ8oKClIKCgoKCgoKClKqilKSkzKKClIKCgoKCgoKCgoKCgpSqooKUgoKCgoKCgoKUrvKAgpSCpIKokqiSqJI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/mldsa/mldsa.go", "mldsa.cs", "ABw4goKWlKaUABw2oqaCgqamAAoWooKmgoL2gpSkpKS4goKCgoKCgqaCgoKCgoKCpoKCgoKCgoKmlIKCgoKUpoKCgoKUpoKCgoKUpqKkgpSCgoKCgoKUgpSCgpSCgriCgoKCuIKCuIKCgoKU7oKClKaCkoKCyoKCgoKCpoKCgqaClLiCgrSCgoKCgoKCgoKCpqaigpSClIKCgoKCgqamlIKmgqaCpoKkgoKCpoKCgoKUqIKClqKCgoKCkoKUpqKCgoKSgpSmooKCkoKUgpSmgoKCgoKClKaCgoKCgpSmgoKCgpSClKaCgpSCgoKCgoKCgtayopSCgoKClIKCgoKClIKCAAcQgoKCgpSCgoKClLiCgpSCgoKClKaCgoKUgriUgoKUgoKmgoKmgoKUuIKmgoKUuIKCpoKClLiCgoKCgqaCgpSmAAoUsqaCgoKClMaCgoKCgoKCgpS0yNiCgqamopSCgoLYgoKC2KSogoKCgoKWooKCkoKUpoKCgoKUpqKilIKClIKCgoKmpoKClIKCgoKUgriCgqaCgoKUgpSCgriCpqaCgoKClIKmooKUgoKCgpSAgqSmgpKCgoKCgoKmlNaCkoKUgoKCgpSCgoKUgqaCgqY=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/mldsa/semiexpanded.go", "semiexpanded.cs", "AA0wAAoCkqYABxLigpSkpKSUpIKCpoKCgoKCgpSClILKABImgoKCgpSCgoKCgsqCgpSUpqKigoKCgoKUgpSCgpSmAAgCooKClIKCgoKClIKCgoKClKaCgoKCgpSmgoKCgoKClKamooKClIKCgoKCgoKCgoKCpoKU5oKCgpSCpoKUgoKClIKCgoKCpoKClIKCpg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/mldsa/mldsa.go", "mldsa.cs", "ABw4goKWlKaUABw2oqaCgqamAAoWooKmgoL2gpSkpKTIgoKCgoKCgqaCgoKCgoKCpoKCgoKCgoKmlIKCgoKUpoKCgoKUpoKCgoKUpqKkgpSCgoKCgoKUgpSCgpSCgriCgoKCuIKCuIKCgoKU7oKClKaCkoKCyoKCgoKCpoKCgqaClLiCgrSCgoKCgoKCgoKCpqaigpSClIKCgoKCgqamlIKmgqaCpoKkgoKCpoKCgoKUqIKClqKCgoKCkoKUpqKCgoKSgpSmooKCkoKUgpSmgoKCgoKClKaCgoKCgpSmgoKCgpSClKaCgpSCgoKCgoKCgtayopSCgoKClIKCgoKClIKCAAcQgoKCgpSCgoKClLiCgpSCgoKClKaCgoKUgriUgoKUgoKmgoKmgoKUuIKmgoKUuIKCpoKClLiCgoKCgqaCgpSmAAoUsqaCgoKClMaCgoKCgoKCgpS0yNiCgqamopSCgoLYgoKC2KSogoKCgoKWooKCkoKUpoKCgoKUpqKilIKClIKCgoKmpoKClIKCgoKUgriCgqaCgoKUgpSCgriCpqaCgoKClIKmooKUgoKCgpSAgqSmgpKCgoKCgoKmlNaCkoKUgoKCgpSCgoKUgqaCgqY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/mldsa/semiexpanded.go", "semiexpanded.cs", "AA0wAAoCkqYABxLigpS0tLSUpIKCpoKCgoKCgpSClILKABImgoKCgpSCgoKCgsqCgpSUpqKigoKCgoKUgpSCgpSmAAgCooKClIKCgoKClIKCgoKClKaCgoKCgpSmgoKCgoKClKamooKClIKCgoKCgoKCgoKCpoKU5oKCgpSCpoKUgoKClIKCgoKCpoKClIKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

@@ -9,9 +9,9 @@ using @internal.syscall;
 
 partial class user_package {
 
-internal static _C_int getGroupList(ж<_C_char> Ꮡname, _C_gid_t userGID, ж<_C_gid_t> Ꮡgids, ж<_C_int> Ꮡn) {
-    var err = unix.Getgrouplist(Ꮡname, userGID, Ꮡgids, Ꮡn);
-    if (err != default!) {
+internal static _C_int getGroupList(ж<_C_char> name, _C_gid_t userGID, ж<_C_gid_t> gids, ж<_C_int> n) {
+    var err = unix.Getgrouplist(name, userGID, gids, n);
+    if (err != nil) {
         return -1;
     }
     return 0;

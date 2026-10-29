@@ -19,7 +19,7 @@ partial class sysrand_package {
 // all supported macOS versions.
 internal static error read(slice<byte> b) {
     unix.ARC4Random(b);
-    return default!;
+    return default;
 }
 
 } // end sysrand_package

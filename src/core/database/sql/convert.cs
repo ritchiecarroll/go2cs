@@ -13,7 +13,7 @@ using strconv = strconv_package;
 using time = time_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.database.sql;
 using go.unicode;
 
@@ -30,11 +30,11 @@ internal static @string describeNamedValue(ref driver.NamedValue nv) {
 
 internal static error validateNamedValueName(@string name) {
     if (len(name) == 0) {
-        return default!;
+        return default;
     }
     var (r, _) = utf8.DecodeRuneInString(name);
     if (unicode.IsLetter(r)) {
-        return default!;
+        return default;
     }
     return fmt.Errorf("name %q does not begin with a letter"u8, name);
 }
@@ -50,7 +50,7 @@ partial struct ccChecker {
 internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> Ꮡnv) {
     ref var nv = ref Ꮡnv.DerefOrNull();
 
-    if (c.cci == default!) {
+    if (c.cci == nil) {
         return driver.ErrSkip;
     }
     // The column converter shouldn't be called on any index
@@ -58,7 +58,7 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
     // in the argument converter loop.
     nint index = nv.Ordinal - 1;
     if (c.want >= 0 && c.want <= index) {
-        return default!;
+        return default;
     }
 
     // First, see if the value itself knows how to convert
@@ -67,7 +67,7 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
     {
         var (vr, ok) = nv.Value._<driver.Valuer>(ᐧ); if (ok) {
             var (sv, errΔ1) = callValuerValue(vr);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
             if (!driver.IsValue(sv)) {
@@ -84,23 +84,23 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
     // truncated), or that a nil can't go into a NOT NULL
     // column before going across the network to get the
     // same error.
-    error err = default!;
+    error err = default;
     var arg = nv.Value;
     (nv.Value, err) = c.cci.ColumnConverter(index).ConvertValue(arg);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (!driver.IsValue(nv.Value)) {
         return fmt.Errorf("driver ColumnConverter error converted %T to unsupported type %T"u8, arg, nv.Value);
     }
-    return default!;
+    return default;
 }
 
 // defaultCheckNamedValue wraps the default ColumnConverter to have the same
 // function signature as the CheckNamedValue in the driver.NamedValueChecker
 // interface.
 internal static error /*err*/ defaultCheckNamedValue(ж<driver.NamedValue> Ꮡnv) {
-    error err = default!;
+    error err = default;
     ref var nv = ref Ꮡnv.DerefOrNull();
 
     (nv.Value, err) = driver.DefaultParameterConverter.ConvertValue(nv.Value);
@@ -123,8 +123,8 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
     // driver deal with errors.
     nint want = -1;
 
-    driver.Stmt si = default!;
-    ccChecker cc = default!;
+    driver.Stmt si = default;
+    ccChecker cc = default;
     if (Ꮡds != nil) {
         si = ds.si;
         want = ds.si.NumInput();
@@ -149,8 +149,8 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
     // and continue. However, if driver.ErrRemoveArgument
     // is returned the argument is not included in the query
     // argument list.
-    error err = default!;
-    nint n = default!;
+    error err = default;
+    nint n = default;
     foreach (var (_, vᴛ1) in args) {
         var arg = vᴛ1;
 
@@ -158,15 +158,15 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
         {
             var (np, okΔ1) = arg._<NamedArg>(ᐧ); if (okΔ1) {
                 {
-                    err = validateNamedValueName(np.Name); if (err != default!) {
-                        return (default!, err);
+                    err = validateNamedValueName(np.Name); if (err != nil) {
+                        return (default, err);
                     }
                 }
                 arg = np.Value;
-                nv.Value.Name = np.Name;
+                nv.Name = np.Name;
             }
         }
-        nv.Value.Ordinal = n + 1;
+        nv.Ordinal = n + 1;
         nv.Value.Value = arg;
 
         // Checking sequence has four routes:
@@ -183,13 +183,13 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
         var checker = defaultCheckNamedValue;
         var nextCC = false;
         switch (ᐧ) {
-        case {} when nvc != default!: {
-            nextCC = cci != default!;
+        case {} when nvc != nil: {
+            nextCC = cci != nil;
             var nvcʗ1 = nvc;
                         checker = nvcʗ1.CheckNamedValue;
             break;
         }
-        case {} when cci != default!: {
+        case {} when cci != nil: {
             var ccʗ1 = cc;
                         checker = (ж<driver.NamedValue> p1) => ccʗ1.CheckNamedValue(p1);
             break;
@@ -197,17 +197,19 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
 
 nextCheck:
         err = checker(nv);
-        var exprᴛ1 = err;
-        if (AreEqual(exprᴛ1, default!)) {
+        switch (err) {
+        case var ᴛ when AreEqual(ᴛ, default): {
             n++;
             continue;
+            break;
         }
-        else if (AreEqual(exprᴛ1, driver.ErrRemoveArgument)) {
+        case var ᴛ when AreEqual(ᴛ, driver.ErrRemoveArgument): {
             nvargs = nvargs.slice(0, len(nvargs) - 1);
             continue;
+            break;
         }
-        else if (AreEqual(exprᴛ1, driver.ErrSkip)) {
-            if (nextCC){
+        case var ᴛ when AreEqual(ᴛ, driver.ErrSkip): {
+            if (nextCC) {
                 nextCC = false;
                 var ccʗ2 = cc;
                                 checker = (ж<driver.NamedValue> p1) => ccʗ2.CheckNamedValue(p1);
@@ -215,19 +217,20 @@ nextCheck:
                 checker = defaultCheckNamedValue;
             }
             goto nextCheck;
+            break;
         }
-        else { /* default: */
-            return (default!, fmt.Errorf("sql: converting argument %s type: %w"u8, describeNamedValue(ref (nv).DerefOrNull()), err));
-        }
+        default: {
+            return (default, fmt.Errorf("sql: converting argument %s type: %w"u8, describeNamedValue(ref (nv).DerefOrNull()), err));
+        }}
     }
 
     // Check the length of arguments after conversion to allow for omitted
     // arguments.
     if (want != -1 && len(nvargs) != want) {
-        return (default!, fmt.Errorf("sql: expected %d arguments, got %d"u8, want, len(nvargs)));
+        return (default, fmt.Errorf("sql: expected %d arguments, got %d"u8, want, len(nvargs)));
     }
 
-    return (nvargs, default!);
+    return (nvargs, default);
 }
 
 // convertAssign is the same as convertAssignRows, but without the optional
@@ -267,21 +270,21 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
                 return errNilPtr;
             }
             d.Value = s;
-            return default!;
+            return default;
         }
         case ж<slice<byte>> d: {
             if (d == nil) {
                 return errNilPtr;
             }
             d.ValueSlot = slice<byte>(s);
-            return default!;
+            return default;
         }
         case ж<RawBytes> d: {
             if (d == nil) {
                 return errNilPtr;
             }
             d.ValueSlot = Ꮡrows.setrawbuf(append(Ꮡrows.rawbuf(), s.ꓸꓸꓸ));
-            return default!;
+            return default;
         }}
         break;
     }
@@ -292,28 +295,28 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
                 return errNilPtr;
             }
             d.Value = (@string)s;
-            return default!;
+            return default;
         }
         case ж<any> d: {
             if (d == nil) {
                 return errNilPtr;
             }
             d.ValueSlot = bytes.Clone(s);
-            return default!;
+            return default;
         }
         case ж<slice<byte>> d: {
             if (d == nil) {
                 return errNilPtr;
             }
             d.ValueSlot = bytes.Clone(s);
-            return default!;
+            return default;
         }
         case ж<RawBytes> d: {
             if (d == nil) {
                 return errNilPtr;
             }
             d.ValueSlot = s;
-            return default!;
+            return default;
         }}
         break;
     }
@@ -321,32 +324,32 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         switch (dest.type()) {
         case ж<time.Time> d: {
             d.Value = s;
-            return default!;
+            return default;
         }
         case ж<@string> d: {
             d.Value = s.Format(time.RFC3339Nano);
-            return default!;
+            return default;
         }
         case ж<slice<byte>> d: {
             if (d == nil) {
                 return errNilPtr;
             }
             d.ValueSlot = s.AppendFormat(new slice<byte>(0, len(time.RFC3339Nano)), time.RFC3339Nano);
-            return default!;
+            return default;
         }
         case ж<RawBytes> d: {
             if (d == nil) {
                 return errNilPtr;
             }
             d.ValueSlot = Ꮡrows.setrawbuf(s.AppendFormat(Ꮡrows.rawbuf(), time.RFC3339Nano));
-            return default!;
+            return default;
         }}
         break;
     }
     case {} Δs when Δs._<decimalDecompose>(out var s): {
         switch (dest.type()) {
         case {} Δd when Δd._<decimalCompose>(out var d): {
-            var (ᴛ1, ᴛ2, ᴛ3, ᴛ4) = s.Decompose(default!);
+            var (ᴛ1, ᴛ2, ᴛ3, ᴛ4) = s.Decompose(default);
             return d.Compose(ᴛ1, ᴛ2, ᴛ3, ᴛ4);
         }}
         break;
@@ -357,22 +360,22 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             if (d == nil) {
                 return errNilPtr;
             }
-            d.ValueSlot = default!;
-            return default!;
+            d.ValueSlot = default;
+            return default;
         }
         case ж<slice<byte>> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            d.ValueSlot = default!;
-            return default!;
+            d.ValueSlot = default;
+            return default;
         }
         case ж<RawBytes> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            d.ValueSlot = default!;
-            return default!;
+            d.ValueSlot = default;
+            return default;
         }}
         break;
     }
@@ -399,11 +402,11 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
                 // When Rows.cancel is called, the closemu will be locked as well.
                 // So we can access rs.lasterr.
                 d.close(Ꮡrows.Value.lasterr);
-                if (parentCancelʗ1 != default!) {
+                if (parentCancelʗ1 != nil) {
                     parentCancelʗ1();
                 }
             };
-            return default!;
+            return default;
         }}
         break;
     }}
@@ -413,19 +416,19 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
     switch (dest.type()) {
     case ж<@string> d: {
         sv = reflect.ValueOf(src);
-        var exprᴛ1 = sv.Kind();
-        if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64) {
+        switch (sv.Kind()) {
+        case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
             d.Value = asString(src);
-            return default!;
-        }
+            return default;
+        }}
         break;
     }
     case ж<slice<byte>> d: {
         sv = reflect.ValueOf(src);
         {
-            var (b, ok) = asBytes(default!, sv); if (ok) {
+            var (b, ok) = asBytes(default, sv); if (ok) {
                 d.ValueSlot = b;
-                return default!;
+                return default;
             }
         }
         break;
@@ -435,21 +438,21 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         {
             var (b, ok) = asBytes(Ꮡrows.rawbuf(), sv); if (ok) {
                 d.ValueSlot = Ꮡrows.setrawbuf(b);
-                return default!;
+                return default;
             }
         }
         break;
     }
     case ж<bool> d: {
         var (bv, err) = driver.Bool.ConvertValue(src);
-        if (err == default!) {
+        if (err == nil) {
             d.Value = bv._<bool>();
         }
         return err;
     }
     case ж<any> d: {
         d.ValueSlot = src;
-        return default!;
+        return default;
     }}
 
     {
@@ -482,12 +485,12 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             dv.Set(sv);
             break;
         }}
-        return default!;
+        return default;
     }
 
     if (dv.Kind() == sv.Kind() && sv.Type().ConvertibleTo(dv.Type())) {
         dv.Set(sv.Convert(dv.Type()));
-        return default!;
+        return default;
     }
 
     // The following conversions use a string value as an intermediate representation
@@ -495,68 +498,69 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
     //
     // This also allows scanning into user defined types such as "type Int int64".
     // For symmetry, also check for string destination types.
-    var exprᴛ2 = dv.Kind();
-    if (exprᴛ2 == reflect.ΔPointer) {
-        if (src == default!) {
+    switch (dv.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔPointer: {
+        if (src == nil) {
             dv.SetZero();
-            return default!;
+            return default;
         }
         dv.Set(reflect.New(dv.Type().Elem()));
         return convertAssignRows(dv.Interface(), src, Ꮡrows);
     }
-    if (exprᴛ2 == reflect.ΔInt || exprᴛ2 == reflect.Int8 || exprᴛ2 == reflect.Int16 || exprᴛ2 == reflect.Int32 || exprᴛ2 == reflect.Int64) {
-        if (src == default!) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+        if (src == nil) {
             return fmt.Errorf("converting NULL to %s is unsupported"u8, dv.Kind());
         }
         @string s = asString(src);
         var (i64, err) = strconv.ParseInt(s, 10, dv.Type().Bits());
-        if (err != default!) {
+        if (err != nil) {
             err = strconvErr(err);
             return fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v"u8, src, s, dv.Kind(), err);
         }
         dv.SetInt(i64);
-        return default!;
+        return default;
     }
-    if (exprᴛ2 == reflect.ΔUint || exprᴛ2 == reflect.Uint8 || exprᴛ2 == reflect.Uint16 || exprᴛ2 == reflect.Uint32 || exprᴛ2 == reflect.Uint64) {
-        if (src == default!) {
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
+        if (src == nil) {
             return fmt.Errorf("converting NULL to %s is unsupported"u8, dv.Kind());
         }
         @string s = asString(src);
         var (u64, err) = strconv.ParseUint(s, 10, dv.Type().Bits());
-        if (err != default!) {
+        if (err != nil) {
             err = strconvErr(err);
             return fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v"u8, src, s, dv.Kind(), err);
         }
         dv.SetUint(u64);
-        return default!;
+        return default;
     }
-    if (exprᴛ2 == reflect.Float32 || exprᴛ2 == reflect.Float64) {
-        if (src == default!) {
+    case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
+        if (src == nil) {
             return fmt.Errorf("converting NULL to %s is unsupported"u8, dv.Kind());
         }
         @string s = asString(src);
         var (f64, err) = strconv.ParseFloat(s, dv.Type().Bits());
-        if (err != default!) {
+        if (err != nil) {
             err = strconvErr(err);
             return fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v"u8, src, s, dv.Kind(), err);
         }
         dv.SetFloat(f64);
-        return default!;
+        return default;
     }
-    if (exprᴛ2 == reflect.ΔString) {
-        if (src == default!) {
+    case var ᴛ when ᴛ == reflect.ΔString: {
+        if (src == nil) {
             return fmt.Errorf("converting NULL to %s is unsupported"u8, dv.Kind());
         }
         switch (src.type()) {
         case @string v: {
             dv.SetString(v);
-            return default!;
+            return default;
         }
         case slice<byte> v: {
             dv.SetString((@string)v);
-            return default!;
+            return default;
         }}
-    }
+        break;
+    }}
 
     return fmt.Errorf("unsupported Scan, storing driver.Value type %T into type %T"u8, src, dest);
 }
@@ -564,7 +568,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
 internal static error strconvErr(error err) {
     {
         var (ne, ok) = err._<ж<strconv.NumError>>(ᐧ); if (ok) {
-            return (~ne).Err;
+            return ne.Err;
         }
     }
     return err;
@@ -579,49 +583,49 @@ internal static @string asString(any src) {
         return (@string)v;
     }}
     var rv = reflect.ValueOf(src);
-    var exprᴛ1 = rv.Kind();
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+    switch (rv.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return strconv.FormatInt(rv.Int(), 10);
     }
-    if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64) {
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
         return strconv.FormatUint(rv.Uint(), 10);
     }
-    if (exprᴛ1 == reflect.Float64) {
-        return strconv.FormatFloat(rv.Float(), (rune)'g', -1, 64);
+    case var ᴛ when ᴛ == reflect.Float64: {
+        return strconv.FormatFloat(rv.Float(), (byte)'g', -1, 64);
     }
-    if (exprᴛ1 == reflect.Float32) {
-        return strconv.FormatFloat(rv.Float(), (rune)'g', -1, 32);
+    case var ᴛ when ᴛ == reflect.Float32: {
+        return strconv.FormatFloat(rv.Float(), (byte)'g', -1, 32);
     }
-    if (exprᴛ1 == reflect.ΔBool) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
         return strconv.FormatBool(rv.Bool());
-    }
+    }}
     return fmt.Sprintf("%v"u8, src);
 }
 
 internal static (slice<byte> b, bool ok) asBytes(slice<byte> buf, reflectꓸValue rv) {
-    slice<byte> b = default!;
-    bool ok = default!;
+    slice<byte> b = default;
+    bool ok = default;
 
-    var exprᴛ1 = rv.Kind();
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+    switch (rv.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (strconv.AppendInt(buf, rv.Int(), 10), true);
     }
-    if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64) {
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
         return (strconv.AppendUint(buf, rv.Uint(), 10), true);
     }
-    if (exprᴛ1 == reflect.Float32) {
-        return (strconv.AppendFloat(buf, rv.Float(), (rune)'g', -1, 32), true);
+    case var ᴛ when ᴛ == reflect.Float32: {
+        return (strconv.AppendFloat(buf, rv.Float(), (byte)'g', -1, 32), true);
     }
-    if (exprᴛ1 == reflect.Float64) {
-        return (strconv.AppendFloat(buf, rv.Float(), (rune)'g', -1, 64), true);
+    case var ᴛ when ᴛ == reflect.Float64: {
+        return (strconv.AppendFloat(buf, rv.Float(), (byte)'g', -1, 64), true);
     }
-    if (exprᴛ1 == reflect.ΔBool) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
         return (strconv.AppendBool(buf, rv.Bool()), true);
     }
-    if (exprᴛ1 == reflect.ΔString) {
+    case var ᴛ when ᴛ == reflect.ΔString: {
         @string s = rv.String();
         return (append(buf, s.ꓸꓸꓸ), true);
-    }
+    }}
     return (b, ok);
 }
 
@@ -641,7 +645,7 @@ internal static reflectꓸType valuerReflectType = reflect.TypeFor<driver.Valuer
 internal static (driverꓸValue v, error err) callValuerValue(driver.Valuer vr) {
     {
         var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.ΔPointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
-            return (default!, default!);
+            return (default, default);
         }
     }
     return vr.Value();

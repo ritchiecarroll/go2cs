@@ -11,14 +11,14 @@ partial class asmgen_package {
     WordBytes: 4,
     CarrySafeLoop: true,
 
-    regs: new @string[]{
+    regs: slice<@string>([
         // R10 is g.
         // R11 is the assembler/linker temporary (but we use it as a regular register).
         // R13 is SP.
         // R14 is LR.
         // R15 is PC.
         "R0"u8, "R1"u8, "R2"u8, "R3"u8, "R4"u8, "R5"u8, "R6"u8, "R7"u8, "R8"u8, "R9"u8, "R11"u8, "R12"u8
-    }.slice(),
+    ]),
     regShift: true,
 
     mov: "MOVW"u8,
@@ -48,15 +48,15 @@ partial class asmgen_package {
     storeDecN: armStoreDecN
 )); }
 
-internal static void armMulWide(ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
-    Ꮡa.Printf("\tMULLU %s, %s, (%s, %s)\n"u8, src1, src2, dsthi, dstlo);
+internal static void armMulWide(ж<Asm> a, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
+    a.Printf("\tMULLU %s, %s, (%s, %s)\n"u8, src1, src2, dsthi, dstlo);
 }
 
 internal static void armLoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     foreach (var (_, r) in regs) {
-        Ꮡa.Printf("\tMOVW.P %d(%s), %s\n"u8, (~a.Arch).WordBytes, p, r);
+        Ꮡa.Printf("\tMOVW.P %d(%s), %s\n"u8, a.Arch.WordBytes, p, r);
     }
 }
 
@@ -64,7 +64,7 @@ internal static void armLoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     foreach (var (_, r) in regs) {
-        Ꮡa.Printf("\tMOVW.W %d(%s), %s\n"u8, -(~a.Arch).WordBytes, p, r);
+        Ꮡa.Printf("\tMOVW.W %d(%s), %s\n"u8, -a.Arch.WordBytes, p, r);
     }
 }
 
@@ -72,7 +72,7 @@ internal static void armStoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     foreach (var (_, r) in regs) {
-        Ꮡa.Printf("\tMOVW.P %s, %d(%s)\n"u8, r, (~a.Arch).WordBytes, p);
+        Ꮡa.Printf("\tMOVW.P %s, %d(%s)\n"u8, r, a.Arch.WordBytes, p);
     }
 }
 
@@ -80,7 +80,7 @@ internal static void armStoreDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     foreach (var (_, r) in regs) {
-        Ꮡa.Printf("\tMOVW.W %s, %d(%s)\n"u8, r, -(~a.Arch).WordBytes, p);
+        Ꮡa.Printf("\tMOVW.W %s, %d(%s)\n"u8, r, -a.Arch.WordBytes, p);
     }
 }
 

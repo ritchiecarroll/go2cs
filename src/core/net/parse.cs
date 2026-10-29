@@ -26,13 +26,13 @@ internal static void close(this ref Δfile f) {
 }
 
 internal static (@string s, bool ok) getLineFromData(this ref Δfile f) {
-    @string s = default!;
-    bool ok = default!;
+    @string s = default;
+    bool ok = default;
 
     var data = f.data;
     nint i = 0;
     for (i = 0; i < len(data); i++) {
-        if (data[i] == (rune)'\n') {
+        if (data[i] == '\n') {
             s = (@string)(data.slice(0, i));
             ok = true;
             // move data
@@ -53,8 +53,8 @@ internal static (@string s, bool ok) getLineFromData(this ref Δfile f) {
 }
 
 internal static (@string s, bool ok) readLine(this ref Δfile f) {
-    @string s = default!;
-    bool ok = default!;
+    @string s = default;
+    bool ok = default;
 
     {
         (s, ok) = f.getLineFromData(); if (ok) {
@@ -76,31 +76,31 @@ internal static (@string s, bool ok) readLine(this ref Δfile f) {
 }
 
 internal static (time.Time mtime, int64 size, error err) stat(this ref Δfile f) {
-    error err = default!;
+    error err = default;
 
     (var st, err) = f.ΔΔfile.Stat();
-    if (err != default!) {
-        return (new time.Time(nil), 0, err);
+    if (err != nil) {
+        return (new time.Time(), 0, err);
     }
-    return (st.ModTime(), st.Size(), default!);
+    return (st.ModTime(), st.Size(), default);
 }
 
 internal static (ж<Δfile>, error) open(@string name) {
     var (fd, err) = os.Open(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new Δfile(fd, new slice<byte>(0, 64 * 1024), false)), default!);
+    return (Ꮡ(new Δfile(fd, new slice<byte>(0, 64 * 1024), false)), default);
 }
 
 internal static (time.Time mtime, int64 size, error err) stat(@string name) {
-    error err = default!;
+    error err = default;
 
     (var st, err) = os.Stat(name);
-    if (err != default!) {
-        return (new time.Time(nil), 0, err);
+    if (err != nil) {
+        return (new time.Time(), 0, err);
     }
-    return (st.ModTime(), st.Size(), default!);
+    return (st.ModTime(), st.Size(), default);
 }
 
 // Count occurrences in s of any bytes in t.
@@ -145,12 +145,12 @@ internal static UntypedInt big => 0xFFFFFF;
 // Decimal to integer.
 // Returns number, characters consumed, success.
 internal static (nint n, nint i, bool ok) dtoi(@string s) {
-    nint n = default!;
-    nint i = default!;
+    nint n = default;
+    nint i = default;
 
     n = 0;
-    for (i = 0; i < len(s) && (rune)'0' <= s[i] && s[i] <= (rune)'9'; i++) {
-        n = n * 10 + (nint)((byte)(s[i] - (rune)'0'));
+    for (i = 0; i < len(s) && '0' <= s[i] && s[i] <= '9'; i++) {
+        n = n * 10 + (nint)((byte)(s[i] - '0'));
         if (n >= big) {
             return (big, i, false);
         }
@@ -164,22 +164,20 @@ internal static (nint n, nint i, bool ok) dtoi(@string s) {
 // Hexadecimal to integer.
 // Returns number, characters consumed, success.
 internal static (nint n, nint i, bool ok) xtoi(@string s) {
-    nint n = default!;
-    nint i = default!;
+    nint n = default;
+    nint i = default;
 
     n = 0;
     for (i = 0; i < len(s); i++) {
-        if ((rune)'0' <= s[i] && s[i] <= (rune)'9'){
+        if ('0' <= s[i] && s[i] <= '9') {
             n *= 16;
-            n += (nint)((byte)(s[i] - (rune)'0'));
-        } else 
-        if ((rune)'a' <= s[i] && s[i] <= (rune)'f'){
+            n += (nint)((byte)(s[i] - '0'));
+        } else if ('a' <= s[i] && s[i] <= 'f') {
             n *= 16;
-            n += (nint)((byte)(s[i] - (rune)'a')) + 10;
-        } else 
-        if ((rune)'A' <= s[i] && s[i] <= (rune)'F'){
+            n += (nint)((byte)(s[i] - 'a')) + 10;
+        } else if ('A' <= s[i] && s[i] <= 'F') {
             n *= 16;
-            n += (nint)((byte)(s[i] - (rune)'A')) + 10;
+            n += (nint)((byte)(s[i] - 'A')) + 10;
         } else {
             break;
         }
@@ -208,7 +206,7 @@ internal static (byte, bool) xtoi2(@string s, byte e) {
 // hasUpperCase tells whether the given string contains at least one upper-case.
 internal static bool hasUpperCase(@string s) {
     foreach (var (i, _) in s) {
-        if ((rune)'A' <= s[i] && s[i] <= (rune)'Z') {
+        if ('A' <= s[i] && s[i] <= 'Z') {
             return true;
         }
     }
@@ -218,7 +216,7 @@ internal static bool hasUpperCase(@string s) {
 // lowerASCIIBytes makes x ASCII lowercase in-place.
 internal static void lowerASCIIBytes(slice<byte> x) {
     foreach (var (i, b) in x) {
-        if ((rune)'A' <= b && b <= (rune)'Z') {
+        if ('A' <= b && b <= 'Z') {
             x[i] += (byte)((rune)'a' - (rune)'A');
         }
     }
@@ -226,7 +224,7 @@ internal static void lowerASCIIBytes(slice<byte> x) {
 
 // lowerASCII returns the ASCII lowercase version of b.
 internal static byte lowerASCII(byte b) {
-    if ((rune)'A' <= b && b <= (rune)'Z') {
+    if ('A' <= b && b <= 'Z') {
         return (byte)(b + ((rune)'a' - (rune)'A'));
     }
     return b;
@@ -245,14 +243,14 @@ internal static @string trimSpace(@string x) {
 
 // isSpace reports whether b is an ASCII space character.
 internal static bool isSpace(byte b) {
-    return b == (rune)' ' || b == (rune)'\t' || b == (rune)'\n' || b == (rune)'\r';
+    return b == ' ' || b == '\t' || b == '\n' || b == '\r';
 }
 
 // removeComment returns line, removing any '#' byte and any following
 // bytes.
 internal static @string removeComment(@string line) {
     {
-        nint i = bytealg.IndexByteString(line, (rune)'#'); if (i != -1) {
+        nint i = bytealg.IndexByteString(line, (byte)'#'); if (i != -1) {
             return line.slice(0, i);
         }
     }
@@ -264,14 +262,14 @@ internal static @string removeComment(@string line) {
 internal static error foreachField(@string x, Func<@string, error> fn) {
     x = trimSpace(x);
     while (len(x) > 0) {
-        nint sp = bytealg.IndexByteString(x, (rune)' ');
+        nint sp = bytealg.IndexByteString(x, (byte)' ');
         if (sp == -1) {
             return fn(x);
         }
         {
             @string field = trimSpace(x.slice(0, sp)); if (len(field) > 0) {
                 {
-                    var err = fn(field); if (err != default!) {
+                    var err = fn(field); if (err != nil) {
                         return err;
                     }
                 }
@@ -279,7 +277,7 @@ internal static error foreachField(@string x, Func<@string, error> fn) {
         }
         x = trimSpace(x.slice(sp + 1));
     }
-    return default!;
+    return default;
 }
 
 // stringsHasSuffixFold reports whether s ends in suffix,

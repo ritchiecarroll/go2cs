@@ -11,7 +11,7 @@ partial class asmgen_package {
     WordBytes: 8,
     CarrySafeLoop: true,
 
-    regs: new @string[]{
+    regs: slice<@string>([
         // X0 is zero.
         // X1 is LR.
         // X2 is SP.
@@ -24,7 +24,7 @@ partial class asmgen_package {
         "X10"u8, "X11"u8, "X12"u8, "X13"u8, "X14"u8, "X15"u8, "X16"u8, "X17"u8, "X18"u8, "X19"u8,
         "X20"u8, "X21"u8, "X22"u8, "X23"u8, "X24"u8, "X25"u8, "X26"u8,
         "X30"u8
-    }.slice(),
+    ]),
 
     reg0: "X0"u8,
     regCarry: "X28"u8,

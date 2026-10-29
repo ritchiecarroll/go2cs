@@ -8,16 +8,16 @@ using @unsafe = unsafe_package;
 
 partial class bigmod_package {
 
-internal static nuint /*c*/ addMulVVW1024(ж<nuint> Ꮡz, ж<nuint> Ꮡx, nuint y) {
-    return addMulVVW(@unsafe.Slice(Ꮡz, 1024 / _W), @unsafe.Slice(Ꮡx, 1024 / _W), y);
+internal static nuint /*c*/ addMulVVW1024(ж<nuint> z, ж<nuint> x, nuint y) {
+    return addMulVVW(@unsafe.Slice(z, 1024 / _W), @unsafe.Slice(x, 1024 / _W), y);
 }
 
-internal static nuint /*c*/ addMulVVW1536(ж<nuint> Ꮡz, ж<nuint> Ꮡx, nuint y) {
-    return addMulVVW(@unsafe.Slice(Ꮡz, 1536 / _W), @unsafe.Slice(Ꮡx, 1536 / _W), y);
+internal static nuint /*c*/ addMulVVW1536(ж<nuint> z, ж<nuint> x, nuint y) {
+    return addMulVVW(@unsafe.Slice(z, 1536 / _W), @unsafe.Slice(x, 1536 / _W), y);
 }
 
-internal static nuint /*c*/ addMulVVW2048(ж<nuint> Ꮡz, ж<nuint> Ꮡx, nuint y) {
-    return addMulVVW(@unsafe.Slice(Ꮡz, 2048 / _W), @unsafe.Slice(Ꮡx, 2048 / _W), y);
+internal static nuint /*c*/ addMulVVW2048(ж<nuint> z, ж<nuint> x, nuint y) {
+    return addMulVVW(@unsafe.Slice(z, 2048 / _W), @unsafe.Slice(x, 2048 / _W), y);
 }
 
 } // end bigmod_package

@@ -26,7 +26,7 @@ public static UntypedInt HuffmanOnly => /* flate.HuffmanOnly */ -2;
 // A Writer is an [io.WriteCloser].
 // Writes to a Writer are compressed and written to w.
 partial struct Writer {
-    /*embed*/ public Header Header;      // written at first call to Write, Flush, or Close
+    /*embed*/ public Header Header; // written at first call to Write, Flush, or Close
     internal io.Writer w;
     internal nint level;
     internal bool wroteHeader;
@@ -34,7 +34,7 @@ partial struct Writer {
     internal array<byte> buf = new(10);
     internal ж<flate.Writer> compressor;
     internal uint32 digest; // CRC-32, IEEE polynomial (section 8)
-    internal uint32 size; // Uncompressed size (section 2.3.1)
+    internal uint32 size;   // Uncompressed size (section 2.3.1)
     internal error err;
 }
 
@@ -59,11 +59,11 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // The error returned will be nil if the level is valid.
 public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
     if (level < HuffmanOnly || level > BestCompression) {
-        return (default!, fmt.Errorf("gzip: invalid compression level: %d"u8, level));
+        return (default, fmt.Errorf("gzip: invalid compression level: %d"u8, level));
     }
     var z = @new<Writer>();
     z.init(w, level);
-    return (z, default!);
+    return (z, default);
 }
 
 internal static void init(this ref Writer z, io.Writer w, nint level) {
@@ -99,7 +99,7 @@ internal static error writeBytes(this ref Writer z, slice<byte> b) {
     }
     le.PutUint16(z.buf[..2], (uint16)len(b));
     var (_, err) = z.w.Write(z.buf[..2]);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (_, err) = z.w.Write(b);
@@ -112,7 +112,7 @@ internal static readonly @string gzipWriteNonLatin1Headerˢ = "gzip.Write: non-L
 // writeString writes a UTF-8 string s in GZIP's format to z.w.
 // GZIP (RFC 1952) specifies that strings are NUL-terminated ISO 8859-1 (Latin-1).
 internal static error /*err*/ writeString(this ref Writer z, @string s) {
-    error err = default!;
+    error err = default;
 
     // GZIP stores Latin-1 strings; error if non-Latin-1; convert if non-ASCII.
     var needconv = false;
@@ -124,7 +124,7 @@ internal static error /*err*/ writeString(this ref Writer z, @string s) {
             needconv = true;
         }
     }
-    if (needconv){
+    if (needconv) {
         var b = new slice<byte>(0, len(s));
         foreach (var (_, v) in s) {
             b = append(b, (byte)v);
@@ -133,7 +133,7 @@ internal static error /*err*/ writeString(this ref Writer z, @string s) {
     } else {
         (_, err) = io.WriteString(z.w, s);
     }
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     // GZIP strings are NUL-terminated.
@@ -145,15 +145,15 @@ internal static error /*err*/ writeString(this ref Writer z, @string s) {
 // Write writes a compressed form of p to the underlying [io.Writer]. The
 // compressed bytes are not necessarily flushed until the [Writer] is closed.
 public static (nint, error) Write(this ref Writer z, slice<byte> p) {
-    if (z.err != default!) {
+    if (z.err != nil) {
         return (0, z.err);
     }
-    nint n = default!;
+    nint n = default;
     // Write the GZIP header lazily.
     if (!z.wroteHeader) {
         z.wroteHeader = true;
         z.buf = new array<byte>(10){[0] = gzipID1, [1] = gzipID2, [2] = gzipDeflate};
-        if (z.Extra != default!) {
+        if (z.Extra != nil) {
             z.buf[3] |= (byte)(0x04);
         }
         if (z.Name != ""u8) {
@@ -167,32 +167,31 @@ public static (nint, error) Write(this ref Writer z, slice<byte> p) {
             // modified time is not set.
             le.PutUint32(z.buf[4..8], (uint32)z.ModTime.Unix());
         }
-        if (z.level == BestCompression){
+        if (z.level == BestCompression) {
             z.buf[8] = 2;
-        } else 
-        if (z.level == BestSpeed) {
+        } else if (z.level == BestSpeed) {
             z.buf[8] = 4;
         }
         z.buf[9] = z.OS;
         (_, z.err) = z.w.Write(z.buf[..10]);
-        if (z.err != default!) {
+        if (z.err != nil) {
             return (0, z.err);
         }
-        if (z.Extra != default!) {
+        if (z.Extra != nil) {
             z.err = z.writeBytes(z.Extra);
-            if (z.err != default!) {
+            if (z.err != nil) {
                 return (0, z.err);
             }
         }
         if (z.Name != ""u8) {
             z.err = z.writeString(z.Name);
-            if (z.err != default!) {
+            if (z.err != nil) {
                 return (0, z.err);
             }
         }
         if (z.Comment != ""u8) {
             z.err = z.writeString(z.Comment);
-            if (z.err != default!) {
+            if (z.err != nil) {
                 return (0, z.err);
             }
         }
@@ -215,15 +214,15 @@ public static (nint, error) Write(this ref Writer z, slice<byte> p) {
 //
 // In the terminology of the zlib library, Flush is equivalent to Z_SYNC_FLUSH.
 public static error Flush(this ref Writer z) {
-    if (z.err != default!) {
+    if (z.err != nil) {
         return z.err;
     }
     if (z.closed) {
-        return default!;
+        return default;
     }
     if (!z.wroteHeader) {
-        z.Write(default!);
-        if (z.err != default!) {
+        z.Write(default);
+        if (z.err != nil) {
             return z.err;
         }
     }
@@ -235,21 +234,21 @@ public static error Flush(this ref Writer z) {
 // [io.Writer] and writing the GZIP footer.
 // It does not close the underlying [io.Writer].
 public static error Close(this ref Writer z) {
-    if (z.err != default!) {
+    if (z.err != nil) {
         return z.err;
     }
     if (z.closed) {
-        return default!;
+        return default;
     }
     z.closed = true;
     if (!z.wroteHeader) {
-        z.Write(default!);
-        if (z.err != default!) {
+        z.Write(default);
+        if (z.err != nil) {
             return z.err;
         }
     }
     z.err = z.compressor.Close();
-    if (z.err != default!) {
+    if (z.err != nil) {
         return z.err;
     }
     le.PutUint32(z.buf[..4], z.digest);

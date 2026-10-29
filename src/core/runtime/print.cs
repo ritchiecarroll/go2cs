@@ -8,7 +8,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(Δsliceᴛ))]
 partial class runtime_package {
 
 // The compiler knows that a print of a value of this type
@@ -90,7 +89,7 @@ internal static void gwrite(slice<byte> b) {
     // than be written to in some buffer, if we're in a panicking state.
     // Note that we can't just clear writebuf in the gp.m.dying case
     // because a panic isn't allowed to have any write barriers.
-    if (gp == nil || (~gp).writebuf == default! || (~(~gp).m).dying > 0) {
+    if (gp == nil || (~gp).writebuf == nil || (~(~gp).m).dying > 0) {
         writeErr(b);
         return;
     }
@@ -112,7 +111,7 @@ internal static readonly @string trueˢ = "true"u8;
 internal static readonly @string falseˢ = "false"u8;
 
 internal static void printbool(bool v) {
-    if (v){
+    if (v) {
         printstring(trueˢ);
     } else {
         printstring(falseˢ);
@@ -124,7 +123,7 @@ internal static UntypedInt float64Bytes => 24;
 
 internal static void printfloat64(float64 v) {
     array<byte> buf = new(24); /* float64Bytes */
-    gwrite(strconv.AppendFloat(buf[..0], v, (rune)'g', -1, 64));
+    gwrite(strconv.AppendFloat(buf[..0], v, (byte)'g', -1, 64));
 }
 
 // float32 requires 1+9+1+1+1+2 = 15 bytes max (sign+digits+decimal point+e+sign+exponent digits).
@@ -132,7 +131,7 @@ internal static UntypedInt float32Bytes => 15;
 
 internal static void printfloat32(float32 v) {
     array<byte> buf = new(15); /* float32Bytes */
-    gwrite(strconv.AppendFloat(buf[..0], (float64)v, (rune)'g', -1, 32));
+    gwrite(strconv.AppendFloat(buf[..0], (float64)v, (byte)'g', -1, 32));
 }
 
 // complex128 requires 24+24+1+1+1 = 51 bytes max (paren+float64+float64+i+paren).
@@ -140,7 +139,7 @@ internal static UntypedInt complex128Bytes => /* 2*float64Bytes + 3 */ 51;
 
 internal static void printcomplex128(complex128 c) {
     array<byte> buf = new(51); /* complex128Bytes */
-    gwrite(strconv.AppendComplex(buf[..0], c, (rune)'g', -1, 128));
+    gwrite(strconv.AppendComplex(buf[..0], c, (byte)'g', -1, 128));
 }
 
 // complex64 requires 15+15+1+1+1 = 33 bytes max (paren+float32+float32+i+paren).
@@ -148,7 +147,7 @@ internal static UntypedInt complex64Bytes => /* 2*float32Bytes + 3 */ 33;
 
 internal static void printcomplex64(complex64 c) {
     array<byte> buf = new(33); /* complex64Bytes */
-    gwrite(strconv.AppendComplex(buf[..0], (complex128)c, (rune)'g', -1, 64));
+    gwrite(strconv.AppendComplex(buf[..0], (complex128)c, (byte)'g', -1, 64));
 }
 
 internal static void printuint(uint64 v) {
@@ -175,7 +174,7 @@ internal static void printint(int64 v) {
     nint i = strconv.RuntimeFormatBase10(buf[..], u);
     if (neg) {
         i--;
-        buf[i] = (rune)'-';
+        buf[i] = (byte)'-';
     }
     gwrite(buf.slice(i));
 }
@@ -198,9 +197,9 @@ internal static void printhexopts(bool include0x, nint mindigits, uint64 v) {
     }
     if (include0x) {
         i--;
-        buf[i] = (rune)'x';
+        buf[i] = (byte)'x';
         i--;
-        buf[i] = (rune)'0';
+        buf[i] = (byte)'0';
     }
     gwrite(buf.slice(i));
 }
@@ -214,36 +213,34 @@ internal static void printquoted(@string s) {
     gwrite(slice<byte>(@""""u8));
     foreach (var (_, r) in s) {
         switch (r) {
-        case (rune)'\n': {
+        case '\n': {
             gwrite(slice<byte>(@"\n"u8));
             continue;
             break;
         }
-        case (rune)'\r': {
+        case '\r': {
             gwrite(slice<byte>(@"\r"u8));
             continue;
             break;
         }
-        case (rune)'\t': {
+        case '\t': {
             gwrite(slice<byte>(@"\t"u8));
             print();
             continue;
             break;
         }
-        case (rune)'\\' or (rune)'"': {
-            gwrite(new byte[]{(byte)(rune)'\\', (byte)r}.slice());
+        case '\\' or '"': {
+            gwrite(slice<byte>([(byte)'\\', (byte)r]));
             continue;
             break;
         }}
         // For now, only allow basic printable ascii through unescaped
-        if (r >= (rune)' ' && r <= (rune)'~'){
-            gwrite(new byte[]{(byte)r}.slice());
-        } else 
-        if (r < 127){
+        if (r >= ' ' && r <= '~') {
+            gwrite(slice<byte>([(byte)r]));
+        } else if (r < 127) {
             gwrite(bytes(@"\x"u8));
             printhexopts(false, 2, (uint64)r);
-        } else 
-        if (r < 0x1_0000){
+        } else if (r < 0x1_0000) {
             gwrite(bytes(@"\u"u8));
             printhexopts(false, 4, (uint64)r);
         } else {
@@ -251,7 +248,7 @@ internal static void printquoted(@string s) {
             printhexopts(false, 8, (uint64)r);
         }
     }
-    gwrite(new byte[]{(byte)(rune)'"'}.slice());
+    gwrite(slice<byte>([(byte)'"']));
     printunlock();
 }
 

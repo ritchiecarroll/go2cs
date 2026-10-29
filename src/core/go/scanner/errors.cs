@@ -59,16 +59,16 @@ public static bool Less(this ErrorList p, nint i, nint j) {
     // Note that it is not sufficient to simply compare file offsets because
     // the offsets do not reflect modified line information (through //line
     // comments).
-    if ((~e).Filename != (~f).Filename) {
-        return (~e).Filename < (~f).Filename;
+    if (e.Filename != f.Filename) {
+        return e.Filename < f.Filename;
     }
-    if ((~e).Line != (~f).Line) {
-        return (~e).Line < (~f).Line;
+    if (e.Line != f.Line) {
+        return e.Line < f.Line;
     }
-    if ((~e).Column != (~f).Column) {
-        return (~e).Column < (~f).Column;
+    if (e.Column != f.Column) {
+        return e.Column < f.Column;
     }
-    return (~p[i]).Msg < (~p[j]).Msg;
+    return p[i].Msg < p[j].Msg;
 }
 
 // Sort sorts an [ErrorList]. *[Error] entries are sorted by position,
@@ -83,11 +83,11 @@ public static void RemoveMultiples(this ж<ErrorList> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     sort.Sort(new ErrorListжInterface(Ꮡp));
-    tokenꓸPosition last = default!;                          // initial last.Line is != any legal error line
+    tokenꓸPosition last = default; // initial last.Line is != any legal error line
     nint i = 0;
     foreach (var (_, e) in p) {
-        if ((~e).Pos.Filename != last.Filename || (~e).Pos.Line != last.Line) {
-            last = e.Value.Pos;
+        if (e.Pos.Filename != last.Filename || e.Pos.Line != last.Line) {
+            last = e.Pos;
             (p)[i] = e;
             i++;
         }
@@ -114,7 +114,7 @@ public static @string Error(this ErrorList p) {
 // If the list is empty, Err returns nil.
 public static error Err(this ErrorList p) {
     if (len(p) == 0) {
-        return default!;
+        return default;
     }
     return p;
 }
@@ -124,12 +124,11 @@ public static error Err(this ErrorList p) {
 // it prints the err string.
 public static void PrintError(io.Writer w, error err) {
     {
-        var (list, ok) = err._<ErrorList>(ᐧ); if (ok){
+        var (list, ok) = err._<ErrorList>(ᐧ); if (ok) {
             foreach (var (_, e) in list) {
                 fmt.Fprintf(w, "%s\n"u8, e.OrTypedNil());
             }
-        } else 
-        if (err != default!) {
+        } else if (err != nil) {
             fmt.Fprintf(w, "%s\n"u8, err);
         }
     }

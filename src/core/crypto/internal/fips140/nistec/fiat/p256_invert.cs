@@ -9,7 +9,7 @@ partial class fiat_package {
 // Invert sets e = 1/x, and returns e.
 //
 // If x == 0, Invert returns e = 0.
-public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡx) {
+public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> x) {
     // Inversion is implemented as exponentiation with exponent p − 2.
     // The sequence of 12 multiplications and 255 squarings is derived from the
     // following addition chain generated with github.com/mmcloughlin/addchain v0.4.0.
@@ -34,10 +34,10 @@ public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> 
     ж<P256Element> t0 = @new<P256Element>();
     ж<P256Element> t1 = @new<P256Element>();
 
-    z.Square(Ꮡx);
-    z.Mul(Ꮡx, z);
+    z.Square(x);
+    z.Mul(x, z);
     z.Square(z);
-    z.Mul(Ꮡx, z);
+    z.Mul(x, z);
     t0.Square(z);
     for (nint s = 1; s < 3; s++) {
         t0.Square(t0);
@@ -53,7 +53,7 @@ public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> 
     }
     z.Mul(z, t0);
     t0.Square(z);
-    t0.Mul(Ꮡx, t0);
+    t0.Mul(x, t0);
     t1.Square(t0);
     for (nint s = 1; s < 16; s++) {
         t1.Square(t1);
@@ -66,7 +66,7 @@ public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> 
     for (nint s = 0; s < 17; s++) {
         t0.Square(t0);
     }
-    t0.Mul(Ꮡx, t0);
+    t0.Mul(x, t0);
     for (nint s = 0; s < 143; s++) {
         t0.Square(t0);
     }
@@ -78,7 +78,7 @@ public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> 
     for (nint s = 0; s < 2; s++) {
         z.Square(z);
     }
-    z.Mul(Ꮡx, z);
+    z.Mul(x, z);
 
     return Ꮡe.Set(z);
 }

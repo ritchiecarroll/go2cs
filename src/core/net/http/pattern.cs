@@ -94,16 +94,16 @@ internal static readonly @string emptyWildcardˢ = "empty wildcard"u8;
 // PATH may end with a '/'.
 // Wildcard names in a path must be distinct.
 internal static (ж<pattern>, error err) parsePattern(@string s) {
-    ж<pattern> _ᴛ1 = default!;
-    error err = default!;
+    ж<pattern> _ᴛ1 = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         if (builtin.len(s) == 0) {
-            (_ᴛ1, err) = (default!, errors.New(emptyPatternˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(emptyPatternˢ)); goto ᒐdone;
         }
         nint off = 0; // offset into string
         defer(() => {
-            if (err != default!) {
+            if (err != nil) {
                 err = fmt.Errorf("at offset %d: %w"u8, off, err);
             }
         }, ref ᒐ);
@@ -122,23 +122,23 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
             method = ""u8;
         }
         if (method != ""u8 && !validMethod(method)) {
-            (_ᴛ1, err) = (default!, fmt.Errorf("invalid method %q"u8, method)); goto ᒐdone;
+            (_ᴛ1, err) = (default, fmt.Errorf("invalid method %q"u8, method)); goto ᒐdone;
         }
         var p = Ꮡ(new pattern(str: s, method: method));
 
         if (found) {
             off = builtin.len(method) + 1;
         }
-        nint i = strings.IndexByte(rest, (rune)'/');
+        nint i = strings.IndexByte(rest, (byte)'/');
         if (i < 0) {
-            (_ᴛ1, err) = (default!, errors.New(hostPathMissingˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(hostPathMissingˢ)); goto ᒐdone;
         }
-        p.Value.host = rest.slice(0, i);
+        p.host = rest.slice(0, i);
         rest = rest.slice(i);
         {
-            nint j = strings.IndexByte((~p).host, (rune)'{'); if (j >= 0) {
+            nint j = strings.IndexByte(p.host, (byte)'{'); if (j >= 0) {
                 off += j;
-                (_ᴛ1, err) = (default!, errors.New(hostContainsMissingˢ)); goto ᒐdone;
+                (_ᴛ1, err) = (default, errors.New(hostContainsMissingˢ)); goto ᒐdone;
             }
         }
         // At this point, rest is the path.
@@ -147,7 +147,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
         // An unclean path with a method that is not CONNECT can never match,
         // because paths are cleaned before matching.
         if (method != ""u8 && method != "CONNECT"u8 && rest != cleanPath(rest)) {
-            (_ᴛ1, err) = (default!, errors.New(nonConnectPatternWithˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(nonConnectPatternWithˢ)); goto ᒐdone;
         }
 
         var seenNames = new map<@string, bool>{}; // remember wildcard names to catch dups
@@ -157,55 +157,55 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
             off = builtin.len(s) - builtin.len(rest);
             if (builtin.len(rest) == 0) {
                 // Trailing slash.
-                p.Value.segments = append((~p).segments, new segment(wild: true, multi: true));
+                p.segments = append(p.segments, new segment(wild: true, multi: true));
                 break;
             }
-            nint iΔ2 = strings.IndexByte(rest, (rune)'/');
+            nint iΔ2 = strings.IndexByte(rest, (byte)'/');
             if (iΔ2 < 0) {
                 iΔ2 = builtin.len(rest);
             }
-            @string seg = default!;
+            @string seg = default;
             (seg, rest) = (rest.slice(0, iΔ2), rest.slice(iΔ2));
             {
-                nint iΔ3 = strings.IndexByte(seg, (rune)'{'); if (iΔ3 < 0){
+                nint iΔ3 = strings.IndexByte(seg, (byte)'{'); if (iΔ3 < 0) {
                     // Literal.
                     seg = pathUnescape(seg);
-                    p.Value.segments = append((~p).segments, new segment(s: seg));
+                    p.segments = append(p.segments, new segment(s: seg));
                 } else {
                     // Wildcard.
                     if (iΔ3 != 0) {
-                        (_ᴛ1, err) = (default!, errors.New(badWildcardSegmentMustˢ)); goto ᒐdone;
+                        (_ᴛ1, err) = (default, errors.New(badWildcardSegmentMustˢ)); goto ᒐdone;
                     }
-                    if (seg[builtin.len(seg) - 1] != (rune)'}') {
-                        (_ᴛ1, err) = (default!, errors.New(badWildcardSegmentMustˢ2)); goto ᒐdone;
+                    if (seg[builtin.len(seg) - 1] != '}') {
+                        (_ᴛ1, err) = (default, errors.New(badWildcardSegmentMustˢ2)); goto ᒐdone;
                     }
                     @string name = seg.slice(1, builtin.len(seg) - 1);
                     if (name == "$"u8) {
                         if (builtin.len(rest) != 0) {
-                            (_ᴛ1, err) = (default!, errors.New(notAtEndˢ)); goto ᒐdone;
+                            (_ᴛ1, err) = (default, errors.New(notAtEndˢ)); goto ᒐdone;
                         }
-                        p.Value.segments = append((~p).segments, new segment(s: "/"u8));
+                        p.segments = append(p.segments, new segment(s: "/"u8));
                         break;
                     }
                     (name, var multi) = strings.CutSuffix(name, "..."u8);
                     if (multi && builtin.len(rest) != 0) {
-                        (_ᴛ1, err) = (default!, errors.New(wildcardNotAtEndˢ)); goto ᒐdone;
+                        (_ᴛ1, err) = (default, errors.New(wildcardNotAtEndˢ)); goto ᒐdone;
                     }
                     if (name == ""u8) {
-                        (_ᴛ1, err) = (default!, errors.New(emptyWildcardˢ)); goto ᒐdone;
+                        (_ᴛ1, err) = (default, errors.New(emptyWildcardˢ)); goto ᒐdone;
                     }
                     if (!isValidWildcardName(name)) {
-                        (_ᴛ1, err) = (default!, fmt.Errorf("bad wildcard name %q"u8, name)); goto ᒐdone;
+                        (_ᴛ1, err) = (default, fmt.Errorf("bad wildcard name %q"u8, name)); goto ᒐdone;
                     }
                     if (seenNames[name]) {
-                        (_ᴛ1, err) = (default!, fmt.Errorf("duplicate wildcard name %q"u8, name)); goto ᒐdone;
+                        (_ᴛ1, err) = (default, fmt.Errorf("duplicate wildcard name %q"u8, name)); goto ᒐdone;
                     }
                     seenNames[name] = true;
-                    p.Value.segments = append((~p).segments, new segment(s: name, wild: true, multi: multi));
+                    p.segments = append(p.segments, new segment(s: name, wild: true, multi: multi));
                 }
             }
         }
-        (_ᴛ1, err) = (p, default!);
+        (_ᴛ1, err) = (p, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -218,7 +218,7 @@ internal static bool isValidWildcardName(@string s) {
     }
     // Valid Go identifier.
     foreach (var (i, c) in s) {
-        if (!unicode.IsLetter(c) && c != (rune)'_' && (i == 0 || !unicode.IsDigit(c))) {
+        if (!unicode.IsLetter(c) && c != '_' && (i == 0 || !unicode.IsDigit(c))) {
             return false;
         }
     }
@@ -227,7 +227,7 @@ internal static bool isValidWildcardName(@string s) {
 
 internal static @string pathUnescape(@string path) {
     var (u, err) = url.PathUnescape(path);
-    if (err != default!) {
+    if (err != nil) {
         // Invalidly escaped path; use the original
         return path;
     }
@@ -237,11 +237,11 @@ internal static @string pathUnescape(@string path) {
 // relationship is a relationship between two patterns, p1 and p2.
 partial struct relationship /*@string*/;
 
-internal static readonly relationship equivalent = "equivalent"u8;              // both match the same requests
-internal static readonly relationship moreGeneral = "moreGeneral"u8;             // p1 matches everything p2 does & more
-internal static readonly relationship moreSpecific = "moreSpecific"u8;            // p2 matches everything p1 does & more
-internal static readonly relationship disjoint = "disjoint"u8;                // there is no request that both match
-internal static readonly relationship overlaps = "overlaps"u8;                // there is a request that both match, but neither is more specific
+internal static readonly relationship equivalent = "equivalent"u8;     // both match the same requests
+internal static readonly relationship moreGeneral = "moreGeneral"u8;   // p1 matches everything p2 does & more
+internal static readonly relationship moreSpecific = "moreSpecific"u8; // p2 matches everything p1 does & more
+internal static readonly relationship disjoint = "disjoint"u8;         // there is no request that both match
+internal static readonly relationship overlaps = "overlaps"u8;         // there is a request that both match, but neither is more specific
 
 // conflictsWith reports whether p1 conflicts with p2, that is, whether
 // there is a request that both match but where neither is higher precedence
@@ -269,13 +269,13 @@ internal static bool conflictsWith(this ref pattern p1, ж<pattern> Ꮡp2) {
     return rel == equivalent || rel == overlaps;
 }
 
-internal static relationship comparePathsAndMethods(this ref pattern p1, ж<pattern> Ꮡp2) {
-    relationship mrel = p1.compareMethods(Ꮡp2);
+internal static relationship comparePathsAndMethods(this ref pattern p1, ж<pattern> p2) {
+    relationship mrel = p1.compareMethods(p2);
     // Optimization: avoid a call to comparePaths.
     if (mrel == disjoint) {
         return disjoint;
     }
-    relationship prel = p1.comparePaths(Ꮡp2);
+    relationship prel = p1.comparePaths(p2);
     return combineRelationships(mrel, prel);
 }
 
@@ -321,8 +321,8 @@ internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2
     }
 
     // Consider corresponding segments in the two path patterns.
-    slice<segment> segs1 = default!;
-    slice<segment> segs2 = default!;
+    slice<segment> segs1 = default;
+    slice<segment> segs2 = default;
     relationship rel = equivalent;
     for ((segs1, segs2) = (p1.segments, p2.segments); builtin.len(segs1) > 0 && builtin.len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
         rel = combineRelationships(rel, compareSegments(segs1[0], segs2[0]));
@@ -392,59 +392,64 @@ internal static relationship compareSegments(segment s1, segment s2) {
 // they overlap.
 internal static relationship combineRelationships(relationship r1, relationship r2) {
     var exprᴛ1 = r1;
-    if (exprᴛ1 == equivalent) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == equivalent: {
         return r2;
     }
-    if (exprᴛ1 == disjoint) {
+    case {} when exprᴛ1 == disjoint: {
         return disjoint;
     }
-    if (exprᴛ1 == overlaps) {
+    case {} when exprᴛ1 == overlaps: {
         if (r2 == disjoint) {
             return disjoint;
         }
         return overlaps;
     }
-    if (exprᴛ1 == moreGeneral || exprᴛ1 == moreSpecific) {
+    case {} when exprᴛ1 == moreGeneral || exprᴛ1 == moreSpecific: {
         var exprᴛ2 = r2;
-        if (exprᴛ2 == equivalent) {
+        switch (ᐧ) {
+        case {} when exprᴛ2 == equivalent: {
             return r1;
         }
-        if (exprᴛ2 == inverseRelationship(r1)) {
+        case {} when exprᴛ2 == inverseRelationship(r1): {
             return overlaps;
         }
-        { /* default: */
+        default: {
             return r2;
-        }
+        }}
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic(fmt.Sprintf("unknown relationship %q"u8, r1));
-    }
+        break;
+    }}
 }
 
 // If p1 has relationship `r` to p2, then
 // p2 has inverseRelationship(r) to p1.
 internal static relationship inverseRelationship(relationship r) {
     var exprᴛ1 = r;
-    if (exprᴛ1 == moreSpecific) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == moreSpecific: {
         return moreGeneral;
     }
-    if (exprᴛ1 == moreGeneral) {
+    case {} when exprᴛ1 == moreGeneral: {
         return moreSpecific;
     }
-    { /* default: */
+    default: {
         return r;
-    }
+    }}
 }
 
 // describeConflict returns an explanation of why two patterns conflict.
-internal static @string describeConflict(ж<pattern> Ꮡp1, ж<pattern> Ꮡp2) {
+internal static @string describeConflict(ж<pattern> Ꮡp1, ж<pattern> p2) {
     ref var p1 = ref Ꮡp1.DerefOrNull();
 
-    relationship mrel = p1.compareMethods(Ꮡp2);
-    relationship prel = p1.comparePaths(Ꮡp2);
+    relationship mrel = p1.compareMethods(p2);
+    relationship prel = p1.comparePaths(p2);
     relationship rel = combineRelationships(mrel, prel);
     if (rel == equivalent) {
-        return fmt.Sprintf("%s matches the same requests as %s"u8, Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil());
+        return fmt.Sprintf("%s matches the same requests as %s"u8, Ꮡp1.OrTypedNil(), p2.OrTypedNil());
     }
     if (rel != overlaps) {
         throw panic("describeConflict called with non-conflicting patterns");
@@ -456,28 +461,28 @@ But neither is more specific than the other.
 %[1]s matches %[4]q, but %[2]s doesn't.
 %[2]s matches %[5]q, but %[1]s doesn't.
 """u8.Raw(),
-            Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil(), commonPath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp2).DerefOrNull(), ref (Ꮡp1).DerefOrNull()));
+            Ꮡp1.OrTypedNil(), p2.OrTypedNil(), commonPath(ref (Ꮡp1).DerefOrNull(), ref (p2).DerefOrNull()), differencePath(ref (Ꮡp1).DerefOrNull(), ref (p2).DerefOrNull()), differencePath(ref (p2).DerefOrNull(), ref (Ꮡp1).DerefOrNull()));
     }
     if (mrel == moreGeneral && prel == moreSpecific) {
-        return fmt.Sprintf("%s matches more methods than %s, but has a more specific path pattern"u8, Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil());
+        return fmt.Sprintf("%s matches more methods than %s, but has a more specific path pattern"u8, Ꮡp1.OrTypedNil(), p2.OrTypedNil());
     }
     if (mrel == moreSpecific && prel == moreGeneral) {
-        return fmt.Sprintf("%s matches fewer methods than %s, but has a more general path pattern"u8, Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil());
+        return fmt.Sprintf("%s matches fewer methods than %s, but has a more general path pattern"u8, Ꮡp1.OrTypedNil(), p2.OrTypedNil());
     }
-    return fmt.Sprintf("bug: unexpected way for two patterns %s and %s to conflict: methods %s, paths %s"u8, Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil(), mrel, prel);
+    return fmt.Sprintf("bug: unexpected way for two patterns %s and %s to conflict: methods %s, paths %s"u8, Ꮡp1.OrTypedNil(), p2.OrTypedNil(), mrel, prel);
 }
 
 // writeMatchingPath writes to b a path that matches the segments.
-internal static void writeMatchingPath(ж<strings.Builder> Ꮡb, slice<segment> segs) {
+internal static void writeMatchingPath(ж<strings.Builder> b, slice<segment> segs) {
     foreach (var (_, s) in segs) {
-        writeSegment(Ꮡb, s);
+        writeSegment(b, s);
     }
 }
 
-internal static void writeSegment(ж<strings.Builder> Ꮡb, segment s) {
-    Ꮡb.WriteByte((rune)'/');
+internal static void writeSegment(ж<strings.Builder> b, segment s) {
+    b.WriteByte((byte)'/');
     if (!s.multi && s.s != "/"u8) {
-        Ꮡb.WriteString(s.s);
+        b.WriteString(s.s);
     }
 }
 
@@ -485,21 +490,20 @@ internal static void writeSegment(ж<strings.Builder> Ꮡb, segment s) {
 // It assumes there is such a path.
 internal static @string commonPath(ref pattern p1, ref pattern p2) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    slice<segment> segs1 = default!;
-    slice<segment> segs2 = default!;
+    slice<segment> segs1 = default;
+    slice<segment> segs2 = default;
     for ((segs1, segs2) = (p1.segments, p2.segments); builtin.len(segs1) > 0 && builtin.len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
         {
-            var s1 = segs1[0]; if (s1.wild){
+            var s1 = segs1[0]; if (s1.wild) {
                 writeSegment(Ꮡb, segs2[0]);
             } else {
                 writeSegment(Ꮡb, s1);
             }
         }
     }
-    if (builtin.len(segs1) > 0){
+    if (builtin.len(segs1) > 0) {
         writeMatchingPath(Ꮡb, segs1);
-    } else 
-    if (builtin.len(segs2) > 0) {
+    } else if (builtin.len(segs2) > 0) {
         writeMatchingPath(Ꮡb, segs2);
     }
     return b.String();
@@ -510,14 +514,14 @@ internal static @string commonPath(ref pattern p1, ref pattern p2) {
 internal static @string differencePath(ref pattern p1, ref pattern p2) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
 
-    slice<segment> segs1 = default!;
-    slice<segment> segs2 = default!;
+    slice<segment> segs1 = default;
+    slice<segment> segs2 = default;
     for ((segs1, segs2) = (p1.segments, p2.segments); builtin.len(segs1) > 0 && builtin.len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
         var s1 = segs1[0];
         var s2 = segs2[0];
         if (s1.multi && s2.multi) {
             // From here the patterns match the same paths, so we must have found a difference earlier.
-            Ꮡb.WriteByte((rune)'/');
+            Ꮡb.WriteByte((byte)'/');
             return b.String();
         }
         if (s1.multi && !s2.multi) {
@@ -525,9 +529,9 @@ internal static @string differencePath(ref pattern p1, ref pattern p2) {
             // A trailing slash will distinguish them, unless s2 ends in "{$}",
             // in which case any segment will do; prefer the wildcard name if
             // it has one.
-            Ꮡb.WriteByte((rune)'/');
+            Ꮡb.WriteByte((byte)'/');
             if (s2.s == "/"u8) {
-                if (s1.s != ""u8){
+                if (s1.s != ""u8) {
                     Ꮡb.WriteString(s1.s);
                 } else {
                     Ꮡb.WriteString("x"u8);
@@ -535,27 +539,24 @@ internal static @string differencePath(ref pattern p1, ref pattern p2) {
             }
             return b.String();
         }
-        if (!s1.multi && s2.multi){
+        if (!s1.multi && s2.multi) {
             writeSegment(Ꮡb, s1);
-        } else 
-        if (s1.wild && s2.wild){
+        } else if (s1.wild && s2.wild) {
             // Both patterns will match whatever we put here; use
             // the first wildcard name.
             writeSegment(Ꮡb, s1);
-        } else 
-        if (s1.wild && !s2.wild){
+        } else if (s1.wild && !s2.wild) {
             // s1 is a wildcard, s2 is a literal.
             // Any segment other than s2.s will work.
             // Prefer the wildcard name, but if it's the same as the literal,
             // tweak the literal.
-            if (s1.s != s2.s){
+            if (s1.s != s2.s) {
                 writeSegment(Ꮡb, s1);
             } else {
-                Ꮡb.WriteByte((rune)'/');
+                Ꮡb.WriteByte((byte)'/');
                 Ꮡb.WriteString(s2.s + "x"u8);
             }
-        } else 
-        if (!s1.wild && s2.wild){
+        } else if (!s1.wild && s2.wild) {
             writeSegment(Ꮡb, s1);
         } else {
             // Both are literals. A precondition of this function is that the
@@ -566,12 +567,11 @@ internal static @string differencePath(ref pattern p1, ref pattern p2) {
             writeSegment(Ꮡb, s1);
         }
     }
-    if (builtin.len(segs1) > 0){
+    if (builtin.len(segs1) > 0) {
         // p1 is longer than p2, and p2 does not end in a multi.
         // Anything that matches the rest of p1 will do.
         writeMatchingPath(Ꮡb, segs1);
-    } else 
-    if (builtin.len(segs2) > 0) {
+    } else if (builtin.len(segs2) > 0) {
         writeMatchingPath(Ꮡb, segs2);
     }
     return b.String();

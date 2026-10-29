@@ -6,7 +6,7 @@ namespace go;
 
 partial class os_package {
 
-public static UntypedInt PathSeparator => /* '/' */ 47; // OS-specific path separator
+public static UntypedInt PathSeparator => /* '/' */ 47;     // OS-specific path separator
 public static UntypedInt PathListSeparator => /* ':' */ 58; // OS-specific path list separator
 
 // IsPathSeparator reports whether c is a directory separator character.
@@ -20,14 +20,14 @@ internal static (@string, @string) splitPath(@string path) {
     @string dirname = "."u8;
 
     // Remove all but one leading slash.
-    while (len(path) > 1 && path[0] == (rune)'/' && path[1] == (rune)'/') {
+    while (len(path) > 1 && path[0] == '/' && path[1] == '/') {
         path = path[1..];
     }
 
     nint i = len(path) - 1;
 
     // Remove trailing slashes.
-    for (; i > 0 && path[i] == (rune)'/'; i--) {
+    for (; i > 0 && path[i] == '/'; i--) {
         path = path.slice(0, i);
     }
 
@@ -36,8 +36,8 @@ internal static (@string, @string) splitPath(@string path) {
 
     // Remove leading directory path
     for (i--; i >= 0; i--) {
-        if (path[i] == (rune)'/') {
-            if (i == 0){
+        if (path[i] == '/') {
+            if (i == 0) {
                 dirname = path[..1];
             } else {
                 dirname = path.slice(0, i);

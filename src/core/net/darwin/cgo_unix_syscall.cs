@@ -47,70 +47,68 @@ internal static @unsafe.Pointer _C_malloc(uintptr n) {
     return @unsafe.Pointer.FromPinnedBox(Ꮡ(new slice<byte>((nint)(n)), 0));
 }
 
-internal static ж<ж<_C_struct_sockaddr>> _C_ai_addr(ж<_C_struct_addrinfo> Ꮡai) {
-    return Ꮡai.of(_C_struct_addrinfo.ᏑAddr);
+internal static ж<ж<_C_struct_sockaddr>> _C_ai_addr(ж<_C_struct_addrinfo> ai) {
+    return ai.of(_C_struct_addrinfo.ᏑAddr);
 }
 
-internal static ж<_C_int> _C_ai_family(ж<_C_struct_addrinfo> Ꮡai) {
-    return Ꮡai.of(_C_struct_addrinfo.ᏑFamily);
+internal static ж<_C_int> _C_ai_family(ж<_C_struct_addrinfo> ai) {
+    return ai.of(_C_struct_addrinfo.ᏑFamily);
 }
 
-internal static ж<_C_int> _C_ai_flags(ж<_C_struct_addrinfo> Ꮡai) {
-    return Ꮡai.of(_C_struct_addrinfo.ᏑFlags);
+internal static ж<_C_int> _C_ai_flags(ж<_C_struct_addrinfo> ai) {
+    return ai.of(_C_struct_addrinfo.ᏑFlags);
 }
 
-internal static ж<ж<_C_struct_addrinfo>> _C_ai_next(ж<_C_struct_addrinfo> Ꮡai) {
-    return Ꮡai.of(_C_struct_addrinfo.ᏑNext);
+internal static ж<ж<_C_struct_addrinfo>> _C_ai_next(ж<_C_struct_addrinfo> ai) {
+    return ai.of(_C_struct_addrinfo.ᏑNext);
 }
 
-internal static ж<_C_int> _C_ai_protocol(ж<_C_struct_addrinfo> Ꮡai) {
-    return Ꮡai.of(_C_struct_addrinfo.ᏑProtocol);
+internal static ж<_C_int> _C_ai_protocol(ж<_C_struct_addrinfo> ai) {
+    return ai.of(_C_struct_addrinfo.ᏑProtocol);
 }
 
-internal static ж<_C_int> _C_ai_socktype(ж<_C_struct_addrinfo> Ꮡai) {
-    return Ꮡai.of(_C_struct_addrinfo.ᏑSocktype);
+internal static ж<_C_int> _C_ai_socktype(ж<_C_struct_addrinfo> ai) {
+    return ai.of(_C_struct_addrinfo.ᏑSocktype);
 }
 
-internal static void _C_freeaddrinfo(ж<_C_struct_addrinfo> Ꮡai) {
-    unix.Freeaddrinfo(Ꮡai);
+internal static void _C_freeaddrinfo(ж<_C_struct_addrinfo> ai) {
+    unix.Freeaddrinfo(ai);
 }
 
 internal static @string _C_gai_strerror(_C_int eai) {
     return unix.GaiStrerror((nint)eai);
 }
 
-internal static (nint, error) _C_getaddrinfo(ж<byte> Ꮡhostname, ж<byte> Ꮡservname, ж<_C_struct_addrinfo> Ꮡhints, ж<ж<_C_struct_addrinfo>> Ꮡres) {
-    return unix.Getaddrinfo(Ꮡhostname, Ꮡservname, Ꮡhints, Ꮡres);
+internal static (nint, error) _C_getaddrinfo(ж<byte> hostname, ж<byte> servname, ж<_C_struct_addrinfo> hints, ж<ж<_C_struct_addrinfo>> res) {
+    return unix.Getaddrinfo(hostname, servname, hints, res);
 }
 
-internal static error _C_res_ninit(ж<_C_struct___res_state> Ꮡstate) {
-    unix.ResNinit(Ꮡstate);
-    return default!;
+internal static error _C_res_ninit(ж<_C_struct___res_state> state) {
+    unix.ResNinit(state);
+    return default;
 }
 
-internal static nint _C_res_nsearch(ж<_C_struct___res_state> Ꮡstate, ж<_C_char> Ꮡdname, nint @class, nint typ, ж<_C_char> Ꮡans, nint anslen) {
-    var (x, _) = unix.ResNsearch(Ꮡstate, Ꮡdname, @class, typ, Ꮡans, anslen);
+internal static nint _C_res_nsearch(ж<_C_struct___res_state> state, ж<_C_char> dname, nint @class, nint typ, ж<_C_char> ans, nint anslen) {
+    var (x, _) = unix.ResNsearch(state, dname, @class, typ, ans, anslen);
     return x;
 }
 
-internal static void _C_res_nclose(ж<_C_struct___res_state> Ꮡstate) {
-    unix.ResNclose(Ꮡstate);
+internal static void _C_res_nclose(ж<_C_struct___res_state> state) {
+    unix.ResNclose(state);
 }
 
-internal static (nint, error) cgoNameinfoPTR(slice<byte> b, ж<syscall.RawSockaddr> Ꮡsa, nint salen) {
-    return unix.Getnameinfo(Ꮡsa, salen, Ꮡ(b, 0), len(b), nil, 0, unix.NI_NAMEREQD);
+internal static (nint, error) cgoNameinfoPTR(slice<byte> b, ж<syscall.RawSockaddr> sa, nint salen) {
+    return unix.Getnameinfo(sa, salen, Ꮡ(b, 0), len(b), nil, 0, unix.NI_NAMEREQD);
 }
 
 internal static ж<syscall.RawSockaddr> cgoSockaddrInet4(IP ip) {
-    ref var sa = ref heap<syscall.RawSockaddrInet4>(out var Ꮡsa);
-    sa = new syscall.RawSockaddrInet4(Len: syscall.SizeofSockaddrInet4, Family: syscall.AF_INET);
+    ref var sa = ref heap<syscall.RawSockaddrInet4>(new syscall.RawSockaddrInet4(Len: syscall.SizeofSockaddrInet4, Family: syscall.AF_INET), out var Ꮡsa);
     copy(sa.Addr[..], ip);
     return Ꮡsa.Reinterpret<syscall.RawSockaddrInet4, syscall.RawSockaddr>();
 }
 
 internal static ж<syscall.RawSockaddr> cgoSockaddrInet6(IP ip, nint zone) {
-    ref var sa = ref heap<syscall.RawSockaddrInet6>(out var Ꮡsa);
-    sa = new syscall.RawSockaddrInet6(Len: syscall.SizeofSockaddrInet6, Family: syscall.AF_INET6, Scope_id: (uint32)zone);
+    ref var sa = ref heap<syscall.RawSockaddrInet6>(new syscall.RawSockaddrInet6(Len: syscall.SizeofSockaddrInet6, Family: syscall.AF_INET6, Scope_id: (uint32)zone), out var Ꮡsa);
     copy(sa.Addr[..], ip);
     return Ꮡsa.Reinterpret<syscall.RawSockaddrInet6, syscall.RawSockaddr>();
 }

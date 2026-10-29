@@ -77,18 +77,18 @@ private static readonly GoBigConst Two129ᶜ2 = GoBigConst.Parse("68056473384187
 //	J1(NaN) = NaN
 public static float64 J1(float64 x) {
     const float64 TwoM27 = /* 1.0 / (1 << 27) */ 7.450580596923828e-09; // 2**-27 0x3e40000000000000
-    GoBigConst Two129 = /* 1 << 129 */       // 2**129 0x4800000000000000
+    GoBigConst Two129 = /* 1 << 129 */                                  // 2**129 0x4800000000000000
             Two129ᶜ2;
     // R0/S0 on [0, 2]
     const float64 R00 = -6.25000000000000000000e-02; // 0xBFB0000000000000
-    const float64 R01 = 1.40705666955189706048e-03; // 0x3F570D9F98472C61
+    const float64 R01 = 1.40705666955189706048e-03;  // 0x3F570D9F98472C61
     const float64 R02 = -1.59955631084035597520e-05; // 0xBEF0C5C6BA169668
-    const float64 R03 = 4.96727999609584448412e-08; // 0x3E6AAAFA46CA0BD9
-    const float64 S01 = 1.91537599538363460805e-02; // 0x3F939D0B12637E53
-    const float64 S02 = 1.85946785588630915560e-04; // 0x3F285F56B9CDF664
-    const float64 S03 = 1.17718464042623683263e-06; // 0x3EB3BFF8333F8498
-    const float64 S04 = 5.04636257076217042715e-09; // 0x3E35AC88C97DFF2C
-    const float64 S05 = 1.23542274426137913908e-11; // 0x3DAB2ACFCFB97ED8
+    const float64 R03 = 4.96727999609584448412e-08;  // 0x3E6AAAFA46CA0BD9
+    const float64 S01 = 1.91537599538363460805e-02;  // 0x3F939D0B12637E53
+    const float64 S02 = 1.85946785588630915560e-04;  // 0x3F285F56B9CDF664
+    const float64 S03 = 1.17718464042623683263e-06;  // 0x3EB3BFF8333F8498
+    const float64 S04 = 5.04636257076217042715e-09;  // 0x3E35AC88C97DFF2C
+    const float64 S05 = 1.23542274426137913908e-11;  // 0x3DAB2ACFCFB97ED8
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x): {
@@ -111,7 +111,7 @@ public static float64 J1(float64 x) {
         // make sure x+x does not overflow
         if (x < /* MaxFloat64 / 2 */ 8.988465674311579e+307D) {
             var zΔ1 = Cos(x + x);
-            if (sΔ1 * c > 0D){
+            if (sΔ1 * c > 0D) {
                 cc = zΔ1 / ss;
             } else {
                 ss = zΔ1 / cc;
@@ -121,8 +121,8 @@ public static float64 J1(float64 x) {
         // j1(x) = 1/sqrt(pi) * (P(1,x)*cc - Q(1,x)*ss) / sqrt(x)
         // y1(x) = 1/sqrt(pi) * (P(1,x)*ss + Q(1,x)*cc) / sqrt(x)
 
-        float64 zΔ2 = default!;
-        if (x > (float64)Two129){
+        float64 zΔ2 = default;
+        if (x > (float64)Two129) {
             zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * cc / Sqrt(x);
         } else {
             var u = pone(x);
@@ -161,18 +161,18 @@ private static readonly GoBigConst Two129ᶜ3 = GoBigConst.Parse("68056473384187
 //	Y1(NaN) = NaN
 public static float64 Y1(float64 x) {
     const float64 TwoM54 = /* 1.0 / (1 << 54) */ 5.551115123125783e-17; // 2**-54 0x3c90000000000000
-    GoBigConst Two129 = /* 1 << 129 */                   // 2**129 0x4800000000000000
+    GoBigConst Two129 = /* 1 << 129 */                                  // 2**129 0x4800000000000000
             Two129ᶜ3;
-    const float64 U00 = -1.96057090646238940668e-01; // 0xBFC91866143CBC8A
-    const float64 U01 = 5.04438716639811282616e-02; // 0x3FA9D3C776292CD1
-    const float64 U02 = -1.91256895875763547298e-03; // 0xBF5F55E54844F50F
-    const float64 U03 = 2.35252600561610495928e-05; // 0x3EF8AB038FA6B88E
-    const float64 U04 = -9.19099158039878874504e-08; // 0xBE78AC00569105B8
-    const float64 V00 = 1.99167318236649903973e-02; // 0x3F94650D3F4DA9F0
-    const float64 V01 = 2.02552581025135171496e-04; // 0x3F2A8C896C257764
-    const float64 V02 = 1.35608801097516229404e-06; // 0x3EB6C05A894E8CA6
-    const float64 V03 = 6.22741452364621501295e-09; // 0x3E3ABF1D5BA69A86
-    const float64 V04 = 1.66559246207992079114e-11; // 0x3DB25039DACA772A
+    const float64 U00 = -1.96057090646238940668e-01;                    // 0xBFC91866143CBC8A
+    const float64 U01 = 5.04438716639811282616e-02;                     // 0x3FA9D3C776292CD1
+    const float64 U02 = -1.91256895875763547298e-03;                    // 0xBF5F55E54844F50F
+    const float64 U03 = 2.35252600561610495928e-05;                     // 0x3EF8AB038FA6B88E
+    const float64 U04 = -9.19099158039878874504e-08;                    // 0xBE78AC00569105B8
+    const float64 V00 = 1.99167318236649903973e-02;                     // 0x3F94650D3F4DA9F0
+    const float64 V01 = 2.02552581025135171496e-04;                     // 0x3F2A8C896C257764
+    const float64 V02 = 1.35608801097516229404e-06;                     // 0x3EB6C05A894E8CA6
+    const float64 V03 = 6.22741452364621501295e-09;                     // 0x3E3ABF1D5BA69A86
+    const float64 V04 = 1.66559246207992079114e-11;                     // 0x3DB25039DACA772A
     // special cases
     switch (ᐧ) {
     case {} when x < 0D || IsNaN(x): {
@@ -193,7 +193,7 @@ public static float64 Y1(float64 x) {
         // make sure x+x does not overflow
         if (x < /* MaxFloat64 / 2 */ 8.988465674311579e+307D) {
             var zΔ1 = Cos(x + x);
-            if (s * c > 0D){
+            if (s * c > 0D) {
                 cc = zΔ1 / ss;
             } else {
                 ss = zΔ1 / cc;
@@ -210,8 +210,8 @@ public static float64 Y1(float64 x) {
         //     sin(x) +- cos(x) = -cos(2x)/(sin(x) -+ cos(x))
         // to compute the worse one.
 
-        float64 zΔ2 = default!;
-        if (x > (float64)Two129){
+        float64 zΔ2 = default;
+        if (x > (float64)Two129) {
             zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * ss / Sqrt(x);
         } else {
             var uΔ1 = pone(x);
@@ -245,7 +245,7 @@ internal static readonly ж<array<float64>> Ꮡp1R8 = new StaticBox<array<float6
     1.32394806593073575129e+01D, // 0x402A7A9D357F7FCE
     4.12051854307378562225e+02D, // 0x4079C0D4652EA590
     3.87474538913960532227e+03D, // 0x40AE457DA3A532CC
-    7.91447954031891731574e+03D // 0x40BEEA7AC32782DD
+    7.91447954031891731574e+03D  // 0x40BEEA7AC32782DD
 }.array());
 internal static ref array<float64> p1R8 => ref ((StaticBox<array<float64>>)Ꮡp1R8).ValueSlot;
 
@@ -254,7 +254,7 @@ internal static readonly ж<array<float64>> Ꮡp1S8 = new StaticBox<array<float6
     3.65093083420853463394e+03D, // 0x40AC85DC964D274F
     3.69562060269033463555e+04D, // 0x40E20B8697C5BB7F
     9.76027935934950801311e+04D, // 0x40F7D42CB28F17BB
-    3.08042720627888811578e+04D // 0x40DE1511697A0B2D
+    3.08042720627888811578e+04D  // 0x40DE1511697A0B2D
 }.array());
 internal static ref array<float64> p1S8 => ref ((StaticBox<array<float64>>)Ꮡp1S8).ValueSlot;
 
@@ -265,7 +265,7 @@ internal static readonly ж<array<float64>> Ꮡp1R5 = new StaticBox<array<float6
     6.80275127868432871736e+00D, // 0x401B36046E6315E3
     1.08308182990189109773e+02D, // 0x405B13B9452602ED
     5.17636139533199752805e+02D, // 0x40802D16D052D649
-    5.28715201363337541807e+02D // 0x408085B8BB7E0CB7
+    5.28715201363337541807e+02D  // 0x408085B8BB7E0CB7
 }.array());
 internal static ref array<float64> p1R5 => ref ((StaticBox<array<float64>>)Ꮡp1R5).ValueSlot;
 
@@ -274,7 +274,7 @@ internal static readonly ж<array<float64>> Ꮡp1S5 = new StaticBox<array<float6
     9.91401418733614377743e+02D, // 0x408EFB361B066701
     5.35326695291487976647e+03D, // 0x40B4E9445706B6FB
     7.84469031749551231769e+03D, // 0x40BEA4B0B8A5BB15
-    1.50404688810361062679e+03D // 0x40978030036F5E51
+    1.50404688810361062679e+03D  // 0x40978030036F5E51
 }.array());
 internal static ref array<float64> p1S5 => ref ((StaticBox<array<float64>>)Ꮡp1S5).ValueSlot;
 
@@ -285,7 +285,7 @@ internal static readonly ж<array<float64>> Ꮡp1R3 = new StaticBox<array<float6
     3.93297750033315640650e+00D, // 0x400F76BCE85EAD8A
     3.51194035591636932736e+01D, // 0x40418F489DA6D129
     9.10550110750781271918e+01D, // 0x4056C3854D2C1837
-    4.85590685197364919645e+01D // 0x4048478F8EA83EE5
+    4.85590685197364919645e+01D  // 0x4048478F8EA83EE5
 }.array());
 internal static ref array<float64> p1R3 => ref ((StaticBox<array<float64>>)Ꮡp1R3).ValueSlot;
 
@@ -294,7 +294,7 @@ internal static readonly ж<array<float64>> Ꮡp1S3 = new StaticBox<array<float6
     3.36762458747825746741e+02D, // 0x40750C3307F1A75F
     1.04687139975775130551e+03D, // 0x40905B7C5037D523
     8.90811346398256432622e+02D, // 0x408BD67DA32E31E9
-    1.03787932439639277504e+02D // 0x4059F26D7C2EED53
+    1.03787932439639277504e+02D  // 0x4059F26D7C2EED53
 }.array());
 internal static ref array<float64> p1S3 => ref ((StaticBox<array<float64>>)Ꮡp1S3).ValueSlot;
 
@@ -305,7 +305,7 @@ internal static readonly ж<array<float64>> Ꮡp1R2 = new StaticBox<array<float6
     2.36851496667608785174e+00D, // 0x4002F2B7F98FAEC0
     1.22426109148261232917e+01D, // 0x40287C377F71A964
     1.76939711271687727390e+01D, // 0x4031B1A8177F8EE2
-    5.07352312588818499250e+00D // 0x40144B49A574C1FE
+    5.07352312588818499250e+00D  // 0x40144B49A574C1FE
 }.array());
 internal static ref array<float64> p1R2 => ref ((StaticBox<array<float64>>)Ꮡp1R2).ValueSlot;
 
@@ -314,26 +314,23 @@ internal static readonly ж<array<float64>> Ꮡp1S2 = new StaticBox<array<float6
     1.25290227168402751090e+02D, // 0x405F529314F92CD5
     2.32276469057162813669e+02D, // 0x406D08D8D5A2DBD9
     1.17679373287147100768e+02D, // 0x405D6B7ADA1884A9
-    8.36463893371618283368e+00D // 0x4020BAB1F44E5192
+    8.36463893371618283368e+00D  // 0x4020BAB1F44E5192
 }.array());
 internal static ref array<float64> p1S2 => ref ((StaticBox<array<float64>>)Ꮡp1S2).ValueSlot;
 
 internal static float64 pone(float64 x) {
-    ж<array<float64>> p = default!;
-    ж<array<float64>> q = default!;
-    if (x >= 8D){
+    ж<array<float64>> p = default;
+    ж<array<float64>> q = default;
+    if (x >= 8D) {
         p = Ꮡp1R8;
         q = Ꮡp1S8;
-    } else 
-    if (x >= 4.5454D){
+    } else if (x >= 4.5454D) {
         p = Ꮡp1R5;
         q = Ꮡp1S5;
-    } else 
-    if (x >= 2.8571D){
+    } else if (x >= 2.8571D) {
         p = Ꮡp1R3;
         q = Ꮡp1S3;
-    } else 
-    if (x >= 2D) {
+    } else if (x >= 2D) {
         p = Ꮡp1R2;
         q = Ꮡp1S2;
     }
@@ -354,12 +351,12 @@ internal static float64 pone(float64 x) {
 
 // for x in [inf, 8] = 1/[0,0.125]
 internal static readonly ж<array<float64>> Ꮡq1R8 = new StaticBox<array<float64>>(new float64[]{
-    0.00000000000000000000e+00D, // 0x0000000000000000
+    0.00000000000000000000e+00D,  // 0x0000000000000000
     -1.02539062499992714161e-01D, // 0xBFBA3FFFFFFFFDF3
     -1.62717534544589987888e+01D, // 0xC0304591A26779F7
     -7.59601722513950107896e+02D, // 0xC087BCD053E4B576
     -1.18498066702429587167e+04D, // 0xC0C724E740F87415
-    -4.84385124285750353010e+04D // 0xC0E7A6D065D09C6A
+    -4.84385124285750353010e+04D  // 0xC0E7A6D065D09C6A
 }.array());
 internal static ref array<float64> q1R8 => ref ((StaticBox<array<float64>>)Ꮡq1R8).ValueSlot;
 
@@ -380,7 +377,7 @@ internal static readonly ж<array<float64>> Ꮡq1R5 = new StaticBox<array<float6
     -8.05644828123936029840e+00D, // 0xC0201CE6CA03AD4B
     -1.83669607474888380239e+02D, // 0xC066F56D6CA7B9B0
     -1.37319376065508163265e+03D, // 0xC09574C66931734F
-    -2.61244440453215656817e+03D // 0xC0A468E388FDA79D
+    -2.61244440453215656817e+03D  // 0xC0A468E388FDA79D
 }.array());
 internal static ref array<float64> q1R5 => ref ((StaticBox<array<float64>>)Ꮡq1R5).ValueSlot;
 
@@ -401,7 +398,7 @@ internal static readonly ж<array<float64>> Ꮡq1R3 = new StaticBox<array<float6
     -4.61011581139473403113e+00D, // 0xC01270C23302D9FF
     -5.78472216562783643212e+01D, // 0xC04CEC71C25D16DA
     -2.28244540737631695038e+02D, // 0xC06C87D34718D55F
-    -2.19210128478909325622e+02D // 0xC06B66B95F5C1BF6
+    -2.19210128478909325622e+02D  // 0xC06B66B95F5C1BF6
 }.array());
 internal static ref array<float64> q1R3 => ref ((StaticBox<array<float64>>)Ꮡq1R3).ValueSlot;
 
@@ -422,7 +419,7 @@ internal static readonly ж<array<float64>> Ꮡq1R2 = new StaticBox<array<float6
     -2.75220568278187460720e+00D, // 0xC006048469BB4EDA
     -1.96636162643703720221e+01D, // 0xC033A9E2C168907F
     -4.23253133372830490089e+01D, // 0xC04529A3DE104AAA
-    -2.13719211703704061733e+01D // 0xC0355F3639CF6E52
+    -2.13719211703704061733e+01D  // 0xC0355F3639CF6E52
 }.array());
 internal static ref array<float64> q1R2 => ref ((StaticBox<array<float64>>)Ꮡq1R2).ValueSlot;
 
@@ -437,21 +434,18 @@ internal static readonly ж<array<float64>> Ꮡq1S2 = new StaticBox<array<float6
 internal static ref array<float64> q1S2 => ref ((StaticBox<array<float64>>)Ꮡq1S2).ValueSlot;
 
 internal static float64 qone(float64 x) {
-    ж<array<float64>> p = default!;
-    ж<array<float64>> q = default!;
-    if (x >= 8D){
+    ж<array<float64>> p = default;
+    ж<array<float64>> q = default;
+    if (x >= 8D) {
         p = Ꮡq1R8;
         q = Ꮡq1S8;
-    } else 
-    if (x >= 4.5454D){
+    } else if (x >= 4.5454D) {
         p = Ꮡq1R5;
         q = Ꮡq1S5;
-    } else 
-    if (x >= 2.8571D){
+    } else if (x >= 2.8571D) {
         p = Ꮡq1R3;
         q = Ꮡq1S3;
-    } else 
-    if (x >= 2D) {
+    } else if (x >= 2D) {
         p = Ꮡq1R2;
         q = Ꮡq1S2;
     }

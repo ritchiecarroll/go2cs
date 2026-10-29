@@ -10,8 +10,8 @@ partial class zstd_package {
 
 // fseEntry is one entry in an FSE table.
 partial struct fseEntry {
-    internal uint8 sym;  // value that this entry records
-    internal uint8 bits;  // number of bits to read to determine next state
+    internal uint8 sym;    // value that this entry records
+    internal uint8 bits;   // number of bits to read to determine next state
     internal uint16 @base; // add those bits to this state to get the next state
 }
 
@@ -32,7 +32,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
 
     var br = Ꮡr.makeBitReader(data, off);
     {
-        var errΔ1 = br.moreBits(); if (errΔ1 != default!) {
+        var errΔ1 = br.moreBits(); if (errΔ1 != nil) {
             return (0, 0, errΔ1);
         }
     }
@@ -64,7 +64,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
 
     while (remaining > 1 && sym <= maxSym) {
         {
-            var errΔ2 = br.moreBits(); if (errΔ2 != default!) {
+            var errΔ2 = br.moreBits(); if (errΔ2 != nil) {
                 return (0, 0, errΔ2);
             }
         }
@@ -76,20 +76,20 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
             nint zsym = sym;
             while ((br.bits & 0xfff) == 0xfff) {
                 zsym += 3 * 6;
-                br.bits >>= (int)(12);
+                br.bits >>= 12;
                 br.cnt -= 12;
                 {
-                    var errΔ3 = br.moreBits(); if (errΔ3 != default!) {
+                    var errΔ3 = br.moreBits(); if (errΔ3 != nil) {
                         return (0, 0, errΔ3);
                     }
                 }
             }
             while ((br.bits & 3) == 3) {
                 zsym += 3;
-                br.bits >>= (int)(2);
+                br.bits >>= 2;
                 br.cnt -= 2;
                 {
-                    var errΔ4 = br.moreBits(); if (errΔ4 != default!) {
+                    var errΔ4 = br.moreBits(); if (errΔ4 != nil) {
                         return (0, 0, errΔ4);
                     }
                 }
@@ -113,8 +113,8 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
         }
 
         nint max = (2 * threshold - 1) - remaining;
-        nint count = default!;
-        if ((nint)(br.bits & (uint32)(threshold - 1)) < max){
+        nint count = default;
+        if ((nint)(br.bits & (uint32)(threshold - 1)) < max) {
             // A small value.
             count = (nint)(br.bits & (uint32)(threshold - 1));
             br.bits.RshAssign((int64)(bitsNeeded - 1));
@@ -130,7 +130,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
         }
 
         count--;
-        if (count >= 0){
+        if (count >= 0) {
             remaining -= count;
         } else {
             remaining--;
@@ -145,7 +145,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
 
         while (remaining < threshold) {
             bitsNeeded--;
-            threshold >>= (int)(1);
+            threshold >>= 1;
         }
     }
 
@@ -160,12 +160,12 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
     br.backup();
 
     {
-        var errΔ5 = r.buildFSE(off, norm.slice(0, maxSym + 1), table, accuracyLog); if (errΔ5 != default!) {
+        var errΔ5 = r.buildFSE(off, norm.slice(0, maxSym + 1), table, accuracyLog); if (errΔ5 != nil) {
             return (0, 0, errΔ5);
         }
     }
 
-    return (accuracyLog, (nint)br.off, default!);
+    return (accuracyLog, (nint)br.off, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -182,7 +182,7 @@ internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, s
     array<uint16> next = new(256);
 
     foreach (var (i, n) in norm) {
-        if (n >= 0){
+        if (n >= 0) {
             next[(uint8)i] = (uint16)n;
         } else {
             table[highThreshold].sym = (uint8)i;
@@ -223,7 +223,7 @@ internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, s
         table[i].@base = (uint16)((nextState.Lsh((int64)(bitsΔ1))) - (uint16)tableSize);
     }
 
-    return default!;
+    return default;
 }
 
 // fseBaselineEntry is an entry in an FSE baseline table.
@@ -235,8 +235,8 @@ internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, s
 partial struct fseBaselineEntry {
     internal uint32 baseline; // baseline for value that this entry represents
     internal uint8 basebits;  // number of bits to read to add to baseline
-    internal uint8 bits;  // number of bits to read to determine next state
-    internal uint16 @base; // add the bits to this base to get the next state
+    internal uint8 bits;      // number of bits to read to determine next state
+    internal uint16 @base;    // add the bits to this base to get the next state
 }
 
 // Given a literal length code, we need to read a number of bits and
@@ -244,7 +244,7 @@ partial struct fseBaselineEntry {
 // state and the number of bits is zero. RFC 3.1.1.3.2.1.1.
 internal static UntypedInt literalLengthOffset => 16;
 
-[GoLazy] partial class lazyᴛliteralLengthBase { internal static slice<uint32> literalLengthBase = new uint32[]{
+[GoLazy] partial class lazyᴛliteralLengthBase { internal static slice<uint32> literalLengthBase = slice<uint32>([
     (uint32)(16 | (1 << 24)),
     (uint32)(18 | (1 << 24)),
     (uint32)(20 | (1 << 24)),
@@ -265,7 +265,7 @@ internal static UntypedInt literalLengthOffset => 16;
     (uint32)(16384 | (14 << 24)),
     (uint32)(32768 | (15 << 24)),
     (uint32)(65536 | (16 << 24))
-}.slice(); }
+]); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fseBaselineSymbolˢ = "FSE baseline symbol overflow"u8;
@@ -277,7 +277,7 @@ internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<
             bits: e.bits,
             @base: e.@base
         );
-        if (e.sym < literalLengthOffset){
+        if (e.sym < literalLengthOffset) {
             be.baseline = (uint32)e.sym;
             be.basebits = 0;
         } else {
@@ -291,7 +291,7 @@ internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<
         }
         baselineTable[i] = be;
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -333,7 +333,7 @@ internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<f
         be.basebits = e.sym;
         baselineTable[i] = be;
     }
-    return default!;
+    return default;
 }
 
 // Given a match length code, we need to read a number of bits and add
@@ -341,7 +341,7 @@ internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<f
 // the number of bits is zero. RFC 3.1.1.3.2.1.1.
 internal static UntypedInt matchLengthOffset => 32;
 
-[GoLazy] partial class lazyᴛmatchLengthBase { internal static slice<uint32> matchLengthBase = new uint32[]{
+[GoLazy] partial class lazyᴛmatchLengthBase { internal static slice<uint32> matchLengthBase = slice<uint32>([
     (uint32)(35 | (1 << 24)),
     (uint32)(37 | (1 << 24)),
     (uint32)(39 | (1 << 24)),
@@ -363,7 +363,7 @@ internal static UntypedInt matchLengthOffset => 32;
     (uint32)(16387 | (14 << 24)),
     (uint32)(32771 | (15 << 24)),
     (uint32)(65539 | (16 << 24))
-}.slice(); }
+]); }
 
 // makeMatchBaselineFSE converts the match length fseTable to baselineTable.
 internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
@@ -372,7 +372,7 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
             bits: e.bits,
             @base: e.@base
         );
-        if (e.sym < matchLengthOffset){
+        if (e.sym < matchLengthOffset) {
             be.baseline = (uint32)e.sym + 3;
             be.basebits = 0;
         } else {
@@ -386,7 +386,7 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
         }
         baselineTable[i] = be;
     }
-    return default!;
+    return default;
 }
 
 // predefinedLiteralTable is the predefined table to use for literal lengths.

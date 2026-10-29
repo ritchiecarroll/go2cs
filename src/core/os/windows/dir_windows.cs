@@ -22,11 +22,11 @@ partial struct dirInfo {
     // does not escape to the heap when returning
     // buf to dirBufPool.
     internal ж<slice<byte>> buf; // buffer for directory I/O
-    internal nint bufp;    // location of next record in buf
+    internal nint bufp;          // location of next record in buf
     internal syscallꓸHandle h;
     internal uint32 vol;
     internal uint32 @class; // type of entries in buf
-    internal @string path; // absolute directory path, empty if the file system supports FILE_ID_BOTH_DIR_INFO
+    internal @string path;  // absolute directory path, empty if the file system supports FILE_ID_BOTH_DIR_INFO
 }
 
 // dirBufSize is the size of the dirInfo buffer.
@@ -50,7 +50,7 @@ internal static void close(this ref dirInfo d) {
     d.h = 0;
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
-        d.buf = default!;
+        d.buf = default;
     }
 }
 
@@ -74,7 +74,7 @@ internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
     // but the reparse point should still live in the parent volume.
     ref var flags = ref heap(new uint32(), out var Ꮡflags);
     var err = windows.GetVolumeInformationByHandle(h, nil, 0, Ꮡd.of(dirInfo.Ꮡvol), nil, Ꮡflags, nil, 0);
-    if (err != default!) {
+    if (err != nil) {
         d.vol = 0; // Set to zero in case Windows writes garbage to it.
         // If we can't get the volume information, we can't use os.SameFile,
         // but we can still read the directory entries.
@@ -84,7 +84,7 @@ internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
         // The file system does not support object IDs, no need to continue.
         return;
     }
-    if (allowReadDirFileID && (flags & (uint32)windows.FILE_SUPPORTS_OPEN_BY_FILE_ID) != 0){
+    if (allowReadDirFileID && (flags & (uint32)windows.FILE_SUPPORTS_OPEN_BY_FILE_ID) != 0) {
         // Use FileIdBothDirectoryRestartInfo if available as it returns the file ID
         // without the need to open the file.
         d.@class = windows.FileIdBothDirectoryRestartInfo;
@@ -115,7 +115,7 @@ internal static FileMode Type(this dirEntry de) {
 }
 
 internal static (FileInfo, error) Info(this dirEntry de) {
-    return (new fileStatжFileInfo(de.fs), default!);
+    return (new fileStatжFileInfo(de.fs), default);
 }
 
 internal static @string String(this dirEntry de) {

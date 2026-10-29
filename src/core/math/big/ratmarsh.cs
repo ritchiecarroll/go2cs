@@ -23,7 +23,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
-        return (default!, default!);
+        return (default, default);
     }
     var buf = new slice<byte>(1 + 4 + (len(x.a.abs) + len(x.b.abs)) * (nint)_S); // extra bytes for version and sign bit (1), and numerator length (4)
     nint i = x.b.abs.bytes(buf);
@@ -31,7 +31,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
     nint n = i - j;
     if ((nint)(uint32)n != n) {
         // this should never happen
-        return (default!, errors.New(ratGobEncodeNumeratorTooˢ));
+        return (default, errors.New(ratGobEncodeNumeratorTooˢ));
     }
     byteorder.BEPutUint32(buf.slice(j - 4, j), (uint32)n);
     j -= 1 + 4;
@@ -40,7 +40,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
         b |= (byte)(1);
     }
     buf[j] = b;
-    return (buf.slice(j), default!);
+    return (buf.slice(j), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -51,8 +51,8 @@ internal static readonly @string ratGobDecodeInvalidˢ = "Rat.GobDecode: invalid
 public static error GobDecode(this ref ΔRat z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
-        z = new ΔRat(nil);
-        return default!;
+        z = new ΔRat();
+        return default;
     }
     if (len(buf) < 5) {
         return errors.New(ratGobDecodeBufferTooˢ);
@@ -73,7 +73,7 @@ public static error GobDecode(this ref ΔRat z, slice<byte> buf) {
     z.a.neg = (byte)(b & 1) != 0;
     z.a.abs = z.a.abs.setBytes(buf.slice(j, i));
     z.b.abs = z.b.abs.setBytes(buf.slice(i));
-    return default!;
+    return default;
 }
 
 // AppendText implements the [encoding.TextAppender] interface.
@@ -83,12 +83,12 @@ public static (slice<byte>, error) AppendText(this ж<ΔRat> Ꮡx, slice<byte> b
     if (x.IsInt()) {
         return Ꮡx.of(big_package.ΔRat.Ꮡa).AppendText(b);
     }
-    return (Ꮡx.marshal(b), default!);
+    return (Ꮡx.marshal(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 public static (slice<byte> text, error err) MarshalText(this ж<ΔRat> Ꮡx) {
-    return Ꮡx.AppendText(default!);
+    return Ꮡx.AppendText(default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
@@ -99,7 +99,7 @@ public static error UnmarshalText(this ж<ΔRat> Ꮡz, slice<byte> text) {
             return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Rat"u8, text);
         }
     }
-    return default!;
+    return default;
 }
 
 } // end big_package

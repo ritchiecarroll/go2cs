@@ -51,18 +51,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 2;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 8 + span.@base());
             }
         }
@@ -72,11 +72,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -91,7 +91,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -111,7 +111,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 1;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ true;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -130,19 +130,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -214,18 +214,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 4;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -235,11 +235,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -254,7 +254,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -274,7 +274,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 2;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ true;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -293,19 +293,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -377,18 +377,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 6;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 24 + span.@base());
             }
         }
@@ -398,11 +398,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -417,7 +417,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -437,7 +437,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 3;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -456,19 +456,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -540,18 +540,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 8;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 32 + span.@base());
             }
         }
@@ -561,11 +561,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -580,7 +580,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -600,7 +600,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 4;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ true;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -619,19 +619,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -703,18 +703,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 10;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 48 + span.@base());
             }
         }
@@ -724,11 +724,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -743,7 +743,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -763,7 +763,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 6;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -782,19 +782,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -866,18 +866,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 12;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 64 + span.@base());
             }
         }
@@ -887,11 +887,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -906,7 +906,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -926,7 +926,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 8;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ true;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -945,19 +945,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -1029,18 +1029,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 14;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 80 + span.@base());
             }
         }
@@ -1050,11 +1050,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -1069,7 +1069,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -1089,7 +1089,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 10;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -1108,19 +1108,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -1192,18 +1192,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 16;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 96 + span.@base());
             }
         }
@@ -1213,11 +1213,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -1232,7 +1232,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -1252,7 +1252,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 12;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -1271,19 +1271,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -1355,18 +1355,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 18;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 112 + span.@base());
             }
         }
@@ -1376,11 +1376,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -1395,7 +1395,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -1415,7 +1415,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
         uintptr bits = /* elemsize / goarch.PtrSize */ 14;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -1434,19 +1434,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -1518,18 +1518,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 20;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 128 + span.@base());
             }
         }
@@ -1539,11 +1539,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -1558,7 +1558,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -1578,7 +1578,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 16;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ true;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -1597,19 +1597,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -1681,18 +1681,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 22;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 144 + span.@base());
             }
         }
@@ -1702,11 +1702,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -1721,7 +1721,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -1741,7 +1741,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 18;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -1760,19 +1760,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -1844,18 +1844,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 24;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 160 + span.@base());
             }
         }
@@ -1865,11 +1865,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -1884,7 +1884,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -1904,7 +1904,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 20;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -1923,19 +1923,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -2007,18 +2007,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 26;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 176 + span.@base());
             }
         }
@@ -2028,11 +2028,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -2047,7 +2047,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -2067,7 +2067,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 22;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -2086,19 +2086,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -2170,18 +2170,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 28;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 192 + span.@base());
             }
         }
@@ -2191,11 +2191,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -2210,7 +2210,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -2230,7 +2230,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 24;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -2249,19 +2249,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -2333,18 +2333,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 30;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 208 + span.@base());
             }
         }
@@ -2354,11 +2354,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -2373,7 +2373,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -2393,7 +2393,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 26;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -2412,19 +2412,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -2496,18 +2496,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 32;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 224 + span.@base());
             }
         }
@@ -2517,11 +2517,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -2536,7 +2536,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -2556,7 +2556,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 28;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -2575,19 +2575,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -2659,18 +2659,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 34;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 240 + span.@base());
             }
         }
@@ -2680,11 +2680,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -2699,7 +2699,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -2719,7 +2719,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 30;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -2738,19 +2738,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -2822,18 +2822,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 36;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 256 + span.@base());
             }
         }
@@ -2843,11 +2843,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -2862,7 +2862,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -2882,7 +2882,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 32;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ true;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -2901,19 +2901,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -2985,18 +2985,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 38;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 288 + span.@base());
             }
         }
@@ -3006,11 +3006,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -3025,7 +3025,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -3045,7 +3045,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 36;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -3064,19 +3064,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -3148,18 +3148,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 40;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 320 + span.@base());
             }
         }
@@ -3169,11 +3169,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -3188,7 +3188,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -3208,7 +3208,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 40;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -3227,19 +3227,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -3311,18 +3311,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 42;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 352 + span.@base());
             }
         }
@@ -3332,11 +3332,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -3351,7 +3351,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -3371,7 +3371,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 44;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -3390,19 +3390,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -3474,18 +3474,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 44;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 384 + span.@base());
             }
         }
@@ -3495,11 +3495,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -3514,7 +3514,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -3534,7 +3534,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 48;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -3553,19 +3553,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -3637,18 +3637,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 46;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 416 + span.@base());
             }
         }
@@ -3658,11 +3658,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -3677,7 +3677,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -3697,7 +3697,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 52;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -3716,19 +3716,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -3800,18 +3800,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 48;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 448 + span.@base());
             }
         }
@@ -3821,11 +3821,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -3840,7 +3840,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -3860,7 +3860,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 56;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -3879,19 +3879,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -3963,18 +3963,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 50;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 480 + span.@base());
             }
         }
@@ -3984,11 +3984,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -4003,7 +4003,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -4023,7 +4023,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 60;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ false;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -4042,19 +4042,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -4126,18 +4126,18 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(0) */ 52;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 512 + span.@base());
             }
         }
@@ -4147,11 +4147,11 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if ((~span).needzero != 0) {
+    if (span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
-    if (goarch.PtrSize == 8 && sizeclass == 1){
-        c.Value.scanAlloc += 8;
+    if (goarch.PtrSize == 8 && sizeclass == 1) {
+        c.scanAlloc += 8;
     } else {
         var dataSize = size;
         var xΔ2 = (uintptr)x;
@@ -4166,7 +4166,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
 
         var scanSize = typ.PtrBytes;
         var src = src0;
-        if (typ.Size_ == goarch.PtrSize){
+        if (typ.Size_ == goarch.PtrSize) {
             src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
@@ -4186,7 +4186,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
         uintptr bits = /* elemsize / goarch.PtrSize */ 64;
 
         const bool bitsIsPowerOfTwo = /* bits&(bits-1) == 0 */ true;
-        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)){
+        if (bits > ptrBits || (!bitsIsPowerOfTwo && j + bits > ptrBits)) {
             var bits0 = (uintptr)ptrBits - j;
             var bits1 = bits - bits0;
             var dst0 = (ж<uintptr>)(uintptr)((uintptr)add(dst, (i + 0) * (uintptr)goarch.PtrSize));
@@ -4205,19 +4205,19 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
         if (doubleCheckHeapSetType) {
             doubleCheckHeapType(xΔ2, dataSize, Ꮡtyp, nil, span);
         }
-        c.Value.scanAlloc += scanSize;
+        c.scanAlloc += scanSize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -4253,10 +4253,10 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -4269,7 +4269,7 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -4285,29 +4285,26 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -4325,29 +4322,29 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -4360,21 +4357,21 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -4404,15 +4401,15 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -4425,7 +4422,7 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -4441,29 +4438,26 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -4481,29 +4475,29 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -4516,21 +4510,21 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -4560,15 +4554,15 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -4581,7 +4575,7 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -4597,29 +4591,26 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -4637,29 +4628,29 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -4672,21 +4663,21 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -4716,15 +4707,15 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -4737,7 +4728,7 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -4753,29 +4744,26 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -4793,29 +4781,29 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -4828,21 +4816,21 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -4872,15 +4860,15 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -4893,7 +4881,7 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -4909,29 +4897,26 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -4949,29 +4934,29 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -4984,21 +4969,21 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -5028,15 +5013,15 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -5049,7 +5034,7 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -5065,29 +5050,26 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -5105,29 +5087,29 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -5140,21 +5122,21 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -5184,15 +5166,15 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -5205,7 +5187,7 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -5221,29 +5203,26 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -5261,29 +5240,29 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -5296,21 +5275,21 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -5340,15 +5319,15 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -5361,7 +5340,7 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -5377,29 +5356,26 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -5417,29 +5393,29 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -5452,21 +5428,21 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -5496,15 +5472,15 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -5517,7 +5493,7 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> Ꮡtyp
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -5533,29 +5509,26 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> Ꮡtyp
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -5573,29 +5546,29 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> Ꮡtyp
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -5608,21 +5581,21 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> Ꮡtyp
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -5652,15 +5625,15 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> Ꮡtyp
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -5673,7 +5646,7 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> Ꮡty
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -5689,29 +5662,26 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> Ꮡty
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -5729,29 +5699,29 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> Ꮡty
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -5764,21 +5734,21 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> Ꮡty
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -5808,15 +5778,15 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> Ꮡty
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -5829,7 +5799,7 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> Ꮡty
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -5845,29 +5815,26 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> Ꮡty
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -5885,29 +5852,29 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> Ꮡty
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -5920,21 +5887,21 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> Ꮡty
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -5964,15 +5931,15 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> Ꮡty
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -5985,7 +5952,7 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> Ꮡty
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -6001,29 +5968,26 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> Ꮡty
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -6041,29 +6005,29 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> Ꮡty
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -6076,21 +6040,21 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> Ꮡty
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -6120,15 +6084,15 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> Ꮡty
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -6141,7 +6105,7 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> Ꮡty
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -6157,29 +6121,26 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> Ꮡty
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -6197,29 +6158,29 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> Ꮡty
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -6232,21 +6193,21 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> Ꮡty
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -6276,15 +6237,15 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> Ꮡty
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -6297,7 +6258,7 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> Ꮡty
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -6313,29 +6274,26 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> Ꮡty
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -6353,29 +6311,29 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> Ꮡty
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -6388,21 +6346,21 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> Ꮡty
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -6432,15 +6390,15 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> Ꮡty
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> typ, bool needzero) {
     var gp = getg();
     if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
-        return (uintptr)mallocgcSmallNoScanSC2(size, Ꮡtyp, needzero);
+        return (uintptr)mallocgcSmallNoScanSC2(size, typ, needzero);
     }
 
     if (doubleCheckMalloc) {
@@ -6453,7 +6411,7 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> Ꮡty
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -6469,29 +6427,26 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> Ꮡty
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckTiny(constsize, Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckTiny(constsize, typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var c = getMCache(ref (mp).DerefOrNull());
-    var off = c.Value.tinyoffset;
+    var off = c.tinyoffset;
 
-    if ((UntypedInt)(constsize & 7) == 0){
+    if ((UntypedInt)(constsize & 7) == 0) {
         off = alignUp(off, 8);
-    } else 
-    if (goarch.PtrSize == 4 && constsize == 12){
+    } else if (goarch.PtrSize == 4 && constsize == 12) {
         off = alignUp(off, 8);
-    } else 
-    if ((UntypedInt)(constsize & 3) == 0){
+    } else if ((UntypedInt)(constsize & 3) == 0) {
         off = alignUp(off, 4);
-    } else 
-    if ((UntypedInt)(constsize & 1) == 0) {
+    } else if ((UntypedInt)(constsize & 1) == 0) {
         off = alignUp(off, 2);
     }
-    if (off + (uintptr)constsize <= maxTinySize && (~c).tiny != 0) {
-        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)((~c).tiny + off);
-        c.Value.tinyoffset = off + (uintptr)constsize;
-        c.Value.tinyAllocs++;
+    if (off + (uintptr)constsize <= maxTinySize && c.tiny != 0) {
+        @unsafe.Pointer xΔ2 = (@unsafe.Pointer)(c.tiny + off);
+        c.tinyoffset = off + (uintptr)constsize;
+        c.tinyAllocs++;
         mp.Value.mallocing = 0;
         releasem(ref (mp).DerefOrNull());
         UntypedInt elemsizeΔ1 = 0;
@@ -6509,29 +6464,29 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> Ꮡty
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsizeΔ1, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsizeΔ1, typ);
             }
             return xΔ2;
         }
     }
 
     var checkGCTrigger = false;
-    var span = (~c).alloc[tinySpanClass];
+    var span = c.alloc[tinySpanClass];
 
     UntypedInt nbytes = 8192;
     const uint16 nelems = /* uint16((nbytes - unsafe.Sizeof(spanInlineMarkBits{})) /
 	16,
 ) */ 504;
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
         if (result < nelems) {
             var freeidx = (uint16)(result + 1);
             if (!((uint16)(freeidx % 64) == 0 && freeidx != nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -6544,21 +6499,21 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> Ꮡty
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
-    if (!raceenabled && (constsize < (~c).tinyoffset || (~c).tiny == 0)) {
-        c.Value.tiny = (uintptr)x;
-        c.Value.tinyoffset = constsize;
+    if (!raceenabled && (constsize < c.tinyoffset || c.tiny == 0)) {
+        c.tiny = (uintptr)x;
+        c.tinyoffset = constsize;
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -6588,12 +6543,12 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> Ꮡty
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -6604,7 +6559,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> �
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -6620,14 +6575,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> �
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 5;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -6653,22 +6608,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> �
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
@@ -6678,20 +6633,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> �
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -6722,12 +6677,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> �
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -6738,7 +6693,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> �
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -6754,14 +6709,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> �
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 7;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -6787,22 +6742,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> �
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 24 + span.@base());
             }
         }
@@ -6812,20 +6767,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> �
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -6856,12 +6811,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> �
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -6872,7 +6827,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> �
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -6888,14 +6843,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> �
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 9;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -6921,22 +6876,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> �
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 32 + span.@base());
             }
         }
@@ -6946,20 +6901,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> �
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -6990,12 +6945,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> �
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -7006,7 +6961,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> �
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -7022,14 +6977,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> �
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 11;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -7055,22 +7010,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> �
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 48 + span.@base());
             }
         }
@@ -7080,20 +7035,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> �
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -7124,12 +7079,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> �
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -7140,7 +7095,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> �
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -7156,14 +7111,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> �
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 13;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -7189,22 +7144,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> �
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 64 + span.@base());
             }
         }
@@ -7214,20 +7169,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> �
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -7258,12 +7213,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> �
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -7274,7 +7229,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> �
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -7290,14 +7245,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> �
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 15;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -7323,22 +7278,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> �
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 80 + span.@base());
             }
         }
@@ -7348,20 +7303,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> �
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -7392,12 +7347,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> �
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -7408,7 +7363,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> �
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -7424,14 +7379,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> �
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 17;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -7457,22 +7412,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> �
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 96 + span.@base());
             }
         }
@@ -7482,20 +7437,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> �
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -7526,12 +7481,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> �
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -7542,7 +7497,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> �
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -7558,14 +7513,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> �
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 19;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -7591,22 +7546,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> �
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 112 + span.@base());
             }
         }
@@ -7616,20 +7571,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> �
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -7660,12 +7615,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> �
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -7676,7 +7631,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -7692,14 +7647,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 21;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -7725,22 +7680,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 128 + span.@base());
             }
         }
@@ -7750,20 +7705,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -7794,12 +7749,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -7810,7 +7765,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -7826,14 +7781,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 23;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -7859,22 +7814,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 144 + span.@base());
             }
         }
@@ -7884,20 +7839,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -7928,12 +7883,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -7944,7 +7899,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -7960,14 +7915,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 25;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -7993,22 +7948,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 160 + span.@base());
             }
         }
@@ -8018,20 +7973,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -8062,12 +8017,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -8078,7 +8033,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -8094,14 +8049,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 27;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -8127,22 +8082,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 176 + span.@base());
             }
         }
@@ -8152,20 +8107,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -8196,12 +8151,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -8212,7 +8167,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -8228,14 +8183,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 29;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -8261,22 +8216,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 192 + span.@base());
             }
         }
@@ -8286,20 +8241,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -8330,12 +8285,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -8346,7 +8301,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -8362,14 +8317,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 31;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -8395,22 +8350,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 208 + span.@base());
             }
         }
@@ -8420,20 +8375,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -8464,12 +8419,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -8480,7 +8435,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -8496,14 +8451,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 33;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -8529,22 +8484,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 224 + span.@base());
             }
         }
@@ -8554,20 +8509,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -8598,12 +8553,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -8614,7 +8569,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -8630,14 +8585,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 35;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -8663,22 +8618,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 240 + span.@base());
             }
         }
@@ -8688,20 +8643,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -8732,12 +8687,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -8748,7 +8703,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -8764,14 +8719,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 37;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -8797,22 +8752,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 256 + span.@base());
             }
         }
@@ -8822,20 +8777,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -8866,12 +8821,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -8882,7 +8837,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -8898,14 +8853,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 39;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -8931,22 +8886,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 288 + span.@base());
             }
         }
@@ -8956,20 +8911,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -9000,12 +8955,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -9016,7 +8971,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -9032,14 +8987,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 41;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -9065,22 +9020,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 320 + span.@base());
             }
         }
@@ -9090,20 +9045,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -9134,12 +9089,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -9150,7 +9105,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -9166,14 +9121,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 43;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -9199,22 +9154,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 352 + span.@base());
             }
         }
@@ -9224,20 +9179,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -9268,12 +9223,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -9284,7 +9239,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -9300,14 +9255,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 45;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -9333,22 +9288,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 384 + span.@base());
             }
         }
@@ -9358,20 +9313,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -9402,12 +9357,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -9418,7 +9373,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -9434,14 +9389,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 47;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -9467,22 +9422,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 416 + span.@base());
             }
         }
@@ -9492,20 +9447,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -9536,12 +9491,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -9552,7 +9507,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -9568,14 +9523,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 49;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -9601,22 +9556,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 448 + span.@base());
             }
         }
@@ -9626,20 +9581,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -9670,12 +9625,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -9686,7 +9641,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -9702,14 +9657,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 51;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -9735,22 +9690,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 480 + span.@base());
             }
         }
@@ -9760,20 +9715,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -9804,12 +9759,12 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }
 
-internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
+internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> typ, bool needzero) {
     if (doubleCheckMalloc) {
         if (gcphase == _GCmarktermination) {
             @throw(mallocgcCalledWithˢ);
@@ -9820,7 +9775,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
 
     if (debug.malloc) {
         {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
                 return xΔ1;
             }
         }
@@ -9836,14 +9791,14 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
 
     var mp = acquirem();
     if (doubleCheckMalloc) {
-        doubleCheckSmallNoScan(Ꮡtyp, ref (mp).DerefOrNull());
+        doubleCheckSmallNoScan(typ, ref (mp).DerefOrNull());
     }
     mp.Value.mallocing = 1;
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     spanClass spc = /* spanClass(sizeclass<<1) | spanClass(1) */ 53;
-    var span = (~c).alloc[spc];
+    var span = c.alloc[spc];
 
     if (runtimeFreegcEnabled && c.hasReusableNoscan(spc)) {
         @unsafe.Pointer vΔ1 = (uintptr)mallocgcSmallNoscanReuse(c, span, spc, elemsize, needzero);
@@ -9869,22 +9824,22 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
             }
 
             if (debug.malloc) {
-                postMallocgcDebug(xΔ2, elemsize, Ꮡtyp);
+                postMallocgcDebug(xΔ2, elemsize, typ);
             }
             return xΔ2;
         }
     }
 
-    gclinkptr nextFreeFastResult = default!;
-    if ((~span).allocCache != 0) {
-        nint theBit = sys.TrailingZeros64((~span).allocCache);
-        var result = (uint16)((~span).freeindex + (uint16)theBit);
-        if (result < (~span).nelems) {
+    gclinkptr nextFreeFastResult = default;
+    if (span.allocCache != 0) {
+        nint theBit = sys.TrailingZeros64(span.allocCache);
+        var result = (uint16)(span.freeindex + (uint16)theBit);
+        if (result < span.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (!((uint16)(freeidx % 64) == 0 && freeidx != (~span).nelems)) {
-                span.Value.allocCache.RshAssign((nuint)(theBit + 1));
-                span.Value.freeindex = freeidx;
-                span.Value.allocCount++;
+            if (!((uint16)(freeidx % 64) == 0 && freeidx != span.nelems)) {
+                span.allocCache.RshAssign((nuint)(theBit + 1));
+                span.freeindex = freeidx;
+                span.allocCount++;
                 nextFreeFastResult = (gclinkptr)((uintptr)result * 512 + span.@base());
             }
         }
@@ -9894,20 +9849,20 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
     @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
-    if (needzero && (~span).needzero != 0) {
+    if (needzero && span.needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
 
     publicationBarrier();
 
-    if (writeBarrier.enabled){
+    if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     } else {
-        span.Value.freeIndexForScan = span.Value.freeindex;
+        span.freeIndexForScan = span.freeindex;
     }
 
-    c.Value.nextSample -= (int64)elemsize;
-    if ((~c).nextSample < 0 || MemProfileRate != (~c).memProfRate) {
+    c.nextSample -= (int64)elemsize;
+    if (c.nextSample < 0 || MemProfileRate != c.memProfRate) {
         profilealloc(ref (mp).DerefOrNull(), x, elemsize);
     }
     mp.Value.mallocing = 0;
@@ -9938,7 +9893,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
     }
 
     if (debug.malloc) {
-        postMallocgcDebug(x, elemsize, Ꮡtyp);
+        postMallocgcDebug(x, elemsize, typ);
     }
     return x;
 }

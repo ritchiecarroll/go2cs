@@ -10,10 +10,10 @@ partial class unix_package {
 
 public static (bool nonblocking, error err) IsNonblock(nint fd) {
     var (flag, e1) = Fcntl(fd, syscall.F_GETFL, 0);
-    if (e1 != default!) {
+    if (e1 != nil) {
         return (false, e1);
     }
-    return ((flag & (nint)syscall.O_NONBLOCK) != 0, default!);
+    return ((flag & (nint)syscall.O_NONBLOCK) != 0, default);
 }
 
 public static bool HasNonblockFlag(nint flag) {

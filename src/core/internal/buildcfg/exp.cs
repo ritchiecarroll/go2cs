@@ -30,14 +30,14 @@ partial struct ExperimentFlags {
 // configuration and any variation from this is an experiment.
 public static readonly ж<ExperimentFlags> ᏑExperiment = new StaticBox<ExperimentFlags>(default(ExperimentFlags));
 public static ref ExperimentFlags Experiment => ref ((StaticBox<ExperimentFlags>)ᏑExperiment).ValueSlot;
-internal static void initᴛExperiment() { Experiment = ((Func<ExperimentFlags>)(() => {
+internal static void initᴛExperiment() { Experiment = func(ExperimentFlags () => {
     var (flags, err) = ParseGOEXPERIMENT(GOOS, GOARCH, envOr("GOEXPERIMENT"u8, defaultGOEXPERIMENT));
-    if (err != default!) {
+    if (err != nil) {
         Error = err;
-        return new ExperimentFlags(nil);
+        return new ExperimentFlags();
     }
     return flags.Value;
-}))(); }
+})(); }
 
 // DefaultGOEXPERIMENT is the embedded default GOEXPERIMENT string.
 // It is not guaranteed to be canonical.
@@ -67,16 +67,19 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
     // supported and enabled by default.
     // regabiAlwaysOn is set to true on platforms where register ABI is
     // always on.
-    bool regabiSupported = default!;
-    bool regabiAlwaysOn = default!;
+    bool regabiSupported = default;
+    bool regabiAlwaysOn = default;
     var exprᴛ1 = goarch;
-    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "riscv64"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "riscv64"u8: {
         regabiAlwaysOn = true;
         regabiSupported = true;
+        break;
     }
-    else if (exprᴛ1 == "s390x"u8) {
+    case {} when exprᴛ1 == "s390x"u8: {
         regabiSupported = true;
-    }
+        break;
+    }}
 
     // Older versions (anything before V16) of dsymutil don't handle
     // the .debug_rnglists section in DWARF5. See
@@ -89,14 +92,13 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
     // things like .debug_addr (needed for DWARF 5).
     var dwarf5Supported = (goos != "darwin"u8 && goos != "ios"u8 && goos != "aix"u8);
 
-    ref var baseline = ref heap<goexperiment.Flags>(out var Ꮡbaseline);
-    baseline = new goexperiment.Flags(
+    ref var baseline = ref heap<goexperiment.Flags>(new goexperiment.Flags(
         RegabiWrappers: regabiSupported,
         RegabiArgs: regabiSupported,
         Dwarf5: dwarf5Supported,
         RandomizedHeapBase64: true,
         GreenTeaGC: true
-    );
+    ), out var Ꮡbaseline);
     var flags = Ꮡ(new ExperimentFlags(
         Flags: baseline,
         baseline: baseline
@@ -136,7 +138,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
                 // GOEXPERIMENT=none disables all experiment flags.
                 // This is used by cmd/dist, which doesn't know how
                 // to build with any experiment flags.
-                flags.Value.Flags = new goexperiment.Flags(nil);
+                flags.Flags = new goexperiment.Flags();
                 continue;
             }
             var val = true;
@@ -145,7 +147,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
             }
             var (set, ok) = names[f, ꟷ];
             if (!ok) {
-                return (default!, fmt.Errorf("unknown GOEXPERIMENT %s"u8, f));
+                return (default, fmt.Errorf("unknown GOEXPERIMENT %s"u8, f));
             }
             set(val);
         }
@@ -162,9 +164,9 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
     }
     // Check regabi dependencies.
     if ((~flags).RegabiArgs && !(~flags).RegabiWrappers) {
-        return (default!, fmt.Errorf("GOEXPERIMENT regabiargs requires regabiwrappers"u8));
+        return (default, fmt.Errorf("GOEXPERIMENT regabiargs requires regabiwrappers"u8));
     }
-    return (flags, default!);
+    return (flags, default);
 }
 
 // String returns the canonical GOEXPERIMENT string to enable this experiment
@@ -177,23 +179,23 @@ public static @string String(this ж<ExperimentFlags> Ꮡexp) {
 // experiments that differ from base. base may be nil to indicate no
 // experiments. If all is true, then include all experiment flags,
 // regardless of base.
-internal static slice<@string> expList(ж<goexperiment.Flags> Ꮡexp, ж<goexperiment.Flags> Ꮡbase, bool all) {
-    slice<@string> list = default!;
-    var rv = reflect.ValueOf(Ꮡexp.OrTypedNil()).Elem();
+internal static slice<@string> expList(ж<goexperiment.Flags> exp, ж<goexperiment.Flags> @base, bool all) {
+    slice<@string> list = default;
+    var rv = reflect.ValueOf(exp.OrTypedNil()).Elem();
     reflectꓸValue rBase = new(nil);
-    if (Ꮡbase != nil) {
-        rBase = reflect.ValueOf(Ꮡbase.OrTypedNil()).Elem();
+    if (@base != nil) {
+        rBase = reflect.ValueOf(@base.OrTypedNil()).Elem();
     }
     var rt = rv.Type();
     for (nint i = 0; i < rt.NumField(); i++) {
         @string name = strings.ToLower(rt.Field(i).Name);
         var val = rv.Field(i).Bool();
         var baseVal = false;
-        if (Ꮡbase != nil) {
+        if (@base != nil) {
             baseVal = rBase.Field(i).Bool();
         }
         if (all || val != baseVal) {
-            if (val){
+            if (val) {
                 list = append(list, name);
             } else {
                 list = append(list, "no"u8 + name);

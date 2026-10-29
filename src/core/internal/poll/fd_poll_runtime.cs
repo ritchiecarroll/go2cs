@@ -8,7 +8,7 @@ using errors = errors_package;
 using sync = go.sync_package;
 using Δsyscall = syscall_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using go;
 
 partial class poll_package {
@@ -52,7 +52,7 @@ internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
         return errnoErr((Δsyscall.Errno)(uintptr)errno);
     }
     pd.runtimeCtx = ctx;
-    return default!;
+    return default;
 }
 
 internal static void close(this ref pollDesc pd) {
@@ -73,18 +73,18 @@ internal static void evict(this ref pollDesc pd) {
 
 internal static error prepare(this ref pollDesc pd, nint mode, bool isFile) {
     if (pd.runtimeCtx == 0) {
-        return default!;
+        return default;
     }
     nint res = runtime_pollReset(pd.runtimeCtx, mode);
     return convertErr(res, isFile);
 }
 
 internal static error prepareRead(this ref pollDesc pd, bool isFile) {
-    return pd.prepare((rune)'r', isFile);
+    return pd.prepare('r', isFile);
 }
 
 internal static error prepareWrite(this ref pollDesc pd, bool isFile) {
-    return pd.prepare((rune)'w', isFile);
+    return pd.prepare('w', isFile);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -99,11 +99,11 @@ internal static error wait(this ref pollDesc pd, nint mode, bool isFile) {
 }
 
 internal static error waitRead(this ref pollDesc pd, bool isFile) {
-    return pd.wait((rune)'r', isFile);
+    return pd.wait('r', isFile);
 }
 
 internal static error waitWrite(this ref pollDesc pd, bool isFile) {
-    return pd.wait((rune)'w', isFile);
+    return pd.wait('w', isFile);
 }
 
 internal static void waitCanceled(this ref pollDesc pd, nint mode) {
@@ -125,19 +125,19 @@ internal static UntypedInt pollErrTimeout => 2;
 internal static UntypedInt pollErrNotPollable => 3;
 
 internal static error convertErr(nint res, bool isFile) {
-    var exprᴛ1 = res;
-    if (exprᴛ1 == pollNoError) {
-        return default!;
+    switch (res) {
+    case var ᴛ when ᴛ == pollNoError: {
+        return default;
     }
-    if (exprᴛ1 == pollErrClosing) {
+    case var ᴛ when ᴛ == pollErrClosing: {
         return errClosing(isFile);
     }
-    if (exprᴛ1 == pollErrTimeout) {
+    case var ᴛ when ᴛ == pollErrTimeout: {
         return ErrDeadlineExceeded;
     }
-    if (exprᴛ1 == pollErrNotPollable) {
+    case var ᴛ when ᴛ == pollErrNotPollable: {
         return ErrNotPollable;
-    }
+    }}
     println((@string)"unreachable: "u8, res);
     throw panic("unreachable");
 }
@@ -149,12 +149,12 @@ public static error SetDeadline(this ж<FD> Ꮡfd, time.Time t) {
 
 // SetReadDeadline sets the read deadline associated with fd.
 public static error SetReadDeadline(this ж<FD> Ꮡfd, time.Time t) {
-    return setDeadlineImpl(Ꮡfd, t, (rune)'r');
+    return setDeadlineImpl(Ꮡfd, t, 'r');
 }
 
 // SetWriteDeadline sets the write deadline associated with fd.
 public static error SetWriteDeadline(this ж<FD> Ꮡfd, time.Time t) {
-    return setDeadlineImpl(Ꮡfd, t, (rune)'w');
+    return setDeadlineImpl(Ꮡfd, t, 'w');
 }
 
 internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
@@ -162,7 +162,7 @@ internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        int64 d = default!;
+        int64 d = default;
         if (!t.IsZero()) {
             d = (int64)time.Until(t);
             if (d == 0) {
@@ -170,7 +170,7 @@ internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
             }
         }
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
@@ -180,9 +180,9 @@ internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
             return ErrNoDeadline;
         }
         runtime_pollSetDeadline(fd.pd.runtimeCtx, d, mode);
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

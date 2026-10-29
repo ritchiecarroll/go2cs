@@ -14,7 +14,7 @@ partial class net_package {
 // can't bail early on numbers > 65536. Therefore reasonably large/small
 // numbers are parsed in full and rejected if invalid.
 internal static (nint port, bool needsLookup) parsePort(@string service) {
-    nint port = default!;
+    nint port = default;
 
     if (service == ""u8) {
         // Lock in the legacy behavior that an empty string
@@ -24,19 +24,18 @@ internal static (nint port, bool needsLookup) parsePort(@string service) {
     const uint32 max = /* uint32(1<<32 - 1) */ 4294967295;
     const uint32 cutoff = /* uint32(1 << 30) */ 1073741824;
     var neg = false;
-    if (service[0] == (rune)'+'){
+    if (service[0] == '+') {
         service = service[1..];
-    } else 
-    if (service[0] == (rune)'-') {
+    } else if (service[0] == '-') {
         neg = true;
         service = service[1..];
     }
-    uint32 n = default!;
+    uint32 n = default;
     foreach (var (_, rᴛ1) in service) {
         var d = rᴛ1;
 
-        if ((rune)'0' <= d && d <= (rune)'9'){
-            d -= (rune)'0';
+        if ('0' <= d && d <= '9') {
+            d -= '0';
         } else {
             return (0, true);
         }
@@ -52,10 +51,9 @@ internal static (nint port, bool needsLookup) parsePort(@string service) {
         }
         n = nn;
     }
-    if (!neg && n >= cutoff){
+    if (!neg && n >= cutoff) {
         port = (nint)(cutoff - 1);
-    } else 
-    if (neg && n > cutoff){
+    } else if (neg && n > cutoff) {
         port = (nint)cutoff;
     } else {
         port = (nint)n;

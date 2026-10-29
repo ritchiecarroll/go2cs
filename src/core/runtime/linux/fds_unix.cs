@@ -36,11 +36,10 @@ internal static void checkfds() {
         }
 
         {
-            var retΔ1 = open(Ꮡ(devNull, 0), O_RDWR, 0); if (retΔ1 < 0){
+            var retΔ1 = open(Ꮡ(devNull, 0), O_RDWR, 0); if (retΔ1 < 0) {
                 print((@string)"runtime: standard file descriptor "u8, i, (@string)" closed, unable to open /dev/null, errno="u8, errno, (@string)"\n"u8);
                 @throw(cannotOpenStandardFdsˢ);
-            } else 
-            if (retΔ1 != (int32)i) {
+            } else if (retΔ1 != (int32)i) {
                 print((@string)"runtime: opened unexpected file descriptor "u8, retΔ1, (@string)" when attempting to open "u8, i, (@string)"\n"u8);
                 @throw(cannotOpenStandardFdsˢ);
             }

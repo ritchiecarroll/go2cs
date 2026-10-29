@@ -54,7 +54,7 @@ public static @string Text(this ж<Float> Ꮡx, byte format, nint prec) {
 // String formats x like x.Text('g', 10).
 // (String must be called explicitly, [Float.Format] does not support %s verb.)
 public static @string String(this ж<Float> Ꮡx) {
-    return Ꮡx.Text((rune)'g', 10);
+    return Ꮡx.Text((byte)'g', 10);
 }
 
 // Append appends to buf the string form of the floating-point number x,
@@ -64,26 +64,26 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
 
     // sign
     if (x.neg) {
-        buf = append(buf, (byte)((rune)'-'));
+        buf = append(buf, (byte)'-');
     }
 
     // Inf
     if (x.form == inf) {
         if (!x.neg) {
-            buf = append(buf, (byte)((rune)'+'));
+            buf = append(buf, (byte)'+');
         }
         return append(buf, ((@string)"Inf"u8).ꓸꓸꓸ);
     }
 
     // pick off easy formats
     switch (fmt) {
-    case (rune)'b': {
+    case (byte)'b': {
         return x.fmtB(buf);
     }
-    case (rune)'p': {
+    case (byte)'p': {
         return x.fmtP(buf);
     }
-    case (rune)'x': {
+    case (byte)'x': {
         return Ꮡx.fmtX(buf, prec);
     }}
 
@@ -93,7 +93,7 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
     //   3) read digits out and format
 
     // 1) convert Float to multiprecision decimal
-    ref var d = ref heap(new @decimal(), out var Ꮡd);                // == 0.0
+    ref var d = ref heap(new @decimal(), out var Ꮡd); // == 0.0
     if (x.form == finite) {
         // x != 0
         Ꮡd.init(x.mant, (nint)x.exp - x.mant.bitLen());
@@ -101,37 +101,37 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
 
     // 2) round to desired precision
     var shortest = false;
-    if (prec < 0){
+    if (prec < 0) {
         shortest = true;
         roundShortest(Ꮡd, ref (Ꮡx).DerefOrNull());
         // Precision for shortest representation mode.
         switch (fmt) {
-        case (rune)'e' or (rune)'E': {
+        case (byte)'e' or (byte)'E': {
             prec = len(d.mant) - 1;
             break;
         }
-        case (rune)'f': {
+        case (byte)'f': {
             prec = max(len(d.mant) - d.exp, 0);
             break;
         }
-        case (rune)'g' or (rune)'G': {
+        case (byte)'g' or (byte)'G': {
             prec = len(d.mant);
             break;
         }}
     } else {
         // round appropriately
         switch (fmt) {
-        case (rune)'e' or (rune)'E': {
+        case (byte)'e' or (byte)'E': {
             // one digit before and number of digits after decimal point
             Ꮡd.round(1 + prec);
             break;
         }
-        case (rune)'f': {
+        case (byte)'f': {
             // number of digits before and after decimal point
             Ꮡd.round(d.exp + prec);
             break;
         }
-        case (rune)'g' or (rune)'G': {
+        case (byte)'g' or (byte)'G': {
             if (prec == 0) {
                 prec = 1;
             }
@@ -142,13 +142,13 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
 
     // 3) read digits out and format
     switch (fmt) {
-    case (rune)'e' or (rune)'E': {
+    case (byte)'e' or (byte)'E': {
         return fmtE(buf, fmt, prec, d);
     }
-    case (rune)'f': {
+    case (byte)'f': {
         return fmtF(buf, prec, d);
     }
-    case (rune)'g' or (rune)'G': {
+    case (byte)'g' or (byte)'G': {
         // trim trailing fractional zeros in %e format
         nint eprec = prec;
         if (eprec > len(d.mant) && len(d.mant) >= d.exp) {
@@ -166,7 +166,7 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
             if (prec > len(d.mant)) {
                 prec = len(d.mant);
             }
-            return fmtE(buf, (byte)(fmt + (rune)'e' - (rune)'g'), prec - 1, d);
+            return fmtE(buf, (byte)(fmt + 'e' - 'g'), prec - 1, d);
         }
         if (prec > d.exp) {
             prec = len(d.mant);
@@ -178,7 +178,7 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
     if (x.neg) {
         buf = buf.slice(0, len(buf) - 1); // sign was added prematurely - remove it again
     }
-    return append(buf, (byte)((rune)'%'), fmt);
+    return append(buf, (byte)'%', fmt);
 }
 
 internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
@@ -200,7 +200,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
     // 1) Compute normalized mantissa mant and exponent exp for x such
     // that the lsb of mant corresponds to 1/2 ulp for the precision of
     // x (i.e., for mant we want x.prec + 1 bits).
-    var mant = ((Δnat)default!).set(x.mant);
+    var mant = ((Δnat)default).set(x.mant);
     nint exp = (nint)x.exp - mant.bitLen();
     nint s = mant.bitLen() - (nint)(x.prec + 1);
     switch (ᐧ) {
@@ -217,7 +217,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
 
     // 2) Compute lower bound by subtracting 1/2 ulp.
     ref var lower = ref heap(new @decimal(), out var Ꮡlower);
-    Δnat tmp = default!;
+    Δnat tmp = default;
     Ꮡlower.init(tmp.sub(mant, natOne), exp);
 
     // 3) Compute upper bound by adding 1/2 ulp.
@@ -265,7 +265,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
 // %e: d.ddddde±dd
 internal static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, @decimal d) {
     // first digit
-    var ch = (byte)(rune)'0';
+    var ch = (byte)'0';
     if (len(d.mant) > 0) {
         ch = d.mant[0];
     }
@@ -273,7 +273,7 @@ internal static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, @decimal 
 
     // .moredigits
     if (prec > 0) {
-        buf = append(buf, (byte)((rune)'.'));
+        buf = append(buf, (byte)'.');
         nint i = 1;
         nint m = min(len(d.mant), prec + 1);
         if (i < m) {
@@ -281,27 +281,27 @@ internal static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, @decimal 
             i = m;
         }
         for (; i <= prec; i++) {
-            buf = append(buf, (byte)((rune)'0'));
+            buf = append(buf, (byte)'0');
         }
     }
 
     // e±
     buf = append(buf, fmt);
-    int64 exp = default!;
+    int64 exp = default;
     if (len(d.mant) > 0) {
         exp = (int64)d.exp - 1; // -1 because first digit was printed before '.'
     }
-    if (exp < 0){
-        ch = (rune)'-';
+    if (exp < 0) {
+        ch = (byte)'-';
         exp = -exp;
     } else {
-        ch = (rune)'+';
+        ch = (byte)'+';
     }
     buf = append(buf, ch);
 
     // dd...d
     if (exp < 10) {
-        buf = append(buf, (byte)((rune)'0')); // at least 2 exponent digits
+        buf = append(buf, (byte)'0'); // at least 2 exponent digits
     }
     return strconv.AppendInt(buf, exp, 10);
 }
@@ -309,19 +309,19 @@ internal static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, @decimal 
 // %f: ddddddd.ddddd
 internal static slice<byte> fmtF(slice<byte> buf, nint prec, @decimal d) {
     // integer, padded with zeros as needed
-    if (d.exp > 0){
+    if (d.exp > 0) {
         nint m = min(len(d.mant), d.exp);
         buf = appendꓸꓸꓸ(buf, d.mant.slice(0, m));
         for (; m < d.exp; m++) {
-            buf = append(buf, (byte)((rune)'0'));
+            buf = append(buf, (byte)'0');
         }
     } else {
-        buf = append(buf, (byte)((rune)'0'));
+        buf = append(buf, (byte)'0');
     }
 
     // fraction
     if (prec > 0) {
-        buf = append(buf, (byte)((rune)'.'));
+        buf = append(buf, (byte)'.');
         for (nint i = 0; i < prec; i++) {
             buf = append(buf, d.at(d.exp + i));
         }
@@ -339,7 +339,7 @@ internal static slice<byte> fmtF(slice<byte> buf, nint prec, @decimal d) {
 // (The caller handles Inf before invoking fmtB.)
 internal static slice<byte> fmtB(this ref Float x, slice<byte> buf) {
     if (x.form == zero) {
-        return append(buf, (byte)((rune)'0'));
+        return append(buf, (byte)'0');
     }
 
     if (debugFloat && x.form != finite) {
@@ -353,20 +353,20 @@ internal static slice<byte> fmtB(this ref Float x, slice<byte> buf) {
         var w = (uint32)len(x.mant) * (uint32)_W;
         switch (ᐧ) {
         case {} when w < x.prec: {
-            m = ((Δnat)default!).lsh(m, (nuint)(x.prec - w));
+            m = ((Δnat)default).lsh(m, (nuint)(x.prec - w));
             break;
         }
         case {} when w > x.prec: {
-            m = ((Δnat)default!).rsh(m, (nuint)(w - x.prec));
+            m = ((Δnat)default).rsh(m, (nuint)(w - x.prec));
             break;
         }}
     }
 
     buf = appendꓸꓸꓸ(buf, m.utoa(10));
-    buf = append(buf, (byte)((rune)'p'));
+    buf = append(buf, (byte)'p');
     var e = (int64)x.exp - (int64)x.prec;
     if (e >= 0) {
-        buf = append(buf, (byte)((rune)'+'));
+        buf = append(buf, (byte)'+');
     }
     return strconv.AppendInt(buf, e, 10);
 }
@@ -383,9 +383,9 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
     if (x.form == zero) {
         buf = append(buf, ((@string)"0x0"u8).ꓸꓸꓸ);
         if (prec > 0) {
-            buf = append(buf, (byte)((rune)'.'));
+            buf = append(buf, (byte)'.');
             for (nint i = 0; i < prec; i++) {
-                buf = append(buf, (byte)((rune)'0'));
+                buf = append(buf, (byte)'0');
             }
         }
         buf = append(buf, ((@string)"p+00"u8).ꓸꓸꓸ);
@@ -397,8 +397,8 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
     }
 
     // round mantissa to n bits
-    nuint n = default!;
-    if (prec < 0){
+    nuint n = default;
+    if (prec < 0) {
         n = 1 + (x.MinPrec() - 1 + 3) / 4 * 4; // round MinPrec up to 1 mod 4
     } else {
         n = 1 + 4 * (nuint)prec;
@@ -412,36 +412,36 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
         nuint w = (nuint)len(x.mant) * (nuint)_W;
         switch (ᐧ) {
         case {} when w < n: {
-            m = ((Δnat)default!).lsh(m, n - w);
+            m = ((Δnat)default).lsh(m, n - w);
             break;
         }
         case {} when w > n: {
-            m = ((Δnat)default!).rsh(m, w - n);
+            m = ((Δnat)default).rsh(m, w - n);
             break;
         }}
     }
     var exp64 = (int64)x.exp - 1; // avoid wrap-around
 
     var hm = m.utoa(16);
-    if (debugFloat && hm[0] != (rune)'1') {
+    if (debugFloat && hm[0] != '1') {
         throw panic("incorrect mantissa: " + ((sstring)hm));
     }
     buf = append(buf, ((@string)"0x1"u8).ꓸꓸꓸ);
     if (len(hm) > 1) {
-        buf = append(buf, (byte)((rune)'.'));
+        buf = append(buf, (byte)'.');
         buf = appendꓸꓸꓸ(buf, hm[1..]);
     }
 
-    buf = append(buf, (byte)((rune)'p'));
-    if (exp64 >= 0){
-        buf = append(buf, (byte)((rune)'+'));
+    buf = append(buf, (byte)'p');
+    if (exp64 >= 0) {
+        buf = append(buf, (byte)'+');
     } else {
         exp64 = -exp64;
-        buf = append(buf, (byte)((rune)'-'));
+        buf = append(buf, (byte)'-');
     }
     // Force at least two exponent digits, to match fmt.
     if (exp64 < 10) {
-        buf = append(buf, (byte)((rune)'0'));
+        buf = append(buf, (byte)'0');
     }
     return strconv.AppendInt(buf, exp64, 10);
 }
@@ -454,7 +454,7 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
 // (The caller handles Inf before invoking fmtP.)
 internal static slice<byte> fmtP(this ref Float x, slice<byte> buf) {
     if (x.form == zero) {
-        return append(buf, (byte)((rune)'0'));
+        return append(buf, (byte)'0');
     }
 
     if (debugFloat && x.form != finite) {
@@ -473,14 +473,14 @@ internal static slice<byte> fmtP(this ref Float x, slice<byte> buf) {
 
     buf = append(buf, ((@string)"0x."u8).ꓸꓸꓸ);
     buf = appendꓸꓸꓸ(buf, bytes_package.TrimRight(m.utoa(16), "0"u8));
-    buf = append(buf, (byte)((rune)'p'));
+    buf = append(buf, (byte)'p');
     if (x.exp >= 0) {
-        buf = append(buf, (byte)((rune)'+'));
+        buf = append(buf, (byte)'+');
     }
     return strconv.AppendInt(buf, (int64)x.exp, 10);
 }
 
-internal static fmt.Formatter _ᴛ3ʗ = new FloatжFormatter(ᏑfloatZero);   // *Float must implement fmt.Formatter
+internal static fmt.Formatter _ᴛ3ʗ = new FloatжFormatter(ᏑfloatZero); // *Float must implement fmt.Formatter
 
 // Format implements [fmt.Formatter]. It accepts all the regular
 // formats for floating-point numbers ('b', 'e', 'E', 'f', 'F',
@@ -501,19 +501,19 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
 
     var exprᴛ1 = format;
     var matchᴛ1 = false;
-    if (exprᴛ1 is (rune)'e' or (rune)'E' or (rune)'f' or (rune)'b' or (rune)'p' or (rune)'x') { matchᴛ1 = true;
+    if (exprᴛ1 is 'e' or 'E' or 'f' or 'b' or 'p' or 'x') { matchᴛ1 = true;
         // nothing to do
     }
-    else if (exprᴛ1 is (rune)'F') { matchᴛ1 = true;
+    else if (exprᴛ1 is 'F') { matchᴛ1 = true;
         // (*Float).Text doesn't support 'F'; handle like 'f'
-        format = (rune)'f';
+        format = 'f';
     }
-    else if (exprᴛ1 is (rune)'v') { matchᴛ1 = true;
+    else if (exprᴛ1 is 'v') { matchᴛ1 = true;
         // handle like 'g'
-        format = (rune)'g';
+        format = 'g';
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && (exprᴛ1 is (rune)'g' or (rune)'G')) {
+    if (fallthrough || !matchᴛ1 && (exprᴛ1 is 'g' or 'G')) {
         if (!hasPrec) {
             prec = -1; // default precision for 'g', 'G'
         }
@@ -522,39 +522,39 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
         fmt.Fprintf(new fmt_StateᴠWriter(s), "%%!%c(*big.Float=%s)"u8, format, Ꮡx.String());
         return;
     }
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     buf = Ꮡx.Append(buf, (byte)format, prec);
     if (len(buf) == 0) {
         buf = slice<byte>("?"u8); // should never happen, but don't crash
     }
     // len(buf) > 0
 
-    @string sign = default!;
+    @string sign = default;
     switch (ᐧ) {
-    case {} when buf[0] is (rune)'-': {
+    case {} when buf[0] is (byte)'-': {
         sign = "-"u8;
         buf = buf[1..];
         break;
     }
-    case {} when buf[0] is (rune)'+': {
+    case {} when buf[0] is (byte)'+': {
         // +Inf
         sign = "+"u8;
-        if (s.Flag((rune)' ')) {
+        if (s.Flag(' ')) {
             sign = " "u8;
         }
         buf = buf[1..];
         break;
     }
-    case {} when s.Flag((rune)'+'): {
+    case {} when s.Flag('+'): {
         sign = "+"u8;
         break;
     }
-    case {} when s.Flag((rune)' '): {
+    case {} when s.Flag(' '): {
         sign = " "u8;
         break;
     }}
 
-    nint padding = default!;
+    nint padding = default;
     {
         var (width, hasWidth) = s.Width(); if (hasWidth && width > len(sign) + len(buf)) {
             padding = width - len(sign) - len(buf);
@@ -562,14 +562,14 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
     }
 
     switch (ᐧ) {
-    case {} when s.Flag((rune)'0') && !x.IsInf(): {
+    case {} when s.Flag('0') && !x.IsInf(): {
         // 0-padding on left
         writeMultiple(s, sign, 1);
         writeMultiple(s, "0"u8, padding);
         s.Write(buf);
         break;
     }
-    case {} when s.Flag((rune)'-'): {
+    case {} when s.Flag('-'): {
         // padding on right
         writeMultiple(s, sign, 1);
         s.Write(buf);

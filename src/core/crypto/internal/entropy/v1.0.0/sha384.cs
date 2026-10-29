@@ -172,7 +172,7 @@ internal static void sha384Block(ref array<uint64> dh, /*[128]*/ ж<array<byte>>
 
     array<uint64> w = new(80);
     foreach (var i in range(80)) {
-        if (i < 16){
+        if (i < 16) {
             w[i] = beUint64(p.slice(i * 8));
         } else {
             var v1 = w[i - 2];

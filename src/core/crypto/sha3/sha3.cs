@@ -66,7 +66,7 @@ public static slice<byte> SumSHAKE128(slice<byte> data, nint length) {
 }
 
 internal static slice<byte> sumSHAKE128(slice<byte> @out, slice<byte> data, nint length) {
-    if (len(@out) < length){
+    if (len(@out) < length) {
         @out = new slice<byte>(length);
     } else {
         @out = @out.slice(0, length);
@@ -86,7 +86,7 @@ public static slice<byte> SumSHAKE256(slice<byte> data, nint length) {
 }
 
 internal static slice<byte> sumSHAKE256(slice<byte> @out, slice<byte> data, nint length) {
-    if (len(@out) < length){
+    if (len(@out) < length) {
         @out = new slice<byte>(length);
     } else {
         @out = @out.slice(0, length);
@@ -104,8 +104,8 @@ partial struct SHA3 {
 }
 
 //go:linkname fips140hash_sha3Unwrap crypto/internal/fips140hash.sha3Unwrap
-public static ж<sha3.Digest> fips140hash_sha3Unwrap(ж<SHA3> Ꮡsha3) {
-    return Ꮡsha3.of(SHA3.Ꮡs);
+public static ж<sha3.Digest> fips140hash_sha3Unwrap(ж<SHA3> sha3Δ1) {
+    return sha3Δ1.of(SHA3.Ꮡs);
 }
 
 // New224 creates a new SHA3-224 hash.
@@ -186,9 +186,8 @@ public static error UnmarshalBinary(this ref SHA3 s, slice<byte> data) {
 
 // Clone implements [hash.Cloner].
 public static (hash.Cloner, error) Clone(this ref SHA3 d) {
-    ref var r = ref heap<SHA3>(out var Ꮡr);
-    r = d.ΔClone();
-    return (new SHA3жCloner(Ꮡr), default!);
+    ref var r = ref heap<SHA3>(d.ΔClone(), out var Ꮡr);
+    return (new SHA3жCloner(Ꮡr), default);
 }
 
 // SHAKE is an instance of a SHAKE extendable output function.

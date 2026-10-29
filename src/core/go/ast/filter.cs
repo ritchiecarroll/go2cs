@@ -24,8 +24,8 @@ internal static bool exportFilter(@string name) {
 // stripped. The [File.Comments] list is not changed.
 //
 // FileExports reports whether there are exported declarations.
-public static bool FileExports(ж<File> Ꮡsrc) {
-    return filterFile(ref (Ꮡsrc).DerefOrNull(), new Func<@string, bool>(exportFilter), true);
+public static bool FileExports(ж<File> src) {
+    return filterFile(ref (src).DerefOrNull(), new Func<@string, bool>(exportFilter), true);
 }
 
 // PackageExports trims the AST for a Go package in place such that
@@ -37,8 +37,8 @@ public static bool FileExports(ж<File> Ꮡsrc) {
 //
 // Deprecated: use the type checker [go/types] instead of [Package];
 // see [Object]. Alternatively, use [FileExports].
-public static bool PackageExports(ж<Package> Ꮡpkg) {
-    return filterPackage(ref (Ꮡpkg).DerefOrNull(), new Func<@string, bool>(exportFilter), true);
+public static bool PackageExports(ж<Package> pkg) {
+    return filterPackage(ref (pkg).DerefOrNull(), new Func<@string, bool>(exportFilter), true);
 }
 
 // type ΔFilter is a methodless func type — rendered inline as its base delegate
@@ -48,7 +48,7 @@ public static bool PackageExports(ж<Package> Ꮡpkg) {
 internal static slice<ж<Ident>> filterIdentList(slice<ж<Ident>> list, Func<@string, bool> f) {
     nint j = 0;
     foreach (var (_, x) in list) {
-        if (f((~x).Name)) {
+        if (f(x.Name)) {
             list[j] = x;
             j++;
         }
@@ -66,20 +66,20 @@ internal static ж<Ident> fieldName(Expr x) {
     }
     case ж<SelectorExpr> t: {
         {
-            var (_, ok) = (~t).X._<ж<Ident>>(ᐧ); if (ok) {
-                return (~t).Sel;
+            var (_, ok) = t.X._<ж<Ident>>(ᐧ); if (ok) {
+                return t.Sel;
             }
         }
         break;
     }
     case ж<StarExpr> t: {
-        return fieldName((~t).X);
+        return fieldName(t.X);
     }}
-    return default!;
+    return default;
 }
 
 internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, Func<@string, bool> filter, bool export) {
-    bool removedFields = default!;
+    bool removedFields = default;
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields == nil) {
@@ -89,21 +89,21 @@ internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, 
     nint j = 0;
     foreach (var (_, f) in list) {
         var keepField = false;
-        if (len((~f).Names) == 0){
+        if (len(f.Names) == 0) {
             // anonymous field
-            var name = fieldName((~f).Type);
-            keepField = name != nil && filter((~name).Name);
+            var name = fieldName(f.Type);
+            keepField = name != nil && filter(name.Name);
         } else {
-            nint n = len((~f).Names);
-            f.Value.Names = filterIdentList((~f).Names, filter);
-            if (len((~f).Names) < n) {
+            nint n = len(f.Names);
+            f.Names = filterIdentList(f.Names, filter);
+            if (len(f.Names) < n) {
                 removedFields = true;
             }
-            keepField = len((~f).Names) > 0;
+            keepField = len(f.Names) > 0;
         }
         if (keepField) {
             if (export) {
-                filterType((~f).Type, filter, export);
+                filterType(f.Type, filter, export);
             }
             list[j] = f;
             j++;
@@ -134,7 +134,7 @@ internal static slice<Expr> filterExprList(slice<Expr> list, Func<@string, bool>
         }
         case ж<KeyValueExpr> x: {
             {
-                var (xΔ1, ok) = (~x).Key._<ж<Ident>>(ᐧ); if (ok && !filter((~xΔ1).Name)) {
+                var (xΔ1, ok) = x.Key._<ж<Ident>>(ᐧ); if (ok && !filter(xΔ1.Name)) {
                     continue;
                 }
             }
@@ -157,9 +157,9 @@ internal static bool filterParamList(ж<FieldList> Ꮡfields, Func<@string, bool
     if (Ꮡfields == nil) {
         return false;
     }
-    bool b = default!;
+    bool b = default;
     foreach (var (_, f) in fields.List) {
-        if (filterType((~f).Type, filter, export)) {
+        if (filterType(f.Type, filter, export)) {
             b = true;
         }
     }
@@ -169,33 +169,33 @@ internal static bool filterParamList(ж<FieldList> Ꮡfields, Func<@string, bool
 internal static bool filterType(Expr typ, Func<@string, bool> f, bool export) {
     switch (typ.type()) {
     case ж<Ident> t: {
-        return f((~t).Name);
+        return f(t.Name);
     }
     case ж<ParenExpr> t: {
-        return filterType((~t).X, f, export);
+        return filterType(t.X, f, export);
     }
     case ж<ArrayType> t: {
-        return filterType((~t).Elt, f, export);
+        return filterType(t.Elt, f, export);
     }
     case ж<StructType> t: {
-        if (filterFieldList((~t).Fields, f, export)) {
-            t.Value.Incomplete = true;
+        if (filterFieldList(t.Fields, f, export)) {
+            t.Incomplete = true;
         }
-        return len((~(~t).Fields).List) > 0;
+        return len(t.Fields.List) > 0;
     }
     case ж<FuncType> t: {
-        var b1 = filterParamList((~t).Params, f, export);
-        var b2 = filterParamList((~t).Results, f, export);
+        var b1 = filterParamList(t.Params, f, export);
+        var b2 = filterParamList(t.Results, f, export);
         return b1 || b2;
     }
     case ж<InterfaceType> t: {
-        if (filterFieldList((~t).Methods, f, export)) {
-            t.Value.Incomplete = true;
+        if (filterFieldList(t.Methods, f, export)) {
+            t.Incomplete = true;
         }
-        return len((~(~t).Methods).List) > 0;
+        return len(t.Methods.List) > 0;
     }
     case ж<MapType> t: {
-        var b1 = filterType((~t).Key, f, export);
+        var b1 = filterType(t.Key, f, export);
         var b2 = filterType((~t).Value, f, export);
         return b1 || b2;
     }
@@ -208,20 +208,20 @@ internal static bool filterType(Expr typ, Func<@string, bool> f, bool export) {
 internal static bool filterSpec(Spec spec, Func<@string, bool> f, bool export) {
     switch (spec.type()) {
     case ж<ValueSpec> s: {
-        s.Value.Names = filterIdentList((~s).Names, f);
-        s.Value.Values = filterExprList((~s).Values, f, export);
-        if (len((~s).Names) > 0) {
+        s.Names = filterIdentList(s.Names, f);
+        s.Values = filterExprList(s.Values, f, export);
+        if (len(s.Names) > 0) {
             if (export) {
-                filterType((~s).Type, f, export);
+                filterType(s.Type, f, export);
             }
             return true;
         }
         break;
     }
     case ж<TypeSpec> s: {
-        if (f((~(~s).Name).Name)) {
+        if (f(s.Name.Name)) {
             if (export) {
-                filterType((~s).Type, f, export);
+                filterType(s.Type, f, export);
             }
             return true;
         }
@@ -231,7 +231,7 @@ internal static bool filterSpec(Spec spec, Func<@string, bool> f, bool export) {
             // out.
             // If the type contains filtered elements,
             // keep the declaration.
-            return filterType((~s).Type, f, export);
+            return filterType(s.Type, f, export);
         }
         break;
     }}
@@ -262,11 +262,11 @@ public static bool FilterDecl(Decl decl, Func<@string, bool> f) {
 internal static bool filterDecl(Decl decl, Func<@string, bool> f, bool export) {
     switch (decl.type()) {
     case ж<GenDecl> d: {
-        d.Value.Specs = filterSpecList((~d).Specs, f, export);
-        return len((~d).Specs) > 0;
+        d.Specs = filterSpecList(d.Specs, f, export);
+        return len(d.Specs) > 0;
     }
     case ж<FuncDecl> d: {
-        return f((~(~d).Name).Name);
+        return f(d.Name.Name);
     }}
     return false;
 }
@@ -280,8 +280,8 @@ internal static bool filterDecl(Decl decl, Func<@string, bool> f, bool export) {
 //
 // FilterFile reports whether there are any top-level declarations
 // left after filtering.
-public static bool FilterFile(ж<File> Ꮡsrc, Func<@string, bool> f) {
-    return filterFile(ref (Ꮡsrc).DerefOrNull(), f, false);
+public static bool FilterFile(ж<File> src, Func<@string, bool> f) {
+    return filterFile(ref (src).DerefOrNull(), f, false);
 }
 
 internal static bool filterFile(ref File src, Func<@string, bool> f, bool export) {
@@ -309,8 +309,8 @@ internal static bool filterFile(ref File src, Func<@string, bool> f, bool export
 //
 // Deprecated: use the type checker [go/types] instead of [Package];
 // see [Object]. Alternatively, use [FilterFile].
-public static bool FilterPackage(ж<Package> Ꮡpkg, Func<@string, bool> f) {
-    return filterPackage(ref (Ꮡpkg).DerefOrNull(), f, false);
+public static bool FilterPackage(ж<Package> pkg, Func<@string, bool> f) {
+    return filterPackage(ref (pkg).DerefOrNull(), f, false);
 }
 
 internal static bool filterPackage(ref Package pkg, Func<@string, bool> f, bool export) {
@@ -347,25 +347,25 @@ public static MergeMode FilterImportDuplicates => 4;
 // receiver, it assumes a function instead.
 internal static @string nameOf(ref FuncDecl f) {
     {
-        var r = f.Recv; if (r != nil && len((~r).List) == 1) {
+        var r = f.Recv; if (r != nil && len(r.List) == 1) {
             // looks like a correct receiver declaration
-            var t = (~r).List[0].Value.Type;
+            var t = r.List[0].Type;
             // dereference pointer receiver types
             {
                 var (p, _) = t._<ж<StarExpr>>(ᐧ); if (p != nil) {
-                    t = p.Value.X;
+                    t = p.X;
                 }
             }
             // the receiver type must be a type name
             {
                 var (p, _) = t._<ж<Ident>>(ᐧ); if (p != nil) {
-                    return (~p).Name + "."u8 + (~f.Name).Name;
+                    return p.Name + "."u8 + f.Name.Name;
                 }
             }
             // otherwise assume a function instead
         }
     }
-    return (~f.Name).Name;
+    return f.Name.Name;
 }
 
 // separator is an empty //-style comment that is interspersed between
@@ -393,16 +393,16 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     foreach (var (filename, f) in pkg.Files) {
         filenames[i] = filename;
         i++;
-        if ((~f).Doc != nil) {
-            ndocs += len((~(~f).Doc).List) + 1; // +1 for separator
+        if (f.Doc != nil) {
+            ndocs += len(f.Doc.List) + 1; // +1 for separator
         }
-        ncomments += len((~f).Comments);
-        ndecls += len((~f).Decls);
-        if (i == 0 || (~f).FileStart < minPos) {
-            minPos = f.Value.FileStart;
+        ncomments += len(f.Comments);
+        ndecls += len(f.Decls);
+        if (i == 0 || f.FileStart < minPos) {
+            minPos = f.FileStart;
         }
-        if (i == 0 || (~f).FileEnd > maxPos) {
-            maxPos = f.Value.FileEnd;
+        if (i == 0 || f.FileEnd > maxPos) {
+            maxPos = f.FileEnd;
         }
     }
     slices.Sort<slice<@string>, @string>(filenames);
@@ -411,28 +411,28 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     // CommentGroup - the collected package documentation. In general
     // there should be only one file with a package comment; but it's
     // better to collect extra comments than drop them on the floor.
-    ж<CommentGroup> doc = default!;
+    ж<CommentGroup> doc = default;
     ref var pos = ref heap(new tokenꓸPos(), out var Ꮡpos);
     if (ndocs > 0) {
         var list = new slice<ж<Comment>>(ndocs - 1); // -1: no separator before first group
         nint iΔ1 = 0;
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
-            if ((~f).Doc != nil) {
+            if (f.Doc != nil) {
                 if (iΔ1 > 0) {
                     // not the first group - add separator
                     list[iΔ1] = separator;
                     iΔ1++;
                 }
-                foreach (var (_, c) in (~(~f).Doc).List) {
+                foreach (var (_, c) in f.Doc.List) {
                     list[iΔ1] = c;
                     iΔ1++;
                 }
-                if ((~f).Package > pos) {
+                if (f.Package > pos) {
                     // Keep the maximum package clause position as
                     // position for the package clause of the merged
                     // files.
-                    pos = f.Value.Package;
+                    pos = f.Package;
                 }
             }
         }
@@ -440,15 +440,15 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     }
 
     // Collect declarations from all package files.
-    slice<Decl> decls = default!;
+    slice<Decl> decls = default;
     if (ndecls > 0) {
         decls = new slice<Decl>(ndecls);
         var funcs = new map<@string, nint>(); // map of func name -> decls index
-        nint iΔ2 = 0; // current index
-        nint n = 0; // number of filtered entries
+        nint iΔ2 = 0;                         // current index
+        nint n = 0;                           // number of filtered entries
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
-            foreach (var (_, vᴛ1) in (~f).Decls) {
+            foreach (var (_, vᴛ1) in f.Decls) {
                 var d = vᴛ1;
 
                 if ((MergeMode)(mode & FilterFuncDuplicates) != 0) {
@@ -465,15 +465,15 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
                         var (fΔ1, isFun) = d._<ж<FuncDecl>>(ᐧ); if (isFun) {
                             @string name = nameOf(ref (fΔ1).DerefOrNull());
                             {
-                                var (j, exists) = funcs[name, ꟷ]; if (exists){
+                                var (j, exists) = funcs[name, ꟷ]; if (exists) {
                                     // function declared already
-                                    if (decls[j] != default! && (~decls[j]._<ж<FuncDecl>>()).Doc == nil){
+                                    if (decls[j] != nil && decls[j]._<ж<FuncDecl>>().Doc == nil) {
                                         // existing declaration has no documentation;
                                         // ignore the existing declaration
-                                        decls[j] = default!;
+                                        decls[j] = default;
                                     } else {
                                         // ignore the new declaration
-                                        d = default!;
+                                        d = default;
                                     }
                                     n++; // filtered an entry
                                 } else {
@@ -496,7 +496,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         if (n > 0) {
             iΔ2 = 0;
             foreach (var (_, d) in decls) {
-                if (d != default!) {
+                if (d != nil) {
                     decls[iΔ2] = d;
                     iΔ2++;
                 }
@@ -506,14 +506,14 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     }
 
     // Collect import specs from all package files.
-    slice<ж<ImportSpec>> imports = default!;
-    if ((MergeMode)(mode & FilterImportDuplicates) != 0){
+    slice<ж<ImportSpec>> imports = default;
+    if ((MergeMode)(mode & FilterImportDuplicates) != 0) {
         var seen = new map<@string, bool>();
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
-            foreach (var (_, imp) in (~f).Imports) {
+            foreach (var (_, imp) in f.Imports) {
                 {
-                    @string path = imp.Value.Path.Value.Value; if (!seen[path]) {
+                    @string path = imp.Path.Value.Value; if (!seen[path]) {
                         // TODO: consider handling cases where:
                         // - 2 imports exist with the same import path but
                         //   have different local names (one should probably
@@ -531,23 +531,23 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         // Iterate over filenames for deterministic order.
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
-            imports = appendꓸꓸꓸ(imports, (~f).Imports);
+            imports = appendꓸꓸꓸ(imports, f.Imports);
         }
     }
 
     // Collect comments from all package files.
-    slice<ж<CommentGroup>> comments = default!;
+    slice<ж<CommentGroup>> comments = default;
     if ((MergeMode)(mode & FilterUnassociatedComments) == 0) {
         comments = new slice<ж<CommentGroup>>(ncomments);
         nint iΔ3 = 0;
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
-            iΔ3 += copy(comments.slice(iΔ3), (~f).Comments);
+            iΔ3 += copy(comments.slice(iΔ3), f.Comments);
         }
     }
 
     // TODO(gri) need to compute unresolved identifiers!
-    return Ꮡ(new File(doc, pos, NewIdent(pkg.Name), decls, minPos, maxPos, pkg.Scope, imports, default!, comments, ""u8));
+    return Ꮡ(new File(doc, pos, NewIdent(pkg.Name), decls, minPos, maxPos, pkg.Scope, imports, default, comments, ""u8));
 }
 
 } // end ast_package

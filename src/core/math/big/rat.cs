@@ -41,30 +41,32 @@ public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
     var bits = math.Float64bits(f);
     var mantissa = (uint64)(bits & ((uint64)(4503599627370496L - 1)));
     nint exp = (nint)((bits >> 52) & (uint64)expMask);
-    var exprᴛ1 = exp;
-    if (exprᴛ1 == expMask) { // non-finite
-        return default!;
+    switch (exp) {
+    case var ᴛ when ᴛ == expMask: { // non-finite
+        return default;
     }
-    if (exprᴛ1 is 0) { // denormal
+    case 0: { // denormal
         exp -= 1022;
+        break;
     }
-    else { /* default: */ // normal
+    default: { // normal
         mantissa |= (uint64)(((uint64)1 << 52));
         exp -= 1023;
-    }
+        break;
+    }}
 
     nint shift = 52 - exp;
 
     // Optimization (?): partially pre-normalise.
     while ((mantissa & 1) == 0 && shift > 0) {
-        mantissa >>= (int)(1);
+        mantissa >>= 1;
         shift--;
     }
 
     Ꮡz.of(big_package.ΔRat.Ꮡa).SetUint64(mantissa);
     z.a.neg = f < 0D;
     Ꮡz.of(big_package.ΔRat.Ꮡb).Set(intOne);
-    if (shift > 0){
+    if (shift > 0) {
         Ꮡz.of(big_package.ΔRat.Ꮡb).Lsh(Ꮡz.of(big_package.ΔRat.Ꮡb), (nuint)shift);
     } else {
         Ꮡz.of(big_package.ΔRat.Ꮡa).Lsh(Ꮡz.of(big_package.ΔRat.Ꮡa), (nuint)(-shift));
@@ -76,9 +78,9 @@ public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
 // nearest to the quotient a/b, using round-to-even in
 // halfway cases. It does not mutate its arguments.
 // Preconditions: b is non-zero; a and b have no common factors.
-internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a, Δnat b) {
-    float32 f = default!;
-    bool exact = default!;
+internal static (float32 f, bool exact) quotToFloat32(ж<stack> stk, Δnat a, Δnat b) {
+    float32 f = default;
+    bool exact = default;
 
     // float size in bits
     UntypedInt Fsize = 32;
@@ -111,15 +113,14 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a,
     // - the high-order 1 is omitted in "normal" representation;
     // - the low-order 1 will be used during rounding then discarded.
     nint exp = alen - blen;
-    Δnat a2 = default!;
-    Δnat b2 = default!;
+    Δnat a2 = default;
+    Δnat b2 = default;
     a2 = a2.set(a);
     b2 = b2.set(b);
     {
-        nint shift = (nint)Msize2 - exp; if (shift > 0){
+        nint shift = (nint)Msize2 - exp; if (shift > 0) {
             a2 = a2.lsh(a2, (nuint)shift);
-        } else 
-        if (shift < 0) {
+        } else if (shift < 0) {
             b2 = b2.lsh(b2, (nuint)(-shift));
         }
     }
@@ -127,8 +128,8 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a,
     // 2. Compute quotient and remainder (q, r).  NB: due to the
     // extra shift, the low-order bit of q is logically the
     // high-order bit of r.
-    Δnat q = default!;
-    (q, var r) = q.div(Ꮡstk, a2, a2, b2); // (recycle a2)
+    Δnat q = default;
+    (q, var r) = q.div(stk, a2, a2, b2); // (recycle a2)
     var mantissa = low32(q);
     var haveRem = len(r) > 0; // mantissa&1 && !haveRem => remainder is exactly half
 
@@ -138,7 +139,7 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a,
         if ((mantissa & 1) == 1) {
             haveRem = true;
         }
-        mantissa >>= (int)(1);
+        mantissa >>= 1;
         exp++;
     }
     if (mantissa >> (int)(Msize1) != 1) {
@@ -162,13 +163,13 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a,
             {
                 mantissa++; if (mantissa >= (uint32)((uint32)1 << (int)(Msize2))) {
                     // Complete rollover 11...1 => 100...0, so shift is safe
-                    mantissa >>= (int)(1);
+                    mantissa >>= 1;
                     exp++;
                 }
             }
         }
     }
-    mantissa >>= (int)(1); // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
+    mantissa >>= 1; // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
 
     f = (float32)math.Ldexp((float64)mantissa, exp - (nint)Msize1);
     if (math.IsInf((float64)f, 0)) {
@@ -181,9 +182,9 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a,
 // nearest to the quotient a/b, using round-to-even in
 // halfway cases. It does not mutate its arguments.
 // Preconditions: b is non-zero; a and b have no common factors.
-internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a, Δnat b) {
-    float64 f = default!;
-    bool exact = default!;
+internal static (float64 f, bool exact) quotToFloat64(ж<stack> stk, Δnat a, Δnat b) {
+    float64 f = default;
+    bool exact = default;
 
     // float size in bits
     UntypedInt Fsize = 64;
@@ -216,15 +217,14 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a,
     // - the high-order 1 is omitted in "normal" representation;
     // - the low-order 1 will be used during rounding then discarded.
     nint exp = alen - blen;
-    Δnat a2 = default!;
-    Δnat b2 = default!;
+    Δnat a2 = default;
+    Δnat b2 = default;
     a2 = a2.set(a);
     b2 = b2.set(b);
     {
-        nint shift = (nint)Msize2 - exp; if (shift > 0){
+        nint shift = (nint)Msize2 - exp; if (shift > 0) {
             a2 = a2.lsh(a2, (nuint)shift);
-        } else 
-        if (shift < 0) {
+        } else if (shift < 0) {
             b2 = b2.lsh(b2, (nuint)(-shift));
         }
     }
@@ -232,8 +232,8 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a,
     // 2. Compute quotient and remainder (q, r).  NB: due to the
     // extra shift, the low-order bit of q is logically the
     // high-order bit of r.
-    Δnat q = default!;
-    (q, var r) = q.div(Ꮡstk, a2, a2, b2); // (recycle a2)
+    Δnat q = default;
+    (q, var r) = q.div(stk, a2, a2, b2); // (recycle a2)
     var mantissa = low64(q);
     var haveRem = len(r) > 0; // mantissa&1 && !haveRem => remainder is exactly half
 
@@ -243,7 +243,7 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a,
         if ((mantissa & 1) == 1) {
             haveRem = true;
         }
-        mantissa >>= (int)(1);
+        mantissa >>= 1;
         exp++;
     }
     if (mantissa >> (int)(Msize1) != 1) {
@@ -267,13 +267,13 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a,
             {
                 mantissa++; if (mantissa >= (uint64)((uint64)1 << (int)(Msize2))) {
                     // Complete rollover 11...1 => 100...0, so shift is safe
-                    mantissa >>= (int)(1);
+                    mantissa >>= 1;
                     exp++;
                 }
             }
         }
     }
-    mantissa >>= (int)(1); // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
+    mantissa >>= 1; // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
 
     f = math.Ldexp((float64)mantissa, exp - (nint)Msize1);
     if (math.IsInf(f, 0)) {
@@ -287,8 +287,8 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a,
 // be represented by a float32, f is an infinity and exact is false.
 // The sign of f always matches the sign of x, even if f == 0.
 public static (float32 f, bool exact) Float32(this ж<ΔRat> Ꮡx) {
-    float32 f = default!;
-    bool exact = default!;
+    float32 f = default;
+    bool exact = default;
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -315,8 +315,8 @@ public static (float32 f, bool exact) Float32(this ж<ΔRat> Ꮡx) {
 // be represented by a float64, f is an infinity and exact is false.
 // The sign of f always matches the sign of x, even if f == 0.
 public static (float64 f, bool exact) Float64(this ж<ΔRat> Ꮡx) {
-    float64 f = default!;
-    bool exact = default!;
+    float64 f = default;
+    bool exact = default;
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -351,7 +351,7 @@ public static ж<ΔRat> SetFrac(this ж<ΔRat> Ꮡz, ж<ΔInt> Ꮡa, ж<ΔInt> �
         throw panic("division by zero");
     }
     if (Ꮡz.of(big_package.ΔRat.Ꮡa) == Ꮡb || alias(z.a.abs, babs)) {
-        babs = ((Δnat)default!).set(babs); // make a copy
+        babs = ((Δnat)default).set(babs); // make a copy
     }
     z.a.abs = z.a.abs.set(a.abs);
     z.b.abs = z.b.abs.set(babs);
@@ -376,10 +376,10 @@ public static ж<ΔRat> SetFrac64(this ж<ΔRat> Ꮡz, int64 a, int64 b) {
 }
 
 // SetInt sets z to x (by making a copy of x) and returns z.
-public static ж<ΔRat> SetInt(this ж<ΔRat> Ꮡz, ж<ΔInt> Ꮡx) {
+public static ж<ΔRat> SetInt(this ж<ΔRat> Ꮡz, ж<ΔInt> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
-    Ꮡz.of(big_package.ΔRat.Ꮡa).Set(Ꮡx);
+    Ꮡz.of(big_package.ΔRat.Ꮡa).Set(x);
     z.b.abs = z.b.abs.setWord(1);
     return Ꮡz;
 }
@@ -403,12 +403,12 @@ public static ж<ΔRat> SetUint64(this ж<ΔRat> Ꮡz, uint64 x) {
 }
 
 // Set sets z to x (by making a copy of x) and returns z.
-public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
+public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
-    if (Ꮡz != Ꮡx) {
-        Ꮡz.of(big_package.ΔRat.Ꮡa).Set(Ꮡx.of(big_package.ΔRat.Ꮡa));
-        Ꮡz.of(big_package.ΔRat.Ꮡb).Set(Ꮡx.of(big_package.ΔRat.Ꮡb));
+    if (Ꮡz != x) {
+        Ꮡz.of(big_package.ΔRat.Ꮡa).Set(x.of(big_package.ΔRat.Ꮡa));
+        Ꮡz.of(big_package.ΔRat.Ꮡb).Set(x.of(big_package.ΔRat.Ꮡb));
     }
     if (len(z.b.abs) == 0) {
         z.b.abs = z.b.abs.setWord(1);
@@ -417,19 +417,19 @@ public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
 }
 
 // Abs sets z to |x| (the absolute value of x) and returns z.
-public static ж<ΔRat> Abs(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
+public static ж<ΔRat> Abs(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
-    Ꮡz.Set(Ꮡx);
+    Ꮡz.Set(x);
     z.a.neg = false;
     return Ꮡz;
 }
 
 // Neg sets z to -x and returns z.
-public static ж<ΔRat> Neg(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
+public static ж<ΔRat> Neg(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
-    Ꮡz.Set(Ꮡx);
+    Ꮡz.Set(x);
     z.a.neg = len(z.a.abs) > 0 && !z.a.neg; // 0 has no sign
     return Ꮡz;
 }
@@ -514,22 +514,22 @@ internal static ж<ΔRat> norm(this ж<ΔRat> Ꮡz) {
             z.b.neg = false;
             {
                 var f = NewInt(0).lehmerGCD(nil, nil, Ꮡz.of(big_package.ΔRat.Ꮡa), Ꮡz.of(big_package.ΔRat.Ꮡb)); if (f.Cmp(intOne) != 0) {
-                    (z.a.abs, _) = z.a.abs.div(stk, default!, z.a.abs, (~f).abs);
-                    (z.b.abs, _) = z.b.abs.div(stk, default!, z.b.abs, (~f).abs);
+                    (z.a.abs, _) = z.a.abs.div(stk, default, z.a.abs, f.abs);
+                    (z.b.abs, _) = z.b.abs.div(stk, default, z.b.abs, f.abs);
                 }
             }
             z.a.neg = neg;
         }
         return Ꮡz;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // mulDenom sets z to the denominator product x*y (by taking into
 // account that 0 values for x or y must be interpreted as 1) and
 // returns z.
-internal static Δnat mulDenom(ж<stack> Ꮡstk, Δnat z, Δnat x, Δnat y) {
+internal static Δnat mulDenom(ж<stack> stk, Δnat z, Δnat x, Δnat y) {
     switch (ᐧ) {
     case {} when len(x) == 0 && len(y) == 0: {
         return z.setWord(1);
@@ -540,12 +540,12 @@ internal static Δnat mulDenom(ж<stack> Ꮡstk, Δnat z, Δnat x, Δnat y) {
     case {} when len(y) is 0: {
         return z.set(x);
     }}
-    return z.mul(Ꮡstk, x, y);
+    return z.mul(stk, x, y);
 }
 
 // scaleDenom sets z to the product x*f.
 // If f == 0 (zero value of denominator), z is set to (a copy of) x.
-internal static void scaleDenom(this ж<ΔInt> Ꮡz, ж<stack> Ꮡstk, ж<ΔInt> Ꮡx, Δnat f) {
+internal static void scaleDenom(this ж<ΔInt> Ꮡz, ж<stack> stk, ж<ΔInt> Ꮡx, Δnat f) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -553,7 +553,7 @@ internal static void scaleDenom(this ж<ΔInt> Ꮡz, ж<stack> Ꮡstk, ж<ΔInt>
         Ꮡz.Set(Ꮡx);
         return;
     }
-    z.abs = z.abs.mul(Ꮡstk, x.abs, f);
+    z.abs = z.abs.mul(stk, x.abs, f);
     z.neg = x.neg;
 }
 
@@ -576,7 +576,7 @@ public static nint Cmp(this ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
         Ꮡb.scaleDenom(stk, Ꮡy.of(big_package.ΔRat.Ꮡa), x.b.abs);
         return Ꮡa.Cmp(Ꮡb);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -600,7 +600,7 @@ public static ж<ΔRat> Add(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
         z.b.abs = mulDenom(stk, z.b.abs, x.b.abs, y.b.abs);
         return Ꮡz.norm();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -624,7 +624,7 @@ public static ж<ΔRat> Sub(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
         z.b.abs = mulDenom(stk, z.b.abs, x.b.abs, y.b.abs);
         return Ꮡz.norm();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -644,7 +644,7 @@ public static ж<ΔRat> Mul(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
             // a squared Rat is positive and can't be reduced (no need to call norm())
             z.a.neg = false;
             z.a.abs = z.a.abs.sqr(stk, x.a.abs);
-            if (len(x.b.abs) == 0){
+            if (len(x.b.abs) == 0) {
                 z.b.abs = z.b.abs.setWord(1);
             } else {
                 z.b.abs = z.b.abs.sqr(stk, x.b.abs);
@@ -656,7 +656,7 @@ public static ж<ΔRat> Mul(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
         z.b.abs = mulDenom(stk, z.b.abs, x.b.abs, y.b.abs);
         return Ꮡz.norm();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -685,7 +685,7 @@ public static ж<ΔRat> Quo(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
         z.a.neg = a.neg != b.neg;
         return Ꮡz.norm();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

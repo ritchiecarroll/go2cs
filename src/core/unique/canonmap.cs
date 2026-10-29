@@ -28,10 +28,10 @@ internal static ж<canonMap<T>> newCanonMap<T>() {
     var cm = @new<canonMap<T>>();
     cm.of(canonMap<T>.Ꮡroot).Store(newIndirectNode<T>(nil));
 
-    map<T, EmptyStruct> m = default!;
+    map<T, EmptyStruct> m = default;
     var mapType = abi.TypeOf(m).MapType();
-    cm.Value.hash = mapType.Value.Hasher;
-    cm.Value.seed = (uintptr)runtime_rand();
+    cm.hash = mapType.Hasher;
+    cm.seed = (uintptr)runtime_rand();
     return cm;
 }
 
@@ -49,9 +49,9 @@ internal static ж<T> Load<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
 
         var n = i.at(unique_package.Δindirect<T>.Ꮡchildren, (ulong)((uintptr)((hash.Rsh((int64)(hashShift))) & (uintptr)nChildrenMask))).Load();
         if (n == nil) {
-            return default!;
+            return default;
         }
-        if ((~n).isEntry) {
+        if (n.isEntry) {
             var (v, _) = n.entry().lookup(key);
             return v;
         }
@@ -69,11 +69,11 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
         var hash = m.hash((uintptr)abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), m.seed);
         System.GC.KeepAlive(Ꮡkey);
 
-        ж<Δindirect<T>> i = default!;
-        nuint hashShift = default!;
-        ж<atomic.Pointer<node<T>>> slot = default!;
-        ж<node<T>> n = default!;
-        while (ᐧ) {
+        ж<Δindirect<T>> i = default;
+        nuint hashShift = default;
+        ж<atomic.Pointer<node<T>>> slot = default;
+        ж<node<T>> n = default;
+        for (;;) {
             // Find the key or a candidate location for insertion.
             i = Ꮡm.of(canonMap<T>.Ꮡroot).Load();
             hashShift = 8 * goarch.PtrSize;
@@ -88,7 +88,7 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
                     haveInsertPoint = true;
                     break;
                 }
-                if ((~n).isEntry) {
+                if (n.isEntry) {
                     // We found an existing entry, which is as far as we can go.
                     // If it stays this way, we'll have to replace it with an
                     // indirect node.
@@ -109,7 +109,7 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
             // Grab the lock and double-check what we saw.
             i.of(unique_package.Δindirect<T>.Ꮡmu).Lock();
             n = slot.Load();
-            if ((n == nil || (~n).isEntry) && !i.of(unique_package.Δindirect<T>.Ꮡdead).Load()) {
+            if ((n == nil || n.isEntry) && !i.of(unique_package.Δindirect<T>.Ꮡdead).Load()) {
                 // What we saw is still true, so we can continue with the insert.
                 break;
             }
@@ -124,7 +124,7 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
         var iʗ1 = i;
         defer(iʗ1.of(unique_package.Δindirect<T>.Ꮡmu).Unlock, ref ᒐ);
 
-        ж<Δentry<T>> oldEntry = default!;
+        ж<Δentry<T>> oldEntry = default;
         if (n != nil) {
             oldEntry = n.entry();
             {
@@ -140,7 +140,7 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
         // value in the set but the cleanup hasn't run yet because it got delayed for some
         // reason.
         oldEntry = oldEntry.prune();
-        if (oldEntry == nil){
+        if (oldEntry == nil) {
             // Easy case: create a new entry and store it.
             slot.Store(newEntry.of(unique_package.Δentry<T>.Ꮡnode));
         } else {
@@ -156,14 +156,14 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
         }, new EmptyStruct(), new object?[] { Ꮡm }, new object?[] { wp });
         return canon;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // expand takes oldEntry and newEntry whose hashes conflict from bit 64 down to hashShift and
 // produces a subtree of indirect nodes to hold the two new entries. newHash is the hash of
 // the value in the new entry.
-internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<Δentry<T>> ᏑoldEntry, ж<Δentry<T>> ᏑnewEntry, uintptr newHash, nuint hashShift, ж<Δindirect<T>> Ꮡparent) {
+internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<Δentry<T>> ᏑoldEntry, ж<Δentry<T>> newEntry, uintptr newHash, nuint hashShift, ж<Δindirect<T>> parent) {
     ref var oldEntry = ref ᏑoldEntry.DerefOrNull();
 
     // Check for a hash collision.
@@ -171,13 +171,13 @@ internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<Δentry<T>> Ꮡ
     if (oldHash == newHash) {
         // Store the old entry in the new entry's overflow list, then store
         // the new entry.
-        ᏑnewEntry.of(unique_package.Δentry<T>.Ꮡoverflow).Store(ᏑoldEntry);
-        return ᏑnewEntry.of(unique_package.Δentry<T>.Ꮡnode);
+        newEntry.of(unique_package.Δentry<T>.Ꮡoverflow).Store(ᏑoldEntry);
+        return newEntry.of(unique_package.Δentry<T>.Ꮡnode);
     }
     // We have to add an indirect node. Worse still, we may need to add more than one.
-    var newIndirect = newIndirectNode(Ꮡparent);
+    var newIndirect = newIndirectNode(parent);
     var top = newIndirect;
-    while (ᐧ) {
+    for (;;) {
         if (hashShift == 0) {
             throw panic("unique.canonMap: ran out of hash bits while inserting");
         }
@@ -186,7 +186,7 @@ internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<Δentry<T>> Ꮡ
         var ni = (uintptr)((newHash.Rsh(hashShift)) & (uintptr)nChildrenMask);
         if (oi != ni) {
             newIndirect.at(unique_package.Δindirect<T>.Ꮡchildren, (ulong)(oi)).Store(ᏑoldEntry.of(unique_package.Δentry<T>.Ꮡnode));
-            newIndirect.at(unique_package.Δindirect<T>.Ꮡchildren, (ulong)(ni)).Store(ᏑnewEntry.of(unique_package.Δentry<T>.Ꮡnode));
+            newIndirect.at(unique_package.Δindirect<T>.Ꮡchildren, (ulong)(ni)).Store(newEntry.of(unique_package.Δentry<T>.Ꮡnode));
             break;
         }
         var nextIndirect = newIndirectNode(newIndirect);
@@ -201,11 +201,11 @@ internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<Δentry<T>> Ꮡ
 // time this function is called. hash must be the hash of the value that
 // wp once pointed to (that is, the hash of *wp.Value()).
 internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Pointer<T> wp) {
-    ж<Δindirect<T>> i = default!;
-    nuint hashShift = default!;
-    ж<atomic.Pointer<node<T>>> slot = default!;
-    ж<node<T>> n = default!;
-    while (ᐧ) {
+    ж<Δindirect<T>> i = default;
+    nuint hashShift = default;
+    ж<atomic.Pointer<node<T>>> slot = default;
+    ж<node<T>> n = default;
+    for (;;) {
         // Find wp in the map by following hash.
         i = Ꮡm.of(canonMap<T>.Ꮡroot).Load();
         hashShift = 8 * goarch.PtrSize;
@@ -219,7 +219,7 @@ internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Po
                 // We found a nil slot, already deleted.
                 return;
             }
-            if ((~n).isEntry) {
+            if (n.isEntry) {
                 if (!n.entry().hasWeakPointer(wp)) {
                     // The weak pointer was already pruned.
                     return;
@@ -236,13 +236,13 @@ internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Po
         // Grab the lock and double-check what we saw.
         i.of(unique_package.Δindirect<T>.Ꮡmu).Lock();
         n = slot.Load();
-        if (n != nil && (~n).isEntry) {
+        if (n != nil && n.isEntry) {
             // Prune the entry node without thinking too hard. If we do
             // somebody else's work, such as someone trying to insert an
             // entry with the same hash (probably the same value) then
             // great, they'll back out without taking the lock.
             var newEntry = n.entry().prune();
-            if (newEntry == nil){
+            if (newEntry == nil) {
                 slot.Store(nil);
             } else {
                 slot.Store(newEntry.of(unique_package.Δentry<T>.Ꮡnode));
@@ -253,14 +253,14 @@ internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Po
             // We'll hand-over-hand lock our way up the tree as we do this,
             // since we need to delete each empty node's link in its parent,
             // which requires the parents' lock.
-            while ((~i).parent != nil && i.empty()) {
+            while (i.parent != nil && i.empty()) {
                 if (hashShift == (nuint)(8 * goarch.PtrSize)) {
                     throw panic("unique.canonMap: ran out of hash bits while iterating");
                 }
                 hashShift += nChildrenLog2;
 
                 // Delete the current node in the parent.
-                var parent = i.Value.parent;
+                var parent = i.parent;
                 parent.of(unique_package.Δindirect<T>.Ꮡmu).Lock();
                 i.of(unique_package.Δindirect<T>.Ꮡdead).Store(true); // Could be done outside of parent's lock.
                 parent.at(unique_package.Δindirect<T>.Ꮡchildren, (ulong)((uintptr)((hash.Rsh(hashShift)) & (uintptr)nChildrenMask))).Store(nil);
@@ -316,8 +316,8 @@ partial struct Δindirect<T> {
     internal array<atomic.Pointer<node<T>>> children = new(nChildren);
 }
 
-internal static ж<Δindirect<T>> newIndirectNode<T>(ж<Δindirect<T>> Ꮡparent) {
-    return Ꮡ(new Δindirect<T>(node: new node<T>(isEntry: false), parent: Ꮡparent));
+internal static ж<Δindirect<T>> newIndirectNode<T>(ж<Δindirect<T>> parent) {
+    return Ꮡ(new Δindirect<T>(node: new node<T>(isEntry: false), parent: parent));
 }
 
 internal static bool empty<T>(this ref Δindirect<T> i) {
@@ -340,8 +340,7 @@ partial struct Δentry<T> {
 internal static (ж<Δentry<T>>, ж<T>, weak.Pointer<T>) newEntryNode<T>(T key, uintptr hash) {
     var k = @new<T>();
     k.ValueSlot = key;
-    ref var wp = ref heap<weak.Pointer<T>>(out var Ꮡwp);
-    wp = weak.Make<T>(k);
+    ref var wp = ref heap<weak.Pointer<T>>(weak.Make<T>(k), out var Ꮡwp);
     return (Ꮡ(new Δentry<T>(
         node: new node<T>(isEntry: true),
         key: wp,
@@ -362,7 +361,7 @@ internal static (ж<T>, weak.Pointer<T>) lookup<T>(this ж<Δentry<T>> Ꮡe, T k
         }
         Ꮡe = Ꮡe.of(unique_package.Δentry<T>.Ꮡoverflow).Load(); e = ref Ꮡe.DerefOrNull();
     }
-    return (default!, new weak.Pointer<T>(nil));
+    return (default, new weak.Pointer<T>());
 }
 
 // hasWeakPointer returns true if the provided weak pointer can be found in the overflow chain.
@@ -392,7 +391,7 @@ internal static ж<Δentry<T>> prune<T>(this ж<Δentry<T>> Ꮡe) {
         Ꮡe = Ꮡe.of(unique_package.Δentry<T>.Ꮡoverflow).Load(); e = ref Ꮡe.DerefOrNull();
     }
     if (Ꮡe == nil) {
-        return default!;
+        return default;
     }
 
     // Prune individual nodes in the list.
@@ -400,7 +399,7 @@ internal static ж<Δentry<T>> prune<T>(this ж<Δentry<T>> Ꮡe) {
     var i = Ꮡe.of(unique_package.Δentry<T>.Ꮡoverflow);
     Ꮡe = i.Load(); e = ref Ꮡe.DerefOrNull();
     while (Ꮡe != nil) {
-        if (e.key.Value() != nil){
+        if (e.key.Value() != nil) {
             i = Ꮡe.of(unique_package.Δentry<T>.Ꮡoverflow);
         } else {
             i.Store(Ꮡe.of(unique_package.Δentry<T>.Ꮡoverflow).Load());

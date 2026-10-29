@@ -55,7 +55,7 @@ internal static void writeMultiple(fmt.State s, @string text, nint count) {
     }
 }
 
-internal static fmt.Formatter _ᴛ4ʗ = new ΔIntжFormatter(intOne);   // *Int must implement fmt.Formatter
+internal static fmt.Formatter _ᴛ4ʗ = new ΔIntжFormatter(intOne); // *Int must implement fmt.Formatter
 
 // Format implements [fmt.Formatter]. It accepts the formats
 // 'b' (binary), 'o' (octal with 0 prefix), 'O' (octal with 0o prefix),
@@ -72,21 +72,21 @@ public static void Format(this ж<ΔInt> Ꮡx, fmt.State s, rune ch) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // determine base
-    nint @base = default!;
+    nint @base = default;
     switch (ch) {
-    case (rune)'b': {
+    case 'b': {
         @base = 2;
         break;
     }
-    case (rune)'o' or (rune)'O': {
+    case 'o' or 'O': {
         @base = 8;
         break;
     }
-    case (rune)'d' or (rune)'s' or (rune)'v': {
+    case 'd' or 's' or 'v': {
         @base = 10;
         break;
     }
-    case (rune)'x' or (rune)'X': {
+    case 'x' or 'X': {
         @base = 16;
         break;
     }
@@ -108,54 +108,54 @@ public static void Format(this ж<ΔInt> Ꮡx, fmt.State s, rune ch) {
         sign = "-"u8;
         break;
     }
-    case {} when s.Flag((rune)'+'): { // supersedes ' ' when both specified
+    case {} when s.Flag('+'): { // supersedes ' ' when both specified
         sign = "+"u8;
         break;
     }
-    case {} when s.Flag((rune)' '): {
+    case {} when s.Flag(' '): {
         sign = " "u8;
         break;
     }}
 
     // determine prefix characters for indicating output base
     @string prefix = ""u8;
-    if (s.Flag((rune)'#')) {
+    if (s.Flag('#')) {
         switch (ch) {
-        case (rune)'b': { // binary
+        case 'b': { // binary
             prefix = "0b"u8;
             break;
         }
-        case (rune)'o': { // octal
+        case 'o': { // octal
             prefix = "0"u8;
             break;
         }
-        case (rune)'x': { // hexadecimal
+        case 'x': { // hexadecimal
             prefix = "0x"u8;
             break;
         }
-        case (rune)'X': {
+        case 'X': {
             prefix = "0X"u8;
             break;
         }}
     }
-    if (ch == (rune)'O') {
+    if (ch == 'O') {
         prefix = "0o"u8;
     }
 
     var digits = x.abs.utoa(@base);
-    if (ch == (rune)'X') {
+    if (ch == 'X') {
         // faster than bytes.ToUpper
         foreach (var (i, d) in digits) {
-            if ((rune)'a' <= d && d <= (rune)'z') {
-                digits[i] = (byte)((rune)'A' + (d - (rune)'a'));
+            if ('a' <= d && d <= 'z') {
+                digits[i] = (byte)('A' + (d - 'a'));
             }
         }
     }
 
     // number of characters for the three classes of number padding
-    nint left = default!;     // space characters to left of digits for right justification ("%8d")
-    nint zeros = default!;   // zero characters (actually cs[0]) as left-most digits ("%.8d")
-    nint right = default!;   // space characters to right of digits for left justification ("%-8d")
+    nint left = default;  // space characters to left of digits for right justification ("%8d")
+    nint zeros = default; // zero characters (actually cs[0]) as left-most digits ("%.8d")
+    nint right = default; // space characters to right of digits for left justification ("%-8d")
 
     // determine number padding from precision: the least number of digits to output
     var (precision, precisionSet) = s.Precision();
@@ -165,7 +165,7 @@ public static void Format(this ж<ΔInt> Ꮡx, fmt.State s, rune ch) {
             zeros = precision - len(digits); // count of zero padding
             break;
         }
-        case {} when len(digits) == 1 && digits[0] == (rune)'0' && precision == 0: {
+        case {} when len(digits) == 1 && digits[0] == (byte)'0' && precision == 0: {
             return; // print nothing if zero value (x == 0) and zero precision ("." or ".0")
         }}
     }
@@ -177,12 +177,12 @@ public static void Format(this ж<ΔInt> Ꮡx, fmt.State s, rune ch) {
             {
                 nint d = width - length;
                 switch (ᐧ) {
-                case {} when s.Flag((rune)'-'): {
+                case {} when s.Flag('-'): {
                     // pad on the right with spaces; supersedes '0' when both specified
                     right = d;
                     break;
                 }
-                case {} when s.Flag((rune)'0') && !precisionSet: {
+                case {} when s.Flag('0') && !precisionSet: {
                     // pad with zeros unless precision also specified
                     zeros = d;
                     break;
@@ -221,36 +221,36 @@ internal static (ж<ΔInt>, nint, error) scan(this ж<ΔInt> Ꮡz, io.ByteScanne
 
     // determine sign
     var (neg, err) = scanSign(r);
-    if (err != default!) {
-        return (default!, 0, err);
+    if (err != nil) {
+        return (default, 0, err);
     }
 
     // determine mantissa
     (z.abs, @base, _, err) = z.abs.scan(r, @base, false);
-    if (err != default!) {
-        return (default!, @base, err);
+    if (err != nil) {
+        return (default, @base, err);
     }
     z.neg = len(z.abs) > 0 && neg; // 0 has no sign
 
-    return (Ꮡz, @base, default!);
+    return (Ꮡz, @base, default);
 }
 
 internal static (bool neg, error err) scanSign(io.ByteScanner r) {
-    bool neg = default!;
-    error err = default!;
+    bool neg = default;
+    error err = default;
 
-    byte ch = default!;
+    byte ch = default;
     {
-        (ch, err) = r.ReadByte(); if (err != default!) {
+        (ch, err) = r.ReadByte(); if (err != nil) {
             return (false, err);
         }
     }
     switch (ch) {
-    case (rune)'-': {
+    case (byte)'-': {
         neg = true;
         break;
     }
-    case (rune)'+': {
+    case (byte)'+': {
         // nothing to do
         break;
     }
@@ -269,7 +269,7 @@ partial struct byteReader {
 
 internal static (byte, error) ReadByte(this byteReader r) {
     var (ch, size, err) = r.ScanState.ReadRune();
-    if (size != 1 && err == default!) {
+    if (size != 1 && err == nil) {
         err = fmt.Errorf("invalid rune %#U"u8, ch);
     }
     return ((byte)ch, err);
@@ -291,23 +291,23 @@ public static error Scan(this ж<ΔInt> Ꮡz, fmt.ScanState s, rune ch) {
     s.SkipSpace(); // skip leading space characters
     nint @base = 0;
     switch (ch) {
-    case (rune)'b': {
+    case 'b': {
         @base = 2;
         break;
     }
-    case (rune)'o': {
+    case 'o': {
         @base = 8;
         break;
     }
-    case (rune)'d': {
+    case 'd': {
         @base = 10;
         break;
     }
-    case (rune)'x' or (rune)'X': {
+    case 'x' or 'X': {
         @base = 16;
         break;
     }
-    case (rune)'s' or (rune)'v': {
+    case 's' or 'v': {
         // let scan determine the base
         break;
     }

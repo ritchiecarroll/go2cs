@@ -35,26 +35,25 @@ partial class cfile_package {
 public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, @string cpkg, io.Writer w, slice<@string> selpkgs) {
     GoFrame ᒐ = default;
     try {
-        ref var cmode = ref heap<coverage.CounterMode>(out var Ꮡcmode);
-        cmode = coverage.ParseCounterMode(cm);
+        ref var cmode = ref heap<coverage.CounterMode>(coverage.ParseCounterMode(cm), out var Ꮡcmode);
         if (cmode == coverage.CtrModeInvalid) {
             return fmt.Errorf("invalid counter mode %q"u8, cm);
         }
 
         // Emit meta-data and counter data.
         var ml = rtcov.Meta.List;
-        if (len(ml) == 0){
+        if (len(ml) == 0) {
             // This corresponds to the case where we have a package that
             // contains test code but no functions (which is fine). In this
             // case there is no need to emit anything.
         } else {
             {
-                var errΔ1 = emitMetaDataToDirectory(dir, ml); if (errΔ1 != default!) {
+                var errΔ1 = emitMetaDataToDirectory(dir, ml); if (errΔ1 != nil) {
                     return errΔ1;
                 }
             }
             {
-                var errΔ2 = emitCounterDataToDirectory(dir); if (errΔ2 != default!) {
+                var errΔ2 = emitCounterDataToDirectory(dir); if (errΔ2 != nil) {
                     return errΔ2;
                 }
             }
@@ -64,18 +63,18 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
         // expect to see a single pod here, but allow for multiple pods in
         // case the test harness is doing extra work to collect data files
         // from builds that it kicks off as part of the testing.
-        var (podlist, err) = pods.CollectPods(new @string[]{dir}.slice(), false);
-        if (err != default!) {
+        var (podlist, err) = pods.CollectPods(slice<@string>([dir]), false);
+        if (err != nil) {
             return fmt.Errorf("reading from %s: %v"u8, dir, err);
         }
 
         // Open text output file if appropriate.
-        ж<os.File> tf = default!;
-        bool tfClosed = default!;
+        ж<os.File> tf = default;
+        bool tfClosed = default;
         if (cfile != ""u8) {
-            error errΔ3 = default!;
+            error errΔ3 = default;
             (tf, errΔ3) = os.Create(cfile);
-            if (errΔ3 != default!) {
+            if (errΔ3 != nil) {
                 return fmt.Errorf("internal error: opening coverage data output file %q: %v"u8, cfile, errΔ3);
             }
             var tfʗ1 = tf;
@@ -89,7 +88,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
 
         // Read/process the pods.
         var ts = Ꮡ(new tstate(
-            cm: Ꮡ(new cmerge.Merger(nil)),
+            cm: Ꮡ(new cmerge.Merger()),
             cf: cformat.NewFormatter(cmode),
             cmode: cmode
         ));
@@ -104,7 +103,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 continue;
             }
             {
-                var errΔ4 = ts.processPod(p, importpaths); if (errΔ4 != default!) {
+                var errΔ4 = ts.processPod(p, importpaths); if (errΔ4 != nil) {
                     return errΔ4;
                 }
             }
@@ -112,9 +111,9 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
 
         @string metafilespath = filepath.Join(dir, coverage.MetaFilesFileName);
         {
-            var (_, errΔ5) = os.Stat(metafilespath); if (errΔ5 == default!) {
+            var (_, errΔ5) = os.Stat(metafilespath); if (errΔ5 == nil) {
                 {
-                    var errΔ6 = ts.readAuxMetaFiles(metafilespath, importpaths); if (errΔ6 != default!) {
+                    var errΔ6 = ts.readAuxMetaFiles(metafilespath, importpaths); if (errΔ6 != nil) {
                         return errΔ6;
                     }
                 }
@@ -123,7 +122,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
 
         // Emit percent.
         {
-            var errΔ7 = (~ts).cf.EmitPercent(w, selpkgs, cpkg, true, true); if (errΔ7 != default!) {
+            var errΔ7 = ts.cf.EmitPercent(w, selpkgs, cpkg, true, true); if (errΔ7 != nil) {
                 return errΔ7;
             }
         }
@@ -131,21 +130,21 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
         // Emit text output.
         if (tf != nil) {
             {
-                var errΔ8 = (~ts).cf.EmitTextual(selpkgs, new os.FileжWriter(tf)); if (errΔ8 != default!) {
+                var errΔ8 = ts.cf.EmitTextual(selpkgs, new os.FileжWriter(tf)); if (errΔ8 != nil) {
                     return errΔ8;
                 }
             }
             tfClosed = true;
             {
-                var errΔ9 = tf.Close(); if (errΔ9 != default!) {
+                var errΔ9 = tf.Close(); if (errΔ9 != nil) {
                     return fmt.Errorf("closing %s: %v"u8, cfile, errΔ9);
                 }
             }
         }
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -164,16 +163,16 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
 
         // Open meta-data file
         var (f, err) = os.Open(p.MetaFile);
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("unable to open meta-data file %s: %v"u8, p.MetaFile, err);
         }
         var fʗ1 = f;
         defer(() => {
             fʗ1.Close();
         }, ref ᒐ);
-        ж<decodemeta.CoverageMetaFileReader> mfr = default!;
-        (mfr, err) = decodemeta.NewCoverageMetaFileReader(f, default!);
-        if (err != default!) {
+        ж<decodemeta.CoverageMetaFileReader> mfr = default;
+        (mfr, err) = decodemeta.NewCoverageMetaFileReader(f, default);
+        if (err != nil) {
             return fmt.Errorf("error reading meta-data file %s: %v"u8, p.MetaFile, err);
         }
         var newmode = mfr.CounterMode();
@@ -182,7 +181,7 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
         }
         var newgran = mfr.CounterGranularity();
         {
-            var errΔ1 = ts.cm.SetModeAndGranularity(p.MetaFile, cmode, newgran); if (errΔ1 != default!) {
+            var errΔ1 = ts.cm.SetModeAndGranularity(p.MetaFile, cmode, newgran); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
@@ -196,20 +195,20 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
             GoFrame ᒐ = default;
             try {
                 var (cf, errΔ2) = os.Open(cdf);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return fmt.Errorf("opening counter data file %s: %s"u8, cdf, errΔ2);
                 }
                 var cfʗ1 = cf;
                 defer(() => cfʗ1.Close(), ref ᒐ);
-                ж<decodecounter.CounterDataReader> cdr = default!;
+                ж<decodecounter.CounterDataReader> cdr = default;
                 (cdr, errΔ2) = decodecounter.NewCounterDataReader(cdf, new os_FileжReadSeeker(cf));
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return fmt.Errorf("reading counter data file %s: %s"u8, cdf, errΔ2);
                 }
                 ref var data = ref heap(new decodecounter.FuncPayload(), out var Ꮡdata);
-                while (ᐧ) {
+                for (;;) {
                     var (ok, errΔ3) = cdr.NextFunc(Ꮡdata);
-                    if (errΔ3 != default!) {
+                    if (errΔ3 != nil) {
                         return fmt.Errorf("reading counter data file %s: %v"u8, cdf, errΔ3);
                     }
                     if (!ok) {
@@ -222,7 +221,7 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
                         var (prev, found) = pmmʗ1[key, ꟷ]; if (found) {
                             // Note: no overflow reporting here.
                             {
-                                var (errΔ4, _) = Ꮡts.Value.cm.MergeCounters(data.Counters, prev); if (errΔ4 != default!) {
+                                var (errΔ4, _) = Ꮡts.Value.cm.MergeCounters(data.Counters, prev); if (errΔ4 != nil) {
                                     return fmt.Errorf("processing counter data file %s: %v"u8, cdf, errΔ4);
                                 }
                             }
@@ -232,16 +231,16 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
                     copy(c, data.Counters);
                     pmmʗ1[key] = c;
                 }
-                return default!;
+                return default;
             }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
             finally { ᒐ.Run(); }
         }
 
         // Read counter data files.
         foreach (var (_, cdf) in p.CounterDataFiles) {
             {
-                var errΔ5 = readcdf(cdf); if (errΔ5 != default!) {
+                var errΔ5 = readcdf(cdf); if (errΔ5 != nil) {
                     return errΔ5;
                 }
             }
@@ -249,11 +248,11 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
 
         // Visit meta-data file.
         var np = (uint32)mfr.NumPackages();
-        var payload = new byte[]{}.slice();
+        var payload = slice<byte>([]);
         for (var pkIdx = (uint32)0; pkIdx < np; pkIdx++) {
-            ж<decodemeta.CoverageMetaDataDecoder> pd = default!;
+            ж<decodemeta.CoverageMetaDataDecoder> pd = default;
             (pd, payload, err) = mfr.GetPackageDecoder(pkIdx, payload);
-            if (err != default!) {
+            if (err != nil) {
                 return fmt.Errorf("reading pkg %d from meta-file %s: %s"u8, pkIdx, p.MetaFile, err);
             }
             ts.cf.SetPackage(pd.PackagePath());
@@ -262,7 +261,7 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
             var nf = pd.NumFuncs();
             for (var fnIdx = (uint32)0; fnIdx < nf; fnIdx++) {
                 {
-                    var errΔ6 = pd.ReadFunc(fnIdx, Ꮡfd); if (errΔ6 != default!) {
+                    var errΔ6 = pd.ReadFunc(fnIdx, Ꮡfd); if (errΔ6 != nil) {
                         return fmt.Errorf("reading meta-data file %s: %v"u8,
                             p.MetaFile, errΔ6);
                     }
@@ -284,9 +283,9 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
                 }
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -299,11 +298,11 @@ internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles,
     // a MetaFileCollection struct.
     ref var mfc = ref heap(new coverage.MetaFileCollection(), out var Ꮡmfc);
     var (data, err) = os.ReadFile(metafiles);
-    if (err != default!) {
+    if (err != nil) {
         return fmt.Errorf("error reading auxmetafiles file %q: %v"u8, metafiles, err);
     }
     {
-        var errΔ1 = json.Unmarshal(data, Ꮡmfc); if (errΔ1 != default!) {
+        var errΔ1 = json.Unmarshal(data, Ꮡmfc); if (errΔ1 != nil) {
             return fmt.Errorf("error reading auxmetafiles file %q: %v"u8, metafiles, errΔ1);
         }
     }
@@ -320,15 +319,15 @@ internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles,
                 continue;
             }
         }
-        pods.Pod pod = default!;
+        pods.Pod pod = default;
         pod.MetaFile = mfc.MetaFileFragments[i];
         {
-            var errΔ2 = Ꮡts.processPod(pod, importpaths); if (errΔ2 != default!) {
+            var errΔ2 = Ꮡts.processPod(pod, importpaths); if (errΔ2 != nil) {
                 return errΔ2;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // Snapshot returns a snapshot of coverage percentage at a moment of

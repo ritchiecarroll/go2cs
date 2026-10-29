@@ -139,46 +139,45 @@ private static readonly @string refusingToUseHttpProxyˢ = "refusing to use HTTP
 internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL> ᏑreqURL) {
     ref var reqURL = ref ᏑreqURL.DerefOrNull();
 
-    ж<url.URL> proxy = default!;
-    if (reqURL.Scheme == "https"u8){
+    ж<url.URL> proxy = default;
+    if (reqURL.Scheme == "https"u8) {
         proxy = cfg.httpsProxy;
-    } else 
-    if (reqURL.Scheme == "http"u8) {
+    } else if (reqURL.Scheme == "http"u8) {
         proxy = cfg.httpProxy;
         if (proxy != nil && cfg.CGI) {
-            return (default!, errors.New(refusingToUseHttpProxyˢ));
+            return (default, errors.New(refusingToUseHttpProxyˢ));
         }
     }
     if (proxy == nil) {
-        return (default!, default!);
+        return (default, default);
     }
     if (!cfg.useProxy(canonicalAddr(ᏑreqURL))) {
-        return (default!, default!);
+        return (default, default);
     }
 
-    return (proxy, default!);
+    return (proxy, default);
 }
 
 internal static (ж<url.URL>, error) parseProxy(@string proxy) {
     if (proxy == ""u8) {
-        return (default!, default!);
+        return (default, default);
     }
 
     var (proxyURL, err) = url.Parse(proxy);
-    if (err != default! || (~proxyURL).Scheme == ""u8 || (~proxyURL).Host == ""u8) {
+    if (err != nil || proxyURL.Scheme == ""u8 || proxyURL.Host == ""u8) {
         // proxy was bogus. Try prepending "http://" to it and
         // see if that parses correctly. If not, we fall
         // through and complain about the original one.
         {
-            var (proxyURLΔ1, errΔ1) = url.Parse("http://"u8 + proxy); if (errΔ1 == default!) {
-                return (proxyURLΔ1, default!);
+            var (proxyURLΔ1, errΔ1) = url.Parse("http://"u8 + proxy); if (errΔ1 == nil) {
+                return (proxyURLΔ1, default);
             }
         }
     }
-    if (err != default!) {
-        return (default!, fmt.Errorf("invalid proxy address %q: %v"u8, proxy, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("invalid proxy address %q: %v"u8, proxy, err));
     }
-    return (proxyURL, default!);
+    return (proxyURL, default);
 }
 
 // useProxy reports whether requests to addr should use a proxy,
@@ -189,15 +188,15 @@ internal static bool useProxy(this ref config cfg, @string addr) {
         return true;
     }
     var (host, port, err) = net.SplitHostPort(addr);
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
     if (host == "localhost"u8) {
         return false;
     }
     (var nip, err) = netip.ParseAddr(host);
-    net.IP ip = default!;
-    if (err == default!) {
+    net.IP ip = default;
+    if (err == nil) {
         ip = (net.IP)nip.AsSlice();
         if (ip.IsLoopback()) {
             return false;
@@ -206,7 +205,7 @@ internal static bool useProxy(this ref config cfg, @string addr) {
 
     addr = strings.ToLower(strings.TrimSpace(host));
 
-    if (ip != default!) {
+    if (ip != nil) {
         foreach (var (_, m) in cfg.ipMatchers) {
             if (m.match(addr, port, ip)) {
                 return false;
@@ -223,12 +222,12 @@ internal static bool useProxy(this ref config cfg, @string addr) {
 
 internal static void init(this ref config c) {
     {
-        var (parsed, err) = parseProxy(c.HTTPProxy); if (err == default!) {
+        var (parsed, err) = parseProxy(c.HTTPProxy); if (err == nil) {
             c.httpProxy = parsed;
         }
     }
     {
-        var (parsed, err) = parseProxy(c.HTTPSProxy); if (err == default!) {
+        var (parsed, err) = parseProxy(c.HTTPSProxy); if (err == nil) {
             c.httpsProxy = parsed;
         }
     }
@@ -242,14 +241,14 @@ internal static void init(this ref config c) {
         }
 
         if (p == "*"u8) {
-            c.ipMatchers = new matcher[]{new allMatch(nil)}.slice();
-            c.domainMatchers = new matcher[]{new allMatch(nil)}.slice();
+            c.ipMatchers = slice<matcher>([new allMatch()]);
+            c.domainMatchers = slice<matcher>([new allMatch()]);
             return;
         }
 
         // IPv4/CIDR, IPv6/CIDR
         {
-            var (_, pnet, errΔ1) = net.ParseCIDR(p); if (errΔ1 == default!) {
+            var (_, pnet, errΔ1) = net.ParseCIDR(p); if (errΔ1 == nil) {
                 c.ipMatchers = append(c.ipMatchers, (matcher)(new cidrMatch(cidr: pnet)));
                 continue;
             }
@@ -257,12 +256,12 @@ internal static void init(this ref config c) {
 
         // IPv4:port, [IPv6]:port
         var (phost, pport, err) = net.SplitHostPort(p);
-        if (err == default!){
+        if (err == nil) {
             if (len(phost) == 0) {
                 // There is no host part, likely the entry is malformed; ignore.
                 continue;
             }
-            if (phost[0] == (rune)'[' && phost[len(phost) - 1] == (rune)']') {
+            if (phost[0] == '[' && phost[len(phost) - 1] == ']') {
                 phost = phost.slice(1, len(phost) - 1);
             }
         } else {
@@ -270,7 +269,7 @@ internal static void init(this ref config c) {
         }
         // IPv4, IPv6
         {
-            var pip = net.ParseIP(phost); if (pip != default!) {
+            var pip = net.ParseIP(phost); if (pip != nil) {
                 c.ipMatchers = append(c.ipMatchers, (matcher)(new ipMatch(ip: pip, port: pport)));
                 continue;
             }
@@ -289,12 +288,12 @@ internal static void init(this ref config c) {
             phost = phost[1..];
         }
         var matchHost = false;
-        if (phost[0] != (rune)'.') {
+        if (phost[0] != '.') {
             matchHost = true;
             phost = "."u8 + phost;
         }
         {
-            var (v, errΔ1) = idnaASCII(phost); if (errΔ1 == default!) {
+            var (v, errΔ1) = idnaASCII(phost); if (errΔ1 == nil) {
                 phost = v;
             }
         }
@@ -314,7 +313,7 @@ internal static @string canonicalAddr(ж<url.URL> Ꮡurl) {
 
     @string addr = urlΔ1.Hostname();
     {
-        var (v, err) = idnaASCII(addr); if (err == default!) {
+        var (v, err) = idnaASCII(addr); if (err == nil) {
             addr = v;
         }
     }
@@ -342,7 +341,7 @@ internal static (@string, error) idnaASCII(@string v) {
     // Note that for correct ASCII IDNs ToASCII will only do considerably more
     // work, but it will not cause an allocation.
     if (isASCII(v)) {
-        return (v, default!);
+        return (v, default);
     }
     return idna.Lookup.ToASCII(v);
 }
@@ -398,7 +397,7 @@ partial struct domainMatch {
 }
 
 internal static bool match(this domainMatch m, @string host, @string port, net.IP ip) {
-    if (ip != default!) {
+    if (ip != nil) {
         return false;
     }
     if (strings.HasSuffix(host, m.host) || (m.matchHost && host == m.host[1..])) {

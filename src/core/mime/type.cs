@@ -13,7 +13,7 @@ using Δsync = sync_package;
 partial class mime_package {
 
 internal static readonly ж<Δsync.Map> ᏑmimeTypes = new StaticBox<Δsync.Map>(default(Δsync.Map));
-internal static ref Δsync.Map mimeTypes => ref ((StaticBox<Δsync.Map>)ᏑmimeTypes).ValueSlot;  // map[string]string; ".Z" => "application/x-compress"
+internal static ref Δsync.Map mimeTypes => ref ((StaticBox<Δsync.Map>)ᏑmimeTypes).ValueSlot;           // map[string]string; ".Z" => "application/x-compress"
 internal static readonly ж<Δsync.Map> ᏑmimeTypesLower = new StaticBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map mimeTypesLower => ref ((StaticBox<Δsync.Map>)ᏑmimeTypesLower).ValueSlot; // map[string]string; ".z" => "application/x-compress"
 
@@ -22,7 +22,7 @@ internal static ref Δsync.Map mimeTypesLower => ref ((StaticBox<Δsync.Map>)Ꮡ
 internal static readonly ж<Δsync.Mutex> ᏑextensionsMu = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex extensionsMu => ref ((StaticBox<Δsync.Mutex>)ᏑextensionsMu).ValueSlot; // Guards stores (but not loads) on extensions.
 internal static readonly ж<Δsync.Map> Ꮡextensions = new StaticBox<Δsync.Map>(default(Δsync.Map));
-internal static ref Δsync.Map extensions => ref ((StaticBox<Δsync.Map>)Ꮡextensions).ValueSlot; // map[string][]string; slice values are append-only.
+internal static ref Δsync.Map extensions => ref ((StaticBox<Δsync.Map>)Ꮡextensions).ValueSlot;         // map[string][]string; slice values are append-only.
 
 // setMimeTypes is used by initMime's non-test path, and by tests.
 internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @string> mixExt) {
@@ -43,10 +43,10 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
         defer(ᏑextensionsMu.Unlock, ref ᒐ);
         foreach (var (k, v) in lowerExt) {
             var (justType, _, err) = ParseMediaType(v);
-            if (err != default!) {
+            if (err != nil) {
                 throw panic(err);
             }
-            slice<@string> exts = default!;
+            slice<@string> exts = default;
             {
                 var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
                     exts = ei._<slice<@string>>();
@@ -138,14 +138,14 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
 }; }
 
 internal static readonly ж<Δsync.Once> Ꮡonce = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once once => ref ((StaticBox<Δsync.Once>)Ꮡonce).ValueSlot;    // guards initMime
+internal static ref Δsync.Once once => ref ((StaticBox<Δsync.Once>)Ꮡonce).ValueSlot; // guards initMime
 
 internal static Action testInitMime;
 internal static Action osInitMime;
 
 internal static void initMime() {
     {
-        var fn = testInitMime; if (fn != default!){
+        var fn = testInitMime; if (fn != nil) {
             fn();
         } else {
             setMimeTypes(builtinTypesLower, builtinTypesLower);
@@ -200,7 +200,7 @@ public static @string TypeByExtension(@string ext) {
             var (sΔ1, _) = siΔ1._<@string>(ᐧ);
             return sΔ1;
         }
-        if ((rune)'A' <= c && c <= (rune)'Z'){
+        if ('A' <= c && c <= 'Z') {
             lower = append(lowerᴷ, lower, (byte)(c + ((rune)'a' - (rune)'A')));
         } else {
             lower = append(lower, c);
@@ -230,18 +230,18 @@ public static @string TypeByExtension(@string ext) {
 // On Windows, extensions are extracted from the registry.
 public static (slice<@string>, error) ExtensionsByType(@string typ) {
     var (justType, _, err) = ParseMediaType(typ);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     Ꮡonce.Do(initMime);
     var (s, ok) = Ꮡextensions.Load(justType);
     if (!ok) {
-        return (default!, default!);
+        return (default, default);
     }
-    var ret = appendꓸꓸꓸ(slice<@string>(default!), s._<slice<@string>>());
+    var ret = appendꓸꓸꓸ(slice<@string>(default), s._<slice<@string>>());
     slices.Sort<slice<@string>, @string>(ret);
-    return (ret, default!);
+    return (ret, default);
 }
 
 // AddExtensionType sets the MIME type associated with
@@ -263,7 +263,7 @@ internal static error setExtensionType(@string extension, @string mimeType) {
     GoFrame ᒐ = default;
     try {
         var (justType, param, err) = ParseMediaType(mimeType);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (strings.HasPrefix(mimeType, textˢ) && param[charsetˢ] == "") {
@@ -277,7 +277,7 @@ internal static error setExtensionType(@string extension, @string mimeType) {
 
         ᏑextensionsMu.Lock();
         defer(ᏑextensionsMu.Unlock, ref ᒐ);
-        slice<@string> exts = default!;
+        slice<@string> exts = default;
         {
             var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
                 exts = ei._<slice<@string>>();
@@ -285,13 +285,13 @@ internal static error setExtensionType(@string extension, @string mimeType) {
         }
         foreach (var (_, v) in exts) {
             if (v == extLower) {
-                return default!;
+                return default;
             }
         }
         Ꮡextensions.Store(justType, append(exts, extLower));
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

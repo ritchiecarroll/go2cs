@@ -56,29 +56,29 @@ internal static nint minVersion(Expr z, nint sign) {
         if (sign < 0) {
             op = orVersion;
         }
-        return op(minVersion((~zΔ1).X, sign), minVersion((~zΔ1).Y, sign));
+        return op(minVersion(zΔ1.X, sign), minVersion(zΔ1.Y, sign));
     }
     case ж<OrExpr> zΔ1: {
         var op = orVersion;
         if (sign < 0) {
             op = andVersion;
         }
-        return op(minVersion((~zΔ1).X, sign), minVersion((~zΔ1).Y, sign));
+        return op(minVersion(zΔ1.X, sign), minVersion(zΔ1.Y, sign));
     }
     case ж<NotExpr> zΔ1: {
-        return minVersion((~zΔ1).X, -sign);
+        return minVersion(zΔ1.X, -sign);
     }
     case ж<TagExpr> zΔ1: {
         if (sign < 0) {
             // !foo implies nothing
             return -1;
         }
-        if ((~zΔ1).Tag == "go1"u8) {
+        if (zΔ1.Tag == "go1"u8) {
             return 0;
         }
-        var (_, v, _) = strings.Cut((~zΔ1).Tag, go1ˢ2);
+        var (_, v, _) = strings.Cut(zΔ1.Tag, go1ˢ2);
         var (n, err) = strconv.Atoi(v);
-        if (err != default!) {
+        if (err != nil) {
             // not a go1.N tag
             return -1;
         }

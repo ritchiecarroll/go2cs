@@ -10,19 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -66,6 +54,13 @@ using static go.net.http.pprof_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(go.@internal.profile_package.Profile))]
+[assembly: go.GoFieldAccess(typeof(go.net.http_package.Server))]
+[assembly: go.GoFieldAccess(typeof(go.net.url_package.URL))]
+[assembly: go.GoFieldAccess(typeof(time_package.Timer))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -74,7 +69,7 @@ using static go.net.http.pprof_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGLAAYKCgpSCgoKCAAgMsoKCpqIACgyigoKUgviCgoKCgvyygoKCpriCgoCUlKSC3LKCgoKmuIKCgJSUpIKs0oKY6pSCgpSmgoKClIKCgoLcgoKUuKqiAAgKgoKCgoKUgIKCpIKClIKClIKUAAkGwoKCgqaCgqaUgoKClIKCgqaCpLSCgpSU2IKCgpSClJSCgoKmgpSCgqKkgoKAgqSCgoKUgqYACRQADBqCggAOHuKAgoKCyIKUgoIACBKC7piAggAqCIKCAAEogoKmjoKUmoI=", "424-426:1", "", "188=Sprintf/1/1/1;219=Sprintf/1/1/1;478=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4")]
+[assembly: go.GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGLAAYKCgpSCgoKCAAgMsoKCpqIACgyigoKUgviCgoKCgvyygoKCpriCgoCUlKSC3LKCgoKmuIKCgJSUpIKs0oKY6pSCgpSmgoKClIKCgoLcgoKUuKqiAAgKgoKCgoKUgIKCpIKClIKClIKUAAkGwoKCgqaCgqaUgoKClIKCgqaCpLSCgpSU2IKCgpSClJSCgoKmgpSCgqKkgoKAgqSCgoKUgqYACRQADBqCggAOHuKAgoKCyIKUgoIACBKC7piAggAqCIKCAAEogoKmjoKUmoI=", "424-426:1", "", "188=Sprintf/1/1/1;219=Sprintf/1/1/1;478=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4", "356:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

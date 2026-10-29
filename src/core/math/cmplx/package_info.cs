@@ -67,7 +67,7 @@ using static go.math.cmplx_package;
 [assembly: go.GoPositionMap("math/cmplx/pow.go", "pow.cs", "AAlkACgCgoKUgpSkgpSklJSCgpSCgoKCgpSC")]
 [assembly: go.GoPositionMap("math/cmplx/rect.go", "rect.cs", "AAkUkoI=")]
 [assembly: go.GoPositionMap("math/cmplx/sin.go", "sin.cs", "AAlqACsCgKSklKTGpIKCAAIiAA4CgKSklKTGpIKCAAIsABMCgKSklKTGpIKCAAIgAA0CgKSklKTGpIKCqJKClIKCgg==")]
-[assembly: go.GoPositionMap("math/cmplx/sqrt.go", "sqrt.cs", "AAl0ADAClIKUgpSSgpSCgoKUgpSCgpSCgoKUgoKUgoKCgoKUgoKUgpQ=")]
+[assembly: go.GoPositionMap("math/cmplx/sqrt.go", "sqrt.cs", "AAl0ADAClIKUgpSCgpSCgoKUgpSCgpSCgoKUgoKUgoKCgoKUgoKUgpQ=")]
 [assembly: go.GoPositionMap("math/cmplx/tan.go", "tan.cs", "AAt8ADECgKSUlKSkgoKUgpQAAiAADQKApJSUpKSCgpQAAhYACBIACAKEAAoYgoKClgAGEIKCgpwAHDKSgoKUgoKCgpSClIKUgpSClKiSgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCpqYAAjoAGgKCgpSClA==")]
 // </GoSourcePositionMaps>
 

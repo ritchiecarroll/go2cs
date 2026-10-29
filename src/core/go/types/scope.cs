@@ -23,11 +23,11 @@ partial class types_package {
 partial struct ΔScope {
     internal ж<ΔScope> parent;
     internal slice<ж<ΔScope>> children;
-    internal nint number;              // parent.children[number-1] is this scope; 0 if there is no parent
+    internal nint number;                // parent.children[number-1] is this scope; 0 if there is no parent
     internal map<@string, Object> elems; // lazily allocated
     internal tokenꓸPos pos, end;         // scope extent; may be invalid
-    internal @string comment;           // for debugging only
-    internal bool isFunc;              // set if this is a function scope (internal use only)
+    internal @string comment;            // for debugging only
+    internal bool isFunc;                // set if this is a function scope (internal use only)
 }
 
 // NewScope returns a new, empty scope contained in the given parent
@@ -35,11 +35,11 @@ partial struct ΔScope {
 public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, tokenꓸPos end, @string comment) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
-    var s = Ꮡ(new ΔScope(Ꮡparent, default!, 0, default!, pos, end, comment, false));
+    var s = Ꮡ(new ΔScope(Ꮡparent, default, 0, default, pos, end, comment, false));
     // don't add children to Universe scope!
     if (Ꮡparent != nil && Ꮡparent != Universe) {
         parent.children = append(parent.children, s);
-        s.Value.number = len(parent.children);
+        s.number = len(parent.children);
     }
     return s;
 }
@@ -100,7 +100,7 @@ public static Object Lookup(this ref ΔScope s, @string name) {
 internal static slice<Object> lookupIgnoringCase(this ref ΔScope s, @string name, bool exported) {
     var matchesᴷ = new stackAppend<Object>(moves: true);
 
-    slice<Object> matches = default!;
+    slice<Object> matches = default;
     foreach (var (_, n) in s.Names()) {
         if ((!exported || isExported(n)) && strings.EqualFold(n, name)) {
             matches = append(matchesᴷ, matches, s.Lookup(n));
@@ -120,7 +120,7 @@ public static Object Insert(this ж<ΔScope> Ꮡs, Object obj) {
 
     @string name = obj.Name();
     {
-        var alt = s.Lookup(name); if (alt != default!) {
+        var alt = s.Lookup(name); if (alt != nil) {
             return alt;
         }
     }
@@ -133,7 +133,7 @@ public static Object Insert(this ж<ΔScope> Ꮡs, Object obj) {
     if (obj.Parent() == nil) {
         obj.setParent(Ꮡs);
     }
-    return default!;
+    return default;
 }
 
 // InsertLazy is like Insert, but allows deferring construction of the
@@ -146,7 +146,7 @@ public static Object Insert(this ж<ΔScope> Ꮡs, Object obj) {
 internal static bool _InsertLazy(this ж<ΔScope> Ꮡs, @string name, Func<Object> resolve) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (s.elems[name] != default!) {
+    if (s.elems[name] != nil) {
         return false;
     }
     s.insert(name, new lazyObjectжObject(Ꮡ(new lazyObject(parent: Ꮡs, resolve: resolve))));
@@ -154,7 +154,7 @@ internal static bool _InsertLazy(this ж<ΔScope> Ꮡs, @string name, Func<Objec
 }
 
 internal static void insert(this ref ΔScope s, @string name, Object obj) {
-    if (s.elems == default!) {
+    if (s.elems == nil) {
         s.elems = new map<@string, Object>();
     }
     s.elems[name] = obj;
@@ -213,7 +213,7 @@ internal static Object resolve(@string name, Object obj) {
         var (lazy, ok) = obj._<ж<lazyObject>>(ᐧ); if (ok) {
             var lazyʗ1 = lazy;
             lazy.of(lazyObject.Ꮡonce).Do(() => {
-                var objΔ1 = (~lazyʗ1).resolve();
+                var objΔ1 = lazyʗ1.resolve();
 
                 {
                     var (_, okΔ1) = objΔ1._<ж<lazyObject>>(ᐧ); if (okΔ1) {
@@ -225,12 +225,12 @@ internal static Object resolve(@string name, Object obj) {
                 }
 
                 if (objΔ1.Parent() == nil) {
-                    objΔ1.setParent((~lazyʗ1).parent);
+                    objΔ1.setParent(lazyʗ1.parent);
                 }
-                lazyʗ1.Value.obj = objΔ1;
+                lazyʗ1.obj = objΔ1;
             });
 
-            obj = lazy.Value.obj;
+            obj = lazy.obj;
         }
     }
     return obj;

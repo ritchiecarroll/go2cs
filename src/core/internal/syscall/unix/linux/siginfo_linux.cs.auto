@@ -22,8 +22,8 @@ internal const nuint is64bit = /* ^uint(0) >> 63 */ 1; // 0 for 32-bit hosts, 1 
 // NOTE fields are exported to be used by TestSiginfoChildLayout.
 partial struct SiginfoChild {
     public int32 Signo;
-    /*embed*/ internal siErrnoCode siErrnoCode;                // Two int32 fields, swapped on MIPS.
-    internal array<int32> _ = new(is64bit); // Extra padding for 64-bit hosts only.
+    /*embed*/ internal siErrnoCode siErrnoCode; // Two int32 fields, swapped on MIPS.
+    internal array<int32> _ = new(is64bit);     // Extra padding for 64-bit hosts only.
 // End of common part. Beginning of signal-specific part.
     public int32 Pid;
     public uint32 Uid;
@@ -48,24 +48,29 @@ internal static UntypedInt continued => 0xffff;
 // WaitStatus converts SiginfoChild, as filled in by the waitid syscall,
 // to syscall.WaitStatus.
 public static syscall.WaitStatus /*ws*/ WaitStatus(this ref SiginfoChild s) {
-    syscall.WaitStatus ws = default!;
+    syscall.WaitStatus ws = default;
 
-    var exprᴛ1 = s.Code;
-    if (exprᴛ1 is _CLD_EXITED) {
+    switch (s.Code) {
+    case _CLD_EXITED: {
         ws = (syscall.WaitStatus)(uint32)((s.Status << 8));
+        break;
     }
-    else if (exprᴛ1 == _CLD_DUMPED) {
+    case var ᴛ when ᴛ == _CLD_DUMPED: {
         ws = (syscall.WaitStatus)(((syscall.WaitStatus)(uint32)s.Status) | (uint32)core);
+        break;
     }
-    else if (exprᴛ1 == _CLD_KILLED) {
+    case var ᴛ when ᴛ == _CLD_KILLED: {
         ws = (syscall.WaitStatus)(uint32)s.Status;
+        break;
     }
-    else if (exprᴛ1 == _CLD_TRAPPED || exprᴛ1 == _CLD_STOPPED) {
+    case var ᴛ when ᴛ == _CLD_TRAPPED || ᴛ == _CLD_STOPPED: {
         ws = (syscall.WaitStatus)(((syscall.WaitStatus)(uint32)((s.Status << 8))) | (uint32)stopped);
+        break;
     }
-    else if (exprᴛ1 == _CLD_CONTINUED) {
+    case var ᴛ when ᴛ == _CLD_CONTINUED: {
         ws = continued;
-    }
+        break;
+    }}
     return ws;
 }
 

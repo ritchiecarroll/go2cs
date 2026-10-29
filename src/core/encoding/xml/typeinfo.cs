@@ -51,11 +51,11 @@ internal static reflectꓸType nameType = reflect.TypeFor<Name>();
 internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
     {
         var (tiΔ1, ok) = ᏑtinfoMap.Load(typ); if (ok) {
-            return (tiΔ1._<ж<typeInfo>>(), default!);
+            return (tiΔ1._<ж<typeInfo>>(), default);
         }
     }
 
-    var tinfo = Ꮡ(new typeInfo(nil));
+    var tinfo = Ꮡ(new typeInfo());
     if (typ.Kind() == reflect.Struct && !AreEqual(typ, nameType)) {
         nint n = typ.NumField();
         for (nint i = 0; i < n; i++) {
@@ -72,19 +72,19 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
                 }
                 if (t.Kind() == reflect.Struct) {
                     var (inner, errΔ1) = getTypeInfo(t);
-                    if (errΔ1 != default!) {
-                        return (default!, errΔ1);
+                    if (errΔ1 != nil) {
+                        return (default, errΔ1);
                     }
-                    if ((~tinfo).xmlname == nil) {
-                        tinfo.Value.xmlname = inner.Value.xmlname;
+                    if (tinfo.xmlname == nil) {
+                        tinfo.xmlname = inner.xmlname;
                     }
-                    foreach (var (_, vᴛ1) in (~inner).fields) {
+                    foreach (var (_, vᴛ1) in inner.fields) {
                         var finfoΔ1 = vᴛ1;
 
-                        finfoΔ1.idx = appendꓸꓸꓸ(new nint[]{i}.slice(), finfoΔ1.idx);
+                        finfoΔ1.idx = appendꓸꓸꓸ(slice<nint>([i]), finfoΔ1.idx);
                         {
-                            var errΔ2 = addFieldInfo(typ, tinfo, ref finfoΔ1); if (errΔ2 != default!) {
-                                return (default!, errΔ2);
+                            var errΔ2 = addFieldInfo(typ, tinfo, ref finfoΔ1); if (errΔ2 != nil) {
+                                return (default, errΔ2);
                             }
                         }
                     }
@@ -93,26 +93,26 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
             }
 
             var (finfo, err) = structFieldInfo(typ, ref f);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
             if (f.Name == xmlName) {
-                tinfo.Value.xmlname = finfo;
+                tinfo.xmlname = finfo;
                 continue;
             }
 
             // Add the field if it doesn't conflict with other fields.
             {
-                var errΔ1 = addFieldInfo(typ, tinfo, ref (finfo).DerefOrNull()); if (errΔ1 != default!) {
-                    return (default!, errΔ1);
+                var errΔ1 = addFieldInfo(typ, tinfo, ref (finfo).DerefOrNull()); if (errΔ1 != nil) {
+                    return (default, errΔ1);
                 }
             }
         }
     }
 
     var (ti, _) = ᏑtinfoMap.LoadOrStore(typ, tinfo.OrTypedNil());
-    return (ti._<ж<typeInfo>>(), default!);
+    return (ti._<ж<typeInfo>>(), default);
 }
 
 // structFieldInfo builds and returns a fieldInfo for f.
@@ -123,74 +123,85 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
     @string tag = f.Tag.Get(xmlˢ);
     {
         var (ns, t, ok) = strings.Cut(tag, " "u8); if (ok) {
-            (finfo.Value.xmlns, tag) = (ns, t);
+            (finfo.xmlns, tag) = (ns, t);
         }
     }
 
     // Parse flags.
     var tokens = strings.Split(tag, ","u8);
-    if (len(tokens) == 1){
-        finfo.Value.flags = fElement;
+    if (len(tokens) == 1) {
+        finfo.flags = fElement;
     } else {
         tag = tokens[0];
         foreach (var (_, flag) in tokens[1..]) {
             var exprᴛ1 = flag;
-            if (exprᴛ1 == "attr"u8) {
-                finfo.Value.flags |= (fieldFlags)(fAttr);
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "attr"u8: {
+                finfo.flags |= (fieldFlags)(fAttr);
+                break;
             }
-            else if (exprᴛ1 == "cdata"u8) {
-                finfo.Value.flags |= (fieldFlags)(fCDATA);
+            case {} when exprᴛ1 == "cdata"u8: {
+                finfo.flags |= (fieldFlags)(fCDATA);
+                break;
             }
-            else if (exprᴛ1 == "chardata"u8) {
-                finfo.Value.flags |= (fieldFlags)(fCharData);
+            case {} when exprᴛ1 == "chardata"u8: {
+                finfo.flags |= (fieldFlags)(fCharData);
+                break;
             }
-            else if (exprᴛ1 == "innerxml"u8) {
-                finfo.Value.flags |= (fieldFlags)(fInnerXML);
+            case {} when exprᴛ1 == "innerxml"u8: {
+                finfo.flags |= (fieldFlags)(fInnerXML);
+                break;
             }
-            else if (exprᴛ1 == "comment"u8) {
-                finfo.Value.flags |= (fieldFlags)(fComment);
+            case {} when exprᴛ1 == "comment"u8: {
+                finfo.flags |= (fieldFlags)(fComment);
+                break;
             }
-            else if (exprᴛ1 == "any"u8) {
-                finfo.Value.flags |= (fieldFlags)(fAny);
+            case {} when exprᴛ1 == "any"u8: {
+                finfo.flags |= (fieldFlags)(fAny);
+                break;
             }
-            else if (exprᴛ1 == "omitempty"u8) {
-                finfo.Value.flags |= (fieldFlags)(fOmitEmpty);
-            }
+            case {} when exprᴛ1 == "omitempty"u8: {
+                finfo.flags |= (fieldFlags)(fOmitEmpty);
+                break;
+            }}
         }
 
         // Validate the flags used.
         var valid = true;
         {
-            fieldFlags mode = (fieldFlags)((~finfo).flags & fMode);
-            var exprᴛ2 = mode;
-            if (exprᴛ2 == (fieldFlags)(0)) {
-                finfo.Value.flags |= (fieldFlags)(fElement);
+            fieldFlags mode = (fieldFlags)(finfo.flags & fMode);
+            switch (mode) {
+            case var ᴛ when ᴛ == (fieldFlags)(0): {
+                finfo.flags |= (fieldFlags)(fElement);
+                break;
             }
-            else if (exprᴛ2 == fAttr || exprᴛ2 == fCDATA || exprᴛ2 == fCharData || exprᴛ2 == fInnerXML || exprᴛ2 == fComment || exprᴛ2 == fAny || exprᴛ2 == (fieldFlags)((fieldFlags)(fAny | fAttr))) {
+            case var ᴛ when ᴛ == fAttr || ᴛ == fCDATA || ᴛ == fCharData || ᴛ == fInnerXML || ᴛ == fComment || ᴛ == fAny || ᴛ == (fieldFlags)((fieldFlags)(fAny | fAttr)): {
                 if (f.Name == xmlName || tag != ""u8 && mode != fAttr) {
                     valid = false;
                 }
+                break;
             }
-            else { /* default: */
+            default: {
                 // This will also catch multiple modes in a single field.
                 valid = false;
-            }
+                break;
+            }}
         }
-        if ((fieldFlags)((~finfo).flags & fMode) == fAny) {
-            finfo.Value.flags |= (fieldFlags)(fElement);
+        if ((fieldFlags)(finfo.flags & fMode) == fAny) {
+            finfo.flags |= (fieldFlags)(fElement);
         }
-        if ((fieldFlags)((~finfo).flags & fOmitEmpty) != 0 && (fieldFlags)((~finfo).flags & ((fieldFlags)(fElement | fAttr))) == 0) {
+        if ((fieldFlags)(finfo.flags & fOmitEmpty) != 0 && (fieldFlags)(finfo.flags & ((fieldFlags)(fElement | fAttr))) == 0) {
             valid = false;
         }
         if (!valid) {
-            return (default!, fmt.Errorf("xml: invalid tag in field %s of type %s: %q"u8,
+            return (default, fmt.Errorf("xml: invalid tag in field %s of type %s: %q"u8,
                 f.Name, typ, f.Tag.Get(xmlˢ)));
         }
     }
 
     // Use of xmlns without a name is not allowed.
-    if ((~finfo).xmlns != ""u8 && tag == ""u8) {
-        return (default!, fmt.Errorf("xml: namespace without name in field %s of type %s: %q"u8,
+    if (finfo.xmlns != ""u8 && tag == ""u8) {
+        return (default, fmt.Errorf("xml: namespace without name in field %s of type %s: %q"u8,
             f.Name, typ, f.Tag.Get(xmlˢ)));
     }
 
@@ -198,8 +209,8 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         // The XMLName field records the XML element name. Don't
         // process it as usual because its name should default to
         // empty rather than to the field name.
-        finfo.Value.name = tag;
-        return (finfo, default!);
+        finfo.name = tag;
+        return (finfo, default);
     }
 
     if (tag == ""u8) {
@@ -207,13 +218,13 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         // default from XMLName of underlying struct if feasible,
         // or field name otherwise.
         {
-            var xmlname = lookupXMLName(f.Type); if (xmlname != nil){
-                (finfo.Value.xmlns, finfo.Value.name) = (xmlname.Value.xmlns, xmlname.Value.name);
+            var xmlname = lookupXMLName(f.Type); if (xmlname != nil) {
+                (finfo.xmlns, finfo.name) = (xmlname.xmlns, xmlname.name);
             } else {
-                finfo.Value.name = f.Name;
+                finfo.name = f.Name;
             }
         }
-        return (finfo, default!);
+        return (finfo, default);
     }
 
     // Prepare field name and parents.
@@ -222,28 +233,28 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         parents[0] = f.Name;
     }
     if (parents[len(parents) - 1] == "") {
-        return (default!, fmt.Errorf("xml: trailing '>' in field %s of type %s"u8, f.Name, typ));
+        return (default, fmt.Errorf("xml: trailing '>' in field %s of type %s"u8, f.Name, typ));
     }
-    finfo.Value.name = parents[len(parents) - 1];
+    finfo.name = parents[len(parents) - 1];
     if (len(parents) > 1) {
-        if (((fieldFlags)((~finfo).flags & fElement)) == 0) {
-            return (default!, fmt.Errorf("xml: %s chain not valid with %s flag"u8, tag, strings.Join(tokens[1..], ","u8)));
+        if (((fieldFlags)(finfo.flags & fElement)) == 0) {
+            return (default, fmt.Errorf("xml: %s chain not valid with %s flag"u8, tag, strings.Join(tokens[1..], ","u8)));
         }
-        finfo.Value.parents = parents.slice(0, len(parents) - 1);
+        finfo.parents = parents.slice(0, len(parents) - 1);
     }
 
     // If the field type has an XMLName field, the names must match
     // so that the behavior of both marshaling and unmarshaling
     // is straightforward and unambiguous.
-    if ((fieldFlags)((~finfo).flags & fElement) != 0) {
+    if ((fieldFlags)(finfo.flags & fElement) != 0) {
         var ftyp = f.Type;
         var xmlname = lookupXMLName(ftyp);
-        if (xmlname != nil && (~xmlname).name != (~finfo).name) {
-            return (default!, fmt.Errorf("xml: name %q in tag of %s.%s conflicts with name %q in %s.XMLName"u8,
-                (~finfo).name, typ, f.Name, (~xmlname).name, ftyp));
+        if (xmlname != nil && xmlname.name != finfo.name) {
+            return (default, fmt.Errorf("xml: name %q in tag of %s.%s conflicts with name %q in %s.XMLName"u8,
+                finfo.name, typ, f.Name, xmlname.name, ftyp));
         }
     }
-    return (finfo, default!);
+    return (finfo, default);
 }
 
 // lookupXMLName returns the fieldInfo for typ's XMLName field
@@ -254,7 +265,7 @@ internal static ж<fieldInfo> /*xmlname*/ lookupXMLName(reflectꓸType typ) {
         typ = typ.Elem();
     }
     if (typ.Kind() != reflect.Struct) {
-        return default!;
+        return default;
     }
     for ((nint i, nint n) = (0, typ.NumField()); i < n; i++) {
         var f = typ.Field(i);
@@ -262,14 +273,14 @@ internal static ж<fieldInfo> /*xmlname*/ lookupXMLName(reflectꓸType typ) {
             continue;
         }
         var (finfo, err) = structFieldInfo(typ, ref f);
-        if (err == default! && (~finfo).name != ""u8) {
+        if (err == nil && finfo.name != ""u8) {
             return finfo;
         }
         // Also consider errors as a non-existent field tag
         // and let getTypeInfo itself report the error.
         break;
     }
-    return default!;
+    return default;
 }
 
 // addFieldInfo adds finfo to tinfo.fields if there are no
@@ -283,34 +294,33 @@ internal static error addFieldInfo(reflectꓸType typ, ж<typeInfo> Ꮡtinfo, re
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
     var conflictsᴷ = new stackAppend<nint>();
 
-    slice<nint> conflicts = default!;
+    slice<nint> conflicts = default;
 Loop:
     foreach (var i in range(tinfo.fields)) {
         // First, figure all conflicts. Most working code will have none.
         var oldf = Ꮡ(tinfo.fields, i);
-        if ((fieldFlags)((~oldf).flags & fMode) != (fieldFlags)(newf.flags & fMode)) {
+        if ((fieldFlags)(oldf.flags & fMode) != (fieldFlags)(newf.flags & fMode)) {
             continue;
         }
-        if ((~oldf).xmlns != ""u8 && newf.xmlns != ""u8 && (~oldf).xmlns != newf.xmlns) {
+        if (oldf.xmlns != ""u8 && newf.xmlns != ""u8 && oldf.xmlns != newf.xmlns) {
             continue;
         }
-        nint minl = min(len(newf.parents), len((~oldf).parents));
+        nint minl = min(len(newf.parents), len(oldf.parents));
         for (nint p = 0; p < minl; p++) {
-            if ((~oldf).parents[p] != newf.parents[p]) {
+            if (oldf.parents[p] != newf.parents[p]) {
                 goto continue_Loop;
             }
         }
-        if (len((~oldf).parents) > len(newf.parents)){
-            if ((~oldf).parents[len(newf.parents)] == newf.name) {
+        if (len(oldf.parents) > len(newf.parents)) {
+            if (oldf.parents[len(newf.parents)] == newf.name) {
                 conflicts = append(conflictsᴷ, conflicts, i);
             }
-        } else 
-        if (len((~oldf).parents) < len(newf.parents)){
-            if (newf.parents[len((~oldf).parents)] == (~oldf).name) {
+        } else if (len(oldf.parents) < len(newf.parents)) {
+            if (newf.parents[len(oldf.parents)] == oldf.name) {
                 conflicts = append(conflicts, i);
             }
         } else {
-            if (newf.name == (~oldf).name && newf.xmlns == (~oldf).xmlns) {
+            if (newf.name == oldf.name && newf.xmlns == oldf.xmlns) {
                 conflicts = append(conflicts, i);
             }
         }
@@ -318,24 +328,24 @@ continue_Loop:;
     }
 break_Loop:;
     // Without conflicts, add the new field and return.
-    if (conflicts == default!) {
+    if (conflicts == nil) {
         tinfo.fields = append(tinfo.fields, newf);
-        return default!;
+        return default;
     }
 
     // If any conflict is shallower, ignore the new field.
     // This matches the Go field resolution on embedding.
     foreach (var (_, i) in conflicts) {
         if (len(tinfo.fields[i].idx) < len(newf.idx)) {
-            return default!;
+            return default;
         }
     }
 
     // Otherwise, if any of them is at the same depth level, it's an error.
     foreach (var (_, i) in conflicts) {
         var oldf = Ꮡ(tinfo.fields, i);
-        if (len((~oldf).idx) == len(newf.idx)) {
-            var f1 = typ.FieldByIndex((~oldf).idx);
+        if (len(oldf.idx) == len(newf.idx)) {
+            var f1 = typ.FieldByIndex(oldf.idx);
             var f2 = typ.FieldByIndex(newf.idx);
             return new TagPathErrorжerror(Ꮡ(new TagPathError(typ, f1.Name, f1.Tag.Get(xmlˢ), f2.Name, f2.Tag.Get(xmlˢ))));
         }
@@ -349,7 +359,7 @@ break_Loop:;
         tinfo.fields = tinfo.fields.slice(0, len(tinfo.fields) - 1);
     }
     tinfo.fields = append(tinfo.fields, newf);
-    return default!;
+    return default;
 }
 
 // A TagPathError represents an error in the unmarshaling process
@@ -379,7 +389,7 @@ internal static reflectꓸValue value(this ref fieldInfo finfo, reflectꓸValue 
             if (t.Kind() == reflect.ΔPointer && t.Elem().Kind() == reflect.Struct) {
                 if (v.IsNil()) {
                     if (!shouldInitNilPointers) {
-                        return new reflectꓸValue(nil);
+                        return new reflectꓸValue();
                     }
                     v.Set(reflect.New(v.Type().Elem()));
                 }

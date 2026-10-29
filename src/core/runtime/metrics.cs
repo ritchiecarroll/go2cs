@@ -75,260 +75,260 @@ internal static void initMetrics() {
     metrics = new map<@string, metricData>{
         ["/cgo/go-to-c-calls:calls"u8] = new(
             compute: (ж<statAggregate> _, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)NumCgoCall();
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)NumCgoCall();
             }
         ),
         ["/cpu/classes/gc/mark/assist:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.GCAssistTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.GCAssistTime));
             }
         ),
         ["/cpu/classes/gc/mark/dedicated:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.GCDedicatedTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.GCDedicatedTime));
             }
         ),
         ["/cpu/classes/gc/mark/idle:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.GCIdleTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.GCIdleTime));
             }
         ),
         ["/cpu/classes/gc/pause:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.GCPauseTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.GCPauseTime));
             }
         ),
         ["/cpu/classes/gc/total:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.GCTotalTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.GCTotalTime));
             }
         ),
         ["/cpu/classes/idle:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.IdleTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.IdleTime));
             }
         ),
         ["/cpu/classes/scavenge/assist:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.ScavengeAssistTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.ScavengeAssistTime));
             }
         ),
         ["/cpu/classes/scavenge/background:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.ScavengeBgTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.ScavengeBgTime));
             }
         ),
         ["/cpu/classes/scavenge/total:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.ScavengeTotalTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.ScavengeTotalTime));
             }
         ),
         ["/cpu/classes/total:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.TotalTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.TotalTime));
             }
         ),
         ["/cpu/classes/user:cpu-seconds"u8] = new(
             deps: makeStatDepSet(cpuStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.UserTime));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(@in.cpuStats.UserTime));
             }
         ),
         ["/gc/cleanups/executed:cleanups"u8] = new(
             deps: makeStatDepSet(finalStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.finalStats.cleanupsExecuted;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.finalStats.cleanupsExecuted;
             }
         ),
         ["/gc/cleanups/queued:cleanups"u8] = new(
             deps: makeStatDepSet(finalStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.finalStats.cleanupsQueued;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.finalStats.cleanupsQueued;
             }
         ),
         ["/gc/cycles/automatic:gc-cycles"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (~@in).sysStats.gcCyclesDone - (~@in).sysStats.gcCyclesForced;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.gcCyclesDone - @in.sysStats.gcCyclesForced;
             }
         ),
         ["/gc/cycles/forced:gc-cycles"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.sysStats.gcCyclesForced;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.gcCyclesForced;
             }
         ),
         ["/gc/cycles/total:gc-cycles"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.sysStats.gcCyclesDone;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.gcCyclesDone;
             }
         ),
         ["/gc/finalizers/executed:finalizers"u8] = new(
             deps: makeStatDepSet(finalStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.finalStats.finalizersExecuted;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.finalStats.finalizersExecuted;
             }
         ),
         ["/gc/finalizers/queued:finalizers"u8] = new(
             deps: makeStatDepSet(finalStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.finalStats.finalizersQueued;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.finalStats.finalizersQueued;
             }
         ),
         ["/gc/scan/globals:bytes"u8] = new(
             deps: makeStatDepSet(gcStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.gcStats.globalsScan;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.gcStats.globalsScan;
             }
         ),
         ["/gc/scan/heap:bytes"u8] = new(
             deps: makeStatDepSet(gcStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.gcStats.heapScan;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.gcStats.heapScan;
             }
         ),
         ["/gc/scan/stack:bytes"u8] = new(
             deps: makeStatDepSet(gcStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.gcStats.stackScan;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.gcStats.stackScan;
             }
         ),
         ["/gc/scan/total:bytes"u8] = new(
             deps: makeStatDepSet(gcStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.gcStats.totalScan;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.gcStats.totalScan;
             }
         ),
         ["/gc/heap/allocs-by-size:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
                 var hist = @out.float64HistOrInit(sizeClassBuckets);
-                hist.Value.counts[len((~hist).counts) - 1] = @in.Value.heapStats.largeAllocCount;
+                hist.counts[len(hist.counts) - 1] = @in.heapStats.largeAllocCount;
                 // Cut off the first index which is ostensibly for size class 0,
                 // but large objects are tracked separately so it's actually unused.
-                foreach (var (i, count) in (~@in).heapStats.smallAllocCount[1..]) {
-                    hist.Value.counts[i] = count;
+                foreach (var (i, count) in @in.heapStats.smallAllocCount[1..]) {
+                    hist.counts[i] = count;
                 }
             }
         ),
         ["/gc/heap/allocs:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.heapStats.totalAllocated;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.heapStats.totalAllocated;
             }
         ),
         ["/gc/heap/allocs:objects"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.heapStats.totalAllocs;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.heapStats.totalAllocs;
             }
         ),
         ["/gc/heap/frees-by-size:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
                 var hist = @out.float64HistOrInit(sizeClassBuckets);
-                hist.Value.counts[len((~hist).counts) - 1] = @in.Value.heapStats.largeFreeCount;
+                hist.counts[len(hist.counts) - 1] = @in.heapStats.largeFreeCount;
                 // Cut off the first index which is ostensibly for size class 0,
                 // but large objects are tracked separately so it's actually unused.
-                foreach (var (i, count) in (~@in).heapStats.smallFreeCount[1..]) {
-                    hist.Value.counts[i] = count;
+                foreach (var (i, count) in @in.heapStats.smallFreeCount[1..]) {
+                    hist.counts[i] = count;
                 }
             }
         ),
         ["/gc/heap/frees:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.heapStats.totalFreed;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.heapStats.totalFreed;
             }
         ),
         ["/gc/heap/frees:objects"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.heapStats.totalFrees;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.heapStats.totalFrees;
             }
         ),
         ["/gc/heap/goal:bytes"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.sysStats.heapGoal;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.heapGoal;
             }
         ),
         ["/gc/gomemlimit:bytes"u8] = new(
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)ᏑgcController.of(gcControllerState.ᏑmemoryLimit).Load();
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)ᏑgcController.of(gcControllerState.ᏑmemoryLimit).Load();
             }
         ),
         ["/gc/gogc:percent"u8] = new(
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)ᏑgcController.of(gcControllerState.ᏑgcPercent).Load();
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)ᏑgcController.of(gcControllerState.ᏑgcPercent).Load();
             }
         ),
         ["/gc/heap/live:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = gcController.heapMarked;
+                @out.kind = metricKindUint64;
+                @out.scalar = gcController.heapMarked;
             }
         ),
         ["/gc/heap/objects:objects"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.heapStats.numObjects;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.heapStats.numObjects;
             }
         ),
         ["/gc/heap/tiny/allocs:objects"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.heapStats.tinyAllocCount;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.heapStats.tinyAllocCount;
             }
         ),
         ["/gc/limiter/last-enabled:gc-cycle"u8] = new(
             compute: (ж<statAggregate> _, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)ᏑgcCPULimiter.of(gcCPULimiterState.ᏑlastEnabledCycle).Load();
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)ᏑgcCPULimiter.of(gcCPULimiterState.ᏑlastEnabledCycle).Load();
             }
         ),
         ["/gc/pauses:seconds"u8] = new(
@@ -339,154 +339,154 @@ internal static void initMetrics() {
         ),
         ["/gc/stack/starting-size:bytes"u8] = new(
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)startingStackSize;
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)startingStackSize;
             }
         ),
         ["/memory/classes/heap/free:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)((~@in).heapStats.committed - (~@in).heapStats.inHeap - (~@in).heapStats.inStacks - (~@in).heapStats.inWorkBufs);
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)(@in.heapStats.committed - @in.heapStats.inHeap - @in.heapStats.inStacks - @in.heapStats.inWorkBufs);
             }
         ),
         ["/memory/classes/heap/objects:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.heapStats.inObjects;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.heapStats.inObjects;
             }
         ),
         ["/memory/classes/heap/released:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)(~@in).heapStats.released;
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)@in.heapStats.released;
             }
         ),
         ["/memory/classes/heap/stacks:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)(~@in).heapStats.inStacks;
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)@in.heapStats.inStacks;
             }
         ),
         ["/memory/classes/heap/unused:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)(~@in).heapStats.inHeap - (~@in).heapStats.inObjects;
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)@in.heapStats.inHeap - @in.heapStats.inObjects;
             }
         ),
         ["/memory/classes/metadata/mcache/free:bytes"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (~@in).sysStats.mCacheSys - (~@in).sysStats.mCacheInUse;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.mCacheSys - @in.sysStats.mCacheInUse;
             }
         ),
         ["/memory/classes/metadata/mcache/inuse:bytes"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.sysStats.mCacheInUse;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.mCacheInUse;
             }
         ),
         ["/memory/classes/metadata/mspan/free:bytes"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (~@in).sysStats.mSpanSys - (~@in).sysStats.mSpanInUse;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.mSpanSys - @in.sysStats.mSpanInUse;
             }
         ),
         ["/memory/classes/metadata/mspan/inuse:bytes"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.sysStats.mSpanInUse;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.mSpanInUse;
             }
         ),
         ["/memory/classes/metadata/other:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep, sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)(~@in).heapStats.inWorkBufs + (~@in).sysStats.gcMiscSys;
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)@in.heapStats.inWorkBufs + @in.sysStats.gcMiscSys;
             }
         ),
         ["/memory/classes/os-stacks:bytes"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.sysStats.stacksSys;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.stacksSys;
             }
         ),
         ["/memory/classes/other:bytes"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.sysStats.otherSys;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.otherSys;
             }
         ),
         ["/memory/classes/profiling/buckets:bytes"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.sysStats.buckHashSys;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.sysStats.buckHashSys;
             }
         ),
         ["/memory/classes/total:bytes"u8] = new(
             deps: makeStatDepSet(heapStatsDep, sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)((~@in).heapStats.committed + (~@in).heapStats.released) + (~@in).sysStats.stacksSys + (~@in).sysStats.mSpanSys + (~@in).sysStats.mCacheSys + (~@in).sysStats.buckHashSys + (~@in).sysStats.gcMiscSys + (~@in).sysStats.otherSys;
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)(@in.heapStats.committed + @in.heapStats.released) + @in.sysStats.stacksSys + @in.sysStats.mSpanSys + @in.sysStats.mCacheSys + @in.sysStats.buckHashSys + @in.sysStats.gcMiscSys + @in.sysStats.otherSys;
             }
         ),
         ["/sched/gomaxprocs:threads"u8] = new(
             compute: (ж<statAggregate> _, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)gomaxprocs;
+                @out.kind = metricKindUint64;
+                @out.scalar = (uint64)gomaxprocs;
             }
         ),
         ["/sched/goroutines:goroutines"u8] = new(
             deps: makeStatDepSet(schedStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.schedStats.gTotal;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.schedStats.gTotal;
             }
         ),
         ["/sched/goroutines/not-in-go:goroutines"u8] = new(
             deps: makeStatDepSet(schedStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.schedStats.gNonGo;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.schedStats.gNonGo;
             }
         ),
         ["/sched/goroutines/running:goroutines"u8] = new(
             deps: makeStatDepSet(schedStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.schedStats.gRunning;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.schedStats.gRunning;
             }
         ),
         ["/sched/goroutines/runnable:goroutines"u8] = new(
             deps: makeStatDepSet(schedStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.schedStats.gRunnable;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.schedStats.gRunnable;
             }
         ),
         ["/sched/goroutines/waiting:goroutines"u8] = new(
             deps: makeStatDepSet(schedStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.schedStats.gWaiting;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.schedStats.gWaiting;
             }
         ),
         ["/sched/goroutines-created:goroutines"u8] = new(
             deps: makeStatDepSet(schedStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.schedStats.gCreated;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.schedStats.gCreated;
             }
         ),
         ["/sched/latencies:seconds"u8] = new(
@@ -517,14 +517,14 @@ internal static void initMetrics() {
         ["/sched/threads/total:threads"u8] = new(
             deps: makeStatDepSet(schedStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = @in.Value.schedStats.threads;
+                @out.kind = metricKindUint64;
+                @out.scalar = @in.schedStats.threads;
             }
         ),
         ["/sync/mutex/wait/total:seconds"u8] = new(
             compute: (ж<statAggregate> _, ж<metricValue> @out) => {
-                @out.Value.kind = metricKindFloat64;
-                @out.Value.scalar = float64bits(nsToSec(totalMutexWaitTimeNanos()));
+                @out.kind = metricKindFloat64;
+                @out.scalar = float64bits(nsToSec(totalMutexWaitTimeNanos()));
             }
         )
     };
@@ -573,11 +573,11 @@ internal static void godebug_registerMetric(@string name, Func<uint64> read) {
 partial struct statDep /*num:nuint*/;
 
 internal static statDep heapStatsDep => /* iota */ 0; // corresponds to heapStatsAggregate
-internal static statDep sysStatsDep => 1;  // corresponds to sysStatsAggregate
-internal static statDep cpuStatsDep => 2;  // corresponds to cpuStatsAggregate
-internal static statDep gcStatsDep => 3;   // corresponds to gcStatsAggregate
-internal static statDep finalStatsDep => 4; // corresponds to finalStatsAggregate
-internal static statDep schedStatsDep => 5; // corresponds to schedStatsAggregate
+internal static statDep sysStatsDep => 1;             // corresponds to sysStatsAggregate
+internal static statDep cpuStatsDep => 2;             // corresponds to cpuStatsAggregate
+internal static statDep gcStatsDep => 3;              // corresponds to gcStatsAggregate
+internal static statDep finalStatsDep => 4;           // corresponds to finalStatsAggregate
+internal static statDep schedStatsDep => 5;           // corresponds to schedStatsAggregate
 internal static statDep numStatsDeps => 6;
 
 // statDepSet represents a set of statDeps.
@@ -589,9 +589,9 @@ partial struct statDepSet /*[1]uint64*/;
 internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
     var deps = depsʗp.sslice();
 
-    statDepSet s = default!;
+    statDepSet s = default;
     foreach (var (_, d) in deps) {
-        s[d / 64] |= (uint64)(((uint64)1 << (int)(nuint)((d % 64))));
+        s[d / 64] |= (uint64)(((uint64)1 << (int)(d % 64)));
     }
     return s.Clone();
 }
@@ -601,7 +601,7 @@ internal static statDepSet difference(this statDepSet s, statDepSet b) {
     s = s.Clone();
     b = b.Clone();
 
-    statDepSet c = default!;
+    statDepSet c = default;
     foreach (var i in range(s)) {
         c[i] = s[i] & ~b[i];
     }
@@ -613,7 +613,7 @@ internal static statDepSet union(this statDepSet s, statDepSet b) {
     s = s.Clone();
     b = b.Clone();
 
-    statDepSet c = default!;
+    statDepSet c = default;
     foreach (var i in range(s)) {
         c[i] = s[i] | b[i];
     }
@@ -632,7 +632,7 @@ internal static bool empty(this ref statDepSet s) {
 
 // has returns true if the set contains a given statDep.
 internal static bool has(this ref statDepSet s, statDep d) {
-    return (s.Value[d / 64] & ((uint64)1 << (int)(nuint)((d % 64)))) != 0;
+    return (s.Value[d / 64] & ((uint64)1 << (int)(d % 64))) != 0;
 }
 
 // heapStatsAggregate represents memory stats obtained from the
@@ -825,25 +825,31 @@ internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> Ꮡdeps)
         if (!missing.has(i)) {
             continue;
         }
-        var exprᴛ1 = i;
-        if (exprᴛ1 == heapStatsDep) {
+        switch (i) {
+        case var ᴛ when ᴛ == heapStatsDep: {
             Ꮡa.of(statAggregate.ᏑheapStats).compute();
+            break;
         }
-        else if (exprᴛ1 == sysStatsDep) {
+        case var ᴛ when ᴛ == sysStatsDep: {
             Ꮡa.of(statAggregate.ᏑsysStats).compute();
+            break;
         }
-        else if (exprᴛ1 == cpuStatsDep) {
+        case var ᴛ when ᴛ == cpuStatsDep: {
             a.cpuStats.compute();
+            break;
         }
-        else if (exprᴛ1 == gcStatsDep) {
+        case var ᴛ when ᴛ == gcStatsDep: {
             a.gcStats.compute();
+            break;
         }
-        else if (exprᴛ1 == finalStatsDep) {
+        case var ᴛ when ᴛ == finalStatsDep: {
             a.finalStats.compute();
+            break;
         }
-        else if (exprᴛ1 == schedStatsDep) {
+        case var ᴛ when ᴛ == schedStatsDep: {
             a.schedStats.compute();
-        }
+            break;
+        }}
     }
     a.ensured = a.ensured.union(missing);
 }
@@ -870,7 +876,7 @@ partial struct metricSample {
 // must be kept structurally identical to that type.
 partial struct metricValue {
     internal metricKind kind;
-    internal uint64 scalar;         // contains scalar values for scalar Kinds.
+    internal uint64 scalar;           // contains scalar values for scalar Kinds.
     internal @unsafe.Pointer pointer; // contains non-scalar values.
 }
 
@@ -878,17 +884,17 @@ partial struct metricValue {
 // from the value, but if none exists, then it allocates one with
 // the given buckets.
 internal static ж<metricFloat64Histogram> float64HistOrInit(this ref metricValue v, slice<float64> buckets) {
-    ж<metricFloat64Histogram> hist = default!;
-    if (v.kind == metricKindFloat64Histogram && v.pointer != nil){
+    ж<metricFloat64Histogram> hist = default;
+    if (v.kind == metricKindFloat64Histogram && v.pointer != nil) {
         hist = (ж<metricFloat64Histogram>)(uintptr)(v.pointer);
     } else {
         v.kind = metricKindFloat64Histogram;
         hist = @new<metricFloat64Histogram>();
         v.pointer = @unsafe.Pointer.FromPinnedBox(hist);
     }
-    hist.Value.buckets = buckets;
-    if (len((~hist).counts) != len((~hist).buckets) - 1) {
-        hist.Value.counts = new slice<uint64>(len(buckets) - 1);
+    hist.buckets = buckets;
+    if (len(hist.counts) != len(hist.buckets) - 1) {
+        hist.counts = new slice<uint64>(len(buckets) - 1);
     }
     return hist;
 }

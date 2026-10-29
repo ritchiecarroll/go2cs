@@ -28,20 +28,20 @@ public static UntypedInt TagSize => 16;
 // Sum generates an authenticator for msg using a one-time key and puts the
 // 16-byte result into out. Authenticating two different messages with the same
 // key allows an attacker to forge messages at will.
-public static void Sum(/*[16]*/ ж<array<byte>> Ꮡout, slice<byte> m, /*[32]*/ ж<array<byte>> Ꮡkey) {
+public static void Sum(/*[16]*/ ж<array<byte>> Ꮡout, slice<byte> m, /*[32]*/ ж<array<byte>> key) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    var h = New(Ꮡkey);
+    var h = New(key);
     h.Write(m);
     h.Sum(@out[..0]);
 }
 
 // Verify returns true if mac is a valid authenticator for m with the given key.
-public static bool Verify(/*[16]*/ ж<array<byte>> Ꮡmac, slice<byte> m, /*[32]*/ ж<array<byte>> Ꮡkey) {
+public static bool Verify(/*[16]*/ ж<array<byte>> Ꮡmac, slice<byte> m, /*[32]*/ ж<array<byte>> key) {
     ref var mac = ref Ꮡmac.DerefOrNull();
 
     ref var tmp = ref heap(new array<byte>(16), out var Ꮡtmp);
-    Sum(Ꮡtmp, m, Ꮡkey);
+    Sum(Ꮡtmp, m, key);
     return subtle.ConstantTimeCompare(tmp[..], mac[..]) == 1;
 }
 
@@ -54,9 +54,9 @@ public static bool Verify(/*[16]*/ ж<array<byte>> Ꮡmac, slice<byte> m, /*[32]
 // The key must be unique for each message, as authenticating
 // two different messages with the same key allows an attacker
 // to forge messages at will.
-public static ж<MAC> New(/*[32]*/ ж<array<byte>> Ꮡkey) {
-    var m = Ꮡ(new MAC(nil));
-    initialize(Ꮡkey, ref (m.of(MAC.ᏑmacState)).DerefOrNull());
+public static ж<MAC> New(/*[32]*/ ж<array<byte>> key) {
+    var m = Ꮡ(new MAC());
+    initialize(key, ref (m.of(MAC.ᏑmacState)).DerefOrNull());
     return m;
 }
 

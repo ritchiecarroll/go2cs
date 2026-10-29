@@ -45,7 +45,7 @@ partial struct Reader {
     internal nuint nBits;
     internal nuint width;
     internal Func<ж<Reader>, (uint16, error)> read; // readLSB or readMSB
-    internal nint litWidth;                          // width in bits of literal codes
+    internal nint litWidth;                         // width in bits of literal codes
     internal error err;
     // The first 1<<litWidth codes are literal codes.
     // The next two codes mean clear and EOF.
@@ -74,7 +74,7 @@ partial struct Reader {
     // It is flushed when it contains >= 1<<maxWidth bytes,
     // so that there is always room to decode an entire code.
     internal array<byte> output = new((2 * 1 << (int)(maxWidth)));
-    internal nint o;   // write index into output
+    internal nint o;             // write index into output
     internal slice<byte> toRead; // bytes to return from Read
 }
 
@@ -82,7 +82,7 @@ partial struct Reader {
 internal static (uint16, error) readLSB(this ref Reader r) {
     while (r.nBits < r.width) {
         var (x, err) = r.r.ReadByte();
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         r.bits |= (uint32)(((uint32)x).Lsh(r.nBits));
@@ -91,14 +91,14 @@ internal static (uint16, error) readLSB(this ref Reader r) {
     var code = (uint16)(r.bits & (((uint32)1).Lsh(r.width) - 1));
     r.bits.RshAssign(r.width);
     r.nBits -= r.width;
-    return (code, default!);
+    return (code, default);
 }
 
 // readMSB returns the next code for "Most Significant Bits first" data.
 internal static (uint16, error) readMSB(this ref Reader r) {
     while (r.nBits < r.width) {
         var (x, err) = r.r.ReadByte();
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         r.bits |= (uint32)(((uint32)x).Lsh((24 - r.nBits)));
@@ -107,20 +107,20 @@ internal static (uint16, error) readMSB(this ref Reader r) {
     var code = (uint16)(r.bits.Rsh((32 - r.width)));
     r.bits.LshAssign(r.width);
     r.nBits -= r.width;
-    return (code, default!);
+    return (code, default);
 }
 
 // Read implements io.Reader, reading uncompressed bytes from its underlying reader.
 public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> b) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         if (len(r.toRead) > 0) {
             nint n = copy(b, r.toRead);
             r.toRead = r.toRead.slice(n);
-            return (n, default!);
+            return (n, default);
         }
-        if (r.err != default!) {
+        if (r.err != nil) {
             return (0, r.err);
         }
         Ꮡr.decode();
@@ -138,9 +138,9 @@ internal static void decode(this ж<Reader> Ꮡr) {
 
     // Loop over the code stream, converting codes into decompressed bytes.
 loop:
-    while (ᐧ) {
+    for (;;) {
         var (code, err) = r.read(Ꮡr);
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
@@ -212,7 +212,7 @@ loop:
             if (r.hi > r.overflow) {
                 throw panic("unreachable");
             }
-            if (r.width == maxWidth){
+            if (r.width == maxWidth) {
                 r.last = decoderInvalidCode;
                 // Undo the d.hi++ a few lines above, so that (1) we maintain
                 // the invariant that d.hi < d.overflow, and (2) d.hi does not
@@ -240,13 +240,13 @@ internal static error errClosed = errors.New("lzw: reader/writer is closed"u8);
 // It does not close the underlying [io.Reader].
 public static error Close(this ref Reader r) {
     r.err = errClosed; // in case any Reads come along
-    return default!;
+    return default;
 }
 
 // Reset clears the [Reader]'s state and allows it to be reused again
 // as a new [Reader].
 public static void Reset(this ref Reader r, io.Reader src, Order order, nint litWidth) {
-    r = new Reader(nil);
+    r = new Reader();
     r.init(src, order, litWidth);
 }
 
@@ -276,24 +276,26 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
 internal static readonly @string lzwUnknownOrderˢ = "lzw: unknown order"u8;
 
 internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) {
-    var exprᴛ1 = order;
-    if (exprᴛ1 == LSB) {
+    switch (order) {
+    case var ᴛ when ᴛ == LSB: {
         r.read = ((Func<ж<Reader>, (uint16, error)>)(readLSB));
+        break;
     }
-    else if (exprᴛ1 == MSB) {
+    case var ᴛ when ᴛ == MSB: {
         r.read = ((Func<ж<Reader>, (uint16, error)>)(readMSB));
+        break;
     }
-    else { /* default: */
+    default: {
         r.err = errors.New(lzwUnknownOrderˢ);
         return;
-    }
+    }}
     if (litWidth < 2 || 8 < litWidth) {
         r.err = fmt.Errorf("lzw: litWidth %d out of range"u8, litWidth);
         return;
     }
 
     var (br, ok) = src._<io.ByteReader>(ᐧ);
-    if (!ok && src != default!) {
+    if (!ok && src != nil) {
         br = new bufio_ReaderжByteReader(bufio.NewReader(src));
     }
     r.r = br;

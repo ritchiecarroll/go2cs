@@ -45,7 +45,7 @@ internal static void initMPTCPavailable() {
     if (errors.Is(err, syscall.EINVAL)) { matchᴛ1 = true; // Not supported: < v5.6
         return;
     }
-    if (err == default!) { matchᴛ1 = true; // Supported and no error
+    if (err == nil) { matchᴛ1 = true; // Supported and no error
         poll.CloseFunc(s);
         fallthrough = true;
     }
@@ -58,11 +58,11 @@ internal static void initMPTCPavailable() {
     hasSOLMPTCP = unix.KernelVersionGE(5, 16);
 }
 
-internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
+internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     if (supportsMultipathTCP()) {
         {
-            var (conn, err) = Ꮡsd.doDialTCPProto(ctx, Ꮡladdr, Ꮡraddr, _IPPROTO_MPTCP); if (err == default!) {
-                return (conn, default!);
+            var (conn, err) = Ꮡsd.doDialTCPProto(ctx, laddr, raddr, _IPPROTO_MPTCP); if (err == nil) {
+                return (conn, default);
             }
         }
     }
@@ -73,14 +73,14 @@ internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context
     // Possible MPTCP specific error: ENOPROTOOPT (sysctl net.mptcp.enabled=0)
     // But just in case MPTCP is blocked differently (SELinux, etc.), just
     // retry with "plain" TCP.
-    return Ꮡsd.dialTCP(ctx, Ꮡladdr, Ꮡraddr);
+    return Ꮡsd.dialTCP(ctx, laddr, raddr);
 }
 
-internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> Ꮡladdr) {
+internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
     if (supportsMultipathTCP()) {
         {
-            var (dial, err) = Ꮡsl.listenTCPProto(ctx, Ꮡladdr, _IPPROTO_MPTCP); if (err == default!) {
-                return (dial, default!);
+            var (dial, err) = Ꮡsl.listenTCPProto(ctx, laddr, _IPPROTO_MPTCP); if (err == nil) {
+                return (dial, default);
             }
         }
     }
@@ -91,7 +91,7 @@ internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl,
     // Possible MPTCP specific error: ENOPROTOOPT (sysctl net.mptcp.enabled=0)
     // But just in case MPTCP is blocked differently (SELinux, etc.), just
     // retry with "plain" TCP.
-    return Ꮡsl.listenTCP(ctx, Ꮡladdr);
+    return Ꮡsl.listenTCP(ctx, laddr);
 }
 
 // hasFallenBack reports whether the MPTCP connection has fallen back to "plain"
@@ -105,8 +105,8 @@ internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl,
 //
 // Kernel >= 5.16 returns EOPNOTSUPP/ENOPROTOOPT in case of fallback.
 // Older kernels will always return them even if MPTCP is used: not usable.
-internal static bool hasFallenBack(ж<netFD> Ꮡfd) {
-    var (_, err) = Ꮡfd.of(netFD.Ꮡpfd).GetsockoptInt(_SOL_MPTCP, _MPTCP_INFO);
+internal static bool hasFallenBack(ж<netFD> fd) {
+    var (_, err) = fd.of(netFD.Ꮡpfd).GetsockoptInt(_SOL_MPTCP, _MPTCP_INFO);
 
     // 2 expected errors in case of fallback depending on the address family
     //   - AF_INET:  EOPNOTSUPP
@@ -119,8 +119,8 @@ internal static bool hasFallenBack(ж<netFD> Ꮡfd) {
 // Compared to hasFallenBack method, here only the socket protocol being used is
 // checked: it can be MPTCP but it doesn't mean MPTCP is used on the wire, maybe
 // a fallback to TCP has been done.
-internal static bool isUsingMPTCPProto(ж<netFD> Ꮡfd) {
-    var (proto, _) = Ꮡfd.of(netFD.Ꮡpfd).GetsockoptInt(syscall.SOL_SOCKET, syscall.SO_PROTOCOL);
+internal static bool isUsingMPTCPProto(ж<netFD> fd) {
+    var (proto, _) = fd.of(netFD.Ꮡpfd).GetsockoptInt(syscall.SOL_SOCKET, syscall.SO_PROTOCOL);
 
     return proto == _IPPROTO_MPTCP;
 }
@@ -129,16 +129,16 @@ internal static bool isUsingMPTCPProto(ж<netFD> Ꮡfd) {
 //
 // Please look at the description of hasFallenBack (kernel >=5.16) and
 // isUsingMPTCPProto methods for more details about what is being checked here.
-internal static bool isUsingMultipathTCP(ж<netFD> Ꮡfd) {
+internal static bool isUsingMultipathTCP(ж<netFD> fd) {
     if (!supportsMultipathTCP()) {
         return false;
     }
 
     if (hasSOLMPTCP) {
-        return !hasFallenBack(Ꮡfd);
+        return !hasFallenBack(fd);
     }
 
-    return isUsingMPTCPProto(Ꮡfd);
+    return isUsingMPTCPProto(fd);
 }
 
 } // end net_package

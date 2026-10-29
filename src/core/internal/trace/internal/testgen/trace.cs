@@ -29,7 +29,7 @@ public static void ΔMain(version.Version ver, Action<ж<Trace>> f) {
     try {
         // Create an output file.
         var (@out, err) = os.Create(os.Args[1]);
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err.Error());
         }
         var outʗ1 = @out;
@@ -43,7 +43,7 @@ public static void ΔMain(version.Version ver, Action<ж<Trace>> f) {
 
         // Write out the generator's state.
         {
-            var (_, errΔ1) = @out.Write(trace.Generate()); if (errΔ1 != default!) {
+            var (_, errΔ1) = @out.Write(trace.Generate()); if (errΔ1 != nil) {
                 throw panic(errΔ1.Error());
             }
         }
@@ -135,7 +135,7 @@ public static slice<byte> Generate(this ref Trace t) {
     // Trace file contents.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var (tw, err) = raw.NewTextWriter(new bytes_BufferжWriter(Ꮡbuf), t.ver);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err.Error());
     }
 
@@ -157,10 +157,10 @@ public static slice<byte> Generate(this ref Trace t) {
 
     // Create the test file's contents.
     return txtar.Format(Ꮡ(new txtar.Archive(
-        Files: new txtar.File[]{
+        Files: slice<txtar.File>([
             new(Name: "expect"u8, Data: expect),
             new(Name: "trace"u8, Data: buf.Bytes())
-        }.slice()
+        ])
     )));
 }
 
@@ -190,7 +190,7 @@ partial struct stack {
 
 public static readonly ж<@string> ᏑNoString = new StaticBox<@string>(""u8);
 public static ref @string NoString => ref ((StaticBox<@string>)ᏑNoString).ValueSlot;
-public static readonly ж<slice<trace.StackFrame>> ᏑNoStack = new StaticBox<slice<trace.StackFrame>>(new trace.StackFrame[]{}.slice());
+public static readonly ж<slice<trace.StackFrame>> ᏑNoStack = new StaticBox<slice<trace.StackFrame>>(slice<trace.StackFrame>([]));
 public static ref slice<trace.StackFrame> NoStack => ref ((StaticBox<slice<trace.StackFrame>>)ᏑNoStack).ValueSlot;
 
 // Generation represents a single generation in the trace.
@@ -268,8 +268,8 @@ public static uint64 Stack(this ref ΔGeneration g, slice<trace.StackFrame> stk)
 // version, the time value is the timestamp of the batch containing a lone
 // EvFrequency event.
 public static void Sync(this ref ΔGeneration g, uint64 freq, Time timeΔ1, uint64 mono, time.Time wall) {
-    if ((~g.trace).ver < version.Go125 && (mono != 0 || !wall.IsZero())) {
-        throw panic(fmt.Sprintf("mono and wall args are not supported in go1.%d traces"u8, (~g.trace).ver));
+    if (g.trace.ver < version.Go125 && (mono != 0 || !wall.IsZero())) {
+        throw panic(fmt.Sprintf("mono and wall args are not supported in go1.%d traces"u8, g.trace.ver));
     }
     g.sync = new sync(
         freq: freq,
@@ -295,12 +295,12 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
     ref var tw = ref Ꮡtw.DerefOrNull();
 
     // go1.25+ sync batches are emitted at the start of the generation.
-    if ((~g.trace).ver >= version.Go125) {
+    if (g.trace.ver >= version.Go125) {
         var bΔ1 = Ꮡg.newStructuralBatch();
         // Arrange for EvClockSnapshot's ts to be exactly g.sync.time.
         bΔ1.setTimestamp(g.sync.time - 1);
-        bΔ1.RawEvent(tracev2.EvSync, default!);
-        bΔ1.RawEvent(tracev2.EvFrequency, default!, g.sync.freq);
+        bΔ1.RawEvent(tracev2.EvSync, default);
+        bΔ1.RawEvent(tracev2.EvFrequency, default, g.sync.freq);
         var sec = (uint64)g.sync.walltime.Unix();
         var nsec = (uint64)g.sync.walltime.Nanosecond();
         bΔ1.Event(clockSnapshotˢ, g.sync.mono, sec, nsec);
@@ -313,28 +313,28 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
     }
 
     // Write lone EvFrequency sync batch for older traces.
-    if ((~g.trace).ver < version.Go125) {
+    if (g.trace.ver < version.Go125) {
         var bΔ3 = Ꮡg.newStructuralBatch();
         bΔ3.setTimestamp(g.sync.time);
-        bΔ3.RawEvent(tracev2.EvFrequency, default!, g.sync.freq);
+        bΔ3.RawEvent(tracev2.EvFrequency, default, g.sync.freq);
         bΔ3.writeEventsTo(Ꮡtw);
     }
 
     // Write stacks.
     var b = Ꮡg.newStructuralBatch();
-    b.RawEvent(tracev2.EvStacks, default!);
+    b.RawEvent(tracev2.EvStacks, default);
     foreach (var (kᴛ1, id) in g.stacks) {
         var stk = kᴛ1.ΔClone();
 
         var stkΔ1 = stk.stk.slice(0, stk.len);
-        var args = new uint64[]{id, (uint64)len(stkΔ1)}.slice();
+        var args = slice<uint64>([id, (uint64)len(stkΔ1)]);
         foreach (var (_, f) in stkΔ1) {
             args = append(args, f.PC, g.String(f.Func), g.String(f.File), f.Line);
         }
-        b.RawEvent(tracev2.EvStack, default!, args.ꓸꓸꓸ);
+        b.RawEvent(tracev2.EvStack, default, args.ꓸꓸꓸ);
 
         // Flush the batch if necessary.
-        if (!g.ignoreStackBatchSizeLimit && (~b).size > (uint64)(tracev2.MaxBatchSize / 2)) {
+        if (!g.ignoreStackBatchSizeLimit && b.size > (uint64)(tracev2.MaxBatchSize / 2)) {
             b.writeEventsTo(Ꮡtw);
             b = Ꮡg.newStructuralBatch();
         }
@@ -343,12 +343,12 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
 
     // Write strings.
     b = Ꮡg.newStructuralBatch();
-    b.RawEvent(tracev2.EvStrings, default!);
+    b.RawEvent(tracev2.EvStrings, default);
     foreach (var (s, id) in g.strings) {
         b.RawEvent(tracev2.EvString, slice<byte>(s), id);
 
         // Flush the batch if necessary.
-        if (!g.ignoreStringBatchSizeLimit && (~b).size > (uint64)(tracev2.MaxBatchSize / 2)) {
+        if (!g.ignoreStringBatchSizeLimit && b.size > (uint64)(tracev2.MaxBatchSize / 2)) {
             b.writeEventsTo(Ꮡtw);
             b = Ꮡg.newStructuralBatch();
         }
@@ -356,9 +356,9 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
     b.writeEventsTo(Ꮡtw);
 
     // Write end-of-generation event if necessary.
-    if ((~g.trace).ver >= version.Go126) {
+    if (g.trace.ver >= version.Go126) {
         tw.WriteEvent(new raw.Event(
-            Version: (~g.trace).ver,
+            Version: g.trace.ver,
             Ev: tracev2.EvEndOfGeneration
         ));
     }
@@ -368,7 +368,7 @@ internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var b = Ꮡ(new ΔBatch(gen: Ꮡg, thread: trace.NoThread));
-    b.setTimestamp((~g.trace).lastTs + 1);
+    b.setTimestamp(g.trace.lastTs + 1);
     return b;
 }
 
@@ -387,22 +387,22 @@ partial struct ΔBatch {
 public static void Event(this ref ΔBatch b, @string name, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    var (ev, ok) = (~(~b.gen).trace).names[name, ꟷ];
+    var (ev, ok) = b.gen.trace.names[name, ꟷ];
     if (!ok) {
         throw panic(fmt.Sprintf("invalid or unknown event %s"u8, name));
     }
-    slice<uint64> uintArgs = default!;
+    slice<uint64> uintArgs = default;
     nint argOff = 0;
-    if ((~(~b.gen).trace).specs[ev].IsTimedEvent) {
-        if ((~(~b.gen).trace).validTimestamps){
-            uintArgs = new uint64[]{1}.slice();
-            b.gen.Value.trace.Value.lastTs += 1;
+    if (b.gen.trace.specs[ev].IsTimedEvent) {
+        if (b.gen.trace.validTimestamps) {
+            uintArgs = slice<uint64>([1]);
+            b.gen.trace.lastTs += 1;
         } else {
-            uintArgs = new uint64[]{0}.slice();
+            uintArgs = slice<uint64>([0]);
         }
         argOff = 1;
     }
-    var spec = (~(~b.gen).trace).specs[ev];
+    var spec = b.gen.trace.specs[ev];
     {
         nint arity = len(spec.Args) - argOff; if (len(args) != arity) {
             throw panic(fmt.Sprintf("expected %d args for %s, got %d"u8, arity, spec.Name, len(args)));
@@ -411,7 +411,7 @@ public static void Event(this ref ΔBatch b, @string name, params ꓸꓸꓸany a
     foreach (var (i, arg) in args) {
         uintArgs = append(uintArgs, b.uintArgFor(arg, spec.Args[i + argOff]));
     }
-    b.RawEvent(ev, default!, uintArgs.ꓸꓸꓸ);
+    b.RawEvent(ev, default, uintArgs.ꓸꓸꓸ);
 }
 
 internal static uint64 uintArgFor(this ref ΔBatch b, any arg, @string argSpec) {
@@ -420,41 +420,53 @@ internal static uint64 uintArgFor(this ref ΔBatch b, any arg, @string argSpec) 
     if (len(components) == 2) {
         typStr = components[1];
     }
-    uint64 u = default!;
+    uint64 u = default;
     var exprᴛ1 = typStr;
-    if (exprᴛ1 == "value"u8 || exprᴛ1 == "mono"u8 || exprᴛ1 == "sec"u8 || exprᴛ1 == "nsec"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "value"u8 || exprᴛ1 == "mono"u8 || exprᴛ1 == "sec"u8 || exprᴛ1 == "nsec"u8: {
         u = arg._<uint64>();
+        break;
     }
-    else if (exprᴛ1 == "stack"u8) {
+    case {} when exprᴛ1 == "stack"u8: {
         u = b.gen.Stack(arg._<slice<trace.StackFrame>>());
+        break;
     }
-    else if (exprᴛ1 == "seq"u8) {
+    case {} when exprᴛ1 == "seq"u8: {
         u = (uint64)(arg._<Seq>());
+        break;
     }
-    else if (exprᴛ1 == "pstatus"u8) {
-        u = (uint64)(uint8)(arg._<tracev2.ProcStatus>());
+    case {} when exprᴛ1 == "pstatus"u8: {
+        u = (uint64)(arg._<tracev2.ProcStatus>());
+        break;
     }
-    else if (exprᴛ1 == "gstatus"u8) {
-        u = (uint64)(uint8)(arg._<tracev2.GoStatus>());
+    case {} when exprᴛ1 == "gstatus"u8: {
+        u = (uint64)(arg._<tracev2.GoStatus>());
+        break;
     }
-    else if (exprᴛ1 == "g"u8) {
-        u = (uint64)(int64)(arg._<trace.GoID>());
+    case {} when exprᴛ1 == "g"u8: {
+        u = (uint64)(arg._<trace.GoID>());
+        break;
     }
-    else if (exprᴛ1 == "m"u8) {
-        u = (uint64)(int64)(arg._<trace.ThreadID>());
+    case {} when exprᴛ1 == "m"u8: {
+        u = (uint64)(arg._<trace.ThreadID>());
+        break;
     }
-    else if (exprᴛ1 == "p"u8) {
-        u = (uint64)(int64)(arg._<trace.ProcID>());
+    case {} when exprᴛ1 == "p"u8: {
+        u = (uint64)(arg._<trace.ProcID>());
+        break;
     }
-    else if (exprᴛ1 == "string"u8) {
+    case {} when exprᴛ1 == "string"u8: {
         u = b.gen.String(arg._<@string>());
+        break;
     }
-    else if (exprᴛ1 == "task"u8) {
+    case {} when exprᴛ1 == "task"u8: {
         u = (uint64)(arg._<trace.TaskID>());
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic(fmt.Sprintf("unsupported arg type %q for spec %q"u8, typStr, argSpec));
-    }
+        break;
+    }}
     return u;
 }
 
@@ -464,7 +476,7 @@ internal static uint64 uintArgFor(this ref ΔBatch b, any arg, @string argSpec) 
 public static void RawEvent(this ref ΔBatch b, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
-    var ev = (~b.gen).trace.createEvent(typ, data, args.ꓸꓸꓸ);
+    var ev = b.gen.trace.createEvent(typ, data, args.ꓸꓸꓸ);
 
     // Compute the size of the event and add it to the batch.
     b.size += 1; // One byte for the event header.
@@ -486,9 +498,9 @@ internal static void writeEventsTo(this ref ΔBatch b, ж<raw.TextWriter> Ꮡtw)
     ref var tw = ref Ꮡtw.DerefOrNull();
 
     tw.WriteEvent(new raw.Event(
-        Version: (~(~b.gen).trace).ver,
+        Version: b.gen.trace.ver,
         Ev: tracev2.EvEventBatch,
-        Args: new uint64[]{(~b.gen).gen, (uint64)(int64)b.thread, (uint64)b.timestamp, b.size}.slice()
+        Args: slice<uint64>([b.gen.gen, (uint64)b.thread, (uint64)b.timestamp, b.size])
     ));
     foreach (var (_, e) in b.events) {
         tw.WriteEvent(e);
@@ -497,9 +509,9 @@ internal static void writeEventsTo(this ref ΔBatch b, ж<raw.TextWriter> Ꮡtw)
 
 // setTimestamp sets the timestamp for the batch.
 internal static void setTimestamp(this ref ΔBatch b, Time t) {
-    if ((~(~b.gen).trace).validTimestamps) {
+    if (b.gen.trace.validTimestamps) {
         b.timestamp = t;
-        b.gen.Value.trace.Value.lastTs = t;
+        b.gen.trace.lastTs = t;
     }
 }
 

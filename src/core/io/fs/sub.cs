@@ -33,17 +33,17 @@ partial interface SubFS :
 // chroot-style security mechanism, and Sub does not change that fact.
 public static (FS, error) Sub(FS fsys, @string dir) {
     if (!ValidPath(dir)) {
-        return (default!, new PathErrorжerror(Ꮡ(new PathError(Op: "sub"u8, Path: dir, Err: ErrInvalid))));
+        return (default, new PathErrorжerror(Ꮡ(new PathError(Op: "sub"u8, Path: dir, Err: ErrInvalid))));
     }
     if (dir == "."u8) {
-        return (fsys, default!);
+        return (fsys, default);
     }
     {
         var (fsysΔ1, ok) = fsys._<SubFS>(ᐧ); if (ok) {
             return fsysΔ1.Sub(dir);
         }
     }
-    return (new subFSжFS(Ꮡ(new subFS(fsys, dir))), default!);
+    return (new subFSжFS(Ꮡ(new subFS(fsys, dir))), default);
 }
 
 internal static FS _ᴛ1ʗ = new subFSжFS(((ж<subFS>)nil));
@@ -66,7 +66,7 @@ internal static (@string, error) fullName(this ref subFS f, @string op, @string 
     if (!ValidPath(name)) {
         return ("", new PathErrorжerror(Ꮡ(new PathError(Op: op, Path: name, Err: ErrInvalid))));
     }
-    return (path.Join(f.dir, name), default!);
+    return (path.Join(f.dir, name), default);
 }
 
 // shorten maps name, which should start with f.dir, back to the suffix after f.dir.
@@ -74,7 +74,7 @@ internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) {
     if (name == f.dir) {
         return (".", true);
     }
-    if (len(name) >= len(f.dir) + 2 && name[len(f.dir)] == (rune)'/' && name.slice(0, len(f.dir)) == f.dir) {
+    if (len(name) >= len(f.dir) + 2 && name[len(f.dir)] == '/' && name.slice(0, len(f.dir)) == f.dir) {
         return (name.slice(len(f.dir) + 1), true);
     }
     return ("", false);
@@ -85,8 +85,8 @@ internal static error fixErr(this ref subFS f, error err) {
     {
         var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
             {
-                var (@short, okΔ1) = f.shorten((~e).Path); if (okΔ1) {
-                    e.Value.Path = @short;
+                var (@short, okΔ1) = f.shorten(e.Path); if (okΔ1) {
+                    e.Path = @short;
                 }
             }
         }
@@ -99,8 +99,8 @@ private static readonly @string openˢ = "open"u8;
 
 internal static (File, error) Open(this ref subFS f, @string name) {
     var (full, err) = f.fullName(openˢ, name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var @file, err) = f.fsys.Open(full);
     return (@file, f.fixErr(err));
@@ -111,8 +111,8 @@ private static readonly @string readˢ = "read"u8;
 
 internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name) {
     var (full, err) = f.fullName(readˢ, name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var dir, err) = ReadDir(f.fsys, full);
     return (dir, f.fixErr(err));
@@ -120,8 +120,8 @@ internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name)
 
 internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
     var (full, err) = f.fullName(readˢ, name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var data, err) = ReadFile(f.fsys, full);
     return (data, f.fixErr(err));
@@ -132,14 +132,14 @@ private static readonly @string readlinkˢ = "readlink"u8;
 
 internal static (@string, error) ReadLink(this ref subFS f, @string name) {
     var (full, err) = f.fullName(readlinkˢ, name);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     (var target, err) = ReadLink(f.fsys, full);
-    if (err != default!) {
+    if (err != nil) {
         return ("", f.fixErr(err));
     }
-    return (target, default!);
+    return (target, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -147,25 +147,25 @@ private static readonly @string lstatˢ = "lstat"u8;
 
 internal static (FileInfo, error) Lstat(this ref subFS f, @string name) {
     var (full, err) = f.fullName(lstatˢ, name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var info, err) = Lstat(f.fsys, full);
-    if (err != default!) {
-        return (default!, f.fixErr(err));
+    if (err != nil) {
+        return (default, f.fixErr(err));
     }
-    return (info, default!);
+    return (info, default);
 }
 
 internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) {
     // Check pattern is well-formed.
     {
-        var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     if (pattern == "."u8) {
-        return (new @string[]{"."u8}.slice(), default!);
+        return (slice<@string>(["."u8]), default);
     }
 
     @string full = f.dir + "/"u8 + pattern;
@@ -173,7 +173,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
     foreach (var (i, name) in list) {
         var (nameΔ1, ok) = f.shorten(name);
         if (!ok) {
-            return (default!, errors.New("invalid result from inner fsys Glob: "u8 + nameΔ1 + " not in "u8 + f.dir)); // can't use fmt in this package
+            return (default, errors.New("invalid result from inner fsys Glob: "u8 + nameΔ1 + " not in "u8 + f.dir)); // can't use fmt in this package
         }
         list[i] = nameΔ1;
     }
@@ -187,14 +187,14 @@ internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (dir == "."u8) {
-        return (new subFSжFS(Ꮡf), default!);
+        return (new subFSжFS(Ꮡf), default);
     }
     ref var full = ref heap<@string>(out var Ꮡfull);
     (full, var err) = f.fullName(subˢ, dir);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (new subFSжFS(Ꮡ(new subFS(f.fsys, full))), default!);
+    return (new subFSжFS(Ꮡ(new subFS(f.fsys, full))), default);
 }
 
 } // end fs_package

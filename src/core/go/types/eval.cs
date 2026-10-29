@@ -24,20 +24,20 @@ internal static readonly @string evalˢ = "eval"u8;
 // same as in [CheckExpr]. An error is returned if expr cannot
 // be parsed successfully, or the resulting expr AST cannot be
 // type-checked.
-public static (TypeAndValue, error err) Eval(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, tokenꓸPos pos, @string expr) {
-    error err = default!;
+public static (TypeAndValue, error err) Eval(ж<token.FileSet> fset, ж<Package> pkg, tokenꓸPos pos, @string expr) {
+    error err = default;
 
     // parse expressions
-    (var node, err) = parser.ParseExprFrom(Ꮡfset, evalˢ, expr, 0);
-    if (err != default!) {
-        return (new TypeAndValue(nil), err);
+    (var node, err) = parser.ParseExprFrom(fset, evalˢ, expr, 0);
+    if (err != nil) {
+        return (new TypeAndValue(), err);
     }
 
     var info = Ꮡ(new ΔInfo(
         Types: new map<ast.Expr, TypeAndValue>()
     ));
-    err = CheckExpr(Ꮡfset, Ꮡpkg, pos, node, info);
-    return ((~info).Types[node], err);
+    err = CheckExpr(fset, pkg, pos, node, info);
+    return (info.Types[node], err);
 }
 
 // CheckExpr type checks the expression expr as if it had appeared at position
@@ -58,7 +58,7 @@ public static (TypeAndValue, error err) Eval(ж<token.FileSet> Ꮡfset, ж<Packa
 // functions ignore the context in which an expression is used (e.g., an
 // assignment). Thus, top-level untyped constants will return an
 // untyped type rather than the respective context-specific type.
-public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, tokenꓸPos pos, ast.Expr expr, ж<ΔInfo> Ꮡinfo) {
+public static error /*err*/ CheckExpr(ж<token.FileSet> fset, ж<Package> Ꮡpkg, tokenꓸPos pos, ast.Expr expr, ж<ΔInfo> info) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -66,19 +66,18 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡ
         ref var err = ref Ꮡerr.ValueSlot;
 
         // determine scope
-        ж<ΔScope> scope = default!;
-        if (Ꮡpkg == nil){
+        ж<ΔScope> scope = default;
+        if (Ꮡpkg == nil) {
             scope = Universe;
             pos = nopos;
-        } else 
-        if (!pos.IsValid()){
+        } else if (!pos.IsValid()) {
             scope = pkg.scope;
         } else {
             // The package scope extent (position information) may be
             // incorrect (files spread across a wide range of fset
             // positions) - ignore it and just consider its children
             // (file scopes).
-            foreach (var (_, fscope) in (~pkg.scope).children) {
+            foreach (var (_, fscope) in pkg.scope.children) {
                 {
                     scope = fscope.Innermost(pos); if (scope != nil) {
                         break;
@@ -88,17 +87,17 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡ
             if (scope == nil || debug) {
                 var s = scope;
                 while (s != nil && s != pkg.scope) {
-                    s = s.Value.parent;
+                    s = s.parent;
                 }
                 // s == nil || s == pkg.scope
                 if (s == nil) {
-                    err = fmt.Errorf("no position %s found in package %s"u8, Ꮡfset.Position(pos), pkg.name); goto ᒐdone;
+                    err = fmt.Errorf("no position %s found in package %s"u8, fset.Position(pos), pkg.name); goto ᒐdone;
                 }
             }
         }
 
         // initialize checker
-        var check = NewChecker(nil, Ꮡfset, Ꮡpkg, Ꮡinfo);
+        var check = NewChecker(nil, fset, Ꮡpkg, info);
         check.Value.scope = scope;
         check.Value.exprPos = pos;
         var checkʗ1 = check;
@@ -106,11 +105,11 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡ
 
         // evaluate node
         ref var x = ref heap(new operand(), out var Ꮡx);
-        check.rawExpr(nil, Ꮡx, expr, default!, true); // allow generic expressions
-        check.processDelayed(0); // incl. all functions
+        check.rawExpr(nil, Ꮡx, expr, default, true); // allow generic expressions
+        check.processDelayed(0);                     // incl. all functions
         check.recordUntyped();
 
-        err = default!;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

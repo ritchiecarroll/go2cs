@@ -29,23 +29,23 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // underlying [io.Writer]. It limits line length to 76 characters. The encoded
 // bytes are not necessarily flushed until the [Writer] is closed.
 public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
 
     foreach (var (i, b) in p) {
         switch (ᐧ) {
         // Simple writes are done in batch.
-        case {} when b >= (rune)'!' && b <= (rune)'~' && b != (rune)'=': {
+        case {} when b >= (byte)'!' && b <= (byte)'~' && b != (byte)'=': {
             continue;
             break;
         }
-        case {} when isWhitespace(b) || !w.Binary && (b == (rune)'\n' || b == (rune)'\r'): {
+        case {} when isWhitespace(b) || !w.Binary && (b == (byte)'\n' || b == (byte)'\r'): {
             continue;
             break;
         }}
 
         if (i > n) {
             {
-                var errΔ1 = w.write(p.slice(n, i)); if (errΔ1 != default!) {
+                var errΔ1 = w.write(p.slice(n, i)); if (errΔ1 != nil) {
                     return (n, errΔ1);
                 }
             }
@@ -53,7 +53,7 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
         }
 
         {
-            var errΔ2 = w.encode(b); if (errΔ2 != default!) {
+            var errΔ2 = w.encode(b); if (errΔ2 != nil) {
                 return (n, errΔ2);
             }
         }
@@ -61,23 +61,23 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
     }
 
     if (n == len(p)) {
-        return (n, default!);
+        return (n, default);
     }
 
     {
-        var errΔ3 = w.write(p.slice(n)); if (errΔ3 != default!) {
+        var errΔ3 = w.write(p.slice(n)); if (errΔ3 != nil) {
             return (n, errΔ3);
         }
     }
 
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 // Close closes the [Writer], flushing any unwritten data to the underlying
 // [io.Writer], but does not close the underlying io.Writer.
 public static error Close(this ref Writer w) {
     {
-        var err = w.checkLastByte(); if (err != default!) {
+        var err = w.checkLastByte(); if (err != nil) {
             return err;
         }
     }
@@ -88,24 +88,24 @@ public static error Close(this ref Writer w) {
 // write limits text encoded in quoted-printable to 76 characters per line.
 internal static error write(this ref Writer w, slice<byte> p) {
     foreach (var (_, b) in p) {
-        if (b == (rune)'\n' || b == (rune)'\r') {
+        if (b == '\n' || b == '\r') {
             // If the previous byte was \r, the CRLF has already been inserted.
-            if (w.cr && b == (rune)'\n') {
+            if (w.cr && b == '\n') {
                 w.cr = false;
                 continue;
             }
 
-            if (b == (rune)'\r') {
+            if (b == '\r') {
                 w.cr = true;
             }
 
             {
-                var err = w.checkLastByte(); if (err != default!) {
+                var err = w.checkLastByte(); if (err != nil) {
                     return err;
                 }
             }
             {
-                var err = w.insertCRLF(); if (err != default!) {
+                var err = w.insertCRLF(); if (err != nil) {
                     return err;
                 }
             }
@@ -114,7 +114,7 @@ internal static error write(this ref Writer w, slice<byte> p) {
 
         if (w.i == (nint)(lineMaxLen - 1)) {
             {
-                var err = w.insertSoftLineBreak(); if (err != default!) {
+                var err = w.insertSoftLineBreak(); if (err != nil) {
                     return err;
                 }
             }
@@ -125,24 +125,24 @@ internal static error write(this ref Writer w, slice<byte> p) {
         w.cr = false;
     }
 
-    return default!;
+    return default;
 }
 
 internal static error encode(this ref Writer w, byte b) {
     if ((nint)(lineMaxLen - 1) - w.i < 3) {
         {
-            var err = w.insertSoftLineBreak(); if (err != default!) {
+            var err = w.insertSoftLineBreak(); if (err != nil) {
                 return err;
             }
         }
     }
 
-    w.line[w.i] = (rune)'=';
+    w.line[w.i] = (byte)'=';
     w.line[w.i + 1] = upperhex[(b >> 4)];
     w.line[w.i + 2] = upperhex[(byte)(b & 0x0f)];
     w.i += 3;
 
-    return default!;
+    return default;
 }
 
 internal static readonly @string upperhex = "0123456789ABCDEF"u8;
@@ -150,32 +150,32 @@ internal static readonly @string upperhex = "0123456789ABCDEF"u8;
 // checkLastByte encodes the last buffered byte if it is a space or a tab.
 internal static error checkLastByte(this ref Writer w) {
     if (w.i == 0) {
-        return default!;
+        return default;
     }
 
     var b = w.line[w.i - 1];
     if (isWhitespace(b)) {
         w.i--;
         {
-            var err = w.encode(b); if (err != default!) {
+            var err = w.encode(b); if (err != nil) {
                 return err;
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 internal static error insertSoftLineBreak(this ref Writer w) {
-    w.line[w.i] = (rune)'=';
+    w.line[w.i] = (byte)'=';
     w.i++;
 
     return w.insertCRLF();
 }
 
 internal static error insertCRLF(this ref Writer w) {
-    w.line[w.i] = (rune)'\r';
-    w.line[w.i + 1] = (rune)'\n';
+    w.line[w.i] = (byte)'\r';
+    w.line[w.i + 1] = (byte)'\n';
     w.i += 2;
 
     return w.flush();
@@ -183,17 +183,17 @@ internal static error insertCRLF(this ref Writer w) {
 
 internal static error flush(this ref Writer w) {
     {
-        var (_, err) = w.w.Write(w.line.slice(0, w.i)); if (err != default!) {
+        var (_, err) = w.w.Write(w.line.slice(0, w.i)); if (err != nil) {
             return err;
         }
     }
 
     w.i = 0;
-    return default!;
+    return default;
 }
 
 internal static bool isWhitespace(byte b) {
-    return b == (rune)' ' || b == (rune)'\t';
+    return b == ' ' || b == '\t';
 }
 
 } // end quotedprintable_package

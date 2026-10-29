@@ -55,7 +55,7 @@ public static Priority LOG_UUCP => 64;
 public static Priority LOG_CRON => 72;
 public static Priority LOG_AUTHPRIV => 80;
 public static Priority LOG_FTP => 88;
-internal static Priority _ᴛ1ʗ => 96; // unused
+internal static Priority _ᴛ1ʗ => 96;  // unused
 internal static Priority _ᴛ2ʗ => 104; // unused
 internal static Priority _ᴛ3ʗ => 112; // unused
 internal static Priority _ᴛ4ʗ => 120; // unused
@@ -117,7 +117,7 @@ public static (ж<Writer>, error) Dial(@string network, @string raddr, Priority 
     GoFrame ᒐ = default;
     try {
         if (priority < 0 || priority > (Priority)(LOG_LOCAL7 | LOG_DEBUG)) {
-            return (default!, errors.New(logSyslogInvalidPriorityˢ));
+            return (default, errors.New(logSyslogInvalidPriorityˢ));
         }
 
         if (tag == ""u8) {
@@ -139,12 +139,12 @@ public static (ж<Writer>, error) Dial(@string network, @string raddr, Priority 
         defer(wʗ1.of(Writer.Ꮡmu).Unlock, ref ᒐ);
 
         var err = w.connect();
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        return (w, default!);
+        return (w, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -154,23 +154,23 @@ internal static readonly @string localhostˢ = "localhost"u8;
 // connect makes a connection to the syslog server.
 // It must be called with w.mu held.
 internal static error /*err*/ connect(this ref Writer w) {
-    error err = default!;
+    error err = default;
 
-    if (w.conn != default!) {
+    if (w.conn != nil) {
         // ignore err from close, it makes sense to continue anyway
         w.conn.close();
-        w.conn = default!;
+        w.conn = default;
     }
 
-    if (w.network == ""u8){
+    if (w.network == ""u8) {
         (w.conn, err) = unixSyslog();
         if (w.hostname == ""u8) {
             w.hostname = localhostˢ;
         }
     } else {
-        net.Conn c = default!;
+        net.Conn c = default;
         (c, err) = net.Dial(w.network, w.raddr);
-        if (err == default!) {
+        if (err == nil) {
             w.conn = new netConnжserverConn(Ꮡ(new netConn(
                 conn: c,
                 local: w.network == "unixgram"u8 || w.network == "unix"u8
@@ -200,14 +200,14 @@ public static error Close(this ж<Writer> Ꮡw) {
         w.mu.Lock();
         ᒐd1 = true;
 
-        if (w.conn != default!) {
+        if (w.conn != nil) {
             var err = w.conn.close();
-            w.conn = default!;
+            w.conn = default;
             return err;
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -278,21 +278,21 @@ internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @s
         w.mu.Lock();
         ᒐd1 = true;
 
-        if (w.conn != default!) {
+        if (w.conn != nil) {
             {
-                var (n, err) = w.write(pr, s); if (err == default!) {
-                    return (n, default!);
+                var (n, err) = w.write(pr, s); if (err == nil) {
+                    return (n, default);
                 }
             }
         }
         {
-            var err = w.connect(); if (err != default!) {
+            var err = w.connect(); if (err != nil) {
                 return (0, err);
             }
         }
         return w.write(pr, s);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -306,13 +306,13 @@ internal static (nint, error) write(this ref Writer w, Priority p, @string msg) 
     }
 
     var err = w.conn.writeString(p, w.hostname, w.tag, msg, nl);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
     // Note: return the length of the input, not the number of
     // bytes printed by Fprintf, because this must behave like
     // an io.Writer.
-    return (len(msg), default!);
+    return (len(msg), default);
 }
 
 internal static error writeString(this ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) {
@@ -343,10 +343,10 @@ internal static error close(this ref netConn n) {
 // set passed through to [log.New] to create the Logger.
 public static (ж<log.Logger>, error) NewLogger(Priority p, nint logFlag) {
     var (s, err) = New(p, ""u8);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (log.New(new WriterжWriter(s), ""u8, logFlag), default!);
+    return (log.New(new WriterжWriter(s), ""u8, logFlag), default);
 }
 
 } // end syslog_package

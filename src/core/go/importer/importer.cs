@@ -49,38 +49,39 @@ internal static readonly @string gccgoˢ = "gccgo"u8;
 // A lookup function must be provided for correct module-aware operation.
 // Deprecated: If lookup is nil, for backwards-compatibility, the importer
 // will attempt to resolve imports in the $GOPATH workspace.
-public static types.Importer ForCompiler(ж<token.FileSet> Ꮡfset, @string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
+public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
     var exprᴛ1 = compiler;
-    if (exprᴛ1 == "gc"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "gc"u8: {
         return new gcimportsжImporter(Ꮡ(new gcimports(
-            fset: Ꮡfset,
+            fset: fset,
             packages: new map<@string, ж<types.Package>>(),
             lookup: lookup
         )));
     }
-    if (exprᴛ1 == "gccgo"u8) {
-        gccgoimporter.GccgoInstallation inst = default!;
+    case {} when exprᴛ1 == "gccgo"u8: {
+        gccgoimporter.GccgoInstallation inst = default;
         {
-            var err = inst.InitFromDriver(gccgoˢ); if (err != default!) {
-                return default!;
+            var err = inst.InitFromDriver(gccgoˢ); if (err != nil) {
+                return default;
             }
         }
         return new gccgoimportsжImporter(Ꮡ(new gccgoimports(
             packages: new map<@string, ж<types.Package>>(),
-            importer: inst.GetImporter(default!, default!),
+            importer: inst.GetImporter(default, default),
             lookup: lookup
         )));
     }
-    if (exprᴛ1 == "source"u8) {
-        if (lookup != default!) {
+    case {} when exprᴛ1 == "source"u8: {
+        if (lookup != nil) {
             throw panic("source importer for custom import path lookup not supported (issue #13847).");
         }
 
-        return new srcimporter.ImporterжImporter(srcimporter.New(Δbuild.ᏑDefault, Ꮡfset, new map<@string, ж<types.Package>>()));
-    }
+        return new srcimporter.ImporterжImporter(srcimporter.New(Δbuild.ᏑDefault, fset, new map<@string, ж<types.Package>>()));
+    }}
 
     // compiler not supported
-    return default!;
+    return default;
 }
 
 // For calls [ForCompiler] with a new FileSet.
@@ -102,7 +103,7 @@ public static types.Importer For(@string compiler, Func<@string, (io.ReadCloser,
 // information derived from the Importer will be incorrect and
 // misleading. See also the package documentation.
 public static types.Importer Default() {
-    return For(runtime.Compiler, default!);
+    return For(runtime.Compiler, default);
 }
 
 // gc importer

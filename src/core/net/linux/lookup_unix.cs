@@ -19,7 +19,7 @@ internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.Onc
     GoFrame ᒐ = default;
     try {
         var (Δfile, err) = open("/etc/protocols"u8);
-        if (err != default!) {
+        if (err != nil) {
             return;
         }
         var fileʗ1 = Δfile;
@@ -28,7 +28,7 @@ internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.Onc
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
             // tcp    6   TCP    # transmission control protocol
             {
-                nint i = bytealg.IndexByteString(line, (rune)'#'); if (i >= 0) {
+                nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {
                     line = line.slice(0, i);
                 }
             }
@@ -74,7 +74,7 @@ internal static (slice<@string> addrs, error err) lookupHost(this ж<Resolver> �
 }
 
 internal static (slice<IPAddr> addrs, error err) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
-    error err = default!;
+    error err = default;
 
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, host);
     if (order == hostLookupCgo) {
@@ -89,12 +89,12 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
     // Prefer the cgo resolver if possible.
     if (!systemConf().mustUseGoResolver(Ꮡr)) {
         var (port, err) = cgoLookupPort(ctx, network, service);
-        if (err != default!) {
+        if (err != nil) {
             // Issue 18213: if cgo fails, first check to see whether we
             // have the answer baked-in to the net package.
             {
-                var (portΔ1, errΔ1) = goLookupPort(network, service); if (errΔ1 == default!) {
-                    return (portΔ1, default!);
+                var (portΔ1, errΔ1) = goLookupPort(network, service); if (errΔ1 == nil) {
+                    return (portΔ1, default);
                 }
             }
         }
@@ -107,8 +107,8 @@ internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Con
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name);
     if (order == hostLookupCgo) {
         {
-            var (cname, err) = cgoLookupCNAME(ctx, name); if (err == default!) {
-                return (cname, default!);
+            var (cname, err) = cgoLookupCNAME(ctx, name); if (err == nil) {
+                return (cname, default);
             }
         }
     }

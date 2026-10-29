@@ -24,7 +24,7 @@ internal static nint roundup(nint l) {
 }
 
 partial struct wireFormat {
-    internal nint extOff; // offset of header extension
+    internal nint extOff;  // offset of header extension
     internal nint bodyOff; // offset of message body
     internal Func<slice<byte>, (Message, error)> parse;
 }

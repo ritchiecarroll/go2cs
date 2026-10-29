@@ -37,7 +37,7 @@ public static UntypedInt MaxVarintLen64 => 10;
 public static slice<byte> AppendUvarint(slice<byte> buf, uint64 x) {
     while (x >= 0x80) {
         buf = append(buf, (byte)((byte)x | 0x80));
-        x >>= (int)(7);
+        x >>= 7;
     }
     return append(buf, (byte)x);
 }
@@ -48,7 +48,7 @@ public static nint PutUvarint(slice<byte> buf, uint64 x) {
     nint i = 0;
     while (x >= 0x80) {
         buf[i] = (byte)((byte)x | 0x80);
-        x >>= (int)(7);
+        x >>= 7;
         i++;
     }
     buf[i] = (byte)x;
@@ -62,8 +62,8 @@ public static nint PutUvarint(slice<byte> buf, uint64 x) {
 //   - n < 0: value larger than 64 bits (overflow) and -n is the number of
 //     bytes read.
 public static (uint64, nint) Uvarint(slice<byte> buf) {
-    uint64 x = default!;
-    nuint s = default!;
+    uint64 x = default;
+    nuint s = default;
     foreach (var (i, b) in buf) {
         if (i == MaxVarintLen64) {
             // Catch byte reads past MaxVarintLen64.
@@ -124,11 +124,11 @@ internal static error errOverflow = errors.New("binary: varint overflows a 64-bi
 // If an [io.EOF] happens after reading some but not all the bytes,
 // ReadUvarint returns [io.ErrUnexpectedEOF].
 public static (uint64, error) ReadUvarint(io.ByteReader r) {
-    uint64 x = default!;
-    nuint s = default!;
+    uint64 x = default;
+    nuint s = default;
     for (nint i = 0; i < MaxVarintLen64; i++) {
         var (b, err) = r.ReadByte();
-        if (err != default!) {
+        if (err != nil) {
             if (i > 0 && AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
@@ -138,7 +138,7 @@ public static (uint64, error) ReadUvarint(io.ByteReader r) {
             if (i == (nint)(MaxVarintLen64 - 1) && b > 1) {
                 return (x, errOverflow);
             }
-            return (x | ((uint64)b).Lsh(s), default!);
+            return (x | ((uint64)b).Lsh(s), default);
         }
         x |= (uint64)(((uint64)((byte)(b & 0x7f))).Lsh(s));
         s += 7;

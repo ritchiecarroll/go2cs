@@ -21,7 +21,7 @@ namespace go.time;
 // The test for this package is time/tzdata_test.go.
 using errors = errors_package;
 using syscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 
 partial class tzdata_package {
 
@@ -102,7 +102,7 @@ internal static (@string, error) loadFromEmbeddedTZData(@string name) {
         }
         xlen = get2s(z.slice(idx + 28));
         idx += 30 + namelen + xlen;
-        return (z.slice(idx, idx + size), default!);
+        return (z.slice(idx, idx + size), default);
     }
 
     return ("", syscall.ENOENT);

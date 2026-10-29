@@ -58,6 +58,11 @@ using static go.crypto.cipher_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(cfb))]
+[assembly: go.GoFieldAccess(typeof(ofb))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -67,7 +72,7 @@ using static go.crypto.cipher_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABs6ggAQKLKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgraUlIKmgoK4poKClAALHrKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgqSCyoKCpqaCgpSCgriCpqaCgpQ=", "", "", "29=BlockSize/1/2/2,Clone/1/1/3,BlockSize/2/2/4")]
-[assembly: go.GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABcwgoKUgpSCgoKmypSCgpSCggADGgAJAoKUAAIYAAkCgpSmgpKUlO6U")]
+[assembly: go.GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABcwgoKUgpSCgoKmypSCgpSCggADGgAJAoKUAAIYAAkCgpSmgoKUlO6U")]
 [assembly: go.GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACVSooCCpIKUgIKkgpSCgpQADBqCpoKCgoKCgoKmgoKCuIKmgoKUgpSAgqSCgpSCgoI=", "", "", "61=Clone/1/1/2")]
 [assembly: go.GoPositionMap("crypto/cipher/gcm.go", "gcm.cs", "ABw84oKUAAIU8oKUAAIWAAgCgpTWgoKCgpS4goKUAAUaAAoCgoKUgoKU7oKmgqaCgqaCgpSClIIAGDKCgqaCpoKClIKmgoKUgtyCgoKClIKmgoKUAA4UgoKUgpSAgqSClAALGIKmgqaCgpSClIKmgoKUgqaigoKUlIKClKaUgoKUgqaClIKmgoKUgqaigoKUgpSCgsqCppSmooKClIKCgriigoKClIKClIKCgriigqaigoKCgq7ygIKUgqSC")]
 [assembly: go.GoPositionMap("crypto/cipher/io.go", "io.cs", "ABMmsoKCAA0csoKCgoKUqqKAgqQ=")]

@@ -24,7 +24,7 @@ public static (nint, error) LsfSocket(nint ifindex, nint proto) {
     // This is missing SOCK_CLOEXEC, but adding the flag
     // could break callers.
     var (s, e) = Socket(AF_PACKET, SOCK_RAW, proto);
-    if (e != default!) {
+    if (e != nil) {
         return (0, e);
     }
     var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡlsall.of(SockaddrLinklayer.ᏑProtocol)));
@@ -32,11 +32,11 @@ public static (nint, error) LsfSocket(nint ifindex, nint proto) {
     p.Value[1] = (byte)proto;
     lsall.Ifindex = ifindex;
     e = Bind(s, new SockaddrLinklayerжSockaddr(Ꮡlsall));
-    if (e != default!) {
+    if (e != nil) {
         Close(s);
         return (0, e);
     }
-    return (s, default!);
+    return (s, default);
 }
 
 partial struct iflags {
@@ -49,7 +49,7 @@ public static error SetLsfPromisc(@string name, bool m) {
     GoFrame ᒐ = default;
     try {
         var (s, e) = Socket(AF_INET, (nint)((nint)SOCK_DGRAM | (nint)SOCK_CLOEXEC), 0);
-        if (e != default!) {
+        if (e != nil) {
             return e;
         }
         defer(Close, s, ref ᒐ);
@@ -61,7 +61,7 @@ public static error SetLsfPromisc(@string name, bool m) {
         if (ep != 0) {
             return ep;
         }
-        if (m){
+        if (m) {
             ifl.flags |= (uint16)((uint16)IFF_PROMISC);
         } else {
             ifl.flags &= unchecked((uint16)~(uint16)((uint16)IFF_PROMISC));
@@ -72,9 +72,9 @@ public static error SetLsfPromisc(@string name, bool m) {
         if (ep != 0) {
             return ep;
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

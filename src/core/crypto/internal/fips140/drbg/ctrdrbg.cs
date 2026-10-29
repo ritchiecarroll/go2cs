@@ -43,7 +43,7 @@ public static UntypedInt SeedSize => /* keySize + aes.BlockSize */ 48;
 internal static UntypedInt reseedInterval => /* 1 << 48 */ 281474976710656;
 internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 
-public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> Ꮡentropy) {
+public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> entropy) {
     // CTR_DRBG_Instantiate_algorithm, per Section 10.2.1.3.1.
     fips140.RecordApproved();
 
@@ -55,14 +55,14 @@ public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> Ꮡentropy) {
     V[len(V) - 1] = 1;
 
     var (cipher, err) = aes.New(K);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
-    var c = Ꮡ(new Counter(nil));
-    c.Value.c = aes.NewCTR(cipher, V).Value;
-    c.update(Ꮡentropy);
-    c.Value.reseedCounter = 1;
+    var c = Ꮡ(new Counter());
+    c.c = aes.NewCTR(cipher, V).Value;
+    c.update(entropy);
+    c.reseedCounter = 1;
     return c;
 }
 
@@ -81,7 +81,7 @@ internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡs
     increment(Ꮡ(array<byte>.Alias(V, 16)));
 
     var (cipher, err) = aes.New(K);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     c.c = aes.NewCTR(cipher, V).Value;
@@ -130,7 +130,7 @@ public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte
     }
 
     // Step 2.
-    if (ᏑadditionalInput != nil){
+    if (ᏑadditionalInput != nil) {
         Ꮡc.update(ᏑadditionalInput);
     } else {
         // If the additional input is null, the first CTR_DRBG_Update is

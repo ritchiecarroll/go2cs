@@ -54,12 +54,12 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
                     http.Error(w, fmt.Sprintf(s, args.ꓸꓸꓸ), http.StatusInternalServerError);
                 }
                 var (recordsΔ1, errΔ1) = f(r);
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     failf("failed to get records: %v"u8, errΔ1);
                     return;
                 }
                 {
-                    var errΔ2 = BuildProfile(recordsΔ1).Write(new http_ResponseWriterᴠWriter(w)); if (errΔ2 != default!) {
+                    var errΔ2 = BuildProfile(recordsΔ1).Write(new http_ResponseWriterᴠWriter(w)); if (errΔ2 != nil) {
                         failf("failed to write profile: %v"u8, errΔ2);
                         return;
                     }
@@ -68,7 +68,7 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
             }
 
             var (blockf, err) = os.CreateTemp(""u8, blockˢ);
-            if (err != default!) {
+            if (err != nil) {
                 http.Error(w, fmt.Sprintf("failed to create temp file: %v"u8, err), http.StatusInternalServerError);
                 return;
             }
@@ -78,31 +78,31 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
                 os.Remove(blockfʗ1.Name());
             }, ref ᒐ);
             (var records, err) = f(r);
-            if (err != default!) {
+            if (err != nil) {
                 http.Error(w, fmt.Sprintf("failed to generate profile: %v"u8, err), http.StatusInternalServerError);
             }
             var blockb = bufio.NewWriter(new os.FileжWriter(blockf));
             {
-                var errΔ1 = BuildProfile(records).Write(new bufio_WriterжWriter(blockb)); if (errΔ1 != default!) {
+                var errΔ1 = BuildProfile(records).Write(new bufio_WriterжWriter(blockb)); if (errΔ1 != nil) {
                     http.Error(w, fmt.Sprintf("failed to write profile: %v"u8, errΔ1), http.StatusInternalServerError);
                     return;
                 }
             }
             {
-                var errΔ2 = blockb.Flush(); if (errΔ2 != default!) {
+                var errΔ2 = blockb.Flush(); if (errΔ2 != nil) {
                     http.Error(w, fmt.Sprintf("failed to flush temp file: %v"u8, errΔ2), http.StatusInternalServerError);
                     return;
                 }
             }
             {
-                var errΔ3 = blockf.Close(); if (errΔ3 != default!) {
+                var errΔ3 = blockf.Close(); if (errΔ3 != nil) {
                     http.Error(w, fmt.Sprintf("failed to close temp file: %v"u8, errΔ3), http.StatusInternalServerError);
                     return;
                 }
             }
             @string svgFilename = blockf.Name() + ".svg"u8;
             {
-                var (output, errΔ4) = exec.Command(goCmd(), toolˢ, pprofˢ, svgˢ, outputˢ, svgFilename, blockf.Name()).CombinedOutput(); if (errΔ4 != default!) {
+                var (output, errΔ4) = exec.Command(goCmd(), toolˢ, pprofˢ, svgˢ, outputˢ, svgFilename, blockf.Name()).CombinedOutput(); if (errΔ4 != nil) {
                     http.Error(w, fmt.Sprintf("failed to execute go tool pprof: %v\n%s"u8, errΔ4, output), http.StatusInternalServerError);
                     return;
                 }
@@ -126,46 +126,46 @@ public static ж<profile.Profile> BuildProfile(slice<ProfileRecord> prof) {
     var p = Ꮡ(new profile.Profile(
         PeriodType: Ꮡ(new profile.ValueType(Type: "trace"u8, Unit: "count"u8)),
         Period: 1,
-        SampleType: new ж<profile.ValueType>[]{
+        SampleType: slice<ж<profile.ValueType>>([
             Ꮡ(new profile.ValueType(Type: "contentions"u8, Unit: "count"u8)),
             Ꮡ(new profile.ValueType(Type: "delay"u8, Unit: "nanoseconds"u8))
-        }.slice()
+        ])
     ));
     var locs = new map<uint64, ж<profile.Location>>();
     var funcs = new map<@string, ж<profile.Function>>();
     foreach (var (_, rec) in prof) {
-        slice<ж<profile.Location>> sloc = default!;
+        slice<ж<profile.Location>> sloc = default;
         foreach (var (_, frame) in rec.Stack) {
             var loc = locs[frame.PC];
             if (loc == nil) {
                 var fn = funcs[frame.File + frame.Func];
                 if (fn == nil) {
                     fn = Ꮡ(new profile.Function(
-                        ID: (uint64)(len((~p).Function) + 1),
+                        ID: (uint64)(len(p.Function) + 1),
                         Name: frame.Func,
                         SystemName: frame.Func,
                         Filename: frame.File
                     ));
-                    p.Value.Function = append((~p).Function, fn);
+                    p.Function = append(p.Function, fn);
                     funcs[frame.File + frame.Func] = fn;
                 }
                 loc = Ꮡ(new profile.Location(
-                    ID: (uint64)(len((~p).Location) + 1),
+                    ID: (uint64)(len(p.Location) + 1),
                     Address: frame.PC,
-                    Line: new profile.Line[]{
+                    Line: slice<profile.Line>([
                         new(
                             Function: fn,
                             ΔLine: (int64)frame.Line
                         )
-                    }.slice()
+                    ])
                 ));
-                p.Value.Location = append((~p).Location, loc);
+                p.Location = append(p.Location, loc);
                 locs[frame.PC] = loc;
             }
             sloc = append(sloc, loc);
         }
-        p.Value.Sample = append((~p).Sample, Ꮡ(new profile.Sample(
-            Value: new int64[]{(int64)rec.Count, (int64)rec.Time}.slice(),
+        p.Sample = append(p.Sample, Ꮡ(new profile.Sample(
+            Value: slice<int64>([(int64)rec.Count, (int64)rec.Time]),
             Location: sloc
         )));
     }
@@ -177,13 +177,13 @@ private static readonly @string exeˢ = ".exe"u8;
 private static readonly @string binˢ = "bin"u8;
 
 internal static @string goCmd() {
-    @string exeSuffix = default!;
+    @string exeSuffix = default;
     if (runtime.GOOS == "windows"u8) {
         exeSuffix = exeˢ;
     }
     @string path = filepath.Join(runtime.GOROOT(), binˢ, "go" + exeSuffix);
     {
-        var (_, err) = os.Stat(path); if (err == default!) {
+        var (_, err) = os.Stat(path); if (err == nil) {
             return path;
         }
     }

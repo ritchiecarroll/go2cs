@@ -32,9 +32,9 @@ public static ж<P384Element> One(this ж<P384Element> Ꮡe) {
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
-public static nint Equal(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
+public static nint Equal(this ж<P384Element> Ꮡe, ж<P384Element> t) {
     var eBytes = Ꮡe.Bytes();
-    var tBytes = Ꮡt.Bytes();
+    var tBytes = t.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
 }
 
@@ -66,7 +66,7 @@ internal static slice<byte> bytes(this ж<P384Element> Ꮡe, /*[48]*/ ж<array<b
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    p384NonMontgomeryDomainFieldElement tmp = default!;
+    p384NonMontgomeryDomainFieldElement tmp = default;
     p384FromMontgomery(ref tmp, ref nonnil(ref e).x);
     var ᴛ1 = tmp.Value;
     p384ToBytes(ref (Ꮡout).DerefOrNull(), ref ᴛ1);
@@ -84,7 +84,7 @@ public static (ж<P384Element>, error) SetBytes(this ж<P384Element> Ꮡe, slice
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p384ElementLen) {
-        return (default!, errors.New(invalidP384Elementˢ));
+        return (default, errors.New(invalidP384Elementˢ));
     }
 
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
@@ -92,17 +92,17 @@ public static (ж<P384Element>, error) SetBytes(this ж<P384Element> Ꮡe, slice
     slice<byte> minusOneEncoding = @new<P384Element>().Sub(
         @new<P384Element>(), @new<P384Element>().One()).Bytes();
     if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
-        return (default!, errors.New(invalidP384Elementˢ));
+        return (default, errors.New(invalidP384Elementˢ));
     }
 
     ref var @in = ref heap(new array<byte>(48), out var Ꮡin);
     copy(@in[..], v);
     p384InvertEndianness(@in[..]);
-    p384NonMontgomeryDomainFieldElement tmp = default!;
+    p384NonMontgomeryDomainFieldElement tmp = default;
     var ᴛ2 = tmp.Value;
     p384FromBytes(ref ᴛ2, ref @in);
     p384ToMontgomery(ref nonnil(ref e).x, ref tmp);
-    return (Ꮡe, default!);
+    return (Ꮡe, default);
 }
 
 // Add sets e = t1 + t2, and returns e.

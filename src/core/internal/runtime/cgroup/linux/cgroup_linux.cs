@@ -25,17 +25,20 @@ partial struct CPU {
 }
 
 public static void Close(this CPU c) {
-    var exprᴛ1 = c.version;
-    if (exprᴛ1 == V1) {
+    switch (c.version) {
+    case var ᴛ when ᴛ == V1: {
         linux.Close(c.quotaFD);
         linux.Close(c.periodFD);
+        break;
     }
-    else if (exprᴛ1 == V2) {
+    case var ᴛ when ᴛ == V2: {
         linux.Close(c.quotaFD);
+        break;
     }
-    else { /* default: */
+    default: {
         @throw(impossibleCgroupVersionˢ);
-    }
+        break;
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -59,12 +62,12 @@ public static (CPU, error) OpenCPU(slice<byte> scratch) {
     var scratch2 = scratch[(int)(PathSize)..];
 
     var (n, version, err) = FindCPU(@base, scratch2);
-    if (err != default!) {
-        return (new CPU(nil), err);
+    if (err != nil) {
+        return (new CPU(), err);
     }
 
-    var exprᴛ1 = version;
-    if (exprᴛ1 == (Version)(1)) {
+    switch (version) {
+    case var ᴛ when ᴛ == (Version)(1): {
         nint n2 = copy(@base.slice(n), v1QuotaFile);
         var path = @base.slice(0, n + n2);
         var (quotaFD, errno) = linux.Open(Ꮡ(path, 0), (nint)((nint)linux.O_RDONLY | (nint)linux.O_CLOEXEC), 0);
@@ -72,7 +75,7 @@ public static (CPU, error) OpenCPU(slice<byte> scratch) {
             // This may fail if this process was migrated out of
             // the cgroup found by FindCPU and that cgroup has been
             // deleted.
-            return (new CPU(nil), errSyscallFailed);
+            return (new CPU(), errSyscallFailed);
         }
 
         n2 = copy(@base.slice(n), v1PeriodFile);
@@ -82,7 +85,7 @@ public static (CPU, error) OpenCPU(slice<byte> scratch) {
             // This may fail if this process was migrated out of
             // the cgroup found by FindCPU and that cgroup has been
             // deleted.
-            return (new CPU(nil), errSyscallFailed);
+            return (new CPU(), errSyscallFailed);
         }
 
         var c = new CPU(
@@ -90,9 +93,9 @@ public static (CPU, error) OpenCPU(slice<byte> scratch) {
             quotaFD: quotaFD,
             periodFD: periodFD
         );
-        return (c, default!);
+        return (c, default);
     }
-    if (exprᴛ1 == (Version)(2)) {
+    case var ᴛ when ᴛ == (Version)(2): {
         nint n2 = copy(@base.slice(n), v2MaxFile);
         var path = @base.slice(0, n + n2);
         var (maxFD, errno) = linux.Open(Ꮡ(path, 0), (nint)((nint)linux.O_RDONLY | (nint)linux.O_CLOEXEC), 0);
@@ -100,7 +103,7 @@ public static (CPU, error) OpenCPU(slice<byte> scratch) {
             // This may fail if this process was migrated out of
             // the cgroup found by FindCPU and that cgroup has been
             // deleted.
-            return (new CPU(nil), errSyscallFailed);
+            return (new CPU(), errSyscallFailed);
         }
 
         var c = new CPU(
@@ -108,44 +111,46 @@ public static (CPU, error) OpenCPU(slice<byte> scratch) {
             quotaFD: maxFD,
             periodFD: -1
         );
-        return (c, default!);
+        return (c, default);
     }
-    { /* default: */
+    default: {
         @throw(impossibleCgroupVersionˢ);
         throw panic("unreachable");
-    }
+        break;
+    }}
 }
 
 // Returns average CPU throughput limit from the cgroup, or ok false if there
 // is no limit.
 public static (float64, bool, error) ReadCPULimit(CPU c) {
-    var exprᴛ1 = c.version;
-    if (exprᴛ1 == (Version)(1)) {
+    switch (c.version) {
+    case var ᴛ when ᴛ == (Version)(1): {
         var (quota, err) = readV1Number(c.quotaFD);
-        if (err != default!) {
+        if (err != nil) {
             return (0D, false, errMalformedFile);
         }
 
         if (quota < 0) {
             // No limit.
-            return (0D, false, default!);
+            return (0D, false, default);
         }
 
         (var period, err) = readV1Number(c.periodFD);
-        if (err != default!) {
+        if (err != nil) {
             return (0D, false, errMalformedFile);
         }
 
-        return ((float64)quota / (float64)period, true, default!);
+        return ((float64)quota / (float64)period, true, default);
     }
-    if (exprᴛ1 == (Version)(2)) {
+    case var ᴛ when ᴛ == (Version)(2): {
         // quotaFD is the cpu.max FD.
         return readV2Limit(c.quotaFD);
     }
-    { /* default: */
+    default: {
         @throw(impossibleCgroupVersionˢ);
         throw panic("unreachable");
-    }
+        break;
+    }}
 }
 
 // Returns the value from the quota/period file.
@@ -219,7 +224,7 @@ public static (nint, Version, error) FindCPU(slice<byte> @out, slice<byte> scrat
     // relative path is the cgroup relative to the mount root.
 
     var (n, version, err) = FindCPUCgroup(@out, scratch);
-    if (err != default!) {
+    if (err != nil) {
         return (0, 0, err);
     }
 
@@ -238,23 +243,22 @@ public static (nint, Version, error) FindCPU(slice<byte> @out, slice<byte> scrat
 public static (nint, Version, error) FindCPUCgroup(slice<byte> @out, slice<byte> scratch) {
     var path = slice<byte>("/proc/self/cgroup\x00"u8);
     var (fd, errno) = linux.Open(Ꮡ(path, 0), (nint)((nint)linux.O_RDONLY | (nint)linux.O_CLOEXEC), 0);
-    if (errno == linux.ENOENT){
+    if (errno == linux.ENOENT) {
         return (0, 0, ErrNoCgroup);
-    } else 
-    if (errno != 0) {
+    } else if (errno != 0) {
         return (0, 0, errSyscallFailed);
     }
 
     // The relative path always starts with /, so we can directly append it
     // to the mount point.
     var (n, version, err) = parseCPUCgroup(fd, linux.Read, @out[..], scratch);
-    if (err != default!) {
+    if (err != nil) {
         linux.Close(fd);
         return (0, 0, err);
     }
 
     linux.Close(fd);
-    return (n, version, default!);
+    return (n, version, default);
 }
 
 // FindCPUMountPoint finds the mount point containing the specified cgroup and
@@ -273,21 +277,20 @@ public static (nint, error) FindCPUMountPoint(slice<byte> @out, slice<byte> cgro
 
     var path = slice<byte>("/proc/self/mountinfo\x00"u8);
     var (fd, errno) = linux.Open(Ꮡ(path, 0), (nint)((nint)linux.O_RDONLY | (nint)linux.O_CLOEXEC), 0);
-    if (errno == linux.ENOENT){
+    if (errno == linux.ENOENT) {
         return (0, ErrNoCgroup);
-    } else 
-    if (errno != 0) {
+    } else if (errno != 0) {
         return (0, errSyscallFailed);
     }
 
     var (n, err) = parseCPUMount(fd, linux.Read, @out, cgroup, version, scratch);
-    if (err != default!) {
+    if (err != nil) {
         linux.Close(fd);
         return (0, err);
     }
     linux.Close(fd);
 
-    return (n, default!);
+    return (n, default);
 }
 
 } // end cgroup_package

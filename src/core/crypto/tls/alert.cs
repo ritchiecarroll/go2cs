@@ -100,7 +100,7 @@ internal static @string String(this alert e) {
     if (ok) {
         return "tls: "u8 + s;
     }
-    return "tls: alert("u8 + strconv.Itoa((nint)(uint8)e) + ")"u8;
+    return "tls: alert("u8 + strconv.Itoa((nint)e) + ")"u8;
 }
 
 internal static @string Error(this alert e) {

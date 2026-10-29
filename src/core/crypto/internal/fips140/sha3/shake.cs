@@ -24,14 +24,14 @@ partial struct SHAKE {
     internal slice<byte> initBlock;
 }
 
-internal static void bytepadWrite(ж<SHAKE> Ꮡc, slice<byte> data, nint rate) {
+internal static void bytepadWrite(ж<SHAKE> c, slice<byte> data, nint rate) {
     var rateEnc = leftEncode((uint64)rate);
-    Ꮡc.Write(rateEnc);
-    Ꮡc.Write(data);
+    c.Write(rateEnc);
+    c.Write(data);
     {
         nint padlen = rate - rem((len(rateEnc) + len(data)), rate); if (padlen < rate) {
             const nint maxRate = /* rateK256 */ 168;
-            Ꮡc.Write(new slice<byte>(padlen, maxRate)); // explicit cap to allow stack allocation
+            c.Write(new slice<byte>(padlen, maxRate)); // explicit cap to allow stack allocation
         }
     }
 }
@@ -104,8 +104,7 @@ public static void Reset(this ж<SHAKE> Ꮡs) {
 
 // Clone returns a copy of the SHAKE context in its current state.
 public static ж<SHAKE> Clone(this ref SHAKE s) {
-    ref var ret = ref heap<SHAKE>(out var Ꮡret);
-    ret = s.ΔClone();
+    ref var ret = ref heap<SHAKE>(s.ΔClone(), out var Ꮡret);
     return Ꮡret;
 }
 
@@ -115,11 +114,11 @@ public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) {
 
 public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> b) {
     (b, var err) = s.d.AppendBinary(b);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     b = appendꓸꓸꓸ(b, s.initBlock);
-    return (b, default!);
+    return (b, default);
 }
 
 public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
@@ -127,12 +126,12 @@ public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
         return errors.New(sha3InvalidHashStateˢ);
     }
     {
-        var err = s.d.UnmarshalBinary(b[..(int)(marshaledSize)]); if (err != default!) {
+        var err = s.d.UnmarshalBinary(b[..(int)(marshaledSize)]); if (err != nil) {
             return err;
         }
     }
     s.initBlock = bytes.Clone(b[(int)(marshaledSize)..]);
-    return default!;
+    return default;
 }
 
 // NewShake128 creates a new SHAKE128 XOF.
@@ -152,7 +151,7 @@ public static ж<SHAKE> NewShake256() {
 // separation. When N and S are both empty, this is equivalent to NewShake128.
 public static ж<SHAKE> NewCShake128(slice<byte> N, slice<byte> S) {
     // The actual logic is in a separate function to outline this allocation.
-    var c = Ꮡ(new SHAKE(nil));
+    var c = Ꮡ(new SHAKE());
     return newCShake128(c, N, S);
 }
 
@@ -173,7 +172,7 @@ internal static ж<SHAKE> newCShake128(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte
 // separation. When N and S are both empty, this is equivalent to NewShake256.
 public static ж<SHAKE> NewCShake256(slice<byte> N, slice<byte> S) {
     // The actual logic is in a separate function to outline this allocation.
-    var c = Ꮡ(new SHAKE(nil));
+    var c = Ꮡ(new SHAKE());
     return newCShake256(c, N, S);
 }
 

@@ -23,7 +23,7 @@ partial struct root {
     // fd is closed when closed is true and refs is 0.
     internal Δsync.Mutex mu;
     internal sysfdType fd;
-    internal nint refs; // number of active operations
+    internal nint refs;   // number of active operations
     internal bool closed; // set when closed
 }
 
@@ -39,10 +39,10 @@ internal static error Close(this ж<root> Ꮡr) {
             syscall.Close(r.fd);
         }
         r.closed = true;
-        runtime.SetFinalizer(Ꮡr.OrTypedNil(), default!); // no need for a finalizer any more
-        return default!;
+        runtime.SetFinalizer(Ꮡr.OrTypedNil(), default); // no need for a finalizer any more
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -58,9 +58,9 @@ internal static error incref(this ж<root> Ꮡr) {
             return ErrClosed;
         }
         r.refs++;
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -89,57 +89,59 @@ internal static @string Name(this ref root r) {
 }
 
 internal static error rootChmod(ref Root r, @string name, FileMode mode) {
-    var (_, err) = doInRoot(ref r, name, 0, default!, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chmodat(parent, nameΔ1, mode)));
-    if (err != default!) {
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chmodat(parent, nameΔ1, mode)));
+    if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chmodat"u8, Path: name, Err: err)));
     }
-    return default!;
+    return default;
 }
 
 internal static error rootChown(ref Root r, @string name, nint uid, nint gid) {
-    var (_, err) = doInRoot(ref r, name, 0, default!, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chownat(parent, nameΔ1, uid, gid)));
-    if (err != default!) {
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chownat(parent, nameΔ1, uid, gid)));
+    if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chownat"u8, Path: name, Err: err)));
     }
-    return default!;
+    return default;
 }
 
 internal static error rootLchown(ref Root r, @string name, nint uid, nint gid) {
-    var (_, err) = doInRoot(ref r, name, 0, default!, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), lchownat(parent, nameΔ1, uid, gid)));
-    if (err != default!) {
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), lchownat(parent, nameΔ1, uid, gid)));
+    if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lchownat"u8, Path: name, Err: err)));
     }
-    return default!;
+    return default;
 }
 
 internal static error rootChtimes(ref Root r, @string name, time.Time atime, time.Time mtime) {
     var atimeʗ1 = atime;
     var mtimeʗ1 = mtime;
-    var (_, err) = doInRoot(ref r, name, 0, default!, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chtimesat(parent, nameΔ1, atimeʗ1, mtimeʗ1)));
-    if (err != default!) {
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chtimesat(parent, nameΔ1, atimeʗ1, mtimeʗ1)));
+    if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chtimesat"u8, Path: name, Err: err)));
     }
-    return default!;
+    return default;
 }
 
 internal static error rootMkdir(ref Root r, @string name, FileMode perm) {
     nuint flags = (nuint)doInRootCreatingDirectory;
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "linux"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "openbsd"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "linux"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "openbsd"u8: {
         // These platforms do not follow "symlink" on "mkdir symlink/".
         // (POSIX.1-2024 4.16 says that the trailing slash should cause
         // resolution to follow the symlink, but we're trying to match
         // platform semantics, not implement POSIX.)
         flags |= (nuint)(doInRootNoHandleTerminalSlash);
-    }
-    var (_, err) = doInRoot(ref r, name, flags, default!, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), mkdirat(parent, nameΔ1, perm)));
-    if (err != default!) {
+        break;
+    }}
+    var (_, err) = doInRoot(ref r, name, flags, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), mkdirat(parent, nameΔ1, perm)));
+    if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat"u8, Path: name, Err: err)));
     }
-    return default!;
+    return default;
 }
 
-internal static error rootMkdirAll(ж<Root> Ꮡr, @string fullname, FileMode perm) {
+internal static error rootMkdirAll(ж<Root> r, @string fullname, FileMode perm) {
     // doInRoot opens each path element in turn.
     //
     // openDirFunc opens all but the last path component.
@@ -159,7 +161,7 @@ internal static error rootMkdirAll(ж<Root> Ꮡr, @string fullname, FileMode per
             // Try again on EEXIST, because the directory may have been created
             // by another process or thread between the rootOpenDir and mkdirat calls.
             {
-                var errΔ2 = mkdirat(parent, name, perm); if (errΔ2 != default! && !AreEqual(errΔ2, syscall.EEXIST)) {
+                var errΔ2 = mkdirat(parent, name, perm); if (errΔ2 != nil && !AreEqual(errΔ2, syscall.EEXIST)) {
                     return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat"u8, Err: errΔ2))));
                 }
             }
@@ -171,25 +173,22 @@ internal static error rootMkdirAll(ж<Root> Ꮡr, @string fullname, FileMode per
         var errΔ3 = mkdirat(parent, name, perm);
         if (AreEqual(errΔ3, syscall.EEXIST)) {
             var (fi, e) = lstatat(parent, name);
-            if (e == default!) {
-                if (fi.Mode().IsDir()){
+            if (e == nil) {
+                if (fi.Mode().IsDir()) {
                     // The target of MkdirAll is an existing directory.
-                    errΔ3 = default!;
-                } else 
-                if (isLink(fi)) {
+                    errΔ3 = default;
+                } else if (isLink(fi)) {
                     // The target of MkdirAll is a symlink or junction.
                     // For consistency with os.MkdirAll,
                     // succeed if the link resolves to a directory.
                     // We don't return errSymlink here, because we don't
                     // want to create the link target if it doesn't exist.
-                    var (fiΔ1, eΔ1) = Ꮡr.Stat(fullname);
-                    if (eΔ1 == default! && fiΔ1.Mode().IsDir()){
-                        errΔ3 = default!;
-                    } else 
-                    if (eΔ1 == default!){
+                    var (fiΔ1, eΔ1) = r.Stat(fullname);
+                    if (eΔ1 == nil && fiΔ1.Mode().IsDir()) {
+                        errΔ3 = default;
+                    } else if (eΔ1 == nil) {
                         errΔ3 = syscall.ENOTDIR;
-                    } else 
-                    if (!IsNotExist(eΔ1)) {
+                    } else if (!IsNotExist(eΔ1)) {
                         // EPERM, ELOOP, etc.,
                         // probably more useful than EEXIST.
                         errΔ3 = eΔ1;
@@ -206,11 +205,13 @@ internal static error rootMkdirAll(ж<Root> Ꮡr, @string fullname, FileMode per
     };
     nuint flags = (nuint)doInRootCreatingDirectory;
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "linux"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "openbsd"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "linux"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "openbsd"u8: {
         flags |= (nuint)(doInRootNoHandleTerminalSlash); // see rootMkdir
-    }
-    var (_, err) = doInRoot(ref (Ꮡr).DerefOrNull(), fullname, flags, openDirFunc, openLastComponentFunc);
-    if (err != default!) {
+        break;
+    }}
+    var (_, err) = doInRoot(ref (r).DerefOrNull(), fullname, flags, openDirFunc, openLastComponentFunc);
+    if (err != nil) {
         {
             var (_, ok) = err._<ж<PathError>>(ᐧ); if (!ok) {
                 err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat"u8, Path: fullname, Err: err)));
@@ -221,19 +222,19 @@ internal static error rootMkdirAll(ж<Root> Ꮡr, @string fullname, FileMode per
 }
 
 internal static (@string, error) rootReadlink(ref Root r, @string name) {
-    var (target, err) = doInRoot(ref r, name, 0, default!, (@string, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => readlinkat(parent, nameΔ1));
-    if (err != default!) {
+    var (target, err) = doInRoot(ref r, name, 0, default, (@string, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => readlinkat(parent, nameΔ1));
+    if (err != nil) {
         return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlinkat"u8, Path: name, Err: err))));
     }
-    return (target, default!);
+    return (target, default);
 }
 
 internal static error rootRemove(ref Root r, @string name) {
-    var (_, err) = doInRoot(ref r, name, 0, default!, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), removeat(parent, nameΔ1)));
-    if (err != default!) {
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), removeat(parent, nameΔ1)));
+    if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "removeat"u8, Path: name, Err: err)));
     }
-    return default!;
+    return default;
 }
 
 internal static error rootRemoveAll(ref Root r, @string name) {
@@ -246,26 +247,26 @@ internal static error rootRemoveAll(ref Root r, @string name) {
         // Consistency with os.RemoveAll: Return EINVAL when trying to remove .
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "RemoveAll"u8, Path: name, Err: syscall.EINVAL)));
     }
-    var (_, err) = doInRoot(ref r, name, 0, default!, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), removeAllFrom(parent, nameΔ1)));
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), removeAllFrom(parent, nameΔ1)));
     if (IsNotExist(err)) {
-        return default!;
+        return default;
     }
-    if (err != default!) {
+    if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "RemoveAll"u8, Path: name, Err: underlyingError(err))));
     }
     return err;
 }
 
-internal static error rootRename(ж<Root> Ꮡr, @string oldname, @string newname) {
-    var (_, err) = doInRoot(ref (Ꮡr).DerefOrNull(), oldname, 0, default!, (EmptyStruct, error) (sysfdType oldparent, @string oldnameΔ1, bool oldEndsInSlash) => {
+internal static error rootRename(ж<Root> r, @string oldname, @string newname) {
+    var (_, err) = doInRoot(ref (r).DerefOrNull(), oldname, 0, default, (EmptyStruct, error) (sysfdType oldparent, @string oldnameΔ1, bool oldEndsInSlash) => {
         nuint flags = (nuint)doInRootCreatingDirectory;
         if (runtime.GOOS == "windows"u8) {
             flags |= (nuint)(doInRootNoHandleTerminalSlash);
         }
-        var (_, errΔ1) = doInRoot(ref (Ꮡr).DerefOrNull(), newname, flags, default!, (EmptyStruct, error) (sysfdType newparent, @string newnameΔ1, bool newEndsInSlash) => {
+        var (_, errΔ1) = doInRoot(ref (r).DerefOrNull(), newname, flags, default, (EmptyStruct, error) (sysfdType newparent, @string newnameΔ1, bool newEndsInSlash) => {
             if (runtime.GOOS != "windows"u8 && newEndsInSlash) {
                 var (oldMode, errΔ2) = modeAt(oldparent, oldnameΔ1);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return (new EmptyStruct(), errΔ2);
                 }
                 if (oldMode.Type() != fs.ModeDir) {
@@ -274,12 +275,11 @@ internal static error rootRename(ж<Root> Ꮡr, @string oldname, @string newname
             }
             // Same checks as applied by rename (in file_unix.go):
             var (fi, errΔ3) = lstatat(newparent, newnameΔ1);
-            if (errΔ3 == default! && fi.IsDir()) {
+            if (errΔ3 == nil && fi.IsDir()) {
                 {
-                    var (ofi, errΔ4) = lstatat(oldparent, oldnameΔ1); if (errΔ4 != default!){
+                    var (ofi, errΔ4) = lstatat(oldparent, oldnameΔ1); if (errΔ4 != nil) {
                         return (new EmptyStruct(), errΔ4);
-                    } else 
-                    if (newnameΔ1 == oldnameΔ1 || !SameFile(fi, ofi)) {
+                    } else if (newnameΔ1 == oldnameΔ1 || !SameFile(fi, ofi)) {
                         return (new EmptyStruct(), syscall.EEXIST);
                     }
                 }
@@ -288,23 +288,23 @@ internal static error rootRename(ж<Root> Ꮡr, @string oldname, @string newname
         });
         return (new EmptyStruct(), errΔ1);
     });
-    if (err != default!) {
+    if (err != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("renameat"u8, oldname, newname, err)));
     }
     return err;
 }
 
-internal static error rootLink(ж<Root> Ꮡr, @string oldname, @string newname) {
-    var (_, err) = doInRoot(ref (Ꮡr).DerefOrNull(), oldname, 0, default!, (EmptyStruct, error) (sysfdType oldparent, @string oldnameΔ1, bool oldEndsInSlash) => {
+internal static error rootLink(ж<Root> r, @string oldname, @string newname) {
+    var (_, err) = doInRoot(ref (r).DerefOrNull(), oldname, 0, default, (EmptyStruct, error) (sysfdType oldparent, @string oldnameΔ1, bool oldEndsInSlash) => {
         nuint flags = (nuint)0;
         if (runtime.GOOS == "windows"u8) {
             // Windows doesn't pay attention to trailing slashes in the link target.
             flags |= (nuint)(doInRootNoHandleTerminalSlash);
         }
-        var (_, errΔ1) = doInRoot(ref (Ꮡr).DerefOrNull(), newname, flags, default!, (EmptyStruct, error) (sysfdType newparent, @string newnameΔ1, bool newEndsInSlash) => (new EmptyStruct(), linkat(oldparent, oldnameΔ1, newparent, newnameΔ1)));
+        var (_, errΔ1) = doInRoot(ref (r).DerefOrNull(), newname, flags, default, (EmptyStruct, error) (sysfdType newparent, @string newnameΔ1, bool newEndsInSlash) => (new EmptyStruct(), linkat(oldparent, oldnameΔ1, newparent, newnameΔ1)));
         return (new EmptyStruct(), errΔ1);
     });
-    if (err != default!) {
+    if (err != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("linkat"u8, oldname, newname, err)));
     }
     return err;
@@ -355,25 +355,25 @@ internal static UntypedInt doInRootAlwaysResolveTerminalSlash => 4;
 // full path which caused the error.
 internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, nuint flags, Func<sysfdType, @string, (sysfdType, error)> openDirFunc, Func<sysfdType, @string, bool, (T, error)> f) {
     T ret = GoZero<T>();
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         {
-            var errΔ1 = r.root.incref(); if (errΔ1 != default!) {
+            var errΔ1 = r.root.incref(); if (errΔ1 != nil) {
                 (ret, err) = (ret, errΔ1); goto ᒐdone;
             }
         }
         defer(r.root.decref, ref ᒐ);
 
-        (var parts, var endsInSlash, err) = splitPathInRoot(name, default!, default!);
-        if (err != default!) {
+        (var parts, var endsInSlash, err) = splitPathInRoot(name, default, default);
+        if (err != nil) {
             goto ᒐdone;
         }
-        if (openDirFunc == default!) {
+        if (openDirFunc == nil) {
             openDirFunc = rootOpenDir;
         }
 
-        sysfdType rootfd = r.root.Value.fd;
+        sysfdType rootfd = r.root.fd;
         sysfdType dirfd = rootfd;
         defer(() => {
             if (dirfd != rootfd) {
@@ -395,7 +395,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, nuint f
         nint restarts = 0;
         nint symlinks = 0;
 Loop:
-        while (ᐧ) {
+        for (;;) {
             steps++;
             if (steps > maxSteps && restarts > maxRestarts) {
                 (ret, err) = (ret, syscall.ENAMETOOLONG); goto ᒐdone;
@@ -418,7 +418,7 @@ Loop:
                 }
                 parts = slices.Delete<slice<@string>, @string>(parts, i - count, end);
                 if (len(parts) == 0) {
-                    parts = new @string[]{"."u8}.slice();
+                    parts = slice<@string>(["."u8]);
                 }
                 i = 0;
                 if (dirfd != rootfd) {
@@ -428,27 +428,27 @@ Loop:
                 continue;
             }
 
-            if (i == len(parts) - 1){
-                err = default!;
+            if (i == len(parts) - 1) {
+                err = default;
                 if (endsInSlash && (flags & (nuint)doInRootNoHandleTerminalSlash) == 0) {
-                    FileInfo fi = default!;
+                    FileInfo fi = default;
                     (fi, err) = lstatat(dirfd, parts[i]);
                     switch (ᐧ) {
                     case {} when IsNotExist(err) && (flags & (nuint)doInRootCreatingDirectory) != 0: {
                         // The path ends in a slash, the last path component
                         // does not exist, and we creating a directory.
                         // This is fine.
-                        err = default!;
+                        err = default;
                         break;
                     }
-                    case {} when err != default!: {
+                    case {} when err != nil: {
                         goto ᒐdone;
                     }
                     case {} when fi.Mode().Type() == fs.ModeDir: {
                         break;
                     }
                     case {} when isLink(fi): {
-                        if (runtime.GOOS != "windows"u8 || (flags & (nuint)doInRootAlwaysResolveTerminalSlash) != 0){
+                        if (runtime.GOOS != "windows"u8 || (flags & (nuint)doInRootAlwaysResolveTerminalSlash) != 0) {
                             err = checkSymlink(dirfd, parts[i], syscall.ENOTDIR);
                         } else {
                             if (!isDirectoryLink(fi)) {
@@ -468,16 +468,16 @@ Loop:
                 // If f returns errSymlink, this element is a symlink
                 // which should be followed.
                 // suffixSep contains any trailing separator characters.
-                if (err == default!) {
+                if (err == nil) {
                     (ret, err) = f(dirfd, parts[i], endsInSlash);
-                    if (err == default!) {
+                    if (err == nil) {
                         goto ᒐdone;
                     }
                 }
             } else {
-                sysfdType fd = default!;
+                sysfdType fd = default;
                 (fd, err) = openDirFunc(dirfd, parts[i]);
-                if (err == default!) {
+                if (err == nil) {
                     if (dirfd != rootfd) {
                         syscall.Close(dirfd);
                     }
@@ -496,7 +496,7 @@ Loop:
                 }
                 var lastPart = i == len(parts) - 1;
                 var (newparts, newEndsInSlash, errΔ2) = splitPathInRoot((@string)e, parts.slice(0, i), parts.slice(i + 1));
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     (ret, err) = (ret, errΔ2); goto ᒐdone;
                 }
                 if (lastPart && newEndsInSlash) {
@@ -519,9 +519,9 @@ Loop:
             }
             case ж<PathError> e: {
                 // This is strings.Join(parts[:i+1], PathSeparator).
-                e.Value.Path = parts[0];
+                e.Path = parts[0];
                 foreach (var (_, part) in parts.slice(1, i + 1)) {
-                    e.Value.Path += ((@string)(rune)PathSeparator) + part;
+                    e.Path += ((@string)(rune)PathSeparator) + part;
                 }
                 (ret, err) = (ret, new fs.PathErrorжerror(e)); goto ᒐdone;
             }
@@ -542,10 +542,10 @@ break_Loop:;
 
 internal static (FileMode, error) modeAt(sysfdType parent, @string name) {
     var (fi, err) = lstatat(parent, name);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
-    return (fi.Mode(), default!);
+    return (fi.Mode(), default);
 }
 
 // errSymlink reports that a file being operated on is actually a symlink,

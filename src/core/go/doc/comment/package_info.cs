@@ -59,6 +59,19 @@ using static go.go.doc.comment_package;
 // the assembly.
 [assembly: global::go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: global::go.GoFieldAccess(typeof(Code))]
+[assembly: global::go.GoFieldAccess(typeof(DocLink))]
+[assembly: global::go.GoFieldAccess(typeof(Heading))]
+[assembly: global::go.GoFieldAccess(typeof(Link))]
+[assembly: global::go.GoFieldAccess(typeof(LinkDef))]
+[assembly: global::go.GoFieldAccess(typeof(List))]
+[assembly: global::go.GoFieldAccess(typeof(ListItem))]
+[assembly: global::go.GoFieldAccess(typeof(Paragraph))]
+[assembly: global::go.GoFieldAccess(typeof(parseDoc))]
+[assembly: global::go.GoFieldAccess(typeof(textPrinter))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -69,10 +82,10 @@ using static go.go.doc.comment_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/doc/comment/html.go", "html.cs", "ABIqwoKCgpT4sqS2gpSCtoKCgoCCgoKkgoKCgraCgraCgpSCgoKCgoCCgoKCgpSkgoKClJSCzKKCgoKClJTYsoKUtIKCtIKCgoK0goKCgpSCggALEtKCgpSCgrSCgrSCgrSCgrSCgrY=")]
 [assembly: global::go.GoPositionMap("go/doc/comment/markdown.go", "markdown.cs", "ABMs0sqCgoKUlNjCpLaCtoKCgIKCgqS2goKCgoKClMiCgoKUgIKCgpSkgoKClILuwoKCgoKUprSCgpSUgoK2rNKClLSCgrSCgoKCtIKClIKCgoKCggAGEtKCgu6CgoIACRCCgoK2", "", "", "26=headingLevel/1/1/2,Repeat/1/1/2")]
-[assembly: global::go.GoPositionMap("go/doc/comment/parse.go", "parse.cs", "ACdSABs6AAIS8gACEuKClILKpgASKAAKFAALFtoACRIAEiYAOYwBAAsCgoKUlJSAgramgoIAAhYACAKClKrCgu6CqqKCgpikpKSkAAITAAEYgpS4gpS0goKC7AAULqIACBKUgoKClIKUgpSAgraCgoLugoKCgpS4goIADyCCpoKUuIKClAAKFoLcgoKCAAgQgraCgsqCkoKUuILGuqKu1IKUgpSCuIKCgriCooKClJSClIKUqJKokoKClKiSgoKUqqKCpqaCgriCgriCuIKCgIKkgsqCgoCCpIK4qJKokq6SqLKCgqrEkoKCgpSUkoKCpoKEAAIQ0oKUgoKmkpKCgu6qwoKqgoKAgramooCklIKCpIKCgoKUlIKu8oKCuICCkoKCgpSClJS2gqassoIAAhoADQKCgoKCgriCgoKCgpSUtIKAgoKCuJKAgoKCgsaCpIK4ggACEgAJAoKCgqaCgoKmgqKCgpSCgIK2gIK2yqzigoKClIKUAAIS4oKCgoKUkoKCgqaCgoKAktyCgoKkgIKSgoKUgoKUlIKCtpSUgoKUlIKCgrSCgoK0toIAAhD4spSktLS0tJSCuILKgoKUgoKCgpSUAAgSgoKCgoKUgpSUtLS0gpSkgtissgABEJTaqgAQGKyqAAsQ2poAHDCqkoKClIIAAhDkgoKAgoKClKSCgoKUlNiaAAoMrKKClIKUgpSClIKUgoKCgpSmpoKClIKCptaKAA4U", "291-291:1;703-710:1;787-792:1;899-902:1;903-909:2", "", "651=TrimSpace/1/1/3;858=parseText/1/1/1")]
+[assembly: global::go.GoPositionMap("go/doc/comment/parse.go", "parse.cs", "ACdSABs6AAIS8gACEuKClILKpgASKAAKFAALFtoACRIAEiYAOYwBAAsCgoKUlJSAgramgoIAAhYACAKClKrCgu6CqqKCgpS0tLS0tKSClLiClLSCgoLsABQuogAIEpSCgoKUgpSClICCtoKCgu6CgoKClLiCggAPIIKmgpS4goKUAAoWgtyCgoIACBCCtoKCyoKCgpS4gsa6oq7UgpSClIK4goKCuIKigoKUlIKUgpSokqiSgoKUqJKCgpSqooKmpoKCuIKCuIK4goKAgqSCyoKCgIKkgriokqiSrpKosoKCqsSSgoKClJSSgoKmgoQAAhDSgpSCgqaCgoKC7qrCgqqCgoCCtqaigKSUgoKkgoKCgpSUgq7ygoK4gIKCgoKClIKUlLaCpqyyggACGgANAoKCgoKCuIKCgoKClJS0goCCgoK4goCCgoKCxoKkgriCAAISAAkCgoKCpoKCgqaCooKClIKAgraAgrbKrOKCgoKUgpQAAhLigoKCgpSSgoKCpoKCgoCS3IKCgqSAgpKCgpSCgpSUgoK2lJSCgpSUgoKCtIKCgrS2ggACEPiylKS0tLS0lIK4gsqCgpSCgoKClJQACBKCgoKCgpSClJS0tLSClKSC2KyyAAIQlNqqABAYrKoACxDamgAcMKqSgoKUggACEOSCgoCCgoKUpIKCgpSU2JoACgysooKUgpSClIKUgpSCgoKClKamgoKUgoKm1ooADhQ=", "291-291:1;703-710:1;787-792:1;899-902:1;903-909:2", "", "656=TrimSpace/1/1/3;860=parseText/1/1/1")]
 [assembly: global::go.GoPositionMap("go/doc/comment/print.go", "print.cs", "ADN0goKUpqKClKaigpQAAioAEgKCgoKUlJSkpKaClAAFFPaigoKCgpSCgoKClKYABhLCgoKCgpQABxCCgoKCgoKClIKCgoLKqqKAgqTYsqS2graCgraCgoKCgoKUyIKCgpSCgpSClIKCgpSC7rKClLS0gpSCgsaCgt7CgoKCgoKU")]
 [assembly: global::go.GoPositionMap("go/doc/comment/std.go", "std.cs", "AAkU")]
-[assembly: global::go.GoPositionMap("go/doc/comment/text.go", "text.cs", "ABg00tyClIKmgoKCgpSUgoKCgqaCgoKCuKrUgoKClIKU2MKktoK2goK2goKCgoKClMiCgoKClIKCgpSClIKCgoKClO7CgoKUgoKUlIKCgpSCgpSUvrKClLS0tAAMKAAvPoqClKSkpJTKgoKCuLSCgu6CgoKU3JK0sqKClIKUuIKCgoKCgoKClIKUgriCuKaCgpSCgoKUqJKUlA==", "231-231:1;232-244:2;255-272:3;278-278:4;280-289:5;281-284:5.1")]
+[assembly: global::go.GoPositionMap("go/doc/comment/text.go", "text.cs", "ABg00tyClIKmgoKCgpSUgoKCgqaCgoKCuKrUgoKClIKU2MKktoK2goK2goKCgoKClMiCgoKClIKCgpSClIKCgoKClO7CgoKUgoKUlIKCgpSCgpSUvrKClLS0tAAMKAAvPoqClKSkpJTKgoKCuLSCgu6CgoKU3IK0sqKClIKUuIKCgoKCgoKClIKUgriCuKaCgpSCgoKUqJKUlA==", "231-231:1;232-244:2;255-272:3;278-278:4;280-289:5;281-284:5.1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.doc;

@@ -102,12 +102,12 @@ internal static readonly @string syncInconsistentMutexˢ = "sync: inconsistent m
 internal static void lockSlow(this ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    int64 waitStartTime = default!;
+    int64 waitStartTime = default;
     var starving = false;
     var awoke = false;
     nint iter = 0;
     var old = m.state;
-    while (ᐧ) {
+    for (;;) {
         // Don't spin in starvation mode, ownership is handed off to waiters
         // so we won't be able to acquire the mutex anyway.
         if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexStarving))) == mutexLocked && runtime_canSpin(iter)) {
@@ -145,7 +145,7 @@ internal static void lockSlow(this ж<Mutex> Ꮡm) {
             }
             @new &= ~(int32)(mutexWoken);
         }
-        if (atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, @new)){
+        if (atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, @new)) {
             if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexStarving))) == 0) {
                 break; // locked the mutex with CAS
             }
@@ -218,9 +218,9 @@ internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) {
     if (((@new + (int32)mutexLocked) & (int32)mutexLocked) == 0) {
         fatal(syncUnlockOfUnlockedˢ);
     }
-    if ((@new & (int32)mutexStarving) == 0){
+    if ((@new & (int32)mutexStarving) == 0) {
         var old = @new;
-        while (ᐧ) {
+        for (;;) {
             // If there are no waiters or a goroutine has already
             // been woken or grabbed the lock, no need to wake anyone.
             // In starvation mode ownership is directly handed off from unlocking

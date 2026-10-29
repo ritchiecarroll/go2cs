@@ -15,16 +15,16 @@ internal static error errEOB = errors.New("binary: end of buffer"u8);
 
 // TODO deduplicate this function.
 internal static (uint64, nint, error) readUvarint(slice<byte> b) {
-    uint64 x = default!;
-    nuint s = default!;
-    byte byt = default!;
+    uint64 x = default;
+    nuint s = default;
+    byte byt = default;
     for (nint i = 0; i < maxVarintLen64 && i < len(b); i++) {
         byt = b[i];
         if (byt < 0x80) {
             if (i == (nint)(maxVarintLen64 - 1) && byt > 1) {
                 return (x, i, errOverflow);
             }
-            return (x | ((uint64)byt).Lsh(s), i + 1, default!);
+            return (x | ((uint64)byt).Lsh(s), i + 1, default);
         }
         x |= (uint64)(((uint64)((byte)(byt & 0x7f))).Lsh(s));
         s += 7;
@@ -39,7 +39,7 @@ internal static nint putUvarint(slice<byte> buf, uint64 x) {
     nint i = 0;
     while (x >= 0x80) {
         buf[i] = (byte)((byte)x | 0x80);
-        x >>= (int)(7);
+        x >>= 7;
         i++;
     }
     buf[i] = (byte)x;

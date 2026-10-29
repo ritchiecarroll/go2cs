@@ -68,8 +68,8 @@ internal static UntypedInt dequeueLimit => /* (1 << dequeueBits) / 4 */ 10737418
 partial class dequeueNil /*ж<EmptyStruct>*/;
 
 internal static (uint32 head, uint32 tail) unpack(this ref poolDequeue d, uint64 ptrs) {
-    uint32 head = default!;
-    uint32 tail = default!;
+    uint32 head = default;
+    uint32 tail = default;
 
     const uint64 mask = /* 1<<dequeueBits - 1 */ 4294967295;
     head = (uint32)((uint64)((ptrs >> (int)(dequeueBits)) & mask));
@@ -104,7 +104,7 @@ internal static bool pushHead(this ж<poolDequeue> Ꮡd, any val) {
     }
 
     // The head slot is free, so we own it.
-    if (val == default!) {
+    if (val == nil) {
         val = (dequeueNil)nil;
     }
     (slot.Reinterpret<eface, any>()).ValueSlot = val;
@@ -121,13 +121,13 @@ internal static bool pushHead(this ж<poolDequeue> Ꮡd, any val) {
 internal static (any, bool) popHead(this ж<poolDequeue> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    ж<eface> slot = default!;
-    while (ᐧ) {
+    ж<eface> slot = default;
+    for (;;) {
         var ptrs = Ꮡd.of(poolDequeue.ᏑheadTail).Load();
         var (head, tail) = d.unpack(ptrs);
         if (tail == head) {
             // Queue is empty.
-            return (default!, false);
+            return (default, false);
         }
 
         // Confirm tail and decrement head. We do this before
@@ -144,11 +144,11 @@ internal static (any, bool) popHead(this ж<poolDequeue> Ꮡd) {
 
     var val = ~slot.Reinterpret<eface, any>();
     if (AreEqual(val, ((dequeueNil)nil))) {
-        val = default!;
+        val = default;
     }
     // Zero the slot. Unlike popTail, this isn't racing with
     // pushHead, so we don't need to be careful here.
-    slot.Value = new eface(nil);
+    slot.Value = new eface();
     return (val, true);
 }
 
@@ -158,13 +158,13 @@ internal static (any, bool) popHead(this ж<poolDequeue> Ꮡd) {
 internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    ж<eface> slot = default!;
-    while (ᐧ) {
+    ж<eface> slot = default;
+    for (;;) {
         var ptrs = Ꮡd.of(poolDequeue.ᏑheadTail).Load();
         var (head, tail) = d.unpack(ptrs);
         if (tail == head) {
             // Queue is empty.
-            return (default!, false);
+            return (default, false);
         }
 
         // Confirm head and tail (for our speculative check
@@ -181,7 +181,7 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     // We now own slot.
     var val = ~slot.Reinterpret<eface, any>();
     if (AreEqual(val, ((dequeueNil)nil))) {
-        val = default!;
+        val = default;
     }
 
     // Tell pushHead that we're done with this slot. Zeroing the
@@ -190,7 +190,7 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     //
     // We write to val first and then publish that we're done with
     // this slot by atomically writing to typ.
-    slot.Value.val = default!;
+    slot.Value.val = default;
     atomic.StorePointer(slot.of(eface.Ꮡtyp), nil);
     // At this point pushHead owns the slot.
 
@@ -253,7 +253,7 @@ internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
         newSize = dequeueLimit;
     }
 
-    var d2 = Ꮡ(new poolChainElt(nil));
+    var d2 = Ꮡ(new poolChainElt());
     d2.of(poolChainElt.Ꮡprev).Store(d);
     d2.Value.vals = new slice<eface>(newSize);
     c.head = d2;
@@ -273,16 +273,16 @@ internal static (any, bool) popHead(this ref poolChain c) {
         // previous dequeue, so try backing up.
         d = d.of(poolChainElt.Ꮡprev).Load();
     }
-    return (default!, false);
+    return (default, false);
 }
 
 internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
     var d = Ꮡc.of(poolChain.Ꮡtail).Load();
     if (d == nil) {
-        return (default!, false);
+        return (default, false);
     }
 
-    while (ᐧ) {
+    for (;;) {
         // It's important that we load the next pointer
         // *before* popping the tail. In general, d may be
         // transiently empty, but if next is non-nil before
@@ -300,7 +300,7 @@ internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
         if (d2 == nil) {
             // This is the only dequeue. It's empty right
             // now, but could be pushed to in the future.
-            return (default!, false);
+            return (default, false);
         }
 
         // The tail of the chain has been drained, so move on

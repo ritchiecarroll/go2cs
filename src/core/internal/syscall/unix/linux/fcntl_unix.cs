@@ -5,7 +5,7 @@
 namespace go.@internal.syscall;
 
 using syscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 
 partial class unix_package {
 
@@ -22,7 +22,7 @@ public static (nint, error) Fcntl(nint fd, nint cmd, nint arg) {
     if (val == -1) {
         return ((nint)val, ((syscall.Errno)(uintptr)errno));
     }
-    return ((nint)val, default!);
+    return ((nint)val, default);
 }
 
 } // end unix_package

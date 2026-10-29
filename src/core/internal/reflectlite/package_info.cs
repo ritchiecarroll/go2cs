@@ -10,15 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
-global using runtimeꓸError = go.runtime_package.ΔError;
 using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
@@ -63,6 +56,12 @@ using static go.@internal.reflectlite_package;
 // the assembly.
 [assembly: go.GoHoistedLiterals]
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(go.@internal.abi_package.EmptyInterface))]
+[assembly: go.GoFieldAccess(typeof(go.@internal.abi_package.ΔFuncType))]
+[assembly: go.GoFieldAccess(typeof(go.@internal.abi_package.ΔStructType))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -72,7 +71,7 @@ using static go.@internal.reflectlite_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIgBrAKCpoKmgqaC2qKCgoKCgvqCgpSCpoKClIKC5oKClIKCgoKUpoKCAAIaAAsO5IKmgqaCAAQWgKSCgoKUpoKCgpQABByCgpSCgoKClLSklKaCpoKCgpTOgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClAACFPKqogAEGoKClIKCpoIABL4BAAkEgsqCuKaygqaCpgAE2AHSgpQ=")]
-[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE6kAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACQq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
+[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE2kAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACQq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

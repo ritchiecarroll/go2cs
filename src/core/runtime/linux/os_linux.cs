@@ -59,20 +59,20 @@ internal static UntypedInt _FUTEX_WAKE_PRIVATE => /* 1 | _FUTEX_PRIVATE_FLAG */ 
 // Don't sleep longer than ns; ns < 0 means forever.
 //
 //go:nosplit
-internal static void futexsleep(ж<uint32> Ꮡaddr, uint32 val, int64 ns) {
+internal static void futexsleep(ж<uint32> addr, uint32 val, int64 ns) {
     // Some Linux kernels have a bug where futex of
     // FUTEX_WAIT returns an internal error code
     // as an errno. Libpthread ignores the return value
     // here, and so can we: as it says a few lines up,
     // spurious wakeups are allowed.
     if (ns < 0) {
-        futex(@unsafe.Pointer.FromPinnedBox(Ꮡaddr), _FUTEX_WAIT_PRIVATE, val, nil, nil, 0);
+        futex(@unsafe.Pointer.FromPinnedBox(addr), _FUTEX_WAIT_PRIVATE, val, nil, nil, 0);
         return;
     }
 
     ref var ts = ref heap(new timespec(), out var Ꮡts);
     ts.setNsec(ns);
-    futex(@unsafe.Pointer.FromPinnedBox(Ꮡaddr), _FUTEX_WAIT_PRIVATE, val, Ꮡts, nil, 0);
+    futex(@unsafe.Pointer.FromPinnedBox(addr), _FUTEX_WAIT_PRIVATE, val, Ꮡts, nil, 0);
 }
 
 // If any procs are sleeping on addr, wake up at most cnt.
@@ -116,7 +116,7 @@ internal static int32 getCPUCount() {
 
         while (v != 0) {
             n += (int32)((byte)(v & 1));
-            v >>= (int)(1);
+            v >>= 1;
         }
     }
     if (n == 0) {
@@ -226,13 +226,13 @@ internal static void newosproc0(uintptr stacksize, @unsafe.Pointer fn) {
     }
 }
 
-internal static UntypedInt _AT_NULL => 0; // End of vector
-internal static UntypedInt _AT_PAGESZ => 6; // System physical page size
+internal static UntypedInt _AT_NULL => 0;      // End of vector
+internal static UntypedInt _AT_PAGESZ => 6;    // System physical page size
 internal static UntypedInt _AT_PLATFORM => 15; // string identifying platform
-internal static UntypedInt _AT_HWCAP => 16; // hardware capability bit vector
-internal static UntypedInt _AT_SECURE => 23; // secure mode boolean
-internal static UntypedInt _AT_RANDOM => 25; // introduced in 2.6.29
-internal static UntypedInt _AT_HWCAP2 => 26; // hardware capability bit vector 2
+internal static UntypedInt _AT_HWCAP => 16;    // hardware capability bit vector
+internal static UntypedInt _AT_SECURE => 23;   // secure mode boolean
+internal static UntypedInt _AT_RANDOM => 25;   // introduced in 2.6.29
+internal static UntypedInt _AT_HWCAP2 => 26;   // hardware capability bit vector 2
 
 internal static readonly ж<slice<byte>> ᏑprocAuxv = new StaticBox<slice<byte>>(slice<byte>("/proc/self/auxv\x00"u8));
 internal static ref slice<byte> procAuxv => ref ((StaticBox<slice<byte>>)ᏑprocAuxv).ValueSlot;
@@ -245,11 +245,11 @@ internal static partial int32 mincore(@unsafe.Pointer addr, uintptr n, ж<byte> 
 internal static readonly ж<array<uintptr>> Ꮡauxvreadbuf = new StaticBox<array<uintptr>>(new array<uintptr>(128));
 internal static ref array<uintptr> auxvreadbuf => ref ((StaticBox<array<uintptr>>)Ꮡauxvreadbuf).ValueSlot;
 
-internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
+internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
     var n = argc + 1;
 
     // skip over argv, envp to get to auxv
-    while (argv_index(Ꮡargv, n) != nil) {
+    while (argv_index(argv, n) != nil) {
         n++;
     }
 
@@ -257,7 +257,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
     n++;
 
     // now argv+n is auxv
-    var auxvp = (ж<array<uintptr>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡargv), (uintptr)n * (uintptr)goarch.PtrSize));
+    var auxvp = (ж<array<uintptr>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)n * (uintptr)goarch.PtrSize));
 
     {
         nint pairsΔ1 = sysauxv(auxvp.slice()); if (pairsΔ1 != 0) {
@@ -278,8 +278,8 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
         if (err != 0) {
             return;
         }
-        uintptr nΔ1 = default!;
-        for (nΔ1 = (uintptr)4 << 10; nΔ1 < size; nΔ1 <<= (int)(1)) {
+        uintptr nΔ1 = default;
+        for (nΔ1 = (uintptr)4 << 10; nΔ1 < size; nΔ1 <<= 1) {
             var errΔ1 = mincore((@unsafe.Pointer)((uintptr)Δp + nΔ1), 1, Ꮡaddrspace_vec.at<byte>(0));
             if (errΔ1 == 0) {
                 physPageSize = nΔ1;
@@ -311,11 +311,11 @@ internal static bool secureMode;
 internal static nint /*pairs*/ sysauxv(slice<uintptr> auxv) {
     // Process the auxiliary vector entries provided by the kernel when the
     // program is executed. See getauxval(3).
-    nint i = default!;
+    nint i = default;
     for (; auxv[i] != _AT_NULL; i += 2) {
         var (tag, val) = (auxv[i], auxv[i + 1]);
-        var exprᴛ1 = tag;
-        if (exprᴛ1 == _AT_RANDOM) {
+        switch (tag) {
+        case var ᴛ when ᴛ == _AT_RANDOM: {
             // The kernel provides a pointer to 16 bytes of cryptographically
             // random data. Note that in cgo programs this value may have
             // already been used by libc at this point, and in particular glibc
@@ -323,13 +323,16 @@ internal static nint /*pairs*/ sysauxv(slice<uintptr> auxv) {
             // cookies from libc_start_main and/or dl_start. Also, cgo programs
             // may use the value after we do.
             startupRand = ((ж<array<byte>>)(uintptr)((@unsafe.Pointer)val)).slice();
+            break;
         }
-        else if (exprᴛ1 == _AT_PAGESZ) {
+        case var ᴛ when ᴛ == _AT_PAGESZ: {
             physPageSize = val;
+            break;
         }
-        else if (exprᴛ1 == _AT_SECURE) {
+        case var ᴛ when ᴛ == _AT_SECURE: {
             secureMode = val == 1;
-        }
+            break;
+        }}
 
         archauxv(tag, val);
         vdsoauxv(tag, val);
@@ -354,7 +357,7 @@ internal static uintptr getHugePageSize() {
     }
     n--; // remove trailing newline
     var (v, err) = strconv.Atoi(slicebytetostringtmp((ж<byte>)(uintptr)(ptr), (nint)n));
-    if (err != default! || v < 0) {
+    if (err != nil || v < 0) {
         v = 0;
     }
     if ((v & (v - 1)) != 0) {
@@ -463,8 +466,8 @@ internal static partial void rtsigprocmask(int32 how, ж<sigset> @new, ж<sigset
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static void sigprocmask(int32 how, ж<sigset> Ꮡnew, ж<sigset> Ꮡold) {
-    rtsigprocmask(how, Ꮡnew, Ꮡold, (int32)/* unsafe.Sizeof(*new) */ (uintptr)8);
+internal static void sigprocmask(int32 how, ж<sigset> @new, ж<sigset> old) {
+    rtsigprocmask(how, @new, old, (int32)/* unsafe.Sizeof(*new) */ (uintptr)8);
 }
 
 internal static partial void raise(uint32 sig);
@@ -506,7 +509,7 @@ internal static void setsig(uint32 i, uintptr fn) {
         sa.sa_restorer = abi.FuncPCABI0(sigreturn__sigaction);
     }
     if (fn == abi.FuncPCABIInternal(sighandler)) { // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
-        if (iscgo){
+        if (iscgo) {
             fn = abi.FuncPCABI0(cgoSigtramp);
         } else {
             fn = abi.FuncPCABI0(sigtramp);
@@ -539,8 +542,8 @@ internal static uintptr getsig(uint32 i) {
 // setSignalstackSP sets the ss_sp field of a stackt.
 //
 //go:nosplit
-internal static void setSignalstackSP(ж<stackt> Ꮡs, uintptr sp) {
-    (Ꮡs.of(stackt.Ꮡss_sp).Reinterpret<ж<byte>, uintptr>()).Value = sp;
+internal static void setSignalstackSP(ж<stackt> s, uintptr sp) {
+    (s.of(stackt.Ꮡss_sp).Reinterpret<ж<byte>, uintptr>()).Value = sp;
 }
 
 //go:nosplit
@@ -553,8 +556,8 @@ internal static readonly @string sigactionFailedˢ = "sigaction failed"u8;
 // sysSigaction calls the rt_sigaction system call.
 //
 //go:nosplit
-internal static void sysSigaction(uint32 sig, ж<sigactiont> Ꮡnew, ж<sigactiont> Ꮡold) {
-    if (rt_sigaction((uintptr)sig, Ꮡnew, Ꮡold, /* unsafe.Sizeof(sigactiont{}.sa_mask) */ (uintptr)8) != 0) {
+internal static void sysSigaction(uint32 sig, ж<sigactiont> @new, ж<sigactiont> old) {
+    if (rt_sigaction((uintptr)sig, @new, old, /* unsafe.Sizeof(sigactiont{}.sa_mask) */ (uintptr)8) != 0) {
         // Workaround for bugs in QEMU user mode emulation.
         //
         // QEMU turns calls to the sigaction system call into
@@ -613,7 +616,7 @@ internal static void signalM(ref m mp, nint sig) {
 // from other sources are always considered valid.
 //
 //go:nosplit
-internal static bool validSIGPROF(ж<m> Ꮡmp, ж<sigctxt> Ꮡc) {
+internal static bool validSIGPROF(ж<m> mp, ж<sigctxt> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var code = (int32)c.sigcode();
@@ -627,7 +630,7 @@ internal static bool validSIGPROF(ж<m> Ꮡmp, ж<sigctxt> Ꮡc) {
         return true;
     }
 
-    if (Ꮡmp == nil) {
+    if (mp == nil) {
         // Since we don't have an M, we can't check if there's an active
         // per-thread timer for this thread. We don't know how long this thread
         // has been around, and if it happened to interact with the Go scheduler
@@ -645,7 +648,7 @@ internal static bool validSIGPROF(ж<m> Ꮡmp, ж<sigctxt> Ꮡc) {
 
     // Having an M means the thread interacts with the Go scheduler, and we can
     // check whether there's an active per-thread timer for this thread.
-    if (Ꮡmp.of(m.ᏑprofileTimerValid).Load()) {
+    if (mp.of(m.ᏑprofileTimerValid).Load()) {
         // If this M has its own per-thread CPU profiling interval timer, we
         // should track the SIGPROF signals that come from that timer (for
         // accurate reporting of its CPU usage; see issue 35057) and ignore any
@@ -755,18 +758,18 @@ partial struct kernelVersion {
 // failing, because this is called during osinit before the runtime
 // is fully initialized and a throw here is unrecoverable.
 internal static (kernelVersion kv, bool ok) getKernelVersion() {
-    bool ok = default!;
+    bool ok = default;
 
     ref var buf = ref heap(new linux.Utsname(), out var Ꮡbuf);
     {
         var e = linux.Uname(Ꮡbuf); if (e != 0) {
-            return (new kernelVersion(nil), false);
+            return (new kernelVersion(), false);
         }
     }
     @string rel = gostringnocopy(Ꮡbuf.at(linux.Utsname.ᏑRelease, 0));
     (var major, var minor, _, ok) = parseRelease(rel);
     if (!ok) {
-        return (new kernelVersion(nil), false);
+        return (new kernelVersion(), false);
     }
     return (new kernelVersion(major: major, minor: minor), true);
 }
@@ -777,10 +780,10 @@ internal static (kernelVersion kv, bool ok) getKernelVersion() {
 // best-effort. Trailing vendor or build suffixes such as
 // "-generic", "+", "_hi3535", or "-rc1" are ignored.
 internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@string rel) {
-    nint major = default!;
-    nint minor = default!;
-    nint patch = default!;
-    bool ok = default!;
+    nint major = default;
+    nint minor = default;
+    nint patch = default;
+    bool ok = default;
 
     // next consumes a run of decimal digits from the front of rel,
     // returning the parsed value. If the digits are followed by a
@@ -788,19 +791,19 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     // parse another component; otherwise scanning terminates and
     // the rest of rel is discarded.
     (nint n, bool more, bool ok) next() {
-        nint n = default!;
+        nint n = default;
         nint i = 0;
-        while (i < len(rel) && rel[i] >= (rune)'0' && rel[i] <= (rune)'9') {
+        while (i < len(rel) && rel[i] >= '0' && rel[i] <= '9') {
             i++;
         }
         if (i == 0) {
             return (0, false, false);
         }
         (n, var err) = strconv.Atoi(rel.slice(0, i));
-        if (err != default!) {
+        if (err != nil) {
             return (0, false, false);
         }
-        if (i < len(rel) && rel[i] == (rune)'.') {
+        if (i < len(rel) && rel[i] == '.') {
             rel = rel.slice(i + 1);
             return (n, true, true);
         }
@@ -808,7 +811,7 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
         return (n, false, true);
     }
 
-    bool more = default!;
+    bool more = default;
     {
         (major, more, ok) = next(); if (!ok || !more) {
             return (0, 0, 0, false);
