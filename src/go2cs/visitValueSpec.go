@@ -305,11 +305,15 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							typeName := fmt.Sprintf("%s, %s", class, strings.ReplaceAll(pkgPath, "/", "."))
 							v.writeOutput("%s static %s %s { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, \"%s\", \"%s\")] get => global::go.LinknameVar<%s>.Get(\"%s\", \"%s\"); set => global::go.LinknameVar<%s>.Set(\"%s\", \"%s\", value); }",
 								getAccess(goIDName), csTypeName, csIDName, class, strings.ReplaceAll(pkgPath, "/", "."), csTypeName, typeName, remote, csTypeName, typeName, remote)
+							v.writeComment(valueSpec.Comment, valueSpec.End())
 							continue
 						}
 
 						v.importQueue.Add(pkgPath)
 						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getAccess(goIDName), csTypeName, csIDName, ref, ref)
+						// The spec's trailing comment rides the property line (os's `var executablePath string // set by
+						// ../runtime/os_darwin.go`), as every other var's does.
+						v.writeComment(valueSpec.Comment, valueSpec.End())
 						continue
 					}
 
@@ -335,6 +339,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						access := v.testDeclaredValueAccess(packageVarAccess(goIDName, v.getIdentType(ident)), ident.Pos(), v.getIdentType(ident))
 						csTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(def.Type(), false))
 						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", access, csTypeName, csIDName, ref, ref)
+						v.writeComment(valueSpec.Comment, valueSpec.End())
 						continue
 					}
 

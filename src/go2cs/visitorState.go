@@ -449,6 +449,14 @@ type Visitor struct {
 	// emitters take the doc as an argument instead.
 	pendingTypeDoc    *ast.CommentGroup
 	pendingTypeDocPos token.Pos
+
+	// pendingTypeComment carries the TRAILING comment of the type spec being declared (Go's
+	// `type sortedHint int // hint for pdqsort`) to the emitter that writes the declaration line, which
+	// writes it after the line's code and any /*fact*/ block; see writePendingTypeComment. It is keyed by
+	// the declared type, so a lifted or nested declaration written first never takes it.
+	pendingTypeComment       *ast.CommentGroup
+	pendingTypeCommentAnchor token.Pos
+	pendingTypeCommentType   types.Type
 	// clauseSpans maps the colon of each case and select clause to the source span its leading comments
 	// are taken from; noteClauseSpans fills it per switch and select, writeLeadingBodyComments reads it.
 	clauseSpans map[token.Pos]clauseSpan

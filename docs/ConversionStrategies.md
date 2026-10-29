@@ -1373,7 +1373,7 @@ a rule, the conversion would stop and name it.
      :120 `// A test file's own vars stay eager`; the unboxed address (probe at 3e3f18925a: a 21-field struct var whose
      method value `mv.sum` is taken stays `internal static six mv = new six(…);`, read as `Ꮡ(mv).sum`):
      :164 `candidate.reason = "its address is taken where the converter keeps no box for it"`;
-     the refusal of a listed var: src/go2cs/visitValueSpec.go:727 `panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))`.
+     the refusal of a listed var: src/go2cs/visitValueSpec.go:732 `panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))`.
      A malloc table's holder: src/core/runtime/malloc_tables_generated.cs:9 `[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{`.
      Why those two are listed: their one reader, mallocgc's size-specialized branch, is gated by a const false
      (goexperiment.SizeSpecializedMalloc is off). Guards: TestLazyPackageVarIsBuiltOnFirstRead,
@@ -1840,9 +1840,9 @@ rules further down this section):
   `uint` value too wide for 32 bits;
 - a `static readonly` field, for any package-level string constant, typed or untyped, and for an integer constant
   too wide for 64 bits, which is golib's `GoBigConst` (C#'s `BigInteger`).
-<!-- forms: src/go2cs/visitValueSpec.go:1444 `else if constExpr == "const"`, :1467 `static %s %s =>%s %s;`,
-     :1262 `static readonly %s %s = %s;`; the GoBigConst field, for an int-kind value that fits neither int64 nor
-     uint64: :1187-1194 `writeUntypedConst(true)`, e.g. src/core/math/big/arith.cs:23
+<!-- forms: src/go2cs/visitValueSpec.go:1449 `else if constExpr == "const"`, :1472 `static %s %s =>%s %s;`,
+     :1267 `static readonly %s %s = %s;`; the GoBigConst field, for an int-kind value that fits neither int64 nor
+     uint64: :1192-1199 `writeUntypedConst(true)`, e.g. src/core/math/big/arith.cs:23
      `internal static readonly GoBigConst _B`; the alias: src/go2cs/csproj-template.xml:129 `Alias="GoBigConst"`. -->
 
 When the value is computed, a `/* … */` comment beside it keeps the Go expression.
@@ -2798,7 +2798,7 @@ a golib type that keeps the constant's exact value.
      for main.go:25 `a := 0x1p-2` and :31 `d := 2.`. Typed const:
      src/core/math/asinh.cs:49 `const float64 Ln2 = 6.93147180559945286227e-01;` and
      src/core/runtime/stubs.cs:156 `0.875f;`, from
-     src/go2cs/visitValueSpec.go:1393-1394 `constValExpr += "f"`. -->
+     src/go2cs/visitValueSpec.go:1398-1399 `constValExpr += "f"`. -->
 
 **A float prints as Go prints it.** go2cs converts `fmt` and `strconv` from Go's own source, so `fmt.Println`
 formats a float with Go's own `strconv` code, never with .NET's `ToString`. Go's default form is the shortest
@@ -3095,8 +3095,8 @@ a constructor that takes golib's `nil` and builds the zero value. That construct
 value embed by its own `new T(nil)`, and a pointer embed as a nil `ж<T>` box rather than a C# `null`, so a
 promoted access through it panics as Go does. `new(nil)` calls it. Here `Padded` is a struct of plain fields, so
 it stays `default!`, and `Embedded` embeds it:
-<!-- src/go2cs/visitValueSpec.go:426-431 `structHasPromotedEmbeds … a value embed by its own … new(nil);`; the
-     embed is declared as a field: src/go2cs/visitStructType.go:977#87d05a (commit 814ff707c7). -->
+<!-- src/go2cs/visitValueSpec.go:431-436 `structHasPromotedEmbeds … a value embed by its own … new(nil);`; the
+     embed is declared as a field: src/go2cs/visitStructType.go:979#87d05a (commit 814ff707c7). -->
 
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:33-40,44-48,140-141 -->
 ```go
@@ -9173,10 +9173,10 @@ of its own package, is built with `new(nil)`. That generated constructor builds 
 embedded type that itself needs construction (one with an array field) is usable, and an embedded pointer
 holds a nil `ж<T>` box rather than a C# `null`.
 <!-- embedded: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:44-48,141 `var e Embedded` -> UnsafeOperations.cs.target:38-42,120 `Embedded e = new(nil);` -->
-<!-- the predicate: src/go2cs/visitStructType.go:1106 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`,
-     which skips :1152 `// A same-package interface embed renders as a plain interface field — no box.` and a
+<!-- the predicate: src/go2cs/visitStructType.go:1108 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`,
+     which skips :1154 `// A same-package interface embed renders as a plain interface field — no box.` and a
      builtin or unnamed embed; a cross-package embed always counts. The zero-value emission:
-     src/go2cs/visitValueSpec.go:426 `} else if v.structHasPromotedEmbeds(def.Type()) {`. -->
+     src/go2cs/visitValueSpec.go:431 `} else if v.structHasPromotedEmbeds(def.Type()) {`. -->
 
 **A struct is copied by value, as in Go.** A C# struct assignment copies the fields. But golib's
 `array<T>` is a small struct that points at its element storage, so a plain copy would share the
@@ -9344,7 +9344,7 @@ assigned, have its address taken, or receive a method call. Because every field 
 struct whose fields are all plain values is laid out exactly as Go lays it, and a pointer that views raw
 memory as the struct (`(*T)(unsafe.Pointer(p))`) reads Go's bytes.
 <!-- Owner ruling (A), 2026-10-16, uniform over value and pointer embeds: the emission is
-src/go2cs/visitStructType.go:977#87d05a; the generator reads such a field as the embed
+src/go2cs/visitStructType.go:979#87d05a; the generator reads such a field as the embed
 (src/gen/go2cs-gen/StructDeclarationSyntaxExtensions.cs:27#95fa84, IsPromotingEmbedType) and declares no storage or
 accessor for it (src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:376#0e4b57, :414#0e4b57). Before (A) the
 converter emitted `partial ref T T { get; }` and the generator stored the value in a private `ʗT` field in a

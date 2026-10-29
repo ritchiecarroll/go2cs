@@ -102,6 +102,7 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 		v.writeString(target, "%s%spartial struct %s%s;", inlineAttrs, access, getSanitizedIdentifier(name), goTypeComment)
 	}
 
+	v.writePendingTypeComment(target, identType)
 	target.WriteString(v.newline)
 
 	if lifted && v.inFunction {
