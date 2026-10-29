@@ -375,7 +375,7 @@ public static partial class GoReflect
         if (entry.Method.DeclaringType is { IsInterface: true })
             return null;
 
-        Type funcType = GoMethodFuncType(t, index);
+        Type funcType = MethodFuncType(t, index);
 
         // The type's generated method set (IGoMethodSet) answers with a delegate compiled code created, which Native AOT
         // can always hand out; the binders below remain the route for a method it has no arm for.
