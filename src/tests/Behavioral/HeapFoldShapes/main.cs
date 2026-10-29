@@ -48,7 +48,7 @@ internal static void Main() {
     keptGrids = append(keptGrids, Ꮡh);
     mark(ref h, 1);
     h.name = "h";
-    fmt.Println("g:", g.cells, g.name, "h:", h.cells, h.name, "kept:", (~keptGrids[0]).cells, (~keptGrids[1]).cells, keptInts[0].Value);
+    fmt.Println("g:", g.cells, g.name, "h:", h.cells, h.name, "kept:", keptGrids[0].cells, keptGrids[1].cells, keptInts[0].Value);
 
     ref var c = ref heap<nint>(1, out var Ꮡc);
     void inc() {
