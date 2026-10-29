@@ -1508,7 +1508,7 @@ The cast site in another file, `generation.cs`:
 
 And the record in `package_info.cs`:
 
-<!-- source: src/core/internal/trace/package_info.cs:54 -->
+<!-- source: src/core/internal/trace/package_info.cs:58 -->
 ```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
