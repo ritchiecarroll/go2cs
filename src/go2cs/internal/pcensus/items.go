@@ -623,13 +623,14 @@ var items = []item{
 	},
 	{
 		// The imported-alias use gate: a `global using X = …;` alias no file of the package uses is no longer written
-		// into package_info.cs. The line is only ever deleted, and only there; an alias whose target changes is a
+		// into package_info.cs, nor into the converted tests' package_test_info.cs (one writer, one gate). The line is
+		// only ever deleted, and only there; an alias whose target changes is a
 		// different change, and its added line is refused. Whether the deleted alias is still used is a fact of the
 		// emission, which a diff cannot show: this item reads the shape only.
 		ID: "A1", Seat: "#41", Title: "an imported type alias no file uses leaves package_info.cs",
 		Block: &blockRule{
 			PerSide: true,
-			File:    rx(`(^|/)package_info\.cs$`),
+			File:    rx(`(^|/)package(?:_test)?_info\.cs$`),
 			Delete:  []*regexp.Regexp{rx(`^global using [^\s=;]+ = [^\s;]+;$`)},
 		},
 	},
