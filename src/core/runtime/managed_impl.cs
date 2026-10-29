@@ -4578,6 +4578,14 @@ partial class runtime_package
     // NEVER A GUESS: two or more calls of the callee after the reported offset (the chain's Add, Add, Add)
     // cannot be told apart from that offset, and keep returnSiteILOffset's answer, as before. A callee the
     // JIT inlined away left no frame, so its caller's frame names a callee no call here targets: unsettled.
+    //
+    // THE DEFERRING FRAME is settled across the whole method, not one statement. A frame suspended calling
+    // GoFrame.Run is a deferred call's caller, running its finally (Go's deferreturn), and the JIT can report
+    // it at IL offset 0, outside any statement that holds the call. Measured 2026-10-29 on linux, Release: at
+    // TieredCompilation=0 for a method-group defer (`defer(where, s, ref ᒐ)`), and under tiering for every
+    // deferring method of the behavioral LineMarkerDeferEndTC0; the line read the function's first statement
+    // where Go's is its closing brace or executed return. A method holds exactly ONE call of Run, the
+    // converter's `finally { ᒐ.Run(); }`, so that call it is; a method with two settles nothing.
     private static int calleeSettledCallSite(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase callee)
     {
         int candidate = returnSiteILOffset(method, ilOffset);
@@ -4587,6 +4595,24 @@ partial class runtime_package
 
         if (callSiteOffsets(method) is not { } calls || sequencePointOffsets(method) is not { Length: > 0 } statements)
             return -1;
+
+        if (callee == GoFrame.RunMethod)
+        {
+            int only = -1;
+
+            foreach (int call in calls)
+            {
+                if (callTarget(method, call) is not { } target || !targetsCallee(target, callee))
+                    continue;
+
+                if (only >= 0)
+                    return -1;
+
+                only = call;
+            }
+
+            return only;
+        }
 
         int index = Array.BinarySearch(statements, ilOffset);
 
