@@ -34,21 +34,21 @@ internal static error applyErr(Func<nint, error> f) {
 
 internal static void Main() {
     var g = slice<Value> (slice<Value> @in) => default;
-    fmt.Println("A1 slice result:", g(default) == default, len(g(default)));
+    fmt.Println("A1 slice result:", g(default) == nil, len(g(default)));
 
     var m = map<@string, nint> (@string k) => default;
-    fmt.Println("A2 map result:", applyMap(m) == default, len(m("x")));
+    fmt.Println("A2 map result:", applyMap(m) == nil, len(m("x")));
 
     var p = ж<Value> () => default;
     fmt.Println("A3 pointer result:", p() == nil);
 
     var c = channel<nint> () => default;
-    fmt.Println("A4 chan result:", applyChan(c) == default);
+    fmt.Println("A4 chan result:", applyChan(c) == nil);
 
     var fn = Func<nint, nint> () => default;
     fmt.Println("A5 func result:", applyFunc(fn) == nil);
 
-    fmt.Println("A6 slice-result lambda passed to a consumer:", apply(g) == default);
+    fmt.Println("A6 slice-result lambda passed to a consumer:", apply(g) == nil);
     fmt.Println("A7 pointer-result lambda passed to a consumer:", applyPtr(p) == nil);
 
     var e = error (nint x) => default;
@@ -70,7 +70,7 @@ internal static void Main() {
         }
         return new Value[]{new(N: 3)}.slice();
     }
-    fmt.Println("B4 mixed arms:", mix(true) == default, mix(false)[0].N);
+    fmt.Println("B4 mixed arms:", mix(true) == nil, mix(false)[0].N);
 
     nint num(nint x) => x * 2;
     fmt.Println("B5 int result:", num(21));

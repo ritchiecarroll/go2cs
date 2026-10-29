@@ -57,7 +57,7 @@ internal static void Main() {
 
     var n = new nested();
     n.board.cells[2] = 9;
-    fmt.Println("nested:", n.at, n.board.cells, n.tags == default, n.seen == default);
+    fmt.Println("nested:", n.at, n.board.cells, n.tags == nil, n.seen == nil);
 
     var q = new pair<@string>();
     q.a = "a";
@@ -99,11 +99,11 @@ internal static void Main() {
     fmt.Println("equal zero values:", new point() == new point(), new grid() == new grid(), p == new point());
 
     var s = new IntSlice(new nint[]{}.slice());
-    fmt.Println("IntSlice{} == nil:", s == default, len(s));
+    fmt.Println("IntSlice{} == nil:", s == nil, len(s));
 
     var m = new StrMap(new map<@string, nint>{});
     m["k"] = 1;
-    fmt.Println("StrMap{} == nil:", m == default, len(m));
+    fmt.Println("StrMap{} == nil:", m == nil, len(m));
 }
 
 } // end main_package

@@ -13,11 +13,11 @@ internal static void Main() {
     lines = append(linesᴷ, lines, (slice<nint>)(default));
     lines = append(lines, (slice<nint>)(default));
     lines[0] = append(lines[0], (nint)7);
-    fmt.Println(len(lines), lines[0], lines[1] == default);
+    fmt.Println(len(lines), lines[0], lines[1] == nil);
 
     slice<map<@string, nint>> maps = default;
     maps = append(mapsᴷ, maps, (map<@string, nint>)(default));
-    fmt.Println(len(maps), maps[0] == default);
+    fmt.Println(len(maps), maps[0] == nil);
 
     slice<ж<nint>> ptrs = default;
     ptrs = append(ptrsᴷ, ptrs, (ж<nint>)(nil));

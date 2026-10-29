@@ -96,7 +96,7 @@ internal static void Main() {
     ref var empty = ref heap<slice<byte>>(out var Ꮡempty);
     var re = reflect.ValueOf(Ꮡempty).Elem();
     re.Grow(3);
-    fmt.Println("Grow(3) from nil:", re.Len(), re.Cap() >= 3, empty == default);
+    fmt.Println("Grow(3) from nil:", re.Len(), re.Cap() >= 3, empty == nil);
 
     ref var big = ref heap<slice<nint>>(out var Ꮡbig);
     big = new slice<nint>(2, 2);

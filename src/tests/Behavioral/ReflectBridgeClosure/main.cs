@@ -179,7 +179,7 @@ internal static void Main() {
 
     var ps = @new<slice<nint>>();
     var pm = @new<map<@string, nint>>();
-    fmt.Println("new(T) is nil:", ps.ValueSlot == default, pm.ValueSlot == default, len(ps.ValueSlot), len(pm.ValueSlot));
+    fmt.Println("new(T) is nil:", ps.ValueSlot == nil, pm.ValueSlot == nil, len(ps.ValueSlot), len(pm.ValueSlot));
 
     var pa = Ꮡ(new array<nint>(5));
     var at = reflect.TypeOf(pa.OrTypedNil()).Elem();

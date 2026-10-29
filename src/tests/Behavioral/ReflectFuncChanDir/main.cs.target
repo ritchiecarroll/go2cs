@@ -81,7 +81,7 @@ internal static void Main() {
 
     Func</*<-*/channel<nint>> h = default;
     h = reflect.MakeFunc(reflect.TypeOf((h).OrTypedNilFunc()), (slice<reflectꓸValue> _Δp0) => new reflectꓸValue[]{reflect.ValueOf(new channel<nint>(0))}.slice()).Interface()._<Func</*<-*/channel<nint>>>();
-    fmt.Println("makefunc:", h() != default);
+    fmt.Println("makefunc:", h() != nil);
     _ = (Action<channel/*<-*/</*<-*/channel<nint>>>)(nestedDir);
 }
 

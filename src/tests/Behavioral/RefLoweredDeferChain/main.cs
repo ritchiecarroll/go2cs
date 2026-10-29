@@ -13,7 +13,7 @@ partial struct root {
 internal static void release(this ref root r) {
     r.fd = -r.fd;
 
-    if (r.done != default) {
+    if (r.done != nil) {
         r.done.ᐸꟷ(r.fd);
     }
 }

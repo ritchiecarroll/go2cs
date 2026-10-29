@@ -17,7 +17,7 @@ internal static void Main() {
 
     Fields nf = default;
     var nc = maps.Clone<Fields, @string, any>(nf);
-    fmt.Printf("%T %v\n"u8, nc, nc == default);
+    fmt.Printf("%T %v\n"u8, nc, nc == nil);
 
     var t = new Tree(new map<@string, Tree>{["x"] = default});
     var tc = maps.Clone<Tree, @string, Tree>(t);

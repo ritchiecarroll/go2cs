@@ -36,7 +36,7 @@ internal static void holder() {
     t["a"].Set("b", new Tree(new map<@string, Tree>{}));
     t["a"]["b"].Set("c", default);
     var (_, hasC) = t["a"]["b"]["c", ꟷ];
-    fmt.Println("holder:", len(t), len(t["a"]), len(t["a"]["b"]), hasC, t["a"]["b"]["c"] == default);
+    fmt.Println("holder:", len(t), len(t["a"]), len(t["a"]["b"]), hasC, t["a"]["b"]["c"] == nil);
 }
 
 internal static void Main() {

@@ -55,12 +55,12 @@ internal static void Main() {
 
     var pnsl = new ж<nsl>[]{Ꮡ(new nsl(new nint[]{}.slice()))}.slice();
     var pnslExplicit = new ж<nsl>[]{Ꮡ(new nsl(new nint[]{}.slice()))}.slice();
-    fmt.Println("pnsl:", len(pnsl[0].ValueSlot), pnsl[0].ValueSlot == default, pnsl[0].ValueSlot);
+    fmt.Println("pnsl:", len(pnsl[0].ValueSlot), pnsl[0].ValueSlot == nil, pnsl[0].ValueSlot);
     fmt.Println("pnslExplicit:", len(pnslExplicit[0].ValueSlot), pnslExplicit[0].ValueSlot);
 
     var pnmp = new ж<nmp>[]{Ꮡ(new nmp(new map<@string, nint>{}))}.slice();
     var pnmpExplicit = new ж<nmp>[]{Ꮡ(new nmp(new map<@string, nint>{}))}.slice();
-    fmt.Println("pnmp:", len(pnmp[0].ValueSlot), pnmp[0].ValueSlot == default, pnmp[0].ValueSlot);
+    fmt.Println("pnmp:", len(pnmp[0].ValueSlot), pnmp[0].ValueSlot == nil, pnmp[0].ValueSlot);
     fmt.Println("pnmpExplicit:", len(pnmpExplicit[0].ValueSlot), pnmpExplicit[0].ValueSlot);
 
     var pnaPop = new ж<nb>[]{Ꮡ(new nb(new byte[]{1, 2, 3, 4}.array()))}.slice();
@@ -85,10 +85,10 @@ internal static void Main() {
     fmt.Println("ps2:", ps2[0].Value);
 
     var psl = new ж<slice<nint>>[]{Ꮡ(new nint[]{}.slice())}.slice();
-    fmt.Println("psl:", len(psl), len(psl[0].ValueSlot), psl[0].ValueSlot == default, psl[0].ValueSlot);
+    fmt.Println("psl:", len(psl), len(psl[0].ValueSlot), psl[0].ValueSlot == nil, psl[0].ValueSlot);
 
     var pm = new ж<map<@string, nint>>[]{Ꮡ(new map<@string, nint>{})}.slice();
-    fmt.Println("pm:", len(pm), len(pm[0].ValueSlot), pm[0].ValueSlot == default, pm[0].ValueSlot);
+    fmt.Println("pm:", len(pm), len(pm[0].ValueSlot), pm[0].ValueSlot == nil, pm[0].ValueSlot);
 
     var mp = new map<@string, ж<array<nint>>>{["a"] = Ꮡ(new nint[]{}.array(2))};
     fmt.Println("mp:", len(mp), len(mp["a"].Value), mp["a"].Value);
