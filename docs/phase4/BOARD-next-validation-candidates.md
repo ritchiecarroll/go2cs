@@ -31269,4 +31269,89 @@ SystemCertVerify, UnsafeStringEmpty, WsaProtocolInfo, WsaSendtoRoundTrip.
   regeneration moved, 2 the behavioral re-mint moved, one of them CrossPkgBox's unused-alias sample, now CrossPkgUser's).
 <!-- Evidence: C2's scratchpad (hg-* logs: per-target census diffs, seat-delta patch, three stdlib builds and the positive
      control, the reflectlite -tests run, the behavioral slices, the base LineMarkerDeferEndTC0 run), on C2's box. -->
+
+## 2026-10-29 — C2 (1.26.10.2 seat #42, claude/c2-seat42-defer-line): a deferred or spawned call's caller is the function Go names, at its deferreturn line — DONE on the seat branch
+
+**The finding (C2's LineMarkerDeferEndTC0 red; a .2 regression).** Inside a deferred call, `runtime.Caller(1)` printed
+the line of the `defer` statement (21/28/52/33/39) where Go prints the deferring function's deferreturn line, its closing
+brace or executed return (24/30/55/35/44). Release versus Debug is not the axis: the main assembly built `/optimize-`
+prints the same lines.
+
+**DATED CORRECTION, 2026-10-29, to two earlier rows of mine (COORD accepted the wording).**
+- Seat #33's row says LineMarkerDeferEndTC0 "reports the same wrong line numbers at the base emission (an instrument limit
+  of a linux `dotnet` run, not this seat)". That is wrong: seat #33 caused it. On today's golib, with the emission the only
+  change, the 7bd0b0fb22 golden `defer(where, fallsOffTheEndˢ, ref ᒐ)` prints Go's exact output, and the ea14f3981c golden
+  `defer(() => where("falls off the end"), ref ᒐ)` prints 21/28/52/33/39.
+- Seat #41's row says the failure "fails identically at a clean 03d19d9279 (the runner's Release build reports each
+  method's first line; the Debug build matches Go)". The base reading was right; the explanation was not. It was seat
+  #33's thunk, below.
+
+**Root cause, two mechanisms, both measured on linux Release.**
+1. A converter THUNK counts as a Go frame. #33 moved constant arguments into a thunk lambda, which classifyGoSourceFrame
+   counted as `main.fallsOffEnd.func0`, so Caller(1) named it at the defer line. Go compiles `defer f(args)` and
+   `go f(args)` into deferwrap/gowrap closures marked as wrappers, and tracebackPCs elides them. The class predates #33:
+   receiver-temp thunks, dropped-result thunks and `go` thunks (Go names runtime.goexit; C# named the go statement).
+2. The JIT can report a frame suspended in its finally's `GoFrame.Run` at IL offset 0; "the first call after" then names
+   the method's first call. Seen at TC0 on method-group defers, and under tiering on every deferring method of the
+   test (its stated residual).
+
+**The fixes (COORD rulings).**
+- F2, golib (calleeSettledCallSite): a frame whose callee is GoFrame.Run resolves to the method's ONE Run call; two settle
+  nothing. Red DeferringFrameRunCallTests.
+- F1, (A) as ruled: the converter writes an invisible sentinel after each thunk's `=> ` and records the body's 1-based
+  line:UTF-16-column as GoPositionMap's optional seventh argument; the converted source is unchanged. golib's Go-frame
+  filter elides a compiler-generated lambda whose first sequence point is a recorded site. Reds:
+  TestGoDeferThunkSitesAreRecordedAndLiteralsAreNot and DeferThunkFrameTests.
+
+**The design check, posted before building F1 (3c70bc177), held.** Release portable PDBs give the converter's
+(line, column) for all 5 probe thunks. All 4 user literals, both Go one-liners included, start a line lower: a literal is
+always a block lambda. The one cost is a symbol read at capture, ruled (A). It is asked only of a lambda in an assembly
+whose records list a thunk, and cached per method. DISCLOSED: with records but no PDB (stripped, trimmed, Native AOT)
+the thunk keeps showing, as before this seat, with no throw and one attempt per assembly. Native AOT is derived from the
+code path, not measured.
+
+**The footprint prediction, written before the run, scored.**
+- MECHANISM HELD. Two-seeded three-target -stdlib (both seeds 6341102e53): 0 converted sources changed; only GoPositionMap
+  record lines in package_info.cs, 0 other lines. windows 43 files, 61 records, 142 sites; linux 43/62/143; darwin
+  41/58/136.
+- SPECIFICS MISSED, attributed exactly. The prediction read 58/61/57 records and 136/142/135 sites because its
+  hand-own filter matched "GoManualConversion" in placeholder COMMENTS. That dropped 5 converted files, among them
+  runtime/<goos>/cgocall.cs, os/user and os/windows. With the line-anchored `[module: GoManualConversion]` predicate it
+  reproduces 61/62/58 and 142/143/136.
+- A FALSIFIER FIRED FIRST, and found a defect. The first new arm changed archive/zip/writer.cs on every target, adding
+  `ref var w = ref Ꮡw.DerefOrNull();`. The sentinel's payload was the letter `w`, and the deref-alias text test read it as
+  the receiver `w`. The payload is now `0`, decimal like a statement sentinel's and never a Go line. The re-run moved 0
+  sources.
+- Stdlib compile arm, records applied to the committed tree per target: 0 errors on windows (703 s), linux (674 s) and
+  darwin (722 s). Positive control: a planted eight-argument record fails with CS1729.
+
+**Behavioral (linux, Release, whole corpus, at the rebased tip on 340ba0cc78).** `--update-targets` re-transpiled 876
+projects and moved 44 tracked package_info.cs files by their record lines alone (44 added, 44 deleted, 0 other lines),
+plus the new DeferThunkFrames. Six slices: 876 projects, Transpile/Compile/Target pass everywhere, Output 847 pass,
+0 fail, 29 skip (no console match). LineMarkerDeferEndTC0, the one red at the base, passes.
+- DeferThunkFrames (new; tiering on) and LineMarkerDeferEndTC0 (tiering off) equal `go run` at
+  DOTNET_TieredCompilation=0 and =1.
+
+**Windows-exclusive projects whose package_info.cs moves, owed on the i7.** Derived from every `[GoPlatformExclusive]`
+project that excludes linux (12) intersected with an emission holding a thunk: RawConnSyncSocketIO (7 thunks),
+SockaddrRoundTrip (1), SystemCertVerify (1), WsaProtocolInfo (1), WsaSendtoRoundTrip (2). The other 7 hold none:
+EnvironBlockWalk, FindFirstFileData, LocalTimeZone, PipeSharedFileObject, PointerOutParameter, UnsafeStringEmpty,
+WindowsNewCallback.
+
+**Gates at the tip.** `go test ./...` in src/go2cs green; repoguard green after re-citing 6 line citations;
+docsamples -check clean; GolibTests at the tip: Release 2311 passed, 0 failed; Debug 2300 passed, 0 failed.
+<!-- Evidence: C2's scratchpad (fp42/: prediction.txt, the per-target census diffs, thunk-records.json, compile-arm.log
+     with the control, behav*.log; dl-flake*.log; dlshapes/ probe), on C2's box. -->
+
+## 2026-10-29 — C2: two GolibTests Debug timing flakes, pre-existing, not chased in #42 (separate finding)
+
+Full Debug GolibTests on linux, three runs at 6341102e53 and three at #42's F2:
+- AHandoffReleaseLetsTheWaiterRunFirst_TestSemaHandoffsRatio failed 2 of 3 at the base and 1 of 3 at F2 ("direct handoff
+  < 2/3: 25 of 1000 (Go measures >90%)"). It is a timing ratio, pre-existing.
+- AForeignGoroutineBlockNamesItsCreatorAmongOtherParkedGoroutines failed once, in an earlier full run at F2 ("the
+  planted goroutines never parked", expected 2, got 3). It passed in all six controlled runs, and 3 of 3 alone. Its count
+  is of parked goroutines whose ParentId equals the test goroutine's id, process-wide, so a leftover goroutine with a
+  reused parent id would read 3. That is a plausible mechanism, not a measured one.
+Neither touches caller-line resolution. Open, unowned.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
