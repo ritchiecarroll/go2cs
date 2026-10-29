@@ -31801,4 +31801,18 @@ in the seat.
      the A-/B-/U-/C- census tables, compile-arm.log and compile-arm-rerun.log with the control, cnr2.log, behav-shapes.txt;
      cr-pred.md; cr-form.md and cr-form3.md, the posted forms), on C2's box. -->
 
+## 2026-10-29 — C2 (seat #43 follow-up, COORD's ruling): a comment after a converter block note is trailing
+
+COORD ruled that the seat row's `misplaced:trailing-spec/trailing-to-own-line` 1 -> 67 is a CENSUS ARTIFACT: each of the
+66 item-3 comments is on its import's line, after the converter's `/* blank import: ... */` note. The census counted a
+`//` comment as trailing only when CODE preceded it. Now a single-line block comment earlier on the same line also counts
+(cslex.go, `noteOnLine`). Instrument only, no emission change. Red first: TestCommentAfterAConverterNoteIsTrailing. Its
+controls hold: the same comment alone on a line still reads moved, and the old fused `//` note still reads missed.
+
+**Census restated** over the same E(seat) union, re-emitted with the same seat binary. The rerun's three-target delta is
+byte-identical to arm B's, CR-normalized. The old census code reproduces every count first measured.
+trailing-to-own-line reads 67 -> 1, arm A's value, and no other count moves. missed groups stay 114 -> 3, plus the
+out-of-scope in-expression 1. anchor-differs stays 25 (accepted as the class-2 form's consequence). eol:missing 0 and
+eol:split 23 are #38's. Arm A carries no note-then-comment line, so the rule cannot move its counts.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

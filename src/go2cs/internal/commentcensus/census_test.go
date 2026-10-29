@@ -16,6 +16,7 @@ package commentcensus
 
 import (
 	"maps"
+	"os"
 	"slices"
 	"strings"
 	"testing"
@@ -302,5 +303,61 @@ func TestPreludeSeparatorIsNotADefect(t *testing.T) {
 	// `bad` keeps regrow's prelude separator: only the blank before its make line is dropped.
 	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 1 {
 		t.Errorf("bad: %v and %d separators, want %v and 1 separator", got, separators, want)
+	}
+}
+
+// A blank import emits no `using`: the converter notes it, and when the spec has a Go trailing comment the note is a
+// block comment with Go's comment after it on the same line (seat #43, item 3):
+// `/* blank import: unsafe_package (...) */ // for linkname`. That line's code part is only the converter's note, and
+// the comment is still trailing its import, so it reads as a trailing comment where it is and is not counted as moved
+// to its own line. Controls: the same comment alone on a line still reads moved, and the old fused `//` note, whose one
+// comment holds Go's text inside it, still reads missed.
+func TestCommentAfterAConverterNoteIsTrailing(t *testing.T) {
+	const goSrc = "package p\n\nimport (\n\t\"fmt\"\n\t_ \"unsafe\" // for linkname\n)\n\nfunc F() { fmt.Println() }\n"
+	const note = "blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)"
+
+	for _, c := range []struct {
+		name, line string
+		want       string // the one finding the rendering must produce, or "" for none
+	}{
+		{"note then comment", "/* " + note + " */ // for linkname", ""},
+		{"comment on its own line", "// for linkname", "misplaced:trailing-spec/trailing-to-own-line"},
+		{"comment fused into the note", "// " + note + " // for linkname", "missed:trailing-spec"},
+	} {
+		dir := t.TempDir()
+		goFile, csFile := dir+"/p.go", dir+"/p.cs"
+		csSrc := "namespace go;\n\nusing fmt = fmt_package;\n" + c.line + "\n\npartial class p_package {\n\npublic static void F() {\n    fmt.Println();\n}\n\n} // end p_package\n"
+
+		if err := os.WriteFile(goFile, []byte(goSrc), 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(csFile, []byte(csSrc), 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		r := NewResults()
+
+		if err := r.AnalyzeFiles(goFile, csFile, "p/p"); err != nil {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+
+		got := map[string]int{}
+
+		for k, n := range r.Counts() {
+			if strings.HasPrefix(k, "missed:") || strings.HasPrefix(k, "partial:") || strings.HasPrefix(k, "misplaced:") {
+				got[k] = n
+			}
+		}
+
+		want := map[string]int{}
+
+		if c.want != "" {
+			want[c.want] = 1
+		}
+
+		if !maps.Equal(got, want) {
+			t.Errorf("%s: %v, want %v", c.name, got, want)
+		}
 	}
 }

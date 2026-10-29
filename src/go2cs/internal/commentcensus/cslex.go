@@ -64,6 +64,10 @@ func lexCS(src string) *csFile {
 	rawQuotes := 0
 	for li, line := range f.lines {
 		var code strings.Builder
+		// A converter note written as a block comment on the line, before any `//` on it. A `//` comment after one
+		// trails that line, as Go's trailing comment does on a blank import the converter notes but emits no code for
+		// (`/* blank import: unsafe_package (...) */ // for linkname`).
+		noteOnLine := false
 		i := 0
 		for i < len(line) {
 			if inBlock {
@@ -118,7 +122,7 @@ func lexCS(src string) *csFile {
 			switch {
 			case c == '/' && i+1 < len(line) && line[i+1] == '/':
 				t := normText(line[i+2:])
-				trailing := strings.TrimSpace(code.String()) != ""
+				trailing := strings.TrimSpace(code.String()) != "" || noteOnLine
 				f.comments = append(f.comments, csComment{line: li + 1, col: visualCol(line, i, 4), text: strings.TrimPrefix(strings.TrimPrefix(t, "/"), " "), trailing: trailing})
 				i = len(line)
 			case c == '/' && i+1 < len(line) && line[i+1] == '*':
@@ -130,6 +134,7 @@ func lexCS(src string) *csFile {
 					// they never match a Go comment's text, so they cannot hide a miss
 					f.comments = append(f.comments, csComment{line: li + 1, col: visualCol(line, i, 4), text: t, trailing: trailing, block: true})
 					code.WriteString(" ")
+					noteOnLine = true
 					i += 2 + end + 2
 				} else {
 					t := normText(line[i+2:])
