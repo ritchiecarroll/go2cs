@@ -153,7 +153,7 @@ internal static (ж<syscall.SockaddrInet4>, bool) sockaddrOf(netꓸAddr addr) {
         return (default, false);
     }
     var ip = (~ua).IP.To4();
-    if (ip == default) {
+    if (ip == nil) {
         return (default, false);
     }
     var sa = Ꮡ(new syscall.SockaddrInet4(Port: (~ua).Port));
@@ -165,7 +165,7 @@ internal static bool sameIPv4(Δnet.IP ip, /*[4]*/ array<byte> raw) {
     raw = raw.Clone();
 
     var four = ip.To4();
-    if (four == default) {
+    if (four == nil) {
         return false;
     }
     for (nint i = 0; i < 4; i++) {
