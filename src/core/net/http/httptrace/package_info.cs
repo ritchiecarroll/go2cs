@@ -10,8 +10,17 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using netꓸAddr = go.net_package.ΔAddr;
+global using netꓸError = go.net_package.ΔError;
+global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
+global using reflectꓸKind = go.reflect_package.ΔKind;
+global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
+global using textprotoꓸError = go.net.textproto_package.ΔError;
+global using timeꓸLocation = go.time_package.ΔLocation;
+global using timeꓸMonth = go.time_package.ΔMonth;
+global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
 

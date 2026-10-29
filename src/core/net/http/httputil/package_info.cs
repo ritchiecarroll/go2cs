@@ -10,8 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using httpꓸCookie = go.net.http_package.ΔCookie;
+global using httpꓸHandler = go.net.http_package.ΔHandler;
 global using httpꓸHeader = go.net.http_package.ΔHeader;
 global using netꓸAddr = go.net_package.ΔAddr;
+global using netꓸError = go.net_package.ΔError;
+global using textprotoꓸError = go.net.textproto_package.ΔError;
+global using timeꓸLocation = go.time_package.ΔLocation;
+global using timeꓸMonth = go.time_package.ΔMonth;
+global using timeꓸWeekday = go.time_package.ΔWeekday;
+global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;

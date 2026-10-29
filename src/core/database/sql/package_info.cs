@@ -10,9 +10,17 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using driverꓸRowsAffected = go.database.sql.driver_package.ΔRowsAffected;
 global using driverꓸValue = object;
+global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
+global using reflectꓸKind = go.reflect_package.ΔKind;
+global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
+global using runtimeꓸError = go.runtime_package.ΔError;
+global using timeꓸLocation = go.time_package.ΔLocation;
+global using timeꓸMonth = go.time_package.ΔMonth;
+global using timeꓸWeekday = go.time_package.ΔWeekday;
 using driver = go.database.sql.driver_package;
 // </ImportedTypeAliases>
 

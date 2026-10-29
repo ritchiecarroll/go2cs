@@ -10,10 +10,21 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
+global using httpꓸHeader = go.net.http_package.ΔHeader;
+global using netꓸAddr = go.net_package.ΔAddr;
+global using netꓸError = go.net_package.ΔError;
+global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
+global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
+global using templateꓸError = go.html.template_package.ΔError;
+global using templateꓸFuncMap = go.text.template_package.FuncMap;
+global using tokenꓸFile = go.go.token_package.ΔFile;
+global using tokenꓸPos = go.go.token_package.ΔPos;
+global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;

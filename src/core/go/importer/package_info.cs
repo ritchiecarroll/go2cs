@@ -10,6 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using runtimeꓸError = go.runtime_package.ΔError;
+global using tokenꓸFile = go.go.token_package.ΔFile;
+global using tokenꓸPos = go.go.token_package.ΔPos;
+global using tokenꓸPosition = go.go.token_package.ΔPosition;
+global using typesꓸError = go.go.types_package.ΔError;
+global using typesꓸInfo = go.go.types_package.ΔInfo;
+global using typesꓸScope = go.go.types_package.ΔScope;
+global using typesꓸSignature = go.go.types_package.ΔSignature;
+global using typesꓸTerm = go.go.types_package.ΔTerm;
+global using typesꓸType = go.go.types_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;

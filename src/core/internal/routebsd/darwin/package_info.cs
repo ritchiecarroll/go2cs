@@ -11,6 +11,9 @@
 
 // <ImportedTypeAliases>
 global using netipꓸAddr = go.net.netip_package.ΔAddr;
+global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
+global using runtimeꓸError = go.runtime_package.ΔError;
+global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;

@@ -10,6 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using runtimeꓸError = go.runtime_package.ΔError;
+global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;

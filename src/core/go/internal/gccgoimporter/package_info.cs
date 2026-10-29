@@ -10,9 +10,25 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using constantꓸKind = go.go.constant_package.ΔKind;
+global using elfꓸData = go.debug.elf_package.ΔData;
+global using elfꓸSection = go.debug.elf_package.ΔSection;
+global using execꓸError = go.os.exec_package.ΔError;
+global using osꓸDirEntry = go.io.fs_package.DirEntry;
+global using osꓸFileInfo = go.io.fs_package.FileInfo;
+global using osꓸFileMode = go.io.fs_package.FileMode;
+global using osꓸPathError = go.io.fs_package.PathError;
+global using osꓸSignal = go.os_package.ΔSignal;
+global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
+global using tokenꓸPosition = go.go.token_package.ΔPosition;
+global using typesꓸError = go.go.types_package.ΔError;
+global using typesꓸInfo = go.go.types_package.ΔInfo;
+global using typesꓸScope = go.go.types_package.ΔScope;
 global using typesꓸSignature = go.go.types_package.ΔSignature;
+global using typesꓸTerm = go.go.types_package.ΔTerm;
 global using typesꓸType = go.go.types_package.ΔType;
+global using xcoffꓸSection = go.@internal.xcoff_package.ΔSection;
 // </ImportedTypeAliases>
 
 using go;

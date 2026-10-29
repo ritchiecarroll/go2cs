@@ -11,9 +11,21 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
+global using bigꓸRat = go.math.big_package.ΔRat;
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
+global using netipꓸAddr = go.net.netip_package.ΔAddr;
+global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
+global using netꓸAddr = go.net_package.ΔAddr;
+global using netꓸError = go.net_package.ΔError;
+global using runtimeꓸError = go.runtime_package.ΔError;
+global using timeꓸLocation = go.time_package.ΔLocation;
+global using timeꓸMonth = go.time_package.ΔMonth;
+global using timeꓸWeekday = go.time_package.ΔWeekday;
+global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;

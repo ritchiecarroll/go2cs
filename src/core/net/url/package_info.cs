@@ -10,6 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using netipꓸAddr = go.net.netip_package.ΔAddr;
+global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
 // </ImportedTypeAliases>
 
 using go;

@@ -10,6 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using dwarfꓸLineReader = go.debug.dwarf_package.ΔLineReader;
+global using dwarfꓸReader = go.debug.dwarf_package.ΔReader;
+global using dwarfꓸType = go.debug.dwarf_package.ΔType;
+global using osꓸDirEntry = go.io.fs_package.DirEntry;
+global using osꓸFileInfo = go.io.fs_package.FileInfo;
+global using osꓸFileMode = go.io.fs_package.FileMode;
+global using osꓸPathError = go.io.fs_package.PathError;
+global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;

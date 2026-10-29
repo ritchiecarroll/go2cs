@@ -10,11 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
+global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
+global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
 global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using abiꓸKind = go.@internal.abi_package.ΔKind;
 global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
+global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using mapsꓸMap = go.@internal.runtime.maps_package.ΔMap;
+global using strconvꓸError = go.@internal.strconv_package.ΔError;
 using abi = go.@internal.abi_package;
 using tracev2 = go.@internal.trace.tracev2_package;
 // </ImportedTypeAliases>

@@ -11,6 +11,7 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
+global using bigꓸRat = go.math.big_package.ΔRat;
 // </ImportedTypeAliases>
 
 using go;

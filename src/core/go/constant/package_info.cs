@@ -12,6 +12,9 @@
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
+global using tokenꓸFile = go.go.token_package.ΔFile;
+global using tokenꓸPos = go.go.token_package.ΔPos;
+global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;

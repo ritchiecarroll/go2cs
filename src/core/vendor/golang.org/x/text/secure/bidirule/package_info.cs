@@ -12,6 +12,7 @@
 // <ImportedTypeAliases>
 global using bidiꓸClass = go.vendor.golang.org.x.text.unicode.bidi_package.ΔClass;
 global using bidiꓸDirection = go.vendor.golang.org.x.text.unicode.bidi_package.ΔDirection;
+global using bidiꓸRun = go.vendor.golang.org.x.text.unicode.bidi_package.ΔRun;
 // </ImportedTypeAliases>
 
 using go;

@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using syntaxꓸError = go.regexp.syntax_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;

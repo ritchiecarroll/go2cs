@@ -10,7 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
 global using bigꓸInt = go.math.big_package.ΔInt;
+global using bigꓸRat = go.math.big_package.ΔRat;
 global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;

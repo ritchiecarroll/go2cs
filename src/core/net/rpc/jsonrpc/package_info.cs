@@ -10,6 +10,11 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using jsonꓸToken = object;
+global using jsonꓸΔToken = object;
+global using netꓸAddr = go.net_package.ΔAddr;
+global using netꓸError = go.net_package.ΔError;
+global using rpcꓸCall = go.net.rpc_package.ΔCall;
 // </ImportedTypeAliases>
 
 using go;
