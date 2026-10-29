@@ -224,11 +224,11 @@ public class FieldAccessGenerator : ISourceGenerator
             string accessor = $"{AddressPrefix}{name}";
 
             // A foreign type's accessors are visible in its metadata; a type of this package gets its accessors
-            // from the TypeGenerator in this same run, for every field its source declares. A foreign field whose type
-            // does not resolve is typed from an assembly this compilation does not reference, and no spelling of it
-            // compiles here (see TypeName).
+            // from the TypeGenerator in this same run, for every field its target declaration declares. A foreign field
+            // whose type does not resolve is typed from an assembly this compilation does not reference, and no spelling
+            // of it compiles here (see TypeName).
             if (foreign ? ContainsErrorType(field.Type) || !type.GetMembers(accessor).OfType<IMethodSymbol>().Any(method => method.IsStatic && method.ReturnsByRef)
-                        : field.DeclaringSyntaxReferences.Length == 0)
+                        : !HasGeneratedAccessor(compilation, type, field))
             {
                 continue;
             }
@@ -265,7 +265,7 @@ public class FieldAccessGenerator : ISourceGenerator
             string accessor = $"{AddressPrefix}{name}";
 
             if (foreign ? ContainsErrorType(property.Type) || !type.GetMembers(accessor).OfType<IMethodSymbol>().Any(method => method.IsStatic && method.ReturnsByRef)
-                        : property.DeclaringSyntaxReferences.Length == 0)
+                        : !HasGeneratedAccessor(compilation, type, property))
             {
                 continue;
             }
@@ -294,6 +294,30 @@ public class FieldAccessGenerator : ISourceGenerator
     /// built before the token declares <c>f</c> and not <c>Ꮡf</c>. A name on the collision list (<c>Ꮡelem</c>, ж&lt;T&gt;'s
     /// own method) is never declared: an instance member wins over an extension, and the site would bind the member.
     /// </remarks>
+    /// <summary>
+    /// Whether the type generator gives <paramref name="member"/> of this compilation's <paramref name="type"/> its
+    /// <c>Ꮡ</c> accessor in this same run.
+    /// </summary>
+    /// <remarks>
+    /// It reads the members of ONE declaration of a type: the one carrying <c>[GoType]</c>, else (outside a hand-owned
+    /// package) the converted one (<see cref="IsConvertedGoTypeDeclaration"/>). A member another partial declares has
+    /// none: internal/poll's hand-written <c>fd_mutex_impl.cs</c> adds <c>fdMutex.rgate</c>, which Go's fdMutex does not
+    /// have, and a property over its missing accessor would not compile (CS0117).
+    /// </remarks>
+    private static bool HasGeneratedAccessor(Compilation compilation, INamedTypeSymbol type, ISymbol member)
+    {
+        List<BaseTypeDeclarationSyntax> declarations = type.DeclaringSyntaxReferences
+            .Select(reference => reference.GetSyntax())
+            .OfType<BaseTypeDeclarationSyntax>()
+            .ToList();
+
+        BaseTypeDeclarationSyntax? target = declarations.FirstOrDefault(declaration => declaration.HasGoTypeAttribute()) ??
+            (IsHandOwnedAssembly(compilation) ? null : declarations.FirstOrDefault(declaration => declaration.IsConvertedGoTypeDeclaration()));
+
+        return target is not null && member.DeclaringSyntaxReferences.Any(reference =>
+            reference.SyntaxTree == target.SyntaxTree && target.Span.Contains(reference.Span));
+    }
+
     private static void AddAddress(List<string> properties, INamedTypeSymbol type, string typeName, string fieldType, string accessor, bool foreign, HashSet<string> declared)
     {
         if (s_collisionNames.Contains(accessor) || declared.Contains(accessor))

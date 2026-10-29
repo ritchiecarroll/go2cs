@@ -99,10 +99,14 @@ public class FieldAccessGeneratorTests
         partial class user_package { }
         """;
 
-    private static string Generate(string source, params MetadataReference[] references)
+    private static string Generate(string source, params MetadataReference[] references) =>
+        GenerateFiles([("", source)], references);
+
+    // Each source is parsed under its file path, which decides whether a declaration is a converted Go type's.
+    private static string GenerateFiles((string path, string source)[] sources, params MetadataReference[] references)
     {
         CSharpCompilation compilation = CSharpCompilation.Create("test",
-            [CSharpSyntaxTree.ParseText(source), CSharpSyntaxTree.ParseText(Stubs)],
+            [.. sources.Select(file => CSharpSyntaxTree.ParseText(file.source, path: file.path)), CSharpSyntaxTree.ParseText(Stubs)],
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location), .. references],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -299,6 +303,39 @@ public class FieldAccessGeneratorTests
             public static nint Len(this ж<other> o) => 0;
         }
         """;
+
+    // internal/poll's fdMutex: a hand-written companion partial (`fd_mutex_impl.cs`) adds fields the Go type does not
+    // have. The type generator gives `Ꮡ` accessors only to the fields of its target declaration (the one carrying
+    // [GoType], else the converted one), so a companion's field has no accessor to reach it through, and no property.
+    private const string ConvertedMutex = """
+        namespace go;
+
+        [GoFieldAccess(typeof(fdMutex))]
+        partial class poll_package
+        {
+            internal partial struct fdMutex { internal ulong state; internal uint rsema; }
+        }
+        """;
+
+    private const string CompanionMutex = """
+        namespace go;
+
+        partial class poll_package
+        {
+            partial struct fdMutex { internal ulong rgate; }
+        }
+        """;
+
+    [TestMethod]
+    public void AFieldOfAHandWrittenCompanionPartialGetsNoProperty()
+    {
+        string generated = GenerateFiles([("fd_mutex.cs", ConvertedMutex), ("fd_mutex_impl.cs", CompanionMutex)]);
+        const string Mutex = "global::go.poll_package.fdMutex";
+
+        StringAssert.Contains(generated, Ref("ulong", "state", Mutex), "the converted declaration's fields keep their properties");
+        StringAssert.Contains(generated, Ref("uint", "rsema", Mutex));
+        Assert.IsFalse(generated.Contains("rgate"), "a companion's field has no Ꮡ accessor: its property would not compile (CS0117)");
+    }
 
     [TestMethod]
     public void AFieldThatShadowsAPromotedMethodGetsNoProperty()
