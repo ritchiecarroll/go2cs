@@ -10,7 +10,8 @@
 // INHERITS rather than declares is still written inside the interface body, at the member's Go position. Two shapes
 // lost it: a declared method a structural base covers (net.Conn's Read/Write/Close, inherited from
 // io.ReadWriteCloser, so the member loop skipped them, docs included), and Go's own embed (hash.Hash's `io.Writer`,
-// moved to the C# base list with its doc dropped).
+// moved to the C# base list with its doc dropped). The doc is followed by `// <Go method spec> is provided by <base>`
+// or `// <embed> is inherited`, so it does not read as the next member's doc.
 
 package main
 
@@ -121,7 +122,8 @@ func main() {
 		return nil
 	}
 
-	// Each interface's member docs, in Go order. Each must appear once, inside the body, after the one before it.
+	// Each interface's member docs in Go order, with the ruled line that names an inherited member as Go spells it and
+	// what supplies it. Each must appear once, inside the body, after the one before it.
 	for _, c := range []struct {
 		iface string
 		docs  []string
@@ -129,13 +131,17 @@ func main() {
 		{"Conn", []string{
 			"// Read reads data from the connection.",
 			"// Read can be made to time out.",
+			"// Read(b []byte) (n int, err error) is provided by io.ReadWriteCloser",
 			"// Write writes data to the connection.",
+			"// Write(b []byte) (n int, err error) is provided by io.ReadWriteCloser",
 			"// Close closes the connection.",
+			"// Close() error is provided by io.ReadWriteCloser",
 			"// LocalAddr returns the local network address, if known.",
 		}},
 		{"Hash", []string{
 			"// Write (via the embedded io.Writer interface) adds more data to the running hash.",
 			"// It never returns an error.",
+			"// io.Writer is inherited",
 			"// Sum appends the current hash to b and returns the resulting slice.",
 		}},
 	} {

@@ -288,7 +288,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	var structuralBases []string
 	var canonicalStructuralBases []string
-	structuralCovered := hashset.HashSet[string]{}
+	structuralCovered := map[string]string{}
 
 	// Structural (non-embedded) satisfaction of an imported interface is emitted as C#
 	// interface inheritance: Go converts fs.File to io.Reader implicitly because the method
@@ -353,7 +353,17 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 			// redeclaring would HIDE the base member (distinct C# members, implementers would
 			// need both). Its signature is guaranteed compatible: the base was only chosen
 			// because types.Implements matched the full method set.
-			if structuralCovered.Contains(method.Names[0].Name) {
+			//
+			// The member's Go doc still belongs here, at its Go position: the doc verbatim, then one line naming
+			// the method as Go spells it and the base that now supplies it. Without that line the doc would read
+			// as the doc of the member after it (net.Conn's Read, Write and Close, supplied by io.ReadWriteCloser).
+			if base, covered := structuralCovered[method.Names[0].Name]; covered {
+				if method.Doc != nil && v.options.includeComments {
+					v.writeDocString(result, method.Doc, method.Pos())
+					goSpec := method.Names[0].Name + strings.TrimPrefix(strings.Join(strings.Fields(v.getPrintedNode(method.Type)), " "), "func")
+					result.WriteString(fmt.Sprintf("%s// %s is provided by %s%s", innerIndent, goSpec, base, v.newline))
+				}
+
 				continue
 			}
 
@@ -415,6 +425,14 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 				}
 
 				isDynamicInterface := v.isDynamicInterface(method.Type)
+
+				// Go's embed moves to the C# base list, but its Go doc stays in the body at the embed's Go position,
+				// followed by one line naming the embed as Go spells it, so the doc does not read as the next
+				// member's (hash.Hash's `io.Writer`).
+				if method.Doc != nil && v.options.includeComments && !isDynamicInterface {
+					v.writeDocString(result, method.Doc, method.Pos())
+					result.WriteString(fmt.Sprintf("%s// %s is inherited%s", innerIndent, strings.Join(strings.Fields(v.getPrintedNode(method.Type)), " "), v.newline))
+				}
 
 				if isDynamicInterface {
 					v.indentLevel--
@@ -632,7 +650,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 // skipped (the embed emission handles those, and a second differently-rendered base of the
 // same type would be a duplicate-interface error). Returns the rendered base type names and
 // the covered method names.
-func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, []string, hashset.HashSet[string]) {
+func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, []string, map[string]string) {
 	named, ok := identType.(*types.Named)
 
 	if !ok {
@@ -712,6 +730,16 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	baseNames := make([]string, 0, len(bases))
 	canonicalBaseNames := make([]string, 0, len(bases))
 	coveredCounts := map[string]int{}
+	coveredBy := map[string]string{}
+
+	// A base as Go spells it from this package (`io.ReadWriteCloser`), for the line that names it in the body
+	goSpelling := func(p *types.Package) string {
+		if p == v.pkg {
+			return ""
+		}
+
+		return p.Name()
+	}
 
 	for i, candidate := range bases {
 		candidateIface := candidate.Underlying().(*types.Interface)
@@ -750,6 +778,7 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 		// The base's FULL method set (embedded members included) is inherited
 		for k := 0; k < candidateIface.NumMethods(); k++ {
 			coveredCounts[candidateIface.Method(k).Name()]++
+			coveredBy[candidateIface.Method(k).Name()] = types.TypeString(candidate, goSpelling)
 		}
 	}
 
@@ -757,11 +786,11 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	// by TWO OR MORE bases (interfaces that share a method without subsuming each other) is
 	// RE-DECLARED instead: the redeclaration hides both inherited slots, so a call through
 	// this interface stays unambiguous (CS0121) — Go needs only one method to satisfy all.
-	covered := hashset.HashSet[string]{}
+	covered := map[string]string{}
 
 	for name, count := range coveredCounts {
 		if count == 1 {
-			covered.Add(name)
+			covered[name] = coveredBy[name]
 		}
 	}
 
