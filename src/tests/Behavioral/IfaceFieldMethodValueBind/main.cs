@@ -37,7 +37,7 @@ internal static void Main() {
     var c = Ꮡ(new config(s: new flat(n: 10)));
     var f = c.pickSizer();
     fmt.Println(f("abc"));
-    fmt.Println((~c).s.size("abc"));
+    fmt.Println(c.s.size("abc"));
 
     var c2 = Ꮡ(new config());
     var g = c2.pickSizer();

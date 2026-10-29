@@ -71,11 +71,11 @@ internal static @string classifyMulti(shape v) {
 internal static void grow(shape v) {
     switch (v.type()) {
     case ж<circle> t: {
-        t.Value.r += 10;
+        t.r += 10;
         break;
     }
     case ж<square> t: {
-        t.Value.s += 10;
+        t.s += 10;
         break;
     }}
 }
@@ -96,7 +96,7 @@ internal static void Main() {
 
     grow(new circleжshape(c));
     grow(new squareжshape(q));
-    fmt.Println((~c).r, (~q).s);
+    fmt.Println(c.r, q.s);
 
     any x = c.OrTypedNil();
     switch (x.type()) {

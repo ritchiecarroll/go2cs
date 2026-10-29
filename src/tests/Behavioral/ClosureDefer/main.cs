@@ -124,7 +124,7 @@ internal static void Main() {
     }
     var (v, err) = fetch();
     var tk = makeTask(5);
-    fmt.Println("task:", (~tk).fn(), (~tk).name);
+    fmt.Println("task:", tk.fn(), tk.name);
     fmt.Println("fetched:", v, err);
 
     fmt.Println("done");

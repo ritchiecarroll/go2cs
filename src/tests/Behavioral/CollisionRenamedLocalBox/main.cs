@@ -60,7 +60,7 @@ internal static void Main() {
     bump(ᏑΔcounter.of(box.Ꮡn));
     fmt.Println(Δcounter.n);
     fmt.Println(Δp.n, usesTypeP());
-    fmt.Println((~lastBox).n, lastInt.Value);
+    fmt.Println(lastBox.n, lastInt.Value);
 }
 
 } // end main_package

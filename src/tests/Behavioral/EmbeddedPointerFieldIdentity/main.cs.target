@@ -45,7 +45,7 @@ internal static void Main() {
     fmt.Println("promoted map:", len(pm), pm[w.of(wrapper.Ꮡc).of(core.Ꮡsema)]);
 
     (w.of(wrapper.Ꮡc).of(core.Ꮡsema)).Value = 7;
-    fmt.Println("shared storage:", (~h).c.sema, (~w).c.sema);
+    fmt.Println("shared storage:", h.c.sema, (~w).c.sema);
 }
 
 } // end main_package

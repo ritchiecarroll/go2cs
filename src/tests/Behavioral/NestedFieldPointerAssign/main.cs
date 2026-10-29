@@ -22,9 +22,9 @@ internal static void Main() {
     ref var @base = ref heap(new outer(), out var Ꮡbase);
     var o = get(Ꮡbase);
 
-    o.Value.stack.hi = 100;
-    o.Value.stack.lo = 50;
-    o.Value.guard = 5;
+    o.stack.hi = 100;
+    o.stack.lo = 50;
+    o.guard = 5;
 
     fmt.Println(@base.stack.hi, @base.stack.lo, @base.guard);
 }

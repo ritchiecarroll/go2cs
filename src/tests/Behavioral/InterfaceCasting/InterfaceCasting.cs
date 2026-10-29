@@ -134,7 +134,7 @@ internal static void Main() {
     inc.Inc();
     fmt.Println("via pointer:", c.Total());
 
-    c.Value.n = 10;
+    c.n = 10;
     fmt.Println("via interface:", inc.Total());
 
     var (back, ok) = inc._<ж<Counter>>(ᐧ);

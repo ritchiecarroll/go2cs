@@ -187,7 +187,7 @@ internal static void probeK1() {
     t = new Tally(5, "s");
     var p = Ꮡt;
     nint get() => Ꮡt.Value.total;
-    p.Value.total = 50;
+    p.total = 50;
     fmt.Println("K1:", get());
 }
 

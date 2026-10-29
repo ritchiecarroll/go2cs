@@ -41,7 +41,7 @@ internal static void Main() {
     var (n, err) = c.Write(slice<byte>("hello"u8));
     fmt.Println(n, err == nil);
 
-    s.Value.broken = true;
+    s.broken = true;
 
     (n, err) = c.Write(slice<byte>("hello"u8));
     fmt.Println(n, err != nil);
@@ -50,7 +50,7 @@ internal static void Main() {
     c.Value.broken = false;
     c.Value.state.of(state.ᏑMutex).Unlock();
 
-    fmt.Println((~s).broken);
+    fmt.Println(s.broken);
 
     (n, err) = c.Write(slice<byte>("xy"u8));
     fmt.Println(n, err == nil);

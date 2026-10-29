@@ -30,7 +30,7 @@ internal static void Main() {
 
     var x = l.head;
     while (x != nil) {
-        fmt.Println((~x).val, (~x).tag);
+        fmt.Println(x.val, (~x).tag);
         x = x.Value.next;
     }
 

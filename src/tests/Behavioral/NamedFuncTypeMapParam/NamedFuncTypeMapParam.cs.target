@@ -22,7 +22,7 @@ internal static (ж<Node> pkg, error err) lookup(map<@string, ж<Node>> imports,
 internal static void Main() {
     var files = new map<@string, ж<Node>>{["a"] = Ꮡ(new Node(name: "alpha"u8))};
     var pkg = newPackage(new Func<map<@string, ж<Node>>, @string, (ж<Node>, error)>(lookup), files);
-    fmt.Println((~pkg).name);
+    fmt.Println(pkg.name);
 }
 
 } // end main_package

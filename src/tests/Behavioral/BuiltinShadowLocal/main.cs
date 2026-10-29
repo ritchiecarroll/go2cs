@@ -47,7 +47,7 @@ internal static nint sumHeap(slice<nint> heap) {
     var p = Ꮡc;
 
     foreach (var (_, v) in heap) {
-        p.Value.n += v;
+        p.n += v;
     }
 
     return c.n;

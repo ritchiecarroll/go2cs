@@ -66,14 +66,14 @@ internal static void Main() {
         r = vᴛ5;
 
         var p = Ꮡr.of(row.Ꮡv);
-        p.Value.x += 5;
-        fmt.Println("addr", (~p).x);
+        p.x += 5;
+        fmt.Println("addr", p.x);
     }
 
     foreach (var (_, r) in rows) {
         r.ptr.bump();
     }
-    fmt.Println("through pointer", (~rows[0].ptr).x, (~rows[1].ptr).x);
+    fmt.Println("through pointer", rows[0].ptr.x, rows[1].ptr.x);
 }
 
 partial struct point {

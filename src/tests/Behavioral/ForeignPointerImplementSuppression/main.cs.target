@@ -14,7 +14,7 @@ internal static void Main() {
     fmt.Println("tone:", l.Tone(), l.Name());
 
     l.Set(7);
-    fmt.Println("alias:", (~t).D, l.Tone());
+    fmt.Println("alias:", t.D, l.Tone());
 
     tone.Level l2 = new tone.ΔToneжLevel(t);
     fmt.Println("eq:", AreEqual(l, l2), AreEqual(l, ((tone.Level)new tone.ΔToneжLevel(Ꮡ(new toneꓸTone(D: 7))))));
@@ -26,11 +26,11 @@ internal static void Main() {
 
     switch (l.type()) {
     case ж<tone.Plain> v: {
-        fmt.Println("switch:", "plain", (~v).D);
+        fmt.Println("switch:", "plain", v.D);
         break;
     }
     case ж<toneꓸTone> v: {
-        fmt.Println("switch:", "tone", (~v).D);
+        fmt.Println("switch:", "tone", v.D);
         break;
     }
     default: {
@@ -47,7 +47,7 @@ internal static void Main() {
     var p = Ꮡ(new tone.Plain(D: 4));
     tone.Level pl = new tone.PlainжLevel(p);
     pl.Set(6);
-    fmt.Println("plain:", pl.Tone(), pl.Name(), (~p).D);
+    fmt.Println("plain:", pl.Tone(), pl.Name(), p.D);
 
     fmt.Println("lib:", tone.Default.Tone(), tone.DefaultPlain.Tone());
 
@@ -59,9 +59,9 @@ internal static void Main() {
 
     shade.Level sl = new tone_ΔToneжLevel(t);
     sl.Set(9);
-    fmt.Println("shade:", sl.Tone(), sl.Name(), (~t).D);
+    fmt.Println("shade:", sl.Tone(), sl.Name(), t.D);
 
-    fmt.Println("cross:", l.Tone(), sl.Tone(), (~back).D);
+    fmt.Println("cross:", l.Tone(), sl.Tone(), back.D);
 }
 
 } // end main_package

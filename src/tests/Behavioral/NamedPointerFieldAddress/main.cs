@@ -41,13 +41,13 @@ internal static void Main() {
     var q = Ꮡ(new pub(10));
     var (x, y, z) = viaParam(pp, q);
     (x.Value, y.Value, z.Value) = (20, 21, 30);
-    fmt.Println("through parameters:", (pp.Value).I, (~q).I);
+    fmt.Println("through parameters:", (pp.Value).I, q.I);
 
     var p = Ꮡ(new pub(1));
     (p.of(pub.ᏑI)).Value = 2;
     var e = p.of(pub.ᏑI);
     e.Value = 5;
-    fmt.Println("plain:", (~p).I, e == p.of(pub.ᏑI));
+    fmt.Println("plain:", p.I, e == p.of(pub.ᏑI));
 }
 
 } // end main_package

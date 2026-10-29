@@ -119,9 +119,9 @@ internal static void Main() {
     fmt.Println(bumpVia(Ꮡcs, 1), cs[1].n);
 
     slots sl = default;
-    sl.at(1).Value.v = 77;
-    sl.at(2).Value.v = (~sl.at(1)).v + 1;
-    fmt.Println(sl[1].v, sl[2].v, (~sl.at(1)).v, sl.sum());
+    sl.at(1).v = 77;
+    sl.at(2).v = sl.at(1).v + 1;
+    fmt.Println(sl[1].v, sl[2].v, sl.at(1).v, sl.sum());
 
     scal sm = new();
     var ᴛ1 = sm.s.Value;

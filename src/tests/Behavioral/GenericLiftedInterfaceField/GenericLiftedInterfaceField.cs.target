@@ -97,10 +97,10 @@ internal static void Main() {
     var c = newCounter();
     var k = new constraints<ж<counter>, nint>("count", c, default);
     var (r, ok) = check(k, 1);
-    fmt.Println((~r).n, ok);
+    fmt.Println(r.n, ok);
     (_, _) = c.query(0);
     (r, ok) = check(k, 3);
-    fmt.Println((~r).n, ok);
+    fmt.Println(r.n, ok);
 }
 
 } // end main_package

@@ -27,7 +27,7 @@ internal static void Main() {
     var inc = mutate(c);
     inc();
     inc();
-    fmt.Println((~c).size);
+    fmt.Println(c.size);
     fmt.Println(f(2));
 }
 

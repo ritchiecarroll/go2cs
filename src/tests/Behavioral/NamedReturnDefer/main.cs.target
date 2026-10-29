@@ -161,7 +161,7 @@ internal static void Main() {
 
     {
         var (bΔ1, err) = parseLimited(4); if (err == nil) {
-            fmt.Println("parseLimited(4):", (~bΔ1).v, err);
+            fmt.Println("parseLimited(4):", bΔ1.v, err);
         }
     }
     var (b2, err2) = parseLimited(99);

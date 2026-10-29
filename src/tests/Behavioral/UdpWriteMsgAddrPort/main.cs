@@ -49,8 +49,8 @@ internal static void writeMsgAddrPortRoundTrip(@string network, @string host) {
 
         fmt.Printf("addrport %s: available=true\n"u8, network);
 
-        var target = netip.AddrPortFrom(netip.MustParseAddr(host), (uint16)(~server.LocalAddr()._<ж<Δnet.UDPAddr>>()).Port);
-        var clientPort = (uint16)(~client.LocalAddr()._<ж<Δnet.UDPAddr>>()).Port;
+        var target = netip.AddrPortFrom(netip.MustParseAddr(host), (uint16)server.LocalAddr()._<ж<Δnet.UDPAddr>>().Port);
+        var clientPort = (uint16)client.LocalAddr()._<ж<Δnet.UDPAddr>>().Port;
 
         var payload = slice<byte>("write-msg-addr-port-payload"u8);
         var buf = new slice<byte>(64);
@@ -113,7 +113,7 @@ internal static void writeMsgUDPRoundTrip(@string network, @string host) {
         fmt.Printf("udpaddr %s: available=true\n"u8, network);
 
         var target = server.LocalAddr()._<ж<Δnet.UDPAddr>>();
-        nint clientPort = client.LocalAddr()._<ж<Δnet.UDPAddr>>().Value.Port;
+        nint clientPort = client.LocalAddr()._<ж<Δnet.UDPAddr>>().Port;
 
         var payload = slice<byte>("write-msg-udpaddr-payload"u8);
         var buf = new slice<byte>(64);
@@ -142,7 +142,7 @@ internal static void writeMsgUDPRoundTrip(@string network, @string host) {
             if (((sstring)(buf.slice(0, rn))) == ((sstring)payload)) {
                 bytes++;
             }
-            if ((~from).Port == clientPort) {
+            if (from.Port == clientPort) {
                 sender++;
             }
             if (roobn == 0) {

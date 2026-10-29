@@ -25,7 +25,7 @@ internal static void Main() {
 
     var q = Ꮡ(new T(x: 5));
     fmt.Println((uintptr)q != 0);
-    fmt.Println((~q).x);
+    fmt.Println(q.x);
 }
 
 } // end main_package

@@ -19,10 +19,10 @@ internal static partial nint run() {
     nint total = 0;
     var sʗ1 = s;
     onstack(() => {
-        var sΔ1 = Ꮡ(new span(largeType: (~sʗ1).largeType * 2, val: (~sʗ1).val + 1));
-        total += (~sΔ1).largeType + (~sΔ1).val;
+        var sΔ1 = Ꮡ(new span(largeType: sʗ1.largeType * 2, val: sʗ1.val + 1));
+        total += sΔ1.largeType + sΔ1.val;
     });
-    total += s.Value.val;
+    total += s.val;
     return total;
 }
 

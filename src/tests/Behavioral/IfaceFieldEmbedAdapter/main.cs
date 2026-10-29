@@ -55,7 +55,7 @@ internal static void Main() {
     conn c = new duplexжconn(d);
     c.Push(c.Pull());
     c.Push(c.Pull());
-    fmt.Println(c.Status(), (~@out).log);
+    fmt.Println(c.Status(), @out.log);
 }
 
 } // end main_package

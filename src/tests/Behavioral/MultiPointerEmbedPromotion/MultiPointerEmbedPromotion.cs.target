@@ -95,9 +95,9 @@ internal static void Main() {
     (n, err) = rwc.Write(buf.slice(0, n));
     fmt.Println("write:", n, err == nil);
 
-    fmt.Println("aliased:", (~r).pos, w.String());
+    fmt.Println("aliased:", r.pos, w.String());
 
-    fmt.Println("close:", rwc.Close() == nil, (~r).pos, (~w).flush);
+    fmt.Println("close:", rwc.Close() == nil, r.pos, w.flush);
 
     readWriter rw = d.Value;
     (n, _) = rw.Write(slice<byte>("!"u8));
@@ -109,11 +109,11 @@ internal static void Main() {
     var fbuf = new slice<byte>(3);
     (n, _) = rsw.Read(fbuf);
     var (n2, _) = rsw.WriteString(((sstring)(fbuf.slice(0, n))) + "def"u8);
-    fmt.Println("foreign:", n, n2, (~f).Builder.String());
+    fmt.Println("foreign:", n, n2, f.Builder.String());
 
     readStringWriter frsw = f.Value;
     var (n3, _) = frsw.WriteString("gh");
-    fmt.Println("foreign value form:", n3, (~f).Builder.String());
+    fmt.Println("foreign value form:", n3, f.Builder.String());
 }
 
 } // end main_package

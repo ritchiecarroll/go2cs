@@ -86,7 +86,7 @@ internal static void Main() {
     report("S2 func, one converted literal:", got, l - 1);
 
     e.Bare();
-    e.Value.n++;
+    e.n++;
     report("S3 method, no args, then a non-call:", got, line() - 2);
 
     nint r = e.Value((@string)"y"u8);

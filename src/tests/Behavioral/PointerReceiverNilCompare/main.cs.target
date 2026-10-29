@@ -54,7 +54,7 @@ internal static void Main() {
 
     var e = Ꮡ(new embedder());
     e.Value.val = 7;
-    e.Value.tag = 9;
+    e.tag = 9;
     fmt.Println(e.isNil(), e.checkGuard());
 
     ж<box> np = default;

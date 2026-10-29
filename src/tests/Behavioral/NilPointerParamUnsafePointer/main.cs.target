@@ -38,7 +38,7 @@ internal static partial ж<node> newNode(nint id, ж<node> parent) {
 
 internal static partial nint depth(ref node n) {
     nint d = 0;
-    for (var p = n.parent; p != nil; p = p.Value.parent) {
+    for (var p = n.parent; p != nil; p = p.parent) {
         d++;
     }
     return d;
@@ -66,9 +66,9 @@ internal static void Main() {
     var root = newNode(1, nil);
     var child = newNode(2, root);
     var grand = newNode(3, child);
-    fmt.Println("named-arg label:", (~root).id, (~child).id, (~grand).id);
+    fmt.Println("named-arg label:", root.id, child.id, grand.id);
     fmt.Println("depths         :", depth(ref (root).DerefOrNull()), depth(ref (child).DerefOrNull()), depth(ref (grand).DerefOrNull()));
-    fmt.Println("links          :", (~root).parent == nil, (~child).parent == root, (~grand).parent == child);
+    fmt.Println("links          :", root.parent == nil, child.parent == root, grand.parent == child);
 }
 
 } // end main_package

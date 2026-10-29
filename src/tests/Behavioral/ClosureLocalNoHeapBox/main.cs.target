@@ -35,7 +35,7 @@ internal static void n2() {
     run(() => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         var p = Ꮡc;
-        p.Value.n = 10;
+        p.n = 10;
         writeThrough(ref (p).DerefOrNull(), 5);
         fmt.Println("N2:", c.n);
     });

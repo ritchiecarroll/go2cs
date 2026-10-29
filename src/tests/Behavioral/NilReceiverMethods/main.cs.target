@@ -143,7 +143,7 @@ internal static void Main() {
 
     fmt.Println();
     fmt.Println("== 5. the receiver survives a write through the pointer ==");
-    real.Value.name = "renamed.txt";
+    real.name = "renamed.txt";
     fmt.Printf("  BoxName -> %s, ValName -> %s\n"u8, real.BoxName(), real.ValName());
 }
 

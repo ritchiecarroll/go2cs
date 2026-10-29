@@ -38,7 +38,7 @@ internal static void Main() {
     var (first, ok) = values[0]._<main_type>(ᐧ);
     fmt.Println("first assert:", ok, first.Len());
 
-    p.Value.n = 2;
+    p.n = 2;
     fmt.Println("old shell after write:", first.Len());
 
     (var again, ok) = values[0]._<main_type>(ᐧ);
@@ -47,7 +47,7 @@ internal static void Main() {
     (var other, ok) = values[1]._<main_type>(ᐧ);
     fmt.Println("other box:", ok, other.Len());
 
-    q.Value.n = 11;
+    q.n = 11;
     fmt.Println("other box after write:", other.Len(), "first box still:", again.Len());
 
     for (nint i = 2; i < len(values); i++) {
@@ -84,7 +84,7 @@ internal static void Main() {
 
     for (nint i = 0; i < 1000; i++) {
         if (i == 500) {
-            p.Value.n = 3;
+            p.n = 3;
         }
 
         foreach (var (_, aΔ1) in values) {

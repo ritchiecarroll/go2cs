@@ -80,12 +80,12 @@ internal static void Main() {
     fmt.Println("empty:", z == new empty());
 
     var pp = Ꮡ(new point());
-    pp.Value.y = 8;
+    pp.y = 8;
     fmt.Println("pointer:", pp.Value);
 
     var pg = Ꮡ(new grid());
-    pg.Value.cells[0] = 6;
-    fmt.Println("pointer grid:", (~pg).cells);
+    pg.cells[0] = 6;
+    fmt.Println("pointer grid:", pg.cells);
 
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
 

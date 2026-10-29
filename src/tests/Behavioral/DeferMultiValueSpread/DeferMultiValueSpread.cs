@@ -113,7 +113,7 @@ internal static void deferMethodSpread() {
         var s = Ꮡ(new sink(tag: "A"));
         var sʗ1 = s;
         defer(ᴛ1 => sʗ1.take(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
-        s.Value.tag = "B";
+        s.tag = "B";
         fmt.Println("deferMethodSpread: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

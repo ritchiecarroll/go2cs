@@ -16,7 +16,7 @@ internal static nint total(params ꓸꓸꓸжbox bsʗp) {
 
     nint sum = 0;
     foreach (var (_, b) in bs) {
-        sum += b.Value.v;
+        sum += b.v;
     }
     return sum;
 }
@@ -119,11 +119,11 @@ internal static void Main() {
     var boxes = new ж<box>[]{a, b, c, Ꮡ(new box(v: 4))}.slice();
     fmt.Println(total(boxes.ꓸꓸꓸ));
     replaceFirst(boxes.ꓸꓸꓸ);
-    fmt.Println((~boxes[0]).v);
+    fmt.Println(boxes[0].v);
     fmt.Println(countCap(a, b, c));
     fmt.Println(deferredLen(a, b));
     deferredReplaceFirst(boxes.ꓸꓸꓸ);
-    fmt.Println((~boxes[0]).v);
+    fmt.Println(boxes[0].v);
     fmt.Println(deferredNamedLen(a, b, c));
     fmt.Println(capturedLen(a, b, c));
     fmt.Println(appendedLen(a, b));

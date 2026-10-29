@@ -45,7 +45,7 @@ internal static void Main() {
     var pr = Ꮡ(rw.Clone());
     var raw = new byte[]{4, 5, 6}.array();
     var pc = Ꮡ(new row(raw.Clone()));
-    (p.Value, pp.Value.x, pa.Value[0], pr.Value[0], pc.Value[0]) = (43, 10, 100, 1, 40);
+    (p.Value, pp.x, pa.Value[0], pr.Value[0], pc.Value[0]) = (43, 10, 100, 1, 40);
     fmt.Println(p.Value, f.Value, s.Value, q.Value, r.Value);
     fmt.Println(pt, pp.Value, arr, pa.Value, rw, pr.Value, raw, pc.Value);
     fmt.Println((~cfg).name, (~cfg).n, limit.Value, boxed(21).Value, new holder(p: Ꮡ((@string)("field"u8))).p.Value);

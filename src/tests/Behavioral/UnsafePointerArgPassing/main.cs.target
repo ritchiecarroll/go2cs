@@ -32,7 +32,7 @@ internal static void Main() {
     var c = Ꮡ(new counter());
     c.add(3);
     c.add(4);
-    fmt.Println((~c).n);
+    fmt.Println(c.n);
 }
 
 } // end main_package

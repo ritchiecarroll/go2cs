@@ -97,7 +97,7 @@ internal static void Main() {
 
     fmt.Println(recv.PtrShadowCall(other));
     fmt.Println(recv.PtrShadowChain(other));
-    fmt.Println((~other).inner.n);
+    fmt.Println(other.inner.n);
     fmt.Println(recv.ValShadowField());
     fmt.Println(recv.SliceShadowIndex());
 

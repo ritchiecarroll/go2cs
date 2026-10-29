@@ -51,7 +51,7 @@ internal static (nint, nint) readOnlyParam(Rect rʗp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
 
     var p = Ꮡr;
-    return ((~p).Min, (~p).Max);
+    return (p.Min, p.Max);
 }
 
 internal static Rect clipLocal() {
@@ -94,7 +94,7 @@ public static (nint, nint) ReadOnlyRecv(this Box bʗp) {
     ref var b = ref heap(bʗp, out var Ꮡb);
 
     var p = Ꮡb;
-    return ((~p).R.Min, (~p).Tag);
+    return (p.R.Min, p.Tag);
 }
 
 public static nint BumpedPtrRecv(this ж<Box> Ꮡb) {
@@ -157,7 +157,7 @@ internal static void Main() {
     fmt.Println("recv plain  :", rb.PlainRecv());
 
     var rq = Ꮡ(new Box(new Rect(0, 16), 6));
-    fmt.Println("recv via ptr:", (~rq).BumpedRecv(), "caller:", (~rq).Tag);
+    fmt.Println("recv via ptr:", (~rq).BumpedRecv(), "caller:", rq.Tag);
 
     Bumper iface = new Box(new Rect(0, 16), 6);
     fmt.Println("recv iface  :", iface.BumpedRecv());

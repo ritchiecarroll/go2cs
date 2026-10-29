@@ -39,7 +39,7 @@ internal static void Main() {
     var pq = new ж<pair>[]{Ꮡ(new pair("q1"u8, (@string)"q2"u8))}.slice();
     var sp = new array<any>(3){[1] = (@string)"sp"u8};
 
-    describe("keyed", (~n).inner);
+    describe("keyed", n.inner);
     fmt.Println("label:", p.label);
     describe("positional", p.value);
     describe("mapval", m["k"]);
@@ -56,9 +56,9 @@ internal static void Main() {
     describe("elided", el[0].inner);
     fmt.Println("elidedpos label:", ep[0].label);
     describe("elidedpos", ep[0].value);
-    describe("ptrelided", (~pp[0]).inner);
-    fmt.Println("ptrelidedpos label:", (~pq[0]).label);
-    describe("ptrelidedpos", (~pq[0]).value);
+    describe("ptrelided", pp[0].inner);
+    fmt.Println("ptrelidedpos label:", pq[0].label);
+    describe("ptrelidedpos", pq[0].value);
     describe("sparse0", sp[0]);
     describe("sparse1", sp[1]);
 }

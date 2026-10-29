@@ -28,12 +28,12 @@ internal static void Main() {
         var more = new byte[]{9, 8}.slice();
         c.add(more.ꓸꓸꓸ);
     });
-    fmt.Println((~s).buf);
+    fmt.Println(s.buf);
 
     var t = Ꮡ(new sink());
     t.add(7);
     t.add((byte)'A', (byte)'B');
-    fmt.Println((~t).buf);
+    fmt.Println(t.buf);
 }
 
 } // end main_package

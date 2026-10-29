@@ -88,7 +88,7 @@ internal static void viaPointer(ж<path> Ꮡp) {
 internal static void Main() {
     var s = Ꮡ(new state(cur: new path("orig")));
     s.fieldOfPointer(1);
-    s.Value.cur = new path("orig");
+    s.cur = new path("orig");
     (~s).fieldOfValue(2);
     s.nullary();
     local(3);

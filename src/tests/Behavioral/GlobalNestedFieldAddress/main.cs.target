@@ -25,7 +25,7 @@ internal static void mutate() {
     var p = Ꮡg.of(outer.Ꮡmid).of(inner.Ꮡa);
     p.Value = 42;
     var q = Ꮡg.of(outer.Ꮡmid);
-    q.Value.b = 7;
+    q.b = 7;
 }
 
 internal static void Main() {

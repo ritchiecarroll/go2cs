@@ -12,7 +12,7 @@ public partial struct options {
 
 internal static Action<ж<options>> withLevel(nint n) {
     return (ж<options> o) => {
-        o.Value.level = n;
+        o.level = n;
     };
 }
 
@@ -23,7 +23,7 @@ internal static nint apply(params Span<Action<ж<options>>> optsʗp) {
     foreach (var (_, opt) in opts) {
         opt(o);
     }
-    return (~o).level;
+    return o.level;
 }
 
 internal static void Main() {

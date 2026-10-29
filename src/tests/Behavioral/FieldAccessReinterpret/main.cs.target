@@ -6,7 +6,6 @@ using runtime = runtime_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 
-[GoFieldAccess(typeof(record), typeof(syscall.RawSockaddrInet4), typeof(reparse))]
 partial class main_package {
 
 partial struct tail {

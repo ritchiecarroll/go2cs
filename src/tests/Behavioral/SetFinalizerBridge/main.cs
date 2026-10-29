@@ -20,7 +20,7 @@ internal static @string registered() {
         runtime.SetFinalizer(p.OrTypedNil(), (ж<payload> _Δp0) => {
             close(doneʗ2);
         });
-        _ = p.Value.n;
+        _ = p.n;
     })();
 
     for (nint i = 0; i < 400; i++) {
@@ -49,7 +49,7 @@ internal static @string cleared() {
             close(doneʗ2);
         });
         runtime.SetFinalizer(p.OrTypedNil(), default);
-        _ = p.Value.n;
+        _ = p.n;
     })();
 
     for (nint i = 0; i < 40; i++) {

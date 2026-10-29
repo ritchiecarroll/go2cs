@@ -35,10 +35,10 @@ internal static (nint, nint) allocShape() {
     run(() => {
         Ꮡc.ValueSlot = alloc();
         Ꮡc.ValueSlot.of(cachelike.Ꮡflush).bump(41);
-        Ꮡc.ValueSlot.Value.pad = 7;
+        Ꮡc.ValueSlot.pad = 7;
     });
     c.of(cachelike.Ꮡflush).bump(1);
-    return (c.of(cachelike.Ꮡflush).get(), (~c).pad);
+    return (c.of(cachelike.Ꮡflush).get(), c.pad);
 }
 
 partial struct gauge {

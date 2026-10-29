@@ -48,8 +48,8 @@ internal static void Main() {
     var o = Ꮡ(new owner(h: Ꮡ(new holder()), deep: Ꮡ(new holder())));
     bump(o, 5);
     bump(o, 5);
-    fmt.Println((~o).h.of(holder.Ꮡwait).get());
-    fmt.Println((~o).deep.of(holder.Ꮡprof).of(profile.Ꮡwait).get());
+    fmt.Println(o.h.of(holder.Ꮡwait).get());
+    fmt.Println(o.deep.of(holder.Ꮡprof).of(profile.Ꮡwait).get());
 
     var o2 = Ꮡ(new owner(h: Ꮡ(new holder())));
     fmt.Println(viaPointerLocal(ref (o2).DerefOrNull(), 4));

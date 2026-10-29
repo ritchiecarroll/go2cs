@@ -76,7 +76,7 @@ internal static void Main() {
 
     var l = Ꮡ(new ledger());
     l.Value.tag = "x";
-    fmt.Println(l.describe(), l.describe(), (~l).seq);
+    fmt.Println(l.describe(), l.describe(), l.seq);
 }
 
 } // end main_package

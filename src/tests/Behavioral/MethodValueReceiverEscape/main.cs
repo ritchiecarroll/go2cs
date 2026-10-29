@@ -90,7 +90,7 @@ internal static nint valueReceiverCopies() {
 internal static nint pointerBaseNoPromotion() {
     var c = Ꮡ(new counter(n: 20));
     applyInt(c.dec, 1, 1);
-    return (~c).n;
+    return c.n;
 }
 
 internal static nint directCallStaysUnboxed() {

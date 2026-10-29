@@ -25,7 +25,7 @@ internal static void child() {
 
 internal static void parent() {
     var cmd = exec.Command(Δos.Args[0]);
-    cmd.Value.Env = append(Δos.Environ(), "EOF_BARRIER_CHILD=1"u8);
+    cmd.Env = append(Δos.Environ(), "EOF_BARRIER_CHILD=1"u8);
     var (stdin, err) = cmd.StdinPipe();
     if (err != nil) {
         fmt.Println("StdinPipe error:", err);

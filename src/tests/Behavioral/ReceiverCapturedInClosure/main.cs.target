@@ -78,7 +78,7 @@ internal static void Main() {
     var add = c.makeAdder();
     add(10);
     add(2);
-    fmt.Println((~c).n);
+    fmt.Println(c.n);
 
     var w = Ꮡ(new widget(id: 42));
     fmt.Println(w.viaFieldMethodValue());

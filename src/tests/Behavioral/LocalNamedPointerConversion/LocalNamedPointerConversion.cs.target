@@ -33,7 +33,7 @@ internal static void inClosure() {
         var ps = Ꮡ(new inClosure_s(2));
         var dps = new inClosure_sPtr(ps);
         (dps.Value).i = 3;
-        fmt.Println("in closure:", (~ps).i);
+        fmt.Println("in closure:", ps.i);
     }
 
     run();

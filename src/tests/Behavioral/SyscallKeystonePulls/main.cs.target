@@ -30,20 +30,20 @@ internal static void Main() {
     (var u, err) = user.Current();
     fmt.Println("user.Current: error:", err != nil);
     if (err == nil) {
-        fmt.Println("user.Current: uid set:", (~u).Uid != ""u8, "gid set:", (~u).Gid != ""u8,
-            "username set:", (~u).Username != ""u8);
+        fmt.Println("user.Current: uid set:", u.Uid != ""u8, "gid set:", u.Gid != ""u8,
+            "username set:", u.Username != ""u8);
 
-        var (byName, e) = user.Lookup((~u).Username);
+        var (byName, e) = user.Lookup(u.Username);
         fmt.Println("user.Lookup(username): error:", e != nil,
-            "uid round-trips:", e == nil && (~byName).Uid == (~u).Uid);
+            "uid round-trips:", e == nil && byName.Uid == u.Uid);
 
-        (var g, e) = user.LookupGroupId((~u).Gid);
+        (var g, e) = user.LookupGroupId(u.Gid);
         fmt.Println("user.LookupGroupId(gid): error:", e != nil,
-            "name set:", e == nil && (~g).Name != ""u8);
+            "name set:", e == nil && g.Name != ""u8);
         if (e == nil) {
-            var (byGroup, e2) = user.LookupGroup((~g).Name);
+            var (byGroup, e2) = user.LookupGroup(g.Name);
             fmt.Println("user.LookupGroup(name): error:", e2 != nil,
-                "gid round-trips:", e2 == nil && (~byGroup).Gid == (~g).Gid);
+                "gid round-trips:", e2 == nil && byGroup.Gid == g.Gid);
         }
     }
 

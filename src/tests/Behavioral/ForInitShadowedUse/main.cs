@@ -14,11 +14,11 @@ internal static nint start(this ref counter c) {
 
 internal static nint shadowedForInit() {
     var b = Ꮡ(new counter(n: 100));
-    nint total = b.Value.n;
+    nint total = b.n;
     {
         var bΔ1 = Ꮡ(new counter(n: 5));
         for ((nint i, nint x) = (0, bΔ1.start()); i < 3; i++) {
-            total += x + (~bΔ1).n + i;
+            total += x + bΔ1.n + i;
         }
     }
     return total;

@@ -30,7 +30,7 @@ public static ж<Setting> New(@string tag) {
 internal static void Main() {
     var s = New("debug");
 
-    fmt.Println((~s).setting == nil);
+    fmt.Println(s.setting == nil);
 
     var sʗ1 = s;
     func(() => {
@@ -46,19 +46,19 @@ internal static void Main() {
     })();
 
     ж<setting> p = default;
-    s.Value.setting = p;
-    fmt.Println((~s).setting == nil);
+    s.setting = p;
+    fmt.Println(s.setting == nil);
 
-    s.Value.setting = lookup("gcpacertrace");
-    fmt.Println((~s).setting == nil);
+    s.setting = lookup("gcpacertrace");
+    fmt.Println(s.setting == nil);
     fmt.Println((~s).name, s.bump(), s.bump());
 
     var direct = lookup("other");
-    s.Value.setting = direct;
+    s.setting = direct;
     s.Value.count = 10;
-    nint before = direct.Value.count;
+    nint before = direct.count;
     nint after = s.bump();
-    fmt.Println(before, after, (~direct).count);
+    fmt.Println(before, after, direct.count);
 }
 
 } // end main_package

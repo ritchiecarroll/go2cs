@@ -30,9 +30,9 @@ internal static void Main() {
         Δos.Exit(1);
     }
     var cmd = exec.Command(exe);
-    cmd.Value.Path = exe;
-    cmd.Value.Args = new @string[]{token, "-marker", "x"}.slice();
-    cmd.Value.Env = append(Δos.Environ(), "ARGV0_DEPTH="u8 + strconv.Itoa(depth + 1));
+    cmd.Path = exe;
+    cmd.Args = new @string[]{token, "-marker", "x"}.slice();
+    cmd.Env = append(Δos.Environ(), "ARGV0_DEPTH="u8 + strconv.Itoa(depth + 1));
     (var @out, err) = cmd.CombinedOutput();
     fmt.Print((@string)@out);
     if (depth == 0) {

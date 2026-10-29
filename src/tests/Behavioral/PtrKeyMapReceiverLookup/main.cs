@@ -60,13 +60,13 @@ internal static void Main() {
     fmt.Println(a.status(t), b.status(t));
 
     a.rename(t, "busy");
-    fmt.Println(a.label(t), len((~t).m));
+    fmt.Println(a.label(t), len(t.m));
 
     b.rename(t, "new");
-    fmt.Println(b.label(t), a.label(t), len((~t).m));
+    fmt.Println(b.label(t), a.label(t), len(t.m));
 
     a.close(t);
-    fmt.Println(len((~t).m), a.status(t), b.status(t));
+    fmt.Println(len(t.m), a.status(t), b.status(t));
 }
 
 } // end main_package

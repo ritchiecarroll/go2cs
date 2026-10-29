@@ -178,7 +178,7 @@ internal static void Main() {
 
     var tl = Ꮡ(new tally());
     var (n, err) = tl.fill(new byteRepeatжReader(Ꮡ(new byteRepeat(left: 10))));
-    fmt.Println(n, err == nil, (~tl).total);
+    fmt.Println(n, err == nil, tl.total);
 
     var fr = new frame(data: new quad(new byte[]{1, 2, 3, 4}.array()));
     fmt.Println(checksum(ref fr));

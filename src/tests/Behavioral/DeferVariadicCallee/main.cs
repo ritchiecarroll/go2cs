@@ -73,7 +73,7 @@ internal static partial void Main() {
     foreach (var (_, s) in order) {
         fmt.Println(s);
     }
-    fmt.Println("counter:", (~c).n);
+    fmt.Println("counter:", c.n);
 
     goǃ(() => signalDone(), GoStack.Bounded);
     ᐸꟷ(defaultDone);

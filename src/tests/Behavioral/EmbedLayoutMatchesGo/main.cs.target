@@ -32,7 +32,7 @@ internal static void Main() {
     var buf = new slice<byte>(16);
 
     var o = Ꮡ(buf, 0).Reinterpret<byte, ordered>();
-    (o.Value.a, o.Value.b, o.Value.c) = (1, 2, 3);
+    (o.Value.a, o.Value.b, o.c) = (1, 2, 3);
     fmt.Println("ordered fields:", buf[..12]);
 
     o.Value = new ordered(new pair(4, 5), 6);
@@ -54,7 +54,7 @@ internal static void Main() {
 
     var p = new ptrEmbed(Ꮡ(new pair(9, 10)), 11);
     var q = p.pair;
-    q.Value.a = 12;
+    q.a = 12;
     fmt.Println("ptrEmbed:      ", p.a, p.b, p.d, p.pair == q);
 }
 

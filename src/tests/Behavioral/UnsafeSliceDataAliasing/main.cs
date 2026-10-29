@@ -44,14 +44,14 @@ internal static void Main() {
     fmt.Println("identity:", @unsafe.SliceData(items) == Ꮡ(items, 0));
     var tail = items[1..];
     fmt.Println("tail identity:", @unsafe.SliceData(tail) == Ꮡ(items, 1));
-    fmt.Println("tail head:", (~@unsafe.SliceData(tail)).key);
+    fmt.Println("tail head:", @unsafe.SliceData(tail).key);
 
     var nums = new int64[]{10, 20, 30}.slice();
     fmt.Println("int64 head:", @unsafe.SliceData(nums).Value);
     fmt.Println("int64 tail head:", @unsafe.SliceData(nums[2..]).Value);
 
     var ptrs = new ж<item>[]{Ꮡ(items, 0), Ꮡ(items, 2)}.slice();
-    fmt.Println("ptr elem:", (~@unsafe.Slice(@unsafe.SliceData(ptrs), len(ptrs))[1]).key);
+    fmt.Println("ptr elem:", @unsafe.Slice(@unsafe.SliceData(ptrs), len(ptrs))[1].key);
 
     var b = slice<byte>("hello"u8);
     fmt.Println("bytes:", (@string)@unsafe.Slice(@unsafe.SliceData(b), len(b)));

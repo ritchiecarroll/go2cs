@@ -70,9 +70,9 @@ internal static void deferArgCapture(ж<box> @out) {
         var pf = @out;
         var pfʗ1 = pf;
         defer(run, () => {
-            pfʗ1.Value.x = 77;
+            pfʗ1.x = 77;
         }, ref ᒐ);
-        pf.Value.x = 5;
+        pf.x = 5;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -133,14 +133,14 @@ internal static void Main() {
     var pe = Ꮡe;
     var peʗ1 = pe;
     run(() => {
-        peʗ1.Value.x = 11;
-        peʗ1.Value.y = (~peʗ1).x + 1;
+        peʗ1.x = 11;
+        peʗ1.y = peʗ1.x + 1;
     });
     fmt.Println("5:", e.x, e.y);
 
     gPtr = Ꮡe;
     run(() => {
-        gPtr.Value.x = gVal.x;
+        gPtr.x = gVal.x;
     });
     fmt.Println("6:", e.x);
 

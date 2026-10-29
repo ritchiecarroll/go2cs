@@ -50,7 +50,7 @@ internal static void Main() {
         fmt.Println("parse certificate error:", err);
         return;
     }
-    fmt.Println("parsed cn:", (~cert).Subject.CommonName);
+    fmt.Println("parsed cn:", cert.Subject.CommonName);
 
     (var chains, err) = cert.Verify(new x509.VerifyOptions());
     fmt.Println("verify chains:", len(chains));
@@ -92,37 +92,37 @@ internal static void walkChain(slice<byte> der) {
         defer(syscall.CertFreeCertificateContext, storeCtx, ref ᒐ);
 
         fmt.Println("store context non-nil:", storeCtx != nil);
-        fmt.Println("store handle round-trips:", (~storeCtx).Store == store);
-        fmt.Println("store context der length:", (nint)(~storeCtx).Length == len(der));
+        fmt.Println("store handle round-trips:", storeCtx.Store == store);
+        fmt.Println("store context der length:", (nint)storeCtx.Length == len(der));
 
         var serverAuth = slice<byte>("1.3.6.1.5.5.7.3.1\x00"u8);
         var oids = new ж<byte>[]{Ꮡ(serverAuth, 0)}.slice();
 
         var para = @new<syscall.CertChainPara>();
-        para.Value.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)80;
-        para.Value.RequestedUsage.Type = syscall.USAGE_MATCH_TYPE_OR;
-        para.Value.RequestedUsage.Usage.Length = (uint32)len(oids);
-        para.Value.RequestedUsage.Usage.UsageIdentifiers = Ꮡ(oids, 0);
+        para.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)80;
+        para.RequestedUsage.Type = syscall.USAGE_MATCH_TYPE_OR;
+        para.RequestedUsage.Usage.Length = (uint32)len(oids);
+        para.RequestedUsage.Usage.UsageIdentifiers = Ꮡ(oids, 0);
 
         ref var chainCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑchainCtx);
         {
-            var errΔ2 = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, nil, (~storeCtx).Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != nil) {
+            var errΔ2 = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, nil, storeCtx.Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != nil) {
                 fmt.Println("get chain error:", errΔ2);
                 return;
             }
         }
         defer(syscall.CertFreeCertificateChain, chainCtx, ref ᒐ);
 
-        fmt.Println("chain count:", (~chainCtx).ChainCount);
-        fmt.Println("chain reports untrusted root:", ((~chainCtx).TrustStatus.ErrorStatus & (uint32)syscall.CERT_TRUST_IS_UNTRUSTED_ROOT) != 0);
+        fmt.Println("chain count:", chainCtx.ChainCount);
+        fmt.Println("chain reports untrusted root:", (chainCtx.TrustStatus.ErrorStatus & (uint32)syscall.CERT_TRUST_IS_UNTRUSTED_ROOT) != 0);
 
-        var simpleChains = @unsafe.Slice((~chainCtx).Chains, (~chainCtx).ChainCount);
-        var last = simpleChains[(~chainCtx).ChainCount - 1];
-        fmt.Println("simple chain elements:", (~last).NumElements);
+        var simpleChains = @unsafe.Slice(chainCtx.Chains, chainCtx.ChainCount);
+        var last = simpleChains[chainCtx.ChainCount - 1];
+        fmt.Println("simple chain elements:", last.NumElements);
 
-        var elements = @unsafe.Slice((~last).Elements, (~last).NumElements);
-        var leaf = elements[0].Value.CertContext;
-        var encoded = @unsafe.Slice((~leaf).EncodedCert, (~leaf).Length);
+        var elements = @unsafe.Slice(last.Elements, last.NumElements);
+        var leaf = elements[0].CertContext;
+        var encoded = @unsafe.Slice(leaf.EncodedCert, leaf.Length);
         fmt.Println("leaf der round-trips:", bytes.Equal(encoded, der));
 
         checkSSLPolicy(chainCtx);
@@ -149,13 +149,13 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> chainCtx, @s
         AuthType: syscall.AUTHTYPE_SERVER,
         ServerName: servernamep
     ));
-    sslPara.Value.Size = (uint32)/* unsafe.Sizeof(*sslPara) */ (uintptr)24;
+    sslPara.Size = (uint32)/* unsafe.Sizeof(*sslPara) */ (uintptr)24;
 
     var para = Ꮡ(new syscall.CertChainPolicyPara(
         Flags: flags,
         ExtraPolicyPara: ((syscall.Pointer)ManagedPointerTokens.MintOpaque(sslPara))
     ));
-    para.Value.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)16;
+    para.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)16;
 
     ref var status = ref heap<syscall.CertChainPolicyStatus>(out var Ꮡstatus);
     status = new syscall.CertChainPolicyStatus();

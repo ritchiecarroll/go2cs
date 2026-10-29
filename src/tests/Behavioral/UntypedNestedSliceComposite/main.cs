@@ -56,7 +56,7 @@ internal static void Main() {
     fmt.Println(len(order[rA]), len(order[rB]), len(order[rC]));
     fmt.Println(order[rC][0], order[rC][1]);
     fmt.Println(grid[0][1], grid[1][0]);
-    fmt.Println((~dbgvars[0]).name, (~dbgvars[1]).value.Value, len(dbgvars));
+    fmt.Println(dbgvars[0].name, dbgvars[1].value.Value, len(dbgvars));
     fmt.Println(jsTable[j0][j1], jsTable[j0][j2], jsTable[j0][j3]);
     fmt.Println(jsTable[j2][j0], jsTable[j2][j3]);
     fmt.Println(sparseRows[0][0], sparseRows[0][2], len(sparseRows[0]));

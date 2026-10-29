@@ -19,7 +19,7 @@ internal static void toAnonymous() {
     var q = e.Reinterpret<Employee, toAnonymous_q>();
 
     q.Value.Age = 14;
-    fmt.Println("to anonymous, write through converted:", (~e).Age);
+    fmt.Println("to anonymous, write through converted:", e.Age);
 }
 
 internal partial struct tagsOnly_t /*dyn*/ {

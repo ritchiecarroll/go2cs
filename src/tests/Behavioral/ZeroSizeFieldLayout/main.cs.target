@@ -39,9 +39,9 @@ internal static void Main() {
     ref var raw = ref heap(new int32(), out var Ꮡraw);
     raw = 7;
     var view = Ꮡraw.Reinterpret<int32, Counter>();
-    fmt.Println("view reads:", (~view).v);
+    fmt.Println("view reads:", view.v);
 
-    view.Value.v = 42;
+    view.v = 42;
     fmt.Println("write through view reaches the original:", raw);
 
     var c = new Counter(v: 3);

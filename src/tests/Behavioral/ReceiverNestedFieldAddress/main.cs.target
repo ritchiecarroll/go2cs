@@ -67,22 +67,22 @@ internal static void Main() {
 
     o.bumpA();
     o.bumpA();
-    fmt.Println("one hop:", (~o).@in.a);
+    fmt.Println("one hop:", o.@in.a);
 
     o.bumpSelected(0);
     o.bumpSelected(1);
-    fmt.Println("selected:", (~o).@in.a, (~o).@in.b);
+    fmt.Println("selected:", o.@in.a, o.@in.b);
 
     o.bumpViaPtr();
-    fmt.Println("through pointer hop:", (~(~o).ptr).b, "value field untouched:", (~o).@in.b);
+    fmt.Println("through pointer hop:", o.ptr.b, "value field untouched:", o.@in.b);
 
     var d = Ꮡ(new deep());
     d.bumpLeaf();
     d.bumpLeaf();
-    fmt.Println("two hops:", (~d).md.lf.n);
+    fmt.Println("two hops:", d.md.lf.n);
 
     fmt.Println("read back:", o.readA());
-    fmt.Println("name intact:", (~o).name);
+    fmt.Println("name intact:", o.name);
 }
 
 } // end main_package

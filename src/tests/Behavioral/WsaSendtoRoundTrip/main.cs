@@ -72,8 +72,8 @@ internal static void roundTrip() {
             fmt.Println("roundtrip: peer address is not UDP");
             return;
         }
-        fmt.Println("roundtrip: peer host matches sender's own:", sameIPv4((~peer).IP, (~mine).Addr));
-        fmt.Println("roundtrip: peer port matches sender's own:", (~peer).Port == (~mine).Port);
+        fmt.Println("roundtrip: peer host matches sender's own:", sameIPv4(peer.IP, mine.Addr));
+        fmt.Println("roundtrip: peer port matches sender's own:", peer.Port == mine.Port);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -152,12 +152,12 @@ internal static (ж<syscall.SockaddrInet4>, bool) sockaddrOf(netꓸAddr addr) {
     if (!ok) {
         return (default, false);
     }
-    var ip = (~ua).IP.To4();
+    var ip = ua.IP.To4();
     if (ip == nil) {
         return (default, false);
     }
-    var sa = Ꮡ(new syscall.SockaddrInet4(Port: (~ua).Port));
-    copy((~sa).Addr[..], ip);
+    var sa = Ꮡ(new syscall.SockaddrInet4(Port: ua.Port));
+    copy(sa.Addr[..], ip);
     return (sa, true);
 }
 

@@ -61,7 +61,7 @@ internal static void Main() {
     greetBumper gb = new mixedжgreetBumper(m);
     fmt.Println(gb.Greet(), gb.Bump(), gb.Bump());
 
-    fmt.Println((~c).n);
+    fmt.Println(c.n);
 
     var o = Ꮡ(new outer(new holder(new hello("deep"), "t"), 7));
 

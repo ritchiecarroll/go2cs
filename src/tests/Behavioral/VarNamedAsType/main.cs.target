@@ -21,7 +21,7 @@ internal static void Main() {
     py.Value = 88;
 
     fmt.Println(v.x, v.y);
-    fmt.Println((~node).x, (~node).y);
+    fmt.Println(node.x, node.y);
 }
 
 } // end main_package

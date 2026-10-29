@@ -91,7 +91,7 @@ internal static void Main() {
     var q3 = q1;
     fmt.Println(reflect.DeepEqual(q1.OrTypedNil(), q2.OrTypedNil()));
     fmt.Println(reflect.DeepEqual(q1.OrTypedNil(), q3.OrTypedNil()));
-    q2.Value.y = 9;
+    q2.y = 9;
     fmt.Println(reflect.DeepEqual(q1.OrTypedNil(), q2.OrTypedNil()));
     ж<point> np1 = default;
     ж<point> np2 = default;
@@ -99,12 +99,12 @@ internal static void Main() {
     fmt.Println(reflect.DeepEqual(np1.OrTypedNil(), q1.OrTypedNil()));
 
     var a = Ꮡ(new node(val: 1));
-    a.Value.next = a;
+    a.next = a;
     var b = Ꮡ(new node(val: 1));
-    b.Value.next = b;
+    b.next = b;
     fmt.Println(reflect.DeepEqual(a.OrTypedNil(), b.OrTypedNil()));
     var c = Ꮡ(new node(val: 2));
-    c.Value.next = c;
+    c.next = c;
     fmt.Println(reflect.DeepEqual(a.OrTypedNil(), c.OrTypedNil()));
 
     fmt.Println(reflect.DeepEqual(new nint[]{1}.slice(), new @string[]{"1"}.slice()));

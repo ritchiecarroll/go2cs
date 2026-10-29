@@ -60,7 +60,7 @@ internal static nint raise(ref nint n) {
 internal static (nint, nint) throughPointer() {
     var c = Ꮡ(new counter());
     var ᴛ6 = c.bump();
-    return ((~c).n, ᴛ6);
+    return (c.n, ᴛ6);
 }
 
 internal static (ж<counter>, nint) pointerIdentity() {
@@ -133,7 +133,7 @@ internal static void Main() {
     fmt.Println("throughPointer:", r, s);
 
     var (pc, pb) = pointerIdentity();
-    fmt.Println("pointerIdentity:", (~pc).n, pb);
+    fmt.Println("pointerIdentity:", pc.n, pb);
 
     var (ua, ub) = unrelatedOperand();
     fmt.Println("unrelatedOperand:", ua, ub);
@@ -153,7 +153,7 @@ internal static void Main() {
     fmt.Println("forwardPointer:", describe(v), ferr);
 
     var (tp, ok) = v._<ж<thing>>(ᐧ);
-    fmt.Println("assert *thing:", ok, (~tp).name);
+    fmt.Println("assert *thing:", ok, tp.name);
 
     var (_, notValue) = v._<thing>(ᐧ);
     fmt.Println("assert thing:", notValue);
@@ -170,7 +170,7 @@ internal static (nint, nint) pointerFieldUnrelated(ref node nd) {
 
 internal static (nint, nint) pointerFieldSame(ref node nd) {
     var ᴛ7 = nd.pat.bump();
-    return ((~nd.pat).n, ᴛ7);
+    return (nd.pat.n, ᴛ7);
 }
 
 } // end main_package

@@ -59,7 +59,7 @@ internal static nint visitLocal(slice<ж<node>> nodes) {
             continue;
         }
         visited[t] = true;
-        sum += t.Value.val;
+        sum += t.val;
     }
     return sum;
 }
@@ -77,19 +77,19 @@ internal static void Main() {
     var a = Ꮡ(new node(val: 1));
     var b = Ꮡ(new node(val: 2));
     var c = Ꮡ(new node(val: 3));
-    a.Value.next = b;
-    b.Value.next = c;
-    c.Value.next = a;
+    a.next = b;
+    b.next = c;
+    c.next = a;
 
     fmt.Println(sumWalk(a, 6));
-    fmt.Println((~firstAfter(a, 4)).val);
+    fmt.Println(firstAfter(a, 4).val);
 
     var seen = new map<ж<node>, bool>{};
     fmt.Println(markSeen(a, seen), markSeen(a, seen), markSeen(b, seen));
 
     var x = Ꮡ(new node(val: 100));
     var y = Ꮡ(new node(val: 20));
-    x.Value.next = y;
+    x.next = y;
     fmt.Println("chain:", walkChain(x));
 
     var dup = Ꮡ(new node(val: 5));
@@ -98,8 +98,8 @@ internal static void Main() {
     slice<ж<node>> list = default;
     list = collect(list, a);
     list = collect(list, b);
-    a.Value.val = 11;
-    fmt.Println("collect:", (~list[0]).val, (~list[1]).val);
+    a.val = 11;
+    fmt.Println("collect:", list[0].val, list[1].val);
 }
 
 } // end main_package

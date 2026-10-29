@@ -29,7 +29,7 @@ internal static void Main() {
     any p = Ꮡ(new point(1, 2));
     {
         var (pt, okΔ2) = p._<ж<point>>(ᐧ); if (okΔ2) {
-            fmt.Println("pointer:", (~pt).x + (~pt).y);
+            fmt.Println("pointer:", pt.x + pt.y);
         }
     }
 }

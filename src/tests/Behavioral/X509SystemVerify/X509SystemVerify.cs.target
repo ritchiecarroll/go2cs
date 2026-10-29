@@ -51,12 +51,12 @@ internal static void Main() {
 
     var (leafBlock, _) = pem.Decode(slice<byte>(googleLeaf));
     var (interBlock, _) = pem.Decode(slice<byte>(gtsIntermediate));
-    (var leaf, err) = x509.ParseCertificate((~leafBlock).Bytes);
+    (var leaf, err) = x509.ParseCertificate(leafBlock.Bytes);
     if (err != nil) {
         fmt.Println("parse error:", err);
         return;
     }
-    (var inter, err) = x509.ParseCertificate((~interBlock).Bytes);
+    (var inter, err) = x509.ParseCertificate(interBlock.Bytes);
     if (err != nil) {
         fmt.Println("parse error:", err);
         return;
@@ -75,7 +75,7 @@ internal static void Main() {
     foreach (var (_, chain) in chains) {
         slice<@string> names = default;
         foreach (var (_, c) in chain) {
-            names = append(namesᴷ, names, (~c).Subject.CommonName);
+            names = append(namesᴷ, names, c.Subject.CommonName);
         }
         fmt.Println("public chain:", strings.Join(names, " -> "));
     }

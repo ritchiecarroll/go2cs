@@ -50,12 +50,12 @@ internal static void Main() {
 
     var pʗ2 = p;
     @catch("field-read", () => {
-        fmt.Println((~pʗ2).name);
+        fmt.Println(pʗ2.name);
     });
 
     var pʗ3 = p;
     @catch("field-write", () => {
-        pʗ3.Value.name = "x";
+        pʗ3.name = "x";
     });
 
     var pʗ4 = p;
@@ -66,35 +66,35 @@ internal static void Main() {
     ref var b = ref heap(new box(), out var Ꮡb);
     var bʗ1 = b;
     @catch("nested-field", () => {
-        fmt.Println((~bʗ1.p).name);
+        fmt.Println(bʗ1.p.name);
     });
 
     var nodes = new slice<ж<node>>(2);
     var nodesʗ1 = nodes;
     @catch("slice-element", () => {
-        fmt.Println((~nodesʗ1[0]).name);
+        fmt.Println(nodesʗ1[0].name);
     });
 
     var m = new map<@string, ж<node>>{};
     var mʗ1 = m;
     @catch("map-value", () => {
-        fmt.Println((~mʗ1["absent"]).name);
+        fmt.Println(mʗ1["absent"].name);
     });
 
     var real = Ꮡ(new node(name: "head"));
     var realʗ1 = real;
     @catch("chain-walk", () => {
-        fmt.Println((~(~realʗ1).next).name);
+        fmt.Println(realʗ1.next.name);
     });
 
     var q = (ж<node>)nil;
     var qʗ1 = q;
     @catch("typed-nil-field-read", () => {
-        fmt.Println((~qʗ1).name);
+        fmt.Println(qʗ1.name);
     });
     var qʗ2 = q;
     @catch("typed-nil-field-write", () => {
-        qʗ2.Value.name = "x";
+        qʗ2.name = "x";
     });
 
     var pʗ5 = p;

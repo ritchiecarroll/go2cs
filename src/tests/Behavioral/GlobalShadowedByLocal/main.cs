@@ -92,7 +92,7 @@ internal static partial ж<qbox> newQbox(nint n) {
 
 internal static partial nint constVarInitShadow() {
     var mlkemQ = newQbox(main_package.mlkemQ);
-    return (~mlkemQ).v;
+    return mlkemQ.v;
 }
 
 internal static partial nint constUnshadowedElsewhere() {

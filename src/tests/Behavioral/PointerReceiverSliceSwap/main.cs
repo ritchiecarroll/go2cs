@@ -81,7 +81,7 @@ internal static void Main() {
     for (nint i = 0; i < len(e.ValueSlot); i++) {
         nint min = i;
         for (nint j = i + 1; j < len(e.ValueSlot); j++) {
-            if ((~e.at(j)).v < (~e.at(min)).v) {
+            if (e.at(j).v < e.at(min).v) {
                 min = j;
             }
         }

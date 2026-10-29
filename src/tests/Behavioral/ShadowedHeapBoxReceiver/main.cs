@@ -20,13 +20,13 @@ internal static nint compute() {
     nint inner() {
         ref var bΔ1 = ref heap(new Builder(), out var ᏑbΔ1);
         ᏑbΔ1.With((ж<Builder> bΔ2) => {
-            bΔ2.Value.n += 1;
+            bΔ2.n += 1;
         });
         ᏑbΔ1.With((ж<Builder> bΔ3) => {
-            bΔ3.Value.n += 2;
+            bΔ3.n += 2;
         });
         ᏑbΔ1.With((ж<Builder> bΔ4) => {
-            bΔ4.Value.n += 3;
+            bΔ4.n += 3;
         });
         return bΔ1.Sum();
     }
@@ -35,10 +35,10 @@ internal static nint compute() {
 
     ref var b = ref heap(new Builder(), out var Ꮡb);
     Ꮡb.With((ж<Builder> bΔ5) => {
-        bΔ5.Value.n += a;
+        bΔ5.n += a;
     });
     Ꮡb.With((ж<Builder> bΔ6) => {
-        bΔ6.Value.n += 10;
+        bΔ6.n += 10;
     });
     return b.Sum();
 }

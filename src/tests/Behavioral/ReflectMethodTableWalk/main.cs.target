@@ -85,14 +85,14 @@ internal static void Main() {
     fmt.Println("Add kind:", add.Kind(), "in0:", add.Type().In(0).Kind());
     fmt.Println("Add(5) =", add.Call(new reflectꓸValue[]{reflect.ValueOf((nint)5)}.slice())[0].Interface());
     fmt.Println("Add(7) =", add.Call(new reflectꓸValue[]{reflect.ValueOf((nint)7)}.slice())[0].Interface());
-    fmt.Println("receiver observed the writes:", (~c).n);
+    fmt.Println("receiver observed the writes:", c.n);
 
     var label = pv.MethodByName("Label");
     fmt.Println("Label:", label.Call(new reflectꓸValue[]{reflect.ValueOf("n")}.slice())[0].Interface());
     fmt.Println("Value:", pv.MethodByName("Value").Call(default)[0].Interface());
 
     var reset = pv.MethodByName("Reset");
-    fmt.Println("Reset outs:", len(reset.Call(default)), "-> n =", (~c).n);
+    fmt.Println("Reset outs:", len(reset.Call(default)), "-> n =", c.n);
 
     var (m, ok) = pt.MethodByName("Value");
     fmt.Println("MethodByName Value:", ok, m.Name, m.Index, pt.Method(m.Index).Name);

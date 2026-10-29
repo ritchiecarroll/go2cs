@@ -12,7 +12,7 @@ internal static (nint, bool) portOf(Δnet.Listener l) {
     if (!ok) {
         return (0, false);
     }
-    return ((~addr).Port, true);
+    return (addr.Port, true);
 }
 
 internal static void Main() {

@@ -20,7 +20,7 @@ public static @string Describe(this Reg r) {
     foreach (var (_, k) in new @string[]{"a", "b"}.slice()) {
         {
             var (it, ok) = r[k, ꟷ]; if (ok) {
-                @out += fmt.Sprintf("%s=%s/%d "u8, k, (~it).Name, (~it).N);
+                @out += fmt.Sprintf("%s=%s/%d "u8, k, it.Name, it.N);
             }
         }
     }
@@ -46,7 +46,7 @@ partial struct List /*[]ж<Item>*/;
 public static @string Describe(this List l) {
     @string @out = "";
     foreach (var (_, it) in l) {
-        @out += fmt.Sprintf("%s/%d "u8, (~it).Name, (~it).N);
+        @out += fmt.Sprintf("%s/%d "u8, it.Name, it.N);
     }
     return @out;
 }
@@ -69,7 +69,7 @@ internal static void Main() {
     c = new Reg(new map<@string, ж<Item>>{["a"] = Ꮡ(new Item(Name: "delta"u8, N: 4))});
     fmt.Println("concrete:", c.Describe());
 
-    c["a"].Value.N = 40;
+    c["a"].N = 40;
     fmt.Println("mutated:", c.Describe());
 
     fmt.Println("arg:", take(new Reg(new map<@string, ж<Item>>{["b"] = Ꮡ(new Item(Name: "epsilon"u8, N: 5))})));

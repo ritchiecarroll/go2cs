@@ -58,7 +58,7 @@ internal static void Main() {
     ref var l = ref heap(new lazyProc(), out var Ꮡl);
     fmt.Println(Ꮡl.find());
     fmt.Println(Ꮡl.find());
-    fmt.Println((~l.p).addr);
+    fmt.Println(l.p.addr);
     identity();
 }
 

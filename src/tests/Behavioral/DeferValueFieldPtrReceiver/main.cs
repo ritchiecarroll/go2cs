@@ -37,7 +37,7 @@ internal static void run(this ж<builder> Ꮡb) {
 internal static void Main() {
     var b = Ꮡ(new builder());
     b.run();
-    fmt.Println("after:", (~b).c.n);
+    fmt.Println("after:", b.c.n);
 
     var x = Ꮡ(new builder());
     var xʗ1 = x;
@@ -47,12 +47,12 @@ internal static void Main() {
             var xʗ2 = xʗ1;
             defer(xʗ2.of(builder.Ꮡc).reset, ref ᒐ);
             xʗ1.of(builder.Ꮡc).inc();
-            fmt.Println("inside2:", (~xʗ1).c.n);
+            fmt.Println("inside2:", xʗ1.c.n);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     })();
-    fmt.Println("after2:", (~x).c.n);
+    fmt.Println("after2:", x.c.n);
 }
 
 } // end main_package

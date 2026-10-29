@@ -53,7 +53,7 @@ internal static void Main() {
     var psʗ3 = ps;
     @try("field array in range", () => psʗ3.at(S.Ꮡa, (ulong)(ok)));
 
-    fmt.Println(arr, (~ps).a);
+    fmt.Println(arr, ps.a);
 }
 
 } // end main_package

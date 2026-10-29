@@ -32,8 +32,8 @@ internal static void fixSpec(Node root) {
     walk(root, (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
-            if (len((~nΔ1).Names) == 1 && (~nΔ1).Names[0] == "Typ" && len((~nΔ1).Values) == 1) {
-                (~nΔ1).Values[0]._<ж<Lit>>().Value.Len = 42;
+            if (len(nΔ1.Names) == 1 && nΔ1.Names[0] == "Typ" && len(nΔ1.Values) == 1) {
+                nΔ1.Values[0]._<ж<Lit>>().Len = 42;
                 return false;
             }
             break;
@@ -46,8 +46,8 @@ internal static nint renumber(Node root, nint i) {
     walk(root, (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
-            foreach (var iΔ1 in range((~nΔ1).Values)) {
-                (~nΔ1).Values[iΔ1]._<ж<Lit>>().Value.Len = (iΔ1 + 1) * 10;
+            foreach (var iΔ1 in range(nΔ1.Values)) {
+                nΔ1.Values[iΔ1]._<ж<Lit>>().Len = (iΔ1 + 1) * 10;
             }
             break;
         }}
@@ -61,7 +61,7 @@ internal static void bump(Node root) {
     walk(root, (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
-            (~nΔ1).Values[0]._<ж<Lit>>().Value.Len += 5;
+            nΔ1.Values[0]._<ж<Lit>>().Len += 5;
             break;
         }}
         return true;
@@ -72,12 +72,12 @@ internal static void tag(Node root) {
     walk(root, (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
-            (~nΔ1).Values[0]._<ж<Lit>>().Value.Name = "spec";
+            nΔ1.Values[0]._<ж<Lit>>().Name = "spec";
             break;
         }
         default: {
             var nΔ1 = n;
-            nΔ1._<ж<Lit>>().Value.Name = "lit";
+            nΔ1._<ж<Lit>>().Name = "lit";
             break;
         }}
         return true;
@@ -90,7 +90,7 @@ internal static @string read(Node root) {
     walk(root, (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
-            got = (~nΔ1).Values[0]._<ж<Lit>>().Value.Name;
+            got = nΔ1.Values[0]._<ж<Lit>>().Name;
             break;
         }}
         return true;
@@ -109,7 +109,7 @@ internal static ж<ValueSpec> newSpec() {
 internal static void Main() {
     var spec = newSpec();
     fixSpec(new ValueSpecжNode(spec));
-    fmt.Println("fixSpec:", (~(~spec).Values[0]._<ж<Lit>>()).Len);
+    fmt.Println("fixSpec:", spec.Values[0]._<ж<Lit>>().Len);
 
     var multi = Ꮡ(new ValueSpec(
         Names: new @string[]{"Typ", "Other"}.slice(),
@@ -118,21 +118,21 @@ internal static void Main() {
     nint outer = renumber(new ValueSpecжNode(multi), 7);
     fmt.Println("renumber outer:", outer);
 
-    foreach (var k in range((~multi).Values)) {
-        fmt.Println("renumber:", k, (~(~multi).Values[k]._<ж<Lit>>()).Len);
+    foreach (var k in range(multi.Values)) {
+        fmt.Println("renumber:", k, multi.Values[k]._<ж<Lit>>().Len);
     }
 
     var bumped = newSpec();
     bump(new ValueSpecжNode(bumped));
-    fmt.Println("bump:", (~(~bumped).Values[0]._<ж<Lit>>()).Len);
+    fmt.Println("bump:", bumped.Values[0]._<ж<Lit>>().Len);
 
     var tagged = newSpec();
     tag(new ValueSpecжNode(tagged));
-    fmt.Println("tag spec:", (~(~tagged).Values[0]._<ж<Lit>>()).Name);
+    fmt.Println("tag spec:", tagged.Values[0]._<ж<Lit>>().Name);
 
     var lone = Ꮡ(new Lit(Len: 9, Name: "z"));
     tag(new LitжNode(lone));
-    fmt.Println("tag default:", (~lone).Name);
+    fmt.Println("tag default:", lone.Name);
 
     fmt.Println("read:", read(new ValueSpecжNode(tagged)));
 }

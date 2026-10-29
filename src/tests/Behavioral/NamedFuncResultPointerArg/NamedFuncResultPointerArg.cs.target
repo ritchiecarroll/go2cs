@@ -12,7 +12,7 @@ partial struct State {
 
 internal static Action<ж<State>, nint> adder() {
     return (ж<State> s, nint x) => {
-        s.Value.sum += x;
+        s.sum += x;
     };
 }
 
@@ -24,7 +24,7 @@ internal static void Main() {
     var s = Ꮡ(new State());
     s.apply(5);
     s.apply(3);
-    fmt.Println((~s).sum);
+    fmt.Println(s.sum);
 }
 
 } // end main_package
