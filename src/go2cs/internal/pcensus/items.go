@@ -209,11 +209,14 @@ var items = []item{
 	},
 	{
 		// After #20, a slice, map or chan compared to nil reads `!= default` (D1 dropped the `!`); stage 2 makes it
-		// `!= nil`.
+		// `!= nil`. Go's `nil == s` keeps its order, so `default == s` reads `nil == s`.
 		ID: "N1b", Seat: "#24", Title: "slice, map and chan compared to `nil` (N1 stage 2)",
-		Measures: []measure{m("N1b", "cmp-default-nobang", `[!=]= default(?:[^!\p{L}\p{N}_]|$)`)},
-		Canon:    []rewrite{rw(`([!=]=) (?:default|nil)\b(?:([^!])|$)`, "$1 ⦃nil⦄$2")},
-		Old:      rx(`[!=]= default(?:[^!\p{L}\p{N}_]|$)`),
+		Measures: []measure{m("N1b", "cmp-default-nobang", `[!=]= default(?:[^!\p{L}\p{N}_]|$)|(?:^|[^!.\p{L}\p{N}_])default [!=]=`)},
+		Canon: []rewrite{
+			rw(`([!=]=) (?:default|nil)\b(?:([^!])|$)`, "$1 ⦃nil⦄$2"),
+			rw(`(^|[^!.⦃\p{L}\p{N}_])(?:default|nil) ([!=]=)`, "$1⦃nil⦄ $2"),
+		},
+		Old: rx(`[!=]= default(?:[^!\p{L}\p{N}_]|$)|(?:^|[^!.\p{L}\p{N}_])default [!=]=`),
 	},
 	{
 		ID: "R5", Seat: "#25", Title: "un-aliased pointer parameters keep their Go name",

@@ -82,6 +82,8 @@ var plants = []plant{
 	// N1 stage 2 (#24)
 	one("N1b good", prodFile, `if (s == default) {`, `if (s == nil) {`, "N1b"),
 	one("N1b bad: the operand changed", prodFile, `if (s == default) {`, `if (t == nil) {`, "UNCLASSIFIED"),
+	one("N1b good: nil on the left", prodFile, `fmt.Println(s == default, default == s, default != new slice<nint>(0, 8));`, `fmt.Println(s == nil, nil == s, nil != new slice<nint>(0, 8));`, "N1b"),
+	one("N1b bad: the left operand changed", prodFile, `if (default != s) {`, `if (nil != t) {`, "UNCLASSIFIED"),
 	// R5 (#25)
 	one("R5 good param", prodFile, `public static void TestX(ж<testing.T> Ꮡt) {`, `public static void TestX(ж<testing.T> t) {`, "R5"),
 	one("R5 good use", testFile, `Ꮡt.Errorf("bad"u8);`, `t.Errorf("bad"u8);`, "R5"),
