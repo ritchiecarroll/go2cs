@@ -143,18 +143,20 @@ func (c *classifier) endFile(t *tally, file string) {
 		return
 	}
 	c.pool = &filePool{oldSeen: map[*item]bool{}, newSeen: map[*item]bool{}}
-	var active, deleter, inserter *item
+	var active *item
+	var deleters, inserters []*item
 	for _, it := range c.allowed {
 		b := it.Block
 		switch {
 		case b == nil:
+		case b.File != nil && !b.File.MatchString(file):
 		case b.PerSide:
 			// Each side on its own anchor, a nil anchor holding always (blockRule).
-			if deleter == nil && (b.OldAnchor == nil || p.oldSeen[it]) {
-				deleter = it
+			if b.OldAnchor == nil || p.oldSeen[it] {
+				deleters = append(deleters, it)
 			}
-			if inserter == nil && (b.NewAnchor == nil || p.newSeen[it]) {
-				inserter = it
+			if b.NewAnchor == nil || p.newSeen[it] {
+				inserters = append(inserters, it)
 			}
 		case active == nil && p.oldSeen[it] && (p.newSeen[it] || b.Standalone):
 			active = it
@@ -168,13 +170,62 @@ func (c *classifier) endFile(t *tally, file string) {
 		}
 		return false
 	}
+	// deleterOf is the PerSide rule that admits a deleted line, or nil.
+	deleterOf := func(l string) *item {
+		for _, it := range deleters {
+			if matches(it.Block.Delete, l) {
+				return it
+			}
+		}
+		return nil
+	}
+	// inserterOf is the PerSide rule that admits the inserted line adds[j], or nil: a rule with a Hunk takes it only
+	// in a hunk its header names, and one with a Closer only where a Closer line ends the run of its lines from j.
+	inserterOf := func(adds []pooled, j int) *item {
+		for _, it := range inserters {
+			b := it.Block
+			if !matches(b.Insert, adds[j].line) || b.Hunk != nil && !b.Hunk.MatchString(adds[j].at) {
+				continue
+			}
+			if b.Closer != nil {
+				closed := false
+				for k := j; k < len(adds) && adds[k].at == adds[j].at && matches(b.Insert, adds[k].line); k++ {
+					if b.Closer.MatchString(adds[k].line) {
+						closed = true
+						break
+					}
+				}
+				if !closed {
+					continue
+				}
+			}
+			return it
+		}
+		return nil
+	}
 	if active == nil {
 		// No whole-file rewrite: every refusal stands as its run made it (a refused pair keeps both its lines, so
 		// the refusal names its site), except a side a PerSide Block admits (P1's records, whose nil OldAnchor holds
 		// in every file). A pair with one side admitted keeps the other side's refusal.
-		for _, r := range p.orig {
-			del := deleter != nil && r.side != '+' && matches(deleter.Block.Delete, r.rem)
-			ins := inserter != nil && r.side != '-' && matches(inserter.Block.Insert, r.add)
+		// The added side of every refusal, in order, so a Closer reads the lines after its own.
+		var adds []pooled
+		addAt := make([]int, len(p.orig))
+		for i, r := range p.orig {
+			addAt[i] = -1
+			if r.side != '-' {
+				addAt[i] = len(adds)
+				adds = append(adds, pooled{r.add, r.at, r.kind})
+			}
+		}
+		for i, r := range p.orig {
+			var deleter, inserter *item
+			if r.side != '+' {
+				deleter = deleterOf(r.rem)
+			}
+			if addAt[i] >= 0 {
+				inserter = inserterOf(adds, addAt[i])
+			}
+			del, ins := deleter != nil, inserter != nil
 			switch {
 			case r.side == '-' && del:
 				t.credit(file, deleter.ID)
@@ -220,7 +271,7 @@ func (c *classifier) endFile(t *tally, file string) {
 				continue
 			}
 		}
-		if deleter != nil && matches(deleter.Block.Delete, r.line) {
+		if deleter := deleterOf(r.line); deleter != nil {
 			t.credit(file, deleter.ID)
 			continue
 		}
@@ -238,7 +289,7 @@ func (c *classifier) endFile(t *tally, file string) {
 			t.credit(file, active.ID)
 			continue
 		}
-		if inserter != nil && matches(inserter.Block.Insert, a.line) {
+		if inserter := inserterOf(p.add, j); inserter != nil {
 			t.credit(file, inserter.ID)
 			continue
 		}

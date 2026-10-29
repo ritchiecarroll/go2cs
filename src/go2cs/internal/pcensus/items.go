@@ -75,6 +75,14 @@ type blockRule struct {
 	Standalone bool
 	Moves      bool
 	PerSide    bool
+	// File, when set, confines the rule to files whose path it matches (A1's alias lines, only in package_info.cs).
+	File *regexp.Regexp
+	// Hunk, when set, admits an Insert line only in a hunk whose `@@` header matches it: git names the enclosing
+	// declaration there (CM's member docs, only inside `partial interface X`).
+	Hunk *regexp.Regexp
+	// Closer, when set, admits an Insert line only where a Closer line ends the inserted lines it starts, in the same
+	// hunk (CM's doc, closed by the line naming the member the interface inherits).
+	Closer *regexp.Regexp
 }
 
 // derefSelects respells every `(~X).` as `X.`, X any expression with balanced parentheses: P1's read through a
@@ -612,6 +620,44 @@ var items = []item{
 		ID: "J", Seat: "#38", Title: "a Go trailing comment pads to the column gofmt gave its run",
 		Canon:    []rewrite{{re: rx(`^.*$`), fn: padTrailingComment}},
 		Respaces: true,
+	},
+	{
+		// The imported-alias use gate: a `global using X = …;` alias no file of the package uses is no longer written
+		// into package_info.cs. The line is only ever deleted, and only there; an alias whose target changes is a
+		// different change, and its added line is refused. Whether the deleted alias is still used is a fact of the
+		// emission, which a diff cannot show: this item reads the shape only.
+		ID: "A1", Seat: "#41", Title: "an imported type alias no file uses leaves package_info.cs",
+		Block: &blockRule{
+			PerSide: true,
+			File:    rx(`(^|/)package_info\.cs$`),
+			Delete:  []*regexp.Regexp{rx(`^global using [^\s=;]+ = [^\s;]+;$`)},
+		},
+	},
+	{
+		// The Go comments C# still dropped are carried (docs/PLAN-comment-and-spacing-parity.md, seat #43):
+		//   - a blank import emits no `using`, and with a Go trailing comment its note becomes a block comment, so Go's
+		//     comment stands as its own token: `// blank import: … // for linkname` -> `/* blank import: … */ // for linkname`;
+		//   - a type spec's trailing comment rides its declaration line, after any fact (`partial struct sortedHint
+		//     /*num:nint*/;` gains `// hint …`), as does a linkname var's on its property line;
+		//   - an interface member C# inherits rather than declares keeps its doc in the body, closed by the line that
+		//     names it as Go spells it: `// Read(b []byte) (n int, err error) is provided by io.ReadWriteCloser`, or
+		//     `// io.Writer is inherited` for Go's own embed. Those lines are only inserted (the Block).
+		ID: "CM", Seat: "#43", Title: "Go comments C# dropped: a blank import's note, a declaration's trailing comment, an inherited member's doc",
+		Canon: []rewrite{
+			rw(`^(\s*)/\* (blank import: .*?) \*/( +//)`, "$1// $2$3"),
+			rw(`^(\s*partial (?:struct|class) `+id+`(?: /\*.*?\*/)?(?:;| \{))\s*//.*$`, "$1"),
+			rw(`^(\s*(?:public|internal) static .+ \{ get => .+; set => .+; \})\s*//.*$`, "$1"),
+		},
+		Guard: rx(`^\s*// blank import: |^\s*partial (?:struct|class) |^\s*(?:public|internal) static .+ \{ get => `),
+		Old:   rx(`^\s*// blank import: .*\) //`),
+		New:   rx(`^\s*partial (?:struct|class) .*(?:;| \{)\s*//|^\s*(?:public|internal) static .+ \{ get => .+ \}\s*//`),
+		Block: &blockRule{
+			PerSide: true,
+			Hunk:    rx(`^@@ [^@]*@@ partial interface `),
+			// A doc line, a Go paragraph break (a bare `//`) among them.
+			Insert: []*regexp.Regexp{rx(`^\s+//(?:[ \t].*)?$`)},
+			Closer: rx(`^\s+// \S.* is (?:provided by \S.*|inherited)$`),
+		},
 	},
 	{
 		ID: "E1", Seat: "#19", Title: "`} else if (` on one line, and `) {` at the end of a line",
