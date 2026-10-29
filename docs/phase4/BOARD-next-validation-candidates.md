@@ -31723,4 +31723,82 @@ docs. No emitted `src/core` file (the deferred-corpus window).
 
 — R (2026-10-29)
 
+## 2026-10-29 — C2 (1.26.10.2 seat #43, claude/c2-seat43-comment-residue): the comment-parity residue — DONE on the seat branch
+
+**The finding (C1's commentcensus).** At 0528e9e884, 114 Go comment groups were missed or partial in the converted stdlib.
+- 91 were `missed:trailing-spec`: 66 import-spec, 24 type-spec, and 1 var.
+- 19 were interface member docs: 18 `missed:field-doc` and 1 `partial:field-doc`.
+- 4 were decl-doc and spec-doc-in-group, and 1 was in-expression, which stays out of scope.
+
+**Class 1: a type spec's trailing comment rides its declaration line.** `type sortedHint int // hint ...` lost its
+comment: visitTypeSpec never handed typeSpec.Comment to the kind visitors that write the declaration line. The comment
+now waits beside the type doc. The declaration-line writes of visitIdent, visitMapType, visitChanType and
+visitStructType, and visitTypeSpec's selector and pointer arms, write it after any `/*fact*/` block. The anchor is the
+Go type's end. visitValueSpec's linkname var branches do the same (os.executablePath).
+
+**Class 2, the form COORD ruled.** A declared method a structural base covers (net.Conn's Read, Write and Close,
+supplied by io.ReadWriteCloser) was skipped, doc and all. Go's own embed (hash.Hash's io.Writer) moved to the base list
+without its doc. Each doc is now written verbatim at its Go position, followed by one line:
+`// Read(b []byte) (n int, err error) is provided by io.ReadWriteCloser` or `// io.Writer is inherited`. Without that
+line the doc would read as the next member's doc. getStructuralInterfaceBases returns each covered method's base as Go
+spells it.
+
+**Item 3, import-spec trailing comments (the owner widened #43).** A MEASURED FINDING: all 66 were already carried, but
+fused into the converter's `// blank import: ... // for linkname` note. The census matches whole C# comment tokens, so
+it read them as missed. The delimiter-only form was ruled. A blank import WITH a Go comment writes its note as
+`/* ... */`, so `// for linkname` is its own token on the same line. A blank import with no comment keeps its `//` note.
+COORD's default of spelling the Go spec in a `//` line would have stayed one token and been missed still, and was
+withdrawn.
+
+**Writer functions.** writeCommentString and writeOperations.go:229-286 are unchanged; this seat only calls
+writeCommentString from new sites. C1's #38 alignment pass sees the class-1 comments as ordinary trailing spec comments.
+
+**Footprint prediction, posted before arm B (f088337af), scored.** Two-seeded three-target -stdlib, both arms seeded from
+the committed 0528e9e884 tree: base binary, then seat binary. Lift-marker files 0, hand-own markers 204 on each target.
+- Item 3, HELD: 57 / 62 / 67 lines (windows / linux / darwin), one per file. The 3 lines per target the census cannot
+  see are in godebug.cs.auto, sample.cs.auto and testing/synctest, as named.
+- Class 1, HELD: 24 / 24 / 25 lines in 15 / 15 / 16 files. Darwin's extra line is os.executablePath.
+- Class 2, HELD: 85 added lines in the 11 named files on every target.
+- GoPositionMap, MISSED by 2 on every target: 9 record lines in 7 package_info.cs, against 11 in 8 predicted. Attribution
+  is exact: hash/hash.cs and go/types/type.cs carry no GoPositionMap record at all, because they hold only interfaces and
+  no mapped code. The prediction assumed every class-2 file had a record. The mechanism held: only class-2 files
+  re-encode, and item 3 and class 1 contribute 0 map lines.
+- Totals: windows +175/-90, linux +180/-95, darwin +186/-101, against +177/-92, +182/-97 and +188/-103 predicted. The
+  difference is exactly the 2 records. 0 hand-owned .cs files changed. No line fell outside the three shapes.
+
+**Stdlib compile arm.** The seat's own A -> B hunks were applied per target to the committed 0528e9e884 tree by content,
+because 70 of the 85 files there carry other arcs' unbanked drift. The 8 map hunks were skipped. 0 errors on windows
+(593 s), linux (644 s) and darwin (677 s). Positive control: a stray `*/` after one block note fails with CS1031. The
+first windows and linux legs died of a full disk while CNR ran beside them (rc=134, MSB3021/MSB3027). Those results are
+void and the reruns ran alone.
+
+**commentcensus over E(seat)**, the union of the three targets' re-emitted files, against the same union at arm A:
+- missed groups went from 114 to 3: missed:decl-doc 1 (crypto/x509/x509.go:1767) and missed:spec-doc-in-group 2
+  (crypto/rand/rand.go:16, crypto/x509/x509.go:47), plus the out-of-scope in-expression 1. That is one fewer than the
+  target of 4, because net/net.go:215's decl-doc "Close closes the connection." was a text collision with the lost
+  Conn.Close doc, and it now resolves.
+- REPORTED, NOT TUNED:
+  - misplaced:field-doc/anchor-differs went from 10 to 25. These are 15 of the 19 class-2 docs: the census anchors a doc
+    to the next C# code line, and the spec line separates them by design.
+  - misplaced:trailing-spec/trailing-to-own-line went from 1 to 67, which is all 66 item-3 comments. The census counts a
+    `//` as trailing only when CODE precedes it, and these lines hold only the block note.
+  - eol:missing went from 7 to 0 and eol:split from 16 to 23. The class-1 comments in type groups are present now but
+    not aligned, which is #38's work.
+
+**Behavioral goldens: 0.** CNR at the rebased tip changed 0 files this seat owns: behavioral projects are converted
+without comments. It did change 3 linux-exclusive projects: MulticastGroupJoin, SendtoSeam and UnixAbstractAddrName
+(`(~p).f` becoming `p.f`, plus a GoFieldAccess record). The BASE binary produces byte-identical output for all 3, so this
+is pre-existing master drift, not this seat. The shape is #30's `p.f`, which 0528e9e884's message names. That its re-mint
+skipped these linux-exclusive projects is not measured. Reported separately, not committed here. Windows-exclusive projects owed: none. A source scan of every
+`[GoPlatformExclusive]` project finds no seat shape, and the emission carries no comments.
+
+**Gates at the tip.** `go test ./...` in src/go2cs is green, and repoguard is green after re-citing the 20 line citations
+the class-1 edit moved. The one docs-sample red, at 0528e9e884, was master's own (fixed at 7979dec811, rebased onto).
+Reds first: TestTypeSpecTrailingCommentRidesTheDeclarationLine, TestInterfaceInheritedMemberDocStaysInTheBody and
+TestBlankImportTrailingCommentIsItsOwnComment were each red at the base and are green at the tip. No src/core file is
+in the seat.
+<!-- Evidence: C2's scratchpad (cr-tools/: arm-crbase.log / arm-crseat.log, delta-<target>.patch, score.py, predict.py,
+     the A-/B-/U-/C- census tables, compile-arm.log and compile-arm-rerun.log with the control, cnr2.log, behav-shapes.txt;
+     cr-pred.md; cr-form.md and cr-form3.md, the posted forms), on C2's box. -->
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
