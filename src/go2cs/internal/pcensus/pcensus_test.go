@@ -575,6 +575,8 @@ func TestP1RecordBlockPlants(t *testing.T) {
 	tl = c.classifyDiff(diffOf(infoFile, []string{block[2]}, nil))
 	if len(tl.refused) != 1 {
 		t.Errorf("P1 assembly record deleted: wanted it refused, read %v, refused %v", tl.labels, tl.refused)
+	}
+}
 
 // L1 in a real diff: a cast over a MULTI-LINE literal (dnsmessage's printPaddedUint8) composes as the one-line cast
 // does, `((@string)new byte[]{` ... `}.slice())` -> `(@string)slice<byte>([` ... `])`, but its open and close lines
