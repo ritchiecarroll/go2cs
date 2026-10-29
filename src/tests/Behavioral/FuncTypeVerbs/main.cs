@@ -10,7 +10,7 @@ partial class main_package {
 internal static UntypedInt letter => /* 'c' */ 99;
 
 internal static (rune, bool) pair() {
-    return ((rune)'p', true);
+    return ('p', true);
 }
 
 internal static void Main() {
@@ -53,8 +53,8 @@ internal static void Main() {
     var named = rune () => letter;
     fmt.Printf("%T %T %T\n"u8, (shrink).OrTypedNilFunc(), (both).OrTypedNilFunc(), (named).OrTypedNilFunc());
     var (r, flag) = both();
-    fmt.Printf("%v %v %v %v\n"u8, shrink((rune)'x'), r, flag, named());
-    fmt.Printf("%T %T\n"u8, shrink((rune)'x'), r);
+    fmt.Printf("%v %v %v %v\n"u8, shrink('x'), r, flag, named());
+    fmt.Printf("%T %T\n"u8, shrink('x'), r);
 
     any held = (shrink).OrTypedNilFunc();
     var fns = new Func<rune>[]{() => (rune)'f'}.slice();
