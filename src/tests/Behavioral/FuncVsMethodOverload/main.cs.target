@@ -39,23 +39,20 @@ internal static uint32 second(this ж<holder> Ꮡh) {
 }
 
 internal static void Main() {
-    ref var vals = ref heap<array<uint32>>(out var Ꮡvals);
-    vals = new uint32[]{10, 20, 30, 40}.array();
+    ref var vals = ref heap<array<uint32>>(new uint32[]{10, 20, 30, 40}.array(), out var Ꮡvals);
     fmt.Println(step(Ꮡvals.at<uint32>(0)));
 
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡvals.at<uint32>(1));
     fmt.Println(~(ж<uint32>)(uintptr)(add(p, 8)));
 
-    ref var n = ref heap<nih>(out var Ꮡn);
-    n = new nih(a: 7, b: 9);
+    ref var n = ref heap<nih>(new nih(a: 7, b: 9), out var Ꮡn);
     var m = Ꮡn.add(0);
     fmt.Println((~m).a, (~m).b);
 
     var pb = Ꮡn.add(4).Reinterpret<nih, uint32>();
     fmt.Println(pb.Value);
 
-    ref var hh = ref heap<holder>(out var Ꮡhh);
-    hh = new holder(x: 3, y: 5);
+    ref var hh = ref heap<holder>(new holder(x: 3, y: 5), out var Ꮡhh);
     fmt.Println(Ꮡhh.second());
 }
 

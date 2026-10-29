@@ -14,24 +14,21 @@ partial struct Wrap {
 }
 
 internal static nint plainFunc() {
-    ref var x = ref heap<Thing>(out var Ꮡx);
-    x = new Thing(val: 7);
+    ref var x = ref heap<Thing>(new Thing(val: 7), out var Ꮡx);
     var p = Ꮡx.of(Thing.Ꮡval);
     p.Value = 99;
     return x.val;
 }
 
 internal static nint nestedChain() {
-    ref var w = ref heap<Wrap>(out var Ꮡw);
-    w = new Wrap(inner: new Thing(val: 5));
+    ref var w = ref heap<Wrap>(new Wrap(inner: new Thing(val: 5)), out var Ꮡw);
     var p = Ꮡw.of(Wrap.Ꮡinner).of(Thing.Ꮡval);
     p.Value = 42;
     return w.inner.val;
 }
 
 internal static nint pointerHop() {
-    ref var t = ref heap<Thing>(out var Ꮡt);
-    t = new Thing(val: 3);
+    ref var t = ref heap<Thing>(new Thing(val: 3), out var Ꮡt);
     var w = new Wrap(ptr: Ꮡt);
     var p = w.ptr.of(Thing.Ꮡval);
     p.Value = 11;
@@ -39,8 +36,7 @@ internal static nint pointerHop() {
 }
 
 internal static nint methodBody(this ref Thing t) {
-    ref var y = ref heap<Thing>(out var Ꮡy);
-    y = new Thing(val: 1);
+    ref var y = ref heap<Thing>(new Thing(val: 1), out var Ꮡy);
     var p = Ꮡy.of(Thing.Ꮡval);
     p.Value = 88;
     return y.val;
@@ -56,8 +52,7 @@ partial struct Outer {
 }
 
 internal static nint promotedValueEmbed() {
-    ref var o = ref heap<Outer>(out var Ꮡo);
-    o = new Outer();
+    ref var o = ref heap<Outer>(new Outer(), out var Ꮡo);
     var p = Ꮡo.of(Outer.Ꮡev);
     p.Value = 33;
     return o.ev;
@@ -68,16 +63,14 @@ partial struct PtrHolder {
 }
 
 internal static nint compositePos() {
-    ref var x = ref heap<Thing>(out var Ꮡx);
-    x = new Thing(val: 2);
+    ref var x = ref heap<Thing>(new Thing(val: 2), out var Ꮡx);
     var h = new PtrHolder(p: Ꮡx.of(Thing.Ꮡval));
     h.p.Value = 55;
     return x.val;
 }
 
 internal static ж<nint> returnPos() {
-    ref var x = ref heap<Thing>(out var Ꮡx);
-    x = new Thing(val: 4);
+    ref var x = ref heap<Thing>(new Thing(val: 4), out var Ꮡx);
     return Ꮡx.of(Thing.Ꮡval);
 }
 

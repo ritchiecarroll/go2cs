@@ -50,8 +50,7 @@ internal static void Main() {
     @try("reflect-set", () => {
         ref var dest = ref heap<Greetable>(out var Ꮡdest);
         var rv = reflect.ValueOf(Ꮡdest).Elem();
-        ref var src = ref heap<Greetable>(out var Ꮡsrc);
-        Ꮡsrc.ValueSlot = wrap(default);
+        ref var src = ref heap<Greetable>(wrap(default), out var Ꮡsrc);
         rv.Set(reflect.ValueOf(Ꮡsrc).Elem());
         fmt.Println("set ok, dest == nil:", Ꮡdest.ValueSlot == nil);
     });

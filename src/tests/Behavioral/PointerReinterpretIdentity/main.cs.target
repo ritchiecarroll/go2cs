@@ -55,8 +55,7 @@ internal static void Main() {
             }, ref ᒐ);
             ref var src = ref heap(new builder(), out var Ꮡsrc);
             Ꮡsrc.write("seed");
-            ref var cp = ref heap<builder>(out var Ꮡcp);
-            cp = src;
+            ref var cp = ref heap<builder>(src, out var Ꮡcp);
             Ꮡcp.write("more");
             fmt.Println("unreachable");
         }

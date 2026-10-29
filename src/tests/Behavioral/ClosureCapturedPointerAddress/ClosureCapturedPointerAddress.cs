@@ -15,8 +15,7 @@ internal static void run(Action f) {
 
 internal static void Main() {
     var head = Ꮡ(new node(v: 1, next: Ꮡ(new node(v: 2, next: Ꮡ(new node(v: 3, next: nil))))));
-    ref var mToFlush = ref heap<ж<node>>(out var ᏑmToFlush);
-    mToFlush = head;
+    ref var mToFlush = ref heap<ж<node>>(head, out var ᏑmToFlush);
 
     run(() => {
         while (ᏑmToFlush.ValueSlot != nil) {

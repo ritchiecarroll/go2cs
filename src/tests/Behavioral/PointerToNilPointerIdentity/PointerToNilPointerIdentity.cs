@@ -10,10 +10,8 @@ partial struct holder {
 }
 
 internal static void Main() {
-    ref var p1 = ref heap<ж<nint>>(out var Ꮡp1);
-    p1 = (ж<nint>)nil;
-    ref var p2 = ref heap<ж<nint>>(out var Ꮡp2);
-    p2 = (ж<nint>)nil;
+    ref var p1 = ref heap<ж<nint>>((ж<nint>)nil, out var Ꮡp1);
+    ref var p2 = ref heap<ж<nint>>((ж<nint>)nil, out var Ꮡp2);
 
     var pp1 = Ꮡp1;
     var pp2 = Ꮡp2;
@@ -28,17 +26,13 @@ internal static void Main() {
     var alias = pp1;
     fmt.Println("alias==pp1", alias == pp1);
 
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 42;
+    ref var n = ref heap<nint>(42, out var Ꮡn);
     alias.ValueSlot = Ꮡn;
     fmt.Println("p1 set", pp1.ValueSlot != nil, (pp1.ValueSlot).Value);
 
-    ref var v = ref heap<nint>(out var Ꮡv);
-    v = 5;
-    ref var c = ref heap<ж<nint>>(out var Ꮡc);
-    c = Ꮡv;
-    ref var d = ref heap<ж<nint>>(out var Ꮡd);
-    d = Ꮡv;
+    ref var v = ref heap<nint>(5, out var Ꮡv);
+    ref var c = ref heap<ж<nint>>(Ꮡv, out var Ꮡc);
+    ref var d = ref heap<ж<nint>>(Ꮡv, out var Ꮡd);
     fmt.Println("c==d", c == d, "&c==&d", Ꮡc == Ꮡd);
 
     var keys = new map<ж<ж<nint>>, @string>{[Ꮡc] = "c", [Ꮡd] = "d"};

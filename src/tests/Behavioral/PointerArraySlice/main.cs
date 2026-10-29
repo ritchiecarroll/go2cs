@@ -25,8 +25,7 @@ internal static nint sumParam(ж<grid> Ꮡp) {
 }
 
 internal static void Main() {
-    ref var arr = ref heap<array<nint>>(out var Ꮡarr);
-    arr = new nint[]{10, 20, 30, 40, 50}.array();
+    ref var arr = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50}.array(), out var Ꮡarr);
     var p = Ꮡarr;
 
     var full = p.slice();
@@ -44,8 +43,7 @@ internal static void Main() {
     full[0] = 99;
     fmt.Println(arr[0]);
 
-    ref var g = ref heap<grid>(out var Ꮡg);
-    g = new grid(new nint[]{2, 4, 6, 8}.array());
+    ref var g = ref heap<grid>(new grid(new nint[]{2, 4, 6, 8}.array()), out var Ꮡg);
     fmt.Println(g.firstTwo(), sumParam(Ꮡg));
 
     rangeIndexOnly();

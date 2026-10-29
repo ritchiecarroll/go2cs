@@ -2126,7 +2126,19 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// Check if the variable needs to be allocated on the heap
 					heapTypeDecl := v.convertToHeapTypeDecl(ident, false)
 
-					if len(heapTypeDecl) > 0 {
+					// A heap-boxed local DECLARED here by a single-LHS `x := rhs` folds its box and its
+					// value into one statement, as Go writes one: `ref var x = ref heap<T>(rhs, out var
+					// Ꮡx);` (written below, once the value is rendered), where the split form declared a
+					// zero box and assigned the value on the next line. The value is the same string the
+					// assignment would take, every transform applied, and `heap<T>(in T, out ж<T>)` copies
+					// it into the box as `x = rhs;` copied it into the zero one; the explicit <T> keeps
+					// that assignment's implicit conversion (COORD's R1). The box declared alone stays for
+					// a box the for-init hoists ahead of its loop, and for a multi-LHS define, where Go
+					// evaluates every RHS before it assigns (R2).
+					foldHeapInit := len(heapTypeDecl) > 0 && format.heapTypeDeclTarget == nil && lhsLen == 1 &&
+						assignStmt.Tok == token.DEFINE && !v.isReassignment(ident)
+
+					if len(heapTypeDecl) > 0 && !foldHeapInit {
 						if format.heapTypeDeclTarget == nil {
 							result.WriteString(heapTypeDecl)
 							result.WriteString(v.newline)
@@ -2134,7 +2146,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						} else {
 							format.heapTypeDeclTarget.WriteString(heapTypeDecl)
 						}
-					} else {
+					} else if !foldHeapInit {
 						// A `:=` declaration initialized from a bare function/method reference (a C#
 						// METHOD GROUP, e.g. `state := lexText`) cannot be typed with `var` — C# cannot
 						// infer a delegate type from a method group (CS8917). Go infers the local's type
@@ -2203,8 +2215,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						}
 					}
 
-					result.WriteString(v.convExpr(lhs, contexts))
-					result.WriteString(operator)
+					lhsText := v.convExpr(lhs, contexts)
+
+					if !foldHeapInit {
+						result.WriteString(lhsText)
+						result.WriteString(operator)
+					}
 
 					// Steer an eligible stack-string's RHS conversion to the zero-copy (sstring)x view.
 					// convCallExpr consumes the flag on the one string(x) conversion; the reset after is
@@ -2243,10 +2259,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 					_, rhsIsTypeAssert := rhs.(*ast.TypeAssertExpr)
 
+					var value string
+
 					if lhsTypeIsInterface[i] && !rhsIsTypeAssert {
-						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
+						value = v.convertExprToInterfaceType(lhs, rhs, rhsExpr)
 					} else {
-						result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
+						value = v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr)
+					}
+
+					if foldHeapInit {
+						result.WriteString(heapTypeDeclWithValue(heapTypeDecl, value))
+					} else {
+						result.WriteString(value)
 					}
 
 					if format.includeSemiColon || i < lhsLen-1 {

@@ -21,8 +21,7 @@ partial struct meterBox {
 }
 
 internal static void Main() {
-    ref var box = ref heap<meterBox>(out var Ꮡbox);
-    box = new meterBox(Meter: ForeignPtrEmbedIfaceLib.NewMeter());
+    ref var box = ref heap<meterBox>(new meterBox(Meter: ForeignPtrEmbedIfaceLib.NewMeter()), out var Ꮡbox);
     accumulator a = box;
     a.Add(5);
     a.Add(7);

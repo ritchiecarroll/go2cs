@@ -5,8 +5,7 @@ using System.Runtime.CompilerServices;
 partial class main_package {
 
 internal static partial nint parenIndex() {
-    ref var s = ref heap<slice<nint>>(out var Ꮡs);
-    s = new nint[]{0, 0, 0}.slice();
+    ref var s = ref heap<slice<nint>>(new nint[]{0, 0, 0}.slice(), out var Ꮡs);
     var p = Ꮡs;
     nint i = 100;
     {

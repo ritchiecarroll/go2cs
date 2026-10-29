@@ -50,8 +50,7 @@ internal static void Main() {
     fmt.Println("get a:", Ꮡc.Get(Ꮡa).Value);
     fmt.Println("get b:", Ꮡc.Get(Ꮡb).Value);
 
-    ref var newAv = ref heap<nint>(out var ᏑnewAv);
-    newAv = 99;
+    ref var newAv = ref heap<nint>(99, out var ᏑnewAv);
     Ꮡc.Put(Ꮡa, ᏑnewAv);
     fmt.Println("get a again:", Ꮡc.Get(Ꮡa).Value);
     fmt.Println("missing:", Ꮡc.Get(@new<nint>()) == nil);

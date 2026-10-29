@@ -20,8 +20,7 @@ internal static void Main() {
     var c2 = context.WithValue(c1, new namedKey(2), "v2");
     fmt.Println(c2);
 
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 3;
+    ref var n = ref heap<nint>(3, out var Ꮡn);
     var c3 = context.WithValue(c2, Ꮡn, "v3");
     fmt.Println(c3);
 }

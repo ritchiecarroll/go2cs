@@ -45,8 +45,7 @@ internal static void Main() {
     fmt.Println(fn(7));
 
     Func<nint, nint> add = default;
-    ref var c = ref heap<counter>(out var Ꮡc);
-    c = new counter(n: 5);
+    ref var c = ref heap<counter>(new counter(n: 5), out var Ꮡc);
     add = Ꮡc.bump;
     fmt.Println(add(3));
     fmt.Println(add(4));

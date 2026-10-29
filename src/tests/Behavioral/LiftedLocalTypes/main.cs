@@ -23,8 +23,7 @@ internal static void Main() {
     main_a b = default;
     b = a;
     fmt.Println(a == b);
-    ref var p = ref heap<main_point>(out var Ꮡp);
-    p = new main_point(X: 1, Y: 2);
+    ref var p = ref heap<main_point>(new main_point(X: 1, Y: 2), out var Ꮡp);
     fmt.Println(p.X + p.Y);
     fmt.Printf("%T %T\n"u8, p, Ꮡp);
 
@@ -67,10 +66,8 @@ internal static void embeddedLocalTypes() {
     k.myInt = 7;
     fmt.Println(k.myInt);
 
-    ref var i = ref heap<embeddedLocalTypes_myInt>(out var Ꮡi);
-    i = (embeddedLocalTypes_myInt)8;
-    ref var e = ref heap<embeddedLocalTypes_embed>(out var Ꮡe);
-    e = new embeddedLocalTypes_embed(Q: 9);
+    ref var i = ref heap<embeddedLocalTypes_myInt>((embeddedLocalTypes_myInt)8, out var Ꮡi);
+    ref var e = ref heap<embeddedLocalTypes_embed>(new embeddedLocalTypes_embed(Q: 9), out var Ꮡe);
     var pp = new embeddedLocalTypes_ptrHolder(myInt: Ꮡi, embed: Ꮡe);
     pp.myInt.Value = 10;
     pp.embed.Value.Q = 11;

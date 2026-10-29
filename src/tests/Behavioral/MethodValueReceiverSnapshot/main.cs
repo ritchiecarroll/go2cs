@@ -42,8 +42,7 @@ internal static void Main() {
     var s10ᴷ = new stackAppend<frame>();
     var s11ᴷ = new stackAppend<frame>();
 
-    ref var a = ref heap<frame>(out var Ꮡa);
-    a = new frame(Name: "a");
+    ref var a = ref heap<frame>(new frame(Name: "a"), out var Ꮡa);
 
         var aʗ1 = a;
     var typed = new Func<@string>[]{
@@ -55,8 +54,7 @@ internal static void Main() {
 
     fmt.Println("typed   ", typed[0](), typed[1]());
 
-    ref var b = ref heap<frame>(out var Ꮡb);
-    b = new frame(Name: "b", Inlined: true);
+    ref var b = ref heap<frame>(new frame(Name: "b", Inlined: true), out var Ꮡb);
 
         var bʗ1 = b;
     var boxed = new any[]{
@@ -89,8 +87,7 @@ internal static void Main() {
     var dʗ2 = d;
     fmt.Println("argument", got, call(() => dʗ2.label()));
 
-    ref var e = ref heap<frame>(out var Ꮡe);
-    e = new frame(Name: "e");
+    ref var e = ref heap<frame>(new frame(Name: "e"), out var Ꮡe);
     @string watch() => Ꮡe.Value.Name;
     var eʗ1 = e;
     
@@ -108,8 +105,7 @@ internal static void Main() {
 
     fmt.Println("chainV  ", chainV());
 
-    ref var h7 = ref heap<holder>(out var Ꮡh7);
-    h7 = new holder(f: new frame(Name: "f7"));
+    ref var h7 = ref heap<holder>(new holder(f: new frame(Name: "f7")), out var Ꮡh7);
     var chainP = Ꮡh7.of(holder.Ꮡf).bump;
     chainP();
 
@@ -151,8 +147,7 @@ internal static void Main() {
 
     fmt.Println("idxP    ", s11[0].Name);
 
-    ref var p12 = ref heap<frame>(out var Ꮡp12);
-    p12 = new frame(Name: "p12");
+    ref var p12 = ref heap<frame>(new frame(Name: "p12"), out var Ꮡp12);
     Action hold(Action f) => f;
     var argP = hold(Ꮡp12.bump);
     p12 = new frame(Name: "P12");
@@ -169,8 +164,7 @@ internal static void Main() {
 
     fmt.Println("idxMapV ", idxMapV());
 
-    ref var c14 = ref heap<frame>(out var Ꮡc14);
-    c14 = new frame(Name: "c14");
+    ref var c14 = ref heap<frame>(new frame(Name: "c14"), out var Ꮡc14);
     var thru = Ꮡc14.bump;
     thru();
     thru();

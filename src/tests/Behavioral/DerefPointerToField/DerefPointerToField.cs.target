@@ -22,10 +22,8 @@ internal static nint readVal(ref holder h) {
 }
 
 internal static void Main() {
-    ref var xs = ref heap<slice<nint>>(out var Ꮡxs);
-    xs = new nint[]{10, 20, 30}.slice();
-    ref var c = ref heap<nint>(out var Ꮡc);
-    c = 7;
+    ref var xs = ref heap<slice<nint>>(new nint[]{10, 20, 30}.slice(), out var Ꮡxs);
+    ref var c = ref heap<nint>(7, out var Ꮡc);
     var h = Ꮡ(new holder(xs: Ꮡxs, cnt: Ꮡc));
     fmt.Println(sumRange(ref (h).DerefOrNull()));
     fmt.Println(readVal(ref (h).DerefOrNull()));

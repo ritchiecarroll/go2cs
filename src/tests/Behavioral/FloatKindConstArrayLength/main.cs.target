@@ -99,8 +99,7 @@ internal static void Main() {
     var got = roundTrip(arg);
     fmt.Println("param", len(got), got[0]);
 
-    ref var lit = ref heap<array<byte>>(out var Ꮡlit);
-    lit = new byte[]{1, 2}.array(10);
+    ref var lit = ref heap<array<byte>>(new byte[]{1, 2}.array(10), out var Ꮡlit);
     fmt.Println("composite", len(lit), lit[0], lit[9]);
 
     ж<array<byte>> ptr = Ꮡlit;

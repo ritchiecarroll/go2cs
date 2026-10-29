@@ -29,8 +29,7 @@ internal static @string nameOf(any fn) {
 }
 
 internal static void Main() {
-    ref var t = ref heap<T>(out var Ꮡt);
-    t = new T(n: 1);
+    ref var t = ref heap<T>(new T(n: 1), out var Ꮡt);
     var p = Ꮡt;
 
     var tʗ1 = t;

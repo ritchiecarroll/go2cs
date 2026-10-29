@@ -73,8 +73,7 @@ internal static void Main() {
     z("outer{}", new outer());
     z("outer{A:NA{0,1}}", new outer(A: new NA(new uint8[]{0, 1}.array())));
     z("outer{I.S:x}", new outer(I: new inner(S: ((NS)(@string)"x"u8))));
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 0;
+    ref var n = ref heap<nint>(0, out var Ꮡn);
     z("outer{P:&n}", new outer(P: Ꮡn));
     z("outer{Sl:[]}", new outer(Sl: new nint[]{}.slice()));
 
@@ -88,8 +87,7 @@ internal static void Main() {
     var ev2 = reflect.ValueOf(Ꮡ(new outer(E: errors.New("x")))).Elem().FieldByName("E");
     fmt.Println("field E set kind:", ev2.Kind(), "IsZero:", ev2.IsZero());
 
-    ref var s = ref heap<slice<byte>>(out var Ꮡs);
-    s = new byte[]{1, 2, 3, 4}.slice();
+    ref var s = ref heap<slice<byte>>(new byte[]{1, 2, 3, 4}.slice(), out var Ꮡs);
     var rv = reflect.ValueOf(Ꮡs).Elem();
     rv.Grow(1);
     fmt.Println("Grow(1) len/cap:", rv.Len(), rv.Cap() >= 5, len(s), cap(s) >= 5);
@@ -99,16 +97,14 @@ internal static void Main() {
     re.Grow(3);
     fmt.Println("Grow(3) from nil:", re.Len(), re.Cap() >= 3, empty == nil);
 
-    ref var big = ref heap<slice<nint>>(out var Ꮡbig);
-    big = new slice<nint>(2, 2);
+    ref var big = ref heap<slice<nint>>(new slice<nint>(2, 2), out var Ꮡbig);
     var rb = reflect.ValueOf(Ꮡbig).Elem();
     rb.Grow(8);
     rb.SetLen(3);
     rb.Index(2).SetInt(99);
     fmt.Println("Grow+SetLen:", len(big), big[2], cap(big) >= 10);
 
-    ref var keep = ref heap<slice<nint>>(out var Ꮡkeep);
-    keep = new nint[]{7, 8}.slice();
+    ref var keep = ref heap<slice<nint>>(new nint[]{7, 8}.slice(), out var Ꮡkeep);
     var rk = reflect.ValueOf(Ꮡkeep).Elem();
     rk.Grow(0);
     fmt.Println("Grow(0):", len(keep), keep[0], keep[1]);

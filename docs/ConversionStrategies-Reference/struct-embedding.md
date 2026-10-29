@@ -47,7 +47,7 @@ freshly `make`d slice's elements) runs no constructor, so a value embed whose ty
 null backing and a pointer embed holds a null reference rather than a nil box; golib cannot run a constructor
 generically there. (Guarded by the `NamedTypeOverStruct` behavioral test — `var s shadowed` with explicit
 `s.ctxt.fn` and promoted `s.fn` access, plus `new(shadowed)`, vs Go.)
-<!-- The declared embed fields: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:40 `/*embed*/ public Padded Padded;`; src/tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.cs.target:20 `/*embed*/ public ж<MyError> MyError;`. The generator reads them: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:50 `private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=`, and builds each in both zero-value constructors: :2212 `result.AppendLine($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);");` (a pointer type maps to `new StandardBox<T>(nil)`, the nil box). The declaration: src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:96 `shadowed z = new(nil);`. Detection: src/go2cs/visitStructType.go:1106 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`. -->
+<!-- The declared embed fields: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:40 `/*embed*/ public Padded Padded;`; src/tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.cs.target:20 `/*embed*/ public ж<MyError> MyError;`. The generator reads them: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:50 `private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=`, and builds each in both zero-value constructors: :2212 `result.AppendLine($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);");` (a pointer type maps to `new StandardBox<T>(nil)`, the nil box). The declaration: src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:95 `shadowed z = new(nil);`. Detection: src/go2cs/visitStructType.go:1106 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`. -->
 
 **A C#-keyword-named embed composes generated names from the unescaped member name.** A Go struct named for a C# keyword (`type base struct{…}`) is emitted with the `@` escape (`@base`), and embedding it makes `@base` the member name. Standalone identifier positions keep the escape (the declared embed field `/*embed*/ internal @base @base;`, the constructor parameter, member accesses like `instance.@base.id`), but every *composed* generated name must strip it, because `@` is only valid leading an identifier: the `Ꮡ`-prefixed field-reference statics, the converter's `structFieldBoxName`, and the generator-owned backing field of the property form that hand-owned files may still spell (`ʗbase`; `ʗ@base` is CS1002). <!-- src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:47 `/*embed*/ internal @base @base;` --> (Guarded by the `NamedTypeOverStruct` extension — a keyword-named embed with promoted field/method access, a keyword-keyed composite literal, and a write through `&p.id` promoted through the embed, all vs Go.)
 
@@ -533,7 +533,7 @@ type (
     holder struct{ myInt; MyInt }
 )
 ```
-<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:47-51 -->
+<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:46-50 -->
 ```csharp
 internal partial struct embeddedLocalTypes_holder /*dyn*/ {
     /*embed*/ internal embeddedLocalTypes_myInt myInt;
@@ -652,7 +652,7 @@ literal keyed by the embedded field and a `new(T)` zero value, values vs Go).
 
 ## Promoted pointer methods descend multi-hop value-embed chains
 A pointer-receiver method promoted through two or more embedded VALUE structs descends hop by hop. Reached through a pointer, the first hop goes through the `&`-machinery (box-vs-parameter distinction), then one `.of(<Owner>.<field-box>)` view per additional hop -- the `ж<T>` field views compose onto the method's receiver box (reflect's `sliceType` embeds `abi.SliceType` embeds `abi.Type`, whose `Common()` extension binds `ж<abi.Type>` -- CS1929): `Ꮡp.of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(…)`. An addressable value (the enclosing `ref` receiver, or a local) takes the bare field path instead, which binds the `ref` overload directly -- `CrossPkgUser`'s local `rg`:
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs.target:235 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs.target:234 -->
 ```csharp
 rg.Device.Sensor.Calibrate(3D);
 ```

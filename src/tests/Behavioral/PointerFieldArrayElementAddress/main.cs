@@ -32,8 +32,7 @@ internal static void viaLocal(ref holder h, nint i) {
 }
 
 internal static void Main() {
-    ref var r = ref heap<rec>(out var Ꮡr);
-    r = new rec(future: new cycle[]{new(0), new(0), new(0)}.array());
+    ref var r = ref heap<rec>(new rec(future: new cycle[]{new(0), new(0), new(0)}.array()), out var Ꮡr);
     viaParam(Ꮡr, 0);
     viaParam(Ꮡr, 0);
     fmt.Println(r.future[0].n);

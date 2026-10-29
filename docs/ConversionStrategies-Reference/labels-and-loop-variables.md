@@ -397,7 +397,7 @@ receiver, and `PointerArrayRange`, which ranges a nil lowered parameter, a nil a
 :280 `expect("overString", "foreach (var (i, _) in str)")`; :281 `expect("overMap", "foreach (var (k, _) in m)")`.
 src/go2cs/rangeNilPointerArray_test.go `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`.
 src/tests/Behavioral/PointerArraySlice/main.go:63 `func rangeIndexOnly() {`, :90 `func (b *grid) fill() {`.
-src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:106 `foreach (var i in range(a)) {`;
+src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:105 `foreach (var i in range(a)) {`;
 src/tests/Behavioral/SlicePointerIdentity/main.go:16 `for i := range s {` -> main.cs.target:13 `foreach (var i in range(s)) {`;
 src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
 -> .cs.target:12 `foreach (var i in range(xs)) {`. -->

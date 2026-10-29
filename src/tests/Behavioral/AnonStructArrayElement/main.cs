@@ -73,11 +73,10 @@ internal partial struct localHeapAnon_firstFree /*dyn*/ {
 }
 
 internal static nint localHeapAnon() {
-    ref var firstFree = ref heap<localHeapAnon_firstFree>(out var ᏑfirstFree);
-    firstFree = new localHeapAnon_firstFree(
+    ref var firstFree = ref heap<localHeapAnon_firstFree>(new localHeapAnon_firstFree(
         @base: 3,
         bound: 7
-    );
+    ), out var ᏑfirstFree);
     var p = ᏑfirstFree;
     p.Value.bound = 10;
     return firstFree.@base + firstFree.bound;

@@ -17,8 +17,7 @@ internal static void show(@string label, reflectꓸValue v) {
 }
 
 internal static void Main() {
-    ref var s = ref heap<reflectꓸValue>(out var Ꮡs);
-    s = reflect.ValueOf("héllo");
+    ref var s = ref heap<reflectꓸValue>(reflect.ValueOf("héllo"), out var Ꮡs);
     for (nint i = 0; i < s.Len(); i++) {
         var e = s.Index(i);
         fmt.Printf("index %d: kind=%v type=%v val=%v canAddr=%v canSet=%v\n"u8,
@@ -33,21 +32,18 @@ internal static void Main() {
     show("named [:0]", sv.Slice(0, 0));
     show("named [6:6]", sv.Slice(6, 6));
 
-    ref var plain = ref heap<reflectꓸValue>(out var Ꮡplain);
-    plain = reflect.ValueOf("abcdef");
+    ref var plain = ref heap<reflectꓸValue>(reflect.ValueOf("abcdef"), out var Ꮡplain);
     show("plain [1:4]", plain.Slice(1, 4));
 
     var full = new nint[]{0, 1, 2, 3, 4, 5, 6, 7}.slice();
-    ref var rf = ref heap<reflectꓸValue>(out var Ꮡrf);
-    rf = reflect.ValueOf(full);
+    ref var rf = ref heap<reflectꓸValue>(reflect.ValueOf(full), out var Ꮡrf);
     var t3 = rf.Slice3(2, 5, 6);
     fmt.Printf("slice3 slice: len=%d cap=%d val=%v\n"u8, t3.Len(), t3.Cap(), t3.Interface());
 
     t3.Index(0).SetInt(99);
     fmt.Printf("slice3 aliases parent: %v\n"u8, full);
 
-    ref var arr = ref heap<array<nint>>(out var Ꮡarr);
-    arr = new nint[]{10, 11, 12, 13, 14, 15}.array();
+    ref var arr = ref heap<array<nint>>(new nint[]{10, 11, 12, 13, 14, 15}.array(), out var Ꮡarr);
     var ra = reflect.ValueOf(Ꮡarr).Elem();
     var a3 = ra.Slice3(1, 3, 5);
     fmt.Printf("slice3 array: len=%d cap=%d val=%v\n"u8, a3.Len(), a3.Cap(), a3.Interface());

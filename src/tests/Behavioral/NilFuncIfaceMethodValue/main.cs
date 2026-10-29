@@ -46,13 +46,11 @@ internal static void Main() {
     i = new GreeterᴠGreetable(g);
     fmt.Println("interface nil:", i == nil);
 
-    ref var v = ref heap<reflectꓸValue>(out var Ꮡv);
-    v = reflect.ValueOf(Ꮡi).Elem();
+    ref var v = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡi).Elem(), out var Ꮡv);
     fmt.Println("kind:", v.Kind(), "elem type:", v.Elem().Type(), "elem nil:", v.Elem().IsNil());
     fmt.Println("NumMethod:", v.NumMethod());
 
-    ref var m = ref heap<reflectꓸValue>(out var Ꮡm);
-    m = v.Method(0);
+    ref var m = ref heap<reflectꓸValue>(v.Method(0), out var Ꮡm);
     fmt.Println("method kind:", m.Kind(), "type:", m.Type());
     var mʗ1 = m;
     call("Method(0).Call", () => mʗ1.Call(default)[0].String());

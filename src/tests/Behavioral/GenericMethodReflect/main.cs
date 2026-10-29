@@ -140,10 +140,8 @@ internal static slice<reflectꓸValue> args(params ꓸꓸꓸany valuesʗp) {
 }
 
 internal static void probe(@string name, any value, any pointer, map<@string, slice<any>> @in) {
-    ref var v = ref heap<reflectꓸValue>(out var Ꮡv);
-    v = reflect.ValueOf(value);
-    ref var pv = ref heap<reflectꓸValue>(out var Ꮡpv);
-    pv = reflect.ValueOf(pointer);
+    ref var v = ref heap<reflectꓸValue>(reflect.ValueOf(value), out var Ꮡv);
+    ref var pv = ref heap<reflectꓸValue>(reflect.ValueOf(pointer), out var Ꮡpv);
 
     var vʗ1 = v;
     @try(name + " value methods"u8, () => names(vʗ1.Type()));

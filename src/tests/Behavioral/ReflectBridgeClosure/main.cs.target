@@ -120,8 +120,7 @@ internal static void Main() {
     var plain = (namedPlainBytes)slice<byte>((@string)"ok"u8);
     fmt.Printf("bytes(namedPlainBytes)=%q\n"u8, (@string)reflect.ValueOf(plain).Bytes());
 
-    ref var arr = ref heap<array<byte>>(out var Ꮡarr);
-    arr = new byte[]{(byte)'a', (byte)'b', (byte)'c'}.array();
+    ref var arr = ref heap<array<byte>>(new byte[]{(byte)'a', (byte)'b', (byte)'c'}.array(), out var Ꮡarr);
     fmt.Printf("bytes([3]byte)=%q\n"u8, (@string)reflect.ValueOf(Ꮡarr).Elem().Bytes());
 
     ref var dstPlain = ref heap<slice<byte>>(out var ᏑdstPlain);

@@ -42,13 +42,11 @@ internal static void Main() {
     setViaDefer(Ꮡa);
     fmt.Println(a);
 
-    ref var b = ref heap<nint>(out var Ꮡb);
-    b = 10;
+    ref var b = ref heap<nint>(10, out var Ꮡb);
     bumpInClosure(Ꮡb);
     fmt.Println(b);
 
-    ref var c = ref heap<nint>(out var Ꮡc);
-    c = 0;
+    ref var c = ref heap<nint>(0, out var Ꮡc);
     mixed(Ꮡc);
     fmt.Println(c);
 }

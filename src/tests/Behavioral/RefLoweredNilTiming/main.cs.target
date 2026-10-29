@@ -77,8 +77,7 @@ internal static void Main() {
     var e3 = i._<ж<elem>>();
     tryEager("boxed", ref (e3).DerefOrNull());
 
-    ref var good = ref heap<elem>(out var Ꮡgood);
-    good = new elem(x: 40);
+    ref var good = ref heap<elem>(new elem(x: 40), out var Ꮡgood);
     tryEager("live", ref good);
     fmt.Println("good.x:", good.x);
 

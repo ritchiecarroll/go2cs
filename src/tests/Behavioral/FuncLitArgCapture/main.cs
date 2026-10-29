@@ -35,8 +35,7 @@ internal static nint sum(this payload p) {
 }
 
 internal static nint nestedStructCapture() {
-    ref var p = ref heap<payload>(out var Ꮡp);
-    p = new payload(vals: new nint[]{1, 2, 3, 4}.slice());
+    ref var p = ref heap<payload>(new payload(vals: new nint[]{1, 2, 3, 4}.slice()), out var Ꮡp);
     var @out = new channel<nint>(1);
     var outʗ1 = @out;
     var pʗ1 = p;

@@ -13,8 +13,7 @@ partial struct ColorList {
 
 internal static void Main() {
     var red = new ColorList(2, "red", nil, nil);
-    ref var blue = ref heap<ColorList>(out var Ꮡblue);
-    blue = new ColorList(2, "blue", nil, nil);
+    ref var blue = ref heap<ColorList>(new ColorList(2, "blue", nil, nil), out var Ꮡblue);
 
     red.Next = Ꮡblue;
 

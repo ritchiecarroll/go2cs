@@ -71,8 +71,7 @@ internal static void arrayOfArrays() {
 }
 
 internal static void pointerArray() {
-    ref var b = ref heap<array<nint>>(out var Ꮡb);
-    b = new nint[]{1, 2, 3, 4}.array();
+    ref var b = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡb);
     var p = Ꮡb;
 
     foreach (var (i, v) in p.Value) {
@@ -146,8 +145,7 @@ internal static void mutableRangeVar() {
 }
 
 internal static void aliasedElement() {
-    ref var a = ref heap<array<nint>>(out var Ꮡa);
-    a = new nint[]{1, 2, 3, 4}.array();
+    ref var a = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡa);
     var q = Ꮡa.at<nint>(2);
 
     foreach (var (i, v) in a.ΔRangeSnapshot()) {

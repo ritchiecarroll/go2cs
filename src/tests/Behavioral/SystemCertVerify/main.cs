@@ -157,8 +157,7 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> chainCtx, @s
     ));
     para.Value.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)16;
 
-    ref var status = ref heap<syscall.CertChainPolicyStatus>(out var Ꮡstatus);
-    status = new syscall.CertChainPolicyStatus();
+    ref var status = ref heap<syscall.CertChainPolicyStatus>(new syscall.CertChainPolicyStatus(), out var Ꮡstatus);
     {
         var errΔ1 = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, chainCtx, para, Ꮡstatus); if (errΔ1 != nil) {
             return "call error: "u8 + errΔ1.Error();

@@ -12,8 +12,7 @@ partial struct @base {
 partial struct view /*@base*/;
 
 internal static ж<@base> makeBase() {
-    ref var x = ref heap<@base>(out var Ꮡx);
-    x = new @base(a: 10, b: 20);
+    ref var x = ref heap<@base>(new @base(a: 10, b: 20), out var Ꮡx);
     return Ꮡx;
 }
 
@@ -57,8 +56,7 @@ internal static void Main() {
 
     any boxed = ((intRef)nil);
     fmt.Println(classify(boxed));
-    ref var n = ref heap<int64>(out var Ꮡn);
-    n = (int64)5;
+    ref var n = ref heap<int64>((int64)5, out var Ꮡn);
     intRef r = Ꮡn;
     fmt.Println(r.Value, classify(r));
 

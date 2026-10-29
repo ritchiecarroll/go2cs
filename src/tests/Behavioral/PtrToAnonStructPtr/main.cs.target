@@ -13,8 +13,7 @@ internal partial struct main_data /*dyn*/ {
 }
 
 internal static void Main() {
-    ref var data = ref heap<ж<main_data>>(out var Ꮡdata);
-    data = Ꮡ(new main_data());
+    ref var data = ref heap<ж<main_data>>(Ꮡ(new main_data()), out var Ꮡdata);
     fmt.Println(decode(Ꮡdata));
     data.Value.Foo = "baz";
     fmt.Println((~data).Foo);

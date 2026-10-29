@@ -881,6 +881,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGuardedNilPointerParamDeref() => CheckTarget("GuardedNilPointerParamDeref");
 
     [TestMethod]
+    public void CheckHeapFoldShapes() => CheckTarget("HeapFoldShapes");
+
+    [TestMethod]
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]

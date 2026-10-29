@@ -14,8 +14,7 @@ internal static ж<T> clone<T>(ж<T> Ꮡp)
 {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    ref var c = ref heap<T>(out var Ꮡc);
-    c = p;
+    ref var c = ref heap<T>(p, out var Ꮡc);
     return Ꮡc;
 }
 
@@ -40,8 +39,7 @@ internal static ж<T> cloneRev<T>(ж<T> Ꮡp)
 {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    ref var c = ref heap<T>(out var Ꮡc);
-    c = p;
+    ref var c = ref heap<T>(p, out var Ꮡc);
     return Ꮡc;
 }
 
@@ -62,8 +60,7 @@ internal static ж<T> cloneChain<T>(ж<T> Ꮡp, nint depth)
     if (depth > 0) {
         return cloneChain<T>(clone<T>(Ꮡp), depth - 1);
     }
-    ref var c = ref heap<T>(out var Ꮡc);
-    c = p;
+    ref var c = ref heap<T>(p, out var Ꮡc);
     return Ꮡc;
 }
 
@@ -96,8 +93,7 @@ internal static ж<T> cloneNamed<T>(ж<T> Ꮡp)
 {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    ref var c = ref heap<T>(out var Ꮡc);
-    c = p;
+    ref var c = ref heap<T>(p, out var Ꮡc);
     return Ꮡc;
 }
 
@@ -106,20 +102,17 @@ internal static ж<T> cloneEmbedded<T>(ж<T> Ꮡp)
 {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    ref var c = ref heap<T>(out var Ꮡc);
-    c = p;
+    ref var c = ref heap<T>(p, out var Ꮡc);
     return Ꮡc;
 }
 
 internal static void Main() {
-    ref var t1 = ref heap<thing>(out var Ꮡt1);
-    t1 = new thing(n: 1, s: "one");
+    ref var t1 = ref heap<thing>(new thing(n: 1, s: "one"), out var Ꮡt1);
     var p1 = clone<thing>(Ꮡt1);
     t1.n = 42;
     fmt.Println((~p1).n, (~p1).s, t1.n);
 
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 7;
+    ref var n = ref heap<nint>(7, out var Ꮡn);
     var pn = clone<nint>(Ꮡn);
     n = 100;
     fmt.Println(pn.Value, n);

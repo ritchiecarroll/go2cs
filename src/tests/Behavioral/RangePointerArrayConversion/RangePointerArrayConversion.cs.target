@@ -6,8 +6,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static void Main() {
-    ref var a = ref heap<array<nint>>(out var Ꮡa);
-    a = new nint[]{10, 20, 30}.array();
+    ref var a = ref heap<array<nint>>(new nint[]{10, 20, 30}.array(), out var Ꮡa);
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡa);
     nint sum = 0;
     foreach (var (i, x) in ((ж<array<nint>>)(uintptr)(p)).Value) {

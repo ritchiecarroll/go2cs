@@ -63,8 +63,7 @@ public static nint ValShadowField(this ж<Thing> Ꮡt) {
     t.val = 2;
     nint got = 0;
     {
-        ref var tΔ1 = ref heap<Thing>(out var ᏑtΔ1);
-        tΔ1 = new Thing(val: 7);
+        ref var tΔ1 = ref heap<Thing>(new Thing(val: 7), out var ᏑtΔ1);
         var q = ᏑtΔ1;
         var p = ᏑtΔ1.of(Thing.Ꮡval);
         p.Value = 99;

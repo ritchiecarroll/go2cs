@@ -31057,4 +31057,164 @@ NilCompareShapes. `docsamples -recite` re-copied the two golden-sourced samples 
 
 — P2 (2026-10-28)
 
+---
+
+### 2026-10-28 — H (parity train seat #29, .2): H2, a heap-boxed single-LHS `x := rhs` folds its box and value into `ref var x = ref heap<T>(rhs, out var Ꮡx);`
+
+**Ruled** by COORD as parity train seat #29 (`docs/PLAN-parity-train.md`), after the measure-why the plan ordered:
+- R1: the type argument is always explicit, `ref var a = ref heap<nint>(10, out var Ꮡa);`, never the plan's inferred
+  `heap(10, …)`: inference mis-types (`10` reads int, not nint; an UntypedInt; a named wrapper; a u8 literal cannot
+  be a type argument at all), and the explicit form is the zero box's own spelling with the value inserted.
+- R2: single-LHS `:=` defines only, not discarded, with no for-init redirect. A multi-LHS define (Go evaluates every
+  RHS before it assigns), a tuple deconstruction and a for-init box hoisted ahead of its loop keep the split.
+
+The deferred-corpus window holds: converter, tests, goldens and docs land; `src/core` is measured and recorded, not
+committed.
+
+**Measure-why.** The split was structural, from the initial port (87465f5f58): the `:=` path wrote the zero box
+(`convertToHeapTypeDecl(ident, false)`) and fell through to the shared value emitter for `x = value;`. No fold had
+been tried and reverted (the "GoZero fold not adopted" ruling, 8268902d90, is the zero-value registry, not this).
+golib's `heap<T>(in T, out ж<T>)` boxes through `Ꮡ(target)`, the same struct copy `x = rhs;` made into the zero box,
+charging the same one GoMemProfile object; the value string the emitter writes already carries every transform (the
+typed-const materialization, an array's `.Clone()`, the channel-direction stamp, the interface conversion). What a
+fold drops is one `GoZero<T>()` per site.
+
+**The shape.** `heapTypeDeclWithValue` inserts the rendered value into the box declaration; the explicit `<T>` keeps
+the assignment's implicit conversion. `h := g` for a struct holding an array reads
+`ref var h = ref heap<grid>(g.ΔClone(), out var Ꮡh);`, the clone riding in the value as it did in the assignment.
+
+**Guards, red first.**
+- `TestHeapFoldEmission` (fixture: HeapFoldShapes' Go program) wants each fold in the ruled spelling (an untyped
+  constant, a string, a struct holding an array and its copy, a closure-written local, an anonymous struct) and the
+  box kept apart for a multi-LHS define, a tuple, a loop's per-iteration copy and a `var x T`; it refuses any
+  `ref heap(` that infers its type argument. Red at the base on all six folds; the kept-apart controls already held.
+- The new behavioral `HeapFoldShapes` runs those shapes against Go, each value read back through its pointer, with
+  COORD's condition (c): a struct holding an array copied by `:=` and mutated through its pointer after the fold,
+  whose source keeps its cells. All four phases passed at the base (its golden there the base emission).
+- pcensus H2, extended red-first twice in the seat:
+  - the item stripped `<T>` from both lines, so a dropped or changed type argument read as H2: the Join now keeps the
+    declaration's `<T>`, and a value spanning several lines folds its first line and closes on its last;
+  - on the real windows A/B the item as first written refused 79 lines, every one a correct fold it could not read:
+    a value written through the box (`Ꮡx.ValueSlot = v;`, `Ꮡx.Value = v;`, a closure-captured local), a trailing
+    comment or an if-init's condition after the value (the value now ends at its statement's own `;`,
+    statementEnd), a keyword-named local (`@out`), and a type argument holding a comment
+    (`heap</*<-*/channel<T>>`). Plants for each, red at the previous item. Two defects planted in the real diff (a
+    value, a type argument) each read as exactly that pair refused, and nothing else.
+
+**Condition (b), decided at the code.** commentcensus' blank-line walk (`walkScaffoldRe`) crosses only the BARE box,
+`heap<T>(out var Ꮡx);` with nothing before `out`, so a folded line is an ordinary statement and the walk stops at it,
+COORD's default; the comment-anchor search (`scaffoldRe`) steps over a line only while it lacks the Go statement's
+first identifier, which a folded line carries. No rule changed; commentcensus and the blank-line tests pass.
+
+**Footprint, the seat's prediction of record** (`data/parity-1262/seat29.lane.tsv`), measured at `2c737cfdfc`; the
+composition is the i7's rung. Two seeded roots, one binary per arm, `-stdlib -comments` over windows, linux and
+darwin; both arms rc 0, 0 degraded/failed/misrouted, 4,560 `.cs` per target.
+
+| Target | Files | `.cs` | package_info | +/- | Folds | MAP | Refused |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| windows | 292 | 197 (4 `.auto`) | 95 | +718 / -1,215 | 497 | 193 | 0 |
+| linux | 283 | 190 (1 `.auto`) | 93 | +676 / -1,142 | 466 | 189 | 0 |
+| darwin | 287 | 194 (1 `.auto`) | 93 | +709 / -1,200 | 491 | 193 | 0 |
+| union | 368 | 245 (4 `.auto`) | 123 | +929 / -1,523 | | | |
+
+Compile arm (COORD's discriminator for uncertainty 1): `go2cs-stdlib.slnx` on windows over each arm's tree, A 0
+errors, B 0 errors with 363 of 363 projects compiled in the run, both the one standing warning (CS9113, hand-owned
+`testing`). The `in T` overload took every implicit conversion, method group, lambda and u8-to-@string value.
+
+**The prediction, scored as posted** (windows / linux / darwin):
+- Folds: floor 408 / 395 / 408, ceiling 490 / 459 / 484; measured 497 / 466 / 491. MISSED, above the ceiling by 7
+  on each (the falsifier fired): the predicate read only `x = v;`, and 14 / 14 / 14 pairs assign through the box,
+  every one folded. Post hoc 422-504 / 409-473 / 422-498, measured inside.
+- Multi-LHS folded: 0 (MET). The 9 adjacent pairs left split on windows are each a multi-LHS define at the Go source
+  (go/parser `pos, op := p.pos, p.tok` twice, internal/godebug, net/http pattern, regexp/syntax, runtime/mprof); the
+  arithmetic leaves 2 folds the predicate's line pairing did not see, a residue named rather than chased.
+- A `heap(` without `<T>` on an added line: 0 (MET; the inferred-type count is identical in both arms, other paths).
+- Files: predicted at most 194 / 187 / 191, measured 197 / 190 / 194 (MISSED by the through-the-box files).
+  GoPositionMap: 193 / 189 / 193 re-encoded, one per changed non-`.auto` production file; map lines removed rather
+  than re-encoded: 0 (MET).
+- pcensus REFUSED 0 per target at the fixed instrument (MET there).
+
+**Condition (a), allocation.** No roster row naming an `AllocsPerRun` assert is in a package with a fold site
+(context, crypto/internal/fips140test, crypto/rand, net/netip, internal/zstd). Fifteen packages whose disclosures
+mention allocation hold fold sites, for the re-bank to re-measure (each fold drops one `GoZero<T>()`, so a count can
+only move toward Go's): crypto/md5, crypto/sha1, crypto/sha3, database/sql, fmt, internal/runtime/maps, log/slog,
+net, os, reflect, runtime, runtime/pprof, strings, sync, unique.
+
+**Known remainders.** A multi-LHS define keeps the split (R2: a fold would have to prove Go's evaluate-every-RHS order
+per site). A `var x T = v` declaration with an initializer keeps it too (the value-spec path, outside R2's `:=`;
+ReflectMethodTableWalk's `var s fmt.Stringer = stringish("hi")`). A loop's per-iteration copy (`x = xᴛN;`) and a
+tuple deconstruction are not folds.
+
+**Behavioral.** CNR moved 117 tests: the 115 predicted that this host regenerates, HeapFoldShapes, and
+NilAdapterOpsClosure (a through-the-box fold the predicate could not see). Of the predicted 124, nine did not move,
+each read at its Go source: four whose pairs are multi-LHS defines, EmbeddedValuePointerMethod (`d, e := chunk{},
+chunk{}`), ReflectMethodTableWalk (`var s T = v`), StackAppendBackingStore (`var x []int64` then a separate
+`x = append(…)`), and SendtoSeam and WritevIovecSeam, linux-native, which this windows host cannot regenerate: their
+goldens need minting on a linux host at landing.
+- `UpdateTestTargets --only` re-baselined the 117 (353 files with ItabLateRegistration's sub-package and 118
+  package_info.cs), every golden byte-equal to its emission.
+- pcensus `-items H2` on the goldens: H2 235, REFUSED 0; on the emissions H2 237, MAP 118, REFUSED 0.
+- docsamples re-copied 40 golden-sourced samples; the illustrations of a single `:=` (defer-panic-recover's `state`
+  twice, multi-assignment's `c`, pointers' `t`) and two passages that described the zero box and the next line take
+  the folded form; 27 provenance notes are re-cited (four of them, at boxes the seat folded, with new quotes or
+  fingerprints), and TestProvenanceNoteGuardFiresOnAPlantedStaleNote's control moves with its note. The plan's H2
+  entry records R1, R2 and the measure-why.
+
+**Gates** at the seat's tip (windows, H):
+- `go test ./...` (src/go2cs): 10 of 10 packages ok, 0 FAIL (go2cs 966 s, repoguard 146 s). The battery's first pass
+  read one red, TestNamedArrayWithGoCloneCopiesThroughValueCloneMethod: it matched the split spelling `r =
+  d.ΔClone();`, and `r := *d` escapes, so the emission is now the fold `ref var r = ref heap<sum>(d.ΔClone(), out
+  var Ꮡr);` with the `ΔClone()` the test exists for intact. The test reads the folded spelling and refuses any
+  `d.Clone()`; red at the base converter, green at the seat.
+- GenTests 346/346; GolibTests 2,257 passed, 36 skipped, 0 failed (unfiltered); golib Release `--no-incremental` 0
+  warnings, 0 errors, csc ran.
+- `go2cs.slnx` 0 errors (158 warnings, the standing count); `go2cs-stdlib.slnx` 0 errors, 0 warnings.
+- Behavioral, the 117 moved tests: total 466 = executed 466 = passed 466 (Transpile 117, Compile 117, Target 117,
+  Output 115: RangePointerArrayConversion and StructWithPointer register no Output test).
+
+**Rebased onto batch 84 (r2), on COORD's call: `53918293a1`.** The seat's 8 commits were cherry-picked onto the
+batch-84 tip (#28 landed), its goldens dropped and re-minted last; the converter delta (visitAssignStmt.go,
+escapeAnalysisOperations.go) keeps stable patch-id `3cd58e7c08`.
+- Conflicts: projitems takes parityTrainHeapFold_test.go beside #28's parityTrainPatternSwitch_test.go; the docs
+  conflicts were each a sample-source or note citation, resolved hunk by hunk to master's number, and the re-cite
+  commit at the end moves every one to the re-minted goldens; the BOARD row re-appended at the tail. A first pass
+  took master's WHOLE file for the conflicted pages, which dropped the seat's own sample re-copies and folded
+  illustrations there; it was caught by docsamples at the re-minted goldens (46 samples no longer matching) and
+  redone at the hunk, and the seat's docs additions now read line for line as before the rebase.
+- Twelve citations re-cited at the r2 tip, each cited text unchanged: six sample sources (docsamples `-recite`) and
+  six provenance notes (PointerSelectorDeref 24,34 -> 24,32, ArrayRangeSnapshot 151 -> 149, AnonymousStructs 41 ->
+  40, ReservedNameShadows 61 -> 60, LiftedLocalTypes 39 -> 38, pointers.md 2413-2422 -> 2411-2420).
+
+**The r2 footprint, scored against the prediction posted before arm B** (`seat29.lane.tsv`, block r2): EQUAL to the
+`2c737cfdfc` record on all three targets, with REFUSED 0 (MET on every quantity).
+- Two seeded roots at `53918293a1`, one binary per arm, `-stdlib -comments` over windows, linux and darwin; both arms
+  rc 0, 0 degraded/failed/misrouted, 4,560 `.cs` per target.
+- Files 292 / 283 / 287 (`.cs` 197 / 190 / 194, package_info 95 / 93 / 93), +718 / -1,215, +676 / -1,142,
+  +709 / -1,200; folds 497 / 466 / 491 (zero boxes 959 -> 462, 902 -> 436, 931 -> 440); pcensus H2 525 / 487 / 516,
+  MAP 193 / 189 / 193, REFUSED 0; the same file set and the same added and deleted count in every file. Multi-LHS
+  folded 0, an added `heap(` without `<T>` 0 (inferred-type boxes 94 / 96 / 102 in both arms), map lines removed 0.
+- The diffs' text differs from the record's in 185 / 181 / 181 line pairs: GoPositionMap re-encodes 174 / 168 / 170
+  (the landed seats moved the positions they encode), R5's un-aliased names inside a folded value 8 / 10 / 8, and one
+  fold's 3 lines re-indented by #28's nested pattern switch (internal/trace summary.cs). No folded value holds a rune
+  literal, so #23's bare rune literals meet no fold in production.
+- Compile arm, `go2cs-stdlib.slnx` over B's emission per GoTargetOS: windows 0 errors (CS9113 only), linux 0 errors
+  (CS9113 and the standing CS0219 `is64bit` in syscall/linux/exec_linux.cs, the same const in both arms), darwin 0
+  errors (CS9113 only); 362 of 362 `core` projects and the generator compiled in each run.
+
+**r2 behavioral and goldens.** CNR at the r2 tip moved the same 117 tests as before the rebase. `UpdateTestTargets
+--only` re-minted them (353 files: 117 `.cs.target`, their 117 `.cs`, ItabLateRegistration's sub-package
+`latelib/latelib.cs` and 118 package_info.cs), each golden byte-equal to its emission; four windows-exclusive projects
+(RawConnSyncSocketIO, SystemCertVerify, WsaProtocolInfo, WsaSendtoRoundTrip) among them were minted here, so none is
+left for the i7. pcensus `-items H2` on the goldens: H2 235, REFUSED 0; on
+the emissions H2 237, MAP 118, REFUSED 0, as before the rebase. SendtoSeam and WritevIovecSeam, linux-native, move
+on linux: each holds one single-LHS fold site (SendtoSeam's `receiverAddr := [4]byte{…}`, WritevIovecSeam's
+`bufs := net.Buffers{}`), which this host cannot regenerate; P2 mints them on top.
+
+**r2 gates, at the r2 tip on `53918293a1`, one battery on the box.** `go test -timeout 60m ./...` 10 of 10 packages
+ok (go2cs 927 s, pcensus and repoguard re-run); GenTests 349/349; GolibTests unfiltered 2,257 passed, 0 failed, 36
+skipped; golib Release `--no-incremental` 0 warnings, 0 errors, csc ran; `go2cs.slnx` 0 errors (158 standing
+warnings); `go2cs-stdlib.slnx` 0/0; behavioral on the 117 moved tests: total 466 = executed = passed (A1, B2, C3 117
+each, D4 115: RangePointerArrayConversion and StructWithPointer register no Output test); repoguard green.
+
+— H (2026-10-28)
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

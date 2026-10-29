@@ -132,8 +132,7 @@ internal static void report(@string label, ref sink s, int64 n, error err) {
 }
 
 internal static void Main() {
-    ref var bufs = ref heap<Buffers>(out var Ꮡbufs);
-    bufs = new Buffers(new slice<byte>[]{slice<byte>("go"u8), slice<byte>("2"u8), slice<byte>("cs"u8)}.slice());
+    ref var bufs = ref heap<Buffers>(new Buffers(new slice<byte>[]{slice<byte>("go"u8), slice<byte>("2"u8), slice<byte>("cs"u8)}.slice()), out var Ꮡbufs);
 
     var tcpSink = Ꮡ(new sink());
     var tcp = Ꮡ(new TCPConn(new conn(fd: tcpSink)));
@@ -158,8 +157,7 @@ internal static void Main() {
 
     {
         var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
-            ref var more = ref heap<Buffers>(out var Ꮡmore);
-            more = new Buffers(new slice<byte>[]{slice<byte>("!"u8)}.slice());
+            ref var more = ref heap<Buffers>(new Buffers(new slice<byte>[]{slice<byte>("!"u8)}.slice()), out var Ꮡmore);
             (n, _) = wv.writeBuffers(Ꮡmore);
             fmt.Println("direct", n, (@string)(~tcpSink).bytes);
         } else {

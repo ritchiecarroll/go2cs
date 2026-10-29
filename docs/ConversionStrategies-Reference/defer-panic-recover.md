@@ -952,7 +952,7 @@ not only for the func-literal-callee case, so `convFuncLit` (reached via convCal
 the argument's `LambdaContext`) routes any argument literal's captures to it, and they are emitted before
 the call — the guard's `defer run(func(){ pf.x = 77 })` shape:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:71-74 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:70-73 -->
 ```csharp
 var pfʗ1 = pf;
 defer(run, () => {
@@ -1011,7 +1011,7 @@ every other read in that body uses. `visitDeferStmt`/`visitGoStmt` enter through
 variant (`enterDeferGoLambdaConversion`) that copies the enclosing lambda's renames into the fresh
 state, so the arguments render exactly like any other expression in the enclosing body:
 
-<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:38-48 -->
+<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:37-47 -->
 ```csharp
 var baseʗ1 = @base;
 func(() => {
@@ -1224,7 +1224,7 @@ Because a named result lives in the literal's OWN scope, a reference to it in th
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
-<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:76 -->
+<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:75 -->
 ```csharp
 defer(() => hʗ1.close(), ref ᒐ);
 ```
@@ -1312,16 +1312,14 @@ element, output-compared vs Go; before the change red 3 and red 5 printed the ne
 The emission above binds the box (`Ꮡstate.free`) for a `defer state.free()` on a value local — but the CAPTURE analysis must cooperate. `defer`/`go`/closure bodies are lambda-conversion scopes: a variable used inside them that escapes to the heap is normally snapshot-copied into a `var stateʗ1 = state;` declaration so the C# closure captures a value, not an uncapturable ref-local. For an escaping value local used **only** as the receiver of a pointer-receiver method call (`state` a `handleState` value, `free` a `*handleState` method — log/slog handler.go's `defer state.free()`), that snapshot is doubly wrong: the address-taking is *implicit* (Go auto-takes `&state`), so the emission still binds the box — but of the *snapshot name* `Ꮡstateʗ1`, which is a plain value with no `Ꮡ` companion:
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
-ref var state = ref heap<handleState>(out var Ꮡstate);
-state = h.ch.newHandleState(buf, true, " "u8);
+ref var state = ref heap<handleState>(h.ch.newHandleState(buf, true, " "u8), out var Ꮡstate);
 var stateʗ1 = state;         // snapshot copy — WRONG
 defer(Ꮡstateʗ1.free, ref ᒐ);        // Ꮡstateʗ1 never declared → CS0103
 ```
 The capture analysis recognizes this implicit address-of (a value receiver of a pointer-receiver method, matching the pointee exactly and NAMED — the same guard the emission uses) as a reason to treat the local as a **box-ref var**, exactly like an explicit `&state`: it skips the snapshot, and the emission binds the original heap box:
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
-ref var state = ref heap<handleState>(out var Ꮡstate);
-state = h.ch.newHandleState(buf, true, " "u8);
+ref var state = ref heap<handleState>(h.ch.newHandleState(buf, true, " "u8), out var Ꮡstate);
 defer(Ꮡstate.free, ref ᒐ);          // binds the live variable's box
 ```
 This is not merely a compile fix — a value snapshot is taken at defer time, so it would miss any mutation the body makes to `state` before the deferred call runs; binding `Ꮡstate` matches Go's semantics of deferring against the *live* variable. Gated to an escaping local (a non-escaping one has no `Ꮡ` box and keeps the compiling `Ꮡ(copy)` form) used as a value receiver whose type is exactly the method's pointer-receiver pointee (an already-pointer receiver's box group is the pointer variable itself, whose snapshot name IS declared, so it is excluded). The same generalization silently corrects the closure form (`func(){ x.mutate() }` on an escaping value local previously mutated a lost copy — go/types conversions.go/typeset.go) and removes now-dead `var xʗ1 = x;` snapshots wherever the box was already used. (Guarded by the `DeferHeapLocalPtrMethod` behavioral test — a value local deferring a pointer-receiver method, mutated after the defer, with the deferred method observing the final value, output-compared vs Go.)

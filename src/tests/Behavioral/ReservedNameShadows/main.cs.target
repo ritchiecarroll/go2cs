@@ -43,8 +43,7 @@ partial struct ΔGoFrame {
 internal static nint deferInShadowedPackage() {
     GoFrame ᒐ = default;
     try {
-        ref var f = ref heap<ΔGoFrame>(out var Ꮡf);
-        f = new ΔGoFrame(k: 1);
+        ref var f = ref heap<ΔGoFrame>(new ΔGoFrame(k: 1), out var Ꮡf);
         defer(() => {
             Ꮡf.Value.k++;
         }, ref ᒐ);

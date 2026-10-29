@@ -16,8 +16,7 @@ public static @string Renamed(Buffer b) {
 }
 
 internal static void Main() {
-    ref var b = ref heap<Buffer>(out var Ꮡb);
-    b = new Buffer(ΔBuffer: inner.NewBuffer("alpha", 3), Tag: "tagged");
+    ref var b = ref heap<Buffer>(new Buffer(ΔBuffer: inner.NewBuffer("alpha", 3), Tag: "tagged"), out var Ꮡb);
 
     fmt.Println(b.ΔBuffer.Data, b.ΔBuffer.N);
     fmt.Println(b.Data, b.N);

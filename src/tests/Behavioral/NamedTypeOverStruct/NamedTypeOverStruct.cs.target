@@ -87,8 +87,7 @@ internal static void Main() {
     d.tag = 1;
     fmt.Println(d.id, d.tag, d.twice());
 
-    ref var e = ref heap<derived>(out var Ꮡe);
-    e = new derived(@base: new @base(id: 21), tag: 2);
+    ref var e = ref heap<derived>(new derived(@base: new @base(id: 21), tag: 2), out var Ꮡe);
     var p = Ꮡe;
     bump(ref (p.of(derived.Ꮡid)).DerefOrNull());
     fmt.Println(e.id, e.tag, e.twice());

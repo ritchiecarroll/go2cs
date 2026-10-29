@@ -55,8 +55,7 @@ internal static void Main() {
 
     ref var u = ref heap(new uint16(), out var Ꮡu);
     u = 9;
-    ref var pu = ref heap<ж<uint16>>(out var Ꮡpu);
-    pu = Ꮡu;
+    ref var pu = ref heap<ж<uint16>>(Ꮡu, out var Ꮡpu);
     fmt.Println("ptrptr nonnil nonzero:", addrOfPtrPtr(Ꮡpu) != 0);
     fmt.Println("basic nonnil nonzero :", addrOfBasic(Ꮡu) != 0);
 

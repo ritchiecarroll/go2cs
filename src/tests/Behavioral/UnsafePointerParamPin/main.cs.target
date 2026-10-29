@@ -57,8 +57,7 @@ internal static void Main() {
     fmt.Println(Ꮡt.read());
     fmt.Println(Ꮡt.tricky());
 
-    ref var h = ref heap<holder>(out var Ꮡh);
-    h = new holder(v: 9);
+    ref var h = ref heap<holder>(new holder(v: 9), out var Ꮡh);
     var q = Ꮡh.of(holder.Ꮡv);
     fmt.Println(q.Value);
 

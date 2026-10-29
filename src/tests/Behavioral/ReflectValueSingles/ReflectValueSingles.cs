@@ -93,12 +93,9 @@ internal partial struct main_ptrSlots /*dyn*/ {
 }
 
 internal static void Main() {
-    ref var xs = ref heap<slice<nint>>(out var Ꮡxs);
-    xs = new nint[]{1, 2, 3, 4, 5, 6, 7, 8}.slice();
-    ref var xa = ref heap<array<nint>>(out var Ꮡxa);
-    xa = new nint[]{10, 20, 30, 40, 50, 60, 70, 80}.array();
-    ref var vs = ref heap<reflectꓸValue>(out var Ꮡvs);
-    vs = reflect.ValueOf(Ꮡxs).Elem();
+    ref var xs = ref heap<slice<nint>>(new nint[]{1, 2, 3, 4, 5, 6, 7, 8}.slice(), out var Ꮡxs);
+    ref var xa = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50, 60, 70, 80}.array(), out var Ꮡxa);
+    ref var vs = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡxs).Elem(), out var Ꮡvs);
     var vsʗ1 = vs;
     expectPanic("SetLen(10)", "SetLen", () => {
         vsʗ1.SetLen(10);
@@ -133,8 +130,7 @@ internal static void Main() {
     expectPanic("SetLen(6)>cap", "SetLen", () => {
         vsʗ7.SetLen(6);
     });
-    ref var va = ref heap<reflectꓸValue>(out var Ꮡva);
-    va = reflect.ValueOf(Ꮡxa).Elem();
+    ref var va = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡxa).Elem(), out var Ꮡva);
     var vaʗ1 = va;
     expectPanic("array SetLen", "SetLen", () => {
         vaʗ1.SetLen(8);
@@ -156,8 +152,7 @@ internal static void Main() {
     var y = reflect.ValueOf(x).Bytes();
     y[0] = 42;
     fmt.Println("S bytes:", y, "aliases x:", x[0] == 42);
-    ref var a = ref heap<main_A>(out var Ꮡa);
-    a = new main_A(new byte[]{1, 2, 3, 4}.array());
+    ref var a = ref heap<main_A>(new main_A(new byte[]{1, 2, 3, 4}.array()), out var Ꮡa);
     expectPanic("Bytes [4]byte value", "unaddressable", () => {
         reflect.ValueOf(Ꮡa.Value).Bytes();
     });
@@ -171,8 +166,7 @@ internal static void Main() {
     fmt.Println("*[4]B bytes:", reflect.ValueOf(Ꮡ(new array<main_B>(4))).Elem().Bytes());
     fmt.Println("SB    bytes:", reflect.ValueOf(new main_SB(new main_B[]{1, 2, 3, 4}.slice())).Bytes());
     fmt.Println("*AB   bytes:", reflect.ValueOf(@new<main_AB>()).Elem().Bytes());
-    ref var ab = ref heap<main_AB>(out var Ꮡab);
-    ab = new main_AB(new main_B[]{5, 6, 7, 8}.array());
+    ref var ab = ref heap<main_AB>(new main_AB(new main_B[]{5, 6, 7, 8}.array()), out var Ꮡab);
     expectPanic("Bytes AB value", "unaddressable", () => {
         reflect.ValueOf(Ꮡab.Value).Bytes();
     });
@@ -241,8 +235,7 @@ internal static void Main() {
     var ap = reflect.ValueOf(src).Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(4L))).Interface()._<ж<array<byte>>>();
     ap.Value[2] = 99;
     fmt.Println("array pointer aliases the slice:", src[2] == 99);
-    ref var sh = ref heap<reflectꓸValue>(out var Ꮡsh);
-    sh = reflect.ValueOf(new byte[]{1, 2, 3, 4}.slice());
+    ref var sh = ref heap<reflectꓸValue>(reflect.ValueOf(new byte[]{1, 2, 3, 4}.slice()), out var Ꮡsh);
     var shʗ1 = sh;
     expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", () => {
         shʗ1.Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L)));

@@ -17,8 +17,7 @@ internal static (ж<nint>, Network) lookup(bool ok) {
     if (!ok) {
         return (default, (@string)"");
     }
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 7;
+    ref var n = ref heap<nint>(7, out var Ꮡn);
     return (Ꮡn, tcpˢ);
 }
 

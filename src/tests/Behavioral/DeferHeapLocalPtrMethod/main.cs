@@ -20,8 +20,7 @@ internal static void add(this ref state s, nint d) {
 internal static void run() {
     GoFrame ᒐ = default;
     try {
-        ref var st = ref heap<state>(out var Ꮡst);
-        st = new state(n: 0, label: "run");
+        ref var st = ref heap<state>(new state(n: 0, label: "run"), out var Ꮡst);
         defer(Ꮡst.free, ref ᒐ);
         st.add(5);
         st.add(10);
@@ -34,8 +33,7 @@ internal static void run() {
 internal static void twice() {
     GoFrame ᒐ = default;
     try {
-        ref var st = ref heap<state>(out var Ꮡst);
-        st = new state(n: 100, label: "twice");
+        ref var st = ref heap<state>(new state(n: 100, label: "twice"), out var Ꮡst);
         defer(Ꮡst.free, ref ᒐ);
         st.add(1);
         fmt.Printf("during twice: n=%d\n"u8, st.n);

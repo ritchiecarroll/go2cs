@@ -32,8 +32,7 @@ internal static void assignThrough(ж<Pt> p) {
 }
 
 internal static Pt derefLocal() {
-    ref var pt = ref heap<Pt>(out var Ꮡpt);
-    pt = new Pt(3, 4);
+    ref var pt = ref heap<Pt>(new Pt(3, 4), out var Ꮡpt);
     var q = Ꮡpt;
     return ~q;
 }
@@ -46,8 +45,7 @@ internal static ж<Pt> advance(ж<Pt> Ꮡp) {
 }
 
 internal static void Main() {
-    ref var pt = ref heap<Pt>(out var Ꮡpt);
-    pt = new Pt(1, 2);
+    ref var pt = ref heap<Pt>(new Pt(1, 2), out var Ꮡpt);
     ref var c = ref heap(new Count(), out var Ꮡc);
     c = 42;
 

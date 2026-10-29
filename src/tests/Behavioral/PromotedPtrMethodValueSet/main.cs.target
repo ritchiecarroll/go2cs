@@ -96,32 +96,27 @@ internal static void describe(@string label, any v) {
 }
 
 internal static void Main() {
-    ref var p = ref heap<SameP>(out var Ꮡp);
-    p = new SameP(Ꮡ(new Inner(10)));
+    ref var p = ref heap<SameP>(new SameP(Ꮡ(new Inner(10))), out var Ꮡp);
     describe("SameP", p);
     describe("*SameP", Ꮡp);
     fmt.Println("SameP inner after:", p.n);
 
-    ref var v = ref heap<SameV>(out var Ꮡv);
-    v = new SameV(new Inner(20));
+    ref var v = ref heap<SameV>(new SameV(new Inner(20)), out var Ꮡv);
     describe("SameV", v);
     describe("*SameV", Ꮡv);
     fmt.Println("SameV inner after:", v.n);
 
-    ref var vp = ref heap<OuterVP>(out var Ꮡvp);
-    vp = new OuterVP(new MidP(Ꮡ(new Inner(30))));
+    ref var vp = ref heap<OuterVP>(new OuterVP(new MidP(Ꮡ(new Inner(30)))), out var Ꮡvp);
     describe("OuterVP", vp);
     describe("*OuterVP", Ꮡvp);
     fmt.Println("OuterVP inner after:", vp.n);
 
-    ref var pv = ref heap<OuterPV>(out var Ꮡpv);
-    pv = new OuterPV(Ꮡ(new MidV(new Inner(40))));
+    ref var pv = ref heap<OuterPV>(new OuterPV(Ꮡ(new MidV(new Inner(40)))), out var Ꮡpv);
     describe("OuterPV", pv);
     describe("*OuterPV", Ꮡpv);
     fmt.Println("OuterPV inner after:", pv.n);
 
-    ref var vv = ref heap<OuterVV>(out var Ꮡvv);
-    vv = new OuterVV(new MidV(new Inner(50)));
+    ref var vv = ref heap<OuterVV>(new OuterVV(new MidV(new Inner(50))), out var Ꮡvv);
     describe("OuterVV", vv);
     describe("*OuterVV", Ꮡvv);
     fmt.Println("OuterVV inner after:", vv.n);

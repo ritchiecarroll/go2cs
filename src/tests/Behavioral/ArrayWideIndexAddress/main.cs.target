@@ -5,8 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    ref var a = ref heap<array<nint>>(out var Ꮡa);
-    a = new nint[]{10, 20, 30, 40}.array();
+    ref var a = ref heap<array<nint>>(new nint[]{10, 20, 30, 40}.array(), out var Ꮡa);
 
     uintptr i = 2;
     var pi = Ꮡa.at<nint>((ulong)(i));

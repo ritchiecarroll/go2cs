@@ -26,8 +26,7 @@ internal static void preformat(this ж<handler> Ꮡh, @string s) {
 }
 
 internal static void Main() {
-    ref var b = ref heap<slice<byte>>(out var Ꮡb);
-    b = new slice<byte>(0, 8);
+    ref var b = ref heap<slice<byte>>(new slice<byte>(0, 8), out var Ꮡb);
     var p = Ꮡb.Reinterpret<slice<byte>, Buf>();
     p.ValueSlot = append(p.ValueSlot, (byte)'h', (byte)'i');
     p.ValueSlot = append(p.ValueSlot, (byte)'!');
@@ -37,16 +36,14 @@ internal static void Main() {
     fmt.Println(len(b));
 
     ж<Buf> makeBuf() {
-        ref var s = ref heap<slice<byte>>(out var Ꮡs);
-        s = new slice<byte>(0, 4);
+        ref var s = ref heap<slice<byte>>(new slice<byte>(0, 4), out var Ꮡs);
         return Ꮡs.Reinterpret<slice<byte>, Buf>();
     }
     var q = makeBuf();
     q.ValueSlot = append(q.ValueSlot, (byte)'x', (byte)'y');
     fmt.Println((@string)(slice<byte>)q.ValueSlot);
 
-    ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
-    src = new slice<byte>(0, 4);
+    ref var src = ref heap<slice<byte>>(new slice<byte>(0, 4), out var Ꮡsrc);
     fmt.Println(fillVia(Ꮡsrc));
     fmt.Println((@string)src);
     fmt.Println(len(src));

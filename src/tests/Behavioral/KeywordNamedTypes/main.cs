@@ -88,8 +88,7 @@ internal static sizer std = new @fixed(n: 3);
 internal static void Main() {
     fmt.Println(std.size("hello"));
 
-    ref var f = ref heap<@fixed>(out var Ꮡf);
-    f = new @fixed(n: 1);
+    ref var f = ref heap<@fixed>(new @fixed(n: 1), out var Ꮡf);
     fmt.Println(f.size("ab"));
 
     f.grow(4);

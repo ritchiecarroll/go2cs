@@ -29,21 +29,17 @@ internal static void Main() {
     fmt.Println("stringSwap:", s1, s2);
 
     ref var events = ref heap<slice<@string>>(out var Ꮡevents);
-    ref var t1 = ref heap<traceHooks>(out var Ꮡt1);
-    t1 = new traceHooks(OnEvent: (@string s) => {
+    ref var t1 = ref heap<traceHooks>(new traceHooks(OnEvent: (@string s) => {
         Ꮡevents.ValueSlot = append(Ꮡevents.ValueSlot, "new:"u8 + s);
-    });
-    ref var t2 = ref heap<traceHooks>(out var Ꮡt2);
-    t2 = new traceHooks(OnEvent: (@string s) => {
+    }), out var Ꮡt1);
+    ref var t2 = ref heap<traceHooks>(new traceHooks(OnEvent: (@string s) => {
         Ꮡevents.ValueSlot = append(Ꮡevents.ValueSlot, "old:"u8 + s);
-    });
+    }), out var Ꮡt2);
     var tv = reflect.ValueOf(Ꮡt1).Elem();
     var ov = reflect.ValueOf(Ꮡt2).Elem();
     var tf = tv.Field(0);
-    ref var of = ref heap<reflectꓸValue>(out var Ꮡof);
-    of = ov.Field(0);
-    ref var tfCopy = ref heap<reflectꓸValue>(out var ᏑtfCopy);
-    tfCopy = reflect.ValueOf(tf.Interface());
+    ref var of = ref heap<reflectꓸValue>(ov.Field(0), out var Ꮡof);
+    ref var tfCopy = ref heap<reflectꓸValue>(reflect.ValueOf(tf.Interface()), out var ᏑtfCopy);
     var ofʗ1 = of;
     var tfCopyʗ1 = tfCopy;
     var newFunc = reflect.MakeFunc(tf.Type(), (slice<reflectꓸValue> args) => {
@@ -55,8 +51,7 @@ internal static void Main() {
     t1.OnEvent("connect");
     fmt.Println("events:", events);
 
-    ref var h = ref heap<traceHooks>(out var Ꮡh);
-    h = new traceHooks();
+    ref var h = ref heap<traceHooks>(new traceHooks(), out var Ꮡh);
     var hv = reflect.ValueOf(Ꮡh).Elem();
     var sumField = hv.Field(1);
     var made = reflect.MakeFunc(sumField.Type(), (slice<reflectꓸValue> args) => {
@@ -83,8 +78,7 @@ internal static void Main() {
     ref var isNil = ref heap<Func<ж<nint>, bool>>(out var ᏑisNil);
     var nv = reflect.ValueOf(ᏑisNil).Elem();
     nv.Set(reflect.MakeFunc(nv.Type(), (slice<reflectꓸValue> args) => new reflectꓸValue[]{reflect.ValueOf(args[0].IsNil())}.slice()));
-    ref var x = ref heap<nint>(out var Ꮡx);
-    x = 5;
+    ref var x = ref heap<nint>(5, out var Ꮡx);
     fmt.Println("isNil:", isNil(nil), isNil(Ꮡx));
 
     ref var sum4 = ref heap<Func<array<byte>, nint>>(out var Ꮡsum4);

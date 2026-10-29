@@ -32,8 +32,7 @@ internal static void report(@string prefix, Tally tʗp, nint n) {
 }
 
 internal static void Main() {
-    ref var @base = ref heap<Tally>(out var Ꮡbase);
-    @base = new Tally(total: 2, log: "d");
+    ref var @base = ref heap<Tally>(new Tally(total: 2, log: "d"), out var Ꮡbase);
 
     var baseʗ1 = @base;
     func(() => {

@@ -43,8 +43,7 @@ partial struct arrHolder {
 }
 
 internal static void assignCopies() {
-    ref var src = ref heap<array<nint>>(out var Ꮡsrc);
-    src = new nint[]{1, 2, 3}.array();
+    ref var src = ref heap<array<nint>>(new nint[]{1, 2, 3}.array(), out var Ꮡsrc);
     var cpy = src.Clone();
     cpy[0] = 99;
     fmt.Println(src[0], cpy[0]);

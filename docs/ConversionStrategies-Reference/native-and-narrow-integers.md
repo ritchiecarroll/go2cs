@@ -167,7 +167,7 @@ and width, so a guarded shift needs no cast of its own.
 ```go
 var x int8 = (a + a) >> n
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:173 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:172 -->
 ```csharp
 int8 x = (int8)(((int8)(a + a)).Rsh(n));
 ```
@@ -238,7 +238,7 @@ prints its result under the label.
 ```go
 sl[counted(1)] /= m1
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:166 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:165 -->
 ```csharp
 sl[counted(1)].QuoAssign(m1);
 ```

@@ -29,8 +29,7 @@ internal static ж<nint> intFieldAddr(ж<conf> c, @string name) {
 }
 
 internal static void Main() {
-    ref var c = ref heap<conf>(out var Ꮡc);
-    c = new conf(name: "cfg", version: "v0", depth: 3);
+    ref var c = ref heap<conf>(new conf(name: "cfg", version: "v0", depth: 3), out var Ꮡc);
 
     boolFieldAddr(Ꮡc, "trace").Value = true;
     stringFieldAddr(Ꮡc, "version").Value = "v1";

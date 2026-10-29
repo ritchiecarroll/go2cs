@@ -25,12 +25,10 @@ internal static void Main() {
 
     ref var p = ref heap(new atomic.Pointer<nint>(), out var Ꮡp);
     fmt.Println("ptr nil:", Ꮡp.Load() == nil);
-    ref var a = ref heap<nint>(out var Ꮡa);
-    a = 1;
+    ref var a = ref heap<nint>(1, out var Ꮡa);
     Ꮡp.Store(Ꮡa);
     fmt.Println("ptr load:", Ꮡp.Load().Value);
-    ref var b = ref heap<nint>(out var Ꮡb);
-    b = 2;
+    ref var b = ref heap<nint>(2, out var Ꮡb);
     fmt.Println("ptr cas no:", Ꮡp.CompareAndSwap(Ꮡb, Ꮡb));
     fmt.Println("ptr cas ok:", Ꮡp.CompareAndSwap(Ꮡa, Ꮡb));
     fmt.Println("ptr final:", Ꮡp.Load().Value);

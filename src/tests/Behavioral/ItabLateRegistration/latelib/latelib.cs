@@ -6,10 +6,8 @@ using go.ItabLateRegistration;
 partial class latelib_package {
 
 public static (@string, nint) Prime() {
-    ref var c = ref heap<lib.Circle>(out var Ꮡc);
-    c = new lib.Circle(R: 7);
-    ref var q = ref heap<lib.Square>(out var Ꮡq);
-    q = new lib.Square(S: 8);
+    ref var c = ref heap<lib.Circle>(new lib.Circle(R: 7), out var Ꮡc);
+    ref var q = ref heap<lib.Square>(new lib.Square(S: 8), out var Ꮡq);
 
     lib.Named n = new lib.CircleжNamed(Ꮡc);
     lib.Sized s = new lib.SquareжSized(Ꮡq);

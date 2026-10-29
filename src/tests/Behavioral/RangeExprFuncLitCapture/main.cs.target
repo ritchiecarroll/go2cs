@@ -38,8 +38,7 @@ internal static void Main() {
     fmt.Println("total", total);
 
     for (nint round = 0; round < 2; round++) {
-        ref var seen = ref heap<slice<@string>>(out var Ꮡseen);
-        seen = new @string[]{}.slice();
+        ref var seen = ref heap<slice<@string>>(new @string[]{}.slice(), out var Ꮡseen);
 
         foreach (var (_, add) in new Action<@string>[]{
             (@string s) => {

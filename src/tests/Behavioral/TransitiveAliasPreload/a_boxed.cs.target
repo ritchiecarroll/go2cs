@@ -6,8 +6,7 @@ partial class main_package {
 
 internal static any peekPtr(nint code) {
     var b = CrossPkgBox.New(code);
-    ref var s = ref heap<CrossPkgLibꓸStatus>(out var Ꮡs);
-    s = b.S;
+    ref var s = ref heap<CrossPkgLibꓸStatus>(b.S, out var Ꮡs);
     return Ꮡs;
 }
 

@@ -1,0 +1,51 @@
+# Seat #29 (H2: a heap-boxed single-LHS `x := rhs` folds its box and value into `ref var x = ref heap<T>(rhs, out var Ꮡx);`) -- the LANE's measurement at its branch base, the seat's PREDICTION of record under PLAN-parity-train §3.2; the rung of record is the i7's at landing.
+key	value
+base	2c737cfdfcd20278e3d04e8151779384e95086da
+arm_A_commit	2c737cfdfc (the base converter)
+arm_A_src_go2cs_tree	11807a7356cf0f817e192e3d502be9ff028f4ed8
+arm_A_sha256	bcfac9cb121f8e617cd2f9d4d876021219abb026a6c4fe71b76990f09945353a
+arm_B_commit	64911f7970 (the seat's converter)
+arm_B_src_go2cs_tree	a8ca86241e2990c562e35e756e3d3a95a7cf9b96
+arm_B_sha256	3b7f61fb4bc09ddac321c9d843452820aa1dc8ede1b7712aec3b31f16caae5f0
+build	go build -trimpath -buildvcs=false, from git archive of each commit's src/go2cs
+go	go1.26.10 windows/amd64
+emission	-stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64, one invocation per arm, each arm its own root seeded by git archive of base (src/core, src/version.props, docs/validation, docs/ValidatedTestPackages.md)
+write_assertions	both arms rc 0; degraded 0; failed 0 on each target; misrouted 0; stage .cs 4560 per target per arm
+classifier	pcensus classify -items H2 at the seat's instrument (type argument kept; through-the-box, statement-end, @name and commented-type-argument forms), per target
+compile_arm	windows go2cs-stdlib.slnx over each arm's windows tree: A 0 errors; B 0 errors, 363 of 363 projects compiled in the run; both read the one standing warning (CS9113, hand-owned testing)
+#
+target	files	cs	package_info	auto	added	deleted	H2	MAP	refused	patch_sha256_crlf_stripped_16
+windows	292	197	95	4	718	1215	525	193	0	db766963f6c763ab
+linux	283	190	93	1	676	1142	487	189	0	14b6ddeab68fe7f1
+darwin	287	194	93	1	709	1200	516	193	0	b4ba18ab904d418d
+union	368	245	123	4	929	1523	-	-	-	-
+#
+quantity (windows / linux / darwin)	predicted (posted before arm B)	measured	score
+folds (zero boxes gone)	floor 408 / 395 / 408, ceiling 490 / 459 / 484	497 / 466 / 491	MISSED (above the ceiling by 7 on each): the predicate read only `x = v;`, and 14 / 14 / 14 pairs assign through the box (`Ꮡx.ValueSlot = v;`, a closure-captured local), every one folded; post hoc 422-504 / 409-473 / 422-498, measured inside
+multi-LHS folded (falsifier)	0	0: the 9 adjacent pairs left split on windows are each a multi-LHS define at the Go source (go/parser `pos, op := p.pos, p.tok` twice, godebug, net/http pattern, regexp/syntax, runtime/mprof)	MET; the arithmetic leaves 2 folds unseen by the predicate's line-pairing (residue named)
+`heap(` without <T> on added lines	0	0 (inferred-type `heap(` count identical in both arms: 94 / 96 / 102, other paths)	MET
+files (.cs)	<= 194 / 187 / 191	197 / 190 / 194	MISSED by 3 (files whose only folds assign through the box)
+GoPositionMap re-encodes	<= 189 / 185 / 189, map lines removed 0	193 / 189 / 193, map lines removed 0	count MISSED by the same files; removed-rather-than-re-encoded MET
+pcensus -items H2 REFUSED	0	0 / 0 / 0 at the fixed instrument	MET at the fixed instrument; the item as first written refused 79 / 70 / 81, every one a fold it could not read
+#
+r2 (rebased onto batch 84 on COORD's call, re-measured)	value
+r2_base	53918293a10313207f9501d22e16ff25efdab4fb
+r2_arm_A	53918293a1 (the base converter); src/go2cs tree 6a852bef3c4b779d80f61e960a5646fd077c9bc7; sha256 3fad96473263893aaea08703f5c44a79a78ea1cb7d75d46e1af9971fa37c6d82
+r2_arm_B	the r2 seat converter; src/go2cs tree dae5341518892662df134804dcb99a43d1885a6b (later r2 commits touch docs and goldens only); sha256 a5e401eb9334203162c3ae843af661934f66c76615a3262fc890bf334211b968
+r2_converter_patch_id	3cd58e7c08 (visitAssignStmt.go, escapeAnalysisOperations.go), the same at 2c737cfdfc and 53918293a1
+r2_write_assertions	both arms rc 0; degraded 0; failed 0 on each target; misrouted 0; stage .cs 4560 per target per arm
+r2_classifier	pcensus classify -items H2 at the r2 instrument (#28's file pool and fixpoint key below H2's Join)
+r2_compile_arm	go2cs-stdlib.slnx over B's emission per GoTargetOS (-c Debug -m --no-incremental -p:GoTargetOS=<goos> -p:UseSharedCompilation=false): windows 0 errors (CS9113 only), linux 0 errors (CS9113 and the standing CS0219 `is64bit` in syscall/linux/exec_linux.cs, the same const in both arms), darwin 0 errors (CS9113 only); 362 of 362 `core` projects and the generator compiled in each run.
+#
+r2 target	files	cs	package_info	auto	added	deleted	H2	MAP	refused	patch_sha256_crlf_stripped_16
+windows	292	197	95	4	718	1215	525	193	0	160605854d7bcf63
+linux	283	190	93	1	676	1142	487	189	0	06b0225bb45e46f6
+darwin	287	194	93	1	709	1200	516	193	0	22e20558c690af71
+#
+r2 quantity	predicted (posted before arm B)	measured	score
+files, cs, package_info, added, deleted, MAP per target	equal to the 2c737cfdfc rows above	equal on every target; the same file set and the same added/deleted count in every file	MET
+folds (zero boxes gone)	497 / 466 / 491	497 / 466 / 491 (zero boxes 959 -> 462, 902 -> 436, 931 -> 440); pcensus H2 525 / 487 / 516, as recorded	MET
+pcensus -items H2 REFUSED	0 per target	0 / 0 / 0	MET
+multi-LHS folded; heap( without <T> on an added line	0; 0	0 (H2 and per-file counts unchanged); 0 (inferred-T 94 / 96 / 102 in both arms)	MET
+map lines removed rather than re-encoded	0	0	MET
+text of the diff lines	(not predicted)	185 / 181 / 181 line pairs differ from the 2c737cfdfc diff: GoPositionMap re-encodes 174 / 168 / 170, R5 names 8 / 10 / 8, one fold re-indented by S1's nested pattern switch 3 / 3 / 3 (internal/trace summary.cs); no folded value holds a rune literal (#23)	attributed

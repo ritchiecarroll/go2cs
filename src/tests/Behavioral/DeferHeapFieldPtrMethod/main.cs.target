@@ -28,8 +28,7 @@ internal static void seed(ref parser p) {
 internal static void run() {
     GoFrame ᒐ = default;
     try {
-        ref var p = ref heap<parser>(out var Ꮡp);
-        p = new parser(name: "p1");
+        ref var p = ref heap<parser>(new parser(name: "p1"), out var Ꮡp);
         seed(ref p);
         defer(Ꮡp.of(parser.Ꮡtrk).flush, ref ᒐ);
         p.trk.lines = append(p.trk.lines, "after-defer"u8);

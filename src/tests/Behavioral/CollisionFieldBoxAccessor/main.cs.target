@@ -56,8 +56,7 @@ internal static partial nint capturedLocalNamedAfterType() {
 }
 
 internal static partial nint boxRefCapturedValueNamedAfterType() {
-    ref var w = ref heap<w>(out var Ꮡw);
-    w = new w(park: 100, other: 9);
+    ref var w = ref heap<w>(new w(park: 100, other: 9), out var Ꮡw);
     nint got = 0;
     run(() => {
         var p = Ꮡw.of(main_package.w.Ꮡpark);

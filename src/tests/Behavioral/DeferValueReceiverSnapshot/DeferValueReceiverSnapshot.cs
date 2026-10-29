@@ -63,8 +63,7 @@ internal static void nullary(this ж<state> Ꮡs) {
 internal static void local(nint k) {
     GoFrame ᒐ = default;
     try {
-        ref var p = ref heap<path>(out var Ꮡp);
-        p = new path("local");
+        ref var p = ref heap<path>(new path("local"), out var Ꮡp);
         var pʗ1 = p;
         defer((ᴛ0, ᴛ1) => ᴛ0.Pop(ᴛ1), pʗ1, k, ref ᒐ);
         p = new path("replaced");

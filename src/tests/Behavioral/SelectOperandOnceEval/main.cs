@@ -48,8 +48,7 @@ internal static void Main() {
         break;
     }}
 
-    ref var ch = ref heap<channel<nint>>(out var Ꮡch);
-    ch = new channel<nint>(1);
+    ref var ch = ref heap<channel<nint>>(new channel<nint>(1), out var Ꮡch);
     ch.ᐸꟷ(7);
     var repl = new channel<nint>(1);
     repl.ᐸꟷ(8);
