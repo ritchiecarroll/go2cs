@@ -31356,6 +31356,10 @@ compiled in the run, with only the standing warnings (CS9113; on linux also the 
 - Native AOT (the i7, win-x64, publish rc 0 at every arm): base `35b4d717fc` `1` RED (exit 2, the raw exception
   above), `2` green; base `c3abec0c0d` `3` and `4` green; fix `29c21185c8` `1`, `2` and none, and fix `66671142cf`
   `1`-`4` and none, every line equal to `go run`.
+- Rebased onto `340ba0cc78` (batch 89) as `claude/h-seat34-aot-gaps-r2`: the seat's delta, the BOARD row aside, has
+  stable patch-id `e7e3c8206d` at both bases; the probe's `package_info.cs` drops eight unused imported aliases under
+  #41's rule (its `main.cs` equals the golden unchanged); repoguard, GenTests 350/350, AotReflectGaps 4/4 and every JIT
+  selection green at the r2 tip.
 
 — H (2026-10-29)
 
