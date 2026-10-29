@@ -72,8 +72,7 @@ func resetPackageState(pkg *packages.Package) {
 	importedSStringTwins = hashset.HashSet[string]{}
 	packageSStringTwinRecords = nil
 	constImportedTypeAliases = hashset.NewHashSet([]string{})
-	derivedTypeAliases = hashset.NewHashSet([]string{})
-	usedDerivedTypeAliases = hashset.NewHashSet([]string{})
+	usedImportedTypeAliases = hashset.NewHashSet([]string{})
 	qualifiedImportedTypeAliases = hashset.NewHashSet([]string{})
 	parsedPackageInfoFiles = hashset.NewHashSet([]string{})
 	interfaceImplementations = make(map[string]hashset.HashSet[string])

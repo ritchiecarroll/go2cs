@@ -249,7 +249,7 @@ func TestUnconvertedDependencyRendersReExportedAlias(t *testing.T) {
 	dependency := loadReExportFixtureDependency(t)
 
 	info := PackageInfo{PackageName: "example.sibmeta.dep", RootPackageName: "dep", SourceDir: dependency.Dir}
-	applyExportedTypeAliases(foreignDerivedTypeAliases(dependency), info, true)
+	applyExportedTypeAliases(foreignDerivedTypeAliases(dependency), info)
 
 	// The reference renders through the `global using` the consumer's own package_info declares.
 	if got := getAliasedTypeName("dep.Thing"); got != "dep"+TypeAliasDot+"Thing" {
@@ -272,11 +272,11 @@ func TestUnconvertedDependencyRendersReExportedAlias(t *testing.T) {
 	}
 
 	// A derived alias declares its `global using` only once a reference has resolved through it.
-	if !usedDerivedTypeAliases.Contains("dep.Thing") {
+	if !usedImportedTypeAliases.Contains("dep.Thing") {
 		t.Fatal("a referenced derived alias must be marked used so its global using is emitted")
 	}
 
-	if usedDerivedTypeAliases.Contains("dep.Stream") {
+	if usedImportedTypeAliases.Contains("dep.Stream") {
 		t.Fatal("an unreferenced derived alias must not be marked used")
 	}
 }

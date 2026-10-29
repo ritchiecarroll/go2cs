@@ -906,13 +906,13 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 
 		if lines, ok := info.NuGetSubstitution.metadataLines(info.ImportPath, goosOfTarget(options.targetPlatform)); ok {
 			if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
-				applyExportedTypeAliases(results, info, false)
+				applyExportedTypeAliases(results, info)
 				loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
 				return
 			}
 		}
 
-		applyExportedTypeAliases(foreignDerivedTypeAliases(importedPackageSources[filepath.Clean(info.SourceDir)]), info, true)
+		applyExportedTypeAliases(foreignDerivedTypeAliases(importedPackageSources[filepath.Clean(info.SourceDir)]), info)
 		return
 	}
 
@@ -949,7 +949,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 		if info.PublishedStdLib {
 			if lines, ok := stdLibExportedMetadata(info.PackageName, goosOfTarget(options.targetPlatform)); ok {
 				if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
-					applyExportedTypeAliases(results, info, false)
+					applyExportedTypeAliases(results, info)
 					loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
 					return
 				}
@@ -963,7 +963,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 		// re-exported type aliases (`os.FileMode` is a using alias to `go.io.fs_package.FileMode`,
 		// not a member of `os_package` — CS0426). See foreignNameCollisions.go and
 		// foreignTypeAliases.go for the invariant and for what deliberately stays underivable.
-		applyExportedTypeAliases(foreignDerivedTypeAliases(importedPackageSources[filepath.Clean(info.SourceDir)]), info, true)
+		applyExportedTypeAliases(foreignDerivedTypeAliases(importedPackageSources[filepath.Clean(info.SourceDir)]), info)
 		return
 	}
 
@@ -972,7 +972,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 	results, err := parseExportedTypeAliases(packageInfoFile)
 
 	if err == nil {
-		applyExportedTypeAliases(results, info, false)
+		applyExportedTypeAliases(results, info)
 		loadPackageImplements(packageInfoFile, info.RootPackageName, info.ImportPath)
 	} else {
 		showWarning("Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
@@ -982,9 +982,9 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 // applyExportedTypeAliases records one imported package's exported type aliases — parsed from its
 // package_info.cs, or derived from its own declarations when that file does not exist — as this
 // package's imported type aliases. Shared by both sources so a derived entry is qualified exactly
-// like a parsed one. A derived entry is marked as such: its `global using` is emitted only if an
-// emitted reference resolves through it (see derivedTypeAliases).
-func applyExportedTypeAliases(results [][2]string, info PackageInfo, derived bool) {
+// like a parsed one. Either kind's `global using` is emitted only if an emitted reference resolves
+// through it (see usedImportedTypeAliases).
+func applyExportedTypeAliases(results [][2]string, info PackageInfo) {
 	if len(results) == 0 {
 		return
 	}
@@ -1100,10 +1100,6 @@ func applyExportedTypeAliases(results [][2]string, info PackageInfo, derived boo
 			}
 
 			importedTypeAliasTargetsByNamespace[publisherNamespace+"\x00"+alias] = typeName
-		}
-
-		if derived {
-			derivedTypeAliases.Add(alias)
 		}
 
 		// A `global using` name the SEEDED production metadata already binds to a different target

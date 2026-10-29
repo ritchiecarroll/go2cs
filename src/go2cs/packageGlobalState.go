@@ -180,20 +180,25 @@ var currentPackageSource *packages.Package
 
 var constImportedTypeAliases hashset.HashSet[string]
 
-// derivedTypeAliases marks the importedTypeAliases keys that were DERIVED from a dependency's own
-// declarations (foreignNameCollisions.go) rather than parsed from its emitted package_info.cs, and
-// usedDerivedTypeAliases the subset an emitted reference actually resolved through. A derived
-// entry's `global using` is emitted into this package's package_info.cs only when it was USED: the
-// parsed set describes an assembly that provably declares every alias target, while a derived set
-// describes what go2cs WOULD emit for that dependency's Go source — true of any real conversion,
-// but not of a hand-written proxy such as the baseline `core/time` stub (which declares no
-// `ΔLocation`/`ΔMonth`/`ΔWeekday` at all, so an unused alias to one is CS0426 in every behavioral
-// test that imports time). Gating on use keeps the derived metadata's blast radius to the code that
-// actually references the renamed member — where the rename is required for the reference to bind
-// at all. Reset per package.
-var derivedTypeAliases hashset.HashSet[string]
-
-var usedDerivedTypeAliases hashset.HashSet[string]
+// usedImportedTypeAliases marks the importedTypeAliases keys an emitted reference actually resolved
+// through. An imported alias's `global using` is emitted into this package's package_info.cs only when
+// it was USED, whether it was parsed from the dependency's package_info.cs or derived from the
+// dependency's own declarations (foreignNameCollisions.go, foreignTypeAliases.go):
+//   - A PARSED set is the dependency's set for the TARGET GOOS, so declaring it whole made the
+//     emission vary with the target even where the Go source does not: FieldAccessReinterpret's
+//     windows-captured file declared syscallꓸHandle and syscallꓸSockaddr, which the program never
+//     names, and the same file built for linux is CS0426 (linux's syscall has no ΔHandle) and CS0305
+//     (linux's ΔSockaddr is generic). A reference resolves through an alias only when the Go source
+//     names the type, and Go source that compiles on every target names the same types on each.
+//   - A DERIVED set describes what go2cs WOULD emit for the dependency's Go source, which a
+//     hand-written proxy does not satisfy (the baseline `core/time` stub declares no
+//     `ΔLocation`/`ΔMonth`/`ΔWeekday`, so an unused alias to one is CS0426 in every behavioral test
+//     that imports time).
+//
+// Go itself refuses an unused import, and an unused `global using` declares nothing the package
+// reads. Reset per package; initialized here too, because every alias-resolving render records into it
+// and a caller that has not reset package state yet (a unit test of one rendering helper) must not panic.
+var usedImportedTypeAliases = hashset.NewHashSet([]string{})
 
 // seededGlobalTypeAliases maps a `global using` alias NAME — the RENDERED form, with TypeAliasDot
 // for every `.` — to the target the PRODUCTION package_info.cs binds it to, for the one model that

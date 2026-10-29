@@ -132,7 +132,7 @@ func emittedImportedAliases(t *testing.T, fileName string) []string {
 // package's own exported `PublicKey`, through the same entry point a real conversion uses.
 func applyEcdhTestAlias() {
 	applyExportedTypeAliases([][2]string{{"PublicKey", ShadowVarMarker + "PublicKey"}},
-		PackageInfo{PackageName: "crypto.ecdh", RootPackageName: "ecdh", SourceDir: "crypto/ecdh"}, false)
+		PackageInfo{PackageName: "crypto.ecdh", RootPackageName: "ecdh", SourceDir: "crypto/ecdh"})
 }
 
 // TestSeededAliasNameCollisionDeclaresOneName is the arm that pays for this file. The production
@@ -250,7 +250,7 @@ func TestSeededAliasNameCollisionLeavesConstKeysUnmarked(t *testing.T) {
 	// branch strips the prefix and keeps the BARE member, so the recorded value differs from the
 	// seeded target by construction and the key reaches the marking site.
 	applyExportedTypeAliases([][2]string{{"PublicKey", "const:" + ShadowVarMarker + "PublicKey"}},
-		PackageInfo{PackageName: "crypto.ecdh", RootPackageName: "ecdh", SourceDir: "crypto/ecdh"}, false)
+		PackageInfo{PackageName: "crypto.ecdh", RootPackageName: "ecdh", SourceDir: "crypto/ecdh"})
 
 	if !constImportedTypeAliases.Contains("ecdh.PublicKey") {
 		t.Fatalf("the fixture recorded no const entry, so this arm would assert nothing")
@@ -330,7 +330,7 @@ func TestUncollidedAliasStillDeclaresItsName(t *testing.T) {
 	t.Cleanup(func() { seededGlobalTypeAliases = nil })
 
 	applyExportedTypeAliases([][2]string{{"Curve", ShadowVarMarker + "Curve"}},
-		PackageInfo{PackageName: "crypto.ecdh", RootPackageName: "ecdh", SourceDir: "crypto/ecdh"}, false)
+		PackageInfo{PackageName: "crypto.ecdh", RootPackageName: "ecdh", SourceDir: "crypto/ecdh"})
 
 	if qualifiedImportedTypeAliases.Contains("ecdh.Curve") {
 		t.Fatalf("`ecdh.Curve` collides with nothing and must not be marked")
@@ -376,8 +376,10 @@ func TestDuplicateGlobalUsingIsRefused(t *testing.T) {
 		packageName = "ecdh"
 		packageNamespace = "go.crypto"
 
-		// No seededGlobalTypeAliases: nothing marks the key, so the writer meets the duplicate.
+		// No seededGlobalTypeAliases: nothing marks the key, so the writer meets the duplicate once a
+		// reference resolves through the alias, which is what declares an imported alias at all.
 		applyEcdhTestAlias()
+		getAliasedTypeName("ecdh.PublicKey")
 
 		writePackageInfoFile(fileName, true)
 

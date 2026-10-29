@@ -30,13 +30,13 @@ func TestParsedImportedAliasDeclaresOnlyWhenReferenced(t *testing.T) {
 	packageName = "ecdh"
 	packageNamespace = "go.crypto"
 
-	// The shape of syscall on windows: a Δ-renamed type the consumer references, and two the
-	// consumer never names.
+	// The shape of syscall on windows: a type the consumer references, and two Δ-renamed ones it
+	// never names.
 	applyExportedTypeAliases([][2]string{
 		{"RawSockaddrInet4", "RawSockaddrInet4"},
 		{"Handle", ShadowVarMarker + "Handle"},
 		{"Sockaddr", ShadowVarMarker + "Sockaddr"},
-	}, PackageInfo{PackageName: "syscall", RootPackageName: "syscall", SourceDir: "syscall"}, false)
+	}, PackageInfo{PackageName: "syscall", RootPackageName: "syscall", SourceDir: "syscall"})
 
 	if got := getAliasedTypeName("syscall.RawSockaddrInet4"); got != "syscall"+TypeAliasDot+"RawSockaddrInet4" {
 		t.Fatalf("a referenced foreign type must render through its alias, got %q", got)

@@ -482,8 +482,9 @@ func TestRecurseNuGetPinsTheCompileRidToTheTarget(t *testing.T) {
 // TestRecurseNuGetImportsTheTargetFlavorsAliases drives the EMISSION: a -recurse=nuget conversion for
 // linux must not import syscall's windows-only aliases into the consumer's <ImportedTypeAliases>
 // block. It did, which is the README walkthrough's `syscallꓸHandle = go.syscall_package.ΔHandle`
-// (CS0426) and non-generic `ΔSockaddr` (CS0305) on Linux. The windows conversion is the control: the
-// reference flavor's aliases are unchanged.
+// (CS0426) and non-generic `ΔSockaddr` (CS0305) on Linux. The windows conversion is the control: it
+// imports the windows flavor's Δ-renamed `Sockaddr` the program names, and, since seat #41, not the
+// `Handle` it never names (an imported alias is declared only once a reference resolves through it).
 func TestRecurseNuGetImportsTheTargetFlavorsAliases(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
@@ -543,7 +544,11 @@ func TestRecurseNuGetImportsTheTargetFlavorsAliases(t *testing.T) {
 
 	windows := convert("windows/amd64")
 
-	if !strings.Contains(windows, "syscallꓸHandle = go.syscall_package.ΔHandle") {
-		t.Errorf("the windows (reference) conversion no longer imports `Handle`; the control is void:\n%s", windows)
+	if !strings.Contains(windows, "syscallꓸSockaddr = go.syscall_package.ΔSockaddr") {
+		t.Errorf("the windows (reference) conversion no longer imports the Δ-renamed `Sockaddr` it names; the control is void:\n%s", windows)
+	}
+
+	if strings.Contains(windows, "syscallꓸHandle") {
+		t.Errorf("the windows conversion declared `Handle`, which the program never names:\n%s", windows)
 	}
 }
