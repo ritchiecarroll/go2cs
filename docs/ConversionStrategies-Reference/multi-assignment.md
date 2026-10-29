@@ -527,7 +527,7 @@ return x.val                       // Go: 99
 <!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs:17-20 -->
 ```csharp
 ref var x = ref heap<Thing>(new Thing(val: 7), out var Ꮡx);
-var p = Ꮡx.of(Thing.Ꮡval);
+var p = Ꮡx.Ꮡval;
 p.Value = 99;
 return x.val;
 ```
