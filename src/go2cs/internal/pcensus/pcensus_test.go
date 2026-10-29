@@ -908,7 +908,7 @@ func TestNonconvergentKeyIsRefused(t *testing.T) {
 }
 
 // A1 (#41) and CM's class 2 (#43) are lines a file's diff only deletes or only inserts, so they are read at the file's
-// end: A1's deleted `global using` alias lines, only in package_info.cs, and CM's interface member docs, inserted only
+// end: A1's deleted `global using` alias lines, only in package_info.cs or package_test_info.cs (one writer, one gate), and CM's interface member docs, inserted only
 // in a hunk inside an interface body and only where the ruled line naming the inherited member closes them.
 func TestA1AndCMBlockPlants(t *testing.T) {
 	c, _ := newClassifier("", false)
@@ -935,6 +935,7 @@ func TestA1AndCMBlockPlants(t *testing.T) {
 		refused    string // a refused line's text, or "" for none
 	}{
 		{"A1 good: aliases removed from package_info.cs", hunk(infoFile, "@@ -40,2 +39,0 @@", aliases...), 2, "A1", ""},
+		{"A1 good: aliases removed from package_test_info.cs", hunk("src/core/p/package_test_info.cs", "@@ -40,2 +39,0 @@", aliases...), 2, "A1", ""},
 		{"A1 bad: an alias removed from a converted file", hunk(prodFile, "@@ -40,2 +39,0 @@", aliases...), 0, "A1", "reflectꓸChanDir"},
 		{"A1 bad: an alias target changed", hunk(infoFile, "@@ -40,1 +40,1 @@", aliases[0], `+global using reflectꓸChanDir = go.reflect_package.ChanDir;`), 0, "", "go.reflect_package.ChanDir;"},
 		{"A1 bad: a non-alias global using removed", hunk(infoFile, "@@ -40,1 +39,0 @@", `-global using static go.reflect_package;`), 0, "A1", "global using static"},
