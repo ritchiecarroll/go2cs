@@ -307,6 +307,36 @@ public class EscapeRegistryGeneratorTests
         Assert.AreEqual(0, neutral.Length, "a neutral package registers only what it converts: " + string.Join(", ", neutral));
     }
 
+    // Seat #34, gap 1: a struct's operations face (IGoTypeOpsSource) is generated in its OWN compilation, and only when that
+    // compilation spells a pointer to it (TypeOpsScope). A pointer to it spelled in ANOTHER compilation therefore reached
+    // golib's dynamic fallback for its operations, which Native AOT cannot run for a value type it never compiled (the
+    // AotReflectGaps probe's fmt %v over a nil *lib.Hidden field: "GoTypeOps`1[Hidden] is missing native code"). The walk
+    // registers GoTypeOps<X> where it crosses ж<X> for a struct X of another assembly that lacks the face; X with the face
+    // is never registered twice (the control), nor is the compilation's own struct (its face is generated beside it), nor a
+    // pointer that never reaches an interface.
+    [TestMethod]
+    public void AForeignStructWithoutTheFaceIsRegisteredWhereItsPointerEscapes()
+    {
+        MetadataReference f = EmitLibrary("fpkg",
+            "namespace go; [GoPackage(\"fpkg\")] public static partial class fpkg_package { " +
+            "public partial struct Bare { public nint x; } " +
+            "public partial struct Faced : IGoTypeOpsSource { public nint y; IGoTypeOps IGoTypeOpsSource.TypeOps => GoTypeOps<Faced>.Instance; } " +
+            "public partial struct Quiet { public nint z; } }");
+
+        (string[] registered, _, Diagnostic[] errors) = RunOn("apkg",
+            "partial struct Own { internal nint w; } " +
+            "partial struct Holder { public ж<fpkg_package.Bare> bare; public ж<fpkg_package.Faced> faced; public ж<Own> own; } " +
+            "internal static object Use() => default(Holder); " +
+            "internal static void Local() { ж<fpkg_package.Quiet> quiet = default; _ = quiet; }",
+            goTargetOS: null, perOSSource: false, f);
+
+        Assert.AreEqual(0, errors.Length, "the registry compiles: " + string.Join("; ", errors.Take(3)));
+        CollectionAssert.Contains(registered, "global::go.fpkg_package.Bare", "a foreign struct without the face, reached through an escaping pointer: " + string.Join(", ", registered));
+        Assert.IsFalse(registered.Any(name => name.Contains("Faced")), "a foreign struct WITH the face is not registered again: " + string.Join(", ", registered));
+        Assert.IsFalse(registered.Any(name => name.Contains("Own")), "the compilation's own struct is not (its face is generated beside it): " + string.Join(", ", registered));
+        Assert.IsFalse(registered.Any(name => name.Contains("Quiet")), "a pointer that never reaches an interface is not: " + string.Join(", ", registered));
+    }
+
     private const string ProjectDirectory = @"C:\go2cs\src\core\opkg";
 
     private static MetadataReference EmitLibrary(string name, string source, params MetadataReference[] references)
