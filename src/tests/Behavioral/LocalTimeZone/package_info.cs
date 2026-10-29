@@ -12,7 +12,6 @@
 // <ImportedTypeAliases>
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;

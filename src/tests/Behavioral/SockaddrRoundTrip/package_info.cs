@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 // </ImportedTypeAliases>
 

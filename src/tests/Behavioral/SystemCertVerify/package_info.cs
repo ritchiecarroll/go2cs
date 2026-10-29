@@ -11,14 +11,7 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
