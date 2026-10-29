@@ -25,6 +25,18 @@ public static float64 Scale(this Num n, float64 f) {
     return (float64)n.N * f;
 }
 
+partial interface Shaper {
+    complex64 Area(int8 a, uint16 b);
+}
+
+partial struct Ghost {
+    public nint X;
+}
+
+public static uint32 Haunt(this Ghost g, bool b, rune r) {
+    return (uint32)g.X + (uint32)r;
+}
+
 internal static void run(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
@@ -51,6 +63,25 @@ internal static void Main() {
     }
     if (only == ""u8 || only == "2"u8) {
         methodTypes();
+    }
+    if (only == ""u8 || only == "3"u8) {
+        run("3a interface Method(0).Type", () => {
+            var m = reflect.TypeOf((ж<Shaper>)nil).Elem().Method(0);
+            fmt.Println("3a", m.Name, m.Type);
+        });
+    }
+    if (only == ""u8 || only == "4"u8) {
+        var gt = reflect.TypeOf((ж<Ghost>)nil);
+        var gtʗ1 = gt;
+        run("4a never-built Method(0).Type value", () => {
+            var m = gtʗ1.Elem().Method(0);
+            fmt.Println("4a", m.Name, m.Type);
+        });
+        var gtʗ2 = gt;
+        run("4b never-built Method(0).Type pointer", () => {
+            var m = gtʗ2.Method(0);
+            fmt.Println("4b", m.Name, m.Type);
+        });
     }
 }
 

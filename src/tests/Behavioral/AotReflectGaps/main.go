@@ -5,13 +5,23 @@
 //     that needs its operations reaches golib's dynamic fallback, which closes GoTypeOps<T> over
 //     the type at run time. Under Native AOT a value type no compiled code names cannot be closed
 //     there.
+//
 //  2. METHOD TYPE: reflect's Method(i).Type over a value-receiver method closes a Func<...> family
 //     over the method's parameter types at run time. Under Native AOT that raised a raw .NET
 //     exception that no Go recover() sees.
 //
+//     Under Native AOT the family over Num's methods closed at the base: go2cs-gen's method set
+//     (IGoMethodSet) names those delegate types in compiled code. Two shapes name none:
+//
+//  3. an interface method, whose func type no generated method set carries (Shaper's signature
+//     is spelled nowhere else);
+//
+//  4. a struct no code ever builds as a value (Ghost is reached only through a nil *Ghost), whose
+//     method set Native AOT has no reason to compile.
+//
 // Each scenario runs under its own recover, so a refusal reads as one named line and the rest still
-// run. An argument selects one gap (`AotReflectGaps 1` or `AotReflectGaps 2`), so a gap that ends the
-// process cannot hide the other; with none, both run.
+// run. An argument selects one group (`AotReflectGaps 1` through `AotReflectGaps 4`), so a group that
+// ends the process cannot hide another; with none, all run.
 package main
 
 import (
@@ -37,6 +47,18 @@ func (n Num) Add(d int, label string) (int, string) { return n.N + d, label }
 
 func (n Num) Scale(f float64) float64 { return float64(n.N) * f }
 
+// Shaper's method signature appears nowhere but here.
+type Shaper interface {
+	Area(a int8, b uint16) complex64
+}
+
+// Ghost is never built as a value: only a nil *Ghost reaches reflect.
+type Ghost struct {
+	X int
+}
+
+func (g Ghost) Haunt(b bool, r rune) uint32 { return uint32(g.X) + uint32(r) }
+
 func run(name string, f func()) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -56,6 +78,17 @@ func main() {
 	}
 	if only == "" || only == "2" {
 		methodTypes()
+	}
+	if only == "" || only == "3" {
+		run("3a interface Method(0).Type", func() {
+			m := reflect.TypeOf((*Shaper)(nil)).Elem().Method(0)
+			fmt.Println("3a", m.Name, m.Type)
+		})
+	}
+	if only == "" || only == "4" {
+		gt := reflect.TypeOf((*Ghost)(nil))
+		run("4a never-built Method(0).Type value", func() { m := gt.Elem().Method(0); fmt.Println("4a", m.Name, m.Type) })
+		run("4b never-built Method(0).Type pointer", func() { m := gt.Method(0); fmt.Println("4b", m.Name, m.Type) })
 	}
 }
 
