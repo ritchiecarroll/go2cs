@@ -689,6 +689,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
+    public void CheckFuncTypeVerbs() => CheckTarget("FuncTypeVerbs");
+
+    [TestMethod]
     public void CheckFuncValueMethodClash() => CheckTarget("FuncValueMethodClash");
 
     [TestMethod]

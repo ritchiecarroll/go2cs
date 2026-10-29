@@ -63,12 +63,15 @@ public unsafe class NativeStructMarshalTests
         public ulong Len;
     }
 
-    // A field with no Go kind at all (a C# char), beside an array that makes the struct reference-bearing:
-    // no Go layout to encode it at, so not provable. (An array field left unsized is NOT this case: it
-    // reads as a Go [0]T, a legal zero-size field.)
+    // A field whose size overflows the address space ([2^62]int64 is 2^65 bytes), beside an array that makes
+    // the struct reference-bearing: no Go layout to encode it at, so not provable. Go refuses the same type
+    // inside StructOf. (An array field left unsized is NOT this case: it reads as a Go [0]T, a legal
+    // zero-size field.) Until seat #40 the unprovable field was a C# char, which then classified as Struct
+    // and reached "unknown" only through the layout walk's depth cap; a char is Go's uint16 now, and a
+    // struct holding one has a layout.
     public struct NoDims
     {
-        public char C;
+        [GoArrayDims(1L << 62)] public array<long> Huge;
         public array<byte> B;
 
         public NoDims() => B = new array<byte>(4);

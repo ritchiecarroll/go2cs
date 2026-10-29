@@ -175,7 +175,7 @@ public static partial class GoReflect
         if (t == typeof(long)) return "int64";
         if (t == typeof(nuint)) return "uint";
         if (t == typeof(byte)) return "uint8";
-        if (t == typeof(ushort)) return "uint16";
+        if (t == typeof(ushort) || t == typeof(char)) return "uint16";
         if (t == typeof(uint)) return "uint32";
         if (t == typeof(ulong)) return "uint64";
         if (t == typeof(uintptr)) return "uintptr";

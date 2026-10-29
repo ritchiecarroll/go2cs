@@ -30952,4 +30952,56 @@ warnings); `go2cs-stdlib.slnx` 0/0; behavioral on the 23 moved tests: trx total 
 
 — H (2026-10-28)
 
+## 2026-10-28 — C2 (1.26.10.2 seat #40, claude/c2-seat40-functype-name): a C# char is Go's uint16 in the reflection bridge, so `%v`/`%T` over one no longer overflow the stack — DONE on the seat branch
+
+**The finding (P2, #23 r2).** At #23 r2's base the converter dropped a rune literal's cast inside a func literal, so
+`shrink := func(r rune) rune { return 'a' }` emitted `var shrink = (rune r) => 'a';`, and C# inferred
+`Func<int, char>`. The program then died in `fmt` with C# exit 134, `Stack overflow.`. P2's fix stopped emitting the
+delegate and left the golib side open.
+
+**The root cause.** `GoReflect.KindOf` maps every CLR primitive to its Go kind except `System.Char`, which fell
+through to `Struct`. `Struct` is the one kind whose walks descend into a type's fields, and a primitive's one
+instance field is of its own type (`char m_value`). So `IsComparable` -> `StructFieldsComparable` never ended; it
+overflowed at 58,048 frames on `%v` of a boxed char (linux, `3d6155ed3a`). `%T` of `Func<int, char>` did not
+overflow, but it printed the CLR's name, `func(int32) Char`. The code comment and manual-conversions.md both rested
+termination on CS0523, and the runtime's primitives are the exception to that rule.
+
+**The fix (golib only).** `KindOf(char)` is `Uint16` and `GoTypeName(char)` is `uint16`: a char is a UTF-16 code
+unit. Measured with the fix:
+- `%T` of `Func<int, char>` prints `func(int32) uint16`, and of `Func<(char, bool)>`, `func() (uint16, bool)`.
+- `%v %d %x %T` of `'x'` print `120 120 78 uint16`.
+- `reflect.ValueOf('x')`: `Kind` uint16, `Uint` 120, `Comparable` true; `DeepEqual` true; a char map key works.
+- Residual, stated: a reflect WRITE into a char-typed slot builds a `ushort`. No Go program produces such a slot.
+
+**One fixture moved with it.** `NativeStructMarshalTests`' `NoDims` used a char as "a field with no Go kind". It was
+unprovable only because the char's size walk hit the 128-level depth cap, the safety net. With a char now 2 bytes
+the struct has a layout, and `AnUnprovableShapeReachesTheKernelUnchanged` failed, alone, in both configurations.
+Its unprovable field is now `[GoArrayDims(1L << 62)] array<long>`: 2^65 bytes, which no layout describes and which Go
+refuses inside `StructOf`. The new fixture passes at master's golib (8 of 8) and at the fix.
+
+**Guards.**
+- Red first, `GolibTests.ClrPrimitiveKindTests`. The list of 14 is checked against the primitives CoreLib exports,
+  and every kind is checked before `IsComparable` runs, so the red names `System.Char` instead of killing the host.
+  Red at `3d6155ed3a`: "Failed: 2, Passed: 1".
+- Behavioral, `FuncTypeVerbs` (COORD's ruling: the Output phase against `go run`). It covers the four signatures COORD
+  named, `func(string, ...any) string`, a nil func, rune-returning func literals, and funcs in an interface, a
+  slice and a map. It is green at master by construction, because master casts every rune literal. It holds the
+  class instead: P2's r2 converter (`f7fbe9b5b0`) emits its literals as `Func<int, char>` and `Func<(char, bool)>`.
+  Over master's golib that emission prints `func(int32) Char` and dies with exit 134. Over the fixed golib it runs
+  to the end with three lines differing from `go run`: a red Output with a readable diff.
+
+**Found on the way, for seat #23.** Master emits `func() uint16 { return 'u' }` as `() => (rune)'u'` and
+`func() byte { return 'y' }` as `() => (rune)'y'`, so `%T` reads `func() int32` where Go reads `func() uint16` and
+`func() uint8`. That is P2's rule from r3 (a func literal's return spells its result type), so FuncTypeVerbs leaves
+those two shapes to RuneLiteralContexts.
+
+**Footprint: 0 by construction.** golib is not converter output, so no corpus file and no existing golden moves.
+
+**Gates at the tip** (linux, `-p:GoTargetOS=linux`):
+- GolibTests Debug: 2,288 passed, 0 failed, 34 skipped. Release: 2,299 passed, 0 failed, 23 skipped.
+- FuncTypeVerbs: Transpile, Compile, Target and Output all pass. The runner's 25 GB disk preflight was waived: the
+  session allows about 11 GB free, and free disk stayed at 11 GB for the whole run.
+- `go test ./...` in src/go2cs green.
+<!-- Evidence: C2's scratchpad (ft-* logs: the red run, both GolibTests configurations, the NativeStructMarshalTests
+     arms at master and at the fix, the r2 emission's runs over both golibs, the behavioral run), on C2's box. -->
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

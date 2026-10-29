@@ -247,6 +247,10 @@ public static partial class GoReflect
         if (t == typeof(nuint)) return Uint;               // Go uint
         if (t == typeof(byte)) return Uint8;
         if (t == typeof(ushort)) return Uint16;
+        // No Go type converts to a C# char, but a lambda whose body returns a bare 'a' infers one, and a
+        // char that falls through to Struct walks its own `char m_value` field forever. A char is a
+        // UTF-16 code unit, Go's uint16.
+        if (t == typeof(char)) return Uint16;
         if (t == typeof(uint)) return Uint32;
         if (t == typeof(ulong)) return Uint64;
         if (t == typeof(float)) return Float32;
@@ -366,6 +370,9 @@ public static partial class GoReflect
     // transitively (CS0523). Go's "no struct contains itself by value" rule says the same thing about
     // the source language, but it is the C# rule that binds here — the walk reads managed metadata,
     // and it was a managed reference classified as Struct that once made this descend forever.
+    // The CLR's own primitives are the exception to CS0523: each holds one field of its own type
+    // (`char m_value`), so every primitive must classify as a scalar before the Struct arm, and
+    // System.Char, the one that did not, overflowed here (GolibTests.ClrPrimitiveKindTests).
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static bool StructFieldsComparable(Type t)
     {
