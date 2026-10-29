@@ -10,11 +10,13 @@
 //     exception that no Go recover() sees.
 //
 // Each scenario runs under its own recover, so a refusal reads as one named line and the rest still
-// run.
+// run. An argument selects one gap (`AotReflectGaps 1` or `AotReflectGaps 2`), so a gap that ends the
+// process cannot hide the other; with none, both run.
 package main
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 
 	"AotReflectGaps/lib"
@@ -45,6 +47,19 @@ func run(name string, f func()) {
 }
 
 func main() {
+	only := ""
+	if len(os.Args) > 1 {
+		only = os.Args[1]
+	}
+	if only == "" || only == "1" {
+		typeOps()
+	}
+	if only == "" || only == "2" {
+		methodTypes()
+	}
+}
+
+func typeOps() {
 	var h Holder
 	h.N = 3
 	ft := reflect.TypeOf(h).Field(0).Type
@@ -64,7 +79,9 @@ func main() {
 		v.Field(0).Set(reflect.New(ft.Elem()))
 		fmt.Printf("1g %+v\n", *h.P)
 	})
+}
 
+func methodTypes() {
 	nt := reflect.TypeOf(Num{})
 	run("2a Method(0).Type value", func() { m := nt.Method(0); fmt.Println("2a", m.Name, m.Type) })
 	run("2b Method(1).Type value", func() { m := nt.Method(1); fmt.Println("2b", m.Name, m.Type) })

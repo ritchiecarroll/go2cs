@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using os = os_package;
 using reflect = reflect_package;
 using lib = AotReflectGaps.lib_package;
 using AotReflectGaps;
@@ -41,6 +42,19 @@ internal static void run(@string name, Action f) {
 }
 
 internal static void Main() {
+    @string only = "";
+    if (len(os.Args) > 1) {
+        only = os.Args[1];
+    }
+    if (only == ""u8 || only == "1"u8) {
+        typeOps();
+    }
+    if (only == ""u8 || only == "2"u8) {
+        methodTypes();
+    }
+}
+
+internal static void typeOps() {
     ref var h = ref heap(new Holder(), out var Ꮡh);
     h.N = 3;
     var ft = reflect.TypeOf(h).Field(0).Type;
@@ -75,7 +89,9 @@ internal static void Main() {
         v.Field(0).Set(reflect.New(ftʗ5.Elem()));
         fmt.Printf("1g %+v\n"u8, Ꮡh.Value.P.Value);
     });
+}
 
+internal static void methodTypes() {
     var nt = reflect.TypeOf(new Num());
     var ntʗ1 = nt;
     run("2a Method(0).Type value", () => {
