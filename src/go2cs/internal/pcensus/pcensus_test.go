@@ -223,6 +223,19 @@ var plants = []plant{
 	one("J bad: spaces inside a string", prodFile, `    s = "a //b";`, `    s = "a   //b";`, "UNCLASSIFIED"),
 	one("J bad: a comment joined the line", prodFile, `    x = 1;`, `    x = 1; // c`, "UNCLASSIFIED"),
 	one("J bad: the indentation changed", prodFile, `    x = 1; // c`, `        x = 1;  // c`, "UNCLASSIFIED"),
+	// CM (#43): a blank import's note becomes a block comment, and a type spec's (or a linkname var's) Go trailing
+	// comment rides its declaration line.
+	one("CM good: the note's delimiter", prodFile, "// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname", "/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname", "CM"),
+	one("CM bad: the note's text changed", prodFile, "// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname", "/* blank import: unicode_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname", "UNCLASSIFIED"),
+	one("CM bad: the Go comment changed", prodFile, "// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname", "/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname", "UNCLASSIFIED"),
+	one("CM good: a type spec's trailing comment", prodFile, `partial struct sortedHint /*num:nint*/;`, `partial struct sortedHint /*num:nint*/; // hint for pdqsort when choosing the pivot`, "CM"),
+	one("CM good: a pointer type's", prodFile, `partial class stringptr /*ж<byte>*/;`, `partial class stringptr /*ж<byte>*/; // used when the value is a string`, "CM"),
+	one("CM good: a one-line struct's opening line", prodFile, `partial struct intVal {`, `partial struct intVal { // Int values not representable as an int64`, "CM"),
+	one("CM good: a linkname var's property line", prodFile,
+		`public static @string executablePath { get => go.runtime_package.executablePath; set => go.runtime_package.executablePath = value; }`,
+		`public static @string executablePath { get => go.runtime_package.executablePath; set => go.runtime_package.executablePath = value; } // set by ../runtime/os_darwin.go`, "CM"),
+	one("CM bad: a comment added to a statement", prodFile, `    x = 1;`, `    x = 1; // c`, "UNCLASSIFIED"),
+	one("CM bad: the declaration changed", prodFile, `partial struct sortedHint /*num:nint*/;`, `partial struct sortedHint /*num:int*/; // hint`, "UNCLASSIFIED"),
 	// A change no item makes, and a removal with nothing beside it.
 	one("bad: an unrelated rewrite", prodFile, `return x + 1;`, `return x + 2;`, "UNCLASSIFIED"),
 	{"bad: a lone removal", prodFile, []string{`    x = 1;`}, nil, "UNPAIRED"},
@@ -891,5 +904,69 @@ func TestNonconvergentKeyIsRefused(t *testing.T) {
 	}
 	if tl.labels["X"] != 0 || nonconvergent != 2 {
 		t.Errorf("a key past the canon cap: wanted no X and 2 NONCONVERGENT refusals, read %v, refused %v", tl.labels, tl.refused)
+	}
+}
+
+// A1 (#41) and CM's class 2 (#43) are lines a file's diff only deletes or only inserts, so they are read at the file's
+// end: A1's deleted `global using` alias lines, only in package_info.cs, and CM's interface member docs, inserted only
+// in a hunk inside an interface body and only where the ruled line naming the inherited member closes them.
+func TestA1AndCMBlockPlants(t *testing.T) {
+	c, _ := newClassifier("", false)
+	const infoFile = "src/core/p/package_info.cs"
+
+	hunk := func(file, header string, lines ...string) string {
+		var b strings.Builder
+		fmt.Fprintf(&b, "diff --git a/%s b/%s\n--- a/%s\n+++ b/%s\n%s\n", file, file, file, file, header)
+		for _, l := range lines {
+			b.WriteString(l + "\n")
+		}
+		return b.String()
+	}
+
+	aliases := []string{
+		`-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;`,
+		`-global using abiꓸKind = go.@internal.abi_package.ΔKind;`,
+	}
+
+	for _, c2 := range []struct {
+		name, diff string
+		want       int    // A1 or CM pairs credited
+		label      string // the item credited
+		refused    string // a refused line's text, or "" for none
+	}{
+		{"A1 good: aliases removed from package_info.cs", hunk(infoFile, "@@ -40,2 +39,0 @@", aliases...), 2, "A1", ""},
+		{"A1 bad: an alias removed from a converted file", hunk(prodFile, "@@ -40,2 +39,0 @@", aliases...), 0, "A1", "reflectꓸChanDir"},
+		{"A1 bad: an alias target changed", hunk(infoFile, "@@ -40,1 +40,1 @@", aliases[0], `+global using reflectꓸChanDir = go.reflect_package.ChanDir;`), 0, "", "go.reflect_package.ChanDir;"},
+		{"A1 bad: a non-alias global using removed", hunk(infoFile, "@@ -40,1 +39,0 @@", `-global using static go.reflect_package;`), 0, "A1", "global using static"},
+		{"CM good: a covered method's doc and its line", hunk(prodFile, "@@ -127,0 +128,4 @@ partial interface Conn :",
+			`+    // Read reads data from the connection.`,
+			`+    // Read can be made to time out.`,
+			`+    // Read(b []byte) (n int, err error) is provided by io.ReadWriteCloser`,
+			`+    // Close() error is provided by io.ReadWriteCloser`), 4, "CM", ""},
+		{"CM good: an embed's doc and its line", hunk(prodFile, "@@ -30,0 +31,2 @@ partial interface Hash :",
+			`+    // Write adds more data to the running hash.`,
+			`+    // io.Writer is inherited`), 2, "CM", ""},
+		{"CM bad: a doc added outside an interface body", hunk(prodFile, "@@ -30,0 +31,2 @@ partial class p_package {",
+			`+    // Write adds more data to the running hash.`,
+			`+    // io.Writer is inherited`), 0, "CM", "Write adds more data"},
+		{"CM bad: a doc with no line naming the inherited member", hunk(prodFile, "@@ -30,0 +31,1 @@ partial interface Hash :",
+			`+    // Write adds more data to the running hash.`), 0, "CM", "Write adds more data"},
+	} {
+		tl := c.classifyDiff(c2.diff)
+		if c2.label != "" && tl.labels[c2.label] != c2.want {
+			t.Errorf("%s: wanted %d %s, read %v, refused %v", c2.name, c2.want, c2.label, tl.labels, tl.refused)
+		}
+		switch {
+		case c2.refused == "" && len(tl.refused) != 0:
+			t.Errorf("%s: wanted nothing refused, refused %v", c2.name, tl.refused)
+		case c2.refused != "":
+			named := false
+			for _, r := range tl.refused {
+				named = named || strings.Contains(r.rem+r.add, c2.refused)
+			}
+			if !named {
+				t.Errorf("%s: wanted a refusal naming %q, read %v, refused %v", c2.name, c2.refused, tl.labels, tl.refused)
+			}
+		}
 	}
 }
