@@ -30952,4 +30952,125 @@ warnings); `go2cs-stdlib.slnx` 0/0; behavioral on the 23 moved tests: trx total 
 
 — H (2026-10-28)
 
+## 2026-10-29 — R (1.26.10.2 parity seat #30 r2, claude/r-seat30-l1-collexpr-r2): L1, a slice literal is golib's builtin over a C# collection expression — DONE on the seat branch
+
+**The change.** Go's `[]int{1, 2, 3}` is now `slice<nint>([1, 2, 3])`, everywhere it was `new nint[]{1, 2, 3}.slice()`:
+every unkeyed literal of an unnamed `[]T`, in every position, nested literals composing; an alias to one
+(`type names = []string`, `List[T any] = []T`), which is the same type; and an elided element of a named slice type
+(`[3]Digits{{1, 2}}`), which takes no constructor and binds through the type's implicit conversion. Keyed literals,
+fixed arrays, slices of arrays (their `GoReflect.WithElemDims` form) and a named slice type's own literal (its
+constructor) keep their forms.
+
+**Why not `[1, 2, 3]`.** The design note's form was blocked by golib: C# takes a collection expression's element type
+from the target's public enumerator, and `slice<T>`'s yields Go's range pair `(nint, T)`, which every converted
+`foreach (var (i, x) in xs)` relies on. A `[CollectionBuilder]` on `slice<T>` broke golib's build (CS9187 at
+`unsafe.cs:1017`), and the extension-`Add` route fails the same way (CS0029, measured on a stand-in). The owner approved
+`slice<T>([…])` instead (COORD, 2026-10-28). The true `[1, 2, 3]` needs `slice<T>`'s enumerator to yield `T` and the
+range emission to move to an explicit member: not additive, so it is a post-.2 seat at a regen boundary, sized at
+every committed `foreach (var (_, x) in xs)` over a slice plus golib's range helpers.
+
+**golib (additive).** `SliceLiteral<T>`, a `[CollectionBuilder]` type whose enumerator yields `T`, and
+`builtin.slice<T>(SliceLiteral<T>)` under `[OverloadResolutionPriority(1)]`. A collection expression converts to `T[]`,
+`ReadOnlySpan<T>` and `SliceLiteral<T>`; the priority binds the new overload, and no other argument converts to
+`SliceLiteral<T>`, so no existing call rebinds. The copy is not charged to `AllocationCounter`, and is listed by name
+in golib's raw-allocation census (`NoUncountedBackingAllocations`, the by-design block), citing Go's `slicelit`,
+which keeps a non-escaping literal's array in a stack temp (cmd/compile/internal/walk/complit.go:356).
+
+**Counted or uncounted, by measurement.** A census of the 238 banked rows found 134 `AllocsPerRun` calls, 5 of whose
+measured functions hold a converted literal (crypto/sha256, slices, fmt, os, and math/big through `NewInt`). With the
+counted span overload, slices, crypto/sha256, fmt and os held their banked counts, but math/big's `TestNewIntAllocs`
+read 2 allocations per run for every non-zero `n`, against 1 at base (Go: 0): away from Go. The uncounted overload reads
+1, as base. COORD ruled uncounted.
+
+**The empty literal.** `[]T{}` is `slice<T>([])`: a non-null shared zero-length backing, so not nil, and no
+allocation where the earlier form allocated a fresh zero-length array. Accepted as a step toward Go's zerobase. Pinned in
+the behavioral test `CollectionExpressionSlices` beside a nil slice, as Go prints them: the literal is not nil, has
+len 0 and cap 0, and `%v` prints `[]`.
+
+**Side finding, for any future builder.** Hand-owned `unsafe.cs:1017` returns `[]` for `unsafe.Slice(nil, 0)` and
+relies on C#'s parameterless-constructor fallback giving a NIL `slice<T>`. A builder on `slice<T>` would silently make
+it non-nil; Go's `unsafe.Slice(nil, 0)` is nil.
+
+**C# 15's `with(` element, caught by S2's guard.** From C# 15, a collection-expression element spelled `with(…)` binds
+as the collection's construction arguments, not as a call (Roslyn, "Compiler Breaking Changes - DotNet 11"). Side
+seat S2 ruled that rule needed no code because a literal was an array initializer; this seat made the literal a
+collection expression, and S2's control (`[with(` never emitted) read red. An element whose text begins with a call
+to a Go `with` is now written `@with(…)`, which names the function in every language version; a `with(…)` inside an
+element keeps its bare spelling. The corpus pins C# 14 and its Go 1.24.13 std declares no production `with` (four
+in cmd/compile, outside the corpus; log/slog's handler_test.go uses a field so named, never as an element), so the
+change moves no emitted line today. The guard was made to fail by disabling the escape.
+
+**The 124 residual golden sites, classified (COORD's item 1).** At DONE, 124 old-form literals remained in the goldens:
+- 86 are a named slice type's own constructor, `new IntSlice(new nint[]{…}.slice())` (each Go type read: all named
+  slices), and 9 a slice of NAMED arrays in its `WithElemDims` form: both kept, as ruled.
+- 27 were misses, fixed in r2: 16 alias literals (PackageAliasRootedTypeArgs' `names = []string` family,
+  GenericTypeAlias' `List[T any] = []T` and `Pairs`) and 11 elided elements of a named slice type (ArrayRangeSnapshot's
+  `[3]Digits{{1, 2}}`, MethodGroupGenericArg's `[]row{{1, 2}}`). CollectionExpressionSlices pins both shapes against Go.
+- 2 sit in linux-exclusive goldens this windows box does not re-mint (below).
+At r2 on 53918293a1: 755 old-form sites before, 97 after (86 + 9 + 2). Every golden-less emitted .cs (81 files: the
+sub-packages) was scanned too: one old-form literal, NamedSliceChildPkg/netlike's `new InfoList(…)`, a named ctor.
+
+**Three-target stdlib emission compile arm (COORD's item 2).** The `-stdlib` emission of the r2 tip, each target in its
+own root seeded from a `git archive` of the ref (src plus docs/validation), built with `go2cs-stdlib.slnx` and
+`GoTargetOS`: windows 1309 files written, 0 errors; linux 1361, 0 errors; darwin 1367, 0 errors. Warnings are the
+standing CS9113 (testing/TestReporter.cs) and, on linux, CS0219 (syscall/linux/exec_linux.cs). Liveness: the compiled
+emission holds 1312 / 1323 / 1323 lines with `slice<T>([`. A dry run of the pre-r2 seat (4dcb081b62) read 0/0/0 as well.
+
+**Two-seeded three-target footprint (COORD's item 3).** A = 53918293a1, B = the r2 tip, each its own seeded root, diffed
+over src/core minus golib: windows 278 files +1913/-1913, linux 284 +1931/-1931, darwin 284 +1928/-1928; 0
+`GoPositionMap` lines; converted sites (opening `new T[]{` removed = `slice<T>([` added) 1354 / 1365 / 1366. pcensus
+`-items L1`: 1914 / 1932 / 1929 pairs, every one L1, 0 refused. Prediction posted before arm B (COORD inbox
+20261029T002708Z): MECHANISM MET (all L1, 0 map lines, no line count moves); COUNT MET (each target at or above round
+1's 1331 / 1342 / 1343); one specific MISSED: "no file but .cs moves" read false on all three targets, where
+`unique/clone.cs.auto`, the review sibling of a hand-owned file, carries one converted literal.
+
+**pcensus.** The canon reads the ruled spelling, spaced and three-deep generic elements, a channel element's
+direction comment (`channel/*<-*/<Result>`, internal/singleflight), and a cast over the literal:
+`((@string)new byte[]{…}.slice())` becomes `(@string)slice<byte>([…])`, on one line by the canon and over a multi-line
+literal (dnsmessage's printPaddedUint8) by a Block whose close line `}.slice())` -> `])` reads L1 only in a file
+showing the cast's two open lines. Each addition was red first.
+
+**Exclusive goldens.** Windows-exclusive goldens this seat moves, minted here on windows: EnvironBlockWalk,
+FindFirstFileData, PipeSharedFileObject, PointerOutParameter, RawConnSyncSocketIO, SystemCertVerify, UnsafeStringEmpty,
+WsaSendtoRoundTrip. Linux-exclusive goldens this box cannot re-mint, owed a linux re-mint: ScmRightsSeam (1 site) and
+WritevIovecSeam (1 site; its `Δnet.Buffers` ctor is kept); the other six linux-exclusive goldens hold none.
+
+**Observed, not this seat.** math/big at 56e4fba06f reads COUNT 249 against banked 248 on R-LAPTOP windows with no seat
+change: `TestMulUnbalanced`, disclosed deferred, passes on both sides, so its disclosure is orphaned. Logged for the
+re-bank.
+
+**Gates.** On R-LAPTOP, win-x64, one at a time, at df27e1e54b (on 53918293a1); the pushed tip differs from it only
+by this row:
+- `go test -count=1 -timeout 60m ./...` in src/go2cs: 10 packages ok. (The suite outlasts `-timeout 30m` on this box,
+  as seat #21's gates note.) Earlier runs named what the seat owed: eight converter tests pinned the earlier
+  `new T[]{…}.slice()` text and now pin `slice<T>([…])`, each asserting what it did; S2's guard read the `with(` hazard;
+  repoguard named provenance notes the seat's lines shift, re-cited; and r2's first run named one composition with
+  #23, TestRuneLiteralForms' `{'x', 'y'}`, which now reads `slice<rune>(['x', 'y'])`, the same bare chars.
+- GolibTests: Release 2274 passed, 0 failed, 25 skipped; Debug 2263 passed, 0 failed, 36 skipped.
+  `SliceLiteralBindingTests` was red first (at base the literal bound the counted span overload); its five other arms
+  (a `u8` literal, a `T[]`, an `array<T>`, the empty literal, a fresh backing array) pass on both sides, which is the
+  no-rebinding proof.
+- pcensus `classify -items L1` over the goldens: 655 pairs in 266 goldens, every one L1, 0 refused. Over the whole
+  diff, `-items L1,D1`: 1316 pairs in 536 files, L1 1312, D1 3, MAP 1; its 9 refusals are lines
+  CollectionExpressionSlices' own main.cs gains from its new cases.
+- CNR: NO REGRESSION, byte-identical across 944 packages (8 platform-exclusive skipped).
+- Behavioral suite: 878 projects; Transpile, Compile and Target 878/878; Output 849 compared, 848 pass, 1 fail
+  (29 skipped). The fail is LineMarkerDeferEndTC0, #33's .2 regression that #42 fixes (COORD ruling #42); this seat
+  moves no line of it (its golden and emitted .cs are unchanged, and CNR reads it byte-identical). The batch restore
+  hit MSB4166 again, and the runner's per-project fallback built its 514 suspects with 0 failures.
+- `go2cs-stdlib.slnx` (the committed corpus against the seat's golib): build succeeded, 0 warnings, 0 errors.
+- Earlier batteries were green at 74ceca1678 (on a4711608e1) and a37222c8da (on 2c737cfdfc). Master moved after the
+  r2 base: batches 85 (#40, golib), 86 (#24), 87-88 (#29) and 89 (#41), with #31 gating as batch 90, touch this seat's
+  BOARD rows, test registrations and shared goldens, which COORD re-mints at the merge on top of batch 90, as ruled.
+
+**The round-1 prediction, scored.** Predicted per target from a go/types census (production 1331 / 1342 / 1343 sites,
+roster tests 11433 / 11578 / 11500, goldens 661-748, zero position-map lines). MECHANISM MET. Goldens COUNT MISSED
+below the floor (about 625 converted at round 1); the floor counted only ctor-wrapped named literals as kept, and r2's
+classification found 27 of the remainder to be misses of the rule, now converted (658 sites at r2, 755 -> 97).
+
+**Footprint.** Converter and its tests, golib (additive), GolibTests, pcensus, one behavioral test, the goldens and
+docs. No emitted `src/core` file (the deferred-corpus window).
+
+— R (2026-10-29)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
