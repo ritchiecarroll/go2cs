@@ -39,14 +39,14 @@ internal static wrap keyed(this ж<mc> Ꮡc) {
 internal static void Main() {
     var c = Ꮡ(new mc(n: 9));
     c.reset();
-    fmt.Println((~c).n);
+    fmt.Println(c.n);
 
     var w = c.wrapped();
-    w.p.Value.n = 42;
-    fmt.Println((~c).n, w.tag);
+    w.p.n = 42;
+    fmt.Println(c.n, w.tag);
     var k = c.keyed();
-    k.p.Value.n++;
-    fmt.Println((~c).n, k.tag);
+    k.p.n++;
+    fmt.Println(c.n, k.tag);
 }
 
 } // end main_package

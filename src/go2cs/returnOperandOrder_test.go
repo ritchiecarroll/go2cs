@@ -195,8 +195,8 @@ func TestMultiValueReturnSpillsCallsThatCanWriteAnEarlierOperand(t *testing.T) {
 		{"parseOID", "= o.fill(text);", "return (o, "},
 		{"readThenBump", "= c.bump();", "return (c.n, "},
 		{"addressArgument", "= raise(ref n);", "return (n, "},
-		{"throughPointer", "= c.bump();", "return ((~c).n, "},
-		{"pointerFieldSame", "= nd.pat.bump();", "return ((~nd.pat).n, "},
+		{"throughPointer", "= c.bump();", "return (c.n, "}, // `c.n` reads the field in place (parity seat #31), after the spill
+		{"pointerFieldSame", "= nd.pat.bump();", "return (nd.pat.n, "},
 	}
 
 	for _, hazard := range hazards {

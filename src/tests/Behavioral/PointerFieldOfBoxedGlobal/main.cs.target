@@ -51,8 +51,8 @@ partial struct holder {
 
 internal static nint viaLocal(ref holder h) {
     var s = h.span;
-    (~s).log.push(10);
-    return (~s).log.sum();
+    s.log.push(10);
+    return s.log.sum();
 }
 
 internal static void Main() {

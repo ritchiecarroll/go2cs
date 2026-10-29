@@ -172,11 +172,11 @@ internal static void Main() {
     fmt.Println("ptrThru ", c14.Name);
 
     var p15 = Ꮡ(new holder(f: new frame(Name: "p15")));
-    var recvʗ5 = (~p15).f;
+    var recvʗ5 = p15.f;
     
     var p15ʗ1 = p15;
     var chainPtrBase = () => recvʗ5.label();
-    p15.Value.f.Name = "P15";
+    p15.f.Name = "P15";
 
     fmt.Println("chainPtr", chainPtrBase());
 
@@ -185,7 +185,7 @@ internal static void Main() {
     
     var h16ʗ1 = h16;
     var chainIfacePtr = h16ʗ1.i.label;
-    n16._<namer, ж<frame>>().Value.Name = "N16";
+    n16._<namer, ж<frame>>().Name = "N16";
 
     fmt.Println("chainIfP", chainIfacePtr());
 

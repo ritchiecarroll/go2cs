@@ -18,19 +18,23 @@ namespace go2cs;
 
 /// <summary>
 /// Emits a field property on <c>ж&lt;T&gt;</c> for every field of each struct type the
-/// <c>[GoFieldAccess(...)]</c> records of a compilation list, so a field reached through a pointer reinterpreted from
-/// <c>unsafe.Pointer</c> reads as Go does: <c>buf.SubstituteNameOffset = x</c>.
+/// <c>[GoFieldAccess(...)]</c> records of a compilation list, so a field reached through a pointer reads as Go spells
+/// it: <c>p.f</c>, and <c>buf.SubstituteNameOffset = x</c> through a pointer reinterpreted from <c>unsafe.Pointer</c>.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Each property is a C# 14 ref-returning extension property over golib's <c>ж&lt;T&gt;.field</c>, which answers the
-/// field at its Go offset when the pointer aliases native memory and at the struct's own slot otherwise, with no box
-/// in between. Being a <c>ref</c>, it serves a read, a write, a compound assignment, a nested field
-/// (<c>p.In.X = 7</c>) and a <c>ref</c> argument alike.
+/// Each property is a C# 14 ref-returning extension property with golib's <c>ж&lt;T&gt;.field</c> semantics: the
+/// field at its Go offset when the pointer is a <c>NativeBox&lt;T&gt;</c> over native memory, and the struct's own slot
+/// otherwise, with no box in between. Its body is specialized (<see cref="Specialized"/>): the managed arm reaches the
+/// field directly, <c>ref ʗp.Value.f</c>, with no accessor delegate, which a field access through any pointer (parity
+/// seat #31) cannot afford on every read. Being a <c>ref</c>, it serves a read, a write, a compound assignment, a
+/// nested field (<c>p.In.X = 7</c>) and a <c>ref</c> argument alike. A field that shadows a promoted method gets none
+/// (<see cref="ShadowsPromotedMethod"/>).
 /// </para>
 /// <para>
-/// The converter puts a record on the package class of each FILE with a site, naming that file's struct types, and
-/// the properties go into the USING package's own compilation, in an <c>internal</c> class: an extension block may extend a foreign type, an exported field's
+/// The converter writes the package's records in its package_info.cs, one assembly-level attribute per struct type
+/// (an earlier converter put them on the package class of each FILE, which is still read; see
+/// <see cref="RecordedTypes"/>), and the properties go into the USING package's own compilation, in an <c>internal</c> class: an extension block may extend a foreign type, an exported field's
 /// <c>Ꮡ</c> accessor is public, and no other assembly sees the class, so two packages extending one type never meet.
 /// The exception is a test assembly that references its package's assembly: it sees the package's class through
 /// <c>InternalsVisibleTo</c>, so a property that class already declares is not declared again (see
@@ -79,7 +83,7 @@ public class FieldAccessGenerator : ISourceGenerator
 
     public void Execute(GeneratorExecutionContext context)
     {
-        if (context.SyntaxReceiver is not FieldAccessRecordFinder { Candidates.Count: > 0 } finder)
+        if (context.SyntaxReceiver is not FieldAccessRecordFinder finder || finder.Candidates.Count == 0 && !finder.AssemblyRecords)
             return;
 
         List<INamedTypeSymbol> types = RecordedTypes(context.Compilation, finder.Candidates);
@@ -88,14 +92,16 @@ public class FieldAccessGenerator : ISourceGenerator
             context.AddSource("GoFieldAccess.g.cs", Source(context.Compilation, types));
     }
 
-    // The struct types the records list, each once, generic ones by their open definition. A record sits on a
-    // package class, which is partial across the package's files, so its symbol carries every file's records.
+    // The struct types the records list, each once, generic ones by their open definition. The converter writes the
+    // records on the compilation's assembly, in package_info.cs (parity seat #31). An earlier converter wrote them on
+    // the package class of each file, which is partial across the package's files, so its symbol carries every file's
+    // records; the committed corpus carries that form until its next regeneration, so both are read.
     internal static List<INamedTypeSymbol> RecordedTypes(Compilation compilation, IEnumerable<ClassDeclarationSyntax> candidates)
     {
         List<INamedTypeSymbol> types = [];
         HashSet<INamedTypeSymbol> seen = new(SymbolEqualityComparer.Default);
         HashSet<INamedTypeSymbol> classes = new(SymbolEqualityComparer.Default);
-        List<AttributeData> records = [];
+        List<AttributeData> records = [.. compilation.Assembly.GetAttributes()];
 
         foreach (ClassDeclarationSyntax candidate in candidates)
         {
@@ -209,8 +215,11 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string name = field.Name;
 
-            if (IsBlank(name) || s_collisionNames.Contains(name) || declared.Contains(name) || !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly))
+            if (IsBlank(name) || s_collisionNames.Contains(name) || declared.Contains(name) || !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly) ||
+                ShadowsPromotedMethod(type, name))
+            {
                 continue;
+            }
 
             string accessor = $"{AddressPrefix}{name}";
 
@@ -225,9 +234,11 @@ public class FieldAccessGenerator : ISourceGenerator
             string fieldType = field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             string slot = $"{ReceiverName}.field({typeName}.{accessor})";
 
+            // A readonly field (a zero-size layout field) has no writable slot of its own: its accessor answers the
+            // shared one, which only the accessor reaches.
             properties.Add(header
-                ? $"public {fieldType} {PropertyName(name)} {{ get => {slot}; set {{ {slot} = value; {ReceiverName}.OnHeaderStore(); }} }}"
-                : $"public ref {fieldType} {PropertyName(name)} => ref {slot};");
+                ? $"public {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => {slot}; [{GetterAttributes}] set {{ {slot} = value; {ReceiverName}.OnHeaderStore(); }} }}"
+                : $"public ref {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {(field.IsReadOnly ? slot : Specialized(typeName, accessor, name))}; }}");
         }
 
         // Embedded structs, by their ref accessors (see the remarks).
@@ -238,8 +249,11 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string name = property.Name;
 
-            if (s_collisionNames.Contains(name) || declared.Contains(name) || !compilation.IsSymbolAccessibleWithin(property, compilation.Assembly))
+            if (s_collisionNames.Contains(name) || declared.Contains(name) || !compilation.IsSymbolAccessibleWithin(property, compilation.Assembly) ||
+                ShadowsPromotedMethod(type, name))
+            {
                 continue;
+            }
 
             string accessor = $"{AddressPrefix}{name}";
 
@@ -251,10 +265,73 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-            properties.Add($"public ref {propertyType} {PropertyName(name)} => ref {ReceiverName}.field({typeName}.{accessor});");
+            properties.Add($"public ref {propertyType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {Specialized(typeName, accessor, name)}; }}");
         }
 
         return properties;
+    }
+
+    // The accessors' attributes. A getter is go2cs machinery, not Go code: inlined at Release, and where the JIT keeps
+    // its frame (a Debug build, a refused inline) the runtime's frame filter skips it, so a traceback and
+    // runtime.Caller see the user's frame either way (design Q4). Two things skip it, each alone sufficient (measured
+    // by PointerFieldSelectors' nil read in a Debug build): its class is not a package class, and its [GeneratedCode].
+    private static readonly string GetterAttributes =
+        $"{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)";
+
+    // The specialized body (design Q1, COORD 2026-10-27): a managed box reaches the field directly, `ref ʗp.Value.f`,
+    // with Value's own nil check and no delegate; a NativeBox<T> answers it at its Go offset through the accessor,
+    // where a struct whose CLR layout is not Go's holds the wrong bytes in its own slot (ж<T>.field's two arms).
+    private static string Specialized(string typeName, string accessor, string name) =>
+        $"{ReceiverName} is global::go.NativeBox<{typeName}> ? ref {ReceiverName}.field({typeName}.{accessor}) : ref {ReceiverName}.Value.{PropertyName(name)}";
+
+    /// <summary>
+    /// Whether a field <paramref name="name"/> of <paramref name="type"/> shadows a method an embedded type promotes,
+    /// as the converter's <c>shadowsPromotedMethod</c> reads it from Go's types.
+    /// </summary>
+    /// <remarks>
+    /// Go selects the field, the shallower member, but the box carries the promoted method as an extension member, and a
+    /// property of the same name beside it makes every <c>p.name</c> ambiguous: abi.ArrayType's field <c>Len</c>
+    /// against the <c>Len</c> method its embedded abi.Type promotes. The converter keeps such a site's box form, so the
+    /// property would serve nothing. An embed is a Go embedded field (<see cref="MemberMarkers.IsGoEmbedded"/>), a value
+    /// or a pointer; its type's methods are extension members of its package class over the value, a ref to it or its
+    /// box, and its own embeds promote theirs in turn.
+    /// </remarks>
+    internal static bool ShadowsPromotedMethod(INamedTypeSymbol type, string name)
+    {
+        HashSet<INamedTypeSymbol> seen = new(SymbolEqualityComparer.Default);
+
+        return Walk(type);
+
+        bool Walk(INamedTypeSymbol owner)
+        {
+            if (!seen.Add(owner.OriginalDefinition))
+                return false;
+
+            foreach (IFieldSymbol field in owner.GetMembers().OfType<IFieldSymbol>())
+            {
+                if (field.IsStatic || !MemberMarkers.IsGoEmbedded(field) || !StructDeclarationSyntaxExtensions.IsPromotingEmbedType(field.Type))
+                    continue;
+
+                ITypeSymbol embedded = field.Type is INamedTypeSymbol { Name: PointerPrefix, TypeArguments: [var element] } ? element : field.Type;
+
+                if (embedded is INamedTypeSymbol named && (HasMethod(named, name) || Walk(named)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool HasMethod(INamedTypeSymbol type, string name) =>
+            type.ContainingType is { } package && package.GetMembers(name).OfType<IMethodSymbol>().Any(method =>
+                method.IsExtensionMethod && method.Parameters.Length > 0 && IsReceiverOf(method.Parameters[0].Type, type));
+
+        static bool IsReceiverOf(ITypeSymbol receiver, INamedTypeSymbol type)
+        {
+            if (receiver is INamedTypeSymbol { Name: PointerPrefix, TypeArguments: [var element] })
+                receiver = element;
+
+            return SymbolEqualityComparer.Default.Equals(receiver.OriginalDefinition, type.OriginalDefinition);
+        }
     }
 
     /// <summary>
@@ -345,30 +422,31 @@ public class FieldAccessGenerator : ISourceGenerator
 }
 
 /// <summary>
-/// Collects the class declarations that carry a <c>GoFieldAccess</c> record, by name; the generator confirms the
-/// attribute by symbol.
+/// Collects the class declarations that carry a <c>GoFieldAccess</c> record, and notes whether any assembly-level record
+/// exists, by name; the generator confirms the attribute by symbol.
 /// </summary>
 public sealed class FieldAccessRecordFinder : ISyntaxReceiver
 {
     public List<ClassDeclarationSyntax> Candidates { get; } = [];
 
+    /// <summary>Whether an <c>[assembly: GoFieldAccess(…)]</c> record was seen (package_info.cs).</summary>
+    public bool AssemblyRecords { get; private set; }
+
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
+        if (syntaxNode is AttributeListSyntax { Target.Identifier.ValueText: "assembly" } assemblyList)
+        {
+            AssemblyRecords |= assemblyList.Attributes.Any(IsRecord);
+            return;
+        }
+
         if (syntaxNode is not ClassDeclarationSyntax { AttributeLists.Count: > 0 } declaration)
             return;
 
-        foreach (AttributeListSyntax list in declaration.AttributeLists)
-        {
-            foreach (AttributeSyntax attribute in list.Attributes)
-            {
-                string name = attribute.Name is QualifiedNameSyntax qualified ? qualified.Right.Identifier.ValueText : attribute.Name.ToString();
-
-                if (name is "GoFieldAccess" or "GoFieldAccessAttribute")
-                {
-                    Candidates.Add(declaration);
-                    return;
-                }
-            }
-        }
+        if (declaration.AttributeLists.Any(list => list.Attributes.Any(IsRecord)))
+            Candidates.Add(declaration);
     }
+
+    private static bool IsRecord(AttributeSyntax attribute) =>
+        (attribute.Name is QualifiedNameSyntax qualified ? qualified.Right.Identifier.ValueText : attribute.Name.ToString()) is "GoFieldAccess" or "GoFieldAccessAttribute";
 }

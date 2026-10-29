@@ -109,7 +109,7 @@ internal static void Main() {
     fmt.Println(makeShape<Shape>(widen<ж<Circle>, Shape>(newUnitCircle, elemᴛ0 => new CircleжShape(elemᴛ0))));
     var sharedʗ1 = shared;
     fmt.Println(makeShape(widen<ж<Circle>, Shape>(ж<Circle> () => {
-        sharedʗ1.Value.R++;
+        sharedʗ1.R++;
         return sharedʗ1;
     }, elemᴛ0 => new CircleжShape(elemᴛ0))));
     fmt.Println(makeShape(widen<ж<Circle>, Shape>(none, elemᴛ0 => new CircleжShape(elemᴛ0))));

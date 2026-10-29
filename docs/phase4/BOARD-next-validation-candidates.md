@@ -31269,4 +31269,161 @@ SystemCertVerify, UnsafeStringEmpty, WsaProtocolInfo, WsaSendtoRoundTrip.
   regeneration moved, 2 the behavioral re-mint moved, one of them CrossPkgBox's unused-alias sample, now CrossPkgUser's).
 <!-- Evidence: C2's scratchpad (hg-* logs: per-target census diffs, seat-delta patch, three stdlib builds and the positive
      control, the reflectlite -tests run, the behavioral slices, the base LineMarkerDeferEndTC0 run), on C2's box. -->
+## 2026-10-29 — G (1.26.10.2 seat #31 P1, claude/g-seat31-field-properties): a field through a pointer reads and writes `p.f` — DONE on the seat branch
+
+**The change.** A field selected through a pointer to a named struct read `(~p).f` (a copy of the whole struct) and
+wrote `p.Value.f`. Both now spell it as Go does:
+
+| Go (behavioral golden) | Before | After |
+|:--|:--|:--|
+| `c.n++` · `c.sub.k--` (IncDecPointerField) | `c.Value.n++` · `c.Value.sub.k--` | `c.n++` · `c.sub.k--` |
+| `fmt.Println(base.n, base.sub.k)` (IncDecPointerField) | `fmt.Println((~@base).n, (~@base).sub.k)` | `fmt.Println(@base.n, @base.sub.k)` |
+| `fmt.Println(a.next.data)` (ReceiverPointerValue) | `fmt.Println((~(~a).next).data)` | `fmt.Println(a.next.data)` |
+| `a.sym.Node = b` (PromotedFieldNameIsType) | `a.Value.sym.Value.Node = b` | `a.sym.Node = b` |
+| `req.Header["Accept"] = …` (BoxedMapFieldWrite) | `req.Value.Header["Accept"] = …` | `req.Header["Accept"] = …` |
+
+- The site binds a C# 14 `ref` extension property go2cs-gen emits on `ж<T>` (FieldAccessGenerator, widened from the
+  unsafe.Pointer route). Its body is specialized (Q1): `ref ʗp is NativeBox<T> ? ref ʗp.field(T.Ꮡf) : ref ʗp.Value.f`.
+- **Behavior change on native boxes (Q2, named as ruled):** over a `NativeBox<T>` the field reads and writes at its
+  GO offset, where `p.Value.f` read the CLR slot. For a struct whose CLR layout is not Go's (an array, a string or
+  another managed field inside), `p.Value.f` refused outright: `runtime error: cannot read native memory as main.wire:
+  its CLR layout is not its Go layout`. Guard: PointerFieldSelectors' native arm (red at the base with exactly that
+  panic). On a managed box the property reaches the same storage `p.Value.f` reached, with the same nil check.
+- **The records live in package_info.cs** (the owner's ask, via COORD): one `[assembly: GoFieldAccess(typeof(T))]`
+  per struct type, under a two-line comment, through the GoImplement record path (qualifyLocalTypeRef, both `-tests`
+  models). No converted `.cs` gains a line. The unsafe.Pointer route's per-file records move too: one form everywhere.
+  go2cs-gen reads both the assembly form and the committed corpus's class form, so the OLD corpus is untouched
+  through the window (golib's attribute also targets Assembly: additive).
+- **Kept today's spelling (each a named residue class below):** a collision name; a field shadowing a promoted method
+  (go2cs-gen's shadow rule reads Go embeds and the embedded type's package-class extension methods); a PROMOTED field
+  (COORD's ruling: out of #31); a struct a hand-owned file declares; testing's T and B; a struct the package defines
+  over another named type (found by this seat's own forward build, below); header-shaped and unnamed structs; a
+  zero-size store target.
+- **Q4 (frames):** the getters are `[AggressiveInlining]`; where the JIT keeps a frame, the runtime's frame filter
+  skips it twice over, by its class (no `_package` class) and by `[GeneratedCode]`, each sufficient alone. Planted:
+  with the class renamed `fieldaccess_package` and the attribute removed, the Debug arm names `fieldaccess.get_X`.
+- **Q3 as ruled, then amended by the owner's ask:** per-file records retired for one per-package record; the three
+  recompiling test projects need no special case (their conversion re-converts the production files, and a merging
+  write keeps the seeded test-info file's records, as the position maps do).
+
+**The prediction, scored as posted** (`#31 PREDICTION` 2026-10-28, the record-line AMENDMENT and the
+FieldAccessReinterpret CORRECTION, both posted before the measurement they score). The lane's two-seeded `-stdlib
+-comments` A/B, base 9390c32e54 against the seat at 8649b6e6a5, three targets, plus the `-tests` leg over the 242
+packages with committed converted tests; one binary per arm (base `905edfb35050417e`, seat `d8591086266f8670`). Both
+arms rc 0, 0 failed, 0 of 204 hand-owns clobbered. The rung of record is the i7's.
+1. MECHANISM: `pcensus classify -items P1` refused 0 (MET): 1,446 files, 24,022 pairs, P1 23,933, MAP 89. 0 hand-owned,
+   `_impl.cs` or golib files moved (MET). AMENDED claim "0 GoPositionMap re-encodes": MISSED, 89 MAP pairs in 16
+   `package_info.cs`, every one beside a file that lost its per-file class record (52 class lines removed): moving the
+   ~50 committed carriers moves their lines. Records: class lines removed 40 / 36 / 38 and assembly records added
+   2,438 / 2,418 / 2,425 (windows / linux / darwin; union 52 and 2,863).
+2. COUNTS (pcensus P1 measures, base root to seat root): deref-select test 6,709 -> 703, fall 6,006 against
+   5,379-6,328 (MET); value-select test 2,570 -> 453, fall 2,117 against 1,883-2,215 (MET); deref-select prod
+   10,445 -> 2,482, fall 7,963 against 8,633-10,157 (MISSED); value-select prod 8,570 -> 3,799, fall 4,771 against
+   6,570-7,729 (MISSED). Changed files 633 prod / 403 test against at most 752 / 488 (MET). The production misses are
+   two classes the prediction named and did not size: runtime's hand-owned-file structs (4,102 sites, prod + test)
+   and closure-box aliases `Ꮡx.Value.f` (897).
+3. GOLDENS: CNR at the rebased seat (on f62cd53f45, batch 86) moved 196 projects against at most 217 (MET), plus
+   PointerFieldSelectors (new): the same set as on 904c363f67. pcensus over the re-baseline: 588 files, 2,070 pairs,
+   P1 2,067, MAP 3 (the three projects whose class record moved), 0 refused.
+   FieldAccessReinterpret's sites hold and its record moves (main.cs -1 class line, package_info.cs +3 records, one
+   MAP re-encode), as CORRECTED.
+4. BUILD: go2cs-stdlib.slnx, Release, 0 errors on every arm (G-LAPTOP): the lane emission FORWARD on windows,
+   linux and darwin (after the wrapper fix below); BACKWARD (the committed corpus under the seat's go2cs-gen and
+   golib); and the TIP's own `-stdlib` emission per GoTargetOS (converter at 4f5c7d89a6, binary `bf3ad48ec714c3bb`,
+   seeded from f62cd53f45; windows 668 s, linux 656 s, darwin 658 s) (MET; the rung of record is the i7's).
+
+**The residue, per named class**, reconciled to the population (base emission, non-call, non-collision `(~X).f` and
+`X.Value.f` spellings outside hand-owned, `_impl` and golib files and outside string literals; a census binary =
+the seat plus an in-band `/*R:class*/` marker at each kept spelling, whose marker-stripped emission equals the seat
+arm's byte for byte, 0 differing entries):
+
+| | prod | test |
+|:--|--:|--:|
+| population | 21,156 | 9,572 |
+| **rewritten to `p.f`** | **15,295** | **8,759** |
+| hand-owned-file struct (runtime's, mostly) | 4,056 | 46 |
+| closure box alias `Ꮡx.Value.f` (another emission path) | 811 | 86 |
+| promoted field (out of #31 by ruling) | 825 | 178 |
+| testing's T/B | 0 | 380 |
+| conversion base `(T)(p).Value.f` | 48 | 9 |
+| unnamed struct | 7 | 42 |
+| wrapper over another named type | 28 | 0 |
+| shadowed by a promoted method | 12 | 0 |
+| embedded-interface hop | 3 | 7 |
+| header-shaped | 2 | 0 |
+| other emission paths (type assertion after a field named `Value`, pointer-embed method hop; 14 in test files the `-tests` leg does not rewrite) | 69 | 65 |
+
+Collisions (199 sites) and explicit `(*p).f` (which renders `(p.Value).f`, outside these spellings) are outside the
+population by construction.
+
+**Found and fixed in the seat (its own forward build, G-LAPTOP, the lane emission):** a struct the package defines
+over another named type (`type winlibcall windows.StdCallInfo`, runtime; `type Term term`, go/types; `type decoder
+coder`, encoding/binary) is declared field-less, its fields generated by InheritedTypeTemplate, which
+FieldAccessGenerator cannot see in the same run: 7 CS1061 on windows, 21 on linux and darwin. isLocalStructWrapper
+keeps those types' sites on today's spelling (`TestFieldPropertyReadsAsGoSpellsIt`'s `type wrapped point` control, red
+before the fix).
+
+**Q5 (build time):** a clean Release build of go2cs-stdlib.slnx (windows), base corpus against the seat's,
+interleaved base/seat three times on G-LAPTOP: base 676 / 607 / 628 s, seat 651 / 678 / 608 s. Median +3.7% (628 to
+651 s), mean +1.4%: under the +5% gate. The run-to-run spread (607-678 s on one arm) is wider than the gate, so the
+reading is "no cost resolvable at n=3", not a measured +3.7%.
+
+**Perf** (G-LAPTOP, base 904c363f67 against the seat at b6f6ec5491 on it; PerfRefLower, PerfFieldView, PerfIface and
+PerfIfaceCall, JIT and Native AOT; 15 interleaved rounds per program and arm, outputs verified equal; every arm's
+binary differs base to seat, AOT publish stamps cleared so no arm reuses the other's): every median within 2%.
+
+| program | JIT base -> seat | AOT base -> seat |
+|:--|:--|:--|
+| PerfRefLower | 764.3 -> 761.4 ms (-0.4%) | 676.6 -> 672.5 ms (-0.6%) |
+| PerfFieldView | 2,103.3 -> 2,087.4 ms (-0.8%) | 2,640.4 -> 2,632.6 ms (-0.3%) |
+| PerfIface | 569.5 -> 565.9 ms (-0.6%) | 599.9 -> 610.9 ms (+1.8%; ranges 585-654 / 586-647) |
+| PerfIfaceCall | 448.5 -> 449.6 ms (+0.2%) | 515.6 -> 517.8 ms (+0.4%) |
+
+Peak memory equal on every row. The native-box gain is a correctness change (Q2), not a speed claim.
+
+**Rebased per §3.3 onto f62cd53f45 (batches 83-86).** pcensus conflicted with batch 84's per-file block reading
+(classifier endFile): P1's PerSide gate is ported into it, a PerSide rule's Delete and Insert admitting lines beside
+the whole-file rule, each side on its own anchor (`TestP1RecordBlockPlants` and every S1 plant green). The goldens
+commit was dropped and re-minted from CNR at the rebased seat; ten provenance notes re-cited.
+
+**Gates on the seat tree at 4f5c7d89a6 (G-LAPTOP):** full `go test ./...` in src/go2cs 10 ok, 0 failed (repoguard,
+docs guards, pcensus); GenTests 353 passed; GolibTests 2,304, 2,274 passed, 30 skipped, 0 failed; CNR as item 3;
+PointerFieldSelectors Target and Output green (red at the base, item Q2); the TIP's `-stdlib` emission as item 4.
+
+**Follow-ons:** #31b (promoted fields; sizing in the DONE post); the frame-lines finding (its own row below).
+
+— G (2026-10-29)
+
+## 2026-10-29 — G (finding, found in seat #31): a recovered panic's frames report the wrong LINES — the same with or without #31
+
+**The finding.** Inside a deferred function that recovers a nil-pointer panic, `runtime.Callers` and
+`runtime.CallersFrames` name the right FUNCTIONS but the wrong LINES for the frames between the panic and `main`.
+Measured with PointerFieldSelectors' nil read (seat #31's test, main.go:171-176), printing `frame.Function:frame.Line`
+for every non-runtime frame:
+
+| Build | Go | C#, `fmt.Println(np.X)` (#31) | C#, `fmt.Println((~np).X)` (base spelling) |
+|:--|:--|:--|:--|
+| Release | `func1.1:172 func1:175 main:176` | `func1.1:172 func1:172 main:171` | `func1.1:172 func1:172 main:171` |
+| Debug | `func1.1:172 func1:175 main:176` | `func1.1:172 func1:172 main:178` | `func1.1:172 func1:172 main:178` |
+
+- The deferred function's own frame (`func1.1`) is right: 172, the `defer` line.
+- The faulting frame (`func1`) reports its `defer` line (172), where Go reports the faulting statement (175).
+- `main` reports the func literal's opening line in Release (171, `func() {`) and the NEXT block's opening line in
+  Debug (178), where Go reports the call's line (176, `}()`).
+- Both spellings give identical lines in both configurations, so this is not #31's. Where the lines are lost
+  (capture of the recovered panic's stack, or its attribution) is not localized.
+
+**Why it went unseen.** Behavioral tests that print recovered-panic frames print FUNCTION names (FuncLiteralCallerNames,
+PointerFieldSelectors) or relations between live-call lines (RuntimeCallerFrames, CallerLineCallSite). No test prints
+a recovered panic frame's LINE.
+
+**Reproduce.** PointerFieldSelectors at #31's tip, with `goFrames` printing `frame.Function:frame.Line` (G's scratch
+`seat31/lines.sh` patches the emitted main.cs that way, once per spelling; the Go side is the same one-line patch to
+main.go under `go run`).
+
+**Owner of the fix:** unassigned. Not the converter (both spellings agree); the likely site is runtime's managed
+traceback (managed_impl.cs), unconfirmed.
+
+— G (2026-10-29)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

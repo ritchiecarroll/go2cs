@@ -36,7 +36,7 @@ internal static partial void Main() {
 
     var acc = Ꮡ(new accum());
     bindAdd(acc);
-    fmt.Println("accum total:", (~acc).total);
+    fmt.Println("accum total:", acc.total);
 
     fmt.Println("Main function");
 }

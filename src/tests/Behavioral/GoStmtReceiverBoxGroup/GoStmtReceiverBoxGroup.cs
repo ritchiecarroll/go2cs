@@ -59,16 +59,16 @@ internal static partial void other(this ref tracker t, ж<tracker> o) {
 internal static void Main() {
     var t = Ꮡ(new tracker(done: new channel<nint>(0), n: 7, @in: new inner(ch: new channel<nint>(0))));
     t.start();
-    fmt.Println(ᐸꟷ((~t).done));
+    fmt.Println(ᐸꟷ(t.done));
     t.startArg();
-    fmt.Println(ᐸꟷ((~t).done));
+    fmt.Println(ᐸꟷ(t.done));
     t.startInner();
-    fmt.Println(ᐸꟷ((~t).@in.ch));
+    fmt.Println(ᐸꟷ(t.@in.ch));
     t.stop();
-    fmt.Println((~t).n);
+    fmt.Println(t.n);
     var o = Ꮡ(new tracker(done: new channel<nint>(0), n: 11));
     t.other(o);
-    fmt.Println(ᐸꟷ((~o).done));
+    fmt.Println(ᐸꟷ(o.done));
 }
 
 } // end main_package

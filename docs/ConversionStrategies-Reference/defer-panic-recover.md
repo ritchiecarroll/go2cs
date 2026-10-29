@@ -956,7 +956,7 @@ the call — the guard's `defer run(func(){ pf.x = 77 })` shape:
 ```csharp
 var pfʗ1 = pf;
 defer(run, () => {
-    pfʗ1.Value.x = 77;
+    pfʗ1.x = 77;
 }, ref ᒐ);
 ```
 

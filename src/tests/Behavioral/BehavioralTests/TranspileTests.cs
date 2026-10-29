@@ -1744,6 +1744,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerFieldOfBoxedGlobal() => CheckTarget("PointerFieldOfBoxedGlobal");
 
     [TestMethod]
+    public void CheckPointerFieldSelectors() => CheckTarget("PointerFieldSelectors");
+
+    [TestMethod]
     public void CheckPointerInterfaceStructField() => CheckTarget("PointerInterfaceStructField");
 
     [TestMethod]

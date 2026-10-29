@@ -49,16 +49,16 @@ internal static partial void Main() {
     var e = Ꮡ(new engine(tally: Ꮡ(new counter(done: new channel<bool>(1)))));
 
     e.start(5);
-    ᐸꟷ((~(~e).tally).done);
-    fmt.Println("after start:", (~(~e).tally).n);
+    ᐸꟷ(e.tally.done);
+    fmt.Println("after start:", e.tally.n);
 
     e.start(7);
-    ᐸꟷ((~(~e).tally).done);
-    fmt.Println("after second start:", (~(~e).tally).n);
+    ᐸꟷ(e.tally.done);
+    fmt.Println("after second start:", e.tally.n);
 
     e.ping();
-    ᐸꟷ((~(~e).tally).done);
-    fmt.Println("pinged:", (~(~e).tally).n);
+    ᐸꟷ(e.tally.done);
+    fmt.Println("pinged:", e.tally.n);
 
     ref var vs = ref heap<valueSender>(new valueSender(c: new channel<nint>(0)), out var Ꮡvs);
     var vsʗ1 = vs;

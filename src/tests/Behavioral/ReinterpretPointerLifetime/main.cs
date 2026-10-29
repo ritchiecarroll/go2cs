@@ -32,12 +32,12 @@ internal static partial void churn() {
 internal static void Main() {
     var h = Ꮡ(new header(kind: 24, size: 16, name: "string"));
     var v = asView(h);
-    v.Value.kind = 25;
-    fmt.Println("alias:", (~h).kind == 25, (~v).size == 16, (~v).name == "string"u8);
+    v.kind = 25;
+    fmt.Println("alias:", h.kind == 25, v.size == 16, v.name == "string"u8);
 
     var retained = asView(Ꮡ(new header(kind: 24, size: 16, name: "retained")));
     churn();
-    fmt.Println("lifetime:", (~retained).kind == 24, (~retained).size == 16, (~retained).name == "retained"u8);
+    fmt.Println("lifetime:", retained.kind == 24, retained.size == 16, retained.name == "retained"u8);
 }
 
 } // end main_package

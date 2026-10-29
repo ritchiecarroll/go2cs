@@ -41,7 +41,7 @@ internal static @string g(@string s) {
             if (errΔ1 != nil) {
                 {
                     var (e, ok) = errΔ1._<ж<tagErr>>(ᐧ); if (ok) {
-                        e.Value.tag = "inner";
+                        e.tag = "inner";
                     }
                 }
                 return errΔ1.Error();

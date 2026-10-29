@@ -28,7 +28,7 @@ internal static any poolGet() {
 
 internal static ж<pp> newPrinter() {
     var p = poolGet()._<ж<pp>>();
-    p.Value.id++;
+    p.id++;
     return p;
 }
 
@@ -45,20 +45,20 @@ internal static void keep(ж<pp> q) {
 
 internal static void Main() {
     var a = newPrinter();
-    a.Value.buf = append((~a).buf, (byte)'a');
-    fmt.Println((@string)(~a).buf, (~a).id);
+    a.buf = append(a.buf, (byte)'a');
+    fmt.Println((@string)a.buf, a.id);
     a.free();
 
     var b = newPrinter();
-    b.Value.buf = append((~b).buf, (byte)'b');
-    fmt.Println((@string)(~b).buf, (~b).id);
+    b.buf = append(b.buf, (byte)'b');
+    fmt.Println((@string)b.buf, b.id);
     b.free();
 
     var c = Ꮡ(new pp(id: 100));
     keep(c);
     var got = poolGet()._<ж<pp>>();
-    got.Value.id = 200;
-    fmt.Println((~c).id);
+    got.id = 200;
+    fmt.Println(c.id);
 }
 
 } // end main_package

@@ -66,7 +66,7 @@ internal static @string describe(any x) {
 internal static @string firstConcrete(any x) {
     switch (x.type()) {
     case ж<circle> t: {
-        return fmt.Sprintf("concrete r=%d"u8, (~t).r);
+        return fmt.Sprintf("concrete r=%d"u8, t.r);
     }
     case {} Δt when Δt._<shape>(out var t): {
         return "iface "u8 + t.name();
@@ -83,7 +83,7 @@ internal static @string firstInterface(any x) {
         return "iface "u8 + t.name();
     }
     case ж<circle> t: {
-        return fmt.Sprintf("concrete r=%d"u8, (~t).r);
+        return fmt.Sprintf("concrete r=%d"u8, t.r);
     }
     default: {
         var t = x;
@@ -154,7 +154,7 @@ internal static void Main() {
         t.grow(10);
         break;
     }}
-    fmt.Println((~c).r);
+    fmt.Println(c.r);
 }
 
 } // end main_package

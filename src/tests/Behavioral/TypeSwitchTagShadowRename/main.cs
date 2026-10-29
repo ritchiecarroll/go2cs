@@ -11,7 +11,7 @@ partial struct node {
 internal static @string inspect(any n) {
     switch (n.type()) {
     case ж<node> nΔ1: {
-        switch ((~nΔ1).inner.type()) {
+        switch (nΔ1.inner.type()) {
         case nint: {
             return "node:int";
         }
@@ -35,7 +35,7 @@ internal static (@string, @string) classifyVia(any v) {
     any unwrap(any vΔ1) {
         {
             var (p, ok) = vΔ1._<ж<node>>(ᐧ); if (ok) {
-                return (~p).inner;
+                return p.inner;
             }
         }
         return vΔ1;
@@ -59,7 +59,7 @@ internal static (@string, @string) classifyVia(any v) {
 
     @string label = "shadow";
     var other = Ꮡ(new node());
-    other.Value.inner = label;
+    other.inner = label;
 
     return (pick(v), pick(other.OrTypedNil()));
 }
@@ -67,7 +67,7 @@ internal static (@string, @string) classifyVia(any v) {
 internal static void Main() {
     @string hi = "hi";
     var sn = Ꮡ(new node());
-    sn.Value.inner = hi;
+    sn.inner = hi;
 
     fmt.Println(inspect(Ꮡ(new node(inner: (nint)5))));
     fmt.Println(inspect(sn.OrTypedNil()));

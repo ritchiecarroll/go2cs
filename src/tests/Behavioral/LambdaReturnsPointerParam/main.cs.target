@@ -37,11 +37,11 @@ internal static void Main() {
 
     foreach (var (_, e) in table) {
         var (it, err) = e.get();
-        fmt.Println((~it).name, err);
+        fmt.Println(it.name, err);
     }
 
-    fmt.Println((~pick(a)()).name);
-    fmt.Println((~passthrough(b)).name);
+    fmt.Println(pick(a)().name);
+    fmt.Println(passthrough(b).name);
 }
 
 } // end main_package

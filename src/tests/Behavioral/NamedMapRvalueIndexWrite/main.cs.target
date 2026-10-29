@@ -26,7 +26,7 @@ internal static void Main() {
     r.Header()["Content-Type"] = new @string[]{"text/plain"}.slice();
     r.Header()["X-Trace"] = new @string[]{"a", "b"}.slice();
 
-    fmt.Println((~r).hdr["Content-Type"], len((~r).hdr["X-Trace"]));
+    fmt.Println(r.hdr["Content-Type"], len(r.hdr["X-Trace"]));
 
     var c = new Counts(new map<@string, nint>{});
     var cʗ1 = c;
@@ -43,7 +43,7 @@ internal static void Main() {
     fmt.Println(absent == nil, ok);
 
     delete(r.Header(), "X-Trace"u8);
-    fmt.Println(len(r.Header()), len((~r).hdr));
+    fmt.Println(len(r.Header()), len(r.hdr));
 }
 
 } // end main_package

@@ -76,10 +76,10 @@ internal static partial nint caseSiblings(nint kind) {
         for (nint i = 0; i < 2; i++) {
             ys[i].link(Ꮡys.at<node>(i + 1));
         }
-        for (var p = Ꮡxs.at<node>(0); p != nil; p = p.Value.next) {
+        for (var p = Ꮡxs.at<node>(0); p != nil; p = p.next) {
             total++;
         }
-        for (var p = Ꮡys.at<node>(0); p != nil; p = p.Value.next) {
+        for (var p = Ꮡys.at<node>(0); p != nil; p = p.next) {
             total += 10;
         }
         break;

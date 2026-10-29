@@ -13,7 +13,7 @@ internal static void Main() {
     var c = PromotedEmbedLib.New("widget");
     c.Add(3);
     bump(c, 4);
-    fmt.Println((~c).Label, c.Report().Sum);
+    fmt.Println(c.Label, c.Report().Sum);
 }
 
 } // end main_package

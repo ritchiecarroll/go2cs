@@ -20,17 +20,17 @@ internal static void Main() {
     var a = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
     var aPending = a.Stop();
-    fmt.Println("A stop-after-fire pending:", aPending, "stale:", tryRecv((~a).C));
+    fmt.Println("A stop-after-fire pending:", aPending, "stale:", tryRecv(a.C));
 
     var b = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
     var bPending = b.Reset(time.ΔHour);
-    fmt.Println("B reset-after-fire pending:", bPending, "stale:", tryRecv((~b).C));
+    fmt.Println("B reset-after-fire pending:", bPending, "stale:", tryRecv(b.C));
 
     var c = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
-    fmt.Println("C len:", len((~c).C), "cap:", cap((~c).C));
-    fmt.Println("C receive:", !(ᐸꟷ((~c).C)).IsZero());
+    fmt.Println("C len:", len(c.C), "cap:", cap(c.C));
+    fmt.Println("C receive:", !(ᐸꟷ(c.C)).IsZero());
 
     time.Duration period = /* 200 * time.Microsecond */ 200000;
     nint dStale = 0;
@@ -38,7 +38,7 @@ internal static void Main() {
         var tkΔ1 = time.NewTicker(period);
         time.Sleep(((time.Duration)(int64)(iΔ1 % 9)) * period / 4);
         tkΔ1.Stop();
-        if (tryRecv((~tkΔ1).C)) {
+        if (tryRecv(tkΔ1.C)) {
             dStale++;
         }
     }
@@ -49,7 +49,7 @@ internal static void Main() {
     for (nint iΔ2 = 0; iΔ2 < 300; iΔ2++) {
         time.Sleep(((time.Duration)(int64)(iΔ2 % 9)) * period / 4);
         tk.Reset(time.ΔHour);
-        if (tryRecv((~tk).C)) {
+        if (tryRecv(tk.C)) {
             eStale++;
         }
         tk.Reset(period);
@@ -61,7 +61,7 @@ internal static void Main() {
     for (nint iΔ3 = 0; iΔ3 < 200; iΔ3++) {
         var t = time.NewTimer(time.ΔHour);
         t.Reset(time.Millisecond);
-        ᐸꟷ((~t).C);
+        ᐸꟷ(t.C);
         fDelivered++;
     }
     fmt.Println("F reset-to-imminent delivered:", fDelivered);
@@ -82,7 +82,7 @@ internal static void Main() {
     var i = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
     i.Stop();
-    fmt.Println("I second stop pending:", i.Stop(), "stale:", tryRecv((~i).C));
+    fmt.Println("I second stop pending:", i.Stop(), "stale:", tryRecv(i.C));
 
     const nint batch = 600;
     time.Duration armAt = /* 40 * time.Millisecond */ 40000000;
@@ -109,7 +109,7 @@ internal static void Main() {
             }
         }
         foreach (var (_, t) in timers) {
-            if (tryRecv((~t).C)) {
+            if (tryRecv(t.C)) {
                 stale++;
             }
         }

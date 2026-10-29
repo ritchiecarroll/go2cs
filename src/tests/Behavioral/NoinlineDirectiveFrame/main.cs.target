@@ -48,7 +48,7 @@ internal static void Main() {
         }
     }
 
-    fmt.Println("bumped", (~c).n);
+    fmt.Println("bumped", c.n);
 }
 
 } // end main_package

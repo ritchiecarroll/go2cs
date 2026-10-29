@@ -47,7 +47,7 @@ internal static void Main() {
 
     ref var n = ref heap<nih>(new nih(a: 7, b: 9), out var Ꮡn);
     var m = Ꮡn.add(0);
-    fmt.Println((~m).a, (~m).b);
+    fmt.Println(m.a, m.b);
 
     var pb = Ꮡn.add(4).Reinterpret<nih, uint32>();
     fmt.Println(pb.Value);

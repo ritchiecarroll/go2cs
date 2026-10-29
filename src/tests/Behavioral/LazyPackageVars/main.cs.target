@@ -16,15 +16,15 @@ internal static void Main() {
     fmt.Println("ByName all:", len(tables.ByName["all"]), tables.ByName["all"][0].Name);
 
     var p = tables.Roots[1];
-    p.Value.Weight = 20;
-    fmt.Println("roots:", tables.Roots[1] == p, (~tables.Roots[1]).Weight, (~tables.Roots[3]).Name);
+    p.Weight = 20;
+    fmt.Println("roots:", tables.Roots[1] == p, tables.Roots[1].Weight, tables.Roots[3].Name);
 
     foreach (var (_, rule) in tables.Rules.ΔRangeSnapshot()) {
         fmt.Println("rule:", rule.Name, rule.Apply(7));
     }
 
     tables.Roots[0] = Ꮡ(new tables.Entry(Name: "swapped"));
-    fmt.Println("swapped:", (~tables.Roots[0]).Name);
+    fmt.Println("swapped:", tables.Roots[0].Name);
 
     var before = tables.GridAddr();
     before.Value[0] = 100;

@@ -17,11 +17,11 @@ internal static partial ж<holder> makeHolder(@string name) {
         tail: new slice<nint>(2)
     ));
 
-    foreach (var i in range((~h).tbl)) {
-        h.Value.tbl[i] = len(name);
+    foreach (var i in range(h.tbl)) {
+        h.tbl[i] = len(name);
     }
 
-    h.Value.tbl[3] = 42;
+    h.tbl[3] = 42;
 
     return h;
 }
@@ -30,11 +30,11 @@ internal static void Main() {
     var h = makeHolder("abc");
     nint sum = 0;
 
-    foreach (var (i, v) in (~h).tbl.ΔRangeSnapshot()) {
+    foreach (var (i, v) in h.tbl.ΔRangeSnapshot()) {
         sum += i * v;
     }
 
-    fmt.Println((~h).name, len((~h).tbl), sum, (~h).tbl[3], len((~h).tail));
+    fmt.Println(h.name, len(h.tbl), sum, h.tbl[3], len(h.tail));
 
     var src = new nint[]{1, 2, 3, 4, 5, 6, 7, 8}.array();
     var g = new holder(name: "xyz", tbl: src.Clone());

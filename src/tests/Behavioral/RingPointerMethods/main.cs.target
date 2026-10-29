@@ -54,7 +54,7 @@ public static nint Len(this ж<Ring> Ꮡr) {
     nint n = 0;
     if (Ꮡr != nil) {
         n = 1;
-        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
+        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.next) {
             n++;
         }
     }
@@ -72,10 +72,10 @@ internal static ж<Ring> makeRing(nint count) {
         ref var i = ref heap<nint>(out var Ꮡi);
         i = iᴛ1;
         var e = Ꮡ(new Ring(Value: i));
-        e.Value.prev = p;
-        e.Value.next = p.Value.next;
-        p.Value.next.Value.prev = e;
-        p.Value.next = e;
+        e.prev = p;
+        e.next = p.next;
+        p.next.prev = e;
+        p.next = e;
         p = e;
         iᴛ1 = i;
     }

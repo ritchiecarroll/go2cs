@@ -72,8 +72,8 @@ internal static void Main() {
 
     fmt.Println(o.of(outer.Ꮡinner).total());
     fmt.Println((~o).n);
-    fmt.Println((~o).inner.n);
-    fmt.Println((~o).tag);
+    fmt.Println(o.inner.n);
+    fmt.Println(o.tag);
     o.of(outer.Ꮡinner).reset0();
     fmt.Println((~o).n);
 

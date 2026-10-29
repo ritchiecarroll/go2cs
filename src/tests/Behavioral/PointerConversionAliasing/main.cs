@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
 
-[GoFieldAccess(typeof(Person))]
 partial class main_package {
 
 partial struct Employee {
@@ -33,11 +32,11 @@ internal static void named() {
     var e = Ꮡ(new Employee(Name: "ann", Age: 30));
     var p = e.Reinterpret<Employee, Person>();
 
-    p.Value.Name = "bob";
-    fmt.Println("named, write through converted:", (~e).Name);
+    p.Name = "bob";
+    fmt.Println("named, write through converted:", e.Name);
 
-    e.Value.Age = 31;
-    fmt.Println("named, write through original:", (~p).Age);
+    e.Age = 31;
+    fmt.Println("named, write through original:", p.Age);
 
     fmt.Println("named, same address:", @unsafe.Pointer.FromPinnedBox(p) == @unsafe.Pointer.FromPinnedBox(e));
     fmt.Println("named, round trip identity:", p.Reinterpret<Person, Employee>() == e);
@@ -54,7 +53,7 @@ internal static void viaUnsafe() {
     var p = e.Reinterpret<Employee, Person>();
 
     p.Age = 6;
-    fmt.Println("unsafe, write through converted:", (~e).Age);
+    fmt.Println("unsafe, write through converted:", e.Age);
     fmt.Println("unsafe, round trip identity:", p.Reinterpret<Person, Employee>() == e);
 }
 
@@ -67,11 +66,11 @@ internal static void anonymous() {
     var a = Ꮡ(new anonymous_a("dot", 7));
     var p = a.Reinterpret<anonymous_a, Person>();
 
-    p.Value.Age = 8;
+    p.Age = 8;
     fmt.Println("anonymous, write through converted:", (~a).Age);
 
     a.Value.Name = "dov";
-    fmt.Println("anonymous, write through original:", (~p).Name);
+    fmt.Println("anonymous, write through original:", p.Name);
     fmt.Println("anonymous, same address:", @unsafe.Pointer.FromPinnedBox(p) == @unsafe.Pointer.FromPinnedBox(a));
 }
 
@@ -90,8 +89,8 @@ internal static void tagsOnlyNamed() {
     var t = Ꮡ(new Tagged(Name: "kim", Age: 18));
     var p = t.Reinterpret<Tagged, Person>();
 
-    p.Value.Age = 19;
-    fmt.Println("tags only named, write through converted:", (~t).Age);
+    p.Age = 19;
+    fmt.Println("tags only named, write through converted:", t.Age);
     fmt.Println("tags only named, round trip identity:", p.Reinterpret<Person, Tagged>() == t);
 }
 
@@ -107,21 +106,21 @@ internal static void definedType() {
     var s = e.Reinterpret<Employee, Staff>();
 
     s.Value.Name = "fay";
-    fmt.Println("defined, write through converted:", (~e).Name);
+    fmt.Println("defined, write through converted:", e.Name);
 }
 
 internal static void callArgument() {
     var e = Ꮡ(new Employee(Name: "gus", Age: 10));
     rename(e.Reinterpret<Employee, Person>(), "hal");
-    fmt.Println("argument, write through converted:", (~e).Name);
+    fmt.Println("argument, write through converted:", e.Name);
 }
 
 internal static void sliceElement() {
     var es = new ж<Employee>[]{Ꮡ(new Employee(Name: "ivy"u8, Age: 11))}.slice();
     var p = es[0].Reinterpret<Employee, Person>();
 
-    p.Value.Age = 12;
-    fmt.Println("slice element, write through converted:", (~es[0]).Age);
+    p.Age = 12;
+    fmt.Println("slice element, write through converted:", es[0].Age);
 }
 
 internal partial struct fieldAddress_pair /*dyn*/ {
@@ -133,7 +132,7 @@ internal static void fieldAddress() {
     ref var pr = ref heap(new fieldAddress_pair(), out var Ꮡpr);
     var p = Ꮡpr.of(fieldAddress_pair.ᏑSecond).Reinterpret<Employee, Person>();
 
-    p.Value.Name = "jan";
+    p.Name = "jan";
     fmt.Println("field address, write through converted:", pr.Second.Name);
 }
 

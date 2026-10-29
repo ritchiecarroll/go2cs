@@ -10,21 +10,21 @@ partial struct request {
     internal nint depth;
 }
 
-[GoLazy] partial class lazyᴛdescribe { internal static Func<ж<request>, @string, @string> describe = (ж<request> r, @string tag) => fmt.Sprint(tag, ":", (~r).path, "/", (~r).closed, "/", (~r).depth, r.label()); }
+[GoLazy] partial class lazyᴛdescribe { internal static Func<ж<request>, @string, @string> describe = (ж<request> r, @string tag) => fmt.Sprint(tag, ":", r.path, "/", r.closed, "/", r.depth, r.label()); }
 
 [GoLazy] partial class lazyᴛdeepen { internal static Action<ж<request>> deepen = (ж<request> r) => {
-    r.Value.depth = (~r).depth + 2;
-    r.Value.closed = !(~r).closed;
+    r.depth = r.depth + 2;
+    r.closed = !r.closed;
 }; }
 
-internal static Func<ж<request>, @string> pathOf = (ж<request> r) => (~r).path;
+internal static Func<ж<request>, @string> pathOf = (ж<request> r) => r.path;
 
 internal static @string label(this ref request r) {
     return "["u8 + r.path + "]"u8;
 }
 
 internal static @string inside() {
-    @string f(ж<request> r) => (~r).path + "!"u8;
+    @string f(ж<request> r) => r.path + "!"u8;
 
     return f(Ꮡ(new request(path: "/ctl")));
 }

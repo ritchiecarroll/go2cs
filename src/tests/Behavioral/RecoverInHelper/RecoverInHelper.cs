@@ -13,7 +13,7 @@ internal static void Main() {
     fmt.Println("3 defer f(&err):", deferNamedWithPointer(), "| gob shape:", deferGobShape());
 
     var g = deferMethodValue();
-    fmt.Println("4 method value:", (~g).got, "| with args:", deferMethodValueWithArgs());
+    fmt.Println("4 method value:", g.got, "| with args:", deferMethodValueWithArgs());
 
     fmt.Println("5 defer recover():", deferRecoverItself());
 
@@ -194,7 +194,7 @@ internal static any deferMethodValueWithArgs() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     })();
-    return (~g).got;
+    return g.got;
 }
 
 internal static any /*outer*/ deferRecoverItself() {

@@ -24,10 +24,10 @@ internal static void Main() {
     var b = Ꮡ(new node(id: 2));
 
     var vm = buildValueMap(a, b);
-    fmt.Println((~vm["a"]).id, (~vm["b"]).id);
+    fmt.Println(vm["a"].id, vm["b"].id);
 
-    vm["a"].Value.id = 99;
-    fmt.Println((~a).id);
+    vm["a"].id = 99;
+    fmt.Println(a.id);
 
     var km = buildKeyMap(a, b);
     fmt.Println(km[a], km[b]);

@@ -26,17 +26,17 @@ internal static void Main() {
         },
         notify: new map<@string, Action<ж<inner.Record>, @string>>{
             ["hit"] = (ж<inner.Record> recΔ2, @string tag) => {
-                recΔ2.Value.Hits++;
-                fmt.Println("notify:", tag, (~recΔ2).Name, (~recΔ2).Hits);
+                recΔ2.Hits++;
+                fmt.Println("notify:", tag, recΔ2.Name, recΔ2.Hits);
             }
         }
     );
 
     var (rec, err) = r.load(r.cache, "alpha", (@string s) => ("-" + s, default));
-    fmt.Println((~rec).Name, (~rec).Hits, err);
+    fmt.Println(rec.Name, rec.Hits, err);
 
     r.notify["hit"](rec, "t1");
-    fmt.Println(len(r.cache), (~r.cache["alpha"]).Hits);
+    fmt.Println(len(r.cache), r.cache["alpha"].Hits);
 }
 
 } // end main_package

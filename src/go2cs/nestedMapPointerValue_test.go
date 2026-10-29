@@ -161,7 +161,7 @@ func TestNestedMapPointerValueRendersTheBox(t *testing.T) {
 	}
 
 	got := emitNestedMapAssign(t, visitor, assign, decls["insert"])
-	want := "(~g).strata[(~g).depth].Set(n.name(), " + AddressPrefix + "n);"
+	want := "g.strata[g.depth].Set(n.name(), " + AddressPrefix + "n);" // `g.f`: parity seat #31's field property
 
 	if got != want {
 		t.Fatalf("the nested map's pointer VALUE slot must take the box:\n got %q\nwant %q\n(a bare %q is CS1503 against map<K, ж<T>>)",
@@ -182,7 +182,7 @@ func TestNestedMapPointerKeyRendersTheBox(t *testing.T) {
 	}
 
 	got := emitNestedMapAssign(t, visitor, assign, decls["index"])
-	want := "(~g).byNode[(~g).depth].Set(" + AddressPrefix + "n, (~n).v);"
+	want := "g.byNode[g.depth].Set(" + AddressPrefix + "n, n.v);"
 
 	if got != want {
 		t.Fatalf("the nested map's pointer KEY slot must take the box:\n got %q\nwant %q", got, want)
@@ -202,7 +202,7 @@ func TestNestedMapValueSlotStaysBare(t *testing.T) {
 	}
 
 	got := emitNestedMapAssign(t, visitor, assign, decls["insertValue"])
-	want := "(~g).plain[(~g).depth].Set(n.name(), (~n).v);"
+	want := "g.plain[g.depth].Set(n.name(), n.v);"
 
 	if got != want {
 		t.Fatalf("a VALUE-typed nested map must emit its value bare:\n got %q\nwant %q", got, want)

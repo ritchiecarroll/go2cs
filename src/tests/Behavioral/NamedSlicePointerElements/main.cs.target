@@ -19,14 +19,14 @@ internal static void Main() {
 
     var q = new queue(new ж<item>[]{Ꮡ(new item(v: 1)), Ꮡ(new item(v: 2))}.slice());
     q = append(qᴷ, q, Ꮡ(new item(v: 3)));
-    q[1].Value.v = 5;
+    q[1].v = 5;
 
     nint sum = 0;
     foreach (var (_, it) in q) {
-        sum += it.Value.v;
+        sum += it.v;
     }
 
-    fmt.Println(len(q), (~q[0]).v, (~q[1]).v, (~q[2]).v, sum);
+    fmt.Println(len(q), q[0].v, q[1].v, q[2].v, sum);
 }
 
 } // end main_package

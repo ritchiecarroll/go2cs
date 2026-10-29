@@ -59,7 +59,7 @@ internal static void Main() {
 
     if (ok) {
         var b = basic.Basic();
-        b.Value.BitSize = 64;
+        b.BitSize = 64;
         b.Value.Label = "uint64";
     }
 
@@ -70,14 +70,14 @@ internal static void Main() {
     Node ni = new IntжNode(i);
     {
         var (bi, okI) = ni._<main_type>(ᐧ); if (okI) {
-            bi.Basic().Value.BitSize = 32;
+            bi.Basic().BitSize = 32;
         }
     }
     fmt.Println("int after write through promoted pointer:", (~i).BitSize, (~i).Label);
 
     switch (n.type()) {
     case {} Δt when Δt._<main_type>(out var t): {
-        fmt.Println("type switch matched anon Basic, bit size:", (~t.Basic()).BitSize);
+        fmt.Println("type switch matched anon Basic, bit size:", t.Basic().BitSize);
         break;
     }
     default: {
@@ -99,19 +99,19 @@ internal static void Main() {
     p.Value.ByteSize = 4;
 
     Node np = new PtrжNode(p);
-    fmt.Println("ptr Common through embed:", (~np.Common()).Label, (~np.Common()).ByteSize);
+    fmt.Println("ptr Common through embed:", np.Common().Label, np.Common().ByteSize);
     fmt.Println("ptr String through embed:", np.String());
 
     var empty = Ꮡ(new Ptr());
     empty.Value.Label = "empty";
     empty.Value.ByteSize = 2;
     Node ne = new PtrжNode(empty);
-    fmt.Println("ptr Common with nil field:", (~ne.Common()).Label, (~ne.Common()).ByteSize);
+    fmt.Println("ptr Common with nil field:", ne.Common().Label, ne.Common().ByteSize);
 
-    ne.Common().Value.ByteSize = 16;
+    ne.Common().ByteSize = 16;
     fmt.Println("ptr after write through Common:", (~empty).ByteSize);
 
-    fmt.Println("ptr field node:", (~(~p).Node.Common()).Label, (~p).Node.String());
+    fmt.Println("ptr field node:", p.Node.Common().Label, p.Node.String());
 }
 
 } // end main_package

@@ -21,7 +21,7 @@ internal static partial ж<view> viewOf(ж<header> hp) {
 }
 
 internal static partial nint readN(ж<view> p) {
-    return (~viewOf(p.Reinterpret<view, header>())).n;
+    return viewOf(p.Reinterpret<view, header>()).n;
 }
 
 internal static void Main() {

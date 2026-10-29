@@ -129,7 +129,7 @@ internal static void Main() {
     var held = gpp;
     gpp = Ꮡ(new T(n: 50));
     fp();
-    fmt.Println("pointer ", (~held).n, (~gpp).n);
+    fmt.Println("pointer ", held.n, gpp.n);
 
     var fs = Ꮡ(gs, 0).inc;
     fs();

@@ -11,8 +11,8 @@ partial struct node {
 
 internal static nint sum(this ж<node> Ꮡn) {
     nint total = 0;
-    for (var p = Ꮡn; p != nil; p = p.Value.next) {
-        total += p.Value.val;
+    for (var p = Ꮡn; p != nil; p = p.next) {
+        total += p.val;
     }
     return total;
 }
@@ -23,17 +23,17 @@ internal static ref ж<node> head => ref ((StaticBox<ж<node>>)Ꮡhead).ValueSlo
 internal static void insert(nint v) {
     var n = Ꮡ(new node(val: v));
     var pp = Ꮡhead;
-    while (pp.ValueSlot != nil && (~(pp.ValueSlot)).val < v) {
+    while (pp.ValueSlot != nil && (pp.ValueSlot).val < v) {
         pp = (pp.ValueSlot).of(node.Ꮡnext);
     }
-    n.Value.next = pp.ValueSlot;
+    n.next = pp.ValueSlot;
     pp.ValueSlot = n;
 }
 
 internal static bool remove(nint v) {
     for (var pp = Ꮡhead; pp.ValueSlot != nil; pp = (pp.ValueSlot).of(node.Ꮡnext)) {
-        if ((~(pp.ValueSlot)).val == v) {
-            pp.ValueSlot = (pp.ValueSlot).Value.next;
+        if ((pp.ValueSlot).val == v) {
+            pp.ValueSlot = (pp.ValueSlot).next;
             return true;
         }
     }
@@ -42,8 +42,8 @@ internal static bool remove(nint v) {
 
 internal static @string list() {
     @string s = "";
-    for (var p = head; p != nil; p = p.Value.next) {
-        s += fmt.Sprintf("%d "u8, (~p).val);
+    for (var p = head; p != nil; p = p.next) {
+        s += fmt.Sprintf("%d "u8, p.val);
     }
     return s;
 }
@@ -62,7 +62,7 @@ internal static void Main() {
     fmt.Println(head.sum());
     insert(5);
     fmt.Println(list());
-    fmt.Println((~head).val);
+    fmt.Println(head.val);
 }
 
 } // end main_package

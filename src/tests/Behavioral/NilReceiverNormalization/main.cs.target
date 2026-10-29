@@ -68,7 +68,7 @@ internal static void Main() {
     fmt.Println(nilLoc.rename("!"));
     fmt.Println(utcLoc.name);
     fmt.Println(real.rename("?"));
-    fmt.Println((~real).name);
+    fmt.Println(real.name);
 
     fmt.Println(real.firstUseReads());
 

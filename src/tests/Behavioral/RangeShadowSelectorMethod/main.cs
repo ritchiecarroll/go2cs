@@ -22,7 +22,7 @@ internal static void Main() {
     var w = Ꮡ(new writer());
     w.typ("top");
 
-    foreach (var (_, line) in (~w).@out) {
+    foreach (var (_, line) in w.@out) {
         fmt.Println(line);
     }
 }

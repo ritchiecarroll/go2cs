@@ -52,7 +52,7 @@ internal static void Main() {
         var v = Ꮡ(new T(f: 1));
         var vʗ1 = v;
         runtime.AddCleanup(v, (nint _Δp0) => {
-            _ = vʗ1.Value.f;
+            _ = vʗ1.f;
         }, 0, new object?[] { v });
     });
 
@@ -70,14 +70,14 @@ internal static void Main() {
         var w = Ꮡ(new T(f: 4));
         var wʗ1 = w;
         runtime.AddCleanup(v, (nint _Δp0) => {
-            _ = wʗ1.Value.f;
+            _ = wʗ1.f;
         }, 0, new object?[] { w });
         runtime.KeepAlive(w.OrTypedNil());
     });
 
     @try("captures value", () => {
         var v = Ꮡ(new T(f: 5));
-        nint n = v.Value.f;
+        nint n = v.f;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = n;
         }, 0);
@@ -92,10 +92,10 @@ internal static void Main() {
         var v = Ꮡ(new T(f: 7));
         var w = Ꮡ(new T(f: 8));
         var vʗ2 = v;
-        nint sibling() => (~vʗ2).f;
+        nint sibling() => vʗ2.f;
         var wʗ2 = w;
         runtime.AddCleanup(v, (nint _Δp0) => {
-            _ = wʗ2.Value.f;
+            _ = wʗ2.f;
         }, 0, new object?[] { w });
         fmt.Println("sibling reads", sibling());
         runtime.KeepAlive(w.OrTypedNil());
@@ -119,7 +119,7 @@ internal static void Main() {
         var v = Ꮡ(new T(f: 12));
         var vʗ3 = v;
         var cleanup = (nint _Δp0) => {
-            _ = vʗ3.Value.f;
+            _ = vʗ3.f;
         };
         runtime.AddCleanup(v, cleanup, 0, new object?[] { v });
     });
@@ -129,7 +129,7 @@ internal static void Main() {
         var w = Ꮡ(new T(f: 14));
         var wʗ3 = w;
         var cleanup = (nint _Δp0) => {
-            _ = wʗ3.Value.f;
+            _ = wʗ3.f;
         };
         runtime.AddCleanup(v, cleanup, 0, new object?[] { w });
         runtime.KeepAlive(w.OrTypedNil());

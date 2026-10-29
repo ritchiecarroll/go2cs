@@ -56,7 +56,7 @@ internal static void Main() {
 
     var b = Ꮡ(new box(data: new nint[]{4, 5}.slice()));
     b.clear();
-    fmt.Println(len((~b).data));
+    fmt.Println(len(b.data));
 
     var m = new map<@string, nint>{["a"] = 1, ["b"] = 2};
     builtin.clear(m);
@@ -64,7 +64,7 @@ internal static void Main() {
 
     var g = Ꮡ(new guard());
     g.run();
-    fmt.Println((~g).err);
+    fmt.Println(g.err);
 
     var h = new header(new map<@string, slice<@string>>{["a"] = new @string[]{"1"}.slice(), ["b"] = new @string[]{"2"}.slice()});
     var alias = h;

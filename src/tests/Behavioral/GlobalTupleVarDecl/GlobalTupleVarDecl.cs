@@ -27,7 +27,7 @@ internal static nint n = tupleᴛ1ʗ.Item1;
 internal static @string s = tupleᴛ1ʗ.Item2;
 
 internal static void Main() {
-    fmt.Println((~defaultBox).v);
+    fmt.Println(defaultBox.v);
     fmt.Println(n, s);
     fmt.Println(calls);
 

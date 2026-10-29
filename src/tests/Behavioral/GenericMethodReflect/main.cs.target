@@ -225,7 +225,7 @@ internal static void Main() {
             return "false";
         }
         nint old = s.Swap(2);
-        return fmt.Sprint(ok, " ", old, " ", (~p).v);
+        return fmt.Sprint(ok, " ", old, " ", p.v);
     });
     @try("assert generic Cell to valuer", () => {
         var (c, ok) = ((any)new Cell<nuint>(V: 1, Valid: true))._<valuer>(ᐧ);

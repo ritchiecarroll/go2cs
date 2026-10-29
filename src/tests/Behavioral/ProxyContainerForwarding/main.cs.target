@@ -85,7 +85,7 @@ public static array<ж<Node>> Triple(this ж<Node> Ꮡn) {
 
 public static iter.Seq<ж<Node>> Path(this ж<Node> Ꮡn) {
     return (Func<ж<Node>, bool> yield) => {
-        for (var p = Ꮡn; p != nil; p = p.Value.next) {
+        for (var p = Ꮡn; p != nil; p = p.next) {
             if (!yield(p)) {
                 return;
             }

@@ -8,9 +8,9 @@
 
 // Guards the field-access emission (fieldAccess.go): a field reached through a local whose every assignment
 // reinterprets an unsafe.Pointer, over a struct that holds a managed reference, reads as Go spells it,
-// `buf.Offset = off`, through a generated field property, and the file names the struct in its
-// `[GoFieldAccess(…)]` record. The controls keep today's emission: a local that is also assigned a plain pointer,
-// and a struct with no managed reference.
+// `buf.Offset = off`, through a generated field property, and the package's package_info.cs records the struct
+// (`[assembly: GoFieldAccess(typeof(T))]`). The controls fall outside the provenance rule: a local that is also assigned a plain
+// pointer, and a struct with no managed reference. Since parity seat #31 P1 serves them, with the same spelling.
 
 package main
 
@@ -22,7 +22,7 @@ import (
 	"testing"
 )
 
-func convertFieldAccessFixture(t *testing.T) string {
+func convertFieldAccessFixture(t *testing.T) (string, string) {
 	t.Helper()
 
 	root := t.TempDir()
@@ -116,7 +116,9 @@ func main() {
 	writeModuleFile(t, filepath.Join(appDir, "frozen.go"), "package main\n\ntype frame struct {\n\tName  string\n\tCount uint16\n}\n")
 	writeModuleFile(t, filepath.Join(root, "out", "src", "example.com", "fieldaccess", "frozen.cs"), "[module: go.GoManualConversion]\n\nnamespace go;\n")
 
-	return readGenerated(t, filepath.Join(convertFieldAccessModule(t, root), "main.cs"))
+	out := convertFieldAccessModule(t, root)
+
+	return readGenerated(t, filepath.Join(out, "main.cs")), readGenerated(t, filepath.Join(out, PackageInfoFileName))
 }
 
 // convertFieldAccessModule converts the fixture module under root/app (example.com/fieldaccess) into root/out and
@@ -158,7 +160,7 @@ func convertFieldAccessModule(t *testing.T, root string) string {
 func TestFieldAccessReadsThroughTheFieldProperty(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
-	cs := convertFieldAccessFixture(t)
+	cs, info := convertFieldAccessFixture(t)
 	scoped := funcBody(t, cs, "void reinterpreted(")
 
 	for _, want := range []string{
@@ -183,9 +185,9 @@ func TestFieldAccessReadsThroughTheFieldProperty(t *testing.T) {
 		t.Errorf("a scoped field access still reads through the whole value:\n%s", scoped)
 	}
 
-	if !strings.Contains(cs, "[GoFieldAccess(typeof(buffer))]\npartial class main_package {") &&
-		!strings.Contains(cs, "[GoFieldAccess(typeof(buffer))]\r\npartial class main_package {") {
-		t.Errorf("the file does not carry its [GoFieldAccess] record on the package class:\n%s", cs)
+	// hdr is listed by its P1 site in scalarOnly (fieldPropertyEmission_test.go): one record serves both routes.
+	if got := strings.Join(fieldAccessRecordsOf(info), " "); got != "buffer hdr" || strings.Contains(cs, "GoFieldAccess") {
+		t.Errorf("package_info.cs records %q, want \"buffer hdr\", and the file carries none:\n%s", got, info)
 	}
 
 	if handOwned := funcBody(t, cs, "void handOwned("); !strings.Contains(handOwned, "fr.of(frame.ᏑCount).Value = 4;") ||
@@ -193,11 +195,13 @@ func TestFieldAccessReadsThroughTheFieldProperty(t *testing.T) {
 		t.Errorf("a field of a hand-owned file's struct does not take the explicit form:\n%s", handOwned)
 	}
 
-	if repointed := funcBody(t, cs, "void repointed("); !strings.Contains(repointed, "buf.Value.Offset = 1;") {
-		t.Errorf("the re-pointed control left today's emission:\n%s", repointed)
+	// The controls are outside the provenance rule, so P1 serves them (parity seat #31): the same spelling, and a field
+	// named like a member of ж<T> keeps today's box form rather than this route's explicit one.
+	if repointed := funcBody(t, cs, "void repointed("); !strings.Contains(repointed, "buf.Offset = 1;") {
+		t.Errorf("the re-pointed control does not take P1's spelling:\n%s", repointed)
 	}
 
-	if scalarOnly := funcBody(t, cs, "void scalarOnly("); !strings.Contains(scalarOnly, "h.Value.Tag = 1;") {
-		t.Errorf("the scalar-only control left today's emission:\n%s", scalarOnly)
+	if scalarOnly := funcBody(t, cs, "void scalarOnly("); !strings.Contains(scalarOnly, "h.Tag = 1;") {
+		t.Errorf("the scalar-only control does not take P1's spelling:\n%s", scalarOnly)
 	}
 }

@@ -52,7 +52,7 @@ internal static partial nint capturedLocalNamedAfterType() {
         p.Value = p.Value + 3;
         got = p.Value;
     });
-    return got + (~w).other;
+    return got + w.other;
 }
 
 internal static partial nint boxRefCapturedValueNamedAfterType() {

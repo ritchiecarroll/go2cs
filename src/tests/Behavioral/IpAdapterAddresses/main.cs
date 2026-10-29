@@ -98,12 +98,12 @@ internal static void Main() {
 
     foreach (var (_, ifi) in ifs) {
         var (found, errΔ1) = Δnet.InterfaceByIndex(ifi.Index);
-        if (errΔ1 != nil || found == nil || (~found).Index != ifi.Index || (~found).Name != ifi.Name) {
+        if (errΔ1 != nil || found == nil || found.Index != ifi.Index || found.Name != ifi.Name) {
             byIndexAgrees = false;
         }
 
         (found, errΔ1) = Δnet.InterfaceByName(ifi.Name);
-        if (errΔ1 != nil || found == nil || (~found).Index != ifi.Index || (~found).Name != ifi.Name) {
+        if (errΔ1 != nil || found == nil || found.Index != ifi.Index || found.Name != ifi.Name) {
             byNameAgrees = false;
         }
     }
@@ -135,26 +135,26 @@ internal static void Main() {
     foreach (var (_, addr) in addrs) {
         switch (addr.type()) {
         case ж<Δnet.IPNet> a: {
-            if (len((~a).IP) != Δnet.IPv4len && len((~a).IP) != Δnet.IPv6len) {
+            if (len(a.IP) != Δnet.IPv4len && len(a.IP) != Δnet.IPv6len) {
                 ipsValid = false;
                 continue;
             }
-            var (ones, bits) = (~a).Mask.Size();
+            var (ones, bits) = a.Mask.Size();
             if (bits == 0 || ones > bits) {
                 masksValid = false;
                 continue;
             }
-            if ((~a).IP.To4() != nil && bits != (nint)(8 * Δnet.IPv4len)) {
+            if (a.IP.To4() != nil && bits != (nint)(8 * Δnet.IPv4len)) {
                 masksValid = false;
             }
-            if ((~a).IP.To4() == nil && bits != (nint)(8 * Δnet.IPv6len)) {
+            if (a.IP.To4() == nil && bits != (nint)(8 * Δnet.IPv6len)) {
                 masksValid = false;
             }
-            if ((~a).IP.IsLoopback()) {
-                if ((~a).IP.To4() != nil && ones == 8) {
+            if (a.IP.IsLoopback()) {
+                if (a.IP.To4() != nil && ones == 8) {
                     loopback4 = true;
                 }
-                if ((~a).IP.To4() == nil && ones == 128) {
+                if (a.IP.To4() == nil && ones == 128) {
                     loopback6 = true;
                 }
             } else {
@@ -163,7 +163,7 @@ internal static void Main() {
             break;
         }
         case ж<Δnet.IPAddr> a: {
-            if (len((~a).IP) != Δnet.IPv4len && len((~a).IP) != Δnet.IPv6len) {
+            if (len(a.IP) != Δnet.IPv4len && len(a.IP) != Δnet.IPv6len) {
                 anycastIPsValid = false;
             }
             break;
@@ -213,11 +213,11 @@ internal static void Main() {
                 multicastIPsValid = false;
                 continue;
             }
-            if (len((~a).IP) != Δnet.IPv4len && len((~a).IP) != Δnet.IPv6len) {
+            if (len(a.IP) != Δnet.IPv4len && len(a.IP) != Δnet.IPv6len) {
                 multicastIPsValid = false;
                 continue;
             }
-            if (!(~a).IP.IsMulticast()) {
+            if (!a.IP.IsMulticast()) {
                 multicastIsMulticast = false;
             }
         }

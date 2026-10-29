@@ -51,8 +51,8 @@ internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
     if (!Ꮡc.ok()) {
         return (0, fmt.Errorf("invalid conn"u8));
     }
-    c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
-    c.fd.Value.mode = "write";
+    c.fd.bytes = appendꓸꓸꓸ(c.fd.bytes, b);
+    c.fd.mode = "write";
     return (len(b), default);
 }
 
@@ -65,10 +65,10 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
     }
     int64 n = default;
     foreach (var (_, b) in v) {
-        c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
+        c.fd.bytes = appendꓸꓸꓸ(c.fd.bytes, b);
         n += (int64)len(b);
     }
-    c.fd.Value.mode = "writeBuffers";
+    c.fd.mode = "writeBuffers";
     return (n, default);
 }
 
@@ -92,8 +92,8 @@ internal static (nint, error) Write(this ж<plainConn> Ꮡc, slice<byte> b) {
     if (!Ꮡc.ok()) {
         return (0, fmt.Errorf("invalid conn"u8));
     }
-    c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
-    c.fd.Value.mode = "write";
+    c.fd.bytes = appendꓸꓸꓸ(c.fd.bytes, b);
+    c.fd.mode = "write";
     return (len(b), default);
 }
 
@@ -106,8 +106,8 @@ partial struct valueSink {
 }
 
 internal static (nint, error) Write(this valueSink s, slice<byte> b) {
-    s.fd.Value.bytes = appendꓸꓸꓸ((~s.fd).bytes, b);
-    s.fd.Value.mode = "write";
+    s.fd.bytes = appendꓸꓸꓸ(s.fd.bytes, b);
+    s.fd.mode = "write";
     return (len(b), default);
 }
 
@@ -116,10 +116,10 @@ internal static (int64, error) writeBuffers(this valueSink s, ж<Buffers> Ꮡv) 
 
     int64 n = default;
     foreach (var (_, b) in v) {
-        s.fd.Value.bytes = appendꓸꓸꓸ((~s.fd).bytes, b);
+        s.fd.bytes = appendꓸꓸꓸ(s.fd.bytes, b);
         n += (int64)len(b);
     }
-    s.fd.Value.mode = "writeBuffers";
+    s.fd.mode = "writeBuffers";
     return (n, default);
 }
 
@@ -159,7 +159,7 @@ internal static void Main() {
         var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
             ref var more = ref heap<Buffers>(new Buffers(new slice<byte>[]{slice<byte>("!"u8)}.slice()), out var Ꮡmore);
             (n, _) = wv.writeBuffers(Ꮡmore);
-            fmt.Println("direct", n, (@string)(~tcpSink).bytes);
+            fmt.Println("direct", n, (@string)tcpSink.bytes);
         } else {
             fmt.Println("direct", "miss");
         }

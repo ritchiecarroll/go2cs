@@ -50,6 +50,10 @@ using static go.main_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(ChanType))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -63,7 +67,7 @@ using static go.main_package;
 [assembly: go.GoPositionMap("escape.go", "escape.cs", "AAomgoLugoKU")]
 [assembly: go.GoPositionMap("main.go", "main.cs", "7oKCgpSUgoI=")]
 [assembly: go.GoPositionMap("switch.go", "switch.cs", "ABtAgoKYpKQ=")]
-[assembly: go.GoPositionMap("type.go", "type.cs", "AEmIAoKClKYAHT6ijKiCgoCCpKaApIKogKaCqIKmggARLqKClKaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSogKaApIAACBCCgoKUpqKCgpSogAAOIoKkgqSCpIKkgqaigpQADTKCpoKmgqaCpqKCgpSClKSigoKUgoKUpoIADRyCAAxSgqqCqIKogqiCqoKCgoKCgsyCgpSCrIKCgoKCgpS6goKUgqiCgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
+[assembly: go.GoPositionMap("type.go", "type.cs", "AEiIAoKClKYAHT6ijKiCgoCCpKaApIKogKaCqIKmggARLqKClKaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSogKaApIAACBCCgoKUpqKCgpSogAAOIoKkgqSCpIKkgqaigpQADTKCpoKmgqaCpqKCgpSClKSigoKUgoKUpoIADRyCAAxSgqqCqIKogqiCqoKCgoKCgsyCgpSCrIKCgoKCgpS6goKUgqiCgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

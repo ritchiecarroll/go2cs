@@ -45,7 +45,7 @@ internal static void Main() {
     
     var h1ʗ1 = h1;
     var fieldV = () => recvʗ1.label();
-    h1.p.Value.Name = "A";
+    h1.p.Name = "A";
 
     fmt.Println("field   ", fieldV(), (~h1.p).label());
 
@@ -63,7 +63,7 @@ internal static void Main() {
     
     var p3ʗ1 = p3;
     var identV = () => recvʗ3.label();
-    p3.Value.Name = "C";
+    p3.Name = "C";
 
     fmt.Println("ident   ", identV());
 
@@ -71,7 +71,7 @@ internal static void Main() {
     @string call(Func<@string> f) => f();
     var recvʗ4 = ~h4.p;
     @string got = call(() => recvʗ4.label());
-    h4.p.Value.Name = "D";
+    h4.p.Name = "D";
 
     var recvʗ5 = ~h4.p;
     fmt.Println("argument", got, call(() => recvʗ5.label()));
@@ -90,7 +90,7 @@ internal static void Main() {
     
     var h6ʗ1 = h6;
     var tag = (@string p1) => recvʗ7.tag(p1);
-    h6.p.Value.Name = "E";
+    h6.p.Name = "E";
 
     fmt.Println("params  ", tag("!"));
 
@@ -100,11 +100,11 @@ internal static void Main() {
     var h7ʗ1 = h7;
     var touch = () => recvʗ8.touch();
 
-    fmt.Println("copy    ", touch(), (~h7.p).Name);
+    fmt.Println("copy    ", touch(), h7.p.Name);
 
     var p8 = Ꮡ(new frame(Name: "g"));
     var paramV = viaParam(p8);
-    p8.Value.Name = "G";
+    p8.Name = "G";
 
     fmt.Println("param   ", paramV());
 
@@ -113,7 +113,7 @@ internal static void Main() {
     
     var s9ʗ1 = s9;
     var elemV = () => recvʗ9.label();
-    s9[0].Value.Name = "H";
+    s9[0].Name = "H";
 
     fmt.Println("elem    ", elemV());
 }

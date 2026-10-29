@@ -475,7 +475,7 @@ C# has no `&^` (AND-NOT) operator, so Go's `a &^= b` expands to `a &= ~b`. The `
 ```
 <!-- source: src/tests/Behavioral/AndNotAssignNarrow/main.cs.target:15 -->
 ```csharp
-    h.Value.flags &= unchecked((uint8)~(uint8)(writing));
+    h.flags &= unchecked((uint8)~(uint8)(writing));
 ```
 
 An LHS type that `int` widens to implicitly (`int`/`int32`/`int64`) needs no cast and stays `a &= ~b`. (Guarded by the `AndNotAssignNarrow` behavioral test, which exercises both an ident LHS and a struct-field LHS — they route through different assignment-emission paths.)

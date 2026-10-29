@@ -15,8 +15,8 @@ internal static void Main() {
     var first = Ꮡ(new node(val: 1, next: second));
 
     nint sum = 0;
-    for ((nint i, var n) = (3, first); i > 0; (i, n) = (i - 1, n.Value.next)) {
-        sum += n.Value.val;
+    for ((nint i, var n) = (3, first); i > 0; (i, n) = (i - 1, n.next)) {
+        sum += n.val;
     }
     fmt.Println(sum);
 

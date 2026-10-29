@@ -36,11 +36,11 @@ internal static void Main() {
     var b = Ꮡ(new node(name: "b"));
 
     foreach (var (_, n) in root.collect(new ж<node>[]{a, b}.slice())) {
-        fmt.Println("got:", (~n).name);
+        fmt.Println("got:", n.name);
     }
 
-    fmt.Println("first:", (~root.firstOr(new ж<node>[]{a, b}.slice())).name);
-    fmt.Println("empty:", (~root.firstOr(default)).name);
+    fmt.Println("first:", root.firstOr(new ж<node>[]{a, b}.slice()).name);
+    fmt.Println("empty:", root.firstOr(default).name);
 }
 
 } // end main_package

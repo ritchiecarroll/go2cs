@@ -44,7 +44,7 @@ internal static void Main() {
 
     {
         var (p, ok) = r._<ж<conn>>(ᐧ); if (ok) {
-            p.Value.data = "mutated";
+            p.data = "mutated";
             fmt.Println("chain assert ok:", p.Read());
         } else {
             fmt.Println("chain assert MISSED");
@@ -56,7 +56,7 @@ internal static void Main() {
 
     switch (r.type()) {
     case ж<conn> v: {
-        fmt.Println("switch *conn:", (~v).data);
+        fmt.Println("switch *conn:", v.data);
         break;
     }
     default: {
@@ -86,7 +86,7 @@ internal static void Main() {
 
     switch (vr.type()) {
     case ж<conn> v: {
-        fmt.Println("value switch WRONGLY matched *conn:", (~v).data);
+        fmt.Println("value switch WRONGLY matched *conn:", v.data);
         break;
     }
     case valConn v: {

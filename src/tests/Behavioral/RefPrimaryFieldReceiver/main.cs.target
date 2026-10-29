@@ -124,9 +124,9 @@ internal static partial void Main() {
     var p = Ꮡ(new counter());
     var q = p;
     q.of(counter.Ꮡmu).Lock();
-    q.Value.n = 42;
+    q.n = 42;
     q.of(counter.Ꮡmu).Unlock();
-    fmt.Println("via local pointer:", (~p).n);
+    fmt.Println("via local pointer:", p.n);
 
     ж<counter> nilc = default;
     fmt.Println("nil receiver, early return:", nilc.nBeforeTouch());

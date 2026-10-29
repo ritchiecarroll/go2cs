@@ -19,8 +19,8 @@ internal static void Main() {
     fmt.Println(entryUpper);
     fmt.Println(stdinName);
     fmt.Println(computed);
-    fmt.Println((~registry).count);
-    fmt.Println(len((~sizedTable).codes), (nint)(tableSize));
+    fmt.Println(registry.count);
+    fmt.Println(len(sizedTable.codes), (nint)(tableSize));
     fmt.Println(len(chunkHolder.chunks), (nint)(numChunks));
 
     chunkHolder.chunks[numChunks - 1] = 7;

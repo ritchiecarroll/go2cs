@@ -171,7 +171,7 @@ internal static void Main() {
     fmt.Println(dsc.Describe());
     var p = dsc.Tag();
     p.Value = 7;
-    fmt.Println((~dev).hits);
+    fmt.Println(dev.hits);
 
     var pw = new pair(new leftSide(tag: "a"), new rightSide(tag: "b"));
     fmt.Println(pw.leftSide.tag, pw.rightSide.Ping());

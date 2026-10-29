@@ -28,7 +28,7 @@ internal static partial void run(Action f) {
 internal static partial nint boxedLocal() {
     ref var h = ref heap(new heap(), out var Ꮡh);
     var p = Ꮡh;
-    p.Value.count += 7;
+    p.count += 7;
 
     return h.count;
 }

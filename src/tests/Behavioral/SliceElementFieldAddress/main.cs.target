@@ -45,32 +45,32 @@ internal static void Main() {
     fmt.Println("local array:", arr[2].n, arr[0].m);
 
     var pr = Ꮡ(new prog(Inst: new slice<inst>(4, () => new(nil))));
-    foreach (var i in range((~pr).Inst)) {
-        (~pr).Inst[i].Name = fmt.Sprintf("i%d"u8, i);
+    foreach (var i in range(pr.Inst)) {
+        pr.Inst[i].Name = fmt.Sprintf("i%d"u8, i);
     }
-    var a = Ꮡ((~pr).Inst, 0).of(inst.ᏑOut);
-    var b = Ꮡ((~pr).Inst, 0).of(inst.ᏑArg);
+    var a = Ꮡ(pr.Inst, 0).of(inst.ᏑOut);
+    var b = Ꮡ(pr.Inst, 0).of(inst.ᏑArg);
     a.Value = 100;
     b.Value = 200;
-    setU32(ref (Ꮡ((~pr).Inst, 1).of(inst.ᏑOut)).DerefOrNull(), 300);
-    fmt.Println("promoted:", (~pr).Inst[0].Out, (~pr).Inst[0].Arg, (~pr).Inst[1].Out);
+    setU32(ref (Ꮡ(pr.Inst, 1).of(inst.ᏑOut)).DerefOrNull(), 300);
+    fmt.Println("promoted:", pr.Inst[0].Out, pr.Inst[0].Arg, pr.Inst[1].Out);
 
-    var x = Ꮡ((~pr).Inst, 2).of(inst.ᏑOut);
-    var y = Ꮡ((~pr).Inst, 2).of(inst.ᏑArg);
+    var x = Ꮡ(pr.Inst, 2).of(inst.ᏑOut);
+    var y = Ꮡ(pr.Inst, 2).of(inst.ᏑArg);
     (x, y) = (y, x);
     x.Value = 41;
     y.Value = 42;
-    fmt.Println("swapped:", (~pr).Inst[2].Out, (~pr).Inst[2].Arg);
+    fmt.Println("swapped:", pr.Inst[2].Out, pr.Inst[2].Arg);
 
-    (~pr).Inst[3].Out = 55;
-    var src = Ꮡ((~pr).Inst, 3).of(inst.ᏑOut);
-    var dst = Ꮡ((~pr).Inst, 1).of(inst.ᏑArg);
+    pr.Inst[3].Out = 55;
+    var src = Ꮡ(pr.Inst, 3).of(inst.ᏑOut);
+    var dst = Ꮡ(pr.Inst, 1).of(inst.ᏑArg);
     dst.Value = src.Value;
-    fmt.Println("patched:", (~pr).Inst[1].Arg, (~pr).Inst[3].Out);
+    fmt.Println("patched:", pr.Inst[1].Arg, pr.Inst[3].Out);
 
-    var n = Ꮡ((~pr).Inst, 3).of(inst.ᏑName);
+    var n = Ꮡ(pr.Inst, 3).of(inst.ᏑName);
     n.Value = "patched";
-    fmt.Println("name:", (~pr).Inst[3].Name);
+    fmt.Println("name:", pr.Inst[3].Name);
 }
 
 } // end main_package

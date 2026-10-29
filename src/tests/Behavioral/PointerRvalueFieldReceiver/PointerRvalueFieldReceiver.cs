@@ -32,22 +32,22 @@ internal static ж<node> tail(this ref queue q) {
 
 internal static void Main() {
     getNode().of(node.Ꮡs).set(42);
-    fmt.Println((~theNode).s.v);
+    fmt.Println(theNode.s.v);
 
     var a = Ꮡ(new node());
     var b = Ꮡ(new node());
     var nodes = new ж<node>[]{a, b}.slice();
     nodes[0].of(node.Ꮡs).set(7);
     nodes[1].of(node.Ꮡs).set(9);
-    fmt.Println((~a).s.v, (~b).s.v);
+    fmt.Println(a.s.v, b.s.v);
 
     var q = Ꮡ(new queue(last: a));
     q.tail().of(node.Ꮡs).set(100);
-    fmt.Println((~a).s.v);
+    fmt.Println(a.s.v);
 
     any iface = b.OrTypedNil();
     iface._<ж<node>>().of(node.Ꮡs).set(55);
-    fmt.Println((~b).s.v);
+    fmt.Println(b.s.v);
 }
 
 } // end main_package

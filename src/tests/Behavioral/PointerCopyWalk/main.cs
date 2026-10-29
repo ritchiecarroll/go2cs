@@ -11,15 +11,15 @@ partial struct node {
 
 internal static ж<node> last(ж<node> start) {
     var r = start;
-    while ((~r).next != nil) {
-        r = r.Value.next;
+    while (r.next != nil) {
+        r = r.next;
     }
     return r;
 }
 
 internal static nint length(ж<node> start) {
     nint n = 0;
-    for (var r = start; r != nil; r = r.Value.next) {
+    for (var r = start; r != nil; r = r.next) {
         n++;
     }
     return n;
@@ -29,8 +29,8 @@ internal static nint sum(ж<node> start) {
     nint total = 0;
     var p = start;
     while (p != nil) {
-        total += p.Value.val;
-        p = p.Value.next;
+        total += p.val;
+        p = p.next;
     }
     return total;
 }
@@ -40,7 +40,7 @@ internal static void Main() {
     var second = Ꮡ(new node(val: 2, next: third));
     var first = Ꮡ(new node(val: 1, next: second));
 
-    fmt.Println((~last(first)).val);
+    fmt.Println(last(first).val);
     fmt.Println(length(first));
     fmt.Println(sum(first));
 }

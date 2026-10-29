@@ -6,7 +6,6 @@ namespace go;
 
 using @unsafe = unsafe_package;
 
-[GoFieldAccess(typeof(ChanType))]
 partial class main_package {
 
 partial struct Type {

@@ -52,10 +52,10 @@ internal static void Main() {
     fmt.Println("struct:", derefStruct(Ꮡpt));
     fmt.Println("named num:", derefNamedNum(Ꮡc));
 
-    viaUnsafe(Ꮡpt).Value.Y = 20;
+    viaUnsafe(Ꮡpt).Y = 20;
     fmt.Println("via unsafe writes through:", pt);
 
-    convIdentity(Ꮡpt).Value.X = 10;
+    convIdentity(Ꮡpt).X = 10;
     fmt.Println("conv identity writes through:", pt);
 
     var got = derefStruct(Ꮡpt);

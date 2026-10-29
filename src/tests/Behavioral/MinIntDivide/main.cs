@@ -176,9 +176,9 @@ internal static void Main() {
         calls = 0;
         ref var c = ref heap<ж<cell>>(fresh(), out var Ꮡc);
         var p = Ꮡc;
-        (p.ValueSlot).Value.x.RemAssign((int64)m1);
-        fresh().Value.x.QuoAssign((int64)m1);
-        return fmt.Sprint((~c).x, " calls ", calls);
+        (p.ValueSlot).x.RemAssign((int64)m1);
+        fresh().x.QuoAssign((int64)m1);
+        return fmt.Sprint(c.x, " calls ", calls);
     });
     arm("compound promoted", () => {
         var h = new holder(Ꮡ(new cell(x: Δmath.MinInt64)));
@@ -189,7 +189,7 @@ internal static void Main() {
             " ", quoAny(i, m1), " ", quoAny((uint8)200, (uint8)3)));
     arm("constant -1 remainder of a nil selector", () => {
         ж<cell> c = default;
-        var rΔ1 = (~c).x * 0;
+        var rΔ1 = c.x * 0;
         return fmt.Sprint(rΔ1);
     });
     arm("constant -1 remainder of a promoted nil selector", () => {

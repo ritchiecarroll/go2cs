@@ -117,7 +117,7 @@ internal static void Main() {
     var nilNodeʗ2 = nilNode;
     @try("store(nil)", () => {
         var h = store(nilNodeʗ2);
-        fmt.Printf("  store -> %s, next nil: %v\n"u8, (~h).name, (~h).next == nil);
+        fmt.Printf("  store -> %s, next nil: %v\n"u8, h.name, h.next == nil);
     });
     var nilNodeʗ3 = nilNode;
     @try("guarded(nil)", () => {
@@ -192,13 +192,13 @@ internal static void Main() {
     var chainʗ7 = chain;
     @try("store(chain)", () => {
         var h = store(chainʗ7);
-        fmt.Printf("  store -> %s, next: %s\n"u8, (~h).name, (~(~h).next).name);
+        fmt.Printf("  store -> %s, next: %s\n"u8, h.name, h.next.name);
     });
 
     fmt.Println();
     fmt.Println("== 8. a write through a pointer parameter still lands ==");
     rename(ref (chain).DerefOrNull(), "renamed");
-    fmt.Printf("  chain.name -> %s\n"u8, (~chain).name);
+    fmt.Printf("  chain.name -> %s\n"u8, chain.name);
 }
 
 internal static void rename(ref node p, @string s) {

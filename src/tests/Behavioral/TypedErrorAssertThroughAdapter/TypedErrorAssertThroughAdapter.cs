@@ -35,8 +35,8 @@ internal partial interface main_type /*dyn*/ {
 internal static void Main() {
     var err = pointerSourced();
     var p = err._<ж<myErr>>();
-    p.Value.code = 7;
-    fmt.Println("ptr-assert", (~p).code, err.Error());
+    p.code = 7;
+    fmt.Println("ptr-assert", p.code, err.Error());
 
     var v = valueSourced()._<valErr>();
     fmt.Println("val-assert", v.tag, v.Error());

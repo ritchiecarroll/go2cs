@@ -20,16 +20,16 @@ internal static void Main() {
     run(() => {
         while (ᏑmToFlush.ValueSlot != nil) {
             var prev = ᏑmToFlush;
-            ᏑmToFlush.ValueSlot.Value.v += 100;
-            prev.ValueSlot = ᏑmToFlush.ValueSlot.Value.next;
+            ᏑmToFlush.ValueSlot.v += 100;
+            prev.ValueSlot = ᏑmToFlush.ValueSlot.next;
         }
     });
 
     fmt.Println("mToFlush is nil:", mToFlush == nil);
 
     nint sum = 0;
-    for (var n = head; n != nil; n = n.Value.next) {
-        sum += n.Value.v;
+    for (var n = head; n != nil; n = n.next) {
+        sum += n.v;
     }
     fmt.Println("sum:", sum);
 }

@@ -176,7 +176,7 @@ internal static void probeK1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     var p = Ꮡt;
     nint get() => Ꮡt.Value.total;
-    p.Value.total = 50;
+    p.total = 50;
     fmt.Println("K1:", get());
 }
 

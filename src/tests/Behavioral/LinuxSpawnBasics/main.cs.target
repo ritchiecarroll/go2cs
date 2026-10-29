@@ -16,7 +16,7 @@ internal static void Main() {
     }
 
     var cmd = exec.Command(Δos.Args[0]);
-    cmd.Value.Env = append(Δos.Environ(), "SPAWN_BASICS_CHILD=1"u8, "SPAWN_BASICS_MARKER=xyzzy");
+    cmd.Env = append(Δos.Environ(), "SPAWN_BASICS_CHILD=1"u8, "SPAWN_BASICS_MARKER=xyzzy");
 
     var (@out, err) = cmd.CombinedOutput();
 

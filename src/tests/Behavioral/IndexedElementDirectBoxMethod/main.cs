@@ -32,7 +32,7 @@ internal static void Main() {
     bump(h, 1);
     bump(h, 1);
     bump(h, 1);
-    fmt.Println((~h).arr[0].get(), (~h).arr[1].get(), (~h).arr[2].get());
+    fmt.Println(h.arr[0].get(), h.arr[1].get(), h.arr[2].get());
 }
 
 } // end main_package

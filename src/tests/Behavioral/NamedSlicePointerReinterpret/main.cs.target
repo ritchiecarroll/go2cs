@@ -52,11 +52,11 @@ internal static void Main() {
     h.preformat("alpha=1");
     h.preformat(" beta=2");
     h.preformat(" gamma=3");
-    fmt.Println((@string)(~h).preformatted, len((~h).preformatted), (~h).groups);
+    fmt.Println((@string)h.preformatted, len(h.preformatted), h.groups);
 
     var t = h.of(handler.Ꮡpreformatted).Reinterpret<slice<byte>, Buf>();
     t.ValueSlot = (t.ValueSlot)[..7];
-    fmt.Println((@string)(~h).preformatted, len((~h).preformatted));
+    fmt.Println((@string)h.preformatted, len(h.preformatted));
 }
 
 } // end main_package

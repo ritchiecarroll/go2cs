@@ -259,7 +259,7 @@ internal static void Main() {
 
         var sptr = Ꮡ(new CrossPkgLibꓸStatus(Code: 10));
         var led = new ledger(cur: statusPtr(sptr));
-        fmt.Println((~led.cur).Code);
+        fmt.Println(led.cur.Code);
 
         CrossPkgLibꓸGrade gv = (CrossPkgLibꓸGrade)7;
         CrossPkgLibꓸStatus stv = default;
@@ -309,10 +309,10 @@ internal static void Main() {
 
         var pr = Ꮡ(new CrossPkgLib.Probe());
         CrossPkgLib.Sampler sam = new CrossPkgLib.ProbeжSampler(pr);
-        fmt.Println(sam.Sample(), sam.Sample(), (~pr).Hits);
+        fmt.Println(sam.Sample(), sam.Sample(), pr.Hits);
 
         var h = Ꮡ(new holder<nint>(Cache: Ꮡ(new CrossPkgLib.Cache<nint>()), name: "h"));
-        fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
+        fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), h.name);
 
         var mk = CrossPkgLib.MakeMarker("tag");
         fmt.Println(mk.ΔΔMarker);
@@ -328,13 +328,13 @@ internal static void Main() {
         fmt.Println(isHot(60), isHot(40));
 
         var (nd, nerr) = CrossPkgLib.Resolve(new Func<map<@string, ж<CrossPkgLib.Node>>, @string, (ж<CrossPkgLib.Node>, error)>(simpleResolve), "abcde");
-        fmt.Println((~nd).ID, nerr == nil);
+        fmt.Println(nd.ID, nerr == nil);
 
-        sensorHolder.Value.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage", Temp: 30D));
-        fmt.Println((~(~sensorHolder).item).Name);
+        sensorHolder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage", Temp: 30D));
+        fmt.Println(sensorHolder.item.Name);
         var sbx = new sensorBox(tag: "b");
         sbx.Holder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "shed", Temp: 40D));
-        fmt.Println((~sbx.Holder.item).Name, sbx.tag);
+        fmt.Println(sbx.Holder.item.Name, sbx.tag);
 
         fmt.Println("leaf:", leafEmitter.Emit());
 
@@ -361,7 +361,7 @@ internal static void Main() {
         var cal = ((Action<ж<CrossPkgLib.Sensor>, CrossPkgLib.Celsius>)(CrossPkgLib.Calibrate));
         var mx = Ꮡ(new CrossPkgLib.Sensor(Name: "mx", Temp: 10D));
         cal(mx, 4D);
-        fmt.Println((float64)(~mx).Temp);
+        fmt.Println((float64)mx.Temp);
         var hot = ((Func<CrossPkgLib.Sensor, bool>)(CrossPkgLib.Hot));
         fmt.Println(hot(mx.Value), hot(new CrossPkgLib.Sensor(Temp: 60D)));
         var madd = ((Func<CrossPkgLib.Celsius, CrossPkgLib.Celsius, CrossPkgLib.Celsius>)(CrossPkgLib.Add));

@@ -20,14 +20,14 @@ internal static partial ж<counter> get(ж<counter> c) {
 
 internal static void Main() {
     var @base = Ꮡ(new counter(n: 5));
-    @base.Value.sub.k = 3;
+    @base.sub.k = 3;
     var c = get(@base);
 
-    c.Value.n++;
-    c.Value.n++;
-    c.Value.sub.k--;
+    c.n++;
+    c.n++;
+    c.sub.k--;
 
-    fmt.Println((~@base).n, (~@base).sub.k);
+    fmt.Println(@base.n, @base.sub.k);
 }
 
 } // end main_package

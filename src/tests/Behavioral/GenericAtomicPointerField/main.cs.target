@@ -19,15 +19,15 @@ partial struct Cache<V> {
 public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> key, ж<V> val) {
     var e = Ꮡ(new entry<V>(key: key));
     e.of(entry<V>.Ꮡv).Store(val);
-    e.Value.next = Ꮡc.of(Cache<V>.Ꮡhead).Load();
+    e.next = Ꮡc.of(Cache<V>.Ꮡhead).Load();
     Ꮡc.of(Cache<V>.Ꮡhead).Store(e);
 }
 
 public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
     ref var key = ref Ꮡkey.DerefOrNull();
 
-    for (var e = Ꮡc.of(Cache<V>.Ꮡhead).Load(); e != nil; e = e.Value.next) {
-        if ((~e).key == Ꮡkey) {
+    for (var e = Ꮡc.of(Cache<V>.Ꮡhead).Load(); e != nil; e = e.next) {
+        if (e.key == Ꮡkey) {
             return e.of(entry<V>.Ꮡv).Load();
         }
     }

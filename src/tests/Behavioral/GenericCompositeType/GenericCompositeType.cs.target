@@ -29,7 +29,7 @@ internal static void Main() {
         value: "hello",
         valid: true
     ));
-    fmt.Printf("Option value: %s, valid: %t\n"u8, (~optionPtr).value, (~optionPtr).valid);
+    fmt.Printf("Option value: %s, valid: %t\n"u8, optionPtr.value, optionPtr.valid);
 
     var options = new Option<nint>[]{
         NewOption<nint>(42),

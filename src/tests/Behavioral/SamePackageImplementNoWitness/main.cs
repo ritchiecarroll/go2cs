@@ -66,7 +66,7 @@ internal static void Main() {
     fmt.Println("ptr:", p.Value());
 
     var (tp, tok) = p._<ж<ledger.Tally>>(ᐧ);
-    fmt.Println("ptr-assert:", tok, (~tp).N);
+    fmt.Println("ptr-assert:", tok, tp.N);
     var (_, tbad) = p._<ledger.Counter>(ᐧ);
     fmt.Println("ptr-assert-miss:", tbad);
 

@@ -24,7 +24,7 @@ public partial struct cfg {
 
 [GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = new Action<ж<cfg>>[]{
     (ж<cfg> c) => {
-        c.Value.verbose = true;
+        c.verbose = true;
     }
 }.slice(); }
 
@@ -39,7 +39,7 @@ internal static void Main() {
     foreach (var (_, apply) in Appliers) {
         apply(c);
     }
-    fmt.Println((~c).verbose);
+    fmt.Println(c.verbose);
 }
 
 } // end main_package

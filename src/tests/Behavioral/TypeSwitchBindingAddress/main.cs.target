@@ -53,7 +53,7 @@ internal static any process(any tok, ж<resolver> Ꮡr) {
     case end t1ᴛ2: {
         ref var t1 = ref heap(t1ᴛ2, out var Ꮡt1);
         var p = Ꮡt1.of(end.Ꮡn);
-        p.Value.space = "held";
+        p.space = "held";
         r.reset(Ꮡt1);
         return t1;
     }}

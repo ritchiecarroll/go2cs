@@ -10,7 +10,7 @@ partial struct thing {
 
 internal static bool Equal(this ref thing t, any x) {
     var (other, ok) = x._<ж<thing>>(ᐧ);
-    return ok && (~other).n == t.n;
+    return ok && other.n == t.n;
 }
 
 internal static any Public(this ref thing t) {

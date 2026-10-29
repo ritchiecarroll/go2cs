@@ -99,10 +99,10 @@ internal static void Main() {
 
     var np = @new<shadowed>();
     np.Value.tag = 11;
-    fmt.Println((~np).tag, (~np).ctxt.tag);
+    fmt.Println((~np).tag, np.ctxt.tag);
 
     var fl = Ꮡ(new @file(fd: 5));
-    fmt.Println(fl.bump(), (~fl).fd);
+    fmt.Println(fl.bump(), fl.fd);
 }
 
 partial struct ctxt {

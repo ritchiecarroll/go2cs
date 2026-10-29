@@ -8,10 +8,10 @@ partial class main_package {
 internal static (@string addr, nint port, bool ok) describe(syscallꓸSockaddr sa) {
     switch (sa.type()) {
     case ж<syscall.SockaddrInet4> s: {
-        return (fmt.Sprintf("%d.%d.%d.%d"u8, (~s).Addr[0], (~s).Addr[1], (~s).Addr[2], (~s).Addr[3]), (~s).Port, true);
+        return (fmt.Sprintf("%d.%d.%d.%d"u8, s.Addr[0], s.Addr[1], s.Addr[2], s.Addr[3]), s.Port, true);
     }
     case ж<syscall.SockaddrInet6> s: {
-        return (fmt.Sprintf("%x"u8, (~s).Addr), (~s).Port, true);
+        return (fmt.Sprintf("%x"u8, s.Addr), s.Port, true);
     }}
     return ("", 0, false);
 }
@@ -20,11 +20,11 @@ internal static bool sameAddr(syscallꓸSockaddr a, syscallꓸSockaddr b) {
     switch (a.type()) {
     case ж<syscall.SockaddrInet4> x: {
         var (y, ok) = b._<ж<syscall.SockaddrInet4>>(ᐧ);
-        return ok && (~x).Addr == (~y).Addr;
+        return ok && x.Addr == y.Addr;
     }
     case ж<syscall.SockaddrInet6> x: {
         var (y, ok) = b._<ж<syscall.SockaddrInet6>>(ᐧ);
-        return ok && (~x).Addr == (~y).Addr;
+        return ok && x.Addr == y.Addr;
     }}
     return false;
 }
@@ -138,15 +138,15 @@ internal static void decodeRawAny(@string label, uint16 family, Action<Action<ni
     switch (sa.type()) {
     case ж<syscall.SockaddrInet4> s: {
         fmt.Printf("%s decode: inet4 addr=%d.%d.%d.%d port=%d\n"u8,
-            label, (~s).Addr[0], (~s).Addr[1], (~s).Addr[2], (~s).Addr[3], (~s).Port);
+            label, s.Addr[0], s.Addr[1], s.Addr[2], s.Addr[3], s.Port);
         break;
     }
     case ж<syscall.SockaddrInet6> s: {
-        fmt.Printf("%s decode: inet6 addr=%x port=%d zone=%d\n"u8, label, (~s).Addr, (~s).Port, (~s).ZoneId);
+        fmt.Printf("%s decode: inet6 addr=%x port=%d zone=%d\n"u8, label, s.Addr, s.Port, s.ZoneId);
         break;
     }
     case ж<syscall.SockaddrUnix> s: {
-        fmt.Printf("%s decode: unix name=%q\n"u8, label, (~s).Name);
+        fmt.Printf("%s decode: unix name=%q\n"u8, label, s.Name);
         break;
     }
     default: {

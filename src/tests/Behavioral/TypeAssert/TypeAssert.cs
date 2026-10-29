@@ -23,12 +23,12 @@ internal static void pointerAssertion() {
 
     {
         var (bΔ1, ok) = i._<ж<box>>(ᐧ); if (ok) {
-            fmt.Println("Value is a *box:", (~bΔ1).n);
+            fmt.Println("Value is a *box:", bΔ1.n);
         }
     }
 
     var b = i._<ж<box>>();
-    fmt.Println("Pointer value:", (~b).n);
+    fmt.Println("Pointer value:", b.n);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

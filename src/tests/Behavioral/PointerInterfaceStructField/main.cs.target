@@ -31,7 +31,7 @@ internal static ref Setting globalSetting => ref ((StaticBox<Setting>)ᏑglobalS
 
 internal static void Main() {
     var h = Ꮡ(new holder(new SettingжDescriber(ᏑglobalSetting), "positional"));
-    fmt.Println((~h).label, (~h).d.Describe());
+    fmt.Println(h.label, h.d.Describe());
 
     ref var local = ref heap<Setting>(new Setting(name: "count", value: 7), out var Ꮡlocal);
     var h2 = new holder(d: new SettingжDescriber(Ꮡlocal), label: "keyed");
@@ -40,7 +40,7 @@ internal static void Main() {
     ref var replacement = ref heap<Setting>(new Setting(name: "assigned", value: 11), out var Ꮡreplacement);
     assignDescriber(ref (h).DerefOrNull(), Ꮡreplacement);
     replacement.value = 12;
-    fmt.Println((~h).label, (~h).d.Describe());
+    fmt.Println(h.label, h.d.Describe());
 }
 
 } // end main_package

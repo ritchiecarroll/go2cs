@@ -26,8 +26,8 @@ internal static void Main() {
     fmt.Println(m, n);
 
     var e = Ꮡ(new edge(@out: 7, arg: 9));
-    (e.Value.@out, e.Value.arg) = (e.Value.arg, e.Value.@out);
-    fmt.Println((~e).@out, (~e).arg);
+    (e.@out, e.arg) = (e.arg, e.@out);
+    fmt.Println(e.@out, e.arg);
 
     var f = new edge(@out: 1, arg: 2);
     var g = new edge(@out: 3, arg: 4);

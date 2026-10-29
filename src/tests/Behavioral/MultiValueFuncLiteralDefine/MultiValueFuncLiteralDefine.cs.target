@@ -54,11 +54,11 @@ internal static void Main() {
     var bʗ2 = bʗ1;
     var bump = (nint p1) => bʗ2.bump(p1);
     bump(3);
-    fmt.Println("method values:", get(), (~b).n);
+    fmt.Println("method values:", get(), b.n);
 
     var show = nint () => 1;
     var p = b;
-    fmt.Println("func literal beside a pointer:", show(), (~p).n);
+    fmt.Println("func literal beside a pointer:", show(), p.n);
 
     var id = identity<@string>;
     var sq = square<float64>;

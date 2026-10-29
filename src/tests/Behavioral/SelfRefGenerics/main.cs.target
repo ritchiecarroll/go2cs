@@ -141,8 +141,8 @@ internal static void Main() {
     var a = Ꮡ(new gnode(g: g, name: "a"));
     var b = Ꮡ(new gnode(g: g, name: "b"));
     var c = Ꮡ(new gnode(name: "c"));
-    (a.Value.next, b.Value.next, c.Value.next) = (b, c, a);
-    g.Value.head = a;
+    (a.next, b.next, c.next) = (b, c, a);
+    g.head = a;
     fmt.Println(g.Labels());
 }
 

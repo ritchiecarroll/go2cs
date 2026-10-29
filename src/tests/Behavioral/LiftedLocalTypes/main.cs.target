@@ -70,8 +70,8 @@ internal static void embeddedLocalTypes() {
     ref var e = ref heap<embeddedLocalTypes_embed>(new embeddedLocalTypes_embed(Q: 9), out var Ꮡe);
     var pp = new embeddedLocalTypes_ptrHolder(myInt: Ꮡi, embed: Ꮡe);
     pp.myInt.Value = 10;
-    pp.embed.Value.Q = 11;
-    fmt.Println(pp.myInt.Value, (~pp.embed).Q, pp.Q);
+    pp.embed.Q = 11;
+    fmt.Println(pp.myInt.Value, pp.embed.Q, pp.Q);
 
     fmt.Printf("%T\n"u8, h.embed);
 }

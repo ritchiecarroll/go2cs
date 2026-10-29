@@ -13,7 +13,7 @@ internal static ж<counter> ptr(this ж<counter> Ꮡc) {
 }
 
 internal static void inc(this ж<counter> Ꮡc) {
-    Ꮡc.ptr().Value.n++;
+    Ꮡc.ptr().n++;
 }
 
 partial struct holder {
@@ -57,20 +57,20 @@ internal static void Main() {
     var b = Ꮡ(new box());
     viaParam(b);
     viaParam(b);
-    fmt.Println((~b).h.c.n);
+    fmt.Println(b.h.c.n);
 
     var w = Ꮡ(new wrapper());
     w.bump();
     w.bump();
     w.bump();
-    fmt.Println((~w).b.h.c.n);
+    fmt.Println(w.b.h.c.n);
 
     var d = Ꮡ(new deep());
     d.bumpDeep();
     d.bumpDeep();
     d.bumpDeep();
     d.bumpDeep();
-    fmt.Println((~d).mid.c.n);
+    fmt.Println(d.mid.c.n);
 }
 
 } // end main_package
