@@ -160,10 +160,6 @@ func (c *classifier) endFile(t *tally, file string) {
 			active = it
 		}
 	}
-	if active == nil && deleter == nil && inserter == nil {
-		t.refused = append(t.refused, p.orig...)
-		return
-	}
 	matches := func(set []*regexp.Regexp, l string) bool {
 		for _, re := range set {
 			if re.MatchString(l) {
@@ -171,6 +167,33 @@ func (c *classifier) endFile(t *tally, file string) {
 			}
 		}
 		return false
+	}
+	if active == nil {
+		// No whole-file rewrite: every refusal stands as its run made it (a refused pair keeps both its lines, so
+		// the refusal names its site), except a side a PerSide Block admits (P1's records, whose nil OldAnchor holds
+		// in every file). A pair with one side admitted keeps the other side's refusal.
+		for _, r := range p.orig {
+			del := deleter != nil && r.side != '+' && matches(deleter.Block.Delete, r.rem)
+			ins := inserter != nil && r.side != '-' && matches(inserter.Block.Insert, r.add)
+			switch {
+			case r.side == '-' && del:
+				t.credit(file, deleter.ID)
+			case r.side == '+' && ins:
+				t.credit(file, inserter.ID)
+			case r.side == 0 && del && ins:
+				t.credit(file, deleter.ID)
+				t.credit(file, inserter.ID)
+			case r.side == 0 && del:
+				t.credit(file, deleter.ID)
+				t.refused = append(t.refused, refusal{r.file, r.at, r.kind, "", r.add, '+'})
+			case r.side == 0 && ins:
+				t.credit(file, inserter.ID)
+				t.refused = append(t.refused, refusal{r.file, r.at, r.kind, r.rem, "", '-'})
+			default:
+				t.refused = append(t.refused, r)
+			}
+		}
+		return
 	}
 	const nonconvergent = "NONCONVERGENT(canon still changing after the key's passes)"
 	took := make([]bool, len(p.add))
