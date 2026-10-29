@@ -1011,7 +1011,7 @@ every other read in that body uses. `visitDeferStmt`/`visitGoStmt` enter through
 variant (`enterDeferGoLambdaConversion`) that copies the enclosing lambda's renames into the fresh
 state, so the arguments render exactly like any other expression in the enclosing body:
 
-<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:38-48 -->
+<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:37-47 -->
 ```csharp
 var baseʗ1 = @base;
 func(() => {
@@ -1224,7 +1224,7 @@ Because a named result lives in the literal's OWN scope, a reference to it in th
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
-<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:76 -->
+<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:75 -->
 ```csharp
 defer(() => hʗ1.close(), ref ᒐ);
 ```
