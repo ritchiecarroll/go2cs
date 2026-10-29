@@ -19,6 +19,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf16"
 
 	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/mod/module"
@@ -94,6 +95,34 @@ func claimPositionMapTarget(target string) string {
 // compiler disallows it in source text, so a sentinel can never collide with converted content — and a
 // sentinel that somehow survived stripping would be a hard compile error rather than silent corruption.
 const PositionSentinel = "\x00"
+
+// ThunkSentinelMark is the content of a THUNK sentinel, SENTINEL 0 SENTINEL, written where a go/defer
+// thunk's body begins (thunkBodySentinel). It is decimal like a statement sentinel's, so every site that reads
+// emitted text treats it as one does, yet it can never be a statement's: Go lines start at 1. A letter would
+// read as an IDENTIFIER to the text tests that ask whether a body names a local (measured: a `w` mark made
+// archive/zip's AddFS emit its receiver's `ref var w` deref alias).
+const ThunkSentinelMark = "0"
+
+// thunkBodySentinel marks the start of a go/defer THUNK's body: the lambda the converter wraps a go or
+// defer call in (`defer(() => where("x"), ref ᒐ)`). Go compiles such a call into a deferwrap/gowrap closure
+// marked as a wrapper, and its tracebacks elide that frame; the runtime elides the thunk the same way,
+// recognising its method by the body's (line, column), which is the lambda's first sequence point. The
+// marked site lands in the file's GoPositionMap record (encodeThunkSites), not in the converted source.
+// Write it immediately after the thunk's `=> `, and only for a thunk: a Go func literal is a frame of its own.
+func (v *Visitor) thunkBodySentinel() string {
+	if v.fset == nil {
+		return ""
+	}
+
+	return PositionSentinel + ThunkSentinelMark + PositionSentinel
+}
+
+// thunkSite is one marked thunk body: its 1-based emitted C# line and 1-based UTF-16 column, the units a
+// portable PDB's sequence point counts in.
+type thunkSite struct {
+	csLine int
+	column int
+}
 
 // positionEntry is one mapped line: the emitted C# line, the Go line it was emitted for, and the
 // statement's later-line call payload when it has one (see writePositionSentinelCalls).
@@ -493,7 +522,7 @@ func (v *Visitor) finalizePositionMap(outputFileName string) {
 		return
 	}
 
-	stripped, entries := extractPositionSentinels(text)
+	stripped, entries, thunks := extractPositionAndThunkSentinels(text)
 
 	v.outputBuilder.Reset()
 	v.outputBuilder.WriteString(stripped)
@@ -522,13 +551,14 @@ func (v *Visitor) finalizePositionMap(outputFileName string) {
 	// only when the file declares literals — a three-argument record stays exactly what it was,
 	// and an older artifact without the argument simply answers the runtime's fallback derivation.
 	//
-	// The METHOD-VALUE half is the optional fifth argument and the PER-CALL half the optional sixth, so a
-	// file that records a later one passes an empty string for each earlier one it lacks; a file that
-	// records none keeps exactly the record it had.
+	// The METHOD-VALUE half is the optional fifth argument, the PER-CALL half the optional sixth and the
+	// THUNK half the optional seventh, so a file that records a later one passes an empty string for each
+	// earlier one it lacks; a file that records none keeps exactly the record it had.
 	optional := []string{
 		encodeFuncLitNames(v.funcLitEntries),
 		encodeMethodValueNames(v.methodValueEntries),
 		encodePositionCalls(entries),
+		encodeThunkSites(thunks),
 	}
 
 	for len(optional) > 0 && optional[len(optional)-1] == "" {
@@ -657,8 +687,17 @@ func positionMapCsName(outputFileName string) string {
 // check below already treats it as whitespace (strings.TrimSpace trims '\r'), and rejoining on
 // "\n" reproduces it verbatim, so no separate strip/re-add step is needed for round-trip fidelity.
 func extractPositionSentinels(text string) (string, []positionEntry) {
+	stripped, entries, _ := extractPositionAndThunkSentinels(text)
+	return stripped, entries
+}
+
+// extractPositionAndThunkSentinels is extractPositionSentinels that also answers the thunk sites the text
+// marks (thunkBodySentinel), in emitted order: each at the line it sits on and the column of the text that
+// follows it once every sentinel is stripped.
+func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []thunkSite) {
 	lines := strings.Split(text, "\n")
 	entries := make([]positionEntry, 0, len(lines))
+	var thunks []thunkSite
 	bound := 0
 
 	for index, line := range lines {
@@ -691,6 +730,11 @@ func extractPositionSentinels(text string) (string, []positionEntry) {
 			rebuilt.WriteString(remainder[:open])
 			remainder = remainder[end+1:]
 
+			if lineText == ThunkSentinelMark {
+				thunks = append(thunks, thunkSite{csLine: index + 1, column: len(utf16.Encode([]rune(rebuilt.String()))) + 1})
+				continue
+			}
+
 			if err == nil {
 				marks = append(marks, positionMark{
 					goLine:  goLine,
@@ -720,7 +764,19 @@ func extractPositionSentinels(text string) (string, []positionEntry) {
 		}
 	}
 
-	return strings.Join(lines, "\n"), entries
+	return strings.Join(lines, "\n"), entries, thunks
+}
+
+// encodeThunkSites renders the THUNK half of a record: one `<line>:<column>` per marked thunk body, comma-joined
+// in emitted order, or "" when the file has none (see thunkBodySentinel).
+func encodeThunkSites(sites []thunkSite) string {
+	encoded := make([]string, len(sites))
+
+	for i, site := range sites {
+		encoded[i] = strconv.Itoa(site.csLine) + ":" + strconv.Itoa(site.column)
+	}
+
+	return strings.Join(encoded, ",")
 }
 
 // positionMark is one sentinel read off a line: the Go line it carries, whether the construct it

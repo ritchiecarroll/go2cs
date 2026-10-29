@@ -261,7 +261,7 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		variadicLit := v.variadicFuncLitCallee(goStmt.Call) != nil
 
 		if recvArg != "" {
-			callExpr = fmt.Sprintf("%s%d => %s, %s", TempVarMarker, 0, callExpr, recvArg)
+			callExpr = fmt.Sprintf("%s%d => %s%s, %s", TempVarMarker, 0, v.thunkBodySentinel(), callExpr, recvArg)
 		} else if boxGroup != "" {
 			callExpr = boxGroup
 		} else if !hasResults && !namedFuncType && !valueRecvMethodGroup && !variadicLit && !variadicCallee && strings.HasSuffix(callExpr, "()") {
@@ -272,9 +272,9 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 			// Func<...> (CS0407); keep the invocation and wrap it in an Action lambda that
 			// discards any result — exactly Go's fire-and-forget goroutine semantics. A nullary
 			// VALUE-receiver method group keeps the invocation too (its trimmed form is CS1113).
-			callExpr = "() => " + callExpr
+			callExpr = "() => " + v.thunkBodySentinel() + callExpr
 		} else {
-			callExpr = "_ => " + callExpr // WaitCallback delegate
+			callExpr = "_ => " + v.thunkBodySentinel() + callExpr // WaitCallback delegate
 		}
 
 		result.WriteString(callExpr)
@@ -307,6 +307,7 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 			}
 
 			result.WriteString(" => ")
+			result.WriteString(v.thunkBodySentinel())
 		} else {
 			// A matching-arity pointer-receiver method group has the same CS1113 as the
 			// nullary form — the deref-alias render is a struct VALUE against the [GoRecv]

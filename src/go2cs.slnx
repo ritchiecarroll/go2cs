@@ -444,6 +444,7 @@
     <Project Path="tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.csproj" />
     <Project Path="tests/Behavioral/DeferPanicArg/DeferPanicArg.csproj" />
     <Project Path="tests/Behavioral/DeferSimple/DeferSimple.csproj" />
+    <Project Path="tests/Behavioral/DeferThunkFrames/DeferThunkFrames.csproj" />
     <Project Path="tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.csproj" />
     <Project Path="tests/Behavioral/DeferValueFieldPtrReceiver/DeferValueFieldPtrReceiver.csproj" />
     <Project Path="tests/Behavioral/DeferValueReceiverSnapshot/DeferValueReceiverSnapshot.csproj" />

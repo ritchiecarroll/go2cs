@@ -91,6 +91,15 @@ namespace go;
 /// The runtime counts the same-name calls of the statement's IL up to the frame's call: when the ordinal
 /// and the total both match, the frame answers the call's line, and otherwise the statement's.
 /// </para>
+/// <para>
+/// <paramref name="thunks"/> is the THUNK list, emitted only when the file wraps a go or defer call in a
+/// thunk lambda (<c>defer(() =&gt; where("x"), ref ᒐ)</c>): one <c>&lt;csLine&gt;:&lt;column&gt;</c> entry per
+/// thunk, comma-joined, at the start of its body, 1-based in UTF-16 units -- the lambda method's first
+/// sequence point. Go compiles such a call into a deferwrap/gowrap closure marked as a wrapper, which its
+/// tracebacks elide; the runtime elides the thunk the same way. A Go func literal is never listed: it is a
+/// frame of its own, and the converter emits it as a block lambda whose first sequence point is the line
+/// below its <c>=&gt; {</c>.
+/// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public sealed class GoPositionMapAttribute : Attribute
@@ -107,9 +116,18 @@ public sealed class GoPositionMapAttribute : Attribute
     }
 
     /// <summary>
-    /// Initializes a record carrying a per-call table.
+    /// Initializes a record carrying a per-call table and no thunk list. Kept as its own constructor for the
+    /// same reason as the five-argument one.
     /// </summary>
     public GoPositionMapAttribute(string goFile, string csFile, string table, string funcLits, string methodValues, string calls)
+        : this(goFile, csFile, table, funcLits, methodValues, calls, "")
+    {
+    }
+
+    /// <summary>
+    /// Initializes a record carrying a thunk list.
+    /// </summary>
+    public GoPositionMapAttribute(string goFile, string csFile, string table, string funcLits, string methodValues, string calls, string thunks)
     {
         GoFile = goFile;
         CsFile = csFile;
@@ -117,6 +135,7 @@ public sealed class GoPositionMapAttribute : Attribute
         FuncLits = funcLits;
         MethodValues = methodValues;
         Calls = calls;
+        Thunks = thunks;
     }
 
     /// <summary>
@@ -151,4 +170,9 @@ public sealed class GoPositionMapAttribute : Attribute
     /// later line than its own.
     /// </summary>
     public string Calls { get; }
+
+    /// <summary>
+    /// Gets the encoded thunk list, or an empty string when the file wraps no go or defer call in a thunk.
+    /// </summary>
+    public string Thunks { get; }
 }

@@ -2937,7 +2937,7 @@ partial class runtime_package
             foreach (object attribute in assembly.GetCustomAttributes(typeof(GoPositionMapAttribute), false))
             {
                 if (attribute is GoPositionMapAttribute map && map.CsFile.Length > 0)
-                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues, map.Calls);
+                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues, map.Calls, map.Thunks);
             }
         }
         catch (Exception)
@@ -3079,9 +3079,43 @@ partial class runtime_package
         remapModuleSource(goFile, normalizeModuleSourceRemap((moduleRoot, stagedRoot)) is { } entry ? (entry.From, entry.To) : null);
 
     // One converted file's recorded position map.
-    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "", string calls = "")
+    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "", string calls = "", string thunks = "")
     {
         private Dictionary<int, string[]>? m_methodValues;
+
+        private HashSet<(int line, int column)>? m_thunks;
+
+        // HasThunks is false for a record without a thunk list, so a lambda of such a file is never read for one.
+        public bool HasThunks => thunks.Length > 0;
+
+        // IsThunkSite answers whether a lambda whose first sequence point is (line, column) is a go/defer thunk
+        // (GoPositionMapAttribute.Thunks). A malformed entry drops the whole list: every lambda of the file then
+        // stays a frame, today's answer, rather than one being elided that Go shows.
+        public bool IsThunkSite(int line, int column)
+        {
+            if (m_thunks is null)
+            {
+                HashSet<(int, int)> decoded = [];
+
+                foreach (string entry in thunks.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    int colon = entry.IndexOf(':');
+
+                    if (colon <= 0 || !int.TryParse(entry.AsSpan(0, colon), out int site) || site <= 0 ||
+                        !int.TryParse(entry.AsSpan(colon + 1), out int at) || at <= 0)
+                    {
+                        decoded.Clear();
+                        break;
+                    }
+
+                    decoded.Add((site, at));
+                }
+
+                m_thunks = decoded;
+            }
+
+            return m_thunks.Contains((line, column));
+        }
 
         // One later-line call of a statement (GoPositionMapAttribute.Calls).
         private readonly record struct CallLine(string Name, int Ordinal, int Total, int Delta);
@@ -4391,7 +4425,65 @@ partial class runtime_package
         if (ns is null || (ns != "go" && !ns.StartsWith("go.", StringComparison.Ordinal)))
             return false;
 
-        return topLevel.Name.EndsWith("_package", StringComparison.Ordinal);
+        if (!topLevel.Name.EndsWith("_package", StringComparison.Ordinal))
+            return false;
+
+        // A go/defer THUNK is elided as a wrapper is: Go's deferwrap/gowrap closure (isRecordedThunk).
+        return keepWrapper || !isRecordedThunk(method);
+    }
+
+    // Whether a converted lambda is a go/defer THUNK, the converter's wrapper around a go or defer call
+    // (`defer(() => where("x"), ref ᒐ)`). Go compiles such a call into a deferwrap/gowrap closure marked as a
+    // wrapper, which tracebackPCs elides, so the deferring function names the deferred call's caller at its
+    // deferreturn line; a thunk counted as a Go frame named itself instead, at the go or defer statement's line
+    // (behavioral LineMarkerDeferEndTC0, seat #42). The file's GoPositionMap record lists each thunk by its
+    // body's (line, column), the lambda's first sequence point, which a Go func literal never shares.
+    //
+    // THE ONE SYMBOL READ AT CAPTURE. The position is in the PDB, and the elision has to be decided where the
+    // frame is counted. It is asked only of a compiler-generated lambda in an assembly that records a thunk,
+    // read once per method (the classification is cached), so an assembly with no thunk opens nothing and a
+    // capture over any other frame stays a pc capture (LazyCallersTests).
+    private static bool isRecordedThunk(System.Reflection.MethodBase method)
+    {
+        if (!method.Name.Contains(">b__", StringComparison.Ordinal))
+            return false;
+
+        System.Reflection.Assembly? assembly = method.DeclaringType?.Assembly ?? method.Module.Assembly;
+
+        if (assembly is null)
+            return false;
+
+        Dictionary<string, GoPositionMapRecord>? records;
+
+        lock (s_positionMapLock)
+        {
+            if (!s_positionMaps.TryGetValue(assembly, out records))
+            {
+                records = readGoPositionMaps(assembly);
+                s_positionMaps[assembly] = records;
+            }
+        }
+
+        bool anyThunk = false;
+
+        foreach (GoPositionMapRecord candidate in records.Values)
+        {
+            if (candidate.HasThunks)
+            {
+                anyThunk = true;
+                break;
+            }
+        }
+
+        if (!anyThunk)
+            return false;
+
+        (string? file, int line, int column) = methodSourceStart(method);
+
+        if (file is null || line <= 0)
+            return false;
+
+        return goPositionMapRecord(method, goSourcePath(file)) is { HasThunks: true } record && record.IsThunkSite(line, column);
     }
 
     // Interns one observed call site to its process-lifetime token -- the managed spelling of "a PC":
@@ -4578,6 +4670,14 @@ partial class runtime_package
     // NEVER A GUESS: two or more calls of the callee after the reported offset (the chain's Add, Add, Add)
     // cannot be told apart from that offset, and keep returnSiteILOffset's answer, as before. A callee the
     // JIT inlined away left no frame, so its caller's frame names a callee no call here targets: unsettled.
+    //
+    // THE DEFERRING FRAME is settled across the whole method, not one statement. A frame suspended calling
+    // GoFrame.Run is a deferred call's caller, running its finally (Go's deferreturn), and the JIT can report
+    // it at IL offset 0, outside any statement that holds the call. Measured 2026-10-29 on linux, Release: at
+    // TieredCompilation=0 for a method-group defer (`defer(where, s, ref ᒐ)`), and under tiering for every
+    // deferring method of the behavioral LineMarkerDeferEndTC0; the line read the function's first statement
+    // where Go's is its closing brace or executed return. A method holds exactly ONE call of Run, the
+    // converter's `finally { ᒐ.Run(); }`, so that call it is; a method with two settles nothing.
     private static int calleeSettledCallSite(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase callee)
     {
         int candidate = returnSiteILOffset(method, ilOffset);
@@ -4587,6 +4687,24 @@ partial class runtime_package
 
         if (callSiteOffsets(method) is not { } calls || sequencePointOffsets(method) is not { Length: > 0 } statements)
             return -1;
+
+        if (callee == GoFrame.RunMethod)
+        {
+            int only = -1;
+
+            foreach (int call in calls)
+            {
+                if (callTarget(method, call) is not { } target || !targetsCallee(target, callee))
+                    continue;
+
+                if (only >= 0)
+                    return -1;
+
+                only = call;
+            }
+
+            return only;
+        }
 
         int index = Array.BinarySearch(statements, ilOffset);
 
