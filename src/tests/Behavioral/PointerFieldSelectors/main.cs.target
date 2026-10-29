@@ -132,7 +132,7 @@ internal static void Main() {
 
     var m = new map<@string, ж<point>>{["k"] = Ꮡ(new point(1, 1))};
     m["k"].X = 4;
-    var ps = new ж<point>[]{Ꮡ(new point(2, 2))}.slice();
+    var ps = slice<ж<point>>([Ꮡ(new point(2, 2))]);
     ps[0].Y *= 3;
     fmt.Println("containers:", m["k"].X, ps[0].Y, mk(5).Y);
 

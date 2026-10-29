@@ -44,8 +44,8 @@ internal static void Main() {
 
     var e = slice<nint>([]);
     slice<nint> n = default;
-    fmt.Printf("empty: %v nil=%v len=%d cap=%d\n"u8, e, e == default, len(e), cap(e));
-    fmt.Printf("nil:   %v nil=%v len=%d cap=%d\n"u8, n, n == default, len(n), cap(n));
+    fmt.Printf("empty: %v nil=%v len=%d cap=%d\n"u8, e, e == nil, len(e), cap(e));
+    fmt.Printf("nil:   %v nil=%v len=%d cap=%d\n"u8, n, n == nil, len(n), cap(n));
 
     var (a, b) = (pair(), pair());
     a[0] = 99;
@@ -54,10 +54,9 @@ internal static void Main() {
     x = slice<nint>([4, 5]);
     fmt.Println("assigned:", x, len(x), cap(x));
 
-    ref var bx = ref heap<box>(out var Ꮡbx);
-    bx = new box(data: slice<nint>([4, 5]), tags: slice<@string>(["t"]));
+    ref var bx = ref heap<box>(new box(data: slice<nint>([4, 5]), tags: slice<@string>(["t"])), out var Ꮡbx);
     var p = Ꮡbx;
-    p.Value.data = slice<nint>([6, 7, 8]);
+    p.data = slice<nint>([6, 7, 8]);
     fmt.Println("box:", bx.data, bx.tags);
 
     var m = new map<@string, slice<nint>>{["k"] = slice<nint>([1, 2])};

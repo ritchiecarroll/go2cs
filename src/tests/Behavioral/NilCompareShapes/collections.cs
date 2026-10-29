@@ -34,9 +34,9 @@ internal static void collections() {
     ref var s = ref heap<slice<nint>>(out var Ꮡs);
     fmt.Println("nil slice:", s == nil, nil == s, s != nil);
     fmt.Println("nil slice resliced:", s[..] == nil, s[0..0] == nil);
-    fmt.Println("append nothing to nil:", appendꓸꓸꓸ(s, new nint[]{}.slice()) == nil);
+    fmt.Println("append nothing to nil:", appendꓸꓸꓸ(s, slice<nint>([])) == nil);
     fmt.Println("make([]int, 0):", new slice<nint>(0) == nil, nil != new slice<nint>(0, 8));
-    fmt.Println("empty literal:", new nint[]{}.slice() == nil);
+    fmt.Println("empty literal:", slice<nint>([]) == nil);
 
     ref var arr = ref heap<array<nint>>(new nint[]{1, 2, 3}.array(), out var Ꮡarr);
     fmt.Println("array resliced to zero:", arr[..0] == nil, arr[3..] == nil);
@@ -74,17 +74,17 @@ internal static void collections() {
 
     bag b = default;
     fmt.Println("zero struct fields:", b.items == nil, b.index == nil, b.done == nil);
-    b = new bag(items: new @string[]{}.slice(), index: new map<@string, nint>{}, done: new channel<EmptyStruct>(0));
+    b = new bag(items: slice<@string>([]), index: new map<@string, nint>{}, done: new channel<EmptyStruct>(0));
     fmt.Println("assigned struct fields:", b.items == nil, b.index == nil, b.done == nil);
 
     var p = Ꮡs;
     fmt.Println("through a pointer:", p.ValueSlot == nil);
 
-    var lookup = new map<@string, slice<nint>>{["x"] = new nint[]{1}.slice()};
+    var lookup = new map<@string, slice<nint>>{["x"] = slice<nint>([1])};
     fmt.Println("map lookups:", lookup["x"] == nil, lookup["y"] == nil);
 
     fmt.Println("variadic:", variadic(), variadic(1), variadic(s.ꓸꓸꓸ));
-    fmt.Println("type parameter:", sliceIsNil<slice<nint>, nint>(s), sliceIsNil<slice<nint>, nint>(new nint[]{}.slice()), sliceIsNil<byteSlice, byte>(bs));
+    fmt.Println("type parameter:", sliceIsNil<slice<nint>, nint>(s), sliceIsNil<slice<nint>, nint>(slice<nint>([])), sliceIsNil<byteSlice, byte>(bs));
 }
 
 } // end main_package

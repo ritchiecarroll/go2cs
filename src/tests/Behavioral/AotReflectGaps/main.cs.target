@@ -140,7 +140,7 @@ internal static void methodTypes() {
         fmt.Println("2c", m.Name, m.Type);
     });
     run("2d Method call", () => {
-        var @out = reflect.ValueOf(new Num(N: 2)).Method(0).Call(new reflectꓸValue[]{reflect.ValueOf((nint)5), reflect.ValueOf("x")}.slice());
+        var @out = reflect.ValueOf(new Num(N: 2)).Method(0).Call(slice<reflectꓸValue>([reflect.ValueOf((nint)5), reflect.ValueOf("x")]));
         fmt.Println("2d", @out[0].Int(), @out[1].String());
     });
 }
