@@ -186,6 +186,33 @@ public class FieldAccessGeneratorTests
         StringAssert.Contains(generated, Ref("T", "First", "global::go.main_package.pair<T>"));
     }
 
+    // A type another generator emits into the package class (the ImplementGenerator's constraint proxy, SelfRefGenerics'
+    // `gnodeжGraphNode`) is unresolved where this generator runs, since generators do not see each other's output.
+    // The field names it bare from inside the package class; the extension class sits outside it, so the property's
+    // type roots every unresolved name at the struct's package class, at any depth of the type (go2cs.slnx: CS0246).
+    private const string Proxied = """
+        namespace go;
+
+        [GoFieldAccess(typeof(gnode))]
+        partial class main_package
+        {
+            public partial struct Graph<N> { public N Root; }
+
+            public partial struct gnode { public ж<Graph<gnodeжGraphNode>> g; public gnodeжGraphNode self; public int id; }
+        }
+        """;
+
+    [TestMethod]
+    public void AFieldTypeNamingAnotherGeneratorsTypeIsRootedAtThePackageClass()
+    {
+        string generated = Generate(Proxied);
+        const string Gnode = "global::go.main_package.gnode";
+
+        StringAssert.Contains(generated, Ref("global::go.ж<global::go.main_package.Graph<global::go.main_package.gnodeжGraphNode>>", "g", Gnode));
+        StringAssert.Contains(generated, Ref("global::go.main_package.gnodeжGraphNode", "self", Gnode));
+        StringAssert.Contains(generated, Ref("int", "id", Gnode), "a resolved field type is rendered as before");
+    }
+
     // A READONLY field is a zero-size layout field, laid over its neighbour at Go's offset: it has no writable slot of
     // its own, and its accessor answers golib's shared zero-size slot. Its property keeps the accessor's body, since
     // `ref ʗp.Value.f` would not compile (CS8329).
