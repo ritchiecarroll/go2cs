@@ -37,7 +37,7 @@
 // The rule of thumb: if the string lands in generated C# that a human reads, prefer the alias-
 // qualified forms; if it lands in metadata a tool parses, use getFullyQualifiedTypeName.
 //
-// The alias plumbing (getAliasedTypeName, foreignAliasedTypeName, markDerivedTypeAliasUsed) lives
+// The alias plumbing (getAliasedTypeName, foreignAliasedTypeName, markImportedTypeAliasUsed) lives
 // here too, since it is what makes the short forms legal.
 
 package main
@@ -908,16 +908,13 @@ func (v *Visitor) getScopeCheckedTypeName(t types.Type) string {
 	return v.getAliasQualifiedTypeName(t, false)
 }
 
-// markDerivedTypeAliasUsed records that an emitted reference resolved through a DERIVED imported
-// type alias, which is what qualifies its `global using` for emission (see derivedTypeAliases). A
-// parsed alias is unaffected — those are always emitted, used or not.
-func markDerivedTypeAliasUsed(alias string) {
+// markImportedTypeAliasUsed records that an emitted reference resolved through an imported type
+// alias, which is what qualifies its `global using` for emission (see usedImportedTypeAliases).
+func markImportedTypeAliasUsed(alias string) {
 	packageLock.Lock()
 	defer packageLock.Unlock()
 
-	if derivedTypeAliases.Contains(alias) {
-		usedDerivedTypeAliases.Add(alias)
-	}
+	usedImportedTypeAliases.Add(alias)
 }
 
 func getAliasedTypeName(typeName string) string {
@@ -971,9 +968,9 @@ func getAliasedTypeName(typeName string) string {
 			return fmt.Sprintf("%s.%s", qualifier, alias)
 		}
 
-		// This reference resolves through the alias, so a DERIVED entry has earned its
-		// `global using` declaration in this package's package_info.cs (see derivedTypeAliases).
-		markDerivedTypeAliasUsed(typeName)
+		// This reference resolves through the alias, so the entry has earned its `global using`
+		// declaration in this package's package_info.cs (see usedImportedTypeAliases).
+		markImportedTypeAliasUsed(typeName)
 
 		return strings.ReplaceAll(typeName, ".", TypeAliasDot)
 	}

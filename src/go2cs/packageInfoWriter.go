@@ -294,16 +294,15 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			}
 		}
 
-		// Add new type aliases to package info file (hashset ensures uniqueness). A DERIVED alias
-		// (synthesized because the dependency has no package_info.cs to read) is emitted only when
-		// an emitted reference actually resolved through it — see derivedTypeAliases for why an
-		// unused one must not be declared.
+		// Add new type aliases to package info file (hashset ensures uniqueness). An imported alias
+		// is emitted only when an emitted reference actually resolved through it — see
+		// usedImportedTypeAliases for why an unused one must not be declared.
 		for alias, typeName := range importedTypeAliases {
 			if constImportedTypeAliases.Contains(alias) {
 				continue
 			}
 
-			if derivedTypeAliases.Contains(alias) && !usedDerivedTypeAliases.Contains(alias) {
+			if !usedImportedTypeAliases.Contains(alias) {
 				continue
 			}
 

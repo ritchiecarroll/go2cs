@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using GenericTypeAliasLibꓸIntBox = go.GenericTypeAliasLib_package.Box<nint>;
 global using GenericTypeAliasLibꓸWord = go.@string;
 // </ImportedTypeAliases>
 

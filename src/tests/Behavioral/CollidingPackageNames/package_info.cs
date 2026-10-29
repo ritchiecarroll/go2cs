@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using dupꓸMarker = go.collidea.dup_package.ΔMarker;
 // </ImportedTypeAliases>
 
 using go;

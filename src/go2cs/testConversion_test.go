@@ -3663,6 +3663,7 @@ func TestWritePackageInfoFileMergesExistingSections(t *testing.T) {
 	packageNamespace = "go"
 	importedTypeAliases["alpha"] = "go.alpha_package.Alpha"
 	importedTypeAliases["zeta"] = "go.zeta_package.Zeta"
+	markImportedTypeAliasUsed("alpha") // an imported alias is declared only once a reference resolves through it
 
 	writePackageInfoFile(fileName, true)
 
@@ -3887,6 +3888,7 @@ func TestWriteExternalVariantMetadataSplitsAnchors(t *testing.T) {
 		"value_package.IntSlice", // production-qualified ⇒ production anchor
 	})
 	importedTypeAliases["alpha"] = "go.alpha_package.Alpha"
+	markImportedTypeAliasUsed("alpha") // an imported alias is declared only once a reference resolves through it
 
 	unitName, err := writeExternalVariantMetadata(testInfoPath, dir, "value", metadataClassPrefix("go", "value"), metadataClassPrefix("go", "value_test"), false)
 	if err != nil {

@@ -915,9 +915,9 @@ Resolving *where* an imported package lives is **module-aware**: the standard li
 // </ExportedTypeAliases>
 ```
 
-A consumer that imports the package and names `CrossPkgLib.Temperature` cannot use a C# member-access for it (C# has no namespace-level type alias). Instead, the converter parses the imported package's `package_info.cs`, reads its `[GoTypeAlias]` attributes, and emits a corresponding `global using` into the consumer's own `<ImportedTypeAliases>` block — keyed by a package-qualified name whose `.` separator is the extended-Unicode dot `ꓸ` (`ꓸ`, a valid C# identifier character), since `CrossPkgLib.Temperature` is not a legal C# identifier:
+A consumer that imports the package and names `CrossPkgLib.Temperature` cannot use a C# member-access for it (C# has no namespace-level type alias). Instead, the converter parses the imported package's `package_info.cs`, reads its `[GoTypeAlias]` attributes, and, for each alias an emitted reference resolves through, emits a corresponding `global using` into the consumer's own `<ImportedTypeAliases>` block — keyed by a package-qualified name whose `.` separator is the extended-Unicode dot `ꓸ` (`ꓸ`, a valid C# identifier character), since `CrossPkgLib.Temperature` is not a legal C# identifier:
 
-<!-- source: src/tests/Behavioral/CrossPkgBox/package_info.cs:12, 16, 19 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/package_info.cs:12, 15, 18 -->
 ```csharp
 // <ImportedTypeAliases>
 …
@@ -930,7 +930,7 @@ The consumer's converted code then refers to the alias as `CrossPkgLibꓸTempera
 
 **A collision-renamed alias chain resolves to its concrete target.** When an exported type's name *collides* with a method name it is `Δ`-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)); and when that type is *also* an empty interface — `type Token any` colliding with a `Token()` method, encoding/json's shape — the producer's `package_info.cs` carries a **two-hop chain**. The collision analysis records `Token → ΔToken`, and `visitTypeSpec` (which renders an empty-interface target as `object`) records the renamed declaration `ΔToken → object`:
 
-<!-- source: src/core/encoding/json/package_info.cs:35-36 -->
+<!-- source: src/core/encoding/json/package_info.cs:32-33 -->
 ```csharp
 [assembly: GoTypeAlias("Token", "ΔToken")]
 [assembly: GoTypeAlias("ΔToken", "object")]
@@ -1725,7 +1725,7 @@ and every consumer would mint its own `binary_bigEndianᴠByteOrder` adapter. Th
 the file visits and before `writePackageInfoFile`) walks the package scope and records the VALUE-form
 pairs the package satisfies. `encoding/binary`'s metadata carries:
 
-<!-- source: src/core/encoding/binary/package_info.cs:43-50 -->
+<!-- source: src/core/encoding/binary/package_info.cs:40-47 -->
 ```csharp
 // <InterfaceImplementations>
 [assembly: GoImplement<bigEndian, AppendByteOrder>]

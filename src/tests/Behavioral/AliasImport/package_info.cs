@@ -18,9 +18,6 @@ global using AliasImportLibꓸIntFn = System.Func<nint, nint>;
 global using AliasImportLibꓸMulti = System.Func<nint, (nint, go.error)>;
 global using AliasImportLibꓸNamed = System.Func<nint, (nint n, bool ok)>;
 global using AliasImportLibꓸVar = go.Funcꓸꓸꓸ<nint, nint>;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;

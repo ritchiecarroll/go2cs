@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using tracev1ꓸSTWReason = go.@internal.trace.@internal.tracev1_package.ΔSTWReason;
 using tracev1 = go.@internal.trace.@internal.tracev1_package;
 // </ImportedTypeAliases>
 

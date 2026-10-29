@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectliteꓸKind = go.@internal.abi_package.ΔKind;
-global using reflectliteꓸType = go.@internal.reflectlite_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;

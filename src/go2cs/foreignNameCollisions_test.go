@@ -178,7 +178,7 @@ func TestUnconvertedDependencySpellsCollisionRenamedMember(t *testing.T) {
 	foreignCollisionAliases = nil
 
 	info := PackageInfo{PackageName: "example.collision.dep", RootPackageName: "dep", SourceDir: dependency.Dir}
-	applyExportedTypeAliases(foreignCollisionTypeAliases(dependency), info, true)
+	applyExportedTypeAliases(foreignCollisionTypeAliases(dependency), info)
 
 	if got := getAliasedTypeName("dep.Second"); got != "dep."+ShadowVarMarker+"Second" {
 		t.Fatalf("a colliding foreign const must render renamed, got %q", got)
@@ -210,11 +210,11 @@ func TestUnconvertedDependencySpellsCollisionRenamedMember(t *testing.T) {
 	// hand-written proxy (the baseline core/time stub) does not satisfy — an unused declaration
 	// would then be CS0426 for a consumer that never names the type. `Month` was just referenced;
 	// `Token` was not.
-	if !usedDerivedTypeAliases.Contains("dep.Month") {
+	if !usedImportedTypeAliases.Contains("dep.Month") {
 		t.Fatal("a referenced derived alias must be marked used so its global using is emitted")
 	}
 
-	if usedDerivedTypeAliases.Contains("dep.Token") {
+	if usedImportedTypeAliases.Contains("dep.Token") {
 		t.Fatal("an unreferenced derived alias must not be marked used")
 	}
 }
