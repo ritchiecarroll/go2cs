@@ -38,8 +38,7 @@ internal static void collections() {
     fmt.Println("make([]int, 0):", new slice<nint>(0) == nil, nil != new slice<nint>(0, 8));
     fmt.Println("empty literal:", new nint[]{}.slice() == nil);
 
-    ref var arr = ref heap<array<nint>>(out var Ꮡarr);
-    arr = new nint[]{1, 2, 3}.array();
+    ref var arr = ref heap<array<nint>>(new nint[]{1, 2, 3}.array(), out var Ꮡarr);
     fmt.Println("array resliced to zero:", arr[..0] == nil, arr[3..] == nil);
     fmt.Println("[]byte(\"\"):", slice<byte>(""u8) == nil);
     fmt.Println("unsafe.Slice(nil, 0):", @unsafe.Slice((ж<byte>)nil, 0) == nil);
