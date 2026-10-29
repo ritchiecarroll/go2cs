@@ -15,15 +15,13 @@ internal static ж<array<nint>> leaked;
 internal static ж<Row> leakedRow;
 
 internal static array<nint> leakLocal() {
-    ref var l = ref heap<array<nint>>(out var Ꮡl);
-    l = new nint[]{1, 2, 3}.array();
+    ref var l = ref heap<array<nint>>(new nint[]{1, 2, 3}.array(), out var Ꮡl);
     leaked = Ꮡl;
     return l.Clone();
 }
 
 internal static Row leakRow() {
-    ref var r = ref heap<Row>(out var Ꮡr);
-    r = new Row(new nint[]{10, 20, 30}.array());
+    ref var r = ref heap<Row>(new Row(new nint[]{10, 20, 30}.array()), out var Ꮡr);
     leakedRow = Ꮡr;
     return r.Clone();
 }

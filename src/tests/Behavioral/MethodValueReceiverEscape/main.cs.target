@@ -40,8 +40,7 @@ internal static void applyPush(Action<nint> f) {
 }
 
 internal static (nint, nint) viaLocal() {
-    ref var c = ref heap<counter>(out var Ꮡc);
-    c = new counter(n: 100);
+    ref var c = ref heap<counter>(new counter(n: 100), out var Ꮡc);
     nint sum = applyInt(Ꮡc.dec, 5, 7);
     return (c.n, sum);
 }
@@ -62,8 +61,7 @@ internal static counter /*c*/ viaNamedResult() {
 }
 
 internal static nint viaFieldChain() {
-    ref var h = ref heap<holder>(out var Ꮡh);
-    h = new holder(c: new counter(n: 30));
+    ref var h = ref heap<holder>(new holder(c: new counter(n: 30)), out var Ꮡh);
     applyInt(Ꮡh.of(holder.Ꮡc).dec, 2, 3);
     return h.c.n;
 }
@@ -101,8 +99,7 @@ internal static nint directCallStaysUnboxed() {
 }
 
 internal static nint viaClosure() {
-    ref var c = ref heap<counter>(out var Ꮡc);
-    c = new counter(n: 60);
+    ref var c = ref heap<counter>(new counter(n: 60), out var Ꮡc);
     void run() {
         applyInt(Ꮡc.dec, 8, 9);
     }

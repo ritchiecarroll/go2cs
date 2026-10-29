@@ -101,8 +101,7 @@ internal static void Main() {
     foreach (var k in range(tbl)) {
         tbl[k] = k;
     }
-    ref var arr = ref heap<array<nint>>(out var Ꮡarr);
-    arr = new array<nint>(256){[144] = 7};
+    ref var arr = ref heap<array<nint>>(new array<nint>(256){[144] = 7}, out var Ꮡarr);
     @string str = "0123456789";
     var tblʗ1 = tbl;
     arm("slice index", () => fmt.Sprint(tblʗ1[(uint8)(u + u)]));

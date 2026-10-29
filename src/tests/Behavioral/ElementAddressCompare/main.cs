@@ -37,8 +37,7 @@ internal static bool overlaps(slice<uint64> z, slice<uint64> x) {
 }
 
 internal static bool besideElem(slice<nint> s) {
-    ref var elem = ref heap<nint>(out var Ꮡelem);
-    elem = 1;
+    ref var elem = ref heap<nint>(1, out var Ꮡelem);
     var p = Ꮡelem;
     p.Value = 2;
     return Ꮡ(s, 0) == Ꮡ(s, 0) && Ꮡ(s, 0) != Ꮡ(s, 1) && elem == 2;

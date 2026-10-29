@@ -21,8 +21,7 @@ internal static void Main() {
     var g2 = (uintptr)Ꮡorigin;
     fmt.Println("global:", g1 != 0, g1 == g2);
 
-    ref var link = ref heap<ж<point>>(out var Ꮡlink);
-    link = Ꮡorigin;
+    ref var link = ref heap<ж<point>>(Ꮡorigin, out var Ꮡlink);
     fmt.Println("param:", addrOf(link) == g1);
 
     ж<point> missing = default;

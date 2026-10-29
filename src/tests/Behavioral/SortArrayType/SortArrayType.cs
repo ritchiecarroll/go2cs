@@ -212,8 +212,7 @@ internal static void Main() {
     var ros = (Roster)(slice<Person>)(byAge[0..2]);
     fmt.Println(ros.headcount(), len(ros));
 
-    ref var crew = ref heap<Roster>(out var Ꮡcrew);
-    crew = new Roster(new Person[]{new(Name: "Ann", Age: 30), new(Name: "Bob", Age: 40)}.slice());
+    ref var crew = ref heap<Roster>(new Roster(new Person[]{new(Name: "Ann", Age: 30), new(Name: "Bob", Age: 40)}.slice()), out var Ꮡcrew);
     consumeOne(ref (Ꮡcrew.of(Roster.Ꮡm_value)).DerefOrNull());
     fmt.Println("consumed:", len(crew), crew[0].Name);
 

@@ -49,8 +49,7 @@ internal static partial @string boundInsideLiteral(ж<T> t) {
 }
 
 internal static partial void Main() {
-    ref var t = ref heap<T>(out var Ꮡt);
-    t = new T(n: 1);
+    ref var t = ref heap<T>(new T(n: 1), out var Ꮡt);
     var p = Ꮡt;
 
     fmt.Println("method expression, value receiver:   ", nameOf(((Func<T, nint>)(valueMethod))));

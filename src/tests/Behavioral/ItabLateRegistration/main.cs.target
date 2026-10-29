@@ -8,12 +8,9 @@ using ItabLateRegistration;
 partial class main_package {
 
 internal static void round(@string tag) {
-    ref var c = ref heap<lib.Circle>(out var Ꮡc);
-    c = new lib.Circle(R: 3);
-    ref var q = ref heap<lib.Square>(out var Ꮡq);
-    q = new lib.Square(S: 4);
-    ref var b = ref heap<lib.Blank>(out var Ꮡb);
-    b = new lib.Blank(N: 5);
+    ref var c = ref heap<lib.Circle>(new lib.Circle(R: 3), out var Ꮡc);
+    ref var q = ref heap<lib.Square>(new lib.Square(S: 4), out var Ꮡq);
+    ref var b = ref heap<lib.Blank>(new lib.Blank(N: 5), out var Ꮡb);
 
     for (nint i = 0; i < 3; i++) {
         var (n1, ok1) = lib.TryName(Ꮡc);

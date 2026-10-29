@@ -33,8 +33,7 @@ internal partial struct cycleMemo_memo /*dyn*/ {
 
 internal static void cycleMemo() {
     var seen = new map<any, EmptyStruct>{};
-    ref var a = ref heap<nint>(out var Ꮡa);
-    a = 10;
+    ref var a = ref heap<nint>(10, out var Ꮡa);
 
     var memo = new cycleMemo_memo(Ꮡa, 2);
 

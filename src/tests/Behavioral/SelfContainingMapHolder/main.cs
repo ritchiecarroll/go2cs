@@ -118,15 +118,13 @@ internal static void generic() {
 }
 
 internal static void viaPtr() {
-    ref var p = ref heap<ViaPtr>(out var Ꮡp);
-    p = new ViaPtr(new map<nint, ж<ViaPtr>>{});
+    ref var p = ref heap<ViaPtr>(new ViaPtr(new map<nint, ж<ViaPtr>>{}), out var Ꮡp);
     p[1] = Ꮡp;
     fmt.Println("viaPtr:", len(p), len(p[1].ValueSlot), (p[1].ValueSlot)[1] == p[1]);
 }
 
 internal static void reflection() {
-    ref var d = ref heap<Direct>(out var Ꮡd);
-    d = new Direct(new map<nint, Direct>{[1] = new Direct(new map<nint, Direct>{[2] = default})});
+    ref var d = ref heap<Direct>(new Direct(new map<nint, Direct>{[1] = new Direct(new map<nint, Direct>{[2] = default})}), out var Ꮡd);
 
     var t = reflect.TypeOf(d);
     fmt.Println("reflect type:", t.Kind(), AreEqual(t.Elem(), t), t.Key().Kind(), t.Size());

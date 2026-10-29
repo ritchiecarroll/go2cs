@@ -16,8 +16,7 @@ public static void Add(this ref Tally t, nint n) {
 }
 
 internal static void probeA1() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     void bump() {
         Ꮡt.Value.total += 100;
     }
@@ -27,16 +26,14 @@ internal static void probeA1() {
 }
 
 internal static void probeA2() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     nint get() => Ꮡt.Value.total;
     t.total += 10;
     fmt.Println("A2:", get());
 }
 
 internal static void probeA3() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     t.total += 2;
     var tʗ1 = t;
     nint get() => tʗ1.total;
@@ -89,8 +86,7 @@ internal static void probeD1(Tally t) {
 internal static void probeE1() {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref heap<Tally>(out var Ꮡt);
-        t = new Tally(5, "s");
+        ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
         defer(() => {
             fmt.Println("E1:", Ꮡt.Value.total);
         }, ref ᒐ);
@@ -103,8 +99,7 @@ internal static void probeE1() {
 internal static void probeE2() {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref heap<Tally>(out var Ꮡt);
-        t = new Tally(5, "s");
+        ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
         defer(ᴛ1 => fmt.Println("E2:", ᴛ1), t.total, ref ᒐ);
         t.total = 42;
     }
@@ -113,8 +108,7 @@ internal static void probeE2() {
 }
 
 internal static partial void probeF1() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     var done = new channel<nint>(0);
     var doneʗ1 = done;
     goǃ(() => {
@@ -128,8 +122,7 @@ internal static partial void probeF1() {
 internal static void probeG1() {
     var fsᴷ = new stackAppend<Action>();
 
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     slice<Action> fs = default;
     for (nint i = 0; i < 2; i++) {
         fs = append(fsᴷ, fs, () => {
@@ -152,8 +145,7 @@ internal static void probeG3() {
 }
 
 internal static void probeH1() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     void inc() {
         Ꮡt.Value.total++;
     }
@@ -164,8 +156,7 @@ internal static void probeH1() {
 }
 
 internal static void probeI1() {
-    ref var s = ref heap<slice<nint>>(out var Ꮡs);
-    s = new nint[]{1}.slice();
+    ref var s = ref heap<slice<nint>>(new nint[]{1}.slice(), out var Ꮡs);
     void app() {
         Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, (nint)2);
     }
@@ -174,8 +165,7 @@ internal static void probeI1() {
 }
 
 internal static void probeJ1() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     func(() => {
         Ꮡt.Value.total += 100;
     })();
@@ -183,8 +173,7 @@ internal static void probeJ1() {
 }
 
 internal static void probeK1() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     var p = Ꮡt;
     nint get() => Ꮡt.Value.total;
     p.Value.total = 50;
@@ -192,8 +181,7 @@ internal static void probeK1() {
 }
 
 internal static void probeL1() {
-    ref var m = ref heap<map<nint, nint>>(out var Ꮡm);
-    m = new map<nint, nint>{};
+    ref var m = ref heap<map<nint, nint>>(new map<nint, nint>{}, out var Ꮡm);
     void set() {
         Ꮡm.ValueSlot = new map<nint, nint>{[1] = 1};
     }
@@ -202,8 +190,7 @@ internal static void probeL1() {
 }
 
 internal static void probeM1() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     void bump() {
         Ꮡt.Value.total += 100;
     }
@@ -222,8 +209,7 @@ internal static void probeN1() {
 }
 
 internal static void probeN2() {
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 0;
+    ref var n = ref heap<nint>(0, out var Ꮡn);
     var p = Ꮡn;
     void inc() {
         Ꮡn.Value += 5;

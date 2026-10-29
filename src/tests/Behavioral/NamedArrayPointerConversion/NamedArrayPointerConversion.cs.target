@@ -37,8 +37,7 @@ internal static void Main() {
     c.Value[1] = 9;
     fmt.Println("C2 composite:", c.Value);
 
-    ref var sraw = ref heap<slice<byte>>(out var Ꮡsraw);
-    sraw = new byte[]{1, 2, 3}.slice();
+    ref var sraw = ref heap<slice<byte>>(new byte[]{1, 2, 3}.slice(), out var Ꮡsraw);
     var sp = Ꮡsraw.Reinterpret<slice<byte>, MyBytes>();
     sp.ValueSlot = append(sp.ValueSlot, (byte)4);
     fmt.Println("C3 named-slice ptr aliases original:", sraw);

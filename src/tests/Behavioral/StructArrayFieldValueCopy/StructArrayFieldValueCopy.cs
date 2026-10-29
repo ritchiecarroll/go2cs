@@ -47,8 +47,7 @@ internal static digest newDigest() {
 }
 
 internal static void derefCopy() {
-    ref var d = ref heap<digest>(out var Ꮡd);
-    d = newDigest();
+    ref var d = ref heap<digest>(newDigest(), out var Ꮡd);
     var p = Ꮡd;
     var d0 = p.Value.ΔClone();
     d0.bump();

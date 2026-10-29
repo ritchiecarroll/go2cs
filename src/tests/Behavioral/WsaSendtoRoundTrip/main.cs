@@ -104,8 +104,7 @@ internal static void zeroLengthDatagram() {
         defer(syscall.Closesocket, sender, ref ᒐ);
 
         var one = new byte[]{0}.slice();
-        ref var buf = ref heap<syscall.WSABuf>(out var Ꮡbuf);
-        buf = new syscall.WSABuf(Len: 0, Buf: Ꮡ(one, 0));
+        ref var buf = ref heap<syscall.WSABuf>(new syscall.WSABuf(Len: 0, Buf: Ꮡ(one, 0)), out var Ꮡbuf);
         ref var sent = ref heap(new uint32(), out var Ꮡsent);
         err = syscall.WSASendto(sender, Ꮡbuf, 1, Ꮡsent, 0, new syscall.SockaddrInet4жΔSockaddr(dst), nil, nil);
         fmt.Println("zerolen: send reported no error:", err == nil);
@@ -140,8 +139,7 @@ internal static (syscallꓸHandle, error) newSender() {
 }
 
 internal static (uint32, error) send(syscallꓸHandle s, slice<byte> payload, syscallꓸSockaddr to) {
-    ref var buf = ref heap<syscall.WSABuf>(out var Ꮡbuf);
-    buf = new syscall.WSABuf(Len: (uint32)len(payload), Buf: Ꮡ(payload, 0));
+    ref var buf = ref heap<syscall.WSABuf>(new syscall.WSABuf(Len: (uint32)len(payload), Buf: Ꮡ(payload, 0)), out var Ꮡbuf);
     ref var sent = ref heap(new uint32(), out var Ꮡsent);
     var err = syscall.WSASendto(s, Ꮡbuf, 1, Ꮡsent, 0, to, nil, nil);
     return (sent, err);

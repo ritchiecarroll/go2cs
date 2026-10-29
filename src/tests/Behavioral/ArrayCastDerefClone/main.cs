@@ -36,8 +36,7 @@ internal static array<uintptr> castDerefReturnDirect(@unsafe.Pointer p) {
 }
 
 internal static void Main() {
-    ref var src = ref heap<Row>(out var Ꮡsrc);
-    src = new Row(new nint[]{1, 2, 3}.array());
+    ref var src = ref heap<Row>(new Row(new nint[]{1, 2, 3}.array()), out var Ꮡsrc);
     var got = typedCastDeref(Ꮡsrc);
     got[0] = 99;
     fmt.Println("copy:", got, "original:", src);

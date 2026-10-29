@@ -31,31 +31,26 @@ internal partial struct main_anon /*dyn*/ {
 internal static void Main() {
     var keepᴷ = new stackAppend<ж<nint>>();
 
-    ref var a = ref heap<nint>(out var Ꮡa);
-    a = 10;
+    ref var a = ref heap<nint>(10, out var Ꮡa);
     keptInts = append(keptInts, Ꮡa);
     bump(ref a);
     fmt.Println("a:", a);
 
-    ref var s = ref heap<@string>(out var Ꮡs);
-    s = "hi";
+    ref var s = ref heap<@string>("hi", out var Ꮡs);
     var ps = Ꮡs;
     ps.Value += "!"u8;
     fmt.Println("s:", s);
 
-    ref var g = ref heap<grid>(out var Ꮡg);
-    g = new grid(name: "g");
+    ref var g = ref heap<grid>(new grid(name: "g"), out var Ꮡg);
     keptGrids = append(keptGrids, Ꮡg);
     mark(ref g, 0);
-    ref var h = ref heap<grid>(out var Ꮡh);
-    h = g.ΔClone();
+    ref var h = ref heap<grid>(g.ΔClone(), out var Ꮡh);
     keptGrids = append(keptGrids, Ꮡh);
     mark(ref h, 1);
     h.name = "h";
     fmt.Println("g:", g.cells, g.name, "h:", h.cells, h.name, "kept:", (~keptGrids[0]).cells, (~keptGrids[1]).cells, keptInts[0].Value);
 
-    ref var c = ref heap<nint>(out var Ꮡc);
-    c = 1;
+    ref var c = ref heap<nint>(1, out var Ꮡc);
     void inc() {
         var p = Ꮡc;
         p.Value += 10;
@@ -64,8 +59,7 @@ internal static void Main() {
     inc();
     fmt.Println("c:", c);
 
-    ref var anon = ref heap<main_anon>(out var Ꮡanon);
-    anon = new main_anon(v: 3);
+    ref var anon = ref heap<main_anon>(new main_anon(v: 3), out var Ꮡanon);
     var pa = Ꮡanon;
     pa.Value.v *= 2;
     fmt.Println("anon:", anon.v);

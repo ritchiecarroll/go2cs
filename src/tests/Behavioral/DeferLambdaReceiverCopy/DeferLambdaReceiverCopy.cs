@@ -52,8 +52,7 @@ internal static void viaPointer(ж<path> Ꮡp) {
 internal static void local() {
     GoFrame ᒐ = default;
     try {
-        ref var k = ref heap<path>(out var Ꮡk);
-        k = new path("local");
+        ref var k = ref heap<path>(new path("local"), out var Ꮡk);
         var kʗ1 = k;
         defer(() => kʗ1.Close(), ref ᒐ);
         k = new path("replaced");

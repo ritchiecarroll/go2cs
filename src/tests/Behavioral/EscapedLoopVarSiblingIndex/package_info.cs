@@ -50,7 +50,7 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("main.go", "main.cs", "AAssgKaCgoKUgoKmgoKUqIKCgoKClKiMgpSigqSigtaoioKUgoKUgoKUgpSCxqaCgoKCgg==")]
-[assembly: go.GoPositionMap("paren.go", "paren.cs", "AAYQgpKCgoKClII=")]
+[assembly: go.GoPositionMap("paren.go", "paren.cs", "AAYQgoKCgoKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go;

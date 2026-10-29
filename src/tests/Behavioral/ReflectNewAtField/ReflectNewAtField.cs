@@ -29,10 +29,8 @@ internal static reflectꓸValue field(reflectꓸValue v, nint i) {
 }
 
 internal static void Main() {
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 7;
-    ref var x = ref heap<P>(out var Ꮡx);
-    x = new P(1, 2, new inner("x"), Ꮡn);
+    ref var n = ref heap<nint>(7, out var Ꮡn);
+    ref var x = ref heap<P>(new P(1, 2, new inner("x"), Ꮡn), out var Ꮡx);
     var v = reflect.ValueOf(Ꮡx).Elem();
 
     for (nint i = 0; i < v.NumField(); i++) {
@@ -46,14 +44,12 @@ internal static void Main() {
     field(v, 2).Set(reflect.ValueOf(new inner("z")));
     fmt.Println(x.@private, x.s.a);
 
-    ref var y = ref heap<P>(out var Ꮡy);
-    y = new P(1, 3, new inner("y"), Ꮡn);
+    ref var y = ref heap<P>(new P(1, 3, new inner("y"), Ꮡn), out var Ꮡy);
     var w = reflect.ValueOf(Ꮡy).Elem();
     fmt.Println(AreEqual(field(v, 1).Interface(), field(w, 1).Interface()));
     fmt.Println(reflect.DeepEqual(field(v, 2).Interface(), field(w, 2).Interface()));
 
-    ref var q = ref heap<Q>(out var Ꮡq);
-    q = new Q(4, 5, 6);
+    ref var q = ref heap<Q>(new Q(4, 5, 6), out var Ꮡq);
     var u = reflect.ValueOf(Ꮡq).Elem();
     fmt.Println(field(u, 0).Interface(), field(u, 1).Interface(), field(u, 2).Interface());
     field(u, 1).SetInt(50);

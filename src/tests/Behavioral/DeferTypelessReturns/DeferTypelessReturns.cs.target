@@ -70,8 +70,7 @@ internal static void Main() {
     GoFrame ᒐ = default;
     try {
         defer(ᴛ1 => closeIt(ᴛ1, 3), nil, ref ᒐ);
-        ref var h = ref heap<res>(out var Ꮡh);
-        h = new res(id: 4);
+        ref var h = ref heap<res>(new res(id: 4), out var Ꮡh);
         var hʗ1 = h;
         defer(() => hʗ1.close(), ref ᒐ);
         var (w, werr) = mixedRet(true);

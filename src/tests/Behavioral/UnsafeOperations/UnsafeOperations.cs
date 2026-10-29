@@ -74,8 +74,7 @@ internal static void Main() {
     var strptr = @unsafe.StringData(str);
     fmt.Println(@unsafe.String(strptr, len(str)));
 
-    ref var arr = ref heap<array<nint>>(out var Ꮡarr);
-    arr = new nint[]{1, 2, 3, 4}.array();
+    ref var arr = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡarr);
     var arrptr = Ꮡarr.at<nint>(0);
 
     @unsafe.Pointer nextPtr = (@unsafe.Pointer)((uintptr)arrptr + /* unsafe.Sizeof(arr[0]) */ (uintptr)8);

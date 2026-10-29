@@ -50,8 +50,7 @@ internal static partial ж<gauge> newGauge() {
 }
 
 internal static nint namedAfterType() {
-    ref var gauge = ref heap<ж<gauge>>(out var Ꮡgauge);
-    gauge = newGauge();
+    ref var gauge = ref heap<ж<gauge>>(newGauge(), out var Ꮡgauge);
     run(() => {
         Ꮡgauge.ValueSlot = newGauge();
         Ꮡgauge.ValueSlot.of(main_package.gauge.Ꮡv).bump(5);

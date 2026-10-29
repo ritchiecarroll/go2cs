@@ -47,8 +47,7 @@ internal static void Main() {
     var l = new Logger(name: "test");
     fmt.Println(l.Handler());
 
-    ref var @base = ref heap<baseHandler>(out var Ꮡbase);
-    @base = new baseHandler(level: 2);
+    ref var @base = ref heap<baseHandler>(new baseHandler(level: 2), out var Ꮡbase);
 
     ΔHandler hv = new wrapper(Handler: @base, prefix: "wrap:");
     fmt.Println(hv.Enabled(1), hv.Enabled(3));

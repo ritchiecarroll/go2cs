@@ -308,8 +308,7 @@ internal static void Main() {
     any ptr3 = Ꮡy;
     fmt.Println("pointer:  ", AreEqual(ptr1, ptr2), AreEqual(ptr1, ptr3));
 
-    ref var pm = ref heap<map<@string, nint>>(out var Ꮡpm);
-    pm = new map<@string, nint>{};
+    ref var pm = ref heap<map<@string, nint>>(new map<@string, nint>{}, out var Ꮡpm);
     any pmap1 = Ꮡpm;
     any pmap2 = Ꮡpm;
     fmt.Println("ptr-to-map:", AreEqual(pmap1, pmap2));

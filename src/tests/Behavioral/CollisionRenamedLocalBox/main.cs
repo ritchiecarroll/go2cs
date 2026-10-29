@@ -52,8 +52,7 @@ internal static nint usesTypeP() {
 }
 
 internal static void Main() {
-    ref var Δp = ref heap<box>(out var Ꮡp);
-    Δp = new box(n: 0);
+    ref var Δp = ref heap<box>(new box(n: 0), out var Ꮡp);
     setN(Ꮡp, 7);
     setN(Ꮡp, Δp.n + 3);
     bump(Ꮡp.of(box.Ꮡn));

@@ -147,8 +147,7 @@ internal static void Main() {
     arm("ordinary", () => fmt.Sprint(i64 / (int64)7, " ", i64 % (int64)7, " ", -7 / m1, " ", 7 % (m1 - 2)));
     arm("compound pointer", () => {
         var p = Ꮡi64;
-        ref var v = ref heap<int64>(out var Ꮡv);
-        v = p.Value;
+        ref var v = ref heap<int64>(p.Value, out var Ꮡv);
         p = Ꮡv;
         p.Value.QuoAssign((int64)m1);
         return fmt.Sprint(v);
@@ -175,8 +174,7 @@ internal static void Main() {
     });
     arm("compound call selector", () => {
         calls = 0;
-        ref var c = ref heap<ж<cell>>(out var Ꮡc);
-        c = fresh();
+        ref var c = ref heap<ж<cell>>(fresh(), out var Ꮡc);
         var p = Ꮡc;
         (p.ValueSlot).Value.x.RemAssign((int64)m1);
         fresh().Value.x.QuoAssign((int64)m1);

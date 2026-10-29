@@ -6,8 +6,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static void Main() {
-    ref var arr = ref heap<array<int32>>(out var Ꮡarr);
-    arr = new int32[]{10, 20, 30, 40, 50}.array();
+    ref var arr = ref heap<array<int32>>(new int32[]{10, 20, 30, 40, 50}.array(), out var Ꮡarr);
 
     uintptr n = 3;
     var s = @unsafe.Slice(Ꮡarr.at<int32>(0), n);

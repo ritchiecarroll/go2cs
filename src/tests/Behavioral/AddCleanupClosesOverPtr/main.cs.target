@@ -107,8 +107,7 @@ internal static void Main() {
     });
 
     @try("reassigned after capture", () => {
-        ref var v = ref heap<ж<T>>(out var Ꮡv);
-        Ꮡv.ValueSlot = Ꮡ(new T(f: 11));
+        ref var v = ref heap<ж<T>>(Ꮡ(new T(f: 11)), out var Ꮡv);
         runtime.AddCleanup(Ꮡv.ValueSlot, (nint _Δp0) => {
             _ = Ꮡv.ValueSlot;
         }, 0);
@@ -147,8 +146,7 @@ internal static void Main() {
 
     @try("struct capture holds ptr", () => {
         var v = Ꮡ(new T(f: 16));
-        ref var p = ref heap<pair>(out var Ꮡp);
-        p = new pair(v, 1);
+        ref var p = ref heap<pair>(new pair(v, 1), out var Ꮡp);
         var pʗ1 = p;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = pʗ1;
@@ -157,8 +155,7 @@ internal static void Main() {
 
     @try("array capture holds ptr", () => {
         var v = Ꮡ(new T(f: 17));
-        ref var a = ref heap<array<ж<T>>>(out var Ꮡa);
-        a = new ж<T>[]{default, v}.array();
+        ref var a = ref heap<array<ж<T>>>(new ж<T>[]{default, v}.array(), out var Ꮡa);
         var aʗ1 = a;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = aʗ1;
@@ -167,8 +164,7 @@ internal static void Main() {
 
     @try("nested struct capture holds ptr", () => {
         var v = Ꮡ(new T(f: 18));
-        ref var o = ref heap<outer>(out var Ꮡo);
-        o = new outer(new pair(v, 2));
+        ref var o = ref heap<outer>(new outer(new pair(v, 2)), out var Ꮡo);
         var oʗ1 = o;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = oʗ1;
@@ -178,8 +174,7 @@ internal static void Main() {
     @try("struct capture holds other object", () => {
         var v = Ꮡ(new T(f: 19));
         var w = Ꮡ(new T(f: 20));
-        ref var p = ref heap<pair>(out var Ꮡp);
-        p = new pair(w, 3);
+        ref var p = ref heap<pair>(new pair(w, 3), out var Ꮡp);
         var pʗ2 = p;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = pʗ2;
@@ -189,8 +184,7 @@ internal static void Main() {
 
     @try("struct over 128 bytes holds ptr", () => {
         var v = Ꮡ(new T(f: 22));
-        ref var l = ref heap<large>(out var Ꮡl);
-        l = new large(p: v);
+        ref var l = ref heap<large>(new large(p: v), out var Ꮡl);
         var lʗ1 = l;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = lʗ1;

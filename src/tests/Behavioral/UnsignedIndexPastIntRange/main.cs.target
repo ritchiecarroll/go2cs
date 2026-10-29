@@ -33,8 +33,7 @@ internal static void Main() {
     copy(a[..], b);
     var nb = (bytes)b;
     path np = (path)s;
-    ref var nk = ref heap<block>(out var Ꮡnk);
-    nk = new block(new byte[]{1, 2, 3, 4}.array());
+    ref var nk = ref heap<block>(new block(new byte[]{1, 2, 3, 4}.array()), out var Ꮡnk);
     var pa = Ꮡa;
 
     uint64 u64 = (uint64)(4294967296L + 5);

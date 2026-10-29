@@ -42,8 +42,7 @@ internal static void Main() {
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
 
-    ref var b = ref heap<Buffer>(out var Ꮡb);
-    b = new Buffer();
+    ref var b = ref heap<Buffer>(new Buffer(), out var Ꮡb);
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 
@@ -79,8 +78,7 @@ public static ж<nint> EscapePrintValPtr(ж<nint> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     fmt.Printf("Value available at *ptr = %d\n"u8, @out);
-    ref var i = ref heap<nint>(out var Ꮡi);
-    i = 99;
+    ref var i = ref heap<nint>(99, out var Ꮡi);
     Ꮡout = Ꮡi; @out = ref Ꮡout.DerefOrNull();
     fmt.Printf("Intra-function updated value available at *ptr = %d\n"u8, @out);
     PrintValPtr(Ꮡout);

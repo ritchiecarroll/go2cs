@@ -24,8 +24,7 @@ internal static void Main() {
     message m = new ValueType(unit: "cpu in nanoseconds");
     show(m);
 
-    ref var v = ref heap<ValueType>(out var Ꮡv);
-    v = new ValueType(unit: "heap in bytes");
+    ref var v = ref heap<ValueType>(new ValueType(unit: "heap in bytes"), out var Ꮡv);
     message mp = new ValueTypeжmessage(Ꮡv);
     show(mp);
     fmt.Println(mp.describe());

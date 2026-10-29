@@ -147,8 +147,7 @@ partial struct Outer {
 }
 
 internal static void Main() {
-    ref var e = ref heap<MyError>(out var Ꮡe);
-    e = new MyError(time.Now(), "Hello");
+    ref var e = ref heap<MyError>(new MyError(time.Now(), "Hello"), out var Ꮡe);
     var a = new MyCustomError("New One", default, Ꮡe);
 
     a.Message = "New";
@@ -158,8 +157,7 @@ internal static void Main() {
     fmt.Println("MyCustomError What =", a.What);
     fmt.Println("MyCustomError method =", a.Time());
 
-    ref var inner = ref heap<ж<Inner>>(out var Ꮡinner);
-    inner = Ꮡ(new Inner(Value: "hello"));
+    ref var inner = ref heap<ж<Inner>>(Ꮡ(new Inner(Value: "hello")), out var Ꮡinner);
     var innerPtr = Ꮡinner;
 
     var middle = new Middle(Inner: inner);

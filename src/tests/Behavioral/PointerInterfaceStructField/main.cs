@@ -33,13 +33,11 @@ internal static void Main() {
     var h = Ꮡ(new holder(new SettingжDescriber(ᏑglobalSetting), "positional"));
     fmt.Println((~h).label, (~h).d.Describe());
 
-    ref var local = ref heap<Setting>(out var Ꮡlocal);
-    local = new Setting(name: "count", value: 7);
+    ref var local = ref heap<Setting>(new Setting(name: "count", value: 7), out var Ꮡlocal);
     var h2 = new holder(d: new SettingжDescriber(Ꮡlocal), label: "keyed");
     fmt.Println(h2.label, h2.d.Describe());
 
-    ref var replacement = ref heap<Setting>(out var Ꮡreplacement);
-    replacement = new Setting(name: "assigned", value: 11);
+    ref var replacement = ref heap<Setting>(new Setting(name: "assigned", value: 11), out var Ꮡreplacement);
     assignDescriber(ref (h).DerefOrNull(), Ꮡreplacement);
     replacement.value = 12;
     fmt.Println((~h).label, (~h).d.Describe());

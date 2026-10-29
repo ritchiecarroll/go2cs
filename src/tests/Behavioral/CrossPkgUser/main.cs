@@ -195,8 +195,7 @@ internal static void Main() {
         fmt.Println(l.Label());
         fmt.Println(CrossPkgLib.Describe(s));
 
-        ref var s2 = ref heap<CrossPkgLib.Sensor>(out var Ꮡs2);
-        s2 = new CrossPkgLib.Sensor(Name: "attic", Temp: 20D);
+        ref var s2 = ref heap<CrossPkgLib.Sensor>(new CrossPkgLib.Sensor(Name: "attic", Temp: 20D), out var Ꮡs2);
         var p = new probe(Sensor: Ꮡs2, id: 7);
         fmt.Println(p.Name, (float64)p.Temp, p.id);
         p.Temp = 75D;

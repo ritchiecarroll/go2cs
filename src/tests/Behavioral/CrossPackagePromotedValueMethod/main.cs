@@ -43,14 +43,12 @@ internal static void Main() {
     fmt.Println(p.Value.Time.Add(-time.ΔHour).Format(time.RFC3339));
     fmt.Println(s.Time.Unix(), p.Value.Time.Nanosecond());
 
-    ref var t = ref heap<time.Time>(out var Ꮡt);
-    t = @base;
+    ref var t = ref heap<time.Time>(@base, out var Ꮡt);
     var ps = new PtrStamp(Ꮡt);
     var pp = Ꮡ(new PtrStamp(Ꮡt));
     fmt.Println(ps.Time.Value.Truncate(time.ΔMinute).Format(time.RFC3339), pp.Value.Time.Value.Year());
 
-    ref var o = ref heap<Outer>(out var Ꮡo);
-    o = new Outer(new inner(@base));
+    ref var o = ref heap<Outer>(new Outer(new inner(@base)), out var Ꮡo);
     var po = Ꮡo;
     fmt.Println(o.inner.Time.Truncate(time.ΔHour).Format(time.RFC3339), po.Value.inner.Time.Month());
     

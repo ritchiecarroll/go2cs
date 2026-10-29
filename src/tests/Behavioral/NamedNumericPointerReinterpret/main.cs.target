@@ -87,13 +87,11 @@ internal static void Main() {
     Ꮡg.set(23);
     fmt.Println(g);
 
-    ref var xy = ref heap<coord>(out var Ꮡxy);
-    xy = new coord(1, 2);
+    ref var xy = ref heap<coord>(new coord(1, 2), out var Ꮡxy);
     bump(Ꮡxy);
     fmt.Println(xy.X, xy.Y);
 
-    ref var s = ref heap<@string>(out var Ꮡs);
-    s = "before";
+    ref var s = ref heap<@string>("before", out var Ꮡs);
     setStr(ref (Ꮡs.Reinterpret<@string, namedString>()).DerefOrNull(), "after");
     fmt.Println(s);
 

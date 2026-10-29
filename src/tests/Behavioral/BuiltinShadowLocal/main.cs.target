@@ -68,8 +68,7 @@ internal static (nint, nint) unshadowed() {
 }
 
 internal static void shadowedCalls() {
-    ref var a = ref heap<arr>(out var Ꮡa);
-    a = new arr(new nint[]{1, 2, 3}.array());
+    ref var a = ref heap<arr>(new arr(new nint[]{1, 2, 3}.array()), out var Ꮡa);
 
     nint make(nint n) => n * 2;
     nint @new(nint n) => n * 3;

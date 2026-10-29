@@ -25,12 +25,10 @@ internal static void Main() {
 
         fmt.Println("-- WSAEnumProtocols --");
 
-        ref var protos = ref heap<array<int32>>(out var Ꮡprotos);
-        protos = new int32[]{syscall.IPPROTO_TCP, 0}.array();
+        ref var protos = ref heap<array<int32>>(new int32[]{syscall.IPPROTO_TCP, 0}.array(), out var Ꮡprotos);
 
         ref var buf = ref heap(new array<syscall.WSAProtocolInfo>(32, () => new()), out var Ꮡbuf);
-        ref var length = ref heap<uint32>(out var Ꮡlength);
-        length = (uint32)/* unsafe.Sizeof(buf) */ (uintptr)20096;
+        ref var length = ref heap<uint32>((uint32)/* unsafe.Sizeof(buf) */ (uintptr)20096, out var Ꮡlength);
 
         var (n, err) = syscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<syscall.WSAProtocolInfo>(0), Ꮡlength);
         if (err != nil) {
@@ -77,8 +75,7 @@ internal static void Main() {
         fmt.Println("-- required size --");
 
         var record = (uint32)/* unsafe.Sizeof(buf[0]) */ (uintptr)628;
-        ref var @required = ref heap<uint32>(out var Ꮡrequired);
-        @required = (uint32)0;
+        ref var @required = ref heap<uint32>((uint32)0, out var Ꮡrequired);
 
         (var m, err) = syscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<syscall.WSAProtocolInfo>(0), Ꮡrequired);
         fmt.Println("undersized buffer refused:", m == -1 && err != nil);

@@ -5,8 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static (ж<int64>, int64) next(int64 now) {
-    ref var v = ref heap<int64>(out var Ꮡv);
-    v = now * 2;
+    ref var v = ref heap<int64>(now * 2, out var Ꮡv);
     return (Ꮡv, now + 1);
 }
 
@@ -27,10 +26,8 @@ internal static (ж<nint>, ж<nint>) pair() {
 }
 
 internal static (ж<nint>, ж<nint>) shadow() {
-    ref var x = ref heap<nint>(out var Ꮡx);
-    x = 100;
-    ref var y = ref heap<nint>(out var Ꮡy);
-    y = 200;
+    ref var x = ref heap<nint>(100, out var Ꮡx);
+    ref var y = ref heap<nint>(200, out var Ꮡy);
     var (px, py) = (Ꮡx, Ꮡy);
     if (px.Value > 0) {
         var (pxΔ1, pyΔ1) = pair();

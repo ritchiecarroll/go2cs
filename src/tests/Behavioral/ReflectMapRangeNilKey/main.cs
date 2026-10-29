@@ -51,8 +51,7 @@ internal static void Main() {
     }
     fmt.Println("named:", iface, nils, invalid, sum, reflect.ValueOf(named).Len());
 
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 9;
+    ref var n = ref heap<nint>(9, out var Ꮡn);
     var ptrKeys = new map<ж<nint>, @string>{[default] = "nil", [Ꮡn] = "n"};
     nint ptrs = 0;
     nint pnils = 0;

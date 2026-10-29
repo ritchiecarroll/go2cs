@@ -95,8 +95,7 @@ internal static void Main() {
     addTo(ref total, 7);
     fmt.Println("total:", total);
 
-    ref var v = ref heap<vec>(out var Ꮡv);
-    v = new vec(x: 1, y: 2);
+    ref var v = ref heap<vec>(new vec(x: 1, y: 2), out var Ꮡv);
     scale(ref v, 3);
     fmt.Println("vec:", v.x, v.y);
 

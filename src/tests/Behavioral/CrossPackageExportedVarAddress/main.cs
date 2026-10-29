@@ -15,8 +15,7 @@ internal static void Main() {
 
     fmt.Println("&lib.N identity:", lib.ᏑN == lib.ᏑN, p == lib.ᏑN);
 
-    ref var y = ref heap<nint>(out var Ꮡy);
-    y = 9;
+    ref var y = ref heap<nint>(9, out var Ꮡy);
     p = Ꮡy;
     p.Value = 10;
     fmt.Println("re-point:", lib.N, y);

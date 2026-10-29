@@ -150,8 +150,7 @@ internal static void Main() {
     var (rro, rrt) = rb.ReadOnlyRecv();
     fmt.Println("recv ro     :", rro, rrt);
 
-    ref var rp = ref heap<Box>(out var Ꮡrp);
-    rp = new Box(new Rect(0, 16), 6);
+    ref var rp = ref heap<Box>(new Box(new Rect(0, 16), 6), out var Ꮡrp);
     fmt.Println("recv ptr    :", Ꮡrp.BumpedPtrRecv(), "caller:", rp.Tag);
 
     fmt.Println("recv plain  :", rb.PlainRecv());

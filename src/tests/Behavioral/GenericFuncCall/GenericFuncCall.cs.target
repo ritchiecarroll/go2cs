@@ -64,8 +64,7 @@ internal static void Main() {
     nint strLength = Convert<@string, nint>(helloˢ, (@string s) => len(s));
     fmt.Printf("String length: %d\n"u8, strLength);
 
-    ref var n = ref heap<nint>(out var Ꮡn);
-    n = 5;
+    ref var n = ref heap<nint>(5, out var Ꮡn);
     fmt.Println(renew(Ꮡn).Value);
 }
 

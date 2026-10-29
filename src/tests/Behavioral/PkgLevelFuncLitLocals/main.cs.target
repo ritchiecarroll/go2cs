@@ -30,8 +30,7 @@ partial struct entry {
         return c.get();
     }),
     new("short-define", () => {
-        ref var c = ref heap<counter>(out var Ꮡc);
-        c = new counter(n: 10);
+        ref var c = ref heap<counter>(new counter(n: 10), out var Ꮡc);
         Ꮡc.inc(5);
         return c.get();
     }),
@@ -48,8 +47,7 @@ partial struct entry {
     }),
     new("if-init", () => {
         {
-            ref var c = ref heap<counter>(out var Ꮡc);
-            c = (new counter(n: 7)); if (c.get() > 0) {
+            ref var c = ref heap<counter>((new counter(n: 7)), out var Ꮡc); if (c.get() > 0) {
                 Ꮡc.inc(2);
                 return c.get();
             }
@@ -58,8 +56,7 @@ partial struct entry {
     }),
     new("switch-init", () => {
         {
-            ref var c = ref heap<counter>(out var Ꮡc);
-            c = (new counter(n: 20));
+            ref var c = ref heap<counter>((new counter(n: 20)), out var Ꮡc);
             switch (ᐧ) {
             default: {
                 Ꮡc.inc(2);
@@ -105,8 +102,7 @@ internal static slice<nint> inDecl() {
     Ꮡa.inc(4);
     @out = append(@out, a.get());
 
-    ref var b = ref heap<counter>(out var Ꮡb);
-    b = new counter(n: 10);
+    ref var b = ref heap<counter>(new counter(n: 10), out var Ꮡb);
     Ꮡb.inc(5);
     @out = append(@out, b.get());
 

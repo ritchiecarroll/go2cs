@@ -6,8 +6,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static void Main() {
-    ref var arr = ref heap<array<nint>>(out var Ꮡarr);
-    arr = new nint[]{10, 20, 30, 40}.array();
+    ref var arr = ref heap<array<nint>>(new nint[]{10, 20, 30, 40}.array(), out var Ꮡarr);
     var s = Ꮡarr.slice(0, 4);
 
     nint sum = 0;
@@ -27,8 +26,7 @@ internal static void Main() {
 
     fmt.Println(sum, total, s[0]);
 
-    ref var ip = ref heap<ж<array<nint>>>(out var Ꮡip);
-    ip = Ꮡarr;
+    ref var ip = ref heap<ж<array<nint>>>(Ꮡarr, out var Ꮡip);
     if (never) {
         var back = (~Ꮡip.Reinterpret<ж<array<nint>>, ж<array<int64>>>()).Value.Clone();
         _ = back;
