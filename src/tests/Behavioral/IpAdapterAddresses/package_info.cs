@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;

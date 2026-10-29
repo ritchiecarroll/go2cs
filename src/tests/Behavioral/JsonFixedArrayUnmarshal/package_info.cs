@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
 // </ImportedTypeAliases>
 
 using go;

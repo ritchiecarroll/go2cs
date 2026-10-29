@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using aliaslibꓸCompareType = go.ExportedAliasUnexportedTarget.aliaslib_package.compareResult;
 global using aliaslibꓸMutexWrap = go.ExportedAliasUnexportedTarget.aliaslib_package.mutexWrap;
 // </ImportedTypeAliases>
 
