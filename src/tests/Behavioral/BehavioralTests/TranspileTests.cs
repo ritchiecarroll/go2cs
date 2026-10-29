@@ -112,6 +112,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnyStringLitComposite() => CheckTarget("AnyStringLitComposite");
 
     [TestMethod]
+    public void CheckAotReflectGaps() => CheckTarget("AotReflectGaps");
+
+    [TestMethod]
     public void CheckAppendNamedSliceElement() => CheckTarget("AppendNamedSliceElement");
 
     [TestMethod]
