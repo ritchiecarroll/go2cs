@@ -215,7 +215,7 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string name = field.Name;
 
-            if (IsBlank(name) || s_collisionNames.Contains(name) || declared.Contains(name) || !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly) ||
+            if (IsBlank(name) || s_collisionNames.Contains(name) || !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly) ||
                 ShadowsPromotedMethod(type, name))
             {
                 continue;
@@ -238,9 +238,14 @@ public class FieldAccessGenerator : ISourceGenerator
 
             // A readonly field (a zero-size layout field) has no writable slot of its own: its accessor answers the
             // shared one, which only the accessor reaches.
-            properties.Add(header
-                ? $"public {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => {slot}; [{GetterAttributes}] set {{ {slot} = value; {ReceiverName}.OnHeaderStore(); }} }}"
-                : $"public ref {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {(field.IsReadOnly ? slot : Specialized(typeName, accessor, name))}; }}");
+            if (!declared.Contains(name))
+            {
+                properties.Add(header
+                    ? $"public {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => {slot}; [{GetterAttributes}] set {{ {slot} = value; {ReceiverName}.OnHeaderStore(); }} }}"
+                    : $"public ref {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {(field.IsReadOnly ? slot : Specialized(typeName, accessor, name))}; }}");
+            }
+
+            AddAddress(properties, type, typeName, fieldType, accessor, foreign, declared);
         }
 
         // Embedded structs, by their ref accessors (see the remarks).
@@ -251,7 +256,7 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string name = property.Name;
 
-            if (s_collisionNames.Contains(name) || declared.Contains(name) || !compilation.IsSymbolAccessibleWithin(property, compilation.Assembly) ||
+            if (s_collisionNames.Contains(name) || !compilation.IsSymbolAccessibleWithin(property, compilation.Assembly) ||
                 ShadowsPromotedMethod(type, name))
             {
                 continue;
@@ -267,10 +272,39 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string propertyType = TypeName(property.Type, type);
 
-            properties.Add($"public ref {propertyType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {Specialized(typeName, accessor, name)}; }}");
+            if (!declared.Contains(name))
+                properties.Add($"public ref {propertyType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {Specialized(typeName, accessor, name)}; }}");
+
+            AddAddress(properties, type, typeName, propertyType, accessor, foreign, declared);
         }
 
         return properties;
+    }
+
+    /// <summary>
+    /// The field's ADDRESS property, <c>ж&lt;F&gt; Ꮡf</c> (parity seat #32): the converter's spelling of Go's
+    /// <c>&amp;p.f</c>, the field's view over the struct's one accessor token <c>T.Ꮡf‿</c>.
+    /// </summary>
+    /// <remarks>
+    /// The token is a <c>static readonly FieldRefFunc&lt;T, F&gt;</c> the TypeGenerator emits beside the accessor, in
+    /// the struct's own assembly, so every site in every assembly hands golib's view cache one delegate object and its
+    /// compare is <c>ReferenceEquals</c> on both runtimes. A foreign assembly built before the token has none in its
+    /// metadata; its address property passes the accessor's method group, today's <c>.of(T.Ꮡf)</c> delegate, which the
+    /// cache still matches by its method. The property is decided apart from the field's own: a referenced package
+    /// built before the token declares <c>f</c> and not <c>Ꮡf</c>. A name on the collision list (<c>Ꮡelem</c>, ж&lt;T&gt;'s
+    /// own method) is never declared: an instance member wins over an extension, and the site would bind the member.
+    /// </remarks>
+    private static void AddAddress(List<string> properties, INamedTypeSymbol type, string typeName, string fieldType, string accessor, bool foreign, HashSet<string> declared)
+    {
+        if (s_collisionNames.Contains(accessor) || declared.Contains(accessor))
+            return;
+
+        string token = $"{accessor}{FieldAccessTokenSuffix}";
+
+        if (foreign && !type.GetMembers(token).OfType<IFieldSymbol>().Any(field => field.IsStatic))
+            token = accessor;
+
+        properties.Add($"public global::go.{PointerPrefix}<{fieldType}> {accessor} {{ [{GetterAttributes}] get => {ReceiverName}.of({typeName}.{token}); }}");
     }
 
     // The accessors' attributes. A getter is go2cs machinery, not Go code: inlined at Release, and where the JIT keeps

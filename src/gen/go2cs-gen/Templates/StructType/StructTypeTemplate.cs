@@ -2118,7 +2118,13 @@ internal class StructTypeTemplate : TemplateBase
 
                 // A readonly zero-size field answers the shared per-type slot (see ReadOnlyZeroSizeMembers).
                 string target = ReadOnlyZeroSizeMembers.Contains(memberName) ? ZeroSizeSlotRef(typeName) : $"ref instance.{memberName}";
-                result.Append($"{fieldScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => {target};");
+                string accessor = $"{AddressPrefix}{GetUnsanitizedIdentifier(memberName)}";
+                result.Append($"{fieldScope} static ref {typeName} {accessor}(ref {StructName} instance) => {target};");
+
+                // The field's ONE accessor token (parity seat #32): `&p.f` reads `p.Ꮡf`, whose view every site in every
+                // assembly asks golib's cache for with this same delegate object, so the cache compares by reference.
+                // It is the accessor's method group, since golib reads the field's name off the delegate's method.
+                result.Append($"\r\n{TypeElemIndent}{fieldScope} static readonly global::go.FieldRefFunc<{StructName}, {typeName}> {accessor}{FieldAccessTokenSuffix} = {accessor};");
             }
 
             return result.ToString();

@@ -365,7 +365,7 @@ func (v *Visitor) receiverFieldChainAddressForm(recv *types.Var, recvName string
 		}
 
 		fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(convertToCSTypeName(v.getAliasQualifiedTypeName(ownerType, false)), "", ownerType), AddressPrefix, v.structFieldBoxName(hop.Sel, hop.X))
-		form = fmt.Sprintf("%s.of(%s)", form, fieldRef)
+		form += v.fieldAddressStep(ownerType, hop, fieldRef)
 	}
 
 	return form, true
@@ -421,7 +421,8 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 		boxName := v.boxBaseName(baseIdent)
 		fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(typeName, "", ownerType), AddressPrefix, v.structFieldBoxName(operand.Sel, operand.X))
 
-		return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxName, fieldRef), true
+		// The address property's owner is the struct either way: the value's type, or the pointer's element.
+		return AddressPrefix + boxName + v.fieldAddressStep(v.getType(operand.X, false), operand, fieldRef), true
 	}
 
 	return "", false
@@ -614,7 +615,12 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 
 						typeName := convertToCSTypeName(v.getAliasQualifiedTypeName(ptrType.Elem(), false))
 						fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(typeName, structExpr, ptrType.Elem()), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
-						return fmt.Sprintf("%s.of(%s)", structExpr, fieldRef)
+						// The address property is ж<T>'s: a named pointer type's wrapper declares `of`, not it.
+						if _, plain := types.Unalias(v.getType(base, false)).(*types.Pointer); !plain {
+							return fmt.Sprintf("%s.of(%s)", structExpr, fieldRef)
+						}
+
+						return structExpr + v.fieldAddressStep(ptrType.Elem(), selectorExpr, fieldRef)
 					}
 				}
 			}
@@ -644,6 +650,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 					structExpr := v.convExpr(selectorExpr.X, nil)
 					typeName := v.dynamicStructTypeName(selectorExpr.X)
 					fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(typeName, "", nil), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
+					step := v.fieldAddressStep(v.getType(selectorExpr.X, false), selectorExpr, fieldRef)
 
 					// When the base is itself a VALUE field reached through a pointer field —
 					// `&gp.m.mLockProfile.waitTime`, base `gp.m.mLockProfile` a value field of the
@@ -657,7 +664,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 					// param-deref branches above; only the multi-level chain needs this recursion.)
 					if v.exprIsValueFieldOfPointer(selectorExpr.X) || v.exprIsValueFieldOfDerefdPointerRoot(selectorExpr.X) {
 						baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
-						return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
+						return baseAddr + step
 					}
 
 					// When the base is a slice/array ELEMENT — `&p.Inst[pc].Out` (regexp's
@@ -686,7 +693,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 					// existing site moves.
 					if indexExpr, ok := selectorExpr.X.(*ast.IndexExpr); ok && v.exprIsIndexableElement(indexExpr) {
 						baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
-						return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
+						return baseAddr + step
 					}
 
 					// A field of ANOTHER package's exported var -- `&lib.S.N`, `&lib.S.Inner.F`, or the
@@ -699,7 +706,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 					// WaitGroup counter", CrossPackageExportedVarAddress).
 					if v.rootsAtImportedBoxedGlobal(selectorExpr.X) {
 						baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
-						return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
+						return baseAddr + step
 					}
 
 					if v.isHeapBoxedExpr(selectorExpr.X) {
@@ -714,7 +721,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 						switch selectorExpr.X.(type) {
 						case *ast.SelectorExpr, *ast.IndexExpr:
 							baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
-							return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
+							return baseAddr + step
 						}
 
 						// The operand already has a heap-boxed pointer companion (e.g. an
@@ -733,13 +740,13 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 							}
 						}
 
-						return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxExpr, fieldRef)
+						return AddressPrefix + boxExpr + step
 					}
 
 					// The operand is an addressable value with no pointer companion (e.g.
 					// a package-global struct var): construct the pointer on the fly with
 					// the "Ꮡ(value).of(...)" call form (mirrors the whole-value case below).
-					return fmt.Sprintf("%s(%s).of(%s)", AddressPrefix, structExpr, fieldRef)
+					return fmt.Sprintf("%s(%s)%s", AddressPrefix, structExpr, step)
 				}
 			}
 		}
@@ -959,7 +966,12 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 						// fell to the naive fallback at the end of this branch, `Ꮡlib.Arr.at<E>(i)`, a name
 						// nothing declares (CS0103, CrossPackageExportedVarAddress).
 						if v.isHeapBoxedExpr(sel) || baseIsPointer || chainRootIsPointer || v.rootsAtImportedBoxedGlobal(sel) {
+							// The field's address stays the accessor's view, the fusion below takes its accessor
+							// (fieldAddressFused); a level below it may read its address property.
+							outerFused := v.fieldAddressFused
+							v.fieldAddressFused = sel
 							arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
+							v.fieldAddressFused = outerFused
 							index := v.convArrayIndex(indexExpr.Index)
 
 							// Combine the field-address `of(field)` with the element-address into a single

@@ -5169,7 +5169,9 @@ func TestWhiteboxBridgeDeclaredNamesCoverMethodsAndPackageDecls(t *testing.T) {
 // TYPE is Δ-renamed and therefore always qualified — and all six `t.mu.Lock()` sites spelled
 // `sql_package.Δtable.Ꮡmu`, a class with no such member (CS0117 ×6).
 //
-// Both directions are asserted: the bridge class appears, and the production class does not.
+// Both directions are asserted: the bridge class appears, and the production class does not. Since parity seat #32
+// an ordinary field's address reads its generated property (`p.Ꮡn`), which names no class; the accessor form, and so
+// this guard, holds for a field the property does not serve, here one named like a member of ж<T> (`&p.Value`).
 func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
@@ -5178,9 +5180,10 @@ func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
 		"value.go": "package boxacc\n\ntype Holder struct{ n int }\n\nfunc NewHolder(n int) *Holder { return &Holder{n: n} }\n",
 		// `probe` the TYPE collides with `probe` the METHOD, which Δ-renames the type — exactly
 		// fakedb_test.go's `table`/`(*fakeDB).table` pairing.
-		"export_test.go": "package boxacc\n\ntype probe struct{ n int }\n\n" +
+		"export_test.go": "package boxacc\n\ntype probe struct{ n, Value int }\n\n" +
 			"func (h *Holder) probe() int { return h.n }\n\n" +
-			"func probeAddr(p *probe) *int { return &p.n }\n",
+			"func probeAddr(p *probe) *int { return &p.n }\n\n" +
+			"func probeValue(p *probe) *int { return &p.Value }\n",
 	}
 	for name, contents := range files {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
@@ -5207,7 +5210,11 @@ func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
 
 	exportCs := readConvertedTestFile(t, outputPath, "export_test.cs")
 
-	accessor := ShadowVarMarker + "probe." + AddressPrefix + "n"
+	if !strings.Contains(exportCs, "return p."+AddressPrefix+"n;") {
+		t.Fatalf("an ordinary field's address must read its address property:\n%s", exportCs)
+	}
+
+	accessor := ShadowVarMarker + "probe." + AddressPrefix + "Value"
 
 	if !strings.Contains(exportCs, "boxacc_internal_test"+PackageSuffix+"."+accessor) {
 		t.Fatalf("the box accessor must name the BRIDGE class that declares the test type:\n%s", exportCs)

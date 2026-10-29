@@ -281,6 +281,26 @@
       ]
     },
     {
+      "name": "FieldAccessTokenSuffix",
+      "value": "\u203F",
+      "csharp": true,
+      "goEscape": true,
+      "goComment": [
+        "FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.\u13D1f\u203F`: the",
+        "`static readonly FieldRefFunc<T, F>` the TypeGenerator emits beside the field's `\u13D1f` accessor, which",
+        "the generated `p.\u13D1f` property (`&p.f`, parity seat #32) hands golib's view cache, so every site in",
+        "every assembly passes one delegate object and the cache compares by reference. U+203F keeps the",
+        "name out of reach of every Go field's accessor, as MapWrapperSet's door does."
+      ],
+      "csComment": [
+        "FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.\u13D1f\u203F`: the",
+        "`static readonly FieldRefFunc<T, F>` the TypeGenerator emits beside the field's `\u13D1f` accessor, which",
+        "the generated `p.\u13D1f` property (`&p.f`, parity seat #32) hands golib's view cache, so every site in",
+        "every assembly passes one delegate object and the cache compares by reference. U+203F keeps the",
+        "name out of reach of every Go field's accessor, as MapWrapperSet's door does."
+      ]
+    },
+    {
       "name": "PointerDerefOp",
       "value": "~",
       "goTrailing": "Example: `~ptr` for dereferencing a pointer",

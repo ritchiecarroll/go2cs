@@ -583,6 +583,62 @@ func (v *Visitor) fieldPropertySelector(selectorExpr *ast.SelectorExpr, pointee 
 	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))), true
 }
 
+// P2 (parity seat #32): `&p.f` READS `p.Ꮡf`, the address property go2cs-gen emits beside each field property, for the
+// same struct types and fields as P1 above. Its body is the field's view over the struct's ONE accessor token, `T.Ꮡf‿`,
+// a `static readonly FieldRefFunc<T, F>` the TypeGenerator emits on T in T's own assembly, so every site in every
+// assembly hands golib's view cache one delegate object and its compare is ReferenceEquals on both runtimes (the
+// design record's "#32 carry-over", R's FieldView root cause). The base is unchanged: a receiver keeps its box
+// (`Ꮡb.Ꮡoff`), a pointer local or un-aliased parameter is the box (`b.Ꮡoff`), and a value base takes the address it
+// took before (`Ꮡ(v).Ꮡf`). These keep the accessor's view, `.of(T.Ꮡf)`:
+//   - every selection P1 keeps today's spelling for (the list above), and a field whose address property would be
+//     named like a member of ж<T> (`Ꮡelem`, in fieldAccessCollisions.txt);
+//   - a selection the converter synthesizes rather than reads from Go's syntax (a promoted method's embed hop), which
+//     has no selection to read and is #31b's;
+//   - the field address an element address fuses with, `&p.arr[i]` as `p.at(T.Ꮡarr, i)` (fieldAddressFused).
+
+// fieldAddressStep renders the step from a ж<T> base to the address of the field selection sel, owner the struct type
+// T: the generated address property `.Ꮡf` where it serves the selection (fieldAddressProperty), recording owner in the
+// package's records, else the accessor's view `.of(fieldRef)`.
+func (v *Visitor) fieldAddressStep(owner types.Type, sel *ast.SelectorExpr, fieldRef string) string {
+	if name, ok := v.fieldAddressProperty(owner, sel); ok {
+		return "." + name
+	}
+
+	return ".of(" + fieldRef + ")"
+}
+
+// fieldAddressProperty names the address property that serves `&sel` on a ж<owner> base, ok false where the selection
+// keeps the accessor's view (see the P2 notes above).
+func (v *Visitor) fieldAddressProperty(owner types.Type, sel *ast.SelectorExpr) (string, bool) {
+	if sel == nil || sel == v.fieldAddressFused {
+		return "", false
+	}
+
+	if pointer, ok := types.Unalias(owner).(*types.Pointer); ok {
+		owner = pointer.Elem()
+	}
+
+	if !fieldPropertyServesType(owner) {
+		return "", false
+	}
+
+	selection := v.info.Selections[sel]
+
+	if selection == nil || selection.Kind() != types.FieldVal || len(selection.Index()) != 1 {
+		return "", false
+	}
+
+	name := removeLeadingSanitizationMarker(getCoreSanitizedIdentifier(sel.Sel.Name))
+
+	if fieldAccessCollisions[name] || fieldAccessCollisions[AddressPrefix+name] || shadowsPromotedMethod(owner, sel.Sel.Name) {
+		return "", false
+	}
+
+	v.recordFieldAccessType(owner)
+
+	return AddressPrefix + v.structFieldBoxName(sel.Sel, sel.X), true
+}
+
 // fieldPropertyServesType reports whether go2cs-gen gives pointee's fields their properties: a named struct with
 // generated accessors that is not header-shaped, and not a wrapper this package defines over another named type (see
 // the P1 notes above).
