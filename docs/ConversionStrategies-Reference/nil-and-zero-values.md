@@ -75,7 +75,7 @@ zero-length slice over real storage, is not nil, as in Go:
     fmt.Println("nil slice:", s == nil, nil == s, s != nil);
 …
     fmt.Println("make([]int, 0):", new slice<nint>(0) == nil, nil != new slice<nint>(0, 8));
-    fmt.Println("empty literal:", new nint[]{}.slice() == nil);
+    fmt.Println("empty literal:", slice<nint>([]) == nil);
 ```
 
 The lines print `true true false`, `false true` and `false`, as Go does. GolibTests `NilHeaderEqualityTests`
