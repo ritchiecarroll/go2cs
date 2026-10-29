@@ -276,6 +276,9 @@ func canon(it *item, s string) string {
 }
 
 func moves(it *item, rem, add string) bool {
+	if it.Respaces && rem != add {
+		return true
+	}
 	for _, old := range append([]*regexp.Regexp{it.Old}, it.Olds...) {
 		if old != nil && len(old.FindAllStringIndex(rem, -1)) > len(old.FindAllStringIndex(add, -1)) {
 			return true
