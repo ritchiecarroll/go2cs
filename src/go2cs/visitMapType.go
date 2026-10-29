@@ -65,6 +65,8 @@ func (v *Visitor) visitMapType(mapType *ast.MapType, identType types.Type, name 
 
 	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, localNameRecord)
 	goTypeAttr, goTypeComment := goTypeMarker(fmt.Sprintf("map[%s, %s]", rootGoTypeDescriptor(keyType), rootGoTypeDescriptor(valueType)))
-	v.writeStringLn(target, "%s%s%spartial struct %s%s%s%s;", localName, goTypeAttr, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
+	v.writeString(target, "%s%s%spartial struct %s%s%s%s;", localName, goTypeAttr, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
+	v.writePendingTypeComment(target, identType)
+	target.WriteString(v.newline)
 	finish()
 }

@@ -95,7 +95,9 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, na
 			goTypeComment, dirAttr = comment, ""
 		}
 	}
-	v.writeStringLn(target, "%s%s%s%spartial struct %s%s%s%s;", localName, goTypeAttr, dirAttr, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
+	v.writeString(target, "%s%s%s%spartial struct %s%s%s%s;", localName, goTypeAttr, dirAttr, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
+	v.writePendingTypeComment(target, identType)
+	target.WriteString(v.newline)
 	finish()
 }
 

@@ -325,7 +325,16 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 			// alias instead (CS0118 + CS0029). Record the import as a comment only; the package's
 			// exported aliases still load (loadImportedTypeAliases above) and a genuine type
 			// reference gets its canonical `using` from visitFile's collectTypePackages machinery.
-			v.packageImports.WriteString(fmt.Sprintf("// blank import: %s (side effects only; no using emitted — a `using _` alias hijacks C# discards)", importPath))
+			//
+			// A Go trailing comment on the spec (`_ "unsafe" // for linkname`) follows this note on the same line.
+			// The note is then a block comment, so Go's comment stays its own `//` comment, not text inside the note.
+			note := fmt.Sprintf("blank import: %s (side effects only; no using emitted — a `using _` alias hijacks C# discards)", importPath)
+
+			if importSpec.Comment != nil && v.options.includeComments {
+				v.packageImports.WriteString("/* " + note + " */")
+			} else {
+				v.packageImports.WriteString("// " + note)
+			}
 		} else {
 			if getSanitizedImport(alias) == canonicalAlias {
 				v.canonicalAliasImported.Add(v.currentImportPath)

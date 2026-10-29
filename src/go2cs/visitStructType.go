@@ -398,7 +398,9 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	}
 
 	goTypeAttr, goTypeComment := goTypeMarker(dynamic)
-	v.writeStringLn(target, "%s%s%s%spartial struct %s%s%s%s{", goTypeAttr, inlineAttrs, structLayoutAttr, access, structTypeName, typeParams, goTypeComment, constraints)
+	v.writeString(target, "%s%s%s%spartial struct %s%s%s%s{", goTypeAttr, inlineAttrs, structLayoutAttr, access, structTypeName, typeParams, goTypeComment, constraints)
+	v.writePendingTypeComment(target, declaredStructType)
+	target.WriteString(v.newline)
 	v.indentLevel++
 
 	var prevNameDiscardedCount int

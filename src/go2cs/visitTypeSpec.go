@@ -332,6 +332,18 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		defer func() { v.pendingTypeDoc = nil }()
 	}
 
+	// The trailing comment rides every kind's declaration line (class 1 of seat #43's comment-parity
+	// residue); the array emitter takes it as an argument, and an interface has no single-line form here.
+	switch typeSpec.Type.(type) {
+	case *ast.ArrayType, *ast.InterfaceType:
+	default:
+		if typeSpec.Comment != nil {
+			v.pendingTypeComment, v.pendingTypeCommentAnchor, v.pendingTypeCommentType = typeSpec.Comment, typeSpec.Type.End(), identType
+
+			defer func() { v.pendingTypeComment, v.pendingTypeCommentType = nil, nil }()
+		}
+	}
+
 	switch typeSpecType := typeSpec.Type.(type) {
 	case *ast.ArrayType:
 		v.visitArrayType(typeSpecType, identType, name, typeSpec.Comment)
@@ -389,7 +401,9 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			inlineAttrs := v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, localNameRecord+wrapperValueCloneAttr(rhsType))
 
 			goTypeAttr, goTypeComment := goTypeMarker(rootGoTypeDescriptor(csName))
-			v.writeStringLn(target, "%s%s%s%spartial struct %s%s;", localName, goTypeAttr, inlineAttrs, access, getSanitizedIdentifier(name), goTypeComment)
+			v.writeString(target, "%s%s%s%spartial struct %s%s;", localName, goTypeAttr, inlineAttrs, access, getSanitizedIdentifier(name), goTypeComment)
+			v.writePendingTypeComment(target, identType)
+			target.WriteString(v.newline)
 			finish()
 		} else {
 			v.outputBuilder.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
@@ -434,7 +448,9 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			}
 
 			goTypeAttr, goTypeComment := goTypeMarker(rootGoTypeDescriptor(pointerTypeName))
-			v.writeStringLn(target, "%s%s%s%spartial class %s%s;", localName, goTypeAttr, dimsAttr, access, getSanitizedIdentifier(name), goTypeComment)
+			v.writeString(target, "%s%s%s%spartial class %s%s;", localName, goTypeAttr, dimsAttr, access, getSanitizedIdentifier(name), goTypeComment)
+			v.writePendingTypeComment(target, identType)
+			target.WriteString(v.newline)
 			usesUnsafeCode = true
 			finish()
 		}
@@ -457,6 +473,20 @@ func (v *Visitor) writePendingTypeDoc(target *strings.Builder) {
 
 	v.pendingTypeDoc = nil
 	v.writeDocString(target, doc, v.pendingTypeDocPos)
+}
+
+// writePendingTypeComment writes the trailing comment visitTypeSpec left for declaredType, once, at the end of
+// that type's declaration line in target: after the code and any /*fact*/ block, before the line break the
+// caller writes. With no pending comment, or one left for another type, it writes nothing.
+func (v *Visitor) writePendingTypeComment(target *strings.Builder, declaredType types.Type) {
+	comment := v.pendingTypeComment
+
+	if comment == nil || v.pendingTypeCommentType != declaredType {
+		return
+	}
+
+	v.pendingTypeComment = nil
+	v.writeCommentString(target, comment, v.pendingTypeCommentAnchor)
 }
 
 // liftLocalTypeDecl prepares a forward-declaration type-kind (array/slice, map, channel) for

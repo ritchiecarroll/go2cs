@@ -43,6 +43,7 @@
     <None Include="$(MSBuildThisFileDirectory)autoSiblingOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)behavioralPackageInfoAttributes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bestEffortTranspile_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)blankImportTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)blockEventFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bodyBlankLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildConstraints_test.go" />
@@ -262,6 +263,7 @@
     <None Include="$(MSBuildThisFileDirectory)internalTestLocalInterfaceStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)intrinsicPlaceholders_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
+    <None Include="$(MSBuildThisFileDirectory)interfaceInheritedMemberDoc_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceMethodDiamond_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census_test.go" />
@@ -621,6 +623,7 @@
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typePredicates.go" />
     <None Include="$(MSBuildThisFileDirectory)typeSignatureParsing.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeSpecTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeSwitchCollapsedFuncCase_test.go" />
     <None Include="$(MSBuildThisFileDirectory)uint8SliceLiteralConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)uniformLineEndings_test.go" />
