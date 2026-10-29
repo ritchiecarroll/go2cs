@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("DeferValueReceiverSnapshot.go", "DeferValueReceiverSnapshot.cs", "AAoUgKKAooDowoKCoqSikqKkwoKipKKCkqKkwoKipIKCgoKCgoI=")]
+[assembly: go.GoPositionMap("DeferValueReceiverSnapshot.go", "DeferValueReceiverSnapshot.cs", "AAoUgKKAooDowoKCoqSikqKkwoKipKKCkqKkwoKipIKCgoKCgoI=", "", "", "", "32:27,33:31,44:27,56:21,68:27,80:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
