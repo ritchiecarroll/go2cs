@@ -325,15 +325,15 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 		variadicLit := v.variadicFuncLitCallee(deferStmt.Call) != nil
 
 		if recvArg != "" {
-			callExpr = fmt.Sprintf("%s%d => %s, %s", TempVarMarker, 0, callExpr, recvArg)
+			callExpr = fmt.Sprintf("%s%d => %s%s, %s", TempVarMarker, 0, v.thunkBodySentinel(), callExpr, recvArg)
 		} else if recvSnapshot {
-			callExpr = "() => " + callExpr
+			callExpr = "() => " + v.thunkBodySentinel() + callExpr
 		} else if boxGroup != "" {
 			callExpr = boxGroup
 		} else if !hasResults && !namedFuncType && !variadicLit && !variadicCallee && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()")
 		} else {
-			callExpr = "() => " + callExpr
+			callExpr = "() => " + v.thunkBodySentinel() + callExpr
 		}
 
 		result.WriteString(callExpr)
@@ -369,6 +369,7 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 			}
 
 			result.WriteString(" => ")
+			result.WriteString(v.thunkBodySentinel())
 		} else {
 			// A matching-arity pointer-receiver method group has the same CS1113 as the
 			// nullary form (see above) — bind the BOX overload here too.

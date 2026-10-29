@@ -8641,7 +8641,7 @@ Anything the proof cannot follow keeps the full stack, unmarked. That includes a
 func value, a range-over-func loop, and a goroutine that reaches either through the standard library, so a
 goroutine that does I/O, formats with `fmt` or serves a connection keeps today's reservation. A mistaken mark would
 crash where Go grows the stack, so the proof gives up rather than guess.
-<!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:337
+<!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:338
      `if bounded, _ := goroutineStackBounded(goStmt.Call, v.info); bounded {`. golib:
      src/core/golib/runtime/Goroutine.cs:94 `private const int DefaultBoundedStackReserve = 16 * 1024 * 1024;` and one
      worker pool per reservation, src/core/golib/runtime/GoroutineThreadPool.cs:53
@@ -12228,8 +12228,8 @@ statement, which converted code writes as golib's `goǃ(…)` ([Goroutines](#gor
 that starts a goroutine carries its own record, kept by hand, that maps each `goǃ(` line to the Go `go`
 statement it replaces and no other line. A traceback's `created by` line then names the Go position, as
 Go's does.
-<!-- the converter's record: src/go2cs/positionMapOperations.go:560 (`Go source positions are recorded here, one`)
-     and :565 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
+<!-- the converter's record: src/go2cs/positionMapOperations.go:590 (`Go source positions are recorded here, one`)
+     and :595 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
      A hand-kept record: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]`),
      for its goǃ( at :246 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
      (`func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`), which requires one record per
