@@ -101,18 +101,25 @@ exists to alias — `go/doc`'s `ast.Filter`, the same skip `writePackageInfoFile
 over a **non-empty named interface**, whose alias target is a `visitTypeSpec`-only rendering of the RHS (no
 instance exists in the corpus<!-- the 302-package corpus at the time -->). Both keep the unrenamed emission.
 
-A derived alias's `global using` is emitted into the consumer's `package_info.cs` **only when an emitted
-reference resolved through it**. A parsed alias set describes an assembly that provably declares every
-target; a derived set describes what go2cs *would* emit for that dependency's Go source — true of any real
-conversion, but not of a hand-written replacement that declares fewer types (an unused `global using` to a type it
-lacks is CS0426 in every consumer).<!-- history: the retired baseline core/time stub declared no
-ΔLocation/ΔMonth/ΔWeekday, and an unused global using to one was CS0426 in every behavioral test that
-imported time. --> Gating on use keeps the derived metadata's reach to the code that actually names
-the
-renamed member — where the rename is required for the reference to bind at all — at the cost of a
-single-package conversion omitting the *unused* alias declarations a full run emits. Every emitted
-**reference** is identical either way: a single-package `-stdlib archive/tar` reconvert matches the
-full-run corpus in all code, and the `time.Second` program compiles and runs.
+An imported alias's `global using` is emitted into the consumer's `package_info.cs` **only when an emitted
+reference resolved through it**, whether the alias was derived or parsed from the dependency's
+`package_info.cs`. A derived set describes what go2cs *would* emit for that dependency's Go source, which is
+true of any real conversion but not of a hand-written replacement that declares fewer types: an unused
+`global using` to a type it lacks is CS0426 in every consumer.<!-- history: the retired baseline core/time
+stub declared no ΔLocation/ΔMonth/ΔWeekday, and an unused global using to one was CS0426 in every
+behavioral test that imported time. --> A parsed set is the dependency's set **for the target GOOS**, so
+declaring it whole made the consumer's emission vary with the target even where its Go source does not.
+FieldAccessReinterpret's `package_info.cs`, captured on windows, declared `syscallꓸHandle` and
+`syscallꓸSockaddr`, which the program never names. Built for linux, it failed CS0426 (linux's `syscall`
+has no `ΔHandle`) and CS0305 (linux's `ΔSockaddr` is generic). A reference resolves through an alias only
+when the Go source names the type, and Go source that compiles on every target names the same types on
+each, so gating on use makes the emission the same for every target. Go refuses an unused import for the
+same reason: it declares nothing the package reads.<!-- seat #41, 2026-10-29: the parsed set was emitted
+whole until then. Measured against 03d19d9279: 167 behavioral package_info.cs (+0 -640) and 228 stdlib
+ones across the three targets (-1499), every changed line an unused global using; the stdlib built with 0
+errors on windows, linux and darwin. --> Every emitted **reference** is identical either way: a
+single-package `-stdlib archive/tar` reconvert matches the full-run corpus in all code, and the
+`time.Second` program compiles and runs.
 
 Two neighboring classes of run-composition dependence share the loader and the symptom but are *not*
 collision renames, so this derivation does not cover them: a dependency's re-exported Go type **aliases**
@@ -176,7 +183,7 @@ target; a methodless named **func** type, rendered inline as its base delegate w
 emitted as a using alias by its own package, which would need a second hop this derivation does not follow.
 Each declines by shape, from the dependency's own declarations, so the decision is stable across runs.
 
-Same use-gating as the collision renames: a derived alias's `global using` reaches the consumer's
+The same use-gating as every imported alias: a derived alias's `global using` reaches the consumer's
 `package_info.cs` only once an emitted reference has resolved through it. Evidence, taken with the derivation
 neutered and restored: a standalone `os.FileMode`/`os.FileInfo`/`os.PathError` + `fs.WalkDir` program
 converted with `go2cs <dir>` against an output root holding **no** converted stdlib fails with the CS0426
