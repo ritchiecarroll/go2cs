@@ -83,6 +83,11 @@ type wrapped point
 
 type pointPtr *point
 
+// Int32 is named like a System type (internal/runtime/atomic's shape): its record must say which Int32 it means.
+type Int32 struct{ v int32 }
+
+func (x *Int32) Add(d int32) *int32 { x.v += d; return &x.v }
+
 var sink []*int
 
 func keep(p *int) { sink = append(sink, p) }
@@ -156,8 +161,18 @@ func TestFieldAddressReadsAsAProperty(t *testing.T) {
 		t.Errorf("a receiver's field address does not read as its property on the receiver's box:\n%s", addr)
 	}
 
-	if got, want := strings.Join(fieldAccessRecordsOf(info), " "), "counter holder link outer pair<> point"; got != want {
+	if got, want := strings.Join(fieldAccessRecordsOf(info), " "), "counter Int32 holder link outer pair<> point"; got != want {
 		t.Errorf("package_info.cs records %q, want %q:\n%s", got, want, info)
+	}
+
+	// A record sits at file scope beside `using System;`: a struct named like a System type is rooted at its package
+	// class, or `typeof(Int32)` is ambiguous with System.Int32 (CS0104, internal/runtime/atomic's forward build).
+	if add := funcBody(t, cs, "ж<int32> Add("); !strings.Contains(add, "return Ꮡx.Ꮡv;") {
+		t.Errorf("Int32's field address does not read as its property:\n%s", add)
+	}
+
+	if strings.Contains(info, "typeof(Int32)") || !strings.Contains(info, ".main_package.Int32))]") {
+		t.Errorf("the Int32 record must be rooted at its package class, not bare:\n%s", info)
 	}
 
 	controls := funcBody(t, cs, "void controls(")
