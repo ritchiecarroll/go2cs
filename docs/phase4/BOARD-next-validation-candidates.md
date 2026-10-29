@@ -31067,5 +31067,49 @@ goldens need minting on a linux host at landing.
 - Behavioral, the 117 moved tests: total 466 = executed 466 = passed 466 (Transpile 117, Compile 117, Target 117,
   Output 115: RangePointerArrayConversion and StructWithPointer register no Output test).
 
+**Rebased onto batch 84 (r2), on COORD's call: `53918293a1`.** The seat's 8 commits were cherry-picked onto the
+batch-84 tip (#28 landed), its goldens dropped and re-minted last; the converter delta (visitAssignStmt.go,
+escapeAnalysisOperations.go) keeps stable patch-id `3cd58e7c08`.
+- Conflicts: projitems takes parityTrainHeapFold_test.go beside #28's parityTrainPatternSwitch_test.go; the docs
+  conflicts were each a sample-source or note citation, resolved hunk by hunk to master's number, and the re-cite
+  commit at the end moves every one to the re-minted goldens; the BOARD row re-appended at the tail. A first pass
+  took master's WHOLE file for the conflicted pages, which dropped the seat's own sample re-copies and folded
+  illustrations there; it was caught by docsamples at the re-minted goldens (46 samples no longer matching) and
+  redone at the hunk, and the seat's docs additions now read line for line as before the rebase.
+- Twelve citations re-cited at the r2 tip, each cited text unchanged: six sample sources (docsamples `-recite`) and
+  six provenance notes (PointerSelectorDeref 24,34 -> 24,32, ArrayRangeSnapshot 151 -> 149, AnonymousStructs 41 ->
+  40, ReservedNameShadows 61 -> 60, LiftedLocalTypes 39 -> 38, pointers.md 2413-2422 -> 2411-2420).
+
+**The r2 footprint, scored against the prediction posted before arm B** (`seat29.lane.tsv`, block r2): EQUAL to the
+`2c737cfdfc` record on all three targets, with REFUSED 0 (MET on every quantity).
+- Two seeded roots at `53918293a1`, one binary per arm, `-stdlib -comments` over windows, linux and darwin; both arms
+  rc 0, 0 degraded/failed/misrouted, 4,560 `.cs` per target.
+- Files 292 / 283 / 287 (`.cs` 197 / 190 / 194, package_info 95 / 93 / 93), +718 / -1,215, +676 / -1,142,
+  +709 / -1,200; folds 497 / 466 / 491 (zero boxes 959 -> 462, 902 -> 436, 931 -> 440); pcensus H2 525 / 487 / 516,
+  MAP 193 / 189 / 193, REFUSED 0; the same file set and the same added and deleted count in every file. Multi-LHS
+  folded 0, an added `heap(` without `<T>` 0 (inferred-type boxes 94 / 96 / 102 in both arms), map lines removed 0.
+- The diffs' text differs from the record's in 185 / 181 / 181 line pairs: GoPositionMap re-encodes 174 / 168 / 170
+  (the landed seats moved the positions they encode), R5's un-aliased names inside a folded value 8 / 10 / 8, and one
+  fold's 3 lines re-indented by #28's nested pattern switch (internal/trace summary.cs). No folded value holds a rune
+  literal, so #23's bare rune literals meet no fold in production.
+- Compile arm, `go2cs-stdlib.slnx` over B's emission per GoTargetOS: windows 0 errors (CS9113 only), linux 0 errors
+  (CS9113 and the standing CS0219 `is64bit` in syscall/linux/exec_linux.cs, the same const in both arms), darwin 0
+  errors (CS9113 only); 362 of 362 `core` projects and the generator compiled in each run.
+
+**r2 behavioral and goldens.** CNR at the r2 tip moved the same 117 tests as before the rebase. `UpdateTestTargets
+--only` re-minted them (353 files: 117 `.cs.target`, their 117 `.cs`, ItabLateRegistration's sub-package
+`latelib/latelib.cs` and 118 package_info.cs), each golden byte-equal to its emission; four windows-exclusive projects
+(RawConnSyncSocketIO, SystemCertVerify, WsaProtocolInfo, WsaSendtoRoundTrip) among them were minted here, so none is
+left for the i7. pcensus `-items H2` on the goldens: H2 235, REFUSED 0; on
+the emissions H2 237, MAP 118, REFUSED 0, as before the rebase. SendtoSeam and WritevIovecSeam, linux-native, move
+on linux: each holds one single-LHS fold site (SendtoSeam's `receiverAddr := [4]byte{…}`, WritevIovecSeam's
+`bufs := net.Buffers{}`), which this host cannot regenerate; P2 mints them on top.
+
+**r2 gates, at the r2 tip on `53918293a1`, one battery on the box.** `go test -timeout 60m ./...` 10 of 10 packages
+ok (go2cs 927 s, pcensus and repoguard re-run); GenTests 349/349; GolibTests unfiltered 2,257 passed, 0 failed, 36
+skipped; golib Release `--no-incremental` 0 warnings, 0 errors, csc ran; `go2cs.slnx` 0 errors (158 standing
+warnings); `go2cs-stdlib.slnx` 0/0; behavioral on the 117 moved tests: total 466 = executed = passed (A1, B2, C3 117
+each, D4 115: RangePointerArrayConversion and StructWithPointer register no Output test); repoguard green.
+
 — H (2026-10-28)
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

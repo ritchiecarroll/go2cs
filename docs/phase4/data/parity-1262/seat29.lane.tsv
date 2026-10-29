@@ -27,3 +27,25 @@ multi-LHS folded (falsifier)	0	0: the 9 adjacent pairs left split on windows are
 files (.cs)	<= 194 / 187 / 191	197 / 190 / 194	MISSED by 3 (files whose only folds assign through the box)
 GoPositionMap re-encodes	<= 189 / 185 / 189, map lines removed 0	193 / 189 / 193, map lines removed 0	count MISSED by the same files; removed-rather-than-re-encoded MET
 pcensus -items H2 REFUSED	0	0 / 0 / 0 at the fixed instrument	MET at the fixed instrument; the item as first written refused 79 / 70 / 81, every one a fold it could not read
+#
+r2 (rebased onto batch 84 on COORD's call, re-measured)	value
+r2_base	53918293a10313207f9501d22e16ff25efdab4fb
+r2_arm_A	53918293a1 (the base converter); src/go2cs tree 6a852bef3c4b779d80f61e960a5646fd077c9bc7; sha256 3fad96473263893aaea08703f5c44a79a78ea1cb7d75d46e1af9971fa37c6d82
+r2_arm_B	the r2 seat converter; src/go2cs tree dae5341518892662df134804dcb99a43d1885a6b (later r2 commits touch docs and goldens only); sha256 a5e401eb9334203162c3ae843af661934f66c76615a3262fc890bf334211b968
+r2_converter_patch_id	3cd58e7c08 (visitAssignStmt.go, escapeAnalysisOperations.go), the same at 2c737cfdfc and 53918293a1
+r2_write_assertions	both arms rc 0; degraded 0; failed 0 on each target; misrouted 0; stage .cs 4560 per target per arm
+r2_classifier	pcensus classify -items H2 at the r2 instrument (#28's file pool and fixpoint key below H2's Join)
+r2_compile_arm	go2cs-stdlib.slnx over B's emission per GoTargetOS (-c Debug -m --no-incremental -p:GoTargetOS=<goos> -p:UseSharedCompilation=false): windows 0 errors (CS9113 only), linux 0 errors (CS9113 and the standing CS0219 `is64bit` in syscall/linux/exec_linux.cs, the same const in both arms), darwin 0 errors (CS9113 only); 362 of 362 `core` projects and the generator compiled in each run.
+#
+r2 target	files	cs	package_info	auto	added	deleted	H2	MAP	refused	patch_sha256_crlf_stripped_16
+windows	292	197	95	4	718	1215	525	193	0	160605854d7bcf63
+linux	283	190	93	1	676	1142	487	189	0	06b0225bb45e46f6
+darwin	287	194	93	1	709	1200	516	193	0	22e20558c690af71
+#
+r2 quantity	predicted (posted before arm B)	measured	score
+files, cs, package_info, added, deleted, MAP per target	equal to the 2c737cfdfc rows above	equal on every target; the same file set and the same added/deleted count in every file	MET
+folds (zero boxes gone)	497 / 466 / 491	497 / 466 / 491 (zero boxes 959 -> 462, 902 -> 436, 931 -> 440); pcensus H2 525 / 487 / 516, as recorded	MET
+pcensus -items H2 REFUSED	0 per target	0 / 0 / 0	MET
+multi-LHS folded; heap( without <T> on an added line	0; 0	0 (H2 and per-file counts unchanged); 0 (inferred-T 94 / 96 / 102 in both arms)	MET
+map lines removed rather than re-encoded	0	0	MET
+text of the diff lines	(not predicted)	185 / 181 / 181 line pairs differ from the 2c737cfdfc diff: GoPositionMap re-encodes 174 / 168 / 170, R5 names 8 / 10 / 8, one fold re-indented by S1's nested pattern switch 3 / 3 / 3 (internal/trace summary.cs); no folded value holds a rune literal (#23)	attributed
