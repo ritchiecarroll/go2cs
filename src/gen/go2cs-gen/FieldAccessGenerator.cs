@@ -231,7 +231,7 @@ public class FieldAccessGenerator : ISourceGenerator
                 continue;
             }
 
-            string fieldType = field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string fieldType = TypeName(field.Type, type);
             string slot = $"{ReceiverName}.field({typeName}.{accessor})";
 
             // A readonly field (a zero-size layout field) has no writable slot of its own: its accessor answers the
@@ -263,7 +263,7 @@ public class FieldAccessGenerator : ISourceGenerator
                 continue;
             }
 
-            string propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string propertyType = TypeName(property.Type, type);
 
             properties.Add($"public ref {propertyType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {Specialized(typeName, accessor, name)}; }}");
         }
@@ -385,7 +385,7 @@ public class FieldAccessGenerator : ISourceGenerator
             else if (parameter.HasNotNullConstraint)
                 constraints.Add("notnull");
 
-            constraints.AddRange(parameter.ConstraintTypes.Select(constraint => constraint.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            constraints.AddRange(parameter.ConstraintTypes.Select(constraint => TypeName(constraint, type)));
 
             if (parameter.HasConstructorConstraint && !parameter.HasValueTypeConstraint)
                 constraints.Add("new()");
@@ -395,6 +395,60 @@ public class FieldAccessGenerator : ISourceGenerator
         }
 
         return clauses.ToString();
+    }
+
+    /// <summary>
+    /// A type as the generated extension class, outside the package class, must spell it.
+    /// </summary>
+    /// <remarks>
+    /// A resolved type is fully qualified. An UNRESOLVED one, at any depth (a type argument, an array element), is a
+    /// type another generator emits into the package class in this same run, which this generator cannot see: the
+    /// ImplementGenerator's constraint proxy (SelfRefGenerics' `gnodeжGraphNode`). The struct's own declaration names
+    /// it bare from inside the package class, so it is rooted at the package class that holds <paramref name="owner"/>.
+    /// </remarks>
+    private static string TypeName(ITypeSymbol type, INamedTypeSymbol owner)
+    {
+        if (!ContainsErrorType(type))
+            return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+        switch (type)
+        {
+            case IArrayTypeSymbol array:
+                return $"{TypeName(array.ElementType, owner)}[{new string(',', array.Rank - 1)}]";
+            case INamedTypeSymbol { TypeKind: TypeKind.Error } error:
+                return $"{PackageClassName(owner)}.{EscapeCsKeyword(error.Name)}{TypeArguments(error, owner)}";
+            case INamedTypeSymbol named:
+                string container = named.ContainingType is { } containingType
+                    ? TypeName(containingType, owner)
+                    : named.ContainingNamespace is { IsGlobalNamespace: false } ns
+                        ? $"global::{ns.ToDisplayString()}"
+                        : "global::";
+                return $"{(container == "global::" ? container : container + ".")}{EscapeCsKeyword(named.Name)}{TypeArguments(named, owner)}";
+            default:
+                return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        }
+    }
+
+    private static string TypeArguments(INamedTypeSymbol type, INamedTypeSymbol owner) =>
+        type.TypeArguments.Length == 0 ? "" : $"<{string.Join(", ", type.TypeArguments.Select(argument => TypeName(argument, owner)))}>";
+
+    private static bool ContainsErrorType(ITypeSymbol type) => type switch
+    {
+        IArrayTypeSymbol array => ContainsErrorType(array.ElementType),
+        INamedTypeSymbol { TypeKind: TypeKind.Error } => true,
+        INamedTypeSymbol named => named.TypeArguments.Any(ContainsErrorType),
+        _ => false
+    };
+
+    // The outermost type that holds owner, its package class (the converter nests every package type in it).
+    private static string PackageClassName(INamedTypeSymbol owner)
+    {
+        INamedTypeSymbol packageClass = owner;
+
+        while (packageClass.ContainingType is { } containingType)
+            packageClass = containingType;
+
+        return packageClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
     }
 
     private static HashSet<string> LoadCollisionNames()
