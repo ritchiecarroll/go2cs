@@ -306,6 +306,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\items.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\pcensus_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\pcensus\plainslug.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\testdata\counts-5931bad29b.tsv" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp_test.go" />

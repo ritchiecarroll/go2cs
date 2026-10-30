@@ -118,7 +118,8 @@ var plants = []plant{
 	one("GD good a continuation line loses its eager constant", prodFile, `        }), (nint)80, ref ᒐ);`, `        }), ref ᒐ);`, "GD"),
 	one("GD bad: a continuation line loses a variable", prodFile, `        }), x, ref ᒐ);`, `        }), ref ᒐ);`, "UNCLASSIFIED"),
 	one("GD bad: the callee changed", prodFile, `    goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);`, `    goǃ(() => fmt.Print("First"));`, "UNCLASSIFIED"),
-	one("GD bad: not a go/defer statement", prodFile, `    x = firstˢ;`, `    x = "First";`, "UNCLASSIFIED"),
+	// Since #51 a hoisted field becoming its literal outside a go/defer statement is PL's (below); GD still reads none.
+	one("GD bad: not a go/defer statement", prodFile, `    x = firstˢ;`, `    x = first;`, "UNCLASSIFIED"),
 	// F1, DIR, FOR, SHIFT (#27)
 	one("F1 good open", prodFile, `((Action)(() => {`, `func(() => {`, "F1"),
 	one("F1 good close", prodFile, `}))();`, `})();`, "F1"),
@@ -250,6 +251,33 @@ var plants = []plant{
 	one("BA bad: a module marker is out of scope", prodFile, `[module: go.GoManualConversion]`, `[module: GoManualConversion]`, "UNCLASSIFIED"),
 	one("BA bad: another golib attribute", infoFile, `[assembly: go.GoImplement<p_package.T, io_package.Reader>]`, `[assembly: GoImplement<p_package.T, io_package.Reader>]`, "UNCLASSIFIED"),
 	one("BA bad: an alias target keeps go.", infoFile, `using fips140 = go.crypto.@internal.fips140_package;`, `using fips140 = crypto.@internal.fips140_package;`, "UNCLASSIFIED"),
+	// PL (#51): every spelling of one literal reads as its slug, so a pair explains only when the literal that moved is
+	// the one the field stood for.
+	one("PL good: a hoisted field goes bare", prodFile, `    take(helloWorldˢ);`, `    take("hello world");`, "PL"),
+	one("PL good: a collision ordinal", prodFile, `    take(helloWorldˢ2, x);`, `    take("Hello, world!", x);`, "PL"),
+	one("PL good: the u8 span goes bare", prodFile, `    l.logf("value %d"u8, i);`, `    l.logf("value %d", i);`, "PL"),
+	one("PL good: the boxed form takes the cached cast", prodFile, `    print((@string)"runtime: g "u8, n);`, `    print((@string)"runtime: g ", n);`, "PL"),
+	one("PL good: a spread takes the cached cast", prodFile, `    b = append(b, ((@string)@"\x"u8).ꓸꓸꓸ);`, `    b = append(b, ((@string)@"\x").ꓸꓸꓸ);`, "PL"),
+	one("PL good: a composite's any element takes a field", prodFile, `    var xs = slice<any>([(@string)"boxed element"u8, i]);`, `    var xs = slice<any>([boxedElementˢ, i]);`, "PL"),
+	one("PL good: a kept field becomes pre-boxed", prodFile, `private static readonly @string funcValueˢ = "func value"u8;`, `private static readonly object funcValueˢ = (@string)"func value"u8;`, "PL"),
+	one("PL good: a char literal holding a quote", prodFile, `    ['"'] = "&#34;"u8,`, `    ['"'] = "&#34;",`, "PL"),
+	one("PL bad: another literal", prodFile, `    take(helloWorldˢ);`, `    take("hello there");`, "UNCLASSIFIED"),
+	one("PL bad: the call changed too", prodFile, `    take(helloWorldˢ);`, `    give("hello world");`, "UNCLASSIFIED"),
+	one("PL bad: the other direction", prodFile, `    take("hello world");`, `    take(helloWorldˢ);`, "UNCLASSIFIED"),
+	one("PL bad: a go/defer statement is GD's", prodFile, `    defer(f, "x"u8, ref ᒐ);`, `    defer(f, "x", ref ᒐ);`, "UNCLASSIFIED"),
+	// PC (#51): a function-local string const's local.
+	one("PC good: the const's local takes its literal", prodFile, `    @string fnAtoi = fnAtoiᶜ;`, `    @string fnAtoi = "Atoi";`, "PC"),
+	one("PC good: a collision ordinal", prodFile, `    @string context = contextᶜ2;`, `    @string context = "ctx";`, "PC"),
+	one("PC bad: another const's field", prodFile, `    @string fnAtoi = fnParseᶜ;`, `    @string fnAtoi = "Atoi";`, "UNCLASSIFIED"),
+	one("PC bad: another local", prodFile, `    @string fnAtoi = fnAtoiᶜ;`, `    @string fnParse = "Atoi";`, "UNCLASSIFIED"),
+	// PR (#51): a relocated initializer is a field initializer again.
+	{"PR good: declaration and init method fold", prodFile, []string{`internal static ж<Profile> heapProfile;`, `internal static void initᴛheapProfile() { heapProfile = Ꮡ(new Profile(`}, []string{`internal static ж<Profile> heapProfile = Ꮡ(new Profile(`}, "PR"},
+	one("PR good: the init method's close", prodFile, `)); }`, `));`, "PR"),
+	{"PR good: one line", prodFile, []string{`internal static @string CPUName;`, `internal static void initᴛCPUName() { CPUName = cpuName(); }`}, []string{`internal static @string CPUName = cpuName();`}, "PR"},
+	{"PR bad: another var's init method", prodFile, []string{`internal static ж<Profile> heapProfile;`, `internal static void initᴛblockProfile() { blockProfile = Ꮡ(new Profile(`}, []string{`internal static ж<Profile> heapProfile = Ꮡ(new Profile(`}, "UNCLASSIFIED"},
+	one("PR bad: a close that loses code", prodFile, `    x.Close(y)); }`, `    x.Close());`, "UNCLASSIFIED"),
+	// GD (#33) reads a named constant moved into the thunk's call (#51's standard library population).
+	one("GD good: a named constant", prodFile, `        defer(userRegion, id, regionEndCode, regionType, ref ᒐ);`, `        defer((ᴛ1, ᴛ2) => userRegion(ᴛ1, regionEndCode, ᴛ2), id, regionType, ref ᒐ);`, "GD"),
 	// A change no item makes, and a removal with nothing beside it.
 	one("bad: an unrelated rewrite", prodFile, `return x + 1;`, `return x + 2;`, "UNCLASSIFIED"),
 	{"bad: a lone removal", prodFile, []string{`    x = 1;`}, nil, "UNPAIRED"},
@@ -427,15 +455,21 @@ func TestBlockPlants(t *testing.T) {
 
 	// GD's hoisted fields are deleted where they stood, often a hunk of their own (Standalone); a field that is
 	// not a hoisted literal is refused, and a hoisted field without the anchor in its hunk is never at issue.
+	// A deletion hunk alone cannot tell GD's fields from PL's (#51, listed first, so the whole-file rewrite is PL's
+	// wherever both are allowed): GD's own reading is taken with GD alone, as #33's footprint was.
 	fields := []string{
 		`// Hoisted @string literals (single allocation; Go keeps these in RODATA)`,
 		`private static readonly object firstˢ = (@string)"First"u8;`,
 		`private static readonly @string fifthˢ = "Fifth"u8;`,
 		``,
 	}
-	tl := c.classifyDiff(diffOf(prodFile, fields, nil))
+	gd, _ := newClassifier("GD", false)
+	tl := gd.classifyDiff(diffOf(prodFile, fields, nil))
 	if len(tl.refused) != 0 || tl.labels["GD"] == 0 {
 		t.Errorf("GD standalone deletion: wanted every line to read GD, read %v, refused %v", tl.labels, tl.refused)
+	}
+	if tl = c.classifyDiff(diffOf(prodFile, fields, nil)); len(tl.refused) != 0 || tl.labels["PL"] == 0 || tl.labels["GD"] != 0 {
+		t.Errorf("standalone deletion with every item: wanted PL's, read %v, refused %v", tl.labels, tl.refused)
 	}
 	tl = c.classifyDiff(diffOf(prodFile, append(fields[:2:2], `private static readonly nint countˢ = 5;`), nil))
 	if len(tl.refused) != 1 || !strings.Contains(tl.refused[0].rem, "countˢ") {
@@ -739,6 +773,7 @@ func TestCountPlants(t *testing.T) {
 		"P1/value-select":         "n = p.Value.next;\r\nn = p.Value;\r\n",
 		"P2/of-field":             "o = Ꮡb.of(Buffer.Ꮡoff);\r\no = Ꮡb.of(Buffer.off);\r\n",
 		"GD/hoisted-godefer-arg":  "goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);\r\ngoǃ(() => fmt.Println(\"First\"));\r\n",
+		"PL/hoisted-field":        "private static readonly @string helloˢ = \"hello\"u8;\r\ntake(\"hello\");\r\n",
 		"E1/else-newline-if":      "} else\r\n    if (x) {}\r\n} else if (x) {}\r\n",
 		"E1/paren-brace-eol":      "if (x){\r\nif (x) {\r\n",
 		"TRa/bounded":             "}, GoStack.Bounded);\r\n});\r\n",
@@ -931,6 +966,58 @@ func TestNonconvergentKeyIsRefused(t *testing.T) {
 	}
 	if tl.labels["X"] != 0 || nonconvergent != 2 {
 		t.Errorf("a key past the canon cap: wanted no X and 2 NONCONVERGENT refusals, read %v, refused %v", tl.labels, tl.refused)
+	}
+}
+
+// #51's blocks: PS's stamp leaves package_info.cs only; PR's `initᴛX();` call leaves package_init.cs only, and its
+// StaticBox fold keeps the ref property standing between the declaration and the init method; PL deletes the
+// hoisted fields where they stood.
+func TestPlainSeatBlockPlants(t *testing.T) {
+	c, _ := newClassifier("", false)
+	const initFile = "src/core/p/package_init.cs"
+	stamp := []string{
+		"// This package's string literals are hoisted to `static readonly` fields (the standard",
+		"// library's form, or -hoist-literals), so no converted file passes a bare literal for",
+		"// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip",
+		"// the assembly.",
+		"[assembly: GoHoistedLiterals]",
+		"",
+	}
+	staticBox := []string{
+		`public static readonly ж<slice<byte>> ᏑLocalhostKey = new StaticBox<slice<byte>>(default(slice<byte>));`,
+		`public static ref slice<byte> LocalhostKey => ref ((StaticBox<slice<byte>>)ᏑLocalhostKey).ValueSlot;`,
+		`internal static void initᴛLocalhostKey() { LocalhostKey = slice<byte>(testingKey(key));`,
+	}
+	staticBoxNew := []string{
+		`public static readonly ж<slice<byte>> ᏑLocalhostKey = new StaticBox<slice<byte>>(slice<byte>(testingKey(key));`,
+		`public static ref slice<byte> LocalhostKey => ref ((StaticBox<slice<byte>>)ᏑLocalhostKey).ValueSlot;`,
+	}
+	fields := []string{
+		`// Hoisted @string literals (single allocation; Go keeps these in RODATA)`,
+		`private static readonly @string testingKeyˢ = "TESTING KEY"u8;`,
+		`internal static readonly @string fnAtoiᶜ = "Atoi"u8;`,
+		``,
+	}
+	for _, p := range []struct {
+		name, diff, label, refused string
+	}{
+		{"PS good: the stamp and its note", diffOf(infoFile, stamp, nil), "PS", ""},
+		{"PS bad: a stamp outside package_info.cs", diffOf(prodFile, stamp[4:5], nil), "", "GoHoistedLiterals"},
+		{"PR good: the static constructor's call", diffOf(initFile, []string{`        initᴛheapProfile();`}, nil), "PR", ""},
+		{"PR bad: an init call outside package_init.cs", diffOf(prodFile, []string{`        initᴛheapProfile();`}, nil), "", "initᴛheapProfile"},
+		{"PR good: a StaticBox keeps its ref property between", diffOf(prodFile, staticBox, staticBoxNew), "PR", ""},
+		{"PL good: hoisted fields and a const field deleted", diffOf(prodFile, fields, nil), "PL", ""},
+	} {
+		tl := c.classifyDiff(p.diff)
+		if p.refused == "" {
+			if len(tl.refused) != 0 || tl.labels[p.label] == 0 {
+				t.Errorf("%s: wanted %s, read %v, refused %v", p.name, p.label, tl.labels, tl.refused)
+			}
+			continue
+		}
+		if len(tl.refused) == 0 || !strings.Contains(tl.refused[0].rem+tl.refused[0].add, p.refused) {
+			t.Errorf("%s: wanted a refusal naming %q, read %v, refused %v", p.name, p.refused, tl.labels, tl.refused)
+		}
 	}
 }
 
