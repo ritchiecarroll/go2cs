@@ -82,7 +82,8 @@ var packagePlainLits map[*ast.BasicLit]bool
 // append's ISlice overload with T = System.String); a named string type's composite element, map key or
 // field value; a value slot whose literal has a degenerate slug or sits where no field may be claimed; and,
 // boxed per evaluation (32 B where `(@string)"…"u8` cost 72), an `any` slot that would take a pre-boxed
-// field but whose slug is degenerate. An sstring twin's position keeps `"…"u8`, a zero-copy view, and a
+// field but whose slug is degenerate. A literal spread into append, `append(b, "x"...)`, takes it too, its
+// `.ꓸꓸꓸ` projecting the cached @string's bytes. An sstring twin's position keeps `"…"u8`, a zero-copy view, and a
 // literal with no bare C# form keeps its own. convExpr's BasicLit arm consults it through isCastStringLiteral.
 var packageCastLits map[*ast.BasicLit]bool
 
@@ -684,6 +685,16 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 			return
 		}
 
+		// Plain mode, a literal spread into append, `append(b, "x"...)`: the spread projects an @string's
+		// bytes, and the cached cast makes that @string once per literal (convExprList wraps it).
+		if c.isAppendSpreadArg(lit, stack) {
+			if value != "" && hasBareCSharpForm(lit) {
+				packageCastLits[lit] = true
+			}
+
+			return
+		}
+
 		// Plain mode also reaches a composite ELEMENT (or key, or field value) and an append argument,
 		// which the hoist excludes (Tier B, and a builtin): the composite's own type, or the appended
 		// slice's element type, fixes the slot's C# type. An exact `string` slot of a composite takes the
@@ -1040,6 +1051,25 @@ func (c *hoistCollector) appendElemSlot(lit *ast.BasicLit, stack []ast.Node) typ
 	}
 
 	return nil
+}
+
+// isAppendSpreadArg reports whether lit is the spread argument of append, `append(b, "x"...)`.
+func (c *hoistCollector) isAppendSpreadArg(lit *ast.BasicLit, stack []ast.Node) bool {
+	call, ok := stack[len(stack)-1].(*ast.CallExpr)
+
+	if !ok || !call.Ellipsis.IsValid() || len(call.Args) != 2 || call.Args[1] != lit {
+		return false
+	}
+
+	ident, ok := ast.Unparen(call.Fun).(*ast.Ident)
+
+	if !ok {
+		return false
+	}
+
+	builtin, isBuiltin := c.info.Uses[ident].(*types.Builtin)
+
+	return isBuiltin && builtin.Name() == "append"
 }
 
 // classifyTarget maps a target slot's type to the hoist kind. Only two slots qualify: a Go

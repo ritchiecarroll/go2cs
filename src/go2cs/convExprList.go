@@ -554,7 +554,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			if lit, ok := spreadExpr.(*ast.BasicLit); ok && lit.Kind == token.STRING {
 				truncated := arg.String()
 				arg.Reset()
-				arg.WriteString(fmt.Sprintf("((@string)%s)", truncated))
+
+				// A plain-mode literal already renders the cached cast, `(@string)"…"` (seat #51), which
+				// makes the @string once per literal where `(@string)"…"u8` copied it per evaluation.
+				if isCastStringLiteral(lit) {
+					arg.WriteString(fmt.Sprintf("(%s)", truncated))
+				} else {
+					arg.WriteString(fmt.Sprintf("((@string)%s)", truncated))
+				}
 			}
 
 			// A string CONCAT spread — `append(buf, "signal.NotifyContext("+name...)`
