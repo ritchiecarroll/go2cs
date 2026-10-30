@@ -83,6 +83,7 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 * Go modules on NuGet: [nugetgo.net](https://nugetgo.net)
 * Packages passing Go's own tests: [Validated Test Packages](ValidatedTestPackages.md)
 * Before you start: [Limitations](Limitations.md) and [Known issues](KnownIssues.md)
+* Make it run well: [Tuning converted code](Tuning.md)
 * Where it stands: [Status](#status) and the [Roadmap](Roadmap.md)
 * Build it yourself: [Building go2cs from source](BuildingGo2cs.md)
 

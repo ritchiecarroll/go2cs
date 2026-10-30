@@ -40,7 +40,8 @@ file, though the next conversion rewrites that file:
 
 Converted executable projects carry this line, commented out. It costs about 90 ms (16%) more startup time,
 and steady-state loop speed stays within measurement noise. It becomes the default if a converted Go program
-ever reproduces the fault.
+ever reproduces the fault. [Tuning converted code](Tuning.md#net-runtime-settings) lists the runtime settings and
+what each trades.
 <!-- Source of the 90 ms (16%) figure, found 2026-10-26: the fleet mailbox post C2 -> COORD of 2026-09-30T10:57Z
      (commit 80f928db5a on origin/claude/mailbox, file docs/phase4/inbox/COORD/20260930T105729Z-C2.md, not on master).
      Measured on a 4-core Linux machine on Canonical's .NET 10.0.12, PerfStartup and PerfSieve built Release from master

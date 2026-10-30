@@ -24,7 +24,8 @@ memory than the Go it came from. The [performance comparison](Performance.md) ha
 says which machine and platform produced them. Some optimization is already in, such as
 [stack strings](ConversionStrategies.md#strings-string-and-sstring) and
 [stack slices](ConversionStrategies.md#slices-and-arrays), and the [Roadmap](Roadmap.md#performance)
-lists the work planned to narrow the gap.
+lists the work planned to narrow the gap. [Tuning converted code](Tuning.md) says which deployment and runtime settings
+to choose.
 
 ## Does converted code really behave like Go?
 
@@ -125,6 +126,7 @@ slower than the JIT on most measurements.
 [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
 has the measured cost and the platform it was measured on, and the
 [Roadmap](Roadmap.md#native-aot-and-trimming) has the work under way to reduce it.
+[Tuning converted code](Tuning.md#choosing-a-deployment) compares Native AOT with the JIT and ReadyToRun.
 
 ## What does converted code depend on at run time?
 

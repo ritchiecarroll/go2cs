@@ -22,6 +22,10 @@ path run at parity or faster in both C# variants (maps dramatically so under Nat
 the rest ranges from well under 2× on tight compute to the structural-interface assert, the honest
 outlier at the other end.
 
+To choose a deployment and runtime settings for your own program, see
+[Tuning converted code](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md): it explains which knobs
+exist, what each trades, and why the suite's diagnostic runs with tiering off are not advice.
+
 ## The benchmarks
 
 | Benchmark | What it exercises |
