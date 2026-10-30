@@ -699,4 +699,173 @@ public class FieldAccessGeneratorTests
             return false;
         }
     }
+
+    // Seat #45 (class B): a FOREIGN struct whose field is typed with a THIRD assembly's struct, which this compilation
+    // does not reference. encoding/json's tests record httptest.Server, whose TLS field is a *tls.Config, and the json
+    // test assembly references net/http/httptest but not crypto/tls: the field's type is unresolved there.
+    private const string Tls = """
+        namespace go;
+
+        public static partial class tls_package
+        {
+            public partial struct Config { public int MinVersion; }
+        }
+        """;
+
+    private const string Httptest = """
+        namespace go;
+
+        public static partial class httptest_package
+        {
+            public partial struct Server
+            {
+                public int Port;
+                public ж<tls_package.Config> TLS;
+                public array<tls_package.Config> Configs;
+
+                public static ref int ᏑPort(ref Server instance) => ref instance.Port;
+                public static ref ж<tls_package.Config> ᏑTLS(ref Server instance) => ref instance.TLS;
+                public static ref array<tls_package.Config> ᏑConfigs(ref Server instance) => ref instance.Configs;
+            }
+        }
+        """;
+
+    private const string HttptestUser = """
+        namespace go;
+
+        [GoFieldAccess(typeof(httptest_package.Server))]
+        partial class json_package { }
+        """;
+
+    // The user compiled against golib's stubs and httptest, and against tls only when referenceTls is set.
+    private static string GenerateOverThreeAssemblies(bool referenceTls)
+    {
+        MetadataReference corlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+
+        MetadataReference Emit(string name, string source, params MetadataReference[] references)
+        {
+            CSharpCompilation compilation = CSharpCompilation.Create(name, [CSharpSyntaxTree.ParseText(source)], [corlib, .. references],
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            using MemoryStream image = new();
+            Microsoft.CodeAnalysis.Emit.EmitResult emitted = compilation.Emit(image);
+            Assert.IsTrue(emitted.Success, $"the {name} fixture compiles: {string.Join("\n", emitted.Diagnostics)}");
+
+            return MetadataReference.CreateFromImage(image.ToArray());
+        }
+
+        MetadataReference stubs = Emit("golib", Stubs);
+        MetadataReference tls = Emit("tls", Tls, stubs);
+        MetadataReference httptest = Emit("httptest", Httptest, stubs, tls);
+
+        CSharpCompilation user = CSharpCompilation.Create("json",
+            [CSharpSyntaxTree.ParseText(HttptestUser)],
+            referenceTls ? [corlib, stubs, httptest, tls] : [corlib, stubs, httptest],
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        GeneratorDriverRunResult result = CSharpGeneratorDriver.Create(new FieldAccessGenerator()).RunGenerators(user).GetRunResult();
+
+        Assert.AreEqual(0, result.Diagnostics.Length, string.Join("\n", result.Diagnostics));
+
+        return result.GeneratedTrees.SingleOrDefault()?.ToString() ?? "";
+    }
+
+    [TestMethod]
+    public void AForeignFieldTypedFromAnUnreferencedAssemblyGetsNoProperty()
+    {
+        const string Server = "global::go.httptest_package.Server";
+        string generated = GenerateOverThreeAssemblies(referenceTls: false);
+
+        StringAssert.Contains(generated, Ref("int", "Port", Server));
+
+        // The field's type cannot be named here at all: rooted at the struct's own package class it read
+        // `global::go.httptest_package.Config` (CS0426), and spelled right it would be CS0012. The field is unreachable
+        // as typed, so it gets no property.
+        Assert.IsFalse(generated.Contains("httptest_package.Config"), $"an unresolved foreign field type is never rooted at the struct's package:\n{generated}");
+        Assert.IsFalse(generated.Contains(" TLS "), $"a field typed from an unreferenced assembly gets no property:\n{generated}");
+        Assert.IsFalse(generated.Contains(" Configs "), $"nor does one whose element type is:\n{generated}");
+
+        // The control: with the third assembly referenced, the same field gets its property, its type qualified by
+        // its own package.
+        string referenced = GenerateOverThreeAssemblies(referenceTls: true);
+
+        StringAssert.Contains(referenced, Ref("global::go.ж<global::go.tls_package.Config>", "TLS", Server));
+        StringAssert.Contains(referenced, Ref("global::go.array<global::go.tls_package.Config>", "Configs", Server));
+    }
+
+    // The same three assemblies under the SDK's compiler, with the converter's spelling of a consumer's `s.TLS != nil`
+    // (P1, fieldPropertySelector: it reads the field through the property whatever the consumer imports). A production
+    // project references its packages transitively, so the third assembly is in view and the property serves the site.
+    // A -tests project does not (DisableTransitiveProjectReferences): there the generated class must still compile, and
+    // the site compiles under no spelling at all, the whole value's `s.Value.TLS` included (CS0012), so no converter
+    // fallback could serve it; such a consumer needs the reference. Inconclusive only where no SDK compiler resolves.
+    [TestMethod]
+    public void AConsumerOfAForeignFieldCompilesWhereItsTypeIsReferenced()
+    {
+        if (SdkCompiler() is not { } compiler)
+        {
+            Assert.Inconclusive("no SDK csc.dll resolves (DOTNET_HOST_PATH, DOTNET_ROOT, PATH): nothing here can compile a C# 14 extension block");
+            return;
+        }
+
+        string directory = Directory.CreateTempSubdirectory("go2cs-fieldaccess-").FullName;
+
+        try
+        {
+            void Library(string output, string source, params string[] references)
+            {
+                File.WriteAllText(Path.Combine(directory, $"{output}.cs"), source);
+                (int code, string log) = Compile(compiler, directory, $"{output}.dll", [$"{output}.cs"], references);
+                Assert.AreEqual(0, code, $"the {output} fixture compiles under the SDK compiler:\n{log}");
+            }
+
+            Library("golib", Stubs);
+            Library("tls", Tls, "golib.dll");
+            Library("httptest", Httptest, "golib.dll", "tls.dll");
+
+            (int Code, string Output) Consumer(bool referenceTls, string site)
+            {
+                string[] references = referenceTls ? ["golib.dll", "httptest.dll", "tls.dll"] : ["golib.dll", "httptest.dll"];
+
+                CSharpCompilation compilation = CSharpCompilation.Create("json",
+                    [CSharpSyntaxTree.ParseText(HttptestUser)],
+                    [MetadataReference.CreateFromFile(typeof(object).Assembly.Location), .. references.Select(reference => MetadataReference.CreateFromFile(Path.Combine(directory, reference)))],
+                    new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+                GeneratorDriverRunResult result = CSharpGeneratorDriver.Create(new FieldAccessGenerator()).RunGenerators(compilation).GetRunResult();
+                Assert.AreEqual(0, result.Diagnostics.Length, string.Join("\n", result.Diagnostics));
+
+                File.WriteAllText(Path.Combine(directory, "user.cs"), HttptestUser);
+                File.WriteAllText(Path.Combine(directory, "generated.cs"), result.GeneratedTrees.SingleOrDefault()?.ToString() ?? "");
+                File.WriteAllText(Path.Combine(directory, "site.cs"), $$"""
+                    namespace go;
+
+                    static class site
+                    {
+                        static bool read(ж<httptest_package.Server> s) => {{site}};
+                    }
+                    """);
+
+                return Compile(compiler, directory, $"json-{referenceTls}.dll", ["user.cs", "generated.cs", "site.cs"], references);
+            }
+
+            (int code, string output) = Consumer(referenceTls: true, "s.TLS != null && s.Port > 0");
+            Assert.AreEqual(0, code, $"with the field's assembly referenced, `s.TLS` binds the generated property:\n{output}");
+
+            (code, output) = Consumer(referenceTls: false, "s.Port > 0");
+            Assert.AreEqual(0, code, $"without it, the generated class still compiles and serves the struct's other fields:\n{output}");
+
+            (code, output) = Consumer(referenceTls: false, "s.TLS != null");
+            Assert.AreNotEqual(0, code, "without it, the field has no property");
+            StringAssert.Contains(output, "CS1061");
+
+            (code, output) = Consumer(referenceTls: false, "s.Value.TLS != null");
+            Assert.AreNotEqual(0, code, "nor does the whole value's field compile: its type is in no referenced assembly");
+            StringAssert.Contains(output, "CS0012");
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
 }
