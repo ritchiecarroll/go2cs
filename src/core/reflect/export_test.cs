@@ -133,7 +133,7 @@ public static ж<byte> FirstMethodNameBytes(global::go.reflect_package.ΔType t)
     }
     var m = ut.Methods()[0];
     var mname = t._<ж<global::go.reflect_package.rtype>>().nameOff(m.Name);
-    if ((byte)(mname.DataChecked(0, "name flag field").Value & ((byte)(1 << 2))) == 0) {
+    if ((byte)(mname.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << 2))) == 0) {
         throw panic("method name does not have pkgPath *string");
     }
     return mname.Bytes;

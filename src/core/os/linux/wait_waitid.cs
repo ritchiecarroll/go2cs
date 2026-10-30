@@ -65,7 +65,7 @@ internal static (bool, error) blockUntilWaitable(this ж<Process> Ꮡp) {
         if (e == syscall.ENOSYS) {
             return (false, default!);
         }
-        return (false, NewSyscallError("waitid", e));
+        return (false, NewSyscallError(waitidˢ, e));
     }
     return (true, default!);
 }
