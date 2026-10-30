@@ -548,11 +548,14 @@ func (v *Visitor) fieldAccessSelector(selectorExpr *ast.SelectorExpr, pointee ty
 // at its GO offset where the struct's CLR slot holds the wrong bytes (a behavior change on native boxes, and a
 // correctness gain).
 //
+// A PROMOTED field reads `p.f` too (#31b): go2cs-gen gives the struct a property for each field Go promotes into it,
+// walking the embeds the selection walks (FieldAccessGenerator.PromotedFields), so the site does not name them.
+//
 // These keep today's spelling, because no property serves them as Go spells them:
 //   - a field named like a member of ж<T> (fieldAccessCollisions.txt), or one that shadows a method an embedded type
 //     promotes (shadowsPromotedMethod): C# would bind the member, or the method group;
-//   - a PROMOTED field: the properties are the struct's own fields, so the site would have to name the embed, `p.E.f`,
-//     which is not Go's text (the unsafe.Pointer route above does, because it must avoid the whole-value read);
+//   - a promoted field whose walk go2cs-gen cannot take (promotedFieldWalkable): through an embed whose fields it
+//     cannot see, or one emitted readonly;
 //   - a struct with no generated accessors: one a hand-owned file declares, and one of a package the converter never
 //     emits (nonConvertedStdLibPackages: testing's T and B are golib-side structs);
 //   - a struct this package defines over another named type (isLocalStructWrapper), whose fields are generated;
@@ -573,14 +576,63 @@ func (v *Visitor) fieldPropertySelector(selectorExpr *ast.SelectorExpr, pointee 
 		return "", false
 	}
 
-	if len(selection.Index()) != 1 || fieldAccessCollisions[removeLeadingSanitizationMarker(getCoreSanitizedIdentifier(selectorExpr.Sel.Name))] ||
-		shadowsPromotedMethod(pointee, selectorExpr.Sel.Name) {
+	if fieldAccessCollisions[removeLeadingSanitizationMarker(getCoreSanitizedIdentifier(selectorExpr.Sel.Name))] ||
+		shadowsPromotedMethod(pointee, selectorExpr.Sel.Name) || !v.promotedFieldWalkable(pointee, selection.Index()) {
 		return "", false
 	}
 
 	v.recordFieldAccessType(pointee)
 
 	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))), true
+}
+
+// promotedFieldWalkable reports whether go2cs-gen's promoted-field property walks the embeds of path, a selection's
+// field indices from owner (true for a direct field, a one-index path). go2cs-gen reads each embedded struct's fields
+// from this compilation's source or a reference's metadata, so it cannot walk an embed whose fields are generated in
+// the same run (a wrapper this package defines over another named struct) or that a hand-owned file declares; and its
+// property is a writable ref, which no readonly field gives (a zero-size layout field, on the walk or at its end).
+func (v *Visitor) promotedFieldWalkable(owner types.Type, path []int) bool {
+	if len(path) < 2 {
+		return true
+	}
+
+	for i, index := range path {
+		structType := v.underlyingStruct(owner)
+
+		if structType == nil || index >= structType.NumFields() {
+			return false
+		}
+
+		if layout, hasLayout := v.structZeroSizeLayout(structType, owner); hasLayout && layout.fieldIsZeroSize(index) {
+			return false
+		}
+
+		if i == len(path)-1 {
+			return true
+		}
+
+		field := structType.Field(index)
+
+		if !field.Embedded() {
+			return false
+		}
+
+		embedded := types.Unalias(field.Type())
+
+		if pointer, isPointer := embedded.(*types.Pointer); isPointer {
+			embedded = types.Unalias(pointer.Elem())
+		}
+
+		named, ok := embedded.(*types.Named)
+
+		if !ok || isHandOwnedType(named) || isLocalStructWrapper(named) {
+			return false
+		}
+
+		owner = named
+	}
+
+	return true
 }
 
 // P2 (parity seat #32): `&p.f` READS `p.Ꮡf`, the address property go2cs-gen emits beside each field property, for the
