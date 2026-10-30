@@ -21,13 +21,13 @@ internal static void Main() {
         var sa = Ꮡ(page, 0).Reinterpret<byte, syscall.RawSockaddrInet4>();
 
         nint port = 8080;
-        var p = @unsafe.ArrayPointer<byte>.Of(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2);
+        var p = @unsafe.ArrayPointer<byte>.Of(sa.ᏑPort, 2);
         p.ElementRef(0) = (byte)(port >> 8);
         p.ElementRef(1) = (byte)port;
 
         fmt.Println("bytes at Go offsets 2 and 3:", page[2], page[3]);
 
-        var q = @unsafe.ArrayPointer<byte>.Of(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2);
+        var q = @unsafe.ArrayPointer<byte>.Of(sa.ᏑPort, 2);
         fmt.Println("port read through the alias:", (nint)q.ElementRef(0) << 8 | (nint)q.ElementRef(1));
 
         fmt.Println("bytes at 0, 1, 4:", page[0], page[1], page[4]);
