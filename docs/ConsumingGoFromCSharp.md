@@ -5,12 +5,12 @@ library is converted and published on NuGet, and so are Go modules listed on [nu
 This page shows what calling them looks like: imports, numbers, strings, errors, slices, maps, pointers, goroutines
 and channels. Most of it reads the way the Go code does.
 
-Every snippet comes from a small console app,
-[`src/tests/CSharpConsumer`](https://github.com/ritchiecarroll/go2cs/tree/master/src/tests/CSharpConsumer). Its
-runner converts two Go modules, [`github.com/google/uuid`](https://github.com/google/uuid) and
-[`github.com/ritchiecarroll/hashset`](https://github.com/ritchiecarroll/hashset), builds the app against them and
-the converted standard library, and checks that each example behaves as shown here. A `…` in a snippet marks
-lines it leaves out, most often those checks.
+> **About the examples:** every snippet in this document comes from a small console app,
+> [`src/tests/CSharpConsumer`](https://github.com/ritchiecarroll/go2cs/tree/master/src/tests/CSharpConsumer). Its
+> runner converts two Go modules, [`github.com/google/uuid`](https://github.com/google/uuid) and
+> [`github.com/ritchiecarroll/hashset`](https://github.com/ritchiecarroll/hashset), builds the app against them and
+> the converted standard library, and checks that each example behaves as shown here. A `…` in a snippet marks
+> lines it leaves out, most often those checks.
 
 ## A five-minute start
 
