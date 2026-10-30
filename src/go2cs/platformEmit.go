@@ -414,6 +414,7 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 
 	written, removed, unchanged := 0, 0, 0
 	layoutPackages := map[string]bool{}
+	foldedPackages := map[string]bool{}
 
 	for _, logical := range sortedKeys(func() map[string]bool {
 		keys := map[string]bool{}
@@ -455,6 +456,7 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 
 				if gone {
 					removed++
+					foldedPackages[pkg] = true
 				}
 			}
 
@@ -559,6 +561,25 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 		}
 	}
 
+	// The converse (seat #49): a package whose LAST per-GOOS files this run folded flat no longer carries the layout,
+	// so its project file drops the block, as every single-target writer renders it for the package, and its emptied
+	// per-GOOS folders go, which no checkout carries anyway. Without this the seed's block survived the fold (os/signal
+	// and time/tzdata, whose targets' package_info.cs #41's alias drop made identical), and the next single-target
+	// writer (a -tests convert, a reconvert from a fresh checkout) dropped it: the emission had two fixed points.
+	blockRemoved := 0
+
+	for _, pkg := range sortedKeys(foldedPackages) {
+		dropped, err := dropLayoutBlockFromProjectFile(filepath.Join(coreDir, filepath.FromSlash(pkg)), targets)
+
+		if err != nil {
+			return err
+		}
+
+		if dropped {
+			blockRemoved++
+		}
+	}
+
 	// A multi-platform emission is the one run that can produce the UNION project set: the
 	// platform-exclusive packages (internal/syscall/windows on Windows, internal/syscall/unix and
 	// internal/runtime/syscall on the unix side, crypto/x509/internal/macos on macOS …) exist in
@@ -582,6 +603,7 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 	fmt.Printf("Artifacts already current            %6d\n", unchanged)
 	fmt.Printf("Stale copies removed                 %6d\n", removed)
 	fmt.Printf("Project files given the L3 block     %6d\n", blockAdded)
+	fmt.Printf("Project files folded out of L3       %6d\n", blockRemoved)
 	fmt.Printf("Packages with routed hand-owns       %6d\n", len(handOwnPackages))
 
 	fmt.Printf("\nPer-GOOS sources:\n")
@@ -1226,6 +1248,60 @@ func applyLayoutBlockToProjectFile(packageDir string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// dropLayoutBlockFromProjectFile takes the L3 blocks back out of a package's project file once the package carries no
+// per-GOOS sources, and removes the per-GOOS folders the fold emptied. A package that is still L3 is left alone.
+// Reports whether the project file changed.
+func dropLayoutBlockFromProjectFile(packageDir string, targets []string) (bool, error) {
+	if packageCarriesPlatformLayout(packageDir) {
+		return false, nil
+	}
+
+	for _, target := range targets {
+		folder := filepath.Join(packageDir, goosOfTarget(target))
+
+		if entries, err := os.ReadDir(folder); err == nil && len(entries) == 0 {
+			if err := os.Remove(folder); err != nil {
+				return false, fmt.Errorf("failed to remove emptied per-GOOS folder %q: %w", folder, err)
+			}
+		}
+	}
+
+	entries, err := os.ReadDir(packageDir)
+
+	if err != nil {
+		return false, fmt.Errorf("failed to read package directory %q: %w", packageDir, err)
+	}
+
+	dropped := false
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".csproj") || strings.HasSuffix(strings.ToLower(entry.Name()), ".tests.csproj") {
+			continue
+		}
+
+		projectFileName := filepath.Join(packageDir, entry.Name())
+		contents, err := os.ReadFile(projectFileName)
+
+		if err != nil {
+			return false, fmt.Errorf("failed to read project file %q: %w", projectFileName, err)
+		}
+
+		updated := []byte(removePlatformLayoutBlocks(string(contents)))
+
+		if !needToWriteFile(projectFileName, updated) {
+			continue
+		}
+
+		if err := os.WriteFile(projectFileName, updated, 0644); err != nil {
+			return false, fmt.Errorf("failed to write project file %q: %w", projectFileName, err)
+		}
+
+		dropped = true
+	}
+
+	return dropped, nil
 }
 
 // copyMergedFile copies a staged artifact to its merged destination, creating directories as

@@ -261,3 +261,14 @@ func applyPlatformLayoutBlocks(projectFileContents string, projectFileName strin
 
 	return contents[:propertyAt] + platformPropertyBlock + contents[propertyAt:]
 }
+
+// removePlatformLayoutBlocks is applyPlatformLayoutBlocks' inverse: it takes the three L3 fragments back out of a
+// project file, giving the file a single-target writer renders for a package with no per-GOOS sources. A file without
+// them is returned unchanged.
+func removePlatformLayoutBlocks(projectFileContents string) string {
+	for _, block := range []string{platformCompileBlock, platformPackageInfoBlock, platformPropertyBlock} {
+		projectFileContents = strings.Replace(projectFileContents, block, "", 1)
+	}
+
+	return projectFileContents
+}
