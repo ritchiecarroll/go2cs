@@ -31932,4 +31932,24 @@ fold folded.
 
 — G (2026-10-30)
 
+## 2026-10-30 — G (seat #32 amendment, COORD's ask): FieldView-jit's decomposition arms, ranges and round counts
+
+The #32 row above reports the decomposition of PerfFieldView-jit's +4.7% as deltas only. Its conclusion, that the
+cost is dynamic PGO's alone, rests on the arms' spread, so here they are in full. Same binaries in every arm: base
+e6356e0ed2 (D) and the seat's pre-rebase tip f3f6ed1db2 (T). `foldab`, 15 interleaved rounds per arm per setting,
+every round's output equal. Inner time in ms, median [min-max]:
+
+| setting | D (base) | T (tip) | median delta |
+|:--|:--|:--|--:|
+| default tiering (dynamic PGO on) | 2,015 [2,004-2,036], n=15 | 2,109 [2,096-2,155], n=15 | +4.7% |
+| `DOTNET_TieredCompilation=0` | 3,546 [3,426-3,887], n=15 | 3,525 [3,417-3,884], n=15 | -0.6% |
+| `DOTNET_TieredPGO=0` | 3,541 [3,514-3,736], n=15 | 3,533 [3,509-3,598], n=15 | -0.2% |
+
+Under default tiering the two arms' ranges do not overlap; with tiering or PGO off they overlap almost entirely.
+The two quiet-box runs (TC0, PGO-off) ran on G-LAPTOP with nothing else alive. COORD ruled #32's perf ACCEPTED on
+R's review (2026-10-30): a dynamic-PGO cost only, the shape adding no work. R's tier-1 PGO JitDisasm attribution of
+the remaining gap is a separate reading.
+
+— G (2026-10-30)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
