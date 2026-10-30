@@ -289,8 +289,13 @@ public class FieldAccessGenerator : ISourceGenerator
         {
             string name = field.Name;
 
+            // An unresolved type in a FOREIGN declaration is an assembly this compilation does not reference (seat #45); one
+            // in this compilation's source is another generator's same-run type, rooted at the package class (TypeName), as
+            // a generic embed's proxy argument substitutes into its field: GenericEmbedPromotion's `curve<p224жpoint>.seed`.
+            bool unreachable = !hops[^1].Type.Locations.Any(location => location.IsInSource) && ContainsErrorType(field.OriginalDefinition.Type);
+
             if (served.Contains(name) || declared.Contains(name) || s_collisionNames.Contains(name) || ShadowsPromotedMethod(type, name) ||
-                field.IsReadOnly || hops.Any(hop => hop.Field.IsReadOnly) || ContainsErrorType(field.Type) ||
+                field.IsReadOnly || hops.Any(hop => hop.Field.IsReadOnly) || unreachable ||
                 !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly) || !hops.All(hop => compilation.IsSymbolAccessibleWithin(hop.Field, compilation.Assembly)))
             {
                 continue;
