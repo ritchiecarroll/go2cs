@@ -43,7 +43,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: go.GoFieldAccess(typeof(sink))]
+[assembly: GoFieldAccess(typeof(sink))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("DeferMultiValueSpread.go", "DeferMultiValueSpread.cs", "AAoYmIKCpoKCqIKCpoKCpoKmgqaCpoKmgoLugqqigoKipqKCgqKoooKCgoKiqKKCgoKiqKKCgpKCoqiigoKUoqiigoKiqKKCgqKogoKCgqqCgoKCpoKCpoKCgoKCgoKCgoKCgoKCpqKmnIKCgoKoooKCoqqigoKUoqiigoKi", "205-207:1", "", "", "66:21,77:21,88:21,101:21,102:21,115:21,128:25,140:21,160:15,167:15,213:21,224:21,237:21")]
+[assembly: GoPositionMap("DeferMultiValueSpread.go", "DeferMultiValueSpread.cs", "AAoYmIKCpoKCqIKCpoKCpoKmgqaCpoKmgoLugqqigoKipqKCgqKoooKCgoKiqKKCgoKiqKKCgpKCoqiigoKUoqiigoKiqKKCgqKogoKCgqqCgoKCpoKCpoKCgoKCgoKCgoKCgoKCpqKmnIKCgoKoooKCoqqigoKUoqiigoKi", "205-207:1", "", "", "66:21,77:21,88:21,101:21,102:21,115:21,128:25,140:21,160:15,167:15,213:21,224:21,237:21")]
 // </GoSourcePositionMaps>
 
 namespace go;

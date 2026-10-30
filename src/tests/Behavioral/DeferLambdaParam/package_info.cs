@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("DeferLambdaParam.go", "DeferLambdaParam.cs", "AAgKooKCAAIQkpKUmpKUkgABHpKqkoKqkoKClKaCog==", "7-9:1;17-19:2;25-27:3;28-30:4;44-46:5;50-53:6;57-63:7", "", "", "19:27,25:21,29:35,33:21,38:27")]
+[assembly: GoPositionMap("DeferLambdaParam.go", "DeferLambdaParam.cs", "AAgKooKCAAIQkpKUmpKUkgABHpKqkoKqkoKClKaCog==", "7-9:1;17-19:2;25-27:3;28-30:4;44-46:5;50-53:6;57-63:7", "", "", "19:27,25:21,29:35,33:21,38:27")]
 // </GoSourcePositionMaps>
 
 namespace go;

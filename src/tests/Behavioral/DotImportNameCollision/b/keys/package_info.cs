@@ -49,7 +49,7 @@ using static go.DotImportNameCollision.b.keys_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("keys.go", "keys.cs", "AAgMgKSA")]
+[assembly: GoPositionMap("keys.go", "keys.cs", "AAgMgKSA")]
 // </GoSourcePositionMaps>
 
 namespace go.DotImportNameCollision.b;

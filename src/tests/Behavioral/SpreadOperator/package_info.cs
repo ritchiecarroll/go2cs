@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("SpreadOperator.go", "SpreadOperator.cs", "+qKCgpSmgpaW")]
+[assembly: GoPositionMap("SpreadOperator.go", "SpreadOperator.cs", "+qKCgpSmgpaW")]
 // </GoSourcePositionMaps>
 
 namespace go;

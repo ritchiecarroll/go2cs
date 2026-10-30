@@ -50,7 +50,7 @@ using static go.ForeignConstraintProxy.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AA4WoAAMCqA=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA4WoAAMCqA=")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignConstraintProxy;

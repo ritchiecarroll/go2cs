@@ -49,7 +49,7 @@ using static go.AliasNamespaceShadow.sort_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("sort.go", "sort.cs", "AAQUgg==")]
+[assembly: GoPositionMap("sort.go", "sort.cs", "AAQUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.AliasNamespaceShadow;

@@ -45,15 +45,15 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: go.GoFieldAccess(typeof(go.crypto.ecdsa_package.PrivateKey))]
-[assembly: go.GoFieldAccess(typeof(go.crypto.x509_package.Certificate))]
-[assembly: go.GoFieldAccess(typeof(syscall_package.CertChainContext))]
-[assembly: go.GoFieldAccess(typeof(syscall_package.CertChainElement))]
-[assembly: go.GoFieldAccess(typeof(syscall_package.CertChainPara))]
-[assembly: go.GoFieldAccess(typeof(syscall_package.CertChainPolicyPara))]
-[assembly: go.GoFieldAccess(typeof(syscall_package.CertContext))]
-[assembly: go.GoFieldAccess(typeof(syscall_package.CertSimpleChain))]
-[assembly: go.GoFieldAccess(typeof(syscall_package.SSLExtraCertChainPolicyPara))]
+[assembly: GoFieldAccess(typeof(go.crypto.ecdsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.x509_package.Certificate))]
+[assembly: GoFieldAccess(typeof(syscall_package.CertChainContext))]
+[assembly: GoFieldAccess(typeof(syscall_package.CertChainElement))]
+[assembly: GoFieldAccess(typeof(syscall_package.CertChainPara))]
+[assembly: GoFieldAccess(typeof(syscall_package.CertChainPolicyPara))]
+[assembly: GoFieldAccess(typeof(syscall_package.CertContext))]
+[assembly: GoFieldAccess(typeof(syscall_package.CertSimpleChain))]
+[assembly: GoFieldAccess(typeof(syscall_package.SSLExtraCertChainPolicyPara))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,7 +63,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "ABRIgoKCgqyCAAsYgoKClJSCgoKUnIKCgpqCmpQAAhKigoKClJSCgoKUmoKAgoKklIKCmoKUgoKCgpSCgIKCpJSClIKClIKCgpSiAAIcipSCgqaCgoKmuJS4lIKAgraUpKSkyIKC", "", "", "29=NewInt/1/1/1,Add/1/2/3,Add/2/2/4", "83:21")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABRIgoKCgqyCAAsYgoKClJSCgoKUnIKCgpqCmpQAAhKigoKClJSCgoKUmoKAgoKklIKCmoKUgoKCgpSCgIKCpJSClIKClIKCgpSiAAIcipSCgqaCgoKmuJS4lIKAgraUpKSkyIKC", "", "", "29=NewInt/1/1/1,Add/1/2/3,Add/2/2/4", "83:21")]
 // </GoSourcePositionMaps>
 
 namespace go;

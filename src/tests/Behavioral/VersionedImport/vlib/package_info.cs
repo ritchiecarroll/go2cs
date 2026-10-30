@@ -50,7 +50,7 @@ using static go.vlib.vlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vlib.go", "vlib.cs", "AAwggqaCgoKCAAYQgqaC")]
+[assembly: GoPositionMap("vlib.go", "vlib.cs", "AAwggqaCgoKCAAYQgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.vlib;

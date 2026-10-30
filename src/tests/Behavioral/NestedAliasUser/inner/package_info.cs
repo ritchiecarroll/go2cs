@@ -51,7 +51,7 @@ using static go.NestedAliasUser.inner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAwugqqCgoKU")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAwugqqCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.NestedAliasUser;

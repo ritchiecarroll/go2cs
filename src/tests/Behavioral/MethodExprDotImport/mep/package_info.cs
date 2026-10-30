@@ -49,7 +49,7 @@ using static go.MethodExprDotImport.mep_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("mep.go", "mep.cs", "AAgWgqaC")]
+[assembly: GoPositionMap("mep.go", "mep.cs", "AAgWgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.MethodExprDotImport;

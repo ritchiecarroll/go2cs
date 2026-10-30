@@ -49,7 +49,7 @@ using static go.PromotedTargetParam.targetlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("targetlib.go", "targetlib.cs", "AAgWgqiC")]
+[assembly: GoPositionMap("targetlib.go", "targetlib.cs", "AAgWgqiC")]
 // </GoSourcePositionMaps>
 
 namespace go.PromotedTargetParam;

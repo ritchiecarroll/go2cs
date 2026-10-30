@@ -51,7 +51,7 @@ using static go.SameNameImportAlias.a.foo_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("foo.go", "foo.cs", "AA8WgA==")]
+[assembly: GoPositionMap("foo.go", "foo.cs", "AA8WgA==")]
 // </GoSourcePositionMaps>
 
 namespace go.SameNameImportAlias.a;

@@ -49,7 +49,7 @@ using static go.PromotedValueEmbedLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAgsggAGEoIABhSCqII=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgsggAGEoIABhSCqII=")]
 // </GoSourcePositionMaps>
 
 namespace go;

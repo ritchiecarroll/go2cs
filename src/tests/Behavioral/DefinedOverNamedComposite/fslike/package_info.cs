@@ -49,7 +49,7 @@ using static go.DefinedOverNamedComposite.fslike_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAYUgKSAyoKCgpTMoA==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAYUgKSAyoKCgpTMoA==")]
 // </GoSourcePositionMaps>
 
 namespace go.DefinedOverNamedComposite;

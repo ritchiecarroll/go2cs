@@ -49,7 +49,7 @@ using static go.DefinedTypeOverForeignStruct.ptlike_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAocgqaCAAcSog==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAocgqaCAAcSog==")]
 // </GoSourcePositionMaps>
 
 namespace go.DefinedTypeOverForeignStruct;

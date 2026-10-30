@@ -49,7 +49,7 @@ using static go.go.shadowlib.@in.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("lib.go", "lib.cs", "zIA=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "zIA=")]
 // </GoSourcePositionMaps>
 
 namespace go.go.shadowlib.@in;

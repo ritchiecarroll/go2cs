@@ -49,7 +49,7 @@ using static go.NamedSliceChildPkg.netlike_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAoogqiC3oKogoKClA==", "", "", "16=NewInfo/1/2/1,NewInfo/2/2/2")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAoogqiC3oKogoKClA==", "", "", "16=NewInfo/1/2/1,NewInfo/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.NamedSliceChildPkg;

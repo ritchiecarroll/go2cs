@@ -49,7 +49,7 @@ using static go.UsingStaticNamespaceAlias.aliaslib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("aliaslib.go", "aliaslib.cs", "AAcSgKaA")]
+[assembly: GoPositionMap("aliaslib.go", "aliaslib.cs", "AAcSgKaA")]
 // </GoSourcePositionMaps>
 
 namespace go.UsingStaticNamespaceAlias;

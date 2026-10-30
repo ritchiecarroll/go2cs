@@ -52,7 +52,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: go.GoFieldAccess(typeof(ChanType))]
+[assembly: GoFieldAccess(typeof(ChanType))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,12 +62,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("abi.go", "abi.cs", "ABFcgoKClIKCgpSCgoKUAAIYgoKUgoKUAAUQggACEoI=")]
-[assembly: go.GoPositionMap("compiletype.go", "compiletype.cs", "AAgegKaAqICmgKaA")]
-[assembly: go.GoPositionMap("escape.go", "escape.cs", "AAomgoLugoKU")]
-[assembly: go.GoPositionMap("main.go", "main.cs", "7oKCgpSUgoI=")]
-[assembly: go.GoPositionMap("switch.go", "switch.cs", "ABtAgoKYpKQ=")]
-[assembly: go.GoPositionMap("type.go", "type.cs", "AEiIAoKClKYAHT6ijKiCgoCCpKaApIKogKaCqIKmggARLqKClKaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSogKaApIAACBCCgoKUpqKCgpSogAAOIoKkgqSCpIKkgqaigpQADTKCpoKmgqaCpqKCgpSClKSigoKUgoKUpoIADRyCAAxSgqqCqIKogqiCqoKCgoKCgsyCgpSCrIKCgoKCgpS6goKUgqiCgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
+[assembly: GoPositionMap("abi.go", "abi.cs", "ABFcgoKClIKCgpSCgoKUAAIYgoKUgoKUAAUQggACEoI=")]
+[assembly: GoPositionMap("compiletype.go", "compiletype.cs", "AAgegKaAqICmgKaA")]
+[assembly: GoPositionMap("escape.go", "escape.cs", "AAomgoLugoKU")]
+[assembly: GoPositionMap("main.go", "main.cs", "7oKCgpSUgoI=")]
+[assembly: GoPositionMap("switch.go", "switch.cs", "ABtAgoKYpKQ=")]
+[assembly: GoPositionMap("type.go", "type.cs", "AEiIAoKClKYAHT6ijKiCgoCCpKaApIKogKaCqIKmggARLqKClKaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSogKaApIAACBCCgoKUpqKCgpSogAAOIoKkgqSCpIKkgqaigpQADTKCpoKmgqaCpqKCgpSClKSigoKUgoKUpoIADRyCAAxSgqqCqIKogqiCqoKCgoKCgsyCgpSCrIKCgoKCgpS6goKUgqiCgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
