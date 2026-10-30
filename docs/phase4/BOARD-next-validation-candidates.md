@@ -31815,4 +31815,121 @@ trailing-to-own-line reads 67 -> 1, arm A's value, and no other count moves. mis
 out-of-scope in-expression 1. anchor-differs stays 25 (accepted as the class-2 form's consequence). eol:missing 0 and
 eol:split 23 are #38's. Arm A carries no note-then-comment line, so the rule cannot move its counts.
 
+## 2026-10-30 — G (1.26.10.2 seat #32 P2, claude/g-seat32-field-token-r3): a field's address reads `p.Ꮡf` — DONE on the seat branch
+
+**The change.** Go's `&p.f` read `p.of(T.Ꮡf)`, the struct's accessor handed to the box's view method. It now reads
+`p.Ꮡf`, a `ж<F>` address property go2cs-gen emits beside each field property P1 (#31) serves. The base is unchanged:
+
+| Go (behavioral golden) | Before | After |
+|:--|:--|:--|
+| `PrintValPtr(&b.off)` (PointerToPointer) | `PrintValPtr(Ꮡb.of(Buffer.Ꮡoff))` | `PrintValPtr(Ꮡb.Ꮡoff)` |
+| `p := &w.inner.val` (LocalStructFieldAddr) | `Ꮡw.of(Wrap.Ꮡinner).of(Thing.Ꮡval)` | `Ꮡw.Ꮡinner.Ꮡval` |
+| `p := &w.ptr.val` (LocalStructFieldAddr) | `w.ptr.of(Thing.Ꮡval)` | `w.ptr.Ꮡval` |
+| `*(&c.n) = v` on a receiver (ReceiverFieldAddress) | `(Ꮡc.of(Counter.Ꮡn)).Value = v` | `(Ꮡc.Ꮡn).Value = v` |
+
+- **One accessor token per field (the carry-over as ruled).** The property's body is `ʗp.of(T.Ꮡf‿)`. `T.Ꮡf‿` is a
+  `static readonly FieldRefFunc<T, F>` the type generator emits beside the `Ꮡf` accessor, on `T` in `T`'s own
+  assembly, so every site in every assembly hands golib's view cache one delegate object and its compare is
+  `ReferenceEquals` on both runtimes. U+203F ends the name (FieldAccessTokenSuffix): C# accepts it, Go cannot spell it.
+  An assembly built before the token has none; its property passes the accessor's method group, which the cache still
+  matches by its method (GolibTests' FieldViewCacheTests, both forms of the match).
+- **Kept on `.of(T.Ꮡf)`:** every field P1 keeps on its box form; a field whose address name is `Ꮡelem` (ж<T>'s own
+  method); a named pointer type (its wrapper declares `of`); the field `&p.arr[i]` fuses with (`p.at(T.Ꮡarr, i)`,
+  unchanged); a promoted method's synthesized embed hop (#31b's).
+- **Found by the seat's own forward builds and fixed in-seat, each red-first:** P2 records internal/runtime/atomic's
+  `Int32`/`Int64`, and a bare `typeof(Int32)` at file scope is ambiguous with System.Int32 (CS0104): the System
+  integer names join systemCollidingTypeNames. P2 records internal/poll's `fdMutex`, whose hand-written companion
+  partial adds non-Go fields (`rgate`, `wgate`): FieldAccessGenerator now serves only the fields of the type
+  generator's own target declaration (CS0117 otherwise; latent since #31).
+
+**The prediction, scored as posted** (`#32 PREDICTION` 2026-10-29, before any reconvert; the population CORRECTION
+posted after the measurement is a finding, not a re-prediction). The lane's two-seeded `-stdlib -comments` A/B, base
+e6356e0ed2 against the seat at c19519e0ab, three targets plus the `-tests` leg over 242 packages; one binary per arm
+(base `bf3ad48ec714c3bb`, seat `ac3f6f6741b10564`). Both rc 0, 0 failed, 0 of 204 hand-owns clobbered. 621 files
+differ: 407 prod `.cs`, 85 test `.cs`, 3 `.cs.auto` twins, 126 `package_info.cs`. The rung of record is the i7's.
+1. MECHANISM: `pcensus classify -items P2` refused 0: 5,177 pairs, all P2, 0 MAP; 0 hand-owned, `_impl` or golib files
+   move. MET. (The Int32 fix arm, seat2 at 52398d49a6, differs from the seat by exactly the two atomic record lines.)
+2. COUNTS (P2 of-field, base root to seat root): prod 7,638 -> 3,314, fall 4,324 against 3,000-3,600: MISSED. Test
+   1,070 -> 528, fall 542 against 700-948: MISSED. Changed files prod 407 (300-412, MET), test 85 (100-116, MISSED).
+   Why: the sizing script's hand-owned filter was unanchored (545 converted files quote the marker in a header
+   comment), so the emitted prod population read 4,004 where it is 7,445; and its "certain movers" held two classes the
+   converter keeps, lifted anonymous structs and a promoted method's embed hop.
+   **The AMBIGUOUS class, scored separately (COORD's note (a)):** `.of(T.ᏑE).M()` through an embed, posted 467 prod /
+   210 test on the committed tree; on the base arm's root (anchored filter) the same textual class holds 477 / 225, of
+   which 22 / 6 moved (an explicit `x.E.M()`) and 455 / 219 stayed (a promoted method's synthesized embed hop).
+3. GOLDENS: CNR moved 69 of the 83 projects carrying `.of(`, plus FieldAddressProperties: MISSED (72-78). The 14 hold
+   only kept sites: lifted anonymous structs (3 projects), embed hops (5), the unsafe route's `.Value` (2), `Ꮡm_value`
+   (2), a hand-owned struct (1), and NativeFieldPortAlias [linux], platform-exclusive and skipped here (2 `.of(`
+   sites: its golden needs the linux re-mint). pcensus over the re-baseline: 186 files, 499 pairs, all P2, refused 0.
+4. BUILD: go2cs-stdlib.slnx, Release, 0 errors on every arm (G-LAPTOP, after the two in-seat fixes): FORWARD on
+   windows (629 / 664 / 685 s, the Q5 tip runs), linux 763 s and darwin 734 s; BACKWARD 680 s. The TIP's own
+   three-target `-stdlib` emission, mirrored onto the tip tree, 0 errors per GoTargetOS: at r2 (dd149aa0f4) windows
+   782 s, linux 986 s, darwin 1,074 s; at r3 windows 693 s (linux and darwin carried from r2, as ruled). go2cs.slnx
+   Debug at r3 0 errors (467 s). MET.
+5. PERF (`foldab`, base e6356e0ed2 against the seat's pre-rebase tip f3f6ed1db2, 15 interleaved rounds per program,
+   every arm's output equal, every program's base and tip binaries different; median inner time):
+
+   | program | Native AOT | JIT (default tiering) |
+   |:--|--:|--:|
+   | PerfFieldView | -0.3% | **+4.7%** |
+   | PerfRefLower | +0.5% | +0.8% |
+   | PerfIface | +0.1% | +1.3% (wall +4.8%, the rounds overlap: noise) |
+   | PerfIfaceCall | -1.1% | 0.0% |
+
+   AOT size +0.34% per program (177.0 MB to 177.6 MB). FieldView's JIT rounds do not overlap (base 2,004-2,036 ms, tip
+   2,096-2,155 ms), so it is real, and it is dynamic PGO's alone: on the same binaries, `DOTNET_TieredCompilation=0`
+   reads -0.6% and `DOTNET_TieredPGO=0` reads -0.2%. PGO takes the base from 3,541 to 2,015 ms and the tip from 3,533
+   to 2,109 ms: the address property keeps all of the optimized code's speed and about 93% of PGO's gain on the one
+   program that is nothing but `&p.f` operands. No steady-state cost, none under AOT. For COORD's ruling.
+
+**The residue, per named class** (a census binary = the seat plus an in-band `/*R:reason*/` marker before each kept
+`.of(`, the converter's own reason; its marker-stripped emission equals the seat root, 0 differing entries, 0
+unmarked sites):
+
+| | prod | test |
+|:--|--:|--:|
+| population (base root: emitted, non-hand-owned files) | 7,445 | 1,070 |
+| **moved to `.Ꮡf`** | **4,324** | **542** |
+| hand-owned type (runtime2.cs's `g`, `m`, `p`, `schedt`, `sudog`, ...) | 1,575 | 1 |
+| unnamed (a lifted anonymous struct) | 892 | 292 |
+| a promoted method's synthesized embed hop | 472 | 216 |
+| promoted field (#31b) | 106 | 14 |
+| unsafe route (`.of(T.Ꮡf).Value` 60, array field 4) | 64 | 0 |
+| `Ꮡm_value` (a named slice's wrapper) | 4 | 0 |
+| header-shaped | 3 | 0 |
+| wrapper over another named struct | 3 | 1 |
+| collision name | 1 | 2 |
+| promoted hop (cross-package / direct path) | 1 | 2 |
+
+**A post-.2 remainder, not a defect (COORD's note (b)):** the 41 hand-owned files keep 193 `.of(T.Ꮡf)` sites. Hand-owned
+files are not regenerated by design; they read as before beside the converted code that now reads `p.Ꮡf`.
+
+**Q5 (build time, the token's cost):** a clean Release build of go2cs-stdlib.slnx (windows), base corpus against the
+seat's, interleaved: base 646 / 688 / 642 s, seat 629 / 664 / 685 s. Median +2.8%, mean +0.1%: under the +5% gate,
+and inside the run-to-run spread.
+
+**Rebased per §3.3 onto 99195664ce (batch 95; claude/g-seat32-field-token-r2, with batch 90's rebase backed up at
+claude/g-seat32-field-token).** The docs conflicts took master's side (#29's heap fold rewrote the samples) and were
+redone from the re-baselined goldens. CNR moved the same 70 projects at all three bases (e6356e0ed2, f31ac325dd,
+99195664ce), and pcensus read the same 186 files / 499 P2 / 0 refused each time. This seat's symbols.json repair of
+seat #20's `default!` comment is the one-word change master's c5a0034c28 also makes; the two merge clean.
+
+**Rebased again as r3 onto 718fd42b94 (batch 99, #45; claude/g-seat32-field-token-r3).** r2 conflicted with #45 in
+FieldAccessGenerator.cs, where each changed one arm of the same condition: the merge keeps #45's foreign arm (a field
+whose type does not resolve gets no property) and this seat's source arm (only the type generator's own fields). The
+projitems conflict kept both entries; one provenance note was re-cited to the merged lines. CNR moved the same 70
+projects, and the re-minted goldens equal r2's byte for byte (189 files, CR aside): batches 98-99 move no emission of
+this seat's.
+
+**Gates at r3 (re-run, as ruled, not carried):** go test ./... 10 ok, 0 failed (with the goldens); GenTests 366, 0 failed
+(#45's arms included); GolibTests 2,292, 0 failed (25 skipped); go2cs.slnx Debug 0 errors. The -tests convert+build of
+os, strconv, sort and encoding/json, on the R0 tree with r3's converter and go2cs-gen: all four build, no error code, so
+neither #45 class reopens. r3's three-target -stdlib emission: rc 0, 0 failed per target; its windows build 0 errors.
+
+**Follow-ons:** #31b (promoted fields and the embed hops above). Seen in passing, not this seat's: ConversionStrategies.md's
+`&b.off` walkthrough still says `heap<Buffer>(out var Ꮡb)` and `b = new Buffer();` as separate lines, which #29's heap
+fold folded.
+
+— G (2026-10-30)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
