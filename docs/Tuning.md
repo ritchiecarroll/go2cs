@@ -44,8 +44,8 @@ performance comparison's table, measured on an earlier converter release; that p
      476.8, IfaceShell 757.0 vs 1,255.2; peak working set lower under AOT on all fourteen rows; "ILC lacks the JIT's
      dynamic PGO/OSR loop optimizations" (Reading the results, Sieve/MatMul). The linux-x64 ReadyToRun figure:
      ConsumingGoFromCSharp.md, "Startup is faster from dotnet publish" (PerfStartup at a5aa6a23f7, median 488 ms JIT,
-     329 ms ReadyToRun, -33%). The deployment table's commands: the converter's Exe template sets
-     <PublishReadyToRun>true</PublishReadyToRun> (src/go2cs/csproj-template.xml), applied only by dotnet publish. -->
+     329 ms ReadyToRun, -33%). The deployment table's commands: the converter's Exe template
+     sets <PublishReadyToRun>true</PublishReadyToRun> (src/go2cs/csproj-template.xml), applied only by dotnet publish. -->
 
 If you publish ReadyToRun as a single file, also set
 `<PublishReadyToRunComposite>false</PublishReadyToRunComposite>`
