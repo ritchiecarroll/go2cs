@@ -32073,4 +32073,92 @@ encoding/json and net/http on the R0 tree with the seat's converter and go2cs-ge
 
 — G (2026-10-30)
 
+## 2026-10-30 — H (1.26.10.2 seat #48, claude/h-seat48-bare-go-attrs): golib's [assembly:] records name their attribute bare under `using go;` — DONE on the seat branch
+
+The owner's point: a package info file that already declares `using go;` still wrote `[assembly: go.GoPositionMap(…)]`,
+`[assembly: go.GoHoistedLiterals]` and `[assembly: go.GoCgoImportDynamic(…)]`. COORD's ruling put `GoFieldAccess` in
+scope too, since it sits in the same section. An `[assembly:]` attribute binds at compilation-unit scope, where
+`using go;` applies, so the `go.` only repeated it.
+
+| Before | After |
+|:--|:--|
+| `[assembly: go.GoPositionMap("bufio/bufio.go", "bufio.cs", "…")]` | `[assembly: GoPositionMap("bufio/bufio.go", "bufio.cs", "…")]` |
+| `[assembly: global::go.GoHoistedLiterals]` (a `go.go` namespace shadows the root) | `[assembly: GoHoistedLiterals]` |
+| `[assembly: go.GoCgoImportDynamic("…_trampoline", "…", "/usr/lib/libSystem.B.dylib")]` | `[assembly: GoCgoImportDynamic(…)]` |
+| `[assembly: global::go.GoFieldAccess(typeof(T))]` | `[assembly: GoFieldAccess(typeof(T))]` |
+
+- **The rule** (`packageInfoWriter.go`): `importsRootNamespace` says whether the file carries `using go;` above its
+  namespace declaration. `rootAttributeName` gives the bare name there and `globalQualifyRooted("go.X")` anywhere
+  else. `respellRootAttribute` turns any of the three spellings into the file's one. Every writer applies it to the
+  records a merging write keeps, so a section never mixes spellings and a kept record dedupes against its re-recorded twin.
+- **Shadowed root, COORD's open question: the bare name binds.** `using go;` itself resolves at the global namespace,
+  so a `go.go` namespace does not capture it. Proven at three scales:
+  - the GenTests arm;
+  - the 535 `global::`-rooted records per target that the stdlib compile now reads bare;
+  - math/rand/v2's `-tests` build, whose test imports go/format.
+- **Readers.** `isHoistedLiteralsStampLine` knew two spellings and now knows all three. Before the fix, a repeat run
+  into a root holding this seat's output would have kept a bare stamp beside a fresh one. `isFieldAccessRecordLine`
+  and pcensus's field-access anchor already accepted the bare form. The position-map key and the cgo section read the
+  quoted fields or the whole line, after respelling. pcensus's MAP label matches on the name alone.
+  `refVerdictPublication_test`'s position-map mask now masks every spelling.
+- **The repeat-run arm, COORD's ask:** `TestRootAttributesRepeatRunIsByteIdentical` converts twice into one root and
+  requires `package_info.cs` byte-identical, for a shadowed package (it imports go/format and is asserted to carry
+  `global::go.`) and an unshadowed one. It is green at the tip. With the old stamp reader restored it is red on both
+  arms, and the file was restored byte-identical after.
+- **Out of scope, unchanged:**
+  - `[module: go.GoManualConversion]` and `[module: go.GoRequiresUnsafe]`: hand-owned markers that tooling matches as text.
+  - Using-alias targets: resolved without the file's other usings, so their `go.` is required.
+  - The hand-written performance-test `package_info.cs` and the GolibTests fixtures: both spellings compile there.
+- **go2cs-gen:** `LiteralInterceptorGenerator` finds the stamp with `ForAttributeWithMetadataName("go.GoHoistedLiteralsAttribute")`,
+  which binds semantically. `TheBareStampIsFoundByItsSymbol` covers three cases:
+  - bare under `using go;`: 0 transforms;
+  - bare with `go.go` present: 0 transforms;
+  - a look-alike `GoHoistedLiteralsAttribute` from another namespace under the same text: 1 transform, so the match is not by text.
+
+  Each stamped arm compiles with 0 errors.
+- **Two instruments taught the new spelling.**
+  - pcensus item **BA**: `[assembly: (global::)?go.X` becomes `[assembly: X` over a byte-identical tail. It is taken
+    ahead of MAP only then; a map whose table moved stays MAP. It has 5 good and 6 bad plants and is red-first: the
+    good plants read UNCLASSIFIED or MAP before the item.
+  - The fleet identifier census's `ipv4_posmap`: `(global::)?(go\.)?gopositionmap\(`, carried as its own labelled
+    commit by COORD's ruling. Self-test 421/0. With the old recogniser it reads 419/2, the two failures being exactly
+    the bare case. `posmapFunclit` was already spelling-neutral.
+
+**The prediction, scored as posted** (`#48 PREDICTION`, 2026-10-30, before arm A). Arms: A = the converter at
+0c9169c456 and B = the seat at 2eff5c03d8, each a seeded `-stdlib -comments` emission over three targets from master's
+`src/core`. Both rc 0, degraded 0, failed 0, misrouted 0, 4,561 `.cs` per target.
+
+1. **Only production `package_info.cs` files move. MET.** windows 354 files, linux 352, darwin 352, union 416. 0 other
+   `.cs`, 0 `.cs.auto`, 0 other files, 0 files added or deleted.
+2. **Every moved line is one of the four records and changes only by losing its prefix. MET.** After stripping the
+   prefix, removed and added lines match as multisets, pairwise mismatch 0.
+3. **All of A's records move. MET.** Removed = A's count over each target's own files (flat plus its `<goos>/`):
+   - windows 3,123 = 3,123: GoPositionMap 1,424, GoHoistedLiterals 354, GoFieldAccess 1,345.
+   - linux 3,172 = 3,172: 1,486 / 352 / 1,334.
+   - darwin 3,395 = 3,395: 1,489 / 352, GoCgoImportDynamic 214, GoFieldAccess 1,340.
+   - union 4,902 = 4,902.
+
+   GoPositionMap, GoHoistedLiterals and GoCgoImportDynamic equal the committed-tree reference posted with the
+   prediction, exactly, per target. GoFieldAccess, which committed production does not yet hold (0), is #31/#31b's
+   records, reported separately as promised.
+4. **pcensus. The original P4 is kept as posted:** "the GoPositionMap pairs classify as MAP; the hoisted, cgo and
+   field-access pairs will REFUSE". **Amended before the measurement, by COORD's ruling to add BA:** every pair BA,
+   refused 0, MAP 0. **MET as amended:** windows 3,123/3,123 BA, linux 3,172/3,172, darwin 3,395/3,395, union
+   4,902/4,902, refused 0, MAP 0.
+
+**Gates:**
+- **Build:** arm B's merged emission was mirrored onto the seat tree. go2cs-stdlib.slnx Release, 0 errors per
+  GoTargetOS, 362/362 fresh each: windows 1,135 s, linux 1,000 s, darwin 985 s.
+- **`-tests` convert and build** with the seat's converter on that tree: os, strconv, sort, encoding/json, net/http
+  and math/rand/v2, all rc 0 with no error code. Each test-info file now holds only bare records, so the merging write
+  respelled the committed rooted ones.
+- **go test ./...** 9 ok and 1 red, `TestProjitemsRegistersEveryGoSource`: the new test file was unregistered. It is
+  registered in 8fc0459693 and the guard re-run is ok.
+- **GenTests:** the LiteralInterceptorGenerator class 34/34.
+- **Goldens:** `run-behavioral.ps1 --update-targets` transpiled 885 projects and refused 0. 946 `package_info.cs` moved, +1,319/−1,319, pcensus BA 1,319 of 1,319 with refused 0. No `.cs.target` moved: the goldens cover `main.cs`, which this seat does not touch. The 8 linux-exclusive projects this windows host skips (MulticastGroupJoin, NativeFieldPortAlias, NativeViewPointerEquality, ScmRightsSeam, SendtoSeam, SetegidBroadcastSeam, UnixAbstractAddrName, WritevIovecSeam) keep `go.` for P2's linux mint on this tip. CNR at the tip: NO REGRESSION, 952 behavioral packages byte-identical, the same 8 skipped.
+- **Noted, not this seat's:** `positionMapOperations.go:91` carries a double blank line that gofmt flags. It is
+  already in master at 0c9169c456.
+
+— H (2026-10-30)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
