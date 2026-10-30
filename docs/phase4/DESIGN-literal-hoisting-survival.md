@@ -6,6 +6,11 @@
 > R's (section 6). Nothing in the converter, golib or the generator changes in this seat. The prior record is
 > `docs/phase4/proposals/plain-literal-cache.md` on `claude/coord-handover` (2026-10-17, i7, win-x64), cited below
 > as "the record".
+>
+> **Closed 2026-10-30 (section 9).** The site classes were measured on G-LAPTOP, and the i9 ran three tests. The
+> owner's literal policy is final: user code stays plain by default, `-hoist-literals` stays as a user opt-in, and the
+> standard library emits the hoist mode, which is now the hybrid, by default. Sections 0 to 8 stand as drafted.
+> Section 9 scores the predictions they made.
 
 ## 0. The decision rule, written before any reading
 
@@ -223,3 +228,116 @@ them.
 Under section 0 the flag survives in no outcome: a winning class becomes an unconditional emission rule, which is
 nothing a user tunes. So `docs/Tuning.md` needs no `-hoist-literals` paragraph either way. Only the `CommandLine.md`
 row's link to the guide depends on the ruling, and it goes with the row if the flag is removed.
+
+## 9. Readings, the ruling, and the predictions scored (2026-10-30)
+
+### 9.1 The site classes, G-LAPTOP
+
+The site classes ran on G-LAPTOP: an AMD Ryzen 5 PRO 6650U, win-x64, .NET 10.0.11. R built the instrument,
+`src/tests/Performance/LiteralSiteBench` on `claude/r-seat52-literal-classes` @ `c82f304fde`. The run had no other
+load and recorded no WHEA errors. Each class ran 15 interleaved rounds plus one discarded round. Every run exited 0
+with equal checksums.
+
+The control class ran first and on its own, and read inside the band on both runtimes. F4 was proved live: an
+inverting copy printed checksum 1672 against 600.
+
+The raw TSVs, the readouts, the F4 proof and the one change to the driver (an argument that orders the classes) are
+in `docs/phase4/data/seat52-literal-classes`.
+
+Cells are per-round ratios, median [min to max]. "Band" is the A/A arm, F5/F1. Every arm allocated 0 B per
+evaluation except F1u8, which allocated 32 B.
+
+| Class | Runtime | Band | F2/F1 (master's cache) | F3/F1 (D6) | Extra |
+|:--|:--|:--|:--|:--|:--|
+| control | JIT | 0.998 [0.985 to 1.031] | 1.004 [0.959 to 1.248] | 0.994 [0.941 to 1.009] | |
+| control | AOT | 1.000 [0.992 to 1.010] | 1.000 [0.980 to 1.017] | 1.004 [0.982 to 1.227] | |
+| C1 argument | JIT | 0.999 [0.949 to 1.213] | 1.637 [1.559 to 1.705] | 1.609 [1.532 to 2.569] | F4/F2 1.918 [1.859 to 2.455] |
+| C1 argument | AOT | 0.998 [0.962 to 1.014] | 1.169 [1.137 to 1.185] | 1.147 [1.118 to 1.158] | F4/F2 1.260 [1.247 to 1.289] |
+| C2 return | JIT | 1.000 [0.988 to 1.021] | 1.707 [1.659 to 1.756] | 1.664 [1.628 to 1.699] | |
+| C2 return | AOT | 0.999 [0.975 to 1.034] | 1.772 [1.722 to 1.820] | 1.712 [1.686 to 1.771] | |
+| C3 map key | JIT | 0.987 [0.957 to 1.033] | 1.131 [1.044 to 1.163] | 1.103 [1.040 to 1.149] | |
+| C3 map key | AOT | 1.001 [0.981 to 1.204] | 1.024 [1.015 to 1.164] | 1.022 [0.992 to 1.102] | |
+| C4 field store | JIT | 1.004 [0.981 to 1.127] | 1.078 [1.058 to 1.158] | 1.082 [1.064 to 1.191] | F1u8/F2 0.877 [0.821 to 0.949] |
+| C4 field store | AOT | 1.000 [0.986 to 1.026] | 1.076 [1.068 to 1.154] | 1.058 [1.049 to 1.236] | F1u8/F2 0.928 [0.865 to 0.980] |
+| C5 local | JIT | 1.001 [0.985 to 1.013] | 1.148 [1.125 to 1.156] | 1.129 [1.117 to 1.163] | |
+| C5 local | AOT | 1.004 [0.988 to 1.007] | 1.112 [1.093 to 1.125] | 1.075 [1.058 to 1.099] | |
+| C6 `any` slot | JIT | 0.999 [0.991 to 1.008] | 1.008 [1.000 to 1.025] | 1.009 [1.001 to 1.024] | |
+| C6 `any` slot | AOT | 1.001 [0.985 to 1.007] | 1.003 [0.986 to 1.008] | 1.001 [0.993 to 1.067] | |
+
+What the table shows, by the driver's disjoint-range test:
+- The hoisted form is faster than both plain forms beyond the band for C1, C2 and C5 on both runtimes.
+- C3 is beyond the band on the JIT only.
+- C4 is beyond the band on Native AOT only. On the JIT it misses by one A/A outlier (1.127).
+- C6 is inside the band on both runtimes.
+
+### 9.2 The i9's three tests
+
+All three ran on the i9: an Intel Core i9-13900K, win-x64, .NET 10.0.14. The arms were H (hoisted: the
+`-hoist-literals` emission), HY (the hybrid) and P (plain). Each test ran 15 interleaved rounds and two passes, with
+every output matching. Tests 1 and 2 ran at master `893d48976f`; test 3 ran at `aaec1d4ca8`.
+
+1. **`PerfStringMatch`, in ms.**
+   - JIT: H 598.5, HY 576.3, P 649.3, so P/HY is 1.13 (1.14 on the second pass; the paired range is 1.04 to 1.23).
+   - AOT: H 569.3, HY 504.9, P 508.4, so P/HY is 1.004 to 1.007.
+2. **`net/url` `ParseQuery`, ns and bytes per call.**
+   - JIT: H 4,332, HY 4,378, P 4,328: flat. Bytes: H 5,392, HY and P 3,920.
+   - AOT: H 4,729, HY 4,608, P 4,702, so P/HY is 1.02 in both passes. The i9 reads that as a layout effect.
+3. **The deciding test: a user loop of 10M calls into small standard-library functions, H against P, with an H2 A/A
+   arm.**
+   - `Hash.String`: P/H is 1.686 and 1.782 on AOT (band 0.959 to 1.041), and 2.029 and 2.023 on the steady JIT (band
+     0.976 to 1.024).
+   - `FormatBool`: P/H is 1.121 and 1.250 on AOT (band 0.892 to 1.108).
+   - `ChanDir`: beyond the band on AOT in one pass of two.
+   - `AppendText`: flat.
+   - **Counter-evidence, recorded and not counted:** on the JIT, plain `FormatBool` is inlined into the user loop and
+     the hoisted one is not, so steady P/H is 0.86; the cause is unexplained.
+   - The default-JIT rows are a Tier0 artifact (the standard-library callees never left Tier0). The i9 is
+     investigating that, and then the inliner.
+
+### 9.3 The ruling
+
+The owner pre-registered the rule (ledger 2026-10-30 16:40): "If it makes little difference, it is settled, plain
+literals in std-lib, otherwise, if there is a measured improvment, hosited by default". COORD applied it to test 3
+(ledger 2026-10-30 18:02). The result:
+
+- User code is plain by default.
+- `-hoist-literals` stays as a user opt-in.
+- The hoist mode becomes the hybrid of seat #51's point 2 (H, `58a59fc2dd`): it keeps the fields for healthy slugs, and
+  every other site takes the plain mode's cached or cast form, so no site copies per evaluation.
+- The standard library emits the hybrid by default.
+
+Section 0 was not the deciding rule. Applied as written, it would have kept C1 and C5 as one unconditional in-loop
+rule (each was faster on both runtimes, and loop depth can select it), failed C2 on condition 2, and removed the flag.
+The owner's rule instead measured the C2 shape where it lives, at the call boundary into the standard library, and
+kept the flag.
+
+### 9.4 The predictions, scored as worded
+
+| Prediction | As worded | Reading | Score |
+|:--|:--|:--|:--|
+| G, section 0 | "Prediction ... removal" | The flag stays (9.3); the in-situ gap held on both runtimes | **miss** |
+| G, section 4b | Option (b) "cannot win"; F4 >= F2 | F4/F2 1.918 on the JIT, 1.260 on AOT | hit |
+| G, section 0 | C2 is the class most likely to win, and the converter cannot select it | C2 is the largest gap on both runtimes (1.71, 1.77); not selectable | hit |
+| G, section 4c | D6 does not close a gap | F3 moves each gap by at most about 4 points; none reaches the band | hit |
+| G, section 2 | After #51, the pure swap's +6.6% (i7, JIT) is the honest baseline | The i9 measured P/HY 1.13 on the JIT: the right direction, about twice the size | partial |
+| R, C1 | F2/F1 above the band; F3/F1 above but below F2/F1; F4/F2 >= 1 | as predicted on both runtimes | hit |
+| R, C2 | above the band; F3 above but closer | as predicted on both runtimes | hit |
+| R, C3 | inside the noise; the map operation, about 60 ns, dominates | AOT inside (55 ns); JIT beyond the band (28 ns) | half |
+| R, C4 | above the band; F3 between; F1u8/F2 "far above 1" at 32 B | AOT above, JIT inside by one outlier; F3 between on AOT only; F1u8/F2 0.877 and 0.928, below 1, at 32 B | **miss** on F1u8, half on the rest |
+| R, C5 | above the band | both runtimes | hit |
+| R, C6 | inside the noise | both runtimes | hit |
+| R, control | inside the noise | both runtimes | hit |
+| R, AOT | "the same verdicts, with F2/F1 at least as large as on JIT" | C3 and C4 swap verdicts; F2/F1 is larger on AOT only for C2 | **miss** |
+| R, bytes | 0 B except F1u8 | as predicted | hit |
+
+One reading neither lane predicted: the i9's macro asymmetry (`PerfStringMatch` plain costs 13% on the JIT and nothing
+on AOT) does not reproduce in the kernels, where AOT keeps the gap (C2 1.77). It looks like a property of that
+program under AOT, not of the cache, and nothing has explained it.
+
+### 9.5 Open items closed
+
+- **`GoHoistedLiteralsAttribute`** (section 7): no removal seat follows, because the hoist mode survives as the
+  standard library's default and as the user opt-in. The type stays live with the mode. Whether the hybrid still
+  stamps its assemblies is seat #51's to state (H).
+- **Section 8:** superseded. The flag survives, so `docs/Tuning.md` gains a `-hoist-literals` section (this seat), and
+  the `CommandLine.md` row links to it.

@@ -111,12 +111,53 @@ loop speed stayed within measurement noise.
 Most converter options change how the emitted C# reads, or which code is converted. They do not change what the
 program costs to run. These do.
 
+### String literals
+
+By default a converted program keeps a string literal where Go has it: `F("hello")`. golib converts each literal from
+C#'s UTF-16 to Go's UTF-8 once and caches the result, so each later evaluation is a lookup that allocates nothing.
+`-hoist-literals` gives the literals named `static readonly` fields instead, `F(helloˢ)`, so an evaluation is a
+plain field read. The standard library is already converted this way, so code that calls into it gets the benefit
+without the flag.
+
+**When it helps:** a tight loop that calls a small function, not inlined, that returns or passes a literal.
+
+- On `win-x64` (an Intel Core i9-13900K), a loop calling a small standard-library function that returns a literal
+  took roughly twice as long with plain literals under the JIT, and roughly 1.7 to 1.8 times as long under Native
+  AOT. A smaller such function took up to a quarter longer under Native AOT.
+- On `win-x64` (an AMD Ryzen 5 PRO 6650U):
+  - a literal returned from a small function called in a hot loop took roughly 1.7 to 1.8 times as long plain,
+    under both the JIT and Native AOT;
+  - a literal argument inside the loop took roughly 1.6 times as long under the JIT, and a sixth longer under Native
+    AOT;
+  - a local assigned from a literal took between a tenth and a seventh longer.
+- In whole programs on the i9: a literal-heavy string-matching benchmark took roughly an eighth more time plain under
+  the JIT, and the same time under Native AOT. Parsing URL queries took about the same time either way.
+
+**When it does not:** a literal evaluated rarely costs one lookup either way. A literal passed as an `any` argument,
+`fmt.Println("x")`, measured the same both ways: both forms pass one pre-boxed value. And hoisting is not always
+faster. On the i9 under the JIT, a small standard-library function ran faster plain, because the JIT inlined the plain
+form into the caller's loop and did not inline the hoisted one. Measure your own hot path.
+
+**What it costs:** the emitted C# names each literal as a field, declared above the function that first uses it, so
+the code reads less like the Go. [Plain literals](ConversionStrategies-Reference/strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
+describes both forms.
+
+<!-- Sources: docs/phase4/DESIGN-literal-hoisting-survival.md section 9 (seat #52, 2026-10-30).
+     i9-13900K, win-x64, .NET 10.0.14, 15 interleaved rounds x 2 passes, A/A band. Test 3, a user loop of 10M calls
+     (master aaec1d4ca8): Hash.String plain/hoisted 2.029 and 2.023 on the steady JIT, 1.686 and 1.782 on AOT;
+     FormatBool 1.121 and 1.250 on AOT, and 0.86 on the steady JIT (plain inlined, hoisted not; cause unexplained).
+     Test 1, PerfStringMatch (893d48976f): plain/hybrid 1.13 on the JIT, 1.004 to 1.007 on AOT. Test 2, net/url
+     ParseQuery: flat on the JIT; AOT plain/hybrid 1.02, which the i9 reads as layout.
+     Ryzen 5 PRO 6650U (G-LAPTOP), win-x64, .NET 10.0.11, LiteralSiteBench, 15 interleaved rounds, per-round medians:
+     return C2 1.707 (JIT) and 1.772 (AOT); argument C1 1.637 and 1.169; local C5 1.148 and 1.112; any slot C6 1.008
+     and 1.003, inside the A/A band. Data: docs/phase4/data/seat52-literal-classes. -->
+
 ### Goroutine stacks
 
 Each goroutine runs on its own thread, and the thread reserves a fixed stack, because a .NET stack cannot grow the
 way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot recurse
 ([how](ConversionStrategies.md#goroutines)). It is address space, not memory, but it is what a thread start pays for:
-on `win-x64`, parking 100,000 goroutines at once took roughly five times as long with the 256 MiB reserve than with
+on `win-x64`, parking 100,000 goroutines at once took roughly five times as long with the 256 MiB reserve as with
 16 MiB. On `linux-x64`, at 10,000 goroutines, the reserve made no measurable difference, and a kernel limit on
 memory mappings, not the reserve, stopped thread creation at around 16,000.
 
