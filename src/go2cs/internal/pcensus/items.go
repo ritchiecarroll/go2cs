@@ -175,6 +175,9 @@ const basic = `(?:nint|nuint|int|uint|long|ulong|short|ushort|byte|sbyte|float|d
 // The plan's sizing measure keeps basic, so its counts stay comparable with the plan table (§1).
 const sizedBasic = `(?:nint|nuint|int|uint|long|ulong|short|ushort|byte|sbyte|float|double|uintptr|rune|float32|float64|int8|int16|int32|int64|uint8|uint16|uint32|uint64)`
 
+// bareAttributes are the golib attributes whose [assembly:] records BA (#48) respells.
+const bareAttributes = `GoPositionMap|GoHoistedLiterals|GoCgoImportDynamic|GoFieldAccess`
+
 func rx(s string) *regexp.Regexp { return regexp.MustCompile(s) }
 
 func m(itemID, name, pattern string) measure {
@@ -669,6 +672,15 @@ var items = []item{
 			Insert: []*regexp.Regexp{rx(`^\s+//(?:[ \t].*)?$`)},
 			Closer: rx(`^\s+// \S.* is (?:provided by \S.*|inherited)$`),
 		},
+	},
+	{
+		// golib's [assembly:] records name their attribute bare in a package info file that carries `using go;` (seat
+		// #48): `[assembly: go.GoPositionMap(…)]` and `[assembly: global::go.GoPositionMap(…)]` both read
+		// `[assembly: GoPositionMap(…)]`, as do GoHoistedLiterals, GoCgoImportDynamic and GoFieldAccess. Only the prefix
+		// goes; the rest of the line is byte-identical, so a position map whose table moved too stays MAP (classify.go).
+		ID: "BA", Seat: "#48", Title: "golib's [assembly:] records name their attribute bare under `using go;`",
+		Canon: []rewrite{rw(`^(\s*)\[assembly: (?:global::)?go\.(`+bareAttributes+`)\b`, "$1[assembly: $2")},
+		Old:   rx(`\[assembly: (?:global::)?go\.(?:` + bareAttributes + `)\b`),
 	},
 	{
 		ID: "E1", Seat: "#19", Title: "`} else if (` on one line, and `) {` at the end of a line",
