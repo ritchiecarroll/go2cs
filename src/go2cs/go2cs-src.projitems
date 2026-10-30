@@ -193,6 +193,7 @@
     <None Include="$(MSBuildThisFileDirectory)fieldAccessCollisions.txt" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessReturn_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccessTestRecords_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldPropertyEmission_test.go" />
@@ -204,6 +205,7 @@
     <None Include="$(MSBuildThisFileDirectory)foldedShiftOperand_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignFieldConsumer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />

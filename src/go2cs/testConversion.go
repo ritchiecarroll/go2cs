@@ -3289,7 +3289,7 @@ func appendExternalTestPackageClass(testInfoPath, packageNamespace, productionPa
 	return os.WriteFile(testInfoPath, []byte(contents), 0644)
 }
 
-// conversionRecordSet snapshots the package-scoped GoImplement/GoImplicitConv record globals so
+// conversionRecordSet snapshots the package-scoped GoImplement/GoImplicitConv/GoFieldAccess record globals so
 // the external test variant's records can be written through the shared writePackageInfoFile in
 // TWO passes with different anchors (B4/B5) — the writer reads the live globals, so each pass
 // installs its partition.
@@ -3302,6 +3302,7 @@ type conversionRecordSet struct {
 	indirectConvs       map[string]hashset.HashSet[string]
 	numericConvs        map[string]map[string]string
 	indirectNumerics    map[string]map[string]string
+	fieldAccess         hashset.HashSet[string]
 }
 
 func newConversionRecordSet() conversionRecordSet {
@@ -3314,6 +3315,7 @@ func newConversionRecordSet() conversionRecordSet {
 		indirectConvs:       make(map[string]hashset.HashSet[string]),
 		numericConvs:        make(map[string]map[string]string),
 		indirectNumerics:    make(map[string]map[string]string),
+		fieldAccess:         hashset.HashSet[string]{},
 	}
 }
 
@@ -3326,12 +3328,14 @@ func (r conversionRecordSet) install() {
 	indirectImplicitConversions = r.indirectConvs
 	numericConversions = r.numericConvs
 	indirectNumericConversions = r.indirectNumerics
+	fieldAccessRecords = r.fieldAccess
 }
 
 func (r conversionRecordSet) isEmpty() bool {
 	return len(r.interfaceImplements) == 0 && len(r.promotedImplements) == 0 &&
 		len(r.proxies) == 0 && len(r.implicitConvs) == 0 && len(r.invertedConvs) == 0 &&
-		len(r.indirectConvs) == 0 && len(r.numericConvs) == 0 && len(r.indirectNumerics) == 0
+		len(r.indirectConvs) == 0 && len(r.numericConvs) == 0 && len(r.indirectNumerics) == 0 &&
+		r.fieldAccess.IsEmpty()
 }
 
 // isTestAnchoredImplementRecord decides which -tests metadata anchor hosts an EXTERNAL variant
@@ -3530,6 +3534,17 @@ func splitExternalVariantRecords(productionClassName string, handOwnHost bool) (
 	splitNumerics(numericConversions, testAnchored.numericConvs, productionAnchored.numericConvs)
 	splitNumerics(indirectNumericConversions, testAnchored.indirectNumerics, productionAnchored.indirectNumerics)
 
+	// A [GoFieldAccess] record names one struct: a bare name is the external test package's own, in scope in the
+	// test-anchored unit, and a qualified one keeps the production anchor, as a conversion pair between qualified
+	// types does.
+	for typeName := range fieldAccessRecords {
+		if isTestAnchoredConversionRecord(typeName, typeName) {
+			testAnchored.fieldAccess.Add(typeName)
+		} else {
+			productionAnchored.fieldAccess.Add(typeName)
+		}
+	}
+
 	return testAnchored, productionAnchored
 }
 
@@ -3702,6 +3717,17 @@ func splitWhiteboxVariantRecords(bridgeTypeNames hashset.HashSet[string], bridge
 
 	splitNumerics(numericConversions, bridgeAnchored.numericConvs, testAnchored.numericConvs)
 	splitNumerics(indirectNumericConversions, bridgeAnchored.indirectNumerics, testAnchored.indirectNumerics)
+
+	// A [GoFieldAccess] record names one struct, and resolves only in the scope of the variant that recorded it: the
+	// external suite's `rootMultiTest` (os) in the bridge anchor was CS0246 (seat #45). A generic struct's record is
+	// its open definition, `pair<>`, which the bridge declares as `pair`.
+	for typeName := range fieldAccessRecords {
+		if outer, _, _ := strings.Cut(typeName, "<"); isBridgeName(outer) {
+			bridgeAnchored.fieldAccess.Add(typeName)
+		} else {
+			testAnchored.fieldAccess.Add(typeName)
+		}
+	}
 
 	return bridgeAnchored, testAnchored
 }
