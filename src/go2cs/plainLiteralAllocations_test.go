@@ -29,7 +29,14 @@ const plainAllocationFixture = "package plit\n\n" +
 	"func Echo[T any](v T) T { return v }\n\n" +
 	"func shortName() Name { return \"OK\" }\n\n" +
 	"var errNamed = Name(\"package level conversion\")\n\n" +
+	"var greeting = \"package greeting\"\n\n" +
+	"func take(s string) int { return len(s) }\n\n" +
+	"func keep() string { return \"hoisted in hybrid\" }\n\n" +
+	"func init() { _ = takeName(\"from init\") }\n\n" +
 	"func sites(i int) int {\n" +
+	"\t_ = takeName(\"hybrid named value\")\n" +
+	"\t_ = take(\"de\")\n" +
+	"\tfmt.Println(\"hi\")\n" +
 	"\t_ = Name(\"xy\")\n" +
 	"\tvar l logger\n" +
 	"\tl.logf(\"method format position %d\", i)\n" +
@@ -181,26 +188,66 @@ func TestAnyShapedSitesTakeThePreBoxedField(t *testing.T) {
 	}
 }
 
-// TestHoistModeKeepsTheAllocationClassesAsTheyWere:-hoist-literals is the user opt-in seat #52 decides on,
-// and #51 leaves it byte-for-byte as it was. Its format positions, append arguments and composite elements
-// stay `"…"u8`.
-func TestHoistModeKeepsTheAllocationClassesAsTheyWere(t *testing.T) {
+// The forms both modes share: every site that takes no field reads the cached plain or cast form, never a per-evaluation
+// copy, and an any-shaped site with a healthy slug takes the pre-boxed field.
+var sharedCachedForms = []string{
+	`l.logf("method format position %d", `,
+	`myf("function format position %v", `,
+	`fmt.Sprintf("twin format position %v"u8, `,
+	`parts, (@string)"appended element")`,
+	`append(parts, (@string)"first of two", `,
+	`[(@string)"named composite element"]`,
+	`[(@string)"named map key"] = "plain map value"`,
+	`takeName((@string)"ab")`,
+	`Echo((@string)"cd")`,
+	`return (@string)"OK";`,
+	`takeName(""u8)`,
+	`(Name)(@string)"package level conversion"`,
+	`(Name)(@string)"xy"`,
+	`take("de")`,
+	`fmt.Println("hi");`,
+	`takeName((@string)"from init")`,
+	`"package greeting";`,
+	`takeName(hybridNamedValueˢ)`,
+	`append(buf, ((@string)"spread literal").ꓸꓸꓸ)`,
+	`print((@string)"print literal ", `,
+	`println((@string)"println literal")`,
+	` in (@string)"range literal")`,
+	`slice<any>([boxedCompositeElementˢ, (@string)"%v", `,
+	`appendedAnyElementˢ`,
+	`["plain bag key"] = boxedMapValueˢ`,
+	`v: boxedFieldValueˢ`,
+	`f((@string)"OK");`,
+}
+
+// TestPlainModeSharedForms: plain mode's side of the shared table, plus its bare literal where hoist mode keeps a field.
+func TestPlainModeSharedForms(t *testing.T) {
+	emitted := convertPlainAllocationFixture(t, false)
+
+	for _, want := range append(sharedCachedForms, `return "hoisted in hybrid";`) {
+		if !strings.Contains(emitted, want) {
+			t.Errorf("want %q:\n%s", want, emitted)
+		}
+	}
+}
+
+// TestHybridHoistModeTakesTheCachedForms (owner ruling 2026-10-30): -hoist-literals is the HYBRID. It keeps a
+// healthy-slug literal's hoisted field, and every site it would have left as a per-evaluation copy -- a degenerate
+// slug, a format position, a composite element, an append or spread or print or range argument, an `init` or
+// package-level initializer, an any-shaped site -- takes the form plain mode gives it. Hoist mode allocates per
+// evaluation nowhere plain mode does not.
+func TestHybridHoistModeTakesTheCachedForms(t *testing.T) {
 	emitted := convertPlainAllocationFixture(t, true)
 
-	for _, want := range []string{
-		`l.logf("method format position %d"u8, `,
-		`myf("function format position %v"u8, `,
-		`parts, "appended element"u8)`,
-		`["named composite element"u8]`,
-		`["named map key"u8] = "plain map value"u8`,
-		`slice<any>([(@string)"boxed composite element"u8, `,
-		`f((@string)"OK"u8);`,
-		`append(buf, ((@string)"spread literal"u8).ꓸꓸꓸ)`,
-		`print((@string)"print literal "u8, `,
-		`println((@string)"println literal"u8)`,
-	} {
+	for _, want := range append(sharedCachedForms, `return hoistedInHybridˢ;`) {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("-hoist-literals: want %q:\n%s", want, emitted)
+		}
+	}
+
+	for _, value := range []string{"method format position %d", "appended element", "named composite element", "ab", "OK", "xy", "de", "hi", "from init", "package greeting", "spread literal", "print literal ", "range literal", "%v", "ef"} {
+		if unwanted := `"` + value + `"u8`; strings.Contains(emitted, unwanted) && !strings.Contains(emitted, "= "+unwanted+";") && !strings.Contains(emitted, "= (@string)"+unwanted+";") {
+			t.Errorf("-hoist-literals: %s still builds an @string per evaluation:\n%s", unwanted, emitted)
 		}
 	}
 }
