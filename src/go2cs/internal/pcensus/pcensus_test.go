@@ -260,6 +260,7 @@ var plants = []plant{
 	one("PL good: a spread takes the cached cast", prodFile, `    b = append(b, ((@string)@"\x"u8).ꓸꓸꓸ);`, `    b = append(b, ((@string)@"\x").ꓸꓸꓸ);`, "PL"),
 	one("PL good: a composite's any element takes a field", prodFile, `    var xs = slice<any>([(@string)"boxed element"u8, i]);`, `    var xs = slice<any>([boxedElementˢ, i]);`, "PL"),
 	one("PL good: a kept field becomes pre-boxed", prodFile, `private static readonly @string funcValueˢ = "func value"u8;`, `private static readonly object funcValueˢ = (@string)"func value"u8;`, "PL"),
+	one("PL good: a bare literal takes the cached cast", prodFile, `            "/data/misc/keychain/certs-added"`, `            (@string)"/data/misc/keychain/certs-added"`, "PL"),
 	one("PL good: a char literal holding a quote", prodFile, `    ['"'] = "&#34;"u8,`, `    ['"'] = "&#34;",`, "PL"),
 	one("PL bad: another literal", prodFile, `    take(helloWorldˢ);`, `    take("hello there");`, "UNCLASSIFIED"),
 	one("PL bad: the call changed too", prodFile, `    take(helloWorldˢ);`, `    give("hello world");`, "UNCLASSIFIED"),
@@ -1003,9 +1004,16 @@ func TestPlainSeatBlockPlants(t *testing.T) {
 	}{
 		{"PS good: the stamp and its note", diffOf(infoFile, stamp, nil), "PS", ""},
 		{"PS bad: a stamp outside package_info.cs", diffOf(prodFile, stamp[4:5], nil), "", "GoHoistedLiterals"},
-		{"PR good: the static constructor's call", diffOf(initFile, []string{`        initᴛheapProfile();`}, nil), "PR", ""},
-		{"PR bad: an init call outside package_init.cs", diffOf(prodFile, []string{`        initᴛheapProfile();`}, nil), "", "initᴛheapProfile"},
+		{"PI good: the static constructor's call", diffOf(initFile, []string{`        initᴛheapProfile();`}, nil), "PI", ""},
+		{"PI bad: an init call outside package_init.cs", diffOf(prodFile, []string{`        initᴛheapProfile();`}, nil), "", "initᴛheapProfile"},
 		{"PR good: a StaticBox keeps its ref property between", diffOf(prodFile, staticBox, staticBoxNew), "PR", ""},
+		{"PR good: a StaticBox's ref property moves below the initializer", hunkDiff(prodFile, []string{
+			"-" + staticBox[0], "-" + staticBox[1], "-" + staticBox[2], "+" + staticBoxNew[0],
+			" " + `    key`,
+			"-" + `)); }`, "+" + `)));`, "+" + staticBox[1],
+		}), "PR", ""},
+		{"PA good: a dead alias and its blank line", diffOf(prodFile, []string{`        ref var roots = ref Ꮡroots.DerefOrNull();`, ``}, nil), "PA", ""},
+		{"PA bad: a live statement", diffOf(prodFile, []string{`        var roots = Ꮡroots.DerefOrNull();`}, nil), "", "var roots"},
 		{"PL good: hoisted fields and a const field deleted", diffOf(prodFile, fields, nil), "PL", ""},
 	} {
 		tl := c.classifyDiff(p.diff)

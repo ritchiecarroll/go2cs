@@ -623,6 +623,8 @@ var items = []item{
 		},
 		Old:  rx(`"u8`),
 		Olds: []*regexp.Regexp{rx(`ˢ`), rx(`ᶜ`), rx(`static readonly @string \w+ˢ`), rx(`ˢ\d`)},
+		// A bare C# literal the base already passed (append's later arguments) gains the cached cast.
+		New: rx(`\(@string\)@?"`),
 		Block: &blockRule{
 			OldAnchor:  rx(`^\s*(?:private|internal) static readonly (?:object|@string) \w+[ˢᶜ]\d* = `),
 			Standalone: true,
@@ -654,6 +656,17 @@ var items = []item{
 		})},
 		Guard: rx(`^\s*@string ` + id + ` = ` + id + `ᶜ\d*;$`),
 		Old:   rx(`ᶜ`),
+	},
+	{
+		// #51's dead-alias scan reads a body without its string literals (visitFuncDecl.go), so a pointer parameter whose
+		// only "use" was a word in a message keeps its Go name (R5 renames the box) and loses its dead dereferencing
+		// alias, which this item deletes, with the blank line after it.
+		ID: "PA", Seat: "#51", Title: "a dead pointer alias a string literal kept is deleted",
+		Block: &blockRule{
+			PerSide:   true,
+			OldAnchor: rx(`^\s*ref var ` + id + ` = ref Ꮡ` + id + `\.DerefOrNull\(\);$`),
+			Delete:    []*regexp.Regexp{rx(`^\s*ref var ` + id + ` = ref Ꮡ` + id + `\.DerefOrNull\(\);$`), rx(`^\s*$`)},
+		},
 	},
 	{
 		// #51's other package_info.cs line: a package that no longer hoists drops the [GoHoistedLiterals] stamp and the
@@ -701,6 +714,17 @@ var items = []item{
 		Canon: []rewrite{rw(`^(.*?)\)+;(?: \})?$`, "$1⦃)⦄;")},
 		Guard: rx(`\); \}$|^(?:internal|public|private) static `),
 		Old:   rx(`; \}$`),
+		// In the declaring file a StaticBox's ref property moves below the initializer, which Moves pairs; the init
+		// method anchors the rewrite. The static constructor's call is PI's.
+		Block: &blockRule{
+			OldAnchor:  rx(`^(?:internal|public|private) static void initᴛ` + id + `\(\) \{ `),
+			Standalone: true,
+			Moves:      true,
+		},
+	},
+	{
+		// PR's other half: the ordered static constructor's `initᴛX();` call leaves package_init.cs, and only there.
+		ID: "PI", Seat: "#51", Title: "a relocated initializer's call leaves package_init.cs",
 		Block: &blockRule{
 			PerSide: true,
 			File:    rx(`(^|/)package_init\.cs$`),
