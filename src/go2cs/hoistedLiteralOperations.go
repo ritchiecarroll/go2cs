@@ -88,6 +88,20 @@ var packagePlainLits map[*ast.BasicLit]bool
 // literal with no bare C# form keeps its own. convExpr's BasicLit arm consults it through isCastStringLiteral.
 var packageCastLits map[*ast.BasicLit]bool
 
+// packageBoxesBareLiterals reports whether a literal in an any slot of the package renders bare, for go2cs-gen's
+// interceptor to box. A hoist-mode package carries the [GoHoistedLiterals] stamp, which turns the generator off, only
+// while it reports false (applyHoistedLiteralsStamp).
+var packageBoxesBareLiterals bool
+
+// literalFallback is a use's form when its literal does not survive naming as a field.
+type literalFallback int
+
+const (
+	fallbackCast     literalFallback = iota + 1 // `(@string)"…"`
+	fallbackPlain                               // `"…"`, a string slot
+	fallbackPlainAny                            // `"…"`, an interceptable any slot
+)
+
 // packageGoDeferLits holds, in plain mode, every string literal that is a direct argument of a go/defer
 // call, which claims no field (seat #33, goDeferConstArgs.go). The value is whether the literal renders
 // as a plain C# literal when it moves into the thunk's call, which is the plain rule of the same literal
@@ -196,6 +210,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 	packageHoistNames = make(map[string]hoistSeed)
 	packageHoistedLocalConsts = make(map[*types.Const]bool)
 	packagePlainLits = make(map[*ast.BasicLit]bool)
+	packageBoxesBareLiterals = false
 	packageGoDeferLits = make(map[*ast.BasicLit]bool)
 	packageCastLits = make(map[*ast.BasicLit]bool)
 
@@ -214,7 +229,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 		uses:    make(map[*ast.BasicLit]*hoistedLiteral),
 		useFunc: make(map[*ast.BasicLit]*ast.FuncDecl),
 
-		castFallback: make(map[*ast.BasicLit]bool),
+		fallback: make(map[*ast.BasicLit]literalFallback),
 	}
 
 	if !initOrderRelocated {
@@ -258,14 +273,13 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 			// hotness heuristic (§4.2). Reachable from a package-level var initializer with no
 			// relocation available (see the initOrderRelocated parameter): a field declared above
 			// this function could be read before its own initializer runs, so nothing here hoists.
-			// Neither reason touches a PLAIN literal, which declares no field, so those still go plain.
+			// Neither reason touches a PLAIN literal, which declares no field, so those still go plain, in both
+			// modes (the hybrid, owner ruling 2026-10-30).
 			if (funcDecl.Recv == nil && funcDecl.Name.Name == "init") || c.initReachable[funcDecl] {
-				if !packageHoistsLiterals {
-					c.plainOnly = true
-					c.collectFunc(funcDecl)
-					c.collectPlainLocalConsts(funcDecl)
-					c.plainOnly = false
-				}
+				c.plainOnly = true
+				c.collectFunc(funcDecl)
+				c.collectPlainLocalConsts(funcDecl)
+				c.plainOnly = false
 
 				continue
 			}
@@ -286,9 +300,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 			}
 		}
 
-		if !packageHoistsLiterals {
-			c.collectPlainPackageVars(fileEntry.file)
-		}
+		c.collectPlainPackageVars(fileEntry.file)
 	}
 
 	c.assignNames(pkg)
@@ -303,11 +315,22 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 		packageHoistedLits[lit] = hl
 	}
 
-	// Plain mode: a use whose literal claimed no surviving field takes the cached cast instead of
-	// `"…"u8` (packageCastLits).
-	for lit := range c.castFallback {
-		if packageHoistedLits[lit] == nil {
+	// A use whose literal claimed no surviving field takes its fallback instead of `"…"u8`: the cached cast
+	// (packageCastLits), or, where the slot takes it, the bare literal (packagePlainLits). A bare literal in an
+	// any slot is boxed by go2cs-gen's interceptor, so the package can carry no [GoHoistedLiterals] stamp.
+	for lit, fallback := range c.fallback {
+		if packageHoistedLits[lit] != nil {
+			continue
+		}
+
+		switch fallback {
+		case fallbackCast:
 			packageCastLits[lit] = true
+		case fallbackPlainAny:
+			packageBoxesBareLiterals = true
+			fallthrough
+		case fallbackPlain:
+			packagePlainLits[lit] = true
 		}
 	}
 
@@ -363,9 +386,9 @@ type hoistCollector struct {
 	// init and init-reachable arm of collectHoistedLiterals).
 	plainOnly bool
 
-	// castFallback holds, in plain mode, every use that renders `(@string)"…"` unless its literal
-	// survives naming as a field (see packageCastLits).
-	castFallback map[*ast.BasicLit]bool
+	// fallback holds every use's form when its literal does not survive naming as a field: the cached cast
+	// `(@string)"…"` (packageCastLits), or the bare literal where its slot takes one (packagePlainLits).
+	fallback map[*ast.BasicLit]literalFallback
 
 	// per-function walk state
 	funcDecl *ast.FuncDecl
@@ -682,11 +705,7 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 	kind, slot, ok := c.hoistTarget(lit, stack)
 
 	if !ok {
-		if packageHoistsLiterals {
-			return
-		}
-
-		// Plain mode, a literal spread into append, `append(b, "x"...)`: the spread projects an @string's
+		// Both modes (hoist mode is the hybrid, owner ruling 2026-10-30): a literal spread into append, `append(b, "x"...)`: the spread projects an @string's
 		// bytes, and the cached cast makes that @string once per literal (convExprList wraps it).
 		// The same for a print or println builtin's argument (golib's overload set takes the @string) and for
 		// a range over a literal, which enumerates an @string.
@@ -698,7 +717,7 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 			return
 		}
 
-		// Plain mode also reaches a composite ELEMENT (or key, or field value) and an append argument,
+		// Both modes also reach a composite ELEMENT (or key, or field value) and an append argument,
 		// which the hoist excludes (Tier B, and a builtin): the composite's own type, or the appended
 		// slice's element type, fixes the slot's C# type. An exact `string` slot of a composite takes the
 		// bare literal. Every other string slot there takes the cached cast (a bare C# string would bind
@@ -734,32 +753,49 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 		return
 	}
 
-	// Plain mode: a value slot typed exactly `string` takes the bare C# literal and no field. The
-	// empty literal goes plain too; it reads as Go does and converts to the zero @string.
-	if !packageHoistsLiterals && kind == hoistUseValue && isPlainStringSlot(slot) && hasBareCSharpForm(lit) && c.plainContext(lit, stack) {
+	// A FORMAT position claims no field in either mode: a format string slugs badly (`"%v"` -> `vˢ`, `"invalid %s
+	// at %d"` -> `invalidSAtD`). Bound to an exact `string` parameter it takes the bare literal; an sstring twin's
+	// keeps `"…"u8`, the zero-copy view; any other (a hoist-mode go/defer argument) takes the cached cast.
+	if c.isFormatPositionArg(lit, stack) {
+		switch {
+		case kind == hoistUseValue && isPlainStringSlot(slot) && hasBareCSharpForm(lit) && c.plainContext(lit, stack):
+			packagePlainLits[lit] = true
+		case value != "" && hasBareCSharpForm(lit) && !c.atSStringTwinPosition(lit, stack):
+			packageCastLits[lit] = true
+		}
+
+		return
+	}
+
+	// A value slot typed exactly `string` takes the bare C# literal. Plain mode claims no field for it; hoist mode
+	// keeps a healthy slug's field and takes the bare literal where the slug is degenerate (the fallback). The empty
+	// literal goes plain in plain mode; it reads as Go does and converts to the zero @string.
+	plainSlot := kind == hoistUseValue && isPlainStringSlot(slot) && hasBareCSharpForm(lit) && c.plainContext(lit, stack)
+
+	// An `any` slot: the argument of a call go2cs-gen's LiteralInterceptorGenerator can intercept takes the bare C#
+	// literal too, and the generated interceptor writes a cached, pre-boxed Go string into the slot. The same
+	// bare-form predicate as the string slot, so the any slot admits no literal the string slot refuses. Every other
+	// any slot keeps the pre-boxed field.
+	plainAnySlot := kind == hoistUseAny && hasBareCSharpForm(lit) && c.interceptableAnyArg(lit, stack)
+
+	if (plainSlot || plainAnySlot) && (!packageHoistsLiterals || c.plainOnly) {
 		packagePlainLits[lit] = true
+		packageBoxesBareLiterals = packageBoxesBareLiterals || plainAnySlot
+
 		return
 	}
 
-	// Plain mode, an `any` slot: the argument of a call go2cs-gen's LiteralInterceptorGenerator can
-	// intercept takes the bare C# literal too, and the generated interceptor writes a cached, pre-boxed Go
-	// string into the slot. The same bare-form predicate as the string slot, so the any slot admits no
-	// literal the string slot refuses. Every other any slot keeps the pre-boxed field.
-	if !packageHoistsLiterals && kind == hoistUseAny && hasBareCSharpForm(lit) && c.interceptableAnyArg(lit, stack) {
-		packagePlainLits[lit] = true
-		return
-	}
-
-	// Plain mode, a FORMAT position that did not go plain: an sstring twin's, where `"…"u8` binds the
-	// zero-copy view. It claims no field, for the reason the hoist excludes it (callArgTarget).
-	if !packageHoistsLiterals && c.isFormatPositionArg(lit, stack) {
-		return
-	}
-
-	// Plain mode: every use below that ends without a surviving field takes the cached cast, except at an
-	// sstring twin's position, where `"…"u8` is already a zero-copy view.
-	if !packageHoistsLiterals && value != "" && hasBareCSharpForm(lit) && !c.atSStringTwinPosition(lit, stack) {
-		c.castFallback[lit] = true
+	// Every use below that ends without a surviving field takes its fallback: the bare literal where the slot takes
+	// one, else the cached cast, except at an sstring twin's position, where `"…"u8` is already a zero-copy view.
+	// Hoist mode leaves the empty literal's `""u8`, which allocates nothing.
+	switch {
+	case value == "" || !hasBareCSharpForm(lit):
+	case plainSlot:
+		c.fallback[lit] = fallbackPlain
+	case plainAnySlot:
+		c.fallback[lit] = fallbackPlainAny
+	case !c.atSStringTwinPosition(lit, stack):
+		c.fallback[lit] = fallbackCast
 	}
 
 	// The empty literal already costs 0 B (ToArray() of an empty span returns Array.Empty). A
@@ -951,15 +987,6 @@ func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (h
 	params := sig.Params()
 
 	if params == nil {
-		return 0, nil, false
-	}
-
-	// FORMAT-POSITION literals stay inline in hoist mode (§4.2): a format string slugs badly (`"%v"` ->
-	// `vˢ`, `"invalid %s at %d"` -> `invalidSAtD`), and a formatting call's cost is dominated by the
-	// formatting itself. Plain mode classifies one like any other argument, since a plain literal has no
-	// name: bound to an exact `string` parameter it goes bare, and otherwise (an sstring twin) consider
-	// keeps it inline without a field.
-	if packageHoistsLiterals && isFormatPosition(call, idx, sig) {
 		return 0, nil, false
 	}
 
