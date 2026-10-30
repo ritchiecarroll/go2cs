@@ -1,0 +1,6 @@
+26a27,31
+> # G's one change (seat #52 run on G-LAPTOP): an optional 6th argument, a comma list of classes, selects and ORDERS them,
+> # so the control class runs first and alone (COORD: "the control class first"). Without it, R's order is unchanged.
+> if len(sys.argv) > 6:
+>     _by = dict(CLASSES)
+>     CLASSES = [(c, _by[c]) for c in sys.argv[6].split(",")]

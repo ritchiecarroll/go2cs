@@ -1,0 +1,8 @@
+negation edit: before=1 after=1 (expect 1 1)
+                nint hit = strings.HasPrefix(line, "//go:build") ? 2 : 0;
+F4chk build rc=0
+0
+F2 c1: checksum: 600
+F2 c1i: checksum: 600
+NEG c1: checksum: 600
+NEG c1i: checksum: 1672
