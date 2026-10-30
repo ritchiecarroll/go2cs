@@ -45,8 +45,8 @@ internal static uint64 fieldArrayMethod() {
 
 internal static uint64 nestedFieldArrayMethod() {
     ref var w = ref heap(new wrap(), out var Ꮡw);
-    Ꮡw.of(wrap.Ꮡh).at(hist.Ꮡcounts, 3).Add(5);
-    return Ꮡw.of(wrap.Ꮡh).at(hist.Ꮡcounts, 3).Load();
+    Ꮡw.Ꮡh.at(hist.Ꮡcounts, 3).Add(5);
+    return Ꮡw.Ꮡh.at(hist.Ꮡcounts, 3).Load();
 }
 
 internal static uint64 localArrayMethod() {

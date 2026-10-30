@@ -25,7 +25,7 @@ internal static void run(this ж<builder> Ꮡb) {
     try {
         ref var b = ref Ꮡb.DerefOrNull();
 
-        defer(Ꮡb.of(builder.Ꮡc).reset, ref ᒐ);
+        defer(Ꮡb.Ꮡc.reset, ref ᒐ);
         b.c.inc();
         b.c.inc();
         fmt.Println("inside:", b.c.n);
@@ -45,8 +45,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             var xʗ2 = xʗ1;
-            defer(xʗ2.of(builder.Ꮡc).reset, ref ᒐ);
-            xʗ1.of(builder.Ꮡc).inc();
+            defer(xʗ2.Ꮡc.reset, ref ᒐ);
+            xʗ1.Ꮡc.inc();
             fmt.Println("inside2:", xʗ1.c.n);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

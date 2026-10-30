@@ -16,8 +16,8 @@ partial struct lazyProc {
 }
 
 internal static bool find(this ж<lazyProc> Ꮡl) {
-    if (atomic.LoadPointer(Ꮡl.of(lazyProc.Ꮡp)) == nil) {
-        atomic.StorePointer(Ꮡl.of(lazyProc.Ꮡp), Ꮡ(new proc(addr: 42)));
+    if (atomic.LoadPointer(Ꮡl.Ꮡp) == nil) {
+        atomic.StorePointer(Ꮡl.Ꮡp, Ꮡ(new proc(addr: 42)));
         return true;
     }
     return false;
@@ -50,8 +50,8 @@ internal static void identity() {
     fmt.Println(same, diff);
 
     ref var l = ref heap(new lazyProc(), out var Ꮡl);
-    @unsafe.Pointer fp = @unsafe.Pointer.FromBox(Ꮡl.of(lazyProc.Ꮡp));
-    fmt.Println(fp == @unsafe.Pointer.FromBox(Ꮡl.of(lazyProc.Ꮡp)), fp == pa);
+    @unsafe.Pointer fp = @unsafe.Pointer.FromBox(Ꮡl.Ꮡp);
+    fmt.Println(fp == @unsafe.Pointer.FromBox(Ꮡl.Ꮡp), fp == pa);
 }
 
 internal static void Main() {

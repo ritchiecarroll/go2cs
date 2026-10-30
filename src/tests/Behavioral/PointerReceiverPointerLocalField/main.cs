@@ -33,11 +33,11 @@ internal static void Main() {
     var @base = Ꮡ(new holder());
     var h = get(@base);
 
-    h.of(holder.Ꮡs).inc();
-    h.of(holder.Ꮡs).inc();
-    h.of(holder.Ꮡs).add(10);
+    h.Ꮡs.inc();
+    h.Ꮡs.inc();
+    h.Ꮡs.add(10);
 
-    fmt.Println(@base.of(holder.Ꮡs).get());
+    fmt.Println(@base.Ꮡs.get());
 }
 
 } // end main_package

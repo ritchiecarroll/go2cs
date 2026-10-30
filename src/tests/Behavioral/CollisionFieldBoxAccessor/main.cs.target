@@ -28,7 +28,7 @@ internal static ref Δmark gm => ref ((StaticBox<Δmark>)Ꮡgm).ValueSlot;
 
 internal static partial nint localShadowsCollisionType() {
     var m = Ꮡ(new Δmark(id: 10));
-    var pid = m.of(main_package.Δmark.Ꮡid);
+    var pid = m.Ꮡid;
     pid.Value = 55;
     nint Δmark = 7;
     return pid.Value + Δmark;
@@ -48,7 +48,7 @@ internal static partial nint capturedLocalNamedAfterType() {
     nint got = 0;
     var wʗ1 = w;
     run(() => {
-        var p = wʗ1.of(main_package.w.Ꮡpark);
+        var p = wʗ1.Ꮡpark;
         p.Value = p.Value + 3;
         got = p.Value;
     });
@@ -59,7 +59,7 @@ internal static partial nint boxRefCapturedValueNamedAfterType() {
     ref var w = ref heap<w>(new w(park: 100, other: 9), out var Ꮡw);
     nint got = 0;
     run(() => {
-        var p = Ꮡw.of(main_package.w.Ꮡpark);
+        var p = Ꮡw.Ꮡpark;
         p.Value = p.Value + 5;
         got = p.Value;
     });
@@ -68,10 +68,10 @@ internal static partial nint boxRefCapturedValueNamedAfterType() {
 }
 
 internal static void Main() {
-    var p = Ꮡh.of(holder.Ꮡmark);
+    var p = Ꮡh.Ꮡmark;
     p.Value = 42;
 
-    var q = Ꮡh.of(holder.Ꮡextra);
+    var q = Ꮡh.Ꮡextra;
     q.Value = 7;
 
     fmt.Println(h.mark, h.extra);
@@ -82,7 +82,7 @@ internal static void Main() {
     t.mark();
     fmt.Println(m.id);
 
-    var pid = Ꮡgm.of(main_package.Δmark.Ꮡid);
+    var pid = Ꮡgm.Ꮡid;
     pid.Value = 99;
     fmt.Println(gm.id);
 

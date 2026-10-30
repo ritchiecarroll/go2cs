@@ -45,6 +45,7 @@ using static go.main_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: go.GoFieldAccess(typeof(holder))]
 [assembly: go.GoFieldAccess(typeof(owner))]
+[assembly: go.GoFieldAccess(typeof(profile))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

@@ -19,7 +19,7 @@ internal static void Main() {
 
     var g = lib.New(lib.Base());
     fmt.Println("add:", g.Add(4));
-    fmt.Printf("%T\n"u8, g.of(lib.Guarded.ᏑMutex));
+    fmt.Printf("%T\n"u8, g.ᏑMutex);
 }
 
 } // end main_package

@@ -13,7 +13,7 @@ partial struct reader {
 internal static (nint, error) Read(this ж<reader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    var q = Ꮡr.of(reader.Ꮡpos);
+    var q = Ꮡr.Ꮡpos;
     if (q.Value >= len(r.src)) {
         return (0, default);
     }

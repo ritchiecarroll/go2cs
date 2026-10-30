@@ -55,8 +55,8 @@ internal static void Main() {
     ref var Δp = ref heap<box>(new box(n: 0), out var Ꮡp);
     setN(Ꮡp, 7);
     setN(Ꮡp, Δp.n + 3);
-    bump(Ꮡp.of(box.Ꮡn));
-    bump(ᏑΔcounter.of(box.Ꮡn));
+    bump(Ꮡp.Ꮡn);
+    bump(ᏑΔcounter.Ꮡn);
     fmt.Println(Δcounter.n);
     fmt.Println(Δp.n, usesTypeP());
     fmt.Println(lastBox.n, lastInt.Value);

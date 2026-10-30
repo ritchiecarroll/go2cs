@@ -38,13 +38,13 @@ internal static partial void bumpInt(ref nint p) {
 
 internal static void Main() {
     var pp = Ꮡ(new pstate(wbBuf: new wbBuf(buf: new uintptr[]{10, 20, 30, 40}.array())));
-    bump(ref (pp.of(pstate.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0)).DerefOrNull());
+    bump(ref (pp.ᏑwbBuf.at(wbBuf.Ꮡbuf, 0)).DerefOrNull());
     fmt.Println(pp.wbBuf.buf[0], pp.wbBuf.buf[1]);
 
     var got = (uintptr)0;
     var ppʗ1 = pp;
     func(() => {
-        bump(ref (ppʗ1.of(pstate.ᏑwbBuf).at(wbBuf.Ꮡbuf, 1)).DerefOrNull());
+        bump(ref (ppʗ1.ᏑwbBuf.at(wbBuf.Ꮡbuf, 1)).DerefOrNull());
         got = ppʗ1.wbBuf.buf[1];
     })();
     fmt.Println(got);

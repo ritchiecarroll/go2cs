@@ -38,7 +38,7 @@ internal static void Main() {
     nint got = default;
     run(() => {
         got = mheap.alloc();
-        var p = Ꮡmheap.of(heap.Ꮡcount);
+        var p = Ꮡmheap.Ꮡcount;
         p.Value += 10;
     });
     fmt.Println(got, mheap.count);

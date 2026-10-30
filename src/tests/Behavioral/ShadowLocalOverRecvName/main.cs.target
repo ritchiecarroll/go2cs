@@ -51,7 +51,7 @@ public static nint PtrShadowChain(this ref Thing t, ж<Thing> other) {
     t.inner.n = 1;
     {
         var tΔ1 = other;
-        var q = tΔ1.of(Thing.Ꮡinner).of(Inner.Ꮡn);
+        var q = tΔ1.Ꮡinner.Ꮡn;
         q.Value = 77;
     }
     return t.inner.n;
@@ -65,7 +65,7 @@ public static nint ValShadowField(this ж<Thing> Ꮡt) {
     {
         ref var tΔ1 = ref heap<Thing>(new Thing(val: 7), out var ᏑtΔ1);
         var q = ᏑtΔ1;
-        var p = ᏑtΔ1.of(Thing.Ꮡval);
+        var p = ᏑtΔ1.Ꮡval;
         p.Value = 99;
         got = q.n();
     }

@@ -82,7 +82,7 @@ internal static void Main() {
     f();
     fmt.Println("pkgvar  ", g.n);
 
-    var fh = Ꮡgh.of(H.Ꮡt).inc;
+    var fh = Ꮡgh.Ꮡt.inc;
     fh();
     fmt.Println("field   ", gh.t.n);
 

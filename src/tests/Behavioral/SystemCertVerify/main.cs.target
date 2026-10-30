@@ -38,7 +38,7 @@ internal static void Main() {
         BasicConstraintsValid: true
     ));
 
-    (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.of(ecdsa.PrivateKey.ᏑPublicKey), key.OrTypedNil());
+    (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.ᏑPublicKey, key.OrTypedNil());
     if (err != nil) {
         fmt.Println("create certificate error:", err);
         return;

@@ -67,7 +67,7 @@ public static bool Verify(this ref DeepHash d, slice<byte> expected) {
 
 internal static array<byte> resetVia(ж<DeepHash> p) {
     ref var acc = ref heap(new array<byte>(4), out var Ꮡacc);
-    p.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
+    p.Ꮡdeep.of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
     return acc.Clone();
 }
 
@@ -78,9 +78,9 @@ internal static void Main() {
     fmt.Println(h.finalized);
 
     var d = Ꮡ(new DeepHash());
-    d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Add(slice<byte>("go2cs"u8));
+    d.Ꮡdeep.of(deep.Ꮡacc).of(acc.Ꮡinner).Add(slice<byte>("go2cs"u8));
     ref var @out = ref heap(new array<byte>(4), out var Ꮡout);
-    d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
+    d.Ꮡdeep.of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
     fmt.Println(@out);
     fmt.Println(d.Verify(@out[..]));
     fmt.Println(d.Verify(slice<byte>([0, 0])));

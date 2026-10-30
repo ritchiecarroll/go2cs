@@ -17,13 +17,13 @@ public static void Log(this ж<Logger> Ꮡl, @string line) {
     try {
         ref var l = ref Ꮡl.DerefOrNull();
 
-        Ꮡl.of(Logger.Ꮡmu).Lock();
+        Ꮡl.Ꮡmu.Lock();
         ᒐd1 = true;
 
         l.lines = append(l.lines, line);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd1) Ꮡl.of(Logger.Ꮡmu).Unlock(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡl.Ꮡmu.Unlock(); ᒐ.Run(); }
 }
 
 internal static void Main() {

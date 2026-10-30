@@ -211,10 +211,10 @@ internal static void Main() {
     var (_, missOther) = keyed[@unsafe.Pointer.FromPinnedBox(n2), ꟷ];
     fmt.Println("map: same box twice found:", foundBox, " same number twice found:", foundNumber, " other box found:", missOther);
     ref var h = ref heap(new main_holder(), out var Ꮡh);
-    @unsafe.Pointer fp = @unsafe.Pointer.FromBox(Ꮡh.of(main_holder.Ꮡp));
+    @unsafe.Pointer fp = @unsafe.Pointer.FromBox(Ꮡh.Ꮡp);
     var fieldKeyed = new map<@unsafe.Pointer, nint>{[fp] = 3};
-    var (_, foundField) = fieldKeyed[@unsafe.Pointer.FromBox(Ꮡh.of(main_holder.Ꮡp)), ꟷ];
-    fmt.Println("same field twice:", fp == @unsafe.Pointer.FromBox(Ꮡh.of(main_holder.Ꮡp)), " field vs other box:", fp == @unsafe.Pointer.FromPinnedBox(n), " map: same field twice found:", foundField);
+    var (_, foundField) = fieldKeyed[@unsafe.Pointer.FromBox(Ꮡh.Ꮡp), ꟷ];
+    fmt.Println("same field twice:", fp == @unsafe.Pointer.FromBox(Ꮡh.Ꮡp), " field vs other box:", fp == @unsafe.Pointer.FromPinnedBox(n), " map: same field twice found:", foundField);
 
     convRow("[]byte(nil) -> *[0]byte", slice<byte>(default), ж<array<byte>>.NilBoxOfDims(0L));
     convRow("[]byte{} -> *[0]byte", slice<byte>([]), Ꮡ(new array<byte>(0)));

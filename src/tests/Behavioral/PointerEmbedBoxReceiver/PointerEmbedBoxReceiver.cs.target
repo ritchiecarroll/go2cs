@@ -9,7 +9,7 @@ partial struct Inner {
 }
 
 public static void Add(this ж<Inner> Ꮡn, nint x) {
-    var p = Ꮡn.of(Inner.Ꮡtotal);
+    var p = Ꮡn.Ꮡtotal;
     p.Value += x;
 }
 

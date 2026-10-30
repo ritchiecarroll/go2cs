@@ -34,11 +34,11 @@ internal static (nint, nint) allocShape() {
     ref var c = ref heap<ж<cachelike>>(out var Ꮡc);
     run(() => {
         Ꮡc.ValueSlot = alloc();
-        Ꮡc.ValueSlot.of(cachelike.Ꮡflush).bump(41);
+        Ꮡc.ValueSlot.Ꮡflush.bump(41);
         Ꮡc.ValueSlot.pad = 7;
     });
-    c.of(cachelike.Ꮡflush).bump(1);
-    return (c.of(cachelike.Ꮡflush).get(), c.pad);
+    c.Ꮡflush.bump(1);
+    return (c.Ꮡflush.get(), c.pad);
 }
 
 partial struct gauge {
@@ -53,10 +53,10 @@ internal static nint namedAfterType() {
     ref var gauge = ref heap<ж<gauge>>(newGauge(), out var Ꮡgauge);
     run(() => {
         Ꮡgauge.ValueSlot = newGauge();
-        Ꮡgauge.ValueSlot.of(main_package.gauge.Ꮡv).bump(5);
+        Ꮡgauge.ValueSlot.Ꮡv.bump(5);
     });
-    gauge.of(main_package.gauge.Ꮡv).bump(2);
-    return gauge.of(main_package.gauge.Ꮡv).get();
+    gauge.Ꮡv.bump(2);
+    return gauge.Ꮡv.get();
 }
 
 internal static void Main() {

@@ -46,6 +46,7 @@ using static go.main_package;
 [assembly: go.GoFieldAccess(typeof(Employee))]
 [assembly: go.GoFieldAccess(typeof(Person))]
 [assembly: go.GoFieldAccess(typeof(Tagged))]
+[assembly: go.GoFieldAccess(typeof(fieldAddress_pair))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

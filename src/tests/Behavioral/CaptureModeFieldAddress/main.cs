@@ -26,25 +26,25 @@ partial struct wrap {
 
 internal static void localStruct() {
     ref var x = ref heap(new holder(), out var Ꮡx);
-    var v = Ꮡx.of(holder.Ꮡi).Add(5);
-    Ꮡx.of(holder.Ꮡi).Add(2);
-    fmt.Println("local:", v, Ꮡx.of(holder.Ꮡi).Load(), x.before, x.after);
+    var v = Ꮡx.Ꮡi.Add(5);
+    Ꮡx.Ꮡi.Add(2);
+    fmt.Println("local:", v, Ꮡx.Ꮡi.Load(), x.before, x.after);
 }
 
 internal static void valueParam(holder xʗp) {
     ref var x = ref heap(xʗp, out var Ꮡx);
 
-    Ꮡx.of(holder.Ꮡi).Store(3);
-    Ꮡx.of(holder.Ꮡi).Add(4);
-    fmt.Println("param:", Ꮡx.of(holder.Ꮡi).Load());
+    Ꮡx.Ꮡi.Store(3);
+    Ꮡx.Ꮡi.Add(4);
+    fmt.Println("param:", Ꮡx.Ꮡi.Load());
 }
 
 internal static void typeSwitchCase(any v) {
     switch (v.type()) {
     case holder tᴛ1: {
         ref var t = ref heap(tᴛ1, out var Ꮡt);
-        Ꮡt.of(holder.Ꮡi).Add(9);
-        fmt.Println("switch:", Ꮡt.of(holder.Ꮡi).Load());
+        Ꮡt.Ꮡi.Add(9);
+        fmt.Println("switch:", Ꮡt.Ꮡi.Load());
         break;
     }}
 }

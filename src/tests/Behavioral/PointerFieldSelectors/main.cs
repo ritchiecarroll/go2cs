@@ -125,7 +125,7 @@ internal static void Main() {
 
     var s = Ꮡ(new sized(new @base(3), 9));
     s.Value.Len++;
-    fmt.Println("shadow:", (~s).Len, s.of(sized.Ꮡbase).Len());
+    fmt.Println("shadow:", (~s).Len, s.Ꮡbase.Len());
 
     var g = Ꮡ(new pair<@string>(First: "a"));
     fmt.Println("generic:", bump(ref (g).DerefOrNull(), (@string)"b"), g.First, g.Count);
@@ -136,7 +136,7 @@ internal static void Main() {
     ps[0].Y *= 3;
     fmt.Println("containers:", m["k"].X, ps[0].Y, mk(5).Y);
 
-    var px = p.of(point.ᏑX);
+    var px = p.ᏑX;
     px.Value = 42;
     fmt.Println("address:", p.X);
 

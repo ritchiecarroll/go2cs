@@ -165,10 +165,10 @@ internal static void Main() {
 
     var g1 = Ꮡ(new guarded(n: 1, name: "a"));
     var g2 = Ꮡ(new guarded(n: 1, name: "a"));
-    g1.of(guarded.Ꮡmu).Lock();
-    g1.of(guarded.Ꮡmu).Unlock();
-    g1.of(guarded.Ꮡrw).RLock();
-    g1.of(guarded.Ꮡrw).RUnlock();
+    g1.Ꮡmu.Lock();
+    g1.Ꮡmu.Unlock();
+    g1.Ꮡrw.RLock();
+    g1.Ꮡrw.RUnlock();
     fmt.Println(reflect.DeepEqual(g1.OrTypedNil(), g2.OrTypedNil()));
     fmt.Println(reflect.DeepEqual(g1.OrTypedNil(), g1.OrTypedNil()));
     fmt.Println(reflect.DeepEqual(g1.OrTypedNil(), Ꮡ(new guarded(n: 2, name: "a"))));
@@ -176,7 +176,7 @@ internal static void Main() {
     fmt.Println(reflect.DeepEqual(slice<ж<guarded>>([g1]), slice<ж<guarded>>([g2])));
     fmt.Println(reflect.DeepEqual(new map<@string, ж<guarded>>{["k"] = g1}, new map<@string, ж<guarded>>{["k"] = g2}));
     var g3 = Ꮡ(new guarded(n: 1, name: "a"));
-    g3.of(guarded.Ꮡonce).Do(() => {
+    g3.Ꮡonce.Do(() => {
     });
     fmt.Println(reflect.DeepEqual(g3.OrTypedNil(), g2.OrTypedNil()));
 

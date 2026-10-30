@@ -192,7 +192,7 @@ internal static ж<nint> lastN;
 internal static nint fillFast(this ж<worker> Ꮡw, slice<byte> b) {
     ref var w = ref Ꮡw.DerefOrNull();
 
-    lastN = Ꮡw.of(worker.Ꮡn);
+    lastN = Ꮡw.Ꮡn;
     return len(b) + w.n;
 }
 

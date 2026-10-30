@@ -20,7 +20,7 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
 }
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) {
-    (Ꮡc.of(Counter.Ꮡn)).Value = v;
+    (Ꮡc.Ꮡn).Value = v;
 }
 
 public static int32 Get(this ref Counter c) {

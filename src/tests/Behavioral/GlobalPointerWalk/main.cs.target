@@ -24,14 +24,14 @@ internal static void insert(nint v) {
     var n = Ꮡ(new node(val: v));
     var pp = Ꮡhead;
     while (pp.ValueSlot != nil && (pp.ValueSlot).val < v) {
-        pp = (pp.ValueSlot).of(node.Ꮡnext);
+        pp = (pp.ValueSlot).Ꮡnext;
     }
     n.next = pp.ValueSlot;
     pp.ValueSlot = n;
 }
 
 internal static bool remove(nint v) {
-    for (var pp = Ꮡhead; pp.ValueSlot != nil; pp = (pp.ValueSlot).of(node.Ꮡnext)) {
+    for (var pp = Ꮡhead; pp.ValueSlot != nil; pp = (pp.ValueSlot).Ꮡnext) {
         if ((pp.ValueSlot).val == v) {
             pp.ValueSlot = (pp.ValueSlot).next;
             return true;

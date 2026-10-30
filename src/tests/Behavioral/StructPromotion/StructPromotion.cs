@@ -51,7 +51,7 @@ partial struct ledger {
 internal static @string describe(this ж<ledger> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
-    var p = Ꮡl.of(ledger.Ꮡseq);
+    var p = Ꮡl.Ꮡseq;
     p.Value++;
     return "ledger:"u8 + l.tag;
 }

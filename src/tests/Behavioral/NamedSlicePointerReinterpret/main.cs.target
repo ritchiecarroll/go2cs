@@ -20,7 +20,7 @@ partial struct handler {
 internal static void preformat(this ж<handler> Ꮡh, @string s) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    var buf = Ꮡh.of(handler.Ꮡpreformatted).Reinterpret<slice<byte>, Buf>();
+    var buf = Ꮡh.Ꮡpreformatted.Reinterpret<slice<byte>, Buf>();
     buf.ValueSlot = append(buf.ValueSlot, s.ꓸꓸꓸ);
     h.groups++;
 }
@@ -54,7 +54,7 @@ internal static void Main() {
     h.preformat(" gamma=3");
     fmt.Println((@string)h.preformatted, len(h.preformatted), h.groups);
 
-    var t = h.of(handler.Ꮡpreformatted).Reinterpret<slice<byte>, Buf>();
+    var t = h.Ꮡpreformatted.Reinterpret<slice<byte>, Buf>();
     t.ValueSlot = (t.ValueSlot)[..7];
     fmt.Println((@string)h.preformatted, len(h.preformatted));
 }

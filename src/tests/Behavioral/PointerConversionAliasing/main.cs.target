@@ -130,7 +130,7 @@ internal partial struct fieldAddress_pair /*dyn*/ {
 
 internal static void fieldAddress() {
     ref var pr = ref heap(new fieldAddress_pair(), out var Ꮡpr);
-    var p = Ꮡpr.of(fieldAddress_pair.ᏑSecond).Reinterpret<Employee, Person>();
+    var p = Ꮡpr.ᏑSecond.Reinterpret<Employee, Person>();
 
     p.Name = "jan";
     fmt.Println("field address, write through converted:", pr.Second.Name);

@@ -33,13 +33,13 @@ internal static partial void setInt(ref nint p, nint v) {
 
 internal static void Main() {
     var cells = new slice<cell>(3);
-    var p = Ꮡ(cells, 1).of(cell.Ꮡn);
+    var p = Ꮡ(cells, 1).Ꮡn;
     p.Value = 7;
     setInt(ref cells[2].m, 9);
     fmt.Println("local slice:", cells[1].n, cells[2].m);
 
     ref var arr = ref heap(new array<cell>(3), out var Ꮡarr);
-    var q = Ꮡarr.at<cell>(2).of(cell.Ꮡn);
+    var q = Ꮡarr.at<cell>(2).Ꮡn;
     q.Value = 11;
     setInt(ref arr[0].m, 13);
     fmt.Println("local array:", arr[2].n, arr[0].m);
@@ -68,7 +68,7 @@ internal static void Main() {
     dst.Value = src.Value;
     fmt.Println("patched:", pr.Inst[1].Arg, pr.Inst[3].Out);
 
-    var n = Ꮡ(pr.Inst, 3).of(inst.ᏑName);
+    var n = Ꮡ(pr.Inst, 3).ᏑName;
     n.Value = "patched";
     fmt.Println("name:", pr.Inst[3].Name);
 }

@@ -108,24 +108,24 @@ internal static partial void Main() {
 
     fmt.Println("trylock while held:", c.tryWhileHeld());
 
-    c.of(counter.Ꮡmu).Lock();
+    c.Ꮡmu.Lock();
     var released = new channel<bool>(0);
     var cʗ2 = c;
     var releasedʗ1 = released;
     goǃ(() => {
-        cʗ2.of(counter.Ꮡmu).Unlock();
+        cʗ2.Ꮡmu.Unlock();
         releasedʗ1.ᐸꟷ(true);
     }, GoStack.Bounded);
     ᐸꟷ(released);
-    c.of(counter.Ꮡmu).Lock();
-    c.of(counter.Ꮡmu).Unlock();
+    c.Ꮡmu.Lock();
+    c.Ꮡmu.Unlock();
     fmt.Println("cross-goroutine unlock: ok");
 
     var p = Ꮡ(new counter());
     var q = p;
-    q.of(counter.Ꮡmu).Lock();
+    q.Ꮡmu.Lock();
     q.n = 42;
-    q.of(counter.Ꮡmu).Unlock();
+    q.Ꮡmu.Unlock();
     fmt.Println("via local pointer:", p.n);
 
     ж<counter> nilc = default;

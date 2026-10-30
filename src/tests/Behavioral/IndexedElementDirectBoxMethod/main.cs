@@ -9,7 +9,7 @@ partial struct counter {
 }
 
 internal static void inc(this ж<counter> Ꮡc) {
-    var p = Ꮡc.of(counter.Ꮡn);
+    var p = Ꮡc.Ꮡn;
     p.Value++;
 }
 

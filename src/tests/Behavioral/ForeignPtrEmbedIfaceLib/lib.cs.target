@@ -7,13 +7,13 @@ partial struct Meter {
 }
 
 public static nint Add(this ж<Meter> Ꮡm, nint delta) {
-    var p = Ꮡm.of(Meter.Ꮡtotal);
+    var p = Ꮡm.Ꮡtotal;
     p.Value += delta;
     return p.Value;
 }
 
 public static nint Total(this ж<Meter> Ꮡm) {
-    var p = Ꮡm.of(Meter.Ꮡtotal);
+    var p = Ꮡm.Ꮡtotal;
     return p.Value;
 }
 
