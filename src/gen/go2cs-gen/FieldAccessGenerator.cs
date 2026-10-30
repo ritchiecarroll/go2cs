@@ -224,8 +224,10 @@ public class FieldAccessGenerator : ISourceGenerator
             string accessor = $"{AddressPrefix}{name}";
 
             // A foreign type's accessors are visible in its metadata; a type of this package gets its accessors
-            // from the TypeGenerator in this same run, for every field its source declares.
-            if (foreign ? !type.GetMembers(accessor).OfType<IMethodSymbol>().Any(method => method.IsStatic && method.ReturnsByRef)
+            // from the TypeGenerator in this same run, for every field its source declares. A foreign field whose type
+            // does not resolve is typed from an assembly this compilation does not reference, and no spelling of it
+            // compiles here (see TypeName).
+            if (foreign ? ContainsErrorType(field.Type) || !type.GetMembers(accessor).OfType<IMethodSymbol>().Any(method => method.IsStatic && method.ReturnsByRef)
                         : field.DeclaringSyntaxReferences.Length == 0)
             {
                 continue;
@@ -257,7 +259,7 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string accessor = $"{AddressPrefix}{name}";
 
-            if (foreign ? !type.GetMembers(accessor).OfType<IMethodSymbol>().Any(method => method.IsStatic && method.ReturnsByRef)
+            if (foreign ? ContainsErrorType(property.Type) || !type.GetMembers(accessor).OfType<IMethodSymbol>().Any(method => method.IsStatic && method.ReturnsByRef)
                         : property.DeclaringSyntaxReferences.Length == 0)
             {
                 continue;
@@ -405,6 +407,10 @@ public class FieldAccessGenerator : ISourceGenerator
     /// type another generator emits into the package class in this same run, which this generator cannot see: the
     /// ImplementGenerator's constraint proxy (SelfRefGenerics' `gnodeжGraphNode`). The struct's own declaration names
     /// it bare from inside the package class, so it is rooted at the package class that holds <paramref name="owner"/>.
+    /// That holds only for an owner declared in this compilation's SOURCE. A foreign owner's field types come from
+    /// metadata, where an unresolved one is a type of an assembly this compilation does not reference (httptest.Server's
+    /// TLS, a *tls.Config, in encoding/json's tests): rooted locally it named a type that does not exist (seat #45), and
+    /// <see cref="Properties"/> gives such a field no property.
     /// </remarks>
     private static string TypeName(ITypeSymbol type, INamedTypeSymbol owner)
     {

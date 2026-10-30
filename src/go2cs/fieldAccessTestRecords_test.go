@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // writeFieldAccessMixedSuiteFixture writes a mixed suite in which each of the three compilations reads a field of a
@@ -99,4 +101,27 @@ func TestFieldAccessRecordsFollowTheirTestVariant(t *testing.T) {
 	if named := recordsNaming(testInfo, "probe"); len(named) > 0 {
 		t.Errorf("the internal suite's bridge-declared record must anchor at the bridge alone: %v", named)
 	}
+}
+
+// The recompile model's external split, the same rule as its conversion pairs: a bare record is the external test
+// package's own and goes to its unit, a qualified one keeps the production anchor.
+func TestExternalVariantFieldAccessRecordPartition(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	fieldAccessRecords.Add("sample")
+	fieldAccessRecords.Add("pair<>")
+	fieldAccessRecords.Add("value_package.Box")
+
+	testAnchored, productionAnchored := splitExternalVariantRecords("value_package", false)
+
+	if !testAnchored.fieldAccess.Contains("sample") || !testAnchored.fieldAccess.Contains("pair<>") || testAnchored.fieldAccess.Contains("value_package.Box") {
+		t.Errorf("test-anchored records = %v, want the bare sample and pair<> alone", testAnchored.fieldAccess.Keys())
+	}
+	if !productionAnchored.fieldAccess.Contains("value_package.Box") || len(productionAnchored.fieldAccess.Keys()) != 1 {
+		t.Errorf("production-anchored records = %v, want value_package.Box alone", productionAnchored.fieldAccess.Keys())
+	}
+
+	resetPackageState(&packages.Package{})
 }
