@@ -1116,6 +1116,38 @@ public class FieldAccessGeneratorTests
         partial class main_package { }
         """;
 
+    // GenericEmbedPromotion's shape: a GENERIC embed instantiated with a constraint proxy another generator emits in this
+    // same run (`curve<p224жpoint>`), so the promoted field's substituted type is unresolved here. Its declaration is in
+    // source, so the type is rooted at the package class, as a direct field's is (#45's rule skips only a FOREIGN
+    // declaration's unresolved type, an assembly this compilation does not reference).
+    private const string GenericPromoted = """
+        namespace go;
+
+        [GoFieldAccess(typeof(p224Curve))]
+        partial class main_package
+        {
+            public partial struct curve<Point> { public nint name; public Point seed; }
+
+            public partial struct p224Curve
+            {
+                /*embed*/ public curve<p224жpoint> curve;
+            }
+        }
+        """;
+
+    [TestMethod]
+    public void APromotedFieldThroughAGenericEmbedOverAProxyIsRootedAtThePackageClass()
+    {
+        string generated = Generate(GenericPromoted);
+        const string Main = "global::go.main_package";
+        const string Curve = $"{Main}.curve<{Main}.p224жpoint>";
+
+        StringAssert.Contains(generated, PromotedRef($"{Main}.p224жpoint", "seed", $"{Main}.p224Curve",
+            $"ʗp.of({Main}.p224Curve.Ꮡcurve).field({Curve}.Ꮡseed)", "curve.seed"), $"the proxy-typed field is promoted too:\n{generated}");
+        StringAssert.Contains(generated, PromotedRef("nint", "name", $"{Main}.p224Curve",
+            $"ʗp.of({Main}.p224Curve.Ꮡcurve).field({Curve}.Ꮡname)", "curve.name"));
+    }
+
     [TestMethod]
     public void AForeignOwnersPromotedFieldWalksItsMetadataEmbeds()
     {
