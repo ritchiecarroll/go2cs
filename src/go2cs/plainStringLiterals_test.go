@@ -282,18 +282,18 @@ func TestHoistLiteralsFlagRestoresTheHoist(t *testing.T) {
 	}
 }
 
-// TestStandardLibraryKeepsHoistedLiterals pins the mode KEY. A package whose source is under
-// GOROOT/src hoists, GOROOT-vendored packages included, whichever driver asks; the -tests driver runs
-// with convertStdLib false (main.go's -stdlib branch is the other arm), so the key is the source
-// location, never the flag. -hoist-literals opts any other package in.
-func TestStandardLibraryKeepsHoistedLiterals(t *testing.T) {
+// TestStandardLibraryEmitsPlainLiterals pins the mode KEY (seat #51, owner order 2026-10-30, which
+// reverses the 2026-10-17 opt-out). The standard library emits plain literals like user code: under
+// -stdlib, under -tests (convertStdLib false), and for a GOROOT-vendored package alike. Only
+// -hoist-literals hoists, for any package.
+func TestStandardLibraryEmitsPlainLiterals(t *testing.T) {
 	goRoot := filepath.Join(t.TempDir(), "go")
 
 	for dir, want := range map[string]bool{
-		filepath.Join(goRoot, "src", "strings"):                                  true,
-		filepath.Join(goRoot, "src", "unicode", "utf8"):                          true,
-		filepath.Join(goRoot, "src", "vendor", "golang.org", "x", "net", "idna"): true,
-		filepath.Join(goRoot, "src", "cmd", "vendor", "golang.org", "x", "mod"):  true,
+		filepath.Join(goRoot, "src", "strings"):                                  false,
+		filepath.Join(goRoot, "src", "unicode", "utf8"):                          false,
+		filepath.Join(goRoot, "src", "vendor", "golang.org", "x", "net", "idna"): false,
+		filepath.Join(goRoot, "src", "cmd", "vendor", "golang.org", "x", "mod"):  false,
 		filepath.Join(goRoot, "src"):                                             false, // GOROOT/src itself is no package
 		filepath.Join(filepath.Dir(goRoot), "app"):                               false,
 		filepath.Join(filepath.Dir(goRoot), "go-other", "src", "strings"):        false,

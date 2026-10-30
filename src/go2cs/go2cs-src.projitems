@@ -472,6 +472,7 @@
     <None Include="$(MSBuildThisFileDirectory)parityTrainSmallFour_test.go" />
     <None Include="$(MSBuildThisFileDirectory)partialInstantiationAnonymousTypeArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)perUnitAliasRenames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)plainLiteralAllocations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)plainStringLiterals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformEmit.go" />
     <None Include="$(MSBuildThisFileDirectory)platformEmitStage_test.go" />
