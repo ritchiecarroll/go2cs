@@ -122,8 +122,8 @@ without the flag.
 **When it helps:** a tight loop that calls a small function, not inlined, that returns or passes a literal.
 
 - On `win-x64` (an Intel Core i9-13900K), a loop calling a small standard-library function that returns a literal
-  took roughly twice as long with plain literals under the JIT, and roughly 1.7 to 1.8 times as long under Native
-  AOT. A smaller such function took up to a quarter longer under Native AOT.
+  took roughly twice as long with plain literals under the JIT, once the JIT had optimized the function, and roughly
+  1.7 to 1.8 times as long under Native AOT. A smaller such function took up to a quarter longer under Native AOT.
 - On `win-x64` (an AMD Ryzen 5 PRO 6650U):
   - a literal returned from a small function called in a hot loop took roughly 1.7 to 1.8 times as long plain,
     under both the JIT and Native AOT;
@@ -135,8 +135,8 @@ without the flag.
 
 **When it does not:** a literal evaluated rarely costs one lookup either way. A literal passed as an `any` argument,
 `fmt.Println("x")`, measured the same both ways: both forms pass one pre-boxed value. And hoisting is not always
-faster. On the i9 under the JIT, a small standard-library function ran faster plain, because the JIT inlined the plain
-form into the caller's loop and did not inline the hoisted one. Measure your own hot path.
+faster. On the i9 under the JIT, once the function was optimized, a small standard-library function ran faster plain,
+because the JIT inlined the plain form into the caller's loop and did not inline the hoisted one. Measure your own hot path.
 
 **What it costs:** the emitted C# names each literal as a field, declared above the function that first uses it, so
 the code reads less like the Go. [Plain literals](ConversionStrategies-Reference/strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
@@ -146,6 +146,8 @@ describes both forms.
      i9-13900K, win-x64, .NET 10.0.14, 15 interleaved rounds x 2 passes, A/A band. Test 3, a user loop of 10M calls
      (master aaec1d4ca8): Hash.String plain/hoisted 2.029 and 2.023 on the steady JIT, 1.686 and 1.782 on AOT;
      FormatBool 1.121 and 1.250 on AOT, and 0.86 on the steady JIT (plain inlined, hoisted not; cause unexplained).
+     The JIT axis: "steady JIT" = DOTNET_TC_CallCountingDelayMs=0. Under default tiering both arms stayed at Tier0
+     (about 28 ns) and read equal; the i9 is investigating why the callees never left Tier0.
      Test 1, PerfStringMatch (893d48976f): plain/hybrid 1.13 on the JIT, 1.004 to 1.007 on AOT. Test 2, net/url
      ParseQuery: flat on the JIT; AOT plain/hybrid 1.02, which the i9 reads as layout.
      Ryzen 5 PRO 6650U (G-LAPTOP), win-x64, .NET 10.0.11, LiteralSiteBench, 15 interleaved rounds, per-round medians:

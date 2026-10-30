@@ -289,10 +289,12 @@ every output matching. Tests 1 and 2 ran at master `893d48976f`; test 3 ran at `
    - `FormatBool`: P/H is 1.121 and 1.250 on AOT (band 0.892 to 1.108).
    - `ChanDir`: beyond the band on AOT in one pass of two.
    - `AppendText`: flat.
-   - **Counter-evidence, recorded and not counted:** on the JIT, plain `FormatBool` is inlined into the user loop and
-     the hoisted one is not, so steady P/H is 0.86; the cause is unexplained.
-   - The default-JIT rows are a Tier0 artifact (the standard-library callees never left Tier0). The i9 is
-     investigating that, and then the inliner.
+   - **Counter-evidence, recorded and not counted:** on the steady JIT, plain `FormatBool` is inlined into the user
+     loop and the hoisted one is not, so P/H is 0.86; the cause is unexplained.
+   - **The JIT axis.** "Steady JIT" means `DOTNET_TC_CallCountingDelayMs=0`. Under default tiering, both arms stayed
+     at Tier0 (about 28 ns) and read equal, because the standard-library callees never left Tier0. Every test-3 JIT
+     figure here is therefore the steady one; test 3's default-tiering rows decide nothing. The i9 is investigating why the
+     callees stayed at Tier0, and then the inliner.
 
 ### 9.3 The ruling
 
