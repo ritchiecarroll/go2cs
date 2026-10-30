@@ -31973,4 +31973,69 @@ through a promoted `mu` from two sites. It must be green at the base before any 
 
 — G (2026-10-30)
 
+## 2026-10-30 — G (1.26.10.2 seat #31b, claude/g-seat31b-promoted-fields): a promoted field through a pointer reads `p.f` — DONE on the seat branch
+
+**The change.** #31 gave a field selected through a pointer Go's spelling, `p.f`, but kept a PROMOTED field on the box
+form, since the generated properties were the struct's own fields. Now go2cs-gen gives each recorded struct a property
+for every field Go promotes into it, and the converter writes `p.f` there too:
+
+| Go (PromotedFieldProperties) | Before | After |
+|:--|:--|:--|
+| `s.X += 10` (Shape embeds Point; `s` a range variable) | `s.Value.X += 10` | `s.X += 10` |
+| `labeled[0].X = 100` (through a pointer embed `*Shape`) | `labeled[0].Value.X = 100` | `labeled[0].X = 100` |
+| `deep[0].Y++` (two embeds down, the second a pointer) | `deep[0].Value.Y++` | `deep[0].Y++` |
+
+- **go2cs-gen walks the hops itself.** `FieldAccessGenerator.PromotedFields` applies Go's rule over the members it can
+  see: a name is promoted from the shallowest embed depth at which it occurs, only when exactly one field carries it
+  there, never when the struct declares it. The property names the embeds, `ref ʗp.Value.E1.E2.f` (a pointer embed
+  adds `.Value`), so it never leans on the type generator's own promoted members, whose set is not Go's (it does not
+  chase a cross-package embed's own embeds). A value chain answers a NativeBox<T> at each hop's Go offset,
+  `ʗp.of(T.ᏑE1).field(E1.Ꮡf)`; a pointer chain's field lives in another allocation, so its property is exactly today's
+  storage, through the embed's own box and its nil check.
+- **Kept on the box form:** a promoted field whose walk go2cs-gen cannot take (a hop a hand-owned file declares, a wrapper
+  this package defines over another named struct, a readonly zero-size field on the walk), and every class #31 keeps.
+- **Found by the seat's own behavioral run and fixed in-seat, red-first:** GenericEmbedPromotion's `p224Curve` embeds
+  `curve<p224жpoint>`, a constraint proxy another generator emits in the same run, so the promoted `seed`'s substituted
+  type is unresolved where FieldAccessGenerator runs; seat #45's skip (a FOREIGN field typed from an unreferenced
+  assembly) had been applied to every promoted field, and `pc.seed` was CS1061. The skip now reads the declaring
+  struct's locality and the field's original declared type, as #45's direct-field rule does; a source declaration's
+  unresolved type is rooted at the package class. No stdlib package has the shape: the forward builds were green
+  before the fix and are re-run after it.
+- **Out of .2, by COORD's scope ruling:** a promoted field's ADDRESS and the synthesized embed hops (the post-.2 row
+  above names the identity test that must pass first).
+
+**The prediction, scored as posted** (`#31b PREDICTION` 2026-10-30, recorded before arm B). The census: base
+4e0a8e02dc (ccceaa54ef's sources) plus in-band `/*PF:class*/` markers; its marker-stripped emission equals the base
+root but for 2 files whose trailing-comment padding the markers widened (identical ignoring whitespace). Arm B: the seat
+at f5b797021a over the census's own seed, `-stdlib -comments` three targets and the `-tests` leg over 242 packages
+(binary `49dc836c7d66bbf9`; base `6739eb66d2092d05`). Both rc 0, 0 failed; the same two `-tests` packages nonzero on
+both arms (internal/runtime/wasitest, testing).
+1. MECHANISM: `pcensus classify -items P1`: 143 files, 901 pairs, all P1, refused 0, 0 MAP; 0 hand-owned, `_impl` or
+   golib files move. MET.
+2. COUNTS: every servable promoted site moved, and only those (the census's base line vs the seat file): prod 817 of
+   817, test 180 of 180, `.cs.auto` 7 of 7; stayed exactly the refused classes (hand-owned owner 35 + 12 `.cs.auto`, a
+   promoted-method shadow 1, a collision 1). Against the instrument named, the P1 measure's fall: prod 714 against
+   780-817, MISSED; test 168 against 168-180, MET. Why: the prediction was sized in census sites, and P1's measure counts
+   only a bare-identifier base (`(~ID).`, `ID.Value.`), while 94 prod deref sites move off a compound base
+   (`(~r.f).UncompressedSize64`, `(~r.File[0]).Name`). Changed `.cs`: prod 94 (90-99) MET, test 31 (28-31) MET.
+   package_info.cs 10 (25-70) and test-info files 7 (10-20): MISSED, low; most promoted owners were already recorded
+   through a direct field.
+3. GOLDENS: CNR moved all 19 of the 19 existing projects whose census emission carried a servable promoted site
+   (16-19), plus the new PromotedFieldProperties: MET. NamedTypeOverStruct, which the prediction thought a wrapper hop
+   would keep, moved: its `np.tag` reaches a plain struct. pcensus classify -items P1 over the re-baseline: 46 files,
+   112 pairs, all P1, refused 0.
+4. BUILD: the seat's own three-target `-stdlib` emission, mirrored onto the seat tree, go2cs-stdlib.slnx Release
+   0 errors per GoTargetOS (windows 648 s, linux 701 s, darwin 624 s); go2cs.slnx Debug 0 errors (448 s). MET. (Before the
+   generic-embed fix; re-run after it, below.)
+5. Behavioral PromotedFieldProperties: Transpile, Target, Compile and Output pass; its output matches Go's, the nil
+   pointer embed's panic included. MET.
+
+**Gates (on the generic-embed fix, b8ac412559, with the goldens):** go test ./... 10 ok, 0 failed; GenTests 371, 0 failed;
+go2cs.slnx Debug 0 errors (472 s); the forward build x3 re-run on the fixed generator, 0 errors (windows 620 s, linux
+724 s, darwin 664 s); the four behavioral phases of every moved project, by the `Embed` and `Promot` filters (34 and 28 projects,
+some in both): Compile 34 of 34 and 28 of 28, Output 31 and 24 compared, 0 failed. COORD's added gate, the `-tests` convert+build of os, strconv, sort,
+encoding/json and net/http on the R0 tree with the seat's converter and go2cs-gen: all five rc 0, no error code.
+
+— G (2026-10-30)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
