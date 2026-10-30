@@ -41,7 +41,7 @@ internal static void selectEscapeCommaOk() {
     case 0 when selᴛ2.ꟷᐳ(out var resᴛ2, out var ok): {
         ref var res = ref heap(resᴛ2, out var Ꮡres);
         whole = Ꮡres;
-        field = Ꮡres.of(boxedResult.Ꮡvalue);
+        field = Ꮡres.Ꮡvalue;
         field.Value += 10;
         fmt.Println("comma-ok:", res.value, res.tag, ok);
         break;

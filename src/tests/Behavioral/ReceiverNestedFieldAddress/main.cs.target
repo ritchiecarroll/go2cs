@@ -16,7 +16,7 @@ partial struct outer {
 }
 
 internal static void bumpA(this ж<outer> Ꮡo) {
-    var p = Ꮡo.of(outer.Ꮡin).of(inner.Ꮡa);
+    var p = Ꮡo.Ꮡin.Ꮡa;
     p.Value++;
 }
 
@@ -24,11 +24,11 @@ internal static void bumpSelected(this ж<outer> Ꮡo, nint which) {
     ж<uint16> count = default;
     switch (which) {
     case 0: {
-        count = Ꮡo.of(outer.Ꮡin).of(inner.Ꮡa);
+        count = Ꮡo.Ꮡin.Ꮡa;
         break;
     }
     case 1: {
-        count = Ꮡo.of(outer.Ꮡin).of(inner.Ꮡb);
+        count = Ꮡo.Ꮡin.Ꮡb;
         break;
     }}
 
@@ -36,7 +36,7 @@ internal static void bumpSelected(this ж<outer> Ꮡo, nint which) {
 }
 
 internal static void bumpViaPtr(this ref outer o) {
-    var p = o.ptr.of(inner.Ꮡb);
+    var p = o.ptr.Ꮡb;
     p.Value += 3;
 }
 
@@ -53,12 +53,12 @@ partial struct deep {
 }
 
 internal static void bumpLeaf(this ж<deep> Ꮡd) {
-    var p = Ꮡd.of(deep.Ꮡmd).of(mid.Ꮡlf).of(leaf.Ꮡn);
+    var p = Ꮡd.Ꮡmd.Ꮡlf.Ꮡn;
     p.Value += 5;
 }
 
 internal static uint16 readA(this ж<outer> Ꮡo) {
-    var p = Ꮡo.of(outer.Ꮡin).of(inner.Ꮡa);
+    var p = Ꮡo.Ꮡin.Ꮡa;
     return p.Value;
 }
 

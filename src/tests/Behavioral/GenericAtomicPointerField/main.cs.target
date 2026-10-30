@@ -18,17 +18,17 @@ partial struct Cache<V> {
 
 public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> key, ж<V> val) {
     var e = Ꮡ(new entry<V>(key: key));
-    e.of(entry<V>.Ꮡv).Store(val);
-    e.next = Ꮡc.of(Cache<V>.Ꮡhead).Load();
-    Ꮡc.of(Cache<V>.Ꮡhead).Store(e);
+    e.Ꮡv.Store(val);
+    e.next = Ꮡc.Ꮡhead.Load();
+    Ꮡc.Ꮡhead.Store(e);
 }
 
 public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
     ref var key = ref Ꮡkey.DerefOrNull();
 
-    for (var e = Ꮡc.of(Cache<V>.Ꮡhead).Load(); e != nil; e = e.next) {
+    for (var e = Ꮡc.Ꮡhead.Load(); e != nil; e = e.next) {
         if (e.key == Ꮡkey) {
-            return e.of(entry<V>.Ꮡv).Load();
+            return e.Ꮡv.Load();
         }
     }
     return default;

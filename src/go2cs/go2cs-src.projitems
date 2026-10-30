@@ -194,6 +194,7 @@
     <None Include="$(MSBuildThisFileDirectory)fieldAccessEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessReturn_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessTestRecords_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAddressEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldPropertyEmission_test.go" />

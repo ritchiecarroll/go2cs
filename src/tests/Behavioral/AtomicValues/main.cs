@@ -35,9 +35,9 @@ internal static void Main() {
     var old = Ꮡp.Swap(Ꮡa);
     fmt.Println("ptr swap:", old.Value, Ꮡp.Load().Value);
 
-    ᏑgHolder.of(holder.Ꮡcount).Store(42);
-    ᏑgHolder.of(holder.Ꮡcount).Add(8);
-    fmt.Println("global field:", ᏑgHolder.of(holder.Ꮡcount).Load());
+    ᏑgHolder.Ꮡcount.Store(42);
+    ᏑgHolder.Ꮡcount.Add(8);
+    fmt.Println("global field:", ᏑgHolder.Ꮡcount.Load());
 }
 
 } // end main_package

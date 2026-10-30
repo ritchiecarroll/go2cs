@@ -22,9 +22,9 @@ internal static partial void keep(ж<outer> p) {
 }
 
 internal static void mutate() {
-    var p = Ꮡg.of(outer.Ꮡmid).of(inner.Ꮡa);
+    var p = Ꮡg.Ꮡmid.Ꮡa;
     p.Value = 42;
-    var q = Ꮡg.of(outer.Ꮡmid);
+    var q = Ꮡg.Ꮡmid;
     q.b = 7;
 }
 

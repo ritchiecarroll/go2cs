@@ -45,6 +45,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(go.crypto.ecdsa_package.PrivateKey))]
 [assembly: go.GoFieldAccess(typeof(go.crypto.x509_package.Certificate))]
 [assembly: go.GoFieldAccess(typeof(syscall_package.CertChainContext))]
 [assembly: go.GoFieldAccess(typeof(syscall_package.CertChainElement))]

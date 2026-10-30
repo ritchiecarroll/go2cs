@@ -33,13 +33,13 @@ internal static void Main() {
     fs.Parse(slice<@string>(["-x"]));
     fmt.Println("flag.BoolVar:", lib.Flag);
 
-    var q = lib.ᏑS.of(lib.Holder.ᏑN);
+    var q = lib.ᏑS.ᏑN;
     q.Value = 3;
     fmt.Println("field pointer:", lib.S.N, lib.ReadS());
 
-    lib.ᏑS.of(lib.Holder.ᏑWG).Add(1);
-    lib.ᏑS.of(lib.Holder.ᏑWG).Done();
-    lib.ᏑS.of(lib.Holder.ᏑWG).Wait();
+    lib.ᏑS.ᏑWG.Add(1);
+    lib.ᏑS.ᏑWG.Done();
+    lib.ᏑS.ᏑWG.Wait();
     fmt.Println("field-path pointer calls: ok");
 
     var e = lib.ᏑArr.at<nint>(1);

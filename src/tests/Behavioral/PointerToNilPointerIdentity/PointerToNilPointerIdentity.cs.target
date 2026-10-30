@@ -46,8 +46,8 @@ internal static void Main() {
     fmt.Println("after", stable[lp], len(stable), (lp.ValueSlot).Value);
 
     ref var h = ref heap(new holder(), out var Ꮡh);
-    var fp = Ꮡh.of(holder.Ꮡp);
-    var fs = Ꮡh.of(holder.Ꮡs);
+    var fp = Ꮡh.Ꮡp;
+    var fs = Ꮡh.Ꮡs;
     fmt.Println("field nil", fp.ValueSlot == nil, fs.ValueSlot == nil, len(fs.ValueSlot));
     var fields = new map<ж<ж<nint>>, @string>{[fp] = "h.p"};
     fmt.Println("field key", fields[fp]);

@@ -62,7 +62,7 @@ internal static counter /*c*/ viaNamedResult() {
 
 internal static nint viaFieldChain() {
     ref var h = ref heap<holder>(new holder(c: new counter(n: 30)), out var Ꮡh);
-    applyInt(Ꮡh.of(holder.Ꮡc).dec, 2, 3);
+    applyInt(Ꮡh.Ꮡc.dec, 2, 3);
     return h.c.n;
 }
 

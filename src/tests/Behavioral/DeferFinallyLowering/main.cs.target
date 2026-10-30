@@ -99,7 +99,7 @@ internal static void unguarded(this ж<box> Ꮡx) {
         ref var x = ref Ꮡx.DerefOrNull();
 
         x.a.touch();
-        defer(Ꮡx.of(box.Ꮡb).done, ref ᒐ);
+        defer(Ꮡx.Ꮡb.done, ref ᒐ);
         fmt.Println("body unguarded");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -146,7 +146,7 @@ internal static void condPrefix(this ж<box> Ꮡx, bool f) {
             x.b.touch();
         }
 
-        defer(Ꮡx.of(box.Ꮡb).done, ref ᒐ);
+        defer(Ꮡx.Ꮡb.done, ref ᒐ);
         fmt.Println("body condPrefix");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -203,7 +203,7 @@ internal static void rebound(this ж<box> Ꮡx, ж<box> other) {
         ref var x = ref Ꮡx.DerefOrNull();
 
         x.a.touch();
-        defer(Ꮡx.of(box.Ꮡa).done, ref ᒐ);
+        defer(Ꮡx.Ꮡa.done, ref ᒐ);
         Ꮡx = other; x = ref Ꮡx.DerefOrNull();
         fmt.Println("body rebound", x.a.id);
     }

@@ -60,7 +60,7 @@ partial struct Device {
 }
 
 public static ж<nint> Tag(this ж<Device> Ꮡd) {
-    return Ꮡd.of(Device.Ꮡhits);
+    return Ꮡd.Ꮡhits;
 }
 
 public static @string Describe(this ref Device d) {
@@ -106,7 +106,7 @@ partial struct rig {
 internal static nint probeRig(rig rʗp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
 
-    return Ꮡr.of(rig.Ꮡdev).Tag().Value;
+    return Ꮡr.Ꮡdev.Tag().Value;
 }
 
 partial struct deviceHandle {

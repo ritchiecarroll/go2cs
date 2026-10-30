@@ -19,7 +19,7 @@ partial struct box {
 internal static void fill(ж<box> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var c = Ꮡb.of(box.Ꮡw);
+    var c = Ꮡb.Ꮡw;
     c.Value.a = 10;
     c.Value.b = 20;
 }
@@ -27,7 +27,7 @@ internal static void fill(ж<box> Ꮡb) {
 internal static int64 readBack(ж<box> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var c = Ꮡb.of(box.Ꮡw);
+    var c = Ꮡb.Ꮡw;
     return (~c).a + (~c).b;
 }
 
@@ -72,7 +72,7 @@ internal static void Main() {
     fmt.Println(b.w.a, b.w.b);
     fmt.Println(readBack(Ꮡb));
 
-    var c = Ꮡb.of(box.Ꮡw);
+    var c = Ꮡb.Ꮡw;
     bump(ref (c.of(wrapper.Ꮡa)).DerefOrNull());
     fmt.Println(b.w.a, readBack(Ꮡb));
 

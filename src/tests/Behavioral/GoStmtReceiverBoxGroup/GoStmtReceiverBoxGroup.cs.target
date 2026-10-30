@@ -40,7 +40,7 @@ internal static partial void startArg(this ж<tracker> Ꮡt) {
 }
 
 internal static partial void startInner(this ж<tracker> Ꮡt) {
-    goǃ(Ꮡt.of(tracker.Ꮡin).send, GoStack.Bounded);
+    goǃ(Ꮡt.Ꮡin.send, GoStack.Bounded);
 }
 
 internal static void stop(this ж<tracker> Ꮡt) {

@@ -38,7 +38,7 @@ internal static nint addInClosure(ж<counter> Ꮡp, nint d) {
 
     void apply() {
         Ꮡp.Value.n += d;
-        addInt(ref (Ꮡp.of(counter.Ꮡn)).DerefOrNull(), d);
+        addInt(ref (Ꮡp.Ꮡn).DerefOrNull(), d);
     }
     apply();
     return Δp.n;

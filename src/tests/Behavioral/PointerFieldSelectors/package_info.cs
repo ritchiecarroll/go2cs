@@ -48,6 +48,7 @@ using static go.main_package;
 [assembly: go.GoFieldAccess(typeof(outer))]
 [assembly: go.GoFieldAccess(typeof(pair<>))]
 [assembly: go.GoFieldAccess(typeof(point))]
+[assembly: go.GoFieldAccess(typeof(sized))]
 [assembly: go.GoFieldAccess(typeof(wire))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

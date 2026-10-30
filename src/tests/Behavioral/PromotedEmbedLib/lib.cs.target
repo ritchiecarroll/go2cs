@@ -11,12 +11,12 @@ partial struct common {
 }
 
 internal static void Add(this ж<common> Ꮡc, nint n) {
-    var p = Ꮡc.of(common.Ꮡsum);
+    var p = Ꮡc.Ꮡsum;
     p.Value += n;
 }
 
 internal static Reading Report(this ж<common> Ꮡc) {
-    var p = Ꮡc.of(common.Ꮡsum);
+    var p = Ꮡc.Ꮡsum;
     return new Reading(Sum: p.Value);
 }
 

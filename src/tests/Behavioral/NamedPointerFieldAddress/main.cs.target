@@ -16,7 +16,7 @@ partial struct holder {
 }
 
 internal static (ж<nint>, ж<nint>, ж<nint>) viaParam(pubPtr pp, ж<pub> q) {
-    return (pp.of(pub.ᏑI), pp.of(pub.ᏑI), q.of(pub.ᏑI));
+    return (pp.of(pub.ᏑI), pp.of(pub.ᏑI), q.ᏑI);
 }
 
 internal static void Main() {
@@ -44,10 +44,10 @@ internal static void Main() {
     fmt.Println("through parameters:", (pp.Value).I, q.I);
 
     var p = Ꮡ(new pub(1));
-    (p.of(pub.ᏑI)).Value = 2;
-    var e = p.of(pub.ᏑI);
+    (p.ᏑI).Value = 2;
+    var e = p.ᏑI;
     e.Value = 5;
-    fmt.Println("plain:", p.I, e == p.of(pub.ᏑI));
+    fmt.Println("plain:", p.I, e == p.ᏑI);
 }
 
 } // end main_package

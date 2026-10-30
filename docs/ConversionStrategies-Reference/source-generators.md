@@ -31,7 +31,9 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
   clauses alone; see [Generic Constraints](generic-constraints.md#a-self-referential-generic-method-set-constraint-uses-a-box-wrapping-proxy-as-the-type-argument).
 * **`FieldAccessGenerator`** — for every struct type a `[GoFieldAccess(…)]` record lists (a package's
   `package_info.cs` holds one assembly record per type), emits a `ref` field property on `ж<T>`, so a field
-  reached through a pointer reads and writes as Go spells it, `p.f`, at its Go offset over native memory; see
+  reached through a pointer reads and writes as Go spells it, `p.f`, at its Go offset over native memory, and
+  beside it a `ж<F>` address property, so `&p.f` reads `p.Ꮡf`, over the field's one accessor token `T.Ꮡf‿` that
+  the type generator emits on the struct; see
   [Implicit Pointer Dereferencing](implicit-dereferencing.md#implicit-pointer-dereferencing) and
   [Pointers](pointers.md#a-field-reached-through-a-pointer-reinterpreted-from-unsafepointer-reads-at-its-go-offset--the-field-property).
 * **`EscapeRegistryGenerator`** — registers, per package class, golib's operations for every closed container the

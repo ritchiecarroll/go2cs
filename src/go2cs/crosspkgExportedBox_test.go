@@ -150,7 +150,7 @@ func TestExportedValueVarIsBoxedAcrossPackages(t *testing.T) {
 	for _, want := range []string{
 		"var p = lib.ᏑN;",
 		"lib.ᏑV.Inc",
-		"lib.ᏑS.of(lib.Holder.ᏑN)",
+		"lib.ᏑS.ᏑN", // the field's address property (parity seat #32)
 		"lib.ᏑArr.at<nint>(1)",
 	} {
 		if !strings.Contains(main, want) {

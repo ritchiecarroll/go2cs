@@ -93,6 +93,13 @@ const ChannelRightOp = "\uA7F7\u1433"            // Example: `ch.ꟷᐳ(out var 
 // the Go method and keeps this door, which no Go identifier can spell (U+203F is a connector
 // punctuation character: legal in C#, illegal in Go).
 const MapWrapperSet = "Set\u203F"
+
+// FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.Ꮡf‿`: the
+// `static readonly FieldRefFunc<T, F>` the TypeGenerator emits beside the field's `Ꮡf` accessor, which
+// the generated `p.Ꮡf` property (`&p.f`, parity seat #32) hands golib's view cache, so every site in
+// every assembly passes one delegate object and the cache compares by reference. U+203F keeps the
+// name out of reach of every Go field's accessor, as MapWrapperSet's door does.
+const FieldAccessTokenSuffix = "\u203F"
 const PointerDerefOp = "~" // Example: `~ptr` for dereferencing a pointer
 
 // NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.Value` to re-alias a

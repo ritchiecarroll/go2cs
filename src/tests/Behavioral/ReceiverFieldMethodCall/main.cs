@@ -26,7 +26,7 @@ internal static int32 add(this ж<Counter> Ꮡc, int32 delta) {
 }
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) {
-    (Ꮡc.of(Counter.Ꮡn)).Value = v;
+    (Ꮡc.Ꮡn).Value = v;
 }
 
 public static int32 Get(this ref Counter c) {
@@ -39,15 +39,15 @@ partial struct Flag {
 }
 
 public static int32 Incr(this ж<Flag> Ꮡf) {
-    return Ꮡf.of(Flag.Ꮡc).Add(1);
+    return Ꮡf.Ꮡc.Add(1);
 }
 
 public static int32 AddN(this ж<Flag> Ꮡf, int32 d) {
-    return Ꮡf.of(Flag.Ꮡc).Add(d);
+    return Ꮡf.Ꮡc.Add(d);
 }
 
 public static void Reset(this ж<Flag> Ꮡf, int32 v) {
-    Ꮡf.of(Flag.Ꮡc).Set(v);
+    Ꮡf.Ꮡc.Set(v);
 }
 
 public static int32 Value(this ref Flag f) {
@@ -72,11 +72,11 @@ public static int32 AddTwice(this ж<Counter> Ꮡc, int32 d) {
 }
 
 public static int32 AddViaValue(this ж<Flag> Ꮡf, int32 d) {
-    return applyTwice(Ꮡf.of(Flag.Ꮡc).Add, d);
+    return applyTwice(Ꮡf.Ꮡc.Add, d);
 }
 
 public static int32 ReadViaValue(this ж<Flag> Ꮡf) {
-    return readVia(Ꮡf.of(Flag.Ꮡc).Get);
+    return readVia(Ꮡf.Ꮡc.Get);
 }
 
 internal static void Main() {
@@ -89,11 +89,11 @@ internal static void Main() {
     fmt.Println("Incr:", Ꮡfl.Incr());
     fmt.Println("AddN 5:", Ꮡfl.AddN(5));
     fmt.Println("final:", fl.Value());
-    fmt.Println("AddTwice 3:", Ꮡfl.of(Flag.Ꮡc).AddTwice(3));
+    fmt.Println("AddTwice 3:", Ꮡfl.Ꮡc.AddTwice(3));
     fmt.Println("AddViaValue 2:", Ꮡfl.AddViaValue(2));
     fmt.Println("ReadViaValue:", Ꮡfl.ReadViaValue());
-    fmt.Println("local value:", applyTwice(Ꮡfl.of(Flag.Ꮡc).Add, 1));
-    fmt.Println("case twin:", Ꮡfl.of(Flag.Ꮡc).add(1));
+    fmt.Println("local value:", applyTwice(Ꮡfl.Ꮡc.Add, 1));
+    fmt.Println("case twin:", Ꮡfl.Ꮡc.add(1));
 }
 
 } // end main_package

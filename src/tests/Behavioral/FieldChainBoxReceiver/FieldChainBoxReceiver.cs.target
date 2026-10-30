@@ -25,7 +25,7 @@ partial struct box {
 }
 
 internal static void viaParam(ж<box> b) {
-    b.of(box.Ꮡh).of(holder.Ꮡc).inc();
+    b.Ꮡh.Ꮡc.inc();
 }
 
 partial struct wrapper {
@@ -38,7 +38,7 @@ internal static ж<wrapper> self(this ж<wrapper> Ꮡw) {
 
 internal static void bump(this ж<wrapper> Ꮡw) {
     _ = Ꮡw.self();
-    Ꮡw.of(wrapper.Ꮡb).of(box.Ꮡh).of(holder.Ꮡc).inc();
+    Ꮡw.Ꮡb.Ꮡh.Ꮡc.inc();
 }
 
 partial struct mid {
@@ -50,7 +50,7 @@ partial struct deep {
 }
 
 internal static void bumpDeep(this ж<deep> Ꮡd) {
-    Ꮡd.of(deep.Ꮡmid).of(mid.Ꮡc).inc();
+    Ꮡd.Ꮡmid.Ꮡc.inc();
 }
 
 internal static void Main() {

@@ -87,7 +87,7 @@ internal static void namedZeroSizeWrites() {
     rp.Value = new nocopy();
     fmt.Printf("after write through reflect's pointer: %#x\n"u8, x.V);
 
-    fmt.Println("reflect Addr == &x.Z:", (uintptr)rx.Field(0).Addr().UnsafePointer() == @unsafe.Pointer.FromPinnedBox(Ꮡx.of(Carrier.ᏑZ)));
+    fmt.Println("reflect Addr == &x.Z:", (uintptr)rx.Field(0).Addr().UnsafePointer() == @unsafe.Pointer.FromPinnedBox(Ꮡx.ᏑZ));
 
     x.V = pattern;
     var p = Ꮡx;

@@ -109,7 +109,7 @@ func main() {
 		"internal static partial void startArg(this ж<tracker> Ꮡt)",
 		"goǃ(Ꮡt.loopArg, (nint)9, GoStack.Bounded);",
 		"internal static partial void startInner(this ж<tracker> Ꮡt)",
-		"goǃ(Ꮡt.of(tracker.Ꮡin).send, GoStack.Bounded);",
+		"goǃ(Ꮡt.Ꮡin.send, GoStack.Bounded);", // the embed's address property (parity seat #32)
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("want %q: a go statement's box method group needs the receiver box in scope:\n%s", want, mainCs)

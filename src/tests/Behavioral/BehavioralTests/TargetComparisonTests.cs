@@ -595,6 +595,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFieldAccessReinterpret() => CheckTarget("FieldAccessReinterpret");
 
     [TestMethod]
+    public void CheckFieldAddressProperties() => CheckTarget("FieldAddressProperties");
+
+    [TestMethod]
     public void CheckFieldChainBoxReceiver() => CheckTarget("FieldChainBoxReceiver");
 
     [TestMethod]

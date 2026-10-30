@@ -46,6 +46,8 @@ using static go.main_package;
 [assembly: go.GoFieldAccess(typeof(box))]
 [assembly: go.GoFieldAccess(typeof(counter))]
 [assembly: go.GoFieldAccess(typeof(deep))]
+[assembly: go.GoFieldAccess(typeof(holder))]
+[assembly: go.GoFieldAccess(typeof(mid))]
 [assembly: go.GoFieldAccess(typeof(wrapper))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

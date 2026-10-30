@@ -106,7 +106,7 @@ internal static void Main() {
     fmt.Println("chainV  ", chainV());
 
     ref var h7 = ref heap<holder>(new holder(f: new frame(Name: "f7")), out var Ꮡh7);
-    var chainP = Ꮡh7.of(holder.Ꮡf).bump;
+    var chainP = Ꮡh7.Ꮡf.bump;
     chainP();
 
     fmt.Println("chainP  ", h7.f.Name);

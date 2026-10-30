@@ -45,13 +45,16 @@ var rootQualifyScanRegex = regexp.MustCompile(`(?:global::)?@?[\p{L}_][\p{L}\p{N
 // (CS0104). qualifySystemCollidingLocalTypeRefs roots those bare references at the package class so
 // they resolve unambiguously to the local type. Only names in this curated set are touched, so
 // attributes whose type names never collide with System (every behavioral-test case) emit
-// byte-identically (no golden churn).
+// byte-identically (no golden churn). The same file-scope rule reaches the field-access records
+// (`[assembly: GoFieldAccess(typeof(T))]`), which name a package's own atomic types since seat #32:
+// internal/runtime/atomic's Int32 and Int64 against System.Int32 and System.Int64.
 var systemCollidingTypeNames = hashset.NewHashSet([]string{
 	"Action", "Activator", "Array", "Attribute", "Boolean", "Buffer", "Byte", "Char", "Comparison",
 	"Console", "Convert", "DateTime", "Decimal", "Delegate", "Double", "Enum", "Environment", "Exception",
-	"Func", "Guid", "Half", "Index", "Int128", "Lazy", "Math", "Memory", "Nullable", "Object", "Predicate",
-	"Progress", "Random", "Range", "SByte", "Single", "Span", "String", "TimeSpan", "TimeZone", "TimeZoneInfo",
-	"Tuple", "Type", "UInt128", "Uri", "ValueType", "Version",
+	"Func", "Guid", "Half", "Index", "Int16", "Int32", "Int64", "Int128", "Lazy", "Math", "Memory", "Nullable",
+	"Object", "Predicate", "Progress", "Random", "Range", "SByte", "Single", "Span", "String", "TimeSpan",
+	"TimeZone", "TimeZoneInfo", "Tuple", "Type", "UInt16", "UInt32", "UInt64", "UInt128", "Uri", "ValueType",
+	"Version",
 })
 
 // rootQualifySubNamespaceTypeRefs prefixes the root namespace ("go.") onto package-qualified type

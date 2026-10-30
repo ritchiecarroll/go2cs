@@ -119,6 +119,19 @@ func derefSelects(s string) string {
 	}
 }
 
+// fieldAccessRecordAnchor and fieldAccessRecordInserts are the field-access records in package_info.cs, one
+// `[assembly: GoFieldAccess(typeof(T))]` per struct type under a two-line comment and over a blank line: inserted by P1
+// (#31) for a field it reads, and by P2 (#32) for a field whose address it takes.
+var (
+	fieldAccessRecordAnchor  = rx(`^\[assembly: (?:global::)?(?:go\.)?GoFieldAccess\(typeof\(`)
+	fieldAccessRecordInserts = []*regexp.Regexp{
+		rx(`^\s*\[assembly: (?:global::)?(?:go\.)?GoFieldAccess\(typeof\(.*\)\)\]$`),
+		rx(`^// The struct types whose fields this package reaches through a pointer, as Go spells it, ` + "`p.f`" + `:$`),
+		rx(`^// go2cs-gen emits a field property on the pointer for each of their fields\.$`),
+		rx(`^$`),
+	}
+)
+
 // valueSelect is one `X.Value.f` of P1's write through a pointer, f possibly `@`-escaped.
 var valueSelect = rx(`([\p{L}\p{N}_\])])\.Value\.([\p{L}_@])`)
 
@@ -566,21 +579,18 @@ var items = []item{
 		Block: &blockRule{
 			PerSide:   true,
 			Delete:    []*regexp.Regexp{rx(`^\s*\[GoFieldAccess\(.*\)\]$`)},
-			NewAnchor: rx(`^\[assembly: (?:global::)?(?:go\.)?GoFieldAccess\(typeof\(`),
-			Insert: []*regexp.Regexp{
-				rx(`^\s*\[assembly: (?:global::)?(?:go\.)?GoFieldAccess\(typeof\(.*\)\)\]$`),
-				rx(`^// The struct types whose fields this package reaches through a pointer, as Go spells it, ` + "`p.f`" + `:$`),
-				rx(`^// go2cs-gen emits a field property on the pointer for each of their fields\.$`),
-				rx(`^$`),
-			},
+			NewAnchor: fieldAccessRecordAnchor,
+			Insert:    fieldAccessRecordInserts,
 		},
 	},
 	{
 		ID: "P2", Seat: "#32", Title: "`&b.off` becomes `b.Ꮡoff`",
 		// The plan's "(not `.Value`)" sets it apart from P1's `p.Value.f`; no `.Value.of(` exists at 5931bad29b.
+		// A struct whose fields only P2 reaches is recorded in package_info.cs as P1's are (G, 2026-10-29).
 		Measures: []measure{m("P2", "of-field", `\.of\([^()]*\.Ꮡ[\p{L}_]`)},
 		Canon:    []rewrite{rw(`\.of\([^()]*?\.(Ꮡ`+id+`)\)`, ".$1")},
 		Old:      rx(`\.of\([^()]*\.Ꮡ[\p{L}_]`),
+		Block:    &blockRule{PerSide: true, NewAnchor: fieldAccessRecordAnchor, Insert: fieldAccessRecordInserts},
 	},
 	{
 		ID: "GD", Seat: "#33", Title: "a go/defer statement's constant argument moves into the thunk's call",

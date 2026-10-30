@@ -19,14 +19,14 @@ internal static partial void keep(ж<controller> c) {
 }
 
 internal static void bump() {
-    Ꮡctrl.of(controller.Ꮡtotal).Add(5);
+    Ꮡctrl.Ꮡtotal.Add(5);
 }
 
 internal static void Main() {
     keep(Ꮡctrl);
     bump();
     bump();
-    fmt.Println(Ꮡctrl.of(controller.Ꮡtotal).Load());
+    fmt.Println(Ꮡctrl.Ꮡtotal.Load());
 }
 
 } // end main_package

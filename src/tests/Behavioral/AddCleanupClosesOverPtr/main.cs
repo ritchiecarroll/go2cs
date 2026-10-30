@@ -58,7 +58,7 @@ internal static void Main() {
 
     @try("captures field pointer", () => {
         var v = Ꮡ(new T(f: 2));
-        var fp = v.of(T.Ꮡf);
+        var fp = v.Ꮡf;
         var fpʗ1 = fp;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = fpʗ1.Value;

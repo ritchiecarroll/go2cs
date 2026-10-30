@@ -116,7 +116,7 @@ internal static void Main() {
 
     ref var c = ref heap(new box(), out var Ꮡc);
     run(() => {
-        var p = Ꮡc.of(box.Ꮡx);
+        var p = Ꮡc.Ꮡx;
         p.Value = 99;
     });
     fmt.Println("3:", c.x);

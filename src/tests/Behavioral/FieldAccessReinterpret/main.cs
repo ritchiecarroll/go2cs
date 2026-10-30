@@ -58,7 +58,7 @@ internal static void Main() {
     nint n = copy(rec.of(record.ᏑPath).slice(2), slice<uint16>([0x0c0d]));
     rec.tail.B = 0x1112;
 
-    var p = rec.of(record.ᏑLength);
+    var p = rec.ᏑLength;
     p.Value += 1;
 
     fmt.Println("bytes:", blob[..20]);

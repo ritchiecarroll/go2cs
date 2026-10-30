@@ -502,6 +502,7 @@
     <Project Path="tests/Behavioral/ExportedAliasUnexportedTarget/aliaslib/ExportedAliasUnexportedTarget.aliaslib.csproj" />
     <Project Path="tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="tests/Behavioral/FieldAccessReinterpret/FieldAccessReinterpret.csproj" />
+    <Project Path="tests/Behavioral/FieldAddressProperties/FieldAddressProperties.csproj" />
     <Project Path="tests/Behavioral/FieldChainBoxReceiver/FieldChainBoxReceiver.csproj" />
     <Project Path="tests/Behavioral/FieldDimsCargo/FieldDimsCargo.csproj" />
     <Project Path="tests/Behavioral/FieldNameShadowsLoopVar/FieldNameShadowsLoopVar.csproj" />

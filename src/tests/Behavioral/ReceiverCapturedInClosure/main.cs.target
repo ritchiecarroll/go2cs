@@ -26,7 +26,7 @@ internal static nint addViaFieldPtr(this ж<counter> Ꮡc, nint d) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     void apply() {
-        addInt(ref (Ꮡc.of(counter.Ꮡn)).DerefOrNull(), d);
+        addInt(ref (Ꮡc.Ꮡn).DerefOrNull(), d);
     }
     apply();
     return c.n;

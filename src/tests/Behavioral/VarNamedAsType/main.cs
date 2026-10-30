@@ -13,10 +13,10 @@ internal static void Main() {
     ref var v = ref heap<node>(new node(x: 5, y: 6), out var Ꮡv);
     var node = Ꮡv;
 
-    var px = node.of(main_package.node.Ꮡx);
+    var px = node.Ꮡx;
     px.Value = 99;
 
-    var py = node.of(main_package.node.Ꮡy);
+    var py = node.Ꮡy;
     py.Value = 88;
 
     fmt.Println(v.x, v.y);

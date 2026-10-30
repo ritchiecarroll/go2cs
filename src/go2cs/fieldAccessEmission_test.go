@@ -171,7 +171,7 @@ func TestFieldAccessReadsThroughTheFieldProperty(t *testing.T) {
 		"buf.of(buffer.ᏑValue).Value = 3;",
 		"buf.of(buffer.ᏑPath).ElementRef(1) = 5;",
 		"copy(buf.of(buffer.ᏑPath).slice(0, 2),",
-		"buf.of(buffer.ᏑOffset)",
+		"buf.ᏑOffset", // `&buf.Offset`: the address property (parity seat #32)
 		"fmt.Println(buf.Offset, buf.In.Y,",
 		"buf.hdr.Count, buf.of(buffer.ᏑPath).ElementRef(1)",
 		"s.of(span.ᏑLen).Value = 3;",

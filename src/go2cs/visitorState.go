@@ -617,7 +617,11 @@ type Visitor struct {
 	// zeroSizeFieldStoreTarget, which cuts the field off that rendering to reach its struct; the field property
 	// route (fieldPropertySelector) leaves it to the box form, whose base is that struct.
 	zeroSizeStorePlain *ast.SelectorExpr
-	funcLevelDecls     map[string]*types.Var // Function-level local declarations of the current function (for global-shadow qualification)
+	// fieldAddressFused is the field selection `p.arr` whose address convUnaryExpr is rendering for an element
+	// address to fuse with, `&p.arr[i]` as `p.at(T.Ꮡarr, i)`: the address property route (fieldAddressProperty)
+	// leaves it to the accessor's view, whose accessor the fusion takes.
+	fieldAddressFused *ast.SelectorExpr
+	funcLevelDecls    map[string]*types.Var // Function-level local declarations of the current function (for global-shadow qualification)
 	// funcScopeVarNames holds the Go name of every variable declared ANYWHERE in the current
 	// function — receiver, parameters, results and locals at every nesting depth, including inside
 	// func literals. A bare type name spelled by the EMITTER (the `Type.Ꮡfield` box accessor) binds

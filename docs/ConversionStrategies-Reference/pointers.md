@@ -278,10 +278,10 @@ The seven argument shapes, each with its emitted form and the golden that pins i
 
 | # | Go argument | boxed emission | lowered emission | golden |
 |:-:|:--|:--|:--|:--|
-| 1 | `&e.x` — field of a deref'd parameter or receiver (a **nullable** base) | `Ꮡe.of(T.Ꮡx)` — 1 box | `ref nonnil(ref e).x` | `RefLoweredParams`, `GenericReceiverFieldAddress` |
+| 1 | `&e.x` — field of a deref'd parameter or receiver (a **nullable** base) | `Ꮡe.Ꮡx` — 1 box | `ref nonnil(ref e).x` | `RefLoweredParams`, `GenericReceiverFieldAddress` |
 | 2 | `&x` — an address-taken local, value parameter or named result | `Ꮡx`, the `heap()` box minted at the declaration | `ref x` — the plain local; the box and its eager `T[1]` slot are gone | `ForVariants` |
 | 3 | a pointer variable/field/deref/assert `q` — it carries a box | `q` | `ref (q).DerefOrNull()` — read at CALL time, so a re-pointed pointer is never stale | `PointerParamNilWalk`, `PointerFieldArrayElementAddress` |
-| 4 | `&s[i]` / `&x.f` over a **value-rooted** base (local, value param, global, slice) | `Ꮡ(s, i)` — 1 box + 1 interface temp; `Ꮡx.of(T.Ꮡf)` for the field form | `ref s[i]` / `ref x.f` — `nonnil` elided, the base provably cannot be null | `AddressOfParamWrite`, `PointerFieldArrayElementAddress` |
+| 4 | `&s[i]` / `&x.f` over a **value-rooted** base (local, value param, global, slice) | `Ꮡ(s, i)` — 1 box + 1 interface temp; `Ꮡx.Ꮡf` for the field form | `ref s[i]` / `ref x.f` — `nonnil` elided, the base provably cannot be null | `AddressOfParamWrite`, `PointerFieldArrayElementAddress` |
 | 5 | `(*T2)(&v.x)` — a pointer conversion over a generated named-**array** wrapper | `Ꮡ((Ꮡv.of(…)).Value.Value)` — 2 boxes | hoisted temp: `var ᴛ1 = v.x.Value;` … `ref ᴛ1` | `NamedArrayWrapper` |
 | 6 | a non-variable pointer expression — `&T{…}`, `new(T)`, any call result | `Ꮡ(new T(…))` / carries the returned box | hoisted temp, same shape as row 5: `var ᴛ1 = new T(…);` … `ref ᴛ1` | `RefLoweredParams` |
 | 7 | the literal `nil` | `default!` | `ref ((ж<T>)default!).DerefOrNull()` — binds the null ref; the callee faults at first use | `GuardedNilPointerParamDeref` |
@@ -1585,7 +1585,7 @@ view).
 ## A direct-ж method on a value field-chain boxes through the &-machinery
 A direct-ж (box-receiver) method called on a field of a plain VALUE param — netip's
 `ip.addr.halves()`, where Go auto-addresses `&ip.addr` — routes the receiver through the
-&-machinery: `Ꮡ(ip).of(netip_package.ΔAddr.Ꮡaddr).halves()`. This boxes a COPY, which is faithful because
+&-machinery: `Ꮡ(ip).Ꮡaddr.halves()`. This boxes a COPY, which is faithful because
 the enclosing Go value param is itself a copy: writes through the method could only ever reach
 the local copy in Go too. (Pointer-rooted chains and indexed elements take their own
 long-standing arms; this is the remaining value-rooted case.) Guarded by
@@ -1597,7 +1597,7 @@ A heap box always keeps the RAW Go identifier (`ref var Δslice = ref heap<T>(ou
 ```csharp
     ref var Δp = ref heap<box>(new box(n: 0), out var Ꮡp);
 …
-    bump(Ꮡp.of(box.Ꮡn));
+    bump(Ꮡp.Ꮡn);
 ```
 
 The local `p` collides with the type `p`, so its value alias is `Δp`, and `&p.n` goes through the RAW-name
@@ -2421,7 +2421,18 @@ collision-named field.
 - **A field promoted through value embeds** walks them by name, `rec.tail.B` (Go's own explicit spelling of
   `rec.B`); the embed's property is its `ref` accessor's. A field promoted through a POINTER embed lives in
   another allocation and keeps the dereference.
-- **`&p.f`** keeps `p.of(T.Ꮡf)`, which already answers a view at the Go offset.
+- **`&p.f`** reads `p.Ꮡf` (parity seat #32), a `ж<F>` address property go2cs-gen emits beside each field
+  property: `get => ʗp.of(T.Ꮡf‿)`, the field's view, at the Go offset on a `NativeBox<T>`. `T.Ꮡf‿` is the field's
+  ONE accessor token, a `static readonly FieldRefFunc<T, F>` the type generator emits beside the `Ꮡf` accessor on
+  `T`, in `T`'s own assembly, so every site in every assembly hands the view cache one delegate object and its
+  compare is a reference compare on both runtimes
+  ([the field-view cache](multi-assignment.md#ꮡxoftꮡf-returns-one-view-per-box-field--the-field-view-cache)). Its
+  name ends in U+203F, which C# accepts in an identifier and Go does not, so no Go field's accessor can spell it.
+  An assembly built before the token has none: the property there passes the accessor's method group, which the
+  cache matches by its method. A field the rules above keep on the explicit form keeps `p.of(T.Ꮡf)` for its
+  address too, and so do a field whose address property would be named like a member of `ж<T>` (`Ꮡelem`), a named
+  pointer type (its wrapper declares `of`, not the property) and the field an element address fuses with,
+  `&p.arr[i]` as `p.at(T.Ꮡarr, i)`.
 - **A header-shaped struct** gets GET/SET properties instead of `ref` ones. Such a struct is an `unsafe.Pointer`
   field followed by one or two `int` fields: internal/unsafeheader's `Slice` and `String`, and runtime's `slice`
   and `stringStruct`. The setter is

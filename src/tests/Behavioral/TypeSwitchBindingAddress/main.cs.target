@@ -44,7 +44,7 @@ internal static any process(any tok, ж<resolver> Ꮡr) {
     switch (tok.type()) {
     case start t1ᴛ1: {
         ref var t1 = ref heap(t1ᴛ1, out var Ꮡt1);
-        r.fix(Ꮡt1.of(start.Ꮡn));
+        r.fix(Ꮡt1.Ꮡn);
         foreach (var i in range(t1.attr)) {
             r.fix(Ꮡ(t1.attr, i));
         }
@@ -52,7 +52,7 @@ internal static any process(any tok, ж<resolver> Ꮡr) {
     }
     case end t1ᴛ2: {
         ref var t1 = ref heap(t1ᴛ2, out var Ꮡt1);
-        var p = Ꮡt1.of(end.Ꮡn);
+        var p = Ꮡt1.Ꮡn;
         p.space = "held";
         r.reset(Ꮡt1);
         return t1;

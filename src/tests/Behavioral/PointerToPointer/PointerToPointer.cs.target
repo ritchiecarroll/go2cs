@@ -43,8 +43,8 @@ internal static void Main() {
     PrintValPtr2Ptr2Ptr(ppptr);
 
     ref var b = ref heap<Buffer>(new Buffer(), out var Ꮡb);
-    PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
-    PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
+    PrintValPtr(Ꮡb.Ꮡoff);
+    PrintValPtr(Ꮡb.Ꮡoff);
 
     derefElements();
 }

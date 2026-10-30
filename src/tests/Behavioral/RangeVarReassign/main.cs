@@ -65,7 +65,7 @@ internal static void Main() {
         ref var r = ref heap(new row(), out var Ꮡr);
         r = vᴛ5;
 
-        var p = Ꮡr.of(row.Ꮡv);
+        var p = Ꮡr.Ꮡv;
         p.x += 5;
         fmt.Println("addr", p.x);
     }

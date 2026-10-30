@@ -55,7 +55,7 @@ internal static bool preferLowLatency(ж<mu> p) {
     default: {
         return false;
     }
-    case var ᴛ when ᴛ == ᏑtheSched.of(schedt.Ꮡlock): {
+    case var ᴛ when ᴛ == ᏑtheSched.Ꮡlock: {
         return true;
     }}
 
@@ -84,7 +84,7 @@ internal static void Main() {
     fmt.Println(second == Ꮡsentinel, Ꮡother == Ꮡsentinel);
 
     ref var elsewhere = ref heap(new mu(), out var Ꮡelsewhere);
-    fmt.Println(preferLowLatency(ᏑtheSched.of(schedt.Ꮡlock)), preferLowLatency(Ꮡelsewhere), preferLowLatency(nil));
+    fmt.Println(preferLowLatency(ᏑtheSched.Ꮡlock), preferLowLatency(Ꮡelsewhere), preferLowLatency(nil));
 
     var (ᴛ1, ᴛ2, ᴛ3) = nativeWidthLiterals();
     fmt.Println(ᴛ1, ᴛ2, ᴛ3);

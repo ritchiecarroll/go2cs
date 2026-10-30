@@ -33,23 +33,23 @@ partial struct owner {
 internal static void bump(ж<owner> Ꮡo, int64 d) {
     ref var o = ref Ꮡo.DerefOrNull();
 
-    o.h.of(holder.Ꮡwait).add(d);
-    o.deep.of(holder.Ꮡprof).of(profile.Ꮡwait).add(d);
+    o.h.Ꮡwait.add(d);
+    o.deep.Ꮡprof.Ꮡwait.add(d);
 }
 
 internal static int64 viaPointerLocal(ref owner o, int64 d) {
     var mp = o.h;
-    mp.of(holder.Ꮡprof).of(profile.Ꮡwait).add(d);
-    mp.of(holder.Ꮡprof).of(profile.Ꮡwait).add(d);
-    return mp.of(holder.Ꮡprof).of(profile.Ꮡwait).get();
+    mp.Ꮡprof.Ꮡwait.add(d);
+    mp.Ꮡprof.Ꮡwait.add(d);
+    return mp.Ꮡprof.Ꮡwait.get();
 }
 
 internal static void Main() {
     var o = Ꮡ(new owner(h: Ꮡ(new holder()), deep: Ꮡ(new holder())));
     bump(o, 5);
     bump(o, 5);
-    fmt.Println(o.h.of(holder.Ꮡwait).get());
-    fmt.Println(o.deep.of(holder.Ꮡprof).of(profile.Ꮡwait).get());
+    fmt.Println(o.h.Ꮡwait.get());
+    fmt.Println(o.deep.Ꮡprof.Ꮡwait.get());
 
     var o2 = Ꮡ(new owner(h: Ꮡ(new holder())));
     fmt.Println(viaPointerLocal(ref (o2).DerefOrNull(), 4));
