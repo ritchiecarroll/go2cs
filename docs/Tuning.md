@@ -104,3 +104,40 @@ loop speed stayed within measurement noise.
      CommandLine.md's -test-tiered row. The runner: src/tests/Performance/PerformanceRunner, `--tc0` ("Add the
      diagnostic TC0 arm (the JIT binary, DOTNET_TieredCompilation=0)"; ReleaseRun.cs: "diagnostic arms ... recorded,
      never in the published table"). -->
+
+## Converter and runtime options
+
+Most converter options change how the emitted C# reads, or which code is converted. They do not change what the
+program costs to run. These do.
+
+### Goroutine stacks
+
+Each goroutine runs on its own thread, and the thread reserves a fixed stack, because a .NET stack cannot grow the
+way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot recurse
+([how](ConversionStrategies.md#goroutines)). It is address space, not memory, but it is what a thread start pays for:
+on `win-x64`, parking 100,000 goroutines at once took roughly five times longer with the 256 MiB reserve than with
+16 MiB. On `linux-x64`, at 10,000 goroutines, the reserve made no measurable difference, and a kernel limit on
+memory mappings, not the reserve, stopped thread creation at around 16,000.
+
+`GO2CS_GOROUTINE_STACK` sets the 256 MiB reserve and `GO2CS_GOROUTINE_BOUNDED_STACK` the 16 MiB one, as a byte
+count with an optional `KiB`, `MiB` or `GiB` suffix; `0` takes .NET's default thread stack. Lower the first only
+for a program that starts many goroutines at once and never recurses deeply in one: recursion past the reserve ends
+the process with no panic and no deferred calls ([Limitations](Limitations.md)).
+
+<!-- Source: BOARD, R's 1.26.10.2 seat #3 row (2026-10-27), ParkStorm, Release, one run at a time. win-x64 (R-LAPTOP,
+     16 hardware threads), N=100,000, time to park / private MB: 256 MiB 361 s / 5,900; 16 MiB 70 s / 5,650 (1 MiB
+     67 s, 4 MiB 66 s, 64 MiB 86 s). linux-x64 (WSL Ubuntu 22.04, 10 cores): N=10,000 parks in 5.7 s (default) /
+     6.4 s (16 MiB); N=20,000 stops at about 16,200 threads at both reserves (vm.max_map_count 65,530). The variables
+     and their syntax: src/core/golib/runtime/Goroutine.cs, ResolveStackReserve and BoundedReserve. -->
+
+### What else was considered
+
+| Option | Why it is not a tuning option |
+|:--|:--|
+| `-var`, `-uco`, `-indent`, `-comments`, `-provenance`, `-license`, `-tree` | Change how the emitted C# reads or what metadata it carries; the program does the same work. |
+| `-goroot`, `-gopath`, `-go2cspath`, `-stdlib`, `-recurse`, `-csproj`, `-tags`, `-platforms`, `-cgo` | Choose which Go code is converted and for which platforms, not how it runs. |
+| `-debug`, `-convert-timeout`, `-platform-census`, `-version`, `-nuget-map-*`, `-module-*` | Govern the conversion itself. |
+| `-tests`, `-test-*` | Converted test hosts only; `-test-tiered` is covered [above](#net-runtime-settings). |
+| `GOGC`, `GOMEMLIMIT` | Read and reported, but .NET's collector does not follow them ([Limitations](Limitations.md)). |
+| `GO2CS_GC_PAUSE_HISTORY=0` | Changes what `runtime` reports about garbage collection, not how the program runs. |
+| golib's `FieldViewCache.Disabled` | A switch for one test, which checks that `&s.f` stays one pointer as it does in Go. Setting it breaks that. |
