@@ -32073,4 +32073,51 @@ encoding/json and net/http on the R0 tree with the seat's converter and go2cs-ge
 
 — G (2026-10-30)
 
+## 2026-10-30 — G (1.26.10.2 seat #49, claude/g-seat49-tests-l3-csproj): a folded package leaves layout L3 — DONE on the seat branch
+
+**The finding, corrected before the code.** The ladder-identity determinism control saw os/signal's production
+`.csproj` lose its L3 block after a `-tests` leg. The `-tests` writer was right. All 25 roster packages that still have
+per-GOOS sources keep their block through it; os/signal had none left. The defect was in the multi-platform merge.
+#41's imported-alias drop made os/signal's and time/tzdata's three per-target `package_info.cs` identical, so the merge
+folded them flat (legitimately), but it never took the project file out of the layout. The seed's block survived,
+inert (an Exists-guarded `package_info` item and a `$(GoTargetOS)/*.cs` glob over EMPTY folders), and every
+single-target writer then rendered the file without it: a `-tests` convert, or any reconvert from a fresh checkout
+(git carries no empty folders). The emission had two fixed points. The block-less file builds: #31b's forward builds
+compiled it on linux and darwin, 0 errors, twice. A census of a fresh `-stdlib` emission: 43 packages carry the block,
+and exactly these two have no per-GOOS sources. R0's "os/signal and time/tzdata fold to root" is this defect's
+trigger, not a different fold.
+
+**The fix.** `mergePlatformEmissions` records each package whose per-GOOS copy an identical-class artifact removed.
+After the layout pass, `dropLayoutBlockFromProjectFile` takes any of those that no longer carries per-GOOS sources out
+of L3: `removePlatformLayoutBlocks` (the inverse of `applyPlatformLayoutBlocks`) on its project file, and the per-GOOS
+folders the fold emptied. A package still carrying per-GOOS sources is untouched. The merge reports "Project files
+folded out of L3". Red-first: `TestMergeThatFoldsAPackagesLastPerGoosFilesDropsItsLayoutBlock` drives the merge over a
+seeded root and three staged targets. The folded package's project file must be the stock template, its emptied
+folders gone, and a still-L3 package's project file byte-identical. It was red at d8c6baacbc on the block and the three
+folders.
+
+**The fixed point** (COORD's addition 1). A root seeded from a FRESH checkout of the seat tip (both packages still
+carrying their three per-GOOS `package_info.cs`) and the seat binary `9a13e52ea2357c4d`: (1) `-stdlib -comments` on
+three targets, "folded out of L3 2"; (2) the `-tests` convert of os/signal and time/tzdata, rc 0 each; (3) `-stdlib`
+again, "folded out of L3 0". After all three, `os.signal.csproj` reads `05fc93c9509e` and `time.tzdata.csproj`
+`5e36626782f2` (sha256, CR-stripped), neither carries the block, and neither package keeps a per-GOOS folder. The
+first equals the rendering the #31b base arm's `-tests` leg produced with #32's binary: the single-target writer's. The
+negative side holds across all three: `os/os.csproj` `7a683a36478e` with its block, and the 41 block-carrying project
+files byte-identical (digest `0ab3e740d00b`). From the
+final root, both packages build for linux and darwin with their dependency closures, 0 errors each (os/signal 285 s and
+230 s, time/tzdata 21 s and 20 s).
+
+**Footprint.** No committed `src/core` file moves in this seat. In E(final) this seat moves exactly the two project files, each
+differing from its committed text by the three L3 fragments alone (`fc389bb436ac` -> `05fc93c9509e`, `52fd8a65ba25` ->
+`5e36626782f2`); the per-target `package_info.cs` the fold removes are #41's, and git tracks no emptied folder. Both are named in the ladder's rung table, so Step D has nothing unexplained outside
+`.cs`. Behavioral emission cannot move: the change is inside the multi-platform merge, which no behavioral transpile
+runs. The ladder rung table (`data/parity-1262/ladder-rungs.tsv`, COORD's ruling 1) and the DESIGN record's dated
+amendment ride this seat.
+
+**Gates:** go test ./... 10 ok (the first run named one cite the merge change moved, `platformEmit.go` :1261 ->
+:1337, re-cited in-seat); repoguard ok at the tip. GenTests, GolibTests and go2cs.slnx are not owed: no golib or gen
+change. CNR is not owed: no behavioral transpile runs the multi-platform merge.
+
+— G (2026-10-30)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -112,3 +112,19 @@ binary by binary.
 Step A: one converter build per converter change (19 here), about 20 minutes, and git. Step B: one emission. Step D:
 one classify. Re-emission only for a bypass joint, for an unattributable residue, or to recover a purged run's
 composite: two emissions per run, on any box (the binary is reproducible, so the rung box is no longer the only one).
+
+## Amendment 2026-10-30 — COORD's rulings on the open points
+
+- **The rung records.** Each converter-changing seat's rung record is the A/B classify reading its DONE post carries,
+  the six seats outside #20-#32 (#33, #38, #41, #42, #43, #45) included. Their before/after binary pairs, rebuilt by
+  the recipe, sit beside each seat's landing commit in
+  [`data/parity-1262/ladder-rungs.tsv`](data/parity-1262/ladder-rungs.tsv). A rung is re-emitted only when Step D reads
+  an UNCLASSIFIED or AMBIGUOUS hunk in a file that rung touched; a `-tests`-only seat (#45) is no exception, since
+  Step D catches any production hunk it made.
+- **Rungs still to come**, both feeding Step C: #46 (golib only; the converter binary is unchanged, so not a joint)
+  and #48 (bare root attributes; H's A/B arms are its record, and its pcensus item lets Step D attribute them).
+- **Step E** (the surviving patches) is optional, run where they survive, and not a gate.
+- **The `.csproj` finding** became seat #49. The cause was not the `-tests` writer: the L3 merge folded a package's
+  last per-GOOS files flat without taking its project file out of the layout, so the emission had two fixed points.
+  #49's E(final) delta outside `.cs` (two project files) is in the rung table, so Step D has nothing unexplained
+  there. The post-step-3 guard stays in the regen brief as defence in depth.
