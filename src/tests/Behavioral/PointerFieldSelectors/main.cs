@@ -102,10 +102,10 @@ internal static void Main() {
     fmt.Println("point:", p.X, p.Y, p.Value);
 
     var o = Ꮡ(new outer(new inner(3), 4));
-    o.Value.Z = 7;
+    o.Z = 7;
     var @in = o.inner;
     @in.Z = 99;
-    fmt.Println("outer:", (~o).Z, o.W, @in.Z, o.inner.Z);
+    fmt.Println("outer:", o.Z, o.W, @in.Z, o.inner.Z);
 
     var (a, b, c) = (Ꮡ(new node(x: 1)), Ꮡ(new node(x: 2)), Ꮡ(new node(x: 3)));
     (a.next, b.prev, b.next, c.prev) = (b, a, c, b);

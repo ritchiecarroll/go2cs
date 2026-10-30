@@ -204,6 +204,7 @@ public class FieldAccessGenerator : ISourceGenerator
     private static List<string> Properties(Compilation compilation, INamedTypeSymbol type, HashSet<string> declared)
     {
         List<string> properties = [];
+        HashSet<string> served = new(StringComparer.Ordinal);
         string typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         bool foreign = !type.Locations.Any(location => location.IsInSource);
         bool header = IsHeaderShaped(type);
@@ -232,6 +233,8 @@ public class FieldAccessGenerator : ISourceGenerator
             {
                 continue;
             }
+
+            served.Add(name);
 
             string fieldType = TypeName(field.Type, type);
             string slot = $"{ReceiverName}.field({typeName}.{accessor})";
@@ -270,6 +273,8 @@ public class FieldAccessGenerator : ISourceGenerator
                 continue;
             }
 
+            served.Add(name);
+
             string propertyType = TypeName(property.Type, type);
 
             if (!declared.Contains(name))
@@ -278,7 +283,151 @@ public class FieldAccessGenerator : ISourceGenerator
             AddAddress(properties, type, typeName, propertyType, accessor, foreign, declared);
         }
 
+        // Promoted fields (parity seat #31b), by the hops Go walks (see PromotedFields). A foreign struct's value-embed
+        // promotions are among the ref properties above, which serve them through the struct's own promoted members.
+        foreach ((IFieldSymbol field, List<EmbedHop> hops) in PromotedFields(compilation, type))
+        {
+            string name = field.Name;
+
+            // An unresolved type in a FOREIGN declaration is an assembly this compilation does not reference (seat #45); one
+            // in this compilation's source is another generator's same-run type, rooted at the package class (TypeName), as
+            // a generic embed's proxy argument substitutes into its field: GenericEmbedPromotion's `curve<p224жpoint>.seed`.
+            bool unreachable = !hops[^1].Type.Locations.Any(location => location.IsInSource) && ContainsErrorType(field.OriginalDefinition.Type);
+
+            if (served.Contains(name) || declared.Contains(name) || s_collisionNames.Contains(name) || ShadowsPromotedMethod(type, name) ||
+                field.IsReadOnly || hops.Any(hop => hop.Field.IsReadOnly) || unreachable ||
+                !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly) || !hops.All(hop => compilation.IsSymbolAccessibleWithin(hop.Field, compilation.Assembly)))
+            {
+                continue;
+            }
+
+            served.Add(name);
+
+            string managed = $"ref {ReceiverName}.Value{string.Concat(hops.Select(hop => $".{PropertyName(hop.Field.Name)}{(hop.Pointer ? ".Value" : "")}"))}.{PropertyName(name)}";
+            string? native = hops.Any(hop => hop.Pointer) ? null : NativeHops(compilation, type, typeName, hops, field);
+
+            properties.Add($"public ref {TypeName(field.Type, type)} {PropertyName(name)} {{ [{GetterAttributes}] get => " +
+                (native is null ? managed : $"ref {ReceiverName} is global::go.NativeBox<{typeName}> ? ref {native} : {managed}") + "; }");
+        }
+
         return properties;
+    }
+
+    /// <summary>
+    /// An embed a promoted field's selection walks: the embedded field, whether it is a pointer embed, and the struct
+    /// type it embeds.
+    /// </summary>
+    private sealed record EmbedHop(IFieldSymbol Field, bool Pointer, INamedTypeSymbol Type);
+
+    /// <summary>
+    /// The fields Go promotes into <paramref name="type"/>, each with the embeds its selection walks.
+    /// </summary>
+    /// <remarks>
+    /// Go's rule: a name is promoted from the shallowest embed depth at which it occurs, and only when exactly one field
+    /// carries it there; an ambiguity at that depth promotes nothing from any depth, and a name the struct declares
+    /// itself is never promoted. The walk reads only members this generator sees (<see cref="GoFields"/>): a promoted
+    /// field's property names the hops itself, <c>ʗp.Value.E1.E2.f</c>, because the type generator's own promoted
+    /// members are not Go's set (they do not chase a cross-package embed's own embeds). Go rejects an ambiguous
+    /// selector, so every promoted selection the converter writes as <c>p.f</c> is one this walk finds, provided each
+    /// hop's fields are visible here: the converter keeps the box form through a hand-owned or wrapper hop.
+    /// </remarks>
+    private static List<(IFieldSymbol Field, List<EmbedHop> Hops)> PromotedFields(Compilation compilation, INamedTypeSymbol type)
+    {
+        List<(IFieldSymbol, List<EmbedHop>)> promoted = [];
+        HashSet<string> settled = new(GoFields(compilation, type).Select(field => field.Name), StringComparer.Ordinal);
+        List<(INamedTypeSymbol Owner, List<EmbedHop> Hops)> level = [(type, [])];
+
+        while (level.Count > 0)
+        {
+            Dictionary<string, List<(IFieldSymbol, List<EmbedHop>)>> atDepth = new(StringComparer.Ordinal);
+            List<(INamedTypeSymbol Owner, List<EmbedHop> Hops)> next = [];
+
+            foreach ((INamedTypeSymbol owner, List<EmbedHop> hops) in level)
+            {
+                foreach (IFieldSymbol embed in GoFields(compilation, owner))
+                {
+                    if (!MemberMarkers.IsGoEmbedded(embed) || !StructDeclarationSyntaxExtensions.IsPromotingEmbedType(embed.Type))
+                        continue;
+
+                    bool pointer = embed.Type is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 };
+                    ITypeSymbol target = pointer ? ((INamedTypeSymbol)embed.Type).TypeArguments[0] : embed.Type;
+
+                    // Go allows a pointer embed of the struct itself, or of one already on the path; its fields were
+                    // decided at a shallower depth.
+                    if (target is not INamedTypeSymbol embedded || SymbolEqualityComparer.Default.Equals(embedded.OriginalDefinition, type.OriginalDefinition) ||
+                        hops.Any(hop => SymbolEqualityComparer.Default.Equals(hop.Type.OriginalDefinition, embedded.OriginalDefinition)))
+                    {
+                        continue;
+                    }
+
+                    List<EmbedHop> path = [.. hops, new EmbedHop(embed, pointer, embedded)];
+
+                    foreach (IFieldSymbol field in GoFields(compilation, embedded))
+                    {
+                        if (!atDepth.TryGetValue(field.Name, out List<(IFieldSymbol, List<EmbedHop>)>? occurrences))
+                            atDepth[field.Name] = occurrences = [];
+
+                        occurrences.Add((field, path));
+                    }
+
+                    next.Add((embedded, path));
+                }
+            }
+
+            foreach (KeyValuePair<string, List<(IFieldSymbol, List<EmbedHop>)>> name in atDepth)
+            {
+                if (settled.Add(name.Key) && name.Value.Count == 1)
+                    promoted.Add(name.Value[0]);
+            }
+
+            level = next;
+        }
+
+        return promoted;
+    }
+
+    /// <summary>
+    /// A struct's Go fields as this compilation sees them: a foreign struct's instance fields, and a struct of this
+    /// compilation's the fields of the type generator's target declaration (a companion partial's fields are not Go's).
+    /// A blank field is never selected or promoted.
+    /// </summary>
+    private static IEnumerable<IFieldSymbol> GoFields(Compilation compilation, INamedTypeSymbol type)
+    {
+        bool foreign = !type.Locations.Any(location => location.IsInSource);
+
+        return type.GetMembers().OfType<IFieldSymbol>().Where(field => !field.IsStatic && !field.IsConst && !field.IsImplicitlyDeclared && !IsBlank(field.Name) &&
+            (foreign || HasGeneratedAccessor(compilation, type, field)));
+    }
+
+    /// <summary>
+    /// A promoted value-chain field's reference on a NativeBox: each embed's view at its Go offset, then the field at its
+    /// own, <c>ʗp.of(T.ᏑE).field(E.Ꮡf)</c>; null when an accessor the chain names is not there to reach.
+    /// </summary>
+    private static string? NativeHops(Compilation compilation, INamedTypeSymbol type, string typeName, List<EmbedHop> hops, IFieldSymbol field)
+    {
+        StringBuilder chain = new(ReceiverName);
+        INamedTypeSymbol owner = type;
+        string ownerName = typeName;
+
+        foreach (EmbedHop hop in hops)
+        {
+            if (!HasAccessor(owner, hop.Field))
+                return null;
+
+            chain.Append($".of({ownerName}.{AddressPrefix}{hop.Field.Name})");
+            owner = hop.Type;
+            ownerName = TypeName(hop.Type, type);
+        }
+
+        if (!HasAccessor(owner, field))
+            return null;
+
+        return chain.Append($".field({ownerName}.{AddressPrefix}{field.Name})").ToString();
+
+        bool HasAccessor(INamedTypeSymbol declaring, IFieldSymbol member) =>
+            declaring.Locations.Any(location => location.IsInSource)
+                ? HasGeneratedAccessor(compilation, declaring, member)
+                : declaring.GetMembers($"{AddressPrefix}{member.Name}").OfType<IMethodSymbol>().Any(method => method.IsStatic && method.ReturnsByRef);
     }
 
     /// <summary>

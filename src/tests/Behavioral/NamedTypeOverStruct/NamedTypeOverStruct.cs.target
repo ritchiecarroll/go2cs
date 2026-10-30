@@ -98,8 +98,8 @@ internal static void Main() {
     fmt.Println(z.ctxt.fn, z.tag);
 
     var np = @new<shadowed>();
-    np.Value.tag = 11;
-    fmt.Println((~np).tag, np.ctxt.tag);
+    np.tag = 11;
+    fmt.Println(np.tag, np.ctxt.tag);
 
     var fl = Ꮡ(new @file(fd: 5));
     fmt.Println(fl.bump(), fl.fd);

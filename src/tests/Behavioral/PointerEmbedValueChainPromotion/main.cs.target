@@ -47,7 +47,7 @@ internal static void Main() {
     fmt.Println(n, err != nil);
 
     c.Value.state.of(state.ᏑMutex).Lock();
-    c.Value.broken = false;
+    c.broken = false;
     c.Value.state.of(state.ᏑMutex).Unlock();
 
     fmt.Println(s.broken);

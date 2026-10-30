@@ -21,9 +21,9 @@ internal static void Main() {
     a.sym.Node = b;
     b.sym.Node = a;
 
-    fmt.Println((~a).Value, (~a).Name, a.Weight);
-    fmt.Println((~a.sym.Node).Name, a.sym.Node.Weight);
-    fmt.Println((~b.sym.Node).Name, (~b).Value);
+    fmt.Println((~a).Value, a.Name, a.Weight);
+    fmt.Println(a.sym.Node.Name, a.sym.Node.Weight);
+    fmt.Println(b.sym.Node.Name, (~b).Value);
 }
 
 } // end main_package

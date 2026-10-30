@@ -31967,5 +31967,110 @@ TestingRuntimeTests run to the batch gates, built with `-p:GoTargetOS=<host>`. O
 build fails 27 of 30 tests on kernel32, which is an environment red, not the code's.
 <!-- Evidence: C2's scratchpad (ei-bisect.log and ei-bisect-<sha>.log, ei-trt-master.log, ei-trt-fix.log,
      ei-trt-control.log, ei-go/ with the real-Go run), on C2's box. -->
+## 2026-10-30 — G (seat #32 amendment, COORD's ask): FieldView-jit's decomposition arms, ranges and round counts
+
+The #32 row above reports the decomposition of PerfFieldView-jit's +4.7% as deltas only. Its conclusion, that the
+cost is dynamic PGO's alone, rests on the arms' spread, so here they are in full. Same binaries in every arm: base
+e6356e0ed2 (D) and the seat's pre-rebase tip f3f6ed1db2 (T). `foldab`, 15 interleaved rounds per arm per setting,
+every round's output equal. Inner time in ms, median [min-max]:
+
+| setting | D (base) | T (tip) | median delta |
+|:--|:--|:--|--:|
+| default tiering (dynamic PGO on) | 2,015 [2,004-2,036], n=15 | 2,109 [2,096-2,155], n=15 | +4.7% |
+| `DOTNET_TieredCompilation=0` | 3,546 [3,426-3,887], n=15 | 3,525 [3,417-3,884], n=15 | -0.6% |
+| `DOTNET_TieredPGO=0` | 3,541 [3,514-3,736], n=15 | 3,533 [3,509-3,598], n=15 | -0.2% |
+
+Under default tiering the two arms' ranges do not overlap; with tiering or PGO off they overlap almost entirely.
+The two quiet-box runs (TC0, PGO-off) ran on G-LAPTOP with nothing else alive. COORD ruled #32's perf ACCEPTED on
+R's review (2026-10-30): a dynamic-PGO cost only, the shape adding no work. R's tier-1 PGO JitDisasm attribution of
+the remaining gap is a separate reading.
+
+— G (2026-10-30)
+
+## 2026-10-30 — G (post-.2 candidate, COORD's #31b scope ruling): a promoted field's address, and the synthesized embed hops
+
+#31b gives a promoted field read or written through a pointer Go's spelling, `p.f`. Two neighbouring classes keep
+today's form, ruled out of 1.26.10.2 because identity outranks visual parity:
+
+- **A promoted field's ADDRESS, `&p.f`** (P2's `R:promoted` class: 106 prod / 14 test sites in the #31b census at
+  4e0a8e02dc). Today's spelling roots the view at the outer box through the struct's own promoted accessor,
+  `c.of(timerCtx.Ꮡmu)` (context's `c.mu.Lock()`), or for a chain that crosses a pointer embed, the pointer-shaped accessor
+  the type generator emits for exactly this reason. An address property that walked the hops itself would root the
+  view differently, `c.of(timerCtx.ᏑcancelCtx).of(cancelCtx.Ꮡmu‿)`. golib's field-reference identity is (containing
+  allocation, field token), so the same Go address could compare unequal depending on the spelling that produced it.
+- **The synthesized embed hops** (`R:nosel`: 478 prod / 252 test): `.of(T.ᏑE).M()` the converter writes for a promoted
+  method's receiver, with no Go selection behind it.
+
+**The test that must pass first:** a behavioral row that takes the address of one promoted field through every spelling
+in play (`&p.f` through value embeds, through a pointer embed, `&p.E.f`, and `&(*p).f`), at one and two depths, compares
+every pair with `==`, and stores through each to read the store back through the others, alongside `sync.Mutex` locking
+through a promoted `mu` from two sites. It must be green at the base before any spelling of `&p.f` moves.
+
+— G (2026-10-30)
+
+## 2026-10-30 — G (1.26.10.2 seat #31b, claude/g-seat31b-promoted-fields): a promoted field through a pointer reads `p.f` — DONE on the seat branch
+
+**The change.** #31 gave a field selected through a pointer Go's spelling, `p.f`, but kept a PROMOTED field on the box
+form, since the generated properties were the struct's own fields. Now go2cs-gen gives each recorded struct a property
+for every field Go promotes into it, and the converter writes `p.f` there too:
+
+| Go (PromotedFieldProperties) | Before | After |
+|:--|:--|:--|
+| `s.X += 10` (Shape embeds Point; `s` a range variable) | `s.Value.X += 10` | `s.X += 10` |
+| `labeled[0].X = 100` (through a pointer embed `*Shape`) | `labeled[0].Value.X = 100` | `labeled[0].X = 100` |
+| `deep[0].Y++` (two embeds down, the second a pointer) | `deep[0].Value.Y++` | `deep[0].Y++` |
+
+- **go2cs-gen walks the hops itself.** `FieldAccessGenerator.PromotedFields` applies Go's rule over the members it can
+  see: a name is promoted from the shallowest embed depth at which it occurs, only when exactly one field carries it
+  there, never when the struct declares it. The property names the embeds, `ref ʗp.Value.E1.E2.f` (a pointer embed
+  adds `.Value`), so it never leans on the type generator's own promoted members, whose set is not Go's (it does not
+  chase a cross-package embed's own embeds). A value chain answers a NativeBox<T> at each hop's Go offset,
+  `ʗp.of(T.ᏑE1).field(E1.Ꮡf)`; a pointer chain's field lives in another allocation, so its property is exactly today's
+  storage, through the embed's own box and its nil check.
+- **Kept on the box form:** a promoted field whose walk go2cs-gen cannot take (a hop a hand-owned file declares, a wrapper
+  this package defines over another named struct, a readonly zero-size field on the walk), and every class #31 keeps.
+- **Found by the seat's own behavioral run and fixed in-seat, red-first:** GenericEmbedPromotion's `p224Curve` embeds
+  `curve<p224жpoint>`, a constraint proxy another generator emits in the same run, so the promoted `seed`'s substituted
+  type is unresolved where FieldAccessGenerator runs; seat #45's skip (a FOREIGN field typed from an unreferenced
+  assembly) had been applied to every promoted field, and `pc.seed` was CS1061. The skip now reads the declaring
+  struct's locality and the field's original declared type, as #45's direct-field rule does; a source declaration's
+  unresolved type is rooted at the package class. No stdlib package has the shape: the forward builds were green
+  before the fix and are re-run after it.
+- **Out of .2, by COORD's scope ruling:** a promoted field's ADDRESS and the synthesized embed hops (the post-.2 row
+  above names the identity test that must pass first).
+
+**The prediction, scored as posted** (`#31b PREDICTION` 2026-10-30, recorded before arm B). The census: base
+4e0a8e02dc (ccceaa54ef's sources) plus in-band `/*PF:class*/` markers; its marker-stripped emission equals the base
+root but for 2 files whose trailing-comment padding the markers widened (identical ignoring whitespace). Arm B: the seat
+at f5b797021a over the census's own seed, `-stdlib -comments` three targets and the `-tests` leg over 242 packages
+(binary `49dc836c7d66bbf9`; base `6739eb66d2092d05`). Both rc 0, 0 failed; the same two `-tests` packages nonzero on
+both arms (internal/runtime/wasitest, testing).
+1. MECHANISM: `pcensus classify -items P1`: 143 files, 901 pairs, all P1, refused 0, 0 MAP; 0 hand-owned, `_impl` or
+   golib files move. MET.
+2. COUNTS: every servable promoted site moved, and only those (the census's base line vs the seat file): prod 817 of
+   817, test 180 of 180, `.cs.auto` 7 of 7; stayed exactly the refused classes (hand-owned owner 35 + 12 `.cs.auto`, a
+   promoted-method shadow 1, a collision 1). Against the instrument named, the P1 measure's fall: prod 714 against
+   780-817, MISSED; test 168 against 168-180, MET. Why: the prediction was sized in census sites, and P1's measure counts
+   only a bare-identifier base (`(~ID).`, `ID.Value.`), while 94 prod deref sites move off a compound base
+   (`(~r.f).UncompressedSize64`, `(~r.File[0]).Name`). Changed `.cs`: prod 94 (90-99) MET, test 31 (28-31) MET.
+   package_info.cs 10 (25-70) and test-info files 7 (10-20): MISSED, low; most promoted owners were already recorded
+   through a direct field.
+3. GOLDENS: CNR moved all 19 of the 19 existing projects whose census emission carried a servable promoted site
+   (16-19), plus the new PromotedFieldProperties: MET. NamedTypeOverStruct, which the prediction thought a wrapper hop
+   would keep, moved: its `np.tag` reaches a plain struct. pcensus classify -items P1 over the re-baseline: 46 files,
+   112 pairs, all P1, refused 0.
+4. BUILD: the seat's own three-target `-stdlib` emission, mirrored onto the seat tree, go2cs-stdlib.slnx Release
+   0 errors per GoTargetOS (windows 648 s, linux 701 s, darwin 624 s); go2cs.slnx Debug 0 errors (448 s). MET. (Before the
+   generic-embed fix; re-run after it, below.)
+5. Behavioral PromotedFieldProperties: Transpile, Target, Compile and Output pass; its output matches Go's, the nil
+   pointer embed's panic included. MET.
+
+**Gates (on the generic-embed fix, b8ac412559, with the goldens):** go test ./... 10 ok, 0 failed; GenTests 371, 0 failed;
+go2cs.slnx Debug 0 errors (472 s); the forward build x3 re-run on the fixed generator, 0 errors (windows 620 s, linux
+724 s, darwin 664 s); the four behavioral phases of every moved project, by the `Embed` and `Promot` filters (34 and 28 projects,
+some in both): Compile 34 of 34 and 28 of 28, Output 31 and 24 compared, 0 failed. COORD's added gate, the `-tests` convert+build of os, strconv, sort,
+encoding/json and net/http on the R0 tree with the seat's converter and go2cs-gen: all five rc 0, no error code.
+
+— G (2026-10-30)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

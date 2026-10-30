@@ -515,6 +515,7 @@
     <None Include="$(MSBuildThisFileDirectory)profiles\win-x86.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)projectFileWriter.go" />
     <None Include="$(MSBuildThisFileDirectory)projitemsIntegrity_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)promotedFieldEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publicizedFieldLifts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publicizeSiblingTestSeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeIndexOnly_test.go" />

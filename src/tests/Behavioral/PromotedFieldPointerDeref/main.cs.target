@@ -20,23 +20,23 @@ partial struct list {
 
 internal static void Main() {
     var a = Ꮡ(new node(val: 1));
-    a.Value.tag = 7;
+    a.tag = 7;
     var b = Ꮡ(new node(val: 2));
-    b.Value.tag = 9;
-    a.Value.next = b;
+    b.tag = 9;
+    a.next = b;
 
     list l = default;
     l.head = a;
 
     var x = l.head;
     while (x != nil) {
-        fmt.Println(x.val, (~x).tag);
-        x = x.Value.next;
+        fmt.Println(x.val, x.tag);
+        x = x.next;
     }
 
     var y = l.head;
-    y.Value.tag = 99;
-    fmt.Println((~a).tag);
+    y.tag = 99;
+    fmt.Println(a.tag);
 }
 
 } // end main_package

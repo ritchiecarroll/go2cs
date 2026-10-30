@@ -53,7 +53,7 @@ internal static void Main() {
     fmt.Println(b.same(b), b.same(Ꮡ(new box())));
 
     var e = Ꮡ(new embedder());
-    e.Value.val = 7;
+    e.val = 7;
     e.tag = 9;
     fmt.Println(e.isNil(), e.checkGuard());
 

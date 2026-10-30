@@ -258,7 +258,7 @@ internal static void Main() {
 
     var d = Ꮡ(new Direct());
     ((any)d.OrTypedNil())._<main_typeᴛ3>().Set(4);
-    fmt.Println("Direct after Set through *Direct:", (~d).X);
+    fmt.Println("Direct after Set through *Direct:", d.X);
 
     var pd = new PtrDirect(Ꮡ(new inner.Inner()));
     ((any)pd)._<main_typeᴛ3>().Set(6);

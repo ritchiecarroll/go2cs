@@ -55,7 +55,7 @@ internal static void Main() {
 
     var d = Ꮡ(new deep(mid: new mid(inner: new inner(n: 4, tag: "d"), extra: 40), label: "orig"));
     var c = derefCopy(ref (d).DerefOrNull());
-    fmt.Println("deref d:", (~d).n, (~d).tag, d.label);
+    fmt.Println("deref d:", d.n, d.tag, d.label);
     fmt.Println("deref c:", c.n, c.tag, c.label);
 
     var shared = Ꮡ(new inner(n: 7, tag: "shared"));

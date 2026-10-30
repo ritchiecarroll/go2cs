@@ -43,6 +43,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: go.GoFieldAccess(typeof(leader))]
 [assembly: go.GoFieldAccess(typeof(ordered))]
 [assembly: go.GoFieldAccess(typeof(pair))]
 

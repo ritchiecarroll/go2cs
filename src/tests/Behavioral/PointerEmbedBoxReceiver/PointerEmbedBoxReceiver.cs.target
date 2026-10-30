@@ -22,7 +22,7 @@ internal static void Main() {
     var o = Ꮡ(new Outer(Inner: Ꮡ(new Inner()), tag: "t"));
     o.Add(5);
     o.Add(3);
-    fmt.Println((~o).total, o.tag);
+    fmt.Println(o.total, o.tag);
 }
 
 } // end main_package
