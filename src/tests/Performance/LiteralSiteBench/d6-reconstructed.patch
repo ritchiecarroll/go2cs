@@ -1,0 +1,65 @@
+diff --git a/src/core/golib/StringLiteralCache.cs b/src/core/golib/StringLiteralCache.cs
+index 1f82a69995..2ef060eefc 100644
+--- a/src/core/golib/StringLiteralCache.cs
++++ b/src/core/golib/StringLiteralCache.cs
+@@ -65,6 +65,13 @@ internal static class StringLiteralCache
+     private static Table s_table = new(InitialLog2);
+     private static readonly Lock s_lock = new();
+ 
++    // D6 (seat #52, RECONSTRUCTED from its description; the original probe source is gone): a fixed, direct-mapped
++    // 4,096-slot primary table. It is static readonly, so tier 1 folds its address and a hit pays no table load.
++    // Master's growable table (s_table) is the overflow, consulted only when the primary slot misses.
++    private const int PrimaryLog2 = 12;
++    private static readonly Slot[] s_primary = new Slot[1 << PrimaryLog2];
++    private static int s_primaryCount;
++
+     // Fibonacci hashing of the object address: frozen literals are laid out consecutively, and a
+     // multiply by 2^64/phi spreads an arithmetic progression evenly over the top bits.
+     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+@@ -80,8 +87,7 @@ internal static class StringLiteralCache
+     {
+         if (value is not null)
+         {
+-            Table table = s_table;
+-            ref Slot slot = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(table.Slots), Index(value, table.Shift));
++            ref Slot slot = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(s_primary), Index(value, 64 - PrimaryLog2));
+ 
+             if (ReferenceEquals(Volatile.Read(ref slot.Key), value))
+                 return slot.Value;
+@@ -136,6 +142,20 @@ internal static class StringLiteralCache
+ 
+         lock (s_lock)
+         {
++            ref Slot primary = ref s_primary[Index(key, 64 - PrimaryLog2)];
++            string? current = primary.Key;
++
++            if (ReferenceEquals(current, key))
++                return primary.Value;
++
++            if (current is null)
++            {
++                primary.Value = value;
++                Volatile.Write(ref primary.Key, key);
++                s_primaryCount++;
++                return value;
++            }
++
+             Table table = s_table;
+             ref Slot slot = ref Find(table, key, out bool found);
+ 
+@@ -202,11 +222,14 @@ internal static class StringLiteralCache
+     }
+ 
+     /// <summary>Number of literals converted and cached so far (diagnostics and tests).</summary>
+-    internal static int Count => s_table.Count;
++    internal static int Count => s_primaryCount + s_table.Count;
+ 
+     /// <summary>Whether this exact string instance has a cached conversion (diagnostics and tests).</summary>
+     internal static bool Contains(string value)
+     {
++        if (ReferenceEquals(Volatile.Read(ref s_primary[Index(value, 64 - PrimaryLog2)].Key), value))
++            return true;
++
+         Find(s_table, value, out bool found);
+         return found;
+     }
