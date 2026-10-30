@@ -979,7 +979,10 @@ public class TestingRuntimeTests
             StringAssert.Contains(reported, @"q=\u0022\u0022|\u0022ab\\n\u0022");
             StringAssert.Contains(reported, "x=61620a");
             StringAssert.Contains(reported, "X=61620A");
-            StringAssert.Contains(reported, @"s=|ab\n|");
+            // %s writes the bytes, newline included, and Go 1.26's (*common).log indents a record's every later line
+            // four spaces (testing.go:1028), so the `|` after it opens the second line: `go test -v` prints
+            // `s=|ab` and then `        | v=[97 98 10]`, the outputWriter's four spaces before log's four.
+            StringAssert.Contains(reported, @"s=|ab\n    | v=");
             // %v keeps the sequence reading — the divergence is confined to the string verbs.
             StringAssert.Contains(reported, "v=[");
         }
