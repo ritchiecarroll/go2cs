@@ -24,8 +24,8 @@ import (
 //
 // A constant moves only into a thunk that CALLS the callee. A method-group or delegate-value launch
 // hands the callee over with no call to move into, and keeps its form; a string constant there renders
-// `(@string)"…"` at the site (see the plain-mode go/defer arm of hoistCollector.consider). A package
-// converted with -hoist-literals keeps its hoisted literals and its eager arguments (literalsHoistedFor).
+// `(@string)"…"` at the site (see the plain-mode go/defer arm of hoistCollector.consider). The standard
+// library keeps its hoisted literals and its eager arguments (literalsHoistedFor).
 
 // goDeferInlineConstArgs reports which arguments of a go/defer call are constants that may render inside
 // the thunk's call, or nil when none may. It answers for a callee that is a declared function or method:

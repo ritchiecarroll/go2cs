@@ -291,7 +291,7 @@ func main() {
 	buildTagsCmd := commandLine.String("tags", "", "Comma-separated build tags applied when loading packages, e.g. -tags purego to select the portable Go implementations over assembly ones (with -stdlib, purego is applied by default and any explicit -tags value replaces it)")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
-	hoistLiteralsCmd := commandLine.Bool("hoist-literals", false, "Hoist each string literal in a value slot to one `static readonly` field (`F(helloˢ)`) instead of the default plain C# literal (`F(\"hello\")`, converted once and shared by golib). Every package, the standard library included, emits plain literals unless this opts it in")
+	hoistLiteralsCmd := commandLine.Bool("hoist-literals", false, "Hoist mode, the standard library's: each string literal in a value slot with a readable name becomes one `static readonly` field (`F(helloˢ)`), and every other literal takes the default plain mode's cached form (`F(\"hello\")`, converted once and shared by golib). The standard library always hoists; this opts any other package in")
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
 	provenanceCmd := commandLine.Bool("provenance", false, "Include a deterministic source-file provenance comment (no conversion timestamp)")

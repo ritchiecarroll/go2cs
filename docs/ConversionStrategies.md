@@ -6771,7 +6771,7 @@ internal static void p2() {
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)). `fmt.Println` takes `any` arguments. The
 literal `"P2:"` stays a plain C# literal, and go2cs-gen, go2cs's [source generators](#source-generators),
 intercepts the call to pass it as a Go `@string` boxed once per file ([Strings](#strings-string-and-sstring)).
-<!-- src/gen/go2cs-gen/LiteralInterceptorGenerator.cs:25-36 `the box the interceptor substitutes is allocated once per … literal per file`; plain literals unless -hoist-literals: src/go2cs/hoistedLiteralOperations.go:42-43 `PLAIN LITERALS … Hoisting is an opt-in (-hoist-literals)` -->
+<!-- src/gen/go2cs-gen/LiteralInterceptorGenerator.cs:25-36 `the box the interceptor substitutes is allocated once per … literal per file`; plain literals outside the standard library unless -hoist-literals: src/go2cs/hoistedLiteralOperations.go:42 `PLAIN LITERALS … Hoisting is the STANDARD LIBRARY's mode` -->
 
 **A literal whose name is also used as a value stays a lambda.** A local function allocates nothing only
 while it is only ever called: C# makes one used as a value into a delegate, which allocates as a lambda does.
@@ -12598,7 +12598,7 @@ result is unpacked with `var (p, err) = …`. `crypto/elliptic`'s `ScalarBaseMul
      asm ordinv and returns a valid inverse; crypto/ecdsa handles the same error with a fallback, so
      ECDSA is unaffected. Inverse is reached via the deprecated `invertible` interface. The inline panic
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
-     (src/go2cs/hoistedLiteralOperations.go:956-958#0b8d4e), since it costs nothing until a panic fires. -->
+     (src/go2cs/hoistedLiteralOperations.go:959-961#0b8d4e), since it costs nothing until a panic fires. -->
 
 **A module converts with `-tags safe`, for a different reason.** Some libraries reach into Go's runtime with
 unsafe pointer arithmetic, adding a byte offset to a value to read one of its private fields. Converted code

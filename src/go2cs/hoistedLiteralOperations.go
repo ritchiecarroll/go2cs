@@ -39,8 +39,10 @@ import (
 // Emission is then a pure substitution: convExpr's BasicLit arm renders the field name for any
 // node this pass registered, and visitFuncDecl emits the declarations the function owns.
 //
-// PLAIN LITERALS (owner ruling 2026-10-17; the standard library too since seat #51, owner order
-// 2026-10-30). Hoisting is an opt-in (-hoist-literals). By default a literal in a value slot typed exactly Go
+// PLAIN LITERALS (owner ruling 2026-10-17). Hoisting is the STANDARD LIBRARY's mode, now the HYBRID (owner
+// rulings 2026-10-30, seat #51), and an opt-in for everything else (-hoist-literals). The hybrid keeps a
+// healthy-slug literal's field, and every site it would leave as a per-evaluation copy takes the form plain
+// mode gives it (consider's fallback). By default a literal in a value slot typed exactly Go
 // `string` renders as the bare C# literal, `F("hello")`, the way Go reads: golib's
 // `implicit operator @string(string)` converts each C# literal once and shares the result
 // (StringLiteralCache.cs), so the slot still costs 0 B per evaluation. Such a literal claims no field,
@@ -57,18 +59,19 @@ import (
 // type's composite element, an append argument, a field-less function) renders the cached cast
 // `(@string)"…"` rather than `"…"u8`, which built an @string per evaluation (packageCastLits, seat #51).
 
-// packageHoistsLiterals is the literal mode of the package being converted: true hoists exactly as
-// before plain literals existed, false emits plain literals. It is a property of the PACKAGE, never of
-// the invocation (see literalsHoistedFor), and each driver sets it beside currentPackageGorootVendored.
+// packageHoistsLiterals is the literal mode of the package being converted: true is hoist mode, the hybrid,
+// false emits plain literals. It is a property of the PACKAGE, never of the invocation (see
+// literalsHoistedFor), and each driver sets it beside currentPackageGorootVendored.
 var packageHoistsLiterals bool
 
-// literalsHoistedFor decides a package's literal mode: only -hoist-literals hoists. The standard library
-// emits plain literals like user code (owner order 2026-10-30, seat #51, reversing the 2026-10-17 opt-out:
-// hoisting bought the standard library about 1% net, while thousands of its sites still built an @string
-// per evaluation). The answer is the same under -stdlib, under -tests and in the -tests seed
-// recomputation, so a package's production and test passes can never disagree.
+// literalsHoistedFor decides a package's literal mode. The standard library takes hoist mode, the hybrid (owner
+// rulings 2026-10-30: user code calling small standard library functions measured faster against hoisted
+// fields): a package is the standard library's when its source is under GOROOT/src (vendored packages
+// included), which is the same answer under -stdlib, under -tests (which runs with convertStdLib false and
+// re-emits the package's production .cs into the corpus) and in the -tests seed recomputation, so a package's
+// production and test passes can never disagree. -hoist-literals opts any other package in.
 func literalsHoistedFor(packageDir string, options Options) bool {
-	return options.hoistLiterals
+	return options.hoistLiterals || stdLibImportPathOf(packageDir, options.goRoot) != ""
 }
 
 // packagePlainLits holds every string-literal NODE that renders as a plain C# literal (see the file
