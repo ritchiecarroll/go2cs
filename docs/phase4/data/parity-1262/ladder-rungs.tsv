@@ -1,0 +1,28 @@
+# The ladder's rungs (docs/phase4/DESIGN-ladder-identity.md, Step A, as COORD ruled 2026-10-30): each first-parent landing at
+# which the converter binary changed, with its before/after sha256 (first 16 hex, the pinned recipe: git archive of
+# src/go2cs, go build -trimpath -buildvcs=false, go1.26.10) beside the seat's landing commit. Each seat's rung record is
+# the A/B classify reading its DONE post carries (its BOARD row). efinal-delta rows name a seat's expected E(final)
+# change outside .cs, which pcensus does not classify: path, sha256 (first 12 hex, CR-stripped) before and after.
+kind	seat	landing	before	after	record
+converter	#20	3b36ee7dfe	3cfacc1e75b391b3	73c10cb0d44cba81	the seat DONE post A/B classify (BOARD row)
+converter	#27	482caf78e5	73c10cb0d44cba81	3aa8534a812fc1f4	the seat DONE post A/B classify (BOARD row)
+converter	#21	0e0c1efbdc	3aa8534a812fc1f4	bcfac9cb121f8e61	the seat DONE post A/B classify (BOARD row)
+converter	#25	6298556cbc	bcfac9cb121f8e61	6f2551b280b9f278	the seat DONE post A/B classify (BOARD row)
+converter	#26	fd6b526a66	6f2551b280b9f278	905edfb35050417e	the seat DONE post A/B classify (BOARD row)
+converter	#33	cf6adea3d8	905edfb35050417e	745e7485aa707544	the seat DONE post A/B classify (BOARD row)
+converter	#23	2639c6f3e9	745e7485aa707544	1e41bf3e1eebed22	the seat DONE post A/B classify (BOARD row)
+converter	#28	53918293a1	1e41bf3e1eebed22	3fad96473263893a	the seat DONE post A/B classify (BOARD row)
+converter	#24	97a3a7c6b9	3fad96473263893a	b70c6bf754c9a526	the seat DONE post A/B classify (BOARD row)
+converter	#29	8949c45b1b	b70c6bf754c9a526	35cbf742ef823cd3	the seat DONE post A/B classify (BOARD row)
+converter	#41	06799fd57f	35cbf742ef823cd3	ae4f9b9ed82df4d0	the seat DONE post A/B classify (BOARD row)
+converter	#31	54ff0665d5	ae4f9b9ed82df4d0	1c8c68fa0c53a665	the seat DONE post A/B classify (BOARD row)
+converter	#42	984f526a51	1c8c68fa0c53a665	71a5097bbf11b66f	the seat DONE post A/B classify (BOARD row)
+converter	#30	99ef93a148	71a5097bbf11b66f	d6974cef18f1f673	the seat DONE post A/B classify (BOARD row)
+converter	#38	6e308e4b91	d6974cef18f1f673	e15d586d1422c410	the seat DONE post A/B classify (BOARD row)
+converter	#43	e6b3b892ad	e15d586d1422c410	448f0d75cc532a70	the seat DONE post A/B classify (BOARD row)
+converter	#45	718fd42b94	448f0d75cc532a70	de2d88959518cd29	the seat DONE post A/B classify (BOARD row)
+converter	#32	62d6d3f9c6	de2d88959518cd29	6739eb66d2092d05	the seat DONE post A/B classify (BOARD row)
+converter	#31b	af28a5ff63	6739eb66d2092d05	49dc836c7d66bbf9	the seat DONE post A/B classify (BOARD row)
+converter	#49	pending (seat tip fb9fce7bd0)	49dc836c7d66bbf9	9a13e52ea2357c4d	the seat DONE post (BOARD row); fixed-point proof
+efinal-delta	#49	pending	fc389bb436ac	05fc93c9509e	src/core/os/signal/os.signal.csproj: the three L3 fragments removed
+efinal-delta	#49	pending	52fd8a65ba25	5e36626782f2	src/core/time/tzdata/time.tzdata.csproj: the three L3 fragments removed
