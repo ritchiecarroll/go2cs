@@ -63,7 +63,7 @@ func TestHoistedLiteralsStampFollowsTheLiteralForm(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 
-	block := strings.Join(append(hoistedLiteralsStampProseLines(), "[assembly: go.GoHoistedLiterals]", "", goSourcePositionMapsProseLines()[0]), "\n")
+	block := strings.Join(append(hoistedLiteralsStampProseLines(), "[assembly: GoHoistedLiterals]", "", goSourcePositionMapsProseLines()[0]), "\n")
 
 	hoisted := convertStampFixture(t, root, true)
 
