@@ -31952,4 +31952,25 @@ the remaining gap is a separate reading.
 
 — G (2026-10-30)
 
+## 2026-10-30 — G (post-.2 candidate, COORD's #31b scope ruling): a promoted field's address, and the synthesized embed hops
+
+#31b gives a promoted field read or written through a pointer Go's spelling, `p.f`. Two neighbouring classes keep
+today's form, ruled out of 1.26.10.2 because identity outranks visual parity:
+
+- **A promoted field's ADDRESS, `&p.f`** (P2's `R:promoted` class: 106 prod / 14 test sites in the #31b census at
+  4e0a8e02dc). Today's spelling roots the view at the outer box through the struct's own promoted accessor,
+  `c.of(timerCtx.Ꮡmu)` (context's `c.mu.Lock()`), or for a chain that crosses a pointer embed, the pointer-shaped accessor
+  the type generator emits for exactly this reason. An address property that walked the hops itself would root the
+  view differently, `c.of(timerCtx.ᏑcancelCtx).of(cancelCtx.Ꮡmu‿)`. golib's field-reference identity is (containing
+  allocation, field token), so the same Go address could compare unequal depending on the spelling that produced it.
+- **The synthesized embed hops** (`R:nosel`: 478 prod / 252 test): `.of(T.ᏑE).M()` the converter writes for a promoted
+  method's receiver, with no Go selection behind it.
+
+**The test that must pass first:** a behavioral row that takes the address of one promoted field through every spelling
+in play (`&p.f` through value embeds, through a pointer embed, `&p.E.f`, and `&(*p).f`), at one and two depths, compares
+every pair with `==`, and stores through each to read the store back through the others, alongside `sync.Mutex` locking
+through a promoted `mu` from two sites. It must be green at the base before any spelling of `&p.f` moves.
+
+— G (2026-10-30)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
