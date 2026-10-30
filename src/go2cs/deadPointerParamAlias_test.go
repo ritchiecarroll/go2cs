@@ -176,6 +176,24 @@ func main() {
 	}
 }
 
+// csharpCodeWithoutCommentsOrLiterals also empties every non-interpolated literal; an interpolated string keeps its
+// holes, which are code.
+func TestCSharpCodeWithoutCommentsOrLiterals(t *testing.T) {
+	for _, test := range []struct{ text, want string }{
+		{`f("p is nil"); // p`, `f("");  `},
+		{`c = 'p'; d = p;`, `c = ''; d = p;`},
+		{`s = @"p\" + p;`, `s = "" + p;`},
+		{"s = \"\"\"\np\n\"\"\" + p;", `s = "" + p;`},
+		{`s = (@string)"p"u8;`, `s = (@string)""u8;`},
+		{`s = $"{p}"; t = $@"{p}"; u = @$"{p}";`, `s = $"{p}"; t = $@"{p}"; u = @$"{p}";`},
+		{`@string @base = "";`, `@string @base = "";`},
+	} {
+		if got := csharpCodeWithoutCommentsOrLiterals(test.text); got != test.want {
+			t.Errorf("csharpCodeWithoutCommentsOrLiterals(%q) = %q, want %q", test.text, got, test.want)
+		}
+	}
+}
+
 // csharpCodeWithoutComments removes comments and nothing else: a `//` or `/*` inside each literal form
 // the converter emits is code, so a value use after it is still found.
 func TestCSharpCodeWithoutComments(t *testing.T) {
