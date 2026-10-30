@@ -528,7 +528,7 @@ func (c *hoistCollector) compositeElemSlot(lit *ast.BasicLit, stack []ast.Node) 
 		isKey = parent.Key == lit
 
 		if composite != nil {
-			if fields, ok := c.typeUnder(c.info.TypeOf(composite)).(*types.Struct); ok {
+			if fields, ok := c.compositeUnder(composite).(*types.Struct); ok {
 				name, ok := parent.Key.(*ast.Ident)
 
 				if !ok || isKey {
@@ -550,7 +550,7 @@ func (c *hoistCollector) compositeElemSlot(lit *ast.BasicLit, stack []ast.Node) 
 		return nil
 	}
 
-	switch under := c.typeUnder(c.info.TypeOf(composite)).(type) {
+	switch under := c.compositeUnder(composite).(type) {
 	case *types.Slice:
 		return under.Elem()
 	case *types.Array:
@@ -1396,6 +1396,18 @@ func isCastStringLiteral(basicLit *ast.BasicLit) bool {
 // isPlainStringLiteral reports whether basicLit renders as a plain C# literal (packagePlainLits).
 func isPlainStringLiteral(basicLit *ast.BasicLit) bool {
 	return packagePlainLits != nil && packagePlainLits[basicLit]
+}
+
+// compositeUnder is a composite literal's underlying type, through the pointer go/types records for an element
+// whose `&T` the outer literal elides (`[]*[2]any{{1, "p"}}`).
+func (c *hoistCollector) compositeUnder(composite *ast.CompositeLit) types.Type {
+	under := c.typeUnder(c.info.TypeOf(composite))
+
+	if pointer, ok := under.(*types.Pointer); ok {
+		return pointer.Elem().Underlying()
+	}
+
+	return under
 }
 
 func (c *hoistCollector) typeUnder(t types.Type) types.Type {
