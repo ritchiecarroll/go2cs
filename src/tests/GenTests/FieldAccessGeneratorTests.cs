@@ -989,4 +989,140 @@ public class FieldAccessGeneratorTests
             Directory.Delete(directory, recursive: true);
         }
     }
+
+    // Seat #31b: a PROMOTED field reads `p.f` too. Go promotes a name from the shallowest embed depth at which exactly one
+    // field carries it, unless the struct declares it itself; an ambiguity at that depth promotes nothing. The property
+    // walks the embed hops itself, over members this generator can see, never T's own generated promoted members (the
+    // type generator's set is not Go's: it does not chase a cross-package embed's own embeds).
+    private const string Promoted = """
+        namespace go;
+
+        [GoFieldAccess(typeof(top), typeof(viaPtr), typeof(clash), typeof(shallow))]
+        partial class main_package
+        {
+            public partial struct leaf { public nint n; public nint shared; }
+
+            public partial struct mid
+            {
+                /*embed*/ public leaf leaf;
+                public nint m;
+            }
+
+            public partial struct top
+            {
+                /*embed*/ public mid mid;
+                public nint t;
+            }
+
+            public partial struct viaPtr
+            {
+                /*embed*/ public ж<leaf> leaf;
+                public nint k;
+            }
+
+            public partial struct other { public nint shared; public nint only; }
+
+            public partial struct clash
+            {
+                /*embed*/ public leaf leaf;
+                /*embed*/ public other other;
+            }
+
+            public partial struct shallow
+            {
+                /*embed*/ public leaf leaf;
+                public nint n;
+            }
+        }
+        """;
+
+    // A value chain: the managed box reaches the field through the embeds in place; a NativeBox<T> takes each hop's view
+    // at its Go offset and the field at its own.
+    private static string PromotedRef(string fieldType, string name, string type, string native, string managed) =>
+        $"public ref {fieldType} {name} {{ {Getter} get => ref ʗp is global::go.NativeBox<{type}> ? ref {native} : ref ʗp.Value.{managed}; }}";
+
+    [TestMethod]
+    public void APromotedFieldWalksItsValueEmbedsToItsGoOffset()
+    {
+        string generated = Generate(Promoted);
+        const string Main = "global::go.main_package";
+
+        StringAssert.Contains(generated, PromotedRef("nint", "n", $"{Main}.top",
+            $"ʗp.of({Main}.top.Ꮡmid).of({Main}.mid.Ꮡleaf).field({Main}.leaf.Ꮡn)", "mid.leaf.n"), "two embeds down");
+        StringAssert.Contains(generated, PromotedRef("nint", "m", $"{Main}.top",
+            $"ʗp.of({Main}.top.Ꮡmid).field({Main}.mid.Ꮡm)", "mid.m"), "one embed down");
+        StringAssert.Contains(generated, PromotedRef($"{Main}.leaf", "leaf", $"{Main}.top",
+            $"ʗp.of({Main}.top.Ꮡmid).field({Main}.mid.Ꮡleaf)", "mid.leaf"), "an embed is a field, and is promoted by its name");
+        StringAssert.Contains(generated, Ref("nint", "t", $"{Main}.top"), "the struct's own field keeps its property");
+    }
+
+    [TestMethod]
+    public void APromotedFieldThroughAPointerEmbedReadsTheManagedPathAlone()
+    {
+        // The field lives in another allocation, which T's memory holds no offset into: the property is exactly today's
+        // `p.Value.f` storage, through the embed's own box and its nil check.
+        StringAssert.Contains(Generate(Promoted),
+            $"public ref nint n {{ {Getter} get => ref ʗp.Value.leaf.Value.n; }}");
+    }
+
+    [TestMethod]
+    public void APromotedFieldFollowsGosAmbiguityAndShadowingRules()
+    {
+        string generated = Generate(Promoted);
+        const string Main = "global::go.main_package";
+
+        Assert.IsFalse(generated.Contains($"NativeBox<{Main}.clash> ? ref ʗp.of({Main}.clash.Ꮡleaf).field({Main}.leaf.Ꮡshared)") ||
+                       generated.Contains($"NativeBox<{Main}.clash> ? ref ʗp.of({Main}.clash.Ꮡother).field({Main}.other.Ꮡshared)"),
+            "two embeds at one depth both carry `shared`: Go promotes neither");
+        StringAssert.Contains(generated, PromotedRef("nint", "only", $"{Main}.clash",
+            $"ʗp.of({Main}.clash.Ꮡother).field({Main}.other.Ꮡonly)", "other.only"), "a name unique at its depth is promoted");
+        StringAssert.Contains(generated, Ref("nint", "n", $"{Main}.shallow"), "the struct's own `n` is the one Go selects");
+        Assert.IsFalse(generated.Contains($"ʗp.of({Main}.shallow.Ꮡleaf).field({Main}.leaf.Ꮡn)"), "an own field shadows the promoted one");
+        StringAssert.Contains(generated, PromotedRef("nint", "shared", $"{Main}.shallow",
+            $"ʗp.of({Main}.shallow.Ꮡleaf).field({Main}.leaf.Ꮡshared)", "leaf.shared"));
+    }
+
+    // The same shapes compiled to metadata: a FOREIGN owner's promoted field is walked over its metadata embeds, by the
+    // Ꮡ accessors its assembly carries.
+    private const string ForeignPromoted = """
+        namespace go;
+
+        public static partial class inner_package
+        {
+            public partial struct Base
+            {
+                public nint ID;
+
+                public static ref nint ᏑID(ref Base instance) => ref instance.ID;
+            }
+
+            public partial struct Outer
+            {
+                [GoEmbedded] public Base Base;
+                public nint Name;
+
+                public static ref Base ᏑBase(ref Outer instance) => ref instance.Base;
+                public static ref nint ᏑName(ref Outer instance) => ref instance.Name;
+            }
+        }
+
+        public sealed class GoEmbeddedAttribute : System.Attribute { }
+        """;
+
+    private const string ForeignPromotedUser = """
+        namespace go;
+
+        [GoFieldAccess(typeof(inner_package.Outer))]
+        partial class main_package { }
+        """;
+
+    [TestMethod]
+    public void AForeignOwnersPromotedFieldWalksItsMetadataEmbeds()
+    {
+        string generated = Generate(ForeignPromotedUser, ForeignReference(ForeignPromoted));
+        const string Inner = "global::go.inner_package";
+
+        StringAssert.Contains(generated, PromotedRef("nint", "ID", $"{Inner}.Outer",
+            $"ʗp.of({Inner}.Outer.ᏑBase).field({Inner}.Base.ᏑID)", "Base.ID"));
+    }
 }

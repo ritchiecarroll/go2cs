@@ -1843,6 +1843,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
 
     [TestMethod]
+    public void CheckPromotedFieldProperties() => CheckTarget("PromotedFieldProperties");
+
+    [TestMethod]
     public void CheckPromotedMethodExpr() => CheckTarget("PromotedMethodExpr");
 
     [TestMethod]

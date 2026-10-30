@@ -9,8 +9,8 @@
 // Guards P1, parity seat #31 (fieldAccess.go, fieldPropertySelector): a field selected through a pointer to a named
 // struct reads and writes as Go spells it, `p.f`, through the generated field property, and the package's
 // package_info.cs carries one `[assembly: GoFieldAccess(typeof(T))]` record per struct, a generic one by its open
-// definition, while the converted file carries none. The controls keep today's `(~p).f` / `p.Value.f`: a promoted
-// field, a field named like a member of ж<T>, a field that shadows a promoted method, a header-shaped struct, an
+// definition, while the converted file carries none. The controls keep today's `(~p).f` / `p.Value.f`: a field
+// named like a member of ж<T>, a field that shadows a promoted method, a header-shaped struct, an
 // unnamed struct, a struct of a package the converter never emits (testing's B), a struct the package defines over
 // another named struct (its fields are generated), and a zero-size store target, whose accessor form names the struct.
 
@@ -192,9 +192,9 @@ func TestFieldPropertyReadsAsGoSpellsIt(t *testing.T) {
 	controls := funcBody(t, cs, "void controls(")
 
 	for _, want := range []string{
-		"o2.Value.Z = 7;", // a promoted field: the site would have to name the embed
-		"fmt.Println((~o2).Z);",
-		"o2.W = 8;",           // ... while the struct's own field is an ordinary P1 site
+		"o2.Z = 7;", // a promoted field reads as Go spells it too (#31b, promotedFieldEmission_test.go)
+		"fmt.Println(o2.Z);",
+		"o2.W = 8;",
 		"w.Value.Value = 1;",  // a field named like a member of ж<T>
 		"t.Value.Len = 2;",    // shadows the Len method base promotes
 		"hh.Value.Len = 3;",   // header-shaped: its properties are get/set, not refs
