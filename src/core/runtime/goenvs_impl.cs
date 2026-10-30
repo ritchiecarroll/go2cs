@@ -89,7 +89,7 @@ partial class runtime_package
         // name the pair.
         try
         {
-            parseRuntimeDebugVars(gogetenv(godebugˢ));
+            parseRuntimeDebugVars(gogetenv("GODEBUG"));
             finishDebugVarsSetup();
         }
         catch (Exception ex)
@@ -152,7 +152,7 @@ partial class runtime_package
             snapshot[i] = environment[i];
 
         envs = snapshot;
-        parseRuntimeDebugVars(gogetenv(godebugˢ));
+        parseRuntimeDebugVars(gogetenv("GODEBUG"));
         finishDebugVarsSetup();
     }
 

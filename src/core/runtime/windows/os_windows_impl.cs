@@ -77,7 +77,7 @@ partial class runtime_package
         // leave room for the separator inside the _MAX_PATH+1 buffer.
         if (directory.Length == 0 || directory.Length > len(sysDirectory) - 1)
         {
-            @throw(unableToDetermineSystemˢ);
+            @throw("Unable to determine system directory");
         }
 
         for (nint i = 0; i < directory.Length; i++)
