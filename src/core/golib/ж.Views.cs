@@ -152,10 +152,43 @@ public abstract partial class ж<T>
     }
 
     /// <summary>
-    /// The typed overload's cached view. The accessor-wrapper lookup (a weak table keyed on the
+    /// The typed overload's cached view: the HIT path, inlined at every site. Every <c>p.Ꮡf</c> site passes the field's
+    /// one token (parity seat #32), so a hit is a reference match on the box's own view slot, sameAccessor's first
+    /// clause. Anything else is <see cref="viewOfSlow{TElem}"/>'s, unchanged: a miss, a box whose views live in the weak
+    /// table, the nil box, the cache disabled, and an older site's own delegate for the field.
+    /// </summary>
+    /// <remarks>
+    /// It is its own small method so that the JIT inlines it without a profile. Dynamic PGO gives none to a method of
+    /// one basic block, and a run of <c>&amp;p.f</c> operands is one: PerfFieldView's <c>step</c> under #32 reached tier 1
+    /// with no PGO data and called the whole lookup out of line for every operand (+4.7%, JitDisasm on R-LAPTOP,
+    /// 2026-10-30), where its base had inlined it from the profile its delegate-cache branches gave it. Forcing the
+    /// whole lookup inline instead read +8.9%. Seat #46; ViewCacheHitPathTests guards the shape.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ж<TElem> viewOf<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
+    {
+        if (!FieldViewCache.Disabled)
+        {
+            ViewEntry? e = this is SlottedStandardBox<T> slotted ? slotted.m_views :
+                this is ElemRefBox<T> element ? element.m_views :
+                this is FieldRefBox<T> view ? view.m_views : null;
+
+            for (; e is not null; e = e.Next)
+            {
+                if (ReferenceEquals(e.Token, fieldRefFunc))
+                    return (ж<TElem>)e.View;
+            }
+        }
+
+        return viewOfSlow(fieldRefFunc);
+    }
+
+    /// <summary>
+    /// The typed overload's full lookup. The accessor-wrapper lookup (a weak table keyed on the
     /// accessor) runs only on a MISS, so a hit pays neither the allocation nor that lookup.
     /// </summary>
-    private ж<TElem> viewOf<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private ж<TElem> viewOfSlow<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
         if (m_isNull || FieldViewCache.Disabled)
             return new FieldRefBox<TElem>(this, FieldRefWrappers<TElem>.For(fieldRefFunc), fieldRefFunc);
