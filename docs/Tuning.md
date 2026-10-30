@@ -7,7 +7,7 @@ see the [performance comparison](Performance.md), which is re-measured as the co
 
 **In short:** keep the .NET defaults. Publish with ReadyToRun or Native AOT when start time matters, and prefer the JIT over
 Native AOT when tight loops dominate. Do not turn tiered compilation or dynamic PGO off for speed: on `win-x64`,
-the default runtime ran a pointer-heavy benchmark roughly 40% faster than with either one off.
+the default runtime ran a pointer-heavy benchmark in roughly 40% less time than with either one off.
 
 ## Choosing a deployment
 
@@ -22,17 +22,18 @@ A converted program can run three ways. All three run the same converted code; t
 Which wins depends on what the program spends its time on. The `win-x64` comparisons below come from the
 performance comparison's table, measured on an earlier converter release; that page dates it.
 
-- **Start time.** On `win-x64`, a Native AOT program starts several times faster than the same program under the JIT,
-  though still slower than Go. On `linux-x64`, ReadyToRun cut a converted program's median start time by about a
+- **Start time.** On `win-x64`, a Native AOT program started in roughly an eighth of the time the same program took
+  under the JIT, though still slower than Go. On `linux-x64`, ReadyToRun cut a converted program's median start time by about a
   third against the JIT.
 - **Tight loops.** On `win-x64`, the JIT ran slice-indexing, floating-point and pointer-heavy loops faster than
-  Native AOT, by a wide margin on the pointer-heavy one. Native AOT has no dynamic profile-guided optimization or
+  Native AOT, which took roughly two to three times as long on each. Native AOT has no dynamic profile-guided optimization or
   on-stack replacement to tune a hot loop as it runs.
 - **Maps.** On `win-x64`, converted map code ran faster than Go under both the JIT and Native AOT, and fastest under
   Native AOT.
-- **Interfaces.** On `win-x64`, calling interface methods and asserting to concrete types cost about the same under
-  the JIT and Native AOT. The one interface path with no compile-time answer, asserting a value to an interface it
-  satisfies only structurally, ran slower under Native AOT than under the JIT.
+- **Interfaces.** On `win-x64`, calling interface methods and asserting to concrete types took within about 15% of
+  the same time under the JIT and Native AOT, with neither ahead on both. The one interface path with no compile-time
+  answer, asserting a value to an interface it satisfies only structurally, took about two thirds longer under Native
+  AOT than under the JIT.
 - **Memory.** On `win-x64`, a Native AOT program's peak working set was lower than the JIT's on every benchmark.
 - **Build cost.** A Native AOT publish compiles every converted package the program references, so it is slow and the
   executable is large. [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
@@ -58,7 +59,7 @@ is recompiled with full optimization, guided by a profile the runtime collected 
 AOT has no tiers and no dynamic PGO.
 
 **Leave tiered compilation and dynamic PGO on.** On `win-x64`, a converted benchmark that takes field addresses in a
-hot loop ran roughly 40% faster with the defaults than with tiered compilation off, and roughly as much faster than
+hot loop took roughly 40% less time with the defaults than with tiered compilation off, and about as much less than
 with dynamic PGO off. Turning tiering off compiles every method once at full optimization, but without the profile
 that the tiers collect, and the profile is worth more.
 
@@ -115,7 +116,7 @@ program costs to run. These do.
 Each goroutine runs on its own thread, and the thread reserves a fixed stack, because a .NET stack cannot grow the
 way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot recurse
 ([how](ConversionStrategies.md#goroutines)). It is address space, not memory, but it is what a thread start pays for:
-on `win-x64`, parking 100,000 goroutines at once took roughly five times longer with the 256 MiB reserve than with
+on `win-x64`, parking 100,000 goroutines at once took roughly five times as long with the 256 MiB reserve than with
 16 MiB. On `linux-x64`, at 10,000 goroutines, the reserve made no measurable difference, and a kernel limit on
 memory mappings, not the reserve, stopped thread creation at around 16,000.
 
