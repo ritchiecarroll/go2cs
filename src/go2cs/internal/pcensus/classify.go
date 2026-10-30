@@ -677,12 +677,25 @@ func (c *classifier) classifyDiff(diff string) *tally {
 			add = append(add, strings.TrimSuffix(ln[1:], "\r"))
 		default: // a context line, "\ No newline at end of file", or anything else ends the run
 			flush()
+			// A context line at column 0 is the declaration the following lines sit in, as git reads a hunk's header:
+			// the run's scope is that line, so a hunk whose header names the declaration above it still names the one
+			// its lines are in (a Block's Hunk). A `}` there closes the declaration.
+			if r, ok := hunkRange.FindString(at), strings.HasPrefix(ln, " "); ok && r != "" && len(ln) > 1 && topLevel.MatchString(ln[1:]) {
+				at = r + " " + ln[1:]
+			}
 		}
 	}
 	flush()
 	c.endFile(t, file)
 	return t
 }
+
+// hunkRange is a hunk header's `@@ -a,b +c,d @@`, without the declaration git names after it.
+var hunkRange = regexp.MustCompile(`^@@ [^@]*@@`)
+
+// topLevel is a line at column 0 that opens or closes a declaration: git's default function-name rule (a letter, `_` or
+// `$` first), and a closing brace.
+var topLevel = regexp.MustCompile(`^[\p{L}_$}]`)
 
 func first(lines []string) string {
 	if len(lines) == 0 {
