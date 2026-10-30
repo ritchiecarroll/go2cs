@@ -54,7 +54,7 @@ type Options struct {
 	buildTags           []string // -tags: build tags applied to package loading AND constraint evaluation
 	tagsExplicit        bool     // whether -tags was passed on the command line (vs. the -stdlib purego default)
 	indentSpaces        int
-	hoistLiterals       bool // -hoist-literals: hoist value-slot string literals to `static readonly` fields, as the standard library always does (literalsHoistedFor); default off, so a user package emits plain literals
+	hoistLiterals       bool // -hoist-literals: hoist value-slot string literals to `static readonly` fields (literalsHoistedFor); default off, so every package, the standard library included, emits plain literals
 	preferVarDecl       bool
 	useChannelOperators bool
 	includeComments     bool

@@ -39,8 +39,8 @@ import (
 // Emission is then a pure substitution: convExpr's BasicLit arm renders the field name for any
 // node this pass registered, and visitFuncDecl emits the declarations the function owns.
 //
-// PLAIN LITERALS (owner ruling 2026-10-17). Hoisting is now the STANDARD LIBRARY's mode and an
-// opt-in for everything else (-hoist-literals). By default a literal in a value slot typed exactly Go
+// PLAIN LITERALS (owner ruling 2026-10-17; the standard library too since seat #51, owner order
+// 2026-10-30). Hoisting is an opt-in (-hoist-literals). By default a literal in a value slot typed exactly Go
 // `string` renders as the bare C# literal, `F("hello")`, the way Go reads: golib's
 // `implicit operator @string(string)` converts each C# literal once and shares the result
 // (StringLiteralCache.cs), so the slot still costs 0 B per evaluation. Such a literal claims no field,
@@ -53,25 +53,38 @@ import (
 // view), and a multi-line raw literal (`.Raw()` must strip the checkout's CRs). A go/defer argument
 // claims no field either: it moves into the thunk's call and takes that call's rule there, or, when it
 // stays an eager argument, renders `(@string)"…"` so the capture list infers @string (seat #33,
-// goDeferConstArgs.go).
+// goDeferConstArgs.go). A use that keeps no field in plain mode (a degenerate slug, a named string
+// type's composite element, an append argument, a field-less function) renders the cached cast
+// `(@string)"…"` rather than `"…"u8`, which built an @string per evaluation (packageCastLits, seat #51).
 
 // packageHoistsLiterals is the literal mode of the package being converted: true hoists exactly as
 // before plain literals existed, false emits plain literals. It is a property of the PACKAGE, never of
 // the invocation (see literalsHoistedFor), and each driver sets it beside currentPackageGorootVendored.
 var packageHoistsLiterals bool
 
-// literalsHoistedFor decides a package's literal mode. The standard library keeps hoisted literals: a
-// package is the standard library's when its source is under GOROOT/src (vendored packages included),
-// which is the same answer under -stdlib, under -tests (which runs with convertStdLib false and
-// re-emits the package's production .cs into the corpus) and in the -tests seed recomputation, so a
-// package's production and test passes can never disagree. -hoist-literals opts any other package in.
+// literalsHoistedFor decides a package's literal mode: only -hoist-literals hoists. The standard library
+// emits plain literals like user code (owner order 2026-10-30, seat #51, reversing the 2026-10-17 opt-out:
+// hoisting bought the standard library about 1% net, while thousands of its sites still built an @string
+// per evaluation). The answer is the same under -stdlib, under -tests and in the -tests seed
+// recomputation, so a package's production and test passes can never disagree.
 func literalsHoistedFor(packageDir string, options Options) bool {
-	return options.hoistLiterals || stdLibImportPathOf(packageDir, options.goRoot) != ""
+	return options.hoistLiterals
 }
 
 // packagePlainLits holds every string-literal NODE that renders as a plain C# literal (see the file
 // comment). convExpr's BasicLit arm consults it through isPlainStringLiteral.
 var packagePlainLits map[*ast.BasicLit]bool
+
+// packageCastLits holds, in plain mode, every string-literal NODE in a value or `any` slot that takes no
+// plain form and no field: it renders `(@string)"…"`. StringLiteralCache converts the C# literal once, so
+// a value slot costs 0 B per evaluation where `"…"u8` built a fresh @string, and the cast fixes the C# type
+// at @string (seat #51, COORD rulings A and B). The sites: an append argument (a bare C# string would bind
+// append's ISlice overload with T = System.String); a named string type's composite element, map key or
+// field value; a value slot whose literal has a degenerate slug or sits where no field may be claimed; and,
+// boxed per evaluation (32 B where `(@string)"…"u8` cost 72), an `any` slot that would take a pre-boxed
+// field but whose slug is degenerate. An sstring twin's position keeps `"…"u8`, a zero-copy view, and a
+// literal with no bare C# form keeps its own. convExpr's BasicLit arm consults it through isCastStringLiteral.
+var packageCastLits map[*ast.BasicLit]bool
 
 // packageGoDeferLits holds, in plain mode, every string literal that is a direct argument of a go/defer
 // call, which claims no field (seat #33, goDeferConstArgs.go). The value is whether the literal renders
@@ -182,6 +195,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 	packageHoistedLocalConsts = make(map[*types.Const]bool)
 	packagePlainLits = make(map[*ast.BasicLit]bool)
 	packageGoDeferLits = make(map[*ast.BasicLit]bool)
+	packageCastLits = make(map[*ast.BasicLit]bool)
 
 	pkgPath := ""
 
@@ -197,6 +211,8 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 		byToken: make(map[string]*hoistedLiteral),
 		uses:    make(map[*ast.BasicLit]*hoistedLiteral),
 		useFunc: make(map[*ast.BasicLit]*ast.FuncDecl),
+
+		castFallback: make(map[*ast.BasicLit]bool),
 	}
 
 	if !initOrderRelocated {
@@ -285,6 +301,14 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 		packageHoistedLits[lit] = hl
 	}
 
+	// Plain mode: a use whose literal claimed no surviving field takes the cached cast instead of
+	// `"…"u8` (packageCastLits).
+	for lit := range c.castFallback {
+		if packageHoistedLits[lit] == nil {
+			packageCastLits[lit] = true
+		}
+	}
+
 	for _, hl := range c.ordered {
 		if hl.name == "" {
 			continue
@@ -336,6 +360,10 @@ type hoistCollector struct {
 	// plainOnly marks a function whose literals may go plain but may claim no field (see the
 	// init and init-reachable arm of collectHoistedLiterals).
 	plainOnly bool
+
+	// castFallback holds, in plain mode, every use that renders `(@string)"…"` unless its literal
+	// survives naming as a field (see packageCastLits).
+	castFallback map[*ast.BasicLit]bool
 
 	// per-function walk state
 	funcDecl *ast.FuncDecl
@@ -652,13 +680,34 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 	kind, slot, ok := c.hoistTarget(lit, stack)
 
 	if !ok {
-		// Plain mode also reaches a composite ELEMENT (or key, or field value), which the hoist
-		// excludes as Tier B: the composite's own type fixes the slot's C# type.
-		if !packageHoistsLiterals && isPlainStringSlot(c.compositeElemSlot(lit, stack)) && hasBareCSharpForm(lit) {
-			packagePlainLits[lit] = true
+		if packageHoistsLiterals {
+			return
 		}
 
-		return
+		// Plain mode also reaches a composite ELEMENT (or key, or field value) and an append argument,
+		// which the hoist excludes (Tier B, and a builtin): the composite's own type, or the appended
+		// slice's element type, fixes the slot's C# type. An exact `string` slot of a composite takes the
+		// bare literal. Every other string slot there takes the cached cast (a bare C# string would bind
+		// append's ISlice overload, and reaches a named string type through no single conversion), and an
+		// `any` slot takes the pre-boxed field below.
+		if slot = c.compositeElemSlot(lit, stack); slot == nil {
+			slot = c.appendElemSlot(lit, stack)
+		} else if isPlainStringSlot(slot) && hasBareCSharpForm(lit) {
+			packagePlainLits[lit] = true
+			return
+		}
+
+		if kind, ok = c.classifyTarget(slot); !ok || !hasBareCSharpForm(lit) {
+			return
+		}
+
+		if kind == hoistUseValue {
+			if value != "" {
+				packageCastLits[lit] = true
+			}
+
+			return
+		}
 	}
 
 	// Plain mode, a go/defer call's argument: no field. It moves into the thunk's call when that form
@@ -685,6 +734,18 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 	if !packageHoistsLiterals && kind == hoistUseAny && hasBareCSharpForm(lit) && c.interceptableAnyArg(lit, stack) {
 		packagePlainLits[lit] = true
 		return
+	}
+
+	// Plain mode, a FORMAT position that did not go plain: an sstring twin's, where `"…"u8` binds the
+	// zero-copy view. It claims no field, for the reason the hoist excludes it (callArgTarget).
+	if !packageHoistsLiterals && c.isFormatPositionArg(lit, stack) {
+		return
+	}
+
+	// Plain mode: every use below that ends without a surviving field takes the cached cast, except at an
+	// sstring twin's position, where `"…"u8` is already a zero-copy view.
+	if !packageHoistsLiterals && value != "" && hasBareCSharpForm(lit) && !c.atSStringTwinPosition(lit, stack) {
+		c.castFallback[lit] = true
 	}
 
 	// The empty literal already costs 0 B (ToArray() of an empty span returns Array.Empty). A
@@ -879,15 +940,13 @@ func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (h
 		return 0, nil, false
 	}
 
-	// FORMAT-POSITION literals stay inline (§4.2): a format string slugs badly (`"%v"` -> `vˢ`,
-	// `"invalid %s at %d"` -> `invalidSAtD`), and a formatting call's cost is dominated by the
-	// formatting itself. Recognised structurally — a variadic function whose name ends in `f`
-	// with a `string` parameter immediately before the variadic — which covers fmt/log/testing's
-	// whole *f family and any user wrapper shaped like one.
-	if sig.Variadic() && params.Len() >= 2 && idx == params.Len()-2 && callFuncNameEndsWithF(call.Fun) {
-		if basic, isBasic := params.At(idx).Type().Underlying().(*types.Basic); isBasic && basic.Kind() == types.String {
-			return 0, nil, false
-		}
+	// FORMAT-POSITION literals stay inline in hoist mode (§4.2): a format string slugs badly (`"%v"` ->
+	// `vˢ`, `"invalid %s at %d"` -> `invalidSAtD`), and a formatting call's cost is dominated by the
+	// formatting itself. Plain mode classifies one like any other argument, since a plain literal has no
+	// name: bound to an exact `string` parameter it goes bare, and otherwise (an sstring twin) consider
+	// keeps it inline without a field.
+	if packageHoistsLiterals && isFormatPosition(call, idx, sig) {
+		return 0, nil, false
 	}
 
 	var target types.Type
@@ -907,6 +966,80 @@ func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (h
 	}
 
 	return c.targetOf(target)
+}
+
+// isFormatPosition reports whether argument idx of call is a FORMAT position, recognised structurally: a
+// variadic function whose name ends in `f`, with a `string` parameter immediately before the variadic. That
+// covers fmt/log/testing's whole *f family and any user wrapper shaped like one.
+func isFormatPosition(call *ast.CallExpr, idx int, sig *types.Signature) bool {
+	params := sig.Params()
+
+	if !sig.Variadic() || params.Len() < 2 || idx != params.Len()-2 || !callFuncNameEndsWithF(call.Fun) {
+		return false
+	}
+
+	basic, isBasic := params.At(idx).Type().Underlying().(*types.Basic)
+
+	return isBasic && basic.Kind() == types.String
+}
+
+// isFormatPositionArg reports whether lit is a call argument in a format position (isFormatPosition).
+func (c *hoistCollector) isFormatPositionArg(lit *ast.BasicLit, stack []ast.Node) bool {
+	call, ok := stack[len(stack)-1].(*ast.CallExpr)
+
+	if !ok || call.Ellipsis.IsValid() || callIsUniverseBuiltin(c.info, call.Fun) {
+		return false
+	}
+
+	sig, ok := c.typeUnder(c.info.TypeOf(call.Fun)).(*types.Signature)
+
+	return ok && isFormatPosition(call, exprIndexOf(call.Args, lit), sig)
+}
+
+// atSStringTwinPosition reports whether lit is the argument of a twinned `string` parameter of an sstring
+// twin, where `"…"u8` binds the twin's zero-copy view (sstringTwinOperations.go).
+func (c *hoistCollector) atSStringTwinPosition(lit *ast.BasicLit, stack []ast.Node) bool {
+	call, ok := stack[len(stack)-1].(*ast.CallExpr)
+
+	if !ok {
+		return false
+	}
+
+	idx := exprIndexOf(call.Args, lit)
+
+	for _, twinned := range sstringTwinIndices(calleeFunc(c.info, call)) {
+		if twinned == idx {
+			return true
+		}
+	}
+
+	return false
+}
+
+// appendElemSlot returns the element type of the slice a literal is appended to, `append(s, "x")`, or nil
+// when the literal is no such argument (a spread `append(b, "x"...)` keeps the ellipsis machinery's form).
+func (c *hoistCollector) appendElemSlot(lit *ast.BasicLit, stack []ast.Node) types.Type {
+	call, ok := stack[len(stack)-1].(*ast.CallExpr)
+
+	if !ok || call.Ellipsis.IsValid() || exprIndexOf(call.Args, lit) < 1 {
+		return nil
+	}
+
+	ident, ok := ast.Unparen(call.Fun).(*ast.Ident)
+
+	if !ok {
+		return nil
+	}
+
+	if builtin, isBuiltin := c.info.Uses[ident].(*types.Builtin); !isBuiltin || builtin.Name() != "append" {
+		return nil
+	}
+
+	if slice, isSlice := c.typeUnder(c.info.TypeOf(call.Args[0])).(*types.Slice); isSlice {
+		return slice.Elem()
+	}
+
+	return nil
 }
 
 // classifyTarget maps a target slot's type to the hoist kind. Only two slots qualify: a Go
@@ -1167,6 +1300,11 @@ func goDeferArgLiteral(basicLit *ast.BasicLit) (plainIfInlined, ok bool) {
 	plainIfInlined, ok = packageGoDeferLits[basicLit]
 
 	return plainIfInlined, ok
+}
+
+// isCastStringLiteral reports whether basicLit renders as the cached cast `(@string)"…"` (packageCastLits).
+func isCastStringLiteral(basicLit *ast.BasicLit) bool {
+	return packageCastLits != nil && packageCastLits[basicLit]
 }
 
 // isPlainStringLiteral reports whether basicLit renders as a plain C# literal (packagePlainLits).
