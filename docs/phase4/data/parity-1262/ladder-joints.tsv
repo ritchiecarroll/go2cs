@@ -1,0 +1,67 @@
+# The ladder identity's joints (docs/phase4/DESIGN-ladder-identity.md, Step A): master's first-parent history from B0 (e9f05d8c09,
+# the first parent of #20's landing) to 0c9169c456. converter_sha256 = sha256 (first 16 hex) of `go build -trimpath -buildvcs=false`
+# of `git archive <commit> src/go2cs`, go1.26.10 windows/amd64, G-LAPTOP 2026-10-30. core_changes = non-golib src/core paths the
+# commit changed (golib excluded). src/version.props (the Go pin) is unchanged across the range.
+commit	subject	src_go2cs_tree	converter_sha256	core_changes
+e9f05d8c09	batch 75: merge claude/c1-darwin-disclosures (b9f93babb8) -- runtime disclosures: darwin j	1c2009e7ed33	3cfacc1e75b391b3	0
+3b36ee7dfe	batch 76: merge claude/p1-seat20-nil-default-r2 (6f1f9378cb) -- parity seat #20 (N1 stage 	f8fa2a9957ae	73c10cb0d44cba81	0
+a4711608e1	goldens: re-baseline the 11 windows-exclusive projects for #20 (N1 + D1) on the i7 (pcensu	f8fa2a9957ae	73c10cb0d44cba81	0
+1f8a1ae12d	batch 77: merge claude/c1-tour-generated-tab (62fbb897cc) -- the tour of go2cs gains a Gen	f8fa2a9957ae	73c10cb0d44cba81	0
+848d2b445f	batch 77: merge claude/c1-darwin-disc-board (d04cb69c06) -- BOARD row for the darwin runti	f8fa2a9957ae	73c10cb0d44cba81	0
+b150301cc7	batch 77: merge claude/p1-seat37-perf-aot-reuse (349d2de004) -- seat #37: the perf runner'	f8fa2a9957ae	73c10cb0d44cba81	0
+b17f4351a3	batch 77: merge claude/g-p1-field-properties-design (be847865c3) -- design record for pari	f8fa2a9957ae	73c10cb0d44cba81	0
+482caf78e5	batch 78: merge claude/h-seat27-small4-r2 (7bd0b0fb22) -- parity seat #27, the small four:	c4b679059ea2	3aa8534a812fc1f4	0
+0e0c1efbdc	batch 79: merge claude/p1-seat21-struct-new-r2 (2122bf87a2) -- parity seat #21, Z1: a Go s	11807a7356cf	bcfac9cb121f8e61	1
+df6f6ba317	batch 79: merge claude/g-seat35-value-fastpath-r2 (03ec80b163) -- parity seat #35: Standar	11807a7356cf	bcfac9cb121f8e61	0
+2c737cfdfc	goldens: re-baseline the 3 windows-exclusive projects for #21 (Z1) on the i7	11807a7356cf	bcfac9cb121f8e61	0
+6298556cbc	batch 80: merge claude/c2-seat25-r5-r2 (889d03e7e2) -- parity seat #25, R5: un-aliased poi	956c8fa00591	6f2551b280b9f278	0
+fd6b526a66	batch 80: merge claude/c2-seat26-n2-r2 (8f032ced27) -- parity seat #26, N2: a named numeri	0522f660ff93	905edfb35050417e	0
+cb43bf292e	goldens: re-mint batch 80 overlaps (#25/#26 share CrossPkgLib and DeferTypelessReturns) an	0522f660ff93	905edfb35050417e	0
+9390c32e54	goldens: re-mint the 3 projects #25 (R5) moves that its own list missed -- 2 windows-exclu	0522f660ff93	905edfb35050417e	0
+cf6adea3d8	batch 81: merge claude/c2-seat33-godefer-const-r2 (ea14f3981c) -- parity seat #33, GD: a g	81fa88d92ae8	745e7485aa707544	0
+904c363f67	goldens: re-mint the windows-exclusive SystemCertVerify for #33 (GD) on the i7	81fa88d92ae8	745e7485aa707544	0
+3d6155ed3a	batch 82: merge claude/c2-seat39-sheetpaste (63fce37bd6) -- seat #39 (tooling): Test-Sheet	81fa88d92ae8	745e7485aa707544	0
+2639c6f3e9	batch 83: merge claude/p2-seat23-rune-lit-r3 (f897166ad2) -- parity seat #23, C1: rune lit	d950a2df3648	1e41bf3e1eebed22	0
+03d19d9279	goldens: re-mint the 4 windows-exclusive projects for #23 (C1) on the i7	d950a2df3648	1e41bf3e1eebed22	0
+53918293a1	batch 84: merge claude/h-seat28-patswitch-r2 (0360c1c9c5) -- parity seat #28, S1: a non-co	6a852bef3c4b	3fad96473263893a	0
+61f79a2d8f	batch 85: merge claude/c2-seat40-functype-name (e770f493fd) -- seat #40 (golib): a C# char	6a852bef3c4b	3fad96473263893a	0
+a8e7c6002e	goldens: re-mint #40's FuncTypeVerbs at the batch 85 merge on the i7 (cut before #23 and #	6a852bef3c4b	3fad96473263893a	0
+97a3a7c6b9	batch 86: merge claude/p2-seat24-nil-compare-r2 (227f4f8748) -- parity seat #24, N1 stage 	995c21b035b5	b70c6bf754c9a526	1
+f62cd53f45	goldens: re-mint the windows-exclusive WsaSendtoRoundTrip for #24 (N1b), and the 2 project	995c21b035b5	b70c6bf754c9a526	0
+8949c45b1b	batch 87: merge claude/h-seat29-heapfold-r2 (b13815e194) -- parity seat #29, H2: a single-	9494fd5b7983	35cbf742ef823cd3	0
+cdd4db4eae	goldens: re-mint NilCompareShapes at the batch 87 merge on the i7 (#24's same-package coll	9494fd5b7983	35cbf742ef823cd3	0
+6341102e53	batch 88: merge claude/p2-seat29-linux-mint (fc25efc4f3) -- #29's two linux-native goldens	9494fd5b7983	35cbf742ef823cd3	0
+06799fd57f	batch 89: merge claude/c2-seat41-host-golden (6fdc21cdfb) -- seat #41: an imported alias d	9082392a162d	ae4f9b9ed82df4d0	228
+801497a338	batch 89: revert d0c61d8ec9 (#41's src/core delta) -- inside the parity window seats land 	9082392a162d	ae4f9b9ed82df4d0	228
+1c39cc5352	goldens: re-mint #41's 11 windows-exclusive projects and the 29 windows-runnable projects 	9082392a162d	ae4f9b9ed82df4d0	0
+33ef3d995c	docs: re-cite 4 samples to master's src/core lines at batch 89 (#41 had re-cited them agai	9082392a162d	ae4f9b9ed82df4d0	0
+340ba0cc78	goldens: re-mint the windows-exclusive WindowsNewCallback for #41 at the batch 89 merge on	9082392a162d	ae4f9b9ed82df4d0	0
+54ff0665d5	batch 90: merge claude/g-seat31-field-properties (e6356e0ed2) -- parity seat #31, P1: p.f 	8d91331ab1db	1c8c68fa0c53a665	0
+bd0aa85bd3	docs: re-cite 7 provenance notes at the batch 90 merge (#31's citations, shifted by batche	8d91331ab1db	1c8c68fa0c53a665	0
+a0f01321eb	pcensus: a file no whole-file Block anchors keeps its runs' refusals whole; PerSide rules 	a0e114626431	1c8c68fa0c53a665	0
+552ac3b621	go2cs-gen (red): a field type naming another generator's type, at any depth, must resolve 	a0e114626431	1c8c68fa0c53a665	0
+e1d2184cd6	go2cs-gen: FieldAccessGenerator roots an unresolved type at the struct's package class, in	a0e114626431	1c8c68fa0c53a665	0
+f31ac325dd	goldens: re-mint HeapFoldShapes and PointerFieldSelectors at the batch 90 merge on the i7 	a0e114626431	1c8c68fa0c53a665	0
+c81637bbac	batch 91: merge claude/h-seat34-aot-gaps-r2 (1d8cb94557) -- seat #34: under Native AOT, go	a0e114626431	1c8c68fa0c53a665	0
+984f526a51	batch 91: merge claude/c2-seat42-defer-line (4077dabe65) -- seat #42: a deferred or spawne	faefccc28aa0	71a5097bbf11b66f	1
+c2c544eb53	goldens: re-mint #42s 5 windows-exclusive projects and the 13 projects #34 and #42 share w	faefccc28aa0	71a5097bbf11b66f	0
+99ef93a148	batch 92: merge claude/p2-seat30-linux-mint (78d6e7f034) -- parity seat #30, L1: slice lit	e6a59356de8a	d6974cef18f1f673	0
+d6463bcaf7	goldens: re-mint the 128 windows-runnable projects #30 shares with batches 85-91 (and its 	e6a59356de8a	d6974cef18f1f673	0
+07cf242e95	docs: re-cite at the batch 92 merge -- one pointers.md sample takes #29's fold and #30's l	e6a59356de8a	d6974cef18f1f673	0
+23d46f3aa5	pcensus: restore the two closing braces the batch 92 merge dropped between #31's TestP1Rec	d40cdfa5beae	d6974cef18f1f673	0
+0528e9e884	goldens: re-mint 5 later-seat tests at the batch 92 merge on the i7 (AotReflectGaps, FuncT	d40cdfa5beae	d6974cef18f1f673	0
+7979dec811	docs: re-copy the nil-and-zero-values sample after batch 92's last re-mint (NilCompareShap	d40cdfa5beae	d6974cef18f1f673	0
+6e308e4b91	batch 93: merge claude/c1-seat38-eol-align (5dc84a3c8) -- seat #38, class J: a Go trailing	54b6bee1d64e	e15d586d1422c410	0
+e6b3b892ad	batch 94: merge claude/c2-seat43-comment-residue (c3eabaf6de) -- seat #43: the Go comments	8d0e9f3b7bae	448f0d75cc532a70	0
+2f9c290902	batch 95: merge claude/c2-seat43-comment-residue (60529ea100) -- #43's census follow-up: c	9e9f734a00a7	448f0d75cc532a70	0
+99195664ce	batch 95: merge claude/p2-linux-exclusive-sweep (fbac10868c) -- the 3 linux-exclusive gold	9e9f734a00a7	448f0d75cc532a70	0
+c5a0034c28	symbols.json: the Action-cast note reads (Action)(default), matching the generated symbols	9e9f734a00a7	448f0d75cc532a70	1
+6f009ae6b2	batch 96: merge claude/c2-seat44-pcensus-items (58fa369eed) -- seat #44 (instrument): pcen	77c73def4080	448f0d75cc532a70	0
+914659c9ff	batch 97: merge claude/c2-seat44-pcensus-items (1bdd9f258c) -- seat #44 follow-up: pcensus	de940cb933d9	448f0d75cc532a70	0
+7072ef5904	batch 98: merge claude/c2-seat44-pcensus-items (25bb90dc7e) -- seat #44 follow-up 2: CM re	4a4279a29346	448f0d75cc532a70	0
+718fd42b94	batch 99: merge claude/g-seat45-test-records (9ef1ea2f7d) -- seat #45: the two #31 defects	1b896ea34916	de2d88959518cd29	0
+62d6d3f9c6	batch 100: merge claude/g-seat32-field-token-r3 (4e0a8e02dc) -- parity seat #32, P2: &p.f 	e94eae3b8c74	6739eb66d2092d05	2
+ccceaa54ef	batch 101: merge claude/p2-seat32-linux-mint (a3e0d5ad10) -- #32's linux-exclusive golden 	e94eae3b8c74	6739eb66d2092d05	0
+e23365a17e	batch 102: merge claude/c2-seat47-errorf-indent (30aa01791d) -- seat #47: TestingRuntimeTe	e94eae3b8c74	6739eb66d2092d05	0
+af28a5ff63	batch 103: merge claude/g-seat31b-promoted-fields (8806ec2f97) -- parity seat #31b: a prom	6c97616644a0	49dc836c7d66bbf9	0
+0c9169c456	batch 103: merge claude/coord-consuming-note (cfdae64d28) -- ConsumingGoFromCSharp: the ex	6c97616644a0	49dc836c7d66bbf9	0
