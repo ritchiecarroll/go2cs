@@ -42,6 +42,8 @@ Most compute lands within a small multiple of Go's time. String-heavy work takes
 
 Why the gap? Go's strings, slices and interfaces don't map one-to-one onto .NET's, so a runtime library emulates them, and the converter aims for C# a Go programmer can read and follow, not hyper-tuned C#. Startup is the other cost: Go compiles straight to machine code, while .NET compiles as it runs ([JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation)) unless you publish with Native AOT, which closes most of that gap at the cost of a slower, heavier build. You don't have to take my word for any of this: the [performance comparison](Performance.md) measures Go, C# on the JIT, and C# with Native AOT, methodology and all.
 
+Some of the cost is yours to choose: [Tuning converted code](Tuning.md) says which deployment and runtime settings fit your program.
+
 Need Go's own speed? You can [export Go functions](https://pkg.go.dev/cmd/cgo#hdr-C_references_to_Go) as C, build them into a native library, and [import them](https://learn.microsoft.com/dotnet/api/system.runtime.interopservices.dllimportattribute) in C#. go2cs is for when you want the code itself.
 
 ---

@@ -92,7 +92,7 @@ command validates every other package on the table — substitute its GOROOT sou
 The test host is published in the Release configuration and run with the CLR's tiered JIT off
 (`DOTNET_TieredCompilation=0`), so every method is compiled once at full optimization and a verdict
 cannot depend on when the runtime promotes a method; `-test-tiered` turns tiering back on, and
-`-test-config Debug` publishes a Debug host. ReadyToRun is opt-in — set `PublishReadyToRun=true` in the
+`-test-config Debug` publishes a Debug host (a program you ship keeps tiering on: [Tuning converted code](Tuning.md#net-runtime-settings)). ReadyToRun is opt-in — set `PublishReadyToRun=true` in the
 environment to publish a precompiled host — because it buys a slower steady state on heavy suites, a
 larger host and a longer first publish, and because precompiled code does not keep the JIT's stack
 frames, so a test that asserts on frames can answer differently.

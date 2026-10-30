@@ -172,7 +172,7 @@ The build output lands under `csharp/.artifacts/bin/`, where a native launcher i
 assembly — `colordemo.exe` on Windows, `./colordemo` on Linux — and runs the same program.
 
 To ship the app, `dotnet publish -c Release -r <runtime>` produces a self-contained, ReadyToRun-compiled
-program. A converted project trims in partial mode: the .NET framework is trimmed, while golib, the
+program ([Tuning converted code](Tuning.md#choosing-a-deployment) compares it with the JIT and Native AOT). A converted project trims in partial mode: the .NET framework is trimmed, while golib, the
 converted packages and the app itself are kept whole, so the members they reach by reflection survive the
 publish. A project may set its own `TrimMode`.
 

@@ -403,7 +403,8 @@ comparison says by how much. This section lists the work planned to narrow the g
 up anything else on this page.
 
 The published [performance comparison](Performance.md) measures converted C# against Go on the JIT
-and under Native AOT. The follow-ups run off the critical path:
+and under Native AOT, and [Tuning converted code](Tuning.md) says which deployment and runtime settings to choose.
+The follow-ups run off the critical path:
 
 - **A re-baseline on the published 1.26.10.1 packages**, measured against 1.24.13.7 in the same
   session, which is also the before picture for the .NET 11 measurement stage. It brings the
