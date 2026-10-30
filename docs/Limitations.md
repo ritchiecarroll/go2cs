@@ -185,7 +185,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **Speed.** Most compute lands within a small multiple of Go's time, string-heavy work takes several
   times longer, maps run at parity or better, and asking at run time whether a value satisfies an
   interface (`v.(fmt.Stringer)`) is the slowest thing converted code does. The
-  [performance comparison](Performance.md) has the numbers, and [Tuning converted code](Tuning.md) says which deployment\r\n  and runtime settings to choose. Measure your own hot path, in Release.
+  [performance comparison](Performance.md) has the numbers, and [Tuning converted code](Tuning.md) says which deployment
+  and runtime settings to choose. Measure your own hot path, in Release.
 * **Startup, memory and shipping.** A converted program loads .NET and one DLL per converted Go package
   it uses, and the JIT compiles each method the first time it runs. Package-level tables are built the
   first time they are read rather than at startup. You ship a .NET app, not Go's small static binary:
