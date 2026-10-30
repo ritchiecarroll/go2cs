@@ -47,7 +47,10 @@ const plainAllocationFixture = "package plit\n\n" +
 	"\tcell := holder{v: \"boxed field value\"}\n" +
 	"\tf := fmt.Println\n" +
 	"\tf(\"OK\")\n" +
-	"\treturn len(parts) + len(names) + len(m) + len(boxed) + len(bag) + len(cell.s)\n" +
+	"\tbuf := []byte{}\n" +
+	"\tbuf = append(buf, \"spread literal\"...)\n" +
+	"\tbuf = append(buf, \"\\t\"...)\n" +
+	"\treturn len(parts) + len(names) + len(m) + len(boxed) + len(bag) + len(cell.s) + len(buf)\n" +
 	"}\n\n" +
 	"type holder struct {\n\tv any\n\ts string\n}\n"
 
@@ -109,7 +112,8 @@ func TestFormatPositionLiteralsGoPlain(t *testing.T) {
 // field, renders `(@string)"…"`. StringLiteralCache converts the C# literal once, and the cast fixes the C# type
 // at @string. That covers an append argument (a bare string would bind append's ISlice overload with
 // T = System.String), a named string type's composite element and map key, a degenerate named slot and a
-// degenerate generic slot. The empty literal keeps `""u8`, which allocates nothing.
+// degenerate generic slot, and a literal spread into append (`append(b, "x"...)`, whose @string the spread
+// projects to its bytes). The empty literal keeps `""u8`, which allocates nothing.
 func TestValueSitesWithNoPlainFormTakeTheCachedCast(t *testing.T) {
 	emitted := convertPlainAllocationFixture(t, false)
 
@@ -122,6 +126,8 @@ func TestValueSitesWithNoPlainFormTakeTheCachedCast(t *testing.T) {
 		`Echo((@string)"cd")`,
 		`return (@string)"OK";`,
 		`takeName(""u8)`,
+		`append(buf, ((@string)"spread literal").ꓸꓸꓸ)`,
+		`append(buf, ((@string)"\t").ꓸꓸꓸ)`,
 	} {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("want %q:\n%s", want, emitted)
@@ -178,6 +184,7 @@ func TestHoistModeKeepsTheAllocationClassesAsTheyWere(t *testing.T) {
 		`["named map key"u8] = "plain map value"u8`,
 		`slice<any>([(@string)"boxed composite element"u8, `,
 		`f((@string)"OK"u8);`,
+		`append(buf, ((@string)"spread literal"u8).ꓸꓸꓸ)`,
 	} {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("-hoist-literals: want %q:\n%s", want, emitted)
