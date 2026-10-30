@@ -83,7 +83,8 @@ var packagePlainLits map[*ast.BasicLit]bool
 // field value; a value slot whose literal has a degenerate slug or sits where no field may be claimed; and,
 // boxed per evaluation (32 B where `(@string)"…"u8` cost 72), an `any` slot that would take a pre-boxed
 // field but whose slug is degenerate. A literal spread into append, `append(b, "x"...)`, takes it too, its
-// `.ꓸꓸꓸ` projecting the cached @string's bytes. An sstring twin's position keeps `"…"u8`, a zero-copy view, and a
+// `.ꓸꓸꓸ` projecting the cached @string's bytes, and so do a print or println builtin's argument and a range
+// over a literal. An sstring twin's position keeps `"…"u8`, a zero-copy view, and a
 // literal with no bare C# form keeps its own. convExpr's BasicLit arm consults it through isCastStringLiteral.
 var packageCastLits map[*ast.BasicLit]bool
 
@@ -687,7 +688,9 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 
 		// Plain mode, a literal spread into append, `append(b, "x"...)`: the spread projects an @string's
 		// bytes, and the cached cast makes that @string once per literal (convExprList wraps it).
-		if c.isAppendSpreadArg(lit, stack) {
+		// The same for a print or println builtin's argument (golib's overload set takes the @string) and for
+		// a range over a literal, which enumerates an @string.
+		if c.isAppendSpreadArg(lit, stack) || c.isPrintArg(lit, stack) || isRangeOverLiteral(lit, stack) {
 			if value != "" && hasBareCSharpForm(lit) {
 				packageCastLits[lit] = true
 			}
@@ -1070,6 +1073,32 @@ func (c *hoistCollector) isAppendSpreadArg(lit *ast.BasicLit, stack []ast.Node) 
 	builtin, isBuiltin := c.info.Uses[ident].(*types.Builtin)
 
 	return isBuiltin && builtin.Name() == "append"
+}
+
+// isPrintArg reports whether lit is an argument of the print or println builtin.
+func (c *hoistCollector) isPrintArg(lit *ast.BasicLit, stack []ast.Node) bool {
+	call, ok := stack[len(stack)-1].(*ast.CallExpr)
+
+	if !ok || exprIndexOf(call.Args, lit) < 0 {
+		return false
+	}
+
+	ident, ok := ast.Unparen(call.Fun).(*ast.Ident)
+
+	if !ok {
+		return false
+	}
+
+	builtin, isBuiltin := c.info.Uses[ident].(*types.Builtin)
+
+	return isBuiltin && (builtin.Name() == "print" || builtin.Name() == "println")
+}
+
+// isRangeOverLiteral reports whether lit is the operand of a range statement, `for _, c := range "x"`.
+func isRangeOverLiteral(lit *ast.BasicLit, stack []ast.Node) bool {
+	rangeStmt, ok := stack[len(stack)-1].(*ast.RangeStmt)
+
+	return ok && rangeStmt.X == lit
 }
 
 // classifyTarget maps a target slot's type to the hoist kind. Only two slots qualify: a Go
