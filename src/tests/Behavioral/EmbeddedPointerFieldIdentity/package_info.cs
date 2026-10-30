@@ -47,6 +47,7 @@ using static go.main_package;
 [assembly: go.GoFieldAccess(typeof(holder))]
 [assembly: go.GoFieldAccess(typeof(inner))]
 [assembly: go.GoFieldAccess(typeof(outer))]
+[assembly: go.GoFieldAccess(typeof(wrapper))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

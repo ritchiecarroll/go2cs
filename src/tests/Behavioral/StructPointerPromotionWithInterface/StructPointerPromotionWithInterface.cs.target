@@ -179,13 +179,13 @@ internal static void Main() {
     fmt.Println(probeRig(new rig(dev: new Device(name: "r", hits: 42))));
 
     var ck = Ꮡ(new counterKind());
-    ck.Value.label = "k9";
+    ck.label = "k9";
     stamper st = new counterKindжstamper(ck);
     fmt.Println(st.Stamp(), st.Stamp(), st.Hits());
 
     var stn = Ꮡ(new Station(id: "s1"));
     Pinger pg = new link(Station: stn);
-    fmt.Println(pg.Ping(), pg.Ping(), (~stn).pings);
+    fmt.Println(pg.Ping(), pg.Ping(), stn.pings);
 }
 
 } // end main_package

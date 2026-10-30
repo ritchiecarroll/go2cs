@@ -66,9 +66,9 @@ internal static void Main() {
     var o = Ꮡ(new outer(new holder(new hello("deep"), "t"), 7));
 
     greetExtra ge = new outerжgreetExtra(o);
-    fmt.Println(ge.Greet(), ge.Extra(), (~o).tag);
+    fmt.Println(ge.Greet(), ge.Extra(), o.tag);
 
-    o.Value.greeter = new hello("replaced");
+    o.greeter = new hello("replaced");
     fmt.Println(ge.Greet());
 }
 

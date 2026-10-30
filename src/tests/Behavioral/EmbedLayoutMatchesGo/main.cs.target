@@ -32,7 +32,7 @@ internal static void Main() {
     var buf = new slice<byte>(16);
 
     var o = Ꮡ(buf, 0).Reinterpret<byte, ordered>();
-    (o.Value.a, o.Value.b, o.c) = (1, 2, 3);
+    (o.a, o.b, o.c) = (1, 2, 3);
     fmt.Println("ordered fields:", buf[..12]);
 
     o.Value = new ordered(new pair(4, 5), 6);
@@ -46,7 +46,7 @@ internal static void Main() {
     }
 
     var l = Ꮡ(buf, 0).Reinterpret<byte, leader>();
-    (l.Value.a, l.Value.b) = (7, 8);
+    (l.a, l.b) = (7, 8);
     fmt.Println("leader fields: ", buf[..8]);
 
     var w = l.Value;

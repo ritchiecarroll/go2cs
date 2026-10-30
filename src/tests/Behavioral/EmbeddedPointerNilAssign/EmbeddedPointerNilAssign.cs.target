@@ -39,7 +39,7 @@ internal static void Main() {
             defer(() => {
                 fmt.Println("recovered:", recover());
             }, ref ᒐ);
-            fmt.Println((~sʗ1).name);
+            fmt.Println(sʗ1.name);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -51,11 +51,11 @@ internal static void Main() {
 
     s.setting = lookup("gcpacertrace");
     fmt.Println(s.setting == nil);
-    fmt.Println((~s).name, s.bump(), s.bump());
+    fmt.Println(s.name, s.bump(), s.bump());
 
     var direct = lookup("other");
     s.setting = direct;
-    s.Value.count = 10;
+    s.count = 10;
     nint before = direct.count;
     nint after = s.bump();
     fmt.Println(before, after, direct.count);

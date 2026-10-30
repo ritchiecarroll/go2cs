@@ -71,11 +71,11 @@ internal static void Main() {
     viaParam(o);
 
     fmt.Println(o.of(outer.Ꮡinner).total());
-    fmt.Println((~o).n);
+    fmt.Println(o.n);
     fmt.Println(o.inner.n);
     fmt.Println(o.tag);
     o.of(outer.Ꮡinner).reset0();
-    fmt.Println((~o).n);
+    fmt.Println(o.n);
 
     var c = new chunk();
     c.alloc(5);

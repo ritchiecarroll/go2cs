@@ -75,7 +75,7 @@ internal static void Main() {
     fmt.Println(record.IsDr());
 
     var l = Ꮡ(new ledger());
-    l.Value.tag = "x";
+    l.tag = "x";
     fmt.Println(l.describe(), l.describe(), l.seq);
 }
 

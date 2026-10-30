@@ -51,7 +51,7 @@ internal partial interface main_type /*dyn*/ {
 
 internal static void Main() {
     var u = Ꮡ(new Uint());
-    u.Value.Label = "uint";
+    u.Label = "uint";
     Node n = new UintжNode(u);
 
     var (basic, ok) = n._<main_type>(ᐧ);
@@ -60,20 +60,20 @@ internal static void Main() {
     if (ok) {
         var b = basic.Basic();
         b.BitSize = 64;
-        b.Value.Label = "uint64";
+        b.Label = "uint64";
     }
 
-    fmt.Println("uint after write through promoted pointer:", (~u).BitSize, (~u).Label, n.String());
+    fmt.Println("uint after write through promoted pointer:", u.BitSize, u.Label, n.String());
 
     var i = Ꮡ(new Int());
-    i.Value.Label = "int";
+    i.Label = "int";
     Node ni = new IntжNode(i);
     {
         var (bi, okI) = ni._<main_type>(ᐧ); if (okI) {
             bi.Basic().BitSize = 32;
         }
     }
-    fmt.Println("int after write through promoted pointer:", (~i).BitSize, (~i).Label);
+    fmt.Println("int after write through promoted pointer:", i.BitSize, i.Label);
 
     switch (n.type()) {
     case {} Δt when Δt._<main_type>(out var t): {
@@ -91,25 +91,25 @@ internal static void Main() {
     fmt.Println("uint VALUE asserts to anon Basic:", valueOK);
 
     var inner = Ꮡ(new Uint());
-    inner.Value.Label = "inner";
-    inner.Value.ByteSize = 8;
+    inner.Label = "inner";
+    inner.ByteSize = 8;
 
     var p = Ꮡ(new Ptr(Node: new UintжNode(inner)));
-    p.Value.Label = "ptr";
-    p.Value.ByteSize = 4;
+    p.Label = "ptr";
+    p.ByteSize = 4;
 
     Node np = new PtrжNode(p);
     fmt.Println("ptr Common through embed:", np.Common().Label, np.Common().ByteSize);
     fmt.Println("ptr String through embed:", np.String());
 
     var empty = Ꮡ(new Ptr());
-    empty.Value.Label = "empty";
-    empty.Value.ByteSize = 2;
+    empty.Label = "empty";
+    empty.ByteSize = 2;
     Node ne = new PtrжNode(empty);
     fmt.Println("ptr Common with nil field:", ne.Common().Label, ne.Common().ByteSize);
 
     ne.Common().ByteSize = 16;
-    fmt.Println("ptr after write through Common:", (~empty).ByteSize);
+    fmt.Println("ptr after write through Common:", empty.ByteSize);
 
     fmt.Println("ptr field node:", p.Node.Common().Label, p.Node.String());
 }
