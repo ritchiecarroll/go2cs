@@ -482,6 +482,7 @@
     <None Include="$(MSBuildThisFileDirectory)platformCompanion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLayoutFold_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformManifest.go" />
     <None Include="$(MSBuildThisFileDirectory)platformPackageInitRetire_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject.go" />
