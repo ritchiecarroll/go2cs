@@ -49,7 +49,7 @@ using static go.DefinedForeignStructConvert.rec_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("rec.go", "rec.cs", "AA4ggKSA")]
+[assembly: GoPositionMap("rec.go", "rec.cs", "AA4ggKSA")]
 // </GoSourcePositionMaps>
 
 namespace go.DefinedForeignStructConvert;

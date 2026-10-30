@@ -49,7 +49,7 @@ using static go.GoHostModuleShadow.consumer_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("consumer.go", "consumer.cs", "AA0ggoKCgqaCpoKClIKClKaCgpQ=")]
+[assembly: GoPositionMap("consumer.go", "consumer.cs", "AA0ggoKCgqaCpoKClIKClKaCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.GoHostModuleShadow;

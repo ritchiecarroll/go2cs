@@ -369,25 +369,6 @@ public class LiteralInterceptorGeneratorTests
     [TestMethod]
     public void AStampedAssemblyRunsNoTransform()
     {
-        (int transforms, Run run) Drive(string? assemblyAttributes)
-        {
-            Compilation compilation = Generate("""return Show("one");""", assemblyAttributes: assemblyAttributes, runGenerator: false).Updated;
-
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(
-                [new LiteralInterceptorGenerator().AsSourceGenerator()],
-                parseOptions: s_parseOptions,
-                driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, trackIncrementalGeneratorSteps: true));
-
-            driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation updated, out ImmutableArray<Diagnostic> diagnostics);
-            GeneratorRunResult result = driver.GetRunResult().Results.Single();
-
-            int transforms = result.TrackedSteps.TryGetValue(LiteralInterceptorGenerator.TransformStepName, out ImmutableArray<IncrementalGeneratorRunStep> steps)
-                ? steps.Sum(step => step.Outputs.Length)
-                : 0;
-
-            return (transforms, new Run(updated, diagnostics, result.GeneratedSources));
-        }
-
         (int unstampedTransforms, Run unstamped) = Drive(null);
 
         Assert.AreEqual(1, unstampedTransforms, "the unstamped control runs the transform for its one candidate file");
@@ -403,6 +384,44 @@ public class LiteralInterceptorGeneratorTests
         ImmutableArray<Diagnostic> net = stamped.Updated.WithAnalyzers([new StringLiteralBindingAnalyzer()]).GetAnalyzerDiagnosticsAsync().Result;
 
         Assert.AreEqual(1, net.Count(diagnostic => diagnostic.Id == "GO2CS0004"), "GO2CS0004 stays the net in a stamped assembly: " + string.Join("; ", net));
+    }
+
+    // The converter names the stamp bare in a package info file that carries `using go;` (seat #48), and the generator
+    // finds it by its symbol, not its text: the bare spelling stamps the assembly, also with a `go.go` namespace in the
+    // compilation (a package importing go/format), while a look-alike GoHoistedLiteralsAttribute from another namespace
+    // does not. Each stamped arm binds without a compiler error, so the spelling is one C# accepts.
+    [TestMethod]
+    [DataRow("using go;\n[assembly: GoHoistedLiterals]", 0, DisplayName = "bare under using go")]
+    [DataRow("using go;\n[assembly: GoHoistedLiterals]\nnamespace go.go.format_package { public static class shadow { } }", 0, DisplayName = "bare with go.go shadowing the root")]
+    [DataRow("using look;\n[assembly: GoHoistedLiterals]\nnamespace look { public sealed class GoHoistedLiteralsAttribute : System.Attribute { } }", 1, DisplayName = "a look-alike is not the stamp")]
+    public void TheBareStampIsFoundByItsSymbol(string assemblyAttributes, int expectedTransforms)
+    {
+        (int transforms, Run run) = Drive(assemblyAttributes);
+
+        Assert.AreEqual(expectedTransforms, transforms);
+        Assert.AreEqual(0, run.Updated.GetDiagnostics().Count(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error),
+            string.Join("; ", run.Updated.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)));
+    }
+
+    // Runs the generator alone over the one-call fixture with the given assembly attributes, tracking its steps: the
+    // number of files the semantic transform ran for, and the run.
+    private static (int transforms, Run run) Drive(string? assemblyAttributes)
+    {
+        Compilation compilation = Generate("""return Show("one");""", assemblyAttributes: assemblyAttributes, runGenerator: false).Updated;
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new LiteralInterceptorGenerator().AsSourceGenerator()],
+            parseOptions: s_parseOptions,
+            driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, trackIncrementalGeneratorSteps: true));
+
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation updated, out ImmutableArray<Diagnostic> diagnostics);
+        GeneratorRunResult result = driver.GetRunResult().Results.Single();
+
+        int transforms = result.TrackedSteps.TryGetValue(LiteralInterceptorGenerator.TransformStepName, out ImmutableArray<IncrementalGeneratorRunStep> steps)
+            ? steps.Sum(step => step.Outputs.Length)
+            : 0;
+
+        return (transforms, new Run(updated, diagnostics, result.GeneratedSources));
     }
 
     // GO2CS0004 is the net: with the generator absent a bare literal in an object slot is an error, and with it present

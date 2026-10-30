@@ -49,7 +49,7 @@ using static go.SiblingPackageNames.teststructs.foo1.foo_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "zIIABhKC")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "zIIABhKC")]
 // </GoSourcePositionMaps>
 
 namespace go.SiblingPackageNames.teststructs.foo1;

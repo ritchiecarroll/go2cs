@@ -50,7 +50,7 @@ using static go.TypeAssertionSource.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AA8egKKA")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA8egKKA")]
 // </GoSourcePositionMaps>
 
 namespace go.TypeAssertionSource;

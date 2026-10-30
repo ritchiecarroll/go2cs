@@ -49,7 +49,7 @@ using static go.RootedUsingCapture.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AA0ggKTSgoKC1oA=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA0ggKTSgoKC1oA=")]
 // </GoSourcePositionMaps>
 
 namespace go.RootedUsingCapture;

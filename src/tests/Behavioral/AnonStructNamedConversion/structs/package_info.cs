@@ -49,7 +49,7 @@ using static go.AnonStructNamedConversion.structs_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("structs.go", "structs.cs", "AAgKgA==")]
+[assembly: GoPositionMap("structs.go", "structs.cs", "AAgKgA==")]
 // </GoSourcePositionMaps>
 
 namespace go.AnonStructNamedConversion;

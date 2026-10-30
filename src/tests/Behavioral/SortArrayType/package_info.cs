@@ -51,7 +51,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("SortArrayType.go", "SortArrayType.cs", "ADN+3oIADiiCAAgSgAAGGIKmgqaCpqKCpoKmgqaCprKUkpSUgoKCpoKCgqaUpoKCgpSClIKClJaClgAbOJSClIKagpqCgpqCnIKClA==")]
+[assembly: GoPositionMap("SortArrayType.go", "SortArrayType.cs", "ADN+3oIADiiCAAgSgAAGGIKmgqaCpqKCpoKmgqaCprKUkpSUgoKCpoKCgqaUpoKCgpSClIKClJaClgAbOJSClIKagpqCgpqCnIKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go;

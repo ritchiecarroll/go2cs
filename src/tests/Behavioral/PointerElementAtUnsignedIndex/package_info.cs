@@ -43,7 +43,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: go.GoFieldAccess(typeof(S))]
+[assembly: GoFieldAccess(typeof(S))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAogooKAgraCoqSCgoKUgoKCgpSSkpKSkpKSpA==", "17-21:1;37-37:1;38-38:2;39-39:3;40-40:4;41-41:5;42-42:6;43-43:7;44-44:8")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAogooKAgraCoqSCgoKUgoKCgpSSkpKSkpKSpA==", "17-21:1;37-37:1;38-38:2;39-39:3;40-40:4;41-41:5;42-42:6;43-43:7;44-44:8")]
 // </GoSourcePositionMaps>
 
 namespace go;

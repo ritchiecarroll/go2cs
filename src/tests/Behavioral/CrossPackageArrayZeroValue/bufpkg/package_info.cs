@@ -49,7 +49,7 @@ using static go.CrossPackageArrayZeroValue.bufpkg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AA8wgoKUrKKCuqKCgpQ=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA8wgoKUrKKCuqKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.CrossPackageArrayZeroValue;

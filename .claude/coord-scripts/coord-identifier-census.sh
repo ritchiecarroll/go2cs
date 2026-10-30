@@ -3243,6 +3243,12 @@ idc_mode_selftest() {
     printf '[assembly: global::go.GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;134-134:%d.%d.%d.%d")]\n' 3 1 1 2 > "$d/m02"
     idc_st_case "DELTA admits it LAST in the list (global::)" "" "$d/m02" 0
     idc_st_exc "  and RULE 6 is what admitted it"                 "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    # The BARE spelling (seat #48): a package info file with `using go;` names the attribute without
+    # `go.`. ipv4_posmap admits all three spellings; posmapFunclit locates the argument list by
+    # index(lo, "gopositionmap(") with no prefix, so it was already spelling-neutral and needs no change.
+    printf '[assembly: GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;134-134:%d.%d.%d.%d")]\n' 3 1 1 3 > "$d/m09"
+    idc_st_case "DELTA admits it in the BARE spelling (seat #48)" "" "$d/m09" 0
+    idc_st_exc "  and RULE 6 is what admitted it"                 "ipv4|position-map-funclit" "$IDC_TMP/st.status"
     # STRICT KEEPS ITS SEMANTICS, pinned: the same bytes at `entry` still refuse. Rule 6 reads the
     # record around the quad, so it is a context rule, and STRICT takes none.
     idc_st_case "STRICT still refuses the SAME record"          "ipv4" "$d/m01" 1

@@ -51,7 +51,7 @@ using static go.GenericTypeAliasLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAsOgKKApIAADSKigoKUpoCkgKSA")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAsOgKKApIAADSKigoKUpoCkgKSA")]
 // </GoSourcePositionMaps>
 
 namespace go;

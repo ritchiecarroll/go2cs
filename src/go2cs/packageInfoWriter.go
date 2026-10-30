@@ -943,6 +943,55 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	}
 }
 
+// importsRootNamespace reports whether a package info file carries the compilation-unit directive
+// `using go;`. Only the directives above the file-scoped namespace declaration count: one below it is
+// scoped to that namespace, not to the [assembly:] records.
+func importsRootNamespace(packageInfoLines []string) bool {
+	directive := "using " + RootNamespace + ";"
+
+	for _, line := range packageInfoLines {
+		trimmed := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trimmed, "namespace ") {
+			return false
+		}
+
+		if trimmed == directive {
+			return true
+		}
+	}
+
+	return false
+}
+
+// rootAttributeName spells one of golib's attributes for an [assembly:] record in a package info file. An
+// assembly attribute binds at compilation-unit scope, where `using go;` applies -- even when a `go.go`
+// namespace shadows the root, since the directive itself resolves at the global namespace -- so a file with
+// that directive names it bare, and any other keeps the rooted spelling.
+func rootAttributeName(name string, bare bool) string {
+	if bare {
+		return name
+	}
+
+	return globalQualifyRooted(RootNamespace + "." + name)
+}
+
+// respellRootAttribute rewrites an [assembly:] record of the named golib attribute, in whichever of its three
+// spellings it was written, to the one rootAttributeName gives it, and returns any other line trimmed and
+// unchanged. A record a merging write keeps from an earlier one so never keeps an old spelling, nor survives
+// beside its respelled twin.
+func respellRootAttribute(line string, name string, bare bool) string {
+	trimmed := strings.TrimSpace(line)
+
+	for _, spelling := range []string{"global::" + RootNamespace + "." + name, RootNamespace + "." + name, name} {
+		if rest, found := strings.CutPrefix(trimmed, "[assembly: "+spelling); found && (strings.HasPrefix(rest, "(") || strings.HasPrefix(rest, "]")) {
+			return "[assembly: " + rootAttributeName(name, bare) + rest
+		}
+	}
+
+	return trimmed
+}
+
 // hoistedLiteralsStampProseLines returns the comment above the [GoHoistedLiterals] stamp. Like every
 // emitted-artifact comment it states what the stamp says and why the shape is so, and nothing about how
 // it came to be.
@@ -955,11 +1004,10 @@ func hoistedLiteralsStampProseLines() []string {
 	}
 }
 
-// isHoistedLiteralsStampLine reports whether a line is the [GoHoistedLiterals] stamp, in either
-// qualification globalQualifyRooted gives it.
+// isHoistedLiteralsStampLine reports whether a line is the [GoHoistedLiterals] stamp, in any of the spellings
+// rootAttributeName gives it.
 func isHoistedLiteralsStampLine(line string) bool {
-	trimmed := strings.TrimSpace(line)
-	return trimmed == "[assembly: go.GoHoistedLiterals]" || trimmed == "[assembly: global::go.GoHoistedLiterals]"
+	return respellRootAttribute(line, "GoHoistedLiterals", true) == "[assembly: GoHoistedLiterals]"
 }
 
 // applyHoistedLiteralsStamp writes the [GoHoistedLiterals] stamp (golib) into the info file of a package
@@ -1004,7 +1052,7 @@ func applyHoistedLiteralsStamp(packageInfoLines []string, packageInfoFileName st
 		return kept
 	}
 
-	block := append(append([]string(nil), prose...), "[assembly: "+globalQualifyRooted("go.GoHoistedLiterals")+"]", "")
+	block := append(append([]string(nil), prose...), "[assembly: "+rootAttributeName("GoHoistedLiterals", importsRootNamespace(kept))+"]", "")
 
 	return slices.Concat(kept[:anchor], block, kept[anchor:])
 }
@@ -1039,6 +1087,7 @@ func applyFieldAccessRecords(packageInfoLines []string, packageInfoFileName stri
 	prose := fieldAccessRecordsProseLines()
 	kept := make([]string, 0, len(packageInfoLines))
 	records := hashset.HashSet[string]{}
+	bare := importsRootNamespace(packageInfoLines)
 
 	for i := 0; i < len(packageInfoLines); i++ {
 		if !isFieldAccessRecordLine(packageInfoLines[i]) {
@@ -1047,7 +1096,7 @@ func applyFieldAccessRecords(packageInfoLines []string, packageInfoFileName stri
 		}
 
 		if mergeExisting {
-			records.Add(strings.TrimSpace(packageInfoLines[i]))
+			records.Add(respellRootAttribute(packageInfoLines[i], "GoFieldAccess", bare))
 		}
 
 		// The records' prose, written just above the first, and the blank line after the last go with them.
@@ -1060,7 +1109,7 @@ func applyFieldAccessRecords(packageInfoLines []string, packageInfoFileName stri
 		}
 	}
 
-	attribute := globalQualifyRooted("go.GoFieldAccess")
+	attribute := rootAttributeName("GoFieldAccess", bare)
 
 	for typeName := range fieldAccessRecords {
 		records.Add(fmt.Sprintf("[assembly: %s(typeof(%s))]", attribute, qualify(typeName)))
@@ -1112,7 +1161,7 @@ func applyGoSourcePositionMaps(packageInfoLines []string, packageInfoFileName st
 	}
 
 	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-		section := positionMapSectionLines(packageInfoFileName, packageInfoLines[startLineIndex+1:endLineIndex], mergeExisting)
+		section := positionMapSectionLines(packageInfoFileName, packageInfoLines[startLineIndex+1:endLineIndex], mergeExisting, importsRootNamespace(packageInfoLines))
 
 		updated := make([]string, 0, len(packageInfoLines)+len(section))
 		updated = append(updated, packageInfoLines[:startLineIndex]...)
@@ -1122,7 +1171,7 @@ func applyGoSourcePositionMaps(packageInfoLines []string, packageInfoFileName st
 		return updated
 	}
 
-	section := positionMapSectionLines(packageInfoFileName, nil, mergeExisting)
+	section := positionMapSectionLines(packageInfoFileName, nil, mergeExisting, importsRootNamespace(packageInfoLines))
 
 	// Not present: create it above the namespace declaration, prose first.
 	namespaceIndex := -1

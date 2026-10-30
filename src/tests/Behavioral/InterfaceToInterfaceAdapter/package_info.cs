@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("InterfaceToInterfaceAdapter.go", "InterfaceToInterfaceAdapter.cs", "AAsagqaCgpSCgg==")]
+[assembly: GoPositionMap("InterfaceToInterfaceAdapter.go", "InterfaceToInterfaceAdapter.cs", "AAsagqaCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

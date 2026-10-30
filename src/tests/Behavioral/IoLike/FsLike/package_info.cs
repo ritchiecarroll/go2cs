@@ -49,7 +49,7 @@ using static go.IoLike.FsLike_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("info.go", "info.cs", "AAkagg==")]
+[assembly: GoPositionMap("info.go", "info.cs", "AAkagg==")]
 // </GoSourcePositionMaps>
 
 namespace go.IoLike;

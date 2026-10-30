@@ -41,6 +41,7 @@
     <None Include="$(MSBuildThisFileDirectory)assemblyScopedAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)astTypeSyntax.go" />
     <None Include="$(MSBuildThisFileDirectory)autoSiblingOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)bareRootAttributes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)behavioralPackageInfoAttributes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bestEffortTranspile_test.go" />
     <None Include="$(MSBuildThisFileDirectory)blankImportTrailingComment_test.go" />

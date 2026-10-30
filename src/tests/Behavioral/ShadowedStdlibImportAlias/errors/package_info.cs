@@ -49,7 +49,7 @@ using static go.ShadowedStdlibImportAlias.errors_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("errors.go", "errors.cs", "AAYQgKSA")]
+[assembly: GoPositionMap("errors.go", "errors.cs", "AAYQgKSA")]
 // </GoSourcePositionMaps>
 
 namespace go.ShadowedStdlibImportAlias;

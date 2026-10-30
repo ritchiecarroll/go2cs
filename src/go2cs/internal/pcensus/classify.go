@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -348,11 +349,15 @@ func isCoreProduction(path string) bool {
 // explain answers the label of one changed pair, or a refusal kind. join names the item whose Join produced rem
 // ("" when none): it is part of the explanation, so the canon items must explain the rest.
 func (c *classifier) explain(file, rem, add, join string) (label, refusedAs string) {
-	if strings.Contains(rem, "GoPositionMap") && strings.Contains(add, "GoPositionMap") {
-		return mapLabel, ""
-	}
 	usable := func(it *item) bool {
 		return it.Canon != nil && (!it.TestOnly || !isCoreProduction(file)) && (it.Guard == nil || it.Guard.MatchString(rem))
+	}
+	// A position map that only lost its `go.` is BA's (#48); one whose table moved is the re-encode, as before.
+	if strings.Contains(rem, "GoPositionMap") && strings.Contains(add, "GoPositionMap") &&
+		!slices.ContainsFunc(c.allowed, func(it *item) bool {
+			return it.ID == "BA" && usable(it) && canon(it, rem) == canon(it, add) && moves(it, rem, add)
+		}) {
+		return mapLabel, ""
 	}
 	name := func(ids ...string) string {
 		var parts []string

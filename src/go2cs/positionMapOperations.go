@@ -606,7 +606,10 @@ func goSourcePositionMapsProseLines() []string {
 // the production records have into the test assembly (productionCSFiles excludes package_info.cs
 // from its compile items). A record this conversion DID produce replaces its predecessor by csFile
 // key, so a stale table can never shadow a fresh one.
-func positionMapSectionLines(infoFileName string, existing []string, mergeExisting bool) []string {
+//
+// bare says whether the info file carries `using go;`: every record, fresh or kept, is then spelled
+// as rootAttributeName gives it, so the section never mixes spellings.
+func positionMapSectionLines(infoFileName string, existing []string, mergeExisting bool, bare bool) []string {
 	packageLock.Lock()
 	records := append([]string(nil), positionMapRecords[infoFileName]...)
 	packageLock.Unlock()
@@ -625,6 +628,10 @@ func positionMapSectionLines(infoFileName string, existing []string, mergeExisti
 				records = append(records, trimmed)
 			}
 		}
+	}
+
+	for i, record := range records {
+		records[i] = respellRootAttribute(record, "GoPositionMap", bare)
 	}
 
 	// The converter visits a package's files in directory order but the records are appended as each

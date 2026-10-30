@@ -51,7 +51,7 @@ using static go.ExportedAliasUnexportedTarget.aliaslib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AA4YooK4ooK4ggAIJIKUpKY=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA4YooK4ooK4ggAIJIKUpKY=")]
 // </GoSourcePositionMaps>
 
 namespace go.ExportedAliasUnexportedTarget;

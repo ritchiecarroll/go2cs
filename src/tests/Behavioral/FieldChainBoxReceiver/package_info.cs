@@ -43,12 +43,12 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: go.GoFieldAccess(typeof(box))]
-[assembly: go.GoFieldAccess(typeof(counter))]
-[assembly: go.GoFieldAccess(typeof(deep))]
-[assembly: go.GoFieldAccess(typeof(holder))]
-[assembly: go.GoFieldAccess(typeof(mid))]
-[assembly: go.GoFieldAccess(typeof(wrapper))]
+[assembly: GoFieldAccess(typeof(box))]
+[assembly: GoFieldAccess(typeof(counter))]
+[assembly: GoFieldAccess(typeof(deep))]
+[assembly: GoFieldAccess(typeof(holder))]
+[assembly: GoFieldAccess(typeof(mid))]
+[assembly: GoFieldAccess(typeof(wrapper))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,7 +58,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("FieldChainBoxReceiver.go", "FieldChainBoxReceiver.cs", "AAoUgKKAAAoMgOqApoKCAAoWgKSCgoKClIKCgoKUgoKCgoI=")]
+[assembly: GoPositionMap("FieldChainBoxReceiver.go", "FieldChainBoxReceiver.cs", "AAoUgKKAAAoMgOqApoKCAAoWgKSCgoKClIKCgoKUgoKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;

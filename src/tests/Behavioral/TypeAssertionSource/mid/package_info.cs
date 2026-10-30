@@ -49,7 +49,7 @@ using static go.TypeAssertionSource.mid_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("mid.go", "mid.cs", "AAgWgNqAooA=")]
+[assembly: GoPositionMap("mid.go", "mid.cs", "AAgWgNqAooA=")]
 // </GoSourcePositionMaps>
 
 namespace go.TypeAssertionSource;

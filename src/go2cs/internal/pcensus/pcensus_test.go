@@ -42,6 +42,7 @@ type plant struct {
 
 const prodFile = "src/core/p/p.cs"
 const testFile = "src/core/p/p_test.cs"
+const infoFile = "src/core/p/package_info.cs"
 
 func one(name, file, rem, add, want string) plant {
 	return plant{name, file, []string{rem}, []string{add}, want}
@@ -236,6 +237,19 @@ var plants = []plant{
 		`public static @string executablePath { get => go.runtime_package.executablePath; set => go.runtime_package.executablePath = value; } // set by ../runtime/os_darwin.go`, "CM"),
 	one("CM bad: a comment added to a statement", prodFile, `    x = 1;`, `    x = 1; // c`, "UNCLASSIFIED"),
 	one("CM bad: the declaration changed", prodFile, `partial struct sortedHint /*num:nint*/;`, `partial struct sortedHint /*num:int*/; // hint`, "UNCLASSIFIED"),
+	// BA (#48): golib's [assembly:] records lose `go.` or `global::go.` where package_info.cs has `using go;`. Only the
+	// attribute name may change; a position map whose table moved as well stays MAP.
+	one("BA good: a position map", infoFile, `[assembly: go.GoPositionMap("p/a.go", "a.cs", "AA==")]`, `[assembly: GoPositionMap("p/a.go", "a.cs", "AA==")]`, "BA"),
+	one("BA good: a shadowed position map", infoFile, `[assembly: global::go.GoPositionMap("p/a.go", "a.cs", "AA==", "10-12:1")]`, `[assembly: GoPositionMap("p/a.go", "a.cs", "AA==", "10-12:1")]`, "BA"),
+	one("BA good: the hoisted stamp", infoFile, `[assembly: global::go.GoHoistedLiterals]`, `[assembly: GoHoistedLiterals]`, "BA"),
+	one("BA good: a cgo import", infoFile, `[assembly: go.GoCgoImportDynamic("libc_getgroups_trampoline", "getgroups", "/usr/lib/libSystem.B.dylib")]`, `[assembly: GoCgoImportDynamic("libc_getgroups_trampoline", "getgroups", "/usr/lib/libSystem.B.dylib")]`, "BA"),
+	one("BA good: a field-access record", infoFile, `[assembly: go.GoFieldAccess(typeof(p_package.T))]`, `[assembly: GoFieldAccess(typeof(p_package.T))]`, "BA"),
+	one("BA bad: the position map's table moved too", infoFile, `[assembly: go.GoPositionMap("p/a.go", "a.cs", "AA==")]`, `[assembly: GoPositionMap("p/a.go", "a.cs", "AB==")]`, "MAP"),
+	one("BA bad: the field-access type changed", infoFile, `[assembly: go.GoFieldAccess(typeof(p_package.T))]`, `[assembly: GoFieldAccess(typeof(p_package.U))]`, "UNCLASSIFIED"),
+	one("BA bad: the other direction", infoFile, `[assembly: GoHoistedLiterals]`, `[assembly: go.GoHoistedLiterals]`, "UNCLASSIFIED"),
+	one("BA bad: a module marker is out of scope", prodFile, `[module: go.GoManualConversion]`, `[module: GoManualConversion]`, "UNCLASSIFIED"),
+	one("BA bad: another golib attribute", infoFile, `[assembly: go.GoImplement<p_package.T, io_package.Reader>]`, `[assembly: GoImplement<p_package.T, io_package.Reader>]`, "UNCLASSIFIED"),
+	one("BA bad: an alias target keeps go.", infoFile, `using fips140 = go.crypto.@internal.fips140_package;`, `using fips140 = crypto.@internal.fips140_package;`, "UNCLASSIFIED"),
 	// A change no item makes, and a removal with nothing beside it.
 	one("bad: an unrelated rewrite", prodFile, `return x + 1;`, `return x + 2;`, "UNCLASSIFIED"),
 	{"bad: a lone removal", prodFile, []string{`    x = 1;`}, nil, "UNPAIRED"},

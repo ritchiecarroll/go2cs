@@ -391,7 +391,7 @@ func TestPublishedRefVerdictsMatchEmitted(t *testing.T) {
 // package_info files can be compared on everything but the C#-line tables their emissions produced.
 func maskPositionMapRecords(lines []string) []string {
 	for i, line := range lines {
-		if strings.HasPrefix(strings.TrimSpace(line), "[assembly: go.GoPositionMap(") {
+		if strings.HasPrefix(respellRootAttribute(line, "GoPositionMap", true), "[assembly: GoPositionMap(") {
 			lines[i] = "[assembly: go.GoPositionMap(<masked>)]"
 		}
 	}

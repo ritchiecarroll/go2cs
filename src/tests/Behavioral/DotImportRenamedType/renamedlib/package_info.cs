@@ -51,7 +51,7 @@ using static go.DotImportRenamedType.renamedlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("renamedlib.go", "renamedlib.cs", "AAsuggAHFoKoggAGFIKogqiC")]
+[assembly: GoPositionMap("renamedlib.go", "renamedlib.cs", "AAsuggAHFoKoggAGFIKogqiC")]
 // </GoSourcePositionMaps>
 
 namespace go.DotImportRenamedType;

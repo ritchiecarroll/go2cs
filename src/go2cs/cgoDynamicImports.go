@@ -255,11 +255,14 @@ func cgoDynamicImportLine(record cgoDynamicImportRecord) string {
 // any trampoline this conversion did not re-record — the same semantics the position-map and
 // import-init sections have, and for the same reason: a single-file or -tests seeding write sees
 // only part of the package.
-func cgoDynamicImportSectionLines(existing []string, mergeExisting bool) []string {
+//
+// bare says whether the info file carries `using go;`: every record, fresh or kept, is then spelled
+// as rootAttributeName gives it, so a kept record and its re-recorded twin dedupe as one line.
+func cgoDynamicImportSectionLines(existing []string, mergeExisting bool, bare bool) []string {
 	records := hashset.HashSet[string]{}
 
 	for _, record := range cgoDynamicImports {
-		records.Add(cgoDynamicImportLine(record))
+		records.Add(respellRootAttribute(cgoDynamicImportLine(record), "GoCgoImportDynamic", bare))
 	}
 
 	if mergeExisting {
@@ -267,7 +270,7 @@ func cgoDynamicImportSectionLines(existing []string, mergeExisting bool) []strin
 			trimmed := strings.TrimSpace(line)
 
 			if strings.HasPrefix(trimmed, "[assembly:") {
-				records.Add(trimmed)
+				records.Add(respellRootAttribute(trimmed, "GoCgoImportDynamic", bare))
 			}
 		}
 	}
@@ -315,7 +318,7 @@ func applyCgoDynamicImports(packageInfoLines []string, packageInfoFileName strin
 	}
 
 	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-		section := cgoDynamicImportSectionLines(packageInfoLines[startLineIndex+1:endLineIndex], mergeExisting)
+		section := cgoDynamicImportSectionLines(packageInfoLines[startLineIndex+1:endLineIndex], mergeExisting, importsRootNamespace(packageInfoLines))
 
 		updated := make([]string, 0, len(packageInfoLines)+len(section))
 		updated = append(updated, packageInfoLines[:startLineIndex]...)
@@ -330,7 +333,7 @@ func applyCgoDynamicImports(packageInfoLines []string, packageInfoFileName strin
 		return packageInfoLines
 	}
 
-	section := cgoDynamicImportSectionLines(nil, mergeExisting)
+	section := cgoDynamicImportSectionLines(nil, mergeExisting, importsRootNamespace(packageInfoLines))
 
 	// Not present: create it above the namespace declaration, prose first — the same anchor the
 	// position-map section uses, so the two sit together and a migrated file and a fresh one agree.

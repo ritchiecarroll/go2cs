@@ -49,7 +49,7 @@ using static go.AliasNamespaceShadow.inner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("inner.go", "inner.cs", "AAgkgoKCqoI=")]
+[assembly: GoPositionMap("inner.go", "inner.cs", "AAgkgoKCqoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.AliasNamespaceShadow;

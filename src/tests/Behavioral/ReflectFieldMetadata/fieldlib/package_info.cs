@@ -49,7 +49,7 @@ using static go.ReflectFieldMetadata.fieldlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("fieldlib.go", "fieldlib.cs", "AAkWgA==")]
+[assembly: GoPositionMap("fieldlib.go", "fieldlib.cs", "AAkWgA==")]
 // </GoSourcePositionMaps>
 
 namespace go.ReflectFieldMetadata;

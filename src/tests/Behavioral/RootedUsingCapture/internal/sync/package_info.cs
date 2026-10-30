@@ -49,7 +49,7 @@ using static go.RootedUsingCapture.@internal.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("sync.go", "sync.cs", "AAgQgKKA6oCkgA==")]
+[assembly: GoPositionMap("sync.go", "sync.cs", "AAgQgKKA6oCkgA==")]
 // </GoSourcePositionMaps>
 
 namespace go.RootedUsingCapture.@internal;

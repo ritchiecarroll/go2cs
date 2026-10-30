@@ -49,7 +49,7 @@ using static go.go.nsshadow_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("lib.go", "lib.cs", "AAgSgqqCqoI=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgSgqqCqoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

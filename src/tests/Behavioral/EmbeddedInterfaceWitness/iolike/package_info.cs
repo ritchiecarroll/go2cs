@@ -51,7 +51,7 @@ using static go.EmbeddedInterfaceWitness.iolike_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("iolike.go", "iolike.cs", "ABEugA==")]
+[assembly: GoPositionMap("iolike.go", "iolike.cs", "ABEugA==")]
 // </GoSourcePositionMaps>
 
 namespace go.EmbeddedInterfaceWitness;
