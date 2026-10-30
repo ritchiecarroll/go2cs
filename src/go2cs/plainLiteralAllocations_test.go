@@ -28,7 +28,9 @@ const plainAllocationFixture = "package plit\n\n" +
 	"func takeName(n Name) Name { return n }\n\n" +
 	"func Echo[T any](v T) T { return v }\n\n" +
 	"func shortName() Name { return \"OK\" }\n\n" +
+	"var errNamed = Name(\"package level conversion\")\n\n" +
 	"func sites(i int) int {\n" +
+	"\t_ = Name(\"xy\")\n" +
 	"\tvar l logger\n" +
 	"\tl.logf(\"method format position %d\", i)\n" +
 	"\t_ = myf(\"function format position %v\", i)\n" +
@@ -132,6 +134,8 @@ func TestValueSitesWithNoPlainFormTakeTheCachedCast(t *testing.T) {
 		`takeName(""u8)`,
 		`append(buf, ((@string)"spread literal").ꓸꓸꓸ)`,
 		`append(buf, ((@string)"\t").ꓸꓸꓸ)`,
+		`(Name)(@string)"package level conversion"`,
+		`(Name)(@string)"xy"`,
 		`print((@string)"print literal ", `,
 		`println((@string)"println literal")`,
 		` in (@string)"range literal")`,
