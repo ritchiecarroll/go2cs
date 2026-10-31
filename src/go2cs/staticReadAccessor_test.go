@@ -146,3 +146,57 @@ func TestStructStaticsReadThroughSameNamedRefReadonlyAccessor(t *testing.T) {
 		t.Errorf("the pre-boxed any-slot literal keeps its plain object field:\n%s", emitted)
 	}
 }
+
+// The scope switch (structStaticReadAccessorsApply) decides whether a PLAIN-mode package, a user package without
+// -hoist-literals, takes the accessor for its string constants. This follows the switch either way: a plain-mode
+// package-level string const takes the accessor exactly when the switch says it applies with the hoist mode off.
+func TestPlainModeStringConstFollowsTheAccessorScopeSwitch(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	saved := packageHoistsLiterals
+	packageHoistsLiterals = false
+	applies := structStaticReadAccessorsApply()
+	packageHoistsLiterals = saved
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/srp\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "srp.go"), "package srp\n\nconst Version = \"1.0\"\n\nfunc use() string { return Version }\n")
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      "linux/amd64",
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "srp", "srp.cs")), "\r\n", "\n")
+	accessor := "public static ref readonly @string Version => ref Versionᵇ;\nprivate static readonly @string Versionᵇ = \"1.0\"u8;"
+	field := "public static readonly @string Version = \"1.0\"u8;"
+
+	if applies && !strings.Contains(emitted, accessor) {
+		t.Errorf("the switch applies the accessor to a plain-mode package, but its string const has none:\n%s", emitted)
+	}
+
+	if !applies && !strings.Contains(emitted, field) {
+		t.Errorf("the switch limits the accessor to the hoist mode, but a plain-mode string const is not one plain field:\n%s", emitted)
+	}
+}

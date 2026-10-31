@@ -150,6 +150,16 @@ public static @string FormatBool(bool b) {
 | a generator-emitted accessor | 1 in the source, 2 compiled | unchanged | as A | not built | a new generator, plus its incremental cost on every edit |
 | leave it | 1 | unchanged | as today | 1.41 | |
 
+**Added 2026-10-30, the i9's AOT probe (the deciding row).** On the same box and tree, on Native AOT:
+
+| Form | `FormatBool`, ns per call, two passes | Against H | What ILC does |
+|:--|:--|:--|:--|
+| H, the field read today | 1.13 / 1.29 | | refuses to inline it, exactly as the JIT does (the struct read sits behind a class-init check) |
+| HR2, form A's shape | 0.75 / 1.02 | 0.66 / 0.79, below the ±9% A/A band | inlines it: the fastest AOT arm |
+| HR1, `Unsafe.AsRef(in f)` | identical code to H | | refuses to inline it, like H |
+
+So HR1 works on the JIT only. **Form A is the only measured shape that inlines on both runtimes.**
+
 **Recommended: A.**
 
 - **Readability.** The function body is what a Go reader compares against Go, and A leaves it untouched. The extra

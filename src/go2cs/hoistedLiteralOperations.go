@@ -1475,6 +1475,14 @@ func funcReadsHoistedLiteral(fn *types.Func) bool {
 	return packageHoistLitReaders[fn]
 }
 
+// structStaticReadAccessorsApply is the ONE scope switch of seat #53's accessor form: whether the package being
+// converted reads its struct-typed statics through accessors. Every writer goes through structStaticReadAccessorDecl,
+// so returning packageHoistsLiterals here limits the form to the hoist mode (the standard library and
+// -hoist-literals), and true applies it to every package.
+func structStaticReadAccessorsApply() bool {
+	return true
+}
+
 // structStaticReadAccessorDecl opens a struct-typed `static readonly` declaration, up to its initializer, as a
 // `ref readonly` accessor under the declared name over a private backing field (StaticBackingFieldMarker). The JIT
 // refuses to inline any method that reads a struct-typed static by value (`ldsfld` of a value class); a read through
@@ -1482,6 +1490,10 @@ func funcReadsHoistedLiteral(fn *types.Func) bool {
 // s.2). The accessor keeps the declared name, so no use site moves. It comes first, so a doc comment written above
 // the declaration stays on the declared name, and a trailing comment written after it lands on the value.
 func structStaticReadAccessorDecl(access, typeName, name, newline, indent string) string {
+	if !structStaticReadAccessorsApply() {
+		return fmt.Sprintf("%s static readonly %s %s = ", access, typeName, name)
+	}
+
 	backing := name + StaticBackingFieldMarker
 
 	return fmt.Sprintf("%s static ref readonly %s %s => ref %s;%s%sprivate static readonly %s %s = ", access, typeName, name, backing, newline, indent, typeName, backing)
