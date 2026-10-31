@@ -266,8 +266,10 @@ func TestHoistLiteralsFlagRestoresTheHoist(t *testing.T) {
 	for _, want := range []string{
 		`take(argumentToAStringˢ);`,
 		`return returnedWordValueˢ;`,
-		`private static readonly @string fnLocalᶜ = "local const value"u8;`,
-		`private static readonly @string mixedAnyAndValueUseˢ = "mixed any and value use"u8;`,
+		`private static ref readonly @string fnLocalᶜ => ref fnLocalᶜᵇ;`,
+		`private static readonly @string fnLocalᶜᵇ = "local const value"u8;`,
+		`private static ref readonly @string mixedAnyAndValueUseˢ => ref mixedAnyAndValueUseˢᵇ;`,
+		`private static readonly @string mixedAnyAndValueUseˢᵇ = "mixed any and value use"u8;`,
 		`return ""u8;`,
 	} {
 		if !strings.Contains(emitted, want) {

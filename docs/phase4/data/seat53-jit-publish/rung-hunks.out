@@ -1,0 +1,63 @@
+files differing: 1368  files with declaration hunks: 764
+  declaration: 5168
+  csproj-hunk: 716
+  package_info-hunk: 556
+declarations by type: @string 5122, ErrorCode 16, GoBigConst 15, curveID 8, relationship 5, ViewType 2
+-- csproj examples:
+   archive\tar\archive.tar.csproj insert
+     - 
+     +     <!-- Count calls from the start: .NET otherwise waits until about 100 ms pass with no new method compiled, so a short
+     +          busy phase runs the standard library's small functions unoptimized. Another value is a delay in milliseconds;
+     +          `runtime` keeps .NET's own default. https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md -->
+   archive\tar\archive.tar.csproj insert
+     - 
+     + 
+     +   <ItemGroup Condition="'$(OutputType)'!='Library' AND '$(GoCallCountingDelayMs)'!='runtime'">
+     +     <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.CallCountingDelayMs" Value="$(GoCallCountingDelayMs)" />
+   archive\zip\archive.zip.csproj insert
+     - 
+     +     <!-- Count calls from the start: .NET otherwise waits until about 100 ms pass with no new method compiled, so a short
+     +          busy phase runs the standard library's small functions unoptimized. Another value is a delay in milliseconds;
+     +          `runtime` keeps .NET's own default. https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md -->
+   archive\zip\archive.zip.csproj insert
+     - 
+     + 
+     +   <ItemGroup Condition="'$(OutputType)'!='Library' AND '$(GoCallCountingDelayMs)'!='runtime'">
+     +     <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.CallCountingDelayMs" Value="$(GoCallCountingDelayMs)" />
+   bufio\bufio.csproj insert
+     - 
+     +     <!-- Count calls from the start: .NET otherwise waits until about 100 ms pass with no new method compiled, so a short
+     +          busy phase runs the standard library's small functions unoptimized. Another value is a delay in milliseconds;
+     +          `runtime` keeps .NET's own default. https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md -->
+   bufio\bufio.csproj insert
+     - 
+     + 
+     +   <ItemGroup Condition="'$(OutputType)'!='Library' AND '$(GoCallCountingDelayMs)'!='runtime'">
+     +     <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.CallCountingDelayMs" Value="$(GoCallCountingDelayMs)" />
+-- package_info examples:
+   archive\tar\darwin\package_info.cs replace
+     - [assembly: GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAkKooKCgoKmgpQASZwBAEqgAYAAJlLGgpSCgpSkpKSUlAACFPKCgoKCgpSCpgACFgAIAoKCgoKUgoKUlIIAHSgADAKClKKC2IKCgoKUgoKAgoKkgoKUpoCCtqKCgpSCgoKCgpSmgIK2ooKUgoKUgoKCgpSCgoKCgpSmgILKkoKCgoKCgoKCgoKCgoKCgpaipoLGpIKClIKkgriCgpSClIKCgKS0tMaClIKCABs4gIKClKSClLS0tLaokgAHEICigKKAooCmkoKUqMSmgpSClIK4gKS0tLS0grTGlLSCtLS0tqaCABhGAAsCgpSCypSCtIK0grSClMa0pJSClIKUgriApoKCgoKCgoKUgoKUpIKAgoKCgoKUgoK2gpQADiCilKQ=", "350-376:1;377-395:2;396-423:3", "", "752=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
+     - [assembly: GoPositionMap("archive/tar/format.go", "format.cs", "AGrYAYCigKKAooCk6KKCgoKmlKSkABk8ogAHELCioKKgoqCigKrUkoKCgriCgoKUpKSkvNTYgrSCgrSCtLqigoKCrvKigpSClKiS2oCigKKAooCigKKAooCigKKA2KCigKKAooCigKKAooCigKKAooCigNigooCigKKAooCigKKAooCigKKAooDYoKKAooCigKKAooCigKKAyICigKKAyICigA==")]
+     + [assembly: GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAsKooKCgoKmgpQAYZwBAEqgAYAAJlLGgpSCgpSkpKSUlAACFPKCgoKCgpSCpgACFgAIAoKCgoKUgoKUlIIALSgADAKClKKC2IKCgoKUgoKAgoKkgoKUpoCCtqKCgpSCgoKCgpSmgIK2ooKUgoKUgoKCgpSCgoKCgpSmgILKkoKCgoKCgoKCgoKCgoKCgpaipoLGpIKClIKkgriCgpSClIKCgKS0tMaClIKCABs4gIKClKSClLS0tLaokgAHEICigKKAooCmkoKUqMSmgpSClIK4gKS0tLS0grTGlLSCtLS0tqaCABlGAAsCgpSCypSCtIK0grSClMa0pJSClIKUgriApoKCgoKCgoKUgoKUpIKAgoKCgoKUgoK2gpQADiCilKQ=", "350-376:1;377-395:2;396-423:3", "", "795=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
+     + [assembly: GoPositionMap("archive/tar/format.go", "format.cs", "AGrYAYCigKKAooCk+KKCgoKmlKSkAB48ogAHELCioKKgoqCigKrUkoKCgriCgoKUpKSkvNTYgrSCgrSCtLqigoKCrvKigpSClKiS2oCigKKAooCigKKAooCigKKA2KCigKKAooCigKKAooCigKKAooCigNigooCigKKAooCigKKAooCigKKAooDYoKKAooCigKKAooCigKKAyICigKKAyICigA==")]
+   archive\tar\darwin\package_info.cs replace
+     - [assembly: GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClICCpICCpIKu8oCCpLiCgpQACBKCgoKmgpSCpIKkgqS4tJKAgriSgoKCgpTmsgAkSKaChKSCgoKUqJKCgoKClJSCgpSCgpSAgsqSgJKCgoCCAA8e1rSSgoKAgraCgoCCypKCgoKClIIAJ1CCgILIlICCpJQABhwACQKUgoKmgoKCgoKCgoKUgoKCgpSs0qaCgpSUgoKCgoKCgoKCgoK4gIKkgqzSgIKkgIKkgpSCgtyyooKUgpSCgpSCgIKCgoKUgqSCgpSCgpSAgqSClIKClJKC7KKCgoKCgoKmgoKCgpQAAhTygpSCgpQAAhoACgKClIKClKyygpSCuIKCuIIACBKygoKUgoKUlKSk+IKokqiSAAkUsoKCpoKCgoKCgoKUgpSCgoK4gpSkpKSkuMKCgoCCtoKmgoKCgoKCgoKClJSClIKC3IKCpoKUpKSkpLiCpoLsgoKCpqiSgpSkpA==", "209-209:1;407-449:1", "", "", "513:25")]
+     + [assembly: GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClICCpICCpIKu8oCCpLiCgpQACBKCgoKmgpSCpIKkgqS4tJKAgriSgoKCgpQACAayACRIpoKEpIKCgpSokoKCgoKUlIKClIKClICCypKAkoKCgIIADx7mtJKCgoCCtoKCgILKkoKCgoKUggAnUIKAgsiUgIKklAAGHAAJApSCgqaCgoKCgoKCgpSCgoKClKzSpoKClJSCgoKCgoKCgoKCgriAgqSCrNKAgqSAgqSClIKC7LKigpSClIKClIKAgoKCgpSCpIKClIKClICCpIKUgoKUkoLsooKCgoKCgqaCgoKClAACFPKClIKClAACGgAKAoKUgoKUrLKClIK4goK4ggAIErKCgpSCgpSUpKT4gqiSqJIACRSygoKmgoKCgoKCgpSClIKCgriClKSkpKS4woKCgIK2gqaCgoKCgoKCgoKUlIKUgoLcgoKmgpSkpKSkuIKmguyCgoKmqJKClKSk", "209-209:1;407-449:1", "", "", "517:25")]
+   archive\tar\linux\package_info.cs replace
+     - [assembly: GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAkKooKCgoKmgpQASZwBAEqgAYAAJlLGgpSCgpSkpKSUlAACFPKCgoKCgpSCpgACFgAIAoKCgoKUgoKUlIIAHSgADAKClKKC2IKCgoKUgoKAgoKkgoKUpoCCtqKCgpSCgoKCgpSmgIK2ooKUgoKUgoKCgpSCgoKCgpSmgILKkoKCgoKCgoKCgoKCgoKCgpaipoLGpIKClIKkgriCgpSClIKCgKS0tMaClIKCABs4gIKClKSClLS0tLaokgAHEICigKKAooCmkoKUqMSmgpSClIK4gKS0tLS0grTGlLSCtLS0tqaCABhGAAsCgpSCypSCtIK0grSClMa0pJSClIKUgriApoKCgoKCgoKUgoKUpIKAgoKCgoKUgoK2gpQADiCilKQ=", "350-376:1;377-395:2;396-423:3", "", "752=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
+     - [assembly: GoPositionMap("archive/tar/format.go", "format.cs", "AGrYAYCigKKAooCk6KKCgoKmlKSkABk8ogAHELCioKKgoqCigKrUkoKCgriCgoKUpKSkvNTYgrSCgrSCtLqigoKCrvKigpSClKiS2oCigKKAooCigKKAooCigKKA2KCigKKAooCigKKAooCigKKAooCigNigooCigKKAooCigKKAooCigKKAooDYoKKAooCigKKAooCigKKAyICigKKAyICigA==")]
+     + [assembly: GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAsKooKCgoKmgpQAYZwBAEqgAYAAJlLGgpSCgpSkpKSUlAACFPKCgoKCgpSCpgACFgAIAoKCgoKUgoKUlIIALSgADAKClKKC2IKCgoKUgoKAgoKkgoKUpoCCtqKCgpSCgoKCgpSmgIK2ooKUgoKUgoKCgpSCgoKCgpSmgILKkoKCgoKCgoKCgoKCgoKCgpaipoLGpIKClIKkgriCgpSClIKCgKS0tMaClIKCABs4gIKClKSClLS0tLaokgAHEICigKKAooCmkoKUqMSmgpSClIK4gKS0tLS0grTGlLSCtLS0tqaCABlGAAsCgpSCypSCtIK0grSClMa0pJSClIKUgriApoKCgoKCgoKUgoKUpIKAgoKCgoKUgoK2gpQADiCilKQ=", "350-376:1;377-395:2;396-423:3", "", "795=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
+     + [assembly: GoPositionMap("archive/tar/format.go", "format.cs", "AGrYAYCigKKAooCk+KKCgoKmlKSkAB48ogAHELCioKKgoqCigKrUkoKCgriCgoKUpKSkvNTYgrSCgrSCtLqigoKCrvKigpSClKiS2oCigKKAooCigKKAooCigKKA2KCigKKAooCigKKAooCigKKAooCigNigooCigKKAooCigKKAooCigKKAooDYoKKAooCigKKAooCigKKAyICigKKAyICigA==")]
+   archive\tar\linux\package_info.cs replace
+     - [assembly: GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClICCpICCpIKu8oCCpLiCgpQACBKCgoKmgpSCpIKkgqS4tJKAgriSgoKCgpTmsgAkSKaChKSCgoKUqJKCgoKClJSCgpSCgpSAgsqSgJKCgoCCAA8e1rSSgoKAgraCgoCCypKCgoKClIIAJ1CCgILIlICCpJQABhwACQKUgoKmgoKCgoKCgoKUgoKCgpSs0qaCgpSUgoKCgoKCgoKCgoK4gIKkgqzSgIKkgIKkgpSCgtyyooKUgpSCgpSCgIKCgoKUgqSCgpSCgpSAgqSClIKClJKC7KKCgoKCgoKmgoKCgpQAAhTygpSCgpQAAhoACgKClIKClKyygpSCuIKCuIIACBKygoKUgoKUlKSk+IKokqiSAAkUsoKCpoKCgoKCgoKUgpSCgoK4gpSkpKSkuMKCgoCCtoKmgoKCgoKCgoKClJSClIKC3IKCpoKUpKSkpLiCpoLsgoKCpqiSgpSkpA==", "209-209:1;407-449:1", "", "", "513:25")]
+     + [assembly: GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClICCpICCpIKu8oCCpLiCgpQACBKCgoKmgpSCpIKkgqS4tJKAgriSgoKCgpQACAayACRIpoKEpIKCgpSokoKCgoKUlIKClIKClICCypKAkoKCgIIADx7mtJKCgoCCtoKCgILKkoKCgoKUggAnUIKAgsiUgIKklAAGHAAJApSCgqaCgoKCgoKCgpSCgoKClKzSpoKClJSCgoKCgoKCgoKCgriAgqSCrNKAgqSAgqSClIKC7LKigpSClIKClIKAgoKCgpSCpIKClIKClICCpIKUgoKUkoLsooKCgoKCgqaCgoKClAACFPKClIKClAACGgAKAoKUgoKUrLKClIK4goK4ggAIErKCgpSCgpSUpKT4gqiSqJIACRSygoKmgoKCgoKCgpSClIKCgriClKSkpKS4woKCgIK2gqaCgoKCgoKCgoKUlIKUgoLcgoKmgpSkpKSkuIKmguyCgoKmqJKClKSk", "209-209:1;407-449:1", "", "", "517:25")]
+   archive\tar\windows\package_info.cs replace
+     - [assembly: GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAkKooKCgoKmgpQASZwBAEqgAYAAJlLGgpSCgpSkpKSUlAACFPKCgoKCgpSCpgACFgAIAoKCgoKUgoKUlIIAHSgADAKClKKC2IKCgoKUgoKAgoKkgoKUpoCCtqKCgpSCgoKCgpSmgIK2ooKUgoKUgoKCgpSCgoKCgpSmgILKkoKCgoKCgoKCgoKCgoKCgpaipoLGpIKClIKkgriCgpSClIKCgKS0tMaClIKCABs4gIKClKSClLS0tLaokgAHEICigKKAooCmkoKUqMSmgpSClIK4gKS0tLS0grTGlLSCtLS0tqaCABhGAAsCgpSCypSCtIK0grSClMa0pJSClIKUgriApoKCgoKCgoKUgoKUpIKAgoKCgoKUgoK2gpQADiCilKQ=", "350-376:1;377-395:2;396-423:3", "", "752=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
+     - [assembly: GoPositionMap("archive/tar/format.go", "format.cs", "AGrYAYCigKKAooCk6KKCgoKmlKSkABk8ogAHELCioKKgoqCigKrUkoKCgriCgoKUpKSkvNTYgrSCgrSCtLqigoKCrvKigpSClKiS2oCigKKAooCigKKAooCigKKA2KCigKKAooCigKKAooCigKKAooCigNigooCigKKAooCigKKAooCigKKAooDYoKKAooCigKKAooCigKKAyICigKKAyICigA==")]
+     + [assembly: GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAsKooKCgoKmgpQAYZwBAEqgAYAAJlLGgpSCgpSkpKSUlAACFPKCgoKCgpSCpgACFgAIAoKCgoKUgoKUlIIALSgADAKClKKC2IKCgoKUgoKAgoKkgoKUpoCCtqKCgpSCgoKCgpSmgIK2ooKUgoKUgoKCgpSCgoKCgpSmgILKkoKCgoKCgoKCgoKCgoKCgpaipoLGpIKClIKkgriCgpSClIKCgKS0tMaClIKCABs4gIKClKSClLS0tLaokgAHEICigKKAooCmkoKUqMSmgpSClIK4gKS0tLS0grTGlLSCtLS0tqaCABlGAAsCgpSCypSCtIK0grSClMa0pJSClIKUgriApoKCgoKCgoKUgoKUpIKAgoKCgoKUgoK2gpQADiCilKQ=", "350-376:1;377-395:2;396-423:3", "", "795=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
+     + [assembly: GoPositionMap("archive/tar/format.go", "format.cs", "AGrYAYCigKKAooCk+KKCgoKmlKSkAB48ogAHELCioKKgoqCigKrUkoKCgriCgoKUpKSkvNTYgrSCgrSCtLqigoKCrvKigpSClKiS2oCigKKAooCigKKAooCigKKA2KCigKKAooCigKKAooCigKKAooCigNigooCigKKAooCigKKAooCigKKAooDYoKKAooCigKKAooCigKKAyICigKKAyICigA==")]
+   archive\tar\windows\package_info.cs replace
+     - [assembly: GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClICCpICCpIKu8oCCpLiCgpQACBKCgoKmgpSCpIKkgqS4tJKAgriSgoKCgpTmsgAkSKaChKSCgoKUqJKCgoKClJSCgpSCgpSAgsqSgJKCgoCCAA8e1rSSgoKAgraCgoCCypKCgoKClIIAJ1CCgILIlICCpJQABhwACQKUgoKmgoKCgoKCgoKUgoKCgpSs0qaCgpSUgoKCgoKCgoKCgoK4gIKkgqzSgIKkgIKkgpSCgtyyooKUgpSCgpSCgIKCgoKUgqSCgpSCgpSAgqSClIKClJKC7KKCgoKCgoKmgoKCgpQAAhTygpSCgpQAAhoACgKClIKClKyygpSCuIKCuIIACBKygoKUgoKUlKSk+IKokqiSAAkUsoKCpoKCgoKCgoKUgpSCgoK4gpSkpKSkuMKCgoCCtoKmgoKCgoKCgoKClJSClIKC3IKCpoKUpKSkpLiCpoLsgoKCpqiSgpSkpA==", "209-209:1;407-449:1", "", "", "513:25")]
+     + [assembly: GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClICCpICCpIKu8oCCpLiCgpQACBKCgoKmgpSCpIKkgqS4tJKAgriSgoKCgpQACAayACRIpoKEpIKCgpSokoKCgoKUlIKClIKClICCypKAkoKCgIIADx7mtJKCgoCCtoKCgILKkoKCgoKUggAnUIKAgsiUgIKklAAGHAAJApSCgqaCgoKCgoKCgpSCgoKClKzSpoKClJSCgoKCgoKCgoKCgriAgqSCrNKAgqSAgqSClIKC7LKigpSClIKClIKAgoKCgpSCpIKClIKClICCpIKUgoKUkoLsooKCgoKCgqaCgoKClAACFPKClIKClAACGgAKAoKUgoKUrLKClIK4goK4ggAIErKCgpSCgpSUpKT4gqiSqJIACRSygoKmgoKCgoKCgpSClIKCgriClKSkpKS4woKCgIK2gqaCgoKCgoKCgoKUlIKUgoLcgoKmgpSkpKSkuIKmguyCgoKmqJKClKSk", "209-209:1;407-449:1", "", "", "517:25")]
+census (base root): {'converted': 12710, 'hand-owned': 75}
+census converted by type: @string 12491, bool 29, GoBigConst 20, ErrorCode 16, mapOp 9, curveID 8, TimeSpan 6, nuint 6, MethodInfo 5, string[] 5, ConstructorInfo 5, Vector128<uint64> 5, relationship 5, GoDeferredRegistrations 4, testMode 4

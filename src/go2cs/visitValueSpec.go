@@ -1162,14 +1162,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 					v.currentFuncPrefix.WriteString("// Hoisted Go big-integer constant (single parse; Go folds constants at compile time)")
 					v.currentFuncPrefix.WriteString(v.newline)
-					v.currentFuncPrefix.WriteString(fmt.Sprintf("private static readonly GoBigConst %s = GoBigConst.Parse(\"%s\");", hoistedFieldName, constVal))
+					v.currentFuncPrefix.WriteString(structStaticReadAccessorDecl("private", "GoBigConst", hoistedFieldName, v.newline, "") + fmt.Sprintf("GoBigConst.Parse(\"%s\");", constVal))
 					v.currentFuncPrefix.WriteString(v.newline)
 				}
 
 				if v.inFunction {
 					v.writeOutput("GoBigConst %s = /* ", csIDName)
 				} else {
-					v.writeOutput("%s static readonly GoBigConst %s = /* ", access, csIDName)
+					v.writeOutput("%s/* ", structStaticReadAccessorDecl(access, "GoBigConst", csIDName, v.newline, v.indent(v.indentLevel)))
 				}
 
 				if len(valueSpec.Values) >= i+1 {
@@ -1253,7 +1253,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 					v.currentFuncPrefix.WriteString("// Hoisted Go string constant (single allocation; Go keeps it in RODATA)")
 					v.currentFuncPrefix.WriteString(v.newline)
-					v.currentFuncPrefix.WriteString(fmt.Sprintf("%s static readonly %s %s = %s;", fieldAccess, strTypeName, fieldName, constVal))
+					v.currentFuncPrefix.WriteString(structStaticReadAccessorDecl(fieldAccess, strTypeName, fieldName, v.newline, "") + constVal + ";")
 					v.currentFuncPrefix.WriteString(v.newline)
 
 					if valueSpec.Type == nil && len(valueSpec.Values) >= i+1 {
@@ -1264,7 +1264,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 				} else if v.inFunction {
 					v.writeOutput("%s %s = %s;", strTypeName, csIDName, constVal)
 				} else {
-					v.writeOutput("%s static readonly %s %s = %s;", access, strTypeName, csIDName, constVal)
+					v.writeOutput("%s%s;", structStaticReadAccessorDecl(access, strTypeName, csIDName, v.newline, v.indent(v.indentLevel)), constVal)
 				}
 
 				if !specCommentTaken {

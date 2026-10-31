@@ -16,7 +16,7 @@ A converted program can run three ways. All three run the same converted code; t
 | Deployment | How you get it | Compiled |
 |:--|:--|:--|
 | **JIT** | `dotnet run`, `dotnet build`, or a framework-dependent `dotnet publish` | as each method first runs, then recompiled hotter as it keeps running |
-| **ReadyToRun** | `dotnet publish -c Release` of a converted program, which turns it on | ahead of time, then the JIT can still recompile hot methods |
+| **ReadyToRun** | `dotnet publish -c Release` of a converted program, which turns it on | golib and the standard library ahead of time, then the JIT can still recompile hot methods; the program's own code as it runs |
 | **Native AOT** | `dotnet publish -r <rid> -p:PublishAot=true` | entirely ahead of time, to a native executable with no JIT |
 
 Which wins depends on what the program spends its time on. The `win-x64` comparisons below come from the
@@ -52,6 +52,24 @@ If you publish ReadyToRun as a single file, also set
 `<PublishReadyToRunComposite>false</PublishReadyToRunComposite>`
 ([Known issues](KnownIssues.md#a-single-file-publish-with-composite-readytorun-runs-out-of-memory)).
 
+**Your own code is compiled as it runs.** A ReadyToRun publish of a converted program precompiles golib and the
+standard library, which is where start time is won. It leaves the program's own assemblies, every project built from
+your module, to the JIT. ReadyToRun compiles each assembly on its own: precompiled code cannot inline a call into
+another assembly, and a loop that runs only once never leaves its precompiled form. On `win-x64` (an AMD Ryzen 5 PRO
+6650U), against a publish that precompiled everything:
+
+- a published loop calling `strconv.FormatBool` ran in about an eighth of the time;
+- a string-matching benchmark's hot phase took about two thirds of the time;
+- start time stayed within run-to-run variation, and the published folder came out a few tens of KB smaller.
+
+To precompile your own code as well, set `<GoReadyToRunUserCode>true</GoReadyToRunUserCode>`.
+
+<!-- Source: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 9 (seat #53, G-LAPTOP, .NET 10.0.11, 15
+     interleaved rounds, A/A band per program): r2rmod main loop 10.205 -> 1.190 ns/call (0.119), its library
+     package's loop 5.421 -> 0.848 (0.156); PerfStringMatch hot phase 1,142 -> 725 ms (0.643); PerfStartup and
+     PerfTlsHandshake wall inside the band (-0.0%, +0.3%); sizes -18 KB, -23 KB, -29 KB. -->
+
+
 ## .NET runtime settings
 
 Under the JIT and ReadyToRun, .NET compiles code in tiers. A method first gets a quick compile; one that keeps running
@@ -76,9 +94,32 @@ The settings, if you need them, each in three equivalent forms: a property in th
 | Tiered compilation | `<TieredCompilation>false</TieredCompilation>` | `"System.Runtime.TieredCompilation": false` | `DOTNET_TieredCompilation=0` |
 | Dynamic PGO | `<TieredPGO>false</TieredPGO>` | `"System.Runtime.TieredPGO": false` | `DOTNET_TieredPGO=0` |
 | Quick JIT for loops | `<TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>` | `"System.Runtime.TieredCompilation.QuickJitForLoops": false` | `DOTNET_TC_QuickJitForLoops=0` |
+| Call-counting delay | `<GoCallCountingDelayMs>0</GoCallCountingDelayMs>` (a converted program's own property) | `"System.Runtime.TieredCompilation.CallCountingDelayMs": 0` | `DOTNET_TC_CallCountingDelayMs=0` |
 
 Microsoft documents every runtime compilation setting in
 [Runtime configuration options for compilation](https://learn.microsoft.com/dotnet/core/runtime-config/compilation).
+
+**A converted program counts calls from the start.** .NET waits until about 100 ms pass with no new method compiled
+before it counts calls toward optimizing a method. Until then, a short busy phase runs the standard library's small
+functions unoptimized. A converted program sets that delay to 0. This applies wherever code is JIT-compiled: under
+`dotnet run` and `dotnet build`, and in a ReadyToRun publish, whose methods are still recompiled as they get hot. It
+does not apply to Native AOT. On `win-x64` (an AMD Ryzen 5 PRO 6650U):
+
+- Under the JIT, a TLS handshake benchmark that loads 112 packages ran about a third faster (about 4.2 s down to
+  2.8 s). A trivial program took about 24 ms, roughly 5%, longer to start.
+- Published with ReadyToRun, the same benchmark ran about 30% faster, and the trivial program took about 30 ms longer
+  to start.
+
+The environment variable overrides the project setting for one run.
+`<GoCallCountingDelayMs>runtime</GoCallCountingDelayMs>` restores .NET's own default. A C# application that references
+converted packages keeps .NET's default unless it sets the `runtimeconfig.json` value itself.
+
+<!-- Source: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 9 (seat #53 P2, G-LAPTOP, .NET 10.0.11, 15
+     interleaved rounds, A/A band per program and metric). JIT build: PerfTlsHandshake wall 4,161 -> 2,804 ms
+     (-32.6%), PerfStartup +24.05 ms (+5.5%); the short hot phase Hash.String 36.97 -> 10.54 ns (0.286). ReadyToRun
+     publish (default against GoCallCountingDelayMs=runtime): PerfTlsHandshake 3,287 -> 2,309 ms, PerfStartup
+     312.6 -> 342.3 ms. Override order measured: the env var beats runtimeconfig.json in both directions. -->
+
 
 **One setting to change on one runtime.** Quick JIT for loops is what lets the JIT replace a running loop with an
 optimized one. Ubuntu's packaged .NET 10, rather than Microsoft's build, can fail in that path on Linux;
@@ -114,14 +155,44 @@ program costs to run. These do.
 ### String literals
 
 By default a converted program keeps a string literal where Go has it: `F("hello")`. golib converts each literal from
-C#'s UTF-16 to Go's UTF-8 once and caches the result, so each later evaluation is a lookup that allocates nothing.
-`-hoist-literals` gives the literals named `static readonly` fields instead, `F(helloˢ)`, so an evaluation is a
-plain field read. The standard library is already converted this way, so code that calls into it gets the benefit
-without the flag.
+C#'s UTF-16 to Go's UTF-8 once and caches the result, so each later evaluation is a lookup that allocates nothing. A
+string constant is one field, as Go declares it.
 
-**When it helps:** a tight loop that calls a small function, not inlined, that returns or passes a literal.
+`-hoist-literals` is the optimization option. It gives each literal a named field, `F(helloˢ)`, and it reads every
+such field, and every string or other struct-typed constant, through a small accessor under the same name. The JIT
+and Native AOT both inline that accessor into the code that reads it; they would not inline a function that reads
+the field directly. The standard library is converted this way already, so code that calls into it gets the benefit
+without the flag. A constant block shows the difference:
 
-- On `win-x64` (an Intel Core i9-13900K), a loop calling a small standard-library function that returns a literal
+```go
+const (
+	Version = "1.0"
+	Name    = "server"
+)
+```
+
+<!-- illustration: the shape src/go2cs/staticReadAccessor_test.go asserts for a package-level string const -->
+```csharp
+// without the flag
+public static readonly @string Version = "1.0"u8;
+public static readonly @string Name = "server"u8;
+
+// with -hoist-literals
+public static ref readonly @string Version => ref Versionᵇ;
+private static readonly @string Versionᵇ = "1.0"u8;
+public static ref readonly @string Name => ref Nameᵇ;
+private static readonly @string Nameᵇ = "server"u8;
+```
+
+Every use still reads `Version` and `Name`, so the Go function bodies are unchanged.
+
+**When it helps:** a small function that returns or passes a literal or a constant, called from a tight loop.
+
+- On `win-x64` (an Intel Core i9-13900K), the standard library's `FormatBool`, which returns one of two literals,
+  took 0.66 ns per call through the accessor under the JIT, against 1.41 ns when it read the field directly and
+  1.07 ns with a plain literal. Under Native AOT it took 0.75 to 1.02 ns through the accessor, against 1.13 to
+  1.29 ns reading the field.
+- On the same machine, a loop calling a small standard-library function that returns a literal
   took roughly twice as long with plain literals under the JIT, once the JIT had optimized the function, and roughly
   1.7 to 1.8 times as long under Native AOT. A smaller such function took up to a quarter longer under Native AOT.
 - On `win-x64` (an AMD Ryzen 5 PRO 6650U):
@@ -133,16 +204,24 @@ without the flag.
 - In whole programs on the i9: a literal-heavy string-matching benchmark took roughly an eighth more time plain under
   the JIT, and the same time under Native AOT. Parsing URL queries took about the same time either way.
 
-**When it does not:** a literal evaluated rarely costs one lookup either way. A literal passed as an `any` argument,
-`fmt.Println("x")`, measured the same both ways: both forms pass one pre-boxed value. And hoisting is not always
-faster. On the i9 under the JIT, once the function was optimized, a small standard-library function ran faster plain,
-because the JIT inlined the plain form into the caller's loop and did not inline the hoisted one. Measure your own hot path.
+Every comparison in this list after the first was measured against the direct field read, before the accessor
+existed; the accessor reads faster than that field.
 
-**What it costs:** the emitted C# names each literal as a field, declared above the function that first uses it, so
-the code reads less like the Go. [Plain literals](ConversionStrategies-Reference/strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
+**When it does not:** a literal evaluated rarely costs one lookup either way. A literal passed as an `any` argument,
+`fmt.Println("x")`, measured the same both ways: both forms pass one pre-boxed value. Before the accessor, a small
+function that read a hoisted field could run slower than its plain form, because the compiler would not inline it;
+the accessor removed that case. Measure your own hot path.
+
+**What it costs:** one more declaration line per literal and per constant. The literal's field is declared above the
+function that first uses it, and each constant becomes an accessor plus a private field. Go function bodies are
+unchanged. [Plain literals](ConversionStrategies-Reference/strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
 describes both forms.
 
-<!-- Sources: docs/phase4/DESIGN-literal-hoisting-survival.md section 9 (seat #52, 2026-10-30).
+<!-- The accessor: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 1 and its s.2.1 AOT row (seat #53).
+     i9-13900K, win-x64, tree aaec1d4ca8, framework-dependent: FormatBool HR2 (the accessor) 0.66 ns, plain 1.07,
+     hoisted ldsfld 1.41, Go 0.73-1.02 on the JIT; Native AOT HR2 0.75 / 1.02 against H 1.13 / 1.29 (two passes), HR2/H
+     0.66 / 0.79, below the +-9% A/A band. The ldsfld refusal: "ldsfld of value class", FailAlways.
+     Sources: docs/phase4/DESIGN-literal-hoisting-survival.md section 9 (seat #52, 2026-10-30).
      i9-13900K, win-x64, .NET 10.0.14, 15 interleaved rounds x 2 passes, A/A band. Test 3, a user loop of 10M calls
      (master aaec1d4ca8): Hash.String plain/hoisted 2.029 and 2.023 on the steady JIT, 1.686 and 1.782 on AOT;
      FormatBool 1.121 and 1.250 on AOT, and 0.86 on the steady JIT (plain inlined, hoisted not; cause unexplained).

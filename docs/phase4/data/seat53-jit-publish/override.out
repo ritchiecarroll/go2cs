@@ -1,0 +1,18 @@
+hotphase wall_ms: A/A 0.992 [0.955-1.100]
+    base   531.651 [518.924-575.901]  ratio 1.000 [1.000-1.000] inside  delta +0.000 (+0.0% of wall)
+    aa     531.491 [517.736-627.301]  ratio 0.992 [0.955-1.100] inside  delta -0.160 (-0.0% of wall)
+    baseEnv0 496.125 [487.834-523.551]  ratio 0.928 [0.855-0.965] inside  delta -35.526 (-6.7% of wall)
+    d0     493.661 [488.905-502.457]  ratio 0.920 [0.866-0.968] inside  delta -37.991 (-7.1% of wall)
+    d0Env100 525.751 [516.538-537.681]  ratio 0.995 [0.922-1.012] inside  delta -5.900 (-1.1% of wall)
+hotphase hash_ns: A/A 1.024 [0.976-1.804]
+    base   37.531 [36.642-38.050]  ratio 1.000 [1.000-1.000] inside  delta +0.000
+    aa     37.616 [36.825-68.645]  ratio 1.024 [0.976-1.804] inside  delta +0.085
+    baseEnv0 10.439 [10.358-12.957]  ratio 0.280 [0.274-0.343] OUTSIDE  delta -27.092
+    d0     10.414 [10.294-11.026]  ratio 0.283 [0.272-0.292] OUTSIDE  delta -27.117
+    d0Env100 37.352 [36.164-37.831]  ratio 0.996 [0.954-1.032] inside  delta -0.179
+hotphase bool_ns: A/A 1.004 [0.976-1.120]
+    base   0.925 [0.919-1.051]  ratio 1.000 [1.000-1.000] inside  delta +0.000
+    aa     0.957 [0.920-1.060]  ratio 1.004 [0.976-1.120] inside  delta +0.033
+    baseEnv0 0.711 [0.697-0.938]  ratio 0.772 [0.665-1.015] inside  delta -0.214
+    d0     0.705 [0.698-0.865]  ratio 0.758 [0.670-0.935] OUTSIDE  delta -0.220
+    d0Env100 0.931 [0.921-1.064]  ratio 1.001 [0.880-1.156] inside  delta +0.006

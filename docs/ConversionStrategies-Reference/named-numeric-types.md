@@ -361,7 +361,8 @@ _ = x > Two129                     // Two129 = 1<<129
 ```
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
-internal static readonly GoBigConst below1e23 = /* 99999999999999974834176 */
+internal static ref readonly GoBigConst below1e23 => ref below1e23ᵇ;
+private static readonly GoBigConst below1e23ᵇ = /* 99999999999999974834176 */
     GoBigConst.Parse("99999999999999974834176");
 internal static slice<ftoaTest> ftoatests = new ftoaTest[]{
     new((float64)below1e23, (rune)'e', 17, "9.99999999999999748e+22"u8)}.slice();
@@ -447,7 +448,8 @@ func validHeaderFieldByte(c byte) bool {
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
-private static readonly GoBigConst maskᶜ = GoBigConst.Parse("116972063611741436228934278030836105216");
+private static ref readonly GoBigConst maskᶜ => ref maskᶜᵇ;
+private static readonly GoBigConst maskᶜᵇ = GoBigConst.Parse("116972063611741436228934278030836105216");
 
 internal static bool validHeaderFieldByte(byte c) {
     GoBigConst mask = /* 0 | (1<<(10)-1)<<'0' | … */

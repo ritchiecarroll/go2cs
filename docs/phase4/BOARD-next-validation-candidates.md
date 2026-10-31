@@ -32281,4 +32281,77 @@ scope too, since it sits in the same section. An `[assembly:]` attribute binds a
 
 — H (2026-10-30)
 
+
+## 2026-10-31 — G (1.26.10.2 seat #53, claude/g-seat53-jit-publish): struct statics read through an inlinable accessor in hoist mode; converted apps call-count from the start and publish their own code IL-only — DONE on the seat branch
+
+**What lands.**
+
+- **Part 1.** In hoist mode (`-stdlib`, and `-hoist-literals`), every struct-typed `static readonly` the converter
+  writes is an accessor under its own name over a private `ᵇ` field. Those are the hoisted literals, the string
+  constants and the big constants. Every Go body is byte-identical.
+  - The JIT and ILC refuse to inline a method that reads such a field by value (`ldsfld` of a value class), and both
+    inline the accessor.
+  - The owner ruled the scope: a plain-mode user package keeps one field per constant.
+- **Part 2.** A converted application sets `CallCountingDelayMs` to 0 through `GoCallCountingDelayMs`; `runtime` opts
+  out, and the env var overrides.
+- **Part 3.** A ReadyToRun publish leaves the application's own assemblies, module-wide, to the JIT; golib and the
+  standard library stay precompiled. `GoReadyToRunUserCode=true` restores today's publish.
+
+**Measured on G-LAPTOP** (Ryzen 5 PRO 6650U, win-x64, .NET 10.0.11, 15 interleaved rounds, A/A bands):
+
+- **`FormatBool`:** 2.43 -> 0.71 ns on the steady JIT and 2.37 -> 0.60 ns on Native AOT. A `NoInlining` control reads
+  like the old field, so the gain is the inlining.
+- **`Hash.String`:** inside the band on both runtimes (median +11% on the JIT; unexplained).
+- **Suite rows:** inside the band on both runtimes.
+- **Delay 0:** PerfTlsHandshake 32.6% faster; PerfStartup +24 ms (+5.5%), the named and accepted cost.
+- **Own code IL-only:** loops entered once 6 to 8 times faster; start time unchanged; a few tens of KB smaller.
+
+**Gates:**
+
+- `go test ./...` ok.
+- Behavioral 885/885 compile and 856 outputs match with 0 failed, at the `everywhere` scope.
+- CNR byte-identical at the ruled scope, so no part-1 golden moves.
+- The seat root's full stdlib build: 0 errors.
+
+**The rung:** 5,168 declaration hunks, equal to the census, plus 556 position-map lines and 358 inert library-csproj
+inserts.
+
+**Predictions scored** in the DESIGN record, section 9.5. The misses:
+
+- no AOT effect: it was a large one;
+- 20 ms keeping 80% of the win;
+- PerfStartup inside the band at 0;
+- no `src/core` file from parts 2 and 3.
+
+Record: `docs/phase4/DESIGN-jit-inlining-tiering-publish.md` section 9. Data: `docs/phase4/data/seat53-jit-publish`.
+
+— G (2026-10-31)
+
+## 2026-10-31 — G (after 1.26.10.2, from seat #53): S3, the accessor for MUTABLE struct package variables — OPEN, deferred past .2
+
+A plain mutable struct static read by value is refused for inlining too. The i9's probe (13900K, win-x64, tree
+`aaec1d4ca8`) measured it:
+
+- a plain `internal static S24` read: 1.76 to 1.94 ns, and the loop keeps the call;
+- the same read through a `ref` accessor (A′): inlined, 0.83 to 0.89 ns;
+- golib's `StaticBox` behind its ref accessor: already inlined, 0.90 to 1.06 ns, so those variables need nothing.
+
+**Why it is not in .2** (COORD's three conditions):
+
+- **(i) is met.** The refusal is shown above.
+- **(ii) fails.** No measured hot path reads one whole. Member access on a `readonly struct` field (`slice<T>`,
+  `@string`), and golib's `len<T>(in slice<T>)`, both read by address. PerfStringMatch's `lines[i % len(lines)]` is
+  not refused, and PerfTlsHandshake reads its package slices in setup only.
+- **(iii), the census of a reference held across a write, was not run.** Under A′, a ref local, an `in` or `ref`
+  argument, a ref return or a ref-receiver call that holds the reference would see a later write, where Go copied at
+  once.
+
+**To pick it up:**
+
+1. Census the whole-value reads of mutable struct statics in a measured hot path.
+2. Run the held-reference census over the emission.
+3. If both show a population, apply A′ through the same `structStaticReadAccessorDecl` switch, with its own
+   measurement.
+
+— G (2026-10-31)
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

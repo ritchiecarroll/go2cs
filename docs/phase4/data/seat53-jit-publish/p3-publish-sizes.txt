@@ -1,0 +1,15 @@
+perfstartup base rc=0 218s size=93728329
+perfstartup aa rc=0 52s size=93728325
+perfstartup new rc=0 55s size=93710409
+perfstartup rt rc=0 71s size=93710339
+perftls base rc=0 143s size=147608181
+perftls aa rc=0 86s size=147608181
+perftls new rc=0 86s size=147585141
+perftls rt rc=0 84s size=147585075
+r2rmod base rc=0 46s size=94078086
+r2rmod aa rc=0 47s size=94078078
+r2rmod new rc=0 48s size=94048898
+r2rmod main rc=0 158s size=94061190
+perfstringmatch base rc=0 51s size=94458168
+perfstringmatch aa rc=0 47s size=94458168
+perfstringmatch new rc=0 46s size=94436664
