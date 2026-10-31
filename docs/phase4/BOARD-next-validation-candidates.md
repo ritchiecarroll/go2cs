@@ -32363,6 +32363,14 @@ CallerLineStackLocal), `38df36d5f7` (GolibTests red StackRegionCallSiteTests), `
 file touched is `src/core/runtime/managed_impl.cs`, which is hand-owned. golib's slice-literal code is untouched:
 `builtin.slice<T>` is R's #54.
 
+**Rebased** (COORD, 2026-10-31) as `claude/h-seat55-caller-resolver-r1` onto batch 110 (`5bf0fcb694`):
+`d17be6e9d9`, `69922d3a92`, `68b1a3f69e`, `366b16d5bf` and `9505262c6d` are the five commits above in order, and
+this row is the next commit. The one conflict was this board, and both rows are kept. `e32cc1b50b` re-mints
+CallerLineStackLocal.csproj with the rebased tip's converter, adding #53's 25 template lines; main.cs, main.cs.target
+and package_info.cs did not move. At the rebased tip, CNR's transpile step over that project is byte-identical, and
+`run-behavioral --filter CallerLine` is 3/3 on all four phases. The measurements below are from the pre-rebase tip.
+managed_impl.cs is byte-identical across the rebase, since batch 110 does not touch it.
+
 **The defect.** In Release, Roslyn keeps a local on the IL evaluation stack (`dup` in place of `ldloc`) when nothing
 in the method pins it. One `u8` literal anywhere in the method is enough to pin it. With the local on the stack, the
 JIT records IL-to-native mappings only at stack-empty points and after a void call or callvirt. A popped value call
