@@ -32354,4 +32354,108 @@ A plain mutable struct static read by value is refused for inlining too. The i9'
    measurement.
 
 — G (2026-10-31)
+
+## 2026-10-31 — R (1.26.10.2 seat #54, claude/r-seat54-slice-lit-lines): a slice literal's elements keep their own Go lines in an optimized build — DONE on the seat branch
+
+**Why: the RWSL-1 dry run's (c) finding.**
+- At 1dacbdf4b6, runtime's TestLineNumber left its disclosed signature: the first failure was compLit[0].lineA on
+  +5, where the signature is compLit[1].lineB on +12, with 17 asserts failing against 12.
+- Seat #30 (L1) had made `slice<T>([...])` bind `SliceLiteral<T>`, a [CollectionBuilder] type. A builder must take
+  `ReadOnlySpan<T>`, so every literal lowered through an inline stack buffer.
+- The PDB is not the loss. Both forms carry one sequence point per initializer, and every element call lies inside
+  its own range.
+- The loss is the optimizing JIT's native-to-IL map over that lowering, measured with
+  `new StackFrame(1).GetILOffset()` in a plain-C# repro, no golib:
+  - an array initializer reports its statement's sequence point for every element;
+  - the span lowering reports element-store boundaries at Tier0;
+  - under TC0 it reports the PREVIOUS initializer's sequence point (runtime's sliceLit[0] read arrayLit's line).
+- So a struct element answered its spec line, and with tiering off a literal answered the statement before it.
+  COORD's STOP rule fired on that evidence (the map cannot carry the calls).
+
+**The change (golib only; ruled (B), then (B1)).**
+- `builtin.slice<T>(T[])`, the existing array overload, takes `[OverloadResolutionPriority(1)]`.
+- `SliceLiteral<T>` and its overload are removed.
+- A collection expression that targets an array lowers to `newarr` and one `stelem` per element. That is the
+  pre-#30 initializer's IL offset for offset (pdbdump of CallerLineMultiLine's .cctor). The overload wraps the
+  array with no copy.
+- A binding probe moves only the collection-expression calls. Arrays, `array<T>`, `@string` to bytes and to runes,
+  spans and u8 literals bind exactly as before.
+- The emission does not change: the converter edit is a comment. CNR is byte-identical over 953 packages, 0 goldens
+  moved.
+
+**Red first.**
+- The new behavioral project CallerLineSliceLiterals, and GolibTests' CallerLineSliceLiteralsReleaseTests: a
+  Release build run tiered and with tiering off. It asserts what an optimized build held before #30:
+  - no element answers a line outside its own literal;
+  - a struct element's first field answers its own line.
+- RED at master with 7 failures (red 827c004e9a), green with the fix (9a36a1a622).
+- CallerLineMultiLine reads the pre-#30 values in all 11 shapes, in both configurations.
+
+**Prediction f80ea7d5b, scored as worded.**
+- 1 IL: MET.
+- 2 frames: MET. This includes the two tiered shapes named in advance as returning to pre-#30 values
+  (pkgSlice [60 60 60 62] -> [60 60 60 60], S7 [122 123] -> [122 122]), accepted by COORD.
+- 3 runtime row: TestLineNumber fails exactly the disclosed 12, MET (two seat runs). The row itself read
+  DIVERGED on TestMemStats; see the WATCH below.
+- 4 allocation and perf: FIRED. Bytes are equal in every shape, but `@string` elements read SLOWER on JIT,
+  +24-25% (5-8 ns per 3-element literal). COORD ruled (B1): land as is. The IL is the pre-#30 initializer's, so
+  the cost is the pre-#30 cost. (B2) is out; (B3) is the post-.2 row below.
+  litbench, 15 interleaved rounds, (B)/today against an A/A pair, R-LAPTOP win-x64 .NET 10.0.11:
+  - JIT: ints 0.57, structs 0.60, nested 0.77 (faster); empty, pointers, anys inside noise; strings 1.24 and string
+    literals 1.25 (slower).
+  - AOT: every row faster or inside noise.
+- 5 (A), the runtime reader's next-call snap, information only: MISSED.
+  - It changed nothing in any shape, form or configuration, because master tiered already answered pkgSlice and S7.
+  - Posted for H's #55, which owns managed_impl.cs. Not committed.
+
+**Rebase.** Onto master 5bf0fcb694 (batch 110), signed: red 424099be27, fix 7d8557a1ab, docs 184a8fdea7. Then
+CallerLineSliceLiterals.csproj was re-minted with the converter (3515a515a6). It gains batch 110's 25 template
+lines; its .cs.target, main.cs and package_info.cs do not move. At 3515a515a6:
+- CNR is byte-identical across 953 packages;
+- `run-behavioral.ps1 --filter CallerLineSliceLiterals` passes;
+- the focused GolibTests pass 12/0 (the line arm, the binding tests, the census, CallerLineMultiLineDebugTests);
+- repoguard is ok.
+
+**Gates, at 5bfdf8d689 (before the rebase).** That commit re-cites two ConversionStrategies.md provenance notes that the builtin.cs
+doc comment moved three lines; repoguard caught them.
+- CNR rc 0, byte-identical across 953 packages.
+- Behavioral: Transpile, Compile and Target 886/886; Output 857 compared, 0 failed.
+  - The batch restore died of MSB4166, the known race. The runner's per-project fallback built all 96 suspect
+    projects with 0 failures.
+  - CNR and behavioral ran at 9a36a1a622; 5bfdf8d689 is docs-only.
+- go test: 10 ok.
+- GenTests 374/0.
+- GolibTests: Release 2300/0 (25 skipped); Debug 2289/0 (36 skipped).
+- -tests encoding/json 550 validated; fmt 62 validated (COORD's rebind canaries).
+- go2cs-stdlib.slnx Release, 0 errors: windows 483 s, linux 484 s, darwin 499 s.
+- runtime -tests row, linux, TC0, R-WSL: TestLineNumber at the disclosed 12. The disclosure is unchanged; nothing
+  narrowed.
+
+**Rung (two-seeded -stdlib A/B, master 1dacbdf4b6 against the seat, golib excluded as the seat's own hand edit):**
+0 emission files on all three targets: windows 1,571 files written by each arm, linux 1,620, darwin 1,630, +0/−0. Each target differs only in the seat's two hand-owned golib files (SliceLiteral.cs removed, builtin.cs +17/−14). Measured with base 1dacbdf4b6 against seat 5bfdf8d689, before the rebase onto 5bf0fcb694; COORD confirms batch 110 put no hunk in these files. **Expected regen rung: 0 files.**
+
+**WATCH for the re-bank: runtime TestMemStats on R-WSL.** Over a ~62-minute process, PauseTotalNs sits at about
+100-101.5 s, straddling Go's `<= 1e11` bound. Four samples on the same box, clone and runner:
+- master dry run: under the bound (wall 3688 s);
+- seat 9a36a1a622: 100.44 s (wall 3638 s);
+- seat 5bfdf8d689: 100.63 s (wall 3723 s);
+- master control: 101.44 s (wall 3768 s).
+By COORD's pre-registered rule it is environmental, not #54's. A runtime row on this box can read DIVERGED on it at
+either ref; the disclosure's 12 zero records gain a 13th line whenever a long run crosses the bound.
+
+— R (2026-10-31)
+
+## 2026-10-31 — R (post-.2 row, from seat #54's ruling (B3)): `@string` elements of a slice literal cost about 25% more on JIT through an array initializer — OPEN, information
+
+- Under seat #54's lowering, `slice<@string>([s1, s2, s3])` stores each element by `stelem` straight into the heap
+  array, which is the pre-#30 IL. That runs about 1.24-1.25x the span lowering's time on JIT: 21.3 -> 26.5 ns
+  (variables), 28.3 -> 36.1 ns (literals). AOT stays inside noise.
+- Pointer and interface elements, and `slice<T>` elements (also a struct holding a reference), are not slower.
+  The class is `@string`'s 16-byte layout (byte[] + int + int); measured, not explained.
+- Question for after .2: is the JIT's struct copy into a heap array suboptimal for this layout, and is it ours or
+  .NET's?
+- Arms: litbench `strings`/`strlits`, the seat-#54 runs (today1/today2 A/A against B), R-LAPTOP, .NET 10.0.11.
+
+— R (2026-10-31)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
