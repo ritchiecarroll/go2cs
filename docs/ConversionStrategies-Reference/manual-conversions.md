@@ -3632,7 +3632,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:4731 (`INLINED PANIC SITES`), :4739 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:4826 (`INLINED PANIC SITES`), :4834 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -3814,6 +3814,23 @@ deferring method of `LineMarkerDeferEndTC0`. "The first call after" offset 0 wou
 first statement. A method holds exactly one `Run` call, so a frame whose callee is `GoFrame.Run`
 resolves to that call wherever it is reported (`calleeSettledCallSite`); a method with two settles
 nothing. Pinned by `DeferringFrameRunCallTests`.<!-- seat #42 F2, measured 2026-10-29 on linux Release -->
+
+**A frame over a stack-held local resolves within the JIT's own region.** Where the optimizing C#
+compiler keeps a local on the evaluation stack (`dup` where a local would be `ldloc`), no statement
+boundary is stack-empty, so the JIT maps only its own boundaries: the instructions the stack is empty at,
+and the instruction after a void call. A frame suspended in a call then reports the instruction after the
+previous void call, which can be a whole statement before the call. The C# compiler holds the local only
+where nothing pins it: one `u8` literal anywhere in the method kept the local in a slot. The suspended call
+lies between the reported offset and the next such boundary, read from the IL by one stack-depth pass
+(`ilBoundaryOffsets`). Where that region holds exactly one call of the frame's callee, that call is the
+answer (`regionSettledCallSite`). The rule fires only where today's reading is provably wrong: it names a
+direct `call` of another method, and the statement settle found nothing, zero calls of the callee or more
+than one. Any indirect call keeps today's reading, named or in the region: a virtual or interface call, a
+`calli` or a delegate `Invoke`. So do zero or two calls of the callee in the region. Tier-0 frames are
+exact on a unique match. Optimized frames (tiering off, Tier1, OSR) are partial: the optimized map keeps
+fewer boundaries, so the region may not reach the call. The rule can move one wrong line to another,
+never a right one to wrong. Pinned by `StackRegionCallSiteTests` and the behavioral
+`CallerLineStackLocal`.<!-- seat #55, measured 2026-10-31 on windows Release: CallerLineStackLocal 4 of 6 shapes one line early at master at tier-0, tiering off and Tier1, 6 of 6 right after; CallerLineMultiLine's pkgSlice elements 2 and 3 right at tier-0 after, unchanged at tiering off. -->
 
 **The two test-variant suffixes are NOT symmetric — `_internal_test` is stripped, `_test` is kept.**
 `goFrameName` derives the reported import path from the emitted namespace plus<!-- history: 2026-08-26 -->
