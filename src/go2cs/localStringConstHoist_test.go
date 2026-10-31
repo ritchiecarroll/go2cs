@@ -103,9 +103,9 @@ func TestLocalStringConstHoistsUnderItsOwnName(t *testing.T) {
 	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(pkgDir, "lsc.cs")), "\r\n", "\n")
 
 	for _, want := range []string{
-		"private static readonly @string fnAtoiᶜ = \"Atoi\"u8;",
-		"private static readonly @string fnAtoiᶜ1 = \"second\"u8;", // the same name in a second function
-		"private static readonly @string helloᶜ = \"hello\"u8;",
+		"private static readonly @string fnAtoiᶜᵇ = \"Atoi\"u8;",
+		"private static readonly @string fnAtoiᶜ1ᵇ = \"second\"u8;", // the same name in a second function
+		"private static readonly @string helloᶜᵇ = \"hello\"u8;",
 	} {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("want the hoisted field %q:\n%s", want, emitted)
@@ -130,7 +130,7 @@ func TestLocalStringConstHoistsUnderItsOwnName(t *testing.T) {
 		}
 	}
 
-	if !strings.Contains(emitted, "static readonly @string pkgConst = ") {
+	if !strings.Contains(emitted, "static ref readonly @string pkgConst => ref pkgConstᵇ;") {
 		t.Errorf("the package-level const keeps its own static readonly field:\n%s", emitted)
 	}
 

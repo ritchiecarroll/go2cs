@@ -228,7 +228,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:162#df9083 (ProjectReference; NuGet via -recurse=nuget) ·
   src/core/unicode/utf8/utf8.cs:20#83c559 + src/core/archive/zip/struct.cs:33#d3abd8 ·
   src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17#ee46fb + src/core/internal/strconv/atoi.cs:130#4606f0 ·
-  src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:143#07f377 (from src/go2cs/csproj-template.xml:128#07f377) ·
+  src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:143#07f377 (from src/go2cs/csproj-template.xml:153#07f377) ·
   src/core/encoding/gob/codec_test.cs:1201#1265b9 ·
   src/core/golib/NilType.cs + src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:52#dd67ea ·
   src/tests/Behavioral/SliceAliasing/main.cs.target:13#ee5567 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:116#9a82dc ·
@@ -1840,11 +1840,16 @@ rules further down this section):
   an untyped number, a named type, a `uintptr` (a golib struct), a complex number, or an `int` or
   `uint` value too wide for 32 bits;
 - a `static readonly` field, for any package-level string constant, typed or untyped, and for an integer constant
-  too wide for 64 bits, which is golib's `GoBigConst` (C#'s `BigInteger`).
+  too wide for 64 bits, which is golib's `GoBigConst` (C#'s `BigInteger`). Its value is a struct, so code reads it
+  through an accessor under the constant's own name, `static ref readonly @string name => ref nameᵇ;`, over the
+  private field `nameᵇ`. The JIT will not inline a function that copies a struct out of a static field, and a read
+  through the accessor is a reference it can inline; every use still spells the constant's name.
 <!-- forms: src/go2cs/visitValueSpec.go:1449 `else if constExpr == "const"`, :1472 `static %s %s =>%s %s;`,
-     :1267 `static readonly %s %s = %s;`; the GoBigConst field, for an int-kind value that fits neither int64 nor
-     uint64: :1192-1199 `writeUntypedConst(true)`, e.g. src/core/math/big/arith.cs:23
-     `internal static readonly GoBigConst _B`; the alias: src/go2cs/csproj-template.xml:129 `Alias="GoBigConst"`. -->
+     :1267 `structStaticReadAccessorDecl(access, strTypeName, csIDName`; the accessor:
+     src/go2cs/hoistedLiteralOperations.go:1484 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
+     int-kind value that fits neither int64 nor uint64: src/go2cs/visitValueSpec.go:1192-1199 `writeUntypedConst(true)`, e.g.
+     src/core/math/big/arith.cs:23 `internal static readonly GoBigConst _B` (the committed corpus, which takes the
+     accessor at the 1.26.10.2 regeneration); the alias: src/go2cs/csproj-template.xml:154 `Alias="GoBigConst"`. -->
 
 When the value is computed, a `/* … */` comment beside it keeps the Go expression.
 
@@ -2228,7 +2233,7 @@ case has its own paragraph in this section.
 Each converted project declares them. So `uint8` is C#'s `byte`, `int64` is `long`, and `rune` is `int`.
 Go's `byte` stays C#'s own `byte`, the same type as `uint8`.
 <!-- each project file carries lines such as `<Using Include="System.Int32" Alias="rune" />`:
-     src/core/bufio/bufio.csproj:143#07f377, from src/go2cs/csproj-template.xml:117-128#9dcfa6 -->
+     src/core/bufio/bufio.csproj:143#07f377, from src/go2cs/csproj-template.xml:142-153#9dcfa6 -->
 
 **`uintptr` is its own type.** It becomes golib's [`uintptr`](../src/core/golib/uintptr.cs), a small struct
 that holds one `nuint`. It is not an alias, because Go treats `uint` and `uintptr` as different types, and
@@ -2784,7 +2789,7 @@ aliases, as it does for the fixed-width integers ([Integer Types and Arithmetic]
 halves from golib, go2cs's [runtime library](#the-golib-runtime-library). Both C# floating-point types follow
 IEEE 754, as Go's do, so infinities, NaN and negative zero behave as in Go: a float divided by zero gives
 `+Inf` or `-Inf`, with no panic.
-<!-- aliases: src/go2cs/csproj-template.xml:125-127 `Alias="float32" … Alias="complex128"`; complex64:
+<!-- aliases: src/go2cs/csproj-template.xml:150-152 `Alias="float32" … Alias="complex128"`; complex64:
      src/core/golib/complex64.cs:18 `public readonly struct complex64`, :34-35 `float m_real; … float m_imaginary;`.
      Divide by zero: probe, go2cs at 8c091fc3aa, `fmt.Println(1/z, -1/z)` -> `fmt.Println(1D / z, -1D / z);`,
      Go prints `+Inf -Inf`. -->

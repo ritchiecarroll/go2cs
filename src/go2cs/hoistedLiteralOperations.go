@@ -1475,6 +1475,18 @@ func funcReadsHoistedLiteral(fn *types.Func) bool {
 	return packageHoistLitReaders[fn]
 }
 
+// structStaticReadAccessorDecl opens a struct-typed `static readonly` declaration, up to its initializer, as a
+// `ref readonly` accessor under the declared name over a private backing field (StaticBackingFieldMarker). The JIT
+// refuses to inline any method that reads a struct-typed static by value (`ldsfld` of a value class); a read through
+// the accessor is an address (`ldsflda`), which inlines (seat #53, docs/phase4/DESIGN-jit-inlining-tiering-publish.md
+// s.2). The accessor keeps the declared name, so no use site moves. It comes first, so a doc comment written above
+// the declaration stays on the declared name, and a trailing comment written after it lands on the value.
+func structStaticReadAccessorDecl(access, typeName, name, newline, indent string) string {
+	backing := name + StaticBackingFieldMarker
+
+	return fmt.Sprintf("%s static ref readonly %s %s => ref %s;%s%sprivate static readonly %s %s = ", access, typeName, name, backing, newline, indent, typeName, backing)
+}
+
 // writeHoistedLiteralDecls emits the `static readonly` field declarations funcDecl OWNS into the
 // function-prefix builder, which visitFuncDecl back-patches immediately above the function's doc
 // comment — the same declaration-injection path a lifted anonymous struct/interface rides. Fields
@@ -1512,7 +1524,13 @@ func (v *Visitor) writeHoistedLiteralDecls(funcDecl *ast.FuncDecl) {
 			access = "internal"
 		}
 
-		v.currentFuncPrefix.WriteString(fmt.Sprintf("%s static readonly %s %s = %s;", access, fieldType, hl.name, v.convBasicLit(hl.node, litContext)))
+		if hl.preBoxed {
+			// A reference type: the inliner refuses value-class loads only, so the field stays as it is.
+			v.currentFuncPrefix.WriteString(fmt.Sprintf("%s static readonly %s %s = %s;", access, fieldType, hl.name, v.convBasicLit(hl.node, litContext)))
+		} else {
+			v.currentFuncPrefix.WriteString(structStaticReadAccessorDecl(access, fieldType, hl.name, v.newline, "") + v.convBasicLit(hl.node, litContext) + ";")
+		}
+
 		v.currentFuncPrefix.WriteString(v.newline)
 	}
 }

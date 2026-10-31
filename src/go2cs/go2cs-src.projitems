@@ -581,6 +581,7 @@
     <None Include="$(MSBuildThisFileDirectory)stackAppendHints.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendHints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendMove2heap_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)staticReadAccessor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stderrTail_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stdLibConverter.go" />
     <None Include="$(MSBuildThisFileDirectory)stdNamespaceGuard_test.go" />

@@ -9,8 +9,8 @@ Go's `string` becomes golib [`@string`](https://github.com/ritchiecarroll/go2cs/
 | a `string` value | `@string` | everywhere by default |
 | a literal in a `string` slot | `"text"`, a C# string converted once and shared | [plain literals](#a-literal-in-a-string-slot-is-a-plain-c-literal) |
 | a literal any other slot reads | `"text"u8` (a `ReadOnlySpan<byte>`) | [`u8` spans](#string-literals-render-as-u8-spans) |
-| a literal used as a value, in the standard library or under `-hoist-literals` | `static readonly @string textˢ` | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
-| `const name = "text"` inside a function, in the standard library or under `-hoist-literals` | `static readonly @string nameᶜ` | [local string constants](#a-function-local-string-const-hoists-to-a-static-readonly-field-under-its-own-name) |
+| a literal used as a value, in the standard library or under `-hoist-literals` | `static readonly @string textˢ`, read through a same-named accessor | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
+| `const name = "text"` inside a function, in the standard library or under `-hoist-literals` | `static readonly @string nameᶜ`, read through a same-named accessor | [local string constants](#a-function-local-string-const-hoists-to-a-static-readonly-field-under-its-own-name) |
 | a raw string that spans lines | `"""…"""u8.Raw()` | [multi-line raw strings](#a-multi-line-raw-string-ends-in-raw) |
 | a literal with raw non-UTF-8 bytes | `((@string)(new byte[]{…}))` | [raw-byte literals](#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string) |
 | `type Token string` | `partial struct Token /*@string*/` | [named string types](#named-string-types) |
@@ -247,6 +247,23 @@ public static @string FormatBool(bool b) {
     return falseˢ;
 }
 ```
+
+**Read through an accessor.** A hoisted field holds a struct, and the JIT will not inline a function that copies a
+struct out of a static field. So the field is private, named with the `ᵇ` marker (`StaticBackingFieldMarker`), and
+its name goes to an accessor that returns it by reference, which the JIT does inline:
+
+<!-- illustration: the shape src/go2cs/staticReadAccessor_test.go asserts for `return "true"`; the committed corpus
+     takes it at the 1.26.10.2 regeneration, so there is no excerpt yet -->
+```csharp
+internal static ref readonly @string trueˢ => ref trueˢᵇ;
+private static readonly @string trueˢᵇ = "true"u8;
+```
+
+Every use still reads `trueˢ`, so `FormatBool`'s body is unchanged. Local string constants, package-level string
+constants and big constants take the same pair. The example above shows the committed corpus, which takes the
+accessor at the 1.26.10.2 regeneration.
+<!-- src/go2cs/hoistedLiteralOperations.go:1484 `func structStaticReadAccessorDecl(`; the measurement:
+     docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 1. -->
 
 **What hoists:** a returned value; an assignment to a local, parameter or field; a `string` or `...string` argument; an `any` target (argument, result, send, assignment); a standalone map-index key; a conversion to a named string type. A literal used **only** in `any` slots is hoisted pre-boxed, as `static readonly object xˢ = (@string)"…"u8;`, so those uses allocate nothing.
 
