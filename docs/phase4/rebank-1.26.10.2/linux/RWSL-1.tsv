@@ -1,0 +1,15 @@
+row	word	verdicts	matched	disclosed	diverged	sweep_s	wall_s	rc	timeout	deadline
+crypto/internal/fips140/mlkem	PASS	11	True	0	0	318	318	0	30m	15m
+crypto/mlkem	PASS	8	True	0	0	69	69	0	30m	15m
+archive/zip	PASS	101	True	0	0	96	96	0	60m	15m
+crypto/dsa	PASS	4	True	0	0	240	240	0	120m	120m
+index/suffixarray	PASS	12	True	0	0	352	352	0	120m	15m
+hash/maphash	PASS	66	True	0	0	439	439	0	60m	15m
+go/parser	PASS	183	True	0	0	567	567	0	90m	90m
+net	PASS	596	True	3	0	390	390	0	120m	15m
+time	PASS	176	True	0	0	472	472	0	40m	15m
+net/http	PASS	1526	True	0	0	412	412	0	60m	15m
+sync/atomic	PASS	108	True	0	0	756	756	0	150m	150m
+crypto/tls	PASS	1394	True	1	0	1264	1264	0	60m	15m
+internal/poll	PASS	12	True	1	0	1715	1715	0	30m	30m
+runtime	DIVERGED	11089	False	72	1	3688	3688	1	120m	60m
