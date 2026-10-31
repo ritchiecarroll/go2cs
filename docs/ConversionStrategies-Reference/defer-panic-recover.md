@@ -730,13 +730,21 @@ shut down under the panicking goroutine: exit 0 with an empty stderr. golib's `M
 - **The count.** A goroutine counts from the moment a panic starts running its deferred calls
   (`GoFrame.Capture`). It stops counting when its frame returns with no panic in flight (a recovery), when
   the goroutine ends, or when its fatal report begins.
-- **The wait.** `main`'s return waits while the count is non-zero, for at most 20 ms. That is as short as Go's
-  1000 yields in spirit: it covers the goroutine's rethrow to its root and no more.
-  <!-- src/core/golib/runtime/MainExit.cs:44 `which takes 1.2 to 1.8 ms from <c>GoFrame.Capture</c> (Release, 30 runs`
-       (the platform measured is not recorded); the bound
-       :72 `internal static readonly TimeSpan PanicDefersWait = TimeSpan.FromMilliseconds(20);` -->
-  A goroutine that is still running a slow recovering call, or blocks in a deferred call, is not waited for, and
-  neither does Go wait for one. If a report has begun, `main` waits for the report and exits with its status.
+- **The wait.** `main`'s return waits while the count is non-zero and a counted goroutine can still run. That is
+  the question Go's 1000 yields answer: a goroutine that can run gets its turns, and a blocked one gets none.
+  A goroutine parked, or inside a system call, releases `main` once the same block has lasted 1 ms. One that can
+  run holds `main` until it has used 20 ms of its own CPU since the wait began, so a goroutine waiting behind
+  other threads for a CPU is waited for. Its rethrow to its root takes a few milliseconds of that.
+  <!-- src/core/golib/runtime/MainExit.cs:51 `take 1.2 to 1.8 ms from <c>GoFrame.Capture</c>`; the budget
+       :95 `internal static readonly TimeSpan PanicDefersCpuBudget = TimeSpan.FromMilliseconds(20);`; the block
+       :98 `internal static readonly TimeSpan BlockedConfirm = TimeSpan.FromMilliseconds(1);`; the guard
+       :104 `internal static TimeSpan HangGuard { get; set; } = TimeSpan.FromSeconds(10);`; and the wall-clock
+       fallback where the CPU cannot be read
+       :90 `internal static readonly TimeSpan PanicDefersWait = TimeSpan.FromMilliseconds(20);`
+       (docs/phase4/DESIGN-main-return-wait.md). -->
+  A goroutine blocked in a slow recovering call, or in a deferred call, is not waited for, and neither does Go
+  wait for one. One divergence from Go remains: a goroutine that can run but is given no CPU at all for 10 s stops
+  being waited for. If a report has begun, `main` waits for the report and exits with its status.
 - **Which report** (Go's `paniclk`): the first fatal start owns it. When `main` panics while a goroutine's crash
   is already under way, `main`'s backstop waits for the goroutine's report, which then ends the process, so the
   first line is the goroutine's, as in Go. Once the owner has reported, the waiting thread parks for good and never
@@ -746,7 +754,7 @@ shut down under the panicking goroutine: exit 0 with an empty stderr. golib's `M
 
 (Guarded by the `GoroutinePanicAfterDeferredDone` behavioral test, which must exit 2 with Go's report, and by
 `GoroutineRecoveringWhenMainReturns`, which prints nothing after `main` returns. GolibTests `MainExitPanicDefersTests`
-pins the count and the bounded wait.)
+pins the count and the wait's decision, sample by sample, and `ThreadCpuTimeTests` the CPU readings it rests on.)
 
 ## A panic VALUE renders through Go's `preprintpanics` rule — an `error` prints its message, not its address
 
