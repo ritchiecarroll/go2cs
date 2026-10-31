@@ -96,6 +96,11 @@ var packageCastLits map[*ast.BasicLit]bool
 // while it reports false (applyHoistedLiteralsStamp).
 var packageBoxesBareLiterals bool
 
+// testAssemblyBoxesBareLiterals is packageBoxesBareLiterals over a whole test assembly: every variant of one -tests
+// conversion rewrites package_test_info.cs, and each variant's collection resets the package flag, so the stamp is
+// decided from the union (convertTestVariants clears it; convertTestVariant accumulates it).
+var testAssemblyBoxesBareLiterals bool
+
 // literalFallback is a use's form when its literal does not survive naming as a field.
 type literalFallback int
 
