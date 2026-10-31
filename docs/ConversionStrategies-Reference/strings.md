@@ -259,9 +259,10 @@ internal static ref readonly @string trueˢ => ref trueˢᵇ;
 private static readonly @string trueˢᵇ = "true"u8;
 ```
 
-Every use still reads `trueˢ`, so `FormatBool`'s body is unchanged. Local string constants, package-level string
-constants and big constants take the same pair. The example above shows the committed corpus, which takes the
-accessor at the 1.26.10.2 regeneration.
+Every use still reads `trueˢ`, so `FormatBool`'s body is unchanged. In the same mode (the standard library, and any
+package converted with `-hoist-literals`), local string constants, package-level string constants and big constants
+take the same pair; a package converted without the flag keeps one field per constant. The example above shows the
+committed corpus, which takes the accessor at the 1.26.10.2 regeneration.
 <!-- src/go2cs/hoistedLiteralOperations.go:1484 `func structStaticReadAccessorDecl(`; the measurement:
      docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 1. -->
 

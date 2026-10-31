@@ -114,14 +114,44 @@ program costs to run. These do.
 ### String literals
 
 By default a converted program keeps a string literal where Go has it: `F("hello")`. golib converts each literal from
-C#'s UTF-16 to Go's UTF-8 once and caches the result, so each later evaluation is a lookup that allocates nothing.
-`-hoist-literals` gives the literals named `static readonly` fields instead, `F(helloˢ)`, so an evaluation is a
-plain field read. The standard library is already converted this way, so code that calls into it gets the benefit
-without the flag.
+C#'s UTF-16 to Go's UTF-8 once and caches the result, so each later evaluation is a lookup that allocates nothing. A
+string constant is one field, as Go declares it.
 
-**When it helps:** a tight loop that calls a small function, not inlined, that returns or passes a literal.
+`-hoist-literals` is the optimization option. It gives each literal a named field, `F(helloˢ)`, and it reads every
+such field, and every string or other struct-typed constant, through a small accessor under the same name. The JIT
+and Native AOT both inline that accessor into the code that reads it; they would not inline a function that reads
+the field directly. The standard library is converted this way already, so code that calls into it gets the benefit
+without the flag. A constant block shows the difference:
 
-- On `win-x64` (an Intel Core i9-13900K), a loop calling a small standard-library function that returns a literal
+```go
+const (
+	Version = "1.0"
+	Name    = "server"
+)
+```
+
+<!-- illustration: the shape src/go2cs/staticReadAccessor_test.go asserts for a package-level string const -->
+```csharp
+// without the flag
+public static readonly @string Version = "1.0"u8;
+public static readonly @string Name = "server"u8;
+
+// with -hoist-literals
+public static ref readonly @string Version => ref Versionᵇ;
+private static readonly @string Versionᵇ = "1.0"u8;
+public static ref readonly @string Name => ref Nameᵇ;
+private static readonly @string Nameᵇ = "server"u8;
+```
+
+Every use still reads `Version` and `Name`, so the Go function bodies are unchanged.
+
+**When it helps:** a small function that returns or passes a literal or a constant, called from a tight loop.
+
+- On `win-x64` (an Intel Core i9-13900K), the standard library's `FormatBool`, which returns one of two literals,
+  took 0.66 ns per call through the accessor under the JIT, against 1.41 ns when it read the field directly and
+  1.07 ns with a plain literal. Under Native AOT it took 0.75 to 1.02 ns through the accessor, against 1.13 to
+  1.29 ns reading the field.
+- On the same machine, a loop calling a small standard-library function that returns a literal
   took roughly twice as long with plain literals under the JIT, once the JIT had optimized the function, and roughly
   1.7 to 1.8 times as long under Native AOT. A smaller such function took up to a quarter longer under Native AOT.
 - On `win-x64` (an AMD Ryzen 5 PRO 6650U):
@@ -133,16 +163,24 @@ without the flag.
 - In whole programs on the i9: a literal-heavy string-matching benchmark took roughly an eighth more time plain under
   the JIT, and the same time under Native AOT. Parsing URL queries took about the same time either way.
 
-**When it does not:** a literal evaluated rarely costs one lookup either way. A literal passed as an `any` argument,
-`fmt.Println("x")`, measured the same both ways: both forms pass one pre-boxed value. And hoisting is not always
-faster. On the i9 under the JIT, once the function was optimized, a small standard-library function ran faster plain,
-because the JIT inlined the plain form into the caller's loop and did not inline the hoisted one. Measure your own hot path.
+Every comparison in this list after the first was measured against the direct field read, before the accessor
+existed; the accessor reads faster than that field.
 
-**What it costs:** the emitted C# names each literal as a field, declared above the function that first uses it, so
-the code reads less like the Go. [Plain literals](ConversionStrategies-Reference/strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
+**When it does not:** a literal evaluated rarely costs one lookup either way. A literal passed as an `any` argument,
+`fmt.Println("x")`, measured the same both ways: both forms pass one pre-boxed value. Before the accessor, a small
+function that read a hoisted field could run slower than its plain form, because the compiler would not inline it;
+the accessor removed that case. Measure your own hot path.
+
+**What it costs:** one more declaration line per literal and per constant. The literal's field is declared above the
+function that first uses it, and each constant becomes an accessor plus a private field. Go function bodies are
+unchanged. [Plain literals](ConversionStrategies-Reference/strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
 describes both forms.
 
-<!-- Sources: docs/phase4/DESIGN-literal-hoisting-survival.md section 9 (seat #52, 2026-10-30).
+<!-- The accessor: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 1 and its s.2.1 AOT row (seat #53).
+     i9-13900K, win-x64, tree aaec1d4ca8, framework-dependent: FormatBool HR2 (the accessor) 0.66 ns, plain 1.07,
+     hoisted ldsfld 1.41, Go 0.73-1.02 on the JIT; Native AOT HR2 0.75 / 1.02 against H 1.13 / 1.29 (two passes), HR2/H
+     0.66 / 0.79, below the +-9% A/A band. The ldsfld refusal: "ldsfld of value class", FailAlways.
+     Sources: docs/phase4/DESIGN-literal-hoisting-survival.md section 9 (seat #52, 2026-10-30).
      i9-13900K, win-x64, .NET 10.0.14, 15 interleaved rounds x 2 passes, A/A band. Test 3, a user loop of 10M calls
      (master aaec1d4ca8): Hash.String plain/hoisted 2.029 and 2.023 on the steady JIT, 1.686 and 1.782 on AOT;
      FormatBool 1.121 and 1.250 on AOT, and 0.86 on the steady JIT (plain inlined, hoisted not; cause unexplained).

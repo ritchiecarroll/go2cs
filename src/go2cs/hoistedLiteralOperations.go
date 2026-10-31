@@ -1478,9 +1478,10 @@ func funcReadsHoistedLiteral(fn *types.Func) bool {
 // structStaticReadAccessorsApply is the ONE scope switch of seat #53's accessor form: whether the package being
 // converted reads its struct-typed statics through accessors. Every writer goes through structStaticReadAccessorDecl,
 // so returning packageHoistsLiterals here limits the form to the hoist mode (the standard library and
-// -hoist-literals), and true applies it to every package.
+// -hoist-literals), and true applies it to every package. The owner ruled the hoist mode (2026-10-30): a plain-mode
+// user package keeps one line per Go constant, and -hoist-literals documents the accessor as an optimization option.
 func structStaticReadAccessorsApply() bool {
-	return true
+	return packageHoistsLiterals
 }
 
 // structStaticReadAccessorDecl opens a struct-typed `static readonly` declaration, up to its initializer, as a

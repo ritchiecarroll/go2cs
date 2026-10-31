@@ -39,7 +39,7 @@ func TestPackedConstOperandCommentsTrailTheirBytes(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, packedConstSource)
 
-	decl := lineContaining(t, lines, "@string packed"+StaticBackingFieldMarker+" =")
+	decl := lineContaining(t, lines, "@string packed =")
 
 	for _, c := range []struct{ comment, bytes string }{
 		{"// first: 0x00410300", "0x00, 0x41, 0x03, 0x00,"},
@@ -62,7 +62,7 @@ func TestPackedConstUnchangedWithoutComments(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	lines := convertWithoutComments(t, packedConstSource)
 
-	at := lineContaining(t, lines, "@string packed"+StaticBackingFieldMarker+" =")
+	at := lineContaining(t, lines, "@string packed =")
 
 	if !strings.Contains(lines[at], "new byte[]{0x00, 0x41, 0x03, 0x00, 0x00, 0x41, 0x03, 0x01, 0xff, 0x80}") {
 		t.Errorf("without -comments the folded constant changed: %q", lines[at])

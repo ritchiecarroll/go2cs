@@ -1840,10 +1840,11 @@ rules further down this section):
   an untyped number, a named type, a `uintptr` (a golib struct), a complex number, or an `int` or
   `uint` value too wide for 32 bits;
 - a `static readonly` field, for any package-level string constant, typed or untyped, and for an integer constant
-  too wide for 64 bits, which is golib's `GoBigConst` (C#'s `BigInteger`). Its value is a struct, so code reads it
-  through an accessor under the constant's own name, `static ref readonly @string name => ref nameᵇ;`, over the
-  private field `nameᵇ`. The JIT will not inline a function that copies a struct out of a static field, and a read
-  through the accessor is a reference it can inline; every use still spells the constant's name.
+  too wide for 64 bits, which is golib's `GoBigConst` (C#'s `BigInteger`). In the standard library, and in a
+  package converted with `-hoist-literals`, the value is read through an accessor under the constant's own name,
+  `static ref readonly @string name => ref nameᵇ;`, over the private field `nameᵇ`. The value is a struct, the JIT
+  will not inline a function that copies a struct out of a static field, and a read through the accessor is a
+  reference it can inline; every use still spells the constant's name. Other packages keep the one field.
 <!-- forms: src/go2cs/visitValueSpec.go:1449 `else if constExpr == "const"`, :1472 `static %s %s =>%s %s;`,
      :1267 `structStaticReadAccessorDecl(access, strTypeName, csIDName`; the accessor:
      src/go2cs/hoistedLiteralOperations.go:1484 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
