@@ -267,6 +267,9 @@ var plants = []plant{
 	one("PL bad: the other direction", prodFile, `    take("hello world");`, `    take(helloWorldˢ);`, "UNCLASSIFIED"),
 	one("PL bad: a go/defer statement is GD's", prodFile, `    defer(f, "x"u8, ref ᒐ);`, `    defer(f, "x", ref ᒐ);`, "UNCLASSIFIED"),
 	one("PL good: a literal nested in a go/defer argument's call", prodFile, `    defer(un, trace(Ꮡp, "parseIndexOrSliceOrInstance"u8), ref ᒐ);`, `    defer(un, trace(Ꮡp, "parseIndexOrSliceOrInstance"), ref ᒐ);`, "PL"),
+	// goDeferOwnsLine's negative control: a launch with no thunk whose hoisted field or literal IS the launch's own
+	// argument stays GD's (with PL's canon it would read PL), as "GD good a method group keeps its form" does for goǃ.
+	one("GD good: a direct launch argument is GD's, not PL's", prodFile, `        defer(@catch, caughtˢ, ref ᒐ, recovers: true);`, `        defer(@catch, (@string)"caught", ref ᒐ, recovers: true);`, "GD"),
 	// PC (#51): a function-local string const's local.
 	one("PC good: the const's local takes its literal", prodFile, `    @string fnAtoi = fnAtoiᶜ;`, `    @string fnAtoi = "Atoi";`, "PC"),
 	one("PC good: a collision ordinal", prodFile, `    @string context = contextᶜ2;`, `    @string context = "ctx";`, "PC"),
