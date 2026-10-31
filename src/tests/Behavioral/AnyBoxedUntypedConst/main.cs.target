@@ -158,17 +158,17 @@ internal static void Main() {
     any sc = (@string)("se" + "ed");
     fmt.Println("str asn lit   :", AreEqual(sv, ((any)s)), AreEqual(sc, ((any)s)));
 
-    var ssl = slice<any>([(@string)"seed"u8, (@string)("se" + "ed")]);
+    var ssl = slice<any>([seedˢ, (@string)("se" + "ed")]);
     fmt.Println("str slc       :", AreEqual(ssl[0], ((any)s)), AreEqual(ssl[1], ((any)s)));
 
-    var smk = new map<any, @string>{[(@string)"seed"u8] = "hit"};
+    var smk = new map<any, @string>{[seedˢ] = "hit"};
     fmt.Println("str mapkey    :", smk[seedˢ], smk[((any)s)]);
 
-    var smv = new map<@string, any>{["k"] = (@string)"seed"u8, ["c"] = (@string)("se"u8 + "ed"u8)};
+    var smv = new map<@string, any>{["k"] = seedˢ, ["c"] = (@string)("se"u8 + "ed"u8)};
     fmt.Println("str mapval    :", AreEqual(smv["k"], ((any)s)), AreEqual(smv["c"], ((any)s)));
 
-    var shk = new holder(v: (@string)"seed"u8);
-    var shp = new holder((@string)"seed"u8);
+    var shk = new holder(v: seedˢ);
+    var shp = new holder(seedˢ);
     var shc = new holder(v: (@string)("se"u8 + "ed"u8));
     fmt.Println("str struct    :", AreEqual(shk.v, ((any)s)), AreEqual(shp.v, ((any)s)), AreEqual(shc.v, ((any)s)));
 

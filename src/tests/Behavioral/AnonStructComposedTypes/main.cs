@@ -11,8 +11,8 @@ partial struct ptrElemsᴛ1 /*dyn*/ {
     /*embed*/ internal error error;
 }
 [GoLazy] partial class lazyᴛptrElems { internal static slice<ж<ptrElemsᴛ1>> ptrElems = slice<ж<ptrElemsᴛ1>>([
-    Ꮡ(new ptrElemsᴛ1(1, "one"u8, default)),
-    Ꮡ(new ptrElemsᴛ1(2, "two"u8, default))
+    Ꮡ(new ptrElemsᴛ1(1, "one", default)),
+    Ꮡ(new ptrElemsᴛ1(2, "two", default))
 ]); }
 
 

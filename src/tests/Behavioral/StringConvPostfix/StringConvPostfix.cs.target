@@ -23,8 +23,8 @@ internal static void Main() {
     fmt.Println(len(m));
 
     slice<byte> eb = default;
-    eb = append(eb, ((@string)"runtime error: "u8).ꓸꓸꓸ);
-    eb = append(eb, ((@string)"oops"u8).ꓸꓸꓸ);
+    eb = append(eb, ((@string)"runtime error: ").ꓸꓸꓸ);
+    eb = append(eb, ((@string)"oops").ꓸꓸꓸ);
     fmt.Println((@string)eb, len(eb));
 
     nint tag = 7;

@@ -38,7 +38,7 @@ internal static void Main() {
         fmt.Println(s.X, s.Y, s.Name, s.sides);
     }
 
-    var labeled = slice<ж<Labeled>>([Ꮡ(new Labeled(Shape: shapes[0], label: "first"u8))]);
+    var labeled = slice<ж<Labeled>>([Ꮡ(new Labeled(Shape: shapes[0], label: "first"))]);
     labeled[0].X = 100;
     fmt.Println(shapes[0].X, labeled[0].Name, labeled[0].label);
 
@@ -57,7 +57,7 @@ internal static void readNil() {
             fmt.Println("recovered:", recover() != nil);
         }, ref ᒐ);
 
-        var broken = slice<ж<Labeled>>([Ꮡ(new Labeled(label: "nil shape"u8))]);
+        var broken = slice<ж<Labeled>>([Ꮡ(new Labeled(label: "nil shape"))]);
         fmt.Println(broken[0].X);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

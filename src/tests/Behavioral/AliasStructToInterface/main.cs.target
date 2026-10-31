@@ -31,9 +31,9 @@ internal static void Main() {
 
     var d = newDirect();
     d.Store("b", (nint)2);
-    (v, ok) = d._<storer, ж<Δsync.Map>>().Load((@string)"b"u8);
+    (v, ok) = d._<storer, ж<Δsync.Map>>().Load((@string)"b");
     fmt.Println(v, ok);
-    (_, ok) = d._<storer, ж<Δsync.Map>>().Load((@string)"a"u8);
+    (_, ok) = d._<storer, ж<Δsync.Map>>().Load((@string)"a");
     fmt.Println(ok);
 }
 

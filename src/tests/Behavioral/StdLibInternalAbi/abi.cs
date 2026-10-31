@@ -16,19 +16,19 @@ partial struct RegArgs {
 }
 
 public static void Dump(this ref RegArgs r) {
-    print((@string)"Ints:"u8);
+    print((@string)"Ints:");
     foreach (var (_, x) in r.Ints.ΔRangeSnapshot()) {
-        print((@string)" "u8, x);
+        print((@string)" ", x);
     }
     println();
-    print((@string)"Floats:"u8);
+    print((@string)"Floats:");
     foreach (var (_, x) in r.Floats.ΔRangeSnapshot()) {
-        print((@string)" "u8, x);
+        print((@string)" ", x);
     }
     println();
-    print((@string)"Ptrs:"u8);
+    print((@string)"Ptrs:");
     foreach (var (_, x) in r.Ptrs.ΔRangeSnapshot()) {
-        print((@string)" "u8, @unsafe.Pointer.OrTypedNil(x));
+        print((@string)" ", @unsafe.Pointer.OrTypedNil(x));
     }
     println();
 }

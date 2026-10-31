@@ -26,18 +26,21 @@ internal static void describe(@string prefix, any v) {
     }}
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object valˢ = (@string)"val"u8;
+
 internal static void Main() {
-    var n = Ꮡ(new node(inner: (@string)"hi"u8));
-    var p = new pair("tag", (@string)"val"u8);
-    var m = new map<@string, any>{["k"] = (@string)"mv"u8};
-    var mk = new map<any, nint>{[(@string)"ky"u8] = 7};
-    var s = slice<any>([(@string)"a"u8, (@string)"b"u8]);
-    var arr = new any[]{(@string)"x"u8, (@string)"y"u8}.array();
-    var el = slice<node>([new(inner: (@string)"e1"u8)]);
-    var ep = slice<pair>([new("e2", (@string)"e3"u8)]);
-    var pp = slice<ж<node>>([Ꮡ(new node(inner: (@string)"p1"u8))]);
-    var pq = slice<ж<pair>>([Ꮡ(new pair("q1"u8, (@string)"q2"u8))]);
-    var sp = new array<any>(3){[1] = (@string)"sp"u8};
+    var n = Ꮡ(new node(inner: (@string)"hi"));
+    var p = new pair("tag", valˢ);
+    var m = new map<@string, any>{["k"] = (@string)"mv"};
+    var mk = new map<any, nint>{[(@string)"ky"] = 7};
+    var s = slice<any>([(@string)"a", (@string)"b"]);
+    var arr = new any[]{(@string)"x", (@string)"y"}.array();
+    var el = slice<node>([new(inner: (@string)"e1")]);
+    var ep = slice<pair>([new("e2", (@string)"e3")]);
+    var pp = slice<ж<node>>([Ꮡ(new node(inner: (@string)"p1"))]);
+    var pq = slice<ж<pair>>([Ꮡ(new pair("q1", (@string)"q2"))]);
+    var sp = new array<any>(3){[1] = (@string)"sp"};
 
     describe("keyed", n.inner);
     fmt.Println("label:", p.label);

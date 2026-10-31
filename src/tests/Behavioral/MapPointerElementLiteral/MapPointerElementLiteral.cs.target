@@ -8,11 +8,8 @@ partial struct node {
     internal nint id;
 }
 
-internal static map<@string, ж<node>> buildValueMap(ж<node> Ꮡa, ж<node> Ꮡb) {
-    ref var a = ref Ꮡa.DerefOrNull();
-    ref var b = ref Ꮡb.DerefOrNull();
-
-    return new map<@string, ж<node>>{["a"] = Ꮡa, ["b"] = Ꮡb};
+internal static map<@string, ж<node>> buildValueMap(ж<node> a, ж<node> b) {
+    return new map<@string, ж<node>>{["a"] = a, ["b"] = b};
 }
 
 internal static map<ж<node>, nint> buildKeyMap(ж<node> a, ж<node> b) {

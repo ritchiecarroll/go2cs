@@ -72,6 +72,9 @@ internal static @string nest(params ꓸꓸꓸany argsʗp) {
     return fmt.Sprintf("<%d>%v"u8, len(args), args);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object twoˢ = (@string)"two"u8;
+
 internal static void Main() {
     fmt.Println(totalArea(2, new RectжShape(newRect(3, 4)), new CircleжShape(Ꮡ(new Circle(r: 2))), new RectжShape(newRect(1, 5))));
 
@@ -103,7 +106,7 @@ internal static void Main() {
     slice<Shape> none = default;
     fmt.Println(describe(none.ꓸꓸꓸ));
 
-    var anys = slice<any>([(nint)1, (@string)"two"u8, default]);
+    var anys = slice<any>([(nint)1, twoˢ, default]);
     var (ᴛ13, ᴛ14) = countArgs((any)(anys));
     fmt.Println(ᴛ13, ᴛ14);
     fmt.Println(nest((any)(anys)));
@@ -127,7 +130,7 @@ internal static void Main() {
     fmt.Println(ᴛ23, ᴛ24);
     fmt.Println(nest((any)(arr)));
 
-    var named = new anyList(new any[]{(nint)1, (@string)"two"u8}.slice());
+    var named = new anyList(new any[]{(nint)1, twoˢ}.slice());
     var (ᴛ25, ᴛ26) = countArgs(named);
     fmt.Println(ᴛ25, ᴛ26);
     fmt.Println(nest(named));

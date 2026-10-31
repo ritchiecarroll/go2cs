@@ -56,7 +56,7 @@ internal static void Main() {
     z("NA{1,2}", new NA(new uint8[]{1, 2}.array()));
     z("NA{}", new NA(new uint8[2].array()));
     z("[3]string{'','',''}", new @string[]{}.array(3));
-    z("[2]NS{'a',''}", new NS[]{(NS)(@string)"a"u8, (NS)(@string)""u8}.array());
+    z("[2]NS{'a',''}", new NS[]{(NS)(@string)"a", (NS)(@string)""u8}.array());
 
     z("NB(nil)", (NB)default);
     z("NB{}", new NB(new byte[]{}.slice()));
@@ -72,13 +72,13 @@ internal static void Main() {
     z("inner{N:1}", new inner(N: 1));
     z("outer{}", new outer());
     z("outer{A:NA{0,1}}", new outer(A: new NA(new uint8[]{0, 1}.array())));
-    z("outer{I.S:x}", new outer(I: new inner(S: ((NS)(@string)"x"u8))));
+    z("outer{I.S:x}", new outer(I: new inner(S: ((NS)(@string)"x"))));
     ref var n = ref heap<nint>(0, out var Ꮡn);
     z("outer{P:&n}", new outer(P: Ꮡn));
     z("outer{Sl:[]}", new outer(Sl: slice<nint>([])));
 
     fmt.Println("any(NS(\"\")) IsZero:", reflect.ValueOf((any)((NS)(@string)""u8)).IsZero());
-    fmt.Println("any(NS(\"v\")) IsZero:", reflect.ValueOf((any)((NS)(@string)"v"u8)).IsZero());
+    fmt.Println("any(NS(\"v\")) IsZero:", reflect.ValueOf((any)((NS)(@string)"v")).IsZero());
 
     z("outer{E:nil}", new outer());
     z("outer{E:err}", new outer(E: errors.New("x")));

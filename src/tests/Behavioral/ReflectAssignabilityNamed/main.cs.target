@@ -30,7 +30,7 @@ internal static void @try(@string label, Action set) {
 internal static void Main() {
     ref var dstString = ref heap(new @string(), out var ᏑdstString);
     @try("S->string (must PANIC)", () => {
-        reflect.ValueOf(ᏑdstString).Elem().Set(reflect.ValueOf((S)(@string)"x"u8));
+        reflect.ValueOf(ᏑdstString).Elem().Set(reflect.ValueOf((S)(@string)"x"));
     });
 
     ref var dstB = ref heap<B>(out var ᏑdstB);

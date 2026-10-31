@@ -131,17 +131,17 @@ internal static void Main() {
     fmt.Println(reflect.DeepEqual(s1, s2));
     fmt.Println(reflect.DeepEqual(s1, s3));
 
-    var k1 = new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2};
-    var k2 = new map<any, nint>{[(@string)"b"u8] = 2, [default] = 1};
-    var k3 = new map<any, nint>{[default] = 9, [(@string)"b"u8] = 2};
-    var k4 = new map<any, nint>{[(@string)"b"u8] = 2, [(@string)"c"u8] = 1};
+    var k1 = new map<any, nint>{[default] = 1, [(@string)"b"] = 2};
+    var k2 = new map<any, nint>{[(@string)"b"] = 2, [default] = 1};
+    var k3 = new map<any, nint>{[default] = 9, [(@string)"b"] = 2};
+    var k4 = new map<any, nint>{[(@string)"b"] = 2, [(@string)"c"] = 1};
     fmt.Println(reflect.DeepEqual(k1, k2));
     fmt.Println(reflect.DeepEqual(k1, k3));
     fmt.Println(reflect.DeepEqual(k1, k4));
-    var j1 = new namedAny(new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2});
-    var j2 = new namedAny(new map<any, nint>{[(@string)"b"u8] = 2, [default] = 1});
-    var j3 = new namedAny(new map<any, nint>{[default] = 9, [(@string)"b"u8] = 2});
-    var j4 = new namedAny(new map<any, nint>{[(@string)"b"u8] = 2, [(@string)"c"u8] = 1});
+    var j1 = new namedAny(new map<any, nint>{[default] = 1, [(@string)"b"] = 2});
+    var j2 = new namedAny(new map<any, nint>{[(@string)"b"] = 2, [default] = 1});
+    var j3 = new namedAny(new map<any, nint>{[default] = 9, [(@string)"b"] = 2});
+    var j4 = new namedAny(new map<any, nint>{[(@string)"b"] = 2, [(@string)"c"] = 1});
     fmt.Println(reflect.DeepEqual(j1, j2));
     fmt.Println(reflect.DeepEqual(j1, j3));
     fmt.Println(reflect.DeepEqual(j1, j4));
@@ -218,7 +218,7 @@ internal static void Main() {
     r2[0] = r2;
     fmt.Println(reflect.DeepEqual(r1, r2));
     var r3 = new recur(1);
-    r3[0] = (@string)"x"u8;
+    r3[0] = (@string)"x";
     fmt.Println(reflect.DeepEqual(r1, r3));
 }
 

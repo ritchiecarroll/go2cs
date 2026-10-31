@@ -12,11 +12,11 @@ internal static void add(@string verb, slice<@string> args) {
     }
 
     if (len(args) != 1) {
-        errorf("%s: want 1 argument, got %d"u8, verb, len(args));
+        errorf("%s: want 1 argument, got %d", verb, len(args));
         return;
     }
 
-    errorf("%s: %s"u8, verb, args[0]);
+    errorf("%s: %s", verb, args[0]);
 }
 
 internal static void Main() {

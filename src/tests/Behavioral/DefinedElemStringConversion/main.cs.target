@@ -29,7 +29,7 @@ private static readonly @string hLloˢ = "héllo"u8;
 
 internal static void Main() {
     ref var ns = ref heap(new namedString(), out var Ꮡns);
-    ns = "hi"u8;
+    ns = (@string)"hi";
     fmt.Println(slice<byte>((@string)ns));
     fmt.Println(slice<rune>((@string)ns));
     fmt.Println(takesBytes(slice<byte>((@string)ns)));
