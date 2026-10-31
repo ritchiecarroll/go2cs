@@ -1,0 +1,8 @@
+<Project>
+  <!-- Seat #53 P1 kit: Native AOT for the program only. A global -p:PublishAot=true also reaches go2cs-gen, a
+       netstandard analyzer, and the SDK refuses it (NETSDK1207). -->
+  <PropertyGroup Condition="'$(GoAot)'=='true' AND '$(OutputType)'=='Exe'">
+    <PublishAot>true</PublishAot>
+    <PublishReadyToRun>false</PublishReadyToRun>
+  </PropertyGroup>
+</Project>
