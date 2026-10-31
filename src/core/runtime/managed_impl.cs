@@ -4670,6 +4670,8 @@ partial class runtime_package
     // NEVER A GUESS: two or more calls of the callee after the reported offset (the chain's Add, Add, Add)
     // cannot be told apart from that offset, and keep returnSiteILOffset's answer, as before. A callee the
     // JIT inlined away left no frame, so its caller's frame names a callee no call here targets: unsettled.
+    // A statement that settles nothing -- no call of the callee, the stack-held local's case, or two, a
+    // statement of several regions -- hands the frame to regionSettledCallSite, which reads the JIT's own.
     //
     // THE DEFERRING FRAME is settled across the whole method, not one statement. A frame suspended calling
     // GoFrame.Run is a deferred call's caller, running its finally (Go's deferreturn), and the JIT can report
@@ -4719,6 +4721,71 @@ partial class runtime_package
             if (call < ilOffset || call >= end || callTarget(method, call) is not { } target || !targetsCallee(target, callee))
                 continue;
 
+            // Two calls of the callee: the statement cannot tell them apart, but the JIT's region may.
+            if (found >= 0)
+            {
+                found = -1;
+                break;
+            }
+
+            found = call;
+        }
+
+        return found >= 0 ? found : regionSettledCallSite(method, ilOffset, candidate, callee, calls);
+    }
+
+    // THE STACK-HELD LOCAL. Where the optimizing C# compiler keeps a local on the evaluation stack (`dup` where a local
+    // would be `ldloc`), no statement boundary is stack-empty, and the JIT maps only its OWN boundaries (ilBoundaryOffsets):
+    // a frame suspended in a call reports the instruction after the previous VOID call, which can be a whole statement
+    // before the call, so the statement settle above finds nothing. Measured 2026-10-31 (windows, Release) on the behavioral
+    // CallerLineStackLocal and CallerLineCallSite: the C# compiler holds the local only where nothing pins it -- one u8
+    // literal anywhere in the method kept it in a slot -- and every frame read the previous statement's line.
+    //
+    // The suspended call lies between the reported offset and the next boundary, so where that region holds exactly ONE
+    // call of the callee, that call it is. It fires only where today's reading is PROVABLY wrong: it names a direct `call`
+    // of another method, and the statement settle found nothing -- no call of the callee, or two (a statement of several
+    // regions: CallerLineMultiLine's pkgSlice stores each element with the stack empty after it, so each is a region of
+    // its own though the statement holds every call). Anything indirect keeps today's reading -- a
+    // virtual or interface call, a calli or a delegate Invoke, named today or anywhere in the region, may be the callee's
+    // frame or hide it -- and so do a callee frame no call can name (a dynamic method or an IL stub), and zero or two
+    // calls of the callee in the region. Unique match is not a heuristic: ambiguity is never broken by distance or order.
+    //
+    // WHAT IT COVERS, stated: tier-0 frames are exact on a unique match, since the region is tier-0's own. Optimized
+    // frames (tiering off, Tier1, OSR) are PARTIAL: the optimized map keeps fewer boundaries, so the reported offset can
+    // sit further back and the region may not reach the suspended call; it can move one wrong line to another, never a
+    // right one to wrong, because it fires only where today's reading is already wrong. Measured on a plain C# probe at
+    // tiering off: two frames suspended in two different calls both reported the instruction after the method's first void
+    // call. With the call-counting delay at 0 (#53) methods reach Tier1 sooner, so optimized frames are the common case.
+    private static int regionSettledCallSite(System.Reflection.MethodBase method, int ilOffset, int named, System.Reflection.MethodBase callee, int[] calls)
+    {
+        if (!isDirectCall(method, named) || callTarget(method, named) is not { } namedTarget || isDelegateInvoke(namedTarget))
+            return -1;
+
+        if (callee.DeclaringType is null || callee is System.Reflection.Emit.DynamicMethod || callee.Name.StartsWith("IL_STUB", StringComparison.Ordinal))
+            return -1;
+
+        if (ilBoundaryOffsets(method) is not { } boundaries)
+            return -1;
+
+        int next = Array.BinarySearch(boundaries, ilOffset + 1);
+
+        if (next < 0)
+            next = ~next;
+
+        int end = next < boundaries.Length ? boundaries[next] : int.MaxValue;
+        int found = -1;
+
+        foreach (int call in calls)
+        {
+            if (call < ilOffset || call >= end)
+                continue;
+
+            if (callTarget(method, call) is not { } target || isIndirectCall(method, call, target))
+                return -1;
+
+            if (!targetsCallee(target, callee))
+                continue;
+
             if (found >= 0)
                 return -1;
 
@@ -4726,6 +4793,34 @@ partial class runtime_package
         }
 
         return found;
+    }
+
+    private static bool isDirectCall(System.Reflection.MethodBase method, int ilOffset) =>
+        ilByte(method, ilOffset) == 0x28;
+
+    // A call whose target is chosen at run time: calli, a delegate Invoke, or a callvirt of a virtual or interface method.
+    // A callvirt of a non-virtual method (the C# compiler's null check) names its target as a call does.
+    private static bool isIndirectCall(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase target) =>
+        ilByte(method, ilOffset) switch
+        {
+            0x28 or 0x73 => isDelegateInvoke(target),
+            0x6F => target.IsVirtual || target.IsAbstract || isDelegateInvoke(target),
+            _ => true
+        };
+
+    private static bool isDelegateInvoke(System.Reflection.MethodBase target) =>
+        target.Name == "Invoke" && target.DeclaringType is { } type && typeof(Delegate).IsAssignableFrom(type);
+
+    private static int ilByte(System.Reflection.MethodBase method, int ilOffset)
+    {
+        try
+        {
+            return method.GetMethodBody()?.GetILAsByteArray() is { } il && ilOffset >= 0 && ilOffset < il.Length ? il[ilOffset] : -1;
+        }
+        catch (Exception)
+        {
+            return -1;
+        }
     }
 
     // INLINED PANIC SITES (COORD's frame-hint ruling, 2026-10-22). Go records inlined frames, so its traceback always
@@ -4970,6 +5065,205 @@ partial class runtime_package
             }
 
             return calls.ToArray();
+        });
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, int[]?> s_ilBoundaryOffsets = new();
+
+    // THE JIT'S OWN BOUNDARIES: the IL offsets at which tier-0's IL-to-native map can start a mapping where no PDB
+    // statement does, ascending -- every instruction the evaluation stack is EMPTY at, and the instruction after a call
+    // that returns nothing (a void call or callvirt; not a constructor call). Measured 2026-10-31 on windows, Release,
+    // tier-0: a value call, even one whose result is popped, left no mapping with a value held beneath it; a void call
+    // did. A boundary this omits only widens the region regionSettledCallSite reads, so a mapping the JIT may also make
+    // (after a nop, a newobj, a calli) is left out rather than guessed.
+    //
+    // One forward pass, as ECMA-335 III.1.7.5 lets a verifier infer the stack: a branch records its target's depth, a
+    // handler is entered at depth 1 (catch, filter) or 0 (finally, fault), and the instruction after an unconditional
+    // transfer takes the depth a forward branch reached it with, else 0. Null where the pass cannot be exact -- no IL
+    // body (NativeAOT), an unreadable call token, a calli or jmp (their stack effect is not a method token's), or two
+    // edges reaching one instruction at different depths -- so the caller settles nothing.
+    private static int[]? ilBoundaryOffsets(System.Reflection.MethodBase method) =>
+        s_ilBoundaryOffsets.GetOrAdd(method, static m =>
+        {
+            byte[]? il;
+            IList<System.Reflection.ExceptionHandlingClause> clauses;
+
+            try
+            {
+                System.Reflection.MethodBody? body = m.GetMethodBody();
+                il = body?.GetILAsByteArray();
+                clauses = body?.ExceptionHandlingClauses ?? [];
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            if (il is null)
+                return null;
+
+            Dictionary<int, int> reached = [];
+
+            foreach (System.Reflection.ExceptionHandlingClause clause in clauses)
+            {
+                reached[clause.TryOffset] = 0;
+                reached[clause.HandlerOffset] = clause.Flags is System.Reflection.ExceptionHandlingClauseOptions.Finally or System.Reflection.ExceptionHandlingClauseOptions.Fault ? 0 : 1;
+
+                if (clause.Flags == System.Reflection.ExceptionHandlingClauseOptions.Filter)
+                    reached[clause.FilterOffset] = 1;
+            }
+
+            List<int> boundaries = [];
+            int depth = 0, i = 0;
+            bool flowsIn = true, afterVoidCall = false, prefixed = false;
+
+            // A branch reaching `target` at depth `at`: a target already reached (or, backward, already read) must agree.
+            bool reach(int target, int at)
+            {
+                if (reached.TryGetValue(target, out int known))
+                    return known == at;
+
+                reached[target] = at;
+                return true;
+            }
+
+            while (i < il.Length)
+            {
+                int start = i;
+                System.Reflection.Emit.OpCode op;
+
+                if (il[i] == 0xFE && i + 1 < il.Length)
+                {
+                    if (!ILOpCodeTable.TwoByte.TryGetValue(il[i + 1], out op))
+                        return null;
+                    i += 2;
+                }
+                else if (!ILOpCodeTable.OneByte.TryGetValue(il[i], out op))
+                {
+                    return null;
+                }
+                else
+                {
+                    i += 1;
+                }
+
+                if (reached.TryGetValue(start, out int known))
+                {
+                    if (flowsIn && known != depth)
+                        return null;
+                    depth = known;
+                }
+                else if (!flowsIn)
+                {
+                    depth = 0;
+                }
+
+                // Recorded at every instruction, so a backward branch to it compares against the depth it was read at.
+                reached[start] = depth;
+
+                if (!prefixed && (depth == 0 || afterVoidCall))
+                    boundaries.Add(start);
+
+                prefixed = op.OpCodeType == System.Reflection.Emit.OpCodeType.Prefix;
+                afterVoidCall = false;
+                flowsIn = true;
+
+                int operand = op.OperandType switch
+                {
+                    System.Reflection.Emit.OperandType.InlineNone => 0,
+                    System.Reflection.Emit.OperandType.ShortInlineBrTarget or System.Reflection.Emit.OperandType.ShortInlineI or System.Reflection.Emit.OperandType.ShortInlineVar => 1,
+                    System.Reflection.Emit.OperandType.InlineVar => 2,
+                    System.Reflection.Emit.OperandType.InlineI8 or System.Reflection.Emit.OperandType.InlineR => 8,
+                    System.Reflection.Emit.OperandType.InlineSwitch when i + 4 <= il.Length => 4 + 4 * BitConverter.ToInt32(il, i),
+                    _ => 4
+                };
+
+                if (i + operand > il.Length)
+                    return null;
+
+                int pop, push;
+
+                if (op == System.Reflection.Emit.OpCodes.Call || op == System.Reflection.Emit.OpCodes.Callvirt || op == System.Reflection.Emit.OpCodes.Newobj)
+                {
+                    if (callTarget(m, start) is not { } target)
+                        return null;
+
+                    int parameters = target.GetParameters().Length;
+                    bool constructs = op == System.Reflection.Emit.OpCodes.Newobj;
+                    bool returnsNothing = target is System.Reflection.ConstructorInfo || target is System.Reflection.MethodInfo { ReturnType: var type } && type == typeof(void);
+
+                    pop = parameters + (!constructs && !target.IsStatic ? 1 : 0);
+                    push = constructs || !returnsNothing ? 1 : 0;
+                    afterVoidCall = !constructs && returnsNothing && target is not System.Reflection.ConstructorInfo;
+                }
+                else if (op == System.Reflection.Emit.OpCodes.Calli || op == System.Reflection.Emit.OpCodes.Jmp)
+                {
+                    return null;
+                }
+                else if (op == System.Reflection.Emit.OpCodes.Ret)
+                {
+                    pop = depth;
+                    push = 0;
+                }
+                else
+                {
+                    pop = op.StackBehaviourPop switch
+                    {
+                        System.Reflection.Emit.StackBehaviour.Pop0 => 0,
+                        System.Reflection.Emit.StackBehaviour.Pop1 or System.Reflection.Emit.StackBehaviour.Popi or System.Reflection.Emit.StackBehaviour.Popref => 1,
+                        System.Reflection.Emit.StackBehaviour.Popi_popi_popi or System.Reflection.Emit.StackBehaviour.Popref_popi_popi or System.Reflection.Emit.StackBehaviour.Popref_popi_popi8 or
+                            System.Reflection.Emit.StackBehaviour.Popref_popi_popr4 or System.Reflection.Emit.StackBehaviour.Popref_popi_popr8 or System.Reflection.Emit.StackBehaviour.Popref_popi_popref or
+                            System.Reflection.Emit.StackBehaviour.Popref_popi_pop1 => 3,
+                        System.Reflection.Emit.StackBehaviour.Varpop => -1,
+                        _ => 2
+                    };
+                    push = op.StackBehaviourPush switch
+                    {
+                        System.Reflection.Emit.StackBehaviour.Push0 => 0,
+                        System.Reflection.Emit.StackBehaviour.Push1_push1 => 2,
+                        System.Reflection.Emit.StackBehaviour.Varpush => -1,
+                        _ => 1
+                    };
+
+                    if (pop < 0 || push < 0)
+                        return null;
+                }
+
+                if (pop > depth)
+                    return null;
+
+                depth += push - pop;
+
+                if (op == System.Reflection.Emit.OpCodes.Leave || op == System.Reflection.Emit.OpCodes.Leave_S)
+                    depth = 0;
+
+                switch (op.OperandType)
+                {
+                    case System.Reflection.Emit.OperandType.ShortInlineBrTarget:
+                        if (!reach(i + 1 + (sbyte)il[i], depth))
+                            return null;
+                        break;
+
+                    case System.Reflection.Emit.OperandType.InlineBrTarget:
+                        if (!reach(i + 4 + BitConverter.ToInt32(il, i), depth))
+                            return null;
+                        break;
+
+                    case System.Reflection.Emit.OperandType.InlineSwitch:
+                        int count = BitConverter.ToInt32(il, i), next = i + operand;
+
+                        for (int k = 0; k < count; k++)
+                        {
+                            if (!reach(next + BitConverter.ToInt32(il, i + 4 + 4 * k), depth))
+                                return null;
+                        }
+                        break;
+                }
+
+                flowsIn = op.FlowControl is not (System.Reflection.Emit.FlowControl.Branch or System.Reflection.Emit.FlowControl.Return or System.Reflection.Emit.FlowControl.Throw);
+                i += operand;
+            }
+
+            return boundaries.ToArray();
         });
 
     // The ECMA-335 opcode table, keyed by encoding, built from System.Reflection.Emit.OpCodes on first
