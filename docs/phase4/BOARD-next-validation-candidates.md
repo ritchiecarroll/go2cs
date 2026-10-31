@@ -32577,4 +32577,12 @@ either ref; the disclosure's 12 zero records gain a 13th line whenever a long ru
 
 — R (2026-10-31)
 
+**WATCH: `GoroutinePanicAfterDeferredDone`'s Go oracle is racy on a loaded Windows box** — COORD (2026-10-31)
+
+At batch 111 the full behavioral suite read one red: `GoroutinePanicAfterDeferredDone [Output]`, exit code C# 2 against Go 0, Go's stderr empty. It is the Go side that varies. The runner's own Release Go binary, run directly on the i7 in the merged tree, exited 0 with nothing on stderr in 4 of 8 runs and exited 2 with the panic report in the other 4. The runner then read the same mismatch in 5 of 5 single-project runs. The converted program exited 2 with Go's first stderr line on every run.
+
+Cause, as read in the Go 1.26.10 source: after `main.main` returns, `runtime.main` waits for `runningPanicDefers` to clear only for a bounded loop of 1000 `Gosched` calls (`runtime/proc.go`, line 310). A loaded host can exhaust that loop before the panicking goroutine sets `panicking`, so Go exits 0. The test's header says the report "always wins"; on this host it does not. The Go binary builds from an unchanged `main.go`, so the red does not depend on the batch under test, and it was ruled an oracle flake, not a regression.
+
+Owed: the test needs an oracle that does not race. One option is to compare C# against the documented panic outcome rather than a live Go run when the Go side exits 0 with an empty stderr. Another is to keep the race but make main block until the report can win in Go too. Until then a red on this one project whose Go side reads exit 0 with an empty stderr is this WATCH, and any other signature is a real red.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
