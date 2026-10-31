@@ -12598,7 +12598,7 @@ result is unpacked with `var (p, err) = …`. `crypto/elliptic`'s `ScalarBaseMul
      asm ordinv and returns a valid inverse; crypto/ecdsa handles the same error with a fallback, so
      ECDSA is unaffected. Inverse is reached via the deprecated `invertible` interface. The inline panic
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
-     (src/go2cs/hoistedLiteralOperations.go:959-961#0b8d4e), since it costs nothing until a panic fires. -->
+     (src/go2cs/hoistedLiteralOperations.go:964-966#0b8d4e), since it costs nothing until a panic fires. -->
 
 **A module converts with `-tags safe`, for a different reason.** Some libraries reach into Go's runtime with
 unsafe pointer arithmetic, adding a byte offset to a value to read one of its private fields. Converted code
