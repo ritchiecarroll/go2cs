@@ -526,7 +526,10 @@ Two-seeded `-stdlib -comments` x3 targets: base converter `be64e39ef4cdb1f2` (ma
   and 3 would move no `src/core` file. That was wrong: the converter writes the whole template into every project.
 - **Nothing else.**
 
-The rung row is in `data/parity-1262/ladder-rungs.tsv`, to be re-measured at the rebase over #51.
+The seat converter above was built at `d5a2c165c5`, before the scope switch. The tip's converter, `a34f3539e295b32e`
+(built at `ff893112d7`), re-emits the same tree byte for byte: 0 files differ. The standard library is hoist mode, so the
+owner's scope leaves it unchanged. The rung row names the tip converter, and is to be re-measured at the rebase over
+#51.
 
 ### 9.4 Readings, G-LAPTOP
 
