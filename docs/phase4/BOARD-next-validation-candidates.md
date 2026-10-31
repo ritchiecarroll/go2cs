@@ -32354,4 +32354,117 @@ A plain mutable struct static read by value is refused for inlining too. The i9'
    measurement.
 
 — G (2026-10-31)
+
+### 2026-10-31, LANDING-READY (H), seat #55: a caller frame over a stack-held local resolves within the JIT's own region
+
+**Branch** `claude/h-seat55-caller-resolver` on master `1dacbdf4b6`: `fd29d20801` (behavioral red
+CallerLineStackLocal), `38df36d5f7` (GolibTests red StackRegionCallSiteTests), `b88eee9971` (three more plants),
+`269d726e62` (the fix, ruling B, plus its reference-doc entry), `377c31b56a` (provenance re-cites). The only runtime
+file touched is `src/core/runtime/managed_impl.cs`, which is hand-owned. golib's slice-literal code is untouched:
+`builtin.slice<T>` is R's #54.
+
+**The defect.** In Release, Roslyn keeps a local on the IL evaluation stack (`dup` in place of `ldloc`) when nothing
+in the method pins it. One `u8` literal anywhere in the method is enough to pin it. With the local on the stack, the
+JIT records IL-to-native mappings only at stack-empty points and after a void call or callvirt. A popped value call
+leaves no mapping. A caller frame then reports an offset one statement before its call. The PDB-statement settle
+finds no callee call there, and `returnSiteILOffset` names the statement's first call, so the line is one statement
+early. #51's stdlib-plain literals expose the class, because they remove the `u8` literals that kept the local in a
+slot.
+
+**The fix.**
+- `ilBoundaryOffsets` is one forward IL stack-depth pass (ECMA-335 III.1.7.5). It is seeded by the
+  exception clauses: a catch or filter handler is entered at depth 1, a finally or fault at 0. It records Tier0's
+  boundary set: the stack-empty points, plus the instruction after a void call. `calli`, `jmp`, varpop/varpush
+  opcodes and an inconsistent join make it return null, and a null refuses the region.
+- `regionSettledCallSite` fires only where today's answer is PROVABLY wrong: today's named call is a direct `call`
+  (0x28), not a delegate Invoke, to a non-callee; the callee frame is matchable (not a DynamicMethod or IL stub); and
+  the statement settle found nothing, meaning zero calls or an ambiguous two (ruling B).
+- It then unique-matches the callee in `[reported offset, next boundary)`. Any indirect call in that region refuses
+  it, and so do two callee calls.
+
+**Honest labels** (they are also in the resolver's doc comment): *Tier0 frames: exact on unique match. Optimized
+frames (TC0, Tier1, OSR): partial. It can move one wrong line to another, never a right one to wrong.* #53's note:
+call counting with delay 0, which is the default, makes optimized frames common.
+
+**Predictions, posted before any fix code (2026-10-31), scored as posted.**
+1. CallerLineStackLocal S1, S2, S3 and S5 go wrong to right at Tier0, TC0 and Tier1. **MET.**
+2. CallerLineCallSite (master's emission) is unchanged. **MET.**
+3. CallerLineCallSite with #51's casts: at Tier0, S3 and S4 go wrong to right; at TC0, S3, S4 and S5 stay wrong.
+   **MET.**
+4. CallerLineMultiLine pkgSlice goes from `[60 60 60 62]` to `[60 61 61 62]` at Tier0; everything else is unchanged.
+   Two score lines, both kept:
+   - **MISSED for arm A as first implemented.** The prediction was derived from the region, and the implementation
+     was narrower: it treated "found nothing" as zero calls only, and pkgSlice's four elements are one ambiguous PDB
+     statement.
+   - **MET under B**, after COORD's ruling that "found nothing" means zero or ambiguous.
+5. runtime TestLineNumber: no assert newly passes, and the pinned disclosure stays byte-identical. **MET:** at TC0
+   the base and #55 arms are identical (below).
+6. CallerLineSliceLiterals (#54): not on master. It gets predicted when it lands.
+
+**Monotone, per assert, per config.** Arm base is managed_impl.cs at `1dacbdf4b6`; arm head is `377c31b56a`. Both
+are unprobed windows Release builds, read twice per config, with no run-to-run spread. Tier1 is confirmed by
+`DOTNET_JitDisasmSummary`: `shapes` goes Tier0, Instrumented Tier0, Tier1. The other rows are Main- or
+cctor-resident, so their warm column is Tier0.
+
+| row | Go | base Tier0 / TC0 / Tier1 | head Tier0 / TC0 / Tier1 |
+|---|---|---|---|
+| CallerLineStackLocal S1-S6 | 39 43 47 50 55 59 | 38 42 46 50 54 59 in all three | 39 43 47 50 55 59 in all three |
+| CallerLineCallSite S1-S9 | all true | 9/9 in all three | 9/9 in all three |
+| CallerLineCallSite, #51's casts | all true | S3 S4 false / S3 S4 S5 false / S3 S4 false | 9/9 / S3 S4 S5 false / 9/9 |
+| CallerLineMultiLine pkgSlice | [60 61 61 62] | [60 60 60 62] / [60 60 60 60] / [60 60 60 62] | [60 61 61 62] / [60 60 60 60] / [60 61 61 62] |
+| CallerLineMultiLine pkgSum, pkgStructs, S1-S8 | (all-shapes run) | base = head, shape by shape, in every config | base = head, shape by shape, in every config |
+
+The changes are 4 asserts wrong to right in every config, 2 at Tier0 under #51's casts, and 2 pkgSlice elements at
+Tier0. Nothing goes right to wrong, and nothing swaps from one wrong line to another.
+
+**Mutations** (floor 13). Nine guards each fail their own plant by name, and every restore is byte-identical:
+- void-call boundary fails AVoidCallIsABoundaryAndAPoppedValueCallIsNot;
+- region indirect check fails AVirtualCallInTheRegionRefusesIt;
+- region uniqueness fails TwoCallsOfTheCalleeInTheRegionSettleNothing, on A and on B;
+- branch depth fails ABranchTargetTakesTheDepthItIsReachedWith and ACatchHandlerIsEnteredWithTheExceptionOnTheStack;
+- handler depth fails ACatchHandlerIsEnteredWithTheExceptionOnTheStack;
+- named-call guard fails ACallvirtNamedTodayIsNotADirectCall and ANewobjNamedTodayIsNotADirectCall;
+- ambiguous-as-do-not-fire fails PkgSliceElementsSettleInTheirOwnRegions.
+
+The first mutation round, on A, left the named-call guard unproven. A virtual callvirt named today is also the
+region's first call, so the region check refused it first. Hence the two plants in `b88eee9971`.
+
+**Gates at `269d726e62`, windows, run one at a time:**
+- **GolibTests:** Release rc 0, 2307 pass, 27 skip. Debug rc 0, 2289 pass, 45 skip. The 18 Debug-only skips by
+  name: 7 are this seat's Roslyn shapes, gated on `IsJITOptimizerDisabled`. 11 are pre-existing gated tests in files
+  this seat does not touch (PointerMintRetention, StackAppend, StringViewTier, NamedSliceLenCapAllocation,
+  AliasOverlapRace, TailCallFrameGuard).
+- **GenTests:** 374/374.
+- **go test ./...:** red in repoguard only. TestDocsProvenanceNotesResolve and its two plant tests: three notes cited
+  managed_impl.cs lines the fix moved by +95. Re-cited in `377c31b56a`, and repoguard is ok after.
+- **Behavioral:** 886 transpile, compile and target. Output 857 pass, 29 skip, 0 fail. The tree is clean after.
+- **CNR:** NO REGRESSION, 953 packages byte-identical, 8 platform-exclusive skipped.
+- **stdlib.slnx Release:** 0 errors on windows, linux and darwin, purged between.
+- **runtime `-tests` row** (windows, Release, TC0): FAIL with two errors, neither of them this seat's.
+  1. **TestLineNumber** reads a signature mismatch: 17 failing asserts against the pinned 12. The 5 extra are
+     compLit[0].lineA, compLit[0].lineB, compLit[1].lineA, compLit[2].lineB and sliceLit[0], all collection-expression
+     shapes.
+     - A/B on the sweep's own emission, same host, managed_impl.cs at base vs at #55: identical at TC0, 17 each, two
+       readings per arm.
+     - Mechanism: the current converter emits compLit and sliceLit as `slice<T>([...])` collection expressions, where
+       the committed corpus has `new T[]{...}.slice()`. This is #30's shape and R's #54 (B1) surface. #54 is gated
+       to bring the row back to the disclosed 12 or fewer (COORD).
+     - For information, not a gate: at the tiered default, base fails 14 and #55 fails 12. sliceLit[1] and [2] go
+       wrong to right, and nothing goes right to wrong.
+  2. **TestAppendByteCapInLoop** read `slice_test.go:686: for size 65, got 4.000000 allocs want 2` in the sweep's
+     full run. A full-suite A/B with the sweep's own arguments at TC0 read it green in both arms. The two arms' fail
+     sets are identical, 64 each, with an empty diff. COORD ruled it a flake.
+- **The sweep's runtime regen was restored:** 208 files, then 0 status lines and 0 `' D'`.
+
+**WATCH, for the runtime re-bank:** TestAppendByteCapInLoop (runtime, windows, TC0, full run) read "size 65 got 4
+allocs want 2" in 1 of 2 full runs on the #55 host, 0 of 1 on base, 0 of 2 isolated, and 0 of 5 in its
+neighbourhood (TestCtrlHandler .. TestAppendByteCapInLoop) per arm. A re-bank red on it is this, not a new finding.
+
+**For #51 (parked behind this seat).** Under #51's casts, CallerLineCallSite S3 and S4 go right to wrong at TC0
+through Roslyn stack scheduling, and #55 cannot recover them. Both frames report IL 0, today's named call is the
+E constructor's `newobj` (not a direct `call`), and their region from IL 0 holds no `line()` call. #51's DONE checks
+whether D1b covers this class, and names it in the disclosure if not. #51 also re-reads TestLineNumber at #51+#55.
+
+— H (2026-10-31)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
