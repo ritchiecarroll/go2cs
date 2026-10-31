@@ -5,6 +5,8 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -33,17 +35,30 @@ namespace go.golib;
 /// alike.
 /// </para>
 /// <para>
-/// Two departures from Go's shape, both forced by .NET's shutdown:
+/// Departures from Go's shape, forced by .NET's shutdown and by goroutines being OS threads:
 /// <list type="bullet">
 /// <item>The handler cannot park forever as Go's main does. Shutdown is serialized, so the backstop's own
 /// <c>Environment.Exit(2)</c> would wait behind it (a deadlock, measured on net10.0). It waits for the
 /// report instead, sets <see cref="Environment.ExitCode"/>, and returns. Setting it there decides the
 /// status for a <c>void</c> or <c>int</c> <c>Main</c>, on JIT and Native AOT (measured on net10.0).</item>
-/// <item>The yield loop is bounded by time (<see cref="PanicDefersWait"/>), not by Go's 1000
-/// <c>Gosched</c> calls. It is as short as Go's in spirit: it covers the goroutine's rethrow and the CLR's first
-/// pass to its root, which takes 1.2 to 1.8 ms from <c>GoFrame.Capture</c> (Release, 30 runs on G-LAPTOP,
-/// 2026-10-24), and no more. A goroutine still running user code in a deferred call (a recovery that sleeps, a
-/// deferred call that blocks) is not waited for, and neither does Go wait for one.</item>
+/// <item>The yield loop cannot hand the panicking goroutine the CPU, as Go's <c>Gosched</c> does under one P: a
+/// goroutine is a thread the OS schedules beside <c>main</c>'s. So it asks Go's question instead of taking Go's
+/// turns: CAN the goroutine run? A goroutine parked and not readied, or inside a system call, cannot
+/// (<see cref="Goroutine.MainReturnSample"/>), and once the same block has lasted <see cref="BlockedConfirm"/>
+/// it releases <c>main</c>, as Go's loop runs out at once for a goroutine with nothing to run. A goroutine that
+/// can run holds <c>main</c> until it has used <see cref="PanicDefersCpuBudget"/> of CPU since the wait began
+/// (<see cref="ThreadCpuTime"/>): the role of Go's 1000 turns, which bounds one running user code in a deferred
+/// call. Its rethrow and the CLR's first pass to its root take 1.2 to 1.8 ms from <c>GoFrame.Capture</c>
+/// (Release, 30 runs on G-LAPTOP, 2026-10-24). A goroutine waiting for a CPU behind other threads uses none, so
+/// it is waited for: the case a wall-clock bound lost (the i9, 2026-10-31: 1 to 2 runs in 20 exited 0 under
+/// pinned load, with an empty stderr).</item>
+/// <item>One visible divergence, in a pathological case only: a goroutine that can run but is given NO CPU for
+/// <see cref="HangGuard"/> (10 s) stops being waited for. Go's single P cannot starve it while <c>main</c> runs,
+/// so Go would wait on. Reaching it takes threads at a higher priority pinned over every core for longer than the
+/// OS's own starvation boost (about 4 s on Windows), or a goroutine blocked somewhere golib does not mark (a C#
+/// wait of the program's own, outside the converted population; docs/phase4/data/main-return-wait). Where the
+/// CPU cannot be read (no seam on this OS, or the thread exited), the bound is the wall-clock
+/// <see cref="PanicDefersWait"/> it was before.</item>
 /// </list>
 /// </para>
 /// <para>
@@ -68,8 +83,29 @@ namespace go.golib;
 /// </remarks>
 public static class MainExit
 {
-    /// <summary>The longest <c>main</c>'s return waits for goroutines that are running a panic's deferred calls.</summary>
+    /// <summary>
+    /// The longest <c>main</c>'s return waits, by the wall clock, for a goroutine running a panic's deferred calls
+    /// whose CPU time cannot be read (the fallback; see the remarks).
+    /// </summary>
     internal static readonly TimeSpan PanicDefersWait = TimeSpan.FromMilliseconds(20);
+
+    /// <summary>
+    /// The CPU a goroutine that can run may use, since the wait began, before <c>main</c> stops waiting for it.
+    /// </summary>
+    internal static readonly TimeSpan PanicDefersCpuBudget = TimeSpan.FromMilliseconds(20);
+
+    /// <summary>How long one block (a park, a system call) must last before it releases <c>main</c>.</summary>
+    internal static readonly TimeSpan BlockedConfirm = TimeSpan.FromMilliseconds(1);
+
+    /// <summary>
+    /// The longest <c>main</c>'s return waits for a goroutine that can run but uses no CPU; see the remarks. Settable
+    /// for GolibTests only, which scale it down to show what reaches it.
+    /// </summary>
+    internal static TimeSpan HangGuard { get; set; } = TimeSpan.FromSeconds(10);
+
+    // The goroutines counted in runningPanicDefers, with the token of the thread each runs on (ThreadCpuTime), so a
+    // returning main can ask each whether it can run. Keyed by its thread state: one entry per counted goroutine.
+    private static readonly ConcurrentDictionary<GoThreadState, (Goroutine Goroutine, long Token)> s_counted = new();
 
     // How long the return waits, once a report has begun, for it to be written. The report always ends in an exit,
     // so this bounds only a report that itself hangs.
@@ -141,10 +177,20 @@ public static class MainExit
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void Count(GoThreadState state)
     {
-        if (!Goroutine.OnGoroutine)
+        if (Goroutine.Current is not { IsMain: false } goroutine)
             return;
 
+        if (!state.CpuTimeTokenTaken)
+        {
+            state.CpuTimeToken = ThreadCpuTime.CurrentThreadToken();
+            state.CpuTimeTokenTaken = true;
+        }
+
         state.RunningPanicDefers = true;
+        goroutine.SetPanicDefersCounted(true);
+
+        // Registered before the count moves, so a main that reads the count finds the goroutine.
+        s_counted[state] = (goroutine, state.CpuTimeToken);
         Interlocked.Increment(ref s_runningPanicDefers);
     }
 
@@ -158,6 +204,10 @@ public static class MainExit
             return;
 
         state.RunningPanicDefers = false;
+
+        if (s_counted.TryRemove(state, out (Goroutine Goroutine, long Token) counted))
+            counted.Goroutine.SetPanicDefersCounted(false);
+
         Interlocked.Decrement(ref s_runningPanicDefers);
     }
 
@@ -221,11 +271,11 @@ public static class MainExit
 
     /// <summary>
     /// runtime.main's yield loop: waits while a goroutine runs a panic's deferred calls and no report has begun,
-    /// stopping the moment either changes, for at most <see cref="PanicDefersWait"/>.
+    /// stopping the moment either changes, or once no counted goroutine can still run (<see cref="Holds"/>).
     /// </summary>
     /// <remarks>
     /// Spins and yields rather than sleeping: <c>Thread.Sleep(1)</c> lasts a whole timer tick (15.6 ms) on Windows,
-    /// which is most of the bound.
+    /// which is far longer than a block's confirmation.
     /// </remarks>
     internal static void AwaitPanickingGoroutines()
     {
@@ -233,11 +283,86 @@ public static class MainExit
             return;
 
         long start = System.Diagnostics.Stopwatch.GetTimestamp();
+        Dictionary<GoThreadState, (ThreadCpuReader? Reader, PanickerWatch Watch)> watches = new();
         SpinWait spin = default;
 
-        while (Volatile.Read(ref s_runningPanicDefers) != 0 && Volatile.Read(ref s_panicking) == 0 &&
-               System.Diagnostics.Stopwatch.GetElapsedTime(start) < PanicDefersWait)
-            spin.SpinOnce(sleep1Threshold: -1);
+        try
+        {
+            while (Volatile.Read(ref s_runningPanicDefers) != 0 && Volatile.Read(ref s_panicking) == 0)
+            {
+                TimeSpan elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(start);
+                bool holds = false;
+
+                foreach ((GoThreadState state, (Goroutine goroutine, long token)) in s_counted)
+                {
+                    // A goroutine first seen now: its reader opens once and lives for the wait (one handle on windows).
+                    if (!watches.TryGetValue(state, out (ThreadCpuReader? Reader, PanickerWatch Watch) entry))
+                        entry = (ThreadCpuTime.Open(token), default);
+
+                    (bool blocked, int sequence) = goroutine.MainReturnSample();
+                    TimeSpan? cpu = entry.Reader is { } reader && reader.TryRead(out TimeSpan read) ? read : null;
+
+                    holds |= Holds(ref entry.Watch, new PanickerSample(blocked, sequence, cpu), elapsed);
+                    watches[state] = entry;
+                }
+
+                if (!holds || elapsed >= HangGuard)
+                    return;
+
+                spin.SpinOnce(sleep1Threshold: -1);
+            }
+        }
+        finally
+        {
+            foreach ((ThreadCpuReader? reader, _) in watches.Values)
+                reader?.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// One look at a counted goroutine: blocked (parked and not readied, or blocked outside a park), which block,
+    /// and its CPU time.
+    /// </summary>
+    internal readonly record struct PanickerSample(bool Blocked, int BlockSequence, TimeSpan? Cpu);
+
+    /// <summary>What a wait remembers of one counted goroutine between its samples.</summary>
+    internal struct PanickerWatch
+    {
+        internal TimeSpan? CpuStart;
+        internal bool Blocked;
+        internal int BlockSequence;
+        internal TimeSpan BlockedSince;
+    }
+
+    /// <summary>
+    /// Whether one counted goroutine still holds a returning <c>main</c>, <paramref name="elapsed"/> into the wait: Go's
+    /// "can it run?" (see the remarks). A block that lasts <see cref="BlockedConfirm"/> as the same block releases it.
+    /// Otherwise it holds while its CPU since the wait began is under <see cref="PanicDefersCpuBudget"/>, or, when the
+    /// CPU cannot be read, while the wait is under <see cref="PanicDefersWait"/>.
+    /// </summary>
+    internal static bool Holds(ref PanickerWatch watch, PanickerSample sample, TimeSpan elapsed)
+    {
+        if (!sample.Blocked)
+        {
+            watch.Blocked = false;
+        }
+        else if (!watch.Blocked || watch.BlockSequence != sample.BlockSequence)
+        {
+            watch.Blocked = true;
+            watch.BlockSequence = sample.BlockSequence;
+            watch.BlockedSince = elapsed;
+        }
+        else if (elapsed - watch.BlockedSince >= BlockedConfirm)
+        {
+            return false;
+        }
+
+        if (sample.Cpu is not { } cpu)
+            return elapsed < PanicDefersWait;
+
+        watch.CpuStart ??= cpu;
+
+        return cpu - watch.CpuStart.Value < PanicDefersCpuBudget;
     }
 
     // runtime.main after main.main returns. ProcessExit runs here for main's return and for every exit; only the
