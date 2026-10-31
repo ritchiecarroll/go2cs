@@ -113,15 +113,15 @@ s  := []any{"a", "b"}             // slice/array element
 sp := [3]any{1: "sp"}             // sparse-array element
 ```
 
-<!-- source: src/tests/Behavioral/AnyStringLitComposite/main.cs.target:30-34, 40 -->
+<!-- source: src/tests/Behavioral/AnyStringLitComposite/main.cs.target:33-37, 43 -->
 ```csharp
-    var n = Ꮡ(new node(inner: (@string)"hi"u8));
-    var p = new pair("tag", (@string)"val"u8);
-    var m = new map<@string, any>{["k"] = (@string)"mv"u8};
-    var mk = new map<any, nint>{[(@string)"ky"u8] = 7};
-    var s = slice<any>([(@string)"a"u8, (@string)"b"u8]);
+    var n = Ꮡ(new node(inner: (@string)"hi"));
+    var p = new pair("tag", valˢ);
+    var m = new map<@string, any>{["k"] = (@string)"mv"};
+    var mk = new map<any, nint>{[(@string)"ky"] = 7};
+    var s = slice<any>([(@string)"a", (@string)"b"]);
     …
-    var sp = new array<any>(3){[1] = (@string)"sp"u8};
+    var sp = new array<any>(3){[1] = (@string)"sp"};
 ```
 
 Every `any` slot takes the combined `(@string)"…"u8` form, where a bare `"hi"u8` is CS1503 and a bare
@@ -356,11 +356,11 @@ already leads with the cast so the two can never double up:
 …
     any sv = seedˢ;
 …
-    var ssl = slice<any>([(@string)"seed"u8, (@string)("se" + "ed")]);
+    var ssl = slice<any>([seedˢ, (@string)("se" + "ed")]);
 …
     fmt.Println("str mapkey    :", smk[seedˢ], smk[((any)s)]);
 …
-    var shk = new holder(v: (@string)"seed"u8);
+    var shk = new holder(v: seedˢ);
 ```
 
 The literal pre-pass then picks the final spelling of a bare literal (see
@@ -411,7 +411,7 @@ marking (`markEmptyInterfaceElems`, shared by both renderers), so the two spelli
 
 <!-- source: src/tests/Behavioral/ElidedAnyCompositeElems/ElidedAnyCompositeElems.cs.target:9 -->
 ```csharp
-    var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)1, (nint)2}.array(), new any[]{(@string)"a"u8, (@string)"b"u8}.array()}.slice(), 2);
+    var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)1, (nint)2}.array(), new any[]{(@string)"a", (@string)"b"}.array()}.slice(), 2);
 ```
 
 A pointer, func or `unsafe.Pointer` element takes its box the same way. An elided literal of any other element type,

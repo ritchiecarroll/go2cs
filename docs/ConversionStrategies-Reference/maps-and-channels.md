@@ -164,7 +164,7 @@ var (v, ok) = m[default, ꟷ];
 …
 delete(m, default);
 …
-var lit = new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2};
+var lit = new map<any, nint>{[default] = 1, [(@string)"b"] = 2};
 ```
 
 golib's `map<TKey, TValue>` wraps a `Dictionary<TKey, TValue>`, which **rejects a null key** with

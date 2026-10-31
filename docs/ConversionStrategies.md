@@ -1847,7 +1847,7 @@ rules further down this section):
   reference it can inline; every use still spells the constant's name. Other packages keep the one field.
 <!-- forms: src/go2cs/visitValueSpec.go:1449 `else if constExpr == "const"`, :1472 `static %s %s =>%s %s;`,
      :1267 `structStaticReadAccessorDecl(access, strTypeName, csIDName`; the accessor:
-     src/go2cs/hoistedLiteralOperations.go:1493 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
+     src/go2cs/hoistedLiteralOperations.go:1737 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
      int-kind value that fits neither int64 nor uint64: src/go2cs/visitValueSpec.go:1192-1199 `writeUntypedConst(true)`, e.g.
      src/core/math/big/arith.cs:23 `internal static readonly GoBigConst _B` (the committed corpus, which takes the
      accessor at the 1.26.10.2 regeneration); the alias: src/go2cs/csproj-template.xml:154 `Alias="GoBigConst"`. -->
@@ -4879,7 +4879,7 @@ func kind(n int) string {
 	return "other value return"
 }
 ```
-<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:6-14 and :102 -->
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:6-14 and :103 -->
 ```csharp
 partial class main_package {
 
@@ -4908,7 +4908,7 @@ nothing ([Source Generators](#source-generators), [Empty Interface (`any`)](#emp
 ```go
 fmt.Println("pre boxed any target")
 ```
-<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:50, 69, 100 -->
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:51, 70, 101 -->
 ```csharp
 internal static void Main() {
 …
@@ -5138,7 +5138,7 @@ fmt.Println(f("via local %s", "ok"))
 <!-- source: src/tests/Behavioral/SStringTwinPilot/main.cs.target:33-34 -->
 ```csharp
 Funcꓸꓸꓸ<@string, any, @string> f = fmt.Sprintfᶠ;
-fmt.Println(f("via local %s"u8, (@string)"ok"u8));
+fmt.Println(f("via local %s", (@string)"ok"));
 ```
 
 `Funcꓸꓸꓸ<@string, any, @string>` is the C# type for Go's `func(string, ...any) string`
@@ -6605,11 +6605,11 @@ func init() {
 internal static slice<@string> order;
 
 [GoInit] internal static void init() {
-    order = append(order, "a_first#1"u8);
+    order = append(order, (@string)"a_first#1");
 }
 
 [GoInit] internal static void initΔ1() {
-    order = append(order, "a_first#2"u8);
+    order = append(order, (@string)"a_first#2");
 }
 ```
 
@@ -6681,8 +6681,8 @@ func apply(f func(prefix string, vals ...int) string) {
 <!-- source: src/tests/Behavioral/VariadicFuncValues/main.cs.target:21-27 -->
 ```csharp
 internal static void apply(Funcꓸꓸꓸ<@string, nint, @string> f) {
-    fmt.Println(f("loose"u8, 1, 2, 3));
-    fmt.Println(f("empty"u8));
+    fmt.Println(f("loose", 1, 2, 3));
+    fmt.Println(f("empty"));
 
     var nums = slice<nint>([4, 5]);
     fmt.Println(f("spread"u8, nums.ꓸꓸꓸ));
@@ -8220,7 +8220,7 @@ spells Go's `nil` and zero values as `default!`, so `r != default!` is Go's `r !
 ([Nil and Zero Values](#nil-and-zero-values)). The extra braces keep `r` scoped to the `if`, as Go's
 `if r := …; r != nil` does.
 
-<!-- Plain literals: docs/ConversionStrategies-Reference/strings.md:73#0b25b7 (assignments take the plain form). The C# string
+<!-- Plain literals: docs/ConversionStrategies-Reference/strings.md:74#0b25b7 (assignments take the plain form). The C# string
 to Go string normalization: src/core/golib/builtin.cs:291#09e845. -->
 `"recovered"` and `"ok"` are assigned to a `string` result, so each is a plain C# literal that golib
 converts once ([Strings](#strings-string-and-sstring)). The literal passed to `panic` stays a plain C#
@@ -13056,11 +13056,11 @@ func init() {
 internal static slice<@string> order;
 
 [GoInit] internal static void init() {
-    order = append(order, "a_first#1"u8);
+    order = append(order, (@string)"a_first#1");
 }
 
 [GoInit] internal static void initΔ1() {
-    order = append(order, "a_first#2"u8);
+    order = append(order, (@string)"a_first#2");
 }
 ```
 
@@ -13090,11 +13090,11 @@ func init() {
 <!-- source: src/tests/Behavioral/MultiFileInitOrder/b_second.cs.target:5-11 -->
 ```csharp
 [GoInit] internal static void initΔ2() {
-    order = append(order, "b_second#1"u8);
+    order = append(order, (@string)"b_second#1");
 }
 
 [GoInit] internal static void initΔ3() {
-    order = append(order, "b_second#2"u8);
+    order = append(order, (@string)"b_second#2");
 }
 ```
 
@@ -13109,7 +13109,7 @@ func init() {
 <!-- source: src/tests/Behavioral/MultiFileInitOrder/main.cs.target:7-9 -->
 ```csharp
 [GoInit] internal static void initΔ4() {
-    order = append(order, "main#1"u8);
+    order = append(order, (@string)"main#1");
 }
 ```
 
