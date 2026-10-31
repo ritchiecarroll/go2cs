@@ -332,21 +332,76 @@ namespace PerformanceRunner
         /// ManagedNativeHeader directory is non-empty). A runtimeconfig cannot say this, and a self-contained publish
         /// without ReadyToRun has the same one. Null when it does.
         /// </summary>
-        internal static string? ReadyToRunCodeProblem(string assemblyPath)
+        internal static string? ReadyToRunCodeProblem(string assemblyPath) =>
+            ReadsReadyToRunCode(assemblyPath, out string? problem) switch
+            {
+                null => problem,
+                true => null,
+                false => $"{Path.GetFileName(assemblyPath)} carries no ReadyToRun code (empty ManagedNativeHeader) -- every method would be jitted",
+            };
+
+        // The converted project's template target (seat #53, part 3) that publishes the program's own code IL-only.
+        internal const string OwnCodeTarget = "GoKeepOwnCodeOutOfReadyToRun";
+
+        /// <summary>
+        /// Whether a converted project's template keeps the program's own code out of ReadyToRun: the target is in
+        /// templates from the .2 release on, and no headline publish sets the GoReadyToRunUserCode opt-in that turns it off.
+        /// </summary>
+        internal static bool KeepsOwnCodeOutOfReadyToRun(string csproj) =>
+            csproj.Contains($"<Target Name=\"{OwnCodeTarget}\"", StringComparison.Ordinal);
+
+        /// <summary>
+        /// Both ReadyToRun arms, as the converted project's template publishes them. With <paramref name="ownCodeIlOnly"/>
+        /// the program's own assembly is IL-only and golib carries ReadyToRun code; without it the program's own
+        /// assembly carries it. Null when the published files say so; <paramref name="shape"/> says what they showed.
+        /// </summary>
+        internal static string? ReadyToRunShapeProblem(string programAssembly, string golibAssembly, bool ownCodeIlOnly, out string shape)
         {
+            shape = "";
+
+            if (!ownCodeIlOnly)
+            {
+                string? problem = ReadyToRunCodeProblem(programAssembly);
+                shape = problem is null ? "own code ReadyToRun" : "";
+                return problem;
+            }
+
+            switch (ReadsReadyToRunCode(programAssembly, out string? programProblem))
+            {
+                case null:
+                    return programProblem;
+                case true:
+                    return $"{Path.GetFileName(programAssembly)} carries ReadyToRun code, but the converted project's template ({OwnCodeTarget}) publishes the program's own code IL-only";
+            }
+
+            string? golibProblem = ReadyToRunCodeProblem(golibAssembly);
+            shape = golibProblem is null ? "own code IL-only, golib ReadyToRun" : "";
+            return golibProblem;
+        }
+
+        // True or false for a managed assembly's ReadyToRun code (a non-empty ManagedNativeHeader); null with the problem
+        // when the file is missing or not managed.
+        private static bool? ReadsReadyToRunCode(string assemblyPath, out string? problem)
+        {
+            problem = null;
+
             if (!File.Exists(assemblyPath))
-                return $"{Path.GetFileName(assemblyPath)} not found";
+            {
+                problem = $"{Path.GetFileName(assemblyPath)} not found";
+                return null;
+            }
 
             using FileStream stream = File.OpenRead(assemblyPath);
             using PEReader reader = new(stream);
             CorHeader? cor = reader.PEHeaders.CorHeader;
 
             if (cor is null)
-                return $"{Path.GetFileName(assemblyPath)} is not a managed assembly";
+            {
+                problem = $"{Path.GetFileName(assemblyPath)} is not a managed assembly";
+                return null;
+            }
 
-            return cor.ManagedNativeHeaderDirectory.Size > 0
-                ? null
-                : $"{Path.GetFileName(assemblyPath)} carries no ReadyToRun code (empty ManagedNativeHeader) -- every method would be jitted";
+            return cor.ManagedNativeHeaderDirectory.Size > 0;
         }
 
         private static bool TryOptions(string? runtimeConfig, out JsonElement options, out string? problem)

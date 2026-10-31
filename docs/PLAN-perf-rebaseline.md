@@ -233,8 +233,25 @@ table is written. The bank fails if any check reads otherwise:
 - **No runtime environment variable reaches a timed arm.** TC0 and Fd1 stay diagnostic and never enter the table.
 - **The page's wording matches the banked table.** The project-reference caveat becomes "as published, from nuget.org".
   Each leg is described as converted with its own release's defaults: plain literals and a call-counting delay of 0
-  at 1.26.10.2; hoisted literals and .NET's default delay at 1.24.13.7, each read from that release's converter rather than taken from this plan. The two older-converter caveats move to
-  History with the 1.23.1 table.
+  at 1.26.10.2; hoisted literals and .NET's default delay at 1.24.13.7, each read from that release's converter
+  rather than taken from this plan. The two older-converter caveats move to History with the 1.23.1 table.
+- **The ReadyToRun column says, per leg, what it measured** (COORD, 2026-10-31). From the .2 template on, a
+  converted program publishes its own code IL-only and only golib and the packages ReadyToRun. At 1.24.13.7 and
+  1.26.10.1 its own code was ReadyToRun too. The page's column description states each leg's shape, copied from the
+  release report's per-leg line ("C# (ReadyToRun) in this leg, as published: ..."). The runner writes that line from
+  the published files: the program's assembly, and golib's.
+
+**What the runner enforces itself (added 2026-10-31, the headline guard).** `HeadlineSettings.cs` checks the following
+before anything is timed, and stops the run with exit 2:
+
+- every headline command line against its allowlist;
+- the build files at or above the `--work` root;
+- the inherited environment;
+- each headline JIT and ReadyToRun `runtimeconfig.json` against the converted project's own template.
+
+Every finding is reported in one shape: column, subject, found, expected. The ReadyToRun shape check follows the
+converted project's template, so the .2 leg's own-code-IL-only publish is admitted, not refused. The manifest's AOT
+publish line is still read by hand at S5: the runner cannot see the i9's publish.
 
 **The S2 source hash, as S0 built it, is host-specific.** `ConsumerProject.SourceHash` covers `package_info.cs`'s
 `GoPositionMap` line, which names each Go file by its absolute path under the `--work` root, and the project's

@@ -4,6 +4,7 @@
     Guards for the performance runner's release-leg decisions (docs/PLAN-perf-rebaseline.md, S0): what a release leg
     refuses before anything is timed; and for when it may reuse a completed AOT publish. The decisions are pure functions in the runner's ReleaseLegs.cs, LINKED here
     rather than referenced, so the runner stays dependency-free (as ConverterBuildInputs.cs is linked into it).
+    HeadlineSettings.cs is the headline guard: what a published column may be built and run with (docs/Performance.md).
   -->
   <PropertyGroup>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
@@ -23,6 +24,7 @@
   <ItemGroup>
     <Compile Include="../PerformanceRunner/ReleaseLegs.cs" Link="ReleaseLegs.cs" />
     <Compile Include="../PerformanceRunner/AotPublishReuse.cs" Link="AotPublishReuse.cs" />
+    <Compile Include="../PerformanceRunner/HeadlineSettings.cs" Link="HeadlineSettings.cs" />
   </ItemGroup>
 
 </Project>
