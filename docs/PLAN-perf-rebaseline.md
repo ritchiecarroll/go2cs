@@ -199,7 +199,7 @@ delta that appears at default tiering and not at TC0 is tier-up timing, not code
 | **S2** | G-LAPTOP converts both legs, checks the source hashes against the i9's manifest, and builds Go x2, JIT and R2R. If ILC moved, it re-licenses on one row. | G-LAPTOP | hashes equal; licence holds |
 | **S3** | Verify all 17 programs x 8 binaries. | G-LAPTOP | identical output |
 | **S4** | Quiet window: A/A null, control, paired measurement, PERF-REVIEW extras, control again. Two windows (COORD, 2026-10-27): window 1 is JIT, R2R, Fd1 and TC0; window 2 is the AOT column. Each has its own null and control. | G-LAPTOP | no significant control drift (section 5); no write under `C:\go2cs-perf` |
-| **S5** | Bank: the runner's `--update-readme` writes the 1.26 table. The same session's 1.24.13.7 leg goes into History beside the retained 1.23.1 and .NET 9 tables. Raw medians, runs, hashes, box state and diagnostic arms go to `docs/phase4/DATA-hop126-perf.md`. | G, a docs seat | repoguard green |
+| **S5** | Bank: the runner's `--update-readme` writes the 1.26 table. The same session's 1.24.13.7 leg goes into History beside the retained 1.23.1 and .NET 9 tables. Raw medians, runs, hashes, box state and diagnostic arms go to `docs/phase4/DATA-hop126-perf.md`. Before the table is written, the fairness check (below) passes. | G, a docs seat | fairness check true; repoguard green |
 
 **Timing (COORD's ruling, 2026-10-27; the owner asked whether the run goes before or after the 1.26.10.2 re-bank and
 release).**
@@ -215,6 +215,26 @@ release).**
 3. **S5 banks the Performance page at 1.26.10.2**, the version users install at launch. The 1.26.10.1 and
    1.24.13.7 legs go into History and into `docs/phase4/DATA-hop126-perf.md`. The target is the page live by about
    2026-11-07 to 11-09 (launch gate 4), ahead of the soft stage on 2026-11-10.
+
+**The S5 fairness check (added 2026-10-31, the owner's ask through COORD).** The Performance page's fairness notes open
+with "Nothing is tuned for these benchmarks", and S5 re-verifies that statement against the bank tip before the
+table is written. The bank fails if any check reads otherwise:
+
+- **The converter is called with no option** beyond the leg's `-recurse=nuget` at the release version and the
+  scratch output, read from `ReleaseRun.cs`'s argv at the bank tip.
+- **The JIT and R2R arms add nothing to the converter's project.** JIT is `dotnet build -c Release` with only an
+  output directory. R2R is the template's own `dotnet publish -c Release -r win-x64`.
+- **The AOT column adds only the standard Native AOT publish properties.** These are `PublishAot`, the RID, and the
+  self-contained, partial-trim shape. The check reads the i9's publish line from each manifest. The 1.26 column is the
+  template-default publish, never the folding-off set. The 1.24.13.7 leg's `IlcFoldIdenticalMethodBodies=false` is
+  the documented workaround that lets that leg publish at all, and History names it beside that leg.
+- **No other build file shapes a timed binary.** The only `Directory.Build.*` above each `--work` program is the one
+  the converter wrote. The suite's `src/tests/Performance/Directory.Build.*` apply only to the in-tree instrument.
+- **No runtime environment variable reaches a timed arm.** TC0 and Fd1 stay diagnostic and never enter the table.
+- **The page's wording matches the banked table.** The project-reference caveat becomes "as published, from nuget.org".
+  Each leg is described as converted with its own release's defaults: plain literals and a call-counting delay of 0
+  at 1.26.10.2; hoisted literals and .NET's default delay at 1.24.13.7, each read from that release's converter rather than taken from this plan. The two older-converter caveats move to
+  History with the 1.23.1 table.
 
 **The S2 source hash, as S0 built it, is host-specific.** `ConsumerProject.SourceHash` covers `package_info.cs`'s
 `GoPositionMap` line, which names each Go file by its absolute path under the `--work` root, and the project's
