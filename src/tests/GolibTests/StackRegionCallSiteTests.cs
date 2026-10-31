@@ -21,6 +21,9 @@ namespace go
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public virtual nint virt(nint a) => a;
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public nint plain(nint a) => a;
     }
 
     // Shapes whose local the optimizing C# compiler keeps on the evaluation stack (`dup` where a local would be
@@ -88,6 +91,39 @@ namespace go
             nint w = value(h, 5);
             record(got, 2, probe() + other.virt(w) - w);
             bare(h);
+        }
+
+        // Today's call is a callvirt of a NON-virtual method (the C# compiler's null check): its target is fixed, but it
+        // is not a direct `call`, so today's reading is not provably wrong.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void namedCallvirt(nint[] got)
+        {
+            var h = new stackregionHeld();
+            bare(h);
+            nint p = h.plain(6);
+            record(got, 3, probe() + p - p);
+            bare(h);
+        }
+
+        // Today's call is a newobj: not a direct `call` either.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void namedNewobj(nint[] got)
+        {
+            var h = new stackregionHeld();
+            bare(h);
+            nint q = value(h, new stackregionHeld().n + 7);
+            record(got, 4, probe() + q - q);
+            bare(h);
+        }
+
+        // CallerLineMultiLine's pkgSlice: ONE statement whose elements are stored into an inline array one by one. Each
+        // store leaves the stack empty, so each element is a region of its own though the statement holds every call --
+        // the statement settle is AMBIGUOUS there, and the region still names one call.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void sliceElements(nint[] got)
+        {
+            ReadOnlySpan<nint> s = [probe(), probe(), probe()];
+            got[0] = s[0] + s[1] + s[2];
         }
     }
 }
@@ -309,6 +345,53 @@ namespace GolibTests
 
             Assert.AreEqual(-1, Invoke<int>("calleeSettledCallSite", shape, start, Fixture("probe")),
                 "a virtual call among the region's calls could hide the callee: nothing is settled");
+        }
+
+        [TestMethod]
+        public void ACallvirtNamedTodayIsNotADirectCall()
+        {
+            (MethodInfo shape, int start, int[] calls) = Shape("namedCallvirt");
+
+            Assert.AreEqual(CallOf(shape, calls, "plain"), Invoke<int>("returnSiteILOffset", shape, start), "the reported offset reads as the `plain` callvirt");
+            Assert.AreEqual(-1, Invoke<int>("calleeSettledCallSite", shape, start, Fixture("probe")),
+                "today's reading names a callvirt, not a direct `call`: kept, though the region holds one call of `probe`");
+        }
+
+        [TestMethod]
+        public void ANewobjNamedTodayIsNotADirectCall()
+        {
+            (MethodInfo shape, int start, int[] calls) = Shape("namedNewobj");
+
+            Assert.AreEqual(".ctor", Invoke<MethodBase?>("callTarget", shape, Invoke<int>("returnSiteILOffset", shape, start))?.Name, "the reported offset reads as the newobj");
+            Assert.AreEqual(-1, Invoke<int>("calleeSettledCallSite", shape, start, Fixture("probe")),
+                "today's reading names a newobj, not a direct `call`: kept, though the region holds one call of `probe`");
+        }
+
+        [TestMethod]
+        public void PkgSliceElementsSettleInTheirOwnRegions()
+        {
+            if (JitOptimizerDisabled)
+                Assert.Inconclusive("the shape is the optimizing C# compiler's; this is a JIT-optimizer-disabled build. Run `dotnet test -c Release`.");
+
+            MethodInfo shape = Fixture("sliceElements"), probe = Fixture("probe");
+            int[] calls = Invoke<int[]>("callSiteOffsets", shape);
+            int[] statements = Invoke<int[]>("sequencePointOffsets", shape);
+            int[] probes = calls.Where(call => Invoke<MethodBase?>("callTarget", shape, call) is { } t && t.MetadataToken == probe.MetadataToken).ToArray();
+            byte[] il = shape.GetMethodBody()!.GetILAsByteArray()!;
+
+            Assert.AreEqual(3, probes.Length, "the fixture's slice holds three calls of `probe`");
+
+            // The second element's region starts after the first element's store, where the stack is empty: the `stind.i`
+            // right after the first element's `call probe`.
+            Assert.AreEqual((byte)0xDF, il[probes[0] + 5], "each element is stored (stind.i) right after its call, the premise");
+            int start = probes[0] + 6;
+
+            Assert.IsFalse(statements.Any(point => point > probes[0] && point <= probes[2]), "the three elements are ONE statement, the premise");
+            Assert.AreNotEqual(probe.Name, Invoke<MethodBase?>("callTarget", shape, Invoke<int>("returnSiteILOffset", shape, start))?.Name,
+                "today's reading names the element's store helper, not `probe`");
+
+            Assert.AreEqual(probes[1], Invoke<int>("calleeSettledCallSite", shape, start, probe),
+                "the statement holds two calls of `probe` after the offset (ambiguous), and the region up to the next stack-empty point holds one: that call");
         }
     }
 }
