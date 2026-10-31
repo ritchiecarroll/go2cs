@@ -4,28 +4,33 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 
 namespace GolibTests;
 
 /// <summary>
-/// Guards how golib's <c>builtin.slice&lt;T&gt;</c> overloads bind (1.26.10.2 parity seat #30, L1).
+/// Guards how golib's <c>builtin.slice&lt;T&gt;</c> overloads bind (1.26.10.2 parity seats #30, L1, and #54).
 /// </summary>
 /// <remarks>
 /// <para>
 /// The converter writes Go's <c>[]int{1, 2, 3}</c> as <c>slice&lt;nint&gt;([1, 2, 3])</c>. A collection expression
-/// converts to <c>T[]</c>, to <c>ReadOnlySpan&lt;T&gt;</c> and to <see cref="SliceLiteral{T}"/> alike, and the
-/// <see cref="SliceLiteral{T}"/> overload's priority makes it bind there: a fresh backing array per evaluation, never
-/// nil, not charged to <see cref="AllocationCounter"/> (as the <c>new T[]{…}</c> array of the earlier form was not).
-/// The counted span overload would charge one allocation per literal, which moved math/big's TestNewIntAllocs away
-/// from Go's count (measured 2 per run against 1).
+/// converts to <c>T[]</c> and to <c>ReadOnlySpan&lt;T&gt;</c>, C# prefers the span, and the array overload's priority
+/// makes it bind the array one instead: a fresh array per evaluation, wrapped, never nil, not charged to
+/// <see cref="AllocationCounter"/> (as the <c>new T[]{…}</c> array of the earlier form was not). The counted span
+/// overload would charge one allocation per literal, which moved math/big's TestNewIntAllocs away from Go's count
+/// (measured 2 per run against 1). The array target also keeps a call inside an element on its own Go line in an
+/// optimized build, where a span target's inline buffer did not (CallerLineSliceLiteralsReleaseTests).
 /// </para>
 /// <para>
-/// No other argument converts to <see cref="SliceLiteral{T}"/>, so adding the overload must leave every existing
-/// call where it was: a <c>u8</c> literal (<c>[]byte("…")</c>) on the counted span overload, an array on the
+/// Every other argument that converts to <c>T[]</c> already bound the array overload, so the priority leaves each
+/// existing call where it was: a <c>u8</c> literal (<c>[]byte("…")</c>) on the counted span overload, an array on the
 /// wrapping array overload, a golib <see cref="array{T}"/> where it bound before. The counter tells the overloads
-/// apart: the span overload charges one allocation, the array overload and the literal overload none.
+/// apart: the span overload charges one allocation, the array overload none.
 /// </para>
 /// </remarks>
 [TestClass]
@@ -35,7 +40,7 @@ public class SliceLiteralBindingTests
     public void EnableCounter() => AllocationCounter.Enable();
 
     [TestMethod]
-    public void ACollectionExpressionBindsTheUncountedLiteralOverload()
+    public void ACollectionExpressionBindsTheUncountedArrayOverload()
     {
         long before = AllocationCounter.CurrentThreadCount;
         slice<nint> s = builtin.slice<nint>([1, 2, 3]);
@@ -108,7 +113,24 @@ public class SliceLiteralBindingTests
         Assert.AreEqual(ArrayAliases, s[0] == 42, "and so is whether the slice aliases the array");
     }
 
-    // The base golib's answer for an array<T> argument, measured before the SliceLiteral<T> overload was added.
+    // The base golib's answer for an array<T> argument, measured before seat #30's literal overload was added.
     private const long ArrayCharged = 0;
     private const bool ArrayAliases = true;
+
+    [TestMethod]
+    public void TheArrayOverloadCarriesThePriorityAndNoSpanBuilderRemains()
+    {
+        MethodInfo[] slices = typeof(builtin).GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(m => m.Name == "slice" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1).ToArray();
+
+        MethodInfo array = slices.Single(m => m.GetParameters()[0].ParameterType is { IsArray: true } t && t.GetElementType()!.IsGenericParameter);
+        Assert.AreEqual(1, array.GetCustomAttribute<OverloadResolutionPriorityAttribute>()?.Priority,
+            "a collection expression binds slice<T>(T[]) only through its priority: C# prefers the span overload otherwise");
+
+        // A [CollectionBuilder] must take ReadOnlySpan<T>, which lowers through an inline stack buffer; no slice-literal
+        // parameter may route a collection expression there again.
+        Assert.IsFalse(slices.Any(m => m.GetParameters()[0].ParameterType.IsGenericType &&
+                                       m.GetParameters()[0].ParameterType.GetGenericTypeDefinition().GetCustomAttribute<CollectionBuilderAttribute>() is not null),
+            "a slice<T> overload takes a [CollectionBuilder] type, whose builder lowers a literal through a span");
+    }
 }

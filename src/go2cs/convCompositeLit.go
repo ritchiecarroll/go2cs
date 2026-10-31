@@ -1243,9 +1243,10 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 
 // sliceLiteralTakesBuiltin reports whether an unkeyed composite literal of type t renders as golib's builtin
 // over a C# collection expression: Go's `[]int{1, 2, 3}` is `slice<nint>([1, 2, 3])` (1.26.10.2 parity seat
-// #30, L1). The collection expression targets builtin.slice<T>(SliceLiteral<T>), whose builder copies it into a
-// fresh backing array, so the result keeps Go's literal semantics in every position: never nil (`slice<nint>([])`
-// is empty, not nil), len == cap, and no two evaluations share elements. T is always written, so nothing is
+// #30, L1). The collection expression targets builtin.slice<T>(T[]), which wraps the fresh array C# builds for it
+// (an array target, not a span, so a call inside an element keeps its own Go line in an optimized build: seat #54),
+// so the result keeps Go's literal semantics in every position: never nil (`slice<nint>([])` is empty, not nil),
+// len == cap, and no two evaluations share elements. T is always written, so nothing is
 // inferred from the elements (an untyped `1` would infer System.Int32 where Go's []int is nint).
 //
 // A collection expression cannot target slice<T> itself: C# takes a collection's element type from its public

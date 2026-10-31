@@ -3803,24 +3803,27 @@ public static partial class builtin
     /// <typeparam name="T">Type of array.</typeparam>
     /// <param name="source">C# source array.</param>
     /// <returns>Go <see cref="go.slice{T}"/> wrapper for C# <paramref name="source"/> array.</returns>
+    /// <remarks>
+    /// <para>
+    /// This is also the overload a Go slice literal binds: the converter writes <c>[]int{1, 2, 3}</c> as
+    /// <c>slice&lt;nint&gt;([1, 2, 3])</c>, and the collection expression becomes the fresh array this wraps, so the
+    /// slice is never nil, has <c>len == cap</c>, and shares no elements with another evaluation. The array is the
+    /// compiler's own <c>new T[]{…}</c>, not charged to <see cref="AllocationCounter"/>, as the earlier
+    /// <c>new T[]{…}.slice()</c> form's was not; an empty literal is the shared zero-length array, empty and not nil.
+    /// </para>
+    /// <para>
+    /// The priority is what binds a collection expression here: C# prefers <see cref="ReadOnlySpan{T}"/> to an
+    /// array for one, and a span target lowers to an inline stack buffer whose element stores the optimizing JIT
+    /// maps to no IL offset of their own, so a call inside an element lost its own Go line (runtime.Caller; seat
+    /// #54). An array target lowers to <c>newarr</c> and one <c>stelem</c> per element, which keeps them. Priority
+    /// only orders this type's overloads, and every other argument that converts to <c>T[]</c> already bound this
+    /// one, so no other call moves.
+    /// </para>
+    /// </remarks>
+    [OverloadResolutionPriority(1)]
     public static slice<T> slice<T>(T[] source)
     {
         return source;
-    }
-
-    /// <summary>
-    /// Builds a Go slice from a slice literal written as a C# collection expression: Go's <c>[]int{1, 2, 3}</c>
-    /// is <c>slice&lt;nint&gt;([1, 2, 3])</c>, never nil, <c>len == cap</c>, over its own fresh backing array.
-    /// </summary>
-    /// <remarks>
-    /// A collection expression converts to <c>T[]</c>, to <see cref="ReadOnlySpan{T}"/> and to
-    /// <see cref="SliceLiteral{T}"/> alike; the priority makes it bind this overload, and no other argument
-    /// converts to <see cref="SliceLiteral{T}"/>, so every existing call resolves as before.
-    /// </remarks>
-    [OverloadResolutionPriority(1)]
-    public static slice<T> slice<T>(SliceLiteral<T> items)
-    {
-        return items.Items;
     }
 
     /// <summary>
