@@ -263,7 +263,7 @@ Every use still reads `trueˢ`, so `FormatBool`'s body is unchanged. In the same
 package converted with `-hoist-literals`), local string constants, package-level string constants and big constants
 take the same pair; a package converted without the flag keeps one field per constant. The example above shows the
 committed corpus, which takes the accessor at the 1.26.10.2 regeneration.
-<!-- src/go2cs/hoistedLiteralOperations.go:1484 `func structStaticReadAccessorDecl(`; the measurement:
+<!-- src/go2cs/hoistedLiteralOperations.go:1493 `func structStaticReadAccessorDecl(`; the measurement:
      docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 1. -->
 
 **What hoists:** a returned value; an assignment to a local, parameter or field; a `string` or `...string` argument; an `any` target (argument, result, send, assignment); a standalone map-index key; a conversion to a named string type. A literal used **only** in `any` slots is hoisted pre-boxed, as `static readonly object xˢ = (@string)"…"u8;`, so those uses allocate nothing.

@@ -16,7 +16,7 @@ A converted program can run three ways. All three run the same converted code; t
 | Deployment | How you get it | Compiled |
 |:--|:--|:--|
 | **JIT** | `dotnet run`, `dotnet build`, or a framework-dependent `dotnet publish` | as each method first runs, then recompiled hotter as it keeps running |
-| **ReadyToRun** | `dotnet publish -c Release` of a converted program, which turns it on | ahead of time, then the JIT can still recompile hot methods |
+| **ReadyToRun** | `dotnet publish -c Release` of a converted program, which turns it on | golib and the standard library ahead of time, then the JIT can still recompile hot methods; the program's own code as it runs |
 | **Native AOT** | `dotnet publish -r <rid> -p:PublishAot=true` | entirely ahead of time, to a native executable with no JIT |
 
 Which wins depends on what the program spends its time on. The `win-x64` comparisons below come from the
@@ -52,6 +52,24 @@ If you publish ReadyToRun as a single file, also set
 `<PublishReadyToRunComposite>false</PublishReadyToRunComposite>`
 ([Known issues](KnownIssues.md#a-single-file-publish-with-composite-readytorun-runs-out-of-memory)).
 
+**Your own code is compiled as it runs.** A ReadyToRun publish of a converted program precompiles golib and the
+standard library, which is where start time is won. It leaves the program's own assemblies, every project built from
+your module, to the JIT. ReadyToRun compiles each assembly on its own: precompiled code cannot inline a call into
+another assembly, and a loop that runs only once never leaves its precompiled form. On `win-x64` (an AMD Ryzen 5 PRO
+6650U), against a publish that precompiled everything:
+
+- a published loop calling `strconv.FormatBool` ran in about an eighth of the time;
+- a string-matching benchmark's hot phase took about two thirds of the time;
+- start time stayed within run-to-run variation, and the published folder came out a few tens of KB smaller.
+
+To precompile your own code as well, set `<GoReadyToRunUserCode>true</GoReadyToRunUserCode>`.
+
+<!-- Source: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 9 (seat #53, G-LAPTOP, .NET 10.0.11, 15
+     interleaved rounds, A/A band per program): r2rmod main loop 10.205 -> 1.190 ns/call (0.119), its library
+     package's loop 5.421 -> 0.848 (0.156); PerfStringMatch hot phase 1,142 -> 725 ms (0.643); PerfStartup and
+     PerfTlsHandshake wall inside the band (-0.0%, +0.3%); sizes -18 KB, -23 KB, -29 KB. -->
+
+
 ## .NET runtime settings
 
 Under the JIT and ReadyToRun, .NET compiles code in tiers. A method first gets a quick compile; one that keeps running
@@ -76,9 +94,32 @@ The settings, if you need them, each in three equivalent forms: a property in th
 | Tiered compilation | `<TieredCompilation>false</TieredCompilation>` | `"System.Runtime.TieredCompilation": false` | `DOTNET_TieredCompilation=0` |
 | Dynamic PGO | `<TieredPGO>false</TieredPGO>` | `"System.Runtime.TieredPGO": false` | `DOTNET_TieredPGO=0` |
 | Quick JIT for loops | `<TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>` | `"System.Runtime.TieredCompilation.QuickJitForLoops": false` | `DOTNET_TC_QuickJitForLoops=0` |
+| Call-counting delay | `<GoCallCountingDelayMs>0</GoCallCountingDelayMs>` (a converted program's own property) | `"System.Runtime.TieredCompilation.CallCountingDelayMs": 0` | `DOTNET_TC_CallCountingDelayMs=0` |
 
 Microsoft documents every runtime compilation setting in
 [Runtime configuration options for compilation](https://learn.microsoft.com/dotnet/core/runtime-config/compilation).
+
+**A converted program counts calls from the start.** .NET waits until about 100 ms pass with no new method compiled
+before it counts calls toward optimizing a method. Until then, a short busy phase runs the standard library's small
+functions unoptimized. A converted program sets that delay to 0. This applies wherever code is JIT-compiled: under
+`dotnet run` and `dotnet build`, and in a ReadyToRun publish, whose methods are still recompiled as they get hot. It
+does not apply to Native AOT. On `win-x64` (an AMD Ryzen 5 PRO 6650U):
+
+- Under the JIT, a TLS handshake benchmark that loads 112 packages ran about a third faster (about 4.2 s down to
+  2.8 s). A trivial program took about 24 ms, roughly 5%, longer to start.
+- Published with ReadyToRun, the same benchmark ran about 30% faster, and the trivial program took about 30 ms longer
+  to start.
+
+The environment variable overrides the project setting for one run.
+`<GoCallCountingDelayMs>runtime</GoCallCountingDelayMs>` restores .NET's own default. A C# application that references
+converted packages keeps .NET's default unless it sets the `runtimeconfig.json` value itself.
+
+<!-- Source: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 9 (seat #53 P2, G-LAPTOP, .NET 10.0.11, 15
+     interleaved rounds, A/A band per program and metric). JIT build: PerfTlsHandshake wall 4,161 -> 2,804 ms
+     (-32.6%), PerfStartup +24.05 ms (+5.5%); the short hot phase Hash.String 36.97 -> 10.54 ns (0.286). ReadyToRun
+     publish (default against GoCallCountingDelayMs=runtime): PerfTlsHandshake 3,287 -> 2,309 ms, PerfStartup
+     312.6 -> 342.3 ms. Override order measured: the env var beats runtimeconfig.json in both directions. -->
+
 
 **One setting to change on one runtime.** Quick JIT for loops is what lets the JIT replace a running loop with an
 optimized one. Ubuntu's packaged .NET 10, rather than Microsoft's build, can fail in that path on Linux;

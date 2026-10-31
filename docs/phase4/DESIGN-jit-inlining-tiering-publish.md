@@ -12,6 +12,10 @@
 > - the AOT side of the address read.
 >
 > Nothing is built before this record is reviewed.
+>
+> **Implemented and measured 2026-10-31 (section 9).** The review rulings, the owner's scope ruling (the accessor
+> applies in hoist mode only), the readings on G-LAPTOP and the predictions scored are all in section 9. Sections 0 to 8
+> stand as reviewed, apart from the dated AOT row added to s.2.1.
 
 ## 0. The rule for adoption
 
@@ -450,3 +454,134 @@ after (`csproj-template.xml` is embedded in the converter, so parts 2 and 3 move
   reasoning about field reads is re-read at the landing.
 
 Every bracketed value is filled from section 5's readings, with the platform named, as the guide's rule requires.
+
+## 9. Implementation, readings and the predictions scored (2026-10-31)
+
+### 9.1 What landed, and the rulings it follows
+
+COORD's review rulings (2026-10-30): form A, the module-wide scope for part 3, S3 left out unless three conditions
+hold, and part 2's default decided by the pre-registered rule. The owner's scope ruling followed: the accessor applies
+**in hoist mode only**, which means the `-stdlib` default and the `-hoist-literals` opt-in. A plain-mode user package
+keeps one field per constant, as before. On the seat branch:
+
+- **Part 1.** `structStaticReadAccessorDecl` (hoistedLiteralOperations.go) renders every struct-typed
+  `static readonly` the converter writes as an accessor under the declared name over a private backing field. The
+  marker is `ᵇ` (U+1D47, `StaticBackingFieldMarker`); the collision census found it in no repository file and no
+  GOROOT 1.26.10 source. The five writers are:
+  - hoisted literals;
+  - the hoisted local string const;
+  - the package-level string const, named string types included;
+  - the package-level and the hoisted local `GoBigConst`.
+
+  Pre-boxed `object` fields are untouched. `structStaticReadAccessorsApply`, one switch, returns
+  `packageHoistsLiterals`, the owner's scope; returning `true` applies the form everywhere.
+  `TestStructStaticsReadThroughSameNamedRefReadonlyAccessor` was red first and asserts every writer.
+  `TestPlainModeStringConstFollowsTheAccessorScopeSwitch` follows the switch. Both scopes were run with the switch
+  flipped, and the file was restored byte-identical.
+- **Part 2.** `GoCallCountingDelayMs` (default 0, `runtime` opts out) feeds `RuntimeHostConfigurationOption`, in
+  applications only.
+- **Part 3.** The `GoKeepOwnCodeOutOfReadyToRun` target runs before `_PrepareForReadyToRunCompilation`. It excludes the
+  application's own assembly, and every `ProjectReference` assembly whose project lies outside `$(go2csPath)core/`.
+  golib and the standard library stay ReadyToRun. `GoReadyToRunUserCode=true` restores today's publish.
+- **S3** (mutable package variables) is **out of .2**. Condition (i) is met: the i9's mutable row shows the refusal,
+  and A′ inlines. Condition (ii) fails: no perf-suite benchmark reads a mutable struct static as a whole value in a
+  hot path. PerfStringMatch's `lines[i % len(lines)]` reads by address, because golib's `len<T>(in slice<T>)` and the
+  indexer both take the address. PerfTlsHandshake reads its package slices in setup only. Condition (iii) was
+  therefore not run. S3 is a BOARD row, with the i9's numbers.
+- **The reflection census** (condition (a)): 129 `GetField`, `GetFields`, `GetProperty` and `GetMember(s)` sites in
+  golib, gen, testing, the hand-owned runtime and reflect, and the converter, each with a verdict. **None needs a
+  change**:
+  - about 95 read instance fields only;
+  - golib's own statics are read by fixed name;
+  - LinknameVar binds variables, not constants;
+  - TestFlagBridge reads vars and named-int properties;
+  - the generators' package-method enumerations already meet 11,980 static get-only properties, and filter the new
+    by-ref getters out;
+  - the converter's `-tests` seed names the accessor.
+
+  The list is in `data/seat53-jit-publish/reflection-census.md`.
+
+### 9.2 Gates
+
+- **`go test ./...`:** all packages ok (a `-timeout 120m` run; the default 10m wall killed the first). The suite was
+  re-run on the final scope.
+- **Behavioral suite, at the `everywhere` scope:** 885 transpile, compile and target pass; output 856 pass, 0 fail, 29
+  skipped, as designed. That run proves the accessor in user code too.
+- **CNR at the ruled scope:** byte-identical across all 952 behavioral packages. So **no part-1 golden moves**.
+  The part 2 and 3 template blocks reach 952 behavioral `.csproj`, as identical added lines and nothing else.
+- **The seat root's full standard-library build:** 0 errors, 362 assemblies, 741 s. That proves all 5,168 accessors
+  compile.
+
+### 9.3 The rung
+
+Two-seeded `-stdlib -comments` x3 targets: base converter `be64e39ef4cdb1f2` (master `1dacbdf4b6`) against seat
+`15bd075395697c5e`. 1,368 files differ, and none appears on one side only:
+
+- **5,168 declaration hunks.** Each is the pair exactly: same indent, access, type and value. That equals the census:
+  5,168 struct-static declarations in 2,754 auto-converted production files of the base emission, none left behind in
+  the seat emission. By type: `@string` 5,122, `ErrorCode` 16, `GoBigConst` 15, `curveID` 8, `relationship` 5,
+  `ViewType` 2.
+- **556 `package_info.cs` position-map lines.**
+- **358 Library `.csproj`**, each with the two template inserts, inert in a library. Section 7 predicted that parts 2
+  and 3 would move no `src/core` file. That was wrong: the converter writes the whole template into every project.
+- **Nothing else.**
+
+The rung row is in `data/parity-1262/ladder-rungs.tsv`, to be re-measured at the rebase over #51.
+
+### 9.4 Readings, G-LAPTOP
+
+Ryzen 5 PRO 6650U, win-x64, .NET 10.0.11, a quiet box, 15 interleaved rounds plus a discarded warm-up. Ratios are
+against the first arm, read against the A/A band per program and metric. The data is in `data/seat53-jit-publish`.
+
+| Part | Reading | Result |
+|:--|:--|:--|
+| 1, JIT steady | `FormatBool` ns: H 2.434, A 0.711, `NoInlining` control 2.399 | A/H 0.292 OUTSIDE; control 0.987 inside, so the gain is the inlining |
+| 1, JIT steady | `Hash.String` ns: H 9.813, A 10.943, control 12.037 | A/H 1.106 inside (median +11%) |
+| 1, Native AOT | `FormatBool` ns: H 2.365, A 0.604 | 0.256 OUTSIDE |
+| 1, Native AOT | `Hash.String` ns: H 4.987, A 5.222 | 1.048 inside |
+| 1, suite | PerfStringMatch and PerfString, wall and hot phase, JIT and AOT | every A/H inside the band |
+| 2, JIT | short hot phase `Hash.String` at delays 0 / 10 / 20 | 0.286 OUTSIDE / 0.948 / 0.706 |
+| 2, JIT | PerfStartup wall, at 0 | +24.05 ms (+5.5%) OUTSIDE |
+| 2, JIT | PerfTlsHandshake wall, at 0 | -1,357 ms (-32.6%) OUTSIDE |
+| 2, published | ReadyToRun, the default against `runtime` | PerfTlsHandshake 3,287 -> 2,309 ms; PerfStartup 312.6 -> 342.3 ms |
+| 2, override | env var against runtimeconfig | the env var wins in both directions |
+| 3 | start time, PerfStartup / PerfTlsHandshake | inside the band (-0.0% / +0.3%) |
+| 3 | size | -18 / -23 / -29 KB |
+| 3 | r2rmod loops entered once | main 10.205 -> 1.190 ns (0.119); its library package 5.421 -> 0.848 (0.156); the one-assembly scope reads the same as module-wide |
+| 3 | PerfStringMatch hot phase | 1,142 -> 725 ms (0.643) |
+
+**Part 2's decision**, by the pre-registered rule, which COORD accepted: step 1 passes. Step 2 finds no qualifying
+value: 0 fails (a) with +5.5%; 10 keeps 8% of the win and 20 keeps 42%, so both fail (b). Step 3 gives a **default of
+0**, with the cost named: +24 ms on a trivial start, against a large program a third faster.
+
+**Not explained:**
+
+- `Hash.String`'s method is a 19-return switch, and the form gains nothing there: A's median is 11% above H on the JIT,
+  inside the band. The reading I offer is the inliner's budget across many accessor calls in one large method. It is
+  unproven.
+- In the one-assembly scope of part 3, the library package's loop sped up as well, although its assembly stayed
+  ReadyToRun. Why is unread.
+
+### 9.5 The predictions of section 6, scored as worded
+
+| Prediction | Reading | Score |
+|:--|:--|:--|
+| 1. A within the band of HR2 on the i9 | not run on the seat tip; the i9 is offered as the second CPU | open |
+| 1. On G-LAPTOP, A < P < H for `FormatBool` | A < H (0.711 against 2.434); P not measured here | partial |
+| 1. The `NoInlining` control reads like H | 0.987 | hit |
+| 2. No AOT effect beyond the band (flagged weakest) | `FormatBool` A/H 0.256 OUTSIDE | **miss** |
+| 3. PerfStringMatch against A inside the band on both runtimes | inside on the JIT and AOT, PerfString too | hit |
+| 4. Delay 0 costs PerfTlsHandshake no more than 5% | it is 32.6% faster | hit |
+| 4. 20 ms keeps at least 80% of 0's hot-phase win | 42% | **miss** |
+| 4. PerfStartup inside the band at every value | 0 reads +5.5%, OUTSIDE | **miss** |
+| 5. IL-only `FormatBool` x100 within the band of the steady JIT | not run in that shape (the r2rmod loop reads 1.190 ns) | not scored |
+| 5. The own-code exclusion costs PerfStartup no more than 10% | -0.0% | hit |
+| 5. Module-wide adds nothing beyond the band for one package | identical by construction; also equal for two packages | hit |
+| 7. Parts 2 and 3 move no `src/core` file | 358 library `.csproj` take inert inserts | **miss** |
+
+### 9.6 For the release notes (.2)
+
+Proposed NEWS line: "In the converted standard library, a public string constant is now read through a property of
+the same name, which the JIT and Native AOT can inline. C# code that uses one compiles unchanged, but an assembly
+compiled against an earlier package must be rebuilt." That covers 108 public string constants. User packages are
+unchanged unless converted with `-hoist-literals`.
