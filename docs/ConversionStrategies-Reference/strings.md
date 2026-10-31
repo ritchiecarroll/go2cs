@@ -281,7 +281,7 @@ committed corpus, which takes the accessor at the 1.26.10.2 regeneration.
 | concatenation operands | `"text"u8` | the concat operator reads the span directly |
 | `[]byte("…")` / `[]rune("…")` sources | the span, or `(@string)"text"` for runes | the result must be a fresh mutable copy anyway |
 | a format string: the `string` parameter before the `...any` of a callee named `…f` | `"%v"`, or `"%v"u8` at an [sstring twin](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind) | it slugs badly; at a twin the literal binds a view and costs nothing |
-| a slug with no ASCII word, or of 3 characters or fewer | the plain form, or `(@string)"text"` where a bare literal would bind wrongly | the name would say less than the value |
+| a slug with no ASCII word, or of 2 characters or fewer | the plain form, or `(@string)"text"` where a bare literal would bind wrongly | the name would say less than the value |
 | `""` | `""u8` | it already costs nothing |
 | composite-literal elements and keys, `append` elements and spreads | the plain form, or the cached cast | thousands of fields would move table-building work into type initializers |
 | `func init()` bodies, functions they reach, and package-level initializers | the plain form, or the cached cast | they run once |

@@ -276,7 +276,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 | [Multiple results](#multi-result-values-and-comma-ok-forms) | `func Atoi(s string) (int, error)` | `public static (nint, error) Atoi(@string s)` | converter |
 | [Comma-ok](#multi-result-values-and-comma-ok-forms) | `v, ok := m["a"]` | `var (v, ok) = m["a", ꟷ];` | golib |
 | [Slices and arrays](#slices-and-arrays) | `[]int{2, 3, 4}` · `[N]T` | `slice<nint>([2, 3, 4])` · `array<T>` | golib |
-| [Strings](#strings-string-and-sstring) | `string` · `"Atoi"` | `@string` · `"Atoi"`, a plain C# literal golib converts once; `"Atoi"u8` where the bytes are read in place, and in the standard library | golib |
+| [Strings](#strings-string-and-sstring) | `string` · `"Atoi"` | `@string` · `"Atoi"`, a plain C# literal golib converts once; `"Atoi"u8` where the bytes are read in place; in the standard library, a `static readonly` field `atoiˢ`, read through a same-named accessor, when the literal's words name it | golib |
 | [Maps](#maps) | `map[string]int{"a": 1, "b": 2}` | `new map<@string, nint>{["a"] = 1, ["b"] = 2}` | golib |
 | [Generics](#generics) | `func Swap[T any](a, b T) (T, T)` · `[S Shape]` | `public static (T, T) Swap<T>(T a, T b)` · `where S : Shape` | converter |
 | [Type aliasing](#type-aliasing) | `type P = *bool` | `global using P = go.ж<bool>;` | converter |
@@ -3408,15 +3408,17 @@ would panic. The same rule lets a [type switch](#type-switch-statements) pick `c
 **A string literal boxes as a Go `string`.** Go's `string` is golib's
 [`@string`](#strings-string-and-sstring), a byte string; the `@` only escapes the C# keyword. A literal
 stored in an `any` holds an `@string`, never a C# `string`, so `x.(string)` and `case string:` match it.
-Where the converter writes that value out, it is `(@string)"hello"u8`: `"hello"u8` is a C# UTF-8 literal,
-and the cast turns it into a Go string. The next two paragraphs say where that form appears.
+Where the converter writes that value out inline, it is `(@string)"hi"`: the cast turns the C# literal into a
+Go string, which golib converts once and shares. The next two paragraphs say where that form appears.
 
-**A literal stored in an `any` is also created only once.** The converter [hoists](#strings-string-and-sstring)
-it into one `static readonly` field, as the standard library does for every literal used as a value. The
-field is declared just above the first function in the package that uses it, and its generated name ends
-in `ˢ`. So `"hello"` becomes the field `helloˢ`. Some literals stay inline, such as an element of a composite literal: `[]any{"keep"}` keeps
-`(@string)"keep"u8` in place. The generated comment gives the reason for hoisting. Go keeps string
-literals in read-only memory (RODATA) at no run-time cost, so the C# allocates each literal only once.
+**A literal stored in an `any` is also boxed only once when its words name it.** The converter
+[hoists](#strings-string-and-sstring) it into one `static readonly` field. The field is declared just above
+the first function in the package that uses it, and its generated name ends in `ˢ`. So `"hello"` becomes the
+field `helloˢ`, initialized once from `(@string)"hello"u8`, a C# UTF-8 literal cast to a Go string, and an
+element of a composite literal reads its field too: `[]any{"keep"}` reads `keepˢ`. A literal whose name
+would say less than its value, such as `"hi"`, stays inline as `(@string)"hi"` and is boxed at
+each use. The generated comment gives the reason for hoisting. Go keeps string literals in read-only memory
+(RODATA) at no run-time cost, so the C# allocates each hoisted literal only once.
 
 **A hoisted literal whose every use in the package is an `any` is stored already boxed.** Its field has
 type `object`. If any use needs a plain `string`, the field is a `@string` instead
@@ -4860,14 +4862,17 @@ fmt.Println(len(rs), (@string)rs);
 A `[]byte` conversion takes the `u8` bytes directly. A `[]rune` conversion first makes the literal an
 `@string`, because `@string` is what decodes UTF-8 into runes.
 
-**The standard library stores each literal used as a value in a field.** Go keeps literals in read-only
-memory, so they cost nothing at run time. A standard-library package matches that by storing such a
-literal in a `static readonly` field of the package's class
+**The standard library stores a literal used as a value in a field when its words name it.** Go keeps
+literals in read-only memory, so they cost nothing at run time. A standard-library package matches that by
+storing such a literal in a `static readonly` field of the package's class
 ([Package Conversion](#package-conversion)), declared just before the first function that uses it, named
-from the literal's words, with the suffix `ˢ` marking it as generated: `return "zero value return"`
-becomes `return zeroValueReturnˢ;`. Reading a field skips the cache lookup a plain literal makes, so
-`-hoist-literals` gives any other package this form, and it is recommended for
-performance-critical code ([Command Line](CommandLine.md)). By default the same function reads as Go does:
+from the literal's words, with the suffix `ˢ` marking it as generated, and read through an accessor under
+the same name: `return "zero value return"` becomes `return zeroValueReturnˢ;`. Reading the field skips the
+cache lookup a plain literal makes, so `-hoist-literals` gives any other package this form, and it is
+recommended for performance-critical code ([Command Line](CommandLine.md)). Every other value site, a
+composite element or an `init` body among them, takes the cached plain form in both modes, and a format string
+at an `sstring` twin keeps its `u8` span, so no literal is copied on each evaluation. By default the
+same function reads as Go does:
 
 <!-- source: src/tests/Behavioral/StringLiteralHoisting/main.go:12-18 -->
 ```go
@@ -9486,7 +9491,7 @@ keeps a plain field (reverse below is built as `new reverse(data)`), and a zero 
 `default(T)` (a missing-key map read, a fresh `make`d slice's elements) runs no constructor. See
 docs/ConversionStrategies-Reference/struct-embedding.md, "Zero values of promoted-embed structs construct
 through a generated constructor". Hoisting rules: docs/ConversionStrategies-Reference/strings.md, "What
-stays inline" (3 characters or fewer; comparisons; composite-literal elements). -->
+claims no field" (2 characters or fewer; comparisons; composite-literal elements). -->
 
 **The embedded struct is stored inline, so copying the outer struct copies it.** An embed is a field
 like any other, not a separate heap object. After `b := a`, `b` has its own `inner`, and writing `b.n`
