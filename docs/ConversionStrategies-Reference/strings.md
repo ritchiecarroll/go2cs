@@ -8,8 +8,9 @@ Go's `string` becomes golib [`@string`](https://github.com/ritchiecarroll/go2cs/
 |:--|:--|:--|
 | a `string` value | `@string` | everywhere by default |
 | a literal in a `string` slot | `"text"`, a C# string converted once and shared | [plain literals](#a-literal-in-a-string-slot-is-a-plain-c-literal) |
+| a literal at a value site a bare literal would bind wrongly | `(@string)"text"`, converted once and shared | [plain literals](#a-literal-in-a-string-slot-is-a-plain-c-literal) |
 | a literal any other slot reads | `"text"u8` (a `ReadOnlySpan<byte>`) | [`u8` spans](#string-literals-render-as-u8-spans) |
-| a literal used as a value, in the standard library or under `-hoist-literals` | `static readonly @string textˢ`, read through a same-named accessor | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
+| a literal used as a value in a function body, whose words name it, in the standard library or under `-hoist-literals` | `static readonly @string textˢ`, read through a same-named accessor | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
 | `const name = "text"` inside a function, in the standard library or under `-hoist-literals` | `static readonly @string nameᶜ`, read through a same-named accessor | [local string constants](#a-function-local-string-const-hoists-to-a-static-readonly-field-under-its-own-name) |
 | a raw string that spans lines | `"""…"""u8.Raw()` | [multi-line raw strings](#a-multi-line-raw-string-ends-in-raw) |
 | a literal with raw non-UTF-8 bytes | `((@string)(new byte[]{…}))` | [raw-byte literals](#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string) |
@@ -72,13 +73,17 @@ golib's `implicit operator @string(string)` makes the conversion. For a C# **lit
 
 The plain form covers returns, assignments, `string` and `...string` arguments, struct fields (keyed or positional), typed slice, array and map elements and keys, package-level `var` initializers, and function-local string constants. A plain literal claims no field, so it adds no initialization-order dependency, and `func init()` bodies and init-reachable functions take it too.
 
-A slot where a bare C# string would bind the wrong C# type keeps a typed form:
+A slot where a bare C# string would bind the wrong C# type keeps a typed form. Where that form is a value, it is the cached cast `(@string)"text"`: the cast converts the C# literal through the same `StringLiteralCache`, so it allocates nothing after the first evaluation either.
 
 | Slot | Kept form | Why |
 |:--|:--|:--|
-| an `any` slot go2cs-gen cannot intercept (below), or a non-empty interface slot | hoisted pre-boxed, or `(@string)"text"u8` | the boxed value would be a `System.String`, the wrong dynamic type |
-| a named string type | `((Token)(@string)"x"u8)` | C# applies only one user-defined conversion (CS0029) |
-| an argument whose callee parameter mentions a type parameter | `"text"u8` | C# would infer the type argument as `string` |
+| an `any` slot go2cs-gen cannot intercept (below), or a non-empty interface slot | hoisted pre-boxed when the literal's words name it, else `(@string)"text"` | the boxed value would be a `System.String`, the wrong dynamic type |
+| a named string type | `((Token)(@string)"x")` | C# applies only one user-defined conversion (CS0029) |
+| an argument whose callee parameter mentions a type parameter | `(@string)"text"` | C# would infer the type argument as `string` |
+| an `append` element | `append(lines, (@string)"seed")` | golib's `append<T>` is generic in the element type |
+| a `print` or `println` argument | `println((@string)"init fn 1")` | golib's `print` takes `params object[]` |
+| a literal spread into `append` | `append(eb, ((@string)"oops").ꓸꓸꓸ)` | the spread is a member of `@string` |
+| a `range` over a literal | `foreach (var (i, c) in (@string)"go")` | a C# string would range over UTF-16 code units |
 | a `go` or `defer` argument that stays in the capture list | `(@string)"text"` | the capture list passes each argument through the launcher's type parameters, which would infer `string` |
 | an [sstring twin](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind)'s parameter | `"text"u8` | a C# string reaches the `sstring` member through a conversion that transcodes on every call; the `u8` form binds a zero-copy view |
 | a multi-line raw string | `"""…"""u8.Raw()` | `Raw()` must strip the checkout's CRs |
@@ -88,11 +93,11 @@ Comparisons, concatenation operands and `[]byte("…")` sources keep the `u8` sp
 
 A `go` or `defer` statement's constant argument leaves the capture list when the callee is a declared function, and renders inside the thunk's call: `go fmt.Println("First")` is `goǃ(() => fmt.Println("First"))`. There it is an ordinary call's argument and follows the rows above. A builtin, func-literal, method-group or func-value callee keeps its arguments in the capture list ([go/defer constants](defer-panic-recover.md#a-gos-or-defers-constant-argument-renders-inside-the-thunks-call)).
 
-**The standard library opts out.** A package whose source is under `GOROOT/src` keeps [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use), under `-stdlib` and under `-tests` alike, so a package's production and test passes always agree (`literalsHoistedFor`). `-hoist-literals` gives any other package the same form, and it is the recommended opt-out for performance-critical code: a hoisted field is a plain static read, where a plain literal makes a cache lookup on every evaluation.
+**The standard library takes the hybrid.** A package whose source is under `GOROOT/src` is converted in hoist mode, under `-stdlib` and under `-tests` alike, so a package's production and test passes always agree (`literalsHoistedFor`). Hoist mode keeps a [hoisted field](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) for a literal whose words name it, and every other site takes the plain form or the cached cast above. So no literal is copied on each evaluation in either mode. `-hoist-literals` gives any other package the same hybrid, and it is recommended for performance-critical code: a hoisted field is a plain static read, where a plain literal makes a cache lookup on every evaluation.
 
 **A wrong binding is a build error.** The analyzer `StringLiteralBindingAnalyzer` (`go2cs-gen`) reports [`GO2CS0004`](../DiagnosticCodes.md), an error, on a C# string literal in converted code that binds where Go's string would not: an `object` or interface parameter, a method type parameter inferred as `string`, or a `System.String` parameter beside an `@string` overload. A parameter marked `[GoTakesCSharpString]` (golib) accepts a C# string by design and is exempt; golib marks `panic`'s state and `len(string)`. Hand-owned assemblies, attribute arguments, `nameof` and parameter defaults are not checked.
 
-The decisions are made in the literal pre-pass (`hoistedLiteralOperations.go`, `packagePlainLits`), and `convExpr`'s `*ast.BasicLit` arm renders a registered node bare. The unit tests in `plainStringLiterals_test.go` cover every row above, and `StringLiteralBindingAnalyzerTests` covers the analyzer.
+The decisions are made in the literal pre-pass (`hoistedLiteralOperations.go`, `packagePlainLits` and `packageCastLits`), and `convExpr`'s `*ast.BasicLit` arm renders a registered node bare or cast. The unit tests in `plainStringLiterals_test.go` cover every row above. `plainLiteralAllocations_test.go` runs one table of cached forms in both modes (`TestPlainModeSharedForms`, `TestHybridHoistModeTakesTheCachedForms`), and `TestStandardLibraryEmitsTheHybrid` pins the standard library's mode. `StringLiteralBindingAnalyzerTests` covers the analyzer.
 
 ## A literal in an `any` slot is a plain C# literal too, and go2cs-gen boxes it as a Go string
 
@@ -123,11 +128,11 @@ A `go` or `defer` argument that stays in the capture list claims no field either
 
 **The build must admit the interceptors.** `InterceptorsNamespaces` must list `go2cs.Interceptors`, or every intercepted call is `CS9137`. `src/Directory.Build.props` sets it for the repository's projects, golib's `go.lib.targets` for a NuGet consumer, and the converter's csproj template for a converted project outside the tree. The same three also make a go2cs-gen that cannot load an error (`CS8032`, `CS8034`, `CS8784`, `CS8785`, `CS9057`), and `go.lib.targets` refuses a compiler older than Roslyn 4.14 ([`GO2CS3001`](../DiagnosticCodes.md)). A .NET 10 SDK build runs its own Roslyn 5.0.
 
-**The cost is design time, and it grows with the sites.** To find each call's callee, the generator binds every call that passes a bare literal to an `any` slot. A generator that binds re-runs on every change to the compilation. So in an IDE, each edit re-binds the `any`-slot literal calls of every file that has one, not only the edited file. That is also what lets `GO2CS0006` see an overload added in another file. A file with no such call pays nothing, because the generator decides that from syntax alone. A build pays the same binding once, and the compiler reuses most of it. For a large project that is IDE-heavy or performance-critical, `-hoist-literals` is the opt-out: with every literal hoisted, the converter emits no bare literal and the generator binds nothing.
+**The cost is design time, and it grows with the sites.** To find each call's callee, the generator binds every call that passes a bare literal to an `any` slot. A generator that binds re-runs on every change to the compilation. So in an IDE, each edit re-binds the `any`-slot literal calls of every file that has one, not only the edited file. That is also what lets `GO2CS0006` see an overload added in another file. A file with no such call pays nothing, because the generator decides that from syntax alone. A build pays the same binding once, and the compiler reuses most of it. For a large project that is IDE-heavy or performance-critical, `-hoist-literals` narrows it: a literal whose words name it takes a pre-boxed field, so only a literal whose name would be degenerate (`"/"`, `"%v"`) still reaches the generator.
 
-**A hoisting package says so, and the generator skips it.** The converter writes `[assembly: GoHoistedLiterals]` (golib) into the info file of every package whose literals it hoists: `package_info.cs`, and `package_test_info.cs` for its test assembly, never `package_info_internal_test.cs`, which the same test assembly also compiles. The stamp is regenerated on every write, so it never outlives the flag. The generator finds the stamp from syntax and drops the assembly's files before any semantic step, so the standard library and a `-hoist-literals` package run no transform at all, even for a file with a call such as `panic("…")`, whose literal argument goes to a parameter that takes a C# string on purpose. The stamp only skips work: a bare literal in an `any` slot of a stamped assembly would still be `GO2CS0004`, a build error. `hoistedLiteralsStamp_test.go` covers the converter's side, and GenTests' `AStampedAssemblyRunsNoTransform` covers the generator.
+**A hoisting package that boxes nothing says so, and the generator skips it.** The converter writes `[assembly: GoHoistedLiterals]` (golib) into the info file of a hoist-mode package that passes no bare literal to an `any` slot: `package_info.cs`, and `package_test_info.cs` for its test assembly, never `package_info_internal_test.cs`, which the same test assembly also compiles. A hoist-mode package whose degenerate-name fallback leaves a bare literal in an interceptable `any` slot carries no stamp, so the interceptor runs; in the standard library that is 8 packages per target (`encoding/gob`, `flag`, `go/ast`, `go/types`, `net/rpc`, `reflect`, `runtime/pprof`, `testing/slogtest`). A test assembly's stamp is one decision over every test variant it compiles. The stamp is regenerated on every write, so it never outlives the flag. The generator finds the stamp from syntax and drops the assembly's files before any semantic step, so a stamped package runs no transform at all, even for a file with a call such as `panic("…")`, whose literal argument goes to a parameter that takes a C# string on purpose. The stamp only skips work: a bare literal in an `any` slot of a stamped assembly would still be `GO2CS0004`, a build error. `hoistedLiteralsStamp_test.go` covers the converter's side, and GenTests' `AStampedAssemblyRunsNoTransform` covers the generator.
 
-`-hoist-literals` and the standard library's opt-out cover the `any` slot too: with every literal hoisted, the converter emits no bare literal for the generator to intercept. `plainStringLiterals_test.go` (`TestPlainLiteralsAtInterceptableAnySlots`, `TestAnySlotsGoInterceptorsCannotReachKeepTheHoist`) covers the converter's side, and GenTests' `LiteralInterceptorGeneratorTests` covers the generator, building and running each shape.
+`plainStringLiterals_test.go` (`TestPlainLiteralsAtInterceptableAnySlots`, `TestAnySlotsGoInterceptorsCannotReachKeepTheHoist`) covers the converter's side of the `any` slot, and GenTests' `LiteralInterceptorGeneratorTests` covers the generator, building and running each shape.
 
 ## String literals render as `u8` spans
 
@@ -145,15 +150,15 @@ var bs = slice<byte>("hello"u8);
 var rs = slice<rune>((@string)"héllo");
 ```
 
-The span form is used in every slot that reads the bytes in place: comparisons, concatenations and `[]byte` sources. In the standard library it is also the form of every literal that is not hoisted, in every slot that accepts it: assignments, `string` parameters, struct fields (positional or keyed), and typed slice and array elements. C# folds `"a"u8 + "b"u8` into one literal. A concatenation with a string value binds golib's `operator +(@string, ReadOnlySpan<byte>)`, which copies the literal's bytes straight into the result.
+The span form is used in every slot that reads the bytes in place: comparisons, concatenations and `[]byte` sources, and at an [sstring twin](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind)'s parameter, where it binds a zero-copy view. A value slot takes the plain form or the cached cast in both modes, the standard library's included. C# folds `"a"u8 + "b"u8` into one literal. A concatenation with a string value binds golib's `operator +(@string, ReadOnlySpan<byte>)`, which copies the literal's bytes straight into the result.
 
 Some slots cannot take a span, and the literal changes form there:
 
 | Slot | Rendering | Why |
 |:--|:--|:--|
-| an `any` / interface slot | `(@string)"text"u8` | a span cannot be boxed |
+| an `any` / interface slot | `(@string)"text"`, the cached cast | a span cannot be boxed |
 | `panic`, `print`, a vararg `...any` concatenation | `"text"` (a C# string) | the operand of an `object` concat cannot be a span |
-| a conversion to a named string type | `((errorString)(@string)"kaboom"u8)` | C# applies only one user-defined conversion |
+| a conversion to a named string type | `((errorString)(@string)"kaboom")` | C# applies only one user-defined conversion |
 | `""` returned as a named string type | `(@string)""` | the same one-conversion limit |
 | a sliced literal in a concatenation | `((@string)"012345678"u8[..n]) + "000"u8[..m]` | a slice of a `u8` literal is not a literal, so C# cannot fold it |
 | `[]rune("…")`, or `[]byte` of a constant concatenation | `slice<rune>((@string)"héllo")` | the rune conversion goes through `@string` |
@@ -221,7 +226,7 @@ A `var` initializer renders as an expression, so each literal piece of a concate
 
 ## A value-materializing string literal is HOISTED to a `static readonly` field beside its first use
 
-This is the standard library's form, and `-hoist-literals` gives it to any other package; elsewhere a literal in a `string` slot is [plain](#a-literal-in-a-string-slot-is-a-plain-c-literal), a literal in an interceptable `any` slot is [plain too](#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string), and only a literal used solely in other `any` slots is hoisted (pre-boxed, below).
+This is hoist mode: the standard library's form, and `-hoist-literals` gives it to any other package. It is a hybrid. A literal whose words name it, used as a value in a function body, takes a field; every other site takes the same [plain form](#a-literal-in-a-string-slot-is-a-plain-c-literal) or cached cast a default package uses. Elsewhere a literal in a `string` slot is plain, a literal in an interceptable `any` slot is [plain too](#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string), and only a literal used solely in other `any` slots is hoisted (pre-boxed, below).
 
 Go keeps literals in read-only memory, so `return "true"` allocates nothing. In C# each conversion of a `u8` literal to `@string` copies it. So a literal that becomes a value is hoisted: a package-wide pre-pass (`hoistedLiteralOperations.go`) gives each such literal one field, declared above the function that first uses it, and every use names the field:
 
@@ -268,22 +273,23 @@ committed corpus, which takes the accessor at the 1.26.10.2 regeneration.
 
 **What hoists:** a returned value; an assignment to a local, parameter or field; a `string` or `...string` argument; an `any` target (argument, result, send, assignment); a standalone map-index key; a conversion to a named string type. A literal used **only** in `any` slots is hoisted pre-boxed, as `static readonly object xˢ = (@string)"…"u8;`, so those uses allocate nothing.
 
-**What stays inline:**
+**What claims no field**, and the form it takes instead:
 
-| Context | Why |
-|:--|:--|
-| comparisons, including lowered `switch` chains | a `u8` span compares in place |
-| concatenation operands | the concat operator reads the span directly |
-| `[]byte("…")` / `[]rune("…")` sources | the result must be a fresh mutable copy anyway |
-| a format string: the `string` parameter before the `...any` of a callee named `…f` | it slugs badly (`"%v"`). When the callee is an [sstring twin](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind), the literal binds a view and costs nothing |
-| a slug with no ASCII word, or of 3 characters or fewer | the name would say less than the value |
-| `""` | it already costs nothing |
-| composite-literal elements and keys | thousands of fields would move table-building work into type initializers |
-| `func init()` bodies and package-level initializers | they run once |
-| a function literal outside any function declaration | there is nowhere to declare the field |
-| raw-byte literals | they already take the byte-array form |
-| declarations in a hand-owned file or function | the converter does not emit them |
-| arguments of builtins (`panic`, `print`, `copy`, …) | each builtin has its own emission path |
+| Context | Form | Why |
+|:--|:--|:--|
+| comparisons, including lowered `switch` chains | `"text"u8` | a `u8` span compares in place |
+| concatenation operands | `"text"u8` | the concat operator reads the span directly |
+| `[]byte("…")` / `[]rune("…")` sources | the span, or `(@string)"text"` for runes | the result must be a fresh mutable copy anyway |
+| a format string: the `string` parameter before the `...any` of a callee named `…f` | `"%v"`, or `"%v"u8` at an [sstring twin](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind) | it slugs badly; at a twin the literal binds a view and costs nothing |
+| a slug with no ASCII word, or of 3 characters or fewer | the plain form, or `(@string)"text"` where a bare literal would bind wrongly | the name would say less than the value |
+| `""` | `""u8` | it already costs nothing |
+| composite-literal elements and keys, `append` elements and spreads | the plain form, or the cached cast | thousands of fields would move table-building work into type initializers |
+| `func init()` bodies, functions they reach, and package-level initializers | the plain form, or the cached cast | they run once |
+| `print`, `println` and a `range` over a literal | `(@string)"text"` | their slots take the cached cast in both modes |
+| a function literal outside any function declaration | the default form | there is nowhere to declare the field |
+| raw-byte literals | the byte-array form | a C# string cannot hold the bytes |
+| declarations in a hand-owned file or function | unchanged | the converter does not emit them |
+| arguments of other builtins (`panic`, `copy`, …) | the builtin's own form | each builtin has its own emission path |
 
 **Naming.** The field is a camelCase slug of the literal's ASCII words, at most 24 characters in total, plus the `ˢ` marker (`HoistedLiteralMarker`). An all-caps word folds whole (`"TESTING KEY"` → `testingKeyˢ`). A literal whose first word alone exceeds 24 characters gets no name and stays inline. Colliding slugs take a package-wide ordinal (`fooˢ`, `fooˢ2`). The marker keeps the names clear of C# keywords and Go identifiers.
 
@@ -295,7 +301,7 @@ Emission is one substitution in `convExpr`'s `*ast.BasicLit` arm; the decisions 
 
 ## A function-LOCAL string const hoists to a `static readonly` field under its own name
 
-This is the standard library's form, and `-hoist-literals` gives it to any other package. Elsewhere the constant is a local initialized from a [plain literal](#a-literal-in-a-string-slot-is-a-plain-c-literal) (`@string fnAtoi = "Atoi";`), which allocates nothing per call.
+This is the standard library's form, and `-hoist-literals` gives it to any other package. Elsewhere the constant is a local initialized from a [plain literal](#a-literal-in-a-string-slot-is-a-plain-c-literal) (`@string fnAtoi = "Atoi";`), which allocates nothing per call; hoist mode takes that plain local too in `func init()` and the functions it reaches, which run once.
 
 A string constant declared inside a function would otherwise be a local initialized from a `u8` literal, copied into a new `@string` on every call. It hoists to one field named after the constant, with the `ᶜ` marker (`HoistedConstMarker`, shared with [local big constants](named-numeric-types.md#a-function-local-gobigconst-hoists-its-parse-to-a-static-readonly-field)). The local copies the field, which allocates nothing, so every reference is unchanged:
 

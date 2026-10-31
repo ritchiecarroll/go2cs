@@ -158,11 +158,12 @@ By default a converted program keeps a string literal where Go has it: `F("hello
 C#'s UTF-16 to Go's UTF-8 once and caches the result, so each later evaluation is a lookup that allocates nothing. A
 string constant is one field, as Go declares it.
 
-`-hoist-literals` is the optimization option. It gives each literal a named field, `F(helloˢ)`, and it reads every
-such field, and every string or other struct-typed constant, through a small accessor under the same name. The JIT
-and Native AOT both inline that accessor into the code that reads it; they would not inline a function that reads
-the field directly. The standard library is converted this way already, so code that calls into it gets the benefit
-without the flag. A constant block shows the difference:
+`-hoist-literals` is the optimization option. It gives each literal whose words make a meaningful name a named field,
+`F(helloˢ)`, and it reads every such field, and every string or other struct-typed constant, through a small accessor
+under the same name; every other literal (`"%v"`, `", "`) keeps the plain cached form, so no literal is copied on each
+evaluation. The JIT and Native AOT both inline that accessor into the code that reads it; they would not inline a
+function that reads the field directly. The standard library is converted this way already, so code that calls into it
+gets the benefit without the flag. A constant block shows the difference:
 
 ```go
 const (
