@@ -1,0 +1,15 @@
+hotphase wall_ms: A/A 1.008 [0.942-1.075]
+    base   161.442 [156.665-169.892]  ratio 1.000 [1.000-1.000] inside  delta +0.000 (+0.0% of wall)
+    aa     161.948 [158.871-171.984]  ratio 1.008 [0.942-1.075] inside  delta +0.507 (+0.3% of wall)
+    A      156.517 [153.823-171.188]  ratio 0.974 [0.925-1.074] inside  delta -4.924 (-3.1% of wall)
+    NI     163.638 [160.612-166.673]  ratio 1.018 [0.958-1.048] inside  delta +2.197 (+1.4% of wall)
+hotphase hash_ns: A/A 0.996 [0.902-1.025]
+    base   4.936 [4.856-5.446]  ratio 1.000 [1.000-1.000] inside  delta +0.000
+    aa     4.939 [4.891-4.994]  ratio 0.996 [0.902-1.025] inside  delta +0.003
+    A      5.158 [5.106-5.350]  ratio 1.043 [0.944-1.092] inside  delta +0.222
+    NI     6.573 [6.503-6.983]  ratio 1.328 [1.198-1.415] OUTSIDE  delta +1.637
+hotphase bool_ns: A/A 1.165 [0.898-1.198]
+    base   2.333 [2.310-2.660]  ratio 1.000 [1.000-1.000] inside  delta +0.000
+    aa     2.736 [2.315-2.803]  ratio 1.165 [0.898-1.198] inside  delta +0.403
+    A      0.606 [0.573-0.661]  ratio 0.259 [0.217-0.282] OUTSIDE  delta -1.728
+    NI     1.873 [1.837-2.034]  ratio 0.805 [0.700-0.876] OUTSIDE  delta -0.460
