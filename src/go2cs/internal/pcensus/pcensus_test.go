@@ -266,6 +266,7 @@ var plants = []plant{
 	one("PL bad: the call changed too", prodFile, `    take(helloWorldˢ);`, `    give("hello world");`, "UNCLASSIFIED"),
 	one("PL bad: the other direction", prodFile, `    take("hello world");`, `    take(helloWorldˢ);`, "UNCLASSIFIED"),
 	one("PL bad: a go/defer statement is GD's", prodFile, `    defer(f, "x"u8, ref ᒐ);`, `    defer(f, "x", ref ᒐ);`, "UNCLASSIFIED"),
+	one("PL good: a literal nested in a go/defer argument's call", prodFile, `    defer(un, trace(Ꮡp, "parseIndexOrSliceOrInstance"u8), ref ᒐ);`, `    defer(un, trace(Ꮡp, "parseIndexOrSliceOrInstance"), ref ᒐ);`, "PL"),
 	// PC (#51): a function-local string const's local.
 	one("PC good: the const's local takes its literal", prodFile, `    @string fnAtoi = fnAtoiᶜ;`, `    @string fnAtoi = "Atoi";`, "PC"),
 	one("PC good: a collision ordinal", prodFile, `    @string context = contextᶜ2;`, `    @string context = "ctx";`, "PC"),

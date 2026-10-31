@@ -611,10 +611,11 @@ var items = []item{
 		// first item whose anchors its diff shows, and in #51's footprint the fields are this seat's.
 		ID: "PL", Seat: "#51", Title: "the standard library emits plain string literals",
 		Measures: []measure{m("PL", "hoisted-field", `static readonly (?:object|@string) \w+ˢ\d* = `)},
-		// A go/defer statement's literal is GD's (#33), whose canon reads the statement whole, so PL leaves those lines.
+		// A go/defer statement's own argument is GD's (#33), whose canon reads the statement whole, so PL leaves those
+		// lines; a literal nested in another call's argument there is an ordinary argument (goDeferOwnsLine).
 		Canon: []rewrite{
 			{re: rx(`^.*$`), fn: func(line string) string {
-				if goDeferStatement.MatchString(line) {
+				if goDeferOwnsLine(line) {
 					return line
 				}
 				return canonPlainLiterals(line)

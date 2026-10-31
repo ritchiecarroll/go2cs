@@ -28,6 +28,47 @@ var plainLiteralForm = regexp.MustCompile(`(?:\(@string\))?(?:@"((?:[^"]|"")*)"|
 // goDeferStatement matches a go/defer statement's line and its multi-line continuation, GD's lines (items.go).
 var goDeferStatement = regexp.MustCompile(`^\s*(?:goǃ|defer)\(|^\s*\}[)}]*(?:, .*)?\);$`)
 
+// goDeferOwnsLine reports whether a go/defer line's literal is GD's: a literal or hoisted field that is a DIRECT
+// argument of the launch (`goǃ(f, helloˢ, …)`, `defer(f, "x"u8, ref ᒐ)`), or a thunk's own call. A literal nested in
+// another call's argument (`defer(un, trace(Ꮡp, "x"u8), ref ᒐ)`) is an ordinary argument, and PL's.
+func goDeferOwnsLine(line string) bool {
+	if !goDeferStatement.MatchString(line) {
+		return false
+	}
+
+	if strings.Contains(line, "=>") || !strings.Contains(strings.TrimSpace(line), "(") {
+		return true
+	}
+
+	depth := 0
+
+	for i := 0; i < len(line); i++ {
+		switch c := line[i]; {
+		case c == '(':
+			depth++
+		case c == ')':
+			depth--
+		case c == '"':
+			if depth == 1 {
+				return true
+			}
+
+			// Skip the literal's body; a verbatim literal (`@"…"`) takes no backslash escapes.
+			verbatim := i > 0 && line[i-1] == '@'
+
+			for i++; i < len(line) && line[i] != '"'; i++ {
+				if line[i] == '\\' && !verbatim {
+					i++
+				}
+			}
+		case depth == 1 && strings.HasPrefix(line[i:], "ˢ"):
+			return true
+		}
+	}
+
+	return false
+}
+
 // plainFieldName matches a hoisted literal field: the slug, the marker, an optional collision ordinal.
 var plainFieldName = regexp.MustCompile(`\b([A-Za-z][A-Za-z0-9]*)ˢ\d*`)
 
