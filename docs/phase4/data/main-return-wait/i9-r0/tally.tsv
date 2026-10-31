@@ -1,0 +1,18 @@
+arm	mode	N	exit0	exit2	other	empty_stderr	exit2_with_panic_line	stdout_recovered
+r0-aot-pad-n32	load	400	0	400	0	0	400	0
+r0-aot-pad-n8	idle	50	0	50	0	0	50	0
+r0-aot-pad-n8	load	400	0	400	0	0	400	0
+r0-aot-pad-n8	loadhi	400	0	400	0	0	400	0
+r0-aot-rec-n32	load	50	50	0	0	50	0	3
+r0-aot-rec-n8	idle	50	50	0	0	50	0	0
+r0-aot-rec-n8	load	50	50	0	0	50	0	0
+r0-aot-rec-n8	loadhi	50	50	0	0	50	0	20
+r0-jit-pad-n32	load	400	2	398	0	2	398	0
+r0-jit-pad-n8	idle	100	0	100	0	0	100	0
+r0-jit-pad-n8	load	100	1	99	0	1	99	0
+r0-jit-pad-n8	loadhi	100	2	98	0	2	98	0
+r0-jit-rec-n32	load	100	100	0	0	100	0	1
+r0-jit-rec-n8	idle	100	100	0	0	100	0	0
+r0-jit-rec-n8	load	100	100	0	0	100	0	0
+r0-jit-rec-n8	loadhi	100	100	0	0	100	0	3
+population: rows.tsv r0 rows=2550, distinct (label,mode,run)=2550

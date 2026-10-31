@@ -1,0 +1,43 @@
+2026-10-31 16:28:56 START r0 base=2e619b9966 sampler=29372
+2026-10-31 16:28:57 ARM r0-jit-pad-n8 idle N=100 START
+2026-10-31 16:29:39 ARM r0-jit-pad-n8 idle N=100 END exit0=0 elapsed=42s [WHEA 0 since 2026-10-31T16:28:56.9783058-05:00]
+2026-10-31 16:29:40 ARM r0-jit-pad-n8 load N=100 START
+2026-10-31 16:32:08 ARM r0-jit-pad-n8 load N=100 END exit0=1 elapsed=148s [WHEA 0 since 2026-10-31T16:29:40.4366557-05:00]
+2026-10-31 16:32:09 ARM r0-jit-pad-n32 load N=100 START
+2026-10-31 16:41:39 ARM r0-jit-pad-n32 load N=100 END exit0=0 elapsed=570s [WHEA 0 since 2026-10-31T16:32:09.0622087-05:00]
+2026-10-31 16:41:40 ARM r0-jit-pad-n32-ext load N=300 START (0 of 100 exit 0)
+2026-10-31 16:53:00 ARM r0-jit-pad-n32-ext load N=300 END exit0=2 elapsed=680s [WHEA 0 since 2026-10-31T16:41:40.1469261-05:00]
+2026-10-31 16:53:01 ARM r0-jit-pad-n8 loadhi N=100 START
+2026-10-31 17:03:24 ARM r0-jit-pad-n8 loadhi N=100 END exit0=2 elapsed=624s [WHEA 0 since 2026-10-31T16:53:00.9569914-05:00]
+2026-10-31 17:03:25 ARM r0-aot-pad-n8 idle N=50 START
+2026-10-31 17:03:35 ARM r0-aot-pad-n8 idle N=50 END exit0=0 elapsed=10s [WHEA 0 since 2026-10-31T17:03:25.4089162-05:00]
+2026-10-31 17:03:36 ARM r0-aot-pad-n8 load N=50 START
+2026-10-31 17:04:22 ARM r0-aot-pad-n8 load N=50 END exit0=0 elapsed=46s [WHEA 0 since 2026-10-31T17:03:36.1861573-05:00]
+2026-10-31 17:04:22 ARM r0-aot-pad-n8-ext load N=350 START (0 of 50 exit 0)
+2026-10-31 17:09:35 ARM r0-aot-pad-n8-ext load N=350 END exit0=0 elapsed=313s [WHEA 0 since 2026-10-31T17:04:22.7639442-05:00]
+2026-10-31 17:09:36 ARM r0-aot-pad-n32 load N=50 START
+2026-10-31 17:12:47 ARM r0-aot-pad-n32 load N=50 END exit0=0 elapsed=191s [WHEA 0 since 2026-10-31T17:09:36.5486333-05:00]
+2026-10-31 17:12:48 ARM r0-aot-pad-n32-ext load N=350 START (0 of 50 exit 0)
+2026-10-31 17:23:26 ARM r0-aot-pad-n32-ext load N=350 END exit0=0 elapsed=638s [WHEA 0 since 2026-10-31T17:12:48.1623893-05:00]
+2026-10-31 17:23:26 ARM r0-aot-pad-n8 loadhi N=50 START
+2026-10-31 17:31:31 ARM r0-aot-pad-n8 loadhi N=50 END exit0=0 elapsed=485s [WHEA 0 since 2026-10-31T17:23:26.9539888-05:00]
+2026-10-31 17:31:31 ARM r0-aot-pad-n8-ext loadhi N=350 START (0 of 50 exit 0)
+2026-10-31 17:42:30 ARM r0-aot-pad-n8-ext loadhi N=350 END exit0=0 elapsed=659s [WHEA 0 since 2026-10-31T17:31:31.9293004-05:00]
+2026-10-31 17:42:31 ARM r0-jit-rec-n8 idle N=100 START
+2026-10-31 17:43:12 ARM r0-jit-rec-n8 idle N=100 END exit0=100 elapsed=41s [WHEA 0 since 2026-10-31T17:42:31.0296938-05:00]
+2026-10-31 17:43:13 ARM r0-jit-rec-n8 load N=100 START
+2026-10-31 17:45:43 ARM r0-jit-rec-n8 load N=100 END exit0=100 elapsed=150s [WHEA 0 since 2026-10-31T17:43:13.0896757-05:00]
+2026-10-31 17:45:43 ARM r0-jit-rec-n32 load N=100 START
+2026-10-31 17:55:44 ARM r0-jit-rec-n32 load N=100 END exit0=100 elapsed=601s [WHEA 0 since 2026-10-31T17:45:43.5548420-05:00]
+2026-10-31 17:55:45 ARM r0-jit-rec-n8 loadhi N=100 START
+2026-10-31 18:06:10 ARM r0-jit-rec-n8 loadhi N=100 END exit0=100 elapsed=625s [WHEA 0 since 2026-10-31T17:55:45.1268221-05:00]
+2026-10-31 18:06:10 ARM r0-aot-rec-n8 idle N=50 START
+2026-10-31 18:06:22 ARM r0-aot-rec-n8 idle N=50 END exit0=50 elapsed=12s [WHEA 0 since 2026-10-31T18:06:10.9330767-05:00]
+2026-10-31 18:06:33 ARM r0-aot-rec-n8 load N=50 START
+2026-10-31 18:07:21 ARM r0-aot-rec-n8 load N=50 END exit0=50 elapsed=48s [WHEA 0 since 2026-10-31T18:06:33.1583723-05:00]
+2026-10-31 18:07:21 ARM r0-aot-rec-n32 load N=50 START
+2026-10-31 18:10:45 ARM r0-aot-rec-n32 load N=50 END exit0=50 elapsed=204s [WHEA 0 since 2026-10-31T18:07:21.6120142-05:00]
+2026-10-31 18:10:45 ARM r0-aot-rec-n8 loadhi N=50 START
+2026-10-31 18:19:29 ARM r0-aot-rec-n8 loadhi N=50 END exit0=50 elapsed=524s [WHEA 0 since 2026-10-31T18:10:45.5804954-05:00]
+2026-10-31 18:19:29 END r0 [WHEA 0 since 2026-10-31T16:28:56.7536291-05:00]
+DONE-R0-RUN

@@ -1,0 +1,5 @@
+2026-10-31 16:08:17 START GoroutinePanicAfterDeferredDone
+2026-10-31 16:19:35 END GoroutinePanicAfterDeferredDone rc=0 elapsed=678s files=67 [WHEA 0 since 2026-10-31T16:08:17.2328456-05:00]
+2026-10-31 16:19:36 START GoroutineRecoveringWhenMainReturns
+2026-10-31 16:28:27 END GoroutineRecoveringWhenMainReturns rc=0 elapsed=531s files=67 [WHEA 0 since 2026-10-31T16:08:17.2328456-05:00]
+DONE-R0-PUBLISH
