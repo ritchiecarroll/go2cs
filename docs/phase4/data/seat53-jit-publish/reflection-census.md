@@ -1,3 +1,5 @@
+# Seat #53: the reflection census
+
 Reflection census (COORD condition a): every GetField/GetFields/GetProperty/GetProperties/GetMember(s)/GetRuntimeField(s) in golib, gen, testing, runtime/reflect hand-owned code and the converter. 129 sites (src at 1dacbdf4b6). S1/S2/S2' change: a struct-typed static readonly FIELD `X` becomes a private field `Xᵇ` plus a static `ref readonly` PROPERTY `X`.
 
 Verdict classes:
