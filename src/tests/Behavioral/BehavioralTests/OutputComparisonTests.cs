@@ -212,6 +212,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCallerLineMultiLine() => CheckTarget("CallerLineMultiLine");
 
     [TestMethod]
+    public void CheckCallerLineSliceLiterals() => CheckTarget("CallerLineSliceLiterals");
+
+    [TestMethod]
     public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
 
     [TestMethod]

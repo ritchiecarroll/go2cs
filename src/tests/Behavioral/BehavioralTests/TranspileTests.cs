@@ -214,6 +214,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCallerLineMultiLine() => CheckTarget("CallerLineMultiLine");
 
     [TestMethod]
+    public void CheckCallerLineSliceLiterals() => CheckTarget("CallerLineSliceLiterals");
+
+    [TestMethod]
     public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
 
     [TestMethod]

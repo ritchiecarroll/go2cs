@@ -217,6 +217,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckCallerLineMultiLine() => CheckTarget("CallerLineMultiLine");
 
     [TestMethod]
+    public void CheckCallerLineSliceLiterals() => CheckTarget("CallerLineSliceLiterals");
+
+    [TestMethod]
     public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
 
     [TestMethod]
