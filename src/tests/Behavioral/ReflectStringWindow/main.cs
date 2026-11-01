@@ -24,7 +24,7 @@ internal static void Main() {
             i, e.Kind(), e.Type(), e.Interface(), e.CanAddr(), e.CanSet());
     }
 
-    var b = new box(S: "abcdef"u8, B: slice<byte>("wxyz"u8));
+    var b = new box(S: (@string)"abcdef", B: slice<byte>("wxyz"u8));
     var rb = reflect.ValueOf(b);
     var sv = rb.Field(0);
     show("named whole", sv);

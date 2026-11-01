@@ -13,7 +13,7 @@ internal static void note(params ꓸꓸꓸstring tagsʗp) {
     var tags = tagsʗp.sslice();
 
     if (len(tags) == 0) {
-        order = append(order, "note()"u8);
+        order = append(order, (@string)"note()");
         return;
     }
     foreach (var (_, t) in tags) {
@@ -47,7 +47,7 @@ internal static ж<counter> run() {
         defer(() => cʗ1.bump(), ref ᒐ);
         var cʗ2 = c;
         defer(() => cʗ2.bump(2, 3), ref ᒐ);
-        order = append(order, "body"u8);
+        order = append(order, (@string)"body");
         return c;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }

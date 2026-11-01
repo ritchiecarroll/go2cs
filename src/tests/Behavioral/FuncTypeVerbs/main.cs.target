@@ -42,7 +42,7 @@ internal static void Main() {
     fmt.Printf("%T\n"u8, (sum).OrTypedNilFunc());
     fmt.Printf("%T\n"u8, (format).OrTypedNilFunc());
     var (ok, err) = parse("go", 5);
-    fmt.Println(square(7), ok, err, sum(1, 2, 3), format("%d-%s", (nint)4, (@string)"x"u8));
+    fmt.Println(square(7), ok, err, sum(1, 2, 3), format("%d-%s", (nint)4, (@string)"x"));
 
     Func<int32, int32> none = default;
     any boxed = (none).OrTypedNilFunc();

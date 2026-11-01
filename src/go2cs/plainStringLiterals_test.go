@@ -225,8 +225,9 @@ func TestPlainLiteralsAtInterceptableAnySlots(t *testing.T) {
 
 // TestAnySlotsGoInterceptorsCannotReachKeepTheHoist: an any slot the generator cannot intercept keeps the
 // pre-boxed field: a func value (a delegate Invoke), a generic function and a method of a generic type (their
-// interceptor would itself be generic, deferred). A composite element is not a call and keeps its inline Go
-// string. A go or defer argument never reaches a capture list bare (TestGoDeferConstantArgumentsMoveIntoTheThunk).
+// interceptor would itself be generic, deferred). A composite's any element is not a call, so it takes the
+// pre-boxed field too (seat #51, COORD ruling B; before, it built and boxed a Go string per evaluation). A go
+// or defer argument never reaches a capture list bare (TestGoDeferConstantArgumentsMoveIntoTheThunk).
 func TestAnySlotsGoInterceptorsCannotReachKeepTheHoist(t *testing.T) {
 	emitted := convertPlainLiteralFixture(t, false)
 
@@ -236,7 +237,7 @@ func TestAnySlotsGoInterceptorsCannotReachKeepTheHoist(t *testing.T) {
 		`b.Note(genericTypeAnySlotˢ);`,
 		`l.Log(methodVariadicAnyˢ, (nint)1);`,
 		`.Store(fieldReceiverMethodˢ, (nint)2);`,
-		`(@string)"composite any element"u8`,
+		`slice<any>([compositeAnyElementˢ])`,
 	} {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("want the pre-boxed form %q:\n%s", want, emitted)
@@ -282,11 +283,12 @@ func TestHoistLiteralsFlagRestoresTheHoist(t *testing.T) {
 	}
 }
 
-// TestStandardLibraryKeepsHoistedLiterals pins the mode KEY. A package whose source is under
-// GOROOT/src hoists, GOROOT-vendored packages included, whichever driver asks; the -tests driver runs
-// with convertStdLib false (main.go's -stdlib branch is the other arm), so the key is the source
-// location, never the flag. -hoist-literals opts any other package in.
-func TestStandardLibraryKeepsHoistedLiterals(t *testing.T) {
+// TestStandardLibraryEmitsTheHybrid pins the mode KEY. A package whose source is under GOROOT/src
+// takes hoist mode, the hybrid (owner rulings 2026-10-30: measured faster for user code calling small
+// standard library functions), GOROOT-vendored packages included, whichever driver asks; the -tests
+// driver runs with convertStdLib false (main.go's -stdlib branch is the other arm), so the key is the
+// source location, never the flag. -hoist-literals opts any other package in.
+func TestStandardLibraryEmitsTheHybrid(t *testing.T) {
 	goRoot := filepath.Join(t.TempDir(), "go")
 
 	for dir, want := range map[string]bool{
@@ -332,8 +334,8 @@ const plainCompositeFixture = "package plit\n\n" +
 
 // TestPlainLiteralsInPackageVarsAndComposites (B2): a package-level var initializer and a composite's
 // element, map key, map value and struct field value typed exactly `string` take the plain literal; an
-// `any` element keeps its boxed inline form, and an inferred generic call in an initializer keeps
-// today's form by G's rule.
+// `any` element of a package-level initializer, which claims no field, takes the cached cast `(@string)"…"`
+// (seat #51, COORD ruling B), and an inferred generic call in an initializer keeps today's form by G's rule.
 func TestPlainLiteralsInPackageVarsAndComposites(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	root := t.TempDir()
@@ -379,7 +381,7 @@ func TestPlainLiteralsInPackageVarsAndComposites(t *testing.T) {
 
 	// The generic initializer keeps the untyped-constant cast, which fixes T = @string; a bare literal
 	// there would infer T = System.String.
-	for _, kept := range []string{`(@string)"boxed composite element"u8`, `Echo((@string)"package generic argument")`} {
+	for _, kept := range []string{`[(@string)"boxed composite element"]`, `Echo((@string)"package generic argument")`} {
 		if !strings.Contains(emitted, kept) {
 			t.Errorf("want today's form %s:\n%s", kept, emitted)
 		}

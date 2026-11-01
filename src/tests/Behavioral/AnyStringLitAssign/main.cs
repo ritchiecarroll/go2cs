@@ -24,6 +24,7 @@ internal static @string sprint(any x) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object nilˢ = (@string)"<nil>"u8;
+private static readonly object keepˢ = (@string)"keep"u8;
 private static readonly object missingˢ = (@string)"<missing>"u8;
 private static readonly object fieldˢ = (@string)"field"u8;
 
@@ -32,7 +33,7 @@ internal static void Main() {
     arg = nilˢ;
     fmt.Println(sprint(arg));
 
-    var args = slice<any>([(nint)1, default, (@string)"keep"u8]);
+    var args = slice<any>([(nint)1, default, keepˢ]);
     foreach (var (i, vᴛ1) in args) {
         var a = vᴛ1;
 

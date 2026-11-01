@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoInit] internal static void initΔ4() {
-    order = append(order, "main#1"u8);
+    order = append(order, (@string)"main#1");
 }
 
 internal static void Main() {

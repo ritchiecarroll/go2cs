@@ -8,7 +8,7 @@ partial class main_package {
 internal static slice<@string> log;
 
 internal static (nint, error) pair() {
-    log = append(log, "pair"u8);
+    log = append(log, (@string)"pair");
     return (7, default);
 }
 
@@ -20,12 +20,12 @@ internal static nint must(nint v, error err) {
 }
 
 internal static channel<nint> chanFor(channel<nint> ch) {
-    log = append(log, "chan"u8);
+    log = append(log, (@string)"chan");
     return ch;
 }
 
 internal static nint idx() {
-    log = append(log, "idx"u8);
+    log = append(log, (@string)"idx");
     return 1;
 }
 
@@ -38,7 +38,7 @@ internal static void deferredSend(channel<nint> ch) {
             var (ᴛ1, ᴛ2) = pair();
             chanᴛ1.ᐸꟷ(must(ᴛ1, ᴛ2));
         }, ref ᒐ);
-        log = append(log, "body"u8);
+        log = append(log, (@string)"body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

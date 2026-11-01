@@ -81,7 +81,7 @@ internal static void Main() {
 
     var ps = slice<ж<S>>([Ꮡ(new S())]);
     fmt.Println("ps:", len(ps), ps[0].Value);
-    var ps2 = slice<ж<S>>([Ꮡ(new S(A: 7, B: "x"u8))]);
+    var ps2 = slice<ж<S>>([Ꮡ(new S(A: 7, B: "x"))]);
     fmt.Println("ps2:", ps2[0].Value);
 
     var psl = slice<ж<slice<nint>>>([Ꮡ(slice<nint>([]))]);

@@ -322,7 +322,7 @@ internal static void Main() {
 
         var wrapped = CrossPkgLib.Wrap<nint>(5);
         fmt.Println(len(wrapped), wrapped[0]);
-        fmt.Println(CrossPkgLib.Pair<@string, nint>("k"u8, 8));
+        fmt.Println(CrossPkgLib.Pair<@string, nint>((@string)"k", 8));
 
         Func<nint, bool> isHot = (nint tΔ1) => tΔ1 > 50;
         fmt.Println(isHot(60), isHot(40));

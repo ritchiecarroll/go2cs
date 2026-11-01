@@ -31,7 +31,7 @@ internal static void Main() {
         fmt.Printf("printf %v %q\n"u8, (nint)3, "q");
 
         Funcꓸꓸꓸ<@string, any, @string> f = fmt.Sprintfᶠ;
-        fmt.Println(f("via local %s"u8, (@string)"ok"u8));
+        fmt.Println(f("via local %s", (@string)"ok"));
         var table = new map<@string, any>{["printf"] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ))};
         fmt.Println(table["printf"]._<Funcꓸꓸꓸ<@string, any, @string>>()("via table %d", (nint)4));
         fmt.Println(apply(fmt.Sprintfᶠ, "via argument %s"));
@@ -42,7 +42,7 @@ internal static void Main() {
         fmt.Println("name:", runtime.FuncForPC(p1).Name());
 
         ref var n = ref heap(new nint(), out var Ꮡn);
-        var (count, err) = fmt.Sscanf("42"u8, "%d"u8, Ꮡn);
+        var (count, err) = fmt.Sscanf((@string)"42", "%d"u8, Ꮡn);
         fmt.Println(count, err, n);
         fmt.Println(fmt.Errorf("wrapped: %w"u8, errors.New("inner")));
         fmt.Println((@string)fmt.Appendf(default, "appended %d"u8, (nint)6));

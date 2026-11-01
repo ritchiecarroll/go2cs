@@ -500,7 +500,8 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	}
 
 	if isStr {
-		if untypedStr {
+		// A plain-mode literal already renders the cached cast (packageCastLits, seat #51).
+		if lit, isLit := rangeStmt.X.(*ast.BasicLit); untypedStr && !(isLit && isCastStringLiteral(lit)) {
 			rangeExpr = fmt.Sprintf("(@string)%s", rangeExpr)
 		}
 

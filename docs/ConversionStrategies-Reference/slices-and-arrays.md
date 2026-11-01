@@ -34,18 +34,23 @@ internal static void Main() {
 An unkeyed literal of an **unnamed** slice type renders as golib's `slice<T>` builtin called on a C# collection
 expression, in every position: `[]int{10, 20, 30}` → `slice<nint>([10, 20, 30])`, nested literals composing
 (`[][]int{{1, 2}, {3}}` → `slice<slice<nint>>([slice<nint>([1, 2]), slice<nint>([3])])`). The collection expression
-binds golib's `builtin.slice<T>(SliceLiteral<T>)`, which copies the elements into a fresh backing array, so the result
-keeps Go's literal semantics: it is never nil (`[]int{}` → `slice<nint>([])` is empty and not nil, with no
-allocation), `len == cap`, and two evaluations of one literal share no elements. `T` is always written, so nothing is
-inferred from the elements: an untyped `1` would infer `System.Int32` where Go's `[]int` is `nint`.
+binds golib's array overload, `builtin.slice<T>(T[])`: C# builds the fresh array, one element store per element, and
+the overload wraps it, so the result keeps Go's literal semantics. It is never nil (`[]int{}` → `slice<nint>([])` is
+empty and not nil, over the shared zero-length array, with no allocation), `len == cap`, and two evaluations of one
+literal share no elements. `T` is always written, so nothing is inferred from the elements: an untyped `1` would infer
+`System.Int32` where Go's `[]int` is `nint`.
 
 A collection expression cannot target `slice<T>` itself. C# takes a collection's element type from its public
-enumerator, and `slice<T>`'s yields Go's range pair `(nint, T)`, which `foreach (var (i, x) in xs)` relies on; the
-`SliceLiteral<T>` parameter carries the elements instead. Its overload has the higher `[OverloadResolutionPriority]`,
-and no other argument converts to `SliceLiteral<T>`, so every other `slice<T>(…)` call binds as it did: a `u8` literal
-(`[]byte("…")`) keeps the counted span overload, and an array keeps the wrapping array overload. The copy is not
-charged to `testing.AllocsPerRun`'s counter, like the `new T[]{…}` array the earlier form allocated: a counted copy
-moved math/big's `TestNewIntAllocs` from 1 to 2 allocations per run, away from Go's 0.
+enumerator, and `slice<T>`'s yields Go's range pair `(nint, T)`, which `foreach (var (i, x) in xs)` relies on. Of the
+builtin's overloads a collection expression converts to, C# prefers the span one, so the array overload carries the
+higher `[OverloadResolutionPriority]`. Every other `slice<T>(…)` call binds as it did: a `u8` literal (`[]byte("…")`)
+keeps the counted span overload, and an array, a golib `array<T>` and an `@string` keep the array overload they already
+bound. The array target is what keeps a call inside an element on its own Go line in an optimized build. A span
+target lowers to an inline stack buffer whose element stores the optimizing JIT maps to no IL offset of their own, so
+`runtime.Caller` inside a struct element answered its literal's spec line, and with tiering off even the previous
+statement's (seat #54). The array is not charged to `testing.AllocsPerRun`'s counter, like the `new T[]{…}` array the
+earlier form allocated: a counted copy moved math/big's `TestNewIntAllocs` from 1 to 2 allocations per run, away from
+Go's 0.
 
 An element that begins with a call to a Go function named `with` is written `@with(…)`: from C# 15, a
 collection-expression element spelled `with(…)` is the collection's construction arguments, not a call, so
@@ -60,8 +65,9 @@ elided element of a named slice type, which takes no constructor and binds throu
 
 A keyed literal keeps its sparse form, a fixed array its `.array()` projection, a slice of arrays its
 `GoReflect.WithElemDims(new array<T>[]{…}.slice(), n)` form (the element dims are recorded on it), and a named slice
-type's own literal its constructor (below). (Guarded by the behavioral test `CollectionExpressionSlices` and by
-golib's `SliceLiteralBindingTests`; 1.26.10.2 parity seat #30.)
+type's own literal its constructor (below). (Guarded by the behavioral test `CollectionExpressionSlices`, by golib's
+`SliceLiteralBindingTests` and, for the lines, `CallerLineSliceLiteralsReleaseTests` over the behavioral project
+`CallerLineSliceLiterals`; 1.26.10.2 parity seats #30 and #54.)
 
 A **named** slice/array type (`type d [3]rune`, `type s []int`) lowers to a struct wrapping `array<T>`/`slice<T>`; its composite literal cannot use C# collection-initializer braces (the lowered struct has no `Add`), so it is constructed through the underlying-collection constructor: `d{0, 32, 0}` → `new d(new rune[]{0, 32, 0}.array())`.
 

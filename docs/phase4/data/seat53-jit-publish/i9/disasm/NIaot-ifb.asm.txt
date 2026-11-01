@@ -1,0 +1,20 @@
+internal_strconv_go_internal_strconv_package__FormatBool:
+  00000001402DF4B0: push        rbx
+  00000001402DF4B1: sub         rsp,20h
+  00000001402DF4B5: mov         rbx,rcx
+  00000001402DF4B8: test        dl,dl
+  00000001402DF4BA: jne         00000001402DF4C9
+  00000001402DF4BC: call        internal_strconv_go_internal_strconv_package__get_false_
+  00000001402DF4C1: movups      xmm0,xmmword ptr [rax]
+  00000001402DF4C4: movups      xmmword ptr [rbx],xmm0
+  00000001402DF4C7: jmp         00000001402DF4D4
+  00000001402DF4C9: call        internal_strconv_go_internal_strconv_package__get_true_
+  00000001402DF4CE: movups      xmm0,xmmword ptr [rax]
+  00000001402DF4D1: movups      xmmword ptr [rbx],xmm0
+  00000001402DF4D4: mov         rax,rbx
+  00000001402DF4D7: add         rsp,20h
+  00000001402DF4DB: pop         rbx
+  00000001402DF4DC: ret
+  00000001402DF4DD: nop
+  00000001402DF4DE: nop
+  00000001402DF4DF: nop

@@ -117,6 +117,9 @@ namespace PerformanceRunner
         private static string s_converterSrc = null!;
         private static string s_go2csExe = null!;
 
+        // Every headline-guard finding of this run (HeadlineSettings.cs), in its one shape.
+        private static readonly List<HeadlineRefusal> s_headline = new();
+
         public static int Main(string[] args)
         {
             // The report uses non-ASCII glyphs (× ratios, · separators); default console codepage mangles them.
@@ -265,6 +268,13 @@ namespace PerformanceRunner
             }
 
             Console.WriteLine($"go2cs performance runner: {projects.Count} project(s), phases [{string.Join(", ", phases)}], {runs} measured run(s){(noAot ? ", AOT disabled" : "")}");
+
+            // ----- Headline guard, startup half (HeadlineSettings.cs): the environment and the build files -----
+            s_headline.AddRange(StartupRefusals(InTreeBuildFileRefusals(projects)));
+
+            if (StopOnHeadlineRefusals(s_headline, "before anything is converted or built"))
+                return 2;
+
             Stopwatch total = Stopwatch.StartNew();
 
             Dictionary<string, ProjectResult> results = projects.ToDictionary(p => p, p => new ProjectResult { Name = p });
@@ -281,6 +291,7 @@ namespace PerformanceRunner
             // ----- Phase: Build (Go binary + C# JIT + C# Native AOT) -----
             if (phases.Contains(Phase.Build))
             {
+                CheckProjectFiles(projects);
                 RunBuildGo(projects, results);
                 RunBuildJit(projects, results);
 
@@ -298,6 +309,10 @@ namespace PerformanceRunner
             // ----- Measurement configuration guard (before anything is compared or timed) -----
             if (phases.Contains(Phase.Verify) || phases.Contains(Phase.Measure))
                 CheckJitConfiguration(projects, results);
+
+            // ----- Headline guard: any refused command line, project file or runtime setting stops here -----
+            if (StopOnHeadlineRefusals(s_headline, "before anything is timed"))
+                return 2;
 
             // ----- Phase: Verify (identical output across variants) -----
             if (phases.Contains(Phase.Verify))
@@ -391,7 +406,13 @@ namespace PerformanceRunner
                 if (UpToDate(projPath))
                     continue;
 
-                ProcResult r = Exec(s_go2csExe, $"-go2cspath \"{s_srcRoot}\" \"{projPath}\"", projPath, TranspileTimeoutMs);
+                if (ExecHeadline(s_headline, "every C# column", HeadlineCommand.InTreeTranspile, s_go2csExe,
+                        Headline.InTreeTranspile(s_srcRoot, projPath), projPath, TranspileTimeoutMs) is not { } r)
+                {
+                    results[p].Failed = true;
+                    failed++;
+                    continue;
+                }
 
                 if (r.ExitCode != 0)
                 {
@@ -441,7 +462,12 @@ namespace PerformanceRunner
                 string goExe = GetExePath(p, Variant.Go);
                 Directory.CreateDirectory(Path.GetDirectoryName(goExe)!);
 
-                ProcResult r = Exec("go", $"build -o \"{goExe}\" .", projPath, GoBuildTimeoutMs);
+                if (ExecHeadline(s_headline, "Go", HeadlineCommand.GoBuild, "go", Headline.GoBuild(goExe), projPath, GoBuildTimeoutMs) is not { } r)
+                {
+                    results[p].Failed = true;
+                    failed++;
+                    continue;
+                }
 
                 if (r.ExitCode == 0)
                 {
@@ -471,9 +497,12 @@ namespace PerformanceRunner
 
             string traversal = WriteTraversalProject(projects);
 
-            ProcResult all = Exec("dotnet",
-                $"build \"{traversal}\" -nologo -clp:ErrorsOnly -p:Configuration={Config} -p:go2csPath={go2csPathArg}",
-                s_perfDir, BuildAllTimeoutMs);
+            if (ExecHeadline(s_headline, "C# (JIT)", HeadlineCommand.InTreeJitBuild, "dotnet",
+                    Headline.InTreeJitBuild(traversal, go2csPathArg), s_perfDir, BuildAllTimeoutMs) is not { } all)
+            {
+                Console.WriteLine("REFUSED");
+                return;
+            }
 
             if (all.ExitCode == 0)
             {
@@ -493,9 +522,13 @@ namespace PerformanceRunner
             {
                 string csproj = Path.Combine(s_perfDir, p, $"{p}.csproj");
 
-                ProcResult r = Exec("dotnet",
-                    $"build \"{csproj}\" -nologo -clp:ErrorsOnly -p:Configuration={Config} -p:go2csPath={go2csPathArg}",
-                    s_perfDir, BuildOneTimeoutMs);
+                if (ExecHeadline(s_headline, "C# (JIT)", HeadlineCommand.InTreeJitBuild, "dotnet",
+                        Headline.InTreeJitBuild(csproj, go2csPathArg), s_perfDir, BuildOneTimeoutMs) is not { } r)
+                {
+                    results[p].Failed = true;
+                    failed++;
+                    continue;
+                }
 
                 if (r.ExitCode == 0)
                 {
@@ -568,10 +601,15 @@ namespace PerformanceRunner
                 Console.Write($"           {p}... ");
                 Stopwatch sw = Stopwatch.StartNew();
 
-                string publishArgs =
-                    $"publish \"{csproj}\" -nologo -clp:ErrorsOnly -c {Config} -p:PerfAot=true -p:go2csPath={go2csPathArg} -o \"{outDir}\"";
+                string publishArgs = Headline.InTreeAotPublish(csproj, go2csPathArg, outDir);
 
-                ProcResult r = Exec("dotnet", publishArgs, s_perfDir, AotPublishTimeoutMs, env);
+                if (ExecHeadline(s_headline, "C# (Native AOT)", HeadlineCommand.InTreeAotPublish, "dotnet",
+                        publishArgs, s_perfDir, AotPublishTimeoutMs, env) is not { } r)
+                {
+                    results[p].Variants[Variant.Aot].Message = "refused";
+                    Console.WriteLine("REFUSED");
+                    continue;
+                }
 
                 // A publish killed mid-ILC (a watchdog, a stopped run, a machine crash) leaves a
                 // TRUNCATED native obj behind, and the next incremental publish sees unchanged
@@ -635,6 +673,7 @@ namespace PerformanceRunner
         {
             Console.Write("[Config]   JIT runtimeconfig... ");
             int rejected = 0;
+            int findings = s_headline.Count;
 
             foreach (string p in projects)
             {
@@ -648,6 +687,13 @@ namespace PerformanceRunner
                 string configPath = Path.Combine(Path.GetDirectoryName(exe)!, $"{p}.runtimeconfig.json");
                 string? problem = InspectJitRuntimeConfig(configPath);
 
+                // What reaches the runtime, against the converter's template itself, never the project: an in-tree
+                // project can carry a hand edit that a skipped transpile kept. The headline guard's finding stops the run
+                // before anything is timed, so the column is refused and never measured.
+                if (problem is null)
+                    s_headline.AddRange(Headline.RuntimeConfigRefusals("C# (JIT)", $"{p} runtimeconfig.json", File.ReadAllText(configPath),
+                        Headline.TemplateCallCountingDelay(File.ReadAllText(Path.Combine(s_converterSrc, "csproj-template.xml")))));
+
                 if (problem is null)
                     continue;
 
@@ -660,7 +706,43 @@ namespace PerformanceRunner
                 rejected++;
             }
 
-            Console.WriteLine(rejected == 0 ? "ok" : $"{rejected} REJECTED");
+            int refused = s_headline.Count - findings;
+            Console.WriteLine(rejected == 0 && refused == 0 ? "ok" : $"{rejected} REJECTED, {refused} headline refusal(s)");
+        }
+
+        // The build files that reach every in-tree headline build: the listed chain, each against its allowlist, and no
+        // build file outside it (one in a benchmark's folder, or a Directory.Build.rsp anywhere above one).
+        private static List<HeadlineRefusal> InTreeBuildFileRefusals(IReadOnlyList<string> projects)
+        {
+            List<HeadlineRefusal> refusals = new();
+
+            foreach ((string relative, IReadOnlyDictionary<string, string?> allowed) in Headline.BuildFiles)
+            {
+                string path = Path.Combine(s_srcRoot, relative);
+
+                if (File.Exists(path))
+                    refusals.AddRange(Headline.BuildFileRefusals($"src/{relative}", File.ReadAllText(path), allowed));
+            }
+
+            foreach (string p in projects)
+                refusals.AddRange(Headline.StrayBuildFiles(Path.Combine(s_perfDir, p), File.Exists));
+
+            return refusals;
+        }
+
+        // Every in-tree benchmark's project file against the converter's template (src/go2cs/csproj-template.xml): an
+        // up-to-date transpile is skipped, so a hand edit to a project would otherwise reach the build.
+        private static void CheckProjectFiles(IReadOnlyList<string> projects)
+        {
+            string template = File.ReadAllText(Path.Combine(s_converterSrc, "csproj-template.xml"));
+
+            foreach (string p in projects)
+            {
+                string csproj = Path.Combine(s_perfDir, p, $"{p}.csproj");
+
+                if (File.Exists(csproj))
+                    s_headline.AddRange(Headline.ProjectFileRefusals($"{p}/{p}.csproj", File.ReadAllText(csproj), template));
+            }
         }
 
         // The decision is BinaryShape.JitProblem (ReleaseLegs.cs), shared with the release legs and guarded by
@@ -1125,9 +1207,10 @@ namespace PerformanceRunner
 
             foreach (string dep in deps)
             {
-                ProcResult r = Exec("dotnet",
-                    $"build \"{dep}\" -nologo -clp:ErrorsOnly -p:Configuration={Config} -p:go2csPath={go2csPathArg}",
-                    s_perfDir, BuildOneTimeoutMs);
+                // The packages a benchmark links are built the way the benchmark is: the same headline command line.
+                if (ExecHeadline(s_headline, "C# (JIT)", HeadlineCommand.InTreeJitBuild, "dotnet",
+                        Headline.InTreeJitBuild(dep, go2csPathArg), s_perfDir, BuildOneTimeoutMs) is not { } r)
+                    continue;
 
                 if (r.ExitCode != 0)
                     Console.Error.WriteLine($"\n  WARNING: shared dep build failed ({Path.GetFileName(dep)}): {Truncate(r.StdOut + r.StdErr)}");
@@ -1281,6 +1364,64 @@ namespace PerformanceRunner
         {
             s = s.Replace("\r", "").Replace("\n", " ").Trim();
             return s.Length <= max ? s : s[..max] + " ...";
+        }
+
+        // ---- Headline guard (HeadlineSettings.cs): one refusal path for every check ----
+
+        internal static IEnumerable<KeyValuePair<string, string?>> InheritedEnvironment() =>
+            Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>()
+                .Select(e => new KeyValuePair<string, string?>((string)e.Key, e.Value as string));
+
+        /// <summary>
+        /// The startup half of the guard, for both modes: the inherited environment, and the build files the caller
+        /// names. It prints the DOTNET_ host variables it admitted, so a run shows what it inherited.
+        /// </summary>
+        internal static List<HeadlineRefusal> StartupRefusals(IEnumerable<HeadlineRefusal> buildFiles)
+        {
+            List<KeyValuePair<string, string?>> environment = InheritedEnvironment().ToList();
+            IReadOnlyList<string> admitted = Headline.AdmittedHostVariables(environment);
+            Console.WriteLine($"[Headline] inherited DOTNET_/COMPlus_ variables admitted: {(admitted.Count == 0 ? "none" : string.Join(", ", admitted))}");
+
+            List<HeadlineRefusal> refusals = new(Headline.EnvironmentRefusals(environment));
+            refusals.AddRange(buildFiles);
+            return refusals;
+        }
+
+        /// <summary>
+        /// Prints every finding in its one shape and answers true when there is any: the caller then exits 2, before
+        /// anything is timed.
+        /// </summary>
+        internal static bool StopOnHeadlineRefusals(IReadOnlyCollection<HeadlineRefusal> refusals, string when)
+        {
+            if (refusals.Count == 0)
+                return false;
+
+            // One line per distinct finding: the same command line refused for several projects reads once.
+            List<string> distinct = refusals.Select(r => r.ToString()).Distinct(StringComparer.Ordinal).ToList();
+            Console.Error.WriteLine($"[Headline] {distinct.Count} refusal(s); stopping {when}, exit 2. A headline column is built and run with the converter's defaults only (docs/Performance.md, \"Nothing is tuned for these benchmarks\").");
+
+            foreach (string refusal in distinct)
+                Console.Error.WriteLine($"           {refusal}");
+
+            return true;
+        }
+
+        /// <summary>
+        /// Runs a headline command line only when its allowlist admits it; a refused one is added to
+        /// <paramref name="headline"/> and not run.
+        /// </summary>
+        internal static ProcResult? ExecHeadline(List<HeadlineRefusal> headline, string column, HeadlineCommand command,
+            string application, string argv, string workingDir, int timeoutMs, Dictionary<string, string>? environment = null)
+        {
+            IReadOnlyList<HeadlineRefusal> refused = Headline.ArgvRefusals(column, command, argv);
+
+            if (refused.Count > 0)
+            {
+                headline.AddRange(refused);
+                return null;
+            }
+
+            return Exec(application, argv, workingDir, timeoutMs, environment);
         }
     }
 }

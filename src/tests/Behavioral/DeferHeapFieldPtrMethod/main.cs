@@ -22,7 +22,7 @@ partial struct parser {
 }
 
 internal static void seed(ref parser p) {
-    p.trk.lines = append(p.trk.lines, "seed"u8);
+    p.trk.lines = append(p.trk.lines, (@string)"seed");
 }
 
 internal static void run() {
@@ -31,8 +31,8 @@ internal static void run() {
         ref var p = ref heap<parser>(new parser(name: "p1"), out var Ꮡp);
         seed(ref p);
         defer(Ꮡp.Ꮡtrk.flush, ref ᒐ);
-        p.trk.lines = append(p.trk.lines, "after-defer"u8);
-        p.trk.lines = append(p.trk.lines, "final"u8);
+        p.trk.lines = append(p.trk.lines, (@string)"after-defer");
+        p.trk.lines = append(p.trk.lines, (@string)"final");
         fmt.Println("run done:", p.name);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

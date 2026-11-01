@@ -1,0 +1,4 @@
+hotphase	base	D:\go2cs-build\s53w\arms\H\bin\hotphase.exe	DOTNET_TC_CallCountingDelayMs=0
+hotphase	aa	D:\go2cs-build\s53w\arms\HA\bin\hotphase.exe	DOTNET_TC_CallCountingDelayMs=0
+hotphase	A	D:\go2cs-build\s53w\arms\A\bin\hotphase.exe	DOTNET_TC_CallCountingDelayMs=0
+hotphase	NI	D:\go2cs-build\s53w\arms\NI\bin\hotphase.exe	DOTNET_TC_CallCountingDelayMs=0

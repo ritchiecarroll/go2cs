@@ -98,9 +98,12 @@ internal static nint viewLen(slice<byte> b) {
     return builtin.len(s) + Δsstring;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object twoˢ = (@string)"two"u8;
+
 internal static void Main() {
     var a = new Δany(x: 1);
-    var vals = slice<any>([(nint)1, (@string)"two"u8, 3.5D]);
+    var vals = slice<any>([(nint)1, twoˢ, 3.5D]);
     var c = (rune)'x';
     c++;
     var r = new Δrune(r: 2);

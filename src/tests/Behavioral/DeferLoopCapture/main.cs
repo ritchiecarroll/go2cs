@@ -96,7 +96,7 @@ internal static partial void goIndexedReceiverInLoop() {
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
-            got = append(got, "TIMEOUT"u8);
+            got = append(got, (@string)"TIMEOUT");
             break;
         }}
     }
@@ -164,7 +164,7 @@ internal static partial void goElementReassigned() {
             break;
         }
         case 1 when selᴛ4.ꟷᐳ(out _): {
-            got = append(got, "TIMEOUT"u8);
+            got = append(got, (@string)"TIMEOUT");
             break;
         }}
     }

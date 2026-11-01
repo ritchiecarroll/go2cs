@@ -562,8 +562,8 @@ value: 0 fails (a) with +5.5%; 10 keeps 8% of the win and 20 keeps 42%, so both 
 - `Hash.String`'s method is a 19-return switch, and the form gains nothing there: A's median is 11% above H on the JIT,
   inside the band. The reading I offer is the inliner's budget across many accessor calls in one large method. It is
   unproven.
-- In the one-assembly scope of part 3, the library package's loop sped up as well, although its assembly stayed
-  ReadyToRun. Why is unread.
+- **OPEN:** in the one-assembly scope of part 3, the library package's loop sped up as well, although its assembly
+  stayed ReadyToRun. Why is unread, and COORD ruled no chase in this seat.
 
 ### 9.5 The predictions of section 6, scored as worded
 
@@ -587,4 +587,111 @@ value: 0 fails (a) with +5.5%; 10 keeps 8% of the win and 20 keeps 42%, so both 
 Proposed NEWS line: "In the converted standard library, a public string constant is now read through a property of
 the same name, which the JIT and Native AOT can inline. C# code that uses one compiles unchanged, but an assembly
 compiled against an earlier package must be rebuilt." That covers 108 public string constants. User packages are
-unchanged unless converted with `-hoist-literals`.
+unchanged unless converted with `-hoist-literals`. COORD accepted it verbatim for the .2 release notes.
+
+### 9.7 The guard on part 3's hook (2026-10-31, after batch 110)
+
+`GoKeepOwnCodeOutOfReadyToRun` hangs off two private SDK targets. A renamed `DependsOnTargets` fails the publish loudly,
+with MSB4057. A renamed `BeforeTargets` would silently never fire: every publish would stay green while the program
+went back to ReadyToRun.
+
+`TestReadyToRunPublishLeavesTheProgramsOwnCodeILOnly` (src/go2cs/r2rOwnCodeGuard_test.go) runs under `go test ./...`,
+the gate every lane runs. It publishes three tiny projects that carry the template's own target text, as the rendered
+template holds it:
+
+- the program;
+- a library of its own module;
+- a library under `$(go2csPath)core/`.
+
+Each publish is `dotnet publish -r <the host's RID> --disable-build-servers -nodeReuse:false`. The test then reads each
+assembly with Go's `debug/pe`: the CLI header's ManagedNativeHeader directory, and the `RTR` signature it must name.
+
+- **Two arms.** The default must leave the program and its module's library IL-only, with the core library
+  ReadyToRun. `GoReadyToRunUserCode=true` must make all three ReadyToRun: the positive control.
+- **The crossgen pack.** It is asserted equal to the SDK's `BundledNETCoreAppPackageVersion` (10.0.11 here), so
+  nothing floats.
+- **No dotnet** skips the test by name ("R2R guard NOT RUN: no dotnet"). A failed restore or publish is a failure that
+  names its cause.
+- **An unmapped host OS and architecture** is a failure, never a skip.
+
+**Made to fail.** Renaming `BeforeTargets` to `_PrepareForReadyToRunCompilationX` in the template took the default
+arm red, while `dotnet publish` still exited 0. The test named `r2rguard.dll` and `modlib.dll` as ReadyToRun, and said
+the target did not run. The control arm stayed green. Renaming `DependsOnTargets` instead failed the publish with
+MSB4057, which the test reports as a failed publish. The template was restored byte-identical both times (sha256
+prefix `3fbd3fcf9e4d3888`).
+
+**Wall time on G-LAPTOP:** 8.5 s with a warm NuGet cache; 13.5 s cold (an empty NUGET_PACKAGES, 341 MB downloaded).
+
+### 9.8 The NoInlining control on both runtimes, and the P1 kit (2026-10-31)
+
+The JIT control in 9.4 swapped two `NoInlining` DLLs into A's build. Native AOT compiles from IL and cannot take a
+swapped DLL, so p1aot had no control behind its 0.256.
+
+**The kit.** `data/seat53-jit-publish/p1kit` makes the control a root instead: the A root with every one of its
+5,168 accessors marked `NoInlining`, in byte mode. The same program is then built against it for both runtimes. The kit
+reproduces the rung end to end on G-LAPTOP:
+
+- both converters rebuilt to the same shas (`be64e39ef4cdb1f2`, `a34f3539e295b32e`);
+- the seed held 4,561 `.cs` files, equal to `git ls-files`;
+- both emissions had 0 failures;
+- its A root is byte-identical to the measured seat emission, and H against A differs in the same 1,368 files.
+
+**The readings**, timed on a quiet box after the kit's reconvert had ended. Same rounds and band as 9.4. H, its twin
+and A are 9.4's binaries; NI is built from the kit's NoInlining root with the A converter.
+
+| Runtime | `FormatBool` ns: H / A / NI | NI/H | `Hash.String` NI/H |
+|:--|:--|:--|:--|
+| JIT steady | 2.417 / 0.713 / 2.153 | 0.889, inside the band | 1.197, OUTSIDE (slower) |
+| Native AOT | 2.333 / 0.606 / 1.873 | 0.805, OUTSIDE (A/A band 0.898-1.198) | 1.328, OUTSIDE (slower) |
+
+- **On the JIT,** the gain is the inlining: NI reads like H.
+- **Under Native AOT,** inlining accounts for about three quarters of A's gain (1.27 of 1.73 ns). The `NoInlining`
+  accessor alone is still about 0.46 ns faster than H's field read. My reading is that the read through the address
+  skips the class-init check ILC puts in front of H's value load. That is unproven, and recorded as **OPEN**.
+  - **CLOSED 2026-10-31 (9.9):** the i9's disassembly shows the 0.46 ns is `FormatBool`'s own inlining into the
+    loop, not a class-init check.
+- **The i9 runs the same kit** on both runtimes as the second CPU. Its reading is the control of record.
+  - **Done 2026-10-31:** section 9.9.
+
+### 9.9 The second CPU: the i9 runs the kit (2026-10-31)
+
+The i9 ran the kit at `88ac80ddbf` unmodified. Its validation counts equal G-LAPTOP's: 5,168 accessors marked, 0 left
+inlinable, and 764 files differing between A and NI. The box was an Intel Core i9-13900K, win-x64, on .NET runtime
+10.0.14 (SDK 10.0.403); G-LAPTOP ran 10.0.11. H and its twin are byte-identical (the exe and the strconv,
+internal.strconv and crypto assemblies), so the band is run noise only. Driver: 15 interleaved rounds after a
+discarded warm-up. The raw data, the run log and the disassembly are in `data/seat53-jit-publish/i9/`.
+
+| Runtime | `FormatBool` ns: H / A / NI | A/H | NI/H | A/A band | `Hash.String` A/H, NI/H |
+|:--|:--|:--|:--|:--|:--|
+| JIT steady | 0.981 / 0.549 / 1.061 | 0.553, OUTSIDE | 0.988, inside | 0.833-1.153 | 1.084, 1.145: both inside |
+| Native AOT | 1.002 / 0.406 / 0.780 | 0.406, OUTSIDE | 0.818 (see below) | 0.947-1.204 | 0.987, 1.066: both inside |
+
+- **On the JIT,** the i9 reads as G-LAPTOP did: A is faster, and NI reads like H.
+- **Under Native AOT, NI sits below the band.** The driver scores NI/H 0.818 as inside, because its rule is that a
+  ratio's range overlaps the A/A range, and one round read 1.527. The other 14 of 15 rounds read 0.734 to 0.877, all
+  below the band's floor of 0.947. That is the same shape as G-LAPTOP's 0.805.
+- **`Hash.String` is inside the band on both runtimes**, for A and for NI. On G-LAPTOP, NI was outside, slower.
+- **The CPUs differ more than the ratios do.** H's `FormatBool` runs 0.981 ns on the i9's JIT against 2.417 on
+  G-LAPTOP's. The record compares ratios, never nanoseconds across boxes.
+
+**The AOT residual is inlining as well.** This CLOSES 9.8's OPEN line. The i9's `dumpbin` disassembly of the Native AOT
+`Main` and `FormatBool` (`i9/disasm/`) shows three loop shapes:
+
+- **H** calls `internal.strconv.FormatBool` from the loop. `FormatBool` reads the 16-byte `@string` static by value,
+  so ILC does not inline it, and the result comes back through a hidden return buffer.
+- **NI** has no call to `FormatBool`: ILC inlines it into `Main`. What `Main` calls is the two `NoInlining` getters,
+  `get_true_` and `get_false_`. With the value read moved behind the getters, `FormatBool` no longer reads a struct
+  static by value, and that is what let it inline.
+- **A** has no call to either: the getters inline too.
+
+So both steps are inlining. H to NI is `FormatBool` inlined into the loop (0.22 ns on the i9, 0.46 on G-LAPTOP). NI to
+A is the getters inlined into it (0.37 ns on the i9, 1.27 on G-LAPTOP). The class-init check is not the difference:
+H's and A's `FormatBool` bodies carry the same check (`cmp qword ptr [rax-8],0`, then `__GetGCStaticBase` on the slow
+path). On the JIT, NI reads like H on both CPUs, so there the gain needs the getters inlined as well. Why the JIT
+takes no H to NI step is not read: its code was not dumped.
+
+Box notes, from the i9's run log:
+
+- H's JIT build ran without the CPU cap: `dotnet build` passes its own `-maxcpucount`, which a `Directory.Build.rsp`
+  `-m:4` did not bound. Every other arm built under affinity 0xF. This affects build time only.
+- WHEA errors: 0 throughout. A quiet-box check read no build processes before the timed rounds.

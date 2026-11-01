@@ -89,10 +89,10 @@ internal static void Main() {
     e.n++;
     report("S3 method, no args, then a non-call:", got, line() - 2);
 
-    nint r = e.Value((@string)"y"u8);
+    nint r = e.Value((@string)"y");
     report("S4 method, result used:", r, line() - 1);
 
-    e.Info((@string)"a"u8, (nint)1, 2.5D);
+    e.Info((@string)"a", (nint)1, 2.5D);
     l = line();
     report("S5 method, variadic, three args:", got, l - 1);
 

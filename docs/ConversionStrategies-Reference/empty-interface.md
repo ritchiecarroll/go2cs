@@ -44,7 +44,7 @@ Guarded by: `NamedEmptyInterface` (int8, int, string, a struct and nil assigned 
 a named `I` and an anonymous `interface{}` parameter; a type assertion, a type switch, comparison, and
 `[]I` and `map[string]I`; each printed as `%T %v` against Go).
 
-## A string literal in an `any` slot boxes through `@string` — as `(@string)"…"u8`
+## A string literal in an `any` slot boxes through `@string`
 A Go string literal normally emits as a `"…"u8` `ReadOnlySpan<byte>` (which converts implicitly to `@string`). But a `ReadOnlySpan<byte>` has **no conversion to `object`**, so a string literal RETURNED (or returned as a tuple element) where the result type is the empty interface fails with CS0029 — testing's `func (f *chattyFlag) Get() any { return "test2json" }`. Such a result must box a golib `@string` (preserving Go string identity for a later `x.(string)` assertion), so `visitReturnStmt` renders the literal as `(@string)"…"u8` for an empty-interface result element:
 
 <!-- illustration: not converter output -->
@@ -59,22 +59,25 @@ internal static any Get(this ref chattyFlag f) {
 
 That inline form is the emitter's rendering; most `any` positions in converted code do not show it,
 because the literal pre-pass decides first (see [Strings](strings.md#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string)).
-A `return`, assignment, send or map lookup reads a hoisted pre-boxed field
-(`private static readonly object seedˢ = (@string)"seed"u8;`); outside the standard library an
-argument of a call go2cs-gen can intercept renders as a bare C# literal that its
-`LiteralInterceptorGenerator` boxes as a Go string at the call; and a composite element keeps the inline
-`(@string)"…"u8`. Every route delivers an
+A literal whose words name it, at a `return`, assignment, send, map lookup or composite element, reads a
+hoisted pre-boxed field (`private static readonly object seedˢ = (@string)"seed"u8;`), boxed once; outside
+the standard library an argument of a call go2cs-gen can intercept renders as a bare C# literal that its
+`LiteralInterceptorGenerator` boxes as a Go string at the call; and a literal whose name would say less
+than its value (`"hi"`) takes the cached cast `(@string)"…"`. Every route delivers an
 `@string` box, which is the rule this section states.
 
-**The cast and the `u8` suffix are independent decisions.** The cast is what the slot requires — it turns
-the span into an `@string`, which boxes with Go's `string` dynamic type. The suffix then just decides where
-the literal's *bytes* come from: `u8` makes them a compile-time constant in the assembly's data section,
-while a bare C# `"…"` is a UTF-16 constant that `Encoding.UTF8.GetBytes` has to transcode **on every
-evaluation** of the site (measured at more than twice the cost, and more again for non-ASCII text<!-- 2.1–2.4× ASCII /
-4.2× non-ASCII, docs/phase4/DESIGN-string-literal-allocation.md; platform not recorded -->). They are separate
-flags (`castToGoString`, `u8StringOK`), so every `any` slot takes the combined form and none pays the
-transcode.<!-- history: the two were coupled for a while (the emitter derived "no u8" from "needs the cast"),
-and every any position paid the transcode. -->
+**The cast and the `u8` suffix are independent decisions.** The cast is what the slot requires: it makes
+the literal an `@string`, which boxes with Go's `string` dynamic type. The suffix decides where the
+literal's *bytes* come from. A pre-boxed field's initializer runs once and takes `(@string)"seed"u8`, whose
+bytes are a compile-time constant in the assembly's data section. An inline site takes `(@string)"…"`:
+golib's `StringLiteralCache` converts the C# literal once per process, so each later evaluation is a lookup
+and allocates only the box, where `(@string)"…"u8` would build a new `@string` at each evaluation. They are
+separate flags of the literal context (`castToGoString`, `u8StringOK`), and the literal pre-pass, which
+decides first, registers the inline sites for the cached cast (`packageCastLits`).<!-- 32 B per evaluation
+against 72 B for `(@string)"…"u8`: the packageCastLits doc comment (seat #51). The uncached transcode measured
+2.1–2.4× ASCII / 4.2× non-ASCII, docs/phase4/DESIGN-string-literal-allocation.md; platform not recorded.
+history: the two flags were coupled for a while (the emitter derived "no u8" from "needs the cast"), and every
+any position paid the transcode. -->
 
 Concatenation needs its own signal: `convBinaryExpr` suppresses `u8` inside a string
 **concatenation** whose slot cannot hold a span, because two u8 operands fold (C# folds UTF-8
@@ -91,8 +94,9 @@ nested operands, so `"a" + "b" + c` stays suppressed all the way down.
 
 The same boxing applies to an **assignment** whose target's static type is the empty interface — a plain
 local (`arg = "<nil>"`, go/types format.go's sprintf over an `any` range variable, CS0029), a
-selector/index target (`h.value = "field"`), and a mixed-statement reassignment all render the literal
-`(@string)"…"u8`. `visitAssignStmt` threads the same `castToGoString`-on literal context
+selector/index target (`h.value = "field"`), and a mixed-statement reassignment all box the literal through
+`@string`: each reads its pre-boxed field (`arg = nilˢ;`), and a literal whose name would say less than its
+value takes the cached cast `(@string)"…"`. `visitAssignStmt` threads the same `castToGoString`-on literal context
 into each RHS conversion site when `lhsIsEmptyInterface` reports the target is `any` (the NON-empty
 interface wrap stays with `convertExprToInterfaceType`, which the empty interface deliberately bypasses).
 (Guarded by the `AnyStringLitAssign` behavioral test — an `any` local, an `any`-typed range variable, and
@@ -113,19 +117,19 @@ s  := []any{"a", "b"}             // slice/array element
 sp := [3]any{1: "sp"}             // sparse-array element
 ```
 
-<!-- source: src/tests/Behavioral/AnyStringLitComposite/main.cs.target:30-34, 40 -->
+<!-- source: src/tests/Behavioral/AnyStringLitComposite/main.cs.target:33-37, 43 -->
 ```csharp
-    var n = Ꮡ(new node(inner: (@string)"hi"u8));
-    var p = new pair("tag", (@string)"val"u8);
-    var m = new map<@string, any>{["k"] = (@string)"mv"u8};
-    var mk = new map<any, nint>{[(@string)"ky"u8] = 7};
-    var s = slice<any>([(@string)"a"u8, (@string)"b"u8]);
+    var n = Ꮡ(new node(inner: (@string)"hi"));
+    var p = new pair("tag", valˢ);
+    var m = new map<@string, any>{["k"] = (@string)"mv"};
+    var mk = new map<any, nint>{[(@string)"ky"] = 7};
+    var s = slice<any>([(@string)"a", (@string)"b"]);
     …
-    var sp = new array<any>(3){[1] = (@string)"sp"u8};
+    var sp = new array<any>(3){[1] = (@string)"sp"};
 ```
 
-Every `any` slot takes the combined `(@string)"…"u8` form, where a bare `"hi"u8` is CS1503 and a bare
-`"val"` boxes the wrong dynamic type. `p`'s FIRST element and the map's key are plain `string` slots,
+Each `any` slot reads the literal's pre-boxed field (`valˢ`) or the cached cast `(@string)"hi"`, where a
+bare `"hi"u8` is CS1503 and a bare `"hi"` boxes the wrong dynamic type. `p`'s FIRST element and the map's key are plain `string` slots,
 which take a [plain](strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal) C# literal.
 
 Keyed elements resolve their target slot in `convKeyValueExpr` (struct field via `info.Uses`; map/sparse
@@ -356,11 +360,11 @@ already leads with the cast so the two can never double up:
 …
     any sv = seedˢ;
 …
-    var ssl = slice<any>([(@string)"seed"u8, (@string)("se" + "ed")]);
+    var ssl = slice<any>([seedˢ, (@string)("se" + "ed")]);
 …
     fmt.Println("str mapkey    :", smk[seedˢ], smk[((any)s)]);
 …
-    var shk = new holder(v: (@string)"seed"u8);
+    var shk = new holder(v: seedˢ);
 ```
 
 The literal pre-pass then picks the final spelling of a bare literal (see
@@ -411,7 +415,7 @@ marking (`markEmptyInterfaceElems`, shared by both renderers), so the two spelli
 
 <!-- source: src/tests/Behavioral/ElidedAnyCompositeElems/ElidedAnyCompositeElems.cs.target:9 -->
 ```csharp
-    var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)1, (nint)2}.array(), new any[]{(@string)"a"u8, (@string)"b"u8}.array()}.slice(), 2);
+    var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)1, (nint)2}.array(), new any[]{(@string)"a", (@string)"b"}.array()}.slice(), 2);
 ```
 
 A pointer, func or `unsafe.Pointer` element takes its box the same way. An elided literal of any other element type,

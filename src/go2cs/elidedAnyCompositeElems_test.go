@@ -74,14 +74,14 @@ func main() {
 
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "eia", "main.cs"))
 
-	// Each element boxes at its Go type: a string literal through @string, an untyped constant through its
-	// default type, a pointer as its box.
+	// Each element boxes at its Go type: a string literal through @string (its cached cast, seat #51, since a
+	// one-letter slug takes no pre-boxed field), an untyped constant through its default type, a pointer as its box.
 	for _, want := range []string{
 		`new any[]{(nint)1, (nint)2}.array()`,
-		`new any[]{(@string)"a"u8, (@string)"b"u8}.array()`,
+		`new any[]{(@string)"a", (@string)"b"}.array()`,
 		`slice<any>([1.5D, (rune)'x'])`,
 		`slice<any>([(@string)("c"u8 + "d"u8), true])`,
-		`Ꮡ(new any[]{(nint)1, (@string)"p"u8}.array())`,
+		`Ꮡ(new any[]{(nint)1, (@string)"p"}.array())`,
 		`slice<any>([p.OrTypedNil()])`,
 	} {
 		if !strings.Contains(mainCs, want) {
@@ -93,7 +93,7 @@ func main() {
 	for _, want := range []string{
 		`slice<nint>([1, 2])`,
 		`slice<@string>(["x"])`, // a `string` element takes the plain literal (hoistedLiteralOperations.go)
-		`slice<any>([(@string)"flat"u8, (nint)3])`,
+		`slice<any>([flatˢ, (nint)3])`, // a healthy slug's any element takes the pre-boxed field (seat #51)
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("control: want %q unchanged:\n%s", want, mainCs)

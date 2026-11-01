@@ -28,7 +28,7 @@ internal static I pick(nint which) {
         return (nint)42;
     }
     case 1: {
-        return (@string)"go"u8;
+        return (@string)"go";
     }
     case 2: {
         return new point(1, 2);
@@ -37,10 +37,14 @@ internal static I pick(nint which) {
     return default;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object threeˢ = (@string)"three"u8;
+private static readonly object oneˢ = (@string)"one"u8;
+
 internal static void Main() {
     any a = (int8)(-5);
     any b = (nint)42;
-    any c = (@string)"go"u8;
+    any c = (@string)"go";
     I d = new point(3, 4);
     I e = default;
     fmt.Printf("%T %v | %T %v | %T %v | %T %v | %T %v\n"u8, a, a, b, b, c, c, d, d, e, e);
@@ -79,9 +83,9 @@ internal static void Main() {
         break;
     }}
 
-    var list = slice<I>([(int8)1, (nint)2, (@string)"three"u8, new point(4, 4), default]);
+    var list = slice<I>([(int8)1, (nint)2, threeˢ, new point(4, 4), default]);
     fmt.Println(len(list), list);
-    var m = new map<@string, I>{["n"] = (nint)1, ["s"] = (@string)"one"u8};
+    var m = new map<@string, I>{["n"] = (nint)1, ["s"] = oneˢ};
     fmt.Println(m["n"], m["s"]);
 }
 

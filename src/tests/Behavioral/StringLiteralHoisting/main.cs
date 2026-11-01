@@ -46,6 +46,7 @@ internal static nint mutableBytes() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string namedStringConversionˢ = "named string conversion"u8;
+private static readonly object anyCompositeElementˢ = (@string)"any composite element"u8;
 
 internal static void Main() {
     fmt.Println(kind(0), kind(1));
@@ -87,7 +88,7 @@ internal static void Main() {
     var table = new map<@string, @string>{["composite key"] = "composite value"};
     fmt.Println(parts[0], parts[1], boxed.name, boxed.tag, table["composite key"]);
 
-    var anys = slice<any>([(@string)"any composite element"u8, (nint)7]);
+    var anys = slice<any>([anyCompositeElementˢ, (nint)7]);
     fmt.Println(anys[0], anys[1]);
 
     fmt.Println(pkgLevelLiteral);

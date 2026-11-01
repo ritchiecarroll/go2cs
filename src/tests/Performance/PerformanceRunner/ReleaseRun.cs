@@ -56,6 +56,8 @@ namespace PerformanceRunner
         {
             public required string WorkDir { get; init; }
             public string? SourceHash { get; set; }
+            // What the ReadyToRun column's published files showed (BinaryShape.ReadyToRunShapeProblem), for the legend.
+            public string? ReadyToRunShape { get; set; }
             public Dictionary<ReleaseArm, Slot> Slots { get; } = Enum.GetValues<ReleaseArm>().ToDictionary(a => a, _ => new Slot());
         }
 
@@ -65,6 +67,13 @@ namespace PerformanceRunner
 
         internal static int Run(string perfDir, IReadOnlyList<string> programs, Options options)
         {
+            // Nothing tunes a headline column (HeadlineSettings.cs): the inherited environment, and any build file at or
+            // above the work root, are read before anything is converted or built.
+            List<HeadlineRefusal> headline = Runner.StartupRefusals(Headline.BuildFilesAtOrAbove(options.WorkRoot, File.Exists));
+
+            if (Runner.StopOnHeadlineRefusals(headline, "before anything is converted"))
+                return 2;
+
             Directory.CreateDirectory(options.WorkRoot);
             Console.WriteLine($"[Release]  legs [{string.Join(", ", options.Legs.Select(l => $"{l.Name} = {l.PackageVersion}"))}], work {options.WorkRoot}");
 
@@ -81,7 +90,7 @@ namespace PerformanceRunner
 
                 foreach (string program in programs)
                 {
-                    LegProgram lp = PrepareProgram(perfDir, program, leg, options, manifest, refusals);
+                    LegProgram lp = PrepareProgram(perfDir, program, leg, options, manifest, refusals, headline);
                     table[(leg.Name, program)] = lp;
 
                     if (lp.SourceHash is not null)
@@ -92,6 +101,19 @@ namespace PerformanceRunner
                 // these, and the manifest it ships back carries them.
                 File.WriteAllText(Path.Combine(options.WorkRoot, $"sources-{leg.Name}.tsv"), sources.ToString());
             }
+
+            // A headline arm runs with the inherited environment only; TC0 is the one arm that sets its own.
+            foreach (((string legName, string program), LegProgram lp) in table)
+            {
+                foreach (ReleaseArm arm in new[] { ReleaseArm.Jit, ReleaseArm.ReadyToRun, ReleaseArm.Aot })
+                {
+                    if (lp.Slots[arm].Environment is { } environment)
+                        headline.Add(new(Column(arm), $"{legName}/{program} {arm} run environment", string.Join(" ", environment.Select(e => $"{e.Key}={e.Value}")), "none: only the TC0 diagnostic sets one"));
+                }
+            }
+
+            if (Runner.StopOnHeadlineRefusals(headline, "before anything is timed"))
+                return 2;
 
             Verify(programs, options.Legs, table, refusals);
             Measure(programs, options, table);
@@ -108,8 +130,17 @@ namespace PerformanceRunner
 
         // ---- one leg, one program: convert, check, build, admit ----
 
+        private static string Column(ReleaseArm arm) => arm switch
+        {
+            ReleaseArm.Go => "Go",
+            ReleaseArm.Jit => "C# (JIT)",
+            ReleaseArm.ReadyToRun => "C# (ReadyToRun)",
+            ReleaseArm.Aot => "C# (Native AOT)",
+            _ => arm.ToString(),
+        };
+
         private static LegProgram PrepareProgram(string perfDir, string program, ReleaseLeg leg, Options options,
-            IReadOnlyList<AotManifestEntry> manifest, List<string> refusals)
+            IReadOnlyList<AotManifestEntry> manifest, List<string> refusals, List<HeadlineRefusal> headline)
         {
             string legRoot = Path.Combine(options.WorkRoot, leg.Name);
             string source = Path.Combine(legRoot, "src", program);
@@ -143,14 +174,21 @@ namespace PerformanceRunner
             foreach (string file in Directory.GetFiles(Path.Combine(perfDir, program)).Where(f => f.EndsWith(".go", StringComparison.Ordinal) || Path.GetFileName(f) == "go.mod"))
                 File.Copy(file, Path.Combine(source, Path.GetFileName(file)));
 
-            Runner.ProcResult convert = Runner.Exec(leg.Converter, $"-recurse=nuget \"{source}\" \"{output}\"", source, ConvertTimeoutMs, GoEnvironment(leg));
+            Runner.ProcResult? converted = Runner.ExecHeadline(headline, "every C# column", HeadlineCommand.ReleaseConvert,
+                leg.Converter, Headline.ReleaseConvert(source, output), source, ConvertTimeoutMs, GoEnvironment(leg));
+
+            if (converted is not { } convert)
+            {
+                Console.WriteLine("REFUSED");
+                return lp;
+            }
 
             if (convert.ExitCode != 0)
             {
                 RefuseCSharp($"{leg.Name}/{program}: conversion exit {convert.ExitCode}: {Runner.Truncate(convert.StdOut + convert.StdErr)}");
 
                 Console.WriteLine("FAILED");
-                BuildGo(program, leg, source, legRoot, lp, Refuse);
+                BuildGo(program, leg, source, legRoot, lp, Refuse, headline);
                 return lp;
             }
 
@@ -161,7 +199,7 @@ namespace PerformanceRunner
                 RefuseCSharp($"{leg.Name}/{program}: the conversion wrote no project for the program under {output}");
 
                 Console.WriteLine("no project");
-                BuildGo(program, leg, source, legRoot, lp, Refuse);
+                BuildGo(program, leg, source, legRoot, lp, Refuse, headline);
                 return lp;
             }
 
@@ -179,7 +217,7 @@ namespace PerformanceRunner
 
             Console.WriteLine($"source {lp.SourceHash[..12]}");
 
-            BuildGo(program, leg, source, legRoot, lp, Refuse);
+            BuildGo(program, leg, source, legRoot, lp, Refuse, headline);
 
             if (consumer.Count > 0)
             {
@@ -189,7 +227,7 @@ namespace PerformanceRunner
                 return lp;
             }
 
-            BuildJit(program, leg, projectDir, csproj, legRoot, lp, options.Tc0, Refuse);
+            BuildJit(program, leg, projectDir, csproj, legRoot, lp, options.Tc0, Refuse, headline);
 
             // The build restored the packages: a floating reference is the leg's release only if it RESOLVED to it.
             // Where the restore wrote it, as MSBuild evaluates it: the release template redirects obj out of the
@@ -206,17 +244,20 @@ namespace PerformanceRunner
                 return lp;
             }
 
-            PublishReadyToRun(program, leg, output, csproj, legRoot, lp, Refuse);
+            PublishReadyToRun(program, leg, output, csproj, legRoot, lp, Refuse, headline);
             PublishFrameworkDependentReadyToRun(program, leg, output, csproj, legRoot, lp, options.Fd1, Refuse);
             AdmitAot(program, leg, options, manifest, lp, Refuse);
             return lp;
         }
 
-        private static void BuildGo(string program, ReleaseLeg leg, string source, string legRoot, LegProgram lp, Action<ReleaseArm, string> refuse)
+        private static void BuildGo(string program, ReleaseLeg leg, string source, string legRoot, LegProgram lp, Action<ReleaseArm, string> refuse,
+            List<HeadlineRefusal> headline)
         {
             string exe = Path.Combine(legRoot, "bin", "go", program + ".exe");
             Directory.CreateDirectory(Path.GetDirectoryName(exe)!);
-            Runner.ProcResult r = Runner.Exec(leg.Go, $"build -o \"{exe}\" .", source, BuildTimeoutMs, GoEnvironment(leg));
+
+            if (Runner.ExecHeadline(headline, "Go", HeadlineCommand.GoBuild, leg.Go, Headline.GoBuild(exe), source, BuildTimeoutMs, GoEnvironment(leg)) is not { } r)
+                return;
 
             if (r.ExitCode != 0)
             {
@@ -228,10 +269,13 @@ namespace PerformanceRunner
             lp.Slots[ReleaseArm.Go].Admitted = true;
         }
 
-        private static void BuildJit(string program, ReleaseLeg leg, string projectDir, string csproj, string legRoot, LegProgram lp, bool tc0, Action<ReleaseArm, string> refuse)
+        private static void BuildJit(string program, ReleaseLeg leg, string projectDir, string csproj, string legRoot, LegProgram lp, bool tc0, Action<ReleaseArm, string> refuse,
+            List<HeadlineRefusal> headline)
         {
             string outDir = Path.Combine(legRoot, "bin", "jit", program) + Path.DirectorySeparatorChar;
-            Runner.ProcResult r = Runner.Exec("dotnet", $"build \"{csproj}\" -nologo -clp:ErrorsOnly -c Release \"-p:OutDir={outDir}\"", projectDir, BuildTimeoutMs);
+
+            if (Runner.ExecHeadline(headline, Column(ReleaseArm.Jit), HeadlineCommand.ReleaseJitBuild, "dotnet", Headline.ReleaseJitBuild(csproj, outDir), projectDir, BuildTimeoutMs) is not { } r)
+                return;
 
             if (r.ExitCode != 0)
             {
@@ -250,6 +294,9 @@ namespace PerformanceRunner
                 refuse(ReleaseArm.Tc0, $"{leg.Name}/{program}: no JIT binary for the TC0 diagnostic");
                 return;
             }
+
+            headline.AddRange(Headline.RuntimeConfigRefusals(Column(ReleaseArm.Jit), $"{leg.Name}/{program} runtimeconfig.json",
+                File.ReadAllText(configPath), Headline.TemplateCallCountingDelay(File.ReadAllText(csproj))));
 
             lp.Slots[ReleaseArm.Jit].Exe = exe;
             lp.Slots[ReleaseArm.Jit].Admitted = true;
@@ -270,7 +317,8 @@ namespace PerformanceRunner
         // win-x64` on the converter-written project. Published from its own copy, because a RID-specific self-contained
         // restore and the framework-dependent build cross-pollute one obj\. The copy is the whole converted tree, not
         // the project folder: the Directory.Build.props above the project sets $(GoStdLibVersion) and redirects obj.
-        private static void PublishReadyToRun(string program, ReleaseLeg leg, string output, string csproj, string legRoot, LegProgram lp, Action<ReleaseArm, string> refuse)
+        private static void PublishReadyToRun(string program, ReleaseLeg leg, string output, string csproj, string legRoot, LegProgram lp, Action<ReleaseArm, string> refuse,
+            List<HeadlineRefusal> headline)
         {
             string copy = Path.Combine(legRoot, "r2r-src", program);
             RecreateDirectory(copy);
@@ -278,7 +326,10 @@ namespace PerformanceRunner
 
             string copiedProject = Path.Combine(copy, Path.GetRelativePath(output, csproj));
             string outDir = Path.Combine(legRoot, "bin", "r2r", program);
-            Runner.ProcResult r = Runner.Exec("dotnet", $"publish \"{copiedProject}\" -nologo -clp:ErrorsOnly -c Release -r win-x64 -o \"{outDir}\"", copy, BuildTimeoutMs);
+
+            if (Runner.ExecHeadline(headline, Column(ReleaseArm.ReadyToRun), HeadlineCommand.ReleaseReadyToRunPublish, "dotnet",
+                    Headline.ReleaseReadyToRunPublish(copiedProject, outDir), copy, BuildTimeoutMs) is not { } r)
+                return;
 
             if (r.ExitCode != 0)
             {
@@ -286,10 +337,14 @@ namespace PerformanceRunner
                 return;
             }
 
+            // The shape is the converted project's own: from the .2 template on, its own code is published IL-only.
+            string csprojText = File.ReadAllText(csproj);
             string exe = Path.Combine(outDir, AssemblyName(csproj, program) + ".exe");
             string configPath = Path.ChangeExtension(exe, ".runtimeconfig.json");
+            string shape = "";
             string? problem = BinaryShape.ReadyToRunProblem(File.Exists(configPath) ? File.ReadAllText(configPath) : null)
-                ?? BinaryShape.ReadyToRunCodeProblem(Path.ChangeExtension(exe, ".dll"));
+                ?? BinaryShape.ReadyToRunShapeProblem(Path.ChangeExtension(exe, ".dll"), Path.Combine(outDir, "golib.dll"),
+                    BinaryShape.KeepsOwnCodeOutOfReadyToRun(csprojText), out shape);
 
             if (problem is not null || !File.Exists(exe))
             {
@@ -297,6 +352,10 @@ namespace PerformanceRunner
                 return;
             }
 
+            headline.AddRange(Headline.RuntimeConfigRefusals(Column(ReleaseArm.ReadyToRun), $"{leg.Name}/{program} runtimeconfig.json",
+                File.ReadAllText(configPath), Headline.TemplateCallCountingDelay(csprojText)));
+
+            lp.ReadyToRunShape = shape;
             lp.Slots[ReleaseArm.ReadyToRun].Exe = exe;
             lp.Slots[ReleaseArm.ReadyToRun].Admitted = true;
         }
@@ -332,7 +391,8 @@ namespace PerformanceRunner
             string exe = Path.Combine(outDir, AssemblyName(csproj, program) + ".exe");
             string configPath = Path.ChangeExtension(exe, ".runtimeconfig.json");
             string? problem = BinaryShape.JitProblem(File.Exists(configPath) ? File.ReadAllText(configPath) : null)
-                ?? BinaryShape.ReadyToRunCodeProblem(Path.ChangeExtension(exe, ".dll"));
+                ?? BinaryShape.ReadyToRunShapeProblem(Path.ChangeExtension(exe, ".dll"), Path.Combine(outDir, "golib.dll"),
+                    BinaryShape.KeepsOwnCodeOutOfReadyToRun(File.ReadAllText(csproj)), out _);
 
             if (problem is not null || !File.Exists(exe))
             {
@@ -480,6 +540,13 @@ namespace PerformanceRunner
             {
                 sb.AppendLine();
                 sb.AppendLine($"### Leg {leg.Name}: go.* {leg.PackageVersion}");
+                sb.AppendLine();
+
+                // What this leg's ReadyToRun column measured, as its published files showed it: from the .2 template on,
+                // the program's own code is IL-only and only golib and the packages are precompiled.
+                List<string> shapes = programs.Select(p => table[(leg.Name, p)].ReadyToRunShape).OfType<string>().Where(s => s.Length > 0)
+                    .Distinct(StringComparer.Ordinal).ToList();
+                sb.AppendLine($"C# (ReadyToRun) in this leg, as published: {(shapes.Count == 0 ? "no binary admitted" : string.Join("; ", shapes))}.");
                 sb.AppendLine();
                 sb.AppendLine("| Benchmark | Go | C# (JIT) | C# (ReadyToRun) | C# (Native AOT) |");
                 sb.AppendLine("|---|---:|---:|---:|---:|");

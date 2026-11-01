@@ -35,7 +35,7 @@ internal static void Main() {
     var b2 = new box(err: ((myErr)42));
     fmt.Println(b2.err.Error());
 
-    var h = new holder((tag)(@string)"x"u8);
+    var h = new holder((tag)(@string)"x");
     fmt.Println(h.n.Name());
 }
 

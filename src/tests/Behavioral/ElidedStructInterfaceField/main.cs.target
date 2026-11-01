@@ -41,8 +41,8 @@ internal static void Main() {
     }
 
     var ptrCases = slice<ж<main_ptrCases>>([
-        Ꮡ(new main_ptrCases("embedded-pointer"u8, new pointerErrжerror(Ꮡ(new pointerErr("embedded-pointer"))))),
-        Ꮡ(new main_ptrCases("embedded-value"u8, new valueErr("embedded-value")))
+        Ꮡ(new main_ptrCases("embedded-pointer", new pointerErrжerror(Ꮡ(new pointerErr("embedded-pointer"))))),
+        Ꮡ(new main_ptrCases("embedded-value", new valueErr("embedded-value")))
     ]);
 
     foreach (var (_, c) in ptrCases) {
