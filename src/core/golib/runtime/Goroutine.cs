@@ -230,6 +230,12 @@ public sealed class Goroutine
     [MethodImpl(MethodImplOptions.NoInlining)]
     private void EnterCountedBlock()
     {
+        // The exit hold (MainExit): once the process's exit is decided, Go's exit would already have stopped this
+        // goroutine, so its system call does not reach the OS. Only a counted goroutine gets here, so an uncounted
+        // system call pays nothing for it.
+        if (MainExit.ExitDecided)
+            MainExit.HoldAtExit();
+
         // The sequence moves BEFORE the depth is published, so main never reads a new block under an old name.
         if (m_blockedDepth == 0)
             Volatile.Write(ref m_blockSequence, m_blockSequence + 1);

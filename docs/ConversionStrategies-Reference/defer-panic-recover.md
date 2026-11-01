@@ -736,15 +736,20 @@ shut down under the panicking goroutine: exit 0 with an empty stderr. golib's `M
   run holds `main` until it has used 20 ms of its own CPU since the wait began, so a goroutine waiting behind
   other threads for a CPU is waited for. Its rethrow to its root takes a few milliseconds of that.
   <!-- src/core/golib/runtime/MainExit.cs:51 `take 1.2 to 1.8 ms from <c>GoFrame.Capture</c>`; the budget
-       :95 `internal static readonly TimeSpan PanicDefersCpuBudget = TimeSpan.FromMilliseconds(20);`; the block
-       :98 `internal static readonly TimeSpan BlockedConfirm = TimeSpan.FromMilliseconds(1);`; the guard
-       :104 `internal static TimeSpan HangGuard { get; set; } = TimeSpan.FromSeconds(10);`; and the wall-clock
+       :101 `internal static readonly TimeSpan PanicDefersCpuBudget = TimeSpan.FromMilliseconds(20);`; the block
+       :104 `internal static readonly TimeSpan BlockedConfirm = TimeSpan.FromMilliseconds(1);`; the guard
+       :110 `internal static TimeSpan HangGuard { get; set; } = TimeSpan.FromSeconds(10);`; and the wall-clock
        fallback where the CPU cannot be read
-       :90 `internal static readonly TimeSpan PanicDefersWait = TimeSpan.FromMilliseconds(20);`
+       :96 `internal static readonly TimeSpan PanicDefersWait = TimeSpan.FromMilliseconds(20);`
        (docs/phase4/DESIGN-main-return-wait.md). -->
   A goroutine blocked in a slow recovering call, or in a deferred call, is not waited for, and neither does Go
   wait for one. One divergence from Go remains: a goroutine that can run but is given no CPU at all for 10 s stops
   being waited for. If a report has begun, `main` waits for the report and exits with its status.
+- **The exit hold.** Go's exit stops every thread at once, but the CLR keeps a converted program's goroutine
+  threads running through its shutdown. So once the exit is decided (the tail is done, or `os.Exit`), a goroutine
+  still counted that enters a system call is held there for up to 10 s, and its write never reaches the OS. The
+  thread running the exit is never held. golib's own direct console writes (the `print` builtin) and a C# caller's
+  own I/O pass no system-call mark, and stay outside the hold.
 - **Which report** (Go's `paniclk`): the first fatal start owns it. When `main` panics while a goroutine's crash
   is already under way, `main`'s backstop waits for the goroutine's report, which then ends the process, so the
   first line is the goroutine's, as in Go. Once the owner has reported, the waiting thread parks for good and never

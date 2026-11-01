@@ -32,3 +32,4 @@ runtime/sema_impl.cs	done.Wait(timeoutMs)	runtime-test-support	a semaphore probe
 net/windows/lookup_windows.cs	switch (select(	marked-deeper	golib select, which parks with Select
 runtime/mfinal.cs	s_idle.Wait(timeoutMs)	system-goroutine-idle	the finalizer goroutine waiting for work; it is counted only while a finalizer's panic runs, never while idle
 runtime/mfinal.cs	s_pending.Wait();	system-goroutine-idle	the finalizer goroutine waiting for work; it is counted only while a finalizer's panic runs, never while idle
+golib/runtime/MainExit.cs	Thread.Sleep(HangGuard);	exit-hold	the exit hold itself: a counted goroutine Go's exit would already have stopped, held for the guard (COORD, 2026-11-01)

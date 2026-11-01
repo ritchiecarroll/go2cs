@@ -66,6 +66,20 @@ or by a block golib does not mark. `ReportWait` (60 s) is unchanged.
 **Not marked, deliberately.** `Coro`'s start handshake: Go's `newcoro` never parks its creator, and the wait is on a
 runnable peer (COORD, 2026-10-31).
 
+**The exit hold** (COORD, 2026-11-01, ruled into this seat). Go's `exit` stops every thread at once; the CLR keeps
+background threads running through `ProcessExit` and its own shutdown, and in that window a goroutine can still reach
+the OS. Once the exit is decided (`OnProcessExit` is done, or `MainExit.Exit` for `os.Exit` and the fatal paths),
+`Goroutine.EnterBlocked` holds a counted goroutine at its next system call for the hang guard. That is in the slow path
+only counted goroutines reach, so an uncounted system call pays nothing. Its conditions:
+
+- The thread that decided the exit is exempt: it runs the handlers, an `os.Exit` from a goroutine included.
+- No lock a held goroutine can own is taken after the decision. The five `ProcessExit` subscriptions in `src/core`
+  (MainExit, the testing host's flush, Q44's dump, IGoEquatable's census write, runtime's stop flag) write through
+  .NET's `File` and `Console`, never through a Go fd or mutex.
+- Anything outside that census is bounded by the guard. A held goroutine that owns a lock the exiting thread needs
+  delays the exit by at most the guard (the GolibTests plant reads 308 ms against a 300 ms guard), never deadlocks it.
+- Residual windows: golib's direct console writes (the `print` builtin) and a C# caller's own I/O pass no mark.
+
 ## 5. The census
 
 `docs/phase4/data/main-return-wait/census.sh` reads every hand-owned `src/core` file (the only route from converted Go

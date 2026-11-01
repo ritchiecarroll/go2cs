@@ -59,6 +59,12 @@ namespace go.golib;
 /// wait of the program's own, outside the converted population; docs/phase4/data/main-return-wait). Where the
 /// CPU cannot be read (no seam on this OS, or the thread exited), the bound is the wall-clock
 /// <see cref="PanicDefersWait"/> it was before.</item>
+/// <item>Go's exit stops every thread at once; the CLR keeps background threads running through ProcessExit and
+/// its own shutdown. Once the exit is decided, a goroutine counted in runningPanicDefers that enters a system call is
+/// held there for <see cref="HangGuard"/> (the exit hold, <see cref="HoldAtExit"/>), so a recovering deferred call
+/// cannot print after <c>main</c> has returned. The thread that decided the exit is exempt. Not covered: golib's own
+/// direct console writes (the <c>print</c> builtin) and a C# caller's own I/O, which do not pass a system-call
+/// mark.</item>
 /// </list>
 /// </para>
 /// <para>
@@ -124,6 +130,49 @@ public static class MainExit
 
     // An exit golib took on purpose: it owns the status, and the main-return tail does not run.
     private static int s_exitRequested;
+
+    // THE EXIT HOLD. Go's exit stops every thread at once; the CLR keeps background threads running through
+    // ProcessExit and its own shutdown, and in that window a goroutine could still reach the OS (a recovering
+    // deferred call printing after main has returned). Once the exit is decided -- main's tail is done, or an exit
+    // golib takes on purpose -- a goroutine counted in runningPanicDefers that enters a system call is held there
+    // (Goroutine.EnterBlocked) for HangGuard, the bound that keeps a lock it holds from stopping the exit for good.
+    // The thread that decided the exit is never held: it is the one running the handlers, an os.Exit from a goroutine
+    // included. The subscriptions that run after the decision (the testing host's flush, Q44's dump, IGoEquatable's
+    // census write, runtime's stop flag) write through .NET's File and Console, never through a Go fd or lock a held
+    // goroutine could own (docs/phase4/DESIGN-main-return-wait.md).
+    private static int s_exitDecided;
+    private static int s_exitThread;
+
+    /// <summary>
+    /// Whether the process's exit is decided: a counted goroutine's next system call is held (the exit hold).
+    /// </summary>
+    internal static bool ExitDecided => Volatile.Read(ref s_exitDecided) != 0;
+
+    // The exit is decided on this thread, which the hold then exempts.
+    internal static void DecideExit()
+    {
+        Volatile.Write(ref s_exitThread, Environment.CurrentManagedThreadId);
+        Volatile.Write(ref s_exitDecided, 1);
+    }
+
+    /// <summary>
+    /// The exit hold, for a counted goroutine entering a system call after the exit is decided: Go's exit would already
+    /// have stopped it. It waits out <see cref="HangGuard"/> unless it is the thread that decided the exit.
+    /// </summary>
+    internal static void HoldAtExit()
+    {
+        if (Environment.CurrentManagedThreadId != Volatile.Read(ref s_exitThread))
+            Thread.Sleep(HangGuard);
+    }
+
+    /// <summary>
+    /// The guard seam for the exit hold: forgets a decided exit, so a test leaves no held system calls behind.
+    /// </summary>
+    internal static void ResetExitForTest()
+    {
+        Volatile.Write(ref s_exitDecided, 0);
+        Volatile.Write(ref s_exitThread, 0);
+    }
 
     /// <summary>The number of goroutines counted as running a panic's deferred calls (GolibTests reads it).</summary>
     internal static int RunningPanicDefers => Volatile.Read(ref s_runningPanicDefers);
@@ -263,6 +312,10 @@ public static class MainExit
     public static void Exit(int code)
     {
         Volatile.Write(ref s_exitRequested, 1);
+
+        // Go's exit stops every goroutine here; the exit hold begins, with this thread (an os.Exit from a goroutine
+        // included) exempt.
+        DecideExit();
         Environment.Exit(code);
 
         // Environment.Exit does not return, but the compiler does not know that.
@@ -374,10 +427,13 @@ public static class MainExit
 
         AwaitPanickingGoroutines();
 
-        if (Volatile.Read(ref s_panicking) == 0)
-            return;
+        if (Volatile.Read(ref s_panicking) != 0)
+        {
+            s_reported.Wait(ReportWait);
+            Environment.ExitCode = Volatile.Read(ref s_fatalCode);
+        }
 
-        s_reported.Wait(ReportWait);
-        Environment.ExitCode = Volatile.Read(ref s_fatalCode);
+        // The tail is done: the process exits now, as Go's exit(0) or exit(2) would, so the exit hold begins.
+        DecideExit();
     }
 }
