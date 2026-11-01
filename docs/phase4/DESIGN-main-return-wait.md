@@ -204,8 +204,9 @@ every traced run.
   hold for the woken goroutine. In 14 of the 45 hi runs the wait had already released correctly, and main was starved
   after the release. 3 runs printed between the release and the exit decision, a window the prediction had not named.
 
-**G-LAPTOP gates.** At this record, golib, the generator, the converter and GolibTests are identical to
-`ba6550b337` and `971f018d7e`.
+**G-LAPTOP gates, on the seat branch before its merge of master.** At `0e521b4758`, golib, the generator, the
+converter and GolibTests are identical to `ba6550b337` and `971f018d7e`. The batch's merge battery covers the merged
+tree.
 - GolibTests Debug and Release: rc 0 at `ba6550b337`. GenTests: rc 0.
 - `go test ./...`: green at the tip.
 - Both solutions build at `971f018d7e`.
