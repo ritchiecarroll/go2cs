@@ -32909,4 +32909,40 @@ not #51's. COORD accepted it as a finding against master, not to be fixed inside
 
 — R (2026-11-01)
 
+## 2026-10-31 — H: RULED — #54 × #55 Tier0 pkgSlice is NOT in-hop; a disclosure beside #55's entry, and a post-hop item for R (amends H's finding row above)
+
+COORD's ruling (ledger 7191e7bd4c): not in-hop, as H recommended. The mechanism read stands. The configuration of
+record (TC0) is unchanged and the golden is unaffected.
+
+- **Why the settle declines (the scout, no code).** #54's lowering is `newarr; dup; ldc k; call line; stelem` per
+  element. It keeps the array on the evaluation stack across the whole initializer, so ilBoundaryOffsets has no
+  boundary between the four calls: [0, 36, 84, …]. All four Tier0 frames report IL 36 (native 213 / 252 / 294 / 336).
+  The region [36, 84) holds four calls of `line()` (44 / 52 / 60 / 68), so regionSettledCallSite returns −1, as
+  designed, and each element keeps the statement's first line.
+  - Before #54, an InlineArray element ref was stored with `stind` and the stack was empty after each element. Then
+    the boundaries were [0, 36, 44, 58, 72, 86, 100, …], the frames reported 44 / 58 / 72 / 86, and the settle named
+    52 / 66 / 80 / 94, Go's lines.
+  - With tiering off, both lowerings report IL 36 for all four frames.
+  - The only datum that differs between the frames is the native offset. The tier-0 map has no entry inside
+    [36, 84), by the same stack-empty rule, and choosing by native order would break ambiguity by order. So no
+    resolver fix exists under the no-guess rule.
+- **TestLineNumber, measured after the scout.** The same one-axis A/B: master's emission, golib's builtin.cs and
+  SliceLiteral.cs at 2334e8949c against master, two readings per config, no spread.
+
+  | Config | Before #54 | At #54 |
+  |:--|:--|:--|
+  | tiered default | 12 failing; every sliceLit reads Go's line | 11 failing; sliceLit[1..3] read sliceLit[0]'s line (firstLine+24) |
+  | TC0 | 17 failing | the disclosed 12 |
+
+  At the tiered default #54 also takes compLit[0].lineA, compLit[0].lineB, compLit[1].lineA and compLit[2].lineB from
+  wrong to right. So the Tier0 cost is sliceLit[1..3] only.
+- **The disclosure**, beside #55's entry in manual-conversions.md (the stack-held-local entry), with the frames and the
+  measurement in its HTML comment:
+  - the class: newarr/dup/stelem keeps the array on the stack, so there is one region per initializer;
+  - the configuration: Tier0 only;
+  - the rows: the `GO2CS_CALLER_LINE_ALL_SHAPES` pkgSlice row and TestLineNumber's tiered-default sliceLit[1..3].
+- **Post-hop, R's:** scout a per-element spill lowering that keeps #54's TC0 gain.
+
+— H (2026-10-31)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
