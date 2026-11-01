@@ -1,0 +1,17 @@
+arm	mode	N	loaded	unloaded	spinner_last	marked_runs
+r0-jit-pad-n8	load	100	100	0	16:32:08	58:loaded
+r0-jit-pad-n32	load	100	100	0	16:41:37	
+r0-jit-pad-n32-ext	load	300	111	189	16:51:39	1:loaded,108:loaded
+r0-jit-pad-n8	loadhi	100	45	55	17:03:00	9:loaded,23:loaded
+r0-aot-pad-n8	load	50	50	0	17:04:20	
+r0-aot-pad-n8-ext	load	350	350	0	17:09:34	
+r0-aot-pad-n32	load	50	50	0	17:12:46	
+r0-aot-pad-n32-ext	load	350	169	181	17:22:47	
+r0-aot-pad-n8	loadhi	50	50	0	17:31:29	
+r0-aot-pad-n8-ext	loadhi	350	71	279	17:41:31	
+r0-jit-rec-n8	load	100	100	0	17:45:41	
+r0-jit-rec-n32	load	100	99	1	17:55:42	59:loaded
+r0-jit-rec-n8	loadhi	100	42	58	18:05:43	2:loaded,7:loaded,31:loaded
+r0-aot-rec-n8	load	50	50	0	18:07:20	
+r0-aot-rec-n32	load	50	50	0	18:10:43	14:loaded,30:loaded,40:loaded
+r0-aot-rec-n8	loadhi	50	50	0	18:19:28	2:loaded,3:loaded,8:loaded,10:loaded,11:loaded,15:loaded,17:loaded,18:loaded,23:loaded,25:loaded,26:loaded,27:loaded,30:loaded,31:loaded,32:loaded,33:loaded,39:loaded,40:loaded,47:loaded,48:loaded

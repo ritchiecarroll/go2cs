@@ -16,3 +16,30 @@
   - WHEA 0 from 16:08 to 18:22 (2026-10-31 local); the last WHEA event was 2026-10-15.
   - One test-process sample in 2,746 read mask 0xFFFFFF (pid 25260 at 17:41:51, during the AOT `pad` loadhi extension). Every other readable sample of the test processes and spinners read 0xF. The 0x0 rows are processes that had exited by the time they were read.
 - Added control, outside the brief: rows `r0ctl-go-rec-*` run the runner's own Go binary of `rec` under loadhi n8 and load n32 (50 runs each). Go itself printed "recovered" in 1 of 50 under loadhi.
+
+## Correction, 2026-10-31: the loaded arms' tails ran without load
+
+The spinner runs a fixed 600 s (`spin.exe N 600`, harness/race2.sh), and six loaded arms outlasted it, so their last
+runs had no load. runs.tsv, tally.tsv and the text above are unedited; this block corrects what they measured.
+
+How it was counted (harness/r0-tail-check.py, output in r0-tail-check.tsv):
+- The spinner's last live moment in an arm is its last affinity.tsv sample (2 s cadence) inside the arm's window from
+  run.txt.
+- A run is LOADED if its stdout file was last written at or before that sample plus 2 s.
+
+Loaded denominators, where they differ from N:
+
+| Arm | N | Loaded | Marked runs, all loaded |
+|:--|--:|--:|:--|
+| JIT `pad` load n32 (with `-ext`) | 400 | 211 | exit 0: 2 |
+| JIT `pad` loadhi n8 | 100 | 45 | exit 0: 2 |
+| AOT `pad` load n32 (with `-ext`) | 400 | 219 | exit 0: none |
+| AOT `pad` loadhi n8 (with `-ext`) | 400 | 121 | exit 0: none |
+| JIT `rec` load n32 | 100 | 99 | "recovered": 1 |
+| JIT `rec` loadhi n8 | 100 | 42 | "recovered": 3 |
+
+Every other R0 arm was loaded for all of its runs. The two `r0ctl-go-rec-*` controls ran outside the sampler's window, but
+lasted 93 s and 205 s from first run to last, inside one spinner's 600 s. Every exit-0 run of `pad`
+and every "recovered" run of `rec` happened while the spinner was alive, so each reproduction stands. What changes is
+the loaded N behind the zeros: AOT `pad` is 0/219 at n32 and 0/121 at loadhi (not 0/400), and JIT `pad` at loadhi is
+2/45 (not 2/100). From R1 on, the spinner outlasts each arm and every run's row records whether it was alive.
