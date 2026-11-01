@@ -48,7 +48,7 @@ partial struct KeyValue {
 //     and then by concrete value as described in the previous rules.
 public static SortedMap Sort(reflectꓸValue mapValue) {
     if (mapValue.Type().Kind() != reflect.Map) {
-        return default!;
+        return default;
     }
     // Note: this code is arranged to not panic even in the presence
     // of a concurrent map update. The runtime is responsible for
@@ -72,20 +72,20 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
     if (!AreEqual(aType, bType)) {
         return -1; // No good answer possible, but don't return 0: they're not equal.
     }
-    var exprᴛ1 = aVal.Kind();
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+    switch (aVal.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return cmp.Compare(aVal.Int(), bVal.Int());
     }
-    if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return cmp.Compare(aVal.Uint(), bVal.Uint());
     }
-    if (exprᴛ1 == reflect.ΔString) {
+    case var ᴛ when ᴛ == reflect.ΔString: {
         return cmp.Compare(aVal.String(), bVal.String());
     }
-    if (exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64) {
+    case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
         return cmp.Compare(aVal.Float(), bVal.Float());
     }
-    if (exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
+    case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
         var (a, b) = (aVal.Complex(), bVal.Complex());
         {
             nint c = cmp.Compare(real(a), real(b)); if (c != 0) {
@@ -94,7 +94,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return cmp.Compare(imag(a), imag(b));
     }
-    if (exprᴛ1 == reflect.ΔBool) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
         var (a, b) = (aVal.Bool(), bVal.Bool());
         switch (ᐧ) {
         case {} when a == b: {
@@ -106,11 +106,12 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         default: {
             return -1;
         }}
+        break;
     }
-    else if (exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔUnsafePointer) {
+    case var ᴛ when ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔUnsafePointer: {
         return cmp.Compare(aVal.Pointer(), bVal.Pointer());
     }
-    else if (exprᴛ1 == reflect.Chan) {
+    case var ᴛ when ᴛ == reflect.Chan: {
         {
             var (c, ok) = nilCompare(aVal, bVal); if (ok) {
                 return c;
@@ -118,7 +119,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return cmp.Compare(aVal.Pointer(), bVal.Pointer());
     }
-    else if (exprᴛ1 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         for (nint i = 0; i < aVal.NumField(); i++) {
             {
                 nint c = compare(aVal.Field(i), bVal.Field(i)); if (c != 0) {
@@ -128,7 +129,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return 0;
     }
-    else if (exprᴛ1 == reflect.Array) {
+    case var ᴛ when ᴛ == reflect.Array: {
         for (nint i = 0; i < aVal.Len(); i++) {
             {
                 nint c = compare(aVal.Index(i), bVal.Index(i)); if (c != 0) {
@@ -138,7 +139,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return 0;
     }
-    else if (exprᴛ1 == reflect.ΔInterface) {
+    case var ᴛ when ᴛ == reflect.ΔInterface: {
         {
             var (cΔ1, ok) = nilCompare(aVal, bVal); if (ok) {
                 return cΔ1;
@@ -150,10 +151,11 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return compare(aVal.Elem(), bVal.Elem());
     }
-    else { /* default: */
+    default: {
         // Certain types cannot appear as keys (maps, funcs, slices), but be explicit.
         throw panic("bad type in compare: " + aType.String());
-    }
+        break;
+    }}
 }
 
 // nilCompare checks whether either value is nil. If not, the boolean is false.

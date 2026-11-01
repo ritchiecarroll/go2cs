@@ -9,7 +9,7 @@ partial class fiat_package {
 // Invert sets e = 1/x, and returns e.
 //
 // If x == 0, Invert returns e = 0.
-public static ж<P224Element> Invert(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡx) {
+public static ж<P224Element> Invert(this ж<P224Element> Ꮡe, ж<P224Element> x) {
     // Inversion is implemented as exponentiation with exponent p − 2.
     // The sequence of 11 multiplications and 223 squarings is derived from the
     // following addition chain generated with github.com/mmcloughlin/addchain v0.4.0.
@@ -35,10 +35,10 @@ public static ж<P224Element> Invert(this ж<P224Element> Ꮡe, ж<P224Element> 
     ж<P224Element> t1 = @new<P224Element>();
     ж<P224Element> t2 = @new<P224Element>();
 
-    z.Square(Ꮡx);
-    t0.Mul(Ꮡx, z);
+    z.Square(x);
+    t0.Mul(x, z);
     z.Square(t0);
-    z.Mul(Ꮡx, z);
+    z.Mul(x, z);
     t1.Square(z);
     for (nint s = 1; s < 3; s++) {
         t1.Square(t1);

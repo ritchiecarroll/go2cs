@@ -61,23 +61,23 @@ partial struct Int {
 }
 
 public static int64 Value(this ж<Int> Ꮡv) {
-    return Ꮡv.of(Int.Ꮡi).Load();
+    return Ꮡv.Ꮡi.Load();
 }
 
 public static @string String(this ж<Int> Ꮡv) {
-    return (@string)Ꮡv.appendJSON(default!);
+    return (@string)Ꮡv.appendJSON(default);
 }
 
 internal static slice<byte> appendJSON(this ж<Int> Ꮡv, slice<byte> b) {
-    return strconv.AppendInt(b, Ꮡv.of(Int.Ꮡi).Load(), 10);
+    return strconv.AppendInt(b, Ꮡv.Ꮡi.Load(), 10);
 }
 
 public static void Add(this ж<Int> Ꮡv, int64 delta) {
-    Ꮡv.of(Int.Ꮡi).Add(delta);
+    Ꮡv.Ꮡi.Add(delta);
 }
 
 public static void Set(this ж<Int> Ꮡv, int64 value) {
-    Ꮡv.of(Int.Ꮡi).Store(value);
+    Ꮡv.Ꮡi.Store(value);
 }
 
 // Float is a 64-bit float variable that satisfies the [Var] interface.
@@ -86,25 +86,25 @@ partial struct Float {
 }
 
 public static float64 Value(this ж<Float> Ꮡv) {
-    return Δmath.Float64frombits(Ꮡv.of(Float.Ꮡf).Load());
+    return Δmath.Float64frombits(Ꮡv.Ꮡf.Load());
 }
 
 public static @string String(this ж<Float> Ꮡv) {
-    return (@string)Ꮡv.appendJSON(default!);
+    return (@string)Ꮡv.appendJSON(default);
 }
 
 internal static slice<byte> appendJSON(this ж<Float> Ꮡv, slice<byte> b) {
-    return strconv.AppendFloat(b, Δmath.Float64frombits(Ꮡv.of(Float.Ꮡf).Load()), (rune)'g', -1, 64);
+    return strconv.AppendFloat(b, Δmath.Float64frombits(Ꮡv.Ꮡf.Load()), (byte)'g', -1, 64);
 }
 
 // Add adds delta to v.
 public static void Add(this ж<Float> Ꮡv, float64 delta) {
-    while (ᐧ) {
-        var cur = Ꮡv.of(Float.Ꮡf).Load();
+    for (;;) {
+        var cur = Ꮡv.Ꮡf.Load();
         var curVal = Δmath.Float64frombits(cur);
         var nxtVal = curVal + delta;
         var nxt = Δmath.Float64bits(nxtVal);
-        if (Ꮡv.of(Float.Ꮡf).CompareAndSwap(cur, nxt)) {
+        if (Ꮡv.Ꮡf.CompareAndSwap(cur, nxt)) {
             return;
         }
     }
@@ -112,7 +112,7 @@ public static void Add(this ж<Float> Ꮡv, float64 delta) {
 
 // Set sets v to value.
 public static void Set(this ж<Float> Ꮡv, float64 value) {
-    Ꮡv.of(Float.Ꮡf).Store(Δmath.Float64bits(value));
+    Ꮡv.Ꮡf.Store(Δmath.Float64bits(value));
 }
 
 // Map is a string-to-Var map variable that satisfies the [Var] interface.
@@ -129,7 +129,7 @@ partial struct KeyValue {
 }
 
 public static @string String(this ж<Map> Ꮡv) {
-    return (@string)Ꮡv.appendJSON(default!);
+    return (@string)Ꮡv.appendJSON(default);
 }
 
 internal static slice<byte> appendJSON(this ж<Map> Ꮡv, slice<byte> b) {
@@ -137,26 +137,26 @@ internal static slice<byte> appendJSON(this ж<Map> Ꮡv, slice<byte> b) {
 }
 
 internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b, bool expand) {
-    var afterCommaDelim = (byte)(rune)' ';
+    var afterCommaDelim = (byte)' ';
     var mayAppendNewline = (slice<byte> bΔ1) => bΔ1;
     if (expand) {
-        afterCommaDelim = (rune)'\n';
-        mayAppendNewline = (slice<byte> bΔ2) => append(bΔ2, (byte)((rune)'\n'));
+        afterCommaDelim = (byte)'\n';
+        mayAppendNewline = (slice<byte> bΔ2) => append(bΔ2, (byte)'\n');
     }
 
-    b = append(b, (byte)((rune)'{'));
+    b = append(b, (byte)'{');
     b = mayAppendNewline(b);
     var first = true;
     Ꮡv.Do((KeyValue kv) => {
         if (!first) {
-            b = append(b, (byte)((rune)','), afterCommaDelim);
+            b = append(b, (byte)',', afterCommaDelim);
         }
         first = false;
         b = appendJSONQuote(b, kv.Key);
-        b = append(b, (byte)((rune)':'), (byte)((rune)' '));
+        b = append(b, (byte)':', (byte)' ');
         switch (kv.Value.type()) {
         case null: {
-            b = append(b, ((@string)"null"u8).ꓸꓸꓸ);
+            b = append(b, ((@string)"null").ꓸꓸꓸ);
             break;
         }
         case {} ΔvΔ1 when ΔvΔ1._<jsonVar>(out var vΔ1): {
@@ -170,7 +170,7 @@ internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b
         }}
     });
     b = mayAppendNewline(b);
-    b = append(b, (byte)((rune)'}'));
+    b = append(b, (byte)'}');
     b = mayAppendNewline(b);
     return b;
 }
@@ -182,14 +182,14 @@ public static ж<Map> Init(this ж<Map> Ꮡv) {
     try {
         ref var v = ref Ꮡv.DerefOrNull();
 
-        Ꮡv.of(Map.ᏑkeysMu).Lock();
+        Ꮡv.ᏑkeysMu.Lock();
         ᒐd1 = true;
         v.keys = v.keys[..0];
-        Ꮡv.of(Map.Ꮡm).Clear();
+        Ꮡv.Ꮡm.Clear();
         return Ꮡv;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡv.of(Map.ᏑkeysMu).Unlock(); ᒐ.Run(); }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
+    finally { if (ᒐd1) Ꮡv.ᏑkeysMu.Unlock(); ᒐ.Run(); }
 }
 
 // addKey updates the sorted list of keys in v.keys.
@@ -199,7 +199,7 @@ internal static void addKey(this ж<Map> Ꮡv, @string key) {
     try {
         ref var v = ref Ꮡv.DerefOrNull();
 
-        Ꮡv.of(Map.ᏑkeysMu).Lock();
+        Ꮡv.ᏑkeysMu.Lock();
         ᒐd1 = true;
         // Using insertion sort to place key into the already-sorted v.keys.
         var (i, found) = slices.BinarySearch(v.keys, key);
@@ -209,11 +209,11 @@ internal static void addKey(this ж<Map> Ꮡv, @string key) {
         v.keys = slices.Insert(v.keys, i, key);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd1) Ꮡv.of(Map.ᏑkeysMu).Unlock(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡv.ᏑkeysMu.Unlock(); ᒐ.Run(); }
 }
 
 public static Var Get(this ж<Map> Ꮡv, @string key) {
-    var (i, _) = Ꮡv.of(Map.Ꮡm).Load(key);
+    var (i, _) = Ꮡv.Ꮡm.Load(key);
     var (av, _) = i._<Var>(ᐧ);
     return av;
 }
@@ -223,9 +223,9 @@ public static void Set(this ж<Map> Ꮡv, @string key, Var av) {
     // before LoadOrStore: LoadOrStore causes the key interface to escape even on
     // the Load path.
     {
-        var (_, ok) = Ꮡv.of(Map.Ꮡm).Load(key); if (!ok) {
+        var (_, ok) = Ꮡv.Ꮡm.Load(key); if (!ok) {
             {
-                var (_, dup) = Ꮡv.of(Map.Ꮡm).LoadOrStore(key, av); if (!dup) {
+                var (_, dup) = Ꮡv.Ꮡm.LoadOrStore(key, av); if (!dup) {
                     Ꮡv.addKey(key);
                     return;
                 }
@@ -233,15 +233,15 @@ public static void Set(this ж<Map> Ꮡv, @string key, Var av) {
         }
     }
 
-    Ꮡv.of(Map.Ꮡm).Store(key, av);
+    Ꮡv.Ꮡm.Store(key, av);
 }
 
 // Add adds delta to the *[Int] value stored under the given map key.
 public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) {
-    var (i, ok) = Ꮡv.of(Map.Ꮡm).Load(key);
+    var (i, ok) = Ꮡv.Ꮡm.Load(key);
     if (!ok) {
-        bool dup = default!;
-        (i, dup) = Ꮡv.of(Map.Ꮡm).LoadOrStore(key, @new<Int>());
+        bool dup = default;
+        (i, dup) = Ꮡv.Ꮡm.LoadOrStore(key, @new<Int>());
         if (!dup) {
             Ꮡv.addKey(key);
         }
@@ -257,10 +257,10 @@ public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) {
 
 // AddFloat adds delta to the *[Float] value stored under the given map key.
 public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) {
-    var (i, ok) = Ꮡv.of(Map.Ꮡm).Load(key);
+    var (i, ok) = Ꮡv.Ꮡm.Load(key);
     if (!ok) {
-        bool dup = default!;
-        (i, dup) = Ꮡv.of(Map.Ꮡm).LoadOrStore(key, @new<Float>());
+        bool dup = default;
+        (i, dup) = Ꮡv.Ꮡm.LoadOrStore(key, @new<Float>());
         if (!dup) {
             Ꮡv.addKey(key);
         }
@@ -281,16 +281,16 @@ public static void Delete(this ж<Map> Ꮡv, @string key) {
     try {
         ref var v = ref Ꮡv.DerefOrNull();
 
-        Ꮡv.of(Map.ᏑkeysMu).Lock();
+        Ꮡv.ᏑkeysMu.Lock();
         ᒐd1 = true;
         var (i, found) = slices.BinarySearch(v.keys, key);
         if (found) {
             v.keys = slices.Delete<slice<@string>, @string>(v.keys, i, i + 1);
-            Ꮡv.of(Map.Ꮡm).Delete(key);
+            Ꮡv.Ꮡm.Delete(key);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd1) Ꮡv.of(Map.ᏑkeysMu).Unlock(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡv.ᏑkeysMu.Unlock(); ᒐ.Run(); }
 }
 
 // Do calls f for each entry in the map.
@@ -302,16 +302,16 @@ public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) {
     try {
         ref var v = ref Ꮡv.DerefOrNull();
 
-        Ꮡv.of(Map.ᏑkeysMu).RLock();
+        Ꮡv.ᏑkeysMu.RLock();
         ᒐd1 = true;
         foreach (var (_, k) in v.keys) {
-            var (i, _) = Ꮡv.of(Map.Ꮡm).Load(k);
+            var (i, _) = Ꮡv.Ꮡm.Load(k);
             var (val, _) = i._<Var>(ᐧ);
             f(new KeyValue(k, val));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd1) Ꮡv.of(Map.ᏑkeysMu).RUnlock(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡv.ᏑkeysMu.RUnlock(); ᒐ.Run(); }
 }
 
 // String is a string variable, and satisfies the [Var] interface.
@@ -320,14 +320,14 @@ partial struct ΔString {
 }
 
 public static @string Value(this ж<ΔString> Ꮡv) {
-    var (p, _) = Ꮡv.of(expvar_package.ΔString.Ꮡs).Load()._<@string>(ᐧ);
+    var (p, _) = Ꮡv.Ꮡs.Load()._<@string>(ᐧ);
     return p;
 }
 
 // String implements the [Var] interface. To get the unquoted string
 // use [String.Value].
 public static @string String(this ж<ΔString> Ꮡv) {
-    return (@string)Ꮡv.appendJSON(default!);
+    return (@string)Ꮡv.appendJSON(default);
 }
 
 internal static slice<byte> appendJSON(this ж<ΔString> Ꮡv, slice<byte> b) {
@@ -335,7 +335,7 @@ internal static slice<byte> appendJSON(this ж<ΔString> Ꮡv, slice<byte> b) {
 }
 
 public static void Set(this ж<ΔString> Ꮡv, @string value) {
-    Ꮡv.of(expvar_package.ΔString.Ꮡs).Store(value);
+    Ꮡv.Ꮡs.Store(value);
 }
 
 // Func implements [Var] by calling the function
@@ -365,12 +365,12 @@ public static void Publish(@string name, Var v) {
     GoFrame ᒐ = default;
     try {
         {
-            var (_, dup) = Ꮡvars.of(Map.Ꮡm).LoadOrStore(name, v); if (dup) {
+            var (_, dup) = Ꮡvars.Ꮡm.LoadOrStore(name, v); if (dup) {
                 Δlog.Panicln(reuseOfExportedVarNameˢ, name);
             }
         }
-        Ꮡvars.of(Map.ᏑkeysMu).Lock();
-        defer(Ꮡvars.of(Map.ᏑkeysMu).Unlock, ref ᒐ);
+        Ꮡvars.ᏑkeysMu.Lock();
+        defer(Ꮡvars.ᏑkeysMu.Unlock, ref ᒐ);
         vars.keys = append(vars.keys, name);
         slices.Sort<slice<@string>, @string>(vars.keys);
     }
@@ -417,12 +417,14 @@ public static void Do(Action<KeyValue> f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string contentTypeˢ = "Content-Type"u8;
-internal static readonly @string applicationJsonCharsetˢ = "application/json; charset=utf-8"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
+internal static ref readonly @string applicationJsonCharsetˢ => ref applicationJsonCharsetˢᵇ;
+private static readonly @string applicationJsonCharsetˢᵇ = "application/json; charset=utf-8"u8;
 
-internal static void expvarHandler(http.ResponseWriter w, ж<http.Request> Ꮡr) {
+internal static void expvarHandler(http.ResponseWriter w, ж<http.Request> r) {
     w.Header().Set(contentTypeˢ, applicationJsonCharsetˢ);
-    w.Write(Ꮡvars.appendJSONMayExpand(default!, true));
+    w.Write(Ꮡvars.appendJSONMayExpand(default, true));
 }
 
 // Handler returns the expvar HTTP Handler.
@@ -443,44 +445,45 @@ internal static any memstats() {
 }
 
 [GoInit] internal static void init() {
-    if (godebug.New("httpmuxgo121"u8).Value() == "1"u8){
-        http.HandleFunc("/debug/vars"u8, expvarHandler);
+    if (godebug.New("httpmuxgo121").Value() == "1"u8) {
+        http.HandleFunc("/debug/vars", expvarHandler);
     } else {
-        http.HandleFunc("GET /debug/vars"u8, expvarHandler);
+        http.HandleFunc("GET /debug/vars", expvarHandler);
     }
-    Publish("cmdline"u8, new FuncᴠVar(new Func(cmdline)));
-    Publish("memstats"u8, new FuncᴠVar(new Func(memstats)));
+    Publish("cmdline", new FuncᴠVar(new Func(cmdline)));
+    Publish("memstats", new FuncᴠVar(new Func(memstats)));
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string hexᶜ = "0123456789abcdef"u8;
+internal static ref readonly @string hexᶜ => ref hexᶜᵇ;
+private static readonly @string hexᶜᵇ = "0123456789abcdef"u8;
 
 // TODO: Use json.appendString instead.
 internal static slice<byte> appendJSONQuote(slice<byte> b, @string s) {
     @string hex = hexᶜ;
-    b = append(b, (byte)((rune)'"'));
+    b = append(b, (byte)'"');
     foreach (var (_, r) in s) {
         switch (ᐧ) {
-        case {} when r < (rune)' ' || r == (rune)'\\' || r == (rune)'"' || r == (rune)'<' || r == (rune)'>' || r == (rune)'&' || r == (rune)'\u2028' || r == (rune)'\u2029': {
+        case {} when r < ' ' || r == '\\' || r == '"' || r == '<' || r == '>' || r == '&' || r == '\u2028' || r == '\u2029': {
             switch (r) {
-            case (rune)'\\' or (rune)'"': {
-                b = append(b, (byte)((rune)'\\'), (byte)r);
+            case '\\' or '"': {
+                b = append(b, (byte)'\\', (byte)r);
                 break;
             }
-            case (rune)'\n': {
-                b = append(b, (byte)((rune)'\\'), (byte)((rune)'n'));
+            case '\n': {
+                b = append(b, (byte)'\\', (byte)'n');
                 break;
             }
-            case (rune)'\r': {
-                b = append(b, (byte)((rune)'\\'), (byte)((rune)'r'));
+            case '\r': {
+                b = append(b, (byte)'\\', (byte)'r');
                 break;
             }
-            case (rune)'\t': {
-                b = append(b, (byte)((rune)'\\'), (byte)((rune)'t'));
+            case '\t': {
+                b = append(b, (byte)'\\', (byte)'t');
                 break;
             }
             default: {
-                b = append(b, (byte)((rune)'\\'), (byte)((rune)'u'), hex[((r >> 12) & 0xf)], hex[((r >> 8) & 0xf)], hex[((r >> 4) & 0xf)], hex[((r >> 0) & 0xf)]);
+                b = append(b, (byte)'\\', (byte)'u', hex[((r >> 12) & 0xf)], hex[((r >> 8) & 0xf)], hex[((r >> 4) & 0xf)], hex[((r >> 0) & 0xf)]);
                 break;
             }}
             break;
@@ -494,7 +497,7 @@ internal static slice<byte> appendJSONQuote(slice<byte> b, @string s) {
             break;
         }}
     }
-    b = append(b, (byte)((rune)'"'));
+    b = append(b, (byte)'"');
     return b;
 }
 

@@ -48,7 +48,8 @@ internal static void vgetrandomInit() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getrandomStatesˢ = "getrandom states"u8;
+internal static ref readonly @string getrandomStatesˢ => ref getrandomStatesˢᵇ;
+private static readonly @string getrandomStatesˢᵇ = "getrandom states"u8;
 
 internal static uintptr vgetrandomGetState() {
     @lock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
@@ -64,7 +65,7 @@ internal static uintptr vgetrandomGetState() {
         }
         setVMAName(Δp, allocSize, getrandomStatesˢ);
         var newBlock = (uintptr)Δp;
-        if (vgetrandomAlloc.states == default!) {
+        if (vgetrandomAlloc.states == nil) {
             vgetrandomAlloc.states = new slice<uintptr>(0, (nint)(num));
         }
         for (var i = (uintptr)0; i < num; i++) {

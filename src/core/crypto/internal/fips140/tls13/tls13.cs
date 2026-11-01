@@ -38,7 +38,7 @@ public static slice<byte> ExpandLabel<H>(Func<H> hashΔ1, slice<byte> secret, @s
     var hkdfLabel = new slice<byte>(0, 2 + 1 + len("tls13 ") + len(label) + 1 + len(context));
     hkdfLabel = byteorder.BEAppendUint16(hkdfLabel, (uint16)length);
     hkdfLabel = append(hkdfLabelᴷ, hkdfLabel, (byte)(len("tls13 ") + len(label)));
-    hkdfLabel = append(hkdfLabel, ((@string)"tls13 "u8).ꓸꓸꓸ);
+    hkdfLabel = append(hkdfLabel, ((@string)"tls13 ").ꓸꓸꓸ);
     hkdfLabel = append(hkdfLabel, label.ꓸꓸꓸ);
     hkdfLabel = append(hkdfLabel, (byte)len(context));
     hkdfLabel = appendꓸꓸꓸ(hkdfLabel, context);
@@ -48,7 +48,7 @@ public static slice<byte> ExpandLabel<H>(Func<H> hashΔ1, slice<byte> secret, @s
 internal static slice<byte> extract<H>(Func<H> hashΔ1, slice<byte> newSecret, slice<byte> currentSecret)
     where H : hash.Hash
 {
-    if (newSecret == default!) {
+    if (newSecret == nil) {
         newSecret = new slice<byte>(hashΔ1().Size());
     }
     return hkdf.Extract(hashΔ1, newSecret, currentSecret);
@@ -57,21 +57,30 @@ internal static slice<byte> extract<H>(Func<H> hashΔ1, slice<byte> newSecret, s
 internal static slice<byte> deriveSecret<H>(Func<H> hashΔ1, slice<byte> secret, @string label, hash.Hash transcript)
     where H : hash.Hash
 {
-    if (transcript == default!) {
+    if (transcript == nil) {
         transcript = hashΔ1();
     }
-    return ExpandLabel(hashΔ1, secret, label, transcript.Sum(default!), transcript.Size());
+    return ExpandLabel(hashΔ1, secret, label, transcript.Sum(default), transcript.Size());
 }
 
-internal static readonly @string resumptionBinderLabel = "res binder"u8;
-internal static readonly @string clientEarlyTrafficLabel = "c e traffic"u8;
-internal static readonly @string clientHandshakeTrafficLabel = "c hs traffic"u8;
-internal static readonly @string serverHandshakeTrafficLabel = "s hs traffic"u8;
-internal static readonly @string clientApplicationTrafficLabel = "c ap traffic"u8;
-internal static readonly @string serverApplicationTrafficLabel = "s ap traffic"u8;
-internal static readonly @string earlyExporterLabel = "e exp master"u8;
-internal static readonly @string exporterLabel = "exp master"u8;
-internal static readonly @string resumptionLabel = "res master"u8;
+internal static ref readonly @string resumptionBinderLabel => ref resumptionBinderLabelᵇ;
+private static readonly @string resumptionBinderLabelᵇ = "res binder"u8;
+internal static ref readonly @string clientEarlyTrafficLabel => ref clientEarlyTrafficLabelᵇ;
+private static readonly @string clientEarlyTrafficLabelᵇ = "c e traffic"u8;
+internal static ref readonly @string clientHandshakeTrafficLabel => ref clientHandshakeTrafficLabelᵇ;
+private static readonly @string clientHandshakeTrafficLabelᵇ = "c hs traffic"u8;
+internal static ref readonly @string serverHandshakeTrafficLabel => ref serverHandshakeTrafficLabelᵇ;
+private static readonly @string serverHandshakeTrafficLabelᵇ = "s hs traffic"u8;
+internal static ref readonly @string clientApplicationTrafficLabel => ref clientApplicationTrafficLabelᵇ;
+private static readonly @string clientApplicationTrafficLabelᵇ = "c ap traffic"u8;
+internal static ref readonly @string serverApplicationTrafficLabel => ref serverApplicationTrafficLabelᵇ;
+private static readonly @string serverApplicationTrafficLabelᵇ = "s ap traffic"u8;
+internal static ref readonly @string earlyExporterLabel => ref earlyExporterLabelᵇ;
+private static readonly @string earlyExporterLabelᵇ = "e exp master"u8;
+internal static ref readonly @string exporterLabel => ref exporterLabelᵇ;
+private static readonly @string exporterLabelᵇ = "exp master"u8;
+internal static ref readonly @string resumptionLabel => ref resumptionLabelᵇ;
+private static readonly @string resumptionLabelᵇ = "res master"u8;
 
 partial struct EarlySecret {
     internal slice<byte> secret;
@@ -82,13 +91,13 @@ public static ж<EarlySecret> NewEarlySecret<H>(Func<H> h, slice<byte> psk)
     where H : hash.Hash
 {
     return Ꮡ(new EarlySecret(
-        secret: extract(h, psk, default!),
+        secret: extract(h, psk, default),
         hash: () => h()
     ));
 }
 
 public static slice<byte> ResumptionBinderKey(this ref EarlySecret s) {
-    return deriveSecret(s.hash, s.secret, resumptionBinderLabel, default!);
+    return deriveSecret(s.hash, s.secret, resumptionBinderLabel, default);
 }
 
 // ClientEarlyTrafficSecret derives the client_early_traffic_secret from the
@@ -103,10 +112,11 @@ partial struct ΔHandshakeSecret {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string derivedˢ = "derived"u8;
+private static ref readonly @string derivedˢ => ref derivedˢᵇ;
+private static readonly @string derivedˢᵇ = "derived"u8;
 
 public static ж<ΔHandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<byte> sharedSecret) {
-    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default!);
+    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default);
     return Ꮡ(new ΔHandshakeSecret(
         secret: extract(s.hash, sharedSecret, derived),
         hash: s.hash
@@ -131,9 +141,9 @@ partial struct ΔMasterSecret {
 }
 
 public static ж<ΔMasterSecret> MasterSecret(this ref ΔHandshakeSecret s) {
-    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default!);
+    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default);
     return Ꮡ(new ΔMasterSecret(
-        secret: extract(s.hash, default!, derived),
+        secret: extract(s.hash, default, derived),
         hash: s.hash
     ));
 }
@@ -180,13 +190,14 @@ public static ж<ΔExporterMasterSecret> EarlyExporterMasterSecret(this ref Earl
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string exporterˢ = "exporter"u8;
+private static ref readonly @string exporterˢ => ref exporterˢᵇ;
+private static readonly @string exporterˢᵇ = "exporter"u8;
 
 public static slice<byte> Exporter(this ref ΔExporterMasterSecret s, @string label, slice<byte> context, nint length) {
-    var secret = deriveSecret(s.hash, s.secret, label, default!);
+    var secret = deriveSecret(s.hash, s.secret, label, default);
     var h = s.hash();
     h.Write(context);
-    return ExpandLabel(s.hash, secret, exporterˢ, h.Sum(default!), length);
+    return ExpandLabel(s.hash, secret, exporterˢ, h.Sum(default), length);
 }
 
 public static slice<byte> TestingOnlyExporterSecret(ж<ΔExporterMasterSecret> Ꮡs) {

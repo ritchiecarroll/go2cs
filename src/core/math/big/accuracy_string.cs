@@ -14,14 +14,15 @@ internal static void _ᴛ1() {
     _ = x[Above - 1];
 }
 
-internal static readonly @string _Accuracy_name = "BelowExactAbove"u8;
+internal static ref readonly @string _Accuracy_name => ref _Accuracy_nameᵇ;
+private static readonly @string _Accuracy_nameᵇ = "BelowExactAbove"u8;
 
 internal static array<uint8> _Accuracy_index = new uint8[]{0, 5, 10, 15}.array();
 
 public static @string String(this Accuracy i) {
     i -= (Accuracy)(-1);
     if (i < 0 || i >= ((Accuracy)(int8)(len(_Accuracy_index) - 1))) {
-        return "Accuracy("u8 + strconv.FormatInt((int64)(int8)(i + -1), 10) + ")"u8;
+        return "Accuracy("u8 + strconv.FormatInt((int64)(i + -1), 10) + ")"u8;
     }
     return _Accuracy_name.slice(_Accuracy_index[i], _Accuracy_index[i + 1]);
 }

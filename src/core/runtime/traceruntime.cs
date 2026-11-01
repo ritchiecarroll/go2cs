@@ -6,7 +6,7 @@ namespace go;
 
 using atomic = @internal.runtime.atomic_package;
 using tracev2 = @internal.trace.tracev2_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal.runtime;
 using @internal.trace;
 
@@ -25,12 +25,12 @@ internal static void reset(this ref gTraceState s) {
 
 // mTraceState is per-M state for the tracer.
 partial struct mTraceState {
-    internal atomic.Bool writing;                          // flag indicating that this M is writing to a trace buffer.
+    internal atomic.Bool writing;                                  // flag indicating that this M is writing to a trace buffer.
     internal array<array<ж<traceBuf>>> buf = new(2, () => new(2)); // Per-M traceBuf for writing. Indexed by trace.gen%2.
-    internal ж<m> link;                                // Snapshot of alllink or freelink.
-    internal uint32 reentered;                               // Whether we've reentered tracing from within tracing.
-    internal uintptr entryGen;                              // The generation value on first entry.
-    internal bool oldthrowsplit;                                 // gp.throwsplit upon calling traceLocker.writer. For debugging.
+    internal ж<m> link;                                            // Snapshot of alllink or freelink.
+    internal uint32 reentered;                                     // Whether we've reentered tracing from within tracing.
+    internal uintptr entryGen;                                     // The generation value on first entry.
+    internal bool oldthrowsplit;                                   // gp.throwsplit upon calling traceLocker.writer. For debugging.
 }
 
 // pTraceState is per-P state for the tracer.
@@ -102,23 +102,23 @@ internal static traceBlockReason traceBlockGCWeakToStrongWait => 15;
 internal static traceBlockReason traceBlockSynctest => 16;
 
 [GoLazy] partial class lazyᴛtraceBlockReasonStrings { internal static array<@string> traceBlockReasonStrings = new golib.SparseArray<@string>{
-    [traceBlockGeneric] = "unspecified"u8,
-    [traceBlockForever] = "forever"u8,
-    [traceBlockNet] = "network"u8,
-    [traceBlockSelect] = "select"u8,
-    [traceBlockCondWait] = "sync.(*Cond).Wait"u8,
-    [traceBlockSync] = "sync"u8,
-    [traceBlockChanSend] = "chan send"u8,
-    [traceBlockChanRecv] = "chan receive"u8,
-    [traceBlockGCMarkAssist] = "GC mark assist wait for work"u8,
-    [traceBlockGCSweep] = "GC background sweeper wait"u8,
-    [traceBlockSystemGoroutine] = "system goroutine wait"u8,
-    [traceBlockPreempted] = "preempted"u8,
-    [traceBlockDebugCall] = "wait for debug call"u8,
-    [traceBlockUntilGCEnds] = "wait until GC ends"u8,
-    [traceBlockSleep] = "sleep"u8,
-    [traceBlockGCWeakToStrongWait] = "GC weak to strong wait"u8,
-    [traceBlockSynctest] = "synctest"u8
+    [traceBlockGeneric] = "unspecified",
+    [traceBlockForever] = "forever",
+    [traceBlockNet] = "network",
+    [traceBlockSelect] = "select",
+    [traceBlockCondWait] = "sync.(*Cond).Wait",
+    [traceBlockSync] = "sync",
+    [traceBlockChanSend] = "chan send",
+    [traceBlockChanRecv] = "chan receive",
+    [traceBlockGCMarkAssist] = "GC mark assist wait for work",
+    [traceBlockGCSweep] = "GC background sweeper wait",
+    [traceBlockSystemGoroutine] = "system goroutine wait",
+    [traceBlockPreempted] = "preempted",
+    [traceBlockDebugCall] = "wait for debug call",
+    [traceBlockUntilGCEnds] = "wait until GC ends",
+    [traceBlockSleep] = "sleep",
+    [traceBlockGCWeakToStrongWait] = "GC weak to strong wait",
+    [traceBlockSynctest] = "synctest"
 }.array(); }
 
 // traceGoStopReason is an enumeration of reasons a goroutine might yield.
@@ -132,9 +132,9 @@ internal static traceGoStopReason traceGoStopGoSched => 1;
 internal static traceGoStopReason traceGoStopPreempted => 2;
 
 internal static array<@string> traceGoStopReasonStrings = new golib.SparseArray<@string>{
-    [traceGoStopGeneric] = "unspecified"u8,
-    [traceGoStopGoSched] = "runtime.Gosched"u8,
-    [traceGoStopPreempted] = "preempted"u8
+    [traceGoStopGeneric] = "unspecified",
+    [traceGoStopGoSched] = "runtime.Gosched",
+    [traceGoStopPreempted] = "preempted"
 }.array();
 
 // traceEnabled returns true if the trace is currently enabled.
@@ -179,7 +179,7 @@ internal const bool debugTraceReentrancy = false;
 //go:nosplit
 internal static traceLocker traceAcquire() {
     if (!traceEnabled()) {
-        return new traceLocker(nil);
+        return new traceLocker();
     }
     return traceAcquireEnabled();
 }
@@ -203,7 +203,7 @@ internal static traceLocker traceAcquireEnabled() {
     // Check if we're already tracing. It's safe to be reentrant in general,
     // because this function (and the invariants of traceLocker.writer) ensure
     // that it is.
-    if (mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Load()) {
+    if (mp.of(m.Ꮡtrace).Ꮡwriting.Load()) {
         mp.Value.trace.reentered++;
         return new traceLocker(mp, (~mp).trace.entryGen);
     }
@@ -214,7 +214,7 @@ internal static traceLocker traceAcquireEnabled() {
     // Note: The write flag is mutated here and also in traceCPUSample. If you update
     // usage of the write flag here, make sure to also look at what traceCPUSample is
     // doing.
-    mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(true);
+    mp.of(m.Ꮡtrace).Ꮡwriting.Store(true);
 
     // N.B. This load of gen appears redundant with the one in traceEnabled.
     // However, it's very important that the gen we use for writing to the trace
@@ -226,9 +226,9 @@ internal static traceLocker traceAcquireEnabled() {
     // what we did and bail.
     var gen = ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Load();
     if (gen == 0) {
-        mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
+        mp.of(m.Ꮡtrace).Ꮡwriting.Store(false);
         releasem(ref (mp).DerefOrNull());
-        return new traceLocker(nil);
+        return new traceLocker();
     }
     mp.Value.trace.entryGen = gen;
     return new traceLocker(mp, gen);
@@ -249,10 +249,10 @@ internal static bool ok(this traceLocker tl) {
 //
 //go:nosplit
 internal static void traceRelease(traceLocker tl) {
-    if ((~tl.mp).trace.reentered > 0){
+    if ((~tl.mp).trace.reentered > 0) {
         tl.mp.Value.trace.reentered--;
     } else {
-        tl.mp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
+        tl.mp.of(m.Ꮡtrace).Ꮡwriting.Store(false);
     }
     releasem(ref (tl.mp).DerefOrNull());
 }
@@ -286,7 +286,7 @@ internal static void ProcStart(this traceLocker tl) {
 }
 
 // ProcStop traces a ProcStop event.
-internal static void ProcStop(this traceLocker tl, ж<Δp> Ꮡpp) {
+internal static void ProcStop(this traceLocker tl, ж<Δp> pp) {
     // The only time a goroutine is allowed to have its Proc moved around
     // from under it is during a syscall.
     tl.eventWriter(tracev2.GoSyscall, tracev2.ProcRunning).@event(tracev2.EvProcStop);
@@ -340,7 +340,8 @@ internal static void STWDone(this traceLocker tl) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string doubleTraceGCSweepStartˢ = "double traceGCSweepStart"u8;
+internal static ref readonly @string doubleTraceGCSweepStartˢ => ref doubleTraceGCSweepStartˢᵇ;
+private static readonly @string doubleTraceGCSweepStartˢᵇ = "double traceGCSweepStart"u8;
 
 // GCSweepStart prepares to trace a sweep loop. This does not
 // emit any events until traceGCSweepSpan is called.
@@ -379,7 +380,8 @@ internal static void GCSweepSpan(this traceLocker tl, uintptr bytesSwept) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string missingTraceGCSweepStartˢ = "missing traceGCSweepStart"u8;
+internal static ref readonly @string missingTraceGCSweepStartˢ => ref missingTraceGCSweepStartˢᵇ;
+private static readonly @string missingTraceGCSweepStartˢᵇ = "missing traceGCSweepStart"u8;
 
 // GCSweepDone finishes tracing a sweep loop. If any memory was
 // swept (i.e. traceGCSweepSpan emitted an event) then this will emit
@@ -522,7 +524,7 @@ internal static void GoSysCall(this traceLocker tl) {
 internal static void GoSysExit(this traceLocker tl, bool lostP) {
     var ev = tracev2.EvGoSyscallEnd;
     var procStatus = tracev2.ProcSyscall; // Procs implicitly enter tracev2.ProcSyscall on GoSyscallBegin.
-    if (lostP){
+    if (lostP) {
         ev = tracev2.EvGoSyscallEndBlocked;
         procStatus = tracev2.ProcRunning; // If a G has a P when emitting this event, it reacquired a P and is indeed running.
     } else {
@@ -577,7 +579,7 @@ internal static void HeapGoal(this traceLocker tl) {
     var heapGoal = ᏑgcController.heapGoal();
     // The heapGoal calculations will result in strange numbers if the GC if off. See go.dev/issue/63864.
     // Check gcPercent before using the heapGoal in the trace.
-    if (heapGoal == ~(uint64)0 || ᏑgcController.of(gcControllerState.ᏑgcPercent).Load() < 0) {
+    if (heapGoal == ~(uint64)0 || ᏑgcController.ᏑgcPercent.Load() < 0) {
         // Heap-based triggering is disabled.
         heapGoal = 0;
     }
@@ -662,7 +664,7 @@ internal static void trace_userRegion(uint64 id, uint64 mode, @string name) {
         // Need to do this check because the caller won't have it.
         return;
     }
-    tracev2.EventType ev = default!;
+    tracev2.EventType ev = default;
     switch (mode) {
     case 0: {
         ev = tracev2.EvUserRegionBegin;
@@ -693,7 +695,8 @@ internal static void trace_userLog(uint64 id, @string category, @string message)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badUseOfTraceWritingˢ = "bad use of trace.writing"u8;
+internal static ref readonly @string badUseOfTraceWritingˢ => ref badUseOfTraceWritingˢᵇ;
+private static readonly @string badUseOfTraceWritingˢᵇ = "bad use of trace.writing"u8;
 
 // traceThreadDestroy is called when a thread is removed from
 // sched.freem.
@@ -701,7 +704,7 @@ internal static readonly @string badUseOfTraceWritingˢ = "bad use of trace.writ
 // mp must not be able to emit trace events anymore.
 //
 // sched.lock must be held to synchronize with traceAdvance.
-internal static void traceThreadDestroy(ж<m> Ꮡmp) {
+internal static void traceThreadDestroy(ж<m> mp) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
 
     // Flush all outstanding buffers to maintain the invariant
@@ -711,25 +714,25 @@ internal static void traceThreadDestroy(ж<m> Ꮡmp) {
     // Perform a traceAcquire/traceRelease on behalf of mp to
     // synchronize with the tracer trying to flush our buffer
     // as well.
-    if (debugTraceReentrancy && Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Load()) {
+    if (debugTraceReentrancy && mp.of(m.Ꮡtrace).Ꮡwriting.Load()) {
         @throw(badUseOfTraceWritingˢ);
     }
-    Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(true);
+    mp.of(m.Ꮡtrace).Ꮡwriting.Store(true);
     systemstack(() => {
         @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-        foreach (var i in range(Ꮡmp.Value.trace.buf)) {
-            foreach (var (exp, buf) in Ꮡmp.Value.trace.buf[i].ΔRangeSnapshot()) {
+        foreach (var i in range(mp.Value.trace.buf)) {
+            foreach (var (exp, buf) in mp.Value.trace.buf[i].ΔRangeSnapshot()) {
                 if (buf != nil) {
                     // N.B. traceBufFlush accepts a generation, but it
                     // really just cares about gen%2.
                     traceBufFlush(buf, (uintptr)i);
-                    Ꮡmp.Value.trace.buf[i][exp] = default!;
+                    mp.Value.trace.buf[i][exp] = default;
                 }
             }
         }
         unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
     });
-    Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
+    mp.of(m.Ꮡtrace).Ꮡwriting.Store(false);
 }
 
 } // end runtime_package

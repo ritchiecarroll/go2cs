@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +46,7 @@ using static go.@internal.runtime.cgroup_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,10 +56,10 @@ using static go.@internal.runtime.cgroup_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/cgroup/cgroup.go", "cgroup.cs", "ADFwlIKClJSCgqamgoKCpoKUppSCgpSUgoKmgoKmrgAVJKaUgoLckoKSgqYABxCCgqaClIKCpoKUgpSUpqaUyqbKlLiokoKClKaClIKmpu4AKEqUgoL+gpKCpqaCgoKUuIKClIKUlKaCgpSCpoKCgpSClIKCgpS4goKUgpSUgqaCgqamgraCtoLcgoKUgoK4gpSUAAkUyoKClIKCgpSClLimgoKClIKUAAUQggACHgAMApKCuJSCgoKCgu6CpoKCgoKmgqaClIKUpg==")]
-[assembly: go.GoPositionMap("internal/runtime/cgroup/cgroup_linux.go", "cgroup_linux.cs", "ABo+gpSCpKTogoKCAAMQwpSClIKCppSCgoK4poKCgrimyqSCgoK4psqkgryilIKCppSmgoKmtqSCugABEgAIAoKClIKmgqgAASQAEQKCgpSCpoIAAhYACAKCyoKCpoIAAhYACAKCgoKSgsqCgoKmggACGgAKAoKUgoKCkoKmgoKClJQ=")]
-[assembly: go.GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "AA4eggAcWAALAgAIKgAUEoKUgpSClIKU3LimgoKUlNymgqamuMqUlJTcAAQaAAgClKY=")]
-[assembly: go.GoPositionMap("internal/runtime/cgroup/runtime.go", "runtime.cs", "AAkc")]
+[assembly: GoPositionMap("internal/runtime/cgroup/cgroup.go", "cgroup.cs", "ADFwlIKClJSCgqamgoKCpoKUppSCgpSUgoKmgoKmrgAVJKaUgoLcgoKCgqYABxCCgqaClIKCpoKUgpSUpqaUyqbKlLiokoKClKaClIKmpgAIDgAoSpSCgu6CgoKmpoKCgpS4goKUgpSUpoKClIKmgoKClIKUgoKClLiCgpSClJSCpoKCpqaCxoLGguyCgpSCgriClJQACRTKgoKUgoKClIKUuKaCgoKUgpQABRCCAAIeAAwCkoK4lIKCgoKC7oKmgoKCgqaCpoKUgpSm")]
+[assembly: GoPositionMap("internal/runtime/cgroup/cgroup_linux.go", "cgroup_linux.cs", "AB0+gpSCtLQACAiCgoIAAxDClIKUgoKmlIKCgrimgoKCuKbKpIKCgrimyqSCzKKUgoKmlKaCgqa2pILKAAESAAgCgoKUgqaCqAABJAARAoKClIKmggACFgAIAoLKgoKmggACFgAIAoKCgoKCyoKCgqaCAAIaAAoCgpSCgoKCgqaCgoKUlA==")]
+[assembly: GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "AA4eggAcWAALAgAIKgAUEoKUgpSClIKU3LimgoKUlNymgqamuMqUlJTcAAQaAAgClKY=")]
+[assembly: GoPositionMap("internal/runtime/cgroup/runtime.go", "runtime.cs", "AAkc")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

@@ -64,7 +64,7 @@ public static M Clone<M, K, V>(M m)
 {
     // Preserve nil in case it matters.
     if (m.IsNil) {
-        return default!;
+        return default;
     }
     return clone(m)._<M>();
 }

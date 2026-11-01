@@ -17,8 +17,8 @@ partial struct Package {
     internal ж<ΔScope> scope;
     internal slice<ж<Package>> imports;
     internal bool complete;
-    internal bool fake;   // scope lookup errors are silently dropped if package is fake (internal use only)
-    internal bool cgo;   // uses of this package will be rewritten into uses of declarations from _cgo_gotypes.go
+    internal bool fake;         // scope lookup errors are silently dropped if package is fake (internal use only)
+    internal bool cgo;          // uses of this package will be rewritten into uses of declarations from _cgo_gotypes.go
     internal @string goVersion; // minimum Go version required for package (by Config.GoVersion, typically from go.mod)
 }
 

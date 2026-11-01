@@ -23,10 +23,14 @@ public static ж<http.Request> NewRequest(@string method, @string target, io.Rea
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getˢ = "GET"u8;
-internal static readonly @string http11ˢ = "HTTP/1.1"u8;
-internal static readonly @string exampleComˢ = "example.com"u8;
-internal static readonly @string httpsˢ = "https://"u8;
+internal static ref readonly @string getˢ => ref getˢᵇ;
+private static readonly @string getˢᵇ = "GET"u8;
+internal static ref readonly @string http11ˢ => ref http11ˢᵇ;
+private static readonly @string http11ˢᵇ = "HTTP/1.1"u8;
+internal static ref readonly @string exampleComˢ => ref exampleComˢᵇ;
+private static readonly @string exampleComˢᵇ = "example.com"u8;
+internal static ref readonly @string httpsˢ => ref httpsˢᵇ;
+private static readonly @string httpsˢᵇ = "https://"u8;
 
 // NewRequestWithContext returns a new incoming server Request, suitable
 // for passing to an [http.Handler] for testing.
@@ -56,43 +60,43 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
         method = getˢ;
     }
     var (req, err) = http.ReadRequest(bufio.NewReader(new strings_ReaderжReader(strings.NewReader(method + " "u8 + target + " HTTP/1.0\r\n\r\n"u8))));
-    if (err != default!) {
+    if (err != nil) {
         throw panic("invalid NewRequest arguments; " + err.Error());
     }
     req = req.WithContext(ctx);
 
     // HTTP/1.0 was used above to avoid needing a Host field. Change it to 1.1 here.
-    req.Value.Proto = http11ˢ;
-    req.Value.ProtoMinor = 1;
-    req.Value.Close = false;
+    req.Proto = http11ˢ;
+    req.ProtoMinor = 1;
+    req.Close = false;
 
-    if (body != default!) {
+    if (body != nil) {
         switch (body.type()) {
         case ж<bytes.Buffer> v: {
-            req.Value.ContentLength = (int64)v.Len();
+            req.ContentLength = (int64)v.Len();
             break;
         }
         case ж<bytes.Reader> v: {
-            req.Value.ContentLength = (int64)v.Len();
+            req.ContentLength = (int64)v.Len();
             break;
         }
         case ж<strings.Reader> v: {
-            req.Value.ContentLength = (int64)v.Len();
+            req.ContentLength = (int64)v.Len();
             break;
         }
         default: {
             var v = body;
-            req.Value.ContentLength = -1;
+            req.ContentLength = -1;
             break;
         }}
         if (AreEqual(body, http.NoBody)) {
-            req.Value.ContentLength = 0;
+            req.ContentLength = 0;
         }
         {
-            var (rc, ok) = body._<io.ReadCloser>(ᐧ); if (ok){
-                req.Value.Body = rc;
+            var (rc, ok) = body._<io.ReadCloser>(ᐧ); if (ok) {
+                req.Body = rc;
             } else {
-                req.Value.Body = io.NopCloser(body);
+                req.Body = io.NopCloser(body);
             }
         }
     }
@@ -100,17 +104,17 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
     // 192.0.2.0/24 is "TEST-NET" in RFC 5737 for use solely in
     // documentation and example source code and should not be
     // used publicly.
-    req.Value.RemoteAddr = "192.0.2.1:1234"u8;
+    req.RemoteAddr = "192.0.2.1:1234";
 
-    if ((~req).Host == ""u8) {
-        req.Value.Host = exampleComˢ;
+    if (req.Host == ""u8) {
+        req.Host = exampleComˢ;
     }
 
     if (strings.HasPrefix(target, httpsˢ)) {
-        req.Value.TLS = Ꮡ(new tlsꓸConnectionState(
+        req.TLS = Ꮡ(new tlsꓸConnectionState(
             Version: tls.VersionTLS12,
             HandshakeComplete: true,
-            ServerName: (~req).Host
+            ServerName: req.Host
         ));
     }
 

@@ -57,7 +57,7 @@ partial struct User {
 //
 // On POSIX systems Gid contains a decimal number representing the group ID.
 partial struct Group {
-    public @string Gid; // group ID
+    public @string Gid;  // group ID
     public @string Name; // group name
 }
 

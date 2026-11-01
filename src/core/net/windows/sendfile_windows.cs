@@ -14,7 +14,7 @@ partial class net_package {
 // https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nf-mswsock-transmitfile
 // https://golang.org/issue/73746
 internal static bool supportsSendfile() {
-    if (testHookSupportsSendfile != default!) {
+    if (testHookSupportsSendfile != nil) {
         return testHookSupportsSendfile();
     }
     return windows.SupportUnlimitedTransmitFile();

@@ -9,8 +9,10 @@ using @internal;
 partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkptrMisalignedˢ = "checkptr: misaligned pointer conversion"u8;
-internal static readonly @string checkptrConvertedPointerˢ = "checkptr: converted pointer straddles multiple allocations"u8;
+internal static ref readonly @string checkptrMisalignedˢ => ref checkptrMisalignedˢᵇ;
+private static readonly @string checkptrMisalignedˢᵇ = "checkptr: misaligned pointer conversion"u8;
+internal static ref readonly @string checkptrConvertedPointerˢ => ref checkptrConvertedPointerˢᵇ;
+private static readonly @string checkptrConvertedPointerˢᵇ = "checkptr: converted pointer straddles multiple allocations"u8;
 
 internal static void checkptrAlignment(@unsafe.Pointer Δp, ж<_type> Ꮡelem, uintptr n) {
     ref var elem = ref Ꮡelem.DerefOrNull();
@@ -56,8 +58,10 @@ internal static bool checkptrStraddles(@unsafe.Pointer ptr, uintptr size) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkptrPointerˢ = "checkptr: pointer arithmetic computed bad pointer value"u8;
-internal static readonly @string checkptrPointerˢ2 = "checkptr: pointer arithmetic result points to invalid allocation"u8;
+internal static ref readonly @string checkptrPointerˢ => ref checkptrPointerˢᵇ;
+private static readonly @string checkptrPointerˢᵇ = "checkptr: pointer arithmetic computed bad pointer value"u8;
+internal static ref readonly @string checkptrPointerˢ2 => ref checkptrPointerˢ2ᵇ;
+private static readonly @string checkptrPointerˢ2ᵇ = "checkptr: pointer arithmetic result points to invalid allocation"u8;
 
 internal static void checkptrArithmetic(@unsafe.Pointer Δp, slice<@unsafe.Pointer> originals) {
     if (0 < (uintptr)Δp && (uintptr)Δp < minLegalPointer) {
@@ -123,11 +127,11 @@ internal static uintptr checkptrBase(@unsafe.Pointer Δp) {
 
     // data or bss
     foreach (var (_, datap) in activeModules()) {
-        if ((~datap).data <= (uintptr)Δp && (uintptr)Δp < (~datap).edata) {
-            return (~datap).data;
+        if (datap.data <= (uintptr)Δp && (uintptr)Δp < datap.edata) {
+            return datap.data;
         }
-        if ((~datap).bss <= (uintptr)Δp && (uintptr)Δp < (~datap).ebss) {
-            return (~datap).bss;
+        if (datap.bss <= (uintptr)Δp && (uintptr)Δp < datap.ebss) {
+            return datap.bss;
         }
     }
 

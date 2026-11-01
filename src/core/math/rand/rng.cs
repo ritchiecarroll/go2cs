@@ -174,8 +174,8 @@ internal static UntypedInt int32max => /* (1 << 31) - 1 */ 2147483647;
 }.array(); }
 
 partial struct rngSource {
-    internal nint tap;          // index into vec
-    internal nint feed;          // index into vec
+    internal nint tap;                       // index into vec
+    internal nint feed;                      // index into vec
     internal array<int64> vec = new(rngLen); // current feedback register
 }
 
@@ -211,7 +211,7 @@ internal static void Seed(this ref rngSource rng, int64 seed) {
     for (nint i = -20; i < rngLen; i++) {
         x = seedrand(x);
         if (i >= 0) {
-            int64 u = default!;
+            int64 u = default;
             u = (int64)x << 40;
             x = seedrand(x);
             u ^= (int64)(((int64)x << 20));

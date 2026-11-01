@@ -141,7 +141,7 @@ internal static (nint, error) Write(this ref sum32 s, slice<byte> data) {
         hash ^= (sum32)(((sum32)(uint32)c));
     }
     s = hash;
-    return (len(data), default!);
+    return (len(data), default);
 }
 
 internal static (nint, error) Write(this ref sum32a s, slice<byte> data) {
@@ -151,7 +151,7 @@ internal static (nint, error) Write(this ref sum32a s, slice<byte> data) {
         hash *= prime32;
     }
     s = hash;
-    return (len(data), default!);
+    return (len(data), default);
 }
 
 internal static (nint, error) Write(this ref sum64 s, slice<byte> data) {
@@ -161,7 +161,7 @@ internal static (nint, error) Write(this ref sum64 s, slice<byte> data) {
         hash ^= (sum64)(((sum64)(uint64)c));
     }
     s = hash;
-    return (len(data), default!);
+    return (len(data), default);
 }
 
 internal static (nint, error) Write(this ref sum64a s, slice<byte> data) {
@@ -171,7 +171,7 @@ internal static (nint, error) Write(this ref sum64a s, slice<byte> data) {
         hash *= prime64;
     }
     s = hash;
-    return (len(data), default!);
+    return (len(data), default);
 }
 
 internal static (nint, error) Write(this ref sum128 s, slice<byte> data) {
@@ -184,7 +184,7 @@ internal static (nint, error) Write(this ref sum128 s, slice<byte> data) {
         s.Value[0] = s0;
         s.Value[1] ^= (uint64)((uint64)c);
     }
-    return (len(data), default!);
+    return (len(data), default);
 }
 
 internal static (nint, error) Write(this ref sum128a s, slice<byte> data) {
@@ -197,7 +197,7 @@ internal static (nint, error) Write(this ref sum128a s, slice<byte> data) {
         s.Value[1] = s1;
         s.Value[0] = s0;
     }
-    return (len(data), default!);
+    return (len(data), default);
 }
 
 internal static nint Size(this ref sum32 s) {
@@ -278,12 +278,18 @@ internal static slice<byte> Sum(this ref sum128a s, slice<byte> @in) {
     return byteorder.BEAppendUint64(ret, s.Value[1]);
 }
 
-internal static readonly @string magic32 = "fnv\x01"u8;
-internal static readonly @string magic32a = "fnv\x02"u8;
-internal static readonly @string magic64 = "fnv\x03"u8;
-internal static readonly @string magic64a = "fnv\x04"u8;
-internal static readonly @string magic128 = "fnv\x05"u8;
-internal static readonly @string magic128a = "fnv\x06"u8;
+internal static ref readonly @string magic32 => ref magic32ᵇ;
+private static readonly @string magic32ᵇ = "fnv\x01"u8;
+internal static ref readonly @string magic32a => ref magic32aᵇ;
+private static readonly @string magic32aᵇ = "fnv\x02"u8;
+internal static ref readonly @string magic64 => ref magic64ᵇ;
+private static readonly @string magic64ᵇ = "fnv\x03"u8;
+internal static ref readonly @string magic64a => ref magic64aᵇ;
+private static readonly @string magic64aᵇ = "fnv\x04"u8;
+internal static ref readonly @string magic128 => ref magic128ᵇ;
+private static readonly @string magic128ᵇ = "fnv\x05"u8;
+internal static ref readonly @string magic128a => ref magic128aᵇ;
+private static readonly @string magic128aᵇ = "fnv\x06"u8;
 internal const nint marshaledSize32 = /* len(magic32) + 4 */ 8;
 internal const nint marshaledSize64 = /* len(magic64) + 8 */ 12;
 internal const nint marshaledSize128 = /* len(magic128) + 8*2 */ 20;
@@ -291,7 +297,7 @@ internal const nint marshaledSize128 = /* len(magic128) + 8*2 */ 20;
 internal static (slice<byte>, error) AppendBinary(this ref sum32 s, slice<byte> b) {
     b = append(b, magic32.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, (uint32)(s));
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref sum32 s) {
@@ -301,7 +307,7 @@ internal static (slice<byte>, error) MarshalBinary(this ref sum32 s) {
 internal static (slice<byte>, error) AppendBinary(this ref sum32a s, slice<byte> b) {
     b = append(b, magic32a.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, (uint32)(s));
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref sum32a s) {
@@ -311,7 +317,7 @@ internal static (slice<byte>, error) MarshalBinary(this ref sum32a s) {
 internal static (slice<byte>, error) AppendBinary(this ref sum64 s, slice<byte> b) {
     b = append(b, magic64.ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, (uint64)(s));
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref sum64 s) {
@@ -321,7 +327,7 @@ internal static (slice<byte>, error) MarshalBinary(this ref sum64 s) {
 internal static (slice<byte>, error) AppendBinary(this ref sum64a s, slice<byte> b) {
     b = append(b, magic64a.ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, (uint64)(s));
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref sum64a s) {
@@ -332,7 +338,7 @@ internal static (slice<byte>, error) AppendBinary(this ref sum128 s, slice<byte>
     b = append(b, magic128.ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, s.Value[0]);
     b = byteorder.BEAppendUint64(b, s.Value[1]);
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref sum128 s) {
@@ -343,7 +349,7 @@ internal static (slice<byte>, error) AppendBinary(this ref sum128a s, slice<byte
     b = append(b, magic128a.ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, s.Value[0]);
     b = byteorder.BEAppendUint64(b, s.Value[1]);
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref sum128a s) {
@@ -351,8 +357,10 @@ internal static (slice<byte>, error) MarshalBinary(this ref sum128a s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string hashFnvInvalidHashStateˢ = "hash/fnv: invalid hash state identifier"u8;
-internal static readonly @string hashFnvInvalidHashStateˢ2 = "hash/fnv: invalid hash state size"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢ => ref hashFnvInvalidHashStateˢᵇ;
+private static readonly @string hashFnvInvalidHashStateˢᵇ = "hash/fnv: invalid hash state identifier"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢ2 => ref hashFnvInvalidHashStateˢ2ᵇ;
+private static readonly @string hashFnvInvalidHashStateˢ2ᵇ = "hash/fnv: invalid hash state size"u8;
 
 internal static error UnmarshalBinary(this ref sum32 s, slice<byte> b) {
     if (len(b) < len(magic32) || ((sstring)(b[..(int)(len(magic32))])) != magic32) {
@@ -362,7 +370,7 @@ internal static error UnmarshalBinary(this ref sum32 s, slice<byte> b) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
     s = (sum32)byteorder.BEUint32(b[4..]);
-    return default!;
+    return default;
 }
 
 internal static error UnmarshalBinary(this ref sum32a s, slice<byte> b) {
@@ -373,7 +381,7 @@ internal static error UnmarshalBinary(this ref sum32a s, slice<byte> b) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
     s = (sum32a)byteorder.BEUint32(b[4..]);
-    return default!;
+    return default;
 }
 
 internal static error UnmarshalBinary(this ref sum64 s, slice<byte> b) {
@@ -384,7 +392,7 @@ internal static error UnmarshalBinary(this ref sum64 s, slice<byte> b) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
     s = (sum64)byteorder.BEUint64(b[4..]);
-    return default!;
+    return default;
 }
 
 internal static error UnmarshalBinary(this ref sum64a s, slice<byte> b) {
@@ -395,7 +403,7 @@ internal static error UnmarshalBinary(this ref sum64a s, slice<byte> b) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
     s = (sum64a)byteorder.BEUint64(b[4..]);
-    return default!;
+    return default;
 }
 
 internal static error UnmarshalBinary(this ref sum128 s, slice<byte> b) {
@@ -407,7 +415,7 @@ internal static error UnmarshalBinary(this ref sum128 s, slice<byte> b) {
     }
     s.Value[0] = byteorder.BEUint64(b[4..]);
     s.Value[1] = byteorder.BEUint64(b[12..]);
-    return default!;
+    return default;
 }
 
 internal static error UnmarshalBinary(this ref sum128a s, slice<byte> b) {
@@ -419,43 +427,37 @@ internal static error UnmarshalBinary(this ref sum128a s, slice<byte> b) {
     }
     s.Value[0] = byteorder.BEUint64(b[4..]);
     s.Value[1] = byteorder.BEUint64(b[12..]);
-    return default!;
+    return default;
 }
 
 internal static (hash.Cloner, error) Clone(this ref sum32 d) {
-    ref var r = ref heap<sum32>(out var Ꮡr);
-    r = d;
-    return (new sum32жCloner(Ꮡr), default!);
+    ref var r = ref heap<sum32>(d, out var Ꮡr);
+    return (new sum32жCloner(Ꮡr), default);
 }
 
 internal static (hash.Cloner, error) Clone(this ref sum32a d) {
-    ref var r = ref heap<sum32a>(out var Ꮡr);
-    r = d;
-    return (new sum32aжCloner(Ꮡr), default!);
+    ref var r = ref heap<sum32a>(d, out var Ꮡr);
+    return (new sum32aжCloner(Ꮡr), default);
 }
 
 internal static (hash.Cloner, error) Clone(this ref sum64 d) {
-    ref var r = ref heap<sum64>(out var Ꮡr);
-    r = d;
-    return (new sum64жCloner(Ꮡr), default!);
+    ref var r = ref heap<sum64>(d, out var Ꮡr);
+    return (new sum64жCloner(Ꮡr), default);
 }
 
 internal static (hash.Cloner, error) Clone(this ref sum64a d) {
-    ref var r = ref heap<sum64a>(out var Ꮡr);
-    r = d;
-    return (new sum64aжCloner(Ꮡr), default!);
+    ref var r = ref heap<sum64a>(d, out var Ꮡr);
+    return (new sum64aжCloner(Ꮡr), default);
 }
 
 internal static (hash.Cloner, error) Clone(this ref sum128 d) {
-    ref var r = ref heap<sum128>(out var Ꮡr);
-    r = d.ΔClone();
-    return (new sum128жCloner(Ꮡr), default!);
+    ref var r = ref heap<sum128>(d.ΔClone(), out var Ꮡr);
+    return (new sum128жCloner(Ꮡr), default);
 }
 
 internal static (hash.Cloner, error) Clone(this ref sum128a d) {
-    ref var r = ref heap<sum128a>(out var Ꮡr);
-    r = d.ΔClone();
-    return (new sum128aжCloner(Ꮡr), default!);
+    ref var r = ref heap<sum128a>(d.ΔClone(), out var Ꮡr);
+    return (new sum128aжCloner(Ꮡr), default);
 }
 
 } // end fnv_package

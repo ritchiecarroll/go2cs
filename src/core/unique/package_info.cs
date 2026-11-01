@@ -10,15 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,7 +45,18 @@ using static go.unique_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(canonMap<>))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.StructField))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔMapType))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔStructType))]
+[assembly: GoFieldAccess(typeof(node<>))]
+[assembly: GoFieldAccess(typeof(uniqueMap<>))]
+[assembly: GoFieldAccess(typeof(Δentry<>))]
+[assembly: GoFieldAccess(typeof(Δindirect<>))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,8 +66,8 @@ using static go.unique_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABo0goKUgoKCgqaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuICCpIKUlIK4goKUpu6kgoKCgJS2yIKU3JSSlNzkgqaCpoKCgoKUgoKCgoKClIKClK7CgoKCgpSCgoKClIKClJSClJSClJSCuIKCyoKClAAHEIKClKaCgoKCgpSCpgAJFKKClKaigpQAEyyCpoKCgqYAChaCgoKSAAYU0oKCgpSUqLKCgpSUrOSCgpSUgriCgoKCgpSUlK4=", "136-138:1")]
-[assembly: go.GoPositionMap("unique/handle.go", "handle.cs", "ABk0oqzEgoKUgoKClKaClJQ=")]
+[assembly: GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABo0goKUgoKCgqaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuICCpIKUlIK4goKUpu6kgoKCgJS2yIKU3JSSlNzkgqaCpoKCgoKUgoKCgoKClIKClK7CgoKCgpSCgoKClIKClJSClJSClJSCuIKCyoKClAAHEIKClKaCgoKCgpSCpgAJFKKClKaigpQAEyyCpoKCgqYAChaCgoKCAAYU0oKCgpSUqLKCgpSUrOSCgpSUgriCgoKCgpSUlK4=", "136-138:1")]
+[assembly: GoPositionMap("unique/handle.go", "handle.cs", "ABk0oqzEgoKUgoKClKaClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -24,7 +24,7 @@ internal static void Store(this ж<onceError> Ꮡa, error err) {
 
         Ꮡa.of(onceError.ᏑMutex).Lock();
         ᒐd1 = true;
-        if (a.err != default!) {
+        if (a.err != nil) {
             return;
         }
         a.err = err;
@@ -43,12 +43,12 @@ internal static error Load(this ж<onceError> Ꮡa) {
         ᒐd1 = true;
         return a.err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡa.of(onceError.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
 // ErrClosedPipe is the error used for read or write operations on a closed pipe.
-public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8);
+public static error ErrClosedPipe = errors.New("io: read/write on closed pipe");
 
 // A pipe is the shared pipe structure underlying PipeReader and PipeWriter.
 partial struct pipe {
@@ -79,28 +79,28 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     case 0 when selᴛ2.ꟷᐳ(out var bw): {
         nint nr = copy(b, bw);
         p.rdCh.ᐸꟷ(nr);
-        return (nr, default!);
+        return (nr, default);
     }
     case 1 when selᴛ3.ꟷᐳ(out _): {
         return (0, Ꮡp.readCloseError());
     }}
-    return default!;
+    return default;
 }
 
 internal static error closeRead(this ж<pipe> Ꮡp, error err) {
-    if (err == default!) {
+    if (err == nil) {
         err = ErrClosedPipe;
     }
-    Ꮡp.of(pipe.Ꮡrerr).Store(err);
-    Ꮡp.of(pipe.Ꮡonce).Do(() => {
+    Ꮡp.Ꮡrerr.Store(err);
+    Ꮡp.Ꮡonce.Do(() => {
         close(Ꮡp.Value.done);
     });
-    return default!;
+    return default;
 }
 
 internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -112,7 +112,7 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
         }
         default: {
             p.wrMu.Lock();
-            defer(Ꮡp.of(pipe.ᏑwrMu).Unlock, ref ᒐ);
+            defer(Ꮡp.ᏑwrMu.Unlock, ref ᒐ);
             break;
         }}
 
@@ -130,7 +130,7 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
                 (n, err) = (n, Ꮡp.writeCloseError()); goto ᒐdone;
             }}
         }
-        (n, err) = (n, default!);
+        (n, err) = (n, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -138,21 +138,21 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
 }
 
 internal static error closeWrite(this ж<pipe> Ꮡp, error err) {
-    if (err == default!) {
+    if (err == nil) {
         err = EOF;
     }
-    Ꮡp.of(pipe.Ꮡwerr).Store(err);
-    Ꮡp.of(pipe.Ꮡonce).Do(() => {
+    Ꮡp.Ꮡwerr.Store(err);
+    Ꮡp.Ꮡonce.Do(() => {
         close(Ꮡp.Value.done);
     });
-    return default!;
+    return default;
 }
 
 // readCloseError is considered internal to the pipe type.
 internal static error readCloseError(this ж<pipe> Ꮡp) {
-    var rerr = Ꮡp.of(pipe.Ꮡrerr).Load();
+    var rerr = Ꮡp.Ꮡrerr.Load();
     {
-        var werr = Ꮡp.of(pipe.Ꮡwerr).Load(); if (rerr == default! && werr != default!) {
+        var werr = Ꮡp.Ꮡwerr.Load(); if (rerr == nil && werr != nil) {
             return werr;
         }
     }
@@ -161,9 +161,9 @@ internal static error readCloseError(this ж<pipe> Ꮡp) {
 
 // writeCloseError is considered internal to the pipe type.
 internal static error writeCloseError(this ж<pipe> Ꮡp) {
-    var werr = Ꮡp.of(pipe.Ꮡwerr).Load();
+    var werr = Ꮡp.Ꮡwerr.Load();
     {
-        var rerr = Ꮡp.of(pipe.Ꮡrerr).Load(); if (werr == default! && rerr != default!) {
+        var rerr = Ꮡp.Ꮡrerr.Load(); if (werr == nil && rerr != nil) {
             return rerr;
         }
     }
@@ -181,13 +181,13 @@ partial struct PipeReader {
 // If the write end is closed with an error, that error is
 // returned as err; otherwise err is EOF.
 public static (nint n, error err) Read(this ж<PipeReader> Ꮡr, slice<byte> data) {
-    return Ꮡr.of(PipeReader.Ꮡpipe).read(data);
+    return Ꮡr.Ꮡpipe.read(data);
 }
 
 // Close closes the reader; subsequent writes to the
 // write half of the pipe will return the error [ErrClosedPipe].
 public static error Close(this ж<PipeReader> Ꮡr) {
-    return Ꮡr.CloseWithError(default!);
+    return Ꮡr.CloseWithError(default);
 }
 
 // CloseWithError closes the reader; subsequent writes
@@ -196,7 +196,7 @@ public static error Close(this ж<PipeReader> Ꮡr) {
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
 public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) {
-    return Ꮡr.of(PipeReader.Ꮡpipe).closeRead(err);
+    return Ꮡr.Ꮡpipe.closeRead(err);
 }
 
 // A PipeWriter is the write half of a pipe.
@@ -210,13 +210,13 @@ partial struct PipeWriter {
 // If the read end is closed with an error, that err is
 // returned as err; otherwise err is [ErrClosedPipe].
 public static (nint n, error err) Write(this ж<PipeWriter> Ꮡw, slice<byte> data) {
-    return Ꮡw.of(PipeWriter.Ꮡr).of(PipeReader.Ꮡpipe).write(data);
+    return Ꮡw.Ꮡr.Ꮡpipe.write(data);
 }
 
 // Close closes the writer; subsequent reads from the
 // read half of the pipe will return no bytes and EOF.
 public static error Close(this ж<PipeWriter> Ꮡw) {
-    return Ꮡw.CloseWithError(default!);
+    return Ꮡw.CloseWithError(default);
 }
 
 // CloseWithError closes the writer; subsequent reads from the
@@ -226,7 +226,7 @@ public static error Close(this ж<PipeWriter> Ꮡw) {
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
 public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) {
-    return Ꮡw.of(PipeWriter.Ꮡr).of(PipeReader.Ꮡpipe).closeWrite(err);
+    return Ꮡw.Ꮡr.Ꮡpipe.closeWrite(err);
 }
 
 // Pipe creates a synchronous in-memory pipe.
@@ -252,7 +252,7 @@ public static (ж<PipeReader>, ж<PipeWriter>) Pipe() {
     )
     )
     ));
-    return (pw.of(PipeWriter.Ꮡr), pw);
+    return (pw.Ꮡr, pw);
 }
 
 } // end io_package

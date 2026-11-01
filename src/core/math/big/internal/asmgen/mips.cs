@@ -6,13 +6,13 @@ namespace go.math.big.@internal;
 partial class asmgen_package {
 
 [GoLazy(Initial = true)] partial class lazyᴛArchMIPS { public static ж<Arch> ArchMIPS = Ꮡ(new Arch(
-    Name: "mipsx"u8,
-    Build: "mips || mipsle"u8,
+    Name: "mipsx",
+    Build: "mips || mipsle",
     WordBits: 32,
     WordBytes: 4,
     CarrySafeLoop: true,
 
-    regs: new @string[]{
+    regs: slice<@string>([
         // R0 is 0
         // R23 is the assembler/linker temporary (which we use too).
         // R24 and R25 are our virtual carry flags.
@@ -20,32 +20,32 @@ partial class asmgen_package {
         // R29 is SP.
         // R30 is g.
         // R31 is LR.
-        "R1"u8, "R2"u8, "R3"u8, "R4"u8, "R5"u8, "R6"u8, "R7"u8, "R8"u8, "R9"u8,
-        "R10"u8, "R11"u8, "R12"u8, "R13"u8, "R14"u8, "R15"u8, "R16"u8, "R17"u8, "R18"u8, "R19"u8,
-        "R20"u8, "R21"u8, "R22"u8, "R24"u8, "R25"u8
-    }.slice(),
-    reg0: "R0"u8,
-    regTmp: "R23"u8,
-    regCarry: "R24"u8,
-    regAltCarry: "R25"u8,
+        "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9",
+        "R10", "R11", "R12", "R13", "R14", "R15", "R16", "R17", "R18", "R19",
+        "R20", "R21", "R22", "R24", "R25"
+    ]),
+    reg0: "R0",
+    regTmp: "R23",
+    regCarry: "R24",
+    regAltCarry: "R25",
 
-    mov: "MOVW"u8,
-    add: "ADDU"u8,
-    sltu: "SGTU"u8, // SGTU args are swapped, so it's really SLTU
-    sub: "SUBU"u8,
+    mov: "MOVW",
+    add: "ADDU",
+    sltu: "SGTU", // SGTU args are swapped, so it's really SLTU
+    sub: "SUBU",
     mulWideF: mipsMulWide,
-    lsh: "SLL"u8,
-    rsh: "SRL"u8,
-    and: "AND"u8,
-    or: "OR"u8,
-    xor: "XOR"u8,
+    lsh: "SLL",
+    rsh: "SRL",
+    and: "AND",
+    or: "OR",
+    xor: "XOR",
 
-    jmpZero: "BEQ %s, %s"u8,
-    jmpNonZero: "BNE %s, %s"u8
+    jmpZero: "BEQ %s, %s",
+    jmpNonZero: "BNE %s, %s"
 )); }
 
-internal static void mipsMulWide(ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
-    Ꮡa.Printf("\tMULU %s, %s\n\tMOVW LO, %s\n\tMOVW HI, %s\n"u8, src1, src2, dstlo, dsthi);
+internal static void mipsMulWide(ж<Asm> a, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
+    a.Printf("\tMULU %s, %s\n\tMOVW LO, %s\n\tMOVW HI, %s\n", src1, src2, dstlo, dsthi);
 }
 
 } // end asmgen_package

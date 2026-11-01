@@ -150,7 +150,7 @@ internal static float64 pow(float64 x, float64 y) {
     // of x according to bits of yi.
     // accumulate powers of two into exp.
     var (x1, xe) = Frexp(x);
-    for (var i = (int64)yi; i != 0; i >>= (int)(1)) {
+    for (var i = (int64)yi; i != 0; i >>= 1) {
         if (xe < -1 << 12 || 1 << 12 < xe) {
             // catch xe before it overflows the left shift below
             // Since i !=0 it has at least one bit still set, so ae will accumulate xe
@@ -165,7 +165,7 @@ internal static float64 pow(float64 x, float64 y) {
             ae += xe;
         }
         x1 *= x1;
-        xe <<= (int)(1);
+        xe <<= 1;
         if (x1 < .5D) {
             x1 += x1;
             xe--;

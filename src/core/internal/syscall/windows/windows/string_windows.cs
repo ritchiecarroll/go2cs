@@ -20,17 +20,16 @@ partial struct NTUnicodeString {
 // the more common *uint16 string type.
 public static (ж<NTUnicodeString>, error) NewNTUnicodeString(@string s) {
     var (s16, err) = syscall.UTF16FromString(s);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    ref var n = ref heap<uint16>(out var Ꮡn);
-    n = (uint16)(len(s16) * 2);
+    ref var n = ref heap<uint16>((uint16)(len(s16) * 2), out var Ꮡn);
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdmsec/nf-wdmsec-wdmlibrtlinitunicodestringex
     return (Ꮡ(new NTUnicodeString(
         Length: (uint16)(n - 2), // subtract 2 bytes for the NUL terminator
         MaximumLength: n,
         Buffer: Ꮡ(s16, 0)
-    )), default!);
+    )), default);
 }
 
 } // end windows_package

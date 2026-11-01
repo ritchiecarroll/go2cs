@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
 // </ImportedTypeAliases>
 
 using go;
@@ -53,7 +51,11 @@ using static go.net.url_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(URL))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,8 +65,8 @@ using static go.net.url_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/url/encoding_table.go", "encoding_table.cs", "ABg2")]
-[assembly: go.GoPositionMap("net/url/url.go", "url.cs", "AB48AAgSgKKA5IKG5oKGyoKoksqCyoKokgACENIAAhTyqrSCgoKUgoKCgpQABxCClAAHEIKCprSCtIKUyIKmgpSklIKCgriCtLS2qqKqoqaCkoKCgpTKgqaClIKClKaCgoKCpqaCgpSCtIKCgrSCtgA3fqIAAhYACAIADByygpSosoKUqsKClIKClNyygoLYgsaClMimAAIS9JKCgpSClICCpAACENKCgpQACA7CgpSCpoKUlIKCyoCCpJSCgpSmgpSClIIACBKAlMiCgoKAgqSCgqSm7oCCpNbCgoKUlIKUgpSCgpSCgIKklIKAgqSAgqSU6qKAgpKmgoKmgoKUgoKmgu6CgoKClIKClJSCgoLugoKUgpSSgIKCAAoWgoKCpqaCgtiCgIKkAAIqABICgoKUgoCUlKSoAAIWAAkCgoKCpoKUrLLcAA0QgsiokoKClIKAlJSkAAIWAAgCgoKCpqqigpSClIKCpgACMAAVApSCgpSCgoKUlIKClIKClIKUgqaClICCgqSAgsiCgpTugIK2lIKClIKClNrCgqaCgIKkAAgawoKClKqiqqKokqiSggACGgAKAoKCpsqCgoKUgoKUgoKU1qKClIKCgoKClIKUgoKCgpSUgoKClJSUqqKClKaCgoKClIKCgoKCgpSCgqaqwoKCkoKClJSCpoKCgoKCgoKClIKkgIKUpKSClIK4griClKqirLKCgpQAAhIACAKSgpS4gpSCgoKClIKCgoKmgoKCgoKmgoKCrLKCqqKCgoKCpoKmgpSuwoKssoKs4pSCgqaCpqyipoKmgoKClIKu4oKmooKCpoKUuIKUkoIAAhgACQKCgpSClIKUlgAMFrSmqJKCgoKmrPKCgpSCgpQ=")]
+[assembly: GoPositionMap("net/url/encoding_table.go", "encoding_table.cs", "ABg2")]
+[assembly: GoPositionMap("net/url/url.go", "url.cs", "AB48AAgSgKKA5IKG5oKG2oKoksqCyoKokgACENIAAhTyqrSCgoKUgoKCgpQABxCClAAHEIKCprSCtIKUyIKmgpS0pIKCgriCtLS2qqKqoqaCkoKCgpTKgqaClIKClKaCgoKCpqaCgpSCtIKCgrSCtgA3fqIAAhYACAIADByygpSosoKUqsKClIKClOyygoLYgsaClMimAAIS9JKCgpSClICCpAACENKCgpQADA7CgpSCpoKUlIKCyoCCpJSCgpSmgpSClIIACBKAlMiCgoKAgqSCgpSm7oCCpObCgoKUlIKUgpSCgpSCgIKklIKAgqSAgqSUAAgKooCCgqaCgqaCgpSCgqaC7oKCgoKUgoKUlIKCgu6CgpSClIKAgoIAChaCgoKmpoKC2IKAgqQAAioAEgKCgpSCgJSUpKgAAhYACQKCgoKmgpSsstwADRCCyKiSgoKUgoCUlKQAAhYACAKCgoKmqqKClIKUgoKmAAIwABUClIKClIKCgpSUgoKUgoKUgpSCpoKUgIKCpICCyIKClO6AgraUgoKUgoKU6sKCpoKAgqQACBrCgoKUqqKqoqiSqJKCAAIaAAoCgoKmyoKCgpSCgpSCgpTmooKUgoKCgoKUgpSCgoKClJSCgoKUlJSqooKUpoKCgoKUgoKCgoKClIKCpqrCgoKCgoKUlIKmgoKCgoKCgoKkgrSAgpSktIKUgsiCuIKUqqKssoKClAACEgAIAoKClLiClIKCgoKUgoKCgqaCgoKCgqaCgoKssoKqooKCgoKmgqaClK7CgqyygqzilIKCpoKmrKKmgqaCgoKUgq7igqaigoKmgpS4gpSCggACGAAJAoKClIKUgpSWAAwWtKaokoKCgqas8oKClIKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

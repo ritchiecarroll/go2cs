@@ -60,36 +60,40 @@ public static @string Error(this KeySizeError k) {
 // AES-128, AES-192, or AES-256.
 public static (ж<Block>, error) New(slice<byte> key) {
     // This call is outline to let the allocation happen on the parent stack.
-    return newOutlined(Ꮡ(new Block(nil)), key);
+    return newOutlined(Ꮡ(new Block()), key);
 }
 
 // newOutlined is marked go:noinline to avoid it inlining into New, and making New
 // too complex to inline itself.
 //
 //go:noinline
-internal static partial (ж<Block>, error) newOutlined(ж<Block> Ꮡb, slice<byte> key) {
-    var exprᴛ1 = len(key);
-    if (exprᴛ1 == aes128KeySize || exprᴛ1 == aes192KeySize || exprᴛ1 == aes256KeySize) {
+internal static partial (ж<Block>, error) newOutlined(ж<Block> b, slice<byte> key) {
+    switch (len(key)) {
+    case var ᴛ when ᴛ == aes128KeySize || ᴛ == aes192KeySize || ᴛ == aes256KeySize: {
+        break;
     }
-    else { /* default: */
-        return (default!, ((KeySizeError)len(key)));
-    }
-    return (newBlock(Ꮡb, key), default!);
+    default: {
+        return (default, ((KeySizeError)len(key)));
+    }}
+    return (newBlock(b, key), default);
 }
 
 internal static void newBlockExpanded(ж<blockExpanded> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    var exprᴛ1 = len(key);
-    if (exprᴛ1 == aes128KeySize) {
+    switch (len(key)) {
+    case var ᴛ when ᴛ == aes128KeySize: {
         c.rounds = aes128Rounds;
+        break;
     }
-    else if (exprᴛ1 == aes192KeySize) {
+    case var ᴛ when ᴛ == aes192KeySize: {
         c.rounds = aes192Rounds;
+        break;
     }
-    else if (exprᴛ1 == aes256KeySize) {
+    case var ᴛ when ᴛ == aes256KeySize: {
         c.rounds = aes256Rounds;
-    }
+        break;
+    }}
     expandKeyGeneric(Ꮡc, key);
 }
 
@@ -130,8 +134,8 @@ public static void Decrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src
 // EncryptBlockInternal applies the AES encryption function to one block.
 //
 // It is an internal function meant only for the gcm package.
-public static void EncryptBlockInternal(ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
-    encryptBlock(ref (Ꮡc).DerefOrNull(), dst, src);
+public static void EncryptBlockInternal(ж<Block> c, slice<byte> dst, slice<byte> src) {
+    encryptBlock(ref (c).DerefOrNull(), dst, src);
 }
 
 } // end aes_package

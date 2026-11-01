@@ -50,7 +50,16 @@ using static go.go.build.constraint_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(AndExpr))]
+[assembly: GoFieldAccess(typeof(NotExpr))]
+[assembly: GoFieldAccess(typeof(OrExpr))]
+[assembly: GoFieldAccess(typeof(SyntaxError))]
+[assembly: GoFieldAccess(typeof(TagExpr))]
+[assembly: GoFieldAccess(typeof(exprParser))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,8 +69,8 @@ using static go.go.build.constraint_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ACxapIKmgqaA/qSCpoKCpKSmgP6klIKCpoKmgoKAgqSmggAHEKSUgoKmgqaCgoCCpKaCAAgSgqaYooCCpICCpKqigtq0gpSCpoKmgtyCgqYADCDSgoCCgIKCpMiCgoKU7NKCgpSs0oKClKzSgoKUgoKCgpSU3AAIBIKSgoCCgIKktoKClIKmgoKUlIKCAAUS4oKClIKCgpSUgoKCpoKUgoKCpoKCgoKmgoKmgoKCqqKC2rSClIKmgpSUlIKU3IKCptiYspSCgoKSgoKClIKClIKUlIKmgpSAgqSmgpSAgqSmgpSssoKUgoKmpsgACAiWkoKCgoKCpLSmlNyCgoKmgoKClKiSgoKCgoKCgpSmpryytqSAgqSkgpSkgoKClIKUpIKCgpSClLyigIKCgqSqooCCgoKk", "214-222:1;280-287:1")]
-[assembly: global::go.GoPositionMap("go/build/constraint/vers.go", "vers.cs", "AA08ABICgoKUgpTaoqSkgoKUpIKClKSklJSClIKClJS+soKUrLKClA==")]
+[assembly: GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ACxapIKmgqaA/qSCpoKCpKSmgP6klIKCpoKmgoKAgqSmggAHEKSUgoKmgqaCgoCCpKaCAAgSgqaYooCCpICCpKqiguq0gpSCpoKmgtyCgqYADCDSgoCCgIKCpMiCgoKU7NKCgpSs0oKClKzSgoKUgoKCgpSU7AAIBIKCgoCCgIKktoKClIKmgoKUlIKCAAUS4oKClIKCgpSUgoKCpoKUgoKCpoKCgoKmgoKmgoKCqqKC6rSClIKmgpSUlIKU3IKCpuiYspSCgoKSgoKClIKClIKUlIKmgpSAgqSmgpSAgqSmgpSssoKUgoKmptgACAiWkoKCgoKCpLSmlNyCgoKmgoKClKiSgoKCgoKCgpSmpryytqSAgqSkgpSkgoKClIKUpIKCgpSClLyigIKCgqSqooCCgoKk", "214-222:1;280-287:1")]
+[assembly: GoPositionMap("go/build/constraint/vers.go", "vers.cs", "AA48ABICgoKUgpTqoqSkgoKUpIKClKSklJSClIKClJS+soKUrLKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.go.build;

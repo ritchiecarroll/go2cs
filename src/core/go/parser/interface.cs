@@ -20,31 +20,32 @@ using path;
 partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidSourceˢ = "invalid source"u8;
+internal static ref readonly @string invalidSourceˢ => ref invalidSourceˢᵇ;
+private static readonly @string invalidSourceˢᵇ = "invalid source"u8;
 
 // If src != nil, readSource converts src to a []byte if possible;
 // otherwise it returns an error. If src == nil, readSource returns
 // the result of reading the file specified by filename.
 internal static (slice<byte>, error) readSource(@string filename, any src) {
-    if (src != default!) {
+    if (src != nil) {
         switch (src.type()) {
         case @string s: {
-            return (slice<byte>(s), default!);
+            return (slice<byte>(s), default);
         }
         case slice<byte> s: {
-            return (s, default!);
+            return (s, default);
         }
         case ж<bytes.Buffer> s: {
             // is io.Reader, but src is already available in []byte form
             if (s != nil) {
-                return (s.Bytes(), default!);
+                return (s.Bytes(), default);
             }
             break;
         }
         case {} Δs when Δs._<io.Reader>(out var s): {
             return io.ReadAll(s);
         }}
-        return (default!, errors.New(invalidSourceˢ));
+        return (default, errors.New(invalidSourceˢ));
     }
     return os.ReadFile(filename);
 }
@@ -54,14 +55,14 @@ internal static (slice<byte>, error) readSource(@string filename, any src) {
 // parser functionality.
 partial struct Mode /*num:nuint*/;
 
-public static Mode PackageClauseOnly => /* 1 << iota */ 1;                      // stop parsing after package clause
-public static Mode ImportsOnly => 2;                            // stop parsing after import declarations
-public static Mode ParseComments => 4;                          // parse comments and add them to AST
-public static Mode Trace => 8;                                  // print a trace of parsed productions
-public static Mode DeclarationErrors => 16;                      // report declaration errors
-public static Mode SpuriousErrors => 32;                         // same as AllErrors, for backward-compatibility
-public static Mode SkipObjectResolution => 64;                   // skip deprecated identifier resolution; see ParseFile
-public static Mode AllErrors => /* SpuriousErrors */ 32;                  // report all errors (not just the first 10 on different lines)
+public static Mode PackageClauseOnly => /* 1 << iota */ 1; // stop parsing after package clause
+public static Mode ImportsOnly => 2;                       // stop parsing after import declarations
+public static Mode ParseComments => 4;                     // parse comments and add them to AST
+public static Mode Trace => 8;                             // print a trace of parsed productions
+public static Mode DeclarationErrors => 16;                // report declaration errors
+public static Mode SpuriousErrors => 32;                   // same as AllErrors, for backward-compatibility
+public static Mode SkipObjectResolution => 64;             // skip deprecated identifier resolution; see ParseFile
+public static Mode AllErrors => /* SpuriousErrors */ 32;   // report all errors (not just the first 10 on different lines)
 
 // ParseFile parses the source code of a single Go source file and returns
 // the corresponding [ast.File] node. The source code may be provided via
@@ -87,38 +88,36 @@ public static Mode AllErrors => /* SpuriousErrors */ 32;                  // rep
 // errors were found, the result is a partial AST (with [ast.Bad]* nodes
 // representing the fragments of erroneous source code). Multiple errors
 // are returned via a scanner.ErrorList which is sorted by source position.
-public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @string filename, any src, Mode mode) {
-    ж<ast.File> f = default!;
+public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> fset, @string filename, any src, Mode mode) {
+    ж<ast.File> f = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
-        ref var fset = ref Ꮡfset.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        if (Ꮡfset == nil) {
+        if (fset == nil) {
             throw panic("parser.ParseFile: no token.FileSet provided (fset == nil)");
         }
 
         // get source
         (var text, err) = readSource(filename, src);
-        if (err != default!) {
-            (f, err) = (default!, err); goto ᒐdone;
+        if (err != nil) {
+            (f, err) = (default, err); goto ᒐdone;
         }
 
-        var @file = Ꮡfset.AddFile(filename, -1, len(text));
+        var @file = fset.AddFile(filename, -1, len(text));
 
         ref var p = ref heap(new parser(), out var Ꮡp);
         var fileʗ1 = @file;
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(); if (e != nil) {
                     // resume same panic if it's not a bailout
                     ref var bail = ref heap<bailout>(out var Ꮡbail);
                     (bail, var ok) = e._<bailout>(ᐧ);
-                    if (!ok){
+                    if (!ok) {
                         throw panic(e);
-                    } else 
-                    if (bail.msg != ""u8) {
+                    } else if (bail.msg != ""u8) {
                         Ꮡp.Value.errors.Add(Ꮡp.Value.@file.Position(bail.pos), bail.msg);
                     }
                 }
@@ -137,8 +136,8 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @
 
             // Ensure the start/end are consistent,
             // whether parsing succeeded or not.
-            f.Value.FileStart = (tokenꓸPos)fileʗ1.Base();
-            f.Value.FileEnd = fileʗ1.End();
+            f.FileStart = (tokenꓸPos)fileʗ1.Base();
+            f.FileEnd = fileʗ1.End();
 
             Ꮡp.Value.errors.Sort();
             Ꮡerr.ValueSlot = Ꮡp.Value.errors.Err();
@@ -170,24 +169,24 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @
 // files with packages. For precise information about the relationship
 // between packages and files, use golang.org/x/tools/go/packages,
 // which can also optionally parse and type-check the files too.
-public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<token.FileSet> Ꮡfset, @string path, Func<fs.FileInfo, bool> filter, Mode mode) {
-    map<@string, ж<ast.Package>> pkgs = default!;
-    error first = default!;
+public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<token.FileSet> fset, @string path, Func<fs.FileInfo, bool> filter, Mode mode) {
+    map<@string, ж<ast.Package>> pkgs = default;
+    error first = default;
 
     var (list, err) = os.ReadDir(path);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     pkgs = new map<@string, ж<ast.Package>>();
     foreach (var (_, d) in list) {
-        if (d.IsDir() || !strings.HasSuffix(d.Name(), ".go"u8)) {
+        if (d.IsDir() || !strings.HasSuffix(d.Name(), ".go")) {
             continue;
         }
-        if (filter != default!) {
+        if (filter != nil) {
             var (info, errΔ1) = d.Info();
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
             if (!filter(info)) {
                 continue;
@@ -195,9 +194,8 @@ public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<toke
         }
         @string filename = filepath.Join(path, d.Name());
         {
-            var (src, errΔ2) = ParseFile(Ꮡfset, filename, default!, mode); if (errΔ2 == default!){
-                ref var name = ref heap<@string>(out var Ꮡname);
-                name = src.Value.Name.Value.Name;
+            var (src, errΔ2) = ParseFile(fset, filename, default, mode); if (errΔ2 == nil) {
+                ref var name = ref heap<@string>(src.Name.Name, out var Ꮡname);
                 var (pkg, found) = pkgs[name, ꟷ];
                 if (!found) {
                     pkg = Ꮡ(new ast.Package(
@@ -206,9 +204,8 @@ public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<toke
                     ));
                     pkgs[name] = pkg;
                 }
-                pkg.Value.Files[filename] = src;
-            } else 
-            if (first == default!) {
+                pkg.Files[filename] = src;
+            } else if (first == nil) {
                 first = errΔ2;
             }
         }
@@ -227,35 +224,33 @@ public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<toke
 // errors were found, the result is a partial AST (with [ast.Bad]* nodes
 // representing the fragments of erroneous source code). Multiple errors
 // are returned via a scanner.ErrorList which is sorted by source position.
-public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> Ꮡfset, @string filename, any src, Mode mode) {
-    ast.Expr expr = default!;
+public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> fset, @string filename, any src, Mode mode) {
+    ast.Expr expr = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
-        ref var fset = ref Ꮡfset.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        if (Ꮡfset == nil) {
+        if (fset == nil) {
             throw panic("parser.ParseExprFrom: no token.FileSet provided (fset == nil)");
         }
 
         // get source
         (var text, err) = readSource(filename, src);
-        if (err != default!) {
-            (expr, err) = (default!, err); goto ᒐdone;
+        if (err != nil) {
+            (expr, err) = (default, err); goto ᒐdone;
         }
 
         ref var p = ref heap(new parser(), out var Ꮡp);
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(); if (e != nil) {
                     // resume same panic if it's not a bailout
                     ref var bail = ref heap<bailout>(out var Ꮡbail);
                     (bail, var ok) = e._<bailout>(ᐧ);
-                    if (!ok){
+                    if (!ok) {
                         throw panic(e);
-                    } else 
-                    if (bail.msg != ""u8) {
+                    } else if (bail.msg != ""u8) {
                         Ꮡp.Value.errors.Add(Ꮡp.Value.@file.Position(bail.pos), bail.msg);
                     }
                 }
@@ -265,7 +260,7 @@ public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> Ꮡfset
         }, ref ᒐ);
 
         // parse expr
-        var @file = Ꮡfset.AddFile(filename, -1, len(text));
+        var @file = fset.AddFile(filename, -1, len(text));
         Ꮡp.init(@file, text, mode);
         expr = Ꮡp.parseRhs();
 

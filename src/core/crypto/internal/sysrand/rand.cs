@@ -19,7 +19,7 @@ internal static readonly ж<atomic.Bool> ᏑfirstUse = new StaticBox<atomic.Bool
 internal static ref atomic.Bool firstUse => ref ((StaticBox<atomic.Bool>)ᏑfirstUse).ValueSlot;
 
 internal static void warnBlocked() {
-    println((@string)"crypto/rand: blocked for 60 seconds waiting to read random data from the kernel"u8);
+    println((@string)"crypto/rand: blocked for 60 seconds waiting to read random data from the kernel");
 }
 
 // fatal is [runtime.fatal], pushed via linkname.
@@ -32,7 +32,8 @@ internal static void warnBlocked() {
 internal static bool testingOnlyFailRead;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testingSimulatedFailureˢ = "testing simulated failure"u8;
+internal static ref readonly @string testingSimulatedFailureˢ => ref testingSimulatedFailureˢᵇ;
+private static readonly @string testingSimulatedFailureˢᵇ = "testing simulated failure"u8;
 
 // Read fills b with cryptographically secure random bytes from the operating
 // system. It always fills b entirely and crashes the program irrecoverably if
@@ -52,9 +53,9 @@ public static void Read(slice<byte> b) {
             defer(() => tʗ1.Stop(), ref ᒐ);
         }
         {
-            var err = read(b); if (err != default! || testingOnlyFailRead) {
-                @string errStr = default!;
-                if (!testingOnlyFailRead){
+            var err = read(b); if (err != nil || testingOnlyFailRead) {
+                @string errStr = default;
+                if (!testingOnlyFailRead) {
                     errStr = err.Error();
                 } else {
                     errStr = testingSimulatedFailureˢ;
@@ -77,13 +78,14 @@ internal static ж<os.File> urandomFile;
 internal static error urandomErr;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string devUrandomˢ = "/dev/urandom"u8;
+internal static ref readonly @string devUrandomˢ => ref devUrandomˢᵇ;
+private static readonly @string devUrandomˢᵇ = "/dev/urandom"u8;
 
 internal static error urandomRead(slice<byte> b) {
     ᏑurandomOnce.Do(() => {
         (urandomFile, urandomErr) = os.Open(devUrandomˢ);
     });
-    if (urandomErr != default!) {
+    if (urandomErr != nil) {
         return urandomErr;
     }
     while (len(b) > 0) {
@@ -91,12 +93,12 @@ internal static error urandomRead(slice<byte> b) {
         // Note that we don't ignore EAGAIN because it should not be possible to
         // hit for a blocking read from urandom, although there were
         // unreproducible reports of it at https://go.dev/issue/9205.
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         b = b.slice(n);
     }
-    return default!;
+    return default;
 }
 
 } // end sysrand_package

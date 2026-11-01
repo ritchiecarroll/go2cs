@@ -9,7 +9,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-internal static @unsafe.Pointer _cgo_clearenv;   // pointer to C function
+internal static @unsafe.Pointer _cgo_clearenv; // pointer to C function
 
 // Clear the C environment if cgo is loaded.
 internal static void clearenv_c() {

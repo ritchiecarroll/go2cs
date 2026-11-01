@@ -11,8 +11,6 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
@@ -55,7 +53,14 @@ using static go.crypto.ecdsa_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(PrivateKey))]
+[assembly: GoFieldAccess(typeof(PublicKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.@internal.fips140.ecdsa_package.Signature))]
+[assembly: GoFieldAccess(typeof(go.crypto.elliptic_package.CurveParams))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -65,9 +70,9 @@ using static go.crypto.ecdsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "AEF+AAgCgoKUgoKUAAIQ0oKClAALLAAOAoKUlKSkpKS4ooKClAAFHAANApSkpKSkuKKCgpQAECrSgoKUgoKUpoKUpKSkupKssoKClKrSAAUiAA4ClKSkpKS4ooKClIKClAAFHgAOApSkpKSkuKKCgpQAAiQADwKClIIAAhDSgoKClJSUlJSkpKSk6KKClIKClAACGAALAoKCgpSUlJSUpKSkpLiigpSCgsqCgpT2ooKUgoKUlKSkpKToooKClJKClIKClKaCgqKClNrCgpSCgpSSgpQAAxLygoKClJSUlKSkpKS4ooKClIKClICCpNaygoKKlKaigoKUpqKCgpSmooKClAAKCsKCgriClIKmgoKClJQACxLClIKUgqaCgoKCgtjClJSCgoI=", "466-469:1;483-488:1;595-597:1;597-600:2", "453=crypto.Hash.New", "655=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABksooKmgoKmgoKCgqyygoKCpoKCgpSmAAQYAA4CgoKmgoKCipSmooKmlpKAgqSClIKUpoKClLKCgoKCppSCgoK4goKCgoKCuAACEgAJAoKUgoKUpoKCpoKClJSClIKUgriClIKCgpSCgpSClIKmmNKCgoKAgqSAgqSCgg==", "", "", "91=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
-[assembly: go.GoPositionMap("crypto/ecdsa/notboring.go", "notboring.cs", "AAsWgqSC")]
+[assembly: GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "AEJ+AAgCgoKUgoKUAAIQ0oKClAANLAAOAoKUlKSkpKS4ooKClAAGHAANApSkpKSkuKKCgpQAECrSgoKUgoKUpoKUpKSkupKssoKClKrSAAYiAA4ClKSkpKS4ooKClIKClAAGHgAOApSkpKSkuKKCgpQAAiQADwKClIIAAhDSgoKClJSUlJSkpKSk+KKClIKClAACGAALAoKCgpSUlJSUpKSkpLiigpSCgsqCgpQACgaigpSCgpSUpKSkpPiigoKUkoKUgoKUpoKCooKU6sKClIKClJKClAADEvKCgoKUlJSUpKSkpLiigoKUgoKUgIKk5rKCgoqUpqKCgpSmooKClKaigoKUAA0KwoKCuIKUgqaCgoKUlAANEsKUgpSCpoKCgoKC6MKUlIKCgg==", "466-469:1;483-488:1;595-597:1;597-600:2", "453=crypto.Hash.New", "668=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
+[assembly: GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABosooKmgoKmgoKCgqyygoKCpoKCgpSmAAUYAA4CgoKmgoKCipSmooKmlpKAgqSClIKUpoKClLKCgoKCppSCgoK4goKCgoKCuAACEgAJAoKUgoKUpoKCpoKClJSClIKUgriClIKCgpSCgpSClIKmmNKCgoKAgqSAgqSCgg==", "", "", "93=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
+[assembly: GoPositionMap("crypto/ecdsa/notboring.go", "notboring.cs", "AAsWgqSC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

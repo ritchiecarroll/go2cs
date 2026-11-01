@@ -15,13 +15,14 @@ internal static void _ᴛ6() {
     _ = x[urlPartUnknown - 3];
 }
 
-internal static readonly @string _urlPart_name = "urlPartNoneurlPartPreQueryurlPartQueryOrFragurlPartUnknown"u8;
+internal static ref readonly @string _urlPart_name => ref _urlPart_nameᵇ;
+private static readonly @string _urlPart_nameᵇ = "urlPartNoneurlPartPreQueryurlPartQueryOrFragurlPartUnknown"u8;
 
 internal static array<uint8> _urlPart_index = new uint8[]{0, 11, 26, 44, 58}.array();
 
 internal static @string String(this urlPart i) {
     if (i >= ((urlPart)(uint8)(len(_urlPart_index) - 1))) {
-        return "urlPart("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "urlPart("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _urlPart_name.slice(_urlPart_index[i], _urlPart_index[i + 1]);
 }

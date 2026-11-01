@@ -47,7 +47,7 @@ public static void SetLogger(Interface implʗp) {
 public static Interface Logger() {
     var impl = Ꮡlogger.Load();
     if (impl == nil) {
-        return default!;
+        return default;
     }
     return impl.ValueSlot;
 }
@@ -55,7 +55,7 @@ public static Interface Logger() {
 // Getenv calls Logger().Getenv, if a logger has been set.
 public static void Getenv(@string name) {
     {
-        var log = Logger(); if (log != default!) {
+        var log = Logger(); if (log != nil) {
             log.Getenv(name);
         }
     }
@@ -64,7 +64,7 @@ public static void Getenv(@string name) {
 // Open calls Logger().Open, if a logger has been set.
 public static void Open(@string name) {
     {
-        var log = Logger(); if (log != default!) {
+        var log = Logger(); if (log != nil) {
             log.Open(name);
         }
     }
@@ -73,7 +73,7 @@ public static void Open(@string name) {
 // Stat calls Logger().Stat, if a logger has been set.
 public static void Stat(@string name) {
     {
-        var log = Logger(); if (log != default!) {
+        var log = Logger(); if (log != nil) {
             log.Stat(name);
         }
     }

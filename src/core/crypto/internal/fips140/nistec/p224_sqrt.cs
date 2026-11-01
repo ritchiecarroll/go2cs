@@ -16,7 +16,7 @@ internal static readonly ж<sync.Once> Ꮡp224GGOnce = new StaticBox<sync.Once>(
 internal static ref sync.Once p224GGOnce => ref ((StaticBox<sync.Once>)Ꮡp224GGOnce).ValueSlot;
 
 // p224SqrtCandidate sets r to a square root candidate for x. r and x must not overlap.
-internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224Element> Ꮡx) {
+internal static void p224SqrtCandidate(ж<fiat.P224Element> r, ж<fiat.P224Element> x) {
     // Since p = 1 mod 4, we can't use the exponentiation by (p + 1) / 4 like
     // for the other primes. Instead, implement a variation of Tonelli–Shanks.
     // The constant-time implementation is adapted from Thomas Pornin's ecGFp5.
@@ -30,11 +30,11 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
     Ꮡp224GGOnce.Do(() => {
         p224GG = Ꮡ(new array<fiat.P224Element>(96, () => new()));
         foreach (var i in range(p224GG, 96)) {
-            if (i == 0){
-                p224GG.at<fiat.P224Element>(i).SetBytes(new byte[]{0x6a, 0x0f, 0xec, 0x67,
+            if (i == 0) {
+                p224GG.at<fiat.P224Element>(i).SetBytes(slice<byte>([0x6a, 0x0f, 0xec, 0x67,
                     0x85, 0x98, 0xa7, 0x92, 0x0c, 0x55, 0xb2, 0xd4,
                     0x0b, 0x2d, 0x6f, 0xfb, 0xbe, 0xa3, 0xd8, 0xce,
-                    0xf3, 0xfb, 0x36, 0x32, 0xdc, 0x69, 0x1b, 0x74}.slice());
+                    0xf3, 0xfb, 0x36, 0x32, 0xdc, 0x69, 0x1b, 0x74]));
             } else {
                 p224GG.at<fiat.P224Element>(i).Square(p224GG.at<fiat.P224Element>(i - 1));
             }
@@ -68,17 +68,17 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
     ж<fiat.P224Element> t0 = @new<fiat.P224Element>();
     ж<fiat.P224Element> t1 = @new<fiat.P224Element>();
 
-    Ꮡr.Square(Ꮡx);
-    Ꮡr.Mul(Ꮡx, Ꮡr);
-    Ꮡr.Square(Ꮡr);
-    Ꮡr.Mul(Ꮡx, Ꮡr);
-    t0.Square(Ꮡr);
+    r.Square(x);
+    r.Mul(x, r);
+    r.Square(r);
+    r.Mul(x, r);
+    t0.Square(r);
     for (nint s = 1; s < 3; s++) {
         t0.Square(t0);
     }
-    t0.Mul(Ꮡr, t0);
+    t0.Mul(r, t0);
     t1.Square(t0);
-    Ꮡr.Mul(Ꮡx, t1);
+    r.Mul(x, t1);
     for (nint s = 0; s < 5; s++) {
         t1.Square(t1);
     }
@@ -92,7 +92,7 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
     for (nint s = 1; s < 7; s++) {
         t1.Square(t1);
     }
-    Ꮡr.Mul(Ꮡr, t1);
+    r.Mul(r, t1);
     for (nint s = 0; s < 17; s++) {
         t1.Square(t1);
     }
@@ -105,14 +105,14 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
     for (nint s = 0; s < 31; s++) {
         t0.Square(t0);
     }
-    Ꮡr.Mul(Ꮡr, t0);
+    r.Mul(r, t0);
 
     // v = x^(2^127-1)^2 * x
-    var v = @new<fiat.P224Element>().Square(Ꮡr);
-    v.Mul(v, Ꮡx);
+    var v = @new<fiat.P224Element>().Square(r);
+    v.Mul(v, x);
 
     // r = x^(2^127-1) * x
-    Ꮡr.Mul(Ꮡr, Ꮡx);
+    r.Mul(r, x);
 
     // for i = n-1 down to 1:
     //     w = v^(2^(i-1))
@@ -130,7 +130,7 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
         }
         nint cond = w.Equal(p224MinusOne);
         v.Select(t0.Mul(v, p224GG.at<fiat.P224Element>(96 - i)), v, cond);
-        Ꮡr.Select(t0.Mul(Ꮡr, p224GG.at<fiat.P224Element>(96 - i - 1)), Ꮡr, cond);
+        r.Select(t0.Mul(r, p224GG.at<fiat.P224Element>(96 - i - 1)), r, cond);
     }
 }
 

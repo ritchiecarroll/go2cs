@@ -34,7 +34,7 @@ internal static UntypedInt profBufTagCount => /* 1 << 14 */ 16384;
 
 partial struct cpuProfile {
     internal mutex @lock;
-    internal bool on;     // profiling is on
+    internal bool on;        // profiling is on
     internal ж<profBuf> log; // profile events written here
     // extra holds extra stacks accumulated in addNonGo
     // corresponding to profiling signals arriving on
@@ -49,7 +49,7 @@ partial struct cpuProfile {
     // signal at least once every few seconds.
     internal array<uintptr> extra = new(1000);
     internal nint numExtra;
-    internal uint64 lostExtra; // count of frames lost because extra is full
+    internal uint64 lostExtra;  // count of frames lost because extra is full
     internal uint64 lostAtomic; // count of frames lost because of being in atomic64 on mips/arm; updated racily
 }
 
@@ -72,27 +72,26 @@ public static void SetCPUProfileRate(nint hz) {
         hz = 1000000;
     }
 
-    @lock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
-    if (hz > 0){
+    @lock(Ꮡcpuprof.Ꮡlock);
+    if (hz > 0) {
         if (cpuprof.on || cpuprof.log != nil) {
-            print((@string)"runtime: cannot set cpu profile rate until previous profile has finished.\n"u8);
-            unlock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
+            print((@string)"runtime: cannot set cpu profile rate until previous profile has finished.\n");
+            unlock(Ꮡcpuprof.Ꮡlock);
             return;
         }
 
         cpuprof.on = true;
         cpuprof.log = newProfBuf(1, profBufWordCount, profBufTagCount);
         var hdr = new uint64[]{(uint64)hz}.array();
-        cpuprof.log.write(nil, nanotime(), hdr[..], default!);
+        cpuprof.log.write(nil, nanotime(), hdr[..], default);
         setcpuprofilerate((int32)hz);
-    } else 
-    if (cpuprof.on) {
+    } else if (cpuprof.on) {
         setcpuprofilerate(0);
         cpuprof.on = false;
         cpuprof.addExtra();
         cpuprof.log.close();
     }
-    unlock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
+    unlock(Ꮡcpuprof.Ꮡlock);
 }
 
 // add adds the stack trace to the profile.
@@ -102,7 +101,7 @@ public static void SetCPUProfileRate(nint hz) {
 // of stack.
 //
 //go:nowritebarrierrec
-internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> ᏑtagPtr, slice<uintptr> stk) {
+internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with setcpuprofilerate.
     while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
@@ -118,7 +117,7 @@ internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> ᏑtagPtr,
         // because otherwise its write barrier behavior may not
         // be correct. See the long comment there before
         // changing the argument here.
-        cpuprof.log.write(ᏑtagPtr, nanotime(), hdr[..], stk);
+        cpuprof.log.write(tagPtr, nanotime(), hdr[..], stk);
     }
 
     Ꮡprof.of(profᴛ1.ᏑsignalLock).Store(0);
@@ -146,7 +145,7 @@ internal static void addNonGo(this ref cpuProfile Δp, slice<uintptr> stk) {
         osyield();
     }
 
-    if (cpuprof.numExtra + 1 + len(stk) < len(cpuprof.extra)){
+    if (cpuprof.numExtra + 1 + len(stk) < len(cpuprof.extra)) {
         nint i = cpuprof.numExtra;
         cpuprof.extra[i] = (uintptr)(1 + len(stk));
         copy(cpuprof.extra.slice(i + 1), stk);
@@ -239,18 +238,18 @@ public static int64 pprof_cyclesPerSecond() {
 //
 //go:linkname runtime_pprof_readProfile runtime/pprof.readProfile
 public static (slice<uint64>, slice<@unsafe.Pointer>, bool) runtime_pprof_readProfile() {
-    @lock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
+    @lock(Ꮡcpuprof.Ꮡlock);
     var log = cpuprof.log;
-    unlock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
+    unlock(Ꮡcpuprof.Ꮡlock);
     profBufReadMode readMode = profBufBlocking;
     if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
         readMode = profBufNonBlocking; // For #61768; on Darwin notes are not async-signal-safe.  See sigNoteSetup in os_darwin.go.
     }
     var (data, tags, eof) = log.read(readMode);
     if (len(data) == 0 && eof) {
-        @lock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
-        cpuprof.log = default!;
-        unlock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
+        @lock(Ꮡcpuprof.Ꮡlock);
+        cpuprof.log = default;
+        unlock(Ꮡcpuprof.Ꮡlock);
     }
     return (data, tags, eof);
 }

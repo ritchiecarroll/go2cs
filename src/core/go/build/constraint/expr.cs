@@ -152,7 +152,7 @@ internal static Expr or(Expr x, Expr y) {
 
 // A SyntaxError reports a syntax error in a parsed build expression.
 partial struct SyntaxError {
-    public nint Offset;   // byte offset in input where error was detected
+    public nint Offset; // byte offset in input where error was detected
     public @string Err; // description of error
 }
 
@@ -160,7 +160,7 @@ public static @string Error(this ref SyntaxError e) {
     return e.Err;
 }
 
-internal static error errNotConstraint = errors.New("not a build constraint"u8);
+internal static error errNotConstraint = errors.New("not a build constraint");
 
 // Parse parses a single build constraint line of the form “//go:build ...” or “// +build ...”
 // and returns the corresponding boolean expression.
@@ -175,7 +175,7 @@ public static (Expr, error) Parse(@string line) {
             return parsePlusBuildExpr(text);
         }
     }
-    return (default!, errNotConstraint);
+    return (default, errNotConstraint);
 }
 
 // IsGoBuild reports whether the line of text is a “//go:build” constraint.
@@ -186,16 +186,17 @@ public static bool IsGoBuild(@string line) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goBuildˢ = "//go:build"u8;
+internal static ref readonly @string goBuildˢ => ref goBuildˢᵇ;
+private static readonly @string goBuildˢᵇ = "//go:build"u8;
 
 // splitGoBuild splits apart the leading //go:build prefix in line from the build expression itself.
 // It returns "", false if the input is not a //go:build line or if the input contains multiple lines.
 internal static (@string expr, bool ok) splitGoBuild(@string line) {
     // A single trailing newline is OK; otherwise multiple lines are not.
-    if (len(line) > 0 && line[len(line) - 1] == (rune)'\n') {
+    if (len(line) > 0 && line[len(line) - 1] == '\n') {
         line = line.slice(0, len(line) - 1);
     }
-    if (strings.Contains(line, "\n"u8)) {
+    if (strings.Contains(line, "\n")) {
         return ("", false);
     }
 
@@ -221,7 +222,7 @@ internal static (@string expr, bool ok) splitGoBuild(@string line) {
 // An exprParser holds state for parsing a build expression.
 partial struct exprParser {
     internal @string s; // input string
-    internal nint i;   // next read location in s
+    internal nint i;    // next read location in s
     internal @string tok; // last token read
     internal bool isTag;
     internal nint pos; // position (start) of last token
@@ -230,13 +231,13 @@ partial struct exprParser {
 
 // parseExpr parses a boolean build tag expression.
 internal static (Expr x, error err) parseExpr(@string text) {
-    Expr x = default!;
-    error err = default!;
+    Expr x = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(); if (e != nil) {
                     {
                         var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok) {
                             err = new SyntaxErrorжerror(eΔ1);
@@ -250,10 +251,10 @@ internal static (Expr x, error err) parseExpr(@string text) {
 
         var p = Ꮡ(new exprParser(s: text));
         x = p.or();
-        if ((~p).tok != ""u8) {
-            throw panic(Ꮡ(new SyntaxError(Offset: (~p).pos, Err: "unexpected token "u8 + (~p).tok)));
+        if (p.tok != ""u8) {
+            throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "unexpected token "u8 + p.tok)));
         }
-        (x, err) = (x, default!);
+        (x, err) = (x, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -294,13 +295,13 @@ internal static Expr not(this ж<exprParser> Ꮡp) {
 
     p.size++;
     if (p.size > maxSize) {
-        throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "build expression too large"u8)));
+        throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "build expression too large")));
     }
     p.lex();
     if (p.tok == "!"u8) {
         p.lex();
         if (p.tok == "!"u8) {
-            throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "double negation not allowed"u8)));
+            throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "double negation not allowed")));
         }
         return not(Ꮡp.atom());
     }
@@ -308,7 +309,8 @@ internal static Expr not(this ж<exprParser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string missingCloseParenˢ = "missing close paren"u8;
+internal static ref readonly @string missingCloseParenˢ => ref missingCloseParenˢᵇ;
+private static readonly @string missingCloseParenˢᵇ = "missing close paren"u8;
 
 // atom parses a tag or a parenthesized expression.
 // On entry, the next input token HAS been lexed.
@@ -320,14 +322,13 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
 
         // first token already in p.tok
         if (p.tok == "("u8) {
-            ref var pos = ref heap<nint>(out var Ꮡpos);
-            pos = p.pos;
+            ref var pos = ref heap<nint>(p.pos, out var Ꮡpos);
             defer(() => {
                 {
-                    var e = recover(); if (e != default!) {
+                    var e = recover(); if (e != nil) {
                         {
-                            var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok && (~eΔ1).Err == "unexpected end of expression"u8) {
-                                eΔ1.Value.Err = missingCloseParenˢ;
+                            var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok && eΔ1.Err == "unexpected end of expression"u8) {
+                                eΔ1.Err = missingCloseParenˢ;
                             }
                         }
                         throw panic(e);
@@ -336,7 +337,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
             }, ref ᒐ);
             var x = Ꮡp.or();
             if (p.tok != ")"u8) {
-                throw panic(Ꮡ(new SyntaxError(Offset: pos, Err: "missing close paren"u8)));
+                throw panic(Ꮡ(new SyntaxError(Offset: pos, Err: "missing close paren")));
             }
             p.lex();
             return x;
@@ -344,7 +345,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
 
         if (!p.isTag) {
             if (p.tok == ""u8) {
-                throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "unexpected end of expression"u8)));
+                throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "unexpected end of expression")));
             }
             throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "unexpected token "u8 + p.tok)));
         }
@@ -352,7 +353,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
         p.lex();
         return tag(tok);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -364,7 +365,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
 // For any other syntax error, lex panics with a SyntaxError.
 internal static void lex(this ref exprParser p) {
     p.isTag = false;
-    while (p.i < len(p.s) && (p.s[p.i] == (rune)' ' || p.s[p.i] == (rune)'\t')) {
+    while (p.i < len(p.s) && (p.s[p.i] == ' ' || p.s[p.i] == '\t')) {
         p.i++;
     }
     if (p.i >= len(p.s)) {
@@ -373,13 +374,13 @@ internal static void lex(this ref exprParser p) {
         return;
     }
     switch (p.s[p.i]) {
-    case (rune)'(' or (rune)')' or (rune)'!': {
+    case (byte)'(' or (byte)')' or (byte)'!': {
         p.pos = p.i;
         p.i++;
         p.tok = p.s.slice(p.pos, p.i);
         return;
     }
-    case (rune)'&' or (rune)'|': {
+    case (byte)'&' or (byte)'|': {
         if (p.i + 1 >= len(p.s) || p.s[p.i + 1] != p.s[p.i]) {
             throw panic(Ꮡ(new SyntaxError(Offset: p.i, Err: "invalid syntax at "u8 + ((@string)(rune)p.s[p.i]))));
         }
@@ -391,7 +392,7 @@ internal static void lex(this ref exprParser p) {
 
     @string tag = p.s.slice(p.i);
     foreach (var (i, c) in tag) {
-        if (!unicode.IsLetter(c) && !unicode.IsDigit(c) && c != (rune)'_' && c != (rune)'.') {
+        if (!unicode.IsLetter(c) && !unicode.IsDigit(c) && c != '_' && c != '.') {
             tag = tag.slice(0, i);
             break;
         }
@@ -415,20 +416,21 @@ public static bool IsPlusBuild(@string line) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string buildˢ = "+build"u8;
+internal static ref readonly @string buildˢ => ref buildˢᵇ;
+private static readonly @string buildˢᵇ = "+build"u8;
 
 // splitPlusBuild splits apart the leading // +build prefix in line from the build expression itself.
 // It returns "", false if the input is not a // +build line or if the input contains multiple lines.
 internal static (@string expr, bool ok) splitPlusBuild(@string line) {
     // A single trailing newline is OK; otherwise multiple lines are not.
-    if (len(line) > 0 && line[len(line) - 1] == (rune)'\n') {
+    if (len(line) > 0 && line[len(line) - 1] == '\n') {
         line = line.slice(0, len(line) - 1);
     }
-    if (strings.Contains(line, "\n"u8)) {
+    if (strings.Contains(line, "\n")) {
         return ("", false);
     }
 
-    if (!strings.HasPrefix(line, "//"u8)) {
+    if (!strings.HasPrefix(line, "//")) {
         return ("", false);
     }
     line = line[(int)(len("//"))..];
@@ -453,7 +455,8 @@ internal static (@string expr, bool ok) splitPlusBuild(@string line) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ignoreˢ = "ignore"u8;
+internal static ref readonly @string ignoreˢ => ref ignoreˢᵇ;
+private static readonly @string ignoreˢᵇ = "ignore"u8;
 
 // parsePlusBuildExpr parses a legacy build tag expression (as used with “// +build”).
 internal static (Expr, error) parsePlusBuildExpr(@string text) {
@@ -463,21 +466,21 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
     const nint maxOldSize = 100;
     nint size = 0;
 
-    Expr x = default!;
+    Expr x = default;
     foreach (var clause in range<@string>(strings.FieldsSeq(text).Invoke)) {
-        Expr y = default!;
-        foreach (var iᴛ1 in range<@string>(strings.SplitSeq(clause, ","u8).Invoke)) {
+        Expr y = default;
+        foreach (var iᴛ1 in range<@string>(strings.SplitSeq(clause, ",").Invoke)) {
             var lit = iᴛ1;
-            Expr z = default!;
-            bool neg = default!;
-            if (strings.HasPrefix(lit, "!!"u8) || lit == "!"u8){
+            Expr z = default;
+            bool neg = default;
+            if (strings.HasPrefix(lit, "!!") || lit == "!"u8) {
                 z = tag(ignoreˢ);
             } else {
-                if (strings.HasPrefix(lit, "!"u8)) {
+                if (strings.HasPrefix(lit, "!")) {
                     neg = true;
                     lit = lit[(int)(len("!"))..];
                 }
-                if (isValidTag(lit)){
+                if (isValidTag(lit)) {
                     z = tag(lit);
                 } else {
                     z = tag(ignoreˢ);
@@ -486,32 +489,32 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
                     z = not(z);
                 }
             }
-            if (y == default!){
+            if (y == nil) {
                 y = z;
             } else {
                 {
                     size++; if (size > maxOldSize) {
-                        return (default!, errComplex);
+                        return (default, errComplex);
                     }
                 }
                 y = and(y, z);
             }
         }
-        if (x == default!){
+        if (x == nil) {
             x = y;
         } else {
             {
                 size++; if (size > maxOldSize) {
-                    return (default!, errComplex);
+                    return (default, errComplex);
                 }
             }
             x = or(x, y);
         }
     }
-    if (x == default!) {
+    if (x == nil) {
         x = tag(ignoreˢ);
     }
-    return (x, default!);
+    return (x, default);
 }
 
 // isValidTag reports whether the word is a valid build tag.
@@ -522,17 +525,18 @@ internal static bool isValidTag(@string word) {
         return false;
     }
     foreach (var (_, c) in word) {
-        if (!unicode.IsLetter(c) && !unicode.IsDigit(c) && c != (rune)'_' && c != (rune)'.') {
+        if (!unicode.IsLetter(c) && !unicode.IsDigit(c) && c != '_' && c != '.') {
             return false;
         }
     }
     return true;
 }
 
-internal static error errComplex = errors.New("expression too complex for // +build lines"u8);
+internal static error errComplex = errors.New("expression too complex for // +build lines");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string buildˢ2 = "// +build"u8;
+internal static ref readonly @string buildˢ2 => ref buildˢ2ᵇ;
+private static readonly @string buildˢ2ᵇ = "// +build"u8;
 
 // PlusBuildLines returns a sequence of “// +build” lines that evaluate to the build expression x.
 // If the expression is too complex to convert directly to “// +build” lines, PlusBuildLines returns an error.
@@ -546,12 +550,12 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
     x = pushNot(x, false);
 
     // Split into AND of ORs of ANDs of literals (tag or NOT tag).
-    slice<slice<slice<Expr>>> split = default!;
-    foreach (var (_, or) in appendSplitAnd(default!, x)) {
-        slice<slice<Expr>> ands = default!;
-        foreach (var (_, and) in appendSplitOr(default!, or)) {
-            slice<Expr> lits = default!;
-            foreach (var (_, lit) in appendSplitAnd(default!, and)) {
+    slice<slice<slice<Expr>>> split = default;
+    foreach (var (_, or) in appendSplitAnd(default, x)) {
+        slice<slice<Expr>> ands = default;
+        foreach (var (_, and) in appendSplitOr(default, or)) {
+            slice<Expr> lits = default;
+            foreach (var (_, lit) in appendSplitAnd(default, and)) {
                 switch (lit.type()) {
                 case ж<TagExpr> _:
                 case ж<NotExpr> _: {
@@ -559,7 +563,7 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
                     break;
                 }
                 default: {
-                    return (default!, errComplex);
+                    return (default, errComplex);
                 }}
             }
             ands = append(ands, lits);
@@ -577,23 +581,23 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
         }
     }
     if (maxOr == 1) {
-        slice<Expr> lits = default!;
+        slice<Expr> lits = default;
         foreach (var (_, or) in split) {
             lits = appendꓸꓸꓸ(lits, or[0]);
         }
-        split = new slice<slice<Expr>>[]{new slice<Expr>[]{lits}.slice()}.slice();
+        split = slice<slice<slice<Expr>>>([slice<slice<Expr>>([lits])]);
     }
 
     // Prepare the +build lines.
-    slice<@string> lines = default!;
+    slice<@string> lines = default;
     foreach (var (_, or) in split) {
         ref var line = ref heap(new strings.Builder(), out var Ꮡline);
         Ꮡline.WriteString(buildˢ2);
         foreach (var (_, and) in or) {
-            Ꮡline.WriteString(" "u8);
+            Ꮡline.WriteString(" ");
             foreach (var (i, lit) in and) {
                 if (i > 0) {
-                    Ꮡline.WriteString(","u8);
+                    Ꮡline.WriteString(",");
                 }
                 Ꮡline.WriteString(lit.String());
             }
@@ -602,7 +606,7 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
     }
 
     lines = move2heap(linesᴷ, lines);
-    return (lines, default!);
+    return (lines, default);
 }
 
 // pushNot applies DeMorgan's law to push negations down the expression,
@@ -617,11 +621,11 @@ internal static Expr pushNot(Expr x, bool not) {
     }
     case ж<NotExpr> xΔ1: {
         {
-            var (_, ok) = (~xΔ1).X._<ж<TagExpr>>(ᐧ); if (ok && !not) {
+            var (_, ok) = xΔ1.X._<ж<TagExpr>>(ᐧ); if (ok && !not) {
                 return new NotExprжExpr(xΔ1);
             }
         }
-        return pushNot((~xΔ1).X, !not);
+        return pushNot(xΔ1.X, !not);
     }
     case ж<TagExpr> xΔ1: {
         if (not) {
@@ -630,23 +634,23 @@ internal static Expr pushNot(Expr x, bool not) {
         return new TagExprжExpr(xΔ1);
     }
     case ж<AndExpr> xΔ1: {
-        var x1 = pushNot((~xΔ1).X, not);
-        var y1 = pushNot((~xΔ1).Y, not);
+        var x1 = pushNot(xΔ1.X, not);
+        var y1 = pushNot(xΔ1.Y, not);
         if (not) {
             return or(x1, y1);
         }
-        if (AreEqual(x1, (~xΔ1).X) && AreEqual(y1, (~xΔ1).Y)) {
+        if (AreEqual(x1, xΔ1.X) && AreEqual(y1, xΔ1.Y)) {
             return new AndExprжExpr(xΔ1);
         }
         return and(x1, y1);
     }
     case ж<OrExpr> xΔ1: {
-        var x1 = pushNot((~xΔ1).X, not);
-        var y1 = pushNot((~xΔ1).Y, not);
+        var x1 = pushNot(xΔ1.X, not);
+        var y1 = pushNot(xΔ1.Y, not);
         if (not) {
             return and(x1, y1);
         }
-        if (AreEqual(x1, (~xΔ1).X) && AreEqual(y1, (~xΔ1).Y)) {
+        if (AreEqual(x1, xΔ1.X) && AreEqual(y1, xΔ1.Y)) {
             return new OrExprжExpr(xΔ1);
         }
         return or(x1, y1);
@@ -658,8 +662,8 @@ internal static Expr pushNot(Expr x, bool not) {
 internal static slice<Expr> appendSplitAnd(slice<Expr> list, Expr x) {
     {
         var (xΔ1, ok) = x._<ж<AndExpr>>(ᐧ); if (ok) {
-            list = appendSplitAnd(list, (~xΔ1).X);
-            list = appendSplitAnd(list, (~xΔ1).Y);
+            list = appendSplitAnd(list, xΔ1.X);
+            list = appendSplitAnd(list, xΔ1.Y);
             return list;
         }
     }
@@ -671,8 +675,8 @@ internal static slice<Expr> appendSplitAnd(slice<Expr> list, Expr x) {
 internal static slice<Expr> appendSplitOr(slice<Expr> list, Expr x) {
     {
         var (xΔ1, ok) = x._<ж<OrExpr>>(ᐧ); if (ok) {
-            list = appendSplitOr(list, (~xΔ1).X);
-            list = appendSplitOr(list, (~xΔ1).Y);
+            list = appendSplitOr(list, xΔ1.X);
+            list = appendSplitOr(list, xΔ1.Y);
             return list;
         }
     }

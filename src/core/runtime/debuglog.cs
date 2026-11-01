@@ -31,7 +31,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(Δsliceᴛ))]
 partial class runtime_package {
 
 // debugLogBytes is the size of each per-M ring buffer. This is
@@ -68,7 +67,7 @@ internal static dlogger dlog() {
 //go:nosplit
 //go:nowritebarrierrec
 internal static dloggerFake dlogFake() {
-    return new dloggerFake(nil);
+    return new dloggerFake();
 }
 
 // go2cs generated this placeholder — func dlogImpl is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -102,7 +101,8 @@ internal static void end(this dloggerFake l) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string recordTooLargeˢ = "record too large"u8;
+internal static ref readonly @string recordTooLargeˢ => ref recordTooLargeˢᵇ;
+private static readonly @string recordTooLargeˢᵇ = "record too large"u8;
 
 //go:nosplit
 internal static void end(this ж<dloggerImpl> Ꮡl) {
@@ -123,7 +123,7 @@ internal static void end(this ж<dloggerImpl> Ꮡl) {
     }
 
     // Return the logger to the global pool.
-    Ꮡl.of(dloggerImpl.Ꮡowned).Store(0);
+    Ꮡl.Ꮡowned.Store(0);
 }
 
 internal static UntypedInt debugLogUnknown => /* 1 + iota */ 1;
@@ -150,7 +150,7 @@ internal static dloggerFake b(this dloggerFake l, bool x) {
 internal static ж<dloggerImpl> b(this ж<dloggerImpl> Ꮡl, bool x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
-    if (x){
+    if (x) {
         l.w.@byte(debugLogBoolTrue);
     } else {
         l.w.@byte(debugLogBoolFalse);
@@ -296,7 +296,8 @@ internal static dloggerFake p(this dloggerFake l, any x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string notAPointerTypeˢ = "not a pointer type"u8;
+internal static ref readonly @string notAPointerTypeˢ => ref notAPointerTypeˢᵇ;
+private static readonly @string notAPointerTypeˢᵇ = "not a pointer type"u8;
 
 //go:nosplit
 internal static ж<dloggerImpl> p(this ж<dloggerImpl> Ꮡl, any xʗp) {
@@ -304,17 +305,19 @@ internal static ж<dloggerImpl> p(this ж<dloggerImpl> Ꮡl, any xʗp) {
     ref var x = ref heap(xʗp, out var Ꮡx);
 
     l.w.@byte(debugLogPtr);
-    if (x == default!){
+    if (x == nil) {
         l.w.uvarint(0);
     } else {
         var v = efaceOf(Ꮡx);
-        var exprᴛ1 = (~v)._type.Kind();
-        if (exprᴛ1 == abi.Chan || exprᴛ1 == abi.Func || exprᴛ1 == abi.Map || exprᴛ1 == abi.Pointer || exprᴛ1 == abi.UnsafePointer) {
+        switch ((~v)._type.Kind()) {
+        case var ᴛ when ᴛ == abi.Chan || ᴛ == abi.Func || ᴛ == abi.Map || ᴛ == abi.Pointer || ᴛ == abi.UnsafePointer: {
             l.w.uvarint((uint64)(uintptr)(~v).data);
+            break;
         }
-        else { /* default: */
+        default: {
             @throw(notAPointerTypeˢ);
-        }
+            break;
+        }}
     }
     return Ꮡl;
 }
@@ -429,7 +432,8 @@ internal static UntypedInt debugLogHeaderSize => 2;
 internal static UntypedInt debugLogSyncSize => /* debugLogHeaderSize + 2*8 */ 18;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string recordWrappedAroundˢ = "record wrapped around"u8;
+internal static ref readonly @string recordWrappedAroundˢ => ref recordWrappedAroundˢᵇ;
+private static readonly @string recordWrappedAroundˢᵇ = "record wrapped around"u8;
 
 //go:nosplit
 internal static void ensure(this ref debugLogWriter l, uint64 n) {
@@ -494,8 +498,8 @@ internal static void bytes(this ref debugLogWriter l, slice<byte> x) {
 
 //go:nosplit
 internal static void varint(this ref debugLogWriter l, int64 x) {
-    uint64 u = default!;
-    if (x < 0){
+    uint64 u = default;
+    if (x < 0) {
         u = (~(uint64)x << 1) | 1; // complement i, bit 0 is 1
     } else {
         u = ((uint64)x << 1); // do not complement i, bit 0 is 0
@@ -508,7 +512,7 @@ internal static void uvarint(this ref debugLogWriter l, uint64 u) {
     nint i = 0;
     while (u >= 0x80) {
         l.buf[i] = (byte)((byte)u | 0x80);
-        u >>= (int)(7);
+        u >>= 7;
         i++;
     }
     l.buf[i] = (byte)u;
@@ -547,14 +551,14 @@ internal static uint64 skip(this ref debugLogReader r) {
 
 //go:nosplit
 internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) {
-    return (uint16)((uint16)(~r.data).b[pos % (uint64)len((~r.data).b)] | (uint16)((uint16)(~r.data).b[(pos + 1) % (uint64)len((~r.data).b)] << 8));
+    return (uint16)((uint16)r.data.b[pos % (uint64)len(r.data.b)] | (uint16)((uint16)r.data.b[(pos + 1) % (uint64)len(r.data.b)] << 8));
 }
 
 //go:nosplit
 internal static uint64 readUint64LEAt(this ref debugLogReader r, uint64 pos) {
     array<byte> b = new(8);
     foreach (var i in range(b)) {
-        b[i] = (~r.data).b[pos % (uint64)len((~r.data).b)];
+        b[i] = r.data.b[pos % (uint64)len(r.data.b)];
         pos++;
     }
     return byteorder.LEUint64(b[..]);
@@ -585,9 +589,9 @@ internal static uint64 /*tick*/ peek(this ref debugLogReader r) {
         return ~(uint64)0;
     }
     var pos = r.begin + (uint64)debugLogHeaderSize;
-    uint64 u = default!;
-    for (nuint i = (nuint)0; ᐧ ; i += 7) {
-        var b = (~r.data).b[pos % (uint64)len((~r.data).b)];
+    uint64 u = default;
+    for (nuint i = (nuint)0; ; i += 7) {
+        var b = r.data.b[pos % (uint64)len(r.data.b)];
         pos++;
         u |= (uint64)(((uint64)((byte)(b & ~0x80))).Lsh(i));
         if ((byte)(b & 0x80) == 0) {
@@ -601,10 +605,10 @@ internal static uint64 /*tick*/ peek(this ref debugLogReader r) {
 }
 
 internal static (uint64 end, uint64 tick, uint64 nano, nint Δp) header(this ref debugLogReader r) {
-    uint64 end = default!;
-    uint64 tick = default!;
-    uint64 nano = default!;
-    nint Δp = default!;
+    uint64 end = default;
+    uint64 tick = default;
+    uint64 nano = default;
+    nint Δp = default;
 
     // Read size. We've already skipped sync packets and checked
     // bounds in peek.
@@ -621,9 +625,9 @@ internal static (uint64 end, uint64 tick, uint64 nano, nint Δp) header(this ref
 }
 
 internal static uint64 uvarint(this ref debugLogReader r) {
-    uint64 u = default!;
-    for (nuint i = (nuint)0; ᐧ ; i += 7) {
-        var b = (~r.data).b[r.begin % (uint64)len((~r.data).b)];
+    uint64 u = default;
+    for (nuint i = (nuint)0; ; i += 7) {
+        var b = r.data.b[r.begin % (uint64)len(r.data.b)];
         r.begin++;
         u |= (uint64)(((uint64)((byte)(b & ~0x80))).Lsh(i));
         if ((byte)(b & 0x80) == 0) {
@@ -635,8 +639,8 @@ internal static uint64 uvarint(this ref debugLogReader r) {
 
 internal static int64 varint(this ref debugLogReader r) {
     var u = r.uvarint();
-    int64 v = default!;
-    if ((u & 1) == 0){
+    int64 v = default;
+    if ((u & 1) == 0) {
         v = (int64)(u >> 1);
     } else {
         v = ~(int64)(u >> 1);

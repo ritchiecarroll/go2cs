@@ -10,11 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +45,7 @@ using static go.@internal.filepathlite_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,8 +55,8 @@ using static go.@internal.filepathlite_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/filepathlite/path.go", "path.cs", "ABQkAA0cgoKUpoKCgoKUgpSCpqKCpoKClKiSgoKCgpSUlO6CkpKCgqaCpsbGgqaCgtiClIKC+oKmguyCpoKokqaCgpSCgoKCgoKmgpSClKiSgpSokoKUqJKClKaCgpSCgoKmqJKCgoKUqJKCgqaokoKmgqaUgoKUgqaClKiSgoKClIKUlKiSqqI=")]
-[assembly: go.GoPositionMap("internal/filepathlite/path_windows.go", "path_windows.cs", "ABEmgqaCgpSUlKaUgoKCgoKUgqaClIKUpoKClKaChJKCgoKUgoKUgqaUgoKCppQAAhDkgoKUyIKUgpSC3IKClOaCgpSmgpSCppSUAAgSgpSClKaCgpSCgqamgoKUqJKCgqaClIKClAAFEuIACBK4AAcQAAgUgpSCgpS4lKyygpSCgoKkgqaClKyygoKCgoK4qJKCgqaqwoLKgoKUgoLcgg==")]
+[assembly: GoPositionMap("internal/filepathlite/path.go", "path.cs", "ABQkAA0cgoKUpoKCgoKUgpSCpqKCpoKClKiSgoKCgpSUlO6CgpKCgqaCpsbGgqaCgtiClIKC+oKmguyCpoKokqaCgpSCgoKCgoKmgpSClKiSgpSokoKUqJKClKaCgpSCgoKmqJKCgoKUqJKCgqaokoKmgqaUgoKUgqaClKiSgoKClIKUlKiSqqI=")]
+[assembly: GoPositionMap("internal/filepathlite/path_windows.go", "path_windows.cs", "ABEmgqaCgpSUlKaUgoKCgoKUgqaClIKUpoKClKaChJKCgoKUgoKUgqaUgoKCppQAAhDkgoKUyIKUgpSC3IKClAAIBoKCpKaCpIKmpJQACBKClIKUpoKClIKCpqaCgpSokoKCpoKUgoKUAAYS4gAIErgABxAACBSClIKClLiUrLKClIKCgpSCpoKUrLKCgoKCgriokoKCpqrCgsqCgpSCgtyC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

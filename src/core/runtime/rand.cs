@@ -9,7 +9,7 @@ using chacha8rand = @internal.chacha8rand_package;
 using goarch = @internal.goarch_package;
 using Δmath = @internal.runtime.math_package;
 using @unsafe = unsafe_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal;
 using @internal.runtime;
 
@@ -37,7 +37,8 @@ internal static readonly ж<bool> ᏑreadRandomFailed = new StaticBox<bool>(defa
 internal static ref bool readRandomFailed => ref ((StaticBox<bool>)ᏑreadRandomFailed).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string randinitTwiceˢ = "randinit twice"u8;
+internal static ref readonly @string randinitTwiceˢ => ref randinitTwiceˢᵇ;
+private static readonly @string randinitTwiceˢᵇ = "randinit twice"u8;
 
 // randinit initializes the global random state.
 // It must be called before any use of grand.
@@ -51,7 +52,7 @@ internal static void randinit() {
     if (len(startupRand) >= 16 &&
         // Check that at least the first two words of startupRand weren't
         // cleared by any libc initialization.
-        !allZero(startupRand[..8]) && !allZero(startupRand[8..16])){
+        !allZero(startupRand[..8]) && !allZero(startupRand[8..16])) {
         foreach (var (i, c) in startupRand) {
             seed.Value[i % 32] ^= (byte)(c);
         }
@@ -67,12 +68,12 @@ internal static void randinit() {
     ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Init(seed.Value);
     builtin.clear(seed.slice());
 
-    if (startupRand != default!) {
+    if (startupRand != nil) {
         // Overwrite startupRand instead of clearing it, in case cgo programs
         // access it after we used it.
         while (len(startupRand) > 0) {
             var buf = new slice<byte>(8);
-            while (ᐧ) {
+            for (;;) {
                 {
                     var (x, ok) = ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Next(); if (ok) {
                         byteorder.BEPutUint64(buf, x);
@@ -84,7 +85,7 @@ internal static void randinit() {
             nint n = copy(startupRand, buf);
             startupRand = startupRand.slice(n);
         }
-        startupRand = default!;
+        startupRand = default;
     }
 
     globalRand.init = true;
@@ -118,7 +119,7 @@ internal static void readTimeRandom(slice<byte> r) {
 }
 
 internal static bool allZero(slice<byte> b) {
-    byte acc = default!;
+    byte acc = default;
     foreach (var (_, x) in b) {
         acc |= (byte)(x);
     }
@@ -126,7 +127,8 @@ internal static bool allZero(slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string randinitMissedˢ = "randinit missed"u8;
+internal static ref readonly @string randinitMissedˢ => ref randinitMissedˢᵇ;
+private static readonly @string randinitMissedˢᵇ = "randinit missed"u8;
 
 // bootstrapRand returns a random uint64 from the global random generator.
 internal static uint64 bootstrapRand() {
@@ -134,7 +136,7 @@ internal static uint64 bootstrapRand() {
     if (!globalRand.init) {
         fatal(randinitMissedˢ);
     }
-    while (ᐧ) {
+    for (;;) {
         {
             var (x, ok) = ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Next(); if (ok) {
                 unlock(ᏑglobalRand.of(globalRandᴛ1.Ꮡlock));
@@ -177,7 +179,7 @@ internal static uint64 rand() {
     // 3.7ns/call this way versus 4.3ns/call with acquirem (+16%).
     var mp = getg().Value.m;
     var c = mp.of(m.Ꮡchacha8);
-    while (ᐧ) {
+    for (;;) {
         // Note: c.Next is marked nosplit,
         // so we don't need to use mp.locks
         // on the fast path, which is that the

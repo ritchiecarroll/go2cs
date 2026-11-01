@@ -12,16 +12,6 @@
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
-global using constantꓸKind = go.go.constant_package.ΔKind;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -71,7 +61,14 @@ using static go.@internal.pkgbits_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Decoder))]
+[assembly: GoFieldAccess(typeof(Encoder))]
+[assembly: GoFieldAccess(typeof(PkgDecoder))]
+[assembly: GoFieldAccess(typeof(PkgEncoder))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -81,13 +78,13 @@ using static go.@internal.pkgbits_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsgKKAAA4igKKAABQugKKA")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADh+sKaQqrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKSgq7CkoKmooKs0uyCgoKCgqamouyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgoCqpKSkpIKCpAACHQAEJoKCgpSmgoKCAAIUAAgCgoKSgpSClKrCgoKCgpKCgoKCgqaClJSokA==")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACZMkAACEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooCCgraCgoKssoKCruKSlAASLrKWksqClIKCgoKCgqaCgpSmgoK4goKCgqaUgoKmpoKCgoCCtqaCgoKmgoKuwoKCgsqCgoIAAyIADQKCgoKUgoKokoKokoKokICmkKaQAAIQ4oKokoIAAhLiqqKCqqKCgryigoKClLiCtLSCtIK0grSCtIKCtILIooKCpoKCqJA=", "61-63:1")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "AA8cspKUlJQABBCygqaCgoKCgg==", "16-21:1")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgsqUgoKClA==")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/version.go", "version.cs", "AECIAQAHEN6S")]
+[assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsgKKAAA4igKKAABQugKKA")]
+[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADh+sKaQqrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgoCktqSkpKSCgqTIgoKClKaCgoIAAhQACAKCgoKClIKUqsKCgoKCgoKCgoKCpoKUlKiQ")]
+[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACZMkAACEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooCCgraCgoKssoKCruKClAASLrKWksqClIKCgoKCgqaCgpSmgoK4goKCgqaUgoKmpoKCgoCCtqaCgoKmgoKuwoKCgsqCgoIAAyIADQKCgoKUgoKokoKokoKokICmkKaQAAIQ4oKokoIAAhLiqqKCqqKCgryigoKClLiCtLSCtIK0grSCtIKCtILIooKCpoKCqJA=", "61-63:1")]
+[assembly: GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
+[assembly: GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "ABAcsoKUlJQABBCygqaCgoKCgg==", "16-21:1")]
+[assembly: GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtqUgoKClA==")]
+[assembly: GoPositionMap("internal/pkgbits/version.go", "version.cs", "AECIAQAHEN6S")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -25,7 +25,7 @@ partial struct Regexp {
 internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    Ꮡr.of(Regexp.Ꮡonce).Do(Ꮡr.build);
+    Ꮡr.Ꮡonce.Do(Ꮡr.build);
     return r.rx;
 }
 
@@ -66,7 +66,7 @@ public static slice<@string> SubexpNames(this ж<Regexp> Ꮡr) {
     return Ꮡr.re().SubexpNames();
 }
 
-internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"u8), ".test"u8);
+internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"), ".test");
 
 // New creates a new lazy regexp, delaying the compiling work until it is first
 // needed. If the code is being run as part of tests, the regexp compiling will

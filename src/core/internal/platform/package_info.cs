@@ -45,7 +45,7 @@ using static go.@internal.platform_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,8 +55,8 @@ using static go.@internal.platform_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/platform/supported.go", "supported.cs", "AA0cggACENKUpKSkvKKUpKS8opSkvKKUpLyipqS8ooK4yIK4lNq4lIK2gqassoKmgIK2gpSmlKS4AAgQtpSmnpSmpqYAARKUppSUppqUpriCmpSsspSkppSklKqilJQAChiSqqKqog==")]
-[assembly: go.GoPositionMap("internal/platform/zosarch.go", "zosarch.cs", "AAkUADVq")]
+[assembly: GoPositionMap("internal/platform/supported.go", "supported.cs", "AA0cggACENKkpKSkvKKkpKS8oqSkvKKkpLyitqS8ooLIyILIpNq4pILGgrassoKmgIK2gqSmpKTIAAgQxpSmrpSmpqYAAhKUpqSUpqqUpriCqpSssqSkppSklKqipJQAChiSqqKqog==")]
+[assembly: GoPositionMap("internal/platform/zosarch.go", "zosarch.cs", "AAkUADVq")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

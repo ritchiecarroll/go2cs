@@ -65,7 +65,8 @@ internal static Action set_crosscall2;
 internal static bool cgoHasExtraM;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cgoUseShouldNotBeCalledˢ = "cgoUse should not be called"u8;
+internal static ref readonly @string cgoUseShouldNotBeCalledˢ => ref cgoUseShouldNotBeCalledˢᵇ;
+private static readonly @string cgoUseShouldNotBeCalledˢᵇ = "cgoUse should not be called"u8;
 
 // cgoUse is called by cgo-generated code (using go:linkname to get at
 // an unexported name). The calls serve two purposes:
@@ -79,7 +80,8 @@ internal static void cgoUse(any _) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cgoKeepAliveShouldNotBeˢ = "cgoKeepAlive should not be called"u8;
+internal static ref readonly @string cgoKeepAliveShouldNotBeˢ => ref cgoKeepAliveShouldNotBeˢᵇ;
+private static readonly @string cgoKeepAliveShouldNotBeˢᵇ = "cgoKeepAlive should not be called"u8;
 
 // cgoKeepAlive is called by cgo-generated code (using go:linkname to get at
 // an unexported name). This call keeps its argument alive until the call site;

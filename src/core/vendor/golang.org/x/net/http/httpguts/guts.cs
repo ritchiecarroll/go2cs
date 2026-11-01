@@ -20,34 +20,34 @@ partial class httpguts_package {
 // See RFC 7230, Section 4.1.2
 public static bool ValidTrailerHeader(@string name) {
     name = textproto.CanonicalMIMEHeaderKey(name);
-    if (strings.HasPrefix(name, "If-"u8) || badTrailer[name]) {
+    if (strings.HasPrefix(name, "If-") || badTrailer[name]) {
         return false;
     }
     return true;
 }
 
 [GoLazy] partial class lazyᴛbadTrailer { internal static map<@string, bool> badTrailer = new map<@string, bool>{
-    ["Authorization"u8] = true,
-    ["Cache-Control"u8] = true,
-    ["Connection"u8] = true,
-    ["Content-Encoding"u8] = true,
-    ["Content-Length"u8] = true,
-    ["Content-Range"u8] = true,
-    ["Content-Type"u8] = true,
-    ["Expect"u8] = true,
-    ["Host"u8] = true,
-    ["Keep-Alive"u8] = true,
-    ["Max-Forwards"u8] = true,
-    ["Pragma"u8] = true,
-    ["Proxy-Authenticate"u8] = true,
-    ["Proxy-Authorization"u8] = true,
-    ["Proxy-Connection"u8] = true,
-    ["Range"u8] = true,
-    ["Realm"u8] = true,
-    ["Te"u8] = true,
-    ["Trailer"u8] = true,
-    ["Transfer-Encoding"u8] = true,
-    ["Www-Authenticate"u8] = true
+    ["Authorization"] = true,
+    ["Cache-Control"] = true,
+    ["Connection"] = true,
+    ["Content-Encoding"] = true,
+    ["Content-Length"] = true,
+    ["Content-Range"] = true,
+    ["Content-Type"] = true,
+    ["Expect"] = true,
+    ["Host"] = true,
+    ["Keep-Alive"] = true,
+    ["Max-Forwards"] = true,
+    ["Pragma"] = true,
+    ["Proxy-Authenticate"] = true,
+    ["Proxy-Authorization"] = true,
+    ["Proxy-Connection"] = true,
+    ["Range"] = true,
+    ["Realm"] = true,
+    ["Te"] = true,
+    ["Trailer"] = true,
+    ["Transfer-Encoding"] = true,
+    ["Www-Authenticate"] = true
 }; }
 
 } // end httpguts_package

@@ -4,7 +4,8 @@ namespace go.@internal;
 
 partial class goarch_package {
 
-public static readonly @string GOARCH = @"amd64"u8;
+public static ref readonly @string GOARCH => ref GOARCHᵇ;
+private static readonly @string GOARCHᵇ = @"amd64"u8;
 
 public static UntypedInt Is386 => 0;
 

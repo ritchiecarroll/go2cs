@@ -42,7 +42,7 @@ public static ΔType Underlying(this ж<Union> Ꮡu) {
 }
 
 public static @string String(this ж<Union> Ꮡu) {
-    return TypeString(new UnionжΔType(Ꮡu), default!);
+    return TypeString(new UnionжΔType(Ꮡu), default);
 }
 
 // A Term represents a term in a [Union].
@@ -72,19 +72,20 @@ public static @string String(this ж<ΔTerm> Ꮡt) {
 internal static UntypedInt maxTermCount => 100;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cannotUseComparableInˢ = "cannot use comparable in union"u8;
+internal static ref readonly @string cannotUseComparableInˢ => ref cannotUseComparableInˢᵇ;
+private static readonly @string cannotUseComparableInˢᵇ = "cannot use comparable in union"u8;
 
 // parseUnion parses uexpr as a union of expressions.
 // The result is a Union type, or Typ[Invalid] for some errors.
 internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    var (blist, tlist) = flattenUnion(default!, uexpr);
+    var (blist, tlist) = flattenUnion(default, uexpr);
     assert(len(blist) == len(tlist) - 1);
 
-    slice<ж<ΔTerm>> terms = default!;
+    slice<ж<ΔTerm>> terms = default;
 
-    ΔType u = default!;
+    ΔType u = default;
     foreach (var (i, x) in tlist) {
         var Δterm = parseTilde(Ꮡcheck, x);
         if (len(tlist) == 1 && !(~Δterm).tilde) {
@@ -93,9 +94,9 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
             // run through term validity check below).
             return (~Δterm).typ; // typ already recorded through check.typ in parseTilde
         }
-        if (len(terms) >= maxTermCount){
+        if (len(terms) >= maxTermCount) {
             if (isValid(u)) {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(x), InvalidUnion, "cannot handle more than %d union terms (implementation limitation)"u8, (nint)(maxTermCount));
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(x), InvalidUnion, "cannot handle more than %d union terms (implementation limitation)", (nint)(maxTermCount));
                 u = new BasicжΔType(Typ[Invalid]);
             }
         } else {
@@ -104,7 +105,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
         }
 
         if (i > 0) {
-            check.recordTypeAndValue(blist[i - 1], typexpr, u, default!);
+            check.recordTypeAndValue(blist[i - 1], typexpr, u, default);
         }
     }
 
@@ -127,12 +128,12 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
             var (f, _) = uΔ1._<ж<Interface>>(ᐧ);
             if ((~t).tilde) {
                 if (f != nil) {
-                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "invalid use of ~ (%s is an interface)"u8, (~t).typ);
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "invalid use of ~ (%s is an interface)", (~t).typ);
                     continue; // don't report another error for t
                 }
 
                 if (!Identical(uΔ1, (~t).typ)) {
-                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "invalid use of ~ (underlying type of %s is %s)"u8, (~t).typ, uΔ1);
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "invalid use of ~ (underlying type of %s is %s)", (~t).typ, uΔ1);
                     continue;
                 }
             }
@@ -145,15 +146,15 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
                 var tset = f.typeSet();
                 switch (ᐧ) {
                 case {} when tset.NumMethods() is not 0: {
-                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "cannot use %s in union (%s contains methods)"u8, t.OrTypedNil(), t.OrTypedNil());
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "cannot use %s in union (%s contains methods)", t.OrTypedNil(), t.OrTypedNil());
                     break;
                 }
                 case {} when AreEqual((~t).typ, universeComparable.Type()): {
                     Ꮡcheck.error(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, cannotUseComparableInˢ);
                     break;
                 }
-                case {} when (~tset).comparable: {
-                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "cannot use %s in union (%s embeds comparable)"u8, t.OrTypedNil(), t.OrTypedNil());
+                case {} when tset.comparable: {
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "cannot use %s in union (%s embeds comparable)", t.OrTypedNil(), t.OrTypedNil());
                     break;
                 }}
                 continue; // terms with interface types are not subject to the no-overlap rule
@@ -163,26 +164,27 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
             // a|a, a|~a, ~a|~a, and ~a|A (where under(A) == a).
             {
                 nint j = overlappingTerm(termsʗ1.slice(0, i), t); if (j >= 0) {
-                    Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "overlapping terms %s and %s"u8, t.OrTypedNil(), termsʗ1[j].OrTypedNil());
+                    Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "overlapping terms %s and %s", t.OrTypedNil(), termsʗ1[j].OrTypedNil());
                 }
             }
         }
-    }).describef(new ast_Exprᴠpositioner(uexpr), "check term validity %s"u8, uexpr);
+    }).describef(new ast_Exprᴠpositioner(uexpr), "check term validity %s", uexpr);
 
     return u;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string termCannotBeATypeˢ = "term cannot be a type parameter"u8;
+internal static ref readonly @string termCannotBeATypeˢ => ref termCannotBeATypeˢᵇ;
+private static readonly @string termCannotBeATypeˢᵇ = "term cannot be a type parameter"u8;
 
 internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var x = tx;
-    bool tilde = default!;
+    bool tilde = default;
     {
-        var (op, _) = x._<ж<ast.UnaryExpr>>(ᐧ); if (op != nil && (~op).Op == token.TILDE) {
-            x = op.Value.X;
+        var (op, _) = x._<ж<ast.UnaryExpr>>(ᐧ); if (op != nil && op.Op == token.TILDE) {
+            x = op.X;
             tilde = true;
         }
     }
@@ -193,8 +195,8 @@ internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
     // simply use its underlying type (like we do for other named, embedded interfaces),
     // and since the underlying type is an interface the embedding is well defined.
     if (isTypeParam(typ)) {
-        if (tilde){
-            Ꮡcheck.errorf(new ast_Exprᴠpositioner(x), MisplacedTypeParam, "type in term %s cannot be a type parameter"u8, tx);
+        if (tilde) {
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(x), MisplacedTypeParam, "type in term %s cannot be a type parameter", tx);
         } else {
             Ꮡcheck.error(new ast_Exprᴠpositioner(x), MisplacedTypeParam, termCannotBeATypeˢ);
         }
@@ -202,7 +204,7 @@ internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
     }
     var Δterm = NewTerm(tilde, typ);
     if (tilde) {
-        check.recordTypeAndValue(tx, typexpr, new UnionжΔType(Ꮡ(new Union(new ж<ΔTerm>[]{Δterm}.slice()))), default!);
+        check.recordTypeAndValue(tx, typexpr, new UnionжΔType(Ꮡ(new Union(slice<ж<ΔTerm>>([Δterm])))), default);
     }
     return Δterm;
 }
@@ -222,7 +224,7 @@ internal static nint overlappingTerm(slice<ж<ΔTerm>> terms, ж<ΔTerm> Ꮡy) {
         // disjoint requires non-nil, non-top arguments,
         // and non-interface types as term types.
         if (debug) {
-            if (x == nil || (~x).typ == default! || Ꮡy == nil || y.typ == default!) {
+            if (x == nil || (~x).typ == nil || Ꮡy == nil || y.typ == nil) {
                 throw panic("empty or top union term");
             }
         }
@@ -236,14 +238,14 @@ internal static nint overlappingTerm(slice<ж<ΔTerm>> terms, ж<ΔTerm> Ꮡy) {
 // flattenUnion walks a union type expression of the form A | B | C | ...,
 // extracting both the binary exprs (blist) and leaf types (tlist).
 internal static (slice<ast.Expr> blist, slice<ast.Expr> tlist) flattenUnion(slice<ast.Expr> list, ast.Expr x) {
-    slice<ast.Expr> blist = default!;
-    slice<ast.Expr> tlist = default!;
+    slice<ast.Expr> blist = default;
+    slice<ast.Expr> tlist = default;
 
     {
-        var (o, _) = x._<ж<ast.BinaryExpr>>(ᐧ); if (o != nil && (~o).Op == token.OR) {
-            (blist, tlist) = flattenUnion(list, (~o).X);
+        var (o, _) = x._<ж<ast.BinaryExpr>>(ᐧ); if (o != nil && o.Op == token.OR) {
+            (blist, tlist) = flattenUnion(list, o.X);
             blist = append(blist, (ast.Expr)(new ast.BinaryExprжExpr(o)));
-            x = o.Value.Y;
+            x = o.Y;
         }
     }
     return (blist, append(tlist, x));

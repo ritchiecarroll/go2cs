@@ -5,7 +5,7 @@
 namespace go.@internal.syscall;
 
 using syscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 
 partial class unix_package {
 
@@ -17,8 +17,8 @@ public static (nint, error) Openat(nint dirfd, @string path, nint flags, uint32 
     return openat(dirfd, path, flags, perm);
 }
 
-public static error Fstatat(nint dirfd, @string path, ж<syscall.Stat_t> Ꮡstat, nint flags) {
-    return fstatat(dirfd, path, Ꮡstat, flags);
+public static error Fstatat(nint dirfd, @string path, ж<syscall.Stat_t> stat, nint flags) {
+    return fstatat(dirfd, path, stat, flags);
 }
 
 //go:linkname unlinkat syscall.unlinkat

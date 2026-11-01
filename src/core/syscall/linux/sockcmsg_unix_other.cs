@@ -15,19 +15,22 @@ internal static nint cmsgAlignOf(nint salen) {
     // dragonfly needs to check ABI version at runtime, see cmsgAlignOf in
     // sockcmsg_dragonfly.go
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "aix"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "aix"u8: {
         // There is no alignment on AIX.
         salign = 1;
+        break;
     }
-    else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8) {
+    case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8: {
         // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
         // kernels still require 32-bit aligned access to network
         // subsystem.
         if (sizeofPtr == 8) {
             salign = 4;
         }
+        break;
     }
-    else if (exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8) {
+    case {} when exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8: {
         // NetBSD and OpenBSD armv7 require 64-bit alignment.
         if (runtime.GOARCH == "arm"u8) {
             salign = 8;
@@ -36,7 +39,8 @@ internal static nint cmsgAlignOf(nint salen) {
         if (runtime.GOOS == "netbsd"u8 && runtime.GOARCH == "arm64"u8) {
             salign = 16;
         }
-    }
+        break;
+    }}
 
     return (salen + salign - 1) & ~(salign - 1);
 }

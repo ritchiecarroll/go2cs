@@ -27,7 +27,7 @@ public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p)
     }
     copy(towrite, p);
     sws.off += (int64)amt;
-    return (amt, default!);
+    return (amt, default);
 }
 
 // Seek repositions the read/write position of the WriteSeeker within
@@ -35,30 +35,30 @@ public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p)
 // expand the size of the slice using SEEK_SET; trying to seek outside
 // the slice will result in an error.
 public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint whence) {
-    var exprᴛ1 = whence;
-    if (exprᴛ1 == io.SeekStart) {
+    switch (whence) {
+    case var ᴛ when ᴛ == io.SeekStart: {
         if (sws.off != offset && (offset < 0 || offset > (int64)len(sws.payload))) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, offset, len(sws.payload)));
         }
         sws.off = offset;
-        return (offset, default!);
+        return (offset, default);
     }
-    if (exprᴛ1 == io.SeekCurrent) {
+    case var ᴛ when ᴛ == io.SeekCurrent: {
         var newoff = sws.off + offset;
         if (newoff != sws.off && (newoff < 0 || newoff > (int64)len(sws.payload))) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, newoff, len(sws.payload)));
         }
         sws.off += offset;
-        return (sws.off, default!);
+        return (sws.off, default);
     }
-    if (exprᴛ1 == io.SeekEnd) {
+    case var ᴛ when ᴛ == io.SeekEnd: {
         var newoff = (int64)len(sws.payload) + offset;
         if (newoff != sws.off && (newoff < 0 || newoff > (int64)len(sws.payload))) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, newoff, len(sws.payload)));
         }
         sws.off = newoff;
-        return (sws.off, default!);
-    }
+        return (sws.off, default);
+    }}
     // other modes not supported
     return (0, fmt.Errorf("unsupported seek mode %d"u8, whence));
 }
@@ -77,7 +77,7 @@ public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) 
     }
     copy(p, toread);
     sws.off += (int64)amt;
-    return (amt, default!);
+    return (amt, default);
 }
 
 } // end slicewriter_package

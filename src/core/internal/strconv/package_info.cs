@@ -47,7 +47,12 @@ using static go.@internal.strconv_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(@decimal))]
+[assembly: GoFieldAccess(typeof(floatInfo))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,20 +62,20 @@ using static go.@internal.strconv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/strconv/atob.go", "atob.cs", "AAcUspSklOiSgpSqooKU")]
-[assembly: go.GoPositionMap("internal/strconv/atoc.go", "atoc.cs", "AAc2ABQCgoK4gqamgoKClJSmgrjIgvyClKS4goKClJSCgpQ=")]
-[assembly: go.GoPositionMap("internal/strconv/atof.go", "atof.cs", "AA4ksoKCgoKUgqYABhDSgpSCgqSClIKCpKaClIK2gqamooKCpoKUlLSCyIKCgqa0gpSCgraCgoKUgoKSgpSklIKUggAHEIKCgpSClLSCpIKUgoKUlIKmpoKmgq4ADAKmgpSUtILIgoKCgoKCgoKUgoKCgoKCgoCkgraClIKCtoKCgpSCgoKCkoKUtoKCgoKClJS0tIKUgqaCggAHEIKCgpSClLSCpIKUgoKCgpSCppKUpoKmgqaCuJTCgqaCgoLcgpSUgoK4goKCgpSUgpSCgoKUlIK4yoKCgqaCuIKmgoKCgsqClJSEkoKUhJKCgpS42gABFgAMAoKUgoKUpuyCgpSUlKSUqtKClIKClJTsgoKUlJSklAACEPKCggAHEIKClIKUgoLcgoK4goKCgoKCgoK4gpSCgoKCpoKCgpSClMrCgIK2goKmgoKmpoKAgraCgoLKgoLMkoKUgoKClKbCgIK2goKmgoKmpoKAgraCgoLKgoLMkoKUgoKClAACPAAbAoKClKaCgoKU")]
-[assembly: go.GoPositionMap("internal/strconv/atofeisel.go", "atofeisel.cs", "ABYw+oKClJSCgriCgqamgoKCgpSClLiCgqaCuIKCgoLugpSCgpSmAA0WgoKUlIKCuIKCpqaCgoKClIKUuIKCpoK4goKCgu6ClIKClA==")]
-[assembly: go.GoPositionMap("internal/strconv/atoi.go", "atoi.cs", "AAcWwgARGoKUpKSklAAKFrKUgqaUguyCgpSCtIK0grSC6qaCkoKqopS0tLaUgoKCgpSCtLS0poKmlJSUgpSUpoKmAAU4ABsClIK4gpS0griSgoKmgqaCgpSClIKClNiSlIKWgoKCgriCooKClJSClLiCrAAIDIKmgriCgoKCuJSCgqaCgpSCpoKmlA==")]
-[assembly: go.GoPositionMap("internal/strconv/ctoa.go", "ctoa.cs", "AAcc8oKssoKUlIKCgpSCgoKUgg==")]
-[assembly: go.GoPositionMap("internal/strconv/decimal.go", "decimal.cs", "ABUsgoKClIKmgoKUuIKCgoKCyIKCgsiCpKaCgpSssoKUgrqypoKCgoKCgriCgoKUggAIEpKClpKCgpSClIKClJSClJSmgoKCgoKCuIKCgoKCkoKUpoIAECQATJwBkoKClIKmqJKCgqaClpKCgoKCgoKSgpS4goKCgoKSgpSmgoKUgqiy2IKClLSCgpTKkoKUlIKUpq7igpSClLqygpSCqJKCuIKCgoKC3IKCqsKClIKCgpSClIKU")]
-[assembly: go.GoPositionMap("internal/strconv/deps.go", "deps.cs", "AAkaoKKAooCigKSCgoKUlKaApIA=")]
-[assembly: go.GoPositionMap("internal/strconv/ftoa.go", "ftoa.cs", "ABxEkgACNgAYAqqi9oKCgpSCtIK0toKCgpSWkpS0tKS4griUpoKUgqaCuIKCgpSEkoKUlLS0pLiCyoKUxrSClMakpoKCgpSmqJKCgoKCgoKClJS0tMiUtLSClKSUpoKUpLaCgsqClIKCgpSUgpS4qtSCggAQIoKU3IKCAAEQ4oKCgpSClIKCygABGgAOCLiCgpSCgoKUgoKUgoLclMrq6si4lIKkgqSCAAkWpIK4goKUpoKCgoKCgpSCyoKCgpSCgpSUppS0tLaopIK4goKCgqa4goKCgoCCpLiopIK4pqaCgpSUqJKCuIKCgriCgoKCgpSClIK4goK4gpSmgoKCgoKkgoKCgsqCgpSCgoKUlKaUtLS2")]
-[assembly: go.GoPositionMap("internal/strconv/ftoadbox.go", "ftoadbox.cs", "AAcyABICgoKUpoKUgoKCgpSCgoKClIKCkoKUgqjegoKCgpSCgoKClIKSgoKCgoLKgoKCgoKCpqqilIKCgoKUgoKCgpSCgpKClIKo3oKCgoKUgoKCgpSCkoKCgoKCyoKCgoKCgqaqooKCgqiSlIKUgqiSqJKClIKUqJKokoKCgpSCgoKUlKiSgoKokoKCrOKCgoKs4oKCgqzigoKCrOKCgoKokqiSqrQABRLCgoKowoKCqJKokqjCgoKUgqiygoKUgg==")]
-[assembly: go.GoPositionMap("internal/strconv/ftoafixed.go", "ftoafixed.cs", "AAoSAAQSABAagtyCggAWLoKClJQAESSUgpiiuAAKEtgACBCCgri4goKCgoLcgoKCgoLcgoKmAAgSgoKUgriCgpSCgg==")]
-[assembly: go.GoPositionMap("internal/strconv/itoa.go", "itoa.cs", "AAoYsoKClIKClIKssoKClIKCgpSCgoKUlIKokqqigoKClKqigoKUgoKUggAEFgAJAoK4goKC3JSCgoKCgoKmgqaCgriCgqaCuIKCpoKClIKmggALLJKClK7CAAISAAsMgoKCpoKCgoKUgtyCyoKCgoKClIKCgoKClA==")]
-[assembly: go.GoPositionMap("internal/strconv/math.go", "math.cs", "ABEikoKo0oKCgqzygpQAAhDkAAIQ5KaCgpQAAkAAHQLcABhCAAgCAAsisoKCgqaCgoKUgIKCpICCgqSAgoKk")]
-[assembly: go.GoPositionMap("internal/strconv/pow10tab.go", "pow10tab.cs", "AA8k")]
+[assembly: GoPositionMap("internal/strconv/atob.go", "atob.cs", "AAcUsqSklAAICJKClKqigpQ=")]
+[assembly: GoPositionMap("internal/strconv/atoc.go", "atoc.cs", "AAc2ABQCgoK4gqamgoKClJSmgrjIgvyClKS4goKClJSCgpQ=")]
+[assembly: GoPositionMap("internal/strconv/atof.go", "atof.cs", "AA4ksoKCgoKUgqYACBDSgpSCgqSClIKCpKaClIK2gqamooKCpoKUlLSCyIKCgqa0gpSCgraCgoKUgoKCgpSklIKUggAHEIKCgpSClLSCpIKUgoKUlIKmpoKmgq4ADAKmgpSUtILIgoKCgoKCgoKUgoKCgoKCgoCkgraClIKCtoKCgpSCgoKCgoKUtoKCgoKClJS0tIKUgqaCggAHEIKCgpSClLSCpIKUgoKCgpSCpoKUpoKmgqaCuJTCgqaCgoLcgpSUgoK4goKCgpSUgpSCgoKUlIK4yoKCgqaCuIKmgoKCgsqClJSEkoKUhJKCgpS42gABFgAMAoKUgoKUpuyCgpSUlKSUqtKClIKClJTsgoKUlJSklAACEPKCggAHEIKClIKUgoLcgoK4goKCgoKCgoK4gpSCgoKCpoKCgpSClNrCgIK2goKmgoKmpoKAgraCgoLKgoLMkoKUgoKClKbCgIK2goKmgoKmpoKAgraCgoLKgoLMkoKUgoKClAACPAAbAoKClKaCgoKU")]
+[assembly: GoPositionMap("internal/strconv/atofeisel.go", "atofeisel.cs", "ABYw+oKClJSCgriCgqamgoKCgpSClLiCgqaCuIKCgoLugpSCgpSmAA0WgoKUlIKCuIKCpqaCgoKClIKUuIKCpoK4goKCgu6ClIKClA==")]
+[assembly: GoPositionMap("internal/strconv/atoi.go", "atoi.cs", "AAcWwgAWGoKUpKSklAALFrKUgqaUguyCgpSCtIK0grSC6qaCgoKqopS0tLaUgoKCgpSCtLS0poKmlJSUgpSUpoKmAAY4ABsClIK4gpS0griSgoKmgqaCgpSClIKClOiSlIKWgoKCgriCooKClJSClLiCrAAIDIKmgriCgoKCuJSCgqaCgpSCpoKmlA==")]
+[assembly: GoPositionMap("internal/strconv/ctoa.go", "ctoa.cs", "AAcc8oKssoKUlIKCgpSCgoKUgg==")]
+[assembly: GoPositionMap("internal/strconv/decimal.go", "decimal.cs", "ABUsgoKClIKmgoKUuIKCgoKCyIKCgsiCpKaCgpSssoKUgrqypoKCgoKCgriCgoKUggAIEpKClpKCgpSClIKClJSClJSmgoKCgoKCuIKCgoKCgoKUpoIAECQATJwBkoKClIKmqJKCgqaClpKCgoKCgoKCgpS4goKCgoKCgpSmgoKUgqiy2IKClLSCgpTKkoKUlIKUpq7igpSClLqygpSCqJKCuIKCgoKC3IKCqsKClIKCgpSClIKU")]
+[assembly: GoPositionMap("internal/strconv/deps.go", "deps.cs", "AAkaoKKAooCigKSCgoKUlKaApIA=")]
+[assembly: GoPositionMap("internal/strconv/ftoa.go", "ftoa.cs", "AB5EkgACNgAYAqqiAAoGgoKClIK0grS2goKClJaSlLS0pLiCyKSmgpSCpoK4goKClISSgpSUtLSkuILKgpTGtIKUxqSmgoKClKaokoKCgoKCgoKUlLS0yJS0tIKUpJSmgpSktoKCyoKUgoKClJSClLiq1IKCABAigpTcgoIAARDigoKClIKUgoLKAAEaAA4IuIKClIKCgpSCgpSCgtyUyurqyLiUgqSCpIIACRakgriCgpSmgoKCgoKClILKgoKClIKClJSmlLS0tqikgriCgoKCpriCgoKCgIKkuKikgrimpoKClJSokoK4goKCuIKCgoKClIKUgriCgriClKaCgoKCgpSCgoKCyoKClIKCgpSUppS0tLY=")]
+[assembly: GoPositionMap("internal/strconv/ftoadbox.go", "ftoadbox.cs", "AAcyABICgoKUpoKUgoKCgpSCgoKClIKCgoKUgqjegoKCgpSCgoKClIKCgoKCgoLKgoKCgoKCpqqilIKCgoKUgoKCgpSCgoKClIKo3oKCgoKUgoKCgpSCgoKCgoKCyoKCgoKCgqaqooKCgqiSlIKUgqiSqJKClIKUqJKokoKCgpSCgoKUlKiSgoKokoKCrOKCgoKs4oKCgqzigoKCrOKCgoKokqiSqrQABRLCgoKowoKCqJKokqjCgoKUgqiygoKUgg==")]
+[assembly: GoPositionMap("internal/strconv/ftoafixed.go", "ftoafixed.cs", "AAoSAAQSABAagtyCggAWLoKClJQAESSUgpiiuAAKEtgACBCCgri4goKCgoLcgoKCgoLcgoKmAAgSgoKUgriCgpSCgg==")]
+[assembly: GoPositionMap("internal/strconv/itoa.go", "itoa.cs", "AAoYsoKClIKClIKssoKClIKCgpSCgoKUlIKokqqigoKClKqigoKUgoKUggAFFgAJAoK4goKC3JSCgoKCgoKmgqaCgriCgqaCuIKCpoKClIKmggAMLJKClK7CAAISAAsMgoKCpoKCgoKUgtyCyoKCgoKClIKCgoKClA==")]
+[assembly: GoPositionMap("internal/strconv/math.go", "math.cs", "ABEikoKo0oKCgqzygpQAAhDkAAIQ5KaCgpQAAkAAHQLcABhCAAgCAAsisoKCgqaCgoKUgIKCpICCgqSAgoKk")]
+[assembly: GoPositionMap("internal/strconv/pow10tab.go", "pow10tab.cs", "AA8k")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

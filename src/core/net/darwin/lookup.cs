@@ -27,11 +27,11 @@ partial class net_package {
 //
 // On Unix, this map is augmented by readProtocols via lookupProtocol.
 internal static map<@string, nint> protocols = new map<@string, nint>{
-    ["icmp"u8] = 1,
-    ["igmp"u8] = 2,
-    ["tcp"u8] = 6,
-    ["udp"u8] = 17,
-    ["ipv6-icmp"u8] = 58
+    ["icmp"] = 1,
+    ["igmp"] = 2,
+    ["tcp"] = 6,
+    ["udp"] = 17,
+    ["ipv6-icmp"] = 58
 };
 
 // services contains minimal mappings between services names and port
@@ -41,23 +41,23 @@ internal static map<@string, nint> protocols = new map<@string, nint>{
 //
 // On Unix, this map is augmented by readServices via goLookupPort.
 [GoLazy] partial class lazyᴛservices { internal static map<@string, map<@string, nint>> services = new map<@string, map<@string, nint>>{
-    ["udp"u8] = new map<@string, nint>{
-        ["domain"u8] = 53},
-    ["tcp"u8] = new map<@string, nint>{
-        ["ftp"u8] = 21,
-        ["ftps"u8] = 990,
-        ["gopher"u8] = 70, // ʕ◔ϖ◔ʔ
-        ["http"u8] = 80,
-        ["https"u8] = 443,
-        ["imap2"u8] = 143,
-        ["imap3"u8] = 220,
-        ["imaps"u8] = 993,
-        ["pop3"u8] = 110,
-        ["pop3s"u8] = 995,
-        ["smtp"u8] = 25,
-        ["submissions"u8] = 465,
-        ["ssh"u8] = 22,
-        ["telnet"u8] = 23}
+    ["udp"] = new map<@string, nint>{
+        ["domain"] = 53},
+    ["tcp"] = new map<@string, nint>{
+        ["ftp"] = 21,
+        ["ftps"] = 990,
+        ["gopher"] = 70, // ʕ◔ϖ◔ʔ
+        ["http"] = 80,
+        ["https"] = 443,
+        ["imap2"] = 143,
+        ["imap3"] = 220,
+        ["imaps"] = 993,
+        ["pop3"] = 110,
+        ["pop3s"] = 995,
+        ["smtp"] = 25,
+        ["submissions"] = 465,
+        ["ssh"] = 22,
+        ["telnet"] = 23}
 }; }
 
 // dnsWaitGroup can be used by tests to wait for all DNS goroutines to
@@ -73,9 +73,9 @@ internal static (nint, error) lookupProtocolMap(@string name) {
     lowerASCIIBytes(lowerProtocol.slice(0, n));
     var (proto, found) = protocols[tmpstring(lowerProtocol.slice(0, n)), ꟷ];
     if (!found || n != len(name)) {
-        return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "unknown IP protocol specified"u8, Addr: name))));
+        return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "unknown IP protocol specified", Addr: name))));
     }
-    return (proto, default!);
+    return (proto, default);
 }
 
 // maxPortBufSize is the longest reasonable name of a service
@@ -86,25 +86,27 @@ internal static (nint, error) lookupProtocolMap(@string name) {
 internal const nint maxPortBufSize = /* len("mobility-header") + 10 */ 25;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tcpˢ = "tcp"u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 
 internal static (nint port, error error) lookupPortMap(@string network, @string service) {
     var exprᴛ1 = network;
-    if (exprᴛ1 == "ip"u8) { // no hints
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "ip"u8: { // no hints
         {
-            var (p, err) = lookupPortMapWithNetwork(tcpˢ, "ip"u8, service); if (err == default!) {
-                return (p, default!);
+            var (p, err) = lookupPortMapWithNetwork(tcpˢ, "ip", service); if (err == nil) {
+                return (p, default);
             }
         }
-        return lookupPortMapWithNetwork(udpˢ, "ip"u8, service);
+        return lookupPortMapWithNetwork(udpˢ, "ip", service);
     }
-    if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
+    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
         return lookupPortMapWithNetwork(tcpˢ, tcpˢ, service);
     }
-    if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
+    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
         return lookupPortMapWithNetwork(udpˢ, udpˢ, service);
-    }
-    return (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: "unknown network"u8, Name: network + "/"u8 + service))));
+    }}
+    return (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: "unknown network", Name: network + "/"u8 + service))));
 }
 
 internal static (nint port, error error) lookupPortMapWithNetwork(@string network, @string errNetwork, @string service) {
@@ -115,13 +117,13 @@ internal static (nint port, error error) lookupPortMapWithNetwork(@string networ
             lowerASCIIBytes(lowerService.slice(0, n));
             {
                 var (portΔ1, okΔ1) = m[tmpstring(lowerService.slice(0, n)), ꟷ]; if (okΔ1 && n == len(service)) {
-                    return (portΔ1, default!);
+                    return (portΔ1, default);
                 }
             }
             return (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), errNetwork + "/"u8 + service, ""u8)));
         }
     }
-    return (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: "unknown network"u8, Name: errNetwork + "/"u8 + service))));
+    return (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: "unknown network", Name: errNetwork + "/"u8 + service))));
 }
 
 // ipVersion returns the provided network's IP version: '4', '6' or 0
@@ -131,7 +133,7 @@ internal static byte ipVersion(@string network) {
         return 0;
     }
     var n = network[len(network) - 1];
-    if (n != (rune)'4' && n != (rune)'6') {
+    if (n != '4' && n != '6') {
         n = 0;
     }
     return n;
@@ -139,7 +141,7 @@ internal static byte ipVersion(@string network) {
 
 // DefaultResolver is the resolver used by the package-level Lookup
 // functions and by Dialers without a specified Resolver.
-public static readonly ж<ж<Resolver>> ᏑDefaultResolver = new StaticBox<ж<Resolver>>(Ꮡ(new Resolver(nil)));
+public static readonly ж<ж<Resolver>> ᏑDefaultResolver = new StaticBox<ж<Resolver>>(Ꮡ(new Resolver()));
 public static ref ж<Resolver> DefaultResolver => ref ((StaticBox<ж<Resolver>>)ᏑDefaultResolver).ValueSlot;
 
 // A Resolver looks up names and numbers.
@@ -193,9 +195,9 @@ internal static bool strictErrors(this ж<Resolver> Ꮡr) {
 
 internal static ж<singleflight.Group> getLookupGroup(this ж<Resolver> Ꮡr) {
     if (Ꮡr == nil) {
-        return DefaultResolver.of(Resolver.ᏑlookupGroup);
+        return DefaultResolver.ᏑlookupGroup;
     }
-    return Ꮡr.of(Resolver.ᏑlookupGroup);
+    return Ꮡr.ᏑlookupGroup;
 }
 
 // LookupHost looks up the given host using the local resolver.
@@ -212,11 +214,11 @@ public static (slice<@string> addrs, error err) LookupHost(@string host) {
 public static (slice<@string> addrs, error err) LookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
     // Make sure that no matter what we do later, host=="" is rejected.
     if (host == ""u8) {
-        return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
+        return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
     }
     {
-        var (_, errΔ1) = netip.ParseAddr(host); if (errΔ1 == default!) {
-            return (new @string[]{host}.slice(), default!);
+        var (_, errΔ1) = netip.ParseAddr(host); if (errΔ1 == nil) {
+            return (slice<@string>([host]), default);
         }
     }
     return Ꮡr.lookupHost(ctx, host);
@@ -226,20 +228,20 @@ public static (slice<@string> addrs, error err) LookupHost(this ж<Resolver> Ꮡ
 // It returns a slice of that host's IPv4 and IPv6 addresses.
 public static (slice<IP>, error) LookupIP(@string host) {
     var (addrs, err) = DefaultResolver.LookupIPAddr(context.Background(), host);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var ips = new slice<IP>(len(addrs));
     foreach (var (i, ia) in addrs) {
         ips[i] = ia.IP;
     }
-    return (ips, default!);
+    return (ips, default);
 }
 
 // LookupIPAddr looks up host using the local resolver.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
 public static (slice<IPAddr>, error) LookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
-    return Ꮡr.lookupIPAddr(ctx, "ip"u8, host);
+    return Ꮡr.lookupIPAddr(ctx, "ip", host);
 }
 
 // LookupIP looks up host for the given network using the local resolver.
@@ -248,29 +250,31 @@ public static (slice<IPAddr>, error) LookupIPAddr(this ж<Resolver> Ꮡr, contex
 // network must be one of "ip", "ip4" or "ip6".
 public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     var (afnet, _, err) = parseNetwork(ctx, network, false);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var exprᴛ1 = afnet;
-    if (exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+        break;
     }
-    else { /* default: */
-        return (default!, ((UnknownNetworkError)network));
-    }
+    default: {
+        return (default, ((UnknownNetworkError)network));
+    }}
 
     if (host == ""u8) {
-        return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
+        return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
     }
     (var addrs, err) = Ꮡr.internetAddrList(ctx, afnet, host);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var ips = new slice<IP>(0, len(addrs));
     foreach (var (_, addr) in addrs) {
-        ips = append(ips, (~addr._<ж<IPAddr>>()).IP);
+        ips = append(ips, addr._<ж<IPAddr>>().IP);
     }
-    return (ips, default!);
+    return (ips, default);
 }
 
 // LookupNetIP looks up host using the local resolver.
@@ -283,8 +287,8 @@ public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, c
     // version at the edge. But for now (2021-10-20), this is a wrapper around
     // the old way.
     var (ips, err) = Ꮡr.LookupIP(ctx, network, host);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var ret = new slice<netipꓸAddr>(0, len(ips));
     foreach (var (_, ip) in ips) {
@@ -294,7 +298,7 @@ public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, c
             }
         }
     }
-    return (ret, default!);
+    return (ret, default);
 }
 
 // onlyValuesCtx is a context that uses an underlying context
@@ -323,7 +327,7 @@ internal static any Value(this ref onlyValuesCtx ovc, any key) {
     var selᴛ13 = ovc.lookupValues.Done();
     switch (trySelect(ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
     case 0 when selᴛ13.ꟷᐳ(out _): {
-        return default!;
+        return default;
     }
     default: {
         return ovc.lookupValues.Value(key);
@@ -343,23 +347,23 @@ internal static context.Context withUnexpiredValuesPreserved(context.Context loo
 internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     // Make sure that no matter what we do later, host=="" is rejected.
     if (host == ""u8) {
-        return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
+        return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
     }
     {
-        var (ip, err) = netip.ParseAddr(host); if (err == default!) {
-            return (new IPAddr[]{new(IP: ((IP)ip.AsSlice()).To16(), Zone: ip.Zone())}.slice(), default!);
+        var (ip, err) = netip.ParseAddr(host); if (err == nil) {
+            return (slice<IPAddr>([new(IP: ((IP)ip.AsSlice()).To16(), Zone: ip.Zone())]), default);
         }
     }
-    var (trace, _) = ctx.Value(new nettrace.TraceKey(nil))._<ж<nettrace.Trace>>(ᐧ);
-    if (trace != nil && (~trace).DNSStart != default!) {
-        (~trace).DNSStart(host);
+    var (trace, _) = ctx.Value(new nettrace.TraceKey())._<ж<nettrace.Trace>>(ᐧ);
+    if (trace != nil && trace.DNSStart != nil) {
+        trace.DNSStart(host);
     }
     // The underlying resolver func is lookupIP by default but it
     // can be overridden by tests. This is needed by net/http, so it
     // uses a context key instead of unexported variables.
     var resolverFunc = (context.Context p1, @string p2, @string p3) => Ꮡr.lookupIP(p1, p2, p3);
     {
-        var (alt, _) = ctx.Value(new nettrace.LookupIPAltResolverKey(nil))._<Func<context.Context, @string, @string, (slice<IPAddr>, error)>>(ᐧ); if (alt != default!) {
+        var (alt, _) = ctx.Value(new nettrace.LookupIPAltResolverKey())._<Func<context.Context, @string, @string, (slice<IPAddr>, error)>>(ᐧ); if (alt != nil) {
             resolverFunc = alt;
         }
     }
@@ -396,7 +400,7 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
         // let the lookup continue uncanceled, and let later
         // lookups with the same key share the result.
         // See issues 8602, 20703, 22724.
-        if (Ꮡr.getLookupGroup().ForgetUnshared(lookupKey)){
+        if (Ꮡr.getLookupGroup().ForgetUnshared(lookupKey)) {
             lookupGroupCancel();
             var dnsWaitGroupDoneʗ1 = dnsWaitGroupDone;
             goǃ(dnsWaitGroupDoneʗ1, ch, () => {
@@ -406,36 +410,36 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
             goǃ(dnsWaitGroupDoneʗ2, ch, lookupGroupCancel);
         }
         var err = newDNSError(mapErr(ctx.Err()), host, ""u8);
-        if (trace != nil && (~trace).DNSDone != default!) {
-            (~trace).DNSDone(default!, false, new DNSErrorжerror(err));
+        if (trace != nil && trace.DNSDone != nil) {
+            trace.DNSDone(default, false, new DNSErrorжerror(err));
         }
-        return (default!, new DNSErrorжerror(err));
+        return (default, new DNSErrorжerror(err));
     }
     case 1 when selᴛ15.ꟷᐳ(out var rΔ1): {
         ᏑdnsWaitGroup.Done();
         lookupGroupCancel();
         var err = rΔ1.Err;
-        if (err != default!) {
+        if (err != nil) {
             {
                 var (_, ok) = err._<ж<DNSError>>(ᐧ); if (!ok) {
                     err = new DNSErrorжerror(newDNSError(mapErr(err), host, ""u8));
                 }
             }
         }
-        if (trace != nil && (~trace).DNSDone != default!) {
+        if (trace != nil && trace.DNSDone != nil) {
             var (addrs, _) = rΔ1.Val._<slice<IPAddr>>(ᐧ);
-            (~trace).DNSDone(ipAddrsEface(addrs), rΔ1.Shared, err);
+            trace.DNSDone(ipAddrsEface(addrs), rΔ1.Shared, err);
         }
         return lookupIPReturn(rΔ1.Val, err, rΔ1.Shared);
     }}
-    return default!;
+    return default;
 }
 
 // lookupIPReturn turns the return values from singleflight.Do into
 // the return values from LookupIP.
 internal static (slice<IPAddr>, error) lookupIPReturn(any addrsi, error err, bool shared) {
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var addrs = addrsi._<slice<IPAddr>>();
     if (shared) {
@@ -443,7 +447,7 @@ internal static (slice<IPAddr>, error) lookupIPReturn(any addrsi, error err, boo
         copy(clone, addrs);
         addrs = clone;
     }
-    return (addrs, default!);
+    return (addrs, default);
 }
 
 // ipAddrsEface returns an empty interface slice of addrs.
@@ -467,29 +471,32 @@ public static (nint port, error err) LookupPort(@string network, @string service
 //
 // The network must be one of "tcp", "tcp4", "tcp6", "udp", "udp4", "udp6" or "ip".
 public static (nint port, error err) LookupPort(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
-    nint port = default!;
-    error err = default!;
+    nint port = default;
+    error err = default;
 
     (port, var needsLookup) = parsePort(service);
     if (needsLookup) {
         var exprᴛ1 = network;
-        if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8 || exprᴛ1 == "ip"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8 || exprᴛ1 == "ip"u8: {
+            break;
         }
-        else if (exprᴛ1 == ""u8) { // a hint wildcard for Go 1.0 undocumented behavior
-            network = "ip"u8;
+        case {} when exprᴛ1 == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
+            network = "ip";
+            break;
         }
-        else { /* default: */
-            return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "unknown network"u8, Addr: network))));
-        }
+        default: {
+            return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "unknown network", Addr: network))));
+        }}
         (port, err) = Ꮡr.lookupPort(ctx, network, service);
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
     }
     if (0 > port || port > 65535) {
-        return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid port"u8, Addr: service))));
+        return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid port", Addr: service))));
     }
-    return (port, default!);
+    return (port, default);
 }
 
 // LookupCNAME returns the canonical name for the given host.
@@ -527,13 +534,13 @@ public static (@string cname, error err) LookupCNAME(@string host) {
 // formatted presentation-format domain name.
 public static (@string, error) LookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
     var (cname, err) = Ꮡr.lookupCNAME(ctx, host);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     if (!isDomainName(cname)) {
         return ("", new DNSErrorжerror(Ꮡ(new DNSError(Err: errMalformedDNSRecordsDetail, Name: host))));
     }
-    return (cname, default!);
+    return (cname, default);
 }
 
 // LookupSRV tries to resolve an [SRV] query of the given service,
@@ -570,18 +577,18 @@ public static (@string cname, slice<ж<SRV>> addrs, error err) LookupSRV(@string
 // will be returned alongside the remaining results, if any.
 public static (@string, slice<ж<SRV>>, error) LookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
     var (cname, addrs, err) = Ꮡr.lookupSRV(ctx, service, proto, name);
-    if (err != default!) {
-        return ("", default!, err);
+    if (err != nil) {
+        return ("", default, err);
     }
     if (cname != ""u8 && !isDomainName(cname)) {
-        return ("", default!, new DNSErrorжerror(Ꮡ(new DNSError(Err: "SRV header name is invalid"u8, Name: name))));
+        return ("", default, new DNSErrorжerror(Ꮡ(new DNSError(Err: "SRV header name is invalid", Name: name))));
     }
     var filteredAddrs = new slice<ж<SRV>>(0, len(addrs));
     foreach (var (_, addr) in addrs) {
         if (addr == nil) {
             continue;
         }
-        if (!isDomainName((~addr).Target)) {
+        if (!isDomainName(addr.Target)) {
             continue;
         }
         filteredAddrs = append(filteredAddrs, addr);
@@ -589,7 +596,7 @@ public static (@string, slice<ж<SRV>>, error) LookupSRV(this ж<Resolver> Ꮡr,
     if (len(addrs) != len(filteredAddrs)) {
         return (cname, filteredAddrs, new DNSErrorжerror(Ꮡ(new DNSError(Err: errMalformedDNSRecordsDetail, Name: name))));
     }
-    return (cname, filteredAddrs, default!);
+    return (cname, filteredAddrs, default);
 }
 
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
@@ -613,19 +620,19 @@ public static (slice<ж<MX>>, error) LookupMX(@string name) {
 // and an error will be returned alongside the remaining results, if any.
 public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (records, err) = Ꮡr.lookupMX(ctx, name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var filteredMX = new slice<ж<MX>>(0, len(records));
     foreach (var (_, mx) in records) {
         if (mx == nil) {
             continue;
         }
-        if (!isDomainName((~mx).Host)) {
+        if (!isDomainName(mx.Host)) {
             // Check for IP address. In practice we observe
             // these with a trailing dot, so strip that.
-            var (ip, errΔ1) = netip.ParseAddr(stringslite.TrimSuffix((~mx).Host, "."u8));
-            if (errΔ1 != default! || ip.Zone() != ""u8) {
+            var (ip, errΔ1) = netip.ParseAddr(stringslite.TrimSuffix(mx.Host, "."));
+            if (errΔ1 != nil || ip.Zone() != ""u8) {
                 continue;
             }
         }
@@ -634,7 +641,7 @@ public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Co
     if (len(records) != len(filteredMX)) {
         return (filteredMX, new DNSErrorжerror(Ꮡ(new DNSError(Err: errMalformedDNSRecordsDetail, Name: name))));
     }
-    return (filteredMX, default!);
+    return (filteredMX, default);
 }
 
 // LookupNS returns the DNS NS records for the given domain name.
@@ -658,15 +665,15 @@ public static (slice<ж<NS>>, error) LookupNS(@string name) {
 // will be returned alongside the remaining results, if any.
 public static (slice<ж<NS>>, error) LookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (records, err) = Ꮡr.lookupNS(ctx, name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var filteredNS = new slice<ж<NS>>(0, len(records));
     foreach (var (_, ns) in records) {
         if (ns == nil) {
             continue;
         }
-        if (!isDomainName((~ns).Host)) {
+        if (!isDomainName(ns.Host)) {
             continue;
         }
         filteredNS = append(filteredNS, ns);
@@ -674,7 +681,7 @@ public static (slice<ж<NS>>, error) LookupNS(this ж<Resolver> Ꮡr, context.Co
     if (len(records) != len(filteredNS)) {
         return (filteredNS, new DNSErrorжerror(Ꮡ(new DNSError(Err: errMalformedDNSRecordsDetail, Name: name))));
     }
-    return (filteredNS, default!);
+    return (filteredNS, default);
 }
 
 // LookupTXT returns the DNS TXT records for the given domain name.
@@ -720,8 +727,8 @@ public static (slice<@string> names, error err) LookupAddr(@string addr) {
 // out and an error will be returned alongside the remaining results, if any.
 public static (slice<@string>, error) LookupAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
     var (names, err) = Ꮡr.lookupAddr(ctx, addr);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var filteredNames = new slice<@string>(0, len(names));
     foreach (var (_, name) in names) {
@@ -732,13 +739,13 @@ public static (slice<@string>, error) LookupAddr(this ж<Resolver> Ꮡr, context
     if (len(names) != len(filteredNames)) {
         return (filteredNames, new DNSErrorжerror(Ꮡ(new DNSError(Err: errMalformedDNSRecordsDetail, Name: addr))));
     }
-    return (filteredNames, default!);
+    return (filteredNames, default);
 }
 
 // errMalformedDNSRecordsDetail is the DNSError detail which is returned when a Resolver.Lookup...
 // method receives DNS records which contain invalid DNS names. This may be returned alongside
 // results which have had the malformed records filtered out.
-internal static @string errMalformedDNSRecordsDetail = "DNS response contained records which contain invalid names"u8;
+internal static @string errMalformedDNSRecordsDetail = "DNS response contained records which contain invalid names";
 
 // dial makes a new connection to the provided server (which must be
 // an IP address) with the provided network type, using either r.Dial
@@ -751,18 +758,18 @@ internal static (Conn, error) dial(this ж<Resolver> Ꮡr, context.Context ctx, 
     // call back here to translate it. The DNS config parser has
     // already checked that all the cfg.servers are IP
     // addresses, which Dial will use without a DNS lookup.
-    Conn c = default!;
-    error err = default!;
-    if (Ꮡr != nil && r.Dial != default!){
+    Conn c = default;
+    error err = default;
+    if (Ꮡr != nil && r.Dial != nil) {
         (c, err) = r.Dial(ctx, network, server);
     } else {
         ref var d = ref heap(new Dialer(), out var Ꮡd);
         (c, err) = Ꮡd.DialContext(ctx, network, server);
     }
-    if (err != default!) {
-        return (default!, mapErr(err));
+    if (err != nil) {
+        return (default, mapErr(err));
     }
-    return (c, default!);
+    return (c, default);
 }
 
 // goLookupSRV returns the SRV records for a target name, built either
@@ -775,38 +782,38 @@ internal static (Conn, error) dial(this ж<Resolver> Ꮡr, context.Context ctx, 
 //
 // The records are sorted by weight.
 internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
-    @string target = default!;
-    slice<ж<SRV>> srvs = default!;
-    error err = default!;
+    @string target = default;
+    slice<ж<SRV>> srvs = default;
+    error err = default;
 
-    if (service == ""u8 && proto == ""u8){
+    if (service == ""u8 && proto == ""u8) {
         target = name;
     } else {
         target = "_"u8 + service + "._"u8 + proto + "."u8 + name;
     }
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, err) = Ꮡr.lookup(ctx, target, dnsmessage.TypeSRV, nil);
-    if (err != default!) {
-        return ("", default!, err);
+    if (err != nil) {
+        return ("", default, err);
     }
     dnsmessage.Name cname = new();
-    while (ᐧ) {
+    for (;;) {
         var (h, errΔ1) = p.AnswerHeader();
         if (AreEqual(errΔ1, dnsmessage.ErrSectionDone)) {
             break;
         }
-        if (errΔ1 != default!) {
-            return ("", default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                Err: "cannot unmarshal DNS message"u8,
+        if (errΔ1 != nil) {
+            return ("", default, new DNSErrorжerror(Ꮡ(new DNSError(
+                Err: "cannot unmarshal DNS message",
                 Name: name,
                 Server: server
             ))));
         }
         if (h.Type != dnsmessage.TypeSRV) {
             {
-                var errΔ2 = p.SkipAnswer(); if (errΔ2 != default!) {
-                    return ("", default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                        Err: "cannot unmarshal DNS message"u8,
+                var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
+                    return ("", default, new DNSErrorжerror(Ꮡ(new DNSError(
+                        Err: "cannot unmarshal DNS message",
                         Name: name,
                         Server: server
                     ))));
@@ -818,9 +825,9 @@ internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(thi
             cname = h.Name.ΔClone();
         }
         (var srv, errΔ1) = p.SRVResource();
-        if (errΔ1 != default!) {
-            return ("", default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                Err: "cannot unmarshal DNS message"u8,
+        if (errΔ1 != nil) {
+            return ("", default, new DNSErrorжerror(Ꮡ(new DNSError(
+                Err: "cannot unmarshal DNS message",
                 Name: name,
                 Server: server
             ))));
@@ -828,34 +835,34 @@ internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(thi
         srvs = append(srvs, Ꮡ(new SRV(Target: srv.Target.String(), Port: srv.Port, Priority: srv.Priority, Weight: srv.Weight)));
     }
     ((byPriorityWeight)srvs).sort();
-    return (cname.String(), srvs, default!);
+    return (cname.String(), srvs, default);
 }
 
 // goLookupMX returns the MX records for name.
 internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeMX, nil);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    slice<ж<MX>> mxs = default!;
-    while (ᐧ) {
+    slice<ж<MX>> mxs = default;
+    for (;;) {
         var (h, errΔ1) = p.AnswerHeader();
         if (AreEqual(errΔ1, dnsmessage.ErrSectionDone)) {
             break;
         }
-        if (errΔ1 != default!) {
-            return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                Err: "cannot unmarshal DNS message"u8,
+        if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                Err: "cannot unmarshal DNS message",
                 Name: name,
                 Server: server
             ))));
         }
         if (h.Type != dnsmessage.TypeMX) {
             {
-                var errΔ2 = p.SkipAnswer(); if (errΔ2 != default!) {
-                    return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                        Err: "cannot unmarshal DNS message"u8,
+                var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
+                    return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                        Err: "cannot unmarshal DNS message",
                         Name: name,
                         Server: server
                     ))));
@@ -864,9 +871,9 @@ internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, contex
             continue;
         }
         (var mx, errΔ1) = p.MXResource();
-        if (errΔ1 != default!) {
-            return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                Err: "cannot unmarshal DNS message"u8,
+        if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                Err: "cannot unmarshal DNS message",
                 Name: name,
                 Server: server
             ))));
@@ -874,7 +881,7 @@ internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, contex
         mxs = append(mxs, Ꮡ(new MX(Host: mx.MX.String(), Pref: mx.Pref)));
     }
     ((byPref)mxs).sort();
-    return (mxs, default!);
+    return (mxs, default);
 }
 
 // goLookupNS returns the NS records for name.
@@ -883,27 +890,27 @@ internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, contex
 
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeNS, nil);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    slice<ж<NS>> nss = default!;
-    while (ᐧ) {
+    slice<ж<NS>> nss = default;
+    for (;;) {
         var (h, errΔ1) = p.AnswerHeader();
         if (AreEqual(errΔ1, dnsmessage.ErrSectionDone)) {
             break;
         }
-        if (errΔ1 != default!) {
-            return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                Err: "cannot unmarshal DNS message"u8,
+        if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                Err: "cannot unmarshal DNS message",
                 Name: name,
                 Server: server
             ))));
         }
         if (h.Type != dnsmessage.TypeNS) {
             {
-                var errΔ2 = p.SkipAnswer(); if (errΔ2 != default!) {
-                    return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                        Err: "cannot unmarshal DNS message"u8,
+                var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
+                    return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                        Err: "cannot unmarshal DNS message",
                         Name: name,
                         Server: server
                     ))));
@@ -912,9 +919,9 @@ internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, contex
             continue;
         }
         (var ns, errΔ1) = p.NSResource();
-        if (errΔ1 != default!) {
-            return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                Err: "cannot unmarshal DNS message"u8,
+        if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                Err: "cannot unmarshal DNS message",
                 Name: name,
                 Server: server
             ))));
@@ -922,34 +929,34 @@ internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, contex
         nss = append(nssᴷ, nss, Ꮡ(new NS(Host: ns.NS.String())));
     }
     nss = move2heap(nssᴷ, nss);
-    return (nss, default!);
+    return (nss, default);
 }
 
 // goLookupTXT returns the TXT records from name.
 internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeTXT, nil);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    slice<@string> txts = default!;
-    while (ᐧ) {
+    slice<@string> txts = default;
+    for (;;) {
         var (h, errΔ1) = p.AnswerHeader();
         if (AreEqual(errΔ1, dnsmessage.ErrSectionDone)) {
             break;
         }
-        if (errΔ1 != default!) {
-            return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                Err: "cannot unmarshal DNS message"u8,
+        if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                Err: "cannot unmarshal DNS message",
                 Name: name,
                 Server: server
             ))));
         }
         if (h.Type != dnsmessage.TypeTXT) {
             {
-                var errΔ2 = p.SkipAnswer(); if (errΔ2 != default!) {
-                    return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                        Err: "cannot unmarshal DNS message"u8,
+                var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
+                    return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                        Err: "cannot unmarshal DNS message",
                         Name: name,
                         Server: server
                     ))));
@@ -958,9 +965,9 @@ internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, cont
             continue;
         }
         (var txt, errΔ1) = p.TXTResource();
-        if (errΔ1 != default!) {
-            return (default!, new DNSErrorжerror(Ꮡ(new DNSError(
-                Err: "cannot unmarshal DNS message"u8,
+        if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                Err: "cannot unmarshal DNS message",
                 Name: name,
                 Server: server
             ))));
@@ -981,12 +988,14 @@ internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, cont
         }
         txts = append(txts, (@string)txtJoin);
     }
-    return (txts, default!);
+    return (txts, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noCnameRecordReceivedˢ = "no CNAME record received"u8;
-internal static readonly @string couldNotParseCnameRecordˢ = "could not parse CNAME record"u8;
+internal static ref readonly @string noCnameRecordReceivedˢ => ref noCnameRecordReceivedˢᵇ;
+private static readonly @string noCnameRecordReceivedˢᵇ = "no CNAME record received"u8;
+internal static ref readonly @string couldNotParseCnameRecordˢ => ref couldNotParseCnameRecordˢᵇ;
+private static readonly @string couldNotParseCnameRecordˢᵇ = "could not parse CNAME record"u8;
 
 internal static (@string, error) parseCNAMEFromResources(slice<dnsmessage.Resource> resources) {
     if (len(resources) == 0) {
@@ -996,7 +1005,7 @@ internal static (@string, error) parseCNAMEFromResources(slice<dnsmessage.Resour
     if (!ok) {
         return ("", errors.New(couldNotParseCnameRecordˢ));
     }
-    return ((~c).CNAME.String(), default!);
+    return (c.CNAME.String(), default);
 }
 
 } // end net_package

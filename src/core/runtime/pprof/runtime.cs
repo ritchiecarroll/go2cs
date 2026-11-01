@@ -42,7 +42,7 @@ internal static void runtime_goroutineLeakGC() {
 // A new goroutine inherits the labels of the goroutine that created it.
 // This is a lower-level API than [Do], which should be used instead when possible.
 public static void SetGoroutineLabels(context.Context ctx) {
-    var (ctxLabels, _) = ctx.Value(new labelContextKey(nil))._<ж<labelMap>>(ᐧ);
+    var (ctxLabels, _) = ctx.Value(new labelContextKey())._<ж<labelMap>>(ᐧ);
     runtime_setProfLabel(@unsafe.Pointer.FromPinnedBox(ctxLabels));
 }
 

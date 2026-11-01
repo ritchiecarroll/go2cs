@@ -151,13 +151,14 @@ internal static bool embedded(this Δname n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string readVarintˢ = "read varint"u8;
+internal static ref readonly @string readVarintˢ => ref readVarintˢᵇ;
+private static readonly @string readVarintˢᵇ = "read varint"u8;
 
 // readVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
 internal static (nint, nint) readVarint(this Δname n, nint off) {
     nint v = 0;
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         var x = n.data(off + i, readVarintˢ).Value;
         v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
@@ -167,7 +168,8 @@ internal static (nint, nint) readVarint(this Δname n, nint off) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nonEmptyStringˢ = "non-empty string"u8;
+internal static ref readonly @string nonEmptyStringˢ => ref nonEmptyStringˢᵇ;
+private static readonly @string nonEmptyStringˢᵇ = "non-empty string"u8;
 
 internal static @string name(this Δname n) {
     if (n.bytes == nil) {
@@ -187,8 +189,10 @@ internal static @string tag(this Δname n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nameFlagFieldˢ = "name flag field"u8;
-internal static readonly @string nameOffsetFieldˢ = "name offset field"u8;
+internal static ref readonly @string nameFlagFieldˢ => ref nameFlagFieldˢᵇ;
+private static readonly @string nameFlagFieldˢᵇ = "name flag field"u8;
+internal static ref readonly @string nameOffsetFieldˢ => ref nameOffsetFieldˢᵇ;
+private static readonly @string nameOffsetFieldˢᵇ = "name offset field"u8;
 
 internal static @string pkgPath(abiꓸName n) {
     if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << 2))) == 0) {
@@ -248,7 +252,7 @@ internal static ж<abi.Type> common(this rtype t) {
 internal static slice<abi.Method> exportedMethods(this rtype t) {
     var ut = t.uncommon();
     if (ut == nil) {
-        return default!;
+        return default;
     }
     return ut.ExportedMethods();
 }
@@ -270,13 +274,13 @@ internal static @string Name(this rtype t) {
     @string s = t.String();
     nint i = len(s) - 1;
     nint sqBrackets = 0;
-    while (i >= 0 && (s[i] != (rune)'.' || sqBrackets != 0)) {
+    while (i >= 0 && (s[i] != '.' || sqBrackets != 0)) {
         switch (s[i]) {
-        case (rune)']': {
+        case (byte)']': {
             sqBrackets++;
             break;
         }
-        case (rune)'[': {
+        case (byte)'[': {
             sqBrackets--;
             break;
         }}
@@ -285,16 +289,16 @@ internal static @string Name(this rtype t) {
     return s.slice(i + 1);
 }
 
-internal static rtype toRType(ж<abi.Type> Ꮡt) {
-    return new rtype(Ꮡt);
+internal static rtype toRType(ж<abi.Type> t) {
+    return new rtype(t);
 }
 
-internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
-    var et = Ꮡt.Elem();
+internal static ж<abi.Type> elem(ж<abi.Type> t) {
+    var et = t.Elem();
     if (et != nil) {
         return et;
     }
-    throw panic("reflect: Elem of invalid type " + toRType(Ꮡt).String());
+    throw panic("reflect: Elem of invalid type " + toRType(t).String());
 }
 
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -328,7 +332,7 @@ internal static nint NumField(this rtype t) {
     if (tt == nil) {
         throw panic("reflect: NumField of non-struct type");
     }
-    return len((~tt).Fields);
+    return len(tt.Fields);
 }
 
 internal static nint NumIn(this rtype t) {
@@ -336,7 +340,7 @@ internal static nint NumIn(this rtype t) {
     if (tt == nil) {
         throw panic("reflect: NumIn of non-func type");
     }
-    return (nint)(~tt).InCount;
+    return (nint)tt.InCount;
 }
 
 internal static nint NumOut(this rtype t) {
@@ -375,7 +379,7 @@ public static ΔType TypeOf(any i) {
 // go2cs generated this placeholder — func Implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static bool AssignableTo(this rtype t, ΔType u) {
-    if (u == default!) {
+    if (u == nil) {
         throw panic("reflect: nil type passed to Type.AssignableTo");
     }
     var uu = u.common();
@@ -384,7 +388,7 @@ internal static bool AssignableTo(this rtype t, ΔType u) {
 }
 
 internal static bool Comparable(this rtype t) {
-    return t.Equal != default!;
+    return t.Equal != nil;
 }
 
 // go2cs generated this placeholder — func implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -435,11 +439,11 @@ internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, boo
 // a nil *rtype must be replaced by a nil Type, but in gccgo this
 // function takes care of ensuring that multiple *rtype for the same
 // type are coalesced into a single Type.
-internal static ΔType toType(ж<abi.Type> Ꮡt) {
-    if (Ꮡt == nil) {
-        return default!;
+internal static ΔType toType(ж<abi.Type> t) {
+    if (t == nil) {
+        return default;
     }
-    return toRType(Ꮡt);
+    return toRType(t);
 }
 
 } // end reflectlite_package

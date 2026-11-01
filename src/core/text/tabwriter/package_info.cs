@@ -45,7 +45,7 @@ using static go.text.tabwriter_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,7 +55,7 @@ using static go.text.tabwriter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUtsqAgoCC/pKCgoKCgoIAMoQBAA8CgpSCgoKCgpSUlJSUqJKCgoKCgpSUAAgSgoKClIK4goKClKiCloKUgqaCgoKUgrimlKKCgqaUgpSmlIK4goKCgoKmgpSCyqaCpqau4oKCgpSCAAkUgqaCgoKCgqaUgIK2gtyCyoKCgriokoKokoIAChiSlKSkAAMQwpSCgtiUgqqigoKCgqbigIKUlICCgqTErMLaAAgCgoLsxIKUlLiCpsoACgKmgoKUpoKCgoKUgtyClO6CgoKClLiUgoKCzJSCgpSCgtyCgtqi")]
+[assembly: GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUtsqAgoCC/pKCgoKCgoIAMoQBAA8CgpSCgoKCgpSUlJSUqJKCgoKCgpSUAAgSgoKClIK4goKClKiCloKUgqaCgoKUgrimlKKCgqaUgpSmlIK4goKCgoKmgpSCyqaCpqau4oKCgpSCAAkUgqaCgoKCgqaUgIK2gtyCyoKCgriokoKokoIAChiSlLS0AAQQwpSCgvikgqqigoKCgqbigIKUlICCgqTErMLqAAgCgoLsxIKUlLiCptoACgKmgoKUpoKCgoKUgtyClP6CgoKClMiUgoKC3JSCgpSCgtyCgtqi")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

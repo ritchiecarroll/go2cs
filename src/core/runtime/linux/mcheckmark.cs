@@ -34,7 +34,8 @@ partial struct checkmarksMap {
 internal static bool useCheckmark = false;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string outOfMemoryAllocatingˢ4 = "out of memory allocating checkmarks bitmap"u8;
+internal static ref readonly @string outOfMemoryAllocatingˢ4 => ref outOfMemoryAllocatingˢ4ᵇ;
+private static readonly @string outOfMemoryAllocatingˢ4ᵇ = "out of memory allocating checkmarks bitmap"u8;
 
 // startCheckmarks prepares for the checkmarks phase.
 //
@@ -45,18 +46,18 @@ internal static void startCheckmarks() {
     // Clear all checkmarks.
     void clearCheckmarks(arenaIdx ai) {
         var arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
-        var bitmap = arena.Value.checkmarks;
+        var bitmap = arena.checkmarks;
 
-        if (bitmap == nil){
+        if (bitmap == nil) {
             // Allocate bitmap on first use.
-            bitmap = (ж<checkmarksMap>)(uintptr)(persistentalloc(/* unsafe.Sizeof(*bitmap) */ (uintptr)1048576, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+            bitmap = (ж<checkmarksMap>)(uintptr)(persistentalloc(/* unsafe.Sizeof(*bitmap) */ (uintptr)1048576, 0, Ꮡmemstats.ᏑgcMiscSys));
             if (bitmap == nil) {
                 @throw(outOfMemoryAllocatingˢ4);
             }
-            arena.Value.checkmarks = bitmap;
+            arena.checkmarks = bitmap;
         } else {
             // Otherwise clear the existing bitmap.
-            builtin.clear((~bitmap).b[..]);
+            builtin.clear(bitmap.b[..]);
         }
     }
     foreach (var (_, ai) in mheap_.heapArenas) {
@@ -71,7 +72,8 @@ internal static void startCheckmarks() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gcWorkNotFlushedˢ = "GC work not flushed"u8;
+internal static ref readonly @string gcWorkNotFlushedˢ => ref gcWorkNotFlushedˢᵇ;
+private static readonly @string gcWorkNotFlushedˢᵇ = "GC work not flushed"u8;
 
 // endCheckmarks ends the checkmarks phase.
 internal static void endCheckmarks() {
@@ -82,9 +84,12 @@ internal static void endCheckmarks() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string baseˢ = "base"u8;
-internal static readonly @string objˢ = "obj"u8;
-internal static readonly @string checkmarkFoundUnmarkedˢ = "checkmark found unmarked object"u8;
+internal static ref readonly @string baseˢ => ref baseˢᵇ;
+private static readonly @string baseˢᵇ = "base"u8;
+internal static ref readonly @string objˢ => ref objˢᵇ;
+private static readonly @string objˢᵇ = "obj"u8;
+internal static ref readonly @string checkmarkFoundUnmarkedˢ => ref checkmarkFoundUnmarkedˢᵇ;
+private static readonly @string checkmarkFoundUnmarkedˢᵇ = "checkmark found unmarked object"u8;
 
 // setCheckmark throws if marking object is a checkmarks violation,
 // and otherwise sets obj's checkmark. It returns true if obj was
@@ -92,8 +97,8 @@ internal static readonly @string checkmarkFoundUnmarkedˢ = "checkmark found unm
 internal static bool setCheckmark(uintptr obj, uintptr @base, uintptr off, markBits mbits) {
     if (!mbits.isMarked()) {
         printlock();
-        print((@string)"runtime: checkmarks found unexpected unmarked object obj="u8, (Δhex)(uint64)obj, (@string)"\n"u8);
-        print((@string)"runtime: found obj at *("u8, (Δhex)(uint64)@base, (@string)"+"u8, (Δhex)(uint64)off, (@string)")\n"u8);
+        print((@string)"runtime: checkmarks found unexpected unmarked object obj=", (Δhex)(uint64)obj, (@string)"\n");
+        print((@string)"runtime: found obj at *(", (Δhex)(uint64)@base, (@string)"+", (Δhex)(uint64)off, (@string)")\n");
 
         // Dump the source (base) object
         gcDumpObject(baseˢ, @base, off);
@@ -117,19 +122,19 @@ internal static bool setCheckmark(uintptr obj, uintptr @base, uintptr off, markB
 }
 
 internal static (ж<byte> bytep, uint8 mask) getCheckmark(uintptr obj) {
-    ж<byte> bytep = default!;
-    uint8 mask = default!;
+    ж<byte> bytep = default;
+    uint8 mask = default;
 
     arenaIdx ai = arenaIndex(obj);
     var arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
     if (arena == nil) {
         // Non-heap pointer.
-        return (default!, 0);
+        return (default, 0);
     }
     var wordIdx = (obj - alignDown(obj, heapArenaBytes)) / (uintptr)goarch.PtrSize;
     var arenaWord = wordIdx / 8;
     mask = (byte)((byte)(1 << (int)(wordIdx % 8)));
-    bytep = (~arena).checkmarks.at(checkmarksMap.Ꮡb, (ulong)(arenaWord));
+    bytep = arena.checkmarks.at(checkmarksMap.Ꮡb, (ulong)(arenaWord));
     return (bytep, mask);
 }
 
@@ -159,9 +164,12 @@ internal static void runCheckmark(Action<ж<gcWork>> prepareRootSet) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string finalizerˢ = "finalizer"u8;
-internal static readonly @string cleanupˢ = "cleanup"u8;
-internal static readonly @string detectedPossibleIssuesˢ = "detected possible issues with cleanups and/or finalizers"u8;
+internal static ref readonly @string finalizerˢ => ref finalizerˢᵇ;
+private static readonly @string finalizerˢᵇ = "finalizer"u8;
+internal static ref readonly @string cleanupˢ => ref cleanupˢᵇ;
+private static readonly @string cleanupˢᵇ = "cleanup"u8;
+internal static ref readonly @string detectedPossibleIssuesˢ => ref detectedPossibleIssuesˢᵇ;
+private static readonly @string detectedPossibleIssuesˢᵇ = "detected possible issues with cleanups and/or finalizers"u8;
 
 // Find the arena and page index into that arena for this shard.
 internal partial struct checkFinalizersAndCleanups_report /*dyn*/ {
@@ -178,34 +186,36 @@ internal static void checkFinalizersAndCleanups() {
     const nint reportCycle = /* 1 << iota */ 1;
     const nint reportTiny = 2;
     ref var reports = ref heap(new array<checkFinalizersAndCleanups_report>(50), out var Ꮡreports);
-    nint nreports = default!;
-    bool more = default!;
-    uintptr lastTinyBlock = default!;
+    nint nreports = default;
+    bool more = default;
+    uintptr lastTinyBlock = default;
 
     forEachSpecial((uintptr Δp, ж<mspan> s, ж<special> sp) => {
         // N.B. The tiny block specials are sorted first in the specials list.
-        if ((~sp).kind == _KindSpecialTinyBlock) {
-            lastTinyBlock = s.@base() + (~sp).offset;
+        if (sp.kind == _KindSpecialTinyBlock) {
+            lastTinyBlock = s.@base() + sp.offset;
             return true;
         }
 
         // We only care about finalizers and cleanups.
-        if ((~sp).kind != _KindSpecialFinalizer && (~sp).kind != _KindSpecialCleanup) {
+        if (sp.kind != _KindSpecialFinalizer && sp.kind != _KindSpecialCleanup) {
             return true;
         }
 
         // Run a checkmark GC using this cleanup and/or finalizer as a root.
         if (debug.checkfinalizers > 1) {
-            print((@string)"Scan trace for cleanup/finalizer on "u8, (Δhex)(uint64)Δp, (@string)":\n"u8);
+            print((@string)"Scan trace for cleanup/finalizer on ", (Δhex)(uint64)Δp, (@string)":\n");
         }
         runCheckmark((ж<gcWork> gcw) => {
-            var exprᴛ1 = (~sp).kind;
-            if (exprᴛ1 == _KindSpecialFinalizer) {
+            switch (sp.kind) {
+            case var ᴛ when ᴛ == _KindSpecialFinalizer: {
                 gcScanFinalizer(sp.Reinterpret<special, specialfinalizer>(), s, gcw);
+                break;
             }
-            else if (exprᴛ1 == _KindSpecialCleanup) {
+            case var ᴛ when ᴛ == _KindSpecialCleanup: {
                 gcScanCleanup(sp.Reinterpret<special, specialCleanup>(), gcw);
-            }
+                break;
+            }}
         });
         if (debug.checkfinalizers > 1) {
             println();
@@ -219,7 +229,7 @@ internal static void checkFinalizersAndCleanups() {
         if (bytep == nil) {
             return true;
         }
-        nint issues = default!;
+        nint issues = default;
         if ((uint8)(atomic.Load8(bytep) & mask) != 0) {
             issues |= (nint)(reportCycle);
         }
@@ -239,12 +249,12 @@ internal static void checkFinalizersAndCleanups() {
 
     if (nreports > 0) {
         var lastPtr = (uintptr)0;
-        println((@string)"WARNING: LIKELY CLEANUP/FINALIZER ISSUES"u8);
+        println((@string)"WARNING: LIKELY CLEANUP/FINALIZER ISSUES");
         println();
         foreach (var (_, r) in reports.slice(0, nreports)) {
-            ж<specialCheckFinalizer> ctx = default!;
-            @string kind = default!;
-            if ((~r.sp).kind == _KindSpecialFinalizer){
+            ж<specialCheckFinalizer> ctx = default;
+            @string kind = default;
+            if (r.sp.kind == _KindSpecialFinalizer) {
                 kind = finalizerˢ;
                 ctx = getCleanupContext(r.ptr, 0);
             } else {
@@ -258,52 +268,52 @@ internal static void checkFinalizersAndCleanups() {
                 if (lastPtr != 0) {
                     println();
                 }
-                print((@string)"Value of type "u8, toRType((~ctx).ptrType).@string(), (@string)" at "u8, (Δhex)(uint64)r.ptr, (@string)"\n"u8);
+                print((@string)"Value of type ", toRType(ctx.ptrType).@string(), (@string)" at ", (Δhex)(uint64)r.ptr, (@string)"\n");
                 if ((nint)(r.issues & reportCycle) != 0) {
-                    if ((~r.sp).kind == _KindSpecialFinalizer){
-                        println((@string)"  is reachable from finalizer"u8);
+                    if (r.sp.kind == _KindSpecialFinalizer) {
+                        println((@string)"  is reachable from finalizer");
                     } else {
-                        println((@string)"  is reachable from cleanup or cleanup argument"u8);
+                        println((@string)"  is reachable from cleanup or cleanup argument");
                     }
                 }
                 if ((nint)(r.issues & reportTiny) != 0) {
-                    println((@string)"  is in a tiny block with other (possibly long-lived) values"u8);
+                    println((@string)"  is in a tiny block with other (possibly long-lived) values");
                 }
                 if ((nint)(r.issues & reportTiny) != 0 && (nint)(r.issues & reportCycle) != 0) {
-                    if ((~r.sp).kind == _KindSpecialFinalizer){
-                        println((@string)"  may be in the same tiny block as finalizer"u8);
+                    if (r.sp.kind == _KindSpecialFinalizer) {
+                        println((@string)"  may be in the same tiny block as finalizer");
                     } else {
-                        println((@string)"  may be in the same tiny block as cleanup or cleanup argument"u8);
+                        println((@string)"  may be in the same tiny block as cleanup or cleanup argument");
                     }
                 }
             }
             println();
 
-            println((@string)"Has"u8, kind, (@string)"at"u8, (Δhex)(uint64)(uintptr)r.sp);
-            var ΔfuncInfo = findfunc((~ctx).funcPC);
-            if (ΔfuncInfo.valid()){
-                var (@file, line) = funcline(ΔfuncInfo, (~ctx).funcPC);
-                print((@string)"  "u8, funcname(ΔfuncInfo), (@string)"()\n"u8);
-                print((@string)"      "u8, @file, (@string)":"u8, line, (@string)" +"u8, (Δhex)(uint64)((~ctx).funcPC - ΔfuncInfo.entry()), (@string)"\n"u8);
+            println((@string)"Has", kind, (@string)"at", (Δhex)(uint64)(uintptr)r.sp);
+            var ΔfuncInfo = findfunc(ctx.funcPC);
+            if (ΔfuncInfo.valid()) {
+                var (@file, line) = funcline(ΔfuncInfo, ctx.funcPC);
+                print((@string)"  ", funcname(ΔfuncInfo), (@string)"()\n");
+                print((@string)"      ", @file, (@string)":", line, (@string)" +", (Δhex)(uint64)(ctx.funcPC - ΔfuncInfo.entry()), (@string)"\n");
             } else {
-                print((@string)"  <bad pc "u8, (Δhex)(uint64)(~ctx).funcPC, (@string)">\n"u8);
+                print((@string)"  <bad pc ", (Δhex)(uint64)ctx.funcPC, (@string)">\n");
             }
 
-            println((@string)"created at: "u8);
-            var createInfo = findfunc((~ctx).createPC);
-            if (createInfo.valid()){
-                var (@file, line) = funcline(createInfo, (~ctx).createPC);
-                print((@string)"  "u8, funcname(createInfo), (@string)"()\n"u8);
-                print((@string)"      "u8, @file, (@string)":"u8, line, (@string)" +"u8, (Δhex)(uint64)((~ctx).createPC - createInfo.entry()), (@string)"\n"u8);
+            println((@string)"created at: ");
+            var createInfo = findfunc(ctx.createPC);
+            if (createInfo.valid()) {
+                var (@file, line) = funcline(createInfo, ctx.createPC);
+                print((@string)"  ", funcname(createInfo), (@string)"()\n");
+                print((@string)"      ", @file, (@string)":", line, (@string)" +", (Δhex)(uint64)(ctx.createPC - createInfo.entry()), (@string)"\n");
             } else {
-                print((@string)"  <bad pc "u8, (Δhex)(uint64)(~ctx).createPC, (@string)">\n"u8);
+                print((@string)"  <bad pc ", (Δhex)(uint64)ctx.createPC, (@string)">\n");
             }
 
             lastPtr = r.ptr;
         }
         println();
         if (more) {
-            println((@string)"... too many potential issues ..."u8);
+            println((@string)"... too many potential issues ...");
         }
         @throw(detectedPossibleIssuesˢ);
     }
@@ -322,7 +332,7 @@ internal static void forEachSpecial(Func<uintptr, ж<mspan>, ж<special>, bool> 
         var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
 
         // Construct slice of bitmap which we'll iterate over.
-        foreach (var i in range((~ha).pageSpecials[..])) {
+        foreach (var i in range(ha.pageSpecials[..])) {
             // Find set bits, which correspond to spans with specials.
             var specials = atomic.Load8(ha.at(heapArena.ᏑpageSpecials, i));
             if (specials == 0) {
@@ -338,12 +348,12 @@ internal static void forEachSpecial(Func<uintptr, ж<mspan>, ж<special>, bool> 
                 // specials implies that the span is in-use, and since we're
                 // currently marking we can be sure that we don't have to worry
                 // about the span being freed and re-used.
-                var s = (~ha).spans[(nuint)i * 8 + j];
+                var s = ha.spans[(nuint)i * 8 + j];
 
                 // Lock the specials to prevent a special from being
                 // removed from the list while we're traversing it.
-                for (var sp = s.Value.specials; sp != nil; sp = sp.Value.next) {
-                    if (!yield(s.@base() + (~sp).offset, s, sp)) {
+                for (var sp = s.specials; sp != nil; sp = sp.next) {
+                    if (!yield(s.@base() + sp.offset, s, sp)) {
                         return;
                     }
                 }

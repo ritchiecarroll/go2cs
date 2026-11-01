@@ -18,38 +18,39 @@ internal static readonly ж<atomic.Uint32> ᏑnetpollWakeSig = new StaticBox<ato
 internal static ref atomic.Uint32 netpollWakeSig => ref ((StaticBox<atomic.Uint32>)ᏑnetpollWakeSig).ValueSlot; // used to avoid duplicate calls of netpollBreak
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeNetpollinitFailedˢ = "runtime: netpollinit failed"u8;
+internal static ref readonly @string runtimeNetpollinitFailedˢ => ref runtimeNetpollinitFailedˢᵇ;
+private static readonly @string runtimeNetpollinitFailedˢᵇ = "runtime: netpollinit failed"u8;
 
 internal static void netpollinit() {
     kq = kqueue();
     if (kq < 0) {
-        println((@string)"runtime: kqueue failed with"u8, -kq);
+        println((@string)"runtime: kqueue failed with", -kq);
         @throw(runtimeNetpollinitFailedˢ);
     }
     closeonexec(kq);
     addWakeupEvent(kq);
 }
 
-internal static int32 netpollopen(uintptr fd, ж<pollDesc> Ꮡpd) {
+internal static int32 netpollopen(uintptr fd, ж<pollDesc> pd) {
     // Arm both EVFILT_READ and EVFILT_WRITE in edge-triggered mode (EV_CLEAR)
     // for the whole fd lifetime. The notifications are automatically unregistered
     // when fd is closed.
     ref var ev = ref heap(new array<keventt>(2), out var Ꮡev);
-    (Ꮡev.at<keventt>(0).of(keventt.Ꮡident).Reinterpret<uint64, uintptr>()).Value = fd;
+    (Ꮡev.at<keventt>(0).Ꮡident.Reinterpret<uint64, uintptr>()).Value = fd;
     ev[0].filter = _EVFILT_READ;
     ev[0].flags = (uint16)((uint16)_EV_ADD | (uint16)_EV_CLEAR);
     ev[0].fflags = 0;
     ev[0].data = 0;
 
-    if (goarch.PtrSize == 4){
+    if (goarch.PtrSize == 4) {
         // We only have a pointer-sized field to store into,
         // so on a 32-bit system we get no sequence protection.
         // TODO(iant): If we notice any problems we could at least
         // steal the low-order 2 bits for a tiny sequence number.
-        ev[0].udata = Ꮡpd.Reinterpret<pollDesc, byte>();
+        ev[0].udata = pd.Reinterpret<pollDesc, byte>();
     } else {
-        var tp = taggedPointerPack(@unsafe.Pointer.FromPinnedBox(Ꮡpd), Ꮡpd.of(pollDesc.Ꮡfdseq).Load());
-        ev[0].udata = (ж<byte>)(uintptr)((@unsafe.Pointer)(uintptr)(uint64)tp);
+        var tp = taggedPointerPack(@unsafe.Pointer.FromPinnedBox(pd), pd.Ꮡfdseq.Load());
+        ev[0].udata = (ж<byte>)(uintptr)((@unsafe.Pointer)(uintptr)tp);
     }
     ev[1] = ev[0];
     ev[1].filter = _EVFILT_WRITE;
@@ -67,7 +68,8 @@ internal static int32 netpollclose(uintptr fd) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeUnusedˢ = "runtime: unused"u8;
+internal static ref readonly @string runtimeUnusedˢ => ref runtimeUnusedˢᵇ;
+private static readonly @string runtimeUnusedˢᵇ = "runtime: unused"u8;
 
 internal static void netpollarm(ref pollDesc pd, nint mode) {
     @throw(runtimeUnusedˢ);
@@ -76,7 +78,8 @@ internal static void netpollarm(ref pollDesc pd, nint mode) {
 // go2cs generated this placeholder — func netpollBreak is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeNetpollFailedˢ = "runtime: netpoll failed"u8;
+internal static ref readonly @string runtimeNetpollFailedˢ => ref runtimeNetpollFailedˢᵇ;
+private static readonly @string runtimeNetpollFailedˢᵇ = "runtime: netpoll failed"u8;
 
 // netpoll checks for ready network connections.
 // Returns a list of goroutines that become runnable,
@@ -88,14 +91,13 @@ internal static readonly @string runtimeNetpollFailedˢ = "runtime: netpoll fail
 // delay > 0: block for up to that many nanoseconds
 internal static (gList, int32) netpoll(int64 delay) {
     if (kq == -1) {
-        return (new gList(nil), 0);
+        return (new gList(), 0);
     }
-    ж<timespec> tp = default!;
+    ж<timespec> tp = default;
     ref var ts = ref heap(new timespec(), out var Ꮡts);
-    if (delay < 0){
-        tp = default!;
-    } else 
-    if (delay == 0){
+    if (delay < 0) {
+        tp = default;
+    } else if (delay == 0) {
         tp = Ꮡts;
     } else {
         ts.setNsec(delay);
@@ -113,13 +115,13 @@ retry:
         // figure out what really happened with n == ETIMEOUT,
         // see https://go.dev/issue/59679 for details.
         if (n != (int32)(-_EINTR) && n != (int32)(-_ETIMEDOUT)) {
-            println((@string)"runtime: kevent on fd"u8, kq, (@string)"failed with"u8, -n);
+            println((@string)"runtime: kevent on fd", kq, (@string)"failed with", -n);
             @throw(runtimeNetpollFailedˢ);
         }
         // If a timed sleep was interrupted, just return to
         // recalculate how long we should sleep now.
         if (delay > 0) {
-            return (new gList(nil), 0);
+            return (new gList(), 0);
         }
         goto retry;
     }
@@ -139,10 +141,10 @@ retry:
             continue;
         }
 
-        int32 mode = default!;
-        var exprᴛ1 = (~ev).filter;
-        if (exprᴛ1 == _EVFILT_READ) {
-            mode += (rune)'r';
+        int32 mode = default;
+        switch (ev.filter) {
+        case var ᴛ when ᴛ == _EVFILT_READ: {
+            mode += 'r';
 
             // On some systems when the read end of a pipe
             // is closed the write end will not get a
@@ -153,30 +155,32 @@ retry:
             // that goroutine will try the write again,
             // and the appropriate thing will happen based
             // on what that write returns (success, EPIPE, EAGAIN).
-            if ((uint16)((~ev).flags & (uint16)_EV_EOF) != 0) {
-                mode += (rune)'w';
+            if ((uint16)(ev.flags & (uint16)_EV_EOF) != 0) {
+                mode += 'w';
             }
+            break;
         }
-        else if (exprᴛ1 == _EVFILT_WRITE) {
-            mode += (rune)'w';
-        }
+        case var ᴛ when ᴛ == _EVFILT_WRITE: {
+            mode += 'w';
+            break;
+        }}
         if (mode != 0) {
-            ж<pollDesc> pd = default!;
-            uintptr tag = default!;
-            if (goarch.PtrSize == 4){
+            ж<pollDesc> pd = default;
+            uintptr tag = default;
+            if (goarch.PtrSize == 4) {
                 // No sequence protection on 32-bit systems.
                 // See netpollopen for details.
-                pd = (~ev).udata.Reinterpret<byte, pollDesc>();
+                pd = ev.udata.Reinterpret<byte, pollDesc>();
                 tag = 0;
             } else {
-                var tpΔ1 = (taggedPointer)(uint64)(uintptr)(~ev).udata;
+                var tpΔ1 = (taggedPointer)(uint64)(uintptr)ev.udata;
                 pd = (ж<pollDesc>)(uintptr)(tpΔ1.pointer());
                 tag = tpΔ1.tag();
-                if (pd.of(pollDesc.Ꮡfdseq).Load() != tag) {
+                if (pd.Ꮡfdseq.Load() != tag) {
                     continue;
                 }
             }
-            pd.setEventErr((~ev).flags == _EV_ERROR, tag);
+            pd.setEventErr(ev.flags == _EV_ERROR, tag);
             delta += netpollready(ᏑtoRun, pd, mode);
         }
     }

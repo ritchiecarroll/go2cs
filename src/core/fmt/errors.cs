@@ -22,13 +22,13 @@ partial class fmt_package {
 // It is invalid to supply the %w verb with an operand that does not implement
 // the error interface. The %w verb is otherwise a synonym for %v.
 public static error /*err*/ Errorf(sstring format, params ꓸꓸꓸany aʗp) {
-    error err = default!;
+    error err = default;
     var a = aʗp.sslice();
 
     // This function has been split in a somewhat unnatural way
     // so that both it and the errors.New call can be inlined.
     {
-        err = errorf(format, a.ꓸꓸꓸ); if (err != default!) {
+        err = errorf(format, a.ꓸꓸꓸ); if (err != nil) {
             return err;
         }
     }
@@ -41,33 +41,32 @@ public static error /*err*/ Errorf(sstring format, params ꓸꓸꓸany aʗp) {
 internal static error errorf(@string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
-    if (len(a) == 0 && stringslite.IndexByte(format, (rune)'%') == -1) {
-        return default!;
+    if (len(a) == 0 && stringslite.IndexByte(format, (byte)'%') == -1) {
+        return default;
     }
     var p = newPrinter();
-    p.Value.wrapErrs = true;
+    p.wrapErrs = true;
     p.doPrintf(format, a);
-    ref var s = ref heap<@string>(out var Ꮡs);
-    s = (@string)(slice<byte>)(~p).buf;
-    error err = default!;
-    switch (len((~p).wrappedErrs)) {
+    ref var s = ref heap<@string>((@string)(slice<byte>)p.buf, out var Ꮡs);
+    error err = default;
+    switch (len(p.wrappedErrs)) {
     case 0: {
         err = errors.New(s);
         break;
     }
     case 1: {
         var w = Ꮡ(new wrapError(msg: s));
-        (w.Value.err, _) = a[(~p).wrappedErrs[0]]._<error>(ᐧ);
+        (w.err, _) = a[p.wrappedErrs[0]]._<error>(ᐧ);
         err = new wrapErrorжerror(w);
         break;
     }
     default: {
-        if ((~p).reordered) {
-            slices.Sort<slice<nint>, nint>((~p).wrappedErrs);
+        if (p.reordered) {
+            slices.Sort<slice<nint>, nint>(p.wrappedErrs);
         }
-        slice<error> errs = default!;
-        foreach (var (i, argNum) in (~p).wrappedErrs) {
-            if (i > 0 && (~p).wrappedErrs[i - 1] == argNum) {
+        slice<error> errs = default;
+        foreach (var (i, argNum) in p.wrappedErrs) {
+            if (i > 0 && p.wrappedErrs[i - 1] == argNum) {
                 continue;
             }
             {

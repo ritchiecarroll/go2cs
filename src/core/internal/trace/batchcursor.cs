@@ -15,13 +15,13 @@ partial class trace_package {
 partial struct batchCursor {
     internal ThreadID m;
     internal ΔTime lastTs;
-    internal nint idx;      // next index into []batch
-    internal nint dataOff;      // next index into batch.data
+    internal nint idx;     // next index into []batch
+    internal nint dataOff; // next index into batch.data
     internal baseEvent ev; // last read event
 }
 
 internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
-    error err = default!;
+    error err = default;
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Batches should generally always have at least one event,
@@ -33,7 +33,7 @@ internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<
     }
     // Have we reached the end of the batches?
     if (b.idx == len(batches)) {
-        return (false, default!);
+        return (false, default);
     }
     // Initialize lastTs if it hasn't been yet.
     if (b.lastTs == 0) {
@@ -41,7 +41,7 @@ internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<
     }
     // Read an event out.
     (var n, var tsdiff, err) = readTimedBaseEvent(batches[b.idx].data.slice(b.dataOff), ref nonnil(ref b).ev);
-    if (err != default!) {
+    if (err != nil) {
         return (false, err);
     }
     // Complete the timestamp from the cursor's last timestamp.
@@ -52,7 +52,7 @@ internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<
 
     // Move the cursor forward.
     b.dataOff += n;
-    return (true, default!);
+    return (true, default);
 }
 
 internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
@@ -72,14 +72,14 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
     // Get the event type.
     var typ = (tracev2.EventType)b[0];
     var specs = tracev2.Specs();
-    if ((nint)(uint8)typ >= len(specs)) {
+    if ((nint)typ >= len(specs)) {
         return (0, 0, fmt.Errorf("found invalid event type: %v"u8, typ));
     }
     e.typ = typ;
 
     // Get spec.
     var spec = Ꮡ(specs, typ);
-    if (len((~spec).Args) == 0 || !(~spec).IsTimedEvent) {
+    if (len(spec.Args) == 0 || !spec.IsTimedEvent) {
         return (0, 0, fmt.Errorf("found event without a timestamp: type=%v"u8, typ));
     }
     nint n = 1;
@@ -92,7 +92,7 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
     n += nb;
 
     // Read the rest of the arguments.
-    for (nint i = 0; i < len((~spec).Args) - 1; i++) {
+    for (nint i = 0; i < len(spec.Args) - 1; i++) {
         var (arg, nbΔ1) = binary.Uvarint(b.slice(n));
         if (nbΔ1 <= 0) {
             return (0, 0, fmt.Errorf("found invalid uvarint"u8));
@@ -100,12 +100,12 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
         e.args[i] = arg;
         n += nbΔ1;
     }
-    return (n, (timestamp)ts, default!);
+    return (n, (timestamp)ts, default);
 }
 
-internal static slice<ж<batchCursor>> heapInsert(slice<ж<batchCursor>> heap, ж<batchCursor> Ꮡbc) {
+internal static slice<ж<batchCursor>> heapInsert(slice<ж<batchCursor>> heap, ж<batchCursor> bc) {
     // Add the cursor to the end of the heap.
-    heap = builtin.append(heap, Ꮡbc);
+    heap = builtin.append(heap, bc);
 
     // Sift the new entry up to the right place.
     heapSiftUp(heap, len(heap) - 1);
@@ -136,7 +136,7 @@ internal static slice<ж<batchCursor>> heapRemove(slice<ж<batchCursor>> heap, n
 }
 
 internal static nint heapSiftUp(slice<ж<batchCursor>> heap, nint i) {
-    while (i > 0 && (~heap[(i - 1) / 2]).ev.time > (~heap[i]).ev.time) {
+    while (i > 0 && heap[(i - 1) / 2].ev.time > heap[i].ev.time) {
         (heap[(i - 1) / 2], heap[i]) = (heap[i], heap[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
@@ -144,7 +144,7 @@ internal static nint heapSiftUp(slice<ж<batchCursor>> heap, nint i) {
 }
 
 internal static nint heapSiftDown(slice<ж<batchCursor>> heap, nint i) {
-    while (ᐧ) {
+    for (;;) {
         nint m = min3(heap, i, 2 * i + 1, 2 * i + 2);
         if (m == i) {
             // Heap invariant already applies.
@@ -160,11 +160,11 @@ internal static nint min3(slice<ж<batchCursor>> b, nint i0, nint i1, nint i2) {
     nint minIdx = i0;
     var minT = maxTime;
     if (i0 < len(b)) {
-        minT = b[i0].Value.ev.time;
+        minT = b[i0].ev.time;
     }
     if (i1 < len(b)) {
         {
-            var t = b[i1].Value.ev.time; if (t < minT) {
+            var t = b[i1].ev.time; if (t < minT) {
                 minT = t;
                 minIdx = i1;
             }
@@ -172,7 +172,7 @@ internal static nint min3(slice<ж<batchCursor>> b, nint i0, nint i1, nint i2) {
     }
     if (i2 < len(b)) {
         {
-            var t = b[i2].Value.ev.time; if (t < minT) {
+            var t = b[i2].ev.time; if (t < minT) {
                 minT = t;
                 minIdx = i2;
             }

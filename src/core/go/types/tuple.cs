@@ -23,7 +23,7 @@ public static ж<Tuple> NewTuple(params ꓸꓸꓸжVar xʗp) {
     if (len(x) > 0) {
         return Ꮡ(new Tuple(vars: x));
     }
-    return default!;
+    return default;
 }
 
 // Len returns the number variables of tuple t.
@@ -46,7 +46,7 @@ public static ΔType Underlying(this ж<Tuple> Ꮡt) {
 }
 
 public static @string String(this ж<Tuple> Ꮡt) {
-    return TypeString(new TupleжΔType(Ꮡt), default!);
+    return TypeString(new TupleжΔType(Ꮡt), default);
 }
 
 } // end types_package

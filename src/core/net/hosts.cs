@@ -19,7 +19,7 @@ internal static time.Duration cacheMaxAge => /* 5 * time.Second */ 5000000000;
 
 internal static @string parseLiteralIP(@string addr) {
     var (ip, err) = netip.ParseAddr(addr);
-    if (err != default!) {
+    if (err != nil) {
         return ""u8;
     }
     return ip.String();
@@ -60,7 +60,7 @@ internal static void readHosts() {
             return;
         }
         var (mtime, size, err) = stat(hp);
-        if (err == default! && hosts.path == hp && hosts.mtime.Equal(mtime) && hosts.size == size) {
+        if (err == nil && hosts.path == hp && hosts.mtime.Equal(mtime) && hosts.size == size) {
             hosts.expire = now.Add(cacheMaxAge);
             return;
         }
@@ -69,7 +69,7 @@ internal static void readHosts() {
         var @is = new map<@string, slice<@string>>();
 
         (var Δfile, err) = open(hp);
-        if (err != default!) {
+        if (err != nil) {
             if (!errors.Is(err, fs.ErrNotExist) && !errors.Is(err, fs.ErrPermission)) {
                 return;
             }
@@ -80,7 +80,7 @@ internal static void readHosts() {
             defer(fileʗ1.close, ref ᒐ);
             for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
                 {
-                    nint i = bytealg.IndexByteString(line, (rune)'#'); if (i >= 0) {
+                    nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {
                         // Discard comments.
                         line = line.slice(0, i);
                     }
@@ -94,7 +94,7 @@ internal static void readHosts() {
                     continue;
                 }
 
-                @string canonical = default!;
+                @string canonical = default;
                 for (nint i = 1; i < len(f); i++) {
                     @string name = absDomainName(f[i]);
                     var h = slice<byte>(f[i]);
@@ -118,7 +118,7 @@ internal static void readHosts() {
                     }
 
                     hs[key] = new byName(
-                        addrs: new @string[]{addr}.slice(),
+                        addrs: slice<@string>([addr]),
                         canonicalName: canonical
                     );
                 }
@@ -157,9 +157,9 @@ internal static (slice<@string>, @string) lookupStaticHost(@string host) {
                 }
             }
         }
-        return (default!, "");
+        return (default, "");
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -172,7 +172,7 @@ internal static slice<@string> lookupStaticAddr(@string addr) {
         readHosts();
         addr = parseLiteralIP(addr);
         if (addr == ""u8) {
-            return default!;
+            return default;
         }
         if (len(hosts.byAddr) != 0) {
             {
@@ -183,9 +183,9 @@ internal static slice<@string> lookupStaticAddr(@string addr) {
                 }
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

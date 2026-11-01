@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syntaxꓸError = go.regexp.syntax_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +48,22 @@ using static go.regexp_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Regexp))]
+[assembly: GoFieldAccess(typeof(bitState))]
+[assembly: GoFieldAccess(typeof(entry))]
+[assembly: GoFieldAccess(typeof(go.regexp.syntax_package.Inst))]
+[assembly: GoFieldAccess(typeof(go.regexp.syntax_package.Prog))]
+[assembly: GoFieldAccess(typeof(inputs))]
+[assembly: GoFieldAccess(typeof(machine))]
+[assembly: GoFieldAccess(typeof(onePassInst))]
+[assembly: GoFieldAccess(typeof(onePassMachine))]
+[assembly: GoFieldAccess(typeof(onePassProg))]
+[assembly: GoFieldAccess(typeof(queue))]
+[assembly: GoFieldAccess(typeof(thread))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,10 +73,10 @@ using static go.regexp_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("regexp/backtrack.go", "backtrack.cs", "AC5igoKClKaigqqigpSqoqzSlIKUpoKClIKmgpSUgqaClJSCvKKCgpSCquaCusKUgoKUgoKCAAgSgoKClISUmAAKFJSCgpSCgsqmgoKCpoKCpoKClIKCpoKClIKCpoKClIKCpoKClIKCppSClJSClIK4goKUgqaCyoLcgpSAgsiCuIK4AAKBAgADigKosoKClJSmgoKmgoKUgoIACBSCgpSCgoKUpoKUlJSUgqaCgoI=")]
-[assembly: go.GoPositionMap("regexp/exec.go", "exec.cs", "ADZwooKmooKmooKCgqamgpKClLiCgpSClKaCgpSqooKAgoKUgqSCAAkUgqaCgpSCgoKUlIKClJSClIKCgpSUgoKUlIKUgpSUrNKCgpSCgpSCgpKCgpSCgpSUgoKUlJSUlIKClIKCpoKClJSCgoKUppSCgoKUlIKosoKCpgACEPKCgoKCgpSCgpSCgpqCgpSUgoKmlKakpKQAAjEAATaClIKmrgAIAoKClICCtoKCgoKClILMgoKkgoK2gqSCgoKClIK2gpSUgpSCAAJFAAFKAAoUgoKClKaigqiygoKmgoKUpoKCppSCkoKClIKClJSClJaClIKCgoKUgoKCmIKCgpSkgraC6oLIgqSkpIKUpIKUAAJNAAFSgpSCgoKCuIKCgqaCgqiSruKUpoKmgpSCpoKUgoKCpoKC", "", "", "468=canCheckPrefix/1/1/1")]
-[assembly: go.GoPositionMap("regexp/onepass.go", "onepass.cs", "ACRSAAkCgoKUgoKCgqaCqJKCgpSGlK7igoKUgpSmgoKUlAAJFIKmooKCpoKCpoKClKaCgriCgpSCgqaCAAwcgpbSgoKClJaSkoKCgoK4goKClIKCgoKmgpS0tLSkgqbYkoK2pILMksqCAAcQgqqClIKCgoKCppSUuIKCgoKSgoKUgsqCAANLAAJUppKeAAgEgqYABhLCgoKClIKklIKCgoKmgoKUgoK4lIKCxoKUgoKCtoKCgoKCtrSCgpSCgoKClIKCgoKClJSUgoKClMSCgpSClIKCgoKUlJSCgoKUxIKClIKCxIKClIKCgoK2poKCgoKCgoKCpoKCpq7igqaElIKCgoLKgoKcgraCgpQAAxeCAAUippSClA==", "170-175:1;178-187:2;308-434:1")]
-[assembly: go.GoPositionMap("regexp/regexp.go", "regexp.cs", "AGbOAZIAAhYACAKSAAIaAAoCAAIsABMCAAIS4qaCgoKUkpSCgoKUkoKUAAoWgoKUlKaCpoKCgpSUAAgUvtKCgpSCgoKCgtyCgpSCgpSosoKCgqiSmKSCgoKUpqSkpIKClKSCgoKCgqYAAj8AA06ygoKUrLKCgpSmgoKUqJIAAhDSAAIU8oKCgrgAEyiCgpSmgqaipqKmgpSCpoKUAAcQgoKUpoKmoqaipoKUgqaClAAJFIKCloKCgpSCpoKmgqaCpoKssqqiqqKqoqzSgoKUrNKCgpSs0oKClKzSgoKUhqyyAAISwoamooKCgoKClJSCpoKCgoK4gpTugpSWkoKUlIKSppTKgpSmrNKCgpSCooKUlKyyAAMSwgAGEpKmgoK+tJKCgriCpoKCgoKCgpSClAACENKUlIKClKzSgoKUpoKCgqaClKaUgoKClIKUgpSmlJSCgs6igoKClK7CgoKUAAIQ0oKCgpSuwoKClAACENKCgpQAAhDygoKClIKCgqYAAigAEQKssqaCgoKClIKClIKClIKUgpSCgoKClLiCgoKUlMqCrAAIAoKUgoKClIKCgoKUlJSUgoKUlLiCgoKClKaCpoKCAAIQ8gACEPKCgoKUgoKCpgACEPIAAhDyAAQSwoKUgpKClJSuwoKUgoKClJSuwoKUgoKClJSuwoKUgoKClJSuwoKUgpKClIKCgqaUrsKClIKCgpSUrsKClIKCgpSCgoKmlAACENKClIKCgpSUAAImABIEgqaCpoKUgoKCgqaCgpSmgqYAAhLirsKqooKClII=", "557-559:1;567-569:1;577-579:1;657-662:1;670-672:1;680-682:1;1062-1067:1;1080-1085:1;1098-1103:1;1116-1121:1;1134-1145:1;1158-1163:1;1176-1187:1;1201-1206:1", "", "188=compileOnePass/1/1/3,StartCond/1/1/6,minInputLen/1/1/9")]
+[assembly: GoPositionMap("regexp/backtrack.go", "backtrack.cs", "AC5igoKClKaigqqigpSqoqzSlIKUpoKClIKmgpSUgqaClJSCvKKCgpSCquaCusKUgoKUgoKCAAgSgoKClISUlLQACxSUgoKUgoLapoKCgraCgraCgpSCgraCgpSCgraCgpSCgraCgpSCgraUgpSUgpSCyIKClIK2gtqC3IKUgILIgriCuMiosoKClJSmgoKmgoKUgoIACBSCgpSCgoKUpoKUlJSUgqaCgoI=")]
+[assembly: GoPositionMap("regexp/exec.go", "exec.cs", "ADZwooKmooKmooKCgqamgoKClLiCgpSClKaCgpSqooKAgoKUgqSCAAkUgqaCgpSCgoKUlIKClJSClIKCgpSUgoKUlIKUgpSUrNKCgpSCgpSCgpKCgpSCgpSUgoKUlJSUlIKClIKCpoKClJSCgoKUppSCgoKUlIKosoKCpgACEPKCgoKCgpSCgpSCgpS2goKUlIKCppS2tLS0pIKUgqauAAgCgoKUgIK2goKCgoKUgpT4goK0goLGgrSCgoKClILGgpSUgpSCpAAKFIKCgpSmooKosoKCpoKClKaCgqaUgpKCgpSCgpSUgpSWgpSCgoKClIKCgpS0goKClLSCxoIACAqC2IK0tLSClLSClKSClIKCgoK4goKCpoKCqJKu4pSmgqaClIKmgpSCgoKmgoI=", "", "", "480=canCheckPrefix/1/1/1")]
+[assembly: GoPositionMap("regexp/onepass.go", "onepass.cs", "ACRSAAkCgoKUgoKCgqaCqJKCgpSGlK7igoKUgpSmgoKUpAAJFIKmooKCpoKCpoKClKaCgriCgpSCgqaCAAwcgpbSgoKClJaCgoKCgoK4goKClIKCgoKmgpS0tLSkgqbYkoLGtILcksqCAAcQgpTGgpSCgoKCgqaUlLiCgoKCgoKClILKgsimkp4ACASCpgAGEsKCgoKUgpSUgoKCgqaCgpSCgriUgoLGgpSCgoLGgoKCgoLGtIKClIKCgoKUgoKCgoKUlJSCgoKUtIKClIKUgoKCgpSUlIKCgpS0goKUgoK0goKUgoKCgramgoKCgoKCgoKmgoKmruKCpoSUgoKCgsqCgpSCxoLGgoKU7KaUgpQ=", "170-175:1;178-187:2;308-434:1")]
+[assembly: GoPositionMap("regexp/regexp.go", "regexp.cs", "AGbOAZIAAhYACAKCAAIaAAoCAAIsABMCAAIS4qaCgoKUgpSCgoKUgoKUAAoWgoKUlKaCpoKCgpSUAAgUvtKCgpSCgoKCgtyCgpSCgpSosoKCgqiSlKSkgoKClKakpKSCgpSkgoKCgoKmvrKCgpSssoKClKaCgpSokgACENIAAhTygoKCuAATKIKClKaCpqKmoqaClIKmgpQABxCCgpSmgqaipqKmgpSCpoKUAAkUgoKWgoKClIKmgqaCpoKmgqyyqqKqoqqirNKCgpSs0oKClKzSgoKUrNKCgpSGrLIAAhLChqaigoKCgoKUlIKmgoKCgriClO6ClJaSgpSUgoKmlMqClKas0oKClIKigpSUrLIAAxLCAAYSkqaCgr60koKCuIKmgoKCgoKClIKUAAIQ0pSUgoKUrNKCgpSmgoKCpoKUppSCgoKUgpSClKaUlIKCzqKCgoKUrsKCgpQAAhDSgoKClK7CgoKUAAIQ0oKClAACEPKCgoKUgoKCpgACKAARAqyypoKCgoKUgoKUgoKUgpSClIKCgoKUuIKCgpSUyoKsAAgCgpSCgoKUgoKCgpSUlJSCgpSUuIKCgoKUpoKmgoIAAhDyAAIQ8oKCgpSCgoKmAAIQ8gACEPIABBLCgpSCkoKUlK7CgpSCgoKUlK7CgpSCgoKUlK7CgpSCgoKUlK7CgpSCkoKUgoKCppSuwoKUgoKClJSuwoKUgoKClIKCgqaUAAIQ0oKUgoKClJQAAiYAEgSCpoKmgpSCgoKCpoKClKaCpgACEuKuwqqigoKUgg==", "557-559:1;567-569:1;577-579:1;657-662:1;670-672:1;680-682:1;1062-1067:1;1080-1085:1;1098-1103:1;1116-1121:1;1134-1145:1;1158-1163:1;1176-1187:1;1201-1206:1", "", "185=compileOnePass/1/1/3,StartCond/1/1/6,minInputLen/1/1/9")]
 // </GoSourcePositionMaps>
 
 namespace go;

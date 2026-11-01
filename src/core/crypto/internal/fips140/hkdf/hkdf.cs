@@ -17,14 +17,14 @@ public static slice<byte> Extract<H>(Func<H> h, slice<byte> secret, slice<byte> 
     if (len(secret) < 112 / 8) {
         fips140.RecordNonApproved();
     }
-    if (salt == default!) {
+    if (salt == nil) {
         salt = new slice<byte>(h().Size());
     }
     var extractor = hmac.New(h, salt);
     hmac.MarkAsUsedInKDF(extractor);
     extractor.Write(secret);
 
-    return extractor.Sum(default!);
+    return extractor.Sum(default);
 }
 
 public static slice<byte> Expand<H>(Func<H> h, slice<byte> pseudorandomKey, @string info, nint keyLen)
@@ -33,8 +33,8 @@ public static slice<byte> Expand<H>(Func<H> h, slice<byte> pseudorandomKey, @str
     var @out = new slice<byte>(0, keyLen);
     var expander = hmac.New(h, pseudorandomKey);
     hmac.MarkAsUsedInKDF(expander);
-    uint8 counter = default!;
-    slice<byte> buf = default!;
+    uint8 counter = default;
+    slice<byte> buf = default;
 
     while (len(@out) < keyLen) {
         counter++;
@@ -46,7 +46,7 @@ public static slice<byte> Expand<H>(Func<H> h, slice<byte> pseudorandomKey, @str
         }
         expander.Write(buf);
         expander.Write(slice<byte>(info));
-        expander.Write(new byte[]{counter}.slice());
+        expander.Write(slice<byte>([counter]));
         buf = expander.Sum(buf[..0]);
         nint remain = keyLen - len(@out);
         remain = min(remain, len(buf));

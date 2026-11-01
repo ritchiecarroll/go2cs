@@ -45,7 +45,11 @@ using static go.crypto.@internal.fips140.drbg_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Counter))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,10 +59,10 @@ using static go.crypto.@internal.fips140.drbg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/cast.go", "cast.cs", "AA0cuIIABxAABxAABxDcgoKCgoKU", "18-57:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "AC1clJSCuJSCgqaCgoKCptaCgoKmlIKClKaigoKCgoKm1JSCgoKo1JSCuIK4gsq4goKmpqY=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/entropy_fips140.go", "entropy_fips140.cs", "AB48goKS7oCCpJQ=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/rand.go", "rand.cs", "AB0wAAMS0oKUgoKCpoKCAAcQgpSCgpSSgriCgoDKgoKktAAEEtIADBqigIKCtoKC", "60-64:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/drbg/cast.go", "cast.cs", "AA0cuIIABxAABxAABxDcgoKCgoKU", "18-57:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "AC1clJSCuJSCgqaCgoKCptaCgoKmlIKClKaigoKCgoKm1JSCgoKo1JSCuIK4gsq4goKmpqY=")]
+[assembly: GoPositionMap("crypto/internal/fips140/drbg/entropy_fips140.go", "entropy_fips140.cs", "AB48goKS7oCCpJQ=")]
+[assembly: GoPositionMap("crypto/internal/fips140/drbg/rand.go", "rand.cs", "AB0wAAMS0oKUgoKCpoKCAAcQgpSCgpSSgriCgoDKgoKktAAEEtIADBqigIKCtoKC", "60-64:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

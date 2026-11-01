@@ -10,18 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using elfꓸData = go.debug.elf_package.ΔData;
-global using elfꓸSection = go.debug.elf_package.ΔSection;
-global using machoꓸSection = go.debug.macho_package.ΔSection;
 global using machoꓸSegment = go.debug.macho_package.ΔSegment;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using peꓸSection = go.debug.pe_package.ΔSection;
-global using plan9objꓸSection = go.debug.plan9obj_package.ΔSection;
-global using xcoffꓸSection = go.@internal.xcoff_package.ΔSection;
 // </ImportedTypeAliases>
 
 using go;
@@ -69,7 +58,26 @@ using static go.debug.buildinfo_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.@internal.xcoff_package.File))]
+[assembly: GoFieldAccess(typeof(go.@internal.xcoff_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.debug.elf_package.File))]
+[assembly: GoFieldAccess(typeof(go.debug.elf_package.Prog))]
+[assembly: GoFieldAccess(typeof(go.debug.elf_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.debug.macho_package.FatFile))]
+[assembly: GoFieldAccess(typeof(go.debug.macho_package.File))]
+[assembly: GoFieldAccess(typeof(go.debug.macho_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.debug.macho_package.ΔSegment))]
+[assembly: GoFieldAccess(typeof(go.debug.pe_package.File))]
+[assembly: GoFieldAccess(typeof(go.debug.pe_package.OptionalHeader32))]
+[assembly: GoFieldAccess(typeof(go.debug.pe_package.OptionalHeader64))]
+[assembly: GoFieldAccess(typeof(go.debug.pe_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.debug.plan9obj_package.File))]
+[assembly: GoFieldAccess(typeof(go.debug.plan9obj_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.runtime.debug_package.BuildInfo))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -79,7 +87,7 @@ using static go.debug.buildinfo_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/buildinfo/buildinfo.go", "buildinfo.cs", "ACxOAA0cygAEFAAJAoKAgpKCyIKClJLssoKClIKClIIADCIACQaCgIK2gpSCgpS0goKUtIKClLSCgpS0goKUtIKClLQABxCCgqaCgriCgpKClIKmACJKgoKCgpSCgriCgoKClJSCgqKCpJSClIKUppSmpoKCgpSmptyCgpKCpoKClJSCgpKUkoKUlKaokoKClIKCgoKUzqKClLiCgqaC3IKCgqaCuIKmgpSSgqaCgoKClJSUlIK4lIKmpqamgoKCpoKClKaCgoKmgoKUAAcQgoKCgqamgoKCpoKCpgAHEIKUpJSmgoKCgoKmpoQACRaChKYABxCCgoKClIKClIKmppSCgqiSgoKCpgAKEIKCgoKmpoKAgqQAChCCgIKkpoKCgoKm", "69-75:1;250-250:1")]
+[assembly: GoPositionMap("debug/buildinfo/buildinfo.go", "buildinfo.cs", "ACxOAA0cygAEFAAJAoKAgoKCyIKClJLssoKClIKClIIADCIACQaCgIK2gpSCgpS0goKUtIKClLSCgpS0goKUtIKClLQABxCCgqaCgriCgoKClIKmACJKgoKCgpSCgriCgoKClJSCgpKCpJSClIKUppSmpoKCgpSmptyCgoKCpoKClJSCgoKUgoKUlKaokoKClIKCgoKUzqKClLiCgqaC3IKCgqaCuIKmgpSCgqaCgoKClJSUlIK4lIKmpqamgoKCpoKClKaCgoKmgoKUAAcQgoKCgqamgoKCpoKCpgAHEIKUpJSmgoKCgoKmpoQACRaChKYABxCCgoKClIKClIKmppSCgqiSgoKCpgALEIKCgoKmpoKAgqQACxCCgIKkpoKCgoKm", "69-75:1;250-250:1", "", "", "94:21")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

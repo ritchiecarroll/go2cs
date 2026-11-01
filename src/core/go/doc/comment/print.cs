@@ -59,7 +59,7 @@ internal static nint headingLevel(this ref Printer p) {
 internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    if (p.HeadingID == default!) {
+    if (p.HeadingID == nil) {
         return h.DefaultID();
     }
     return p.HeadingID(Ꮡh);
@@ -68,7 +68,7 @@ internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) {
 internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
     ref var link = ref Ꮡlink.DerefOrNull();
 
-    if (p.DocLinkURL != default!) {
+    if (p.DocLinkURL != nil) {
         return p.DocLinkURL(Ꮡlink);
     }
     return link.DefaultURL(p.DocLinkBaseURL);
@@ -95,8 +95,8 @@ internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
 public static @string DefaultURL(this ref DocLink l, @string baseURL) {
     if (l.ImportPath != ""u8) {
         @string slash = ""u8;
-        if (strings.HasSuffix(baseURL, "/"u8)){
-            slash = "/"u8;
+        if (strings.HasSuffix(baseURL, "/")) {
+            slash = "/";
         } else {
             baseURL += "/"u8;
         }
@@ -118,7 +118,8 @@ public static @string DefaultURL(this ref DocLink l, @string baseURL) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string hdrˢ = "hdr-"u8;
+internal static ref readonly @string hdrˢ => ref hdrˢᵇ;
+private static readonly @string hdrˢᵇ = "hdr-"u8;
 
 // DefaultID returns the default anchor ID for the heading h.
 //
@@ -140,10 +141,10 @@ public static @string DefaultID(this ref Heading h) {
     @out.Reset();
     Ꮡout.WriteString(hdrˢ);
     foreach (var (_, r) in s) {
-        if (r < 0x80 && isIdentASCII((byte)r)){
+        if (r < 0x80 && isIdentASCII((byte)r)) {
             Ꮡout.WriteByte((byte)r);
         } else {
-            Ꮡout.WriteByte((rune)'_');
+            Ꮡout.WriteByte((byte)'_');
         }
     }
     return @out.String();
@@ -162,7 +163,7 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     foreach (var (i, x) in d.Content) {
         if (i > 0 && blankBefore(x)) {
-            @out.WriteString("\n"u8);
+            @out.WriteString("\n");
         }
         cp.block(Ꮡout, x);
     }
@@ -176,16 +177,16 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
         var used = i == 0;
         var first = true;
         foreach (var (_, def) in d.Links) {
-            if ((~def).Used == used) {
+            if (def.Used == used) {
                 if (first) {
-                    @out.WriteString("\n"u8);
+                    @out.WriteString("\n");
                     first = false;
                 }
-                @out.WriteString("["u8);
-                @out.WriteString((~def).Text);
-                @out.WriteString("]: "u8);
-                @out.WriteString((~def).URL);
-                @out.WriteString("\n"u8);
+                @out.WriteString("[");
+                @out.WriteString(def.Text);
+                @out.WriteString("]: ");
+                @out.WriteString(def.URL);
+                @out.WriteString("\n");
             }
         }
     }
@@ -205,7 +206,8 @@ internal static bool blankBefore(Block x) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string fourSpaceᶜ1 = "    "u8;
+internal static ref readonly @string fourSpaceᶜ1 => ref fourSpaceᶜ1ᵇ;
+private static readonly @string fourSpaceᶜ1ᵇ = "    "u8;
 
 // block prints the block x to out.
 internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
@@ -218,49 +220,49 @@ internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, B
         break;
     }
     case ж<Paragraph> xΔ1: {
-        p.text(Ꮡout, ""u8, (~xΔ1).Text);
-        @out.WriteString("\n"u8);
+        p.text(Ꮡout, ""u8, xΔ1.Text);
+        @out.WriteString("\n");
         break;
     }
     case ж<Heading> xΔ1: {
-        @out.WriteString("# "u8);
-        p.text(Ꮡout, ""u8, (~xΔ1).Text);
-        @out.WriteString("\n"u8);
+        @out.WriteString("# ");
+        p.text(Ꮡout, ""u8, xΔ1.Text);
+        @out.WriteString("\n");
         break;
     }
     case ж<Code> xΔ1: {
-        @string md = xΔ1.Value.Text;
+        @string md = xΔ1.Text;
         while (md != ""u8) {
-            @string line = default!;
-            (line, md, _) = strings.Cut(md, "\n"u8);
+            @string line = default;
+            (line, md, _) = strings.Cut(md, "\n");
             if (line != ""u8) {
-                @out.WriteString("\t"u8);
+                @out.WriteString("\t");
                 @out.WriteString(line);
             }
-            @out.WriteString("\n"u8);
+            @out.WriteString("\n");
         }
         break;
     }
     case ж<List> xΔ1: {
         var loose = xΔ1.BlankBetween();
-        foreach (var (i, item) in (~xΔ1).Items) {
+        foreach (var (i, item) in xΔ1.Items) {
             if (i > 0 && loose) {
-                @out.WriteString("\n"u8);
+                @out.WriteString("\n");
             }
-            @out.WriteString(" "u8);
-            if ((~item).Number == ""u8){
-                @out.WriteString(" - "u8);
+            @out.WriteString(" ");
+            if (item.Number == ""u8) {
+                @out.WriteString(" - ");
             } else {
-                @out.WriteString((~item).Number);
-                @out.WriteString(". "u8);
+                @out.WriteString(item.Number);
+                @out.WriteString(". ");
             }
-            foreach (var (iΔ1, blk) in (~item).Content) {
+            foreach (var (iΔ1, blk) in item.Content) {
                 @string fourSpace = fourSpaceᶜ1;
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
                 }
-                p.text(Ꮡout, fourSpace, (~blk._<ж<Paragraph>>()).Text);
-                @out.WriteString("\n"u8);
+                p.text(Ꮡout, fourSpace, blk._<ж<Paragraph>>().Text);
+                @out.WriteString("\n");
             }
         }
         break;
@@ -282,19 +284,19 @@ internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @s
             break;
         }
         case ж<Link> tΔ1: {
-            if ((~tΔ1).Auto){
-                p.text(Ꮡout, indent, (~tΔ1).Text);
+            if (tΔ1.Auto) {
+                p.text(Ꮡout, indent, tΔ1.Text);
             } else {
-                @out.WriteString("["u8);
-                p.text(Ꮡout, indent, (~tΔ1).Text);
-                @out.WriteString("]"u8);
+                @out.WriteString("[");
+                p.text(Ꮡout, indent, tΔ1.Text);
+                @out.WriteString("]");
             }
             break;
         }
         case ж<DocLink> tΔ1: {
-            @out.WriteString("["u8);
-            p.text(Ꮡout, indent, (~tΔ1).Text);
-            @out.WriteString("]"u8);
+            @out.WriteString("[");
+            p.text(Ꮡout, indent, tΔ1.Text);
+            @out.WriteString("]");
             break;
         }}
     }
@@ -306,10 +308,10 @@ internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, 
     ref var @out = ref Ꮡout.DerefOrNull();
 
     while (s != ""u8) {
-        var (line, rest, ok) = strings.Cut(s, "\n"u8);
+        var (line, rest, ok) = strings.Cut(s, "\n");
         @out.WriteString(line);
         if (ok) {
-            @out.WriteString("\n"u8);
+            @out.WriteString("\n");
             @out.WriteString(indent);
         }
         s = rest;

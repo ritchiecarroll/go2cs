@@ -15,8 +15,8 @@ partial class runtime_package {
 internal static UntypedInt m5 => 0x1d8e4e27c47d124f;
 
 internal static uintptr memhashFallback(@unsafe.Pointer Δp, uintptr seed, uintptr s) {
-    uintptr a = default!;
-    uintptr b = default!;
+    uintptr a = default;
+    uintptr b = default;
     seed ^= (uintptr)(hashkey[0]);
     switch (ᐧ) {
     case {} when s == 0: {

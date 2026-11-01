@@ -11,8 +11,10 @@ using Δsyscall = syscall_package;
 partial class poll_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string acceptˢ = "accept"u8;
-internal static readonly @string setnonblockˢ = "setnonblock"u8;
+internal static ref readonly @string acceptˢ => ref acceptˢᵇ;
+private static readonly @string acceptˢᵇ = "accept"u8;
+internal static ref readonly @string setnonblockˢ => ref setnonblockˢᵇ;
+private static readonly @string setnonblockˢᵇ = "setnonblock"u8;
 
 // Wrapper around the accept system call that marks the returned file
 // descriptor as nonblocking and close-on-exec.
@@ -23,19 +25,19 @@ internal static (nint, Δsyscall.Sockaddr, @string, error) accept(nint s) {
     // However, a call to the File method will put it back into
     // blocking mode. We can't take that risk, so no use of ForkLock here.
     var (ns, sa, err) = AcceptFunc(s);
-    if (err == default!) {
+    if (err == nil) {
         Δsyscall.CloseOnExec(ns);
     }
-    if (err != default!) {
-        return (-1, default!, acceptˢ, err);
+    if (err != nil) {
+        return (-1, default, acceptˢ, err);
     }
     {
-        err = Δsyscall.SetNonblock(ns, true); if (err != default!) {
+        err = Δsyscall.SetNonblock(ns, true); if (err != nil) {
             CloseFunc(ns);
-            return (-1, default!, setnonblockˢ, err);
+            return (-1, default, setnonblockˢ, err);
         }
     }
-    return (ns, sa, "", default!);
+    return (ns, sa, "", default);
 }
 
 } // end poll_package

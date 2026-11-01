@@ -33,14 +33,14 @@ public static ж<JSONHandler> NewJSONHandler(io.Writer w, ж<HandlerOptions> Ꮡ
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     if (Ꮡopts == nil) {
-        Ꮡopts = Ꮡ(new HandlerOptions(nil)); opts = ref Ꮡopts.DerefOrNull();
+        Ꮡopts = Ꮡ(new HandlerOptions()); opts = ref Ꮡopts.DerefOrNull();
     }
     return Ꮡ(new JSONHandler(
         Ꮡ(new commonHandler(
             json: true,
             w: w,
             opts: opts,
-            mu: Ꮡ(new sync.Mutex(nil))
+            mu: Ꮡ(new sync.Mutex())
         ))
     ));
 }
@@ -96,7 +96,8 @@ public static error Handle(this ref JSONHandler h, context.Context _, Record r) 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string timeTimeYearOutsideOfˢ = "time.Time year outside of range [0,9999]"u8;
+internal static ref readonly @string timeTimeYearOutsideOfˢ => ref timeTimeYearOutsideOfˢᵇ;
+private static readonly @string timeTimeYearOutsideOfˢᵇ = "time.Time year outside of range [0,9999]"u8;
 
 // Adapted from time.Time.MarshalJSON to avoid allocation.
 internal static void appendJSONTime(ж<handleState> Ꮡs, time.Time t) {
@@ -109,59 +110,68 @@ internal static void appendJSONTime(ж<handleState> Ꮡs, time.Time t) {
             s.appendError(errors.New(timeTimeYearOutsideOfˢ));
         }
     }
-    s.buf.WriteByte((rune)'"');
+    s.buf.WriteByte((byte)'"');
     s.buf.ValueSlot = t.AppendFormat(s.buf.ValueSlot, time_package.RFC3339Nano);
-    s.buf.WriteByte((rune)'"');
+    s.buf.WriteByte((byte)'"');
 }
 
 internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == KindString) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == KindString: {
         s.appendString(v.str());
+        break;
     }
-    else if (exprᴛ1 == KindInt64) {
+    case var ᴛ when ᴛ == KindInt64: {
         s.buf.ValueSlot = strconv.AppendInt(s.buf.ValueSlot, v.Int64(), 10);
+        break;
     }
-    else if (exprᴛ1 == KindUint64) {
+    case var ᴛ when ᴛ == KindUint64: {
         s.buf.ValueSlot = strconv.AppendUint(s.buf.ValueSlot, v.Uint64(), 10);
+        break;
     }
-    else if (exprᴛ1 == KindFloat64) {
+    case var ᴛ when ᴛ == KindFloat64: {
         // json.Marshal is funny about floats; it doesn't
         // always match strconv.AppendFloat. So just call it.
         // That's expensive, but floats are rare.
         {
-            var err = appendJSONMarshal(s.buf, v.Float64()); if (err != default!) {
+            var err = appendJSONMarshal(s.buf, v.Float64()); if (err != nil) {
                 return err;
             }
         }
+        break;
     }
-    else if (exprᴛ1 == KindBool) {
+    case var ᴛ when ᴛ == KindBool: {
         s.buf.ValueSlot = strconv.AppendBool(s.buf.ValueSlot, v.Bool());
+        break;
     }
-    else if (exprᴛ1 == KindDuration) {
+    case var ᴛ when ᴛ == KindDuration: {
         // Do what json.Marshal does.
         s.buf.ValueSlot = strconv.AppendInt(s.buf.ValueSlot, (int64)v.Duration(), 10);
+        break;
     }
-    else if (exprᴛ1 == KindTime) {
+    case var ᴛ when ᴛ == KindTime: {
         Ꮡs.appendTime(v.Time());
+        break;
     }
-    else if (exprᴛ1 == KindAny) {
+    case var ᴛ when ᴛ == KindAny: {
         var a = v.Any();
         var (_, jm) = a._<json.Marshaler>(ᐧ);
         {
-            var (err, ok) = a._<error>(ᐧ); if (ok && !jm){
+            var (err, ok) = a._<error>(ᐧ); if (ok && !jm) {
                 s.appendString(err.Error());
             } else {
                 return appendJSONMarshal(s.buf, a);
             }
         }
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
-    }
-    return default!;
+        break;
+    }}
+    return default;
 }
 
 partial struct jsonEncoder {
@@ -175,8 +185,8 @@ partial struct jsonEncoder {
         var enc = Ꮡ(new jsonEncoder(
             buf: @new<bytes.Buffer>()
         ));
-        enc.Value.json = json.NewEncoder(new bytes_BufferжWriter((~enc).buf));
-        (~enc).json.SetEscapeHTML(false);
+        enc.json = json.NewEncoder(new bytes_BufferжWriter(enc.buf));
+        enc.json.SetEscapeHTML(false);
         return enc.OrTypedNil();
     }
 )); }
@@ -191,31 +201,34 @@ internal static error appendJSONMarshal(ж<buffer.Buffer> Ꮡbuf, any v) {
         defer(() => {
             // To reduce peak allocation, return only smaller buffers to the pool.
             const nint maxBufferSize = /* 16 << 10 */ 16384;
-            if ((~jʗ1).buf.Cap() > maxBufferSize) {
+            if (jʗ1.buf.Cap() > maxBufferSize) {
                 return;
             }
-            (~jʗ1).buf.Reset();
+            jʗ1.buf.Reset();
             jsonEncoderPool.Put(jʗ1.OrTypedNil());
         }, ref ᒐ);
 
         {
-            var err = (~j).json.Encode(v); if (err != default!) {
+            var err = j.json.Encode(v); if (err != nil) {
                 return err;
             }
         }
 
-        var bs = (~j).buf.Bytes();
+        var bs = j.buf.Bytes();
         buf.Write(bs.slice(0, len(bs) - 1)); // remove final newline
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string u00ˢ = @"u00"u8;
-internal static readonly @string ufffdˢ = @"\ufffd"u8;
-internal static readonly @string u202ˢ = @"\u202"u8;
+internal static ref readonly @string u00ˢ => ref u00ˢᵇ;
+private static readonly @string u00ˢᵇ = @"u00"u8;
+internal static ref readonly @string ufffdˢ => ref ufffdˢᵇ;
+private static readonly @string ufffdˢᵇ = @"\ufffd"u8;
+internal static ref readonly @string u202ˢ => ref u202ˢᵇ;
+private static readonly @string u202ˢᵇ = @"\u202"u8;
 
 // appendEscapedJSONString escapes s for JSON and appends it to buf.
 // It does not surround the string in quotation marks.
@@ -241,22 +254,22 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
                 if (start < i) {
                     str(s.slice(start, i));
                 }
-                @char((rune)'\\');
+                @char((byte)'\\');
                 switch (b) {
-                case (rune)'\\' or (rune)'"': {
+                case (byte)'\\' or (byte)'"': {
                     @char(b);
                     break;
                 }
-                case (rune)'\n': {
-                    @char((rune)'n');
+                case (byte)'\n': {
+                    @char((byte)'n');
                     break;
                 }
-                case (rune)'\r': {
-                    @char((rune)'r');
+                case (byte)'\r': {
+                    @char((byte)'r');
                     break;
                 }
-                case (rune)'\t': {
-                    @char((rune)'t');
+                case (byte)'\t': {
+                    @char((byte)'t');
                     break;
                 }
                 default: {
@@ -288,7 +301,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
         // and can lead to security holes there. It is valid JSON to
         // escape them, so we do so unconditionally.
         // See http://timelessrepo.com/json-isnt-a-javascript-subset for discussion.
-        if (c == (rune)'\u2028' || c == (rune)'\u2029') {
+        if (c == '\u2028' || c == '\u2029') {
             if (start < i) {
                 str(s.slice(start, i));
             }
@@ -306,7 +319,8 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
     return buf;
 }
 
-internal static readonly @string hex = "0123456789abcdef"u8;
+internal static ref readonly @string hex => ref hexᵇ;
+private static readonly @string hexᵇ = "0123456789abcdef"u8;
 
 // Copied from encoding/json/tables.go.
 //
@@ -317,102 +331,102 @@ internal static readonly @string hex = "0123456789abcdef"u8;
 // All values are true except for the ASCII control characters (0-31), the
 // double quote ("), and the backslash character ("\").
 [GoLazy] partial class lazyᴛsafeSet { internal static array<bool> safeSet = new array<bool>(128){
-    [(rune)' '] = true,
-    [(rune)'!'] = true,
-    [(rune)'"'] = false,
-    [(rune)'#'] = true,
-    [(rune)'$'] = true,
-    [(rune)'%'] = true,
-    [(rune)'&'] = true,
-    [(rune)'\''] = true,
-    [(rune)'('] = true,
-    [(rune)')'] = true,
-    [(rune)'*'] = true,
-    [(rune)'+'] = true,
-    [(rune)','] = true,
-    [(rune)'-'] = true,
-    [(rune)'.'] = true,
-    [(rune)'/'] = true,
-    [(rune)'0'] = true,
-    [(rune)'1'] = true,
-    [(rune)'2'] = true,
-    [(rune)'3'] = true,
-    [(rune)'4'] = true,
-    [(rune)'5'] = true,
-    [(rune)'6'] = true,
-    [(rune)'7'] = true,
-    [(rune)'8'] = true,
-    [(rune)'9'] = true,
-    [(rune)':'] = true,
-    [(rune)';'] = true,
-    [(rune)'<'] = true,
-    [(rune)'='] = true,
-    [(rune)'>'] = true,
-    [(rune)'?'] = true,
-    [(rune)'@'] = true,
-    [(rune)'A'] = true,
-    [(rune)'B'] = true,
-    [(rune)'C'] = true,
-    [(rune)'D'] = true,
-    [(rune)'E'] = true,
-    [(rune)'F'] = true,
-    [(rune)'G'] = true,
-    [(rune)'H'] = true,
-    [(rune)'I'] = true,
-    [(rune)'J'] = true,
-    [(rune)'K'] = true,
-    [(rune)'L'] = true,
-    [(rune)'M'] = true,
-    [(rune)'N'] = true,
-    [(rune)'O'] = true,
-    [(rune)'P'] = true,
-    [(rune)'Q'] = true,
-    [(rune)'R'] = true,
-    [(rune)'S'] = true,
-    [(rune)'T'] = true,
-    [(rune)'U'] = true,
-    [(rune)'V'] = true,
-    [(rune)'W'] = true,
-    [(rune)'X'] = true,
-    [(rune)'Y'] = true,
-    [(rune)'Z'] = true,
-    [(rune)'['] = true,
-    [(rune)'\\'] = false,
-    [(rune)']'] = true,
-    [(rune)'^'] = true,
-    [(rune)'_'] = true,
-    [(rune)'`'] = true,
-    [(rune)'a'] = true,
-    [(rune)'b'] = true,
-    [(rune)'c'] = true,
-    [(rune)'d'] = true,
-    [(rune)'e'] = true,
-    [(rune)'f'] = true,
-    [(rune)'g'] = true,
-    [(rune)'h'] = true,
-    [(rune)'i'] = true,
-    [(rune)'j'] = true,
-    [(rune)'k'] = true,
-    [(rune)'l'] = true,
-    [(rune)'m'] = true,
-    [(rune)'n'] = true,
-    [(rune)'o'] = true,
-    [(rune)'p'] = true,
-    [(rune)'q'] = true,
-    [(rune)'r'] = true,
-    [(rune)'s'] = true,
-    [(rune)'t'] = true,
-    [(rune)'u'] = true,
-    [(rune)'v'] = true,
-    [(rune)'w'] = true,
-    [(rune)'x'] = true,
-    [(rune)'y'] = true,
-    [(rune)'z'] = true,
-    [(rune)'{'] = true,
-    [(rune)'|'] = true,
-    [(rune)'}'] = true,
-    [(rune)'~'] = true,
-    [(rune)'\x7f'] = true
+    [' '] = true,
+    ['!'] = true,
+    ['"'] = false,
+    ['#'] = true,
+    ['$'] = true,
+    ['%'] = true,
+    ['&'] = true,
+    ['\''] = true,
+    ['('] = true,
+    [')'] = true,
+    ['*'] = true,
+    ['+'] = true,
+    [','] = true,
+    ['-'] = true,
+    ['.'] = true,
+    ['/'] = true,
+    ['0'] = true,
+    ['1'] = true,
+    ['2'] = true,
+    ['3'] = true,
+    ['4'] = true,
+    ['5'] = true,
+    ['6'] = true,
+    ['7'] = true,
+    ['8'] = true,
+    ['9'] = true,
+    [':'] = true,
+    [';'] = true,
+    ['<'] = true,
+    ['='] = true,
+    ['>'] = true,
+    ['?'] = true,
+    ['@'] = true,
+    ['A'] = true,
+    ['B'] = true,
+    ['C'] = true,
+    ['D'] = true,
+    ['E'] = true,
+    ['F'] = true,
+    ['G'] = true,
+    ['H'] = true,
+    ['I'] = true,
+    ['J'] = true,
+    ['K'] = true,
+    ['L'] = true,
+    ['M'] = true,
+    ['N'] = true,
+    ['O'] = true,
+    ['P'] = true,
+    ['Q'] = true,
+    ['R'] = true,
+    ['S'] = true,
+    ['T'] = true,
+    ['U'] = true,
+    ['V'] = true,
+    ['W'] = true,
+    ['X'] = true,
+    ['Y'] = true,
+    ['Z'] = true,
+    ['['] = true,
+    ['\\'] = false,
+    [']'] = true,
+    ['^'] = true,
+    ['_'] = true,
+    ['`'] = true,
+    ['a'] = true,
+    ['b'] = true,
+    ['c'] = true,
+    ['d'] = true,
+    ['e'] = true,
+    ['f'] = true,
+    ['g'] = true,
+    ['h'] = true,
+    ['i'] = true,
+    ['j'] = true,
+    ['k'] = true,
+    ['l'] = true,
+    ['m'] = true,
+    ['n'] = true,
+    ['o'] = true,
+    ['p'] = true,
+    ['q'] = true,
+    ['r'] = true,
+    ['s'] = true,
+    ['t'] = true,
+    ['u'] = true,
+    ['v'] = true,
+    ['w'] = true,
+    ['x'] = true,
+    ['y'] = true,
+    ['z'] = true,
+    ['{'] = true,
+    ['|'] = true,
+    ['}'] = true,
+    ['~'] = true,
+    ['\x7f'] = true
 }; }
 
 } // end slog_package

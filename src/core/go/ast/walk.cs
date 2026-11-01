@@ -33,7 +33,7 @@ internal static void walkList<N>(Visitor v, slice<N> list)
 // w.Visit(nil).
 public static void Walk(Visitor v, Node node) {
     {
-        v = v.Visit(node); if (v == default!) {
+        v = v.Visit(node); if (v == nil) {
             return;
         }
     }
@@ -48,27 +48,27 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<CommentGroup> n: {
-        walkList(v, widen<ж<Comment>, Node>((~n).List, elemᴛ1 => new CommentжNode(elemᴛ1)));
+        walkList(v, widen<ж<Comment>, Node>(n.List, elemᴛ1 => new CommentжNode(elemᴛ1)));
         break;
     }
     case ж<Field> n: {
-        if ((~n).Doc != nil) {
-            Walk(v, new CommentGroupжNode((~n).Doc));
+        if (n.Doc != nil) {
+            Walk(v, new CommentGroupжNode(n.Doc));
         }
-        walkList(v, widen<ж<Ident>, Node>((~n).Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
-        if ((~n).Type != default!) {
-            Walk(v, (~n).Type);
+        walkList(v, widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
+        if (n.Type != nil) {
+            Walk(v, n.Type);
         }
-        if ((~n).Tag != nil) {
-            Walk(v, new BasicLitжNode((~n).Tag));
+        if (n.Tag != nil) {
+            Walk(v, new BasicLitжNode(n.Tag));
         }
-        if ((~n).Comment != nil) {
-            Walk(v, new CommentGroupжNode((~n).Comment));
+        if (n.Comment != nil) {
+            Walk(v, new CommentGroupжNode(n.Comment));
         }
         break;
     }
     case ж<FieldList> n: {
-        walkList(v, widen<ж<Field>, Node>((~n).List, elemᴛ1 => new FieldжNode(elemᴛ1)));
+        walkList(v, widen<ж<Field>, Node>(n.List, elemᴛ1 => new FieldжNode(elemᴛ1)));
         break;
     }
     // Expressions
@@ -80,115 +80,115 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<Ellipsis> n: {
-        if ((~n).Elt != default!) {
-            Walk(v, (~n).Elt);
+        if (n.Elt != nil) {
+            Walk(v, n.Elt);
         }
         break;
     }
     case ж<FuncLit> n: {
-        Walk(v, new FuncTypeжNode((~n).Type));
-        Walk(v, new BlockStmtжNode((~n).Body));
+        Walk(v, new FuncTypeжNode(n.Type));
+        Walk(v, new BlockStmtжNode(n.Body));
         break;
     }
     case ж<CompositeLit> n: {
-        if ((~n).Type != default!) {
-            Walk(v, (~n).Type);
+        if (n.Type != nil) {
+            Walk(v, n.Type);
         }
-        walkList(v, (~n).Elts);
+        walkList(v, n.Elts);
         break;
     }
     case ж<ParenExpr> n: {
-        Walk(v, (~n).X);
+        Walk(v, n.X);
         break;
     }
     case ж<SelectorExpr> n: {
-        Walk(v, (~n).X);
-        Walk(v, new IdentжNode((~n).Sel));
+        Walk(v, n.X);
+        Walk(v, new IdentжNode(n.Sel));
         break;
     }
     case ж<IndexExpr> n: {
-        Walk(v, (~n).X);
-        Walk(v, (~n).Index);
+        Walk(v, n.X);
+        Walk(v, n.Index);
         break;
     }
     case ж<IndexListExpr> n: {
-        Walk(v, (~n).X);
-        walkList(v, (~n).Indices);
+        Walk(v, n.X);
+        walkList(v, n.Indices);
         break;
     }
     case ж<SliceExpr> n: {
-        Walk(v, (~n).X);
-        if ((~n).Low != default!) {
-            Walk(v, (~n).Low);
+        Walk(v, n.X);
+        if (n.Low != nil) {
+            Walk(v, n.Low);
         }
-        if ((~n).High != default!) {
-            Walk(v, (~n).High);
+        if (n.High != nil) {
+            Walk(v, n.High);
         }
-        if ((~n).Max != default!) {
-            Walk(v, (~n).Max);
+        if (n.Max != nil) {
+            Walk(v, n.Max);
         }
         break;
     }
     case ж<TypeAssertExpr> n: {
-        Walk(v, (~n).X);
-        if ((~n).Type != default!) {
-            Walk(v, (~n).Type);
+        Walk(v, n.X);
+        if (n.Type != nil) {
+            Walk(v, n.Type);
         }
         break;
     }
     case ж<CallExpr> n: {
-        Walk(v, (~n).Fun);
-        walkList(v, (~n).Args);
+        Walk(v, n.Fun);
+        walkList(v, n.Args);
         break;
     }
     case ж<StarExpr> n: {
-        Walk(v, (~n).X);
+        Walk(v, n.X);
         break;
     }
     case ж<UnaryExpr> n: {
-        Walk(v, (~n).X);
+        Walk(v, n.X);
         break;
     }
     case ж<BinaryExpr> n: {
-        Walk(v, (~n).X);
-        Walk(v, (~n).Y);
+        Walk(v, n.X);
+        Walk(v, n.Y);
         break;
     }
     case ж<KeyValueExpr> n: {
-        Walk(v, (~n).Key);
+        Walk(v, n.Key);
         Walk(v, (~n).Value);
         break;
     }
     // Types
     case ж<ArrayType> n: {
-        if ((~n).Len != default!) {
-            Walk(v, (~n).Len);
+        if (n.Len != nil) {
+            Walk(v, n.Len);
         }
-        Walk(v, (~n).Elt);
+        Walk(v, n.Elt);
         break;
     }
     case ж<StructType> n: {
-        Walk(v, new FieldListжNode((~n).Fields));
+        Walk(v, new FieldListжNode(n.Fields));
         break;
     }
     case ж<FuncType> n: {
-        if ((~n).TypeParams != nil) {
-            Walk(v, new FieldListжNode((~n).TypeParams));
+        if (n.TypeParams != nil) {
+            Walk(v, new FieldListжNode(n.TypeParams));
         }
-        if ((~n).Params != nil) {
-            Walk(v, new FieldListжNode((~n).Params));
+        if (n.Params != nil) {
+            Walk(v, new FieldListжNode(n.Params));
         }
-        if ((~n).Results != nil) {
-            Walk(v, new FieldListжNode((~n).Results));
+        if (n.Results != nil) {
+            Walk(v, new FieldListжNode(n.Results));
         }
         break;
     }
     case ж<InterfaceType> n: {
-        Walk(v, new FieldListжNode((~n).Methods));
+        Walk(v, new FieldListжNode(n.Methods));
         break;
     }
     case ж<MapType> n: {
-        Walk(v, (~n).Key);
+        Walk(v, n.Key);
         Walk(v, (~n).Value);
         break;
     }
@@ -202,7 +202,7 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<DeclStmt> n: {
-        Walk(v, (~n).Decl);
+        Walk(v, n.Decl);
         break;
     }
     case ж<EmptyStmt> n: {
@@ -210,158 +210,158 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<LabeledStmt> n: {
-        Walk(v, new IdentжNode((~n).Label));
-        Walk(v, (~n).Stmt);
+        Walk(v, new IdentжNode(n.Label));
+        Walk(v, n.Stmt);
         break;
     }
     case ж<ExprStmt> n: {
-        Walk(v, (~n).X);
+        Walk(v, n.X);
         break;
     }
     case ж<SendStmt> n: {
-        Walk(v, (~n).Chan);
+        Walk(v, n.Chan);
         Walk(v, (~n).Value);
         break;
     }
     case ж<IncDecStmt> n: {
-        Walk(v, (~n).X);
+        Walk(v, n.X);
         break;
     }
     case ж<AssignStmt> n: {
-        walkList(v, (~n).Lhs);
-        walkList(v, (~n).Rhs);
+        walkList(v, n.Lhs);
+        walkList(v, n.Rhs);
         break;
     }
     case ж<GoStmt> n: {
-        Walk(v, new CallExprжNode((~n).Call));
+        Walk(v, new CallExprжNode(n.Call));
         break;
     }
     case ж<DeferStmt> n: {
-        Walk(v, new CallExprжNode((~n).Call));
+        Walk(v, new CallExprжNode(n.Call));
         break;
     }
     case ж<ReturnStmt> n: {
-        walkList(v, (~n).Results);
+        walkList(v, n.Results);
         break;
     }
     case ж<BranchStmt> n: {
-        if ((~n).Label != nil) {
-            Walk(v, new IdentжNode((~n).Label));
+        if (n.Label != nil) {
+            Walk(v, new IdentжNode(n.Label));
         }
         break;
     }
     case ж<BlockStmt> n: {
-        walkList(v, (~n).List);
+        walkList(v, n.List);
         break;
     }
     case ж<IfStmt> n: {
-        if ((~n).Init != default!) {
-            Walk(v, (~n).Init);
+        if (n.Init != nil) {
+            Walk(v, n.Init);
         }
-        Walk(v, (~n).Cond);
-        Walk(v, new BlockStmtжNode((~n).Body));
-        if ((~n).Else != default!) {
-            Walk(v, (~n).Else);
+        Walk(v, n.Cond);
+        Walk(v, new BlockStmtжNode(n.Body));
+        if (n.Else != nil) {
+            Walk(v, n.Else);
         }
         break;
     }
     case ж<CaseClause> n: {
-        walkList(v, (~n).List);
-        walkList(v, (~n).Body);
+        walkList(v, n.List);
+        walkList(v, n.Body);
         break;
     }
     case ж<SwitchStmt> n: {
-        if ((~n).Init != default!) {
-            Walk(v, (~n).Init);
+        if (n.Init != nil) {
+            Walk(v, n.Init);
         }
-        if ((~n).Tag != default!) {
-            Walk(v, (~n).Tag);
+        if (n.Tag != nil) {
+            Walk(v, n.Tag);
         }
-        Walk(v, new BlockStmtжNode((~n).Body));
+        Walk(v, new BlockStmtжNode(n.Body));
         break;
     }
     case ж<TypeSwitchStmt> n: {
-        if ((~n).Init != default!) {
-            Walk(v, (~n).Init);
+        if (n.Init != nil) {
+            Walk(v, n.Init);
         }
-        Walk(v, (~n).Assign);
-        Walk(v, new BlockStmtжNode((~n).Body));
+        Walk(v, n.Assign);
+        Walk(v, new BlockStmtжNode(n.Body));
         break;
     }
     case ж<CommClause> n: {
-        if ((~n).Comm != default!) {
-            Walk(v, (~n).Comm);
+        if (n.Comm != nil) {
+            Walk(v, n.Comm);
         }
-        walkList(v, (~n).Body);
+        walkList(v, n.Body);
         break;
     }
     case ж<SelectStmt> n: {
-        Walk(v, new BlockStmtжNode((~n).Body));
+        Walk(v, new BlockStmtжNode(n.Body));
         break;
     }
     case ж<ForStmt> n: {
-        if ((~n).Init != default!) {
-            Walk(v, (~n).Init);
+        if (n.Init != nil) {
+            Walk(v, n.Init);
         }
-        if ((~n).Cond != default!) {
-            Walk(v, (~n).Cond);
+        if (n.Cond != nil) {
+            Walk(v, n.Cond);
         }
-        if ((~n).Post != default!) {
-            Walk(v, (~n).Post);
+        if (n.Post != nil) {
+            Walk(v, n.Post);
         }
-        Walk(v, new BlockStmtжNode((~n).Body));
+        Walk(v, new BlockStmtжNode(n.Body));
         break;
     }
     case ж<RangeStmt> n: {
-        if ((~n).Key != default!) {
-            Walk(v, (~n).Key);
+        if (n.Key != nil) {
+            Walk(v, n.Key);
         }
-        if ((~n).Value != default!) {
+        if ((~n).Value != nil) {
             Walk(v, (~n).Value);
         }
-        Walk(v, (~n).X);
-        Walk(v, new BlockStmtжNode((~n).Body));
+        Walk(v, n.X);
+        Walk(v, new BlockStmtжNode(n.Body));
         break;
     }
     // Declarations
     case ж<ImportSpec> n: {
-        if ((~n).Doc != nil) {
-            Walk(v, new CommentGroupжNode((~n).Doc));
+        if (n.Doc != nil) {
+            Walk(v, new CommentGroupжNode(n.Doc));
         }
-        if ((~n).Name != nil) {
-            Walk(v, new IdentжNode((~n).Name));
+        if (n.Name != nil) {
+            Walk(v, new IdentжNode(n.Name));
         }
-        Walk(v, new BasicLitжNode((~n).Path));
-        if ((~n).Comment != nil) {
-            Walk(v, new CommentGroupжNode((~n).Comment));
+        Walk(v, new BasicLitжNode(n.Path));
+        if (n.Comment != nil) {
+            Walk(v, new CommentGroupжNode(n.Comment));
         }
         break;
     }
     case ж<ValueSpec> n: {
-        if ((~n).Doc != nil) {
-            Walk(v, new CommentGroupжNode((~n).Doc));
+        if (n.Doc != nil) {
+            Walk(v, new CommentGroupжNode(n.Doc));
         }
-        walkList(v, widen<ж<Ident>, Node>((~n).Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
-        if ((~n).Type != default!) {
-            Walk(v, (~n).Type);
+        walkList(v, widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
+        if (n.Type != nil) {
+            Walk(v, n.Type);
         }
-        walkList(v, (~n).Values);
-        if ((~n).Comment != nil) {
-            Walk(v, new CommentGroupжNode((~n).Comment));
+        walkList(v, n.Values);
+        if (n.Comment != nil) {
+            Walk(v, new CommentGroupжNode(n.Comment));
         }
         break;
     }
     case ж<TypeSpec> n: {
-        if ((~n).Doc != nil) {
-            Walk(v, new CommentGroupжNode((~n).Doc));
+        if (n.Doc != nil) {
+            Walk(v, new CommentGroupжNode(n.Doc));
         }
-        Walk(v, new IdentжNode((~n).Name));
-        if ((~n).TypeParams != nil) {
-            Walk(v, new FieldListжNode((~n).TypeParams));
+        Walk(v, new IdentжNode(n.Name));
+        if (n.TypeParams != nil) {
+            Walk(v, new FieldListжNode(n.TypeParams));
         }
-        Walk(v, (~n).Type);
-        if ((~n).Comment != nil) {
-            Walk(v, new CommentGroupжNode((~n).Comment));
+        Walk(v, n.Type);
+        if (n.Comment != nil) {
+            Walk(v, new CommentGroupжNode(n.Comment));
         }
         break;
     }
@@ -370,40 +370,40 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<GenDecl> n: {
-        if ((~n).Doc != nil) {
-            Walk(v, new CommentGroupжNode((~n).Doc));
+        if (n.Doc != nil) {
+            Walk(v, new CommentGroupжNode(n.Doc));
         }
-        walkList(v, (~n).Specs);
+        walkList(v, n.Specs);
         break;
     }
     case ж<FuncDecl> n: {
-        if ((~n).Doc != nil) {
-            Walk(v, new CommentGroupжNode((~n).Doc));
+        if (n.Doc != nil) {
+            Walk(v, new CommentGroupжNode(n.Doc));
         }
-        if ((~n).Recv != nil) {
-            Walk(v, new FieldListжNode((~n).Recv));
+        if (n.Recv != nil) {
+            Walk(v, new FieldListжNode(n.Recv));
         }
-        Walk(v, new IdentжNode((~n).Name));
-        Walk(v, new FuncTypeжNode((~n).Type));
-        if ((~n).Body != nil) {
-            Walk(v, new BlockStmtжNode((~n).Body));
+        Walk(v, new IdentжNode(n.Name));
+        Walk(v, new FuncTypeжNode(n.Type));
+        if (n.Body != nil) {
+            Walk(v, new BlockStmtжNode(n.Body));
         }
         break;
     }
     // Files and packages
     case ж<File> n: {
-        if ((~n).Doc != nil) {
-            Walk(v, new CommentGroupжNode((~n).Doc));
+        if (n.Doc != nil) {
+            Walk(v, new CommentGroupжNode(n.Doc));
         }
-        Walk(v, new IdentжNode((~n).Name));
-        walkList(v, (~n).Decls);
+        Walk(v, new IdentжNode(n.Name));
+        walkList(v, n.Decls);
         // don't walk n.Comments - they have been
         // visited already through the individual
         // nodes
         break;
     }
     case ж<Package> n: {
-        foreach (var (_, f) in (~n).Files) {
+        foreach (var (_, f) in n.Files) {
             Walk(v, new FileжNode(f));
         }
         break;
@@ -414,7 +414,7 @@ public static void Walk(Visitor v, Node node) {
         break;
     }}
 
-    v.Visit(default!);
+    v.Visit(default);
 }
 
 internal delegate bool inspector(Node _);
@@ -423,7 +423,7 @@ internal static Visitor Visit(this inspector f, Node node) {
     if (f(node)) {
         return new inspectorᴠVisitor(f);
     }
-    return default!;
+    return default;
 }
 
 // Inspect traverses an AST in depth-first order: It starts by calling
@@ -449,7 +449,7 @@ public static iter.Seq<Node> Preorder(Node root) {
     return (Func<Node, bool> yield) => {
         var ok = true;
         Inspect(root, (Node n) => {
-            if (n != default!) {
+            if (n != nil) {
                 // yield must not be called once ok is false.
                 ok = ok && yield(n);
             }
@@ -473,7 +473,7 @@ public static iter.Seq<Node> Preorder(Node root) {
 public static void PreorderStack(Node root, slice<Node> stack, Func<Node, slice<Node>, bool> f) {
     nint before = len(stack);
     Inspect(root, (Node n) => {
-        if (n != default!){
+        if (n != nil) {
             if (!f(n, stack)) {
                 // Do not push, as there will be no corresponding pop.
                 return false;

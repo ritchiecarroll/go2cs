@@ -41,7 +41,7 @@ internal static void checkInitialized(params ꓸꓸꓸжPoint pointsʗp) {
     var points = pointsʗp.sslice();
 
     foreach (var (_, p) in points) {
-        if ((~p).x == (new field.Element(nil)) && (~p).y == (new field.Element(nil))) {
+        if (p.x == (new field.Element()) && p.y == (new field.Element())) {
             throw panic("edwards25519: use of uninitialized Point");
         }
     }
@@ -57,18 +57,18 @@ partial struct affineCached {
 
 // Constructors.
 internal static ж<projP2> Zero(this ж<projP2> Ꮡv) {
-    Ꮡv.of(projP2.ᏑX).Zero();
-    Ꮡv.of(projP2.ᏑY).One();
-    Ꮡv.of(projP2.ᏑZ).One();
+    Ꮡv.ᏑX.Zero();
+    Ꮡv.ᏑY.One();
+    Ꮡv.ᏑZ.One();
     return Ꮡv;
 }
 
 // identity is the point at infinity.
 internal static ж<Point> identity;
 internal static error _ᴛ1ʗ;
-internal static void initᴛidentity() { identity = @new<Point>().SetBytes(new byte[]{
+internal static void initᴛidentity() { identity = @new<Point>().SetBytes(slice<byte>([
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice()).Item1; }
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])).Item1; }
 
 // NewIdentityPoint returns a new Point set to the identity.
 public static ж<Point> NewIdentityPoint() {
@@ -79,11 +79,11 @@ public static ж<Point> NewIdentityPoint() {
 // correspondence of this encoding with the values in RFC 8032.
 internal static ж<Point> generator;
 internal static error _ᴛ2ʗ;
-internal static void initᴛgenerator() { generator = @new<Point>().SetBytes(new byte[]{
+internal static void initᴛgenerator() { generator = @new<Point>().SetBytes(slice<byte>([
     0x58, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66,
     0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66,
     0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66,
-    0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66}.slice()).Item1; }
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66])).Item1; }
 
 // NewGeneratorPoint returns a new Point set to the canonical generator.
 public static ж<Point> NewGeneratorPoint() {
@@ -91,17 +91,17 @@ public static ж<Point> NewGeneratorPoint() {
 }
 
 internal static ж<projCached> Zero(this ж<projCached> Ꮡv) {
-    Ꮡv.of(projCached.ᏑYplusX).One();
-    Ꮡv.of(projCached.ᏑYminusX).One();
-    Ꮡv.of(projCached.ᏑZ).One();
-    Ꮡv.of(projCached.ᏑT2d).Zero();
+    Ꮡv.ᏑYplusX.One();
+    Ꮡv.ᏑYminusX.One();
+    Ꮡv.ᏑZ.One();
+    Ꮡv.ᏑT2d.Zero();
     return Ꮡv;
 }
 
 internal static ж<affineCached> Zero(this ж<affineCached> Ꮡv) {
-    Ꮡv.of(affineCached.ᏑYplusX).One();
-    Ꮡv.of(affineCached.ᏑYminusX).One();
-    Ꮡv.of(affineCached.ᏑT2d).Zero();
+    Ꮡv.ᏑYplusX.One();
+    Ꮡv.ᏑYminusX.One();
+    Ꮡv.ᏑT2d.Zero();
     return Ꮡv;
 }
 
@@ -127,17 +127,17 @@ public static slice<byte> Bytes(this ж<Point> Ꮡv) {
     return Ꮡv.bytes(Ꮡbuf);
 }
 
-internal static slice<byte> bytes(this ж<Point> Ꮡv, /*[32]*/ ж<array<byte>> Ꮡbuf) {
+internal static slice<byte> bytes(this ж<Point> Ꮡv, /*[32]*/ ж<array<byte>> buf) {
     checkInitialized(Ꮡv);
 
     ref var zInv = ref heap(new field.Element(), out var ᏑzInv);
     ref var x = ref heap(new field.Element(), out var Ꮡx);
     ref var y = ref heap(new field.Element(), out var Ꮡy);
-    ᏑzInv.Invert(Ꮡv.of(Point.Ꮡz)); // zInv = 1 / Z
-    Ꮡx.Multiply(Ꮡv.of(Point.Ꮡx), ᏑzInv); // x = X / Z
-    Ꮡy.Multiply(Ꮡv.of(Point.Ꮡy), ᏑzInv); // y = Y / Z
+    ᏑzInv.Invert(Ꮡv.Ꮡz);       // zInv = 1 / Z
+    Ꮡx.Multiply(Ꮡv.Ꮡx, ᏑzInv); // x = X / Z
+    Ꮡy.Multiply(Ꮡv.Ꮡy, ᏑzInv); // y = Y / Z
 
-    var @out = copyFieldElement(Ꮡbuf, Ꮡy);
+    var @out = copyFieldElement(buf, Ꮡy);
     @out[31] |= (byte)((byte)(x.IsNegative() << 7));
     return @out;
 }
@@ -145,8 +145,10 @@ internal static slice<byte> bytes(this ж<Point> Ꮡv, /*[32]*/ ж<array<byte>> 
 internal static ж<field.Element> feOne = @new<field.Element>().One();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string edwards25519InvalidPointˢ = "edwards25519: invalid point encoding length"u8;
-internal static readonly @string edwards25519InvalidPointˢ2 = "edwards25519: invalid point encoding"u8;
+internal static ref readonly @string edwards25519InvalidPointˢ => ref edwards25519InvalidPointˢᵇ;
+private static readonly @string edwards25519InvalidPointˢᵇ = "edwards25519: invalid point encoding length"u8;
+internal static ref readonly @string edwards25519InvalidPointˢ2 => ref edwards25519InvalidPointˢ2ᵇ;
+private static readonly @string edwards25519InvalidPointˢ2ᵇ = "edwards25519: invalid point encoding"u8;
 
 // SetBytes sets v = x, where x is a 32-byte encoding of v. If x does not
 // represent a valid point on the curve, SetBytes returns nil and an error and
@@ -165,8 +167,8 @@ public static (ж<Point>, error) SetBytes(this ж<Point> Ꮡv, slice<byte> x) {
     // specifically the "Canonical A, R" section.
 
     var (y, err) = @new<field.Element>().SetBytes(x);
-    if (err != default!) {
-        return (default!, errors.New(edwards25519InvalidPointˢ));
+    if (err != nil) {
+        return (default, errors.New(edwards25519InvalidPointˢ));
     }
 
     // -x² + y² = 1 + dx²y²
@@ -184,19 +186,19 @@ public static (ж<Point>, error) SetBytes(this ж<Point> Ꮡv, slice<byte> x) {
     // x = +√(u/v)
     var (xx, wasSquare) = @new<field.Element>().SqrtRatio(u, vv);
     if (wasSquare == 0) {
-        return (default!, errors.New(edwards25519InvalidPointˢ2));
+        return (default, errors.New(edwards25519InvalidPointˢ2));
     }
 
     // Select the negative square root if the sign bit is set.
     var xxNeg = @new<field.Element>().Negate(xx);
     xx = xx.Select(xxNeg, xx, (nint)(x[31] >> 7));
 
-    Ꮡv.of(Point.Ꮡx).Set(xx);
-    Ꮡv.of(Point.Ꮡy).Set(y);
-    Ꮡv.of(Point.Ꮡz).One();
-    Ꮡv.of(Point.Ꮡt).Multiply(xx, y); // xy = T / Z
+    Ꮡv.Ꮡx.Set(xx);
+    Ꮡv.Ꮡy.Set(y);
+    Ꮡv.Ꮡz.One();
+    Ꮡv.Ꮡt.Multiply(xx, y); // xy = T / Z
 
-    return (Ꮡv, default!);
+    return (Ꮡv, default);
 }
 
 internal static slice<byte> copyFieldElement(/*[32]*/ ж<array<byte>> Ꮡbuf, ж<field.Element> Ꮡv) {
@@ -208,86 +210,86 @@ internal static slice<byte> copyFieldElement(/*[32]*/ ж<array<byte>> Ꮡbuf, ж
 }
 
 // Conversions.
-internal static ж<projP2> FromP1xP1(this ж<projP2> Ꮡv, ж<projP1xP1> Ꮡp) {
-    Ꮡv.of(projP2.ᏑX).Multiply(Ꮡp.of(projP1xP1.ᏑX), Ꮡp.of(projP1xP1.ᏑT));
-    Ꮡv.of(projP2.ᏑY).Multiply(Ꮡp.of(projP1xP1.ᏑY), Ꮡp.of(projP1xP1.ᏑZ));
-    Ꮡv.of(projP2.ᏑZ).Multiply(Ꮡp.of(projP1xP1.ᏑZ), Ꮡp.of(projP1xP1.ᏑT));
+internal static ж<projP2> FromP1xP1(this ж<projP2> Ꮡv, ж<projP1xP1> p) {
+    Ꮡv.ᏑX.Multiply(p.ᏑX, p.ᏑT);
+    Ꮡv.ᏑY.Multiply(p.ᏑY, p.ᏑZ);
+    Ꮡv.ᏑZ.Multiply(p.ᏑZ, p.ᏑT);
     return Ꮡv;
 }
 
-internal static ж<projP2> FromP3(this ж<projP2> Ꮡv, ж<Point> Ꮡp) {
-    Ꮡv.of(projP2.ᏑX).Set(Ꮡp.of(Point.Ꮡx));
-    Ꮡv.of(projP2.ᏑY).Set(Ꮡp.of(Point.Ꮡy));
-    Ꮡv.of(projP2.ᏑZ).Set(Ꮡp.of(Point.Ꮡz));
+internal static ж<projP2> FromP3(this ж<projP2> Ꮡv, ж<Point> p) {
+    Ꮡv.ᏑX.Set(p.Ꮡx);
+    Ꮡv.ᏑY.Set(p.Ꮡy);
+    Ꮡv.ᏑZ.Set(p.Ꮡz);
     return Ꮡv;
 }
 
-internal static ж<Point> fromP1xP1(this ж<Point> Ꮡv, ж<projP1xP1> Ꮡp) {
-    Ꮡv.of(Point.Ꮡx).Multiply(Ꮡp.of(projP1xP1.ᏑX), Ꮡp.of(projP1xP1.ᏑT));
-    Ꮡv.of(Point.Ꮡy).Multiply(Ꮡp.of(projP1xP1.ᏑY), Ꮡp.of(projP1xP1.ᏑZ));
-    Ꮡv.of(Point.Ꮡz).Multiply(Ꮡp.of(projP1xP1.ᏑZ), Ꮡp.of(projP1xP1.ᏑT));
-    Ꮡv.of(Point.Ꮡt).Multiply(Ꮡp.of(projP1xP1.ᏑX), Ꮡp.of(projP1xP1.ᏑY));
+internal static ж<Point> fromP1xP1(this ж<Point> Ꮡv, ж<projP1xP1> p) {
+    Ꮡv.Ꮡx.Multiply(p.ᏑX, p.ᏑT);
+    Ꮡv.Ꮡy.Multiply(p.ᏑY, p.ᏑZ);
+    Ꮡv.Ꮡz.Multiply(p.ᏑZ, p.ᏑT);
+    Ꮡv.Ꮡt.Multiply(p.ᏑX, p.ᏑY);
     return Ꮡv;
 }
 
-internal static ж<Point> fromP2(this ж<Point> Ꮡv, ж<projP2> Ꮡp) {
-    Ꮡv.of(Point.Ꮡx).Multiply(Ꮡp.of(projP2.ᏑX), Ꮡp.of(projP2.ᏑZ));
-    Ꮡv.of(Point.Ꮡy).Multiply(Ꮡp.of(projP2.ᏑY), Ꮡp.of(projP2.ᏑZ));
-    Ꮡv.of(Point.Ꮡz).Square(Ꮡp.of(projP2.ᏑZ));
-    Ꮡv.of(Point.Ꮡt).Multiply(Ꮡp.of(projP2.ᏑX), Ꮡp.of(projP2.ᏑY));
+internal static ж<Point> fromP2(this ж<Point> Ꮡv, ж<projP2> p) {
+    Ꮡv.Ꮡx.Multiply(p.ᏑX, p.ᏑZ);
+    Ꮡv.Ꮡy.Multiply(p.ᏑY, p.ᏑZ);
+    Ꮡv.Ꮡz.Square(p.ᏑZ);
+    Ꮡv.Ꮡt.Multiply(p.ᏑX, p.ᏑY);
     return Ꮡv;
 }
 
 // d is a constant in the curve equation.
-internal static ж<field.Element> d = @new<field.Element>().SetBytes(new byte[]{
+internal static ж<field.Element> d = @new<field.Element>().SetBytes(slice<byte>([
     0xa3, 0x78, 0x59, 0x13, 0xca, 0x4d, 0xeb, 0x75,
     0xab, 0xd8, 0x41, 0x41, 0x4d, 0x0a, 0x70, 0x00,
     0x98, 0xe8, 0x79, 0x77, 0x79, 0x40, 0xc7, 0x8c,
-    0x73, 0xfe, 0x6f, 0x2b, 0xee, 0x6c, 0x03, 0x52}.slice()).Item1;
+    0x73, 0xfe, 0x6f, 0x2b, 0xee, 0x6c, 0x03, 0x52])).Item1;
 internal static error _ᴛ3ʗ;
 
 internal static ж<field.Element> d2 = @new<field.Element>().Add(d, d);
 
-internal static ж<projCached> FromP3(this ж<projCached> Ꮡv, ж<Point> Ꮡp) {
-    Ꮡv.of(projCached.ᏑYplusX).Add(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
-    Ꮡv.of(projCached.ᏑYminusX).Subtract(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
-    Ꮡv.of(projCached.ᏑZ).Set(Ꮡp.of(Point.Ꮡz));
-    Ꮡv.of(projCached.ᏑT2d).Multiply(Ꮡp.of(Point.Ꮡt), d2);
+internal static ж<projCached> FromP3(this ж<projCached> Ꮡv, ж<Point> p) {
+    Ꮡv.ᏑYplusX.Add(p.Ꮡy, p.Ꮡx);
+    Ꮡv.ᏑYminusX.Subtract(p.Ꮡy, p.Ꮡx);
+    Ꮡv.ᏑZ.Set(p.Ꮡz);
+    Ꮡv.ᏑT2d.Multiply(p.Ꮡt, d2);
     return Ꮡv;
 }
 
-internal static ж<affineCached> FromP3(this ж<affineCached> Ꮡv, ж<Point> Ꮡp) {
-    Ꮡv.of(affineCached.ᏑYplusX).Add(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
-    Ꮡv.of(affineCached.ᏑYminusX).Subtract(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
-    Ꮡv.of(affineCached.ᏑT2d).Multiply(Ꮡp.of(Point.Ꮡt), d2);
+internal static ж<affineCached> FromP3(this ж<affineCached> Ꮡv, ж<Point> p) {
+    Ꮡv.ᏑYplusX.Add(p.Ꮡy, p.Ꮡx);
+    Ꮡv.ᏑYminusX.Subtract(p.Ꮡy, p.Ꮡx);
+    Ꮡv.ᏑT2d.Multiply(p.Ꮡt, d2);
 
     ref var invZ = ref heap(new field.Element(), out var ᏑinvZ);
-    ᏑinvZ.Invert(Ꮡp.of(Point.Ꮡz));
-    Ꮡv.of(affineCached.ᏑYplusX).Multiply(Ꮡv.of(affineCached.ᏑYplusX), ᏑinvZ);
-    Ꮡv.of(affineCached.ᏑYminusX).Multiply(Ꮡv.of(affineCached.ᏑYminusX), ᏑinvZ);
-    Ꮡv.of(affineCached.ᏑT2d).Multiply(Ꮡv.of(affineCached.ᏑT2d), ᏑinvZ);
+    ᏑinvZ.Invert(p.Ꮡz);
+    Ꮡv.ᏑYplusX.Multiply(Ꮡv.ᏑYplusX, ᏑinvZ);
+    Ꮡv.ᏑYminusX.Multiply(Ꮡv.ᏑYminusX, ᏑinvZ);
+    Ꮡv.ᏑT2d.Multiply(Ꮡv.ᏑT2d, ᏑinvZ);
     return Ꮡv;
 }
 
 // (Re)addition and subtraction.
 
 // Add sets v = p + q, and returns v.
-public static ж<Point> Add(this ж<Point> Ꮡv, ж<Point> Ꮡp, ж<Point> Ꮡq) {
-    checkInitialized(Ꮡp, Ꮡq);
-    var qCached = @new<projCached>().FromP3(Ꮡq);
-    var result = @new<projP1xP1>().Add(Ꮡp, qCached);
+public static ж<Point> Add(this ж<Point> Ꮡv, ж<Point> p, ж<Point> q) {
+    checkInitialized(p, q);
+    var qCached = @new<projCached>().FromP3(q);
+    var result = @new<projP1xP1>().Add(p, qCached);
     return Ꮡv.fromP1xP1(result);
 }
 
 // Subtract sets v = p - q, and returns v.
-public static ж<Point> Subtract(this ж<Point> Ꮡv, ж<Point> Ꮡp, ж<Point> Ꮡq) {
-    checkInitialized(Ꮡp, Ꮡq);
-    var qCached = @new<projCached>().FromP3(Ꮡq);
-    var result = @new<projP1xP1>().Sub(Ꮡp, qCached);
+public static ж<Point> Subtract(this ж<Point> Ꮡv, ж<Point> p, ж<Point> q) {
+    checkInitialized(p, q);
+    var qCached = @new<projCached>().FromP3(q);
+    var result = @new<projP1xP1>().Sub(p, qCached);
     return Ꮡv.fromP1xP1(result);
 }
 
-internal static ж<projP1xP1> Add(this ж<projP1xP1> Ꮡv, ж<Point> Ꮡp, ж<projCached> Ꮡq) {
+internal static ж<projP1xP1> Add(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<projCached> q) {
     ref var YplusX = ref heap(new field.Element(), out var ᏑYplusX);
     ref var YminusX = ref heap(new field.Element(), out var ᏑYminusX);
     ref var PP = ref heap(new field.Element(), out var ᏑPP);
@@ -295,24 +297,24 @@ internal static ж<projP1xP1> Add(this ж<projP1xP1> Ꮡv, ж<Point> Ꮡp, ж<pr
     ref var TT2d = ref heap(new field.Element(), out var ᏑTT2d);
     ref var ZZ2 = ref heap(new field.Element(), out var ᏑZZ2);
 
-    ᏑYplusX.Add(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
-    ᏑYminusX.Subtract(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
+    ᏑYplusX.Add(p.Ꮡy, p.Ꮡx);
+    ᏑYminusX.Subtract(p.Ꮡy, p.Ꮡx);
 
-    ᏑPP.Multiply(ᏑYplusX, Ꮡq.of(projCached.ᏑYplusX));
-    ᏑMM.Multiply(ᏑYminusX, Ꮡq.of(projCached.ᏑYminusX));
-    ᏑTT2d.Multiply(Ꮡp.of(Point.Ꮡt), Ꮡq.of(projCached.ᏑT2d));
-    ᏑZZ2.Multiply(Ꮡp.of(Point.Ꮡz), Ꮡq.of(projCached.ᏑZ));
+    ᏑPP.Multiply(ᏑYplusX, q.ᏑYplusX);
+    ᏑMM.Multiply(ᏑYminusX, q.ᏑYminusX);
+    ᏑTT2d.Multiply(p.Ꮡt, q.ᏑT2d);
+    ᏑZZ2.Multiply(p.Ꮡz, q.ᏑZ);
 
     ᏑZZ2.Add(ᏑZZ2, ᏑZZ2);
 
-    Ꮡv.of(projP1xP1.ᏑX).Subtract(ᏑPP, ᏑMM);
-    Ꮡv.of(projP1xP1.ᏑY).Add(ᏑPP, ᏑMM);
-    Ꮡv.of(projP1xP1.ᏑZ).Add(ᏑZZ2, ᏑTT2d);
-    Ꮡv.of(projP1xP1.ᏑT).Subtract(ᏑZZ2, ᏑTT2d);
+    Ꮡv.ᏑX.Subtract(ᏑPP, ᏑMM);
+    Ꮡv.ᏑY.Add(ᏑPP, ᏑMM);
+    Ꮡv.ᏑZ.Add(ᏑZZ2, ᏑTT2d);
+    Ꮡv.ᏑT.Subtract(ᏑZZ2, ᏑTT2d);
     return Ꮡv;
 }
 
-internal static ж<projP1xP1> Sub(this ж<projP1xP1> Ꮡv, ж<Point> Ꮡp, ж<projCached> Ꮡq) {
+internal static ж<projP1xP1> Sub(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<projCached> q) {
     ref var YplusX = ref heap(new field.Element(), out var ᏑYplusX);
     ref var YminusX = ref heap(new field.Element(), out var ᏑYminusX);
     ref var PP = ref heap(new field.Element(), out var ᏑPP);
@@ -320,24 +322,24 @@ internal static ж<projP1xP1> Sub(this ж<projP1xP1> Ꮡv, ж<Point> Ꮡp, ж<pr
     ref var TT2d = ref heap(new field.Element(), out var ᏑTT2d);
     ref var ZZ2 = ref heap(new field.Element(), out var ᏑZZ2);
 
-    ᏑYplusX.Add(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
-    ᏑYminusX.Subtract(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
+    ᏑYplusX.Add(p.Ꮡy, p.Ꮡx);
+    ᏑYminusX.Subtract(p.Ꮡy, p.Ꮡx);
 
-    ᏑPP.Multiply(ᏑYplusX, Ꮡq.of(projCached.ᏑYminusX)); // flipped sign
-    ᏑMM.Multiply(ᏑYminusX, Ꮡq.of(projCached.ᏑYplusX)); // flipped sign
-    ᏑTT2d.Multiply(Ꮡp.of(Point.Ꮡt), Ꮡq.of(projCached.ᏑT2d));
-    ᏑZZ2.Multiply(Ꮡp.of(Point.Ꮡz), Ꮡq.of(projCached.ᏑZ));
+    ᏑPP.Multiply(ᏑYplusX, q.ᏑYminusX); // flipped sign
+    ᏑMM.Multiply(ᏑYminusX, q.ᏑYplusX); // flipped sign
+    ᏑTT2d.Multiply(p.Ꮡt, q.ᏑT2d);
+    ᏑZZ2.Multiply(p.Ꮡz, q.ᏑZ);
 
     ᏑZZ2.Add(ᏑZZ2, ᏑZZ2);
 
-    Ꮡv.of(projP1xP1.ᏑX).Subtract(ᏑPP, ᏑMM);
-    Ꮡv.of(projP1xP1.ᏑY).Add(ᏑPP, ᏑMM);
-    Ꮡv.of(projP1xP1.ᏑZ).Subtract(ᏑZZ2, ᏑTT2d); // flipped sign
-    Ꮡv.of(projP1xP1.ᏑT).Add(ᏑZZ2, ᏑTT2d); // flipped sign
+    Ꮡv.ᏑX.Subtract(ᏑPP, ᏑMM);
+    Ꮡv.ᏑY.Add(ᏑPP, ᏑMM);
+    Ꮡv.ᏑZ.Subtract(ᏑZZ2, ᏑTT2d); // flipped sign
+    Ꮡv.ᏑT.Add(ᏑZZ2, ᏑTT2d);      // flipped sign
     return Ꮡv;
 }
 
-internal static ж<projP1xP1> AddAffine(this ж<projP1xP1> Ꮡv, ж<Point> Ꮡp, ж<affineCached> Ꮡq) {
+internal static ж<projP1xP1> AddAffine(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<affineCached> q) {
     ref var YplusX = ref heap(new field.Element(), out var ᏑYplusX);
     ref var YminusX = ref heap(new field.Element(), out var ᏑYminusX);
     ref var PP = ref heap(new field.Element(), out var ᏑPP);
@@ -345,23 +347,23 @@ internal static ж<projP1xP1> AddAffine(this ж<projP1xP1> Ꮡv, ж<Point> Ꮡp,
     ref var TT2d = ref heap(new field.Element(), out var ᏑTT2d);
     ref var Z2 = ref heap(new field.Element(), out var ᏑZ2);
 
-    ᏑYplusX.Add(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
-    ᏑYminusX.Subtract(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
+    ᏑYplusX.Add(p.Ꮡy, p.Ꮡx);
+    ᏑYminusX.Subtract(p.Ꮡy, p.Ꮡx);
 
-    ᏑPP.Multiply(ᏑYplusX, Ꮡq.of(affineCached.ᏑYplusX));
-    ᏑMM.Multiply(ᏑYminusX, Ꮡq.of(affineCached.ᏑYminusX));
-    ᏑTT2d.Multiply(Ꮡp.of(Point.Ꮡt), Ꮡq.of(affineCached.ᏑT2d));
+    ᏑPP.Multiply(ᏑYplusX, q.ᏑYplusX);
+    ᏑMM.Multiply(ᏑYminusX, q.ᏑYminusX);
+    ᏑTT2d.Multiply(p.Ꮡt, q.ᏑT2d);
 
-    ᏑZ2.Add(Ꮡp.of(Point.Ꮡz), Ꮡp.of(Point.Ꮡz));
+    ᏑZ2.Add(p.Ꮡz, p.Ꮡz);
 
-    Ꮡv.of(projP1xP1.ᏑX).Subtract(ᏑPP, ᏑMM);
-    Ꮡv.of(projP1xP1.ᏑY).Add(ᏑPP, ᏑMM);
-    Ꮡv.of(projP1xP1.ᏑZ).Add(ᏑZ2, ᏑTT2d);
-    Ꮡv.of(projP1xP1.ᏑT).Subtract(ᏑZ2, ᏑTT2d);
+    Ꮡv.ᏑX.Subtract(ᏑPP, ᏑMM);
+    Ꮡv.ᏑY.Add(ᏑPP, ᏑMM);
+    Ꮡv.ᏑZ.Add(ᏑZ2, ᏑTT2d);
+    Ꮡv.ᏑT.Subtract(ᏑZ2, ᏑTT2d);
     return Ꮡv;
 }
 
-internal static ж<projP1xP1> SubAffine(this ж<projP1xP1> Ꮡv, ж<Point> Ꮡp, ж<affineCached> Ꮡq) {
+internal static ж<projP1xP1> SubAffine(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<affineCached> q) {
     ref var YplusX = ref heap(new field.Element(), out var ᏑYplusX);
     ref var YminusX = ref heap(new field.Element(), out var ᏑYminusX);
     ref var PP = ref heap(new field.Element(), out var ᏑPP);
@@ -369,68 +371,68 @@ internal static ж<projP1xP1> SubAffine(this ж<projP1xP1> Ꮡv, ж<Point> Ꮡp,
     ref var TT2d = ref heap(new field.Element(), out var ᏑTT2d);
     ref var Z2 = ref heap(new field.Element(), out var ᏑZ2);
 
-    ᏑYplusX.Add(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
-    ᏑYminusX.Subtract(Ꮡp.of(Point.Ꮡy), Ꮡp.of(Point.Ꮡx));
+    ᏑYplusX.Add(p.Ꮡy, p.Ꮡx);
+    ᏑYminusX.Subtract(p.Ꮡy, p.Ꮡx);
 
-    ᏑPP.Multiply(ᏑYplusX, Ꮡq.of(affineCached.ᏑYminusX)); // flipped sign
-    ᏑMM.Multiply(ᏑYminusX, Ꮡq.of(affineCached.ᏑYplusX)); // flipped sign
-    ᏑTT2d.Multiply(Ꮡp.of(Point.Ꮡt), Ꮡq.of(affineCached.ᏑT2d));
+    ᏑPP.Multiply(ᏑYplusX, q.ᏑYminusX); // flipped sign
+    ᏑMM.Multiply(ᏑYminusX, q.ᏑYplusX); // flipped sign
+    ᏑTT2d.Multiply(p.Ꮡt, q.ᏑT2d);
 
-    ᏑZ2.Add(Ꮡp.of(Point.Ꮡz), Ꮡp.of(Point.Ꮡz));
+    ᏑZ2.Add(p.Ꮡz, p.Ꮡz);
 
-    Ꮡv.of(projP1xP1.ᏑX).Subtract(ᏑPP, ᏑMM);
-    Ꮡv.of(projP1xP1.ᏑY).Add(ᏑPP, ᏑMM);
-    Ꮡv.of(projP1xP1.ᏑZ).Subtract(ᏑZ2, ᏑTT2d); // flipped sign
-    Ꮡv.of(projP1xP1.ᏑT).Add(ᏑZ2, ᏑTT2d); // flipped sign
+    Ꮡv.ᏑX.Subtract(ᏑPP, ᏑMM);
+    Ꮡv.ᏑY.Add(ᏑPP, ᏑMM);
+    Ꮡv.ᏑZ.Subtract(ᏑZ2, ᏑTT2d); // flipped sign
+    Ꮡv.ᏑT.Add(ᏑZ2, ᏑTT2d);      // flipped sign
     return Ꮡv;
 }
 
 // Doubling.
-internal static ж<projP1xP1> Double(this ж<projP1xP1> Ꮡv, ж<projP2> Ꮡp) {
+internal static ж<projP1xP1> Double(this ж<projP1xP1> Ꮡv, ж<projP2> p) {
     ref var XX = ref heap(new field.Element(), out var ᏑXX);
     ref var YY = ref heap(new field.Element(), out var ᏑYY);
     ref var ZZ2 = ref heap(new field.Element(), out var ᏑZZ2);
     ref var XplusYsq = ref heap(new field.Element(), out var ᏑXplusYsq);
 
-    ᏑXX.Square(Ꮡp.of(projP2.ᏑX));
-    ᏑYY.Square(Ꮡp.of(projP2.ᏑY));
-    ᏑZZ2.Square(Ꮡp.of(projP2.ᏑZ));
+    ᏑXX.Square(p.ᏑX);
+    ᏑYY.Square(p.ᏑY);
+    ᏑZZ2.Square(p.ᏑZ);
     ᏑZZ2.Add(ᏑZZ2, ᏑZZ2);
-    ᏑXplusYsq.Add(Ꮡp.of(projP2.ᏑX), Ꮡp.of(projP2.ᏑY));
+    ᏑXplusYsq.Add(p.ᏑX, p.ᏑY);
     ᏑXplusYsq.Square(ᏑXplusYsq);
 
-    Ꮡv.of(projP1xP1.ᏑY).Add(ᏑYY, ᏑXX);
-    Ꮡv.of(projP1xP1.ᏑZ).Subtract(ᏑYY, ᏑXX);
+    Ꮡv.ᏑY.Add(ᏑYY, ᏑXX);
+    Ꮡv.ᏑZ.Subtract(ᏑYY, ᏑXX);
 
-    Ꮡv.of(projP1xP1.ᏑX).Subtract(ᏑXplusYsq, Ꮡv.of(projP1xP1.ᏑY));
-    Ꮡv.of(projP1xP1.ᏑT).Subtract(ᏑZZ2, Ꮡv.of(projP1xP1.ᏑZ));
+    Ꮡv.ᏑX.Subtract(ᏑXplusYsq, Ꮡv.ᏑY);
+    Ꮡv.ᏑT.Subtract(ᏑZZ2, Ꮡv.ᏑZ);
     return Ꮡv;
 }
 
 // Negation.
 
 // Negate sets v = -p, and returns v.
-public static ж<Point> Negate(this ж<Point> Ꮡv, ж<Point> Ꮡp) {
-    checkInitialized(Ꮡp);
-    Ꮡv.of(Point.Ꮡx).Negate(Ꮡp.of(Point.Ꮡx));
-    Ꮡv.of(Point.Ꮡy).Set(Ꮡp.of(Point.Ꮡy));
-    Ꮡv.of(Point.Ꮡz).Set(Ꮡp.of(Point.Ꮡz));
-    Ꮡv.of(Point.Ꮡt).Negate(Ꮡp.of(Point.Ꮡt));
+public static ж<Point> Negate(this ж<Point> Ꮡv, ж<Point> p) {
+    checkInitialized(p);
+    Ꮡv.Ꮡx.Negate(p.Ꮡx);
+    Ꮡv.Ꮡy.Set(p.Ꮡy);
+    Ꮡv.Ꮡz.Set(p.Ꮡz);
+    Ꮡv.Ꮡt.Negate(p.Ꮡt);
     return Ꮡv;
 }
 
 // Equal returns 1 if v is equivalent to u, and 0 otherwise.
-public static nint Equal(this ж<Point> Ꮡv, ж<Point> Ꮡu) {
-    checkInitialized(Ꮡv, Ꮡu);
+public static nint Equal(this ж<Point> Ꮡv, ж<Point> u) {
+    checkInitialized(Ꮡv, u);
 
     ref var t1 = ref heap(new field.Element(), out var Ꮡt1);
     ref var t2 = ref heap(new field.Element(), out var Ꮡt2);
     ref var t3 = ref heap(new field.Element(), out var Ꮡt3);
     ref var t4 = ref heap(new field.Element(), out var Ꮡt4);
-    Ꮡt1.Multiply(Ꮡv.of(Point.Ꮡx), Ꮡu.of(Point.Ꮡz));
-    Ꮡt2.Multiply(Ꮡu.of(Point.Ꮡx), Ꮡv.of(Point.Ꮡz));
-    Ꮡt3.Multiply(Ꮡv.of(Point.Ꮡy), Ꮡu.of(Point.Ꮡz));
-    Ꮡt4.Multiply(Ꮡu.of(Point.Ꮡy), Ꮡv.of(Point.Ꮡz));
+    Ꮡt1.Multiply(Ꮡv.Ꮡx, u.Ꮡz);
+    Ꮡt2.Multiply(u.Ꮡx, Ꮡv.Ꮡz);
+    Ꮡt3.Multiply(Ꮡv.Ꮡy, u.Ꮡz);
+    Ꮡt4.Multiply(u.Ꮡy, Ꮡv.Ꮡz);
 
     return t1.Equal(Ꮡt2) & t3.Equal(Ꮡt4);
 }
@@ -438,19 +440,19 @@ public static nint Equal(this ж<Point> Ꮡv, ж<Point> Ꮡu) {
 // Constant-time operations
 
 // Select sets v to a if cond == 1 and to b if cond == 0.
-internal static ж<projCached> Select(this ж<projCached> Ꮡv, ж<projCached> Ꮡa, ж<projCached> Ꮡb, nint cond) {
-    Ꮡv.of(projCached.ᏑYplusX).Select(Ꮡa.of(projCached.ᏑYplusX), Ꮡb.of(projCached.ᏑYplusX), cond);
-    Ꮡv.of(projCached.ᏑYminusX).Select(Ꮡa.of(projCached.ᏑYminusX), Ꮡb.of(projCached.ᏑYminusX), cond);
-    Ꮡv.of(projCached.ᏑZ).Select(Ꮡa.of(projCached.ᏑZ), Ꮡb.of(projCached.ᏑZ), cond);
-    Ꮡv.of(projCached.ᏑT2d).Select(Ꮡa.of(projCached.ᏑT2d), Ꮡb.of(projCached.ᏑT2d), cond);
+internal static ж<projCached> Select(this ж<projCached> Ꮡv, ж<projCached> a, ж<projCached> b, nint cond) {
+    Ꮡv.ᏑYplusX.Select(a.ᏑYplusX, b.ᏑYplusX, cond);
+    Ꮡv.ᏑYminusX.Select(a.ᏑYminusX, b.ᏑYminusX, cond);
+    Ꮡv.ᏑZ.Select(a.ᏑZ, b.ᏑZ, cond);
+    Ꮡv.ᏑT2d.Select(a.ᏑT2d, b.ᏑT2d, cond);
     return Ꮡv;
 }
 
 // Select sets v to a if cond == 1 and to b if cond == 0.
-internal static ж<affineCached> Select(this ж<affineCached> Ꮡv, ж<affineCached> Ꮡa, ж<affineCached> Ꮡb, nint cond) {
-    Ꮡv.of(affineCached.ᏑYplusX).Select(Ꮡa.of(affineCached.ᏑYplusX), Ꮡb.of(affineCached.ᏑYplusX), cond);
-    Ꮡv.of(affineCached.ᏑYminusX).Select(Ꮡa.of(affineCached.ᏑYminusX), Ꮡb.of(affineCached.ᏑYminusX), cond);
-    Ꮡv.of(affineCached.ᏑT2d).Select(Ꮡa.of(affineCached.ᏑT2d), Ꮡb.of(affineCached.ᏑT2d), cond);
+internal static ж<affineCached> Select(this ж<affineCached> Ꮡv, ж<affineCached> a, ж<affineCached> b, nint cond) {
+    Ꮡv.ᏑYplusX.Select(a.ᏑYplusX, b.ᏑYplusX, cond);
+    Ꮡv.ᏑYminusX.Select(a.ᏑYminusX, b.ᏑYminusX, cond);
+    Ꮡv.ᏑT2d.Select(a.ᏑT2d, b.ᏑT2d, cond);
     return Ꮡv;
 }
 
@@ -458,8 +460,8 @@ internal static ж<affineCached> Select(this ж<affineCached> Ꮡv, ж<affineCac
 internal static ж<projCached> CondNeg(this ж<projCached> Ꮡv, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
 
-    v.YplusX.Swap(Ꮡv.of(projCached.ᏑYminusX), cond);
-    Ꮡv.of(projCached.ᏑT2d).Select(@new<field.Element>().Negate(Ꮡv.of(projCached.ᏑT2d)), Ꮡv.of(projCached.ᏑT2d), cond);
+    v.YplusX.Swap(Ꮡv.ᏑYminusX, cond);
+    Ꮡv.ᏑT2d.Select(@new<field.Element>().Negate(Ꮡv.ᏑT2d), Ꮡv.ᏑT2d, cond);
     return Ꮡv;
 }
 
@@ -467,8 +469,8 @@ internal static ж<projCached> CondNeg(this ж<projCached> Ꮡv, nint cond) {
 internal static ж<affineCached> CondNeg(this ж<affineCached> Ꮡv, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
 
-    v.YplusX.Swap(Ꮡv.of(affineCached.ᏑYminusX), cond);
-    Ꮡv.of(affineCached.ᏑT2d).Select(@new<field.Element>().Negate(Ꮡv.of(affineCached.ᏑT2d)), Ꮡv.of(affineCached.ᏑT2d), cond);
+    v.YplusX.Swap(Ꮡv.ᏑYminusX, cond);
+    Ꮡv.ᏑT2d.Select(@new<field.Element>().Negate(Ꮡv.ᏑT2d), Ꮡv.ᏑT2d, cond);
     return Ꮡv;
 }
 

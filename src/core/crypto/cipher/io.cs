@@ -18,8 +18,8 @@ partial struct StreamReader {
 }
 
 public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = r.R.Read(dst);
     r.S.XORKeyStream(dst.slice(0, n), dst.slice(0, n));
@@ -38,13 +38,13 @@ partial struct StreamWriter {
 }
 
 public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     var c = new slice<byte>(len(src));
     w.S.XORKeyStream(c, src);
     (n, err) = w.W.Write(c);
-    if (n != len(src) && err == default!) { // should never happen
+    if (n != len(src) && err == nil) { // should never happen
         err = io.ErrShortWrite;
     }
     return (n, err);
@@ -58,7 +58,7 @@ public static error Close(this StreamWriter w) {
             return c.Close();
         }
     }
-    return default!;
+    return default;
 }
 
 } // end cipher_package

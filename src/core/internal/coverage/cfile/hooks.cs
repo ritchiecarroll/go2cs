@@ -32,7 +32,7 @@ public static void InitHook(bool istest) {
     // register the counter data hook before the meta-data hook
     // (in the case where two hooks are needed).
     exithook.Add(new exithook.Hook(F: emitCounterData, RunOnFailure: true));
-    if (istest){
+    if (istest) {
         exithook.Add(new exithook.Hook(F: emitMetaData, RunOnFailure: true));
     } else {
         emitMetaData();

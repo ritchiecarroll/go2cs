@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -48,7 +45,7 @@ using static go.crypto.@internal.fips140deps.time_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,7 +55,7 @@ using static go.crypto.@internal.fips140deps.time_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140deps/time/time.go", "time.cs", "AAsWAAEQ4g==")]
+[assembly: GoPositionMap("crypto/internal/fips140deps/time/time.go", "time.cs", "AAsWAAEQ4g==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140deps;

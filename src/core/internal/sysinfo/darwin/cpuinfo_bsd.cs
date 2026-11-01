@@ -9,7 +9,8 @@ using syscall = syscall_package;
 partial class sysinfo_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string machdepCpuBrandStringˢ = "machdep.cpu.brand_string"u8;
+internal static ref readonly @string machdepCpuBrandStringˢ => ref machdepCpuBrandStringˢᵇ;
+private static readonly @string machdepCpuBrandStringˢᵇ = "machdep.cpu.brand_string"u8;
 
 internal static @string osCPUInfoName() {
     var (cpu, _) = syscall.Sysctl(machdepCpuBrandStringˢ);

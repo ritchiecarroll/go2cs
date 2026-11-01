@@ -18,7 +18,7 @@ internal static uintptr pageCachePages => /* 8 * unsafe.Sizeof(pageCache{}.cache
 partial struct pageCache {
     internal uintptr @base; // base address of the chunk
     internal uint64 cache;  // 64-bit bitmap representing free pages (1 means free)
-    internal uint64 scav;  // 64-bit bitmap representing scavenged pages (1 means scavenged)
+    internal uint64 scav;   // 64-bit bitmap representing scavenged pages (1 means scavenged)
 }
 
 // empty reports whether the page cache has no free pages.
@@ -42,7 +42,7 @@ internal static (uintptr, uintptr) alloc(this ref pageCache c, uintptr npages) {
         var i = (uintptr)sys.TrailingZeros64(c.cache);
         var scav = (c.scav.Rsh((uint64)(i))) & 1;
         c.cache &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((uint64)(i)))); // set bit to mark in-use
-        c.scav &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((uint64)(i)))); // clear bit to mark unscavenged
+        c.scav &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((uint64)(i))));  // clear bit to mark unscavenged
         return (c.@base + i * (uintptr)pageSize, (uintptr)scav * (uintptr)pageSize);
     }
     return c.allocN(npages);
@@ -62,7 +62,7 @@ internal static (uintptr, uintptr) allocN(this ref pageCache c, uintptr npages) 
     var mask = ((((uint64)1).Lsh((uint64)(npages))) - 1).Lsh(i);
     nint scav = sys.OnesCount64(c.scav & mask);
     c.cache &= unchecked((uint64)~(uint64)(mask)); // mark in-use bits
-    c.scav &= unchecked((uint64)~(uint64)(mask)); // clear scavenged bits
+    c.scav &= unchecked((uint64)~(uint64)(mask));  // clear scavenged bits
     return (c.@base + (uintptr)(i * (nuint)pageSize), (uintptr)scav * (uintptr)pageSize);
 }
 
@@ -93,10 +93,10 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
             Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).free1(pi + i);
 
             // Update density statistics.
-            Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(ci, pi + i, 1);
+            Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).free(ci, pi + i, 1);
         }
         if ((c.scav & (((uint64)1).Lsh(i))) != 0) {
-            Δp.chunkOf(ci).of(pallocData.Ꮡscavenged).setRange(pi + i, 1);
+            Δp.chunkOf(ci).Ꮡscavenged.setRange(pi + i, 1);
         }
     }
 
@@ -108,7 +108,7 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
         }
     }
     Δp.update(c.@base, pageCachePages, false, false);
-    c = new pageCache(nil);
+    c = new pageCache();
 }
 
 // allocToCache acquires a pageCachePages-aligned chunk of free pages which
@@ -126,12 +126,12 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
     // If the searchAddr refers to a region which has a higher address than
     // any known chunk, then we know we're out of memory.
     if (chunkIndex(Δp.searchAddr.addr()) >= Δp.end) {
-        return new pageCache(nil);
+        return new pageCache();
     }
-    var c = new pageCache(nil);
+    var c = new pageCache();
     chunkIdx ci = chunkIndex(Δp.searchAddr.addr()); // chunk index
-    ж<pallocData> chunk = default!;
-    if (Δp.summary[len(Δp.summary) - 1][ci] != 0){
+    ж<pallocData> chunk = default;
+    if (Δp.summary[len(Δp.summary) - 1][ci] != 0) {
         // Fast path: there's free pages at or near the searchAddr address.
         chunk = Δp.chunkOf(ci);
         var (j, _) = chunk.of(pallocData.ᏑpallocBits).find(1, chunkPageIndex(Δp.searchAddr.addr()));
@@ -141,7 +141,7 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
         c = new pageCache(
             @base: chunkBase(ci) + alignDown((uintptr)j, 64) * (uintptr)pageSize,
             cache: ~chunk.of(pallocData.ᏑpallocBits).pages64(j),
-            scav: chunk.of(pallocData.Ꮡscavenged).block64(j)
+            scav: chunk.Ꮡscavenged.block64(j)
         );
     } else {
         // Slow path: the searchAddr address had nothing there, so go find
@@ -151,14 +151,14 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
             // We failed to find adequate free space, so mark the searchAddr as OoM
             // and return an empty pageCache.
             Δp.searchAddr = maxSearchAddr();
-            return new pageCache(nil);
+            return new pageCache();
         }
         ci = chunkIndex(addr);
         chunk = Δp.chunkOf(ci);
         c = new pageCache(
             @base: alignDown(addr, 64 * pageSize),
             cache: ~chunk.of(pallocData.ᏑpallocBits).pages64(chunkPageIndex(addr)),
-            scav: chunk.of(pallocData.Ꮡscavenged).block64(chunkPageIndex(addr))
+            scav: chunk.Ꮡscavenged.block64(chunkPageIndex(addr))
         );
     }
 
@@ -166,7 +166,7 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
     // be careful to only set and clear the relevant bits.
     nuint cpi = chunkPageIndex(c.@base);
     chunk.of(pallocData.ᏑpallocBits).allocPages64(cpi, c.cache);
-    chunk.of(pallocData.Ꮡscavenged).clearBlock64(cpi, c.cache & c.scav /* free and scavenged */);
+    chunk.Ꮡscavenged.clearBlock64(cpi, c.cache & c.scav /* free and scavenged */);
 
     // Update as an allocation, but note that it's not contiguous.
     Δp.update(c.@base, pageCachePages, false, true);

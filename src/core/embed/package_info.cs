@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +53,13 @@ using static go.embed_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(@file))]
+[assembly: GoFieldAccess(typeof(openDir))]
+[assembly: GoFieldAccess(typeof(openFile))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,7 +69,7 @@ using static go.embed_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("embed/embed.go", "embed.cs", "ALwB/ALSgoKClKiCAAscgpaAgKKAooCigICigKKAooCkgoKUpoLKlpK4lIKUgsqCgpKClIKUqJKCuIKSgpSSgpSssoKClIKU2JKCgpSCgpSCgpTYkoKClIKClAAIFIKWgKKApIKClIKUgoKmgti0pIKUgqaCgpSCgpQACRSAooCkgqaCgoKClJSClIKClIKotpKClIKUuA==", "261-264:1;279-282:1;283-286:2")]
+[assembly: GoPositionMap("embed/embed.go", "embed.cs", "ALwB/ALSgoKClKiCAAscgpaAgKKAooCigICigKKAooCkgoKUpoLKlpK4lIKUgsqCgpKClIKUqJKCuIKSgpSSgpSssoKClIKU6JKCgpSCgpSCgpTokoKClIKClAAIFIKWgKKApIKClIKUgoKmgti0pIKUgqaCgpSCgpQACRSAooCkgqaCgoKClJSClIKClIKotpKClIKUuA==", "261-264:1;279-282:1;283-286:2")]
 // </GoSourcePositionMaps>
 
 namespace go;

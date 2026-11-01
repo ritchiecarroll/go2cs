@@ -10,10 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +46,11 @@ using static go.@internal.syscall.windows.registry_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(KeyInfo))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,8 +60,8 @@ using static go.@internal.syscall.windows.registry_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/registry/key.go", "key.cs", "AD6KAZIAAhDSgoKUgoKClKjogpSmgoKCkoKCgpSUgoKUgpSUtAAFEPKCgoKClJSClKiSgoKUAAwckoKmgpQ=")]
-[assembly: go.GoPositionMap("internal/syscall/windows/registry/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiClIKCgoKCgpaiAAoCgpSmoqKClKaiooKUpqIADAKClKaiAAgCgpSmosKClKaywoKClA==")]
+[assembly: GoPositionMap("internal/syscall/windows/registry/key.go", "key.cs", "AD6KAZIAAhDSgoKUgoKClKjogpSmgoKCgoKCgpSUgoKUgpSUtAAFEPKCgoKClJSClKiSgoKUAAwckoKmgpQ=")]
+[assembly: GoPositionMap("internal/syscall/windows/registry/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiClIKCgoKCgpaiAAoCgpSmoqKClKaiooKUpqIADAKClKaiAAgCgpSmosKClKaywoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall.windows;

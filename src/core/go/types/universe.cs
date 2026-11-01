@@ -37,52 +37,54 @@ internal static Object universeComparable;
 // Use Universe.Lookup("byte").Type() to obtain the specific
 // alias basic type named "byte" (and analogous for "rune").
 [GoLazy] partial class lazyᴛTyp { public static readonly ж<slice<ж<Basic>>> ᏑTyp = new StaticBox<slice<ж<Basic>>>(new golib.SparseArray<ж<Basic>>{
-    [(int)Invalid] = Ꮡ(new Basic(Invalid, 0, "invalid type"u8)),
+    [(int)Invalid] = Ꮡ(new Basic(Invalid, 0, "invalid type")),
 
-    [(int)Bool] = Ꮡ(new Basic(Bool, IsBoolean, "bool"u8)),
-    [(int)Int] = Ꮡ(new Basic(Int, IsInteger, "int"u8)),
-    [(int)Int8] = Ꮡ(new Basic(Int8, IsInteger, "int8"u8)),
-    [(int)Int16] = Ꮡ(new Basic(Int16, IsInteger, "int16"u8)),
-    [(int)Int32] = Ꮡ(new Basic(Int32, IsInteger, "int32"u8)),
-    [(int)Int64] = Ꮡ(new Basic(Int64, IsInteger, "int64"u8)),
-    [(int)Uint] = Ꮡ(new Basic(Uint, (BasicInfo)(IsInteger | IsUnsigned), "uint"u8)),
-    [(int)Uint8] = Ꮡ(new Basic(Uint8, (BasicInfo)(IsInteger | IsUnsigned), "uint8"u8)),
-    [(int)Uint16] = Ꮡ(new Basic(Uint16, (BasicInfo)(IsInteger | IsUnsigned), "uint16"u8)),
-    [(int)Uint32] = Ꮡ(new Basic(Uint32, (BasicInfo)(IsInteger | IsUnsigned), "uint32"u8)),
-    [(int)Uint64] = Ꮡ(new Basic(Uint64, (BasicInfo)(IsInteger | IsUnsigned), "uint64"u8)),
-    [(int)Uintptr] = Ꮡ(new Basic(Uintptr, (BasicInfo)(IsInteger | IsUnsigned), "uintptr"u8)),
-    [(int)Float32] = Ꮡ(new Basic(Float32, IsFloat, "float32"u8)),
-    [(int)Float64] = Ꮡ(new Basic(Float64, IsFloat, "float64"u8)),
-    [(int)Complex64] = Ꮡ(new Basic(Complex64, IsComplex, "complex64"u8)),
-    [(int)Complex128] = Ꮡ(new Basic(Complex128, IsComplex, "complex128"u8)),
-    [(int)ΔString] = Ꮡ(new Basic(ΔString, IsString, "string"u8)),
-    [(int)UnsafePointer] = Ꮡ(new Basic(UnsafePointer, 0, "Pointer"u8)),
+    [(int)Bool] = Ꮡ(new Basic(Bool, IsBoolean, "bool")),
+    [(int)Int] = Ꮡ(new Basic(Int, IsInteger, "int")),
+    [(int)Int8] = Ꮡ(new Basic(Int8, IsInteger, "int8")),
+    [(int)Int16] = Ꮡ(new Basic(Int16, IsInteger, "int16")),
+    [(int)Int32] = Ꮡ(new Basic(Int32, IsInteger, "int32")),
+    [(int)Int64] = Ꮡ(new Basic(Int64, IsInteger, "int64")),
+    [(int)Uint] = Ꮡ(new Basic(Uint, (BasicInfo)(IsInteger | IsUnsigned), "uint")),
+    [(int)Uint8] = Ꮡ(new Basic(Uint8, (BasicInfo)(IsInteger | IsUnsigned), "uint8")),
+    [(int)Uint16] = Ꮡ(new Basic(Uint16, (BasicInfo)(IsInteger | IsUnsigned), "uint16")),
+    [(int)Uint32] = Ꮡ(new Basic(Uint32, (BasicInfo)(IsInteger | IsUnsigned), "uint32")),
+    [(int)Uint64] = Ꮡ(new Basic(Uint64, (BasicInfo)(IsInteger | IsUnsigned), "uint64")),
+    [(int)Uintptr] = Ꮡ(new Basic(Uintptr, (BasicInfo)(IsInteger | IsUnsigned), "uintptr")),
+    [(int)Float32] = Ꮡ(new Basic(Float32, IsFloat, "float32")),
+    [(int)Float64] = Ꮡ(new Basic(Float64, IsFloat, "float64")),
+    [(int)Complex64] = Ꮡ(new Basic(Complex64, IsComplex, "complex64")),
+    [(int)Complex128] = Ꮡ(new Basic(Complex128, IsComplex, "complex128")),
+    [(int)ΔString] = Ꮡ(new Basic(ΔString, IsString, "string")),
+    [(int)UnsafePointer] = Ꮡ(new Basic(UnsafePointer, 0, "Pointer")),
 
-    [(int)UntypedBool] = Ꮡ(new Basic(UntypedBool, (BasicInfo)(IsBoolean | IsUntyped), "untyped bool"u8)),
-    [(int)ΔUntypedInt] = Ꮡ(new Basic(ΔUntypedInt, (BasicInfo)(IsInteger | IsUntyped), "untyped int"u8)),
-    [(int)UntypedRune] = Ꮡ(new Basic(UntypedRune, (BasicInfo)(IsInteger | IsUntyped), "untyped rune"u8)),
-    [(int)ΔUntypedFloat] = Ꮡ(new Basic(ΔUntypedFloat, (BasicInfo)(IsFloat | IsUntyped), "untyped float"u8)),
-    [(int)ΔUntypedComplex] = Ꮡ(new Basic(ΔUntypedComplex, (BasicInfo)(IsComplex | IsUntyped), "untyped complex"u8)),
-    [(int)UntypedString] = Ꮡ(new Basic(UntypedString, (BasicInfo)(IsString | IsUntyped), "untyped string"u8)),
-    [(int)UntypedNil] = Ꮡ(new Basic(UntypedNil, IsUntyped, "untyped nil"u8))
+    [(int)UntypedBool] = Ꮡ(new Basic(UntypedBool, (BasicInfo)(IsBoolean | IsUntyped), "untyped bool")),
+    [(int)ΔUntypedInt] = Ꮡ(new Basic(ΔUntypedInt, (BasicInfo)(IsInteger | IsUntyped), "untyped int")),
+    [(int)UntypedRune] = Ꮡ(new Basic(UntypedRune, (BasicInfo)(IsInteger | IsUntyped), "untyped rune")),
+    [(int)ΔUntypedFloat] = Ꮡ(new Basic(ΔUntypedFloat, (BasicInfo)(IsFloat | IsUntyped), "untyped float")),
+    [(int)ΔUntypedComplex] = Ꮡ(new Basic(ΔUntypedComplex, (BasicInfo)(IsComplex | IsUntyped), "untyped complex")),
+    [(int)UntypedString] = Ꮡ(new Basic(UntypedString, (BasicInfo)(IsString | IsUntyped), "untyped string")),
+    [(int)UntypedNil] = Ꮡ(new Basic(UntypedNil, IsUntyped, "untyped nil"))
 }.slice()); }
 public static ref slice<ж<Basic>> Typ => ref ((StaticBox<slice<ж<Basic>>>)ᏑTyp).ValueSlot;
 
 internal static array<ж<Basic>> basicAliases = new ж<Basic>[]{
-    Ꮡ(new Basic(Byte, (BasicInfo)(IsInteger | IsUnsigned), "byte"u8)),
-    Ꮡ(new Basic(Rune, IsInteger, "rune"u8))
+    Ꮡ(new Basic(Byte, (BasicInfo)(IsInteger | IsUnsigned), "byte")),
+    Ꮡ(new Basic(Rune, IsInteger, "rune"))
 }.array();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string errorˢ = "error"u8;
-internal static readonly @string errorˢ2 = "Error"u8;
+internal static ref readonly @string errorˢ => ref errorˢᵇ;
+private static readonly @string errorˢᵇ = "error"u8;
+internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
+private static readonly @string errorˢ2ᵇ = "Error"u8;
 
 internal static void defPredeclaredTypes() {
     foreach (var (_, t) in Typ) {
-        def(new TypeNameжObject(NewTypeName(nopos, nil, (~t).name, new BasicжΔType(t))));
+        def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжΔType(t))));
     }
     foreach (var (_, t) in basicAliases.ΔRangeSnapshot()) {
-        def(new TypeNameжObject(NewTypeName(nopos, nil, (~t).name, new BasicжΔType(t))));
+        def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжΔType(t))));
     }
 
     // type any = interface{}
@@ -110,40 +112,40 @@ internal static void defPredeclaredTypes() {
         // It shouldn't matter which representation of any is actually inserted
         // into the Universe, but we lean toward the future and insert the Alias
         // representation.
-        universeAnyAlias = NewTypeName(nopos, nil, anyˢ, default!);
+        universeAnyAlias = NewTypeName(nopos, nil, anyˢ, default);
         _ = NewAlias(universeAnyAlias, universeAnyNoAlias.of(TypeName.Ꮡobject).Type().Underlying()); // Link TypeName and Alias
         def(new TypeNameжObject(universeAnyAlias));
     }
 
     // type error interface{ Error() string }
     {
-        var obj = NewTypeName(nopos, nil, errorˢ, default!);
-        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
+        var obj = NewTypeName(nopos, nil, errorˢ, default);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default, default);
 
         // error.Error() string
         var recv = newVar(RecvVar, nopos, nil, ""u8, new NamedжΔType(typ));
         var res = newVar(ResultVar, nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
-        var sig = NewSignatureType(recv, default!, default!, nil, NewTuple(res), false);
+        var sig = NewSignatureType(recv, default, default, nil, NewTuple(res), false);
         var err = NewFunc(nopos, nil, errorˢ2, sig);
 
         // interface{ Error() string }
-        var ityp = Ꮡ(new Interface(methods: new ж<Func>[]{err}.slice(), complete: true));
+        var ityp = Ꮡ(new Interface(methods: slice<ж<Func>>([err]), complete: true));
         computeInterfaceTypeSet(nil, nopos, ityp); // prevent races due to lazy computation of tset
 
-        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.fromRHS = new InterfaceжΔType(ityp);
         typ.Underlying();
         def(new TypeNameжObject(obj));
     }
 
     // type comparable interface{} // marked as comparable
     {
-        var obj = NewTypeName(nopos, nil, comparableˢ, default!);
-        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
+        var obj = NewTypeName(nopos, nil, comparableˢ, default);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default, default);
 
         // interface{} // marked as comparable
-        var ityp = Ꮡ(new Interface(complete: true, tset: Ꮡ(new _TypeSet(default!, allTermlist, true))));
+        var ityp = Ꮡ(new Interface(complete: true, tset: Ꮡ(new _TypeSet(default, allTermlist, true))));
 
-        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.fromRHS = new InterfaceжΔType(ityp);
         typ.Underlying();
         def(new TypeNameжObject(obj));
     }
@@ -155,9 +157,9 @@ partial struct predeclaredConstsᴛ1 /*dyn*/ {
     internal constant.Value val;
 }
 internal static array<predeclaredConstsᴛ1> predeclaredConsts = new predeclaredConstsᴛ1[]{
-    new("true"u8, UntypedBool, constant.MakeBool(true)),
-    new("false"u8, UntypedBool, constant.MakeBool(false)),
-    new("iota"u8, ΔUntypedInt, constant.MakeInt64(0))
+    new("true", UntypedBool, constant.MakeBool(true)),
+    new("false", UntypedBool, constant.MakeBool(false)),
+    new("iota", ΔUntypedInt, constant.MakeInt64(0))
 }.array();
 
 internal static void defPredeclaredConsts() {
@@ -167,7 +169,7 @@ internal static void defPredeclaredConsts() {
 }
 
 internal static void defPredeclaredNil() {
-    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil"u8, typ: new BasicжΔType(Typ[UntypedNil]))))));
+    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil", typ: new BasicжΔType(Typ[UntypedNil]))))));
 }
 
 // A builtinId is the id of a builtin function.
@@ -214,37 +216,37 @@ partial struct predeclaredFuncsᴛ1 /*dyn*/ {
     internal exprKind kind;
 }
 [GoLazy] partial class lazyᴛpredeclaredFuncs { internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseArray<predeclaredFuncsᴛ1>{
-    [(int)_Append] = new("append"u8, 1, true, expression),
-    [(int)_Cap] = new("cap"u8, 1, false, expression),
-    [(int)_Clear] = new("clear"u8, 1, false, statement),
-    [(int)_Close] = new("close"u8, 1, false, statement),
-    [(int)_Complex] = new("complex"u8, 2, false, expression),
-    [(int)_Copy] = new("copy"u8, 2, false, statement),
-    [(int)_Delete] = new("delete"u8, 2, false, statement),
-    [(int)_Imag] = new("imag"u8, 1, false, expression),
-    [(int)_Len] = new("len"u8, 1, false, expression),
-    [(int)_Make] = new("make"u8, 1, true, expression),
+    [(int)_Append] = new("append", 1, true, expression),
+    [(int)_Cap] = new("cap", 1, false, expression),
+    [(int)_Clear] = new("clear", 1, false, statement),
+    [(int)_Close] = new("close", 1, false, statement),
+    [(int)_Complex] = new("complex", 2, false, expression),
+    [(int)_Copy] = new("copy", 2, false, statement),
+    [(int)_Delete] = new("delete", 2, false, statement),
+    [(int)_Imag] = new("imag", 1, false, expression),
+    [(int)_Len] = new("len", 1, false, expression),
+    [(int)_Make] = new("make", 1, true, expression),
     // To disable max/min, remove the next two lines.
-    [(int)_Max] = new("max"u8, 1, true, expression),
-    [(int)_Min] = new("min"u8, 1, true, expression),
-    [(int)_New] = new("new"u8, 1, false, expression),
-    [(int)_Panic] = new("panic"u8, 1, false, statement),
-    [(int)_Print] = new("print"u8, 0, true, statement),
-    [(int)_Println] = new("println"u8, 0, true, statement),
-    [(int)_Real] = new("real"u8, 1, false, expression),
-    [(int)_Recover] = new("recover"u8, 0, false, statement),
+    [(int)_Max] = new("max", 1, true, expression),
+    [(int)_Min] = new("min", 1, true, expression),
+    [(int)_New] = new("new", 1, false, expression),
+    [(int)_Panic] = new("panic", 1, false, statement),
+    [(int)_Print] = new("print", 0, true, statement),
+    [(int)_Println] = new("println", 0, true, statement),
+    [(int)_Real] = new("real", 1, false, expression),
+    [(int)_Recover] = new("recover", 0, false, statement),
 
-    [(int)_Add] = new("Add"u8, 2, false, expression),
-    [(int)_Alignof] = new("Alignof"u8, 1, false, expression),
-    [(int)_Offsetof] = new("Offsetof"u8, 1, false, expression),
-    [(int)_Sizeof] = new("Sizeof"u8, 1, false, expression),
-    [(int)_Slice] = new("Slice"u8, 2, false, expression),
-    [(int)_SliceData] = new("SliceData"u8, 1, false, expression),
-    [(int)_String] = new("String"u8, 2, false, expression),
-    [(int)_StringData] = new("StringData"u8, 1, false, expression),
+    [(int)_Add] = new("Add", 2, false, expression),
+    [(int)_Alignof] = new("Alignof", 1, false, expression),
+    [(int)_Offsetof] = new("Offsetof", 1, false, expression),
+    [(int)_Sizeof] = new("Sizeof", 1, false, expression),
+    [(int)_Slice] = new("Slice", 2, false, expression),
+    [(int)_SliceData] = new("SliceData", 1, false, expression),
+    [(int)_String] = new("String", 2, false, expression),
+    [(int)_StringData] = new("StringData", 1, false, expression),
 
-    [(int)_Assert] = new("assert"u8, 1, false, statement),
-    [(int)_Trace] = new("trace"u8, 0, true, statement)
+    [(int)_Assert] = new("assert", 1, false, statement),
+    [(int)_Trace] = new("trace", 0, true, statement)
 }.array(); }
 
 internal static void defPredeclaredFuncs() {
@@ -258,13 +260,14 @@ internal static void defPredeclaredFuncs() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string assertˢ = "assert"u8;
+internal static ref readonly @string assertˢ => ref assertˢᵇ;
+private static readonly @string assertˢᵇ = "assert"u8;
 
 // DefPredeclaredTestFuncs defines the assert and trace built-ins.
 // These built-ins are intended for debugging and testing of this
 // package only.
 public static void DefPredeclaredTestFuncs() {
-    if (Universe.Lookup(assertˢ) != default!) {
+    if (Universe.Lookup(assertˢ) != nil) {
         return; // already defined
     }
     def(new BuiltinжObject(newBuiltin(_Assert)));
@@ -272,50 +275,50 @@ public static void DefPredeclaredTestFuncs() {
 }
 
 [GoInit] internal static void initΔ2() {
-    Universe = NewScope(nil, nopos, nopos, "universe"u8);
-    Unsafe = NewPackage("unsafe"u8, "unsafe"u8);
-    Unsafe.Value.complete = true;
+    Universe = NewScope(nil, nopos, nopos, "universe");
+    Unsafe = NewPackage("unsafe", "unsafe");
+    Unsafe.complete = true;
 
     defPredeclaredTypes();
     defPredeclaredConsts();
     defPredeclaredNil();
     defPredeclaredFuncs();
 
-    universeIota = Universe.Lookup("iota"u8);
-    universeBool = Universe.Lookup("bool"u8).Type();
-    universeByte = Universe.Lookup("byte"u8).Type();
-    universeRune = Universe.Lookup("rune"u8).Type();
-    universeError = Universe.Lookup("error"u8).Type();
-    universeComparable = Universe.Lookup("comparable"u8);
+    universeIota = Universe.Lookup("iota");
+    universeBool = Universe.Lookup("bool").Type();
+    universeByte = Universe.Lookup("byte").Type();
+    universeRune = Universe.Lookup("rune").Type();
+    universeError = Universe.Lookup("error").Type();
+    universeComparable = Universe.Lookup("comparable");
 }
 
 // Objects with names containing blanks are internal and not entered into
 // a scope. Objects with exported names are inserted in the unsafe package
 // scope; other objects are inserted in the universe scope.
 internal static void def(Object obj) {
-    assert(obj.Type() != default!);
+    assert(obj.Type() != nil);
     @string name = obj.Name();
-    if (strings.Contains(name, " "u8)) {
+    if (strings.Contains(name, " ")) {
         return; // nothing to do
     }
     // fix Obj link for named types
     {
         var typ = asNamed(obj.Type()); if (typ != nil) {
-            typ.Value.obj = obj._<ж<TypeName>>();
+            typ.obj = obj._<ж<TypeName>>();
         }
     }
     // exported identifiers go into package unsafe
     var scope = Universe;
     if (obj.Exported()) {
-        scope = Unsafe.Value.scope;
+        scope = Unsafe.scope;
         // set Pkg field
         switch (obj.type()) {
         case ж<TypeName> objΔ1: {
-            objΔ1.Value.pkg = Unsafe;
+            objΔ1.pkg = Unsafe;
             break;
         }
         case ж<Builtin> objΔ1: {
-            objΔ1.Value.pkg = Unsafe;
+            objΔ1.pkg = Unsafe;
             break;
         }
         default: {
@@ -324,7 +327,7 @@ internal static void def(Object obj) {
             break;
         }}
     }
-    if (scope.Insert(obj) != default!) {
+    if (scope.Insert(obj) != nil) {
         throw panic("double declaration of predeclared identifier");
     }
 }

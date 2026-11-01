@@ -144,7 +144,7 @@ partial interface Connector {
 // package should continue as if the optional interface was not
 // implemented. ErrSkip is only supported where explicitly
 // documented.
-public static error ErrSkip = errors.New("driver: skip fast-path; continue as if unimplemented"u8);
+public static error ErrSkip = errors.New("driver: skip fast-path; continue as if unimplemented");
 
 // ErrBadConn should be returned by a driver to signal to the [database/sql]
 // package that a driver.[Conn] is in a bad state (such as the server
@@ -158,7 +158,7 @@ public static error ErrSkip = errors.New("driver: skip fast-path; continue as if
 //
 // Errors will be checked using [errors.Is]. An error may
 // wrap ErrBadConn or implement the Is(error) bool method.
-public static error ErrBadConn = errors.New("driver: bad connection"u8);
+public static error ErrBadConn = errors.New("driver: bad connection");
 
 // Pinger is an optional interface that may be implemented by a [Conn].
 //
@@ -375,7 +375,7 @@ partial interface StmtQueryContext {
 // [database/sql] package to not pass the argument to the driver query interface.
 // Return when accepting query specific options or structures that aren't
 // SQL query arguments.
-public static error ErrRemoveArgument = errors.New("driver: remove argument from query"u8);
+public static error ErrRemoveArgument = errors.New("driver: remove argument from query");
 
 // NamedValueChecker may be optionally implemented by [Conn] or [Stmt]. It provides
 // the driver more control to handle Go and database types beyond the default
@@ -522,14 +522,15 @@ partial struct ΔRowsAffected /*num:int64*/;
 internal static Result _ᴛ1ʗ = ((ΔRowsAffected)0);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lastInsertIdIsNotˢ = "LastInsertId is not supported by this driver"u8;
+internal static ref readonly @string lastInsertIdIsNotˢ => ref lastInsertIdIsNotˢᵇ;
+private static readonly @string lastInsertIdIsNotˢᵇ = "LastInsertId is not supported by this driver"u8;
 
 public static (int64, error) LastInsertId(this ΔRowsAffected _) {
     return (0, errors.New(lastInsertIdIsNotˢ));
 }
 
 public static (int64, error) RowsAffected(this ΔRowsAffected v) {
-    return ((int64)v, default!);
+    return ((int64)v, default);
 }
 
 // ResultNoRows is a pre-defined [Result] for drivers to return when a DDL
@@ -541,17 +542,19 @@ public static ref noRows ResultNoRows => ref ((StaticBox<noRows>)ᏑResultNoRows
 public partial struct noRows {
 }
 
-internal static Result _ᴛ2ʗ = new noRows(nil);
+internal static Result _ᴛ2ʗ = new noRows();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noLastInsertIdAvailableˢ = "no LastInsertId available after DDL statement"u8;
+internal static ref readonly @string noLastInsertIdAvailableˢ => ref noLastInsertIdAvailableˢᵇ;
+private static readonly @string noLastInsertIdAvailableˢᵇ = "no LastInsertId available after DDL statement"u8;
 
 public static (int64, error) LastInsertId(this noRows _) {
     return (0, errors.New(noLastInsertIdAvailableˢ));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noRowsAffectedAvailableˢ = "no RowsAffected available after DDL statement"u8;
+internal static ref readonly @string noRowsAffectedAvailableˢ => ref noRowsAffectedAvailableˢᵇ;
+private static readonly @string noRowsAffectedAvailableˢᵇ = "no RowsAffected available after DDL statement"u8;
 
 public static (int64, error) RowsAffected(this noRows _) {
     return (0, errors.New(noRowsAffectedAvailableˢ));

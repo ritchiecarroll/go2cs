@@ -12,7 +12,8 @@ partial class pprof_package {
 // go2cs generated this placeholder — func readMapping is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string notImplementedˢ = "not implemented"u8;
+internal static ref readonly @string notImplementedˢ => ref notImplementedˢᵇ;
+private static readonly @string notImplementedˢᵇ = "not implemented"u8;
 
 internal static (uint64 start, uint64 end, @string exe, @string buildID, error err) readMainModuleMapping() {
     return (0, 0, "", "", errors.New(notImplementedˢ));

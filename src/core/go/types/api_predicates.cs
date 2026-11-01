@@ -17,13 +17,13 @@ partial class types_package {
 //   - if V is a generalized interface; i.e., an interface that may only be used
 //     as a type constraint in Go code
 //   - if T is an uninstantiated generic type
-public static bool AssertableTo(ж<Interface> ᏑV, ΔType T) {
+public static bool AssertableTo(ж<Interface> V, ΔType T) {
     // Checker.newAssertableTo suppresses errors for invalid types, so we need special
     // handling here.
     if (!isValid(T.Underlying())) {
         return false;
     }
-    return (((ж<Checker>)nil)).newAssertableTo(new InterfaceжΔType(ᏑV), T, nil);
+    return (((ж<Checker>)nil)).newAssertableTo(new InterfaceжΔType(V), T, nil);
 }
 
 // AssignableTo reports whether a value of type V is assignable to a variable
@@ -32,8 +32,7 @@ public static bool AssertableTo(ж<Interface> ᏑV, ΔType T) {
 // The behavior of AssignableTo is unspecified if V or T is Typ[Invalid] or an
 // uninstantiated generic type.
 public static bool AssignableTo(ΔType V, ΔType T) {
-    ref var x = ref heap<operand>(out var Ꮡx);
-    x = new operand(mode: value, typ: V);
+    ref var x = ref heap<operand>(new operand(mode: value, typ: V), out var Ꮡx);
     var (ok, _) = Ꮡx.assignableTo(nil, T, nil); // check not needed for non-constant x
     return ok;
 }
@@ -44,8 +43,7 @@ public static bool AssignableTo(ΔType V, ΔType T) {
 // The behavior of ConvertibleTo is unspecified if V or T is Typ[Invalid] or an
 // uninstantiated generic type.
 public static bool ConvertibleTo(ΔType V, ΔType T) {
-    ref var x = ref heap<operand>(out var Ꮡx);
-    x = new operand(mode: value, typ: V);
+    ref var x = ref heap<operand>(new operand(mode: value, typ: V), out var Ꮡx);
     return Ꮡx.convertibleTo(nil, T, nil); // check not needed for non-constant x
 }
 
@@ -53,8 +51,8 @@ public static bool ConvertibleTo(ΔType V, ΔType T) {
 //
 // The behavior of Implements is unspecified if V is Typ[Invalid] or an uninstantiated
 // generic type.
-public static bool Implements(ΔType V, ж<Interface> ᏑT) {
-    if (ᏑT.Empty()) {
+public static bool Implements(ΔType V, ж<Interface> T) {
+    if (T.Empty()) {
         // All types (even Typ[Invalid]) implement the empty interface.
         return true;
     }
@@ -63,15 +61,15 @@ public static bool Implements(ΔType V, ж<Interface> ᏑT) {
     if (!isValid(V.Underlying())) {
         return false;
     }
-    return (((ж<Checker>)nil)).implements(V, new InterfaceжΔType(ᏑT), false, nil);
+    return (((ж<Checker>)nil)).implements(V, new InterfaceжΔType(T), false, nil);
 }
 
 // Satisfies reports whether type V satisfies the constraint T.
 //
 // The behavior of Satisfies is unspecified if V is Typ[Invalid] or an uninstantiated
 // generic type.
-public static bool Satisfies(ΔType V, ж<Interface> ᏑT) {
-    return (((ж<Checker>)nil)).implements(V, new InterfaceжΔType(ᏑT), true, nil);
+public static bool Satisfies(ΔType V, ж<Interface> T) {
+    return (((ж<Checker>)nil)).implements(V, new InterfaceжΔType(T), true, nil);
 }
 
 // Identical reports whether x and y are identical types.
@@ -89,14 +87,14 @@ public static bool Satisfies(ΔType V, ж<Interface> ᏑT) {
 // all loaded packages and their dependencies.
 // For more information, see https://github.com/golang/go/issues/57497.
 public static bool Identical(ΔType x, ΔType y) {
-    comparer c = default!;
+    comparer c = default;
     return c.identical(x, y, nil);
 }
 
 // IdenticalIgnoreTags reports whether x and y are identical types if tags are ignored.
 // Receivers of [Signature] types are ignored.
 public static bool IdenticalIgnoreTags(ΔType x, ΔType y) {
-    comparer c = default!;
+    comparer c = default;
     c.ignoreTags = true;
     return c.identical(x, y, nil);
 }

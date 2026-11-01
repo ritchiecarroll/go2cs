@@ -12,14 +12,14 @@ partial class os_package {
 internal static (FileInfo, error) lstatat(this ж<File> Ꮡf, @string name) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    if (stathook != default!) {
+    if (stathook != nil) {
         var (fi, err) = stathook(Ꮡf, name);
-        if (fi != default! || err != default!) {
+        if (fi != nil || err != nil) {
             return (fi, err);
         }
     }
     {
-        var log = testlog.Logger(); if (log != default!) {
+        var log = testlog.Logger(); if (log != nil) {
             log.Stat(joinPath(f.Name(), name));
         }
     }

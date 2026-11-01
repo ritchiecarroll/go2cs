@@ -47,7 +47,12 @@ using static go.crypto.@internal.fips140.rsa_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(PrivateKey))]
+[assembly: GoFieldAccess(typeof(millerRabin))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,11 +62,11 @@ using static go.crypto.@internal.fips140.rsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/cast.go", "cast.cs", "ABAglAAgQgAgQgAQIgAQIgAQIgAQIgAQIgAJFIKCgtwAIUSCgpSAgqSClA==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "ABciooKUgoKmgoKClIKCpoKClIKCpoKmgoKUggAOHoKUlIKmgoIABxCmggAPIIKCpoKS3IKClLjK5sIABxCSgpSmgoKUggAHEIKUgpSAgrbaooKmgoKAgtqC3IKUgrgAESSCAAQY8oKUuIKigoIAECKCgpS0tLS0tLS0toKCgoKCgpSUgpSCggANHAAeOqKmgoKUgpSmgoKUuIKCgqYACgyUgpSCgIKkggAIEoKCuIKCgpSUuA==", "114-126:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "ABcyABAqwoKClKaCgoKm1qSSgoKCgsqCgpSCgoKUgoKuwoKClKaigIKSguyCpoKCpoKClIKmpoK4")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABdMAA4CgIKkgIKkgIKkqqKClIKCgoKClIKClOimgoIABxCCyoKmgoKCAAwalIKCgpQABxCC3MqmpvqmgoKCAAcQgriCyoLKgpqygty4poKCgpTKgu6CgoKmgrgABxCCgoKClKaClKrCgoK4gpTYsoKCAAcQgriClIKAgraCgoIACRSAkoKCtqiSqJKClKaigoKCgIKSgraCpoKCgoIABxCCgpSmpoLmygAJDoKCgoCCkoKkgoKmgoKUgoKUgoKUgIK2gpSosoKClIKEpoKCpoKClJSClIKU3J7ygpSCgoKCgqaCpg==", "", "", "465=Size/1/1/1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKClIKClIKClIKClNaygoKClJSCgoKUuJSUgoKU7oCCpKqigoKUgoKUgoKUgoKUgoKm7oCCpKyygoKUgoKU3ICCpK4ADQKCgoKClIKCgoKCAA0KopSAgpKCtpSCpoKCpoK4goCCpIKAgqSCAAoWgoKUgoKUgoKCgqaCgpSCgpSCgoK4gpSUgsqCgpSCggAIEoKAlIKCprjIggAIEoKmAAkGooKClILKgpSClIK4griC3IKUqJKCgIKkpoKCgpSmkpLckoKqooKssoKmgqSCgqaUgpaClJSUlJSUpoKCgrg=")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/cast.go", "cast.cs", "ABAglAAgQgAgQgAQIgAQIgAQIgAQIgAQIgAJFIKCgtwAIUSCgpSAgqSClA==")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "AB0iooKUgoKmgoKClIKCpoKClIKCpoKmgoKUggAOHoKUlIKmgoIABxCmggAPIIKCpoKS3IKClLjKAAkGwgAHEJKClKaCgpSCAAcQgpSClICCtuqigqaCgoCC2oLcgpSCuAARJIIABBjygpS4gqKCggAQIoKClLS0tLS0tLS2goKCgoKClJSClIKCAA0cACA6oqaCgpSClKaCgpS4goKCpgAMDJSClIKAgqSCAAgSgoK4goKClJS4", "114-126:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "ABcyABAqwoKClKaCgoKm5qSSgoKCgsqCgpSCgoKUgoKuwoKClKaigIKCguyCpoKCpoKClIKmpoLY")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABdMAA4CgIKkgIKkgIKkqqKClIKCgoKClIKClPimgoIABxCCyoKmgoKCAAwalIKCgpQABxCC3MqmpgAICqaCgoIABxCCuILKgsqCmrKC3LimgoKClMqC7oKCgqaCuAAHEIKCgoKUpoKUqsKCgriClOiygoIABxCCuIKUgoCCtoKCggAJFICSgoK2qJKokoKUpqKCgoKAgoKCtoKmgoKCggAHEIKClKamgubKAAkOgoKCgIKCgqSCgqaCgpSCgpSCgpSAgraClKiygoKUgoSmgoKmgoKUlIKUgpTcnvKClIKCgoKCpoKm", "", "", "466=Size/1/1/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKClIKClIKClIKClOaygoKClJSCgoKUuJSUgoKU7oCCpKqigoKUgoKUgoKUgoKUgoKm7oCCpKyygoKUgoKU3ICCpK4ADQKCgoKClIKCgoKCABYKopSAgoKCtpSCpoKCpoK4goCCpIKAgqSCAAoWgoKUgoKUgoKCgqaCgpSCgpSCgoK4gpSUgsqCgpSCggAIEoKAlIKCprjIggAIEoKmAA4GooKClILKgpSClIK4griC3IKUqJKCgIKkpoKCgpSmkpLckoKqooKssoKmgqSCgqaUgpaClJSUlJSUpoKCgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

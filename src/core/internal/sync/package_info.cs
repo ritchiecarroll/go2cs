@@ -10,14 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 // </ImportedTypeAliases>
 
 using go;
@@ -53,7 +45,13 @@ using static go.@internal.sync_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Mutex))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.Type))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔMapType))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,8 +61,8 @@ using static go.@internal.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/sync/mutex.go", "mutex.cs", "ADl65IKClKas0oKC3IKmgpTWooKCgoKCpriElIKCgpSUgpSC3IKUpoKUlIKCpoKClIKCgsqClILclIKUgpS4gr7SgoK4gqboooKUgoLugqaCgoKUAAcQ", "", "", "117=CompareAndSwapInt32/1/1/1")]
-[assembly: go.GoPositionMap("internal/sync/runtime.go", "runtime.cs", "AAkqAA0WAAoM2sampg==")]
+[assembly: GoPositionMap("internal/sync/mutex.go", "mutex.cs", "ADl65IKClKas0oKC3IKmgpTmooKCgoKCpriElIKCgpSUgpSC3IKUpoKUlIKCpoKClIKCgsqClILclIKUgpS4gr7SgoK4gqb4ooKUgoLugqaCgoKUAAcQ", "", "", "118=CompareAndSwapInt32/1/1/1")]
+[assembly: GoPositionMap("internal/sync/runtime.go", "runtime.cs", "AAkqAA0WAAoM2sampg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

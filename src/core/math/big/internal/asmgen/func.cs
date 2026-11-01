@@ -18,13 +18,14 @@ partial class asmgen_package {
 partial struct ΔFunc {
     public @string Name;
     public ж<Asm> Asm;
-    internal slice<@string> inputs; // name of input slices (not beginning with z)
-    internal slice<@string> outputs; // names of output slices (beginning with z)
+    internal slice<@string> inputs;   // name of input slices (not beginning with z)
+    internal slice<@string> outputs;  // names of output slices (beginning with z)
     internal map<@string, nint> args; // offsets of args, results on stack
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string funcˢ = "func "u8;
+internal static ref readonly @string funcˢ => ref funcˢᵇ;
+private static readonly @string funcˢᵇ = "func "u8;
 
 // Func starts a new function in the assembly output.
 public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
@@ -32,12 +33,12 @@ public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
 
     var (d, ok) = strings.CutPrefix(decl, funcˢ);
     if (!ok) {
-        Ꮡa.Fatalf("func decl does not begin with 'func '"u8);
+        Ꮡa.Fatalf("func decl does not begin with 'func '");
     }
     ref var name = ref heap<@string>(out var Ꮡname);
-    (name, d, ok) = strings.Cut(d, "("u8);
+    (name, d, ok) = strings.Cut(d, "(");
     if (!ok) {
-        Ꮡa.Fatalf("func decl does not have func arg list"u8);
+        Ꮡa.Fatalf("func decl does not have func arg list");
     }
     var f = Ꮡ(new ΔFunc(
         Name: name,
@@ -48,22 +49,22 @@ public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
 
     // Parse argument names and types. Quick and dirty.
     // Convert (args) (results) into args, results.
-    d = strings.ReplaceAll(d, ") ("u8, ", "u8);
-    d = strings.TrimSuffix(d, ")"u8);
-    var args = strings.Split(d, ","u8);
+    d = strings.ReplaceAll(d, ") (", ", ");
+    d = strings.TrimSuffix(d, ")");
+    var args = strings.Split(d, ",");
 
     // Assign implicit types to all arguments (x, y int -> x int, y int).
     @string typ = ""u8;
     foreach (var (i, vᴛ1) in range<nint, @string>(slices.Backward<slice<@string>, @string>(args).Invoke)) {
         var arg = vᴛ1;
         arg = strings.TrimSpace(arg);
-        if (!strings.Contains(arg, " "u8)){
+        if (!strings.Contains(arg, " ")) {
             if (typ == ""u8) {
-                Ꮡa.Fatalf("missing argument type"u8);
+                Ꮡa.Fatalf("missing argument type");
             }
             arg += " "u8 + typ;
         } else {
-            (_, typ, _) = strings.Cut(arg, " "u8);
+            (_, typ, _) = strings.Cut(arg, " ");
         }
         args[i] = arg;
     }
@@ -71,33 +72,37 @@ public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
     // Record mapping from names to offsets.
     nint off = 0;
     foreach (var (_, arg) in args) {
-        var (nameΔ1, typΔ1, _) = strings.Cut(arg, " "u8);
+        var (nameΔ1, typΔ1, _) = strings.Cut(arg, " ");
         var exprᴛ1 = typΔ1;
-        if (exprᴛ1 == "Word"u8 || exprᴛ1 == "uint"u8 || exprᴛ1 == "int"u8) {
-            f.Value.args[nameΔ1] = off;
-            off += a.Arch.Value.WordBytes;
+        switch (ᐧ) {
+        default: {
+            Ꮡa.Fatalf("unknown type %s", typΔ1);
+            break;
         }
-        else if (exprᴛ1 == "[]Word"u8) {
-            if (strings.HasPrefix(nameΔ1, "z"u8)){
-                f.Value.outputs = append((~f).outputs, nameΔ1);
+        case {} when exprᴛ1 == "Word"u8 || exprᴛ1 == "uint"u8 || exprᴛ1 == "int"u8: {
+            f.args[nameΔ1] = off;
+            off += a.Arch.WordBytes;
+            break;
+        }
+        case {} when exprᴛ1 == "[]Word"u8: {
+            if (strings.HasPrefix(nameΔ1, "z")) {
+                f.outputs = append(f.outputs, nameΔ1);
             } else {
-                f.Value.inputs = append((~f).inputs, nameΔ1);
+                f.inputs = append(f.inputs, nameΔ1);
             }
-            f.Value.args[nameΔ1 + "_base"u8] = off;
-            f.Value.args[nameΔ1 + "_len"u8] = off + (~a.Arch).WordBytes;
-            f.Value.args[nameΔ1 + "_cap"u8] = off + 2 * (~a.Arch).WordBytes;
-            off += 3 * (~a.Arch).WordBytes;
-        }
-        else { /* default: */
-            Ꮡa.Fatalf("unknown type %s"u8, typΔ1);
-        }
+            f.args[nameΔ1 + "_base"u8] = off;
+            f.args[nameΔ1 + "_len"u8] = off + a.Arch.WordBytes;
+            f.args[nameΔ1 + "_cap"u8] = off + 2 * a.Arch.WordBytes;
+            off += 3 * a.Arch.WordBytes;
+            break;
+        }}
     }
 
-    Ꮡa.Printf("\n"u8);
-    Ꮡa.Printf("// %s\n"u8, decl);
-    Ꮡa.Printf("TEXT ·%s(SB), NOSPLIT, $0\n"u8, name);
-    if ((~a.Arch).setup != default!) {
-        (~a.Arch).setup(f);
+    Ꮡa.Printf("\n");
+    Ꮡa.Printf("// %s\n", decl);
+    Ꮡa.Printf("TEXT ·%s(SB), NOSPLIT, $0\n", name);
+    if (a.Arch.setup != nil) {
+        a.Arch.setup(f);
     }
     return f;
 }
@@ -112,10 +117,10 @@ public static ΔReg Arg(this ref ΔFunc f, @string name) {
 public static ΔReg ArgHint(this ref ΔFunc f, @string name, Hint hint) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
-        f.Asm.Fatalf("unknown argument %s"u8, name);
+        f.Asm.Fatalf("unknown argument %s", name);
     }
     var mem = new ΔReg(fmt.Sprintf("%s+%d(FP)"u8, name, off));
-    if (hint == HintMemOK && (~(~f.Asm).Arch).memOK) {
+    if (hint == HintMemOK && f.Asm.Arch.memOK) {
         return mem;
     }
     var r = f.Asm.RegHint(hint);
@@ -132,11 +137,11 @@ public static RegPtr ArgPtr(this ref ΔFunc f, @string name) {
 public static void StoreArg(this ref ΔFunc f, ΔReg src, @string name) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
-        f.Asm.Fatalf("unknown argument %s"u8, name);
+        f.Asm.Fatalf("unknown argument %s", name);
     }
     var a = f.Asm;
     var mem = new ΔReg(fmt.Sprintf("%s+%d(FP)"u8, name, off));
-    if (src.IsImm() && !(~(~a).Arch).memOK) {
+    if (src.IsImm() && !a.Arch.memOK) {
         var r = a.Reg();
         a.Mov(src, r);
         a.Mov(r, mem);

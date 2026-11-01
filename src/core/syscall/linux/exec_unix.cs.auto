@@ -80,7 +80,7 @@ public static slice<ж<byte>> StringSlicePtr(slice<@string> ss) {
     for (nint i = 0; i < len(ss); i++) {
         bb[i] = StringBytePtr(ss[i]);
     }
-    bb[len(ss)] = default!;
+    bb[len(ss)] = default;
     return bb;
 }
 
@@ -91,7 +91,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     nint n = 0;
     foreach (var (_, s) in ss) {
         if (bytealg.IndexByteString(s, 0) != -1) {
-            return (default!, EINVAL);
+            return (default, EINVAL);
         }
         n += len(s) + 1; // +1 for NUL
     }
@@ -103,7 +103,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
         copy(b.slice(n), s);
         n += len(s) + 1;
     }
-    return (bb, default!);
+    return (bb, default);
 }
 
 public static void CloseOnExec(nint fd) {
@@ -111,16 +111,16 @@ public static void CloseOnExec(nint fd) {
 }
 
 public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
-    error err = default!;
+    error err = default;
 
     (var flag, err) = fcntl(fd, F_GETFL, 0);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (((flag & (nint)O_NONBLOCK) != 0) == nonblocking) {
-        return default!;
+        return default;
     }
-    if (nonblocking){
+    if (nonblocking) {
         flag |= (nint)(O_NONBLOCK);
     } else {
         flag &= ~(nint)(O_NONBLOCK);
@@ -132,8 +132,8 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
 // Credential holds user and group identities to be assumed
 // by a child process started by [StartProcess].
 partial struct Credential {
-    public uint32 Uid;   // User ID.
-    public uint32 Gid;   // Group ID.
+    public uint32 Uid;           // User ID.
+    public uint32 Gid;           // Group ID.
     public slice<uint32> Groups; // Supplementary group IDs.
     public bool NoSetGroups;     // If true, don't set supplementary groups
 }
@@ -141,8 +141,8 @@ partial struct Credential {
 // ProcAttr holds attributes that will be applied to a new process started
 // by [StartProcess].
 partial struct ProcAttr {
-    public @string Dir;   // Current working directory.
-    public slice<@string> Env; // Environment.
+    public @string Dir;          // Current working directory.
+    public slice<@string> Env;   // Environment.
     public slice<uintptr> Files; // File descriptors.
     public ж<SysProcAttr> Sys;
 }
@@ -154,12 +154,12 @@ internal static readonly ж<SysProcAttr> ᏑzeroSysProcAttr = new StaticBox<SysP
 internal static ref SysProcAttr zeroSysProcAttr => ref ((StaticBox<SysProcAttr>)ᏑzeroSysProcAttr).ValueSlot;
 
 internal static (nint pid, error err) forkExec(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    nint pid = default!;
-    error err = default!;
+    nint pid = default;
+    error err = default;
     ref var attr = ref Ꮡattr.DerefOrNull();
 
     array<nint> p = new(2);
-    nint n = default!;
+    nint n = default;
     ref var err1 = ref heap(new Errno(), out var Ꮡerr1);
     ref var wstatus = ref heap(new WaitStatus(), out var Ꮡwstatus);
 
@@ -173,15 +173,15 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
 
     // Convert args to C form.
     (var argv0p, err) = BytePtrFromString(argv0);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
     (var argvp, err) = SlicePtrFromStrings(argv);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
     (var envvp, err) = SlicePtrFromStrings(attr.Env);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
 
@@ -189,27 +189,27 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
         argvp[0] = argv0p;
     }
 
-    ж<byte> chroot = default!;
-    if ((~sys).Chroot != ""u8) {
-        (chroot, err) = BytePtrFromString((~sys).Chroot);
-        if (err != default!) {
+    ж<byte> chroot = default;
+    if (sys.Chroot != ""u8) {
+        (chroot, err) = BytePtrFromString(sys.Chroot);
+        if (err != nil) {
             return (0, err);
         }
     }
-    ж<byte> dir = default!;
+    ж<byte> dir = default;
     if (attr.Dir != ""u8) {
         (dir, err) = BytePtrFromString(attr.Dir);
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
     }
 
     // Both Setctty and Foreground use the Ctty field,
     // but they give it slightly different meanings.
-    if ((~sys).Setctty && (~sys).Foreground) {
+    if (sys.Setctty && sys.Foreground) {
         return (0, errorspkg.New("both Setctty and Foreground set in SysProcAttr"u8));
     }
-    if ((~sys).Setctty && (~sys).Ctty >= len(attr.Files)) {
+    if (sys.Setctty && sys.Ctty >= len(attr.Files)) {
         return (0, errorspkg.New("Setctty set but Ctty not valid in child"u8));
     }
 
@@ -217,7 +217,7 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
 
     // Allocate child status pipe close on exec.
     {
-        err = forkExecPipe(p[..]); if (err != default!) {
+        err = forkExecPipe(p[..]); if (err != nil) {
             releaseForkLock();
             return (0, err);
         }
@@ -235,18 +235,18 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
 
     // Read child error status from pipe.
     Close(p[1]);
-    while (ᐧ) {
+    for (;;) {
         (n, err) = readlen(p[0], Ꮡerr1.Reinterpret<Errno, byte>(), (nint)/* unsafe.Sizeof(err1) */ (uintptr)8);
         if (!AreEqual(err, EINTR)) {
             break;
         }
     }
     Close(p[0]);
-    if (err != default! || n != 0) {
+    if (err != nil || n != 0) {
         if (n == (nint)/* unsafe.Sizeof(err1) */ (uintptr)8) {
             err = err1;
         }
-        if (err == default!) {
+        if (err == nil) {
             err = EPIPE;
         }
 
@@ -264,20 +264,20 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
     }
 
     // Read got EOF, so pipe closed on exec, so exec succeeded.
-    return (pid, default!);
+    return (pid, default);
 }
 
 // Combination of fork and exec, careful to be thread safe.
-public static (nint pid, error err) ForkExec(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    return forkExec(argv0, argv, Ꮡattr);
+public static (nint pid, error err) ForkExec(@string argv0, slice<@string> argv, ж<ProcAttr> attr) {
+    return forkExec(argv0, argv, attr);
 }
 
 // StartProcess wraps [ForkExec] for package os.
-public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    nint pid = default!;
-    error err = default!;
+public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> attr) {
+    nint pid = default;
+    error err = default;
 
-    (pid, err) = forkExec(argv0, argv, Ꮡattr);
+    (pid, err) = forkExec(argv0, argv, attr);
     return (pid, 0, err);
 }
 
@@ -292,18 +292,18 @@ internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveLibc;
 
 // Exec invokes the execve(2) system call.
 public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@string> envv) {
-    error err = default!;
+    error err = default;
 
     (var argv0p, err) = BytePtrFromString(argv0);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var argvp, err) = SlicePtrFromStrings(argv);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var envvp, err) = SlicePtrFromStrings(envv);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     runtime_BeforeExec();
@@ -313,13 +313,15 @@ public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@stri
         Setrlimit(RLIMIT_NOFILE, rlim);
     }
 
-    error err1 = default!;
+    error err1 = default;
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8: {
         // RawSyscall should never be used on these platforms.
         err1 = execveLibc(argv0p, Ꮡ(argvp, 0), Ꮡ(envvp, 0));
+        break;
     }
-    else { /* default: */
+    default: {
         var ᴋ0 = argv0p;
         var ᴋ1 = @unsafe.Pointer.FromBox(Ꮡ(argvp, 0));
         var ᴋ2 = @unsafe.Pointer.FromBox(Ꮡ(envvp, 0));
@@ -329,7 +331,8 @@ public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@stri
         System.GC.KeepAlive(ᴋ0);
         System.GC.KeepAlive(ᴋ1);
         System.GC.KeepAlive(ᴋ2);
-    }
+        break;
+    }}
     runtime_AfterExec();
     return err1;
 }

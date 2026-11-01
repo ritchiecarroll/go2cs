@@ -255,7 +255,8 @@ public static ж<Decoder> NewTokenDecoder(TokenReader t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedEofˢ = "unexpected EOF"u8;
+internal static ref readonly @string unexpectedEofˢ => ref unexpectedEofˢᵇ;
+private static readonly @string unexpectedEofˢᵇ = "unexpected EOF"u8;
 
 // Token returns the next XML token in the input stream.
 // At the end of the input stream, Token returns nil, [io.EOF].
@@ -284,26 +285,26 @@ internal static readonly @string unexpectedEofˢ = "unexpected EOF"u8;
 // If Token encounters an unrecognized name space prefix,
 // it uses the prefix as the Space rather than report an error.
 public static (ΔToken, error) Token(this ref Decoder d) {
-    ΔToken t = default!;
-    error err = default!;
-    if (d.stk != nil && (~d.stk).kind == stkEOF) {
-        return (default!, io.EOF);
+    ΔToken t = default;
+    error err = default;
+    if (d.stk != nil && d.stk.kind == stkEOF) {
+        return (default, io.EOF);
     }
-    if (d.nextToken != default!){
+    if (d.nextToken != nil) {
         t = d.nextToken;
-        d.nextToken = default!;
+        d.nextToken = default;
     } else {
         {
-            (t, err) = d.rawToken(); if (t == default! && err != default!) {
-                if (AreEqual(err, io.EOF) && d.stk != nil && (~d.stk).kind != stkEOF) {
+            (t, err) = d.rawToken(); if (t == nil && err != nil) {
+                if (AreEqual(err, io.EOF) && d.stk != nil && d.stk.kind != stkEOF) {
                     err = d.syntaxError(unexpectedEofˢ);
                 }
-                return (default!, err);
+                return (default, err);
             }
         }
         // We still have a token to process, so clear any
         // errors (e.g. EOF) and proceed.
-        err = default!;
+        err = default;
     }
     if (!d.Strict) {
         {
@@ -335,9 +336,9 @@ public static (ΔToken, error) Token(this ref Decoder d) {
         }
 
         d.pushElement(t1.Name);
-        d.translate(Ꮡt1.of(StartElement.ᏑName), true);
+        d.translate(Ꮡt1.ᏑName, true);
         foreach (var i in range(t1.Attr)) {
-            d.translate(Ꮡ(t1.Attr, i).of(Attr.ᏑName), false);
+            d.translate(Ꮡ(t1.Attr, i).ᏑName, false);
         }
         t = t1;
         break;
@@ -345,7 +346,7 @@ public static (ΔToken, error) Token(this ref Decoder d) {
     case EndElement t1ᴛ2: {
         ref var t1 = ref heap(t1ᴛ2, out var Ꮡt1);
         if (!d.popElement(Ꮡt1)) {
-            return (default!, d.err);
+            return (default, d.err);
         }
         t = t1;
         break;
@@ -353,9 +354,12 @@ public static (ΔToken, error) Token(this ref Decoder d) {
     return (t, err);
 }
 
-internal static readonly @string xmlURL = "http://www.w3.org/XML/1998/namespace"u8;
-internal static readonly @string xmlnsPrefix = "xmlns"u8;
-internal static readonly @string xmlPrefix = "xml"u8;
+internal static ref readonly @string xmlURL => ref xmlURLᵇ;
+private static readonly @string xmlURLᵇ = "http://www.w3.org/XML/1998/namespace"u8;
+internal static ref readonly @string xmlnsPrefix => ref xmlnsPrefixᵇ;
+private static readonly @string xmlnsPrefixᵇ = "xmlns"u8;
+internal static ref readonly @string xmlPrefix => ref xmlPrefixᵇ;
+private static readonly @string xmlPrefixᵇ = "xml"u8;
 
 // Apply name space translation to name n.
 // The default name space (for Space=="")
@@ -378,10 +382,9 @@ internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElement
         return;
     }}
     {
-        var (v, ok) = d.ns[n.Space, ꟷ]; if (ok){
+        var (v, ok) = d.ns[n.Space, ꟷ]; if (ok) {
             n.Space = v;
-        } else 
-        if (n.Space == ""u8) {
+        } else if (n.Space == ""u8) {
             n.Space = d.DefaultSpace;
         }
     }
@@ -393,7 +396,7 @@ internal static void switchToReader(this ref Decoder d, io.Reader r) {
     // ReadByte, it's efficient enough.
     // Otherwise, use bufio.
     {
-        var (rb, ok) = r._<io.ByteReader>(ᐧ); if (ok){
+        var (rb, ok) = r._<io.ByteReader>(ᐧ); if (ok) {
             d.r = rb;
         } else {
             d.r = new bufio_ReaderжByteReader(bufio.NewReader(r));
@@ -418,13 +421,13 @@ internal static UntypedInt stkEOF => 2;
 
 internal static ж<stack> push(this ref Decoder d, nint kind) {
     var s = d.free;
-    if (s != nil){
-        d.free = s.Value.next;
+    if (s != nil) {
+        d.free = s.next;
     } else {
         s = @new<stack>();
     }
-    s.Value.next = d.stk;
-    s.Value.kind = kind;
+    s.next = d.stk;
+    s.kind = kind;
     if (kind == stkStart) {
         d.stkDepth++;
     }
@@ -435,11 +438,11 @@ internal static ж<stack> push(this ref Decoder d, nint kind) {
 internal static ж<stack> pop(this ref Decoder d) {
     var s = d.stk;
     if (s != nil) {
-        if ((~s).kind == stkStart) {
+        if (s.kind == stkStart) {
             d.stkDepth--;
         }
-        d.stk = s.Value.next;
-        s.Value.next = d.free;
+        d.stk = s.next;
+        s.next = d.free;
         d.free = s;
     }
     return s;
@@ -453,29 +456,29 @@ internal static void pushEOF(this ref Decoder d) {
     // It might not be the top, because there might be stkNs
     // entries above it.
     var start = d.stk;
-    while ((~start).kind != stkStart) {
-        start = start.Value.next;
+    while (start.kind != stkStart) {
+        start = start.next;
     }
     // The stkNs entries below a start are associated with that
     // element too; skip over them.
-    while ((~start).next != nil && (~(~start).next).kind == stkNs) {
-        start = start.Value.next;
+    while (start.next != nil && start.next.kind == stkNs) {
+        start = start.next;
     }
     var s = d.free;
-    if (s != nil){
-        d.free = s.Value.next;
+    if (s != nil) {
+        d.free = s.next;
     } else {
         s = @new<stack>();
     }
-    s.Value.kind = stkEOF;
-    s.Value.next = start.Value.next;
-    start.Value.next = s;
+    s.kind = stkEOF;
+    s.next = start.next;
+    start.next = s;
 }
 
 // Undo a pushEOF.
 // The element must have been finished, so the EOF should be at the top of the stack.
 internal static bool popEOF(this ref Decoder d) {
-    if (d.stk == nil || (~d.stk).kind != stkEOF) {
+    if (d.stk == nil || d.stk.kind != stkEOF) {
         return false;
     }
     d.pop();
@@ -485,16 +488,16 @@ internal static bool popEOF(this ref Decoder d) {
 // Record that we are starting an element with the given name.
 internal static void pushElement(this ref Decoder d, Name name) {
     var s = d.push(stkStart);
-    s.Value.name = name;
+    s.name = name;
 }
 
 // Record that we are changing the value of ns[local].
 // The old value is url, ok.
 internal static void pushNs(this ref Decoder d, @string local, @string url, bool ok) {
     var s = d.push(stkNs);
-    s.Value.name.Local = local;
-    s.Value.name.Space = url;
-    s.Value.ok = ok;
+    s.name.Local = local;
+    s.name.Space = url;
+    s.ok = ok;
 }
 
 // Creates a SyntaxError with the current line number.
@@ -514,39 +517,39 @@ internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
     var s = d.pop();
     var name = t.Name;
     switch (ᐧ) {
-    case {} when s == nil || (~s).kind != stkStart: {
+    case {} when s == nil || s.kind != stkStart: {
         d.err = d.syntaxError("unexpected end element </"u8 + name.Local + ">"u8);
         return false;
     }
-    case {} when (~s).name.Local != name.Local: {
+    case {} when s.name.Local != name.Local: {
         if (!d.Strict) {
             d.needClose = true;
             d.toClose = t.Name;
-            t.Name = s.Value.name;
+            t.Name = s.name;
             return true;
         }
-        d.err = d.syntaxError("element <"u8 + (~s).name.Local + "> closed by </"u8 + name.Local + ">"u8);
+        d.err = d.syntaxError("element <"u8 + s.name.Local + "> closed by </"u8 + name.Local + ">"u8);
         return false;
     }
-    case {} when (~s).name.Space != name.Space: {
+    case {} when s.name.Space != name.Space: {
         @string ns = name.Space;
         if (name.Space == ""u8) {
-            ns = @""""""u8;
+            ns = @"""""";
         }
-        d.err = d.syntaxError("element <"u8 + (~s).name.Local + "> in space "u8 + (~s).name.Space + " closed by </"u8 + name.Local + "> in space "u8 + ns);
+        d.err = d.syntaxError("element <"u8 + s.name.Local + "> in space "u8 + s.name.Space + " closed by </"u8 + name.Local + "> in space "u8 + ns);
         return false;
     }}
 
-    d.translate(Ꮡt.of(EndElement.ᏑName), true);
+    d.translate(Ꮡt.ᏑName, true);
 
     // Pop stack until a Start or EOF is on the top, undoing the
     // translations that were associated with the element we just closed.
-    while (d.stk != nil && (~d.stk).kind != stkStart && (~d.stk).kind != stkEOF) {
+    while (d.stk != nil && d.stk.kind != stkStart && d.stk.kind != stkEOF) {
         var sΔ1 = d.pop();
-        if ((~sΔ1).ok){
-            d.ns[(~sΔ1).name.Local] = sΔ1.Value.name.Space;
+        if (sΔ1.ok) {
+            d.ns[sΔ1.name.Local] = sΔ1.name.Space;
         } else {
-            delete(d.ns, (~sΔ1).name.Local);
+            delete(d.ns, sΔ1.name.Local);
         }
     }
 
@@ -556,129 +559,141 @@ internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
 // If the top element on the stack is autoclosing and
 // t is not the end tag, invent the end tag.
 internal static (ΔToken, bool) autoClose(this ref Decoder d, ΔToken t) {
-    if (d.stk == nil || (~d.stk).kind != stkStart) {
-        return (default!, false);
+    if (d.stk == nil || d.stk.kind != stkStart) {
+        return (default, false);
     }
     foreach (var (_, s) in d.AutoClose) {
-        if (strings.EqualFold(s, (~d.stk).name.Local)) {
+        if (strings.EqualFold(s, d.stk.name.Local)) {
             // This one should be auto closed if t doesn't close it.
             var (et, ok) = t._<EndElement>(ᐧ);
-            if (!ok || !strings.EqualFold(et.Name.Local, (~d.stk).name.Local)) {
-                return (new EndElement((~d.stk).name), true);
+            if (!ok || !strings.EqualFold(et.Name.Local, d.stk.name.Local)) {
+                return (new EndElement(d.stk.name), true);
             }
             break;
         }
     }
-    return (default!, false);
+    return (default, false);
 }
 
-internal static error errRawToken = errors.New("xml: cannot use RawToken from UnmarshalXML method"u8);
+internal static error errRawToken = errors.New("xml: cannot use RawToken from UnmarshalXML method");
 
 // RawToken is like [Decoder.Token] but does not verify that
 // start and end elements match and does not translate
 // name space prefixes to their corresponding URLs.
 public static (ΔToken, error) RawToken(this ref Decoder d) {
     if (d.inUnmarshalXML) {
-        return (default!, errRawToken);
+        return (default, errRawToken);
     }
     return d.rawToken();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string expectedElementNameAfterˢ = "expected element name after </"u8;
-internal static readonly @string expectedTargetNameAfterˢ = "expected target name after <?"u8;
-internal static readonly @string versionˢ = "version"u8;
-internal static readonly @string encodingˢ = "encoding"u8;
-internal static readonly @string utf8ˢ = "utf-8"u8;
-internal static readonly @string invalidSequenceNotPartOfˢ = "invalid sequence <!- not part of <!--"u8;
-internal static readonly @string invalidSequenceNotˢ = @"invalid sequence ""--"" not allowed in comments"u8;
-internal static readonly @string invalidSequenceˢ = "invalid <![ sequence"u8;
-internal static readonly @string expectedElementNameAfterˢ2 = "expected element name after <"u8;
-internal static readonly @string expectedInElementˢ = "expected /> in element"u8;
-internal static readonly @string expectedAttributeNameInˢ = "expected attribute name in element"u8;
-internal static readonly @string attributeNameWithoutInˢ = "attribute name without = in element"u8;
+internal static ref readonly @string expectedElementNameAfterˢ => ref expectedElementNameAfterˢᵇ;
+private static readonly @string expectedElementNameAfterˢᵇ = "expected element name after </"u8;
+internal static ref readonly @string expectedTargetNameAfterˢ => ref expectedTargetNameAfterˢᵇ;
+private static readonly @string expectedTargetNameAfterˢᵇ = "expected target name after <?"u8;
+internal static ref readonly @string versionˢ => ref versionˢᵇ;
+private static readonly @string versionˢᵇ = "version"u8;
+internal static ref readonly @string encodingˢ => ref encodingˢᵇ;
+private static readonly @string encodingˢᵇ = "encoding"u8;
+internal static ref readonly @string utf8ˢ => ref utf8ˢᵇ;
+private static readonly @string utf8ˢᵇ = "utf-8"u8;
+internal static ref readonly @string invalidSequenceNotPartOfˢ => ref invalidSequenceNotPartOfˢᵇ;
+private static readonly @string invalidSequenceNotPartOfˢᵇ = "invalid sequence <!- not part of <!--"u8;
+internal static ref readonly @string invalidSequenceNotˢ => ref invalidSequenceNotˢᵇ;
+private static readonly @string invalidSequenceNotˢᵇ = @"invalid sequence ""--"" not allowed in comments"u8;
+internal static ref readonly @string invalidSequenceˢ => ref invalidSequenceˢᵇ;
+private static readonly @string invalidSequenceˢᵇ = "invalid <![ sequence"u8;
+internal static ref readonly @string expectedElementNameAfterˢ2 => ref expectedElementNameAfterˢ2ᵇ;
+private static readonly @string expectedElementNameAfterˢ2ᵇ = "expected element name after <"u8;
+internal static ref readonly @string expectedInElementˢ => ref expectedInElementˢᵇ;
+private static readonly @string expectedInElementˢᵇ = "expected /> in element"u8;
+internal static ref readonly @string expectedAttributeNameInˢ => ref expectedAttributeNameInˢᵇ;
+private static readonly @string expectedAttributeNameInˢᵇ = "expected attribute name in element"u8;
+internal static ref readonly @string attributeNameWithoutInˢ => ref attributeNameWithoutInˢᵇ;
+private static readonly @string attributeNameWithoutInˢᵇ = "attribute name without = in element"u8;
 
 internal static (ΔToken, error) rawToken(this ref Decoder d) {
-    if (d.t != default!) {
+    if (d.t != nil) {
         return d.t.Token();
     }
-    if (d.err != default!) {
-        return (default!, d.err);
+    if (d.err != nil) {
+        return (default, d.err);
     }
     if (d.needClose) {
         // The last element we read was self-closing and
         // we returned just the StartElement half.
         // Return the EndElement half now.
         d.needClose = false;
-        return (new EndElement(d.toClose), default!);
+        return (new EndElement(d.toClose), default);
     }
 
     var (b, ok) = d.getc();
     if (!ok) {
-        return (default!, d.err);
+        return (default, d.err);
     }
 
-    if (b != (rune)'<') {
+    if (b != '<') {
         // Text section.
         d.ungetc(b);
         var data = d.text(-1, false);
-        if (data == default!) {
-            return (default!, d.err);
+        if (data == nil) {
+            return (default, d.err);
         }
-        return ((CharData)data, default!);
+        return ((CharData)data, default);
     }
 
     {
         (b, ok) = d.mustgetc(); if (!ok) {
-            return (default!, d.err);
+            return (default, d.err);
         }
     }
     switch (b) {
-    case (rune)'/': {
+    case (byte)'/': {
         // </: End element
-        Name nameΔ2 = default!;
+        Name nameΔ2 = default;
         {
             (nameΔ2, ok) = d.nsname(); if (!ok) {
-                if (d.err == default!) {
+                if (d.err == nil) {
                     d.err = d.syntaxError(expectedElementNameAfterˢ);
                 }
-                return (default!, d.err);
+                return (default, d.err);
             }
         }
         d.space();
         {
             (b, ok) = d.mustgetc(); if (!ok) {
-                return (default!, d.err);
+                return (default, d.err);
             }
         }
-        if (b != (rune)'>') {
+        if (b != '>') {
             d.err = d.syntaxError("invalid characters between </"u8 + nameΔ2.Local + " and >"u8);
-            return (default!, d.err);
+            return (default, d.err);
         }
-        return (new EndElement(nameΔ2), default!);
+        return (new EndElement(nameΔ2), default);
     }
-    case (rune)'?': {
+    case (byte)'?': {
         // <?: Processing instruction.
-        @string targetΔ1 = default!;
+        @string targetΔ1 = default;
         {
             (targetΔ1, ok) = d.name(); if (!ok) {
-                if (d.err == default!) {
+                if (d.err == nil) {
                     d.err = d.syntaxError(expectedTargetNameAfterˢ);
                 }
-                return (default!, d.err);
+                return (default, d.err);
             }
         }
         d.space();
         d.buf.Reset();
-        byte b0 = default!;
-        while (ᐧ) {
+        byte b0 = default;
+        for (;;) {
             {
                 (b, ok) = d.mustgetc(); if (!ok) {
-                    return (default!, d.err);
+                    return (default, d.err);
                 }
             }
             d.buf.WriteByte(b);
-            if (b0 == (rune)'?' && b == (rune)'>') {
+            if (b0 == '?' && b == '>') {
                 break;
             }
             b0 = b;
@@ -691,62 +706,62 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
             @string ver = procInst(versionˢ, content);
             if (ver != ""u8 && ver != "1.0"u8) {
                 d.err = fmt.Errorf("xml: unsupported version %q; only version 1.0 is supported"u8, ver);
-                return (default!, d.err);
+                return (default, d.err);
             }
             @string enc = procInst(encodingˢ, content);
             if (enc != ""u8 && enc != "utf-8"u8 && enc != "UTF-8"u8 && !strings.EqualFold(enc, utf8ˢ)) {
-                if (d.CharsetReader == default!) {
+                if (d.CharsetReader == nil) {
                     d.err = fmt.Errorf("xml: encoding %q declared but Decoder.CharsetReader is nil"u8, enc);
-                    return (default!, d.err);
+                    return (default, d.err);
                 }
                 var (newr, err) = d.CharsetReader(enc, d.r._<io.Reader>());
-                if (err != default!) {
+                if (err != nil) {
                     d.err = fmt.Errorf("xml: opening charset %q: %w"u8, enc, err);
-                    return (default!, d.err);
+                    return (default, d.err);
                 }
-                if (newr == default!) {
+                if (newr == nil) {
                     throw panic("CharsetReader returned a nil Reader for charset " + enc);
                 }
                 d.switchToReader(newr);
             }
         }
-        return (new ProcInst(targetΔ1, data), default!);
+        return (new ProcInst(targetΔ1, data), default);
     }
-    case (rune)'!': {
+    case (byte)'!': {
         // <!: Maybe comment, maybe CDATA.
         {
             (b, ok) = d.mustgetc(); if (!ok) {
-                return (default!, d.err);
+                return (default, d.err);
             }
         }
         switch (b) {
-        case (rune)'-': { // <!-
+        case (byte)'-': { // <!-
             // Probably <!-- for a comment.
             {
                 (b, ok) = d.mustgetc(); if (!ok) {
-                    return (default!, d.err);
+                    return (default, d.err);
                 }
             }
-            if (b != (rune)'-') {
+            if (b != '-') {
                 d.err = d.syntaxError(invalidSequenceNotPartOfˢ);
-                return (default!, d.err);
+                return (default, d.err);
             }
             // Look for terminator.
             d.buf.Reset();
-            byte b0 = default!;
-            byte b1 = default!;
-            while (ᐧ) {
+            byte b0 = default;
+            byte b1 = default;
+            for (;;) {
                 {
                     (b, ok) = d.mustgetc(); if (!ok) {
-                        return (default!, d.err);
+                        return (default, d.err);
                     }
                 }
                 d.buf.WriteByte(b);
-                if (b0 == (rune)'-' && b1 == (rune)'-') {
-                    if (b != (rune)'>') {
+                if (b0 == '-' && b1 == '-') {
+                    if (b != '>') {
                         d.err = d.syntaxError(
                             invalidSequenceNotˢ);
-                        return (default!, d.err);
+                        return (default, d.err);
                     }
                     break;
                 }
@@ -754,27 +769,27 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
             }
             var data = d.buf.Bytes();
             data = data.slice(0, len(data) - 3); // chop -->
-            return ((Comment)data, default!);
+            return ((Comment)data, default);
         }
-        case (rune)'[': { // <![
+        case (byte)'[': { // <![
             // Probably <![CDATA[.
             for (nint i = 0; i < 6; i++) {
                 {
                     (b, ok) = d.mustgetc(); if (!ok) {
-                        return (default!, d.err);
+                        return (default, d.err);
                     }
                 }
                 if (b != LiteralByteAt("CDATA["u8, i)) {
                     d.err = d.syntaxError(invalidSequenceˢ);
-                    return (default!, d.err);
+                    return (default, d.err);
                 }
             }
             // Have <![CDATA[.  Read text until ]]>.
             var data = d.text(-1, true);
-            if (data == default!) {
-                return (default!, d.err);
+            if (data == nil) {
+                return (default, d.err);
             }
-            return ((CharData)data, default!);
+            return ((CharData)data, default);
         }}
 
         // Probably a directive: <!DOCTYPE ...>, <!ENTITY ...>, etc.
@@ -784,13 +799,13 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         d.buf.WriteByte(b);
         var inquote = (uint8)0;
         nint depth = 0;
-        while (ᐧ) {
+        for (;;) {
             {
                 (b, ok) = d.mustgetc(); if (!ok) {
-                    return (default!, d.err);
+                    return (default, d.err);
                 }
             }
-            if (inquote == 0 && b == (rune)'>' && depth == 0) {
+            if (inquote == 0 && b == '>' && depth == 0) {
                 break;
             }
 HandleB:
@@ -804,21 +819,21 @@ HandleB:
                 // in quotes, no special action
                 break;
             }
-            case {} when b == (rune)'\'' || b == (rune)'"': {
+            case {} when b == (byte)'\'' || b == (byte)'"': {
                 inquote = b;
                 break;
             }
-            case {} when b == (rune)'>' && inquote == 0: {
+            case {} when b == (byte)'>' && inquote == 0: {
                 depth--;
                 break;
             }
-            case {} when b == (rune)'<' && inquote == 0: {
+            case {} when b == (byte)'<' && inquote == 0: {
                 // Look for <!-- to begin comment.
-                @string s = "!--"u8;
+                @string s = "!--";
                 for (nint i = 0; i < len(s); i++) {
                     {
                         (b, ok) = d.mustgetc(); if (!ok) {
-                            return (default!, d.err);
+                            return (default, d.err);
                         }
                     }
                     if (b != s[i]) {
@@ -834,15 +849,15 @@ HandleB:
                 d.buf.Truncate(d.buf.Len() - 1);
 
                 // Look for terminator.
-                byte b0 = default!;
-                byte b1 = default!;
-                while (ᐧ) {
+                byte b0 = default;
+                byte b1 = default;
+                for (;;) {
                     {
                         (b, ok) = d.mustgetc(); if (!ok) {
-                            return (default!, d.err);
+                            return (default, d.err);
                         }
                     }
-                    if (b0 == (rune)'-' && b1 == (rune)'-' && b == (rune)'>') {
+                    if (b0 == '-' && b1 == '-' && b == '>') {
                         break;
                     }
                     (b0, b1) = (b1, b);
@@ -852,81 +867,81 @@ HandleB:
                 // body, so that markup parts that were separated by the comment
                 // (like a "<" and a "!") don't get joined when re-encoding the
                 // Directive, taking new semantic meaning.
-                d.buf.WriteByte((rune)' ');
+                d.buf.WriteByte((byte)' ');
                 break;
             }}
         }
-        return ((Directive)d.buf.Bytes(), default!);
+        return ((Directive)d.buf.Bytes(), default);
     }}
 
     // Must be an open element like <a href="foo">
     d.ungetc(b);
 
-    Name name = default!;
-    bool empty = default!;
-    slice<Attr> attr = default!;
+    Name name = default;
+    bool empty = default;
+    slice<Attr> attr = default;
     {
         (name, ok) = d.nsname(); if (!ok) {
-            if (d.err == default!) {
+            if (d.err == nil) {
                 d.err = d.syntaxError(expectedElementNameAfterˢ2);
             }
-            return (default!, d.err);
+            return (default, d.err);
         }
     }
 
-    attr = new Attr[]{}.slice();
-    while (ᐧ) {
+    attr = slice<Attr>([]);
+    for (;;) {
         d.space();
         {
             (b, ok) = d.mustgetc(); if (!ok) {
-                return (default!, d.err);
+                return (default, d.err);
             }
         }
-        if (b == (rune)'/') {
+        if (b == '/') {
             empty = true;
             {
                 (b, ok) = d.mustgetc(); if (!ok) {
-                    return (default!, d.err);
+                    return (default, d.err);
                 }
             }
-            if (b != (rune)'>') {
+            if (b != '>') {
                 d.err = d.syntaxError(expectedInElementˢ);
-                return (default!, d.err);
+                return (default, d.err);
             }
             break;
         }
-        if (b == (rune)'>') {
+        if (b == '>') {
             break;
         }
         d.ungetc(b);
 
-        var a = new Attr(nil);
+        var a = new Attr();
         {
             (a.Name, ok) = d.nsname(); if (!ok) {
-                if (d.err == default!) {
+                if (d.err == nil) {
                     d.err = d.syntaxError(expectedAttributeNameInˢ);
                 }
-                return (default!, d.err);
+                return (default, d.err);
             }
         }
         d.space();
         {
             (b, ok) = d.mustgetc(); if (!ok) {
-                return (default!, d.err);
+                return (default, d.err);
             }
         }
-        if (b != (rune)'='){
+        if (b != '=') {
             if (d.Strict) {
                 d.err = d.syntaxError(attributeNameWithoutInˢ);
-                return (default!, d.err);
+                return (default, d.err);
             }
             d.ungetc(b);
             a.Value = a.Name.Local;
         } else {
             d.space();
             var data = d.attrval();
-            if (data == default!) {
-                return (default!, d.err);
+            if (data == nil) {
+                return (default, d.err);
             }
             a.Value = (@string)data;
         }
@@ -936,36 +951,37 @@ HandleB:
         d.needClose = true;
         d.toClose = name;
     }
-    return (new StartElement(name, attr), default!);
+    return (new StartElement(name, attr), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unquotedOrMissingˢ = "unquoted or missing attribute value in element"u8;
+internal static ref readonly @string unquotedOrMissingˢ => ref unquotedOrMissingˢᵇ;
+private static readonly @string unquotedOrMissingˢᵇ = "unquoted or missing attribute value in element"u8;
 
 internal static slice<byte> attrval(this ref Decoder d) {
     var (b, ok) = d.mustgetc();
     if (!ok) {
-        return default!;
+        return default;
     }
     // Handle quoted attribute values
-    if (b == (rune)'"' || b == (rune)'\'') {
+    if (b == '"' || b == '\'') {
         return d.text((nint)b, false);
     }
     // Handle unquoted attribute values for strict parsers
     if (d.Strict) {
         d.err = d.syntaxError(unquotedOrMissingˢ);
-        return default!;
+        return default;
     }
     // Handle unquoted attribute values for unstrict parsers
     d.ungetc(b);
     d.buf.Reset();
-    while (ᐧ) {
+    for (;;) {
         (b, ok) = d.mustgetc();
         if (!ok) {
-            return default!;
+            return default;
         }
         // https://www.w3.org/TR/REC-html40/intro/sgmltut.html#h-3.2.2
-        if ((rune)'a' <= b && b <= (rune)'z' || (rune)'A' <= b && b <= (rune)'Z' || (rune)'0' <= b && b <= (rune)'9' || b == (rune)'_' || b == (rune)':' || b == (rune)'-'){
+        if ('a' <= b && b <= 'z' || 'A' <= b && b <= 'Z' || '0' <= b && b <= '9' || b == '_' || b == ':' || b == '-') {
             d.buf.WriteByte(b);
         } else {
             d.ungetc(b);
@@ -977,13 +993,13 @@ internal static slice<byte> attrval(this ref Decoder d) {
 
 // Skip spaces if any
 internal static void space(this ref Decoder d) {
-    while (ᐧ) {
+    for (;;) {
         var (b, ok) = d.getc();
         if (!ok) {
             return;
         }
         switch (b) {
-        case (rune)' ' or (rune)'\r' or (rune)'\n' or (rune)'\t': {
+        case (byte)' ' or (byte)'\r' or (byte)'\n' or (byte)'\t': {
             break;
         }
         default: {
@@ -998,24 +1014,24 @@ internal static void space(this ref Decoder d) {
 // and leave the error in d.err.
 // Maintain line number.
 internal static (byte b, bool ok) getc(this ref Decoder d) {
-    byte b = default!;
+    byte b = default;
 
-    if (d.err != default!) {
+    if (d.err != nil) {
         return (0, false);
     }
-    if (d.nextByte >= 0){
+    if (d.nextByte >= 0) {
         b = (byte)d.nextByte;
         d.nextByte = -1;
     } else {
         (b, d.err) = d.r.ReadByte();
-        if (d.err != default!) {
+        if (d.err != nil) {
             return (0, false);
         }
         if (d.saved != nil) {
             d.saved.WriteByte(b);
         }
     }
-    if (b == (rune)'\n') {
+    if (b == '\n') {
         d.line++;
         d.linestart = d.offset + 1;
     }
@@ -1052,8 +1068,8 @@ internal static nint savedOffset(this ref Decoder d) {
 // set d.err to SyntaxError("unexpected EOF")
 // and return ok==false
 internal static (byte b, bool ok) mustgetc(this ref Decoder d) {
-    byte b = default!;
-    bool ok = default!;
+    byte b = default;
+    bool ok = default;
 
     {
         (b, ok) = d.getc(); if (!ok) {
@@ -1067,7 +1083,7 @@ internal static (byte b, bool ok) mustgetc(this ref Decoder d) {
 
 // Unread a single byte.
 internal static void ungetc(this ref Decoder d, byte b) {
-    if (b == (rune)'\n') {
+    if (b == '\n') {
         d.line--;
     }
     d.nextByte = (nint)b;
@@ -1075,37 +1091,41 @@ internal static void ungetc(this ref Decoder d, byte b) {
 }
 
 internal static map<@string, rune> entity = new map<@string, rune>{
-    ["lt"u8] = (rune)'<',
-    ["gt"u8] = (rune)'>',
-    ["amp"u8] = (rune)'&',
-    ["apos"u8] = (rune)'\'',
-    ["quot"u8] = (rune)'"'
+    ["lt"] = '<',
+    ["gt"] = '>',
+    ["amp"] = '&',
+    ["apos"] = '\'',
+    ["quot"] = '"'
 };
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedEofInCdataˢ = "unexpected EOF in CDATA section"u8;
-internal static readonly @string unescapedNotInCdataˢ = "unescaped ]]> not in CDATA section"u8;
-internal static readonly @string unescapedInsideQuotedˢ = "unescaped < inside quoted string"u8;
-internal static readonly @string invalidUtf8ˢ = "invalid UTF-8"u8;
+internal static ref readonly @string unexpectedEofInCdataˢ => ref unexpectedEofInCdataˢᵇ;
+private static readonly @string unexpectedEofInCdataˢᵇ = "unexpected EOF in CDATA section"u8;
+internal static ref readonly @string unescapedNotInCdataˢ => ref unescapedNotInCdataˢᵇ;
+private static readonly @string unescapedNotInCdataˢᵇ = "unescaped ]]> not in CDATA section"u8;
+internal static ref readonly @string unescapedInsideQuotedˢ => ref unescapedInsideQuotedˢᵇ;
+private static readonly @string unescapedInsideQuotedˢᵇ = "unescaped < inside quoted string"u8;
+internal static ref readonly @string invalidUtf8ˢ => ref invalidUtf8ˢᵇ;
+private static readonly @string invalidUtf8ˢᵇ = "invalid UTF-8"u8;
 
 // Read plain text section (XML calls it character data).
 // If quote >= 0, we are in a quoted string and need to find the matching quote.
 // If cdata == true, we are in a <![CDATA[ section and need to find ]]>.
 // On failure return nil and leave the error in d.err.
 internal static slice<byte> text(this ref Decoder d, nint quote, bool cdata) {
-    byte b0 = default!;
-    byte b1 = default!;
-    nint trunc = default!;
+    byte b0 = default;
+    byte b1 = default;
+    nint trunc = default;
     d.buf.Reset();
 Input:
-    while (ᐧ) {
+    for (;;) {
         var (b, ok) = d.getc();
         if (!ok) {
             if (cdata) {
                 if (AreEqual(d.err, io.EOF)) {
                     d.err = d.syntaxError(unexpectedEofInCdataˢ);
                 }
-                return default!;
+                return default;
             }
             goto break_Input;
         }
@@ -1113,76 +1133,76 @@ Input:
         // <![CDATA[ section ends with ]]>.
         // It is an error for ]]> to appear in ordinary text,
         // but it is allowed in quoted strings.
-        if (quote < 0 && b0 == (rune)']' && b1 == (rune)']' && b == (rune)'>') {
+        if (quote < 0 && b0 == ']' && b1 == ']' && b == '>') {
             if (cdata) {
                 trunc = 2;
                 goto break_Input;
             }
             d.err = d.syntaxError(unescapedNotInCdataˢ);
-            return default!;
+            return default;
         }
 
         // Stop reading text if we see a <.
-        if (b == (rune)'<' && !cdata) {
+        if (b == '<' && !cdata) {
             if (quote >= 0) {
                 d.err = d.syntaxError(unescapedInsideQuotedˢ);
-                return default!;
+                return default;
             }
-            d.ungetc((rune)'<');
+            d.ungetc((byte)'<');
             goto break_Input;
         }
         if (quote >= 0 && b == (byte)quote) {
             goto break_Input;
         }
-        if (b == (rune)'&' && !cdata) {
+        if (b == '&' && !cdata) {
             // Read escaped character expression up to semicolon.
             // XML in all its glory allows a document to define and use
             // its own character names with <!ENTITY ...> directives.
             // Parsers are required to recognize lt, gt, amp, apos, and quot
             // even if they have not been declared.
             nint before = d.buf.Len();
-            d.buf.WriteByte((rune)'&');
-            bool okΔ1 = default!;
-            @string text = default!;
-            bool haveText = default!;
+            d.buf.WriteByte((byte)'&');
+            bool okΔ1 = default;
+            @string text = default;
+            bool haveText = default;
             {
                 (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                    return default!;
+                    return default;
                 }
             }
-            if (b == (rune)'#'){
+            if (b == '#') {
                 d.buf.WriteByte(b);
                 {
                     (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                        return default!;
+                        return default;
                     }
                 }
                 nint @base = 10;
-                if (b == (rune)'x') {
+                if (b == 'x') {
                     @base = 16;
                     d.buf.WriteByte(b);
                     {
                         (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                            return default!;
+                            return default;
                         }
                     }
                 }
                 nint start = d.buf.Len();
-                while ((rune)'0' <= b && b <= (rune)'9' || @base == 16 && (rune)'a' <= b && b <= (rune)'f' || @base == 16 && (rune)'A' <= b && b <= (rune)'F') {
+                while ('0' <= b && b <= '9' || @base == 16 && 'a' <= b && b <= 'f' || @base == 16 && 'A' <= b && b <= 'F') {
                     d.buf.WriteByte(b);
                     {
                         (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                            return default!;
+                            return default;
                         }
                     }
                 }
-                if (b != (rune)';'){
+                if (b != ';') {
                     d.ungetc(b);
                 } else {
                     @string s = (@string)(d.buf.Bytes().slice(start));
-                    d.buf.WriteByte((rune)';');
+                    d.buf.WriteByte((byte)';');
                     var (n, err) = strconv.ParseUint(s, @base, 64);
-                    if (err == default! && n <= unicode.MaxRune) {
+                    if (err == nil && n <= unicode.MaxRune) {
                         text = (@string)(rune)n;
                         haveText = true;
                     }
@@ -1190,28 +1210,27 @@ Input:
             } else {
                 d.ungetc(b);
                 if (!d.readName()) {
-                    if (d.err != default!) {
-                        return default!;
+                    if (d.err != nil) {
+                        return default;
                     }
                 }
                 {
                     (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                        return default!;
+                        return default;
                     }
                 }
-                if (b != (rune)';'){
+                if (b != ';') {
                     d.ungetc(b);
                 } else {
                     var name = d.buf.Bytes().slice(before + 1);
-                    d.buf.WriteByte((rune)';');
+                    d.buf.WriteByte((byte)';');
                     if (isName(name)) {
                         @string s = (@string)name;
                         {
-                            var (r, okΔ2) = entity[s, ꟷ]; if (okΔ2){
+                            var (r, okΔ2) = entity[s, ꟷ]; if (okΔ2) {
                                 text = (@string)r;
                                 haveText = true;
-                            } else 
-                            if (d.Entity != default!) {
+                            } else if (d.Entity != nil) {
                                 (text, haveText) = d.Entity[s, ꟷ];
                             }
                         }
@@ -1230,18 +1249,17 @@ Input:
                 goto continue_Input;
             }
             @string ent = (@string)(d.buf.Bytes().slice(before));
-            if (ent[len(ent) - 1] != (rune)';') {
+            if (ent[len(ent) - 1] != ';') {
                 ent += " (no semicolon)"u8;
             }
             d.err = d.syntaxError("invalid character entity "u8 + ent);
-            return default!;
+            return default;
         }
 
         // We must rewrite unescaped \r and \r\n into \n.
-        if (b == (rune)'\r'){
-            d.buf.WriteByte((rune)'\n');
-        } else 
-        if (b1 == (rune)'\r' && b == (rune)'\n'){
+        if (b == '\r') {
+            d.buf.WriteByte((byte)'\n');
+        } else if (b1 == '\r' && b == '\n') {
             // Skip \r\n--we already wrote \n.
         } else {
             d.buf.WriteByte(b);
@@ -1260,12 +1278,12 @@ break_Input:;
         var (r, size) = utf8.DecodeRune(buf);
         if (r == utf8.RuneError && size == 1) {
             d.err = d.syntaxError(invalidUtf8ˢ);
-            return default!;
+            return default;
         }
         buf = buf.slice(size);
         if (!isInCharacterRange(r)) {
             d.err = d.syntaxError(fmt.Sprintf("illegal character code %U"u8, r));
-            return default!;
+            return default;
         }
     }
 
@@ -1282,18 +1300,17 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
 // Get name space name: name with a : stuck in the middle.
 // The part before the : is the name space identifier.
 internal static (Name name, bool ok) nsname(this ref Decoder d) {
-    Name name = default!;
-    bool ok = default!;
+    Name name = default;
+    bool ok = default;
 
     (var s, ok) = d.name();
     if (!ok) {
         return (name, ok);
     }
-    if (strings.Count(s, ":"u8) > 1){
+    if (strings.Count(s, ":") > 1) {
         return (name, false);
-    } else 
-    {
-        var (space, local, okΔ1) = strings.Cut(s, ":"u8); if (!okΔ1 || space == ""u8 || local == ""u8){
+    } else {
+        var (space, local, okΔ1) = strings.Cut(s, ":"); if (!okΔ1 || space == ""u8 || local == ""u8) {
             name.Local = s;
         } else {
             name.Space = space;
@@ -1325,9 +1342,9 @@ internal static (@string s, bool ok) name(this ref Decoder d) {
 // The name is delimited by any single-byte character not valid in names.
 // All multi-byte characters are accepted; the caller must check their validity.
 internal static bool /*ok*/ readName(this ref Decoder d) {
-    bool ok = default!;
+    bool ok = default;
 
-    byte b = default!;
+    byte b = default;
     {
         (b, ok) = d.mustgetc(); if (!ok) {
             return ok;
@@ -1339,7 +1356,7 @@ internal static bool /*ok*/ readName(this ref Decoder d) {
     }
     d.buf.WriteByte(b);
 
-    while (ᐧ) {
+    for (;;) {
         {
             (b, ok) = d.mustgetc(); if (!ok) {
                 return ok;
@@ -1355,7 +1372,7 @@ internal static bool /*ok*/ readName(this ref Decoder d) {
 }
 
 internal static bool isNameByte(byte c) {
-    return (rune)'A' <= c && c <= (rune)'Z' || (rune)'a' <= c && c <= (rune)'z' || (rune)'0' <= c && c <= (rune)'9' || c == (rune)'_' || c == (rune)':' || c == (rune)'.' || c == (rune)'-';
+    return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '_' || c == ':' || c == '.' || c == '-';
 }
 
 internal static bool isName(slice<byte> s) {
@@ -1411,7 +1428,7 @@ internal static bool isNameString(@string s) {
 // and then reformatting. First corresponds to (Letter | '_' | ':')
 // and second corresponds to NameChar.
 [GoLazy] partial class lazyᴛfirst { internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
-    R16: new unicode.Range16[]{
+    R16: slice<unicode.Range16>([
         new(0x003A, 0x003A, 1),
         new(0x0041, 0x005A, 1),
         new(0x005F, 0x005F, 1),
@@ -1602,11 +1619,11 @@ internal static bool isNameString(@string s) {
         new(0x3105, 0x312C, 1),
         new(0x4E00, 0x9FA5, 1),
         new(0xAC00, 0xD7A3, 1)
-    }.slice()
+    ])
 )); }
 
 [GoLazy] partial class lazyᴛsecond { internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
-    R16: new unicode.Range16[]{
+    R16: slice<unicode.Range16>([
         new(0x002D, 0x002E, 1),
         new(0x0030, 0x0039, 1),
         new(0x00B7, 0x00B7, 1),
@@ -1719,7 +1736,7 @@ internal static bool isNameString(@string s) {
         new(0x3099, 0x309A, 1),
         new(0x309D, 0x309E, 1),
         new(0x30FC, 0x30FE, 1)
-    }.slice()
+    ])
 )); }
 
 // HTMLEntity is an entity map containing translations for the
@@ -1738,258 +1755,258 @@ public static ref map<@string, @string> HTMLEntity => ref ((StaticBox<map<@strin
 			,s/\&lt;!ENTITY ([^ ]+) .*U\+([0-9A-F][0-9A-F][0-9A-F][0-9A-F]) .+/	"\1": "\\u\2",/g
 		'
 	*/
-    ["nbsp"u8] = "\u00A0"u8,
-    ["iexcl"u8] = "\u00A1"u8,
-    ["cent"u8] = "\u00A2"u8,
-    ["pound"u8] = "\u00A3"u8,
-    ["curren"u8] = "\u00A4"u8,
-    ["yen"u8] = "\u00A5"u8,
-    ["brvbar"u8] = "\u00A6"u8,
-    ["sect"u8] = "\u00A7"u8,
-    ["uml"u8] = "\u00A8"u8,
-    ["copy"u8] = "\u00A9"u8,
-    ["ordf"u8] = "\u00AA"u8,
-    ["laquo"u8] = "\u00AB"u8,
-    ["not"u8] = "\u00AC"u8,
-    ["shy"u8] = "\u00AD"u8,
-    ["reg"u8] = "\u00AE"u8,
-    ["macr"u8] = "\u00AF"u8,
-    ["deg"u8] = "\u00B0"u8,
-    ["plusmn"u8] = "\u00B1"u8,
-    ["sup2"u8] = "\u00B2"u8,
-    ["sup3"u8] = "\u00B3"u8,
-    ["acute"u8] = "\u00B4"u8,
-    ["micro"u8] = "\u00B5"u8,
-    ["para"u8] = "\u00B6"u8,
-    ["middot"u8] = "\u00B7"u8,
-    ["cedil"u8] = "\u00B8"u8,
-    ["sup1"u8] = "\u00B9"u8,
-    ["ordm"u8] = "\u00BA"u8,
-    ["raquo"u8] = "\u00BB"u8,
-    ["frac14"u8] = "\u00BC"u8,
-    ["frac12"u8] = "\u00BD"u8,
-    ["frac34"u8] = "\u00BE"u8,
-    ["iquest"u8] = "\u00BF"u8,
-    ["Agrave"u8] = "\u00C0"u8,
-    ["Aacute"u8] = "\u00C1"u8,
-    ["Acirc"u8] = "\u00C2"u8,
-    ["Atilde"u8] = "\u00C3"u8,
-    ["Auml"u8] = "\u00C4"u8,
-    ["Aring"u8] = "\u00C5"u8,
-    ["AElig"u8] = "\u00C6"u8,
-    ["Ccedil"u8] = "\u00C7"u8,
-    ["Egrave"u8] = "\u00C8"u8,
-    ["Eacute"u8] = "\u00C9"u8,
-    ["Ecirc"u8] = "\u00CA"u8,
-    ["Euml"u8] = "\u00CB"u8,
-    ["Igrave"u8] = "\u00CC"u8,
-    ["Iacute"u8] = "\u00CD"u8,
-    ["Icirc"u8] = "\u00CE"u8,
-    ["Iuml"u8] = "\u00CF"u8,
-    ["ETH"u8] = "\u00D0"u8,
-    ["Ntilde"u8] = "\u00D1"u8,
-    ["Ograve"u8] = "\u00D2"u8,
-    ["Oacute"u8] = "\u00D3"u8,
-    ["Ocirc"u8] = "\u00D4"u8,
-    ["Otilde"u8] = "\u00D5"u8,
-    ["Ouml"u8] = "\u00D6"u8,
-    ["times"u8] = "\u00D7"u8,
-    ["Oslash"u8] = "\u00D8"u8,
-    ["Ugrave"u8] = "\u00D9"u8,
-    ["Uacute"u8] = "\u00DA"u8,
-    ["Ucirc"u8] = "\u00DB"u8,
-    ["Uuml"u8] = "\u00DC"u8,
-    ["Yacute"u8] = "\u00DD"u8,
-    ["THORN"u8] = "\u00DE"u8,
-    ["szlig"u8] = "\u00DF"u8,
-    ["agrave"u8] = "\u00E0"u8,
-    ["aacute"u8] = "\u00E1"u8,
-    ["acirc"u8] = "\u00E2"u8,
-    ["atilde"u8] = "\u00E3"u8,
-    ["auml"u8] = "\u00E4"u8,
-    ["aring"u8] = "\u00E5"u8,
-    ["aelig"u8] = "\u00E6"u8,
-    ["ccedil"u8] = "\u00E7"u8,
-    ["egrave"u8] = "\u00E8"u8,
-    ["eacute"u8] = "\u00E9"u8,
-    ["ecirc"u8] = "\u00EA"u8,
-    ["euml"u8] = "\u00EB"u8,
-    ["igrave"u8] = "\u00EC"u8,
-    ["iacute"u8] = "\u00ED"u8,
-    ["icirc"u8] = "\u00EE"u8,
-    ["iuml"u8] = "\u00EF"u8,
-    ["eth"u8] = "\u00F0"u8,
-    ["ntilde"u8] = "\u00F1"u8,
-    ["ograve"u8] = "\u00F2"u8,
-    ["oacute"u8] = "\u00F3"u8,
-    ["ocirc"u8] = "\u00F4"u8,
-    ["otilde"u8] = "\u00F5"u8,
-    ["ouml"u8] = "\u00F6"u8,
-    ["divide"u8] = "\u00F7"u8,
-    ["oslash"u8] = "\u00F8"u8,
-    ["ugrave"u8] = "\u00F9"u8,
-    ["uacute"u8] = "\u00FA"u8,
-    ["ucirc"u8] = "\u00FB"u8,
-    ["uuml"u8] = "\u00FC"u8,
-    ["yacute"u8] = "\u00FD"u8,
-    ["thorn"u8] = "\u00FE"u8,
-    ["yuml"u8] = "\u00FF"u8,
-    ["fnof"u8] = "\u0192"u8,
-    ["Alpha"u8] = "\u0391"u8,
-    ["Beta"u8] = "\u0392"u8,
-    ["Gamma"u8] = "\u0393"u8,
-    ["Delta"u8] = "\u0394"u8,
-    ["Epsilon"u8] = "\u0395"u8,
-    ["Zeta"u8] = "\u0396"u8,
-    ["Eta"u8] = "\u0397"u8,
-    ["Theta"u8] = "\u0398"u8,
-    ["Iota"u8] = "\u0399"u8,
-    ["Kappa"u8] = "\u039A"u8,
-    ["Lambda"u8] = "\u039B"u8,
-    ["Mu"u8] = "\u039C"u8,
-    ["Nu"u8] = "\u039D"u8,
-    ["Xi"u8] = "\u039E"u8,
-    ["Omicron"u8] = "\u039F"u8,
-    ["Pi"u8] = "\u03A0"u8,
-    ["Rho"u8] = "\u03A1"u8,
-    ["Sigma"u8] = "\u03A3"u8,
-    ["Tau"u8] = "\u03A4"u8,
-    ["Upsilon"u8] = "\u03A5"u8,
-    ["Phi"u8] = "\u03A6"u8,
-    ["Chi"u8] = "\u03A7"u8,
-    ["Psi"u8] = "\u03A8"u8,
-    ["Omega"u8] = "\u03A9"u8,
-    ["alpha"u8] = "\u03B1"u8,
-    ["beta"u8] = "\u03B2"u8,
-    ["gamma"u8] = "\u03B3"u8,
-    ["delta"u8] = "\u03B4"u8,
-    ["epsilon"u8] = "\u03B5"u8,
-    ["zeta"u8] = "\u03B6"u8,
-    ["eta"u8] = "\u03B7"u8,
-    ["theta"u8] = "\u03B8"u8,
-    ["iota"u8] = "\u03B9"u8,
-    ["kappa"u8] = "\u03BA"u8,
-    ["lambda"u8] = "\u03BB"u8,
-    ["mu"u8] = "\u03BC"u8,
-    ["nu"u8] = "\u03BD"u8,
-    ["xi"u8] = "\u03BE"u8,
-    ["omicron"u8] = "\u03BF"u8,
-    ["pi"u8] = "\u03C0"u8,
-    ["rho"u8] = "\u03C1"u8,
-    ["sigmaf"u8] = "\u03C2"u8,
-    ["sigma"u8] = "\u03C3"u8,
-    ["tau"u8] = "\u03C4"u8,
-    ["upsilon"u8] = "\u03C5"u8,
-    ["phi"u8] = "\u03C6"u8,
-    ["chi"u8] = "\u03C7"u8,
-    ["psi"u8] = "\u03C8"u8,
-    ["omega"u8] = "\u03C9"u8,
-    ["thetasym"u8] = "\u03D1"u8,
-    ["upsih"u8] = "\u03D2"u8,
-    ["piv"u8] = "\u03D6"u8,
-    ["bull"u8] = "\u2022"u8,
-    ["hellip"u8] = "\u2026"u8,
-    ["prime"u8] = "\u2032"u8,
-    ["Prime"u8] = "\u2033"u8,
-    ["oline"u8] = "\u203E"u8,
-    ["frasl"u8] = "\u2044"u8,
-    ["weierp"u8] = "\u2118"u8,
-    ["image"u8] = "\u2111"u8,
-    ["real"u8] = "\u211C"u8,
-    ["trade"u8] = "\u2122"u8,
-    ["alefsym"u8] = "\u2135"u8,
-    ["larr"u8] = "\u2190"u8,
-    ["uarr"u8] = "\u2191"u8,
-    ["rarr"u8] = "\u2192"u8,
-    ["darr"u8] = "\u2193"u8,
-    ["harr"u8] = "\u2194"u8,
-    ["crarr"u8] = "\u21B5"u8,
-    ["lArr"u8] = "\u21D0"u8,
-    ["uArr"u8] = "\u21D1"u8,
-    ["rArr"u8] = "\u21D2"u8,
-    ["dArr"u8] = "\u21D3"u8,
-    ["hArr"u8] = "\u21D4"u8,
-    ["forall"u8] = "\u2200"u8,
-    ["part"u8] = "\u2202"u8,
-    ["exist"u8] = "\u2203"u8,
-    ["empty"u8] = "\u2205"u8,
-    ["nabla"u8] = "\u2207"u8,
-    ["isin"u8] = "\u2208"u8,
-    ["notin"u8] = "\u2209"u8,
-    ["ni"u8] = "\u220B"u8,
-    ["prod"u8] = "\u220F"u8,
-    ["sum"u8] = "\u2211"u8,
-    ["minus"u8] = "\u2212"u8,
-    ["lowast"u8] = "\u2217"u8,
-    ["radic"u8] = "\u221A"u8,
-    ["prop"u8] = "\u221D"u8,
-    ["infin"u8] = "\u221E"u8,
-    ["ang"u8] = "\u2220"u8,
-    ["and"u8] = "\u2227"u8,
-    ["or"u8] = "\u2228"u8,
-    ["cap"u8] = "\u2229"u8,
-    ["cup"u8] = "\u222A"u8,
-    ["int"u8] = "\u222B"u8,
-    ["there4"u8] = "\u2234"u8,
-    ["sim"u8] = "\u223C"u8,
-    ["cong"u8] = "\u2245"u8,
-    ["asymp"u8] = "\u2248"u8,
-    ["ne"u8] = "\u2260"u8,
-    ["equiv"u8] = "\u2261"u8,
-    ["le"u8] = "\u2264"u8,
-    ["ge"u8] = "\u2265"u8,
-    ["sub"u8] = "\u2282"u8,
-    ["sup"u8] = "\u2283"u8,
-    ["nsub"u8] = "\u2284"u8,
-    ["sube"u8] = "\u2286"u8,
-    ["supe"u8] = "\u2287"u8,
-    ["oplus"u8] = "\u2295"u8,
-    ["otimes"u8] = "\u2297"u8,
-    ["perp"u8] = "\u22A5"u8,
-    ["sdot"u8] = "\u22C5"u8,
-    ["lceil"u8] = "\u2308"u8,
-    ["rceil"u8] = "\u2309"u8,
-    ["lfloor"u8] = "\u230A"u8,
-    ["rfloor"u8] = "\u230B"u8,
-    ["lang"u8] = "\u2329"u8,
-    ["rang"u8] = "\u232A"u8,
-    ["loz"u8] = "\u25CA"u8,
-    ["spades"u8] = "\u2660"u8,
-    ["clubs"u8] = "\u2663"u8,
-    ["hearts"u8] = "\u2665"u8,
-    ["diams"u8] = "\u2666"u8,
-    ["quot"u8] = "\u0022"u8,
-    ["amp"u8] = "\u0026"u8,
-    ["lt"u8] = "\u003C"u8,
-    ["gt"u8] = "\u003E"u8,
-    ["OElig"u8] = "\u0152"u8,
-    ["oelig"u8] = "\u0153"u8,
-    ["Scaron"u8] = "\u0160"u8,
-    ["scaron"u8] = "\u0161"u8,
-    ["Yuml"u8] = "\u0178"u8,
-    ["circ"u8] = "\u02C6"u8,
-    ["tilde"u8] = "\u02DC"u8,
-    ["ensp"u8] = "\u2002"u8,
-    ["emsp"u8] = "\u2003"u8,
-    ["thinsp"u8] = "\u2009"u8,
-    ["zwnj"u8] = "\u200C"u8,
-    ["zwj"u8] = "\u200D"u8,
-    ["lrm"u8] = "\u200E"u8,
-    ["rlm"u8] = "\u200F"u8,
-    ["ndash"u8] = "\u2013"u8,
-    ["mdash"u8] = "\u2014"u8,
-    ["lsquo"u8] = "\u2018"u8,
-    ["rsquo"u8] = "\u2019"u8,
-    ["sbquo"u8] = "\u201A"u8,
-    ["ldquo"u8] = "\u201C"u8,
-    ["rdquo"u8] = "\u201D"u8,
-    ["bdquo"u8] = "\u201E"u8,
-    ["dagger"u8] = "\u2020"u8,
-    ["Dagger"u8] = "\u2021"u8,
-    ["permil"u8] = "\u2030"u8,
-    ["lsaquo"u8] = "\u2039"u8,
-    ["rsaquo"u8] = "\u203A"u8,
-    ["euro"u8] = "\u20AC"u8
+    ["nbsp"] = "\u00A0",
+    ["iexcl"] = "\u00A1",
+    ["cent"] = "\u00A2",
+    ["pound"] = "\u00A3",
+    ["curren"] = "\u00A4",
+    ["yen"] = "\u00A5",
+    ["brvbar"] = "\u00A6",
+    ["sect"] = "\u00A7",
+    ["uml"] = "\u00A8",
+    ["copy"] = "\u00A9",
+    ["ordf"] = "\u00AA",
+    ["laquo"] = "\u00AB",
+    ["not"] = "\u00AC",
+    ["shy"] = "\u00AD",
+    ["reg"] = "\u00AE",
+    ["macr"] = "\u00AF",
+    ["deg"] = "\u00B0",
+    ["plusmn"] = "\u00B1",
+    ["sup2"] = "\u00B2",
+    ["sup3"] = "\u00B3",
+    ["acute"] = "\u00B4",
+    ["micro"] = "\u00B5",
+    ["para"] = "\u00B6",
+    ["middot"] = "\u00B7",
+    ["cedil"] = "\u00B8",
+    ["sup1"] = "\u00B9",
+    ["ordm"] = "\u00BA",
+    ["raquo"] = "\u00BB",
+    ["frac14"] = "\u00BC",
+    ["frac12"] = "\u00BD",
+    ["frac34"] = "\u00BE",
+    ["iquest"] = "\u00BF",
+    ["Agrave"] = "\u00C0",
+    ["Aacute"] = "\u00C1",
+    ["Acirc"] = "\u00C2",
+    ["Atilde"] = "\u00C3",
+    ["Auml"] = "\u00C4",
+    ["Aring"] = "\u00C5",
+    ["AElig"] = "\u00C6",
+    ["Ccedil"] = "\u00C7",
+    ["Egrave"] = "\u00C8",
+    ["Eacute"] = "\u00C9",
+    ["Ecirc"] = "\u00CA",
+    ["Euml"] = "\u00CB",
+    ["Igrave"] = "\u00CC",
+    ["Iacute"] = "\u00CD",
+    ["Icirc"] = "\u00CE",
+    ["Iuml"] = "\u00CF",
+    ["ETH"] = "\u00D0",
+    ["Ntilde"] = "\u00D1",
+    ["Ograve"] = "\u00D2",
+    ["Oacute"] = "\u00D3",
+    ["Ocirc"] = "\u00D4",
+    ["Otilde"] = "\u00D5",
+    ["Ouml"] = "\u00D6",
+    ["times"] = "\u00D7",
+    ["Oslash"] = "\u00D8",
+    ["Ugrave"] = "\u00D9",
+    ["Uacute"] = "\u00DA",
+    ["Ucirc"] = "\u00DB",
+    ["Uuml"] = "\u00DC",
+    ["Yacute"] = "\u00DD",
+    ["THORN"] = "\u00DE",
+    ["szlig"] = "\u00DF",
+    ["agrave"] = "\u00E0",
+    ["aacute"] = "\u00E1",
+    ["acirc"] = "\u00E2",
+    ["atilde"] = "\u00E3",
+    ["auml"] = "\u00E4",
+    ["aring"] = "\u00E5",
+    ["aelig"] = "\u00E6",
+    ["ccedil"] = "\u00E7",
+    ["egrave"] = "\u00E8",
+    ["eacute"] = "\u00E9",
+    ["ecirc"] = "\u00EA",
+    ["euml"] = "\u00EB",
+    ["igrave"] = "\u00EC",
+    ["iacute"] = "\u00ED",
+    ["icirc"] = "\u00EE",
+    ["iuml"] = "\u00EF",
+    ["eth"] = "\u00F0",
+    ["ntilde"] = "\u00F1",
+    ["ograve"] = "\u00F2",
+    ["oacute"] = "\u00F3",
+    ["ocirc"] = "\u00F4",
+    ["otilde"] = "\u00F5",
+    ["ouml"] = "\u00F6",
+    ["divide"] = "\u00F7",
+    ["oslash"] = "\u00F8",
+    ["ugrave"] = "\u00F9",
+    ["uacute"] = "\u00FA",
+    ["ucirc"] = "\u00FB",
+    ["uuml"] = "\u00FC",
+    ["yacute"] = "\u00FD",
+    ["thorn"] = "\u00FE",
+    ["yuml"] = "\u00FF",
+    ["fnof"] = "\u0192",
+    ["Alpha"] = "\u0391",
+    ["Beta"] = "\u0392",
+    ["Gamma"] = "\u0393",
+    ["Delta"] = "\u0394",
+    ["Epsilon"] = "\u0395",
+    ["Zeta"] = "\u0396",
+    ["Eta"] = "\u0397",
+    ["Theta"] = "\u0398",
+    ["Iota"] = "\u0399",
+    ["Kappa"] = "\u039A",
+    ["Lambda"] = "\u039B",
+    ["Mu"] = "\u039C",
+    ["Nu"] = "\u039D",
+    ["Xi"] = "\u039E",
+    ["Omicron"] = "\u039F",
+    ["Pi"] = "\u03A0",
+    ["Rho"] = "\u03A1",
+    ["Sigma"] = "\u03A3",
+    ["Tau"] = "\u03A4",
+    ["Upsilon"] = "\u03A5",
+    ["Phi"] = "\u03A6",
+    ["Chi"] = "\u03A7",
+    ["Psi"] = "\u03A8",
+    ["Omega"] = "\u03A9",
+    ["alpha"] = "\u03B1",
+    ["beta"] = "\u03B2",
+    ["gamma"] = "\u03B3",
+    ["delta"] = "\u03B4",
+    ["epsilon"] = "\u03B5",
+    ["zeta"] = "\u03B6",
+    ["eta"] = "\u03B7",
+    ["theta"] = "\u03B8",
+    ["iota"] = "\u03B9",
+    ["kappa"] = "\u03BA",
+    ["lambda"] = "\u03BB",
+    ["mu"] = "\u03BC",
+    ["nu"] = "\u03BD",
+    ["xi"] = "\u03BE",
+    ["omicron"] = "\u03BF",
+    ["pi"] = "\u03C0",
+    ["rho"] = "\u03C1",
+    ["sigmaf"] = "\u03C2",
+    ["sigma"] = "\u03C3",
+    ["tau"] = "\u03C4",
+    ["upsilon"] = "\u03C5",
+    ["phi"] = "\u03C6",
+    ["chi"] = "\u03C7",
+    ["psi"] = "\u03C8",
+    ["omega"] = "\u03C9",
+    ["thetasym"] = "\u03D1",
+    ["upsih"] = "\u03D2",
+    ["piv"] = "\u03D6",
+    ["bull"] = "\u2022",
+    ["hellip"] = "\u2026",
+    ["prime"] = "\u2032",
+    ["Prime"] = "\u2033",
+    ["oline"] = "\u203E",
+    ["frasl"] = "\u2044",
+    ["weierp"] = "\u2118",
+    ["image"] = "\u2111",
+    ["real"] = "\u211C",
+    ["trade"] = "\u2122",
+    ["alefsym"] = "\u2135",
+    ["larr"] = "\u2190",
+    ["uarr"] = "\u2191",
+    ["rarr"] = "\u2192",
+    ["darr"] = "\u2193",
+    ["harr"] = "\u2194",
+    ["crarr"] = "\u21B5",
+    ["lArr"] = "\u21D0",
+    ["uArr"] = "\u21D1",
+    ["rArr"] = "\u21D2",
+    ["dArr"] = "\u21D3",
+    ["hArr"] = "\u21D4",
+    ["forall"] = "\u2200",
+    ["part"] = "\u2202",
+    ["exist"] = "\u2203",
+    ["empty"] = "\u2205",
+    ["nabla"] = "\u2207",
+    ["isin"] = "\u2208",
+    ["notin"] = "\u2209",
+    ["ni"] = "\u220B",
+    ["prod"] = "\u220F",
+    ["sum"] = "\u2211",
+    ["minus"] = "\u2212",
+    ["lowast"] = "\u2217",
+    ["radic"] = "\u221A",
+    ["prop"] = "\u221D",
+    ["infin"] = "\u221E",
+    ["ang"] = "\u2220",
+    ["and"] = "\u2227",
+    ["or"] = "\u2228",
+    ["cap"] = "\u2229",
+    ["cup"] = "\u222A",
+    ["int"] = "\u222B",
+    ["there4"] = "\u2234",
+    ["sim"] = "\u223C",
+    ["cong"] = "\u2245",
+    ["asymp"] = "\u2248",
+    ["ne"] = "\u2260",
+    ["equiv"] = "\u2261",
+    ["le"] = "\u2264",
+    ["ge"] = "\u2265",
+    ["sub"] = "\u2282",
+    ["sup"] = "\u2283",
+    ["nsub"] = "\u2284",
+    ["sube"] = "\u2286",
+    ["supe"] = "\u2287",
+    ["oplus"] = "\u2295",
+    ["otimes"] = "\u2297",
+    ["perp"] = "\u22A5",
+    ["sdot"] = "\u22C5",
+    ["lceil"] = "\u2308",
+    ["rceil"] = "\u2309",
+    ["lfloor"] = "\u230A",
+    ["rfloor"] = "\u230B",
+    ["lang"] = "\u2329",
+    ["rang"] = "\u232A",
+    ["loz"] = "\u25CA",
+    ["spades"] = "\u2660",
+    ["clubs"] = "\u2663",
+    ["hearts"] = "\u2665",
+    ["diams"] = "\u2666",
+    ["quot"] = "\u0022",
+    ["amp"] = "\u0026",
+    ["lt"] = "\u003C",
+    ["gt"] = "\u003E",
+    ["OElig"] = "\u0152",
+    ["oelig"] = "\u0153",
+    ["Scaron"] = "\u0160",
+    ["scaron"] = "\u0161",
+    ["Yuml"] = "\u0178",
+    ["circ"] = "\u02C6",
+    ["tilde"] = "\u02DC",
+    ["ensp"] = "\u2002",
+    ["emsp"] = "\u2003",
+    ["thinsp"] = "\u2009",
+    ["zwnj"] = "\u200C",
+    ["zwj"] = "\u200D",
+    ["lrm"] = "\u200E",
+    ["rlm"] = "\u200F",
+    ["ndash"] = "\u2013",
+    ["mdash"] = "\u2014",
+    ["lsquo"] = "\u2018",
+    ["rsquo"] = "\u2019",
+    ["sbquo"] = "\u201A",
+    ["ldquo"] = "\u201C",
+    ["rdquo"] = "\u201D",
+    ["bdquo"] = "\u201E",
+    ["dagger"] = "\u2020",
+    ["Dagger"] = "\u2021",
+    ["permil"] = "\u2030",
+    ["lsaquo"] = "\u2039",
+    ["rsaquo"] = "\u203A",
+    ["euro"] = "\u20AC"
 }; }
 
 // HTMLAutoClose is the set of HTML elements that
@@ -2000,25 +2017,25 @@ public static readonly ж<slice<@string>> ᏑHTMLAutoClose = new StaticBox<slice
 public static ref slice<@string> HTMLAutoClose => ref ((StaticBox<slice<@string>>)ᏑHTMLAutoClose).ValueSlot;
 internal static void initᴛHTMLAutoClose() { HTMLAutoClose = htmlAutoClose; }
 
-internal static slice<@string> htmlAutoClose = new @string[]{
+internal static slice<@string> htmlAutoClose = slice<@string>([
     /*
 		hget http://www.w3.org/TR/html4/loose.dtd |
 		9 sed -n 's/<!ELEMENT ([^ ]*) +- O EMPTY.+/	"\1",/p' | tr A-Z a-z
 	*/
-    "basefont"u8,
-    "br"u8,
-    "area"u8,
-    "link"u8,
-    "img"u8,
-    "param"u8,
-    "hr"u8,
-    "input"u8,
-    "col"u8,
-    "frame"u8,
-    "isindex"u8,
-    "base"u8,
-    "meta"u8
-}.slice();
+    "basefont",
+    "br",
+    "area",
+    "link",
+    "img",
+    "param",
+    "hr",
+    "input",
+    "col",
+    "frame",
+    "isindex",
+    "base",
+    "meta"
+]);
 
 internal static slice<byte> escQuot = slice<byte>("&#34;"u8); // shorter than "&quot;"
 internal static slice<byte> escApos = slice<byte>("&#39;"u8); // shorter than "&apos;"
@@ -2040,44 +2057,44 @@ public static error EscapeText(io.Writer w, slice<byte> s) {
 // of the plain text data s. If escapeNewline is true, newline
 // characters will be escaped.
 internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline) {
-    slice<byte> esc = default!;
+    slice<byte> esc = default;
     nint last = 0;
     for (nint i = 0; i < len(s); ) {
         var (r, width) = utf8.DecodeRune(s.slice(i));
         i += width;
         switch (r) {
-        case (rune)'"': {
+        case '"': {
             esc = escQuot;
             break;
         }
-        case (rune)'\'': {
+        case '\'': {
             esc = escApos;
             break;
         }
-        case (rune)'&': {
+        case '&': {
             esc = escAmp;
             break;
         }
-        case (rune)'<': {
+        case '<': {
             esc = escLT;
             break;
         }
-        case (rune)'>': {
+        case '>': {
             esc = escGT;
             break;
         }
-        case (rune)'\t': {
+        case '\t': {
             esc = escTab;
             break;
         }
-        case (rune)'\n': {
+        case '\n': {
             if (!escapeNewline) {
                 continue;
             }
             esc = escNL;
             break;
         }
-        case (rune)'\r': {
+        case '\r': {
             esc = escCR;
             break;
         }
@@ -2090,12 +2107,12 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
             break;
         }}
         {
-            var (_, errΔ1) = w.Write(s.slice(last, i - width)); if (errΔ1 != default!) {
+            var (_, errΔ1) = w.Write(s.slice(last, i - width)); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
         {
-            var (_, errΔ2) = w.Write(esc); if (errΔ2 != default!) {
+            var (_, errΔ2) = w.Write(esc); if (errΔ2 != nil) {
                 return errΔ2;
             }
         }
@@ -2108,41 +2125,41 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
 // EscapeString writes to p the properly escaped XML equivalent
 // of the plain text data s.
 internal static void EscapeString(this ref printer p, @string s) {
-    slice<byte> esc = default!;
+    slice<byte> esc = default;
     nint last = 0;
     for (nint i = 0; i < len(s); ) {
         var (r, width) = utf8.DecodeRuneInString(s.slice(i));
         i += width;
         switch (r) {
-        case (rune)'"': {
+        case '"': {
             esc = escQuot;
             break;
         }
-        case (rune)'\'': {
+        case '\'': {
             esc = escApos;
             break;
         }
-        case (rune)'&': {
+        case '&': {
             esc = escAmp;
             break;
         }
-        case (rune)'<': {
+        case '<': {
             esc = escLT;
             break;
         }
-        case (rune)'>': {
+        case '>': {
             esc = escGT;
             break;
         }
-        case (rune)'\t': {
+        case '\t': {
             esc = escTab;
             break;
         }
-        case (rune)'\n': {
+        case '\n': {
             esc = escNL;
             break;
         }
-        case (rune)'\r': {
+        case '\r': {
             esc = escCR;
             break;
         }
@@ -2176,27 +2193,27 @@ internal static slice<byte> cdataEscape = slice<byte>("]]]]><![CDATA[>"u8);
 // It escapes CDATA directives nested in s.
 internal static error emitCDATA(io.Writer w, slice<byte> s) {
     if (len(s) == 0) {
-        return default!;
+        return default;
     }
     {
-        var (_, errΔ1) = w.Write(cdataStart); if (errΔ1 != default!) {
+        var (_, errΔ1) = w.Write(cdataStart); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
 
-    while (ᐧ) {
+    for (;;) {
         var (before, after, ok) = bytes.Cut(s, cdataEnd);
         if (!ok) {
             break;
         }
         // Found a nested CDATA directive end.
         {
-            var (_, errΔ2) = w.Write(before); if (errΔ2 != default!) {
+            var (_, errΔ2) = w.Write(before); if (errΔ2 != nil) {
                 return errΔ2;
             }
         }
         {
-            var (_, errΔ3) = w.Write(cdataEscape); if (errΔ3 != default!) {
+            var (_, errΔ3) = w.Write(cdataEscape); if (errΔ3 != nil) {
                 return errΔ3;
             }
         }
@@ -2204,7 +2221,7 @@ internal static error emitCDATA(io.Writer w, slice<byte> s) {
     }
 
     {
-        var (_, errΔ4) = w.Write(s); if (errΔ4 != default!) {
+        var (_, errΔ4) = w.Write(s); if (errΔ4 != nil) {
             return errΔ4;
         }
     }
@@ -2221,7 +2238,7 @@ internal static @string procInst(@string param, @string s) {
     param = param + "="u8;
     nint lenp = len(param);
     nint i = 0;
-    byte sep = default!;
+    byte sep = default;
     while (i < len(s)) {
         @string sub = s.slice(i);
         nint k = strings.Index(sub, param);
@@ -2230,7 +2247,7 @@ internal static @string procInst(@string param, @string s) {
         }
         i += lenp + k + 1;
         {
-            var c = sub[lenp + k]; if (c == (rune)'\'' || c == (rune)'"') {
+            var c = sub[lenp + k]; if (c == '\'' || c == '"') {
                 sep = c;
                 break;
             }

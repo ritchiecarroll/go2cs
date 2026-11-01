@@ -23,15 +23,24 @@ internal static void _ᴛ1() {
     _ = x[ECDSAWithSHA1 - 515];
 }
 
-internal static readonly @string _SignatureScheme_name_0 = "PKCS1WithSHA1"u8;
-internal static readonly @string _SignatureScheme_name_1 = "ECDSAWithSHA1"u8;
-internal static readonly @string _SignatureScheme_name_2 = "PKCS1WithSHA256"u8;
-internal static readonly @string _SignatureScheme_name_3 = "ECDSAWithP256AndSHA256"u8;
-internal static readonly @string _SignatureScheme_name_4 = "PKCS1WithSHA384"u8;
-internal static readonly @string _SignatureScheme_name_5 = "ECDSAWithP384AndSHA384"u8;
-internal static readonly @string _SignatureScheme_name_6 = "PKCS1WithSHA512"u8;
-internal static readonly @string _SignatureScheme_name_7 = "ECDSAWithP521AndSHA512"u8;
-internal static readonly @string _SignatureScheme_name_8 = "PSSWithSHA256PSSWithSHA384PSSWithSHA512Ed25519"u8;
+internal static ref readonly @string _SignatureScheme_name_0 => ref _SignatureScheme_name_0ᵇ;
+private static readonly @string _SignatureScheme_name_0ᵇ = "PKCS1WithSHA1"u8;
+internal static ref readonly @string _SignatureScheme_name_1 => ref _SignatureScheme_name_1ᵇ;
+private static readonly @string _SignatureScheme_name_1ᵇ = "ECDSAWithSHA1"u8;
+internal static ref readonly @string _SignatureScheme_name_2 => ref _SignatureScheme_name_2ᵇ;
+private static readonly @string _SignatureScheme_name_2ᵇ = "PKCS1WithSHA256"u8;
+internal static ref readonly @string _SignatureScheme_name_3 => ref _SignatureScheme_name_3ᵇ;
+private static readonly @string _SignatureScheme_name_3ᵇ = "ECDSAWithP256AndSHA256"u8;
+internal static ref readonly @string _SignatureScheme_name_4 => ref _SignatureScheme_name_4ᵇ;
+private static readonly @string _SignatureScheme_name_4ᵇ = "PKCS1WithSHA384"u8;
+internal static ref readonly @string _SignatureScheme_name_5 => ref _SignatureScheme_name_5ᵇ;
+private static readonly @string _SignatureScheme_name_5ᵇ = "ECDSAWithP384AndSHA384"u8;
+internal static ref readonly @string _SignatureScheme_name_6 => ref _SignatureScheme_name_6ᵇ;
+private static readonly @string _SignatureScheme_name_6ᵇ = "PKCS1WithSHA512"u8;
+internal static ref readonly @string _SignatureScheme_name_7 => ref _SignatureScheme_name_7ᵇ;
+private static readonly @string _SignatureScheme_name_7ᵇ = "ECDSAWithP521AndSHA512"u8;
+internal static ref readonly @string _SignatureScheme_name_8 => ref _SignatureScheme_name_8ᵇ;
+private static readonly @string _SignatureScheme_name_8ᵇ = "PSSWithSHA256PSSWithSHA384PSSWithSHA512Ed25519"u8;
 
 internal static array<uint8> _SignatureScheme_index_8 = new uint8[]{0, 13, 26, 39, 46}.array();
 
@@ -66,7 +75,7 @@ public static @string String(this SignatureScheme i) {
         return _SignatureScheme_name_8.slice(_SignatureScheme_index_8[i], _SignatureScheme_index_8[i + 1]);
     }
     default: {
-        return "SignatureScheme("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
+        return "SignatureScheme("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 
@@ -83,9 +92,12 @@ internal static void _ᴛ2() {
     _ = x[SecP384r1MLKEM1024 - 4589];
 }
 
-internal static readonly @string _CurveID_name_0 = "CurveP256CurveP384CurveP521"u8;
-internal static readonly @string _CurveID_name_1 = "X25519"u8;
-internal static readonly @string _CurveID_name_2 = "SecP256r1MLKEM768X25519MLKEM768SecP384r1MLKEM1024"u8;
+internal static ref readonly @string _CurveID_name_0 => ref _CurveID_name_0ᵇ;
+private static readonly @string _CurveID_name_0ᵇ = "CurveP256CurveP384CurveP521"u8;
+internal static ref readonly @string _CurveID_name_1 => ref _CurveID_name_1ᵇ;
+private static readonly @string _CurveID_name_1ᵇ = "X25519"u8;
+internal static ref readonly @string _CurveID_name_2 => ref _CurveID_name_2ᵇ;
+private static readonly @string _CurveID_name_2ᵇ = "SecP256r1MLKEM768X25519MLKEM768SecP384r1MLKEM1024"u8;
 
 internal static array<uint8> _CurveID_index_0 = new uint8[]{0, 9, 18, 27}.array();
 internal static array<uint8> _CurveID_index_2 = new uint8[]{0, 17, 31, 49}.array();
@@ -104,7 +116,7 @@ public static @string String(this CurveID i) {
         return _CurveID_name_2.slice(_CurveID_index_2[i], _CurveID_index_2[i + 1]);
     }
     default: {
-        return "CurveID("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
+        return "CurveID("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 
@@ -119,13 +131,14 @@ internal static void _ᴛ3() {
     _ = x[RequireAndVerifyClientCert - 4];
 }
 
-internal static readonly @string _ClientAuthType_name = "NoClientCertRequestClientCertRequireAnyClientCertVerifyClientCertIfGivenRequireAndVerifyClientCert"u8;
+internal static ref readonly @string _ClientAuthType_name => ref _ClientAuthType_nameᵇ;
+private static readonly @string _ClientAuthType_nameᵇ = "NoClientCertRequestClientCertRequireAnyClientCertVerifyClientCertIfGivenRequireAndVerifyClientCert"u8;
 
 internal static array<uint8> _ClientAuthType_index = new uint8[]{0, 12, 29, 49, 72, 98}.array();
 
 public static @string String(this ClientAuthType i) {
     if (i < 0 || i >= ((ClientAuthType)(len(_ClientAuthType_index) - 1))) {
-        return "ClientAuthType("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "ClientAuthType("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _ClientAuthType_name.slice(_ClientAuthType_index[i], _ClientAuthType_index[i + 1]);
 }

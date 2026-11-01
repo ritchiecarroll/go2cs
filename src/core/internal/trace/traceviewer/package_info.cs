@@ -10,34 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using templateꓸError = go.html.template_package.ΔError;
-global using templateꓸFuncMap = go.text.template_package.FuncMap;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using traceꓸEvent = go.@internal.trace_package.ΔEvent;
-global using traceꓸLabel = go.@internal.trace_package.ΔLabel;
-global using traceꓸLog = go.@internal.trace_package.ΔLog;
-global using traceꓸMetric = go.@internal.trace_package.ΔMetric;
-global using traceꓸRange = go.@internal.trace_package.ΔRange;
-global using traceꓸRegion = go.@internal.trace_package.ΔRegion;
-global using traceꓸStack = go.@internal.trace_package.ΔStack;
-global using traceꓸStateTransition = go.@internal.trace_package.ΔStateTransition;
-global using traceꓸSync = go.@internal.trace_package.ΔSync;
-global using traceꓸTask = go.@internal.trace_package.ΔTask;
-global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
 
 using go;
@@ -80,7 +53,15 @@ using static go.@internal.trace.traceviewer_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.@internal.profile_package.Profile))]
+[assembly: GoFieldAccess(typeof(go.@internal.trace.traceviewer.format_package.Event))]
+[assembly: GoFieldAccess(typeof(go.net.http_package.Request))]
+[assembly: GoFieldAccess(typeof(mmuCacheEntry))]
+[assembly: GoFieldAccess(typeof(splitter))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -90,11 +71,11 @@ using static go.@internal.trace.traceviewer_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/traceviewer/emitter.go", "emitter.cs", "AB82soKCgoKUggALBIKCpoKUlKKClKKClIKUgpSmpqaCggAKCoIACSCU9Ka4gpKClJKClJSCgraClIKUgqbcgoKC7gAFEIK4goKCgpSCgqaCgsqCgu6CgoKUgoKmgIIAFCiCgqYAAB4AExCUpoKCpoKUgoK4qJKCgoKUggAJHKKUACNGgoK4goKUpoKmgqaCpoKClKaCpoKClAAXMIKClIKUkoKUggAKFgAUKoKClIKUkgAWLoKClKaCpoKClIIACBIAEiaCpoKCpoKmgoKCgpSCAAsYpoKCgpSCAAsYpoiygpSCpoKClJKClIIABxCokoIABhCmgqqiAAkGgpSClIKmlIKCgpSCgpSUpqaC7gAIEoLcAAcUoqiSgpSCgpSCgoKCgoKUAAcQggA9iAEAGTSCgg==", "36-40:1;41-65:2;47-50:2.1;51-54:2.2;66-68:3;69-73:4;97-99:1;100-129:2;106-109:2.1;110-113:2.2;121-123:2.3;124-126:2.4;130-132:3;133-206:4", "", "209=Sprintf/1/1/1;228=Sprintf/1/1/1;396=viewerTime/1/2/3,viewerTime/2/2/4;433=viewerTime/1/1/4;444=viewerTime/1/1/4;474=viewerTime/1/1/5;513=viewerTime/1/1/6;522=viewerTime/1/1/6;561=viewerTime/1/1/3;582=viewerTime/1/1/3;619=viewerTime/1/1/3")]
-[assembly: go.GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABculpKCgpSCgpSCgpSClKiSqLKCppSCgoK4goKUgpSmgpSCqIKC")]
-[assembly: go.GoPositionMap("internal/trace/traceviewer/http.go", "http.cs", "ABEegpKAgoIALVYAxwGKA4KClAAKFoLWgoKAgoKkggCIAY4Cgg==", "16-21:1;279-286:1")]
-[assembly: go.GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "ADBWgsqSlIKkgpS4AAoQgoKClAAQIqKCgoKClJSSgoKUgqaokoKCgqaCgoKCyoKCgIKkppSCgoKUgqaAgraCgoKCgoKClIKUuIKCggDLAZADsoKCgqaCgoKClJaSgqaCgoIACBKEkqKCpg==", "49-59:1;101-109:1")]
-[assembly: go.GoPositionMap("internal/trace/traceviewer/pprof.go", "pprof.cs", "ACkykqKClJKCgpSCgoKUgIKCpKaCgoKUkoKUgoKUgoCCgqSAgoKkgIKCpIKAgoKkgoKiAAkSggAHEIKCgoKCgoKCgtyClAAJFIKUlMrmgoKClIKAgqQ=", "26-81:1;30-34:1.1;52-55:1.2")]
+[assembly: GoPositionMap("internal/trace/traceviewer/emitter.go", "emitter.cs", "ACI2soKCgoKUggALBIKCpoKUlKKClKKClIKUgpSmpqaCggAKCoIACSCU9Ka4gpKClJKClJSCgqaClIKUgqbcgoKC7gAFEIK4goKCgpSCgqaCgsqCgu6CgoKUgoKmgIIAFCiCgqYAAB4AExCUpoKCpoKUgoK4qJKCgoKUggAJHKKUACNGgoK4goKUpoKmgqaCpoKClKaCpoKClAAXMIKClIKUgoKUggAKFgAUKoKClIKUggAWLoKClKaCpoKClIIACBIAEiaCpoKCpoKmgoKCgpSCAAsYpoKCgpSCAAsYpoiygpSCpoKClIKClIIABxCokoIABhCmgqqiAA4GgpSClIKmlIKCgpSCgpSUpqaC7gAIEoLcAAcUoqiSgpSCgpSCgoKCgoKUAAcQggBdiAEAGTSCgg==", "36-40:1;41-65:2;47-50:2.1;51-54:2.2;66-68:3;69-73:4;97-99:1;100-129:2;106-109:2.1;110-113:2.2;121-123:2.3;124-126:2.4;130-132:3;133-206:4", "", "211=Sprintf/1/1/1;230=Sprintf/1/1/1;398=viewerTime/1/2/3,viewerTime/2/2/4;434=viewerTime/1/1/4;445=viewerTime/1/1/4;474=viewerTime/1/1/5;513=viewerTime/1/1/6;522=viewerTime/1/1/6;561=viewerTime/1/1/3;582=viewerTime/1/1/3;618=viewerTime/1/1/3")]
+[assembly: GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABculpKCgpSCgpSCgpSClKiSqLKCppSCgoK4goKUgpSmgpSCqIKC")]
+[assembly: GoPositionMap("internal/trace/traceviewer/http.go", "http.cs", "ABEegpKAgoIALlYAyQGKA4KClAAKFoLmgoKAgoKkggCIAY4Cgg==", "16-21:1;279-286:1")]
+[assembly: GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "ADFWgsqSpIKkgpS4AAsQgoKClAAQIqKCgoKClJSSgoKUgqaokoKCgqaCgoKCyoKCgIKkppSCgoKUgqaAgraCgoKCgoKClIKUuIKCggDMAZADsoKCgqaCgoKClJaSgqaCgoIACBKEkqKCpg==", "49-59:1;101-109:1")]
+[assembly: GoPositionMap("internal/trace/traceviewer/pprof.go", "pprof.cs", "ADQykqKClJKCgpSCgoKUgIKCpKaCgoKUkoKUgoKUgoCCgqSAgoKkgIKCpIKAgoKkgoKiAAkSggAHEIKCgoKCgoKCgtyClAAJFIKUlMoACAaCgoKUgoCCpA==", "26-81:1;30-34:1.1;52-55:1.2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

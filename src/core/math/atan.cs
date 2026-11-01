@@ -73,7 +73,7 @@ internal static float64 xatan(float64 x) {
 // to the range [0, 0.66] and calls xatan.
 internal static float64 satan(float64 x) {
     UntypedFloat Morebits = 6.123233995736765886130e-17; // pi/2 = PIO2 + Morebits
-    const float64 Tan3pio8 = 2.41421356237309504880; // tan(3*pi/8)
+    const float64 Tan3pio8 = 2.41421356237309504880;     // tan(3*pi/8)
     if (x <= 0.66D) {
         return xatan(x);
     }

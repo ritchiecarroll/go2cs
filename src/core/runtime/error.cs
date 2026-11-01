@@ -58,7 +58,7 @@ public static @string Error(this ref TypeAssertionError e) {
         @string msg = "interface conversion: "u8 + inter + " is "u8 + cs + ", not "u8 + @as;
         if (cs == @as) {
             // provide slightly clearer error message
-            if (toRType(e.concrete).pkgpath() != toRType(e.asserted).pkgpath()){
+            if (toRType(e.concrete).pkgpath() != toRType(e.asserted).pkgpath()) {
                 msg += " (types from different packages)"u8;
             } else {
                 msg += " (types from different scopes)"u8;
@@ -77,11 +77,11 @@ public static @string Error(this ref TypeAssertionError e) {
 internal static slice<byte> itoa(slice<byte> buf, uint64 val) {
     nint i = len(buf) - 1;
     while (val >= 10) {
-        buf[i] = (byte)(val % 10 + (rune)'0');
+        buf[i] = (byte)(val % 10 + '0');
         i--;
         val /= 10;
     }
-    buf[i] = (byte)(val + (rune)'0');
+    buf[i] = (byte)(val + '0');
     return buf.slice(i);
 }
 
@@ -96,7 +96,7 @@ internal static @string Error(this errorString e) {
 }
 
 partial struct errorAddressString {
-    internal @string msg; // error message
+    internal @string msg;  // error message
     internal uintptr addr; // memory address where the error occurred
 }
 
@@ -144,27 +144,27 @@ partial struct boundsError {
 // Note: if you change these strings, you should adjust the size of the buffer
 // in boundsError.Error below as well.
 [GoLazy] partial class lazyᴛboundsErrorFmts { internal static array<@string> boundsErrorFmts = new golib.SparseArray<@string>{
-    [abi.BoundsIndex] = "index out of range [%x] with length %y"u8,
-    [abi.BoundsSliceAlen] = "slice bounds out of range [:%x] with length %y"u8,
-    [abi.BoundsSliceAcap] = "slice bounds out of range [:%x] with capacity %y"u8,
-    [abi.BoundsSliceB] = "slice bounds out of range [%x:%y]"u8,
-    [abi.BoundsSlice3Alen] = "slice bounds out of range [::%x] with length %y"u8,
-    [abi.BoundsSlice3Acap] = "slice bounds out of range [::%x] with capacity %y"u8,
-    [abi.BoundsSlice3B] = "slice bounds out of range [:%x:%y]"u8,
-    [abi.BoundsSlice3C] = "slice bounds out of range [%x:%y:]"u8,
-    [abi.BoundsConvert] = "cannot convert slice with length %y to array or pointer to array with length %x"u8
+    [abi.BoundsIndex] = "index out of range [%x] with length %y",
+    [abi.BoundsSliceAlen] = "slice bounds out of range [:%x] with length %y",
+    [abi.BoundsSliceAcap] = "slice bounds out of range [:%x] with capacity %y",
+    [abi.BoundsSliceB] = "slice bounds out of range [%x:%y]",
+    [abi.BoundsSlice3Alen] = "slice bounds out of range [::%x] with length %y",
+    [abi.BoundsSlice3Acap] = "slice bounds out of range [::%x] with capacity %y",
+    [abi.BoundsSlice3B] = "slice bounds out of range [:%x:%y]",
+    [abi.BoundsSlice3C] = "slice bounds out of range [%x:%y:]",
+    [abi.BoundsConvert] = "cannot convert slice with length %y to array or pointer to array with length %x"
 }.array(); }
 
 // boundsNegErrorFmts are overriding formats if x is negative. In this case there's no need to report y.
 [GoLazy] partial class lazyᴛboundsNegErrorFmts { internal static array<@string> boundsNegErrorFmts = new golib.SparseArray<@string>{
-    [abi.BoundsIndex] = "index out of range [%x]"u8,
-    [abi.BoundsSliceAlen] = "slice bounds out of range [:%x]"u8,
-    [abi.BoundsSliceAcap] = "slice bounds out of range [:%x]"u8,
-    [abi.BoundsSliceB] = "slice bounds out of range [%x:]"u8,
-    [abi.BoundsSlice3Alen] = "slice bounds out of range [::%x]"u8,
-    [abi.BoundsSlice3Acap] = "slice bounds out of range [::%x]"u8,
-    [abi.BoundsSlice3B] = "slice bounds out of range [:%x:]"u8,
-    [abi.BoundsSlice3C] = "slice bounds out of range [%x::]"u8
+    [abi.BoundsIndex] = "index out of range [%x]",
+    [abi.BoundsSliceAlen] = "slice bounds out of range [:%x]",
+    [abi.BoundsSliceAcap] = "slice bounds out of range [:%x]",
+    [abi.BoundsSliceB] = "slice bounds out of range [%x:]",
+    [abi.BoundsSlice3Alen] = "slice bounds out of range [::%x]",
+    [abi.BoundsSlice3Acap] = "slice bounds out of range [::%x]",
+    [abi.BoundsSlice3B] = "slice bounds out of range [:%x:]",
+    [abi.BoundsSlice3C] = "slice bounds out of range [%x::]"
 }.array(); }
 
 internal static void RuntimeError(this boundsError e) {
@@ -172,7 +172,7 @@ internal static void RuntimeError(this boundsError e) {
 
 internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
     if (signed && v < 0) {
-        b = append(b, (byte)((rune)'-'));
+        b = append(b, (byte)'-');
         v = -v;
     }
     array<byte> buf = new(20);
@@ -190,20 +190,20 @@ internal static @string Error(this boundsError e) {
     // max message length is 99: "runtime error: slice bounds out of range [::%x] with capacity %y"
     // x can be at most 20 characters. y can be at most 19.
     var b = new slice<byte>(0, 100);
-    b = append(b, ((@string)"runtime error: "u8).ꓸꓸꓸ);
+    b = append(b, ((@string)"runtime error: ").ꓸꓸꓸ);
     for (nint i = 0; i < len(fmt); i++) {
         var c = fmt[i];
-        if (c != (rune)'%') {
+        if (c != '%') {
             b = append(bᴷ, b, c);
             continue;
         }
         i++;
         switch (fmt[i]) {
-        case (rune)'x': {
+        case (byte)'x': {
             b = appendIntStr(b, e.x, e.signed);
             break;
         }
-        case (rune)'y': {
+        case (byte)'y': {
             b = appendIntStr(b, (int64)e.y, true);
             break;
         }}
@@ -226,7 +226,7 @@ partial interface stringer {
 internal static void printpanicval(any v) {
     switch (v.type()) {
     case null: {
-        print((@string)"nil"u8);
+        print((@string)"nil");
         break;
     }
     case bool vΔ1: {
@@ -311,75 +311,93 @@ internal static void printanycustomtype(any iʗp) {
     var eface = efaceOf(Ꮡi);
     @string typestring = toRType((~eface)._type).@string();
 
-    var exprᴛ1 = (~eface)._type.Kind();
-    if (exprᴛ1 == abi.ΔString) {
-        print(typestring, (@string)@"("""u8);
+    switch ((~eface)._type.Kind()) {
+    case var ᴛ when ᴛ == abi.ΔString: {
+        print(typestring, (@string)@"(""");
         printindented(~(ж<@string>)(uintptr)((~eface).data));
-        print((@string)@""")"u8);
+        print((@string)@""")");
+        break;
     }
-    else if (exprᴛ1 == abi.Bool) {
-        print(typestring, (@string)"("u8, ~(ж<bool>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Bool: {
+        print(typestring, (@string)"(", ~(ж<bool>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Int) {
-        print(typestring, (@string)"("u8, ~(ж<nint>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Int: {
+        print(typestring, (@string)"(", ~(ж<nint>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Int8) {
-        print(typestring, (@string)"("u8, ~(ж<int8>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Int8: {
+        print(typestring, (@string)"(", ~(ж<int8>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Int16) {
-        print(typestring, (@string)"("u8, ~(ж<int16>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Int16: {
+        print(typestring, (@string)"(", ~(ж<int16>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Int32) {
-        print(typestring, (@string)"("u8, ~(ж<int32>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Int32: {
+        print(typestring, (@string)"(", ~(ж<int32>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Int64) {
-        print(typestring, (@string)"("u8, ~(ж<int64>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Int64: {
+        print(typestring, (@string)"(", ~(ж<int64>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Uint) {
-        print(typestring, (@string)"("u8, ~(ж<nuint>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Uint: {
+        print(typestring, (@string)"(", ~(ж<nuint>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Uint8) {
-        print(typestring, (@string)"("u8, ~(ж<uint8>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Uint8: {
+        print(typestring, (@string)"(", ~(ж<uint8>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Uint16) {
-        print(typestring, (@string)"("u8, ~(ж<uint16>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Uint16: {
+        print(typestring, (@string)"(", ~(ж<uint16>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Uint32) {
-        print(typestring, (@string)"("u8, ~(ж<uint32>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Uint32: {
+        print(typestring, (@string)"(", ~(ж<uint32>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Uint64) {
-        print(typestring, (@string)"("u8, ~(ж<uint64>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Uint64: {
+        print(typestring, (@string)"(", ~(ж<uint64>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Uintptr) {
-        print(typestring, (@string)"("u8, ~(ж<uintptr>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Uintptr: {
+        print(typestring, (@string)"(", ~(ж<uintptr>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Float32) {
-        print(typestring, (@string)"("u8, ~(ж<float32>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Float32: {
+        print(typestring, (@string)"(", ~(ж<float32>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Float64) {
-        print(typestring, (@string)"("u8, ~(ж<float64>)(uintptr)((~eface).data), (@string)")"u8);
+    case var ᴛ when ᴛ == abi.Float64: {
+        print(typestring, (@string)"(", ~(ж<float64>)(uintptr)((~eface).data), (@string)")");
+        break;
     }
-    else if (exprᴛ1 == abi.Complex64) {
+    case var ᴛ when ᴛ == abi.Complex64: {
         print(typestring, ~(ж<complex64>)(uintptr)((~eface).data));
+        break;
     }
-    else if (exprᴛ1 == abi.Complex128) {
+    case var ᴛ when ᴛ == abi.Complex128: {
         print(typestring, ~(ж<complex128>)(uintptr)((~eface).data));
+        break;
     }
-    else { /* default: */
-        print((@string)"("u8, typestring, (@string)") "u8, @unsafe.Pointer.OrTypedNil((~eface).data));
-    }
+    default: {
+        print((@string)"(", typestring, (@string)") ", @unsafe.Pointer.OrTypedNil((~eface).data));
+        break;
+    }}
 }
 
 // printindented prints s, replacing "\n" with "\n\t".
 internal static void printindented(@string s) {
-    while (ᐧ) {
-        nint i = bytealg.IndexByteString(s, (rune)'\n');
+    for (;;) {
+        nint i = bytealg.IndexByteString(s, (byte)'\n');
         if (i < 0) {
             break;
         }
         i += len("\n");
         print(s.slice(0, i));
-        print((@string)"\t"u8);
+        print((@string)"\t");
         s = s.slice(i);
     }
     print(s);
@@ -395,7 +413,7 @@ internal static void panicwrap() {
     // name is something like "main.(*T).F".
     // We want to extract pkg ("main"), typ ("T"), and meth ("F").
     // Do it by finding the parens.
-    nint i = bytealg.IndexByteString(name, (rune)'(');
+    nint i = bytealg.IndexByteString(name, (byte)'(');
     if (i < 0) {
         @throw("panicwrap: no ( in "u8 + name);
     }
@@ -404,7 +422,7 @@ internal static void panicwrap() {
         @throw("panicwrap: unexpected string after package name: "u8 + name);
     }
     name = name.slice(i + 2);
-    i = bytealg.IndexByteString(name, (rune)')');
+    i = bytealg.IndexByteString(name, (byte)')');
     if (i < 0) {
         @throw("panicwrap: no ) in "u8 + name);
     }

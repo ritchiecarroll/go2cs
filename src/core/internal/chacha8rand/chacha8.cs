@@ -18,10 +18,10 @@ partial class chacha8rand_package {
 internal static uintptr offsetLOONG64HasLSX => /* unsafe.Offsetof(cpu.Loong64.HasLSX) */ 64;
 internal static uintptr offsetRISCV64HasV => /* unsafe.Offsetof(cpu.RISCV64.HasV) */ 65;
 
-internal static UntypedInt ctrInc => 4; // increment counter by 4 between block calls
+internal static UntypedInt ctrInc => 4;  // increment counter by 4 between block calls
 internal static UntypedInt ctrMax => 16; // reseed when counter reaches 16
-internal static UntypedInt chunk => 32; // each chunk produced by block is 32 uint64s
-internal static UntypedInt reseed => 4; // reseed with 4 words
+internal static UntypedInt chunk => 32;  // each chunk produced by block is 32 uint64s
+internal static UntypedInt reseed => 4;  // reseed with 4 words
 
 // block is the chacha8rand block function.
 internal static partial void block(/*[4]*/ ж<array<uint64>> seed, /*[32]*/ ж<array<uint64>> blocks, uint32 counter);
@@ -75,7 +75,7 @@ public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.seed = seed.Clone();
-    block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), 0);
+    block(Ꮡs.Ꮡseed, Ꮡs.Ꮡbuf, 0);
     s.c = 0;
     s.i = 0;
     s.n = chunk;
@@ -102,7 +102,7 @@ public static void Refill(this ж<State> Ꮡs) {
         s.seed[3] = s.buf[(nint)(len(s.buf) - (nint)reseed) + 3];
         s.c = 0;
     }
-    block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), s.c);
+    block(Ꮡs.Ꮡseed, Ꮡs.Ꮡbuf, s.c);
     s.i = 0;
     s.n = (uint32)len(s.buf);
     if (s.c == (uint32)(ctrMax - ctrInc)) {
@@ -119,7 +119,7 @@ public static void Reseed(this ж<State> Ꮡs) {
 
     array<uint64> seed = new(4);
     foreach (var i in range(seed)) {
-        while (ᐧ) {
+        for (;;) {
             var (x, ok) = s.Next();
             if (ok) {
                 seed[i] = x;
@@ -153,7 +153,8 @@ partial struct errUnmarshalChaCha8 {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidChaCha8Encodingˢ = "invalid ChaCha8 encoding"u8;
+internal static ref readonly @string invalidChaCha8Encodingˢ => ref invalidChaCha8Encodingˢᵇ;
+private static readonly @string invalidChaCha8Encodingˢᵇ = "invalid ChaCha8 encoding"u8;
 
 internal static @string Error(this ref errUnmarshalChaCha8 _) {
     return invalidChaCha8Encodingˢ;
@@ -174,13 +175,13 @@ public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
         s.seed[i] = byteorder.LEUint64(data.slice((2 + i) * 8));
     }
     s.c = (uint32)ctrInc * ((uint32)used / (uint32)chunk);
-    block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), s.c);
+    block(Ꮡs.Ꮡseed, Ꮡs.Ꮡbuf, s.c);
     s.i = (uint32)used % (uint32)chunk;
     s.n = chunk;
     if (s.c == (uint32)(ctrMax - ctrInc)) {
         s.n = chunk - reseed;
     }
-    return default!;
+    return default;
 }
 
 } // end chacha8rand_package

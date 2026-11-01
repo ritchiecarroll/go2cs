@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using tracev1ꓸSTWReason = go.@internal.trace.@internal.tracev1_package.ΔSTWReason;
 using tracev1 = go.@internal.trace.@internal.tracev1_package;
 // </ImportedTypeAliases>
 
@@ -73,7 +69,30 @@ using static go.@internal.trace_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(ClockSnapshot))]
+[assembly: GoFieldAccess(typeof(GoroutineSummary))]
+[assembly: GoFieldAccess(typeof(MutatorUtilizationV2_perP))]
+[assembly: GoFieldAccess(typeof(Reader))]
+[assembly: GoFieldAccess(typeof(UserRegionSummary))]
+[assembly: GoFieldAccess(typeof(UserTaskSummary))]
+[assembly: GoFieldAccess(typeof(accumulator))]
+[assembly: GoFieldAccess(typeof(batch))]
+[assembly: GoFieldAccess(typeof(batchCursor))]
+[assembly: GoFieldAccess(typeof(cpuSample))]
+[assembly: GoFieldAccess(typeof(evTable))]
+[assembly: GoFieldAccess(typeof(gState))]
+[assembly: GoFieldAccess(typeof(generation))]
+[assembly: GoFieldAccess(typeof(go.@internal.trace.@internal.tracev1_package.Event))]
+[assembly: GoFieldAccess(typeof(go.@internal.trace.tracev2_package.EventSpec))]
+[assembly: GoFieldAccess(typeof(mState))]
+[assembly: GoFieldAccess(typeof(mmuSeries))]
+[assembly: GoFieldAccess(typeof(mud))]
+[assembly: GoFieldAccess(typeof(pState))]
+[assembly: GoFieldAccess(typeof(traceV1Converter))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -83,19 +102,19 @@ using static go.@internal.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/base.go", "base.cs", "AB5CopSUABMwooKUgpSAgqSCgoKCqqKClAALHvKClICCpIKosoKUgoKs0pSmgoKCgpSCppSmgpSClIKCgoKClKrCgpSCgqSCgIK2qLKCgpSCpoKUgoKmrNKCgpTekgASMPYABxCCAAcQgoKClA==")]
-[assembly: go.GoPositionMap("internal/trace/batch.go", "batch.cs", "ABw6gqaCpoKmgqqCAAgIqoKClICCpICCyIKCgoKUyoKClIKClIKCuIKClIKokoKCgpSCuA==", "", "", "119=Bytes/1/1/3")]
-[assembly: go.GoPositionMap("internal/trace/batchcursor.go", "batchcursor.cs", "ABYu1oKCgqaCpoKmgoKmpqaCpqIAAhQACASCgoKUpoKClKaCgpSmgoKClIKUppSmgqaUgqamlIKCpoKUgqaCgoKUpoKCgpSUgpSmgoKCgpSCgIKCtoKAgoK2")]
-[assembly: go.GoPositionMap("internal/trace/event.go", "event.cs", "AFq8AZKClKYAKFSSAHD4AaSCgoIACxqSkoKUgoKC3IIABRKygoKmgoKC3AAhSpKClIKClAAjUgAIBMqkgpSSuKaClIKUpICCxoCCxoCCxoCCxoCCxoCCxoCCxoCCxoCCtuaigpSUpKSklIKmooKUgpSCppbWlIKUlKSkpLaClJSCpIKklKS2gpSUgqSCpJSktoKClIKUlJSklKSUlKailIKmgoK0grSCgoLGgoKCgraCgpSCgoKUgpSUlIKCpIKCpIKktoKklIKkgoKkgoKkgqS2lIKkgqSCpLaUgqS2yJSmooKCgpSCgoKCgoKmgqaCgoKUlNaigpSClIKCpIKCtpSmooKClKSklKaigoKCgqaigoKCpqKCgtyUAAkWsqiyAAIYAAsCAAIQ8gACGgAMAq7igpSClIKCyoKClPzSgpSClIKkgqSCpJSs0oKUgpQAChLSgIKkgriCpIKkgoKClLaCgoKUtpSs0oKUgpQACx7SgIKkgoKUgqSCpJQABhTSgIKkgpQABRLSgpSClAAGFNKClIKUpLaCypS2pIKClIKkpKSkpIKCpIKC2qSCpKSkgoKCpJSqwoKUgoKCgpSCgu4AHkzSgpSCggAKFgA1bO7u7gAJEtKCgpSApIKCgpSkgqSCgoKCgoKUlLaCpIKkgqSClIKCpIKClIKCgoK2goKCgpSUpIKCgu6AgoKCpKrCgpSmgoKCgu6CgoKCpqaCAAsYgg==", "287-304:1;418-433:1", "", "283=mustGet/1/2/2,mustGet/2/2/3;871=append/1/2/2,append/2/2/3;1018=mustGet/1/1/1;1088=Uint64Value/1/2/3,Uint64Value/2/2/7;1146=mustGet/1/1/2;1164=mustGet/1/2/2,mustGet/2/2/3;1278=mul/1/1/1;1327=Experiments/1/1/2;1509=Format/1/1/3")]
-[assembly: go.GoPositionMap("internal/trace/gc.go", "gc.cs", "AD1uAAwEAAAegoKCgoKCpoaGmpKCgqaUtIKClIKClIKmlJSCgoKUlIK2uKa0uNyCpKa4AAwUgriSgoKClIKClNq0goKSgpKCgoCC2IKCkoKSgoKAguiCgpSCgoKUkpSmtIIABxCCgsqUgpSCgpSCgri4poKCgoKU3ILugoKUtoKClJSUgpSmAAcQgqiSAB9GooKClO6UgoKCgoKCAAcQgqaUgoKCuIKSgoKCgoKCgpSmprKCggAOHoKmgqaCpoKmgoKCAAsYgqaCgpSmgqaCpoKCggAYPNgAAhDygpSUprjcgoKUpoLKgoKUppSmpoKUlIKAgsrIuK7CkoIAAhDSkoKCAAIaAAoCggAOHoKCggACEuKCgoKmuJKCpoKCggANHJSUpqKCgqaCgqKCgIK2goKUysqCgoK47oKCgpSCgoKUgor4goKCuIKUgoKUtLSkyoKmpqrCABAigoKCgIKkgpSCgpSC7sqAgpSkgpS4AA0isp7ilIK4koKCgpSmlIKCgpSqooKCptaCpoKmgg==", "81-83:1;84-86:2;87-89:3")]
-[assembly: go.GoPositionMap("internal/trace/generation.go", "generation.cs", "ACdMooKUAAcQgoKCgpSUgpSUlIKUlJSClIKUgILagpSCAAkUgqaAgsiCAA8oAAkCgpTulIKCgIKklpKCooKUgriClJSUlJSUlIKUAAcQlIKUgILagpSCAAkUgqaAgsiC2LKUgILWgILWgoKUtICC1oKUgILWpICCpKSqyoKSgoKCgpSCgoKUgoKCppSs0oKUgoKCpoKUgoKUgriCgriCgpSCuIKClIK4goKAgras0oKUgoKCppSCgpSCuIKCuIKClIK4gpSCgpSCgpSCgpSCgpSUgIIAChSAgrassoKUgoKCppSCgpSCuIKCuIKClKaCgpSmgoKUgoK4goK4AAkUAAsYgoKUgoKCgriClIKClIKUgqaCgqa0gpSUgoKUgoKCgpSCgoKUgoLKtKaqooKUuKaUgoKm", "271-290:1;600-602:1")]
-[assembly: go.GoPositionMap("internal/trace/mud.go", "mud.cs", "ADR4woKmgriClIK4goKCgpSClIKCgpSClIKCgoLcgIKClJSmAAUU0riCgoKUgoKUlIIAAhDSgpQAAhTygriCmIKClIKCkoKCgpKCgpKCgpSCpriCgoKmypSUgpSUgpQ=", "170-172:1")]
-[assembly: go.GoPositionMap("internal/trace/order.go", "order.cs", "ACNeAA8ClKaSgpSCgoKClpKCgriUgoKmgoKUgpSClKaC2gBIkgGikpKClIKAgriCkriCkoKUlIKClLamgoIABxCUgoKCgoKCpoKmgqaigsqC3MqCgIKkgoKCgoKmAAsUgoKUgpSCgIKkgoKCgqaigoKCuKaCgIIACBCCpoK4goK4lIKUgpSCgriCgriCAAgSgoKmopKCpIKUgoCCgpSSlIKUpJSCprSCyoLKlILugqaUuJK4yqSCpsaCgIK2gIK2koCCpJKClIKCptiAgqSCgpSCuIKmgraCtoKUgqaigoKCuKaCgIKkgoKCgoKmtIKCgriUgqaCpgALFICCpIKClIKUgoKCuJTKpri2pqaCgoKmgoKCpsaAgqSCgpSCpoKCgpQACxiCgpSCgqbYgIKkgoKUgpSmgoKUgpSCgqYADBaCgoKUgsqAgqSCgpSClIKCgoKm2ICCtpKAgqSUgoKCpgASIoCCtoKClIKmgoKmgoKClIKmgqaCgpSCpgAKEIKAgsiCuILKgoKClIKAgqSCprKCgLiCgqaCpICCpIKmsoCCpIKCgoKUgoKUgIKkgqaygIKkgoKCgpSCgpSAgqSCAAIUAAkCgoKClIKCgpSUlIKUgoCCpIKmooKCgoKClJSUgpSCgoCCpIKmooKUlIKUgpSCgoCCpIKmtICCpIKmtICCpIKmtICCpICCpIKmosqCgpSAgqSCpqKAgqSCgpSCprSAgqSCgpSCgpSAgqSCpqK4goKUgIKkgqaigIKkgoKUgoKUppSCprSAgqSCqJIACRi0gpKCuIKSgriCkoKUABEekpSkpJQAFS6SgIKkAA0ikoKokpSUgIKkggAXOLKClIKqooKClJKClKiSrLKCgoKCgqaCpoKCggAIFJKokqiSpoKCgpSCgpSCgpSCggAQJpKClIKokoKCuIKCgoKmgoKqooKUgoKCggACEPIABxCCABMs")]
-[assembly: go.GoPositionMap("internal/trace/reader.go", "reader.cs", "ADJskoKSgpSUgoKUyAAMGL4ACgSCuIKUgoKCpoKUgoKSgpQAEyiCgpSAgqSClLiAgsiCgpSClIK4goKClJSClICCyIKClJSmlKaCgoKCyoKUgIKS3IKCgoCCkoKCtoLagoKUAAkKooKUgoKUgoKU3IKCqJKCgoKCgpSqwpSCgoKUpqaygoKCgpSUlJSmpoKCgoKCgpSU", "134-145:1;172-192:2", "", "65=convertV1Trace/1/1/1")]
-[assembly: go.GoPositionMap("internal/trace/resources.go", "resources.cs", "AC5kogAIDLKUpKSkpKSUAA0kotyylKSkpJQAEyaylKSkpJQACRaygoKUtLSkgqyygpSssoKUrLKClKyygpQAGj6SAAYQkgAGHPKClAACFPKClA==")]
-[assembly: go.GoPositionMap("internal/trace/summary.go", "summary.cs", "ADqKAaKqwoKClAAkVILugriokoSCuIKUqLKCgoKClIKCgoKUpqKCgoKUgoKUrNKUgriCuIKUgpSClIKUgpSClKzSgpSU3IKCgoKmACFOkgANHrKClJSmuIK2koKUuIKUyoKCgu6ClKSk7IKUpqSmgoKCAAsYgIKCgqS2graCgsiCgsiCgoKUlIKmggAHEILcgsq2goK2tIKCgqa0pIKC7IKCgoCCgoIACA6Cgu7agoKmgpSCgIKklNaCgpSkgoCCppS2gpSCgpSCyIKC3JSCgqSCgoKAlIKCgriUgoKkgoLKgoKCgoKUyoKCgramgoK4goKCgpSqooKmgoKCgoKUlIKUlJQADhLaiqKClIKUgoKUgoKClO6CgpSCgpSCgIK2lNa4", "618-631:1", "", "112=UnknownTime/1/1/5;565=Time/1/1/4,snapshotStat/1/1/4;705=Goroutine/1/1/1")]
-[assembly: go.GoPositionMap("internal/trace/tracev1.go", "tracev1.cs", "AHe6AaKCgoKCgoKCgoKUlpKCgoKmuIKUgpKAgraCgoKUgqaClIKSgoKUgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSUpqaCyoLugoKCqsKCgpSCuIKUgqaCgqaUgpKCyoKUgqYAARIACgKCgpSUgqaCuAAOHoK2goCCgpSCgsaAgoKUgoLGpKSCgoKkgqSkpIKClKSCgoKUtgANGgAOHKSCpIKkgqSCpIKkpIKkgqSCpIKkgqSCpILIgoKCyoKUlIKCygANHAAJFIK4pKSCgqS4gqSkpKSkgoKClIKCpKaCgoLutpS0pKSCpNykpoKAgsiCgoCCtoKUgoKUAAwaqqKCgg==", "123-127:1;141-145:2;408-419:1", "", "573=addExtraString/1/1/4")]
-[assembly: go.GoPositionMap("internal/trace/value.go", "value.cs", "ABhE4qyygpTaooKUlJSokqiS")]
+[assembly: GoPositionMap("internal/trace/base.go", "base.cs", "AB5CopSUABMwooKUgpSAgqSCgoKCqqKClAALHvKClICCpIKosoKUgoKs0pSmgoKCgpSCppSmgpSClIKCgoKClKrCgpSCgpSCgIK2qLKCgpSCpoKUgoKmrNKCgpTekgASMPYABxCCAAcQgoKClA==")]
+[assembly: GoPositionMap("internal/trace/batch.go", "batch.cs", "ABw6gqaCpoKmgqqCAAgIqoKClICCpICCyIKCgoKUyoKClIKClIKCuIKClIKokoKCgpSCuA==", "", "", "119=Bytes/1/1/3")]
+[assembly: GoPositionMap("internal/trace/batchcursor.go", "batchcursor.cs", "ABYu1oKCgqaCpoKmgoKmpqaCpqIAAhQACASCgoKUpoKClKaCgpSmgoKClIKUppSmgqaUgqamlIKCpoKUgqaCgoKUpoKCgpSUgpSmgoKCgpSCgIKCtoKAgoK2")]
+[assembly: GoPositionMap("internal/trace/event.go", "event.cs", "AFq8AZKClKYAKFSSAHD4AaSCgoIACxqSkoKUgoKC3IIABRKygoKmgoKC3AAiSpKClIKClAAjUgAIBMqkgpSCuKaClIKUpICC1oCC1oCC1oCC1oCC1oCC1oCC1oCC1oCCxuaigpSktLS0lIKmooKUgpSCppbWpIKUlLS0tMaClJSCtIK0lLTGgpSUgrSCtJS0xoKClIKUlJS0lLSUpKailIKmgoK0grSCgoLGgoKCgsaCgpSCgoKUgpSUlIKCtIKCtIK0xoK0lIK0goK0goK0grTGlIK0grSCtMaUgrTG2JSmooKCgpSCgoKCgoKmgqaCgoKUlOaigpSClIKCtIKCxqSmooKClLS0pKaigoKCgqaigoKCpqKCgtyUAAkWsqiyAAIYAAsCAAIQ8gACGgAMAq7igpSClIKCyoKClAAKDNKClIKUgrSCtIK0pKzSgpSClAANEtKAgqSCuIK0grSCgoKUxoKCgpTGpKzSgpSClAALHtKAgqSCgpSCtIK0pAAGFNKAgqSClAAFEtKClIKUAAYU0oKUgpS0xoLKlMa0goKUgrS0tLS0goK0goLqtIK0tLSCgoK0pKrCgpSCgoKClIKC7gAeTNKClIKCAAoWADVs7u7uAAkS0oKClICkgoKClLSCtIKCgoKCgpSUxoK0grSCtIKUgoK0goKkgoKCgsaCgoKClJS0goKC/oCCgoKkqsKClKaCgoKC7oKCgoKmpoIACxiC", "287-304:1;418-433:1", "", "283=mustGet/1/2/2,mustGet/2/2/3;925=append/1/2/2,append/2/2/3;1079=mustGet/1/1/1;1157=Uint64Value/1/2/3,Uint64Value/2/2/7;1218=mustGet/1/1/2;1236=mustGet/1/2/2,mustGet/2/2/3;1367=mul/1/1/1;1416=Experiments/1/1/2;1608=Format/1/1/3")]
+[assembly: GoPositionMap("internal/trace/gc.go", "gc.cs", "AD1uAAwEAAAegoKCgoKCpoaGmpKCgqaUtIKClIKClIKmlJSCgoKUlIK2uKa0uNyCpKa4AAwUgriSgoKClIKClNq0goKCgoKCgoCC2IKCgoKCgoKAguiCgpSCgoKUgpSmtIIABxCCgsqUgpSCgpSCgri4poKCgoKU3ILugoKUtoKClJSUgpSmAAcQgqiSAB9GooKClO6UgoKCgoKCAAcQgqaUgoKCuIKCgoKCgoKCgpSmprKCggAOHoKmgqaCpoKmgoKCAAsYgqaCgpSmgqaCpoKCggAYPNgAAhDygpSUprjcgoKUpoLKgoKUppSmpoKUlIKAgsrIuK7CgoIAAhDSgoKCAAIaAAoCggAOHoKCggACEuKCgoKmuIKCpoKCggANHJSUpqKCgqaCgqKCgIK2goKUysqCgoK47oKCgpSCgoKUgor4goKCuIKUgoKUtLSkyoKmpqrCABAigoKCgIKkgpSCgpSC7sqAgpSkgpS4AA0isp7ilIK4koKCgpSmlIKCgpSqooKCpuaCpoKmgg==", "81-83:1;84-86:2;87-89:3")]
+[assembly: GoPositionMap("internal/trace/generation.go", "generation.cs", "AClMooKUAAcQgoKCgpSUgpSUlIKUlJSClIKUgILagpSCAAkUgqaAgsiCABAoAAkCgpTulIKCgIKklpKCooKUgriClJSUlJSUlIKUAAcQlIKUgILagpSCAAkUgqaAgsiC6LKUgILWgILWgoKUtICC1oKUgILWpICCpKSqyoKSgoKCgpSCgoKUgoKCppSs0oKUgoKCpoKUgoKUgriCgriCgpSCuIKClIK4goKAgras0oKUgoKCppSCgpSCuIKCuIKClIK4gpSCgpSCgpSCgpSCgpSUgIIAChSAgrassoKUgoKCppSCgpSCuIKCuIKClKaCgpSmgoKUgoK4goK4AAkUAAsYgoKUgoKCgriClIKClIKUgqaCgqa0gpSUgoKUgoKCgpSCgoKUgoLKtKaqooKUuKaUgoKm", "271-290:1;600-602:1")]
+[assembly: GoPositionMap("internal/trace/mud.go", "mud.cs", "ADR4woKmgriClIK4goKCgpSClIKCgpSClIKCgoLcgIKClJSmAAUU0riCgoKUgoKUlIIAAhDSgpQAAhTygriCmIKClIKCkoKCgoKCgoKCgpSCpriCgoKmypSUgpSUgpQ=", "170-172:1")]
+[assembly: GoPositionMap("internal/trace/order.go", "order.cs", "ACNeAA8ClKaSgpSCgoKClpKCgriUgoKmgoKUgpSClKaC2gBIkgGigoKClIKAgriCgriCgoKUlIKClLamgoIABxCUgoKCgoKCpoKmgqaigsqC3MqCgIKkgoKCgoKmAAsUgoKUgpSCgIKkgoKCgqaigoKCuKaCgIIACBCCpoK4goK4lIKUgpSCgriCgriCAAgSgoKmooKClIKUgoCCgpSClIKUpJSCprSCyoLKlILugqaUuIK4yqSCpsaCgIK2gIK2goCCpIKClIKCptiAgqSCgpSCuIKmgsaCxoKkgqaigoKCuKaCgIKkgoKCgoKmtIKCgriUgqaCpgALFICCpIKClIKUgoKCuJTKprjGpraCgoKmgoKCpsaAgqSCgpSCpoKCgpQACxiCgpSCgqbYgIKkgoKUgpSmgoKUgpSCgqYADBaCgoKUgsqAgqSCgpSClIKCgoKm2ICCtoKAgqSUgoKCpgASIoCCtoKClIKmgoKmgoKClIKmgqaCgpSCpgAKEIKAgsiCuILKgoKClIKAgqSCprKCgLiCgqaCpICCpIKmsoCCpIKCgoKUgoKUgIKkgqaygIKkgoKCgpSCgpSAgqSCAAIUAAkCgoKClIKCgpSUlIKUgoCCpIKmooKCgoKClJSUgpSCgoCCpIKmooKUlIKUgpSCgoCCpIKmtICCpIKmtICCpIKmtICCpICCpIKmosqCgpSAgqSCpqKAgqSCgpSCprSAgqSCgpSCgpSAgqSCpqK4goKUgIKkgqaigIKkgoKUgoKUppSCprSAgqSCqJIACRi0goKCuIKCgriCgoKUABUekpSkpJQAFS6SgIKkAA0ikoKokpSUgIKkggAXOLKClIKqooKClIKClKiSrLKCgoKCgqaCpoKCggAIFJKokqiSpoKCgpSCgpSCgpSCggAQJpKClIKokoKCuIKCgoKmgoKqooKUgoKCggACEPIABxCCABMs")]
+[assembly: GoPositionMap("internal/trace/reader.go", "reader.cs", "ADJskoKSgpSUgoKUyAAMGL4ACgSCuIKUgoKCpoKUgoKCgpQAEyiCgpSAgqSClLiAgsiCgpSClIK4goKClJSClICCyIKClJSmlKaCgoKCyoKUgIKC3IKCgoCCgoKCtoLagoKUAAoKooKUgoKUgoKU3IKCqJKCgoKCgpSqwpSCgoKUpqaygoKCgpSUlJSmpoKCgoKCgpSU", "134-145:1;172-192:2", "", "65=convertV1Trace/1/1/1")]
+[assembly: GoPositionMap("internal/trace/resources.go", "resources.cs", "AC5kogAMDLKUpKSkpKSUAA0kouyylKSkpJQAFyaylKSkpJQACRaygoKUtLSkgqyygpSssoKUrLKClKyygpQAGj6SAAYQkgAGHPKClAACFPKClA==")]
+[assembly: GoPositionMap("internal/trace/summary.go", "summary.cs", "ADqKAaKqwoKClAAkVILugriokoSCuIKUqLKCgoKClIKCgoKUpqKCgoKUgoKUrNKUgriCuIKUgpSClIKUgpSClKzSgpSU3IKCgoKmACFOkgANHrKClJSmyIKmgoKUuIKUyoKCgu6ClLS0/IKUtrSmgoKCAAsYgIKCgqTGgsaCgtiCgtiCgoKUlIKmggAIEILcgsq2goK2tIKCgqa0pIKC7IKCgoCCgoIACQ6Cgu7qgoK2gpSCgIKklMaCgpS0goCCppTGgpSCgpSCyIKC3JSCgrSCgoKAlIKCgriUgoKkgoLagoKCgoKUyoKCgsamgoLIgoKCgpSqooKmgoKCgoKUlIKUlJQADhLaiqKClIKUgoKUgoKClO6CgpSCgpSCgIK2lOa4", "618-631:1", "", "112=UnknownTime/1/1/5;578=Time/1/1/4,snapshotStat/1/1/4;722=Goroutine/1/1/1")]
+[assembly: GoPositionMap("internal/trace/tracev1.go", "tracev1.cs", "AJMBugGigoKCgoKCgoKClJaSgoKCpriClIKSgIK2goKClIKmgpSCkoKClIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUlKamgsqC7oKCgqrCgoKUgriClIKmgoKmlIKCgsqClIKmAAESAAoCgoKUlIKmgrgADh6CxoKAgoKUgoLWgIKClIKC1rS0goKCtIK0tLSCgpS0goKClMYADRoADhy0grSCtIK0grSCtLSCtIK0grSCtIK0grSC2IKCgsqClJSCgsoADRwACRSCyLSkgoK0uIK0tLS0tIKCgpSCgrSmgoKC7saUtKS0grTctKaCgILIgoKAgraClIKClAAMGqqigoI=", "123-127:1;141-145:2;408-419:1", "", "634=addExtraString/1/1/4")]
+[assembly: GoPositionMap("internal/trace/value.go", "value.cs", "ABhE4qyygpTqooKUlJSokqiS")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -12,11 +12,11 @@ using go.@internal.syscall;
 
 partial class filepathlite_package {
 
-public static UntypedInt Separator => /* '\\' */ 92; // OS-specific path separator
+public static UntypedInt Separator => /* '\\' */ 92;    // OS-specific path separator
 public static UntypedInt ListSeparator => /* ';' */ 59; // OS-specific path list separator
 
 public static bool IsPathSeparator(uint8 c) {
-    return c == (rune)'\\' || c == (rune)'/';
+    return c == '\\' || c == '/';
 }
 
 internal static bool isLocal(@string path) {
@@ -27,14 +27,14 @@ internal static bool isLocal(@string path) {
         // Path rooted in the current drive.
         return false;
     }
-    if (stringslite.IndexByte(path, (rune)':') >= 0) {
+    if (stringslite.IndexByte(path, (byte)':') >= 0) {
         // Colons are only valid when marking a drive letter ("C:foo").
         // Rejecting any path with a colon is conservative but safe.
         return false;
     }
     var hasDots = false; // contains . or .. path elements
     for (@string p = path; p != ""u8; ) {
-        @string part = default!;
+        @string part = default;
         (part, p, _) = cutPath(p);
         if (part == "."u8 || part == ".."u8) {
             hasDots = true;
@@ -46,7 +46,7 @@ internal static bool isLocal(@string path) {
     if (hasDots) {
         path = Clean(path);
     }
-    if (path == ".."u8 || stringslite.HasPrefix(path, @"..\"u8)) {
+    if (path == ".."u8 || stringslite.HasPrefix(path, @"..\")) {
         return false;
     }
     return true;
@@ -55,16 +55,16 @@ internal static bool isLocal(@string path) {
 internal static (@string, error) localize(@string path) {
     for (nint i = 0; i < len(path); i++) {
         switch (path[i]) {
-        case (rune)':' or (rune)'\\' or 0: {
+        case (byte)':' or (byte)'\\' or 0: {
             return ("", errInvalidPath);
         }}
     }
     var containsSlash = false;
     for (@string p = path; p != ""u8; ) {
         // Find the next path element.
-        @string element = default!;
-        nint i = bytealg.IndexByteString(p, (rune)'/');
-        if (i < 0){
+        @string element = default;
+        nint i = bytealg.IndexByteString(p, (byte)'/');
+        if (i < 0) {
             element = p;
             p = ""u8;
         } else {
@@ -80,13 +80,13 @@ internal static (@string, error) localize(@string path) {
         // We can't depend on strings, so substitute \ for / manually.
         var buf = slice<byte>(path);
         foreach (var (i, b) in buf) {
-            if (b == (rune)'/') {
-                buf[i] = (rune)'\\';
+            if (b == '/') {
+                buf[i] = (byte)'\\';
             }
         }
         path = (@string)buf;
     }
-    return (path, default!);
+    return (path, default);
 }
 
 // isReservedName reports if name is a Windows reserved device name.
@@ -99,13 +99,13 @@ internal static bool isReservedName(@string name) {
     @string @base = name;
     for (nint i = 0; i < len(@base); i++) {
         switch (@base[i]) {
-        case (rune)':' or (rune)'.': {
+        case (byte)':' or (byte)'.': {
             @base = @base.slice(0, i);
             break;
         }}
     }
     // Trailing spaces in the last path element are ignored.
-    while (len(@base) > 0 && @base[len(@base) - 1] == (rune)' ') {
+    while (len(@base) > 0 && @base[len(@base) - 1] == ' ') {
         @base = @base.slice(0, len(@base) - 1);
     }
     if (!isReservedBaseName(@base)) {
@@ -119,36 +119,41 @@ internal static bool isReservedName(@string name) {
     // longer reserved. For example, "CON.txt" is a valid file
     // name. Use RtlIsDosDeviceName_U to see if the name is reserved.
     var (p, err) = Δsyscall.UTF16PtrFromString(name);
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
     return windows.RtlIsDosDeviceName_U(p) > 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string coninˢ = "CONIN$"u8;
-private static readonly @string conoutˢ = "CONOUT$"u8;
+private static ref readonly @string coninˢ => ref coninˢᵇ;
+private static readonly @string coninˢᵇ = "CONIN$"u8;
+private static ref readonly @string conoutˢ => ref conoutˢᵇ;
+private static readonly @string conoutˢᵇ = "CONOUT$"u8;
 
 internal static bool isReservedBaseName(@string name) {
     if (len(name) == 3) {
-        var exprᴛ1 = ((sstring)new byte[]{toUpper(name[0]), toUpper(name[1]), toUpper(name[2])}.slice());
-        if (exprᴛ1 == "CON"u8 || exprᴛ1 == "PRN"u8 || exprᴛ1 == "AUX"u8 || exprᴛ1 == "NUL"u8) {
+        var exprᴛ1 = ((sstring)slice<byte>([toUpper(name[0]), toUpper(name[1]), toUpper(name[2])]));
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "CON"u8 || exprᴛ1 == "PRN"u8 || exprᴛ1 == "AUX"u8 || exprᴛ1 == "NUL"u8: {
             return true;
-        }
+        }}
     }
     if (len(name) >= 4) {
-        var exprᴛ2 = ((sstring)new byte[]{toUpper(name[0]), toUpper(name[1]), toUpper(name[2])}.slice());
-        if (exprᴛ2 == "COM"u8 || exprᴛ2 == "LPT"u8) {
-            if (len(name) == 4 && (rune)'1' <= name[3] && name[3] <= (rune)'9') {
+        var exprᴛ2 = ((sstring)slice<byte>([toUpper(name[0]), toUpper(name[1]), toUpper(name[2])]));
+        switch (ᐧ) {
+        case {} when exprᴛ2 == "COM"u8 || exprᴛ2 == "LPT"u8: {
+            if (len(name) == 4 && '1' <= name[3] && name[3] <= '9') {
                 return true;
             }
             // Superscript ¹, ², and ³ are considered numbers as well.
             var exprᴛ3 = name[3..];
-            if (exprᴛ3 == "\u00b2"u8 || exprᴛ3 == "\u00b3"u8 || exprᴛ3 == "\u00b9"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ3 == "\u00b2"u8 || exprᴛ3 == "\u00b3"u8 || exprᴛ3 == "\u00b9"u8: {
                 return true;
-            }
+            }}
             return false;
-        }
+        }}
     }
 
     // Passing CONIN$ or CONOUT$ to CreateFile opens a console handle.
@@ -156,10 +161,10 @@ internal static bool isReservedBaseName(@string name) {
     //
     // While CONIN$ and CONOUT$ aren't documented as being files,
     // they behave the same as CON. For example, ./CONIN$ also opens the console input.
-    if (len(name) == 6 && name[5] == (rune)'$' && equalFold(name, coninˢ)) {
+    if (len(name) == 6 && name[5] == '$' && equalFold(name, coninˢ)) {
         return true;
     }
-    if (len(name) == 7 && name[6] == (rune)'$' && equalFold(name, conoutˢ)) {
+    if (len(name) == 7 && name[6] == '$' && equalFold(name, conoutˢ)) {
         return true;
     }
     return false;
@@ -178,7 +183,7 @@ internal static bool equalFold(@string a, @string b) {
 }
 
 internal static byte toUpper(byte c) {
-    if ((rune)'a' <= c && c <= (rune)'z') {
+    if ('a' <= c && c <= 'z') {
         return (byte)(c - ((rune)'a' - (rune)'A'));
     }
     return c;
@@ -202,7 +207,8 @@ public static bool /*b*/ IsAbs(@string path) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string uncˢ = @"\\.\UNC"u8;
+private static ref readonly @string uncˢ => ref uncˢᵇ;
+private static readonly @string uncˢᵇ = @"\\.\UNC"u8;
 
 // volumeNameLen returns length of the leading volume name on Windows.
 // It returns 0 elsewhere.
@@ -212,7 +218,7 @@ private static readonly @string uncˢ = @"\\.\UNC"u8;
 // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html
 internal static nint volumeNameLen(@string path) {
     switch (ᐧ) {
-    case {} when len(path) >= 2 && path[1] == (rune)':': {
+    case {} when len(path) >= 2 && path[1] == (byte)':': {
         // Path starts with a drive letter.
         //
         // Not all Windows functions necessarily enforce the requirement that
@@ -234,7 +240,7 @@ internal static nint volumeNameLen(@string path) {
         // \\.\unc\a\b\..\c into \\.\unc\a\c.
         return uncLen(path, len(@"\\.\UNC\"));
     }
-    case {} when pathHasPrefixFold(path, @"\\."u8) || pathHasPrefixFold(path, @"\\?"u8) || pathHasPrefixFold(path, @"\??"u8): {
+    case {} when pathHasPrefixFold(path, @"\\.") || pathHasPrefixFold(path, @"\\?") || pathHasPrefixFold(path, @"\??"): {
         // Path starts with \\.\, and is a Local Device path; or
         // path starts with \\?\ or \??\ and is a Root Local Device path.
         //
@@ -265,12 +271,11 @@ internal static bool pathHasPrefixFold(@string s, @string prefix) {
         return false;
     }
     for (nint i = 0; i < len(prefix); i++) {
-        if (IsPathSeparator(prefix[i])){
+        if (IsPathSeparator(prefix[i])) {
             if (!IsPathSeparator(s[i])) {
                 return false;
             }
-        } else 
-        if (toUpper(prefix[i]) != toUpper(s[i])) {
+        } else if (toUpper(prefix[i]) != toUpper(s[i])) {
             return false;
         }
     }
@@ -311,7 +316,7 @@ internal static (@string before, @string after, bool found) cutPath(@string path
 internal static void postClean(ж<lazybuf> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    if (@out.volLen != 0 || @out.buf == default!) {
+    if (@out.volLen != 0 || @out.buf == nil) {
         return;
     }
     // If a ':' appears in the path element at the start of a path,
@@ -321,7 +326,7 @@ internal static void postClean(ж<lazybuf> Ꮡout) {
         if (IsPathSeparator(c)) {
             break;
         }
-        if (c == (rune)':') {
+        if (c == ':') {
             @out.prepend((rune)'.', Separator);
             return;
         }
@@ -329,7 +334,7 @@ internal static void postClean(ж<lazybuf> Ꮡout) {
     // If a path begins with \??\, insert a \. at the beginning
     // to avoid converting paths like \a\..\??\c:\x into \??\c:\x
     // (equivalent to c:\x).
-    if (len(@out.buf) >= 3 && IsPathSeparator(@out.buf[0]) && @out.buf[1] == (rune)'?' && @out.buf[2] == (rune)'?') {
+    if (len(@out.buf) >= 3 && IsPathSeparator(@out.buf[0]) && @out.buf[1] == '?' && @out.buf[2] == '?') {
         @out.prepend(Separator, (rune)'.');
     }
 }

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
 global using ed25519ꓸPublicKey = go.crypto.@internal.fips140.ed25519_package.ΔPublicKey;
@@ -49,7 +48,11 @@ using static go.crypto.ed25519_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Options))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,7 +62,7 @@ using static go.crypto.ed25519_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "AC9kwoKClN6SgoKokoKClKyyAAsgAAsCuoKUgoKAgqSUpIKUpKQADSCQpAABFgAJAoKCgoKmuIKAgraCgq7UgoKmgoKUlKrGgoKmgrqClIIAAhDSAAUcAA0CgIKkgoKUlKSClKSk", "98-100:1;100-102:2;204-206:1;206-208:2")]
+[assembly: GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "AC9kwoKClN6SgoKokoKClKyyAA0gAAsCuoKUgoKAgqSUpIKUpKQADSCQpAABFgAJAoKCgoKmuIKAgraCgq7UgoKmgoKUlKrGgoKmgrqClIIAAhDSAAYcAA0CgIKkgoKUlKSClKSk", "98-100:1;100-102:2;204-206:1;206-208:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

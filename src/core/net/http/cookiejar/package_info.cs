@@ -11,16 +11,8 @@
 
 // <ImportedTypeAliases>
 global using httpꓸCookie = go.net.http_package.ΔCookie;
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +48,11 @@ using static go.net.http.cookiejar_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Jar))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,8 +62,8 @@ using static go.net.http.cookiejar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AEmgAcKmgpQAGjqSrLKssoKUqJKClIKCkoKmrLKUppSmgpSCgpTWgoKAgqSokqyyqPKClIKClJSClIKCpoKCgqaCgqKCgoKUgpSCgoKUgoKU3IKAgqSAgqSUgpbcsqjygpSClIKClIKUgpSUgoKCgpSCgoKAgoK2lIKmgIKClIKCpIKCpoKClMaoooKCgoK4goKCpoKqooKClIKUqJKCpoKCgoKmgoKUgqbcgqiSypSqooKmgoKUAAcYAA0ClIKUpoKCuIKSgoKUgoKUgpSCuIKCgpSUpKSmqILMlpKmpgAQIoIACxjclKamgpSm7riCgIKmlOyCpg==", "247-255:1")]
-[assembly: go.GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ABtG8oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgpKClIKUgpSCgoKClIKUpoKUpJSokoKUlIKCgoKUAAgYsoKUgoKCgoKUpg==")]
+[assembly: GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AE2gAcKmgpQAGjqSrLKssoKUqJKClIKCgoKmrLKUppSmgpSCgpTmgoKAgqSokqyyqPKClIKClJSClIKCpoKCgqaCgqKCgoKUgpSCgoKUgoKU3IKAgqSAgqSUgpbcsqjygpSClIKClIKUgpSUgoKCgpSCgoKAgoK2lIKmgIKClIKCpIKCpoKClMaoooKCgoK4goKCpoKqooKClIKUqJKCpoKCgoKmgoKUgqbcgqiSypSqooKmgoKUAAoYAA0ClIKUpoKCuIKCgoKUgoKUgpSCuIKCgpSUtLS2qILMlpKmpgAQIoIACxjclKamgpSm7riCgIKmlOyCpg==", "247-255:1")]
+[assembly: GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ABtG8oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgoKClIKUgpSCgoKClIKUpoKUpJSokoKUlIKCgoKUAAkYsoKUgoKCgoKUpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

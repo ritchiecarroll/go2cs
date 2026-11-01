@@ -33,7 +33,7 @@ partial struct Sym {
 
 // Static reports whether this symbol is static (not visible outside its file).
 public static bool Static(this ref Sym s) {
-    return s.Type >= (rune)'a';
+    return s.Type >= 'a';
 }
 
 // nameWithoutInst returns s.Name if s.Name has no brackets (does not reference an
@@ -42,11 +42,11 @@ public static bool Static(this ref Sym s) {
 // and right bracket removed. This is useful to ignore any extra slashes or dots
 // inside the brackets from the string searches below, where needed.
 internal static @string nameWithoutInst(this ref Sym s) {
-    nint start = strings.Index(s.Name, "["u8);
+    nint start = strings.Index(s.Name, "[");
     if (start < 0) {
         return s.Name;
     }
-    nint end = strings.LastIndex(s.Name, "]"u8);
+    nint end = strings.LastIndex(s.Name, "]");
     if (end < 0) {
         // Malformed name, should contain closing bracket too.
         return s.Name;
@@ -55,8 +55,10 @@ internal static @string nameWithoutInst(this ref Sym s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string typeˢ = "type:"u8;
-internal static readonly @string typeˢ2 = "type."u8;
+internal static ref readonly @string typeˢ => ref typeˢᵇ;
+private static readonly @string typeˢᵇ = "type:"u8;
+internal static ref readonly @string typeˢ2 => ref typeˢ2ᵇ;
+private static readonly @string typeˢ2ᵇ = "type."u8;
 
 // PackageName returns the package part of the symbol name,
 // or the empty string if there is none.
@@ -67,22 +69,22 @@ public static @string PackageName(this ref Sym s) {
     // they do not belong to any package.
     //
     // See cmd/compile/internal/base/link.go:ReservedImports variable.
-    if (s.goVersion >= ver120 && (strings.HasPrefix(name, "go:"u8) || strings.HasPrefix(name, typeˢ))) {
+    if (s.goVersion >= ver120 && (strings.HasPrefix(name, "go:") || strings.HasPrefix(name, typeˢ))) {
         return ""u8;
     }
 
     // For go1.18 and below, the prefix are "type." and "go." instead.
-    if (s.goVersion <= ver118 && (strings.HasPrefix(name, "go."u8) || strings.HasPrefix(name, typeˢ2))) {
+    if (s.goVersion <= ver118 && (strings.HasPrefix(name, "go.") || strings.HasPrefix(name, typeˢ2))) {
         return ""u8;
     }
 
-    nint pathend = strings.LastIndex(name, "/"u8);
+    nint pathend = strings.LastIndex(name, "/");
     if (pathend < 0) {
         pathend = 0;
     }
 
     {
-        nint i = strings.Index(name.slice(pathend), "."u8); if (i != -1) {
+        nint i = strings.Index(name.slice(pathend), "."); if (i != -1) {
             return name.slice(0, pathend + i);
         }
     }
@@ -96,15 +98,15 @@ public static @string ReceiverName(this ref Sym s) {
     @string name = s.nameWithoutInst();
     // If we find a slash in name, it should precede any bracketed expression
     // that was removed, so pathend will apply correctly to name and s.Name.
-    nint pathend = strings.LastIndex(name, "/"u8);
+    nint pathend = strings.LastIndex(name, "/");
     if (pathend < 0) {
         pathend = 0;
     }
     // Find the first dot after pathend (or from the beginning, if there was
     // no slash in name).
-    nint l = strings.Index(name.slice(pathend), "."u8);
+    nint l = strings.Index(name.slice(pathend), ".");
     // Find the last dot after pathend (or the beginning).
-    nint r = strings.LastIndex(name.slice(pathend), "."u8);
+    nint r = strings.LastIndex(name.slice(pathend), ".");
     if (l == -1 || r == -1 || l == r) {
         // There is no receiver if we didn't find two distinct dots after pathend.
         return ""u8;
@@ -112,7 +114,7 @@ public static @string ReceiverName(this ref Sym s) {
     // Given there is a trailing '.' that is in name, find it now in s.Name.
     // pathend+l should apply to s.Name, because it should be the dot in the
     // package name.
-    r = strings.LastIndex(s.Name.slice(pathend), "."u8);
+    r = strings.LastIndex(s.Name.slice(pathend), ".");
     return s.Name.slice(pathend + l + 1, pathend + r);
 }
 
@@ -120,15 +122,15 @@ public static @string ReceiverName(this ref Sym s) {
 public static @string BaseName(this ref Sym s) {
     @string name = s.nameWithoutInst();
     {
-        nint i = strings.LastIndex(name, "."u8); if (i != -1) {
+        nint i = strings.LastIndex(name, "."); if (i != -1) {
             if (s.Name != name) {
-                nint brack = strings.Index(s.Name, "["u8);
+                nint brack = strings.Index(s.Name, "[");
                 if (i > brack) {
                     // BaseName is a method name after the brackets, so
                     // recalculate for s.Name. Otherwise, i applies
                     // correctly to s.Name, since it is before the
                     // brackets.
-                    i = strings.LastIndex(s.Name, "."u8);
+                    i = strings.LastIndex(s.Name, ".");
                 }
             }
             return s.Name.slice(i + 1);
@@ -181,7 +183,7 @@ partial struct Table {
     public slice<Sym> Syms; // nil for Go 1.3 and later binaries
     public slice<Func> Funcs;
     public map<@string, ж<Obj>> Files; // for Go 1.2 and later all files map to one Obj
-    public slice<Obj> Objs;      // for Go 1.2 and later only one Obj in slice
+    public slice<Obj> Objs;            // for Go 1.2 and later only one Obj in slice
     internal ж<LineTable> go12line; // Go 1.2 line number table
 }
 
@@ -192,13 +194,13 @@ partial struct sym {
     internal slice<byte> name;
 }
 
-internal static slice<byte> littleEndianSymtab = new byte[]{0xFD, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00}.slice();
-internal static slice<byte> bigEndianSymtab = new byte[]{0xFF, 0xFF, 0xFF, 0xFD, 0x00, 0x00, 0x00}.slice();
-internal static slice<byte> oldLittleEndianSymtab = new byte[]{0xFE, 0xFF, 0xFF, 0xFF, 0x00, 0x00}.slice();
+internal static slice<byte> littleEndianSymtab = slice<byte>([0xFD, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00]);
+internal static slice<byte> bigEndianSymtab = slice<byte>([0xFF, 0xFF, 0xFF, 0xFD, 0x00, 0x00, 0x00]);
+internal static slice<byte> oldLittleEndianSymtab = slice<byte>([0xFE, 0xFF, 0xFF, 0xFF, 0x00, 0x00]);
 
 internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
     if (len(data) == 0) { // missing symtab is okay
-        return default!;
+        return default;
     }
     binary.ByteOrder order = binary.BigEndian;
     var newTable = false;
@@ -223,36 +225,36 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
     ref var ptrsz = ref heap(new nint(), out var Ꮡptrsz);
     if (newTable) {
         if (len(data) < 8) {
-            return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
+            return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF", default)));
         }
         ptrsz = (nint)data[7];
         if (ptrsz != 4 && ptrsz != 8) {
-            return new DecodingErrorжerror(Ꮡ(new DecodingError(7, "invalid pointer size"u8, ptrsz)));
+            return new DecodingErrorжerror(Ꮡ(new DecodingError(7, "invalid pointer size", ptrsz)));
         }
         data = data[8..];
     }
-    sym s = default!;
+    sym s = default;
     var p = data;
     while (len(p) >= 4) {
         ref var typ = ref heap(new byte(), out var Ꮡtyp);
-        if (newTable){
+        if (newTable) {
             // Symbol type, value, Go type.
             typ = (byte)(p[0] & 0x3F);
             var wideValue = (byte)(p[0] & 0x40) != 0;
             var goType = (byte)(p[0] & 0x80) != 0;
-            if (typ < 26){
-                typ += (rune)'A';
+            if (typ < 26) {
+                typ += (byte)'A';
             } else {
                 typ += (byte)((rune)'a' - 26);
             }
             s.typ = typ;
             p = p[1..];
-            if (wideValue){
+            if (wideValue) {
                 if (len(p) < ptrsz) {
-                    return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
+                    return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF", default)));
                 }
                 // fixed-width value
-                if (ptrsz == 8){
+                if (ptrsz == 8) {
                     s.value = order.Uint64(p[0..8]);
                     p = p[8..];
                 } else {
@@ -269,17 +271,17 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
                     p = p[1..];
                 }
                 if (len(p) == 0) {
-                    return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
+                    return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF", default)));
                 }
                 s.value |= (uint64)(((uint64)p[0]).Lsh(shift));
                 p = p[1..];
             }
             if (goType) {
                 if (len(p) < ptrsz) {
-                    return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
+                    return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF", default)));
                 }
                 // fixed-width go type
-                if (ptrsz == 8){
+                if (ptrsz == 8) {
                     s.gotype = order.Uint64(p[0..8]);
                     p = p[8..];
                 } else {
@@ -291,11 +293,11 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
             // Value, symbol type.
             s.value = (uint64)order.Uint32(p[0..4]);
             if (len(p) < 5) {
-                return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
+                return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF", default)));
             }
             typ = p[4];
             if ((byte)(typ & 0x80) == 0) {
-                return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data) - len(p) + 4, "bad symbol type"u8, typ)));
+                return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data) - len(p) + 4, "bad symbol type", typ)));
             }
             typ &= unchecked((byte)~(byte)(0x80));
             s.typ = typ;
@@ -303,8 +305,8 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
         }
 
         // Name.
-        nint i = default!;
-        nint nnul = default!;
+        nint i = default;
+        nint nnul = default;
         for (i = 0; i < len(p); i++) {
             if (p[i] == 0) {
                 nnul = 1;
@@ -312,7 +314,7 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
             }
         }
         switch (typ) {
-        case (rune)'z' or (rune)'Z': {
+        case (byte)'z' or (byte)'Z': {
             p = p.slice(i + nnul);
             for (i = 0; i + 2 <= len(p); i += 2) {
                 if (p[i] == 0 && p[i + 1] == 0) {
@@ -323,7 +325,7 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
             break;
         }}
         if (len(p) < i + nnul) {
-            return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
+            return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF", default)));
         }
         s.name = p.slice(0, i);
         i += nnul;
@@ -331,7 +333,7 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
 
         if (!newTable) {
             if (len(p) < 4) {
-                return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
+                return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF", default)));
             }
             // Go type.
             s.gotype = (uint64)order.Uint32(p[..4]);
@@ -339,7 +341,7 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
         }
         fn(s);
     }
-    return default!;
+    return default;
 }
 
 // NewTable decodes the Go symbol table (the ".gosymtab" section in ELF),
@@ -349,13 +351,13 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
 public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡpcln) {
     ref var pcln = ref Ꮡpcln.DerefOrNull();
 
-    nint n = default!;
+    nint n = default;
     var err = walksymtab(symtab, (sym s) => {
         n++;
-        return default!;
+        return default;
     });
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     ref var t = ref heap(new Table(), out var Ꮡt);
@@ -372,10 +374,10 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
         nint nΔ1 = len(Ꮡt.Value.Syms);
         Ꮡt.Value.Syms = Ꮡt.Value.Syms.slice(0, nΔ1 + 1);
         var ts = Ꮡ(Ꮡt.Value.Syms, nΔ1);
-        ts.Value.Type = s.typ;
+        ts.Type = s.typ;
         ts.Value.Value = s.value;
-        ts.Value.ΔGoType = s.gotype;
-        ts.Value.goVersion = Ꮡpcln.Value.version;
+        ts.ΔGoType = s.gotype;
+        ts.goVersion = Ꮡpcln.Value.version;
         switch (s.typ) {
         default: {
             // rewrite name to use . instead of · (c2 b7)
@@ -384,55 +386,54 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             for (nint i = 0; i < len(b); i++) {
                 if (b[i] == 0xc2 && i + 1 < len(b) && b[i + 1] == 0xb7) {
                     i++;
-                    b[i] = (rune)'.';
+                    b[i] = (byte)'.';
                 }
                 b[w] = b[i];
                 w++;
             }
-            ts.Value.Name = (@string)(s.name.slice(0, w));
+            ts.Name = (@string)(s.name.slice(0, w));
             break;
         }
-        case (rune)'z' or (rune)'Z': {
-            if (lasttyp != (rune)'z' && lasttyp != (rune)'Z') {
+        case (byte)'z' or (byte)'Z': {
+            if (lasttyp != 'z' && lasttyp != 'Z') {
                 nz++;
             }
             for (nint i = 0; i < len(s.name); i += 2) {
-                ref var eltIdx = ref heap<uint16>(out var ᏑeltIdx);
-                eltIdx = binary.BigEndian.Uint16(s.name.slice(i, i + 2));
+                ref var eltIdx = ref heap<uint16>(binary.BigEndian.Uint16(s.name.slice(i, i + 2)), out var ᏑeltIdx);
                 var (elt, ok) = fnameʗ1[eltIdx, ꟷ];
                 if (!ok) {
-                    return new DecodingErrorжerror(Ꮡ(new DecodingError(-1, "bad filename code"u8, eltIdx)));
+                    return new DecodingErrorжerror(Ꮡ(new DecodingError(-1, "bad filename code", eltIdx)));
                 }
                 {
-                    nint nΔ3 = len((~ts).Name); if (nΔ3 > 0 && (~ts).Name[nΔ3 - 1] != (rune)'/') {
-                        ts.Value.Name += "/"u8;
+                    nint nΔ3 = len(ts.Name); if (nΔ3 > 0 && ts.Name[nΔ3 - 1] != '/') {
+                        ts.Name += "/"u8;
                     }
                 }
-                ts.Value.Name += elt;
+                ts.Name += elt;
             }
             break;
         }}
         switch (s.typ) {
-        case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l': {
+        case (byte)'T' or (byte)'t' or (byte)'L' or (byte)'l': {
             nf++;
             break;
         }
-        case (rune)'f': {
-            fnameʗ1[(uint16)s.value] = ts.Value.Name;
+        case (byte)'f': {
+            fnameʗ1[(uint16)s.value] = ts.Name;
             break;
         }}
         lasttyp = s.typ;
-        return default!;
+        return default;
     });
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     t.Funcs = new slice<Func>(0, () => new(nil), nf);
     t.Files = new map<@string, ж<Obj>>();
 
-    ж<Obj> obj = default!;
-    if (t.go12line != nil){
+    ж<Obj> obj = default;
+    if (t.go12line != nil) {
         // Put all functions into one Obj.
         t.Objs = new slice<Obj>(1);
         obj = Ꮡ(t.Objs, 0);
@@ -446,15 +447,15 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
     nint lastf = 0;
     for (nint i = 0; i < len(t.Syms); i++) {
         var sym = Ꮡ(t.Syms, i);
-        switch ((~sym).Type) {
-        case (rune)'Z' or (rune)'z': { // path symbol
+        switch (sym.Type) {
+        case (byte)'Z' or (byte)'z': { // path symbol
             if (t.go12line != nil) {
                 // Go 1.2 binaries have the file information elsewhere. Ignore.
                 break;
             }
             // Finish the current object
             if (obj != nil) {
-                obj.Value.Funcs = t.Funcs.slice(lastf);
+                obj.Funcs = t.Funcs.slice(lastf);
             }
             lastf = len(t.Funcs);
 
@@ -464,58 +465,58 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             obj = Ꮡ(t.Objs, nΔ9);
 
             // Count & copy path symbols
-            nint endΔ1 = default!;
+            nint endΔ1 = default;
             for (endΔ1 = i + 1; endΔ1 < len(t.Syms); endΔ1++) {
                 {
-                    var c = t.Syms[endΔ1].Type; if (c != (rune)'Z' && c != (rune)'z') {
+                    var c = t.Syms[endΔ1].Type; if (c != 'Z' && c != 'z') {
                         break;
                     }
                 }
             }
-            obj.Value.Paths = t.Syms.slice(i, endΔ1);
+            obj.Paths = t.Syms.slice(i, endΔ1);
             i = endΔ1 - 1; // loop will i++
 
             // Record file names
             nint depth = 0;
-            foreach (var j in range((~obj).Paths)) {
-                var s = Ꮡ((~obj).Paths, j);
-                if ((~s).Name == ""u8){
+            foreach (var j in range(obj.Paths)) {
+                var s = Ꮡ(obj.Paths, j);
+                if (s.Name == ""u8) {
                     depth--;
                 } else {
                     if (depth == 0) {
-                        t.Files[(~s).Name] = obj;
+                        t.Files[s.Name] = obj;
                     }
                     depth++;
                 }
             }
             break;
         }
-        case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l': { // text symbol
+        case (byte)'T' or (byte)'t' or (byte)'L' or (byte)'l': { // text symbol
             {
                 nint nΔ10 = len(t.Funcs); if (nΔ10 > 0) {
                     t.Funcs[nΔ10 - 1].End = sym.Value.Value;
                 }
             }
-            if ((~sym).Name == "runtime.etext"u8 || (~sym).Name == "etext"u8) {
+            if (sym.Name == "runtime.etext"u8 || sym.Name == "etext"u8) {
                 continue;
             }
 
             // Count parameter and local (auto) syms
-            nint np = default!;
-            nint na = default!;
-            nint end = default!;
+            nint np = default;
+            nint na = default;
+            nint end = default;
 countloop:
             for (end = i + 1; end < len(t.Syms); end++) {
                 switch (t.Syms[end].Type) {
-                case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l' or (rune)'Z' or (rune)'z': {
+                case (byte)'T' or (byte)'t' or (byte)'L' or (byte)'l' or (byte)'Z' or (byte)'z': {
                     goto break_countloop;
                     break;
                 }
-                case (rune)'p': {
+                case (byte)'p': {
                     np++;
                     break;
                 }
-                case (rune)'a': {
+                case (byte)'a': {
                     na++;
                     break;
                 }}
@@ -527,39 +528,38 @@ break_countloop:;
             nint nΔ11 = len(t.Funcs);
             t.Funcs = t.Funcs.slice(0, nΔ11 + 1);
             var fn = Ꮡ(t.Funcs, nΔ11);
-            sym.Value.Func = fn;
-            fn.Value.Params = new slice<ж<Sym>>(0, np);
-            fn.Value.Locals = new slice<ж<Sym>>(0, na);
-            fn.Value.Sym = sym;
-            fn.Value.Entry = sym.Value.Value;
-            fn.Value.Obj = obj;
-            if (t.go12line != nil){
+            sym.Func = fn;
+            fn.Params = new slice<ж<Sym>>(0, np);
+            fn.Locals = new slice<ж<Sym>>(0, na);
+            fn.Sym = sym;
+            fn.Entry = sym.Value.Value;
+            fn.Obj = obj;
+            if (t.go12line != nil) {
                 // All functions share the same line table.
                 // It knows how to narrow down to a specific
                 // function quickly.
-                fn.Value.LineTable = t.go12line;
-            } else 
-            if (Ꮡpcln != nil) {
-                fn.Value.LineTable = pcln.Δslice((~fn).Entry);
-                Ꮡpcln = fn.Value.LineTable; pcln = ref Ꮡpcln.DerefOrNull();
+                fn.LineTable = t.go12line;
+            } else if (Ꮡpcln != nil) {
+                fn.LineTable = pcln.Δslice(fn.Entry);
+                Ꮡpcln = fn.LineTable; pcln = ref Ꮡpcln.DerefOrNull();
             }
             for (nint j = i; j < end; j++) {
                 var s = Ꮡ(t.Syms, j);
-                switch ((~s).Type) {
-                case (rune)'m': {
-                    fn.Value.FrameSize = (nint)(~s).Value;
+                switch (s.Type) {
+                case (byte)'m': {
+                    fn.FrameSize = (nint)(~s).Value;
                     break;
                 }
-                case (rune)'p': {
-                    nint nΔ13 = len((~fn).Params);
-                    fn.Value.Params = (~fn).Params.slice(0, nΔ13 + 1);
-                    fn.Value.Params[nΔ13] = s;
+                case (byte)'p': {
+                    nint nΔ13 = len(fn.Params);
+                    fn.Params = fn.Params.slice(0, nΔ13 + 1);
+                    fn.Params[nΔ13] = s;
                     break;
                 }
-                case (rune)'a': {
-                    nint nΔ14 = len((~fn).Locals);
-                    fn.Value.Locals = (~fn).Locals.slice(0, nΔ14 + 1);
-                    fn.Value.Locals[nΔ14] = s;
+                case (byte)'a': {
+                    nint nΔ14 = len(fn.Locals);
+                    fn.Locals = fn.Locals.slice(0, nΔ14 + 1);
+                    fn.Locals[nΔ14] = s;
                     break;
                 }}
             }
@@ -572,9 +572,9 @@ break_countloop:;
         t.Funcs = t.go12line.go12Funcs();
     }
     if (obj != nil) {
-        obj.Value.Funcs = t.Funcs.slice(lastf);
+        obj.Funcs = t.Funcs.slice(lastf);
     }
-    return (Ꮡt, default!);
+    return (Ꮡt, default);
 }
 
 // PCToFunc returns the function containing the program counter pc,
@@ -585,11 +585,11 @@ public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
         nint m = len(funcs) / 2;
         var fn = Ꮡ(funcs, m);
         switch (ᐧ) {
-        case {} when pc < (~fn).Entry: {
+        case {} when pc < fn.Entry: {
             funcs = funcs.slice(0, m);
             break;
         }
-        case {} when (~fn).Entry <= pc && pc < (~fn).End: {
+        case {} when fn.Entry <= pc && pc < fn.End: {
             return fn;
         }
         default: {
@@ -597,26 +597,26 @@ public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
             break;
         }}
     }
-    return default!;
+    return default;
 }
 
 // PCToLine looks up line number information for a program counter.
 // If there is no information, it returns fn == nil.
 public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t, uint64 pc) {
-    @string @file = default!;
-    nint line = default!;
-    ж<Func> fn = default!;
+    @string @file = default;
+    nint line = default;
+    ж<Func> fn = default;
 
     {
         fn = t.PCToFunc(pc); if (fn == nil) {
             return (@file, line, fn);
         }
     }
-    if (t.go12line != nil){
+    if (t.go12line != nil) {
         @file = t.go12line.go12PCToFile(pc);
         line = t.go12line.go12PCToLine(pc);
     } else {
-        (@file, line) = (~fn).Obj.lineFromAline((~fn).LineTable.PCToLine(pc));
+        (@file, line) = fn.Obj.lineFromAline(fn.LineTable.PCToLine(pc));
     }
     return (@file, line, fn);
 }
@@ -625,35 +625,35 @@ public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t,
 // the named file. It returns [UnknownFileError] or [UnknownLineError] if
 // there is an error looking up this line.
 public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @string @file, nint line) {
-    uint64 pc = default!;
-    ж<Func> fn = default!;
-    error err = default!;
+    uint64 pc = default;
+    ж<Func> fn = default;
+    error err = default;
 
     var (obj, ok) = t.Files[@file, ꟷ];
     if (!ok) {
-        return (0, default!, ((UnknownFileError)@file));
+        return (0, default, ((UnknownFileError)@file));
     }
 
     if (t.go12line != nil) {
         var pcΔ1 = t.go12line.go12LineToPC(@file, line);
         if (pcΔ1 == 0) {
-            return (0, default!, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(@file, line))));
+            return (0, default, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(@file, line))));
         }
-        return (pcΔ1, t.PCToFunc(pcΔ1), default!);
+        return (pcΔ1, t.PCToFunc(pcΔ1), default);
     }
 
     (var abs, err) = obj.alineFromLine(@file, line);
-    if (err != default!) {
+    if (err != nil) {
         return (pc, fn, err);
     }
-    foreach (var i in range((~obj).Funcs)) {
-        var f = Ꮡ((~obj).Funcs, i);
-        var pcΔ2 = (~f).LineTable.LineToPC(abs, (~f).End);
+    foreach (var i in range(obj.Funcs)) {
+        var f = Ꮡ(obj.Funcs, i);
+        var pcΔ2 = f.LineTable.LineToPC(abs, f.End);
         if (pcΔ2 != 0) {
-            return (pcΔ2, f, default!);
+            return (pcΔ2, f, default);
         }
     }
-    return (0, default!, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(@file, line))));
+    return (0, default, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(@file, line))));
 }
 
 // LookupSym returns the text, data, or bss symbol with the given name,
@@ -662,15 +662,15 @@ public static ж<Sym> LookupSym(this ref Table t, @string name) {
     // TODO(austin) Maybe make a map
     foreach (var i in range(t.Syms)) {
         var s = Ꮡ(t.Syms, i);
-        switch ((~s).Type) {
-        case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l' or (rune)'D' or (rune)'d' or (rune)'B' or (rune)'b': {
-            if ((~s).Name == name) {
+        switch (s.Type) {
+        case (byte)'T' or (byte)'t' or (byte)'L' or (byte)'l' or (byte)'D' or (byte)'d' or (byte)'B' or (byte)'b': {
+            if (s.Name == name) {
                 return s;
             }
             break;
         }}
     }
-    return default!;
+    return default;
 }
 
 // LookupFunc returns the text, data, or bss symbol with the given name,
@@ -678,30 +678,31 @@ public static ж<Sym> LookupSym(this ref Table t, @string name) {
 public static ж<Func> LookupFunc(this ref Table t, @string name) {
     foreach (var i in range(t.Funcs)) {
         var f = Ꮡ(t.Funcs, i);
-        if ((~(~f).Sym).Name == name) {
+        if (f.Sym.Name == name) {
             return f;
         }
     }
-    return default!;
+    return default;
 }
 
 // SymByAddr returns the text, data, or bss symbol starting at the given address.
 public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
     foreach (var i in range(t.Syms)) {
         var s = Ꮡ(t.Syms, i);
-        switch ((~s).Type) {
-        case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l' or (rune)'D' or (rune)'d' or (rune)'B' or (rune)'b': {
+        switch (s.Type) {
+        case (byte)'T' or (byte)'t' or (byte)'L' or (byte)'l' or (byte)'D' or (byte)'d' or (byte)'B' or (byte)'b': {
             if ((~s).Value == addr) {
                 return s;
             }
             break;
         }}
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string malformedSymbolTableˢ = "<malformed symbol table>"u8;
+internal static ref readonly @string malformedSymbolTableˢ => ref malformedSymbolTableˢᵇ;
+private static readonly @string malformedSymbolTableˢᵇ = "<malformed symbol table>"u8;
 
 internal partial struct lineFromAline_stackEnt /*dyn*/ {
     internal @string path;
@@ -720,13 +721,12 @@ internal partial struct lineFromAline_stackEnt /*dyn*/ {
 //
 // Go 1.2 and later use a simpler format, documented at golang.org/s/go12symtab.
 internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) {
-    var noPath = Ꮡ(new lineFromAline_stackEnt(""u8, 0, 0, nil));
+    var noPath = Ꮡ(new lineFromAline_stackEnt("", 0, 0, nil));
     var tos = noPath;
 
 pathloop:
     foreach (var (_, s) in o.Paths) {
-        ref var val = ref heap<nint>(out var Ꮡval);
-        val = (nint)s.Value;
+        ref var val = ref heap<nint>((nint)s.Value, out var Ꮡval);
         switch (ᐧ) {
         case {} when val > aline: {
             goto break_pathloop;
@@ -742,8 +742,8 @@ pathloop:
             if (tos == noPath) {
                 return (malformedSymbolTableˢ, 0);
             }
-            tos.Value.prev.Value.offset += val - (~tos).start;
-            tos = tos.Value.prev;
+            tos.prev.offset += val - tos.start;
+            tos = tos.prev;
             break;
         }
         default: {
@@ -758,7 +758,7 @@ break_pathloop:;
     if (tos == noPath) {
         return ("", 0);
     }
-    return ((~tos).path, aline - (~tos).start - (~tos).offset + 1);
+    return (tos.path, aline - tos.start - tos.offset + 1);
 }
 
 internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint line) {
@@ -774,21 +774,20 @@ internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint l
 
         // Find this line at this stack level
         nint depth = 0;
-        nint incstart = default!;
+        nint incstart = default;
         line += (nint)s.Value;
 pathloop:
         foreach (var (_, sΔ1) in o.Paths.slice(i)) {
             nint val = (nint)sΔ1.Value;
             switch (ᐧ) {
             case {} when depth == 1 && val >= line: {
-                return (line - 1, default!);
+                return (line - 1, default);
             }
             case {} when sΔ1.Name == ""u8: {
                 depth--;
-                if (depth == 0){
+                if (depth == 0) {
                     goto break_pathloop;
-                } else 
-                if (depth == 1) {
+                } else if (depth == 1) {
                     line += val - incstart;
                 }
                 break;
@@ -842,7 +841,7 @@ partial struct DecodingError {
 
 public static @string Error(this ref DecodingError e) {
     @string msg = e.msg;
-    if (e.val != default!) {
+    if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
     }
     msg += fmt.Sprintf(" at byte %#x"u8, e.off);

@@ -10,14 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using dwarfꓸLineReader = go.debug.dwarf_package.ΔLineReader;
-global using dwarfꓸReader = go.debug.dwarf_package.ΔReader;
-global using dwarfꓸType = go.debug.dwarf_package.ΔType;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -74,7 +66,20 @@ using static go.debug.macho_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Dylib))]
+[assembly: GoFieldAccess(typeof(Dysymtab))]
+[assembly: GoFieldAccess(typeof(FatArch))]
+[assembly: GoFieldAccess(typeof(FatFile))]
+[assembly: GoFieldAccess(typeof(File))]
+[assembly: GoFieldAccess(typeof(Reloc))]
+[assembly: GoFieldAccess(typeof(Rpath))]
+[assembly: GoFieldAccess(typeof(Symtab))]
+[assembly: GoFieldAccess(typeof(ΔSection))]
+[assembly: GoFieldAccess(typeof(ΔSegment))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -84,11 +89,11 @@ using static go.debug.macho_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/macho/fat.go", "fat.cs", "AClSmrKCuIKCkoaigoKClKamkoKClJSCyoTIgoKUgoKCgoKUlIKCgriCgIKkpoKUgrimqqKCgpSCgoKUgqaCgoKClA==")]
-[assembly: go.GoPositionMap("debug/macho/file.go", "file.cs", "ADVqgAAfQpKokAApVpKokAA0aIKCgpSCqJKCgpSCgoKUgqyygoKClKqigpiigIKkgoKUgqSCpLiAgsiSgpSCgpSCgpSCgpSClIKClIKCgoKagoKAgqSCgpSCgqaCgoCCpIKClIKCgoKCpoKCgIKkgoKUgoKUlIKClIKClIKmgoKAgqSCkoK2griCgpSCgIKkgoKCgoKmgoKAgqSCgoKCgoKCgoKCgoKCgoKCgIKkgoKCgoKCgoKCgoCC2oKCgIKkgoKCgoKCgoKCgoKCgoKCgoCCpIKCgoKCgoKCgoKAggAFzwIAAdgCgoKUgpSCpqaigoKClIKCgoKCgIK2goCCpIKCgoKUgqaCgpQABxCCgoIABxCigoKUgoKClJSUgoKUgoCCtoKCgoKCgpSUgoKCgoKkgoKCgoKk3KaCgoKUqJKCgIK2qqKCgqYACwiSgoKClLS0uAAIEoKCppSCgoKmgoKCgoKUgIKkgIKklKyygoKClICCpIKClKaCgriCgoKUgJS2goKmgpSUgrissoKmgoKCgoKouoKCuKzSgoKAgrY=", "612-640:1;641-663:2")]
-[assembly: go.GoPositionMap("debug/macho/macho.go", "macho.cs", "ACpi7oCigAAOIAAIEoCigAAPIgAIEoCigADZAboDgoKCgpSm")]
-[assembly: go.GoPositionMap("debug/macho/reloctype.go", "reloctype.cs", "ABEogAAPIoAADyKAABAkgA==")]
-[assembly: go.GoPositionMap("debug/macho/reloctype_string.go", "reloctype_string.cs", "/oaigoKCgoLKlIKClKSGooKCgoKCgoKCgsqUgoKUpIaigoKCgoKCgoKCypSCgpSkhqKCgoKCgoKCgoKCypSCgpQ=")]
+[assembly: GoPositionMap("debug/macho/fat.go", "fat.cs", "AClSmrKCuIKCgoaigoKClKaWkoKClJSCyoTIgoKUgoKCgoKUlIKCgriCgIKkpoKUgrimqqKCgpSCgoKUgqaCgoKClA==")]
+[assembly: GoPositionMap("debug/macho/file.go", "file.cs", "ADVqgAAfQpKokAApVpKokAA0aIKCgpSCqJKCgpSCgoKUgqyygoKClKqigpiigIKkgoKUgrSCtLiAgsiCgpSCgpSCgpSCgpSClIKClIKCgoKUtoKCgIKkgoKUgoK2goKAgqSCgpSCgoKCgraCgoCCpIKClIKClJSCgpSCgpSCtoKCgIKkgoKCpoK4goKUgoCCpIKCgoKCtoKCgIKkgoKCgoKCgoKCgoKCgoKCgoCCpIKCgoKCgoKCgoKAguqCgoCCpIKCgoKCgoKCgoKCgoKCgoKAgqSCgoKCgoKCgoKCgILYgoKUgpSCpqaigoKClIKCgoKCgIK2goCCpIKCgoKUgqaCgpQABxCCgoIABxCigoKUgoKClJSUgoKUgoCCtoKCgoKCgpSUgoKCgoK0goKCgoK07KaCgoKUqJKCgIK2qqKCgqYAEgiSgoKClLS0uAAIEoKCppSCgoKmgoKCgoKUgIKkgIKklKyygoKClICCpIKClKaCgriCgoKUgJS2goKmgpSUgrissoKmgoKCgoKouoKCuKzSgoKAgrY=", "612-640:1;641-663:2")]
+[assembly: GoPositionMap("debug/macho/macho.go", "macho.cs", "ACpi7oCigAAOIAAIEoCigAAPIgAIEoCigADZAboDgoKCgpSm")]
+[assembly: GoPositionMap("debug/macho/reloctype.go", "reloctype.cs", "ABEogAAPIoAADyKAABAkgA==")]
+[assembly: GoPositionMap("debug/macho/reloctype_string.go", "reloctype_string.cs", "/oaigoKCgoLalIKClKSGooKCgoKCgoKCgtqUgoKUpIaigoKCgoKCgoKC2pSCgpSkhqKCgoKCgoKCgoKC2pSCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

@@ -13,10 +13,10 @@ using go.sync;
 partial class syscall_package {
 
 partial struct SysProcAttr {
-    public @string Chroot;     // Chroot.
+    public @string Chroot;           // Chroot.
     public ж<Credential> Credential; // Credential.
-    public bool Ptrace;        // Enable tracing.
-    public bool Setsid;        // Create session.
+    public bool Ptrace;              // Enable tracing.
+    public bool Setsid;              // Create session.
     // Setpgid sets the process group ID of the child to Pgid,
     // or, if Pgid == 0, to the new child's process ID.
     public bool Setpgid;
@@ -26,7 +26,7 @@ partial struct SysProcAttr {
     // This is only meaningful if Setsid is true.
     public bool Setctty;
     public bool Noctty; // Detach fd 0 from controlling terminal
-    public nint Ctty; // Controlling TTY fd
+    public nint Ctty;   // Controlling TTY fd
     // Foreground places the child process group in the foreground.
     // This implies Setpgid. The Ctty field must be set to
     // the descriptor of the controlling TTY.
@@ -55,18 +55,18 @@ internal static partial void runtime_AfterForkInChild();
 // instrumented (go:norace).
 //
 //go:norace
-internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> Ꮡchroot, ж<byte> Ꮡdir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
+internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> argv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> chroot, ж<byte> dir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
     ref var err1 = ref heap(new Errno(), out var Ꮡerr1);
 
     // Declare all variables at top in case any
     // declarations require heap allocation (e.g., err1).
-    uintptr r1 = default!;
-    nint nextfd = default!;
-    nint i = default!;
+    uintptr r1 = default;
+    nint nextfd = default;
+    nint i = default;
     ref var pgrp = ref heap(new _C_int(), out var Ꮡpgrp);
-    ж<Credential> cred = default!;
-    uintptr ngroups = default!;
-    uintptr groups = default!;
+    ж<Credential> cred = default;
+    uintptr ngroups = default;
+    uintptr groups = default;
 
     var rlim = ᏑorigRlimitNofile.Load();
 
@@ -155,8 +155,8 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     runtime_AfterForkInChild();
 
     // Chroot
-    if (Ꮡchroot != nil) {
-        var ᴋ1 = Ꮡchroot;
+    if (chroot != nil) {
+        var ᴋ1 = chroot;
                 (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_chroot_trampoline), (uintptr)ᴋ1, 0, 0);
         System.GC.KeepAlive(ᴋ1);
         if (err1 != 0) {
@@ -167,22 +167,22 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     // User and groups
     {
         cred = sys.Credential; if (cred != nil) {
-            ngroups = (uintptr)len((~cred).Groups);
+            ngroups = (uintptr)len(cred.Groups);
             groups = (uintptr)0;
             if (ngroups > 0) {
-                groups = (uintptr)Ꮡ((~cred).Groups, 0);
+                groups = (uintptr)Ꮡ(cred.Groups, 0);
             }
-            if (!(~cred).NoSetGroups) {
+            if (!cred.NoSetGroups) {
                 (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setgroups_trampoline), ngroups, groups, 0);
                 if (err1 != 0) {
                     goto childerror;
                 }
             }
-            (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setgid_trampoline), (uintptr)(~cred).Gid, 0, 0);
+            (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setgid_trampoline), (uintptr)cred.Gid, 0, 0);
             if (err1 != 0) {
                 goto childerror;
             }
-            (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setuid_trampoline), (uintptr)(~cred).Uid, 0, 0);
+            (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setuid_trampoline), (uintptr)cred.Uid, 0, 0);
             if (err1 != 0) {
                 goto childerror;
             }
@@ -190,8 +190,8 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     }
 
     // Chdir
-    if (Ꮡdir != nil) {
-        var ᴋ2 = Ꮡdir;
+    if (dir != nil) {
+        var ᴋ2 = dir;
                 (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_chdir_trampoline), (uintptr)ᴋ2, 0, 0);
         System.GC.KeepAlive(ᴋ2);
         if (err1 != 0) {
@@ -202,7 +202,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     // Pass 1: look for fd[i] < i and move those up above len(fd)
     // so that pass 2 won't stomp on an fd it needs later.
     if (pipe < nextfd) {
-        if (runtime.GOOS == "openbsd"u8){
+        if (runtime.GOOS == "openbsd"u8) {
             (_, _, err1) = rawSyscall(dupTrampoline, (uintptr)pipe, (uintptr)nextfd, O_CLOEXEC);
         } else {
             (_, _, err1) = rawSyscall(dupTrampoline, (uintptr)pipe, (uintptr)nextfd, 0);
@@ -222,7 +222,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             if (nextfd == pipe) { // don't stomp on pipe
                 nextfd++;
             }
-            if (runtime.GOOS == "openbsd"u8){
+            if (runtime.GOOS == "openbsd"u8) {
                 (_, _, err1) = rawSyscall(dupTrampoline, (uintptr)fd[i], (uintptr)nextfd, O_CLOEXEC);
             } else {
                 (_, _, err1) = rawSyscall(dupTrampoline, (uintptr)fd[i], (uintptr)nextfd, 0);
@@ -294,7 +294,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     }
 
     // Time to exec.
-    var ᴋ4 = Ꮡargv0;
+    var ᴋ4 = argv0;
     var ᴋ5 = @unsafe.Pointer.FromBox(Ꮡ(argv, 0));
     var ᴋ6 = @unsafe.Pointer.FromBox(Ꮡ(envv, 0));
         (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_execve_trampoline), (uintptr)ᴋ4, (uintptr)ᴋ5, (uintptr)ᴋ6);
@@ -307,7 +307,7 @@ childerror:
         rawSyscall(abi.FuncPCABI0(libc_write_trampoline), (uintptr)pipe, (uintptr)ᴋ7, /* unsafe.Sizeof(err1) */ (uintptr)8);
     System.GC.KeepAlive(ᴋ7);
     // send error code on pipe
-    while (ᐧ) {
+    for (;;) {
         rawSyscall(abi.FuncPCABI0(libc_exit_trampoline), 253, 0, 0);
     }
 }

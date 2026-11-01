@@ -17,8 +17,10 @@ internal static readonly ж<getwdCacheᴛ1> ᏑgetwdCache = new StaticBox<getwdC
 internal static ref getwdCacheᴛ1 getwdCache => ref ((StaticBox<getwdCacheᴛ1>)ᏑgetwdCache).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getwdˢ = "getwd"u8;
-internal static readonly @string pwdˢ = "PWD"u8;
+internal static ref readonly @string getwdˢ => ref getwdˢᵇ;
+private static readonly @string getwdˢᵇ = "getwd"u8;
+internal static ref readonly @string pwdˢ => ref pwdˢᵇ;
+private static readonly @string pwdˢᵇ = "PWD"u8;
 
 // Getwd returns an absolute path name corresponding to the
 // current directory. If the current directory can be
@@ -29,8 +31,8 @@ internal static readonly @string pwdˢ = "PWD"u8;
 // provides an absolute name, and it is a name of the
 // current directory, it is returned.
 public static (@string dir, error err) Getwd() {
-    @string dir = default!;
-    error err = default!;
+    @string dir = default;
+    error err = default;
 
     if (runtime.GOOS == "windows"u8 || runtime.GOOS == "plan9"u8) {
         // Use syscall.Getwd directly for
@@ -43,16 +45,16 @@ public static (@string dir, error err) Getwd() {
 
     // Clumsy but widespread kludge:
     // if $PWD is set and matches ".", use it.
-    FileInfo dot = default!;
+    FileInfo dot = default;
     dir = Getenv(pwdˢ);
-    if (len(dir) > 0 && dir[0] == (rune)'/') {
-        (dot, err) = statNolog("."u8);
-        if (err != default!) {
+    if (len(dir) > 0 && dir[0] == '/') {
+        (dot, err) = statNolog(".");
+        if (err != nil) {
             return ("", err);
         }
         var (d, errΔ1) = statNolog(dir);
-        if (errΔ1 == default! && SameFile(dot, d)) {
-            return (dir, default!);
+        if (errΔ1 == nil && SameFile(dot, d)) {
+            return (dir, default);
         }
         // If err is ENAMETOOLONG here, the syscall.Getwd below will
         // fail with the same error, too, but let's give it a try
@@ -72,9 +74,9 @@ public static (@string dir, error err) Getwd() {
     }
 
     // We're trying to find our way back to ".".
-    if (dot == default!) {
-        (dot, err) = statNolog("."u8);
-        if (err != default!) {
+    if (dot == nil) {
+        (dot, err) = statNolog(".");
+        if (err != nil) {
             return ("", err);
         }
     }
@@ -84,38 +86,38 @@ public static (@string dir, error err) Getwd() {
     ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
     if (len(dir) > 0) {
         var (d, errΔ2) = statNolog(dir);
-        if (errΔ2 == default! && SameFile(dot, d)) {
-            return (dir, default!);
+        if (errΔ2 == nil && SameFile(dot, d)) {
+            return (dir, default);
         }
     }
 
     // Root is a special case because it has no parent
     // and ends in a slash.
-    (var root, err) = statNolog("/"u8);
-    if (err != default!) {
+    (var root, err) = statNolog("/");
+    if (err != nil) {
         // Can't stat root - no hope.
         return ("", err);
     }
     if (SameFile(root, dot)) {
-        return ("/", default!);
+        return ("/", default);
     }
 
     // General algorithm: find name in parent
     // and then find name of parent. Each iteration
     // adds /name to the beginning of dir.
     dir = ""u8;
-    for (@string parent = ".."u8; ᐧ ; parent = "../"u8 + parent) {
+    for (@string parent = ".."; ; parent = "../"u8 + parent) {
         if (len(parent) >= 1024) { // Sanity check
             return ("", NewSyscallError(getwdˢ, syscall.ENAMETOOLONG));
         }
         var (fd, errΔ3) = openDirNolog(parent);
-        if (errΔ3 != default!) {
+        if (errΔ3 != nil) {
             return ("", errΔ3);
         }
 
-        while (ᐧ) {
+        for (;;) {
             var (names, errΔ4) = fd.Readdirnames(100);
-            if (errΔ4 != default!) {
+            if (errΔ4 != nil) {
                 fd.Close();
                 // Readdirnames can return io.EOF or other error.
                 // In any case, we're here because syscall.Getwd
@@ -138,7 +140,7 @@ public static (@string dir, error err) Getwd() {
 Found:
         (var pd, errΔ3) = fd.Stat();
         fd.Close();
-        if (errΔ3 != default!) {
+        if (errΔ3 != nil) {
             return ("", errΔ3);
         }
         if (SameFile(pd, root)) {
@@ -153,7 +155,7 @@ Found:
     getwdCache.dir = dir;
     ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
 
-    return (dir, default!);
+    return (dir, default);
 }
 
 } // end os_package

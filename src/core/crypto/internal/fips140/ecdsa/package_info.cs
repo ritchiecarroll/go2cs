@@ -54,7 +54,13 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(PrivateKey))]
+[assembly: GoFieldAccess(typeof(Signature))]
+[assembly: GoFieldAccess(typeof(hmacDRBG))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,10 +70,10 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABIglAAWLoIADhiigoKCgoKUyIKCgri4ggAMGoKCgpSAgqSClMiCgoKCAAwagoKClICCpIKU", "55-63:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABs4gqaCAAcQggAfPqKCgoKUgqaAtIK4gqbugLSCyoKm3IC0griCpgAHEIC0griCpgANGvKCgoKUgpSCgpSClILaAAkIgpSCgpSo0pSGgqbuggACEgAIAoKCgIIADBiApoKUAAgQgIKCtoIAESYACgKClILugoCCAAkSlAACEAALAoKUgoKCqsKCgubGgoKUgriClIKClIKC3IKmgpSCgpSCgqaCpqjSgpSCgoKU3KoACAqAgoKAgsaCggADEtKClIKCgoKmAAUUAAwCgpSCgvbGgoKmgoKUgpSCgpSCpoKmgqaCgqaCgqaCgqaCgqaClA==", "202-204:1;335-338:1", "", "241=Bytes/1/2/3,Bytes/2/2/5")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_noasm.go", "ecdsa_noasm.cs", "AAgSoqai")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACNO/uy0lKqmpriCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKClIKCAAIQ8qaigoCCyqSUgqaCpoKmgoKCAAgSgoKClIKClA==", "57-59:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABIglAAWLoIADxiigoKCgoKUyIKCgri4ggAMGoKCgpSAgqSClMiCgoKCAAwagoKClICCpIKU", "55-63:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABs4gqaCAAcQggAjPqKCgoKUgqaAtIK4gqbugLSCyoKm3IC0griCpgAHEIC0griCpgAPGvKCgoKUgpSCgpSClILqAAkIgpSCgpSo0pSGgqbuggACEgAIAoKCgIIADBiApoKUAAgQgIKCtoIAEiYACgKClILugoCCAAkSlAACEAALAoKUgoKCqsKCggAIBsaCgpSCuIKUgoKUgoLcgqaClIKClIKCpoKmqNKClIKCgpTcqgAICoCCgoCCxoKCAAMS0oKUgoKCgqYABhQADAKClIKCAAoGxoKCpoKClIKUgoKUgqaCpoKmgoKmgoKmgoKmgoKmgpQ=", "202-204:1;335-338:1", "", "248=Bytes/1/2/3,Bytes/2/2/5")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_noasm.go", "ecdsa_noasm.cs", "AAgSoqai")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACNO/uy0lKqmpriCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKClIKCAAIQ8qaigoCCyqSUgqaCpoKmgoKCAAgSgoKClIKClA==", "57-59:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

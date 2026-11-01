@@ -6,21 +6,21 @@ partial class bidi_package {
 // Class is the Unicode BiDi class. Each rune has a single class.
 partial struct ΔClass /*num:nuint*/;
 
-public static ΔClass L => /* iota */ 0;      // LeftToRight
-public static ΔClass R => 1;      // RightToLeft
-public static ΔClass EN => 2;     // EuropeanNumber
-public static ΔClass ES => 3;     // EuropeanSeparator
-public static ΔClass ET => 4;     // EuropeanTerminator
-public static ΔClass AN => 5;     // ArabicNumber
-public static ΔClass CS => 6;     // CommonSeparator
-public static ΔClass B => 7;      // ParagraphSeparator
-public static ΔClass S => 8;      // SegmentSeparator
-public static ΔClass WS => 9;     // WhiteSpace
-public static ΔClass ON => 10;     // OtherNeutral
-public static ΔClass BN => 11;     // BoundaryNeutral
-public static ΔClass NSM => 12;    // NonspacingMark
-public static ΔClass AL => 13;     // ArabicLetter
-public static ΔClass Control => 14; // Control LRO - PDI
+public static ΔClass L => /* iota */ 0; // LeftToRight
+public static ΔClass R => 1;            // RightToLeft
+public static ΔClass EN => 2;           // EuropeanNumber
+public static ΔClass ES => 3;           // EuropeanSeparator
+public static ΔClass ET => 4;           // EuropeanTerminator
+public static ΔClass AN => 5;           // ArabicNumber
+public static ΔClass CS => 6;           // CommonSeparator
+public static ΔClass B => 7;            // ParagraphSeparator
+public static ΔClass S => 8;            // SegmentSeparator
+public static ΔClass WS => 9;           // WhiteSpace
+public static ΔClass ON => 10;          // OtherNeutral
+public static ΔClass BN => 11;          // BoundaryNeutral
+public static ΔClass NSM => 12;         // NonspacingMark
+public static ΔClass AL => 13;          // ArabicLetter
+public static ΔClass Control => 14;     // Control LRO - PDI
 
 internal static ΔClass numClass => 15;
 

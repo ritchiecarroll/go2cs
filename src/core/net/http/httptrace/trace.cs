@@ -26,7 +26,7 @@ partial struct clientEventContextKey {
 // ContextClientTrace returns the [ClientTrace] associated with the
 // provided context. If none, it returns nil.
 public static ж<ClientTrace> ContextClientTrace(context.Context ctx) {
-    var (trace, _) = ctx.Value(new clientEventContextKey(nil))._<ж<ClientTrace>>(ᐧ);
+    var (trace, _) = ctx.Value(new clientEventContextKey())._<ж<ClientTrace>>(ᐧ);
     return trace;
 }
 
@@ -44,19 +44,19 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     var old = ContextClientTrace(ctx);
     Ꮡtrace.compose(old);
 
-    ctx = context.WithValue(ctx, new clientEventContextKey(nil), Ꮡtrace.OrTypedNil());
+    ctx = context.WithValue(ctx, new clientEventContextKey(), Ꮡtrace.OrTypedNil());
     if (Ꮡtrace.hasNetHooks()) {
         var nt = Ꮡ(new nettrace.Trace(
             ConnectStart: trace.ConnectStart,
             ConnectDone: trace.ConnectDone
         ));
-        if (trace.DNSStart != default!) {
-            nt.Value.DNSStart = (@string name) => {
+        if (trace.DNSStart != nil) {
+            nt.DNSStart = (@string name) => {
                 Ꮡtrace.Value.DNSStart(new DNSStartInfo(Host: name));
             };
         }
-        if (trace.DNSDone != default!) {
-            nt.Value.DNSDone = (slice<any> netIPs, bool coalesced, error err) => {
+        if (trace.DNSDone != nil) {
+            nt.DNSDone = (slice<any> netIPs, bool coalesced, error err) => {
                 var addrs = new slice<net.IPAddr>(len(netIPs));
                 foreach (var (i, ip) in netIPs) {
                     addrs[i] = ip._<net.IPAddr>();
@@ -68,7 +68,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
                 ));
             };
         }
-        ctx = context.WithValue(ctx, new nettrace.TraceKey(nil), nt.OrTypedNil());
+        ctx = context.WithValue(ctx, new nettrace.TraceKey(), nt.OrTypedNil());
     }
     return ctx;
 }
@@ -163,12 +163,12 @@ partial struct WroteRequestInfo {
 
 // compose modifies t such that it respects the previously-registered hooks in old,
 // subject to the composition policy requested in t.Compose.
-internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) {
-    if (Ꮡold == nil) {
+internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
+    if (old == nil) {
         return;
     }
     var tv = reflect.ValueOf(Ꮡt.OrTypedNil()).Elem();
-    var ov = reflect.ValueOf(Ꮡold.OrTypedNil()).Elem();
+    var ov = reflect.ValueOf(old.OrTypedNil()).Elem();
     var structType = tv.Type();
     for (nint i = 0; i < structType.NumField(); i++) {
         var tf = tv.Field(i);
@@ -176,8 +176,7 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) 
         if (hookType.Kind() != reflect.Func) {
             continue;
         }
-        ref var of = ref heap<reflectꓸValue>(out var Ꮡof);
-        of = ov.Field(i);
+        ref var of = ref heap<reflectꓸValue>(ov.Field(i), out var Ꮡof);
         if (of.IsNil()) {
             continue;
         }
@@ -188,8 +187,7 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) 
 
         // Make a copy of tf for tf to call. (Otherwise it
         // creates a recursive call cycle and stack overflows)
-        ref var tfCopy = ref heap<reflectꓸValue>(out var ᏑtfCopy);
-        tfCopy = reflect.ValueOf(tf.Interface());
+        ref var tfCopy = ref heap<reflectꓸValue>(reflect.ValueOf(tf.Interface()), out var ᏑtfCopy);
 
         // We need to call both tf and of in some order.
         var ofʗ1 = of;
@@ -225,7 +223,7 @@ internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
     if (Ꮡt == nil) {
         return false;
     }
-    return t.DNSStart != default! || t.DNSDone != default! || t.ConnectStart != default! || t.ConnectDone != default!;
+    return t.DNSStart != nil || t.DNSDone != nil || t.ConnectStart != nil || t.ConnectDone != nil;
 }
 
 // GotConnInfo is the argument to the [ClientTrace.GotConn] function and

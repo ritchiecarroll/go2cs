@@ -42,13 +42,14 @@ internal static void _ᴛ5() {
     _ = x[stateDead - 30];
 }
 
-internal static readonly @string _state_name = "stateTextstateTagstateAttrNamestateAfterNamestateBeforeValuestateHTMLCmtstateRCDATAstateAttrstateURLstateSrcsetstateJSstateJSDqStrstateJSSqStrstateJSTmplLitstateJSRegexpstateJSBlockCmtstateJSLineCmtstateJSHTMLOpenCmtstateJSHTMLCloseCmtstateCSSstateCSSDqStrstateCSSSqStrstateCSSDqURLstateCSSSqURLstateCSSURLstateCSSBlockCmtstateCSSLineCmtstateErrorstateMetaContentstateMetaContentURLstateDead"u8;
+internal static ref readonly @string _state_name => ref _state_nameᵇ;
+private static readonly @string _state_nameᵇ = "stateTextstateTagstateAttrNamestateAfterNamestateBeforeValuestateHTMLCmtstateRCDATAstateAttrstateURLstateSrcsetstateJSstateJSDqStrstateJSSqStrstateJSTmplLitstateJSRegexpstateJSBlockCmtstateJSLineCmtstateJSHTMLOpenCmtstateJSHTMLCloseCmtstateCSSstateCSSDqStrstateCSSSqStrstateCSSDqURLstateCSSSqURLstateCSSURLstateCSSBlockCmtstateCSSLineCmtstateErrorstateMetaContentstateMetaContentURLstateDead"u8;
 
 [GoLazy] partial class lazyᴛ_state_index { internal static array<uint16> _state_index = new uint16[]{0, 9, 17, 30, 44, 60, 72, 83, 92, 100, 111, 118, 130, 142, 156, 169, 184, 198, 216, 235, 243, 256, 269, 282, 295, 306, 322, 337, 347, 363, 382, 391}.array(); }
 
 internal static @string String(this state i) {
     if (i >= ((state)(uint8)(len(_state_index) - 1))) {
-        return "state("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "state("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _state_name.slice(_state_index[i], _state_index[i + 1]);
 }

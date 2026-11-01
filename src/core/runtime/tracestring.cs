@@ -30,7 +30,7 @@ internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string 
 
     // Put the string in the table.
     var ss = stringStructOf(Ꮡs);
-    var (id, added) = Ꮡt.of(traceStringTable.Ꮡtab).put((~ss).str, (uintptr)(~ss).len);
+    var (id, added) = Ꮡt.Ꮡtab.put((~ss).str, (uintptr)(~ss).len);
     if (added) {
         // Write the string to the buffer.
         systemstack(() => {
@@ -46,7 +46,7 @@ internal static uint64 emit(this ж<traceStringTable> Ꮡt, uintptr gen, @string
         return 0; // Empty strings are implicitly assigned ID 0 already.
     }
     // Grab an ID and write the string to the buffer.
-    var id = Ꮡt.of(traceStringTable.Ꮡtab).stealID();
+    var id = Ꮡt.Ꮡtab.stealID();
     systemstack(() => {
         Ꮡt.writeString(gen, id, s);
     });
@@ -66,11 +66,11 @@ internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, ui
         s = s[..(int)(tracev2.MaxEventTrailerDataSize)];
     }
 
-    @lock(Ꮡt.of(traceStringTable.Ꮡlock));
+    @lock(Ꮡt.Ꮡlock);
     var w = unsafeTraceWriter(gen, t.buf);
 
     // Ensure we have a place to write to.
-    bool flushed = default!;
+    bool flushed = default;
     (w, flushed) = w.ensure((nint)(2 + 2 * traceBytesPerNumber) + len(s) /* tracev2.EvStrings + tracev2.EvString + ID + len + string data */);
     if (flushed) {
         // Annotate the batch as containing strings.
@@ -85,7 +85,7 @@ internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, ui
 
     // Store back buf in case it was updated during ensure.
     t.buf = w.traceBuf;
-    unlock(Ꮡt.of(traceStringTable.Ꮡlock));
+    unlock(Ꮡt.Ꮡlock);
 }
 
 // reset clears the string table and flushes any buffers it has.
@@ -101,11 +101,11 @@ internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
             traceBufFlush(Ꮡt.Value.buf, gen);
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
         });
-        t.buf = default!;
+        t.buf = default;
     }
 
     // Reset the table.
-    Ꮡt.of(traceStringTable.Ꮡtab).reset();
+    Ꮡt.Ꮡtab.reset();
 }
 
 } // end runtime_package

@@ -31,21 +31,22 @@ partial struct desCipher {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoDesUseOfDesIsNotˢ = "crypto/des: use of DES is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoDesUseOfDesIsNotˢ => ref cryptoDesUseOfDesIsNotˢᵇ;
+private static readonly @string cryptoDesUseOfDesIsNotˢᵇ = "crypto/des: use of DES is not allowed in FIPS 140-only mode"u8;
 
 // NewCipher creates and returns a new [cipher.Block].
 public static (cipher.Block, error) NewCipher(slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoDesUseOfDesIsNotˢ));
+        return (default, errors.New(cryptoDesUseOfDesIsNotˢ));
     }
 
     if (len(key) != 8) {
-        return (default!, ((KeySizeError)len(key)));
+        return (default, ((KeySizeError)len(key)));
     }
 
     var c = @new<desCipher>();
     c.generateSubkeys(key);
-    return (new desCipherжBlock(c), default!);
+    return (new desCipherжBlock(c), default);
 }
 
 internal static nint BlockSize(this ref desCipher c) {
@@ -84,23 +85,24 @@ partial struct tripleDESCipher {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoDesUseOfTripleDESˢ = "crypto/des: use of TripleDES is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoDesUseOfTripleDESˢ => ref cryptoDesUseOfTripleDESˢᵇ;
+private static readonly @string cryptoDesUseOfTripleDESˢᵇ = "crypto/des: use of TripleDES is not allowed in FIPS 140-only mode"u8;
 
 // NewTripleDESCipher creates and returns a new [cipher.Block].
 public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoDesUseOfTripleDESˢ));
+        return (default, errors.New(cryptoDesUseOfTripleDESˢ));
     }
 
     if (len(key) != 24) {
-        return (default!, ((KeySizeError)len(key)));
+        return (default, ((KeySizeError)len(key)));
     }
 
     var c = @new<tripleDESCipher>();
-    c.of(tripleDESCipher.Ꮡcipher1).generateSubkeys(key[..8]);
-    c.of(tripleDESCipher.Ꮡcipher2).generateSubkeys(key[8..16]);
-    c.of(tripleDESCipher.Ꮡcipher3).generateSubkeys(key[16..]);
-    return (new tripleDESCipherжBlock(c), default!);
+    c.Ꮡcipher1.generateSubkeys(key[..8]);
+    c.Ꮡcipher2.generateSubkeys(key[8..16]);
+    c.Ꮡcipher3.generateSubkeys(key[16..]);
+    return (new tripleDESCipherжBlock(c), default);
 }
 
 internal static nint BlockSize(this ref tripleDESCipher c) {

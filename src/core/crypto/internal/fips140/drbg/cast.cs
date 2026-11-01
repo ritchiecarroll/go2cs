@@ -15,7 +15,7 @@ partial class drbg_package {
     // Per IG 10.3.A, Resolution 7: "A KAT of a DRBG may be performed by:
     // Instantiate with known data, Reseed with other known data, Generate and
     // then compare the result to a pre-computed value."
-    fips140.CAST("CTR_DRBG"u8, error () => {
+    fips140.CAST("CTR_DRBG", error () => {
         var entropy = Ꮡ(new byte[]{
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
@@ -40,20 +40,20 @@ partial class drbg_package {
             0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88,
             0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x90
         }.array());
-        var want = new byte[]{
+        var want = slice<byte>([
             0x6e, 0x6e, 0x47, 0x9d, 0x24, 0xf8, 0x6a, 0x3b,
             0x77, 0x87, 0xa8, 0xf8, 0x18, 0x6d, 0x98, 0x5a,
             0x53, 0xbe, 0xbe, 0xed, 0xde, 0xab, 0x92, 0x28,
             0xf0, 0xf4, 0xac, 0x6e, 0x10, 0xbf, 0x01, 0x93
-        }.slice();
+        ]);
         var c = NewCounter(entropy);
         c.Reseed(reseedEntropy, additionalInput);
         var got = new slice<byte>(len(want));
         c.Generate(got, additionalInput);
         if (!bytes.Equal(got, want)) {
-            return errors.New("unexpected result"u8);
+            return errors.New("unexpected result");
         }
-        return default!;
+        return default;
     });
 }
 

@@ -48,7 +48,7 @@ using static go.encoding.ascii85_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,7 +58,7 @@ using static go.encoding.ascii85_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/ascii85/ascii85.go", "ascii85.cs", "AA02AA0CgqaCgoKCgoKWkrSCpIKkgqS4goKCgoK4goK4goKClJSClKiQrtAAChSygriCgoKClIKCgpSCgIKkuIKCgpSCgoKAgraCuIKCgqq0goKClAAEErIAAiAAEQKCgoKClJS0grSCtJSCgoKCgoKCgqaCgsqClLiUgoKCuKiQAAwYsoKUgqaUgoKCqLKCgoKCgpSmgoKCgqbKgpSCgriC")]
+[assembly: GoPositionMap("encoding/ascii85/ascii85.go", "ascii85.cs", "AA02AA0CgqaCgoKCgoKWkrSCpIKkgqS4goKCgoK4goK4goKClJSClKiQrtAAChSygriCgoKClIKCgpSCgIKkuIKCgpSCgoKAgraCuIKCgqq0goKClAAEErIAAiAAEQKCgoKClJS0grSCtJSCgoKCgoKCgqaCgsqClLiUgoKCuKiQAAwYsoKUgqaUgoKCqLKCgoKCgpSmgoKCgqbKgpSCgriC")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

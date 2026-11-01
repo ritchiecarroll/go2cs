@@ -50,10 +50,10 @@ internal static parser.Mode parserMode => /* parser.ParseComments | parser.SkipO
 //
 // The function may return early (before the entire result is written)
 // and return a formatting error, for instance due to an incorrect AST.
-public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
+public static error Node(io.Writer dst, ж<token.FileSet> fset, any node) {
     // Determine if we have a complete source file (file != nil).
-    ж<ast.File> @file = default!;
-    ж<printer.CommentedNode> cnode = default!;
+    ж<ast.File> @file = default;
+    ж<printer.CommentedNode> cnode = default;
     switch (node.type()) {
     case ж<ast.File> n: {
         @file = n;
@@ -61,7 +61,7 @@ public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
     }
     case ж<printer.CommentedNode> n: {
         {
-            var (f, ok) = (~n).Node._<ж<ast.File>>(ᐧ); if (ok) {
+            var (f, ok) = n.Node._<ж<ast.File>>(ᐧ); if (ok) {
                 @file = f;
                 cnode = n;
             }
@@ -74,25 +74,25 @@ public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
         // Make a copy of the AST because ast.SortImports is destructive.
         // TODO(gri) Do this more efficiently.
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-        var err = Ꮡconfig.Fprint(new bytes_BufferжWriter(Ꮡbuf), Ꮡfset, @file.OrTypedNil());
-        if (err != default!) {
+        var err = Ꮡconfig.Fprint(new bytes_BufferжWriter(Ꮡbuf), fset, @file.OrTypedNil());
+        if (err != nil) {
             return err;
         }
-        (@file, err) = parser.ParseFile(Ꮡfset, ""u8, buf.Bytes(), parserMode);
-        if (err != default!) {
+        (@file, err) = parser.ParseFile(fset, ""u8, buf.Bytes(), parserMode);
+        if (err != nil) {
             // We should never get here. If we do, provide good diagnostic.
             return fmt.Errorf("format.Node internal error (%s)"u8, err);
         }
-        ast.SortImports(Ꮡfset, @file);
+        ast.SortImports(fset, @file);
 
         // Use new file with sorted imports.
         node = @file.OrTypedNil();
         if (cnode != nil) {
-            node = Ꮡ(new printer.CommentedNode(Node: @file.OrTypedNil(), Comments: (~cnode).Comments));
+            node = Ꮡ(new printer.CommentedNode(Node: @file.OrTypedNil(), Comments: cnode.Comments));
         }
     }
 
-    return Ꮡconfig.Fprint(dst, Ꮡfset, node);
+    return Ꮡconfig.Fprint(dst, fset, node);
 }
 
 // Source formats src in canonical gofmt style and returns the result
@@ -106,11 +106,11 @@ public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
 public static (slice<byte>, error) Source(slice<byte> src) {
     var fset = token.NewFileSet();
     var (@file, sourceAdj, indentAdj, err) = parse(fset, ""u8, src, true);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    if (sourceAdj == default!) {
+    if (sourceAdj == nil) {
         // Complete source file.
         // TODO(gri) consider doing this always.
         ast.SortImports(fset, @file);
@@ -122,12 +122,12 @@ public static (slice<byte>, error) Source(slice<byte> src) {
 internal static bool hasUnsortedImports(ref ast.File @file) {
     foreach (var (_, d) in @file.Decls) {
         var (dΔ1, ok) = d._<ж<ast.GenDecl>>(ᐧ);
-        if (!ok || (~dΔ1).Tok != token.IMPORT) {
+        if (!ok || dΔ1.Tok != token.IMPORT) {
             // Not an import declaration, so we're done.
             // Imports are always first.
             return false;
         }
-        if ((~dΔ1).Lparen.IsValid()) {
+        if (dΔ1.Lparen.IsValid()) {
             // For now assume all grouped imports are unsorted.
             // TODO(gri) Should check if they are sorted already.
             return true;

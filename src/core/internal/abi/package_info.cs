@@ -54,7 +54,7 @@ using static go.@internal.abi_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,14 +64,14 @@ using static go.@internal.abi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAISAAkEgg==")]
-[assembly: go.GoPositionMap("internal/abi/bounds.go", "bounds.cs", "ABluABgCgoKCgpSClJSClJSCgoKUlIKUlKTygoKCgoKCgoKCgpSClIKClIKUgpQ=")]
-[assembly: go.GoPositionMap("internal/abi/compiletype.go", "compiletype.cs", "AAce8KaQqKCmkKaQ")]
-[assembly: go.GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgu6SgpQAAiAAEBwADgKC")]
-[assembly: go.GoPositionMap("internal/abi/funcpc.go", "funcpc.cs", "AAgsAA4S")]
-[assembly: go.GoPositionMap("internal/abi/map.go", "map.cs", "AC9qkqSSpJKkkg==")]
-[assembly: go.GoPositionMap("internal/abi/switch.go", "switch.cs", "ACBAppSk")]
-[assembly: go.GoPositionMap("internal/abi/type.go", "type.cs", "AIgBngKSgpSmACFcgKSCqJCmkqaCgpQAGS6igpTWooKUAAIU8gASMoIAP0SygpSUpKysrKysrKwAEZQBkKSAAAgQgoKClKaigoKUqJAAGj6CpoKmgqaCAAYyggANHIIAJVKi2qKokqiSqJLaooKCgoKCzJKClIKssoKCgoKClOqSgpSCqJKClIKCpoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
+[assembly: GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAISAAkEgg==")]
+[assembly: GoPositionMap("internal/abi/bounds.go", "bounds.cs", "ABluABgCgoKCgpSClJSClJSCgoKUlIKUlKTygoKCgoKCgoKCgpSClIKClIKUgpQ=")]
+[assembly: GoPositionMap("internal/abi/compiletype.go", "compiletype.cs", "AAce8KaQqKCmkKaQ")]
+[assembly: GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgu6SgpQAAiAAEBwADgKC")]
+[assembly: GoPositionMap("internal/abi/funcpc.go", "funcpc.cs", "AAgsAA4S")]
+[assembly: GoPositionMap("internal/abi/map.go", "map.cs", "AC9qkqSSpJKkkg==")]
+[assembly: GoPositionMap("internal/abi/switch.go", "switch.cs", "ACBAppSk")]
+[assembly: GoPositionMap("internal/abi/type.go", "type.cs", "AIgBngKSgpSmACFcgKSCqJCmkqaCgpQAGi6igpTmooKUAAIU8gASMoIAP0SygpSUpKysrKysrKwAEZQBkKSAAAgQgoKClKaigoKUqJAAGj6CpoKmgqaCAAYyggANHIIAJVKi6qKokqiSqJLqooKCgoKCzJKClIKssoKCgoKClPqSgpSCqJKClIKCpoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

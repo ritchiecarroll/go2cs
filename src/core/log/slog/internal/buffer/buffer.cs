@@ -45,17 +45,17 @@ public static void Reset(this ref Buffer b) {
 
 public static (nint, error) Write(this ref Buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 public static (nint, error) WriteString(this ref Buffer b, @string s) {
     b = append(b, s.ꓸꓸꓸ);
-    return (len(s), default!);
+    return (len(s), default);
 }
 
 public static error WriteByte(this ref Buffer b, byte c) {
     b = append(b, c);
-    return default!;
+    return default;
 }
 
 public static @string String(this ref Buffer b) {

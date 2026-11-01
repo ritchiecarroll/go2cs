@@ -21,7 +21,7 @@ public static nint ConstantTimeCompare(slice<byte> x, slice<byte> y) {
         return 0;
     }
 
-    byte v = default!;
+    byte v = default;
 
     for (nint i = 0; i < len(x); i++) {
         v |= (byte)((byte)(x[i] ^ y[i]));
@@ -41,7 +41,7 @@ public static nint ConstantTimeLessOrEqBytes(slice<byte> x, slice<byte> y) {
 
     // Do a constant time subtraction chain y - x.
     // If there is no borrow at the end, then x <= y.
-    uint64 b = default!;
+    uint64 b = default;
     while (len(x) > 8) {
         var x0 = byteorder.BEUint64(x.slice(len(x) - 8));
         var y0 = byteorder.BEUint64(y.slice(len(y) - 8));

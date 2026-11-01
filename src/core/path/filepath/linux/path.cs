@@ -167,13 +167,13 @@ public static (@string, error) Abs(@string path) {
 
 internal static (@string, error) unixAbs(@string path) {
     if (IsAbs(path)) {
-        return (Clean(path), default!);
+        return (Clean(path), default);
     }
     var (wd, err) = os.Getwd();
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
-    return (Join(wd, path), default!);
+    return (Join(wd, path), default);
 }
 
 // Rel returns a relative path that is lexically equivalent to targPath when
@@ -191,14 +191,13 @@ public static (@string, error) Rel(@string basePath, @string targPath) {
     @string @base = Clean(basePath);
     @string targ = Clean(targPath);
     if (sameWord(targ, @base)) {
-        return (".", default!);
+        return (".", default);
     }
     @base = @base.slice(len(baseVol));
     targ = targ.slice(len(targVol));
-    if (@base == "."u8){
+    if (@base == "."u8) {
         @base = ""u8;
-    } else 
-    if (@base == ""u8 && filepathlite.VolumeNameLen(baseVol) > 2) {
+    } else if (@base == ""u8 && filepathlite.VolumeNameLen(baseVol) > 2) {
         /* isUNC */
         // Treat any targetpath matching `\\host\share` basePath as absolute path.
         @base = (@string)(rune)Separator;
@@ -213,11 +212,11 @@ public static (@string, error) Rel(@string basePath, @string targPath) {
     // Position base[b0:bi] and targ[t0:ti] at the first differing elements.
     nint bl = len(@base);
     nint tl = len(targ);
-    nint b0 = default!;
-    nint bi = default!;
-    nint t0 = default!;
-    nint ti = default!;
-    while (ᐧ) {
+    nint b0 = default;
+    nint bi = default;
+    nint t0 = default;
+    nint ti = default;
+    for (;;) {
         while (bi < bl && @base[bi] != Separator) {
             bi++;
         }
@@ -257,9 +256,9 @@ public static (@string, error) Rel(@string basePath, @string targPath) {
             buf[n] = Separator;
             copy(buf.slice(n + 1), targ.slice(t0));
         }
-        return (Clean((@string)buf), default!);
+        return (Clean((@string)buf), default);
     }
-    return (targ.slice(t0), default!);
+    return (targ.slice(t0), default);
 }
 
 // SkipDir is used as a return value from [WalkFunc] to indicate that
@@ -313,27 +312,27 @@ public static error SkipAll = fs.SkipAll;
 // type WalkFunc is a methodless func type — rendered inline as its base delegate
 
 internal static readonly ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
-internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox<Func<@string, (fs.FileInfo, error)>>)Ꮡlstat).ValueSlot;                   // for testing
+internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox<Func<@string, (fs.FileInfo, error)>>)Ꮡlstat).ValueSlot; // for testing
 
 // walkDir recursively descends path, calling walkDirFn.
 internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirEntry, error, error> walkDirFn) {
     {
-        var errΔ1 = walkDirFn(path, d, default!); if (errΔ1 != default! || !d.IsDir()) {
+        var errΔ1 = walkDirFn(path, d, default); if (errΔ1 != nil || !d.IsDir()) {
             if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
                 // Successfully skipped directory.
-                errΔ1 = default!;
+                errΔ1 = default;
             }
             return errΔ1;
         }
     }
 
     var (dirs, err) = os.ReadDir(path);
-    if (err != default!) {
+    if (err != nil) {
         // Second call, to report ReadDir error.
         err = walkDirFn(path, d, err);
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, SkipDir) && d.IsDir()) {
-                err = default!;
+                err = default;
             }
             return err;
         }
@@ -342,7 +341,7 @@ internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirE
     foreach (var (_, d1) in dirs) {
         @string path1 = Join(path, d1.Name());
         {
-            var errΔ2 = walkDir(path1, d1, walkDirFn); if (errΔ2 != default!) {
+            var errΔ2 = walkDir(path1, d1, walkDirFn); if (errΔ2 != nil) {
                 if (AreEqual(errΔ2, SkipDir)) {
                     break;
                 }
@@ -350,13 +349,13 @@ internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirE
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // walk recursively descends path, calling walkFn.
 internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.FileInfo, error, error> walkFn) {
     if (!info.IsDir()) {
-        return walkFn(path, info, default!);
+        return walkFn(path, info, default);
     }
 
     var (names, err) = readDirNames(path);
@@ -364,7 +363,7 @@ internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.File
     // If err != nil, walk can't walk into this directory.
     // err1 != nil means walkFn want walk to skip this directory or stop walking.
     // Therefore, if one of err and err1 isn't nil, walk will return.
-    if (err != default! || err1 != default!) {
+    if (err != nil || err1 != nil) {
         // The caller's behavior is controlled by the return value, which is decided
         // by walkFn. walkFn may ignore err and return nil.
         // If walkFn returns SkipDir or SkipAll, it will be handled by the caller.
@@ -375,22 +374,22 @@ internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.File
     foreach (var (_, name) in names) {
         @string filename = Join(path, name);
         var (fileInfo, errΔ1) = lstat(filename);
-        if (errΔ1 != default!){
+        if (errΔ1 != nil) {
             {
-                var errΔ2 = walkFn(filename, fileInfo, errΔ1); if (errΔ2 != default! && !AreEqual(errΔ2, SkipDir)) {
+                var errΔ2 = walkFn(filename, fileInfo, errΔ1); if (errΔ2 != nil && !AreEqual(errΔ2, SkipDir)) {
                     return errΔ2;
                 }
             }
         } else {
             errΔ1 = walk(filename, fileInfo, walkFn);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 if (!fileInfo.IsDir() || !AreEqual(errΔ1, SkipDir)) {
                     return errΔ1;
                 }
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // WalkDir walks the file tree rooted at root, calling fn for each file or
@@ -410,13 +409,13 @@ internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.File
 // uses slash separated paths.
 public static error WalkDir(@string root, Func<@string, fs.DirEntry, error, error> fn) {
     var (info, err) = os.Lstat(root);
-    if (err != default!){
-        err = fn(root, default!, err);
+    if (err != nil) {
+        err = fn(root, default, err);
     } else {
         err = walkDir(root, fs.FileInfoToDirEntry(info), fn);
     }
     if (AreEqual(err, SkipDir) || AreEqual(err, SkipAll)) {
-        return default!;
+        return default;
     }
     return err;
 }
@@ -437,13 +436,13 @@ public static error WalkDir(@string root, Func<@string, fs.DirEntry, error, erro
 // which avoids calling os.Lstat on every visited file or directory.
 public static error Walk(@string root, Func<@string, fs.FileInfo, error, error> fn) {
     var (info, err) = os.Lstat(root);
-    if (err != default!){
-        err = fn(root, default!, err);
+    if (err != nil) {
+        err = fn(root, default, err);
     } else {
         err = walk(root, info, fn);
     }
     if (AreEqual(err, SkipDir) || AreEqual(err, SkipAll)) {
-        return default!;
+        return default;
     }
     return err;
 }
@@ -452,16 +451,16 @@ public static error Walk(@string root, Func<@string, fs.FileInfo, error, error> 
 // a sorted list of directory entry names.
 internal static (slice<@string>, error) readDirNames(@string dirname) {
     var (f, err) = os.Open(dirname);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var names, err) = f.Readdirnames(-1);
     f.Close();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     slices.Sort<slice<@string>, @string>(names);
-    return (names, default!);
+    return (names, default);
 }
 
 // Base returns the last element of path.

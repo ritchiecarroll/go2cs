@@ -9,11 +9,11 @@ using @unsafe = unsafe_package;
 partial class checktest_package {
 
 public static ж<uint32> PtrStaticData() {
-    return default!;
+    return default;
 }
 
 public static @unsafe.Pointer PtrStaticText() {
-    return default!;
+    return default;
 }
 
 } // end checktest_package

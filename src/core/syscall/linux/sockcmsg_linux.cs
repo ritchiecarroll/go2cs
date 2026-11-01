@@ -16,8 +16,8 @@ public static slice<byte> UnixCredentials(ж<Ucred> Ꮡucred) {
 
     var b = new slice<byte>(CmsgSpace(SizeofUcred));
     var h = Ꮡ(b, 0).Reinterpret<byte, Cmsghdr>();
-    h.Value.Level = SOL_SOCKET;
-    h.Value.Type = SCM_CREDENTIALS;
+    h.Level = SOL_SOCKET;
+    h.Type = SCM_CREDENTIALS;
     h.SetLen(CmsgLen(SizeofUcred));
     ((ж<Ucred>)(uintptr)(h.data(0))).Value = ucred;
     return b;
@@ -30,17 +30,16 @@ public static (ж<Ucred>, error) ParseUnixCredentials(ж<SocketControlMessage> �
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (m.Header.Level != SOL_SOCKET) {
-        return (default!, EINVAL);
+        return (default, EINVAL);
     }
     if (m.Header.Type != SCM_CREDENTIALS) {
-        return (default!, EINVAL);
+        return (default, EINVAL);
     }
     if ((uintptr)len(m.Data) < /* unsafe.Sizeof(Ucred{}) */ (uintptr)12) {
-        return (default!, EINVAL);
+        return (default, EINVAL);
     }
-    ref var ucred = ref heap<Ucred>(out var Ꮡucred);
-    ucred = ~Ꮡ(m.Data, 0).Reinterpret<byte, Ucred>();
-    return (Ꮡucred, default!);
+    ref var ucred = ref heap<Ucred>(~Ꮡ(m.Data, 0).Reinterpret<byte, Ucred>(), out var Ꮡucred);
+    return (Ꮡucred, default);
 }
 
 } // end syscall_package

@@ -80,12 +80,18 @@ internal static void _ᴛ3() {
     _ = x[TagImmutableType - 75];
 }
 
-internal static readonly @string _Tag_name_0 = "ArrayTypeClassTypeEntryPointEnumerationTypeFormalParameter"u8;
-internal static readonly @string _Tag_name_1 = "ImportedDeclaration"u8;
-internal static readonly @string _Tag_name_2 = "LabelLexDwarfBlock"u8;
-internal static readonly @string _Tag_name_3 = "Member"u8;
-internal static readonly @string _Tag_name_4 = "PointerTypeReferenceTypeCompileUnitStringTypeStructType"u8;
-internal static readonly @string _Tag_name_5 = "SubroutineTypeTypedefUnionTypeUnspecifiedParametersVariantCommonDwarfBlockCommonInclusionInheritanceInlinedSubroutineModulePtrToMemberTypeSetTypeSubrangeTypeWithStmtAccessDeclarationBaseTypeCatchDwarfBlockConstTypeConstantEnumeratorFileTypeFriendNamelistNamelistItemPackedTypeSubprogramTemplateTypeParameterTemplateValueParameterThrownTypeTryDwarfBlockVariantPartVariableVolatileTypeDwarfProcedureRestrictTypeInterfaceTypeNamespaceImportedModuleUnspecifiedTypePartialUnitImportedUnitMutableTypeConditionSharedTypeTypeUnitRvalueReferenceTypeTemplateAliasCoarrayTypeGenericSubrangeDynamicTypeAtomicTypeCallSiteCallSiteParameterSkeletonUnitImmutableType"u8;
+internal static ref readonly @string _Tag_name_0 => ref _Tag_name_0ᵇ;
+private static readonly @string _Tag_name_0ᵇ = "ArrayTypeClassTypeEntryPointEnumerationTypeFormalParameter"u8;
+internal static ref readonly @string _Tag_name_1 => ref _Tag_name_1ᵇ;
+private static readonly @string _Tag_name_1ᵇ = "ImportedDeclaration"u8;
+internal static ref readonly @string _Tag_name_2 => ref _Tag_name_2ᵇ;
+private static readonly @string _Tag_name_2ᵇ = "LabelLexDwarfBlock"u8;
+internal static ref readonly @string _Tag_name_3 => ref _Tag_name_3ᵇ;
+private static readonly @string _Tag_name_3ᵇ = "Member"u8;
+internal static ref readonly @string _Tag_name_4 => ref _Tag_name_4ᵇ;
+private static readonly @string _Tag_name_4ᵇ = "PointerTypeReferenceTypeCompileUnitStringTypeStructType"u8;
+internal static ref readonly @string _Tag_name_5 => ref _Tag_name_5ᵇ;
+private static readonly @string _Tag_name_5ᵇ = "SubroutineTypeTypedefUnionTypeUnspecifiedParametersVariantCommonDwarfBlockCommonInclusionInheritanceInlinedSubroutineModulePtrToMemberTypeSetTypeSubrangeTypeWithStmtAccessDeclarationBaseTypeCatchDwarfBlockConstTypeConstantEnumeratorFileTypeFriendNamelistNamelistItemPackedTypeSubprogramTemplateTypeParameterTemplateValueParameterThrownTypeTryDwarfBlockVariantPartVariableVolatileTypeDwarfProcedureRestrictTypeInterfaceTypeNamespaceImportedModuleUnspecifiedTypePartialUnitImportedUnitMutableTypeConditionSharedTypeTypeUnitRvalueReferenceTypeTemplateAliasCoarrayTypeGenericSubrangeDynamicTypeAtomicTypeCallSiteCallSiteParameterSkeletonUnitImmutableType"u8;
 
 internal static array<uint8> _Tag_index_0 = new uint8[]{0, 9, 18, 28, 43, 58}.array();
 internal static array<uint8> _Tag_index_2 = new uint8[]{0, 5, 18}.array();
@@ -117,7 +123,7 @@ public static @string String(this Tag i) {
         return _Tag_name_5.slice(_Tag_index_5[i], _Tag_index_5[i + 1]);
     }
     default: {
-        return "Tag("u8 + strconv.FormatInt((int64)(uint32)i, 10) + ")"u8;
+        return "Tag("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 

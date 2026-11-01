@@ -9,14 +9,15 @@ using errors = errors_package;
 partial class plugin_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pluginNotImplementedˢ = "plugin: not implemented"u8;
+private static ref readonly @string pluginNotImplementedˢ => ref pluginNotImplementedˢᵇ;
+private static readonly @string pluginNotImplementedˢᵇ = "plugin: not implemented"u8;
 
 internal static (Symbol, error) lookup(ref Plugin p, @string symName) {
-    return (default!, errors.New(pluginNotImplementedˢ));
+    return (default, errors.New(pluginNotImplementedˢ));
 }
 
 internal static (ж<Plugin>, error) open(@string name) {
-    return (default!, errors.New(pluginNotImplementedˢ));
+    return (default, errors.New(pluginNotImplementedˢ));
 }
 
 } // end plugin_package

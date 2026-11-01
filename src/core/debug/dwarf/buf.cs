@@ -52,11 +52,12 @@ internal static nint addrsize(this unknownFormat u) {
 internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offset off, slice<byte> data) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    return new buf(Ꮡd, d.order, format, name, off, data, default!);
+    return new buf(Ꮡd, d.order, format, name, off, data, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string underflowˢ = "underflow"u8;
+internal static ref readonly @string underflowˢ => ref underflowˢᵇ;
+private static readonly @string underflowˢᵇ = "underflow"u8;
 
 internal static uint8 uint8(this ref buf b) {
     if (len(b.data) < 1) {
@@ -72,7 +73,7 @@ internal static uint8 uint8(this ref buf b) {
 internal static slice<byte> bytes(this ref buf b, nint n) {
     if (n < 0 || len(b.data) < n) {
         b.error(underflowˢ);
-        return default!;
+        return default;
     }
     var data = b.data.slice(0, n);
     b.data = b.data.slice(n);
@@ -99,7 +100,7 @@ internal static @string @string(this ref buf b) {
 
 internal static uint16 uint16(this ref buf b) {
     var a = b.bytes(2);
-    if (a == default!) {
+    if (a == nil) {
         return 0;
     }
     return b.order.Uint16(a);
@@ -107,10 +108,10 @@ internal static uint16 uint16(this ref buf b) {
 
 internal static uint32 uint24(this ref buf b) {
     var a = b.bytes(3);
-    if (a == default!) {
+    if (a == nil) {
         return 0;
     }
-    if ((~b.dwarf).bigEndian){
+    if (b.dwarf.bigEndian) {
         return (uint32)a[2] | (uint32)a[1] << 8 | (uint32)a[0] << 16;
     } else {
         return (uint32)a[0] | (uint32)a[1] << 8 | (uint32)a[2] << 16;
@@ -119,7 +120,7 @@ internal static uint32 uint24(this ref buf b) {
 
 internal static uint32 uint32(this ref buf b) {
     var a = b.bytes(4);
-    if (a == default!) {
+    if (a == nil) {
         return 0;
     }
     return b.order.Uint32(a);
@@ -127,7 +128,7 @@ internal static uint32 uint32(this ref buf b) {
 
 internal static uint64 uint64(this ref buf b) {
     var a = b.bytes(8);
-    if (a == default!) {
+    if (a == nil) {
         return 0;
     }
     return b.order.Uint64(a);
@@ -136,8 +137,8 @@ internal static uint64 uint64(this ref buf b) {
 // Read a varint, which is 7 bits per byte, little endian.
 // the 0x80 bit means read another byte.
 internal static (uint64 c, nuint bits) varint(this ref buf b) {
-    uint64 c = default!;
-    nuint bits = default!;
+    uint64 c = default;
+    nuint bits = default;
 
     for (nint i = 0; i < len(b.data); i++) {
         var @byte = b.data[i];
@@ -169,7 +170,8 @@ internal static int64 @int(this ref buf b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unknownAddressSizeˢ = "unknown address size"u8;
+internal static ref readonly @string unknownAddressSizeˢ => ref unknownAddressSizeˢᵇ;
+private static readonly @string unknownAddressSizeˢᵇ = "unknown address size"u8;
 
 // Address-sized uint.
 internal static uint64 addr(this ref buf b) {
@@ -191,26 +193,26 @@ internal static uint64 addr(this ref buf b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unitLengthHasReservedˢ = "unit length has reserved value"u8;
+internal static ref readonly @string unitLengthHasReservedˢ => ref unitLengthHasReservedˢᵇ;
+private static readonly @string unitLengthHasReservedˢᵇ = "unit length has reserved value"u8;
 
 internal static (Offset length, bool dwarf64) unitLength(this ref buf b) {
-    Offset length = default!;
-    bool dwarf64 = default!;
+    Offset length = default;
+    bool dwarf64 = default;
 
     length = (Offset)b.uint32();
-    if (length == 0xffffffffU){
+    if (length == 0xffffffffU) {
         dwarf64 = true;
         length = (Offset)(uint32)b.uint64();
-    } else 
-    if (length >= 0xfffffff0U) {
+    } else if (length >= 0xfffffff0U) {
         b.error(unitLengthHasReservedˢ);
     }
     return (length, dwarf64);
 }
 
 internal static void error(this ref buf b, @string s) {
-    if (b.err == default!) {
-        b.data = default!;
+    if (b.err == nil) {
+        b.data = default;
         b.err = new DecodeError(b.name, b.off, s);
     }
 }
@@ -222,7 +224,7 @@ partial struct DecodeError {
 }
 
 public static @string Error(this DecodeError e) {
-    return "decoding dwarf section "u8 + e.Name + " at offset 0x"u8 + strconv.FormatInt((int64)(uint32)e.Offset, 16) + ": "u8 + e.Err;
+    return "decoding dwarf section "u8 + e.Name + " at offset 0x"u8 + strconv.FormatInt((int64)e.Offset, 16) + ": "u8 + e.Err;
 }
 
 } // end dwarf_package

@@ -40,15 +40,15 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) {
         }
 
         var (@file, err) = fsys.Open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fileʗ1 = @file;
         defer(() => fileʗ1.Close(), ref ᒐ);
 
-        nint size = default!;
+        nint size = default;
         {
-            var (info, errΔ1) = @file.Stat(); if (errΔ1 == default!) {
+            var (info, errΔ1) = @file.Stat(); if (errΔ1 == nil) {
                 var size64 = info.Size();
                 if ((int64)(nint)size64 == size64) {
                     size = (nint)size64;
@@ -57,22 +57,22 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) {
         }
 
         var data = new slice<byte>(0, size + 1);
-        while (ᐧ) {
+        for (;;) {
             if (len(data) >= cap(data)) {
                 var d = append(data.slice(0, cap(data)), (byte)0);
                 data = d.slice(0, len(data));
             }
             var (n, errΔ2) = @file.Read(data.slice(len(data), cap(data)));
             data = data.slice(0, len(data) + n);
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 if (AreEqual(errΔ2, io.EOF)) {
-                    errΔ2 = default!;
+                    errΔ2 = default;
                 }
                 return (data, errΔ2);
             }
         }
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

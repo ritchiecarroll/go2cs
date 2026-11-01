@@ -13,11 +13,11 @@ using go.@internal.runtime;
 partial class scan_package {
 
 // ScanSpanPackedGo is an optimized pure Go implementation of ScanSpanPacked.
-public static int32 /*count*/ ScanSpanPackedGo(@unsafe.Pointer mem, ж<uintptr> Ꮡbufp, ж<gc.ObjMask> ᏑobjMarks, uintptr sizeClass, ж<gc.PtrMask> ᏑptrMask) {
+public static int32 /*count*/ ScanSpanPackedGo(@unsafe.Pointer mem, ж<uintptr> bufp, ж<gc.ObjMask> ᏑobjMarks, uintptr sizeClass, ж<gc.PtrMask> ᏑptrMask) {
     ref var objMarks = ref ᏑobjMarks.DerefOrNull();
     ref var ptrMask = ref ᏑptrMask.DerefOrNull();
 
-    var buf = newUnsafeBuf<uintptr>(Ꮡbufp);
+    var buf = newUnsafeBuf<uintptr>(bufp);
     var objBytes = (uintptr)gc.SizeClassToSize[sizeClass];
     // TODO(austin): Trim objMarks to the number of objects in this size class?
     foreach (var (markI, vᴛ1) in objMarks) {
@@ -74,8 +74,8 @@ partial struct unsafeBuf<T> {
     internal nint n;
 }
 
-internal static unsafeBuf<T> newUnsafeBuf<T>(ж<T> Ꮡbase) {
-    return new unsafeBuf<T>(Ꮡbase, 0);
+internal static unsafeBuf<T> newUnsafeBuf<T>(ж<T> @base) {
+    return new unsafeBuf<T>(@base, 0);
 }
 
 // addIf appends a value to the buffer if the predicate is true.
@@ -102,7 +102,7 @@ internal static void check<T>(this unsafeBuf<T> b, nint cap) {
 
 internal static nint bool2int(bool x) {
     // This particular pattern gets optimized by the compiler.
-    nint b = default!;
+    nint b = default;
     if (x) {
         b = 1;
     }

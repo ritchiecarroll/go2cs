@@ -10,19 +10,19 @@ using go.@internal.syscall;
 
 partial class poll_package {
 
-public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> Ꮡs, nint flags) {
+public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => unix.Fstatat(Ꮡfd.Value.Sysfd, name, Ꮡs, flags));
+        return ignoringEINTR(() => unix.Fstatat(Ꮡfd.Value.Sysfd, name, s, flags));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 

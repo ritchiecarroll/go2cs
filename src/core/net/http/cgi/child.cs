@@ -27,20 +27,20 @@ partial class cgi_package {
 // The returned Request's Body is populated, if applicable.
 public static (ж<http.Request>, error) Request() {
     var (r, err) = RequestFromMap(envMap(os.Environ()));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    if ((~r).ContentLength > 0) {
-        r.Value.Body = io.NopCloser(io.LimitReader(new os_FileжReader(os.Stdin), (~r).ContentLength));
+    if (r.ContentLength > 0) {
+        r.Body = io.NopCloser(io.LimitReader(new os_FileжReader(os.Stdin), r.ContentLength));
     }
-    return (r, default!);
+    return (r, default);
 }
 
 internal static map<@string, @string> envMap(slice<@string> env) {
     var m = new map<@string, @string>();
     foreach (var (_, kv) in env) {
         {
-            var (k, v, ok) = strings.Cut(kv, "="u8); if (ok) {
+            var (k, v, ok) = strings.Cut(kv, "="); if (ok) {
                 m[k] = v;
             }
         }
@@ -49,60 +49,71 @@ internal static map<@string, @string> envMap(slice<@string> env) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cgiNoRequestMethodInˢ = "cgi: no REQUEST_METHOD in environment"u8;
-internal static readonly @string serverProtocolˢ = "SERVER_PROTOCOL"u8;
-internal static readonly @string cgiInvalidServerProtocolˢ = "cgi: invalid SERVER_PROTOCOL version"u8;
-internal static readonly @string httpHostˢ = "HTTP_HOST"u8;
-internal static readonly @string contentLengthˢ = "CONTENT_LENGTH"u8;
-internal static readonly @string contentTypeˢ = "CONTENT_TYPE"u8;
-internal static readonly @string contentTypeˢ2 = "Content-Type"u8;
-internal static readonly @string httpˢ = "HTTP_"u8;
-internal static readonly @string queryStringˢ = "QUERY_STRING"u8;
-internal static readonly @string httpsˢ = "HTTPS"u8;
-internal static readonly @string remotePortˢ = "REMOTE_PORT"u8;
-internal static readonly @string remoteAddrˢ = "REMOTE_ADDR"u8;
+internal static ref readonly @string cgiNoRequestMethodInˢ => ref cgiNoRequestMethodInˢᵇ;
+private static readonly @string cgiNoRequestMethodInˢᵇ = "cgi: no REQUEST_METHOD in environment"u8;
+internal static ref readonly @string serverProtocolˢ => ref serverProtocolˢᵇ;
+private static readonly @string serverProtocolˢᵇ = "SERVER_PROTOCOL"u8;
+internal static ref readonly @string cgiInvalidServerProtocolˢ => ref cgiInvalidServerProtocolˢᵇ;
+private static readonly @string cgiInvalidServerProtocolˢᵇ = "cgi: invalid SERVER_PROTOCOL version"u8;
+internal static ref readonly @string httpHostˢ => ref httpHostˢᵇ;
+private static readonly @string httpHostˢᵇ = "HTTP_HOST"u8;
+internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
+private static readonly @string contentLengthˢᵇ = "CONTENT_LENGTH"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "CONTENT_TYPE"u8;
+internal static ref readonly @string contentTypeˢ2 => ref contentTypeˢ2ᵇ;
+private static readonly @string contentTypeˢ2ᵇ = "Content-Type"u8;
+internal static ref readonly @string httpˢ => ref httpˢᵇ;
+private static readonly @string httpˢᵇ = "HTTP_"u8;
+internal static ref readonly @string queryStringˢ => ref queryStringˢᵇ;
+private static readonly @string queryStringˢᵇ = "QUERY_STRING"u8;
+internal static ref readonly @string httpsˢ => ref httpsˢᵇ;
+private static readonly @string httpsˢᵇ = "HTTPS"u8;
+internal static ref readonly @string remotePortˢ => ref remotePortˢᵇ;
+private static readonly @string remotePortˢᵇ = "REMOTE_PORT"u8;
+internal static ref readonly @string remoteAddrˢ => ref remoteAddrˢᵇ;
+private static readonly @string remoteAddrˢᵇ = "REMOTE_ADDR"u8;
 
 // RequestFromMap creates an [http.Request] from CGI variables.
 // The returned Request's Body field is not populated.
 public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @params) {
     var r = @new<http.Request>();
-    r.Value.Method = @params[requestMethodˢ];
-    if ((~r).Method == ""u8) {
-        return (default!, errors.New(cgiNoRequestMethodInˢ));
+    r.Method = @params[requestMethodˢ];
+    if (r.Method == ""u8) {
+        return (default, errors.New(cgiNoRequestMethodInˢ));
     }
 
-    r.Value.Proto = @params[serverProtocolˢ];
-    bool ok = default!;
-    if ((~r).Proto == "INCLUDED"u8){
+    r.Proto = @params[serverProtocolˢ];
+    bool ok = default;
+    if (r.Proto == "INCLUDED"u8) {
         // SSI (Server Side Include) use case
         // CGI Specification RFC 3875 - section 4.1.16
-        (r.Value.ProtoMajor, r.Value.ProtoMinor) = (1, 0);
-    } else 
-    {
-        (r.Value.ProtoMajor, r.Value.ProtoMinor, ok) = http.ParseHTTPVersion((~r).Proto); if (!ok) {
-            return (default!, errors.New(cgiInvalidServerProtocolˢ));
+        (r.ProtoMajor, r.ProtoMinor) = (1, 0);
+    } else {
+        (r.ProtoMajor, r.ProtoMinor, ok) = http.ParseHTTPVersion(r.Proto); if (!ok) {
+            return (default, errors.New(cgiInvalidServerProtocolˢ));
         }
     }
 
-    r.Value.Close = true;
-    r.Value.Trailer = new httpꓸHeader(new map<@string, slice<@string>>{});
-    r.Value.Header = new httpꓸHeader(new map<@string, slice<@string>>{});
+    r.Close = true;
+    r.Trailer = new httpꓸHeader(new map<@string, slice<@string>>{});
+    r.Header = new httpꓸHeader(new map<@string, slice<@string>>{});
 
-    r.Value.Host = @params[httpHostˢ];
+    r.Host = @params[httpHostˢ];
 
     {
         @string lenstr = @params[contentLengthˢ]; if (lenstr != ""u8) {
             var (clen, err) = strconv.ParseInt(lenstr, 10, 64);
-            if (err != default!) {
-                return (default!, errors.New("cgi: bad CONTENT_LENGTH in environment: "u8 + lenstr));
+            if (err != nil) {
+                return (default, errors.New("cgi: bad CONTENT_LENGTH in environment: "u8 + lenstr));
             }
-            r.Value.ContentLength = clen;
+            r.ContentLength = clen;
         }
     }
 
     {
         @string ct = @params[contentTypeˢ]; if (ct != ""u8) {
-            (~r).Header.Set(contentTypeˢ2, ct);
+            r.Header.Set(contentTypeˢ2, ct);
         }
     }
 
@@ -113,7 +124,7 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
         }
         {
             var (after, found) = strings.CutPrefix(k, httpˢ); if (found) {
-                (~r).Header.Add(strings.ReplaceAll(after, "_"u8, "-"u8), v);
+                r.Header.Add(strings.ReplaceAll(after, "_", "-"), v);
             }
         }
     }
@@ -132,40 +143,40 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
     // https://web.archive.org/web/20170105004655/http://docstore.mik.ua/orelly/linux/cgi/ch03_02.htm#ch03-35636
     {
         @string s = @params[httpsˢ]; if (s == "on"u8 || s == "ON"u8 || s == "1"u8) {
-            r.Value.TLS = Ꮡ(new tlsꓸConnectionState(HandshakeComplete: true));
+            r.TLS = Ꮡ(new tlsꓸConnectionState(HandshakeComplete: true));
         }
     }
 
-    if ((~r).Host != ""u8) {
+    if (r.Host != ""u8) {
         // Hostname is provided, so we can reasonably construct a URL.
-        @string rawurl = (~r).Host + uriStr;
-        if ((~r).TLS == nil){
+        @string rawurl = r.Host + uriStr;
+        if (r.TLS == nil) {
             rawurl = "http://"u8 + rawurl;
         } else {
             rawurl = "https://"u8 + rawurl;
         }
         var (urlΔ1, err) = url.Parse(rawurl);
-        if (err != default!) {
-            return (default!, errors.New("cgi: failed to parse host and REQUEST_URI into a URL: "u8 + rawurl));
+        if (err != nil) {
+            return (default, errors.New("cgi: failed to parse host and REQUEST_URI into a URL: "u8 + rawurl));
         }
-        r.Value.URL = urlΔ1;
+        r.URL = urlΔ1;
     }
     // Fallback logic if we don't have a Host header or the URL
     // failed to parse
-    if ((~r).URL == nil) {
+    if (r.URL == nil) {
         var (urlΔ2, err) = url.Parse(uriStr);
-        if (err != default!) {
-            return (default!, errors.New("cgi: failed to parse REQUEST_URI into a URL: "u8 + uriStr));
+        if (err != nil) {
+            return (default, errors.New("cgi: failed to parse REQUEST_URI into a URL: "u8 + uriStr));
         }
-        r.Value.URL = urlΔ2;
+        r.URL = urlΔ2;
     }
 
     // Request.RemoteAddr has its port set by Go's standard http
     // server, so we do here too.
     var (remotePort, _) = strconv.Atoi(@params[remotePortˢ]); // zero if unset or invalid
-    r.Value.RemoteAddr = net.JoinHostPort(@params[remoteAddrˢ], strconv.Itoa(remotePort));
+    r.RemoteAddr = net.JoinHostPort(@params[remoteAddrˢ], strconv.Itoa(remotePort));
 
-    return (r, default!);
+    return (r, default);
 }
 
 // Serve executes the provided [Handler] on the currently active CGI
@@ -174,13 +185,13 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
 // [http.DefaultServeMux].
 public static error Serve(httpꓸHandler handler) {
     var (req, err) = Request();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
-    if ((~req).Body == default!) {
-        req.Value.Body = http.NoBody;
+    if (req.Body == nil) {
+        req.Body = http.NoBody;
     }
-    if (handler == default!) {
+    if (handler == nil) {
         handler = new http.ServeMuxжΔHandler(http.DefaultServeMux);
     }
     var rw = Ꮡ(new response(
@@ -189,13 +200,13 @@ public static error Serve(httpꓸHandler handler) {
         bufw: bufio.NewWriter(new os.FileжWriter(os.Stdout))
     ));
     handler.ServeHTTP(new responseжResponseWriter(rw), req);
-    rw.Write(default!); // make sure a response is sent
+    rw.Write(default); // make sure a response is sent
     {
-        err = (~rw).bufw.Flush(); if (err != default!) {
+        err = rw.bufw.Flush(); if (err != nil) {
             return err;
         }
     }
-    return default!;
+    return default;
 }
 
 partial struct response {
@@ -228,7 +239,7 @@ internal static (nint n, error err) Write(this ref response r, slice<byte> p) {
 internal static void WriteHeader(this ref response r, nint code) {
     if (r.wroteHeader) {
         // Note: explicitly using Stderr, as Stdout is our HTTP output.
-        fmt.Fprintf(new os.FileжWriter(os.Stderr), "CGI attempted to write header twice on request for %s"u8, (~r.req).URL.OrTypedNil());
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "CGI attempted to write header twice on request for %s"u8, r.req.URL.OrTypedNil());
         return;
     }
     r.wroteHeader = true;
@@ -251,7 +262,7 @@ internal static void writeCGIHeader(this ref response r, slice<byte> p) {
         }
     }
     r.header.Write(new bufio_WriterжWriter(r.bufw));
-    r.bufw.WriteString("\r\n"u8);
+    r.bufw.WriteString("\r\n");
     r.bufw.Flush();
 }
 

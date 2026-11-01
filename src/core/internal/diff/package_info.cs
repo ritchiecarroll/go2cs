@@ -46,7 +46,7 @@ using static go.@internal.diff_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,7 +56,7 @@ using static go.@internal.diff_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/diff/diff.go", "diff.cs", "ABNcAB4CgpSClpKCggABEAAJDIKU7oKCgpSCgoLKgoKUgoKqooSCgoKUgriCgoKUgoKClMqClIKUgoKUgoK4griCgoKClKassoKCuJQAAhYAEAqCgoCCtoKAggAEFAAIAoKCgqaCgIKCAAgQkoKCgoKUkqaClIKCgqaCgoKCgoKmgg==", "238-240:1")]
+[assembly: GoPositionMap("internal/diff/diff.go", "diff.cs", "ABNcAB4CgpSClpKCggABEAAJDIKU7oKCgpSCgoLKgoKUgoKqooSCgoKUgriCgoKUgoKClMqClIKUgoKUgoK4griCgoKClKassoKCuJQAAhYAEAqCgoCCtoKAggAEFAAIAoKCgqaCgIKCAAgQkoKCgoKUkqaClIKCgqaCgoKCgoKmgg==", "238-240:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

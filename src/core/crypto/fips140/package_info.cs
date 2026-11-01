@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,7 +45,7 @@ using static go.crypto.fips140_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,8 +55,8 @@ using static go.crypto.fips140_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/fips140/enforcement.go", "enforcement.cs", "AAsqAAsCgoKUgoKipJqyqMbG")]
-[assembly: go.GoPositionMap("crypto/fips140/fips140.go", "fips140.cs", "ABM0AAgCgpQAAhwACwI=")]
+[assembly: GoPositionMap("crypto/fips140/enforcement.go", "enforcement.cs", "AAsqAAsCgoKUgoKipJqyqMbG")]
+[assembly: GoPositionMap("crypto/fips140/fips140.go", "fips140.cs", "ABM0AAgCgpQAAhwACwI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

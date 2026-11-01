@@ -8,8 +8,8 @@ using Δsyscall = syscall_package;
 
 partial class poll_package {
 
-internal static Δsyscall.Iovec newIovecWithBase(ж<byte> Ꮡbase) {
-    return new Δsyscall.Iovec(Base: Ꮡbase);
+internal static Δsyscall.Iovec newIovecWithBase(ж<byte> @base) {
+    return new Δsyscall.Iovec(Base: @base);
 }
 
 } // end poll_package

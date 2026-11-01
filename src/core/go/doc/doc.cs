@@ -55,8 +55,8 @@ partial struct Type {
     public ж<ast.GenDecl> Decl;
     // associated declarations
     public slice<ж<Value>> Consts; // sorted list of constants of (mostly) this type
-    public slice<ж<Value>> Vars; // sorted list of variables of (mostly) this type
-    public slice<ж<Func>> Funcs; // sorted list of functions returning this type
+    public slice<ж<Value>> Vars;   // sorted list of variables of (mostly) this type
+    public slice<ж<Func>> Funcs;   // sorted list of functions returning this type
     public slice<ж<Func>> Methods; // sorted list of methods (including embedded ones) of this type
     // Examples is a sorted list of examples associated with
     // this type. Examples are extracted from _test.go files
@@ -86,8 +86,8 @@ partial struct Func {
 // Notes are collected in the Package.Notes map indexed by the notes marker.
 partial struct Note {
     public tokenꓸPos Pos, End; // position range of the comment containing the marker
-    public @string UID;   // uid found with the marker
-    public @string Body;   // note body text
+    public @string UID;        // uid found with the marker
+    public @string Body;       // note body text
 }
 
 // Mode values control the operation of [New] and [NewFromFiles].
@@ -107,7 +107,8 @@ public static Mode AllMethods => 2;
 public static Mode PreserveAST => 4;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bugˢ = "BUG"u8;
+internal static ref readonly @string bugˢ => ref bugˢᵇ;
+private static readonly @string bugˢᵇ = "BUG"u8;
 
 // New computes the package documentation for the given package AST.
 // New takes ownership of the AST pkg and may edit or overwrite it.
@@ -137,17 +138,17 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
         syms: new map<@string, bool>()
     ));
 
-    p.collectValues((~p).Consts);
-    p.collectValues((~p).Vars);
-    p.collectTypes((~p).Types);
-    p.collectFuncs((~p).Funcs);
+    p.collectValues(p.Consts);
+    p.collectValues(p.Vars);
+    p.collectTypes(p.Types);
+    p.collectFuncs(p.Funcs);
 
     return p;
 }
 
 internal static void collectValues(this ref Package p, slice<ж<Value>> values) {
     foreach (var (_, v) in values) {
-        foreach (var (_, name) in (~v).Names) {
+        foreach (var (_, name) in v.Names) {
             p.syms[name] = true;
         }
     }
@@ -155,15 +156,15 @@ internal static void collectValues(this ref Package p, slice<ж<Value>> values) 
 
 internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
     foreach (var (_, t) in types) {
-        if (p.syms[(~t).Name]) {
+        if (p.syms[t.Name]) {
             // Shouldn't be any cycles but stop just in case.
             continue;
         }
-        p.syms[(~t).Name] = true;
-        p.collectValues((~t).Consts);
-        p.collectValues((~t).Vars);
-        p.collectFuncs((~t).Funcs);
-        p.collectFuncs((~t).Methods);
+        p.syms[t.Name] = true;
+        p.collectValues(t.Consts);
+        p.collectValues(t.Vars);
+        p.collectFuncs(t.Funcs);
+        p.collectFuncs(t.Methods);
         p.collectInterfaceMethods(t);
         p.collectStructFields(t);
     }
@@ -171,16 +172,16 @@ internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
 
 internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
     foreach (var (_, f) in funcs) {
-        if ((~f).Recv != ""u8){
-            @string r = strings.TrimPrefix((~f).Recv, "*"u8);
+        if (f.Recv != ""u8) {
+            @string r = strings.TrimPrefix(f.Recv, "*");
             {
-                nint i = strings.IndexByte(r, (rune)'['); if (i >= 0) {
+                nint i = strings.IndexByte(r, (byte)'['); if (i >= 0) {
                     r = r.slice(0, i); // remove type parameters
                 }
             }
-            p.syms[r + "."u8 + (~f).Name] = true;
+            p.syms[r + "."u8 + f.Name] = true;
         } else {
-            p.syms[(~f).Name] = true;
+            p.syms[f.Name] = true;
         }
     }
 }
@@ -197,18 +198,18 @@ internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
 internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, s) in (~t.Decl).Specs) {
+    foreach (var (_, s) in t.Decl.Specs) {
         var (spec, ok) = s._<ж<ast.TypeSpec>>(ᐧ);
         if (!ok) {
             continue;
         }
-        var (list, isStruct) = fields((~spec).Type);
+        var (list, isStruct) = fields(spec.Type);
         if (isStruct) {
             continue;
         }
         foreach (var (_, field) in list) {
-            foreach (var (_, name) in (~field).Names) {
-                p.syms[t.Name + "."u8 + (~name).Name] = true;
+            foreach (var (_, name) in field.Names) {
+                p.syms[t.Name + "."u8 + name.Name] = true;
             }
         }
     }
@@ -217,25 +218,26 @@ internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) 
 internal static void collectStructFields(this ref Package p, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, s) in (~t.Decl).Specs) {
+    foreach (var (_, s) in t.Decl.Specs) {
         var (spec, ok) = s._<ж<ast.TypeSpec>>(ᐧ);
         if (!ok) {
             continue;
         }
-        var (list, isStruct) = fields((~spec).Type);
+        var (list, isStruct) = fields(spec.Type);
         if (!isStruct) {
             continue;
         }
         foreach (var (_, field) in list) {
-            foreach (var (_, name) in (~field).Names) {
-                p.syms[t.Name + "."u8 + (~name).Name] = true;
+            foreach (var (_, name) in field.Names) {
+                p.syms[t.Name + "."u8 + name.Name] = true;
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testGoˢ = "_test.go"u8;
+internal static ref readonly @string testGoˢ => ref testGoˢᵇ;
+private static readonly @string testGoˢᵇ = "_test.go"u8;
 
 // NewFromFiles computes documentation for a package.
 //
@@ -259,16 +261,15 @@ internal static readonly @string testGoˢ = "_test.go"u8;
 //
 // NewFromFiles takes ownership of the AST files and may edit them,
 // unless the PreserveAST Mode bit is on.
-public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice<ж<ast.File>> files, @string importPath, params ꓸꓸꓸany optsʗp) {
+public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> fset, slice<ж<ast.File>> files, @string importPath, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.sslice();
-    ref var fset = ref Ꮡfset.DerefOrNull();
     var testGoFilesᴷ = new stackAppend<ж<ast.File>>();
 
     // Check for invalid API usage.
-    if (Ꮡfset == nil) {
+    if (fset == nil) {
         throw panic(fmt.Errorf("doc.NewFromFiles: no token.FileSet provided (fset == nil)"u8));
     }
-    Mode mode = default!;
+    Mode mode = default;
     switch (len(opts)) {
     case 0: {
         // There can only be 0 or 1 options, so a simple switch works for now.
@@ -291,11 +292,11 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
     // Collect .go and _test.go files.
     ref var pkgName = ref heap(new @string(), out var ᏑpkgName);
     map<@string, ж<ast.File>> goFiles = new map<@string, ж<ast.File>>();
-    slice<ж<ast.File>> testGoFiles = default!;
+    slice<ж<ast.File>> testGoFiles = default;
     foreach (var (i, @file) in files) {
-        var f = Ꮡfset.File(@file.Pos());
+        var f = fset.File(@file.Pos());
         if (f == nil) {
-            return (default!, fmt.Errorf("file files[%d] is not found in the provided file set"u8, i));
+            return (default, fmt.Errorf("file files[%d] is not found in the provided file set"u8, i));
         }
         {
             @string filename = f.Name();
@@ -304,13 +305,13 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
                 testGoFiles = append(testGoFilesᴷ, testGoFiles, @file);
                 break;
             }
-            case {} when strings.HasSuffix(filename, ".go"u8): {
-                pkgName = @file.Value.Name.Value.Name;
+            case {} when strings.HasSuffix(filename, ".go"): {
+                pkgName = @file.Name.Name;
                 goFiles[filename] = @file;
                 break;
             }
             default: {
-                return (default!, fmt.Errorf("file files[%d] filename %q does not have a .go extension"u8, i, filename));
+                return (default, fmt.Errorf("file files[%d] filename %q does not have a .go extension"u8, i, filename));
             }}
         }
     }
@@ -324,7 +325,7 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
     var pkg = Ꮡ(new ast.Package(Name: pkgName, Files: goFiles));
     var p = New(pkg, importPath, mode);
     classifyExamples(p, Examples(testGoFiles.ꓸꓸꓸ));
-    return (p, default!);
+    return (p, default);
 }
 
 // lookupSym reports whether the package has a given symbol or method.
@@ -381,7 +382,7 @@ public static ж<comment.Parser> Parser(this ж<Package> Ꮡp) {
 public static ж<comment.Printer> Printer(this ref Package p) {
     // No customization today, but having p.Printer()
     // gives us flexibility in the future, and it is convenient for callers.
-    return Ꮡ(new comment.Printer(nil));
+    return Ꮡ(new comment.Printer());
 }
 
 // HTML returns formatted HTML for the doc comment text.

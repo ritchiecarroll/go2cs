@@ -20,7 +20,8 @@ using ꓸꓸꓸany = Span<any>;
 partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string assertionFailedˢ = "assertion failed"u8;
+internal static ref readonly @string assertionFailedˢ => ref assertionFailedˢᵇ;
+private static readonly @string assertionFailedˢᵇ = "assertion failed"u8;
 
 internal static partial void assert(bool p) {
     if (!p) {
@@ -79,13 +80,13 @@ internal static void addAltDecl(this ref error_ err, Object obj) {
             // We use "other" rather than "previous" here because
             // the first declaration seen may not be textually
             // earlier in the source.
-            err.addf(new Objectᴠpositioner(obj), "other declaration of %s"u8, obj.Name());
+            err.addf(new Objectᴠpositioner(obj), "other declaration of %s", obj.Name());
         }
     }
 }
 
 internal static bool empty(this ref error_ err) {
-    return err.desc == default!;
+    return err.desc == nil;
 }
 
 internal static positioner posn(this ref error_ err) {
@@ -96,7 +97,8 @@ internal static positioner posn(this ref error_ err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noErrorˢ = "no error"u8;
+internal static ref readonly @string noErrorˢ => ref noErrorˢᵇ;
+private static readonly @string noErrorˢᵇ = "no error"u8;
 
 // msg returns the formatted error message without the primary error position pos().
 internal static @string msg(this ref error_ err) {
@@ -108,20 +110,23 @@ internal static @string msg(this ref error_ err) {
     foreach (var i in range(err.desc)) {
         var p = Ꮡ(err.desc, i);
         if (i > 0) {
-            fmt.Fprint(new strings_BuilderжWriter(Ꮡbuf), (@string)"\n\t"u8);
-            if ((~p).posn.Pos().IsValid()) {
-                fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "%s: "u8, (~err.check).fset.Position((~p).posn.Pos()));
+            fmt.Fprint(new strings_BuilderжWriter(Ꮡbuf), "\n\t");
+            if (p.posn.Pos().IsValid()) {
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "%s: "u8, err.check.fset.Position(p.posn.Pos()));
             }
         }
-        Ꮡbuf.WriteString((~p).msg);
+        Ꮡbuf.WriteString(p.msg);
     }
     return buf.String();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidOperandˢ = "invalid operand"u8;
-internal static readonly @string invalidTypeˢ = "invalid type"u8;
-internal static readonly @string errorSCodeDˢ = "ERROR: %s (code = %d)"u8;
+internal static ref readonly @string invalidOperandˢ => ref invalidOperandˢᵇ;
+private static readonly @string invalidOperandˢᵇ = "invalid operand"u8;
+internal static ref readonly @string invalidTypeˢ => ref invalidTypeˢᵇ;
+private static readonly @string invalidTypeˢᵇ = "invalid type"u8;
+internal static ref readonly @string errorSCodeDˢ => ref errorSCodeDˢᵇ;
+private static readonly @string errorSCodeDˢᵇ = "ERROR: %s (code = %d)"u8;
 
 // report reports the error err, setting check.firstError if necessary.
 internal static void report(this ref error_ err) {
@@ -135,7 +140,7 @@ internal static void report(this ref error_ err) {
     // exclude them if these strings are not at the beginning,
     // and only if we have at least one error already reported.
     var check = err.check;
-    if ((~check).firstErr != default!) {
+    if (check.firstErr != nil) {
         // It is sufficient to look at the first sub-error only.
         @string msg = err.desc[0].msg;
         if (strings.Index(msg, invalidOperandˢ) > 0 || strings.Index(msg, invalidTypeˢ) > 0) {
@@ -143,7 +148,7 @@ internal static void report(this ref error_ err) {
         }
     }
 
-    if ((~(~check).conf)._Trace) {
+    if (check.conf._Trace) {
         check.trace(err.posn().Pos(), errorSCodeDˢ, err.desc[0].msg, err.code);
     }
 
@@ -160,32 +165,32 @@ internal static void report(this ref error_ err) {
         }
     }
 
-    if (multiError){
+    if (multiError) {
         foreach (var i in range(err.desc)) {
             var p = Ꮡ(err.desc, i);
-            check.handleError(i, (~p).posn, err.code, (~p).msg, err.soft);
+            check.handleError(i, p.posn, err.code, p.msg, err.soft);
         }
     } else {
         check.handleError(0, err.posn(), err.code, err.msg(), err.soft);
     }
 
     // make sure the error is not reported twice
-    err.desc = default!;
+    err.desc = default;
 }
 
 // handleError should only be called by error_.report.
 internal static void handleError(this ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
     assert(code != 0);
 
-    if (index == 0){
+    if (index == 0) {
         // If we are encountering an error while evaluating an inherited
         // constant initialization expression, pos is the position of
         // the original expression, and not of the currently declared
         // constant identifier. Use the provided errpos instead.
         // TODO(gri) We may also want to augment the error message and
         // refer to the position (pos) in the original expression.
-        if (check.errpos != default! && check.errpos.Pos().IsValid()) {
-            assert(check.iota != default!);
+        if (check.errpos != nil && check.errpos.Pos().IsValid()) {
+            assert(check.iota != nil);
             posn = check.errpos;
         }
 
@@ -195,10 +200,10 @@ internal static void handleError(this ref Checker check, nint index, positioner 
         }
 
         // If we have a URL for error codes, add a link to the first line.
-        if ((~check.conf)._ErrorURL != ""u8) {
-            @string url = fmt.Sprintf((~check.conf)._ErrorURL, code);
+        if (check.conf._ErrorURL != ""u8) {
+            @string url = fmt.Sprintf(check.conf._ErrorURL, code);
             {
-                nint i = strings.Index(msg, "\n"u8); if (i >= 0){
+                nint i = strings.Index(msg, "\n"); if (i >= 0) {
                     msg = msg.slice(0, i) + url + msg.slice(i);
                 } else {
                     msg += url;
@@ -222,7 +227,7 @@ internal static void handleError(this ref Checker check, nint index, positioner 
         go116end: span.end
     );
 
-    if (check.errpos != default!) {
+    if (check.errpos != nil) {
         // If we have an internal error and the errpos override is set, use it to
         // augment our error positioning.
         // TODO(rFindley) we may also want to augment the error message and refer
@@ -233,19 +238,21 @@ internal static void handleError(this ref Checker check, nint index, positioner 
         e.go116end = spanΔ1.end;
     }
 
-    if (check.firstErr == default!) {
+    if (check.firstErr == nil) {
         check.firstErr = e;
     }
 
-    var f = check.conf.Value.Error;
-    if (f == default!) {
-        throw panic(new bailout(nil)); // record first error and exit
+    var f = check.conf.Error;
+    if (f == nil) {
+        throw panic(new bailout()); // record first error and exit
     }
     f(e);
 }
 
-internal static readonly @string invalidArg = "invalid argument: "u8;
-internal static readonly @string invalidOp = "invalid operation: "u8;
+internal static ref readonly @string invalidArg => ref invalidArgᵇ;
+private static readonly @string invalidArgᵇ = "invalid argument: "u8;
+internal static ref readonly @string invalidOp => ref invalidOpᵇ;
+private static readonly @string invalidOpᵇ = "invalid operation: "u8;
 
 // The positioner interface is used to extract the position of type-checker errors.
 partial interface positioner {
@@ -254,7 +261,7 @@ partial interface positioner {
 
 internal static void error(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
     var err = Ꮡcheck.newError(code);
-    err.addf(at, "%s"u8, msg);
+    err.addf(at, "%s", msg);
     err.report();
 }
 
@@ -271,7 +278,7 @@ internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors
 
     var err = Ꮡcheck.newError(code);
     err.addf(at, format, args.ꓸꓸꓸ);
-    err.Value.soft = true;
+    err.soft = true;
     err.report();
 }
 
@@ -280,7 +287,7 @@ internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goV
 
     @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
     var err = Ꮡcheck.newError(UnsupportedFeature);
-    err.addf(at, "%s requires %s or later"u8, msg, v);
+    err.addf(at, "%s requires %s or later", msg, v);
     err.report();
 }
 
@@ -333,9 +340,9 @@ internal static posSpan spanOf(positioner at) {
         return new posSpan(pos, pos, x.End());
     }
     case ж<operand> x: {
-        if ((~x).expr != default!) {
+        if (x.expr != nil) {
             tokenꓸPos pos = x.Pos();
-            return new posSpan(pos, pos, (~x).expr.End());
+            return new posSpan(pos, pos, x.expr.End());
         }
         return new posSpan(nopos, nopos, nopos);
     }

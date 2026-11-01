@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +46,7 @@ using static go.crypto.@internal.boring.bbig_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,7 +56,7 @@ using static go.crypto.@internal.boring.bbig_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/boring/bbig/big.go", "big.cs", "AA0aooKUgoKUpoKClIKUgg==")]
+[assembly: GoPositionMap("crypto/internal/boring/bbig/big.go", "big.cs", "AA0aooKUgoKUpoKClIKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.boring;

@@ -12,7 +12,8 @@ partial class runtime_package {
 internal const bool raceenabled = false;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string raceˢ = "race"u8;
+internal static ref readonly @string raceˢ => ref raceˢᵇ;
+private static readonly @string raceˢᵇ = "race"u8;
 
 // Because raceenabled is false, none of these functions should be called.
 internal static void raceReadObjectPC(ref _type t, @unsafe.Pointer addr, uintptr callerpc, uintptr pc) {

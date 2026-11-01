@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal.runtime;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 
 partial class cgroup_package {
 

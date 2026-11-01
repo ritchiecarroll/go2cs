@@ -12,7 +12,8 @@ partial class runtime_package {
 internal const bool msanenabled = false;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string msanˢ = "msan"u8;
+internal static ref readonly @string msanˢ => ref msanˢᵇ;
+private static readonly @string msanˢᵇ = "msan"u8;
 
 // Because msanenabled is false, none of these functions should be called.
 internal static void msanread(@unsafe.Pointer addr, uintptr sz) {
