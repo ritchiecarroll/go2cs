@@ -3,10 +3,19 @@
 //
 // The race: wg.Done() runs as one of the panicking goroutine's deferred calls, so wg.Wait() returns
 // and main returns while that goroutine is still running its deferred calls and has not reported yet.
-// Go's runtime.main does not exit then: it waits while any goroutine runs a panic's deferred calls
-// (runningPanicDefers) and parks once one is printing its report (panicking), so the report always
-// wins (runtime/proc.go, "Make racy client program work"; issues 3934 and 20018). Converted, main
-// returned first and the process exited 0 with nothing on stderr (found by P1, 5 of 5 runs).
+// Go's runtime.main does not exit at once: while any goroutine runs a panic's deferred calls
+// (runningPanicDefers) it yields, and once one is printing its report (panicking) it parks, so the
+// dying goroutine prints and exits 2 (runtime/proc.go, "Make racy client program work"; issues 3934
+// and 20018). The yield is bounded, though: at most 1000 Gosched calls (go1.26 proc.go:310). With
+// several Ps, a goroutine whose thread the OS deschedules can miss that window, and Go exits 0.
+//
+// runtime.GOMAXPROCS(1) closes the window on Go's side. With one P, the panicking goroutine keeps the
+// P after wg.Done() wakes main, and each of main's Gosched calls hands the P back to it, so the report
+// always begins before main's wait ends. golib's GOMAXPROCS only records the setting (goroutines are
+// CLR threads), so the converted program still returns from main mid-panic and exercises golib's
+// main-return tail (MainExit), which is what this test guards. That tail's wait is bounded by time
+// rather than by progress, so under heavy CPU contention the converted side can still lose this race
+// (tracked on the BOARD).
 //
 // GoroutinePanicExitCode is the control: a goroutine panic with main blocked, so no race at all.
 // Nothing prints after wg.Wait(): in Go that line races the crash.
@@ -14,10 +23,13 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 )
 
 func main() {
+	runtime.GOMAXPROCS(1)
+
 	fmt.Println("before goroutine panic")
 
 	var wg sync.WaitGroup
