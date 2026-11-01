@@ -1309,7 +1309,7 @@ Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.
 where `parseControl` returns five values feeding `newRange`'s five parameters. C# has no splat, so the inner
 call is deconstructed into markers and passed expanded (`rangeˢ` is the hoisted `"range"` literal):
 
-<!-- source: src/core/text/template/parse/parse.cs:752-753 -->
+<!-- source: src/core/text/template/parse/parse.cs:768-769 -->
 ```csharp
     var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
@@ -1501,14 +1501,14 @@ internal partial interface readBatch_r /*dyn*/ :
 
 The cast site in another file, `generation.cs`:
 
-<!-- source: src/core/internal/trace/generation.cs:168 -->
+<!-- source: src/core/internal/trace/generation.cs:171 -->
 ```csharp
-(b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
+(b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(r));
 ```
 
 And the record in `package_info.cs`:
 
-<!-- source: src/core/internal/trace/package_info.cs:58 -->
+<!-- source: src/core/internal/trace/package_info.cs:54 -->
 ```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
@@ -1769,7 +1769,7 @@ In `package_info_internal_test.cs`, anchored at the internal test bridge class:
 
 In `package_test_info.cs`, anchored at the external test class:
 
-<!-- source: src/core/encoding/gob/package_test_info.cs:42 -->
+<!-- source: src/core/encoding/gob/package_test_info.cs:27 -->
 ```csharp
 [assembly: GoImplement<go.encoding.gob_test_package.Point, Pythagoras>]
 ```

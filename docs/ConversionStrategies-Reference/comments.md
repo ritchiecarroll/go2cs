@@ -96,7 +96,7 @@ the next group:
 	}
 ```
 
-<!-- source: src/core/internal/strconv/ftoa.cs:473-481 -->
+<!-- source: src/core/internal/strconv/ftoa.cs:480-488 -->
 ```csharp
         }
     }
@@ -158,8 +158,8 @@ func (r *Reader) Read(b []byte) (n int, err error) {
 ```csharp
 // Read implements the [io.Reader] interface.
 public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -210,10 +210,10 @@ A blank line where Go has one:
 	return dst
 ```
 
-<!-- source: src/core/internal/strconv/ftoa.cs:500-505 -->
+<!-- source: src/core/internal/strconv/ftoa.cs:507-512 -->
 ```csharp
     default: {
-        dst = append(dst, (byte)((byte)(exp / 100) + (rune)'0'), (byte)((byte)(exp / 10) % 10 + (rune)'0'), (byte)((byte)(exp % 10) + (rune)'0'));
+        dst = append(dst, (byte)((byte)(exp / 100) + '0'), (byte)((byte)(exp / 10) % 10 + '0'), (byte)((byte)(exp % 10) + '0'));
         break;
     }}
 
@@ -298,12 +298,12 @@ var (
 <!-- source: src/core/encoding/csv/reader.cs:89-95 -->
 ```csharp
 // These are the errors that can be returned in [ParseError.Err].
-public static error ErrBareQuote = errors.New("bare \" in non-quoted-field"u8);
-public static error ErrQuote = errors.New("extraneous or missing \" in quoted-field"u8);
-public static error ErrFieldCount = errors.New("wrong number of fields"u8);
+public static error ErrBareQuote = errors.New("bare \" in non-quoted-field");
+public static error ErrQuote = errors.New("extraneous or missing \" in quoted-field");
+public static error ErrFieldCount = errors.New("wrong number of fields");
 
 // Deprecated: ErrTrailingComma is no longer used.
-public static error ErrTrailingComma = errors.New("extra delimiter at end of line"u8);
+public static error ErrTrailingComma = errors.New("extra delimiter at end of line");
 ```
 
 The same file shows the group rule above: the blank line Go has before `ErrTrailingComma`'s doc is kept.
@@ -399,7 +399,7 @@ emitted C# line: after one space, or at the column of its gofmt-aligned run (bel
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1180-1182 -->
+<!-- source: src/core/strings/strings.cs:1185-1187 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -449,12 +449,11 @@ tree:
 			}
 ```
 
-<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:724-731 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:726-732 -->
 ```csharp
-            if (t == L){
+            if (t == L) {
                 // no change
-            } else 
-            if (t == R){
+            } else if (t == R) {
                 s.resolvedLevels[i] += 1;
             } else { // t == AN || t == EN
                 s.resolvedLevels[i] += 2;
@@ -509,7 +508,7 @@ Above a label:
 	case exp > 0 && exp <= 15+22: // int * 10^k
 ```
 
-<!-- source: src/core/internal/strconv/atof.cs:487-494 -->
+<!-- source: src/core/internal/strconv/atof.cs:486-493 -->
 ```csharp
     switch (ᐧ) {
     case {} when exp is 0: {
@@ -571,12 +570,11 @@ An empty block:
 		}
 ```
 
-<!-- source: src/core/encoding/xml/xml.cs:1241-1248 -->
+<!-- source: src/core/encoding/xml/xml.cs:1260-1266 -->
 ```csharp
-        if (b == (rune)'\r'){
-            d.buf.WriteByte((rune)'\n');
-        } else 
-        if (b1 == (rune)'\r' && b == (rune)'\n'){
+        if (b == '\r') {
+            d.buf.WriteByte((byte)'\n');
+        } else if (b1 == '\r' && b == '\n') {
             // Skip \r\n--we already wrote \n.
         } else {
             d.buf.WriteByte(b);
@@ -600,7 +598,7 @@ indented deeper than the label stay at the end of that body.
 	}
 ```
 
-<!-- source: src/core/internal/runtime/maps/table.cs:1146-1152 -->
+<!-- source: src/core/internal/runtime/maps/table.cs:1145-1151 -->
 ```csharp
             it.key = key;
             it.elem = elem;
@@ -638,13 +636,13 @@ var unitMap = map[string]uint64{
 	"μs": uint64(Microsecond), // U+03BC = Greek letter mu
 ```
 
-<!-- source: src/core/time/format.cs:1771-1775 -->
+<!-- source: src/core/time/format.cs:1830-1834 -->
 ```csharp
 [GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{
-    ["ns"u8] = (uint64)(int64)ΔNanosecond,
-    ["us"u8] = (uint64)(int64)Microsecond,
-    ["µs"u8] = (uint64)(int64)Microsecond, // U+00B5 = micro symbol
-    ["μs"u8] = (uint64)(int64)Microsecond, // U+03BC = Greek letter mu
+    ["ns"] = (uint64)ΔNanosecond,
+    ["us"] = (uint64)Microsecond,
+    ["µs"] = (uint64)Microsecond, // U+00B5 = micro symbol
+    ["μs"] = (uint64)Microsecond, // U+03BC = Greek letter mu
 ```
 
 `unitMap` is pure data, so its declaration sits inside a `[GoLazy]` holder class and is
@@ -663,7 +661,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3192-3196 -->
+<!-- source: src/core/database/sql/sql.cs:3201-3205 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,
@@ -698,7 +696,7 @@ func appendLines(x, y []byte) []byte {
 }
 ```
 
-<!-- source: src/core/go/printer/gobuild.cs:147-153 -->
+<!-- source: src/core/go/printer/gobuild.cs:146-152 -->
 ```csharp
 internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     if (len(y) > 0 && isNL(y[0]) && // y starts in blank line
@@ -716,9 +714,9 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 		clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */)
 ```
 
-<!-- source: src/core/crypto/tls/handshake_client.cs:985 -->
+<!-- source: src/core/crypto/tls/handshake_client.cs:999 -->
 ```csharp
-        clientCipher = (~hs.suite).cipher(clientKey, clientIV, false /* not for reading */);
+        clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */);
 ```
 
 `~` is golib's pointer dereference.
@@ -742,7 +740,7 @@ own line at the next place it can. The comment is then misplaced, never lost:
 				// underflow to ±0
 ```
 
-<!-- source: src/core/math/big/float.cs:925-927 -->
+<!-- source: src/core/math/big/float.cs:933-935 -->
 ```csharp
             if (p < 0 /* m <= 0.25 */ || p == 0 && x.mant.sticky((nuint)len(x.mant) * (nuint)_W - 1) == 0) {
                 /* m == 0.5 */

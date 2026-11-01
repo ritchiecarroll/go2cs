@@ -498,7 +498,7 @@ src/core/internal/goos/darwin/…
 
 Such a package's `.csproj` gains exactly two blocks — the selector, and the include that reads it:
 
-<!-- source: src/core/internal/goos/internal.goos.csproj:145-147 -->
+<!-- source: src/core/internal/goos/internal.goos.csproj:170-172 -->
 ```xml
 <PropertyGroup Condition="'$(GoTargetOS)'==''">
   <GoTargetOS>windows</GoTargetOS>
@@ -930,7 +930,7 @@ The consumer's converted code then refers to the alias as `CrossPkgLibꓸTempera
 
 **A collision-renamed alias chain resolves to its concrete target.** When an exported type's name *collides* with a method name it is `Δ`-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)); and when that type is *also* an empty interface — `type Token any` colliding with a `Token()` method, encoding/json's shape — the producer's `package_info.cs` carries a **two-hop chain**. The collision analysis records `Token → ΔToken`, and `visitTypeSpec` (which renders an empty-interface target as `object`) records the renamed declaration `ΔToken → object`:
 
-<!-- source: src/core/encoding/json/package_info.cs:35-36 -->
+<!-- source: src/core/encoding/json/package_info.cs:32-33 -->
 ```csharp
 [assembly: GoTypeAlias("Token", "ΔToken")]
 [assembly: GoTypeAlias("ΔToken", "object")]
@@ -989,9 +989,9 @@ A pull whose direct reference would close a project cycle is instead reached **l
 golib's `LinknameVar<T>` — the same storage, with no `ProjectReference`. math/bits is that case at Go 1.26,
 because `runtime` imports `math/bits`:
 
-<!-- source: src/core/runtime/panic.cs:344 -->
+<!-- source: src/core/runtime/panic.cs:349 -->
 ```csharp
-public static error overflowError = ((error)((errorString)(@string)"integer overflow"u8));
+public static error overflowError = ((error)((errorString)(@string)"integer overflow"));
 ```
 <!-- source: src/core/math/bits/bits_errors.cs:12 -->
 ```csharp
@@ -1071,7 +1071,7 @@ import (
 )
 type fsOnly struct{ fs.FS }
 ```
-<!-- source: src/core/testing/fstest/mapfs.cs:7, 222 -->
+<!-- source: src/core/testing/fstest/mapfs.cs:7, 221 -->
 ```csharp
 using fs = go.io.fs_package;
 …
@@ -1438,7 +1438,7 @@ The remedy is one hook, seeded into `package_test_info.cs`'s anchor class by
 `referenceModelTestPackageInfoSeed`, using the same `RunModuleConstructor` mechanism as the import
 hooks:
 
-<!-- source: src/core/net/http/pprof/package_test_info.cs:61-63, 97-104 -->
+<!-- source: src/core/net/http/pprof/package_test_info.cs:59-61, 95-102 -->
 ```csharp
 [GoPackage("pprof")]
 public static partial class pprof_internal_test_package
@@ -1725,7 +1725,7 @@ and every consumer would mint its own `binary_bigEndianᴠByteOrder` adapter. Th
 the file visits and before `writePackageInfoFile`) walks the package scope and records the VALUE-form
 pairs the package satisfies. `encoding/binary`'s metadata carries:
 
-<!-- source: src/core/encoding/binary/package_info.cs:43-50 -->
+<!-- source: src/core/encoding/binary/package_info.cs:40-47 -->
 ```csharp
 // <InterfaceImplementations>
 [assembly: GoImplement<bigEndian, AppendByteOrder>]

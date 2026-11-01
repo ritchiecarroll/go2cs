@@ -107,7 +107,7 @@ A conversion **between two named slice types** sharing an identical underlying (
 ```go
 f, err := MapFS(fsys).Open(name)          // fsys is shuffledFS
 ```
-<!-- source: src/core/testing/fstest/testfs_test.cs:72 -->
+<!-- source: src/core/testing/fstest/testfs_test.cs:75 -->
 ```csharp
 var (f, err) = ((global::go.testing.fstest_package.MapFS)fsys).Open(name);
 ```
@@ -493,7 +493,7 @@ promotes `byte`/`ushort` to `int` first, so bare `~x` is `-6`: identical in the 
 ```go
 	w.writeBits(int32(^uint16(length)), 16)
 ```
-<!-- source: src/core/compress/flate/huffman_bit_writer.cs:415 -->
+<!-- source: src/core/compress/flate/huffman_bit_writer.cs:416 -->
 ```csharp
     w.writeBits((int32)(((uint16)(~(uint16)length))), 16);
 ```
@@ -518,7 +518,7 @@ section count against, seven times in one file:
 ```go
 if len(m.Questions) > int(^uint16(0)) {     // vendor/golang.org/x/net/dns/dnsmessage
 ```
-<!-- source: src/core/vendor/golang.org/x/net/dns/dnsmessage/message.cs:1170 -->
+<!-- source: src/core/vendor/golang.org/x/net/dns/dnsmessage/message.cs:1169 -->
 ```csharp
 if (len(m.Questions) > (nint)(unchecked((uint16)(~(uint16)0)))) {
 ```

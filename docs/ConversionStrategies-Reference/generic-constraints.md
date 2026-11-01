@@ -22,7 +22,7 @@ declares `IArray<E>, ISupportMake<wrapper>` (the go2cs-gen `Array` inherited-typ
 surface the body needs, and the `new()` (appended by the same path) covers `var f T`/`T{}` construction.
 <!-- history: at the fix (Go 1.23/1.24 corpus) this greened crypto/internal/mlkem768, and the reconvert A/B changed only
 mlkem768.cs's four constraint lines; census 254 -> 255. In Go 1.26.10 the package is crypto/internal/fips140/mlkem:
-src/core/crypto/internal/fips140/mlkem/field.cs:133 `IArray<fieldElement>, new()`. --> (Guarded by
+src/core/crypto/internal/fips140/mlkem/field.cs:134 `IArray<fieldElement>, new()`. --> (Guarded by
 `GenericArrayConstraint` — two array-wrapper types over a shared
 `~[4]fieldElement` core through a generic function that indexes, index-ranges, value-ranges, and
 constructs the type parameter, values vs Go.)
@@ -53,9 +53,9 @@ real emission has been tried: a non-empty type set whose
 operator set is empty emits the union as a breadcrumb comment plus the one constraint C# can still
 express —
 
-<!-- source: src/core/runtime/pprof/pprof_test.cs:3733-3734 -->
+<!-- source: src/core/runtime/pprof/pprof_test.cs:3784-3785 -->
 ```csharp
-internal static void testProfileRecordNullPadding<T>(ж<testing.T> Ꮡt, @string name, Func<slice<T>, (nint, bool)> fn)
+internal static void testProfileRecordNullPadding<T>(ж<testing.T> t, @string name, Func<slice<T>, (nint, bool)> fn)
     where T : /* runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord */ new()
 ```
 
@@ -103,15 +103,14 @@ emitted `<…>` list and `where` clauses (a breadcrumb comment preserves the Go 
 classification treats a `p P` exactly like a `p *T` (`paramPointerType` — deref alias, `Ꮡ` box naming),
 so the entire existing pointer machinery applies unchanged:
 
-<!-- source: src/core/go/types/predicates.cs:684-692 -->
+<!-- source: src/core/go/types/predicates.cs:686-693 -->
 ```csharp
 internal static ж<T> clone<T>(ж<T> Ꮡp)
     /* where P : *T (erased: P renders as ж<T>) */
 {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    ref var c = ref heap<T>(out var Ꮡc);
-    c = p;
+    ref var c = ref heap<T>(p, out var Ꮡc);
     return Ꮡc;
 }
 ```
@@ -330,7 +329,7 @@ internal static void walkList<N>(Visitor v, slice<N> list)
     }
 }
 …
-walkList(v, widen<ж<Ident>, Node>((~n).Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
+walkList(v, widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
 ```
 
 golib's `widen<T, TWide>(slice<T>, Func<T, TWide>)` copies the slice HEADER only — elements alias
