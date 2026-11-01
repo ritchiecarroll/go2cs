@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -100,7 +101,9 @@ func TestReadyToRunPublishLeavesTheProgramsOwnCodeILOnly(t *testing.T) {
 		return out
 	}
 
-	check := func(arm, dir string, want map[string]bool) {
+	// check returns the assemblies that read ReadyToRun where they should be IL-only: the one mismatch that says the
+	// target did not run. A reader error is reported as itself and says nothing about the target.
+	check := func(arm, dir string, want map[string]bool) (precompiled []string) {
 		t.Helper()
 
 		for assembly, wantReadyToRun := range want {
@@ -113,17 +116,25 @@ func TestReadyToRunPublishLeavesTheProgramsOwnCodeILOnly(t *testing.T) {
 
 			if got != wantReadyToRun {
 				t.Errorf("R2R guard (%s arm): %s is ReadyToRun=%v, want %v", arm, assembly, got, wantReadyToRun)
+
+				if got {
+					precompiled = append(precompiled, assembly)
+				}
 			}
 		}
+
+		sort.Strings(precompiled)
+
+		return precompiled
 	}
 
 	// Arm 1, the default: the program and its module's library are IL-only; the core/ library stays ReadyToRun.
 	defaultOut := publish("default")
-	check("default", defaultOut, map[string]bool{"r2rguard.dll": false, "modlib.dll": false, "corelib.dll": true})
 
-	if t.Failed() {
-		t.Errorf("R2R guard: the template's GoKeepOwnCodeOutOfReadyToRun target did not run. It hangs off the SDK's private " +
-			"_PrepareForReadyToRunCompilation (BeforeTargets); if this SDK renamed it, re-hook the target to its successor")
+	if precompiled := check("default", defaultOut, map[string]bool{"r2rguard.dll": false, "modlib.dll": false, "corelib.dll": true}); len(precompiled) > 0 {
+		t.Errorf("R2R guard: the template's GoKeepOwnCodeOutOfReadyToRun target did not run (%s precompiled). It hangs off the SDK's "+
+			"private _PrepareForReadyToRunCompilation (BeforeTargets); if this SDK renamed it, re-hook the target to its successor",
+			strings.Join(precompiled, ", "))
 	}
 
 	// Arm 2, the positive control: with the target switched off, all three are ReadyToRun, so the reader can see
@@ -171,6 +182,56 @@ func TestReadyToRunImageReaderUndoesTheOSMachineOverride(t *testing.T) {
 
 	if _, err := isReadyToRunImage(path); err == nil || !strings.Contains(err.Error(), "unrecognized PE machine") {
 		t.Errorf("Machine 0x1234: got %v, want debug/pe's unrecognized PE machine", err)
+	}
+
+	// The reader's table is exactly the overrides spelled out above, windows (none) aside.
+	for osName, override := range overrides {
+		if got, ok := readyToRunOSOverrides[osName]; osName != "windows" && (!ok || got != override) {
+			t.Errorf("readyToRunOSOverrides[%q] = %#x (present %v), want %#x", osName, got, ok, override)
+		}
+	}
+
+	if len(readyToRunOSOverrides) != len(overrides)-1 {
+		t.Errorf("readyToRunOSOverrides has %d entries, want %d", len(readyToRunOSOverrides), len(overrides)-1)
+	}
+}
+
+// openManagedImage refuses a Machine that more than one override explains. This arm shows the real overrides never
+// produce one: for every Machine debug/pe reads, that Machine XORed with any single override reads back cleanly.
+func TestReadyToRunOSOverridesAreUnambiguous(t *testing.T) {
+	machines := []uint16{pe.IMAGE_FILE_MACHINE_AM33, pe.IMAGE_FILE_MACHINE_AMD64, pe.IMAGE_FILE_MACHINE_ARM,
+		pe.IMAGE_FILE_MACHINE_ARMNT, pe.IMAGE_FILE_MACHINE_ARM64, pe.IMAGE_FILE_MACHINE_EBC, pe.IMAGE_FILE_MACHINE_I386,
+		pe.IMAGE_FILE_MACHINE_IA64, pe.IMAGE_FILE_MACHINE_LOONGARCH32, pe.IMAGE_FILE_MACHINE_LOONGARCH64,
+		pe.IMAGE_FILE_MACHINE_M32R, pe.IMAGE_FILE_MACHINE_MIPS16, pe.IMAGE_FILE_MACHINE_MIPSFPU, pe.IMAGE_FILE_MACHINE_MIPSFPU16,
+		pe.IMAGE_FILE_MACHINE_POWERPC, pe.IMAGE_FILE_MACHINE_POWERPCFP, pe.IMAGE_FILE_MACHINE_R4000, pe.IMAGE_FILE_MACHINE_SH3,
+		pe.IMAGE_FILE_MACHINE_SH3DSP, pe.IMAGE_FILE_MACHINE_SH4, pe.IMAGE_FILE_MACHINE_SH5, pe.IMAGE_FILE_MACHINE_THUMB,
+		pe.IMAGE_FILE_MACHINE_WCEMIPSV2, pe.IMAGE_FILE_MACHINE_RISCV32, pe.IMAGE_FILE_MACHINE_RISCV64,
+		pe.IMAGE_FILE_MACHINE_RISCV128}
+	dir := t.TempDir()
+	readable := 0
+
+	for _, machine := range machines {
+		path := filepath.Join(dir, fmt.Sprintf("%#x.dll", machine))
+		writeSyntheticManagedImage(t, path, machine, true)
+
+		if _, err := isReadyToRunImage(path); err != nil {
+			continue // debug/pe does not read this Machine at all, so no override can be undone to it
+		}
+
+		readable++
+
+		for osName, override := range readyToRunOSOverrides {
+			path := filepath.Join(dir, fmt.Sprintf("%#x-%s.dll", machine, osName))
+			writeSyntheticManagedImage(t, path, machine^override, true)
+
+			if got, err := isReadyToRunImage(path); err != nil || !got {
+				t.Errorf("Machine %#x under the %s override (%#x): ReadyToRun=%v, %v", machine, osName, machine^override, got, err)
+			}
+		}
+	}
+
+	if readable < 2 {
+		t.Fatalf("only %d of %d Machines read at all: the arm covers nothing", readable, len(machines))
 	}
 }
 
@@ -235,10 +296,61 @@ func hostRuntimeIdentifier(goos, goarch string) (string, bool) {
 	return rid, ok
 }
 
+// readyToRunOSOverrides are CoreCLR's IMAGE_FILE_MACHINE_NATIVE_OS_OVERRIDE values (src/coreclr/inc/pedecoder.h).
+// crossgen2 XORs the target OS's value into the COFF Machine of a ReadyToRun image it builds for that OS, so a linux-x64
+// image reads 0x8664 ^ 0x7B79 = 0xFD1D, a Machine debug/pe refuses. Windows has no override.
+var readyToRunOSOverrides = map[string]uint16{"apple": 0x4644, "freebsd": 0xADC4, "openbsd": 0xADC5, "linux": 0x7B79,
+	"netbsd": 0x1993, "sunos": 0x1992}
+
+// openManagedImage opens a PE image, first undoing an OS override in its COFF Machine. The image is read into memory and
+// patched there: the file on disk is never written. debug/pe itself decides which un-XORed Machine it can read, and
+// exactly one override must explain the stored value; otherwise debug/pe's own refusal stands.
+func openManagedImage(path string) (*pe.File, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := pe.NewFile(bytes.NewReader(data))
+	if err == nil || len(data) < 0x40 {
+		return f, err
+	}
+
+	// The COFF Machine is the first field after the "PE\0\0" signature, which e_lfanew (offset 0x3c) locates.
+	offset := int(binary.LittleEndian.Uint32(data[0x3c:0x40])) + 4
+
+	if offset+2 > len(data) || !bytes.Equal(data[offset-4:offset], []byte("PE\x00\x00")) {
+		return nil, err
+	}
+
+	stored := binary.LittleEndian.Uint16(data[offset:])
+	var explained []string
+
+	for osName, override := range readyToRunOSOverrides {
+		patched := bytes.Clone(data)
+		binary.LittleEndian.PutUint16(patched[offset:], stored^override)
+
+		if readable, readErr := pe.NewFile(bytes.NewReader(patched)); readErr == nil {
+			explained = append(explained, osName)
+			f = readable
+		}
+	}
+
+	switch len(explained) {
+	case 0:
+		return nil, err
+	case 1:
+		return f, nil
+	default:
+		sort.Strings(explained)
+		return nil, fmt.Errorf("%w; the OS overrides %s all explain it", err, strings.Join(explained, ", "))
+	}
+}
+
 // isReadyToRunImage reads a managed PE image's CLI header (data directory 14, IMAGE_COR20_HEADER) and reports whether
 // its ManagedNativeHeader directory (offset 64) names a READYTORUN_HEADER, whose signature is 'RTR' (0x00525452).
 func isReadyToRunImage(path string) (bool, error) {
-	f, err := pe.Open(path)
+	f, err := openManagedImage(path)
 	if err != nil {
 		return false, err
 	}
