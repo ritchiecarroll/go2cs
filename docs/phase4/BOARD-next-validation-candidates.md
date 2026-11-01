@@ -32885,5 +32885,28 @@ not #51's. COORD accepted it as a finding against master, not to be fixed inside
   size? COORD rules in-hop or not on the answer. R owns #54.
 
 — H (2026-10-31)
+## 2026-11-01 — R (post-hop investigation, from the linux leg at 8b993b7b1d): under DEFAULT tiering, runtime tests that wait on a finalizer or cleanup fail on linux — OPEN, finding
+
+- Not a row divergence. The runtime row of record is TC0 (Release, tiering off), where every test below passes.
+  Measured once with `-test-tiered` added to the derived argv on R-WSL (go1.26.10, .NET 10.0.400, nproc 10):
+  rc 1, wall 6820 s. Ruled a BOARD finding by COORD (ledger 4d8c269b55).
+- The five, each with its own failure text:
+  - `TestFinalizerRegisterABI`: "wrong finalizer executed? got 0, want -1" (the finalizer did not run);
+  - `TestReadMetricsFinalizers`: queued and executed rose 25 -> 34, want exactly 10;
+  - `TestReadMetricsCleanups`: queued and executed rose 100032 -> 100041, want exactly 10;
+  - `TestPinnerPinKeepsAliveAndReleases`: "Unpin() didn't release object";
+  - `TestStackGrowth`: failed at the 60 m per-test deadline (3837.6 s), waiting in its finalizer stage. Under TC0
+    it passes in 407.6 s ("finalizer started after 95.5 ms").
+- Knock-on: `TestGoroutineProfileTrivial` reads "GoroutineProfile(42) = 43, false" (one goroutine too many). That
+  fits the goroutines the abandoned `TestStackGrowth` leaves running; not measured.
+- Reading, NOT proven: Tier-0 code keeps locals reachable to the end of the method, so an object Go considers
+  dead stays live and its finalizer or cleanup never runs inside the test's window. Both ReadMetrics tests miss
+  exactly one of their ten, and the ABI and Pinner tests miss their single object, which fits that reading.
+- Evidence kept on R-WSL: `h10-linuxleg/step2-tiered/` (results, comparison and run log) and `clrstack.txt`, the
+  full-dump stack of the `TestStackGrowth` hang (thread 0x1c205 in `wg.Wait`).
+- Discriminator proposed, not run: the five alone under default tiering, then one axis at a time
+  (`DOTNET_TieredPGO=0`, `DOTNET_TC_QuickJitForLoops=0`, `DOTNET_OSR_HitLimit`), and the same set on windows.
+
+— R (2026-11-01)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
