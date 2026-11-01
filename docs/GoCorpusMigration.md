@@ -706,6 +706,46 @@ second shape.)*
 Any small deferred housekeeping that needs a quiet point (unregistered solution members, and the
 like) rides here too.
 
+#### Amendment 2026-11-01 (G, from the 2026-10-27 lesson) — the regen emits `-tests` for every roster row too, as its own commit, and production still equals `E(final)`
+
+**The lesson.** A `-stdlib`-only regen leaves the converted tests stale. The freeze fixed-point regen at `f75e0c53ec`
+re-emitted the standard library's production code only. Three 1.26.10.2 seats had changed emission inside converted
+test sources as well:
+- #3 added `GoStack.Bounded` to a `goǃ` launch;
+- #10 added the `Ꮡelem` element-address compare;
+- #4 added the receiver snapshot of a deferred or `go` method call.
+
+So the committed `_test.cs` files no longer matched what the converter emits. The re-bank's dry run converted and ran
+the new emission, so every verdict was a valid reading. But rows read real drift in their test files, and COORD had to
+name the drift as a class (test-refresh-1262, shapes a, b and c) and refresh the tests in a seat of their own.
+<!-- COORD's rulings, mailbox: fc829aaaf5 (2026-10-27T23:27Z, the class, shapes a and b, the refresh seat) and
+     3c1b388ebc (2026-10-27T23:47Z, shape c from seat #4; "THE LESSON, recorded: the freeze fixed-point regen
+     re-emitted -stdlib only, so every seat that changes emission inside test sources leaves the committed converted
+     tests stale"). The dry-run shards at f75e0c53ec: 9b43bb8ce1 (i9-S), 119d1ac2f0 (R-S). -->
+
+**So the bundle's item 2, the seeded full reconvert, includes the tests.** A deliberate regen runs:
+
+1. **Production first.** The seeded `-stdlib` emission on its targets, which is `E(final)`.
+2. **Then the tests, into the SAME seeded root.** For every roster row, run the convert-only action,
+   `-tests -test-action convert`. Take the rows from [`ValidatedTestPackages.md`](ValidatedTestPackages.md) through
+   its reader, never from a hand list. Nothing runs a test here; the re-bank runs them against this emission.
+3. **The guard: production still equals `E(final)`.** A `-tests` convert writes production files as well. It
+   regenerates the package's production `.cs`. Before seat #49, it also rewrote an L3 package's `.csproj` without
+   that package's `GoTargetOS` block. After the tests leg, compare every production file with `E(final)`,
+   CR-normalised:
+   - a file the tests leg rewrote is restored from `E(final)`, and recorded as a finding;
+   - it is never applied as part of the regen.
+4. **Classify the test diff.** Each changed test hunk must belong to a mechanism the regen's rungs or a standing ruling
+   name. An unclassified hunk is a finding.
+5. **Commit the tests as their own commit** in the regen series, after production and before the metadata
+   (`go generate .`). It carries the roster count, the files written, and the guard's reading.
+6. **Re-check.** At the new tip, a convert-only pass over every roster row reads zero drift in the tests.
+
+The 1.26.10.2 end regen runs this shape: [`PLAN-parity-train.md`](PLAN-parity-train.md) §3.4 step 3, with the guard
+from [`DESIGN-ladder-identity.md`](phase4/DESIGN-ladder-identity.md) Step B. That control found the L3 `.csproj`
+rewrite, and seat #49 removed its cause. The guard stays, because any later `-tests`-only emission path can write
+production files again.
+
 #### Amendment 2026-09-13 — the pin assertion, both halves and the pairing, as copyable blocks
 
 H4a and every step of the H5 series are run by hand, so no harness pins them. Placeholders used from here to H9:
