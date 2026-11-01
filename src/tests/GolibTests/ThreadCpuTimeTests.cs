@@ -23,7 +23,7 @@ public class ThreadCpuTimeTests
     // Runs `work` on a fresh thread that hands out its token first, and reads that thread's CPU time across `work`.
     private static (TimeSpan Cpu, TimeSpan Wall) Measure(Action work)
     {
-        using ManualResetEventSlim tokenTaken = new(false), go = new(false), finished = new(false);
+        using ManualResetEventSlim tokenTaken = new(false), go = new(false), finished = new(false), release = new(false);
         long token = 0;
 
         Thread thread = new(() =>
@@ -33,27 +33,40 @@ public class ThreadCpuTimeTests
             go.Wait();
             work();
             finished.Set();
-            go.Wait(); // stays alive until read
+
+            // Alive until the second read: on linux and macOS an exited thread's CPU clock reads as a failure, so a
+            // thread that exits first fails "the second read". `go` cannot hold it here, being set already.
+            release.Wait();
         });
 
         thread.Start();
-        Assert.IsTrue(tokenTaken.Wait(5000), "the thread did not start");
-        Assert.AreNotEqual(0L, token, "this OS has a seam, so the token is not 0");
 
-        using ThreadCpuReader? reader = ThreadCpuTime.Open(token);
-        Assert.IsNotNull(reader, "the reader opens");
-        Assert.IsTrue(reader.TryRead(out TimeSpan before), "the first read");
+        try
+        {
+            Assert.IsTrue(tokenTaken.Wait(5000), "the thread did not start");
+            Assert.AreNotEqual(0L, token, "this OS has a seam, so the token is not 0");
 
-        Stopwatch wall = Stopwatch.StartNew();
-        go.Set();
-        Assert.IsTrue(finished.Wait(10_000), "the work did not finish");
-        wall.Stop();
+            using ThreadCpuReader? reader = ThreadCpuTime.Open(token);
+            Assert.IsNotNull(reader, "the reader opens");
+            Assert.IsTrue(reader.TryRead(out TimeSpan before), "the first read");
 
-        Assert.IsTrue(reader.TryRead(out TimeSpan after), "the second read");
-        thread.Join();
+            Stopwatch wall = Stopwatch.StartNew();
+            go.Set();
+            Assert.IsTrue(finished.Wait(10_000), "the work did not finish");
+            wall.Stop();
 
-        Console.WriteLine($"cpu {(after - before).TotalMilliseconds:F2} ms over {wall.Elapsed.TotalMilliseconds:F2} ms of wall");
-        return (after - before, wall.Elapsed);
+            Assert.IsTrue(reader.TryRead(out TimeSpan after), "the second read");
+
+            Console.WriteLine($"cpu {(after - before).TotalMilliseconds:F2} ms over {wall.Elapsed.TotalMilliseconds:F2} ms of wall");
+            return (after - before, wall.Elapsed);
+        }
+        finally
+        {
+            // Released on every path, so a failed assertion never leaves the worker waiting on a disposed event.
+            go.Set();
+            release.Set();
+            thread.Join();
+        }
     }
 
     [TestMethod]
