@@ -9,6 +9,7 @@
 package main
 
 import (
+	"bytes"
 	"debug/pe"
 	"encoding/binary"
 	"encoding/json"
@@ -132,6 +133,95 @@ func TestReadyToRunPublishLeavesTheProgramsOwnCodeILOnly(t *testing.T) {
 
 	// The crossgen pack is the SDK's bundled one: no floating version.
 	assertBundledCrossgenPack(t, dotnet, app, rid)
+}
+
+// The reader's own arm, run on every host and without an SDK: a ReadyToRun image built for a non-Windows OS carries that
+// OS's IMAGE_FILE_MACHINE_NATIVE_OS_OVERRIDE (src/coreclr/inc/pedecoder.h) XORed into its COFF Machine, so a linux-x64
+// image reads 0x8664 ^ 0x7B79 = 0xFD1D, and debug/pe refuses every such value. Synthetic images cover each override
+// before a host of that OS runs the publish arms for real.
+func TestReadyToRunImageReaderUndoesTheOSMachineOverride(t *testing.T) {
+	overrides := map[string]uint16{"windows": 0, "apple": 0x4644, "freebsd": 0xADC4, "openbsd": 0xADC5, "linux": 0x7B79,
+		"netbsd": 0x1993, "sunos": 0x1992}
+	architectures := map[string]uint16{"x64": pe.IMAGE_FILE_MACHINE_AMD64, "arm64": pe.IMAGE_FILE_MACHINE_ARM64}
+	dir := t.TempDir()
+
+	for osName, override := range overrides {
+		for arch, machine := range architectures {
+			for _, readyToRun := range []bool{true, false} {
+				path := filepath.Join(dir, fmt.Sprintf("%s-%s-%v.dll", osName, arch, readyToRun))
+				written := writeSyntheticManagedImage(t, path, machine^override, readyToRun)
+				got, err := isReadyToRunImage(path)
+
+				if err != nil {
+					t.Errorf("%s-%s (Machine %#x): %v", osName, arch, machine^override, err)
+				} else if got != readyToRun {
+					t.Errorf("%s-%s (Machine %#x): ReadyToRun=%v, want %v", osName, arch, machine^override, got, readyToRun)
+				}
+
+				if after, err := os.ReadFile(path); err != nil || !bytes.Equal(after, written) {
+					t.Errorf("%s-%s: the reader changed the image on disk (%v)", osName, arch, err)
+				}
+			}
+		}
+	}
+
+	// A Machine no override explains is still refused, in debug/pe's own words.
+	path := filepath.Join(dir, "unexplained.dll")
+	writeSyntheticManagedImage(t, path, 0x1234, true)
+
+	if _, err := isReadyToRunImage(path); err == nil || !strings.Contains(err.Error(), "unrecognized PE machine") {
+		t.Errorf("Machine 0x1234: got %v, want debug/pe's unrecognized PE machine", err)
+	}
+}
+
+// writeSyntheticManagedImage writes the smallest PE32+ image isReadyToRunImage walks, and returns its bytes: one section
+// at RVA 0x2000 holding an IMAGE_COR20_HEADER whose ManagedNativeHeader names a READYTORUN_HEADER signature ('RTR'), or
+// is empty for an IL-only image.
+func writeSyntheticManagedImage(t *testing.T, path string, machine uint16, readyToRun bool) []byte {
+	t.Helper()
+
+	const sectionRVA, sectionOffset, sectionSize, nativeHeader = 0x2000, 0x200, 0x200, 0x100
+
+	optional := pe.OptionalHeader64{Magic: 0x20b, SectionAlignment: 0x1000, FileAlignment: 0x200,
+		SizeOfImage: sectionRVA + 0x1000, SizeOfHeaders: sectionOffset, NumberOfRvaAndSizes: 16}
+	optional.DataDirectory[pe.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR] = pe.DataDirectory{VirtualAddress: sectionRVA, Size: 72}
+
+	file := pe.FileHeader{Machine: machine, NumberOfSections: 1, SizeOfOptionalHeader: uint16(binary.Size(optional)),
+		Characteristics: pe.IMAGE_FILE_EXECUTABLE_IMAGE | pe.IMAGE_FILE_LARGE_ADDRESS_AWARE | pe.IMAGE_FILE_DLL}
+	section := pe.SectionHeader32{Name: [8]uint8{'.', 't', 'e', 'x', 't'}, VirtualSize: sectionSize,
+		VirtualAddress: sectionRVA, SizeOfRawData: sectionSize, PointerToRawData: sectionOffset}
+
+	var image bytes.Buffer
+	dos := make([]byte, 0x40)
+	copy(dos, "MZ")
+	binary.LittleEndian.PutUint32(dos[0x3c:], 0x40)
+	image.Write(dos)
+	image.WriteString("PE\x00\x00")
+
+	for _, part := range []any{file, optional, section} {
+		if err := binary.Write(&image, binary.LittleEndian, part); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	image.Write(make([]byte, sectionOffset-image.Len()))
+
+	data := make([]byte, sectionSize)
+	binary.LittleEndian.PutUint32(data[0:4], 72)
+
+	if readyToRun {
+		binary.LittleEndian.PutUint32(data[64:68], sectionRVA+nativeHeader)
+		binary.LittleEndian.PutUint32(data[68:72], 4)
+		binary.LittleEndian.PutUint32(data[nativeHeader:], 0x00525452)
+	}
+
+	image.Write(data)
+
+	if err := os.WriteFile(path, image.Bytes(), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	return image.Bytes()
 }
 
 // hostRuntimeIdentifier maps a Go host to the .NET runtime identifier a publish targets.
