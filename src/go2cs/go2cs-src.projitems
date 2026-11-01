@@ -595,6 +595,7 @@
     <None Include="$(MSBuildThisFileDirectory)subtreeLoadGoRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)suppressionCompanion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)symbols.go" />
+    <None Include="$(MSBuildThisFileDirectory)symbolsInSync_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syncCopyChecker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testAliasShadowOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion.go" />
