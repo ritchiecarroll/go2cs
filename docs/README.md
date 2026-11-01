@@ -17,14 +17,14 @@ machinery stays out of the converted files. Behavior comes first: a goroutine ru
 and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
 package, on Windows and Linux, and the same validation is in progress on macOS.
 
-## 📰 NEWS — The converted standard library moves to Go 1.26.10
+## 📰 NEWS — Another package's variables by address, and converted code that reads like Go
 
-**October 26, 2026, NuGet 1.26.10.1.** The converted standard library is built from Go 1.26.10, a release
-Go still supports, and every package that can be validated passes Go's own tests at Go 1.26.10 on
-Windows x64 and Linux x64. Converting needs Go 1.26.10. Go 1.26's new packages are new `go.*` package
-IDs, and the ten IDs Go 1.26 no longer has are deprecated, pointing at 1.24.13.7. A limitation is newly
-documented: the address of another package's variable is the address of a copy.
-[Full announcement](NEWS.md#october-26-2026--the-converted-standard-library-moves-to-go-12610).
+**November XX, 2026, NuGet 1.26.10.2.** The first fix release on the Go 1.26 line, still built from Go 1.26.10.
+Taking the address of a variable another package exports now reaches the variable, as in Go, and converted C#
+reads closer to the Go it came from: `p.f` through a pointer, `err != nil`, and slice literals as C# collection
+expressions. Two changes break compiled C#, so an assembly built against an earlier package must be rebuilt. A
+goroutine's crash is no longer lost when `main` returns, and a converted program optimizes its hot methods sooner.
+[Full announcement](NEWS.md#november-xx-2026--another-packages-variables-by-address-and-converted-code-that-reads-like-go).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 

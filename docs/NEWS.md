@@ -8,6 +8,89 @@ their full text.
 
 ---
 
+## November XX, 2026 — Another package's variables by address, and converted code that reads like Go
+
+<!-- RELEASE DAY: replace "November XX" with the publish date here, in the README's NEWS block, and in that block's
+     link anchor. This entry is held unmerged until release day, and lands just before the release tag mints
+     (GoCorpusMigration.md, the release ritual, item 1). -->
+
+**NuGet 1.26.10.2.** The first fix release on the Go 1.26 line. The converted standard library is still built from
+Go 1.26.10, and converting a module still needs a Go 1.26 toolchain and the .NET 10 SDK. Two of the changes below
+break compiled C#. C# source that uses the packages compiles unchanged, but an assembly built against an earlier
+package must be rebuilt against this one.
+
+**Another package's variables, by address.** Taking the address of a variable another package exports now
+reaches the variable, as in Go: `&otherpkg.V`, `flag.BoolVar(&otherpkg.Debug, ...)`, a pointer-receiver method
+value such as `f := otherpkg.V.Reset`, and an address inside it, `&otherpkg.S.Field` or `&otherpkg.Arr[i]`. Only a
+pointer- or interface-typed variable is still handed over as a copy ([Limitations](Limitations.md)). **This is a
+breaking change for compiled C# code**: each exported variable of a value type is now a `ref` property over its
+storage, not a field, so an assembly compiled against 1.26.10.1 must be rebuilt against 1.26.10.2. C# source that
+reads or assigns `pkg.V` compiles unchanged. go.* packages now depend on each other at the exact release version,
+so a project that mixes 1.26.10.1 and 1.26.10.2 packages fails at restore and names them. A read of such a variable
+costs about 0.5 ns more than a field read on the JIT, and about 0.7 to 0.9 ns more under Native AOT (measured on
+`win-x64`, one development machine).
+
+**String constants the compiler can inline.** In the converted standard library a public string constant is now
+read through a same-named property the JIT and Native AOT inline; C# that uses one compiles unchanged, but an
+assembly built against an earlier package must be rebuilt.
+
+**Converted code reads closer to the Go.** Converted C# is meant to read like the Go it came from, and this release
+removes most of the remaining wrapping:
+
+- A field through a pointer reads `p.f`, as in Go, where it read `(~p).f` or wrote `p.Value.f`; its address reads
+  `p.Ꮡf`.
+- A comparison with `nil` reads `err != nil`, and a zero value reads `default`, where both read `default!`.
+- A slice literal reads `slice<error>([e1])`, a C# collection expression, where it read
+  `new error[]{e1}.slice()`. A struct's zero literal reads `new T()`.
+- A rune literal reads `'x'` wherever C# takes a char, without a `(rune)` cast.
+- A `switch` on a value becomes a C# pattern switch, `case ' ' or '\t':`.
+- `else if` stays on one line, an opening brace follows a space as gofmt writes it, and a variable whose address
+  escapes is declared and initialized in one statement.
+- Trailing comments that gofmt aligned stay aligned, and the comments C# still dropped are carried.
+
+**Faster from the first call.** A converted program counts calls toward optimizing a method from the start, rather
+than after .NET's usual quiet period of about 100 ms. On `win-x64`, a TLS handshake benchmark ran about a third
+faster under the JIT, and a trivial program took about 24 ms longer to start. A ReadyToRun publish precompiles golib
+and the standard library and leaves the program's own code to the JIT, which can then inline across it: on the
+same machine, a published loop calling `strconv.FormatBool` ran in about an eighth of the time it took when
+everything was precompiled.
+`<GoReadyToRunUserCode>true</GoReadyToRunUserCode>` precompiles your own code too, and
+`<GoCallCountingDelayMs>runtime</GoCallCountingDelayMs>` restores .NET's delay. [Tuning](Tuning.md) has the
+measurements and every setting.
+
+**Single-file publishes keep ReadyToRun.** The publish profiles go2cs writes beside a converted program now keep
+ReadyToRun on and compile it one assembly at a time. 1.26.10.1's profiles turned it off, because a single-file
+publish compiled as one composite image runs out of memory; a profile publish now gets ReadyToRun's faster start.
+A program converted by an earlier go2cs keeps its old profiles, since go2cs never overwrites one:
+[Known issues](KnownIssues.md#a-single-file-publish-with-composite-readytorun-runs-out-of-memory) says what to change.
+
+**A goroutine's crash is not lost when `main` returns.** When `main` returns while another goroutine is running a
+panic's deferred calls, the program waits while that goroutine can still run, as Go does, so the crash report
+prints and the process exits with code 2. The wait used to be a fixed 20 ms, and on a busy machine a crashing
+program could exit 0 with nothing printed. A goroutine blocked in its deferred calls, on a channel or in a system
+call, does not hold the exit.
+
+**Large package-level data is built on first use.** A package-level variable that holds a large pure-data value,
+such as one of `unicode`'s tables, is built the first time it is read, not when its package loads. 1.26.10.1
+already did this; it was not announced then.
+
+**Also in this release:**
+
+- A Native AOT program that uses `net` or `crypto/tls` runs again; on 1.26.10.1 it could exit with an error the
+  first time it passed a struct pointer to a system call
+  ([Known issues](KnownIssues.md#with-the-go-126101-packages-a-native-aot-program-that-uses-the-network-can-exit-with-an-error)).
+- A type switch's `case int:` no longer also takes an `int32` or a rune, and `case uint:` no longer takes a `uint32`.
+- A deferred or `go` method call on an array element uses the element as it is at the statement, as Go does.
+- A goroutine the converter proves cannot recurse reserves a 16 MiB stack, where others reserve 256 MiB, so a
+  program that starts many goroutines starts them faster ([Tuning](Tuning.md#goroutine-stacks)).
+- A package-level `sync.WaitGroup` stays outside a `testing/synctest` bubble, as in Go.
+- Panic messages name a Go `int32` as `int32` and a byte as `uint8`.
+- Converting a single `.go` file names the output after that file, and a relative `-go2cspath` resolves.
+- The release's Windows executables are Authenticode-signed, and its `SHA256SUMS` carries a GPG signature
+  ([Limitations](Limitations.md)).
+
+---
+
 ## October 26, 2026 — The converted standard library moves to Go 1.26.10
 
 **NuGet 1.26.10.1.** The converted standard library is now built from Go 1.26.10, a release Go still
