@@ -1,0 +1,112 @@
+# trace arm, n32 (load): late = stdout holds "recovered"; times are ms from tail-start
+
+LATE traced run 8: class B 
+  tail-start present
+  park       -927.666  park goroutine=3 reason=ChanReceive
+  syscall    +322.320  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +509.074  wait-exit count=0 panicking=0
+  wait-done  +509.306
+
+LATE traced run 14: class B 
+  tail-start present
+  park       -1055.917  park goroutine=3 reason=ChanReceive
+  syscall    +201.589  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +221.660  wait-exit count=0 panicking=0
+  wait-done  +221.852
+
+LATE traced run 28: class B 
+  tail-start present
+  park       -1712.682  park goroutine=3 reason=ChanReceive
+  syscall    +887.709  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +1107.513  wait-exit count=0 panicking=0
+  wait-done  +1107.815
+
+LATE traced run 51: class B 
+  tail-start present
+  park       -1054.729  park goroutine=3 reason=ChanReceive
+  syscall    +505.532  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +532.752  wait-exit count=0 panicking=0
+  wait-done  +532.898
+
+LATE traced run 55: class B 
+  tail-start present
+  park       -1087.044  park goroutine=3 reason=ChanReceive
+  syscall    +179.323  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +569.716  wait-exit count=0 panicking=0
+  wait-done  +570.010
+
+LATE traced run 69: class B 
+  tail-start present
+  park       -1529.604  park goroutine=3 reason=ChanReceive
+  syscall    +449.998  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +481.669  wait-exit count=0 panicking=0
+  wait-done  +481.876
+
+LATE traced run 79: class B 
+  tail-start present
+  park       -917.369  park goroutine=3 reason=ChanReceive
+  syscall    +848.222  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +878.692  wait-exit count=0 panicking=0
+  wait-done  +878.895
+
+LATE traced run 84: class B 
+  tail-start present
+  park       -538.866  park goroutine=3 reason=ChanReceive
+  syscall    +740.861  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +781.052  wait-exit count=0 panicking=0
+  wait-done  +781.220
+
+LATE traced run 88: class B 
+  tail-start present
+  park       -1129.005  park goroutine=3 reason=ChanReceive
+  syscall    +385.333  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +624.991  wait-exit count=0 panicking=0
+  wait-done  +625.216
+
+LATE traced run 94: class B 
+  tail-start present
+  park       -1493.752  park goroutine=3 reason=ChanReceive
+  syscall    +518.276  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +793.024  wait-exit count=0 panicking=0
+  wait-done  +793.261
+
+LATE traced run 99: class B 
+  tail-start present
+  park       -690.342  park goroutine=3 reason=ChanReceive
+  syscall    +195.011  syscall goroutine=3 counted=1
+  wait-start -  (derived: wait-end minus elapsedMs)
+  wait-end   +304.816  wait-exit count=0 panicking=0
+  wait-done  +305.021
+
+ON-TIME traced run 1
+  tail-start present
+  park       -441.446  park goroutine=3 reason=ChanReceive
+  wait-start +0.319  (derived: wait-end minus elapsedMs)
+  wait-end   +68.559  wait-release holds=False elapsedMs=68.24 blocked=True seq=1 cpuMs=0.00 confirmedFor=68.24
+  wait-done  +68.783
+
+ON-TIME traced run 2
+  tail-start present
+  park       -960.723  park goroutine=3 reason=ChanReceive
+  wait-start +0.299  (derived: wait-end minus elapsedMs)
+  wait-end   +47.129  wait-release holds=False elapsedMs=46.83 blocked=True seq=1 cpuMs=0.00 confirmedFor=46.81
+  wait-done  +47.381
+
+ON-TIME traced run 3
+  tail-start present
+  park       -242.033  park goroutine=3 reason=ChanReceive
+  wait-start +0.231  (derived: wait-end minus elapsedMs)
+  wait-end   +99.041  wait-release holds=False elapsedMs=98.81 blocked=True seq=1 cpuMs=0.00 confirmedFor=98.81
+  wait-done  +99.218
+
+COUNTS late traced 11/100, late untraced 11/100, classes A=0 B-before-wait=0 B-in-wait=0 B=11 B0=0 C=0 D=0 ?=0

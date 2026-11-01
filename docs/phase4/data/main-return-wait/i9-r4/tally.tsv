@@ -1,0 +1,5 @@
+arm	mode	N	exit0	exit2	other	empty_stderr	exit2_with_panic_line	stdout_recovered	spinner_alive
+m4-tr-hi	loadhi	100	100	0	0	100	0	45	100
+m4-tr-n32	load	100	100	0	0	100	0	11	100
+m4-un-hi	loadhi	100	100	0	0	100	0	40	100
+m4-un-n32	load	100	100	0	0	100	0	11	100

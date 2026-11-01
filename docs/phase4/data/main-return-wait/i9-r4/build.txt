@@ -1,0 +1,3 @@
+2026-11-01 08:08:28 START aot-rec-trace tree=8914486591 trace-lines=9
+2026-11-01 08:19:56 END aot-rec-trace rc=0 elapsed=688s exe-sha=955c43401b106f32 [WHEA 0 since 2026-11-01T08:08:28.5856801-06:00]
+DONE-R4-BUILD

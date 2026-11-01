@@ -1,0 +1,7 @@
+2026-11-01 08:20:48 START r4 exe-sha=955c43401b106f32
+2026-11-01 08:20:48 ARM hi loadhi n8 START
+2026-11-01 09:01:28 ARM hi loadhi n8 END elapsed=2439s traced:{N=100 exit0=100 alive=100 recovered=45 trace-files=100} untraced:{N=100 exit0=100 alive=100 recovered=40} [WHEA 0 since 2026-11-01T08:20:48.2442259-06:00]
+2026-11-01 09:01:28 ARM n32 load n32 START
+2026-11-01 09:17:20 ARM n32 load n32 END elapsed=951s traced:{N=100 exit0=100 alive=100 recovered=11 trace-files=100} untraced:{N=100 exit0=100 alive=100 recovered=11} [WHEA 0 since 2026-11-01T09:01:28.2260924-06:00]
+2026-11-01 09:17:20 END r4 [WHEA 0 since 2026-11-01T08:20:47.4180011-06:00]
+2026-11-01 09:17:20 DONE-R4-RUN

@@ -1,0 +1,5 @@
+205334967484	5	park goroutine=3 reason=ChanReceive
+205335599254	1	tail-start count=1 exitRequested=0
+205337553868	5	syscall goroutine=3 counted=1
+205338603307	1	wait-exit count=0 panicking=0
+205338603592	1	tail-wait-done count=0 panicking=0

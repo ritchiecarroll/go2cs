@@ -1,0 +1,4 @@
+203741427525	5	park goroutine=3 reason=ChanReceive
+203741883367	1	tail-start count=1 exitRequested=0
+203742033533	1	wait-release holds=False elapsedMs=149.83 blocked=True seq=1 cpuMs=0.00 confirmedFor=149.82
+203742033890	1	tail-wait-done count=1 panicking=0
