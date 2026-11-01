@@ -3831,6 +3831,17 @@ exact on a unique match. Optimized frames (tiering off, Tier1, OSR) are partial:
 fewer boundaries, so the region may not reach the call. The rule can move one wrong line to another,
 never a right one to wrong. Pinned by `StackRegionCallSiteTests` and the behavioral
 `CallerLineStackLocal`.<!-- seat #55, measured 2026-10-31 on windows Release: CallerLineStackLocal 4 of 6 shapes one line early at master at tier-0, tiering off and Tier1, 6 of 6 right after; CallerLineMultiLine's pkgSlice elements 2 and 3 right at tier-0 after, unchanged at tiering off. -->
+One optimized shape it cannot reach: with tiering off, a frame whose reported offset is IL 0, where the
+method's first instruction is a constructor `newobj` rather than a call, names no call of its callee in that
+region, and a callee the method calls more than once cannot be told apart, so the frame keeps the method's
+first line. The behavioral `CallerLineCallSite` reads it at S3, S4 and S5 with tiering off (Go's lines 60, 63
+and 65; the converted frame's 47), and reads Go's lines at tier-0 and Tier1.<!-- seat #51 r2, COORD's ruling
+2026-10-31: a disclosure, and bending the emission to re-pin the receiver is ruled out (owner). Measured windows
+Release at r2 ff8073e372 against master 8b993b7b1d, two readings per config: master's emission reads 9/9 at
+tier-0, tiering off and Tier1; #51's, which drops the u8 literals that kept `e` in a local slot, reads S3, S4 and S5
+false with tiering off only. The frames report IL 0 (native 810, 1127, 1446); the region [0,7) holds only the E
+constructor's newobj; line() is called 9 times and Info twice. At the report, S3's and S4's line() and S5's Info
+read 47. -->
 
 **The two test-variant suffixes are NOT symmetric — `_internal_test` is stripped, `_test` is kept.**
 `goFrameName` derives the reported import path from the emitted namespace plus<!-- history: 2026-08-26 -->
