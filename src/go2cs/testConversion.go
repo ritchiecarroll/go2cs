@@ -8486,6 +8486,18 @@ type testDisclosure struct {
 	// signatures are reconsidered at phase C.
 	Records int `json:"records,omitempty"`
 
+	// OptionalRecords names records a pinned test logs on SOME runs and not others (ruled option A,
+	// 2026-11-01, ledger 05:11). runtime's TestMemStats logs its twelve disclosed zero fields always,
+	// and a thirteenth when the CLR's real total GC pause crosses Go's 1e11 ns sanity bound, which 8 of
+	// 10 linux TC0 readings did: no exact count holds on both kinds of run. Each optional record absorbs
+	// AT MOST one record outside the signature, and only a record carrying EVERY one of its substrings,
+	// so it pins the field and the failure text together and no other record about that field is
+	// absorbed. The pin holds iff the records seen, less the optional records matched, equal Records
+	// (optionalRecordsMatched). The loader refuses an optional record on an unpinned entry, one with
+	// fewer than two substrings or an empty one, one without a reason, the same one twice, and one the
+	// signature's own record would satisfy. Each one's reason is rendered on the proof page.
+	OptionalRecords []optionalRecord `json:"optionalRecords,omitempty"`
+
 	// Halves carries a test that fails for TWO reasons, each with its own class (the two-half shape,
 	// ruled 2026-09-28 09:47, ledger 435557647c, item 3b; per-half platforms added at 17:56, ledger
 	// a4dbed7620). runtime's TestReadMetricsConsistency is the first: its linux-only mark-class check
@@ -8510,6 +8522,26 @@ type testDisclosure struct {
 	// rendered fields to that.
 	History                string `json:"history,omitempty"`
 	HostConditionalHistory string `json:"hostConditionalHistory,omitempty"`
+}
+
+// optionalRecord is one record a pinned entry may carry on some runs (testDisclosure.OptionalRecords):
+// the substrings that must ALL appear in that one record, the reason the proof page renders, and the
+// same never-rendered History beside it (testDisclosure.History).
+type optionalRecord struct {
+	Contains []string `json:"contains"`
+	Reason   string   `json:"reason"`
+	History  string   `json:"history,omitempty"`
+}
+
+// matches reports whether one record carries every one of the optional record's substrings.
+func (o optionalRecord) matches(record string) bool {
+	for _, substring := range o.Contains {
+		if !strings.Contains(record, substring) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // disclosureHalf is one reason of a two-half entry (testDisclosure.Halves): the class, signature,
@@ -8785,6 +8817,9 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 		}
 		if disclosure.Records > 0 && disclosure.Class == hostFatalClass {
 			return nil, nil, fmt.Errorf("disclosure %s pins %d record(s), but a %s test is withdrawn from both sides and logs nothing to count", disclosure.Name, disclosure.Records, hostFatalClass)
+		}
+		if err := validateOptionalRecords(disclosure); err != nil {
+			return nil, nil, err
 		}
 
 		// The retirement fields' rules (the deferred contract, the floor, the structural refusal of a
@@ -9350,6 +9385,89 @@ func nonSignatureRecords(records []string, signatures ...string) []string {
 	return others
 }
 
+// validateOptionalRecords holds an entry's optional records to what they can honestly mean
+// (testDisclosure.OptionalRecords): each adjusts a record-count pin, so an unpinned entry has nothing
+// for it to adjust; it names a field AND a failure text, so it carries at least two substrings, none
+// empty; it is rendered, so it has a reason; and it must be able to absorb only a record of its own,
+// so it is not the same optional twice, and not one the signature's own record already satisfies.
+func validateOptionalRecords(disclosure testDisclosure) error {
+	if len(disclosure.OptionalRecords) == 0 {
+		return nil
+	}
+
+	if disclosure.Records <= 0 {
+		return fmt.Errorf("disclosure %s names optional records but has no record-count pin: an optional record adjusts the pin, and an unpinned entry has nothing to adjust", disclosure.Name)
+	}
+
+	seen := hashset.HashSet[string]{}
+
+	for i, optional := range disclosure.OptionalRecords {
+		if len(optional.Contains) < 2 {
+			return fmt.Errorf("disclosure %s optional record %d carries %d substring(s), and needs at least two: the field and its failure text, so no other record about the field can be absorbed", disclosure.Name, i+1, len(optional.Contains))
+		}
+
+		for _, substring := range optional.Contains {
+			if substring == "" {
+				return fmt.Errorf("disclosure %s optional record %d has an empty substring, which every record contains", disclosure.Name, i+1)
+			}
+		}
+
+		if strings.TrimSpace(optional.Reason) == "" {
+			return fmt.Errorf("disclosure %s optional record %d requires a reason: the proof page states it", disclosure.Name, i+1)
+		}
+
+		sorted := append([]string{}, optional.Contains...)
+		sort.Strings(sorted)
+
+		if !seen.Add(strings.Join(sorted, "\x00")) {
+			return fmt.Errorf("disclosure %s names optional record %q twice", disclosure.Name, optional.Contains)
+		}
+
+		for _, signature := range disclosure.signatures() {
+			if signature != "" && optional.matches(signature) {
+				return fmt.Errorf("disclosure %s optional record %q is satisfied by the signature's own record (%q), so it could absorb the record the signature pins", disclosure.Name, optional.Contains, signature)
+			}
+		}
+	}
+
+	return nil
+}
+
+// optionalRecordsMatched answers how many of an entry's optional records the C# record list carries,
+// or a failure text. Each optional record absorbs AT MOST one record, outside the signature, and two
+// optional records never share one.
+func optionalRecordsMatched(disclosure testDisclosure, records []string) (int, string) {
+	if len(disclosure.OptionalRecords) == 0 {
+		return 0, ""
+	}
+
+	signatures := disclosure.signatures()
+	used := map[int]bool{}
+	matched := 0
+
+	for _, optional := range disclosure.OptionalRecords {
+		var candidates []int
+
+		for i, record := range records {
+			if len(nonSignatureRecords([]string{record}, signatures...)) == 1 && optional.matches(record) {
+				candidates = append(candidates, i)
+			}
+		}
+
+		switch {
+		case len(candidates) > 1:
+			return 0, fmt.Sprintf("%d records match optional record %q, which absorbs at most one", len(candidates), optional.Contains)
+		case len(candidates) == 1 && used[candidates[0]]:
+			return 0, fmt.Sprintf("optional record %q matches a record another optional record already absorbed", optional.Contains)
+		case len(candidates) == 1:
+			used[candidates[0]] = true
+			matched++
+		}
+	}
+
+	return matched, ""
+}
+
 // recordPinFailure answers "" when a disclosure's record-count pin holds for the named test's C#
 // terminal event, or the mismatch text that names the records outside the signature. An unpinned
 // entry (Records == 0) always holds, and so does every entry when csRecords is nil, the legacy entry
@@ -9367,11 +9485,21 @@ func recordPinFailure(name string, disclosure testDisclosure, csRecords map[stri
 		return fmt.Sprintf("%s: the %s disclosure pins %d log record(s), but the C# terminal event carries no record list", name, disclosure.classLabel(), disclosure.Records)
 	}
 
-	if records.Dropped == 0 && len(records.Records) == disclosure.Records {
+	optionalMatched, optionalFailure := optionalRecordsMatched(disclosure, records.Records)
+
+	if records.Dropped == 0 && optionalFailure == "" && len(records.Records)-optionalMatched == disclosure.Records {
 		return ""
 	}
 
 	text := fmt.Sprintf("%s: C# logged %d record(s) where the %s disclosure pins %d", name, len(records.Records), disclosure.classLabel(), disclosure.Records)
+
+	if len(disclosure.OptionalRecords) > 0 {
+		text += fmt.Sprintf(" plus at most %d optional", len(disclosure.OptionalRecords))
+	}
+
+	if optionalFailure != "" {
+		text += "; " + optionalFailure
+	}
 
 	if records.Dropped > 0 {
 		text += fmt.Sprintf(", and the host's log cap dropped %d more", records.Dropped)
