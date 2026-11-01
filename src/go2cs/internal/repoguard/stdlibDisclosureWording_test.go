@@ -20,7 +20,7 @@ import (
 
 // A standard-library disclosure's rendered text is PUBLIC, exactly as a module's is (moduleDisclosureWording_test.go):
 // validationProofPages.go copies each entry's `reason` (each half's, for a two-half entry), its `hostConditional`
-// sentence and the manifest's `notes` onto the package's proof page under docs/validation/current, which go2cs.net
+// sentence, each optional record's `reason` and the manifest's `notes` onto the package's proof page under docs/validation/current, which go2cs.net
 // publishes. So that text must read to a visitor: what the test does, why the converted side differs, what was
 // measured. Until seat #13 of the 1.26.10.2 plan, 320 of the 371 standard-library reasons carried their own history
 // (RELABEL narratives, lane names, ledger and mailbox citations, SHAs of posts), on 704 proof pages; the owner's
@@ -48,6 +48,9 @@ type stdlibDisclosureText struct {
 	Halves          []struct {
 		Reason string `json:"reason"`
 	} `json:"halves"`
+	OptionalRecords []struct {
+		Reason string `json:"reason"`
+	} `json:"optionalRecords"`
 }
 
 type stdlibDisclosureManifest struct {
@@ -103,6 +106,10 @@ func stdlibDisclosureWordingFindings(path string, data []byte) ([]string, error)
 
 		for i, half := range d.Halves {
 			add("disclosure "+d.Name+" half "+string(rune('1'+i))+" reason", half.Reason)
+		}
+
+		for i, optional := range d.OptionalRecords {
+			add("disclosure "+d.Name+" optional record "+string(rune('1'+i))+" reason", optional.Reason)
 		}
 	}
 
@@ -166,7 +173,9 @@ func TestStdlibDisclosureWordingGuardFiresOnAPlantedWord(t *testing.T) {
 		{"name": "TestY", "class": "host-identity", "signature": "s", "reason": "reads the host's name.",
 		 "hostConditional": "decided on the i9's lane box"},
 		{"name": "TestZ", "halves": [{"class": "structural", "signature": "a", "reason": "boxes (R) a value"},
-		 {"class": "deferred", "signature": "b", "reason": "measured on train Q"}]}],
+		 {"class": "deferred", "signature": "b", "reason": "measured on train Q"}]},
+		{"name": "TestW", "class": "runtime-capability", "signature": "s", "reason": "reads zero.", "records": 1,
+		 "optionalRecords": [{"contains": ["a", "b"], "reason": "crosses the bound on the mailbox box"}]}],
 		"notes": ["The fleet re-banked it."]}`)
 
 	found, err := stdlibDisclosureWordingFindings("planted.json", planted)
@@ -180,6 +189,7 @@ func TestStdlibDisclosureWordingGuardFiresOnAPlantedWord(t *testing.T) {
 		"planted.json: disclosure TestY hostConditional: i9, lane",
 		"planted.json: disclosure TestZ half 1 reason: (R)",
 		"planted.json: disclosure TestZ half 2 reason: train",
+		"planted.json: disclosure TestW optional record 1 reason: mailbox",
 		"planted.json: note 0: fleet, banked",
 	}
 
