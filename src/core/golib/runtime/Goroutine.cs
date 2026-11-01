@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace go.golib;
@@ -169,6 +170,72 @@ public sealed class Goroutine
 
     /// <summary>The managed id of the thread running this goroutine, or 0 while no thread is.</summary>
     internal int ThreadId => Volatile.Read(ref m_threadId);
+
+    // THE MAIN-RETURN MARKS (MainExit). A returning main asks a goroutine that is running a panic's deferred calls
+    // the question runtime.main's yield loop asks (proc.go:310): can it run? Parked (m_waitReason, not readied)
+    // answers most of it. The rest is a goroutine blocked OUTSIDE the park accounting, m_blockedDepth:
+    // - Go's _Gsyscall, a goroutine inside a system call, marked by the runtime's entersyscall family (linux, darwin)
+    //   and by the windows syscall trampoline (dll_windows.cs), the two places a converted program enters the OS;
+    // - a golib wait that cannot be a Park because Park would reenter what it waits on: the execution tracer's
+    //   reader and stop, which hold the lock its block event takes (Go parks the reader as "trace reader (blocked)"
+    //   and semacquires the stop).
+    //
+    // Written ONLY while this goroutine is counted in runningPanicDefers (m_panicDefersCounted), so an uncounted
+    // syscall pays one thread-static read and a branch. The counted window sees every syscall that matters: the count
+    // starts on this goroutine's own thread, at its panic, so a syscall that began before the goroutine was counted
+    // had already returned before its panic could start.
+    //
+    // m_blockSequence names the block. It moves at each counted park or blocked entry, so main can tell one block that
+    // lasted from two short ones in a row: a goroutine trading messages in a deferred call is making progress.
+    private int m_panicDefersCounted;
+    private int m_blockedDepth;
+    private int m_blockSequence;
+
+    /// <summary>MainExit counts this goroutine in runningPanicDefers, or stops counting it; the marks follow.</summary>
+    internal void SetPanicDefersCounted(bool counted) => Volatile.Write(ref m_panicDefersCounted, counted ? 1 : 0);
+
+    /// <summary>
+    /// What a returning <c>main</c> reads of this goroutine (MainExit): whether it is blocked, parked and not readied
+    /// or blocked outside the park accounting, and which block that is.
+    /// </summary>
+    internal (bool Blocked, int Sequence) MainReturnSample()
+    {
+        int reason = Volatile.Read(ref m_waitReason);
+        bool parked = reason != (int)WaitReason.Zero && (reason & ReadiedFlag) == 0;
+
+        return (parked || Volatile.Read(ref m_blockedDepth) > 0, Volatile.Read(ref m_blockSequence));
+    }
+
+    /// <summary>
+    /// The calling goroutine blocks outside the park accounting: a system call (Go's <c>entersyscall</c>, golib's
+    /// half; the runtime's <c>g</c> status moves separately), or a golib wait that cannot park. A returning <c>main</c>
+    /// reads it as not runnable. Pair it with <see cref="ExitBlocked"/>. Inert on a thread with no goroutine identity,
+    /// and on a goroutine that is not counted in runningPanicDefers, the only goroutine main asks about.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void EnterBlocked()
+    {
+        if (t_current is { m_panicDefersCounted: not 0 } goroutine)
+            goroutine.EnterCountedBlock();
+    }
+
+    /// <summary>The block <see cref="EnterBlocked"/> marked has ended: Go's <c>exitsyscall</c>, golib's half.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ExitBlocked()
+    {
+        if (t_current is { m_blockedDepth: > 0 } goroutine)
+            Volatile.Write(ref goroutine.m_blockedDepth, goroutine.m_blockedDepth - 1);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void EnterCountedBlock()
+    {
+        // The sequence moves BEFORE the depth is published, so main never reads a new block under an old name.
+        if (m_blockedDepth == 0)
+            Volatile.Write(ref m_blockSequence, m_blockSequence + 1);
+
+        Volatile.Write(ref m_blockedDepth, m_blockedDepth + 1);
+    }
 
     // The synctest bubble this goroutine belongs to (SyncTestBubble), set by its CREATOR before its
     // thread starts -- Go's newg.syncGroup = callergp.syncGroup -- and cleared when it exits. Read by
@@ -585,6 +652,11 @@ public sealed class Goroutine
             parkTransition(reason, true);
             Volatile.Write(ref goroutine.m_parkTransitioned, 1);
         }
+
+        // A counted goroutine's park is a new block to a returning main (see the main-return marks), named BEFORE the
+        // reason is published.
+        if (previous == (int)WaitReason.Zero && goroutine.m_panicDefersCounted != 0)
+            Volatile.Write(ref goroutine.m_blockSequence, goroutine.m_blockSequence + 1);
 
         Volatile.Write(ref goroutine.m_waitReason, (int)reason);
 

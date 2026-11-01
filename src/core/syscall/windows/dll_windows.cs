@@ -225,33 +225,51 @@ private static unsafe void refuseRetainingProc(nuint fn) {
 
 private static unsafe (nuint r, int lastError) callNative(nuint fn, ReadOnlySpan<nuint> a) {
     nuint r;
+    int lastError;
+
+    // A system call, as Go's cgocall enters one: a returning main reads this goroutine as not runnable while it is
+    // inside (golib Goroutine's main-return marks). Every SyscallN arity, and NativeStructMarshal.CallDeep, come
+    // through here.
+    if (a.Length > MaxSyscallArgs) {
+        throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
+    }
 
     Marshal.SetLastSystemError(0);
 
-    switch (a.Length) {
-        case 0: r = ((delegate* unmanaged<nuint>)fn)(); break;
-        case 1: r = ((delegate* unmanaged<nuint, nuint>)fn)(a[0]); break;
-        case 2: r = ((delegate* unmanaged<nuint, nuint, nuint>)fn)(a[0], a[1]); break;
-        case 3: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2]); break;
-        case 4: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3]); break;
-        case 5: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4]); break;
-        case 6: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5]); break;
-        case 7: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6]); break;
-        case 8: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]); break;
-        case 9: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]); break;
-        case 10: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9]); break;
-        case 11: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10]); break;
-        case 12: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11]); break;
-        case 13: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12]); break;
-        case 14: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13]); break;
-        case 15: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14]); break;
-        case 16: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15]); break;
-        case 17: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16]); break;
-        case 18: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]); break;
-        default: throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
+    global::go.golib.Goroutine.EnterBlocked();
+
+    try {
+        switch (a.Length) {
+            case 0: r = ((delegate* unmanaged<nuint>)fn)(); break;
+            case 1: r = ((delegate* unmanaged<nuint, nuint>)fn)(a[0]); break;
+            case 2: r = ((delegate* unmanaged<nuint, nuint, nuint>)fn)(a[0], a[1]); break;
+            case 3: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2]); break;
+            case 4: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3]); break;
+            case 5: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4]); break;
+            case 6: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5]); break;
+            case 7: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6]); break;
+            case 8: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]); break;
+            case 9: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]); break;
+            case 10: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9]); break;
+            case 11: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10]); break;
+            case 12: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11]); break;
+            case 13: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12]); break;
+            case 14: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13]); break;
+            case 15: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14]); break;
+            case 16: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15]); break;
+            case 17: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16]); break;
+            case 18: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]); break;
+            default: throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
+        }
+
+        // Read inside the call's window: nothing may run between the native call and its last-error.
+        lastError = Marshal.GetLastSystemError();
+    }
+    finally {
+        global::go.golib.Goroutine.ExitBlocked();
     }
 
-    return (r, Marshal.GetLastSystemError());
+    return (r, lastError);
 }
 
 // The runtime-provided DLL loader entry points that OTHER packages reach by symbol via

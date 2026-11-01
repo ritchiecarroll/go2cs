@@ -272,13 +272,40 @@ public static class ExecutionTracer
             lock (s_readLock)
             {
                 while (stop ? !s_drained : s_generationsDone < ended && !s_drained)
-                    Monitor.Wait(s_readLock);
+                    BlockedWait();
             }
         }
 
         // Outside the advance lock: the advancer may be waiting for it, to find the trace gone.
         if (advancer is not null && advancer != Thread.CurrentThread)
-            advancer.Join();
+        {
+            Goroutine.EnterBlocked();
+
+            try
+            {
+                advancer.Join();
+            }
+            finally
+            {
+                Goroutine.ExitBlocked();
+            }
+        }
+    }
+
+    // A wait on the reader's queue, marked blocked for a returning main (Goroutine's main-return marks). Not a Park:
+    // Park's block event takes s_lock, and a thread here holds s_readLock, which emit takes under s_lock.
+    private static void BlockedWait()
+    {
+        Goroutine.EnterBlocked();
+
+        try
+        {
+            Monitor.Wait(s_readLock);
+        }
+        finally
+        {
+            Goroutine.ExitBlocked();
+        }
     }
 
     /// <summary>
@@ -318,7 +345,7 @@ public static class ExecutionTracer
                 if (s_drained)
                     return null;
 
-                Monitor.Wait(s_readLock);
+                BlockedWait();
             }
         }
     }

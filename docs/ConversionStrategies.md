@@ -8625,7 +8625,7 @@ carries nothing over: golib resets its thread state between goroutines, and each
 even while goroutines are still running. The one exception, also Go's, is a goroutine that is panicking: `main`'s
 return waits for its report and exits 2 with it (golib's `MainExit`; see
 [defer, panic and recover](ConversionStrategies-Reference/defer-panic-recover.md)).
-<!-- src/core/golib/runtime/Goroutine.cs:1134 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
+<!-- src/core/golib/runtime/Goroutine.cs:1206 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
      src/core/golib/runtime/GoroutineThreadPool.cs:45 `internal const int MaxIdle = 64;`, :48
      `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :181
      `// A goroutine that exited locked to its thread takes the thread with it (Go: "If the calling`.
@@ -8657,7 +8657,7 @@ goroutine that does I/O, formats with `fmt` or serves a connection keeps today's
 crash where Go grows the stack, so the proof gives up rather than guess.
 <!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:338
      `if bounded, _ := goroutineStackBounded(goStmt.Call, v.info); bounded {`. golib:
-     src/core/golib/runtime/Goroutine.cs:94 `private const int DefaultBoundedStackReserve = 16 * 1024 * 1024;` and one
+     src/core/golib/runtime/Goroutine.cs:95 `private const int DefaultBoundedStackReserve = 16 * 1024 * 1024;` and one
      worker pool per reservation, src/core/golib/runtime/GoroutineThreadPool.cs:53
      `private static readonly Pool s_bounded = new(Goroutine.BoundedStackReserve);`. Sample: the behavioral test
      GoroutineStackReserve. Measured on Windows x64 (R-LAPTOP, 16 hardware threads, ParkStorm, 100,000 goroutines
