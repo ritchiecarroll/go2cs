@@ -32945,4 +32945,39 @@ record (TC0) is unchanged and the golden is unaffected.
 
 — H (2026-10-31)
 
+## 2026-11-01 — G (#45 follow-up, claude/g-seat45-followup): testing's TestTBHelper misreports a caller line under seat #53's literal accessor — DISCLOSED for .2 (structural, Release only); the fix is queued post-hop
+
+**The finding.** Once the #45 follow-up let `testing` convert again, its bank-act row failed one test that the bank
+had validated. `TestTBHelper` reads Go's `helperfuncs_test.go:86` and `:87` as `:84`, the previous statement's line.
+
+- **The bisect.** Windows, Release, one tree (`c5a4637bba`), one act. Every converter after #45 refuses `testing`
+  without the follow-up, so the fix (`d9da4a7f11`) was cherry-picked onto each arm:
+
+  | Converter | testing |
+  |:--|:--|
+  | `7072ef5904` (batch 98) | validated 83 + 2 |
+  | `1dacbdf4b6` (batch 109) | validated 83 + 2 |
+  | `5bf0fcb694` (batch 110, seat #53) | fails `TestTBHelper` alone (`TestAllocsPerRun` and `TestMorePanic` are its two disclosures) |
+
+- **The emission.** At `5bf0fcb694` the converted test reads the two literals through #53's hoist-mode accessor,
+  `private static ref readonly @string genericFloat64ˢ => ref genericFloat64ˢᵇ;`. Exactly the two calls that pass
+  them misreport; every call that passes a plain literal reports its own line.
+- **Configuration.** `-test-config Debug` at `d9da4a7f11` validates 83 + 2. So the class follows `TestLineNumber`'s:
+  structural, for the default Release configuration.
+- **Reach.** Hoist-mode emission only: the standard library and its converted tests. User code is plain.
+
+**RULED (COORD, 2026-11-01).**
+- **(C) for .2:** `testing`'s manifest discloses `TestTBHelper` (`structural`, signature
+  `helperfuncs_test.go:84: GenericFloat64`, `3b9a3d7209`). Its bank-act row at that commit reads **82 + 3**: one test
+  moves from matched to disclosed, so the total is 85 on both sides. The roster row still reads 83 | 2 until the
+  re-bank records it.
+- **(A) REFUSED:** a `-tests`-only plain-field emission. The owner's standing ruling (2026-09-28, ledger
+  `e15a841635`) never changes visible emission to satisfy a test that asserts diagnostic-only output. It would also
+  make the standard library's tests read differently from its production code.
+- **(B) QUEUED POST-HOP:** the retirement. #55's caller-line resolver maps a call made through an inlined accessor
+  to its own line, with a census first of the standard library's caller-line readers (`log`'s `Lshortfile`,
+  `testing.Helper`), since the same accessor reaches their callers.
+
+— G (2026-11-01)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
