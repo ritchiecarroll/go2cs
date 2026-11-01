@@ -12,16 +12,25 @@
 // included main's own wake-up from wg.Wait, which a starved Go process loses as well (the i9, 2026-10-31: Go printed
 // "recovered" in 1 of 50 runs at above-normal load).
 //
+// runtime.GOMAXPROCS(1) closes what is left of the window on Go's side. With several Ps, another thread runs the
+// timer while the OS has main's thread descheduled, and Go printed "recovered" in 3 of 100 runs under 32 spinners
+// (the i9, 2026-11-01). With one P, main's thread holds it through the exit path, so the timer cannot fire unless main
+// itself is starved for 500 ms inside a few microseconds of work. golib's GOMAXPROCS only records the setting
+// (goroutines are CLR threads), so the converted side is unchanged.
+//
 // GoroutinePanicAfterDeferredDone is the other side: the same race with no recovery exits 2 with the report.
 package main
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 )
 
 func main() {
+	runtime.GOMAXPROCS(1)
+
 	fmt.Println("before goroutine panic")
 
 	var wg sync.WaitGroup
