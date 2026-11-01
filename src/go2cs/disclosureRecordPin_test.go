@@ -183,6 +183,131 @@ func TestDisclosureLoaderRecordRules(t *testing.T) {
 	}
 }
 
+// AN OPTIONAL RECORD (ruled option A, 2026-11-01, ledger 05:11): a record a pinned test logs on SOME
+// runs. runtime's TestMemStats always logs its twelve disclosed zero-field records, and adds a
+// thirteenth when the CLR's real total GC pause crosses Go's 1e11 ns sanity bound, which 8 of 10 linux
+// TC0 readings did and 2 did not. An exact pin of 12 reds every crossing run and 13 reds every other,
+// so the entry names the thirteenth as optional: it may absorb AT MOST one record, outside the
+// signature, and only a record carrying EVERY one of its substrings (the field AND the failure text),
+// so no other PauseTotalNs record is ever absorbed.
+
+const memStatsSignature = "MSpanInuse = 0: zero value"
+
+var memStatsRecords = func() []string {
+	var records []string
+	for _, field := range []string{"Mallocs", "Frees", "HeapObjects", "StackInuse", "StackSys", "MSpanInuse", "MSpanSys",
+		"MCacheInuse", "MCacheSys", "BuckHashSys", "GCSys", "OtherSys"} {
+		records = append(records, "malloc_test.go:95: "+field+" = 0: zero value")
+	}
+	return records
+}()
+
+const pauseRecord = "malloc_test.go:95: PauseTotalNs = 104542321000: insanely high value (overflow?); want <= 1e+11"
+
+const memStatsEntry = `{"name":"TestMemStats","class":"runtime-capability","signature":"` + memStatsSignature + `",` +
+	`"reason":"the span and cache fields","records":12,` +
+	`"optionalRecords":[{"contains":["PauseTotalNs = ","insanely high value (overflow?)"],"reason":"the real GC pause total"}]}`
+
+func memStatsWith(extra ...string) []string {
+	return append(append([]string{}, memStatsRecords...), extra...)
+}
+
+// Both states admit: the twelve alone, and the twelve plus the crossing record.
+func TestAnOptionalRecordAdmitsBothStates(t *testing.T) {
+	disclosures := loadRaw(t, "linux", memStatsEntry)
+
+	for _, records := range [][]string{memStatsWith(), memStatsWith(pauseRecord)} {
+		if mismatches, disclosed := matchOne(disclosures, "TestMemStats", "fail", records, true); len(mismatches) != 0 || len(disclosed) != 1 {
+			t.Fatalf("%d records must be disclosed; mismatches %q disclosed %q", len(records), mismatches, disclosed)
+		}
+	}
+}
+
+// The pin still counts everything else: a 13th unrelated record, and a 14th beside the optional one.
+func TestAnOptionalRecordAbsorbsNothingElse(t *testing.T) {
+	disclosures := loadRaw(t, "linux", memStatsEntry)
+	planted := "malloc_test.go:95: planted extra assert"
+
+	for _, records := range [][]string{memStatsWith(planted), memStatsWith(pauseRecord, planted)} {
+		mismatches, disclosed := matchOne(disclosures, "TestMemStats", "fail", records, true)
+
+		if len(disclosed) != 0 || len(mismatches) != 1 || !strings.Contains(mismatches[0], "planted extra assert") {
+			t.Fatalf("%d records with a plant must be a mismatch naming it; mismatches %q disclosed %q", len(records), mismatches, disclosed)
+		}
+	}
+}
+
+// One optional record absorbs one record: a doubled crossing line is a mismatch that says so.
+func TestAnOptionalRecordAbsorbsAtMostOne(t *testing.T) {
+	mismatches, disclosed := matchOne(loadRaw(t, "linux", memStatsEntry), "TestMemStats", "fail", memStatsWith(pauseRecord, pauseRecord), true)
+
+	if len(disclosed) != 0 || len(mismatches) != 1 || !strings.Contains(mismatches[0], "absorbs at most one") {
+		t.Fatalf("a doubled optional record must be a mismatch that says it absorbs at most one; mismatches %q disclosed %q", mismatches, disclosed)
+	}
+}
+
+// The failure text is part of the pin: a PauseTotalNs record of another shape is NOT absorbed.
+func TestAnOptionalRecordNeedsItsFailureText(t *testing.T) {
+	zero := "malloc_test.go:95: PauseTotalNs = 0: zero value"
+	mismatches, disclosed := matchOne(loadRaw(t, "linux", memStatsEntry), "TestMemStats", "fail", memStatsWith(zero), true)
+
+	if len(disclosed) != 0 || len(mismatches) != 1 || !strings.Contains(mismatches[0], "PauseTotalNs = 0: zero value") {
+		t.Fatalf("a PauseTotalNs record without the failure text must stay a mismatch naming it; mismatches %q disclosed %q", mismatches, disclosed)
+	}
+}
+
+// The proof page states the optional record's own reason on a row of its own.
+func TestTheProofPageStatesAnOptionalRecord(t *testing.T) {
+	comparison := testComparison{
+		Package: "runtime", Status: "validated",
+		Go:     map[string]string{"TestMemStats": "pass"},
+		CSharp: map[string]string{"TestMemStats": "fail"},
+	}
+
+	page := renderValidationProofPage(proofPageProvenance{importPath: "runtime", goVersion: "1.26.10", platform: "linux/amd64", date: "2026-11-01"},
+		comparison, loadRaw(t, "linux", memStatsEntry), nil)
+
+	for _, row := range []string{"| `runtime-capability` | the span and cache fields |", "| `optional record` | the real GC pause total |"} {
+		if !strings.Contains(page, row) {
+			t.Fatalf("the page states the entry and its optional record, missing %q:\n%s", row, page)
+		}
+	}
+}
+
+// The loader refuses every optional record that cannot mean what it says. The valid entry loads, so the
+// refusals are the rule's and not the fixture's.
+func TestTheOptionalRecordLoaderRefusals(t *testing.T) {
+	entry := func(records, optionals string) string {
+		return `{"name":"TestMemStats","class":"runtime-capability","signature":"` + memStatsSignature + `","reason":"r"` +
+			records + `,"optionalRecords":[` + optionals + `]}`
+	}
+	optional := func(contains, reason string) string {
+		return `{"contains":[` + contains + `],"reason":"` + reason + `"}`
+	}
+	pause := optional(`"PauseTotalNs = ","insanely high value"`, "p")
+	load := func(body string) error {
+		_, _, _, err := loadTestDisclosures(rawManifest(t, body), "linux")
+		return err
+	}
+
+	if err := load(entry(`,"records":12`, pause)); err != nil {
+		t.Fatalf("a valid optional record must load; got %v", err)
+	}
+
+	for _, refused := range []struct{ body, want string }{
+		{entry(``, pause), "no record-count pin"},
+		{entry(`,"records":12`, optional(`"PauseTotalNs = "`, "p")), "at least two"},
+		{entry(`,"records":12`, optional(`"PauseTotalNs = ",""`, "p")), "empty substring"},
+		{entry(`,"records":12`, optional(`"PauseTotalNs = ","insanely high value"`, "")), "requires a reason"},
+		{entry(`,"records":12`, pause+","+optional(`"insanely high value","PauseTotalNs = "`, "q")), "twice"},
+		{entry(`,"records":12`, optional(`"MSpanInuse = 0","zero value"`, "m")), "signature's own record"},
+	} {
+		if err := load(refused.body); err == nil || !strings.Contains(err.Error(), refused.want) {
+			t.Errorf("want a refusal containing %q for %s; got %v", refused.want, refused.body, err)
+		}
+	}
+}
+
 // What the comparison record publishes for a disclosed test: every record outside the signature.
 func TestNonSignatureRecordsExcludesOnlyTheSignature(t *testing.T) {
 	got := nonSignatureRecords(planted(), stackSignature)
