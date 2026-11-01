@@ -1624,32 +1624,42 @@ function csStrEnd(lo, p,   L, c) {
 }
 # posmapFunclit is RULE 6's whole decision, per OCCURRENCE: 1 only when ALL THREE hold.
 #   (1) the line IS a GoPositionMap record -- ipv4_posmap, the recogniser the DEFINITION carries,
-#       anchored at the line's start, and its argument list parses as exactly FOUR C# string
-#       literals joined by ", " and closed by ")]", as positionMapOperations.go emits it;
+#       anchored at the line's start, and its argument list parses as FOUR TO SEVEN C# string
+#       literals joined by ", " and closed by ")]" -- golib's GoPositionMapAttribute constructors
+#       (goFile, csFile, table, funcLits, then methodValues, calls, thunks), as
+#       positionMapOperations.go emits them;
 #   (2) the candidate lies wholly INSIDE THE FOURTH argument -- the funcLits list -- and not in the
 #       Go file identity, the C# file name, the encoded table, or anything after the ")]";
 #   (3) it is EXACTLY THE SUFFIX of one well-formed entry: immediately preceded by
 #       <digits>-<digits>: whose first digit opens the argument or follows a ';', and immediately
 #       followed by a ';' or by the argument's closing quote.
+# ARITY, 2026-11-01 (H's end regen, batch 125 HOLD): the rule first required EXACTLY four
+# arguments, the only record it had seen. Seat #42 F1's thunk-site form (3aa8abf2b9) emits SEVEN
+# ("<funcLits>", "", "", "<thunks>"), and the regen carried it into the corpus: five well-formed
+# four-deep suffixes in runtime's and runtime/pprof's package_test_info.cs read as refusals. The
+# fourth argument is funcLits in every constructor, so the arity widened to the constructor set and
+# (2) still pins the candidate to argument 4; an eighth argument, or a quad in 5-7, still refuses.
 # The opening parenthesis is found by index() on the characters, never from RLENGTH: this file's
 # doctrine is that an engine's reported extent is an assumption (see ipv4Extent), and the prefix the
 # recogniser matched is one literal the line has to spell anyway.
-function posmapFunclit(lo, s, e,   p, i, q, open4, k) {
+function posmapFunclit(lo, s, e,   p, i, q, open4, close4, k) {
     if (!("ipv4_posmap" in RE)) return 0
     if (lo !~ RE["ipv4_posmap"]) return 0
     p = index(lo, "gopositionmap(")
     if (p == 0) return 0
     p = p + length("gopositionmap(")
-    open4 = 0; q = 0
-    for (i = 1; i <= 4; i++) {
+    open4 = 0; close4 = 0; q = 0
+    for (i = 1; i <= 7; i++) {
         if (i > 1) { if (substr(lo, p, 2) != ", ") return 0; p = p + 2 }
         q = csStrEnd(lo, p)
         if (q == 0) return 0
-        if (i == 4) open4 = p
+        if (i == 4) { open4 = p; close4 = q }
         p = q + 1
+        if (i >= 4 && substr(lo, p, 2) == ")]") break
     }
-    if (substr(lo, p, 2) != ")]") return 0
-    # (2) q is now the FOURTH argument's closing quote and open4 its opening one.
+    if (i > 7 || substr(lo, p, 2) != ")]") return 0
+    # (2) close4 is the FOURTH argument's closing quote and open4 its opening one.
+    q = close4
     if (s <= open4 || e >= q) return 0
     # (3) the terminator, then the entry prefix read backwards from the candidate's own start.
     if (!(substr(lo, e + 1, 1) == ";" || e + 1 == q)) return 0
@@ -3289,6 +3299,17 @@ idc_mode_selftest() {
     printf '[assembly: go.GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;139-139:%d.%d.%d.%d.%d")]\n' 3 1 1 1 2 > "$d/m08"
     idc_st_case "a five-deep suffix is excused by rule 2 first" "" "$d/m08" 0
     idc_st_exc "  and keeps rule 2's reason"                      "ipv4|token-run" "$IDC_TMP/st.status"
+    # ARITY (2026-11-01): the SEVEN-argument record seat #42 F1 emits (funcLits, methodValues,
+    # calls, thunks), funcLits still the fourth. Admitted in argument 4; a quad in the thunks
+    # argument, and any quad in an EIGHT-argument record, still refuse.
+    printf '[assembly: GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;1023-1026:%d.%d.%d.%d", "", "", "40-41:2")]\n' 3 1 1 1 > "$d/m10"
+    idc_st_case "DELTA admits it in a SEVEN-argument record (seat #42 F1)" "" "$d/m10" 0
+    idc_st_exc "  and RULE 6 is what admitted it"                 "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    printf '[assembly: GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;134-134:%d.%d.%d.%d", "", "", "40-41:%d.%d.%d.%d")]\n' 3 1 1 1 10 20 30 40 > "$d/m11"
+    idc_st_case "a quad in the 7th (thunks) argument REFUSES"   "ipv4" "$d/m11" 0
+    idc_st_exc "  while the suffix beside it was admitted"        "ipv4|position-map-funclit" "$IDC_TMP/st.status"
+    printf '[assembly: GoPositionMap("x/lits/lits.go", "lits.cs", "AB8wwoKClqaC", "30-54:1;134-134:%d.%d.%d.%d", "", "", "", "")]\n' 3 1 1 1 > "$d/m12"
+    idc_st_case "an EIGHT-argument record is not rule 6's: REFUSES" "ipv4" "$d/m12" 0
 
     echo
     echo "  B2. THE SHORT-MATCH PATH -- the same cases with the engine's reported start PERTURBED"
