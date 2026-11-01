@@ -24,7 +24,10 @@ outlier at the other end.
 
 To choose a deployment and runtime settings for your own program, see
 [Tuning converted code](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md): it explains which knobs
-exist, what each trades, and why the suite's diagnostic runs with tiering off are not advice.
+exist, what each trades, and why the suite's diagnostic runs with tiering off are not advice. The suite itself
+is not tuned: each program is converted with go2cs's default settings and built from the project file the converter
+writes, the way a user would. The [fairness notes](#methodology--fairness-notes) say exactly what that covers for the
+table below, which was measured with an older converter whose defaults differ from today's in two places.
 
 ## The benchmarks
 
@@ -55,6 +58,26 @@ separately by the Startup row.
 
 ## Methodology / fairness notes
 
+- **Nothing is tuned for these benchmarks.** Each program is converted with the converter's default settings and
+  built from the project file the converter writes, with no setting added for any one benchmark. The Go column is a
+  plain `go build`. The JIT column is a plain `Release` build of the converted project. The Native AOT column adds
+  only the standard Native AOT publish properties: `PublishAot`, `SelfContained`, `PublishTrimmed` with
+  `TrimMode=partial`, `RuntimeIdentifier` set to the host's, and `PublishReadyToRun=false`, which Native AOT requires.
+  No compiler, garbage-collector or tiering setting is added, and the runner sets no runtime environment variable for
+  a timed run. None of the opt-in settings in
+  [Tuning converted code](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md) is applied:
+  `-hoist-literals` ([string literals](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#string-literals)),
+  `GoReadyToRunUserCode` ([deployments](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#choosing-a-deployment)),
+  or the tiered-compilation, dynamic PGO and quick-JIT-for-loops settings
+  ([runtime settings](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#net-runtime-settings)). The
+  diagnostic runs with tiering off never appear in the table. Three things about the current table are not what a user
+  gets today, and the planned re-baseline changes all three:
+  - It was built against the standard library in this repository, by project reference. A user's program references
+    the published `go.*` packages from nuget.org.
+  - Its converter hoisted the string literals in the program's own code into named fields. That was the default
+    then; today the program's own literals stay plain unless you pass `-hoist-literals`.
+  - It predates the converter's call-counting setting, so its JIT column ran with .NET's own default delay. A program
+    converted today counts calls from the start.
 - **Three variants of the identical program:** the Go binary (`go build`, default optimized), the
   transpiled C# built `Release` framework-dependent (JIT column), and the same C# published with
   `PublishAot=true` self-contained, partial trim (Native AOT column).
