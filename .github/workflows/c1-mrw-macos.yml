@@ -52,7 +52,10 @@ jobs:
       - name: The leg
         run: |
           set +e
-          bash docs/phase4/data/main-return-wait/c1-macos/run-leg.sh "$RUNNER_TEMP/tip" "$RUNNER_TEMP/base" \
+          # macOS's own bash is 3.2; the script is written for it, and runs under Homebrew's bash when there is one.
+          B=/bin/bash; for c in /opt/homebrew/bin/bash /usr/local/bin/bash; do [ -x "$c" ] && B=$c && break; done
+          echo "bash: $B $("$B" -c 'echo $BASH_VERSION')"
+          "$B" docs/phase4/data/main-return-wait/c1-macos/run-leg.sh "$RUNNER_TEMP/tip" "$RUNNER_TEMP/base" \
             "${{ matrix.rid }}" "$N" "$RUNNER_TEMP/out"
           echo "leg exit $?"
           grep -E '^(==|ARM|built|BUILD|golibtests)' "$RUNNER_TEMP/out/leg.log" > "$RUNNER_TEMP/summary.txt"

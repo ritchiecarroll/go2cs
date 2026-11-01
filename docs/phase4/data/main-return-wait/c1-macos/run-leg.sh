@@ -26,19 +26,22 @@ say() { echo "$*" | tee -a "$LOG"; }
 bounded() { perl -e 'alarm shift; exec @ARGV' 120 "$@"; }
 
 say "== host: $(sysctl -n machdep.cpu.brand_string 2>/dev/null || grep -m1 'model name' /proc/cpuinfo | cut -d: -f2) cpus=$(sysctl -n hw.ncpu 2>/dev/null || nproc) rid=$RID os=$(sw_vers -productVersion 2>/dev/null || uname -sr)"
-say "== dotnet: $(dotnet --version); runtime: $(dotnet --list-runtimes | grep Microsoft.NETCore.App | tail -1)"
+say "== dotnet: $(dotnet --version); runtime: $(dotnet --list-runtimes | grep Microsoft.NETCore.App | tail -1); bash $BASH_VERSION"
 say "== tip $(git -C "$TIP" rev-parse --short=10 HEAD), base $(git -C "$BASE" rev-parse --short=10 HEAD), N=$N, GoTargetOS=${GoTargetOS:-UNSET}"
 # Without GoTargetOS every build links the windows flavor of the corpus, and the program dies in its module
 # initializer on any other host, exiting 2 -- which reads like the amplifier's pass. Refuse to run that way.
 [ -n "${GoTargetOS:-}" ] || { say "REFUSED: GoTargetOS is unset"; exit 3; }
 
 # ---- 1. GolibTests at the tip ----------------------------------------------------------------------------------------
-say "== GolibTests (MainExit*, ThreadCpuTime*) at the tip"
-dotnet test "$TIP/src/tests/GolibTests/GolibTests.csproj" \
+# GolibTests runs WITHOUT GoTargetOS: under darwin it does not compile (NativeRootedFieldIdentityTests holds
+# RawSockaddrInet4.Family as ж<ushort>, a byte on darwin). MainExit and ThreadCpuTime are golib, which chooses its
+# thread-CPU-time reader at run time (OperatingSystem.IsMacOS -> thread_info), so the darwin path is what runs.
+say "== GolibTests (MainExit*, ThreadCpuTime*) at the tip, GoTargetOS unset"
+env -u GoTargetOS dotnet test "$TIP/src/tests/GolibTests/GolibTests.csproj" \
   --filter "FullyQualifiedName~MainExit|FullyQualifiedName~ThreadCpuTime" \
   --logger "console;verbosity=normal" > "$OUT/golibtests.log" 2>&1
 say "golibtests exit=$? $(grep -E 'Passed!|Failed!|Total tests|Passed:|Failed:' "$OUT/golibtests.log" | tail -3 | tr '\n' ' ')"
-grep -E '^\s+(Passed|Failed|Skipped) ' "$OUT/golibtests.log" | sed 's/^ *//' | sort | uniq -c | tee -a "$LOG"
+grep -E '^[[:space:]]+(Passed|Failed|Skipped) ' "$OUT/golibtests.log" | sed 's/^ *//' | sort | uniq -c | tee -a "$LOG"
 
 # ---- builds ------------------------------------------------------------------------------------------------------------
 build() { # tree project runtime -> prints the executable path
@@ -58,13 +61,16 @@ build() { # tree project runtime -> prints the executable path
     echo "$OUT/aot-$4-$proj/$proj"
   fi
 }
-declare -A EXE
+# macOS ships bash 3.2, which has no associative arrays: one variable per executable instead.
+exe_key() { echo "EXE_$1" | tr -c 'A-Za-z0-9_\n' '_'; }
+set_exe() { eval "$(exe_key "$1")=\"\$2\""; }
+get_exe() { eval "echo \"\${$(exe_key "$1"):-}\""; }
 for spec in "base $BASE $AMP" "tip $TIP $AMP" "tip $TIP $REC"; do
   set -- $spec
   for rt in jit aot; do
     t0=$(date +%s)
     if exe=$(build "$2" "$3" $rt "$1"); then
-      EXE[$1-$3-$rt]=$exe
+      set_exe "$1-$3-$rt" "$exe"
       say "built $1 $3 $rt in $(( $(date +%s) - t0 ))s"
     else
       say "BUILD FAILED: $1 $3 $rt (see build-$1-$3-$rt.log)"; tail -15 "$OUT/build-$1-$3-$rt.log" | tee -a "$LOG"
@@ -90,7 +96,7 @@ arm() { # name exe load
     bounded "$exe" > "$OUT/run.out" 2> "$OUT/run.err"; rc=$?
     t1=$(perl -MTime::HiRes=time -e 'printf "%d", time*1000')
     local sp=-; [ "$load" = n32 ] && sp=$(alive)
-    printf '%d\t%d\t%d\t%d\t%d\t%s\t%d\t%d\n' "$r" "$rc" "$(wc -c < "$OUT/run.err")" \
+    printf '%d\t%d\t%d\t%d\t%d\t%s\t%d\t%d\n' "$r" "$rc" "$(wc -c < "$OUT/run.err" | tr -d ' ')" \
       "$(grep -c -F "$REPORT" "$OUT/run.err")" "$(grep -c '^recovered$' "$OUT/run.out")" "$sp" $((t1 - t0)) \
       "$(grep -c -E 'TypeInitializationException|is running the "[a-z]+" build of the converted' "$OUT/run.err")" >> "$tsv"
     [ -e "$OUT/$name.first-run.err" ] || { cp "$OUT/run.out" "$OUT/$name.first-run.out"; cp "$OUT/run.err" "$OUT/$name.first-run.err"; }
@@ -111,7 +117,7 @@ for stage in "r0 base $AMP" "r1 tip $AMP" "r2 tip $REC"; do
   set -- $stage
   for rt in jit aot; do
     for load in idle n32; do
-      arm "$1-$rt-$load" "${EXE[$2-$3-$rt]:-}" "$load"
+      arm "$1-$rt-$load" "$(get_exe "$2-$3-$rt")" "$load"
     done
   done
 done
