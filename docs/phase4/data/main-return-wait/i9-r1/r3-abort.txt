@@ -1,0 +1,8 @@
+2026-11-01 00:15:32 START r3 tip=e592e782ca2660b3d0e43e62de52edb29f848707 committed MainExit.cs blob=218301c588de04454cfa471ce06833583dbdd1f1
+patched src/core/golib/runtime/MainExit.cs: blocked (rebuild golib and the behavioral project before running)
+2026-11-01 00:15:46 PATCH blocked diff-lines=1: + sample = sample with { Blocked = true, BlockSequence = 0 }; // RED: always blocked
+2026-11-01 00:15:46 START rebuild-blocked
+2026-11-01 00:18:14 END rebuild-blocked rc=1 elapsed=148s runner: FAIL  (1 projects, 146.7s) [WHEA 0 since 2026-11-01T00:15:46.1987930-05:00]
+2026-11-01 00:18:17 COPY red blocked golib=84dbbd0e918abe68 r1-golib=eaeae52f7d4e081d
+2026-11-01 00:18:17 ARM r3-blocked-pad-n32 load n32 runs=100 START
+RESTORE-BY-HAND after abort: 2026-11-01 00:18:59

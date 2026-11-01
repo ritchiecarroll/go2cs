@@ -1,0 +1,20 @@
+2026-10-31 20:04:47 START runner-tip-pad
+2026-10-31 20:09:46 END runner-tip-pad rc=0 elapsed=299s [WHEA 0 since 2026-10-31T20:04:47.7062914-05:00]
+2026-10-31 20:09:47 START runner-tip-rec
+2026-10-31 20:12:12 END runner-tip-rec rc=0 elapsed=145s [WHEA 0 since 2026-10-31T20:09:46.9958944-05:00]
+2026-10-31 20:12:13 START runner-old-rec
+2026-10-31 20:17:12 END runner-old-rec rc=0 elapsed=299s [WHEA 0 since 2026-10-31T20:12:13.1973265-05:00]
+2026-10-31 20:17:13 COPY tip pad rc=0 jit=e09ab6de19015559 golib=eaeae52f7d4e081d go=f087c68e6a829661
+2026-10-31 20:17:14 COPY tip rec rc=0 jit=9be6f737ce1bb6b8 golib=eaeae52f7d4e081d go=8422a548ed9a26b3
+2026-10-31 20:17:14 COPY old rec rc=0 jit=332fb839c7769e49 golib=47a7165fc11e49c5 go=a519c8718d01efa9
+2026-10-31 20:17:15 START aot-tip-pad
+2026-10-31 20:26:09 END aot-tip-pad rc=0 elapsed=534s [WHEA 0 since 2026-10-31T20:17:15.1548652-05:00]
+2026-10-31 20:26:09 AOT tip pad exe=/c/go2cs-build/logs/pado/r1/aot-tip-pad/GoroutinePanicAfterDeferredDone.exe sha=012626e0d7574144
+2026-10-31 20:26:10 START aot-tip-rec
+2026-10-31 20:35:09 END aot-tip-rec rc=0 elapsed=539s [WHEA 0 since 2026-10-31T20:26:10.0989803-05:00]
+2026-10-31 20:35:10 AOT tip rec exe=/c/go2cs-build/logs/pado/r1/aot-tip-rec/GoroutineRecoveringWhenMainReturns.exe sha=afdd076de9044709
+2026-10-31 20:35:10 START aot-old-rec
+2026-10-31 20:44:04 END aot-old-rec rc=0 elapsed=534s [WHEA 0 since 2026-10-31T20:35:10.9310874-05:00]
+2026-10-31 20:44:04 AOT old rec exe=/c/go2cs-build/logs/pado/r1/aot-old-rec/GoroutineRecoveringWhenMainReturns.exe sha=018826204286c63b
+2026-10-31 20:44:04 END r1-build [WHEA 0 since 2026-10-31T20:04:47.5251256-05:00]
+DONE-R1-BUILD

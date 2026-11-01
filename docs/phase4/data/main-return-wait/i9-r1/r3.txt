@@ -1,0 +1,34 @@
+2026-11-01 00:20:26 START r3 tree=D:/go2cs-build/i9-mrw-tip3 tip=e592e782ca2660b3d0e43e62de52edb29f848707 committed MainExit.cs blob=218301c588de04454cfa471ce06833583dbdd1f1 tracked-changes=0
+2026-11-01 00:20:26 START baseline-pad
+2026-11-01 00:25:13 END baseline-pad rc=0 elapsed=287s runner: PASS  (1 projects, 283.8s) [WHEA 0 since 2026-11-01T00:20:26.2415798-05:00]
+2026-11-01 00:25:13 BASELINE golib=eade3712794d4f5f
+patched src/core/golib/runtime/MainExit.cs: blocked (rebuild golib and the behavioral project before running)
+2026-11-01 00:25:14 PATCH blocked diff-lines=1: + sample = sample with { Blocked = true, BlockSequence = 0 }; // RED: always blocked
+2026-11-01 00:25:14 START rebuild-red-blocked
+2026-11-01 00:27:35 END rebuild-red-blocked rc=0 elapsed=140s runner: PASS  (1 projects, 139.1s) [WHEA 0 since 2026-11-01T00:25:14.3117517-05:00]
+2026-11-01 00:27:36 COPY red blocked golib=534e44cfb66240a0 baseline-golib=eade3712794d4f5f
+2026-11-01 00:27:36 STARTS jit-red-blocked-pad rc=2
+2026-11-01 00:27:36 ARM r3-blocked-pad-n32 load n32 runs=100 START
+2026-11-01 00:37:08 ARM r3-blocked-pad-n32 load n32 END elapsed=572s {N=100 exit0=0 alive=100} recovered=0 [WHEA 0 since 2026-11-01T00:27:36.6507475-05:00]
+2026-11-01 00:37:09 ARM r3-blocked-pad-n8 loadhi n8 runs=100 START
+2026-11-01 01:04:08 ARM r3-blocked-pad-n8 loadhi n8 END elapsed=1618s {N=100 exit0=4 alive=100} recovered=0 [WHEA 0 since 2026-11-01T00:37:09.0864610-05:00]
+warning: in the working copy of 'src/core/golib/runtime/MainExit.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/core/golib/runtime/MainExit.cs', LF will be replaced by CRLF the next time Git touches it
+restored: src/core/golib/runtime/MainExit.cs matches HEAD
+2026-11-01 01:04:08 RESTORE hash=218301c588de04454cfa471ce06833583dbdd1f1 committed=218301c588de04454cfa471ce06833583dbdd1f1
+patched src/core/golib/runtime/MainExit.cs: runnable (rebuild golib and the behavioral project before running)
+2026-11-01 01:04:08 PATCH runnable diff-lines=1: + if (elapsed >= TimeSpan.Zero) return true; // RED: always runnable, no budget
+2026-11-01 01:04:09 START rebuild-red-runnable
+2026-11-01 01:06:45 END rebuild-red-runnable rc=1 elapsed=156s runner: FAIL  (1 projects, 154.5s) [WHEA 0 since 2026-11-01T01:04:09.1133662-05:00]
+2026-11-01 01:06:46 COPY red runnable golib=1712273fd39a52b5 baseline-golib=eade3712794d4f5f
+2026-11-01 01:06:47 STARTS jit-red-runnable-rec rc=0
+2026-11-01 01:06:47 ARM r3-runnable-rec-n8 idle n8 runs=20 START
+2026-11-01 01:07:06 ARM r3-runnable-rec-n8 idle n8 END elapsed=18s {N=20 exit0=20 alive=20} recovered=20 [WHEA 0 since 2026-11-01T01:06:47.5194409-05:00]
+2026-11-01 01:07:06 ARM r3-runnable-rec-n32 load n32 runs=20 START
+2026-11-01 01:09:42 ARM r3-runnable-rec-n32 load n32 END elapsed=155s {N=20 exit0=20 alive=20} recovered=20 [WHEA 0 since 2026-11-01T01:07:06.3890252-05:00]
+warning: in the working copy of 'src/core/golib/runtime/MainExit.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/core/golib/runtime/MainExit.cs', LF will be replaced by CRLF the next time Git touches it
+restored: src/core/golib/runtime/MainExit.cs matches HEAD
+2026-11-01 01:09:42 RESTORE hash=218301c588de04454cfa471ce06833583dbdd1f1 committed=218301c588de04454cfa471ce06833583dbdd1f1
+2026-11-01 01:09:43 END r3 tracked-changes=0 [WHEA 0 since 2026-11-01T00:20:25.6871641-05:00]
+2026-11-01 01:09:43 DONE-R3-RUN

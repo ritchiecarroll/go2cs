@@ -1,0 +1,27 @@
+2026-10-31 20:44:47 START r1 tip=e592e782ca old=971f018d7e sampler=18704
+2026-10-31 20:44:47 ARM r1-jit-pad idle n8 runs=100 START
+2026-10-31 20:45:29 ARM r1-jit-pad idle n8 END elapsed=42s r1-jit-pad-n8:{N=100 exit0=0 alive=100} [WHEA 0 since 2026-10-31T20:44:47.6506809-05:00]
+2026-10-31 20:45:30 ARM r1-jit-pad load n8 runs=100 START
+2026-10-31 20:47:59 ARM r1-jit-pad load n8 END elapsed=149s r1-jit-pad-n8:{N=100 exit0=0 alive=100} [WHEA 0 since 2026-10-31T20:45:30.4896831-05:00]
+2026-10-31 20:47:59 ARM r1-jit-pad load n32 runs=400 START
+2026-10-31 21:26:03 ARM r1-jit-pad load n32 END elapsed=2284s r1-jit-pad-n32:{N=400 exit0=0 alive=400} [WHEA 0 since 2026-10-31T20:47:59.8345094-05:00]
+2026-10-31 21:26:04 ARM r1-jit-pad loadhi n8 runs=100 START
+2026-10-31 21:50:24 ARM r1-jit-pad loadhi n8 END elapsed=1460s r1-jit-pad-n8:{N=100 exit0=0 alive=100} [WHEA 0 since 2026-10-31T21:26:04.3614302-05:00]
+2026-10-31 21:50:24 ARM r1-aot-pad idle n8 runs=100 START
+2026-10-31 21:50:45 ARM r1-aot-pad idle n8 END elapsed=21s r1-aot-pad-n8:{N=100 exit0=0 alive=100} [WHEA 0 since 2026-10-31T21:50:24.8449305-05:00]
+2026-10-31 21:50:46 ARM r1-aot-pad load n8 runs=100 START
+2026-10-31 21:52:22 ARM r1-aot-pad load n8 END elapsed=96s r1-aot-pad-n8:{N=100 exit0=0 alive=100} [WHEA 0 since 2026-10-31T21:50:46.2049383-05:00]
+2026-10-31 21:52:23 ARM r1-aot-pad load n32 runs=100 START
+2026-10-31 21:58:39 ARM r1-aot-pad load n32 END elapsed=377s r1-aot-pad-n32:{N=100 exit0=0 alive=100} [WHEA 0 since 2026-10-31T21:52:22.9489340-05:00]
+2026-10-31 21:58:40 ARM r1-aot-pad loadhi n8 runs=100 START
+2026-10-31 22:15:08 ARM r1-aot-pad loadhi n8 END elapsed=988s r1-aot-pad-n8:{N=100 exit0=0 alive=100} [WHEA 0 since 2026-10-31T21:58:40.0361236-05:00]
+2026-10-31 22:15:09 ARM r2-rec idle n8 runs=100 START
+2026-10-31 22:17:16 ARM r2-rec idle n8 END elapsed=127s r2-old-jit-n8:{N=100 exit0=100 alive=100} r2-old-go-n8:{N=100 exit0=100 alive=100} r2-new-jit-n8:{N=100 exit0=100 alive=100} r2-new-go-n8:{N=100 exit0=100 alive=100} r2-old-aot-n8:{N=50 exit0=50 alive=50} r2-new-aot-n8:{N=50 exit0=50 alive=50} [WHEA 0 since 2026-10-31T22:15:09.3098886-05:00]
+2026-10-31 22:17:16 ARM r2-rec load n8 runs=100 START
+2026-10-31 22:25:39 ARM r2-rec load n8 END elapsed=503s r2-old-jit-n8:{N=100 exit0=100 alive=100} r2-old-go-n8:{N=100 exit0=100 alive=100} r2-new-jit-n8:{N=100 exit0=100 alive=100} r2-new-go-n8:{N=100 exit0=100 alive=100} r2-old-aot-n8:{N=50 exit0=50 alive=50} r2-new-aot-n8:{N=50 exit0=50 alive=50} [WHEA 0 since 2026-10-31T22:17:16.6817613-05:00]
+2026-10-31 22:25:39 ARM r2-rec load n32 runs=100 START
+2026-10-31 23:00:26 ARM r2-rec load n32 END elapsed=2087s r2-old-jit-n32:{N=100 exit0=100 alive=100} r2-old-go-n32:{N=100 exit0=100 alive=100} r2-new-jit-n32:{N=100 exit0=100 alive=100} r2-new-go-n32:{N=100 exit0=100 alive=100} r2-old-aot-n32:{N=50 exit0=50 alive=50} r2-new-aot-n32:{N=50 exit0=50 alive=50} [WHEA 0 since 2026-10-31T22:25:39.6464283-05:00]
+2026-10-31 23:00:34 ARM r2-rec loadhi n8 runs=100 START
+2026-11-01 00:14:56 ARM r2-rec loadhi n8 END elapsed=4462s r2-old-jit-n8:{N=100 exit0=100 alive=100} r2-old-go-n8:{N=100 exit0=100 alive=100} r2-new-jit-n8:{N=100 exit0=100 alive=100} r2-new-go-n8:{N=100 exit0=100 alive=100} r2-old-aot-n8:{N=50 exit0=50 alive=50} r2-new-aot-n8:{N=50 exit0=50 alive=50} [WHEA 0 since 2026-10-31T23:00:34.4934793-05:00]
+2026-11-01 00:14:57 END r1 [WHEA 0 since 2026-10-31T20:44:47.4310848-05:00]
+DONE-R1-RUN

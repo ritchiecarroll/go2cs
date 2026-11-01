@@ -1,0 +1,8 @@
+syscallbench wall_ms: A/A 1.000 [0.939-1.039]
+    base   200.387 [195.509-212.986]  ratio 1.000 [1.000-1.000] inside  delta +0.000 (+0.0% of wall)
+    aa     199.780 [192.943-205.265]  ratio 1.000 [0.939-1.039] inside  delta -0.607 (-0.3% of wall)
+    tip    201.855 [198.865-210.259]  ratio 1.007 [0.955-1.064] inside  delta +1.469 (+0.7% of wall)
+syscallbench syscall_ns: A/A 1.022 [0.977-1.060]
+    base   9.405 [8.997-9.605]  ratio 1.000 [1.000-1.000] inside  delta +0.000
+    aa     9.440 [9.192-9.858]  ratio 1.022 [0.977-1.060] inside  delta +0.035
+    tip    9.664 [9.408-10.725]  ratio 1.034 [0.999-1.171] inside  delta +0.259

@@ -1,0 +1,23 @@
+00:18:19	spin	34460	0xF	Normal	spin
+00:18:21	spin	34460	0xF	Normal	spin
+00:18:24	GoroutinePanicAfterDeferredDone	18752	0xF	Normal	jit-red-blocked-pad
+00:18:24	spin	34460	0xF	Normal	spin
+00:18:26	GoroutinePanicAfterDeferredDone	34516	0xF	Normal	jit-red-blocked-pad
+00:18:26	spin	34460	0xF	Normal	spin
+00:18:28	GoroutinePanicAfterDeferredDone	1092	0xF	Normal	jit-red-blocked-pad
+00:18:28	spin	34460	0xF	Normal	spin
+00:18:30	GoroutinePanicAfterDeferredDone	25088	0xF	Normal	jit-red-blocked-pad
+00:18:30	spin	34460	0xF	Normal	spin
+00:18:33	GoroutinePanicAfterDeferredDone	21024	0xF	Normal	jit-red-blocked-pad
+00:18:33	spin	34460	0xF	Normal	spin
+00:18:35	spin	34460	0xF	Normal	spin
+00:18:37	GoroutinePanicAfterDeferredDone	7816	0x0		jit-red-blocked-pad
+00:18:37	spin	34460	0xF	Normal	spin
+00:18:39	GoroutinePanicAfterDeferredDone	32224	0x0		jit-red-blocked-pad
+00:18:39	spin	34460	0xF	Normal	spin
+00:18:41	GoroutinePanicAfterDeferredDone	21928	0xF	Normal	jit-red-blocked-pad
+00:18:41	spin	34460	0xF	Normal	spin
+00:18:43	GoroutinePanicAfterDeferredDone	22232	0x0		jit-red-blocked-pad
+00:18:43	spin	34460	0xF	Normal	spin
+00:18:45	GoroutinePanicAfterDeferredDone	33368	0x0		jit-red-blocked-pad
+00:18:45	spin	34460	0xF	Normal	spin

@@ -1,0 +1,29 @@
+2026-11-01 01:10:02 START p6 base=2e619b99664c0f5e8c470c325948d0fc66ffb9eb tip=e592e782ca2660b3d0e43e62de52edb29f848707
+2026-11-01 01:10:03 roots clean: base=0 tip6=0
+2026-11-01 01:10:03 START converter
+2026-11-01 01:10:14 END converter rc=0 elapsed=10s [WHEA 0 since 2026-11-01T01:10:03.3529507-05:00]
+2026-11-01 01:10:14 converter sha=4ad2b3e972b7261f
+2026-11-01 01:10:14 START arm-base
+2026-11-01 01:13:10 END arm-base rc=0 elapsed=176s [WHEA 0 since 2026-11-01T01:10:14.5729000-05:00]
+2026-11-01 01:13:10 EXE base D:\go2cs-build\i9-mrw-p6\arms\base\bin\syscallbench.exe exists=yes sha=83e76620fafce37c
+2026-11-01 01:13:10 START arm-aa
+2026-11-01 01:15:52 END arm-aa rc=0 elapsed=162s [WHEA 0 since 2026-11-01T01:13:10.9041115-05:00]
+2026-11-01 01:15:52 EXE aa D:\go2cs-build\i9-mrw-p6\arms\aa\bin\syscallbench.exe exists=yes sha=83e76620fafce37c
+2026-11-01 01:15:52 START arm-tip
+2026-11-01 01:18:47 END arm-tip rc=0 elapsed=175s [WHEA 0 since 2026-11-01T01:15:52.8341494-05:00]
+2026-11-01 01:18:47 EXE tip D:\go2cs-build\i9-mrw-p6\arms\tip\bin\syscallbench.exe exists=yes sha=83e76620fafce37c
+2026-11-01 01:18:48 START arm-baseaot
+2026-11-01 01:30:38 END arm-baseaot rc=0 elapsed=709s [WHEA 0 since 2026-11-01T01:18:48.1394069-05:00]
+2026-11-01 01:30:39 EXE baseaot D:\go2cs-build\i9-mrw-p6\arms\baseaot\bin\syscallbench.exe exists=yes sha=5c11ee515b52889f
+2026-11-01 01:30:39 START arm-aaaot
+2026-11-01 01:40:11 END arm-aaaot rc=0 elapsed=572s [WHEA 0 since 2026-11-01T01:30:39.8955923-05:00]
+2026-11-01 01:40:13 EXE aaaot D:\go2cs-build\i9-mrw-p6\arms\aaaot\bin\syscallbench.exe exists=yes sha=c44162959f68a180
+2026-11-01 01:40:13 START arm-tipaot
+2026-11-01 01:51:49 END arm-tipaot rc=0 elapsed=696s [WHEA 0 since 2026-11-01T01:40:13.3567000-05:00]
+2026-11-01 01:51:51 EXE tipaot D:\go2cs-build\i9-mrw-p6\arms\tipaot\bin\syscallbench.exe exists=yes sha=ab142b57c5ace775
+2026-11-01 01:51:51 START drive-jit
+2026-11-01 01:52:17 END drive-jit rc=0 elapsed=25s [WHEA 0 since 2026-11-01T01:51:51.6950744-05:00]
+2026-11-01 01:52:17 START drive-aot
+2026-11-01 01:52:32 END drive-aot rc=0 elapsed=14s [WHEA 0 since 2026-11-01T01:52:17.4931598-05:00]
+2026-11-01 01:52:32 END p6 [WHEA 0 since 2026-11-01T01:10:02.8741843-05:00]
+2026-11-01 01:52:32 DONE-P6-RUN

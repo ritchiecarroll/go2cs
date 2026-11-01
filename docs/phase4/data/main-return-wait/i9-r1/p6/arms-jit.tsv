@@ -1,0 +1,3 @@
+syscallbench	base	D:\go2cs-build\i9-mrw-p6\arms\base\bin\syscallbench.exe	DOTNET_TC_CallCountingDelayMs=0
+syscallbench	aa	D:\go2cs-build\i9-mrw-p6\arms\aa\bin\syscallbench.exe	DOTNET_TC_CallCountingDelayMs=0
+syscallbench	tip	D:\go2cs-build\i9-mrw-p6\arms\tip\bin\syscallbench.exe	DOTNET_TC_CallCountingDelayMs=0

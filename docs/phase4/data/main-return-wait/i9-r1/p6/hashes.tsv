@@ -1,0 +1,16 @@
+arm	file	sha256_16
+base	syscallbench.dll	ac112577bc82caa6
+base	syscall.dll	43b00d7dfea208de
+base	golib.dll	baa33737d855f6c8
+base	runtime.dll	8ddea20fcc91a946
+aa	syscallbench.dll	4b569bf7e39bb6d3
+aa	syscall.dll	43b00d7dfea208de
+aa	golib.dll	baa33737d855f6c8
+aa	runtime.dll	8ddea20fcc91a946
+tip	syscallbench.dll	65de38ceaadcab0d
+tip	syscall.dll	1925d6dfb19f784a
+tip	golib.dll	818ed64a4e68bddd
+tip	runtime.dll	60296c90d0db3ea5
+baseaot	syscallbench.exe	5c11ee515b52889f
+aaaot	syscallbench.exe	c44162959f68a180
+tipaot	syscallbench.exe	ab142b57c5ace775
