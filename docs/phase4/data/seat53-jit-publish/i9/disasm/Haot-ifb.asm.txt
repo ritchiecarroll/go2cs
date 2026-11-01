@@ -1,0 +1,30 @@
+internal_strconv_go_internal_strconv_package__FormatBool:
+  00000001402DF5B0: push        rbx
+  00000001402DF5B1: sub         rsp,20h
+  00000001402DF5B5: mov         rbx,rcx
+  00000001402DF5B8: test        dl,dl
+  00000001402DF5BA: jne         00000001402DF5DA
+  00000001402DF5BC: lea         rax,[?__NONGCSTATICS@internal_strconv_go_internal_strconv_package@@]
+  00000001402DF5C3: cmp         qword ptr [rax-8],0
+  00000001402DF5C8: jne         00000001402DF606
+  00000001402DF5CA: mov         rax,qword ptr [?__GCSTATICS@internal_strconv_go_internal_strconv_package@@]
+  00000001402DF5D1: movups      xmm0,xmmword ptr [rax+18h]
+  00000001402DF5D5: movups      xmmword ptr [rbx],xmm0
+  00000001402DF5D8: jmp         00000001402DF5F6
+  00000001402DF5DA: lea         rax,[?__NONGCSTATICS@internal_strconv_go_internal_strconv_package@@]
+  00000001402DF5E1: cmp         qword ptr [rax-8],0
+  00000001402DF5E6: jne         00000001402DF5FF
+  00000001402DF5E8: mov         rax,qword ptr [?__GCSTATICS@internal_strconv_go_internal_strconv_package@@]
+  00000001402DF5EF: movups      xmm0,xmmword ptr [rax+8]
+  00000001402DF5F3: movups      xmmword ptr [rbx],xmm0
+  00000001402DF5F6: mov         rax,rbx
+  00000001402DF5F9: add         rsp,20h
+  00000001402DF5FD: pop         rbx
+  00000001402DF5FE: ret
+  00000001402DF5FF: call        __GetGCStaticBase_internal_strconv_go_internal_strconv_package
+  00000001402DF604: jmp         00000001402DF5E8
+  00000001402DF606: call        __GetGCStaticBase_internal_strconv_go_internal_strconv_package
+  00000001402DF60B: jmp         00000001402DF5CA
+  00000001402DF60D: nop
+  00000001402DF60E: nop
+  00000001402DF60F: nop

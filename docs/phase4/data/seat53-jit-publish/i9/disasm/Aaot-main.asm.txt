@@ -1,0 +1,215 @@
+hotphase_go_example_com_main_package__Main:
+  00000001401D6660: push        rdi
+  00000001401D6661: push        rsi
+  00000001401D6662: push        rbx
+  00000001401D6663: sub         rsp,1B0h
+  00000001401D666A: movaps      xmmword ptr [rsp+1A0h],xmm6
+  00000001401D6672: xorps       xmm4,xmm4
+  00000001401D6675: mov         rax,0FFFFFFFFFFFFFE80h
+  00000001401D667F: movaps      xmmword ptr [rsp+rax+1A0h],xmm4
+  00000001401D6687: movaps      xmmword ptr [rsp+rax+1B0h],xmm4
+  00000001401D668F: movaps      xmmword ptr [rsp+rax+1C0h],xmm4
+  00000001401D6697: add         rax,30h
+  00000001401D669B: jne         00000001401D667F
+  00000001401D669D: mov         qword ptr [rsp+110h],2
+  00000001401D66A9: mov         qword ptr [rsp+118h],3
+  00000001401D66B5: mov         qword ptr [rsp+120h],5
+  00000001401D66C1: mov         qword ptr [rsp+128h],7
+  00000001401D66CD: lea         rcx,[rsp+0C0h]
+  00000001401D66D5: lea         rdx,[rsp+110h]
+  00000001401D66DD: mov         r8d,4
+  00000001401D66E3: call        hotphase__PrivateImplementationDetails___InlineArrayAsReadOnlySpan<S_P_CoreLib_System_Runtime_CompilerServices_InlineArray4_1<crypto_go_crypto_package_Hash>__crypto_go_crypto_package_Hash>
+  00000001401D66E8: mov         rbx,qword ptr [rsp+0C0h]
+  00000001401D66F0: mov         esi,dword ptr [rsp+0C8h]
+  00000001401D66F7: test        esi,esi
+  00000001401D66F9: je          00000001401D6724
+  00000001401D66FB: mov         edx,esi
+  00000001401D66FD: lea         rcx,[??_7__Array<crypto_go_crypto_package_Hash>@@6B@]
+  00000001401D6704: call        RhpNewPtrArrayFast
+  00000001401D6709: mov         rdi,rax
+  00000001401D670C: mov         r8d,esi
+  00000001401D670F: shl         r8,3
+  00000001401D6713: lea         rcx,[rdi+10h]
+  00000001401D6717: mov         rdx,rbx
+  00000001401D671A: call        S_P_CoreLib_System_SpanHelpers__Memmove
+  00000001401D671F: mov         rdx,rdi
+  00000001401D6722: jmp         00000001401D672B
+  00000001401D6724: lea         rdx,[__FrozenObj_S_P_CoreLib_System_Array_EmptyArray_1<crypto_go_crypto_package_Hash>2]
+  00000001401D672B: lea         rcx,[rsp+68h]
+  00000001401D6730: call        golib_go_slice_1<Bool>___ctor_1
+  00000001401D6735: movups      xmm0,xmmword ptr [rsp+68h]
+  00000001401D673A: movups      xmmword ptr [rsp+178h],xmm0
+  00000001401D6742: movups      xmm0,xmmword ptr [rsp+78h]
+  00000001401D6747: movups      xmmword ptr [rsp+188h],xmm0
+  00000001401D674F: mov         rcx,qword ptr [rsp+88h]
+  00000001401D6757: mov         qword ptr [rsp+198h],rcx
+  00000001401D675F: xor         ebx,ebx
+  00000001401D6761: lea         rcx,[rsp+160h]
+  00000001401D6769: call        time_go_time_package__Now
+  00000001401D676E: xor         esi,esi
+  00000001401D6770: jmp         00000001401D67A5
+  00000001401D6772: lea         rdx,[rsi+rbx]
+  00000001401D6776: and         rdx,3
+  00000001401D677A: lea         rcx,[rsp+178h]
+  00000001401D6782: call        golib_go_slice_1<crypto_go_crypto_package_Hash>__get_Item_0
+  00000001401D6787: mov         rdx,qword ptr [rax]
+  00000001401D678A: lea         rcx,[rsp+0D0h]
+  00000001401D6792: call        crypto_go_crypto_package__String
+  00000001401D6797: movsxd      rcx,dword ptr [rsp+0DCh]
+  00000001401D679F: add         rbx,rcx
+  00000001401D67A2: inc         rsi
+  00000001401D67A5: cmp         rsi,1E8480h
+  00000001401D67AC: jl          00000001401D67C2
+  00000001401D67AE: cmp         rsi,1E8480h
+  00000001401D67B5: jg          00000001401D67BB
+  00000001401D67B7: xor         edx,edx
+  00000001401D67B9: jmp         00000001401D67C7
+  00000001401D67BB: mov         edx,1
+  00000001401D67C0: jmp         00000001401D67C7
+  00000001401D67C2: mov         edx,0FFFFFFFFh
+  00000001401D67C7: test        edx,edx
+  00000001401D67C9: jl          00000001401D6772
+  00000001401D67CB: lea         rcx,[rsp+148h]
+  00000001401D67D3: call        time_go_time_package__Now
+  00000001401D67D8: xor         esi,esi
+  00000001401D67DA: jmp         00000001401D6818
+  00000001401D67DC: mov         eax,1
+  00000001401D67E1: jmp         00000001401D67E8
+  00000001401D67E3: mov         eax,0FFFFFFFFh
+  00000001401D67E8: test        eax,eax
+  00000001401D67EA: jge         00000001401D684C
+  00000001401D67EC: lea         eax,[rsi+rbx]
+  00000001401D67EF: test        al,1
+  00000001401D67F1: je          00000001401D682E
+  00000001401D67F3: lea         rax,[?__NONGCSTATICS@internal_strconv_go_internal_strconv_package@@]
+  00000001401D67FA: cmp         qword ptr [rax-8],0
+  00000001401D67FF: jne         00000001401D6A65
+  00000001401D6805: mov         rax,qword ptr [?__GCSTATICS@internal_strconv_go_internal_strconv_package@@]
+  00000001401D680C: mov         edi,dword ptr [rax+24h]
+  00000001401D680F: movsxd      rcx,edi
+  00000001401D6812: add         rbx,rcx
+  00000001401D6815: inc         rsi
+  00000001401D6818: cmp         rsi,1E8480h
+  00000001401D681F: jl          00000001401D67E3
+  00000001401D6821: cmp         rsi,1E8480h
+  00000001401D6828: jg          00000001401D67DC
+  00000001401D682A: xor         eax,eax
+  00000001401D682C: jmp         00000001401D67E8
+  00000001401D682E: lea         rax,[?__NONGCSTATICS@internal_strconv_go_internal_strconv_package@@]
+  00000001401D6835: cmp         qword ptr [rax-8],0
+  00000001401D683A: jne         00000001401D6A5B
+  00000001401D6840: mov         rcx,qword ptr [?__GCSTATICS@internal_strconv_go_internal_strconv_package@@]
+  00000001401D6847: mov         edi,dword ptr [rcx+14h]
+  00000001401D684A: jmp         00000001401D680F
+  00000001401D684C: lea         rcx,[rsp+130h]
+  00000001401D6854: call        time_go_time_package__Now
+  00000001401D6859: xorps       xmm0,xmm0
+  00000001401D685C: movups      xmmword ptr [rsp+100h],xmm0
+  00000001401D6864: lea         rcx,[__Str_checksum__382F2898C6B9FCFFB7D8E06D46882C52C5880B9F36F58F88BE6262D8CCCF871D]
+  00000001401D686B: mov         qword ptr [rsp+100h],rcx
+  00000001401D6873: lea         rcx,[??_7Boxed_IntPtr@@6B@]
+  00000001401D687A: call        RhpNewFast
+  00000001401D687F: mov         qword ptr [rax+8],rbx
+  00000001401D6883: mov         qword ptr [rsp+108h],rax
+  00000001401D688B: lea         rax,[?__NONGCSTATICS@hotphase_go2cs_Interceptors__main_b3ba3e36_Interceptors_g_F0950B0E4B0D52AD7879A39749E91A68073E3D690C91013853C349075FF5223ED___Literals@@]
+  00000001401D6892: cmp         qword ptr [rax-8],0
+  00000001401D6897: jne         00000001401D6A6F
+  00000001401D689D: mov         rbx,qword ptr [?__GCSTATICS@hotphase_go2cs_Interceptors__main_b3ba3e36_Interceptors_g_F0950B0E4B0D52AD7879A39749E91A68073E3D690C91013853C349075FF5223ED___Literals@@]
+  00000001401D68A4: mov         rdx,qword ptr [rbx+8]
+  00000001401D68A8: mov         qword ptr [rsp+100h],rdx
+  00000001401D68B0: lea         rdx,[rsp+100h]
+  00000001401D68B8: mov         qword ptr [rsp+38h],rdx
+  00000001401D68BD: mov         dword ptr [rsp+40h],2
+  00000001401D68C5: lea         rdx,[rsp+38h]
+  00000001401D68CA: lea         rcx,[rsp+0B0h]
+  00000001401D68D2: call        fmt_go_fmt_package__Println
+  00000001401D68D7: xorps       xmm0,xmm0
+  00000001401D68DA: movups      xmmword ptr [rsp+0F0h],xmm0
+  00000001401D68E2: lea         rcx,[__Str_hash_ns__B87F10C54990F15FD72C769CA72119B69658CD2E3598B273A605992E0D93383B]
+  00000001401D68E9: mov         qword ptr [rsp+0F0h],rcx
+  00000001401D68F1: movups      xmm0,xmmword ptr [rsp+148h]
+  00000001401D68F9: movups      xmmword ptr [rsp+20h],xmm0
+  00000001401D68FE: mov         rcx,qword ptr [rsp+158h]
+  00000001401D6906: mov         qword ptr [rsp+30h],rcx
+  00000001401D690B: lea         rcx,[rsp+20h]
+  00000001401D6910: lea         rdx,[rsp+160h]
+  00000001401D6918: call        time_go_time_package__Sub
+  00000001401D691D: mov         rsi,rax
+  00000001401D6920: lea         rax,[?__NONGCSTATICS@time_go_time_package@@]
+  00000001401D6927: cmp         qword ptr [rax-8],0
+  00000001401D692C: jne         00000001401D6A79
+  00000001401D6932: xorps       xmm6,xmm6
+  00000001401D6935: cvtsi2sd    xmm6,rsi
+  00000001401D693A: mov         qword ptr [rsp+58h],1E8480h
+  00000001401D6943: mov         byte ptr [rsp+60h],0
+  00000001401D6948: lea         rcx,[??_7Boxed_Double@@6B@]
+  00000001401D694F: call        RhpNewFast
+  00000001401D6954: mov         rsi,rax
+  00000001401D6957: lea         rcx,[rsp+58h]
+  00000001401D695C: call        golib_go_UntypedInt__ToFloat64
+  00000001401D6961: divsd       xmm6,xmm0
+  00000001401D6965: movsd       mmword ptr [rsi+8],xmm6
+  00000001401D696A: mov         qword ptr [rsp+0F8h],rsi
+  00000001401D6972: mov         rdx,qword ptr [rbx+10h]
+  00000001401D6976: mov         qword ptr [rsp+0F0h],rdx
+  00000001401D697E: lea         rdx,[rsp+0F0h]
+  00000001401D6986: mov         qword ptr [rsp+38h],rdx
+  00000001401D698B: mov         dword ptr [rsp+40h],2
+  00000001401D6993: lea         rdx,[rsp+38h]
+  00000001401D6998: lea         rcx,[rsp+0A0h]
+  00000001401D69A0: call        fmt_go_fmt_package__Println
+  00000001401D69A5: xorps       xmm0,xmm0
+  00000001401D69A8: movups      xmmword ptr [rsp+0E0h],xmm0
+  00000001401D69B0: lea         rcx,[__Str_bool_ns__9F187D02EB3C5EAC5E87D18C987B11D9D949E0D04640BB4F9E4067ACEAE06976]
+  00000001401D69B7: mov         qword ptr [rsp+0E0h],rcx
+  00000001401D69BF: lea         rcx,[rsp+130h]
+  00000001401D69C7: lea         rdx,[rsp+148h]
+  00000001401D69CF: call        time_go_time_package__Sub
+  00000001401D69D4: xorps       xmm6,xmm6
+  00000001401D69D7: cvtsi2sd    xmm6,rax
+  00000001401D69DC: mov         qword ptr [rsp+48h],1E8480h
+  00000001401D69E5: mov         byte ptr [rsp+50h],0
+  00000001401D69EA: lea         rcx,[??_7Boxed_Double@@6B@]
+  00000001401D69F1: call        RhpNewFast
+  00000001401D69F6: mov         rsi,rax
+  00000001401D69F9: lea         rcx,[rsp+48h]
+  00000001401D69FE: call        golib_go_UntypedInt__ToFloat64
+  00000001401D6A03: divsd       xmm6,xmm0
+  00000001401D6A07: movsd       mmword ptr [rsi+8],xmm6
+  00000001401D6A0C: mov         qword ptr [rsp+0E8h],rsi
+  00000001401D6A14: mov         rdx,qword ptr [rbx+18h]
+  00000001401D6A18: mov         qword ptr [rsp+0E0h],rdx
+  00000001401D6A20: lea         rdx,[rsp+0E0h]
+  00000001401D6A28: mov         qword ptr [rsp+38h],rdx
+  00000001401D6A2D: mov         dword ptr [rsp+40h],2
+  00000001401D6A35: lea         rdx,[rsp+38h]
+  00000001401D6A3A: lea         rcx,[rsp+90h]
+  00000001401D6A42: call        fmt_go_fmt_package__Println
+  00000001401D6A47: nop
+  00000001401D6A48: movaps      xmm6,xmmword ptr [rsp+1A0h]
+  00000001401D6A50: add         rsp,1B0h
+  00000001401D6A57: pop         rbx
+  00000001401D6A58: pop         rsi
+  00000001401D6A59: pop         rdi
+  00000001401D6A5A: ret
+  00000001401D6A5B: call        __GetGCStaticBase_internal_strconv_go_internal_strconv_package
+  00000001401D6A60: jmp         00000001401D6840
+  00000001401D6A65: call        __GetGCStaticBase_internal_strconv_go_internal_strconv_package
+  00000001401D6A6A: jmp         00000001401D6805
+  00000001401D6A6F: call        __GetGCStaticBase_hotphase_go2cs_Interceptors__main_b3ba3e36_Interceptors_g_F0950B0E4B0D52AD7879A39749E91A68073E3D690C91013853C349075FF5223ED___Literals
+  00000001401D6A74: jmp         00000001401D689D
+  00000001401D6A79: call        __GetNonGCStaticBase_time_go_time_package
+  00000001401D6A7E: jmp         00000001401D6932
+  00000001401D6A83: nop
+  00000001401D6A84: nop
+  00000001401D6A85: nop
+  00000001401D6A86: nop
+  00000001401D6A87: nop
+  00000001401D6A88: nop
+  00000001401D6A89: nop
+  00000001401D6A8A: nop
+  00000001401D6A8B: nop
+  00000001401D6A8C: nop
+  00000001401D6A8D: nop
+  00000001401D6A8E: nop
+  00000001401D6A8F: nop
