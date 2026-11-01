@@ -29,7 +29,7 @@ using static go.log_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/log_test.go", "log_test.cs", "AClSABcokoKCgoKClJSCgoKCgpSClKaCgILIgoKC6IKCgoKCgILIgoKCpoKCgoKCgrKCgqKk9oKCgoKClIKCgpSCgpSCgoKmgoKCgpSCuIKCgoKAgsiCgoKUgoKUgoK4gpSClPaCgoKCgoKAgqSAgsiCgoKQtoIAFwiigqaCgoKmmKKioqKioqKioqKioqLIgoKUlLKUkoKCgriolIKAgraCgpSUqIIABxKikoKCgoKCgoKC6KKCgoKCgoLoooKCgoKCggAIEILmgoKCgoKygpSipNaigoKC", "119-123:1;211-211:1;234-234:1;235-235:2;236-236:3;237-237:4;238-238:5;239-239:6;240-240:7;241-241:8;242-242:9;243-243:10;244-244:11;245-245:12;246-246:13;247-247:14;258-295:15;348-353:1", "", "203=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;212=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;357=Name/1/1/1,QuoteMeta/1/1/1")]
+[assembly: GoPositionMap("log/log_test.go", "log_test.cs", "AC9SABcokoKCgoKClJSCgoKCgpSClKaCgILIgoKC+IKCgoKCgILIgoKCpoKCgoKCgrKCgqKkAAkGgoKCgoKUgoKClIKClIKCgqaCgoKClIK4goKCgoCCyIKCgpSCgpSCgriClIKUAAkGgoKCgoKCgIKkgILIgoKCkLaCABsIgoKmgoKCppiioqKioqKioqKioqKiyIKClJSylJKCgoK4qJSCgIK2goKUlKiCAAcSooKCgoKCgoKCgviigoKCgoKC+KKCgoKCgoIACBCCAAgGgoKCgoKygpSipNaigoKC", "119-123:1;211-211:1;234-234:1;235-235:2;236-236:3;237-237:4;238-238:5;239-239:6;240-240:7;241-241:8;242-242:9;243-243:10;244-244:11;245-245:12;246-246:13;247-247:14;258-295:15;348-353:1", "", "212=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;221=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;370=Name/1/1/1,QuoteMeta/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -21,25 +21,27 @@ partial class fipsdeps_internal_test_package {
 public static readonly ж<map<@string, bool>> ᏑAllowedInternalPackages = new StaticBox<map<@string, bool>>(new map<@string, bool>{
     // entropy.Depleted/Seed is the entropy source, and sysrand.Read
     // is the actual (but uncredited!) random bytes source.
-    ["crypto/internal/entropy"u8] = true,
-    ["crypto/internal/entropy/v1.0.0"u8] = true,
-    ["crypto/internal/sysrand"u8] = true,
+    ["crypto/internal/entropy"] = true,
+    ["crypto/internal/entropy/v1.0.0"] = true,
+    ["crypto/internal/sysrand"] = true,
 
     // impl.Register is how the packages expose their alternative
     // implementations to tests outside the module.
-    ["crypto/internal/impl"u8] = true,
+    ["crypto/internal/impl"] = true,
 
     // randutil.MaybeReadByte is used in non-FIPS mode by GenerateKey functions.
-    ["crypto/internal/randutil"u8] = true,
+    ["crypto/internal/randutil"] = true,
 
     // constanttime are the constant-time intrinsics.
-    ["crypto/internal/constanttime"u8] = true
+    ["crypto/internal/constanttime"] = true
 });
 public static ref map<@string, bool> AllowedInternalPackages => ref ((StaticBox<map<@string, bool>>)ᏑAllowedInternalPackages).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string listˢ = "list"u8;
-internal static readonly @string pathImportPathRangeˢ = """
+internal static ref readonly @string listˢ => ref listˢᵇ;
+private static readonly @string listˢᵇ = "list"u8;
+internal static ref readonly @string pathImportPathRangeˢ => ref pathImportPathRangeˢᵇ;
+private static readonly @string pathImportPathRangeˢᵇ = """
 {{$path := .ImportPath -}}
 {{range .Imports -}}
 {{$path}} {{.}}
@@ -51,26 +53,31 @@ internal static readonly @string pathImportPathRangeˢ = """
 {{$path}} {{.}}
 {{end -}}
 """u8.Raw();
-internal static readonly @string cryptoInternalFips140ˢ = "crypto/internal/fips140/..."u8;
-internal static readonly @string cryptoInternalFips140ˢ2 = "crypto/internal/fips140/"u8;
-internal static readonly @string cryptoInternalFips140ˢ3 = "crypto/internal/fips140"u8;
-internal static readonly @string cryptoInternalˢ = "crypto/internal/fips140deps/"u8;
-internal static readonly @string internalˢ = "internal"u8;
+internal static ref readonly @string cryptoInternalFips140ˢ => ref cryptoInternalFips140ˢᵇ;
+private static readonly @string cryptoInternalFips140ˢᵇ = "crypto/internal/fips140/..."u8;
+internal static ref readonly @string cryptoInternalFips140ˢ2 => ref cryptoInternalFips140ˢ2ᵇ;
+private static readonly @string cryptoInternalFips140ˢ2ᵇ = "crypto/internal/fips140/"u8;
+internal static ref readonly @string cryptoInternalFips140ˢ3 => ref cryptoInternalFips140ˢ3ᵇ;
+private static readonly @string cryptoInternalFips140ˢ3ᵇ = "crypto/internal/fips140"u8;
+internal static ref readonly @string cryptoInternalˢ => ref cryptoInternalˢᵇ;
+private static readonly @string cryptoInternalˢᵇ = "crypto/internal/fips140deps/"u8;
+internal static ref readonly @string internalˢ => ref internalˢᵇ;
+private static readonly @string internalˢᵇ = "internal"u8;
 
-public static void TestImports(ж<testing.T> Ꮡt) {
-    var cmd = testenv.Command(new fipsdeps_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new fipsdeps_internal_test_package.testing_TжTB(Ꮡt)), listˢ, "-f", pathImportPathRangeˢ, cryptoInternalFips140ˢ);
+public static void TestImports(ж<testing.T> t) {
+    var cmd = testenv.Command(new fipsdeps_internal_test_package.testing_TжTB(t), testenv.GoToolPath(new fipsdeps_internal_test_package.testing_TжTB(t)), listˢ, "-f", pathImportPathRangeˢ, cryptoInternalFips140ˢ);
     var (bout, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("go list: %v\n%s"u8, err, bout);
+    if (err != nil) {
+        t.Fatalf("go list: %v\n%s", err, bout);
     }
     @string @out = (@string)bout;
 
     // In a snapshot, all the paths are crypto/internal/fips140/v1.2.3/...
     // Determine the version number and remove it for the test.
     var (_, v, _) = strings.Cut(@out, cryptoInternalFips140ˢ2);
-    (v, _, _) = strings.Cut(v, "/"u8);
-    (v, _, _) = strings.Cut(v, " "u8);
-    if (strings.HasPrefix(v, "v"u8) && strings.Count(v, "."u8) == 2) {
+    (v, _, _) = strings.Cut(v, "/");
+    (v, _, _) = strings.Cut(v, " ");
+    if (strings.HasPrefix(v, "v") && strings.Count(v, ".") == 2) {
         @out = strings.ReplaceAll(@out, "crypto/internal/fips140/"u8 + v, cryptoInternalFips140ˢ3);
     }
 
@@ -79,11 +86,11 @@ public static void TestImports(ж<testing.T> Ꮡt) {
     // importCheck is the set of packages that import crypto/internal/fips140/check.
     var importCheck = new map<@string, bool>();
 
-    foreach (var (_, line) in strings.Split(@out, "\n"u8)) {
+    foreach (var (_, line) in strings.Split(@out, "\n")) {
         if (line == ""u8) {
             continue;
         }
-        var (pkg, importedPkg, _) = strings.Cut(line, " "u8);
+        var (pkg, importedPkg, _) = strings.Cut(line, " ");
 
         allPackages[pkg] = true;
 
@@ -101,34 +108,44 @@ public static void TestImports(ж<testing.T> Ꮡt) {
             continue;
         }
         if (strings.Contains(importedPkg, internalˢ)) {
-            Ꮡt.Errorf("unexpected import of internal package: %s -> %s"u8, pkg, importedPkg);
+            t.Errorf("unexpected import of internal package: %s -> %s", pkg, importedPkg);
         }
     }
 
     // Ensure that all packages except check and check's dependencies import check.
     foreach (var (pkg, _) in allPackages) {
         var exprᴛ1 = pkg;
-        if (exprᴛ1 == "crypto/internal/fips140/check"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "crypto/internal/fips140/check"u8: {
+            break;
         }
-        else if (exprᴛ1 == "crypto/internal/fips140"u8) {
+        case {} when exprᴛ1 == "crypto/internal/fips140"u8: {
+            break;
         }
-        else if (exprᴛ1 == "crypto/internal/fips140/alias"u8) {
+        case {} when exprᴛ1 == "crypto/internal/fips140/alias"u8: {
+            break;
         }
-        else if (exprᴛ1 == "crypto/internal/fips140/subtle"u8) {
+        case {} when exprᴛ1 == "crypto/internal/fips140/subtle"u8: {
+            break;
         }
-        else if (exprᴛ1 == "crypto/internal/fips140/hmac"u8) {
+        case {} when exprᴛ1 == "crypto/internal/fips140/hmac"u8: {
+            break;
         }
-        else if (exprᴛ1 == "crypto/internal/fips140/sha3"u8) {
+        case {} when exprᴛ1 == "crypto/internal/fips140/sha3"u8: {
+            break;
         }
-        else if (exprᴛ1 == "crypto/internal/fips140/sha256"u8) {
+        case {} when exprᴛ1 == "crypto/internal/fips140/sha256"u8: {
+            break;
         }
-        else if (exprᴛ1 == "crypto/internal/fips140/sha512"u8) {
+        case {} when exprᴛ1 == "crypto/internal/fips140/sha512"u8: {
+            break;
         }
-        else { /* default: */
+        default: {
             if (!importCheck[pkg]) {
-                Ꮡt.Errorf("package %s does not import crypto/internal/fips140/check"u8, pkg);
+                t.Errorf("package %s does not import crypto/internal/fips140/check", pkg);
             }
-        }
+            break;
+        }}
     }
 }
 

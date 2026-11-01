@@ -10,8 +10,8 @@ using static go.time_package;
 partial class time_internal_test_package {
 
 public static void ResetLocalOnceForTest() {
-    localOnce = new Δsync.Once(nil);
-    localLoc = new ΔLocation(nil);
+    localOnce = new Δsync.Once();
+    localLoc = new ΔLocation();
 }
 
 public static void ForceUSPacificForTesting() {
@@ -24,8 +24,8 @@ public static ж<@string> ZoneinfoForTesting() {
 }
 
 public static void ResetZoneinfoForTesting() {
-    zoneinfo = default!;
-    zoneinfoOnce = new Δsync.Once(nil);
+    zoneinfo = default;
+    zoneinfoOnce = new Δsync.Once();
 }
 
 public static readonly ж<Func<Action>> ᏑDisablePlatformSources = new StaticBox<Func<Action>>(default(Func<Action>));
@@ -92,58 +92,58 @@ public static (Rule, @string, bool) TzsetRule(@string s) {
 
 // StdChunkNames maps from nextStdChunk results to the matched strings.
 public static readonly ж<map<nint, @string>> ᏑStdChunkNames = new StaticBox<map<nint, @string>>(new map<nint, @string>{
-    [0] = ""u8,
-    [stdLongMonth] = "January"u8,
-    [stdMonth] = "Jan"u8,
-    [stdNumMonth] = "1"u8,
-    [stdZeroMonth] = "01"u8,
-    [stdLongWeekDay] = "Monday"u8,
-    [stdWeekDay] = "Mon"u8,
-    [stdDay] = "2"u8,
-    [stdUnderDay] = "_2"u8,
-    [stdZeroDay] = "02"u8,
-    [stdUnderYearDay] = "__2"u8,
-    [stdZeroYearDay] = "002"u8,
-    [stdHour] = "15"u8,
-    [stdHour12] = "3"u8,
-    [stdZeroHour12] = "03"u8,
-    [stdMinute] = "4"u8,
-    [stdZeroMinute] = "04"u8,
-    [stdSecond] = "5"u8,
-    [stdZeroSecond] = "05"u8,
-    [stdLongYear] = "2006"u8,
-    [stdYear] = "06"u8,
-    [stdPM] = "PM"u8,
-    [stdpm] = "pm"u8,
-    [stdTZ] = "MST"u8,
-    [stdISO8601TZ] = "Z0700"u8,
-    [stdISO8601SecondsTZ] = "Z070000"u8,
-    [stdISO8601ShortTZ] = "Z07"u8,
-    [stdISO8601ColonTZ] = "Z07:00"u8,
-    [stdISO8601ColonSecondsTZ] = "Z07:00:00"u8,
-    [stdNumTZ] = "-0700"u8,
-    [stdNumSecondsTz] = "-070000"u8,
-    [stdNumShortTZ] = "-07"u8,
-    [stdNumColonTZ] = "-07:00"u8,
-    [stdNumColonSecondsTZ] = "-07:00:00"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(1 << (int)(stdArgShift)))] = ".0"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(2 << (int)(stdArgShift)))] = ".00"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(3 << (int)(stdArgShift)))] = ".000"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(4 << (int)(stdArgShift)))] = ".0000"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(5 << (int)(stdArgShift)))] = ".00000"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(6 << (int)(stdArgShift)))] = ".000000"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(7 << (int)(stdArgShift)))] = ".0000000"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(8 << (int)(stdArgShift)))] = ".00000000"u8,
-    [(nint)((nint)stdFracSecond0 | (nint)(9 << (int)(stdArgShift)))] = ".000000000"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(1 << (int)(stdArgShift)))] = ".9"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(2 << (int)(stdArgShift)))] = ".99"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(3 << (int)(stdArgShift)))] = ".999"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(4 << (int)(stdArgShift)))] = ".9999"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(5 << (int)(stdArgShift)))] = ".99999"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(6 << (int)(stdArgShift)))] = ".999999"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(7 << (int)(stdArgShift)))] = ".9999999"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(8 << (int)(stdArgShift)))] = ".99999999"u8,
-    [(nint)((nint)stdFracSecond9 | (nint)(9 << (int)(stdArgShift)))] = ".999999999"u8
+    [0] = "",
+    [stdLongMonth] = "January",
+    [stdMonth] = "Jan",
+    [stdNumMonth] = "1",
+    [stdZeroMonth] = "01",
+    [stdLongWeekDay] = "Monday",
+    [stdWeekDay] = "Mon",
+    [stdDay] = "2",
+    [stdUnderDay] = "_2",
+    [stdZeroDay] = "02",
+    [stdUnderYearDay] = "__2",
+    [stdZeroYearDay] = "002",
+    [stdHour] = "15",
+    [stdHour12] = "3",
+    [stdZeroHour12] = "03",
+    [stdMinute] = "4",
+    [stdZeroMinute] = "04",
+    [stdSecond] = "5",
+    [stdZeroSecond] = "05",
+    [stdLongYear] = "2006",
+    [stdYear] = "06",
+    [stdPM] = "PM",
+    [stdpm] = "pm",
+    [stdTZ] = "MST",
+    [stdISO8601TZ] = "Z0700",
+    [stdISO8601SecondsTZ] = "Z070000",
+    [stdISO8601ShortTZ] = "Z07",
+    [stdISO8601ColonTZ] = "Z07:00",
+    [stdISO8601ColonSecondsTZ] = "Z07:00:00",
+    [stdNumTZ] = "-0700",
+    [stdNumSecondsTz] = "-070000",
+    [stdNumShortTZ] = "-07",
+    [stdNumColonTZ] = "-07:00",
+    [stdNumColonSecondsTZ] = "-07:00:00",
+    [(nint)((nint)stdFracSecond0 | (nint)(1 << (int)(stdArgShift)))] = ".0",
+    [(nint)((nint)stdFracSecond0 | (nint)(2 << (int)(stdArgShift)))] = ".00",
+    [(nint)((nint)stdFracSecond0 | (nint)(3 << (int)(stdArgShift)))] = ".000",
+    [(nint)((nint)stdFracSecond0 | (nint)(4 << (int)(stdArgShift)))] = ".0000",
+    [(nint)((nint)stdFracSecond0 | (nint)(5 << (int)(stdArgShift)))] = ".00000",
+    [(nint)((nint)stdFracSecond0 | (nint)(6 << (int)(stdArgShift)))] = ".000000",
+    [(nint)((nint)stdFracSecond0 | (nint)(7 << (int)(stdArgShift)))] = ".0000000",
+    [(nint)((nint)stdFracSecond0 | (nint)(8 << (int)(stdArgShift)))] = ".00000000",
+    [(nint)((nint)stdFracSecond0 | (nint)(9 << (int)(stdArgShift)))] = ".000000000",
+    [(nint)((nint)stdFracSecond9 | (nint)(1 << (int)(stdArgShift)))] = ".9",
+    [(nint)((nint)stdFracSecond9 | (nint)(2 << (int)(stdArgShift)))] = ".99",
+    [(nint)((nint)stdFracSecond9 | (nint)(3 << (int)(stdArgShift)))] = ".999",
+    [(nint)((nint)stdFracSecond9 | (nint)(4 << (int)(stdArgShift)))] = ".9999",
+    [(nint)((nint)stdFracSecond9 | (nint)(5 << (int)(stdArgShift)))] = ".99999",
+    [(nint)((nint)stdFracSecond9 | (nint)(6 << (int)(stdArgShift)))] = ".999999",
+    [(nint)((nint)stdFracSecond9 | (nint)(7 << (int)(stdArgShift)))] = ".9999999",
+    [(nint)((nint)stdFracSecond9 | (nint)(8 << (int)(stdArgShift)))] = ".99999999",
+    [(nint)((nint)stdFracSecond9 | (nint)(9 << (int)(stdArgShift)))] = ".999999999"
 });
 public static ref map<nint, @string> StdChunkNames => ref ((StaticBox<map<nint, @string>>)ᏑStdChunkNames).ValueSlot;
 

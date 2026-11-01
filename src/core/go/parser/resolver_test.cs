@@ -20,8 +20,10 @@ using static global::go.go.parser_package;
 partial class parser_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataˢ = "testdata"u8;
-internal static readonly @string resolutionˢ = "resolution"u8;
+internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
+private static readonly @string testdataˢᵇ = "testdata"u8;
+internal static ref readonly @string resolutionˢ => ref resolutionˢᵇ;
+private static readonly @string resolutionˢᵇ = "resolution"u8;
 
 // TestResolution checks that identifiers are resolved to the declarations
 // annotated in the source, by comparing the positions of the resulting
@@ -35,29 +37,29 @@ internal static readonly @string resolutionˢ = "resolution"u8;
 // for a comment to denote both the declaration and use of a label (e.g.
 // '=@foo'). Leading and trailing whitespace is ignored. Any comment not
 // beginning with '=' or '@' is ignored.
-public static void TestResolution(ж<testing.T> Ꮡt) {
+public static void TestResolution(ж<testing.T> t) {
     @string dir = filepath.Join(testdataˢ, resolutionˢ);
     var (fis, err) = os.ReadDir(dir);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     foreach (var (_, fi) in fis) {
         var fiʗ1 = fi;
-        Ꮡt.Run(fi.Name(), (ж<testing.T> tΔ1) => {
+        t.Run(fi.Name(), (ж<testing.T> tΔ1) => {
             var fset = token.NewFileSet();
             @string path = filepath.Join(dir, fiʗ1.Name());
             var src = readFile(path); // panics on failure
-            global::go.go.parser_package.Mode mode = default!;
+            global::go.go.parser_package.Mode mode = default;
             var (@file, errΔ1) = ParseFile(fset, path, src, mode);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
 
             // Compare the positions of objects resolved during parsing (fromParser)
             // to those annotated in source comments (fromComments).
 
-            var handle = fset.File((~@file).Package);
+            var handle = fset.File(@file.Package);
             var fromParser = declsFromParser(@file);
             var fromComments = declsFromComments(handle, src);
 
@@ -72,14 +74,14 @@ public static void TestResolution(ж<testing.T> Ꮡt) {
             foreach (var (k, want) in fromComments) {
                 {
                     tokenꓸPos got = fromParser[k]; if (got != want) {
-                        tΔ1.Errorf("%s resolved to %s, want %s"u8, pos(k), pos(got), pos(want));
+                        tΔ1.Errorf("%s resolved to %s, want %s", pos(k), pos(got), pos(want));
                     }
                 }
                 delete(fromParser, k);
             }
             // What remains in fromParser are unexpected resolutions.
             foreach (var (k, got) in fromParser) {
-                tΔ1.Errorf("%s resolved to %s, want no object"u8, pos(k), pos(got));
+                tΔ1.Errorf("%s resolved to %s, want no object", pos(k), pos(got));
             }
         });
     }
@@ -87,14 +89,14 @@ public static void TestResolution(ж<testing.T> Ꮡt) {
 
 // declsFromParser walks the file and collects the map associating an
 // identifier position with its declaration position.
-internal static map<tokenꓸPos, tokenꓸPos> declsFromParser(ж<ast.File> Ꮡfile) {
+internal static map<tokenꓸPos, tokenꓸPos> declsFromParser(ж<ast.File> @file) {
     var objmap = new map<tokenꓸPos, tokenꓸPos>{};
     var objmapʗ1 = objmap;
-    ast.Inspect(new ast.FileжNode(Ꮡfile), (ast.Node node) => {
+    ast.Inspect(new ast.FileжNode(@file), (ast.Node node) => {
         // Ignore blank identifiers to reduce noise.
         {
-            var (ident, _) = node._<ж<ast.Ident>>(ᐧ); if (ident != nil && (~ident).Obj != nil && (~ident).Name != "_"u8) {
-                objmapʗ1[ident.Pos()] = (~ident).Obj.Pos();
+            var (ident, _) = node._<ж<ast.Ident>>(ᐧ); if (ident != nil && ident.Obj != nil && ident.Name != "_"u8) {
+                objmapʗ1[ident.Pos()] = ident.Obj.Pos();
             }
         }
         return true;
@@ -105,8 +107,8 @@ internal static map<tokenꓸPos, tokenꓸPos> declsFromParser(ж<ast.File> Ꮡfi
 // declsFromComments looks at comments annotating uses and declarations, and
 // maps each identifier use to its corresponding declaration. See the
 // description of these annotations in the documentation for TestResolution.
-internal static map<tokenꓸPos, tokenꓸPos> declsFromComments(ж<tokenꓸFile> Ꮡhandle, slice<byte> src) {
-    var (decls, uses) = positionMarkers(Ꮡhandle, src);
+internal static map<tokenꓸPos, tokenꓸPos> declsFromComments(ж<tokenꓸFile> handle, slice<byte> src) {
+    var (decls, uses) = positionMarkers(handle, src);
 
     var objmap = new map<tokenꓸPos, tokenꓸPos>();
     // Join decls and uses on name, to build the map of use->decl.
@@ -126,18 +128,18 @@ internal static map<tokenꓸPos, tokenꓸPos> declsFromComments(ж<tokenꓸFile>
 // prefixed with '=' (declarations) and '@' (uses): for example '@foo' or
 // '=@bar'. It returns a map of name->position for declarations, and
 // name->position(s) for uses.
-internal static (map<@string, tokenꓸPos> decls, map<@string, slice<tokenꓸPos>> uses) positionMarkers(ж<tokenꓸFile> Ꮡhandle, slice<byte> src) {
-    map<@string, tokenꓸPos> decls = default!;
-    map<@string, slice<tokenꓸPos>> uses = default!;
+internal static (map<@string, tokenꓸPos> decls, map<@string, slice<tokenꓸPos>> uses) positionMarkers(ж<tokenꓸFile> handle, slice<byte> src) {
+    map<@string, tokenꓸPos> decls = default;
+    map<@string, slice<tokenꓸPos>> uses = default;
 
-    scanner.Scanner s = default!;
-    s.Init(Ꮡhandle, src, default!, scanner.ScanComments);
+    scanner.Scanner s = default;
+    s.Init(handle, src, default, scanner.ScanComments);
     decls = new map<@string, tokenꓸPos>();
     uses = new map<@string, slice<tokenꓸPos>>();
-    tokenꓸPos prev = default!;                // position of last non-comment, non-semicolon token
+    tokenꓸPos prev = default; // position of last non-comment, non-semicolon token
 
 scanFile:
-    while (ᐧ) {
+    for (;;) {
         var (pos, tok, lit) = s.Scan();
         var exprᴛ1 = tok;
         var matchᴛ1 = false;
@@ -177,11 +179,11 @@ break_scanFile:;
 }
 
 internal static (@string name, bool decl, bool use) annotatedObj(@string lit) {
-    @string name = default!;
-    bool decl = default!;
-    bool use = default!;
+    @string name = default;
+    bool decl = default;
+    bool use = default;
 
-    if (lit[1] == (rune)'*') {
+    if (lit[1] == '*') {
         lit = lit.slice(0, len(lit) - 2); // strip trailing */
     }
     lit = strings.TrimSpace(lit[2..]);
@@ -189,11 +191,11 @@ internal static (@string name, bool decl, bool use) annotatedObj(@string lit) {
 scanLit:
     foreach (var (idx, r) in lit) {
         switch (r) {
-        case (rune)'=': {
+        case '=': {
             decl = true;
             break;
         }
-        case (rune)'@': {
+        case '@': {
             use = true;
             break;
         }

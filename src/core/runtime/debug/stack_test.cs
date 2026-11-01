@@ -25,31 +25,36 @@ using path;
 partial class debug_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goRuntimeDebugTestˢ = "GO_RUNTIME_DEBUG_TEST_ENTRYPOINT"u8;
-private static readonly @string crashoutputˢ = "CRASHOUTPUT"u8;
+private static ref readonly @string goRuntimeDebugTestˢ => ref goRuntimeDebugTestˢᵇ;
+private static readonly @string goRuntimeDebugTestˢᵇ = "GO_RUNTIME_DEBUG_TEST_ENTRYPOINT"u8;
+private static ref readonly @string crashoutputˢ => ref crashoutputˢᵇ;
+private static readonly @string crashoutputˢᵇ = "CRASHOUTPUT"u8;
 
-public static void TestMain(ж<testing.M> Ꮡm) {
+public static void TestMain(ж<testing.M> m) {
     var exprᴛ1 = os.Getenv(goRuntimeDebugTestˢ);
-    if (exprᴛ1 == "dumpgoroot"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "dumpgoroot"u8: {
         fmt.Println(runtime.GOROOT());
         os.Exit(0);
+        break;
     }
-    else if (exprᴛ1 == "setcrashoutput"u8) {
+    case {} when exprᴛ1 == "setcrashoutput"u8: {
         var (f, err) = os.Create(os.Getenv(crashoutputˢ));
-        if (err != default!) {
+        if (err != nil) {
             log.Fatal(err);
         }
         {
-            var errΔ1 = SetCrashOutput(f, new debug.CrashOptions(nil)); if (errΔ1 != default!) {
+            var errΔ1 = SetCrashOutput(f, new debug.CrashOptions()); if (errΔ1 != nil) {
                 log.Fatal(errΔ1); // e.g. EMFILE
             }
         }
-        println((@string)"hello"u8);
+        println((@string)"hello");
         throw panic("oops");
-    }
+        break;
+    }}
 
     // default: run the tests.
-    os.Exit(Ꮡm.Run());
+    os.Exit(m.Run());
 }
 
 partial struct T /*num:nint*/;
@@ -64,14 +69,22 @@ internal static partial slice<byte> method(this T t) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object tooFewLinesˢ = (@string)"too few lines"u8;
-private static readonly @string gorootˢ = "GOROOT"u8;
-private static readonly @string runtimeDebugStackGoˢ = "runtime/debug/stack.go"u8;
-private static readonly @string runtimeDebugStackˢ = "runtime/debug.Stack"u8;
-private static readonly @string runtimeDebugStackTestGoˢ = "runtime/debug/stack_test.go"u8;
-private static readonly @string runtimeDebugTestTˢ = "runtime/debug_test.(*T).ptrmethod"u8;
-private static readonly @string runtimeDebugTestTMethodˢ = "runtime/debug_test.T.method"u8;
-private static readonly @string runtimeDebugTestˢ = "runtime/debug_test.TestStack"u8;
-private static readonly @string testingTestingGoˢ = "testing/testing.go"u8;
+private static ref readonly @string gorootˢ => ref gorootˢᵇ;
+private static readonly @string gorootˢᵇ = "GOROOT"u8;
+private static ref readonly @string runtimeDebugStackGoˢ => ref runtimeDebugStackGoˢᵇ;
+private static readonly @string runtimeDebugStackGoˢᵇ = "runtime/debug/stack.go"u8;
+private static ref readonly @string runtimeDebugStackˢ => ref runtimeDebugStackˢᵇ;
+private static readonly @string runtimeDebugStackˢᵇ = "runtime/debug.Stack"u8;
+private static ref readonly @string runtimeDebugStackTestGoˢ => ref runtimeDebugStackTestGoˢᵇ;
+private static readonly @string runtimeDebugStackTestGoˢᵇ = "runtime/debug/stack_test.go"u8;
+private static ref readonly @string runtimeDebugTestTˢ => ref runtimeDebugTestTˢᵇ;
+private static readonly @string runtimeDebugTestTˢᵇ = "runtime/debug_test.(*T).ptrmethod"u8;
+private static ref readonly @string runtimeDebugTestTMethodˢ => ref runtimeDebugTestTMethodˢᵇ;
+private static readonly @string runtimeDebugTestTMethodˢᵇ = "runtime/debug_test.T.method"u8;
+private static ref readonly @string runtimeDebugTestˢ => ref runtimeDebugTestˢᵇ;
+private static readonly @string runtimeDebugTestˢᵇ = "runtime/debug_test.TestStack"u8;
+private static ref readonly @string testingTestingGoˢ => ref testingTestingGoˢᵇ;
+private static readonly @string testingTestingGoˢᵇ = "testing/testing.go"u8;
 
 /*
 The traceback should look something like this, modulo line numbers and hex constants.
@@ -91,13 +104,11 @@ Don't worry much about the base levels, but check the ones in our own package.
 	created by testing.RunTests
 		/Users/r/go/src/testing/testing.go:561 +0x86d
 */
-public static partial void TestStack(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static partial void TestStack(ж<testing.T> t) {
     var b = ((T)0).method();
-    var lines = strings.Split((@string)b, "\n"u8);
+    var lines = strings.Split((@string)b, "\n");
     if (len(lines) < 6) {
-        Ꮡt.Fatal(tooFewLinesˢ);
+        t.Fatal(tooFewLinesˢ);
     }
 
     // If built with -trimpath, file locations should start with package paths.
@@ -106,18 +117,18 @@ public static partial void TestStack(ж<testing.T> Ꮡt) {
     // that may be set in the environment).
     @string fileGoroot = ""u8;
     {
-        @string envGoroot = os.Getenv(gorootˢ); if (envGoroot != ""u8){
+        @string envGoroot = os.Getenv(gorootˢ); if (envGoroot != ""u8) {
             // Since GOROOT is set explicitly in the environment, we can't be certain
             // that it is the same GOROOT value baked into the binary, and we can't
             // change the value in-process because runtime.GOROOT uses the value from
             // initial (not current) environment. Spawn a subprocess to determine the
             // real baked-in GOROOT.
-            Ꮡt.Logf("found GOROOT %q from environment; checking embedded GOROOT value"u8, envGoroot);
-            var cmd = exec.Command(testenv.Executable(new testing_TжTB(Ꮡt)));
-            cmd.Value.Env = append(os.Environ(), "GOROOT="u8, "GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=dumpgoroot");
+            t.Logf("found GOROOT %q from environment; checking embedded GOROOT value", envGoroot);
+            var cmd = exec.Command(testenv.Executable(new testing_TжTB(t)));
+            cmd.Env = append(os.Environ(), (@string)"GOROOT=", (@string)"GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=dumpgoroot");
             var (@out, err) = cmd.Output();
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             fileGoroot = (@string)bytes.TrimSpace(@out);
         } else {
@@ -134,11 +145,11 @@ public static partial void TestStack(ж<testing.T> Ꮡt) {
     nint n = 0;
     var linesʗ1 = lines;
     void frame(@string @file, @string code) {
-        Ꮡt.Helper();
+        t.Helper();
 
         @string line = linesʗ1[n];
         if (!strings.Contains(line, code)) {
-            Ꮡt.Errorf("expected %q in %q"u8, code, line);
+            t.Errorf("expected %q in %q", code, line);
         }
         n++;
 
@@ -146,7 +157,7 @@ public static partial void TestStack(ж<testing.T> Ꮡt) {
 
         @string wantPrefix = "\t"u8 + filePrefix + @file;
         if (!strings.HasPrefix(line, wantPrefix)) {
-            Ꮡt.Errorf("in line %q, expected prefix %q"u8, line, wantPrefix);
+            t.Errorf("in line %q, expected prefix %q", line, wantPrefix);
         }
         n++;
     }
@@ -160,21 +171,23 @@ public static partial void TestStack(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string crashOutˢ = "crash.out"u8;
-private static readonly @string helloˢ = "hello"u8;
+private static ref readonly @string crashOutˢ => ref crashOutˢᵇ;
+private static readonly @string crashOutˢᵇ = "crash.out"u8;
+private static ref readonly @string helloˢ => ref helloˢᵇ;
+private static readonly @string helloˢᵇ = "hello"u8;
 
-public static void TestSetCrashOutput(ж<testing.T> Ꮡt) {
-    @string crashOutput = filepath.Join(Ꮡt.TempDir(), crashOutˢ);
+public static void TestSetCrashOutput(ж<testing.T> t) {
+    @string crashOutput = filepath.Join(t.TempDir(), crashOutˢ);
 
-    var cmd = exec.Command(testenv.Executable(new testing_TжTB(Ꮡt)));
-    cmd.Value.Stderr = new strings_BuilderжWriter(@new<strings.Builder>());
-    cmd.Value.Env = append(os.Environ(), "GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=setcrashoutput"u8, "CRASHOUTPUT=" + crashOutput);
+    var cmd = exec.Command(testenv.Executable(new testing_TжTB(t)));
+    cmd.Stderr = new strings_BuilderжWriter(@new<strings.Builder>());
+    cmd.Env = append(os.Environ(), (@string)"GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=setcrashoutput", "CRASHOUTPUT=" + crashOutput);
     var err = cmd.Run();
-    @string stderr = fmt.Sprint((~cmd).Stderr);
-    if (err == default!) {
-        Ꮡt.Fatalf("child process succeeded unexpectedly (stderr: %s)"u8, stderr);
+    @string stderr = fmt.Sprint(cmd.Stderr);
+    if (err == nil) {
+        t.Fatalf("child process succeeded unexpectedly (stderr: %s)", stderr);
     }
-    Ꮡt.Logf("child process finished with error %v and stderr <<%s>>"u8, err, stderr);
+    t.Logf("child process finished with error %v and stderr <<%s>>", err, stderr);
 
     // Read the file the child process should have written.
     // It should contain a crash report such as this:
@@ -187,34 +200,34 @@ public static void TestSetCrashOutput(ж<testing.T> Ꮡt) {
     // main.main()
     // 	_testmain.go:71 +0x170
     (var data, err) = os.ReadFile(crashOutput);
-    if (err != default!) {
-        Ꮡt.Fatalf("child process failed to write crash report: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("child process failed to write crash report: %v", err);
     }
     @string crash = (@string)data;
-    Ꮡt.Logf("crash = <<%s>>"u8, crash);
-    Ꮡt.Logf("stderr = <<%s>>"u8, stderr);
+    t.Logf("crash = <<%s>>", crash);
+    t.Logf("stderr = <<%s>>", stderr);
 
     // Check that the crash file and the stderr both contain the panic and stack trace.
-    foreach (var (_, want) in new @string[]{
-        "panic: oops"u8,
-        "goroutine 1"u8,
-        "debug_test.TestMain"u8
-    }.slice()) {
+    foreach (var (_, want) in slice<@string>([
+        "panic: oops",
+        "goroutine 1",
+        "debug_test.TestMain"
+    ])) {
         if (!strings.Contains(crash, want)) {
-            Ꮡt.Errorf("crash output does not contain %q"u8, want);
+            t.Errorf("crash output does not contain %q", want);
         }
         if (!strings.Contains(stderr, want)) {
-            Ꮡt.Errorf("stderr output does not contain %q"u8, want);
+            t.Errorf("stderr output does not contain %q", want);
         }
     }
 
     // Check that stderr, but not crash, contains the output of println().
     @string printlnOnly = helloˢ;
     if (strings.Contains(crash, printlnOnly)) {
-        Ꮡt.Errorf("crash output contains %q, but should not"u8, printlnOnly);
+        t.Errorf("crash output contains %q, but should not", printlnOnly);
     }
     if (!strings.Contains(stderr, printlnOnly)) {
-        Ꮡt.Errorf("stderr output does not contain %q, but should"u8, printlnOnly);
+        t.Errorf("stderr output does not contain %q, but should", printlnOnly);
     }
 }
 

@@ -15,23 +15,24 @@ using static global::go.go.doc.comment_package;
 
 partial class comment_internal_test_package {
 
-internal static ж<int64> wrapSeed = flag.Int64("wrapseed"u8, 0, "use `seed` for wrap test (default auto-seeds)"u8);
+internal static ж<int64> wrapSeed = flag.Int64("wrapseed", 0, "use `seed` for wrap test (default auto-seeds)");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cdefghijklmnopqrstuvwxyzˢ = "1234567890αβcdefghijklmnopqrstuvwxyz"u8;
+internal static ref readonly @string cdefghijklmnopqrstuvwxyzˢ => ref cdefghijklmnopqrstuvwxyzˢᵇ;
+private static readonly @string cdefghijklmnopqrstuvwxyzˢᵇ = "1234567890αβcdefghijklmnopqrstuvwxyz"u8;
 internal static readonly object maxˢ = (@string)"max="u8;
 
-public static void TestWrap(ж<testing.T> Ꮡt) {
+public static void TestWrap(ж<testing.T> t) {
     if (wrapSeed.Value == 0) {
         wrapSeed.Value = time.Now().UnixNano();
     }
-    Ꮡt.Logf("-wrapseed=%#x\n"u8, wrapSeed.Value);
+    t.Logf("-wrapseed=%#x\n", wrapSeed.Value);
     var r = rand.New(rand.NewSource(wrapSeed.Value));
 
     // Generate words of random length.
     @string s = cdefghijklmnopqrstuvwxyzˢ;
     nint sN = utf8.RuneCountInString(s);
-    slice<@string> words = default!;
+    slice<@string> words = default;
     for (nint i = 0; i < 100; i++) {
         nint n = 1 + r.Intn(sN - 1);
         if (n >= 12) {
@@ -43,12 +44,12 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
         words = append(words, s.slice(0, n));
     }
 
-    for (nint nᴛ1 = 1; nᴛ1 <= len(words) && !Ꮡt.Failed(); nᴛ1++) {
+    for (nint nᴛ1 = 1; nᴛ1 <= len(words) && !t.Failed(); nᴛ1++) {
         var n = nᴛ1;
         var wordsʗ1 = words;
-        Ꮡt.Run(fmt.Sprint((@string)"n="u8, n), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprint("n=", n), (ж<testing.T> tΔ1) => {
             var wordsΔ1 = wordsʗ1.slice(0, n);
-            tΔ1.Logf("words: %v"u8, wordsΔ1);
+            tΔ1.Logf("words: %v", wordsΔ1);
             for (nint maxᴛ1 = 1; maxᴛ1 < 100 && !tΔ1.Failed(); maxᴛ1++) {
                 var max = maxᴛ1;
                 var wordsʗ2 = wordsΔ1;
@@ -59,41 +60,39 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
                     nint start = 0;
                     var score = (int64)0;
                     if (len(seq) == 0) {
-                        tΔ2.Fatalf("wrap seq is empty"u8);
+                        tΔ2.Fatalf("wrap seq is empty");
                     }
                     if (seq[0] != 0) {
-                        tΔ2.Fatalf("wrap seq does not start with 0"u8);
+                        tΔ2.Fatalf("wrap seq does not start with 0");
                     }
                     foreach (var (_, nΔ1) in seq[1..]) {
                         if (nΔ1 <= start) {
-                            tΔ2.Fatalf("wrap seq is non-increasing: %v"u8, seq);
+                            tΔ2.Fatalf("wrap seq is non-increasing: %v", seq);
                         }
                         if (nΔ1 > len(wordsʗ2)) {
-                            tΔ2.Fatalf("wrap seq contains %d > %d: %v"u8, nΔ1, len(wordsʗ2), seq);
+                            tΔ2.Fatalf("wrap seq contains %d > %d: %v", nΔ1, len(wordsʗ2), seq);
                         }
                         nint size = -1;
                         foreach (var (_, sΔ1) in wordsʗ2.slice(start, nΔ1)) {
                             size += 1 + utf8.RuneCountInString(sΔ1);
                         }
-                        if (nΔ1 - start == 1 && size >= max){
+                        if (nΔ1 - start == 1 && size >= max) {
                             // no score
-                        } else 
-                        if (size > max){
-                            tΔ2.Fatalf("wrap used overlong line %d:%d: %v"u8, start, nΔ1, wordsʗ2.slice(start, nΔ1));
-                        } else 
-                        if (nΔ1 != len(wordsʗ2)) {
+                        } else if (size > max) {
+                            tΔ2.Fatalf("wrap used overlong line %d:%d: %v", start, nΔ1, wordsʗ2.slice(start, nΔ1));
+                        } else if (nΔ1 != len(wordsʗ2)) {
                             score += (int64)(max - size) * (int64)(max - size) + wrapPenalty(wordsʗ2[nΔ1 - 1]);
                         }
                         start = nΔ1;
                     }
                     if (start != len(wordsʗ2)) {
-                        tΔ2.Fatalf("wrap seq does not use all words (%d < %d): %v"u8, start, len(wordsʗ2), seq);
+                        tΔ2.Fatalf("wrap seq does not use all words (%d < %d): %v", start, len(wordsʗ2), seq);
                     }
 
                     // Check that score matches slow reference implementation.
                     var (slowSeq, slowScore) = wrapSlow(wordsʗ2, max);
                     if (score != slowScore) {
-                        tΔ2.Fatalf("wrap score = %d != wrapSlow score %d\nwrap: %v\nslow: %v"u8, score, slowScore, seq, slowSeq);
+                        tΔ2.Fatalf("wrap score = %d != wrapSlow score %d\nwrap: %v\nslow: %v", score, slowScore, seq, slowSeq);
                     }
                 });
             }
@@ -106,7 +105,7 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
 // It is OK if wrap returns a different sequence as long as that
 // sequence has the same score.
 internal static (slice<nint> seq, int64 score) wrapSlow(slice<@string> words, nint max) {
-    slice<nint> seq = default!;
+    slice<nint> seq = default;
 
     // Quadratic dynamic programming algorithm for line wrapping problem.
     // best[i] tracks the best score possible for words[:i],

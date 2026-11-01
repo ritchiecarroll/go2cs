@@ -29,7 +29,8 @@ internal static readonly object gdbDoesNotWorkOnDarwinˢ = (@string)"gdb does no
 internal static readonly object gdbDoesNotWorkWithˢ = (@string)"gdb does not work with threads on NetBSD; see https://golang.org/issue/22893 and https://gnats.netbsd.org/52548"u8;
 internal static readonly object skippingGdbTestsOnLinuxˢ = (@string)"skipping gdb tests on linux/ppc64; see https://golang.org/issue/17366"u8;
 internal static readonly object skippingGdbTestsOnLinuxˢ2 = (@string)"skipping gdb tests on linux/mips; see https://golang.org/issue/25939"u8;
-internal static readonly @string alpineˢ = "-alpine"u8;
+internal static ref readonly @string alpineˢ => ref alpineˢᵇ;
+private static readonly @string alpineˢᵇ = "-alpine"u8;
 internal static readonly object skippingGdbTestsOnAlpineˢ = (@string)"skipping gdb tests on alpine; see https://golang.org/issue/54352"u8;
 internal static readonly object skippingGdbTestsOnˢ = (@string)"skipping gdb tests on FreeBSD; see https://golang.org/issue/29508"u8;
 internal static readonly object skippingGdbTestsOnAixSeeˢ = (@string)"skipping gdb tests on AIX; see https://golang.org/issue/35710"u8;
@@ -40,111 +41,119 @@ internal static readonly object thereIsNoGdbOnPlan9ˢ = (@string)"there is no gd
 // must never run in parallel with GDB tests.
 //
 // See issue 39021 and https://sourceware.org/bugzilla/show_bug.cgi?id=26056.
-internal static void checkGdbEnvironment(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
+internal static void checkGdbEnvironment(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(t));
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "darwin"u8) {
-        Ꮡt.Skip(gdbDoesNotWorkOnDarwinˢ);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "darwin"u8: {
+        t.Skip(gdbDoesNotWorkOnDarwinˢ);
+        break;
     }
-    else if (exprᴛ1 == "netbsd"u8) {
-        Ꮡt.Skip(gdbDoesNotWorkWithˢ);
+    case {} when exprᴛ1 == "netbsd"u8: {
+        t.Skip(gdbDoesNotWorkWithˢ);
+        break;
     }
-    else if (exprᴛ1 == "linux"u8) {
+    case {} when exprᴛ1 == "linux"u8: {
         if (Δruntime.GOARCH == "ppc64"u8) {
-            Ꮡt.Skip(skippingGdbTestsOnLinuxˢ);
+            t.Skip(skippingGdbTestsOnLinuxˢ);
         }
         if (Δruntime.GOARCH == "mips"u8) {
-            Ꮡt.Skip(skippingGdbTestsOnLinuxˢ2);
+            t.Skip(skippingGdbTestsOnLinuxˢ2);
         }
         // Disable GDB tests on alpine until issue #54352 resolved.
         if (strings.HasSuffix(testenv.Builder(), alpineˢ)) {
-            Ꮡt.Skip(skippingGdbTestsOnAlpineˢ);
+            t.Skip(skippingGdbTestsOnAlpineˢ);
         }
+        break;
     }
-    else if (exprᴛ1 == "freebsd"u8) {
-        Ꮡt.Skip(skippingGdbTestsOnˢ);
+    case {} when exprᴛ1 == "freebsd"u8: {
+        t.Skip(skippingGdbTestsOnˢ);
+        break;
     }
-    else if (exprᴛ1 == "aix"u8) {
+    case {} when exprᴛ1 == "aix"u8: {
         if (testing.Short()) {
-            Ꮡt.Skip(skippingGdbTestsOnAixSeeˢ);
+            t.Skip(skippingGdbTestsOnAixSeeˢ);
         }
+        break;
     }
-    else if (exprᴛ1 == "plan9"u8) {
-        Ꮡt.Skip(thereIsNoGdbOnPlan9ˢ);
-    }
+    case {} when exprᴛ1 == "plan9"u8: {
+        t.Skip(thereIsNoGdbOnPlan9ˢ);
+        break;
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gdbˢ = "gdb"u8;
-internal static readonly @string versionˢ = "--version"u8;
+internal static ref readonly @string gdbˢ => ref gdbˢᵇ;
+private static readonly @string gdbˢᵇ = "gdb"u8;
+internal static ref readonly @string versionˢ => ref versionˢᵇ;
+private static readonly @string versionˢᵇ = "--version"u8;
 
-internal static void checkGdbVersion(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+internal static void checkGdbVersion(ж<testing.T> t) {
     // Issue 11214 reports various failures with older versions of gdb.
     var (@out, err) = exec.Command(gdbˢ, versionˢ).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Skipf("skipping: error executing gdb: %v"u8, err);
+    if (err != nil) {
+        t.Skipf("skipping: error executing gdb: %v", err);
     }
-    var re = Δregexp.MustCompile(@"([0-9]+)\.([0-9]+)"u8);
+    var re = Δregexp.MustCompile(@"([0-9]+)\.([0-9]+)");
     var matches = re.FindSubmatch(@out);
     if (len(matches) < 3) {
-        Ꮡt.Skipf("skipping: can't determine gdb version from\n%s\n"u8, @out);
+        t.Skipf("skipping: can't determine gdb version from\n%s\n", @out);
     }
     var (major, err1) = strconv.Atoi((@string)matches[1]);
     var (minor, err2) = strconv.Atoi((@string)matches[2]);
-    if (err1 != default! || err2 != default!) {
-        Ꮡt.Skipf("skipping: can't determine gdb version: %v, %v"u8, err1, err2);
+    if (err1 != nil || err2 != nil) {
+        t.Skipf("skipping: can't determine gdb version: %v, %v", err1, err2);
     }
     // The Go toolchain now generates DWARF 5 by default, which needs
     // a GDB version of 10 or above.
     if (major < 10) {
-        Ꮡt.Skipf("skipping: gdb version %d.%d too old"u8, major, minor);
+        t.Skipf("skipping: gdb version %d.%d too old", major, minor);
     }
     if (major < 12 || (major == 12 && minor < 1)) {
-        Ꮡt.Logf("gdb version <12.1 is known to crash due to a SIGWINCH received in non-interactive mode; if you see a crash, some test may be sending SIGWINCH to the whole process group. See go.dev/issue/58932."u8);
+        t.Logf("gdb version <12.1 is known to crash due to a SIGWINCH received in non-interactive mode; if you see a crash, some test may be sending SIGWINCH to the whole process group. See go.dev/issue/58932.");
     }
-    Ꮡt.Logf("gdb version %d.%d"u8, major, minor);
+    t.Logf("gdb version %d.%d", major, minor);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingGdbPythonTestsOnˢ = (@string)"skipping gdb python tests on illumos and solaris; see golang.org/issue/20821"u8;
 
-internal static void checkGdbPython(ж<testing.T> Ꮡt) {
+internal static void checkGdbPython(ж<testing.T> t) {
     if (Δruntime.GOOS == "solaris"u8 || Δruntime.GOOS == "illumos"u8) {
-        Ꮡt.Skip(skippingGdbPythonTestsOnˢ);
+        t.Skip(skippingGdbPythonTestsOnˢ);
     }
-    var args = new @string[]{"-nx"u8, "-q"u8, "--batch"u8, "-iex"u8, "python import sys; print('go gdb python support')"u8}.slice();
+    var args = slice<@string>(["-nx", "-q", "--batch", "-iex", "python import sys; print('go gdb python support')"]);
     gdbArgsFixup(args);
     var cmd = exec.Command("gdb"u8, args.ꓸꓸꓸ);
     var (@out, err) = cmd.CombinedOutput();
 
-    if (err != default!) {
-        Ꮡt.Skipf("skipping due to issue running gdb: %v"u8, err);
+    if (err != nil) {
+        t.Skipf("skipping due to issue running gdb: %v", err);
     }
     if (strings.TrimSpace((@string)@out) != "go gdb python support"u8) {
-        Ꮡt.Skipf("skipping due to lack of python gdb support: %s"u8, @out);
+        t.Skipf("skipping due to lack of python gdb support: %s", @out);
     }
 }
 
 // checkCleanBacktrace checks that the given backtrace is well formed and does
 // not contain any error messages from GDB.
-internal static void checkCleanBacktrace(ж<testing.T> Ꮡt, @string backtrace) {
+internal static void checkCleanBacktrace(ж<testing.T> t, @string backtrace) {
     backtrace = strings.TrimSpace(backtrace);
-    var lines = strings.Split(backtrace, "\n"u8);
+    var lines = strings.Split(backtrace, "\n");
     if (len(lines) == 0) {
-        Ꮡt.Fatalf("empty backtrace"u8);
+        t.Fatalf("empty backtrace");
     }
     foreach (var (i, l) in lines) {
         if (!strings.HasPrefix(l, fmt.Sprintf("#%v  "u8, i))) {
-            Ꮡt.Fatalf("malformed backtrace at line %v: %v"u8, i, l);
+            t.Fatalf("malformed backtrace at line %v: %v", i, l);
         }
     }
     // TODO(mundaym): check for unknown frames (e.g. "??").
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string procSysKernelYamaPtraceˢ = "/proc/sys/kernel/yama/ptrace_scope"u8;
+internal static ref readonly @string procSysKernelYamaPtraceˢ => ref procSysKernelYamaPtraceˢᵇ;
+private static readonly @string procSysKernelYamaPtraceˢᵇ = "/proc/sys/kernel/yama/ptrace_scope"u8;
 internal static readonly object skippingPtraceOperationˢ = (@string)"skipping ptrace: Operation not permitted"u8;
 internal static readonly object skippingPtraceOperationˢ2 = (@string)"skipping ptrace: Operation not permitted with non-root user"u8;
 
@@ -156,7 +165,7 @@ internal static readonly object skippingPtraceOperationˢ2 = (@string)"skipping 
 // 1 - Restricted attach. Only child processes plus normal permissions.
 // 2 - Admin-only attach. Only executables with CAP_SYS_PTRACE.
 // 3 - No attach. No process may call ptrace at all. Irrevocable.
-internal static void checkPtraceScope(ж<testing.T> Ꮡt) {
+internal static void checkPtraceScope(ж<testing.T> t) {
     if (Δruntime.GOOS != "linux"u8) {
         return;
     }
@@ -171,21 +180,21 @@ internal static void checkPtraceScope(ж<testing.T> Ꮡt) {
     }
 
     var (data, err) = Δos.ReadFile(path);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to read file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to read file: %v", err);
     }
     (var value, err) = strconv.Atoi(strings.TrimSpace((@string)data));
-    if (err != default!) {
-        Ꮡt.Fatalf("failed converting value to int: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed converting value to int: %v", err);
     }
     switch (value) {
     case 3: {
-        Ꮡt.Skip(skippingPtraceOperationˢ);
+        t.Skip(skippingPtraceOperationˢ);
         break;
     }
     case 2: {
         if (Δos.Geteuid() != 0) {
-            Ꮡt.Skip(skippingPtraceOperationˢ2);
+            t.Skip(skippingPtraceOperationˢ2);
         }
         break;
     }}
@@ -246,13 +255,12 @@ internal static void gdbArgsFixup(slice<@string> args) {
     }
     // On Windows, some gdb flavors expect -ex and -iex arguments
     // containing spaces to be double quoted.
-    bool quote = default!;
+    bool quote = default;
     foreach (var (i, arg) in args) {
-        if (arg == "-iex"u8 || arg == "-ex"u8){
+        if (arg == "-iex"u8 || arg == "-ex"u8) {
             quote = true;
-        } else 
-        if (quote) {
-            if (strings.ContainsRune(arg, (rune)' ')) {
+        } else if (quote) {
+            if (strings.ContainsRune(arg, ' ')) {
                 args[i] = @""""u8 + arg + @""""u8;
             }
             quote = false;
@@ -260,69 +268,101 @@ internal static void gdbArgsFixup(slice<@string> args) {
     }
 }
 
-public static void TestGdbPython(ж<testing.T> Ꮡt) {
-    testGdbPython(Ꮡt, false);
+public static void TestGdbPython(ж<testing.T> t) {
+    testGdbPython(t, false);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mipsˢ = "mips"u8;
+internal static ref readonly @string mipsˢ => ref mipsˢᵇ;
+private static readonly @string mipsˢᵇ = "mips"u8;
 
-public static void TestGdbPythonCgo(ж<testing.T> Ꮡt) {
+public static void TestGdbPythonCgo(ж<testing.T> t) {
     if (strings.HasPrefix(Δruntime.GOARCH, mipsˢ)) {
-        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 37794);
+        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 37794);
     }
-    testGdbPython(Ꮡt, true);
+    testGdbPython(t, true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packageMainˢ = "package main\n"u8;
-internal static readonly @string mainGoˢ = "main.go"u8;
-internal static readonly @string buildˢ = "build"u8;
-internal static readonly @string aExeˢ = "a.exe"u8;
-internal static readonly @string srcˢ = "src"u8;
-internal static readonly @string runtimeGdbPyˢ = "runtime-gdb.py"u8;
-internal static readonly @string msBeginNNNENDˢ = @"(?ms)^BEGIN ([^\n]*)\n(.*?)\nEND"u8;
-internal static readonly @string sDSRunningSˢ = @"\*\s+\d+\s+running\s+"u8;
-internal static readonly @string infoGoroutinesˢ = "info goroutines"u8;
-internal static readonly @string mapStringString0x09aFSˢ = @"^\$[0-9]+ = map\[string\]string = {\[(0x[0-9a-f]+\s+)?""abc""\] = (0x[0-9a-f]+\s+)?""def""}$"u8;
-internal static readonly @string printSmallmapvarˢ = "print smallmapvar"u8;
-internal static readonly @string mapStringString0x09aFSˢ2 = @"^\$[0-9]+ = map\[string\]string = {\[(0x[0-9a-f]+\s+)?""abc""\] = (0x[0-9a-f]+\s+)?""def"", \[(0x[0-9a-f]+\s+)?""ghi""\] = (0x[0-9a-f]+\s+)?""jkl""}$"u8;
-internal static readonly @string mapStringString0x09aFSˢ3 = @"^\$[0-9]+ = map\[string\]string = {\[(0x[0-9a-f]+\s+)?""ghi""\] = (0x[0-9a-f]+\s+)?""jkl"", \[(0x[0-9a-f]+\s+)?""abc""\] = (0x[0-9a-f]+\s+)?""def""}$"u8;
-internal static readonly @string printMapvarˢ = "print mapvar"u8;
-internal static readonly @string mapStringStringEStringFGˢ = @"map[string][]string = {[""e""] = []string = {""f"", ""g"", ""h""}, [""a""] = []string = {""b"", ""c"", ""d""}}"u8;
-internal static readonly @string mapStringStringAStringBCˢ = @"map[string][]string = {[""a""] = []string = {""b"", ""c"", ""d""}, [""e""] = []string = {""f"", ""g"", ""h""}}"u8;
-internal static readonly @string printSlicemapˢ = "print slicemap"u8;
-internal static readonly @string chanInt9911ˢ = @"chan int = {99, 11}"u8;
-internal static readonly @string printChanintˢ = "print chanint"u8;
-internal static readonly @string chanStringSpongepantsˢ = @"chan string = {""spongepants"", ""squarebob""}"u8;
-internal static readonly @string printChanstrˢ = "print chanstr"u8;
-internal static readonly @string fSAbcˢ = @"^\$[0-9]+ = (0x[0-9a-f]+\s+)?""abc""$"u8;
-internal static readonly @string printStrvarˢ = "print strvar"u8;
-internal static readonly @string infoLocalsˢ = "info locals"u8;
-internal static readonly @string slicevarˢ = "slicevar"u8;
-internal static readonly @string mapvarˢ = "mapvar"u8;
-internal static readonly @string strvarˢ = "strvar"u8;
-internal static readonly @string goroutine1Btˢ = "goroutine 1 bt"u8;
-internal static readonly @string goroutine1BtAtTheEndˢ = "goroutine 1 bt at the end"u8;
-internal static readonly @string m0S0x09aFSInSMainMainAtˢ = @"(?m)^#0\s+(0x[0-9a-f]+\s+in\s+)?main\.main.+at"u8;
-internal static readonly @string goroutineAllBtˢ = "goroutine all bt"u8;
+internal static ref readonly @string packageMainˢ => ref packageMainˢᵇ;
+private static readonly @string packageMainˢᵇ = "package main\n"u8;
+internal static ref readonly @string mainGoˢ => ref mainGoˢᵇ;
+private static readonly @string mainGoˢᵇ = "main.go"u8;
+internal static ref readonly @string buildˢ => ref buildˢᵇ;
+private static readonly @string buildˢᵇ = "build"u8;
+internal static ref readonly @string aExeˢ => ref aExeˢᵇ;
+private static readonly @string aExeˢᵇ = "a.exe"u8;
+internal static ref readonly @string srcˢ => ref srcˢᵇ;
+private static readonly @string srcˢᵇ = "src"u8;
+internal static ref readonly @string runtimeGdbPyˢ => ref runtimeGdbPyˢᵇ;
+private static readonly @string runtimeGdbPyˢᵇ = "runtime-gdb.py"u8;
+internal static ref readonly @string msBeginNNNENDˢ => ref msBeginNNNENDˢᵇ;
+private static readonly @string msBeginNNNENDˢᵇ = @"(?ms)^BEGIN ([^\n]*)\n(.*?)\nEND"u8;
+internal static ref readonly @string sDSRunningSˢ => ref sDSRunningSˢᵇ;
+private static readonly @string sDSRunningSˢᵇ = @"\*\s+\d+\s+running\s+"u8;
+internal static ref readonly @string infoGoroutinesˢ => ref infoGoroutinesˢᵇ;
+private static readonly @string infoGoroutinesˢᵇ = "info goroutines"u8;
+internal static ref readonly @string mapStringString0x09aFSˢ => ref mapStringString0x09aFSˢᵇ;
+private static readonly @string mapStringString0x09aFSˢᵇ = @"^\$[0-9]+ = map\[string\]string = {\[(0x[0-9a-f]+\s+)?""abc""\] = (0x[0-9a-f]+\s+)?""def""}$"u8;
+internal static ref readonly @string printSmallmapvarˢ => ref printSmallmapvarˢᵇ;
+private static readonly @string printSmallmapvarˢᵇ = "print smallmapvar"u8;
+internal static ref readonly @string mapStringString0x09aFSˢ2 => ref mapStringString0x09aFSˢ2ᵇ;
+private static readonly @string mapStringString0x09aFSˢ2ᵇ = @"^\$[0-9]+ = map\[string\]string = {\[(0x[0-9a-f]+\s+)?""abc""\] = (0x[0-9a-f]+\s+)?""def"", \[(0x[0-9a-f]+\s+)?""ghi""\] = (0x[0-9a-f]+\s+)?""jkl""}$"u8;
+internal static ref readonly @string mapStringString0x09aFSˢ3 => ref mapStringString0x09aFSˢ3ᵇ;
+private static readonly @string mapStringString0x09aFSˢ3ᵇ = @"^\$[0-9]+ = map\[string\]string = {\[(0x[0-9a-f]+\s+)?""ghi""\] = (0x[0-9a-f]+\s+)?""jkl"", \[(0x[0-9a-f]+\s+)?""abc""\] = (0x[0-9a-f]+\s+)?""def""}$"u8;
+internal static ref readonly @string printMapvarˢ => ref printMapvarˢᵇ;
+private static readonly @string printMapvarˢᵇ = "print mapvar"u8;
+internal static ref readonly @string mapStringStringEStringFGˢ => ref mapStringStringEStringFGˢᵇ;
+private static readonly @string mapStringStringEStringFGˢᵇ = @"map[string][]string = {[""e""] = []string = {""f"", ""g"", ""h""}, [""a""] = []string = {""b"", ""c"", ""d""}}"u8;
+internal static ref readonly @string mapStringStringAStringBCˢ => ref mapStringStringAStringBCˢᵇ;
+private static readonly @string mapStringStringAStringBCˢᵇ = @"map[string][]string = {[""a""] = []string = {""b"", ""c"", ""d""}, [""e""] = []string = {""f"", ""g"", ""h""}}"u8;
+internal static ref readonly @string printSlicemapˢ => ref printSlicemapˢᵇ;
+private static readonly @string printSlicemapˢᵇ = "print slicemap"u8;
+internal static ref readonly @string chanInt9911ˢ => ref chanInt9911ˢᵇ;
+private static readonly @string chanInt9911ˢᵇ = @"chan int = {99, 11}"u8;
+internal static ref readonly @string printChanintˢ => ref printChanintˢᵇ;
+private static readonly @string printChanintˢᵇ = "print chanint"u8;
+internal static ref readonly @string chanStringSpongepantsˢ => ref chanStringSpongepantsˢᵇ;
+private static readonly @string chanStringSpongepantsˢᵇ = @"chan string = {""spongepants"", ""squarebob""}"u8;
+internal static ref readonly @string printChanstrˢ => ref printChanstrˢᵇ;
+private static readonly @string printChanstrˢᵇ = "print chanstr"u8;
+internal static ref readonly @string fSAbcˢ => ref fSAbcˢᵇ;
+private static readonly @string fSAbcˢᵇ = @"^\$[0-9]+ = (0x[0-9a-f]+\s+)?""abc""$"u8;
+internal static ref readonly @string printStrvarˢ => ref printStrvarˢᵇ;
+private static readonly @string printStrvarˢᵇ = "print strvar"u8;
+internal static ref readonly @string infoLocalsˢ => ref infoLocalsˢᵇ;
+private static readonly @string infoLocalsˢᵇ = "info locals"u8;
+internal static ref readonly @string slicevarˢ => ref slicevarˢᵇ;
+private static readonly @string slicevarˢᵇ = "slicevar"u8;
+internal static ref readonly @string mapvarˢ => ref mapvarˢᵇ;
+private static readonly @string mapvarˢᵇ = "mapvar"u8;
+internal static ref readonly @string strvarˢ => ref strvarˢᵇ;
+private static readonly @string strvarˢᵇ = "strvar"u8;
+internal static ref readonly @string goroutine1Btˢ => ref goroutine1Btˢᵇ;
+private static readonly @string goroutine1Btˢᵇ = "goroutine 1 bt"u8;
+internal static ref readonly @string goroutine1BtAtTheEndˢ => ref goroutine1BtAtTheEndˢᵇ;
+private static readonly @string goroutine1BtAtTheEndˢᵇ = "goroutine 1 bt at the end"u8;
+internal static ref readonly @string m0S0x09aFSInSMainMainAtˢ => ref m0S0x09aFSInSMainMainAtˢᵇ;
+private static readonly @string m0S0x09aFSInSMainMainAtˢᵇ = @"(?m)^#0\s+(0x[0-9a-f]+\s+in\s+)?main\.main.+at"u8;
+internal static ref readonly @string goroutineAllBtˢ => ref goroutineAllBtˢᵇ;
+private static readonly @string goroutineAllBtˢᵇ = "goroutine all bt"u8;
 
-internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
+internal static void testGdbPython(ж<testing.T> t, bool cgo) {
     var argsᴷ = new stackAppend<@string>();
 
     if (cgo) {
-        testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
+        testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(t));
     }
 
-    checkGdbEnvironment(Ꮡt);
-    Ꮡt.Parallel();
-    checkGdbVersion(Ꮡt);
-    checkGdbPython(Ꮡt);
-    checkPtraceScope(Ꮡt);
+    checkGdbEnvironment(t);
+    t.Parallel();
+    checkGdbVersion(t);
+    checkGdbPython(t);
+    checkPtraceScope(t);
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
 
-    bytes.Buffer buf = default!;
+    bytes.Buffer buf = default;
     buf.WriteString(packageMainˢ);
     if (cgo) {
         buf.WriteString(@"import ""C"""u8 + "\n"u8);
@@ -332,7 +372,7 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
     var src = buf.Bytes();
 
     // Locate breakpoint line
-    nint bp = default!;
+    nint bp = default;
     var lines = bytes.Split(src, slice<byte>("\n"u8));
     foreach (var (i, line) in lines) {
         if (bytes.Contains(line, slice<byte>("breakpoint"u8))) {
@@ -342,81 +382,81 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
     }
 
     var err = Δos.WriteFile(filepath.Join(dir, mainGoˢ), src, 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create file: %v", err);
     }
     nint nLines = lastLine(src);
 
-    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", aExeˢ, mainGoˢ);
-    cmd.Value.Dir = dir;
+    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), buildˢ, "-o", aExeˢ, mainGoˢ);
+    cmd.Dir = dir;
     (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("building source %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("building source %v\n%s", err, @out);
     }
 
-    var args = new @string[]{"-nx"u8, "-q"u8, "--batch"u8,
-        "-iex"u8, "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ),
-        "-ex"u8, "set startup-with-shell off"u8,
-        "-ex"u8, "set print thread-events off"u8
-    }.slice();
-    if (cgo){
+    var args = slice<@string>(["-nx", "-q", "--batch",
+        "-iex", "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(t)), srcˢ, runtimeˢ),
+        "-ex", "set startup-with-shell off",
+        "-ex", "set print thread-events off"
+    ]);
+    if (cgo) {
         // When we build the cgo version of the program, the system's
         // linker is used. Some external linkers, like GNU gold,
         // compress the .debug_gdb_scripts into .zdebug_gdb_scripts.
         // Until gold and gdb can work together, temporarily load the
         // python script directly.
         args = append(argsᴷ, args,
-            "-ex"u8, "source " + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ, runtimeGdbPyˢ));
+            (@string)"-ex", "source " + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(t)), srcˢ, runtimeˢ, runtimeGdbPyˢ));
     } else {
         args = append(args,
-            "-ex"u8, "info auto-load python-scripts");
+            (@string)"-ex", (@string)"info auto-load python-scripts");
     }
     args = append(args,
-        "-ex"u8, "set python print-stack full",
-        "-ex", fmt.Sprintf("br main.go:%d"u8, bp),
-        "-ex", "run",
-        "-ex", "echo BEGIN info goroutines\n",
-        "-ex", "info goroutines",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN print smallmapvar\n",
-        "-ex", "print smallmapvar",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN print mapvar\n",
-        "-ex", "print mapvar",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN print slicemap\n",
-        "-ex", "print slicemap",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN print strvar\n",
-        "-ex", "print strvar",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN print chanint\n",
-        "-ex", "print chanint",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN print chanstr\n",
-        "-ex", "print chanstr",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN info locals\n",
-        "-ex", "info locals",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN goroutine 1 bt\n",
-        "-ex", "goroutine 1 bt",
-        "-ex", "echo END\n",
-        "-ex", "echo BEGIN goroutine all bt\n",
-        "-ex", "goroutine all bt",
-        "-ex", "echo END\n",
-        "-ex", "clear main.go:15", // clear the previous break point
-        "-ex", fmt.Sprintf("br main.go:%d"u8, nLines), // new break point at the end of main
-        "-ex", "c",
-        "-ex", "echo BEGIN goroutine 1 bt at the end\n",
-        "-ex", "goroutine 1 bt",
-        "-ex", "echo END\n",
+        (@string)"-ex", (@string)"set python print-stack full",
+        (@string)"-ex", fmt.Sprintf("br main.go:%d"u8, bp),
+        (@string)"-ex", (@string)"run",
+        (@string)"-ex", (@string)"echo BEGIN info goroutines\n",
+        (@string)"-ex", (@string)"info goroutines",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN print smallmapvar\n",
+        (@string)"-ex", (@string)"print smallmapvar",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN print mapvar\n",
+        (@string)"-ex", (@string)"print mapvar",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN print slicemap\n",
+        (@string)"-ex", (@string)"print slicemap",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN print strvar\n",
+        (@string)"-ex", (@string)"print strvar",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN print chanint\n",
+        (@string)"-ex", (@string)"print chanint",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN print chanstr\n",
+        (@string)"-ex", (@string)"print chanstr",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN info locals\n",
+        (@string)"-ex", (@string)"info locals",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN goroutine 1 bt\n",
+        (@string)"-ex", (@string)"goroutine 1 bt",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"echo BEGIN goroutine all bt\n",
+        (@string)"-ex", (@string)"goroutine all bt",
+        (@string)"-ex", (@string)"echo END\n",
+        (@string)"-ex", (@string)"clear main.go:15", // clear the previous break point
+        (@string)"-ex", fmt.Sprintf("br main.go:%d"u8, nLines), // new break point at the end of main
+        (@string)"-ex", (@string)"c",
+        (@string)"-ex", (@string)"echo BEGIN goroutine 1 bt at the end\n",
+        (@string)"-ex", (@string)"goroutine 1 bt",
+        (@string)"-ex", (@string)"echo END\n",
         filepath.Join(dir, aExeˢ));
     gdbArgsFixup(args);
     (var got, err) = exec.Command("gdb"u8, args.ꓸꓸꓸ).CombinedOutput();
-    Ꮡt.Logf("gdb output:\n%s"u8, got);
-    if (err != default!) {
-        Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
+    t.Logf("gdb output:\n%s", got);
+    if (err != nil) {
+        t.Fatalf("gdb exited with error: %v", err);
     }
 
     got = bytes.ReplaceAll(got, slice<byte>("\r\n"u8), slice<byte>("\n"u8)); // normalize line endings
@@ -430,14 +470,14 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
     var infoGoroutinesRe = Δregexp.MustCompile(sDSRunningSˢ);
     {
         @string bl = blocks[infoGoroutinesˢ]; if (!infoGoroutinesRe.MatchString(bl)) {
-            Ꮡt.Fatalf("info goroutines failed: %s"u8, bl);
+            t.Fatalf("info goroutines failed: %s", bl);
         }
     }
 
     var printSmallMapvarRe = Δregexp.MustCompile(mapStringString0x09aFSˢ);
     {
         @string bl = blocks[printSmallmapvarˢ]; if (!printSmallMapvarRe.MatchString(bl)) {
-            Ꮡt.Fatalf("print smallmapvar failed: %s"u8, bl);
+            t.Fatalf("print smallmapvar failed: %s", bl);
         }
     }
 
@@ -445,7 +485,7 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
     var printMapvarRe2 = Δregexp.MustCompile(mapStringString0x09aFSˢ3);
     {
         @string bl = blocks[printMapvarˢ]; if (!printMapvarRe1.MatchString(bl) && !printMapvarRe2.MatchString(bl)) {
-            Ꮡt.Fatalf("print mapvar failed: %s"u8, bl);
+            t.Fatalf("print mapvar failed: %s", bl);
         }
     }
 
@@ -453,29 +493,29 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
     @string sliceMapSfx1 = mapStringStringEStringFGˢ;
     @string sliceMapSfx2 = mapStringStringAStringBCˢ;
     {
-        @string bl = strings.ReplaceAll(blocks[printSlicemapˢ], "  "u8, " "u8); if (!strings.HasSuffix(bl, sliceMapSfx1) && !strings.HasSuffix(bl, sliceMapSfx2)) {
-            Ꮡt.Fatalf("print slicemap failed: %s"u8, bl);
+        @string bl = strings.ReplaceAll(blocks[printSlicemapˢ], "  ", " "); if (!strings.HasSuffix(bl, sliceMapSfx1) && !strings.HasSuffix(bl, sliceMapSfx2)) {
+            t.Fatalf("print slicemap failed: %s", bl);
         }
     }
 
     @string chanIntSfx = chanInt9911ˢ;
     {
-        @string bl = strings.ReplaceAll(blocks[printChanintˢ], "  "u8, " "u8); if (!strings.HasSuffix(bl, chanIntSfx)) {
-            Ꮡt.Fatalf("print chanint failed: %s"u8, bl);
+        @string bl = strings.ReplaceAll(blocks[printChanintˢ], "  ", " "); if (!strings.HasSuffix(bl, chanIntSfx)) {
+            t.Fatalf("print chanint failed: %s", bl);
         }
     }
 
     @string chanStrSfx = chanStringSpongepantsˢ;
     {
-        @string bl = strings.ReplaceAll(blocks[printChanstrˢ], "  "u8, " "u8); if (!strings.HasSuffix(bl, chanStrSfx)) {
-            Ꮡt.Fatalf("print chanstr failed: %s"u8, bl);
+        @string bl = strings.ReplaceAll(blocks[printChanstrˢ], "  ", " "); if (!strings.HasSuffix(bl, chanStrSfx)) {
+            t.Fatalf("print chanstr failed: %s", bl);
         }
     }
 
     var strVarRe = Δregexp.MustCompile(fSAbcˢ);
     {
         @string bl = blocks[printStrvarˢ]; if (!strVarRe.MatchString(bl)) {
-            Ꮡt.Fatalf("print strvar failed: %s"u8, bl);
+            t.Fatalf("print strvar failed: %s", bl);
         }
     }
 
@@ -493,36 +533,37 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
 
     {
         @string bl = blocks[infoLocalsˢ]; if (!strings.Contains(bl, slicevarˢ) || !strings.Contains(bl, mapvarˢ) || !strings.Contains(bl, strvarˢ)) {
-            Ꮡt.Fatalf("info locals failed: %s"u8, bl);
+            t.Fatalf("info locals failed: %s", bl);
         }
     }
 
     // Check that the backtraces are well formed.
-    checkCleanBacktrace(Ꮡt, blocks[goroutine1Btˢ]);
-    checkCleanBacktrace(Ꮡt, blocks[goroutine1BtAtTheEndˢ]);
+    checkCleanBacktrace(t, blocks[goroutine1Btˢ]);
+    checkCleanBacktrace(t, blocks[goroutine1BtAtTheEndˢ]);
 
     var btGoroutine1Re = Δregexp.MustCompile(m0S0x09aFSInSMainMainAtˢ);
     {
         @string bl = blocks[goroutine1Btˢ]; if (!btGoroutine1Re.MatchString(bl)) {
-            Ꮡt.Fatalf("goroutine 1 bt failed: %s"u8, bl);
+            t.Fatalf("goroutine 1 bt failed: %s", bl);
         }
     }
 
     {
         @string bl = blocks[goroutineAllBtˢ]; if (!btGoroutine1Re.MatchString(bl)) {
-            Ꮡt.Fatalf("goroutine all bt failed: %s"u8, bl);
+            t.Fatalf("goroutine all bt failed: %s", bl);
         }
     }
 
     var btGoroutine1AtTheEndRe = Δregexp.MustCompile(m0S0x09aFSInSMainMainAtˢ);
     {
         @string bl = blocks[goroutine1BtAtTheEndˢ]; if (!btGoroutine1AtTheEndRe.MatchString(bl)) {
-            Ꮡt.Fatalf("goroutine 1 bt at the end failed: %s"u8, bl);
+            t.Fatalf("goroutine 1 bt at the end failed: %s", bl);
         }
     }
 }
 
-internal static readonly @string backtraceSource = """
+internal static ref readonly @string backtraceSource => ref backtraceSourceᵇ;
+private static readonly @string backtraceSourceᵇ = """
 
 package main
 
@@ -550,14 +591,16 @@ func main() {
 """u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testParallelˢ = "test.parallel"u8;
-internal static readonly @string couldnTGetAZAZRegistersˢ = @"Couldn't get [a-zA-Z_ -]* ?registers: No such process\."u8;
+internal static ref readonly @string testParallelˢ => ref testParallelˢᵇ;
+private static readonly @string testParallelˢᵇ = "test.parallel"u8;
+internal static ref readonly @string couldnTGetAZAZRegistersˢ => ref couldnTGetAZAZRegistersˢᵇ;
+private static readonly @string couldnTGetAZAZRegistersˢᵇ = @"Couldn't get [a-zA-Z_ -]* ?registers: No such process\."u8;
 
 // TestGdbBacktrace tests that gdb can unwind the stack correctly
 // using only the DWARF debug info.
-public static void TestGdbBacktrace(ж<testing.T> Ꮡt) {
+public static void TestGdbBacktrace(ж<testing.T> t) {
     if (Δruntime.GOOS == "netbsd"u8) {
-        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 15603);
+        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 15603);
     }
     if ((~flag.Lookup(testParallelˢ)).Value._<flag.Getter>().Get()._<nint>() < 2) {
         // It is possible that this test will hang for a long time due to an
@@ -566,43 +609,42 @@ public static void TestGdbBacktrace(ж<testing.T> Ꮡt) {
         // tests will finish, and then this test will finish right before it would
         // time out. However, if test are running sequentially, a hang in this test
         // would likely cause the remaining tests to run out of time.
-        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 37405);
+        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 37405);
     }
 
-    checkGdbEnvironment(Ꮡt);
-    Ꮡt.Parallel();
-    checkGdbVersion(Ꮡt);
-    checkPtraceScope(Ꮡt);
+    checkGdbEnvironment(t);
+    t.Parallel();
+    checkGdbVersion(t);
+    checkPtraceScope(t);
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
 
     // Build the source code.
     @string src = filepath.Join(dir, mainGoˢ);
     var err = Δos.WriteFile(src, slice<byte>(backtraceSource), 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create file: %v", err);
     }
-    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", aExeˢ, mainGoˢ);
-    cmd.Value.Dir = dir;
+    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), buildˢ, "-o", aExeˢ, mainGoˢ);
+    cmd.Dir = dir;
     (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("building source %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("building source %v\n%s", err, @out);
     }
 
     // Execute gdb commands.
-    ref var start = ref heap<time.Time>(out var Ꮡstart);
-    start = time.Now();
-    var args = new @string[]{"-nx"u8, "-batch"u8,
-        "-iex"u8, "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ),
-        "-ex"u8, "set startup-with-shell off"u8,
-        "-ex"u8, "break main.eee"u8,
-        "-ex"u8, "run"u8,
-        "-ex"u8, "backtrace"u8,
-        "-ex"u8, "continue"u8,
+    ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart);
+    var args = slice<@string>(["-nx", "-batch",
+        "-iex", "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(t)), srcˢ, runtimeˢ),
+        "-ex", "set startup-with-shell off",
+        "-ex", "break main.eee",
+        "-ex", "run",
+        "-ex", "backtrace",
+        "-ex", "continue",
         filepath.Join(dir, aExeˢ)
-    }.slice();
+    ]);
     gdbArgsFixup(args);
-    cmd = testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), "gdb"u8, args.ꓸꓸꓸ);
+    cmd = testenv.Command(new runtime_test_package.testing_TжTB(t), "gdb"u8, args.ꓸꓸꓸ);
 
     // Work around the GDB hang reported in https://go.dev/issue/37405.
     // Sometimes (rarely), the GDB process hangs completely when the Go program
@@ -624,61 +666,62 @@ public static void TestGdbBacktrace(ж<testing.T> Ꮡt) {
     // anyway if someone is trying to investigate and fix the GDB bug.
     var cmdʗ1 = cmd;
     var startʗ1 = start;
-    cmd.Value.Cancel = () => {
-        Ꮡt.Logf("GDB command timed out after %v: %v"u8, time.Since(startʗ1), cmdʗ1.OrTypedNil());
-        return (~cmdʗ1).Process.Kill();
+    cmd.Cancel = () => {
+        t.Logf("GDB command timed out after %v: %v", time.Since(startʗ1), cmdʗ1.OrTypedNil());
+        return cmdʗ1.Process.Kill();
     };
 
     (var got, err) = cmd.CombinedOutput();
-    Ꮡt.Logf("gdb output:\n%s"u8, got);
-    if (err != default!) {
+    t.Logf("gdb output:\n%s", got);
+    if (err != nil) {
         var noProcessRE = Δregexp.MustCompile(couldnTGetAZAZRegistersˢ);
         switch (ᐧ) {
         case {} when bytes.Contains(got, slice<byte>("internal-error: wait returned unexpected status 0x0"u8)): {
             // GDB bug: https://sourceware.org/bugzilla/show_bug.cgi?id=28551
-            testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 43068);
+            testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 43068);
             break;
         }
         case {} when (noProcessRE.Match(got)) || (bytes.Contains(got, slice<byte>("Unable to fetch general registers.: No such process."u8))) || (bytes.Contains(got, slice<byte>("reading register pc (#64): No such process."u8))): {
             // GDB bug: https://sourceware.org/bugzilla/show_bug.cgi?id=9086
-            testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 50838);
+            testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 50838);
             break;
         }
         case {} when bytes.Contains(got, slice<byte>("waiting for new child: No child processes."u8)): {
             // GDB bug: Sometimes it fails to wait for a clone child.
-            testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 60553);
+            testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 60553);
             break;
         }
         case {} when bytes.Contains(got, slice<byte>(" exited normally]\n"u8)): {
             // GDB bug: Sometimes the inferior exits fine,
             // but then GDB hangs.
-            testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 37405);
+            testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 37405);
             break;
         }}
-        Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
+        t.Fatalf("gdb exited with error: %v", err);
     }
 
     // Check that the backtrace matches the source code.
-    var bt = new @string[]{
-        "eee"u8,
-        "ddd"u8,
-        "ccc"u8,
-        "bbb"u8,
-        "aaa"u8,
-        "main"u8
-    }.slice();
+    var bt = slice<@string>([
+        "eee",
+        "ddd",
+        "ccc",
+        "bbb",
+        "aaa",
+        "main"
+    ]);
     foreach (var (i, name) in bt) {
         @string s = fmt.Sprintf("#%v.*main\\.%v"u8, i, name);
         var re = Δregexp.MustCompile(s);
         {
-            var found = re.Find(got) != default!; if (!found) {
-                Ꮡt.Fatalf("could not find '%v' in backtrace"u8, s);
+            var found = re.Find(got) != nil; if (!found) {
+                t.Fatalf("could not find '%v' in backtrace", s);
             }
         }
     }
 }
 
-internal static readonly @string autotmpTypeSource = """
+internal static ref readonly @string autotmpTypeSource => ref autotmpTypeSourceᵇ;
+private static readonly @string autotmpTypeSourceᵇ = """
 
 package main
 
@@ -696,75 +739,77 @@ func main() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testGdbAutotmpTypesIsTooˢ = (@string)"TestGdbAutotmpTypes is too slow on aix/ppc64"u8;
-internal static readonly @string gcflagsAllNLˢ = "-gcflags=all=-N -l"u8;
+internal static ref readonly @string gcflagsAllNLˢ => ref gcflagsAllNLˢᵇ;
+private static readonly @string gcflagsAllNLˢᵇ = "-gcflags=all=-N -l"u8;
 
 // TestGdbAutotmpTypes ensures that types of autotmp variables appear in .debug_info
 // See bug #17830.
-public static void TestGdbAutotmpTypes(ж<testing.T> Ꮡt) {
-    checkGdbEnvironment(Ꮡt);
-    Ꮡt.Parallel();
-    checkGdbVersion(Ꮡt);
-    checkPtraceScope(Ꮡt);
+public static void TestGdbAutotmpTypes(ж<testing.T> t) {
+    checkGdbEnvironment(t);
+    t.Parallel();
+    checkGdbVersion(t);
+    checkPtraceScope(t);
 
     if (Δruntime.GOOS == "aix"u8 && testing.Short()) {
-        Ꮡt.Skip(testGdbAutotmpTypesIsTooˢ);
+        t.Skip(testGdbAutotmpTypesIsTooˢ);
     }
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
 
     // Build the source code.
     @string src = filepath.Join(dir, mainGoˢ);
     var err = Δos.WriteFile(src, slice<byte>(autotmpTypeSource), 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create file: %v", err);
     }
-    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, gcflagsAllNLˢ, "-o", aExeˢ, mainGoˢ);
-    cmd.Value.Dir = dir;
+    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), buildˢ, gcflagsAllNLˢ, "-o", aExeˢ, mainGoˢ);
+    cmd.Dir = dir;
     (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("building source %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("building source %v\n%s", err, @out);
     }
 
     // Execute gdb commands.
-    var args = new @string[]{"-nx"u8, "-batch"u8,
-        "-iex"u8, "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ),
-        "-ex"u8, "set startup-with-shell off"u8,
+    var args = slice<@string>(["-nx", "-batch",
+        "-iex", "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(t)), srcˢ, runtimeˢ),
+        "-ex", "set startup-with-shell off",
         // Some gdb may set scheduling-locking as "step" by default. This prevents background tasks
         // (e.g GC) from completing which may result in a hang when executing the step command.
         // See #49852.
-        "-ex"u8, "set scheduler-locking off"u8,
-        "-ex"u8, "break main.main"u8,
-        "-ex"u8, "run"u8,
-        "-ex"u8, "step"u8,
-        "-ex"u8, "info types astruct"u8,
+        "-ex", "set scheduler-locking off",
+        "-ex", "break main.main",
+        "-ex", "run",
+        "-ex", "step",
+        "-ex", "info types astruct",
         filepath.Join(dir, aExeˢ)
-    }.slice();
+    ]);
     gdbArgsFixup(args);
     (var got, err) = exec.Command("gdb"u8, args.ꓸꓸꓸ).CombinedOutput();
-    Ꮡt.Logf("gdb output:\n%s"u8, got);
-    if (err != default!) {
-        Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
+    t.Logf("gdb output:\n%s", got);
+    if (err != nil) {
+        t.Fatalf("gdb exited with error: %v", err);
     }
 
     @string sgot = (@string)got;
 
     // Check that the backtrace matches the source code.
-    var types = new @string[]{
-        "[]main.astruct"u8,
-        "main.astruct"u8,
-        "groupReference<string,main.astruct>"u8,
-        "table<string,main.astruct>"u8,
-        "map<string,main.astruct>"u8,
-        "map<string,main.astruct> * map[string]main.astruct"u8
-    }.slice();
+    var types = slice<@string>([
+        "[]main.astruct",
+        "main.astruct",
+        "groupReference<string,main.astruct>",
+        "table<string,main.astruct>",
+        "map<string,main.astruct>",
+        "map<string,main.astruct> * map[string]main.astruct"
+    ]);
     foreach (var (_, name) in types) {
         if (!strings.Contains(sgot, name)) {
-            Ꮡt.Fatalf("could not find %q in 'info typrs astruct' output"u8, name);
+            t.Fatalf("could not find %q in 'info typrs astruct' output", name);
         }
     }
 }
 
-internal static readonly @string constsSource = """
+internal static ref readonly @string constsSource => ref constsSourceᵇ;
+private static readonly @string constsSourceᵇ = """
 
 package main
 
@@ -778,55 +823,56 @@ func main() {
 
 """u8.Raw();
 
-public static void TestGdbConst(ж<testing.T> Ꮡt) {
-    checkGdbEnvironment(Ꮡt);
-    Ꮡt.Parallel();
-    checkGdbVersion(Ꮡt);
-    checkPtraceScope(Ꮡt);
+public static void TestGdbConst(ж<testing.T> t) {
+    checkGdbEnvironment(t);
+    t.Parallel();
+    checkGdbVersion(t);
+    checkPtraceScope(t);
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
 
     // Build the source code.
     @string src = filepath.Join(dir, mainGoˢ);
     var err = Δos.WriteFile(src, slice<byte>(constsSource), 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create file: %v", err);
     }
-    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, gcflagsAllNLˢ, "-o", aExeˢ, mainGoˢ);
-    cmd.Value.Dir = dir;
+    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), buildˢ, gcflagsAllNLˢ, "-o", aExeˢ, mainGoˢ);
+    cmd.Dir = dir;
     (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("building source %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("building source %v\n%s", err, @out);
     }
 
     // Execute gdb commands.
-    var args = new @string[]{"-nx"u8, "-batch"u8,
-        "-iex"u8, "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ),
-        "-ex"u8, "set startup-with-shell off"u8,
-        "-ex"u8, "break main.main"u8,
-        "-ex"u8, "run"u8,
-        "-ex"u8, "print main.aConstant"u8,
-        "-ex"u8, "print main.largeConstant"u8,
-        "-ex"u8, "print main.minusOne"u8,
-        "-ex"u8, "print 'runtime.mSpanInUse'"u8,
-        "-ex"u8, "print 'runtime._PageSize'"u8,
+    var args = slice<@string>(["-nx", "-batch",
+        "-iex", "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(t)), srcˢ, runtimeˢ),
+        "-ex", "set startup-with-shell off",
+        "-ex", "break main.main",
+        "-ex", "run",
+        "-ex", "print main.aConstant",
+        "-ex", "print main.largeConstant",
+        "-ex", "print main.minusOne",
+        "-ex", "print 'runtime.mSpanInUse'",
+        "-ex", "print 'runtime._PageSize'",
         filepath.Join(dir, aExeˢ)
-    }.slice();
+    ]);
     gdbArgsFixup(args);
     (var got, err) = exec.Command("gdb"u8, args.ꓸꓸꓸ).CombinedOutput();
-    Ꮡt.Logf("gdb output:\n%s"u8, got);
-    if (err != default!) {
-        Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
+    t.Logf("gdb output:\n%s", got);
+    if (err != nil) {
+        t.Fatalf("gdb exited with error: %v", err);
     }
 
-    @string sgot = strings.ReplaceAll((@string)got, "\r\n"u8, "\n"u8);
+    @string sgot = strings.ReplaceAll((@string)got, "\r\n", "\n");
 
-    if (!strings.Contains(sgot, "\n$1 = 42\n$2 = 18446744073709551615\n$3 = -1\n$4 = 1 '\\001'\n$5 = 8192"u8)) {
-        Ꮡt.Fatalf("output mismatch"u8);
+    if (!strings.Contains(sgot, "\n$1 = 42\n$2 = 18446744073709551615\n$3 = -1\n$4 = 1 '\\001'\n$5 = 8192")) {
+        t.Fatalf("output mismatch");
     }
 }
 
-internal static readonly @string panicSource = """
+internal static ref readonly @string panicSource => ref panicSourceᵇ;
+private static readonly @string panicSourceᵇ = """
 
 package main
 
@@ -848,63 +894,64 @@ internal static readonly object noSignalsOnWindowsˢ = (@string)"no signals on w
 
 // TestGdbPanic tests that gdb can unwind the stack correctly
 // from SIGABRTs from Go panics.
-public static void TestGdbPanic(ж<testing.T> Ꮡt) {
-    checkGdbEnvironment(Ꮡt);
-    Ꮡt.Parallel();
-    checkGdbVersion(Ꮡt);
-    checkPtraceScope(Ꮡt);
+public static void TestGdbPanic(ж<testing.T> t) {
+    checkGdbEnvironment(t);
+    t.Parallel();
+    checkGdbVersion(t);
+    checkPtraceScope(t);
 
     if (Δruntime.GOOS == "windows"u8) {
-        Ꮡt.Skip(noSignalsOnWindowsˢ);
+        t.Skip(noSignalsOnWindowsˢ);
     }
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
 
     // Build the source code.
     @string src = filepath.Join(dir, mainGoˢ);
     var err = Δos.WriteFile(src, slice<byte>(panicSource), 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create file: %v", err);
     }
-    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", aExeˢ, mainGoˢ);
-    cmd.Value.Dir = dir;
+    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), buildˢ, "-o", aExeˢ, mainGoˢ);
+    cmd.Dir = dir;
     (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("building source %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("building source %v\n%s", err, @out);
     }
 
     // Execute gdb commands.
-    var args = new @string[]{"-nx"u8, "-batch"u8,
-        "-iex"u8, "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ),
-        "-ex"u8, "set startup-with-shell off"u8,
-        "-ex"u8, "run"u8,
-        "-ex"u8, "backtrace"u8,
+    var args = slice<@string>(["-nx", "-batch",
+        "-iex", "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(t)), srcˢ, runtimeˢ),
+        "-ex", "set startup-with-shell off",
+        "-ex", "run",
+        "-ex", "backtrace",
         filepath.Join(dir, aExeˢ)
-    }.slice();
+    ]);
     gdbArgsFixup(args);
     (var got, err) = exec.Command("gdb"u8, args.ꓸꓸꓸ).CombinedOutput();
-    Ꮡt.Logf("gdb output:\n%s"u8, got);
-    if (err != default!) {
-        Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
+    t.Logf("gdb output:\n%s", got);
+    if (err != nil) {
+        t.Fatalf("gdb exited with error: %v", err);
     }
 
     // Check that the backtrace matches the source code.
-    var bt = new @string[]{
-        @"crash"u8,
-        @"main"u8
-    }.slice();
+    var bt = slice<@string>([
+        @"crash",
+        @"main"
+    ]);
     foreach (var (_, name) in bt) {
         @string s = fmt.Sprintf("(#.* .* in )?main\\.%v"u8, name);
         var re = Δregexp.MustCompile(s);
         {
-            var found = re.Find(got) != default!; if (!found) {
-                Ꮡt.Fatalf("could not find '%v' in backtrace"u8, s);
+            var found = re.Find(got) != nil; if (!found) {
+                t.Fatalf("could not find '%v' in backtrace", s);
             }
         }
     }
 }
 
-public static readonly @string InfCallstackSource = """
+public static ref readonly @string InfCallstackSource => ref InfCallstackSourceᵇ;
+private static readonly @string InfCallstackSourceᵇ = """
 
 package main
 import "C"
@@ -929,65 +976,65 @@ internal static readonly object skippingInfiniteˢ = (@string)"skipping infinite
 // TestGdbInfCallstack tests that gdb can unwind the callstack of cgo programs
 // on arm64 platforms without endless frames of function 'crossfunc1'.
 // https://golang.org/issue/37238
-public static void TestGdbInfCallstack(ж<testing.T> Ꮡt) {
-    checkGdbEnvironment(Ꮡt);
+public static void TestGdbInfCallstack(ж<testing.T> t) {
+    checkGdbEnvironment(t);
 
-    testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(t));
     if (Δruntime.GOARCH != "arm64"u8) {
-        Ꮡt.Skip(skippingInfiniteˢ);
+        t.Skip(skippingInfiniteˢ);
     }
 
-    Ꮡt.Parallel();
-    checkGdbVersion(Ꮡt);
-    checkPtraceScope(Ꮡt);
+    t.Parallel();
+    checkGdbVersion(t);
+    checkPtraceScope(t);
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
 
     // Build the source code.
     @string src = filepath.Join(dir, mainGoˢ);
     var err = Δos.WriteFile(src, slice<byte>(InfCallstackSource), 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create file: %v", err);
     }
-    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", aExeˢ, mainGoˢ);
-    cmd.Value.Dir = dir;
+    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), buildˢ, "-o", aExeˢ, mainGoˢ);
+    cmd.Dir = dir;
     (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("building source %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("building source %v\n%s", err, @out);
     }
 
     // Execute gdb commands.
     // 'setg_gcc' is the first point where we can reproduce the issue with just one 'run' command.
-    var args = new @string[]{"-nx"u8, "-batch"u8,
-        "-iex"u8, "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ),
-        "-ex"u8, "set startup-with-shell off"u8,
-        "-ex"u8, "break setg_gcc"u8,
-        "-ex"u8, "run"u8,
-        "-ex"u8, "backtrace 3"u8,
-        "-ex"u8, "disable 1"u8,
-        "-ex"u8, "continue"u8,
+    var args = slice<@string>(["-nx", "-batch",
+        "-iex", "add-auto-load-safe-path "u8 + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(t)), srcˢ, runtimeˢ),
+        "-ex", "set startup-with-shell off",
+        "-ex", "break setg_gcc",
+        "-ex", "run",
+        "-ex", "backtrace 3",
+        "-ex", "disable 1",
+        "-ex", "continue",
         filepath.Join(dir, aExeˢ)
-    }.slice();
+    ]);
     gdbArgsFixup(args);
     (var got, err) = exec.Command("gdb"u8, args.ꓸꓸꓸ).CombinedOutput();
-    Ꮡt.Logf("gdb output:\n%s"u8, got);
-    if (err != default!) {
-        Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
+    t.Logf("gdb output:\n%s", got);
+    if (err != nil) {
+        t.Fatalf("gdb exited with error: %v", err);
     }
 
     // Check that the backtrace matches
     // We check the 3 inner most frames only as they are present certainly, according to gcc_<OS>_arm64.c
-    var bt = new @string[]{
-        @"setg_gcc"u8,
-        @"crosscall1"u8,
-        @"threadentry"u8
-    }.slice();
+    var bt = slice<@string>([
+        @"setg_gcc",
+        @"crosscall1",
+        @"threadentry"
+    ]);
     foreach (var (i, name) in bt) {
         @string s = fmt.Sprintf("#%v.*%v"u8, i, name);
         var re = Δregexp.MustCompile(s);
         {
-            var found = re.Find(got) != default!; if (!found) {
-                Ꮡt.Fatalf("could not find '%v' in backtrace"u8, s);
+            var found = re.Find(got) != nil; if (!found) {
+                t.Fatalf("could not find '%v' in backtrace", s);
             }
         }
     }

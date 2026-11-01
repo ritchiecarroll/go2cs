@@ -24,7 +24,7 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class template_internal_test_package {
 
-internal static ж<bool> debug = flag.Bool("debug"u8, false, "show the errors produced by the tests"u8);
+internal static ж<bool> debug = flag.Bool("debug", false, "show the errors produced by the tests");
 
 // T has lots of interesting pieces to use to test execution.
 public partial struct T {
@@ -98,7 +98,7 @@ public partial struct T {
 public partial struct S /*[]@string*/;
 
 public static @string Method0(this S _) {
-    return "M0"u8;
+    return "M0";
 }
 
 public partial struct U {
@@ -110,7 +110,8 @@ public partial struct V {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nilVˢ = "nilV"u8;
+internal static ref readonly @string nilVˢ => ref nilVˢᵇ;
+private static readonly @string nilVˢᵇ = "nilV"u8;
 
 public static @string String(this ж<V> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
@@ -126,7 +127,8 @@ public partial struct W {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nilWˢ = "nilW"u8;
+internal static ref readonly @string nilWˢ => ref nilWˢᵇ;
+private static readonly @string nilWˢᵇ = "nilW"u8;
 
 public static @string Error(this ж<W> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
@@ -137,69 +139,69 @@ public static @string Error(this ж<W> Ꮡw) {
     return fmt.Sprintf("[%d]"u8, w.k);
 }
 
-internal static readonly ж<I> ᏑsiVal = new StaticBox<I>(((I)new S(new @string[]{"a"u8, "b"u8}.slice())));
+internal static readonly ж<I> ᏑsiVal = new StaticBox<I>(((I)new S(new @string[]{"a", "b"}.slice())));
 internal static ref I siVal => ref ((StaticBox<I>)ᏑsiVal).ValueSlot;
 
-internal static (ж<global::go.html.template_package.Template>, error) tupleᴛ1ʗ = New("x"u8).Parse("test template"u8);
+internal static (ж<global::go.html.template_package.Template>, error) tupleᴛ1ʗ = New("x").Parse("test template");
 internal static ж<T> tVal = Ꮡ(new T(
     True: true,
     I: 17,
     U16: 16,
-    X: "x"u8,
-    S: "xyz"u8,
-    U: Ꮡ(new U("v"u8)),
+    X: "x",
+    S: "xyz",
+    U: Ꮡ(new U("v")),
     V0: new V(6666),
     V1: Ꮡ(new V(7777)), // leave V2 as nil
     W0: new W(888),
     W1: Ꮡ(new W(999)), // leave W2 as nil
-    SI: new nint[]{3, 4, 5}.slice(),
+    SI: slice<nint>([3, 4, 5]),
     SICap: new slice<nint>(5, 10),
     AI: new nint[]{3, 4, 5}.array(),
-    SB: new bool[]{true, false}.slice(),
-    MSI: new map<@string, nint>{["one"u8] = 1, ["two"u8] = 2, ["three"u8] = 3},
-    MSIone: new map<@string, nint>{["one"u8] = 1},
-    MXI: new map<any, nint>{[(@string)"one"u8] = 1},
+    SB: slice<bool>([true, false]),
+    MSI: new map<@string, nint>{["one"] = 1, ["two"] = 2, ["three"] = 3},
+    MSIone: new map<@string, nint>{["one"] = 1},
+    MXI: new map<any, nint>{[(@string)"one"] = 1},
     MII: new map<nint, nint>{[1] = 1},
-    MI32S: new map<int32, @string>{[1] = "one"u8, [2] = "two"u8},
-    MI64S: new map<int64, @string>{[2] = "i642"u8, [3] = "i643"u8},
-    MUI32S: new map<uint32, @string>{[2] = "u322"u8, [3] = "u323"u8},
-    MUI64S: new map<uint64, @string>{[2] = "ui642"u8, [3] = "ui643"u8},
-    MI8S: new map<int8, @string>{[2] = "i82"u8, [3] = "i83"u8},
-    MUI8S: new map<uint8, @string>{[2] = "u82"u8, [3] = "u83"u8},
-    SMSI: new map<@string, nint>[]{
-        new map<@string, nint>{["one"u8] = 1, ["two"u8] = 2},
-        new map<@string, nint>{["eleven"u8] = 11, ["twelve"u8] = 12}
-    }.slice(),
+    MI32S: new map<int32, @string>{[1] = "one", [2] = "two"},
+    MI64S: new map<int64, @string>{[2] = "i642", [3] = "i643"},
+    MUI32S: new map<uint32, @string>{[2] = "u322", [3] = "u323"},
+    MUI64S: new map<uint64, @string>{[2] = "ui642", [3] = "ui643"},
+    MI8S: new map<int8, @string>{[2] = "i82", [3] = "i83"},
+    MUI8S: new map<uint8, @string>{[2] = "u82", [3] = "u83"},
+    SMSI: slice<map<@string, nint>>([
+        new map<@string, nint>{["one"] = 1, ["two"] = 2},
+        new map<@string, nint>{["eleven"] = 11, ["twelve"] = 12}
+    ]),
     Empty1: (nint)3,
-    Empty2: (@string)"empty2"u8,
-    Empty3: new nint[]{7, 8}.slice(),
-    Empty4: Ꮡ(new U("UinEmpty"u8)),
-    NonEmptyInterface: new template_internal_test_package.TжI(Ꮡ(new T(X: "x"u8))),
+    Empty2: (@string)"empty2",
+    Empty3: slice<nint>([7, 8]),
+    Empty4: Ꮡ(new U("UinEmpty")),
+    NonEmptyInterface: new template_internal_test_package.TжI(Ꮡ(new T(X: "x"))),
     NonEmptyInterfacePtS: ᏑsiVal,
     NonEmptyInterfaceTypedNil: new template_internal_test_package.TжI(((ж<T>)nil)),
     Str: new template_test_package.bytes_BufferжStringer(bytes.NewBuffer(slice<byte>("foozle"u8))),
-    Err: errors.New("erroozle"u8),
+    Err: errors.New("erroozle"),
     PI: newInt(23),
-    PS: newString("a string"u8),
+    PS: newString("a string"),
     PSI: newIntSlice(21, 22, 23),
     BinaryFunc: (@string a, @string b) => fmt.Sprintf("[%s=%s]"u8, a, b),
     VariadicFunc: (params ꓸꓸꓸstring sʗp) => {
         var s = sʗp.slice();
-        return fmt.Sprint((@string)"<"u8, strings.Join(s, "+"u8), (@string)">"u8);
+        return fmt.Sprint("<", strings.Join(s, "+"), ">");
     },
     VariadicFuncInt: (nint a, params ꓸꓸꓸstring sʗp) => {
         var s = sʗp.slice();
-        return fmt.Sprint(a, (@string)"=<"u8, strings.Join(s, "+"u8), (@string)">"u8);
+        return fmt.Sprint(a, "=<", strings.Join(s, "+"), ">");
     },
     NilOKFunc: (ж<nint> s) => s == nil,
-    ErrFunc: () => ("bla", default!),
+    ErrFunc: () => ("bla", default),
     PanicFunc: () => {
         throw panic("test panic");
     },
     Tmpl: Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2) // "x" is the value of .X
 ));
 
-internal static slice<ж<T>> tSliceOfNil = new ж<T>[]{default!}.slice();
+internal static slice<ж<T>> tSliceOfNil = slice<ж<T>>([default]);
 
 // A non-empty interface.
 public partial interface I {
@@ -233,7 +235,7 @@ internal static ж<slice<nint>> newIntSlice(params ꓸꓸꓸnint nʗp) {
 
 // Simple methods with and without arguments.
 public static @string Method0(this ref T t) {
-    return "M0"u8;
+    return "M0";
 }
 
 public static nint Method1(this ref T t, nint a) {
@@ -262,14 +264,14 @@ public static slice<nint> MAdd(this ref T t, nint a, slice<nint> b) {
     return v;
 }
 
-internal static error myError = errors.New("my error"u8);
+internal static error myError = errors.New("my error");
 
 // MyError returns a value and an error according to its argument.
 public static (bool, error) MyError(this ref T t, bool error) {
     if (error) {
         return (true, myError);
     }
-    return (false, default!);
+    return (false, default);
 }
 
 // A few methods to test chaining.
@@ -278,7 +280,8 @@ public static ж<U> GetU(this ref T t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string trueˢ = "true"u8;
+internal static ref readonly @string trueˢ => ref trueˢᵇ;
+private static readonly @string trueˢᵇ = "true"u8;
 
 public static @string TrueFalse(this ref U u, bool b) {
     if (b) {
@@ -309,421 +312,422 @@ internal static @string bigUint = fmt.Sprintf("0x%x"u8, (nuint)(((nuint)1).Lsh((
         internal nint a;
         internal @string b;
     }
-internal static slice<execTest> execTests = new execTest[]{
+internal static slice<execTest> execTests = slice<execTest>([
     // Trivial cases.
-    new("empty"u8, ""u8, ""u8, default!, true),
-    new("text"u8, "some text"u8, "some text"u8, default!, true),
-    new("nil action"u8, "{{nil}}"u8, ""u8, default!, false),
+    new("empty", "", "", default, true),
+    new("text", "some text", "some text", default, true),
+    new("nil action", "{{nil}}", "", default, false),
 
     // Ideal constants.
-    new("ideal int"u8, "{{typeOf 3}}"u8, "int"u8, (nint)0, true),
-    new("ideal float"u8, "{{typeOf 1.0}}"u8, "float64"u8, (nint)0, true),
-    new("ideal exp float"u8, "{{typeOf 1e1}}"u8, "float64"u8, (nint)0, true),
-    new("ideal complex"u8, "{{typeOf 1i}}"u8, "complex128"u8, (nint)0, true),
-    new("ideal int"u8, "{{typeOf "u8 + bigInt + "}}"u8, "int"u8, (nint)0, true),
-    new("ideal too big"u8, "{{typeOf "u8 + bigUint + "}}"u8, ""u8, (nint)0, false),
-    new("ideal nil without type"u8, "{{nil}}"u8, ""u8, (nint)0, false),
+    new("ideal int", "{{typeOf 3}}", "int", (nint)0, true),
+    new("ideal float", "{{typeOf 1.0}}", "float64", (nint)0, true),
+    new("ideal exp float", "{{typeOf 1e1}}", "float64", (nint)0, true),
+    new("ideal complex", "{{typeOf 1i}}", "complex128", (nint)0, true),
+    new("ideal int", "{{typeOf "u8 + bigInt + "}}"u8, "int", (nint)0, true),
+    new("ideal too big", "{{typeOf "u8 + bigUint + "}}"u8, "", (nint)0, false),
+    new("ideal nil without type", "{{nil}}", "", (nint)0, false),
 
     // Fields of structs.
-    new(".X"u8, "-{{.X}}-"u8, "-x-"u8, tVal.OrTypedNil(), true),
-    new(".U.V"u8, "-{{.U.V}}-"u8, "-v-"u8, tVal.OrTypedNil(), true),
-    new(".unexported"u8, "{{.unexported}}"u8, ""u8, tVal.OrTypedNil(), false),
+    new(".X", "-{{.X}}-", "-x-", tVal.OrTypedNil(), true),
+    new(".U.V", "-{{.U.V}}-", "-v-", tVal.OrTypedNil(), true),
+    new(".unexported", "{{.unexported}}", "", tVal.OrTypedNil(), false),
 
     // Fields on maps.
-    new("map .one"u8, "{{.MSI.one}}"u8, "1"u8, tVal.OrTypedNil(), true),
-    new("map .two"u8, "{{.MSI.two}}"u8, "2"u8, tVal.OrTypedNil(), true),
-    new("map .NO"u8, "{{.MSI.NO}}"u8, ""u8, tVal.OrTypedNil(), true), // NOTE: <no value> in text/template
-    new("map .one interface"u8, "{{.MXI.one}}"u8, "1"u8, tVal.OrTypedNil(), true),
-    new("map .WRONG args"u8, "{{.MSI.one 1}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("map .WRONG type"u8, "{{.MII.one}}"u8, ""u8, tVal.OrTypedNil(), false),
+    new("map .one", "{{.MSI.one}}", "1", tVal.OrTypedNil(), true),
+    new("map .two", "{{.MSI.two}}", "2", tVal.OrTypedNil(), true),
+    new("map .NO", "{{.MSI.NO}}", "", tVal.OrTypedNil(), true), // NOTE: <no value> in text/template
+    new("map .one interface", "{{.MXI.one}}", "1", tVal.OrTypedNil(), true),
+    new("map .WRONG args", "{{.MSI.one 1}}", "", tVal.OrTypedNil(), false),
+    new("map .WRONG type", "{{.MII.one}}", "", tVal.OrTypedNil(), false),
 
     // Dots of all kinds to test basic evaluation.
-    new("dot int"u8, "<{{.}}>"u8, "&lt;13>"u8, (nint)13, true),
-    new("dot uint"u8, "<{{.}}>"u8, "&lt;14>"u8, (nuint)14, true),
-    new("dot float"u8, "<{{.}}>"u8, "&lt;15.1>"u8, 15.1D, true),
-    new("dot bool"u8, "<{{.}}>"u8, "&lt;true>"u8, true, true),
-    new("dot complex"u8, "<{{.}}>"u8, "&lt;(16.2-17i)>"u8, 16.2D + -17D.i(), true),
-    new("dot string"u8, "<{{.}}>"u8, "&lt;hello>"u8, (@string)"hello"u8, true),
-    new("dot slice"u8, "<{{.}}>"u8, "&lt;[-1 -2 -3]>"u8, new nint[]{-1, -2, -3}.slice(), true),
-    new("dot map"u8, "<{{.}}>"u8, "&lt;map[two:22]>"u8, new map<@string, nint>{["two"u8] = 22}, true),
-    new("dot struct"u8, "<{{.}}>"u8, "&lt;{7 seven}>"u8, new Δtype(7, "seven"u8), true),
+    new("dot int", "<{{.}}>", "&lt;13>", (nint)13, true),
+    new("dot uint", "<{{.}}>", "&lt;14>", (nuint)14, true),
+    new("dot float", "<{{.}}>", "&lt;15.1>", 15.1D, true),
+    new("dot bool", "<{{.}}>", "&lt;true>", true, true),
+    new("dot complex", "<{{.}}>", "&lt;(16.2-17i)>", 16.2D + -17D.i(), true),
+    new("dot string", "<{{.}}>", "&lt;hello>", (@string)"hello", true),
+    new("dot slice", "<{{.}}>", "&lt;[-1 -2 -3]>", slice<nint>([-1, -2, -3]), true),
+    new("dot map", "<{{.}}>", "&lt;map[two:22]>", new map<@string, nint>{["two"] = 22}, true),
+    new("dot struct", "<{{.}}>", "&lt;{7 seven}>", new Δtype(7, "seven"), true),
 
     // Variables.
-    new("$ int"u8, "{{$}}"u8, "123"u8, (nint)123, true),
-    new("$.I"u8, "{{$.I}}"u8, "17"u8, tVal.OrTypedNil(), true),
-    new("$.U.V"u8, "{{$.U.V}}"u8, "v"u8, tVal.OrTypedNil(), true),
-    new("declare in action"u8, "{{$x := $.U.V}}{{$x}}"u8, "v"u8, tVal.OrTypedNil(), true),
-    new("simple assignment"u8, "{{$x := 2}}{{$x = 3}}{{$x}}"u8, "3"u8, tVal.OrTypedNil(), true),
-    new("nested assignment"u8,
-        "{{$x := 2}}{{if true}}{{$x = 3}}{{end}}{{$x}}"u8,
-        "3"u8, tVal.OrTypedNil(), true),
-    new("nested assignment changes the last declaration"u8,
-        "{{$x := 1}}{{if true}}{{$x := 2}}{{if true}}{{$x = 3}}{{end}}{{end}}{{$x}}"u8,
-        "1"u8, tVal.OrTypedNil(), true),
+    new("$ int", "{{$}}", "123", (nint)123, true),
+    new("$.I", "{{$.I}}", "17", tVal.OrTypedNil(), true),
+    new("$.U.V", "{{$.U.V}}", "v", tVal.OrTypedNil(), true),
+    new("declare in action", "{{$x := $.U.V}}{{$x}}", "v", tVal.OrTypedNil(), true),
+    new("simple assignment", "{{$x := 2}}{{$x = 3}}{{$x}}", "3", tVal.OrTypedNil(), true),
+    new("nested assignment",
+        "{{$x := 2}}{{if true}}{{$x = 3}}{{end}}{{$x}}",
+        "3", tVal.OrTypedNil(), true),
+    new("nested assignment changes the last declaration",
+        "{{$x := 1}}{{if true}}{{$x := 2}}{{if true}}{{$x = 3}}{{end}}{{end}}{{$x}}",
+        "1", tVal.OrTypedNil(), true),
 
     // Type with String method.
-    new("V{6666}.String()"u8, "-{{.V0}}-"u8, "-{6666}-"u8, tVal.OrTypedNil(), true), //  NOTE: -<6666>- in text/template
-    new("&V{7777}.String()"u8, "-{{.V1}}-"u8, "-&lt;7777&gt;-"u8, tVal.OrTypedNil(), true),
-    new("(*V)(nil).String()"u8, "-{{.V2}}-"u8, "-nilV-"u8, tVal.OrTypedNil(), true),
+    new("V{6666}.String()", "-{{.V0}}-", "-{6666}-", tVal.OrTypedNil(), true), //  NOTE: -<6666>- in text/template
+    new("&V{7777}.String()", "-{{.V1}}-", "-&lt;7777&gt;-", tVal.OrTypedNil(), true),
+    new("(*V)(nil).String()", "-{{.V2}}-", "-nilV-", tVal.OrTypedNil(), true),
 
     // Type with Error method.
-    new("W{888}.Error()"u8, "-{{.W0}}-"u8, "-{888}-"u8, tVal.OrTypedNil(), true), // NOTE: -[888] in text/template
-    new("&W{999}.Error()"u8, "-{{.W1}}-"u8, "-[999]-"u8, tVal.OrTypedNil(), true),
-    new("(*W)(nil).Error()"u8, "-{{.W2}}-"u8, "-nilW-"u8, tVal.OrTypedNil(), true),
+    new("W{888}.Error()", "-{{.W0}}-", "-{888}-", tVal.OrTypedNil(), true), // NOTE: -[888] in text/template
+    new("&W{999}.Error()", "-{{.W1}}-", "-[999]-", tVal.OrTypedNil(), true),
+    new("(*W)(nil).Error()", "-{{.W2}}-", "-nilW-", tVal.OrTypedNil(), true),
 
     // Pointers.
-    new("*int"u8, "{{.PI}}"u8, "23"u8, tVal.OrTypedNil(), true),
-    new("*string"u8, "{{.PS}}"u8, "a string"u8, tVal.OrTypedNil(), true),
-    new("*[]int"u8, "{{.PSI}}"u8, "[21 22 23]"u8, tVal.OrTypedNil(), true),
-    new("*[]int[1]"u8, "{{index .PSI 1}}"u8, "22"u8, tVal.OrTypedNil(), true),
-    new("NIL"u8, "{{.NIL}}"u8, "&lt;nil&gt;"u8, tVal.OrTypedNil(), true),
+    new("*int", "{{.PI}}", "23", tVal.OrTypedNil(), true),
+    new("*string", "{{.PS}}", "a string", tVal.OrTypedNil(), true),
+    new("*[]int", "{{.PSI}}", "[21 22 23]", tVal.OrTypedNil(), true),
+    new("*[]int[1]", "{{index .PSI 1}}", "22", tVal.OrTypedNil(), true),
+    new("NIL", "{{.NIL}}", "&lt;nil&gt;", tVal.OrTypedNil(), true),
 
     // Empty interfaces holding values.
-    new("empty nil"u8, "{{.Empty0}}"u8, ""u8, tVal.OrTypedNil(), true), // NOTE: <no value> in text/template
-    new("empty with int"u8, "{{.Empty1}}"u8, "3"u8, tVal.OrTypedNil(), true),
-    new("empty with string"u8, "{{.Empty2}}"u8, "empty2"u8, tVal.OrTypedNil(), true),
-    new("empty with slice"u8, "{{.Empty3}}"u8, "[7 8]"u8, tVal.OrTypedNil(), true),
-    new("empty with struct"u8, "{{.Empty4}}"u8, "{UinEmpty}"u8, tVal.OrTypedNil(), true),
-    new("empty with struct, field"u8, "{{.Empty4.V}}"u8, "UinEmpty"u8, tVal.OrTypedNil(), true),
+    new("empty nil", "{{.Empty0}}", "", tVal.OrTypedNil(), true), // NOTE: <no value> in text/template
+    new("empty with int", "{{.Empty1}}", "3", tVal.OrTypedNil(), true),
+    new("empty with string", "{{.Empty2}}", "empty2", tVal.OrTypedNil(), true),
+    new("empty with slice", "{{.Empty3}}", "[7 8]", tVal.OrTypedNil(), true),
+    new("empty with struct", "{{.Empty4}}", "{UinEmpty}", tVal.OrTypedNil(), true),
+    new("empty with struct, field", "{{.Empty4.V}}", "UinEmpty", tVal.OrTypedNil(), true),
 
     // Edge cases with <no value> with an interface value
-    new("field on interface"u8, "{{.foo}}"u8, ""u8, default!, true), // NOTE: <no value> in text/template
-    new("field on parenthesized interface"u8, "{{(.).foo}}"u8, ""u8, default!, true), // NOTE: <no value> in text/template
+    new("field on interface", "{{.foo}}", "", default, true),                  // NOTE: <no value> in text/template
+    new("field on parenthesized interface", "{{(.).foo}}", "", default, true), // NOTE: <no value> in text/template
 
     // Issue 31810: Parenthesized first element of pipeline with arguments.
     // See also TestIssue31810.
-    new("unparenthesized non-function"u8, "{{1 2}}"u8, ""u8, default!, false),
-    new("parenthesized non-function"u8, "{{(1) 2}}"u8, ""u8, default!, false),
-    new("parenthesized non-function with no args"u8, "{{(1)}}"u8, "1"u8, default!, true), // This is fine.
+    new("unparenthesized non-function", "{{1 2}}", "", default, false),
+    new("parenthesized non-function", "{{(1) 2}}", "", default, false),
+    new("parenthesized non-function with no args", "{{(1)}}", "1", default, true), // This is fine.
 
     // Method calls.
-    new(".Method0"u8, "-{{.Method0}}-"u8, "-M0-"u8, tVal.OrTypedNil(), true),
-    new(".Method1(1234)"u8, "-{{.Method1 1234}}-"u8, "-1234-"u8, tVal.OrTypedNil(), true),
-    new(".Method1(.I)"u8, "-{{.Method1 .I}}-"u8, "-17-"u8, tVal.OrTypedNil(), true),
-    new(".Method2(3, .X)"u8, "-{{.Method2 3 .X}}-"u8, "-Method2: 3 x-"u8, tVal.OrTypedNil(), true),
-    new(".Method2(.U16, `str`)"u8, "-{{.Method2 .U16 `str`}}-"u8, "-Method2: 16 str-"u8, tVal.OrTypedNil(), true),
-    new(".Method2(.U16, $x)"u8, "{{if $x := .X}}-{{.Method2 .U16 $x}}{{end}}-"u8, "-Method2: 16 x-"u8, tVal.OrTypedNil(), true),
-    new(".Method3(nil constant)"u8, "-{{.Method3 nil}}-"u8, "-Method3: &lt;nil&gt;-"u8, tVal.OrTypedNil(), true),
-    new(".Method3(nil value)"u8, "-{{.Method3 .MXI.unset}}-"u8, "-Method3: &lt;nil&gt;-"u8, tVal.OrTypedNil(), true),
-    new("method on var"u8, "{{if $x := .}}-{{$x.Method2 .U16 $x.X}}{{end}}-"u8, "-Method2: 16 x-"u8, tVal.OrTypedNil(), true),
-    new("method on chained var"u8,
-        "{{range .MSIone}}{{if $.U.TrueFalse $.True}}{{$.U.TrueFalse $.True}}{{else}}WRONG{{end}}{{end}}"u8,
-        "true"u8, tVal.OrTypedNil(), true),
-    new("chained method"u8,
-        "{{range .MSIone}}{{if $.GetU.TrueFalse $.True}}{{$.U.TrueFalse $.True}}{{else}}WRONG{{end}}{{end}}"u8,
-        "true"u8, tVal.OrTypedNil(), true),
-    new("chained method on variable"u8,
-        "{{with $x := .}}{{with .SI}}{{$.GetU.TrueFalse $.True}}{{end}}{{end}}"u8,
-        "true"u8, tVal.OrTypedNil(), true),
-    new(".NilOKFunc not nil"u8, "{{call .NilOKFunc .PI}}"u8, "false"u8, tVal.OrTypedNil(), true),
-    new(".NilOKFunc nil"u8, "{{call .NilOKFunc nil}}"u8, "true"u8, tVal.OrTypedNil(), true),
-    new("method on nil value from slice"u8, "-{{range .}}{{.Method1 1234}}{{end}}-"u8, "-1234-"u8, tSliceOfNil, true),
-    new("method on typed nil interface value"u8, "{{.NonEmptyInterfaceTypedNil.Method0}}"u8, "M0"u8, tVal.OrTypedNil(), true),
+    new(".Method0", "-{{.Method0}}-", "-M0-", tVal.OrTypedNil(), true),
+    new(".Method1(1234)", "-{{.Method1 1234}}-", "-1234-", tVal.OrTypedNil(), true),
+    new(".Method1(.I)", "-{{.Method1 .I}}-", "-17-", tVal.OrTypedNil(), true),
+    new(".Method2(3, .X)", "-{{.Method2 3 .X}}-", "-Method2: 3 x-", tVal.OrTypedNil(), true),
+    new(".Method2(.U16, `str`)", "-{{.Method2 .U16 `str`}}-", "-Method2: 16 str-", tVal.OrTypedNil(), true),
+    new(".Method2(.U16, $x)", "{{if $x := .X}}-{{.Method2 .U16 $x}}{{end}}-", "-Method2: 16 x-", tVal.OrTypedNil(), true),
+    new(".Method3(nil constant)", "-{{.Method3 nil}}-", "-Method3: &lt;nil&gt;-", tVal.OrTypedNil(), true),
+    new(".Method3(nil value)", "-{{.Method3 .MXI.unset}}-", "-Method3: &lt;nil&gt;-", tVal.OrTypedNil(), true),
+    new("method on var", "{{if $x := .}}-{{$x.Method2 .U16 $x.X}}{{end}}-", "-Method2: 16 x-", tVal.OrTypedNil(), true),
+    new("method on chained var",
+        "{{range .MSIone}}{{if $.U.TrueFalse $.True}}{{$.U.TrueFalse $.True}}{{else}}WRONG{{end}}{{end}}",
+        "true", tVal.OrTypedNil(), true),
+    new("chained method",
+        "{{range .MSIone}}{{if $.GetU.TrueFalse $.True}}{{$.U.TrueFalse $.True}}{{else}}WRONG{{end}}{{end}}",
+        "true", tVal.OrTypedNil(), true),
+    new("chained method on variable",
+        "{{with $x := .}}{{with .SI}}{{$.GetU.TrueFalse $.True}}{{end}}{{end}}",
+        "true", tVal.OrTypedNil(), true),
+    new(".NilOKFunc not nil", "{{call .NilOKFunc .PI}}", "false", tVal.OrTypedNil(), true),
+    new(".NilOKFunc nil", "{{call .NilOKFunc nil}}", "true", tVal.OrTypedNil(), true),
+    new("method on nil value from slice", "-{{range .}}{{.Method1 1234}}{{end}}-", "-1234-", tSliceOfNil, true),
+    new("method on typed nil interface value", "{{.NonEmptyInterfaceTypedNil.Method0}}", "M0", tVal.OrTypedNil(), true),
 
     // Function call builtin.
-    new(".BinaryFunc"u8, "{{call .BinaryFunc `1` `2`}}"u8, "[1=2]"u8, tVal.OrTypedNil(), true),
-    new(".VariadicFunc0"u8, "{{call .VariadicFunc}}"u8, "&lt;&gt;"u8, tVal.OrTypedNil(), true),
-    new(".VariadicFunc2"u8, "{{call .VariadicFunc `he` `llo`}}"u8, "&lt;he&#43;llo&gt;"u8, tVal.OrTypedNil(), true),
-    new(".VariadicFuncInt"u8, "{{call .VariadicFuncInt 33 `he` `llo`}}"u8, "33=&lt;he&#43;llo&gt;"u8, tVal.OrTypedNil(), true),
-    new("if .BinaryFunc call"u8, "{{ if .BinaryFunc}}{{call .BinaryFunc `1` `2`}}{{end}}"u8, "[1=2]"u8, tVal.OrTypedNil(), true),
-    new("if not .BinaryFunc call"u8, "{{ if not .BinaryFunc}}{{call .BinaryFunc `1` `2`}}{{else}}No{{end}}"u8, "No"u8, tVal.OrTypedNil(), true),
-    new("Interface Call"u8, @"{{stringer .S}}"u8, "foozle"u8, new map<@string, any>{["S"u8] = bytes.NewBufferString("foozle"u8).OrTypedNil()}, true),
-    new(".ErrFunc"u8, "{{call .ErrFunc}}"u8, "bla"u8, tVal.OrTypedNil(), true),
-    new("call nil"u8, "{{call nil}}"u8, ""u8, tVal.OrTypedNil(), false),
+    new(".BinaryFunc", "{{call .BinaryFunc `1` `2`}}", "[1=2]", tVal.OrTypedNil(), true),
+    new(".VariadicFunc0", "{{call .VariadicFunc}}", "&lt;&gt;", tVal.OrTypedNil(), true),
+    new(".VariadicFunc2", "{{call .VariadicFunc `he` `llo`}}", "&lt;he&#43;llo&gt;", tVal.OrTypedNil(), true),
+    new(".VariadicFuncInt", "{{call .VariadicFuncInt 33 `he` `llo`}}", "33=&lt;he&#43;llo&gt;", tVal.OrTypedNil(), true),
+    new("if .BinaryFunc call", "{{ if .BinaryFunc}}{{call .BinaryFunc `1` `2`}}{{end}}", "[1=2]", tVal.OrTypedNil(), true),
+    new("if not .BinaryFunc call", "{{ if not .BinaryFunc}}{{call .BinaryFunc `1` `2`}}{{else}}No{{end}}", "No", tVal.OrTypedNil(), true),
+    new("Interface Call", @"{{stringer .S}}", "foozle", new map<@string, any>{["S"] = bytes.NewBufferString("foozle").OrTypedNil()}, true),
+    new(".ErrFunc", "{{call .ErrFunc}}", "bla", tVal.OrTypedNil(), true),
+    new("call nil", "{{call nil}}", "", tVal.OrTypedNil(), false),
 
     // Erroneous function calls (check args).
-    new(".BinaryFuncTooFew"u8, "{{call .BinaryFunc `1`}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new(".BinaryFuncTooMany"u8, "{{call .BinaryFunc `1` `2` `3`}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new(".BinaryFuncBad0"u8, "{{call .BinaryFunc 1 3}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new(".BinaryFuncBad1"u8, "{{call .BinaryFunc `1` 3}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new(".VariadicFuncBad0"u8, "{{call .VariadicFunc 3}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new(".VariadicFuncIntBad0"u8, "{{call .VariadicFuncInt}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new(".VariadicFuncIntBad`"u8, "{{call .VariadicFuncInt `x`}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new(".VariadicFuncNilBad"u8, "{{call .VariadicFunc nil}}"u8, ""u8, tVal.OrTypedNil(), false),
+    new(".BinaryFuncTooFew", "{{call .BinaryFunc `1`}}", "", tVal.OrTypedNil(), false),
+    new(".BinaryFuncTooMany", "{{call .BinaryFunc `1` `2` `3`}}", "", tVal.OrTypedNil(), false),
+    new(".BinaryFuncBad0", "{{call .BinaryFunc 1 3}}", "", tVal.OrTypedNil(), false),
+    new(".BinaryFuncBad1", "{{call .BinaryFunc `1` 3}}", "", tVal.OrTypedNil(), false),
+    new(".VariadicFuncBad0", "{{call .VariadicFunc 3}}", "", tVal.OrTypedNil(), false),
+    new(".VariadicFuncIntBad0", "{{call .VariadicFuncInt}}", "", tVal.OrTypedNil(), false),
+    new(".VariadicFuncIntBad`", "{{call .VariadicFuncInt `x`}}", "", tVal.OrTypedNil(), false),
+    new(".VariadicFuncNilBad", "{{call .VariadicFunc nil}}", "", tVal.OrTypedNil(), false),
 
     // Pipelines.
-    new("pipeline"u8, "-{{.Method0 | .Method2 .U16}}-"u8, "-Method2: 16 M0-"u8, tVal.OrTypedNil(), true),
-    new("pipeline func"u8, "-{{call .VariadicFunc `llo` | call .VariadicFunc `he` }}-"u8, "-&lt;he&#43;&lt;llo&gt;&gt;-"u8, tVal.OrTypedNil(), true),
+    new("pipeline", "-{{.Method0 | .Method2 .U16}}-", "-Method2: 16 M0-", tVal.OrTypedNil(), true),
+    new("pipeline func", "-{{call .VariadicFunc `llo` | call .VariadicFunc `he` }}-", "-&lt;he&#43;&lt;llo&gt;&gt;-", tVal.OrTypedNil(), true),
 
     // Nil values aren't missing arguments.
-    new("nil pipeline"u8, "{{ .Empty0 | call .NilOKFunc }}"u8, "true"u8, tVal.OrTypedNil(), true),
-    new("nil call arg"u8, "{{ call .NilOKFunc .Empty0 }}"u8, "true"u8, tVal.OrTypedNil(), true),
-    new("bad nil pipeline"u8, "{{ .Empty0 | .VariadicFunc }}"u8, ""u8, tVal.OrTypedNil(), false),
+    new("nil pipeline", "{{ .Empty0 | call .NilOKFunc }}", "true", tVal.OrTypedNil(), true),
+    new("nil call arg", "{{ call .NilOKFunc .Empty0 }}", "true", tVal.OrTypedNil(), true),
+    new("bad nil pipeline", "{{ .Empty0 | .VariadicFunc }}", "", tVal.OrTypedNil(), false),
 
     // Parenthesized expressions
-    new("parens in pipeline"u8, "{{printf `%d %d %d` (1) (2 | add 3) (add 4 (add 5 6))}}"u8, "1 5 15"u8, tVal.OrTypedNil(), true),
+    new("parens in pipeline", "{{printf `%d %d %d` (1) (2 | add 3) (add 4 (add 5 6))}}", "1 5 15", tVal.OrTypedNil(), true),
 
     // Parenthesized expressions with field accesses
-    new("parens: $ in paren"u8, "{{($).X}}"u8, "x"u8, tVal.OrTypedNil(), true),
-    new("parens: $.GetU in paren"u8, "{{($.GetU).V}}"u8, "v"u8, tVal.OrTypedNil(), true),
-    new("parens: $ in paren in pipe"u8, "{{($ | echo).X}}"u8, "x"u8, tVal.OrTypedNil(), true),
-    new("parens: spaces and args"u8, @"{{(makemap ""up"" ""down"" ""left"" ""right"").left}}"u8, "right"u8, tVal.OrTypedNil(), true),
+    new("parens: $ in paren", "{{($).X}}", "x", tVal.OrTypedNil(), true),
+    new("parens: $.GetU in paren", "{{($.GetU).V}}", "v", tVal.OrTypedNil(), true),
+    new("parens: $ in paren in pipe", "{{($ | echo).X}}", "x", tVal.OrTypedNil(), true),
+    new("parens: spaces and args", @"{{(makemap ""up"" ""down"" ""left"" ""right"").left}}", "right", tVal.OrTypedNil(), true),
 
     // If.
-    new("if true"u8, "{{if true}}TRUE{{end}}"u8, "TRUE"u8, tVal.OrTypedNil(), true),
-    new("if false"u8, "{{if false}}TRUE{{else}}FALSE{{end}}"u8, "FALSE"u8, tVal.OrTypedNil(), true),
-    new("if nil"u8, "{{if nil}}TRUE{{end}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("if on typed nil interface value"u8, "{{if .NonEmptyInterfaceTypedNil}}TRUE{{ end }}"u8, ""u8, tVal.OrTypedNil(), true),
-    new("if 1"u8, "{{if 1}}NON-ZERO{{else}}ZERO{{end}}"u8, "NON-ZERO"u8, tVal.OrTypedNil(), true),
-    new("if 0"u8, "{{if 0}}NON-ZERO{{else}}ZERO{{end}}"u8, "ZERO"u8, tVal.OrTypedNil(), true),
-    new("if 1.5"u8, "{{if 1.5}}NON-ZERO{{else}}ZERO{{end}}"u8, "NON-ZERO"u8, tVal.OrTypedNil(), true),
-    new("if 0.0"u8, "{{if .FloatZero}}NON-ZERO{{else}}ZERO{{end}}"u8, "ZERO"u8, tVal.OrTypedNil(), true),
-    new("if 1.5i"u8, "{{if 1.5i}}NON-ZERO{{else}}ZERO{{end}}"u8, "NON-ZERO"u8, tVal.OrTypedNil(), true),
-    new("if 0.0i"u8, "{{if .ComplexZero}}NON-ZERO{{else}}ZERO{{end}}"u8, "ZERO"u8, tVal.OrTypedNil(), true),
-    new("if emptystring"u8, "{{if ``}}NON-EMPTY{{else}}EMPTY{{end}}"u8, "EMPTY"u8, tVal.OrTypedNil(), true),
-    new("if string"u8, "{{if `notempty`}}NON-EMPTY{{else}}EMPTY{{end}}"u8, "NON-EMPTY"u8, tVal.OrTypedNil(), true),
-    new("if emptyslice"u8, "{{if .SIEmpty}}NON-EMPTY{{else}}EMPTY{{end}}"u8, "EMPTY"u8, tVal.OrTypedNil(), true),
-    new("if slice"u8, "{{if .SI}}NON-EMPTY{{else}}EMPTY{{end}}"u8, "NON-EMPTY"u8, tVal.OrTypedNil(), true),
-    new("if emptymap"u8, "{{if .MSIEmpty}}NON-EMPTY{{else}}EMPTY{{end}}"u8, "EMPTY"u8, tVal.OrTypedNil(), true),
-    new("if map"u8, "{{if .MSI}}NON-EMPTY{{else}}EMPTY{{end}}"u8, "NON-EMPTY"u8, tVal.OrTypedNil(), true),
-    new("if map unset"u8, "{{if .MXI.none}}NON-ZERO{{else}}ZERO{{end}}"u8, "ZERO"u8, tVal.OrTypedNil(), true),
-    new("if map not unset"u8, "{{if not .MXI.none}}ZERO{{else}}NON-ZERO{{end}}"u8, "ZERO"u8, tVal.OrTypedNil(), true),
-    new("if $x with $y int"u8, "{{if $x := true}}{{with $y := .I}}{{$x}},{{$y}}{{end}}{{end}}"u8, "true,17"u8, tVal.OrTypedNil(), true),
-    new("if $x with $x int"u8, "{{if $x := true}}{{with $x := .I}}{{$x}},{{end}}{{$x}}{{end}}"u8, "17,true"u8, tVal.OrTypedNil(), true),
-    new("if else if"u8, "{{if false}}FALSE{{else if true}}TRUE{{end}}"u8, "TRUE"u8, tVal.OrTypedNil(), true),
-    new("if else chain"u8, "{{if eq 1 3}}1{{else if eq 2 3}}2{{else if eq 3 3}}3{{end}}"u8, "3"u8, tVal.OrTypedNil(), true),
+    new("if true", "{{if true}}TRUE{{end}}", "TRUE", tVal.OrTypedNil(), true),
+    new("if false", "{{if false}}TRUE{{else}}FALSE{{end}}", "FALSE", tVal.OrTypedNil(), true),
+    new("if nil", "{{if nil}}TRUE{{end}}", "", tVal.OrTypedNil(), false),
+    new("if on typed nil interface value", "{{if .NonEmptyInterfaceTypedNil}}TRUE{{ end }}", "", tVal.OrTypedNil(), true),
+    new("if 1", "{{if 1}}NON-ZERO{{else}}ZERO{{end}}", "NON-ZERO", tVal.OrTypedNil(), true),
+    new("if 0", "{{if 0}}NON-ZERO{{else}}ZERO{{end}}", "ZERO", tVal.OrTypedNil(), true),
+    new("if 1.5", "{{if 1.5}}NON-ZERO{{else}}ZERO{{end}}", "NON-ZERO", tVal.OrTypedNil(), true),
+    new("if 0.0", "{{if .FloatZero}}NON-ZERO{{else}}ZERO{{end}}", "ZERO", tVal.OrTypedNil(), true),
+    new("if 1.5i", "{{if 1.5i}}NON-ZERO{{else}}ZERO{{end}}", "NON-ZERO", tVal.OrTypedNil(), true),
+    new("if 0.0i", "{{if .ComplexZero}}NON-ZERO{{else}}ZERO{{end}}", "ZERO", tVal.OrTypedNil(), true),
+    new("if emptystring", "{{if ``}}NON-EMPTY{{else}}EMPTY{{end}}", "EMPTY", tVal.OrTypedNil(), true),
+    new("if string", "{{if `notempty`}}NON-EMPTY{{else}}EMPTY{{end}}", "NON-EMPTY", tVal.OrTypedNil(), true),
+    new("if emptyslice", "{{if .SIEmpty}}NON-EMPTY{{else}}EMPTY{{end}}", "EMPTY", tVal.OrTypedNil(), true),
+    new("if slice", "{{if .SI}}NON-EMPTY{{else}}EMPTY{{end}}", "NON-EMPTY", tVal.OrTypedNil(), true),
+    new("if emptymap", "{{if .MSIEmpty}}NON-EMPTY{{else}}EMPTY{{end}}", "EMPTY", tVal.OrTypedNil(), true),
+    new("if map", "{{if .MSI}}NON-EMPTY{{else}}EMPTY{{end}}", "NON-EMPTY", tVal.OrTypedNil(), true),
+    new("if map unset", "{{if .MXI.none}}NON-ZERO{{else}}ZERO{{end}}", "ZERO", tVal.OrTypedNil(), true),
+    new("if map not unset", "{{if not .MXI.none}}ZERO{{else}}NON-ZERO{{end}}", "ZERO", tVal.OrTypedNil(), true),
+    new("if $x with $y int", "{{if $x := true}}{{with $y := .I}}{{$x}},{{$y}}{{end}}{{end}}", "true,17", tVal.OrTypedNil(), true),
+    new("if $x with $x int", "{{if $x := true}}{{with $x := .I}}{{$x}},{{end}}{{$x}}{{end}}", "17,true", tVal.OrTypedNil(), true),
+    new("if else if", "{{if false}}FALSE{{else if true}}TRUE{{end}}", "TRUE", tVal.OrTypedNil(), true),
+    new("if else chain", "{{if eq 1 3}}1{{else if eq 2 3}}2{{else if eq 3 3}}3{{end}}", "3", tVal.OrTypedNil(), true),
 
     // Print etc.
-    new("print"u8, @"{{print ""hello, print""}}"u8, "hello, print"u8, tVal.OrTypedNil(), true),
-    new("print 123"u8, @"{{print 1 2 3}}"u8, "1 2 3"u8, tVal.OrTypedNil(), true),
-    new("print nil"u8, @"{{print nil}}"u8, "&lt;nil&gt;"u8, tVal.OrTypedNil(), true),
-    new("println"u8, @"{{println 1 2 3}}"u8, "1 2 3\n"u8, tVal.OrTypedNil(), true),
-    new("printf int"u8, @"{{printf ""%04x"" 127}}"u8, "007f"u8, tVal.OrTypedNil(), true),
-    new("printf float"u8, @"{{printf ""%g"" 3.5}}"u8, "3.5"u8, tVal.OrTypedNil(), true),
-    new("printf complex"u8, @"{{printf ""%g"" 1+7i}}"u8, "(1&#43;7i)"u8, tVal.OrTypedNil(), true),
-    new("printf string"u8, @"{{printf ""%s"" ""hello""}}"u8, "hello"u8, tVal.OrTypedNil(), true),
-    new("printf function"u8, @"{{printf ""%#q"" zeroArgs}}"u8, "`zeroArgs`"u8, tVal.OrTypedNil(), true),
-    new("printf field"u8, @"{{printf ""%s"" .U.V}}"u8, "v"u8, tVal.OrTypedNil(), true),
-    new("printf method"u8, @"{{printf ""%s"" .Method0}}"u8, "M0"u8, tVal.OrTypedNil(), true),
-    new("printf dot"u8, @"{{with .I}}{{printf ""%d"" .}}{{end}}"u8, "17"u8, tVal.OrTypedNil(), true),
-    new("printf var"u8, @"{{with $x := .I}}{{printf ""%d"" $x}}{{end}}"u8, "17"u8, tVal.OrTypedNil(), true),
-    new("printf lots"u8, @"{{printf ""%d %s %g %s"" 127 ""hello"" 7-3i .Method0}}"u8, "127 hello (7-3i) M0"u8, tVal.OrTypedNil(), true),
+    new("print", @"{{print ""hello, print""}}", "hello, print", tVal.OrTypedNil(), true),
+    new("print 123", @"{{print 1 2 3}}", "1 2 3", tVal.OrTypedNil(), true),
+    new("print nil", @"{{print nil}}", "&lt;nil&gt;", tVal.OrTypedNil(), true),
+    new("println", @"{{println 1 2 3}}", "1 2 3\n", tVal.OrTypedNil(), true),
+    new("printf int", @"{{printf ""%04x"" 127}}", "007f", tVal.OrTypedNil(), true),
+    new("printf float", @"{{printf ""%g"" 3.5}}", "3.5", tVal.OrTypedNil(), true),
+    new("printf complex", @"{{printf ""%g"" 1+7i}}", "(1&#43;7i)", tVal.OrTypedNil(), true),
+    new("printf string", @"{{printf ""%s"" ""hello""}}", "hello", tVal.OrTypedNil(), true),
+    new("printf function", @"{{printf ""%#q"" zeroArgs}}", "`zeroArgs`", tVal.OrTypedNil(), true),
+    new("printf field", @"{{printf ""%s"" .U.V}}", "v", tVal.OrTypedNil(), true),
+    new("printf method", @"{{printf ""%s"" .Method0}}", "M0", tVal.OrTypedNil(), true),
+    new("printf dot", @"{{with .I}}{{printf ""%d"" .}}{{end}}", "17", tVal.OrTypedNil(), true),
+    new("printf var", @"{{with $x := .I}}{{printf ""%d"" $x}}{{end}}", "17", tVal.OrTypedNil(), true),
+    new("printf lots", @"{{printf ""%d %s %g %s"" 127 ""hello"" 7-3i .Method0}}", "127 hello (7-3i) M0", tVal.OrTypedNil(), true),
 
     // HTML.
-    new("html"u8, @"{{html ""<script>alert(\""XSS\"");</script>""}}"u8,
-        "&lt;script&gt;alert(&#34;XSS&#34;);&lt;/script&gt;"u8, default!, true),
-    new("html pipeline"u8, @"{{printf ""<script>alert(\""XSS\"");</script>"" | html}}"u8,
-        "&lt;script&gt;alert(&#34;XSS&#34;);&lt;/script&gt;"u8, default!, true),
-    new("html"u8, @"{{html .PS}}"u8, "a string"u8, tVal.OrTypedNil(), true),
-    new("html typed nil"u8, @"{{html .NIL}}"u8, "&lt;nil&gt;"u8, tVal.OrTypedNil(), true),
-    new("html untyped nil"u8, @"{{html .Empty0}}"u8, "&lt;nil&gt;"u8, tVal.OrTypedNil(), true), // NOTE: "&lt;no value&gt;" in text/template
+    new("html", @"{{html ""<script>alert(\""XSS\"");</script>""}}",
+        "&lt;script&gt;alert(&#34;XSS&#34;);&lt;/script&gt;", default, true),
+    new("html pipeline", @"{{printf ""<script>alert(\""XSS\"");</script>"" | html}}",
+        "&lt;script&gt;alert(&#34;XSS&#34;);&lt;/script&gt;", default, true),
+    new("html", @"{{html .PS}}", "a string", tVal.OrTypedNil(), true),
+    new("html typed nil", @"{{html .NIL}}", "&lt;nil&gt;", tVal.OrTypedNil(), true),
+    new("html untyped nil", @"{{html .Empty0}}", "&lt;nil&gt;", tVal.OrTypedNil(), true), // NOTE: "&lt;no value&gt;" in text/template
 
     // JavaScript.
-    new("js"u8, @"{{js .}}"u8, @"It\&#39;d be nice."u8, (@string)@"It'd be nice."u8, true),
+    new("js", @"{{js .}}", @"It\&#39;d be nice.", (@string)@"It'd be nice.", true),
 
     // URL query.
-    new("urlquery"u8, @"{{""http://www.example.org/""|urlquery}}"u8, "http%3A%2F%2Fwww.example.org%2F"u8, default!, true),
+    new("urlquery", @"{{""http://www.example.org/""|urlquery}}", "http%3A%2F%2Fwww.example.org%2F", default, true),
 
     // Booleans
-    new("not"u8, "{{not true}} {{not false}}"u8, "false true"u8, default!, true),
-    new("and"u8, "{{and false 0}} {{and 1 0}} {{and 0 true}} {{and 1 1}}"u8, "false 0 0 1"u8, default!, true),
-    new("or"u8, "{{or 0 0}} {{or 1 0}} {{or 0 true}} {{or 1 1}}"u8, "0 1 true 1"u8, default!, true),
-    new("boolean if"u8, "{{if and true 1 `hi`}}TRUE{{else}}FALSE{{end}}"u8, "TRUE"u8, tVal.OrTypedNil(), true),
-    new("boolean if not"u8, "{{if and true 1 `hi` | not}}TRUE{{else}}FALSE{{end}}"u8, "FALSE"u8, default!, true),
+    new("not", "{{not true}} {{not false}}", "false true", default, true),
+    new("and", "{{and false 0}} {{and 1 0}} {{and 0 true}} {{and 1 1}}", "false 0 0 1", default, true),
+    new("or", "{{or 0 0}} {{or 1 0}} {{or 0 true}} {{or 1 1}}", "0 1 true 1", default, true),
+    new("boolean if", "{{if and true 1 `hi`}}TRUE{{else}}FALSE{{end}}", "TRUE", tVal.OrTypedNil(), true),
+    new("boolean if not", "{{if and true 1 `hi` | not}}TRUE{{else}}FALSE{{end}}", "FALSE", default, true),
 
     // Indexing.
-    new("slice[0]"u8, "{{index .SI 0}}"u8, "3"u8, tVal.OrTypedNil(), true),
-    new("slice[1]"u8, "{{index .SI 1}}"u8, "4"u8, tVal.OrTypedNil(), true),
-    new("slice[HUGE]"u8, "{{index .SI 10}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("slice[WRONG]"u8, "{{index .SI `hello`}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("slice[nil]"u8, "{{index .SI nil}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("map[one]"u8, "{{index .MSI `one`}}"u8, "1"u8, tVal.OrTypedNil(), true),
-    new("map[two]"u8, "{{index .MSI `two`}}"u8, "2"u8, tVal.OrTypedNil(), true),
-    new("map[NO]"u8, "{{index .MSI `XXX`}}"u8, "0"u8, tVal.OrTypedNil(), true),
-    new("map[nil]"u8, "{{index .MSI nil}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("map[``]"u8, "{{index .MSI ``}}"u8, "0"u8, tVal.OrTypedNil(), true),
-    new("map[WRONG]"u8, "{{index .MSI 10}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("double index"u8, "{{index .SMSI 1 `eleven`}}"u8, "11"u8, tVal.OrTypedNil(), true),
-    new("nil[1]"u8, "{{index nil 1}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("map MI64S"u8, "{{index .MI64S 2}}"u8, "i642"u8, tVal.OrTypedNil(), true),
-    new("map MI32S"u8, "{{index .MI32S 2}}"u8, "two"u8, tVal.OrTypedNil(), true),
-    new("map MUI64S"u8, "{{index .MUI64S 3}}"u8, "ui643"u8, tVal.OrTypedNil(), true),
-    new("map MI8S"u8, "{{index .MI8S 3}}"u8, "i83"u8, tVal.OrTypedNil(), true),
-    new("map MUI8S"u8, "{{index .MUI8S 2}}"u8, "u82"u8, tVal.OrTypedNil(), true),
-    new("index of an interface field"u8, "{{index .Empty3 0}}"u8, "7"u8, tVal.OrTypedNil(), true),
+    new("slice[0]", "{{index .SI 0}}", "3", tVal.OrTypedNil(), true),
+    new("slice[1]", "{{index .SI 1}}", "4", tVal.OrTypedNil(), true),
+    new("slice[HUGE]", "{{index .SI 10}}", "", tVal.OrTypedNil(), false),
+    new("slice[WRONG]", "{{index .SI `hello`}}", "", tVal.OrTypedNil(), false),
+    new("slice[nil]", "{{index .SI nil}}", "", tVal.OrTypedNil(), false),
+    new("map[one]", "{{index .MSI `one`}}", "1", tVal.OrTypedNil(), true),
+    new("map[two]", "{{index .MSI `two`}}", "2", tVal.OrTypedNil(), true),
+    new("map[NO]", "{{index .MSI `XXX`}}", "0", tVal.OrTypedNil(), true),
+    new("map[nil]", "{{index .MSI nil}}", "", tVal.OrTypedNil(), false),
+    new("map[``]", "{{index .MSI ``}}", "0", tVal.OrTypedNil(), true),
+    new("map[WRONG]", "{{index .MSI 10}}", "", tVal.OrTypedNil(), false),
+    new("double index", "{{index .SMSI 1 `eleven`}}", "11", tVal.OrTypedNil(), true),
+    new("nil[1]", "{{index nil 1}}", "", tVal.OrTypedNil(), false),
+    new("map MI64S", "{{index .MI64S 2}}", "i642", tVal.OrTypedNil(), true),
+    new("map MI32S", "{{index .MI32S 2}}", "two", tVal.OrTypedNil(), true),
+    new("map MUI64S", "{{index .MUI64S 3}}", "ui643", tVal.OrTypedNil(), true),
+    new("map MI8S", "{{index .MI8S 3}}", "i83", tVal.OrTypedNil(), true),
+    new("map MUI8S", "{{index .MUI8S 2}}", "u82", tVal.OrTypedNil(), true),
+    new("index of an interface field", "{{index .Empty3 0}}", "7", tVal.OrTypedNil(), true),
 
     // Slicing.
-    new("slice[:]"u8, "{{slice .SI}}"u8, "[3 4 5]"u8, tVal.OrTypedNil(), true),
-    new("slice[1:]"u8, "{{slice .SI 1}}"u8, "[4 5]"u8, tVal.OrTypedNil(), true),
-    new("slice[1:2]"u8, "{{slice .SI 1 2}}"u8, "[4]"u8, tVal.OrTypedNil(), true),
-    new("slice[-1:]"u8, "{{slice .SI -1}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("slice[1:-2]"u8, "{{slice .SI 1 -2}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("slice[1:2:-1]"u8, "{{slice .SI 1 2 -1}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("slice[2:1]"u8, "{{slice .SI 2 1}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("slice[2:2:1]"u8, "{{slice .SI 2 2 1}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("out of range"u8, "{{slice .SI 4 5}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("out of range"u8, "{{slice .SI 2 2 5}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("len(s) < indexes < cap(s)"u8, "{{slice .SICap 6 10}}"u8, "[0 0 0 0]"u8, tVal.OrTypedNil(), true),
-    new("len(s) < indexes < cap(s)"u8, "{{slice .SICap 6 10 10}}"u8, "[0 0 0 0]"u8, tVal.OrTypedNil(), true),
-    new("indexes > cap(s)"u8, "{{slice .SICap 10 11}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("indexes > cap(s)"u8, "{{slice .SICap 6 10 11}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("array[:]"u8, "{{slice .AI}}"u8, "[3 4 5]"u8, tVal.OrTypedNil(), true),
-    new("array[1:]"u8, "{{slice .AI 1}}"u8, "[4 5]"u8, tVal.OrTypedNil(), true),
-    new("array[1:2]"u8, "{{slice .AI 1 2}}"u8, "[4]"u8, tVal.OrTypedNil(), true),
-    new("string[:]"u8, "{{slice .S}}"u8, "xyz"u8, tVal.OrTypedNil(), true),
-    new("string[0:1]"u8, "{{slice .S 0 1}}"u8, "x"u8, tVal.OrTypedNil(), true),
-    new("string[1:]"u8, "{{slice .S 1}}"u8, "yz"u8, tVal.OrTypedNil(), true),
-    new("string[1:2]"u8, "{{slice .S 1 2}}"u8, "y"u8, tVal.OrTypedNil(), true),
-    new("out of range"u8, "{{slice .S 1 5}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("3-index slice of string"u8, "{{slice .S 1 2 2}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("slice of an interface field"u8, "{{slice .Empty3 0 1}}"u8, "[7]"u8, tVal.OrTypedNil(), true),
+    new("slice[:]", "{{slice .SI}}", "[3 4 5]", tVal.OrTypedNil(), true),
+    new("slice[1:]", "{{slice .SI 1}}", "[4 5]", tVal.OrTypedNil(), true),
+    new("slice[1:2]", "{{slice .SI 1 2}}", "[4]", tVal.OrTypedNil(), true),
+    new("slice[-1:]", "{{slice .SI -1}}", "", tVal.OrTypedNil(), false),
+    new("slice[1:-2]", "{{slice .SI 1 -2}}", "", tVal.OrTypedNil(), false),
+    new("slice[1:2:-1]", "{{slice .SI 1 2 -1}}", "", tVal.OrTypedNil(), false),
+    new("slice[2:1]", "{{slice .SI 2 1}}", "", tVal.OrTypedNil(), false),
+    new("slice[2:2:1]", "{{slice .SI 2 2 1}}", "", tVal.OrTypedNil(), false),
+    new("out of range", "{{slice .SI 4 5}}", "", tVal.OrTypedNil(), false),
+    new("out of range", "{{slice .SI 2 2 5}}", "", tVal.OrTypedNil(), false),
+    new("len(s) < indexes < cap(s)", "{{slice .SICap 6 10}}", "[0 0 0 0]", tVal.OrTypedNil(), true),
+    new("len(s) < indexes < cap(s)", "{{slice .SICap 6 10 10}}", "[0 0 0 0]", tVal.OrTypedNil(), true),
+    new("indexes > cap(s)", "{{slice .SICap 10 11}}", "", tVal.OrTypedNil(), false),
+    new("indexes > cap(s)", "{{slice .SICap 6 10 11}}", "", tVal.OrTypedNil(), false),
+    new("array[:]", "{{slice .AI}}", "[3 4 5]", tVal.OrTypedNil(), true),
+    new("array[1:]", "{{slice .AI 1}}", "[4 5]", tVal.OrTypedNil(), true),
+    new("array[1:2]", "{{slice .AI 1 2}}", "[4]", tVal.OrTypedNil(), true),
+    new("string[:]", "{{slice .S}}", "xyz", tVal.OrTypedNil(), true),
+    new("string[0:1]", "{{slice .S 0 1}}", "x", tVal.OrTypedNil(), true),
+    new("string[1:]", "{{slice .S 1}}", "yz", tVal.OrTypedNil(), true),
+    new("string[1:2]", "{{slice .S 1 2}}", "y", tVal.OrTypedNil(), true),
+    new("out of range", "{{slice .S 1 5}}", "", tVal.OrTypedNil(), false),
+    new("3-index slice of string", "{{slice .S 1 2 2}}", "", tVal.OrTypedNil(), false),
+    new("slice of an interface field", "{{slice .Empty3 0 1}}", "[7]", tVal.OrTypedNil(), true),
 
     // Len.
-    new("slice"u8, "{{len .SI}}"u8, "3"u8, tVal.OrTypedNil(), true),
-    new("map"u8, "{{len .MSI }}"u8, "3"u8, tVal.OrTypedNil(), true),
-    new("len of int"u8, "{{len 3}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("len of nothing"u8, "{{len .Empty0}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("len of an interface field"u8, "{{len .Empty3}}"u8, "2"u8, tVal.OrTypedNil(), true),
+    new("slice", "{{len .SI}}", "3", tVal.OrTypedNil(), true),
+    new("map", "{{len .MSI }}", "3", tVal.OrTypedNil(), true),
+    new("len of int", "{{len 3}}", "", tVal.OrTypedNil(), false),
+    new("len of nothing", "{{len .Empty0}}", "", tVal.OrTypedNil(), false),
+    new("len of an interface field", "{{len .Empty3}}", "2", tVal.OrTypedNil(), true),
 
     // With.
-    new("with true"u8, "{{with true}}{{.}}{{end}}"u8, "true"u8, tVal.OrTypedNil(), true),
-    new("with false"u8, "{{with false}}{{.}}{{else}}FALSE{{end}}"u8, "FALSE"u8, tVal.OrTypedNil(), true),
-    new("with 1"u8, "{{with 1}}{{.}}{{else}}ZERO{{end}}"u8, "1"u8, tVal.OrTypedNil(), true),
-    new("with 0"u8, "{{with 0}}{{.}}{{else}}ZERO{{end}}"u8, "ZERO"u8, tVal.OrTypedNil(), true),
-    new("with 1.5"u8, "{{with 1.5}}{{.}}{{else}}ZERO{{end}}"u8, "1.5"u8, tVal.OrTypedNil(), true),
-    new("with 0.0"u8, "{{with .FloatZero}}{{.}}{{else}}ZERO{{end}}"u8, "ZERO"u8, tVal.OrTypedNil(), true),
-    new("with 1.5i"u8, "{{with 1.5i}}{{.}}{{else}}ZERO{{end}}"u8, "(0&#43;1.5i)"u8, tVal.OrTypedNil(), true),
-    new("with 0.0i"u8, "{{with .ComplexZero}}{{.}}{{else}}ZERO{{end}}"u8, "ZERO"u8, tVal.OrTypedNil(), true),
-    new("with emptystring"u8, "{{with ``}}{{.}}{{else}}EMPTY{{end}}"u8, "EMPTY"u8, tVal.OrTypedNil(), true),
-    new("with string"u8, "{{with `notempty`}}{{.}}{{else}}EMPTY{{end}}"u8, "notempty"u8, tVal.OrTypedNil(), true),
-    new("with emptyslice"u8, "{{with .SIEmpty}}{{.}}{{else}}EMPTY{{end}}"u8, "EMPTY"u8, tVal.OrTypedNil(), true),
-    new("with slice"u8, "{{with .SI}}{{.}}{{else}}EMPTY{{end}}"u8, "[3 4 5]"u8, tVal.OrTypedNil(), true),
-    new("with emptymap"u8, "{{with .MSIEmpty}}{{.}}{{else}}EMPTY{{end}}"u8, "EMPTY"u8, tVal.OrTypedNil(), true),
-    new("with map"u8, "{{with .MSIone}}{{.}}{{else}}EMPTY{{end}}"u8, "map[one:1]"u8, tVal.OrTypedNil(), true),
-    new("with empty interface, struct field"u8, "{{with .Empty4}}{{.V}}{{end}}"u8, "UinEmpty"u8, tVal.OrTypedNil(), true),
-    new("with $x int"u8, "{{with $x := .I}}{{$x}}{{end}}"u8, "17"u8, tVal.OrTypedNil(), true),
-    new("with $x struct.U.V"u8, "{{with $x := $}}{{$x.U.V}}{{end}}"u8, "v"u8, tVal.OrTypedNil(), true),
-    new("with variable and action"u8, "{{with $x := $}}{{$y := $.U.V}}{{$y}}{{end}}"u8, "v"u8, tVal.OrTypedNil(), true),
-    new("with on typed nil interface value"u8, "{{with .NonEmptyInterfaceTypedNil}}TRUE{{ end }}"u8, ""u8, tVal.OrTypedNil(), true),
-    new("with else with"u8, "{{with 0}}{{.}}{{else with true}}{{.}}{{end}}"u8, "true"u8, tVal.OrTypedNil(), true),
-    new("with else with chain"u8, "{{with 0}}{{.}}{{else with false}}{{.}}{{else with `notempty`}}{{.}}{{end}}"u8, "notempty"u8, tVal.OrTypedNil(), true),
+    new("with true", "{{with true}}{{.}}{{end}}", "true", tVal.OrTypedNil(), true),
+    new("with false", "{{with false}}{{.}}{{else}}FALSE{{end}}", "FALSE", tVal.OrTypedNil(), true),
+    new("with 1", "{{with 1}}{{.}}{{else}}ZERO{{end}}", "1", tVal.OrTypedNil(), true),
+    new("with 0", "{{with 0}}{{.}}{{else}}ZERO{{end}}", "ZERO", tVal.OrTypedNil(), true),
+    new("with 1.5", "{{with 1.5}}{{.}}{{else}}ZERO{{end}}", "1.5", tVal.OrTypedNil(), true),
+    new("with 0.0", "{{with .FloatZero}}{{.}}{{else}}ZERO{{end}}", "ZERO", tVal.OrTypedNil(), true),
+    new("with 1.5i", "{{with 1.5i}}{{.}}{{else}}ZERO{{end}}", "(0&#43;1.5i)", tVal.OrTypedNil(), true),
+    new("with 0.0i", "{{with .ComplexZero}}{{.}}{{else}}ZERO{{end}}", "ZERO", tVal.OrTypedNil(), true),
+    new("with emptystring", "{{with ``}}{{.}}{{else}}EMPTY{{end}}", "EMPTY", tVal.OrTypedNil(), true),
+    new("with string", "{{with `notempty`}}{{.}}{{else}}EMPTY{{end}}", "notempty", tVal.OrTypedNil(), true),
+    new("with emptyslice", "{{with .SIEmpty}}{{.}}{{else}}EMPTY{{end}}", "EMPTY", tVal.OrTypedNil(), true),
+    new("with slice", "{{with .SI}}{{.}}{{else}}EMPTY{{end}}", "[3 4 5]", tVal.OrTypedNil(), true),
+    new("with emptymap", "{{with .MSIEmpty}}{{.}}{{else}}EMPTY{{end}}", "EMPTY", tVal.OrTypedNil(), true),
+    new("with map", "{{with .MSIone}}{{.}}{{else}}EMPTY{{end}}", "map[one:1]", tVal.OrTypedNil(), true),
+    new("with empty interface, struct field", "{{with .Empty4}}{{.V}}{{end}}", "UinEmpty", tVal.OrTypedNil(), true),
+    new("with $x int", "{{with $x := .I}}{{$x}}{{end}}", "17", tVal.OrTypedNil(), true),
+    new("with $x struct.U.V", "{{with $x := $}}{{$x.U.V}}{{end}}", "v", tVal.OrTypedNil(), true),
+    new("with variable and action", "{{with $x := $}}{{$y := $.U.V}}{{$y}}{{end}}", "v", tVal.OrTypedNil(), true),
+    new("with on typed nil interface value", "{{with .NonEmptyInterfaceTypedNil}}TRUE{{ end }}", "", tVal.OrTypedNil(), true),
+    new("with else with", "{{with 0}}{{.}}{{else with true}}{{.}}{{end}}", "true", tVal.OrTypedNil(), true),
+    new("with else with chain", "{{with 0}}{{.}}{{else with false}}{{.}}{{else with `notempty`}}{{.}}{{end}}", "notempty", tVal.OrTypedNil(), true),
 
     // Range.
-    new("range []int"u8, "{{range .SI}}-{{.}}-{{end}}"u8, "-3--4--5-"u8, tVal.OrTypedNil(), true),
-    new("range empty no else"u8, "{{range .SIEmpty}}-{{.}}-{{end}}"u8, ""u8, tVal.OrTypedNil(), true),
-    new("range []int else"u8, "{{range .SI}}-{{.}}-{{else}}EMPTY{{end}}"u8, "-3--4--5-"u8, tVal.OrTypedNil(), true),
-    new("range empty else"u8, "{{range .SIEmpty}}-{{.}}-{{else}}EMPTY{{end}}"u8, "EMPTY"u8, tVal.OrTypedNil(), true),
-    new("range []int break else"u8, "{{range .SI}}-{{.}}-{{break}}NOTREACHED{{else}}EMPTY{{end}}"u8, "-3-"u8, tVal.OrTypedNil(), true),
-    new("range []int continue else"u8, "{{range .SI}}-{{.}}-{{continue}}NOTREACHED{{else}}EMPTY{{end}}"u8, "-3--4--5-"u8, tVal.OrTypedNil(), true),
-    new("range []bool"u8, "{{range .SB}}-{{.}}-{{end}}"u8, "-true--false-"u8, tVal.OrTypedNil(), true),
-    new("range []int method"u8, "{{range .SI | .MAdd .I}}-{{.}}-{{end}}"u8, "-20--21--22-"u8, tVal.OrTypedNil(), true),
-    new("range map"u8, "{{range .MSI}}-{{.}}-{{end}}"u8, "-1--3--2-"u8, tVal.OrTypedNil(), true),
-    new("range empty map no else"u8, "{{range .MSIEmpty}}-{{.}}-{{end}}"u8, ""u8, tVal.OrTypedNil(), true),
-    new("range map else"u8, "{{range .MSI}}-{{.}}-{{else}}EMPTY{{end}}"u8, "-1--3--2-"u8, tVal.OrTypedNil(), true),
-    new("range empty map else"u8, "{{range .MSIEmpty}}-{{.}}-{{else}}EMPTY{{end}}"u8, "EMPTY"u8, tVal.OrTypedNil(), true),
-    new("range empty interface"u8, "{{range .Empty3}}-{{.}}-{{else}}EMPTY{{end}}"u8, "-7--8-"u8, tVal.OrTypedNil(), true),
-    new("range empty nil"u8, "{{range .Empty0}}-{{.}}-{{end}}"u8, ""u8, tVal.OrTypedNil(), true),
-    new("range $x SI"u8, "{{range $x := .SI}}<{{$x}}>{{end}}"u8, "&lt;3>&lt;4>&lt;5>"u8, tVal.OrTypedNil(), true),
-    new("range $x $y SI"u8, "{{range $x, $y := .SI}}<{{$x}}={{$y}}>{{end}}"u8, "&lt;0=3>&lt;1=4>&lt;2=5>"u8, tVal.OrTypedNil(), true),
-    new("range $x MSIone"u8, "{{range $x := .MSIone}}<{{$x}}>{{end}}"u8, "&lt;1>"u8, tVal.OrTypedNil(), true),
-    new("range $x $y MSIone"u8, "{{range $x, $y := .MSIone}}<{{$x}}={{$y}}>{{end}}"u8, "&lt;one=1>"u8, tVal.OrTypedNil(), true),
-    new("range $x PSI"u8, "{{range $x := .PSI}}<{{$x}}>{{end}}"u8, "&lt;21>&lt;22>&lt;23>"u8, tVal.OrTypedNil(), true),
-    new("declare in range"u8, "{{range $x := .PSI}}<{{$foo:=$x}}{{$x}}>{{end}}"u8, "&lt;21>&lt;22>&lt;23>"u8, tVal.OrTypedNil(), true),
-    new("range count"u8, @"{{range $i, $x := count 5}}[{{$i}}]{{$x}}{{end}}"u8, "[0]a[1]b[2]c[3]d[4]e"u8, tVal.OrTypedNil(), true),
-    new("range nil count"u8, @"{{range $i, $x := count 0}}{{else}}empty{{end}}"u8, "empty"u8, tVal.OrTypedNil(), true),
+    new("range []int", "{{range .SI}}-{{.}}-{{end}}", "-3--4--5-", tVal.OrTypedNil(), true),
+    new("range empty no else", "{{range .SIEmpty}}-{{.}}-{{end}}", "", tVal.OrTypedNil(), true),
+    new("range []int else", "{{range .SI}}-{{.}}-{{else}}EMPTY{{end}}", "-3--4--5-", tVal.OrTypedNil(), true),
+    new("range empty else", "{{range .SIEmpty}}-{{.}}-{{else}}EMPTY{{end}}", "EMPTY", tVal.OrTypedNil(), true),
+    new("range []int break else", "{{range .SI}}-{{.}}-{{break}}NOTREACHED{{else}}EMPTY{{end}}", "-3-", tVal.OrTypedNil(), true),
+    new("range []int continue else", "{{range .SI}}-{{.}}-{{continue}}NOTREACHED{{else}}EMPTY{{end}}", "-3--4--5-", tVal.OrTypedNil(), true),
+    new("range []bool", "{{range .SB}}-{{.}}-{{end}}", "-true--false-", tVal.OrTypedNil(), true),
+    new("range []int method", "{{range .SI | .MAdd .I}}-{{.}}-{{end}}", "-20--21--22-", tVal.OrTypedNil(), true),
+    new("range map", "{{range .MSI}}-{{.}}-{{end}}", "-1--3--2-", tVal.OrTypedNil(), true),
+    new("range empty map no else", "{{range .MSIEmpty}}-{{.}}-{{end}}", "", tVal.OrTypedNil(), true),
+    new("range map else", "{{range .MSI}}-{{.}}-{{else}}EMPTY{{end}}", "-1--3--2-", tVal.OrTypedNil(), true),
+    new("range empty map else", "{{range .MSIEmpty}}-{{.}}-{{else}}EMPTY{{end}}", "EMPTY", tVal.OrTypedNil(), true),
+    new("range empty interface", "{{range .Empty3}}-{{.}}-{{else}}EMPTY{{end}}", "-7--8-", tVal.OrTypedNil(), true),
+    new("range empty nil", "{{range .Empty0}}-{{.}}-{{end}}", "", tVal.OrTypedNil(), true),
+    new("range $x SI", "{{range $x := .SI}}<{{$x}}>{{end}}", "&lt;3>&lt;4>&lt;5>", tVal.OrTypedNil(), true),
+    new("range $x $y SI", "{{range $x, $y := .SI}}<{{$x}}={{$y}}>{{end}}", "&lt;0=3>&lt;1=4>&lt;2=5>", tVal.OrTypedNil(), true),
+    new("range $x MSIone", "{{range $x := .MSIone}}<{{$x}}>{{end}}", "&lt;1>", tVal.OrTypedNil(), true),
+    new("range $x $y MSIone", "{{range $x, $y := .MSIone}}<{{$x}}={{$y}}>{{end}}", "&lt;one=1>", tVal.OrTypedNil(), true),
+    new("range $x PSI", "{{range $x := .PSI}}<{{$x}}>{{end}}", "&lt;21>&lt;22>&lt;23>", tVal.OrTypedNil(), true),
+    new("declare in range", "{{range $x := .PSI}}<{{$foo:=$x}}{{$x}}>{{end}}", "&lt;21>&lt;22>&lt;23>", tVal.OrTypedNil(), true),
+    new("range count", @"{{range $i, $x := count 5}}[{{$i}}]{{$x}}{{end}}", "[0]a[1]b[2]c[3]d[4]e", tVal.OrTypedNil(), true),
+    new("range nil count", @"{{range $i, $x := count 0}}{{else}}empty{{end}}", "empty", tVal.OrTypedNil(), true),
 
     // Cute examples.
-    new("or as if true"u8, @"{{or .SI ""slice is empty""}}"u8, "[3 4 5]"u8, tVal.OrTypedNil(), true),
-    new("or as if false"u8, @"{{or .SIEmpty ""slice is empty""}}"u8, "slice is empty"u8, tVal.OrTypedNil(), true),
+    new("or as if true", @"{{or .SI ""slice is empty""}}", "[3 4 5]", tVal.OrTypedNil(), true),
+    new("or as if false", @"{{or .SIEmpty ""slice is empty""}}", "slice is empty", tVal.OrTypedNil(), true),
 
     // Error handling.
-    new("error method, error"u8, "{{.MyError true}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("error method, no error"u8, "{{.MyError false}}"u8, "false"u8, tVal.OrTypedNil(), true),
+    new("error method, error", "{{.MyError true}}", "", tVal.OrTypedNil(), false),
+    new("error method, no error", "{{.MyError false}}", "false", tVal.OrTypedNil(), true),
 
     // Numbers
-    new("decimal"u8, "{{print 1234}}"u8, "1234"u8, tVal.OrTypedNil(), true),
-    new("decimal _"u8, "{{print 12_34}}"u8, "1234"u8, tVal.OrTypedNil(), true),
-    new("binary"u8, "{{print 0b101}}"u8, "5"u8, tVal.OrTypedNil(), true),
-    new("binary _"u8, "{{print 0b_1_0_1}}"u8, "5"u8, tVal.OrTypedNil(), true),
-    new("BINARY"u8, "{{print 0B101}}"u8, "5"u8, tVal.OrTypedNil(), true),
-    new("octal0"u8, "{{print 0377}}"u8, "255"u8, tVal.OrTypedNil(), true),
-    new("octal"u8, "{{print 0o377}}"u8, "255"u8, tVal.OrTypedNil(), true),
-    new("octal _"u8, "{{print 0o_3_7_7}}"u8, "255"u8, tVal.OrTypedNil(), true),
-    new("OCTAL"u8, "{{print 0O377}}"u8, "255"u8, tVal.OrTypedNil(), true),
-    new("hex"u8, "{{print 0x123}}"u8, "291"u8, tVal.OrTypedNil(), true),
-    new("hex _"u8, "{{print 0x1_23}}"u8, "291"u8, tVal.OrTypedNil(), true),
-    new("HEX"u8, "{{print 0X123ABC}}"u8, "1194684"u8, tVal.OrTypedNil(), true),
-    new("float"u8, "{{print 123.4}}"u8, "123.4"u8, tVal.OrTypedNil(), true),
-    new("float _"u8, "{{print 0_0_1_2_3.4}}"u8, "123.4"u8, tVal.OrTypedNil(), true),
-    new("hex float"u8, "{{print +0x1.ep+2}}"u8, "7.5"u8, tVal.OrTypedNil(), true),
-    new("hex float _"u8, "{{print +0x_1.e_0p+0_2}}"u8, "7.5"u8, tVal.OrTypedNil(), true),
-    new("HEX float"u8, "{{print +0X1.EP+2}}"u8, "7.5"u8, tVal.OrTypedNil(), true),
-    new("print multi"u8, "{{print 1_2_3_4 7.5_00_00_00}}"u8, "1234 7.5"u8, tVal.OrTypedNil(), true),
-    new("print multi2"u8, "{{print 1234 0x0_1.e_0p+02}}"u8, "1234 7.5"u8, tVal.OrTypedNil(), true),
+    new("decimal", "{{print 1234}}", "1234", tVal.OrTypedNil(), true),
+    new("decimal _", "{{print 12_34}}", "1234", tVal.OrTypedNil(), true),
+    new("binary", "{{print 0b101}}", "5", tVal.OrTypedNil(), true),
+    new("binary _", "{{print 0b_1_0_1}}", "5", tVal.OrTypedNil(), true),
+    new("BINARY", "{{print 0B101}}", "5", tVal.OrTypedNil(), true),
+    new("octal0", "{{print 0377}}", "255", tVal.OrTypedNil(), true),
+    new("octal", "{{print 0o377}}", "255", tVal.OrTypedNil(), true),
+    new("octal _", "{{print 0o_3_7_7}}", "255", tVal.OrTypedNil(), true),
+    new("OCTAL", "{{print 0O377}}", "255", tVal.OrTypedNil(), true),
+    new("hex", "{{print 0x123}}", "291", tVal.OrTypedNil(), true),
+    new("hex _", "{{print 0x1_23}}", "291", tVal.OrTypedNil(), true),
+    new("HEX", "{{print 0X123ABC}}", "1194684", tVal.OrTypedNil(), true),
+    new("float", "{{print 123.4}}", "123.4", tVal.OrTypedNil(), true),
+    new("float _", "{{print 0_0_1_2_3.4}}", "123.4", tVal.OrTypedNil(), true),
+    new("hex float", "{{print +0x1.ep+2}}", "7.5", tVal.OrTypedNil(), true),
+    new("hex float _", "{{print +0x_1.e_0p+0_2}}", "7.5", tVal.OrTypedNil(), true),
+    new("HEX float", "{{print +0X1.EP+2}}", "7.5", tVal.OrTypedNil(), true),
+    new("print multi", "{{print 1_2_3_4 7.5_00_00_00}}", "1234 7.5", tVal.OrTypedNil(), true),
+    new("print multi2", "{{print 1234 0x0_1.e_0p+02}}", "1234 7.5", tVal.OrTypedNil(), true),
 
     // Fixed bugs.
     // Must separate dot and receiver; otherwise args are evaluated with dot set to variable.
-    new("bug0"u8, "{{range .MSIone}}{{if $.Method1 .}}X{{end}}{{end}}"u8, "X"u8, tVal.OrTypedNil(), true),
+    new("bug0", "{{range .MSIone}}{{if $.Method1 .}}X{{end}}{{end}}", "X", tVal.OrTypedNil(), true),
     // Do not loop endlessly in indirect for non-empty interfaces.
     // The bug appears with *interface only; looped forever.
-    new("bug1"u8, "{{.Method0}}"u8, "M0"u8, ᏑiVal, true),
+    new("bug1", "{{.Method0}}", "M0", ᏑiVal, true),
     // Was taking address of interface field, so method set was empty.
-    new("bug2"u8, "{{$.NonEmptyInterface.Method0}}"u8, "M0"u8, tVal.OrTypedNil(), true),
+    new("bug2", "{{$.NonEmptyInterface.Method0}}", "M0", tVal.OrTypedNil(), true),
     // Struct values were not legal in with - mere oversight.
-    new("bug3"u8, "{{with $}}{{.Method0}}{{end}}"u8, "M0"u8, tVal.OrTypedNil(), true),
+    new("bug3", "{{with $}}{{.Method0}}{{end}}", "M0", tVal.OrTypedNil(), true),
     // Nil interface values in if.
-    new("bug4"u8, "{{if .Empty0}}non-nil{{else}}nil{{end}}"u8, "nil"u8, tVal.OrTypedNil(), true),
+    new("bug4", "{{if .Empty0}}non-nil{{else}}nil{{end}}", "nil", tVal.OrTypedNil(), true),
     // Stringer.
-    new("bug5"u8, "{{.Str}}"u8, "foozle"u8, tVal.OrTypedNil(), true),
-    new("bug5a"u8, "{{.Err}}"u8, "erroozle"u8, tVal.OrTypedNil(), true),
+    new("bug5", "{{.Str}}", "foozle", tVal.OrTypedNil(), true),
+    new("bug5a", "{{.Err}}", "erroozle", tVal.OrTypedNil(), true),
     // Args need to be indirected and dereferenced sometimes.
-    new("bug6a"u8, "{{vfunc .V0 .V1}}"u8, "vfunc"u8, tVal.OrTypedNil(), true),
-    new("bug6b"u8, "{{vfunc .V0 .V0}}"u8, "vfunc"u8, tVal.OrTypedNil(), true),
-    new("bug6c"u8, "{{vfunc .V1 .V0}}"u8, "vfunc"u8, tVal.OrTypedNil(), true),
-    new("bug6d"u8, "{{vfunc .V1 .V1}}"u8, "vfunc"u8, tVal.OrTypedNil(), true),
+    new("bug6a", "{{vfunc .V0 .V1}}", "vfunc", tVal.OrTypedNil(), true),
+    new("bug6b", "{{vfunc .V0 .V0}}", "vfunc", tVal.OrTypedNil(), true),
+    new("bug6c", "{{vfunc .V1 .V0}}", "vfunc", tVal.OrTypedNil(), true),
+    new("bug6d", "{{vfunc .V1 .V1}}", "vfunc", tVal.OrTypedNil(), true),
     // Legal parse but illegal execution: non-function should have no arguments.
-    new("bug7a"u8, "{{3 2}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug7b"u8, "{{$x := 1}}{{$x 2}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug7c"u8, "{{$x := 1}}{{3 | $x}}"u8, ""u8, tVal.OrTypedNil(), false),
+    new("bug7a", "{{3 2}}", "", tVal.OrTypedNil(), false),
+    new("bug7b", "{{$x := 1}}{{$x 2}}", "", tVal.OrTypedNil(), false),
+    new("bug7c", "{{$x := 1}}{{3 | $x}}", "", tVal.OrTypedNil(), false),
     // Pipelined arg was not being type-checked.
-    new("bug8a"u8, "{{3|oneArg}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug8b"u8, "{{4|dddArg 3}}"u8, ""u8, tVal.OrTypedNil(), false),
+    new("bug8a", "{{3|oneArg}}", "", tVal.OrTypedNil(), false),
+    new("bug8b", "{{4|dddArg 3}}", "", tVal.OrTypedNil(), false),
     // A bug was introduced that broke map lookups for lower-case names.
-    new("bug9"u8, "{{.cause}}"u8, "neglect"u8, new map<@string, @string>{["cause"u8] = "neglect"u8}, true),
+    new("bug9", "{{.cause}}", "neglect", new map<@string, @string>{["cause"] = "neglect"}, true),
     // Field chain starting with function did not work.
-    new("bug10"u8, "{{mapOfThree.three}}-{{(mapOfThree).three}}"u8, "3-3"u8, (nint)0, true),
+    new("bug10", "{{mapOfThree.three}}-{{(mapOfThree).three}}", "3-3", (nint)0, true),
     // Dereferencing nil pointer while evaluating function arguments should not panic. Issue 7333.
-    new("bug11"u8, "{{valueString .PS}}"u8, ""u8, new T(nil), false),
+    new("bug11", "{{valueString .PS}}", "", new T(), false),
     // 0xef gave constant type float64. Issue 8622.
-    new("bug12xe"u8, "{{printf `%T` 0xef}}"u8, "int"u8, new T(nil), true),
-    new("bug12xE"u8, "{{printf `%T` 0xEE}}"u8, "int"u8, new T(nil), true),
-    new("bug12Xe"u8, "{{printf `%T` 0Xef}}"u8, "int"u8, new T(nil), true),
-    new("bug12XE"u8, "{{printf `%T` 0XEE}}"u8, "int"u8, new T(nil), true),
+    new("bug12xe", "{{printf `%T` 0xef}}", "int", new T(), true),
+    new("bug12xE", "{{printf `%T` 0xEE}}", "int", new T(), true),
+    new("bug12Xe", "{{printf `%T` 0Xef}}", "int", new T(), true),
+    new("bug12XE", "{{printf `%T` 0XEE}}", "int", new T(), true),
     // Chained nodes did not work as arguments. Issue 8473.
-    new("bug13"u8, "{{print (.Copy).I}}"u8, "17"u8, tVal.OrTypedNil(), true),
+    new("bug13", "{{print (.Copy).I}}", "17", tVal.OrTypedNil(), true),
     // Didn't protect against nil or literal values in field chains.
-    new("bug14a"u8, "{{(nil).True}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug14b"u8, "{{$x := nil}}{{$x.anything}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug14c"u8, @"{{$x := (1.0)}}{{$y := (""hello"")}}{{$x.anything}}{{$y.true}}"u8, ""u8, tVal.OrTypedNil(), false),
+    new("bug14a", "{{(nil).True}}", "", tVal.OrTypedNil(), false),
+    new("bug14b", "{{$x := nil}}{{$x.anything}}", "", tVal.OrTypedNil(), false),
+    new("bug14c", @"{{$x := (1.0)}}{{$y := (""hello"")}}{{$x.anything}}{{$y.true}}", "", tVal.OrTypedNil(), false),
     // Didn't call validateType on function results. Issue 10800.
-    new("bug15"u8, "{{valueString returnInt}}"u8, ""u8, tVal.OrTypedNil(), false),
+    new("bug15", "{{valueString returnInt}}", "", tVal.OrTypedNil(), false),
     // Variadic function corner cases. Issue 10946.
-    new("bug16a"u8, "{{true|printf}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug16b"u8, "{{1|printf}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug16c"u8, "{{1.1|printf}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug16d"u8, "{{'x'|printf}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug16e"u8, "{{0i|printf}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug16f"u8, "{{true|twoArgs \"xxx\"}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug16g"u8, "{{\"aaa\" |twoArgs \"bbb\"}}"u8, "twoArgs=bbbaaa"u8, tVal.OrTypedNil(), true),
-    new("bug16h"u8, "{{1|oneArg}}"u8, ""u8, tVal.OrTypedNil(), false),
-    new("bug16i"u8, "{{\"aaa\"|oneArg}}"u8, "oneArg=aaa"u8, tVal.OrTypedNil(), true),
-    new("bug16j"u8, "{{1+2i|printf \"%v\"}}"u8, "(1&#43;2i)"u8, tVal.OrTypedNil(), true),
-    new("bug16k"u8, "{{\"aaa\"|printf }}"u8, "aaa"u8, tVal.OrTypedNil(), true),
-    new("bug17a"u8, "{{.NonEmptyInterface.X}}"u8, "x"u8, tVal.OrTypedNil(), true),
-    new("bug17b"u8, "-{{.NonEmptyInterface.Method1 1234}}-"u8, "-1234-"u8, tVal.OrTypedNil(), true),
-    new("bug17c"u8, "{{len .NonEmptyInterfacePtS}}"u8, "2"u8, tVal.OrTypedNil(), true),
-    new("bug17d"u8, "{{index .NonEmptyInterfacePtS 0}}"u8, "a"u8, tVal.OrTypedNil(), true),
-    new("bug17e"u8, "{{range .NonEmptyInterfacePtS}}-{{.}}-{{end}}"u8, "-a--b-"u8, tVal.OrTypedNil(), true),
+    new("bug16a", "{{true|printf}}", "", tVal.OrTypedNil(), false),
+    new("bug16b", "{{1|printf}}", "", tVal.OrTypedNil(), false),
+    new("bug16c", "{{1.1|printf}}", "", tVal.OrTypedNil(), false),
+    new("bug16d", "{{'x'|printf}}", "", tVal.OrTypedNil(), false),
+    new("bug16e", "{{0i|printf}}", "", tVal.OrTypedNil(), false),
+    new("bug16f", "{{true|twoArgs \"xxx\"}}", "", tVal.OrTypedNil(), false),
+    new("bug16g", "{{\"aaa\" |twoArgs \"bbb\"}}", "twoArgs=bbbaaa", tVal.OrTypedNil(), true),
+    new("bug16h", "{{1|oneArg}}", "", tVal.OrTypedNil(), false),
+    new("bug16i", "{{\"aaa\"|oneArg}}", "oneArg=aaa", tVal.OrTypedNil(), true),
+    new("bug16j", "{{1+2i|printf \"%v\"}}", "(1&#43;2i)", tVal.OrTypedNil(), true),
+    new("bug16k", "{{\"aaa\"|printf }}", "aaa", tVal.OrTypedNil(), true),
+    new("bug17a", "{{.NonEmptyInterface.X}}", "x", tVal.OrTypedNil(), true),
+    new("bug17b", "-{{.NonEmptyInterface.Method1 1234}}-", "-1234-", tVal.OrTypedNil(), true),
+    new("bug17c", "{{len .NonEmptyInterfacePtS}}", "2", tVal.OrTypedNil(), true),
+    new("bug17d", "{{index .NonEmptyInterfacePtS 0}}", "a", tVal.OrTypedNil(), true),
+    new("bug17e", "{{range .NonEmptyInterfacePtS}}-{{.}}-{{end}}", "-a--b-", tVal.OrTypedNil(), true),
 
     // More variadic function corner cases. Some runes would get evaluated
     // as constant floats instead of ints. Issue 34483.
-    new("bug18a"u8, "{{eq . '.'}}"u8, "true"u8, (rune)'.', true),
-    new("bug18b"u8, "{{eq . 'e'}}"u8, "true"u8, (rune)'e', true),
-    new("bug18c"u8, "{{eq . 'P'}}"u8, "true"u8, (rune)'P', true)
-}.slice();
+    new("bug18a", "{{eq . '.'}}", "true", (rune)'.', true),
+    new("bug18b", "{{eq . 'e'}}", "true", (rune)'e', true),
+    new("bug18c", "{{eq . 'P'}}", "true", (rune)'P', true)
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string zeroArgsˢ = "zeroArgs"u8;
+internal static ref readonly @string zeroArgsˢ => ref zeroArgsˢᵇ;
+private static readonly @string zeroArgsˢᵇ = "zeroArgs"u8;
 
 internal static @string zeroArgs() {
     return zeroArgsˢ;
@@ -746,7 +750,7 @@ internal static @string dddArg(nint a, params ꓸꓸꓸstring bʗp) {
 // count returns a channel that will deliver n sequential 1-letter strings starting at "a"
 internal static partial channel<@string> count(nint n) {
     if (n == 0) {
-        return default!;
+        return default;
     }
     var c = new channel<@string>(0);
     var cʗ1 = c;
@@ -755,12 +759,13 @@ internal static partial channel<@string> count(nint n) {
             cʗ1.ᐸꟷ("abcdefghijklmnop"u8.slice(i, i + 1));
         }
         close(cʗ1);
-    });
+    }, GoStack.Bounded);
     return c;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string vfuncˢ = "vfunc"u8;
+internal static ref readonly @string vfuncˢ => ref vfuncˢᵇ;
+private static readonly @string vfuncˢᵇ = "vfunc"u8;
 
 // vfunc takes a *V and a V
 internal static @string vfunc(V _Δp0, ж<V> _Δp1) {
@@ -768,7 +773,8 @@ internal static @string vfunc(V _Δp0, ж<V> _Δp1) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string valueIsIgnoredˢ = "value is ignored"u8;
+internal static ref readonly @string valueIsIgnoredˢ => ref valueIsIgnoredˢᵇ;
+private static readonly @string valueIsIgnoredˢᵇ = "value is ignored"u8;
 
 // valueString takes a string, not a pointer.
 internal static @string valueString(@string v) {
@@ -812,60 +818,58 @@ internal static @string stringer(fmt.Stringer s) {
 }
 
 internal static any mapOfThree() {
-    return new map<@string, nint>{["three"u8] = 3};
+    return new map<@string, nint>{["three"] = 3};
 }
 
-internal static void testExecute(slice<execTest> execTests, ж<global::go.html.template_package.Template> Ꮡtemplate, ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+internal static void testExecute(slice<execTest> execTests, ж<global::go.html.template_package.Template> template, ж<testing.T> t) {
     var b = @new<strings.Builder>();
     var funcs = new FuncMap(new map<@string, any>{
-        ["add"u8] = ((Funcꓸꓸꓸ<nint, nint>)(add)),
-        ["count"u8] = count,
-        ["dddArg"u8] = ((Funcꓸꓸꓸ<nint, @string, @string>)(dddArg)),
-        ["echo"u8] = echo,
-        ["makemap"u8] = ((Funcꓸꓸꓸ<@string, map<@string, @string>>)(makemap)),
-        ["mapOfThree"u8] = mapOfThree,
-        ["oneArg"u8] = oneArg,
-        ["returnInt"u8] = returnInt,
-        ["stringer"u8] = stringer,
-        ["twoArgs"u8] = twoArgs,
-        ["typeOf"u8] = typeOf,
-        ["valueString"u8] = valueString,
-        ["vfunc"u8] = vfunc,
-        ["zeroArgs"u8] = zeroArgs
+        ["add"] = ((Funcꓸꓸꓸ<nint, nint>)(add)),
+        ["count"] = count,
+        ["dddArg"] = ((Funcꓸꓸꓸ<nint, @string, @string>)(dddArg)),
+        ["echo"] = echo,
+        ["makemap"] = ((Funcꓸꓸꓸ<@string, map<@string, @string>>)(makemap)),
+        ["mapOfThree"] = mapOfThree,
+        ["oneArg"] = oneArg,
+        ["returnInt"] = returnInt,
+        ["stringer"] = stringer,
+        ["twoArgs"] = twoArgs,
+        ["typeOf"] = typeOf,
+        ["valueString"] = valueString,
+        ["vfunc"] = vfunc,
+        ["zeroArgs"] = zeroArgs
     });
     foreach (var (_, test) in execTests) {
-        ж<global::go.html.template_package.Template> tmpl = default!;
-        error err = default!;
-        if (Ꮡtemplate == nil){
+        ж<global::go.html.template_package.Template> tmpl = default;
+        error err = default;
+        if (template == nil) {
             (tmpl, err) = New(test.name).Funcs(funcs).Parse(test.input);
         } else {
-            (tmpl, err) = Ꮡtemplate.Clone();
-            if (err != default!) {
-                Ꮡt.Errorf("%s: clone error: %s"u8, test.name, err);
+            (tmpl, err) = template.Clone();
+            if (err != nil) {
+                t.Errorf("%s: clone error: %s", test.name, err);
                 continue;
             }
             (tmpl, err) = tmpl.New(test.name).Funcs(funcs).Parse(test.input);
         }
-        if (err != default!) {
-            Ꮡt.Errorf("%s: parse error: %s"u8, test.name, err);
+        if (err != nil) {
+            t.Errorf("%s: parse error: %s", test.name, err);
             continue;
         }
         b.Reset();
         err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(b), test.data);
         switch (ᐧ) {
-        case {} when !test.ok && err == default!: {
-            Ꮡt.Errorf("%s: expected error; got none"u8, test.name);
+        case {} when !test.ok && err == nil: {
+            t.Errorf("%s: expected error; got none", test.name);
             continue;
             break;
         }
-        case {} when test.ok && err != default!: {
-            Ꮡt.Errorf("%s: unexpected execute error: %s"u8, test.name, err);
+        case {} when test.ok && err != nil: {
+            t.Errorf("%s: unexpected execute error: %s", test.name, err);
             continue;
             break;
         }
-        case {} when !test.ok && err != default!: {
+        case {} when !test.ok && err != nil: {
             // expected error, got one
             if (debug.Value) {
                 fmt.Printf("%s: %s\n\t%s\n"u8, test.name, test.input, err);
@@ -874,34 +878,37 @@ internal static void testExecute(slice<execTest> execTests, ж<global::go.html.t
         }}
         @string result = b.String();
         if (result != test.output) {
-            Ꮡt.Errorf("%s: expected\n\t%q\ngot\n\t%q"u8, test.name, test.output, result);
+            t.Errorf("%s: expected\n\t%q\ngot\n\t%q", test.name, test.output, result);
         }
     }
 }
 
-public static void TestExecute(ж<testing.T> Ꮡt) {
-    testExecute(execTests, nil, Ꮡt);
+public static void TestExecute(ж<testing.T> t) {
+    testExecute(execTests, nil, t);
 }
 
-internal static slice<@string> delimPairs = new @string[]{
-    ""u8, ""u8, // default
-    "{{"u8, "}}"u8, // same as default
-    "|"u8, "|"u8, // same
-    "(日)"u8, "(本)"u8 // peculiar
-}.slice();
+internal static slice<@string> delimPairs = slice<@string>([
+    "", "", // default
+    "{{", "}}", // same as default
+    "|", "|", // same
+    "(日)", "(本)" // peculiar
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string strˢ = ".Str"u8;
-internal static readonly @string delimsˢ = "delims"u8;
+internal static ref readonly @string strˢ => ref strˢᵇ;
+private static readonly @string strˢᵇ = ".Str"u8;
+internal static ref readonly @string delimsˢ => ref delimsˢᵇ;
+private static readonly @string delimsˢᵇ = "delims"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string helloᶜ = "Hello, world"u8;
+internal static ref readonly @string helloᶜ => ref helloᶜᵇ;
+private static readonly @string helloᶜᵇ = "Hello, world"u8;
 
 internal partial struct TestDelims_type /*dyn*/ {
     public @string Str;
 }
 
-public static void TestDelims(ж<testing.T> Ꮡt) {
+public static void TestDelims(ж<testing.T> t) {
     @string hello = helloᶜ;
     TestDelims_type value = new TestDelims_type(hello);
     for (nint i = 0; i < len(delimPairs); i += 2) {
@@ -911,10 +918,10 @@ public static void TestDelims(ж<testing.T> Ꮡt) {
         @string right = delimPairs[i + 1];
         @string trueRight = right;
         if (left == ""u8) { // default case
-            trueLeft = "{{"u8;
+            trueLeft = "{{";
         }
         if (right == ""u8) { // default case
-            trueRight = "}}"u8;
+            trueRight = "}}";
         }
         text = trueLeft + text + trueRight;
         // Now add a comment
@@ -923,45 +930,47 @@ public static void TestDelims(ж<testing.T> Ꮡt) {
         text += trueLeft + @""""u8 + trueLeft + @""""u8 + trueRight;
         // At this point text looks like `{{.Str}}{{/*comment*/}}{{"{{"}}`.
         var (tmpl, err) = New(delimsˢ).Delims(left, right).Parse(text);
-        if (err != default!) {
-            Ꮡt.Fatalf("delim %q text %q parse err %s"u8, left, text, err);
+        if (err != nil) {
+            t.Fatalf("delim %q text %q parse err %s", left, text, err);
         }
         ж<strings.Builder> b = @new<strings.Builder>();
         err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(b), value);
-        if (err != default!) {
-            Ꮡt.Fatalf("delim %q exec err %s"u8, left, err);
+        if (err != nil) {
+            t.Fatalf("delim %q exec err %s", left, err);
         }
         if (b.String() != hello + trueLeft) {
-            Ꮡt.Errorf("expected %q got %q"u8, hello + trueLeft, b.String());
+            t.Errorf("expected %q got %q", hello + trueLeft, b.String());
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string errorˢ = "error"u8;
-internal static readonly @string myErrorTrueˢ = "{{.MyError true}}"u8;
+internal static ref readonly @string errorˢ => ref errorˢᵇ;
+private static readonly @string errorˢᵇ = "error"u8;
+internal static ref readonly @string myErrorTrueˢ => ref myErrorTrueˢᵇ;
+private static readonly @string myErrorTrueˢᵇ = "{{.MyError true}}"u8;
 
 // Check that an error from a method flows back to the top.
-public static void TestExecuteError(ж<testing.T> Ꮡt) {
+public static void TestExecuteError(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     var tmpl = New(errorˢ);
     var (_, err) = tmpl.Parse(myErrorTrueˢ);
-    if (err != default!) {
-        Ꮡt.Fatalf("parse error: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("parse error: %s", err);
     }
     err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(b), tVal.OrTypedNil());
-    if (err == default!){
-        Ꮡt.Errorf("expected error; got none"u8);
-    } else 
-    if (!strings.Contains(err.Error(), myError.Error())) {
+    if (err == nil) {
+        t.Errorf("expected error; got none");
+    } else if (!strings.Contains(err.Error(), myError.Error())) {
         if (debug.Value) {
             fmt.Printf("test execute error: %s\n"u8, err);
         }
-        Ꮡt.Errorf("expected myError; got %s"u8, err);
+        t.Errorf("expected myError; got %s", err);
     }
 }
 
-internal static readonly @string execErrorText = """
+internal static ref readonly @string execErrorText => ref execErrorTextᵇ;
+private static readonly @string execErrorTextᵇ = """
 line 1
 line 2
 line 3
@@ -972,27 +981,29 @@ line 3
 """u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string topˢ = "top"u8;
+internal static ref readonly @string topˢ => ref topˢᵇ;
+private static readonly @string topˢᵇ = "top"u8;
 internal static readonly object parseErrorˢ = (@string)"parse error:"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ2 = @"template: top:7:20: executing ""three"" at <index ""hi"" $>: error calling index: index out of range: 5"u8;
+internal static ref readonly @string wantᶜ2 => ref wantᶜ2ᵇ;
+private static readonly @string wantᶜ2ᵇ = @"template: top:7:20: executing ""three"" at <index ""hi"" $>: error calling index: index out of range: 5"u8;
 
 // Check that an error from a nested template contains all the relevant information.
-public static void TestExecError(ж<testing.T> Ꮡt) {
+public static void TestExecError(ж<testing.T> t) {
     var (tmpl, err) = New(topˢ).Parse(execErrorText);
-    if (err != default!) {
-        Ꮡt.Fatal(parseErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(parseErrorˢ, err);
     }
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)5); // 5 is out of range indexing "hi"
-    if (err == default!) {
-        Ꮡt.Fatal(expectedErrorˢ);
+    if (err == nil) {
+        t.Fatal(expectedErrorˢ);
     }
     @string want = wantᶜ2;
     @string got = err.Error();
     if (got != want) {
-        Ꮡt.Errorf("expected\n%q\ngot\n%q"u8, want, got);
+        t.Errorf("expected\n%q\ngot\n%q", want, got);
     }
 }
 
@@ -1000,21 +1011,21 @@ internal partial struct TestJSEscaping_testCases /*dyn*/ {
     internal @string @in, exp;
 }
 
-public static void TestJSEscaping(ж<testing.T> Ꮡt) {
-    var testCases = new TestJSEscaping_testCases[]{
-        new(@"a"u8, @"a"u8),
-        new(@"'foo"u8, @"\'foo"u8),
-        new(@"Go ""jump"" \"u8, @"Go \""jump\"" \\"u8),
-        new(@"Yukihiro says ""今日は世界"""u8, @"Yukihiro says \""今日は世界\"""u8),
-        new("unprintable \uFFFE"u8, @"unprintable \uFFFE"u8),
-        new(@"<html>"u8, @"\u003Chtml\u003E"u8),
-        new(@"no = in attributes"u8, @"no \u003D in attributes"u8),
-        new(@"&#x27; does not become HTML entity"u8, @"\u0026#x27; does not become HTML entity"u8)
-    }.slice();
+public static void TestJSEscaping(ж<testing.T> t) {
+    var testCases = slice<TestJSEscaping_testCases>([
+        new(@"a", @"a"),
+        new(@"'foo", @"\'foo"),
+        new(@"Go ""jump"" \", @"Go \""jump\"" \\"),
+        new(@"Yukihiro says ""今日は世界""", @"Yukihiro says \""今日は世界\"""),
+        new("unprintable \uFFFE", @"unprintable \uFFFE"),
+        new(@"<html>", @"\u003Chtml\u003E"),
+        new(@"no = in attributes", @"no \u003D in attributes"),
+        new(@"&#x27; does not become HTML entity", @"\u0026#x27; does not become HTML entity")
+    ]);
     foreach (var (_, tc) in testCases) {
         @string s = JSEscapeString(tc.@in);
         if (s != tc.exp) {
-            Ꮡt.Errorf("JS escaping [%s] got [%s] want [%s]"u8, tc.@in, s, tc.exp);
+            t.Errorf("JS escaping [%s] got [%s] want [%s]", tc.@in, s, tc.exp);
         }
     }
 }
@@ -1027,7 +1038,8 @@ public partial struct Tree {
 
 // Use different delimiters to test Set.Delims.
 // Also test the trimming of leading and trailing spaces.
-internal static readonly @string treeTemplate = """
+internal static ref readonly @string treeTemplate => ref treeTemplateᵇ;
+private static readonly @string treeTemplateᵇ = """
 
 	(- define "tree" -)
 	[
@@ -1044,13 +1056,15 @@ internal static readonly @string treeTemplate = """
 """u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string treeˢ = "tree"u8;
+internal static ref readonly @string treeˢ => ref treeˢᵇ;
+private static readonly @string treeˢᵇ = "tree"u8;
 internal static readonly object execErrorˢ = (@string)"exec error:"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectᶜ1 = "[1[2[3[4]][5[6]]][7[8[9]][10[11]]]]"u8;
+internal static ref readonly @string expectᶜ1 => ref expectᶜ1ᵇ;
+private static readonly @string expectᶜ1ᵇ = "[1[2[3[4]][5[6]]][7[8[9]][10[11]]]]"u8;
 
-public static void TestTree(ж<testing.T> Ꮡt) {
+public static void TestTree(ж<testing.T> t) {
     ж<Tree> tree = Ꮡ(new Tree(
         1,
         Ꮡ(new Tree(
@@ -1087,37 +1101,38 @@ public static void TestTree(ж<testing.T> Ꮡt) {
             ))
         ))
     ));
-    var (tmpl, err) = New(rootˢ).Delims("("u8, ")"u8).Parse(treeTemplate);
-    if (err != default!) {
-        Ꮡt.Fatal(parseErrorˢ, err);
+    var (tmpl, err) = New(rootˢ).Delims("(", ")").Parse(treeTemplate);
+    if (err != nil) {
+        t.Fatal(parseErrorˢ, err);
     }
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     @string expect = expectᶜ1;
     // First by looking up the template.
     err = tmpl.Lookup(treeˢ).Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), tree.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(execErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(execErrorˢ, err);
     }
     @string result = b.String();
     if (result != expect) {
-        Ꮡt.Errorf("expected %q got %q"u8, expect, result);
+        t.Errorf("expected %q got %q", expect, result);
     }
     // Then direct to execution.
     b.Reset();
     err = tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), treeˢ, tree.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(execErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(execErrorˢ, err);
     }
     result = b.String();
     if (result != expect) {
-        Ꮡt.Errorf("expected %q got %q"u8, expect, result);
+        t.Errorf("expected %q got %q", expect, result);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nameˢ = "Name"u8;
+internal static ref readonly @string nameˢ => ref nameˢᵇ;
+private static readonly @string nameˢᵇ = "Name"u8;
 
-public static void TestExecuteOnNewTemplate(ж<testing.T> Ꮡt) {
+public static void TestExecuteOnNewTemplate(ж<testing.T> t) {
     // This is issue 3872.
     New(nameˢ).Templates();
     // This is issue 11379.
@@ -1128,63 +1143,68 @@ public static void TestExecuteOnNewTemplate(ж<testing.T> Ꮡt) {
     // new(Template).ExecuteTemplate(nil, "XXX", nil) // TODO: crashes; returns an error (but does not crash)
 }
 
-internal static readonly @string testTemplates = @"{{define ""one""}}one{{end}}{{define ""two""}}two{{end}}"u8;
+internal static ref readonly @string testTemplates => ref testTemplatesᵇ;
+private static readonly @string testTemplatesᵇ = @"{{define ""one""}}one{{end}}{{define ""two""}}two{{end}}"u8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string emptyˢ = "empty"u8;
+internal static ref readonly @string emptyˢ => ref emptyˢᵇ;
+private static readonly @string emptyˢᵇ = "empty"u8;
 internal static readonly object expectedInitialErrorˢ = (@string)"expected initial error"u8;
-internal static readonly @string templateEmptyIsAnˢ = @"template: ""empty"" is an incomplete or empty template"u8;
-internal static readonly @string secondaryˢ = "secondary"u8;
+internal static ref readonly @string templateEmptyIsAnˢ => ref templateEmptyIsAnˢᵇ;
+private static readonly @string templateEmptyIsAnˢᵇ = @"template: ""empty"" is an incomplete or empty template"u8;
+internal static ref readonly @string secondaryˢ => ref secondaryˢᵇ;
+private static readonly @string secondaryˢᵇ = "secondary"u8;
 internal static readonly object expectedSecondErrorˢ = (@string)"expected second error"u8;
 
-public static void TestMessageForExecuteEmpty(ж<testing.T> Ꮡt) {
+public static void TestMessageForExecuteEmpty(ж<testing.T> t) {
     // Test a truly empty template.
     var tmpl = New(emptyˢ);
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)0);
-    if (err == default!) {
-        Ꮡt.Fatal(expectedInitialErrorˢ);
+    if (err == nil) {
+        t.Fatal(expectedInitialErrorˢ);
     }
     @string got = err.Error();
     @string want = templateEmptyIsAnˢ; // NOTE: text/template has extra "empty: " in message
     if (got != want) {
-        Ꮡt.Errorf("expected error %s got %s"u8, want, got);
+        t.Errorf("expected error %s got %s", want, got);
     }
 
     // Add a non-empty template to check that the error is helpful.
     tmpl = New(emptyˢ);
     (var tests, err) = New(""u8).Parse(testTemplates);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    tmpl.AddParseTree(secondaryˢ, (~tests).Tree);
+    tmpl.AddParseTree(secondaryˢ, tests.Tree);
     err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)0);
-    if (err == default!) {
-        Ꮡt.Fatal(expectedSecondErrorˢ);
+    if (err == nil) {
+        t.Fatal(expectedSecondErrorˢ);
     }
     got = err.Error();
     if (got != want) {
-        Ꮡt.Errorf("expected error %s got %s"u8, want, got);
+        t.Errorf("expected error %s got %s", want, got);
     }
     // Make sure we can execute the secondary.
     err = tmpl.ExecuteTemplate(new template_test_package.bytes_BufferжWriter(Ꮡb), secondaryˢ, (nint)0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xPrintfˢ = @"{{""x"" | printf}}"u8;
+internal static ref readonly @string xPrintfˢ => ref xPrintfˢᵇ;
+private static readonly @string xPrintfˢᵇ = @"{{""x"" | printf}}"u8;
 
-public static void TestFinalForPrintf(ж<testing.T> Ꮡt) {
+public static void TestFinalForPrintf(ж<testing.T> t) {
     var (tmpl, err) = New(""u8).Parse(xPrintfˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 }
 
@@ -1194,124 +1214,124 @@ internal partial struct cmpTest {
     internal bool ok;
 }
 
-internal static slice<cmpTest> cmpTests = new cmpTest[]{
-    new("eq true true"u8, "true"u8, true),
-    new("eq true false"u8, "false"u8, true),
-    new("eq 1+2i 1+2i"u8, "true"u8, true),
-    new("eq 1+2i 1+3i"u8, "false"u8, true),
-    new("eq 1.5 1.5"u8, "true"u8, true),
-    new("eq 1.5 2.5"u8, "false"u8, true),
-    new("eq 1 1"u8, "true"u8, true),
-    new("eq 1 2"u8, "false"u8, true),
-    new("eq `xy` `xy`"u8, "true"u8, true),
-    new("eq `xy` `xyz`"u8, "false"u8, true),
-    new("eq .Uthree .Uthree"u8, "true"u8, true),
-    new("eq .Uthree .Ufour"u8, "false"u8, true),
-    new("eq 3 4 5 6 3"u8, "true"u8, true),
-    new("eq 3 4 5 6 7"u8, "false"u8, true),
-    new("ne true true"u8, "false"u8, true),
-    new("ne true false"u8, "true"u8, true),
-    new("ne 1+2i 1+2i"u8, "false"u8, true),
-    new("ne 1+2i 1+3i"u8, "true"u8, true),
-    new("ne 1.5 1.5"u8, "false"u8, true),
-    new("ne 1.5 2.5"u8, "true"u8, true),
-    new("ne 1 1"u8, "false"u8, true),
-    new("ne 1 2"u8, "true"u8, true),
-    new("ne `xy` `xy`"u8, "false"u8, true),
-    new("ne `xy` `xyz`"u8, "true"u8, true),
-    new("ne .Uthree .Uthree"u8, "false"u8, true),
-    new("ne .Uthree .Ufour"u8, "true"u8, true),
-    new("lt 1.5 1.5"u8, "false"u8, true),
-    new("lt 1.5 2.5"u8, "true"u8, true),
-    new("lt 1 1"u8, "false"u8, true),
-    new("lt 1 2"u8, "true"u8, true),
-    new("lt `xy` `xy`"u8, "false"u8, true),
-    new("lt `xy` `xyz`"u8, "true"u8, true),
-    new("lt .Uthree .Uthree"u8, "false"u8, true),
-    new("lt .Uthree .Ufour"u8, "true"u8, true),
-    new("le 1.5 1.5"u8, "true"u8, true),
-    new("le 1.5 2.5"u8, "true"u8, true),
-    new("le 2.5 1.5"u8, "false"u8, true),
-    new("le 1 1"u8, "true"u8, true),
-    new("le 1 2"u8, "true"u8, true),
-    new("le 2 1"u8, "false"u8, true),
-    new("le `xy` `xy`"u8, "true"u8, true),
-    new("le `xy` `xyz`"u8, "true"u8, true),
-    new("le `xyz` `xy`"u8, "false"u8, true),
-    new("le .Uthree .Uthree"u8, "true"u8, true),
-    new("le .Uthree .Ufour"u8, "true"u8, true),
-    new("le .Ufour .Uthree"u8, "false"u8, true),
-    new("gt 1.5 1.5"u8, "false"u8, true),
-    new("gt 1.5 2.5"u8, "false"u8, true),
-    new("gt 1 1"u8, "false"u8, true),
-    new("gt 2 1"u8, "true"u8, true),
-    new("gt 1 2"u8, "false"u8, true),
-    new("gt `xy` `xy`"u8, "false"u8, true),
-    new("gt `xy` `xyz`"u8, "false"u8, true),
-    new("gt .Uthree .Uthree"u8, "false"u8, true),
-    new("gt .Uthree .Ufour"u8, "false"u8, true),
-    new("gt .Ufour .Uthree"u8, "true"u8, true),
-    new("ge 1.5 1.5"u8, "true"u8, true),
-    new("ge 1.5 2.5"u8, "false"u8, true),
-    new("ge 2.5 1.5"u8, "true"u8, true),
-    new("ge 1 1"u8, "true"u8, true),
-    new("ge 1 2"u8, "false"u8, true),
-    new("ge 2 1"u8, "true"u8, true),
-    new("ge `xy` `xy`"u8, "true"u8, true),
-    new("ge `xy` `xyz`"u8, "false"u8, true),
-    new("ge `xyz` `xy`"u8, "true"u8, true),
-    new("ge .Uthree .Uthree"u8, "true"u8, true),
-    new("ge .Uthree .Ufour"u8, "false"u8, true),
-    new("ge .Ufour .Uthree"u8, "true"u8, true),
+internal static slice<cmpTest> cmpTests = slice<cmpTest>([
+    new("eq true true", "true", true),
+    new("eq true false", "false", true),
+    new("eq 1+2i 1+2i", "true", true),
+    new("eq 1+2i 1+3i", "false", true),
+    new("eq 1.5 1.5", "true", true),
+    new("eq 1.5 2.5", "false", true),
+    new("eq 1 1", "true", true),
+    new("eq 1 2", "false", true),
+    new("eq `xy` `xy`", "true", true),
+    new("eq `xy` `xyz`", "false", true),
+    new("eq .Uthree .Uthree", "true", true),
+    new("eq .Uthree .Ufour", "false", true),
+    new("eq 3 4 5 6 3", "true", true),
+    new("eq 3 4 5 6 7", "false", true),
+    new("ne true true", "false", true),
+    new("ne true false", "true", true),
+    new("ne 1+2i 1+2i", "false", true),
+    new("ne 1+2i 1+3i", "true", true),
+    new("ne 1.5 1.5", "false", true),
+    new("ne 1.5 2.5", "true", true),
+    new("ne 1 1", "false", true),
+    new("ne 1 2", "true", true),
+    new("ne `xy` `xy`", "false", true),
+    new("ne `xy` `xyz`", "true", true),
+    new("ne .Uthree .Uthree", "false", true),
+    new("ne .Uthree .Ufour", "true", true),
+    new("lt 1.5 1.5", "false", true),
+    new("lt 1.5 2.5", "true", true),
+    new("lt 1 1", "false", true),
+    new("lt 1 2", "true", true),
+    new("lt `xy` `xy`", "false", true),
+    new("lt `xy` `xyz`", "true", true),
+    new("lt .Uthree .Uthree", "false", true),
+    new("lt .Uthree .Ufour", "true", true),
+    new("le 1.5 1.5", "true", true),
+    new("le 1.5 2.5", "true", true),
+    new("le 2.5 1.5", "false", true),
+    new("le 1 1", "true", true),
+    new("le 1 2", "true", true),
+    new("le 2 1", "false", true),
+    new("le `xy` `xy`", "true", true),
+    new("le `xy` `xyz`", "true", true),
+    new("le `xyz` `xy`", "false", true),
+    new("le .Uthree .Uthree", "true", true),
+    new("le .Uthree .Ufour", "true", true),
+    new("le .Ufour .Uthree", "false", true),
+    new("gt 1.5 1.5", "false", true),
+    new("gt 1.5 2.5", "false", true),
+    new("gt 1 1", "false", true),
+    new("gt 2 1", "true", true),
+    new("gt 1 2", "false", true),
+    new("gt `xy` `xy`", "false", true),
+    new("gt `xy` `xyz`", "false", true),
+    new("gt .Uthree .Uthree", "false", true),
+    new("gt .Uthree .Ufour", "false", true),
+    new("gt .Ufour .Uthree", "true", true),
+    new("ge 1.5 1.5", "true", true),
+    new("ge 1.5 2.5", "false", true),
+    new("ge 2.5 1.5", "true", true),
+    new("ge 1 1", "true", true),
+    new("ge 1 2", "false", true),
+    new("ge 2 1", "true", true),
+    new("ge `xy` `xy`", "true", true),
+    new("ge `xy` `xyz`", "false", true),
+    new("ge `xyz` `xy`", "true", true),
+    new("ge .Uthree .Uthree", "true", true),
+    new("ge .Uthree .Ufour", "false", true),
+    new("ge .Ufour .Uthree", "true", true),
     // Mixing signed and unsigned integers.
-    new("eq .Uthree .Three"u8, "true"u8, true),
-    new("eq .Three .Uthree"u8, "true"u8, true),
-    new("le .Uthree .Three"u8, "true"u8, true),
-    new("le .Three .Uthree"u8, "true"u8, true),
-    new("ge .Uthree .Three"u8, "true"u8, true),
-    new("ge .Three .Uthree"u8, "true"u8, true),
-    new("lt .Uthree .Three"u8, "false"u8, true),
-    new("lt .Three .Uthree"u8, "false"u8, true),
-    new("gt .Uthree .Three"u8, "false"u8, true),
-    new("gt .Three .Uthree"u8, "false"u8, true),
-    new("eq .Ufour .Three"u8, "false"u8, true),
-    new("lt .Ufour .Three"u8, "false"u8, true),
-    new("gt .Ufour .Three"u8, "true"u8, true),
-    new("eq .NegOne .Uthree"u8, "false"u8, true),
-    new("eq .Uthree .NegOne"u8, "false"u8, true),
-    new("ne .NegOne .Uthree"u8, "true"u8, true),
-    new("ne .Uthree .NegOne"u8, "true"u8, true),
-    new("lt .NegOne .Uthree"u8, "true"u8, true),
-    new("lt .Uthree .NegOne"u8, "false"u8, true),
-    new("le .NegOne .Uthree"u8, "true"u8, true),
-    new("le .Uthree .NegOne"u8, "false"u8, true),
-    new("gt .NegOne .Uthree"u8, "false"u8, true),
-    new("gt .Uthree .NegOne"u8, "true"u8, true),
-    new("ge .NegOne .Uthree"u8, "false"u8, true),
-    new("ge .Uthree .NegOne"u8, "true"u8, true),
-    new("eq (index `x` 0) 'x'"u8, "true"u8, true), // The example that triggered this rule.
-    new("eq (index `x` 0) 'y'"u8, "false"u8, true),
-    new("eq .V1 .V2"u8, "true"u8, true),
-    new("eq .Ptr .Ptr"u8, "true"u8, true),
-    new("eq .Ptr .NilPtr"u8, "false"u8, true),
-    new("eq .NilPtr .NilPtr"u8, "true"u8, true),
-    new("eq .Iface1 .Iface1"u8, "true"u8, true),
-    new("eq .Iface1 .Iface2"u8, "false"u8, true),
-    new("eq .Iface2 .Iface2"u8, "true"u8, true),
-    new("eq .Map .Map"u8, "true"u8, true), // Uncomparable types but nil is OK.
-    new("eq .Map nil"u8, "true"u8, true), // Uncomparable types but nil is OK.
-    new("eq nil .Map"u8, "true"u8, true), // Uncomparable types but nil is OK.
-    new("eq .Map .NonNilMap"u8, "false"u8, true), // Uncomparable types but nil is OK.
+    new("eq .Uthree .Three", "true", true),
+    new("eq .Three .Uthree", "true", true),
+    new("le .Uthree .Three", "true", true),
+    new("le .Three .Uthree", "true", true),
+    new("ge .Uthree .Three", "true", true),
+    new("ge .Three .Uthree", "true", true),
+    new("lt .Uthree .Three", "false", true),
+    new("lt .Three .Uthree", "false", true),
+    new("gt .Uthree .Three", "false", true),
+    new("gt .Three .Uthree", "false", true),
+    new("eq .Ufour .Three", "false", true),
+    new("lt .Ufour .Three", "false", true),
+    new("gt .Ufour .Three", "true", true),
+    new("eq .NegOne .Uthree", "false", true),
+    new("eq .Uthree .NegOne", "false", true),
+    new("ne .NegOne .Uthree", "true", true),
+    new("ne .Uthree .NegOne", "true", true),
+    new("lt .NegOne .Uthree", "true", true),
+    new("lt .Uthree .NegOne", "false", true),
+    new("le .NegOne .Uthree", "true", true),
+    new("le .Uthree .NegOne", "false", true),
+    new("gt .NegOne .Uthree", "false", true),
+    new("gt .Uthree .NegOne", "true", true),
+    new("ge .NegOne .Uthree", "false", true),
+    new("ge .Uthree .NegOne", "true", true),
+    new("eq (index `x` 0) 'x'", "true", true), // The example that triggered this rule.
+    new("eq (index `x` 0) 'y'", "false", true),
+    new("eq .V1 .V2", "true", true),
+    new("eq .Ptr .Ptr", "true", true),
+    new("eq .Ptr .NilPtr", "false", true),
+    new("eq .NilPtr .NilPtr", "true", true),
+    new("eq .Iface1 .Iface1", "true", true),
+    new("eq .Iface1 .Iface2", "false", true),
+    new("eq .Iface2 .Iface2", "true", true),
+    new("eq .Map .Map", "true", true),        // Uncomparable types but nil is OK.
+    new("eq .Map nil", "true", true),         // Uncomparable types but nil is OK.
+    new("eq nil .Map", "true", true),         // Uncomparable types but nil is OK.
+    new("eq .Map .NonNilMap", "false", true), // Uncomparable types but nil is OK.
     // Errors
-    new("eq `xy` 1"u8, ""u8, false), // Different types.
-    new("eq 2 2.0"u8, ""u8, false), // Different types.
-    new("lt true true"u8, ""u8, false), // Unordered types.
-    new("lt 1+0i 1+0i"u8, ""u8, false), // Unordered types.
-    new("eq .Ptr 1"u8, ""u8, false), // Incompatible types.
-    new("eq .Ptr .NegOne"u8, ""u8, false), // Incompatible types.
-    new("eq .Map .V1"u8, ""u8, false), // Uncomparable types.
-    new("eq .NonNilMap .NonNilMap"u8, ""u8, false) // Uncomparable types.
-}.slice();
+    new("eq `xy` 1", "", false),               // Different types.
+    new("eq 2 2.0", "", false),                // Different types.
+    new("lt true true", "", false),            // Unordered types.
+    new("lt 1+0i 1+0i", "", false),            // Unordered types.
+    new("eq .Ptr 1", "", false),               // Incompatible types.
+    new("eq .Ptr .NegOne", "", false),         // Incompatible types.
+    new("eq .Map .V1", "", false),             // Uncomparable types.
+    new("eq .NonNilMap .NonNilMap", "", false) // Uncomparable types.
+]);
 
 internal partial struct TestComparison_type /*dyn*/ {
     public nuint Uthree, Ufour;
@@ -1323,7 +1343,7 @@ internal partial struct TestComparison_type /*dyn*/ {
     public fmt.Stringer Iface1, Iface2;
 }
 
-public static void TestComparison(ж<testing.T> Ꮡt) {
+public static void TestComparison(ж<testing.T> t) {
     var b = @new<strings.Builder>();
     ref var cmpStruct = ref heap(new TestComparison_type(), out var ᏑcmpStruct);
 
@@ -1339,106 +1359,112 @@ public static void TestComparison(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in cmpTests) {
         @string text = fmt.Sprintf("{{if %s}}true{{else}}false{{end}}"u8, test.expr);
         var (tmpl, err) = New(emptyˢ).Parse(text);
-        if (err != default!) {
-            Ꮡt.Fatalf("%q: %s"u8, test.expr, err);
+        if (err != nil) {
+            t.Fatalf("%q: %s", test.expr, err);
         }
         b.Reset();
         err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(b), ᏑcmpStruct);
-        if (test.ok && err != default!) {
-            Ꮡt.Errorf("%s errored incorrectly: %s"u8, test.expr, err);
+        if (test.ok && err != nil) {
+            t.Errorf("%s errored incorrectly: %s", test.expr, err);
             continue;
         }
-        if (!test.ok && err == default!) {
-            Ꮡt.Errorf("%s did not error"u8, test.expr);
+        if (!test.ok && err == nil) {
+            t.Errorf("%s did not error", test.expr);
             continue;
         }
         if (b.String() != test.truth) {
-            Ꮡt.Errorf("%s: want %s; got %s"u8, test.expr, test.truth, b.String());
+            t.Errorf("%s: want %s; got %s", test.expr, test.truth, b.String());
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string missingkeyDefaultˢ = "missingkey=default"u8;
+internal static ref readonly @string missingkeyDefaultˢ => ref missingkeyDefaultˢᵇ;
+private static readonly @string missingkeyDefaultˢᵇ = "missingkey=default"u8;
 internal static readonly object defaultˢ = (@string)"default:"u8;
-internal static readonly @string missingkeyZeroˢ = "missingkey=zero"u8;
+internal static ref readonly @string missingkeyZeroˢ => ref missingkeyZeroˢᵇ;
+private static readonly @string missingkeyZeroˢᵇ = "missingkey=zero"u8;
 internal static readonly object zeroˢ = (@string)"zero:"u8;
-internal static readonly @string missingkeyErrorˢ = "missingkey=error"u8;
+internal static ref readonly @string missingkeyErrorˢ => ref missingkeyErrorˢᵇ;
+private static readonly @string missingkeyErrorˢᵇ = "missingkey=error"u8;
 
-public static void TestMissingMapKey(ж<testing.T> Ꮡt) {
+public static void TestMissingMapKey(ж<testing.T> t) {
     var data = new map<@string, nint>{
-        ["x"u8] = 99
+        ["x"] = 99
     };
-    var (tmpl, err) = New("t1"u8).Parse("{{.x}} {{.y}}"u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (tmpl, err) = New("t1").Parse("{{.x}} {{.y}}");
+    if (err != nil) {
+        t.Fatal(err);
     }
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     // By default, just get "<no value>" // NOTE: not in html/template, get empty string
     err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), data);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    @string want = "99 "u8;
+    @string want = "99 ";
     @string got = b.String();
     if (got != want) {
-        Ꮡt.Errorf("got %q; expected %q"u8, got, want);
+        t.Errorf("got %q; expected %q", got, want);
     }
     // Same if we set the option explicitly to the default.
     tmpl.Option(missingkeyDefaultˢ);
     b.Reset();
     err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), data);
-    if (err != default!) {
-        Ꮡt.Fatal(defaultˢ, err);
+    if (err != nil) {
+        t.Fatal(defaultˢ, err);
     }
     got = b.String();
     if (got != want) {
-        Ꮡt.Errorf("got %q; expected %q"u8, got, want);
+        t.Errorf("got %q; expected %q", got, want);
     }
     // Next we ask for a zero value
     tmpl.Option(missingkeyZeroˢ);
     b.Reset();
     err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), data);
-    if (err != default!) {
-        Ꮡt.Fatal(zeroˢ, err);
+    if (err != nil) {
+        t.Fatal(zeroˢ, err);
     }
-    want = "99 0"u8;
+    want = "99 0";
     got = b.String();
     if (got != want) {
-        Ꮡt.Errorf("got %q; expected %q"u8, got, want);
+        t.Errorf("got %q; expected %q", got, want);
     }
     // Now we ask for an error.
     tmpl.Option(missingkeyErrorˢ);
     err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), data);
-    if (err == default!) {
-        Ꮡt.Errorf("expected error; got none"u8);
+    if (err == nil) {
+        t.Errorf("expected error; got none");
     }
     // same Option, but now a nil interface: ask for an error
-    err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), default!);
-    Ꮡt.Log(err);
-    if (err == default!) {
-        Ꮡt.Errorf("expected error for nil-interface; got none"u8);
+    err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), default);
+    t.Log(err);
+    if (err == nil) {
+        t.Errorf("expected error for nil-interface; got none");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloUnterminatedSomeˢ = "hello\n\n{{`unterminated\n\n\n\n}}\n some more\n\n"u8;
-internal static readonly @string x3UnterminatedRawQuotedˢ = "X:3: unterminated raw quoted string"u8;
+internal static ref readonly @string helloUnterminatedSomeˢ => ref helloUnterminatedSomeˢᵇ;
+private static readonly @string helloUnterminatedSomeˢᵇ = "hello\n\n{{`unterminated\n\n\n\n}}\n some more\n\n"u8;
+internal static ref readonly @string x3UnterminatedRawQuotedˢ => ref x3UnterminatedRawQuotedˢᵇ;
+private static readonly @string x3UnterminatedRawQuotedˢᵇ = "X:3: unterminated raw quoted string"u8;
 
 // Test that the error message for multiline unterminated string
 // refers to the line number of the opening quote.
-public static void TestUnterminatedStringError(ж<testing.T> Ꮡt) {
-    var (_, err) = New("X"u8).Parse(helloUnterminatedSomeˢ);
-    if (err == default!) {
-        Ꮡt.Fatal(expectedErrorˢ);
+public static void TestUnterminatedStringError(ж<testing.T> t) {
+    var (_, err) = New("X").Parse(helloUnterminatedSomeˢ);
+    if (err == nil) {
+        t.Fatal(expectedErrorˢ);
     }
     @string str = err.Error();
     if (!strings.Contains(str, x3UnterminatedRawQuotedˢ)) {
-        Ꮡt.Fatalf("unexpected error: %s"u8, str);
+        t.Fatalf("unexpected error: %s", str);
     }
 }
 
-internal static readonly @string alwaysErrorText = "always be failing"u8;
+internal static ref readonly @string alwaysErrorText => ref alwaysErrorTextᵇ;
+private static readonly @string alwaysErrorTextᵇ = "always be failing"u8;
 
 internal static error alwaysError = errors.New(alwaysErrorText);
 
@@ -1450,38 +1476,40 @@ public static (nint, error) Write(this ErrorWriter e, slice<byte> p) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorGotNoneˢ = (@string)"expected error; got none"u8;
-internal static readonly @string helloXYˢ = "hello, {{.X.Y}}"u8;
-internal static readonly @string fieldXInTypeIntˢ = "field X in type int"u8;
+internal static ref readonly @string helloXYˢ => ref helloXYˢᵇ;
+private static readonly @string helloXYˢᵇ = "hello, {{.X.Y}}"u8;
+internal static ref readonly @string fieldXInTypeIntˢ => ref fieldXInTypeIntˢᵇ;
+private static readonly @string fieldXInTypeIntˢᵇ = "field X in type int"u8;
 
-public static void TestExecuteGivesExecError(ж<testing.T> Ꮡt) {
+public static void TestExecuteGivesExecError(ж<testing.T> t) {
     // First, a non-execution error shouldn't be an ExecError.
-    var (tmpl, err) = New("X"u8).Parse(helloˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (tmpl, err) = New("X").Parse(helloˢ);
+    if (err != nil) {
+        t.Fatal(err);
     }
     err = tmpl.Execute((ErrorWriter)0, (nint)0);
-    if (err == default!) {
-        Ꮡt.Fatal(expectedErrorGotNoneˢ);
+    if (err == nil) {
+        t.Fatal(expectedErrorGotNoneˢ);
     }
     if (err.Error() != alwaysErrorText) {
-        Ꮡt.Errorf("expected %q error; got %q"u8, alwaysErrorText, err);
+        t.Errorf("expected %q error; got %q", alwaysErrorText, err);
     }
     // This one should be an ExecError.
-    (tmpl, err) = New("X"u8).Parse(helloXYˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (tmpl, err) = New("X").Parse(helloXYˢ);
+    if (err != nil) {
+        t.Fatal(err);
     }
     err = tmpl.Execute(io.Discard, (nint)0);
-    if (err == default!) {
-        Ꮡt.Fatal(expectedErrorGotNoneˢ);
+    if (err == nil) {
+        t.Fatal(expectedErrorGotNoneˢ);
     }
     var (eerr, ok) = err._<text.template_package.ExecError>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatalf("did not expect ExecError %s"u8, eerr);
+        t.Fatalf("did not expect ExecError %s", eerr);
     }
     @string expect = fieldXInTypeIntˢ;
     if (!strings.Contains(err.Error(), expect)) {
-        Ꮡt.Errorf("expected %q; got %q"u8, expect, err);
+        t.Errorf("expected %q; got %q", expect, err);
     }
 }
 
@@ -1489,50 +1517,50 @@ internal static nint funcNameTestFunc() {
     return 0;
 }
 
-public static void TestGoodFuncNames(ж<testing.T> Ꮡt) {
-    var names = new @string[]{
-        "_"u8,
-        "a"u8,
-        "a1"u8,
-        "a1"u8,
-        "Ӵ"u8
-    }.slice();
+public static void TestGoodFuncNames(ж<testing.T> t) {
+    var names = slice<@string>([
+        "_",
+        "a",
+        "a1",
+        "a1",
+        "Ӵ"
+    ]);
     foreach (var (_, name) in names) {
-        var tmpl = New("X"u8).Funcs(
+        var tmpl = New("X").Funcs(
             new FuncMap(new map<@string, any>{
                 [name] = funcNameTestFunc
             }));
         if (tmpl == nil) {
-            Ꮡt.Fatalf("nil result for %q"u8, name);
+            t.Fatalf("nil result for %q", name);
         }
     }
 }
 
-public static void TestBadFuncNames(ж<testing.T> Ꮡt) {
-    var names = new @string[]{
-        ""u8,
-        "2"u8,
-        "a-b"u8
-    }.slice();
+public static void TestBadFuncNames(ж<testing.T> t) {
+    var names = slice<@string>([
+        "",
+        "2",
+        "a-b"
+    ]);
     foreach (var (_, name) in names) {
-        testBadFuncName(name, Ꮡt);
+        testBadFuncName(name, t);
     }
 }
 
-internal static void testBadFuncName(@string name, ж<testing.T> Ꮡt) {
+internal static void testBadFuncName(@string name, ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Helper();
+        t.Helper();
         defer(() => {
             recover();
         }, ref ᒐ);
-        New("X"u8).Funcs(
+        New("X").Funcs(
             new FuncMap(new map<@string, any>{
                 [name] = funcNameTestFunc
             }));
         // If we get here, the name did not cause a panic, which is how Funcs
         // reports an error.
-        Ꮡt.Errorf("%q succeeded incorrectly as function name"u8, name);
+        t.Errorf("%q succeeded incorrectly as function name", name);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -1542,60 +1570,66 @@ internal static void testBadFuncName(@string name, ж<testing.T> Ꮡt) {
 internal static readonly object goodbyeˢ = (@string)"goodbye"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string inputᶜ1 = @"a({{block ""inner"" .}}bar({{.}})baz{{end}})b"u8;
+internal static ref readonly @string inputᶜ1 => ref inputᶜ1ᵇ;
+private static readonly @string inputᶜ1ᵇ = @"a({{block ""inner"" .}}bar({{.}})baz{{end}})b"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ3 = @"a(bar(hello)baz)b"u8;
+internal static ref readonly @string wantᶜ3 => ref wantᶜ3ᵇ;
+private static readonly @string wantᶜ3ᵇ = @"a(bar(hello)baz)b"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string overlayᶜ1 = @"{{define ""inner""}}foo({{.}})bar{{end}}"u8;
+internal static ref readonly @string overlayᶜ1 => ref overlayᶜ1ᵇ;
+private static readonly @string overlayᶜ1ᵇ = @"{{define ""inner""}}foo({{.}})bar{{end}}"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string want2ᶜ = @"a(foo(goodbye)bar)b"u8;
+internal static ref readonly @string want2ᶜ => ref want2ᶜᵇ;
+private static readonly @string want2ᶜᵇ = @"a(foo(goodbye)bar)b"u8;
 
-public static void TestBlock(ж<testing.T> Ꮡt) {
+public static void TestBlock(ж<testing.T> t) {
     @string input = inputᶜ1;
     @string want = wantᶜ3;
     @string overlay = overlayᶜ1;
     @string want2 = want2ᶜ;
     var (tmpl, err) = New(outerˢ).Parse(input);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var (ᴛ1, ᴛ2) = tmpl.Clone();
     (var tmpl2, err) = Must(ᴛ1, ᴛ2).Parse(overlay);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     {
-        var errΔ1 = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), helloˢ); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), helloˢ); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
         @string got = buf.String(); if (got != want) {
-            Ꮡt.Errorf("got %q, want %q"u8, got, want);
+            t.Errorf("got %q, want %q", got, want);
         }
     }
 
     buf.Reset();
     {
-        var errΔ2 = tmpl2.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), goodbyeˢ); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = tmpl2.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), goodbyeˢ); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     {
         @string got = buf.String(); if (got != want2) {
-            Ꮡt.Errorf("got %q, want %q"u8, got, want2);
+            t.Errorf("got %q, want %q", got, want2);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tmplˢ = "tmpl"u8;
-internal static readonly @string nilˢ = "<nil>"u8;
+internal static ref readonly @string tmplˢ => ref tmplˢᵇ;
+private static readonly @string tmplˢᵇ = "tmpl"u8;
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 internal partial struct TestEvalFieldErrors_tests /*dyn*/ {
     internal @string name, src;
@@ -1603,65 +1637,63 @@ internal partial struct TestEvalFieldErrors_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestEvalFieldErrors(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var tests = new TestEvalFieldErrors_tests[]{
+public static void TestEvalFieldErrors(ж<testing.T> t) {
+    var tests = slice<TestEvalFieldErrors_tests>([
         new(
             // Check that calling an invalid field on nil pointer
             // prints a field error instead of a distracting nil
             // pointer error. https://golang.org/issue/15125
-            "MissingFieldOnNil"u8,
-            "{{.MissingField}}"u8,
+            "MissingFieldOnNil",
+            "{{.MissingField}}",
             (ж<T>)nil,
-            "can't evaluate field MissingField in type *template.T"u8
+            "can't evaluate field MissingField in type *template.T"
         ),
         new(
-            "MissingFieldOnNonNil"u8,
-            "{{.MissingField}}"u8,
-            Ꮡ(new T(nil)),
-            "can't evaluate field MissingField in type *template.T"u8
+            "MissingFieldOnNonNil",
+            "{{.MissingField}}",
+            Ꮡ(new T()),
+            "can't evaluate field MissingField in type *template.T"
         ),
         new(
-            "ExistingFieldOnNil"u8,
-            "{{.X}}"u8,
+            "ExistingFieldOnNil",
+            "{{.X}}",
             (ж<T>)nil,
-            "nil pointer evaluating *template.T.X"u8
+            "nil pointer evaluating *template.T.X"
         ),
         new(
-            "MissingKeyOnNilMap"u8,
-            "{{.MissingKey}}"u8,
+            "MissingKeyOnNilMap",
+            "{{.MissingKey}}",
             (ж<map<@string, @string>>)nil,
-            "nil pointer evaluating *map[string]string.MissingKey"u8
+            "nil pointer evaluating *map[string]string.MissingKey"
         ),
         new(
-            "MissingKeyOnNilMapPtr"u8,
-            "{{.MissingKey}}"u8,
+            "MissingKeyOnNilMapPtr",
+            "{{.MissingKey}}",
             (ж<map<@string, @string>>)nil,
-            "nil pointer evaluating *map[string]string.MissingKey"u8
+            "nil pointer evaluating *map[string]string.MissingKey"
         ),
         new(
-            "MissingKeyOnMapPtrToNil"u8,
-            "{{.MissingKey}}"u8,
+            "MissingKeyOnMapPtrToNil",
+            "{{.MissingKey}}",
             Ꮡ(new map<@string, @string>{}),
-            "<nil>"u8
+            "<nil>"
         )
-    }.slice();
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestEvalFieldErrors_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (ᴛ3, ᴛ4) = New(tmplˢ).Parse(tcʗ1.src);
             var tmpl = Must(ᴛ3, ᴛ4);
             var err = tmpl.Execute(io.Discard, tcʗ1.value);
             @string got = nilˢ;
-            if (err != default!) {
+            if (err != nil) {
                 got = err.Error();
             }
             if (!strings.HasSuffix(got, tcʗ1.want)) {
-                tΔ1.Fatalf("got error %q, want %q"u8, got, tcʗ1.want);
+                tΔ1.Fatalf("got error %q, want %q", got, tcʗ1.want);
             }
         });
     }
@@ -1669,128 +1701,131 @@ public static void TestEvalFieldErrors(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in -short mode"u8;
-internal static readonly @string templateTmplˢ = @"{{template ""tmpl"" .}}"u8;
+internal static ref readonly @string templateTmplˢ => ref templateTmplˢᵇ;
+private static readonly @string templateTmplˢᵇ = @"{{template ""tmpl"" .}}"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ4 = "exceeded maximum template depth"u8;
+internal static ref readonly @string wantᶜ4 => ref wantᶜ4ᵇ;
+private static readonly @string wantᶜ4ᵇ = "exceeded maximum template depth"u8;
 
-public static void TestMaxExecDepth(ж<testing.T> Ꮡt) {
+public static void TestMaxExecDepth(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     var (ᴛ5, ᴛ6) = New(tmplˢ).Parse(templateTmplˢ);
     var tmpl = Must(ᴛ5, ᴛ6);
-    var err = tmpl.Execute(io.Discard, default!);
+    var err = tmpl.Execute(io.Discard, default);
     @string got = nilˢ;
-    if (err != default!) {
+    if (err != nil) {
         got = err.Error();
     }
     @string want = wantᶜ4;
     if (!strings.Contains(got, want)) {
-        Ꮡt.Errorf("got error %q; want %q"u8, got, want);
+        t.Errorf("got error %q; want %q", got, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object lt1Gtˢ = (@string)"&lt;1&gt;"u8;
 
-public static void TestAddrOfIndex(ж<testing.T> Ꮡt) {
+public static void TestAddrOfIndex(ж<testing.T> t) {
     // golang.org/issue/14916.
     // Before index worked on reflect.Values, the .String could not be
     // found on the (incorrectly unaddressable) V value,
     // in contrast to range, which worked fine.
     // Also testing that passing a reflect.Value to tmpl.Execute works.
-    var texts = new @string[]{
-        @"{{range .}}{{.String}}{{end}}"u8,
-        @"{{with index . 0}}{{.String}}{{end}}"u8
-    }.slice();
+    var texts = slice<@string>([
+        @"{{range .}}{{.String}}{{end}}",
+        @"{{with index . 0}}{{.String}}{{end}}"
+    ]);
     foreach (var (_, text) in texts) {
         var (ᴛ7, ᴛ8) = New(tmplˢ).Parse(text);
         var tmpl = Must(ᴛ7, ᴛ8);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-        var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), reflect.ValueOf(new V[]{new(1)}.slice()));
-        if (err != default!) {
-            Ꮡt.Fatalf("%s: Execute: %v"u8, text, err);
+        var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), reflect.ValueOf(slice<V>([new(1)])));
+        if (err != nil) {
+            t.Fatalf("%s: Execute: %v", text, err);
         }
         if (buf.String() != "&lt;1&gt;"u8) {
-            Ꮡt.Fatalf("%s: template output = %q, want %q"u8, text, Ꮡbuf, lt1Gtˢ);
+            t.Fatalf("%s: template output = %q, want %q", text, Ꮡbuf, lt1Gtˢ);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string errorˢ2 = "ERROR:"u8;
+internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
+private static readonly @string errorˢ2ᵇ = "ERROR:"u8;
 
 internal partial struct TestInterfaceValues_tests /*dyn*/ {
     internal @string text;
     internal @string @out;
 }
 
-public static void TestInterfaceValues(ж<testing.T> Ꮡt) {
+public static void TestInterfaceValues(ж<testing.T> t) {
     // golang.org/issue/17714.
     // Before index worked on reflect.Values, interface values
     // were always implicitly promoted to the underlying value,
     // except that nil interfaces were promoted to the zero reflect.Value.
     // Eliminating a round trip to interface{} and back to reflect.Value
     // eliminated this promotion, breaking these cases.
-    var tests = new TestInterfaceValues_tests[]{
-        new(@"{{index .Nil 1}}"u8, "ERROR: index of untyped nil"u8),
-        new(@"{{index .Slice 2}}"u8, "2"u8),
-        new(@"{{index .Slice .Two}}"u8, "2"u8),
-        new(@"{{call .Nil 1}}"u8, "ERROR: call of nil"u8),
-        new(@"{{call .PlusOne 1}}"u8, "2"u8),
-        new(@"{{call .PlusOne .One}}"u8, "2"u8),
-        new(@"{{and (index .Slice 0) true}}"u8, "0"u8),
-        new(@"{{and .Zero true}}"u8, "0"u8),
-        new(@"{{and (index .Slice 1) false}}"u8, "false"u8),
-        new(@"{{and .One false}}"u8, "false"u8),
-        new(@"{{or (index .Slice 0) false}}"u8, "false"u8),
-        new(@"{{or .Zero false}}"u8, "false"u8),
-        new(@"{{or (index .Slice 1) true}}"u8, "1"u8),
-        new(@"{{or .One true}}"u8, "1"u8),
-        new(@"{{not (index .Slice 0)}}"u8, "true"u8),
-        new(@"{{not .Zero}}"u8, "true"u8),
-        new(@"{{not (index .Slice 1)}}"u8, "false"u8),
-        new(@"{{not .One}}"u8, "false"u8),
-        new(@"{{eq (index .Slice 0) .Zero}}"u8, "true"u8),
-        new(@"{{eq (index .Slice 1) .One}}"u8, "true"u8),
-        new(@"{{ne (index .Slice 0) .Zero}}"u8, "false"u8),
-        new(@"{{ne (index .Slice 1) .One}}"u8, "false"u8),
-        new(@"{{ge (index .Slice 0) .One}}"u8, "false"u8),
-        new(@"{{ge (index .Slice 1) .Zero}}"u8, "true"u8),
-        new(@"{{gt (index .Slice 0) .One}}"u8, "false"u8),
-        new(@"{{gt (index .Slice 1) .Zero}}"u8, "true"u8),
-        new(@"{{le (index .Slice 0) .One}}"u8, "true"u8),
-        new(@"{{le (index .Slice 1) .Zero}}"u8, "false"u8),
-        new(@"{{lt (index .Slice 0) .One}}"u8, "true"u8),
-        new(@"{{lt (index .Slice 1) .Zero}}"u8, "false"u8)
-    }.slice();
+    var tests = slice<TestInterfaceValues_tests>([
+        new(@"{{index .Nil 1}}", "ERROR: index of untyped nil"),
+        new(@"{{index .Slice 2}}", "2"),
+        new(@"{{index .Slice .Two}}", "2"),
+        new(@"{{call .Nil 1}}", "ERROR: call of nil"),
+        new(@"{{call .PlusOne 1}}", "2"),
+        new(@"{{call .PlusOne .One}}", "2"),
+        new(@"{{and (index .Slice 0) true}}", "0"),
+        new(@"{{and .Zero true}}", "0"),
+        new(@"{{and (index .Slice 1) false}}", "false"),
+        new(@"{{and .One false}}", "false"),
+        new(@"{{or (index .Slice 0) false}}", "false"),
+        new(@"{{or .Zero false}}", "false"),
+        new(@"{{or (index .Slice 1) true}}", "1"),
+        new(@"{{or .One true}}", "1"),
+        new(@"{{not (index .Slice 0)}}", "true"),
+        new(@"{{not .Zero}}", "true"),
+        new(@"{{not (index .Slice 1)}}", "false"),
+        new(@"{{not .One}}", "false"),
+        new(@"{{eq (index .Slice 0) .Zero}}", "true"),
+        new(@"{{eq (index .Slice 1) .One}}", "true"),
+        new(@"{{ne (index .Slice 0) .Zero}}", "false"),
+        new(@"{{ne (index .Slice 1) .One}}", "false"),
+        new(@"{{ge (index .Slice 0) .One}}", "false"),
+        new(@"{{ge (index .Slice 1) .Zero}}", "true"),
+        new(@"{{gt (index .Slice 0) .One}}", "false"),
+        new(@"{{gt (index .Slice 1) .Zero}}", "true"),
+        new(@"{{le (index .Slice 0) .One}}", "true"),
+        new(@"{{le (index .Slice 1) .Zero}}", "false"),
+        new(@"{{lt (index .Slice 0) .One}}", "true"),
+        new(@"{{lt (index .Slice 1) .Zero}}", "false")
+    ]);
 
     foreach (var (_, tt) in tests) {
         var (ᴛ9, ᴛ10) = New(tmplˢ).Parse(tt.text);
         var tmpl = Must(ᴛ9, ᴛ10);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), new map<@string, any>{
-            ["PlusOne"u8] = nint (nint n) => n + 1,
-            ["Slice"u8] = new nint[]{0, 1, 2, 3}.slice(),
-            ["One"u8] = (nint)1,
-            ["Two"u8] = (nint)2,
-            ["Nil"u8] = default!,
-            ["Zero"u8] = (nint)0
+            ["PlusOne"] = nint (nint n) => n + 1,
+            ["Slice"] = slice<nint>([0, 1, 2, 3]),
+            ["One"] = (nint)1,
+            ["Two"] = (nint)2,
+            ["Nil"] = default,
+            ["Zero"] = (nint)0
         });
         if (strings.HasPrefix(tt.@out, errorˢ2)) {
             @string e = strings.TrimSpace(strings.TrimPrefix(tt.@out, errorˢ2));
-            if (err == default! || !strings.Contains(err.Error(), e)) {
-                Ꮡt.Errorf("%s: Execute: %v, want error %q"u8, tt.text, err, e);
+            if (err == nil || !strings.Contains(err.Error(), e)) {
+                t.Errorf("%s: Execute: %v, want error %q", tt.text, err, e);
             }
             continue;
         }
-        if (err != default!) {
-            Ꮡt.Errorf("%s: Execute: %v"u8, tt.text, err);
+        if (err != nil) {
+            t.Errorf("%s: Execute: %v", tt.text, err);
             continue;
         }
         if (buf.String() != tt.@out) {
-            Ꮡt.Errorf("%s: template output = %q, want %q"u8, tt.text, Ꮡbuf, tt.@out);
+            t.Errorf("%s: template output = %q, want %q", tt.text, Ꮡbuf, tt.@out);
         }
     }
 }
@@ -1803,101 +1838,101 @@ internal partial struct TestExecutePanicDuringCall_tests /*dyn*/ {
 }
 
 // Check that panics during calls are recovered and returned as errors.
-public static void TestExecutePanicDuringCall(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestExecutePanicDuringCall(ж<testing.T> t) {
     var funcs = new map<@string, any>{
-        ["doPanic"u8] = @string () => {
+        ["doPanic"] = @string () => {
             throw panic("custom panic string");
         }
     };
-    var tests = new TestExecutePanicDuringCall_tests[]{
+    var tests = slice<TestExecutePanicDuringCall_tests>([
         new(
-            "direct func call panics"u8,
-            "{{doPanic}}"u8, (ж<T>)nil,
-            @"template: t:1:2: executing ""t"" at <doPanic>: error calling doPanic: custom panic string"u8
+            "direct func call panics",
+            "{{doPanic}}", (ж<T>)nil,
+            @"template: t:1:2: executing ""t"" at <doPanic>: error calling doPanic: custom panic string"
         ),
         new(
-            "indirect func call panics"u8,
-            "{{call doPanic}}"u8, (ж<T>)nil,
-            @"template: t:1:7: executing ""t"" at <doPanic>: error calling doPanic: custom panic string"u8
+            "indirect func call panics",
+            "{{call doPanic}}", (ж<T>)nil,
+            @"template: t:1:7: executing ""t"" at <doPanic>: error calling doPanic: custom panic string"
         ),
         new(
-            "direct method call panics"u8,
-            "{{.GetU}}"u8, (ж<T>)nil,
-            @"template: t:1:2: executing ""t"" at <.GetU>: error calling GetU: runtime error: invalid memory address or nil pointer dereference"u8
+            "direct method call panics",
+            "{{.GetU}}", (ж<T>)nil,
+            @"template: t:1:2: executing ""t"" at <.GetU>: error calling GetU: runtime error: invalid memory address or nil pointer dereference"
         ),
         new(
-            "indirect method call panics"u8,
-            "{{call .GetU}}"u8, (ж<T>)nil,
-            @"template: t:1:7: executing ""t"" at <.GetU>: error calling GetU: runtime error: invalid memory address or nil pointer dereference"u8
+            "indirect method call panics",
+            "{{call .GetU}}", (ж<T>)nil,
+            @"template: t:1:7: executing ""t"" at <.GetU>: error calling GetU: runtime error: invalid memory address or nil pointer dereference"
         ),
         new(
-            "func field call panics"u8,
-            "{{call .PanicFunc}}"u8, tVal.OrTypedNil(),
-            @"template: t:1:2: executing ""t"" at <call .PanicFunc>: error calling call: test panic"u8
+            "func field call panics",
+            "{{call .PanicFunc}}", tVal.OrTypedNil(),
+            @"template: t:1:2: executing ""t"" at <call .PanicFunc>: error calling call: test panic"
         ),
         new(
-            "method call on nil interface"u8,
-            "{{.NonEmptyInterfaceNil.Method0}}"u8, tVal.OrTypedNil(),
-            @"template: t:1:23: executing ""t"" at <.NonEmptyInterfaceNil.Method0>: nil pointer evaluating template.I.Method0"u8
+            "method call on nil interface",
+            "{{.NonEmptyInterfaceNil.Method0}}", tVal.OrTypedNil(),
+            @"template: t:1:23: executing ""t"" at <.NonEmptyInterfaceNil.Method0>: nil pointer evaluating template.I.Method0"
         )
-    }.slice();
+    ]);
     foreach (var (_, tc) in tests) {
         var b = @new<bytes.Buffer>();
-        var (tmpl, err) = New("t"u8).Funcs(funcs).Parse(tc.input);
-        if (err != default!) {
-            Ꮡt.Fatalf("parse error: %s"u8, err);
+        var (tmpl, err) = New("t").Funcs(funcs).Parse(tc.input);
+        if (err != nil) {
+            t.Fatalf("parse error: %s", err);
         }
         err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(b), tc.data);
-        if (err == default!){
-            Ꮡt.Errorf("%s: expected error; got none"u8, tc.name);
-        } else 
-        if (!strings.Contains(err.Error(), tc.wantErr)) {
+        if (err == nil) {
+            t.Errorf("%s: expected error; got none", tc.name);
+        } else if (!strings.Contains(err.Error(), tc.wantErr)) {
             if (debug.Value) {
                 fmt.Printf("%s: test execute error: %s\n"u8, tc.name, err);
             }
-            Ꮡt.Errorf("%s: expected error:\n%s\ngot:\n%s"u8, tc.name, tc.wantErr, err);
+            t.Errorf("%s: expected error:\n%s\ngot:\n%s", tc.name, tc.wantErr, err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object brokenInHtmlTemplateˢ = (@string)"broken in html/template"u8;
-internal static readonly @string resultˢ = "result"u8;
+internal static ref readonly @string resultˢ => ref resultˢᵇ;
+private static readonly @string resultˢᵇ = "result"u8;
 internal static readonly object expectedErrorWithNoCallˢ = (@string)"expected error with no call, got none"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string textᶜ = "{{ (.)  }}"u8;
+internal static ref readonly @string textᶜ => ref textᶜᵇ;
+private static readonly @string textᶜᵇ = "{{ (.)  }}"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string textCallᶜ = "{{ (call .)  }}"u8;
+internal static ref readonly @string textCallᶜ => ref textCallᶜᵇ;
+private static readonly @string textCallᶜᵇ = "{{ (call .)  }}"u8;
 
 // Issue 31810. Check that a parenthesized first argument behaves properly.
-public static void TestIssue31810(ж<testing.T> Ꮡt) {
-    Ꮡt.Skip(brokenInHtmlTemplateˢ);
+public static void TestIssue31810(ж<testing.T> t) {
+    t.Skip(brokenInHtmlTemplateˢ);
 
     // A simple value with no arguments is fine.
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     @string text = textᶜ;
     var (tmpl, err) = New(""u8).Parse(text);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
     }
     err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), resultˢ);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
     }
     if (b.String() != "result"u8) {
-        Ꮡt.Errorf("%s got %q, expected %q"u8, text, b.String(), resultˢ);
+        t.Errorf("%s got %q, expected %q", text, b.String(), resultˢ);
     }
 
     // Even a plain function fails - need to use call.
     var f = @string () => resultˢ;
     b.Reset();
     err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), (f).OrTypedNilFunc());
-    if (err == default!) {
-        Ꮡt.Error(expectedErrorWithNoCallˢ);
+    if (err == nil) {
+        t.Error(expectedErrorWithNoCallˢ);
     }
 
     // Works if the function is explicitly called.
@@ -1905,16 +1940,17 @@ public static void TestIssue31810(ж<testing.T> Ꮡt) {
     (tmpl, err) = New(""u8).Parse(textCall);
     b.Reset();
     err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), (f).OrTypedNilFunc());
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
     }
     if (b.String() != "result"u8) {
-        Ꮡt.Errorf("%s got %q, expected %q"u8, textCall, b.String(), resultˢ);
+        t.Errorf("%s got %q, expected %q", textCall, b.String(), resultˢ);
     }
 }
 
 // Issue 39807. There was a race applying escapeTemplate.
-internal static readonly @string raceText = """
+internal static ref readonly @string raceText => ref raceTextᵇ;
+private static readonly @string raceTextᵇ = """
 
 {{- define "jstempl" -}}
 var v = "v";
@@ -1926,20 +1962,22 @@ var v = "v";
 """u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string templHtmlˢ = "templ.html"u8;
-internal static readonly @string templateTemplHtmlˢ = @"{{ template ""templ.html"" .}}"u8;
+internal static ref readonly @string templHtmlˢ => ref templHtmlˢᵇ;
+private static readonly @string templHtmlˢᵇ = "templ.html"u8;
+internal static ref readonly @string templateTemplHtmlˢ => ref templateTemplHtmlˢᵇ;
+private static readonly @string templateTemplHtmlˢᵇ = @"{{ template ""templ.html"" .}}"u8;
 
-public static partial void TestEscapeRace(ж<testing.T> Ꮡt) {
+public static partial void TestEscapeRace(ж<testing.T> t) {
     var tmpl = New(""u8);
     var (_, err) = tmpl.New(templHtmlˢ).Parse(raceText);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     const nint count = 20;
     for (nint i = 0; i < count; i++) {
         var (_, errΔ1) = tmpl.New(fmt.Sprintf("x%d.html"u8, i)).Parse(templateTemplHtmlˢ);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 
@@ -1954,8 +1992,8 @@ public static partial void TestEscapeRace(ж<testing.T> Ꮡt) {
                 for (nint j = 0; j < count; j++) {
                     var sub = tmplʗ1.Lookup(fmt.Sprintf("x%d.html"u8, j));
                     {
-                        var errΔ2 = sub.Execute(io.Discard, default!); if (errΔ2 != default!) {
-                            Ꮡt.Error(errΔ2);
+                        var errΔ2 = sub.Execute(io.Discard, default); if (errΔ2 != nil) {
+                            t.Error(errΔ2);
                         }
                     }
                 }
@@ -1968,40 +2006,44 @@ public static partial void TestEscapeRace(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string subroutineˢ = "subroutine"u8;
-internal static readonly @string xHtmlˢ = "x.html"u8;
-internal static readonly @string recurˢ = @"{{recur}}"u8;
-internal static readonly @string aHrefXPABˢ = @"<a href=""/x?p={{""'a<b'""}}"">"u8;
+internal static ref readonly @string subroutineˢ => ref subroutineˢᵇ;
+private static readonly @string subroutineˢᵇ = "subroutine"u8;
+internal static ref readonly @string xHtmlˢ => ref xHtmlˢᵇ;
+private static readonly @string xHtmlˢᵇ = "x.html"u8;
+internal static ref readonly @string recurˢ => ref recurˢᵇ;
+private static readonly @string recurˢᵇ = @"{{recur}}"u8;
+internal static ref readonly @string aHrefXPABˢ => ref aHrefXPABˢᵇ;
+private static readonly @string aHrefXPABˢᵇ = @"<a href=""/x?p={{""'a<b'""}}"">"u8;
 
-public static void TestRecursiveExecute(ж<testing.T> Ꮡt) {
+public static void TestRecursiveExecute(ж<testing.T> t) {
     var tmpl = New(""u8);
 
     var tmplʗ1 = tmpl;
     var recur = (global::go.html.template_package.HTML, error) () => {
         ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
         {
-            var errΔ1 = tmplʗ1.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default!); if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            var errΔ1 = tmplʗ1.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
-        return ((global::go.html.template_package.HTML)sb.String(), default!);
+        return ((global::go.html.template_package.HTML)sb.String(), default);
     };
 
     var m = new FuncMap(new map<@string, any>{
-        ["recur"u8] = (recur).OrTypedNilFunc()
+        ["recur"] = (recur).OrTypedNilFunc()
     });
 
     var (top, err) = tmpl.New(xHtmlˢ).Funcs(m).Parse(recurˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (_, err) = tmpl.New(subroutineˢ).Parse(aHrefXPABˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        var errΔ2 = top.Execute(io.Discard, default!); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = top.Execute(io.Discard, default); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
 }
@@ -2015,47 +2057,50 @@ internal partial struct recursiveInvoker {
 internal static (@string, error) Recur(this ref recursiveInvoker r) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     {
-        var err = r.tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default!); if (err != default!) {
+        var err = r.tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default); if (err != nil) {
             r.t.Fatal(err);
         }
     }
-    return (sb.String(), default!);
+    return (sb.String(), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string recurˢ2 = @"{{.Recur}}"u8;
+internal static ref readonly @string recurˢ2 => ref recurˢ2ᵇ;
+private static readonly @string recurˢ2ᵇ = @"{{.Recur}}"u8;
 
-public static void TestRecursiveExecuteViaMethod(ж<testing.T> Ꮡt) {
+public static void TestRecursiveExecuteViaMethod(ж<testing.T> t) {
     var tmpl = New(""u8);
     var (top, err) = tmpl.New(xHtmlˢ).Parse(recurˢ2);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (_, err) = tmpl.New(subroutineˢ).Parse(aHrefXPABˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var r = Ꮡ(new recursiveInvoker(
-        t: Ꮡt,
+        t: t,
         tmpl: tmpl
     ));
     {
-        var errΔ1 = top.Execute(io.Discard, r.OrTypedNil()); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = top.Execute(io.Discard, r.OrTypedNil()); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string origˢ = "orig"u8;
-internal static readonly @string childˢ = "child"u8;
+internal static ref readonly @string origˢ => ref origˢᵇ;
+private static readonly @string origˢᵇ = "orig"u8;
+internal static ref readonly @string childˢ => ref childˢᵇ;
+private static readonly @string childˢᵇ = "child"u8;
 
 // Issue 43295.
-public static void TestTemplateFuncsAfterClone(ж<testing.T> Ꮡt) {
-    @string s = @"{{ f . }}"u8;
+public static void TestTemplateFuncsAfterClone(ж<testing.T> t) {
+    @string s = @"{{ f . }}";
     @string want = testˢ;
     var orig = New(origˢ).Funcs(new map<@string, any>{
-        ["f"u8] = @string (@string @in) => @in
+        ["f"] = @string (@string @in) => @in
     }).New(childˢ);
 
     var (ᴛ11, ᴛ12) = orig.Clone();
@@ -2064,13 +2109,13 @@ public static void TestTemplateFuncsAfterClone(ж<testing.T> Ꮡt) {
     var overviewTmpl = Must(ᴛ13, ᴛ14);
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
     {
-        var err = overviewTmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡout), want); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = overviewTmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡout), want); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
         @string got = @out.String(); if (got != want) {
-            Ꮡt.Fatalf("got %q; want %q"u8, got, want);
+            t.Fatalf("got %q; want %q", got, want);
         }
     }
 }

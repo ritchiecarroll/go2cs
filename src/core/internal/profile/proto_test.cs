@@ -15,46 +15,46 @@ internal partial struct TestPackedEncoding_testcase /*dyn*/ {
     internal slice<byte> encoded;
 }
 
-public static void TestPackedEncoding(ж<testing.T> Ꮡt) {
-    foreach (var (i, tc) in new TestPackedEncoding_testcase[]{
+public static void TestPackedEncoding(ж<testing.T> t) {
+    foreach (var (i, tc) in slice<TestPackedEncoding_testcase>([
         new(
-            new uint64[]{0, 1, 10, 100, 1000, 10000}.slice(),
-            new int64[]{1000, 0, 1000}.slice(),
-            new byte[]{10, 8, 0, 1, 10, 100, 232, 7, 144, 78, 18, 5, 232, 7, 0, 232, 7}.slice()
+            slice<uint64>([0, 1, 10, 100, 1000, 10000]),
+            slice<int64>([1000, 0, 1000]),
+            slice<byte>([10, 8, 0, 1, 10, 100, 232, 7, 144, 78, 18, 5, 232, 7, 0, 232, 7])
         ),
         new(
-            new uint64[]{10000}.slice(),
-            default!,
-            new byte[]{8, 144, 78}.slice()
+            slice<uint64>([10000]),
+            default,
+            slice<byte>([8, 144, 78])
         ),
         new(
-            default!,
-            new int64[]{-10000}.slice(),
-            new byte[]{16, 240, 177, 255, 255, 255, 255, 255, 255, 255, 1}.slice()
+            default,
+            slice<int64>([-10000]),
+            slice<byte>([16, 240, 177, 255, 255, 255, 255, 255, 255, 255, 1])
         )
-    }.slice()) {
+    ])) {
         var source = Ꮡ(new packedInts(tc.uint64s, tc.int64s));
         {
             var (got, want) = (marshal(new profile_internal_test_package.packedIntsжmessage(source)), tc.encoded); if (!slices.Equal<slice<byte>, byte>(got, want)) {
-                Ꮡt.Errorf("failed encode %d, got %v, want %v"u8, i, got, want);
+                t.Errorf("failed encode %d, got %v, want %v", i, got, want);
             }
         }
 
         var dest = @new<packedInts>();
         {
-            var err = unmarshal(tc.encoded, new profile_internal_test_package.packedIntsжmessage(dest)); if (err != default!) {
-                Ꮡt.Errorf("failed decode %d: %v"u8, i, err);
+            var err = unmarshal(tc.encoded, new profile_internal_test_package.packedIntsжmessage(dest)); if (err != nil) {
+                t.Errorf("failed decode %d: %v", i, err);
                 continue;
             }
         }
         {
-            var (got, want) = (dest.Value.uint64s, tc.uint64s); if (!slices.Equal<slice<uint64>, uint64>(got, want)) {
-                Ꮡt.Errorf("failed decode uint64s %d, got %v, want %v"u8, i, got, want);
+            var (got, want) = (dest.uint64s, tc.uint64s); if (!slices.Equal<slice<uint64>, uint64>(got, want)) {
+                t.Errorf("failed decode uint64s %d, got %v, want %v", i, got, want);
             }
         }
         {
-            var (got, want) = (dest.Value.int64s, tc.int64s); if (!slices.Equal<slice<int64>, int64>(got, want)) {
-                Ꮡt.Errorf("failed decode int64s %d, got %v, want %v"u8, i, got, want);
+            var (got, want) = (dest.int64s, tc.int64s); if (!slices.Equal<slice<int64>, int64>(got, want)) {
+                t.Errorf("failed decode int64s %d, got %v, want %v", i, got, want);
             }
         }
     }
@@ -66,16 +66,16 @@ internal partial struct packedInts {
 }
 
 internal static slice<Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>> decoder(this ref packedInts u) {
-    return new Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>[]{
-        default!,
-        (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeUint64s(ref (b).DerefOrNull(), m._<global::go.@internal.profile_package.message, ж<packedInts>>().of(packedInts.Ꮡuint64s)),
-        (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeInt64s(ref (b).DerefOrNull(), m._<global::go.@internal.profile_package.message, ж<packedInts>>().of(packedInts.Ꮡint64s))
-    }.slice();
+    return slice<Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>>([
+        default,
+        (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeUint64s(ref (b).DerefOrNull(), m._<global::go.@internal.profile_package.message, ж<packedInts>>().Ꮡuint64s),
+        (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeInt64s(ref (b).DerefOrNull(), m._<global::go.@internal.profile_package.message, ж<packedInts>>().Ꮡint64s)
+    ]);
 }
 
-internal static void encode(this ref packedInts u, ж<global::go.@internal.profile_package.buffer> Ꮡb) {
-    encodeUint64s(ref (Ꮡb).DerefOrNull(), 1, u.uint64s);
-    encodeInt64s(ref (Ꮡb).DerefOrNull(), 2, u.int64s);
+internal static void encode(this ref packedInts u, ж<global::go.@internal.profile_package.buffer> b) {
+    encodeUint64s(ref (b).DerefOrNull(), 1, u.uint64s);
+    encodeInt64s(ref (b).DerefOrNull(), 2, u.int64s);
 }
 
 } // end profile_internal_test_package

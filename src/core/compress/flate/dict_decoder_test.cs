@@ -11,25 +11,28 @@ using static go.compress.flate_package;
 partial class flate_internal_test_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string abcᶜ1 = "ABC\n"u8;
+internal static ref readonly @string abcᶜ1 => ref abcᶜ1ᵇ;
+private static readonly @string abcᶜ1ᵇ = "ABC\n"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string foxᶜ = "The quick brown fox jumped over the lazy dog!\n"u8;
+internal static ref readonly @string foxᶜ => ref foxᶜᵇ;
+private static readonly @string foxᶜᵇ = "The quick brown fox jumped over the lazy dog!\n"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string poemᶜ = "The Road Not Taken\nRobert Frost\n\nTwo roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth;\n\nThen took the other, as just as fair,\nAnd having perhaps the better claim,\nBecause it was grassy and wanted wear;\nThough as for that the passing there\nHad worn them really about the same,\n\nAnd both that morning equally lay\nIn leaves no step had trodden black.\nOh, I kept the first for another day!\nYet knowing how way leads on to way,\nI doubted if I should ever come back.\n\nI shall be telling this with a sigh\nSomewhere ages and ages hence:\nTwo roads diverged in a wood, and I-\nI took the one less traveled by,\nAnd that has made all the difference.\n";
+internal static ref readonly @string poemᶜ => ref poemᶜᵇ;
+private static readonly @string poemᶜᵇ = "The Road Not Taken\nRobert Frost\n\nTwo roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth;\n\nThen took the other, as just as fair,\nAnd having perhaps the better claim,\nBecause it was grassy and wanted wear;\nThough as for that the passing there\nHad worn them really about the same,\n\nAnd both that morning equally lay\nIn leaves no step had trodden black.\nOh, I kept the first for another day!\nYet knowing how way leads on to way,\nI doubted if I should ever come back.\n\nI shall be telling this with a sigh\nSomewhere ages and ages hence:\nTwo roads diverged in a wood, and I-\nI took the one less traveled by,\nAnd that has made all the difference.\n";
 
 internal partial struct TestDictDecoder_type /*dyn*/ {
-    internal nint dist; // Backward distance (0 if this is an insertion)
+    internal nint dist;   // Backward distance (0 if this is an insertion)
     internal nint length; // Length of copy or insertion
 }
 
-public static void TestDictDecoder(ж<testing.T> Ꮡt) {
+public static void TestDictDecoder(ж<testing.T> t) {
     @string abc = abcᶜ1;
     @string fox = foxᶜ;
     @string poem = poemᶜ;
 
-    slice<TestDictDecoder_type> poemRefs = new TestDictDecoder_type[]{
+    slice<TestDictDecoder_type> poemRefs = slice<TestDictDecoder_type>([
         new(0, 38), new(33, 3), new(0, 48), new(79, 3), new(0, 11), new(34, 5), new(0, 6), new(23, 7),
         new(0, 8), new(50, 3), new(0, 2), new(69, 3), new(34, 5), new(0, 4), new(97, 3), new(0, 4),
         new(43, 5), new(0, 6), new(7, 4), new(88, 7), new(0, 12), new(80, 3), new(0, 2), new(141, 4),
@@ -51,12 +54,12 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
         new(615, 5), new(46, 5), new(0, 2), new(104, 3), new(475, 10), new(549, 3), new(0, 4), new(597, 8),
         new(314, 3), new(0, 1), new(473, 6), new(317, 5), new(0, 1), new(400, 3), new(0, 3), new(109, 3),
         new(151, 3), new(48, 4), new(0, 4), new(125, 3), new(108, 3), new(0, 2)
-    }.slice();
+    ]);
 
     ref var got = ref heap(new bytes.Buffer(), out var Ꮡgot);
     ref var want = ref heap(new bytes.Buffer(), out var Ꮡwant);
     ref var dd = ref heap(new global::go.compress.flate_package.dictDecoder(), out var Ꮡdd);
-    dd.init(1 << 11, default!);
+    dd.init(1 << 11, default);
 
     Action<nint, nint> writeCopy = (nint dist, nint length) => {
         while (length > 0) {
@@ -82,12 +85,12 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
         }
     };
 
-    writeString("."u8);
-    want.WriteByte((rune)'.');
+    writeString(".");
+    want.WriteByte((byte)'.');
 
     @string str = poem;
     foreach (var (_, @ref) in poemRefs) {
-        if (@ref.dist == 0){
+        if (@ref.dist == 0) {
             writeString(str.slice(0, @ref.length));
         } else {
             writeCopy(@ref.dist, @ref.length);
@@ -107,9 +110,9 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
     writeCopy(len(fox), 9 * len(fox));
     want.WriteString(strings.Repeat(fox, 10));
 
-    writeString("."u8);
+    writeString(".");
     writeCopy(1, 9);
-    want.WriteString(strings.Repeat("."u8, 10));
+    want.WriteString(strings.Repeat(".", 10));
 
     writeString(strings.ToUpper(poem));
     writeCopy(len(poem), 7 * len(poem));
@@ -120,7 +123,7 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
 
     got.Write(dd.readFlush());
     if (Ꮡgot.String() != Ꮡwant.String()) {
-        Ꮡt.Errorf("final string mismatch:\ngot  %q\nwant %q"u8, Ꮡgot.String(), Ꮡwant.String());
+        t.Errorf("final string mismatch:\ngot  %q\nwant %q", Ꮡgot.String(), Ꮡwant.String());
     }
 }
 

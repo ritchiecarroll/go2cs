@@ -12,23 +12,25 @@ using static go.log.slog.@internal.buffer_package;
 partial class buffer_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloˢ = "hello"u8;
-internal static readonly @string helloWorldˢ = "hello, world"u8;
+internal static ref readonly @string helloˢ => ref helloˢᵇ;
+private static readonly @string helloˢᵇ = "hello"u8;
+internal static ref readonly @string helloWorldˢ => ref helloWorldˢᵇ;
+private static readonly @string helloWorldˢᵇ = "hello, world"u8;
 
-public static void Test(ж<testing.T> Ꮡt) {
+public static void Test(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var b = New();
         var bʗ1 = b;
         defer(bʗ1.Free, ref ᒐ);
         b.WriteString(helloˢ);
-        b.WriteByte((rune)',');
+        b.WriteByte((byte)',');
         b.Write(slice<byte>(" world"u8));
 
         @string got = b.String();
         @string want = helloWorldˢ;
         if (got != want) {
-            Ꮡt.Errorf("got %q, want %q"u8, got, want);
+            t.Errorf("got %q, want %q", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -37,13 +39,14 @@ public static void Test(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestInRaceModeˢ = (@string)"skipping test in race mode"u8;
-internal static readonly @string not1kWorthOfBytesˢ = "not 1K worth of bytes"u8;
+internal static ref readonly @string not1kWorthOfBytesˢ => ref not1kWorthOfBytesˢᵇ;
+private static readonly @string not1kWorthOfBytesˢᵇ = "not 1K worth of bytes"u8;
 
-public static void TestAlloc(ж<testing.T> Ꮡt) {
+public static void TestAlloc(ж<testing.T> t) {
     if (race.Enabled) {
-        Ꮡt.Skip(skippingTestInRaceModeˢ);
+        t.Skip(skippingTestInRaceModeˢ);
     }
-    testenv.SkipIfOptimizationOff(new buffer_internal_test_package.testing_TжTB(Ꮡt));
+    testenv.SkipIfOptimizationOff(new buffer_internal_test_package.testing_TжTB(t));
     nint got = (nint)testing.AllocsPerRun(5, () => {
         GoFrame ᒐ = default;
         try {
@@ -56,7 +59,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
         finally { ᒐ.Run(); }
     });
     if (got != 0) {
-        Ꮡt.Errorf("got %d allocs, want 0"u8, got);
+        t.Errorf("got %d allocs, want 0", got);
     }
 }
 

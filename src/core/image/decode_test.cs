@@ -24,37 +24,37 @@ partial struct imageTest {
     internal nint tolerance;
 }
 
-internal static slice<imageTest> imageTests = new imageTest[]{
-    new("testdata/video-001.png"u8, "testdata/video-001.png"u8, 0),
+internal static slice<imageTest> imageTests = slice<imageTest>([
+    new("testdata/video-001.png", "testdata/video-001.png", 0),
     // GIF images are restricted to a 256-color palette and the conversion
     // to GIF loses significant image quality.
-    new("testdata/video-001.png"u8, "testdata/video-001.gif"u8, 64 << 8),
-    new("testdata/video-001.png"u8, "testdata/video-001.interlaced.gif"u8, 64 << 8),
-    new("testdata/video-001.png"u8, "testdata/video-001.5bpp.gif"u8, 128 << 8),
+    new("testdata/video-001.png", "testdata/video-001.gif", 64 << 8),
+    new("testdata/video-001.png", "testdata/video-001.interlaced.gif", 64 << 8),
+    new("testdata/video-001.png", "testdata/video-001.5bpp.gif", 128 << 8),
     // JPEG is a lossy format and hence needs a non-zero tolerance.
-    new("testdata/video-001.png"u8, "testdata/video-001.jpeg"u8, 8 << 8),
-    new("testdata/video-001.png"u8, "testdata/video-001.progressive.jpeg"u8, 8 << 8),
-    new("testdata/video-001.221212.png"u8, "testdata/video-001.221212.jpeg"u8, 8 << 8),
-    new("testdata/video-001.cmyk.png"u8, "testdata/video-001.cmyk.jpeg"u8, 8 << 8),
-    new("testdata/video-001.rgb.png"u8, "testdata/video-001.rgb.jpeg"u8, 8 << 8),
-    new("testdata/video-001.progressive.truncated.png"u8, "testdata/video-001.progressive.truncated.jpeg"u8, 8 << 8),
+    new("testdata/video-001.png", "testdata/video-001.jpeg", 8 << 8),
+    new("testdata/video-001.png", "testdata/video-001.progressive.jpeg", 8 << 8),
+    new("testdata/video-001.221212.png", "testdata/video-001.221212.jpeg", 8 << 8),
+    new("testdata/video-001.cmyk.png", "testdata/video-001.cmyk.jpeg", 8 << 8),
+    new("testdata/video-001.rgb.png", "testdata/video-001.rgb.jpeg", 8 << 8),
+    new("testdata/video-001.progressive.truncated.png", "testdata/video-001.progressive.truncated.jpeg", 8 << 8),
     // Grayscale images.
-    new("testdata/video-005.gray.png"u8, "testdata/video-005.gray.jpeg"u8, 8 << 8),
-    new("testdata/video-005.gray.png"u8, "testdata/video-005.gray.png"u8, 0)
-}.slice();
+    new("testdata/video-005.gray.png", "testdata/video-005.gray.jpeg", 8 << 8),
+    new("testdata/video-005.gray.png", "testdata/video-005.gray.png", 0)
+]);
 
 internal static (Δimage.Image, @string, error) decode(@string filename) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(filename);
-        if (err != default!) {
-            return (default!, "", err);
+        if (err != nil) {
+            return (default, "", err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         return Δimage.Decode(new image_test_package.bufio_ReaderжReader(bufio.NewReader(new image_test_package.os_FileжReader(f))));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -62,14 +62,14 @@ internal static (Δimage.Config, @string, error) decodeConfig(@string filename) 
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(filename);
-        if (err != default!) {
-            return (new Δimage.Config(nil), "", err);
+        if (err != nil) {
+            return (new Δimage.Config(), "", err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         return Δimage.DecodeConfig(new image_test_package.bufio_ReaderжReader(bufio.NewReader(new image_test_package.os_FileжReader(f))));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -91,7 +91,7 @@ internal static bool withinTolerance(color.Color c0, color.Color c1, nint tolera
     return r <= tolerance && g <= tolerance && b <= tolerance && a <= tolerance;
 }
 
-public static void TestDecode(ж<testing.T> Ꮡt) {
+public static void TestDecode(ж<testing.T> t) {
     @string rgba(color.Color c) {
         var (r, g, b, a) = c.RGBA();
         return fmt.Sprintf("rgba = 0x%04x, 0x%04x, 0x%04x, 0x%04x for %T%v"u8, r, g, b, a, c, c);
@@ -101,29 +101,29 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
 loop:
     foreach (var (_, it) in imageTests) {
         var g = golden[it.goldenFilename];
-        if (g == default!) {
-            error errΔ1 = default!;
+        if (g == nil) {
+            error errΔ1 = default;
             (g, _, errΔ1) = decode(it.goldenFilename);
-            if (errΔ1 != default!) {
-                Ꮡt.Errorf("%s: %v"u8, it.goldenFilename, errΔ1);
+            if (errΔ1 != nil) {
+                t.Errorf("%s: %v", it.goldenFilename, errΔ1);
                 goto continue_loop;
             }
             golden[it.goldenFilename] = g;
         }
         var (m, imageFormat, err) = decode(it.filename);
-        if (err != default!) {
-            Ꮡt.Errorf("%s: %v"u8, it.filename, err);
+        if (err != nil) {
+            t.Errorf("%s: %v", it.filename, err);
             goto continue_loop;
         }
         var b = g.Bounds();
         if (!b.Eq(m.Bounds())) {
-            Ꮡt.Errorf("%s: got bounds %v want %v"u8, it.filename, m.Bounds(), b);
+            t.Errorf("%s: got bounds %v want %v", it.filename, m.Bounds(), b);
             goto continue_loop;
         }
         for (nint y = b.Min.Y; y < b.Max.Y; y++) {
             for (nint x = b.Min.X; x < b.Max.X; x++) {
                 if (!withinTolerance(g.At(x, y), m.At(x, y), it.tolerance)) {
-                    Ꮡt.Errorf("%s: at (%d, %d):\ngot  %v\nwant %v"u8,
+                    t.Errorf("%s: at (%d, %d):\ngot  %v\nwant %v",
                         it.filename, x, y, rgba(m.At(x, y)), rgba(g.At(x, y)));
                     goto continue_loop;
                 }
@@ -136,12 +136,12 @@ loop:
             continue;
         }
         (var c, _, err) = decodeConfig(it.filename);
-        if (err != default!) {
-            Ꮡt.Errorf("%s: %v"u8, it.filename, err);
+        if (err != nil) {
+            t.Errorf("%s: %v", it.filename, err);
             goto continue_loop;
         }
         if (!AreEqual(m.ColorModel(), c.ColorModel)) {
-            Ꮡt.Errorf("%s: color models differ"u8, it.filename);
+            t.Errorf("%s: color models differ", it.filename);
             goto continue_loop;
         }
 continue_loop:;

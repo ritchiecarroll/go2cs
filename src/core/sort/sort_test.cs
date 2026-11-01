@@ -24,30 +24,30 @@ internal static array<nint> ints = new nint[]{74, 59, 238, -784, 9845, 959, 905,
 
 internal static array<float64> float64s = new float64[]{74.3D, 59.0D, Δmath.Inf(1), 238.2D, -784.0D, 2.3D, Δmath.NaN(), Δmath.NaN(), Δmath.Inf(-1), 9845.768D, -959.7485D, 905D, 7.8D, 7.8D}.array();
 
-internal static array<@string> stringsData = new @string[]{""u8, "Hello"u8, "foo"u8, "bar"u8, "foo"u8, "f00"u8, "%*&^*&^&"u8, "***"u8}.array();
+internal static array<@string> stringsData = new @string[]{"", "Hello", "foo", "bar", "foo", "f00", "%*&^*&^&", "***"}.array();
 
-public static void TestSortIntSlice(ж<testing.T> Ꮡt) {
+public static void TestSortIntSlice(ж<testing.T> t) {
     var data = ints.Clone();
     var a = (sort.IntSlice)(data[0..]);
     Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
-        Ꮡt.Errorf("sorted %v"u8, ints);
-        Ꮡt.Errorf("   got %v"u8, data);
+        t.Errorf("sorted %v", ints);
+        t.Errorf("   got %v", data);
     }
 }
 
-public static void TestSortFloat64Slice(ж<testing.T> Ꮡt) {
+public static void TestSortFloat64Slice(ж<testing.T> t) {
     var data = float64s.Clone();
     var a = (sort.Float64Slice)(data[0..]);
     Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
-        Ꮡt.Errorf("sorted %v"u8, float64s);
-        Ꮡt.Errorf("   got %v"u8, data);
+        t.Errorf("sorted %v", float64s);
+        t.Errorf("   got %v", data);
     }
 }
 
 // Compare Sort with slices.Sort sorting a float64 slice containing NaNs.
-public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> Ꮡt) {
+public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> t) {
     var slice1 = slices.Clone<slice<float64>, float64>(float64s[..]);
     var slice2 = slices.Clone<slice<float64>, float64>(float64s[..]);
 
@@ -56,62 +56,59 @@ public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> Ꮡt) {
 
     // Compare for equality using cmp.Compare, which considers NaNs equal.
     if (!slices.EqualFunc(slice1, slice2, (float64 a, float64 b) => cmp.Compare(a, b) == 0)) {
-        Ꮡt.Errorf("mismatch between Sort and slices.Sort: got %v, want %v"u8, slice1, slice2);
+        t.Errorf("mismatch between Sort and slices.Sort: got %v, want %v", slice1, slice2);
     }
 }
 
-public static void TestSortStringSlice(ж<testing.T> Ꮡt) {
+public static void TestSortStringSlice(ж<testing.T> t) {
     var data = stringsData.Clone();
     var a = (sort.StringSlice)(data[0..]);
     Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
-        Ꮡt.Errorf("sorted %v"u8, stringsData);
-        Ꮡt.Errorf("   got %v"u8, data);
+        t.Errorf("sorted %v", stringsData);
+        t.Errorf("   got %v", data);
     }
 }
 
-public static void TestInts(ж<testing.T> Ꮡt) {
+public static void TestInts(ж<testing.T> t) {
     var data = ints.Clone();
     Ints(data[0..]);
     if (!IntsAreSorted(data[0..])) {
-        Ꮡt.Errorf("sorted %v"u8, ints);
-        Ꮡt.Errorf("   got %v"u8, data);
+        t.Errorf("sorted %v", ints);
+        t.Errorf("   got %v", data);
     }
 }
 
-public static void TestFloat64s(ж<testing.T> Ꮡt) {
+public static void TestFloat64s(ж<testing.T> t) {
     var data = float64s.Clone();
     Float64s(data[0..]);
     if (!Float64sAreSorted(data[0..])) {
-        Ꮡt.Errorf("sorted %v"u8, float64s);
-        Ꮡt.Errorf("   got %v"u8, data);
+        t.Errorf("sorted %v", float64s);
+        t.Errorf("   got %v", data);
     }
 }
 
-public static void TestStrings(ж<testing.T> Ꮡt) {
+public static void TestStrings(ж<testing.T> t) {
     var data = stringsData.Clone();
     Strings(data[0..]);
     if (!StringsAreSorted(data[0..])) {
-        Ꮡt.Errorf("sorted %v"u8, stringsData);
-        Ꮡt.Errorf("   got %v"u8, data);
+        t.Errorf("sorted %v", stringsData);
+        t.Errorf("   got %v", data);
     }
 }
 
-public static void TestSlice(ж<testing.T> Ꮡt) {
-    ref var data = ref heap<array<@string>>(out var Ꮡdata);
-    data = stringsData.Clone();
+public static void TestSlice(ж<testing.T> t) {
+    ref var data = ref heap<array<@string>>(stringsData.Clone(), out var Ꮡdata);
     var dataʗ1 = data;
     Slice(data[..], (nint i, nint j) => dataʗ1[i] < dataʗ1[j]);
     var dataʗ2 = data;
     if (!SliceIsSorted(data[..], (nint i, nint j) => dataʗ2[i] < dataʗ2[j])) {
-        Ꮡt.Errorf("sorted %v"u8, stringsData);
-        Ꮡt.Errorf("   got %v"u8, data);
+        t.Errorf("sorted %v", stringsData);
+        t.Errorf("   got %v", data);
     }
 }
 
-public static void TestSortLarge_Random(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestSortLarge_Random(ж<testing.T> t) {
     nint n = 1000000;
     if (testing.Short()) {
         n /= 100;
@@ -121,17 +118,15 @@ public static void TestSortLarge_Random(ж<testing.T> Ꮡt) {
         data[i] = rand.IntN(100);
     }
     if (IntsAreSorted(data)) {
-        Ꮡt.Fatalf("terrible rand.rand"u8);
+        t.Fatalf("terrible rand.rand");
     }
     Ints(data);
     if (!IntsAreSorted(data)) {
-        Ꮡt.Errorf("sort didn't sort - 1M ints"u8);
+        t.Errorf("sort didn't sort - 1M ints");
     }
 }
 
-public static void TestReverseSortIntSlice(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestReverseSortIntSlice(ж<testing.T> t) {
     var data = ints.Clone();
     var data1 = ints.Clone();
     var a = (sort.IntSlice)(data[0..]);
@@ -140,7 +135,7 @@ public static void TestReverseSortIntSlice(ж<testing.T> Ꮡt) {
     Sort(Reverse(r));
     for (nint i = 0; i < len(data); i++) {
         if (a[i] != r[len(data) - 1 - i]) {
-            Ꮡt.Errorf("reverse sort didn't sort"u8);
+            t.Errorf("reverse sort didn't sort");
         }
         if (i > len(data) / 2) {
             break;
@@ -148,7 +143,7 @@ public static void TestReverseSortIntSlice(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestBreakPatterns(ж<testing.T> Ꮡt) {
+public static void TestBreakPatterns(ж<testing.T> t) {
     // Special slice used to trigger breakPatterns.
     var data = new slice<nint>(30);
     foreach (var i in range(data)) {
@@ -160,23 +155,21 @@ public static void TestBreakPatterns(ж<testing.T> Ꮡt) {
     Sort((sort.Interface)((sort.IntSlice)data));
 }
 
-public static void TestReverseRange(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var data = new nint[]{1, 2, 3, 4, 5, 6, 7}.slice();
+public static void TestReverseRange(ж<testing.T> t) {
+    var data = slice<nint>([1, 2, 3, 4, 5, 6, 7]);
     sort_internal_test_package.ReverseRange((sort.IntSlice)data, 0, len(data));
     for (nint i = len(data) - 1; i > 0; i--) {
         if (data[i] > data[i - 1]) {
-            Ꮡt.Fatalf("reverseRange didn't work"u8);
+            t.Fatalf("reverseRange didn't work");
         }
     }
 
-    var data1 = new nint[]{1, 2, 3, 4, 5, 6, 7}.slice();
-    var data2 = new nint[]{1, 2, 5, 4, 3, 6, 7}.slice();
+    var data1 = slice<nint>([1, 2, 3, 4, 5, 6, 7]);
+    var data2 = slice<nint>([1, 2, 5, 4, 3, 6, 7]);
     sort_internal_test_package.ReverseRange((sort.IntSlice)data1, 2, 5);
     foreach (var (i, v) in data1) {
         if (v != data2[i]) {
-            Ꮡt.Fatalf("reverseRange didn't work"u8);
+            t.Fatalf("reverseRange didn't work");
         }
     }
 }
@@ -202,15 +195,15 @@ internal static void Swap(this ref nonDeterministicTestingData t, nint i, nint j
     }
 }
 
-public static void TestNonDeterministicComparison(ж<testing.T> Ꮡt) {
+public static void TestNonDeterministicComparison(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Ensure that sort.Sort does not panic when Less returns inconsistent results.
         // See https://golang.org/issue/14377.
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
-                    Ꮡt.Error(r);
+                var r = recover(); if (r != nil) {
+                    t.Error(r);
                 }
             }
         }, ref ᒐ);
@@ -457,7 +450,7 @@ internal static bool Less(this ref testingData d, nint i, nint j) {
 
 internal static void Swap(this ref testingData d, nint i, nint j) {
     if (d.nswap >= d.maxswap) {
-        d.t.Fatalf("%s: used %d swaps sorting slice of %d"u8, d.desc, d.nswap, len(d.data));
+        d.t.Fatalf("%s: used %d swaps sorting slice of %d", d.desc, d.nswap, len(d.data));
     }
     d.nswap++;
     (d.data[i], d.data[j]) = (d.data[j], d.data[i]);
@@ -471,15 +464,13 @@ internal static nint lg(nint n) {
     return i;
 }
 
-internal static void testBentleyMcIlroy(ж<testing.T> Ꮡt, Action<sort.Interface> sort, Func<nint, nint> maxswap) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var sizes = new nint[]{100, 1023, 1024, 1025}.slice();
+internal static void testBentleyMcIlroy(ж<testing.T> t, Action<sort.Interface> sort, Func<nint, nint> maxswap) {
+    var sizes = slice<nint>([100, 1023, 1024, 1025]);
     if (testing.Short()) {
-        sizes = new nint[]{100, 127, 128, 129}.slice();
+        sizes = slice<nint>([100, 127, 128, 129]);
     }
-    var dists = new @string[]{"sawtooth"u8, "rand"u8, "stagger"u8, "plateau"u8, "shuffle"u8}.slice();
-    var modes = new @string[]{"copy"u8, "reverse"u8, "reverse1"u8, "reverse2"u8, "sort"u8, "dither"u8}.slice();
+    var dists = slice<@string>(["sawtooth", "rand", "stagger", "plateau", "shuffle"]);
+    var modes = slice<@string>(["copy", "reverse", "reverse1", "reverse2", "sort", "dither"]);
     array<nint> tmp1 = new(1025);
     array<nint> tmp2 = new(1025);
     foreach (var (_, n) in sizes) {
@@ -489,76 +480,86 @@ internal static void testBentleyMcIlroy(ж<testing.T> Ꮡt, Action<sort.Interfac
                 nint k = 1;
                 var data = tmp1.slice(0, n);
                 for (nint i = 0; i < n; i++) {
-                    var exprᴛ1 = dist;
-                    if (exprᴛ1 == _Sawtooth) {
+                    switch (dist) {
+                    case var ᴛ when ᴛ == _Sawtooth: {
                         data[i] = rem(i, m);
+                        break;
                     }
-                    else if (exprᴛ1 == _Rand) {
+                    case var ᴛ when ᴛ == _Rand: {
                         data[i] = rand.IntN(m);
+                        break;
                     }
-                    else if (exprᴛ1 == _Stagger) {
+                    case var ᴛ when ᴛ == _Stagger: {
                         data[i] = rem((i * m + i), n);
+                        break;
                     }
-                    else if (exprᴛ1 == _Plateau) {
+                    case var ᴛ when ᴛ == _Plateau: {
                         data[i] = min(i, m);
+                        break;
                     }
-                    else if (exprᴛ1 == _Shuffle) {
-                        if (rand.IntN(m) != 0){
+                    case var ᴛ when ᴛ == _Shuffle: {
+                        if (rand.IntN(m) != 0) {
                             j += 2;
                             data[i] = j;
                         } else {
                             k += 2;
                             data[i] = k;
                         }
-                    }
+                        break;
+                    }}
                 }
 
                 var mdata = tmp2.slice(0, n);
                 for (nint mode = 0; mode < _NMode; mode++) {
-                    var exprᴛ2 = mode;
-                    if (exprᴛ2 == _Copy) {
+                    switch (mode) {
+                    case var ᴛ when ᴛ == _Copy: {
                         for (nint i = 0; i < n; i++) {
                             mdata[i] = data[i];
                         }
+                        break;
                     }
-                    else if (exprᴛ2 == _Reverse) {
+                    case var ᴛ when ᴛ == _Reverse: {
                         for (nint i = 0; i < n; i++) {
                             mdata[i] = data[n - i - 1];
                         }
+                        break;
                     }
-                    else if (exprᴛ2 == _ReverseFirstHalf) {
+                    case var ᴛ when ᴛ == _ReverseFirstHalf: {
                         for (nint i = 0; i < n / 2; i++) {
                             mdata[i] = data[n / 2 - i - 1];
                         }
                         for (nint i = n / 2; i < n; i++) {
                             mdata[i] = data[i];
                         }
+                        break;
                     }
-                    else if (exprᴛ2 == _ReverseSecondHalf) {
+                    case var ᴛ when ᴛ == _ReverseSecondHalf: {
                         for (nint i = 0; i < n / 2; i++) {
                             mdata[i] = data[i];
                         }
                         for (nint i = n / 2; i < n; i++) {
                             mdata[i] = data[n - (i - n / 2) - 1];
                         }
+                        break;
                     }
-                    else if (exprᴛ2 == _Sorted) {
+                    case var ᴛ when ᴛ == _Sorted: {
                         for (nint i = 0; i < n; i++) {
                             mdata[i] = data[i];
                         }
                         // Ints is known to be correct
                         // because mode Sort runs after mode _Copy.
                         Ints(mdata);
+                        break;
                     }
-                    else if (exprᴛ2 == _Dither) {
+                    case var ᴛ when ᴛ == _Dither: {
                         for (nint i = 0; i < n; i++) {
                             mdata[i] = data[i] + i % 5;
                         }
-                    }
+                        break;
+                    }}
 
-                    ref var desc = ref heap<@string>(out var Ꮡdesc);
-                    desc = fmt.Sprintf("n=%d m=%d dist=%s mode=%s"u8, n, m, dists[dist], modes[mode]);
-                    var d = Ꮡ(new testingData(desc: desc, t: Ꮡt, data: mdata.slice(0, n), maxswap: maxswap(n)));
+                    ref var desc = ref heap<@string>(fmt.Sprintf("n=%d m=%d dist=%s mode=%s"u8, n, m, dists[dist], modes[mode]), out var Ꮡdesc);
+                    var d = Ꮡ(new testingData(desc: desc, t: t, data: mdata.slice(0, n), maxswap: maxswap(n)));
                     sort(new sort_test_package.testingDataжInterface(d));
                     // Uncomment if you are trying to improve the number of compares/swaps.
                     //t.Logf("%s: ncmp=%d, nswp=%d", desc, d.ncmp, d.nswap)
@@ -572,7 +573,7 @@ internal static void testBentleyMcIlroy(ж<testing.T> Ꮡt, Action<sort.Interfac
                     // mutating method Sort can call is TestingData.swap,
                     // it suffices here just to check that the final slice is sorted.
                     if (!IntsAreSorted(mdata)) {
-                        Ꮡt.Fatalf("%s: ints not sorted\n\t%v"u8, desc, mdata);
+                        t.Fatalf("%s: ints not sorted\n\t%v", desc, mdata);
                     }
                 }
             }
@@ -580,16 +581,16 @@ internal static void testBentleyMcIlroy(ж<testing.T> Ꮡt, Action<sort.Interfac
     }
 }
 
-public static void TestSortBM(ж<testing.T> Ꮡt) {
-    testBentleyMcIlroy(Ꮡt, Sort, (nint n) => n * lg(n) * 12 / 10);
+public static void TestSortBM(ж<testing.T> t) {
+    testBentleyMcIlroy(t, Sort, (nint n) => n * lg(n) * 12 / 10);
 }
 
-public static void TestHeapsortBM(ж<testing.T> Ꮡt) {
-    testBentleyMcIlroy(Ꮡt, sort_internal_test_package.Heapsort, (nint n) => n * lg(n) * 12 / 10);
+public static void TestHeapsortBM(ж<testing.T> t) {
+    testBentleyMcIlroy(t, sort_internal_test_package.Heapsort, (nint n) => n * lg(n) * 12 / 10);
 }
 
-public static void TestStableBM(ж<testing.T> Ꮡt) {
-    testBentleyMcIlroy(Ꮡt, Stable, (nint n) => n * lg(n) * lg(n) / 3);
+public static void TestStableBM(ж<testing.T> t) {
+    testBentleyMcIlroy(t, Stable, (nint n) => n * lg(n) * lg(n) / 3);
 }
 
 // This is based on the "antiquicksort" implementation by M. Douglas McIlroy.
@@ -597,11 +598,11 @@ public static void TestStableBM(ж<testing.T> Ꮡt) {
 partial struct adversaryTestingData {
     internal ж<testing.T> t;
     internal slice<nint> data; // item values, initialized to special gas value and changed by Less
-    internal nint maxcmp;  // number of comparisons allowed
-    internal nint ncmp;  // number of comparisons (calls to Less)
-    internal nint nsolid;  // number of elements that have been set to non-gas values
-    internal nint candidate;  // guess at current pivot
-    internal nint gas;  // special value for unset elements, higher than everything else
+    internal nint maxcmp;      // number of comparisons allowed
+    internal nint ncmp;        // number of comparisons (calls to Less)
+    internal nint nsolid;      // number of elements that have been set to non-gas values
+    internal nint candidate;   // guess at current pivot
+    internal nint gas;         // special value for unset elements, higher than everything else
 }
 
 internal static nint Len(this ref adversaryTestingData d) {
@@ -610,12 +611,12 @@ internal static nint Len(this ref adversaryTestingData d) {
 
 internal static bool Less(this ref adversaryTestingData d, nint i, nint j) {
     if (d.ncmp >= d.maxcmp) {
-        d.t.Fatalf("used %d comparisons sorting adversary data with size %d"u8, d.ncmp, len(d.data));
+        d.t.Fatalf("used %d comparisons sorting adversary data with size %d", d.ncmp, len(d.data));
     }
     d.ncmp++;
 
     if (d.data[i] == d.gas && d.data[j] == d.gas) {
-        if (i == d.candidate){
+        if (i == d.candidate) {
             // freeze i
             d.data[i] = d.nsolid;
             d.nsolid++;
@@ -626,10 +627,9 @@ internal static bool Less(this ref adversaryTestingData d, nint i, nint j) {
         }
     }
 
-    if (d.data[i] == d.gas){
+    if (d.data[i] == d.gas) {
         d.candidate = i;
-    } else 
-    if (d.data[j] == d.gas) {
+    } else if (d.data[j] == d.gas) {
         d.candidate = j;
     }
 
@@ -640,34 +640,33 @@ internal static void Swap(this ref adversaryTestingData d, nint i, nint j) {
     (d.data[i], d.data[j]) = (d.data[j], d.data[i]);
 }
 
-internal static ж<adversaryTestingData> newAdversaryTestingData(ж<testing.T> Ꮡt, nint size, nint maxcmp) {
-    ref var gas = ref heap<nint>(out var Ꮡgas);
-    gas = size - 1;
+internal static ж<adversaryTestingData> newAdversaryTestingData(ж<testing.T> t, nint size, nint maxcmp) {
+    ref var gas = ref heap<nint>(size - 1, out var Ꮡgas);
     var data = new slice<nint>(size);
     for (nint i = 0; i < size; i++) {
         data[i] = gas;
     }
-    return Ꮡ(new adversaryTestingData(t: Ꮡt, data: data, maxcmp: maxcmp, gas: gas));
+    return Ꮡ(new adversaryTestingData(t: t, data: data, maxcmp: maxcmp, gas: gas));
 }
 
-public static void TestAdversary(ж<testing.T> Ꮡt) {
-    const nint size = 10000;   // large enough to distinguish between O(n^2) and O(n*log(n))
+public static void TestAdversary(ж<testing.T> t) {
+    const nint size = 10000;           // large enough to distinguish between O(n^2) and O(n*log(n))
     nint maxcmp = size * lg(size) * 4; // the factor 4 was found by trial and error
-    var d = newAdversaryTestingData(Ꮡt, size, maxcmp);
+    var d = newAdversaryTestingData(t, size, maxcmp);
     Sort(new sort_test_package.adversaryTestingDataжInterface(d)); // This should degenerate to heapsort.
     // Check data is fully populated and sorted.
-    foreach (var (i, v) in (~d).data) {
+    foreach (var (i, v) in d.data) {
         if (v != i) {
-            Ꮡt.Fatalf("adversary data not fully sorted"u8);
+            t.Fatalf("adversary data not fully sorted");
         }
     }
 }
 
-public static void TestStableInts(ж<testing.T> Ꮡt) {
+public static void TestStableInts(ж<testing.T> t) {
     var data = ints.Clone();
     Stable((sort.IntSlice)(data[0..]));
     if (!IntsAreSorted(data[0..])) {
-        Ꮡt.Errorf("nsorted %v\n   got %v"u8, ints, data);
+        t.Errorf("nsorted %v\n   got %v", ints, data);
     }
 }
 
@@ -715,9 +714,7 @@ internal static bool inOrder(this intPairs d) {
     return true;
 }
 
-public static void TestStability(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestStability(ж<testing.T> t) {
     nint n = 100000;
     nint m = 1000;
     if (testing.Short()) {
@@ -730,25 +727,25 @@ public static void TestStability(ж<testing.T> Ꮡt) {
         data[i].a = rand.IntN(m);
     }
     if (IsSorted(data)) {
-        Ꮡt.Fatalf("terrible rand.rand"u8);
+        t.Fatalf("terrible rand.rand");
     }
     data.initB();
     Stable(data);
     if (!IsSorted(data)) {
-        Ꮡt.Errorf("Stable didn't sort %d ints"u8, n);
+        t.Errorf("Stable didn't sort %d ints", n);
     }
     if (!data.inOrder()) {
-        Ꮡt.Errorf("Stable wasn't stable on %d ints"u8, n);
+        t.Errorf("Stable wasn't stable on %d ints", n);
     }
 
     // already sorted
     data.initB();
     Stable(data);
     if (!IsSorted(data)) {
-        Ꮡt.Errorf("Stable shuffled sorted %d ints (order)"u8, n);
+        t.Errorf("Stable shuffled sorted %d ints (order)", n);
     }
     if (!data.inOrder()) {
-        Ꮡt.Errorf("Stable shuffled sorted %d ints (stability)"u8, n);
+        t.Errorf("Stable shuffled sorted %d ints (stability)", n);
     }
 
     // sorted reversed
@@ -758,58 +755,60 @@ public static void TestStability(ж<testing.T> Ꮡt) {
     data.initB();
     Stable(data);
     if (!IsSorted(data)) {
-        Ꮡt.Errorf("Stable didn't sort %d ints"u8, n);
+        t.Errorf("Stable didn't sort %d ints", n);
     }
     if (!data.inOrder()) {
-        Ꮡt.Errorf("Stable wasn't stable on %d ints"u8, n);
+        t.Errorf("Stable wasn't stable on %d ints", n);
     }
 }
 
-internal static slice<nint> countOpsSizes = new nint[]{100, 300, 1000, 3000, 10000, 30000, 100000, 300000, 1000000}.slice();
+internal static slice<nint> countOpsSizes = slice<nint>([100, 300, 1000, 3000, 10000, 30000, 100000, 300000, 1000000]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object countingSkippedAsNonˢ = (@string)"Counting skipped as non-verbose mode."u8;
 
-internal static void countOps(ж<testing.T> Ꮡt, Action<sort.Interface> algo, @string name) {
+internal static void countOps(ж<testing.T> t, Action<sort.Interface> algo, @string name) {
     var sizes = countOpsSizes;
     if (testing.Short()) {
         sizes = sizes[..5];
     }
     if (!testing.Verbose()) {
-        Ꮡt.Skip(countingSkippedAsNonˢ);
+        t.Skip(countingSkippedAsNonˢ);
     }
     foreach (var (_, n) in sizes) {
-        ref var td = ref heap<testingData>(out var Ꮡtd);
-        td = new testingData(
+        ref var td = ref heap<testingData>(new testingData(
             desc: name,
-            t: Ꮡt,
+            t: t,
             data: new slice<nint>(n),
             maxswap: (nint)(2147483648L - 1)
-        );
+        ), out var Ꮡtd);
         for (nint i = 0; i < n; i++) {
             td.data[i] = rand.IntN(n / 5);
         }
         algo(new sort_test_package.testingDataжInterface(Ꮡtd));
-        Ꮡt.Logf("%s %8d elements: %11d Swap, %10d Less"u8, name, n, td.nswap, td.ncmp);
+        t.Logf("%s %8d elements: %11d Swap, %10d Less", name, n, td.nswap, td.ncmp);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stableˢ = "Stable"u8;
+internal static ref readonly @string stableˢ => ref stableˢᵇ;
+private static readonly @string stableˢᵇ = "Stable"u8;
 
-public static void TestCountStableOps(ж<testing.T> Ꮡt) {
-    countOps(Ꮡt, Stable, stableˢ);
+public static void TestCountStableOps(ж<testing.T> t) {
+    countOps(t, Stable, stableˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sortˢ = "Sort  "u8;
+internal static ref readonly @string sortˢ => ref sortˢᵇ;
+private static readonly @string sortˢᵇ = "Sort  "u8;
 
-public static void TestCountSortOps(ж<testing.T> Ꮡt) {
-    countOps(Ꮡt, Sort, sortˢ);
+public static void TestCountSortOps(ж<testing.T> t) {
+    countOps(t, Sort, sortˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string raceˢ = "-race"u8;
+internal static ref readonly @string raceˢ => ref raceˢᵇ;
+private static readonly @string raceˢᵇ = "-race"u8;
 internal static readonly object skippingSlowBenchmarkOnˢ = (@string)"skipping slow benchmark on race builder"u8;
 
 internal static void bench(ж<testing.B> Ꮡb, nint size, Action<sort.Interface> algo, @string name) {
@@ -836,40 +835,41 @@ internal static void bench(ж<testing.B> Ꮡb, nint size, Action<sort.Interface>
             algo(data);
             b.StopTimer();
             if (!IsSorted(data)) {
-                Ꮡb.Errorf("%s did not sort %d ints"u8, name, n);
+                Ꮡb.Errorf("%s did not sort %d ints", name, n);
             }
             if (name == "Stable"u8 && !data.inOrder()) {
-                Ꮡb.Errorf("%s unstable on %d ints"u8, name, n);
+                Ꮡb.Errorf("%s unstable on %d ints", name, n);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sortˢ2 = "Sort"u8;
+internal static ref readonly @string sortˢ2 => ref sortˢ2ᵇ;
+private static readonly @string sortˢ2ᵇ = "Sort"u8;
 
-public static void BenchmarkSort1e2(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, 100, Sort, sortˢ2);
+public static void BenchmarkSort1e2(ж<testing.B> b) {
+    bench(b, 100, Sort, sortˢ2);
 }
 
-public static void BenchmarkStable1e2(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, 100, Stable, stableˢ);
+public static void BenchmarkStable1e2(ж<testing.B> b) {
+    bench(b, 100, Stable, stableˢ);
 }
 
-public static void BenchmarkSort1e4(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, 10000, Sort, sortˢ2);
+public static void BenchmarkSort1e4(ж<testing.B> b) {
+    bench(b, 10000, Sort, sortˢ2);
 }
 
-public static void BenchmarkStable1e4(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, 10000, Stable, stableˢ);
+public static void BenchmarkStable1e4(ж<testing.B> b) {
+    bench(b, 10000, Stable, stableˢ);
 }
 
-public static void BenchmarkSort1e6(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, 1000000, Sort, sortˢ2);
+public static void BenchmarkSort1e6(ж<testing.B> b) {
+    bench(b, 1000000, Sort, sortˢ2);
 }
 
-public static void BenchmarkStable1e6(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, 1000000, Stable, stableˢ);
+public static void BenchmarkStable1e6(ж<testing.B> b) {
+    bench(b, 1000000, Stable, stableˢ);
 }
 
 } // end sort_test_package

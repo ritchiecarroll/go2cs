@@ -18,25 +18,25 @@ partial struct xxHashTestsᴛ1 /*dyn*/ {
     internal @string data;
     internal uint64 hash;
 }
-internal static slice<xxHashTestsᴛ1> xxHashTests = new xxHashTestsᴛ1[]{
+internal static slice<xxHashTestsᴛ1> xxHashTests = slice<xxHashTestsᴛ1>([
     new(
-        "hello, world"u8,
+        "hello, world",
         0xb33a384e6d1b1242UL
     ),
     new(
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$"u8,
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$",
         0x1032d841e824f998UL
     )
-}.slice();
+]);
 
-public static void TestXXHash(ж<testing.T> Ꮡt) {
+public static void TestXXHash(ж<testing.T> t) {
     global::go.@internal.zstd_package.xxhash64 xh = new();
     foreach (var (i, test) in xxHashTests) {
         xh.reset();
         xh.update(slice<byte>(test.data));
         {
             var got = xh.digest(); if (got != test.hash) {
-                Ꮡt.Errorf("#%d: got %#x want %#x"u8, i, got, test.hash);
+                t.Errorf("#%d: got %#x want %#x", i, got, test.hash);
             }
         }
     }
@@ -44,16 +44,17 @@ public static void TestXXHash(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingExpensiveTestInˢ = (@string)"skipping expensive test in short mode"u8;
-internal static readonly @string testdataIsaacNewtonˢ = "../../testdata/Isaac.Newton-Opticks.txt"u8;
+internal static ref readonly @string testdataIsaacNewtonˢ => ref testdataIsaacNewtonˢᵇ;
+private static readonly @string testdataIsaacNewtonˢᵇ = "../../testdata/Isaac.Newton-Opticks.txt"u8;
 
-public static void TestLargeXXHash(ж<testing.T> Ꮡt) {
+public static void TestLargeXXHash(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingExpensiveTestInˢ);
+        t.Skip(skippingExpensiveTestInˢ);
     }
 
     var (data, err) = os.ReadFile(testdataIsaacNewtonˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     global::go.@internal.zstd_package.xxhash64 xh = new();
@@ -72,24 +73,26 @@ public static void TestLargeXXHash(ж<testing.T> Ꮡt) {
     var got = xh.digest();
     var want = (uint64)0xf0dd39fd7e063f82UL;
     if (got != want) {
-        Ꮡt.Errorf("got %#x want %#x"u8, got, want);
+        t.Errorf("got %#x want %#x", got, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xxhsumˢ = "xxhsum"u8;
+internal static ref readonly @string xxhsumˢ => ref xxhsumˢᵇ;
+private static readonly @string xxhsumˢᵇ = "xxhsum"u8;
 internal static readonly object skippingBecauseXxhsumNotˢ = (@string)"skipping because xxhsum not found"u8;
 
 internal static @string findXxhsum(testing.TB t) {
     var (xxhsum, err) = exec.LookPath(xxhsumˢ);
-    if (err != default!) {
+    if (err != nil) {
         t.Skip(skippingBecauseXxhsumNotˢ);
     }
     return xxhsum;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string h64ˢ = "-H64"u8;
+internal static ref readonly @string h64ˢ => ref h64ˢᵇ;
+private static readonly @string h64ˢᵇ = "-H64"u8;
 
 public static void FuzzXXHash(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
@@ -100,7 +103,7 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
         f.Add(slice<byte>(test.data));
     }
     f.Add(bytes.Repeat(slice<byte>("abcdefghijklmnop"u8), 256));
-    bytes.Buffer buf = default!;
+    bytes.Buffer buf = default;
     for (nint i = 0; i < 256; i++) {
         buf.WriteByte((byte)i);
     }
@@ -109,18 +112,18 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
 
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
         var cmd = exec.Command(xxhsum, h64ˢ);
-        cmd.Value.Stdin = new zstd_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b));
+        cmd.Stdin = new zstd_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b));
         ref var hhsumHash = ref heap(new bytes.Buffer(), out var ᏑhhsumHash);
-        cmd.Value.Stdout = new zstd_internal_test_package.bytes_BufferжWriter(ᏑhhsumHash);
+        cmd.Stdout = new zstd_internal_test_package.bytes_BufferжWriter(ᏑhhsumHash);
         {
-            var errΔ1 = cmd.Run(); if (errΔ1 != default!) {
-                t.Fatalf("running hhsum failed: %v"u8, errΔ1);
+            var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
+                t.Fatalf("running hhsum failed: %v", errΔ1);
             }
         }
         var hhHashBytes = bytes.Fields(bytes.TrimSpace(hhsumHash.Bytes()))[0];
         var (hhHash, err) = strconv.ParseUint((@string)hhHashBytes, 16, 64);
-        if (err != default!) {
-            t.Fatalf("could not parse hash %q: %v"u8, hhHashBytes, err);
+        if (err != nil) {
+            t.Fatalf("could not parse hash %q: %v", hhHashBytes, err);
         }
 
         global::go.@internal.zstd_package.xxhash64 xh = new();
@@ -129,7 +132,7 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
         var goHash = xh.digest();
 
         if (goHash != hhHash) {
-            t.Errorf("Go hash %#x != xxhsum hash %#x"u8, goHash, hhHash);
+            t.Errorf("Go hash %#x != xxhsum hash %#x", goHash, hhHash);
         }
     });
 }

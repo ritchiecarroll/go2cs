@@ -17,30 +17,31 @@ using static global::go.go.parser_package;
 
 partial class parser_internal_test_package {
 
-internal static slice<@string> validFiles = new @string[]{
-    "parser.go"u8,
-    "parser_test.go"u8,
-    "error_test.go"u8,
-    "short_test.go"u8
-}.slice();
+internal static slice<@string> validFiles = slice<@string>([
+    "parser.go",
+    "parser_test.go",
+    "error_test.go",
+    "short_test.go"
+]);
 
-public static void TestParse(ж<testing.T> Ꮡt) {
+public static void TestParse(ж<testing.T> t) {
     foreach (var (_, filename) in validFiles) {
-        var (_, err) = ParseFile(token.NewFileSet(), filename, default!, DeclarationErrors);
-        if (err != default!) {
-            Ꮡt.Fatalf("ParseFile(%s): %v"u8, filename, err);
+        var (_, err) = ParseFile(token.NewFileSet(), filename, default, DeclarationErrors);
+        if (err != nil) {
+            t.Fatalf("ParseFile(%s): %v", filename, err);
         }
     }
 }
 
 internal static bool nameFilter(@string filename) {
     var exprᴛ1 = filename;
-    if (exprᴛ1 == "parser.go"u8 || exprᴛ1 == "interface.go"u8 || exprᴛ1 == "parser_test.go"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "parser.go"u8 || exprᴛ1 == "interface.go"u8 || exprᴛ1 == "parser_test.go"u8: {
         return true;
     }
-    if (exprᴛ1 == "parser.go.orig"u8) {
+    case {} when exprᴛ1 == "parser.go.orig"u8: {
         return true; // permit but should be ignored by ParseDir
-    }
+    }}
     return false;
 }
 
@@ -49,152 +50,160 @@ internal static bool dirFilter(fs.FileInfo f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePVarSSSSSSSSSSSSˢ = "package p\nvar _=s[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]"u8;
+internal static ref readonly @string packagePVarSSSSSSSSSSSSˢ => ref packagePVarSSSSSSSSSSSSˢᵇ;
+private static readonly @string packagePVarSSSSSSSSSSSSˢᵇ = "package p\nvar _=s[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]"u8;
 
-public static void TestParseFile(ж<testing.T> Ꮡt) {
+public static void TestParseFile(ж<testing.T> t) {
     @string src = packagePVarSSSSSSSSSSSSˢ;
     var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, 0);
-    if (err == default!) {
-        Ꮡt.Errorf("ParseFile(%s) succeeded unexpectedly"u8, src);
+    if (err == nil) {
+        t.Errorf("ParseFile(%s) succeeded unexpectedly", src);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sSSSSSSSSSSSˢ = "s[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]"u8;
+internal static ref readonly @string sSSSSSSSSSSSˢ => ref sSSSSSSSSSSSˢᵇ;
+private static readonly @string sSSSSSSSSSSSˢᵇ = "s[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]+\ns[::]"u8;
 
-public static void TestParseExprFrom(ж<testing.T> Ꮡt) {
+public static void TestParseExprFrom(ж<testing.T> t) {
     @string src = sSSSSSSSSSSSˢ;
     var (_, err) = ParseExprFrom(token.NewFileSet(), ""u8, src, 0);
-    if (err == default!) {
-        Ꮡt.Errorf("ParseExprFrom(%s) succeeded unexpectedly"u8, src);
+    if (err == nil) {
+        t.Errorf("ParseExprFrom(%s) succeeded unexpectedly", src);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string parserˢ = "parser"u8;
+internal static ref readonly @string parserˢ => ref parserˢᵇ;
+private static readonly @string parserˢᵇ = "parser"u8;
 
-public static void TestParseDir(ж<testing.T> Ꮡt) {
-    @string path = "."u8;
+public static void TestParseDir(ж<testing.T> t) {
+    @string path = ".";
     var (pkgs, err) = ParseDir(token.NewFileSet(), path, dirFilter, 0);
-    if (err != default!) {
-        Ꮡt.Fatalf("ParseDir(%s): %v"u8, path, err);
+    if (err != nil) {
+        t.Fatalf("ParseDir(%s): %v", path, err);
     }
     {
         nint n = len(pkgs); if (n != 1) {
-            Ꮡt.Errorf("got %d packages; want 1"u8, n);
+            t.Errorf("got %d packages; want 1", n);
         }
     }
     var pkg = pkgs[parserˢ];
     if (pkg == nil) {
-        Ꮡt.Errorf(@"package ""parser"" not found"u8);
+        t.Errorf(@"package ""parser"" not found");
         return;
     }
     {
-        nint n = len((~pkg).Files); if (n != 3) {
-            Ꮡt.Errorf("got %d package files; want 3"u8, n);
+        nint n = len(pkg.Files); if (n != 3) {
+            t.Errorf("got %d package files; want 3", n);
         }
     }
-    foreach (var (filename, _) in (~pkg).Files) {
+    foreach (var (filename, _) in pkg.Files) {
         if (!nameFilter(filename)) {
-            Ꮡt.Errorf("unexpected package file: %s"u8, filename);
+            t.Errorf("unexpected package file: %s", filename);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataIssue42951ˢ = "./testdata/issue42951"u8;
+internal static ref readonly @string testdataIssue42951ˢ => ref testdataIssue42951ˢᵇ;
+private static readonly @string testdataIssue42951ˢᵇ = "./testdata/issue42951"u8;
 
-public static void TestIssue42951(ж<testing.T> Ꮡt) {
+public static void TestIssue42951(ж<testing.T> t) {
     @string path = testdataIssue42951ˢ;
-    var (_, err) = ParseDir(token.NewFileSet(), path, default!, 0);
-    if (err != default!) {
-        Ꮡt.Errorf("ParseDir(%s): %v"u8, path, err);
+    var (_, err) = ParseDir(token.NewFileSet(), path, default, 0);
+    if (err != nil) {
+        t.Errorf("ParseDir(%s): %v", path, err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string structXIntˢ = "struct{x *int}"u8;
-internal static readonly @string aIXˢ = "a[i] := x"u8;
+internal static ref readonly @string structXIntˢ => ref structXIntˢᵇ;
+private static readonly @string structXIntˢᵇ = "struct{x *int}"u8;
+internal static ref readonly @string aIXˢ => ref aIXˢᵇ;
+private static readonly @string aIXˢᵇ = "a[i] := x"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string validExprᶜ = "a + b"u8;
+internal static ref readonly @string validExprᶜ => ref validExprᶜᵇ;
+private static readonly @string validExprᶜᵇ = "a + b"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string anythingᶜ = "dh3*#D)#_"u8;
+internal static ref readonly @string anythingᶜ => ref anythingᶜᵇ;
+private static readonly @string anythingᶜᵇ = "dh3*#D)#_"u8;
 
-public static void TestParseExpr(ж<testing.T> Ꮡt) {
+public static void TestParseExpr(ж<testing.T> t) {
     // just kicking the tires:
     // a valid arithmetic expression
-    @string src = "a + b"u8;
+    @string src = "a + b";
     var (x, err) = ParseExpr(src);
-    if (err != default!) {
-        Ꮡt.Errorf("ParseExpr(%q): %v"u8, src, err);
+    if (err != nil) {
+        t.Errorf("ParseExpr(%q): %v", src, err);
     }
     // sanity check
     {
         var (_, ok) = x._<ж<ast.BinaryExpr>>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr"u8, src, x);
+            t.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr", src, x);
         }
     }
 
     // a valid type expression
     src = structXIntˢ;
     (x, err) = ParseExpr(src);
-    if (err != default!) {
-        Ꮡt.Errorf("ParseExpr(%q): %v"u8, src, err);
+    if (err != nil) {
+        t.Errorf("ParseExpr(%q): %v", src, err);
     }
     // sanity check
     {
         var (_, ok) = x._<ж<ast.StructType>>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("ParseExpr(%q): got %T, want *ast.StructType"u8, src, x);
+            t.Errorf("ParseExpr(%q): got %T, want *ast.StructType", src, x);
         }
     }
 
     // an invalid expression
-    src = "a + *"u8;
+    src = "a + *";
     (x, err) = ParseExpr(src);
-    if (err == default!) {
-        Ꮡt.Errorf("ParseExpr(%q): got no error"u8, src);
+    if (err == nil) {
+        t.Errorf("ParseExpr(%q): got no error", src);
     }
-    if (x == default!) {
-        Ꮡt.Errorf("ParseExpr(%q): got no (partial) result"u8, src);
+    if (x == nil) {
+        t.Errorf("ParseExpr(%q): got no (partial) result", src);
     }
     {
         var (_, ok) = x._<ж<ast.BinaryExpr>>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr"u8, src, x);
+            t.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr", src, x);
         }
     }
 
     // a valid expression followed by extra tokens is invalid
     src = aIXˢ;
     {
-        var (_, errΔ1) = ParseExpr(src); if (errΔ1 == default!) {
-            Ꮡt.Errorf("ParseExpr(%q): got no error"u8, src);
+        var (_, errΔ1) = ParseExpr(src); if (errΔ1 == nil) {
+            t.Errorf("ParseExpr(%q): got no error", src);
         }
     }
 
     // a semicolon is not permitted unless automatically inserted
-    src = "a + b\n"u8;
+    src = "a + b\n";
     {
-        var (_, errΔ2) = ParseExpr(src); if (errΔ2 != default!) {
-            Ꮡt.Errorf("ParseExpr(%q): got error %s"u8, src, errΔ2);
+        var (_, errΔ2) = ParseExpr(src); if (errΔ2 != nil) {
+            t.Errorf("ParseExpr(%q): got error %s", src, errΔ2);
         }
     }
-    src = "a + b;"u8;
+    src = "a + b;";
     {
-        var (_, errΔ3) = ParseExpr(src); if (errΔ3 == default!) {
-            Ꮡt.Errorf("ParseExpr(%q): got no error"u8, src);
+        var (_, errΔ3) = ParseExpr(src); if (errΔ3 == nil) {
+            t.Errorf("ParseExpr(%q): got no error", src);
         }
     }
 
     // various other stuff following a valid expression
     @string validExpr = validExprᶜ;
     @string anything = anythingᶜ;
-    foreach (var (_, c) in (@string)"!)]};,"u8) {
+    foreach (var (_, c) in (@string)"!)]};,") {
         @string srcΔ1 = validExpr + ((@string)c) + anything;
         {
-            var (_, errΔ4) = ParseExpr(srcΔ1); if (errΔ4 == default!) {
-                Ꮡt.Errorf("ParseExpr(%q): got no error"u8, srcΔ1);
+            var (_, errΔ4) = ParseExpr(srcΔ1); if (errΔ4 == nil) {
+                t.Errorf("ParseExpr(%q): got no error", srcΔ1);
             }
         }
     }
@@ -208,24 +217,24 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object packagePFuncFXYZXYZˢ = (@string)@"package p; func f() { x, y, z := x, y, z }"u8;
 
-public static void TestColonEqualsScope(ж<testing.T> Ꮡt) {
+public static void TestColonEqualsScope(ж<testing.T> t) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packagePFuncFXYZXYZˢ, 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // RHS refers to undefined globals; LHS does not.
-    var @as = (~(~(~f).Decls[0]._<ж<ast.FuncDecl>>()).Body).List[0]._<ж<ast.AssignStmt>>();
-    foreach (var (_, v) in (~@as).Rhs) {
+    var @as = f.Decls[0]._<ж<ast.FuncDecl>>().Body.List[0]._<ж<ast.AssignStmt>>();
+    foreach (var (_, v) in @as.Rhs) {
         var id = v._<ж<ast.Ident>>();
-        if ((~id).Obj != nil) {
-            Ꮡt.Errorf("rhs %s has Obj, should not"u8, (~id).Name);
+        if (id.Obj != nil) {
+            t.Errorf("rhs %s has Obj, should not", id.Name);
         }
     }
-    foreach (var (_, v) in (~@as).Lhs) {
+    foreach (var (_, v) in @as.Lhs) {
         var id = v._<ж<ast.Ident>>();
-        if ((~id).Obj == nil) {
-            Ꮡt.Errorf("lhs %s does not have Obj, should"u8, (~id).Name);
+        if (id.Obj == nil) {
+            t.Errorf("lhs %s does not have Obj, should", id.Name);
         }
     }
 }
@@ -233,29 +242,30 @@ public static void TestColonEqualsScope(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object packagePFuncFVarXYZXYZˢ = (@string)@"package p; func f() { var x, y, z = x, y, z }"u8;
 
-public static void TestVarScope(ж<testing.T> Ꮡt) {
+public static void TestVarScope(ж<testing.T> t) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packagePFuncFVarXYZXYZˢ, 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // RHS refers to undefined globals; LHS does not.
-    var @as = (~(~(~(~(~f).Decls[0]._<ж<ast.FuncDecl>>()).Body).List[0]._<ж<ast.DeclStmt>>()).Decl._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>();
-    foreach (var (_, v) in (~@as).Values) {
+    var @as = f.Decls[0]._<ж<ast.FuncDecl>>().Body.List[0]._<ж<ast.DeclStmt>>().Decl._<ж<ast.GenDecl>>().Specs[0]._<ж<ast.ValueSpec>>();
+    foreach (var (_, v) in @as.Values) {
         var id = v._<ж<ast.Ident>>();
-        if ((~id).Obj != nil) {
-            Ꮡt.Errorf("rhs %s has Obj, should not"u8, (~id).Name);
+        if (id.Obj != nil) {
+            t.Errorf("rhs %s has Obj, should not", id.Name);
         }
     }
-    foreach (var (_, id) in (~@as).Names) {
-        if ((~id).Obj == nil) {
-            Ꮡt.Errorf("lhs %s does not have Obj, should"u8, (~id).Name);
+    foreach (var (_, id) in @as.Names) {
+        if (id.Obj == nil) {
+            t.Errorf("lhs %s does not have Obj, should", id.Name);
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ = """
+internal static ref readonly @string srcᶜ => ref srcᶜᵇ;
+private static readonly @string srcᶜᵇ = """
 
 package p
 import fmt "fmt"
@@ -266,44 +276,42 @@ func f() { L: }
 
 """u8.Raw();
 
-public static void TestObjects(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestObjects(ж<testing.T> t) {
     @string src = srcᶜ;
 
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, src, 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var objects = new map<@string, ast.ObjKind>{
-        ["p"u8] = ast.Bad, // not in a scope
-        ["fmt"u8] = ast.Bad, // not resolved yet
-        ["pi"u8] = ast.Con,
-        ["T"u8] = ast.Typ,
-        ["x"u8] = ast.Var,
-        ["int"u8] = ast.Bad, // not resolved yet
-        ["f"u8] = ast.Fun,
-        ["L"u8] = ast.Lbl
+        ["p"] = ast.Bad,   // not in a scope
+        ["fmt"] = ast.Bad, // not resolved yet
+        ["pi"] = ast.Con,
+        ["T"] = ast.Typ,
+        ["x"] = ast.Var,
+        ["int"] = ast.Bad, // not resolved yet
+        ["f"] = ast.Fun,
+        ["L"] = ast.Lbl
     };
 
     var objectsʗ1 = objects;
     ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
         {
             var (ident, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
-                var obj = ident.Value.Obj;
+                var obj = ident.Obj;
                 if (obj == nil) {
-                    if (objectsʗ1[(~ident).Name] != ast.Bad) {
-                        Ꮡt.Errorf("no object for %s"u8, (~ident).Name);
+                    if (objectsʗ1[ident.Name] != ast.Bad) {
+                        t.Errorf("no object for %s", ident.Name);
                     }
                     return true;
                 }
-                if ((~obj).Name != (~ident).Name) {
-                    Ꮡt.Errorf("names don't match: obj.Name = %s, ident.Name = %s"u8, (~obj).Name, (~ident).Name);
+                if (obj.Name != ident.Name) {
+                    t.Errorf("names don't match: obj.Name = %s, ident.Name = %s", obj.Name, ident.Name);
                 }
-                ast.ObjKind kind = objectsʗ1[(~ident).Name];
-                if ((~obj).Kind != kind) {
-                    Ꮡt.Errorf("%s: obj.Kind = %s; want %s"u8, (~ident).Name, (~obj).Kind, kind);
+                ast.ObjKind kind = objectsʗ1[ident.Name];
+                if (obj.Kind != kind) {
+                    t.Errorf("%s: obj.Kind = %s; want %s", ident.Name, obj.Kind, kind);
                 }
             }
         }
@@ -338,10 +346,10 @@ type s3b struct { a, b *s3b; c []float }
 
 """u8.Raw();
 
-public static void TestUnresolved(ж<testing.T> Ꮡt) {
+public static void TestUnresolved(ж<testing.T> t) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packagePFuncF1aIntFuncˢ, 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     @string want = "int "u8 + // f1a
@@ -366,14 +374,14 @@ public static void TestUnresolved(ж<testing.T> Ꮡt) {
 
     // collect unresolved identifiers
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (_, u) in (~f).Unresolved) {
-        Ꮡbuf.WriteString((~u).Name);
-        Ꮡbuf.WriteByte((rune)' ');
+    foreach (var (_, u) in f.Unresolved) {
+        Ꮡbuf.WriteString(u.Name);
+        Ꮡbuf.WriteByte((byte)' ');
     }
     @string got = buf.String();
 
     if (got != want) {
-        Ꮡt.Errorf("\ngot:  %s\nwant: %s"u8, got, want);
+        t.Errorf("\ngot:  %s\nwant: %s", got, want);
     }
 }
 
@@ -399,32 +407,32 @@ func ExampleCount() {
 
 """u8.Raw();
 
-public static void TestCommentGroups(ж<testing.T> Ꮡt) {
+public static void TestCommentGroups(ж<testing.T> t) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packageP1a1b1c1d2a2bˢ, ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    var expected = new slice<@string>[]{
-        new @string[]{"/* 1a */"u8, "/* 1b */"u8, "/* 1c */"u8, "// 1d"u8}.slice(),
-        new @string[]{"/* 2a\n*/"u8, "// 2b"u8}.slice(),
-        new @string[]{"/* 3a */"u8, "// 3b"u8, "/* 3c */"u8}.slice(),
-        new @string[]{"// Example from go.dev/issue/3139"u8}.slice(),
-        new @string[]{"// before & after each rune"u8}.slice(),
-        new @string[]{"// Output:"u8, "// 3"u8, "// 5"u8}.slice()
-    }.slice();
-    if (len((~f).Comments) != len(expected)) {
-        Ꮡt.Fatalf("got %d comment groups; expected %d"u8, len((~f).Comments), len(expected));
+    var expected = slice<slice<@string>>([
+        slice<@string>(["/* 1a */", "/* 1b */", "/* 1c */", "// 1d"]),
+        slice<@string>(["/* 2a\n*/", "// 2b"]),
+        slice<@string>(["/* 3a */", "// 3b", "/* 3c */"]),
+        slice<@string>(["// Example from go.dev/issue/3139"]),
+        slice<@string>(["// before & after each rune"]),
+        slice<@string>(["// Output:", "// 3", "// 5"])
+    ]);
+    if (len(f.Comments) != len(expected)) {
+        t.Fatalf("got %d comment groups; expected %d", len(f.Comments), len(expected));
     }
     foreach (var (i, exp) in expected) {
-        var got = (~f).Comments[i].Value.List;
+        var got = f.Comments[i].List;
         if (len(got) != len(exp)) {
-            Ꮡt.Errorf("got %d comments in group %d; expected %d"u8, len(got), i, len(exp));
+            t.Errorf("got %d comments in group %d; expected %d", len(got), i, len(exp));
             continue;
         }
         foreach (var (j, expΔ1) in exp) {
-            @string gotΔ1 = got[j].Value.Text;
+            @string gotΔ1 = got[j].Text;
             if (gotΔ1 != expΔ1) {
-                Ꮡt.Errorf("got %q in group %d; expected %q"u8, gotΔ1, i, expΔ1);
+                t.Errorf("got %q in group %d; expected %q", gotΔ1, i, expΔ1);
             }
         }
     }
@@ -433,18 +441,18 @@ public static void TestCommentGroups(ж<testing.T> Ꮡt) {
 internal static ж<ast.Field> getField(ж<ast.File> Ꮡfile, @string fieldname) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
-    var parts = strings.Split(fieldname, "."u8);
+    var parts = strings.Split(fieldname, ".");
     foreach (var (_, d) in @file.Decls) {
         {
-            var (dΔ1, ok) = d._<ж<ast.GenDecl>>(ᐧ); if (ok && (~dΔ1).Tok == token.TYPE) {
-                foreach (var (_, s) in (~dΔ1).Specs) {
+            var (dΔ1, ok) = d._<ж<ast.GenDecl>>(ᐧ); if (ok && dΔ1.Tok == token.TYPE) {
+                foreach (var (_, s) in dΔ1.Specs) {
                     {
-                        var (sΔ1, okΔ1) = s._<ж<ast.TypeSpec>>(ᐧ); if (okΔ1 && (~(~sΔ1).Name).Name == parts[0]) {
+                        var (sΔ1, okΔ1) = s._<ж<ast.TypeSpec>>(ᐧ); if (okΔ1 && sΔ1.Name.Name == parts[0]) {
                             {
-                                var (sΔ2, okΔ2) = (~sΔ1).Type._<ж<ast.StructType>>(ᐧ); if (okΔ2) {
-                                    foreach (var (_, f) in (~(~sΔ2).Fields).List) {
-                                        foreach (var (_, name) in (~f).Names) {
-                                            if ((~name).Name == parts[1]) {
+                                var (sΔ2, okΔ2) = sΔ1.Type._<ж<ast.StructType>>(ᐧ); if (okΔ2) {
+                                    foreach (var (_, f) in sΔ2.Fields.List) {
+                                        foreach (var (_, name) in f.Names) {
+                                            if (name.Name == parts[1]) {
                                                 return f;
                                             }
                                         }
@@ -457,7 +465,7 @@ internal static ж<ast.Field> getField(ж<ast.File> Ꮡfile, @string fieldname) 
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // Don't use ast.CommentGroup.Text() - we want to see exact comment text.
@@ -467,25 +475,25 @@ internal static @string commentText(ж<ast.CommentGroup> Ꮡc) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     if (Ꮡc != nil) {
         foreach (var (_, cΔ1) in c.List) {
-            Ꮡbuf.WriteString((~cΔ1).Text);
+            Ꮡbuf.WriteString(cΔ1.Text);
         }
     }
     return buf.String();
 }
 
-internal static void checkFieldComments(ж<testing.T> Ꮡt, ж<ast.File> Ꮡfile, @string fieldname, @string lead, @string line) {
-    var f = getField(Ꮡfile, fieldname);
+internal static void checkFieldComments(ж<testing.T> t, ж<ast.File> @file, @string fieldname, @string lead, @string line) {
+    var f = getField(@file, fieldname);
     if (f == nil) {
-        Ꮡt.Fatalf("field not found: %s"u8, fieldname);
+        t.Fatalf("field not found: %s", fieldname);
     }
     {
-        @string got = commentText((~f).Doc); if (got != lead) {
-            Ꮡt.Errorf("got lead comment %q; expected %q"u8, got, lead);
+        @string got = commentText(f.Doc); if (got != lead) {
+            t.Errorf("got lead comment %q; expected %q", got, lead);
         }
     }
     {
-        @string got = commentText((~f).Comment); if (got != line) {
-            Ꮡt.Errorf("got line comment %q; expected %q"u8, got, line);
+        @string got = commentText(f.Comment); if (got != line) {
+            t.Errorf("got line comment %q; expected %q", got, line);
         }
     }
 }
@@ -511,71 +519,89 @@ type T struct {
 }
 
 """u8.Raw();
-internal static readonly @string tF1ˢ = "T.F1"u8;
-internal static readonly @string f1LeadCommentˢ = "/* F1 lead comment *///"u8;
-internal static readonly @string f1LineCommentˢ = "/* F1 */// line comment"u8;
-internal static readonly @string tF2ˢ = "T.F2"u8;
-internal static readonly @string f2LeadCommentˢ = "// F2 lead// comment"u8;
-internal static readonly @string f2LineCommentˢ = "// F2 line comment"u8;
-internal static readonly @string tF3ˢ = "T.f3"u8;
-internal static readonly @string f3LeadCommentˢ = "// f3 lead comment"u8;
-internal static readonly @string f3LineCommentˢ = "// f3 line comment"u8;
-internal static readonly @string tF4ˢ = "T.f4"u8;
-internal static readonly @string tF5ˢ = "T.f5"u8;
-internal static readonly @string f5LineCommentˢ = "// f5 line comment"u8;
-internal static readonly @string tF6ˢ = "T.f6"u8;
-internal static readonly @string f6LineCommentˢ = "/* f6 line comment */"u8;
-internal static readonly @string tF7ˢ = "T.f7"u8;
-internal static readonly @string f7aF7bF7cˢ = "/*f7a*//*f7b*///f7c"u8;
+internal static ref readonly @string tF1ˢ => ref tF1ˢᵇ;
+private static readonly @string tF1ˢᵇ = "T.F1"u8;
+internal static ref readonly @string f1LeadCommentˢ => ref f1LeadCommentˢᵇ;
+private static readonly @string f1LeadCommentˢᵇ = "/* F1 lead comment *///"u8;
+internal static ref readonly @string f1LineCommentˢ => ref f1LineCommentˢᵇ;
+private static readonly @string f1LineCommentˢᵇ = "/* F1 */// line comment"u8;
+internal static ref readonly @string tF2ˢ => ref tF2ˢᵇ;
+private static readonly @string tF2ˢᵇ = "T.F2"u8;
+internal static ref readonly @string f2LeadCommentˢ => ref f2LeadCommentˢᵇ;
+private static readonly @string f2LeadCommentˢᵇ = "// F2 lead// comment"u8;
+internal static ref readonly @string f2LineCommentˢ => ref f2LineCommentˢᵇ;
+private static readonly @string f2LineCommentˢᵇ = "// F2 line comment"u8;
+internal static ref readonly @string tF3ˢ => ref tF3ˢᵇ;
+private static readonly @string tF3ˢᵇ = "T.f3"u8;
+internal static ref readonly @string f3LeadCommentˢ => ref f3LeadCommentˢᵇ;
+private static readonly @string f3LeadCommentˢᵇ = "// f3 lead comment"u8;
+internal static ref readonly @string f3LineCommentˢ => ref f3LineCommentˢᵇ;
+private static readonly @string f3LineCommentˢᵇ = "// f3 line comment"u8;
+internal static ref readonly @string tF4ˢ => ref tF4ˢᵇ;
+private static readonly @string tF4ˢᵇ = "T.f4"u8;
+internal static ref readonly @string tF5ˢ => ref tF5ˢᵇ;
+private static readonly @string tF5ˢᵇ = "T.f5"u8;
+internal static ref readonly @string f5LineCommentˢ => ref f5LineCommentˢᵇ;
+private static readonly @string f5LineCommentˢᵇ = "// f5 line comment"u8;
+internal static ref readonly @string tF6ˢ => ref tF6ˢᵇ;
+private static readonly @string tF6ˢᵇ = "T.f6"u8;
+internal static ref readonly @string f6LineCommentˢ => ref f6LineCommentˢᵇ;
+private static readonly @string f6LineCommentˢᵇ = "/* f6 line comment */"u8;
+internal static ref readonly @string tF7ˢ => ref tF7ˢᵇ;
+private static readonly @string tF7ˢᵇ = "T.f7"u8;
+internal static ref readonly @string f7aF7bF7cˢ => ref f7aF7bF7cˢᵇ;
+private static readonly @string f7aF7bF7cˢᵇ = "/*f7a*//*f7b*///f7c"u8;
 internal static readonly object notExpectedToFindTF3ˢ = (@string)"not expected to find T.f3"u8;
 
-public static void TestLeadAndLineComments(ж<testing.T> Ꮡt) {
+public static void TestLeadAndLineComments(ж<testing.T> t) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packagePTypeTStructF1ˢ, ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    checkFieldComments(Ꮡt, f, tF1ˢ, f1LeadCommentˢ, f1LineCommentˢ);
-    checkFieldComments(Ꮡt, f, tF2ˢ, f2LeadCommentˢ, f2LineCommentˢ);
-    checkFieldComments(Ꮡt, f, tF3ˢ, f3LeadCommentˢ, f3LineCommentˢ);
-    checkFieldComments(Ꮡt, f, tF4ˢ, ""u8, ""u8);
-    checkFieldComments(Ꮡt, f, tF5ˢ, ""u8, f5LineCommentˢ);
-    checkFieldComments(Ꮡt, f, tF6ˢ, ""u8, f6LineCommentˢ);
-    checkFieldComments(Ꮡt, f, tF7ˢ, ""u8, f7aF7bF7cˢ);
+    checkFieldComments(t, f, tF1ˢ, f1LeadCommentˢ, f1LineCommentˢ);
+    checkFieldComments(t, f, tF2ˢ, f2LeadCommentˢ, f2LineCommentˢ);
+    checkFieldComments(t, f, tF3ˢ, f3LeadCommentˢ, f3LineCommentˢ);
+    checkFieldComments(t, f, tF4ˢ, ""u8, ""u8);
+    checkFieldComments(t, f, tF5ˢ, ""u8, f5LineCommentˢ);
+    checkFieldComments(t, f, tF6ˢ, ""u8, f6LineCommentˢ);
+    checkFieldComments(t, f, tF7ˢ, ""u8, f7aF7bF7cˢ);
 
     ast.FileExports(f);
-    checkFieldComments(Ꮡt, f, tF1ˢ, f1LeadCommentˢ, f1LineCommentˢ);
-    checkFieldComments(Ꮡt, f, tF2ˢ, f2LeadCommentˢ, f2LineCommentˢ);
+    checkFieldComments(t, f, tF1ˢ, f1LeadCommentˢ, f1LineCommentˢ);
+    checkFieldComments(t, f, tF2ˢ, f2LeadCommentˢ, f2LineCommentˢ);
     if (getField(f, tF3ˢ) != nil) {
-        Ꮡt.Error(notExpectedToFindTF3ˢ);
+        t.Error(notExpectedToFindTF3ˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string wantˢ = "want ';'"u8;
-internal static readonly @string butIsImplicitˢ = "but ';' is implicit"u8;
+internal static ref readonly @string wantˢ => ref wantˢᵇ;
+private static readonly @string wantˢᵇ = "want ';'"u8;
+internal static ref readonly @string butIsImplicitˢ => ref butIsImplicitˢᵇ;
+private static readonly @string butIsImplicitˢᵇ = "but ';' is implicit"u8;
 
 // TestIssue9979 verifies that empty statements are contained within their enclosing blocks.
-public static void TestIssue9979(ж<testing.T> Ꮡt) {
-    foreach (var (_, src) in new @string[]{
-        "package p; func f() {;}"u8,
-        "package p; func f() {L:}"u8,
-        "package p; func f() {L:;}"u8,
-        "package p; func f() {L:\n}"u8,
-        "package p; func f() {L:\n;}"u8,
-        "package p; func f() { ; }"u8,
-        "package p; func f() { L: }"u8,
-        "package p; func f() { L: ; }"u8,
-        "package p; func f() { L: \n}"u8,
-        "package p; func f() { L: \n; }"u8
-    }.slice()) {
+public static void TestIssue9979(ж<testing.T> t) {
+    foreach (var (_, src) in slice<@string>([
+        "package p; func f() {;}",
+        "package p; func f() {L:}",
+        "package p; func f() {L:;}",
+        "package p; func f() {L:\n}",
+        "package p; func f() {L:\n;}",
+        "package p; func f() { ; }",
+        "package p; func f() { L: }",
+        "package p; func f() { L: ; }",
+        "package p; func f() { L: \n}",
+        "package p; func f() { L: \n; }"
+    ])) {
         var fset = token.NewFileSet();
         var (f, err) = ParseFile(fset, ""u8, src, 0);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
-        tokenꓸPos pos = default!;
-        tokenꓸPos end = default!;
+        tokenꓸPos pos = default;
+        tokenꓸPos end = default;
         var fsetʗ1 = fset;
         ast.Inspect(new ast.FileжNode(f), (ast.Node x) => {
             switch (x.type()) {
@@ -590,17 +616,17 @@ public static void TestIssue9979(ж<testing.T> Ꮡt) {
             case ж<ast.EmptyStmt> s: {
                 // check containment
                 if (s.Pos() < pos || s.End() > end) {
-                    Ꮡt.Errorf("%s: %T[%d, %d] not inside [%d, %d]"u8, src, s.OrTypedNil(), s.Pos(), s.End(), pos, end);
+                    t.Errorf("%s: %T[%d, %d] not inside [%d, %d]", src, s.OrTypedNil(), s.Pos(), s.End(), pos, end);
                 }
                 // check semicolon
                 nint offs = fsetʗ1.Position(s.Pos()).Offset;
                 {
-                    var ch = src[offs]; if (ch != (rune)';' != (~s).Implicit) {
+                    var ch = src[offs]; if (ch != ';' != s.Implicit) {
                         @string want = wantˢ;
-                        if ((~s).Implicit) {
+                        if (s.Implicit) {
                             want = butIsImplicitˢ;
                         }
-                        Ꮡt.Errorf("%s: found %q at offset %d; %s"u8, src, ch, offs, want);
+                        t.Errorf("%s: found %q at offset %d; %s", src, ch, offs, want);
                     }
                 }
                 break;
@@ -611,12 +637,16 @@ public static void TestIssue9979(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fileGoˢ = "file.go"u8;
-internal static readonly @string fileGo11ˢ = "file.go:1:1"u8;
-internal static readonly @string fileGo1019ˢ = "file.go:10:19"u8;
+internal static ref readonly @string fileGoˢ => ref fileGoˢᵇ;
+private static readonly @string fileGoˢᵇ = "file.go"u8;
+internal static ref readonly @string fileGo11ˢ => ref fileGo11ˢᵇ;
+private static readonly @string fileGo11ˢᵇ = "file.go:1:1"u8;
+internal static ref readonly @string fileGo1019ˢ => ref fileGo1019ˢᵇ;
+private static readonly @string fileGo1019ˢᵇ = "file.go:10:19"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ1 = """
+internal static ref readonly @string srcᶜ1 => ref srcᶜ1ᵇ;
+private static readonly @string srcᶜ1ᵇ = """
 // Copyright
 
 //+build tag
@@ -630,26 +660,26 @@ var lastDecl int
 
 """u8.Raw();
 
-public static void TestFileStartEndPos(ж<testing.T> Ꮡt) {
+public static void TestFileStartEndPos(ж<testing.T> t) {
     @string src = srcᶜ1;
     var fset = token.NewFileSet();
     var (f, err) = ParseFile(fset, fileGoˢ, src, 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // File{Start,End} spans the entire file, not just the declarations.
     {
-        @string got = fset.Position((~f).FileStart).String();
+        @string got = fset.Position(f.FileStart).String();
         @string want = fileGo11ˢ; if (got != want) {
-            Ꮡt.Errorf("for File.FileStart, got %s, want %s"u8, got, want);
+            t.Errorf("for File.FileStart, got %s, want %s", got, want);
         }
     }
     // The end position is the newline at the end of the /* end of file */ line.
     {
-        @string got = fset.Position((~f).FileEnd).String();
+        @string got = fset.Position(f.FileEnd).String();
         @string want = fileGo1019ˢ; if (got != want) {
-            Ꮡt.Errorf("for File.FileEnd, got %s, want %s"u8, got, want);
+            t.Errorf("for File.FileEnd, got %s, want %s", got, want);
         }
     }
 }
@@ -658,29 +688,31 @@ public static void TestFileStartEndPos(ж<testing.T> Ꮡt) {
 internal static readonly object foundNoAstSelectorExprˢ = (@string)"found no *ast.SelectorExpr"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantErrᶜ = "expected selector or type assertion"u8;
+internal static ref readonly @string wantErrᶜ => ref wantErrᶜᵇ;
+private static readonly @string wantErrᶜᵇ = "expected selector or type assertion"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantSelᶜ = "&{fmt _}"u8;
+internal static ref readonly @string wantSelᶜ => ref wantSelᶜᵇ;
+private static readonly @string wantSelᶜᵇ = "&{fmt _}"u8;
 
 // TestIncompleteSelection ensures that an incomplete selector
 // expression is parsed as a (blank) *ast.SelectorExpr, not a
 // *ast.BadExpr.
-public static void TestIncompleteSelection(ж<testing.T> Ꮡt) {
-    foreach (var (_, src) in new @string[]{
-        "package p; var _ = fmt."u8, // at EOF
-        "package p; var _ = fmt.\ntype X int"u8 // not at EOF
-    }.slice()) {
+public static void TestIncompleteSelection(ж<testing.T> t) {
+    foreach (var (_, src) in slice<@string>([
+        "package p; var _ = fmt.",            // at EOF
+        "package p; var _ = fmt.\ntype X int" // not at EOF
+    ])) {
         var fset = token.NewFileSet();
         var (f, err) = ParseFile(fset, ""u8, src, 0);
-        if (err == default!) {
-            Ꮡt.Errorf("ParseFile(%s) succeeded unexpectedly"u8, src);
+        if (err == nil) {
+            t.Errorf("ParseFile(%s) succeeded unexpectedly", src);
             continue;
         }
 
         @string wantErr = wantErrᶜ;
         if (!strings.Contains(err.Error(), wantErr)) {
-            Ꮡt.Errorf("ParseFile returned wrong error %q, want %q"u8, err, wantErr);
+            t.Errorf("ParseFile returned wrong error %q, want %q", err, wantErr);
         }
 
         ref var sel = ref heap<ж<ast.SelectorExpr>>(out var Ꮡsel);
@@ -693,12 +725,12 @@ public static void TestIncompleteSelection(ж<testing.T> Ꮡt) {
             return true;
         });
         if (sel == nil) {
-            Ꮡt.Error(foundNoAstSelectorExprˢ);
+            t.Error(foundNoAstSelectorExprˢ);
             continue;
         }
         @string wantSel = wantSelᶜ;
         if (fmt.Sprint(sel.OrTypedNil()) != wantSel) {
-            Ꮡt.Errorf("found selector %s, want %s"u8, sel.OrTypedNil(), wantSel);
+            t.Errorf("found selector %s, want %s", sel.OrTypedNil(), wantSel);
             continue;
         }
     }
@@ -708,22 +740,23 @@ public static void TestIncompleteSelection(ж<testing.T> Ꮡt) {
 internal static readonly object commentˢ = (@string)"// comment"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ2 = """
+internal static ref readonly @string srcᶜ2 => ref srcᶜ2ᵇ;
+private static readonly @string srcᶜ2ᵇ = """
 package main
 type x int // comment
 
 """u8.Raw();
 
-public static void TestLastLineComment(ж<testing.T> Ꮡt) {
+public static void TestLastLineComment(ж<testing.T> t) {
     @string src = srcᶜ2;
     var fset = token.NewFileSet();
     var (f, err) = ParseFile(fset, ""u8, src, ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    @string comment = (~(~(~(~f).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.TypeSpec>>()).Comment).List[0].Value.Text;
+    @string comment = f.Decls[0]._<ж<ast.GenDecl>>().Specs[0]._<ж<ast.TypeSpec>>().Comment.List[0].Text;
     if (comment != "// comment"u8) {
-        Ꮡt.Errorf("got %q, want %q"u8, comment, commentˢ);
+        t.Errorf("got %q, want %q", comment, commentˢ);
     }
 }
 
@@ -743,61 +776,61 @@ partial struct parseDepthTestsᴛ1 /*dyn*/ {
     // depths.
     internal nint scopeMultiplier;
 }
-internal static slice<parseDepthTestsᴛ1> parseDepthTests = new parseDepthTestsᴛ1[]{
+internal static slice<parseDepthTestsᴛ1> parseDepthTests = slice<parseDepthTestsᴛ1>([
     // The format expands the part inside « » many times.
     // A second set of brackets nested inside the first stops the repetition,
     // so that for example «(«1»)» expands to (((...((((1))))...))).
-    new(name: "array"u8, format: "package main; var x «[1]»int"u8),
-    new(name: "slice"u8, format: "package main; var x «[]»int"u8),
-    new(name: "struct"u8, format: "package main; var x «struct { X «int» }»"u8, scope: true),
-    new(name: "pointer"u8, format: "package main; var x «*»int"u8),
-    new(name: "func"u8, format: "package main; var x «func()»int"u8, scope: true),
-    new(name: "chan"u8, format: "package main; var x «chan »int"u8),
-    new(name: "chan2"u8, format: "package main; var x «<-chan »int"u8),
-    new(name: "interface"u8, format: "package main; var x «interface { M() «int» }»"u8, scope: true, scopeMultiplier: 2), // Scopes: InterfaceType, FuncType
-    new(name: "map"u8, format: "package main; var x «map[int]»int"u8),
-    new(name: "slicelit"u8, format: "package main; var x = []any{«[]any{«»}»}"u8, parseMultiplier: 3), // Parser nodes: UnaryExpr, CompositeLit
-    new(name: "arraylit"u8, format: "package main; var x = «[1]any{«nil»}»"u8, parseMultiplier: 3), // Parser nodes: UnaryExpr, CompositeLit
-    new(name: "structlit"u8, format: "package main; var x = «struct{x any}{«nil»}»"u8, parseMultiplier: 3), // Parser nodes: UnaryExpr, CompositeLit
-    new(name: "maplit"u8, format: "package main; var x = «map[int]any{1:«nil»}»"u8, parseMultiplier: 3), // Parser nodes: CompositeLit, KeyValueExpr
-    new(name: "element"u8, format: "package main; var x = struct{x any}{x: «{«»}»}"u8),
-    new(name: "dot"u8, format: "package main; var x = «x.»x"u8),
-    new(name: "index"u8, format: "package main; var x = x«[1]»"u8),
-    new(name: "slice"u8, format: "package main; var x = x«[1:2]»"u8),
-    new(name: "slice3"u8, format: "package main; var x = x«[1:2:3]»"u8),
-    new(name: "dottype"u8, format: "package main; var x = x«.(any)»"u8),
-    new(name: "callseq"u8, format: "package main; var x = x«()»"u8),
-    new(name: "methseq"u8, format: "package main; var x = x«.m()»"u8, parseMultiplier: 2), // Parser nodes: SelectorExpr, CallExpr
-    new(name: "binary"u8, format: "package main; var x = «1+»1"u8),
-    new(name: "binaryparen"u8, format: "package main; var x = «1+(«1»)»"u8, parseMultiplier: 2), // Parser nodes: BinaryExpr, ParenExpr
-    new(name: "unary"u8, format: "package main; var x = «^»1"u8),
-    new(name: "addr"u8, format: "package main; var x = «& »x"u8),
-    new(name: "star"u8, format: "package main; var x = «*»x"u8),
-    new(name: "recv"u8, format: "package main; var x = «<-»x"u8),
-    new(name: "call"u8, format: "package main; var x = «f(«1»)»"u8, parseMultiplier: 2), // Parser nodes: Ident, CallExpr
-    new(name: "conv"u8, format: "package main; var x = «(*T)(«1»)»"u8, parseMultiplier: 2), // Parser nodes: ParenExpr, CallExpr
-    new(name: "label"u8, format: "package main; func main() { «Label:» }"u8),
-    new(name: "if"u8, format: "package main; func main() { «if true { «» }»}"u8, parseMultiplier: 2, scope: true, scopeMultiplier: 2), // Parser nodes: IfStmt, BlockStmt. Scopes: IfStmt, BlockStmt
-    new(name: "ifelse"u8, format: "package main; func main() { «if true {} else » {} }"u8, scope: true),
-    new(name: "switch"u8, format: "package main; func main() { «switch { default: «» }»}"u8, scope: true, scopeMultiplier: 2), // Scopes: TypeSwitchStmt, CaseClause
-    new(name: "typeswitch"u8, format: "package main; func main() { «switch x.(type) { default: «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: TypeSwitchStmt, CaseClause
-    new(name: "for0"u8, format: "package main; func main() { «for { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: ForStmt, BlockStmt
-    new(name: "for1"u8, format: "package main; func main() { «for x { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: ForStmt, BlockStmt
-    new(name: "for3"u8, format: "package main; func main() { «for f(); g(); h() { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: ForStmt, BlockStmt
-    new(name: "forrange0"u8, format: "package main; func main() { «for range x { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: RangeStmt, BlockStmt
-    new(name: "forrange1"u8, format: "package main; func main() { «for x = range z { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: RangeStmt, BlockStmt
-    new(name: "forrange2"u8, format: "package main; func main() { «for x, y = range z { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: RangeStmt, BlockStmt
-    new(name: "go"u8, format: "package main; func main() { «go func() { «» }()» }"u8, parseMultiplier: 2, scope: true), // Parser nodes: GoStmt, FuncLit
-    new(name: "defer"u8, format: "package main; func main() { «defer func() { «» }()» }"u8, parseMultiplier: 2, scope: true), // Parser nodes: DeferStmt, FuncLit
-    new(name: "select"u8, format: "package main; func main() { «select { default: «» }» }"u8, scope: true),
-    new(name: "block"u8, format: "package main; func main() { «{«»}» }"u8, scope: true)
-}.slice();
+    new(name: "array", format: "package main; var x «[1]»int"),
+    new(name: "slice", format: "package main; var x «[]»int"),
+    new(name: "struct", format: "package main; var x «struct { X «int» }»", scope: true),
+    new(name: "pointer", format: "package main; var x «*»int"),
+    new(name: "func", format: "package main; var x «func()»int", scope: true),
+    new(name: "chan", format: "package main; var x «chan »int"),
+    new(name: "chan2", format: "package main; var x «<-chan »int"),
+    new(name: "interface", format: "package main; var x «interface { M() «int» }»", scope: true, scopeMultiplier: 2), // Scopes: InterfaceType, FuncType
+    new(name: "map", format: "package main; var x «map[int]»int"),
+    new(name: "slicelit", format: "package main; var x = []any{«[]any{«»}»}", parseMultiplier: 3),      // Parser nodes: UnaryExpr, CompositeLit
+    new(name: "arraylit", format: "package main; var x = «[1]any{«nil»}»", parseMultiplier: 3),         // Parser nodes: UnaryExpr, CompositeLit
+    new(name: "structlit", format: "package main; var x = «struct{x any}{«nil»}»", parseMultiplier: 3), // Parser nodes: UnaryExpr, CompositeLit
+    new(name: "maplit", format: "package main; var x = «map[int]any{1:«nil»}»", parseMultiplier: 3),    // Parser nodes: CompositeLit, KeyValueExpr
+    new(name: "element", format: "package main; var x = struct{x any}{x: «{«»}»}"),
+    new(name: "dot", format: "package main; var x = «x.»x"),
+    new(name: "index", format: "package main; var x = x«[1]»"),
+    new(name: "slice", format: "package main; var x = x«[1:2]»"),
+    new(name: "slice3", format: "package main; var x = x«[1:2:3]»"),
+    new(name: "dottype", format: "package main; var x = x«.(any)»"),
+    new(name: "callseq", format: "package main; var x = x«()»"),
+    new(name: "methseq", format: "package main; var x = x«.m()»", parseMultiplier: 2), // Parser nodes: SelectorExpr, CallExpr
+    new(name: "binary", format: "package main; var x = «1+»1"),
+    new(name: "binaryparen", format: "package main; var x = «1+(«1»)»", parseMultiplier: 2), // Parser nodes: BinaryExpr, ParenExpr
+    new(name: "unary", format: "package main; var x = «^»1"),
+    new(name: "addr", format: "package main; var x = «& »x"),
+    new(name: "star", format: "package main; var x = «*»x"),
+    new(name: "recv", format: "package main; var x = «<-»x"),
+    new(name: "call", format: "package main; var x = «f(«1»)»", parseMultiplier: 2),    // Parser nodes: Ident, CallExpr
+    new(name: "conv", format: "package main; var x = «(*T)(«1»)»", parseMultiplier: 2), // Parser nodes: ParenExpr, CallExpr
+    new(name: "label", format: "package main; func main() { «Label:» }"),
+    new(name: "if", format: "package main; func main() { «if true { «» }»}", parseMultiplier: 2, scope: true, scopeMultiplier: 2), // Parser nodes: IfStmt, BlockStmt. Scopes: IfStmt, BlockStmt
+    new(name: "ifelse", format: "package main; func main() { «if true {} else » {} }", scope: true),
+    new(name: "switch", format: "package main; func main() { «switch { default: «» }»}", scope: true, scopeMultiplier: 2),               // Scopes: TypeSwitchStmt, CaseClause
+    new(name: "typeswitch", format: "package main; func main() { «switch x.(type) { default: «» }» }", scope: true, scopeMultiplier: 2), // Scopes: TypeSwitchStmt, CaseClause
+    new(name: "for0", format: "package main; func main() { «for { «» }» }", scope: true, scopeMultiplier: 2),                            // Scopes: ForStmt, BlockStmt
+    new(name: "for1", format: "package main; func main() { «for x { «» }» }", scope: true, scopeMultiplier: 2),                          // Scopes: ForStmt, BlockStmt
+    new(name: "for3", format: "package main; func main() { «for f(); g(); h() { «» }» }", scope: true, scopeMultiplier: 2),              // Scopes: ForStmt, BlockStmt
+    new(name: "forrange0", format: "package main; func main() { «for range x { «» }» }", scope: true, scopeMultiplier: 2),               // Scopes: RangeStmt, BlockStmt
+    new(name: "forrange1", format: "package main; func main() { «for x = range z { «» }» }", scope: true, scopeMultiplier: 2),           // Scopes: RangeStmt, BlockStmt
+    new(name: "forrange2", format: "package main; func main() { «for x, y = range z { «» }» }", scope: true, scopeMultiplier: 2),        // Scopes: RangeStmt, BlockStmt
+    new(name: "go", format: "package main; func main() { «go func() { «» }()» }", parseMultiplier: 2, scope: true),                      // Parser nodes: GoStmt, FuncLit
+    new(name: "defer", format: "package main; func main() { «defer func() { «» }()» }", parseMultiplier: 2, scope: true),                // Parser nodes: DeferStmt, FuncLit
+    new(name: "select", format: "package main; func main() { «select { default: «» }» }", scope: true),
+    new(name: "block", format: "package main; func main() { «{«»}» }", scope: true)
+]);
 
 // split splits pre«mid»post into pre, mid, post.
 // If the string does not have that form, split returns x, "", "".
 internal static (@string pre, @string mid, @string post) split(@string x) {
-    nint start = strings.Index(x, "«"u8);
-    nint end = strings.LastIndex(x, "»"u8);
+    nint start = strings.Index(x, "«");
+    nint end = strings.LastIndex(x, "»");
     if (start < 0 || end < 0) {
         return (x, "", "");
     }
@@ -807,17 +840,17 @@ internal static (@string pre, @string mid, @string post) split(@string x) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testRequiresSignificantˢ = (@string)"test requires significant memory"u8;
 
-public static void TestParseDepthLimit(ж<testing.T> Ꮡt) {
+public static void TestParseDepthLimit(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(testRequiresSignificantˢ);
+        t.Skip(testRequiresSignificantˢ);
     }
     foreach (var (_, vᴛ1) in parseDepthTests) {
         ref var tt = ref heap(new parseDepthTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
-        foreach (var (_, size) in new @string[]{"small"u8, "big"u8}.slice()) {
+        foreach (var (_, size) in slice<@string>(["small", "big"])) {
             var ttʗ1 = tt;
-            Ꮡt.Run(tt.name + "/"u8 + size, (ж<testing.T> tΔ1) => {
+            t.Run(tt.name + "/"u8 + size, (ж<testing.T> tΔ1) => {
                 nint n = maxNestLev + 1;
                 if (ttʗ1.parseMultiplier > 0) {
                     n = quo(n, ttʗ1.parseMultiplier);
@@ -832,7 +865,7 @@ public static void TestParseDepthLimit(ж<testing.T> Ꮡt) {
                 }
 
                 var (pre, mid, post) = split(ttʗ1.format);
-                if (strings.Contains(mid, "«"u8)){
+                if (strings.Contains(mid, "«")) {
                     var (left, @base, right) = split(mid);
                     mid = strings.Repeat(left, n) + @base + strings.Repeat(right, n);
                 } else {
@@ -842,14 +875,14 @@ public static void TestParseDepthLimit(ж<testing.T> Ꮡt) {
 
                 var fset = token.NewFileSet();
                 var (_, err) = ParseFile(fset, ""u8, input, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
-                if (size == "small"u8){
-                    if (err != default!) {
-                        tΔ1.Errorf("ParseFile(...): %v (want success)"u8, err);
+                if (size == "small"u8) {
+                    if (err != nil) {
+                        tΔ1.Errorf("ParseFile(...): %v (want success)", err);
                     }
                 } else {
                     @string expected = exceededMaxNestingDepthˢ;
-                    if (err == default! || !strings.HasSuffix(err.Error(), expected)) {
-                        tΔ1.Errorf("ParseFile(...) = _, %v, want %q"u8, err, expected);
+                    if (err == nil || !strings.HasSuffix(err.Error(), expected)) {
+                        tΔ1.Errorf("ParseFile(...) = _, %v, want %q", err, expected);
                     }
                 }
             });
@@ -858,9 +891,10 @@ public static void TestParseDepthLimit(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string exceededMaxScopeDepthˢ = "exceeded max scope depth during object resolution"u8;
+internal static ref readonly @string exceededMaxScopeDepthˢ => ref exceededMaxScopeDepthˢᵇ;
+private static readonly @string exceededMaxScopeDepthˢᵇ = "exceeded max scope depth during object resolution"u8;
 
-public static void TestScopeDepthLimit(ж<testing.T> Ꮡt) {
+public static void TestScopeDepthLimit(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in parseDepthTests) {
         ref var tt = ref heap(new parseDepthTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
@@ -868,9 +902,9 @@ public static void TestScopeDepthLimit(ж<testing.T> Ꮡt) {
         if (!tt.scope) {
             continue;
         }
-        foreach (var (_, size) in new @string[]{"small"u8, "big"u8}.slice()) {
+        foreach (var (_, size) in slice<@string>(["small", "big"])) {
             var ttʗ1 = tt;
-            Ꮡt.Run(tt.name + "/"u8 + size, (ж<testing.T> tΔ1) => {
+            t.Run(tt.name + "/"u8 + size, (ж<testing.T> tΔ1) => {
                 nint n = maxScopeDepth + 1;
                 if (ttʗ1.scopeMultiplier > 0) {
                     n = quo(n, ttʗ1.scopeMultiplier);
@@ -885,7 +919,7 @@ public static void TestScopeDepthLimit(ж<testing.T> Ꮡt) {
                 }
 
                 var (pre, mid, post) = split(ttʗ1.format);
-                if (strings.Contains(mid, "«"u8)){
+                if (strings.Contains(mid, "«")) {
                     var (left, @base, right) = split(mid);
                     mid = strings.Repeat(left, n) + @base + strings.Repeat(right, n);
                 } else {
@@ -895,14 +929,14 @@ public static void TestScopeDepthLimit(ж<testing.T> Ꮡt) {
 
                 var fset = token.NewFileSet();
                 var (_, err) = ParseFile(fset, ""u8, input, DeclarationErrors);
-                if (size == "small"u8){
-                    if (err != default!) {
-                        tΔ1.Errorf("ParseFile(...): %v (want success)"u8, err);
+                if (size == "small"u8) {
+                    if (err != nil) {
+                        tΔ1.Errorf("ParseFile(...): %v (want success)", err);
                     }
                 } else {
                     @string expected = exceededMaxScopeDepthˢ;
-                    if (err == default! || !strings.HasSuffix(err.Error(), expected)) {
-                        tΔ1.Errorf("ParseFile(...) = _, %v, want %q"u8, err, expected);
+                    if (err == nil || !strings.HasSuffix(err.Error(), expected)) {
+                        tΔ1.Errorf("ParseFile(...) = _, %v, want %q", err, expected);
                     }
                 }
             });
@@ -911,32 +945,33 @@ public static void TestScopeDepthLimit(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rangeˢ = "range"u8;
+internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
+private static readonly @string rangeˢᵇ = "range"u8;
 
 // proposal go.dev/issue/50429
-public static void TestRangePos(ж<testing.T> Ꮡt) {
-    var testcases = new @string[]{
-        "package p; func _() { for range x {} }"u8,
-        "package p; func _() { for i = range x {} }"u8,
-        "package p; func _() { for i := range x {} }"u8,
-        "package p; func _() { for k, v = range x {} }"u8,
-        "package p; func _() { for k, v := range x {} }"u8
-    }.slice();
+public static void TestRangePos(ж<testing.T> t) {
+    var testcases = slice<@string>([
+        "package p; func _() { for range x {} }",
+        "package p; func _() { for i = range x {} }",
+        "package p; func _() { for i := range x {} }",
+        "package p; func _() { for k, v = range x {} }",
+        "package p; func _() { for k, v := range x {} }"
+    ]);
 
     foreach (var (_, src) in testcases) {
         var fset = token.NewFileSet();
         var (f, err) = ParseFile(fset, src, src, 0);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         var fsetʗ1 = fset;
         ast.Inspect(new ast.FileжNode(f), (ast.Node x) => {
             switch (x.type()) {
             case ж<ast.RangeStmt> s: {
-                var pos = fsetʗ1.Position((~s).Range);
+                var pos = fsetʗ1.Position(s.Range);
                 if (pos.Offset != strings.Index(src, rangeˢ)) {
-                    Ꮡt.Errorf("%s: got offset %v, want %v"u8, src, pos.Offset, strings.Index(src, rangeˢ));
+                    t.Errorf("%s: got offset %v, want %v", src, pos.Offset, strings.Index(src, rangeˢ));
                 }
                 break;
             }}
@@ -946,92 +981,97 @@ public static void TestRangePos(ж<testing.T> Ꮡt) {
 }
 
 // TestIssue59180 tests that line number overflow doesn't cause an infinite loop.
-public static void TestIssue59180(ж<testing.T> Ꮡt) {
-    var testcases = new @string[]{
-        "package p\n//line :9223372036854775806\n\n//"u8,
-        "package p\n//line :1:9223372036854775806\n\n//"u8,
-        "package p\n//line file:9223372036854775806\n\n//"u8
-    }.slice();
+public static void TestIssue59180(ж<testing.T> t) {
+    var testcases = slice<@string>([
+        "package p\n//line :9223372036854775806\n\n//",
+        "package p\n//line :1:9223372036854775806\n\n//",
+        "package p\n//line file:9223372036854775806\n\n//"
+    ]);
 
     foreach (var (_, src) in testcases) {
         var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, ParseComments);
-        if (err == default!) {
-            Ꮡt.Errorf("ParseFile(%s) succeeded unexpectedly"u8, src);
+        if (err == nil) {
+            t.Errorf("ParseFile(%s) succeeded unexpectedly", src);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataGoversionˢ = "./testdata/goversion"u8;
+internal static ref readonly @string testdataGoversionˢ => ref testdataGoversionˢᵇ;
+private static readonly @string testdataGoversionˢᵇ = "./testdata/goversion"u8;
 
-public static void TestGoVersion(ж<testing.T> Ꮡt) {
+public static void TestGoVersion(ж<testing.T> t) {
     var fset = token.NewFileSet();
-    var (pkgs, err) = ParseDir(fset, testdataGoversionˢ, default!, 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (pkgs, err) = ParseDir(fset, testdataGoversionˢ, default, 0);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     foreach (var (_, p) in pkgs) {
-        @string want = strings.ReplaceAll((~p).Name, "_"u8, "."u8);
+        @string want = strings.ReplaceAll(p.Name, "_", ".");
         if (want == "none"u8) {
             want = ""u8;
         }
-        foreach (var (_, f) in (~p).Files) {
-            if ((~f).GoVersion != want) {
-                Ꮡt.Errorf("%s: GoVersion = %q, want %q"u8, fset.Position(f.Pos()), (~f).GoVersion, want);
+        foreach (var (_, f) in p.Files) {
+            if (f.GoVersion != want) {
+                t.Errorf("%s: GoVersion = %q, want %q", fset.Position(f.Pos()), f.GoVersion, want);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePFuncFVarXStructˢ = @"package p; func f() { var x struct"u8;
+internal static ref readonly @string packagePFuncFVarXStructˢ => ref packagePFuncFVarXStructˢᵇ;
+private static readonly @string packagePFuncFVarXStructˢᵇ = @"package p; func f() { var x struct"u8;
 
-public static void TestIssue57490(ж<testing.T> Ꮡt) {
+public static void TestIssue57490(ж<testing.T> t) {
     @string src = packagePFuncFVarXStructˢ; // program not correctly terminated
     var fset = token.NewFileSet();
     var (@file, err) = ParseFile(fset, ""u8, src, 0);
-    if (err == default!) {
-        Ꮡt.Fatalf("syntax error expected, but no error reported"u8);
+    if (err == nil) {
+        t.Fatalf("syntax error expected, but no error reported");
     }
 
     // Because of the syntax error, the end position of the function declaration
     // is past the end of the file's position range.
-    tokenꓸPos funcEnd = (~@file).Decls[0].End();
+    tokenꓸPos funcEnd = @file.Decls[0].End();
 
     // Offset(funcEnd) must not panic (to test panic, set debug=true in token package)
     // (panic: offset 35 out of bounds [0, 34] (position 36 out of bounds [1, 35]))
     var tokFile = fset.File(@file.Pos());
     nint offset = tokFile.Offset(funcEnd);
     if (offset != tokFile.Size()) {
-        Ꮡt.Fatalf("offset = %d, want %d"u8, offset, tokFile.Size());
+        t.Fatalf("offset = %d, want %d", offset, tokFile.Size());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testGoˢ = "test.go"u8;
+internal static ref readonly @string testGoˢ => ref testGoˢᵇ;
+private static readonly @string testGoˢᵇ = "test.go"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ3 = "package p; type X[A (B),] struct{}"u8;
+internal static ref readonly @string srcᶜ3 => ref srcᶜ3ᵇ;
+private static readonly @string srcᶜ3ᵇ = "package p; type X[A (B),] struct{}"u8;
 
-public static void TestParseTypeParamsAsParenExpr(ж<testing.T> Ꮡt) {
+public static void TestParseTypeParamsAsParenExpr(ж<testing.T> t) {
     @string src = srcᶜ3;
 
     var fset = token.NewFileSet();
     var (f, err) = ParseFile(fset, testGoˢ, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    var typeParam = (~(~(~(~f).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.TypeSpec>>()).TypeParams).List[0].Value.Type;
+    var typeParam = f.Decls[0]._<ж<ast.GenDecl>>().Specs[0]._<ж<ast.TypeSpec>>().TypeParams.List[0].Type;
     var (_, ok) = typeParam._<ж<ast.ParenExpr>>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatalf("typeParam is a %T; want: *ast.ParenExpr"u8, typeParam);
+        t.Fatalf("typeParam is a %T; want: *ast.ParenExpr", typeParam);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aGoˢ = "a.go"u8;
+internal static ref readonly @string aGoˢ => ref aGoˢᵇ;
+private static readonly @string aGoˢᵇ = "a.go"u8;
 
 internal partial struct TestEmptyFileHasValidStartEnd_type /*dyn*/ {
     internal @string src;
@@ -1039,24 +1079,25 @@ internal partial struct TestEmptyFileHasValidStartEnd_type /*dyn*/ {
 }
 
 // TestEmptyFileHasValidStartEnd is a regression test for #70162.
-public static void TestEmptyFileHasValidStartEnd(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestEmptyFileHasValidStartEnd_type[]{
-        new(src: ""u8, want: "0 1 1"u8),
-        new(src: "package "u8, want: "0 1 9"u8),
-        new(src: "package p"u8, want: "1 1 10"u8),
-        new(src: "type T int"u8, want: "0 1 11"u8)
-    }.slice()) {
+public static void TestEmptyFileHasValidStartEnd(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestEmptyFileHasValidStartEnd_type>([
+        new(src: "", want: "0 1 1"),
+        new(src: "package ", want: "0 1 9"),
+        new(src: "package p", want: "1 1 10"),
+        new(src: "type T int", want: "0 1 11")
+    ])) {
         var fset = token.NewFileSet();
         var (f, _) = ParseFile(fset, aGoˢ, test.src, 0);
-        @string got = fmt.Sprintf("%d %d %d"u8, f.Pos(), (~f).FileStart, (~f).FileEnd);
+        @string got = fmt.Sprintf("%d %d %d"u8, f.Pos(), f.FileStart, f.FileEnd);
         if (got != test.want) {
-            Ꮡt.Fatalf("src = %q: got %s, want %s"u8, test.src, got, test.want);
+            t.Fatalf("src = %q: got %s, want %s", test.src, got, test.want);
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ4 = """
+internal static ref readonly @string srcᶜ4 => ref srcᶜ4ᵇ;
+private static readonly @string srcᶜ4ᵇ = """
 package main
 func test() {
 //line a:15:1
@@ -1065,32 +1106,32 @@ func test() {
 
 """u8.Raw();
 
-public static void TestCommentGroupWithLineDirective(ж<testing.T> Ꮡt) {
+public static void TestCommentGroupWithLineDirective(ж<testing.T> t) {
     @string src = srcᶜ4;
     var fset = token.NewFileSet();
     var (f, err) = ParseFile(fset, testGoˢ, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    var wantCommentGroups = new ж<ast.CommentGroup>[]{
+    var wantCommentGroups = slice<ж<ast.CommentGroup>>([
         Ꮡ(new ast.CommentGroup(
-            List: new ж<ast.Comment>[]{
+            List: slice<ж<ast.Comment>>([
                 Ꮡ(new ast.Comment(
                     Slash: ((tokenꓸPos)28),
-                    Text: "//line a:15:1"u8)),
+                    Text: "//line a:15:1")),
                 Ꮡ(new ast.Comment(
                     Slash: ((tokenꓸPos)43),
-                    Text: "//"u8))
-            }.slice()))
-    }.slice();
+                    Text: "//"))
+            ])))
+    ]);
 
-    if (!reflect.DeepEqual((~f).Comments, wantCommentGroups)) {
+    if (!reflect.DeepEqual(f.Comments, wantCommentGroups)) {
         ref var got = ref heap(new strings.Builder(), out var Ꮡgot);
         ref var want = ref heap(new strings.Builder(), out var Ꮡwant);
-        ast.Fprint(new parser_test_package.strings_BuilderжWriter(Ꮡgot), fset, (~f).Comments, default!);
-        ast.Fprint(new parser_test_package.strings_BuilderжWriter(Ꮡwant), fset, wantCommentGroups, default!);
-        Ꮡt.Fatalf("unexpected f.Comments got:\n%v\nwant:\n%v"u8, got.String(), want.String());
+        ast.Fprint(new parser_test_package.strings_BuilderжWriter(Ꮡgot), fset, f.Comments, default);
+        ast.Fprint(new parser_test_package.strings_BuilderжWriter(Ꮡwant), fset, wantCommentGroups, default);
+        t.Fatalf("unexpected f.Comments got:\n%v\nwant:\n%v", got.String(), want.String());
     }
 }
 
@@ -1099,7 +1140,8 @@ internal static readonly object missingLineCommentˢ = (@string)"missing line co
 internal static readonly object missingDocCommentˢ = (@string)"missing doc comment"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ5 = """
+internal static ref readonly @string srcᶜ5 => ref srcᶜ5ᵇ;
+private static readonly @string srcᶜ5ᵇ = """
 package test
 
 var _ int; /* line comment */
@@ -1116,56 +1158,59 @@ func _() {}
 // TestBothLineAndLeadComment makes sure that we populate the
 // p.lineComment field even though there is a comment after the
 // line comment.
-public static void TestBothLineAndLeadComment(ж<testing.T> Ꮡt) {
+public static void TestBothLineAndLeadComment(ж<testing.T> t) {
     @string src = srcᶜ5;
 
     var fset = token.NewFileSet();
     var (f, _) = ParseFile(fset, ""u8, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
 
-    var lineComment = (~(~f).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>().Value.Comment;
-    var docComment = (~f).Decls[1]._<ж<ast.FuncDecl>>().Value.Doc;
+    var lineComment = f.Decls[0]._<ж<ast.GenDecl>>().Specs[0]._<ж<ast.ValueSpec>>().Comment;
+    var docComment = f.Decls[1]._<ж<ast.FuncDecl>>().Doc;
 
     if (lineComment == nil) {
-        Ꮡt.Fatal(missingLineCommentˢ);
+        t.Fatal(missingLineCommentˢ);
     }
     if (docComment == nil) {
-        Ꮡt.Fatal(missingDocCommentˢ);
+        t.Fatal(missingDocCommentˢ);
     }
 
-    if ((~(~lineComment).List[0]).Text != "/* line comment */"u8) {
-        Ꮡt.Errorf(@"unexpected line comment got = %q; want ""/* line comment */"""u8, (~(~lineComment).List[0]).Text);
+    if (lineComment.List[0].Text != "/* line comment */"u8) {
+        t.Errorf(@"unexpected line comment got = %q; want ""/* line comment */""", lineComment.List[0].Text);
     }
-    if ((~(~docComment).List[0]).Text != "// Doc comment"u8) {
-        Ꮡt.Errorf(@"unexpected line comment got = %q; want ""// Doc comment"""u8, (~(~docComment).List[0]).Text);
+    if (docComment.List[0].Text != "// Doc comment"u8) {
+        t.Errorf(@"unexpected line comment got = %q; want ""// Doc comment""", docComment.List[0].Text);
     }
 
-    var lineComment2 = (~(~f).Decls[2]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>().Value.Comment;
+    var lineComment2 = f.Decls[2]._<ж<ast.GenDecl>>().Specs[0]._<ж<ast.ValueSpec>>().Comment;
     if (lineComment2 == nil) {
-        Ꮡt.Fatal(missingLineCommentˢ);
+        t.Fatal(missingLineCommentˢ);
     }
-    if ((~(~lineComment).List[0]).Text != "/* line comment */"u8) {
-        Ꮡt.Errorf(@"unexpected line comment got = %q; want ""/* line comment */"""u8, (~(~lineComment).List[0]).Text);
+    if (lineComment.List[0].Text != "/* line comment */"u8) {
+        t.Errorf(@"unexpected line comment got = %q; want ""/* line comment */""", lineComment.List[0].Text);
     }
 
-    var docComment2 = (~f).Decls[3]._<ж<ast.FuncDecl>>().Value.Doc;
+    var docComment2 = f.Decls[3]._<ж<ast.FuncDecl>>().Doc;
     if (docComment2 != nil) {
-        Ꮡt.Errorf("unexpected doc comment %v"u8, docComment2.OrTypedNil());
+        t.Errorf("unexpected doc comment %v", docComment2.OrTypedNil());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string abcˢ = "`abc\n`"u8;
+internal static ref readonly @string abcˢ => ref abcˢᵇ;
+private static readonly @string abcˢᵇ = "`abc\n`"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string stringlitᶜ = "`abc\r\n`"u8;
+internal static ref readonly @string stringlitᶜ => ref stringlitᶜᵇ;
+private static readonly @string stringlitᶜᵇ = "`abc\r\n`"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ6 = "package p\n\nimport `abc\r\n` ;\n\ntype _ struct{ x int `abc\r\n` }\n\nconst _ = `abc\r\n` ;\n";
+internal static ref readonly @string srcᶜ6 => ref srcᶜ6ᵇ;
+private static readonly @string srcᶜ6ᵇ = "package p\n\nimport `abc\r\n` ;\n\ntype _ struct{ x int `abc\r\n` }\n\nconst _ = `abc\r\n` ;\n";
 
 // Tests of BasicLit.End() method, which in go1.26 started precisely
 // recording the Value token's end position instead of heuristically
 // computing it, which is inaccurate for strings containing "\r".
-public static void TestBasicLit_End(ж<testing.T> Ꮡt) {
+public static void TestBasicLit_End(ж<testing.T> t) {
     // lit is a raw string literal containing [a b c \r \n],
     // denoting "abc\n", because the scanner normalizes \r\n to \n.
     @string stringlit = stringlitᶜ;
@@ -1192,14 +1237,14 @@ public static void TestBasicLit_End(ж<testing.T> Ꮡt) {
                 // Check BasicLit.Value.
                 {
                     @string want = abcˢ; if ((~lit).Value != want) {
-                        Ꮡt.Errorf("%s: BasicLit.Value = %q, want %q"u8, fsetʗ1.Position(lit.Pos()), (~lit).Value, want);
+                        t.Errorf("%s: BasicLit.Value = %q, want %q", fsetʗ1.Position(lit.Pos()), (~lit).Value, want);
                     }
                 }
 
                 // Check source extent.
                 {
                     @string got = src.slice(start, end); if (got != stringlit) {
-                        Ꮡt.Errorf("%s: src[BasicLit.Pos:End] = %q, want %q"u8, fsetʗ1.Position(lit.Pos()), got, stringlit);
+                        t.Errorf("%s: src[BasicLit.Pos:End] = %q, want %q", fsetʗ1.Position(lit.Pos()), got, stringlit);
                     }
                 }
             }
@@ -1207,7 +1252,7 @@ public static void TestBasicLit_End(ж<testing.T> Ꮡt) {
         return true;
     });
     if (count != 3) {
-        Ꮡt.Errorf("found %d BasicLit, want 3"u8, count);
+        t.Errorf("found %d BasicLit, want 3", count);
     }
 }
 

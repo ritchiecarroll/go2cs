@@ -110,6 +110,7 @@
   <ItemGroup>
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="package_test_info.cs" />
+    <Compile Include="unsafeheader.cs" />
     <Compile Include="unsafeheader_test.cs" />
   </ItemGroup>
 
@@ -126,7 +127,6 @@
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
-    <ProjectReference Include="internal.unsafeheader.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

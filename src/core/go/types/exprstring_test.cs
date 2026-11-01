@@ -12,123 +12,123 @@ using static global::go.go.types_internal_test_package;
 
 partial class types_test_package {
 
-internal static slice<testEntry> testExprs = new testEntry[]{
+internal static slice<testEntry> testExprs = slice<testEntry>([
     // basic type literals
-    dup("x"u8),
-    dup("true"u8),
-    dup("42"u8),
-    dup("3.1415"u8),
-    dup("2.71828i"u8),
-    dup(@"'a'"u8),
-    dup(@"""foo"""u8),
-    dup("`bar`"u8),
-    dup("any"u8),
+    dup("x"),
+    dup("true"),
+    dup("42"),
+    dup("3.1415"),
+    dup("2.71828i"),
+    dup(@"'a'"),
+    dup(@"""foo"""),
+    dup("`bar`"),
+    dup("any"),
 
     // func and composite literals
-    new("func(){}"u8, "(func() literal)"u8),
-    new("func(x int) complex128 {}"u8, "(func(x int) complex128 literal)"u8),
-    new("[]int{1, 2, 3}"u8, "[]int{…}"u8),
+    new("func(){}", "(func() literal)"),
+    new("func(x int) complex128 {}", "(func(x int) complex128 literal)"),
+    new("[]int{1, 2, 3}", "[]int{…}"),
 
     // type expressions
-    dup("[1 << 10]byte"u8),
-    dup("[]int"u8),
-    dup("*int"u8),
-    dup("struct{x int}"u8),
-    dup("func()"u8),
-    dup("func(int, float32) string"u8),
-    dup("interface{m()}"u8),
-    dup("interface{m() string; n(x int)}"u8),
-    dup("interface{~int}"u8),
+    dup("[1 << 10]byte"),
+    dup("[]int"),
+    dup("*int"),
+    dup("struct{x int}"),
+    dup("func()"),
+    dup("func(int, float32) string"),
+    dup("interface{m()}"),
+    dup("interface{m() string; n(x int)}"),
+    dup("interface{~int}"),
 
-    dup("map[string]int"u8),
-    dup("chan E"u8),
-    dup("<-chan E"u8),
-    dup("chan<- E"u8),
+    dup("map[string]int"),
+    dup("chan E"),
+    dup("<-chan E"),
+    dup("chan<- E"),
 
     // new interfaces
-    dup("interface{int}"u8),
-    dup("interface{~int}"u8),
+    dup("interface{int}"),
+    dup("interface{~int}"),
 
     // generic constraints
-    dup("interface{~a | ~b | ~c; ~int | ~string; float64; m()}"u8),
-    dup("interface{int | string}"u8),
-    dup("interface{~int | ~string; float64; m()}"u8),
-    dup("interface{~T[int, string] | string}"u8),
+    dup("interface{~a | ~b | ~c; ~int | ~string; float64; m()}"),
+    dup("interface{int | string}"),
+    dup("interface{~int | ~string; float64; m()}"),
+    dup("interface{~T[int, string] | string}"),
 
     // generic types
-    dup("x[T]"u8),
-    dup("x[N | A | S]"u8),
-    dup("x[N, A]"u8),
+    dup("x[T]"),
+    dup("x[N | A | S]"),
+    dup("x[N, A]"),
 
     // non-type expressions
-    dup("(x)"u8),
-    dup("x.f"u8),
-    dup("a[i]"u8),
+    dup("(x)"),
+    dup("x.f"),
+    dup("a[i]"),
 
-    dup("s[:]"u8),
-    dup("s[i:]"u8),
-    dup("s[:j]"u8),
-    dup("s[i:j]"u8),
-    dup("s[:j:k]"u8),
-    dup("s[i:j:k]"u8),
+    dup("s[:]"),
+    dup("s[i:]"),
+    dup("s[:j]"),
+    dup("s[i:j]"),
+    dup("s[:j:k]"),
+    dup("s[i:j:k]"),
 
-    dup("x.(T)"u8),
+    dup("x.(T)"),
 
-    dup("x.([10]int)"u8),
-    dup("x.([...]int)"u8),
+    dup("x.([10]int)"),
+    dup("x.([...]int)"),
 
-    dup("x.(struct{})"u8),
-    dup("x.(struct{x int; y, z float32; E})"u8),
+    dup("x.(struct{})"),
+    dup("x.(struct{x int; y, z float32; E})"),
 
-    dup("x.(func())"u8),
-    dup("x.(func(x int))"u8),
-    dup("x.(func() int)"u8),
-    dup("x.(func(x, y int, z float32) (r int))"u8),
-    dup("x.(func(a, b, c int))"u8),
-    dup("x.(func(x ...T))"u8),
+    dup("x.(func())"),
+    dup("x.(func(x int))"),
+    dup("x.(func() int)"),
+    dup("x.(func(x, y int, z float32) (r int))"),
+    dup("x.(func(a, b, c int))"),
+    dup("x.(func(x ...T))"),
 
-    dup("x.(interface{})"u8),
-    dup("x.(interface{m(); n(x int); E})"u8),
-    dup("x.(interface{m(); n(x int) T; E; F})"u8),
+    dup("x.(interface{})"),
+    dup("x.(interface{m(); n(x int); E})"),
+    dup("x.(interface{m(); n(x int) T; E; F})"),
 
-    dup("x.(map[K]V)"u8),
+    dup("x.(map[K]V)"),
 
-    dup("x.(chan E)"u8),
-    dup("x.(<-chan E)"u8),
-    dup("x.(chan<- chan int)"u8),
-    dup("x.(chan<- <-chan int)"u8),
-    dup("x.(<-chan chan int)"u8),
-    dup("x.(chan (<-chan int))"u8),
+    dup("x.(chan E)"),
+    dup("x.(<-chan E)"),
+    dup("x.(chan<- chan int)"),
+    dup("x.(chan<- <-chan int)"),
+    dup("x.(<-chan chan int)"),
+    dup("x.(chan (<-chan int))"),
 
-    dup("f()"u8),
-    dup("f(x)"u8),
-    dup("int(x)"u8),
-    dup("f(x, x + y)"u8),
-    dup("f(s...)"u8),
-    dup("f(a, s...)"u8),
+    dup("f()"),
+    dup("f(x)"),
+    dup("int(x)"),
+    dup("f(x, x + y)"),
+    dup("f(s...)"),
+    dup("f(a, s...)"),
 
     // generic functions
-    dup("f[T]()"u8),
-    dup("f[T](T)"u8),
-    dup("f[T, T1]()"u8),
-    dup("f[T, T1](T, T1)"u8),
+    dup("f[T]()"),
+    dup("f[T](T)"),
+    dup("f[T, T1]()"),
+    dup("f[T, T1](T, T1)"),
 
-    dup("*x"u8),
-    dup("&x"u8),
-    dup("x + y"u8),
-    dup("x + y << (2 * s)"u8)
-}.slice();
+    dup("*x"),
+    dup("&x"),
+    dup("x + y"),
+    dup("x + y << (2 * s)")
+]);
 
-public static void TestExprString(ж<testing.T> Ꮡt) {
+public static void TestExprString(ж<testing.T> t) {
     foreach (var (_, test) in testExprs) {
         var (x, err) = parser.ParseExpr(test.src);
-        if (err != default!) {
-            Ꮡt.Errorf("%s: %s"u8, test.src, err);
+        if (err != nil) {
+            t.Errorf("%s: %s", test.src, err);
             continue;
         }
         {
             @string got = ExprString(x); if (got != test.str) {
-                Ꮡt.Errorf("%s: got %s, want %s"u8, test.src, got, test.str);
+                t.Errorf("%s: got %s, want %s", test.src, got, test.str);
             }
         }
     }

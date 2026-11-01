@@ -23,13 +23,13 @@ internal static UntypedInt syscall_TCP_KEEPINTVL => /* windows.TCP_KEEPINTVL */ 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingOnWindowsˢ = (@string)"skipping on windows"u8;
 
-internal static partial void maybeSkipKeepAliveTest(ж<testing.T> Ꮡt) {
+internal static partial void maybeSkipKeepAliveTest(ж<testing.T> t) {
     // TODO(panjf2000): Unlike Unix-like OS's, old Windows (prior to Windows 10, version 1709)
     // 	doesn't provide any ways to retrieve the current TCP keep-alive settings, therefore
     // 	we're not able to run the test suite similar to Unix-like OS's on Windows.
     //  Try to find another proper approach to test the keep-alive settings on old Windows.
     if (!windows.SupportTCPKeepAliveIdle() || !windows.SupportTCPKeepAliveInterval() || !windows.SupportTCPKeepAliveCount()) {
-        Ꮡt.Skip(skippingOnWindowsˢ);
+        t.Skip(skippingOnWindowsˢ);
     }
 }
 

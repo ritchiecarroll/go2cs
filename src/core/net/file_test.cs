@@ -23,47 +23,51 @@ partial class net_internal_test_package {
 partial struct fileConnTestsᴛ1 /*dyn*/ {
     internal @string network;
 }
-internal static slice<fileConnTestsᴛ1> fileConnTests = new fileConnTestsᴛ1[]{
-    new("tcp"u8),
-    new("udp"u8),
-    new("unix"u8),
-    new("unixpacket"u8)
-}.slice();
+internal static slice<fileConnTestsᴛ1> fileConnTests = slice<fileConnTestsᴛ1>([
+    new("tcp"),
+    new("udp"),
+    new("unix"),
+    new("unixpacket")
+]);
 
-public static void TestFileConn(ж<testing.T> Ꮡt) {
+public static void TestFileConn(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-        Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
+        t.Skipf("not supported on %s", Δruntime.GOOS);
+        break;
+    }}
 
     foreach (var (_, vᴛ1) in fileConnTests) {
         ref var tt = ref heap(new fileConnTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.network, (ж<testing.T> tΔ1) => {
+        t.Run(tt.network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableNetwork(ttʗ1.network)) {
-                    tΔ1.Skipf("skipping %s test"u8, ttʗ1.network);
+                    tΔ1.Skipf("skipping %s test", ttʗ1.network);
                 }
 
-                @string network = default!;
-                @string address = default!;
+                @string network = default;
+                @string address = default;
                 var exprᴛ2 = ttʗ1.network;
-                if (exprᴛ2 == "udp"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ2 == "udp"u8: {
                     var c = newLocalPacketListener(new net_test_package.testing_TжTB(tΔ1), ttʗ1.network);
                     var cʗ1 = c;
                     defer(() => cʗ1.Close(), ref ᒐ);
                     network = c.LocalAddr().Network();
                     address = c.LocalAddr().String();
+                    break;
                 }
-                else { /* default: */
+                default: {
                     var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener ln) => {
                         GoFrame ᒐ = default;
                         try {
                             var (c, errΔ3) = ln.Accept();
-                            if (errΔ3 != default!) {
+                            if (errΔ3 != nil) {
                                 return;
                             }
                             var cʗ2 = c;
@@ -78,18 +82,19 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
                     var lsʗ1 = ls;
                     defer(() => lsʗ1.teardown(), ref ᒐ);
                     {
-                        var errΔ4 = ls.buildup(handler); if (errΔ4 != default!) {
+                        var errΔ4 = ls.buildup(handler); if (errΔ4 != nil) {
                             tΔ1.Fatal(errΔ4);
                         }
                     }
-                    network = (~ls).Listener.Addr().Network();
-                    address = (~ls).Listener.Addr().String();
-                }
+                    network = ls.Listener.Addr().Network();
+                    address = ls.Listener.Addr().String();
+                    break;
+                }}
 
                 var (c1, err) = Dial(network, address);
-                if (err != default!) {
+                if (err != nil) {
                     {
-                        var perr = parseDialError(err); if (perr != default!) {
+                        var perr = parseDialError(err); if (perr != nil) {
                             tΔ1.Error(perr);
                         }
                     }
@@ -97,7 +102,7 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
                 }
                 var addr = c1.LocalAddr();
 
-                ж<Δos.File> f = default!;
+                ж<Δos.File> f = default;
                 switch (c1.type()) {
                 case ж<global::go.net_package.TCPConn> c1Δ1: {
                     (f, err) = c1Δ1.of(global::go.net_package.TCPConn.Ꮡconn).File();
@@ -112,18 +117,18 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
                     break;
                 }}
                 {
-                    var errΔ1 = c1.Close(); if (errΔ1 != default!) {
+                    var errΔ1 = c1.Close(); if (errΔ1 != nil) {
                         {
-                            var perr = parseCloseError(errΔ1, false); if (perr != default!) {
+                            var perr = parseCloseError(errΔ1, false); if (perr != nil) {
                                 tΔ1.Error(perr);
                             }
                         }
                         tΔ1.Error(errΔ1);
                     }
                 }
-                if (err != default!) {
+                if (err != nil) {
                     {
-                        var perr = parseCommonError(err); if (perr != default!) {
+                        var perr = parseCommonError(err); if (perr != nil) {
                             tΔ1.Error(perr);
                         }
                     }
@@ -132,13 +137,13 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
 
                 (var c2, err) = FileConn(f);
                 {
-                    var errΔ2 = f.Close(); if (errΔ2 != default!) {
+                    var errΔ2 = f.Close(); if (errΔ2 != nil) {
                         tΔ1.Error(errΔ2);
                     }
                 }
-                if (err != default!) {
+                if (err != nil) {
                     {
-                        var perr = parseCommonError(err); if (perr != default!) {
+                        var perr = parseCommonError(err); if (perr != nil) {
                             tΔ1.Error(perr);
                         }
                     }
@@ -148,9 +153,9 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
                 defer(() => c2ʗ1.Close(), ref ᒐ);
 
                 {
-                    var (_, errΔ3) = c2.Write(slice<byte>("FILECONN TEST"u8)); if (errΔ3 != default!) {
+                    var (_, errΔ3) = c2.Write(slice<byte>("FILECONN TEST"u8)); if (errΔ3 != nil) {
                         {
-                            var perr = parseWriteError(errΔ3); if (perr != default!) {
+                            var perr = parseWriteError(errΔ3); if (perr != nil) {
                                 tΔ1.Error(perr);
                             }
                         }
@@ -158,7 +163,7 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
                     }
                 }
                 if (!reflect.DeepEqual(c2.LocalAddr(), addr)) {
-                    tΔ1.Fatalf("got %#v; want %#v"u8, c2.LocalAddr(), addr);
+                    tΔ1.Fatalf("got %#v; want %#v", c2.LocalAddr(), addr);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -167,39 +172,43 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static slice<fileConnTestsᴛ1> fileListenerTests = new fileConnTestsᴛ1[]{
-    new("tcp"u8),
-    new("unix"u8),
-    new("unixpacket"u8)
-}.slice();
+internal static slice<fileConnTestsᴛ1> fileListenerTests = slice<fileConnTestsᴛ1>([
+    new("tcp"),
+    new("unix"),
+    new("unixpacket")
+]);
 
-public static void TestFileListener(ж<testing.T> Ꮡt) {
+public static void TestFileListener(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-        Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
+        t.Skipf("not supported on %s", Δruntime.GOOS);
+        break;
+    }}
 
     foreach (var (_, vᴛ1) in fileListenerTests) {
         ref var tt = ref heap(new fileConnTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.network, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        t.Run(tt.network, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableNetwork(ttʗ1.network)) {
-                    tΔ1.Skipf("skipping %s test"u8, ttʗ1.network);
+                    tΔ1.Skipf("skipping %s test", ttʗ1.network);
                 }
 
                 var ln1 = newLocalListener(new net_test_package.testing_TжTB(tΔ1), ttʗ1.network);
                 var exprᴛ2 = ttʗ1.network;
-                if (exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8: {
                     defer(Δos.Remove, ln1.Addr().String(), ref ᒐ);
-                }
+                    break;
+                }}
                 var addr = ln1.Addr();
 
-                ж<Δos.File> f = default!;
-                error err = default!;
+                ж<Δos.File> f = default;
+                error err = default;
                 switch (ln1.type()) {
                 case ж<global::go.net_package.TCPListener> ln1Δ1: {
                     (f, err) = ln1Δ1.File();
@@ -210,20 +219,23 @@ public static void TestFileListener(ж<testing.T> Ꮡt) {
                     break;
                 }}
                 var exprᴛ3 = ttʗ1.network;
-                if (exprᴛ3 == "unix"u8 || exprᴛ3 == "unixpacket"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ3 == "unix"u8 || exprᴛ3 == "unixpacket"u8: {
                     var ln1ʗ1 = ln1;
                     defer(() => ln1ʗ1.Close(), ref ᒐ); // UnixListener.Close calls syscall.Unlink internally
+                    break;
                 }
-                else { /* default: */
+                default: {
                     {
-                        var errΔ2 = ln1.Close(); if (errΔ2 != default!) {
+                        var errΔ2 = ln1.Close(); if (errΔ2 != nil) {
                             tΔ1.Error(errΔ2);
                         }
                     }
-                }
-                if (err != default!) {
+                    break;
+                }}
+                if (err != nil) {
                     {
-                        var perr = parseCommonError(err); if (perr != default!) {
+                        var perr = parseCommonError(err); if (perr != nil) {
                             tΔ1.Error(perr);
                         }
                     }
@@ -232,13 +244,13 @@ public static void TestFileListener(ж<testing.T> Ꮡt) {
 
                 (var ln2, err) = FileListener(f);
                 {
-                    var errΔ3 = f.Close(); if (errΔ3 != default!) {
+                    var errΔ3 = f.Close(); if (errΔ3 != nil) {
                         tΔ1.Error(errΔ3);
                     }
                 }
-                if (err != default!) {
+                if (err != nil) {
                     {
-                        var perr = parseCommonError(err); if (perr != default!) {
+                        var perr = parseCommonError(err); if (perr != nil) {
                             tΔ1.Error(perr);
                         }
                     }
@@ -255,9 +267,9 @@ public static void TestFileListener(ж<testing.T> Ꮡt) {
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
                         var (cΔ1, errΔ4) = Dial(ln2ʗ2.Addr().Network(), ln2ʗ2.Addr().String());
-                        if (errΔ4 != default!) {
+                        if (errΔ4 != nil) {
                             {
-                                var perr = parseDialError(errΔ4); if (perr != default!) {
+                                var perr = parseDialError(errΔ4); if (perr != nil) {
                                     tΔ1.Error(perr);
                                 }
                             }
@@ -270,9 +282,9 @@ public static void TestFileListener(ж<testing.T> Ꮡt) {
                     finally { ᒐ.Run(); }
                 });
                 (var c, err) = ln2.Accept();
-                if (err != default!) {
+                if (err != nil) {
                     {
-                        var perr = parseAcceptError(err); if (perr != default!) {
+                        var perr = parseAcceptError(err); if (perr != nil) {
                             tΔ1.Error(perr);
                         }
                     }
@@ -281,7 +293,7 @@ public static void TestFileListener(ж<testing.T> Ꮡt) {
                 c.Close();
                 Ꮡwg.Wait();
                 if (!reflect.DeepEqual(ln2.Addr(), addr)) {
-                    tΔ1.Fatalf("got %#v; want %#v"u8, ln2.Addr(), addr);
+                    tΔ1.Fatalf("got %#v; want %#v", ln2.Addr(), addr);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -290,38 +302,42 @@ public static void TestFileListener(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static slice<fileConnTestsᴛ1> filePacketConnTests = new fileConnTestsᴛ1[]{
-    new("udp"u8),
-    new("unixgram"u8)
-}.slice();
+internal static slice<fileConnTestsᴛ1> filePacketConnTests = slice<fileConnTestsᴛ1>([
+    new("udp"),
+    new("unixgram")
+]);
 
-public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
+public static void TestFilePacketConn(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-        Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
+        t.Skipf("not supported on %s", Δruntime.GOOS);
+        break;
+    }}
 
     foreach (var (_, vᴛ1) in filePacketConnTests) {
         ref var tt = ref heap(new fileConnTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.network, (ж<testing.T> tΔ1) => {
+        t.Run(tt.network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableNetwork(ttʗ1.network)) {
-                    tΔ1.Skipf("skipping %s test"u8, ttʗ1.network);
+                    tΔ1.Skipf("skipping %s test", ttʗ1.network);
                 }
 
                 var c1 = newLocalPacketListener(new net_test_package.testing_TжTB(tΔ1), ttʗ1.network);
                 var exprᴛ2 = ttʗ1.network;
-                if (exprᴛ2 == "unixgram"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ2 == "unixgram"u8: {
                     defer(Δos.Remove, c1.LocalAddr().String(), ref ᒐ);
-                }
+                    break;
+                }}
                 var addr = c1.LocalAddr();
 
-                ж<Δos.File> f = default!;
-                error err = default!;
+                ж<Δos.File> f = default;
+                error err = default;
                 switch (c1.type()) {
                 case ж<global::go.net_package.UDPConn> c1Δ1: {
                     (f, err) = c1Δ1.of(global::go.net_package.UDPConn.Ꮡconn).File();
@@ -332,18 +348,18 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
                     break;
                 }}
                 {
-                    var errΔ1 = c1.Close(); if (errΔ1 != default!) {
+                    var errΔ1 = c1.Close(); if (errΔ1 != nil) {
                         {
-                            var perr = parseCloseError(errΔ1, false); if (perr != default!) {
+                            var perr = parseCloseError(errΔ1, false); if (perr != nil) {
                                 tΔ1.Error(perr);
                             }
                         }
                         tΔ1.Error(errΔ1);
                     }
                 }
-                if (err != default!) {
+                if (err != nil) {
                     {
-                        var perr = parseCommonError(err); if (perr != default!) {
+                        var perr = parseCommonError(err); if (perr != nil) {
                             tΔ1.Error(perr);
                         }
                     }
@@ -352,13 +368,13 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
 
                 (var c2, err) = FilePacketConn(f);
                 {
-                    var errΔ2 = f.Close(); if (errΔ2 != default!) {
+                    var errΔ2 = f.Close(); if (errΔ2 != nil) {
                         tΔ1.Error(errΔ2);
                     }
                 }
-                if (err != default!) {
+                if (err != nil) {
                     {
-                        var perr = parseCommonError(err); if (perr != default!) {
+                        var perr = parseCommonError(err); if (perr != nil) {
                             tΔ1.Error(perr);
                         }
                     }
@@ -368,9 +384,9 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
                 defer(() => c2ʗ1.Close(), ref ᒐ);
 
                 {
-                    var (_, errΔ3) = c2.WriteTo(slice<byte>("FILEPACKETCONN TEST"u8), addr); if (errΔ3 != default!) {
+                    var (_, errΔ3) = c2.WriteTo(slice<byte>("FILEPACKETCONN TEST"u8), addr); if (errΔ3 != nil) {
                         {
-                            var perr = parseWriteError(errΔ3); if (perr != default!) {
+                            var perr = parseWriteError(errΔ3); if (perr != nil) {
                                 tΔ1.Error(perr);
                             }
                         }
@@ -378,7 +394,7 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
                     }
                 }
                 if (!reflect.DeepEqual(c2.LocalAddr(), addr)) {
-                    tΔ1.Fatalf("got %#v; want %#v"u8, c2.LocalAddr(), addr);
+                    tΔ1.Fatalf("got %#v; want %#v", c2.LocalAddr(), addr);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -391,22 +407,24 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
 internal static readonly object tcpNotSupportedˢ = (@string)"tcp not supported"u8;
 
 // Issue 24483.
-public static partial void TestFileCloseRace(ж<testing.T> Ꮡt) {
+public static partial void TestFileCloseRace(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-            Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
-        }
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
+            t.Skipf("not supported on %s", Δruntime.GOOS);
+            break;
+        }}
         if (!testableNetwork(tcpˢ)) {
-            Ꮡt.Skip(tcpNotSupportedˢ);
+            t.Skip(tcpNotSupportedˢ);
         }
 
         var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener ln) => {
             GoFrame ᒐ = default;
             try {
                 var (c, err) = ln.Accept();
-                if (err != default!) {
+                if (err != nil) {
                     return;
                 }
                 var cʗ1 = c;
@@ -418,20 +436,20 @@ public static partial void TestFileCloseRace(ж<testing.T> Ꮡt) {
             finally { ᒐ.Run(); }
         };
 
-        var ls = newLocalServer(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+        var ls = newLocalServer(new net_test_package.testing_TжTB(t), tcpˢ);
         var lsʗ1 = ls;
         defer(() => lsʗ1.teardown(), ref ᒐ);
         {
-            var err = ls.buildup(handler); if (err != default!) {
-                Ꮡt.Fatal(err);
+            var err = ls.buildup(handler); if (err != nil) {
+                t.Fatal(err);
             }
         }
 
         const nint tries = 100;
         for (nint i = 0; i < tries; i++) {
-            var (c1, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            var (c1, err) = Dial(ls.Listener.Addr().Network(), ls.Listener.Addr().String());
+            if (err != nil) {
+                t.Fatal(err);
             }
             var tc = c1._<ж<global::go.net_package.TCPConn>>();
 
@@ -443,7 +461,7 @@ public static partial void TestFileCloseRace(ж<testing.T> Ꮡt) {
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
                     var (f, errΔ1) = tcʗ1.of(global::go.net_package.TCPConn.Ꮡconn).File();
-                    if (errΔ1 == default!) {
+                    if (errΔ1 == nil) {
                         f.Close();
                     }
                 }

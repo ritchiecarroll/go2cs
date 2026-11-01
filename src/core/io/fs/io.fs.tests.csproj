@@ -108,17 +108,27 @@
        shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
        can leak in because it is never listed. -->
   <ItemGroup>
+    <Compile Include="format.cs" />
     <Compile Include="format_test.cs" />
+    <Compile Include="fs.cs" />
     <Compile Include="fs_test.cs" />
+    <Compile Include="glob.cs" />
     <Compile Include="glob_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
+    <Compile Include="package_info_external_test.cs" />
     <Compile Include="package_init_external_test.cs" />
     <Compile Include="package_test_info.cs" />
+    <Compile Include="readdir.cs" />
     <Compile Include="readdir_test.cs" />
+    <Compile Include="readfile.cs" />
     <Compile Include="readfile_test.cs" />
+    <Compile Include="readlink.cs" />
     <Compile Include="readlink_test.cs" />
+    <Compile Include="stat.cs" />
     <Compile Include="stat_test.cs" />
+    <Compile Include="sub.cs" />
     <Compile Include="sub_test.cs" />
+    <Compile Include="walk.cs" />
     <Compile Include="walk_test.cs" />
   </ItemGroup>
 
@@ -149,6 +159,8 @@
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/bytealg/internal.bytealg.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/oserror/internal.oserror.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
@@ -158,7 +170,7 @@
     <ProjectReference Include="$(go2csPath)core/testing/fstest/testing.fstest.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
-    <ProjectReference Include="io.fs.csproj" />
+    <ProjectReference Include="$(go2csPath)core/unicode/utf8/unicode.utf8.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

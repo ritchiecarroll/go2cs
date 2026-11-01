@@ -49,44 +49,45 @@ internal static readonly ж<codeResponse> ᏑcodeStruct = new StaticBox<codeResp
 internal static ref codeResponse codeStruct => ref ((StaticBox<codeResponse>)ᏑcodeStruct).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string internalJsontestTestdataˢ = "internal/jsontest/testdata/golang_source.json.zst"u8;
+internal static ref readonly @string internalJsontestTestdataˢ => ref internalJsontestTestdataˢᵇ;
+private static readonly @string internalJsontestTestdataˢᵇ = "internal/jsontest/testdata/golang_source.json.zst"u8;
 
 internal static void codeInit() {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(internalJsontestTestdataˢ);
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         var gz = zstd.NewReader(new json_test_package.os_FileжReader(f));
         (var data, err) = io.ReadAll(new json_test_package.zstd_ReaderжReader(gz));
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
 
         codeJSON = data;
 
         {
-            var errΔ1 = Unmarshal(codeJSON, ᏑcodeStruct); if (errΔ1 != default!) {
+            var errΔ1 = Unmarshal(codeJSON, ᏑcodeStruct); if (errΔ1 != nil) {
                 throw panic("unmarshal code.json: " + errΔ1.Error());
             }
         }
 
         {
-            (data, err) = Marshal(ᏑcodeStruct); if (err != default!) {
+            (data, err) = Marshal(ᏑcodeStruct); if (err != nil) {
                 throw panic("marshal code.json: " + err.Error());
             }
         }
 
         if (!bytes.Equal(data, codeJSON)) {
-            println((@string)"different lengths"u8, len(data), len(codeJSON));
+            println((@string)"different lengths", len(data), len(codeJSON));
             for (nint i = 0; i < len(data) && i < len(codeJSON); i++) {
                 if (data[i] != codeJSON[i]) {
-                    println((@string)"re-marshal: changed at byte"u8, i);
-                    println((@string)"orig: "u8, (@string)(codeJSON.slice(i - 10, i + 10)));
-                    println((@string)"new: "u8, (@string)(data.slice(i - 10, i + 10)));
+                    println((@string)"re-marshal: changed at byte", i);
+                    println((@string)"orig: ", (@string)(codeJSON.slice(i - 10, i + 10)));
+                    println((@string)"new: ", (@string)(data.slice(i - 10, i + 10)));
                     break;
                 }
             }
@@ -101,7 +102,7 @@ public static void BenchmarkCodeEncoder(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    if (codeJSON == default!) {
+    if (codeJSON == nil) {
         b.StopTimer();
         codeInit();
         b.StartTimer();
@@ -110,8 +111,8 @@ public static void BenchmarkCodeEncoder(ж<testing.B> Ꮡb) {
         var enc = NewEncoder(io.Discard);
         while (pb.Next()) {
             {
-                var err = enc.Encode(ᏑcodeStruct); if (err != default!) {
-                    Ꮡb.Fatalf("Encode error: %v"u8, err);
+                var err = enc.Encode(ᏑcodeStruct); if (err != nil) {
+                    Ꮡb.Fatalf("Encode error: %v", err);
                 }
             }
         }
@@ -132,25 +133,24 @@ public static void BenchmarkCodeEncoderError(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    if (codeJSON == default!) {
+    if (codeJSON == nil) {
         b.StopTimer();
         codeInit();
         b.StartTimer();
     }
-    ref var dummy = ref heap<BenchmarkCodeEncoderError_Dummy>(out var Ꮡdummy);
-    dummy = new BenchmarkCodeEncoderError_Dummy(Name: "Dummy"u8);
+    ref var dummy = ref heap<BenchmarkCodeEncoderError_Dummy>(new BenchmarkCodeEncoderError_Dummy(Name: "Dummy"), out var Ꮡdummy);
     dummy.Next = Ꮡdummy;
 
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         var enc = NewEncoder(io.Discard);
         while (pb.Next()) {
             {
-                var err = enc.Encode(ᏑcodeStruct); if (err != default!) {
-                    Ꮡb.Fatalf("Encode error: %v"u8, err);
+                var err = enc.Encode(ᏑcodeStruct); if (err != nil) {
+                    Ꮡb.Fatalf("Encode error: %v", err);
                 }
             }
             {
-                var (_, err) = Marshal(Ꮡdummy.Value); if (err == default!) {
+                var (_, err) = Marshal(Ꮡdummy.Value); if (err == nil) {
                     Ꮡb.Fatal(marshalErrorGotNilWantˢ);
                 }
             }
@@ -163,7 +163,7 @@ public static void BenchmarkCodeMarshal(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    if (codeJSON == default!) {
+    if (codeJSON == nil) {
         b.StopTimer();
         codeInit();
         b.StartTimer();
@@ -171,8 +171,8 @@ public static void BenchmarkCodeMarshal(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             {
-                var (_, err) = Marshal(ᏑcodeStruct); if (err != default!) {
-                    Ꮡb.Fatalf("Marshal error: %v"u8, err);
+                var (_, err) = Marshal(ᏑcodeStruct); if (err != nil) {
+                    Ꮡb.Fatalf("Marshal error: %v", err);
                 }
             }
         }
@@ -190,24 +190,23 @@ public static void BenchmarkCodeMarshalError(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    if (codeJSON == default!) {
+    if (codeJSON == nil) {
         b.StopTimer();
         codeInit();
         b.StartTimer();
     }
-    ref var dummy = ref heap<BenchmarkCodeMarshalError_Dummy>(out var Ꮡdummy);
-    dummy = new BenchmarkCodeMarshalError_Dummy(Name: "Dummy"u8);
+    ref var dummy = ref heap<BenchmarkCodeMarshalError_Dummy>(new BenchmarkCodeMarshalError_Dummy(Name: "Dummy"), out var Ꮡdummy);
     dummy.Next = Ꮡdummy;
 
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             {
-                var (_, err) = Marshal(ᏑcodeStruct); if (err != default!) {
-                    Ꮡb.Fatalf("Marshal error: %v"u8, err);
+                var (_, err) = Marshal(ᏑcodeStruct); if (err != nil) {
+                    Ꮡb.Fatalf("Marshal error: %v", err);
                 }
             }
             {
-                var (_, err) = Marshal(Ꮡdummy.Value); if (err == default!) {
+                var (_, err) = Marshal(Ꮡdummy.Value); if (err == nil) {
                     Ꮡb.Fatal(marshalErrorGotNilWantˢ);
                 }
             }
@@ -231,8 +230,8 @@ internal static Action<ж<testing.B>> benchMarshalBytes(nint n) {
     return (ж<testing.B> b) => {
         for (nint i = 0; i < (~b).N; i++) {
             {
-                var (_, err) = Marshal(vʗ1.OrTypedNil()); if (err != default!) {
-                    b.Fatalf("Marshal error: %v"u8, err);
+                var (_, err) = Marshal(vʗ1.OrTypedNil()); if (err != nil) {
+                    b.Fatalf("Marshal error: %v", err);
                 }
             }
         }
@@ -256,20 +255,19 @@ internal static Action<ж<testing.B>> benchMarshalBytesError(nint n) {
     var v = Ꮡ(new benchMarshalBytesError_v(
         bytes.Repeat(sample, (n / len(sample)) + 1).slice(0, n)
     ));
-    ref var dummy = ref heap<benchMarshalBytesError_Dummy>(out var Ꮡdummy);
-    dummy = new benchMarshalBytesError_Dummy(Name: "Dummy"u8);
+    ref var dummy = ref heap<benchMarshalBytesError_Dummy>(new benchMarshalBytesError_Dummy(Name: "Dummy"), out var Ꮡdummy);
     dummy.Next = Ꮡdummy;
 
     var vʗ1 = v;
     return (ж<testing.B> b) => {
         for (nint i = 0; i < (~b).N; i++) {
             {
-                var (_, err) = Marshal(vʗ1.OrTypedNil()); if (err != default!) {
-                    b.Fatalf("Marshal error: %v"u8, err);
+                var (_, err) = Marshal(vʗ1.OrTypedNil()); if (err != nil) {
+                    b.Fatalf("Marshal error: %v", err);
                 }
             }
             {
-                var (_, err) = Marshal(Ꮡdummy.Value); if (err == default!) {
+                var (_, err) = Marshal(Ꮡdummy.Value); if (err == nil) {
                     b.Fatal(marshalErrorGotNilWantˢ);
                 }
             }
@@ -282,12 +280,12 @@ public static void BenchmarkMarshalBytes(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     // 32 fits within encodeState.scratch.
-    Ꮡb.Run("32"u8, benchMarshalBytes(32));
+    Ꮡb.Run("32", benchMarshalBytes(32));
     // 256 doesn't fit in encodeState.scratch, but is small enough to
     // allocate and avoid the slower base64.NewEncoder.
-    Ꮡb.Run("256"u8, benchMarshalBytes(256));
+    Ꮡb.Run("256", benchMarshalBytes(256));
     // 4096 is large enough that we want to avoid allocating for it.
-    Ꮡb.Run("4096"u8, benchMarshalBytes(4096));
+    Ꮡb.Run("4096", benchMarshalBytes(4096));
 }
 
 public static void BenchmarkMarshalBytesError(ж<testing.B> Ꮡb) {
@@ -295,12 +293,12 @@ public static void BenchmarkMarshalBytesError(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     // 32 fits within encodeState.scratch.
-    Ꮡb.Run("32"u8, benchMarshalBytesError(32));
+    Ꮡb.Run("32", benchMarshalBytesError(32));
     // 256 doesn't fit in encodeState.scratch, but is small enough to
     // allocate and avoid the slower base64.NewEncoder.
-    Ꮡb.Run("256"u8, benchMarshalBytesError(256));
+    Ꮡb.Run("256", benchMarshalBytesError(256));
     // 4096 is large enough that we want to avoid allocating for it.
-    Ꮡb.Run("4096"u8, benchMarshalBytesError(4096));
+    Ꮡb.Run("4096", benchMarshalBytesError(4096));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -311,15 +309,15 @@ public static void BenchmarkMarshalMap(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     var m = new map<@string, nint>{
-        ["key3"u8] = 3,
-        ["key2"u8] = 2,
-        ["key1"u8] = 1
+        ["key3"] = 3,
+        ["key2"] = 2,
+        ["key1"] = 1
     };
     var mʗ1 = m;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             {
-                var (_, err) = Marshal(mʗ1); if (err != default!) {
+                var (_, err) = Marshal(mʗ1); if (err != nil) {
                     Ꮡb.Fatal(marshalˢ, err);
                 }
             }
@@ -331,7 +329,7 @@ public static void BenchmarkCodeDecoder(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    if (codeJSON == default!) {
+    if (codeJSON == nil) {
         b.StopTimer();
         codeInit();
         b.StartTimer();
@@ -343,12 +341,12 @@ public static void BenchmarkCodeDecoder(ж<testing.B> Ꮡb) {
         while (pb.Next()) {
             buf.Write(codeJSON);
             // hide EOF
-            buf.WriteByte((rune)'\n');
-            buf.WriteByte((rune)'\n');
-            buf.WriteByte((rune)'\n');
+            buf.WriteByte((byte)'\n');
+            buf.WriteByte((byte)'\n');
+            buf.WriteByte((byte)'\n');
             {
-                var err = dec.Decode(Ꮡr); if (err != default!) {
-                    Ꮡb.Fatalf("Decode error: %v"u8, err);
+                var err = dec.Decode(Ꮡr); if (err != nil) {
+                    Ꮡb.Fatalf("Decode error: %v", err);
                 }
             }
         }
@@ -368,8 +366,8 @@ public static void BenchmarkUnicodeDecoder(ж<testing.B> Ꮡb) {
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         {
-            var err = dec.Decode(Ꮡout); if (err != default!) {
-                Ꮡb.Fatalf("Decode error: %v"u8, err);
+            var err = dec.Decode(Ꮡout); if (err != nil) {
+                Ꮡb.Fatalf("Decode error: %v", err);
             }
         }
         r.Seek(0, 0);
@@ -383,29 +381,29 @@ public static void BenchmarkDecoderStream(ж<testing.B> Ꮡb) {
     b.StopTimer();
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var dec = NewDecoder(new json_test_package.bytes_BufferжReader(Ꮡbuf));
-    buf.WriteString(@""""u8 + strings.Repeat("x"u8, 1000000) + @""""u8 + "\n\n\n"u8);
+    buf.WriteString(@""""u8 + strings.Repeat("x", 1000000) + @""""u8 + "\n\n\n"u8);
     ref var x = ref heap<any>(out var Ꮡx);
     {
-        var err = dec.Decode(Ꮡx); if (err != default!) {
-            Ꮡb.Fatalf("Decode error: %v"u8, err);
+        var err = dec.Decode(Ꮡx); if (err != nil) {
+            Ꮡb.Fatalf("Decode error: %v", err);
         }
     }
-    @string ones = strings.Repeat(" 1\n"u8, 300000) + "\n\n\n"u8;
+    @string ones = strings.Repeat(" 1\n", 300000) + "\n\n\n"u8;
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
         if (i % 300000 == 0) {
             buf.WriteString(ones);
         }
-        x = default!;
+        x = default;
         {
             var err = dec.Decode(Ꮡx);
             switch (ᐧ) {
-            case {} when err != default!: {
-                Ꮡb.Fatalf("Decode error: %v"u8, err);
+            case {} when err != nil: {
+                Ꮡb.Fatalf("Decode error: %v", err);
                 break;
             }
             case {} when x is not 1.0D: {
-                Ꮡb.Fatalf("Decode: got %v want 1.0"u8, i);
+                Ꮡb.Fatalf("Decode: got %v want 1.0", i);
                 break;
             }}
         }
@@ -416,7 +414,7 @@ public static void BenchmarkCodeUnmarshal(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    if (codeJSON == default!) {
+    if (codeJSON == nil) {
         b.StopTimer();
         codeInit();
         b.StartTimer();
@@ -425,8 +423,8 @@ public static void BenchmarkCodeUnmarshal(ж<testing.B> Ꮡb) {
         while (pb.Next()) {
             ref var r = ref heap(new codeResponse(), out var Ꮡr);
             {
-                var err = Unmarshal(codeJSON, Ꮡr); if (err != default!) {
-                    Ꮡb.Fatalf("Unmarshal error: %v"u8, err);
+                var err = Unmarshal(codeJSON, Ꮡr); if (err != nil) {
+                    Ꮡb.Fatalf("Unmarshal error: %v", err);
                 }
             }
         }
@@ -438,7 +436,7 @@ public static void BenchmarkCodeUnmarshalReuse(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    if (codeJSON == default!) {
+    if (codeJSON == nil) {
         b.StopTimer();
         codeInit();
         b.StartTimer();
@@ -447,8 +445,8 @@ public static void BenchmarkCodeUnmarshalReuse(ж<testing.B> Ꮡb) {
         ref var r = ref heap(new codeResponse(), out var Ꮡr);
         while (pb.Next()) {
             {
-                var err = Unmarshal(codeJSON, Ꮡr); if (err != default!) {
-                    Ꮡb.Fatalf("Unmarshal error: %v"u8, err);
+                var err = Unmarshal(codeJSON, Ꮡr); if (err != nil) {
+                    Ꮡb.Fatalf("Unmarshal error: %v", err);
                 }
             }
         }
@@ -466,8 +464,8 @@ public static void BenchmarkUnmarshalString(ж<testing.B> Ꮡb) {
         ref var s = ref heap(new @string(), out var Ꮡs);
         while (pb.Next()) {
             {
-                var err = Unmarshal(dataʗ1, Ꮡs); if (err != default!) {
-                    Ꮡb.Fatalf("Unmarshal error: %v"u8, err);
+                var err = Unmarshal(dataʗ1, Ꮡs); if (err != nil) {
+                    Ꮡb.Fatalf("Unmarshal error: %v", err);
                 }
             }
         }
@@ -484,8 +482,8 @@ public static void BenchmarkUnmarshalFloat64(ж<testing.B> Ꮡb) {
         ref var f = ref heap(new float64(), out var Ꮡf);
         while (pb.Next()) {
             {
-                var err = Unmarshal(dataʗ1, Ꮡf); if (err != default!) {
-                    Ꮡb.Fatalf("Unmarshal error: %v"u8, err);
+                var err = Unmarshal(dataʗ1, Ꮡf); if (err != nil) {
+                    Ꮡb.Fatalf("Unmarshal error: %v", err);
                 }
             }
         }
@@ -502,8 +500,8 @@ public static void BenchmarkUnmarshalInt64(ж<testing.B> Ꮡb) {
         ref var x = ref heap(new int64(), out var Ꮡx);
         while (pb.Next()) {
             {
-                var err = Unmarshal(dataʗ1, Ꮡx); if (err != default!) {
-                    Ꮡb.Fatalf("Unmarshal error: %v"u8, err);
+                var err = Unmarshal(dataʗ1, Ꮡx); if (err != nil) {
+                    Ꮡb.Fatalf("Unmarshal error: %v", err);
                 }
             }
         }
@@ -517,12 +515,11 @@ public static void BenchmarkUnmarshalMap(ж<testing.B> Ꮡb) {
     var data = slice<byte>(@"{""key1"":""value1"",""key2"":""value2"",""key3"":""value3""}"u8);
     var dataʗ1 = data;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
-        ref var x = ref heap<map<@string, @string>>(out var Ꮡx);
-        x = new map<@string, @string>(3);
+        ref var x = ref heap<map<@string, @string>>(new map<@string, @string>(3), out var Ꮡx);
         while (pb.Next()) {
             {
-                var err = Unmarshal(dataʗ1, Ꮡx); if (err != default!) {
-                    Ꮡb.Fatalf("Unmarshal error: %v"u8, err);
+                var err = Unmarshal(dataʗ1, Ꮡx); if (err != nil) {
+                    Ꮡb.Fatalf("Unmarshal error: %v", err);
                 }
             }
         }
@@ -539,8 +536,8 @@ public static void BenchmarkIssue10335(ж<testing.B> Ꮡb) {
         ref var s = ref heap(new EmptyStruct(), out var Ꮡs);
         while (pb.Next()) {
             {
-                var err = Unmarshal(jʗ1, Ꮡs); if (err != default!) {
-                    Ꮡb.Fatalf("Unmarshal error: %v"u8, err);
+                var err = Unmarshal(jʗ1, Ꮡs); if (err != nil) {
+                    Ꮡb.Fatalf("Unmarshal error: %v", err);
                 }
             }
         }
@@ -555,15 +552,14 @@ public static void BenchmarkIssue34127(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    ref var j = ref heap<BenchmarkIssue34127_j>(out var Ꮡj);
-    j = new BenchmarkIssue34127_j(
-        Bar: @"foobar"u8
-    );
+    ref var j = ref heap<BenchmarkIssue34127_j>(new BenchmarkIssue34127_j(
+        Bar: @"foobar"
+    ), out var Ꮡj);
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             {
-                var (_, err) = Marshal(Ꮡj); if (err != default!) {
-                    Ꮡb.Fatalf("Marshal error: %v"u8, err);
+                var (_, err) = Marshal(Ꮡj); if (err != nil) {
+                    Ꮡb.Fatalf("Marshal error: %v", err);
                 }
             }
         }
@@ -580,8 +576,8 @@ public static void BenchmarkUnmapped(ж<testing.B> Ꮡb) {
         ref var s = ref heap(new EmptyStruct(), out var Ꮡs);
         while (pb.Next()) {
             {
-                var err = Unmarshal(jʗ1, Ꮡs); if (err != default!) {
-                    Ꮡb.Fatalf("Unmarshal error: %v"u8, err);
+                var err = Unmarshal(jʗ1, Ꮡs); if (err != nil) {
+                    Ꮡb.Fatalf("Unmarshal error: %v", err);
                 }
             }
         }
@@ -599,11 +595,11 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
 
     // Dynamically generate many new types.
     var types = new slice<reflectꓸType>(maxTypes);
-    var fs = new reflect.StructField[]{new(
+    var fs = slice<reflect.StructField>([new(
         Type: reflect.TypeFor<@string>(),
-        Index: new nint[]{0}.slice()
+        Index: slice<nint>([0])
     )
-    }.slice();
+    ]);
     foreach (var i in range(types)) {
         fs[0].Name = fmt.Sprintf("TypeFieldsCache%d"u8, i);
         types[i] = reflect.StructOf(fs);
@@ -611,7 +607,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
 
     // clearClear clears the cache. Other JSON operations, must not be running.
     void clearCache() {
-        fieldCache = new sync.Map(nil);
+        fieldCache = new sync.Map();
     }
 
     // MissTypes tests the performance of repeated cache misses.
@@ -670,16 +666,15 @@ public static void BenchmarkEncodeMarshaler(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
 
-    ref var m = ref heap<BenchmarkEncodeMarshaler_m>(out var Ꮡm);
-    m = new BenchmarkEncodeMarshaler_m();
+    ref var m = ref heap<BenchmarkEncodeMarshaler_m>(new BenchmarkEncodeMarshaler_m(), out var Ꮡm);
 
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         var enc = NewEncoder(io.Discard);
 
         while (pb.Next()) {
             {
-                var err = enc.Encode(Ꮡm); if (err != default!) {
-                    Ꮡb.Fatalf("Encode error: %v"u8, err);
+                var err = enc.Encode(Ꮡm); if (err != nil) {
+                    Ꮡb.Fatalf("Encode error: %v", err);
                 }
             }
         }
@@ -694,13 +689,13 @@ public static void BenchmarkEncoderEncode(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    var v = Ꮡ(new BenchmarkEncoderEncode_T("foo"u8, "bar"u8));
+    var v = Ꮡ(new BenchmarkEncoderEncode_T("foo", "bar"));
     var vʗ1 = v;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             {
-                var err = NewEncoder(io.Discard).Encode(vʗ1.OrTypedNil()); if (err != default!) {
-                    Ꮡb.Fatalf("Encode error: %v"u8, err);
+                var err = NewEncoder(io.Discard).Encode(vʗ1.OrTypedNil()); if (err != nil) {
+                    Ꮡb.Fatalf("Encode error: %v", err);
                 }
             }
         }
@@ -710,20 +705,21 @@ public static void BenchmarkEncoderEncode(ж<testing.B> Ꮡb) {
 public static void BenchmarkNumberIsValid(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string s = "-61657.61667E+61673"u8;
+    @string s = "-61657.61667E+61673";
     for (nint i = 0; i < b.N; i++) {
         isValidNumber(s);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dDEEDˢ = @"^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$"u8;
+internal static ref readonly @string dDEEDˢ => ref dDEEDˢᵇ;
+private static readonly @string dDEEDˢᵇ = @"^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$"u8;
 
 public static void BenchmarkNumberIsValidRegexp(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ж<regexp.Regexp> jsonNumberRegexp = regexp.MustCompile(dDEEDˢ);
-    @string s = "-61657.61667E+61673"u8;
+    @string s = "-61657.61667E+61673";
     for (nint i = 0; i < b.N; i++) {
         jsonNumberRegexp.MatchString(s);
     }
@@ -740,7 +736,7 @@ public static void BenchmarkUnmarshalNumber(ж<testing.B> Ꮡb) {
     ref var number = ref heap(new global::go.encoding.json_package.Number(), out var Ꮡnumber);
     for (nint i = 0; i < b.N; i++) {
         {
-            var err = Unmarshal(data, Ꮡnumber); if (err != default!) {
+            var err = Unmarshal(data, Ꮡnumber); if (err != nil) {
                 Ꮡb.Fatal(unmarshalˢ, err);
             }
         }

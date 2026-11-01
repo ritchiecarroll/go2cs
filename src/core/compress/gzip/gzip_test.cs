@@ -14,121 +14,124 @@ using static go.compress.gzip_package;
 partial class gzip_internal_test_package {
 
 // TestEmpty tests that an empty payload still forms a valid GZIP stream.
-public static void TestEmpty(ж<testing.T> Ꮡt) {
+public static void TestEmpty(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
 
     {
-        var errΔ1 = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf)).Close(); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("Writer.Close: %v"u8, errΔ1);
+        var errΔ1 = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf)).Close(); if (errΔ1 != nil) {
+            t.Fatalf("Writer.Close: %v", errΔ1);
         }
     }
 
     var (r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(buf));
-    if (err != default!) {
-        Ꮡt.Fatalf("NewReader: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("NewReader: %v", err);
     }
     {
-        var want = (new Header(OS: 255)); if (!reflect.DeepEqual((~r).Header, want)) {
-            Ꮡt.Errorf("Header mismatch:\ngot  %#v\nwant %#v"u8, (~r).Header, want);
+        var want = (new Header(OS: 255)); if (!reflect.DeepEqual(r.Header, want)) {
+            t.Errorf("Header mismatch:\ngot  %#v\nwant %#v", r.Header, want);
         }
     }
     (var b, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(r));
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadAll: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("ReadAll: %v", err);
     }
     if (len(b) != 0) {
-        Ꮡt.Fatalf("got %d bytes, want 0"u8, len(b));
+        t.Fatalf("got %d bytes, want 0", len(b));
     }
     {
-        var errΔ2 = r.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("Reader.Close: %v"u8, errΔ2);
+        var errΔ2 = r.Close(); if (errΔ2 != nil) {
+            t.Fatalf("Reader.Close: %v", errΔ2);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string commentˢ = "comment"u8;
-internal static readonly @string nameˢ = "name"u8;
+internal static ref readonly @string commentˢ => ref commentˢᵇ;
+private static readonly @string commentˢᵇ = "comment"u8;
+internal static ref readonly @string nameˢ => ref nameˢᵇ;
+private static readonly @string nameˢᵇ = "name"u8;
 internal static readonly object payloadˢ = (@string)"payload"u8;
 internal static readonly object extraˢ = (@string)"extra"u8;
 
 // TestRoundTrip tests that gzipping and then gunzipping is the identity
 // function.
-public static void TestRoundTrip(ж<testing.T> Ꮡt) {
+public static void TestRoundTrip(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
 
     var w = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf));
-    w.Value.Comment = commentˢ;
-    w.Value.Extra = slice<byte>("extra"u8);
-    w.Value.ModTime = time.Unix(100000000, 0);
-    w.Value.Name = nameˢ;
+    w.Comment = commentˢ;
+    w.Extra = slice<byte>("extra"u8);
+    w.ModTime = time.Unix(100000000, 0);
+    w.Name = nameˢ;
     {
-        var (_, errΔ1) = w.Write(slice<byte>("payload"u8)); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("Write: %v"u8, errΔ1);
+        var (_, errΔ1) = w.Write(slice<byte>("payload"u8)); if (errΔ1 != nil) {
+            t.Fatalf("Write: %v", errΔ1);
         }
     }
     {
-        var errΔ2 = w.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("Writer.Close: %v"u8, errΔ2);
+        var errΔ2 = w.Close(); if (errΔ2 != nil) {
+            t.Fatalf("Writer.Close: %v", errΔ2);
         }
     }
 
     var (r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(buf));
-    if (err != default!) {
-        Ꮡt.Fatalf("NewReader: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("NewReader: %v", err);
     }
     (var b, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(r));
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadAll: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("ReadAll: %v", err);
     }
     if (((sstring)b) != "payload"u8) {
-        Ꮡt.Fatalf("payload is %q, want %q"u8, (@string)b, payloadˢ);
+        t.Fatalf("payload is %q, want %q", (@string)b, payloadˢ);
     }
-    if ((~r).Comment != "comment"u8) {
-        Ꮡt.Fatalf("comment is %q, want %q"u8, (~r).Comment, commentˢ);
+    if (r.Comment != "comment"u8) {
+        t.Fatalf("comment is %q, want %q", r.Comment, commentˢ);
     }
-    if (((sstring)(~r).Extra) != "extra"u8) {
-        Ꮡt.Fatalf("extra is %q, want %q"u8, (~r).Extra, extraˢ);
+    if (((sstring)r.Extra) != "extra"u8) {
+        t.Fatalf("extra is %q, want %q", r.Extra, extraˢ);
     }
-    if ((~r).ModTime.Unix() != 100000000) {
-        Ꮡt.Fatalf("mtime is %d, want %d"u8, (~r).ModTime.Unix(), (uint32)100000000);
+    if (r.ModTime.Unix() != 100000000) {
+        t.Fatalf("mtime is %d, want %d", r.ModTime.Unix(), (uint32)100000000);
     }
-    if ((~r).Name != "name"u8) {
-        Ꮡt.Fatalf("name is %q, want %q"u8, (~r).Name, nameˢ);
+    if (r.Name != "name"u8) {
+        t.Fatalf("name is %q, want %q", r.Name, nameˢ);
     }
     {
-        var errΔ3 = r.Close(); if (errΔ3 != default!) {
-            Ꮡt.Fatalf("Reader.Close: %v"u8, errΔ3);
+        var errΔ3 = r.Close(); if (errΔ3 != nil) {
+            t.Fatalf("Reader.Close: %v", errΔ3);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string uErungˢ = "Äußerung"u8;
+internal static ref readonly @string uErungˢ => ref uErungˢᵇ;
+private static readonly @string uErungˢᵇ = "Äußerung"u8;
 
 // TestLatin1 tests the internal functions for converting to and from Latin-1.
-public static void TestLatin1(ж<testing.T> Ꮡt) {
-    var latin1 = new byte[]{0xc4, (rune)'u', 0xdf, (rune)'e', (rune)'r', (rune)'u', (rune)'n', (rune)'g', 0}.slice();
+public static void TestLatin1(ж<testing.T> t) {
+    var latin1 = slice<byte>([0xc4, (byte)'u', 0xdf, (byte)'e', (byte)'r', (byte)'u', (byte)'n', (byte)'g', 0]);
     @string utf8 = uErungˢ;
     var z = new Reader(r: new gzip_test_package.bufio_ReaderжReader(bufio.NewReader(new gzip_test_package.bytes_ReaderжReader(bytes.NewReader(latin1)))));
     var (s, err) = z.readString();
-    if (err != default!) {
-        Ꮡt.Fatalf("readString: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("readString: %v", err);
     }
     if (s != utf8) {
-        Ꮡt.Fatalf("read latin-1: got %q, want %q"u8, s, utf8);
+        t.Fatalf("read latin-1: got %q, want %q", s, utf8);
     }
 
     var buf = bytes.NewBuffer(new slice<byte>(0, len(latin1)));
     var c = new Writer(w: new gzip_test_package.bytes_BufferжWriter(buf));
     {
-        err = c.writeString(utf8); if (err != default!) {
-            Ꮡt.Fatalf("writeString: %v"u8, err);
+        err = c.writeString(utf8); if (err != nil) {
+            t.Fatalf("writeString: %v", err);
         }
     }
     s = buf.String();
     if (s != ((sstring)latin1)) {
-        Ꮡt.Fatalf("write utf-8: got %q, want %q"u8, s, (@string)latin1);
+        t.Fatalf("write utf-8: got %q, want %q", s, (@string)latin1);
     }
 }
 
@@ -139,27 +142,27 @@ internal partial struct TestLatin1RoundTrip_testCases /*dyn*/ {
 
 // TestLatin1RoundTrip tests that metadata that is representable in Latin-1
 // survives a round trip.
-public static void TestLatin1RoundTrip(ж<testing.T> Ꮡt) {
-    var testCases = new TestLatin1RoundTrip_testCases[]{
-        new(""u8, true),
-        new("ASCII is OK"u8, true),
-        new("unless it contains a NUL\x00"u8, false),
-        new("no matter where \x00 occurs"u8, false),
-        new("\x00\x00\x00"u8, false),
-        new("Látin-1 also passes (U+00E1)"u8, true),
-        new("but LĀtin Extended-A (U+0100) does not"u8, false),
-        new("neither does 日本語"u8, false),
+public static void TestLatin1RoundTrip(ж<testing.T> t) {
+    var testCases = slice<TestLatin1RoundTrip_testCases>([
+        new("", true),
+        new("ASCII is OK", true),
+        new("unless it contains a NUL\x00", false),
+        new("no matter where \x00 occurs", false),
+        new("\x00\x00\x00", false),
+        new("Látin-1 also passes (U+00E1)", true),
+        new("but LĀtin Extended-A (U+0100) does not", false),
+        new("neither does 日本語", false),
         new(((@string)(new byte[]{0x69, 0x6e, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x20, 0x55, 0x54, 0x46, 0x2d, 0x38, 0x20, 0x61, 0x6c, 0x73, 0x6f, 0x20, 0xff, 0x61, 0x69, 0x6c, 0x73})), false),
-        new("\x00 as does Látin-1 with NUL"u8, false)
-    }.slice();
+        new("\x00 as does Látin-1 with NUL", false)
+    ]);
     foreach (var (_, tc) in testCases) {
         var buf = @new<bytes.Buffer>();
 
         var w = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf));
-        w.Value.Name = tc.name;
+        w.Name = tc.name;
         var err = w.Close();
-        if ((err == default!) != tc.ok) {
-            Ꮡt.Errorf("Writer.Close: name = %q, err = %v"u8, tc.name, err);
+        if ((err == nil) != tc.ok) {
+            t.Errorf("Writer.Close: name = %q, err = %v", tc.name, err);
             continue;
         }
         if (!tc.ok) {
@@ -167,22 +170,22 @@ public static void TestLatin1RoundTrip(ж<testing.T> Ꮡt) {
         }
 
         (var r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(buf));
-        if (err != default!) {
-            Ꮡt.Errorf("NewReader: %v"u8, err);
+        if (err != nil) {
+            t.Errorf("NewReader: %v", err);
             continue;
         }
         (_, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(r));
-        if (err != default!) {
-            Ꮡt.Errorf("ReadAll: %v"u8, err);
+        if (err != nil) {
+            t.Errorf("ReadAll: %v", err);
             continue;
         }
-        if ((~r).Name != tc.name) {
-            Ꮡt.Errorf("name is %q, want %q"u8, (~r).Name, tc.name);
+        if (r.Name != tc.name) {
+            t.Errorf("name is %q, want %q", r.Name, tc.name);
             continue;
         }
         {
-            var errΔ1 = r.Close(); if (errΔ1 != default!) {
-                Ꮡt.Errorf("Reader.Close: %v"u8, errΔ1);
+            var errΔ1 = r.Close(); if (errΔ1 != nil) {
+                t.Errorf("Reader.Close: %v", errΔ1);
                 continue;
             }
         }
@@ -193,52 +196,52 @@ public static void TestLatin1RoundTrip(ж<testing.T> Ꮡt) {
 internal static readonly object noDataAfterFirstFlushˢ = (@string)"no data after first flush"u8;
 internal static readonly object flushDidnTFlushAnyDataˢ = (@string)"Flush didn't flush any data"u8;
 
-public static void TestWriterFlush(ж<testing.T> Ꮡt) {
+public static void TestWriterFlush(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
 
     var w = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf));
-    w.Value.Comment = commentˢ;
-    w.Value.Extra = slice<byte>("extra"u8);
-    w.Value.ModTime = time.Unix(100000000, 0);
-    w.Value.Name = nameˢ;
+    w.Comment = commentˢ;
+    w.Extra = slice<byte>("extra"u8);
+    w.ModTime = time.Unix(100000000, 0);
+    w.Name = nameˢ;
 
     nint n0 = buf.Len();
     if (n0 != 0) {
-        Ꮡt.Fatalf("buffer size = %d before writes; want 0"u8, n0);
+        t.Fatalf("buffer size = %d before writes; want 0", n0);
     }
 
     {
-        var err = w.Flush(); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = w.Flush(); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
     nint n1 = buf.Len();
     if (n1 == 0) {
-        Ꮡt.Fatal(noDataAfterFirstFlushˢ);
+        t.Fatal(noDataAfterFirstFlushˢ);
     }
 
     w.Write(slice<byte>("x"u8));
 
     nint n2 = buf.Len();
     if (n1 != n2) {
-        Ꮡt.Fatalf("after writing a single byte, size changed from %d to %d; want no change"u8, n1, n2);
+        t.Fatalf("after writing a single byte, size changed from %d to %d; want no change", n1, n2);
     }
 
     {
-        var err = w.Flush(); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = w.Flush(); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
     nint n3 = buf.Len();
     if (n2 == n3) {
-        Ꮡt.Fatal(flushDidnTFlushAnyDataˢ);
+        t.Fatal(flushDidnTFlushAnyDataˢ);
     }
 
     {
-        var err = w.Close(); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = w.Close(); if (err != nil) {
+            t.Fatal(err);
         }
     }
 }
@@ -247,7 +250,7 @@ public static void TestWriterFlush(ж<testing.T> Ꮡt) {
 internal static readonly object helloWorldˢ = (@string)"hello world"u8;
 
 // Multiple gzip files concatenated form a valid gzip file.
-public static void TestConcat(ж<testing.T> Ꮡt) {
+public static void TestConcat(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var w = NewWriter(new gzip_test_package.bytes_BufferжWriter(Ꮡbuf));
     w.Write(slice<byte>("hello "u8));
@@ -257,16 +260,16 @@ public static void TestConcat(ж<testing.T> Ꮡt) {
     w.Close();
 
     var (r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(Ꮡbuf));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var data, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(r));
-    if (((sstring)data) != "hello world\n"u8 || err != default!) {
-        Ꮡt.Fatalf("ReadAll = %q, %v, want %q, nil"u8, data, err, helloWorldˢ);
+    if (((sstring)data) != "hello world\n"u8 || err != nil) {
+        t.Fatalf("ReadAll = %q, %v, want %q, nil", data, err, helloWorldˢ);
     }
 }
 
-public static void TestWriterReset(ж<testing.T> Ꮡt) {
+public static void TestWriterReset(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
     var buf2 = @new<bytes.Buffer>();
     var z = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf));
@@ -277,7 +280,7 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
     z.Write(msg);
     z.Close();
     if (buf.String() != buf2.String()) {
-        Ꮡt.Errorf("buf2 %q != original buf of %q"u8, buf2.String(), buf.String());
+        t.Errorf("buf2 %q != original buf of %q", buf2.String(), buf.String());
     }
 }
 
@@ -293,11 +296,11 @@ internal static (nint n, error err) Write(this ref limitedWriter l, slice<byte> 
         }
     }
     l.N -= len(p);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 // Write should never return more bytes than the input slice.
-public static void TestLimitedWrite(ж<testing.T> Ꮡt) {
+public static void TestLimitedWrite(ж<testing.T> t) {
     var msg = slice<byte>("a"u8);
 
     for (nint limᴛ1 = 2; limᴛ1 < 20; limᴛ1++) {
@@ -306,21 +309,21 @@ public static void TestLimitedWrite(ж<testing.T> Ꮡt) {
         var z = NewWriter(new gzip_internal_test_package.limitedWriterжWriter(Ꮡ(new limitedWriter(lim))));
         {
             var (n, _) = z.Write(msg); if (n > len(msg)) {
-                Ꮡt.Errorf("Write() = %d, want %d or less"u8, n, len(msg));
+                t.Errorf("Write() = %d, want %d or less", n, len(msg));
             }
         }
 
         z.Reset(new gzip_internal_test_package.limitedWriterжWriter(Ꮡ(new limitedWriter(lim))));
-        z.Value.Header = new Header(
-            Comment: "comment"u8,
+        z.Header = new Header(
+            Comment: "comment",
             Extra: slice<byte>("extra"u8),
             ModTime: time.Now(),
-            Name: "name"u8,
+            Name: "name",
             OS: 1
         );
         {
             var (n, _) = z.Write(msg); if (n > len(msg)) {
-                Ꮡt.Errorf("Write() = %d, want %d or less"u8, n, len(msg));
+                t.Errorf("Write() = %d, want %d or less", n, len(msg));
             }
         }
         limᴛ1 = lim;

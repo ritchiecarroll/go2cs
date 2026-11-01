@@ -16,7 +16,8 @@ using static global::go.go.doc_package;
 partial class doc_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testGoˢ2 = "test.go"u8;
+internal static ref readonly @string testGoˢ2 => ref testGoˢ2ᵇ;
+private static readonly @string testGoˢ2ᵇ = "test.go"u8;
 
 internal partial struct TestImportGroupStarts_type /*dyn*/ {
     internal @string name;
@@ -24,10 +25,10 @@ internal partial struct TestImportGroupStarts_type /*dyn*/ {
     internal slice<@string> want; // paths of group-starting imports
 }
 
-public static void TestImportGroupStarts(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestImportGroupStarts_type[]{
+public static void TestImportGroupStarts(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestImportGroupStarts_type>([
         new(
-            name: "one group"u8,
+            name: "one group",
             @in: """
 package p
 import (
@@ -38,10 +39,10 @@ import (
 )
 
 """u8.Raw(),
-            want: new @string[]{"a"u8}.slice()
+            want: slice<@string>(["a"])
         ),
         new(
-            name: "several groups"u8,
+            name: "several groups",
             @in: """
 package p
 import (
@@ -54,10 +55,10 @@ import (
 )
 
 """u8.Raw(),
-            want: new @string[]{"a"u8, "b"u8, "d"u8}.slice()
+            want: slice<@string>(["a", "b", "d"])
         ),
         new(
-            name: "extra space"u8,
+            name: "extra space",
             @in: """
 package p
 import (
@@ -72,10 +73,10 @@ import (
 )
 
 """u8.Raw(),
-            want: new @string[]{"a"u8, "b"u8, "d"u8}.slice()
+            want: slice<@string>(["a", "b", "d"])
         ),
         new(
-            name: "line comment"u8,
+            name: "line comment",
             @in: """
 package p
 import (
@@ -85,10 +86,10 @@ import (
 	"c"
 )
 """u8.Raw(),
-            want: new @string[]{"a"u8, "c"u8}.slice()
+            want: slice<@string>(["a", "c"])
         ),
         new(
-            name: "named import"u8,
+            name: "named import",
             @in: """
 package p
 import (
@@ -99,10 +100,10 @@ import (
 	"d"
 )
 """u8.Raw(),
-            want: new @string[]{"a"u8, "c"u8}.slice()
+            want: slice<@string>(["a", "c"])
         ),
         new(
-            name: "blank import"u8,
+            name: "blank import",
             @in: """
 package p
 import (
@@ -114,29 +115,29 @@ import (
 	"d"
 )
 """u8.Raw(),
-            want: new @string[]{"a"u8, "b"u8, "c"u8}.slice()
+            want: slice<@string>(["a", "b", "c"])
         )
-    }.slice()) {
+    ])) {
         ref var test = ref heap(new TestImportGroupStarts_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             var fset = token.NewFileSet();
             var (@file, err) = parser.ParseFile(fset, testGoˢ2, strings.NewReader(testʗ1.@in).OrTypedNil(), parser.ParseComments);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
-            var imps = findImportGroupStarts1((~@file).Imports);
+            var imps = findImportGroupStarts1(@file.Imports);
             var got = new slice<@string>(len(imps));
             foreach (var (i, imp) in imps) {
-                (got[i], err) = strconv.Unquote((~(~imp).Path).Value);
-                if (err != default!) {
+                (got[i], err) = strconv.Unquote((~imp.Path).Value);
+                if (err != nil) {
                     tΔ1.Fatal(err);
                 }
             }
             if (!reflect.DeepEqual(got, testʗ1.want)) {
-                tΔ1.Errorf("got %v, want %v"u8, got, testʗ1.want);
+                tΔ1.Errorf("got %v, want %v", got, testʗ1.want);
             }
         });
     }

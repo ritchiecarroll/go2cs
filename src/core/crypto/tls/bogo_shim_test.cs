@@ -42,84 +42,85 @@ using vendor.golang.org.x.crypto;
 
 partial class tls_internal_test_package {
 
-internal static readonly @string boringsslModVer = "v0.0.0-20250620172916-f51d8b099832"u8;
+internal static ref readonly @string boringsslModVer => ref boringsslModVerᵇ;
+private static readonly @string boringsslModVerᵇ = "v0.0.0-20250620172916-f51d8b099832"u8;
 
-internal static ж<@string> port = flag.String("port"u8, ""u8, ""u8);
-internal static ж<bool> server = flag.Bool("server"u8, false, ""u8);
+internal static ж<@string> port = flag.String("port", "", "");
+internal static ж<bool> server = flag.Bool("server", false, "");
 
-internal static ж<bool> isHandshakerSupported = flag.Bool("is-handshaker-supported"u8, false, ""u8);
+internal static ж<bool> isHandshakerSupported = flag.Bool("is-handshaker-supported", false, "");
 
-internal static ж<@string> keyfile = flag.String("key-file"u8, ""u8, ""u8);
-internal static ж<@string> certfile = flag.String("cert-file"u8, ""u8, ""u8);
-internal static ж<base64Flag> ocspResponse = flagBase64("ocsp-response"u8, ""u8);
-internal static ж<intSlice> signingPrefs = flagIntSlice("signing-prefs"u8, ""u8);
+internal static ж<@string> keyfile = flag.String("key-file", "", "");
+internal static ж<@string> certfile = flag.String("cert-file", "", "");
+internal static ж<base64Flag> ocspResponse = flagBase64("ocsp-response", "");
+internal static ж<intSlice> signingPrefs = flagIntSlice("signing-prefs", "");
 
-internal static ж<@string> trustCert = flag.String("trust-cert"u8, ""u8, ""u8);
+internal static ж<@string> trustCert = flag.String("trust-cert", "", "");
 
-internal static ж<nint> minVersion = flag.Int("min-version"u8, VersionSSL30, ""u8);
-internal static ж<nint> maxVersion = flag.Int("max-version"u8, VersionTLS13, ""u8);
-internal static ж<nint> expectVersion = flag.Int("expect-version"u8, 0, ""u8);
+internal static ж<nint> minVersion = flag.Int("min-version", VersionSSL30, "");
+internal static ж<nint> maxVersion = flag.Int("max-version", VersionTLS13, "");
+internal static ж<nint> expectVersion = flag.Int("expect-version", 0, "");
 
-internal static ж<bool> noTLS1 = flag.Bool("no-tls1"u8, false, ""u8);
-internal static ж<bool> noTLS11 = flag.Bool("no-tls11"u8, false, ""u8);
-internal static ж<bool> noTLS12 = flag.Bool("no-tls12"u8, false, ""u8);
-internal static ж<bool> noTLS13 = flag.Bool("no-tls13"u8, false, ""u8);
+internal static ж<bool> noTLS1 = flag.Bool("no-tls1", false, "");
+internal static ж<bool> noTLS11 = flag.Bool("no-tls11", false, "");
+internal static ж<bool> noTLS12 = flag.Bool("no-tls12", false, "");
+internal static ж<bool> noTLS13 = flag.Bool("no-tls13", false, "");
 
-internal static ж<bool> requireAnyClientCertificate = flag.Bool("require-any-client-certificate"u8, false, ""u8);
+internal static ж<bool> requireAnyClientCertificate = flag.Bool("require-any-client-certificate", false, "");
 
-internal static ж<bool> shimWritesFirst = flag.Bool("shim-writes-first"u8, false, ""u8);
+internal static ж<bool> shimWritesFirst = flag.Bool("shim-writes-first", false, "");
 
-internal static ж<nint> resumeCount = flag.Int("resume-count"u8, 0, ""u8);
+internal static ж<nint> resumeCount = flag.Int("resume-count", 0, "");
 
-internal static ж<intSlice> curves = flagIntSlice("curves"u8, ""u8);
-internal static ж<@string> expectedCurve = flag.String("expect-curve-id"u8, ""u8, ""u8);
+internal static ж<intSlice> curves = flagIntSlice("curves", "");
+internal static ж<@string> expectedCurve = flag.String("expect-curve-id", "", "");
 
-internal static ж<intSlice> verifyPrefs = flagIntSlice("verify-prefs"u8, ""u8);
-internal static ж<@string> expectedSigAlg = flag.String("expect-peer-signature-algorithm"u8, ""u8, ""u8);
-internal static ж<intSlice> expectedPeerSigAlg = flagIntSlice("expect-peer-verify-pref"u8, ""u8);
+internal static ж<intSlice> verifyPrefs = flagIntSlice("verify-prefs", "");
+internal static ж<@string> expectedSigAlg = flag.String("expect-peer-signature-algorithm", "", "");
+internal static ж<intSlice> expectedPeerSigAlg = flagIntSlice("expect-peer-verify-pref", "");
 
-internal static ж<uint64> shimID = flag.Uint64("shim-id"u8, 0, ""u8);
-internal static ж<bool> _ᴛ1ʗ = flag.Bool("ipv6"u8, false, ""u8);
+internal static ж<uint64> shimID = flag.Uint64("shim-id", 0, "");
+internal static ж<bool> _ᴛ1ʗ = flag.Bool("ipv6", false, "");
 
-internal static ж<base64Flag> echConfigList = flagBase64("ech-config-list"u8, ""u8);
-internal static ж<bool> expectECHAccepted = flag.Bool("expect-ech-accept"u8, false, ""u8);
-internal static ж<bool> expectHRR = flag.Bool("expect-hrr"u8, false, ""u8);
-internal static ж<bool> expectNoHRR = flag.Bool("expect-no-hrr"u8, false, ""u8);
-internal static ж<@string> expectedECHRetryConfigs = flag.String("expect-ech-retry-configs"u8, ""u8, ""u8);
-internal static ж<bool> expectNoECHRetryConfigs = flag.Bool("expect-no-ech-retry-configs"u8, false, ""u8);
-internal static ж<bool> onInitialExpectECHAccepted = flag.Bool("on-initial-expect-ech-accept"u8, false, ""u8);
-internal static ж<bool> _ᴛ2ʗ = flag.Bool("expect-no-ech-name-override"u8, false, ""u8);
-internal static ж<@string> _ᴛ3ʗ = flag.String("expect-ech-name-override"u8, ""u8, ""u8);
-internal static ж<bool> _ᴛ4ʗ = flag.Bool("reverify-on-resume"u8, false, ""u8);
-internal static ж<base64Flag> onResumeECHConfigList = flagBase64("on-resume-ech-config-list"u8, ""u8);
-internal static ж<bool> _ᴛ5ʗ = flag.Bool("on-resume-expect-reject-early-data"u8, false, ""u8);
-internal static ж<bool> onResumeExpectECHAccepted = flag.Bool("on-resume-expect-ech-accept"u8, false, ""u8);
-internal static ж<bool> _ᴛ6ʗ = flag.Bool("on-resume-expect-no-ech-name-override"u8, false, ""u8);
-internal static ж<@string> expectedServerName = flag.String("expect-server-name"u8, ""u8, ""u8);
-internal static ж<stringSlice> echServerConfig = flagStringSlice("ech-server-config"u8, ""u8);
-internal static ж<stringSlice> echServerKey = flagStringSlice("ech-server-key"u8, ""u8);
-internal static ж<stringSlice> echServerRetryConfig = flagStringSlice("ech-is-retry-config"u8, ""u8);
+internal static ж<base64Flag> echConfigList = flagBase64("ech-config-list", "");
+internal static ж<bool> expectECHAccepted = flag.Bool("expect-ech-accept", false, "");
+internal static ж<bool> expectHRR = flag.Bool("expect-hrr", false, "");
+internal static ж<bool> expectNoHRR = flag.Bool("expect-no-hrr", false, "");
+internal static ж<@string> expectedECHRetryConfigs = flag.String("expect-ech-retry-configs", "", "");
+internal static ж<bool> expectNoECHRetryConfigs = flag.Bool("expect-no-ech-retry-configs", false, "");
+internal static ж<bool> onInitialExpectECHAccepted = flag.Bool("on-initial-expect-ech-accept", false, "");
+internal static ж<bool> _ᴛ2ʗ = flag.Bool("expect-no-ech-name-override", false, "");
+internal static ж<@string> _ᴛ3ʗ = flag.String("expect-ech-name-override", "", "");
+internal static ж<bool> _ᴛ4ʗ = flag.Bool("reverify-on-resume", false, "");
+internal static ж<base64Flag> onResumeECHConfigList = flagBase64("on-resume-ech-config-list", "");
+internal static ж<bool> _ᴛ5ʗ = flag.Bool("on-resume-expect-reject-early-data", false, "");
+internal static ж<bool> onResumeExpectECHAccepted = flag.Bool("on-resume-expect-ech-accept", false, "");
+internal static ж<bool> _ᴛ6ʗ = flag.Bool("on-resume-expect-no-ech-name-override", false, "");
+internal static ж<@string> expectedServerName = flag.String("expect-server-name", "", "");
+internal static ж<stringSlice> echServerConfig = flagStringSlice("ech-server-config", "");
+internal static ж<stringSlice> echServerKey = flagStringSlice("ech-server-key", "");
+internal static ж<stringSlice> echServerRetryConfig = flagStringSlice("ech-is-retry-config", "");
 
-internal static ж<bool> expectSessionMiss = flag.Bool("expect-session-miss"u8, false, ""u8);
+internal static ж<bool> expectSessionMiss = flag.Bool("expect-session-miss", false, "");
 
-internal static ж<bool> _ᴛ7ʗ = flag.Bool("enable-early-data"u8, false, ""u8);
-internal static ж<bool> _ᴛ8ʗ = flag.Bool("on-resume-expect-accept-early-data"u8, false, ""u8);
-internal static ж<bool> _ᴛ9ʗ = flag.Bool("expect-ticket-supports-early-data"u8, false, ""u8);
-internal static ж<bool> _ᴛ10ʗ = flag.Bool("on-resume-shim-writes-first"u8, false, ""u8);
+internal static ж<bool> _ᴛ7ʗ = flag.Bool("enable-early-data", false, "");
+internal static ж<bool> _ᴛ8ʗ = flag.Bool("on-resume-expect-accept-early-data", false, "");
+internal static ж<bool> _ᴛ9ʗ = flag.Bool("expect-ticket-supports-early-data", false, "");
+internal static ж<bool> _ᴛ10ʗ = flag.Bool("on-resume-shim-writes-first", false, "");
 
-internal static ж<@string> advertiseALPN = flag.String("advertise-alpn"u8, ""u8, ""u8);
-internal static ж<@string> expectALPN = flag.String("expect-alpn"u8, ""u8, ""u8);
-internal static ж<bool> rejectALPN = flag.Bool("reject-alpn"u8, false, ""u8);
-internal static ж<bool> declineALPN = flag.Bool("decline-alpn"u8, false, ""u8);
-internal static ж<@string> expectAdvertisedALPN = flag.String("expect-advertised-alpn"u8, ""u8, ""u8);
-internal static ж<@string> selectALPN = flag.String("select-alpn"u8, ""u8, ""u8);
+internal static ж<@string> advertiseALPN = flag.String("advertise-alpn", "", "");
+internal static ж<@string> expectALPN = flag.String("expect-alpn", "", "");
+internal static ж<bool> rejectALPN = flag.Bool("reject-alpn", false, "");
+internal static ж<bool> declineALPN = flag.Bool("decline-alpn", false, "");
+internal static ж<@string> expectAdvertisedALPN = flag.String("expect-advertised-alpn", "", "");
+internal static ж<@string> selectALPN = flag.String("select-alpn", "", "");
 
-internal static ж<@string> hostName = flag.String("host-name"u8, ""u8, ""u8);
+internal static ж<@string> hostName = flag.String("host-name", "", "");
 
-internal static ж<bool> verifyPeer = flag.Bool("verify-peer"u8, false, ""u8);
-internal static ж<bool> _ᴛ11ʗ = flag.Bool("use-custom-verify-callback"u8, false, ""u8);
+internal static ж<bool> verifyPeer = flag.Bool("verify-peer", false, "");
+internal static ж<bool> _ᴛ11ʗ = flag.Bool("use-custom-verify-callback", false, "");
 
-internal static ж<bool> waitForDebugger = flag.Bool("wait-for-debugger"u8, false, ""u8);
+internal static ж<bool> waitForDebugger = flag.Bool("wait-for-debugger", false, "");
 
 internal partial struct stringSlice /*[]@string*/;
 
@@ -130,12 +131,12 @@ internal static ж<stringSlice> flagStringSlice(@string name, @string usage) {
 }
 
 internal static @string String(this ref stringSlice saf) {
-    return strings.Join(saf, ","u8);
+    return strings.Join(saf, ",");
 }
 
 internal static error Set(this ref stringSlice saf, @string s) {
     saf = append(saf, s);
-    return default!;
+    return default;
 }
 
 internal partial struct intSlice /*[]int64*/;
@@ -147,16 +148,16 @@ internal static ж<intSlice> flagIntSlice(@string name, @string usage) {
 }
 
 internal static @string String(this ref intSlice sf) {
-    return strings.Join(strings.Split(fmt.Sprint(sf), " "u8), ","u8);
+    return strings.Join(strings.Split(fmt.Sprint(sf), " "), ",");
 }
 
 internal static error Set(this ref intSlice sf, @string s) {
     var (i, err) = strconv.ParseInt(s, 10, 64);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     sf = append(sf, i);
-    return default!;
+    return default;
 }
 
 internal partial struct base64Flag /*[]byte*/;
@@ -172,21 +173,23 @@ internal static @string String(this ref base64Flag f) {
 }
 
 internal static error Set(this ref base64Flag f, @string s) {
-    if (f != default!) {
+    if (f != nil) {
         return fmt.Errorf("multiple base64 values not supported"u8);
     }
     var (b, err) = base64.StdEncoding.DecodeString(s);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     f = b;
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object echServerConfigEchServerˢ = (@string)"-ech-server-config, -ech-server-key, and -ech-is-retry-config mismatch"u8;
-internal static readonly @string tcpˢ = "tcp"u8;
-internal static readonly @string localhostˢ = "localhost"u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
+internal static ref readonly @string localhostˢ => ref localhostˢᵇ;
+private static readonly @string localhostˢᵇ = "localhost"u8;
 internal static readonly object unexpectedAlpnProtocolˢ = (@string)"unexpected ALPN protocol"u8;
 internal static readonly object expectedEchToBeAcceptedˢ = (@string)"expected ECH to be accepted, but connection state shows it was not"u8;
 internal static readonly object expectedEchToBeAcceptedˢ2 = (@string)"expected ECH to be accepted on resumption, but connection state shows it was not"u8;
@@ -199,20 +202,20 @@ internal static void bogoShim() {
     GoFrame ᒐ = default;
     try {
         if (isHandshakerSupported.Value) {
-            fmt.Println((@string)"No"u8);
+            fmt.Println("No");
             return;
         }
 
         fmt.Printf("BoGo shim flags: %q"u8, os.Args[1..]);
 
         // Test with both the default and insecure cipher suites.
-        slice<uint16> ciphersuites = default!;
+        slice<uint16> ciphersuites = default;
         foreach (var (_, s) in appendꓸꓸꓸ(CipherSuites(), InsecureCipherSuites())) {
-            ciphersuites = append(ciphersuites, (~s).ID);
+            ciphersuites = append(ciphersuites, s.ID);
         }
 
         var cfg = Ꮡ(new Config(
-            ServerName: "test"u8,
+            ServerName: "test",
 
             MinVersion: (uint16)(minVersion.Value),
             MaxVersion: (uint16)(maxVersion.Value),
@@ -225,44 +228,43 @@ internal static void bogoShim() {
                 if (expectAdvertisedALPN.Value != ""u8) {
                     var s = (cryptobyte.String)slice<byte>(expectAdvertisedALPN.Value);
 
-                    slice<@string> expectedALPNs = default!;
+                    slice<@string> expectedALPNs = default;
 
                     while (!s.Empty()) {
                         ref var alpn = ref heap<cryptobyte.String>(out var Ꮡalpn);
                         if (!s.ReadUint8LengthPrefixed(Ꮡalpn)) {
-                            return (default!, fmt.Errorf("unexpected error while parsing arguments for -expect-advertised-alpn"u8));
+                            return (default, fmt.Errorf("unexpected error while parsing arguments for -expect-advertised-alpn"u8));
                         }
                         expectedALPNs = append(expectedALPNs, (@string)(slice<byte>)alpn);
                     }
 
-                    if (!slices.Equal<slice<@string>, @string>((~chi).SupportedProtos, expectedALPNs)) {
-                        return (default!, fmt.Errorf("unexpected ALPN: got %q, want %q"u8, (~chi).SupportedProtos, expectedALPNs));
+                    if (!slices.Equal<slice<@string>, @string>(chi.SupportedProtos, expectedALPNs)) {
+                        return (default, fmt.Errorf("unexpected ALPN: got %q, want %q"u8, chi.SupportedProtos, expectedALPNs));
                     }
                 }
-                return (default!, default!);
+                return (default, default);
             }
         ));
 
-        if (noTLS1.Value){
-            cfg.Value.MinVersion = VersionTLS11;
+        if (noTLS1.Value) {
+            cfg.MinVersion = VersionTLS11;
             if (noTLS11.Value) {
-                cfg.Value.MinVersion = VersionTLS12;
+                cfg.MinVersion = VersionTLS12;
                 if (noTLS12.Value) {
-                    cfg.Value.MinVersion = VersionTLS13;
+                    cfg.MinVersion = VersionTLS13;
                     if (noTLS13.Value) {
-                        log.Fatalf("no supported versions enabled"u8);
+                        log.Fatalf("no supported versions enabled");
                     }
                 }
             }
-        } else 
-        if (noTLS13.Value) {
-            cfg.Value.MaxVersion = VersionTLS12;
+        } else if (noTLS13.Value) {
+            cfg.MaxVersion = VersionTLS12;
             if (noTLS12.Value) {
-                cfg.Value.MaxVersion = VersionTLS11;
+                cfg.MaxVersion = VersionTLS11;
                 if (noTLS11.Value) {
-                    cfg.Value.MaxVersion = VersionTLS10;
+                    cfg.MaxVersion = VersionTLS10;
                     if (noTLS1.Value) {
-                        log.Fatalf("no supported versions enabled"u8);
+                        log.Fatalf("no supported versions enabled");
                     }
                 }
             }
@@ -272,31 +274,31 @@ internal static void bogoShim() {
             @string alpns = advertiseALPN.Value;
             while (len(alpns) > 0) {
                 nint alpnLen = (nint)alpns[0];
-                cfg.Value.NextProtos = append((~cfg).NextProtos, alpns.slice(1, 1 + alpnLen));
+                cfg.NextProtos = append(cfg.NextProtos, alpns.slice(1, 1 + alpnLen));
                 alpns = alpns.slice(alpnLen + 1);
             }
         }
 
         if (rejectALPN.Value) {
-            cfg.Value.NextProtos = new @string[]{"unnegotiableprotocol"u8}.slice();
+            cfg.NextProtos = slice<@string>(["unnegotiableprotocol"]);
         }
 
         if (declineALPN.Value) {
-            cfg.Value.NextProtos = new @string[]{}.slice();
+            cfg.NextProtos = slice<@string>([]);
         }
         if (selectALPN.Value != ""u8) {
-            cfg.Value.NextProtos = new @string[]{selectALPN.Value}.slice();
+            cfg.NextProtos = slice<@string>([selectALPN.Value]);
         }
 
         if (hostName.Value != ""u8) {
-            cfg.Value.ServerName = hostName.Value;
+            cfg.ServerName = hostName.Value;
         }
 
         if (keyfile.Value != ""u8 || certfile.Value != ""u8) {
             ref var pair = ref heap<global::go.crypto.tls_package.Certificate>(out var Ꮡpair);
             (pair, var err) = LoadX509KeyPair(certfile.Value, keyfile.Value);
-            if (err != default!) {
-                log.Fatalf("load key-file err: %s"u8, err);
+            if (err != nil) {
+                log.Fatalf("load key-file err: %s", err);
             }
             foreach (var (_, id) in signingPrefs.ValueSlot) {
                 pair.SupportedSignatureAlgorithms = append(pair.SupportedSignatureAlgorithms, (global::go.crypto.tls_package.SignatureScheme)(uint16)id);
@@ -305,88 +307,88 @@ internal static void bogoShim() {
             // Use Get[Client]Certificate to force the use of the certificate, which
             // more closely matches the BoGo expectations (e.g. handshake failure if
             // no client certificates are compatible).
-            cfg.Value.GetCertificate = (ж<global::go.crypto.tls_package.Certificate>, error) (ж<global::go.crypto.tls_package.ClientHelloInfo> chi) => {
-                if (expectedPeerSigAlg.ValueSlot != default!) {
-                    if (len((~chi).SignatureSchemes) != len(expectedPeerSigAlg.ValueSlot)) {
-                        return (default!, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, (~chi).SignatureSchemes, expectedPeerSigAlg.ValueSlot));
+            cfg.GetCertificate = (ж<global::go.crypto.tls_package.Certificate>, error) (ж<global::go.crypto.tls_package.ClientHelloInfo> chi) => {
+                if (expectedPeerSigAlg.ValueSlot != nil) {
+                    if (len(chi.SignatureSchemes) != len(expectedPeerSigAlg.ValueSlot)) {
+                        return (default, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, chi.SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                     }
                     foreach (var i in range(expectedPeerSigAlg.ValueSlot)) {
-                        if ((~chi).SignatureSchemes[i] != ((global::go.crypto.tls_package.SignatureScheme)(uint16)(expectedPeerSigAlg.ValueSlot)[i])) {
-                            return (default!, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, (~chi).SignatureSchemes, expectedPeerSigAlg.ValueSlot));
+                        if (chi.SignatureSchemes[i] != ((global::go.crypto.tls_package.SignatureScheme)(uint16)(expectedPeerSigAlg.ValueSlot)[i])) {
+                            return (default, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, chi.SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                         }
                     }
                 }
-                return (Ꮡpair, default!);
+                return (Ꮡpair, default);
             };
-            cfg.Value.GetClientCertificate = (ж<global::go.crypto.tls_package.Certificate>, error) (ж<global::go.crypto.tls_package.CertificateRequestInfo> cri) => {
-                if (expectedPeerSigAlg.ValueSlot != default!) {
-                    if (len((~cri).SignatureSchemes) != len(expectedPeerSigAlg.ValueSlot)) {
-                        return (default!, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, (~cri).SignatureSchemes, expectedPeerSigAlg.ValueSlot));
+            cfg.GetClientCertificate = (ж<global::go.crypto.tls_package.Certificate>, error) (ж<global::go.crypto.tls_package.CertificateRequestInfo> cri) => {
+                if (expectedPeerSigAlg.ValueSlot != nil) {
+                    if (len(cri.SignatureSchemes) != len(expectedPeerSigAlg.ValueSlot)) {
+                        return (default, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, cri.SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                     }
                     foreach (var i in range(expectedPeerSigAlg.ValueSlot)) {
-                        if ((~cri).SignatureSchemes[i] != ((global::go.crypto.tls_package.SignatureScheme)(uint16)(expectedPeerSigAlg.ValueSlot)[i])) {
-                            return (default!, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, (~cri).SignatureSchemes, expectedPeerSigAlg.ValueSlot));
+                        if (cri.SignatureSchemes[i] != ((global::go.crypto.tls_package.SignatureScheme)(uint16)(expectedPeerSigAlg.ValueSlot)[i])) {
+                            return (default, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, cri.SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                         }
                     }
                 }
-                return (Ꮡpair, default!);
+                return (Ꮡpair, default);
             };
         }
         if (trustCert.Value != ""u8) {
             var pool = Δx509.NewCertPool();
             var (certFile, err) = os.ReadFile(trustCert.Value);
-            if (err != default!) {
-                log.Fatalf("load trust-cert err: %s"u8, err);
+            if (err != nil) {
+                log.Fatalf("load trust-cert err: %s", err);
             }
             var (block, _) = pem.Decode(certFile);
-            (var cert, err) = Δx509.ParseCertificate((~block).Bytes);
-            if (err != default!) {
-                log.Fatalf("parse trust-cert err: %s"u8, err);
+            (var cert, err) = Δx509.ParseCertificate(block.Bytes);
+            if (err != nil) {
+                log.Fatalf("parse trust-cert err: %s", err);
             }
             pool.AddCert(cert);
-            cfg.Value.RootCAs = pool;
+            cfg.RootCAs = pool;
         }
 
         if (requireAnyClientCertificate.Value) {
-            cfg.Value.ClientAuth = RequireAnyClientCert;
+            cfg.ClientAuth = RequireAnyClientCert;
         }
         if (verifyPeer.Value) {
-            cfg.Value.ClientAuth = VerifyClientCertIfGiven;
+            cfg.ClientAuth = VerifyClientCertIfGiven;
         }
 
-        if (echConfigList.ValueSlot != default!) {
-            cfg.Value.EncryptedClientHelloConfigList = echConfigList.ValueSlot;
-            cfg.Value.MinVersion = VersionTLS13;
+        if (echConfigList.ValueSlot != nil) {
+            cfg.EncryptedClientHelloConfigList = echConfigList.ValueSlot;
+            cfg.MinVersion = VersionTLS13;
         }
 
-        if (curves.ValueSlot != default!) {
+        if (curves.ValueSlot != nil) {
             foreach (var (_, id) in curves.ValueSlot) {
-                cfg.Value.CurvePreferences = append((~cfg).CurvePreferences, (global::go.crypto.tls_package.CurveID)(uint16)id);
+                cfg.CurvePreferences = append(cfg.CurvePreferences, (global::go.crypto.tls_package.CurveID)(uint16)id);
             }
         }
 
-        if (verifyPrefs.ValueSlot != default!) {
+        if (verifyPrefs.ValueSlot != nil) {
             foreach (var (_, id) in verifyPrefs.ValueSlot) {
                 testingOnlySupportedSignatureAlgorithms = append(testingOnlySupportedSignatureAlgorithms, (global::go.crypto.tls_package.SignatureScheme)(uint16)id);
             }
         }
 
-        if (echServerConfig.ValueSlot != default!) {
+        if (echServerConfig.ValueSlot != nil) {
             if (len(echServerConfig.ValueSlot) != len(echServerKey.ValueSlot) || len(echServerConfig.ValueSlot) != len(echServerRetryConfig.ValueSlot)) {
                 log.Fatal(echServerConfigEchServerˢ);
             }
 
             foreach (var (i, c) in echServerConfig.ValueSlot) {
                 var (configBytes, err) = base64.StdEncoding.DecodeString(c);
-                if (err != default!) {
-                    log.Fatalf("parse ech-server-config err: %s"u8, err);
+                if (err != nil) {
+                    log.Fatalf("parse ech-server-config err: %s", err);
                 }
                 (var privBytes, err) = base64.StdEncoding.DecodeString((echServerKey.ValueSlot)[i]);
-                if (err != default!) {
-                    log.Fatalf("parse ech-server-key err: %s"u8, err);
+                if (err != nil) {
+                    log.Fatalf("parse ech-server-key err: %s", err);
                 }
 
-                cfg.Value.EncryptedClientHelloKeys = append((~cfg).EncryptedClientHelloKeys, new EncryptedClientHelloKey(
+                cfg.EncryptedClientHelloKeys = append(cfg.EncryptedClientHelloKeys, new EncryptedClientHelloKey(
                     Config: configBytes,
                     PrivateKey: privBytes,
                     SendAsRetry: (echServerRetryConfig.ValueSlot)[i] == "1"
@@ -395,13 +397,13 @@ internal static void bogoShim() {
         }
 
         for (nint i = 0; i < resumeCount.Value + 1; i++) {
-            if (i > 0 && onResumeECHConfigList.ValueSlot != default!) {
-                cfg.Value.EncryptedClientHelloConfigList = onResumeECHConfigList.ValueSlot;
+            if (i > 0 && onResumeECHConfigList.ValueSlot != nil) {
+                cfg.EncryptedClientHelloConfigList = onResumeECHConfigList.ValueSlot;
             }
 
             var (conn, err) = net.Dial(tcpˢ, net.JoinHostPort(localhostˢ, port.Value));
-            if (err != default!) {
-                log.Fatalf("dial err: %s"u8, err);
+            if (err != nil) {
+                log.Fatalf("dial err: %s", err);
             }
             var connʗ1 = conn;
             defer(() => connʗ1.Close(), ref ᒐ);
@@ -410,13 +412,13 @@ internal static void bogoShim() {
             var shimIDBytes = new slice<byte>(8);
             byteorder.LEPutUint64(shimIDBytes, shimID.Value);
             {
-                var (_, errΔ1) = conn.Write(shimIDBytes); if (errΔ1 != default!) {
-                    log.Fatalf("failed to write shim id: %s"u8, errΔ1);
+                var (_, errΔ1) = conn.Write(shimIDBytes); if (errΔ1 != nil) {
+                    log.Fatalf("failed to write shim id: %s", errΔ1);
                 }
             }
 
-            ж<global::go.crypto.tls_package.Conn> tlsConn = default!;
-            if (server.Value){
+            ж<global::go.crypto.tls_package.Conn> tlsConn = default;
+            if (server.Value) {
                 tlsConn = Server(conn, cfg);
             } else {
                 tlsConn = Client(conn, cfg);
@@ -424,8 +426,8 @@ internal static void bogoShim() {
 
             if (i == 0 && shimWritesFirst.Value) {
                 {
-                    var (_, errΔ2) = tlsConn.Write(slice<byte>("hello"u8)); if (errΔ2 != default!) {
-                        log.Fatalf("write err: %s"u8, errΔ2);
+                    var (_, errΔ2) = tlsConn.Write(slice<byte>("hello"u8)); if (errΔ2 != nil) {
+                        log.Fatalf("write err: %s", errΔ2);
                     }
                 }
             }
@@ -436,11 +438,11 @@ internal static void bogoShim() {
                 pauseProcess();
             }
 
-            while (ᐧ) {
+            for (;;) {
                 var buf = new slice<byte>(500);
-                nint n = default!;
+                nint n = default;
                 (n, err) = tlsConn.Read(buf);
-                if (err != default!) {
+                if (err != nil) {
                     break;
                 }
                 buf = buf.slice(0, n);
@@ -448,7 +450,7 @@ internal static void bogoShim() {
                     buf[iΔ1] ^= (byte)(0xff);
                 }
                 {
-                    (_, err) = tlsConn.Write(buf); if (err != default!) {
+                    (_, err) = tlsConn.Write(buf); if (err != nil) {
                         break;
                     }
                 }
@@ -464,47 +466,44 @@ internal static void bogoShim() {
                 if (!ok) {
                     log.Fatal(err);
                 }
-                if (expectNoECHRetryConfigs.Value && len((~retryErr).RetryConfigList) > 0) {
-                    log.Fatalf("expected no ECH retry configs, got some"u8);
+                if (expectNoECHRetryConfigs.Value && len(retryErr.RetryConfigList) > 0) {
+                    log.Fatalf("expected no ECH retry configs, got some");
                 }
                 if (expectedECHRetryConfigs.Value != ""u8) {
                     var (expectedRetryConfigs, errΔ3) = base64.StdEncoding.DecodeString(expectedECHRetryConfigs.Value);
-                    if (errΔ3 != default!) {
-                        log.Fatalf("failed to decode expected retry configs: %s"u8, errΔ3);
+                    if (errΔ3 != nil) {
+                        log.Fatalf("failed to decode expected retry configs: %s", errΔ3);
                     }
-                    if (!bytes.Equal((~retryErr).RetryConfigList, expectedRetryConfigs)) {
-                        log.Fatalf("unexpected retry list returned: got %x, want %x"u8, (~retryErr).RetryConfigList, expectedRetryConfigs);
+                    if (!bytes.Equal(retryErr.RetryConfigList, expectedRetryConfigs)) {
+                        log.Fatalf("unexpected retry list returned: got %x, want %x", retryErr.RetryConfigList, expectedRetryConfigs);
                     }
                 }
-                log.Fatalf("conn error: %s"u8, err);
+                log.Fatalf("conn error: %s", err);
             }
 
             var cs = tlsConn.ConnectionState();
             if (cs.HandshakeComplete) {
                 if (expectALPN.Value != ""u8 && cs.NegotiatedProtocol != expectALPN.Value) {
-                    log.Fatalf("unexpected protocol negotiated: want %q, got %q"u8, expectALPN.Value, cs.NegotiatedProtocol);
+                    log.Fatalf("unexpected protocol negotiated: want %q, got %q", expectALPN.Value, cs.NegotiatedProtocol);
                 }
 
                 if (selectALPN.Value != ""u8 && cs.NegotiatedProtocol != selectALPN.Value) {
-                    log.Fatalf("unexpected protocol negotiated: want %q, got %q"u8, selectALPN.Value, cs.NegotiatedProtocol);
+                    log.Fatalf("unexpected protocol negotiated: want %q, got %q", selectALPN.Value, cs.NegotiatedProtocol);
                 }
 
                 if (expectVersion.Value != 0 && cs.Version != (uint16)(expectVersion.Value)) {
-                    log.Fatalf("expected ssl version %d, got %d"u8, expectVersion.Value, cs.Version);
+                    log.Fatalf("expected ssl version %d, got %d", expectVersion.Value, cs.Version);
                 }
                 if (declineALPN.Value && cs.NegotiatedProtocol != ""u8) {
                     log.Fatal(unexpectedAlpnProtocolˢ);
                 }
-                if (expectECHAccepted.Value && !cs.ECHAccepted){
+                if (expectECHAccepted.Value && !cs.ECHAccepted) {
                     log.Fatal(expectedEchToBeAcceptedˢ);
-                } else 
-                if (i == 0 && onInitialExpectECHAccepted.Value && !cs.ECHAccepted){
+                } else if (i == 0 && onInitialExpectECHAccepted.Value && !cs.ECHAccepted) {
                     log.Fatal(expectedEchToBeAcceptedˢ);
-                } else 
-                if (i > 0 && onResumeExpectECHAccepted.Value && !cs.ECHAccepted){
+                } else if (i > 0 && onResumeExpectECHAccepted.Value && !cs.ECHAccepted) {
                     log.Fatal(expectedEchToBeAcceptedˢ2);
-                } else 
-                if (i == 0 && !expectECHAccepted.Value && cs.ECHAccepted) {
+                } else if (i == 0 && !expectECHAccepted.Value && cs.ECHAccepted) {
                     log.Fatal(didNotExpectEchButItWasˢ);
                 }
 
@@ -521,28 +520,28 @@ internal static void bogoShim() {
                 }
 
                 if (expectedServerName.Value != ""u8 && cs.ServerName != expectedServerName.Value) {
-                    log.Fatalf("unexpected server name: got %q, want %q"u8, cs.ServerName, expectedServerName.Value);
+                    log.Fatalf("unexpected server name: got %q, want %q", cs.ServerName, expectedServerName.Value);
                 }
             }
 
             if (expectedCurve.Value != ""u8) {
                 var (expectedCurveID, errΔ4) = strconv.Atoi(expectedCurve.Value);
-                if (errΔ4 != default!) {
-                    log.Fatalf("failed to parse -expect-curve-id: %s"u8, errΔ4);
+                if (errΔ4 != nil) {
+                    log.Fatalf("failed to parse -expect-curve-id: %s", errΔ4);
                 }
                 if (cs.CurveID != ((global::go.crypto.tls_package.CurveID)(uint16)expectedCurveID)) {
-                    log.Fatalf("unexpected curve id: want %d, got %d"u8, expectedCurveID, (~tlsConn).curveID);
+                    log.Fatalf("unexpected curve id: want %d, got %d", expectedCurveID, tlsConn.curveID);
                 }
             }
 
             // TODO: implement testingOnlyPeerSignatureAlgorithm on resumption.
             if (expectedSigAlg.Value != ""u8 && !cs.DidResume) {
                 var (expectedSigAlgID, errΔ5) = strconv.Atoi(expectedSigAlg.Value);
-                if (errΔ5 != default!) {
-                    log.Fatalf("failed to parse -expect-peer-signature-algorithm: %s"u8, errΔ5);
+                if (errΔ5 != nil) {
+                    log.Fatalf("failed to parse -expect-peer-signature-algorithm: %s", errΔ5);
                 }
                 if (cs.testingOnlyPeerSignatureAlgorithm != ((global::go.crypto.tls_package.SignatureScheme)(uint16)expectedSigAlgID)) {
-                    log.Fatalf("unexpected peer signature algorithm: want %s, got %s"u8, (global::go.crypto.tls_package.SignatureScheme)(uint16)expectedSigAlgID, cs.testingOnlyPeerSignatureAlgorithm);
+                    log.Fatalf("unexpected peer signature algorithm: want %s, got %s", (global::go.crypto.tls_package.SignatureScheme)(uint16)expectedSigAlgID, cs.testingOnlyPeerSignatureAlgorithm);
                 }
             }
         }
@@ -568,9 +567,9 @@ internal static void orderlyShutdown(ж<global::go.crypto.tls_package.Conn> Ꮡt
 
     // Read and discard any data that was sent by the peer.
     var buf = new slice<byte>(maxPlaintext);
-    while (ᐧ) {
+    for (;;) {
         var (n, err) = tcpConn.Read(buf);
-        if (n == 0 || err != default!) {
+        if (n == 0 || err != nil) {
             break;
         }
     }
@@ -581,63 +580,67 @@ internal static void orderlyShutdown(ж<global::go.crypto.tls_package.Conn> Ꮡt
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in short mode"u8;
 internal static readonly object windowsNetworkˢ = (@string)"#66913: windows network connections are flakey on builders"u8;
-internal static readonly @string bogoConfigJsonˢ = "bogo_config.json"u8;
-internal static readonly @string boringsslGooglesourceComˢ = "boringssl.googlesource.com/boringssl.git"u8;
-internal static readonly @string resultsJsonˢ = "results.json"u8;
-internal static readonly @string sslTestRunnerˢ = "ssl/test/runner"u8;
+internal static ref readonly @string bogoConfigJsonˢ => ref bogoConfigJsonˢᵇ;
+private static readonly @string bogoConfigJsonˢᵇ = "bogo_config.json"u8;
+internal static ref readonly @string boringsslGooglesourceComˢ => ref boringsslGooglesourceComˢᵇ;
+private static readonly @string boringsslGooglesourceComˢᵇ = "boringssl.googlesource.com/boringssl.git"u8;
+internal static ref readonly @string resultsJsonˢ => ref resultsJsonˢᵇ;
+private static readonly @string resultsJsonˢᵇ = "results.json"u8;
+internal static ref readonly @string sslTestRunnerˢ => ref sslTestRunnerˢᵇ;
+private static readonly @string sslTestRunnerˢᵇ = "ssl/test/runner"u8;
 
-public static void TestBogoSuite(ж<testing.T> Ꮡt) {
+public static void TestBogoSuite(ж<testing.T> t) {
     var argsᴷ = new stackAppend<@string>();
 
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     if (testenv.Builder() != ""u8 && runtime.GOOS == "windows"u8) {
-        Ꮡt.Skip(windowsNetworkˢ);
+        t.Skip(windowsNetworkˢ);
     }
-    skipFIPS(Ꮡt);
+    skipFIPS(t);
 
     // In order to make Go test caching work as expected, we stat the
     // bogo_config.json file, so that the Go testing hooks know that it is
     // important for this test and will invalidate a cached test result if the
     // file changes.
     {
-        var (_, errΔ1) = os.Stat(bogoConfigJsonˢ); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var (_, errΔ1) = os.Stat(bogoConfigJsonˢ); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 
-    @string bogoDir = default!;
-    if (bogoLocalDir.Value != ""u8){
-        ensureLocalBogo(Ꮡt, bogoLocalDir.Value);
+    @string bogoDir = default;
+    if (bogoLocalDir.Value != ""u8) {
+        ensureLocalBogo(t, bogoLocalDir.Value);
         bogoDir = bogoLocalDir.Value;
     } else {
-        bogoDir = cryptotest.FetchModule(Ꮡt, boringsslGooglesourceComˢ, boringsslModVer);
+        bogoDir = cryptotest.FetchModule(t, boringsslGooglesourceComˢ, boringsslModVer);
     }
 
     var (cwd, err) = os.Getwd();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    @string resultsFile = filepath.Join(Ꮡt.TempDir(), resultsJsonˢ);
+    @string resultsFile = filepath.Join(t.TempDir(), resultsJsonˢ);
 
-    var args = new @string[]{
-        "test"u8,
-        "."u8,
+    var args = slice<@string>([
+        "test",
+        ".",
         fmt.Sprintf("-shim-config=%s"u8, filepath.Join(cwd, bogoConfigJsonˢ)),
-        fmt.Sprintf("-shim-path=%s"u8, testenv.Executable(new tls_test_package.testing_TжTB(Ꮡt))),
-        "-shim-extra-flags=-bogo-mode"u8,
-        "-allow-unimplemented"u8,
-        "-loose-errors"u8, // TODO(roland): this should be removed eventually
+        fmt.Sprintf("-shim-path=%s"u8, testenv.Executable(new tls_test_package.testing_TжTB(t))),
+        "-shim-extra-flags=-bogo-mode",
+        "-allow-unimplemented",
+        "-loose-errors", // TODO(roland): this should be removed eventually
         fmt.Sprintf("-json-output=%s"u8, resultsFile)
-    }.slice();
+    ]);
     if (bogoFilter.Value != ""u8) {
         args = append(argsᴷ, args, fmt.Sprintf("-test=%s"u8, bogoFilter.Value));
     }
 
-    var cmd = testenv.Command(new tls_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new tls_test_package.testing_TжTB(Ꮡt)), args.ꓸꓸꓸ);
-    cmd.Value.Dir = filepath.Join(bogoDir, sslTestRunnerˢ);
+    var cmd = testenv.Command(new tls_test_package.testing_TжTB(t), testenv.GoToolPath(new tls_test_package.testing_TжTB(t)), args.ꓸꓸꓸ);
+    cmd.Dir = filepath.Join(bogoDir, sslTestRunnerˢ);
     (var @out, err) = cmd.CombinedOutput();
     // NOTE: we don't immediately check the error, because the failure could be either because
     // the runner failed for some unexpected reason, or because a test case failed, and we
@@ -646,24 +649,24 @@ public static void TestBogoSuite(ж<testing.T> Ꮡt) {
     // to determine the failure mode.
 
     var (resultsJSON, jsonErr) = os.ReadFile(resultsFile);
-    if (jsonErr != default!) {
-        if (err != default!) {
-            Ꮡt.Fatalf("bogo failed: %s\n%s"u8, err, @out);
+    if (jsonErr != nil) {
+        if (err != nil) {
+            t.Fatalf("bogo failed: %s\n%s", err, @out);
         }
-        Ꮡt.Fatalf("failed to read results JSON file: %s"u8, jsonErr);
+        t.Fatalf("failed to read results JSON file: %s", jsonErr);
     }
 
     ref var results = ref heap(new bogoResults(), out var Ꮡresults);
     {
-        var errΔ2 = json.Unmarshal(resultsJSON, Ꮡresults); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("failed to parse results JSON: %s"u8, errΔ2);
+        var errΔ2 = json.Unmarshal(resultsJSON, Ꮡresults); if (errΔ2 != nil) {
+            t.Fatalf("failed to parse results JSON: %s", errΔ2);
         }
     }
 
     if (bogoReport.Value != ""u8) {
         {
-            var errΔ3 = generateReport(results, bogoReport.Value); if (errΔ3 != default!) {
-                Ꮡt.Fatalf("failed to generate report: %v"u8, errΔ3);
+            var errΔ3 = generateReport(results, bogoReport.Value); if (errΔ3 != nil) {
+                t.Fatalf("failed to generate report: %v", errΔ3);
             }
         }
     }
@@ -672,21 +675,21 @@ public static void TestBogoSuite(ж<testing.T> Ꮡt) {
     // are present in the output. They are only checked if -bogo-filter
     // was not passed.
     var assertResults = new map<@string, @string>{
-        ["CurveTest-Client-MLKEM-TLS13"u8] = "PASS"u8,
-        ["CurveTest-Server-MLKEM-TLS13"u8] = "PASS"u8,
+        ["CurveTest-Client-MLKEM-TLS13"] = "PASS",
+        ["CurveTest-Server-MLKEM-TLS13"] = "PASS",
 
         // Various signature algorithm tests checking that we enforce our
         // preferences on the peer.
-        ["ClientAuth-Enforced"u8] = "PASS"u8,
-        ["ServerAuth-Enforced"u8] = "PASS"u8,
-        ["ClientAuth-Enforced-TLS13"u8] = "PASS"u8,
-        ["ServerAuth-Enforced-TLS13"u8] = "PASS"u8,
-        ["VerifyPreferences-Advertised"u8] = "PASS"u8,
-        ["VerifyPreferences-Enforced"u8] = "PASS"u8,
-        ["Client-TLS12-NoSign-RSA_PKCS1_MD5_SHA1"u8] = "PASS"u8,
-        ["Server-TLS12-NoSign-RSA_PKCS1_MD5_SHA1"u8] = "PASS"u8,
-        ["Client-TLS13-NoSign-RSA_PKCS1_MD5_SHA1"u8] = "PASS"u8,
-        ["Server-TLS13-NoSign-RSA_PKCS1_MD5_SHA1"u8] = "PASS"u8
+        ["ClientAuth-Enforced"] = "PASS",
+        ["ServerAuth-Enforced"] = "PASS",
+        ["ClientAuth-Enforced-TLS13"] = "PASS",
+        ["ServerAuth-Enforced-TLS13"] = "PASS",
+        ["VerifyPreferences-Advertised"] = "PASS",
+        ["VerifyPreferences-Enforced"] = "PASS",
+        ["Client-TLS12-NoSign-RSA_PKCS1_MD5_SHA1"] = "PASS",
+        ["Server-TLS12-NoSign-RSA_PKCS1_MD5_SHA1"] = "PASS",
+        ["Client-TLS13-NoSign-RSA_PKCS1_MD5_SHA1"] = "PASS",
+        ["Server-TLS13-NoSign-RSA_PKCS1_MD5_SHA1"] = "PASS"
     };
 
     foreach (var (name, vᴛ1) in results.Tests) {
@@ -696,7 +699,7 @@ public static void TestBogoSuite(ж<testing.T> Ꮡt) {
         // This is not really the intended way to do this... but... it works?
         var assertResultsʗ1 = assertResults;
         var resultʗ1 = result;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        t.Run(name, (ж<testing.T> tΔ1) => {
             if (resultʗ1.Actual == "FAIL"u8 && resultʗ1.IsUnexpected) {
                 tΔ1.Fail();
             }
@@ -705,7 +708,7 @@ public static void TestBogoSuite(ж<testing.T> Ꮡt) {
             }
             {
                 var (exp, ok) = assertResultsʗ1[name, ꟷ]; if (ok && exp != resultʗ1.Actual) {
-                    tΔ1.Errorf("unexpected result: got %s, want %s"u8, resultʗ1.Actual, exp);
+                    tΔ1.Errorf("unexpected result: got %s, want %s", resultʗ1.Actual, exp);
                 }
             }
             delete(assertResultsʗ1, name);
@@ -717,85 +720,90 @@ public static void TestBogoSuite(ж<testing.T> Ꮡt) {
     if (bogoFilter.Value == ""u8) {
         // Anything still in assertResults did not show up in the results, so we should fail
         foreach (var (name, expectedResult) in assertResults) {
-            Ꮡt.Run(name, (ж<testing.T> tΔ2) => {
-                tΔ2.Fatalf("expected test to run with result %s, but it was not present in the test results"u8, expectedResult);
+            t.Run(name, (ж<testing.T> tΔ2) => {
+                tΔ2.Fatalf("expected test to run with result %s, but it was not present in the test results", expectedResult);
             });
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gitˢ = "git"u8;
-internal static readonly @string cloneˢ = "clone"u8;
-internal static readonly @string noCheckoutˢ = "--no-checkout"u8;
-internal static readonly @string httpsBoringsslˢ = "https://boringssl.googlesource.com/boringssl"u8;
-internal static readonly @string checkoutˢ = "checkout"u8;
+internal static ref readonly @string gitˢ => ref gitˢᵇ;
+private static readonly @string gitˢᵇ = "git"u8;
+internal static ref readonly @string cloneˢ => ref cloneˢᵇ;
+private static readonly @string cloneˢᵇ = "clone"u8;
+internal static ref readonly @string noCheckoutˢ => ref noCheckoutˢᵇ;
+private static readonly @string noCheckoutˢᵇ = "--no-checkout"u8;
+internal static ref readonly @string httpsBoringsslˢ => ref httpsBoringsslˢᵇ;
+private static readonly @string httpsBoringsslˢᵇ = "https://boringssl.googlesource.com/boringssl"u8;
+internal static ref readonly @string checkoutˢ => ref checkoutˢᵇ;
+private static readonly @string checkoutˢᵇ = "checkout"u8;
 
 // ensureLocalBogo fetches BoringSSL to localBogoDir at the correct revision
 // (from boringsslModVer) if localBogoDir doesn't already exist.
 //
 // If localBogoDir does exist, ensureLocalBogo fails the test if it isn't
 // a directory.
-internal static void ensureLocalBogo(ж<testing.T> Ꮡt, @string localBogoDir) {
-    Ꮡt.Helper();
+internal static void ensureLocalBogo(ж<testing.T> t, @string localBogoDir) {
+    t.Helper();
 
     {
-        var (stat, err) = os.Stat(localBogoDir); if (err == default!){
+        var (stat, err) = os.Stat(localBogoDir); if (err == nil) {
             if (!stat.IsDir()) {
-                Ꮡt.Fatalf("local bogo dir (%q) exists but is not a directory"u8, localBogoDir);
+                t.Fatalf("local bogo dir (%q) exists but is not a directory", localBogoDir);
             }
 
-            Ꮡt.Logf("using local bogo checkout from %q"u8, localBogoDir);
+            t.Logf("using local bogo checkout from %q", localBogoDir);
             return;
-        } else 
-        if (!errors.Is(err, os.ErrNotExist)) {
-            Ꮡt.Fatalf("failed to stat local bogo dir (%q): %v"u8, localBogoDir, err);
+        } else if (!errors.Is(err, os.ErrNotExist)) {
+            t.Fatalf("failed to stat local bogo dir (%q): %v", localBogoDir, err);
         }
     }
 
-    testenv.MustHaveExecPath(new tls_test_package.testing_TжTB(Ꮡt), gitˢ);
+    testenv.MustHaveExecPath(new tls_test_package.testing_TжTB(t), gitˢ);
 
-    nint idx = strings.LastIndex(boringsslModVer, "-"u8);
+    nint idx = strings.LastIndex(boringsslModVer, "-");
     if (idx == -1 || idx == len(boringsslModVer) - 1) {
-        Ꮡt.Fatalf("invalid boringsslModVer format: %q"u8, boringsslModVer);
+        t.Fatalf("invalid boringsslModVer format: %q", boringsslModVer);
     }
     @string commitSHA = boringsslModVer.slice(idx + 1);
 
-    Ꮡt.Logf("cloning boringssl@%s to %q"u8, commitSHA, localBogoDir);
-    var cloneCmd = testenv.Command(new tls_test_package.testing_TжTB(Ꮡt), gitˢ, cloneˢ, noCheckoutˢ, httpsBoringsslˢ, localBogoDir);
+    t.Logf("cloning boringssl@%s to %q", commitSHA, localBogoDir);
+    var cloneCmd = testenv.Command(new tls_test_package.testing_TжTB(t), gitˢ, cloneˢ, noCheckoutˢ, httpsBoringsslˢ, localBogoDir);
     {
-        var err = cloneCmd.Run(); if (err != default!) {
-            Ꮡt.Fatalf("git clone failed: %v"u8, err);
+        var err = cloneCmd.Run(); if (err != nil) {
+            t.Fatalf("git clone failed: %v", err);
         }
     }
 
-    var checkoutCmd = testenv.Command(new tls_test_package.testing_TжTB(Ꮡt), gitˢ, checkoutˢ, commitSHA);
-    checkoutCmd.Value.Dir = localBogoDir;
+    var checkoutCmd = testenv.Command(new tls_test_package.testing_TжTB(t), gitˢ, checkoutˢ, commitSHA);
+    checkoutCmd.Dir = localBogoDir;
     {
-        var err = checkoutCmd.Run(); if (err != default!) {
-            Ꮡt.Fatalf("git checkout failed: %v"u8, err);
+        var err = checkoutCmd.Run(); if (err != nil) {
+            t.Fatalf("git checkout failed: %v", err);
         }
     }
 
-    Ꮡt.Logf("using fresh local bogo checkout from %q"u8, localBogoDir);
+    t.Logf("using fresh local bogo checkout from %q", localBogoDir);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string reportˢ = "report"u8;
+internal static ref readonly @string reportˢ => ref reportˢᵇ;
+private static readonly @string reportˢᵇ = "report"u8;
 
 internal static error generateReport(bogoResults results, @string outPath) {
     GoFrame ᒐ = default;
     try {
         var data = new reportData(
             Results: results,
-            Timestamp: time_package.Unix((int64)results.SecondsSinceEpoch, 0).Format("2006-01-02 15:04:05"u8),
+            Timestamp: time_package.Unix((int64)results.SecondsSinceEpoch, 0).Format("2006-01-02 15:04:05"),
             Revision: boringsslModVer
         );
 
         var (ᴛ1, ᴛ2) = template.New(reportˢ).Parse(reportTemplate);
         var tmpl = template.Must(ᴛ1, ᴛ2);
         var (@file, err) = os.Create(outPath);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var fileʗ1 = @file;
@@ -803,7 +811,7 @@ internal static error generateReport(bogoResults results, @string outPath) {
 
         return tmpl.Execute(new os.FileжWriter(@file), data);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -831,7 +839,8 @@ internal partial struct reportData {
     public @string Revision;
 }
 
-internal static readonly @string reportTemplate = """
+internal static ref readonly @string reportTemplate => ref reportTemplateᵇ;
+private static readonly @string reportTemplateᵇ = """
 
 <!DOCTYPE html>
 <html>

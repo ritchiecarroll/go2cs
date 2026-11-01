@@ -7,22 +7,6 @@
 global using static global::go.go.build_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using scannerꓸError = go.go.scanner_package.ΔError;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -52,7 +36,14 @@ using static global::go.go.build_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.go.build_package.Package))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.File))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Ident))]
+[assembly: GoFieldAccess(typeof(readTest))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,11 +53,11 @@ using static global::go.go.build_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/build_test.go", "build_test.cs", "ABoqgoLmgpKCgoKCgpSCpoKCgoKUgriCgpSCgoKCgoIACAaCgoKUgqaCgpSClIKC+IKCgpSClIL4goKAggAJCIKUgoKUyoK4gIK2gIK2gIL4goKmgoKmgoKUggALCACIAfwCgrKSgoKCggAKFIKCgoKClIIABxCCqIL2ABAsgrKSkoKUlJKUgoIACQqCgqaCgpSCusYADB6CgoKClAAJCqIACRqCgoKUggARDsKCpJSClAAGFpSCkpSClIKCgoKUlIK4gqaC6gAIBIKUlJKCgpSCgoKUgoK4opSUkoKClIKCgoKCggAICoKUlJKCgpSCgoKmgoK4gpSUkoKClJSCgpSClIKCAAsOsri4goCCpICCtoKCkoKUgoCCkoCClAAIDNiCgqaC7NiCgqaCAAoOsoKCgIKkgoKUkpSCgoLKypSAgv6ykoKCgpSCggALEsKSgoKCgpSCgpSCgqaCgoKClIKUgoLogoKClIIADgiCgoKmgoKUgoKCppSU", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "144=FromSlash/1/1/1;537=Join/1/2/6,Join/2/2/8")]
-[assembly: global::go.GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AOAGuA2UpIKCgqaCgqaCgqaClICCpKaClIKCgpSUgpSCgoKClIKUgoKCgqaCysSCgoKUgoKClIKCgpSCgoKUlIKUyIKClIKCgpSClIKUgoKCgriCqJKCgpSqopSCgoKmgoLMkoKClIKCgoKCgqY=", "865-882:1", "", "962=Join/1/1/1")]
-[assembly: global::go.GoPositionMap("go/build/read_test.go", "read_test.cs", "ABcuADtoADBagoKCgpSAgoK2goKCgpKClJSCgqaCgsqCgoKCuIKmAEWGAbiCgoKCgqaCgoLoAFiaAYKCgsiCgoKUgoKCgpSCgoI=", "154-158:1;244-248:1")]
-[assembly: global::go.GoPositionMap("go/build/syslist_test.go", "syslist_test.cs", "AA0egpaCgpSmgoKUAAcQABEkgoKC")]
-[assembly: global::go.GoPositionMap("go/build/vendor_test.go", "vendor_test.cs", "ABgoAAsQkoKCgoKClIKCgoKCpoIAChKCgoKm9qIABhSCgg==")]
+[assembly: GoPositionMap("go/build/build_test.go", "build_test.cs", "ABoqgoIACAaCgoKCgoKClIKmgoKCgpSCuIKClIKCgoKCggALBoKCgpSCpoKClIKUgoL4goKClIKUggAICIKCgIIACwiClIKClMqCuICCtoCCtoCCAAgIgoKmgoKmgoKUggALCACIAfwCgrKSgoKCggALFIKCgoKClIIABxCCqIL2ABAsgrKCkoKUlJKUgoIACwqCgqaCgpSCusYADB6CgoKClAAJCoIACRqCgoKUggAWDsKClJSClAAGFpSCkpSClIKCgoKUlIK4gqaC6gAMBIKUlIKCgpSCgoKUgoK4opSUgoKClIKCgoKCggAKCoKUlIKCgpSCgoKmgoK4gpSUgoKClJSCgpSClIKCABAOsri4goCCpICCtoKCgoKUgoCCgoCClAAJDNiCgqaC/NiCgqaCAA4OsoKCgIKkgoKUgpSCgoLKypSAggAIDrKCgoKClIKCABASwoKCgoKClIKClIKCpoKCgoKUgpSCgviCgoKUggAXCIKCgqaCgpSCgoKmlJQ=", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "151=FromSlash/1/1/1;549=Join/1/2/6,Join/2/2/8")]
+[assembly: GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AOAGuA2UpIKCgqaCgqaCgqaClICCpKaClIKCgpSUgpSCgoKClIKUgoKCgqaCytSCgoKUgoKClIKCgpSCgoKUlIKUuIKClIKCgpSClIKUgoKCgriCqJKCgpSqopSCgoKmgoLMkoKClIKCgoKCgqY=", "865-882:1", "", "963=Join/1/1/1")]
+[assembly: GoPositionMap("go/build/read_test.go", "read_test.cs", "ABguADtoADBagoKCgpSAgoK2goKCgoKClJSCgqaCgsqCgoKCuIKmAEaGAbiCgoKCgqaCgoLoAFiaAYKCgriCgoKUgoKCgpSCgoI=", "154-158:1;244-248:1")]
+[assembly: GoPositionMap("go/build/syslist_test.go", "syslist_test.cs", "AA0egpaCgpSmgoKUAAcQABEkgoKC")]
+[assembly: GoPositionMap("go/build/vendor_test.go", "vendor_test.cs", "ABgoAA4QkoKCgoKClIKCgoKCpoIAChKCgoKm9oIABhSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

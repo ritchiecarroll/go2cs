@@ -25,89 +25,87 @@ internal partial struct TestInstantiateEquality_tests /*dyn*/ {
     internal bool wantEqual;
 }
 
-public static void TestInstantiateEquality(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var emptySignature = NewSignatureType(nil, default!, default!, nil, nil, false);
-    var tests = new TestInstantiateEquality_tests[]{
+public static void TestInstantiateEquality(ж<testing.T> t) {
+    var emptySignature = NewSignatureType(nil, default, default, nil, nil, false);
+    var tests = slice<TestInstantiateEquality_tests>([
         new(
-            "package basictype; type T[P any] int"u8,
-            "T"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
-            "T"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
+            "package basictype; type T[P any] int",
+            "T", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "T", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
             true
         ),
         new(
-            "package differenttypeargs; type T[P any] int"u8,
-            "T"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
-            "T"u8, new typesꓸType[]{new types.BasicжΔType(Typ[ΔString])}.slice(),
+            "package differenttypeargs; type T[P any] int",
+            "T", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "T", slice<typesꓸType>([new types.BasicжΔType(Typ[ΔString])]),
             false
         ),
         new(
-            "package typeslice; type T[P any] int"u8,
-            "T"u8, new typesꓸType[]{new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))}.slice(),
-            "T"u8, new typesꓸType[]{new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))}.slice(),
+            "package typeslice; type T[P any] int",
+            "T", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]),
+            "T", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]),
             true
         ),
         new(
             // interface{interface{...}} is equivalent to interface{...}
-            "package equivalentinterfaces; type T[P any] int"u8,
-            "T"u8, new typesꓸType[]{new types.InterfaceжΔType(NewInterfaceType(new ж<types.Func>[]{NewFunc(nopos, nil, "M"u8, emptySignature)}.slice(), default!))
-        }.slice(),
-            "T"u8, new typesꓸType[]{new types.InterfaceжΔType(NewInterfaceType(
-            default!,
-            new typesꓸType[]{new types.InterfaceжΔType(NewInterfaceType(new ж<types.Func>[]{NewFunc(nopos, nil, "M"u8, emptySignature)}.slice(), default!))
-            }.slice()))
-        }.slice(),
+            "package equivalentinterfaces; type T[P any] int",
+            "T", slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(slice<ж<types.Func>>([NewFunc(nopos, nil, "M", emptySignature)]), default))
+        ]),
+            "T", slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(
+            default,
+            slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(slice<ж<types.Func>>([NewFunc(nopos, nil, "M", emptySignature)]), default))
+            ])))
+        ]),
             true
         ),
         new(
             // int|string is equivalent to string|int
-            "package equivalenttypesets; type T[P any] int"u8,
-            "T"u8, new typesꓸType[]{new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.UnionжΔType(NewUnion(new ж<typesꓸTerm>[]{NewTerm(false, new types.BasicжΔType(Typ[Int])), NewTerm(false, new types.BasicжΔType(Typ[ΔString]))}.slice()))
-        }.slice()))
-        }.slice(),
-            "T"u8, new typesꓸType[]{new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.UnionжΔType(NewUnion(new ж<typesꓸTerm>[]{NewTerm(false, new types.BasicжΔType(Typ[ΔString])), NewTerm(false, new types.BasicжΔType(Typ[Int]))}.slice()))
-        }.slice()))
-        }.slice(),
+            "package equivalenttypesets; type T[P any] int",
+            "T", slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.UnionжΔType(NewUnion(slice<ж<typesꓸTerm>>([NewTerm(false, new types.BasicжΔType(Typ[Int])), NewTerm(false, new types.BasicжΔType(Typ[ΔString]))])))
+        ])))
+        ]),
+            "T", slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.UnionжΔType(NewUnion(slice<ж<typesꓸTerm>>([NewTerm(false, new types.BasicжΔType(Typ[ΔString])), NewTerm(false, new types.BasicжΔType(Typ[Int]))])))
+        ])))
+        ]),
             true
         ),
         new(
-            "package basicfunc; func F[P any]() {}"u8,
-            "F"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
-            "F"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
+            "package basicfunc; func F[P any]() {}",
+            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
             true
         ),
         new(
-            "package funcslice; func F[P any]() {}"u8,
-            "F"u8, new typesꓸType[]{new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))}.slice(),
-            "F"u8, new typesꓸType[]{new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))}.slice(),
+            "package funcslice; func F[P any]() {}",
+            "F", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]),
+            "F", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]),
             true
         ),
         new(
-            "package funcwithparams; func F[P any](x string) float64 { return 0 }"u8,
-            "F"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
-            "F"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
+            "package funcwithparams; func F[P any](x string) float64 { return 0 }",
+            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
             true
         ),
         new(
-            "package differentfuncargs; func F[P any](x string) float64 { return 0 }"u8,
-            "F"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
-            "F"u8, new typesꓸType[]{new types.BasicжΔType(Typ[ΔString])}.slice(),
+            "package differentfuncargs; func F[P any](x string) float64 { return 0 }",
+            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[ΔString])]),
             false
         ),
         new(
-            "package funcequality; func F1[P any](x int) {}; func F2[Q any](x int) {}"u8,
-            "F1"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
-            "F2"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
+            "package funcequality; func F1[P any](x int) {}; func F2[Q any](x int) {}",
+            "F1", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F2", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
             false
         ),
         new(
-            "package funcsymmetry; func F1[P any](x P) {}; func F2[Q any](x Q) {}"u8,
-            "F1"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
-            "F2"u8, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(),
+            "package funcsymmetry; func F1[P any](x P) {}; func F2[Q any](x Q) {}",
+            "F1", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F2", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
             false
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestInstantiateEquality_tests(), out var Ꮡtest);
@@ -117,24 +115,24 @@ public static void TestInstantiateEquality(ж<testing.T> Ꮡt) {
 
         var pkgʗ1 = pkg;
         var testʗ1 = test;
-        Ꮡt.Run(pkg.Name(), (ж<testing.T> tΔ1) => {
+        t.Run(pkg.Name(), (ж<testing.T> tΔ1) => {
             var ctxt = NewContext();
 
             var T1 = pkgʗ1.Scope().Lookup(testʗ1.name1).Type();
             var (res1, err) = Instantiate(ctxt, T1, testʗ1.targs1, false);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
 
             var T2 = pkgʗ1.Scope().Lookup(testʗ1.name2).Type();
             (var res2, err) = Instantiate(ctxt, T2, testʗ1.targs2, false);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
 
             {
                 var gotEqual = AreEqual(res1, res2); if (gotEqual != testʗ1.wantEqual) {
-                    tΔ1.Errorf("%s == %s: %t, want %t"u8, res1, res2, gotEqual, testʗ1.wantEqual);
+                    tΔ1.Errorf("%s == %s: %t, want %t", res1, res2, gotEqual, testʗ1.wantEqual);
                 }
             }
         });
@@ -142,35 +140,37 @@ public static void TestInstantiateEquality(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ18 = "package p; type T[P any] int"u8;
+internal static ref readonly @string srcᶜ18 => ref srcᶜ18ᵇ;
+private static readonly @string srcᶜ18ᵇ = "package p; type T[P any] int"u8;
 
-public static void TestInstantiateNonEquality(ж<testing.T> Ꮡt) {
+public static void TestInstantiateNonEquality(ж<testing.T> t) {
     @string src = srcᶜ18;
     var pkg1 = mustTypecheck(src, nil, nil);
     var pkg2 = mustTypecheck(src, nil, nil);
     // We consider T1 and T2 to be distinct types, so their instances should not
     // be deduplicated by the context.
-    var T1 = pkg1.Scope().Lookup("T"u8).Type()._<ж<types.Named>>();
-    var T2 = pkg2.Scope().Lookup("T"u8).Type()._<ж<types.Named>>();
+    var T1 = pkg1.Scope().Lookup("T").Type()._<ж<types.Named>>();
+    var T2 = pkg2.Scope().Lookup("T").Type()._<ж<types.Named>>();
     var ctxt = NewContext();
-    var (res1, err) = Instantiate(ctxt, new types.NamedжΔType(T1), new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(), false);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (res1, err) = Instantiate(ctxt, new types.NamedжΔType(T1), slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]), false);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    (var res2, err) = Instantiate(ctxt, new types.NamedжΔType(T2), new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice(), false);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var res2, err) = Instantiate(ctxt, new types.NamedжΔType(T2), slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]), false);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (AreEqual(res1, res2)) {
-        Ꮡt.Errorf("instance from pkg1 (%s) is pointer-equivalent to instance from pkg2 (%s)"u8, res1, res2);
+        t.Errorf("instance from pkg1 (%s) is pointer-equivalent to instance from pkg2 (%s)", res1, res2);
     }
     if (Identical(res1, res2)) {
-        Ꮡt.Errorf("instance from pkg1 (%s) is identical to instance from pkg2 (%s)"u8, res1, res2);
+        t.Errorf("instance from pkg1 (%s) is identical to instance from pkg2 (%s)", res1, res2);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string prefixᶜ1 = """
+internal static ref readonly @string prefixᶜ1 => ref prefixᶜ1ᵇ;
+private static readonly @string prefixᶜ1ᵇ = """
 package p
 
 type T[P any] struct{}
@@ -185,39 +185,41 @@ internal partial struct TestMethodInstantiation_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestMethodInstantiation(ж<testing.T> Ꮡt) {
+public static void TestMethodInstantiation(ж<testing.T> t) {
     @string prefix = prefixᶜ1;
-    var tests = new TestMethodInstantiation_tests[]{
-        new("func (r T[P]) m() P"u8, "func (T[int]).m() int"u8),
-        new("func (r T[P]) m(P)"u8, "func (T[int]).m(int)"u8),
-        new("func (r *T[P]) m(P)"u8, "func (*T[int]).m(int)"u8),
-        new("func (r T[P]) m() T[P]"u8, "func (T[int]).m() T[int]"u8),
-        new("func (r T[P]) m(T[P])"u8, "func (T[int]).m(T[int])"u8),
-        new("func (r T[P]) m(T[P], P, string)"u8, "func (T[int]).m(T[int], int, string)"u8),
-        new("func (r T[P]) m(T[P], T[string], T[int])"u8, "func (T[int]).m(T[int], T[string], T[int])"u8)
-    }.slice();
+    var tests = slice<TestMethodInstantiation_tests>([
+        new("func (r T[P]) m() P", "func (T[int]).m() int"),
+        new("func (r T[P]) m(P)", "func (T[int]).m(int)"),
+        new("func (r *T[P]) m(P)", "func (*T[int]).m(int)"),
+        new("func (r T[P]) m() T[P]", "func (T[int]).m() T[int]"),
+        new("func (r T[P]) m(T[P])", "func (T[int]).m(T[int])"),
+        new("func (r T[P]) m(T[P], P, string)", "func (T[int]).m(T[int], int, string)"),
+        new("func (r T[P]) m(T[P], T[string], T[int])", "func (T[int]).m(T[int], T[string], T[int])")
+    ]);
 
     foreach (var (_, test) in tests) {
         @string src = prefix + test.decl;
         var pkg = mustTypecheck(src, nil, nil);
-        var typ = NewPointer(pkg.Scope().Lookup("X"u8).Type());
-        var (sel, ok) = LookupSelection(new types.PointerжΔType(typ), false, pkg, "m"u8);
+        var typ = NewPointer(pkg.Scope().Lookup("X").Type());
+        var (sel, ok) = LookupSelection(new types.PointerжΔType(typ), false, pkg, "m");
         if (!ok) {
-            Ꮡt.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m"u8, typ.OrTypedNil());
+            t.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m", typ.OrTypedNil());
         }
         {
             @string got = ObjectString(sel.Obj(), RelativeTo(pkg)); if (got != test.want) {
-                Ꮡt.Errorf("instantiated %q, want %q"u8, got, test.want);
+                t.Errorf("instantiated %q, want %q", got, test.want);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string funcTPMˢ = "func (T[P]).m()"u8;
+internal static ref readonly @string funcTPMˢ => ref funcTPMˢᵇ;
+private static readonly @string funcTPMˢᵇ = "func (T[P]).m()"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ19 = """
+internal static ref readonly @string srcᶜ19 => ref srcᶜ19ᵇ;
+private static readonly @string srcᶜ19ᵇ = """
 package p
 
 type T[P any] struct{}
@@ -228,13 +230,13 @@ var _ T[int]
 
 """u8.Raw();
 
-public static void TestImmutableSignatures(ж<testing.T> Ꮡt) {
+public static void TestImmutableSignatures(ж<testing.T> t) {
     @string src = srcᶜ19;
     var pkg = mustTypecheck(src, nil, nil);
-    var typ = pkg.Scope().Lookup("T"u8).Type()._<ж<types.Named>>();
-    var (sel, ok) = LookupSelection(new types.NamedжΔType(typ), false, pkg, "m"u8);
+    var typ = pkg.Scope().Lookup("T").Type()._<ж<types.Named>>();
+    var (sel, ok) = LookupSelection(new types.NamedжΔType(typ), false, pkg, "m");
     if (!ok) {
-        Ꮡt.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m"u8, typ.OrTypedNil());
+        t.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m", typ.OrTypedNil());
     }
 
     // Verify that the original method is not mutated by instantiating T (this
@@ -242,7 +244,7 @@ public static void TestImmutableSignatures(ж<testing.T> Ꮡt) {
     @string want = funcTPMˢ;
     {
         @string got = stripAnnotations(ObjectString(sel.Obj(), RelativeTo(pkg))); if (got != want) {
-            Ꮡt.Errorf("instantiated %q, want %q"u8, got, want);
+            t.Errorf("instantiated %q, want %q", got, want);
         }
     }
 }
@@ -252,7 +254,7 @@ internal static @string stripAnnotations(@string s) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (_, r) in s) {
         // strip #'s and subscript digits
-        if (r < (rune)'₀' || (rune)'₀' + 10 <= r) { // '₀' == U+2080
+        if (r < '₀' || (rune)'₀' + 10 <= r) { // '₀' == U+2080
             Ꮡbuf.WriteRune(r);
         }
     }

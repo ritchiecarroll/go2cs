@@ -10,25 +10,26 @@ using static go.encoding.json_package;
 partial class json_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fieldFoobarFooˢ = "field,foobar,foo"u8;
+internal static ref readonly @string fieldFoobarFooˢ => ref fieldFoobarFooˢᵇ;
+private static readonly @string fieldFoobarFooˢᵇ = "field,foobar,foo"u8;
 
 internal partial struct TestTagParsing_type /*dyn*/ {
     internal @string opt;
     internal bool want;
 }
 
-public static void TestTagParsing(ж<testing.T> Ꮡt) {
+public static void TestTagParsing(ж<testing.T> t) {
     var (name, opts) = parseTag(fieldFoobarFooˢ);
     if (name != "field"u8) {
-        Ꮡt.Fatalf("name = %q, want field"u8, name);
+        t.Fatalf("name = %q, want field", name);
     }
-    foreach (var (_, tt) in new TestTagParsing_type[]{
-        new("foobar"u8, true),
-        new("foo"u8, true),
-        new("bar"u8, false)
-    }.slice()) {
+    foreach (var (_, tt) in slice<TestTagParsing_type>([
+        new("foobar", true),
+        new("foo", true),
+        new("bar", false)
+    ])) {
         if (opts.Contains(tt.opt) != tt.want) {
-            Ꮡt.Errorf("Contains(%q) = %v, want %v"u8, tt.opt, !tt.want, tt.want);
+            t.Errorf("Contains(%q) = %v, want %v", tt.opt, !tt.want, tt.want);
         }
     }
 }

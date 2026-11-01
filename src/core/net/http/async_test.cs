@@ -12,7 +12,7 @@ using static global::go.net.http_internal_test_package;
 
 partial class http_test_package {
 
-internal static error errStillRunning = errors.New("async op still running"u8);
+internal static error errStillRunning = errors.New("async op still running");
 
 partial struct asyncResult<T> {
     internal channel<EmptyStruct> donec;
@@ -32,8 +32,8 @@ internal static partial ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
-            defer(ᴛ1 => builtin.close(ᴛ1), (~rʗ1).donec, ref ᒐ);
-            (rʗ1.Value.res, rʗ1.Value.err) = f();
+            defer(ᴛ1 => builtin.close(ᴛ1), rʗ1.donec, ref ᒐ);
+            (rʗ1.res, rʗ1.err) = f();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }

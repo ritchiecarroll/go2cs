@@ -13,7 +13,7 @@ using static go.math_internal_test_package;
 
 partial class math_test_package {
 
-internal static slice<float64> vf = new float64[]{
+internal static slice<float64> vf = slice<float64>([
     4.9790119248836735e+00D,
     7.7388724745781045e+00D,
     -2.7688005719200159e-01D,
@@ -24,14 +24,14 @@ internal static slice<float64> vf = new float64[]{
     2.7279399104360102e+00D,
     1.8253080916808550e+00D,
     -8.6859247685756013e+00D
-}.slice();
+]);
 
 // The expected results below were computed by the high precision calculators
 // at https://keisan.casio.com/.  More exact input values (array vf[], above)
 // were obtained by printing them with "%.26f".  The answers were calculated
 // to 26 digits (by using the "Digit number" drop-down control of each
 // calculator).
-internal static slice<float64> acos = new float64[]{
+internal static slice<float64> acos = slice<float64>([
     1.0496193546107222142571536e+00D,
     6.8584012813664425171660692e-01D,
     1.5984878714577160325521819e+00D,
@@ -42,9 +42,9 @@ internal static slice<float64> acos = new float64[]{
     1.2945003481781246062157835e+00D,
     1.3872364345374451433846657e+00D,
     2.6231510803970463967294145e+00D
-}.slice();
+]);
 
-internal static slice<float64> acosh = new float64[]{
+internal static slice<float64> acosh = slice<float64>([
     2.4743347004159012494457618e+00D,
     2.8576385344292769649802701e+00D,
     7.2796961502981066190593175e-01D,
@@ -55,9 +55,9 @@ internal static slice<float64> acosh = new float64[]{
     1.99050839282411638174299e+00D,
     1.6988625798424034227205445e+00D,
     2.9611454842470387925531875e+00D
-}.slice();
+]);
 
-internal static slice<float64> asin = new float64[]{
+internal static slice<float64> asin = slice<float64>([
     5.2117697218417440497416805e-01D,
     8.8495619865825236751471477e-01D,
     -0.027691544662819412D,
@@ -68,9 +68,9 @@ internal static slice<float64> asin = new float64[]{
     2.7629597861677201301553823e-01D,
     1.83559892257451475846656e-01D,
     -1.0523547536021497774980928e+00D
-}.slice();
+]);
 
-internal static slice<float64> asinh = new float64[]{
+internal static slice<float64> asinh = slice<float64>([
     2.3083139124923523427628243e+00D,
     2.743551594301593620039021e+00D,
     -2.7345908534880091229413487e-01D,
@@ -81,9 +81,9 @@ internal static slice<float64> asinh = new float64[]{
     1.7287118790768438878045346e+00D,
     1.3626658083714826013073193e+00D,
     -2.8581483626513914445234004e+00D
-}.slice();
+]);
 
-internal static slice<float64> atan = new float64[]{
+internal static slice<float64> atan = slice<float64>([
     1.372590262129621651920085e+00D,
     1.442290609645298083020664e+00D,
     -2.7011324359471758245192595e-01D,
@@ -94,9 +94,9 @@ internal static slice<float64> atan = new float64[]{
     1.2194305844639670701091426e+00D,
     1.0696031952318783760193244e+00D,
     -1.4561721938838084990898679e+00D
-}.slice();
+]);
 
-internal static slice<float64> atanh = new float64[]{
+internal static slice<float64> atanh = slice<float64>([
     5.4651163712251938116878204e-01D,
     1.0299474112843111224914709e+00D,
     -2.7695084420740135145234906e-02D,
@@ -107,9 +107,9 @@ internal static slice<float64> atanh = new float64[]{
     2.7987997499441511013958297e-01D,
     1.8459947964298794318714228e-01D,
     -1.3273186910532645867272502e+00D
-}.slice();
+]);
 
-internal static slice<float64> atan2 = new float64[]{
+internal static slice<float64> atan2 = slice<float64>([
     1.1088291730037004444527075e+00D,
     9.1218183188715804018797795e-01D,
     1.5984772603216203736068915e+00D,
@@ -120,9 +120,9 @@ internal static slice<float64> atan2 = new float64[]{
     1.3044821793397925293797357e+00D,
     1.3902530903455392306872261e+00D,
     2.2859857424479142655411058e+00D
-}.slice();
+]);
 
-internal static slice<float64> cbrt = new float64[]{
+internal static slice<float64> cbrt = slice<float64>([
     1.7075799841925094446722675e+00D,
     1.9779982212970353936691498e+00D,
     -6.5177429017779910853339447e-01D,
@@ -133,9 +133,9 @@ internal static slice<float64> cbrt = new float64[]{
     1.3972633462554328350552916e+00D,
     1.2221149580905388454977636e+00D,
     -2.0556003730500069110343596e+00D
-}.slice();
+]);
 
-internal static slice<float64> ceil = new float64[]{
+internal static slice<float64> ceil = slice<float64>([
     5.0000000000000000e+00D,
     8.0000000000000000e+00D,
     Copysign(0D, -1D),
@@ -146,9 +146,9 @@ internal static slice<float64> ceil = new float64[]{
     3.0000000000000000e+00D,
     2.0000000000000000e+00D,
     -8.0000000000000000e+00D
-}.slice();
+]);
 
-internal static slice<float64> copysign = new float64[]{
+internal static slice<float64> copysign = slice<float64>([
     -4.9790119248836735e+00D,
     -7.7388724745781045e+00D,
     -2.7688005719200159e-01D,
@@ -159,9 +159,9 @@ internal static slice<float64> copysign = new float64[]{
     -2.7279399104360102e+00D,
     -1.8253080916808550e+00D,
     -8.6859247685756013e+00D
-}.slice();
+]);
 
-internal static slice<float64> cos = new float64[]{
+internal static slice<float64> cos = slice<float64>([
     2.634752140995199110787593e-01D,
     1.148551260848219865642039e-01D,
     9.6191297325640768154550453e-01D,
@@ -172,10 +172,10 @@ internal static slice<float64> cos = new float64[]{
     -9.1565869021018925545016502e-01D,
     -2.517729313893103197176091e-01D,
     -7.39241351595676573201918e-01D
-}.slice();
+]);
 
 // Results for 100000 * Pi + vf[i]
-internal static slice<float64> cosLarge = new float64[]{
+internal static slice<float64> cosLarge = slice<float64>([
     2.634752141185559426744e-01D,
     1.14855126055543100712e-01D,
     9.61912973266488928113e-01D,
@@ -186,9 +186,9 @@ internal static slice<float64> cosLarge = new float64[]{
     -9.15658690217517835002e-01D,
     -2.51772931436786954751e-01D,
     -7.3924135157173099849e-01D
-}.slice();
+]);
 
-internal static slice<float64> cosh = new float64[]{
+internal static slice<float64> cosh = slice<float64>([
     7.2668796942212842775517446e+01D,
     1.1479413465659254502011135e+03D,
     1.0385767908766418550935495e+00D,
@@ -199,9 +199,9 @@ internal static slice<float64> cosh = new float64[]{
     7.6833430994624643209296404e+00D,
     3.1829371625150718153881164e+00D,
     2.9595059261916188501640911e+03D
-}.slice();
+]);
 
-internal static slice<float64> erf = new float64[]{
+internal static slice<float64> erf = slice<float64>([
     5.1865354817738701906913566e-01D,
     7.2623875834137295116929844e-01D,
     -3.123458688281309990629839e-02D,
@@ -212,9 +212,9 @@ internal static slice<float64> erf = new float64[]{
     3.0034702916738588551174831e-01D,
     2.0369924417882241241559589e-01D,
     -7.8069386968009226729944677e-01D
-}.slice();
+]);
 
-internal static slice<float64> erfc = new float64[]{
+internal static slice<float64> erfc = slice<float64>([
     4.8134645182261298093086434e-01D,
     2.7376124165862704883070156e-01D,
     1.0312345868828130999062984e+00D,
@@ -225,9 +225,9 @@ internal static slice<float64> erfc = new float64[]{
     6.9965297083261411448825169e-01D,
     7.9630075582117758758440411e-01D,
     1.7806938696800922672994468e+00D
-}.slice();
+]);
 
-internal static slice<float64> erfinv = new float64[]{
+internal static slice<float64> erfinv = slice<float64>([
     4.746037673358033586786350696e-01D,
     8.559054432692110956388764172e-01D,
     -2.45427830571707336251331946e-02D,
@@ -238,9 +238,9 @@ internal static slice<float64> erfinv = new float64[]{
     2.466703532707627818954585670e-01D,
     1.632011465103005426240343116e-01D,
     -1.06672334642196900710000389e+00D
-}.slice();
+]);
 
-internal static slice<float64> exp = new float64[]{
+internal static slice<float64> exp = slice<float64>([
     1.4533071302642137507696589e+02D,
     2.2958822575694449002537581e+03D,
     7.5814542574851666582042306e-01D,
@@ -251,9 +251,9 @@ internal static slice<float64> exp = new float64[]{
     1.5301332413189378961665788e+01D,
     6.2047063430646876349125085e+00D,
     1.6894712385826521111610438e-04D
-}.slice();
+]);
 
-internal static slice<float64> expm1 = new float64[]{
+internal static slice<float64> expm1 = slice<float64>([
     5.105047796122957327384770212e-02D,
     8.046199708567344080562675439e-02D,
     -2.764970978891639815187418703e-03D,
@@ -264,9 +264,9 @@ internal static slice<float64> expm1 = new float64[]{
     2.765488851131274068067445335e-02D,
     1.842068661871398836913874273e-02D,
     -8.3193870863553801814961137573e-02D
-}.slice();
+]);
 
-internal static slice<float64> expm1Large = new float64[]{
+internal static slice<float64> expm1Large = slice<float64>([
     4.2031418113550844e+21D,
     4.0690789717473863e+33D,
     -0.9372627915981363e+00D,
@@ -277,9 +277,9 @@ internal static slice<float64> expm1Large = new float64[]{
     7.03546003972584e+11D,
     8.456921800389698e+07D,
     -1.0D
-}.slice();
+]);
 
-internal static slice<float64> exp2 = new float64[]{
+internal static slice<float64> exp2 = slice<float64>([
     3.1537839463286288034313104e+01D,
     2.1361549283756232296144849e+02D,
     8.2537402562185562902577219e-01D,
@@ -290,9 +290,9 @@ internal static slice<float64> exp2 = new float64[]{
     6.6250893439173561733216375e+00D,
     3.5438267900243941544605339e+00D,
     2.4281533133513300984289196e-03D
-}.slice();
+]);
 
-internal static slice<float64> fabs = new float64[]{
+internal static slice<float64> fabs = slice<float64>([
     4.9790119248836735e+00D,
     7.7388724745781045e+00D,
     2.7688005719200159e-01D,
@@ -303,9 +303,9 @@ internal static slice<float64> fabs = new float64[]{
     2.7279399104360102e+00D,
     1.8253080916808550e+00D,
     8.6859247685756013e+00D
-}.slice();
+]);
 
-internal static slice<float64> fdim = new float64[]{
+internal static slice<float64> fdim = slice<float64>([
     4.9790119248836735e+00D,
     7.7388724745781045e+00D,
     0.0000000000000000e+00D,
@@ -316,9 +316,9 @@ internal static slice<float64> fdim = new float64[]{
     2.7279399104360102e+00D,
     1.8253080916808550e+00D,
     0.0000000000000000e+00D
-}.slice();
+]);
 
-internal static slice<float64> floor = new float64[]{
+internal static slice<float64> floor = slice<float64>([
     4.0000000000000000e+00D,
     7.0000000000000000e+00D,
     -1.0000000000000000e+00D,
@@ -329,9 +329,9 @@ internal static slice<float64> floor = new float64[]{
     2.0000000000000000e+00D,
     1.0000000000000000e+00D,
     -9.0000000000000000e+00D
-}.slice();
+]);
 
-internal static slice<float64> fmod = new float64[]{
+internal static slice<float64> fmod = slice<float64>([
     4.197615023265299782906368e-02D,
     2.261127525421895434476482e+00D,
     3.231794108794261433104108e-02D,
@@ -342,14 +342,14 @@ internal static slice<float64> fmod = new float64[]{
     1.816180268691969246219742e+00D,
     8.734595415957246977711748e-01D,
     1.314075231424398637614104e+00D
-}.slice();
+]);
 
 partial struct fi {
     internal float64 f;
     internal nint i;
 }
 
-internal static slice<fi> frexp = new fi[]{
+internal static slice<fi> frexp = slice<fi>([
     new(6.2237649061045918750e-01D, 3),
     new(9.6735905932226306250e-01D, 3),
     new(-5.5376011438400318000e-01D, -1),
@@ -360,9 +360,9 @@ internal static slice<fi> frexp = new fi[]{
     new(6.8198497760900255000e-01D, 2),
     new(9.1265404584042750000e-01D, 1),
     new(-5.4287029803597508250e-01D, 4)
-}.slice();
+]);
 
-internal static slice<float64> gamma = new float64[]{
+internal static slice<float64> gamma = slice<float64>([
     2.3254348370739963835386613898e+01D,
     2.991153837155317076427529816e+03D,
     -4.561154336726758060575129109e+00D,
@@ -373,9 +373,9 @@ internal static slice<float64> gamma = new float64[]{
     1.579733951448952054898583387e+00D,
     9.3834586598354592860187267089e-01D,
     -2.093995902923148389186189429e-05D
-}.slice();
+]);
 
-internal static slice<float64> j0 = new float64[]{
+internal static slice<float64> j0 = slice<float64>([
     -1.8444682230601672018219338e-01D,
     2.27353668906331975435892e-01D,
     9.809259936157051116270273e-01D,
@@ -386,9 +386,9 @@ internal static slice<float64> j0 = new float64[]{
     -1.5466726714884328135358907e-01D,
     3.252650187653420388714693e-01D,
     -8.72218484409407250005360235e-03D
-}.slice();
+]);
 
-internal static slice<float64> j1 = new float64[]{
+internal static slice<float64> j1 = slice<float64>([
     -3.251526395295203422162967e-01D,
     1.893581711430515718062564e-01D,
     -1.3711761352467242914491514e-01D,
@@ -399,9 +399,9 @@ internal static slice<float64> j1 = new float64[]{
     4.329481396640773768835036e-01D,
     5.8181350531954794639333955e-01D,
     -2.7030574577733036112996607e-01D
-}.slice();
+]);
 
-internal static slice<float64> j2 = new float64[]{
+internal static slice<float64> j2 = slice<float64>([
     5.3837518920137802565192769e-02D,
     -1.7841678003393207281244667e-01D,
     9.521746934916464142495821e-03D,
@@ -412,9 +412,9 @@ internal static slice<float64> j2 = new float64[]{
     4.720849184745124761189957e-01D,
     3.122312022520957042957497e-01D,
     7.096213118930231185707277e-02D
-}.slice();
+]);
 
-internal static slice<float64> jM3 = new float64[]{
+internal static slice<float64> jM3 = slice<float64>([
     -3.684042080996403091021151e-01D,
     2.8157665936340887268092661e-01D,
     4.401005480841948348343589e-04D,
@@ -425,9 +425,9 @@ internal static slice<float64> jM3 = new float64[]{
     -2.592737332129663376736604e-01D,
     -1.0241334641061485092351251e-01D,
     -2.3762660886100206491674503e-01D
-}.slice();
+]);
 
-internal static slice<fi> lgamma = new fi[]{
+internal static slice<fi> lgamma = slice<fi>([
     new(3.146492141244545774319734e+00D, 1),
     new(8.003414490659126375852113e+00D, 1),
     new(1.517575735509779707488106e+00D, -1),
@@ -438,9 +438,9 @@ internal static slice<fi> lgamma = new fi[]{
     new(4.5725644770161182299423372e-01D, 1),
     new(-6.363667087767961257654854e-02D, 1),
     new(-1.077385130910300066425564e+01D, -1)
-}.slice();
+]);
 
-internal static slice<float64> log = new float64[]{
+internal static slice<float64> log = slice<float64>([
     1.605231462693062999102599e+00D,
     2.0462560018708770653153909e+00D,
     -1.2841708730962657801275038e+00D,
@@ -451,9 +451,9 @@ internal static slice<float64> log = new float64[]{
     1.0035467127723465801264487e+00D,
     6.0174879014578057187016475e-01D,
     2.161703872847352815363655e+00D
-}.slice();
+]);
 
-internal static slice<float64> logb = new float64[]{
+internal static slice<float64> logb = slice<float64>([
     2.0000000000000000e+00D,
     2.0000000000000000e+00D,
     -2.0000000000000000e+00D,
@@ -464,9 +464,9 @@ internal static slice<float64> logb = new float64[]{
     1.0000000000000000e+00D,
     0.0000000000000000e+00D,
     3.0000000000000000e+00D
-}.slice();
+]);
 
-internal static slice<float64> log10 = new float64[]{
+internal static slice<float64> log10 = slice<float64>([
     6.9714316642508290997617083e-01D,
     8.886776901739320576279124e-01D,
     -5.5770832400658929815908236e-01D,
@@ -477,9 +477,9 @@ internal static slice<float64> log10 = new float64[]{
     4.3583479968917773161304553e-01D,
     2.6133617905227038228626834e-01D,
     9.3881606348649405716214241e-01D
-}.slice();
+]);
 
-internal static slice<float64> log1p = new float64[]{
+internal static slice<float64> log1p = slice<float64>([
     4.8590257759797794104158205e-02D,
     7.4540265965225865330849141e-02D,
     -2.7726407903942672823234024e-03D,
@@ -490,9 +490,9 @@ internal static slice<float64> log1p = new float64[]{
     2.6913947602193238458458594e-02D,
     1.8088493239630770262045333e-02D,
     -9.0865245631588989681559268e-02D
-}.slice();
+]);
 
-internal static slice<float64> log2 = new float64[]{
+internal static slice<float64> log2 = slice<float64>([
     2.3158594707062190618898251e+00D,
     2.9521233862883917703341018e+00D,
     -1.8526669502700329984917062e+00D,
@@ -503,7 +503,7 @@ internal static slice<float64> log2 = new float64[]{
     1.447811865817085365540347e+00D,
     8.6813999540425116282815557e-01D,
     3.118679457227342224364709e+00D
-}.slice();
+]);
 
 internal static slice<array<float64>> modf = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{4.0000000000000000e+00D, 9.7901192488367350108546816e-01D}.array(),
@@ -518,7 +518,7 @@ internal static slice<array<float64>> modf = GoReflect.WithElemDims(new array<fl
     new float64[]{-8.0000000000000000e+00D, -6.8592476857560136238589621e-01D}.array()
 }.slice(), 2);
 
-internal static slice<float32> nextafter32 = new float32[]{
+internal static slice<float32> nextafter32 = slice<float32>([
     4.979012489318848e+00F,
     7.738873004913330e+00F,
     -2.768800258636475e-01F,
@@ -529,9 +529,9 @@ internal static slice<float32> nextafter32 = new float32[]{
     2.727940082550049e+00F,
     1.825308203697205e+00F,
     -8.685923576354980e+00F
-}.slice();
+]);
 
-internal static slice<float64> nextafter64 = new float64[]{
+internal static slice<float64> nextafter64 = slice<float64>([
     4.97901192488367438926388786e+00D,
     7.73887247457810545370193722e+00D,
     -2.7688005719200153853520874e-01D,
@@ -542,9 +542,9 @@ internal static slice<float64> nextafter64 = new float64[]{
     2.72793991043601069534929593e+00D,
     1.82530809168085528249036997e+00D,
     -8.68592476857559958602905681e+00D
-}.slice();
+]);
 
-internal static slice<float64> pow = new float64[]{
+internal static slice<float64> pow = slice<float64>([
     9.5282232631648411840742957e+04D,
     5.4811599352999901232411871e+07D,
     5.2859121715894396531132279e-01D,
@@ -555,9 +555,9 @@ internal static slice<float64> pow = new float64[]{
     5.3449040147551939075312879e+02D,
     6.688182138451414936380374e+01D,
     2.0609869004248742886827439e-09D
-}.slice();
+]);
 
-internal static slice<float64> remainder = new float64[]{
+internal static slice<float64> remainder = slice<float64>([
     4.197615023265299782906368e-02D,
     2.261127525421895434476482e+00D,
     3.231794108794261433104108e-02D,
@@ -568,9 +568,9 @@ internal static slice<float64> remainder = new float64[]{
     -9.117596417440410050403443e-01D,
     8.734595415957246977711748e-01D,
     1.314075231424398637614104e+00D
-}.slice();
+]);
 
-internal static slice<float64> round = new float64[]{
+internal static slice<float64> round = slice<float64>([
     5D,
     8D,
     Copysign(0D, -1D),
@@ -581,9 +581,9 @@ internal static slice<float64> round = new float64[]{
     3D,
     2D,
     -9D
-}.slice();
+]);
 
-internal static slice<bool> signbit = new bool[]{
+internal static slice<bool> signbit = slice<bool>([
     false,
     false,
     true,
@@ -594,9 +594,9 @@ internal static slice<bool> signbit = new bool[]{
     false,
     false,
     true
-}.slice();
+]);
 
-internal static slice<float64> sin = new float64[]{
+internal static slice<float64> sin = slice<float64>([
     -9.6466616586009283766724726e-01D,
     9.9338225271646545763467022e-01D,
     -2.7335587039794393342449301e-01D,
@@ -607,10 +607,10 @@ internal static slice<float64> sin = new float64[]{
     4.019566681155577786649878e-01D,
     9.6778633541687993721617774e-01D,
     -6.734405869050344734943028e-01D
-}.slice();
+]);
 
 // Results for 100000 * Pi + vf[i]
-internal static slice<float64> sinLarge = new float64[]{
+internal static slice<float64> sinLarge = slice<float64>([
     -9.646661658548936063912e-01D,
     9.933822527198506903752e-01D,
     -2.7335587036246899796e-01D,
@@ -621,9 +621,9 @@ internal static slice<float64> sinLarge = new float64[]{
     4.01956668098863248917e-01D,
     9.67786335404528727927e-01D,
     -6.7344058693131973066e-01D
-}.slice();
+]);
 
-internal static slice<float64> sinh = new float64[]{
+internal static slice<float64> sinh = slice<float64>([
     7.2661916084208532301448439e+01D,
     1.1479409110035194500526446e+03D,
     -2.8043136512812518927312641e-01D,
@@ -634,9 +634,9 @@ internal static slice<float64> sinh = new float64[]{
     7.6179893137269146407361477e+00D,
     3.021769180549615819524392e+00D,
     -2.95950575724449499189888e+03D
-}.slice();
+]);
 
-internal static slice<float64> sqrt = new float64[]{
+internal static slice<float64> sqrt = slice<float64>([
     2.2313699659365484748756904e+00D,
     2.7818829009464263511285458e+00D,
     5.2619393496314796848143251e-01D,
@@ -647,9 +647,9 @@ internal static slice<float64> sqrt = new float64[]{
     1.6516476350711159636222979e+00D,
     1.3510396336454586262419247e+00D,
     2.9471892997524949215723329e+00D
-}.slice();
+]);
 
-internal static slice<float64> tan = new float64[]{
+internal static slice<float64> tan = slice<float64>([
     -3.661316565040227801781974e+00D,
     8.64900232648597589369854e+00D,
     -2.8417941955033612725238097e-01D,
@@ -660,10 +660,10 @@ internal static slice<float64> tan = new float64[]{
     -4.389808914752818126249079e-01D,
     -3.843885560201130679995041e+00D,
     9.10988793377685105753416e-01D
-}.slice();
+]);
 
 // Results for 100000 * Pi + vf[i]
-internal static slice<float64> tanLarge = new float64[]{
+internal static slice<float64> tanLarge = slice<float64>([
     -3.66131656475596512705e+00D,
     8.6490023287202547927e+00D,
     -2.841794195104782406e-01D,
@@ -674,9 +674,9 @@ internal static slice<float64> tanLarge = new float64[]{
     -4.38980891453536115952e-01D,
     -3.84388555942723509071e+00D,
     9.1098879344275101051e-01D
-}.slice();
+]);
 
-internal static slice<float64> tanh = new float64[]{
+internal static slice<float64> tanh = slice<float64>([
     9.9990531206936338549262119e-01D,
     9.9999962057085294197613294e-01D,
     -2.7001505097318677233756845e-01D,
@@ -687,9 +687,9 @@ internal static slice<float64> tanh = new float64[]{
     9.9149409509772875982054701e-01D,
     9.4936501296239685514466577e-01D,
     -9.9999994291374030946055701e-01D
-}.slice();
+]);
 
-internal static slice<float64> trunc = new float64[]{
+internal static slice<float64> trunc = slice<float64>([
     4.0000000000000000e+00D,
     7.0000000000000000e+00D,
     Copysign(0D, -1D),
@@ -700,9 +700,9 @@ internal static slice<float64> trunc = new float64[]{
     2.0000000000000000e+00D,
     1.0000000000000000e+00D,
     -8.0000000000000000e+00D
-}.slice();
+]);
 
-internal static slice<float64> y0 = new float64[]{
+internal static slice<float64> y0 = slice<float64>([
     -3.053399153780788357534855e-01D,
     1.7437227649515231515503649e-01D,
     -8.6221781263678836910392572e-01D,
@@ -713,9 +713,9 @@ internal static slice<float64> y0 = new float64[]{
     4.5399790746668954555205502e-01D,
     4.8290004112497761007536522e-01D,
     2.7036697826604756229601611e-01D
-}.slice();
+]);
 
-internal static slice<float64> y1 = new float64[]{
+internal static slice<float64> y1 = slice<float64>([
     0.15494213737457922210218611D,
     -0.2165955142081145245075746D,
     -2.4644949631241895201032829D,
@@ -726,9 +726,9 @@ internal static slice<float64> y1 = new float64[]{
     0.2380116417809914424860165D,
     -0.20849492979459761009678934D,
     0.0242503179793232308250804D
-}.slice();
+]);
 
-internal static slice<float64> y2 = new float64[]{
+internal static slice<float64> y2 = slice<float64>([
     0.3675780219390303613394936D,
     -0.23034826393250119879267257D,
     -16.939677983817727205631397D,
@@ -739,9 +739,9 @@ internal static slice<float64> y2 = new float64[]{
     -0.2794987252299739821654982D,
     -0.7113490692587462579757954D,
     -0.2647831587821263302087457D
-}.slice();
+]);
 
-internal static slice<float64> yM3 = new float64[]{
+internal static slice<float64> yM3 = slice<float64>([
     -0.14035984421094849100895341D,
     -0.097535139617792072703973D,
     242.25775994555580176377379D,
@@ -752,88 +752,88 @@ internal static slice<float64> yM3 = new float64[]{
     0.64784284687568332737963658D,
     1.3503631555901938037008443D,
     0.1461869756579956803341844D
-}.slice();
+]);
 
 // arguments and expected results for special cases
-internal static slice<float64> vfacosSC = new float64[]{
+internal static slice<float64> vfacosSC = slice<float64>([
     -Pi,
     1D,
     Pi,
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> acosSC = new float64[]{
+internal static slice<float64> acosSC = slice<float64>([
     NaN(),
     0D,
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfacoshSC = new float64[]{
+internal static slice<float64> vfacoshSC = slice<float64>([
     Inf(-1),
     0.5D,
     1D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> acoshSC = new float64[]{
+internal static slice<float64> acoshSC = slice<float64>([
     NaN(),
     NaN(),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfasinSC = new float64[]{
+internal static slice<float64> vfasinSC = slice<float64>([
     -Pi,
     Copysign(0D, -1D),
     0D,
     Pi,
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> asinSC = new float64[]{
+internal static slice<float64> asinSC = slice<float64>([
     NaN(),
     Copysign(0D, -1D),
     0D,
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfasinhSC = new float64[]{
+internal static slice<float64> vfasinhSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> asinhSC = new float64[]{
+internal static slice<float64> asinhSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfatanSC = new float64[]{
+internal static slice<float64> vfatanSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> atanSC = new float64[]{
+internal static slice<float64> atanSC = slice<float64>([
     -Pi / 2D,
     Copysign(0D, -1D),
     0D,
     Pi / 2D,
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfatanhSC = new float64[]{
+internal static slice<float64> vfatanhSC = slice<float64>([
     Inf(-1),
     -Pi,
     -1D,
@@ -843,9 +843,9 @@ internal static slice<float64> vfatanhSC = new float64[]{
     Pi,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> atanhSC = new float64[]{
+internal static slice<float64> atanhSC = slice<float64>([
     NaN(),
     NaN(),
     Inf(-1),
@@ -855,7 +855,7 @@ internal static slice<float64> atanhSC = new float64[]{
     NaN(),
     NaN(),
     NaN()
-}.slice();
+]);
 
 internal static slice<array<float64>> vfatan2SC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(-1), Inf(-1)}.array(),
@@ -897,63 +897,63 @@ internal static slice<array<float64>> vfatan2SC = GoReflect.WithElemDims(new arr
     new float64[]{NaN(), NaN()}.array()
 }.slice(), 2);
 
-internal static slice<float64> atan2SC = new float64[]{
-    -3D * Pi / 4D, // atan2(-Inf, -Inf)
-    -Pi / 2D, // atan2(-Inf, -Pi)
-    -Pi / 2D, // atan2(-Inf, +0)
-    -Pi / 2D, // atan2(-Inf, +Pi)
-    -Pi / 4D, // atan2(-Inf, +Inf)
-    NaN(), // atan2(-Inf, NaN)
-    -Pi, // atan2(-Pi, -Inf)
-    -Pi / 2D, // atan2(-Pi, +0)
+internal static slice<float64> atan2SC = slice<float64>([
+    -3D * Pi / 4D,     // atan2(-Inf, -Inf)
+    -Pi / 2D,          // atan2(-Inf, -Pi)
+    -Pi / 2D,          // atan2(-Inf, +0)
+    -Pi / 2D,          // atan2(-Inf, +Pi)
+    -Pi / 4D,          // atan2(-Inf, +Inf)
+    NaN(),             // atan2(-Inf, NaN)
+    -Pi,               // atan2(-Pi, -Inf)
+    -Pi / 2D,          // atan2(-Pi, +0)
     Copysign(0D, -1D), // atan2(-Pi, Inf)
-    NaN(), // atan2(-Pi, NaN)
-    -Pi, // atan2(-0, -Inf)
-    -Pi, // atan2(-0, -Pi)
-    -Pi, // atan2(-0, -0)
+    NaN(),             // atan2(-Pi, NaN)
+    -Pi,               // atan2(-0, -Inf)
+    -Pi,               // atan2(-0, -Pi)
+    -Pi,               // atan2(-0, -0)
     Copysign(0D, -1D), // atan2(-0, +0)
     Copysign(0D, -1D), // atan2(-0, +Pi)
     Copysign(0D, -1D), // atan2(-0, +Inf)
-    NaN(), // atan2(-0, NaN)
-    Pi, // atan2(+0, -Inf)
-    Pi, // atan2(+0, -Pi)
-    Pi, // atan2(+0, -0)
-    0D, // atan2(+0, +0)
-    0D, // atan2(+0, +Pi)
-    0D, // atan2(+0, +Inf)
-    NaN(), // atan2(+0, NaN)
-    Pi, // atan2(+Pi, -Inf)
-    Pi / 2D, // atan2(+Pi, +0)
-    0D, // atan2(+Pi, +Inf)
-    0D, // atan2(+1, +Inf)
+    NaN(),             // atan2(-0, NaN)
+    Pi,                // atan2(+0, -Inf)
+    Pi,                // atan2(+0, -Pi)
+    Pi,                // atan2(+0, -0)
+    0D,                // atan2(+0, +0)
+    0D,                // atan2(+0, +Pi)
+    0D,                // atan2(+0, +Inf)
+    NaN(),             // atan2(+0, NaN)
+    Pi,                // atan2(+Pi, -Inf)
+    Pi / 2D,           // atan2(+Pi, +0)
+    0D,                // atan2(+Pi, +Inf)
+    0D,                // atan2(+1, +Inf)
     Copysign(0D, -1D), // atan2(-1, +Inf)
-    NaN(), // atan2(+Pi, NaN)
-    3D * Pi / 4D, // atan2(+Inf, -Inf)
-    Pi / 2D, // atan2(+Inf, -Pi)
-    Pi / 2D, // atan2(+Inf, +0)
-    Pi / 2D, // atan2(+Inf, +Pi)
-    Pi / 4D, // atan2(+Inf, +Inf)
-    NaN(), // atan2(+Inf, NaN)
-    NaN() // atan2(NaN, NaN)
-}.slice();
+    NaN(),             // atan2(+Pi, NaN)
+    3D * Pi / 4D,      // atan2(+Inf, -Inf)
+    Pi / 2D,           // atan2(+Inf, -Pi)
+    Pi / 2D,           // atan2(+Inf, +0)
+    Pi / 2D,           // atan2(+Inf, +Pi)
+    Pi / 4D,           // atan2(+Inf, +Inf)
+    NaN(),             // atan2(+Inf, NaN)
+    NaN()              // atan2(NaN, NaN)
+]);
 
-internal static slice<float64> vfcbrtSC = new float64[]{
+internal static slice<float64> vfcbrtSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> cbrtSC = new float64[]{
+internal static slice<float64> cbrtSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfceilSC = new float64[]{
+internal static slice<float64> vfceilSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
@@ -967,15 +967,15 @@ internal static slice<float64> vfceilSC = new float64[]{
     -4503599627370495D,
     9007199254740992D,
     -9007199254740992D
-}.slice();
+]);
 
-internal static slice<float64> ceilBaseSC = new float64[]{
+internal static slice<float64> ceilBaseSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
 internal static slice<float64> ceilSC = append(ceilBaseSC,
     4503599627370495D,
@@ -1007,47 +1007,47 @@ internal static slice<float64> truncSC = append(ceilBaseSC,
     9007199254740992D,
     -9007199254740992D);
 
-internal static slice<float64> vfcopysignSC = new float64[]{
+internal static slice<float64> vfcopysignSC = slice<float64>([
     Inf(-1),
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> copysignSC = new float64[]{
+internal static slice<float64> copysignSC = slice<float64>([
     Inf(-1),
     Inf(-1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfcosSC = new float64[]{
+internal static slice<float64> vfcosSC = slice<float64>([
     Inf(-1),
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> cosSC = new float64[]{
+internal static slice<float64> cosSC = slice<float64>([
     NaN(),
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfcoshSC = new float64[]{
+internal static slice<float64> vfcoshSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> coshSC = new float64[]{
+internal static slice<float64> coshSC = slice<float64>([
     Inf(1),
     1D,
     1D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vferfSC = new float64[]{
+internal static slice<float64> vferfSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
@@ -1055,9 +1055,9 @@ internal static slice<float64> vferfSC = new float64[]{
     NaN(),
     -1000D,
     1000D
-}.slice();
+]);
 
-internal static slice<float64> erfSC = new float64[]{
+internal static slice<float64> erfSC = slice<float64>([
     -1D,
     Copysign(0D, -1D),
     0D,
@@ -1065,61 +1065,61 @@ internal static slice<float64> erfSC = new float64[]{
     NaN(),
     -1D,
     1D
-}.slice();
+]);
 
-internal static slice<float64> vferfcSC = new float64[]{
+internal static slice<float64> vferfcSC = slice<float64>([
     Inf(-1),
     Inf(1),
     NaN(),
     -1000D,
     1000D
-}.slice();
+]);
 
-internal static slice<float64> erfcSC = new float64[]{
+internal static slice<float64> erfcSC = slice<float64>([
     2D,
     0D,
     NaN(),
     2D,
     0D
-}.slice();
+]);
 
-internal static slice<float64> vferfinvSC = new float64[]{
+internal static slice<float64> vferfinvSC = slice<float64>([
     1D,
     -1D,
     0D,
     Inf(-1),
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> erfinvSC = new float64[]{
+internal static slice<float64> erfinvSC = slice<float64>([
     Inf(+1),
     Inf(-1),
     0D,
     NaN(),
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vferfcinvSC = new float64[]{
+internal static slice<float64> vferfcinvSC = slice<float64>([
     0D,
     2D,
     1D,
     Inf(1),
     Inf(-1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> erfcinvSC = new float64[]{
+internal static slice<float64> erfcinvSC = slice<float64>([
     Inf(+1),
     Inf(-1),
     0D,
     NaN(),
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfexpSC = new float64[]{
+internal static slice<float64> vfexpSC = slice<float64>([
     Inf(-1),
     -2000D,
     2000D,
@@ -1135,9 +1135,9 @@ internal static slice<float64> vfexpSC = new float64[]{
     3.725290298461915e-09D,
     // denormal
     -740D
-}.slice();
+]);
 
-internal static slice<float64> expSC = new float64[]{
+internal static slice<float64> expSC = slice<float64>([
     0D,
     0D,
     Inf(1),
@@ -1149,9 +1149,9 @@ internal static slice<float64> expSC = new float64[]{
     2.718281828459045D,
     1.0000000037252903D,
     4.2e-322D
-}.slice();
+]);
 
-internal static slice<float64> vfexp2SC = new float64[]{
+internal static slice<float64> vfexp2SC = slice<float64>([
     Inf(-1),
     -2000D,
     2000D,
@@ -1163,9 +1163,9 @@ internal static slice<float64> vfexp2SC = new float64[]{
     -1.07399999999999e+03D,
     // near zero
     3.725290298461915e-09D
-}.slice();
+]);
 
-internal static slice<float64> exp2SC = new float64[]{
+internal static slice<float64> exp2SC = slice<float64>([
     0D,
     0D,
     Inf(1),
@@ -1174,9 +1174,9 @@ internal static slice<float64> exp2SC = new float64[]{
     Inf(1),
     5e-324D,
     1.0000000025821745D
-}.slice();
+]);
 
-internal static slice<float64> vfexpm1SC = new float64[]{
+internal static slice<float64> vfexpm1SC = slice<float64>([
     Inf(-1),
     -710D,
     Copysign(0D, -1D),
@@ -1184,9 +1184,9 @@ internal static slice<float64> vfexpm1SC = new float64[]{
     710D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> expm1SC = new float64[]{
+internal static slice<float64> expm1SC = slice<float64>([
     -1D,
     -1D,
     Copysign(0D, -1D),
@@ -1194,23 +1194,23 @@ internal static slice<float64> expm1SC = new float64[]{
     Inf(1),
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vffabsSC = new float64[]{
+internal static slice<float64> vffabsSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> fabsSC = new float64[]{
+internal static slice<float64> fabsSC = slice<float64>([
     Inf(1),
     0D,
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
 internal static slice<array<float64>> vffdimSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(-1), Inf(-1)}.array(),
@@ -1250,7 +1250,7 @@ internal static slice<array<float64>> vffdim2SC = GoReflect.WithElemDims(new arr
     new float64[]{nan, nan}.array()
 }.slice(), 2);
 
-internal static slice<float64> fdimSC = new float64[]{
+internal static slice<float64> fdimSC = slice<float64>([
     NaN(),
     0D,
     NaN(),
@@ -1266,9 +1266,9 @@ internal static slice<float64> fdimSC = new float64[]{
     NaN(),
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> fmaxSC = new float64[]{
+internal static slice<float64> fmaxSC = slice<float64>([
     Inf(-1),
     Inf(1),
     NaN(),
@@ -1284,9 +1284,9 @@ internal static slice<float64> fmaxSC = new float64[]{
     NaN(),
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> fminSC = new float64[]{
+internal static slice<float64> fminSC = slice<float64>([
     Inf(-1),
     Inf(-1),
     Inf(-1),
@@ -1302,7 +1302,7 @@ internal static slice<float64> fminSC = new float64[]{
     NaN(),
     NaN(),
     NaN()
-}.slice();
+]);
 
 internal static slice<array<float64>> vffmodSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(-1), Inf(-1)}.array(),
@@ -1341,58 +1341,58 @@ internal static slice<array<float64>> vffmodSC = GoReflect.WithElemDims(new arra
     new float64[]{NaN(), NaN()}.array()
 }.slice(), 2);
 
-internal static slice<float64> fmodSC = new float64[]{
-    NaN(), // fmod(-Inf, -Inf)
-    NaN(), // fmod(-Inf, -Pi)
-    NaN(), // fmod(-Inf, 0)
-    NaN(), // fmod(-Inf, Pi)
-    NaN(), // fmod(-Inf, +Inf)
-    NaN(), // fmod(-Inf, NaN)
-    -Pi, // fmod(-Pi, -Inf)
-    NaN(), // fmod(-Pi, 0)
-    -Pi, // fmod(-Pi, +Inf)
-    NaN(), // fmod(-Pi, NaN)
+internal static slice<float64> fmodSC = slice<float64>([
+    NaN(),             // fmod(-Inf, -Inf)
+    NaN(),             // fmod(-Inf, -Pi)
+    NaN(),             // fmod(-Inf, 0)
+    NaN(),             // fmod(-Inf, Pi)
+    NaN(),             // fmod(-Inf, +Inf)
+    NaN(),             // fmod(-Inf, NaN)
+    -Pi,               // fmod(-Pi, -Inf)
+    NaN(),             // fmod(-Pi, 0)
+    -Pi,               // fmod(-Pi, +Inf)
+    NaN(),             // fmod(-Pi, NaN)
     Copysign(0D, -1D), // fmod(-0, -Inf)
-    NaN(), // fmod(-0, 0)
+    NaN(),             // fmod(-0, 0)
     Copysign(0D, -1D), // fmod(-0, Inf)
-    NaN(), // fmod(-0, NaN)
-    0D, // fmod(0, -Inf)
-    NaN(), // fmod(0, 0)
-    0D, // fmod(0, +Inf)
-    NaN(), // fmod(0, NaN)
-    Pi, // fmod(Pi, -Inf)
-    NaN(), // fmod(Pi, 0)
-    Pi, // fmod(Pi, +Inf)
-    NaN(), // fmod(Pi, NaN)
-    NaN(), // fmod(+Inf, -Inf)
-    NaN(), // fmod(+Inf, -Pi)
-    NaN(), // fmod(+Inf, 0)
-    NaN(), // fmod(+Inf, Pi)
-    NaN(), // fmod(+Inf, +Inf)
-    NaN(), // fmod(+Inf, NaN)
-    NaN(), // fmod(NaN, -Inf)
-    NaN(), // fmod(NaN, -Pi)
-    NaN(), // fmod(NaN, 0)
-    NaN(), // fmod(NaN, Pi)
-    NaN(), // fmod(NaN, +Inf)
-    NaN() // fmod(NaN, NaN)
-}.slice();
+    NaN(),             // fmod(-0, NaN)
+    0D,                // fmod(0, -Inf)
+    NaN(),             // fmod(0, 0)
+    0D,                // fmod(0, +Inf)
+    NaN(),             // fmod(0, NaN)
+    Pi,                // fmod(Pi, -Inf)
+    NaN(),             // fmod(Pi, 0)
+    Pi,                // fmod(Pi, +Inf)
+    NaN(),             // fmod(Pi, NaN)
+    NaN(),             // fmod(+Inf, -Inf)
+    NaN(),             // fmod(+Inf, -Pi)
+    NaN(),             // fmod(+Inf, 0)
+    NaN(),             // fmod(+Inf, Pi)
+    NaN(),             // fmod(+Inf, +Inf)
+    NaN(),             // fmod(+Inf, NaN)
+    NaN(),             // fmod(NaN, -Inf)
+    NaN(),             // fmod(NaN, -Pi)
+    NaN(),             // fmod(NaN, 0)
+    NaN(),             // fmod(NaN, Pi)
+    NaN(),             // fmod(NaN, +Inf)
+    NaN()              // fmod(NaN, NaN)
+]);
 
-internal static slice<float64> vffrexpSC = new float64[]{
+internal static slice<float64> vffrexpSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<fi> frexpSC = new fi[]{
+internal static slice<fi> frexpSC = slice<fi>([
     new(Inf(-1), 0),
     new(Copysign(0D, -1D), 0),
     new(0D, 0),
     new(Inf(1), 0),
     new(NaN(), 0)
-}.slice();
+]);
 
 internal static slice<array<float64>> vfgamma = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(1), Inf(1)}.array(),
@@ -1500,7 +1500,7 @@ internal static slice<array<float64>> vfhypotSC = GoReflect.WithElemDims(new arr
     new float64[]{NaN(), NaN()}.array()
 }.slice(), 2);
 
-internal static slice<float64> hypotSC = new float64[]{
+internal static slice<float64> hypotSC = slice<float64>([
     Inf(1),
     Inf(1),
     Inf(1),
@@ -1520,51 +1520,51 @@ internal static slice<float64> hypotSC = new float64[]{
     NaN(),
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<nint> ilogbSC = new nint[]{
+internal static slice<nint> ilogbSC = slice<nint>([
     MaxInt32,
     MinInt32,
     MaxInt32,
     MaxInt32
-}.slice();
+]);
 
-internal static slice<float64> vfj0SC = new float64[]{
+internal static slice<float64> vfj0SC = slice<float64>([
     Inf(-1),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> j0SC = new float64[]{
+internal static slice<float64> j0SC = slice<float64>([
     0D,
     1D,
     0D,
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> j1SC = new float64[]{
+internal static slice<float64> j1SC = slice<float64>([
     0D,
     0D,
     0D,
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> j2SC = new float64[]{
+internal static slice<float64> j2SC = slice<float64>([
     0D,
     0D,
     0D,
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> jM3SC = new float64[]{
+internal static slice<float64> jM3SC = slice<float64>([
     0D,
     0D,
     0D,
     NaN()
-}.slice();
+]);
 
-internal static slice<fi> vfldexpSC = new fi[]{
+internal static slice<fi> vfldexpSC = slice<fi>([
     new(0D, 0),
     new(0D, -1075),
     new(0D, 1024),
@@ -1578,9 +1578,9 @@ internal static slice<fi> vfldexpSC = new fi[]{
     new(NaN(), -1024),
     new(10D, unchecked((nint)(72057594037927936L))),
     new(10D, (nint)(-(unchecked((nint)(72057594037927936L)))))
-}.slice();
+]);
 
-internal static slice<float64> ldexpSC = new float64[]{
+internal static slice<float64> ldexpSC = slice<float64>([
     0D,
     0D,
     0D,
@@ -1594,9 +1594,9 @@ internal static slice<float64> ldexpSC = new float64[]{
     NaN(),
     Inf(1),
     0D
-}.slice();
+]);
 
-internal static slice<float64> vflgammaSC = new float64[]{
+internal static slice<float64> vflgammaSC = slice<float64>([
     Inf(-1),
     -3D,
     0D,
@@ -1604,9 +1604,9 @@ internal static slice<float64> vflgammaSC = new float64[]{
     2D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<fi> lgammaSC = new fi[]{
+internal static slice<fi> lgammaSC = slice<fi>([
     new(Inf(-1), 1),
     new(Inf(1), 1),
     new(Inf(1), 1),
@@ -1614,9 +1614,9 @@ internal static slice<fi> lgammaSC = new fi[]{
     new(0D, 1),
     new(Inf(1), 1),
     new(NaN(), 1)
-}.slice();
+]);
 
-internal static slice<float64> vflogSC = new float64[]{
+internal static slice<float64> vflogSC = slice<float64>([
     Inf(-1),
     -Pi,
     Copysign(0D, -1D),
@@ -1624,9 +1624,9 @@ internal static slice<float64> vflogSC = new float64[]{
     1D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> logSC = new float64[]{
+internal static slice<float64> logSC = slice<float64>([
     NaN(),
     NaN(),
     Inf(-1),
@@ -1634,23 +1634,23 @@ internal static slice<float64> logSC = new float64[]{
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vflogbSC = new float64[]{
+internal static slice<float64> vflogbSC = slice<float64>([
     Inf(-1),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> logbSC = new float64[]{
+internal static slice<float64> logbSC = slice<float64>([
     Inf(1),
     Inf(-1),
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vflog1pSC = new float64[]{
+internal static slice<float64> vflog1pSC = slice<float64>([
     Inf(-1),
     -Pi,
     -1D,
@@ -1659,9 +1659,9 @@ internal static slice<float64> vflog1pSC = new float64[]{
     Inf(1),
     NaN(),
     4503599627370496.5D // Issue #29488
-}.slice();
+]);
 
-internal static slice<float64> log1pSC = new float64[]{
+internal static slice<float64> log1pSC = slice<float64>([
     NaN(),
     NaN(),
     Inf(-1),
@@ -1670,14 +1670,14 @@ internal static slice<float64> log1pSC = new float64[]{
     Inf(1),
     NaN(),
     36.04365338911715D // Issue #29488
-}.slice();
+]);
 
-internal static slice<float64> vfmodfSC = new float64[]{
+internal static slice<float64> vfmodfSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     Inf(1),
     NaN()
-}.slice();
+]);
 
 internal static slice<array<float64>> modfSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(-1), NaN()}.array(), // [2]float64{Copysign(0, -1), Inf(-1)},
@@ -1699,7 +1699,7 @@ internal static slice<array<float32>> vfnextafter32SC = GoReflect.WithElemDims(n
     new float32[]{(float32)NaN(), (float32)NaN()}.array()
 }.slice(), 2);
 
-internal static slice<float32> nextafter32SC = new float32[]{
+internal static slice<float32> nextafter32SC = slice<float32>([
     0F,
     0F,
     -1.401298464e-45F, // Float32frombits(0x80000001)
@@ -1710,7 +1710,7 @@ internal static slice<float32> nextafter32SC = new float32[]{
     -1.401298464e-45F, // Float32frombits(0x80000001)
     (float32)NaN(),
     (float32)NaN()
-}.slice();
+]);
 
 internal static slice<array<float64>> vfnextafter64SC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{0D, 0D}.array(),
@@ -1725,7 +1725,7 @@ internal static slice<array<float64>> vfnextafter64SC = GoReflect.WithElemDims(n
     new float64[]{NaN(), NaN()}.array()
 }.slice(), 2);
 
-internal static slice<float64> nextafter64SC = new float64[]{
+internal static slice<float64> nextafter64SC = slice<float64>([
     0D,
     0D,
     -4.9406564584124654418e-324D, // Float64frombits(0x8000000000000001)
@@ -1736,7 +1736,7 @@ internal static slice<float64> nextafter64SC = new float64[]{
     -4.9406564584124654418e-324D, // Float64frombits(0x8000000000000001)
     NaN(),
     NaN()
-}.slice();
+]);
 
 internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(-1), -Pi}.array(),
@@ -1825,89 +1825,89 @@ internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array
     new float64[]{Copysign(0D, -1D), -(9007199254740991L)}.array()
 }.slice(), 2);
 
-internal static slice<float64> powSC = new float64[]{
-    0D, // pow(-Inf, -Pi)
+internal static slice<float64> powSC = slice<float64>([
+    0D,                // pow(-Inf, -Pi)
     Copysign(0D, -1D), // pow(-Inf, -3)
-    1D, // pow(-Inf, -0)
-    1D, // pow(-Inf, +0)
-    Inf(-1), // pow(-Inf, 1)
-    Inf(-1), // pow(-Inf, 3)
-    Inf(1), // pow(-Inf, Pi)
-    Inf(1), // pow(-Inf, 0.5)
-    NaN(), // pow(-Inf, NaN)
-    0D, // pow(-Pi, -Inf)
-    NaN(), // pow(-Pi, -Pi)
-    1D, // pow(-Pi, -0)
-    1D, // pow(-Pi, +0)
-    -Pi, // pow(-Pi, 1)
-    NaN(), // pow(-Pi, Pi)
-    Inf(1), // pow(-Pi, +Inf)
-    NaN(), // pow(-Pi, NaN)
-    1D, // pow(-1, -Inf) IEEE 754-2008
-    1D, // pow(-1, +Inf) IEEE 754-2008
-    NaN(), // pow(-1, NaN)
-    Inf(1), // pow(-1/2, -Inf)
-    0D, // pow(-1/2, +Inf)
-    Inf(1), // pow(-0, -Inf)
-    Inf(1), // pow(-0, -Pi)
-    Inf(1), // pow(-0, -0.5)
-    Inf(-1), // pow(-0, -3) IEEE 754-2008
+    1D,                // pow(-Inf, -0)
+    1D,                // pow(-Inf, +0)
+    Inf(-1),           // pow(-Inf, 1)
+    Inf(-1),           // pow(-Inf, 3)
+    Inf(1),            // pow(-Inf, Pi)
+    Inf(1),            // pow(-Inf, 0.5)
+    NaN(),             // pow(-Inf, NaN)
+    0D,                // pow(-Pi, -Inf)
+    NaN(),             // pow(-Pi, -Pi)
+    1D,                // pow(-Pi, -0)
+    1D,                // pow(-Pi, +0)
+    -Pi,               // pow(-Pi, 1)
+    NaN(),             // pow(-Pi, Pi)
+    Inf(1),            // pow(-Pi, +Inf)
+    NaN(),             // pow(-Pi, NaN)
+    1D,                // pow(-1, -Inf) IEEE 754-2008
+    1D,                // pow(-1, +Inf) IEEE 754-2008
+    NaN(),             // pow(-1, NaN)
+    Inf(1),            // pow(-1/2, -Inf)
+    0D,                // pow(-1/2, +Inf)
+    Inf(1),            // pow(-0, -Inf)
+    Inf(1),            // pow(-0, -Pi)
+    Inf(1),            // pow(-0, -0.5)
+    Inf(-1),           // pow(-0, -3) IEEE 754-2008
     Copysign(0D, -1D), // pow(-0, 3) IEEE 754-2008
-    0D, // pow(-0, +Pi)
-    0D, // pow(-0, 0.5)
-    0D, // pow(-0, +Inf)
-    Inf(1), // pow(+0, -Inf)
-    Inf(1), // pow(+0, -Pi)
-    Inf(1), // pow(+0, -3)
-    1D, // pow(+0, -0)
-    1D, // pow(+0, +0)
-    0D, // pow(+0, 3)
-    0D, // pow(+0, +Pi)
-    0D, // pow(+0, +Inf)
-    NaN(), // pow(+0, NaN)
-    Inf(1), // pow(1/2, -Inf)
-    0D, // pow(1/2, +Inf)
-    1D, // pow(1, -Inf) IEEE 754-2008
-    1D, // pow(1, +Inf) IEEE 754-2008
-    1D, // pow(1, NaN) IEEE 754-2008
-    0D, // pow(+Pi, -Inf)
-    1D, // pow(+Pi, -0)
-    1D, // pow(+Pi, +0)
-    Pi, // pow(+Pi, 1)
-    Inf(1), // pow(+Pi, +Inf)
-    NaN(), // pow(+Pi, NaN)
-    0D, // pow(+Inf, -Pi)
-    1D, // pow(+Inf, -0)
-    1D, // pow(+Inf, +0)
-    Inf(1), // pow(+Inf, 1)
-    Inf(1), // pow(+Inf, Pi)
-    NaN(), // pow(+Inf, NaN)
-    NaN(), // pow(NaN, -Pi)
-    1D, // pow(NaN, -0)
-    1D, // pow(NaN, +0)
-    NaN(), // pow(NaN, 1)
-    NaN(), // pow(NaN, +Pi)
-    NaN(), // pow(NaN, NaN)
+    0D,                // pow(-0, +Pi)
+    0D,                // pow(-0, 0.5)
+    0D,                // pow(-0, +Inf)
+    Inf(1),            // pow(+0, -Inf)
+    Inf(1),            // pow(+0, -Pi)
+    Inf(1),            // pow(+0, -3)
+    1D,                // pow(+0, -0)
+    1D,                // pow(+0, +0)
+    0D,                // pow(+0, 3)
+    0D,                // pow(+0, +Pi)
+    0D,                // pow(+0, +Inf)
+    NaN(),             // pow(+0, NaN)
+    Inf(1),            // pow(1/2, -Inf)
+    0D,                // pow(1/2, +Inf)
+    1D,                // pow(1, -Inf) IEEE 754-2008
+    1D,                // pow(1, +Inf) IEEE 754-2008
+    1D,                // pow(1, NaN) IEEE 754-2008
+    0D,                // pow(+Pi, -Inf)
+    1D,                // pow(+Pi, -0)
+    1D,                // pow(+Pi, +0)
+    Pi,                // pow(+Pi, 1)
+    Inf(1),            // pow(+Pi, +Inf)
+    NaN(),             // pow(+Pi, NaN)
+    0D,                // pow(+Inf, -Pi)
+    1D,                // pow(+Inf, -0)
+    1D,                // pow(+Inf, +0)
+    Inf(1),            // pow(+Inf, 1)
+    Inf(1),            // pow(+Inf, Pi)
+    NaN(),             // pow(+Inf, NaN)
+    NaN(),             // pow(NaN, -Pi)
+    1D,                // pow(NaN, -0)
+    1D,                // pow(NaN, +0)
+    NaN(),             // pow(NaN, 1)
+    NaN(),             // pow(NaN, +Pi)
+    NaN(),             // pow(NaN, NaN)
 
     // Issue #7394 overflow checks
-    Inf(1), // pow(2, float64(1 << 32))
-    0D, // pow(2, -float64(1 << 32))
+    Inf(1),  // pow(2, float64(1 << 32))
+    0D,      // pow(2, -float64(1 << 32))
     Inf(-1), // pow(-2, float64(1<<32 + 1))
-    0D, // pow(1/2, float64(1 << 45))
-    Inf(1), // pow(1/2, -float64(1 << 45))
-    Inf(1), // pow(Nextafter(1, 2), float64(1 << 63))
-    0D, // pow(Nextafter(1, -2), float64(1 << 63))
-    0D, // pow(Nextafter(-1, 2), float64(1 << 63))
-    Inf(1), // pow(Nextafter(-1, -2), float64(1 << 63))
+    0D,      // pow(1/2, float64(1 << 45))
+    Inf(1),  // pow(1/2, -float64(1 << 45))
+    Inf(1),  // pow(Nextafter(1, 2), float64(1 << 63))
+    0D,      // pow(Nextafter(1, -2), float64(1 << 63))
+    0D,      // pow(Nextafter(-1, 2), float64(1 << 63))
+    Inf(1),  // pow(Nextafter(-1, -2), float64(1 << 63))
 
     // Issue #57465
-    0D, // pow(-0, 1e19)
-    Inf(1), // pow(-0, -1e19)
+    0D,                // pow(-0, 1e19)
+    Inf(1),            // pow(-0, -1e19)
     Copysign(0D, -1D), // pow(-0, 1<<53 -1)
-    Inf(-1) // pow(-0, -(1<<53 -1))
-}.slice();
+    Inf(-1)            // pow(-0, -(1<<53 -1))
+]);
 
-internal static slice<nint> vfpow10SC = new nint[]{
+internal static slice<nint> vfpow10SC = slice<nint>([
     MinInt32,
     -324,
     -323,
@@ -1923,25 +1923,25 @@ internal static slice<nint> vfpow10SC = new nint[]{
     308,
     309,
     MaxInt32
-}.slice();
+]);
 
-internal static slice<float64> pow10SC = new float64[]{
-    0D, // pow10(MinInt32)
-    0D, // pow10(-324)
+internal static slice<float64> pow10SC = slice<float64>([
+    0D,        // pow10(MinInt32)
+    0D,        // pow10(-324)
     1.0e-323D, // pow10(-323)
-    1.0e-50D, // pow10(-50)
-    1.0e-22D, // pow10(-22)
-    1.0e-1D, // pow10(-1)
-    1.0e0D, // pow10(0)
-    1.0e1D, // pow10(1)
-    1.0e22D, // pow10(22)
-    1.0e50D, // pow10(50)
-    1.0e100D, // pow10(100)
-    1.0e200D, // pow10(200)
-    1.0e308D, // pow10(308)
-    Inf(1), // pow10(309)
-    Inf(1) // pow10(MaxInt32)
-}.slice();
+    1.0e-50D,  // pow10(-50)
+    1.0e-22D,  // pow10(-22)
+    1.0e-1D,   // pow10(-1)
+    1.0e0D,    // pow10(0)
+    1.0e1D,    // pow10(1)
+    1.0e22D,   // pow10(22)
+    1.0e50D,   // pow10(50)
+    1.0e100D,  // pow10(100)
+    1.0e200D,  // pow10(200)
+    1.0e308D,  // pow10(308)
+    Inf(1),    // pow10(309)
+    Inf(1)     // pow10(MaxInt32)
+]);
 
 internal static slice<array<float64>> vfroundSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{0D, 0D}.array(),
@@ -1956,7 +1956,7 @@ internal static slice<array<float64>> vfroundSC = GoReflect.WithElemDims(new arr
     new float64[]{2251799813685249.5D, 2251799813685250D}.array(), // 1 bit fraction
     new float64[]{2251799813685250.5D, 2251799813685251D}.array(),
     new float64[]{4503599627370495.5D, 4503599627370496D}.array(), // 1 bit fraction, rounding to 0 bit fraction
-    new float64[]{4503599627370497D, 4503599627370497D}.array() // large integer
+    new float64[]{4503599627370497D, 4503599627370497D}.array()    // large integer
 }.slice(), 2);
 
 internal static slice<array<float64>> vfroundEvenSC = GoReflect.WithElemDims(new array<float64>[]{
@@ -1972,58 +1972,58 @@ internal static slice<array<float64>> vfroundEvenSC = GoReflect.WithElemDims(new
     new float64[]{2251799813685249.5D, 2251799813685250D}.array(), // 1 bit fraction
     new float64[]{2251799813685250.5D, 2251799813685250D}.array(),
     new float64[]{4503599627370495.5D, 4503599627370496D}.array(), // 1 bit fraction, rounding to 0 bit fraction
-    new float64[]{4503599627370497D, 4503599627370497D}.array() // large integer
+    new float64[]{4503599627370497D, 4503599627370497D}.array()    // large integer
 }.slice(), 2);
 
-internal static slice<float64> vfsignbitSC = new float64[]{
+internal static slice<float64> vfsignbitSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<bool> signbitSC = new bool[]{
+internal static slice<bool> signbitSC = slice<bool>([
     true,
     true,
     false,
     false,
     false
-}.slice();
+]);
 
-internal static slice<float64> vfsinSC = new float64[]{
+internal static slice<float64> vfsinSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> sinSC = new float64[]{
+internal static slice<float64> sinSC = slice<float64>([
     NaN(),
     Copysign(0D, -1D),
     0D,
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfsinhSC = new float64[]{
+internal static slice<float64> vfsinhSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> sinhSC = new float64[]{
+internal static slice<float64> sinhSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfsqrtSC = new float64[]{
+internal static slice<float64> vfsqrtSC = slice<float64>([
     Inf(-1),
     -Pi,
     Copysign(0D, -1D),
@@ -2031,9 +2031,9 @@ internal static slice<float64> vfsqrtSC = new float64[]{
     Inf(1),
     NaN(),
     Float64frombits(2) // subnormal; see https://golang.org/issue/13013
-}.slice();
+]);
 
-internal static slice<float64> sqrtSC = new float64[]{
+internal static slice<float64> sqrtSC = slice<float64>([
     NaN(),
     NaN(),
     Copysign(0D, -1D),
@@ -2041,69 +2041,69 @@ internal static slice<float64> sqrtSC = new float64[]{
     Inf(1),
     NaN(),
     3.1434555694052576e-162D
-}.slice();
+]);
 
-internal static slice<float64> vftanhSC = new float64[]{
+internal static slice<float64> vftanhSC = slice<float64>([
     Inf(-1),
     Copysign(0D, -1D),
     0D,
     Inf(1),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> tanhSC = new float64[]{
+internal static slice<float64> tanhSC = slice<float64>([
     -1D,
     Copysign(0D, -1D),
     0D,
     1D,
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> vfy0SC = new float64[]{
+internal static slice<float64> vfy0SC = slice<float64>([
     Inf(-1),
     0D,
     Inf(1),
     NaN(),
     -1D
-}.slice();
+]);
 
-internal static slice<float64> y0SC = new float64[]{
+internal static slice<float64> y0SC = slice<float64>([
     NaN(),
     Inf(-1),
     0D,
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> y1SC = new float64[]{
+internal static slice<float64> y1SC = slice<float64>([
     NaN(),
     Inf(-1),
     0D,
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> y2SC = new float64[]{
+internal static slice<float64> y2SC = slice<float64>([
     NaN(),
     Inf(-1),
     0D,
     NaN(),
     NaN()
-}.slice();
+]);
 
-internal static slice<float64> yM3SC = new float64[]{
+internal static slice<float64> yM3SC = slice<float64>([
     NaN(),
     Inf(1),
     0D,
     NaN(),
     NaN()
-}.slice();
+]);
 
 // arguments and expected results for boundary cases
 public static UntypedFloat SmallestNormalFloat64 => 2.2250738585072014e-308; // 2**-1022
 public static UntypedFloat LargestSubnormalFloat64 => /* SmallestNormalFloat64 - SmallestNonzeroFloat64 */ 2.225073858507201e-308;
 
-internal static slice<float64> vffrexpBC = new float64[]{
+internal static slice<float64> vffrexpBC = slice<float64>([
     SmallestNormalFloat64,
     LargestSubnormalFloat64,
     SmallestNonzeroFloat64,
@@ -2112,9 +2112,9 @@ internal static slice<float64> vffrexpBC = new float64[]{
     -LargestSubnormalFloat64,
     -SmallestNonzeroFloat64,
     -MaxFloat64
-}.slice();
+]);
 
-internal static slice<fi> frexpBC = new fi[]{
+internal static slice<fi> frexpBC = slice<fi>([
     new(0.5D, -1021),
     new(0.99999999999999978D, -1022),
     new(0.5D, -1073),
@@ -2123,9 +2123,9 @@ internal static slice<fi> frexpBC = new fi[]{
     new(-0.99999999999999978D, -1022),
     new(-0.5D, -1073),
     new(-0.99999999999999989D, 1024)
-}.slice();
+]);
 
-internal static slice<fi> vfldexpBC = new fi[]{
+internal static slice<fi> vfldexpBC = slice<fi>([
     new(SmallestNormalFloat64, -52),
     new(LargestSubnormalFloat64, -51),
     new(SmallestNonzeroFloat64, 1074),
@@ -2136,9 +2136,9 @@ internal static slice<fi> vfldexpBC = new fi[]{
     new(-1D, 1024),
     new(1.0000000000000002D, -1075),
     new(1D, -1075)
-}.slice();
+]);
 
-internal static slice<float64> ldexpBC = new float64[]{
+internal static slice<float64> ldexpBC = slice<float64>([
     SmallestNonzeroFloat64,
     1e-323D, // 2**-1073
     1D,
@@ -2149,9 +2149,9 @@ internal static slice<float64> ldexpBC = new float64[]{
     Inf(-1),
     SmallestNonzeroFloat64,
     0D
-}.slice();
+]);
 
-internal static slice<float64> logbBC = new float64[]{
+internal static slice<float64> logbBC = slice<float64>([
     -1022D,
     -1023D,
     -1074D,
@@ -2160,7 +2160,7 @@ internal static slice<float64> logbBC = new float64[]{
     -1023D,
     -1074D,
     1023D
-}.slice();
+]);
 
 // Test cases were generated with Berkeley TestFloat-3e/testfloat_gen.
 // http://www.jhauser.us/arithmetic/TestFloat.html.
@@ -2168,7 +2168,7 @@ internal static slice<float64> logbBC = new float64[]{
 partial struct fmaCᴛ1 /*dyn*/ {
     internal float64 x, y, z, want;
 }
-internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
+internal static slice<fmaCᴛ1> fmaC = slice<fmaCᴛ1>([
     // Large exponent spread
     new(-3.999999999999087D, -1.1123914289620494e-16D, -7.999877929687506D, -7.999877929687505D),
     new(-262112.0000004768D, -0.06251525855623184D, 1.1102230248837136e-16D, 16385.99945072085D),
@@ -2233,9 +2233,9 @@ internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
     new(2.2250738585072014e-308D, -2.2250738585072014e-308D, 0D, Copysign(0D, -1D)),
     new(Copysign(0D, -1D), 1D, 0D, 0D),
     new(1D, Copysign(0D, -1D), 0D, 0D)
-}.slice();
+]);
 
-internal static slice<float32> sqrt32 = new float32[]{
+internal static slice<float32> sqrt32 = slice<float32>([
     0F,
     (float32)Copysign(0D, -1D),
     (float32)NaN(),
@@ -2248,7 +2248,7 @@ internal static slice<float32> sqrt32 = new float32[]{
     7.7388724745781045e+00F,
     -2.7688005719200159e-01F,
     -5.0106036182710749e+00F
-}.slice();
+]);
 
 internal static bool tolerance(float64 a, float64 b, float64 e) {
     // Multiplying by e here can underflow denormal values to zero.
@@ -2296,364 +2296,366 @@ internal static bool alike(float64 a, float64 b) {
     return false;
 }
 
-public static void TestNaN(ж<testing.T> Ꮡt) {
+public static void TestNaN(ж<testing.T> t) {
     var f64 = NaN();
     if (f64 == f64) {
-        Ꮡt.Fatalf("NaN() returns %g, expected NaN"u8, f64);
+        t.Fatalf("NaN() returns %g, expected NaN", f64);
     }
     var f32 = (float32)f64;
     if (f32 == f32) {
-        Ꮡt.Fatalf("float32(NaN()) is %g, expected NaN"u8, f32);
+        t.Fatalf("float32(NaN()) is %g, expected NaN", f32);
     }
 }
 
-public static void TestAcos(ж<testing.T> Ꮡt) {
+public static void TestAcos(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = vf[i] / 10D;
         {
             var f = Acos(a); if (!close(acos[i], f)) {
-                Ꮡt.Errorf("Acos(%g) = %g, want %g"u8, a, f, acos[i]);
+                t.Errorf("Acos(%g) = %g, want %g", a, f, acos[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfacosSC); i++) {
         {
             var f = Acos(vfacosSC[i]); if (!alike(acosSC[i], f)) {
-                Ꮡt.Errorf("Acos(%g) = %g, want %g"u8, vfacosSC[i], f, acosSC[i]);
+                t.Errorf("Acos(%g) = %g, want %g", vfacosSC[i], f, acosSC[i]);
             }
         }
     }
 }
 
-public static void TestAcosh(ж<testing.T> Ꮡt) {
+public static void TestAcosh(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = 1D + Abs(vf[i]);
         {
             var f = Acosh(a); if (!veryclose(acosh[i], f)) {
-                Ꮡt.Errorf("Acosh(%g) = %g, want %g"u8, a, f, acosh[i]);
+                t.Errorf("Acosh(%g) = %g, want %g", a, f, acosh[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfacoshSC); i++) {
         {
             var f = Acosh(vfacoshSC[i]); if (!alike(acoshSC[i], f)) {
-                Ꮡt.Errorf("Acosh(%g) = %g, want %g"u8, vfacoshSC[i], f, acoshSC[i]);
+                t.Errorf("Acosh(%g) = %g, want %g", vfacoshSC[i], f, acoshSC[i]);
             }
         }
     }
 }
 
-public static void TestAsin(ж<testing.T> Ꮡt) {
+public static void TestAsin(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = vf[i] / 10D;
         {
             var f = Asin(a); if (!veryclose(asin[i], f)) {
-                Ꮡt.Errorf("Asin(%g) = %g, want %g"u8, a, f, asin[i]);
+                t.Errorf("Asin(%g) = %g, want %g", a, f, asin[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfasinSC); i++) {
         {
             var f = Asin(vfasinSC[i]); if (!alike(asinSC[i], f)) {
-                Ꮡt.Errorf("Asin(%g) = %g, want %g"u8, vfasinSC[i], f, asinSC[i]);
+                t.Errorf("Asin(%g) = %g, want %g", vfasinSC[i], f, asinSC[i]);
             }
         }
     }
 }
 
-public static void TestAsinh(ж<testing.T> Ꮡt) {
+public static void TestAsinh(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Asinh(vf[i]); if (!veryclose(asinh[i], f)) {
-                Ꮡt.Errorf("Asinh(%g) = %g, want %g"u8, vf[i], f, asinh[i]);
+                t.Errorf("Asinh(%g) = %g, want %g", vf[i], f, asinh[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfasinhSC); i++) {
         {
             var f = Asinh(vfasinhSC[i]); if (!alike(asinhSC[i], f)) {
-                Ꮡt.Errorf("Asinh(%g) = %g, want %g"u8, vfasinhSC[i], f, asinhSC[i]);
+                t.Errorf("Asinh(%g) = %g, want %g", vfasinhSC[i], f, asinhSC[i]);
             }
         }
     }
 }
 
-public static void TestAtan(ж<testing.T> Ꮡt) {
+public static void TestAtan(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Atan(vf[i]); if (!veryclose(atan[i], f)) {
-                Ꮡt.Errorf("Atan(%g) = %g, want %g"u8, vf[i], f, atan[i]);
+                t.Errorf("Atan(%g) = %g, want %g", vf[i], f, atan[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfatanSC); i++) {
         {
             var f = Atan(vfatanSC[i]); if (!alike(atanSC[i], f)) {
-                Ꮡt.Errorf("Atan(%g) = %g, want %g"u8, vfatanSC[i], f, atanSC[i]);
+                t.Errorf("Atan(%g) = %g, want %g", vfatanSC[i], f, atanSC[i]);
             }
         }
     }
 }
 
-public static void TestAtanh(ж<testing.T> Ꮡt) {
+public static void TestAtanh(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = vf[i] / 10D;
         {
             var f = Atanh(a); if (!veryclose(atanh[i], f)) {
-                Ꮡt.Errorf("Atanh(%g) = %g, want %g"u8, a, f, atanh[i]);
+                t.Errorf("Atanh(%g) = %g, want %g", a, f, atanh[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfatanhSC); i++) {
         {
             var f = Atanh(vfatanhSC[i]); if (!alike(atanhSC[i], f)) {
-                Ꮡt.Errorf("Atanh(%g) = %g, want %g"u8, vfatanhSC[i], f, atanhSC[i]);
+                t.Errorf("Atanh(%g) = %g, want %g", vfatanhSC[i], f, atanhSC[i]);
             }
         }
     }
 }
 
-public static void TestAtan2(ж<testing.T> Ꮡt) {
+public static void TestAtan2(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Atan2(10D, vf[i]); if (!veryclose(atan2[i], f)) {
-                Ꮡt.Errorf("Atan2(10, %g) = %g, want %g"u8, vf[i], f, atan2[i]);
+                t.Errorf("Atan2(10, %g) = %g, want %g", vf[i], f, atan2[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfatan2SC); i++) {
         {
             var f = Atan2(vfatan2SC[i][0], vfatan2SC[i][1]); if (!alike(atan2SC[i], f)) {
-                Ꮡt.Errorf("Atan2(%g, %g) = %g, want %g"u8, vfatan2SC[i][0], vfatan2SC[i][1], f, atan2SC[i]);
+                t.Errorf("Atan2(%g, %g) = %g, want %g", vfatan2SC[i][0], vfatan2SC[i][1], f, atan2SC[i]);
             }
         }
     }
 }
 
-public static void TestCbrt(ж<testing.T> Ꮡt) {
+public static void TestCbrt(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Cbrt(vf[i]); if (!veryclose(cbrt[i], f)) {
-                Ꮡt.Errorf("Cbrt(%g) = %g, want %g"u8, vf[i], f, cbrt[i]);
+                t.Errorf("Cbrt(%g) = %g, want %g", vf[i], f, cbrt[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfcbrtSC); i++) {
         {
             var f = Cbrt(vfcbrtSC[i]); if (!alike(cbrtSC[i], f)) {
-                Ꮡt.Errorf("Cbrt(%g) = %g, want %g"u8, vfcbrtSC[i], f, cbrtSC[i]);
+                t.Errorf("Cbrt(%g) = %g, want %g", vfcbrtSC[i], f, cbrtSC[i]);
             }
         }
     }
 }
 
-public static void TestCeil(ж<testing.T> Ꮡt) {
+public static void TestCeil(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Ceil(vf[i]); if (!alike(ceil[i], f)) {
-                Ꮡt.Errorf("Ceil(%g) = %g, want %g"u8, vf[i], f, ceil[i]);
+                t.Errorf("Ceil(%g) = %g, want %g", vf[i], f, ceil[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfceilSC); i++) {
         {
             var f = Ceil(vfceilSC[i]); if (!alike(ceilSC[i], f)) {
-                Ꮡt.Errorf("Ceil(%g) = %g, want %g"u8, vfceilSC[i], f, ceilSC[i]);
+                t.Errorf("Ceil(%g) = %g, want %g", vfceilSC[i], f, ceilSC[i]);
             }
         }
     }
 }
 
-public static void TestCopysign(ж<testing.T> Ꮡt) {
+public static void TestCopysign(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Copysign(vf[i], -1D); if (copysign[i] != f) {
-                Ꮡt.Errorf("Copysign(%g, -1) = %g, want %g"u8, vf[i], f, copysign[i]);
+                t.Errorf("Copysign(%g, -1) = %g, want %g", vf[i], f, copysign[i]);
             }
         }
     }
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Copysign(vf[i], 1D); if (-copysign[i] != f) {
-                Ꮡt.Errorf("Copysign(%g, 1) = %g, want %g"u8, vf[i], f, -copysign[i]);
+                t.Errorf("Copysign(%g, 1) = %g, want %g", vf[i], f, -copysign[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfcopysignSC); i++) {
         {
             var f = Copysign(vfcopysignSC[i], -1D); if (!alike(copysignSC[i], f)) {
-                Ꮡt.Errorf("Copysign(%g, -1) = %g, want %g"u8, vfcopysignSC[i], f, copysignSC[i]);
+                t.Errorf("Copysign(%g, -1) = %g, want %g", vfcopysignSC[i], f, copysignSC[i]);
             }
         }
     }
 }
 
-public static void TestCos(ж<testing.T> Ꮡt) {
+public static void TestCos(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Cos(vf[i]); if (!veryclose(cos[i], f)) {
-                Ꮡt.Errorf("Cos(%g) = %g, want %g"u8, vf[i], f, cos[i]);
+                t.Errorf("Cos(%g) = %g, want %g", vf[i], f, cos[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfcosSC); i++) {
         {
             var f = Cos(vfcosSC[i]); if (!alike(cosSC[i], f)) {
-                Ꮡt.Errorf("Cos(%g) = %g, want %g"u8, vfcosSC[i], f, cosSC[i]);
+                t.Errorf("Cos(%g) = %g, want %g", vfcosSC[i], f, cosSC[i]);
             }
         }
     }
 }
 
-public static void TestCosh(ж<testing.T> Ꮡt) {
+public static void TestCosh(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Cosh(vf[i]); if (!close(cosh[i], f)) {
-                Ꮡt.Errorf("Cosh(%g) = %g, want %g"u8, vf[i], f, cosh[i]);
+                t.Errorf("Cosh(%g) = %g, want %g", vf[i], f, cosh[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfcoshSC); i++) {
         {
             var f = Cosh(vfcoshSC[i]); if (!alike(coshSC[i], f)) {
-                Ꮡt.Errorf("Cosh(%g) = %g, want %g"u8, vfcoshSC[i], f, coshSC[i]);
+                t.Errorf("Cosh(%g) = %g, want %g", vfcoshSC[i], f, coshSC[i]);
             }
         }
     }
 }
 
-public static void TestErf(ж<testing.T> Ꮡt) {
+public static void TestErf(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = vf[i] / 10D;
         {
             var f = Erf(a); if (!veryclose(erf[i], f)) {
-                Ꮡt.Errorf("Erf(%g) = %g, want %g"u8, a, f, erf[i]);
+                t.Errorf("Erf(%g) = %g, want %g", a, f, erf[i]);
             }
         }
     }
     for (nint i = 0; i < len(vferfSC); i++) {
         {
             var f = Erf(vferfSC[i]); if (!alike(erfSC[i], f)) {
-                Ꮡt.Errorf("Erf(%g) = %g, want %g"u8, vferfSC[i], f, erfSC[i]);
+                t.Errorf("Erf(%g) = %g, want %g", vferfSC[i], f, erfSC[i]);
             }
         }
     }
 }
 
-public static void TestErfc(ж<testing.T> Ꮡt) {
+public static void TestErfc(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = vf[i] / 10D;
         {
             var f = Erfc(a); if (!veryclose(erfc[i], f)) {
-                Ꮡt.Errorf("Erfc(%g) = %g, want %g"u8, a, f, erfc[i]);
+                t.Errorf("Erfc(%g) = %g, want %g", a, f, erfc[i]);
             }
         }
     }
     for (nint i = 0; i < len(vferfcSC); i++) {
         {
             var f = Erfc(vferfcSC[i]); if (!alike(erfcSC[i], f)) {
-                Ꮡt.Errorf("Erfc(%g) = %g, want %g"u8, vferfcSC[i], f, erfcSC[i]);
+                t.Errorf("Erfc(%g) = %g, want %g", vferfcSC[i], f, erfcSC[i]);
             }
         }
     }
 }
 
-public static void TestErfinv(ж<testing.T> Ꮡt) {
+public static void TestErfinv(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = vf[i] / 10D;
         {
             var f = Erfinv(a); if (!veryclose(erfinv[i], f)) {
-                Ꮡt.Errorf("Erfinv(%g) = %g, want %g"u8, a, f, erfinv[i]);
+                t.Errorf("Erfinv(%g) = %g, want %g", a, f, erfinv[i]);
             }
         }
     }
     for (nint i = 0; i < len(vferfinvSC); i++) {
         {
             var f = Erfinv(vferfinvSC[i]); if (!alike(erfinvSC[i], f)) {
-                Ꮡt.Errorf("Erfinv(%g) = %g, want %g"u8, vferfinvSC[i], f, erfinvSC[i]);
+                t.Errorf("Erfinv(%g) = %g, want %g", vferfinvSC[i], f, erfinvSC[i]);
             }
         }
     }
     for (var x = -0.9D; x <= 0.90D; x += 1e-2D) {
         {
             var f = Erf(Erfinv(x)); if (!close(x, f)) {
-                Ꮡt.Errorf("Erf(Erfinv(%g)) = %g, want %g"u8, x, f, x);
+                t.Errorf("Erf(Erfinv(%g)) = %g, want %g", x, f, x);
             }
         }
     }
     for (var x = -0.9D; x <= 0.90D; x += 1e-2D) {
         {
             var f = Erfinv(Erf(x)); if (!close(x, f)) {
-                Ꮡt.Errorf("Erfinv(Erf(%g)) = %g, want %g"u8, x, f, x);
+                t.Errorf("Erfinv(Erf(%g)) = %g, want %g", x, f, x);
             }
         }
     }
 }
 
-public static void TestErfcinv(ж<testing.T> Ꮡt) {
+public static void TestErfcinv(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = 1.0D - (vf[i] / 10D);
         {
             var f = Erfcinv(a); if (!veryclose(erfinv[i], f)) {
-                Ꮡt.Errorf("Erfcinv(%g) = %g, want %g"u8, a, f, erfinv[i]);
+                t.Errorf("Erfcinv(%g) = %g, want %g", a, f, erfinv[i]);
             }
         }
     }
     for (nint i = 0; i < len(vferfcinvSC); i++) {
         {
             var f = Erfcinv(vferfcinvSC[i]); if (!alike(erfcinvSC[i], f)) {
-                Ꮡt.Errorf("Erfcinv(%g) = %g, want %g"u8, vferfcinvSC[i], f, erfcinvSC[i]);
+                t.Errorf("Erfcinv(%g) = %g, want %g", vferfcinvSC[i], f, erfcinvSC[i]);
             }
         }
     }
     for (var x = 0.1D; x <= 1.9D; x += 1e-2D) {
         {
             var f = Erfc(Erfcinv(x)); if (!close(x, f)) {
-                Ꮡt.Errorf("Erfc(Erfcinv(%g)) = %g, want %g"u8, x, f, x);
+                t.Errorf("Erfc(Erfcinv(%g)) = %g, want %g", x, f, x);
             }
         }
     }
     for (var x = 0.1D; x <= 1.9D; x += 1e-2D) {
         {
             var f = Erfcinv(Erfc(x)); if (!close(x, f)) {
-                Ꮡt.Errorf("Erfcinv(Erfc(%g)) = %g, want %g"u8, x, f, x);
+                t.Errorf("Erfcinv(Erfc(%g)) = %g, want %g", x, f, x);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string expˢ = "Exp"u8;
-internal static readonly @string expGoˢ = "ExpGo"u8;
+internal static ref readonly @string expˢ => ref expˢᵇ;
+private static readonly @string expˢᵇ = "Exp"u8;
+internal static ref readonly @string expGoˢ => ref expGoˢᵇ;
+private static readonly @string expGoˢᵇ = "ExpGo"u8;
 
-public static void TestExp(ж<testing.T> Ꮡt) {
-    testExp(Ꮡt, Exp, expˢ);
-    testExp(Ꮡt, math_internal_test_package.ExpGo, expGoˢ);
+public static void TestExp(ж<testing.T> t) {
+    testExp(t, Exp, expˢ);
+    testExp(t, math_internal_test_package.ExpGo, expGoˢ);
 }
 
-internal static void testExp(ж<testing.T> Ꮡt, Func<float64, float64> Exp, @string name) {
+internal static void testExp(ж<testing.T> t, Func<float64, float64> Exp, @string name) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Exp(vf[i]); if (!veryclose(exp[i], f)) {
-                Ꮡt.Errorf("%s(%g) = %g, want %g"u8, name, vf[i], f, exp[i]);
+                t.Errorf("%s(%g) = %g, want %g", name, vf[i], f, exp[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfexpSC); i++) {
         {
             var f = Exp(vfexpSC[i]); if (!alike(expSC[i], f)) {
-                Ꮡt.Errorf("%s(%g) = %g, want %g"u8, name, vfexpSC[i], f, expSC[i]);
+                t.Errorf("%s(%g) = %g, want %g", name, vfexpSC[i], f, expSC[i]);
             }
         }
     }
 }
 
-public static void TestExpm1(ж<testing.T> Ꮡt) {
+public static void TestExpm1(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = vf[i] / 100D;
         {
             var f = Expm1(a); if (!veryclose(expm1[i], f)) {
-                Ꮡt.Errorf("Expm1(%g) = %g, want %g"u8, a, f, expm1[i]);
+                t.Errorf("Expm1(%g) = %g, want %g", a, f, expm1[i]);
             }
         }
     }
@@ -2661,40 +2663,42 @@ public static void TestExpm1(ж<testing.T> Ꮡt) {
         var a = vf[i] * 10D;
         {
             var f = Expm1(a); if (!close(expm1Large[i], f)) {
-                Ꮡt.Errorf("Expm1(%g) = %g, want %g"u8, a, f, expm1Large[i]);
+                t.Errorf("Expm1(%g) = %g, want %g", a, f, expm1Large[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfexpm1SC); i++) {
         {
             var f = Expm1(vfexpm1SC[i]); if (!alike(expm1SC[i], f)) {
-                Ꮡt.Errorf("Expm1(%g) = %g, want %g"u8, vfexpm1SC[i], f, expm1SC[i]);
+                t.Errorf("Expm1(%g) = %g, want %g", vfexpm1SC[i], f, expm1SC[i]);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string exp2ˢ = "Exp2"u8;
-internal static readonly @string exp2Goˢ = "Exp2Go"u8;
+internal static ref readonly @string exp2ˢ => ref exp2ˢᵇ;
+private static readonly @string exp2ˢᵇ = "Exp2"u8;
+internal static ref readonly @string exp2Goˢ => ref exp2Goˢᵇ;
+private static readonly @string exp2Goˢᵇ = "Exp2Go"u8;
 
-public static void TestExp2(ж<testing.T> Ꮡt) {
-    testExp2(Ꮡt, Exp2, exp2ˢ);
-    testExp2(Ꮡt, math_internal_test_package.Exp2Go, exp2Goˢ);
+public static void TestExp2(ж<testing.T> t) {
+    testExp2(t, Exp2, exp2ˢ);
+    testExp2(t, math_internal_test_package.Exp2Go, exp2Goˢ);
 }
 
-internal static void testExp2(ж<testing.T> Ꮡt, Func<float64, float64> Exp2, @string name) {
+internal static void testExp2(ж<testing.T> t, Func<float64, float64> Exp2, @string name) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Exp2(vf[i]); if (!close(exp2[i], f)) {
-                Ꮡt.Errorf("%s(%g) = %g, want %g"u8, name, vf[i], f, exp2[i]);
+                t.Errorf("%s(%g) = %g, want %g", name, vf[i], f, exp2[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfexp2SC); i++) {
         {
             var f = Exp2(vfexp2SC[i]); if (!alike(exp2SC[i], f)) {
-                Ꮡt.Errorf("%s(%g) = %g, want %g"u8, name, vfexp2SC[i], f, exp2SC[i]);
+                t.Errorf("%s(%g) = %g, want %g", name, vfexp2SC[i], f, exp2SC[i]);
             }
         }
     }
@@ -2702,169 +2706,169 @@ internal static void testExp2(ж<testing.T> Ꮡt, Func<float64, float64> Exp2, @
         var f = Exp2((float64)n);
         var vfΔ1 = Ldexp(1D, n);
         if (f != vfΔ1) {
-            Ꮡt.Errorf("%s(%d) = %g, want %g"u8, name, n, f, vfΔ1);
+            t.Errorf("%s(%d) = %g, want %g", name, n, f, vfΔ1);
         }
     }
 }
 
-public static void TestAbs(ж<testing.T> Ꮡt) {
+public static void TestAbs(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Abs(vf[i]); if (fabs[i] != f) {
-                Ꮡt.Errorf("Abs(%g) = %g, want %g"u8, vf[i], f, fabs[i]);
+                t.Errorf("Abs(%g) = %g, want %g", vf[i], f, fabs[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffabsSC); i++) {
         {
             var f = Abs(vffabsSC[i]); if (!alike(fabsSC[i], f)) {
-                Ꮡt.Errorf("Abs(%g) = %g, want %g"u8, vffabsSC[i], f, fabsSC[i]);
+                t.Errorf("Abs(%g) = %g, want %g", vffabsSC[i], f, fabsSC[i]);
             }
         }
     }
 }
 
-public static void TestDim(ж<testing.T> Ꮡt) {
+public static void TestDim(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Dim(vf[i], 0D); if (fdim[i] != f) {
-                Ꮡt.Errorf("Dim(%g, %g) = %g, want %g"u8, vf[i], 0.0D, f, fdim[i]);
+                t.Errorf("Dim(%g, %g) = %g, want %g", vf[i], 0.0D, f, fdim[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffdimSC); i++) {
         {
             var f = Dim(vffdimSC[i][0], vffdimSC[i][1]); if (!alike(fdimSC[i], f)) {
-                Ꮡt.Errorf("Dim(%g, %g) = %g, want %g"u8, vffdimSC[i][0], vffdimSC[i][1], f, fdimSC[i]);
+                t.Errorf("Dim(%g, %g) = %g, want %g", vffdimSC[i][0], vffdimSC[i][1], f, fdimSC[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffdim2SC); i++) {
         {
             var f = Dim(vffdim2SC[i][0], vffdim2SC[i][1]); if (!alike(fdimSC[i], f)) {
-                Ꮡt.Errorf("Dim(%g, %g) = %g, want %g"u8, vffdim2SC[i][0], vffdim2SC[i][1], f, fdimSC[i]);
+                t.Errorf("Dim(%g, %g) = %g, want %g", vffdim2SC[i][0], vffdim2SC[i][1], f, fdimSC[i]);
             }
         }
     }
 }
 
-public static void TestFloor(ж<testing.T> Ꮡt) {
+public static void TestFloor(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Floor(vf[i]); if (!alike(floor[i], f)) {
-                Ꮡt.Errorf("Floor(%g) = %g, want %g"u8, vf[i], f, floor[i]);
+                t.Errorf("Floor(%g) = %g, want %g", vf[i], f, floor[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfceilSC); i++) {
         {
             var f = Floor(vfceilSC[i]); if (!alike(floorSC[i], f)) {
-                Ꮡt.Errorf("Floor(%g) = %g, want %g"u8, vfceilSC[i], f, floorSC[i]);
+                t.Errorf("Floor(%g) = %g, want %g", vfceilSC[i], f, floorSC[i]);
             }
         }
     }
 }
 
-public static void TestMax(ж<testing.T> Ꮡt) {
+public static void TestMax(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Max(vf[i], ceil[i]); if (ceil[i] != f) {
-                Ꮡt.Errorf("Max(%g, %g) = %g, want %g"u8, vf[i], ceil[i], f, ceil[i]);
+                t.Errorf("Max(%g, %g) = %g, want %g", vf[i], ceil[i], f, ceil[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffdimSC); i++) {
         {
             var f = Max(vffdimSC[i][0], vffdimSC[i][1]); if (!alike(fmaxSC[i], f)) {
-                Ꮡt.Errorf("Max(%g, %g) = %g, want %g"u8, vffdimSC[i][0], vffdimSC[i][1], f, fmaxSC[i]);
+                t.Errorf("Max(%g, %g) = %g, want %g", vffdimSC[i][0], vffdimSC[i][1], f, fmaxSC[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffdim2SC); i++) {
         {
             var f = Max(vffdim2SC[i][0], vffdim2SC[i][1]); if (!alike(fmaxSC[i], f)) {
-                Ꮡt.Errorf("Max(%g, %g) = %g, want %g"u8, vffdim2SC[i][0], vffdim2SC[i][1], f, fmaxSC[i]);
+                t.Errorf("Max(%g, %g) = %g, want %g", vffdim2SC[i][0], vffdim2SC[i][1], f, fmaxSC[i]);
             }
         }
     }
 }
 
-public static void TestMin(ж<testing.T> Ꮡt) {
+public static void TestMin(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Min(vf[i], floor[i]); if (floor[i] != f) {
-                Ꮡt.Errorf("Min(%g, %g) = %g, want %g"u8, vf[i], floor[i], f, floor[i]);
+                t.Errorf("Min(%g, %g) = %g, want %g", vf[i], floor[i], f, floor[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffdimSC); i++) {
         {
             var f = Min(vffdimSC[i][0], vffdimSC[i][1]); if (!alike(fminSC[i], f)) {
-                Ꮡt.Errorf("Min(%g, %g) = %g, want %g"u8, vffdimSC[i][0], vffdimSC[i][1], f, fminSC[i]);
+                t.Errorf("Min(%g, %g) = %g, want %g", vffdimSC[i][0], vffdimSC[i][1], f, fminSC[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffdim2SC); i++) {
         {
             var f = Min(vffdim2SC[i][0], vffdim2SC[i][1]); if (!alike(fminSC[i], f)) {
-                Ꮡt.Errorf("Min(%g, %g) = %g, want %g"u8, vffdim2SC[i][0], vffdim2SC[i][1], f, fminSC[i]);
+                t.Errorf("Min(%g, %g) = %g, want %g", vffdim2SC[i][0], vffdim2SC[i][1], f, fminSC[i]);
             }
         }
     }
 }
 
-public static void TestMod(ж<testing.T> Ꮡt) {
+public static void TestMod(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Mod(10D, vf[i]); if (fmod[i] != f) {
-                Ꮡt.Errorf("Mod(10, %g) = %g, want %g"u8, vf[i], f, fmod[i]);
+                t.Errorf("Mod(10, %g) = %g, want %g", vf[i], f, fmod[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffmodSC); i++) {
         {
             var f = Mod(vffmodSC[i][0], vffmodSC[i][1]); if (!alike(fmodSC[i], f)) {
-                Ꮡt.Errorf("Mod(%g, %g) = %g, want %g"u8, vffmodSC[i][0], vffmodSC[i][1], f, fmodSC[i]);
+                t.Errorf("Mod(%g, %g) = %g, want %g", vffmodSC[i][0], vffmodSC[i][1], f, fmodSC[i]);
             }
         }
     }
     // verify precision of result for extreme inputs
     {
         var f = Mod(5.9790119248836734e+200D, 1.1258465975523544D); if (0.6447968302508578D != f) {
-            Ꮡt.Errorf("Remainder(5.9790119248836734e+200, 1.1258465975523544) = %g, want 0.6447968302508578"u8, f);
+            t.Errorf("Remainder(5.9790119248836734e+200, 1.1258465975523544) = %g, want 0.6447968302508578", f);
         }
     }
 }
 
-public static void TestFrexp(ж<testing.T> Ꮡt) {
+public static void TestFrexp(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var (f, j) = Frexp(vf[i]); if (!veryclose(frexp[i].f, f) || frexp[i].i != j) {
-                Ꮡt.Errorf("Frexp(%g) = %g, %d, want %g, %d"u8, vf[i], f, j, frexp[i].f, frexp[i].i);
+                t.Errorf("Frexp(%g) = %g, %d, want %g, %d", vf[i], f, j, frexp[i].f, frexp[i].i);
             }
         }
     }
     for (nint i = 0; i < len(vffrexpSC); i++) {
         {
             var (f, j) = Frexp(vffrexpSC[i]); if (!alike(frexpSC[i].f, f) || frexpSC[i].i != j) {
-                Ꮡt.Errorf("Frexp(%g) = %g, %d, want %g, %d"u8, vffrexpSC[i], f, j, frexpSC[i].f, frexpSC[i].i);
+                t.Errorf("Frexp(%g) = %g, %d, want %g, %d", vffrexpSC[i], f, j, frexpSC[i].f, frexpSC[i].i);
             }
         }
     }
     for (nint i = 0; i < len(vffrexpBC); i++) {
         {
             var (f, j) = Frexp(vffrexpBC[i]); if (!alike(frexpBC[i].f, f) || frexpBC[i].i != j) {
-                Ꮡt.Errorf("Frexp(%g) = %g, %d, want %g, %d"u8, vffrexpBC[i], f, j, frexpBC[i].f, frexpBC[i].i);
+                t.Errorf("Frexp(%g) = %g, %d, want %g, %d", vffrexpBC[i], f, j, frexpBC[i].f, frexpBC[i].i);
             }
         }
     }
 }
 
-public static void TestGamma(ж<testing.T> Ꮡt) {
+public static void TestGamma(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Gamma(vf[i]); if (!close(gamma[i], f)) {
-                Ꮡt.Errorf("Gamma(%g) = %g, want %g"u8, vf[i], f, gamma[i]);
+                t.Errorf("Gamma(%g) = %g, want %g", vf[i], f, gamma[i]);
             }
         }
     }
@@ -2872,310 +2876,309 @@ public static void TestGamma(ж<testing.T> Ꮡt) {
         var g = vᴛ1.Clone();
 
         var f = Gamma(g[0]);
-        bool ok = default!;
-        if (IsNaN(g[1]) || IsInf(g[1], 0) || g[1] == 0D || f == 0D){
+        bool ok = default;
+        if (IsNaN(g[1]) || IsInf(g[1], 0) || g[1] == 0D || f == 0D) {
             ok = alike(g[1], f);
-        } else 
-        if (g[0] > -50D && g[0] <= 171D){
+        } else if (g[0] > -50D && g[0] <= 171D) {
             ok = veryclose(g[1], f);
         } else {
             ok = close(g[1], f);
         }
         if (!ok) {
-            Ꮡt.Errorf("Gamma(%g) = %g, want %g"u8, g[0], f, g[1]);
+            t.Errorf("Gamma(%g) = %g, want %g", g[0], f, g[1]);
         }
     }
 }
 
-public static void TestHypot(ж<testing.T> Ꮡt) {
+public static void TestHypot(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(1e200D * tanh[i] * Sqrt(2D));
         {
             var f = Hypot(1e200D * tanh[i], 1e200D * tanh[i]); if (!veryclose(a, f)) {
-                Ꮡt.Errorf("Hypot(%g, %g) = %g, want %g"u8, 1e200D * tanh[i], 1e200D * tanh[i], f, a);
+                t.Errorf("Hypot(%g, %g) = %g, want %g", 1e200D * tanh[i], 1e200D * tanh[i], f, a);
             }
         }
     }
     for (nint i = 0; i < len(vfhypotSC); i++) {
         {
             var f = Hypot(vfhypotSC[i][0], vfhypotSC[i][1]); if (!alike(hypotSC[i], f)) {
-                Ꮡt.Errorf("Hypot(%g, %g) = %g, want %g"u8, vfhypotSC[i][0], vfhypotSC[i][1], f, hypotSC[i]);
+                t.Errorf("Hypot(%g, %g) = %g, want %g", vfhypotSC[i][0], vfhypotSC[i][1], f, hypotSC[i]);
             }
         }
     }
 }
 
-public static void TestHypotGo(ж<testing.T> Ꮡt) {
+public static void TestHypotGo(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(1e200D * tanh[i] * Sqrt(2D));
         {
             var f = math_internal_test_package.HypotGo(1e200D * tanh[i], 1e200D * tanh[i]); if (!veryclose(a, f)) {
-                Ꮡt.Errorf("HypotGo(%g, %g) = %g, want %g"u8, 1e200D * tanh[i], 1e200D * tanh[i], f, a);
+                t.Errorf("HypotGo(%g, %g) = %g, want %g", 1e200D * tanh[i], 1e200D * tanh[i], f, a);
             }
         }
     }
     for (nint i = 0; i < len(vfhypotSC); i++) {
         {
             var f = math_internal_test_package.HypotGo(vfhypotSC[i][0], vfhypotSC[i][1]); if (!alike(hypotSC[i], f)) {
-                Ꮡt.Errorf("HypotGo(%g, %g) = %g, want %g"u8, vfhypotSC[i][0], vfhypotSC[i][1], f, hypotSC[i]);
+                t.Errorf("HypotGo(%g, %g) = %g, want %g", vfhypotSC[i][0], vfhypotSC[i][1], f, hypotSC[i]);
             }
         }
     }
 }
 
-public static void TestIlogb(ж<testing.T> Ꮡt) {
+public static void TestIlogb(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         nint a = frexp[i].i - 1; // adjust because fr in the interval [½, 1)
         {
             nint e = Ilogb(vf[i]); if (a != e) {
-                Ꮡt.Errorf("Ilogb(%g) = %d, want %d"u8, vf[i], e, a);
+                t.Errorf("Ilogb(%g) = %d, want %d", vf[i], e, a);
             }
         }
     }
     for (nint i = 0; i < len(vflogbSC); i++) {
         {
             nint e = Ilogb(vflogbSC[i]); if (ilogbSC[i] != e) {
-                Ꮡt.Errorf("Ilogb(%g) = %d, want %d"u8, vflogbSC[i], e, ilogbSC[i]);
+                t.Errorf("Ilogb(%g) = %d, want %d", vflogbSC[i], e, ilogbSC[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffrexpBC); i++) {
         {
             nint e = Ilogb(vffrexpBC[i]); if ((nint)logbBC[i] != e) {
-                Ꮡt.Errorf("Ilogb(%g) = %d, want %d"u8, vffrexpBC[i], e, (nint)logbBC[i]);
+                t.Errorf("Ilogb(%g) = %d, want %d", vffrexpBC[i], e, (nint)logbBC[i]);
             }
         }
     }
 }
 
-public static void TestJ0(ж<testing.T> Ꮡt) {
+public static void TestJ0(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = J0(vf[i]); if (!soclose(j0[i], f, 4e-14D)) {
-                Ꮡt.Errorf("J0(%g) = %g, want %g"u8, vf[i], f, j0[i]);
+                t.Errorf("J0(%g) = %g, want %g", vf[i], f, j0[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfj0SC); i++) {
         {
             var f = J0(vfj0SC[i]); if (!alike(j0SC[i], f)) {
-                Ꮡt.Errorf("J0(%g) = %g, want %g"u8, vfj0SC[i], f, j0SC[i]);
+                t.Errorf("J0(%g) = %g, want %g", vfj0SC[i], f, j0SC[i]);
             }
         }
     }
 }
 
-public static void TestJ1(ж<testing.T> Ꮡt) {
+public static void TestJ1(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = J1(vf[i]); if (!close(j1[i], f)) {
-                Ꮡt.Errorf("J1(%g) = %g, want %g"u8, vf[i], f, j1[i]);
+                t.Errorf("J1(%g) = %g, want %g", vf[i], f, j1[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfj0SC); i++) {
         {
             var f = J1(vfj0SC[i]); if (!alike(j1SC[i], f)) {
-                Ꮡt.Errorf("J1(%g) = %g, want %g"u8, vfj0SC[i], f, j1SC[i]);
+                t.Errorf("J1(%g) = %g, want %g", vfj0SC[i], f, j1SC[i]);
             }
         }
     }
 }
 
-public static void TestJn(ж<testing.T> Ꮡt) {
+public static void TestJn(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Jn(2, vf[i]); if (!close(j2[i], f)) {
-                Ꮡt.Errorf("Jn(2, %g) = %g, want %g"u8, vf[i], f, j2[i]);
+                t.Errorf("Jn(2, %g) = %g, want %g", vf[i], f, j2[i]);
             }
         }
         {
             var f = Jn(-3, vf[i]); if (!close(jM3[i], f)) {
-                Ꮡt.Errorf("Jn(-3, %g) = %g, want %g"u8, vf[i], f, jM3[i]);
+                t.Errorf("Jn(-3, %g) = %g, want %g", vf[i], f, jM3[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfj0SC); i++) {
         {
             var f = Jn(2, vfj0SC[i]); if (!alike(j2SC[i], f)) {
-                Ꮡt.Errorf("Jn(2, %g) = %g, want %g"u8, vfj0SC[i], f, j2SC[i]);
+                t.Errorf("Jn(2, %g) = %g, want %g", vfj0SC[i], f, j2SC[i]);
             }
         }
         {
             var f = Jn(-3, vfj0SC[i]); if (!alike(jM3SC[i], f)) {
-                Ꮡt.Errorf("Jn(-3, %g) = %g, want %g"u8, vfj0SC[i], f, jM3SC[i]);
+                t.Errorf("Jn(-3, %g) = %g, want %g", vfj0SC[i], f, jM3SC[i]);
             }
         }
     }
 }
 
-public static void TestLdexp(ж<testing.T> Ꮡt) {
+public static void TestLdexp(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Ldexp(frexp[i].f, frexp[i].i); if (!veryclose(vf[i], f)) {
-                Ꮡt.Errorf("Ldexp(%g, %d) = %g, want %g"u8, frexp[i].f, frexp[i].i, f, vf[i]);
+                t.Errorf("Ldexp(%g, %d) = %g, want %g", frexp[i].f, frexp[i].i, f, vf[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffrexpSC); i++) {
         {
             var f = Ldexp(frexpSC[i].f, frexpSC[i].i); if (!alike(vffrexpSC[i], f)) {
-                Ꮡt.Errorf("Ldexp(%g, %d) = %g, want %g"u8, frexpSC[i].f, frexpSC[i].i, f, vffrexpSC[i]);
+                t.Errorf("Ldexp(%g, %d) = %g, want %g", frexpSC[i].f, frexpSC[i].i, f, vffrexpSC[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfldexpSC); i++) {
         {
             var f = Ldexp(vfldexpSC[i].f, vfldexpSC[i].i); if (!alike(ldexpSC[i], f)) {
-                Ꮡt.Errorf("Ldexp(%g, %d) = %g, want %g"u8, vfldexpSC[i].f, vfldexpSC[i].i, f, ldexpSC[i]);
+                t.Errorf("Ldexp(%g, %d) = %g, want %g", vfldexpSC[i].f, vfldexpSC[i].i, f, ldexpSC[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffrexpBC); i++) {
         {
             var f = Ldexp(frexpBC[i].f, frexpBC[i].i); if (!alike(vffrexpBC[i], f)) {
-                Ꮡt.Errorf("Ldexp(%g, %d) = %g, want %g"u8, frexpBC[i].f, frexpBC[i].i, f, vffrexpBC[i]);
+                t.Errorf("Ldexp(%g, %d) = %g, want %g", frexpBC[i].f, frexpBC[i].i, f, vffrexpBC[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfldexpBC); i++) {
         {
             var f = Ldexp(vfldexpBC[i].f, vfldexpBC[i].i); if (!alike(ldexpBC[i], f)) {
-                Ꮡt.Errorf("Ldexp(%g, %d) = %g, want %g"u8, vfldexpBC[i].f, vfldexpBC[i].i, f, ldexpBC[i]);
+                t.Errorf("Ldexp(%g, %d) = %g, want %g", vfldexpBC[i].f, vfldexpBC[i].i, f, ldexpBC[i]);
             }
         }
     }
 }
 
-public static void TestLgamma(ж<testing.T> Ꮡt) {
+public static void TestLgamma(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var (f, s) = Lgamma(vf[i]); if (!close(lgamma[i].f, f) || lgamma[i].i != s) {
-                Ꮡt.Errorf("Lgamma(%g) = %g, %d, want %g, %d"u8, vf[i], f, s, lgamma[i].f, lgamma[i].i);
+                t.Errorf("Lgamma(%g) = %g, %d, want %g, %d", vf[i], f, s, lgamma[i].f, lgamma[i].i);
             }
         }
     }
     for (nint i = 0; i < len(vflgammaSC); i++) {
         {
             var (f, s) = Lgamma(vflgammaSC[i]); if (!alike(lgammaSC[i].f, f) || lgammaSC[i].i != s) {
-                Ꮡt.Errorf("Lgamma(%g) = %g, %d, want %g, %d"u8, vflgammaSC[i], f, s, lgammaSC[i].f, lgammaSC[i].i);
+                t.Errorf("Lgamma(%g) = %g, %d, want %g, %d", vflgammaSC[i], f, s, lgammaSC[i].f, lgammaSC[i].i);
             }
         }
     }
 }
 
-public static void TestLog(ж<testing.T> Ꮡt) {
+public static void TestLog(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(vf[i]);
         {
             var f = Log(a); if (log[i] != f) {
-                Ꮡt.Errorf("Log(%g) = %g, want %g"u8, a, f, log[i]);
+                t.Errorf("Log(%g) = %g, want %g", a, f, log[i]);
             }
         }
     }
     {
         var f = Log(10D); if (f != Ln10) {
-            Ꮡt.Errorf("Log(%g) = %g, want %g"u8, 10.0D, f, (float64)(Ln10));
+            t.Errorf("Log(%g) = %g, want %g", 10.0D, f, (float64)(Ln10));
         }
     }
     for (nint i = 0; i < len(vflogSC); i++) {
         {
             var f = Log(vflogSC[i]); if (!alike(logSC[i], f)) {
-                Ꮡt.Errorf("Log(%g) = %g, want %g"u8, vflogSC[i], f, logSC[i]);
+                t.Errorf("Log(%g) = %g, want %g", vflogSC[i], f, logSC[i]);
             }
         }
     }
 }
 
-public static void TestLogb(ж<testing.T> Ꮡt) {
+public static void TestLogb(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Logb(vf[i]); if (logb[i] != f) {
-                Ꮡt.Errorf("Logb(%g) = %g, want %g"u8, vf[i], f, logb[i]);
+                t.Errorf("Logb(%g) = %g, want %g", vf[i], f, logb[i]);
             }
         }
     }
     for (nint i = 0; i < len(vflogbSC); i++) {
         {
             var f = Logb(vflogbSC[i]); if (!alike(logbSC[i], f)) {
-                Ꮡt.Errorf("Logb(%g) = %g, want %g"u8, vflogbSC[i], f, logbSC[i]);
+                t.Errorf("Logb(%g) = %g, want %g", vflogbSC[i], f, logbSC[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffrexpBC); i++) {
         {
             var f = Logb(vffrexpBC[i]); if (!alike(logbBC[i], f)) {
-                Ꮡt.Errorf("Logb(%g) = %g, want %g"u8, vffrexpBC[i], f, logbBC[i]);
+                t.Errorf("Logb(%g) = %g, want %g", vffrexpBC[i], f, logbBC[i]);
             }
         }
     }
 }
 
-public static void TestLog10(ж<testing.T> Ꮡt) {
+public static void TestLog10(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(vf[i]);
         {
             var f = Log10(a); if (!veryclose(log10[i], f)) {
-                Ꮡt.Errorf("Log10(%g) = %g, want %g"u8, a, f, log10[i]);
+                t.Errorf("Log10(%g) = %g, want %g", a, f, log10[i]);
             }
         }
     }
     {
         var f = Log10(E); if (f != Log10E) {
-            Ꮡt.Errorf("Log10(%g) = %g, want %g"u8, (float64)(E), f, (float64)(Log10E));
+            t.Errorf("Log10(%g) = %g, want %g", (float64)(E), f, (float64)(Log10E));
         }
     }
     for (nint i = 0; i < len(vflogSC); i++) {
         {
             var f = Log10(vflogSC[i]); if (!alike(logSC[i], f)) {
-                Ꮡt.Errorf("Log10(%g) = %g, want %g"u8, vflogSC[i], f, logSC[i]);
+                t.Errorf("Log10(%g) = %g, want %g", vflogSC[i], f, logSC[i]);
             }
         }
     }
 }
 
-public static void TestLog1p(ж<testing.T> Ꮡt) {
+public static void TestLog1p(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var aΔ1 = vf[i] / 100D;
         {
             var f = Log1p(aΔ1); if (!veryclose(log1p[i], f)) {
-                Ꮡt.Errorf("Log1p(%g) = %g, want %g"u8, aΔ1, f, log1p[i]);
+                t.Errorf("Log1p(%g) = %g, want %g", aΔ1, f, log1p[i]);
             }
         }
     }
     var a = 9.0D;
     {
         var f = Log1p(a); if (f != Ln10) {
-            Ꮡt.Errorf("Log1p(%g) = %g, want %g"u8, a, f, (float64)(Ln10));
+            t.Errorf("Log1p(%g) = %g, want %g", a, f, (float64)(Ln10));
         }
     }
     for (nint i = 0; i < len(vflogSC); i++) {
         {
             var f = Log1p(vflog1pSC[i]); if (!alike(log1pSC[i], f)) {
-                Ꮡt.Errorf("Log1p(%g) = %g, want %g"u8, vflog1pSC[i], f, log1pSC[i]);
+                t.Errorf("Log1p(%g) = %g, want %g", vflog1pSC[i], f, log1pSC[i]);
             }
         }
     }
 }
 
-public static void TestLog2(ж<testing.T> Ꮡt) {
+public static void TestLog2(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(vf[i]);
         {
             var f = Log2(a); if (!veryclose(log2[i], f)) {
-                Ꮡt.Errorf("Log2(%g) = %g, want %g"u8, a, f, log2[i]);
+                t.Errorf("Log2(%g) = %g, want %g", a, f, log2[i]);
             }
         }
     }
     {
         var f = Log2(E); if (f != Log2E) {
-            Ꮡt.Errorf("Log2(%g) = %g, want %g"u8, (float64)(E), f, (float64)(Log2E));
+            t.Errorf("Log2(%g) = %g, want %g", (float64)(E), f, (float64)(Log2E));
         }
     }
     for (nint i = 0; i < len(vflogSC); i++) {
         {
             var f = Log2(vflogSC[i]); if (!alike(logSC[i], f)) {
-                Ꮡt.Errorf("Log2(%g) = %g, want %g"u8, vflogSC[i], f, logSC[i]);
+                t.Errorf("Log2(%g) = %g, want %g", vflogSC[i], f, logSC[i]);
             }
         }
     }
@@ -3183,116 +3186,116 @@ public static void TestLog2(ж<testing.T> Ꮡt) {
         var f = Ldexp(1D, i);
         var l = Log2(f);
         if (l != (float64)i) {
-            Ꮡt.Errorf("Log2(2**%d) = %g, want %d"u8, i, l, i);
+            t.Errorf("Log2(2**%d) = %g, want %d", i, l, i);
         }
     }
 }
 
-public static void TestModf(ж<testing.T> Ꮡt) {
+public static void TestModf(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var (f, g) = Modf(vf[i]); if (!veryclose(modf[i][0], f) || !veryclose(modf[i][1], g)) {
-                Ꮡt.Errorf("Modf(%g) = %g, %g, want %g, %g"u8, vf[i], f, g, modf[i][0], modf[i][1]);
+                t.Errorf("Modf(%g) = %g, %g, want %g, %g", vf[i], f, g, modf[i][0], modf[i][1]);
             }
         }
     }
     for (nint i = 0; i < len(vfmodfSC); i++) {
         {
             var (f, g) = Modf(vfmodfSC[i]); if (!alike(modfSC[i][0], f) || !alike(modfSC[i][1], g)) {
-                Ꮡt.Errorf("Modf(%g) = %g, %g, want %g, %g"u8, vfmodfSC[i], f, g, modfSC[i][0], modfSC[i][1]);
+                t.Errorf("Modf(%g) = %g, %g, want %g, %g", vfmodfSC[i], f, g, modfSC[i][0], modfSC[i][1]);
             }
         }
     }
 }
 
-public static void TestNextafter32(ж<testing.T> Ꮡt) {
+public static void TestNextafter32(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var vfi = (float32)vf[i];
         {
             var f = Nextafter32(vfi, 10F); if (nextafter32[i] != f) {
-                Ꮡt.Errorf("Nextafter32(%g, %g) = %g want %g"u8, vfi, 10.0D, f, nextafter32[i]);
+                t.Errorf("Nextafter32(%g, %g) = %g want %g", vfi, 10.0D, f, nextafter32[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfnextafter32SC); i++) {
         {
             var f = Nextafter32(vfnextafter32SC[i][0], vfnextafter32SC[i][1]); if (!alike((float64)nextafter32SC[i], (float64)f)) {
-                Ꮡt.Errorf("Nextafter32(%g, %g) = %g want %g"u8, vfnextafter32SC[i][0], vfnextafter32SC[i][1], f, nextafter32SC[i]);
+                t.Errorf("Nextafter32(%g, %g) = %g want %g", vfnextafter32SC[i][0], vfnextafter32SC[i][1], f, nextafter32SC[i]);
             }
         }
     }
 }
 
-public static void TestNextafter64(ж<testing.T> Ꮡt) {
+public static void TestNextafter64(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Nextafter(vf[i], 10D); if (nextafter64[i] != f) {
-                Ꮡt.Errorf("Nextafter64(%g, %g) = %g want %g"u8, vf[i], 10.0D, f, nextafter64[i]);
+                t.Errorf("Nextafter64(%g, %g) = %g want %g", vf[i], 10.0D, f, nextafter64[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfnextafter64SC); i++) {
         {
             var f = Nextafter(vfnextafter64SC[i][0], vfnextafter64SC[i][1]); if (!alike(nextafter64SC[i], f)) {
-                Ꮡt.Errorf("Nextafter64(%g, %g) = %g want %g"u8, vfnextafter64SC[i][0], vfnextafter64SC[i][1], f, nextafter64SC[i]);
+                t.Errorf("Nextafter64(%g, %g) = %g want %g", vfnextafter64SC[i][0], vfnextafter64SC[i][1], f, nextafter64SC[i]);
             }
         }
     }
 }
 
-public static void TestPow(ж<testing.T> Ꮡt) {
+public static void TestPow(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Pow(10D, vf[i]); if (!close(pow[i], f)) {
-                Ꮡt.Errorf("Pow(10, %g) = %g, want %g"u8, vf[i], f, pow[i]);
+                t.Errorf("Pow(10, %g) = %g, want %g", vf[i], f, pow[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfpowSC); i++) {
         {
             var f = Pow(vfpowSC[i][0], vfpowSC[i][1]); if (!alike(powSC[i], f)) {
-                Ꮡt.Errorf("Pow(%g, %g) = %g, want %g"u8, vfpowSC[i][0], vfpowSC[i][1], f, powSC[i]);
+                t.Errorf("Pow(%g, %g) = %g, want %g", vfpowSC[i][0], vfpowSC[i][1], f, powSC[i]);
             }
         }
     }
 }
 
-public static void TestPow10(ж<testing.T> Ꮡt) {
+public static void TestPow10(ж<testing.T> t) {
     for (nint i = 0; i < len(vfpow10SC); i++) {
         {
             var f = Pow10(vfpow10SC[i]); if (!alike(pow10SC[i], f)) {
-                Ꮡt.Errorf("Pow10(%d) = %g, want %g"u8, vfpow10SC[i], f, pow10SC[i]);
+                t.Errorf("Pow10(%d) = %g, want %g", vfpow10SC[i], f, pow10SC[i]);
             }
         }
     }
 }
 
-public static void TestRemainder(ж<testing.T> Ꮡt) {
+public static void TestRemainder(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Remainder(10D, vf[i]); if (remainder[i] != f) {
-                Ꮡt.Errorf("Remainder(10, %g) = %g, want %g"u8, vf[i], f, remainder[i]);
+                t.Errorf("Remainder(10, %g) = %g, want %g", vf[i], f, remainder[i]);
             }
         }
     }
     for (nint i = 0; i < len(vffmodSC); i++) {
         {
             var f = Remainder(vffmodSC[i][0], vffmodSC[i][1]); if (!alike(fmodSC[i], f)) {
-                Ꮡt.Errorf("Remainder(%g, %g) = %g, want %g"u8, vffmodSC[i][0], vffmodSC[i][1], f, fmodSC[i]);
+                t.Errorf("Remainder(%g, %g) = %g, want %g", vffmodSC[i][0], vffmodSC[i][1], f, fmodSC[i]);
             }
         }
     }
     // verify precision of result for extreme inputs
     {
         var f = Remainder(5.9790119248836734e+200D, 1.1258465975523544D); if (-0.4810497673014966D != f) {
-            Ꮡt.Errorf("Remainder(5.9790119248836734e+200, 1.1258465975523544) = %g, want -0.4810497673014966"u8, f);
+            t.Errorf("Remainder(5.9790119248836734e+200, 1.1258465975523544) = %g, want -0.4810497673014966", f);
         }
     }
     // verify that sign is correct when r == 0.
     void test(float64 x, float64 y) {
         {
             var r = Remainder(x, y); if (r == 0D && Signbit(r) != Signbit(x)) {
-                Ꮡt.Errorf("Remainder(x=%f, y=%f) = %f, sign of (zero) result should agree with sign of x"u8, x, y, r);
+                t.Errorf("Remainder(x=%f, y=%f) = %f, sign of (zero) result should agree with sign of x", x, y, r);
             }
         }
     }
@@ -3306,137 +3309,135 @@ public static void TestRemainder(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestRound(ж<testing.T> Ꮡt) {
+public static void TestRound(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Round(vf[i]); if (!alike(round[i], f)) {
-                Ꮡt.Errorf("Round(%g) = %g, want %g"u8, vf[i], f, round[i]);
+                t.Errorf("Round(%g) = %g, want %g", vf[i], f, round[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfroundSC); i++) {
         {
             var f = Round(vfroundSC[i][0]); if (!alike(vfroundSC[i][1], f)) {
-                Ꮡt.Errorf("Round(%g) = %g, want %g"u8, vfroundSC[i][0], f, vfroundSC[i][1]);
+                t.Errorf("Round(%g) = %g, want %g", vfroundSC[i][0], f, vfroundSC[i][1]);
             }
         }
     }
 }
 
-public static void TestRoundToEven(ж<testing.T> Ꮡt) {
+public static void TestRoundToEven(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = RoundToEven(vf[i]); if (!alike(round[i], f)) {
-                Ꮡt.Errorf("RoundToEven(%g) = %g, want %g"u8, vf[i], f, round[i]);
+                t.Errorf("RoundToEven(%g) = %g, want %g", vf[i], f, round[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfroundEvenSC); i++) {
         {
             var f = RoundToEven(vfroundEvenSC[i][0]); if (!alike(vfroundEvenSC[i][1], f)) {
-                Ꮡt.Errorf("RoundToEven(%g) = %g, want %g"u8, vfroundEvenSC[i][0], f, vfroundEvenSC[i][1]);
+                t.Errorf("RoundToEven(%g) = %g, want %g", vfroundEvenSC[i][0], f, vfroundEvenSC[i][1]);
             }
         }
     }
 }
 
-public static void TestSignbit(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestSignbit(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Signbit(vf[i]); if (signbit[i] != f) {
-                Ꮡt.Errorf("Signbit(%g) = %t, want %t"u8, vf[i], f, signbit[i]);
+                t.Errorf("Signbit(%g) = %t, want %t", vf[i], f, signbit[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfsignbitSC); i++) {
         {
             var f = Signbit(vfsignbitSC[i]); if (signbitSC[i] != f) {
-                Ꮡt.Errorf("Signbit(%g) = %t, want %t"u8, vfsignbitSC[i], f, signbitSC[i]);
+                t.Errorf("Signbit(%g) = %t, want %t", vfsignbitSC[i], f, signbitSC[i]);
             }
         }
     }
 }
 
-public static void TestSin(ж<testing.T> Ꮡt) {
+public static void TestSin(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Sin(vf[i]); if (!veryclose(sin[i], f)) {
-                Ꮡt.Errorf("Sin(%g) = %g, want %g"u8, vf[i], f, sin[i]);
+                t.Errorf("Sin(%g) = %g, want %g", vf[i], f, sin[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfsinSC); i++) {
         {
             var f = Sin(vfsinSC[i]); if (!alike(sinSC[i], f)) {
-                Ꮡt.Errorf("Sin(%g) = %g, want %g"u8, vfsinSC[i], f, sinSC[i]);
+                t.Errorf("Sin(%g) = %g, want %g", vfsinSC[i], f, sinSC[i]);
             }
         }
     }
 }
 
-public static void TestSincos(ж<testing.T> Ꮡt) {
+public static void TestSincos(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var (s, c) = Sincos(vf[i]); if (!veryclose(sin[i], s) || !veryclose(cos[i], c)) {
-                Ꮡt.Errorf("Sincos(%g) = %g, %g want %g, %g"u8, vf[i], s, c, sin[i], cos[i]);
+                t.Errorf("Sincos(%g) = %g, %g want %g, %g", vf[i], s, c, sin[i], cos[i]);
             }
         }
     }
 }
 
-public static void TestSinh(ж<testing.T> Ꮡt) {
+public static void TestSinh(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Sinh(vf[i]); if (!close(sinh[i], f)) {
-                Ꮡt.Errorf("Sinh(%g) = %g, want %g"u8, vf[i], f, sinh[i]);
+                t.Errorf("Sinh(%g) = %g, want %g", vf[i], f, sinh[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfsinhSC); i++) {
         {
             var f = Sinh(vfsinhSC[i]); if (!alike(sinhSC[i], f)) {
-                Ꮡt.Errorf("Sinh(%g) = %g, want %g"u8, vfsinhSC[i], f, sinhSC[i]);
+                t.Errorf("Sinh(%g) = %g, want %g", vfsinhSC[i], f, sinhSC[i]);
             }
         }
     }
 }
 
-public static void TestSqrt(ж<testing.T> Ꮡt) {
+public static void TestSqrt(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(vf[i]);
         {
             var f = math_internal_test_package.SqrtGo(a); if (sqrt[i] != f) {
-                Ꮡt.Errorf("SqrtGo(%g) = %g, want %g"u8, a, f, sqrt[i]);
+                t.Errorf("SqrtGo(%g) = %g, want %g", a, f, sqrt[i]);
             }
         }
         a = Abs(vf[i]);
         {
             var f = Sqrt(a); if (sqrt[i] != f) {
-                Ꮡt.Errorf("Sqrt(%g) = %g, want %g"u8, a, f, sqrt[i]);
+                t.Errorf("Sqrt(%g) = %g, want %g", a, f, sqrt[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfsqrtSC); i++) {
         {
             var f = math_internal_test_package.SqrtGo(vfsqrtSC[i]); if (!alike(sqrtSC[i], f)) {
-                Ꮡt.Errorf("SqrtGo(%g) = %g, want %g"u8, vfsqrtSC[i], f, sqrtSC[i]);
+                t.Errorf("SqrtGo(%g) = %g, want %g", vfsqrtSC[i], f, sqrtSC[i]);
             }
         }
         {
             var f = Sqrt(vfsqrtSC[i]); if (!alike(sqrtSC[i], f)) {
-                Ꮡt.Errorf("Sqrt(%g) = %g, want %g"u8, vfsqrtSC[i], f, sqrtSC[i]);
+                t.Errorf("Sqrt(%g) = %g, want %g", vfsqrtSC[i], f, sqrtSC[i]);
             }
         }
     }
 }
 
-public static void TestTan(ж<testing.T> Ꮡt) {
+public static void TestTan(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Tan(vf[i]); if (!veryclose(tan[i], f)) {
-                Ꮡt.Errorf("Tan(%g) = %g, want %g"u8, vf[i], f, tan[i]);
+                t.Errorf("Tan(%g) = %g, want %g", vf[i], f, tan[i]);
             }
         }
     }
@@ -3444,127 +3445,127 @@ public static void TestTan(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < len(vfsinSC); i++) {
         {
             var f = Tan(vfsinSC[i]); if (!alike(sinSC[i], f)) {
-                Ꮡt.Errorf("Tan(%g) = %g, want %g"u8, vfsinSC[i], f, sinSC[i]);
+                t.Errorf("Tan(%g) = %g, want %g", vfsinSC[i], f, sinSC[i]);
             }
         }
     }
 }
 
-public static void TestTanh(ж<testing.T> Ꮡt) {
+public static void TestTanh(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Tanh(vf[i]); if (!veryclose(tanh[i], f)) {
-                Ꮡt.Errorf("Tanh(%g) = %g, want %g"u8, vf[i], f, tanh[i]);
+                t.Errorf("Tanh(%g) = %g, want %g", vf[i], f, tanh[i]);
             }
         }
     }
     for (nint i = 0; i < len(vftanhSC); i++) {
         {
             var f = Tanh(vftanhSC[i]); if (!alike(tanhSC[i], f)) {
-                Ꮡt.Errorf("Tanh(%g) = %g, want %g"u8, vftanhSC[i], f, tanhSC[i]);
+                t.Errorf("Tanh(%g) = %g, want %g", vftanhSC[i], f, tanhSC[i]);
             }
         }
     }
 }
 
-public static void TestTrunc(ж<testing.T> Ꮡt) {
+public static void TestTrunc(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         {
             var f = Trunc(vf[i]); if (!alike(trunc[i], f)) {
-                Ꮡt.Errorf("Trunc(%g) = %g, want %g"u8, vf[i], f, trunc[i]);
+                t.Errorf("Trunc(%g) = %g, want %g", vf[i], f, trunc[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfceilSC); i++) {
         {
             var f = Trunc(vfceilSC[i]); if (!alike(truncSC[i], f)) {
-                Ꮡt.Errorf("Trunc(%g) = %g, want %g"u8, vfceilSC[i], f, truncSC[i]);
+                t.Errorf("Trunc(%g) = %g, want %g", vfceilSC[i], f, truncSC[i]);
             }
         }
     }
 }
 
-public static void TestY0(ж<testing.T> Ꮡt) {
+public static void TestY0(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(vf[i]);
         {
             var f = Y0(a); if (!close(y0[i], f)) {
-                Ꮡt.Errorf("Y0(%g) = %g, want %g"u8, a, f, y0[i]);
+                t.Errorf("Y0(%g) = %g, want %g", a, f, y0[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfy0SC); i++) {
         {
             var f = Y0(vfy0SC[i]); if (!alike(y0SC[i], f)) {
-                Ꮡt.Errorf("Y0(%g) = %g, want %g"u8, vfy0SC[i], f, y0SC[i]);
+                t.Errorf("Y0(%g) = %g, want %g", vfy0SC[i], f, y0SC[i]);
             }
         }
     }
 }
 
-public static void TestY1(ж<testing.T> Ꮡt) {
+public static void TestY1(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(vf[i]);
         {
             var f = Y1(a); if (!soclose(y1[i], f, 2e-14D)) {
-                Ꮡt.Errorf("Y1(%g) = %g, want %g"u8, a, f, y1[i]);
+                t.Errorf("Y1(%g) = %g, want %g", a, f, y1[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfy0SC); i++) {
         {
             var f = Y1(vfy0SC[i]); if (!alike(y1SC[i], f)) {
-                Ꮡt.Errorf("Y1(%g) = %g, want %g"u8, vfy0SC[i], f, y1SC[i]);
+                t.Errorf("Y1(%g) = %g, want %g", vfy0SC[i], f, y1SC[i]);
             }
         }
     }
 }
 
-public static void TestYn(ж<testing.T> Ꮡt) {
+public static void TestYn(ж<testing.T> t) {
     for (nint i = 0; i < len(vf); i++) {
         var a = Abs(vf[i]);
         {
             var f = Yn(2, a); if (!close(y2[i], f)) {
-                Ꮡt.Errorf("Yn(2, %g) = %g, want %g"u8, a, f, y2[i]);
+                t.Errorf("Yn(2, %g) = %g, want %g", a, f, y2[i]);
             }
         }
         {
             var f = Yn(-3, a); if (!close(yM3[i], f)) {
-                Ꮡt.Errorf("Yn(-3, %g) = %g, want %g"u8, a, f, yM3[i]);
+                t.Errorf("Yn(-3, %g) = %g, want %g", a, f, yM3[i]);
             }
         }
     }
     for (nint i = 0; i < len(vfy0SC); i++) {
         {
             var f = Yn(2, vfy0SC[i]); if (!alike(y2SC[i], f)) {
-                Ꮡt.Errorf("Yn(2, %g) = %g, want %g"u8, vfy0SC[i], f, y2SC[i]);
+                t.Errorf("Yn(2, %g) = %g, want %g", vfy0SC[i], f, y2SC[i]);
             }
         }
         {
             var f = Yn(-3, vfy0SC[i]); if (!alike(yM3SC[i], f)) {
-                Ꮡt.Errorf("Yn(-3, %g) = %g, want %g"u8, vfy0SC[i], f, yM3SC[i]);
+                t.Errorf("Yn(-3, %g) = %g, want %g", vfy0SC[i], f, yM3SC[i]);
             }
         }
     }
     {
         var f = Yn(0, 0D); if (!alike(Inf(-1), f)) {
-            Ꮡt.Errorf("Yn(0, 0) = %g, want %g"u8, f, Inf(-1));
+            t.Errorf("Yn(0, 0) = %g, want %g", f, Inf(-1));
         }
     }
 }
 
 public static readonly ж<Func<float64, float64, float64, float64>> ᏑPortableFMA = new StaticBox<Func<float64, float64, float64, float64>>(FMA);
-public static ref Func<float64, float64, float64, float64> PortableFMA => ref ((StaticBox<Func<float64, float64, float64, float64>>)ᏑPortableFMA).ValueSlot;                          // hide call from compiler intrinsic; falls back to portable code
+public static ref Func<float64, float64, float64, float64> PortableFMA => ref ((StaticBox<Func<float64, float64, float64, float64>>)ᏑPortableFMA).ValueSlot; // hide call from compiler intrinsic; falls back to portable code
 
-public static void TestFMA(ж<testing.T> Ꮡt) {
+public static void TestFMA(ж<testing.T> t) {
     foreach (var (_, c) in fmaC) {
         var got = FMA(c.x, c.y, c.z);
         if (!alike(got, c.want)) {
-            Ꮡt.Errorf("FMA(%g,%g,%g) == %g; want %g"u8, c.x, c.y, c.z, got, c.want);
+            t.Errorf("FMA(%g,%g,%g) == %g; want %g", c.x, c.y, c.z, got, c.want);
         }
         got = PortableFMA(c.x, c.y, c.z);
         if (!alike(got, c.want)) {
-            Ꮡt.Errorf("PortableFMA(%g,%g,%g) == %g; want %g"u8, c.x, c.y, c.z, got, c.want);
+            t.Errorf("PortableFMA(%g,%g,%g) == %g; want %g", c.x, c.y, c.z, got, c.want);
         }
     }
 }
@@ -3584,7 +3585,7 @@ internal static partial float64 fnmadd(float64 x, float64 y, float64 z) {
     return FMA(-x, y, -z);
 }
 
-public static void TestFMANegativeArgs(ж<testing.T> Ꮡt) {
+public static void TestFMANegativeArgs(ж<testing.T> t) {
     // Some architectures have instructions for fused multiply-subtract and
     // also negated variants of fused multiply-add and subtract. This test
     // aims to check that the optimizations that generate those instructions
@@ -3593,17 +3594,17 @@ public static void TestFMANegativeArgs(ж<testing.T> Ꮡt) {
         var want = PortableFMA(c.x, c.y, -c.z);
         var got = fmsub(c.x, c.y, c.z);
         if (!alike(got, want)) {
-            Ꮡt.Errorf("FMA(%g, %g, -(%g)) == %g, want %g"u8, c.x, c.y, c.z, got, want);
+            t.Errorf("FMA(%g, %g, -(%g)) == %g, want %g", c.x, c.y, c.z, got, want);
         }
         want = PortableFMA(-c.x, c.y, c.z);
         got = fnmsub(c.x, c.y, c.z);
         if (!alike(got, want)) {
-            Ꮡt.Errorf("FMA(-(%g), %g, %g) == %g, want %g"u8, c.x, c.y, c.z, got, want);
+            t.Errorf("FMA(-(%g), %g, %g) == %g, want %g", c.x, c.y, c.z, got, want);
         }
         want = PortableFMA(-c.x, c.y, -c.z);
         got = fnmadd(c.x, c.y, c.z);
         if (!alike(got, want)) {
-            Ꮡt.Errorf("FMA(-(%g), %g, -(%g)) == %g, want %g"u8, c.x, c.y, c.z, got, want);
+            t.Errorf("FMA(-(%g), %g, -(%g)) == %g, want %g", c.x, c.y, c.z, got, want);
         }
     }
 }
@@ -3612,53 +3613,53 @@ public static void TestFMANegativeArgs(ж<testing.T> Ꮡt) {
 // return accurate results. [Since (vf[i] + large) - large != vf[i],
 // testing for Trig(vf[i] + large) == Trig(vf[i]), where large is
 // a multiple of 2*Pi, is misleading.]
-public static void TestLargeCos(ж<testing.T> Ꮡt) {
+public static void TestLargeCos(ж<testing.T> t) {
     var large = /* 100000 * Pi */ 314159.26535897935D;
     for (nint i = 0; i < len(vf); i++) {
         var f1 = cosLarge[i];
         var f2 = Cos(vf[i] + large);
         if (!close(f1, f2)) {
-            Ꮡt.Errorf("Cos(%g) = %g, want %g"u8, vf[i] + large, f2, f1);
+            t.Errorf("Cos(%g) = %g, want %g", vf[i] + large, f2, f1);
         }
     }
 }
 
-public static void TestLargeSin(ж<testing.T> Ꮡt) {
+public static void TestLargeSin(ж<testing.T> t) {
     var large = /* 100000 * Pi */ 314159.26535897935D;
     for (nint i = 0; i < len(vf); i++) {
         var f1 = sinLarge[i];
         var f2 = Sin(vf[i] + large);
         if (!close(f1, f2)) {
-            Ꮡt.Errorf("Sin(%g) = %g, want %g"u8, vf[i] + large, f2, f1);
+            t.Errorf("Sin(%g) = %g, want %g", vf[i] + large, f2, f1);
         }
     }
 }
 
-public static void TestLargeSincos(ж<testing.T> Ꮡt) {
+public static void TestLargeSincos(ж<testing.T> t) {
     var large = /* 100000 * Pi */ 314159.26535897935D;
     for (nint i = 0; i < len(vf); i++) {
         var (f1, g1) = (sinLarge[i], cosLarge[i]);
         var (f2, g2) = Sincos(vf[i] + large);
         if (!close(f1, f2) || !close(g1, g2)) {
-            Ꮡt.Errorf("Sincos(%g) = %g, %g, want %g, %g"u8, vf[i] + large, f2, g2, f1, g1);
+            t.Errorf("Sincos(%g) = %g, %g, want %g, %g", vf[i] + large, f2, g2, f1, g1);
         }
     }
 }
 
-public static void TestLargeTan(ж<testing.T> Ꮡt) {
+public static void TestLargeTan(ж<testing.T> t) {
     var large = /* 100000 * Pi */ 314159.26535897935D;
     for (nint i = 0; i < len(vf); i++) {
         var f1 = tanLarge[i];
         var f2 = Tan(vf[i] + large);
         if (!close(f1, f2)) {
-            Ꮡt.Errorf("Tan(%g) = %g, want %g"u8, vf[i] + large, f2, f1);
+            t.Errorf("Tan(%g) = %g, want %g", vf[i] + large, f2, f1);
         }
     }
 }
 
 // Check that trigReduce matches the standard reduction results for input values
 // below reduceThreshold.
-public static void TestTrigReduce(ж<testing.T> Ꮡt) {
+public static void TestTrigReduce(ж<testing.T> t) {
     var inputsᴷ = new stackAppend<float64>();
 
     var inputs = new slice<float64>(len(vf));
@@ -3678,23 +3679,23 @@ public static void TestTrigReduce(ж<testing.T> Ꮡt) {
 
         {
             var (fΔ1, fredΔ1) = (Sin(x), Sin(xred)); if (!close(fΔ1, fredΔ1)) {
-                Ꮡt.Errorf("Sin(trigReduce(%g)) != Sin(%g), got %g, want %g"u8, x, x, fredΔ1, fΔ1);
+                t.Errorf("Sin(trigReduce(%g)) != Sin(%g), got %g, want %g", x, x, fredΔ1, fΔ1);
             }
         }
         {
             var (fΔ2, fredΔ2) = (Cos(x), Cos(xred)); if (!close(fΔ2, fredΔ2)) {
-                Ꮡt.Errorf("Cos(trigReduce(%g)) != Cos(%g), got %g, want %g"u8, x, x, fredΔ2, fΔ2);
+                t.Errorf("Cos(trigReduce(%g)) != Cos(%g), got %g, want %g", x, x, fredΔ2, fΔ2);
             }
         }
         {
             var (fΔ3, fredΔ3) = (Tan(x), Tan(xred)); if (!close(fΔ3, fredΔ3)) {
-                Ꮡt.Errorf(" Tan(trigReduce(%g)) != Tan(%g), got %g, want %g"u8, x, x, fredΔ3, fΔ3);
+                t.Errorf(" Tan(trigReduce(%g)) != Tan(%g), got %g, want %g", x, x, fredΔ3, fΔ3);
             }
         }
         var (f, g) = Sincos(x);
         var (fred, gred) = Sincos(xred);
         if (!close(f, fred) || !close(g, gred)) {
-            Ꮡt.Errorf(" Sincos(trigReduce(%g)) != Sincos(%g), got %g, %g, want %g, %g"u8, x, x, fred, gred, f, g);
+            t.Errorf(" Sincos(trigReduce(%g)) != Sincos(%g), got %g, %g, want %g, %g", x, x, fred, gred, f, g);
         }
     }
 }
@@ -3708,31 +3709,31 @@ partial struct floatTest {
     internal @string str;
 }
 
-internal static slice<floatTest> floatTests = new floatTest[]{
-    new((float64)MaxFloat64, "MaxFloat64"u8, "1.7976931348623157e+308"u8),
-    new((float64)SmallestNonzeroFloat64, "SmallestNonzeroFloat64"u8, "5e-324"u8),
-    new((float32)MaxFloat32, "MaxFloat32"u8, "3.4028235e+38"u8),
-    new((float32)SmallestNonzeroFloat32, "SmallestNonzeroFloat32"u8, "1e-45"u8)
-}.slice();
+internal static slice<floatTest> floatTests = slice<floatTest>([
+    new((float64)MaxFloat64, "MaxFloat64", "1.7976931348623157e+308"),
+    new((float64)SmallestNonzeroFloat64, "SmallestNonzeroFloat64", "5e-324"),
+    new((float32)MaxFloat32, "MaxFloat32", "3.4028235e+38"),
+    new((float32)SmallestNonzeroFloat32, "SmallestNonzeroFloat32", "1e-45")
+]);
 
-public static void TestFloatMinMax(ж<testing.T> Ꮡt) {
+public static void TestFloatMinMax(ж<testing.T> t) {
     foreach (var (_, tt) in floatTests) {
         @string s = fmt.Sprint(tt.val);
         if (s != tt.str) {
-            Ꮡt.Errorf("Sprint(%v) = %s, want %s"u8, tt.name, s, tt.str);
+            t.Errorf("Sprint(%v) = %s, want %s", tt.name, s, tt.str);
         }
     }
 }
 
-public static void TestFloatMinima(ж<testing.T> Ꮡt) {
+public static void TestFloatMinima(ж<testing.T> t) {
     {
         var q = /* SmallestNonzeroFloat32 / 2 */ 0F; if (q != 0F) {
-            Ꮡt.Errorf("float32(SmallestNonzeroFloat32 / 2) = %g, want 0"u8, q);
+            t.Errorf("float32(SmallestNonzeroFloat32 / 2) = %g, want 0", q);
         }
     }
     {
         var q = /* SmallestNonzeroFloat64 / 2 */ 0D; if (q != 0D) {
-            Ꮡt.Errorf("float64(SmallestNonzeroFloat64 / 2) = %g, want 0"u8, q);
+            t.Errorf("float64(SmallestNonzeroFloat64 / 2) = %g, want 0", q);
         }
     }
 }
@@ -3740,18 +3741,18 @@ public static void TestFloatMinima(ж<testing.T> Ꮡt) {
 internal static Func<float64, float64> indirectSqrt = Sqrt;
 
 // TestFloat32Sqrt checks the correctness of the float32 square root optimization result.
-public static void TestFloat32Sqrt(ж<testing.T> Ꮡt) {
+public static void TestFloat32Sqrt(ж<testing.T> t) {
     foreach (var (_, v) in sqrt32) {
         var want = (float32)indirectSqrt((float64)v);
         var got = (float32)Sqrt((float64)v);
         if (IsNaN((float64)want)) {
             if (!IsNaN((float64)got)) {
-                Ꮡt.Errorf("got=%#v want=NaN, v=%#v"u8, got, v);
+                t.Errorf("got=%#v want=NaN, v=%#v", got, v);
             }
             continue;
         }
         if (got != want) {
-            Ꮡt.Errorf("got=%#v want=%#v, v=%#v"u8, got, want, v);
+            t.Errorf("got=%#v want=%#v, v=%#v", got, want, v);
         }
     }
 }

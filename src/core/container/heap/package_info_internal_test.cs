@@ -29,7 +29,7 @@ using static go.container.heap_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("container/heap/heap_test.go", "heap_test.cs", "AA4cgqaCpoKmooKmgqaCgoKCgoKCgpSUgoKClLiCgoKUgpSCgoKCyoKCgpSClIKCgoLKgoKUgpSClIKCpoKCgpSCgsqCgoKUlIKCgoKUuIKCgpSUgoKClLiilIKClJSCgoKmgpSCgsqigpKCgpSCyoKClIKUlIKUgoKUgoKClJSC")]
+[assembly: GoPositionMap("container/heap/heap_test.go", "heap_test.cs", "AA4cgqaCpoKmooKmgqaCgoKCgoKCgpSUgoKClLiCgoKUgpSCgoKCyoKCgpSClIKCgoLKgoKUgpSClIKCpoKCgpSCgsqCgoKUlIKCgoKUuIKCgpSUgoKClLiClIKClJSCgoKmgpSCgsqigoKCgpSCyoKClIKUlIKUgoKUgoKClJSC")]
 // </GoSourcePositionMaps>
 
 namespace go.container;

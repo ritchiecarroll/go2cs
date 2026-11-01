@@ -33,62 +33,62 @@ internal static readonly object expectedToFindSomeGzˢ = (@string)"expected to f
 //	$ dd if=/dev/zero bs=1 seek=4 count=4 conv=notrunc of=filename.gz
 //
 // See https://golang.org/issue/14937.
-public static void TestGZIPFilesHaveZeroMTimes(ж<testing.T> Ꮡt) {
+public static void TestGZIPFilesHaveZeroMTimes(ж<testing.T> t) {
     // To avoid spurious false positives due to untracked GZIP files that
     // may be in the user's GOROOT (Issue 18604), we only run this test on
     // the builders, which should have a clean checkout of the tree.
     if (testenv.Builder() == ""u8) {
-        Ꮡt.Skip(skippingTestOnNonBuilderˢ);
+        t.Skip(skippingTestOnNonBuilderˢ);
     }
-    testenv.MustHaveSource(new gzip_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveSource(new gzip_test_package.testing_TжTB(t));
 
     var (goroot, err) = filepath.EvalSymlinks(runtime.GOROOT());
-    if (err != default!) {
-        Ꮡt.Fatal(errorEvaluatingGorootˢ, err);
+    if (err != nil) {
+        t.Fatal(errorEvaluatingGorootˢ, err);
     }
     ref var files = ref heap<slice<@string>>(out var Ꮡfiles);
     err = filepath.WalkDir(goroot, error (@string path, fs.DirEntry info, error errΔ1) => {
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return errΔ1;
         }
-        if (!info.IsDir() && strings.HasSuffix(path, ".gz"u8)) {
+        if (!info.IsDir() && strings.HasSuffix(path, ".gz")) {
             Ꮡfiles.ValueSlot = append(Ꮡfiles.ValueSlot, path);
         }
-        return default!;
+        return default;
     });
-    if (err != default!) {
+    if (err != nil) {
         if (os.IsNotExist(err)) {
-            Ꮡt.Skipf("skipping: GOROOT directory not found: %s"u8, runtime.GOROOT());
+            t.Skipf("skipping: GOROOT directory not found: %s", runtime.GOROOT());
         }
-        Ꮡt.Fatal(errorCollectingListOfGzˢ, err);
+        t.Fatal(errorCollectingListOfGzˢ, err);
     }
     if (len(files) == 0) {
-        Ꮡt.Fatal(expectedToFindSomeGzˢ);
+        t.Fatal(expectedToFindSomeGzˢ);
     }
     foreach (var (_, path) in files) {
-        checkZeroMTime(Ꮡt, path);
+        checkZeroMTime(t, path);
     }
 }
 
-internal static void checkZeroMTime(ж<testing.T> Ꮡt, @string path) {
+internal static void checkZeroMTime(ж<testing.T> t, @string path) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(path);
-        if (err != default!) {
-            Ꮡt.Error(err);
+        if (err != nil) {
+            t.Error(err);
             return;
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         (var gz, err) = NewReader(new gzip_test_package.os_FileжReader(f));
-        if (err != default!) {
-            Ꮡt.Errorf("cannot read gzip file %s: %s"u8, path, err);
+        if (err != nil) {
+            t.Errorf("cannot read gzip file %s: %s", path, err);
             return;
         }
         var gzʗ1 = gz;
         defer(() => gzʗ1.Close(), ref ᒐ);
-        if (!(~gz).ModTime.IsZero()) {
-            Ꮡt.Errorf("gzip file %s has non-zero mtime (%s)"u8, path, (~gz).ModTime);
+        if (!gz.ModTime.IsZero()) {
+            t.Errorf("gzip file %s has non-zero mtime (%s)", path, gz.ModTime);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -9,7 +9,7 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-internal static slice<global::go.net_package.KeepAliveConfig> testConfigs = new global::go.net_package.KeepAliveConfig[]{
+internal static slice<global::go.net_package.KeepAliveConfig> testConfigs = slice<global::go.net_package.KeepAliveConfig>([
     new(
         Enable: true,
         Idle: (time.Duration)(5000000000L),
@@ -100,6 +100,6 @@ internal static slice<global::go.net_package.KeepAliveConfig> testConfigs = new 
         Interval: 0,
         Count: 0
     )
-}.slice();
+]);
 
 } // end net_internal_test_package

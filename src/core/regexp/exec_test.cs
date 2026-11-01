@@ -26,7 +26,8 @@ using static go.regexp_package;
 partial class regexp_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataRe2SearchTxtˢ = "testdata/re2-search.txt"u8;
+internal static ref readonly @string testdataRe2SearchTxtˢ => ref testdataRe2SearchTxtˢᵇ;
+private static readonly @string testdataRe2SearchTxtˢᵇ = "testdata/re2-search.txt"u8;
 
 // TestRE2 tests this package's regexp API against test cases
 // considered during RE2's exhaustive tests, which run all possible
@@ -71,26 +72,27 @@ internal static readonly @string testdataRe2SearchTxtˢ = "testdata/re2-search.t
 //
 // At time of writing, re2-exhaustive.txt is 59 MB but compresses to 385 kB,
 // so we store re2-exhaustive.txt.bz2 in the repository and decompress it on the fly.
-public static void TestRE2Search(ж<testing.T> Ꮡt) {
-    testRE2(Ꮡt, testdataRe2SearchTxtˢ);
+public static void TestRE2Search(ж<testing.T> t) {
+    testRE2(t, testdataRe2SearchTxtˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bz2ˢ = ".bz2"u8;
+internal static ref readonly @string bz2ˢ => ref bz2ˢᵇ;
+private static readonly @string bz2ˢᵇ = ".bz2"u8;
 
-internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
+internal static void testRE2(ж<testing.T> t, @string @file) {
     GoFrame ᒐ = default;
     try {
         var strᴷ = new stackAppend<@string>();
 
         var (f, err) = Δos.Open(@file);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
-        Δio.Reader txt = default!;
-        if (strings.HasSuffix(@file, bz2ˢ)){
+        Δio.Reader txt = default;
+        if (strings.HasSuffix(@file, bz2ˢ)) {
             var z = bzip2.NewReader(new regexp_test_package.os_FileжReader(f));
             txt = z;
             @file = @file.slice(0, len(@file) - len(".bz2")); // for error messages
@@ -99,27 +101,27 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
         }
         nint lineno = 0;
         var scanner = bufio.NewScanner(txt);
-        slice<@string> str = default!;
-        slice<@string> input = default!;
-        bool inStrings = default!;
-        ж<global::go.regexp_package.Regexp> re = default!;
-        ж<global::go.regexp_package.Regexp> refull = default!;
-        nint nfail = default!;
-        nint ncase = default!;
+        slice<@string> str = default;
+        slice<@string> input = default;
+        bool inStrings = default;
+        ж<global::go.regexp_package.Regexp> re = default;
+        ж<global::go.regexp_package.Regexp> refull = default;
+        nint nfail = default;
+        nint ncase = default;
         for (nint linenoΔ1 = 1; scanner.Scan(); linenoΔ1++) {
             @string line = scanner.Text();
             switch (ᐧ) {
             case {} when line == ""u8: {
-                Ꮡt.Fatalf("%s:%d: unexpected blank line"u8, @file, linenoΔ1);
+                t.Fatalf("%s:%d: unexpected blank line", @file, linenoΔ1);
                 break;
             }
-            case {} when line[0] is (rune)'#': {
+            case {} when line[0] is (byte)'#': {
                 continue;
                 break;
             }
-            case {} when (rune)'A' <= line[0] && line[0] <= (rune)'Z': {
+            case {} when (byte)'A' <= line[0] && line[0] <= (byte)'Z': {
                 // Test name.
-                Ꮡt.Logf("%s\n"u8, line);
+                t.Logf("%s\n", line);
                 continue;
                 break;
             }
@@ -132,11 +134,11 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                 inStrings = false;
                 break;
             }
-            case {} when line[0] is (rune)'"': {
+            case {} when line[0] is (byte)'"': {
                 var (q, errΔ2) = strconv.Unquote(line);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     // Fatal because we'll get out of sync.
-                    Ꮡt.Fatalf("%s:%d: unquote %s: %v"u8, @file, linenoΔ1, line, errΔ2);
+                    t.Fatalf("%s:%d: unquote %s: %v", @file, linenoΔ1, line, errΔ2);
                 }
                 if (inStrings) {
                     str = append(strᴷ, str, q);
@@ -144,32 +146,32 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                 }
                 // Is a regexp.
                 if (len(input) != 0) {
-                    Ꮡt.Fatalf("%s:%d: out of sync: have %d strings left before %#q"u8, @file, linenoΔ1, len(input), q);
+                    t.Fatalf("%s:%d: out of sync: have %d strings left before %#q", @file, linenoΔ1, len(input), q);
                 }
                 (re, errΔ2) = tryCompile(q);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     if (errΔ2.Error() == "error parsing regexp: invalid escape sequence: `\\C`"u8) {
                         // We don't and likely never will support \C; keep going.
                         continue;
                     }
-                    Ꮡt.Errorf("%s:%d: compile %#q: %v"u8, @file, linenoΔ1, q, errΔ2);
+                    t.Errorf("%s:%d: compile %#q: %v", @file, linenoΔ1, q, errΔ2);
                     {
                         nfail++; if (nfail >= 100) {
-                            Ꮡt.Fatalf("stopping after %d errors"u8, nfail);
+                            t.Fatalf("stopping after %d errors", nfail);
                         }
                     }
                     continue;
                 }
                 @string full = @"\A(?:"u8 + q + @")\z"u8;
                 (refull, errΔ2) = tryCompile(full);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     // Fatal because q worked, so this should always work.
-                    Ꮡt.Fatalf("%s:%d: compile full %#q: %v"u8, @file, linenoΔ1, full, errΔ2);
+                    t.Fatalf("%s:%d: compile full %#q: %v", @file, linenoΔ1, full, errΔ2);
                 }
                 input = str;
                 break;
             }
-            case {} when line[0] == (rune)'-' || (rune)'0' <= line[0] && line[0] <= (rune)'9': {
+            case {} when line[0] == (byte)'-' || (byte)'0' <= line[0] && line[0] <= (byte)'9': {
                 // A sequence of match results.
                 ncase++;
                 if (re == nil) {
@@ -177,11 +179,11 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                     continue;
                 }
                 if (len(input) == 0) {
-                    Ꮡt.Fatalf("%s:%d: out of sync: no input remaining"u8, @file, linenoΔ1);
+                    t.Fatalf("%s:%d: out of sync: no input remaining", @file, linenoΔ1);
                 }
-                @string text = default!;
+                @string text = default;
                 (text, input) = (input[0], input[1..]);
-                if (!isSingleBytes(text) && strings.Contains(re.String(), @"\B"u8)) {
+                if (!isSingleBytes(text) && strings.Contains(re.String(), @"\B")) {
                     // RE2's \B considers every byte position,
                     // so it sees 'not word boundary' in the
                     // middle of UTF-8 sequences. This package
@@ -189,28 +191,28 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                     // so it disagrees. Skip those cases.
                     continue;
                 }
-                var res = strings.Split(line, ";"u8);
+                var res = strings.Split(line, ";");
                 if (len(res) != len(run)) {
-                    Ꮡt.Fatalf("%s:%d: have %d test results, want %d"u8, @file, linenoΔ1, len(res), len(run));
+                    t.Fatalf("%s:%d: have %d test results, want %d", @file, linenoΔ1, len(res), len(run));
                 }
                 foreach (var i in range(res)) {
                     var (have, suffix) = run[i](re, refull, text);
-                    var want = parseResult(Ꮡt, @file, linenoΔ1, res[i]);
+                    var want = parseResult(t, @file, linenoΔ1, res[i]);
                     if (!slices.Equal<slice<nint>, nint>(have, want)) {
-                        Ꮡt.Errorf("%s:%d: %#q%s.FindSubmatchIndex(%#q) = %v, want %v"u8, @file, linenoΔ1, re.OrTypedNil(), suffix, text, have, want);
+                        t.Errorf("%s:%d: %#q%s.FindSubmatchIndex(%#q) = %v, want %v", @file, linenoΔ1, re.OrTypedNil(), suffix, text, have, want);
                         {
                             nfail++; if (nfail >= 100) {
-                                Ꮡt.Fatalf("stopping after %d errors"u8, nfail);
+                                t.Fatalf("stopping after %d errors", nfail);
                             }
                         }
                         continue;
                     }
                     (var b, suffix) = Δmatch[i](re, refull, text);
-                    if (b != (want != default!)) {
-                        Ꮡt.Errorf("%s:%d: %#q%s.MatchString(%#q) = %v, want %v"u8, @file, linenoΔ1, re.OrTypedNil(), suffix, text, b, !b);
+                    if (b != (want != nil)) {
+                        t.Errorf("%s:%d: %#q%s.MatchString(%#q) = %v, want %v", @file, linenoΔ1, re.OrTypedNil(), suffix, text, b, !b);
                         {
                             nfail++; if (nfail >= 100) {
-                                Ꮡt.Fatalf("stopping after %d errors"u8, nfail);
+                                t.Fatalf("stopping after %d errors", nfail);
                             }
                         }
                         continue;
@@ -219,54 +221,54 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                 break;
             }
             default: {
-                Ꮡt.Fatalf("%s:%d: out of sync: %s\n"u8, @file, linenoΔ1, line);
+                t.Fatalf("%s:%d: out of sync: %s\n", @file, linenoΔ1, line);
                 break;
             }}
         }
         {
-            var errΔ3 = scanner.Err(); if (errΔ3 != default!) {
-                Ꮡt.Fatalf("%s:%d: %v"u8, @file, lineno, errΔ3);
+            var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
+                t.Fatalf("%s:%d: %v", @file, lineno, errΔ3);
             }
         }
         if (len(input) != 0) {
-            Ꮡt.Fatalf("%s:%d: out of sync: have %d strings left at EOF"u8, @file, lineno, len(input));
+            t.Fatalf("%s:%d: out of sync: have %d strings left at EOF", @file, lineno, len(input));
         }
-        Ꮡt.Logf("%d cases tested"u8, ncase);
+        t.Logf("%d cases tested", ncase);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 internal static slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (slice<nint>, @string)>> run;
-internal static void initᴛrun() { run = new Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (slice<nint>, @string)>[]{
+internal static void initᴛrun() { run = slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (slice<nint>, @string)>>([
     runFull,
     runPartial,
     runFullLongest,
     runPartialLongest
-}.slice(); }
+]); }
 
-internal static (slice<nint>, @string) runFull(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
+internal static (slice<nint>, @string) runFull(ж<global::go.regexp_package.Regexp> re, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
     ref var refull = ref Ꮡrefull.DerefOrNull();
 
     refull.longest = false;
     return (Ꮡrefull.FindStringSubmatchIndex(text), "[full]");
 }
 
-internal static (slice<nint>, @string) runPartial(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
+internal static (slice<nint>, @string) runPartial(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> refull, @string text) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     re.longest = false;
     return (Ꮡre.FindStringSubmatchIndex(text), "");
 }
 
-internal static (slice<nint>, @string) runFullLongest(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
+internal static (slice<nint>, @string) runFullLongest(ж<global::go.regexp_package.Regexp> re, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
     ref var refull = ref Ꮡrefull.DerefOrNull();
 
     refull.longest = true;
     return (Ꮡrefull.FindStringSubmatchIndex(text), "[full,longest]");
 }
 
-internal static (slice<nint>, @string) runPartialLongest(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
+internal static (slice<nint>, @string) runPartialLongest(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> refull, @string text) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     re.longest = true;
@@ -274,35 +276,35 @@ internal static (slice<nint>, @string) runPartialLongest(ж<global::go.regexp_pa
 }
 
 internal static slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (bool, @string)>> Δmatch;
-internal static void initᴛΔmatch() { Δmatch = new Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (bool, @string)>[]{
+internal static void initᴛΔmatch() { Δmatch = slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (bool, @string)>>([
     matchFull,
     matchPartial,
     matchFullLongest,
     matchPartialLongest
-}.slice(); }
+]); }
 
-internal static (bool, @string) matchFull(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
+internal static (bool, @string) matchFull(ж<global::go.regexp_package.Regexp> re, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
     ref var refull = ref Ꮡrefull.DerefOrNull();
 
     refull.longest = false;
     return (Ꮡrefull.MatchString(text), "[full]");
 }
 
-internal static (bool, @string) matchPartial(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
+internal static (bool, @string) matchPartial(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> refull, @string text) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     re.longest = false;
     return (Ꮡre.MatchString(text), "");
 }
 
-internal static (bool, @string) matchFullLongest(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
+internal static (bool, @string) matchFullLongest(ж<global::go.regexp_package.Regexp> re, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
     ref var refull = ref Ꮡrefull.DerefOrNull();
 
     refull.longest = true;
     return (Ꮡrefull.MatchString(text), "[full,longest]");
 }
 
-internal static (bool, @string) matchPartialLongest(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
+internal static (bool, @string) matchPartialLongest(ж<global::go.regexp_package.Regexp> Ꮡre, ж<global::go.regexp_package.Regexp> refull, @string text) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     re.longest = true;
@@ -319,14 +321,14 @@ internal static bool isSingleBytes(@string s) {
 }
 
 internal static (ж<global::go.regexp_package.Regexp> re, error err) tryCompile(@string s) {
-    ж<global::go.regexp_package.Regexp> re = default!;
-    error err = default!;
+    ж<global::go.regexp_package.Regexp> re = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         // Protect against panic during Compile.
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     err = fmt.Errorf("panic: %v"u8, r);
                 }
             }
@@ -338,15 +340,15 @@ internal static (ж<global::go.regexp_package.Regexp> re, error err) tryCompile(
     return (re, err);
 }
 
-internal static slice<nint> parseResult(ж<testing.T> Ꮡt, @string @file, nint lineno, @string res) {
+internal static slice<nint> parseResult(ж<testing.T> t, @string @file, nint lineno, @string res) {
     // A single - indicates no match.
     if (res == "-"u8) {
-        return default!;
+        return default;
     }
     // Otherwise, a space-separated list of pairs.
     nint n = 1;
     for (nint j = 0; j < len(res); j++) {
-        if (res[j] == (rune)' ') {
+        if (res[j] == ' ') {
             n++;
         }
     }
@@ -354,18 +356,18 @@ internal static slice<nint> parseResult(ж<testing.T> Ꮡt, @string @file, nint 
     nint i = 0;
     n = 0;
     for (nint j = 0; j <= len(res); j++) {
-        if (j == len(res) || res[j] == (rune)' ') {
+        if (j == len(res) || res[j] == ' ') {
             // Process a single pair.  - means no submatch.
             @string pair = res.slice(i, j);
-            if (pair == "-"u8){
+            if (pair == "-"u8) {
                 @out[n] = -1;
                 @out[n + 1] = -1;
             } else {
-                var (loStr, hiStr, _) = strings.Cut(pair, "-"u8);
+                var (loStr, hiStr, _) = strings.Cut(pair, "-");
                 var (lo, err1) = strconv.Atoi(loStr);
                 var (hi, err2) = strconv.Atoi(hiStr);
-                if (err1 != default! || err2 != default! || lo > hi) {
-                    Ꮡt.Fatalf("%s:%d: invalid pair %s"u8, @file, lineno, pair);
+                if (err1 != nil || err2 != nil || lo > hi) {
+                    t.Fatalf("%s:%d: invalid pair %s", @file, lineno, pair);
                 }
                 @out[n] = lo;
                 @out[n + 1] = hi;
@@ -378,31 +380,32 @@ internal static slice<nint> parseResult(ж<testing.T> Ꮡt, @string @file, nint 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataDatˢ = "testdata/*.dat"u8;
+internal static ref readonly @string testdataDatˢ => ref testdataDatˢᵇ;
+private static readonly @string testdataDatˢᵇ = "testdata/*.dat"u8;
 
 // TestFowler runs this package's regexp API against the
 // POSIX regular expression tests collected by Glenn Fowler
 // at http://www2.research.att.com/~astopen/testregex/testregex.html.
-public static void TestFowler(ж<testing.T> Ꮡt) {
+public static void TestFowler(ж<testing.T> t) {
     var (files, err) = filepath.Glob(testdataDatˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     foreach (var (_, @file) in files) {
-        Ꮡt.Log(@file);
-        testFowler(Ꮡt, @file);
+        t.Log(@file);
+        testFowler(t, @file);
     }
 }
 
 internal static ж<global::go.regexp_package.Regexp> notab;
-internal static void initᴛnotab() { notab = MustCompilePOSIX(@"[^\t]+"u8); }
+internal static void initᴛnotab() { notab = MustCompilePOSIX(@"[^\t]+"); }
 
-internal static void testFowler(ж<testing.T> Ꮡt, @string @file) {
+internal static void testFowler(ж<testing.T> t, @string @file) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = Δos.Open(@file);
-        if (err != default!) {
-            Ꮡt.Error(err);
+        if (err != nil) {
+            t.Error(err);
             return;
         }
         var fʗ1 = f;
@@ -411,12 +414,12 @@ internal static void testFowler(ж<testing.T> Ꮡt, @string @file) {
         nint lineno = 0;
         @string lastRegexp = ""u8;
 Reading:
-        while (ᐧ) {
+        for (;;) {
             lineno++;
-            var (line, errΔ1) = b.ReadString((rune)'\n');
-            if (errΔ1 != default!) {
+            var (line, errΔ1) = b.ReadString((byte)'\n');
+            if (errΔ1 != nil) {
                 if (!AreEqual(errΔ1, Δio.EOF)) {
-                    Ꮡt.Errorf("%s:%d: %v"u8, @file, lineno, errΔ1);
+                    t.Errorf("%s:%d: %v", @file, lineno, errΔ1);
                 }
                 goto break_Reading;
             }
@@ -428,7 +431,7 @@ Reading:
             //   specification. A specification is five fields separated by one
             //   or more tabs. NULL denotes the empty string and NIL denotes the
             //   0 pointer.
-            if (line[0] == (rune)'#' || line[0] == (rune)'\n') {
+            if (line[0] == '#' || line[0] == '\n') {
                 goto continue_Reading;
             }
             line = line.slice(0, len(line) - 1);
@@ -438,7 +441,7 @@ Reading:
                     field[i] = ""u8;
                 }
                 if (fΔ1 == "NIL"u8) {
-                    Ꮡt.Logf("%s:%d: skip: %s"u8, @file, lineno, line);
+                    t.Logf("%s:%d: skip: %s", @file, lineno, line);
                     goto continue_Reading;
                 }
             }
@@ -508,7 +511,7 @@ Reading:
             //     number		use number for nmatch (20 by default)
             @string flag = field[0];
             switch (flag[0]) {
-            case (rune)'?' or (rune)'&' or (rune)'|' or (rune)';' or (rune)'{' or (rune)'}': {
+            case (byte)'?' or (byte)'&' or (byte)'|' or (byte)';' or (byte)'{' or (byte)'}': {
                 // Ignore all the control operators.
                 // Just run everything.
                 flag = flag[1..];
@@ -517,40 +520,40 @@ Reading:
                 }
                 break;
             }
-            case (rune)':': {
-                bool okΔ2 = default!;
+            case (byte)':': {
+                bool okΔ2 = default;
                 {
-                    (_, flag, okΔ2) = strings.Cut(flag[1..], ":"u8); if (!okΔ2) {
-                        Ꮡt.Logf("skip: %s"u8, line);
+                    (_, flag, okΔ2) = strings.Cut(flag[1..], ":"); if (!okΔ2) {
+                        t.Logf("skip: %s", line);
                         goto continue_Reading;
                     }
                 }
                 break;
             }
-            case (rune)'C' or (rune)'N' or (rune)'T' or (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7' or (rune)'8' or (rune)'9': {
-                Ꮡt.Logf("skip: %s"u8, line);
+            case (byte)'C' or (byte)'N' or (byte)'T' or (byte)'0' or (byte)'1' or (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9': {
+                t.Logf("skip: %s", line);
                 goto continue_Reading;
                 break;
             }}
 
             // Can check field count now that we've handled the myriad comment formats.
             if (len(field) < 4) {
-                Ꮡt.Errorf("%s:%d: too few fields: %s"u8, @file, lineno, line);
+                t.Errorf("%s:%d: too few fields: %s", @file, lineno, line);
                 goto continue_Reading;
             }
 
             // Expand C escapes (a.k.a. Go escapes).
-            if (strings.Contains(flag, "$"u8)) {
+            if (strings.Contains(flag, "$")) {
                 @string fΔ2 = @"""" + field[1] + @"""";
                 {
-                    (field[1], errΔ1) = strconv.Unquote(fΔ2); if (errΔ1 != default!) {
-                        Ꮡt.Errorf("%s:%d: cannot unquote %s"u8, @file, lineno, fΔ2);
+                    (field[1], errΔ1) = strconv.Unquote(fΔ2); if (errΔ1 != nil) {
+                        t.Errorf("%s:%d: cannot unquote %s", @file, lineno, fΔ2);
                     }
                 }
                 fΔ2 = @"""" + field[2] + @"""";
                 {
-                    (field[2], errΔ1) = strconv.Unquote(fΔ2); if (errΔ1 != default!) {
-                        Ꮡt.Errorf("%s:%d: cannot unquote %s"u8, @file, lineno, fΔ2);
+                    (field[2], errΔ1) = strconv.Unquote(fΔ2); if (errΔ1 != nil) {
+                        t.Errorf("%s:%d: cannot unquote %s", @file, lineno, fΔ2);
                     }
                 }
             }
@@ -569,7 +572,7 @@ Reading:
             //   Field 4: the test outcome...
             var (ok, shouldCompile, shouldMatch, pos) = parseFowlerResult(field[3]);
             if (!ok) {
-                Ꮡt.Errorf("%s:%d: cannot parse result %#q"u8, @file, lineno, field[3]);
+                t.Errorf("%s:%d: cannot parse result %#q", @file, lineno, field[3]);
                 goto continue_Reading;
             }
 
@@ -585,11 +588,11 @@ Testing:
                     goto continue_Testing;
                     break;
                 }
-                case (rune)'E': {
+                case 'E': {
                     // extended regexp (what we support)
                     break;
                 }
-                case (rune)'L': {
+                case 'L': {
                     // literal
                     pattern = QuoteMeta(pattern);
                     break;
@@ -597,38 +600,38 @@ Testing:
 
                 foreach (var (_, cΔ1) in flag) {
                     switch (cΔ1) {
-                    case (rune)'i': {
+                    case 'i': {
                         syn |= (syntax.Flags)(syntax.FoldCase);
                         break;
                     }}
                 }
 
                 var (re, errΔ2) = compile(pattern, syn, true);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     if (shouldCompile) {
-                        Ꮡt.Errorf("%s:%d: %#q did not compile"u8, @file, lineno, pattern);
+                        t.Errorf("%s:%d: %#q did not compile", @file, lineno, pattern);
                     }
                     goto continue_Testing;
                 }
                 if (!shouldCompile) {
-                    Ꮡt.Errorf("%s:%d: %#q should not compile"u8, @file, lineno, pattern);
+                    t.Errorf("%s:%d: %#q should not compile", @file, lineno, pattern);
                     goto continue_Testing;
                 }
                 var Δmatch = re.MatchString(text);
                 if (Δmatch != shouldMatch) {
-                    Ꮡt.Errorf("%s:%d: %#q.Match(%#q) = %v, want %v"u8, @file, lineno, pattern, text, Δmatch, shouldMatch);
+                    t.Errorf("%s:%d: %#q.Match(%#q) = %v, want %v", @file, lineno, pattern, text, Δmatch, shouldMatch);
                     goto continue_Testing;
                 }
                 var have = re.FindStringSubmatchIndex(text);
                 if ((len(have) > 0) != Δmatch) {
-                    Ꮡt.Errorf("%s:%d: %#q.Match(%#q) = %v, but %#q.FindSubmatchIndex(%#q) = %v"u8, @file, lineno, pattern, text, Δmatch, pattern, text, have);
+                    t.Errorf("%s:%d: %#q.Match(%#q) = %v, but %#q.FindSubmatchIndex(%#q) = %v", @file, lineno, pattern, text, Δmatch, pattern, text, have);
                     goto continue_Testing;
                 }
                 if (len(have) > len(pos)) {
                     have = have.slice(0, len(pos));
                 }
                 if (!slices.Equal<slice<nint>, nint>(have, pos)) {
-                    Ꮡt.Errorf("%s:%d: %#q.FindSubmatchIndex(%#q) = %v, want %v"u8, @file, lineno, pattern, text, have, pos);
+                    t.Errorf("%s:%d: %#q.FindSubmatchIndex(%#q) = %v, want %v", @file, lineno, pattern, text, have, pos);
                 }
 continue_Testing:;
             }
@@ -642,10 +645,10 @@ break_Reading:;
 }
 
 internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFowlerResult(@string s) {
-    bool ok = default!;
-    bool compiled = default!;
-    bool matched = default!;
-    slice<nint> pos = default!;
+    bool ok = default;
+    bool compiled = default;
+    bool matched = default;
+    slice<nint> pos = default;
     var xᴷ = new stackAppend<nint>(moves: true);
 
     //   Field 4: the test outcome. This is either one of the posix error
@@ -677,7 +680,7 @@ internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFow
         matched = false;
         return (ok, compiled, matched, pos);
     }
-    case {} when (rune)'A' <= s[0] && s[0] <= (rune)'Z': {
+    case {} when (byte)'A' <= s[0] && s[0] <= (byte)'Z': {
         // All the other error codes are compile errors.
         ok = true;
         compiled = false;
@@ -685,16 +688,16 @@ internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFow
     }}
     compiled = true;
 
-    slice<nint> x = default!;
+    slice<nint> x = default;
     while (s != ""u8) {
-        byte end = (rune)')';
+        byte end = (byte)')';
         if (len(x) % 2 == 0) {
-            if (s[0] != (rune)'(') {
+            if (s[0] != '(') {
                 ok = false;
                 return (ok, compiled, matched, pos);
             }
             s = s[1..];
-            end = (rune)',';
+            end = (byte)',';
         }
         nint i = 0;
         while (i < len(s) && s[i] != end) {
@@ -705,10 +708,10 @@ internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFow
             return (ok, compiled, matched, pos);
         }
         nint v = -1;
-        error err = default!;
+        error err = default;
         if (s.slice(0, i) != "?") {
             (v, err) = strconv.Atoi(s.slice(0, i));
-            if (err != default!) {
+            if (err != nil) {
                 ok = false;
                 return (ok, compiled, matched, pos);
             }
@@ -741,8 +744,8 @@ internal static slice<byte> makeText(nint n) {
         if ((int32)x < 0) {
             x ^= (uint32)(0x88888eefU);
         }
-        if (x % 31 == 0){
-            text[i] = (rune)'\n';
+        if (x % 31 == 0) {
+            text[i] = (byte)'\n';
         } else {
             text[i] = (byte)(x % (0x7E + 1 - 0x20) + 0x20);
         }
@@ -751,10 +754,11 @@ internal static slice<byte> makeText(nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string raceˢ = "-race"u8;
+internal static ref readonly @string raceˢ => ref raceˢᵇ;
+private static readonly @string raceˢᵇ = "-race"u8;
 internal static readonly object matchˢ = (@string)"match!"u8;
 
-public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
+public static void BenchmarkMatch(ж<testing.B> b) {
     var isRaceBuilder = strings.HasSuffix(testenv.Builder(), raceˢ);
 
     foreach (var (_, data) in benchData) {
@@ -770,7 +774,7 @@ public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
             var rʗ1 = r;
             var sizeʗ1 = size;
             var tʗ1 = t;
-            Ꮡb.Run(data.name + "/"u8 + size.name, (ж<testing.B> bΔ1) => {
+            b.Run(data.name + "/"u8 + size.name, (ж<testing.B> bΔ1) => {
                 bΔ1.SetBytes((int64)sizeʗ1.n);
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     if (rʗ1.Match(tʗ1)) {
@@ -783,14 +787,15 @@ public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sAZˢ = @"(?s)\A.*\z"u8;
+internal static ref readonly @string sAZˢ => ref sAZˢᵇ;
+private static readonly @string sAZˢᵇ = @"(?s)\A.*\z"u8;
 internal static readonly object notMatchˢ = (@string)"not match!"u8;
 
-public static void BenchmarkMatch_onepass_regex(ж<testing.B> Ꮡb) {
+public static void BenchmarkMatch_onepass_regex(ж<testing.B> b) {
     var isRaceBuilder = strings.HasSuffix(testenv.Builder(), raceˢ);
     var r = MustCompile(sAZˢ);
-    if ((~r).onepass == nil) {
-        Ꮡb.Fatalf("want onepass regex, but %q is not onepass"u8, r.OrTypedNil());
+    if (r.onepass == nil) {
+        b.Fatalf("want onepass regex, but %q is not onepass", r.OrTypedNil());
     }
     foreach (var (_, vᴛ1) in benchSizes) {
         ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
@@ -803,7 +808,7 @@ public static void BenchmarkMatch_onepass_regex(ж<testing.B> Ꮡb) {
         var rʗ1 = r;
         var sizeʗ1 = size;
         var tʗ1 = t;
-        Ꮡb.Run(size.name, (ж<testing.B> bΔ1) => {
+        b.Run(size.name, (ж<testing.B> bΔ1) => {
             bΔ1.SetBytes((int64)sizeʗ1.n);
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -815,62 +820,65 @@ public static void BenchmarkMatch_onepass_regex(ж<testing.B> Ꮡb) {
     }
 }
 
-internal static slice<compileBenchDataᴛ1> benchData = new compileBenchDataᴛ1[]{
-    new("Easy0"u8, "ABCDEFGHIJKLMNOPQRSTUVWXYZ$"u8),
-    new("Easy0i"u8, "(?i)ABCDEFGHIJklmnopqrstuvwxyz$"u8),
-    new("Easy1"u8, "A[AB]B[BC]C[CD]D[DE]E[EF]F[FG]G[GH]H[HI]I[IJ]J$"u8),
-    new("Medium"u8, "[XYZ]ABCDEFGHIJKLMNOPQRSTUVWXYZ$"u8),
-    new("Hard"u8, "[ -~]*ABCDEFGHIJKLMNOPQRSTUVWXYZ$"u8),
-    new("Hard1"u8, "ABCD|CDEF|EFGH|GHIJ|IJKL|KLMN|MNOP|OPQR|QRST|STUV|UVWX|WXYZ"u8)
-}.slice();
+internal static slice<compileBenchDataᴛ1> benchData = slice<compileBenchDataᴛ1>([
+    new("Easy0", "ABCDEFGHIJKLMNOPQRSTUVWXYZ$"),
+    new("Easy0i", "(?i)ABCDEFGHIJklmnopqrstuvwxyz$"),
+    new("Easy1", "A[AB]B[BC]C[CD]D[DE]E[EF]F[FG]G[GH]H[HI]I[IJ]J$"),
+    new("Medium", "[XYZ]ABCDEFGHIJKLMNOPQRSTUVWXYZ$"),
+    new("Hard", "[ -~]*ABCDEFGHIJKLMNOPQRSTUVWXYZ$"),
+    new("Hard1", "ABCD|CDEF|EFGH|GHIJ|IJKL|KLMN|MNOP|OPQR|QRST|STUV|UVWX|WXYZ")
+]);
 
 partial struct benchSizesᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
 }
-internal static slice<benchSizesᴛ1> benchSizes = new benchSizesᴛ1[]{
-    new("16"u8, 16),
-    new("32"u8, 32),
-    new("1K"u8, 1 << 10),
-    new("32K"u8, 32 << 10),
-    new("1M"u8, 1 << 20),
-    new("32M"u8, 32 << 20)
-}.slice();
+internal static slice<benchSizesᴛ1> benchSizes = slice<benchSizesᴛ1>([
+    new("16", 16),
+    new("32", 32),
+    new("1K", 1 << 10),
+    new("32K", 32 << 10),
+    new("1M", 1 << 20),
+    new("32M", 32 << 20)
+]);
 
-public static void TestLongest(ж<testing.T> Ꮡt) {
-    var (re, err) = Compile(@"a(|b)"u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+public static void TestLongest(ж<testing.T> t) {
+    var (re, err) = Compile(@"a(|b)");
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        @string g = re.FindString("ab"u8);
-        @string w = "a"u8; if (g != w) {
-            Ꮡt.Errorf("first match was %q, want %q"u8, g, w);
+        @string g = re.FindString("ab");
+        @string w = "a"; if (g != w) {
+            t.Errorf("first match was %q, want %q", g, w);
         }
     }
     re.Longest();
     {
-        @string g = re.FindString("ab"u8);
-        @string w = "ab"u8; if (g != w) {
-            Ꮡt.Errorf("longest match was %q, want %q"u8, g, w);
+        @string g = re.FindString("ab");
+        @string w = "ab"; if (g != w) {
+            t.Errorf("longest match was %q, want %q", g, w);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string oneTwoThreeFourFiveSixˢ = @"(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twentyone|twentytwo|twentythree|twentyfour|twentyfive|twentysix|twentyseven|twentyeight|twentynine|thirty|thirtyone|thirtytwo|thirtythree|thirtyfour|thirtyfive|thirtysix|thirtyseven|thirtyeight|thirtynine|forty|fortyone|fortytwo|fortythree|fortyfour|fortyfive|fortysix|fortyseven|fortyeight|fortynine|fifty|fiftyone|fiftytwo|fiftythree|fiftyfour|fiftyfive|fiftysix|fiftyseven|fiftyeight|fiftynine|sixty|sixtyone|sixtytwo|sixtythree|sixtyfour|sixtyfive|sixtysix|sixtyseven|sixtyeight|sixtynine|seventy|seventyone|seventytwo|seventythree|seventyfour|seventyfive|seventysix|seventyseven|seventyeight|seventynine|eighty|eightyone|eightytwo|eightythree|eightyfour|eightyfive|eightysix|eightyseven|eightyeight|eightynine|ninety|ninetyone|ninetytwo|ninetythree|ninetyfour|ninetyfive|ninetysix|ninetyseven|ninetyeight|ninetynine|onehundred)"u8;
-internal static readonly @string twoˢ = "two"u8;
-internal static readonly @string xxxˢ = "xxx"u8;
+internal static ref readonly @string oneTwoThreeFourFiveSixˢ => ref oneTwoThreeFourFiveSixˢᵇ;
+private static readonly @string oneTwoThreeFourFiveSixˢᵇ = @"(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twentyone|twentytwo|twentythree|twentyfour|twentyfive|twentysix|twentyseven|twentyeight|twentynine|thirty|thirtyone|thirtytwo|thirtythree|thirtyfour|thirtyfive|thirtysix|thirtyseven|thirtyeight|thirtynine|forty|fortyone|fortytwo|fortythree|fortyfour|fortyfive|fortysix|fortyseven|fortyeight|fortynine|fifty|fiftyone|fiftytwo|fiftythree|fiftyfour|fiftyfive|fiftysix|fiftyseven|fiftyeight|fiftynine|sixty|sixtyone|sixtytwo|sixtythree|sixtyfour|sixtyfive|sixtysix|sixtyseven|sixtyeight|sixtynine|seventy|seventyone|seventytwo|seventythree|seventyfour|seventyfive|seventysix|seventyseven|seventyeight|seventynine|eighty|eightyone|eightytwo|eightythree|eightyfour|eightyfive|eightysix|eightyseven|eightyeight|eightynine|ninety|ninetyone|ninetytwo|ninetythree|ninetyfour|ninetyfive|ninetysix|ninetyseven|ninetyeight|ninetynine|onehundred)"u8;
+internal static ref readonly @string twoˢ => ref twoˢᵇ;
+private static readonly @string twoˢᵇ = "two"u8;
+internal static ref readonly @string xxxˢ => ref xxxˢᵇ;
+private static readonly @string xxxˢᵇ = "xxx"u8;
 
 // TestProgramTooLongForBacktrack tests that a regex which is too long
 // for the backtracker still executes properly.
-public static void TestProgramTooLongForBacktrack(ж<testing.T> Ꮡt) {
+public static void TestProgramTooLongForBacktrack(ж<testing.T> t) {
     var longRegex = MustCompile(oneTwoThreeFourFiveSixˢ);
     if (!longRegex.MatchString(twoˢ)) {
-        Ꮡt.Errorf("longRegex.MatchString(\"two\") was false, want true"u8);
+        t.Errorf("longRegex.MatchString(\"two\") was false, want true");
     }
     if (longRegex.MatchString(xxxˢ)) {
-        Ꮡt.Errorf("longRegex.MatchString(\"xxx\") was true, want false"u8);
+        t.Errorf("longRegex.MatchString(\"xxx\") was true, want false");
     }
 }
 

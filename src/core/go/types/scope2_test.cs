@@ -19,8 +19,10 @@ using ꓸꓸꓸжastꓸFile = Span<ж<global::go.go.ast_package.File>>;
 partial class types_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packageLibVarXIntˢ = "package lib; var X int"u8;
-internal static readonly @string libPkgname5XVar1PiConst8ˢ = """
+internal static ref readonly @string packageLibVarXIntˢ => ref packageLibVarXIntˢᵇ;
+private static readonly @string packageLibVarXIntˢᵇ = "package lib; var X int"u8;
+internal static ref readonly @string libPkgname5XVar1PiConst8ˢ => ref libPkgname5XVar1PiConst8ˢᵇ;
+private static readonly @string libPkgname5XVar1PiConst8ˢᵇ = """
 
 /*lib=pkgname:5*/ /*X=var:1*/ /*Pi=const:8*/ /*T=typename:9*/ /*Y=var:10*/ /*F=func:12*/
 package main
@@ -64,27 +66,26 @@ func F[T *U, U any](param1, param2 int) /*param1=undef*/ (res1 /*res1=undef*/, r
 /*main=undef*/
 
 """u8.Raw();
-internal static readonly @string undefˢ = "undef"u8;
-internal static readonly @string typesˢ2 = "*types."u8;
+internal static ref readonly @string undefˢ => ref undefˢᵇ;
+private static readonly @string undefˢᵇ = "undef"u8;
+internal static ref readonly @string typesˢ2 => ref typesˢ2ᵇ;
+private static readonly @string typesˢ2ᵇ = "*types."u8;
 
 // TestScopeLookupParent ensures that (*Scope).LookupParent returns
 // the correct result at various positions with the source.
-public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestScopeLookupParent(ж<testing.T> t) {
     var fset = token.NewFileSet();
     var imports = new testImporter(0);
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Importer: imports);
+    ref var conf = ref heap<types.Config>(new Config(Importer: imports), out var Ꮡconf);
     ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
     var fsetʗ1 = fset;
     var importsʗ1 = imports;
     void makePkg(@string path, params ꓸꓸꓸжastꓸFile filesʗp) {
         var files = filesʗp.slice();
-        error err = default!;
+        error err = default;
         (importsʗ1[path], err) = Ꮡconf.Check(path, fsetʗ1, files, Ꮡinfo);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
     }
 
@@ -101,14 +102,14 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
     var f = mustParse(fset, mainSrc);
     makePkg(mainˢ, f);
     var mainScope = imports[mainˢ].Scope();
-    var rx = regexp.MustCompile(@"^/\*(\w*)=([\w:]*)\*/$"u8);
-    foreach (var (_, group) in (~f).Comments) {
-        foreach (var (_, comment) in (~group).List) {
+    var rx = regexp.MustCompile(@"^/\*(\w*)=([\w:]*)\*/$");
+    foreach (var (_, group) in f.Comments) {
+        foreach (var (_, comment) in group.List) {
             // Parse the assertion in the comment.
-            var m = rx.FindStringSubmatch((~comment).Text);
-            if (m == default!) {
-                Ꮡt.Errorf("%s: bad comment: %s"u8,
-                    fset.Position(comment.Pos()), (~comment).Text);
+            var m = rx.FindStringSubmatch(comment.Text);
+            if (m == nil) {
+                t.Errorf("%s: bad comment: %s",
+                    fset.Position(comment.Pos()), comment.Text);
                 continue;
             }
             @string name = m[1];
@@ -117,20 +118,20 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
             // Look up the name in the innermost enclosing scope.
             var inner = mainScope.Innermost(comment.Pos());
             if (inner == nil) {
-                Ꮡt.Errorf("%s: at %s: can't find innermost scope"u8,
-                    fset.Position(comment.Pos()), (~comment).Text);
+                t.Errorf("%s: at %s: can't find innermost scope",
+                    fset.Position(comment.Pos()), comment.Text);
                 continue;
             }
             @string got = undefˢ;
             {
-                var (_, obj) = inner.LookupParent(name, comment.Pos()); if (obj != default!) {
+                var (_, obj) = inner.LookupParent(name, comment.Pos()); if (obj != nil) {
                     @string kind = strings.ToLower(strings.TrimPrefix(reflect.TypeOf(obj).String(), typesˢ2));
                     got = fmt.Sprintf("%s:%d"u8, kind, fset.Position(obj.Pos()).Line);
                 }
             }
             if (got != want) {
-                Ꮡt.Errorf("%s: at %s: %s resolved to %s, want %s"u8,
-                    fset.Position(comment.Pos()), (~comment).Text, name, got, want);
+                t.Errorf("%s: at %s: %s resolved to %s, want %s",
+                    fset.Position(comment.Pos()), comment.Text, name, got, want);
             }
         }
     }
@@ -142,8 +143,8 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
     foreach (var (id, wantObj) in info.Uses) {
         var inner = mainScope.Innermost(id.Pos());
         if (inner == nil) {
-            Ꮡt.Errorf("%s: can't find innermost scope enclosing %q"u8,
-                fset.Position(id.Pos()), (~id).Name);
+            t.Errorf("%s: can't find innermost scope enclosing %q",
+                fset.Position(id.Pos()), id.Name);
             continue;
         }
 
@@ -151,16 +152,16 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
         // refs only.  (Ideally, we'd see if the AST parent is a
         // SelectorExpr, but that requires PathEnclosingInterval
         // from golang.org/x/tools/go/ast/astutil.)
-        if ((~id).Name == "X"u8) {
+        if (id.Name == "X"u8) {
             continue;
         }
 
-        var (_, gotObj) = inner.LookupParent((~id).Name, id.Pos());
+        var (_, gotObj) = inner.LookupParent(id.Name, id.Pos());
         if (!AreEqual(gotObj, wantObj)) {
             // Print the scope tree of mainScope in case of error.
             ref var printScopeTree = ref heap<Action<@string, ж<typesꓸScope>>>(out var ᏑprintScopeTree);
             printScopeTree = (@string indent, ж<typesꓸScope> s) => {
-                Ꮡt.Logf("%sscope %s %v-%v = %v"u8,
+                t.Logf("%sscope %s %v-%v = %v",
                     indent,
                     types_internal_test_package.ScopeComment(s),
                     s.Pos(),
@@ -172,10 +173,10 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
             };
             printScopeTree(""u8, mainScope);
 
-            Ꮡt.Errorf("%s: Scope(%s).LookupParent(%s@%v) got %v, want %v [scopePos=%v]"u8,
+            t.Errorf("%s: Scope(%s).LookupParent(%s@%v) got %v, want %v [scopePos=%v]",
                 fset.Position(id.Pos()),
                 types_internal_test_package.ScopeComment(inner),
-                (~id).Name,
+                id.Name,
                 id.Pos(),
                 gotObj,
                 wantObj,

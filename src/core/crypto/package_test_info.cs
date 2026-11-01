@@ -1,34 +1,48 @@
-// go2cs metadata anchor for a production-reference test project: the test assembly
-// REFERENCES the colocated production project instead of
-// recompiling its sources, so the production assembly is the single identity for the
-// production types and no production class partial may be declared here. The first —
-// and only — class is the test metadata class the go2cs-gen generators anchor
-// generated adapters and partials to.
-global using static global::go.crypto_package;
+// go2cs code converter defines `global using` statements here for imported type
+// aliases as package references are encountered via `import' statements. Exported
+// type aliases that need a `global using` declaration will be loaded from the
+// referenced package by parsing its 'package_info.cs' source file and reading its
+// defined `GoTypeAlias` attributes.
+
+// Package name separator "dot" used in imported type aliases is extended Unicode
+// character '\uA4F8' which is a valid character in a C# identifier name. This is
+// used to simulate Go's package level type aliases since C# does not yet support
+// importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.crypto_test_package;
+using static go.crypto_package;
+using static go.crypto_test_package;
+
+// For encountered type alias declarations, e.g., `type Table = map[string]int`,
+// go2cs code converter will generate a `global using` statement for the alias in
+// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
+// Although scope of `global using` is available to all files in the project, all
+// converted Go code for the project targets the same package, so `global using`
+// statements will effectively have package level scope.
+
+// Additionally, `GoTypeAlias` attributes will be generated here for exported type
+// aliases. This allows the type alias to be imported and used from other packages
+// when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("DecrypterOpts", "object")]
+[assembly: GoTypeAlias("PrivateKey", "object")]
+[assembly: GoTypeAlias("PublicKey", "object")]
 // </ExportedTypeAliases>
 
+// As types are cast to interfaces in Go source code, the go2cs code converter
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
+// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
+// this way is what keeps startup free of reflection.
+
 // <InterfaceImplementations>
-[assembly: GoImplement<go.crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>(Pointer = true)]
-[assembly: GoImplement<go.crypto.rsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]
-[assembly: GoImplement<messageSignerOnly, crypto_package.Signer>(Pointer = true)]
-[assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
+[assembly: GoImplement<Hash, SignerOpts>(Pointer = true, Production = true)]
+[assembly: GoImplement<Hash, SignerOpts>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -38,7 +52,14 @@ using static global::go.crypto_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.crypto.rsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.encoding.pem_package.Block))]
+[assembly: GoFieldAccess(typeof(go.go.build_package.Package))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -48,15 +69,16 @@ using static global::go.crypto_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("crypto/crypto_test.go", "crypto_test.cs", "ACI6gtaCpoKCgoIAIwaCAAE4lJSCgpSCgpSAgraCgpSAggALCAAKFpSCgpSAkoKUgpSCpoKCpoKCgpSmlA==", "115-140:1")]
-[assembly: global::go.GoPositionMap("crypto/issue21104_test.go", "issue21104_test.cs", "ABAclIKCgpTUgtSC1ILUgqSUgpKCgpSCAAgEwoKCgpKCgpSCgqai", "50-59:1")]
-[assembly: global::go.GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ABoowoKCgoKCgpSUgoKCgpSCgoKmgoKmggAIEIKClIKU", "", "", "60=GOROOT/1/1/3")]
+[assembly: GoPositionMap("crypto/crypto.go", "crypto.cs", "AC0mkgAqBoKUpKSkpKSkpKSkpKSkpKSkpKSkpAAYNgAVMrKClKaYooKCgqaokqyygpQAP8ABsoCCpIKCgpQ=")]
+[assembly: GoPositionMap("crypto/crypto_test.go", "crypto_test.cs", "ACM6guaCpoKCgoIAJgaCAAE4lJSCgpSCgpSAgraCgpSAggAQCAAKFpSCgpSAkoKUgpSCpoKCpoKCgpSmlA==", "115-140:1")]
+[assembly: GoPositionMap("crypto/issue21104_test.go", "issue21104_test.cs", "ABEclIKCgpTkguSC5ILkgqSUgpKCgpSCAAoEooKCgpKCgpSCgqai", "50-59:1")]
+[assembly: GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ACAowoKCgoKCgpSUgoKCgpSCgoKmgoKmggAHEIKClIKU", "", "", "66=GOROOT/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go;
 
-[GoPackage("crypto_test")]
-public static partial class crypto_test_package
+[GoPackage("crypto")]
+public static partial class crypto_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -65,7 +87,16 @@ public static partial class crypto_test_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct messageSignerOnly {}
+    public partial interface Decapsulator {}
+    public partial interface Decrypter {}
+    [GoLocalName("DecrypterOpts")] public partial interface DecrypterOptsᴅ {}
+    public partial interface Encapsulator {}
+    public partial interface MessageSigner {}
+    [GoLocalName("PrivateKey")] public partial interface PrivateKeyᴅ {}
+    [GoLocalName("PublicKey")] public partial interface PublicKeyᴅ {}
+    public partial interface Signer {}
+    public partial interface SignerOpts {}
+    public partial struct Hash {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -76,7 +107,6 @@ public static partial class crypto_test_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
-    [GoInit] internal static void initᴛᴛimportꓸcrypto() => builtin.initPackage(typeof(crypto_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸaes() => builtin.initPackage(typeof(global::go.crypto.aes_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸcipher() => builtin.initPackage(typeof(global::go.crypto.cipher_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(global::go.crypto.rand_package));
@@ -86,6 +116,7 @@ public static partial class crypto_test_package
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸpem() => builtin.initPackage(typeof(encoding.pem_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸbuild() => builtin.initPackage(typeof(global::go.go.build_package));
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(global::go.io.fs_package));
@@ -93,14 +124,13 @@ public static partial class crypto_test_package
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
-    // Go runs every `init` in the package under test - the production files' included -
-    // before the first test. The production package is a REFERENCED assembly here, whose
-    // module constructor .NET would not run until something in it is touched, so that
-    // initialization is forced before anything else in this test module runs.
-    [GoInit] internal static void initᴛᴛproduction() {
-        builtin.initPackage(typeof(global::go.crypto_package));
-    }
+}
+
+[GoPackage("crypto_test")]
+public static partial class crypto_test_package
+{
 }

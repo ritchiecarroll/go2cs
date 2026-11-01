@@ -28,22 +28,22 @@ internal static map<token.Token, token.Token> assignOps = new map<token.Token, t
     [token.AND_NOT_ASSIGN] = token.AND_NOT
 };
 
-public static partial void TestZeroTok(ж<testing.T> Ꮡt) {
+public static partial void TestZeroTok(ж<testing.T> t) {
     // zero value for token.Token must be token.ILLEGAL
-    token.Token zero = default!;
+    token.Token zero = default;
     if (token.ILLEGAL != zero) {
-        Ꮡt.Errorf("%s == %d; want 0"u8, token.ILLEGAL, zero);
+        t.Errorf("%s == %d; want 0", token.ILLEGAL, zero);
     }
 }
 
-public static void TestAssignOp(ж<testing.T> Ꮡt) {
+public static void TestAssignOp(ж<testing.T> t) {
     // there are fewer than 256 tokens
     for (nint i = 0; i < 256; i++) {
         token.Token tok = (token.Token)i;
         token.Token got = assignOp(tok);
         token.Token want = assignOps[tok];
         if (got != want) {
-            Ꮡt.Errorf("for assignOp(%s): got %s; want %s"u8, tok, got, want);
+            t.Errorf("for assignOp(%s): got %s; want %s", tok, got, want);
         }
     }
 }

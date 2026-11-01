@@ -14,7 +14,8 @@ partial class time_internal_test_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string americaLosAngelesˢ = "America/Los_Angeles"u8;
+internal static ref readonly @string americaLosAngelesˢ => ref americaLosAngelesˢᵇ;
+private static readonly @string americaLosAngelesˢᵇ = "America/Los_Angeles"u8;
 
 internal static void initTestingZone() {
     // For hermeticity, use only tzinfo source from the test's GOROOT,
@@ -22,12 +23,12 @@ internal static void initTestingZone() {
     // set in the process's environment (if any).
     // This test runs in GOROOT/src/time, so GOROOT is "../..",
     // but it is theoretically possible
-    var sources = new @string[]{"../../lib/time/zoneinfo.zip"u8}.slice();
+    var sources = slice<@string>(["../../lib/time/zoneinfo.zip"]);
     var (z, err) = loadLocation(americaLosAngelesˢ, sources);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("cannot load America/Los_Angeles for testing: " + err.Error() + "; you may want to use -tags=timetzdata");
     }
-    z.Value.name = localˢ;
+    z.name = localˢ;
     localLoc = z.Value;
 }
 
@@ -35,7 +36,7 @@ internal static slice<@string> origPlatformZoneSources;
 internal static void initᴛorigPlatformZoneSources() { origPlatformZoneSources = platformZoneSources; }
 
 internal static Action /*undo*/ disablePlatformSources() {
-    platformZoneSources = default!;
+    platformZoneSources = default;
     return () => {
         platformZoneSources = origPlatformZoneSources;
     };
@@ -61,7 +62,7 @@ public static void CheckRuntimeTimerPeriodOverflow() {
         // We manually create a runtimeTimer with huge period, but that expires
         // immediately. The public Timer interface would require waiting for
         // the entire period before the first update.
-        var t = newTimer(runtimeNano(), 9223372036854775807L, empty, default!, nil);
+        var t = newTimer(runtimeNano(), 9223372036854775807L, empty, default, nil);
         var tʗ1 = t;
         defer(() => tʗ1.Stop(), ref ᒐ);
 

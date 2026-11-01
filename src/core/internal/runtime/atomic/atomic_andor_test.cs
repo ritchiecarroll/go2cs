@@ -14,16 +14,15 @@ using go.@internal.runtime;
 
 partial class atomic_test_package {
 
-public static partial void TestAnd32(ж<testing.T> Ꮡt) {
+public static partial void TestAnd32(ж<testing.T> t) {
     // Basic sanity check.
-    ref var x = ref heap<uint32>(out var Ꮡx);
-    x = (uint32)0xffffffffU;
+    ref var x = ref heap<uint32>((uint32)0xffffffffU, out var Ꮡx);
     for (var i = (uint32)0; i < 32; i++) {
         var old = x;
         var v = atomic.And32(Ꮡx, ~(((uint32)1).Lsh((uint64)(i))));
         {
             var r = ((uint32)0xffffffffU).Lsh((uint64)(i + 1)); if (x != r || v != old) {
-                Ꮡt.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v"u8, (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
+                t.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v", (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
             }
         }
     }
@@ -45,7 +44,7 @@ public static partial void TestAnd32(ж<testing.T> Ꮡt) {
                 atomic.And(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
     }
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
@@ -54,22 +53,21 @@ public static partial void TestAnd32(ж<testing.T> Ꮡt) {
     // Check that the array has been totally cleared.
     foreach (var (i, v) in a) {
         if (v != 0) {
-            Ꮡt.Fatalf("a[%v] not cleared: want %#x, got %#x"u8, i, (uint32)0, v);
+            t.Fatalf("a[%v] not cleared: want %#x, got %#x", i, (uint32)0, v);
         }
     }
 }
 
-public static partial void TestAnd64(ж<testing.T> Ꮡt) {
+public static partial void TestAnd64(ж<testing.T> t) {
     // Basic sanity check.
-    ref var x = ref heap<uint64>(out var Ꮡx);
-    x = (uint64)0xffffffffffffffffUL;
+    ref var x = ref heap<uint64>((uint64)0xffffffffffffffffUL, out var Ꮡx);
     sink = Ꮡx;
     for (var i = (uint64)0; i < 64; i++) {
         var old = x;
         var v = atomic.And64(Ꮡx, ~(((uint64)1).Lsh(i)));
         {
             var r = ((uint64)0xffffffffffffffffUL).Lsh((i + 1)); if (x != r || v != old) {
-                Ꮡt.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v"u8, (uint64)(((uint64)1).Lsh(i)), r, x, v);
+                t.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v", (uint64)(((uint64)1).Lsh(i)), r, x, v);
             }
         }
     }
@@ -91,7 +89,7 @@ public static partial void TestAnd64(ж<testing.T> Ꮡt) {
                 atomic.And64(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
     }
     for (nint i = 0; i < 64; i++) {
         ᐸꟷ(done);
@@ -100,21 +98,20 @@ public static partial void TestAnd64(ж<testing.T> Ꮡt) {
     // Check that the array has been totally cleared.
     foreach (var (i, v) in a) {
         if (v != 0) {
-            Ꮡt.Fatalf("a[%v] not cleared: want %#x, got %#x"u8, i, (uint64)0, v);
+            t.Fatalf("a[%v] not cleared: want %#x, got %#x", i, (uint64)0, v);
         }
     }
 }
 
-public static partial void TestOr32(ж<testing.T> Ꮡt) {
+public static partial void TestOr32(ж<testing.T> t) {
     // Basic sanity check.
-    ref var x = ref heap<uint32>(out var Ꮡx);
-    x = (uint32)0;
+    ref var x = ref heap<uint32>((uint32)0, out var Ꮡx);
     for (var i = (uint32)0; i < 32; i++) {
         var old = x;
         var v = atomic.Or32(Ꮡx, ((uint32)1).Lsh((uint64)(i)));
         {
             var r = (((uint32)1).Lsh((uint64)(i + 1))) - 1; if (x != r || v != old) {
-                Ꮡt.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v"u8, (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
+                t.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v", (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
             }
         }
     }
@@ -133,7 +130,7 @@ public static partial void TestOr32(ж<testing.T> Ꮡt) {
                 atomic.Or32(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
     }
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
@@ -142,22 +139,21 @@ public static partial void TestOr32(ж<testing.T> Ꮡt) {
     // Check that the array has been totally set.
     foreach (var (i, v) in a) {
         if (v != 0xffffffffU) {
-            Ꮡt.Fatalf("a[%v] not fully set: want %#x, got %#x"u8, i, (uint32)0xffffffffU, v);
+            t.Fatalf("a[%v] not fully set: want %#x, got %#x", i, (uint32)0xffffffffU, v);
         }
     }
 }
 
-public static partial void TestOr64(ж<testing.T> Ꮡt) {
+public static partial void TestOr64(ж<testing.T> t) {
     // Basic sanity check.
-    ref var x = ref heap<uint64>(out var Ꮡx);
-    x = (uint64)0;
+    ref var x = ref heap<uint64>((uint64)0, out var Ꮡx);
     sink = Ꮡx;
     for (var i = (uint64)0; i < 64; i++) {
         var old = x;
         var v = atomic.Or64(Ꮡx, ((uint64)1).Lsh(i));
         {
             var r = (((uint64)1).Lsh((i + 1))) - 1; if (x != r || v != old) {
-                Ꮡt.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v"u8, (uint64)(((uint64)1).Lsh(i)), r, x, v);
+                t.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v", (uint64)(((uint64)1).Lsh(i)), r, x, v);
             }
         }
     }
@@ -176,7 +172,7 @@ public static partial void TestOr64(ж<testing.T> Ꮡt) {
                 atomic.Or64(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
     }
     for (nint i = 0; i < 64; i++) {
         ᐸꟷ(done);
@@ -185,7 +181,7 @@ public static partial void TestOr64(ж<testing.T> Ꮡt) {
     // Check that the array has been totally set.
     foreach (var (i, v) in a) {
         if (v != 0xffffffffffffffffUL) {
-            Ꮡt.Fatalf("a[%v] not fully set: want %#x, got %#x"u8, i, (uint64)0xffffffffffffffffUL, v);
+            t.Fatalf("a[%v] not fully set: want %#x, got %#x", i, (uint64)0xffffffffffffffffUL, v);
         }
     }
 }
@@ -193,17 +189,17 @@ public static partial void TestOr64(ж<testing.T> Ꮡt) {
 public static void BenchmarkAnd32(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var x = ref heap(new array<uint32>(128), out var Ꮡx);                       // give x its own cache line
+    ref var x = ref heap(new array<uint32>(128), out var Ꮡx); // give x its own cache line
     sink = Ꮡx;
     for (nint i = 0; i < b.N; i++) {
         atomic.And32(Ꮡx.at<uint32>(63), (uint32)i);
     }
 }
 
-public static void BenchmarkAnd32Parallel(ж<testing.B> Ꮡb) {
-    ref var x = ref heap(new array<uint32>(128), out var Ꮡx);                       // give x its own cache line
+public static void BenchmarkAnd32Parallel(ж<testing.B> b) {
+    ref var x = ref heap(new array<uint32>(128), out var Ꮡx); // give x its own cache line
     sink = Ꮡx;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         var i = (uint32)0;
         while (pb.Next()) {
             atomic.And32(Ꮡx.at<uint32>(63), i);
@@ -215,17 +211,17 @@ public static void BenchmarkAnd32Parallel(ж<testing.B> Ꮡb) {
 public static void BenchmarkAnd64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var x = ref heap(new array<uint64>(128), out var Ꮡx);                       // give x its own cache line
+    ref var x = ref heap(new array<uint64>(128), out var Ꮡx); // give x its own cache line
     sink = Ꮡx;
     for (nint i = 0; i < b.N; i++) {
         atomic.And64(Ꮡx.at<uint64>(63), (uint64)i);
     }
 }
 
-public static void BenchmarkAnd64Parallel(ж<testing.B> Ꮡb) {
-    ref var x = ref heap(new array<uint64>(128), out var Ꮡx);                       // give x its own cache line
+public static void BenchmarkAnd64Parallel(ж<testing.B> b) {
+    ref var x = ref heap(new array<uint64>(128), out var Ꮡx); // give x its own cache line
     sink = Ꮡx;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         var i = (uint64)0;
         while (pb.Next()) {
             atomic.And64(Ꮡx.at<uint64>(63), i);
@@ -237,17 +233,17 @@ public static void BenchmarkAnd64Parallel(ж<testing.B> Ꮡb) {
 public static void BenchmarkOr32(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var x = ref heap(new array<uint32>(128), out var Ꮡx);                       // give x its own cache line
+    ref var x = ref heap(new array<uint32>(128), out var Ꮡx); // give x its own cache line
     sink = Ꮡx;
     for (nint i = 0; i < b.N; i++) {
         atomic.Or32(Ꮡx.at<uint32>(63), (uint32)i);
     }
 }
 
-public static void BenchmarkOr32Parallel(ж<testing.B> Ꮡb) {
-    ref var x = ref heap(new array<uint32>(128), out var Ꮡx);                       // give x its own cache line
+public static void BenchmarkOr32Parallel(ж<testing.B> b) {
+    ref var x = ref heap(new array<uint32>(128), out var Ꮡx); // give x its own cache line
     sink = Ꮡx;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         var i = (uint32)0;
         while (pb.Next()) {
             atomic.Or32(Ꮡx.at<uint32>(63), i);
@@ -259,17 +255,17 @@ public static void BenchmarkOr32Parallel(ж<testing.B> Ꮡb) {
 public static void BenchmarkOr64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var x = ref heap(new array<uint64>(128), out var Ꮡx);                       // give x its own cache line
+    ref var x = ref heap(new array<uint64>(128), out var Ꮡx); // give x its own cache line
     sink = Ꮡx;
     for (nint i = 0; i < b.N; i++) {
         atomic.Or64(Ꮡx.at<uint64>(63), (uint64)i);
     }
 }
 
-public static void BenchmarkOr64Parallel(ж<testing.B> Ꮡb) {
-    ref var x = ref heap(new array<uint64>(128), out var Ꮡx);                       // give x its own cache line
+public static void BenchmarkOr64Parallel(ж<testing.B> b) {
+    ref var x = ref heap(new array<uint64>(128), out var Ꮡx); // give x its own cache line
     sink = Ꮡx;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         var i = (uint64)0;
         while (pb.Next()) {
             atomic.Or64(Ꮡx.at<uint64>(63), i);

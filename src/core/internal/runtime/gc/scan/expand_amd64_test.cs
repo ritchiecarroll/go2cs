@@ -16,11 +16,11 @@ partial class scan_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object noAvx512ˢ = (@string)"no AVX512"u8;
 
-public static partial void TestExpandAVX512(ж<testing.T> Ꮡt) {
+public static partial void TestExpandAVX512(ж<testing.T> t) {
     if (!scan.CanAVX512()) {
-        Ꮡt.Skip(noAvx512ˢ);
+        t.Skip(noAvx512ˢ);
     }
-    testExpand(Ꮡt, new Action<nint, ж<gc.ObjMask>, ж<gc.PtrMask>>(scan.ExpandAVX512));
+    testExpand(t, new Action<nint, ж<gc.ObjMask>, ж<gc.PtrMask>>(scan.ExpandAVX512));
 }
 
 } // end scan_test_package

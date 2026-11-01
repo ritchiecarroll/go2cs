@@ -4,7 +4,7 @@
 namespace go;
 
 using bytes = bytes_package;
-using Δcrypto = crypto_package;
+using Δcrypto = global::go.crypto_package;
 using rand = global::go.crypto.rand_package;
 using rsa = global::go.crypto.rsa_package;
 using x509 = global::go.crypto.x509_package;
@@ -20,6 +20,7 @@ using strings = strings_package;
 using testing = testing_package;
 using @internal;
 using encoding;
+using global::go;
 using global::go.crypto;
 using global::go.io;
 using hash = hash_package;
@@ -37,21 +38,23 @@ internal static cryptoꓸPublicKey Public(this ref messageSignerOnly s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string unimplementedˢ = "unimplemented"u8;
+private static ref readonly @string unimplementedˢ => ref unimplementedˢᵇ;
+private static readonly @string unimplementedˢᵇ = "unimplemented"u8;
 
 internal static (slice<byte>, error) Sign(this ref messageSignerOnly s, Δio.Reader _Δp1, slice<byte> _Δp2, Δcrypto.SignerOpts _Δp3) {
-    return (default!, errors.New(unimplementedˢ));
+    return (default, errors.New(unimplementedˢ));
 }
 
 internal static (slice<byte>, error) SignMessage(this ref messageSignerOnly s, Δio.Reader rand, slice<byte> msg, Δcrypto.SignerOpts opts) {
     var h = opts.HashFunc().New();
     h.Write(msg);
-    var digest = h.Sum(default!);
+    var digest = h.Sum(default);
     return s.k.Sign(rand, digest, opts);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string beginRsaTestingKeyˢ = """
+private static ref readonly @string beginRsaTestingKeyˢ => ref beginRsaTestingKeyˢᵇ;
+private static readonly @string beginRsaTestingKeyˢᵇ = """
 -----BEGIN RSA TESTING KEY-----
 MIIEowIBAAKCAQEAsPnoGUOnrpiSqt4XynxA+HRP7S+BSObI6qJ7fQAVSPtRkqso
 tWxQYLEYzNEx5ZSHTGypibVsJylvCfuToDTfMul8b/CZjP2Ob0LdpYrNH6l5hvFE
@@ -80,49 +83,56 @@ UjmopwKBgAqB2KYYMUqAOvYcBnEfLDmyZv9BTVNHbR2lKkMYqv5LlvDaBxVfilE0
 7d56RZOE+ERK2uz/7JX9VSsM/LbH9pJibd4e8mikDS9ntciqOH/3
 -----END RSA TESTING KEY-----
 """u8.Raw();
-private static readonly @string testingKeyˢ = "TESTING KEY"u8;
-private static readonly @string privateKeyˢ = "PRIVATE KEY"u8;
+private static ref readonly @string testingKeyˢ => ref testingKeyˢᵇ;
+private static readonly @string testingKeyˢᵇ = "TESTING KEY"u8;
+private static ref readonly @string privateKeyˢ => ref privateKeyˢᵇ;
+private static readonly @string privateKeyˢᵇ = "PRIVATE KEY"u8;
 
-public static void TestSignMessage(ж<testing.T> Ꮡt) {
+public static void TestSignMessage(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(strings.ReplaceAll(
         beginRsaTestingKeyˢ, testingKeyˢ, privateKeyˢ)));
-    var (k, _) = x509.ParsePKCS1PrivateKey((~block).Bytes);
+    var (k, _) = x509.ParsePKCS1PrivateKey(block.Bytes);
 
     var msg = slice<byte>("hello :)"u8);
 
     var h = Δcrypto.SHA256.New();
     h.Write(msg);
-    var digest = h.Sum(default!);
+    var digest = h.Sum(default);
 
     var (sig, err) = Δcrypto.SignMessage(new rsa_PrivateKeyжSigner(k), rand.Reader, msg, new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(Hash: Δcrypto.SHA256))));
-    if (err != default!) {
-        Ꮡt.Fatalf("SignMessage failed with Signer: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("SignMessage failed with Signer: %s", err);
     }
     {
-        var errΔ1 = rsa.VerifyPSS(k.of(rsa.PrivateKey.ᏑPublicKey), Δcrypto.SHA256, digest, sig, nil); if (errΔ1 != default!) {
-            Ꮡt.Errorf("VerifyPSS failed for Signer signature: %s"u8, errΔ1);
+        var errΔ1 = rsa.VerifyPSS(k.ᏑPublicKey, Δcrypto.SHA256, digest, sig, nil); if (errΔ1 != nil) {
+            t.Errorf("VerifyPSS failed for Signer signature: %s", errΔ1);
         }
     }
 
     (sig, err) = Δcrypto.SignMessage(new messageSignerOnlyжSigner(Ꮡ(new messageSignerOnly(k))), rand.Reader, msg, new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(Hash: Δcrypto.SHA256))));
-    if (err != default!) {
-        Ꮡt.Fatalf("SignMessage failed with MessageSigner: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("SignMessage failed with MessageSigner: %s", err);
     }
     {
-        var errΔ2 = rsa.VerifyPSS(k.of(rsa.PrivateKey.ᏑPublicKey), Δcrypto.SHA256, digest, sig, nil); if (errΔ2 != default!) {
-            Ꮡt.Errorf("VerifyPSS failed for MessageSigner signature: %s"u8, errΔ2);
+        var errΔ2 = rsa.VerifyPSS(k.ᏑPublicKey, Δcrypto.SHA256, digest, sig, nil); if (errΔ2 != nil) {
+            t.Errorf("VerifyPSS failed for MessageSigner signature: %s", errΔ2);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string internalˢ = "internal"u8;
-private static readonly @string boringˢ = "boring"u8;
-private static readonly @string sigˢ = "sig"u8;
-private static readonly @string sByteWordSˢ = @"(^|;)\s(BYTE|WORD)\s"u8;
-private static readonly @string srcCryptoˢ = "src/crypto"u8;
+private static ref readonly @string internalˢ => ref internalˢᵇ;
+private static readonly @string internalˢᵇ = "internal"u8;
+private static ref readonly @string boringˢ => ref boringˢᵇ;
+private static readonly @string boringˢᵇ = "boring"u8;
+private static ref readonly @string sigˢ => ref sigˢᵇ;
+private static readonly @string sigˢᵇ = "sig"u8;
+private static ref readonly @string sByteWordSˢ => ref sByteWordSˢᵇ;
+private static readonly @string sByteWordSˢᵇ = @"(^|;)\s(BYTE|WORD)\s"u8;
+private static ref readonly @string srcCryptoˢ => ref srcCryptoˢᵇ;
+private static readonly @string srcCryptoˢᵇ = "src/crypto"u8;
 
-public static void TestDisallowedAssemblyInstructions(ж<testing.T> Ꮡt) {
+public static void TestDisallowedAssemblyInstructions(ж<testing.T> t) {
     // This test enforces the cryptography assembly policy rule that we do not
     // use BYTE or WORD instructions, since these instructions can obscure what
     // the assembly is actually doing. If we do not support specific
@@ -136,38 +146,38 @@ public static void TestDisallowedAssemblyInstructions(ж<testing.T> Ꮡt) {
     @string boringSigPath = filepath.Join(internalˢ, boringˢ, sigˢ);
 
     var (matcher, err) = Δregexp.Compile(sByteWordSˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
         var matcherʗ1 = matcher;
-        var errΔ1 = filepath.WalkDir(filepath.Join(testenv.GOROOT(new testing_TжTB(Ꮡt)), srcCryptoˢ), (@string path, fs.DirEntry d, error errΔ2) => {
-            if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+        var errΔ1 = filepath.WalkDir(filepath.Join(testenv.GOROOT(new testing_TжTB(t)), srcCryptoˢ), (@string path, fs.DirEntry d, error errΔ2) => {
+            if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
-            if (d.IsDir() || !strings.HasSuffix(path, ".s"u8)) {
-                return default!;
+            if (d.IsDir() || !strings.HasSuffix(path, ".s")) {
+                return default;
             }
             if (strings.Contains(path, boringSigPath)) {
-                return default!;
+                return default;
             }
 
             (var f, errΔ2) = Δos.ReadFile(path);
-            if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
 
             nint i = 1;
             foreach (var line in range<slice<byte>>(bytes.Lines(f).Invoke)) {
                 if (matcherʗ1.Match(line)) {
-                    Ꮡt.Errorf("%s:%d assembly contains BYTE or WORD instruction (%q)"u8, path, i, (@string)line);
+                    t.Errorf("%s:%d assembly contains BYTE or WORD instruction (%q)", path, i, (@string)line);
                 }
                 i++;
             }
 
-            return default!;
-        }); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+            return default;
+        }); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 }

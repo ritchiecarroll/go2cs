@@ -9,12 +9,12 @@ using Δruntime = runtime_package;
 using sort = sort_package;
 using strings = strings_package;
 using testing = testing_package;
-using static unicode_package;
+using static go.unicode_package;
 using Δunicode = unicode_package;
 
 partial class unicode_test_package {
 
-internal static slice<rune> upperTest = new rune[]{
+internal static slice<rune> upperTest = slice<rune>([
     0x41,
     0xc0,
     0xd8,
@@ -37,9 +37,9 @@ internal static slice<rune> upperTest = new rune[]{
     0x10400,
     0x1d400,
     0x1d7ca
-}.slice();
+]);
 
-internal static slice<rune> notupperTest = new rune[]{
+internal static slice<rune> notupperTest = slice<rune>([
     0x40,
     0x5b,
     0x61,
@@ -51,9 +51,9 @@ internal static slice<rune> notupperTest = new rune[]{
     0xab7d,
     0xffff,
     0x10000
-}.slice();
+]);
 
-internal static slice<rune> letterTest = new rune[]{
+internal static slice<rune> letterTest = slice<rune>([
     0x41,
     0x61,
     0xaa,
@@ -86,9 +86,9 @@ internal static slice<rune> letterTest = new rune[]{
     0x20000,
     0x2f800,
     0x2fa1d
-}.slice();
+]);
 
-internal static slice<rune> notletterTest = new rune[]{
+internal static slice<rune> notletterTest = slice<rune>([
     0x20,
     0x35,
     0x375,
@@ -98,10 +98,10 @@ internal static slice<rune> notletterTest = new rune[]{
     0xfffe,
     0x1ffff,
     0x10ffff
-}.slice();
+]);
 
 // Contains all the special cased Latin-1 chars.
-internal static slice<rune> spaceTest = new rune[]{
+internal static slice<rune> spaceTest = slice<rune>([
     0x09,
     0x0a,
     0x0b,
@@ -112,48 +112,48 @@ internal static slice<rune> spaceTest = new rune[]{
     0xA0,
     0x2000,
     0x3000
-}.slice();
+]);
 
 partial struct caseT {
     internal nint cas;
     internal rune @in, @out;
 }
 
-internal static slice<caseT> caseTest = new caseT[]{
+internal static slice<caseT> caseTest = slice<caseT>([
     // errors
-    new(-1, (rune)'\n', 0xFFFD),
+    new(-1, '\n', 0xFFFD),
     new(UpperCase, -1, -1),
     new(UpperCase, (rune)(1 << 30), (rune)(1 << 30)),
 
     // ASCII (special-cased so test carefully)
-    new(UpperCase, (rune)'\n', (rune)'\n'),
-    new(UpperCase, (rune)'a', (rune)'A'),
-    new(UpperCase, (rune)'A', (rune)'A'),
-    new(UpperCase, (rune)'7', (rune)'7'),
-    new(LowerCase, (rune)'\n', (rune)'\n'),
-    new(LowerCase, (rune)'a', (rune)'a'),
-    new(LowerCase, (rune)'A', (rune)'a'),
-    new(LowerCase, (rune)'7', (rune)'7'),
-    new(TitleCase, (rune)'\n', (rune)'\n'),
-    new(TitleCase, (rune)'a', (rune)'A'),
-    new(TitleCase, (rune)'A', (rune)'A'),
-    new(TitleCase, (rune)'7', (rune)'7'),
+    new(UpperCase, '\n', '\n'),
+    new(UpperCase, 'a', 'A'),
+    new(UpperCase, 'A', 'A'),
+    new(UpperCase, '7', '7'),
+    new(LowerCase, '\n', '\n'),
+    new(LowerCase, 'a', 'a'),
+    new(LowerCase, 'A', 'a'),
+    new(LowerCase, '7', '7'),
+    new(TitleCase, '\n', '\n'),
+    new(TitleCase, 'a', 'A'),
+    new(TitleCase, 'A', 'A'),
+    new(TitleCase, '7', '7'),
 
     // Latin-1: easy to read the tests!
     new(UpperCase, 0x80, 0x80),
-    new(UpperCase, (rune)'Å', (rune)'Å'),
-    new(UpperCase, (rune)'å', (rune)'Å'),
+    new(UpperCase, 'Å', 'Å'),
+    new(UpperCase, 'å', 'Å'),
     new(LowerCase, 0x80, 0x80),
-    new(LowerCase, (rune)'Å', (rune)'å'),
-    new(LowerCase, (rune)'å', (rune)'å'),
+    new(LowerCase, 'Å', 'å'),
+    new(LowerCase, 'å', 'å'),
     new(TitleCase, 0x80, 0x80),
-    new(TitleCase, (rune)'Å', (rune)'Å'),
-    new(TitleCase, (rune)'å', (rune)'Å'),
+    new(TitleCase, 'Å', 'Å'),
+    new(TitleCase, 'å', 'Å'),
 
     // 0131;LATIN SMALL LETTER DOTLESS I;Ll;0;L;;;;;N;;;0049;;0049
-    new(UpperCase, 0x0131, (rune)'I'),
+    new(UpperCase, 0x0131, 'I'),
     new(LowerCase, 0x0131, 0x0131),
-    new(TitleCase, 0x0131, (rune)'I'),
+    new(TitleCase, 0x0131, 'I'),
 
     // 0133;LATIN SMALL LIGATURE IJ;Ll;0;L;<compat> 0069 006A;;;;N;LATIN SMALL LETTER I J;;0132;;0132
     new(UpperCase, 0x0133, 0x0132),
@@ -162,7 +162,7 @@ internal static slice<caseT> caseTest = new caseT[]{
 
     // 212A;KELVIN SIGN;Lu;0;L;004B;;;;N;DEGREES KELVIN;;;006B;
     new(UpperCase, 0x212A, 0x212A),
-    new(LowerCase, 0x212A, (rune)'k'),
+    new(LowerCase, 0x212A, 'k'),
     new(TitleCase, 0x212A, 0x212A),
 
     // From an UpperLower sequence
@@ -233,211 +233,215 @@ internal static slice<caseT> caseTest = new caseT[]{
     // Non-letters with case.
     new(LowerCase, 0x2161, 0x2171),
     new(UpperCase, 0x0345, 0x0399)
-}.slice();
+]);
 
-public static void TestIsLetter(ж<testing.T> Ꮡt) {
+public static void TestIsLetter(ж<testing.T> t) {
     foreach (var (_, r) in upperTest) {
         if (!IsLetter(r)) {
-            Ꮡt.Errorf("IsLetter(U+%04X) = false, want true"u8, r);
+            t.Errorf("IsLetter(U+%04X) = false, want true", r);
         }
     }
     foreach (var (_, r) in letterTest) {
         if (!IsLetter(r)) {
-            Ꮡt.Errorf("IsLetter(U+%04X) = false, want true"u8, r);
+            t.Errorf("IsLetter(U+%04X) = false, want true", r);
         }
     }
     foreach (var (_, r) in notletterTest) {
         if (IsLetter(r)) {
-            Ꮡt.Errorf("IsLetter(U+%04X) = true, want false"u8, r);
+            t.Errorf("IsLetter(U+%04X) = true, want false", r);
         }
     }
 }
 
-public static void TestIsUpper(ж<testing.T> Ꮡt) {
+public static void TestIsUpper(ж<testing.T> t) {
     foreach (var (_, r) in upperTest) {
         if (!IsUpper(r)) {
-            Ꮡt.Errorf("IsUpper(U+%04X) = false, want true"u8, r);
+            t.Errorf("IsUpper(U+%04X) = false, want true", r);
         }
     }
     foreach (var (_, r) in notupperTest) {
         if (IsUpper(r)) {
-            Ꮡt.Errorf("IsUpper(U+%04X) = true, want false"u8, r);
+            t.Errorf("IsUpper(U+%04X) = true, want false", r);
         }
     }
     foreach (var (_, r) in notletterTest) {
         if (IsUpper(r)) {
-            Ꮡt.Errorf("IsUpper(U+%04X) = true, want false"u8, r);
+            t.Errorf("IsUpper(U+%04X) = true, want false", r);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string upperCaseˢ = "UpperCase"u8;
-private static readonly @string lowerCaseˢ = "LowerCase"u8;
-private static readonly @string titleCaseˢ = "TitleCase"u8;
-private static readonly @string errorCaseˢ = "ErrorCase"u8;
+private static ref readonly @string upperCaseˢ => ref upperCaseˢᵇ;
+private static readonly @string upperCaseˢᵇ = "UpperCase"u8;
+private static ref readonly @string lowerCaseˢ => ref lowerCaseˢᵇ;
+private static readonly @string lowerCaseˢᵇ = "LowerCase"u8;
+private static ref readonly @string titleCaseˢ => ref titleCaseˢᵇ;
+private static readonly @string titleCaseˢᵇ = "TitleCase"u8;
+private static ref readonly @string errorCaseˢ => ref errorCaseˢᵇ;
+private static readonly @string errorCaseˢᵇ = "ErrorCase"u8;
 
 internal static @string caseString(nint c) {
-    var exprᴛ1 = c;
-    if (exprᴛ1 == UpperCase) {
+    switch (c) {
+    case var ᴛ when ᴛ == UpperCase: {
         return upperCaseˢ;
     }
-    if (exprᴛ1 == LowerCase) {
+    case var ᴛ when ᴛ == LowerCase: {
         return lowerCaseˢ;
     }
-    if (exprᴛ1 == TitleCase) {
+    case var ᴛ when ᴛ == TitleCase: {
         return titleCaseˢ;
-    }
+    }}
     return errorCaseˢ;
 }
 
-public static void TestTo(ж<testing.T> Ꮡt) {
+public static void TestTo(ж<testing.T> t) {
     foreach (var (_, c) in caseTest) {
         var r = To(c.cas, c.@in);
         if (c.@out != r) {
-            Ꮡt.Errorf("To(U+%04X, %s) = U+%04X want U+%04X"u8, c.@in, caseString(c.cas), r, c.@out);
+            t.Errorf("To(U+%04X, %s) = U+%04X want U+%04X", c.@in, caseString(c.cas), r, c.@out);
         }
     }
 }
 
-public static void TestToUpperCase(ж<testing.T> Ꮡt) {
+public static void TestToUpperCase(ж<testing.T> t) {
     foreach (var (_, c) in caseTest) {
         if (c.cas != UpperCase) {
             continue;
         }
         var r = ToUpper(c.@in);
         if (c.@out != r) {
-            Ꮡt.Errorf("ToUpper(U+%04X) = U+%04X want U+%04X"u8, c.@in, r, c.@out);
+            t.Errorf("ToUpper(U+%04X) = U+%04X want U+%04X", c.@in, r, c.@out);
         }
     }
 }
 
-public static void TestToLowerCase(ж<testing.T> Ꮡt) {
+public static void TestToLowerCase(ж<testing.T> t) {
     foreach (var (_, c) in caseTest) {
         if (c.cas != LowerCase) {
             continue;
         }
         var r = ToLower(c.@in);
         if (c.@out != r) {
-            Ꮡt.Errorf("ToLower(U+%04X) = U+%04X want U+%04X"u8, c.@in, r, c.@out);
+            t.Errorf("ToLower(U+%04X) = U+%04X want U+%04X", c.@in, r, c.@out);
         }
     }
 }
 
-public static void TestToTitleCase(ж<testing.T> Ꮡt) {
+public static void TestToTitleCase(ж<testing.T> t) {
     foreach (var (_, c) in caseTest) {
         if (c.cas != TitleCase) {
             continue;
         }
         var r = ToTitle(c.@in);
         if (c.@out != r) {
-            Ꮡt.Errorf("ToTitle(U+%04X) = U+%04X want U+%04X"u8, c.@in, r, c.@out);
+            t.Errorf("ToTitle(U+%04X) = U+%04X want U+%04X", c.@in, r, c.@out);
         }
     }
 }
 
-public static void TestIsSpace(ж<testing.T> Ꮡt) {
+public static void TestIsSpace(ж<testing.T> t) {
     foreach (var (_, c) in spaceTest) {
         if (!IsSpace(c)) {
-            Ꮡt.Errorf("IsSpace(U+%04X) = false; want true"u8, c);
+            t.Errorf("IsSpace(U+%04X) = false; want true", c);
         }
     }
     foreach (var (_, c) in letterTest) {
         if (IsSpace(c)) {
-            Ꮡt.Errorf("IsSpace(U+%04X) = true; want false"u8, c);
+            t.Errorf("IsSpace(U+%04X) = true; want false", c);
         }
     }
 }
 
 // Check that the optimizations for IsLetter etc. agree with the tables.
 // We only need to check the Latin-1 range.
-public static void TestLetterOptimizations(ж<testing.T> Ꮡt) {
+public static void TestLetterOptimizations(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         if (Is(Letter, i) != IsLetter(i)) {
-            Ꮡt.Errorf("IsLetter(U+%04X) disagrees with Is(Letter)"u8, i);
+            t.Errorf("IsLetter(U+%04X) disagrees with Is(Letter)", i);
         }
         if (Is(Upper, i) != IsUpper(i)) {
-            Ꮡt.Errorf("IsUpper(U+%04X) disagrees with Is(Upper)"u8, i);
+            t.Errorf("IsUpper(U+%04X) disagrees with Is(Upper)", i);
         }
         if (Is(Lower, i) != IsLower(i)) {
-            Ꮡt.Errorf("IsLower(U+%04X) disagrees with Is(Lower)"u8, i);
+            t.Errorf("IsLower(U+%04X) disagrees with Is(Lower)", i);
         }
         if (Is(Title, i) != IsTitle(i)) {
-            Ꮡt.Errorf("IsTitle(U+%04X) disagrees with Is(Title)"u8, i);
+            t.Errorf("IsTitle(U+%04X) disagrees with Is(Title)", i);
         }
         if (Is(White_Space, i) != IsSpace(i)) {
-            Ꮡt.Errorf("IsSpace(U+%04X) disagrees with Is(White_Space)"u8, i);
+            t.Errorf("IsSpace(U+%04X) disagrees with Is(White_Space)", i);
         }
         if (To(UpperCase, i) != ToUpper(i)) {
-            Ꮡt.Errorf("ToUpper(U+%04X) disagrees with To(Upper)"u8, i);
+            t.Errorf("ToUpper(U+%04X) disagrees with To(Upper)", i);
         }
         if (To(LowerCase, i) != ToLower(i)) {
-            Ꮡt.Errorf("ToLower(U+%04X) disagrees with To(Lower)"u8, i);
+            t.Errorf("ToLower(U+%04X) disagrees with To(Lower)", i);
         }
         if (To(TitleCase, i) != ToTitle(i)) {
-            Ꮡt.Errorf("ToTitle(U+%04X) disagrees with To(Title)"u8, i);
+            t.Errorf("ToTitle(U+%04X) disagrees with To(Title)", i);
         }
     }
 }
 
-public static void TestTurkishCase(ж<testing.T> Ꮡt) {
+public static void TestTurkishCase(ж<testing.T> t) {
     var lower = slice<rune>((@string)"abcçdefgğhıijklmnoöprsştuüvyz");
     var upper = slice<rune>((@string)"ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ");
     foreach (var (i, l) in lower) {
         var u = upper[i];
         if (TurkishCase.ToLower(l) != l) {
-            Ꮡt.Errorf("lower(U+%04X) is U+%04X not U+%04X"u8, l, TurkishCase.ToLower(l), l);
+            t.Errorf("lower(U+%04X) is U+%04X not U+%04X", l, TurkishCase.ToLower(l), l);
         }
         if (TurkishCase.ToUpper(u) != u) {
-            Ꮡt.Errorf("upper(U+%04X) is U+%04X not U+%04X"u8, u, TurkishCase.ToUpper(u), u);
+            t.Errorf("upper(U+%04X) is U+%04X not U+%04X", u, TurkishCase.ToUpper(u), u);
         }
         if (TurkishCase.ToUpper(l) != u) {
-            Ꮡt.Errorf("upper(U+%04X) is U+%04X not U+%04X"u8, l, TurkishCase.ToUpper(l), u);
+            t.Errorf("upper(U+%04X) is U+%04X not U+%04X", l, TurkishCase.ToUpper(l), u);
         }
         if (TurkishCase.ToLower(u) != l) {
-            Ꮡt.Errorf("lower(U+%04X) is U+%04X not U+%04X"u8, u, TurkishCase.ToLower(l), l);
+            t.Errorf("lower(U+%04X) is U+%04X not U+%04X", u, TurkishCase.ToLower(l), l);
         }
         if (TurkishCase.ToTitle(u) != u) {
-            Ꮡt.Errorf("title(U+%04X) is U+%04X not U+%04X"u8, u, TurkishCase.ToTitle(u), u);
+            t.Errorf("title(U+%04X) is U+%04X not U+%04X", u, TurkishCase.ToTitle(u), u);
         }
         if (TurkishCase.ToTitle(l) != u) {
-            Ꮡt.Errorf("title(U+%04X) is U+%04X not U+%04X"u8, l, TurkishCase.ToTitle(l), u);
+            t.Errorf("title(U+%04X) is U+%04X not U+%04X", l, TurkishCase.ToTitle(l), u);
         }
     }
 }
 
-internal static slice<@string> simpleFoldTests = new @string[]{
+internal static slice<@string> simpleFoldTests = slice<@string>([
     // SimpleFold(x) returns the next equivalent rune > x or wraps
     // around to smaller values.
 
     // Easy cases.
-    "Aa"u8,
-    "δΔ"u8,
+    "Aa",
+    "δΔ",
 
     // ASCII special cases.
-    "KkK"u8,
-    "Ssſ"u8,
+    "KkK",
+    "Ssſ",
 
     // Non-ASCII special cases.
-    "ρϱΡ"u8,
-    "ͅΙιι"u8,
+    "ρϱΡ",
+    "ͅΙιι",
 
     // Extra special cases: has lower/upper but no case fold.
-    "İ"u8,
-    "ı"u8,
+    "İ",
+    "ı",
 
     // Upper comes before lower (Cherokee).
-    "\u13b0\uab80"u8
-}.slice();
+    "\u13b0\uab80"
+]);
 
-public static void TestSimpleFold(ж<testing.T> Ꮡt) {
+public static void TestSimpleFold(ж<testing.T> t) {
     foreach (var (_, tt) in simpleFoldTests) {
         var cycle = slice<rune>(tt);
         var r = cycle[len(cycle) - 1];
         foreach (var (_, @out) in cycle) {
             {
                 var rΔ1 = SimpleFold(r); if (rΔ1 != @out) {
-                    Ꮡt.Errorf("SimpleFold(%#U) = %#U, want %#U"u8, rΔ1, rΔ1, @out);
+                    t.Errorf("SimpleFold(%#U) = %#U, want %#U", rΔ1, rΔ1, @out);
                 }
             }
             r = @out;
@@ -446,7 +450,7 @@ public static void TestSimpleFold(ж<testing.T> Ꮡt) {
 
     {
         var r = SimpleFold(-42); if (r != -42) {
-            Ꮡt.Errorf("SimpleFold(-42) = %v, want -42"u8, r);
+            t.Errorf("SimpleFold(-42) = %v, want -42", r);
         }
     }
 }
@@ -460,9 +464,9 @@ public static void TestSimpleFold(ж<testing.T> Ꮡt) {
 // In practice most runes are ASCII so this is a conservative estimate
 // of an effective cutoff value. In practice we could probably set it higher
 // than what this function recommends.
-internal static ж<bool> calibrate = flag.Bool("calibrate"u8, false, "compute crossover for linear vs. binary search"u8);
+internal static ж<bool> calibrate = flag.Bool("calibrate", false, "compute crossover for linear vs. binary search");
 
-public static void TestCalibrate(ж<testing.T> Ꮡt) {
+public static void TestCalibrate(ж<testing.T> t) {
     if (!calibrate.Value) {
         return;
     }
@@ -506,7 +510,7 @@ public static void TestCalibrate(ж<testing.T> Ꮡt) {
 }
 
 internal static slice<Δunicode.Range16> fakeTable(nint n) {
-    slice<Δunicode.Range16> r16 = default!;
+    slice<Δunicode.Range16> r16 = default;
     for (nint i = 0; i < n; i++) {
         r16 = append(r16, new Range16((uint16)(i * 5 + 10), (uint16)(i * 5 + 12), 1));
     }
@@ -516,11 +520,11 @@ internal static slice<Δunicode.Range16> fakeTable(nint n) {
 internal static bool linear(slice<Δunicode.Range16> ranges, uint16 r) {
     foreach (var i in range(ranges)) {
         var range_ = Ꮡ(ranges, i);
-        if (r < (~range_).Lo) {
+        if (r < range_.Lo) {
             return false;
         }
-        if (r <= (~range_).Hi) {
-            return (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
+        if (r <= range_.Hi) {
+            return (uint16)((uint16)(r - range_.Lo) % range_.Stride) == 0;
         }
     }
     return false;
@@ -533,10 +537,10 @@ internal static bool binary(slice<Δunicode.Range16> ranges, uint16 r) {
     while (lo < hi) {
         nint m = (nint)((nuint)(lo + hi) >> 1);
         var range_ = Ꮡ(ranges, m);
-        if ((~range_).Lo <= r && r <= (~range_).Hi) {
-            return (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
+        if (range_.Lo <= r && r <= range_.Hi) {
+            return (uint16)((uint16)(r - range_.Lo) % range_.Stride) == 0;
         }
-        if (r < (~range_).Lo){
+        if (r < range_.Lo) {
             hi = m;
         } else {
             lo = m + 1;
@@ -545,50 +549,52 @@ internal static bool binary(slice<Δunicode.Range16> ranges, uint16 r) {
     return false;
 }
 
-public static void TestLatinOffset(ж<testing.T> Ꮡt) {
-    slice<map<@string, ж<Δunicode.RangeTable>>> maps = new map<@string, ж<Δunicode.RangeTable>>[]{
+public static void TestLatinOffset(ж<testing.T> t) {
+    slice<map<@string, ж<Δunicode.RangeTable>>> maps = slice<map<@string, ж<Δunicode.RangeTable>>>([
         Categories,
         FoldCategory,
         FoldScript,
         Properties,
         Scripts
-    }.slice();
+    ]);
     foreach (var (_, m) in maps) {
         foreach (var (name, tab) in m) {
             nint i = 0;
-            while (i < len((~tab).R16) && (~tab).R16[i].Hi <= MaxLatin1) {
+            while (i < len(tab.R16) && tab.R16[i].Hi <= MaxLatin1) {
                 i++;
             }
-            if ((~tab).LatinOffset != i) {
-                Ꮡt.Errorf("%s: LatinOffset=%d, want %d"u8, name, (~tab).LatinOffset, i);
+            if (tab.LatinOffset != i) {
+                t.Errorf("%s: LatinOffset=%d, want %d", name, tab.LatinOffset, i);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abcˢ = "ABC"u8;
-private static readonly @string abcˢ2 = "Abc"u8;
+private static ref readonly @string abcˢ => ref abcˢᵇ;
+private static readonly @string abcˢᵇ = "ABC"u8;
+private static ref readonly @string abcˢ2 => ref abcˢ2ᵇ;
+private static readonly @string abcˢ2ᵇ = "Abc"u8;
 
-public static void TestSpecialCaseNoMapping(ж<testing.T> Ꮡt) {
+public static void TestSpecialCaseNoMapping(ж<testing.T> t) {
     // Issue 25636
     // no change for rune 'A', zero delta, under upper/lower/title case change.
-    Δunicode.CaseRange noChangeForCapitalA = new CaseRange((rune)'A', (rune)'A', new rune[]{0, 0, 0}.array());
-    @string got = strings.ToLowerSpecial((Δunicode.SpecialCase)new Δunicode.CaseRange[]{noChangeForCapitalA.ΔClone()}.slice(), abcˢ);
+    Δunicode.CaseRange noChangeForCapitalA = new CaseRange('A', 'A', new rune[]{0, 0, 0}.array());
+    @string got = strings.ToLowerSpecial((Δunicode.SpecialCase)slice<Δunicode.CaseRange>([noChangeForCapitalA.ΔClone()]), abcˢ);
     @string want = abcˢ2;
     if (got != want) {
-        Ꮡt.Errorf("got %q; want %q"u8, got, want);
+        t.Errorf("got %q; want %q", got, want);
     }
 }
 
-public static void TestNegativeRune(ж<testing.T> Ꮡt) {
+public static void TestNegativeRune(ж<testing.T> t) {
     // Issue 43254
     // These tests cover negative rune handling by testing values which,
     // when cast to uint8 or uint16, look like a particular valid rune.
     // This package has Latin-1-specific optimizations, so we test all of
     // Latin-1 and representative non-Latin-1 values in the character
     // categories covered by IsGraphic, etc.
-    var nonLatin1 = new uint32[]{
+    var nonLatin1 = slice<uint32>([
         // Lu: LATIN CAPITAL LETTER A WITH MACRON
         0x0100,
         // Ll: LATIN SMALL LETTER A WITH MACRON
@@ -605,7 +611,7 @@ public static void TestNegativeRune(ж<testing.T> Ꮡt) {
         0x02C2,
         // Z: OGHAM SPACE MARK
         0x1680
-    }.slice();
+    ]);
     for (nint i = 0; i < (nint)MaxLatin1 + len(nonLatin1); i++) {
         var @base = (uint32)i;
         if (i >= MaxLatin1) {
@@ -616,46 +622,46 @@ public static void TestNegativeRune(ж<testing.T> Ꮡt) {
         // uint16(r) == uint16(base).
         var r = (rune)(@base - ((uint32)1 << 31));
         if (Is(Letter, r)) {
-            Ꮡt.Errorf("Is(Letter, 0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("Is(Letter, 0x%x - 1<<31) = true, want false", @base);
         }
         if (IsControl(r)) {
-            Ꮡt.Errorf("IsControl(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsControl(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsDigit(r)) {
-            Ꮡt.Errorf("IsDigit(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsDigit(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsGraphic(r)) {
-            Ꮡt.Errorf("IsGraphic(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsGraphic(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsLetter(r)) {
-            Ꮡt.Errorf("IsLetter(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsLetter(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsLower(r)) {
-            Ꮡt.Errorf("IsLower(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsLower(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsMark(r)) {
-            Ꮡt.Errorf("IsMark(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsMark(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsNumber(r)) {
-            Ꮡt.Errorf("IsNumber(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsNumber(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsPrint(r)) {
-            Ꮡt.Errorf("IsPrint(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsPrint(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsPunct(r)) {
-            Ꮡt.Errorf("IsPunct(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsPunct(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsSpace(r)) {
-            Ꮡt.Errorf("IsSpace(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsSpace(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsSymbol(r)) {
-            Ꮡt.Errorf("IsSymbol(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsSymbol(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsTitle(r)) {
-            Ꮡt.Errorf("IsTitle(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsTitle(0x%x - 1<<31) = true, want false", @base);
         }
         if (IsUpper(r)) {
-            Ꮡt.Errorf("IsUpper(0x%x - 1<<31) = true, want false"u8, @base);
+            t.Errorf("IsUpper(0x%x - 1<<31) = true, want false", @base);
         }
     }
 }
@@ -664,7 +670,7 @@ public static void BenchmarkToUpper(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        _ = ToUpper((rune)'δ');
+        _ = ToUpper('δ');
     }
 }
 
@@ -672,28 +678,32 @@ public static void BenchmarkToLower(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        _ = ToLower((rune)'Δ');
+        _ = ToLower('Δ');
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string upperˢ = "Upper"u8;
-private static readonly @string lowerˢ = "Lower"u8;
-private static readonly @string foldˢ = "Fold"u8;
-private static readonly @string noFoldˢ = "NoFold"u8;
+private static ref readonly @string upperˢ => ref upperˢᵇ;
+private static readonly @string upperˢᵇ = "Upper"u8;
+private static ref readonly @string lowerˢ => ref lowerˢᵇ;
+private static readonly @string lowerˢᵇ = "Lower"u8;
+private static ref readonly @string foldˢ => ref foldˢᵇ;
+private static readonly @string foldˢᵇ = "Fold"u8;
+private static ref readonly @string noFoldˢ => ref noFoldˢᵇ;
+private static readonly @string noFoldˢᵇ = "NoFold"u8;
 
-public static void BenchmarkSimpleFold(ж<testing.B> Ꮡb) {
+public static void BenchmarkSimpleFold(ж<testing.B> b) {
     void bench(@string name, rune r) {
-        Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
+        b.Run(name, (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 _ = SimpleFold(r);
             }
         });
     }
-    bench(upperˢ, (rune)'Δ');
-    bench(lowerˢ, (rune)'δ');
-    bench(foldˢ, (rune)'\u212A');
-    bench(noFoldˢ, (rune)'習');
+    bench(upperˢ, 'Δ');
+    bench(lowerˢ, 'δ');
+    bench(foldˢ, '\u212A');
+    bench(noFoldˢ, '習');
 }
 
 } // end unicode_test_package

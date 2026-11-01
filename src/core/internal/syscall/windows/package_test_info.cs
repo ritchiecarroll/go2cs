@@ -1,33 +1,47 @@
-// go2cs metadata anchor for a production-reference test project: the test assembly
-// REFERENCES the colocated production project instead of
-// recompiling its sources, so the production assembly is the single identity for the
-// production types and no production class partial may be declared here. The first —
-// and only — class is the test metadata class the go2cs-gen generators anchor
-// generated adapters and partials to.
-global using static global::go.@internal.syscall.windows_package;
+// go2cs code converter defines `global using` statements here for imported type
+// aliases as package references are encountered via `import' statements. Exported
+// type aliases that need a `global using` declaration will be loaded from the
+// referenced package by parsing its 'package_info.cs' source file and reading its
+// defined `GoTypeAlias` attributes.
+
+// Package name separator "dot" used in imported type aliases is extended Unicode
+// character '\uA4F8' which is a valid character in a C# identifier name. This is
+// used to simulate Go's package level type aliases since C# does not yet support
+// importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.@internal.syscall.windows_test_package;
+using static go.@internal.syscall.windows_package;
+using static go.@internal.syscall.windows_test_package;
+
+// For encountered type alias declarations, e.g., `type Table = map[string]int`,
+// go2cs code converter will generate a `global using` statement for the alias in
+// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
+// Although scope of `global using` is available to all files in the project, all
+// converted Go code for the project targets the same package, so `global using`
+// statements will effectively have package level scope.
+
+// Additionally, `GoTypeAlias` attributes will be generated here for exported type
+// aliases. This allows the type alias to be imported and used from other packages
+// when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("7374727563747b6f6e63652073796e632e4f6e63653b2073656e64416464722075696e747074723b2072656376416464722075696e747074723b20657272206572726f727d", "sendRecvMsgFuncᴛ1")]
+[assembly: GoTypeAlias("Context", "go.@internal.runtime.syscall.windows_package.Context")]
+[assembly: GoTypeAlias("MemoryBasicInformation", "go.@internal.runtime.syscall.windows_package.MemoryBasicInformation")]
 // </ExportedTypeAliases>
 
+// As types are cast to interfaces in Go source code, the go2cs code converter
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
+// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
+// this way is what keeps startup free of reflection.
+
 // <InterfaceImplementations>
-[assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
+[assembly: GoImplement<NTStatus, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -37,7 +51,16 @@ using static global::go.@internal.syscall.windows_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(LUID_AND_ATTRIBUTES))]
+[assembly: GoFieldAccess(typeof(OBJECT_ATTRIBUTES))]
+[assembly: GoFieldAccess(typeof(TOKEN_MANDATORY_LABEL))]
+[assembly: GoFieldAccess(typeof(_OSVERSIONINFOEXW))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: GoFieldAccess(typeof(symlinkat_reparseDataBufferT))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -47,14 +70,23 @@ using static global::go.@internal.syscall.windows_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABkggpSCgoKClJQACh6CgoKCgpSCgoKClIIACQqCAAYSspKUgoKCgpS4poKClIKCgoK4gILsgoCCAAkIooKClIKClIKCpgAJGNySgMy2goAABxLE", "66-66:1;72-103:2;127-137:1", "", "161=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3")]
-[assembly: go.GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSmgoKClIKCtA==")]
+[assembly: GoPositionMap("internal/syscall/windows/at_windows.go", "at_windows.cs", "AB5EgoKmpIKClIKUgpSCgqaCgoKCgoKCgpSmtIK0gtikgpSUlIKmgqaCgpSClIKmlIKClIKUgpSAggADENKUgrS0toKCpoKCgpQADByClIKmgoK4gIK2goK4AAcUAA8ShJSCgrqCyoKCgoKUgoKmgpTcgoKCuoKU2JKClJSUAAoUgsaklKaCgoCCpIIACxqClIKmoqaUgoCCpIIABhCCgILsAAYQgqaUgqYACxgACx6UyKQACxaygoCmuoKUAAYQgoLIAAgUooKAgqSCAAYQgpSUuoKClIKUgpSY3oIABxC4gpTegIKk1qKCgIKkggAGEIKUlKaCgpSClIKUht6AgqQAFCjcAA8KooKClJSCgpSmgoCCpIIACxqClIYAABy8lIKCgoKCgoKCpoKUAAgShJIABxKm3NKClIKClJSCgpSCgoKUlIKClIKCgqaCgoKCpg==", "51-55:1;585-587:1", "", "223=IndexByte/1/3/1,IndexByte/2/3/1,IndexByte/3/3/1", "738:21")]
+[assembly: GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABgggpSCgoKClJQACh6CgoKCgpSCgoKClIIACQqCAAYSspKUgoKCgpS4poKClIKCgoK4gILsgoCCAAwIooKClIKClIKCpgAJGNySgMy2goAABxLE", "66-66:1;72-103:2;127-137:1", "", "163=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3")]
+[assembly: GoPositionMap("internal/syscall/windows/nonblocking_windows.go", "nonblocking_windows.cs", "AAoesoKAgqQ=")]
+[assembly: GoPositionMap("internal/syscall/windows/reparse_windows.go", "reparse_windows.cs", "ADyEAZKCggATKpKCgg==")]
+[assembly: GoPositionMap("internal/syscall/windows/security_windows.go", "security_windows.cs", "ACZisoKUppSUAA0eggBBpgEACwjCgoKCgoKUgpSCABxuABIysoLYsoI=")]
+[assembly: GoPositionMap("internal/syscall/windows/string_windows.go", "string_windows.cs", "ABAowoKClJQ=")]
+[assembly: GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABIqooKUgoKCgpQAxAGmA/4AM9gBgoKClIKClAAnZJIAPpIBsoKCgoKUgpSUrOwAHjSCpoCkgg==")]
+[assembly: GoPositionMap("internal/syscall/windows/types_windows.go", "types_windows.cs", "AG7mAZKClIKClIKClII=")]
+[assembly: GoPositionMap("internal/syscall/windows/version_windows.go", "version_windows.cs", "ABxE0oKCgqqiggAMFoKCAAcSooKUgoKCgpSCgoKUgoKiqKKCqqKCrLKC/IKC3IKmgpSCgoKUgoKm")]
+[assembly: GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSmgoKClIKCtA==", "", "", "", "23:21")]
+[assembly: GoPositionMap("internal/syscall/windows/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiCgoKCgoKCgpSCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggADIKLCgpSmoqKCpqKigqaiooKmooKClKaigoKUpqKigqaiAAgCgpSmouKClKaywoKClKayooKClKaigoKUooKUpqKigpSmooKClKai4oKUpqKCgoKUpqIACgKClKaiooKUpqKCgpSigpSmouKClKaywoKClKaygoKClKaywoKClKaigoKmosKClKaigoKmsoKCgpSmoqKClKaiooKUprKigoKUprKigoKUprKigoKUAAQesqKCgpSmogAKAoKUpqLCgpSmoqKClAAGJqLCgpSmssKCgpSmsoKCgpSmosKCpqIACgKCpqKigpSmoqKClKaiooKUAAQWosKClKai4oKUpqLCgpQACDaiwoKUpqLCgpQABBCiooKmooKCpqKigpSmooKClKKClKaiooKUpqLCgpSmoqKClAAEHrKigoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall;
 
-[GoPackage("windows_test")]
-public static partial class windows_test_package
+[GoPackage("windows")]
+public static partial class windows_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -63,8 +95,66 @@ public static partial class windows_test_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct TestDeleteAt_testCases {}
-    internal partial struct TestOpen_tests {}
+    [GoValueClone("csdVersion")] internal partial struct _OSVERSIONINFOEXW {}
+    internal partial struct sendRecvMsgFuncᴛ1 {}
+    [GoLocalName("reparseDataBufferT")] internal partial struct symlinkat_reparseDataBufferT {}
+    public partial struct ACCESS_MASK {}
+    public partial struct ACL {}
+    public partial struct EXPLICIT_ACCESS {}
+    public partial struct FILE_ATTRIBUTE_TAG_INFO {}
+    public partial struct FILE_BASIC_INFO {}
+    public partial struct FILE_COMPLETION_INFORMATION {}
+    public partial struct FILE_DISPOSITION_INFO {}
+    public partial struct FILE_DISPOSITION_INFORMATION {}
+    public partial struct FILE_DISPOSITION_INFORMATION_EX {}
+    [GoValueClone("FileName")] public partial struct FILE_FULL_DIR_INFO {}
+    [GoValueClone("ShortName", "FileName")] public partial struct FILE_ID_BOTH_DIR_INFO {}
+    public partial struct FILE_IO_COMPLETION_NOTIFICATION_INFORMATION {}
+    [GoValueClone("FileName")] public partial struct FILE_LINK_INFORMATION {}
+    public partial struct FILE_MODE_INFORMATION {}
+    [GoValueClone("FileName")] public partial struct FILE_RENAME_INFORMATION {}
+    [GoValueClone("FileName")] public partial struct FILE_RENAME_INFORMATION_EX {}
+    public partial struct IO_STATUS_BLOCK {}
+    [GoValueClone("PhysicalAddress", "ZoneIndices")] public partial struct IpAdapterAddresses {}
+    public partial struct IpAdapterAnycastAddress {}
+    public partial struct IpAdapterDnsServerAdapter {}
+    public partial struct IpAdapterGatewayAddress {}
+    public partial struct IpAdapterMulticastAddress {}
+    public partial struct IpAdapterPrefix {}
+    public partial struct IpAdapterUnicastAddress {}
+    public partial struct IpAdapterWinsServerAddress {}
+    public partial struct LUID {}
+    public partial struct LUID_AND_ATTRIBUTES {}
+    public partial struct LocalGroupUserInfo0 {}
+    [GoValueClone("Module", "ExePath")] public partial struct ModuleEntry32 {}
+    [GoValueClone("PathBuffer")] public partial struct MountPointReparseBuffer {}
+    public partial struct NTStatus {}
+    public partial struct NTUnicodeString {}
+    public partial struct OBJECT_ATTRIBUTES {}
+    public partial struct PROCESS_MEMORY_COUNTERS {}
+    public partial struct REPARSE_DATA_BUFFER {}
+    public partial struct REPARSE_DATA_BUFFER_HEADER {}
+    public partial struct RUNTIME_FUNCTION {}
+    public partial struct SECURITY_DESCRIPTOR {}
+    public partial struct SECURITY_DESCRIPTOR_CONTROL {}
+    public partial struct SECURITY_QUALITY_OF_SERVICE {}
+    public partial struct SERVICE_STATUS {}
+    public partial struct SHARE_INFO_2 {}
+    public partial struct SID_AND_ATTRIBUTES {}
+    [GoValueClone("Value")] public partial struct SID_IDENTIFIER_AUTHORITY {}
+    public partial struct SecurityAttributes {}
+    public partial struct SocketAddress {}
+    [GoValueClone("PathBuffer")] public partial struct SymbolicLinkReparseBuffer {}
+    public partial struct SymlinkatFlags {}
+    public partial struct TCP_INITIAL_RTO_PARAMETERS {}
+    [GoValueClone("Groups")] public partial struct TOKEN_GROUPS {}
+    public partial struct TOKEN_MANDATORY_LABEL {}
+    [GoValueClone("Privileges")] public partial struct TOKEN_PRIVILEGES {}
+    public partial struct TRUSTEE {}
+    public partial struct TokenType {}
+    public partial struct UserInfo1 {}
+    public partial struct UserInfo4 {}
+    public partial struct WSAMsg {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -76,19 +166,22 @@ public static partial class windows_test_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindows() => builtin.initPackage(typeof(go.@internal.syscall.windows_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸoserror() => builtin.initPackage(typeof(go.@internal.oserror_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸsyscallꓸwindows() => builtin.initPackage(typeof(go.@internal.runtime.syscall.windows_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstringslite() => builtin.initPackage(typeof(go.@internal.stringslite_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindowsꓸsysdll() => builtin.initPackage(typeof(go.@internal.syscall.windows.sysdll_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(go.sync_package));
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
-    // Go runs every `init` in the package under test - the production files' included -
-    // before the first test. The production package is a REFERENCED assembly here, whose
-    // module constructor .NET would not run until something in it is touched, so that
-    // initialization is forced before anything else in this test module runs.
-    [GoInit] internal static void initᴛᴛproduction() {
-        builtin.initPackage(typeof(global::go.@internal.syscall.windows_package));
-    }
+}
+
+[GoPackage("windows_test")]
+public static partial class windows_test_package
+{
 }

@@ -32,17 +32,19 @@ public static void Log(Δio.Writer w, @string key, @string val) {
     b.Reset();
     // Replace this with time.Now() in a real logger.
     b.WriteString(timeNow().UTC().Format(time.RFC3339));
-    b.WriteByte((rune)' ');
+    b.WriteByte((byte)' ');
     b.WriteString(key);
-    b.WriteByte((rune)'=');
+    b.WriteByte((byte)'=');
     b.WriteString(val);
     w.Write(b.Bytes());
     ᏑbufPool.Put(b.OrTypedNil());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pathˢ = "path"u8;
-internal static readonly @string searchQFlowersˢ = "/search?q=flowers"u8;
+internal static ref readonly @string pathˢ => ref pathˢᵇ;
+private static readonly @string pathˢᵇ = "path"u8;
+internal static ref readonly @string searchQFlowersˢ => ref searchQFlowersˢᵇ;
+private static readonly @string searchQFlowersˢᵇ = "/search?q=flowers"u8;
 
 public static void ExamplePool() {
     Log(new Δos.FileжWriter(Δos.Stdout), pathˢ, searchQFlowersˢ);

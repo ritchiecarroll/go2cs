@@ -32,21 +32,31 @@ using static go.debug.buildinfo_internal_test_package;
 
 partial class buildinfo_test_package {
 
-internal static ж<bool> flagAll = flag.Bool("all"u8, false, "test all supported GOOS/GOARCH platforms, instead of only the current platform"u8);
+internal static ж<bool> flagAll = flag.Bool("all", false, "test all supported GOOS/GOARCH platforms, instead of only the current platform");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testRequiresCompilingAndˢ = (@string)"test requires compiling and linking, which may be slow"u8;
-internal static readonly @string goModˢ = "go.mod"u8;
-internal static readonly @string helloGoˢ = "hello.go"u8;
-internal static readonly @string buildˢ = "build"u8;
-internal static readonly @string srcExampleComMˢ = "src/example.com/m"u8;
+internal static ref readonly @string goModˢ => ref goModˢᵇ;
+private static readonly @string goModˢᵇ = "go.mod"u8;
+internal static ref readonly @string helloGoˢ => ref helloGoˢᵇ;
+private static readonly @string helloGoˢᵇ = "hello.go"u8;
+internal static ref readonly @string buildˢ => ref buildˢᵇ;
+private static readonly @string buildˢᵇ = "build"u8;
+internal static ref readonly @string srcExampleComMˢ => ref srcExampleComMˢᵇ;
+private static readonly @string srcExampleComMˢᵇ = "src/example.com/m"u8;
 internal static readonly object goBuildinfNotFoundˢ = (@string)"Go buildinf not found"u8;
-internal static readonly @string mGoˢ = "(?m)^go\t.*\n"u8;
-internal static readonly @string mBuildˢ = "(?m)^build\t.*\n"u8;
-internal static readonly @string goGoversionˢ = "go\tGOVERSION\n"u8;
-internal static readonly @string buildCompilerˢ = "build\t-compiler="u8;
-internal static readonly @string doesnotexistTxtˢ = "doesnotexist.txt"u8;
-internal static readonly @string emptyˢ = "empty"u8;
+internal static ref readonly @string mGoˢ => ref mGoˢᵇ;
+private static readonly @string mGoˢᵇ = "(?m)^go\t.*\n"u8;
+internal static ref readonly @string mBuildˢ => ref mBuildˢᵇ;
+private static readonly @string mBuildˢᵇ = "(?m)^build\t.*\n"u8;
+internal static ref readonly @string goGoversionˢ => ref goGoversionˢᵇ;
+private static readonly @string goGoversionˢᵇ = "go\tGOVERSION\n"u8;
+internal static ref readonly @string buildCompilerˢ => ref buildCompilerˢᵇ;
+private static readonly @string buildCompilerˢᵇ = "build\t-compiler="u8;
+internal static ref readonly @string doesnotexistTxtˢ => ref doesnotexistTxtˢᵇ;
+private static readonly @string doesnotexistTxtˢᵇ = "doesnotexist.txt"u8;
+internal static ref readonly @string emptyˢ => ref emptyˢᵇ;
+private static readonly @string emptyˢᵇ = "empty"u8;
 
 internal partial struct TestReadFile_platform /*dyn*/ {
     internal @string goos, goarch;
@@ -63,25 +73,23 @@ internal partial struct TestReadFile_cases /*dyn*/ {
 // on supported target platforms. It builds a trivial binary on the current
 // platforms (or all platforms if -all is set) in various configurations and
 // checks that build information can or cannot be read.
-public static void TestReadFile(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+public static void TestReadFile(ж<testing.T> t) {
     var platformsᴷ = new stackAppend<TestReadFile_platform>();
 
     if (testing.Short()) {
-        Ꮡt.Skip(testRequiresCompilingAndˢ);
+        t.Skip(testRequiresCompilingAndˢ);
     }
-    testenv.MustHaveGoBuild(new buildinfo_test_package.testing_TжTB(Ꮡt));
-    var platforms = new TestReadFile_platform[]{
-        new("aix"u8, "ppc64"u8),
-        new("darwin"u8, "amd64"u8),
-        new("darwin"u8, "arm64"u8),
-        new("linux"u8, "386"u8),
-        new("linux"u8, "amd64"u8),
-        new("windows"u8, "386"u8),
-        new("windows"u8, "amd64"u8)
-    }.slice();
-    ref var runtimePlatform = ref heap<TestReadFile_platform>(out var ᏑruntimePlatform);
-    runtimePlatform = new TestReadFile_platform(runtime.GOOS, runtime.GOARCH);
+    testenv.MustHaveGoBuild(new buildinfo_test_package.testing_TжTB(t));
+    var platforms = slice<TestReadFile_platform>([
+        new("aix", "ppc64"),
+        new("darwin", "amd64"),
+        new("darwin", "arm64"),
+        new("linux", "386"),
+        new("linux", "amd64"),
+        new("windows", "386"),
+        new("windows", "amd64")
+    ]);
+    ref var runtimePlatform = ref heap<TestReadFile_platform>(new TestReadFile_platform(runtime.GOOS, runtime.GOARCH), out var ᏑruntimePlatform);
     var haveRuntimePlatform = false;
     foreach (var (_, p) in platforms) {
         if (p == runtimePlatform) {
@@ -93,9 +101,9 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         platforms = append(platformsᴷ, platforms, runtimePlatform);
     }
 
-    var buildModes = new @string[]{"pie"u8, "exe"u8}.slice();
+    var buildModes = slice<@string>(["pie", "exe"]);
     if (testenv.HasCGO()) {
-        buildModes = append(buildModes, "c-shared"u8);
+        buildModes = append(buildModes, (@string)"c-shared");
     }
 
     // Keep in sync with src/cmd/go/internal/work/init.go:buildModeInit.
@@ -107,31 +115,31 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         @string gomodPath = filepath.Join(dir, goModˢ);
         var gomodData = slice<byte>("module example.com/m\ngo 1.18\n"u8);
         {
-            var err = os.WriteFile(gomodPath, gomodData, 438); if (err != default!) {
+            var err = os.WriteFile(gomodPath, gomodData, 438); if (err != nil) {
                 tΔ1.Fatal(err);
             }
         }
         @string helloPath = filepath.Join(dir, helloGoˢ);
         var helloData = slice<byte>("package main\nfunc main() {}\n"u8);
         {
-            var err = os.WriteFile(helloPath, helloData, 438); if (err != default!) {
+            var err = os.WriteFile(helloPath, helloData, 438); if (err != nil) {
                 tΔ1.Fatal(err);
             }
         }
         @string outPath = filepath.Join(dir, path.Base(tΔ1.Name()));
         var cmd = exec.Command(testenv.GoToolPath(new buildinfo_test_package.testing_TжTB(tΔ1)), buildˢ, "-o=" + outPath, "-buildmode=" + buildmode);
-        cmd.Value.Dir = dir;
-        cmd.Value.Env = append(os.Environ(), "GO111MODULE=on"u8, "GOOS=" + goos, "GOARCH=" + goarch);
-        var stderr = Ꮡ(new strings.Builder(nil));
-        cmd.Value.Stderr = new buildinfo_test_package.strings_BuilderжWriter(stderr);
+        cmd.Dir = dir;
+        cmd.Env = append(os.Environ(), (@string)"GO111MODULE=on", "GOOS=" + goos, "GOARCH=" + goarch);
+        var stderr = Ꮡ(new strings.Builder());
+        cmd.Stderr = new buildinfo_test_package.strings_BuilderжWriter(stderr);
         {
-            var err = cmd.Run(); if (err != default!) {
+            var err = cmd.Run(); if (err != nil) {
                 {
                     @string badmodeMsg = badmodeʗ1(goos, goarch, buildmode); if (strings.Contains(stderr.String(), badmodeMsg)) {
                         tΔ1.Skip(badmodeMsg);
                     }
                 }
-                tΔ1.Fatalf("failed building test file: %v\n%s"u8, err, stderr.String());
+                tΔ1.Fatalf("failed building test file: %v\n%s", err, stderr.String());
             }
         }
         return outPath;
@@ -142,31 +150,31 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         @string gopathDir = tΔ2.TempDir();
         @string pkgDir = filepath.Join(gopathDir, srcExampleComMˢ);
         {
-            var err = os.MkdirAll(pkgDir, 511); if (err != default!) {
+            var err = os.MkdirAll(pkgDir, 511); if (err != nil) {
                 tΔ2.Fatal(err);
             }
         }
         @string helloPath = filepath.Join(pkgDir, helloGoˢ);
         var helloData = slice<byte>("package main\nfunc main() {}\n"u8);
         {
-            var err = os.WriteFile(helloPath, helloData, 438); if (err != default!) {
+            var err = os.WriteFile(helloPath, helloData, 438); if (err != nil) {
                 tΔ2.Fatal(err);
             }
         }
         @string outPath = filepath.Join(gopathDir, path.Base(tΔ2.Name()));
         var cmd = exec.Command(testenv.GoToolPath(new buildinfo_test_package.testing_TжTB(tΔ2)), buildˢ, "-o=" + outPath, "-buildmode=" + buildmode);
-        cmd.Value.Dir = pkgDir;
-        cmd.Value.Env = append(os.Environ(), "GO111MODULE=off"u8, "GOPATH=" + gopathDir, "GOOS=" + goos, "GOARCH=" + goarch);
-        var stderr = Ꮡ(new strings.Builder(nil));
-        cmd.Value.Stderr = new buildinfo_test_package.strings_BuilderжWriter(stderr);
+        cmd.Dir = pkgDir;
+        cmd.Env = append(os.Environ(), (@string)"GO111MODULE=off", "GOPATH=" + gopathDir, "GOOS=" + goos, "GOARCH=" + goarch);
+        var stderr = Ꮡ(new strings.Builder());
+        cmd.Stderr = new buildinfo_test_package.strings_BuilderжWriter(stderr);
         {
-            var err = cmd.Run(); if (err != default!) {
+            var err = cmd.Run(); if (err != nil) {
                 {
                     @string badmodeMsg = badmodeʗ2(goos, goarch, buildmode); if (strings.Contains(stderr.String(), badmodeMsg)) {
                         tΔ2.Skip(badmodeMsg);
                     }
                 }
-                tΔ2.Fatalf("failed building test file: %v\n%s"u8, err, stderr.String());
+                tΔ2.Fatalf("failed building test file: %v\n%s", err, stderr.String());
             }
         }
         return outPath;
@@ -174,16 +182,16 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
 
     void damageBuildInfo(ж<testing.T> tΔ3, @string name) {
         var (data, err) = os.ReadFile(name);
-        if (err != default!) {
+        if (err != nil) {
             tΔ3.Fatal(err);
         }
         nint i = bytes.Index(data, slice<byte>(((@string)(new byte[]{0xff, 0x20, 0x47, 0x6f, 0x20, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x66, 0x3a}))));
         if (i < 0) {
             tΔ3.Fatal(goBuildinfNotFoundˢ);
         }
-        data[i + 2] = (rune)'N';
+        data[i + 2] = (byte)'N';
         {
-            var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != default!) {
+            var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != nil) {
                 tΔ3.Fatal(errΔ1);
             }
         }
@@ -191,7 +199,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
 
     void damageStringLen(ж<testing.T> tΔ4, @string name) {
         var (data, err) = os.ReadFile(name);
-        if (err != default!) {
+        if (err != nil) {
             tΔ4.Fatal(err);
         }
         nint i = bytes.Index(data, slice<byte>(((@string)(new byte[]{0xff, 0x20, 0x47, 0x6f, 0x20, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x66, 0x3a}))));
@@ -201,7 +209,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         var verLen = data.slice(i + 32);
         binary.PutUvarint(verLen, (uint64)16 << 40); // 16TB ought to be enough for anyone.
         {
-            var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != default!) {
+            var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != nil) {
                 tΔ4.Fatal(errΔ1);
             }
         }
@@ -236,64 +244,64 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
 
             var buildWithGOPATHʗ1 = buildWithGOPATH;
             var damageBuildInfoʗ2 = damageBuildInfo;
-    var cases = new TestReadFile_cases[]{
+    var cases = slice<TestReadFile_cases>([
         new(
-            name: "doesnotexist"u8,
+            name: "doesnotexist",
             build: (ж<testing.T> tΔ5, @string goos, @string goarch, @string buildmode) => doesnotexistTxtˢ,
-            wantErr: "doesnotexist"u8
+            wantErr: "doesnotexist"
         ),
         new(
-            name: "empty"u8,
+            name: "empty",
             build: (ж<testing.T> tΔ6, @string _Δp1, @string _Δp2, @string _Δp3) => {
                 @string dir = tΔ6.TempDir();
                 @string name = filepath.Join(dir, emptyˢ);
                 {
-                    var err = os.WriteFile(name, default!, 438); if (err != default!) {
+                    var err = os.WriteFile(name, default, 438); if (err != nil) {
                         tΔ6.Fatal(err);
                     }
                 }
                 return name;
             },
-            wantErr: "unrecognized file format"u8
+            wantErr: "unrecognized file format"
         ),
         new(
-            name: "valid_modules"u8,
+            name: "valid_modules",
             build: buildWithModules,
             want: "go\tGOVERSION\n"u8 + "path\texample.com/m\n"u8 + "mod\texample.com/m\t(devel)\t\n"u8 + "build\t-compiler=gc\n"u8
         ),
         new(
-            name: "invalid_modules"u8,
+            name: "invalid_modules",
             build: (ж<testing.T> tΔ7, @string goos, @string goarch, @string buildmode) => {
                 @string name = buildWithModulesʗ1(tΔ7, goos, goarch, buildmode);
                 damageBuildInfoʗ1(tΔ7, name);
                 return name;
             },
-            wantErr: "not a Go executable"u8
+            wantErr: "not a Go executable"
         ),
         new(
-            name: "invalid_str_len"u8,
+            name: "invalid_str_len",
             build: (ж<testing.T> tΔ8, @string goos, @string goarch, @string buildmode) => {
                 @string name = buildWithModulesʗ2(tΔ8, goos, goarch, buildmode);
                 damageStringLenʗ1(tΔ8, name);
                 return name;
             },
-            wantErr: "not a Go executable"u8
+            wantErr: "not a Go executable"
         ),
         new(
-            name: "valid_gopath"u8,
+            name: "valid_gopath",
             build: buildWithGOPATH,
             want: "go\tGOVERSION\n"u8 + "path\texample.com/m\n"u8 + "build\t-compiler=gc\n"u8
         ),
         new(
-            name: "invalid_gopath"u8,
+            name: "invalid_gopath",
             build: (ж<testing.T> tΔ9, @string goos, @string goarch, @string buildmode) => {
                 @string name = buildWithGOPATHʗ1(tΔ9, goos, goarch, buildmode);
                 damageBuildInfoʗ2(tΔ9, name);
                 return name;
             },
-            wantErr: "not a Go executable"u8
+            wantErr: "not a Go executable"
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in platforms) {
         ref var p = ref heap(new TestReadFile_platform(), out var Ꮡp);
@@ -304,9 +312,9 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         var cleanOutputForComparisonʗ1 = cleanOutputForComparison;
         var pʗ1 = p;
         var runtimePlatformʗ1 = runtimePlatform;
-        Ꮡt.Run(p.goos + "_"u8 + p.goarch, (ж<testing.T> tΔ10) => {
+        t.Run(p.goos + "_"u8 + p.goarch, (ж<testing.T> tΔ10) => {
             if (pʗ1 != runtimePlatformʗ1 && !flagAll.Value) {
-                tΔ10.Skipf("skipping platforms other than %s_%s because -all was not set"u8, runtimePlatformʗ1.goos, runtimePlatformʗ1.goarch);
+                tΔ10.Skipf("skipping platforms other than %s_%s because -all was not set", runtimePlatformʗ1.goos, runtimePlatformʗ1.goarch);
             }
             foreach (var (_, mode) in buildModesʗ1) {
                 var casesʗ2 = casesʗ1;
@@ -324,23 +332,22 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
                             tΔ12.Parallel();
                             @string name = tcʗ1.build(tΔ12, pʗ3.goos, pʗ3.goarch, mode);
                             {
-                                var (info, err) = buildinfo.ReadFile(name); if (err != default!){
-                                    if (tcʗ1.wantErr == ""u8){
-                                        tΔ12.Fatalf("unexpected error: %v"u8, err);
-                                    } else 
-                                    {
+                                var (info, err) = buildinfo.ReadFile(name); if (err != nil) {
+                                    if (tcʗ1.wantErr == ""u8) {
+                                        tΔ12.Fatalf("unexpected error: %v", err);
+                                    } else {
                                         @string errMsg = err.Error(); if (!strings.Contains(errMsg, tcʗ1.wantErr)) {
-                                            tΔ12.Fatalf("got error %q; want error containing %q"u8, errMsg, tcʗ1.wantErr);
+                                            tΔ12.Fatalf("got error %q; want error containing %q", errMsg, tcʗ1.wantErr);
                                         }
                                     }
                                 } else {
                                     if (tcʗ1.wantErr != ""u8) {
-                                        tΔ12.Fatalf("unexpected success; want error containing %q"u8, tcʗ1.wantErr);
+                                        tΔ12.Fatalf("unexpected success; want error containing %q", tcʗ1.wantErr);
                                     }
                                     @string got = info.String();
                                     {
                                         @string clean = cleanOutputForComparisonʗ3(got); if (got != tcʗ1.want && clean != tcʗ1.want) {
-                                            tΔ12.Fatalf("got:\n%s\nwant:\n%s"u8, got, tcʗ1.want);
+                                            tΔ12.Fatalf("got:\n%s\nwant:\n%s", got, tcʗ1.want);
                                         }
                                     }
                                 }
@@ -354,51 +361,54 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataGo117Go117Base64ˢ = "testdata/go117/go117.base64"u8;
+internal static ref readonly @string testdataGo117Go117Base64ˢ => ref testdataGo117Go117Base64ˢᵇ;
+private static readonly @string testdataGo117Go117Base64ˢᵇ = "testdata/go117/go117.base64"u8;
 
 // Test117 verifies that parsing of the old, pre-1.18 format works.
-public static void Test117(ж<testing.T> Ꮡt) {
+public static void Test117(ж<testing.T> t) {
     var (b, err) = obscuretestdata.ReadFile(testdataGo117Go117Base64ˢ);
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadFile got err %v, want nil"u8, err);
+    if (err != nil) {
+        t.Fatalf("ReadFile got err %v, want nil", err);
     }
 
     (var info, err) = buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)));
-    if (err != default!) {
-        Ꮡt.Fatalf("Read got err %v, want nil"u8, err);
+    if (err != nil) {
+        t.Fatalf("Read got err %v, want nil", err);
     }
 
-    if ((~info).GoVersion != "go1.17"u8) {
-        Ꮡt.Errorf("GoVersion got %s want go1.17"u8, (~info).GoVersion);
+    if (info.GoVersion != "go1.17"u8) {
+        t.Errorf("GoVersion got %s want go1.17", info.GoVersion);
     }
-    if ((~info).Path != "example.com/go117"u8) {
-        Ꮡt.Errorf("Path got %s want example.com/go117"u8, (~info).Path);
+    if (info.Path != "example.com/go117"u8) {
+        t.Errorf("Path got %s want example.com/go117", info.Path);
     }
-    if ((~info).Main.Path != "example.com/go117"u8) {
-        Ꮡt.Errorf("Main.Path got %s want example.com/go117"u8, (~info).Main.Path);
+    if (info.Main.Path != "example.com/go117"u8) {
+        t.Errorf("Main.Path got %s want example.com/go117", info.Main.Path);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataNotgoNotgoBase64ˢ = "testdata/notgo/notgo.base64"u8;
-internal static readonly @string notAGoExecutableˢ = "not a Go executable"u8;
+internal static ref readonly @string testdataNotgoNotgoBase64ˢ => ref testdataNotgoNotgoBase64ˢᵇ;
+private static readonly @string testdataNotgoNotgoBase64ˢᵇ = "testdata/notgo/notgo.base64"u8;
+internal static ref readonly @string notAGoExecutableˢ => ref notAGoExecutableˢᵇ;
+private static readonly @string notAGoExecutableˢᵇ = "not a Go executable"u8;
 
 // TestNotGo verifies that parsing of a non-Go binary returns the proper error.
-public static void TestNotGo(ж<testing.T> Ꮡt) {
+public static void TestNotGo(ж<testing.T> t) {
     var (b, err) = obscuretestdata.ReadFile(testdataNotgoNotgoBase64ˢ);
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadFile got err %v, want nil"u8, err);
+    if (err != nil) {
+        t.Fatalf("ReadFile got err %v, want nil", err);
     }
 
     (_, err) = buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)));
-    if (err == default!) {
-        Ꮡt.Fatalf("Read got nil err, want non-nil"u8);
+    if (err == nil) {
+        t.Fatalf("Read got nil err, want non-nil");
     }
 
     // The precise error text here isn't critical, but we want something
     // like errNotGoExe rather than e.g., a file read error.
     if (!strings.Contains(err.Error(), notAGoExecutableˢ)) {
-        Ꮡt.Errorf("ReadFile got err %v want not a Go executable"u8, err);
+        t.Errorf("ReadFile got err %v want not a Go executable", err);
     }
 }
 
@@ -410,7 +420,7 @@ public static void FuzzIssue57002(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // input from issue
-    f.Add(new byte[]{0x4d, 0x5a, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x50, 0x45, 0x0, 0x0, 0x0, 0x0, 0x5, 0x0, 0x20, 0x20, 0x20, 0x20, 0x0, 0x0, 0x0, 0x0, 0x20, 0x3f, 0x0, 0x20, 0x0, 0x0, 0x20, 0x20, 0x20, 0x20, 0x20, 0xff, 0x20, 0x20, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xb, 0x20, 0x20, 0x20, 0xfc, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x9, 0x0, 0x0, 0x0, 0x20, 0x0, 0x0, 0x0, 0x20, 0x20, 0x20, 0x20, 0x20, 0xef, 0x20, 0xff, 0xbf, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf, 0x0, 0x2, 0x0, 0x20, 0x0, 0x0, 0x9, 0x0, 0x4, 0x0, 0x20, 0xf6, 0x0, 0xd3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x1, 0x0, 0x0, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0xa, 0x20, 0xa, 0x20, 0x20, 0x20, 0xff, 0x20, 0x20, 0xff, 0x20, 0x47, 0x6f, 0x20, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x66, 0x3a, 0xde, 0xb5, 0xdf, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x6, 0x7f, 0x7f, 0x7f, 0x20, 0xf4, 0xb2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0xb, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x20, 0x0, 0x0, 0x0, 0x0, 0x5, 0x0, 0x20, 0x20, 0x20, 0x20, 0x0, 0x0, 0x0, 0x0, 0x20, 0x3f, 0x27, 0x20, 0x0, 0xd, 0x0, 0xa, 0x20, 0x20, 0x20, 0x20, 0x20, 0xff, 0x20, 0x20, 0xff, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x0, 0x20, 0x20, 0x0, 0x0, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x5c, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20}.slice());
+    f.Add(slice<byte>([0x4d, 0x5a, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x50, 0x45, 0x0, 0x0, 0x0, 0x0, 0x5, 0x0, 0x20, 0x20, 0x20, 0x20, 0x0, 0x0, 0x0, 0x0, 0x20, 0x3f, 0x0, 0x20, 0x0, 0x0, 0x20, 0x20, 0x20, 0x20, 0x20, 0xff, 0x20, 0x20, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xb, 0x20, 0x20, 0x20, 0xfc, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x9, 0x0, 0x0, 0x0, 0x20, 0x0, 0x0, 0x0, 0x20, 0x20, 0x20, 0x20, 0x20, 0xef, 0x20, 0xff, 0xbf, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf, 0x0, 0x2, 0x0, 0x20, 0x0, 0x0, 0x9, 0x0, 0x4, 0x0, 0x20, 0xf6, 0x0, 0xd3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x1, 0x0, 0x0, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0xa, 0x20, 0xa, 0x20, 0x20, 0x20, 0xff, 0x20, 0x20, 0xff, 0x20, 0x47, 0x6f, 0x20, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x66, 0x3a, 0xde, 0xb5, 0xdf, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x6, 0x7f, 0x7f, 0x7f, 0x20, 0xf4, 0xb2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0xb, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x20, 0x0, 0x0, 0x0, 0x0, 0x5, 0x0, 0x20, 0x20, 0x20, 0x20, 0x0, 0x0, 0x0, 0x0, 0x20, 0x3f, 0x27, 0x20, 0x0, 0xd, 0x0, 0xa, 0x20, 0x20, 0x20, 0x20, 0x20, 0xff, 0x20, 0x20, 0xff, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x0, 0x20, 0x20, 0x0, 0x0, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x5c, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20]));
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> input) => {
         buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(input)));
     });
@@ -420,10 +430,8 @@ public static void FuzzIssue57002(ж<testing.F> Ꮡf) {
 //
 // The cause of issue 54968 is when the first buildInfoMagic is invalid, it
 // enters an infinite loop.
-public static void TestIssue54968(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    Ꮡt.Parallel();
+public static void TestIssue54968(ж<testing.T> t) {
+    t.Parallel();
 
     const nint paddingSize = 200;
     const nint buildInfoAlign = 16;
@@ -432,17 +440,17 @@ public static void TestIssue54968(ж<testing.T> Ꮡt) {
     // Construct a valid PE header.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
-    buf.Write(new byte[]{(rune)'M', (rune)'Z'}.slice());
-    buf.Write(bytes.Repeat(new byte[]{0}.slice(), 0x3c - 2));
+    buf.Write(slice<byte>([(byte)'M', (byte)'Z']));
+    buf.Write(bytes.Repeat(slice<byte>([0]), 0x3c - 2));
     // At location 0x3c, the stub has the file offset to the PE signature.
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (int32)(0x3c + 4));
 
-    buf.Write(new byte[]{(rune)'P', (rune)'E', 0, 0}.slice());
+    buf.Write(slice<byte>([(byte)'P', (byte)'E', 0, 0]));
 
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, new pe.FileHeader(NumberOfSections: 1));
 
     var sh = new pe.SectionHeader32(
-        Name: new uint8[]{(rune)'t', 0}.array(8),
+        Name: new uint8[]{(uint8)'t', 0}.array(8),
         SizeOfRawData: (uint32)(paddingSize + len(buildInfoMagic)),
         PointerToRawData: (uint32)buf.Len()
     );
@@ -451,12 +459,12 @@ public static void TestIssue54968(ж<testing.T> Ꮡt) {
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, sh);
 
     nint start = buf.Len();
-    buf.Write(bytes.Repeat(new byte[]{0}.slice(), paddingSize + len(buildInfoMagic)));
+    buf.Write(bytes.Repeat(slice<byte>([0]), paddingSize + len(buildInfoMagic)));
     var data = buf.Bytes();
 
     {
-        var (_, err) = pe.NewFile(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data))); if (err != default!) {
-            Ꮡt.Fatalf("need a valid PE header for the misaligned buildInfoMagic test: %s"u8, err);
+        var (_, err) = pe.NewFile(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data))); if (err != nil) {
+            t.Fatalf("need a valid PE header for the misaligned buildInfoMagic test: %s", err);
         }
     }
 
@@ -470,22 +478,21 @@ public static void TestIssue54968(ж<testing.T> Ꮡt) {
 
         var buildInfoMagicʗ1 = buildInfoMagic;
         var dataʗ1 = data;
-        Ꮡt.Run(fmt.Sprintf("start_at_%d"u8, i), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("start_at_%d"u8, i), (ж<testing.T> tΔ1) => {
             var d = dataʗ1.slice(0, start);
             // Construct intentionally-misaligned buildInfoMagic.
-            d = appendꓸꓸꓸ(d, bytes.Repeat(new byte[]{0}.slice(), i));
+            d = appendꓸꓸꓸ(d, bytes.Repeat(slice<byte>([0]), i));
             d = appendꓸꓸꓸ(d, buildInfoMagicʗ1);
-            d = appendꓸꓸꓸ(d, bytes.Repeat(new byte[]{0}.slice(), paddingSize - i));
+            d = appendꓸꓸꓸ(d, bytes.Repeat(slice<byte>([0]), paddingSize - i));
 
             var (_, err) = buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(d)));
 
             @string wantErr = notAGoExecutableˢ;
-            if (err == default!){
-                tΔ1.Errorf("got error nil; want error containing %q"u8, wantErr);
-            } else 
-            {
+            if (err == nil) {
+                tΔ1.Errorf("got error nil; want error containing %q", wantErr);
+            } else {
                 @string errMsg = err.Error(); if (!strings.Contains(errMsg, wantErr)) {
-                    tΔ1.Errorf("got error %q; want error containing %q"u8, errMsg, wantErr);
+                    tΔ1.Errorf("got error %q; want error containing %q", errMsg, wantErr);
                 }
             }
         });
@@ -496,14 +503,14 @@ public static void FuzzRead(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var (go117, err) = obscuretestdata.ReadFile(testdataGo117Go117Base64ˢ);
-    if (err != default!) {
-        Ꮡf.Errorf("Error reading go117: %v"u8, err);
+    if (err != nil) {
+        Ꮡf.Errorf("Error reading go117: %v", err);
     }
     f.Add(go117);
 
     (var notgo, err) = obscuretestdata.ReadFile(testdataNotgoNotgoBase64ˢ);
-    if (err != default!) {
-        Ꮡf.Errorf("Error reading notgo: %v"u8, err);
+    if (err != nil) {
+        Ꮡf.Errorf("Error reading notgo: %v", err);
     }
     f.Add(notgo);
 

@@ -18,9 +18,10 @@ using static global::go.net.http_package;
 partial class http_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string foobarˢ = "foobar"u8;
+internal static ref readonly @string foobarˢ => ref foobarˢᵇ;
+private static readonly @string foobarˢᵇ = "foobar"u8;
 
-public static void TestBodyReadBadTrailer(ж<testing.T> Ꮡt) {
+public static void TestBodyReadBadTrailer(ж<testing.T> t) {
     var b = Ꮡ(new body(
         src: new http_test_package.strings_ReaderжReader(strings.NewReader(foobarˢ)),
         hdr: true, // force reading the trailer
@@ -29,41 +30,42 @@ public static void TestBodyReadBadTrailer(ж<testing.T> Ꮡt) {
     var buf = new slice<byte>(7);
     var (n, err) = b.Read(buf[..3]);
     @string got = (@string)(buf.slice(0, n));
-    if (got != "foo"u8 || err != default!) {
-        Ꮡt.Fatalf(@"first Read = %d (%q), %v; want 3 (""foo"")"u8, n, got, err);
+    if (got != "foo"u8 || err != nil) {
+        t.Fatalf(@"first Read = %d (%q), %v; want 3 (""foo"")", n, got, err);
     }
 
     (n, err) = b.Read(buf[..]);
     got = (@string)(buf.slice(0, n));
-    if (got != "bar"u8 || err != default!) {
-        Ꮡt.Fatalf(@"second Read = %d (%q), %v; want 3 (""bar"")"u8, n, got, err);
+    if (got != "bar"u8 || err != nil) {
+        t.Fatalf(@"second Read = %d (%q), %v; want 3 (""bar"")", n, got, err);
     }
 
     (n, err) = b.Read(buf[..]);
     got = (@string)(buf.slice(0, n));
-    if (err == default!) {
-        Ꮡt.Errorf("final Read was successful (%q), expected error from trailer read"u8, got);
+    if (err == nil) {
+        t.Errorf("final Read was successful (%q), expected error from trailer read", got);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bodyHereContinuedˢ = "Body here\ncontinued"u8;
+internal static ref readonly @string bodyHereContinuedˢ => ref bodyHereContinuedˢᵇ;
+private static readonly @string bodyHereContinuedˢᵇ = "Body here\ncontinued"u8;
 
-public static void TestFinalChunkedBodyReadEOF(ж<testing.T> Ꮡt) {
+public static void TestFinalChunkedBodyReadEOF(ж<testing.T> t) {
     var (res, err) = ReadResponse(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8 + "0a\r\n"u8 + "Body here\n\r\n"u8 + "09\r\n"u8 + "continued\r\n"u8 + "0\r\n"u8 + "\r\n"u8))), nil);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     @string want = bodyHereContinuedˢ;
     var buf = new slice<byte>(builtin.len(want));
-    (var n, err) = (~res).Body.Read(buf);
+    (var n, err) = res.Body.Read(buf);
     if (n != builtin.len(want) || !AreEqual(err, io.EOF)) {
-        Ꮡt.Logf("body = %#v"u8, (~res).Body);
-        Ꮡt.Errorf("Read = %v, %v; want %d, EOF"u8, n, err, builtin.len(want));
+        t.Logf("body = %#v", res.Body);
+        t.Errorf("Read = %v, %v; want %d, EOF", n, err, builtin.len(want));
     }
     if (((sstring)buf) != want) {
-        Ꮡt.Errorf("buf = %q; want %q"u8, buf, want);
+        t.Errorf("buf = %q; want %q", buf, want);
     }
 }
 
@@ -72,25 +74,25 @@ internal partial struct TestDetectInMemoryReaders_tests /*dyn*/ {
     internal bool want;
 }
 
-public static void TestDetectInMemoryReaders(ж<testing.T> Ꮡt) {
+public static void TestDetectInMemoryReaders(ж<testing.T> t) {
     var (pr, _) = io.Pipe();
-    var tests = new TestDetectInMemoryReaders_tests[]{
+    var tests = slice<TestDetectInMemoryReaders_tests>([
         new(new io.PipeReaderжReader(pr), false),
 
-        new(new http_test_package.bytes_ReaderжReader(bytes.NewReader(default!)), true),
-        new(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default!)), true),
+        new(new http_test_package.bytes_ReaderжReader(bytes.NewReader(default)), true),
+        new(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default)), true),
         new(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8)), true),
 
         new(io.NopCloser(new io.PipeReaderжReader(pr)), false),
 
-        new(io.NopCloser(new http_test_package.bytes_ReaderжReader(bytes.NewReader(default!))), true),
-        new(io.NopCloser(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default!))), true),
+        new(io.NopCloser(new http_test_package.bytes_ReaderжReader(bytes.NewReader(default))), true),
+        new(io.NopCloser(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default))), true),
         new(io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8))), true)
-    }.slice();
+    ]);
     foreach (var (i, tt) in tests) {
         var got = isKnownInMemoryReader(tt.r);
         if (got != tt.want) {
-            Ꮡt.Errorf("%d: got = %v; want %v"u8, i, got, tt.want);
+            t.Errorf("%d: got = %v; want %v", i, got, tt.want);
         }
     }
 }
@@ -113,7 +115,8 @@ internal static (nint, error) Write(this ref mockTransferWriter w, slice<byte> p
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string netHttpNewfilefuncˢ = "net-http-newfilefunc"u8;
+internal static ref readonly @string netHttpNewfilefuncˢ => ref netHttpNewfilefuncˢᵇ;
+private static readonly @string netHttpNewfilefuncˢᵇ = "net-http-newfilefunc"u8;
 internal static readonly object didNotCallReadFromˢ = (@string)"did not call ReadFrom"u8;
 internal static readonly object didNotInvokeWriteˢ = (@string)"did not invoke Write"u8;
 
@@ -128,28 +131,28 @@ internal partial struct TestTransferWriterWriteBodyReaderTypes_cases /*dyn*/ {
     internal bool expectedWrite;
 }
 
-public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
+public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> t) {
     var fileType = reflect.TypeFor<ж<os.File>>();
     var bufferType = reflect.TypeFor<ж<bytes.Buffer>>();
 
     var nBytes = (int64)((int64)1 << 10);
     var newFileFunc = (io.Reader r, Action done, error err) () => {
-        Action done = default!;
-        error err = default!;
+        Action done = default;
+        error err = default;
         (var f, err) = os.CreateTemp(""u8, netHttpNewfilefuncˢ);
-        if (err != default!) {
-            return (default!, default!, err);
+        if (err != nil) {
+            return (default, default, err);
         }
 
         // Write some bytes to the file to enable reading.
         {
-            var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, nBytes); if (errΔ1 != default!) {
-                return (default!, default!, fmt.Errorf("failed to write data to file: %v"u8, errΔ1));
+            var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, nBytes); if (errΔ1 != nil) {
+                return (default, default, fmt.Errorf("failed to write data to file: %v"u8, errΔ1));
             }
         }
         {
-            var (_, errΔ2) = f.Seek(0, 0); if (errΔ2 != default!) {
-                return (default!, default!, fmt.Errorf("failed to seek to front: %v"u8, errΔ2));
+            var (_, errΔ2) = f.Seek(0, 0); if (errΔ2 != nil) {
+                return (default, default, fmt.Errorf("failed to seek to front: %v"u8, errΔ2));
             }
         }
 
@@ -159,27 +162,27 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
             os.Remove(fʗ1.Name());
         };
 
-        return (new http_test_package.os_FileжReader(f), done, default!);
+        return (new http_test_package.os_FileжReader(f), done, default);
     };
 
     var newBufferFunc = (io.Reader, Action, error) () => (new http_test_package.bytes_BufferжReader(bytes.NewBuffer(new slice<byte>((nint)(nBytes)))), () => {
-        }, default!);
+        }, default);
 
             var newFileFuncʗ1 = newFileFunc;
 
             var newBufferFuncʗ1 = newBufferFunc;
-    var cases = new TestTransferWriterWriteBodyReaderTypes_cases[]{
+    var cases = slice<TestTransferWriterWriteBodyReaderTypes_cases>([
         new(
-            name: "file, non-chunked, size set"u8,
+            name: "file, non-chunked, size set",
             bodyFunc: newFileFunc,
-            method: "PUT"u8,
+            method: "PUT",
             contentLength: nBytes,
             limitedReader: true,
             expectedReader: fileType
         ),
         new(
-            name: "file, non-chunked, size set, nopCloser wrapped"u8,
-            method: "PUT"u8,
+            name: "file, non-chunked, size set, nopCloser wrapped",
+            method: "PUT",
             bodyFunc: () => {
                 var (r, cleanup, err) = newFileFuncʗ1();
                 return (io.NopCloser(r), cleanup, err);
@@ -189,37 +192,37 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
             expectedReader: fileType
         ),
         new(
-            name: "file, non-chunked, negative size"u8,
-            method: "PUT"u8,
+            name: "file, non-chunked, negative size",
+            method: "PUT",
             bodyFunc: newFileFunc,
             contentLength: -1,
             expectedReader: fileType
         ),
         new(
-            name: "file, non-chunked, CONNECT, negative size"u8,
-            method: "CONNECT"u8,
+            name: "file, non-chunked, CONNECT, negative size",
+            method: "CONNECT",
             bodyFunc: newFileFunc,
             contentLength: -1,
             expectedReader: fileType
         ),
         new(
-            name: "file, chunked"u8,
-            method: "PUT"u8,
+            name: "file, chunked",
+            method: "PUT",
             bodyFunc: newFileFunc,
-            transferEncoding: new @string[]{"chunked"u8}.slice(),
+            transferEncoding: slice<@string>(["chunked"]),
             expectedWrite: true
         ),
         new(
-            name: "buffer, non-chunked, size set"u8,
+            name: "buffer, non-chunked, size set",
             bodyFunc: newBufferFunc,
-            method: "PUT"u8,
+            method: "PUT",
             contentLength: nBytes,
             limitedReader: true,
             expectedReader: bufferType
         ),
         new(
-            name: "buffer, non-chunked, size set, nopCloser wrapped"u8,
-            method: "PUT"u8,
+            name: "buffer, non-chunked, size set, nopCloser wrapped",
+            method: "PUT",
             bodyFunc: () => {
                 var (r, cleanup, err) = newBufferFuncʗ1();
                 return (io.NopCloser(r), cleanup, err);
@@ -229,44 +232,44 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
             expectedReader: bufferType
         ),
         new(
-            name: "buffer, non-chunked, negative size"u8,
-            method: "PUT"u8,
+            name: "buffer, non-chunked, negative size",
+            method: "PUT",
             bodyFunc: newBufferFunc,
             contentLength: -1,
             expectedWrite: true
         ),
         new(
-            name: "buffer, non-chunked, CONNECT, negative size"u8,
-            method: "CONNECT"u8,
+            name: "buffer, non-chunked, CONNECT, negative size",
+            method: "CONNECT",
             bodyFunc: newBufferFunc,
             contentLength: -1,
             expectedWrite: true
         ),
         new(
-            name: "buffer, chunked"u8,
-            method: "PUT"u8,
+            name: "buffer, chunked",
+            method: "PUT",
             bodyFunc: newBufferFunc,
-            transferEncoding: new @string[]{"chunked"u8}.slice(),
+            transferEncoding: slice<@string>(["chunked"]),
             expectedWrite: true
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in cases) {
         ref var tc = ref heap(new TestTransferWriterWriteBodyReaderTypes_cases(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 var (body, cleanup, err) = tcʗ1.bodyFunc();
-                if (err != default!) {
+                if (err != nil) {
                     tΔ1.Fatal(err);
                 }
                 var cleanupʗ1 = cleanup;
                 defer(cleanupʗ1, ref ᒐ, recovers: true);
 
-                var mw = Ꮡ(new mockTransferWriter(nil));
+                var mw = Ꮡ(new mockTransferWriter());
                 var tw = Ꮡ(new transferWriter(
                     Body: body,
                     ContentLength: tcʗ1.contentLength,
@@ -274,22 +277,22 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
                 ));
 
                 {
-                    var errΔ1 = tw.writeBody(new http_internal_test_package.mockTransferWriterжWriter(mw)); if (errΔ1 != default!) {
+                    var errΔ1 = tw.writeBody(new http_internal_test_package.mockTransferWriterжWriter(mw)); if (errΔ1 != nil) {
                         tΔ1.Fatal(errΔ1);
                     }
                 }
 
-                if (tcʗ1.expectedReader != default!) {
-                    if ((~mw).CalledReader == default!) {
+                if (tcʗ1.expectedReader != nil) {
+                    if (mw.CalledReader == nil) {
                         tΔ1.Fatal(didNotCallReadFromˢ);
                     }
 
-                    reflectꓸType actualReader = default!;
-                    var (lr, ok) = (~mw).CalledReader._<ж<io.LimitedReader>>(ᐧ);
-                    if (ok && tcʗ1.limitedReader){
-                        actualReader = reflect.TypeOf((~lr).R);
+                    reflectꓸType actualReader = default;
+                    var (lr, ok) = mw.CalledReader._<ж<io.LimitedReader>>(ᐧ);
+                    if (ok && tcʗ1.limitedReader) {
+                        actualReader = reflect.TypeOf(lr.R);
                     } else {
-                        actualReader = reflect.TypeOf((~mw).CalledReader);
+                        actualReader = reflect.TypeOf(mw.CalledReader);
                         // We have to handle this special case for genericWriteTo in os,
                         // this struct is introduced to support a zero-copy optimization,
                         // check out https://go.dev/issue/58808 for details.
@@ -299,11 +302,11 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
                     }
 
                     if (!AreEqual(tcʗ1.expectedReader, actualReader)) {
-                        tΔ1.Fatalf("got reader %s want %s"u8, actualReader, tcʗ1.expectedReader);
+                        tΔ1.Fatalf("got reader %s want %s", actualReader, tcʗ1.expectedReader);
                     }
                 }
 
-                if (tcʗ1.expectedWrite && !(~mw).WriteCalled) {
+                if (tcʗ1.expectedWrite && !mw.WriteCalled) {
                     tΔ1.Fatal(didNotInvokeWriteˢ);
                 }
             }
@@ -318,37 +321,37 @@ internal partial struct TestParseTransferEncoding_tests /*dyn*/ {
     internal error wantErr;
 }
 
-public static void TestParseTransferEncoding(ж<testing.T> Ꮡt) {
-    var tests = new TestParseTransferEncoding_tests[]{
+public static void TestParseTransferEncoding(ж<testing.T> t) {
+    var tests = slice<TestParseTransferEncoding_tests>([
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"u8] = new @string[]{"fugazi"u8}.slice()}),
-            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""fugazi"""u8)))
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["fugazi"])}),
+            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""fugazi""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"u8] = new @string[]{"chunked, chunked"u8, "identity"u8, "chunked"u8}.slice()}),
-            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"too many transfer encodings: [""chunked, chunked"" ""identity"" ""chunked""]"u8)))
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["chunked, chunked", "identity", "chunked"])}),
+            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"too many transfer encodings: [""chunked, chunked"" ""identity"" ""chunked""]")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"u8] = new @string[]{""u8}.slice()}),
-            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: """""u8)))
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>([""])}),
+            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: """"")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"u8] = new @string[]{"chunked, identity"u8}.slice()}),
-            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""chunked, identity"""u8)))
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["chunked, identity"])}),
+            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""chunked, identity""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"u8] = new @string[]{"chunked"u8, "identity"u8}.slice()}),
-            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"too many transfer encodings: [""chunked"" ""identity""]"u8)))
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["chunked", "identity"])}),
+            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"too many transfer encodings: [""chunked"" ""identity""]")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"u8] = new @string[]{((@string)(new byte[]{0x0b, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x65, 0x64}))}.slice()}),
-            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""\vchunked"""u8)))
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>([((@string)(new byte[]{0x0b, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x65, 0x64}))])}),
+            wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""\vchunked""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"u8] = new @string[]{"chunked"u8}.slice()}),
-            wantErr: default!
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["chunked"])}),
+            wantErr: default
         )
-    }.slice();
+    ]);
 
     foreach (var (i, tt) in tests) {
         var tr = Ꮡ(new transferReader(
@@ -358,7 +361,7 @@ public static void TestParseTransferEncoding(ж<testing.T> Ꮡt) {
         ));
         var gotErr = tr.parseTransferEncoding();
         if (!reflect.DeepEqual(gotErr, tt.wantErr)) {
-            Ꮡt.Errorf("%d.\ngot error:\n%v\nwant error:\n%v\n\n"u8, i, gotErr, tt.wantErr);
+            t.Errorf("%d.\ngot error:\n%v\nwant error:\n%v\n\n", i, gotErr, tt.wantErr);
         }
     }
 }
@@ -369,39 +372,39 @@ internal partial struct TestParseContentLength_tests /*dyn*/ {
 }
 
 // issue 39017 - disallow Content-Length values such as "+3"
-public static void TestParseContentLength(ж<testing.T> Ꮡt) {
-    var tests = new TestParseContentLength_tests[]{
+public static void TestParseContentLength(ж<testing.T> t) {
+    var tests = slice<TestParseContentLength_tests>([
         new(
-            cl: ""u8,
+            cl: "",
             wantErr: badStringError(invalidEmptyContentˢ, ""u8)
         ),
         new(
-            cl: "3"u8,
-            wantErr: default!
+            cl: "3",
+            wantErr: default
         ),
         new(
-            cl: "+3"u8,
-            wantErr: badStringError(badContentLengthˢ, "+3"u8)
+            cl: "+3",
+            wantErr: badStringError(badContentLengthˢ, "+3")
         ),
         new(
-            cl: "-3"u8,
-            wantErr: badStringError(badContentLengthˢ, "-3"u8)
+            cl: "-3",
+            wantErr: badStringError(badContentLengthˢ, "-3")
         ),
         new(
             // max int64, for safe conversion before returning
-            cl: "9223372036854775807"u8,
-            wantErr: default!
+            cl: "9223372036854775807",
+            wantErr: default
         ),
         new(
-            cl: "9223372036854775808"u8,
-            wantErr: badStringError(badContentLengthˢ, "9223372036854775808"u8)
+            cl: "9223372036854775808",
+            wantErr: badStringError(badContentLengthˢ, "9223372036854775808")
         )
-    }.slice();
+    ]);
 
     foreach (var (_, tt) in tests) {
         {
-            var (_, gotErr) = parseContentLength(new @string[]{tt.cl}.slice()); if (!reflect.DeepEqual(gotErr, tt.wantErr)) {
-                Ꮡt.Errorf("%q:\n\tgot=%v\n\twant=%v"u8, tt.cl, gotErr, tt.wantErr);
+            var (_, gotErr) = parseContentLength(slice<@string>([tt.cl])); if (!reflect.DeepEqual(gotErr, tt.wantErr)) {
+                t.Errorf("%q:\n\tgot=%v\n\twant=%v", tt.cl, gotErr, tt.wantErr);
             }
         }
     }

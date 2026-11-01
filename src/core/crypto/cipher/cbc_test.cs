@@ -12,8 +12,7 @@ using io = io_package;
 using rand = go.math.rand_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using go.crypto;
 using go.crypto.@internal;
 using go.math;
@@ -21,12 +20,13 @@ using go.math;
 partial class cipher_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string desˢ = "DES"u8;
+private static ref readonly @string desˢ => ref desˢᵇ;
+private static readonly @string desˢᵇ = "DES"u8;
 
 // Test CBC Blockmode against the general cipher.BlockMode interface tester
-public static void TestCBCBlockMode(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, aesˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (_, keylen) in new nint[]{128, 192, 256}.slice()) {
+public static void TestCBCBlockMode(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, aesˢ, (ж<testing.T> tΔ1) => {
+        foreach (var (_, keylen) in slice<nint>([128, 192, 256])) {
             tΔ1.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ2) => {
                 var rng = newRandReader(tΔ2);
 
@@ -34,7 +34,7 @@ public static void TestCBCBlockMode(ж<testing.T> Ꮡt) {
                 rng.Read(key);
 
                 var (block, err) = aes.NewCipher(key);
-                if (err != default!) {
+                if (err != nil) {
                     throw panic(err);
                 }
 
@@ -43,14 +43,14 @@ public static void TestCBCBlockMode(ж<testing.T> Ꮡt) {
         }
     });
 
-    Ꮡt.Run(desˢ, (ж<testing.T> tΔ3) => {
+    t.Run(desˢ, (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         var key = new slice<byte>(8);
         rng.Read(key);
 
         var (block, err) = des.NewCipher(key);
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
 
@@ -59,22 +59,22 @@ public static void TestCBCBlockMode(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string setIVˢ = "SetIV"u8;
+private static ref readonly @string setIVˢ => ref setIVˢᵇ;
+private static readonly @string setIVˢᵇ = "SetIV"u8;
 
-public static void TestCBCExtraMethods(ж<testing.T> Ꮡt) {
+public static void TestCBCExtraMethods(ж<testing.T> t) {
     var (block, _) = aes.NewCipher(new slice<byte>(16));
     var iv = new slice<byte>(block.BlockSize());
-    ref var s = ref heap<cipher.BlockMode>(out var Ꮡs);
-    s = cipher.NewCBCEncrypter(block, iv);
-    cryptotest.NoExtraMethods(Ꮡt, Ꮡs, setIVˢ);
+    ref var s = ref heap<cipher.BlockMode>(cipher.NewCBCEncrypter(block, iv), out var Ꮡs);
+    cryptotest.NoExtraMethods(t, Ꮡs, setIVˢ);
 
     s = cipher.NewCBCDecrypter(block, iv);
-    cryptotest.NoExtraMethods(Ꮡt, Ꮡs, setIVˢ);
+    cryptotest.NoExtraMethods(t, Ꮡs, setIVˢ);
 }
 
-internal static partial io.Reader newRandReader(ж<testing.T> Ꮡt) {
+internal static partial io.Reader newRandReader(ж<testing.T> t) {
     var seed = time.Now().UnixNano();
-    Ꮡt.Logf("Deterministic RNG seed: 0x%x"u8, seed);
+    t.Logf("Deterministic RNG seed: 0x%x", seed);
     return new rand_RandжReader(rand.New(rand.NewSource(seed)));
 }
 

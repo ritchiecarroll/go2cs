@@ -5,7 +5,7 @@ namespace go;
 
 using Δtesting = testing_package;
 using Δtime = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using static go.time_internal_test_package;
 
 partial class time_test_package {
@@ -27,24 +27,24 @@ partial class time_test_package {
     return (ᴛ1, ᴛ2, ᴛ3, ᴛ4);
 }
 
-public static void TestLinkname(ж<Δtesting.T> Ꮡt) {
+public static void TestLinkname(ж<Δtesting.T> t) {
     var tm = Δtime.Date(2006, Δtime.January, 2, 15, 4, 5, 6, Δtime.ΔUTC);
     var abs = timeAbs(tm);
     // wantAbs should be Jan 1 based, not Mar 1 based.
     // See absolute time description in time.go.
     UntypedInt wantAbs = 9223372029851535845; // NOT 9223372029877973939
     if (abs != wantAbs) {
-        Ꮡt.Fatalf("timeAbs(2006-01-02 15:04:05 UTC) = %d, want %d"u8, abs, (uint64)wantAbs);
+        t.Fatalf("timeAbs(2006-01-02 15:04:05 UTC) = %d, want %d", abs, (uint64)wantAbs);
     }
 
     var (year, month, day, yday) = absDate(abs, true);
     if (year != 2006 || month != Δtime.January || day != 2 || yday != 1) {
-        Ꮡt.Errorf("absDate() = %v, %v, %v, %v, want 2006, January, 2, 1"u8, year, month, day, yday);
+        t.Errorf("absDate() = %v, %v, %v, %v, want 2006, January, 2, 1", year, month, day, yday);
     }
 
     var (hour, min, sec) = absClock(abs);
     if (hour != 15 || min != 4 || sec != 5) {
-        Ꮡt.Errorf("absClock() = %v, %v, %v, 15, 4, 5"u8, hour, min, sec);
+        t.Errorf("absClock() = %v, %v, %v, 15, 4, 5", hour, min, sec);
     }
 }
 

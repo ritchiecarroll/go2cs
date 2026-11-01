@@ -15,8 +15,8 @@ using version = go.@internal.trace.version_package;
 
 partial class testtrace_internal_test_package {
 
-internal static ж<@string> convert = flag.String("convert"u8, ""u8, "Path to trace text file to convert to binary format"u8);
-internal static ж<@string> output = flag.String("out"u8, ""u8, "Output path for converted trace"u8);
+internal static ж<@string> convert = flag.String("convert", "", "Path to trace text file to convert to binary format");
+internal static ж<@string> output = flag.String("out", "", "Output path for converted trace");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object setConvertToConvertAˢ = (@string)"Set -convert to convert a trace text file"u8;
@@ -31,17 +31,17 @@ internal static readonly object setOutToSpecifyˢ = (@string)"Set -out to specif
 // This would be cleaner as a dedicated internal command rather than a test,
 // but cmd/dist does not handle internal (non-distributed) commands in std
 // well.
-public static void TestConvertDump(ж<testing.T> Ꮡt) {
+public static void TestConvertDump(ж<testing.T> t) {
     if (convert.Value == ""u8) {
-        Ꮡt.Skip(setConvertToConvertAˢ);
+        t.Skip(setConvertToConvertAˢ);
     }
     if (output.Value == ""u8) {
-        Ꮡt.Fatal(setOutToSpecifyˢ);
+        t.Fatal(setOutToSpecifyˢ);
     }
 
     {
-        var err = convertDump(convert.Value, output.Value); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = convertDump(convert.Value, output.Value); if (err != nil) {
+            t.Error(err);
         }
     }
 }
@@ -50,46 +50,46 @@ internal static error convertDump(@string inPath, @string outPath) {
     GoFrame ᒐ = default;
     try {
         var (@in, err) = os.Open(inPath);
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("error opening input: %v"u8, err);
         }
         var inʗ1 = @in;
         defer(() => inʗ1.Close(), ref ᒐ);
 
         (var @out, err) = os.Create(outPath);
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("error creating output: %v"u8, err);
         }
         var outʗ1 = @out;
         defer(() => outʗ1.Close(), ref ᒐ);
 
         (var tr, err) = raw.NewTextReader(new testtrace_internal_test_package.os_FileжReader(@in));
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("error creating text reader: %v"u8, err);
         }
         (var tw, err) = raw.NewWriter(new os.FileжWriter(@out), tr.Version());
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("error creating raw writer: %v"u8, err);
         }
 
-        while (ᐧ) {
+        for (;;) {
             var (ev, errΔ1) = tr.ReadEvent();
             if (AreEqual(errΔ1, io.EOF)) {
                 break;
             }
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 return fmt.Errorf("bad trace file: %v"u8, errΔ1);
             }
             {
-                var errΔ2 = tw.WriteEvent(ev); if (errΔ2 != default!) {
+                var errΔ2 = tw.WriteEvent(ev); if (errΔ2 != nil) {
                     return fmt.Errorf("failed to write trace bytes: %v"u8, errΔ2);
                 }
             }
         }
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

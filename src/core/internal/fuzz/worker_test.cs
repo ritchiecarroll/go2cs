@@ -22,15 +22,15 @@ using static global::go.@internal.fuzz_package;
 
 partial class fuzz_internal_test_package {
 
-internal static ж<bool> benchmarkWorkerFlag = flag.Bool("benchmarkworker"u8, false, ""u8);
+internal static ж<bool> benchmarkWorkerFlag = flag.Bool("benchmarkworker", false, "");
 
-public static void TestMain(ж<testing.M> Ꮡm) {
+public static void TestMain(ж<testing.M> m) {
     flag.Parse();
     if (benchmarkWorkerFlag.Value) {
         runBenchmarkWorker();
         return;
     }
-    os.Exit(Ꮡm.Run());
+    os.Exit(m.Run());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -51,34 +51,34 @@ public static void BenchmarkWorkerFuzzOverhead(ж<testing.B> Ꮡb) {
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
 
         var ws = Ꮡ(new workerServer(
-            fuzzFn: (CorpusEntry _) => (time.ΔSecond, default!),
+            fuzzFn: (CorpusEntry _) => (time.ΔSecond, default),
             workerComm: new workerComm(memMu: new channel<ж<global::go.@internal.fuzz_package.sharedMem>>(1))
         ));
 
         var (mem, err) = sharedMemTempFile(workerSharedMemSize);
-        if (err != default!) {
-            Ꮡb.Fatalf("failed to create temporary shared memory file: %s"u8, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("failed to create temporary shared memory file: %s", err);
         }
         var memʗ1 = mem;
         defer(() => {
             {
-                var errΔ1 = memʗ1.Close(); if (errΔ1 != default!) {
+                var errΔ1 = memʗ1.Close(); if (errΔ1 != nil) {
                     Ꮡb.Error(errΔ1);
                 }
             }
         }, ref ᒐ);
 
-        var initialVal = new any[]{new slice<byte>(32)}.slice();
+        var initialVal = slice<any>([new slice<byte>(32)]);
         var encodedVals = marshalCorpusFile(initialVal.ꓸꓸꓸ);
         mem.setValue(encodedVals);
 
-        (~ws).memMu.ᐸꟷ(mem);
+        ws.memMu.ᐸꟷ(mem);
 
         b.ResetTimer();
         for (nint i = 0; i < b.N; i++) {
-            ws.Value.m = newMutator();
+            ws.m = newMutator();
             mem.setValue(encodedVals);
-            mem.header().Value.count = 0;
+            mem.header().count = 0;
 
             ws.fuzz(context.Background(), new fuzzArgs(Limit: 1));
         }
@@ -99,7 +99,7 @@ public static void BenchmarkWorkerPing(ж<testing.B> Ꮡb) {
     var w = newWorkerForTest(new fuzz_internal_test_package.testing_BжTB(Ꮡb));
     for (nint i = 0; i < b.N; i++) {
         {
-            var err = (~w).client.ping(context.Background()); if (err != default!) {
+            var err = w.client.ping(context.Background()); if (err != nil) {
                 Ꮡb.Fatal(err);
             }
         }
@@ -119,15 +119,15 @@ public static void BenchmarkWorkerFuzz(ж<testing.B> Ꮡb) {
     }
     b.SetParallelism(1);
     var w = newWorkerForTest(new fuzz_internal_test_package.testing_BжTB(Ꮡb));
-    var entry = new CorpusEntry(Values: new any[]{slice<byte>(default!)}.slice());
+    var entry = new CorpusEntry(Values: slice<any>([slice<byte>(default)]));
     entry.Data = marshalCorpusFile(entry.Values.ꓸꓸꓸ);
     for (var i = (int64)0; i < (int64)b.N; ) {
         var args = new fuzzArgs(
             Limit: (int64)b.N - i,
             Timeout: workerFuzzDuration
         );
-        var (_, resp, _, err) = (~w).client.fuzz(context.Background(), entry, args);
-        if (err != default!) {
+        var (_, resp, _, err) = w.client.fuzz(context.Background(), entry, args);
+        if (err != nil) {
             Ꮡb.Fatal(err);
         }
         if (resp.Err != ""u8) {
@@ -147,37 +147,37 @@ public static void BenchmarkWorkerFuzz(ж<testing.B> Ꮡb) {
 internal static ж<global::go.@internal.fuzz_package.worker> newWorkerForTest(testing.TB tb) {
     tb.Helper();
     var (c, err) = newCoordinator(new CoordinateFuzzingOpts(
-        Types: new reflectꓸType[]{reflect.TypeOf(slice<byte>(default!))}.slice(),
+        Types: slice<reflectꓸType>([reflect.TypeOf(slice<byte>(default))]),
         Log: io.Discard
     ));
-    if (err != default!) {
+    if (err != nil) {
         tb.Fatal(err);
     }
-    @string dir = ""u8; // same as self
+    @string dir = ""u8;           // same as self
     @string binPath = os.Args[0]; // same as self
-    var args = append(os.Args[1..], "-benchmarkworker"u8);
+    var args = append(os.Args[1..], (@string)"-benchmarkworker");
     var env = os.Environ(); // same as self
     (var w, err) = newWorker(c, dir, binPath, args, env);
-    if (err != default!) {
+    if (err != nil) {
         tb.Fatal(err);
     }
     var wʗ1 = w;
     tb.Cleanup(() => {
         {
-            var errΔ1 = wʗ1.cleanup(); if (errΔ1 != default!) {
+            var errΔ1 = wʗ1.cleanup(); if (errΔ1 != nil) {
                 tb.Error(errΔ1);
             }
         }
     });
     {
-        var errΔ2 = w.startAndPing(context.Background()); if (errΔ2 != default!) {
+        var errΔ2 = w.startAndPing(context.Background()); if (errΔ2 != nil) {
             tb.Fatal(errΔ2);
         }
     }
     var wʗ2 = w;
     tb.Cleanup(() => {
         {
-            var errΔ3 = wʗ2.stop(); if (errΔ3 != default!) {
+            var errΔ3 = wʗ2.stop(); if (errΔ3 != nil) {
                 tb.Error(errΔ3);
             }
         }
@@ -191,9 +191,9 @@ internal static void runBenchmarkWorker() {
         var (ctx, cancel) = signal.NotifyContext(context.Background(), os.Interrupt);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        var fn = error (CorpusEntry _) => default!;
+        var fn = error (CorpusEntry _) => default;
         {
-            var err = RunFuzzWorker(ctx, fn); if (err != default! && !AreEqual(err, ctx.Err())) {
+            var err = RunFuzzWorker(ctx, fn); if (err != nil && !AreEqual(err, ctx.Err())) {
                 throw panic(err);
             }
         }
@@ -203,13 +203,14 @@ internal static void runBenchmarkWorker() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string initialFailureForDeflakeˢ = "initial failure for deflake"u8;
+internal static ref readonly @string initialFailureForDeflakeˢ => ref initialFailureForDeflakeˢᵇ;
+private static readonly @string initialFailureForDeflakeˢᵇ = "initial failure for deflake"u8;
 
-public static void BenchmarkWorkerMinimize(ж<testing.B> Ꮡb) {
+public static void BenchmarkWorkerMinimize(ж<testing.B> b) {
     GoFrame ᒐ = default;
     try {
         if (race.Enabled) {
-            Ꮡb.Skip(todo48504FixAndReEnableˢ);
+            b.Skip(todo48504FixAndReEnableˢ);
         }
 
         var ws = Ꮡ(new workerServer(
@@ -218,41 +219,41 @@ public static void BenchmarkWorkerMinimize(ж<testing.B> Ꮡb) {
 
         ref var mem = ref heap<ж<global::go.@internal.fuzz_package.sharedMem>>(out var Ꮡmem);
         (mem, var err) = sharedMemTempFile(workerSharedMemSize);
-        if (err != default!) {
-            Ꮡb.Fatalf("failed to create temporary shared memory file: %s"u8, err);
+        if (err != nil) {
+            b.Fatalf("failed to create temporary shared memory file: %s", err);
         }
         defer(() => {
             {
-                var errΔ1 = Ꮡmem.ValueSlot.Close(); if (errΔ1 != default!) {
-                    Ꮡb.Error(errΔ1);
+                var errΔ1 = Ꮡmem.ValueSlot.Close(); if (errΔ1 != nil) {
+                    b.Error(errΔ1);
                 }
             }
         }, ref ᒐ);
-        (~ws).memMu.ᐸꟷ(mem);
+        ws.memMu.ᐸꟷ(mem);
 
         var bytes = new slice<byte>(1024);
         var ctx = context.Background();
-        for (nint szᴛ1 = 1; szᴛ1 <= len(bytes); szᴛ1 <<= (int)(1)) {
+        for (nint szᴛ1 = 1; szᴛ1 <= len(bytes); szᴛ1 <<= 1) {
             var sz = szᴛ1;
-            var input = new any[]{bytes.slice(0, sz)}.slice();
+            var input = slice<any>([bytes.slice(0, sz)]);
             var encodedVals = marshalCorpusFile(input.ꓸꓸꓸ);
-            mem = ᐸꟷ((~ws).memMu);
+            mem = ᐸꟷ(ws.memMu);
             mem.setValue(encodedVals);
-            (~ws).memMu.ᐸꟷ(mem);
+            ws.memMu.ᐸꟷ(mem);
             var ctxʗ1 = ctx;
             var wsʗ1 = ws;
-            Ꮡb.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
+            b.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
                 nint i = 0;
-                wsʗ1.Value.fuzzFn = (CorpusEntry _) => {
+                wsʗ1.fuzzFn = (CorpusEntry _) => {
                     if (i == 0) {
                         i++;
                         return (time.ΔSecond, errors.New(initialFailureForDeflakeˢ));
                     }
-                    return (time.ΔSecond, default!);
+                    return (time.ΔSecond, default);
                 };
                 for (nint iΔ1 = 0; iΔ1 < (~bΔ1).N; iΔ1++) {
                     bΔ1.SetBytes((int64)sz);
-                    wsʗ1.minimize(ctxʗ1, new minimizeArgs(nil));
+                    wsʗ1.minimize(ctxʗ1, new minimizeArgs());
                 }
             });
         }

@@ -28,7 +28,7 @@ using static go.crypto.des_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/des/internal_test.go", "internal_test.cs", "AAoSgoKCgoKCyoKCgoKCgg==")]
+[assembly: GoPositionMap("crypto/des/internal_test.go", "internal_test.cs", "AAoSgoKCgoKCyoKCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

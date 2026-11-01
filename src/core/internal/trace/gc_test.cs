@@ -33,37 +33,37 @@ internal partial struct TestMMU_type /*dyn*/ {
     internal slice<float64> worst;
 }
 
-public static void TestMMU(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestMMU(ж<testing.T> t) {
+    t.Parallel();
 
     // MU
     // 1.0  *****   *****   *****
     // 0.5      *   *   *   *
     // 0.0      *****   *****
     //      0   1   2   3   4   5
-    var util = new slice<Δtrace.MutatorUtil>[]{new Δtrace.MutatorUtil[]{
+    var util = slice<slice<Δtrace.MutatorUtil>>([slice<Δtrace.MutatorUtil>([
         new(0, 1D),
         new(1000000000, 0D),
         new(2000000000, 1D),
         new(3000000000, 0D),
         new(4000000000, 1D),
-        new(5000000000, 0D)}.slice()
-    }.slice();
+        new(5000000000, 0D)])
+    ]);
     var mmuCurve = Δtrace.NewMMUCurve(util);
 
-    foreach (var (_, test) in new TestMMU_type[]{
-        new(0, 0D, new float64[]{}.slice()),
-        new(time.Millisecond, 0D, new float64[]{0D, 0D}.slice()),
-        new(time.ΔSecond, 0D, new float64[]{0D, 0D}.slice()),
-        new(2 * time.ΔSecond, 0.5D, new float64[]{0.5D, 0.5D}.slice()),
-        new((time.Duration)(3000000000L), 1D / 3.0D, new float64[]{1D / 3.0D}.slice()),
-        new((time.Duration)(4000000000L), 0.5D, new float64[]{0.5D}.slice()),
-        new((time.Duration)(5000000000L), 3D / 5.0D, new float64[]{3D / 5.0D}.slice()),
-        new((time.Duration)(6000000000L), 3D / 5.0D, new float64[]{3D / 5.0D}.slice())
-    }.slice()) {
+    foreach (var (_, test) in slice<TestMMU_type>([
+        new(0, 0D, slice<float64>([])),
+        new(time.Millisecond, 0D, slice<float64>([0D, 0D])),
+        new(time.ΔSecond, 0D, slice<float64>([0D, 0D])),
+        new(2 * time.ΔSecond, 0.5D, slice<float64>([0.5D, 0.5D])),
+        new((time.Duration)(3000000000L), 1D / 3.0D, slice<float64>([1D / 3.0D])),
+        new((time.Duration)(4000000000L), 0.5D, slice<float64>([0.5D])),
+        new((time.Duration)(5000000000L), 3D / 5.0D, slice<float64>([3D / 5.0D])),
+        new((time.Duration)(6000000000L), 3D / 5.0D, slice<float64>([3D / 5.0D]))
+    ])) {
         {
             var got = mmuCurve.MMU(test.window); if (!aeq(test.want, got)) {
-                Ꮡt.Errorf("for %s window, want mu = %f, got %f"u8, test.window, test.want, got);
+                t.Errorf("for %s window, want mu = %f, got %f", test.window, test.want, got);
             }
         }
         var worst = mmuCurve.Examples(test.window, 2);
@@ -71,12 +71,12 @@ public static void TestMMU(ж<testing.T> Ꮡt) {
         // (and depends on the exact banding), so we just
         // check that we got the right number with the right
         // utilizations.
-        if (len(worst) != len(test.worst)){
-            Ꮡt.Errorf("for %s window, want worst %v, got %v"u8, test.window, test.worst, worst);
+        if (len(worst) != len(test.worst)) {
+            t.Errorf("for %s window, want worst %v, got %v", test.window, test.worst, worst);
         } else {
             foreach (var i in range(worst)) {
                 if (worst[i].MutatorUtil != test.worst[i]) {
-                    Ꮡt.Errorf("for %s window, want worst %v, got %v"u8, test.window, test.worst, worst);
+                    t.Errorf("for %s window, want worst %v, got %v", test.window, test.worst, worst);
                     break;
                 }
             }
@@ -86,14 +86,15 @@ public static void TestMMU(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in -short mode"u8;
-internal static readonly @string testdataTestsGo122Gcˢ = "testdata/tests/go122-gc-stress.test"u8;
+internal static ref readonly @string testdataTestsGo122Gcˢ => ref testdataTestsGo122Gcˢᵇ;
+private static readonly @string testdataTestsGo122Gcˢᵇ = "testdata/tests/go122-gc-stress.test"u8;
 
-public static void TestMMUTrace(ж<testing.T> Ꮡt) {
+public static void TestMMUTrace(ж<testing.T> t) {
     // Can't be t.Parallel() because it modifies the
     // testingOneBand package variable.
     if (testing.Short()) {
         // test input too big for all.bash
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     void check(ж<testing.T> tΔ1, slice<slice<Δtrace.MutatorUtil>> mu) {
         GoFrame ᒐ = default;
@@ -106,7 +107,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
                 var want = mmuSlow(mu[0], window);
                 var got = mmuCurve.MMU(window);
                 if (!aeq(want, got)) {
-                    tΔ1.Errorf("want %f, got %f mutator utilization in window %s"u8, want, got, window);
+                    tΔ1.Errorf("want %f, got %f mutator utilization in window %s", want, got, window);
                 }
             }
 
@@ -119,13 +120,13 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
             }, trace_internal_test_package.BandsPerSeries, ref ᒐ);
             trace_internal_test_package.BandsPerSeries = 1;
             var mmuCurve2 = Δtrace.NewMMUCurve(mu);
-            var quantiles = new float64[]{0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D}.slice();
+            var quantiles = slice<float64>([0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D]);
             for (var window = time.Microsecond; window < time.ΔSecond; window *= 10) {
                 var mud1 = mmuCurve.MUD(window, quantiles);
                 var mud2 = mmuCurve2.MUD(window, quantiles);
                 foreach (var i in range(mud1)) {
                     if (!aeq(mud1[i], mud2[i])) {
-                        tΔ1.Errorf("for quantiles %v at window %v, want %v, got %v"u8, quantiles, window, mud2, mud1);
+                        tΔ1.Errorf("for quantiles %v at window %v, want %v, got %v", quantiles, window, mud2, mud1);
                         break;
                     }
                 }
@@ -135,24 +136,24 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
         finally { ᒐ.Run(); }
     }
     var checkʗ1 = check;
-    Ꮡt.Run("V2"u8, (ж<testing.T> tΔ2) => {
+    t.Run("V2", (ж<testing.T> tΔ2) => {
         @string testPath = testdataTestsGo122Gcˢ;
         var (r, _, _, err) = testtrace.ParseFile(testPath);
-        if (err != default!) {
-            tΔ2.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, err);
+        if (err != nil) {
+            tΔ2.Fatalf("malformed test %s: bad trace file: %v", testPath, err);
         }
-        slice<traceꓸEvent> events = default!;
+        slice<traceꓸEvent> events = default;
         (var tr, err) = Δtrace.NewReader(r);
-        if (err != default!) {
-            tΔ2.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, err);
+        if (err != nil) {
+            tΔ2.Fatalf("malformed test %s: bad trace file: %v", testPath, err);
         }
-        while (ᐧ) {
+        for (;;) {
             var (ev, errΔ1) = tr.ReadEvent();
             if (AreEqual(errΔ1, io.EOF)) {
                 break;
             }
-            if (errΔ1 != default!) {
-                tΔ2.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, errΔ1);
+            if (errΔ1 != nil) {
+                tΔ2.Fatalf("malformed test %s: bad trace file: %v", testPath, errΔ1);
             }
             events = append(events, ev.ΔClone());
         }
@@ -162,7 +163,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
 }
 
 internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Duration window) {
-    float64 mmu = default!;
+    float64 mmu = default;
 
     {
         var max = (time.Duration)(util[len(util) - 1].Time - util[0].Time); if (window > max) {
@@ -176,7 +177,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
     // util[0].Time and end.
     float64 muInWindow(slice<Δtrace.MutatorUtil> utilΔ1, int64 end) {
         var total = 0.0D;
-        Δtrace.MutatorUtil prevU = default!;
+        Δtrace.MutatorUtil prevU = default;
         foreach (var (_, u) in utilΔ1) {
             if (u.Time > end) {
                 total += prevU.Util * (float64)(end - prevU.Time);

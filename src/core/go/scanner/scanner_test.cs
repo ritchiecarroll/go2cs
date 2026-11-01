@@ -46,212 +46,213 @@ internal partial struct elt {
     internal nint @class;
 }
 
-internal static slice<elt> tokens = new elt[]{
+internal static slice<elt> tokens = slice<elt>([
     // Special tokens
-    new(token.COMMENT, "/* a comment */"u8, special),
-    new(token.COMMENT, "// a comment \n"u8, special),
-    new(token.COMMENT, "/*\r*/"u8, special),
-    new(token.COMMENT, "/**\r/*/"u8, special), // issue 11151
-    new(token.COMMENT, "/**\r\r/*/"u8, special),
-    new(token.COMMENT, "//\r\n"u8, special),
+    new(token.COMMENT, "/* a comment */", special),
+    new(token.COMMENT, "// a comment \n", special),
+    new(token.COMMENT, "/*\r*/", special),
+    new(token.COMMENT, "/**\r/*/", special), // issue 11151
+    new(token.COMMENT, "/**\r\r/*/", special),
+    new(token.COMMENT, "//\r\n", special),
 
     // Identifiers and basic type literals
-    new(token.IDENT, "foobar"u8, literal),
-    new(token.IDENT, "a۰۱۸"u8, literal),
-    new(token.IDENT, "foo६४"u8, literal),
-    new(token.IDENT, "bar９８７６"u8, literal),
-    new(token.IDENT, "ŝ"u8, literal), // was bug (issue 4000)
-    new(token.IDENT, "ŝfoo"u8, literal), // was bug (issue 4000)
-    new(token.INT, "0"u8, literal),
-    new(token.INT, "1"u8, literal),
-    new(token.INT, "123456789012345678890"u8, literal),
-    new(token.INT, "01234567"u8, literal),
-    new(token.INT, "0xcafebabe"u8, literal),
-    new(token.FLOAT, "0."u8, literal),
-    new(token.FLOAT, ".0"u8, literal),
-    new(token.FLOAT, "3.14159265"u8, literal),
-    new(token.FLOAT, "1e0"u8, literal),
-    new(token.FLOAT, "1e+100"u8, literal),
-    new(token.FLOAT, "1e-100"u8, literal),
-    new(token.FLOAT, "2.71828e-1000"u8, literal),
-    new(token.IMAG, "0i"u8, literal),
-    new(token.IMAG, "1i"u8, literal),
-    new(token.IMAG, "012345678901234567889i"u8, literal),
-    new(token.IMAG, "123456789012345678890i"u8, literal),
-    new(token.IMAG, "0.i"u8, literal),
-    new(token.IMAG, ".0i"u8, literal),
-    new(token.IMAG, "3.14159265i"u8, literal),
-    new(token.IMAG, "1e0i"u8, literal),
-    new(token.IMAG, "1e+100i"u8, literal),
-    new(token.IMAG, "1e-100i"u8, literal),
-    new(token.IMAG, "2.71828e-1000i"u8, literal),
-    new(token.CHAR, "'a'"u8, literal),
-    new(token.CHAR, "'\\000'"u8, literal),
-    new(token.CHAR, "'\\xFF'"u8, literal),
-    new(token.CHAR, "'\\uff16'"u8, literal),
-    new(token.CHAR, "'\\U0000ff16'"u8, literal),
-    new(token.STRING, "`foobar`"u8, literal),
+    new(token.IDENT, "foobar", literal),
+    new(token.IDENT, "a۰۱۸", literal),
+    new(token.IDENT, "foo६४", literal),
+    new(token.IDENT, "bar９８７６", literal),
+    new(token.IDENT, "ŝ", literal),    // was bug (issue 4000)
+    new(token.IDENT, "ŝfoo", literal), // was bug (issue 4000)
+    new(token.INT, "0", literal),
+    new(token.INT, "1", literal),
+    new(token.INT, "123456789012345678890", literal),
+    new(token.INT, "01234567", literal),
+    new(token.INT, "0xcafebabe", literal),
+    new(token.FLOAT, "0.", literal),
+    new(token.FLOAT, ".0", literal),
+    new(token.FLOAT, "3.14159265", literal),
+    new(token.FLOAT, "1e0", literal),
+    new(token.FLOAT, "1e+100", literal),
+    new(token.FLOAT, "1e-100", literal),
+    new(token.FLOAT, "2.71828e-1000", literal),
+    new(token.IMAG, "0i", literal),
+    new(token.IMAG, "1i", literal),
+    new(token.IMAG, "012345678901234567889i", literal),
+    new(token.IMAG, "123456789012345678890i", literal),
+    new(token.IMAG, "0.i", literal),
+    new(token.IMAG, ".0i", literal),
+    new(token.IMAG, "3.14159265i", literal),
+    new(token.IMAG, "1e0i", literal),
+    new(token.IMAG, "1e+100i", literal),
+    new(token.IMAG, "1e-100i", literal),
+    new(token.IMAG, "2.71828e-1000i", literal),
+    new(token.CHAR, "'a'", literal),
+    new(token.CHAR, "'\\000'", literal),
+    new(token.CHAR, "'\\xFF'", literal),
+    new(token.CHAR, "'\\uff16'", literal),
+    new(token.CHAR, "'\\U0000ff16'", literal),
+    new(token.STRING, "`foobar`", literal),
     new(token.STRING, "`"u8 + """
 foo
 	                        bar
 """u8.Raw() + "`"u8,
         literal
     ),
-    new(token.STRING, "`\r`"u8, literal),
-    new(token.STRING, "`foo\r\nbar`"u8, literal),
+    new(token.STRING, "`\r`", literal),
+    new(token.STRING, "`foo\r\nbar`", literal),
 
     // Operators and delimiters
-    new(token.ADD, "+"u8, @operator),
-    new(token.SUB, "-"u8, @operator),
-    new(token.MUL, "*"u8, @operator),
-    new(token.QUO, "/"u8, @operator),
-    new(token.REM, "%"u8, @operator),
+    new(token.ADD, "+", @operator),
+    new(token.SUB, "-", @operator),
+    new(token.MUL, "*", @operator),
+    new(token.QUO, "/", @operator),
+    new(token.REM, "%", @operator),
 
-    new(token.AND, "&"u8, @operator),
-    new(token.OR, "|"u8, @operator),
-    new(token.XOR, "^"u8, @operator),
-    new(token.SHL, "<<"u8, @operator),
-    new(token.SHR, ">>"u8, @operator),
-    new(token.AND_NOT, "&^"u8, @operator),
+    new(token.AND, "&", @operator),
+    new(token.OR, "|", @operator),
+    new(token.XOR, "^", @operator),
+    new(token.SHL, "<<", @operator),
+    new(token.SHR, ">>", @operator),
+    new(token.AND_NOT, "&^", @operator),
 
-    new(token.ADD_ASSIGN, "+="u8, @operator),
-    new(token.SUB_ASSIGN, "-="u8, @operator),
-    new(token.MUL_ASSIGN, "*="u8, @operator),
-    new(token.QUO_ASSIGN, "/="u8, @operator),
-    new(token.REM_ASSIGN, "%="u8, @operator),
+    new(token.ADD_ASSIGN, "+=", @operator),
+    new(token.SUB_ASSIGN, "-=", @operator),
+    new(token.MUL_ASSIGN, "*=", @operator),
+    new(token.QUO_ASSIGN, "/=", @operator),
+    new(token.REM_ASSIGN, "%=", @operator),
 
-    new(token.AND_ASSIGN, "&="u8, @operator),
-    new(token.OR_ASSIGN, "|="u8, @operator),
-    new(token.XOR_ASSIGN, "^="u8, @operator),
-    new(token.SHL_ASSIGN, "<<="u8, @operator),
-    new(token.SHR_ASSIGN, ">>="u8, @operator),
-    new(token.AND_NOT_ASSIGN, "&^="u8, @operator),
+    new(token.AND_ASSIGN, "&=", @operator),
+    new(token.OR_ASSIGN, "|=", @operator),
+    new(token.XOR_ASSIGN, "^=", @operator),
+    new(token.SHL_ASSIGN, "<<=", @operator),
+    new(token.SHR_ASSIGN, ">>=", @operator),
+    new(token.AND_NOT_ASSIGN, "&^=", @operator),
 
-    new(token.LAND, "&&"u8, @operator),
-    new(token.LOR, "||"u8, @operator),
-    new(token.ARROW, "<-"u8, @operator),
-    new(token.INC, "++"u8, @operator),
-    new(token.DEC, "--"u8, @operator),
+    new(token.LAND, "&&", @operator),
+    new(token.LOR, "||", @operator),
+    new(token.ARROW, "<-", @operator),
+    new(token.INC, "++", @operator),
+    new(token.DEC, "--", @operator),
 
-    new(token.EQL, "=="u8, @operator),
-    new(token.LSS, "<"u8, @operator),
-    new(token.GTR, ">"u8, @operator),
-    new(token.ASSIGN, "="u8, @operator),
-    new(token.NOT, "!"u8, @operator),
+    new(token.EQL, "==", @operator),
+    new(token.LSS, "<", @operator),
+    new(token.GTR, ">", @operator),
+    new(token.ASSIGN, "=", @operator),
+    new(token.NOT, "!", @operator),
 
-    new(token.NEQ, "!="u8, @operator),
-    new(token.LEQ, "<="u8, @operator),
-    new(token.GEQ, ">="u8, @operator),
-    new(token.DEFINE, ":="u8, @operator),
-    new(token.ELLIPSIS, "..."u8, @operator),
+    new(token.NEQ, "!=", @operator),
+    new(token.LEQ, "<=", @operator),
+    new(token.GEQ, ">=", @operator),
+    new(token.DEFINE, ":=", @operator),
+    new(token.ELLIPSIS, "...", @operator),
 
-    new(token.LPAREN, "("u8, @operator),
-    new(token.LBRACK, "["u8, @operator),
-    new(token.LBRACE, "{"u8, @operator),
-    new(token.COMMA, ","u8, @operator),
-    new(token.PERIOD, "."u8, @operator),
+    new(token.LPAREN, "(", @operator),
+    new(token.LBRACK, "[", @operator),
+    new(token.LBRACE, "{", @operator),
+    new(token.COMMA, ",", @operator),
+    new(token.PERIOD, ".", @operator),
 
-    new(token.RPAREN, ")"u8, @operator),
-    new(token.RBRACK, "]"u8, @operator),
-    new(token.RBRACE, "}"u8, @operator),
-    new(token.SEMICOLON, ";"u8, @operator),
-    new(token.COLON, ":"u8, @operator),
-    new(token.TILDE, "~"u8, @operator),
+    new(token.RPAREN, ")", @operator),
+    new(token.RBRACK, "]", @operator),
+    new(token.RBRACE, "}", @operator),
+    new(token.SEMICOLON, ";", @operator),
+    new(token.COLON, ":", @operator),
+    new(token.TILDE, "~", @operator),
 
     // Keywords
-    new(token.BREAK, "break"u8, keyword),
-    new(token.CASE, "case"u8, keyword),
-    new(token.CHAN, "chan"u8, keyword),
-    new(token.CONST, "const"u8, keyword),
-    new(token.CONTINUE, "continue"u8, keyword),
+    new(token.BREAK, "break", keyword),
+    new(token.CASE, "case", keyword),
+    new(token.CHAN, "chan", keyword),
+    new(token.CONST, "const", keyword),
+    new(token.CONTINUE, "continue", keyword),
 
-    new(token.DEFAULT, "default"u8, keyword),
-    new(token.DEFER, "defer"u8, keyword),
-    new(token.ELSE, "else"u8, keyword),
-    new(token.FALLTHROUGH, "fallthrough"u8, keyword),
-    new(token.FOR, "for"u8, keyword),
+    new(token.DEFAULT, "default", keyword),
+    new(token.DEFER, "defer", keyword),
+    new(token.ELSE, "else", keyword),
+    new(token.FALLTHROUGH, "fallthrough", keyword),
+    new(token.FOR, "for", keyword),
 
-    new(token.FUNC, "func"u8, keyword),
-    new(token.GO, "go"u8, keyword),
-    new(token.GOTO, "goto"u8, keyword),
-    new(token.IF, "if"u8, keyword),
-    new(token.IMPORT, "import"u8, keyword),
+    new(token.FUNC, "func", keyword),
+    new(token.GO, "go", keyword),
+    new(token.GOTO, "goto", keyword),
+    new(token.IF, "if", keyword),
+    new(token.IMPORT, "import", keyword),
 
-    new(token.INTERFACE, "interface"u8, keyword),
-    new(token.MAP, "map"u8, keyword),
-    new(token.PACKAGE, "package"u8, keyword),
-    new(token.RANGE, "range"u8, keyword),
-    new(token.RETURN, "return"u8, keyword),
+    new(token.INTERFACE, "interface", keyword),
+    new(token.MAP, "map", keyword),
+    new(token.PACKAGE, "package", keyword),
+    new(token.RANGE, "range", keyword),
+    new(token.RETURN, "return", keyword),
 
-    new(token.SELECT, "select"u8, keyword),
-    new(token.STRUCT, "struct"u8, keyword),
-    new(token.SWITCH, "switch"u8, keyword),
-    new(token.TYPE, "type"u8, keyword),
-    new(token.VAR, "var"u8, keyword)
-}.slice();
+    new(token.SELECT, "select", keyword),
+    new(token.STRUCT, "struct", keyword),
+    new(token.SWITCH, "switch", keyword),
+    new(token.TYPE, "type", keyword),
+    new(token.VAR, "var", keyword)
+]);
 
-internal static readonly @string whitespace = "  \t  \n\n\n"u8; // to separate tokens
+internal static ref readonly @string whitespace => ref whitespaceᵇ;
+private static readonly @string whitespaceᵇ = "  \t  \n\n\n"u8; // to separate tokens
 
-internal static slice<byte> source = ((Func<slice<byte>>)(() => {
-    slice<byte> src = default!;
+internal static slice<byte> source = func(slice<byte> () => {
+    slice<byte> src = default;
     foreach (var (_, t) in tokens) {
         src = append(src, t.lit.ꓸꓸꓸ);
         src = append(src, whitespace.ꓸꓸꓸ);
     }
     return src;
-}))();
+})();
 
 internal static nint newlineCount(@string s) {
     nint n = 0;
     for (nint i = 0; i < len(s); i++) {
-        if (s[i] == (rune)'\n') {
+        if (s[i] == '\n') {
             n++;
         }
     }
     return n;
 }
 
-internal static void checkPos(ж<testing.T> Ꮡt, @string lit, tokenꓸPos p, tokenꓸPosition expected) {
+internal static void checkPos(ж<testing.T> t, @string lit, tokenꓸPos p, tokenꓸPosition expected) {
     var pos = fset.Position(p);
     // Check cleaned filenames so that we don't have to worry about
     // different os.PathSeparator values.
     if (pos.Filename != expected.Filename && filepath.Clean(pos.Filename) != filepath.Clean(expected.Filename)) {
-        Ꮡt.Errorf("bad filename for %q: got %s, expected %s"u8, lit, pos.Filename, expected.Filename);
+        t.Errorf("bad filename for %q: got %s, expected %s", lit, pos.Filename, expected.Filename);
     }
     if (pos.Offset != expected.Offset) {
-        Ꮡt.Errorf("bad position for %q: got %d, expected %d"u8, lit, pos.Offset, expected.Offset);
+        t.Errorf("bad position for %q: got %d, expected %d", lit, pos.Offset, expected.Offset);
     }
     if (pos.Line != expected.Line) {
-        Ꮡt.Errorf("bad line for %q: got %d, expected %d"u8, lit, pos.Line, expected.Line);
+        t.Errorf("bad line for %q: got %d, expected %d", lit, pos.Line, expected.Line);
     }
     if (pos.Column != expected.Column) {
-        Ꮡt.Errorf("bad column for %q: got %d, expected %d"u8, lit, pos.Column, expected.Column);
+        t.Errorf("bad column for %q: got %d, expected %d", lit, pos.Column, expected.Column);
     }
 }
 
 // Verify that calling Scan() provides the correct results.
-public static void TestScan(ж<testing.T> Ꮡt) {
+public static void TestScan(ж<testing.T> t) {
     nint whitespace_linecount = newlineCount(whitespace);
 
     // error handler
     var eh = (tokenꓸPosition _, @string msg) => {
-        Ꮡt.Errorf("error handler called (msg = %s)"u8, msg);
+        t.Errorf("error handler called (msg = %s)", msg);
     };
 
     // verify scan
-    global::go.go.scanner_package.Scanner s = default!;
+    global::go.go.scanner_package.Scanner s = default;
     s.Init(fset.AddFile(""u8, fset.Base(), len(source)), source, new Action<tokenꓸPosition, @string>(eh), (global::go.go.scanner_package.Mode)(ScanComments | dontInsertSemis));
 
     // set up expected position
     var epos = new tokenꓸPosition(
-        Filename: ""u8,
+        Filename: "",
         Offset: 0,
         Line: 1,
         Column: 1
     );
 
     nint index = 0;
-    while (ᐧ) {
+    for (;;) {
         var (pos, tok, lit) = s.Scan();
 
         // check position
@@ -260,54 +261,57 @@ public static void TestScan(ж<testing.T> Ꮡt) {
             epos.Line = newlineCount((@string)source);
             epos.Column = 2;
         }
-        checkPos(Ꮡt, lit, pos, epos);
+        checkPos(t, lit, pos, epos);
 
         // check token
-        var e = new elt(token.EOF, ""u8, special);
+        var e = new elt(token.EOF, "", special);
         if (index < len(tokens)) {
             e = tokens[index];
             index++;
         }
         if (tok != e.tok) {
-            Ꮡt.Errorf("bad token for %q: got %s, expected %s"u8, lit, tok, e.tok);
+            t.Errorf("bad token for %q: got %s, expected %s", lit, tok, e.tok);
         }
 
         // check token class
         if (tokenclass(tok) != e.@class) {
-            Ꮡt.Errorf("bad class for %q: got %d, expected %d"u8, lit, tokenclass(tok), e.@class);
+            t.Errorf("bad class for %q: got %d, expected %d", lit, tokenclass(tok), e.@class);
         }
 
         // check literal
         @string elit = ""u8;
-        var exprᴛ1 = e.tok;
-        if (exprᴛ1 == token.COMMENT) {
+        switch (e.tok) {
+        case var ᴛ when ᴛ == token.COMMENT: {
             // no CRs in comments
-            elit = (@string)stripCR(slice<byte>(e.lit), e.lit[1] == (rune)'*');
+            elit = (@string)stripCR(slice<byte>(e.lit), e.lit[1] == '*');
             //-style comment literal doesn't contain newline
-            if (elit[1] == (rune)'/') {
+            if (elit[1] == '/') {
                 elit = elit.slice(0, len(elit) - 1);
             }
+            break;
         }
-        else if (exprᴛ1 == token.IDENT) {
+        case var ᴛ when ᴛ == token.IDENT: {
             elit = e.lit;
+            break;
         }
-        else if (exprᴛ1 == token.SEMICOLON) {
-            elit = ";"u8;
+        case var ᴛ when ᴛ == token.SEMICOLON: {
+            elit = ";";
+            break;
         }
-        else { /* default: */
-            if (e.tok.IsLiteral()){
+        default: {
+            if (e.tok.IsLiteral()) {
                 // no CRs in raw string literals
                 elit = e.lit;
-                if (elit[0] == (rune)'`') {
+                if (elit[0] == '`') {
                     elit = (@string)stripCR(slice<byte>(elit), false);
                 }
-            } else 
-            if (e.tok.IsKeyword()) {
+            } else if (e.tok.IsKeyword()) {
                 elit = e.lit;
             }
-        }
+            break;
+        }}
         if (lit != elit) {
-            Ꮡt.Errorf("bad literal for %q: got %q, expected %q"u8, lit, lit, elit);
+            t.Errorf("bad literal for %q: got %q, expected %q", lit, lit, elit);
         }
 
         if (tok == token.EOF) {
@@ -320,7 +324,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
     }
 
     if (s.ErrorCount != 0) {
-        Ꮡt.Errorf("found %d errors"u8, s.ErrorCount);
+        t.Errorf("found %d errors", s.ErrorCount);
     }
 }
 
@@ -328,33 +332,37 @@ internal partial struct TestStripCR_type /*dyn*/ {
     internal @string have, want;
 }
 
-public static void TestStripCR(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestStripCR_type[]{
-        new("//\n"u8, "//\n"u8),
-        new("//\r\n"u8, "//\n"u8),
-        new("//\r\r\r\n"u8, "//\n"u8),
-        new("//\r*\r/\r\n"u8, "//*/\n"u8),
-        new("/**/"u8, "/**/"u8),
-        new("/*\r/*/"u8, "/*/*/"u8),
-        new("/*\r*/"u8, "/**/"u8),
-        new("/**\r/*/"u8, "/**\r/*/"u8),
-        new("/*\r/\r*\r/*/"u8, "/*/*\r/*/"u8),
-        new("/*\r\r\r\r*/"u8, "/**/"u8)
-    }.slice()) {
-        @string got = (@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == (rune)'*');
+public static void TestStripCR(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestStripCR_type>([
+        new("//\n", "//\n"),
+        new("//\r\n", "//\n"),
+        new("//\r\r\r\n", "//\n"),
+        new("//\r*\r/\r\n", "//*/\n"),
+        new("/**/", "/**/"),
+        new("/*\r/*/", "/*/*/"),
+        new("/*\r*/", "/**/"),
+        new("/**\r/*/", "/**\r/*/"),
+        new("/*\r/\r*\r/*/", "/*/*\r/*/"),
+        new("/*\r\r\r\r*/", "/**/")
+    ])) {
+        @string got = (@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == '*');
         if (got != test.want) {
-            Ꮡt.Errorf("stripCR(%q) = %q; want %q"u8, test.have, got, test.want);
+            t.Errorf("stripCR(%q) = %q; want %q", test.have, got, test.want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string commentˢ = "COMMENT "u8;
-internal static readonly @string commentˢ2 = " COMMENT"u8;
-internal static readonly @string commentˢ3 = "COMMENT"u8;
-internal static readonly @string testSemisˢ = "TestSemis"u8;
+internal static ref readonly @string commentˢ => ref commentˢᵇ;
+private static readonly @string commentˢᵇ = "COMMENT "u8;
+internal static ref readonly @string commentˢ2 => ref commentˢ2ᵇ;
+private static readonly @string commentˢ2ᵇ = " COMMENT"u8;
+internal static ref readonly @string commentˢ3 => ref commentˢ3ᵇ;
+private static readonly @string commentˢ3ᵇ = "COMMENT"u8;
+internal static ref readonly @string testSemisˢ => ref testSemisˢᵇ;
+private static readonly @string testSemisˢᵇ = "TestSemis"u8;
 
-internal static void checkSemi(ж<testing.T> Ꮡt, @string input, @string want, global::go.go.scanner_package.Mode mode) {
+internal static void checkSemi(ж<testing.T> t, @string input, @string want, global::go.go.scanner_package.Mode mode) {
     var tokensᴷ = new stackAppend<@string>();
 
     if ((global::go.go.scanner_package.Mode)(mode & ScanComments) == 0) {
@@ -364,10 +372,10 @@ internal static void checkSemi(ж<testing.T> Ꮡt, @string input, @string want, 
     }
 
     var @file = fset.AddFile(testSemisˢ, fset.Base(), len(input));
-    global::go.go.scanner_package.Scanner scan = default!;
-    scan.Init(@file, slice<byte>(input), default!, mode);
-    slice<@string> tokens = default!;
-    while (ᐧ) {
+    global::go.go.scanner_package.Scanner scan = default;
+    scan.Init(@file, slice<byte>(input), default, mode);
+    slice<@string> tokens = default;
+    for (;;) {
         var (pos, tok, lit) = scan.Scan();
         if (tok == token.EOF) {
             break;
@@ -376,16 +384,16 @@ internal static void checkSemi(ж<testing.T> Ꮡt, @string input, @string want, 
             // Artificial semicolon:
             // assert that position is EOF or that of a newline.
             nint off = @file.Offset(pos);
-            if (off != len(input) && input[off] != (rune)'\n') {
-                Ꮡt.Errorf("scanning <<%s>>, got SEMICOLON at offset %d, want newline or EOF"u8, input, off);
+            if (off != len(input) && input[off] != '\n') {
+                t.Errorf("scanning <<%s>>, got SEMICOLON at offset %d, want newline or EOF", input, off);
             }
         }
         lit = tok.String(); // "\n" => ";"
         tokens = append(tokensᴷ, tokens, lit);
     }
     {
-        @string got = strings.Join(tokens, " "u8); if (got != want) {
-            Ꮡt.Errorf("scanning <<%s>>, got [%s], want [%s]"u8, input, got, want);
+        @string got = strings.Join(tokens, " "); if (got != want) {
+            t.Errorf("scanning <<%s>>, got [%s], want [%s]", input, got, want);
         }
     }
 }
@@ -394,226 +402,228 @@ partial struct semicolonTestsᴛ1 /*dyn*/ {
     internal @string input, want;
 }
 internal static array<semicolonTestsᴛ1> semicolonTests = new semicolonTestsᴛ1[]{
-    new(""u8, ""u8),
-    new("\ufeff;"u8, ";"u8), // first BOM is ignored
-    new(";"u8, ";"u8),
-    new("foo\n"u8, "IDENT ;"u8),
-    new("123\n"u8, "INT ;"u8),
-    new("1.2\n"u8, "FLOAT ;"u8),
-    new("'x'\n"u8, "CHAR ;"u8),
-    new(@"""x"""u8 + "\n"u8, "STRING ;"u8),
-    new("`x`\n"u8, "STRING ;"u8),
+    new("", ""),
+    new("\ufeff;", ";"), // first BOM is ignored
+    new(";", ";"),
+    new("foo\n", "IDENT ;"),
+    new("123\n", "INT ;"),
+    new("1.2\n", "FLOAT ;"),
+    new("'x'\n", "CHAR ;"),
+    new(@"""x"""u8 + "\n"u8, "STRING ;"),
+    new("`x`\n", "STRING ;"),
 
-    new("+\n"u8, "+"u8),
-    new("-\n"u8, "-"u8),
-    new("*\n"u8, "*"u8),
-    new("/\n"u8, "/"u8),
-    new("%\n"u8, "%"u8),
+    new("+\n", "+"),
+    new("-\n", "-"),
+    new("*\n", "*"),
+    new("/\n", "/"),
+    new("%\n", "%"),
 
-    new("&\n"u8, "&"u8),
-    new("|\n"u8, "|"u8),
-    new("^\n"u8, "^"u8),
-    new("<<\n"u8, "<<"u8),
-    new(">>\n"u8, ">>"u8),
-    new("&^\n"u8, "&^"u8),
+    new("&\n", "&"),
+    new("|\n", "|"),
+    new("^\n", "^"),
+    new("<<\n", "<<"),
+    new(">>\n", ">>"),
+    new("&^\n", "&^"),
 
-    new("+=\n"u8, "+="u8),
-    new("-=\n"u8, "-="u8),
-    new("*=\n"u8, "*="u8),
-    new("/=\n"u8, "/="u8),
-    new("%=\n"u8, "%="u8),
+    new("+=\n", "+="),
+    new("-=\n", "-="),
+    new("*=\n", "*="),
+    new("/=\n", "/="),
+    new("%=\n", "%="),
 
-    new("&=\n"u8, "&="u8),
-    new("|=\n"u8, "|="u8),
-    new("^=\n"u8, "^="u8),
-    new("<<=\n"u8, "<<="u8),
-    new(">>=\n"u8, ">>="u8),
-    new("&^=\n"u8, "&^="u8),
+    new("&=\n", "&="),
+    new("|=\n", "|="),
+    new("^=\n", "^="),
+    new("<<=\n", "<<="),
+    new(">>=\n", ">>="),
+    new("&^=\n", "&^="),
 
-    new("&&\n"u8, "&&"u8),
-    new("||\n"u8, "||"u8),
-    new("<-\n"u8, "<-"u8),
-    new("++\n"u8, "++ ;"u8),
-    new("--\n"u8, "-- ;"u8),
+    new("&&\n", "&&"),
+    new("||\n", "||"),
+    new("<-\n", "<-"),
+    new("++\n", "++ ;"),
+    new("--\n", "-- ;"),
 
-    new("==\n"u8, "=="u8),
-    new("<\n"u8, "<"u8),
-    new(">\n"u8, ">"u8),
-    new("=\n"u8, "="u8),
-    new("!\n"u8, "!"u8),
+    new("==\n", "=="),
+    new("<\n", "<"),
+    new(">\n", ">"),
+    new("=\n", "="),
+    new("!\n", "!"),
 
-    new("!=\n"u8, "!="u8),
-    new("<=\n"u8, "<="u8),
-    new(">=\n"u8, ">="u8),
-    new(":=\n"u8, ":="u8),
-    new("...\n"u8, "..."u8),
+    new("!=\n", "!="),
+    new("<=\n", "<="),
+    new(">=\n", ">="),
+    new(":=\n", ":="),
+    new("...\n", "..."),
 
-    new("(\n"u8, "("u8),
-    new("[\n"u8, "["u8),
-    new("{\n"u8, "{"u8),
-    new(",\n"u8, ","u8),
-    new(".\n"u8, "."u8),
+    new("(\n", "("),
+    new("[\n", "["),
+    new("{\n", "{"),
+    new(",\n", ","),
+    new(".\n", "."),
 
-    new(")\n"u8, ") ;"u8),
-    new("]\n"u8, "] ;"u8),
-    new("}\n"u8, "} ;"u8),
-    new(";\n"u8, ";"u8),
-    new(":\n"u8, ":"u8),
+    new(")\n", ") ;"),
+    new("]\n", "] ;"),
+    new("}\n", "} ;"),
+    new(";\n", ";"),
+    new(":\n", ":"),
 
-    new("break\n"u8, "break ;"u8),
-    new("case\n"u8, "case"u8),
-    new("chan\n"u8, "chan"u8),
-    new("const\n"u8, "const"u8),
-    new("continue\n"u8, "continue ;"u8),
+    new("break\n", "break ;"),
+    new("case\n", "case"),
+    new("chan\n", "chan"),
+    new("const\n", "const"),
+    new("continue\n", "continue ;"),
 
-    new("default\n"u8, "default"u8),
-    new("defer\n"u8, "defer"u8),
-    new("else\n"u8, "else"u8),
-    new("fallthrough\n"u8, "fallthrough ;"u8),
-    new("for\n"u8, "for"u8),
+    new("default\n", "default"),
+    new("defer\n", "defer"),
+    new("else\n", "else"),
+    new("fallthrough\n", "fallthrough ;"),
+    new("for\n", "for"),
 
-    new("func\n"u8, "func"u8),
-    new("go\n"u8, "go"u8),
-    new("goto\n"u8, "goto"u8),
-    new("if\n"u8, "if"u8),
-    new("import\n"u8, "import"u8),
+    new("func\n", "func"),
+    new("go\n", "go"),
+    new("goto\n", "goto"),
+    new("if\n", "if"),
+    new("import\n", "import"),
 
-    new("interface\n"u8, "interface"u8),
-    new("map\n"u8, "map"u8),
-    new("package\n"u8, "package"u8),
-    new("range\n"u8, "range"u8),
-    new("return\n"u8, "return ;"u8),
+    new("interface\n", "interface"),
+    new("map\n", "map"),
+    new("package\n", "package"),
+    new("range\n", "range"),
+    new("return\n", "return ;"),
 
-    new("select\n"u8, "select"u8),
-    new("struct\n"u8, "struct"u8),
-    new("switch\n"u8, "switch"u8),
-    new("type\n"u8, "type"u8),
-    new("var\n"u8, "var"u8),
+    new("select\n", "select"),
+    new("struct\n", "struct"),
+    new("switch\n", "switch"),
+    new("type\n", "type"),
+    new("var\n", "var"),
 
-    new("foo//comment\n"u8, "IDENT COMMENT ;"u8),
-    new("foo//comment"u8, "IDENT COMMENT ;"u8),
-    new("foo/*comment*/\n"u8, "IDENT COMMENT ;"u8),
-    new("foo/*\n*/"u8, "IDENT COMMENT ;"u8),
-    new("foo/*comment*/    \n"u8, "IDENT COMMENT ;"u8),
-    new("foo/*\n*/    "u8, "IDENT COMMENT ;"u8),
+    new("foo//comment\n", "IDENT COMMENT ;"),
+    new("foo//comment", "IDENT COMMENT ;"),
+    new("foo/*comment*/\n", "IDENT COMMENT ;"),
+    new("foo/*\n*/", "IDENT COMMENT ;"),
+    new("foo/*comment*/    \n", "IDENT COMMENT ;"),
+    new("foo/*\n*/    ", "IDENT COMMENT ;"),
 
-    new("foo    // comment\n"u8, "IDENT COMMENT ;"u8),
-    new("foo    // comment"u8, "IDENT COMMENT ;"u8),
-    new("foo    /*comment*/\n"u8, "IDENT COMMENT ;"u8),
-    new("foo    /*\n*/"u8, "IDENT COMMENT ;"u8),
-    new("foo    /*  */ /* \n */ bar/**/\n"u8, "IDENT COMMENT COMMENT ; IDENT COMMENT ;"u8),
-    new("foo    /*0*/ /*1*/ /*2*/\n"u8, "IDENT COMMENT COMMENT COMMENT ;"u8),
+    new("foo    // comment\n", "IDENT COMMENT ;"),
+    new("foo    // comment", "IDENT COMMENT ;"),
+    new("foo    /*comment*/\n", "IDENT COMMENT ;"),
+    new("foo    /*\n*/", "IDENT COMMENT ;"),
+    new("foo    /*  */ /* \n */ bar/**/\n", "IDENT COMMENT COMMENT ; IDENT COMMENT ;"),
+    new("foo    /*0*/ /*1*/ /*2*/\n", "IDENT COMMENT COMMENT COMMENT ;"),
 
-    new("foo    /*comment*/    \n"u8, "IDENT COMMENT ;"u8),
-    new("foo    /*0*/ /*1*/ /*2*/    \n"u8, "IDENT COMMENT COMMENT COMMENT ;"u8),
-    new("foo	/**/ /*-------------*/       /*----\n*/bar       /*  \n*/baa\n"u8, "IDENT COMMENT COMMENT COMMENT ; IDENT COMMENT ; IDENT ;"u8),
-    new("foo    /* an EOF terminates a line */"u8, "IDENT COMMENT ;"u8),
-    new("foo    /* an EOF terminates a line */ /*"u8, "IDENT COMMENT COMMENT ;"u8),
-    new("foo    /* an EOF terminates a line */ //"u8, "IDENT COMMENT COMMENT ;"u8),
+    new("foo    /*comment*/    \n", "IDENT COMMENT ;"),
+    new("foo    /*0*/ /*1*/ /*2*/    \n", "IDENT COMMENT COMMENT COMMENT ;"),
+    new("foo	/**/ /*-------------*/       /*----\n*/bar       /*  \n*/baa\n", "IDENT COMMENT COMMENT COMMENT ; IDENT COMMENT ; IDENT ;"),
+    new("foo    /* an EOF terminates a line */", "IDENT COMMENT ;"),
+    new("foo    /* an EOF terminates a line */ /*", "IDENT COMMENT COMMENT ;"),
+    new("foo    /* an EOF terminates a line */ //", "IDENT COMMENT COMMENT ;"),
 
-    new("package main\n\nfunc main() {\n\tif {\n\t\treturn /* */ }\n}\n"u8, "package IDENT ; func IDENT ( ) { if { return COMMENT } ; } ;"u8),
-    new("package main"u8, "package IDENT ;"u8)
+    new("package main\n\nfunc main() {\n\tif {\n\t\treturn /* */ }\n}\n", "package IDENT ; func IDENT ( ) { if { return COMMENT } ; } ;"),
+    new("package main", "package IDENT ;")
 }.array();
 
-public static void TestSemicolons(ж<testing.T> Ꮡt) {
+public static void TestSemicolons(ж<testing.T> t) {
     foreach (var (_, test) in semicolonTests.ΔRangeSnapshot()) {
         @string input = test.input;
         @string want = test.want;
-        checkSemi(Ꮡt, input, want, 0);
-        checkSemi(Ꮡt, input, want, ScanComments);
+        checkSemi(t, input, want, 0);
+        checkSemi(t, input, want, ScanComments);
 
         // if the input ended in newlines, the input must tokenize the
         // same with or without those newlines
-        for (nint i = len(input) - 1; i >= 0 && input[i] == (rune)'\n'; i--) {
-            checkSemi(Ꮡt, input.slice(0, i), want, 0);
-            checkSemi(Ꮡt, input.slice(0, i), want, ScanComments);
+        for (nint i = len(input) - 1; i >= 0 && input[i] == '\n'; i--) {
+            checkSemi(t, input.slice(0, i), want, 0);
+            checkSemi(t, input.slice(0, i), want, ScanComments);
         }
     }
 }
 
 internal partial struct segment {
-    internal @string srcline; // a line of source text
-    internal @string filename; // filename for current token; error message for invalid line directives
-    internal nint line, column;   // line and column for current token; error position for invalid line directives
+    internal @string srcline;   // a line of source text
+    internal @string filename;  // filename for current token; error message for invalid line directives
+    internal nint line, column; // line and column for current token; error position for invalid line directives
 }
 
-internal static slice<segment> segments = new segment[]{
+internal static slice<segment> segments = slice<segment>([
     // exactly one token per line since the test consumes one token per segment
-    new("  line1"u8, "TestLineDirectives"u8, 1, 3),
-    new("\nline2"u8, "TestLineDirectives"u8, 2, 1),
-    new("\nline3  //line File1.go:100"u8, "TestLineDirectives"u8, 3, 1), // bad line comment, ignored
-    new("\nline4"u8, "TestLineDirectives"u8, 4, 1),
-    new("\n//line File1.go:100\n  line100"u8, "File1.go"u8, 100, 0),
-    new("\n//line  \t :42\n  line1"u8, " \t "u8, 42, 0),
-    new("\n//line File2.go:200\n  line200"u8, "File2.go"u8, 200, 0),
-    new("\n//line foo\t:42\n  line42"u8, "foo\t"u8, 42, 0),
-    new("\n //line foo:42\n  line43"u8, "foo\t"u8, 44, 0), // bad line comment, ignored (use existing, prior filename)
-    new("\n//line foo 42\n  line44"u8, "foo\t"u8, 46, 0), // bad line comment, ignored (use existing, prior filename)
-    new("\n//line /bar:42\n  line45"u8, "/bar"u8, 42, 0),
-    new("\n//line ./foo:42\n  line46"u8, "foo"u8, 42, 0),
-    new("\n//line a/b/c/File1.go:100\n  line100"u8, "a/b/c/File1.go"u8, 100, 0),
-    new("\n//line c:\\bar:42\n  line200"u8, "c:\\bar"u8, 42, 0),
-    new("\n//line c:\\dir\\File1.go:100\n  line201"u8, "c:\\dir\\File1.go"u8, 100, 0),
+    new("  line1", "TestLineDirectives", 1, 3),
+    new("\nline2", "TestLineDirectives", 2, 1),
+    new("\nline3  //line File1.go:100", "TestLineDirectives", 3, 1), // bad line comment, ignored
+    new("\nline4", "TestLineDirectives", 4, 1),
+    new("\n//line File1.go:100\n  line100", "File1.go", 100, 0),
+    new("\n//line  \t :42\n  line1", " \t ", 42, 0),
+    new("\n//line File2.go:200\n  line200", "File2.go", 200, 0),
+    new("\n//line foo\t:42\n  line42", "foo\t", 42, 0),
+    new("\n //line foo:42\n  line43", "foo\t", 44, 0), // bad line comment, ignored (use existing, prior filename)
+    new("\n//line foo 42\n  line44", "foo\t", 46, 0),  // bad line comment, ignored (use existing, prior filename)
+    new("\n//line /bar:42\n  line45", "/bar", 42, 0),
+    new("\n//line ./foo:42\n  line46", "foo", 42, 0),
+    new("\n//line a/b/c/File1.go:100\n  line100", "a/b/c/File1.go", 100, 0),
+    new("\n//line c:\\bar:42\n  line200", "c:\\bar", 42, 0),
+    new("\n//line c:\\dir\\File1.go:100\n  line201", "c:\\dir\\File1.go", 100, 0),
 
     // tests for new line directive syntax
-    new("\n//line :100\na1"u8, ""u8, 100, 0), // missing filename means empty filename
-    new("\n//line bar:100\nb1"u8, "bar"u8, 100, 0),
-    new("\n//line :100:10\nc1"u8, "bar"u8, 100, 10), // missing filename means current filename
-    new("\n//line foo:100:10\nd1"u8, "foo"u8, 100, 10),
+    new("\n//line :100\na1", "", 100, 0), // missing filename means empty filename
+    new("\n//line bar:100\nb1", "bar", 100, 0),
+    new("\n//line :100:10\nc1", "bar", 100, 10), // missing filename means current filename
+    new("\n//line foo:100:10\nd1", "foo", 100, 10),
 
-    new("\n/*line :100*/a2"u8, ""u8, 100, 0), // missing filename means empty filename
-    new("\n/*line bar:100*/b2"u8, "bar"u8, 100, 0),
-    new("\n/*line :100:10*/c2"u8, "bar"u8, 100, 10), // missing filename means current filename
-    new("\n/*line foo:100:10*/d2"u8, "foo"u8, 100, 10),
-    new("\n/*line foo:100:10*/    e2"u8, "foo"u8, 100, 14), // line-directive relative column
-    new("\n/*line foo:100:10*/\n\nf2"u8, "foo"u8, 102, 1) // absolute column since on new line
-}.slice();
+    new("\n/*line :100*/a2", "", 100, 0), // missing filename means empty filename
+    new("\n/*line bar:100*/b2", "bar", 100, 0),
+    new("\n/*line :100:10*/c2", "bar", 100, 10), // missing filename means current filename
+    new("\n/*line foo:100:10*/d2", "foo", 100, 10),
+    new("\n/*line foo:100:10*/    e2", "foo", 100, 14), // line-directive relative column
+    new("\n/*line foo:100:10*/\n\nf2", "foo", 102, 1)   // absolute column since on new line
+]);
 
-internal static slice<segment> dirsegments = new segment[]{
+internal static slice<segment> dirsegments = slice<segment>([
     // exactly one token per line since the test consumes one token per segment
-    new("  line1"u8, "TestLineDir/TestLineDirectives"u8, 1, 3),
-    new("\n//line File1.go:100\n  line100"u8, "TestLineDir/File1.go"u8, 100, 0)
-}.slice();
+    new("  line1", "TestLineDir/TestLineDirectives", 1, 3),
+    new("\n//line File1.go:100\n  line100", "TestLineDir/File1.go", 100, 0)
+]);
 
-internal static slice<segment> dirUnixSegments = new segment[]{
-    new("\n//line /bar:42\n  line42"u8, "/bar"u8, 42, 0)
-}.slice();
+internal static slice<segment> dirUnixSegments = slice<segment>([
+    new("\n//line /bar:42\n  line42", "/bar", 42, 0)
+]);
 
-internal static slice<segment> dirWindowsSegments = new segment[]{
-    new("\n//line c:\\bar:42\n  line42"u8, "c:\\bar"u8, 42, 0)
-}.slice();
+internal static slice<segment> dirWindowsSegments = slice<segment>([
+    new("\n//line c:\\bar:42\n  line42", "c:\\bar", 42, 0)
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testLineDirectivesˢ = "TestLineDirectives"u8;
-internal static readonly @string testLineDirˢ = "TestLineDir/TestLineDirectives"u8;
+internal static ref readonly @string testLineDirectivesˢ => ref testLineDirectivesˢᵇ;
+private static readonly @string testLineDirectivesˢᵇ = "TestLineDirectives"u8;
+internal static ref readonly @string testLineDirˢ => ref testLineDirˢᵇ;
+private static readonly @string testLineDirˢᵇ = "TestLineDir/TestLineDirectives"u8;
 
 // Verify that line directives are interpreted correctly.
-public static void TestLineDirectives(ж<testing.T> Ꮡt) {
-    testSegments(Ꮡt, segments, testLineDirectivesˢ);
-    testSegments(Ꮡt, dirsegments, testLineDirˢ);
-    if (runtime.GOOS == "windows"u8){
-        testSegments(Ꮡt, dirWindowsSegments, testLineDirˢ);
+public static void TestLineDirectives(ж<testing.T> t) {
+    testSegments(t, segments, testLineDirectivesˢ);
+    testSegments(t, dirsegments, testLineDirˢ);
+    if (runtime.GOOS == "windows"u8) {
+        testSegments(t, dirWindowsSegments, testLineDirˢ);
     } else {
-        testSegments(Ꮡt, dirUnixSegments, testLineDirˢ);
+        testSegments(t, dirUnixSegments, testLineDirˢ);
     }
 }
 
-internal static void testSegments(ж<testing.T> Ꮡt, slice<segment> segments, @string filename) {
-    @string src = default!;
+internal static void testSegments(ж<testing.T> t, slice<segment> segments, @string filename) {
+    @string src = default;
     foreach (var (_, e) in segments) {
         src += e.srcline;
     }
 
     // verify scan
-    global::go.go.scanner_package.Scanner S = default!;
+    global::go.go.scanner_package.Scanner S = default;
     var @file = fset.AddFile(filename, fset.Base(), len(src));
     S.Init(@file, slice<byte>(src), (tokenꓸPosition pos, @string msg) => {
-        Ꮡt.Error(new ΔError(pos, msg));
+        t.Error(new ΔError(pos, msg));
     }, dontInsertSemis);
     foreach (var (_, s) in segments) {
         var (p, _, lit) = S.Scan();
         var pos = @file.Position(p);
-        checkPos(Ꮡt, lit, p, new tokenꓸPosition(
+        checkPos(t, lit, p, new tokenꓸPosition(
             Filename: s.filename,
             Offset: pos.Offset,
             Line: s.line,
@@ -622,41 +632,42 @@ internal static void testSegments(ж<testing.T> Ꮡt, slice<segment> segments, @
     }
 
     if (S.ErrorCount != 0) {
-        Ꮡt.Errorf("got %d errors"u8, S.ErrorCount);
+        t.Errorf("got %d errors", S.ErrorCount);
     }
 }
 
 // The filename is used for the error message in these test cases.
 // The first line directive is valid and used to control the expected error line.
-internal static slice<segment> invalidSegments = new segment[]{
-    new("\n//line :1:1\n//line foo:42 extra text\ndummy"u8, "invalid line number: 42 extra text"u8, 1, 12),
-    new("\n//line :2:1\n//line foobar:\ndummy"u8, "invalid line number: "u8, 2, 15),
-    new("\n//line :5:1\n//line :0\ndummy"u8, "invalid line number: 0"u8, 5, 9),
-    new("\n//line :10:1\n//line :1:0\ndummy"u8, "invalid column number: 0"u8, 10, 11),
-    new("\n//line :1:1\n//line :foo:0\ndummy"u8, "invalid line number: 0"u8, 1, 13) // foo is considered part of the filename
-}.slice();
+internal static slice<segment> invalidSegments = slice<segment>([
+    new("\n//line :1:1\n//line foo:42 extra text\ndummy", "invalid line number: 42 extra text", 1, 12),
+    new("\n//line :2:1\n//line foobar:\ndummy", "invalid line number: ", 2, 15),
+    new("\n//line :5:1\n//line :0\ndummy", "invalid line number: 0", 5, 9),
+    new("\n//line :10:1\n//line :1:0\ndummy", "invalid column number: 0", 10, 11),
+    new("\n//line :1:1\n//line :foo:0\ndummy", "invalid line number: 0", 1, 13) // foo is considered part of the filename
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dirˢ = "dir"u8;
+internal static ref readonly @string dirˢ => ref dirˢᵇ;
+private static readonly @string dirˢᵇ = "dir"u8;
 
 // Verify that invalid line directives get the correct error message.
-public static void TestInvalidLineDirectives(ж<testing.T> Ꮡt) {
+public static void TestInvalidLineDirectives(ж<testing.T> t) {
     // make source
-    @string src = default!;
+    @string src = default;
     foreach (var (_, e) in invalidSegments) {
         src += e.srcline;
     }
 
     // verify scan
-    global::go.go.scanner_package.Scanner S = default!;
-    ref var s = ref heap(new segment(), out var Ꮡs);               // current segment
+    global::go.go.scanner_package.Scanner S = default;
+    ref var s = ref heap(new segment(), out var Ꮡs); // current segment
     var @file = fset.AddFile(filepath.Join(dirˢ, "TestInvalidLineDirectives"), fset.Base(), len(src));
     S.Init(@file, slice<byte>(src), (tokenꓸPosition pos, @string msg) => {
         if (msg != Ꮡs.Value.filename) {
-            Ꮡt.Errorf("got error %q; want %q"u8, msg, Ꮡs.Value.filename);
+            t.Errorf("got error %q; want %q", msg, Ꮡs.Value.filename);
         }
         if (pos.Line != Ꮡs.Value.line || pos.Column != Ꮡs.Value.column) {
-            Ꮡt.Errorf("got position %d:%d; want %d:%d"u8, pos.Line, pos.Column, Ꮡs.Value.line, Ꮡs.Value.column);
+            t.Errorf("got position %d:%d; want %d:%d", pos.Line, pos.Column, Ꮡs.Value.line, Ꮡs.Value.column);
         }
     }, dontInsertSemis);
     foreach (var (_, vᴛ1) in invalidSegments) {
@@ -666,58 +677,64 @@ public static void TestInvalidLineDirectives(ж<testing.T> Ꮡt) {
     }
 
     if (S.ErrorCount != len(invalidSegments)) {
-        Ꮡt.Errorf("got %d errors; want %d"u8, S.ErrorCount, len(invalidSegments));
+        t.Errorf("got %d errors; want %d", S.ErrorCount, len(invalidSegments));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ifTrueˢ = "if true { }"u8;
-internal static readonly @string src1ˢ = "src1"u8;
-internal static readonly @string goTrueˢ = "go true { ]"u8;
-internal static readonly @string src2ˢ = "src2"u8;
+internal static ref readonly @string ifTrueˢ => ref ifTrueˢᵇ;
+private static readonly @string ifTrueˢᵇ = "if true { }"u8;
+internal static ref readonly @string src1ˢ => ref src1ˢᵇ;
+private static readonly @string src1ˢᵇ = "src1"u8;
+internal static ref readonly @string goTrueˢ => ref goTrueˢᵇ;
+private static readonly @string goTrueˢᵇ = "go true { ]"u8;
+internal static ref readonly @string src2ˢ => ref src2ˢᵇ;
+private static readonly @string src2ˢᵇ = "src2"u8;
 
 // Verify that initializing the same scanner more than once works correctly.
-public static void TestInit(ж<testing.T> Ꮡt) {
-    global::go.go.scanner_package.Scanner s = default!;
+public static void TestInit(ж<testing.T> t) {
+    global::go.go.scanner_package.Scanner s = default;
 
     // 1st init
     @string src1 = ifTrueˢ;
     var f1 = fset.AddFile(src1ˢ, fset.Base(), len(src1));
-    s.Init(f1, slice<byte>(src1), default!, dontInsertSemis);
+    s.Init(f1, slice<byte>(src1), default, dontInsertSemis);
     if (f1.Size() != len(src1)) {
-        Ꮡt.Errorf("bad file size: got %d, expected %d"u8, f1.Size(), len(src1));
+        t.Errorf("bad file size: got %d, expected %d", f1.Size(), len(src1));
     }
-    s.Scan(); // if
-    s.Scan(); // true
+    s.Scan();                   // if
+    s.Scan();                   // true
     var (_, tok, _) = s.Scan(); // {
     if (tok != token.LBRACE) {
-        Ꮡt.Errorf("bad token: got %s, expected %s"u8, tok, token.LBRACE);
+        t.Errorf("bad token: got %s, expected %s", tok, token.LBRACE);
     }
 
     // 2nd init
     @string src2 = goTrueˢ;
     var f2 = fset.AddFile(src2ˢ, fset.Base(), len(src2));
-    s.Init(f2, slice<byte>(src2), default!, dontInsertSemis);
+    s.Init(f2, slice<byte>(src2), default, dontInsertSemis);
     if (f2.Size() != len(src2)) {
-        Ꮡt.Errorf("bad file size: got %d, expected %d"u8, f2.Size(), len(src2));
+        t.Errorf("bad file size: got %d, expected %d", f2.Size(), len(src2));
     }
     (_, tok, _) = s.Scan(); // go
     if (tok != token.GO) {
-        Ꮡt.Errorf("bad token: got %s, expected %s"u8, tok, token.GO);
+        t.Errorf("bad token: got %s, expected %s", tok, token.GO);
     }
 
     if (s.ErrorCount != 0) {
-        Ꮡt.Errorf("found %d errors"u8, s.ErrorCount);
+        t.Errorf("found %d errors", s.ErrorCount);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string file1ˢ = "File1"u8;
+internal static ref readonly @string file1ˢ => ref file1ˢᵇ;
+private static readonly @string file1ˢᵇ = "File1"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ = "@\n@ @\n//line File2:20\n@\n//line File2:1\n@ @\n//line File1:1\n@ @ @";
+internal static ref readonly @string srcᶜ => ref srcᶜᵇ;
+private static readonly @string srcᶜᵇ = "@\n@ @\n//line File2:20\n@\n//line File2:1\n@ @\n//line File1:1\n@ @ @";
 
-public static void TestStdErrorHandler(ж<testing.T> Ꮡt) {
+public static void TestStdErrorHandler(ж<testing.T> t) {
 // illegal character, cause an error
 // two errors on the same line
 // different file, but same line
@@ -729,9 +746,9 @@ public static void TestStdErrorHandler(ж<testing.T> Ꮡt) {
         Ꮡlist.ValueSlot.Add(pos, msg);
     };
 
-    global::go.go.scanner_package.Scanner s = default!;
+    global::go.go.scanner_package.Scanner s = default;
     s.Init(fset.AddFile(file1ˢ, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), dontInsertSemis);
-    while (ᐧ) {
+    for (;;) {
         {
             var (_, tok, _) = s.Scan(); if (tok == token.EOF) {
                 break;
@@ -740,23 +757,23 @@ public static void TestStdErrorHandler(ж<testing.T> Ꮡt) {
     }
 
     if (len(list) != s.ErrorCount) {
-        Ꮡt.Errorf("found %d errors, expected %d"u8, len(list), s.ErrorCount);
+        t.Errorf("found %d errors, expected %d", len(list), s.ErrorCount);
     }
 
     if (len(list) != 9) {
-        Ꮡt.Errorf("found %d raw errors, expected 9"u8, len(list));
+        t.Errorf("found %d raw errors, expected 9", len(list));
         PrintError(new os.FileжWriter(os.Stderr), list);
     }
 
     list.Sort();
     if (len(list) != 9) {
-        Ꮡt.Errorf("found %d sorted errors, expected 9"u8, len(list));
+        t.Errorf("found %d sorted errors, expected 9", len(list));
         PrintError(new os.FileжWriter(os.Stderr), list);
     }
 
     Ꮡlist.RemoveMultiples();
     if (len(list) != 4) {
-        Ꮡt.Errorf("found %d one-per-line errors, expected 4"u8, len(list));
+        t.Errorf("found %d one-per-line errors, expected 4", len(list));
         PrintError(new os.FileжWriter(os.Stderr), list);
     }
 }
@@ -767,8 +784,8 @@ internal partial struct errorCollector {
     internal tokenꓸPosition pos; // last error position encountered
 }
 
-internal static void checkError(ж<testing.T> Ꮡt, @string src, token.Token tok, nint pos, @string lit, @string err) {
-    global::go.go.scanner_package.Scanner s = default!;
+internal static void checkError(ж<testing.T> t, @string src, token.Token tok, nint pos, @string lit, @string err) {
+    global::go.go.scanner_package.Scanner s = default;
     ref var h = ref heap(new errorCollector(), out var Ꮡh);
     var eh = (tokenꓸPosition posΔ1, @string msg) => {
         Ꮡh.Value.cnt++;
@@ -778,23 +795,23 @@ internal static void checkError(ж<testing.T> Ꮡt, @string src, token.Token tok
     s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), (global::go.go.scanner_package.Mode)(ScanComments | dontInsertSemis));
     var (_, tok0, lit0) = s.Scan();
     if (tok0 != tok) {
-        Ꮡt.Errorf("%q: got %s, expected %s"u8, src, tok0, tok);
+        t.Errorf("%q: got %s, expected %s", src, tok0, tok);
     }
     if (tok0 != token.ILLEGAL && lit0 != lit) {
-        Ꮡt.Errorf("%q: got literal %q, expected %q"u8, src, lit0, lit);
+        t.Errorf("%q: got literal %q, expected %q", src, lit0, lit);
     }
     nint cnt = 0;
     if (err != ""u8) {
         cnt = 1;
     }
     if (h.cnt != cnt) {
-        Ꮡt.Errorf("%q: got cnt %d, expected %d"u8, src, h.cnt, cnt);
+        t.Errorf("%q: got cnt %d, expected %d", src, h.cnt, cnt);
     }
     if (h.msg != err) {
-        Ꮡt.Errorf("%q: got msg %q, expected %q"u8, src, h.msg, err);
+        t.Errorf("%q: got msg %q, expected %q", src, h.msg, err);
     }
     if (h.pos.Offset != pos) {
-        Ꮡt.Errorf("%q: got offset %d, expected %d"u8, src, h.pos.Offset, pos);
+        t.Errorf("%q: got offset %d, expected %d", src, h.pos.Offset, pos);
     }
 }
 
@@ -805,105 +822,106 @@ partial struct errorsᴛ1 /*dyn*/ {
     internal @string lit;
     internal @string err;
 }
-internal static slice<errorsᴛ1> errors = new errorsᴛ1[]{
-    new("\a"u8, token.ILLEGAL, 0, ""u8, "illegal character U+0007"u8),
-    new(@"#"u8, token.ILLEGAL, 0, ""u8, "illegal character U+0023 '#'"u8),
-    new(@"…"u8, token.ILLEGAL, 0, ""u8, "illegal character U+2026 '…'"u8),
-    new(".."u8, token.PERIOD, 0, ""u8, ""u8), // two periods, not invalid token (issue #28112)
-    new(@"' '"u8, token.CHAR, 0, @"' '"u8, ""u8),
-    new(@"''"u8, token.CHAR, 0, @"''"u8, "illegal rune literal"u8),
-    new(@"'12'"u8, token.CHAR, 0, @"'12'"u8, "illegal rune literal"u8),
-    new(@"'123'"u8, token.CHAR, 0, @"'123'"u8, "illegal rune literal"u8),
-    new(@"'\0'"u8, token.CHAR, 3, @"'\0'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\07'"u8, token.CHAR, 4, @"'\07'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\8'"u8, token.CHAR, 2, @"'\8'"u8, "unknown escape sequence"u8),
-    new(@"'\08'"u8, token.CHAR, 3, @"'\08'"u8, "illegal character U+0038 '8' in escape sequence"u8),
-    new(@"'\x'"u8, token.CHAR, 3, @"'\x'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\x0'"u8, token.CHAR, 4, @"'\x0'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\x0g'"u8, token.CHAR, 4, @"'\x0g'"u8, "illegal character U+0067 'g' in escape sequence"u8),
-    new(@"'\u'"u8, token.CHAR, 3, @"'\u'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\u0'"u8, token.CHAR, 4, @"'\u0'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\u00'"u8, token.CHAR, 5, @"'\u00'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\u000'"u8, token.CHAR, 6, @"'\u000'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\u000"u8, token.CHAR, 6, @"'\u000"u8, "escape sequence not terminated"u8),
-    new(@"'\u0000'"u8, token.CHAR, 0, @"'\u0000'"u8, ""u8),
-    new(@"'\U'"u8, token.CHAR, 3, @"'\U'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\U0'"u8, token.CHAR, 4, @"'\U0'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\U00'"u8, token.CHAR, 5, @"'\U00'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\U000'"u8, token.CHAR, 6, @"'\U000'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\U0000'"u8, token.CHAR, 7, @"'\U0000'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\U00000'"u8, token.CHAR, 8, @"'\U00000'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\U000000'"u8, token.CHAR, 9, @"'\U000000'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\U0000000'"u8, token.CHAR, 10, @"'\U0000000'"u8, "illegal character U+0027 ''' in escape sequence"u8),
-    new(@"'\U0000000"u8, token.CHAR, 10, @"'\U0000000"u8, "escape sequence not terminated"u8),
-    new(@"'\U00000000'"u8, token.CHAR, 0, @"'\U00000000'"u8, ""u8),
-    new(@"'\Uffffffff'"u8, token.CHAR, 2, @"'\Uffffffff'"u8, "escape sequence is invalid Unicode code point"u8),
-    new(@"'"u8, token.CHAR, 0, @"'"u8, "rune literal not terminated"u8),
-    new(@"'\"u8, token.CHAR, 2, @"'\"u8, "escape sequence not terminated"u8),
-    new("'\n"u8, token.CHAR, 0, "'"u8, "rune literal not terminated"u8),
-    new("'\n   "u8, token.CHAR, 0, "'"u8, "rune literal not terminated"u8),
-    new(@""""""u8, token.STRING, 0, @""""""u8, ""u8),
-    new(@"""abc"u8, token.STRING, 0, @"""abc"u8, "string literal not terminated"u8),
-    new("\"abc\n"u8, token.STRING, 0, @"""abc"u8, "string literal not terminated"u8),
-    new("\"abc\n   "u8, token.STRING, 0, @"""abc"u8, "string literal not terminated"u8),
-    new("``"u8, token.STRING, 0, "``"u8, ""u8),
-    new("`"u8, token.STRING, 0, "`"u8, "raw string literal not terminated"u8),
-    new("/**/"u8, token.COMMENT, 0, "/**/"u8, ""u8),
-    new("/*"u8, token.COMMENT, 0, "/*"u8, "comment not terminated"u8),
-    new("077"u8, token.INT, 0, "077"u8, ""u8),
-    new("078."u8, token.FLOAT, 0, "078."u8, ""u8),
-    new("07801234567."u8, token.FLOAT, 0, "07801234567."u8, ""u8),
-    new("078e0"u8, token.FLOAT, 0, "078e0"u8, ""u8),
-    new("0E"u8, token.FLOAT, 2, "0E"u8, "exponent has no digits"u8), // issue 17621
-    new("078"u8, token.INT, 2, "078"u8, "invalid digit '8' in octal literal"u8),
-    new("07090000008"u8, token.INT, 3, "07090000008"u8, "invalid digit '9' in octal literal"u8),
-    new("0x"u8, token.INT, 2, "0x"u8, "hexadecimal literal has no digits"u8),
-    new(((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66, 0x22})), token.STRING, 4, ((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66, 0x22})), "illegal character NUL"u8),
-    new(((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x80, 0x64, 0x65, 0x66, 0x22})), token.STRING, 4, ((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x80, 0x64, 0x65, 0x66, 0x22})), "illegal UTF-8 encoding"u8),
-    new("\ufeff\ufeff"u8, token.ILLEGAL, 3, "\ufeff\ufeff"u8, "illegal byte order mark"u8), // only first BOM is ignored
-    new("//\ufeff"u8, token.COMMENT, 2, "//\ufeff"u8, "illegal byte order mark"u8), // only first BOM is ignored
-    new("'\ufeff"u8 + @"'"u8, token.CHAR, 1, "'\ufeff"u8 + @"'"u8, "illegal byte order mark"u8), // only first BOM is ignored
-    new(@""""u8 + "abc\ufeffdef"u8 + @""""u8, token.STRING, 4, @""""u8 + "abc\ufeffdef"u8 + @""""u8, "illegal byte order mark"u8), // only first BOM is ignored
-    new(((@string)(new byte[]{0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66})), token.IDENT, 3, "abc"u8, "illegal character NUL"u8),
-    new("abc\x00"u8, token.IDENT, 3, "abc"u8, "illegal character NUL"u8),
-    new("“abc”"u8, token.ILLEGAL, 0, "abc"u8, @"curly quotation mark '“' (use neutral '""')"u8)
-}.slice();
+internal static slice<errorsᴛ1> errors = slice<errorsᴛ1>([
+    new("\a", token.ILLEGAL, 0, "", "illegal character U+0007"),
+    new(@"#", token.ILLEGAL, 0, "", "illegal character U+0023 '#'"),
+    new(@"…", token.ILLEGAL, 0, "", "illegal character U+2026 '…'"),
+    new("..", token.PERIOD, 0, "", ""), // two periods, not invalid token (issue #28112)
+    new(@"' '", token.CHAR, 0, @"' '", ""),
+    new(@"''", token.CHAR, 0, @"''", "illegal rune literal"),
+    new(@"'12'", token.CHAR, 0, @"'12'", "illegal rune literal"),
+    new(@"'123'", token.CHAR, 0, @"'123'", "illegal rune literal"),
+    new(@"'\0'", token.CHAR, 3, @"'\0'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\07'", token.CHAR, 4, @"'\07'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\8'", token.CHAR, 2, @"'\8'", "unknown escape sequence"),
+    new(@"'\08'", token.CHAR, 3, @"'\08'", "illegal character U+0038 '8' in escape sequence"),
+    new(@"'\x'", token.CHAR, 3, @"'\x'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\x0'", token.CHAR, 4, @"'\x0'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\x0g'", token.CHAR, 4, @"'\x0g'", "illegal character U+0067 'g' in escape sequence"),
+    new(@"'\u'", token.CHAR, 3, @"'\u'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\u0'", token.CHAR, 4, @"'\u0'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\u00'", token.CHAR, 5, @"'\u00'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\u000'", token.CHAR, 6, @"'\u000'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\u000", token.CHAR, 6, @"'\u000", "escape sequence not terminated"),
+    new(@"'\u0000'", token.CHAR, 0, @"'\u0000'", ""),
+    new(@"'\U'", token.CHAR, 3, @"'\U'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\U0'", token.CHAR, 4, @"'\U0'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\U00'", token.CHAR, 5, @"'\U00'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\U000'", token.CHAR, 6, @"'\U000'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\U0000'", token.CHAR, 7, @"'\U0000'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\U00000'", token.CHAR, 8, @"'\U00000'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\U000000'", token.CHAR, 9, @"'\U000000'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\U0000000'", token.CHAR, 10, @"'\U0000000'", "illegal character U+0027 ''' in escape sequence"),
+    new(@"'\U0000000", token.CHAR, 10, @"'\U0000000", "escape sequence not terminated"),
+    new(@"'\U00000000'", token.CHAR, 0, @"'\U00000000'", ""),
+    new(@"'\Uffffffff'", token.CHAR, 2, @"'\Uffffffff'", "escape sequence is invalid Unicode code point"),
+    new(@"'", token.CHAR, 0, @"'", "rune literal not terminated"),
+    new(@"'\", token.CHAR, 2, @"'\", "escape sequence not terminated"),
+    new("'\n", token.CHAR, 0, "'", "rune literal not terminated"),
+    new("'\n   ", token.CHAR, 0, "'", "rune literal not terminated"),
+    new(@"""""", token.STRING, 0, @"""""", ""),
+    new(@"""abc", token.STRING, 0, @"""abc", "string literal not terminated"),
+    new("\"abc\n", token.STRING, 0, @"""abc", "string literal not terminated"),
+    new("\"abc\n   ", token.STRING, 0, @"""abc", "string literal not terminated"),
+    new("``", token.STRING, 0, "``", ""),
+    new("`", token.STRING, 0, "`", "raw string literal not terminated"),
+    new("/**/", token.COMMENT, 0, "/**/", ""),
+    new("/*", token.COMMENT, 0, "/*", "comment not terminated"),
+    new("077", token.INT, 0, "077", ""),
+    new("078.", token.FLOAT, 0, "078.", ""),
+    new("07801234567.", token.FLOAT, 0, "07801234567.", ""),
+    new("078e0", token.FLOAT, 0, "078e0", ""),
+    new("0E", token.FLOAT, 2, "0E", "exponent has no digits"), // issue 17621
+    new("078", token.INT, 2, "078", "invalid digit '8' in octal literal"),
+    new("07090000008", token.INT, 3, "07090000008", "invalid digit '9' in octal literal"),
+    new("0x", token.INT, 2, "0x", "hexadecimal literal has no digits"),
+    new(((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66, 0x22})), token.STRING, 4, ((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66, 0x22})), "illegal character NUL"),
+    new(((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x80, 0x64, 0x65, 0x66, 0x22})), token.STRING, 4, ((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x80, 0x64, 0x65, 0x66, 0x22})), "illegal UTF-8 encoding"),
+    new("\ufeff\ufeff", token.ILLEGAL, 3, "\ufeff\ufeff", "illegal byte order mark"),                                            // only first BOM is ignored
+    new("//\ufeff", token.COMMENT, 2, "//\ufeff", "illegal byte order mark"),                                                    // only first BOM is ignored
+    new("'\ufeff"u8 + @"'"u8, token.CHAR, 1, "'\ufeff"u8 + @"'"u8, "illegal byte order mark"),                                   // only first BOM is ignored
+    new(@""""u8 + "abc\ufeffdef"u8 + @""""u8, token.STRING, 4, @""""u8 + "abc\ufeffdef"u8 + @""""u8, "illegal byte order mark"), // only first BOM is ignored
+    new(((@string)(new byte[]{0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66})), token.IDENT, 3, "abc", "illegal character NUL"),
+    new("abc\x00", token.IDENT, 3, "abc", "illegal character NUL"),
+    new("“abc”", token.ILLEGAL, 0, "abc", @"curly quotation mark '“' (use neutral '""')")
+]);
 
-public static void TestScanErrors(ж<testing.T> Ꮡt) {
+public static void TestScanErrors(ж<testing.T> t) {
     foreach (var (_, e) in errors) {
-        checkError(Ꮡt, e.src, e.tok, e.pos, e.lit, e.err);
+        checkError(t, e.src, e.tok, e.pos, e.lit, e.err);
     }
 }
 
-public static void TestUTF16(ж<testing.T> Ꮡt) {
+public static void TestUTF16(ж<testing.T> t) {
     // This test doesn't fit within TestScanErrors because
     // the latter assumes that there was only one error.
-    foreach (var (_, src) in new @string[]{
+    foreach (var (_, src) in slice<@string>([
         ((@string)(new byte[]{0xfe, 0xff, 0x00, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x70})), // BOM + "package p" encoded as UTF-16 BE
-        ((@string)(new byte[]{0xff, 0xfe, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x70, 0x00})) // BOM + "package p" encoded as UTF-16 LE
-    }.slice()) {
+        ((@string)(new byte[]{0xff, 0xfe, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x70, 0x00}))  // BOM + "package p" encoded as UTF-16 LE
+    ])) {
         ref var got = ref heap<slice<@string>>(out var Ꮡgot);
         var eh = (tokenꓸPosition posn, @string msg) => {
             Ꮡgot.ValueSlot = append(Ꮡgot.ValueSlot, fmt.Sprintf("#%d: %s"u8, posn.Offset, msg));
         };
-        global::go.go.scanner_package.Scanner sc = default!;
+        global::go.go.scanner_package.Scanner sc = default;
         sc.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), 0);
         sc.Scan();
 
         // We expect two errors:
         // one from the decoder, one from the scanner.
-        var want = new @string[]{
-            "#0: illegal UTF-8 encoding (got UTF-16)"u8,
-            "#0: illegal character U+FFFD '�'"u8
-        }.slice();
+        var want = slice<@string>([
+            "#0: illegal UTF-8 encoding (got UTF-16)",
+            "#0: illegal character U+FFFD '�'"
+        ]);
         if (!slices.Equal<slice<@string>, @string>(got, want)) {
-            Ꮡt.Errorf("Scan(%q) returned errors %q, want %q"u8, src, got, want);
+            t.Errorf("Scan(%q) returned errors %q, want %q", src, got, want);
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ1 = """
+internal static ref readonly @string srcᶜ1 => ref srcᶜ1ᵇ;
+private static readonly @string srcᶜ1ᵇ = """
 
 		var (
 			A = 1 // foo
@@ -926,15 +944,15 @@ internal static readonly @string srcᶜ1 = """
 """u8.Raw();
 
 // Verify that no comments show up as literal values when skipping comments.
-public static void TestIssue10213(ж<testing.T> Ꮡt) {
+public static void TestIssue10213(ж<testing.T> t) {
     @string src = srcᶜ1;
-    global::go.go.scanner_package.Scanner s = default!;
-    s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), default!, 0);
-    while (ᐧ) {
+    global::go.go.scanner_package.Scanner s = default;
+    s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), default, 0);
+    for (;;) {
         var (pos, tok, lit) = s.Scan();
         nint @class = tokenclass(tok);
         if (lit != ""u8 && @class != keyword && @class != literal && tok != token.SEMICOLON) {
-            Ꮡt.Errorf("%s: tok = %s, lit = %q"u8, fset.Position(pos), tok, lit);
+            t.Errorf("%s: tok = %s, lit = %q", fset.Position(pos), tok, lit);
         }
         if (tok <= token.EOF) {
             break;
@@ -943,21 +961,22 @@ public static void TestIssue10213(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ2 = "... .. 0.. .."u8;
+internal static ref readonly @string srcᶜ2 => ref srcᶜ2ᵇ;
+private static readonly @string srcᶜ2ᵇ = "... .. 0.. .."u8;
 
-public static void TestIssue28112(ж<testing.T> Ꮡt) {
+public static void TestIssue28112(ж<testing.T> t) {
     @string src = srcᶜ2; // make sure to have stand-alone ".." immediately before EOF to test EOF behavior
-    var tokens = new token.Token[]{token.ELLIPSIS, token.PERIOD, token.PERIOD, token.FLOAT, token.PERIOD, token.PERIOD, token.PERIOD, token.EOF}.slice();
-    global::go.go.scanner_package.Scanner s = default!;
-    s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), default!, 0);
+    var tokens = slice<token.Token>([token.ELLIPSIS, token.PERIOD, token.PERIOD, token.FLOAT, token.PERIOD, token.PERIOD, token.PERIOD, token.EOF]);
+    global::go.go.scanner_package.Scanner s = default;
+    s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), default, 0);
     foreach (var (_, want) in tokens) {
         var (pos, got, lit) = s.Scan();
         if (got != want) {
-            Ꮡt.Errorf("%s: got %s, want %s"u8, fset.Position(pos), got, want);
+            t.Errorf("%s: got %s, want %s", fset.Position(pos), got, want);
         }
         // literals expect to have a (non-empty) literal string and we don't care about other tokens for this test
         if (tokenclass(got) == literal && lit == ""u8) {
-            Ꮡt.Errorf("%s: for %s got empty literal string"u8, fset.Position(pos), got);
+            t.Errorf("%s: for %s got empty literal string", fset.Position(pos), got);
         }
     }
 }
@@ -968,11 +987,11 @@ public static void BenchmarkScan(ж<testing.B> Ꮡb) {
     b.StopTimer();
     var fset = token.NewFileSet();
     var @file = fset.AddFile(""u8, fset.Base(), len(source));
-    global::go.go.scanner_package.Scanner s = default!;
+    global::go.go.scanner_package.Scanner s = default;
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
-        s.Init(@file, source, default!, ScanComments);
-        while (ᐧ) {
+        s.Init(@file, source, default, ScanComments);
+        for (;;) {
             var (_, tok, _) = s.Scan();
             if (tok == token.EOF) {
                 break;
@@ -981,30 +1000,30 @@ public static void BenchmarkScan(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkScanFiles(ж<testing.B> Ꮡb) {
+public static void BenchmarkScanFiles(ж<testing.B> b) {
     // Scan a few arbitrary large files, and one small one, to provide some
     // variety in benchmarks.
-    foreach (var (_, p) in new @string[]{
-        "go/types/expr.go"u8,
-        "go/parser/parser.go"u8,
-        "net/http/server.go"u8,
-        "go/scanner/errors.go"u8
-    }.slice()) {
-        Ꮡb.Run(p, (ж<testing.B> bΔ1) => {
+    foreach (var (_, p) in slice<@string>([
+        "go/types/expr.go",
+        "go/parser/parser.go",
+        "net/http/server.go",
+        "go/scanner/errors.go"
+    ])) {
+        b.Run(p, (ж<testing.B> bΔ1) => {
             bΔ1.StopTimer();
-            @string filename = filepath.Join(".."u8, "..", filepath.FromSlash(p));
+            @string filename = filepath.Join("..", "..", filepath.FromSlash(p));
             var (src, err) = os.ReadFile(filename);
-            if (err != default!) {
+            if (err != nil) {
                 bΔ1.Fatal(err);
             }
             var fset = token.NewFileSet();
             var @file = fset.AddFile(filename, fset.Base(), len(src));
             bΔ1.SetBytes((int64)len(src));
-            global::go.go.scanner_package.Scanner s = default!;
+            global::go.go.scanner_package.Scanner s = default;
             bΔ1.StartTimer();
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                s.Init(@file, src, default!, ScanComments);
-                while (ᐧ) {
+                s.Init(@file, src, default, ScanComments);
+                for (;;) {
                     var (_, tok, _) = s.Scan();
                     if (tok == token.EOF) {
                         break;
@@ -1020,191 +1039,194 @@ internal partial struct TestNumbers_type /*dyn*/ {
     internal @string src, tokens, err;
 }
 
-public static void TestNumbers(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestNumbers_type[]{
+public static void TestNumbers(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestNumbers_type>([
         // binaries
-        new(token.INT, "0b0"u8, "0b0"u8, ""u8),
-        new(token.INT, "0b1010"u8, "0b1010"u8, ""u8),
-        new(token.INT, "0B1110"u8, "0B1110"u8, ""u8),
+        new(token.INT, "0b0", "0b0", ""),
+        new(token.INT, "0b1010", "0b1010", ""),
+        new(token.INT, "0B1110", "0B1110", ""),
 
-        new(token.INT, "0b"u8, "0b"u8, "binary literal has no digits"u8),
-        new(token.INT, "0b0190"u8, "0b0190"u8, "invalid digit '9' in binary literal"u8),
-        new(token.INT, "0b01a0"u8, "0b01 a0"u8, ""u8), // only accept 0-9
+        new(token.INT, "0b", "0b", "binary literal has no digits"),
+        new(token.INT, "0b0190", "0b0190", "invalid digit '9' in binary literal"),
+        new(token.INT, "0b01a0", "0b01 a0", ""), // only accept 0-9
 
-        new(token.FLOAT, "0b."u8, "0b."u8, "invalid radix point in binary literal"u8),
-        new(token.FLOAT, "0b.1"u8, "0b.1"u8, "invalid radix point in binary literal"u8),
-        new(token.FLOAT, "0b1.0"u8, "0b1.0"u8, "invalid radix point in binary literal"u8),
-        new(token.FLOAT, "0b1e10"u8, "0b1e10"u8, "'e' exponent requires decimal mantissa"u8),
-        new(token.FLOAT, "0b1P-1"u8, "0b1P-1"u8, "'P' exponent requires hexadecimal mantissa"u8),
+        new(token.FLOAT, "0b.", "0b.", "invalid radix point in binary literal"),
+        new(token.FLOAT, "0b.1", "0b.1", "invalid radix point in binary literal"),
+        new(token.FLOAT, "0b1.0", "0b1.0", "invalid radix point in binary literal"),
+        new(token.FLOAT, "0b1e10", "0b1e10", "'e' exponent requires decimal mantissa"),
+        new(token.FLOAT, "0b1P-1", "0b1P-1", "'P' exponent requires hexadecimal mantissa"),
 
-        new(token.IMAG, "0b10i"u8, "0b10i"u8, ""u8),
-        new(token.IMAG, "0b10.0i"u8, "0b10.0i"u8, "invalid radix point in binary literal"u8),
+        new(token.IMAG, "0b10i", "0b10i", ""),
+        new(token.IMAG, "0b10.0i", "0b10.0i", "invalid radix point in binary literal"),
 
         // octals
-        new(token.INT, "0o0"u8, "0o0"u8, ""u8),
-        new(token.INT, "0o1234"u8, "0o1234"u8, ""u8),
-        new(token.INT, "0O1234"u8, "0O1234"u8, ""u8),
+        new(token.INT, "0o0", "0o0", ""),
+        new(token.INT, "0o1234", "0o1234", ""),
+        new(token.INT, "0O1234", "0O1234", ""),
 
-        new(token.INT, "0o"u8, "0o"u8, "octal literal has no digits"u8),
-        new(token.INT, "0o8123"u8, "0o8123"u8, "invalid digit '8' in octal literal"u8),
-        new(token.INT, "0o1293"u8, "0o1293"u8, "invalid digit '9' in octal literal"u8),
-        new(token.INT, "0o12a3"u8, "0o12 a3"u8, ""u8), // only accept 0-9
+        new(token.INT, "0o", "0o", "octal literal has no digits"),
+        new(token.INT, "0o8123", "0o8123", "invalid digit '8' in octal literal"),
+        new(token.INT, "0o1293", "0o1293", "invalid digit '9' in octal literal"),
+        new(token.INT, "0o12a3", "0o12 a3", ""), // only accept 0-9
 
-        new(token.FLOAT, "0o."u8, "0o."u8, "invalid radix point in octal literal"u8),
-        new(token.FLOAT, "0o.2"u8, "0o.2"u8, "invalid radix point in octal literal"u8),
-        new(token.FLOAT, "0o1.2"u8, "0o1.2"u8, "invalid radix point in octal literal"u8),
-        new(token.FLOAT, "0o1E+2"u8, "0o1E+2"u8, "'E' exponent requires decimal mantissa"u8),
-        new(token.FLOAT, "0o1p10"u8, "0o1p10"u8, "'p' exponent requires hexadecimal mantissa"u8),
+        new(token.FLOAT, "0o.", "0o.", "invalid radix point in octal literal"),
+        new(token.FLOAT, "0o.2", "0o.2", "invalid radix point in octal literal"),
+        new(token.FLOAT, "0o1.2", "0o1.2", "invalid radix point in octal literal"),
+        new(token.FLOAT, "0o1E+2", "0o1E+2", "'E' exponent requires decimal mantissa"),
+        new(token.FLOAT, "0o1p10", "0o1p10", "'p' exponent requires hexadecimal mantissa"),
 
-        new(token.IMAG, "0o10i"u8, "0o10i"u8, ""u8),
-        new(token.IMAG, "0o10e0i"u8, "0o10e0i"u8, "'e' exponent requires decimal mantissa"u8),
+        new(token.IMAG, "0o10i", "0o10i", ""),
+        new(token.IMAG, "0o10e0i", "0o10e0i", "'e' exponent requires decimal mantissa"),
 
         // 0-octals
-        new(token.INT, "0"u8, "0"u8, ""u8),
-        new(token.INT, "0123"u8, "0123"u8, ""u8),
+        new(token.INT, "0", "0", ""),
+        new(token.INT, "0123", "0123", ""),
 
-        new(token.INT, "08123"u8, "08123"u8, "invalid digit '8' in octal literal"u8),
-        new(token.INT, "01293"u8, "01293"u8, "invalid digit '9' in octal literal"u8),
-        new(token.INT, "0F."u8, "0 F ."u8, ""u8), // only accept 0-9
-        new(token.INT, "0123F."u8, "0123 F ."u8, ""u8),
-        new(token.INT, "0123456x"u8, "0123456 x"u8, ""u8),
+        new(token.INT, "08123", "08123", "invalid digit '8' in octal literal"),
+        new(token.INT, "01293", "01293", "invalid digit '9' in octal literal"),
+        new(token.INT, "0F.", "0 F .", ""), // only accept 0-9
+        new(token.INT, "0123F.", "0123 F .", ""),
+        new(token.INT, "0123456x", "0123456 x", ""),
 
         // decimals
-        new(token.INT, "1"u8, "1"u8, ""u8),
-        new(token.INT, "1234"u8, "1234"u8, ""u8),
+        new(token.INT, "1", "1", ""),
+        new(token.INT, "1234", "1234", ""),
 
-        new(token.INT, "1f"u8, "1 f"u8, ""u8), // only accept 0-9
+        new(token.INT, "1f", "1 f", ""), // only accept 0-9
 
-        new(token.IMAG, "0i"u8, "0i"u8, ""u8),
-        new(token.IMAG, "0678i"u8, "0678i"u8, ""u8),
+        new(token.IMAG, "0i", "0i", ""),
+        new(token.IMAG, "0678i", "0678i", ""),
 
         // decimal floats
-        new(token.FLOAT, "0."u8, "0."u8, ""u8),
-        new(token.FLOAT, "123."u8, "123."u8, ""u8),
-        new(token.FLOAT, "0123."u8, "0123."u8, ""u8),
+        new(token.FLOAT, "0.", "0.", ""),
+        new(token.FLOAT, "123.", "123.", ""),
+        new(token.FLOAT, "0123.", "0123.", ""),
 
-        new(token.FLOAT, ".0"u8, ".0"u8, ""u8),
-        new(token.FLOAT, ".123"u8, ".123"u8, ""u8),
-        new(token.FLOAT, ".0123"u8, ".0123"u8, ""u8),
+        new(token.FLOAT, ".0", ".0", ""),
+        new(token.FLOAT, ".123", ".123", ""),
+        new(token.FLOAT, ".0123", ".0123", ""),
 
-        new(token.FLOAT, "0.0"u8, "0.0"u8, ""u8),
-        new(token.FLOAT, "123.123"u8, "123.123"u8, ""u8),
-        new(token.FLOAT, "0123.0123"u8, "0123.0123"u8, ""u8),
+        new(token.FLOAT, "0.0", "0.0", ""),
+        new(token.FLOAT, "123.123", "123.123", ""),
+        new(token.FLOAT, "0123.0123", "0123.0123", ""),
 
-        new(token.FLOAT, "0e0"u8, "0e0"u8, ""u8),
-        new(token.FLOAT, "123e+0"u8, "123e+0"u8, ""u8),
-        new(token.FLOAT, "0123E-1"u8, "0123E-1"u8, ""u8),
+        new(token.FLOAT, "0e0", "0e0", ""),
+        new(token.FLOAT, "123e+0", "123e+0", ""),
+        new(token.FLOAT, "0123E-1", "0123E-1", ""),
 
-        new(token.FLOAT, "0.e+1"u8, "0.e+1"u8, ""u8),
-        new(token.FLOAT, "123.E-10"u8, "123.E-10"u8, ""u8),
-        new(token.FLOAT, "0123.e123"u8, "0123.e123"u8, ""u8),
+        new(token.FLOAT, "0.e+1", "0.e+1", ""),
+        new(token.FLOAT, "123.E-10", "123.E-10", ""),
+        new(token.FLOAT, "0123.e123", "0123.e123", ""),
 
-        new(token.FLOAT, ".0e-1"u8, ".0e-1"u8, ""u8),
-        new(token.FLOAT, ".123E+10"u8, ".123E+10"u8, ""u8),
-        new(token.FLOAT, ".0123E123"u8, ".0123E123"u8, ""u8),
+        new(token.FLOAT, ".0e-1", ".0e-1", ""),
+        new(token.FLOAT, ".123E+10", ".123E+10", ""),
+        new(token.FLOAT, ".0123E123", ".0123E123", ""),
 
-        new(token.FLOAT, "0.0e1"u8, "0.0e1"u8, ""u8),
-        new(token.FLOAT, "123.123E-10"u8, "123.123E-10"u8, ""u8),
-        new(token.FLOAT, "0123.0123e+456"u8, "0123.0123e+456"u8, ""u8),
+        new(token.FLOAT, "0.0e1", "0.0e1", ""),
+        new(token.FLOAT, "123.123E-10", "123.123E-10", ""),
+        new(token.FLOAT, "0123.0123e+456", "0123.0123e+456", ""),
 
-        new(token.FLOAT, "0e"u8, "0e"u8, "exponent has no digits"u8),
-        new(token.FLOAT, "0E+"u8, "0E+"u8, "exponent has no digits"u8),
-        new(token.FLOAT, "1e+f"u8, "1e+ f"u8, "exponent has no digits"u8),
-        new(token.FLOAT, "0p0"u8, "0p0"u8, "'p' exponent requires hexadecimal mantissa"u8),
-        new(token.FLOAT, "1.0P-1"u8, "1.0P-1"u8, "'P' exponent requires hexadecimal mantissa"u8),
+        new(token.FLOAT, "0e", "0e", "exponent has no digits"),
+        new(token.FLOAT, "0E+", "0E+", "exponent has no digits"),
+        new(token.FLOAT, "1e+f", "1e+ f", "exponent has no digits"),
+        new(token.FLOAT, "0p0", "0p0", "'p' exponent requires hexadecimal mantissa"),
+        new(token.FLOAT, "1.0P-1", "1.0P-1", "'P' exponent requires hexadecimal mantissa"),
 
-        new(token.IMAG, "0.i"u8, "0.i"u8, ""u8),
-        new(token.IMAG, ".123i"u8, ".123i"u8, ""u8),
-        new(token.IMAG, "123.123i"u8, "123.123i"u8, ""u8),
-        new(token.IMAG, "123e+0i"u8, "123e+0i"u8, ""u8),
-        new(token.IMAG, "123.E-10i"u8, "123.E-10i"u8, ""u8),
-        new(token.IMAG, ".123E+10i"u8, ".123E+10i"u8, ""u8),
+        new(token.IMAG, "0.i", "0.i", ""),
+        new(token.IMAG, ".123i", ".123i", ""),
+        new(token.IMAG, "123.123i", "123.123i", ""),
+        new(token.IMAG, "123e+0i", "123e+0i", ""),
+        new(token.IMAG, "123.E-10i", "123.E-10i", ""),
+        new(token.IMAG, ".123E+10i", ".123E+10i", ""),
 
         // hexadecimals
-        new(token.INT, "0x0"u8, "0x0"u8, ""u8),
-        new(token.INT, "0x1234"u8, "0x1234"u8, ""u8),
-        new(token.INT, "0xcafef00d"u8, "0xcafef00d"u8, ""u8),
-        new(token.INT, "0XCAFEF00D"u8, "0XCAFEF00D"u8, ""u8),
+        new(token.INT, "0x0", "0x0", ""),
+        new(token.INT, "0x1234", "0x1234", ""),
+        new(token.INT, "0xcafef00d", "0xcafef00d", ""),
+        new(token.INT, "0XCAFEF00D", "0XCAFEF00D", ""),
 
-        new(token.INT, "0x"u8, "0x"u8, "hexadecimal literal has no digits"u8),
-        new(token.INT, "0x1g"u8, "0x1 g"u8, ""u8),
+        new(token.INT, "0x", "0x", "hexadecimal literal has no digits"),
+        new(token.INT, "0x1g", "0x1 g", ""),
 
-        new(token.IMAG, "0xf00i"u8, "0xf00i"u8, ""u8),
+        new(token.IMAG, "0xf00i", "0xf00i", ""),
 
         // hexadecimal floats
-        new(token.FLOAT, "0x0p0"u8, "0x0p0"u8, ""u8),
-        new(token.FLOAT, "0x12efp-123"u8, "0x12efp-123"u8, ""u8),
-        new(token.FLOAT, "0xABCD.p+0"u8, "0xABCD.p+0"u8, ""u8),
-        new(token.FLOAT, "0x.0189P-0"u8, "0x.0189P-0"u8, ""u8),
-        new(token.FLOAT, "0x1.ffffp+1023"u8, "0x1.ffffp+1023"u8, ""u8),
+        new(token.FLOAT, "0x0p0", "0x0p0", ""),
+        new(token.FLOAT, "0x12efp-123", "0x12efp-123", ""),
+        new(token.FLOAT, "0xABCD.p+0", "0xABCD.p+0", ""),
+        new(token.FLOAT, "0x.0189P-0", "0x.0189P-0", ""),
+        new(token.FLOAT, "0x1.ffffp+1023", "0x1.ffffp+1023", ""),
 
-        new(token.FLOAT, "0x."u8, "0x."u8, "hexadecimal literal has no digits"u8),
-        new(token.FLOAT, "0x0."u8, "0x0."u8, "hexadecimal mantissa requires a 'p' exponent"u8),
-        new(token.FLOAT, "0x.0"u8, "0x.0"u8, "hexadecimal mantissa requires a 'p' exponent"u8),
-        new(token.FLOAT, "0x1.1"u8, "0x1.1"u8, "hexadecimal mantissa requires a 'p' exponent"u8),
-        new(token.FLOAT, "0x1.1e0"u8, "0x1.1e0"u8, "hexadecimal mantissa requires a 'p' exponent"u8),
-        new(token.FLOAT, "0x1.2gp1a"u8, "0x1.2 gp1a"u8, "hexadecimal mantissa requires a 'p' exponent"u8),
-        new(token.FLOAT, "0x0p"u8, "0x0p"u8, "exponent has no digits"u8),
-        new(token.FLOAT, "0xeP-"u8, "0xeP-"u8, "exponent has no digits"u8),
-        new(token.FLOAT, "0x1234PAB"u8, "0x1234P AB"u8, "exponent has no digits"u8),
-        new(token.FLOAT, "0x1.2p1a"u8, "0x1.2p1 a"u8, ""u8),
+        new(token.FLOAT, "0x.", "0x.", "hexadecimal literal has no digits"),
+        new(token.FLOAT, "0x0.", "0x0.", "hexadecimal mantissa requires a 'p' exponent"),
+        new(token.FLOAT, "0x.0", "0x.0", "hexadecimal mantissa requires a 'p' exponent"),
+        new(token.FLOAT, "0x1.1", "0x1.1", "hexadecimal mantissa requires a 'p' exponent"),
+        new(token.FLOAT, "0x1.1e0", "0x1.1e0", "hexadecimal mantissa requires a 'p' exponent"),
+        new(token.FLOAT, "0x1.2gp1a", "0x1.2 gp1a", "hexadecimal mantissa requires a 'p' exponent"),
+        new(token.FLOAT, "0x0p", "0x0p", "exponent has no digits"),
+        new(token.FLOAT, "0xeP-", "0xeP-", "exponent has no digits"),
+        new(token.FLOAT, "0x1234PAB", "0x1234P AB", "exponent has no digits"),
+        new(token.FLOAT, "0x1.2p1a", "0x1.2p1 a", ""),
 
-        new(token.IMAG, "0xf00.bap+12i"u8, "0xf00.bap+12i"u8, ""u8),
+        new(token.IMAG, "0xf00.bap+12i", "0xf00.bap+12i", ""),
 
         // separators
-        new(token.INT, "0b_1000_0001"u8, "0b_1000_0001"u8, ""u8),
-        new(token.INT, "0o_600"u8, "0o_600"u8, ""u8),
-        new(token.INT, "0_466"u8, "0_466"u8, ""u8),
-        new(token.INT, "1_000"u8, "1_000"u8, ""u8),
-        new(token.FLOAT, "1_000.000_1"u8, "1_000.000_1"u8, ""u8),
-        new(token.IMAG, "10e+1_2_3i"u8, "10e+1_2_3i"u8, ""u8),
-        new(token.INT, "0x_f00d"u8, "0x_f00d"u8, ""u8),
-        new(token.FLOAT, "0x_f00d.0p1_2"u8, "0x_f00d.0p1_2"u8, ""u8),
+        new(token.INT, "0b_1000_0001", "0b_1000_0001", ""),
+        new(token.INT, "0o_600", "0o_600", ""),
+        new(token.INT, "0_466", "0_466", ""),
+        new(token.INT, "1_000", "1_000", ""),
+        new(token.FLOAT, "1_000.000_1", "1_000.000_1", ""),
+        new(token.IMAG, "10e+1_2_3i", "10e+1_2_3i", ""),
+        new(token.INT, "0x_f00d", "0x_f00d", ""),
+        new(token.FLOAT, "0x_f00d.0p1_2", "0x_f00d.0p1_2", ""),
 
-        new(token.INT, "0b__1000"u8, "0b__1000"u8, "'_' must separate successive digits"u8),
-        new(token.INT, "0o60___0"u8, "0o60___0"u8, "'_' must separate successive digits"u8),
-        new(token.INT, "0466_"u8, "0466_"u8, "'_' must separate successive digits"u8),
-        new(token.FLOAT, "1_."u8, "1_."u8, "'_' must separate successive digits"u8),
-        new(token.FLOAT, "0._1"u8, "0._1"u8, "'_' must separate successive digits"u8),
-        new(token.FLOAT, "2.7_e0"u8, "2.7_e0"u8, "'_' must separate successive digits"u8),
-        new(token.IMAG, "10e+12_i"u8, "10e+12_i"u8, "'_' must separate successive digits"u8),
-        new(token.INT, "0x___0"u8, "0x___0"u8, "'_' must separate successive digits"u8),
-        new(token.FLOAT, "0x1.0_p0"u8, "0x1.0_p0"u8, "'_' must separate successive digits"u8)
-    }.slice()) {
-        global::go.go.scanner_package.Scanner s = default!;
-        @string err = default!;
+        new(token.INT, "0b__1000", "0b__1000", "'_' must separate successive digits"),
+        new(token.INT, "0o60___0", "0o60___0", "'_' must separate successive digits"),
+        new(token.INT, "0466_", "0466_", "'_' must separate successive digits"),
+        new(token.FLOAT, "1_.", "1_.", "'_' must separate successive digits"),
+        new(token.FLOAT, "0._1", "0._1", "'_' must separate successive digits"),
+        new(token.FLOAT, "2.7_e0", "2.7_e0", "'_' must separate successive digits"),
+        new(token.IMAG, "10e+12_i", "10e+12_i", "'_' must separate successive digits"),
+        new(token.INT, "0x___0", "0x___0", "'_' must separate successive digits"),
+        new(token.FLOAT, "0x1.0_p0", "0x1.0_p0", "'_' must separate successive digits")
+    ])) {
+        global::go.go.scanner_package.Scanner s = default;
+        @string err = default;
         s.Init(fset.AddFile(""u8, fset.Base(), len(test.src)), slice<byte>(test.src), (tokenꓸPosition _Δp0, @string msg) => {
             if (err == ""u8) {
                 err = msg;
             }
         }, 0);
-        foreach (var (i, want) in strings.Split(test.tokens, " "u8)) {
+        foreach (var (i, want) in strings.Split(test.tokens, " ")) {
             err = ""u8;
             var (_, tokΔ1, lit) = s.Scan();
 
             // compute lit where for tokens where lit is not defined
-            var exprᴛ1 = tokΔ1;
-            if (exprᴛ1 == token.PERIOD) {
-                lit = "."u8;
+            switch (tokΔ1) {
+            case var ᴛ when ᴛ == token.PERIOD: {
+                lit = ".";
+                break;
             }
-            else if (exprᴛ1 == token.ADD) {
-                lit = "+"u8;
+            case var ᴛ when ᴛ == token.ADD: {
+                lit = "+";
+                break;
             }
-            else if (exprᴛ1 == token.SUB) {
-                lit = "-"u8;
-            }
+            case var ᴛ when ᴛ == token.SUB: {
+                lit = "-";
+                break;
+            }}
 
             if (i == 0) {
                 if (tokΔ1 != test.tok) {
-                    Ꮡt.Errorf("%q: got token %s; want %s"u8, test.src, tokΔ1, test.tok);
+                    t.Errorf("%q: got token %s; want %s", test.src, tokΔ1, test.tok);
                 }
                 if (err != test.err) {
-                    Ꮡt.Errorf("%q: got error %q; want %q"u8, test.src, err, test.err);
+                    t.Errorf("%q: got error %q; want %q", test.src, err, test.err);
                 }
             }
 
             if (lit != want) {
-                Ꮡt.Errorf("%q: got literal %q (%s); want %s"u8, test.src, lit, tokΔ1, want);
+                t.Errorf("%q: got literal %q (%s); want %s", test.src, lit, tokΔ1, want);
             }
         }
 
@@ -1214,7 +1236,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
             (_, tok, _) = s.Scan();
         }
         if (tok != token.EOF) {
-            Ꮡt.Errorf("%q: got %s; want EOF"u8, test.src, tok);
+            t.Errorf("%q: got %s; want EOF", test.src, tok);
         }
     }
 }

@@ -17,7 +17,7 @@ partial struct testState {
     internal map<nint, bool> flag;
 }
 
-internal static fmt.State _ᴛ2ʗ = new testState(nil);
+internal static fmt.State _ᴛ2ʗ = new testState();
 
 internal static (nint n, error err) Write(this testState s, slice<byte> b) {
     throw panic("unimplemented");
@@ -38,7 +38,7 @@ internal static bool Flag(this testState s, nint c) {
 public static UntypedInt NO => -1000;
 
 internal static testState mkState(nint w, nint p, @string flags) {
-    var s = new testState(nil);
+    var s = new testState();
     if (w != NO) {
         s.width = w;
         s.widthOK = true;
@@ -60,23 +60,23 @@ internal partial struct TestFormatString_type /*dyn*/ {
     internal @string result;
 }
 
-public static void TestFormatString(ж<Δtesting.T> Ꮡt) {
-    slice<TestFormatString_type> tests = new TestFormatString_type[]{
-        new(NO, NO, ""u8, "%x"u8),
-        new(NO, 3, ""u8, "%.3x"u8),
-        new(3, NO, ""u8, "%3x"u8),
-        new(7, 3, ""u8, "%7.3x"u8),
-        new(NO, NO, " +-#0"u8, "% +-#0x"u8),
-        new(7, 3, "+"u8, "%+7.3x"u8),
-        new(7, -3, "-"u8, "%-7.-3x"u8),
-        new(7, 3, " "u8, "% 7.3x"u8),
-        new(7, 3, "#"u8, "%#7.3x"u8),
-        new(7, 3, "0"u8, "%07.3x"u8)
-    }.slice();
+public static void TestFormatString(ж<Δtesting.T> t) {
+    slice<TestFormatString_type> tests = slice<TestFormatString_type>([
+        new(NO, NO, "", "%x"),
+        new(NO, 3, "", "%.3x"),
+        new(3, NO, "", "%3x"),
+        new(7, 3, "", "%7.3x"),
+        new(NO, NO, " +-#0", "% +-#0x"),
+        new(7, 3, "+", "%+7.3x"),
+        new(7, -3, "-", "%-7.-3x"),
+        new(7, 3, " ", "% 7.3x"),
+        new(7, 3, "#", "%#7.3x"),
+        new(7, 3, "0", "%07.3x")
+    ]);
     foreach (var (_, test) in tests) {
-        @string got = fmt.FormatString(mkState(test.width, test.prec, test.flags), (rune)'x');
+        @string got = fmt.FormatString(mkState(test.width, test.prec, test.flags), 'x');
         if (got != test.result) {
-            Ꮡt.Errorf("%v: got %s"u8, test, got);
+            t.Errorf("%v: got %s", test, got);
         }
     }
 }

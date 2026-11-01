@@ -15,7 +15,7 @@ using io = io_package;
 
 partial class slogtest_test_package {
 
-public static void TestRun(ж<testing.T> Ꮡt) {
+public static void TestRun(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
     var newHandler = (ж<testing.T> _) => {
@@ -23,17 +23,16 @@ public static void TestRun(ж<testing.T> Ꮡt) {
         return new slog.JSONHandlerжΔHandler(slog.NewJSONHandler(new bytes_BufferжWriter(Ꮡbuf), nil));
     };
     var result = (ж<testing.T> tΔ1) => {
-        ref var m = ref heap<map<@string, any>>(out var Ꮡm);
-        m = new map<@string, any>{};
+        ref var m = ref heap<map<@string, any>>(new map<@string, any>{}, out var Ꮡm);
         {
-            var err = json.Unmarshal(Ꮡbuf.Value.Bytes(), Ꮡm); if (err != default!) {
+            var err = json.Unmarshal(Ꮡbuf.Value.Bytes(), Ꮡm); if (err != nil) {
                 tΔ1.Fatal(err);
             }
         }
         return m;
     };
 
-    slogtest.Run(Ꮡt, newHandler, result);
+    slogtest.Run(t, newHandler, result);
 }
 
 } // end slogtest_test_package

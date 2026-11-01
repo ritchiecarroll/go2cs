@@ -26,7 +26,7 @@ using static global::go.log.slog.@internal.buffer_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -36,7 +36,7 @@ using static global::go.log.slog.@internal.buffer_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/internal/buffer/buffer_test.go", "buffer_test.cs", "ABEaooKSgoKUgoKCtOSCgpSCooKSopKC", "32-36:1")]
+[assembly: GoPositionMap("log/slog/internal/buffer/buffer_test.go", "buffer_test.cs", "ABMaooKSgoKUgoKCtPSCgpSCooKSopKC", "32-36:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;

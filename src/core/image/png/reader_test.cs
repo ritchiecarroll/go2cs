@@ -20,70 +20,70 @@ using static go.image.png_package;
 
 partial class png_internal_test_package {
 
-internal static slice<@string> filenames = new @string[]{
-    "basn0g01"u8,
-    "basn0g01-30"u8,
-    "basn0g02"u8,
-    "basn0g02-29"u8,
-    "basn0g04"u8,
-    "basn0g04-31"u8,
-    "basn0g08"u8,
-    "basn0g16"u8,
-    "basn2c08"u8,
-    "basn2c16"u8,
-    "basn3p01"u8,
-    "basn3p02"u8,
-    "basn3p04"u8,
-    "basn3p04-31i"u8,
-    "basn3p08"u8,
-    "basn3p08-trns"u8,
-    "basn4a08"u8,
-    "basn4a16"u8,
-    "basn6a08"u8,
-    "basn6a16"u8,
-    "ftbbn0g01"u8,
-    "ftbbn0g02"u8,
-    "ftbbn0g04"u8,
-    "ftbbn2c16"u8,
-    "ftbbn3p08"u8,
-    "ftbgn2c16"u8,
-    "ftbgn3p08"u8,
-    "ftbrn2c08"u8,
-    "ftbwn0g16"u8,
-    "ftbwn3p08"u8,
-    "ftbyn3p08"u8,
-    "ftp0n0g08"u8,
-    "ftp0n2c08"u8,
-    "ftp0n3p08"u8,
-    "ftp1n3p08"u8
-}.slice();
+internal static slice<@string> filenames = slice<@string>([
+    "basn0g01",
+    "basn0g01-30",
+    "basn0g02",
+    "basn0g02-29",
+    "basn0g04",
+    "basn0g04-31",
+    "basn0g08",
+    "basn0g16",
+    "basn2c08",
+    "basn2c16",
+    "basn3p01",
+    "basn3p02",
+    "basn3p04",
+    "basn3p04-31i",
+    "basn3p08",
+    "basn3p08-trns",
+    "basn4a08",
+    "basn4a16",
+    "basn6a08",
+    "basn6a16",
+    "ftbbn0g01",
+    "ftbbn0g02",
+    "ftbbn0g04",
+    "ftbbn2c16",
+    "ftbbn3p08",
+    "ftbgn2c16",
+    "ftbgn3p08",
+    "ftbrn2c08",
+    "ftbwn0g16",
+    "ftbwn3p08",
+    "ftbyn3p08",
+    "ftp0n0g08",
+    "ftp0n2c08",
+    "ftp0n3p08",
+    "ftp1n3p08"
+]);
 
-internal static slice<@string> filenamesPaletted = new @string[]{
-    "basn3p01"u8,
-    "basn3p02"u8,
-    "basn3p04"u8,
-    "basn3p08"u8,
-    "basn3p08-trns"u8
-}.slice();
+internal static slice<@string> filenamesPaletted = slice<@string>([
+    "basn3p01",
+    "basn3p02",
+    "basn3p04",
+    "basn3p08",
+    "basn3p08-trns"
+]);
 
-internal static slice<@string> filenamesShort = new @string[]{
-    "basn0g01"u8,
-    "basn0g04-31"u8,
-    "basn6a16"u8
-}.slice();
+internal static slice<@string> filenamesShort = slice<@string>([
+    "basn0g01",
+    "basn0g04-31",
+    "basn6a16"
+]);
 
 internal static (image.Image, error) readPNG(@string filename) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(filename);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         return Decode(new png_test_package.os_FileжReader(f));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -91,25 +91,25 @@ internal static (image.Image, error) readPNG(@string filename) {
 // the sng command-line tool. Package png doesn't keep that metadata when
 // png.Decode returns an image.Image.
 internal static map<@string, @string> fakebKGDs = new map<@string, @string>{
-    ["ftbbn0g01"u8] = "bKGD {gray: 0;}\n"u8,
-    ["ftbbn0g02"u8] = "bKGD {gray: 0;}\n"u8,
-    ["ftbbn0g04"u8] = "bKGD {gray: 0;}\n"u8,
-    ["ftbbn2c16"u8] = "bKGD {red: 0;  green: 0;  blue: 65535;}\n"u8,
-    ["ftbbn3p08"u8] = "bKGD {index: 245}\n"u8,
-    ["ftbgn2c16"u8] = "bKGD {red: 0;  green: 65535;  blue: 0;}\n"u8,
-    ["ftbgn3p08"u8] = "bKGD {index: 245}\n"u8,
-    ["ftbrn2c08"u8] = "bKGD {red: 255;  green: 0;  blue: 0;}\n"u8,
-    ["ftbwn0g16"u8] = "bKGD {gray: 65535;}\n"u8,
-    ["ftbwn3p08"u8] = "bKGD {index: 0}\n"u8,
-    ["ftbyn3p08"u8] = "bKGD {index: 245}\n"u8
+    ["ftbbn0g01"] = "bKGD {gray: 0;}\n",
+    ["ftbbn0g02"] = "bKGD {gray: 0;}\n",
+    ["ftbbn0g04"] = "bKGD {gray: 0;}\n",
+    ["ftbbn2c16"] = "bKGD {red: 0;  green: 0;  blue: 65535;}\n",
+    ["ftbbn3p08"] = "bKGD {index: 245}\n",
+    ["ftbgn2c16"] = "bKGD {red: 0;  green: 65535;  blue: 0;}\n",
+    ["ftbgn3p08"] = "bKGD {index: 245}\n",
+    ["ftbrn2c08"] = "bKGD {red: 255;  green: 0;  blue: 0;}\n",
+    ["ftbwn0g16"] = "bKGD {gray: 65535;}\n",
+    ["ftbwn3p08"] = "bKGD {index: 0}\n",
+    ["ftbyn3p08"] = "bKGD {index: 245}\n"
 };
 
 // fakegAMAs maps from filenames to fake gAMA chunks for our approximation to
 // the sng command-line tool. Package png doesn't keep that metadata when
 // png.Decode returns an image.Image.
 internal static map<@string, @string> fakegAMAs = new map<@string, @string>{
-    ["ftbbn0g01"u8] = ""u8,
-    ["ftbbn0g02"u8] = "gAMA {0.45455}\n"u8
+    ["ftbbn0g01"] = "",
+    ["ftbbn0g02"] = "gAMA {0.45455}\n"
 };
 
 // fakeIHDRUsings maps from filenames to fake IHDR "using" lines for our
@@ -122,25 +122,34 @@ internal static map<@string, @string> fakegAMAs = new map<@string, @string>{
 // can't otherwise discriminate PNG's "IHDR says color (with no alpha) but tRNS
 // says alpha" and "IHDR says color with alpha".
 internal static map<@string, @string> fakeIHDRUsings = new map<@string, @string>{
-    ["ftbbn0g01"u8] = "    using grayscale;\n"u8,
-    ["ftbbn0g02"u8] = "    using grayscale;\n"u8,
-    ["ftbbn0g04"u8] = "    using grayscale;\n"u8,
-    ["ftbbn2c16"u8] = "    using color;\n"u8,
-    ["ftbgn2c16"u8] = "    using color;\n"u8,
-    ["ftbrn2c08"u8] = "    using color;\n"u8,
-    ["ftbwn0g16"u8] = "    using grayscale;\n"u8
+    ["ftbbn0g01"] = "    using grayscale;\n",
+    ["ftbbn0g02"] = "    using grayscale;\n",
+    ["ftbbn0g04"] = "    using grayscale;\n",
+    ["ftbbn2c16"] = "    using color;\n",
+    ["ftbgn2c16"] = "    using color;\n",
+    ["ftbrn2c08"] = "    using color;\n",
+    ["ftbwn0g16"] = "    using grayscale;\n"
 };
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string usingColorˢ = "    using color;\n"u8;
-internal static readonly @string usingColorAlphaˢ = "    using color alpha;\n"u8;
-internal static readonly @string usingGrayscaleˢ = "    using grayscale;\n"u8;
-internal static readonly @string usingColorPaletteˢ = "    using color palette;\n"u8;
-internal static readonly @string unknownPngDecoderColorˢ = "unknown PNG decoder color model\n"u8;
-internal static readonly @string gAMA10000ˢ = "gAMA {1.0000}\n"u8;
-internal static readonly @string plteˢ2 = "PLTE {\n"u8;
-internal static readonly @string tRNSˢ2 = "tRNS {\n"u8;
-internal static readonly @string imagePixelsHexˢ = "IMAGE {\n    pixels hex\n"u8;
+internal static ref readonly @string usingColorˢ => ref usingColorˢᵇ;
+private static readonly @string usingColorˢᵇ = "    using color;\n"u8;
+internal static ref readonly @string usingColorAlphaˢ => ref usingColorAlphaˢᵇ;
+private static readonly @string usingColorAlphaˢᵇ = "    using color alpha;\n"u8;
+internal static ref readonly @string usingGrayscaleˢ => ref usingGrayscaleˢᵇ;
+private static readonly @string usingGrayscaleˢᵇ = "    using grayscale;\n"u8;
+internal static ref readonly @string usingColorPaletteˢ => ref usingColorPaletteˢᵇ;
+private static readonly @string usingColorPaletteˢᵇ = "    using color palette;\n"u8;
+internal static ref readonly @string unknownPngDecoderColorˢ => ref unknownPngDecoderColorˢᵇ;
+private static readonly @string unknownPngDecoderColorˢᵇ = "unknown PNG decoder color model\n"u8;
+internal static ref readonly @string gAMA10000ˢ => ref gAMA10000ˢᵇ;
+private static readonly @string gAMA10000ˢᵇ = "gAMA {1.0000}\n"u8;
+internal static ref readonly @string plteˢ2 => ref plteˢ2ᵇ;
+private static readonly @string plteˢ2ᵇ = "PLTE {\n"u8;
+internal static ref readonly @string tRNSˢ2 => ref tRNSˢ2ᵇ;
+private static readonly @string tRNSˢ2ᵇ = "tRNS {\n"u8;
+internal static ref readonly @string imagePixelsHexˢ => ref imagePixelsHexˢᵇ;
+private static readonly @string imagePixelsHexˢᵇ = "IMAGE {\n    pixels hex\n"u8;
 
 // An approximation of the sng command-line tool.
 internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
@@ -149,17 +158,19 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
         defer(() => w.Close(), ref ᒐ);
         var bounds = png.Bounds();
         var cm = png.ColorModel();
-        nint bitdepth = default!;
-        var exprᴛ1 = cm;
-        if (AreEqual(exprᴛ1, color.RGBAModel) || AreEqual(exprᴛ1, color.NRGBAModel) || AreEqual(exprᴛ1, color.AlphaModel) || AreEqual(exprᴛ1, color.GrayModel)) {
+        nint bitdepth = default;
+        switch (cm) {
+        case var ᴛ when AreEqual(ᴛ, color.RGBAModel) || AreEqual(ᴛ, color.NRGBAModel) || AreEqual(ᴛ, color.AlphaModel) || AreEqual(ᴛ, color.GrayModel): {
             bitdepth = 8;
+            break;
         }
-        else { /* default: */
+        default: {
             bitdepth = 16;
-        }
+            break;
+        }}
         var (cpm, _) = cm._<color.Palette>(ᐧ);
-        ж<image.Paletted> paletted = default!;
-        if (cpm != default!) {
+        ж<image.Paletted> paletted = default;
+        if (cpm != nil) {
             switch (ᐧ) {
             case {} when len(cpm) is <= 2: {
                 bitdepth = 1;
@@ -184,7 +195,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
         io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "#SNG: from "u8 + filename + ".png\nIHDR {\n"u8);
         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    width: %d; height: %d; bitdepth: %d;\n"u8, bounds.Dx(), bounds.Dy(), bitdepth);
         {
-            var (s, ok) = fakeIHDRUsings[filename, ꟷ]; if (ok){
+            var (s, ok) = fakeIHDRUsings[filename, ꟷ]; if (ok) {
                 io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
             } else {
                 switch (ᐧ) {
@@ -200,7 +211,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), usingGrayscaleˢ);
                     break;
                 }
-                case {} when cpm != default!: {
+                case {} when cpm != nil: {
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), usingColorPaletteˢ);
                     break;
                 }
@@ -210,13 +221,13 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 }}
             }
         }
-        io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
+        io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n");
 
         // We fake a gAMA chunk. The test files have a gAMA chunk but the go PNG
         // parser ignores it (the PNG spec section 11.3 says "Ancillary chunks may
         // be ignored by a decoder").
         {
-            var (s, ok) = fakegAMAs[filename, ꟷ]; if (ok){
+            var (s, ok) = fakegAMAs[filename, ꟷ]; if (ok) {
                 io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
             } else {
                 io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), gAMA10000ˢ);
@@ -225,14 +236,14 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
 
         // Write the PLTE and tRNS (if applicable).
         var useTransparent = false;
-        if (cpm != default!){
+        if (cpm != nil) {
             nint lastAlpha = -1;
             io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), plteˢ2);
             foreach (var (i, c) in cpm) {
-                uint8 r = default!;
-                uint8 g = default!;
-                uint8 b = default!;
-                uint8 a = default!;
+                uint8 r = default;
+                uint8 g = default;
+                uint8 b = default;
+                uint8 a = default;
                 switch (c.type()) {
                 case colorꓸRGBA cΔ1: {
                     (r, g, b, a) = (cΔ1.R, cΔ1.G, cΔ1.B, 0xff);
@@ -252,7 +263,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 }
                 fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    (%3d,%3d,%3d)     # rgb = (0x%02x,0x%02x,0x%02x)\n"u8, r, g, b, r, g, b);
             }
-            io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
+            io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n");
             {
                 var (s, ok) = fakebKGDs[filename, ꟷ]; if (ok) {
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
@@ -262,13 +273,12 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
                 for (nint i = 0; i <= lastAlpha; i++) {
                     var (_, _, _, a) = cpm[i].RGBA();
-                    a >>= (int)(8);
+                    a >>= 8;
                     fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), " %d"u8, a);
                 }
-                io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
+                io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n");
             }
-        } else 
-        if (strings.HasPrefix(filename, "ft"u8)) {
+        } else if (strings.HasPrefix(filename, "ft")) {
             {
                 var (s, ok) = fakebKGDs[filename, ꟷ]; if (ok) {
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
@@ -282,15 +292,18 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                     useTransparent = true;
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
                     var exprᴛ2 = filename;
-                    if (exprᴛ2 == "ftbbn0g01"u8 || exprᴛ2 == "ftbbn0g02"u8 || exprᴛ2 == "ftbbn0g04"u8) {
+                    switch (ᐧ) {
+                    case {} when exprᴛ2 == "ftbbn0g01"u8 || exprᴛ2 == "ftbbn0g02"u8 || exprᴛ2 == "ftbbn0g04"u8: {
                         // The standard image package doesn't have a "gray with
                         // alpha" type. Instead, we use an image.NRGBA.
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    gray: %d;\n"u8, c.R);
+                        break;
                     }
-                    else { /* default: */
+                    default: {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    red: %d; green: %d; blue: %d;\n"u8, c.R, c.G, c.B);
-                    }
-                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
+                        break;
+                    }}
+                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n");
                 }
                 break;
             }
@@ -299,15 +312,18 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                     useTransparent = true;
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
                     var exprᴛ3 = filename;
-                    if (exprᴛ3 == "ftbwn0g16"u8) {
+                    switch (ᐧ) {
+                    case {} when exprᴛ3 == "ftbwn0g16"u8: {
                         // The standard image package doesn't have a "gray16 with
                         // alpha" type. Instead, we use an image.NRGBA64.
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    gray: %d;\n"u8, c.R);
+                        break;
                     }
-                    else { /* default: */
+                    default: {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    red: %d; green: %d; blue: %d;\n"u8, c.R, c.G, c.B);
-                    }
-                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
+                        break;
+                    }}
+                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n");
                 }
                 break;
             }}
@@ -349,16 +365,19 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
                     var nrgba = png.At(x, y)._<color.NRGBA>();
                     var exprᴛ4 = filename;
-                    if (exprᴛ4 == "ftbbn0g01"u8 || exprᴛ4 == "ftbbn0g02"u8 || exprᴛ4 == "ftbbn0g04"u8) {
+                    switch (ᐧ) {
+                    case {} when exprᴛ4 == "ftbbn0g01"u8 || exprᴛ4 == "ftbbn0g02"u8 || exprᴛ4 == "ftbbn0g04"u8: {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x"u8, nrgba.R);
+                        break;
                     }
-                    else { /* default: */
-                        if (useTransparent){
+                    default: {
+                        if (useTransparent) {
                             fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x%02x%02x "u8, nrgba.R, nrgba.G, nrgba.B);
                         } else {
                             fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x%02x%02x%02x "u8, nrgba.R, nrgba.G, nrgba.B, nrgba.A);
                         }
-                    }
+                        break;
+                    }}
                 }
                 break;
             }
@@ -366,22 +385,25 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
                     var nrgba64 = png.At(x, y)._<color.NRGBA64>();
                     var exprᴛ5 = filename;
-                    if (exprᴛ5 == "ftbwn0g16"u8) {
+                    switch (ᐧ) {
+                    case {} when exprᴛ5 == "ftbwn0g16"u8: {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%04x "u8, nrgba64.R);
+                        break;
                     }
-                    else { /* default: */
-                        if (useTransparent){
+                    default: {
+                        if (useTransparent) {
                             fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%04x%04x%04x "u8, nrgba64.R, nrgba64.G, nrgba64.B);
                         } else {
                             fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%04x%04x%04x%04x "u8, nrgba64.R, nrgba64.G, nrgba64.B, nrgba64.A);
                         }
-                    }
+                        break;
+                    }}
                 }
                 break;
             }
-            case {} when cpm != default!: {
-                nint b = default!;
-                nint c = default!;
+            case {} when cpm != nil: {
+                nint b = default;
+                nint c = default;
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
                     b = b.Lsh((nuint)bitdepth) | (nint)paletted.ColorIndexAt(x, y);
                     c++;
@@ -400,18 +422,19 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 }
                 break;
             }}
-            io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "\n"u8);
+            io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "\n");
         }
-        io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
+        io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rgbˢ = "# rgb = ("u8;
+internal static ref readonly @string rgbˢ => ref rgbˢᵇ;
+private static readonly @string rgbˢᵇ = "# rgb = ("u8;
 
-public static partial void TestReader(ж<testing.T> Ꮡt) {
+public static partial void TestReader(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var names = filenames;
@@ -421,8 +444,8 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
         foreach (var (_, fn) in names) {
             // Read the .png file.
             var (img, err) = readPNG("testdata/pngsuite/"u8 + fn + ".png"u8);
-            if (err != default!) {
-                Ꮡt.Error(fn, err);
+            if (err != nil) {
+                t.Error(fn, err);
                 continue;
             }
 
@@ -431,7 +454,7 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
                 // so we just check a single random pixel.
                 var c = img.At(2, 1)._<color.NRGBA64>();
                 if (c.R != 0x11a7 || c.G != 0x11a7 || c.B != 0x11a7 || c.A != 0x1085) {
-                    Ꮡt.Error(fn, fmt.Errorf("wrong pixel value at (2, 1): %x"u8, c));
+                    t.Error(fn, fmt.Errorf("wrong pixel value at (2, 1): %x"u8, c));
                 }
                 continue;
             }
@@ -444,8 +467,8 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
 
             // Read the .sng file.
             (var sf, err) = os.Open("testdata/pngsuite/"u8 + fn + ".sng"u8);
-            if (err != default!) {
-                Ꮡt.Error(fn, err);
+            if (err != nil) {
+                t.Error(fn, err);
                 continue;
             }
             var sfʗ1 = sf;
@@ -453,14 +476,14 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
             var sb = bufio.NewScanner(new png_test_package.os_FileжReader(sf));
 
             // Compare the two, in SNG format, line by line.
-            while (ᐧ) {
+            for (;;) {
                 var pdone = !pb.Scan();
                 var sdone = !sb.Scan();
                 if (pdone && sdone) {
                     break;
                 }
                 if (pdone || sdone) {
-                    Ꮡt.Errorf("%s: Different sizes"u8, fn);
+                    t.Errorf("%s: Different sizes", fn);
                     break;
                 }
                 @string ps = pb.Text();
@@ -474,24 +497,24 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
                 //	# rgb = (0xff,0xff,0xff)
                 //	# rgb = (0x00,0x00,0xff)
                 // We strip any such name.
-                if (strings.Contains(ss, rgbˢ) && !strings.HasSuffix(ss, ")"u8)) {
+                if (strings.Contains(ss, rgbˢ) && !strings.HasSuffix(ss, ")")) {
                     {
-                        nint i = strings.LastIndex(ss, ") "u8); if (i >= 0) {
+                        nint i = strings.LastIndex(ss, ") "); if (i >= 0) {
                             ss = ss.slice(0, i + 1);
                         }
                     }
                 }
 
                 if (ps != ss) {
-                    Ꮡt.Errorf("%s: Mismatch\n%s\nversus\n%s\n"u8, fn, ps, ss);
+                    t.Errorf("%s: Mismatch\n%s\nversus\n%s\n", fn, ps, ss);
                     break;
                 }
             }
-            if (pb.Err() != default!) {
-                Ꮡt.Error(fn, pb.Err());
+            if (pb.Err() != nil) {
+                t.Error(fn, pb.Err());
             }
-            if (sb.Err() != default!) {
-                Ꮡt.Error(fn, sb.Err());
+            if (sb.Err() != nil) {
+                t.Error(fn, sb.Err());
             }
         }
     }
@@ -503,52 +526,52 @@ partial struct readerErrorsᴛ1 /*dyn*/ {
     internal @string @file;
     internal @string err;
 }
-internal static slice<readerErrorsᴛ1> readerErrors = new readerErrorsᴛ1[]{
-    new("invalid-zlib.png"u8, "zlib: invalid checksum"u8),
-    new("invalid-crc32.png"u8, "invalid checksum"u8),
-    new("invalid-noend.png"u8, "unexpected EOF"u8),
-    new("invalid-trunc.png"u8, "unexpected EOF"u8)
-}.slice();
+internal static slice<readerErrorsᴛ1> readerErrors = slice<readerErrorsᴛ1>([
+    new("invalid-zlib.png", "zlib: invalid checksum"),
+    new("invalid-crc32.png", "invalid checksum"),
+    new("invalid-noend.png", "unexpected EOF"),
+    new("invalid-trunc.png", "unexpected EOF")
+]);
 
-public static void TestReaderError(ж<testing.T> Ꮡt) {
+public static void TestReaderError(ж<testing.T> t) {
     foreach (var (_, tt) in readerErrors) {
         var (img, err) = readPNG("testdata/"u8 + tt.@file);
-        if (err == default!) {
-            Ꮡt.Errorf("decoding %s: missing error"u8, tt.@file);
+        if (err == nil) {
+            t.Errorf("decoding %s: missing error", tt.@file);
             continue;
         }
         if (!strings.Contains(err.Error(), tt.err)) {
-            Ꮡt.Errorf("decoding %s: %s, want %s"u8, tt.@file, err, tt.err);
+            t.Errorf("decoding %s: %s, want %s", tt.@file, err, tt.err);
         }
-        if (img != default!) {
-            Ꮡt.Errorf("decoding %s: have image + error"u8, tt.@file);
+        if (img != nil) {
+            t.Errorf("decoding %s: have image + error", tt.@file);
         }
     }
 }
 
-public static void TestPalettedDecodeConfig(ж<testing.T> Ꮡt) {
+public static void TestPalettedDecodeConfig(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         foreach (var (_, fn) in filenamesPaletted) {
             var (f, err) = os.Open("testdata/pngsuite/"u8 + fn + ".png"u8);
-            if (err != default!) {
-                Ꮡt.Errorf("%s: open failed: %v"u8, fn, err);
+            if (err != nil) {
+                t.Errorf("%s: open failed: %v", fn, err);
                 continue;
             }
             var fʗ1 = f;
             defer(() => fʗ1.Close(), ref ᒐ);
             (var cfg, err) = DecodeConfig(new png_test_package.os_FileжReader(f));
-            if (err != default!) {
-                Ꮡt.Errorf("%s: %v"u8, fn, err);
+            if (err != nil) {
+                t.Errorf("%s: %v", fn, err);
                 continue;
             }
             var (pal, ok) = cfg.ColorModel._<color.Palette>(ᐧ);
             if (!ok) {
-                Ꮡt.Errorf("%s: expected paletted color model"u8, fn);
+                t.Errorf("%s: expected paletted color model", fn);
                 continue;
             }
-            if (pal == default!) {
-                Ꮡt.Errorf("%s: palette not initialized"u8, fn);
+            if (pal == nil) {
+                t.Errorf("%s: palette not initialized", fn);
                 continue;
             }
         }
@@ -558,20 +581,22 @@ public static void TestPalettedDecodeConfig(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataGrayGradientPngˢ = "testdata/gray-gradient.png"u8;
-internal static readonly @string testdataGrayGradientˢ = "testdata/gray-gradient.interlaced.png"u8;
+internal static ref readonly @string testdataGrayGradientPngˢ => ref testdataGrayGradientPngˢᵇ;
+private static readonly @string testdataGrayGradientPngˢᵇ = "testdata/gray-gradient.png"u8;
+internal static ref readonly @string testdataGrayGradientˢ => ref testdataGrayGradientˢᵇ;
+private static readonly @string testdataGrayGradientˢᵇ = "testdata/gray-gradient.interlaced.png"u8;
 
-public static void TestInterlaced(ж<testing.T> Ꮡt) {
+public static void TestInterlaced(ж<testing.T> t) {
     var (a, err) = readPNG(testdataGrayGradientPngˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var b, err) = readPNG(testdataGrayGradientˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (!reflect.DeepEqual(a, b)) {
-        Ꮡt.Fatalf("decodings differ:\nnon-interlaced:\n%#v\ninterlaced:\n%#v"u8, a, b);
+        t.Fatalf("decodings differ:\nnon-interlaced:\n%#v\ninterlaced:\n%#v", a, b);
     }
 }
 
@@ -579,15 +604,18 @@ public static void TestInterlaced(ж<testing.T> Ꮡt) {
 internal static readonly object gotNilErrorWantNonNilˢ = (@string)"got nil error, want non-nil"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string ihdrᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0xbc, 0xea, 0xe9, 0xfb}));
+internal static ref readonly @string ihdrᶜ => ref ihdrᶜᵇ;
+private static readonly @string ihdrᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0xbc, 0xea, 0xe9, 0xfb}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string idatᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+internal static ref readonly @string idatᶜ => ref idatᶜᵇ;
+private static readonly @string idatᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string iendᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
+internal static ref readonly @string iendᶜ => ref iendᶜᵇ;
+private static readonly @string iendᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
 
-public static void TestIncompleteIDATOnRowBoundary(ж<testing.T> Ꮡt) {
+public static void TestIncompleteIDATOnRowBoundary(ж<testing.T> t) {
     // The following is an invalid 1x2 grayscale PNG image. The header is OK,
     // but the zlib-compressed IDAT payload contains two bytes "\x02\x00",
     // which is only one row of data (the leading "\x02" is a row filter).
@@ -595,8 +623,8 @@ public static void TestIncompleteIDATOnRowBoundary(ж<testing.T> Ꮡt) {
     @string idat = idatᶜ;
     @string iend = iendᶜ;
     var (_, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idat + iend)));
-    if (err == default!) {
-        Ꮡt.Fatal(gotNilErrorWantNonNilˢ);
+    if (err == nil) {
+        t.Fatal(gotNilErrorWantNonNilˢ);
     }
 }
 
@@ -604,21 +632,26 @@ public static void TestIncompleteIDATOnRowBoundary(ж<testing.T> Ꮡt) {
 internal static readonly object decodedImageFromTrailingˢ = (@string)"decoded image from trailing IDAT chunk"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string ihdrᶜ1 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00, 0x3a, 0x7e, 0x9b, 0x55}));
+internal static ref readonly @string ihdrᶜ1 => ref ihdrᶜ1ᵇ;
+private static readonly @string ihdrᶜ1ᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00, 0x3a, 0x7e, 0x9b, 0x55}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string idatWhiteᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0xfa, 0x0f, 0x08, 0x00, 0x00, 0xff, 0xff, 0x01, 0x05, 0x01, 0x02, 0x5a, 0xdd, 0x39, 0xcd}));
+internal static ref readonly @string idatWhiteᶜ => ref idatWhiteᶜᵇ;
+private static readonly @string idatWhiteᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0xfa, 0x0f, 0x08, 0x00, 0x00, 0xff, 0xff, 0x01, 0x05, 0x01, 0x02, 0x5a, 0xdd, 0x39, 0xcd}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string idatZeroᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x44, 0x41, 0x54, 0x35, 0xaf, 0x06, 0x1e}));
+internal static ref readonly @string idatZeroᶜ => ref idatZeroᶜᵇ;
+private static readonly @string idatZeroᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x44, 0x41, 0x54, 0x35, 0xaf, 0x06, 0x1e}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string iendᶜ1 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
+internal static ref readonly @string iendᶜ1 => ref iendᶜ1ᵇ;
+private static readonly @string iendᶜ1ᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string idatBlackᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+internal static ref readonly @string idatBlackᶜ => ref idatBlackᶜᵇ;
+private static readonly @string idatBlackᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
 
-public static void TestTrailingIDATChunks(ж<testing.T> Ꮡt) {
+public static void TestTrailingIDATChunks(ж<testing.T> t) {
     // The following is a valid 1x1 PNG image containing color.Gray{255} and
     // a trailing zero-length IDAT chunk (see PNG specification section 12.9):
     @string ihdr = ihdrᶜ1;
@@ -626,8 +659,8 @@ public static void TestTrailingIDATChunks(ж<testing.T> Ꮡt) {
     @string idatZero = idatZeroᶜ;
     @string iend = iendᶜ1;
     var (_, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idatWhite + idatZero + iend)));
-    if (err != default!) {
-        Ꮡt.Fatalf("decoding valid image: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("decoding valid image: %v", err);
     }
 
     // Non-zero-length trailing IDAT chunks should be ignored (recoverable error).
@@ -635,30 +668,35 @@ public static void TestTrailingIDATChunks(ж<testing.T> Ꮡt) {
     @string idatBlack = idatBlackᶜ;
 
     (var img, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idatWhite + idatBlack + iend)));
-    if (err != default!) {
-        Ꮡt.Fatalf("trailing IDAT not ignored: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("trailing IDAT not ignored: %v", err);
     }
     if (AreEqual(img.At(0, 0), (new color.Gray(0)))) {
-        Ꮡt.Fatal(decodedImageFromTrailingˢ);
+        t.Fatal(decodedImageFromTrailingˢ);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string ihdrᶜ2 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x03, 0x00, 0x00, 0x00, 0x28, 0xcb, 0x34, 0xbb}));
+internal static ref readonly @string ihdrᶜ2 => ref ihdrᶜ2ᵇ;
+private static readonly @string ihdrᶜ2ᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x03, 0x00, 0x00, 0x00, 0x28, 0xcb, 0x34, 0xbb}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string plteᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x03, 0x50, 0x4c, 0x54, 0x45, 0xff, 0x00, 0x00, 0x19, 0xe2, 0x09, 0x37}));
+internal static ref readonly @string plteᶜ => ref plteᶜᵇ;
+private static readonly @string plteᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x03, 0x50, 0x4c, 0x54, 0x45, 0xff, 0x00, 0x00, 0x19, 0xe2, 0x09, 0x37}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string trnsᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x01, 0x74, 0x52, 0x4e, 0x53, 0x7f, 0x80, 0x5c, 0xb4, 0xcb}));
+internal static ref readonly @string trnsᶜ => ref trnsᶜᵇ;
+private static readonly @string trnsᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x01, 0x74, 0x52, 0x4e, 0x53, 0x7f, 0x80, 0x5c, 0xb4, 0xcb}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string idatᶜ1 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
+internal static ref readonly @string idatᶜ1 => ref idatᶜ1ᵇ;
+private static readonly @string idatᶜ1ᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x00, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0x06, 0x00, 0x03, 0xfa, 0xd0, 0x59, 0xae}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string iendᶜ2 = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
+internal static ref readonly @string iendᶜ2 => ref iendᶜ2ᵇ;
+private static readonly @string iendᶜ2ᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82}));
 
-public static void TestMultipletRNSChunks(ж<testing.T> Ꮡt) {
+public static void TestMultipletRNSChunks(ж<testing.T> t) {
     /*
 		The following is a valid 1x1 paletted PNG image with a 1-element palette
 		containing color.NRGBA{0xff, 0x00, 0x00, 0x7f}:
@@ -677,7 +715,7 @@ public static void TestMultipletRNSChunks(ж<testing.T> Ꮡt) {
     @string idat = idatᶜ1;
     @string iend = iendᶜ2;
     for (nint i = 0; i < 4; i++) {
-        slice<byte> b = default!;
+        slice<byte> b = default;
         b = append(b, pngHeader.ꓸꓸꓸ);
         b = append(b, ihdr.ꓸꓸꓸ);
         b = append(b, plte.ꓸꓸꓸ);
@@ -687,62 +725,61 @@ public static void TestMultipletRNSChunks(ж<testing.T> Ꮡt) {
         b = append(b, idat.ꓸꓸꓸ);
         b = append(b, iend.ꓸꓸꓸ);
 
-        color.Color want = default!;
+        color.Color want = default;
         var (m, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
         switch (i) {
         case 0: {
-            if (err != default!) {
-                Ꮡt.Errorf("%d tRNS chunks: %v"u8, i, err);
+            if (err != nil) {
+                t.Errorf("%d tRNS chunks: %v", i, err);
                 continue;
             }
             want = new colorꓸRGBA(0xff, 0x00, 0x00, 0xff);
             break;
         }
         case 1: {
-            if (err != default!) {
-                Ꮡt.Errorf("%d tRNS chunks: %v"u8, i, err);
+            if (err != nil) {
+                t.Errorf("%d tRNS chunks: %v", i, err);
                 continue;
             }
             want = new color.NRGBA(0xff, 0x00, 0x00, 0x7f);
             break;
         }
         default: {
-            if (err == default!) {
-                Ꮡt.Errorf("%d tRNS chunks: got nil error, want non-nil"u8, i);
+            if (err == nil) {
+                t.Errorf("%d tRNS chunks: got nil error, want non-nil", i);
             }
             continue;
             break;
         }}
         {
             var got = m.At(0, 0); if (!AreEqual(got, want)) {
-                Ꮡt.Errorf("%d tRNS chunks: got %T %v, want %T %v"u8, i, got, got, want, want);
+                t.Errorf("%d tRNS chunks: got %T %v, want %T %v", i, got, got, want, want);
             }
         }
     }
 }
 
-public static void TestUnknownChunkLengthUnderflow(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var data = new byte[]{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xff,
+public static void TestUnknownChunkLengthUnderflow(ж<testing.T> t) {
+    var data = slice<byte>([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xff,
         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x06, 0xf4, 0x7c, 0x55, 0x04, 0x1a,
         0xd3, 0x11, 0x9a, 0x73, 0x00, 0x00, 0xf8, 0x1e, 0xf3, 0x2e, 0x00, 0x00,
         0x01, 0x00, 0xff, 0xff, 0xff, 0xff, 0x07, 0xf4, 0x7c, 0x55, 0x04, 0x1a,
-        0xd3}.slice();
+        0xd3]);
     var (_, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(data)));
-    if (err == default!) {
-        Ꮡt.Errorf("Didn't fail reading an unknown chunk with length 0xffffffff"u8);
+    if (err == nil) {
+        t.Errorf("Didn't fail reading an unknown chunk with length 0xffffffff");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataInvalidPaletteˢ = "testdata/invalid-palette.png"u8;
+internal static ref readonly @string testdataInvalidPaletteˢ => ref testdataInvalidPaletteˢᵇ;
+private static readonly @string testdataInvalidPaletteˢᵇ = "testdata/invalid-palette.png"u8;
 
-public static void TestPaletted8OutOfRangePixel(ж<testing.T> Ꮡt) {
+public static void TestPaletted8OutOfRangePixel(ж<testing.T> t) {
     // IDAT contains a reference to a palette index that does not exist in the file.
     var (img, err) = readPNG(testdataInvalidPaletteˢ);
-    if (err != default!) {
-        Ꮡt.Errorf("decoding invalid-palette.png: unexpected error %v"u8, err);
+    if (err != nil) {
+        t.Errorf("decoding invalid-palette.png: unexpected error %v", err);
         return;
     }
 
@@ -750,20 +787,22 @@ public static void TestPaletted8OutOfRangePixel(ж<testing.T> Ꮡt) {
     var want = new colorꓸRGBA(0x00, 0x00, 0x00, 0xff);
     {
         var got = img.At(15, 15); if (!AreEqual(got, want)) {
-            Ꮡt.Errorf("got %F %v, expected %T %v"u8, got, got, want, want);
+            t.Errorf("got %F %v, expected %T %v", got, got, want, want);
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string hexᶜ = "0123456789abcdef"u8;
+internal static ref readonly @string hexᶜ => ref hexᶜᵇ;
+private static readonly @string hexᶜᵇ = "0123456789abcdef"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ = ".. .. .. ce bd bd bd bd bd bd bd bd bd bd e6 \n.. .. .. 7b 84 94 94 94 94 94 94 94 94 6b bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \ne6 bd bd 7b a5 bd bd f7 .. .. .. .. .. 8c bd \nbd 6b 94 94 94 94 5a ef .. .. .. .. .. 8c bd \nbd 8c .. .. .. .. 63 ad ad ad ad ad ad 73 bd \nbd 8c .. .. .. .. 63 9c 9c 9c 9c 9c 9c 9c de \nbd 6b 94 94 94 94 5a ef .. .. .. .. .. .. .. \ne6 b5 b5 b5 b5 b5 b5 f7 .. .. .. .. .. .. .. \n";
+internal static ref readonly @string wantᶜ => ref wantᶜᵇ;
+private static readonly @string wantᶜᵇ = ".. .. .. ce bd bd bd bd bd bd bd bd bd bd e6 \n.. .. .. 7b 84 94 94 94 94 94 94 94 94 6b bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \n.. .. .. 7b d6 .. .. .. .. .. .. .. .. 8c bd \ne6 bd bd 7b a5 bd bd f7 .. .. .. .. .. 8c bd \nbd 6b 94 94 94 94 5a ef .. .. .. .. .. 8c bd \nbd 8c .. .. .. .. 63 ad ad ad ad ad ad 73 bd \nbd 8c .. .. .. .. 63 9c 9c 9c 9c 9c 9c 9c de \nbd 6b 94 94 94 94 5a ef .. .. .. .. .. .. .. \ne6 b5 b5 b5 b5 b5 b5 f7 .. .. .. .. .. .. .. \n";
 
-public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
+public static void TestGray8Transparent(ж<testing.T> t) {
     // These bytes come from https://golang.org/issues/19553
-    var (m, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(new byte[]{
+    var (m, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>([
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
         0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x0b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x85, 0x2c, 0x88,
         0x80, 0x00, 0x00, 0x00, 0x02, 0x74, 0x52, 0x4e, 0x53, 0x00, 0xff, 0x5b, 0x91, 0x22, 0xb5, 0x00,
@@ -777,37 +816,37 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
         0x92, 0xd7, 0x82, 0x41, 0x31, 0x9c, 0x3f, 0x07, 0x02, 0xee, 0xa1, 0xaa, 0xff, 0xff, 0x9f, 0xe1,
         0xd9, 0x56, 0x30, 0xf8, 0x0e, 0xe5, 0x03, 0x00, 0xa9, 0x42, 0x84, 0x3d, 0xdf, 0x8f, 0xa6, 0x8f,
         0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-    }.slice())));
-    if (err != default!) {
-        Ꮡt.Fatalf("Decode: %v"u8, err);
+    ]))));
+    if (err != nil) {
+        t.Fatalf("Decode: %v", err);
     }
 
     @string hex = hexᶜ;
-    slice<byte> got = default!;
+    slice<byte> got = default;
     var bounds = m.Bounds();
     for (nint y = bounds.Min.Y; y < bounds.Max.Y; y++) {
         for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
             {
-                var (r, _, _, a) = m.At(x, y).RGBA(); if (a != 0){
+                var (r, _, _, a) = m.At(x, y).RGBA(); if (a != 0) {
                     got = append(got,
                         hex[(0x0f & (r >> 12))],
                         hex[(0x0f & (r >> 8))],
-                        (byte)((rune)' '));
+                        (byte)' ');
                 } else {
                     got = append(got,
-                        (byte)((rune)'.'),
-                        (byte)((rune)'.'),
-                        (byte)((rune)' '));
+                        (byte)'.',
+                        (byte)'.',
+                        (byte)' ');
                 }
             }
         }
-        got = append(got, (byte)((rune)'\n'));
+        got = append(got, (byte)'\n');
     }
 
     @string want = wantᶜ;
 
     if (((sstring)got) != want) {
-        Ꮡt.Errorf("got:\n%swant:\n%s"u8, got, want);
+        t.Errorf("got:\n%swant:\n%s", got, want);
     }
 }
 
@@ -821,24 +860,24 @@ internal partial struct TestDimensionOverflow_testCases /*dyn*/ {
     internal nint height;
 }
 
-public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
+public static void TestDimensionOverflow(ж<testing.T> t) {
     nint maxInt32AsInt = (nint)((2147483648L) - 1);
     var have32BitInts = 0 > (1 + maxInt32AsInt);
 
-    var testCases = new TestDimensionOverflow_testCases[]{
+    var testCases = slice<TestDimensionOverflow_testCases>([
         // These bytes come from https://golang.org/issues/22304
         //
         // It encodes a 2147483646 × 2147483646 (i.e. 0x7ffffffe × 0x7ffffffe)
         // NRGBA image. The (width × height) per se doesn't overflow an int64, but
         // (width × height × bytesPerPixel) will.
         new(
-            src: new byte[]{
+            src: slice<byte>([
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
                 0x7f, 0xff, 0xff, 0xfe, 0x7f, 0xff, 0xff, 0xfe, 0x08, 0x06, 0x00, 0x00, 0x00, 0x30, 0x57, 0xb3,
                 0xfd, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x20, 0x12, 0x8c,
                 0x2a, 0xa4, 0xb3, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x38, 0x00, 0x15, 0x2d, 0xef,
                 0x5f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-            }.slice(),
+            ]),
             // It's debatable whether DecodeConfig (which does not allocate a
             // pixel buffer, unlike Decode) should fail in this case. The Go
             // standard library has made its choice, and the standard library
@@ -851,13 +890,13 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
         // The next three cases come from https://golang.org/issues/38435
 
         new(
-            src: new byte[]{
+            src: slice<byte>([
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
                 0x00, 0x00, 0xb5, 0x04, 0x00, 0x00, 0xb5, 0x04, 0x08, 0x06, 0x00, 0x00, 0x00, 0xf5, 0x60, 0x2c,
                 0xb8, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x20, 0x12, 0x8c,
                 0x2a, 0xa4, 0xb3, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x38, 0x00, 0x15, 0x2d, 0xef,
                 0x5f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-            }.slice(),
+            ]),
             // Here, width * height = 0x7ffea810, just under MaxInt32, but at 4
             // bytes per pixel, the number of pixels overflows an int32.
             unsupportedConfig: have32BitInts,
@@ -866,68 +905,63 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
         ),
 
         new(
-            src: new byte[]{
+            src: slice<byte>([
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
                 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x30, 0x6e, 0xc5,
                 0x21, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x20, 0x12, 0x8c,
                 0x2a, 0xa4, 0xb3, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x38, 0x00, 0x15, 0x2d, 0xef,
                 0x5f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-            }.slice(),
+            ]),
             unsupportedConfig: false,
             width: 0x04000000,
             height: 0x00000001
         ),
 
         new(
-            src: new byte[]{
+            src: slice<byte>([
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
                 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0xaa, 0xd4, 0x7c,
                 0xda, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x66, 0x20, 0x12, 0x30,
                 0x8d, 0x2a, 0xa4, 0xaf, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x14, 0xd2, 0x00, 0x16, 0x00,
                 0x00, 0x00
-            }.slice(),
+            ]),
             unsupportedConfig: false,
             width: 0x08000000,
             height: 0x00000001
         )
-    }.slice();
+    ]);
 
     foreach (var (i, tc) in testCases) {
         var (cfg, err) = DecodeConfig(new png_test_package.bytes_ReaderжReader(bytes.NewReader(tc.src)));
-        if (tc.unsupportedConfig){
-            if (err == default!){
-                Ꮡt.Errorf("i=%d: DecodeConfig: got nil error, want non-nil"u8, i);
-            } else 
-            {
+        if (tc.unsupportedConfig) {
+            if (err == nil) {
+                t.Errorf("i=%d: DecodeConfig: got nil error, want non-nil", i);
+            } else {
                 var (_, ok) = err._<UnsupportedError>(ᐧ); if (!ok) {
-                    Ꮡt.Fatalf("Decode: got %v (of type %T), want non-nil error (of type png.UnsupportedError)"u8, err, err);
+                    t.Fatalf("Decode: got %v (of type %T), want non-nil error (of type png.UnsupportedError)", err, err);
                 }
             }
             continue;
-        } else 
-        if (err != default!){
-            Ꮡt.Errorf("i=%d: DecodeConfig: %v"u8, i, err);
+        } else if (err != nil) {
+            t.Errorf("i=%d: DecodeConfig: %v", i, err);
             continue;
-        } else 
-        if (cfg.Width != tc.width){
-            Ꮡt.Errorf("i=%d: width: got %d, want %d"u8, i, cfg.Width, tc.width);
+        } else if (cfg.Width != tc.width) {
+            t.Errorf("i=%d: width: got %d, want %d", i, cfg.Width, tc.width);
             continue;
-        } else 
-        if (cfg.Height != tc.height) {
-            Ꮡt.Errorf("i=%d: height: got %d, want %d"u8, i, cfg.Height, tc.height);
+        } else if (cfg.Height != tc.height) {
+            t.Errorf("i=%d: height: got %d, want %d", i, cfg.Height, tc.height);
             continue;
         }
 
         {
-            var nPixels = (int64)cfg.Width * (int64)cfg.Height; if (nPixels > 0x7f000000){
+            var nPixels = (int64)cfg.Width * (int64)cfg.Height; if (nPixels > 0x7f000000) {
                 // In theory, calling Decode would succeed, given several gigabytes
                 // of memory. In practice, trying to make a []uint8 big enough to
                 // hold all of the pixels can often result in OOM (out of memory).
                 // OOM is unrecoverable; we can't write a test that passes when OOM
                 // happens. Instead we skip the Decode call (and its tests).
                 continue;
-            } else 
-            if (testing.Short()) {
+            } else if (testing.Short()) {
                 // Even for smaller image dimensions, calling Decode might allocate
                 // 1 GiB or more of memory. This is usually feasible, and we want
                 // to check that calling Decode doesn't panic if there's enough
@@ -940,18 +974,18 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
 
         // Even if we don't panic, these aren't valid PNG images.
         {
-            var (_, errΔ1) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(tc.src))); if (errΔ1 == default!) {
-                Ꮡt.Errorf("i=%d: Decode: got nil error, want non-nil"u8, i);
+            var (_, errΔ1) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(tc.src))); if (errΔ1 == nil) {
+                t.Errorf("i=%d: Decode: got nil error, want non-nil", i);
             }
         }
     }
 
     if (testing.Short()) {
-        Ꮡt.Skip(skippingTestsWhichˢ);
+        t.Skip(skippingTestsWhichˢ);
     }
 }
 
-public static void TestDecodePalettedWithTransparency(ж<testing.T> Ꮡt) {
+public static void TestDecodePalettedWithTransparency(ж<testing.T> t) {
     // These bytes come from https://go.dev/issue/54325
     //
     // Per the PNG spec, a PLTE chunk contains 3 (not 4) bytes per palette
@@ -962,7 +996,7 @@ public static void TestDecodePalettedWithTransparency(ж<testing.T> Ꮡt) {
     //
     // Both Decode and DecodeConfig should pick up that the first palette
     // entry's alpha is zero.
-    var src = new byte[]{
+    var src = slice<byte>([
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
         0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x20, 0x04, 0x03, 0x00, 0x00, 0x00, 0x81, 0x54, 0x67,
         0xc7, 0x00, 0x00, 0x00, 0x30, 0x50, 0x4c, 0x54, 0x45, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x0e,
@@ -987,25 +1021,23 @@ public static void TestDecodePalettedWithTransparency(ж<testing.T> Ꮡt) {
         0xa1, 0x40, 0x84, 0x2c, 0xe0, 0xc4, 0xa0, 0xb2, 0x28, 0x14, 0xc1, 0x67, 0xe9, 0x50, 0x60, 0x60,
         0xea, 0x70, 0x40, 0x12, 0x00, 0x79, 0x54, 0x09, 0x22, 0x00, 0x00, 0x30, 0xf3, 0x52, 0x87, 0xc6,
         0xe4, 0xbd, 0x70, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-    }.slice();
+    ]);
 
     var (cfg, err) = DecodeConfig(new png_test_package.bytes_ReaderжReader(bytes.NewReader(src)));
-    if (err != default!){
-        Ꮡt.Fatalf("DecodeConfig: %v"u8, err);
-    } else 
-    {
+    if (err != nil) {
+        t.Fatalf("DecodeConfig: %v", err);
+    } else {
         var (_, _, _, alpha) = cfg.ColorModel._<color.Palette>()[0].RGBA(); if (alpha != 0) {
-            Ꮡt.Errorf("DecodeConfig: got %d, want 0"u8, alpha);
+            t.Errorf("DecodeConfig: got %d, want 0", alpha);
         }
     }
 
     (var img, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(src)));
-    if (err != default!){
-        Ꮡt.Fatalf("Decode: %v"u8, err);
-    } else 
-    {
+    if (err != nil) {
+        t.Fatalf("Decode: %v", err);
+    } else {
         var (_, _, _, alpha) = img.ColorModel()._<color.Palette>()[0].RGBA(); if (alpha != 0) {
-            Ꮡt.Errorf("Decode: got %d, want 0"u8, alpha);
+            t.Errorf("Decode: got %d, want 0", alpha);
         }
     }
 }
@@ -1014,11 +1046,11 @@ internal static void benchmarkDecode(ж<testing.B> Ꮡb, @string filename, nint 
     ref var b = ref Ꮡb.DerefOrNull();
 
     var (data, err) = os.ReadFile(filename);
-    if (err != default!) {
+    if (err != nil) {
         Ꮡb.Fatal(err);
     }
     (var cfg, err) = DecodeConfig(new png_test_package.bytes_ReaderжReader(bytes.NewReader(data)));
-    if (err != default!) {
+    if (err != nil) {
         Ꮡb.Fatal(err);
     }
     b.SetBytes((int64)(cfg.Width * cfg.Height * bytesPerPixel));
@@ -1030,45 +1062,51 @@ internal static void benchmarkDecode(ж<testing.B> Ꮡb, @string filename, nint 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataBenchGrayPngˢ = "testdata/benchGray.png"u8;
+internal static ref readonly @string testdataBenchGrayPngˢ => ref testdataBenchGrayPngˢᵇ;
+private static readonly @string testdataBenchGrayPngˢᵇ = "testdata/benchGray.png"u8;
 
-public static void BenchmarkDecodeGray(ж<testing.B> Ꮡb) {
-    benchmarkDecode(Ꮡb, testdataBenchGrayPngˢ, 1);
+public static void BenchmarkDecodeGray(ж<testing.B> b) {
+    benchmarkDecode(b, testdataBenchGrayPngˢ, 1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataBenchNRGBAˢ = "testdata/benchNRGBA-gradient.png"u8;
+internal static ref readonly @string testdataBenchNRGBAˢ => ref testdataBenchNRGBAˢᵇ;
+private static readonly @string testdataBenchNRGBAˢᵇ = "testdata/benchNRGBA-gradient.png"u8;
 
-public static void BenchmarkDecodeNRGBAGradient(ж<testing.B> Ꮡb) {
-    benchmarkDecode(Ꮡb, testdataBenchNRGBAˢ, 4);
+public static void BenchmarkDecodeNRGBAGradient(ж<testing.B> b) {
+    benchmarkDecode(b, testdataBenchNRGBAˢ, 4);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataBenchNRGBAOpaqueˢ = "testdata/benchNRGBA-opaque.png"u8;
+internal static ref readonly @string testdataBenchNRGBAOpaqueˢ => ref testdataBenchNRGBAOpaqueˢᵇ;
+private static readonly @string testdataBenchNRGBAOpaqueˢᵇ = "testdata/benchNRGBA-opaque.png"u8;
 
-public static void BenchmarkDecodeNRGBAOpaque(ж<testing.B> Ꮡb) {
-    benchmarkDecode(Ꮡb, testdataBenchNRGBAOpaqueˢ, 4);
+public static void BenchmarkDecodeNRGBAOpaque(ж<testing.B> b) {
+    benchmarkDecode(b, testdataBenchNRGBAOpaqueˢ, 4);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataBenchPalettedPngˢ = "testdata/benchPaletted.png"u8;
+internal static ref readonly @string testdataBenchPalettedPngˢ => ref testdataBenchPalettedPngˢᵇ;
+private static readonly @string testdataBenchPalettedPngˢᵇ = "testdata/benchPaletted.png"u8;
 
-public static void BenchmarkDecodePaletted(ж<testing.B> Ꮡb) {
-    benchmarkDecode(Ꮡb, testdataBenchPalettedPngˢ, 1);
+public static void BenchmarkDecodePaletted(ж<testing.B> b) {
+    benchmarkDecode(b, testdataBenchPalettedPngˢ, 1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataBenchRGBPngˢ = "testdata/benchRGB.png"u8;
+internal static ref readonly @string testdataBenchRGBPngˢ => ref testdataBenchRGBPngˢᵇ;
+private static readonly @string testdataBenchRGBPngˢᵇ = "testdata/benchRGB.png"u8;
 
-public static void BenchmarkDecodeRGB(ж<testing.B> Ꮡb) {
-    benchmarkDecode(Ꮡb, testdataBenchRGBPngˢ, 4);
+public static void BenchmarkDecodeRGB(ж<testing.B> b) {
+    benchmarkDecode(b, testdataBenchRGBPngˢ, 4);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataBenchRGBˢ = "testdata/benchRGB-interlace.png"u8;
+internal static ref readonly @string testdataBenchRGBˢ => ref testdataBenchRGBˢᵇ;
+private static readonly @string testdataBenchRGBˢᵇ = "testdata/benchRGB-interlace.png"u8;
 
-public static void BenchmarkDecodeInterlacing(ж<testing.B> Ꮡb) {
-    benchmarkDecode(Ꮡb, testdataBenchRGBˢ, 4);
+public static void BenchmarkDecodeInterlacing(ж<testing.B> b) {
+    benchmarkDecode(b, testdataBenchRGBˢ, 4);
 }
 
 } // end png_internal_test_package

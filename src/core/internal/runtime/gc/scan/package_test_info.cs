@@ -27,7 +27,7 @@ using static global::go.@internal.runtime.gc.scan_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -37,14 +37,14 @@ using static global::go.@internal.runtime.gc.scan_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/expand_amd64_test.go", "expand_amd64_test.cs", "ABIcgoKU")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/expand_test.go", "expand_test.cs", "ABEggpSSkoKUgoKCgoKUgg==", "19-36:1")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/filter_amd64_test.go", "filter_amd64_test.cs", "ABEcgoKU")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/filter_test.go", "filter_test.cs", "AAsYggASBoKClIKUgpSClIKUgpSClIKUgpSClIKUgpSClIK4ooKClIKCgpSCgqaCgoKUgpSCgIKSgraCgIK2gg==", "17-19:1;20-22:2;23-25:3;26-28:4;29-31:5;32-34:6;35-37:7;38-40:8;41-43:9;44-46:10;47-49:11;50-52:12;53-55:13;56-58:14")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/mem_nounix_test.go", "mem_nounix_test.cs", "AA8agoI=")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/scan_amd64_test.go", "scan_amd64_test.cs", "ABAcgoKU")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/scan_generic_test.go", "scan_generic_test.cs", "AA0Ygg==")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/scan_test.go", "scan_test.cs", "ABsuoqaCkqa4goKCpoKCwoKUgpKCxqSCgoKUgoKUhJKCgoKCgu6CgoKUpoLWgoKClIKCgqaClIKCuIKCgpSCgpSCAAkKoqaCkqa4goKCyqa4goKCgoKUgoKClIKCAAwalMLCgoKCpsKCgoKmgsKCgoL8pLKClIKCgoKUgpSCgoKmpriigpKClKaClJSCgoK0", "44-53:1;65-76:1;70-74:1.1;94-96:1;99-101:2;107-109:3;121-123:1;184-208:1;185-191:1.1;192-198:1.2;200-206:1.3;238-257:1")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/expand_amd64_test.go", "expand_amd64_test.cs", "ABIcgoKU")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/expand_test.go", "expand_test.cs", "ABEggpSSkoKUgoKCgoKUgg==", "19-36:1")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/filter_amd64_test.go", "filter_amd64_test.cs", "ABEcgoKU")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/filter_test.go", "filter_test.cs", "AAsYggAgBoKClIKUgpSClIKUgpSClIKUgpSClIKUgpSClIK4goKClIKCgpSCgqaCgoKUgpSCgIKCgraCgIK2gg==", "17-19:1;20-22:2;23-25:3;26-28:4;29-31:5;32-34:6;35-37:7;38-40:8;41-43:9;44-46:10;47-49:11;50-52:12;53-55:13;56-58:14")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/mem_nounix_test.go", "mem_nounix_test.cs", "AA8agoI=")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_amd64_test.go", "scan_amd64_test.cs", "ABAcgoKU")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_generic_test.go", "scan_generic_test.cs", "AA0Ygg==")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_test.go", "scan_test.cs", "ABsuoqaCkqa4goKCpoKCwoKUgoKCxqSCgoKUgoKUhJKCgoKCgu6CgoKUpoLmgoKClIKCgqaClIKCuIKCgpSCgpSCAAwKoqaCkqa4goKCyqa4goKCgoKUgoKClIKCAAwalMLCgoKCpsKCgoKmgsKCgoL8pLKClIKCgoKUgpSCgoKmpriigpKClKaClJSCgoK0", "44-53:1;65-76:1;70-74:1.1;94-96:1;99-101:2;107-109:3;121-123:1;184-208:1;185-191:1.1;192-198:1.2;200-206:1.3;238-257:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime.gc;

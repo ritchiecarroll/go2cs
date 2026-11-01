@@ -20,17 +20,18 @@ using sha3 = go.crypto.sha3_package;
 
 partial class sha3_test_package {
 
-internal static readonly @string testString = "brekeccakkeccak koax koax"u8;
+internal static ref readonly @string testString => ref testStringᵇ;
+private static readonly @string testStringᵇ = "brekeccakkeccak koax koax"u8;
 
 // testDigests contains functions returning hash.Hash instances
 // with output-length equal to the KAT length for SHA-3, Keccak
 // and SHAKE instances.
 internal static map<@string, Func<ж<sha3.SHA3>>> testDigests = new map<@string, Func<ж<sha3.SHA3>>>{
-    ["SHA3-224"u8] = New224,
-    ["SHA3-256"u8] = New256,
-    ["SHA3-384"u8] = New384,
-    ["SHA3-512"u8] = New512,
-    ["SHA3-Zero"u8] = () => Ꮡ(new SHA3(nil))
+    ["SHA3-224"] = New224,
+    ["SHA3-256"] = New256,
+    ["SHA3-384"] = New384,
+    ["SHA3-512"] = New512,
+    ["SHA3-Zero"] = () => Ꮡ(new SHA3())
 };
 
 // testShakes contains functions that return *sha3.SHAKE instances for
@@ -42,18 +43,19 @@ partial struct testShakesᴛ1 /*dyn*/ {
 }
 internal static map<@string, testShakesᴛ1> testShakes = new map<@string, testShakesᴛ1>{
     // NewCSHAKE without customization produces same result as SHAKE
-    ["SHAKE128"u8] = new(NewCSHAKE128, ""u8, ""u8),
-    ["SHAKE256"u8] = new(NewCSHAKE256, ""u8, ""u8),
-    ["cSHAKE128"u8] = new(NewCSHAKE128, "CSHAKE128"u8, "CustomString"u8),
-    ["cSHAKE256"u8] = new(NewCSHAKE256, "CSHAKE256"u8, "CustomString"u8),
-    ["SHAKE-Zero"u8] = new((slice<byte> N, slice<byte> S) => Ꮡ(new SHAKE(nil)), ""u8, ""u8)
+    ["SHAKE128"] = new(NewCSHAKE128, "", ""),
+    ["SHAKE256"] = new(NewCSHAKE256, "", ""),
+    ["cSHAKE128"] = new(NewCSHAKE128, "CSHAKE128", "CustomString"),
+    ["cSHAKE256"] = new(NewCSHAKE256, "CSHAKE256", "CustomString"),
+    ["SHAKE-Zero"] = new((slice<byte> N, slice<byte> S) => Ꮡ(new SHAKE()), "", "")
 };
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sha3ˢ = "sha3"u8;
+private static ref readonly @string sha3ˢ => ref sha3ˢᵇ;
+private static readonly @string sha3ˢᵇ = "sha3"u8;
 
-public static void TestSHA3Hash(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, (ж<testing.T> tΔ1) => {
+public static void TestSHA3Hash(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, sha3ˢ, (ж<testing.T> tΔ1) => {
         foreach (var (name, f) in testDigests) {
             var fʗ1 = f;
             tΔ1.Run(name, (ж<testing.T> tΔ2) => {
@@ -66,17 +68,17 @@ public static void TestSHA3Hash(ж<testing.T> Ꮡt) {
 
 // TestUnalignedWrite tests that writing data in an arbitrary pattern with
 // small input buffers.
-public static void TestUnalignedWrite(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, testUnalignedWrite);
+public static void TestUnalignedWrite(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, sha3ˢ, testUnalignedWrite);
 }
 
-internal static void testUnalignedWrite(ж<testing.T> Ꮡt) {
+internal static void testUnalignedWrite(ж<testing.T> t) {
     var buf = sequentialBytes(0x10000);
     foreach (var (alg, df) in testDigests) {
         var d = df();
         d.Reset();
         d.Write(buf);
-        var want = d.Sum(default!);
+        var want = d.Sum(default);
         d.Reset();
         for (nint i = 0; i < len(buf); ) {
             // Cycle through offsets which make a 137 byte sequence.
@@ -94,9 +96,9 @@ internal static void testUnalignedWrite(ж<testing.T> Ꮡt) {
                 i += j;
             }
         }
-        var got = d.Sum(default!);
+        var got = d.Sum(default);
         if (!bytes.Equal(got, want)) {
-            Ꮡt.Errorf("Unaligned writes, alg=%s\ngot %q, want %q"u8, alg, got, want);
+            t.Errorf("Unaligned writes, alg=%s\ngot %q, want %q", alg, got, want);
         }
     }
 
@@ -128,17 +130,17 @@ internal static void testUnalignedWrite(ж<testing.T> Ꮡt) {
         }
         d.Read(got);
         if (!bytes.Equal(got, want)) {
-            Ꮡt.Errorf("Unaligned writes, alg=%s\ngot %q, want %q"u8, alg, got, want);
+            t.Errorf("Unaligned writes, alg=%s\ngot %q, want %q", alg, got, want);
         }
     }
 }
 
 // TestAppend checks that appending works when reallocation is necessary.
-public static void TestAppend(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, testAppend);
+public static void TestAppend(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, sha3ˢ, testAppend);
 }
 
-internal static void testAppend(ж<testing.T> Ꮡt) {
+internal static void testAppend(ж<testing.T> t) {
     var d = New224();
 
     for (nint capacity = 2; capacity <= 66; capacity += 64) {
@@ -146,42 +148,42 @@ internal static void testAppend(ж<testing.T> Ꮡt) {
         // The second time, it will not.
         var buf = new slice<byte>(2, capacity);
         d.Reset();
-        d.Write(new byte[]{0xcc}.slice());
+        d.Write(slice<byte>([0xcc]));
         buf = d.Sum(buf);
-        @string expected = "0000DF70ADC49B2E76EEE3A6931B93FA41841C3AF2CDF5B32A18B5478C39"u8;
+        @string expected = "0000DF70ADC49B2E76EEE3A6931B93FA41841C3AF2CDF5B32A18B5478C39";
         {
             @string got = strings.ToUpper(hex.EncodeToString(buf)); if (got != expected) {
-                Ꮡt.Errorf("got %s, want %s"u8, got, expected);
+                t.Errorf("got %s, want %s", got, expected);
             }
         }
     }
 }
 
 // TestAppendNoRealloc tests that appending works when no reallocation is necessary.
-public static void TestAppendNoRealloc(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, testAppendNoRealloc);
+public static void TestAppendNoRealloc(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, sha3ˢ, testAppendNoRealloc);
 }
 
-internal static void testAppendNoRealloc(ж<testing.T> Ꮡt) {
+internal static void testAppendNoRealloc(ж<testing.T> t) {
     var buf = new slice<byte>(1, 200);
     var d = New224();
-    d.Write(new byte[]{0xcc}.slice());
+    d.Write(slice<byte>([0xcc]));
     buf = d.Sum(buf);
-    @string expected = "00DF70ADC49B2E76EEE3A6931B93FA41841C3AF2CDF5B32A18B5478C39"u8;
+    @string expected = "00DF70ADC49B2E76EEE3A6931B93FA41841C3AF2CDF5B32A18B5478C39";
     {
         @string got = strings.ToUpper(hex.EncodeToString(buf)); if (got != expected) {
-            Ꮡt.Errorf("got %s, want %s"u8, got, expected);
+            t.Errorf("got %s, want %s", got, expected);
         }
     }
 }
 
 // TestSqueezing checks that squeezing the full output a single time produces
 // the same output as repeatedly squeezing the instance.
-public static void TestSqueezing(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, testSqueezing);
+public static void TestSqueezing(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, sha3ˢ, testSqueezing);
 }
 
-internal static void testSqueezing(ж<testing.T> Ꮡt) {
+internal static void testSqueezing(ж<testing.T> t) {
     foreach (var (algo, v) in testShakes) {
         var d0 = v.constructor(slice<byte>(v.defAlgoName), slice<byte>(v.defCustomStr));
         d0.Write(slice<byte>(testString));
@@ -190,7 +192,7 @@ internal static void testSqueezing(ж<testing.T> Ꮡt) {
 
         var d1 = v.constructor(slice<byte>(v.defAlgoName), slice<byte>(v.defCustomStr));
         d1.Write(slice<byte>(testString));
-        slice<byte> multiple = default!;
+        slice<byte> multiple = default;
         foreach (var _ᴛ1 in range(@ref)) {
             d1.Read(new slice<byte>(0));
             var one = new slice<byte>(1);
@@ -198,7 +200,7 @@ internal static void testSqueezing(ж<testing.T> Ꮡt) {
             multiple = appendꓸꓸꓸ(multiple, one);
         }
         if (!bytes.Equal(@ref, multiple)) {
-            Ꮡt.Errorf("%s: squeezing %d bytes one at a time failed"u8, algo, len(@ref));
+            t.Errorf("%s: squeezing %d bytes one at a time failed", algo, len(@ref));
         }
     }
 }
@@ -218,21 +220,21 @@ internal static slice<byte> sequentialBytes(nint size) {
     return result;
 }
 
-public static void TestReset(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, testReset);
+public static void TestReset(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, sha3ˢ, testReset);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object expectedˢ = (@string)"\nExpected:\n"u8;
 private static readonly object gotˢ = (@string)"\ngot:\n"u8;
 
-internal static void testReset(ж<testing.T> Ꮡt) {
+internal static void testReset(ж<testing.T> t) {
     var out1 = new slice<byte>(32);
     var out2 = new slice<byte>(32);
 
     foreach (var (_, v) in testShakes) {
         // Calculate hash for the first time
-        var c = v.constructor(default!, new byte[]{0x99, 0x98}.slice());
+        var c = v.constructor(default, slice<byte>([0x99, 0x98]));
         c.Write(sequentialBytes(0x100));
         c.Read(out1);
 
@@ -242,7 +244,7 @@ internal static void testReset(ж<testing.T> Ꮡt) {
         c.Read(out2);
 
         if (!bytes.Equal(out1, out2)) {
-            Ꮡt.Error(expectedˢ, out1, gotˢ, out2);
+            t.Error(expectedˢ, out1, gotˢ, out2);
         }
     }
 }
@@ -250,14 +252,18 @@ internal static void testReset(ж<testing.T> Ꮡt) {
 internal static byte sinkSHA3;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string newˢ = "New"u8;
-private static readonly @string newSHAKEˢ = "NewSHAKE"u8;
-private static readonly @string sumˢ = "Sum"u8;
-private static readonly @string sumSHAKEˢ = "SumSHAKE"u8;
+private static ref readonly @string newˢ => ref newˢᵇ;
+private static readonly @string newˢᵇ = "New"u8;
+private static ref readonly @string newSHAKEˢ => ref newSHAKEˢᵇ;
+private static readonly @string newSHAKEˢᵇ = "NewSHAKE"u8;
+private static ref readonly @string sumˢ => ref sumˢᵇ;
+private static readonly @string sumˢᵇ = "Sum"u8;
+private static ref readonly @string sumSHAKEˢ => ref sumSHAKEˢᵇ;
+private static readonly @string sumSHAKEˢᵇ = "SumSHAKE"u8;
 
-public static void TestAllocations(ж<testing.T> Ꮡt) {
-    cryptotest.SkipTestAllocations(Ꮡt);
-    Ꮡt.Run(newˢ, (ж<testing.T> tΔ1) => {
+public static void TestAllocations(ж<testing.T> t) {
+    cryptotest.SkipTestAllocations(t);
+    t.Run(newˢ, (ж<testing.T> tΔ1) => {
         {
             var allocs = testing.AllocsPerRun(10, () => {
                 var h = New256();
@@ -267,11 +273,11 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
                 @out = h.Sum(@out);
                 sinkSHA3 ^= (byte)(@out[0]);
             }); if (allocs > 0D) {
-                tΔ1.Errorf("expected zero allocations, got %0.1f"u8, allocs);
+                tΔ1.Errorf("expected zero allocations, got %0.1f", allocs);
             }
         }
     });
-    Ꮡt.Run(newSHAKEˢ, (ж<testing.T> tΔ2) => {
+    t.Run(newSHAKEˢ, (ж<testing.T> tΔ2) => {
         {
             var allocs = testing.AllocsPerRun(10, () => {
                 var h = NewSHAKE128();
@@ -281,39 +287,41 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
                 h.Read(@out);
                 sinkSHA3 ^= (byte)(@out[0]);
             }); if (allocs > 0D) {
-                tΔ2.Errorf("expected zero allocations, got %0.1f"u8, allocs);
+                tΔ2.Errorf("expected zero allocations, got %0.1f", allocs);
             }
         }
     });
-    Ꮡt.Run(sumˢ, (ж<testing.T> tΔ3) => {
+    t.Run(sumˢ, (ж<testing.T> tΔ3) => {
         {
             var allocs = testing.AllocsPerRun(10, () => {
                 var b = slice<byte>("ABC"u8);
                 var @out = Sum256(b);
                 sinkSHA3 ^= (byte)(@out[0]);
             }); if (allocs > 0D) {
-                tΔ3.Errorf("expected zero allocations, got %0.1f"u8, allocs);
+                tΔ3.Errorf("expected zero allocations, got %0.1f", allocs);
             }
         }
     });
-    Ꮡt.Run(sumSHAKEˢ, (ж<testing.T> tΔ4) => {
+    t.Run(sumSHAKEˢ, (ж<testing.T> tΔ4) => {
         {
             var allocs = testing.AllocsPerRun(10, () => {
                 var b = slice<byte>("ABC"u8);
                 var @out = SumSHAKE128(b, 10);
                 sinkSHA3 ^= (byte)(@out[0]);
             }); if (allocs > 0D) {
-                tΔ4.Errorf("expected zero allocations, got %0.1f"u8, allocs);
+                tΔ4.Errorf("expected zero allocations, got %0.1f", allocs);
             }
         }
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cSHAKE128ˢ = "cSHAKE128"u8;
-private static readonly @string cSHAKE256ˢ = "cSHAKE256"u8;
+private static ref readonly @string cSHAKE128ˢ => ref cSHAKE128ˢᵇ;
+private static readonly @string cSHAKE128ˢᵇ = "cSHAKE128"u8;
+private static ref readonly @string cSHAKE256ˢ => ref cSHAKE256ˢᵇ;
+private static readonly @string cSHAKE256ˢᵇ = "cSHAKE256"u8;
 
-public static void TestCSHAKEAccumulated(ж<testing.T> Ꮡt) {
+public static void TestCSHAKEAccumulated(ж<testing.T> t) {
     // Generated with pycryptodome@3.20.0
     //
     //    from Crypto.Hash import cSHAKE128
@@ -357,21 +365,21 @@ public static void TestCSHAKEAccumulated(ж<testing.T> Ꮡt) {
     //    }
     //    console.log(bytesToHex(acc.xof(32)));
     //
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, (ж<testing.T> tΔ1) => {
+    cryptotest.TestAllImplementations(t, sha3ˢ, (ж<testing.T> tΔ1) => {
         tΔ1.Run(cSHAKE128ˢ, (ж<testing.T> tΔ2) => {
             testCSHAKEAccumulated(tΔ2, NewCSHAKE128, (1600 - 256) / 8,
-                "bb14f8657c6ec5403d0b0e2ef3d3393497e9d3b1a9a9e8e6c81dbaa5fd809252"u8);
+                "bb14f8657c6ec5403d0b0e2ef3d3393497e9d3b1a9a9e8e6c81dbaa5fd809252");
         });
         tΔ1.Run(cSHAKE256ˢ, (ж<testing.T> tΔ3) => {
             testCSHAKEAccumulated(tΔ3, NewCSHAKE256, (1600 - 512) / 8,
-                "0baaf9250c6e25f0c14ea5c7f9bfde54c8a922c8276437db28f3895bdf6eeeef"u8);
+                "0baaf9250c6e25f0c14ea5c7f9bfde54c8a922c8276437db28f3895bdf6eeeef");
         });
     });
 }
 
-internal static void testCSHAKEAccumulated(ж<testing.T> Ꮡt, Func<slice<byte>, slice<byte>, ж<sha3.SHAKE>> newCSHAKE, int64 rate, @string exp) {
-    var rnd = newCSHAKE(default!, default!);
-    var acc = newCSHAKE(default!, default!);
+internal static void testCSHAKEAccumulated(ж<testing.T> t, Func<slice<byte>, slice<byte>, ж<sha3.SHAKE>> newCSHAKE, int64 rate, @string exp) {
+    var rnd = newCSHAKE(default, default);
+    var acc = newCSHAKE(default, default);
     for (nint n = 0; n < 200; n++) {
         var N = new slice<byte>(n);
         rnd.Read(N);
@@ -396,21 +404,21 @@ internal static void testCSHAKEAccumulated(ж<testing.T> Ꮡt, Func<slice<byte>,
     acc.Read(@out);
     {
         @string got = hex.EncodeToString(@out); if (got != exp) {
-            Ꮡt.Errorf("got %s, want %s"u8, got, exp);
+            t.Errorf("got %s, want %s", got, exp);
         }
     }
 }
 
-public static void TestCSHAKELargeS(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, testCSHAKELargeS);
+public static void TestCSHAKELargeS(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, sha3ˢ, testCSHAKELargeS);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object skippingTestInShortModeˢ = (@string)"skipping test in short mode."u8;
 
-internal static void testCSHAKELargeS(ж<testing.T> Ꮡt) {
+internal static void testCSHAKELargeS(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingTestInShortModeˢ);
+        t.Skip(skippingTestInShortModeˢ);
     }
 
     // See https://go.dev/issue/66232.
@@ -418,7 +426,7 @@ internal static void testCSHAKELargeS(ж<testing.T> Ꮡt) {
     var S = new slice<byte>(s);
     var rnd = NewSHAKE128();
     rnd.Read(S);
-    var c = NewCSHAKE128(default!, S);
+    var c = NewCSHAKE128(default, S);
     io.CopyN(new sha3.SHAKEжWriter(c), new sha3.SHAKEжReader(rnd), 1000);
     var @out = new slice<byte>(32);
     c.Read(@out);
@@ -432,24 +440,30 @@ internal static void testCSHAKELargeS(ж<testing.T> Ꮡt) {
     //    c.update(rng.read(1000))
     //    print(c.read(32).hex())
     //
-    @string exp = "2cb9f237767e98f2614b8779cf096a52da9b3a849280bbddec820771ae529cf0"u8;
+    @string exp = "2cb9f237767e98f2614b8779cf096a52da9b3a849280bbddec820771ae529cf0";
     {
         @string got = hex.EncodeToString(@out); if (got != exp) {
-            Ꮡt.Errorf("got %s, want %s"u8, got, exp);
+            t.Errorf("got %s, want %s", got, exp);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sha3224ˢ = "SHA3-224"u8;
-private static readonly @string sha3256ˢ = "SHA3-256"u8;
-private static readonly @string sha3384ˢ = "SHA3-384"u8;
-private static readonly @string sha3512ˢ = "SHA3-512"u8;
-private static readonly @string shake128ˢ = "SHAKE128"u8;
-private static readonly @string shake256ˢ = "SHAKE256"u8;
+private static ref readonly @string sha3224ˢ => ref sha3224ˢᵇ;
+private static readonly @string sha3224ˢᵇ = "SHA3-224"u8;
+private static ref readonly @string sha3256ˢ => ref sha3256ˢᵇ;
+private static readonly @string sha3256ˢᵇ = "SHA3-256"u8;
+private static ref readonly @string sha3384ˢ => ref sha3384ˢᵇ;
+private static readonly @string sha3384ˢᵇ = "SHA3-384"u8;
+private static ref readonly @string sha3512ˢ => ref sha3512ˢᵇ;
+private static readonly @string sha3512ˢᵇ = "SHA3-512"u8;
+private static ref readonly @string shake128ˢ => ref shake128ˢᵇ;
+private static readonly @string shake128ˢᵇ = "SHAKE128"u8;
+private static ref readonly @string shake256ˢ => ref shake256ˢᵇ;
+private static readonly @string shake256ˢᵇ = "SHAKE256"u8;
 
-public static void TestMarshalUnmarshal(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, (ж<testing.T> tΔ1) => {
+public static void TestMarshalUnmarshal(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, sha3ˢ, (ж<testing.T> tΔ1) => {
         tΔ1.Run(sha3224ˢ, (ж<testing.T> tΔ2) => {
             testMarshalUnmarshal(tΔ2, New224());
         });
@@ -478,35 +492,35 @@ public static void TestMarshalUnmarshal(ж<testing.T> Ꮡt) {
 }
 
 // TODO(filippo): move this to crypto/internal/cryptotest.
-internal static void testMarshalUnmarshal(ж<testing.T> Ꮡt, ж<sha3.SHA3> Ꮡh) {
+internal static void testMarshalUnmarshal(ж<testing.T> t, ж<sha3.SHA3> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var buf = new slice<byte>(200);
     rand.Read(buf);
     nint n = rand.Intn(200);
     Ꮡh.Write(buf);
-    var want = h.Sum(default!);
+    var want = h.Sum(default);
     h.Reset();
     Ꮡh.Write(buf.slice(0, n));
     var (b, err) = h.MarshalBinary();
-    if (err != default!) {
-        Ꮡt.Errorf("MarshalBinary: %v"u8, err);
+    if (err != nil) {
+        t.Errorf("MarshalBinary: %v", err);
     }
-    Ꮡh.Write(bytes.Repeat(new byte[]{0}.slice(), 200));
+    Ꮡh.Write(bytes.Repeat(slice<byte>([0]), 200));
     {
-        var errΔ1 = h.UnmarshalBinary(b); if (errΔ1 != default!) {
-            Ꮡt.Errorf("UnmarshalBinary: %v"u8, errΔ1);
+        var errΔ1 = h.UnmarshalBinary(b); if (errΔ1 != nil) {
+            t.Errorf("UnmarshalBinary: %v", errΔ1);
         }
     }
     Ꮡh.Write(buf.slice(n));
-    var got = h.Sum(default!);
+    var got = h.Sum(default);
     if (!bytes.Equal(got, want)) {
-        Ꮡt.Errorf("got %x, want %x"u8, got, want);
+        t.Errorf("got %x, want %x", got, want);
     }
 }
 
 // TODO(filippo): move this to crypto/internal/cryptotest.
-internal static void testMarshalUnmarshalSHAKE(ж<testing.T> Ꮡt, ж<sha3.SHAKE> Ꮡh) {
+internal static void testMarshalUnmarshalSHAKE(ж<testing.T> t, ж<sha3.SHAKE> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var buf = new slice<byte>(200);
@@ -518,20 +532,20 @@ internal static void testMarshalUnmarshalSHAKE(ж<testing.T> Ꮡt, ж<sha3.SHAKE
     Ꮡh.Reset();
     Ꮡh.Write(buf.slice(0, n));
     var (b, err) = h.MarshalBinary();
-    if (err != default!) {
-        Ꮡt.Errorf("MarshalBinary: %v"u8, err);
+    if (err != nil) {
+        t.Errorf("MarshalBinary: %v", err);
     }
-    Ꮡh.Write(bytes.Repeat(new byte[]{0}.slice(), 200));
+    Ꮡh.Write(bytes.Repeat(slice<byte>([0]), 200));
     {
-        var errΔ1 = h.UnmarshalBinary(b); if (errΔ1 != default!) {
-            Ꮡt.Errorf("UnmarshalBinary: %v"u8, errΔ1);
+        var errΔ1 = h.UnmarshalBinary(b); if (errΔ1 != nil) {
+            t.Errorf("UnmarshalBinary: %v", errΔ1);
         }
     }
     Ꮡh.Write(buf.slice(n));
     var got = new slice<byte>(32);
     Ꮡh.Read(got);
     if (!bytes.Equal(got, want)) {
-        Ꮡt.Errorf("got %x, want %x"u8, got, want);
+        t.Errorf("got %x, want %x", got, want);
     }
 }
 
@@ -545,7 +559,7 @@ internal static void benchmarkHash(ж<testing.B> Ꮡb, hash.Hash h, nint size, n
     b.SetBytes((int64)(size * num));
     b.StartTimer();
 
-    slice<byte> state = default!;
+    slice<byte> state = default;
     for (nint i = 0; i < b.N; i++) {
         for (nint j = 0; j < num; j++) {
             h.Write(data);
@@ -558,11 +572,11 @@ internal static void benchmarkHash(ж<testing.B> Ꮡb, hash.Hash h, nint size, n
 
 // benchmarkShake is specialized to the Shake instances, which don't
 // require a copy on reading output.
-internal static void benchmarkShake(ж<testing.B> Ꮡb, ж<sha3.SHAKE> Ꮡh, nint size, nint num) {
+internal static void benchmarkShake(ж<testing.B> Ꮡb, ж<sha3.SHAKE> h, nint size, nint num) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    Ꮡh.Reset();
+    h.Reset();
     var data = sequentialBytes(size);
     var d = new slice<byte>(32);
 
@@ -570,48 +584,48 @@ internal static void benchmarkShake(ж<testing.B> Ꮡb, ж<sha3.SHAKE> Ꮡh, nin
     b.StartTimer();
 
     for (nint i = 0; i < b.N; i++) {
-        Ꮡh.Reset();
+        h.Reset();
         for (nint j = 0; j < num; j++) {
-            Ꮡh.Write(data);
+            h.Write(data);
         }
-        Ꮡh.Read(d);
+        h.Read(d);
     }
 }
 
-public static void BenchmarkSha3_512_MTU(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New512()), 1350, 1);
+public static void BenchmarkSha3_512_MTU(ж<testing.B> b) {
+    benchmarkHash(b, new sha3.SHA3жHash(New512()), 1350, 1);
 }
 
-public static void BenchmarkSha3_384_MTU(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New384()), 1350, 1);
+public static void BenchmarkSha3_384_MTU(ж<testing.B> b) {
+    benchmarkHash(b, new sha3.SHA3жHash(New384()), 1350, 1);
 }
 
-public static void BenchmarkSha3_256_MTU(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New256()), 1350, 1);
+public static void BenchmarkSha3_256_MTU(ж<testing.B> b) {
+    benchmarkHash(b, new sha3.SHA3жHash(New256()), 1350, 1);
 }
 
-public static void BenchmarkSha3_224_MTU(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New224()), 1350, 1);
+public static void BenchmarkSha3_224_MTU(ж<testing.B> b) {
+    benchmarkHash(b, new sha3.SHA3жHash(New224()), 1350, 1);
 }
 
-public static void BenchmarkShake128_MTU(ж<testing.B> Ꮡb) {
-    benchmarkShake(Ꮡb, NewSHAKE128(), 1350, 1);
+public static void BenchmarkShake128_MTU(ж<testing.B> b) {
+    benchmarkShake(b, NewSHAKE128(), 1350, 1);
 }
 
-public static void BenchmarkShake256_MTU(ж<testing.B> Ꮡb) {
-    benchmarkShake(Ꮡb, NewSHAKE256(), 1350, 1);
+public static void BenchmarkShake256_MTU(ж<testing.B> b) {
+    benchmarkShake(b, NewSHAKE256(), 1350, 1);
 }
 
-public static void BenchmarkShake256_16x(ж<testing.B> Ꮡb) {
-    benchmarkShake(Ꮡb, NewSHAKE256(), 16, 1024);
+public static void BenchmarkShake256_16x(ж<testing.B> b) {
+    benchmarkShake(b, NewSHAKE256(), 16, 1024);
 }
 
-public static void BenchmarkShake256_1MiB(ж<testing.B> Ꮡb) {
-    benchmarkShake(Ꮡb, NewSHAKE256(), 1024, 1024);
+public static void BenchmarkShake256_1MiB(ж<testing.B> b) {
+    benchmarkShake(b, NewSHAKE256(), 1024, 1024);
 }
 
-public static void BenchmarkSha3_512_1MiB(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New512()), 1024, 1024);
+public static void BenchmarkSha3_512_1MiB(ж<testing.B> b) {
+    benchmarkHash(b, new sha3.SHA3жHash(New512()), 1024, 1024);
 }
 
 } // end sha3_test_package

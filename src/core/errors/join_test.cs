@@ -3,62 +3,64 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using errors = errors_package;
+using errors = go.errors_package;
 using reflect = reflect_package;
 using testing = testing_package;
+using go;
 
 partial class errors_test_package {
 
-public static void TestJoinReturnsNil(ж<testing.T> Ꮡt) {
+public static void TestJoinReturnsNil(ж<testing.T> t) {
     {
-        var err = errors.Join(); if (err != default!) {
-            Ꮡt.Errorf("errors.Join() = %v, want nil"u8, err);
+        var err = errors.Join(); if (err != nil) {
+            t.Errorf("errors.Join() = %v, want nil", err);
         }
     }
     {
-        var err = errors.Join((error)(default!)); if (err != default!) {
-            Ꮡt.Errorf("errors.Join(nil) = %v, want nil"u8, err);
+        var err = errors.Join((error)(default)); if (err != nil) {
+            t.Errorf("errors.Join(nil) = %v, want nil", err);
         }
     }
     {
-        var err = errors.Join((error)(default!), (error)(default!)); if (err != default!) {
-            Ꮡt.Errorf("errors.Join(nil, nil) = %v, want nil"u8, err);
+        var err = errors.Join((error)(default), (error)(default)); if (err != nil) {
+            t.Errorf("errors.Join(nil, nil) = %v, want nil", err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string err3ˢ = "err3"u8;
+private static ref readonly @string err3ˢ => ref err3ˢᵇ;
+private static readonly @string err3ˢᵇ = "err3"u8;
 
 internal partial struct TestJoin_type /*dyn*/ {
     internal slice<error> errs;
     internal slice<error> want;
 }
 
-public static void TestJoin(ж<testing.T> Ꮡt) {
+public static void TestJoin(ж<testing.T> t) {
     var err1 = errors.New(err1ˢ);
     var err2 = errors.New(err2ˢ);
     var merr = new multiErr(new error[]{errors.New(err3ˢ)}.slice());
-    foreach (var (_, test) in new TestJoin_type[]{new(
-        errs: new error[]{err1}.slice(),
-        want: new error[]{err1}.slice()
+    foreach (var (_, test) in slice<TestJoin_type>([new(
+        errs: slice<error>([err1]),
+        want: slice<error>([err1])
     ), new(
-        errs: new error[]{err1, err2}.slice(),
-        want: new error[]{err1, err2}.slice()
+        errs: slice<error>([err1, err2]),
+        want: slice<error>([err1, err2])
     ), new(
-        errs: new error[]{err1, default!, err2}.slice(),
-        want: new error[]{err1, err2}.slice()
+        errs: slice<error>([err1, default, err2]),
+        want: slice<error>([err1, err2])
     ), new(
-        errs: new error[]{merr}.slice(),
-        want: new error[]{merr}.slice()
+        errs: slice<error>([merr]),
+        want: slice<error>([merr])
     )
-    }.slice()) {
-        var got = errors.Join(test.errs.ꓸꓸꓸ)._<ExampleJoin_type>().Unwrap();
+    ])) {
+        var got = errors.Join(test.errs.ꓸꓸꓸ)._<is_typeᴛ1>().Unwrap();
         if (!reflect.DeepEqual(got, test.want)) {
-            Ꮡt.Errorf("Join(%v) = %v; want %v"u8, test.errs, got, test.want);
+            t.Errorf("Join(%v) = %v; want %v", test.errs, got, test.want);
         }
         if (len(got) != cap(got)) {
-            Ꮡt.Errorf("Join(%v) returns errors with len=%v, cap=%v; want len==cap"u8, test.errs, len(got), cap(got));
+            t.Errorf("Join(%v) returns errors with len=%v, cap=%v; want len==cap", test.errs, len(got), cap(got));
         }
     }
 }
@@ -68,23 +70,23 @@ internal partial struct TestJoinErrorMethod_type /*dyn*/ {
     internal @string want;
 }
 
-public static void TestJoinErrorMethod(ж<testing.T> Ꮡt) {
+public static void TestJoinErrorMethod(ж<testing.T> t) {
     var err1 = errors.New(err1ˢ);
     var err2 = errors.New(err2ˢ);
-    foreach (var (_, test) in new TestJoinErrorMethod_type[]{new(
-        errs: new error[]{err1}.slice(),
-        want: "err1"u8
+    foreach (var (_, test) in slice<TestJoinErrorMethod_type>([new(
+        errs: slice<error>([err1]),
+        want: "err1"
     ), new(
-        errs: new error[]{err1, err2}.slice(),
-        want: "err1\nerr2"u8
+        errs: slice<error>([err1, err2]),
+        want: "err1\nerr2"
     ), new(
-        errs: new error[]{err1, default!, err2}.slice(),
-        want: "err1\nerr2"u8
+        errs: slice<error>([err1, default, err2]),
+        want: "err1\nerr2"
     )
-    }.slice()) {
+    ])) {
         @string got = errors.Join(test.errs.ꓸꓸꓸ).Error();
         if (got != test.want) {
-            Ꮡt.Errorf("Join(%v).Error() = %q; want %q"u8, test.errs, got, test.want);
+            t.Errorf("Join(%v).Error() = %q; want %q", test.errs, got, test.want);
         }
     }
 }

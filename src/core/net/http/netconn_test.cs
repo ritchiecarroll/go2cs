@@ -23,10 +23,10 @@ internal static ж<fakeNetListener> fakeNetListen() {
     var li = Ꮡ(new fakeNetListener(
         setc: new channel<EmptyStruct>(1),
         unsetc: new channel<EmptyStruct>(1),
-        addr: netip.MustParseAddrPort("127.0.0.1:8000"u8),
+        addr: netip.MustParseAddrPort("127.0.0.1:8000"),
         locPort: 10000
     ));
-    (~li).unsetc.ᐸꟷ(new EmptyStruct());
+    li.unsetc.ᐸꟷ(new EmptyStruct());
     return li;
 }
 
@@ -36,7 +36,7 @@ partial struct fakeNetListener {
     internal bool closed;
     internal netip.AddrPort addr;
     internal uint16 locPort;
-    internal Action onDial;             // called when making a new connection
+    internal Action onDial;                  // called when making a new connection
     internal Action<ж<fakeNetConn>> onClose; // called when closing a connection
     internal bool trackConns; // set this to record all created conns
     internal slice<ж<fakeNetConn>> conns;
@@ -55,7 +55,7 @@ internal static void @lock(this ref fakeNetListener li) {
 }
 
 internal static void unlock(this ref fakeNetListener li) {
-    if (li.closed || len(li.queue) > 0){
+    if (li.closed || len(li.queue) > 0) {
         li.setc.ᐸꟷ(new EmptyStruct());
     } else {
         li.unsetc.ᐸꟷ(new EmptyStruct());
@@ -68,7 +68,7 @@ internal static ж<fakeNetConn> connect(this ж<fakeNetListener> Ꮡli) {
     try {
         ref var li = ref Ꮡli.DerefOrNull();
 
-        if (li.onDial != default!) {
+        if (li.onDial != nil) {
             li.onDial();
         }
         li.@lock();
@@ -76,15 +76,15 @@ internal static ж<fakeNetConn> connect(this ж<fakeNetListener> Ꮡli) {
         var locAddr = netip.AddrPortFrom(netip.AddrFrom4(new byte[]{127, 0, 0, 1}.array()), li.locPort);
         li.locPort++;
         var (c0, c1) = fakeNetPipe(li.addr, locAddr);
-        c0.Value.onClose = li.onClose;
-        c1.Value.onClose = li.onClose;
+        c0.onClose = li.onClose;
+        c1.onClose = li.onClose;
         li.queue = append(li.queue, (net.Conn)(new http_test_package.fakeNetConnжConn(c0)));
         if (li.trackConns) {
             li.conns = append(li.conns, c0);
         }
         return c1;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡli.DerefOrNull().unlock(); ᒐ.Run(); }
 }
 
@@ -97,13 +97,13 @@ internal static (net.Conn, error) Accept(this ж<fakeNetListener> Ꮡli) {
         ᐸꟷ(li.setc);
         ᒐd1 = true;
         if (li.closed) {
-            return (default!, net.ErrClosed);
+            return (default, net.ErrClosed);
         }
         var c = li.queue[0];
         li.queue = li.queue[1..];
-        return (c, default!);
+        return (c, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡli.DerefOrNull().unlock(); ᒐ.Run(); }
 }
 
@@ -116,9 +116,9 @@ internal static error Close(this ж<fakeNetListener> Ꮡli) {
         li.@lock();
         ᒐd1 = true;
         li.closed = true;
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡli.DerefOrNull().unlock(); ᒐ.Run(); }
 }
 
@@ -138,8 +138,8 @@ internal static (ж<fakeNetConn> r, ж<fakeNetConn> w) fakeNetPipe(netip.AddrPor
     var s2 = newSynctestNetConnHalf(new net.TCPAddrжΔAddr(s2addr));
     var c1 = Ꮡ(new fakeNetConn(loc: s1, rem: s2));
     var c2 = Ꮡ(new fakeNetConn(loc: s2, rem: s1));
-    c1.Value.peer = c2;
-    c2.Value.peer = c1;
+    c1.peer = c2;
+    c2.peer = c1;
     return (c1, c2);
 }
 
@@ -175,8 +175,8 @@ internal static slice<byte> Peek(this ref fakeNetConn c) {
 
 // Write writes data to the connection.
 internal static (nint n, error err) Write(this ж<fakeNetConn> Ꮡc, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -205,9 +205,9 @@ internal static bool IsClosedByPeer(this ж<fakeNetConn> Ꮡc) {
         ᒐd1 = true;
         // If the remote half of the conn is returning ErrClosed,
         // the peer has closed the connection.
-        return AreEqual((~c.rem).readErr, net.ErrClosed);
+        return AreEqual(c.rem.readErr, net.ErrClosed);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().rem.unlock(); ᒐ.Run(); }
 }
 
@@ -215,55 +215,55 @@ internal static bool IsClosedByPeer(this ж<fakeNetConn> Ꮡc) {
 internal static error Close(this ж<fakeNetConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (c.onClose != default!) {
+    if (c.onClose != nil) {
         c.onClose(Ꮡc);
     }
     // Local half of the conn is now closed.
     c.loc.@lock();
-    c.loc.Value.writeErr = net.ErrClosed;
-    c.loc.Value.readErr = net.ErrClosed;
-    c.loc.of(fakeNetConnHalf.Ꮡbuf).Reset();
+    c.loc.writeErr = net.ErrClosed;
+    c.loc.readErr = net.ErrClosed;
+    c.loc.Ꮡbuf.Reset();
     c.loc.unlock();
     // Remote half of the connection reads EOF after reading any remaining data.
     c.rem.@lock();
-    if ((~c.rem).readErr == default!) {
-        c.rem.Value.readErr = io.EOF;
+    if (c.rem.readErr == nil) {
+        c.rem.readErr = io.EOF;
     }
-    c.rem.Value.writeErr = net.ErrClosed;
+    c.rem.writeErr = net.ErrClosed;
     c.rem.unlock();
     if (c.autoWait) {
         synctest.Wait();
     }
-    return default!;
+    return default;
 }
 
 // LocalAddr returns the (fake) local network address.
 internal static netꓸAddr LocalAddr(this ref fakeNetConn c) {
-    return (~c.loc).addr;
+    return c.loc.addr;
 }
 
 // LocalAddr returns the (fake) remote network address.
 internal static netꓸAddr RemoteAddr(this ref fakeNetConn c) {
-    return (~c.rem).addr;
+    return c.rem.addr;
 }
 
 // SetDeadline sets the read and write deadlines for the connection.
 internal static error SetDeadline(this ref fakeNetConn c, time.Time t) {
     c.SetReadDeadline(t);
     c.SetWriteDeadline(t);
-    return default!;
+    return default;
 }
 
 // SetReadDeadline sets the read deadline for the connection.
 internal static error SetReadDeadline(this ref fakeNetConn c, time.Time t) {
-    c.loc.of(fakeNetConnHalf.Ꮡrctx).setDeadline(t);
-    return default!;
+    c.loc.Ꮡrctx.setDeadline(t);
+    return default;
 }
 
 // SetWriteDeadline sets the write deadline for the connection.
 internal static error SetWriteDeadline(this ref fakeNetConn c, time.Time t) {
-    c.rem.of(fakeNetConnHalf.Ꮡwctx).setDeadline(t);
-    return default!;
+    c.rem.Ꮡwctx.setDeadline(t);
+    return default;
 }
 
 // SetReadBufferSize sets the read buffer limit for the connection.
@@ -284,13 +284,13 @@ partial struct fakeNetConnHalf {
     // and allow waiting for readability/writability.
     // When the half is unlocked, exactly one channel contains a value.
     // When the half is locked, all channels are empty.
-    internal channel<EmptyStruct> lockr; // readable
-    internal channel<EmptyStruct> lockw; // writable
+    internal channel<EmptyStruct> lockr;  // readable
+    internal channel<EmptyStruct> lockw;  // writable
     internal channel<EmptyStruct> lockrw; // readable and writable
-    internal channel<EmptyStruct> lockc; // neither readable nor writable
+    internal channel<EmptyStruct> lockc;  // neither readable nor writable
     internal nint bufMax; // maximum buffer size
     internal bytes.Buffer buf;
-    internal error readErr; // error returned by reads
+    internal error readErr;  // error returned by reads
     internal error writeErr; // error returned by writes
 }
 
@@ -330,8 +330,8 @@ internal static void @lock(this ref fakeNetConnHalf h) {
 
 // h unlocks h.
 internal static void unlock(this ref fakeNetConnHalf h) {
-    var canRead = h.readErr != default! || h.buf.Len() > 0;
-    var canWrite = h.writeErr != default! || h.bufMax > h.buf.Len();
+    var canRead = h.readErr != nil || h.buf.Len() > 0;
+    var canWrite = h.writeErr != nil || h.bufMax > h.buf.Len();
     switch (ᐧ) {
     case {} when canRead && canWrite: {
         h.lockrw.ᐸꟷ(new EmptyStruct()); // readable and writable
@@ -361,30 +361,30 @@ internal static error waitAndLockForRead(this ж<fakeNetConnHalf> Ꮡh) {
     var selᴛ23 = h.lockrw;
     switch (trySelect(ᐸꟷ(selᴛ22, ꓸꓸꓸ), ᐸꟷ(selᴛ23, ꓸꓸꓸ))) {
     case 0 when selᴛ22.ꟷᐳ(out _): {
-        return default!; // readable
+        return default; // readable
     }
     case 1 when selᴛ23.ꟷᐳ(out _): {
-        return default!;
+        return default;
     }
     default: {
         // readable and writable
         break;
     }}
-    var ctx = Ꮡh.of(fakeNetConnHalf.Ꮡrctx).context();
+    var ctx = Ꮡh.Ꮡrctx.context();
     var selᴛ24 = h.lockr;
     var selᴛ25 = h.lockrw;
     var selᴛ26 = ctx.Done();
     switch (select(ᐸꟷ(selᴛ24, ꓸꓸꓸ), ᐸꟷ(selᴛ25, ꓸꓸꓸ), ᐸꟷ(selᴛ26, ꓸꓸꓸ))) {
     case 0 when selᴛ24.ꟷᐳ(out _): {
-        return default!; // readable
+        return default; // readable
     }
     case 1 when selᴛ25.ꟷᐳ(out _): {
-        return default!; // readable and writable
+        return default; // readable and writable
     }
     case 2 when selᴛ26.ꟷᐳ(out _): {
         return context_package.Cause(ctx);
     }}
-    return default!;
+    return default;
 }
 
 // waitAndLockForWrite waits until h is writable and locks it.
@@ -397,30 +397,30 @@ internal static error waitAndLockForWrite(this ж<fakeNetConnHalf> Ꮡh) {
     var selᴛ28 = h.lockrw;
     switch (trySelect(ᐸꟷ(selᴛ27, ꓸꓸꓸ), ᐸꟷ(selᴛ28, ꓸꓸꓸ))) {
     case 0 when selᴛ27.ꟷᐳ(out _): {
-        return default!; // writable
+        return default; // writable
     }
     case 1 when selᴛ28.ꟷᐳ(out _): {
-        return default!;
+        return default;
     }
     default: {
         // readable and writable
         break;
     }}
-    var ctx = Ꮡh.of(fakeNetConnHalf.Ꮡwctx).context();
+    var ctx = Ꮡh.Ꮡwctx.context();
     var selᴛ29 = h.lockw;
     var selᴛ30 = h.lockrw;
     var selᴛ31 = ctx.Done();
     switch (select(ᐸꟷ(selᴛ29, ꓸꓸꓸ), ᐸꟷ(selᴛ30, ꓸꓸꓸ), ᐸꟷ(selᴛ31, ꓸꓸꓸ))) {
     case 0 when selᴛ29.ꟷᐳ(out _): {
-        return default!; // writable
+        return default; // writable
     }
     case 1 when selᴛ30.ꟷᐳ(out _): {
-        return default!; // readable and writable
+        return default; // readable and writable
     }
     case 2 when selᴛ31.ꟷᐳ(out _): {
         return context_package.Cause(ctx);
     }}
-    return default!;
+    return default;
 }
 
 internal static slice<byte> peek(this ж<fakeNetConnHalf> Ꮡh) {
@@ -433,24 +433,24 @@ internal static slice<byte> peek(this ж<fakeNetConnHalf> Ꮡh) {
         ᒐd1 = true;
         return h.buf.Bytes();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡh.DerefOrNull().unlock(); ᒐ.Run(); }
 }
 
 internal static (nint n, error err) read(this ж<fakeNetConnHalf> Ꮡh, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
 
         {
-            var errΔ1 = Ꮡh.waitAndLockForRead(); if (errΔ1 != default!) {
+            var errΔ1 = Ꮡh.waitAndLockForRead(); if (errΔ1 != nil) {
                 (n, err) = (0, errΔ1); goto ᒐdone;
             }
         }
         defer(Ꮡh.unlock, ref ᒐ);
-        if (h.buf.Len() == 0 && h.readErr != default!) {
+        if (h.buf.Len() == 0 && h.readErr != nil) {
             (n, err) = (0, h.readErr); goto ᒐdone;
         }
         (n, err) = h.buf.Read(b);
@@ -475,32 +475,32 @@ internal static void setReadBufferSize(this ж<fakeNetConnHalf> Ꮡh, nint size)
 }
 
 internal static (nint n, error err) write(this ж<fakeNetConnHalf> Ꮡh, slice<byte> b) {
-    nint n = default!;
+    nint n = default;
 
     while (n < len(b)) {
         var (nn, errΔ1) = Ꮡh.writePartial(b.slice(n));
         n += nn;
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return (n, errΔ1);
         }
     }
-    return (n, default!);
+    return (n, default);
 }
 
 internal static (nint n, error err) writePartial(this ж<fakeNetConnHalf> Ꮡh, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
 
         {
-            var errΔ1 = Ꮡh.waitAndLockForWrite(); if (errΔ1 != default!) {
+            var errΔ1 = Ꮡh.waitAndLockForWrite(); if (errΔ1 != nil) {
                 (n, err) = (0, errΔ1); goto ᒐdone;
             }
         }
         defer(Ꮡh.unlock, ref ᒐ);
-        if (h.writeErr != default!) {
+        if (h.writeErr != nil) {
             (n, err) = (0, h.writeErr); goto ᒐdone;
         }
         nint writeMax = h.bufMax - h.buf.Len();
@@ -531,12 +531,12 @@ internal static context.Context context(this ж<deadlineContext> Ꮡt) {
 
         t.mu.Lock();
         ᒐd1 = true;
-        if (t.ctx == default!) {
+        if (t.ctx == nil) {
             (t.ctx, t.cancel) = context_package.WithCancelCause(context_package.Background());
         }
         return t.ctx;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -547,10 +547,10 @@ internal static void setDeadline(this ж<deadlineContext> Ꮡt, time.Time deadli
         ref var t = ref Ꮡt.DerefOrNull();
 
         t.mu.Lock();
-        defer(Ꮡt.of(deadlineContext.Ꮡmu).Unlock, ref ᒐ);
+        defer(Ꮡt.Ꮡmu.Unlock, ref ᒐ);
         // If t.ctx is non-nil and t.cancel is nil, then t.ctx was canceled
         // and we should create a new one.
-        if (t.ctx == default! || t.cancel == default!) {
+        if (t.ctx == nil || t.cancel == nil) {
             (t.ctx, t.cancel) = context_package.WithCancelCause(context_package.Background());
         }
         // Stop any existing deadline from expiring.
@@ -565,7 +565,7 @@ internal static void setDeadline(this ж<deadlineContext> Ꮡt, time.Time deadli
         if (!deadline.After(now)) {
             // Deadline has already expired.
             t.cancel(os.ErrDeadlineExceeded);
-            t.cancel = default!;
+            t.cancel = default;
             return;
         }
         if (t.timer != nil) {
@@ -578,9 +578,9 @@ internal static void setDeadline(this ж<deadlineContext> Ꮡt, time.Time deadli
             GoFrame ᒐ = default;
             try {
                 Ꮡt.Value.mu.Lock();
-                defer(Ꮡt.of(deadlineContext.Ꮡmu).Unlock, ref ᒐ);
+                defer(Ꮡt.Ꮡmu.Unlock, ref ᒐ);
                 Ꮡt.Value.cancel(os.ErrDeadlineExceeded);
-                Ꮡt.Value.cancel = default!;
+                Ꮡt.Value.cancel = default;
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }

@@ -21,18 +21,27 @@ using text;
 
 partial class platform_test_package {
 
-internal static ж<bool> flagFix = flag.Bool("fix"u8, false, "if true, fix out-of-date generated files"u8);
+internal static ж<bool> flagFix = flag.Bool("fix", false, "if true, fix out-of-date generated files");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string runˢ = "run"u8;
-private static readonly @string cmdDistˢ = "cmd/dist"u8;
-private static readonly @string listˢ = "list"u8;
-private static readonly @string jsonˢ = "-json"u8;
-private static readonly @string brokenˢ = "-broken"u8;
-private static readonly @string zosarchˢ = "zosarch"u8;
-private static readonly @string gofmtˢ = "gofmt"u8;
-private static readonly @string zosarchGoˢ = "zosarch.go"u8;
-private static readonly @string wantˢ = "want"u8;
+private static ref readonly @string runˢ => ref runˢᵇ;
+private static readonly @string runˢᵇ = "run"u8;
+private static ref readonly @string cmdDistˢ => ref cmdDistˢᵇ;
+private static readonly @string cmdDistˢᵇ = "cmd/dist"u8;
+private static ref readonly @string listˢ => ref listˢᵇ;
+private static readonly @string listˢᵇ = "list"u8;
+private static ref readonly @string jsonˢ => ref jsonˢᵇ;
+private static readonly @string jsonˢᵇ = "-json"u8;
+private static ref readonly @string brokenˢ => ref brokenˢᵇ;
+private static readonly @string brokenˢᵇ = "-broken"u8;
+private static ref readonly @string zosarchˢ => ref zosarchˢᵇ;
+private static readonly @string zosarchˢᵇ = "zosarch"u8;
+private static ref readonly @string gofmtˢ => ref gofmtˢᵇ;
+private static readonly @string gofmtˢᵇ = "gofmt"u8;
+private static ref readonly @string zosarchGoˢ => ref zosarchGoˢᵇ;
+private static readonly @string zosarchGoˢᵇ = "zosarch.go"u8;
+private static ref readonly @string wantˢ => ref wantˢᵇ;
+private static readonly @string wantˢᵇ = "want"u8;
 
 internal partial struct TestGenerated_listEntry /*dyn*/ {
     public @string GOOS, GOARCH;
@@ -43,30 +52,30 @@ internal partial struct TestGenerated_listEntry /*dyn*/ {
 
 // TestGenerated verifies that zosarch.go is up to date,
 // or regenerates it if the -fix flag is set.
-public static void TestGenerated(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoRun(new testing_TжTB(Ꮡt));
+public static void TestGenerated(ж<testing.T> t) {
+    testenv.MustHaveGoRun(new testing_TжTB(t));
 
     // Here we use 'go run cmd/dist' instead of 'go tool dist' in case the
     // installed cmd/dist is stale or missing. We don't want to miss a
     // skew in the data due to a stale binary.
-    var cmd = testenv.Command(new testing_TжTB(Ꮡt), "go"u8, runˢ, cmdDistˢ, listˢ, jsonˢ, brokenˢ);
+    var cmd = testenv.Command(new testing_TжTB(t), "go", runˢ, cmdDistˢ, listˢ, jsonˢ, brokenˢ);
 
     // cmd/dist requires GOROOT to be set explicitly in the environment.
-    cmd.Value.Env = append(cmd.Environ(), "GOROOT="u8 + testenv.GOROOT(new testing_TжTB(Ꮡt)));
+    cmd.Env = append(cmd.Environ(), "GOROOT="u8 + testenv.GOROOT(new testing_TжTB(t)));
 
     var (@out, err) = cmd.Output();
-    if (err != default!) {
+    if (err != nil) {
         {
-            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len((~ee).Stderr) > 0) {
-                Ꮡt.Logf("stderr:\n%s"u8, (~ee).Stderr);
+            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
+                t.Logf("stderr:\n%s", ee.Stderr);
             }
         }
-        Ꮡt.Fatalf("%v: %v"u8, cmd.OrTypedNil(), err);
+        t.Fatalf("%v: %v", cmd.OrTypedNil(), err);
     }
     ref var entries = ref heap<slice<TestGenerated_listEntry>>(out var Ꮡentries);
     {
-        var errΔ1 = json.Unmarshal(@out, Ꮡentries); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = json.Unmarshal(@out, Ꮡentries); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 
@@ -74,45 +83,46 @@ public static void TestGenerated(ж<testing.T> Ꮡt) {
     var (ᴛ1, ᴛ2) = template.New(zosarchˢ).Parse(zosarchTmpl);
     var tmpl = template.Must(ᴛ1, ᴛ2);
     err = tmpl.Execute(new bytes_BufferжWriter(tmplOut), entries);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    cmd = testenv.Command(new testing_TжTB(Ꮡt), gofmtˢ);
-    cmd.Value.Stdin = new bytes_ReaderжReader(bytes.NewReader(tmplOut.Bytes()));
+    cmd = testenv.Command(new testing_TжTB(t), gofmtˢ);
+    cmd.Stdin = new bytes_ReaderжReader(bytes.NewReader(tmplOut.Bytes()));
     (var want, err) = cmd.Output();
-    if (err != default!) {
-        Ꮡt.Logf("stdin:\n%s"u8, tmplOut.Bytes());
+    if (err != nil) {
+        t.Logf("stdin:\n%s", tmplOut.Bytes());
         {
-            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len((~ee).Stderr) > 0) {
-                Ꮡt.Logf("stderr:\n%s"u8, (~ee).Stderr);
+            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
+                t.Logf("stderr:\n%s", ee.Stderr);
             }
         }
-        Ꮡt.Fatalf("%v: %v"u8, cmd.OrTypedNil(), err);
+        t.Fatalf("%v: %v", cmd.OrTypedNil(), err);
     }
 
     (var got, err) = os.ReadFile(zosarchGoˢ);
-    if (err == default! && bytes.Equal(got, want)) {
+    if (err == nil && bytes.Equal(got, want)) {
         return;
     }
 
     if (!flagFix.Value) {
-        if (err != default!){
-            Ꮡt.Log(err);
+        if (err != nil) {
+            t.Log(err);
         } else {
-            Ꮡt.Logf("diff:\n%s"u8, diff.Diff(zosarchGoˢ, got, wantˢ, want));
+            t.Logf("diff:\n%s", diff.Diff(zosarchGoˢ, got, wantˢ, want));
         }
-        Ꮡt.Fatalf("zosarch.go is missing or out of date; to regenerate, run\ngo generate internal/platform"u8);
+        t.Fatalf("zosarch.go is missing or out of date; to regenerate, run\ngo generate internal/platform");
     }
 
     {
-        var errΔ2 = os.WriteFile(zosarchGoˢ, want, 438); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = os.WriteFile(zosarchGoˢ, want, 438); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
 }
 
-internal static readonly @string zosarchTmpl = """
+internal static ref readonly @string zosarchTmpl => ref zosarchTmplᵇ;
+private static readonly @string zosarchTmplᵇ = """
 // Code generated by go test internal/platform -fix. DO NOT EDIT.
 
 // To change the information in this file, edit the cgoEnabled and/or firstClass

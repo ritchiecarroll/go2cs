@@ -13,14 +13,14 @@ using ꓸꓸꓸuintptr = Span<uintptr>;
 
 partial class unique_internal_test_package {
 
-public static void TestMakeCloneSeq(ж<testing.T> Ꮡt) {
-    testCloneSeq<testString, testString>(Ꮡt, cSeq(0));
-    testCloneSeq<testIntArray, testIntArray>(Ꮡt, cSeq());
-    testCloneSeq<testEface, testEfaceᴅ>(Ꮡt, cSeq());
-    testCloneSeq<testStringArray, testStringArray>(Ꮡt, cSeq(0, 2 * goarch.PtrSize, 4 * goarch.PtrSize));
-    testCloneSeq<testStringStruct, testStringStruct>(Ꮡt, cSeq(0));
-    testCloneSeq<testStringStructArrayStruct, testStringStructArrayStruct>(Ꮡt, cSeq(0, 2 * goarch.PtrSize));
-    testCloneSeq<testStruct, testStruct>(Ꮡt, cSeq(8));
+public static void TestMakeCloneSeq(ж<testing.T> t) {
+    testCloneSeq<testString, testString>(t, cSeq(0));
+    testCloneSeq<testIntArray, testIntArray>(t, cSeq());
+    testCloneSeq<testEface, testEfaceᴅ>(t, cSeq());
+    testCloneSeq<testStringArray, testStringArray>(t, cSeq(0, 2 * goarch.PtrSize, 4 * goarch.PtrSize));
+    testCloneSeq<testStringStruct, testStringStruct>(t, cSeq(0));
+    testCloneSeq<testStringStructArrayStruct, testStringStructArrayStruct>(t, cSeq(0, 2 * goarch.PtrSize));
+    testCloneSeq<testStruct, testStruct>(t, cSeq(8));
 }
 
 internal static global::go.unique_package.cloneSeq cSeq(params ꓸꓸꓸuintptr stringOffsetsʗp) {
@@ -29,15 +29,15 @@ internal static global::go.unique_package.cloneSeq cSeq(params ꓸꓸꓸuintptr 
     return new cloneSeq(stringOffsets: stringOffsets);
 }
 
-internal static void testCloneSeq<T, Tᴺ>(ж<testing.T> Ꮡt, global::go.unique_package.cloneSeq want) {
+internal static void testCloneSeq<T, Tᴺ>(ж<testing.T> t, global::go.unique_package.cloneSeq want) {
     @string typName = reflect.TypeFor<Tᴺ>().Name();
     var typ = abi.TypeFor<T>();
     var typʗ1 = typ;
     var wantʗ1 = want;
-    Ꮡt.Run(typName, (ж<testing.T> tΔ1) => {
+    t.Run(typName, (ж<testing.T> tΔ1) => {
         var got = makeCloneSeq(typʗ1);
         if (!reflect.DeepEqual(got, wantʗ1)) {
-            tΔ1.Errorf("unexpected cloneSeq for type %s: got %#v, want %#v"u8, typName, got, wantʗ1);
+            tΔ1.Errorf("unexpected cloneSeq for type %s: got %#v, want %#v", typName, got, wantʗ1);
         }
     });
 }

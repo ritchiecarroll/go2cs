@@ -26,44 +26,45 @@ internal static int64 declSize;
 
 internal static void testprint(io.Writer @out, ast.Node node) {
     {
-        var err = (Ꮡ(new Config((global::go.go.printer_package.Mode)((global::go.go.printer_package.Mode)(TabIndent | UseSpaces) | normalizeNumbers), 8, 0))).Fprint(@out, fset, node); if (err != default!) {
-            log.Fatalf("print error: %s"u8, err);
+        var err = (Ꮡ(new Config((global::go.go.printer_package.Mode)((global::go.go.printer_package.Mode)(TabIndent | UseSpaces) | normalizeNumbers), 8, 0))).Fprint(@out, fset, node); if (err != nil) {
+            log.Fatalf("print error: %s", err);
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string filenameᶜ = "testdata/parser.go"u8;
+internal static ref readonly @string filenameᶜ => ref filenameᶜᵇ;
+private static readonly @string filenameᶜᵇ = "testdata/parser.go"u8;
 
 // cannot initialize in init because (printer) Fprint launches goroutines.
 internal static void initialize() {
     @string filename = filenameᶜ;
 
     var (src, err) = os.ReadFile(filename);
-    if (err != default!) {
-        log.Fatalf("%s"u8, err);
+    if (err != nil) {
+        log.Fatalf("%s", err);
     }
 
     (var @file, err) = parser.ParseFile(fset, filename, src, parser.ParseComments);
-    if (err != default!) {
-        log.Fatalf("%s"u8, err);
+    if (err != nil) {
+        log.Fatalf("%s", err);
     }
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     testprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), new ast.FileжNode(@file));
     if (!bytes.Equal(buf.Bytes(), src)) {
-        log.Fatalf("print error: %s not idempotent"u8, filename);
+        log.Fatalf("print error: %s not idempotent", filename);
     }
 
     fileNode = @file;
     fileSize = (int64)len(src);
 
-    foreach (var (_, decl) in (~@file).Decls) {
+    foreach (var (_, decl) in @file.Decls) {
         // The first global variable, which is pretty short:
         //
         //	var unresolved = new(ast.Object)
         {
-            var (declΔ1, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && (~declΔ1).Tok == token.VAR) {
+            var (declΔ1, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && declΔ1.Tok == token.VAR) {
                 declNode = new ast.GenDeclжDecl(declΔ1);
                 declSize = (int64)(fset.Position(declΔ1.End()).Offset - fset.Position(declΔ1.Pos()).Offset);
                 break;
@@ -88,7 +89,7 @@ public static void BenchmarkPrintFile(ж<testing.B> Ꮡb) {
 public static void BenchmarkPrintDecl(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    if (declNode == default!) {
+    if (declNode == nil) {
         initialize();
     }
     b.ReportAllocs();

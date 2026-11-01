@@ -25,23 +25,23 @@ using static global::go.@internal.reflectlite_internal_test_package;
 
 partial class reflectlite_test_package {
 
-internal static slice<@string> typeNames = new @string[]{
-    "uncommonType"u8,
-    "arrayType"u8,
-    "chanType"u8,
-    "funcType"u8,
-    "interfaceType"u8,
-    "ptrType"u8,
-    "sliceType"u8,
-    "structType"u8
-}.slice();
+internal static slice<@string> typeNames = slice<@string>([
+    "uncommonType",
+    "arrayType",
+    "chanType",
+    "funcType",
+    "interfaceType",
+    "ptrType",
+    "sliceType",
+    "structType"
+]);
 
 partial struct visitor {
     internal map<@string, map<@string, bool>> m;
 }
 
 internal static visitor newVisitor() {
-    var v = new visitor(nil);
+    var v = new visitor();
     v.m = new map<@string, map<@string, bool>>();
 
     return v;
@@ -54,16 +54,16 @@ internal static bool filter(this visitor v, @string name) {
 internal static ast.Visitor Visit(this visitor v, ast.Node n) {
     switch (n.type()) {
     case ж<ast.TypeSpec> x: {
-        if (v.filter((~x).Name.String())) {
+        if (v.filter(x.Name.String())) {
             {
-                var (st, ok) = (~x).Type._<ж<ast.StructType>>(ᐧ); if (ok) {
-                    v.m[(~x).Name.String()] = new map<@string, bool>();
-                    foreach (var (_, field) in (~(~st).Fields).List) {
-                        @string k = fmt.Sprintf("%s"u8, (~field).Type);
-                        if (len((~field).Names) > 0) {
-                            k = (~field).Names[0].Value.Name;
+                var (st, ok) = x.Type._<ж<ast.StructType>>(ᐧ); if (ok) {
+                    v.m[x.Name.String()] = new map<@string, bool>();
+                    foreach (var (_, field) in st.Fields.List) {
+                        @string k = fmt.Sprintf("%s"u8, field.Type);
+                        if (len(field.Names) > 0) {
+                            k = field.Names[0].Name;
                         }
-                        v.m[(~x).Name.String()].Set(k, true);
+                        v.m[x.Name.String()].Set(k, true);
                     }
                 }
             }
@@ -76,47 +76,49 @@ internal static ast.Visitor Visit(this visitor v, ast.Node n) {
 internal static void loadTypes(@string path, @string pkgName, visitor v) {
     var fset = token.NewFileSet();
 
-    var filter = (fs.FileInfo fi) => strings.HasSuffix(fi.Name(), ".go"u8);
+    var filter = (fs.FileInfo fi) => strings.HasSuffix(fi.Name(), ".go");
     var (pkgs, err) = parser.ParseDir(fset, path, filter, 0);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
     var pkg = pkgs[pkgName];
 
-    foreach (var (_, f) in (~pkg).Files) {
+    foreach (var (_, f) in pkg.Files) {
         ast.Walk(v, new ast.FileжNode(f));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string srcˢ = "src"u8;
-internal static readonly @string reflectˢ = "reflect"u8;
+internal static ref readonly @string srcˢ => ref srcˢᵇ;
+private static readonly @string srcˢᵇ = "src"u8;
+internal static ref readonly @string reflectˢ => ref reflectˢᵇ;
+private static readonly @string reflectˢᵇ = "reflect"u8;
 
 internal partial struct TestMirrorWithReflect_type /*dyn*/ {
     internal @string path, pkg;
     internal visitor v;
 }
 
-public static partial void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
+public static partial void TestMirrorWithReflect(ж<testing.T> t) {
     // TODO when the dust clears, figure out what this should actually test.
-    Ꮡt.Skipf("reflect and reflectlite are out of sync for now"u8);
+    t.Skipf("reflect and reflectlite are out of sync for now");
     @string reflectDir = filepath.Join(Δruntime.GOROOT(), srcˢ, reflectˢ);
     {
         var (_, err) = os.Stat(reflectDir); if (os.IsNotExist(err)) {
             // On some mobile builders, the test binary executes on a machine without a
             // complete GOROOT source tree.
-            Ꮡt.Skipf("GOROOT source not present"u8);
+            t.Skipf("GOROOT source not present");
         }
     }
 
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     var (rl, r) = (newVisitor(), newVisitor());
 
-    foreach (var (_, vᴛ1) in new TestMirrorWithReflect_type[]{
-        new("."u8, "reflectlite"u8, rl),
-        new(reflectDir, "reflect"u8, r)
-    }.slice()) {
+    foreach (var (_, vᴛ1) in slice<TestMirrorWithReflect_type>([
+        new(".", "reflectlite", rl),
+        new(reflectDir, "reflect", r)
+    ])) {
         ref var tc = ref heap(new TestMirrorWithReflect_type(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -135,18 +137,18 @@ public static partial void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
     Ꮡwg.Wait();
 
     if (len(rl.m) != len(r.m)) {
-        Ꮡt.Fatalf("number of types mismatch, reflect: %d, reflectlite: %d (%+v, %+v)"u8, len(r.m), len(rl.m), r.m, rl.m);
+        t.Fatalf("number of types mismatch, reflect: %d, reflectlite: %d (%+v, %+v)", len(r.m), len(rl.m), r.m, rl.m);
     }
 
     foreach (var (typName, _) in r.m) {
         if (len(r.m[typName]) != len(rl.m[typName])) {
-            Ꮡt.Errorf("type %s number of fields mismatch, reflect: %d, reflectlite: %d"u8, typName, len(r.m[typName]), len(rl.m[typName]));
+            t.Errorf("type %s number of fields mismatch, reflect: %d, reflectlite: %d", typName, len(r.m[typName]), len(rl.m[typName]));
             continue;
         }
         foreach (var (field, _) in r.m[typName]) {
             {
                 var (_, ok) = rl.m[typName][field, ꟷ]; if (!ok) {
-                    Ꮡt.Errorf(@"Field mismatch, reflect have ""%s"", relectlite does not."u8, field);
+                    t.Errorf(@"Field mismatch, reflect have ""%s"", relectlite does not.", field);
                 }
             }
         }

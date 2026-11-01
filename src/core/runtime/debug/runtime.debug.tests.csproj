@@ -109,12 +109,18 @@
        can leak in because it is never listed. -->
   <ItemGroup>
     <Compile Include="example_monitor_test.cs" />
+    <Compile Include="garbage.cs" />
     <Compile Include="garbage_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="heapdump_test.cs" />
+    <Compile Include="mod.cs" />
     <Compile Include="mod_test.cs" />
+    <Compile Include="package_info_external_test.cs" />
     <Compile Include="package_test_info.cs" />
+    <Compile Include="stack.cs" />
     <Compile Include="stack_test.cs" />
+    <Compile Include="stubs.cs" />
+    <Compile Include="stubs_impl.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -138,6 +144,8 @@
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/poll/internal.poll.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
@@ -147,10 +155,12 @@
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
+    <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
+    <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
-    <ProjectReference Include="runtime.debug.csproj" />
+    <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

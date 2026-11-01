@@ -26,7 +26,7 @@ using static global::go.crypto.@internal.fips140deps.fipsdeps_internal_test_pack
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -36,7 +36,7 @@ using static global::go.crypto.@internal.fips140deps.fipsdeps_internal_test_pack
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140deps/fipsdeps_test.go", "fipsdeps_test.cs", "ABQkACYkggAAFIKClLiCgoKCpqaUgoKUlJSC3IaUgpSCyoIAERSC", "", "", "97=HasPrefix/1/2/1,HasPrefix/2/2/2")]
+[assembly: GoPositionMap("crypto/internal/fips140deps/fipsdeps_test.go", "fipsdeps_test.cs", "ABQkAC0kggAAFIKClLiCgoKCpqaUgoKUlJSC3IaUgpSCyoIAGhSC", "", "", "104=HasPrefix/1/2/1,HasPrefix/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140deps;

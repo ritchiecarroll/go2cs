@@ -22,7 +22,7 @@ internal static void benchmarkAESGCMSeal(ж<testing.B> Ꮡb, slice<byte> buf, ni
     array<byte> ad = new(13);
     var (aesΔ1, _) = aes.NewCipher(key[..]);
     var (aesgcm, _) = cipher.NewGCM(aesΔ1);
-    slice<byte> @out = default!;
+    slice<byte> @out = default;
 
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -41,9 +41,9 @@ internal static void benchmarkAESGCMOpen(ж<testing.B> Ꮡb, slice<byte> buf, ni
     array<byte> ad = new(13);
     var (aesΔ1, _) = aes.NewCipher(key[..]);
     var (aesgcm, _) = cipher.NewGCM(aesΔ1);
-    slice<byte> @out = default!;
+    slice<byte> @out = default;
 
-    var ct = aesgcm.Seal(default!, nonce[..], buf[..], ad[..]);
+    var ct = aesgcm.Seal(default, nonce[..], buf[..], ad[..]);
 
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -51,19 +51,19 @@ internal static void benchmarkAESGCMOpen(ж<testing.B> Ꮡb, slice<byte> buf, ni
     }
 }
 
-public static void BenchmarkAESGCM(ж<testing.B> Ꮡb) {
-    foreach (var (_, length) in new nint[]{64, 1350, 8 * 1024}.slice()) {
-        Ꮡb.Run("Open-128-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ1) => {
+public static void BenchmarkAESGCM(ж<testing.B> b) {
+    foreach (var (_, length) in slice<nint>([64, 1350, 8 * 1024])) {
+        b.Run("Open-128-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ1) => {
             benchmarkAESGCMOpen(bΔ1, new slice<byte>(length), 128 / 8);
         });
-        Ꮡb.Run("Seal-128-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ2) => {
+        b.Run("Seal-128-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ2) => {
             benchmarkAESGCMSeal(bΔ2, new slice<byte>(length), 128 / 8);
         });
 
-        Ꮡb.Run("Open-256-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ3) => {
+        b.Run("Open-256-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ3) => {
             benchmarkAESGCMOpen(bΔ3, new slice<byte>(length), 256 / 8);
         });
-        Ꮡb.Run("Seal-256-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ4) => {
+        b.Run("Seal-256-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ4) => {
             benchmarkAESGCMSeal(bΔ4, new slice<byte>(length), 256 / 8);
         });
     }
@@ -93,17 +93,17 @@ internal static UntypedInt almost1K => /* 1024 - 5 */ 1019;
 
 internal static UntypedInt almost8K => /* 8*1024 - 5 */ 8187;
 
-public static void BenchmarkAESCTR(ж<testing.B> Ꮡb) {
-    foreach (var (_, keyBits) in new nint[]{128, 192, 256}.slice()) {
+public static void BenchmarkAESCTR(ж<testing.B> b) {
+    foreach (var (_, keyBits) in slice<nint>([128, 192, 256])) {
         nint keySize = keyBits / 8;
-        Ꮡb.Run(strconv.Itoa(keyBits), (ж<testing.B> bΔ1) => {
-            bΔ1.Run("50"u8, (ж<testing.B> bΔ2) => {
+        b.Run(strconv.Itoa(keyBits), (ж<testing.B> bΔ1) => {
+            bΔ1.Run("50", (ж<testing.B> bΔ2) => {
                 benchmarkAESStream(bΔ2, cipher.NewCTR, new slice<byte>(50), keySize);
             });
-            bΔ1.Run("1K"u8, (ж<testing.B> bΔ3) => {
+            bΔ1.Run("1K", (ж<testing.B> bΔ3) => {
                 benchmarkAESStream(bΔ3, cipher.NewCTR, new slice<byte>(almost1K), keySize);
             });
-            bΔ1.Run("8K"u8, (ж<testing.B> bΔ4) => {
+            bΔ1.Run("8K", (ж<testing.B> bΔ4) => {
                 benchmarkAESStream(bΔ4, cipher.NewCTR, new slice<byte>(almost8K), keySize);
             });
         });

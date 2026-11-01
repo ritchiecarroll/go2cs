@@ -12,15 +12,15 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-public static void BenchmarkTraceStack(ж<testing.B> Ꮡb) {
-    foreach (var (_, stackDepth) in new nint[]{1, 10, 100}.slice()) {
-        Ꮡb.Run("stackDepth="u8 + strconv.Itoa(stackDepth), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
+public static void BenchmarkTraceStack(ж<testing.B> b) {
+    foreach (var (_, stackDepth) in slice<nint>([1, 10, 100])) {
+        b.Run("stackDepth="u8 + strconv.Itoa(stackDepth), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             benchmarkTraceStack(bΔ1, stackDepth);
         });
     }
 }
 
-internal static partial void benchmarkTraceStack(ж<testing.B> Ꮡb, nint stackDepth) {
+internal static partial void benchmarkTraceStack(ж<testing.B> b, nint stackDepth) {
     GoFrame ᒐ = default;
     try {
         ref var tab = ref heap(new global::go.runtime_internal_test_package.TraceStackTable(), out var Ꮡtab);
@@ -45,7 +45,7 @@ internal static partial void benchmarkTraceStack(ж<testing.B> Ꮡb, nint stackD
         });
         ᐸꟷ(ready);
 
-        while (Ꮡb.Loop()) {
+        while (b.Loop()) {
             runtime_internal_test_package.TraceStack(gp, Ꮡtab);
         }
 

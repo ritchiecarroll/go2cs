@@ -10,19 +10,19 @@ using static go.os_internal_test_package;
 partial class os_test_package {
 
 [GoInit] internal static void initΔ2() {
-    pipeDeadlinesTestCases = new pipeDeadlineTest[]{
+    pipeDeadlinesTestCases = slice<pipeDeadlineTest>([
         new(
-            "named overlapped pipe"u8,
+            "named overlapped pipe",
             (ж<Δtesting.T> t) => {
-                ж<Δos.File> r = default!;
-                ж<Δos.File> w = default!;
+                ж<Δos.File> r = default;
+                ж<Δos.File> w = default;
                 @string name = pipeName();
                 w = newBytePipe(new os_test_package.testing_TжTB(t), name, true);
                 r = newFileOverlapped(new os_test_package.testing_TжTB(t), name, true);
                 return (r, w);
             }
         )
-    }.slice();
+    ]);
 }
 
 } // end os_test_package

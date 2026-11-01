@@ -19,49 +19,52 @@ using static go.testing.fstest_package;
 partial class fstest_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloLinkˢ = "hello.link"u8;
-internal static readonly @string helloRelLinkˢ = "hello_rel.link"u8;
+internal static ref readonly @string helloLinkˢ => ref helloLinkˢᵇ;
+private static readonly @string helloLinkˢᵇ = "hello.link"u8;
+internal static ref readonly @string helloRelLinkˢ => ref helloRelLinkˢᵇ;
+private static readonly @string helloRelLinkˢᵇ = "hello_rel.link"u8;
 
-public static void TestSymlink(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSymlink(new fstest_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestSymlink(ж<testing.T> t) {
+    testenv.MustHaveSymlink(new fstest_internal_test_package.testing_TжTB(t));
 
-    @string tmp = Ꮡt.TempDir();
+    @string tmp = t.TempDir();
     var tmpfs = os.DirFS(tmp);
 
     {
-        var err = os.WriteFile(filepath.Join(tmp, helloˢ), slice<byte>("hello, world\n"u8), 420); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = os.WriteFile(filepath.Join(tmp, helloˢ), slice<byte>("hello, world\n"u8), 420); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
     {
-        var err = os.Symlink(filepath.Join(tmp, helloˢ), filepath.Join(tmp, helloLinkˢ)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = os.Symlink(filepath.Join(tmp, helloˢ), filepath.Join(tmp, helloLinkˢ)); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var err = os.Symlink(helloˢ, filepath.Join(tmp, helloRelLinkˢ)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = os.Symlink(helloˢ, filepath.Join(tmp, helloRelLinkˢ)); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
     {
-        var err = TestFS(tmpfs, helloˢ, helloLinkˢ); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = TestFS(tmpfs, helloˢ, helloLinkˢ); if (err != nil) {
+            t.Fatal(err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aBAˢ = "a-b/a"u8;
+internal static ref readonly @string aBAˢ => ref aBAˢᵇ;
+private static readonly @string aBAˢᵇ = "a-b/a"u8;
 
-public static void TestDash(ж<testing.T> Ꮡt) {
+public static void TestDash(ж<testing.T> t) {
     var m = new MapFS(new map<@string, ж<global::go.testing.fstest_package.MapFile>>{
-        ["a-b/a"u8] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("a-b/a"u8)))
+        ["a-b/a"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("a-b/a"u8)))
     });
     {
-        var err = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), aBAˢ); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), aBAˢ); if (err != nil) {
+            t.Error(err);
         }
     }
 }
@@ -70,10 +73,10 @@ internal partial struct shuffledFS /*global::go.testing.fstest_package.MapFS*/;
 
 internal static (fs.File, error) Open(this shuffledFS fsys, @string name) {
     var (f, err) = ((global::go.testing.fstest_package.MapFS)fsys).Open(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (new fstest_internal_test_package.shuffledFileжFile(Ꮡ(new shuffledFile(File: f))), default!);
+    return (new fstest_internal_test_package.shuffledFileжFile(Ꮡ(new shuffledFile(File: f))), default);
 }
 
 internal partial struct shuffledFile {
@@ -92,19 +95,22 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref shuffledFile f, nin
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tmpOneˢ = "tmp/one"u8;
-internal static readonly @string tmpTwoˢ = "tmp/two"u8;
-internal static readonly @string tmpThreeˢ = "tmp/three"u8;
+internal static ref readonly @string tmpOneˢ => ref tmpOneˢᵇ;
+private static readonly @string tmpOneˢᵇ = "tmp/one"u8;
+internal static ref readonly @string tmpTwoˢ => ref tmpTwoˢᵇ;
+private static readonly @string tmpTwoˢᵇ = "tmp/two"u8;
+internal static ref readonly @string tmpThreeˢ => ref tmpThreeˢᵇ;
+private static readonly @string tmpThreeˢᵇ = "tmp/three"u8;
 
-public static void TestShuffledFS(ж<testing.T> Ꮡt) {
+public static void TestShuffledFS(ж<testing.T> t) {
     var fsys = new shuffledFS(new map<@string, ж<global::go.testing.fstest_package.MapFile>>{
-        ["tmp/one"u8] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("1"u8))),
-        ["tmp/two"u8] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("2"u8))),
-        ["tmp/three"u8] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("3"u8)))
+        ["tmp/one"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("1"u8))),
+        ["tmp/two"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("2"u8))),
+        ["tmp/three"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("3"u8)))
     });
     {
-        var err = TestFS(fsys, tmpOneˢ, tmpTwoˢ, tmpThreeˢ); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = TestFS(fsys, tmpOneˢ, tmpTwoˢ, tmpThreeˢ); if (err != nil) {
+            t.Error(err);
         }
     }
 }
@@ -115,9 +121,9 @@ internal partial struct failPermFS {
 
 internal static (fs.File, error) Open(this failPermFS f, @string name) {
     if (!fs.ValidPath(name)) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrInvalid))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrInvalid))));
     }
-    return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrPermission))));
+    return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrPermission))));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -131,25 +137,25 @@ internal partial interface TestTestFSWrappedErrors_wrapper /*dyn*/ :
     slice<error> Unwrap();
 }
 
-public static void TestTestFSWrappedErrors(ж<testing.T> Ꮡt) {
-    var err = TestFS(new failPermFS(nil));
-    if (err == default!) {
-        Ꮡt.Fatal(errorExpectedˢ);
+public static void TestTestFSWrappedErrors(ж<testing.T> t) {
+    var err = TestFS(new failPermFS());
+    if (err == nil) {
+        t.Fatal(errorExpectedˢ);
     }
-    Ꮡt.Logf("Error (expecting wrapped fs.ErrPermission):\n%v"u8, err);
+    t.Logf("Error (expecting wrapped fs.ErrPermission):\n%v", err);
 
     if (!errors.Is(err, fs.ErrPermission)) {
-        Ꮡt.Errorf("error should be a wrapped ErrPermission: %#v"u8, err);
+        t.Errorf("error should be a wrapped ErrPermission: %#v", err);
     }
     var (errs, ok) = errors.AsType<TestTestFSWrappedErrors_wrapper>(err);
-    if (!ok){
-        Ꮡt.Errorf("caller should be able to extract the errors as a list: %#v"u8, err);
+    if (!ok) {
+        t.Errorf("caller should be able to extract the errors as a list: %#v", err);
     } else {
         foreach (var (_, errΔ1) in errs.Unwrap()) {
             // ErrPermission is expected
             // but any other error must be reported.
             if (!errors.Is(errΔ1, fs.ErrPermission)) {
-                Ꮡt.Errorf("unexpected error: %v"u8, errΔ1);
+                t.Errorf("unexpected error: %v", errΔ1);
             }
         }
     }

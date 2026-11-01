@@ -166,7 +166,7 @@ internal static nint Len(this myStructs s) {
 }
 
 internal static bool Less(this myStructs s, nint i, nint j) {
-    return (~s[i]).n < (~s[j]).n;
+    return s[i].n < s[j].n;
 }
 
 internal static void Swap(this myStructs s, nint i, nint j) {
@@ -182,19 +182,19 @@ internal static myStructs makeRandomStructs(nint n) {
     return structs;
 }
 
-public static void TestStructSorts(ж<testing.T> Ꮡt) {
+public static void TestStructSorts(ж<testing.T> t) {
     var ss = makeRandomStructs(200);
     var ss2 = new slice<ж<myStruct>>(len(ss));
     foreach (var i in range(ss)) {
-        ss2[i] = Ꮡ(new myStruct(n: (~ss[i]).n));
+        ss2[i] = Ꮡ(new myStruct(n: ss[i].n));
     }
 
     Sort(ss);
-    slices.SortFunc(ss2, (ж<myStruct> a, ж<myStruct> b) => (~a).n - (~b).n);
+    slices.SortFunc(ss2, (ж<myStruct> a, ж<myStruct> b) => a.n - b.n);
 
     foreach (var i in range(ss)) {
         if (ss[i].Value != ss2[i].Value) {
-            Ꮡt.Fatalf("ints2 mismatch at %d; %v != %v"u8, i, ss[i].Value, ss2[i].Value);
+            t.Fatalf("ints2 mismatch at %d; %v != %v", i, ss[i].Value, ss2[i].Value);
         }
     }
 }
@@ -213,7 +213,7 @@ public static void BenchmarkSortStructs(ж<testing.B> Ꮡb) {
 public static void BenchmarkSortFuncStructs(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var cmpFunc = (ж<myStruct> a, ж<myStruct> bΔ1) => (~a).n - (~bΔ1).n;
+    var cmpFunc = (ж<myStruct> a, ж<myStruct> bΔ1) => a.n - bΔ1.n;
     for (nint i = 0; i < b.N; i++) {
         b.StopTimer();
         var ss = makeRandomStructs(N);

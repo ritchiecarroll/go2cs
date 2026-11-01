@@ -1,33 +1,45 @@
-// go2cs metadata anchor for a production-reference test project: the test assembly
-// REFERENCES the colocated production project instead of
-// recompiling its sources, so the production assembly is the single identity for the
-// production types and no production class partial may be declared here. The first —
-// and only — class is the test metadata class the go2cs-gen generators anchor
-// generated adapters and partials to.
-global using static global::go.runtime.metrics_package;
+// go2cs code converter defines `global using` statements here for imported type
+// aliases as package references are encountered via `import' statements. Exported
+// type aliases that need a `global using` declaration will be loaded from the
+// referenced package by parsing its 'package_info.cs' source file and reading its
+// defined `GoTypeAlias` attributes.
+
+// Package name separator "dot" used in imported type aliases is extended Unicode
+// character '\uA4F8' which is a valid character in a C# identifier name. This is
+// used to simulate Go's package level type aliases since C# does not yet support
+// importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
 global using commentꓸText = go.go.doc.comment_package.ΔText;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
 global using metricsꓸFloat64Histogram = go.runtime.metrics_package.ΔFloat64Histogram;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.runtime.metrics_test_package;
+using static go.runtime.metrics_package;
+using static go.runtime.metrics_test_package;
+
+// For encountered type alias declarations, e.g., `type Table = map[string]int`,
+// go2cs code converter will generate a `global using` statement for the alias in
+// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
+// Although scope of `global using` is available to all files in the project, all
+// converted Go code for the project targets the same package, so `global using`
+// statements will effectively have package level scope.
+
+// Additionally, `GoTypeAlias` attributes will be generated here for exported type
+// aliases. This allows the type alias to be imported and used from other packages
+// when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("Float64Histogram", "ΔFloat64Histogram")]
 // </ExportedTypeAliases>
 
+// As types are cast to interfaces in Go source code, the go2cs code converter
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
+// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
+// this way is what keeps startup free of reflection.
+
 // <InterfaceImplementations>
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -37,7 +49,15 @@ using static global::go.runtime.metrics_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.go.ast_package.File))]
+[assembly: GoFieldAccess(typeof(go.go.doc.comment_package.Code))]
+[assembly: GoFieldAccess(typeof(go.go.doc.comment_package.Doc))]
+[assembly: GoFieldAccess(typeof(go.go.doc.comment_package.Heading))]
+[assembly: GoFieldAccess(typeof(go.go.doc_package.Package))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -47,14 +67,16 @@ using static global::go.runtime.metrics_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("runtime/metrics/description_test.go", "description_test.cs", "AB88AAkElIKCgoKUgriCgoKClJSCgoKUgoKUgpS4goKCpqKCgoKUgpSmAAoEgpSCgpSCgoKUgoKUgoKUgpSCgoKCgpSCgsaCgoKClILsgpSCgoKCgoKCgoKClICCtII=")]
-[assembly: global::go.GoPositionMap("runtime/metrics/example_test.go", "example_test.cs", "AA4YhLaCpsqC7pSmlKaCgrimlLaUpMjI/sqigoKUgoKCgoKm")]
+[assembly: GoPositionMap("runtime/metrics/description.go", "description.cs", "ADVuAO8ClgemgoKUgoKCggAHFKiS")]
+[assembly: GoPositionMap("runtime/metrics/description_test.go", "description_test.cs", "AB88AAoElIKCgoKUgriCgoKClJSCgoKUgoKUgpS4goKCpoKCgoKUgpSmAA8EgpSCgpSCgoKUgoKUgoKUgpSCgoKCgpSCgsaCgoKClILsgpSCgoKCgoKCgoKClICCpII=")]
+[assembly: GoPositionMap("runtime/metrics/example_test.go", "example_test.cs", "AA8YhLaCpsqC7pSmlKaCgrimlLaUtNjYAAgO2qKCgpSCgoKCgqY=")]
+[assembly: GoPositionMap("runtime/metrics/value.go", "value.cs", "ACBKkqyygpSssoKUrLKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
 
-[GoPackage("metrics_test")]
-public static partial class metrics_test_package
+[GoPackage("metrics")]
+public static partial class metrics_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -63,6 +85,10 @@ public static partial class metrics_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    public partial struct Description {}
+    public partial struct Value {}
+    public partial struct ValueKind {}
+    public partial struct ΔFloat64Histogram {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -82,18 +108,18 @@ public static partial class metrics_test_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸparser() => builtin.initPackage(typeof(global::go.go.parser_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(@internal.diff_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebugs() => builtin.initPackage(typeof(@internal.godebugs_package));
+    [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
-    [GoInit] internal static void initᴛᴛimportꓸruntimeꓸmetrics() => builtin.initPackage(typeof(global::go.runtime.metrics_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
-    // Go runs every `init` in the package under test - the production files' included -
-    // before the first test. The production package is a REFERENCED assembly here, whose
-    // module constructor .NET would not run until something in it is touched, so that
-    // initialization is forced before anything else in this test module runs.
-    [GoInit] internal static void initᴛᴛproduction() {
-        builtin.initPackage(typeof(global::go.runtime.metrics_package));
-    }
+}
+
+[GoPackage("metrics_test")]
+public static partial class metrics_test_package
+{
 }

@@ -27,101 +27,107 @@ internal partial struct TestForeachHeaderElement_tests /*dyn*/ {
     internal slice<@string> want;
 }
 
-public static void TestForeachHeaderElement(ж<testing.T> Ꮡt) {
-    var tests = new TestForeachHeaderElement_tests[]{
-        new("Foo"u8, new @string[]{"Foo"u8}.slice()),
-        new(" Foo"u8, new @string[]{"Foo"u8}.slice()),
-        new("Foo "u8, new @string[]{"Foo"u8}.slice()),
-        new(" Foo "u8, new @string[]{"Foo"u8}.slice()),
+public static void TestForeachHeaderElement(ж<testing.T> t) {
+    var tests = slice<TestForeachHeaderElement_tests>([
+        new("Foo", slice<@string>(["Foo"])),
+        new(" Foo", slice<@string>(["Foo"])),
+        new("Foo ", slice<@string>(["Foo"])),
+        new(" Foo ", slice<@string>(["Foo"])),
 
-        new("foo"u8, new @string[]{"foo"u8}.slice()),
-        new("anY-cAsE"u8, new @string[]{"anY-cAsE"u8}.slice()),
+        new("foo", slice<@string>(["foo"])),
+        new("anY-cAsE", slice<@string>(["anY-cAsE"])),
 
-        new(""u8, default!),
-        new(",,,,  ,  ,,   ,,, ,"u8, default!),
+        new("", default),
+        new(",,,,  ,  ,,   ,,, ,", default),
 
-        new(" Foo,Bar, Baz,lower,,Quux "u8, new @string[]{"Foo"u8, "Bar"u8, "Baz"u8, "lower"u8, "Quux"u8}.slice())
-    }.slice();
+        new(" Foo,Bar, Baz,lower,,Quux ", slice<@string>(["Foo", "Bar", "Baz", "lower", "Quux"]))
+    ]);
     foreach (var (_, tt) in tests) {
         ref var got = ref heap<slice<@string>>(out var Ꮡgot);
         foreachHeaderElement(tt.@in, (@string v) => {
             Ꮡgot.ValueSlot = append(Ꮡgot.ValueSlot, v);
         });
         if (!slices.Equal<slice<@string>, @string>(got, tt.want)) {
-            Ꮡt.Errorf("foreachHeaderElement(%q) = %q; want %q"u8, tt.@in, got, tt.want);
+            t.Errorf("foreachHeaderElement(%q) = %q; want %q", tt.@in, got, tt.want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string toolˢ = "tool"u8;
+internal static ref readonly @string toolˢ => ref toolˢᵇ;
+private static readonly @string toolˢᵇ = "tool"u8;
 
 // Test that cmd/go doesn't link in the HTTP server.
 //
 // This catches accidental dependencies between the HTTP transport and
 // server code.
-public static void TestCmdGoNoHTTPServer(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string goBin = testenv.GoToolPath(new http_test_package.testing_TжTB(Ꮡt));
-    var (@out, err) = testenv.Command(new http_test_package.testing_TжTB(Ꮡt), goBin, toolˢ, "nm", goBin).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("go tool nm: %v: %s"u8, err, @out);
+public static void TestCmdGoNoHTTPServer(ж<testing.T> t) {
+    t.Parallel();
+    @string goBin = testenv.GoToolPath(new http_test_package.testing_TжTB(t));
+    var (@out, err) = testenv.Command(new http_test_package.testing_TжTB(t), goBin, toolˢ, "nm", goBin).CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("go tool nm: %v: %s", err, @out);
     }
     var wantSym = new map<@string, bool>{
         // Verify these exist: (sanity checking this test)
-        ["net/http.(*Client).do"u8] = true,
-        ["net/http.(*Transport).RoundTrip"u8] = true,
+        ["net/http.(*Client).do"] = true,
+        ["net/http.(*Transport).RoundTrip"] = true,
 
         // Verify these don't exist:
-        ["net/http.http2Server"u8] = false,
-        ["net/http.(*Server).Serve"u8] = false,
-        ["net/http.(*ServeMux).ServeHTTP"u8] = false,
-        ["net/http.DefaultServeMux"u8] = false
+        ["net/http.http2Server"] = false,
+        ["net/http.(*Server).Serve"] = false,
+        ["net/http.(*ServeMux).ServeHTTP"] = false,
+        ["net/http.DefaultServeMux"] = false
     };
     foreach (var (sym, want) in wantSym) {
         var got = bytes.Contains(@out, slice<byte>(sym));
         if (!want && got) {
-            Ꮡt.Errorf("cmd/go unexpectedly links in HTTP server code; found symbol %q in cmd/go"u8, sym);
+            t.Errorf("cmd/go unexpectedly links in HTTP server code; found symbol %q in cmd/go", sym);
         }
         if (want && !got) {
-            Ꮡt.Errorf("expected to find symbol %q in cmd/go; not found"u8, sym);
+            t.Errorf("expected to find symbol %q in cmd/go; not found", sym);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in short mode"u8;
-internal static readonly @string testˢ = "test"u8;
-internal static readonly @string shortˢ = "-short"u8;
-internal static readonly @string tagsNethttpomithttp2ˢ = "-tags=nethttpomithttp2"u8;
-internal static readonly @string netHttpˢ2 = "net/http"u8;
+internal static ref readonly @string testˢ => ref testˢᵇ;
+private static readonly @string testˢᵇ = "test"u8;
+internal static ref readonly @string shortˢ => ref shortˢᵇ;
+private static readonly @string shortˢᵇ = "-short"u8;
+internal static ref readonly @string tagsNethttpomithttp2ˢ => ref tagsNethttpomithttp2ˢᵇ;
+private static readonly @string tagsNethttpomithttp2ˢᵇ = "-tags=nethttpomithttp2"u8;
+internal static ref readonly @string netHttpˢ2 => ref netHttpˢ2ᵇ;
+private static readonly @string netHttpˢ2ᵇ = "net/http"u8;
 
 // Tests that the nethttpomithttp2 build tag doesn't rot too much,
 // even if there's not a regular builder on it.
-public static void TestOmitHTTP2(ж<testing.T> Ꮡt) {
+public static void TestOmitHTTP2(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
-    Ꮡt.Parallel();
-    @string goTool = testenv.GoToolPath(new http_test_package.testing_TжTB(Ꮡt));
-    var (@out, err) = testenv.Command(new http_test_package.testing_TжTB(Ꮡt), goTool, testˢ, shortˢ, tagsNethttpomithttp2ˢ, netHttpˢ2).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("go test -short failed: %v, %s"u8, err, @out);
+    t.Parallel();
+    @string goTool = testenv.GoToolPath(new http_test_package.testing_TжTB(t));
+    var (@out, err) = testenv.Command(new http_test_package.testing_TжTB(t), goTool, testˢ, shortˢ, tagsNethttpomithttp2ˢ, netHttpˢ2).CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("go test -short failed: %v, %s", err, @out);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string vetˢ = "vet"u8;
+internal static ref readonly @string vetˢ => ref vetˢᵇ;
+private static readonly @string vetˢᵇ = "vet"u8;
 
 // Tests that the nethttpomithttp2 build tag at least type checks
 // in short mode.
 // The TestOmitHTTP2 test above actually runs tests (in long mode).
-public static void TestOmitHTTP2Vet(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string goTool = testenv.GoToolPath(new http_test_package.testing_TжTB(Ꮡt));
-    var (@out, err) = testenv.Command(new http_test_package.testing_TжTB(Ꮡt), goTool, vetˢ, tagsNethttpomithttp2ˢ, netHttpˢ2).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("go vet failed: %v, %s"u8, err, @out);
+public static void TestOmitHTTP2Vet(ж<testing.T> t) {
+    t.Parallel();
+    @string goTool = testenv.GoToolPath(new http_test_package.testing_TжTB(t));
+    var (@out, err) = testenv.Command(new http_test_package.testing_TжTB(t), goTool, vetˢ, tagsNethttpomithttp2ˢ, netHttpˢ2).CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("go vet failed: %v, %s", err, @out);
     }
 }
 
@@ -135,20 +141,20 @@ public static void BenchmarkCopyValues(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     var src = new url.Values(new map<@string, slice<@string>>{
-        ["a"u8] = new @string[]{"1"u8, "2"u8, "3"u8, "4"u8, "5"u8}.slice(),
-        ["b"u8] = new @string[]{"2"u8, "2"u8, "3"u8, "4"u8, "5"u8}.slice(),
-        ["c"u8] = new @string[]{"3"u8, "2"u8, "3"u8, "4"u8, "5"u8}.slice(),
-        ["d"u8] = new @string[]{"4"u8, "2"u8, "3"u8, "4"u8, "5"u8}.slice(),
-        ["e"u8] = new @string[]{"1"u8, "1"u8, "2"u8, "3"u8, "4"u8, "5"u8, "6"u8, "7"u8, "abcdef"u8, "l"u8, "a"u8, "b"u8, "c"u8, "d"u8, "z"u8}.slice(),
-        ["j"u8] = new @string[]{"1"u8, "2"u8}.slice(),
-        ["m"u8] = default!
+        ["a"] = slice<@string>(["1", "2", "3", "4", "5"]),
+        ["b"] = slice<@string>(["2", "2", "3", "4", "5"]),
+        ["c"] = slice<@string>(["3", "2", "3", "4", "5"]),
+        ["d"] = slice<@string>(["4", "2", "3", "4", "5"]),
+        ["e"] = slice<@string>(["1", "1", "2", "3", "4", "5", "6", "7", "abcdef", "l", "a", "b", "c", "d", "z"]),
+        ["j"] = slice<@string>(["1", "2"]),
+        ["m"] = default
     });
     for (nint i = 0; i < b.N; i++) {
-        var dst = new url.Values(new map<@string, slice<@string>>{["a"u8] = new @string[]{"b"u8}.slice(), ["b"u8] = new @string[]{"2"u8}.slice(), ["c"u8] = new @string[]{"3"u8}.slice(), ["d"u8] = new @string[]{"4"u8}.slice(), ["j"u8] = default!, ["m"u8] = new @string[]{"x"u8}.slice()});
+        var dst = new url.Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["b"]), ["b"] = slice<@string>(["2"]), ["c"] = slice<@string>(["3"]), ["d"] = slice<@string>(["4"]), ["j"] = default, ["m"] = slice<@string>(["x"])});
         copyValues(dst, src);
         {
-            http_internal_test_package.valuesCount = builtin.len(dst["a"u8]); if (http_internal_test_package.valuesCount != 6) {
-                Ꮡb.Fatalf(@"%d items in dst[""a""] but expected 6"u8, http_internal_test_package.valuesCount);
+            http_internal_test_package.valuesCount = builtin.len(dst["a"]); if (http_internal_test_package.valuesCount != 6) {
+                Ꮡb.Fatalf(@"%d items in dst[""a""] but expected 6", http_internal_test_package.valuesCount);
             }
         }
     }
@@ -159,88 +165,91 @@ public static void BenchmarkCopyValues(ж<testing.B> Ꮡb) {
 
 internal static map<@string, bool> forbiddenStringsFunctions = new map<@string, bool>{
     // Functions that use Unicode-aware case folding.
-    ["EqualFold"u8] = true,
-    ["Title"u8] = true,
-    ["ToLower"u8] = true,
-    ["ToLowerSpecial"u8] = true,
-    ["ToTitle"u8] = true,
-    ["ToTitleSpecial"u8] = true,
-    ["ToUpper"u8] = true,
-    ["ToUpperSpecial"u8] = true,
+    ["EqualFold"] = true,
+    ["Title"] = true,
+    ["ToLower"] = true,
+    ["ToLowerSpecial"] = true,
+    ["ToTitle"] = true,
+    ["ToTitleSpecial"] = true,
+    ["ToUpper"] = true,
+    ["ToUpperSpecial"] = true,
 
     // Functions that use Unicode-aware spaces.
-    ["Fields"u8] = true,
-    ["TrimSpace"u8] = true
+    ["Fields"] = true,
+    ["TrimSpace"] = true
 };
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stringsBytesAZaZˢ = @"(strings|bytes).([A-Za-z]+)"u8;
-internal static readonly @string testGoˢ = "_test.go"u8;
+internal static ref readonly @string stringsBytesAZaZˢ => ref stringsBytesAZaZˢᵇ;
+private static readonly @string stringsBytesAZaZˢᵇ = @"(strings|bytes).([A-Za-z]+)"u8;
+internal static ref readonly @string testGoˢ => ref testGoˢᵇ;
+private static readonly @string testGoˢᵇ = "_test.go"u8;
 
 // TestNoUnicodeStrings checks that nothing in net/http uses the Unicode-aware
 // strings and bytes package functions. HTTP is mostly ASCII based, and doing
 // Unicode-aware case folding or space stripping can introduce vulnerabilities.
-public static void TestNoUnicodeStrings(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSource(new http_test_package.testing_TжTB(Ꮡt));
+public static void TestNoUnicodeStrings(ж<testing.T> t) {
+    testenv.MustHaveSource(new http_test_package.testing_TжTB(t));
 
     var re = regexp.MustCompile(stringsBytesAZaZˢ);
     {
         var reʗ1 = re;
-        var err = fs.WalkDir(os.DirFS("."u8), "."u8, error (@string path, fs.DirEntry d, error errΔ1) => {
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+        var err = fs.WalkDir(os.DirFS("."), ".", error (@string path, fs.DirEntry d, error errΔ1) => {
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
 
             if (path == "internal/ascii"u8) {
                 return fs.SkipDir;
             }
-            if (!strings.HasSuffix(path, ".go"u8) || strings.HasSuffix(path, testGoˢ) || path == "h2_bundle.go"u8 || path == "internal/httpcommon/httpcommon.go"u8 || d.IsDir()) {
-                return default!;
+            if (!strings.HasSuffix(path, ".go") || strings.HasSuffix(path, testGoˢ) || path == "h2_bundle.go"u8 || path == "internal/httpcommon/httpcommon.go"u8 || d.IsDir()) {
+                return default;
             }
 
             (var contents, errΔ1) = os.ReadFile(path);
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
-            foreach (var (lineNum, line) in strings.Split((@string)contents, "\n"u8)) {
+            foreach (var (lineNum, line) in strings.Split((@string)contents, "\n")) {
                 foreach (var (_, match) in reʗ1.FindAllStringSubmatch(line, -1)) {
                     if (!forbiddenStringsFunctions[match[2]]) {
                         continue;
                     }
-                    Ꮡt.Errorf("disallowed call to %s at %s:%d"u8, match[0], path, lineNum + 1);
+                    t.Errorf("disallowed call to %s at %s:%d", match[0], path, lineNum + 1);
                 }
             }
 
-            return default!;
-        }); if (err != default!) {
-            Ꮡt.Fatal(err);
+            return default;
+        }); if (err != nil) {
+            t.Fatal(err);
         }
     }
 }
 
-public static void TestProtocols(ж<testing.T> Ꮡt) {
-    global::go.net.http_package.Protocols p = default!;
+public static void TestProtocols(ж<testing.T> t) {
+    global::go.net.http_package.Protocols p = default;
     if (p.HTTP1()) {
-        Ꮡt.Errorf("zero-value protocols: p.HTTP1() = true, want false"u8);
+        t.Errorf("zero-value protocols: p.HTTP1() = true, want false");
     }
     p.SetHTTP1(true);
     p.SetHTTP2(true);
     if (!p.HTTP1()) {
-        Ꮡt.Errorf("initialized protocols: p.HTTP1() = false, want true"u8);
+        t.Errorf("initialized protocols: p.HTTP1() = false, want true");
     }
     if (!p.HTTP2()) {
-        Ꮡt.Errorf("initialized protocols: p.HTTP2() = false, want true"u8);
+        t.Errorf("initialized protocols: p.HTTP2() = false, want true");
     }
     p.SetHTTP1(false);
     if (p.HTTP1()) {
-        Ꮡt.Errorf("after unsetting HTTP1: p.HTTP1() = true, want false"u8);
+        t.Errorf("after unsetting HTTP1: p.HTTP1() = true, want false");
     }
     if (!p.HTTP2()) {
-        Ꮡt.Errorf("after unsetting HTTP1: p.HTTP2() = false, want true"u8);
+        t.Errorf("after unsetting HTTP1: p.HTTP2() = false, want true");
     }
 }
 
-internal static readonly @string redirectURL = "/thisaredirect细雪withasciilettersのけぶabcdefghijk.html"u8;
+internal static ref readonly @string redirectURL => ref redirectURLᵇ;
+private static readonly @string redirectURLᵇ = "/thisaredirect细雪withasciilettersのけぶabcdefghijk.html"u8;
 
 public static void BenchmarkHexEscapeNonASCII(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

@@ -1,26 +1,18 @@
-// go2cs metadata anchor for a production-reference test project: the test assembly
-// REFERENCES the colocated production project instead of
-// recompiling its sources, so the production assembly is the single identity for the
-// production types and no production class partial may be declared here. The first —
-// and only — class is the test metadata class the go2cs-gen generators anchor
-// generated adapters and partials to.
-global using static global::go.go.@internal.gcimporter_package;
+// go2cs code converter defines `global using` statements here for imported type
+// aliases as package references are encountered via `import' statements. Exported
+// type aliases that need a `global using` declaration will be loaded from the
+// referenced package by parsing its 'package_info.cs' source file and reading its
+// defined `GoTypeAlias` attributes.
+
+// Package name separator "dot" used in imported type aliases is extended Unicode
+// character '\uA4F8' which is a valid character in a C# identifier name. This is
+// used to simulate Go's package level type aliases since C# does not yet support
+// importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
+global using pkgbitsꓸRelElemIdx = go.@internal.pkgbits_package.Index;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
-global using typesꓸError = go.go.types_package.ΔError;
 global using typesꓸInfo = go.go.types_package.ΔInfo;
 global using typesꓸScope = go.go.types_package.ΔScope;
 global using typesꓸSignature = go.go.types_package.ΔSignature;
@@ -29,16 +21,32 @@ global using typesꓸType = go.go.types_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.go.@internal.gcimporter_test_package;
+using static go.go.@internal.gcimporter_package;
+using static go.go.@internal.gcimporter_test_package;
+
+// For encountered type alias declarations, e.g., `type Table = map[string]int`,
+// go2cs code converter will generate a `global using` statement for the alias in
+// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
+// Although scope of `global using` is available to all files in the project, all
+// converted Go code for the project targets the same package, so `global using`
+// statements will effectively have package level scope.
+
+// Additionally, `GoTypeAlias` attributes will be generated here for exported type
+// aliases. This allows the type alias to be imported and used from other packages
+// when referenced.
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b2077616e7420737472696e677d", "importedObjectTestsᴛ1")]
 // </ExportedTypeAliases>
 
+// As types are cast to interfaces in Go source code, the go2cs code converter
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
+// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
+// this way is what keeps startup free of reflection.
+
 // <InterfaceImplementations>
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<importMap, go.go.types_package.Importer>]
-[assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReadCloser>(Pointer = true, Production = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -48,7 +56,15 @@ using static global::go.go.@internal.gcimporter_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(fileInfo))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: GoFieldAccess(typeof(pkgReader))]
+[assembly: GoFieldAccess(typeof(reader))]
+[assembly: GoFieldAccess(typeof(readerDict))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,13 +74,16 @@ using static global::go.go.@internal.gcimporter_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/internal/gcimporter/gcimporter_test.go", "gcimporter_test.cs", "ACU+goIACAz0goKUgpSCgoKmgoKCgoKClKaCgoKCgoKUgqbUgoKClICCgqTWtIKmlLiUgoKUgpSAuIKCgvr0ooK4gtyCgIKAgtiUgriCgoKmgpSmkoKCgpS4yoKCgpSCgoKUlIKClIKClIKUgriCgpTYqtKCgoKUlKaCgoKClLaCgpQADQaipoKmgoKCpoKCgoCCtpSCgoKUgpSUgriClIKWyoIAARLKgpS4gsqCgqamgoKmgqaCgqaCgpKAgtYACQSCgpSmgqiSgoKCgpSUgoKCgriCgqbmABcwgqaCpoKCgoKUgpSCgoKmgoKCpoKCpoCC3rSCgqaCgriCgoKCgpSCypSAggAICoKmgqaUgoKCgpSAgoKCgoIADRCSpoKmgoKCgqaCgoKCgJIACgiipoKmgoLKgoKmgqamgoLG5KKmgqaCgpSmogAIBIKmgriCgoKCqJKCgoKmgriCgoK4goK4gviipoKmgpQADRyCgoKAgtbUgqaCptaCpoK4goKAgvaCpoKm1oKmgqbWgqaCpqaCgoKCgpSmooKCgoLWooCCpIKC3IAAEgSCpoKmgoKAgraUlIKCppKCgpSmqgACEKaCgoLCgoCCxKQ=", "165-214:1;380-384:1;794-803:1;821-826:2", "", "287=Default/1/1/1")]
+[assembly: GoPositionMap("go/internal/gcimporter/gcimporter.go", "gcimporter.cs", "ABUs8oKCpoKUpoCCpIKClJSCgoKClLiAgsiSgpSClKaUpIKCgoKUlIKE", "62-67:1", "", "", "83:21")]
+[assembly: GoPositionMap("go/internal/gcimporter/gcimporter_test.go", "gcimporter_test.cs", "ACU+goIADAzkgoKUgpSCgoKmgoKCgoKClKaCgoKCgoKUgqbkgoKClICCgqTmtIKmlLiUgoKUgpSAuIKCgvoACgSigriC3IKAgoCC2JSCuIKCgqaClKaSgoKClLjKgoKClIKCgpSUgoKUgoKUgpSCuIKClNiq0oKCgpSUpoKCgoKUpoKClAAUBqKmgqaCgoKmgoKCgIK2lIKCgpSClJSCuIKUgqbaggACEtqCpMiCyoKCpqaCgqaCpoKCpoKCgoCC1gANBIKClKaCqJKCgoKClJSCgoKCuIKCpuYAFzCCpoKmgoKCgpSClIKCgqaCgoKmgoKmgILetIKCpoKCuIKCgoKClILKlICCAAkKgqaCppSCgoKClICCgoKCggAREJKmgqaCgoKCpoKCgoKAkgAOCKKmgqaCgsqCgqaCpqaCgsYACASipoKmgoKUpqIACwSCpoK4goKCgqiSgoKCpoK4goKCuIKCuIIACQiipoKmgpQADRyCgoKAgtbkgqaCpuaCpoK4goKAggAIBoKmgqbmgqaCpuaCpoKmpoKCgoKClKaigoKCgtaigIKkgoLcgAAVBIKmgqaCgoCCtpSUgoKmkoKClKaqAAIQpoKCgsKCgILEpA==", "165-214:1;380-384:1;794-803:1;821-826:2", "", "295=Default/1/1/1")]
+[assembly: GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABAggoK4ogAPIO6CgoKmgpSCuKaCgoKCpoIAFyySgoKUgoKClA==", "64-69:1")]
+[assembly: GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "ACVUkqriAA4elIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAGzqC3ILcgqqygoK4goKCpqKmooCCtoKC7pSmgoKmtJSCgqqygqbGgIK2goKmooKktKSmgIK2lIKUqrKmgoKClKaygoKCgpSmgIK2goKClIKCpoCCtoKmooCkgramgoKCgpSmpoKkgqSkpKSkpKTIgoKCgoKCgoKUgoKClKamgoKClKaigoKUgoKCgqaCpoKCAAkUlKaClIKClKaClIKCpqaClIKClIKCqrKUgqaClIKCpqakgoKCgpSClIKmgoK4gIK2gpSClJKmlLaCgoKUgraCgoK2goKCtpSCgpSUyoCCgoKClIKCpoKCpoKCtpSCyIKCyKaklIKCgIK2goKmgoKCgoK4uKai7oIABxCCgoKUgqaCggAOHoKigrimgoKClIKUgqaAooCigKSCgq7CgpTotqSCgoKUgg==", "100-102:1;483-485:1;638-642:1", "", "50=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;134=NewDecoder/1/1/1;141=TempDecoder/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
 
-[GoPackage("gcimporter_test")]
-public static partial class gcimporter_test_package
+[GoPackage("gcimporter")]
+public static partial class gcimporter_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -73,8 +92,13 @@ public static partial class gcimporter_test_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct importMap {}
-    internal partial struct importedObjectTestsᴛ1 {}
+    internal partial struct derivedInfo {}
+    internal partial struct fakeFileSet {}
+    internal partial struct fileInfo {}
+    internal partial struct pkgReader {}
+    internal partial struct reader {}
+    internal partial struct readerDict {}
+    internal partial struct typeInfo {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -84,31 +108,34 @@ public static partial class gcimporter_test_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸbufio() => builtin.initPackage(typeof(bufio_package));
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸast() => builtin.initPackage(typeof(global::go.go.ast_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸbuild() => builtin.initPackage(typeof(global::go.go.build_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸimporter() => builtin.initPackage(typeof(global::go.go.importer_package));
-    [GoInit] internal static void initᴛᴛimportꓸgoꓸinternalꓸgcimporter() => builtin.initPackage(typeof(global::go.go.@internal.gcimporter_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸparser() => builtin.initPackage(typeof(global::go.go.parser_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtypes() => builtin.initPackage(typeof(global::go.go.types_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸexportdata() => builtin.initPackage(typeof(global::go.@internal.exportdata_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(global::go.@internal.godebug_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸpkgbits() => builtin.initPackage(typeof(global::go.@internal.pkgbits_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(global::go.@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(global::go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpath() => builtin.initPackage(typeof(path_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(global::go.path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
-    // Go runs every `init` in the package under test - the production files' included -
-    // before the first test. The production package is a REFERENCED assembly here, whose
-    // module constructor .NET would not run until something in it is touched, so that
-    // initialization is forced before anything else in this test module runs.
-    [GoInit] internal static void initᴛᴛproduction() {
-        builtin.initPackage(typeof(global::go.go.@internal.gcimporter_package));
-    }
+}
+
+[GoPackage("gcimporter_test")]
+public static partial class gcimporter_test_package
+{
 }

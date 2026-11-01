@@ -26,26 +26,28 @@ partial class os_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object slowTestSkippingˢ = (@string)"slow test; skipping"u8;
-internal static readonly @string testExeˢ = "test.exe"u8;
-internal static readonly @string testRunˢ = "-test.run=^$"u8;
+internal static ref readonly @string testExeˢ => ref testExeˢᵇ;
+private static readonly @string testExeˢᵇ = "test.exe"u8;
+internal static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^$"u8;
 
-public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         // Regression test for golang.org/issue/25965.
         if (Δtesting.Short()) {
-            Ꮡt.Skip(slowTestSkippingˢ);
+            t.Skip(slowTestSkippingˢ);
         }
-        testenv.MustHaveExec(new os_test_package.testing_TжTB(Ꮡt));
+        testenv.MustHaveExec(new os_test_package.testing_TжTB(t));
 
         ref var err = ref heap<error>(out var Ꮡerr);
         (var name, err) = Executable();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         (var r, err) = Open(name);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
@@ -55,31 +57,31 @@ public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt
         for (nint i = 0; i < n; i++) {
             // Rewind r.
             {
-                var (_, errΔ1) = r.Seek(0, Δio.SeekStart); if (errΔ1 != default!) {
-                    Ꮡt.Fatal(errΔ1);
+                var (_, errΔ1) = r.Seek(0, Δio.SeekStart); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
             }
-            @string nameΔ1 = filepath.Join(Ꮡt.TempDir(), testExeˢ);
+            @string nameΔ1 = filepath.Join(t.TempDir(), testExeˢ);
             execs[i] = nameΔ1;
             var (w, errΔ2) = Create(nameΔ1);
-            if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
             {
-                (_, errΔ2) = Δio.Copy(new Δos.FileжWriter(w), new os_test_package.os_FileжReader(r)); if (errΔ2 != default!) {
+                (_, errΔ2) = Δio.Copy(new Δos.FileжWriter(w), new os_test_package.os_FileжReader(r)); if (errΔ2 != nil) {
                     w.Close();
-                    Ꮡt.Fatal(errΔ2);
+                    t.Fatal(errΔ2);
                 }
             }
             {
-                var errΔ3 = w.Sync(); if (errΔ3 != default!) {
+                var errΔ3 = w.Sync(); if (errΔ3 != nil) {
                     w.Close();
-                    Ꮡt.Fatal(errΔ3);
+                    t.Fatal(errΔ3);
                 }
             }
             {
-                errΔ2 = w.Close(); if (errΔ2 != default!) {
-                    Ꮡt.Fatal(errΔ2);
+                errΔ2 = w.Close(); if (errΔ2 != nil) {
+                    t.Fatal(errΔ2);
                 }
             }
         }
@@ -97,16 +99,16 @@ public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt
                     @string nameΔ2 = execsʗ1[iΔ1];
                     @string dir = filepath.Dir(nameΔ2);
                     // Run test.exe without executing any test, just to make it do something.
-                    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), nameΔ2, testRunˢ);
+                    var cmd = testenv.Command(new os_test_package.testing_TжTB(t), nameΔ2, testRunˢ);
                     {
-                        var errΔ4 = cmd.Run(); if (errΔ4 != default!) {
-                            Ꮡt.Errorf("exec failed: %v"u8, errΔ4);
+                        var errΔ4 = cmd.Run(); if (errΔ4 != nil) {
+                            t.Errorf("exec failed: %v", errΔ4);
                         }
                     }
                     // Remove dir and check that it doesn't return `ERROR_ACCESS_DENIED`.
                     Ꮡerr.ValueSlot = RemoveAll(dir);
-                    if (Ꮡerr.ValueSlot != default!) {
-                        Ꮡt.Errorf("RemoveAll failed: %v"u8, Ꮡerr.ValueSlot);
+                    if (Ꮡerr.ValueSlot != nil) {
+                        t.Errorf("RemoveAll failed: %v", Ꮡerr.ValueSlot);
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -120,13 +122,15 @@ public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getProcessTimesˢ = "GetProcessTimes"u8;
+internal static ref readonly @string getProcessTimesˢ => ref getProcessTimesˢᵇ;
+private static readonly @string getProcessTimesˢᵇ = "GetProcessTimes"u8;
 internal static readonly object withHandleDidNotCallTheˢ = (@string)"WithHandle did not call the callback function"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string envVarᶜ = "OSTEST_PROCESS_WITH_HANDLE"u8;
+internal static ref readonly @string envVarᶜ => ref envVarᶜᵇ;
+private static readonly @string envVarᶜᵇ = "OSTEST_PROCESS_WITH_HANDLE"u8;
 
-public static void TestProcessWithHandleWindows(ж<Δtesting.T> Ꮡt) {
+public static void TestProcessWithHandleWindows(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         @string envVar = envVarᶜ;
@@ -135,35 +139,35 @@ public static void TestProcessWithHandleWindows(ж<Δtesting.T> Ꮡt) {
             return;
         }
 
-        var cmd = testenv.CommandContext(new os_test_package.testing_TжTB(Ꮡt), Ꮡt.Context(), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)), "-test.run=^"u8 + Ꮡt.Name() + "$"u8);
+        var cmd = testenv.CommandContext(new os_test_package.testing_TжTB(t), t.Context(), testenv.Executable(new os_test_package.testing_TжTB(t)), "-test.run=^"u8 + t.Name() + "$"u8);
         cmd = testenv.CleanCmdEnv(cmd);
-        cmd.Value.Env = append((~cmd).Env, envVar + "=1");
+        cmd.Env = append(cmd.Env, envVar + "=1");
         {
-            var errΔ1 = cmd.Start(); if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
         var cmdʗ1 = cmd;
         defer(() => {
-            (~cmdʗ1).Process.Kill();
+            cmdʗ1.Process.Kill();
             cmdʗ1.Wait();
         }, ref ᒐ);
 
         var called = false;
-        var err = (~cmd).Process.WithHandle((uintptr handle) => {
+        var err = cmd.Process.WithHandle((uintptr handle) => {
             called = true;
             // Check the handle is valid.
             ref var u = ref heap(new syscall.Rusage(), out var Ꮡu);
-            var e = syscall.GetProcessTimes((syscallꓸHandle)handle, Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
-            if (e != default!) {
-                Ꮡt.Errorf("Using process handle failed: %v"u8, NewSyscallError(getProcessTimesˢ, e));
+            var e = syscall.GetProcessTimes((syscallꓸHandle)handle, Ꮡu.ᏑCreationTime, Ꮡu.ᏑExitTime, Ꮡu.ᏑKernelTime, Ꮡu.ᏑUserTime);
+            if (e != nil) {
+                t.Errorf("Using process handle failed: %v", NewSyscallError(getProcessTimesˢ, e));
             }
         });
-        if (err != default!) {
-            Ꮡt.Fatalf("WithHandle: got error %v, want nil"u8, err);
+        if (err != nil) {
+            t.Fatalf("WithHandle: got error %v, want nil", err);
         }
         if (!called) {
-            Ꮡt.Fatal(withHandleDidNotCallTheˢ);
+            t.Fatal(withHandleDidNotCallTheˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

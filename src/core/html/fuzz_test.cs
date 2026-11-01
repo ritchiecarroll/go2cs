@@ -8,12 +8,12 @@ using static go.html_package;
 
 partial class html_internal_test_package {
 
-public static void FuzzEscapeUnescape(ж<testing.F> Ꮡf) {
-    Ꮡf.Fuzz((ж<testing.T> t, @string v) => {
+public static void FuzzEscapeUnescape(ж<testing.F> f) {
+    f.Fuzz((ж<testing.T> t, @string v) => {
         @string e = EscapeString(v);
         @string u = UnescapeString(e);
         if (u != v) {
-            t.Errorf("EscapeString(%q) = %q, UnescapeString(%q) = %q, want %q"u8, v, e, e, u, v);
+            t.Errorf("EscapeString(%q) = %q, UnescapeString(%q) = %q, want %q", v, e, e, u, v);
         }
 
         // As per the documentation, this isn't always equal to v, so it makes

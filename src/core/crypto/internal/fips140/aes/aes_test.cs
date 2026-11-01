@@ -12,13 +12,13 @@ partial class aes_internal_test_package {
 
 // Test that powx is initialized correctly.
 // (Can adapt this code to generate it too.)
-public static void TestPowx(ж<testing.T> Ꮡt) {
+public static void TestPowx(ж<testing.T> t) {
     nint p = 1;
     for (nint i = 0; i < len(powx); i++) {
         if (powx[i] != (byte)p) {
-            Ꮡt.Errorf("powx[%d] = %#x, want %#x"u8, i, powx[i], p);
+            t.Errorf("powx[%d] = %#x, want %#x", i, powx[i], p);
         }
-        p <<= (int)(1);
+        p <<= 1;
         if ((p & 0x100) != 0) {
             p ^= (nint)(poly);
         }
@@ -30,7 +30,7 @@ internal static uint32 mul(uint32 b, uint32 c) {
     var i = b;
     var j = c;
     var s = (uint32)0;
-    for (var k = (uint32)1; k < 0x100 && j != 0; k <<= (int)(1)) {
+    for (var k = (uint32)1; k < 0x100 && j != 0; k <<= 1) {
         // Invariant: k == 1<<n, i == b * xⁿ
 
         if ((j & k) != 0) {
@@ -40,7 +40,7 @@ internal static uint32 mul(uint32 b, uint32 c) {
         }
 
         // i *= x in GF(2) modulo the polynomial
-        i <<= (int)(1);
+        i <<= 1;
         if ((i & 0x100) != 0) {
             i ^= (uint32)(poly);
         }
@@ -49,7 +49,7 @@ internal static uint32 mul(uint32 b, uint32 c) {
 }
 
 // Test all mul inputs against bit-by-bit n² algorithm.
-public static void TestMul(ж<testing.T> Ꮡt) {
+public static void TestMul(ж<testing.T> t) {
     for (var i = (uint32)0; i < 256; i++) {
         for (var j = (uint32)0; j < 256; j++) {
             // Multiply i, j bit by bit.
@@ -63,7 +63,7 @@ public static void TestMul(ж<testing.T> Ꮡt) {
             }
             {
                 var x = mul(i, j); if (x != (uint32)s) {
-                    Ꮡt.Fatalf("mul(%#x, %#x) = %#x, want %#x"u8, i, j, x, s);
+                    t.Fatalf("mul(%#x, %#x) = %#x, want %#x", i, j, x, s);
                 }
             }
         }
@@ -74,16 +74,16 @@ public static void TestMul(ж<testing.T> Ꮡt) {
 // They have more structure that we could test,
 // but if this sanity check passes, we'll assume
 // the cut and paste from the FIPS PDF worked.
-public static void TestSboxes(ж<testing.T> Ꮡt) {
+public static void TestSboxes(ж<testing.T> t) {
     for (nint i = 0; i < 256; i++) {
         {
             var j = sbox0[sbox1[i]]; if (j != (byte)i) {
-                Ꮡt.Errorf("sbox0[sbox1[%#x]] = %#x"u8, i, j);
+                t.Errorf("sbox0[sbox1[%#x]] = %#x", i, j);
             }
         }
         {
             var j = sbox1[sbox0[i]]; if (j != (byte)i) {
-                Ꮡt.Errorf("sbox1[sbox0[%#x]] = %#x"u8, i, j);
+                t.Errorf("sbox1[sbox0[%#x]] = %#x", i, j);
             }
         }
     }
@@ -91,7 +91,7 @@ public static void TestSboxes(ж<testing.T> Ꮡt) {
 
 // Test that encryption tables are correct.
 // (Can adapt this code to generate them too.)
-public static void TestTe(ж<testing.T> Ꮡt) {
+public static void TestTe(ж<testing.T> t) {
     for (nint i = 0; i < 256; i++) {
         var s = (uint32)sbox0[i];
         var s2 = mul(s, 2);
@@ -101,7 +101,7 @@ public static void TestTe(ж<testing.T> Ꮡt) {
         for (nint j = 0; j < 4; j++) {
             {
                 var x = te[j][i]; if (x != w) {
-                    Ꮡt.Fatalf("te[%d][%d] = %#x, want %#x"u8, j, i, x, w);
+                    t.Fatalf("te[%d][%d] = %#x, want %#x", j, i, x, w);
                 }
             }
             w = w << 24 | w >> 8;
@@ -111,7 +111,7 @@ public static void TestTe(ж<testing.T> Ꮡt) {
 
 // Test that decryption tables are correct.
 // (Can adapt this code to generate them too.)
-public static void TestTd(ж<testing.T> Ꮡt) {
+public static void TestTd(ж<testing.T> t) {
     for (nint i = 0; i < 256; i++) {
         var s = (uint32)sbox1[i];
         var s9 = mul(s, 0x9);
@@ -123,7 +123,7 @@ public static void TestTd(ж<testing.T> Ꮡt) {
         for (nint j = 0; j < 4; j++) {
             {
                 var x = td[j][i]; if (x != w) {
-                    Ꮡt.Fatalf("td[%d][%d] = %#x, want %#x"u8, j, i, x, w);
+                    t.Fatalf("td[%d][%d] = %#x, want %#x", j, i, x, w);
                 }
             }
             w = w << 24 | w >> 8;

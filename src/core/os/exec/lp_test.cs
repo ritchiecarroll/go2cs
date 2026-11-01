@@ -8,29 +8,29 @@ using static go.os.exec_package;
 
 partial class exec_internal_test_package {
 
-internal static slice<@string> nonExistentPaths = new @string[]{
-    "some-non-existent-path"u8,
-    "non-existent-path/slashed"u8
-}.slice();
+internal static slice<@string> nonExistentPaths = slice<@string>([
+    "some-non-existent-path",
+    "non-existent-path/slashed"
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object lookPathErrorIsNotAnExecˢ = (@string)"LookPath error is not an exec.Error"u8;
 
-public static void TestLookPathNotFound(ж<testing.T> Ꮡt) {
+public static void TestLookPathNotFound(ж<testing.T> t) {
     foreach (var (_, name) in nonExistentPaths) {
         var (path, err) = LookPath(name);
-        if (err == default!) {
-            Ꮡt.Fatalf("LookPath found %q in $PATH"u8, name);
+        if (err == nil) {
+            t.Fatalf("LookPath found %q in $PATH", name);
         }
         if (path != ""u8) {
-            Ꮡt.Fatalf("LookPath path == %q when err != nil"u8, path);
+            t.Fatalf("LookPath path == %q when err != nil", path);
         }
         var (perr, ok) = err._<ж<global::go.os.exec_package.ΔError>>(ᐧ);
         if (!ok) {
-            Ꮡt.Fatal(lookPathErrorIsNotAnExecˢ);
+            t.Fatal(lookPathErrorIsNotAnExecˢ);
         }
-        if ((~perr).Name != name) {
-            Ꮡt.Fatalf("want Error name %q, got %q"u8, name, (~perr).Name);
+        if (perr.Name != name) {
+            t.Fatalf("want Error name %q, got %q", name, perr.Name);
         }
     }
 }

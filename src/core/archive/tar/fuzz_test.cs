@@ -18,24 +18,24 @@ internal partial struct FuzzReader_file /*dyn*/ {
 public static void FuzzReader(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var b = bytes.NewBuffer(default!);
+    var b = bytes.NewBuffer(default);
     var w = NewWriter(new tar_test_package.bytes_BufferжWriter(b));
     var inp = slice<byte>("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."u8);
     var err = w.WriteHeader(Ꮡ(new Header(
-        Name: "lorem.txt"u8,
+        Name: "lorem.txt",
         Mode: 384,
         Size: (int64)len(inp)
     )));
-    if (err != default!) {
-        Ꮡf.Fatalf("failed to create writer: %s"u8, err);
+    if (err != nil) {
+        Ꮡf.Fatalf("failed to create writer: %s", err);
     }
     (_, err) = w.Write(inp);
-    if (err != default!) {
-        Ꮡf.Fatalf("failed to write file to archive: %s"u8, err);
+    if (err != nil) {
+        Ꮡf.Fatalf("failed to write file to archive: %s", err);
     }
     {
-        var errΔ1 = w.Close(); if (errΔ1 != default!) {
-            Ꮡf.Fatalf("failed to write archive: %s"u8, errΔ1);
+        var errΔ1 = w.Close(); if (errΔ1 != nil) {
+            Ꮡf.Fatalf("failed to write archive: %s", errΔ1);
         }
     }
     f.Add(b.Bytes());
@@ -43,18 +43,18 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> bΔ1) => {
         var filesᴷ = new stackAppend<FuzzReader_file>(moves: true);
         var r = NewReader(new tar_test_package.bytes_ReaderжReader(bytes.NewReader(bΔ1)));
-        var files = new FuzzReader_file[]{}.slice();
-        while (ᐧ) {
+        var files = slice<FuzzReader_file>([]);
+        for (;;) {
             var (hdr, errΔ2) = r.Next();
             if (AreEqual(errΔ2, io.EOF)) {
                 break;
             }
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 return;
             }
-            var buf = bytes.NewBuffer(default!);
+            var buf = bytes.NewBuffer(default);
             {
-                var (_, errΔ3) = io.Copy(new tar_test_package.bytes_BufferжWriter(buf), new global::go.archive.tar_package.ReaderжReader(r)); if (errΔ3 != default!) {
+                var (_, errΔ3) = io.Copy(new tar_test_package.bytes_BufferжWriter(buf), new global::go.archive.tar_package.ReaderжReader(r)); if (errΔ3 != nil) {
                     continue;
                 }
             }
@@ -67,24 +67,24 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
             return;
         }
 
-        var @out = bytes.NewBuffer(default!);
+        var @out = bytes.NewBuffer(default);
         var wΔ1 = NewWriter(new tar_test_package.bytes_BufferжWriter(@out));
         files = move2heap(filesᴷ, files);
         foreach (var (_, fΔ1) in files) {
             {
-                var errΔ4 = wΔ1.WriteHeader(fΔ1.header); if (errΔ4 != default!) {
-                    t.Fatalf("unable to write previously parsed header: %s"u8, errΔ4);
+                var errΔ4 = wΔ1.WriteHeader(fΔ1.header); if (errΔ4 != nil) {
+                    t.Fatalf("unable to write previously parsed header: %s", errΔ4);
                 }
             }
             {
-                var (_, errΔ5) = wΔ1.Write(fΔ1.content); if (errΔ5 != default!) {
-                    t.Fatalf("unable to write previously parsed content: %s"u8, errΔ5);
+                var (_, errΔ5) = wΔ1.Write(fΔ1.content); if (errΔ5 != nil) {
+                    t.Fatalf("unable to write previously parsed content: %s", errΔ5);
                 }
             }
         }
         {
-            var errΔ6 = wΔ1.Close(); if (errΔ6 != default!) {
-                t.Fatalf("Unable to write archive: %s"u8, errΔ6);
+            var errΔ6 = wΔ1.Close(); if (errΔ6 != nil) {
+                t.Fatalf("Unable to write archive: %s", errΔ6);
             }
         }
 

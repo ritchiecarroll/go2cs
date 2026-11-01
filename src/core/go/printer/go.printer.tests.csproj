@@ -178,7 +178,6 @@
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/ast/go.ast.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/build/constraint/go.build.constraint.csproj" />
-    <ProjectReference Include="$(go2csPath)core/go/doc/comment/go.doc.comment.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/parser/go.parser.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/token/go.token.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />

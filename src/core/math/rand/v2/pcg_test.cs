@@ -14,8 +14,8 @@ partial class rand_test_package {
 public static void BenchmarkPCG_DXSM(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    rand.PCG p = default!;
-    uint64 t = default!;
+    rand.PCG p = default;
+    uint64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += p.Uint64();
     }
@@ -23,49 +23,51 @@ public static void BenchmarkPCG_DXSM(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ = ((@string)(new byte[]{0x70, 0x63, 0x67, 0x3a, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10}));
+internal static ref readonly @string wantᶜ => ref wantᶜᵇ;
+private static readonly @string wantᶜᵇ = ((@string)(new byte[]{0x70, 0x63, 0x67, 0x3a, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10}));
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantAppendᶜ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x70, 0x63, 0x67, 0x3a, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10}));
+internal static ref readonly @string wantAppendᶜ => ref wantAppendᶜᵇ;
+private static readonly @string wantAppendᶜᵇ = ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x70, 0x63, 0x67, 0x3a, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10}));
 
-public static void TestPCGMarshal(ж<testing.T> Ꮡt) {
-    rand.PCG p = default!;
+public static void TestPCGMarshal(ж<testing.T> t) {
+    rand.PCG p = default;
     const uint64 seed1 = 0x123456789abcdef0;
     const uint64 seed2 = 0xfedcba9876543210;
     @string want = wantᶜ;
     @string wantAppend = wantAppendᶜ;
     p.Seed(seed1, seed2);
     var (data, err) = p.MarshalBinary();
-    if (((sstring)data) != want || err != default!) {
-        Ꮡt.Errorf("MarshalBinary() = %q, %v, want %q, nil"u8, data, err, want);
+    if (((sstring)data) != want || err != nil) {
+        t.Errorf("MarshalBinary() = %q, %v, want %q, nil", data, err, want);
     }
 
     var dataAppend = new slice<byte>(4, 32);
     (dataAppend, err) = p.AppendBinary(dataAppend);
-    if (((sstring)dataAppend) != wantAppend || err != default!) {
-        Ꮡt.Errorf("AppendBinary() = %q, %v, want %q, nil"u8, dataAppend, err, wantAppend);
+    if (((sstring)dataAppend) != wantAppend || err != nil) {
+        t.Errorf("AppendBinary() = %q, %v, want %q, nil", dataAppend, err, wantAppend);
     }
 
-    var q = new PCG(nil);
+    var q = new PCG();
     {
-        var errΔ1 = q.UnmarshalBinary(slice<byte>(want)); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("UnmarshalBinary(): %v"u8, errΔ1);
+        var errΔ1 = q.UnmarshalBinary(slice<byte>(want)); if (errΔ1 != nil) {
+            t.Fatalf("UnmarshalBinary(): %v", errΔ1);
         }
     }
     if (q != p) {
-        Ꮡt.Fatalf("after round trip, q = %#x, but p = %#x"u8, q, p);
+        t.Fatalf("after round trip, q = %#x, but p = %#x", q, p);
     }
 
     var qu = q.Uint64();
     var pu = p.Uint64();
     if (qu != pu) {
-        Ꮡt.Errorf("after round trip, q.Uint64() = %#x, but p.Uint64() = %#x"u8, qu, pu);
+        t.Errorf("after round trip, q.Uint64() = %#x, but p.Uint64() = %#x", qu, pu);
     }
 }
 
-public static void TestPCG(ж<testing.T> Ꮡt) {
+public static void TestPCG(ж<testing.T> t) {
     var p = NewPCG(1, 2);
-    var want = new uint64[]{
+    var want = slice<uint64>([
         0xc4f5a58656eef510UL,
         0x9dcec3ad077dec6cUL,
         0xc8d04605312f8088UL,
@@ -86,12 +88,12 @@ public static void TestPCG(ж<testing.T> Ꮡt) {
         0x8232bd645f29ed22UL,
         0x12be8f07ad14c539UL,
         0x54908a48e8e4736eUL
-    }.slice();
+    ]);
 
     foreach (var (i, x) in want) {
         {
             var u = p.Uint64(); if (u != x) {
-                Ꮡt.Errorf("PCG #%d = %#x, want %#x"u8, i, u, x);
+                t.Errorf("PCG #%d = %#x, want %#x", i, u, x);
             }
         }
     }

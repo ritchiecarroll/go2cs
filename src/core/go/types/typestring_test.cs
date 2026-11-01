@@ -13,7 +13,8 @@ using types = global::go.go.types_package;
 
 partial class types_test_package {
 
-internal static readonly @string filename = "<src>"u8;
+internal static ref readonly @string filename => ref filenameᵇ;
+private static readonly @string filenameᵇ = "<src>"u8;
 
 partial struct testEntry {
     internal @string src, str;
@@ -25,128 +26,130 @@ internal static testEntry dup(@string s) {
 }
 
 // types that don't depend on any other type declarations
-internal static slice<testEntry> independentTestTypes = new testEntry[]{
+internal static slice<testEntry> independentTestTypes = slice<testEntry>([
     // basic types
-    dup("int"u8),
-    dup("float32"u8),
-    dup("string"u8),
+    dup("int"),
+    dup("float32"),
+    dup("string"),
 
     // arrays
-    dup("[10]int"u8),
+    dup("[10]int"),
 
     // slices
-    dup("[]int"u8),
-    dup("[][]int"u8),
+    dup("[]int"),
+    dup("[][]int"),
 
     // structs
-    dup("struct{}"u8),
-    dup("struct{x int}"u8),
+    dup("struct{}"),
+    dup("struct{x int}"),
     new("""
 struct {
 		x, y int
 		z float32 "foo"
 	}
-"""u8.Raw(), @"struct{x int; y int; z float32 ""foo""}"u8),
+"""u8.Raw(), @"struct{x int; y int; z float32 ""foo""}"),
     new("""
 struct {
 		string
 		elems []complex128
 	}
-"""u8.Raw(), @"struct{string; elems []complex128}"u8),
+"""u8.Raw(), @"struct{string; elems []complex128}"),
 
     // pointers
-    dup("*int"u8),
-    dup("***struct{}"u8),
-    dup("*struct{a int; b float32}"u8),
+    dup("*int"),
+    dup("***struct{}"),
+    dup("*struct{a int; b float32}"),
 
     // functions
-    dup("func()"u8),
-    dup("func(x int)"u8),
-    new("func(x, y int)"u8, "func(x int, y int)"u8),
-    new("func(x, y int, z string)"u8, "func(x int, y int, z string)"u8),
-    dup("func(int)"u8),
-    new("func(int, string, byte)"u8, "func(int, string, byte)"u8),
+    dup("func()"),
+    dup("func(x int)"),
+    new("func(x, y int)", "func(x int, y int)"),
+    new("func(x, y int, z string)", "func(x int, y int, z string)"),
+    dup("func(int)"),
+    new("func(int, string, byte)", "func(int, string, byte)"),
 
-    dup("func() int"u8),
-    new("func() (string)"u8, "func() string"u8),
-    dup("func() (u int)"u8),
-    new("func() (u, v int, w string)"u8, "func() (u int, v int, w string)"u8),
+    dup("func() int"),
+    new("func() (string)", "func() string"),
+    dup("func() (u int)"),
+    new("func() (u, v int, w string)", "func() (u int, v int, w string)"),
 
-    dup("func(int) string"u8),
-    dup("func(x int) string"u8),
-    dup("func(x int) (u string)"u8),
-    new("func(x, y int) (u string)"u8, "func(x int, y int) (u string)"u8),
+    dup("func(int) string"),
+    dup("func(x int) string"),
+    dup("func(x int) (u string)"),
+    new("func(x, y int) (u string)", "func(x int, y int) (u string)"),
 
-    dup("func(...int) string"u8),
-    dup("func(x ...int) string"u8),
-    dup("func(x ...int) (u string)"u8),
-    new("func(x int, y ...int) (u string)"u8, "func(x int, y ...int) (u string)"u8),
+    dup("func(...int) string"),
+    dup("func(x ...int) string"),
+    dup("func(x ...int) (u string)"),
+    new("func(x int, y ...int) (u string)", "func(x int, y ...int) (u string)"),
 
     // interfaces
-    dup("interface{}"u8),
-    dup("interface{m()}"u8),
-    dup(@"interface{String() string; m(int) float32}"u8),
-    dup("interface{int | float32 | complex128}"u8),
-    dup("interface{int | ~float32 | ~complex128}"u8),
-    dup("any"u8),
-    dup("interface{comparable}"u8),
+    dup("interface{}"),
+    dup("interface{m()}"),
+    dup(@"interface{String() string; m(int) float32}"),
+    dup("interface{int | float32 | complex128}"),
+    dup("interface{int | ~float32 | ~complex128}"),
+    dup("any"),
+    dup("interface{comparable}"),
     // TODO(gri) adjust test for EvalCompositeTest
     // {"comparable", "interface{comparable}"},
     // {"error", "interface{Error() string}"},
 
     // maps
-    dup("map[string]int"u8),
-    new("map[struct{x, y int}][]byte"u8, "map[struct{x int; y int}][]byte"u8),
+    dup("map[string]int"),
+    new("map[struct{x, y int}][]byte", "map[struct{x int; y int}][]byte"),
 
     // channels
-    dup("chan<- chan int"u8),
-    dup("chan<- <-chan int"u8),
-    dup("<-chan <-chan int"u8),
-    dup("chan (<-chan int)"u8),
-    dup("chan<- func()"u8),
-    dup("<-chan []func() int"u8)
-}.slice();
+    dup("chan<- chan int"),
+    dup("chan<- <-chan int"),
+    dup("<-chan <-chan int"),
+    dup("chan (<-chan int)"),
+    dup("chan<- func()"),
+    dup("<-chan []func() int")
+]);
 
 // types that depend on other type declarations (src in TestTypes)
-internal static slice<testEntry> dependentTestTypes = new testEntry[]{
+internal static slice<testEntry> dependentTestTypes = slice<testEntry>([
     // interfaces
-    dup(@"interface{io.Reader; io.Writer}"u8),
-    dup(@"interface{m() int; io.Writer}"u8),
-    new(@"interface{m() interface{T}}"u8, @"interface{m() interface{p.T}}"u8)
-}.slice();
+    dup(@"interface{io.Reader; io.Writer}"),
+    dup(@"interface{m() int; io.Writer}"),
+    new(@"interface{m() interface{T}}", @"interface{m() interface{p.T}}")
+]);
 
-public static void TestTypeString(ж<testing.T> Ꮡt) {
+public static void TestTypeString(ж<testing.T> t) {
     // The Go command is needed for the importer to determine the locations of stdlib .a files.
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
-    slice<testEntry> tests = default!;
+    slice<testEntry> tests = default;
     tests = appendꓸꓸꓸ(tests, independentTestTypes);
     tests = appendꓸꓸꓸ(tests, dependentTestTypes);
 
     foreach (var (_, test) in tests) {
         @string src = @"package p; import ""io""; type _ io.Writer; type T "u8 + test.src;
         var (pkg, err) = typecheck(src, nil, nil);
-        if (err != default!) {
-            Ꮡt.Errorf("%s: %s"u8, src, err);
+        if (err != nil) {
+            t.Errorf("%s: %s", src, err);
             continue;
         }
-        var obj = pkg.Scope().Lookup("T"u8);
-        if (obj == default!) {
-            Ꮡt.Errorf("%s: T not found"u8, test.src);
+        var obj = pkg.Scope().Lookup("T");
+        if (obj == nil) {
+            t.Errorf("%s: T not found", test.src);
             continue;
         }
         var typ = obj.Type().Underlying();
         {
             @string got = typ.String(); if (got != test.str) {
-                Ꮡt.Errorf("%s: got %s, want %s"u8, test.src, got, test.str);
+                t.Errorf("%s: got %s, want %s", test.src, got, test.str);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePTypeTIntˢ = "package p; type T int"u8;
-internal static readonly @string packageQˢ = "package q"u8;
+internal static ref readonly @string packagePTypeTIntˢ => ref packagePTypeTIntˢᵇ;
+private static readonly @string packagePTypeTIntˢᵇ = "package p; type T int"u8;
+internal static ref readonly @string packageQˢ => ref packageQˢᵇ;
+private static readonly @string packageQˢᵇ = "package q"u8;
 
 internal partial struct TestQualifiedTypeString_type /*dyn*/ {
     internal typesꓸType typ;
@@ -154,19 +157,19 @@ internal partial struct TestQualifiedTypeString_type /*dyn*/ {
     internal @string want;
 }
 
-public static void TestQualifiedTypeString(ж<testing.T> Ꮡt) {
+public static void TestQualifiedTypeString(ж<testing.T> t) {
     var p = mustTypecheck(packagePTypeTIntˢ, nil, nil);
     var q = mustTypecheck(packageQˢ, nil, nil);
 
-    var pT = p.Scope().Lookup("T"u8).Type();
-    foreach (var (_, vᴛ1) in new TestQualifiedTypeString_type[]{
-        new(default!, nil, "<nil>"u8),
-        new(pT, nil, "p.T"u8),
-        new(pT, p, "T"u8),
-        new(pT, q, "p.T"u8),
-        new(new types.PointerжΔType(NewPointer(pT)), p, "*T"u8),
-        new(new types.PointerжΔType(NewPointer(pT)), q, "*p.T"u8)
-    }.slice()) {
+    var pT = p.Scope().Lookup("T").Type();
+    foreach (var (_, vᴛ1) in slice<TestQualifiedTypeString_type>([
+        new(default, nil, "<nil>"),
+        new(pT, nil, "p.T"),
+        new(pT, p, "T"),
+        new(pT, q, "p.T"),
+        new(new types.PointerжΔType(NewPointer(pT)), p, "*T"),
+        new(new types.PointerжΔType(NewPointer(pT)), q, "*p.T")
+    ])) {
         ref var test = ref heap(new TestQualifiedTypeString_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -179,7 +182,7 @@ public static void TestQualifiedTypeString(ж<testing.T> Ꮡt) {
         };
         {
             @string got = TypeString(test.typ, new Func<ж<types.Package>, @string>(qualifier)); if (got != test.want) {
-                Ꮡt.Errorf("TypeString(%s, %s) = %s, want %s"u8,
+                t.Errorf("TypeString(%s, %s) = %s, want %s",
                     test.@this.OrTypedNil(), test.typ, got, test.want);
             }
         }

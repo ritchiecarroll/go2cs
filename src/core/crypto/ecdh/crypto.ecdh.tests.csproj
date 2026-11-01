@@ -108,9 +108,13 @@
        shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
        can leak in because it is never listed. -->
   <ItemGroup>
+    <Compile Include="ecdh.cs" />
     <Compile Include="ecdh_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
+    <Compile Include="nist.cs" />
+    <Compile Include="package_info_external_test.cs" />
     <Compile Include="package_test_info.cs" />
+    <Compile Include="x25519.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -127,9 +131,15 @@
     <ProjectReference Include="$(go2csPath)core/crypto/crypto.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/boring/crypto.internal.boring.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/ecdh/crypto.internal.fips140.ecdh.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/edwards25519/field/crypto.internal.fips140.edwards25519.field.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/nistec/crypto.internal.fips140.nistec.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140only/crypto.internal.fips140only.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/rand/crypto.internal.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha256/crypto.sha256.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/subtle/crypto.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/hex/encoding.hex.csproj" />
+    <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
@@ -142,7 +152,6 @@
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="$(go2csPath)core/vendor/golang.org/x/crypto/chacha20/vendor.golang.org.x.crypto.chacha20.csproj" />
-    <ProjectReference Include="crypto.ecdh.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

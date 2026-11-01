@@ -33,9 +33,9 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
 
     b.StopTimer();
 
-    global::go.image.draw_package.Image dst = default!;
-    var exprᴛ1 = dcm;
-    if (AreEqual(exprᴛ1, color.RGBAModel)) {
+    global::go.image.draw_package.Image dst = default;
+    switch (dcm) {
+    case var ᴛ when AreEqual(ᴛ, color.RGBAModel): {
         var dst1 = image.NewRGBA(image.Rect(0, 0, dstw, dsth));
         for (nint y = 0; y < dsth; y++) {
             for (nint x = 0; x < dstw; x++) {
@@ -48,8 +48,9 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             }
         }
         dst = new draw_test_package.image_ΔRGBAжImage(dst1);
+        break;
     }
-    else if (AreEqual(exprᴛ1, color.RGBA64Model)) {
+    case var ᴛ when AreEqual(ᴛ, color.RGBA64Model): {
         var dst1 = image.NewRGBA64(image.Rect(0, 0, dstw, dsth));
         for (nint y = 0; y < dsth; y++) {
             for (nint x = 0; x < dstw; x++) {
@@ -62,11 +63,12 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             }
         }
         dst = new draw_test_package.image_RGBA64жImage(dst1);
+        break;
     }
-    else { /* default: */
+    default: {
         // The == operator isn't defined on a color.Palette (a slice), so we
         // use reflection.
-        if (reflect.DeepEqual(dcm, palette)){
+        if (reflect.DeepEqual(dcm, palette)) {
             var dst1 = image.NewPaletted(image.Rect(0, 0, dstw, dsth), palette);
             for (nint y = 0; y < dsth; y++) {
                 for (nint x = 0; x < dstw; x++) {
@@ -77,14 +79,16 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
         } else {
             Ꮡb.Fatal(unknownDestinationColorˢ, dcm);
         }
-    }
+        break;
+    }}
 
-    image.Image src = default!;
-    var exprᴛ2 = scm;
-    if (AreEqual(exprᴛ2, default!)) {
+    image.Image src = default;
+    switch (scm) {
+    case var ᴛ when AreEqual(ᴛ, default): {
         src = new image.UniformжImage(Ꮡ(new image.Uniform(C: new colorꓸRGBA(0x11, 0x22, 0x33, 0x44))));
+        break;
     }
-    else if (AreEqual(exprᴛ2, color.CMYKModel)) {
+    case var ᴛ when AreEqual(ᴛ, color.CMYKModel): {
         var src1 = image.NewCMYK(image.Rect(0, 0, srcw, srch));
         for (nint y = 0; y < srch; y++) {
             for (nint x = 0; x < srcw; x++) {
@@ -97,8 +101,9 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             }
         }
         src = new image.CMYKжImage(src1);
+        break;
     }
-    else if (AreEqual(exprᴛ2, color.GrayModel)) {
+    case var ᴛ when AreEqual(ᴛ, color.GrayModel): {
         var src1 = image.NewGray(image.Rect(0, 0, srcw, srch));
         for (nint y = 0; y < srch; y++) {
             for (nint x = 0; x < srcw; x++) {
@@ -108,8 +113,9 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             }
         }
         src = new image.GrayжImage(src1);
+        break;
     }
-    else if (AreEqual(exprᴛ2, color.RGBAModel)) {
+    case var ᴛ when AreEqual(ᴛ, color.RGBAModel): {
         var src1 = image.NewRGBA(image.Rect(0, 0, srcw, srch));
         for (nint y = 0; y < srch; y++) {
             for (nint x = 0; x < srcw; x++) {
@@ -122,8 +128,9 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             }
         }
         src = new image.ΔRGBAжImage(src1);
+        break;
     }
-    else if (AreEqual(exprᴛ2, color.RGBA64Model)) {
+    case var ᴛ when AreEqual(ᴛ, color.RGBA64Model): {
         var src1 = image.NewRGBA64(image.Rect(0, 0, srcw, srch));
         for (nint y = 0; y < srch; y++) {
             for (nint x = 0; x < srcw; x++) {
@@ -136,8 +143,9 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             }
         }
         src = new image.RGBA64жImage(src1);
+        break;
     }
-    else if (AreEqual(exprᴛ2, color.NRGBAModel)) {
+    case var ᴛ when AreEqual(ᴛ, color.NRGBAModel): {
         var src1 = image.NewNRGBA(image.Rect(0, 0, srcw, srch));
         for (nint y = 0; y < srch; y++) {
             for (nint x = 0; x < srcw; x++) {
@@ -150,8 +158,9 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             }
         }
         src = new image.NRGBAжImage(src1);
+        break;
     }
-    else if (AreEqual(exprᴛ2, color.YCbCrModel)) {
+    case var ᴛ when AreEqual(ᴛ, color.YCbCrModel): {
         var yy = new slice<uint8>(srcw * srch);
         var cb = new slice<uint8>(srcw * srch);
         var cr = new slice<uint8>(srcw * srch);
@@ -169,17 +178,20 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             SubsampleRatio: image.YCbCrSubsampleRatio444,
             Rect: image.Rect(0, 0, srcw, srch)
         )));
+        break;
     }
-    else { /* default: */
+    default: {
         Ꮡb.Fatal(unknownSourceColorModelˢ, scm);
-    }
+        break;
+    }}
 
-    image.Image mask = default!;
-    var exprᴛ3 = mcm;
-    if (AreEqual(exprᴛ3, default!)) {
+    image.Image mask = default;
+    switch (mcm) {
+    case var ᴛ when AreEqual(ᴛ, default): {
         // No-op.
+        break;
     }
-    else if (AreEqual(exprᴛ3, color.AlphaModel)) {
+    case var ᴛ when AreEqual(ᴛ, color.AlphaModel): {
         var mask1 = image.NewAlpha(image.Rect(0, 0, srcw, srch));
         for (nint y = 0; y < srch; y++) {
             for (nint x = 0; x < srcw; x++) {
@@ -192,10 +204,12 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             }
         }
         mask = new image.AlphaжImage(mask1);
+        break;
     }
-    else { /* default: */
+    default: {
         Ꮡb.Fatal(unknownMaskColorModelˢ, mcm);
-    }
+        break;
+    }}
 
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -203,90 +217,90 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
         nint x = 3 * i % (nint)(dstw - srcw);
         nint y = 7 * i % (nint)(dsth - srch);
 
-        DrawMask(dst, dst.Bounds().Add(image.Pt(x, y)), src, new image.Point(nil), mask, new image.Point(nil), op);
+        DrawMask(dst, dst.Bounds().Add(image.Pt(x, y)), src, new image.Point(), mask, new image.Point(), op);
     }
 }
 
 // The BenchmarkFoo functions exercise a drawFoo fast-path function in draw.go.
-public static void BenchmarkFillOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, default!, default!, Over);
+public static void BenchmarkFillOver(ж<testing.B> b) {
+    bench(b, color.RGBAModel, default, default, Over);
 }
 
-public static void BenchmarkFillSrc(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, default!, default!, Src);
+public static void BenchmarkFillSrc(ж<testing.B> b) {
+    bench(b, color.RGBAModel, default, default, Src);
 }
 
-public static void BenchmarkCopyOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.RGBAModel, default!, Over);
+public static void BenchmarkCopyOver(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.RGBAModel, default, Over);
 }
 
-public static void BenchmarkCopySrc(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.RGBAModel, default!, Src);
+public static void BenchmarkCopySrc(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.RGBAModel, default, Src);
 }
 
-public static void BenchmarkNRGBAOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.NRGBAModel, default!, Over);
+public static void BenchmarkNRGBAOver(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.NRGBAModel, default, Over);
 }
 
-public static void BenchmarkNRGBASrc(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.NRGBAModel, default!, Src);
+public static void BenchmarkNRGBASrc(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.NRGBAModel, default, Src);
 }
 
-public static void BenchmarkYCbCr(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.YCbCrModel, default!, Over);
+public static void BenchmarkYCbCr(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.YCbCrModel, default, Over);
 }
 
-public static void BenchmarkGray(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.GrayModel, default!, Over);
+public static void BenchmarkGray(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.GrayModel, default, Over);
 }
 
-public static void BenchmarkCMYK(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.CMYKModel, default!, Over);
+public static void BenchmarkCMYK(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.CMYKModel, default, Over);
 }
 
-public static void BenchmarkGlyphOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, default!, color.AlphaModel, Over);
+public static void BenchmarkGlyphOver(ж<testing.B> b) {
+    bench(b, color.RGBAModel, default, color.AlphaModel, Over);
 }
 
-public static void BenchmarkRGBAMaskOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.RGBAModel, color.AlphaModel, Over);
+public static void BenchmarkRGBAMaskOver(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.RGBAModel, color.AlphaModel, Over);
 }
 
-public static void BenchmarkGrayMaskOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.GrayModel, color.AlphaModel, Over);
+public static void BenchmarkGrayMaskOver(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.GrayModel, color.AlphaModel, Over);
 }
 
-public static void BenchmarkRGBA64ImageMaskOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.RGBA64Model, color.AlphaModel, Over);
+public static void BenchmarkRGBA64ImageMaskOver(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.RGBA64Model, color.AlphaModel, Over);
 }
 
-public static void BenchmarkRGBA(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBAModel, color.RGBA64Model, default!, Src);
+public static void BenchmarkRGBA(ж<testing.B> b) {
+    bench(b, color.RGBAModel, color.RGBA64Model, default, Src);
 }
 
-public static void BenchmarkPalettedFill(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, palette, default!, default!, Src);
+public static void BenchmarkPalettedFill(ж<testing.B> b) {
+    bench(b, palette, default, default, Src);
 }
 
-public static void BenchmarkPalettedRGBA(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, palette, color.RGBAModel, default!, Src);
+public static void BenchmarkPalettedRGBA(ж<testing.B> b) {
+    bench(b, palette, color.RGBAModel, default, Src);
 }
 
 // The BenchmarkGenericFoo functions exercise the generic, slow-path code.
-public static void BenchmarkGenericOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBA64Model, color.RGBA64Model, default!, Over);
+public static void BenchmarkGenericOver(ж<testing.B> b) {
+    bench(b, color.RGBA64Model, color.RGBA64Model, default, Over);
 }
 
-public static void BenchmarkGenericMaskOver(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBA64Model, color.RGBA64Model, color.AlphaModel, Over);
+public static void BenchmarkGenericMaskOver(ж<testing.B> b) {
+    bench(b, color.RGBA64Model, color.RGBA64Model, color.AlphaModel, Over);
 }
 
-public static void BenchmarkGenericSrc(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBA64Model, color.RGBA64Model, default!, Src);
+public static void BenchmarkGenericSrc(ж<testing.B> b) {
+    bench(b, color.RGBA64Model, color.RGBA64Model, default, Src);
 }
 
-public static void BenchmarkGenericMaskSrc(ж<testing.B> Ꮡb) {
-    bench(Ꮡb, color.RGBA64Model, color.RGBA64Model, color.AlphaModel, Src);
+public static void BenchmarkGenericMaskSrc(ж<testing.B> b) {
+    bench(b, color.RGBA64Model, color.RGBA64Model, color.AlphaModel, Src);
 }
 
 } // end draw_internal_test_package

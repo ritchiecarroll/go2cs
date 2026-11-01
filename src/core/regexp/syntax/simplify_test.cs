@@ -12,111 +12,111 @@ partial struct simplifyTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     public @string Simple;
 }
-internal static slice<simplifyTestsᴛ1> simplifyTests = new simplifyTestsᴛ1[]{
+internal static slice<simplifyTestsᴛ1> simplifyTests = slice<simplifyTestsᴛ1>([
     // Already-simple constructs
-    new(@"a"u8, @"a"u8),
-    new(@"ab"u8, @"ab"u8),
-    new(@"a|b"u8, @"[ab]"u8),
-    new(@"ab|cd"u8, @"ab|cd"u8),
-    new(@"(ab)*"u8, @"(ab)*"u8),
-    new(@"(ab)+"u8, @"(ab)+"u8),
-    new(@"(ab)?"u8, @"(ab)?"u8),
-    new(@"."u8, @"(?s:.)"u8),
-    new(@"^"u8, @"(?m:^)"u8),
-    new(@"$"u8, @"(?m:$)"u8),
-    new(@"[ac]"u8, @"[ac]"u8),
-    new(@"[^ac]"u8, @"[^ac]"u8),
+    new(@"a", @"a"),
+    new(@"ab", @"ab"),
+    new(@"a|b", @"[ab]"),
+    new(@"ab|cd", @"ab|cd"),
+    new(@"(ab)*", @"(ab)*"),
+    new(@"(ab)+", @"(ab)+"),
+    new(@"(ab)?", @"(ab)?"),
+    new(@".", @"(?s:.)"),
+    new(@"^", @"(?m:^)"),
+    new(@"$", @"(?m:$)"),
+    new(@"[ac]", @"[ac]"),
+    new(@"[^ac]", @"[^ac]"),
 
     // Posix character classes
-    new(@"[[:alnum:]]"u8, @"[0-9A-Za-z]"u8),
-    new(@"[[:alpha:]]"u8, @"[A-Za-z]"u8),
-    new(@"[[:blank:]]"u8, @"[\t ]"u8),
-    new(@"[[:cntrl:]]"u8, @"[\x00-\x1f\x7f]"u8),
-    new(@"[[:digit:]]"u8, @"[0-9]"u8),
-    new(@"[[:graph:]]"u8, @"[!-~]"u8),
-    new(@"[[:lower:]]"u8, @"[a-z]"u8),
-    new(@"[[:print:]]"u8, @"[ -~]"u8),
-    new(@"[[:punct:]]"u8, "[!-/:-@\\[-`\\{-~]"u8),
-    new(@"[[:space:]]"u8, @"[\t-\r ]"u8),
-    new(@"[[:upper:]]"u8, @"[A-Z]"u8),
-    new(@"[[:xdigit:]]"u8, @"[0-9A-Fa-f]"u8),
+    new(@"[[:alnum:]]", @"[0-9A-Za-z]"),
+    new(@"[[:alpha:]]", @"[A-Za-z]"),
+    new(@"[[:blank:]]", @"[\t ]"),
+    new(@"[[:cntrl:]]", @"[\x00-\x1f\x7f]"),
+    new(@"[[:digit:]]", @"[0-9]"),
+    new(@"[[:graph:]]", @"[!-~]"),
+    new(@"[[:lower:]]", @"[a-z]"),
+    new(@"[[:print:]]", @"[ -~]"),
+    new(@"[[:punct:]]", "[!-/:-@\\[-`\\{-~]"),
+    new(@"[[:space:]]", @"[\t-\r ]"),
+    new(@"[[:upper:]]", @"[A-Z]"),
+    new(@"[[:xdigit:]]", @"[0-9A-Fa-f]"),
 
     // Perl character classes
-    new(@"\d"u8, @"[0-9]"u8),
-    new(@"\s"u8, @"[\t\n\f\r ]"u8),
-    new(@"\w"u8, @"[0-9A-Z_a-z]"u8),
-    new(@"\D"u8, @"[^0-9]"u8),
-    new(@"\S"u8, @"[^\t\n\f\r ]"u8),
-    new(@"\W"u8, @"[^0-9A-Z_a-z]"u8),
-    new(@"[\d]"u8, @"[0-9]"u8),
-    new(@"[\s]"u8, @"[\t\n\f\r ]"u8),
-    new(@"[\w]"u8, @"[0-9A-Z_a-z]"u8),
-    new(@"[\D]"u8, @"[^0-9]"u8),
-    new(@"[\S]"u8, @"[^\t\n\f\r ]"u8),
-    new(@"[\W]"u8, @"[^0-9A-Z_a-z]"u8),
+    new(@"\d", @"[0-9]"),
+    new(@"\s", @"[\t\n\f\r ]"),
+    new(@"\w", @"[0-9A-Z_a-z]"),
+    new(@"\D", @"[^0-9]"),
+    new(@"\S", @"[^\t\n\f\r ]"),
+    new(@"\W", @"[^0-9A-Z_a-z]"),
+    new(@"[\d]", @"[0-9]"),
+    new(@"[\s]", @"[\t\n\f\r ]"),
+    new(@"[\w]", @"[0-9A-Z_a-z]"),
+    new(@"[\D]", @"[^0-9]"),
+    new(@"[\S]", @"[^\t\n\f\r ]"),
+    new(@"[\W]", @"[^0-9A-Z_a-z]"),
 
     // Posix repetitions
-    new(@"a{1}"u8, @"a"u8),
-    new(@"a{2}"u8, @"aa"u8),
-    new(@"a{5}"u8, @"aaaaa"u8),
-    new(@"a{0,1}"u8, @"a?"u8),
+    new(@"a{1}", @"a"),
+    new(@"a{2}", @"aa"),
+    new(@"a{5}", @"aaaaa"),
+    new(@"a{0,1}", @"a?"),
     // The next three are illegible because Simplify inserts (?:)
     // parens instead of () parens to avoid creating extra
     // captured subexpressions. The comments show a version with fewer parens.
-    new(@"(a){0,2}"u8, @"(?:(a)(a)?)?"u8), //       (aa?)?
-    new(@"(a){0,4}"u8, @"(?:(a)(?:(a)(?:(a)(a)?)?)?)?"u8), //   (a(a(aa?)?)?)?
-    new(@"(a){2,6}"u8, @"(a)(a)(?:(a)(?:(a)(?:(a)(a)?)?)?)?"u8), // aa(a(a(aa?)?)?)?
-    new(@"a{0,2}"u8, @"(?:aa?)?"u8), //       (aa?)?
-    new(@"a{0,4}"u8, @"(?:a(?:a(?:aa?)?)?)?"u8), //   (a(a(aa?)?)?)?
-    new(@"a{2,6}"u8, @"aa(?:a(?:a(?:aa?)?)?)?"u8), // aa(a(a(aa?)?)?)?
-    new(@"a{0,}"u8, @"a*"u8),
-    new(@"a{1,}"u8, @"a+"u8),
-    new(@"a{2,}"u8, @"aa+"u8),
-    new(@"a{5,}"u8, @"aaaaa+"u8),
+    new(@"(a){0,2}", @"(?:(a)(a)?)?"),                       //       (aa?)?
+    new(@"(a){0,4}", @"(?:(a)(?:(a)(?:(a)(a)?)?)?)?"),       //   (a(a(aa?)?)?)?
+    new(@"(a){2,6}", @"(a)(a)(?:(a)(?:(a)(?:(a)(a)?)?)?)?"), // aa(a(a(aa?)?)?)?
+    new(@"a{0,2}", @"(?:aa?)?"),                             //       (aa?)?
+    new(@"a{0,4}", @"(?:a(?:a(?:aa?)?)?)?"),                 //   (a(a(aa?)?)?)?
+    new(@"a{2,6}", @"aa(?:a(?:a(?:aa?)?)?)?"),               // aa(a(a(aa?)?)?)?
+    new(@"a{0,}", @"a*"),
+    new(@"a{1,}", @"a+"),
+    new(@"a{2,}", @"aa+"),
+    new(@"a{5,}", @"aaaaa+"),
 
     // Test that operators simplify their arguments.
-    new(@"(?:a{1,}){1,}"u8, @"a+"u8),
-    new(@"(a{1,}b{1,})"u8, @"(a+b+)"u8),
-    new(@"a{1,}|b{1,}"u8, @"a+|b+"u8),
-    new(@"(?:a{1,})*"u8, @"(?:a+)*"u8),
-    new(@"(?:a{1,})+"u8, @"a+"u8),
-    new(@"(?:a{1,})?"u8, @"(?:a+)?"u8),
-    new(@""u8, @"(?:)"u8),
-    new(@"a{0}"u8, @"(?:)"u8),
+    new(@"(?:a{1,}){1,}", @"a+"),
+    new(@"(a{1,}b{1,})", @"(a+b+)"),
+    new(@"a{1,}|b{1,}", @"a+|b+"),
+    new(@"(?:a{1,})*", @"(?:a+)*"),
+    new(@"(?:a{1,})+", @"a+"),
+    new(@"(?:a{1,})?", @"(?:a+)?"),
+    new(@"", @"(?:)"),
+    new(@"a{0}", @"(?:)"),
 
     // Character class simplification
-    new(@"[ab]"u8, @"[ab]"u8),
-    new(@"[abc]"u8, @"[a-c]"u8),
-    new(@"[a-za-za-z]"u8, @"[a-z]"u8),
-    new(@"[A-Za-zA-Za-z]"u8, @"[A-Za-z]"u8),
-    new(@"[ABCDEFGH]"u8, @"[A-H]"u8),
-    new(@"[AB-CD-EF-GH]"u8, @"[A-H]"u8),
-    new(@"[W-ZP-XE-R]"u8, @"[E-Z]"u8),
-    new(@"[a-ee-gg-m]"u8, @"[a-m]"u8),
-    new(@"[a-ea-ha-m]"u8, @"[a-m]"u8),
-    new(@"[a-ma-ha-e]"u8, @"[a-m]"u8),
-    new(@"[a-zA-Z0-9 -~]"u8, @"[ -~]"u8),
+    new(@"[ab]", @"[ab]"),
+    new(@"[abc]", @"[a-c]"),
+    new(@"[a-za-za-z]", @"[a-z]"),
+    new(@"[A-Za-zA-Za-z]", @"[A-Za-z]"),
+    new(@"[ABCDEFGH]", @"[A-H]"),
+    new(@"[AB-CD-EF-GH]", @"[A-H]"),
+    new(@"[W-ZP-XE-R]", @"[E-Z]"),
+    new(@"[a-ee-gg-m]", @"[a-m]"),
+    new(@"[a-ea-ha-m]", @"[a-m]"),
+    new(@"[a-ma-ha-e]", @"[a-m]"),
+    new(@"[a-zA-Z0-9 -~]", @"[ -~]"),
 
     // Empty character classes
-    new(@"[^[:cntrl:][:^cntrl:]]"u8, @"[^\x00-\x{10FFFF}]"u8),
+    new(@"[^[:cntrl:][:^cntrl:]]", @"[^\x00-\x{10FFFF}]"),
 
     // Full character classes
-    new(@"[[:cntrl:][:^cntrl:]]"u8, @"(?s:.)"u8),
+    new(@"[[:cntrl:][:^cntrl:]]", @"(?s:.)"),
 
     // Unicode case folding.
-    new(@"(?i)A"u8, @"(?i:A)"u8),
-    new(@"(?i)a"u8, @"(?i:A)"u8),
-    new(@"(?i)[A]"u8, @"(?i:A)"u8),
-    new(@"(?i)[a]"u8, @"(?i:A)"u8),
-    new(@"(?i)K"u8, @"(?i:K)"u8),
-    new(@"(?i)k"u8, @"(?i:K)"u8),
-    new(@"(?i)\x{212a}"u8, "(?i:K)"u8),
-    new(@"(?i)[K]"u8, "[Kk\u212A]"u8),
-    new(@"(?i)[k]"u8, "[Kk\u212A]"u8),
-    new(@"(?i)[\x{212a}]"u8, "[Kk\u212A]"u8),
-    new(@"(?i)[a-z]"u8, "[A-Za-z\u017F\u212A]"u8),
-    new(@"(?i)[\x00-\x{FFFD}]"u8, "[\\x00-\uFFFD]"u8),
-    new(@"(?i)[\x00-\x{10FFFF}]"u8, @"(?s:.)"u8),
+    new(@"(?i)A", @"(?i:A)"),
+    new(@"(?i)a", @"(?i:A)"),
+    new(@"(?i)[A]", @"(?i:A)"),
+    new(@"(?i)[a]", @"(?i:A)"),
+    new(@"(?i)K", @"(?i:K)"),
+    new(@"(?i)k", @"(?i:K)"),
+    new(@"(?i)\x{212a}", "(?i:K)"),
+    new(@"(?i)[K]", "[Kk\u212A]"),
+    new(@"(?i)[k]", "[Kk\u212A]"),
+    new(@"(?i)[\x{212a}]", "[Kk\u212A]"),
+    new(@"(?i)[a-z]", "[A-Za-z\u017F\u212A]"),
+    new(@"(?i)[\x00-\x{FFFD}]", "[\\x00-\uFFFD]"),
+    new(@"(?i)[\x00-\x{10FFFF}]", @"(?s:.)"),
 
     // Empty string as a regular expression.
     // The empty string must be preserved inside parens in order
@@ -124,33 +124,33 @@ internal static slice<simplifyTestsᴛ1> simplifyTests = new simplifyTestsᴛ1[]
     // interesting than they might otherwise be. String inserts
     // explicit (?:) in place of non-parenthesized empty strings,
     // to make them easier to spot for other parsers.
-    new(@"(a|b|c|)"u8, @"([a-c]|(?:))"u8),
-    new(@"(a|b|)"u8, @"([ab]|(?:))"u8),
-    new(@"(|)"u8, @"()"u8),
-    new(@"a()"u8, @"a()"u8),
-    new(@"(()|())"u8, @"(()|())"u8),
-    new(@"(a|)"u8, @"(a|(?:))"u8),
-    new(@"ab()cd()"u8, @"ab()cd()"u8),
-    new(@"()"u8, @"()"u8),
-    new(@"()*"u8, @"()*"u8),
-    new(@"()+"u8, @"()+"u8),
-    new(@"()?"u8, @"()?"u8),
-    new(@"(){0}"u8, @"(?:)"u8),
-    new(@"(){1}"u8, @"()"u8),
-    new(@"(){1,}"u8, @"()+"u8),
-    new(@"(){0,2}"u8, @"(?:()()?)?"u8)
-}.slice();
+    new(@"(a|b|c|)", @"([a-c]|(?:))"),
+    new(@"(a|b|)", @"([ab]|(?:))"),
+    new(@"(|)", @"()"),
+    new(@"a()", @"a()"),
+    new(@"(()|())", @"(()|())"),
+    new(@"(a|)", @"(a|(?:))"),
+    new(@"ab()cd()", @"ab()cd()"),
+    new(@"()", @"()"),
+    new(@"()*", @"()*"),
+    new(@"()+", @"()+"),
+    new(@"()?", @"()?"),
+    new(@"(){0}", @"(?:)"),
+    new(@"(){1}", @"()"),
+    new(@"(){1,}", @"()+"),
+    new(@"(){0,2}", @"(?:()()?)?")
+]);
 
-public static void TestSimplify(ж<testing.T> Ꮡt) {
+public static void TestSimplify(ж<testing.T> t) {
     foreach (var (_, tt) in simplifyTests) {
         var (re, err) = Parse(tt.Regexp, (global::go.regexp.syntax_package.Flags)(MatchNL | (global::go.regexp.syntax_package.Flags)(Perl & ~OneLine)));
-        if (err != default!) {
-            Ꮡt.Errorf("Parse(%#q) = error %v"u8, tt.Regexp, err);
+        if (err != nil) {
+            t.Errorf("Parse(%#q) = error %v", tt.Regexp, err);
             continue;
         }
         @string s = re.Simplify().String();
         if (s != tt.Simple) {
-            Ꮡt.Errorf("Simplify(%#q) = %#q, want %#q"u8, tt.Regexp, s, tt.Simple);
+            t.Errorf("Simplify(%#q) = %#q, want %#q", tt.Regexp, s, tt.Simple);
         }
     }
 }

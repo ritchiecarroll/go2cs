@@ -20,15 +20,16 @@ internal partial struct shutdownCodec {
 }
 
 internal static error WriteRequest(this ref shutdownCodec c, ж<global::go.net.rpc_package.Request> _Δp1, any _Δp2) {
-    return default!;
+    return default;
 }
 
 internal static error ReadResponseBody(this ref shutdownCodec c, any _) {
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string shutdownCodecˢ = "shutdownCodec ReadResponseHeader"u8;
+internal static ref readonly @string shutdownCodecˢ => ref shutdownCodecˢᵇ;
+private static readonly @string shutdownCodecˢᵇ = "shutdownCodec ReadResponseHeader"u8;
 
 internal static error ReadResponseHeader(this ref shutdownCodec c, ж<global::go.net.rpc_package.Response> _) {
     c.responded.ᐸꟷ(1);
@@ -37,19 +38,19 @@ internal static error ReadResponseHeader(this ref shutdownCodec c, ж<global::go
 
 internal static error Close(this ref shutdownCodec c) {
     c.closed = true;
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object clientCloseDidNotCloseˢ = (@string)"client.Close did not close codec"u8;
 
-public static void TestCloseCodec(ж<testing.T> Ꮡt) {
+public static void TestCloseCodec(ж<testing.T> t) {
     var codec = Ꮡ(new shutdownCodec(responded: new channel<nint>(0)));
     var client = NewClientWithCodec(new rpc_internal_test_package.shutdownCodecжClientCodec(codec));
-    ᐸꟷ((~codec).responded);
+    ᐸꟷ(codec.responded);
     client.Close();
-    if (!(~codec).closed) {
-        Ꮡt.Error(clientCloseDidNotCloseˢ);
+    if (!codec.closed) {
+        t.Error(clientCloseDidNotCloseˢ);
     }
 }
 
@@ -61,48 +62,51 @@ public partial struct R {
 public partial struct S {
 }
 
-public static error Recv(this ref S s, ж<EmptyStruct> Ꮡnul, ж<R> Ꮡreply) {
+public static error Recv(this ref S s, ж<EmptyStruct> nul, ж<R> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply = new R(slice<byte>("foo"u8));
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noErrorˢ = (@string)"no error"u8;
-internal static readonly @string readingBodyUnexpectedEofˢ = "reading body unexpected EOF"u8;
+internal static ref readonly @string readingBodyUnexpectedEofˢ => ref readingBodyUnexpectedEofˢᵇ;
+private static readonly @string readingBodyUnexpectedEofˢᵇ = "reading body unexpected EOF"u8;
 internal static readonly object expectedReadingBodyˢ = (@string)"expected `reading body unexpected EOF', got"u8;
-internal static readonly @string tcpˢ = "tcp"u8;
-internal static readonly @string sRecvˢ = "S.Recv"u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
+internal static ref readonly @string sRecvˢ => ref sRecvˢᵇ;
+private static readonly @string sRecvˢᵇ = "S.Recv"u8;
 
-public static partial void TestGobError(ж<testing.T> Ꮡt) {
+public static partial void TestGobError(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             var errΔ1 = recover();
-            if (errΔ1 == default!) {
-                Ꮡt.Fatal(noErrorˢ);
+            if (errΔ1 == nil) {
+                t.Fatal(noErrorˢ);
             }
             if (!strings.Contains(errΔ1._<error>().Error(), readingBodyUnexpectedEofˢ)) {
-                Ꮡt.Fatal(expectedReadingBodyˢ, errΔ1);
+                t.Fatal(expectedReadingBodyˢ, errΔ1);
             }
         }, ref ᒐ);
         Register(@new<S>());
 
-        var (listen, err) = net.Listen(tcpˢ, "127.0.0.1:0"u8);
-        if (err != default!) {
+        var (listen, err) = net.Listen(tcpˢ, "127.0.0.1:0");
+        if (err != nil) {
             throw panic(err);
         }
         goǃ(Accept, listen);
 
         (var client, err) = Dial(tcpˢ, listen.Addr().String());
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
 
         ref var reply = ref heap(new Reply(), out var Ꮡreply);
         err = client.Call(sRecvˢ, Ꮡ(new EmptyStruct()), Ꮡreply);
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
 

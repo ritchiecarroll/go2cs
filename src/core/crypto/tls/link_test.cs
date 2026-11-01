@@ -18,10 +18,14 @@ using static go.crypto.tls_package;
 partial class tls_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xGoˢ = "x.go"u8;
-internal static readonly @string xExeˢ = "x.exe"u8;
-internal static readonly @string buildˢ = "build"u8;
-internal static readonly @string toolˢ = "tool"u8;
+internal static ref readonly @string xGoˢ => ref xGoˢᵇ;
+private static readonly @string xGoˢᵇ = "x.go"u8;
+internal static ref readonly @string xExeˢ => ref xExeˢᵇ;
+private static readonly @string xExeˢᵇ = "x.exe"u8;
+internal static ref readonly @string buildˢ => ref buildˢᵇ;
+private static readonly @string buildˢᵇ = "build"u8;
+internal static ref readonly @string toolˢ => ref toolˢᵇ;
+private static readonly @string toolˢᵇ = "tool"u8;
 
 internal partial struct TestLinkerGC_tests /*dyn*/ {
     internal @string name;
@@ -31,29 +35,29 @@ internal partial struct TestLinkerGC_tests /*dyn*/ {
 }
 
 // Tests that the linker is able to remove references to the Client or Server if unused.
-public static void TestLinkerGC(ж<testing.T> Ꮡt) {
+public static void TestLinkerGC(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    var tests = new TestLinkerGC_tests[]{
+    var tests = slice<TestLinkerGC_tests>([
         new(
-            name: "empty_import"u8,
+            name: "empty_import",
             program: """
 package main
 import _ "crypto/tls"
 func main() {}
 
 """u8.Raw(),
-            bad: new @string[]{
-                "tls.(*Conn)"u8,
-                "type:crypto/tls.clientHandshakeState"u8,
-                "type:crypto/tls.serverHandshakeState"u8
-            }.slice()
+            bad: slice<@string>([
+                "tls.(*Conn)",
+                "type:crypto/tls.clientHandshakeState",
+                "type:crypto/tls.serverHandshakeState"
+            ])
         ),
         new(
-            name: "client_and_server"u8,
+            name: "client_and_server",
             program: """
 package main
 import "crypto/tls"
@@ -63,30 +67,30 @@ func main() {
 }
 
 """u8.Raw(),
-            want: new @string[]{
-                "crypto/tls.(*Conn).clientHandshake"u8,
-                "crypto/tls.(*Conn).serverHandshake"u8
-            }.slice()
+            want: slice<@string>([
+                "crypto/tls.(*Conn).clientHandshake",
+                "crypto/tls.(*Conn).serverHandshake"
+            ])
         ),
         new(
-            name: "only_client"u8,
+            name: "only_client",
             program: """
 package main
 import "crypto/tls"
 func main() { tls.Dial("", "", nil) }
 
 """u8.Raw(),
-            want: new @string[]{
-                "crypto/tls.(*Conn).clientHandshake"u8
-            }.slice(),
-            bad: new @string[]{
-                "crypto/tls.(*Conn).serverHandshake"u8
-            }.slice()
+            want: slice<@string>([
+                "crypto/tls.(*Conn).clientHandshake"
+            ]),
+            bad: slice<@string>([
+                "crypto/tls.(*Conn).serverHandshake"
+            ])
         )
         // TODO: add only_server like func main() { tls.Server(nil, nil) }
         // That currently brings in the client via Conn.handleRenegotiation.
-    }.slice();
-    @string tmpDir = Ꮡt.TempDir();
+    ]);
+    @string tmpDir = t.TempDir();
     @string goFile = filepath.Join(tmpDir, xGoˢ);
     @string exeFile = filepath.Join(tmpDir, xExeˢ);
     foreach (var (_, vᴛ1) in tests) {
@@ -94,35 +98,35 @@ func main() { tls.Dial("", "", nil) }
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.name, (ж<testing.T> tΔ1) => {
             {
-                var errΔ1 = os.WriteFile(goFile, slice<byte>(ttʗ1.program), 420); if (errΔ1 != default!) {
+                var errΔ1 = os.WriteFile(goFile, slice<byte>(ttʗ1.program), 420); if (errΔ1 != nil) {
                     tΔ1.Fatal(errΔ1);
                 }
             }
             os.Remove(exeFile);
             var cmd = testenv.Command(new tls_test_package.testing_TжTB(tΔ1), testenv.GoToolPath(new tls_test_package.testing_TжTB(tΔ1)), buildˢ, "-o", xExeˢ, xGoˢ);
-            cmd.Value.Dir = tmpDir;
+            cmd.Dir = tmpDir;
             {
-                var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != default!) {
-                    tΔ1.Fatalf("compile: %v\n%s"u8, errΔ2, @out);
+                var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
+                    tΔ1.Fatalf("compile: %v\n%s", errΔ2, @out);
                 }
             }
 
             cmd = testenv.Command(new tls_test_package.testing_TжTB(tΔ1), testenv.GoToolPath(new tls_test_package.testing_TжTB(tΔ1)), toolˢ, "nm", xExeˢ);
-            cmd.Value.Dir = tmpDir;
+            cmd.Dir = tmpDir;
             var (nm, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-            if (err != default!) {
-                tΔ1.Fatalf("nm: %v\n%s"u8, err, nm);
+            if (err != nil) {
+                tΔ1.Fatalf("nm: %v\n%s", err, nm);
             }
             foreach (var (_, sym) in ttʗ1.want) {
                 if (!bytes.Contains(nm, slice<byte>(sym))) {
-                    tΔ1.Errorf("expected symbol %q not found"u8, sym);
+                    tΔ1.Errorf("expected symbol %q not found", sym);
                 }
             }
             foreach (var (_, sym) in ttʗ1.bad) {
                 if (bytes.Contains(nm, slice<byte>(sym))) {
-                    tΔ1.Errorf("unexpected symbol %q found"u8, sym);
+                    tΔ1.Errorf("unexpected symbol %q found", sym);
                 }
             }
         });

@@ -18,9 +18,9 @@ partial class http_test_package {
 // The name is assumed to be a delimited by forward slashes, as guaranteed
 // by the http.FileSystem interface.
 internal static bool containsDotFile(@string name) {
-    var parts = strings.Split(name, "/"u8);
+    var parts = strings.Split(name, "/");
     foreach (var (_, part) in parts) {
-        if (strings.HasPrefix(part, "."u8)) {
+        if (strings.HasPrefix(part, ".")) {
             return true;
         }
     }
@@ -37,17 +37,17 @@ partial struct dotFileHidingFile {
 // Readdir is a wrapper around the Readdir method of the embedded File
 // that filters out all files that start with a period in their name.
 internal static (slice<fs.FileInfo> fis, error err) Readdir(this dotFileHidingFile f, nint n) {
-    slice<fs.FileInfo> fis = default!;
-    error err = default!;
+    slice<fs.FileInfo> fis = default;
+    error err = default;
     var fisᴷ = new stackAppend<fs.FileInfo>(moves: true);
 
     (var files, err) = f.File.Readdir(n);
     foreach (var (_, @file) in files) { // Filters out the dot files
-        if (!strings.HasPrefix(@file.Name(), "."u8)) {
+        if (!strings.HasPrefix(@file.Name(), ".")) {
             fis = append(fisᴷ, fis, @file);
         }
     }
-    if (err == default! && n > 0 && len(fis) == 0) {
+    if (err == nil && n > 0 && len(fis) == 0) {
         err = io.EOF;
     }
     fis = move2heap(fisᴷ, fis);
@@ -65,20 +65,20 @@ partial struct dotFileHidingFileSystem {
 // with whose name starts with a period in its path.
 internal static (Δhttp.File, error) Open(this dotFileHidingFileSystem fsys, @string name) {
     if (containsDotFile(name)) { // If dot file, return 403 response
-        return (default!, fs.ErrPermission);
+        return (default, fs.ErrPermission);
     }
 
     var (@file, err) = fsys.FileSystem.Open(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (new dotFileHidingFile(@file), default!);
+    return (new dotFileHidingFile(@file), default);
 }
 
 public static void ExampleFileServer_dotFileHiding() {
-    var fsys = new dotFileHidingFileSystem((Δhttp.Dir)(@string)"."u8);
-    Δhttp.Handle("/"u8, Δhttp.FileServer(fsys));
-    log.Fatal(Δhttp.ListenAndServe(":8080"u8, default!));
+    var fsys = new dotFileHidingFileSystem((Δhttp.Dir)(@string)".");
+    Δhttp.Handle("/", Δhttp.FileServer(fsys));
+    log.Fatal(Δhttp.ListenAndServe(":8080", default));
 }
 
 } // end http_test_package

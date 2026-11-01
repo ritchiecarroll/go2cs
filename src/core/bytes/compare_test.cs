@@ -14,7 +14,7 @@ partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
 }
-internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
+internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
     new(slice<byte>(""u8), slice<byte>(""u8), 0),
     new(slice<byte>("a"u8), slice<byte>(""u8), 1),
     new(slice<byte>(""u8), slice<byte>("a"u8), -1),
@@ -33,14 +33,14 @@ internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
     new(slice<byte>("abcdefghi"u8), slice<byte>("abcdefghj"u8), -1),
     new(slice<byte>("abcdefghj"u8), slice<byte>("abcdefghi"u8), 1),
     // nil tests
-    new(default!, default!, 0),
-    new(slice<byte>(""u8), default!, 0),
-    new(default!, slice<byte>(""u8), 0),
-    new(slice<byte>("a"u8), default!, 1),
-    new(default!, slice<byte>("a"u8), -1)
-}.slice();
+    new(default, default, 0),
+    new(slice<byte>(""u8), default, 0),
+    new(default, slice<byte>(""u8), 0),
+    new(slice<byte>("a"u8), default, 1),
+    new(default, slice<byte>("a"u8), -1)
+]);
 
-public static void TestCompare(ж<testing.T> Ꮡt) {
+public static void TestCompare(ж<testing.T> t) {
     foreach (var (_, tt) in compareTests) {
         nint numShifts = 16;
         var buffer = new slice<byte>(len(tt.b) + numShifts);
@@ -50,7 +50,7 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
             copy(shiftedB, tt.b);
             nint cmp = Compare(tt.a, shiftedB);
             if (cmp != tt.i) {
-                Ꮡt.Errorf(@"Compare(%q, %q), offset %d = %v; want %v"u8, tt.a, tt.b, offset, cmp, tt.i);
+                t.Errorf(@"Compare(%q, %q), offset %d = %v; want %v", tt.a, tt.b, offset, cmp, tt.i);
             }
         }
     }
@@ -59,17 +59,17 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object bB1Failedˢ = (@string)"b > b[:1] failed"u8;
 
-public static void TestCompareIdenticalSlice(ж<testing.T> Ꮡt) {
+public static void TestCompareIdenticalSlice(ж<testing.T> t) {
     slice<byte> b = slice<byte>("Hello Gophers!"u8);
     if (Compare(b, b) != 0) {
-        Ꮡt.Error((@string)"b != b"u8);
+        t.Error((@string)"b != b");
     }
     if (Compare(b, b[..1]) != 1) {
-        Ꮡt.Error(bB1Failedˢ);
+        t.Error(bB1Failedˢ);
     }
 }
 
-public static void TestCompareBytes(ж<testing.T> Ꮡt) {
+public static void TestCompareBytes(ж<testing.T> t) {
     var lengthsᴷ = new stackAppend<nint>();
 
     var lengths = new slice<nint>(0); // lengths to test in ascending order
@@ -98,35 +98,35 @@ public static void TestCompareBytes(ж<testing.T> Ꮡt) {
         }
         nint cmp = Compare(a.slice(0, lenΔ1), b.slice(0, lenΔ1));
         if (cmp != 0) {
-            Ꮡt.Errorf(@"CompareIdentical(%d) = %d"u8, lenΔ1, cmp);
+            t.Errorf(@"CompareIdentical(%d) = %d", lenΔ1, cmp);
         }
         if (lenΔ1 > 0) {
             cmp = Compare(a.slice(0, lenΔ1 - 1), b.slice(0, lenΔ1));
             if (cmp != -1) {
-                Ꮡt.Errorf(@"CompareAshorter(%d) = %d"u8, lenΔ1, cmp);
+                t.Errorf(@"CompareAshorter(%d) = %d", lenΔ1, cmp);
             }
             cmp = Compare(a.slice(0, lenΔ1), b.slice(0, lenΔ1 - 1));
             if (cmp != 1) {
-                Ꮡt.Errorf(@"CompareBshorter(%d) = %d"u8, lenΔ1, cmp);
+                t.Errorf(@"CompareBshorter(%d) = %d", lenΔ1, cmp);
             }
         }
         for (nint k = 0; k < lenΔ1; k++) {
             b[k] = (byte)(a[k] - 1);
             cmp = Compare(a.slice(0, lenΔ1), b.slice(0, lenΔ1));
             if (cmp != 1) {
-                Ꮡt.Errorf(@"CompareAbigger(%d,%d) = %d"u8, lenΔ1, k, cmp);
+                t.Errorf(@"CompareAbigger(%d,%d) = %d", lenΔ1, k, cmp);
             }
             b[k] = (byte)(a[k] + 1);
             cmp = Compare(a.slice(0, lenΔ1), b.slice(0, lenΔ1));
             if (cmp != -1) {
-                Ꮡt.Errorf(@"CompareBbigger(%d,%d) = %d"u8, lenΔ1, k, cmp);
+                t.Errorf(@"CompareBbigger(%d,%d) = %d", lenΔ1, k, cmp);
             }
             b[k] = a[k];
         }
     }
 }
 
-public static void TestEndianBaseCompare(ж<testing.T> Ꮡt) {
+public static void TestEndianBaseCompare(ж<testing.T> t) {
     // This test compares byte slices that are almost identical, except one
     // difference that for some j, a[j]>b[j] and a[j+1]<b[j+1]. If the implementation
     // compares large chunks with wrong endianness, it gets wrong result.
@@ -139,19 +139,19 @@ public static void TestEndianBaseCompare(ж<testing.T> Ꮡt) {
         a[i] = (byte)(1 + 31 * i % 254);
         b[i] = (byte)(1 + 31 * i % 254);
     }
-    for (nint i = 2; i <= maxLength; i <<= (int)(1)) {
+    for (nint i = 2; i <= maxLength; i <<= 1) {
         for (nint j = 0; j < i - 1; j++) {
             a[j] = (byte)(b[j] - 1);
             a[j + 1] = (byte)(b[j + 1] + 1);
             nint cmp = Compare(a.slice(0, i), b.slice(0, i));
             if (cmp != -1) {
-                Ꮡt.Errorf(@"CompareBbigger(%d,%d) = %d"u8, i, j, cmp);
+                t.Errorf(@"CompareBbigger(%d,%d) = %d", i, j, cmp);
             }
             a[j] = (byte)(b[j] + 1);
             a[j + 1] = (byte)(b[j + 1] - 1);
             cmp = Compare(a.slice(0, i), b.slice(0, i));
             if (cmp != 1) {
-                Ꮡt.Errorf(@"CompareAbigger(%d,%d) = %d"u8, i, j, cmp);
+                t.Errorf(@"CompareAbigger(%d,%d) = %d", i, j, cmp);
             }
             a[j] = b[j];
             a[j + 1] = b[j + 1];
@@ -181,7 +181,7 @@ public static void BenchmarkCompareBytesToNil(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var b1 = slice<byte>("Hello Gophers!"u8);
-    slice<byte> b2 = default!;
+    slice<byte> b2 = default;
     for (nint i = 0; i < b.N; i++) {
         if (Compare(b1, b2) != 1) {
             Ꮡb.Fatal(b1B2Failedˢ);
@@ -246,7 +246,7 @@ internal static void benchmarkCompareBytesBigUnaligned(ж<testing.B> Ꮡb, nint 
     b.StopTimer();
     var b1 = new slice<byte>(0, (1 << 20));
     while (len(b1) < 1 << 20) {
-        b1 = append(b1, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
+        b1 = append(b1, ((@string)"Hello Gophers!").ꓸꓸꓸ);
     }
     var b2 = appendꓸꓸꓸ(slice<byte>("12345678"u8).slice(0, offset), b1);
     b.StartTimer();
@@ -258,10 +258,10 @@ internal static void benchmarkCompareBytesBigUnaligned(ж<testing.B> Ꮡb, nint 
     b.SetBytes((int64)len(b1));
 }
 
-public static void BenchmarkCompareBytesBigUnaligned(ж<testing.B> Ꮡb) {
+public static void BenchmarkCompareBytesBigUnaligned(ж<testing.B> b) {
     for (nint iᴛ1 = 1; iᴛ1 < 8; iᴛ1++) {
         var i = iᴛ1;
-        Ꮡb.Run(fmt.Sprintf("offset=%d"u8, i), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("offset=%d"u8, i), (ж<testing.B> bΔ1) => {
             benchmarkCompareBytesBigUnaligned(bΔ1, i);
         });
     }
@@ -287,10 +287,10 @@ internal static void benchmarkCompareBytesBigBothUnaligned(ж<testing.B> Ꮡb, n
     b.SetBytes((int64)len(b1.slice(offset)));
 }
 
-public static void BenchmarkCompareBytesBigBothUnaligned(ж<testing.B> Ꮡb) {
+public static void BenchmarkCompareBytesBigBothUnaligned(ж<testing.B> b) {
     for (nint iᴛ1 = 0; iᴛ1 < 8; iᴛ1++) {
         var i = iᴛ1;
-        Ꮡb.Run(fmt.Sprintf("offset=%d"u8, i), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("offset=%d"u8, i), (ж<testing.B> bΔ1) => {
             benchmarkCompareBytesBigBothUnaligned(bΔ1, i);
         });
     }
@@ -302,9 +302,9 @@ public static void BenchmarkCompareBytesBig(ж<testing.B> Ꮡb) {
     b.StopTimer();
     var b1 = new slice<byte>(0, (1 << 20));
     while (len(b1) < 1 << 20) {
-        b1 = append(b1, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
+        b1 = append(b1, ((@string)"Hello Gophers!").ꓸꓸꓸ);
     }
-    var b2 = appendꓸꓸꓸ(new byte[]{}.slice(), b1);
+    var b2 = appendꓸꓸꓸ(slice<byte>([]), b1);
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
         if (Compare(b1, b2) != 0) {
@@ -320,7 +320,7 @@ public static void BenchmarkCompareBytesBigIdentical(ж<testing.B> Ꮡb) {
     b.StopTimer();
     var b1 = new slice<byte>(0, (1 << 20));
     while (len(b1) < 1 << 20) {
-        b1 = append(b1, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
+        b1 = append(b1, ((@string)"Hello Gophers!").ꓸꓸꓸ);
     }
     var b2 = b1;
     b.StartTimer();

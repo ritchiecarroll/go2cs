@@ -1,21 +1,40 @@
-// go2cs metadata anchor for a production-reference test project: the test assembly
-// REFERENCES the colocated production project instead of
-// recompiling its sources, so the production assembly is the single identity for the
-// production types and no production class partial may be declared here. The first —
-// and only — class is the test metadata class the go2cs-gen generators anchor
-// generated adapters and partials to.
-global using static global::go.unicode_package;
+// go2cs code converter defines `global using` statements here for imported type
+// aliases as package references are encountered via `import' statements. Exported
+// type aliases that need a `global using` declaration will be loaded from the
+// referenced package by parsing its 'package_info.cs' source file and reading its
+// defined `GoTypeAlias` attributes.
+
+// Package name separator "dot" used in imported type aliases is extended Unicode
+// character '\uA4F8' which is a valid character in a C# identifier name. This is
+// used to simulate Go's package level type aliases since C# does not yet support
+// importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.unicode_test_package;
+using static go.unicode_package;
+using static go.unicode_test_package;
+
+// For encountered type alias declarations, e.g., `type Table = map[string]int`,
+// go2cs code converter will generate a `global using` statement for the alias in
+// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
+// Although scope of `global using` is available to all files in the project, all
+// converted Go code for the project targets the same package, so `global using`
+// statements will effectively have package level scope.
+
+// Additionally, `GoTypeAlias` attributes will be generated here for exported type
+// aliases. This allows the type alias to be imported and used from other packages
+// when referenced.
 
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
+
+// As types are cast to interfaces in Go source code, the go2cs code converter
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
+// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
+// this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
 // </InterfaceImplementations>
@@ -27,7 +46,15 @@ using static global::go.unicode_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(CaseRange))]
+[assembly: GoFieldAccess(typeof(Range16))]
+[assembly: GoFieldAccess(typeof(Range32))]
+[assembly: GoFieldAccess(typeof(unicode_package.Range16))]
+[assembly: GoFieldAccess(typeof(unicode_package.RangeTable))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -37,16 +64,21 @@ using static global::go.unicode_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unicode/digit_test.go", "digit_test.cs", "AAsYADp2ACJGgoKCpoKCzJKCgg==")]
-[assembly: go.GoPositionMap("unicode/graphic_test.go", "graphic_test.cs", "AAsewoKCgpS0pILKooKCgoLKooKCgoLKooKCgoLKooKCgoLKooKCgoKUgsqigoKCgsqigoKCgsqigoKCgsqigoKCgg==")]
-[assembly: go.GoPositionMap("unicode/letter_test.go", "letter_test.cs", "ABAiABgyAA0cACJGAAwaABEkAHPoAYKCgqaCgqaCgsqCgoKmgoKmgoIACgqClKSklKaCgoKCyoKCgpSCgsqCgoKUgoLKgoKClIKCyoKCgqaCgs6igoKUgpSClIKUgpSClIKUgsqCgoKCgoKUgpSClIKUgpSCygAXMIKCgoKCgIKkuICCAA0clIKCpoLugoKSgoKCgriSgoKCgriCgoKUpoKCgpSmgoKCgpSCpqaUgoKCgoKClIKUpqaC7oKCgoKUggAJDIaigoKCuO4AESSCgoLKgoKUgpSClIKUgpSClIKUgpSClIKUgpSClIKUgsqigriiggAJCIKCgoK4goKC", "467-491:1;469-477:1.1;478-486:1.2;659-665:1;660-664:1.1")]
-[assembly: go.GoPositionMap("unicode/script_test.go", "script_test.cs", "ABAiACtYAClMgoKClIKAgqSClJSC+IKCgpSCgIKkgpSUgg==")]
+[assembly: GoPositionMap("unicode/casetables.go", "casetables.cs", "AAsYou4=")]
+[assembly: GoPositionMap("unicode/digit.go", "digit.cs", "AAcQkoKU")]
+[assembly: GoPositionMap("unicode/digit_test.go", "digit_test.cs", "AAsYADp2ACJGgoKCpoKCzJKCgg==")]
+[assembly: GoPositionMap("unicode/graphic.go", "graphic.cs", "ABcu7M7WgpQAAhDSgpSqooKCpqiygoKmrLKCpqiSgpSopKiSgpSqooKUAAIWAAkEgpSUlKiSgpQ=")]
+[assembly: GoPositionMap("unicode/graphic_test.go", "graphic_test.cs", "AAseooKCgpS0pILKgoKCgoLKgoKCgoLKgoKCgoLKgoKCgoLKgoKCgoKUgsqCgoKCgsqCgoKCgsqCgoKCgsqCgoKCgg==")]
+[assembly: GoPositionMap("unicode/letter.go", "letter.cs", "AFa2AZKCgoKClIKmuIKCgoKCgpSClKaokoKCgoKUgqa4goKCgoKClIKUpqiylIKUgoKUpoKUgIKkgoKUqKSClKikgpSokoKUqrSCgoKCgoKUgpSmqJKCAAoWlKqigpSAgqSokoKokoKClJSokoKClJSokoKClJSokoKClKiSgoKUqJKCgpQACzwAEgKCpoK4goKCgoKUpoLcgIKAgqSk")]
+[assembly: GoPositionMap("unicode/letter_test.go", "letter_test.cs", "ABAiABgyAA0cACJGAAwaABEkAHPoAYKCgqaCgqaCgsqCgoKmgoKmgoIADgqClKSklKaCgoKCyoKCgpSCgsqCgoKUgoLKgoKClIKCyoKCgqaCgs6igoKUgpSClIKUgpSClIKUgsqCgoKCgoKUgpSClIKUgpSCygAXMIKCgoKCgIKkuICCAA0clIKCpoLugoKSgoKCgriSgoKCgriCgoKUpoKCgpSmgoKCgpSCpqaUgoKCgoKClIKUpqaC7oKCgoKUggALDIaigoKCuO4AESSCgoLKgoKUgpSClIKUgpSClIKUgpSClIKUgpSClIKUgsqigriiggANCIKCgoK4goKC", "467-491:1;469-477:1.1;478-486:1.2;659-665:1;660-664:1.1")]
+[assembly: GoPositionMap("unicode/script_test.go", "script_test.cs", "ABAiACtYAClMgoKClIKAgqSClJSC+IKCgpSCgIKkgpSUgg==")]
+[assembly: GoPositionMap("unicode/tables.go", "tables.cs", "AAoSACpUAC1aAOgE0gkABxAAGDIA4gTGCQAJFNwA9gTuCQCOAZ4CAKoB1gIAPHoA6wPYBwALGACcAboCALEC5AQApAHKAgAJFAC6AvYEAI4BngIAR5ABABEkAE6eAQCuAd4CAAkUABImABw6AAkUAAoWAKsB2AIAH0AA0AGiAwAWLgAhRAA4cgCtAdwCAAsY3NwACxqCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKoAKYBzAIACBIACBLuADdwAAgSAAcQ7gAIEgAHEO4AEiYACRQABxAACBLc7twACRTuAAcQAAcQAAgSAAcQ7gCrAdgCAAcQAAkUAAoW7gAPIO4ACxgADRzuAAoW7u7uACpWAAwaAAwa7gATKAAmTgASJgALGAAUKgAaNgASJgAHENwACBIADRwADBoABxAAIUQABxAABxAABxAABxAAESQAFCoACBLuAA0cAAcQAAgSAAcQAAcQAA8gACtYAAcQAAkUAAgSAAwaAAgS7gAHEO7uAAsY7gAHEAAIEgAMGu4ABxAABxAACBLuAAgSAAcQAAwaAAgSAAoWAAcQAAcQ7gAIEgAIEgAHEO4ABxAACRTc3AAIEgAHEO7uAAcQ7u7u7gASJgAHEAAHEAAKFu7u3AAHEAAIEu7u7u7u7gAHEAAIEgATKO4ABxDu7twACBLuAAcQ7gAJFO4ABxAAFzAABxAACRQAESTc7gALGAAHEAAHEO4ABxDcAA0cAAcQAAcQAAgS7gAHEoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgqgAJkwACBIACBIAFCoADBoAqgHWAgAdPAALGAALGO7cABo23AAKFgAYMgDsAdoDAA8gABYuAAcQAAcQACBCAHz6AQALGAAdPAAJFAALGAAPIAAHEO4ASJIBACBCAGPIAQAVLAAKFgANHoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoK6ogDKApQFAIIChgQAggGGAgBevgEACRLcAH38AQANHAB+/gHuAAwW3Nzc")]
 // </GoSourcePositionMaps>
 
 namespace go;
 
-[GoPackage("unicode_test")]
-public static partial class unicode_test_package
+[GoPackage("unicode")]
+public static partial class unicode_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -55,8 +87,13 @@ public static partial class unicode_test_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct caseT {}
-    public partial struct T {}
+    internal partial struct foldPair {}
+    [GoValueClone("Delta")] public partial struct CaseRange {}
+    public partial struct Range16 {}
+    public partial struct Range32 {}
+    public partial struct RangeTable {}
+    public partial struct SpecialCase {}
+    public partial struct d {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -72,13 +109,10 @@ public static partial class unicode_test_package
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
-    [GoInit] internal static void initᴛᴛimportꓸunicode() => builtin.initPackage(typeof(unicode_package));
     // </ImportInitializers>
-    // Go runs every `init` in the package under test - the production files' included -
-    // before the first test. The production package is a REFERENCED assembly here, whose
-    // module constructor .NET would not run until something in it is touched, so that
-    // initialization is forced before anything else in this test module runs.
-    [GoInit] internal static void initᴛᴛproduction() {
-        builtin.initPackage(typeof(global::go.unicode_package));
-    }
+}
+
+[GoPackage("unicode_test")]
+public static partial class unicode_test_package
+{
 }

@@ -16,8 +16,8 @@ partial class net_internal_test_package {
 // found.
 internal static ж<global::go.net_package.Interface> loopbackInterface() {
     var (ift, err) = Interfaces();
-    if (err != default!) {
-        return default!;
+    if (err != nil) {
+        return default;
     }
     foreach (var (_, vᴛ1) in ift) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
@@ -27,25 +27,25 @@ internal static ж<global::go.net_package.Interface> loopbackInterface() {
             return Ꮡifi;
         }
     }
-    return default!;
+    return default;
 }
 
 // ipv6LinkLocalUnicastAddr returns an IPv6 link-local unicast address
 // on the given network interface for tests. It returns "" if no
 // suitable address is found.
-internal static @string ipv6LinkLocalUnicastAddr(ж<global::go.net_package.Interface> Ꮡifi) {
-    if (Ꮡifi == nil) {
+internal static @string ipv6LinkLocalUnicastAddr(ж<global::go.net_package.Interface> ifi) {
+    if (ifi == nil) {
         return ""u8;
     }
-    var (ifat, err) = Ꮡifi.Addrs();
-    if (err != default!) {
+    var (ifat, err) = ifi.Addrs();
+    if (err != nil) {
         return ""u8;
     }
     foreach (var (_, ifa) in ifat) {
         {
             var (ifaΔ1, ok) = ifa._<ж<global::go.net_package.IPNet>>(ᐧ); if (ok) {
-                if ((~ifaΔ1).IP.To4() == default! && (~ifaΔ1).IP.IsLinkLocalUnicast()) {
-                    return (~ifaΔ1).IP.String();
+                if (ifaΔ1.IP.To4() == nil && ifaΔ1.IP.IsLinkLocalUnicast()) {
+                    return ifaΔ1.IP.String();
                 }
             }
         }
@@ -53,72 +53,75 @@ internal static @string ipv6LinkLocalUnicastAddr(ж<global::go.net_package.Inter
     return ""u8;
 }
 
-public static void TestInterfaces(ж<testing.T> Ꮡt) {
+public static void TestInterfaces(ж<testing.T> t) {
     var (ift, err) = Interfaces();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     foreach (var (_, vᴛ1) in ift) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
         var (ifxi, errΔ1) = InterfaceByIndex(ifi.Index);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8) {
-            if ((~ifxi).Index != ifi.Index) {
-                Ꮡt.Errorf("got %v; want %v"u8, ifxi.OrTypedNil(), ifi);
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8: {
+            if (ifxi.Index != ifi.Index) {
+                t.Errorf("got %v; want %v", ifxi.OrTypedNil(), ifi);
             }
+            break;
         }
-        else { /* default: */
+        default: {
             if (!reflect.DeepEqual(ifxi.OrTypedNil(), Ꮡifi)) {
-                Ꮡt.Errorf("got %v; want %v"u8, ifxi.OrTypedNil(), ifi);
+                t.Errorf("got %v; want %v", ifxi.OrTypedNil(), ifi);
             }
-        }
+            break;
+        }}
         if (ifi.Name != ""u8) {
             var (ifxn, errΔ2) = InterfaceByName(ifi.Name);
-            if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
             if (!reflect.DeepEqual(ifxn.OrTypedNil(), Ꮡifi)) {
-                Ꮡt.Errorf("got %v; want %v"u8, ifxn.OrTypedNil(), ifi);
+                t.Errorf("got %v; want %v", ifxn.OrTypedNil(), ifi);
             }
         }
-        Ꮡt.Logf("%s: flags=%v index=%d mtu=%d hwaddr=%v"u8, ifi.Name, ifi.Flags, ifi.Index, ifi.MTU, ifi.HardwareAddr);
+        t.Logf("%s: flags=%v index=%d mtu=%d hwaddr=%v", ifi.Name, ifi.Flags, ifi.Index, ifi.MTU, ifi.HardwareAddr);
     }
 }
 
-public static void TestInterfaceAddrs(ж<testing.T> Ꮡt) {
+public static void TestInterfaceAddrs(ж<testing.T> t) {
     var (ift, err) = Interfaces();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var ifStats = interfaceStats(ift);
     (var ifat, err) = InterfaceAddrs();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var uniStats, err) = validateInterfaceUnicastAddrs(ifat);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        var errΔ1 = checkUnicastStats(ifStats, uniStats); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = checkUnicastStats(ifStats, uniStats); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 }
 
-public static void TestInterfaceUnicastAddrs(ж<testing.T> Ꮡt) {
+public static void TestInterfaceUnicastAddrs(ж<testing.T> t) {
     var (ift, err) = Interfaces();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var ifStats = interfaceStats(ift);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     ref var uniStats = ref heap(new routeStats(), out var ᏑuniStats);
     foreach (var (_, vᴛ1) in ift) {
@@ -126,36 +129,36 @@ public static void TestInterfaceUnicastAddrs(ж<testing.T> Ꮡt) {
         ifi = vᴛ1;
 
         var (ifat, errΔ1) = Ꮡifi.Addrs();
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(ifi, errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(ifi, errΔ1);
         }
         (var stats, errΔ1) = validateInterfaceUnicastAddrs(ifat);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(ifi, errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(ifi, errΔ1);
         }
-        uniStats.ipv4 += stats.Value.ipv4;
-        uniStats.ipv6 += stats.Value.ipv6;
+        uniStats.ipv4 += stats.ipv4;
+        uniStats.ipv6 += stats.ipv6;
     }
     {
-        var errΔ2 = checkUnicastStats(ifStats, ᏑuniStats); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = checkUnicastStats(ifStats, ᏑuniStats); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
 }
 
-public static void TestInterfaceMulticastAddrs(ж<testing.T> Ꮡt) {
+public static void TestInterfaceMulticastAddrs(ж<testing.T> t) {
     var (ift, err) = Interfaces();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var ifStats = interfaceStats(ift);
     (var ifat, err) = InterfaceAddrs();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var uniStats, err) = validateInterfaceUnicastAddrs(ifat);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     ref var multiStats = ref heap(new routeStats(), out var ᏑmultiStats);
     foreach (var (_, vᴛ1) in ift) {
@@ -163,25 +166,25 @@ public static void TestInterfaceMulticastAddrs(ж<testing.T> Ꮡt) {
         ifi = vᴛ1;
 
         var (ifmat, errΔ1) = Ꮡifi.MulticastAddrs();
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(ifi, errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(ifi, errΔ1);
         }
         (var stats, errΔ1) = validateInterfaceMulticastAddrs(ifmat);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(ifi, errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(ifi, errΔ1);
         }
-        multiStats.ipv4 += stats.Value.ipv4;
-        multiStats.ipv6 += stats.Value.ipv6;
+        multiStats.ipv4 += stats.ipv4;
+        multiStats.ipv6 += stats.ipv6;
     }
     {
-        var errΔ2 = checkMulticastStats(ifStats, uniStats, ᏑmultiStats); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = checkMulticastStats(ifStats, uniStats, ᏑmultiStats); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
 }
 
 internal partial struct ifStats {
-    internal nint loop; // # of active loopback interfaces
+    internal nint loop;  // # of active loopback interfaces
     internal nint other; // # of active other interfaces
 }
 
@@ -189,7 +192,7 @@ internal static ж<ifStats> interfaceStats(slice<global::go.net_package.Interfac
     ref var stats = ref heap(new ifStats(), out var Ꮡstats);
     foreach (var (_, ifi) in ift) {
         if ((global::go.net_package.Flags)(ifi.Flags & FlagUp) != 0) {
-            if ((global::go.net_package.Flags)(ifi.Flags & FlagLoopback) != 0){
+            if ((global::go.net_package.Flags)(ifi.Flags & FlagLoopback) != 0) {
                 stats.loop++;
             } else {
                 stats.other++;
@@ -214,54 +217,54 @@ internal static (ж<routeStats>, error) validateInterfaceUnicastAddrs(slice<glob
     foreach (var (_, ifa) in ifat) {
         switch (ifa.type()) {
         case ж<global::go.net_package.IPNet> ifaΔ1: {
-            if (ifaΔ1 == nil || (~ifaΔ1).IP == default! || (~ifaΔ1).IP.IsMulticast() || (~ifaΔ1).Mask == default!) {
-                return (default!, fmt.Errorf("unexpected value: %#v"u8, ifaΔ1.OrTypedNil()));
+            if (ifaΔ1 == nil || ifaΔ1.IP == nil || ifaΔ1.IP.IsMulticast() || ifaΔ1.Mask == nil) {
+                return (default, fmt.Errorf("unexpected value: %#v"u8, ifaΔ1.OrTypedNil()));
             }
-            if (len((~ifaΔ1).IP) != IPv6len) {
-                return (default!, fmt.Errorf("should be internal representation either IPv6 or IPv4-mapped IPv6 address: %#v"u8, ifaΔ1.OrTypedNil()));
+            if (len(ifaΔ1.IP) != IPv6len) {
+                return (default, fmt.Errorf("should be internal representation either IPv6 or IPv4-mapped IPv6 address: %#v"u8, ifaΔ1.OrTypedNil()));
             }
-            var (prefixLen, maxPrefixLen) = (~ifaΔ1).Mask.Size();
-            if ((~ifaΔ1).IP.To4() != default!) {
+            var (prefixLen, maxPrefixLen) = ifaΔ1.Mask.Size();
+            if (ifaΔ1.IP.To4() != nil) {
                 if (0 >= prefixLen || prefixLen > (nint)(8 * IPv4len) || maxPrefixLen != (nint)(8 * IPv4len)) {
-                    return (default!, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
+                    return (default, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
                 }
-                if ((~ifaΔ1).IP.IsLoopback() && prefixLen < 8) { // see RFC 1122
-                    return (default!, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
+                if (ifaΔ1.IP.IsLoopback() && prefixLen < 8) { // see RFC 1122
+                    return (default, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
                 }
-                stats.Value.ipv4++;
+                stats.ipv4++;
             }
-            if ((~ifaΔ1).IP.To16() != default! && (~ifaΔ1).IP.To4() == default!) {
+            if (ifaΔ1.IP.To16() != nil && ifaΔ1.IP.To4() == nil) {
                 if (0 >= prefixLen || prefixLen > (nint)(8 * IPv6len) || maxPrefixLen != (nint)(8 * IPv6len)) {
-                    return (default!, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
+                    return (default, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
                 }
-                if ((~ifaΔ1).IP.IsLoopback() && prefixLen != (nint)(8 * IPv6len)) { // see RFC 4291
-                    return (default!, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
+                if (ifaΔ1.IP.IsLoopback() && prefixLen != (nint)(8 * IPv6len)) { // see RFC 4291
+                    return (default, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
                 }
-                stats.Value.ipv6++;
+                stats.ipv6++;
             }
             break;
         }
         case ж<global::go.net_package.IPAddr> ifaΔ1: {
-            if (ifaΔ1 == nil || (~ifaΔ1).IP == default! || (~ifaΔ1).IP.IsMulticast()) {
-                return (default!, fmt.Errorf("unexpected value: %#v"u8, ifaΔ1.OrTypedNil()));
+            if (ifaΔ1 == nil || ifaΔ1.IP == nil || ifaΔ1.IP.IsMulticast()) {
+                return (default, fmt.Errorf("unexpected value: %#v"u8, ifaΔ1.OrTypedNil()));
             }
-            if (len((~ifaΔ1).IP) != IPv6len) {
-                return (default!, fmt.Errorf("should be internal representation either IPv6 or IPv4-mapped IPv6 address: %#v"u8, ifaΔ1.OrTypedNil()));
+            if (len(ifaΔ1.IP) != IPv6len) {
+                return (default, fmt.Errorf("should be internal representation either IPv6 or IPv4-mapped IPv6 address: %#v"u8, ifaΔ1.OrTypedNil()));
             }
-            if ((~ifaΔ1).IP.To4() != default!) {
-                stats.Value.ipv4++;
+            if (ifaΔ1.IP.To4() != nil) {
+                stats.ipv4++;
             }
-            if ((~ifaΔ1).IP.To16() != default! && (~ifaΔ1).IP.To4() == default!) {
-                stats.Value.ipv6++;
+            if (ifaΔ1.IP.To16() != nil && ifaΔ1.IP.To4() == nil) {
+                stats.ipv6++;
             }
             break;
         }
         default: {
             var ifaΔ1 = ifa;
-            return (default!, fmt.Errorf("unexpected type: %T"u8, ifaΔ1));
+            return (default, fmt.Errorf("unexpected type: %T"u8, ifaΔ1));
         }}
     }
-    return (stats, default!);
+    return (stats, default);
 }
 
 internal static (ж<routeStats>, error) validateInterfaceMulticastAddrs(slice<global::go.net_package.ΔAddr> ifat) {
@@ -269,26 +272,26 @@ internal static (ж<routeStats>, error) validateInterfaceMulticastAddrs(slice<gl
     foreach (var (_, ifa) in ifat) {
         switch (ifa.type()) {
         case ж<global::go.net_package.IPAddr> ifaΔ1: {
-            if (ifaΔ1 == nil || (~ifaΔ1).IP == default! || (~ifaΔ1).IP.IsUnspecified() || !(~ifaΔ1).IP.IsMulticast()) {
-                return (default!, fmt.Errorf("unexpected value: %#v"u8, ifaΔ1.OrTypedNil()));
+            if (ifaΔ1 == nil || ifaΔ1.IP == nil || ifaΔ1.IP.IsUnspecified() || !ifaΔ1.IP.IsMulticast()) {
+                return (default, fmt.Errorf("unexpected value: %#v"u8, ifaΔ1.OrTypedNil()));
             }
-            if (len((~ifaΔ1).IP) != IPv6len) {
-                return (default!, fmt.Errorf("should be internal representation either IPv6 or IPv4-mapped IPv6 address: %#v"u8, ifaΔ1.OrTypedNil()));
+            if (len(ifaΔ1.IP) != IPv6len) {
+                return (default, fmt.Errorf("should be internal representation either IPv6 or IPv4-mapped IPv6 address: %#v"u8, ifaΔ1.OrTypedNil()));
             }
-            if ((~ifaΔ1).IP.To4() != default!) {
-                stats.Value.ipv4++;
+            if (ifaΔ1.IP.To4() != nil) {
+                stats.ipv4++;
             }
-            if ((~ifaΔ1).IP.To16() != default! && (~ifaΔ1).IP.To4() == default!) {
-                stats.Value.ipv6++;
+            if (ifaΔ1.IP.To16() != nil && ifaΔ1.IP.To4() == nil) {
+                stats.ipv6++;
             }
             break;
         }
         default: {
             var ifaΔ1 = ifa;
-            return (default!, fmt.Errorf("unexpected type: %T"u8, ifaΔ1));
+            return (default, fmt.Errorf("unexpected type: %T"u8, ifaΔ1));
         }}
     }
-    return (stats, default!);
+    return (stats, default);
 }
 
 internal static error checkUnicastStats(ж<ifStats> ᏑifStats, ж<routeStats> ᏑuniStats) {
@@ -305,7 +308,7 @@ internal static error checkUnicastStats(ж<ifStats> ᏑifStats, ж<routeStats> �
     if (supportsIPv6() && ifStats.loop > 0 && uniStats.ipv6 == 0) {
         return fmt.Errorf("num IPv6 unicast routes = 0; want >0; summary: %+v, %+v"u8, ᏑifStats.OrTypedNil(), ᏑuniStats.OrTypedNil());
     }
-    return default!;
+    return default;
 }
 
 internal static error checkMulticastStats(ж<ifStats> ᏑifStats, ж<routeStats> ᏑuniStats, ж<routeStats> ᏑmultiStats) {
@@ -314,9 +317,11 @@ internal static error checkMulticastStats(ж<ifStats> ᏑifStats, ж<routeStats>
     ref var multiStats = ref ᏑmultiStats.DerefOrNull();
 
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "aix"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8: {
+        break;
     }
-    else { /* default: */
+    default: {
         // Test the existence of connected multicast route
         // clones for IPv4. Unlike IPv6, IPv4 multicast
         // capability is not a mandatory feature, and so IPv4
@@ -332,8 +337,9 @@ internal static error checkMulticastStats(ж<ifStats> ᏑifStats, ж<routeStats>
         if (supportsIPv6() && ifStats.loop > 0 && uniStats.ipv6 > 1 && multiStats.ipv6 == 0) {
             return fmt.Errorf("num IPv6 multicast route clones = 0; want >0; summary: %+v, %+v, %+v"u8, ᏑifStats.OrTypedNil(), ᏑuniStats.OrTypedNil(), ᏑmultiStats.OrTypedNil());
         }
-    }
-    return default!;
+        break;
+    }}
+    return default;
 }
 
 public static void BenchmarkInterfaces(ж<testing.B> Ꮡb) {
@@ -344,7 +350,7 @@ public static void BenchmarkInterfaces(ж<testing.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         {
-            var (_, err) = Interfaces(); if (err != default!) {
+            var (_, err) = Interfaces(); if (err != nil) {
                 Ꮡb.Fatal(err);
             }
         }
@@ -366,7 +372,7 @@ public static void BenchmarkInterfaceByIndex(ж<testing.B> Ꮡb) {
     }
     for (nint i = 0; i < b.N; i++) {
         {
-            var (_, err) = InterfaceByIndex((~ifi).Index); if (err != default!) {
+            var (_, err) = InterfaceByIndex(ifi.Index); if (err != nil) {
                 Ꮡb.Fatal(err);
             }
         }
@@ -385,7 +391,7 @@ public static void BenchmarkInterfaceByName(ж<testing.B> Ꮡb) {
     }
     for (nint i = 0; i < b.N; i++) {
         {
-            var (_, err) = InterfaceByName((~ifi).Name); if (err != default!) {
+            var (_, err) = InterfaceByName(ifi.Name); if (err != nil) {
                 Ꮡb.Fatal(err);
             }
         }
@@ -400,7 +406,7 @@ public static void BenchmarkInterfaceAddrs(ж<testing.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         {
-            var (_, err) = InterfaceAddrs(); if (err != default!) {
+            var (_, err) = InterfaceAddrs(); if (err != nil) {
                 Ꮡb.Fatal(err);
             }
         }
@@ -419,7 +425,7 @@ public static void BenchmarkInterfacesAndAddrs(ж<testing.B> Ꮡb) {
     }
     for (nint i = 0; i < b.N; i++) {
         {
-            var (_, err) = ifi.Addrs(); if (err != default!) {
+            var (_, err) = ifi.Addrs(); if (err != nil) {
                 Ꮡb.Fatal(err);
             }
         }
@@ -438,7 +444,7 @@ public static void BenchmarkInterfacesAndMulticastAddrs(ж<testing.B> Ꮡb) {
     }
     for (nint i = 0; i < b.N; i++) {
         {
-            var (_, err) = ifi.MulticastAddrs(); if (err != default!) {
+            var (_, err) = ifi.MulticastAddrs(); if (err != nil) {
                 Ꮡb.Fatal(err);
             }
         }

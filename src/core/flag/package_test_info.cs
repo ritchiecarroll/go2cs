@@ -8,25 +8,7 @@ global using static global::go.flag_package;
 global using static global::go.flag_internal_test_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
 global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,11 +32,13 @@ using static global::go.flag_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(flag_package.Flag))]
+[assembly: GoFieldAccess(typeof(flag_package.FlagSet))]
+[assembly: GoFieldAccess(typeof(global::go.flag_package.FlagSet))]
+[assembly: GoFieldAccess(typeof(go.net.url_package.URL))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,9 +48,9 @@ using static global::go.flag_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("flag/example_test.go", "example_test.cs", "ABEi/oKYggAFEKLcAAgMgpSCgoKUlAAIEqam")]
-[assembly: go.GoPositionMap("flag/example_value_test.go", "example_value_test.cs", "ABEigoKUpoKAgpSkpuSCgpSC")]
-[assembly: go.GoPositionMap("flag/flag_test.go", "flag_test.cs", "AB4wgoKUABwGgoKCgoKCgoKCgoKUkoKCgoKClLS0tLSkgriCgoKCpoKCgoKCuIKCgoKCgoKCgoKCgoKCgqiSgJKCuIKCgoKCgoKCgpSCgoKCgpSUpKSkpKSkpJSCuOaCgoCSgpSCABwIooKUgoKCgoKCgoKCggALGICCpIKUgpSClIKUgpSClIKUgpSClIKUgpKC6IKAktaC3IKmgoLmgoKCgoKCgIKkgpSCgviCgoKCgoKUgIKkgpSCgIKmkoKCgIK2goKYgIK2gIKSgIIACAiCgoKAkoKCAAgSgqaCgpSmgqaCgoKCgoKCgIKCyIKmguiCgoKCgoKClIKCgoKUlIKCgoLogoKCgoKCgIIACAzCgJKCkJKCgoCCpIKCgoKUgrQAEQaSgoKAkoKUgoKUgpSCgqaCgpSClIKWkoKCgoKUggAKFoKCpoKClAA8TIKCgoKCgoKCgoKCgoKCgoKCgoKCgoL6koKUgoKCgIKkgIL6soKCgoCSgoKCgILE5IKCgoKUgpSClIKmgoKCgpSClIKUggAICIKCgoKCgoKCgoKUgoKCgpSC+oLugoKCgoKCgpSCgoKUggAPCoKUgoKCgoKUgqYAGDqigrqClIKUgtyigoKktICC5rai9IIAChyylIKClKKClICCAA0KggAKHIKUgoKUgpSSlICCAAkKgoKCgoKClICCpIKUgoCCppKCgoCCtoKCmICCtoCCkoCCAAwIgpSmkg==", "41-41:1;42-42:2;46-66:3;103-103:4;120-149:1;155-155:1;231-231:1;273-276:1;297-299:2;315-315:1;403-403:1;405-405:2;426-426:1;566-566:1;725-736:1;762-765:1;797-799:1;810-813:1;834-836:2;855-857:1", "", "934=Environ/1/1/1")]
+[assembly: GoPositionMap("flag/example_test.go", "example_test.cs", "ABEi/oKYggAFEKLsAAgMgpSCgoKUlAAIEqam")]
+[assembly: GoPositionMap("flag/example_value_test.go", "example_value_test.cs", "ABEigoKUpoKAgpSkpgAJBIKClII=")]
+[assembly: GoPositionMap("flag/flag_test.go", "flag_test.cs", "ACAwgoKUADAGgoKCgoKCgoKCgoKUgoKCgoKClLS0tLSkgriCgoKCpoKCgoKCuIKCgoKCgoKCgoKCgoKCgqiSgJKCuIKCgoKCgoKCgpSCgoKCgpSktLS0tLS0tKSCuOaCgoCSgpSCACcIooKUgoKCgoKCgoKCggALGICCpIKUgpSClIKUgpSClIKUgpSClIKUgoKC6IKAkuaC3IKmgoL2goKCgoKCgIKkgpSCggAICIKCgoKCgpSAgqSClIKAgqaSgoKAgraCgpiAgraAgoKAggAJCIKCgoCSgoIACBKCpoKClKaCpoKCgoKCgoKAgoLIgqaC+IKCgoKCgoKUgoKCgpSUgoKCgviCgoKCgoKAggAKDMKAkoKQkoKCgIKkgoKCgpSCtAAWBpKCgoCSgpSCgpSClIKCpoKClIKUgpaSgoKCgpSCAAoWgoKmgoKUAFBMgoKCgoKCgoKCgoKCgoKCgoKCgoKCgvqSgpSCgoKAgqSAggAICrKCgoKAkoKCgoCCxAAIBIKCgoKUgpSClIKmgoKCgpSClIKUggALCIKCgoKCgoKCgoKUgoKCgpSCAAgKgu6CgoKCgoKClIKCgpSCABIKgpSCgoKCgpSCpgAYOqKCuoKUgpSC3KKCgqS0gILmtqL0ggAKHLKUgoKUooKUgIIADgqCAAocgpSCgpSClJKUgIIACgqCgoKCgoKUgIKkgpSCgIKmkoKCgIK2goKYgIK2gIKCgIIAEQiClKaS", "41-41:1;42-42:2;46-66:3;103-103:4;120-149:1;155-155:1;231-231:1;273-276:1;297-299:2;315-315:1;403-403:1;405-405:2;426-426:1;566-566:1;725-736:1;762-765:1;797-799:1;810-813:1;834-836:2;855-857:1", "", "1016=Environ/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

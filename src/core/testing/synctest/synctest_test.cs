@@ -11,8 +11,7 @@ using testing = testing_package;
 using synctest = go.testing.synctest_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using context = context_package;
 using exec = go.os.exec_package;
 using go.os;
@@ -22,23 +21,24 @@ partial class synctest_test_package {
 
 // Tests for interactions between synctest bubbles and the testing package.
 // Other bubble behaviors are tested in internal/synctest.
-public static void TestSuccess(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestSuccess(ж<testing.T> t) {
+    synctest.Test(t, (ж<testing.T> tΔ1) => {
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object fatalˢ = (@string)"fatal"u8;
-private static readonly @string failTestFatalSynctestˢ = """
+private static ref readonly @string failTestFatalSynctestˢ => ref failTestFatalSynctestˢᵇ;
+private static readonly @string failTestFatalSynctestˢᵇ = """
 ^--- FAIL: TestFatal.*
     synctest_test.go:.* fatal
 FAIL
 $
 """u8.Raw();
 
-public static void TestFatal(ж<testing.T> Ꮡt) {
-    runTest(Ꮡt, default!, () => {
-        synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestFatal(ж<testing.T> t) {
+    runTest(t, default, () => {
+        synctest.Test(t, (ж<testing.T> tΔ1) => {
             tΔ1.Fatal(fatalˢ);
         });
     }, failTestFatalSynctestˢ);
@@ -46,23 +46,25 @@ public static void TestFatal(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object errorˢ = (@string)"error"u8;
-private static readonly @string failTestErrorSynctestˢ = """
+private static ref readonly @string failTestErrorSynctestˢ => ref failTestErrorSynctestˢᵇ;
+private static readonly @string failTestErrorSynctestˢᵇ = """
 ^--- FAIL: TestError.*
     synctest_test.go:.* error
 FAIL
 $
 """u8.Raw();
 
-public static void TestError(ж<testing.T> Ꮡt) {
-    runTest(Ꮡt, default!, () => {
-        synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestError(ж<testing.T> t) {
+    runTest(t, default, () => {
+        synctest.Test(t, (ж<testing.T> tΔ1) => {
             tΔ1.Error(errorˢ);
         });
     }, failTestErrorSynctestˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string runTestVerboseErrorˢ = """
+private static ref readonly @string runTestVerboseErrorˢ => ref runTestVerboseErrorˢᵇ;
+private static readonly @string runTestVerboseErrorˢᵇ = """
 ^=== RUN   TestVerboseError
     synctest_test.go:.* error
 --- FAIL: TestVerboseError.*
@@ -70,9 +72,9 @@ FAIL
 $
 """u8.Raw();
 
-public static void TestVerboseError(ж<testing.T> Ꮡt) {
-    runTest(Ꮡt, new @string[]{"-test.v"u8}.slice(), () => {
-        synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestVerboseError(ж<testing.T> t) {
+    runTest(t, slice<@string>(["-test.v"]), () => {
+        synctest.Test(t, (ж<testing.T> tΔ1) => {
             tΔ1.Error(errorˢ);
         });
     }, runTestVerboseErrorˢ);
@@ -80,21 +82,23 @@ public static void TestVerboseError(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object skipˢ = (@string)"skip"u8;
-private static readonly @string passˢ = """
+private static ref readonly @string passˢ => ref passˢᵇ;
+private static readonly @string passˢᵇ = """
 ^PASS
 $
 """u8.Raw();
 
-public static void TestSkip(ж<testing.T> Ꮡt) {
-    runTest(Ꮡt, default!, () => {
-        synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestSkip(ж<testing.T> t) {
+    runTest(t, default, () => {
+        synctest.Test(t, (ж<testing.T> tΔ1) => {
             tΔ1.Skip(skipˢ);
         });
     }, passˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string runTestVerboseSkipˢ = """
+private static ref readonly @string runTestVerboseSkipˢ => ref runTestVerboseSkipˢᵇ;
+private static readonly @string runTestVerboseSkipˢᵇ = """
 ^=== RUN   TestVerboseSkip
     synctest_test.go:.* skip
 --- PASS: TestVerboseSkip.*
@@ -102,17 +106,17 @@ PASS
 $
 """u8.Raw();
 
-public static void TestVerboseSkip(ж<testing.T> Ꮡt) {
-    runTest(Ꮡt, new @string[]{"-test.v"u8}.slice(), () => {
-        synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestVerboseSkip(ж<testing.T> t) {
+    runTest(t, slice<@string>(["-test.v"]), () => {
+        synctest.Test(t, (ж<testing.T> tΔ1) => {
             tΔ1.Skip(skipˢ);
         });
     }, runTestVerboseSkipˢ);
 }
 
-public static void TestCleanup(ж<testing.T> Ꮡt) {
+public static void TestCleanup(ж<testing.T> t) {
     var done = false;
-    synctest.Test(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+    synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         var ch = new channel<EmptyStruct>(0);
         var chʗ1 = ch;
         tΔ1.Cleanup(() => {
@@ -126,21 +130,24 @@ public static void TestCleanup(ж<testing.T> Ꮡt) {
         goǃ(() => {
             ᐸꟷ(chʗ2);
             done = true;
-        });
+        }, GoStack.Bounded);
     });
     if (!done) {
-        Ꮡt.Fatalf("background goroutine did not return"u8);
+        t.Fatalf("background goroutine did not return");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string notStartedˢ = "not started"u8;
-private static readonly @string waitingOnContextˢ = "waiting on context"u8;
-private static readonly @string doneˢ = "done"u8;
+private static ref readonly @string notStartedˢ => ref notStartedˢᵇ;
+private static readonly @string notStartedˢᵇ = "not started"u8;
+private static ref readonly @string waitingOnContextˢ => ref waitingOnContextˢᵇ;
+private static readonly @string waitingOnContextˢᵇ = "waiting on context"u8;
+private static ref readonly @string doneˢ => ref doneˢᵇ;
+private static readonly @string doneˢᵇ = "done"u8;
 
-public static void TestContext(ж<testing.T> Ꮡt) {
+public static void TestContext(ж<testing.T> t) {
     @string state = notStartedˢ;
-    synctest.Test(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+    synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         goǃ(() => {
             state = waitingOnContextˢ;
             ᐸꟷ(tΔ1.Context().Done());
@@ -151,7 +158,7 @@ public static void TestContext(ж<testing.T> Ꮡt) {
         {
             @string got = state;
             @string want = waitingOnContextˢ; if (got != want) {
-                tΔ1.Fatalf("state = %q, want %q"u8, got, want);
+                tΔ1.Fatalf("state = %q, want %q", got, want);
             }
         }
     });
@@ -160,16 +167,17 @@ public static void TestContext(ж<testing.T> Ꮡt) {
     {
         @string got = state;
         @string want = doneˢ; if (got != want) {
-            Ꮡt.Fatalf("state = %q, want %q"u8, got, want);
+            t.Fatalf("state = %q, want %q", got, want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testingTDeadlineCalledˢ = "testing: t.Deadline called inside synctest bubble"u8;
+private static ref readonly @string testingTDeadlineCalledˢ => ref testingTDeadlineCalledˢᵇ;
+private static readonly @string testingTDeadlineCalledˢᵇ = "testing: t.Deadline called inside synctest bubble"u8;
 
-public static void TestDeadline(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestDeadline(ж<testing.T> t) {
+    synctest.Test(t, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             defer(wantPanic, tΔ1, testingTDeadlineCalledˢ, ref ᒐ, recovers: true);
@@ -181,10 +189,11 @@ public static void TestDeadline(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testingTParallelCalledˢ = "testing: t.Parallel called inside synctest bubble"u8;
+private static ref readonly @string testingTParallelCalledˢ => ref testingTParallelCalledˢᵇ;
+private static readonly @string testingTParallelCalledˢᵇ = "testing: t.Parallel called inside synctest bubble"u8;
 
-public static void TestParallel(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestParallel(ж<testing.T> t) {
+    synctest.Test(t, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             defer(wantPanic, tΔ1, testingTParallelCalledˢ, ref ᒐ, recovers: true);
@@ -196,11 +205,13 @@ public static void TestParallel(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testingTRunCalledInsideˢ = "testing: t.Run called inside synctest bubble"u8;
-private static readonly @string subtestˢ = "subtest"u8;
+private static ref readonly @string testingTRunCalledInsideˢ => ref testingTRunCalledInsideˢᵇ;
+private static readonly @string testingTRunCalledInsideˢᵇ = "testing: t.Run called inside synctest bubble"u8;
+private static ref readonly @string subtestˢ => ref subtestˢᵇ;
+private static readonly @string subtestˢᵇ = "subtest"u8;
 
-public static void TestRun(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestRun(ж<testing.T> t) {
+    synctest.Test(t, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             defer(wantPanic, tΔ1, testingTRunCalledInsideˢ, ref ᒐ, recovers: true);
@@ -213,8 +224,10 @@ public static void TestRun(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string logInHelperˢ = "log in helper"u8;
-private static readonly @string runTestHelperSynctestˢ = """
+private static ref readonly @string logInHelperˢ => ref logInHelperˢᵇ;
+private static readonly @string logInHelperˢᵇ = "log in helper"u8;
+private static ref readonly @string runTestHelperSynctestˢ => ref runTestHelperSynctestˢᵇ;
+private static readonly @string runTestHelperSynctestˢᵇ = """
 ^=== RUN   TestHelper
     synctest_test.go:.* log in helper
 --- PASS: TestHelper.*
@@ -222,28 +235,28 @@ PASS
 $
 """u8.Raw();
 
-public static void TestHelper(ж<testing.T> Ꮡt) {
-    runTest(Ꮡt, new @string[]{"-test.v"u8}.slice(), () => {
-        synctest.Test(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+public static void TestHelper(ж<testing.T> t) {
+    runTest(t, slice<@string>(["-test.v"]), () => {
+        synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             helperLog(tΔ1, logInHelperˢ);
         });
     }, runTestHelperSynctestˢ);
 }
 
-internal static void wantPanic(ж<testing.T> Ꮡt, @string want) {
+internal static void wantPanic(ж<testing.T> t, @string want) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
         {
-            var e = recover(calledByDefer); if (e != default!){
+            var e = recover(calledByDefer); if (e != nil) {
                 {
                     @string got = fmt.Sprint(e); if (got != want) {
-                        Ꮡt.Errorf("got panic message %q, want %q"u8, got, want);
+                        t.Errorf("got panic message %q, want %q", got, want);
                     }
                 }
             } else {
-                Ꮡt.Errorf("got no panic, want one"u8);
+                t.Errorf("got no panic, want one");
             }
         }
     }
@@ -252,32 +265,34 @@ internal static void wantPanic(ж<testing.T> Ꮡt, @string want) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
-private static readonly @string testCount1ˢ = "-test.count=1"u8;
+private static ref readonly @string goWantHelperProcessˢ => ref goWantHelperProcessˢᵇ;
+private static readonly @string goWantHelperProcessˢᵇ = "GO_WANT_HELPER_PROCESS"u8;
+private static ref readonly @string testCount1ˢ => ref testCount1ˢᵇ;
+private static readonly @string testCount1ˢᵇ = "-test.count=1"u8;
 
-internal static void runTest(ж<testing.T> Ꮡt, slice<@string> args, Action f, @string pattern) {
+internal static void runTest(ж<testing.T> t, slice<@string> args, Action f, @string pattern) {
     if (os.Getenv(goWantHelperProcessˢ) == "1"u8) {
         f();
         return;
     }
-    Ꮡt.Helper();
+    t.Helper();
     var re = regexp.MustCompile(pattern);
-    testenv.MustHaveExec(new testing_TжTB(Ꮡt));
-    var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), "-test.run=^"u8 + regexp.QuoteMeta(Ꮡt.Name()) + "$"u8, testCount1ˢ);
-    cmd.Value.Args = appendꓸꓸꓸ((~cmd).Args, args);
+    testenv.MustHaveExec(new testing_TжTB(t));
+    var cmd = testenv.Command(new testing_TжTB(t), testenv.Executable(new testing_TжTB(t)), "-test.run=^"u8 + regexp.QuoteMeta(t.Name()) + "$"u8, testCount1ˢ);
+    cmd.Args = appendꓸꓸꓸ(cmd.Args, args);
     cmd = testenv.CleanCmdEnv(cmd);
-    cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
+    cmd.Env = append(cmd.Env, (@string)"GO_WANT_HELPER_PROCESS=1");
     var (@out, _) = cmd.CombinedOutput();
     if (!re.Match(@out)) {
-        Ꮡt.Errorf("got output:\n%s\nwant matching:\n%s"u8, @out, pattern);
+        t.Errorf("got output:\n%s\nwant matching:\n%s", @out, pattern);
     }
 }
 
-public static void TestNow(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestNow(ж<testing.T> t) {
+    synctest.Test(t, (ж<testing.T> tΔ1) => {
         {
             var (got, want) = (time.Now(), time.Date(2000, time.January, 1, 0, 0, 0, 0, time.ΔUTC)); if (!got.Equal(want)) {
-                tΔ1.Errorf("time.Now() = %v, want %v"u8, got, want);
+                tΔ1.Errorf("time.Now() = %v, want %v", got, want);
             }
         }
     });

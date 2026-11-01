@@ -58,122 +58,126 @@ internal partial struct TestParsePKCS1PrivateKey_val /*dyn*/ {
     public ж<bigꓸInt> Q;
 }
 
-public static void TestParsePKCS1PrivateKey(ж<testing.T> Ꮡt) {
+public static void TestParsePKCS1PrivateKey(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(pemPrivateKey));
-    var (priv, err) = ParsePKCS1PrivateKey((~block).Bytes);
-    if (err != default!) {
-        Ꮡt.Errorf("Failed to parse private key: %s"u8, err);
+    var (priv, err) = ParsePKCS1PrivateKey(block.Bytes);
+    if (err != nil) {
+        t.Errorf("Failed to parse private key: %s", err);
         return;
     }
-    if ((~priv).PublicKey.N.Cmp((~rsaPrivateKey).PublicKey.N) != 0 || (~priv).PublicKey.E != (~rsaPrivateKey).PublicKey.E || (~priv).D.Cmp((~rsaPrivateKey).D) != 0 || (~priv).Primes[0].Cmp((~rsaPrivateKey).Primes[0]) != 0 || (~priv).Primes[1].Cmp((~rsaPrivateKey).Primes[1]) != 0) {
-        Ꮡt.Errorf("got:%+v want:%+v"u8, priv.OrTypedNil(), rsaPrivateKey.OrTypedNil());
+    if (priv.PublicKey.N.Cmp(rsaPrivateKey.PublicKey.N) != 0 || priv.PublicKey.E != rsaPrivateKey.PublicKey.E || priv.D.Cmp(rsaPrivateKey.D) != 0 || priv.Primes[0].Cmp(rsaPrivateKey.Primes[0]) != 0 || priv.Primes[1].Cmp(rsaPrivateKey.Primes[1]) != 0) {
+        t.Errorf("got:%+v want:%+v", priv.OrTypedNil(), rsaPrivateKey.OrTypedNil());
     }
 
     // This private key includes an invalid prime that
     // rsa.PrivateKey.Validate should reject.
     var data = slice<byte>(((@string)(new byte[]{0x30, 0x16, 0x02, 0x00, 0x02, 0x02, 0x7f, 0x00, 0x02, 0x02, 0x30, 0x30, 0x02, 0x02, 0x30, 0x30, 0x02, 0x02, 0x00, 0x01, 0x02, 0x02, 0x7f, 0x00})));
     {
-        var (_, errΔ1) = ParsePKCS1PrivateKey(data); if (errΔ1 == default!) {
-            Ꮡt.Errorf("parsing invalid private key did not result in an error"u8);
+        var (_, errΔ1) = ParsePKCS1PrivateKey(data); if (errΔ1 == nil) {
+            t.Errorf("parsing invalid private key did not result in an error");
         }
     }
 
     // A partial key without CRT values should still parse.
     var (b, _) = asn1.Marshal(new TestParsePKCS1PrivateKey_val(
-        N: (~priv).N,
-        E: (~priv).PublicKey.E,
-        D: (~priv).D,
-        P: (~priv).Primes[0],
-        Q: (~priv).Primes[1]
+        N: priv.N,
+        E: priv.PublicKey.E,
+        D: priv.D,
+        P: priv.Primes[0],
+        Q: priv.Primes[1]
     ));
     (var p2, err) = ParsePKCS1PrivateKey(b);
-    if (err != default!) {
-        Ꮡt.Fatalf("parsing partial private key resulted in an error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("parsing partial private key resulted in an error: %v", err);
     }
     if (!p2.Equal(priv.OrTypedNil())) {
-        Ꮡt.Errorf("partial private key did not match original key"u8);
+        t.Errorf("partial private key did not match original key");
     }
-    if ((~p2).Precomputed.Dp == nil || (~p2).Precomputed.Dq == nil || (~p2).Precomputed.Qinv == nil) {
-        Ꮡt.Errorf("precomputed values not recomputed"u8);
+    if (p2.Precomputed.Dp == nil || p2.Precomputed.Dq == nil || p2.Precomputed.Qinv == nil) {
+        t.Errorf("precomputed values not recomputed");
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string pkixPublicKeyᶜ = "30820122300d06092a864886f70d01010105000382010f003082010a0282010100dd5a0f37d3ca5232852ccc0e81eebec270e2f2c6c44c6231d852971a0aad00aa7399e9b9de444611083c59ea919a9d76c20a7be131a99045ec19a7bb452d647a72429e66b87e28be9e8187ed1d2a2a01ef3eb2360706bd873b07f2d1f1a72337aab5ec94e983e39107f52c480d404915e84d75a3db2cfd601726a128cb1d7f11492d4bdb53272e652276667220795c709b8a9b4af6489cbf48bb8173b8fb607c834a71b6e8bf2d6aab82af3c8ad7ce16d8dcf58373a6edc427f7484d09744d4c08f4e19ed07adbf6cb31243bc5d0d1145e77a08a6fc5efd208eca67d6abf2d6f38f58b6fdd7c28774fb0cc03fc4935c6e074842d2e1479d3d8787249258719f90203010001"u8;
+internal static ref readonly @string pkixPublicKeyᶜ => ref pkixPublicKeyᶜᵇ;
+private static readonly @string pkixPublicKeyᶜᵇ = "30820122300d06092a864886f70d01010105000382010f003082010a0282010100dd5a0f37d3ca5232852ccc0e81eebec270e2f2c6c44c6231d852971a0aad00aa7399e9b9de444611083c59ea919a9d76c20a7be131a99045ec19a7bb452d647a72429e66b87e28be9e8187ed1d2a2a01ef3eb2360706bd873b07f2d1f1a72337aab5ec94e983e39107f52c480d404915e84d75a3db2cfd601726a128cb1d7f11492d4bdb53272e652276667220795c709b8a9b4af6489cbf48bb8173b8fb607c834a71b6e8bf2d6aab82af3c8ad7ce16d8dcf58373a6edc427f7484d09744d4c08f4e19ed07adbf6cb31243bc5d0d1145e77a08a6fc5efd208eca67d6abf2d6f38f58b6fdd7c28774fb0cc03fc4935c6e074842d2e1479d3d8787249258719f90203010001"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string errorContainsᶜ = "use ParsePKIXPublicKey instead"u8;
+internal static ref readonly @string errorContainsᶜ => ref errorContainsᶜᵇ;
+private static readonly @string errorContainsᶜᵇ = "use ParsePKIXPublicKey instead"u8;
 
-public static void TestPKCS1MismatchPublicKeyFormat(ж<testing.T> Ꮡt) {
+public static void TestPKCS1MismatchPublicKeyFormat(ж<testing.T> t) {
     @string pkixPublicKey = pkixPublicKeyᶜ;
     @string errorContains = errorContainsᶜ;
     var (derBytes, _) = hex.DecodeString(pkixPublicKey);
     var (_, err) = ParsePKCS1PublicKey(derBytes);
     if (!strings.Contains(err.Error(), errorContains)) {
-        Ꮡt.Errorf("expected error containing %q, got %s"u8, errorContains, err);
+        t.Errorf("expected error containing %q, got %s", errorContains, err);
     }
 }
 
-public static void TestMarshalInvalidPublicKey(ж<testing.T> Ꮡt) {
-    var (_, err) = MarshalPKIXPublicKey(Ꮡ(new ecdsa.PublicKey(nil)));
-    if (err == default!) {
-        Ꮡt.Errorf("expected error, got MarshalPKIXPublicKey success"u8);
+public static void TestMarshalInvalidPublicKey(ж<testing.T> t) {
+    var (_, err) = MarshalPKIXPublicKey(Ꮡ(new ecdsa.PublicKey()));
+    if (err == nil) {
+        t.Errorf("expected error, got MarshalPKIXPublicKey success");
     }
     (_, err) = MarshalPKIXPublicKey(Ꮡ(new ecdsa.PublicKey(
         Curve: elliptic.P256(),
         X: big.NewInt(1), Y: big.NewInt(2)
     )));
-    if (err == default!) {
-        Ꮡt.Errorf("expected error, got MarshalPKIXPublicKey success"u8);
+    if (err == nil) {
+        t.Errorf("expected error, got MarshalPKIXPublicKey success");
     }
 }
 
-internal static any /*pub*/ testParsePKIXPublicKey(ж<testing.T> Ꮡt, @string pemBytes) {
-    any pub = default!;
-    ref var t = ref Ꮡt.DerefOrNull();
+internal static any /*pub*/ testParsePKIXPublicKey(ж<testing.T> t, @string pemBytes) {
+    any pub = default;
 
     var (block, _) = pem.Decode(slice<byte>(pemBytes));
-    (pub, var err) = ParsePKIXPublicKey((~block).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to parse public key: %s"u8, err);
+    (pub, var err) = ParsePKIXPublicKey(block.Bytes);
+    if (err != nil) {
+        t.Fatalf("Failed to parse public key: %s", err);
     }
 
     (var pubBytes2, err) = MarshalPKIXPublicKey(pub);
-    if (err != default!) {
-        Ꮡt.Errorf("Failed to marshal public key for the second time: %s"u8, err);
+    if (err != nil) {
+        t.Errorf("Failed to marshal public key for the second time: %s", err);
         return pub;
     }
-    if (!bytes.Equal(pubBytes2, (~block).Bytes)) {
-        Ꮡt.Errorf("Reserialization of public key didn't match. got %x, want %x"u8, pubBytes2, (~block).Bytes);
+    if (!bytes.Equal(pubBytes2, block.Bytes)) {
+        t.Errorf("Reserialization of public key didn't match. got %x, want %x", pubBytes2, block.Bytes);
     }
     return pub;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rsaˢ = "RSA"u8;
-internal static readonly @string ed25519ˢ = "Ed25519"u8;
-internal static readonly @string x25519ˢ = "X25519"u8;
+internal static ref readonly @string rsaˢ => ref rsaˢᵇ;
+private static readonly @string rsaˢᵇ = "RSA"u8;
+internal static ref readonly @string ed25519ˢ => ref ed25519ˢᵇ;
+private static readonly @string ed25519ˢᵇ = "Ed25519"u8;
+internal static ref readonly @string x25519ˢ => ref x25519ˢᵇ;
+private static readonly @string x25519ˢᵇ = "X25519"u8;
 
-public static void TestParsePKIXPublicKey(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(rsaˢ, (ж<testing.T> tΔ1) => {
+public static void TestParsePKIXPublicKey(ж<testing.T> t) {
+    t.Run(rsaˢ, (ж<testing.T> tΔ1) => {
         var pub = testParsePKIXPublicKey(tΔ1, pemPublicKey);
         var (_, ok) = pub._<ж<rsa.PublicKey>>(ᐧ);
         if (!ok) {
-            tΔ1.Errorf("Value returned from ParsePKIXPublicKey was not an RSA public key"u8);
+            tΔ1.Errorf("Value returned from ParsePKIXPublicKey was not an RSA public key");
         }
     });
-    Ꮡt.Run(ed25519ˢ, (ж<testing.T> tΔ2) => {
+    t.Run(ed25519ˢ, (ж<testing.T> tΔ2) => {
         var pub = testParsePKIXPublicKey(tΔ2, pemEd25519Key);
         var (_, ok) = pub._<ed25519.PublicKey>(ᐧ);
         if (!ok) {
-            tΔ2.Errorf("Value returned from ParsePKIXPublicKey was not an Ed25519 public key"u8);
+            tΔ2.Errorf("Value returned from ParsePKIXPublicKey was not an Ed25519 public key");
         }
     });
-    Ꮡt.Run(x25519ˢ, (ж<testing.T> tΔ3) => {
+    t.Run(x25519ˢ, (ж<testing.T> tΔ3) => {
         var pub = testParsePKIXPublicKey(tΔ3, pemX25519Key);
         var (k, ok) = pub._<ж<ecdhꓸPublicKey>>(ᐧ);
         if (!ok || !AreEqual(k.Curve(), ecdh.X25519())) {
-            tΔ3.Errorf("Value returned from ParsePKIXPublicKey was not an X25519 public key"u8);
+            tΔ3.Errorf("Value returned from ParsePKIXPublicKey was not an X25519 public key");
         }
     });
 }
@@ -230,18 +234,20 @@ MCowBQYDK2VuAyEA5yGXrH/6OzxuWEhEWS01/f4OP+Of3Yrddy6/J1kDTVM=
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string pkcs1PublicKeyᶜ = "308201080282010100817cfed98bcaa2e2a57087451c7674e0c675686dc33ff1268b0c2a6ee0202dec710858ee1c31bdf5e7783582e8ca800be45f3275c6576adc35d98e26e95bb88ca5beb186f853b8745d88bc9102c5f38753bcda519fb05948d5c77ac429255ff8aaf27d9f45d1586e95e2e9ba8a7cb771b8a09dd8c8fed3f933fd9b439bc9f30c475953418ef25f71a2b6496f53d94d39ce850aa0cc75d445b5f5b4f4ee4db78ab197a9a8d8a852f44529a007ac0ac23d895928d60ba538b16b0b087a7f903ed29770e215019b77eaecc360f35f7ab11b6d735978795b2c4a74e5bdea4dc6594cd67ed752a108e666729a753ab36d6c4f606f8760f507e1765be8cd744007e629020103"u8;
+internal static ref readonly @string pkcs1PublicKeyᶜ => ref pkcs1PublicKeyᶜᵇ;
+private static readonly @string pkcs1PublicKeyᶜᵇ = "308201080282010100817cfed98bcaa2e2a57087451c7674e0c675686dc33ff1268b0c2a6ee0202dec710858ee1c31bdf5e7783582e8ca800be45f3275c6576adc35d98e26e95bb88ca5beb186f853b8745d88bc9102c5f38753bcda519fb05948d5c77ac429255ff8aaf27d9f45d1586e95e2e9ba8a7cb771b8a09dd8c8fed3f933fd9b439bc9f30c475953418ef25f71a2b6496f53d94d39ce850aa0cc75d445b5f5b4f4ee4db78ab197a9a8d8a852f44529a007ac0ac23d895928d60ba538b16b0b087a7f903ed29770e215019b77eaecc360f35f7ab11b6d735978795b2c4a74e5bdea4dc6594cd67ed752a108e666729a753ab36d6c4f606f8760f507e1765be8cd744007e629020103"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string errorContainsᶜ1 = "use ParsePKCS1PublicKey instead"u8;
+internal static ref readonly @string errorContainsᶜ1 => ref errorContainsᶜ1ᵇ;
+private static readonly @string errorContainsᶜ1ᵇ = "use ParsePKCS1PublicKey instead"u8;
 
-public static void TestPKIXMismatchPublicKeyFormat(ж<testing.T> Ꮡt) {
+public static void TestPKIXMismatchPublicKeyFormat(ж<testing.T> t) {
     @string pkcs1PublicKey = pkcs1PublicKeyᶜ;
     @string errorContains = errorContainsᶜ1;
     var (derBytes, _) = hex.DecodeString(pkcs1PublicKey);
     var (_, err) = ParsePKIXPublicKey(derBytes);
     if (!strings.Contains(err.Error(), errorContains)) {
-        Ꮡt.Errorf("expected error containing %q, got %s"u8, errorContains, err);
+        t.Errorf("expected error containing %q, got %s", errorContains, err);
     }
 }
 
@@ -251,9 +257,9 @@ internal static ref ж<rsa.PrivateKey> testPrivateKey => ref ((StaticBox<ж<rsa.
 [GoInit] internal static void init() {
     var (block, _) = pem.Decode(slice<byte>(pemPrivateKey));
 
-    error err = default!;
+    error err = default;
     {
-        (x509_internal_test_package.testPrivateKey, err) = ParsePKCS1PrivateKey((~block).Bytes); if (err != default!) {
+        (x509_internal_test_package.testPrivateKey, err) = ParsePKCS1PrivateKey(block.Bytes); if (err != nil) {
             throw panic("Failed to parse private key: " + err.Error());
         }
     }
@@ -279,48 +285,49 @@ internal static ж<bigꓸInt> bigFromHexString(@string s) {
 
 internal static ж<rsa.PrivateKey> rsaPrivateKey = Ꮡ(new rsa.PrivateKey(
     PublicKey: new rsa.PublicKey(
-        N: bigFromString("124737666279038955318614287965056875799409043964547386061640914307192830334599556034328900586693254156136128122194531292927142396093148164407300419162827624945636708870992355233833321488652786796134504707628792159725681555822420087112284637501705261187690946267527866880072856272532711620639179596808018872997"u8),
+        N: bigFromString("124737666279038955318614287965056875799409043964547386061640914307192830334599556034328900586693254156136128122194531292927142396093148164407300419162827624945636708870992355233833321488652786796134504707628792159725681555822420087112284637501705261187690946267527866880072856272532711620639179596808018872997"),
         E: 65537
     ),
-    D: bigFromString("69322600686866301945688231018559005300304807960033948687567105312977055197015197977971637657636780793670599180105424702854759606794705928621125408040473426339714144598640466128488132656829419518221592374964225347786430566310906679585739468938549035854760501049443920822523780156843263434219450229353270690889"u8),
-    Primes: new ж<bigꓸInt>[]{
-        bigFromString("11405025354575369741595561190164746858706645478381139288033759331174478411254205003127028642766986913445391069745480057674348716675323735886284176682955723"u8),
-        bigFromString("10937079261204603443118731009201819560867324167189758120988909645641782263430128449826989846631183550578761324239709121189827307416350485191350050332642639"u8)
-    }.slice()
+    D: bigFromString("69322600686866301945688231018559005300304807960033948687567105312977055197015197977971637657636780793670599180105424702854759606794705928621125408040473426339714144598640466128488132656829419518221592374964225347786430566310906679585739468938549035854760501049443920822523780156843263434219450229353270690889"),
+    Primes: slice<ж<bigꓸInt>>([
+        bigFromString("11405025354575369741595561190164746858706645478381139288033759331174478411254205003127028642766986913445391069745480057674348716675323735886284176682955723"),
+        bigFromString("10937079261204603443118731009201819560867324167189758120988909645641782263430128449826989846631183550578761324239709121189827307416350485191350050332642639")
+    ])
 ));
 
-public static void TestMarshalRSAPrivateKey(ж<testing.T> Ꮡt) {
+public static void TestMarshalRSAPrivateKey(ж<testing.T> t) {
     var priv = Ꮡ(new rsa.PrivateKey(
         PublicKey: new rsa.PublicKey(
-            N: fromBase10("16346378922382193400538269749936049106320265317511766357599732575277382844051791096569333808598921852351577762718529818072849191122419410612033592401403764925096136759934497687765453905884149505175426053037420486697072448609022753683683718057795566811401938833367954642951433473337066311978821180526439641496973296037000052546108507805269279414789035461158073156772151892452251106173507240488993608650881929629163465099476849643165682709047462010581308719577053905787496296934240246311806555924593059995202856826239801816771116902778517096212527979497399966526283516447337775509777558018145573127308919204297111496233"u8),
+            N: fromBase10("16346378922382193400538269749936049106320265317511766357599732575277382844051791096569333808598921852351577762718529818072849191122419410612033592401403764925096136759934497687765453905884149505175426053037420486697072448609022753683683718057795566811401938833367954642951433473337066311978821180526439641496973296037000052546108507805269279414789035461158073156772151892452251106173507240488993608650881929629163465099476849643165682709047462010581308719577053905787496296934240246311806555924593059995202856826239801816771116902778517096212527979497399966526283516447337775509777558018145573127308919204297111496233"),
             E: 3
         ),
-        D: fromBase10("10897585948254795600358846499957366070880176878341177571733155050184921896034527397712889205732614568234385175145686545381899460748279607074689061600935843283397424506622998458510302603922766336783617368686090042765718290914099334449154829375179958369993407724946186243249568928237086215759259909861748642124071874879861299389874230489928271621259294894142840428407196932444474088857746123104978617098858619445675532587787023228852383149557470077802718705420275739737958953794088728369933811184572620857678792001136676902250566845618813972833750098806496641114644760255910789397593428910198080271317419213080834885003"u8),
-        Primes: new ж<bigꓸInt>[]{
-            fromBase10("1025363189502892836833747188838978207017355117492483312747347695538428729137306368764177201532277413433182799108299960196606011786562992097313508180436744488171474690412562218914213688661311117337381958560443"u8),
-            fromBase10("3467903426626310123395340254094941045497208049900750380025518552334536945536837294961497712862519984786362199788654739924501424784631315081391467293694361474867825728031147665777546570788493758372218019373"u8),
-            fromBase10("4597024781409332673052708605078359346966325141767460991205742124888960305710298765592730135879076084498363772408626791576005136245060321874472727132746643162385746062759369754202494417496879741537284589047"u8)
-        }.slice()
+        D: fromBase10("10897585948254795600358846499957366070880176878341177571733155050184921896034527397712889205732614568234385175145686545381899460748279607074689061600935843283397424506622998458510302603922766336783617368686090042765718290914099334449154829375179958369993407724946186243249568928237086215759259909861748642124071874879861299389874230489928271621259294894142840428407196932444474088857746123104978617098858619445675532587787023228852383149557470077802718705420275739737958953794088728369933811184572620857678792001136676902250566845618813972833750098806496641114644760255910789397593428910198080271317419213080834885003"),
+        Primes: slice<ж<bigꓸInt>>([
+            fromBase10("1025363189502892836833747188838978207017355117492483312747347695538428729137306368764177201532277413433182799108299960196606011786562992097313508180436744488171474690412562218914213688661311117337381958560443"),
+            fromBase10("3467903426626310123395340254094941045497208049900750380025518552334536945536837294961497712862519984786362199788654739924501424784631315081391467293694361474867825728031147665777546570788493758372218019373"),
+            fromBase10("4597024781409332673052708605078359346966325141767460991205742124888960305710298765592730135879076084498363772408626791576005136245060321874472727132746643162385746062759369754202494417496879741537284589047")
+        ])
     ));
 
     var derBytes = MarshalPKCS1PrivateKey(priv);
 
     var (priv2, err) = ParsePKCS1PrivateKey(derBytes);
-    if (err != default!) {
-        Ꮡt.Errorf("error parsing serialized key: %s"u8, err);
+    if (err != nil) {
+        t.Errorf("error parsing serialized key: %s", err);
         return;
     }
-    if ((~priv).PublicKey.N.Cmp((~priv2).PublicKey.N) != 0 || (~priv).PublicKey.E != (~priv2).PublicKey.E || (~priv).D.Cmp((~priv2).D) != 0 || builtin.len((~priv2).Primes) != 3 || (~priv).Primes[0].Cmp((~priv2).Primes[0]) != 0 || (~priv).Primes[1].Cmp((~priv2).Primes[1]) != 0 || (~priv).Primes[2].Cmp((~priv2).Primes[2]) != 0) {
-        Ꮡt.Errorf("wrong priv:\ngot  %+v\nwant %+v"u8, priv2.OrTypedNil(), priv.OrTypedNil());
+    if (priv.PublicKey.N.Cmp(priv2.PublicKey.N) != 0 || priv.PublicKey.E != priv2.PublicKey.E || priv.D.Cmp(priv2.D) != 0 || builtin.len(priv2.Primes) != 3 || priv.Primes[0].Cmp(priv2.Primes[0]) != 0 || priv.Primes[1].Cmp(priv2.Primes[1]) != 0 || priv.Primes[2].Cmp(priv2.Primes[2]) != 0) {
+        t.Errorf("wrong priv:\ngot  %+v\nwant %+v", priv2.OrTypedNil(), priv.OrTypedNil());
     }
 
-    if ((~priv).Precomputed.Dp == nil) {
-        Ꮡt.Fatalf("Precomputed.Dp is nil"u8);
+    if (priv.Precomputed.Dp == nil) {
+        t.Fatalf("Precomputed.Dp is nil");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string beginRsaTestingKeyˢ = """
+internal static ref readonly @string beginRsaTestingKeyˢ => ref beginRsaTestingKeyˢᵇ;
+private static readonly @string beginRsaTestingKeyˢᵇ = """
 -----BEGIN RSA TESTING KEY-----
 MIIEowIBAAKCAQEAsPnoGUOnrpiSqt4XynxA+HRP7S+BSObI6qJ7fQAVSPtRkqso
 tWxQYLEYzNEx5ZSHTGypibVsJylvCfuToDTfMul8b/CZjP2Ob0LdpYrNH6l5hvFE
@@ -349,33 +356,35 @@ UjmopwKBgAqB2KYYMUqAOvYcBnEfLDmyZv9BTVNHbR2lKkMYqv5LlvDaBxVfilE0
 7d56RZOE+ERK2uz/7JX9VSsM/LbH9pJibd4e8mikDS9ntciqOH/3
 -----END RSA TESTING KEY-----
 """u8.Raw();
-internal static readonly @string testingKeyˢ = "TESTING KEY"u8;
-internal static readonly @string privateKeyˢ = "PRIVATE KEY"u8;
-internal static readonly @string x509rsacrt0ˢ = "x509rsacrt=0"u8;
+internal static ref readonly @string testingKeyˢ => ref testingKeyˢᵇ;
+private static readonly @string testingKeyˢᵇ = "TESTING KEY"u8;
+internal static ref readonly @string privateKeyˢ => ref privateKeyˢᵇ;
+private static readonly @string privateKeyˢᵇ = "PRIVATE KEY"u8;
+internal static ref readonly @string x509rsacrt0ˢ => ref x509rsacrt0ˢᵇ;
+private static readonly @string x509rsacrt0ˢᵇ = "x509rsacrt=0"u8;
 
-public static void TestMarshalRSAPrivateKeyInvalid(ж<testing.T> Ꮡt) {
+public static void TestMarshalRSAPrivateKeyInvalid(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(strings.ReplaceAll(
         beginRsaTestingKeyˢ, testingKeyˢ, privateKeyˢ)));
-    var (testRSA2048, _) = ParsePKCS1PrivateKey((~block).Bytes);
+    var (testRSA2048, _) = ParsePKCS1PrivateKey(block.Bytes);
 
-    ref var broken = ref heap<rsa.PrivateKey>(out var Ꮡbroken);
-    broken = testRSA2048.Value;
+    ref var broken = ref heap<rsa.PrivateKey>(testRSA2048.Value, out var Ꮡbroken);
     broken.Precomputed.Dp = @new<bigꓸInt>().SetUint64(42);
 
     var (parsed, err) = ParsePKCS1PrivateKey(MarshalPKCS1PrivateKey(Ꮡbroken));
-    if (err == default!) {
-        Ꮡt.Errorf("expected error, got success"u8);
+    if (err == nil) {
+        t.Errorf("expected error, got success");
     }
 
-    Ꮡt.Setenv(godebugˢ, x509rsacrt0ˢ);
+    t.Setenv(godebugˢ, x509rsacrt0ˢ);
 
     (parsed, err) = ParsePKCS1PrivateKey(MarshalPKCS1PrivateKey(Ꮡbroken));
-    if (err != default!) {
-        Ꮡt.Fatalf("expected success, got error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("expected success, got error: %v", err);
     }
     // Dp should have been recomputed.
-    if ((~parsed).Precomputed.Dp.Cmp((~testRSA2048).Precomputed.Dp) != 0) {
-        Ꮡt.Errorf("Dp recomputation failed: got %v, want %v"u8, (~parsed).Precomputed.Dp.OrTypedNil(), (~testRSA2048).Precomputed.Dp.OrTypedNil());
+    if (parsed.Precomputed.Dp.Cmp(testRSA2048.Precomputed.Dp) != 0) {
+        t.Errorf("Dp recomputation failed: got %v, want %v", parsed.Precomputed.Dp.OrTypedNil(), testRSA2048.Precomputed.Dp.OrTypedNil());
     }
 }
 
@@ -384,119 +393,117 @@ internal partial struct TestMarshalRSAPublicKey_publicKeys /*dyn*/ {
     internal @string expectedErrSubstr;
 }
 
-public static void TestMarshalRSAPublicKey(ж<testing.T> Ꮡt) {
+public static void TestMarshalRSAPublicKey(ж<testing.T> t) {
     var pub = Ꮡ(new rsa.PublicKey(
-        N: fromBase10("16346378922382193400538269749936049106320265317511766357599732575277382844051791096569333808598921852351577762718529818072849191122419410612033592401403764925096136759934497687765453905884149505175426053037420486697072448609022753683683718057795566811401938833367954642951433473337066311978821180526439641496973296037000052546108507805269279414789035461158073156772151892452251106173507240488993608650881929629163465099476849643165682709047462010581308719577053905787496296934240246311806555924593059995202856826239801816771116902778517096212527979497399966526283516447337775509777558018145573127308919204297111496233"u8),
+        N: fromBase10("16346378922382193400538269749936049106320265317511766357599732575277382844051791096569333808598921852351577762718529818072849191122419410612033592401403764925096136759934497687765453905884149505175426053037420486697072448609022753683683718057795566811401938833367954642951433473337066311978821180526439641496973296037000052546108507805269279414789035461158073156772151892452251106173507240488993608650881929629163465099476849643165682709047462010581308719577053905787496296934240246311806555924593059995202856826239801816771116902778517096212527979497399966526283516447337775509777558018145573127308919204297111496233"),
         E: 3
     ));
     var derBytes = MarshalPKCS1PublicKey(pub);
     var (pub2, err) = ParsePKCS1PublicKey(derBytes);
-    if (err != default!) {
-        Ꮡt.Errorf("ParsePKCS1PublicKey: %s"u8, err);
+    if (err != nil) {
+        t.Errorf("ParsePKCS1PublicKey: %s", err);
     }
-    if ((~pub).N.Cmp((~pub2).N) != 0 || (~pub).E != (~pub2).E) {
-        Ꮡt.Errorf("ParsePKCS1PublicKey = %+v, want %+v"u8, pub.OrTypedNil(), pub2.OrTypedNil());
+    if (pub.N.Cmp(pub2.N) != 0 || pub.E != pub2.E) {
+        t.Errorf("ParsePKCS1PublicKey = %+v, want %+v", pub.OrTypedNil(), pub2.OrTypedNil());
     }
 
     // It's never been documented that asn1.Marshal/Unmarshal on rsa.PublicKey works,
     // but it does, and we know of code that depends on it.
     // Lock that in, even though we'd prefer that people use MarshalPKCS1PublicKey and ParsePKCS1PublicKey.
     (var derBytes2, err) = asn1.Marshal(pub.Value);
-    if (err != default!){
-        Ꮡt.Errorf("Marshal(rsa.PublicKey): %v"u8, err);
-    } else 
-    if (!bytes.Equal(derBytes, derBytes2)) {
-        Ꮡt.Errorf("Marshal(rsa.PublicKey) = %x, want %x"u8, derBytes2, derBytes);
+    if (err != nil) {
+        t.Errorf("Marshal(rsa.PublicKey): %v", err);
+    } else if (!bytes.Equal(derBytes, derBytes2)) {
+        t.Errorf("Marshal(rsa.PublicKey) = %x, want %x", derBytes2, derBytes);
     }
     var pub3 = @new<rsa.PublicKey>();
     (var rest, err) = asn1.Unmarshal(derBytes, pub3.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Errorf("Unmarshal(rsa.PublicKey): %v"u8, err);
+    if (err != nil) {
+        t.Errorf("Unmarshal(rsa.PublicKey): %v", err);
     }
-    if (builtin.len(rest) != 0 || (~pub).N.Cmp((~pub3).N) != 0 || (~pub).E != (~pub3).E) {
-        Ꮡt.Errorf("Unmarshal(rsa.PublicKey) = %+v, %q want %+v, %q"u8, pub.OrTypedNil(), rest, pub2.OrTypedNil(), slice<byte>(default!));
+    if (builtin.len(rest) != 0 || pub.N.Cmp(pub3.N) != 0 || pub.E != pub3.E) {
+        t.Errorf("Unmarshal(rsa.PublicKey) = %+v, %q want %+v, %q", pub.OrTypedNil(), rest, pub2.OrTypedNil(), slice<byte>(default));
     }
 
-    var publicKeys = new TestMarshalRSAPublicKey_publicKeys[]{
+    var publicKeys = slice<TestMarshalRSAPublicKey_publicKeys>([
         new(
-            derBytes: new byte[]{
+            derBytes: slice<byte>([
                 0x30, 6, // SEQUENCE, 6 bytes
                 0x02, 1, // INTEGER, 1 byte
                 17,
                 0x02, 1, // INTEGER, 1 byte
                 3 // 3
-            }.slice()
+            ])
         ), new(
-        derBytes: new byte[]{
+        derBytes: slice<byte>([
             0x30, 6, // SEQUENCE
             0x02, 1, // INTEGER, 1 byte
-            0xff, // -1
+            0xff,    // -1
             0x02, 1, // INTEGER, 1 byte
             3
-        }.slice(),
-        expectedErrSubstr: "zero or negative"u8
+        ]),
+        expectedErrSubstr: "zero or negative"
     ), new(
-        derBytes: new byte[]{
+        derBytes: slice<byte>([
             0x30, 6, // SEQUENCE
             0x02, 1, // INTEGER, 1 byte
             17,
             0x02, 1, // INTEGER, 1 byte
             0xff // -1
-        }.slice(),
-        expectedErrSubstr: "zero or negative"u8
+        ]),
+        expectedErrSubstr: "zero or negative"
     ), new(
-        derBytes: new byte[]{
+        derBytes: slice<byte>([
             0x30, 6, // SEQUENCE
             0x02, 1, // INTEGER, 1 byte
             17,
             0x02, 1, // INTEGER, 1 byte
             3,
             1
-        }.slice(),
-        expectedErrSubstr: "trailing data"u8
+        ]),
+        expectedErrSubstr: "trailing data"
     ), new(
-        derBytes: new byte[]{
+        derBytes: slice<byte>([
             0x30, 9, // SEQUENCE
             0x02, 1, // INTEGER, 1 byte
             17,
             0x02, 4, // INTEGER, 4 bytes
             0x7f, 0xff, 0xff, 0xff
-        }.slice()
+        ])
     ), new(
-        derBytes: new byte[]{
+        derBytes: slice<byte>([
             0x30, 10, // SEQUENCE
             0x02, 1, // INTEGER, 1 byte
             17,
             0x02, 5, // INTEGER, 5 bytes
             0x00, 0x80, 0x00, 0x00, 0x00
-        }.slice(),
+        ]),
         // On 64-bit systems, encoding/asn1 will accept the
         // public exponent, but ParsePKCS1PublicKey will return
         // an error. On 32-bit systems, encoding/asn1 will
         // return the error. The common substring of both error
         // is the word “large”.
-        expectedErrSubstr: "large"u8
+        expectedErrSubstr: "large"
     )
-    }.slice();
+    ]);
 
     foreach (var (i, test) in publicKeys) {
         var shouldFail = builtin.len(test.expectedErrSubstr) > 0;
         var (pubΔ1, errΔ1) = ParsePKCS1PublicKey(test.derBytes);
-        if (shouldFail){
-            if (errΔ1 == default!){
-                Ꮡt.Errorf("#%d: unexpected success, got %#v"u8, i, pubΔ1.OrTypedNil());
-            } else 
-            if (!strings.Contains(errΔ1.Error(), test.expectedErrSubstr)) {
-                Ꮡt.Errorf("#%d: expected error containing %q, got %s"u8, i, test.expectedErrSubstr, errΔ1);
+        if (shouldFail) {
+            if (errΔ1 == nil) {
+                t.Errorf("#%d: unexpected success, got %#v", i, pubΔ1.OrTypedNil());
+            } else if (!strings.Contains(errΔ1.Error(), test.expectedErrSubstr)) {
+                t.Errorf("#%d: expected error containing %q, got %s", i, test.expectedErrSubstr, errΔ1);
             }
         } else {
-            if (errΔ1 != default!) {
-                Ꮡt.Errorf("#%d: unexpected failure: %s"u8, i, errΔ1);
+            if (errΔ1 != nil) {
+                t.Errorf("#%d: unexpected failure: %s", i, errΔ1);
                 continue;
             }
             var reserialized = MarshalPKCS1PublicKey(pubΔ1);
             if (!bytes.Equal(reserialized, test.derBytes)) {
-                Ꮡt.Errorf("#%d: failed to reserialize: got %x, expected %x"u8, i, reserialized, test.derBytes);
+                t.Errorf("#%d: failed to reserialize: got %x, expected %x", i, reserialized, test.derBytes);
             }
         }
     }
@@ -507,134 +514,134 @@ internal partial struct matchHostnamesTest {
     internal bool ok;
 }
 
-internal static slice<matchHostnamesTest> matchHostnamesTests = new matchHostnamesTest[]{
-    new("a.b.c"u8, "a.b.c"u8, true),
-    new("a.b.c"u8, "b.b.c"u8, false),
-    new(""u8, "b.b.c"u8, false),
-    new("a.b.c"u8, ""u8, false),
-    new("example.com"u8, "example.com"u8, true),
-    new("example.com"u8, "www.example.com"u8, false),
-    new("*.example.com"u8, "example.com"u8, false),
-    new("*.example.com"u8, "www.example.com"u8, true),
-    new("*.example.com"u8, "www.example.com."u8, true),
-    new("*.example.com"u8, "xyz.www.example.com"u8, false),
-    new("*.example.com"u8, "https://www.example.com"u8, false), // Issue 27591
-    new("*.example..com"u8, "www.example..com"u8, false),
-    new("www.example..com"u8, "www.example..com"u8, true),
-    new("*.*.example.com"u8, "xyz.www.example.com"u8, false),
-    new("*.www.*.com"u8, "xyz.www.example.com"u8, false),
-    new("*bar.example.com"u8, "foobar.example.com"u8, false),
-    new("f*.example.com"u8, "foobar.example.com"u8, false),
-    new("www.example.com"u8, "*.example.com"u8, false),
-    new(""u8, "."u8, false),
-    new("."u8, ""u8, false),
-    new("."u8, "."u8, false),
-    new("example.com"u8, "example.com."u8, true),
-    new("example.com."u8, "example.com"u8, false),
-    new("example.com."u8, "example.com."u8, true), // perfect matches allow trailing dots in patterns
-    new("*.com."u8, "example.com."u8, false),
-    new("*.com."u8, "example.com"u8, false),
-    new("*.com"u8, "example.com"u8, true),
-    new("*.com"u8, "example.com."u8, true),
-    new("foo:bar"u8, "foo:bar"u8, true),
-    new("*.foo:bar"u8, "xxx.foo:bar"u8, false),
-    new("*.2.3.4"u8, "1.2.3.4"u8, false),
-    new("*.2.3.4"u8, "[1.2.3.4]"u8, false),
-    new("*:4860:4860::8888"u8, "2001:4860:4860::8888"u8, false),
-    new("*:4860:4860::8888"u8, "[2001:4860:4860::8888]"u8, false),
-    new("2001:4860:4860::8888"u8, "2001:4860:4860::8888"u8, false),
-    new("2001:4860:4860::8888"u8, "[2001:4860:4860::8888]"u8, false),
-    new("[2001:4860:4860::8888]"u8, "2001:4860:4860::8888"u8, false),
-    new("[2001:4860:4860::8888]"u8, "[2001:4860:4860::8888]"u8, false)
-}.slice();
+internal static slice<matchHostnamesTest> matchHostnamesTests = slice<matchHostnamesTest>([
+    new("a.b.c", "a.b.c", true),
+    new("a.b.c", "b.b.c", false),
+    new("", "b.b.c", false),
+    new("a.b.c", "", false),
+    new("example.com", "example.com", true),
+    new("example.com", "www.example.com", false),
+    new("*.example.com", "example.com", false),
+    new("*.example.com", "www.example.com", true),
+    new("*.example.com", "www.example.com.", true),
+    new("*.example.com", "xyz.www.example.com", false),
+    new("*.example.com", "https://www.example.com", false), // Issue 27591
+    new("*.example..com", "www.example..com", false),
+    new("www.example..com", "www.example..com", true),
+    new("*.*.example.com", "xyz.www.example.com", false),
+    new("*.www.*.com", "xyz.www.example.com", false),
+    new("*bar.example.com", "foobar.example.com", false),
+    new("f*.example.com", "foobar.example.com", false),
+    new("www.example.com", "*.example.com", false),
+    new("", ".", false),
+    new(".", "", false),
+    new(".", ".", false),
+    new("example.com", "example.com.", true),
+    new("example.com.", "example.com", false),
+    new("example.com.", "example.com.", true), // perfect matches allow trailing dots in patterns
+    new("*.com.", "example.com.", false),
+    new("*.com.", "example.com", false),
+    new("*.com", "example.com", true),
+    new("*.com", "example.com.", true),
+    new("foo:bar", "foo:bar", true),
+    new("*.foo:bar", "xxx.foo:bar", false),
+    new("*.2.3.4", "1.2.3.4", false),
+    new("*.2.3.4", "[1.2.3.4]", false),
+    new("*:4860:4860::8888", "2001:4860:4860::8888", false),
+    new("*:4860:4860::8888", "[2001:4860:4860::8888]", false),
+    new("2001:4860:4860::8888", "2001:4860:4860::8888", false),
+    new("2001:4860:4860::8888", "[2001:4860:4860::8888]", false),
+    new("[2001:4860:4860::8888]", "2001:4860:4860::8888", false),
+    new("[2001:4860:4860::8888]", "[2001:4860:4860::8888]", false)
+]);
 
-public static void TestMatchHostnames(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestMatchHostnames(ж<testing.T> t) {
     foreach (var (i, test) in matchHostnamesTests) {
-        var c = Ꮡ(new Certificate(DNSNames: new @string[]{test.pattern}.slice()));
-        var r = c.VerifyHostname(test.host) == default!;
+        var c = Ꮡ(new Certificate(DNSNames: slice<@string>([test.pattern])));
+        var r = c.VerifyHostname(test.host) == nil;
         if (r != test.ok) {
-            Ꮡt.Errorf("#%d mismatch got: %t want: %t when matching '%s' against '%s'"u8, i, r, test.ok, test.host, test.pattern);
+            t.Errorf("#%d mismatch got: %t want: %t when matching '%s' against '%s'", i, r, test.ok, test.host, test.pattern);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string quuxFooBarBazˢ = "quux.foo.bar.baz"u8;
+internal static ref readonly @string quuxFooBarBazˢ => ref quuxFooBarBazˢᵇ;
+private static readonly @string quuxFooBarBazˢᵇ = "quux.foo.bar.baz"u8;
 
-public static void TestMatchIP(ж<testing.T> Ꮡt) {
+public static void TestMatchIP(ж<testing.T> t) {
     // Check that pattern matching is working.
     var c = Ꮡ(new Certificate(
-        DNSNames: new @string[]{"*.foo.bar.baz"u8}.slice(),
+        DNSNames: slice<@string>(["*.foo.bar.baz"]),
         Subject: new pkix.Name(
-            CommonName: "*.foo.bar.baz"u8
+            CommonName: "*.foo.bar.baz"
         )
     ));
     var err = c.VerifyHostname(quuxFooBarBazˢ);
-    if (err != default!) {
-        Ꮡt.Fatalf("VerifyHostname(quux.foo.bar.baz): %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("VerifyHostname(quux.foo.bar.baz): %v", err);
     }
 
     // But check that if we change it to be matching against an IP address,
     // it is rejected.
     c = Ꮡ(new Certificate(
-        DNSNames: new @string[]{"*.2.3.4"u8}.slice(),
+        DNSNames: slice<@string>(["*.2.3.4"]),
         Subject: new pkix.Name(
-            CommonName: "*.2.3.4"u8
+            CommonName: "*.2.3.4"
         )
     ));
-    err = c.VerifyHostname("1.2.3.4"u8);
-    if (err == default!) {
-        Ꮡt.Fatalf("VerifyHostname(1.2.3.4) should have failed, did not"u8);
+    err = c.VerifyHostname("1.2.3.4");
+    if (err == nil) {
+        t.Fatalf("VerifyHostname(1.2.3.4) should have failed, did not");
     }
 
     c = Ꮡ(new Certificate(
-        IPAddresses: new net.IP[]{net.ParseIP("127.0.0.1"u8), net.ParseIP("::1"u8)}.slice()
+        IPAddresses: slice<net.IP>([net.ParseIP("127.0.0.1"), net.ParseIP("::1")])
     ));
-    err = c.VerifyHostname("127.0.0.1"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("VerifyHostname(127.0.0.1): %v"u8, err);
+    err = c.VerifyHostname("127.0.0.1");
+    if (err != nil) {
+        t.Fatalf("VerifyHostname(127.0.0.1): %v", err);
     }
-    err = c.VerifyHostname("::1"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("VerifyHostname(::1): %v"u8, err);
+    err = c.VerifyHostname("::1");
+    if (err != nil) {
+        t.Fatalf("VerifyHostname(::1): %v", err);
     }
-    err = c.VerifyHostname("[::1]"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("VerifyHostname([::1]): %v"u8, err);
+    err = c.VerifyHostname("[::1]");
+    if (err != nil) {
+        t.Fatalf("VerifyHostname([::1]): %v", err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mailGoogleComˢ = "mail.google.com"u8;
+internal static ref readonly @string mailGoogleComˢ => ref mailGoogleComˢᵇ;
+private static readonly @string mailGoogleComˢᵇ = "mail.google.com"u8;
 
-public static void TestCertificateParse(ж<testing.T> Ꮡt) {
+public static void TestCertificateParse(ж<testing.T> t) {
     var (s, _) = base64.StdEncoding.DecodeString(certBytes);
     var (certs, err) = ParseCertificates(s);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
     }
     if (builtin.len(certs) != 2) {
-        Ꮡt.Errorf("Wrong number of certs: got %d want 2"u8, builtin.len(certs));
+        t.Errorf("Wrong number of certs: got %d want 2", builtin.len(certs));
         return;
     }
 
     err = certs[0].CheckSignatureFrom(certs[1]);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
     }
 
     {
-        var errΔ1 = certs[0].VerifyHostname(mailGoogleComˢ); if (errΔ1 != default!) {
-            Ꮡt.Error(errΔ1);
+        var errΔ1 = certs[0].VerifyHostname(mailGoogleComˢ); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
     }
 
     const nint expectedExtensions = 10;
     {
-        nint n = builtin.len((~certs[0]).Extensions); if (n != expectedExtensions) {
-            Ꮡt.Errorf("want %d extensions, got %d"u8, (nint)(expectedExtensions), n);
+        nint n = builtin.len(certs[0].Extensions); if (n != expectedExtensions) {
+            t.Errorf("want %d extensions, got %d", (nint)(expectedExtensions), n);
         }
     }
 }
@@ -645,21 +652,21 @@ internal static readonly object nilCertificatesCNil2Isˢ = (@string)"Nil certifi
 internal static readonly object unexpectedlyCNil1IsEqualˢ = (@string)"Unexpectedly cNil1 is equal to cNonNil"u8;
 internal static readonly object unexpectedlyCNonNilIsˢ = (@string)"Unexpectedly cNonNil is equal to cNil1"u8;
 
-public static void TestCertificateEqualOnNil(ж<testing.T> Ꮡt) {
+public static void TestCertificateEqualOnNil(ж<testing.T> t) {
     var cNonNil = @new<global::go.crypto.x509_package.Certificate>();
-    ж<global::go.crypto.x509_package.Certificate> cNil1 = default!;
-    ж<global::go.crypto.x509_package.Certificate> cNil2 = default!;
+    ж<global::go.crypto.x509_package.Certificate> cNil1 = default;
+    ж<global::go.crypto.x509_package.Certificate> cNil2 = default;
     if (!cNil1.Equal(cNil2)) {
-        Ꮡt.Error(nilCertificatesCNil1Isˢ);
+        t.Error(nilCertificatesCNil1Isˢ);
     }
     if (!cNil2.Equal(cNil1)) {
-        Ꮡt.Error(nilCertificatesCNil2Isˢ);
+        t.Error(nilCertificatesCNil2Isˢ);
     }
     if (cNil1.Equal(cNonNil)) {
-        Ꮡt.Error(unexpectedlyCNil1IsEqualˢ);
+        t.Error(unexpectedlyCNil1IsEqualˢ);
     }
     if (cNonNil.Equal(cNil1)) {
-        Ꮡt.Error(unexpectedlyCNonNilIsˢ);
+        t.Error(unexpectedlyCNonNilIsˢ);
     }
 }
 
@@ -668,28 +675,29 @@ internal static readonly object failedToFindPemBlockˢ = (@string)"Failed to fin
 internal static readonly object checkSignatureˢ = (@string)"CheckSignature unexpectedly return no error"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectedSubstringᶜ = " but have public key of type "u8;
+internal static ref readonly @string expectedSubstringᶜ => ref expectedSubstringᶜᵇ;
+private static readonly @string expectedSubstringᶜᵇ = " but have public key of type "u8;
 
-public static void TestMismatchedSignatureAlgorithm(ж<testing.T> Ꮡt) {
+public static void TestMismatchedSignatureAlgorithm(ж<testing.T> t) {
     var (der, _) = pem.Decode(slice<byte>(rsaPSSSelfSignedPEM));
     if (der == nil) {
-        Ꮡt.Fatal(failedToFindPemBlockˢ);
+        t.Fatal(failedToFindPemBlockˢ);
     }
 
-    var (cert, err) = ParseCertificate((~der).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (cert, err) = ParseCertificate(der.Bytes);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     {
-        err = cert.CheckSignature(ECDSAWithSHA256, default!, default!); if (err == default!) {
-            Ꮡt.Fatal(checkSignatureˢ);
+        err = cert.CheckSignature(ECDSAWithSHA256, default, default); if (err == nil) {
+            t.Fatal(checkSignatureˢ);
         }
     }
 
     @string expectedSubstring = expectedSubstringᶜ;
     if (!strings.Contains(err.Error(), expectedSubstring)) {
-        Ꮡt.Errorf("Expected error containing %q, but got %q"u8, expectedSubstring, err);
+        t.Errorf("Expected error containing %q, but got %q", expectedSubstring, err);
     }
 }
 
@@ -697,7 +705,7 @@ internal static @string certBytes = "MIIE0jCCA7qgAwIBAgIQWcvS+TTB3GwCAAAAAGEAWzA
 
 internal static ж<net.IPNet> parseCIDR(@string s) {
     var (_, netΔ1, err) = net.ParseCIDR(s);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     return netΔ1;
@@ -705,16 +713,20 @@ internal static ж<net.IPNet> parseCIDR(@string s) {
 
 internal static ж<url.URL> parseURI(@string s) {
     var (uri, err) = url.Parse(s);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     return uri;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testExampleComˢ = "test.example.com"u8;
-internal static readonly @string httpsFooComWibbleFooˢ = "https://foo.com/wibble#foo"u8;
-internal static readonly @string db848ˢ = "2001:db8::/48"u8;
+internal static ref readonly @string testExampleComˢ => ref testExampleComˢᵇ;
+private static readonly @string testExampleComˢᵇ = "test.example.com"u8;
+internal static readonly object gopherˢ = (@string)"Gopher"u8;
+internal static ref readonly @string httpsFooComWibbleFooˢ => ref httpsFooComWibbleFooˢᵇ;
+private static readonly @string httpsFooComWibbleFooˢᵇ = "https://foo.com/wibble#foo"u8;
+internal static ref readonly @string db848ˢ => ref db848ˢᵇ;
+private static readonly @string db848ˢᵇ = "2001:db8::/48"u8;
 internal static readonly object sanExtensionIsMarkedˢ = (@string)"SAN extension is marked critical"u8;
 
 internal partial struct TestCreateSelfSignedCertificate_tests /*dyn*/ {
@@ -724,63 +736,60 @@ internal partial struct TestCreateSelfSignedCertificate_tests /*dyn*/ {
     internal global::go.crypto.x509_package.SignatureAlgorithm sigAlgo;
 }
 
-public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestCreateSelfSignedCertificate(ж<testing.T> t) {
     var random = rand.Reader;
 
     var (ecdsaPriv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to generate ECDSA key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Failed to generate ECDSA key: %s", err);
     }
 
     (var ed25519Pub, var ed25519Priv, err) = ed25519.GenerateKey(random);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to generate Ed25519 key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Failed to generate Ed25519 key: %s", err);
     }
 
-    var tests = new TestCreateSelfSignedCertificate_tests[]{
-        new("RSA/RSA"u8, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil(), true, SHA384WithRSA),
-        new("RSA/ECDSA"u8, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), ecdsaPriv.OrTypedNil(), false, ECDSAWithSHA384),
-        new("ECDSA/RSA"u8, ecdsaPriv.of(ecdsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil(), false, SHA256WithRSA),
-        new("ECDSA/ECDSA"u8, ecdsaPriv.of(ecdsa.PrivateKey.ᏑPublicKey), ecdsaPriv.OrTypedNil(), true, ECDSAWithSHA256),
-        new("RSAPSS/RSAPSS"u8, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil(), true, SHA256WithRSAPSS),
-        new("ECDSA/RSAPSS"u8, ecdsaPriv.of(ecdsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil(), false, SHA256WithRSAPSS),
-        new("RSAPSS/ECDSA"u8, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), ecdsaPriv.OrTypedNil(), false, ECDSAWithSHA384),
-        new("Ed25519"u8, ed25519Pub, ed25519Priv, true, PureEd25519)
-    }.slice();
+    var tests = slice<TestCreateSelfSignedCertificate_tests>([
+        new("RSA/RSA", testPrivateKey.ᏑPublicKey, testPrivateKey.OrTypedNil(), true, SHA384WithRSA),
+        new("RSA/ECDSA", testPrivateKey.ᏑPublicKey, ecdsaPriv.OrTypedNil(), false, ECDSAWithSHA384),
+        new("ECDSA/RSA", ecdsaPriv.ᏑPublicKey, testPrivateKey.OrTypedNil(), false, SHA256WithRSA),
+        new("ECDSA/ECDSA", ecdsaPriv.ᏑPublicKey, ecdsaPriv.OrTypedNil(), true, ECDSAWithSHA256),
+        new("RSAPSS/RSAPSS", testPrivateKey.ᏑPublicKey, testPrivateKey.OrTypedNil(), true, SHA256WithRSAPSS),
+        new("ECDSA/RSAPSS", ecdsaPriv.ᏑPublicKey, testPrivateKey.OrTypedNil(), false, SHA256WithRSAPSS),
+        new("RSAPSS/ECDSA", testPrivateKey.ᏑPublicKey, ecdsaPriv.OrTypedNil(), false, ECDSAWithSHA384),
+        new("Ed25519", ed25519Pub, ed25519Priv, true, PureEd25519)
+    ]);
 
-    var testExtKeyUsage = new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth, ExtKeyUsageServerAuth}.slice();
-    var testUnknownExtKeyUsage = new asn1.ObjectIdentifier[]{new nint[]{1, 2, 3}.slice(), new nint[]{2, 59, 1}.slice()}.slice();
+    var testExtKeyUsage = slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth, ExtKeyUsageServerAuth]);
+    var testUnknownExtKeyUsage = slice<asn1.ObjectIdentifier>([slice<nint>([1, 2, 3]), slice<nint>([2, 59, 1])]);
     var extraExtensionData = slice<byte>("extra extension"u8);
 
     foreach (var (_, test) in tests) {
         @string commonName = testExampleComˢ;
-        ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-        template = new Certificate(
+        ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
             SerialNumber: big.NewInt(1),
             Subject: new pkix.Name(
                 CommonName: commonName,
-                Organization: new @string[]{"Σ Acme Co"u8}.slice(),
-                Country: new @string[]{"US"u8}.slice(),
-                ExtraNames: new pkix.AttributeTypeAndValue[]{
+                Organization: slice<@string>(["Σ Acme Co"]),
+                Country: slice<@string>(["US"]),
+                ExtraNames: slice<pkix.AttributeTypeAndValue>([
                     new(
-                        Type: new nint[]{2, 5, 4, 42}.slice(),
-                        Value: (@string)"Gopher"u8
+                        Type: slice<nint>([2, 5, 4, 42]),
+                        Value: gopherˢ
                     ),
                     // This should override the Country, above.
                     new(
-                        Type: new nint[]{2, 5, 4, 6}.slice(),
-                        Value: (@string)"NL"u8
+                        Type: slice<nint>([2, 5, 4, 6]),
+                        Value: (@string)"NL"
                     )
-                }.slice()
+                ])
             ),
             NotBefore: time.Unix(1000, 0),
             NotAfter: time.Unix(100000, 0),
 
             SignatureAlgorithm: test.sigAlgo,
 
-            SubjectKeyId: new byte[]{1, 2, 3, 4}.slice(),
+            SubjectKeyId: slice<byte>([1, 2, 3, 4]),
             KeyUsage: KeyUsageCertSign,
 
             ExtKeyUsage: testExtKeyUsage,
@@ -789,171 +798,171 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
             BasicConstraintsValid: true,
             IsCA: true,
 
-            OCSPServer: new @string[]{"http://ocsp.example.com"u8}.slice(),
-            IssuingCertificateURL: new @string[]{"http://crt.example.com/ca1.crt"u8}.slice(),
+            OCSPServer: slice<@string>(["http://ocsp.example.com"]),
+            IssuingCertificateURL: slice<@string>(["http://crt.example.com/ca1.crt"]),
 
-            DNSNames: new @string[]{"test.example.com"u8}.slice(),
-            EmailAddresses: new @string[]{"gopher@golang.org"u8}.slice(),
-            IPAddresses: new net.IP[]{net.IPv4(127, 0, 0, 1).To4(), net.ParseIP("2001:4860:0:2001::68"u8)}.slice(),
-            URIs: new ж<url.URL>[]{parseURI(httpsFooComWibbleFooˢ)}.slice(),
+            DNSNames: slice<@string>(["test.example.com"]),
+            EmailAddresses: slice<@string>(["gopher@golang.org"]),
+            IPAddresses: slice<net.IP>([net.IPv4(127, 0, 0, 1).To4(), net.ParseIP("2001:4860:0:2001::68")]),
+            URIs: slice<ж<url.URL>>([parseURI(httpsFooComWibbleFooˢ)]),
 
-            Policies: new global::go.crypto.x509_package.ΔOID[]{mustNewOIDFromInts(new uint64[]{1, 2, 3, math.MaxUint32, math.MaxUint64}.slice())}.slice(),
-            PermittedDNSDomains: new @string[]{".example.com"u8, "example.com"u8}.slice(),
-            ExcludedDNSDomains: new @string[]{"bar.example.com"u8}.slice(),
-            PermittedIPRanges: new ж<net.IPNet>[]{parseCIDR("192.168.1.1/16"u8), parseCIDR("1.2.3.4/8"u8)}.slice(),
-            ExcludedIPRanges: new ж<net.IPNet>[]{parseCIDR(db848ˢ)}.slice(),
-            PermittedEmailAddresses: new @string[]{"foo@example.com"u8}.slice(),
-            ExcludedEmailAddresses: new @string[]{".example.com"u8, "example.com"u8}.slice(),
-            PermittedURIDomains: new @string[]{".bar.com"u8, "bar.com"u8}.slice(),
-            ExcludedURIDomains: new @string[]{".bar2.com"u8, "bar2.com"u8}.slice(),
+            Policies: slice<global::go.crypto.x509_package.ΔOID>([mustNewOIDFromInts(slice<uint64>([1, 2, 3, math.MaxUint32, math.MaxUint64]))]),
+            PermittedDNSDomains: slice<@string>([".example.com", "example.com"]),
+            ExcludedDNSDomains: slice<@string>(["bar.example.com"]),
+            PermittedIPRanges: slice<ж<net.IPNet>>([parseCIDR("192.168.1.1/16"), parseCIDR("1.2.3.4/8")]),
+            ExcludedIPRanges: slice<ж<net.IPNet>>([parseCIDR(db848ˢ)]),
+            PermittedEmailAddresses: slice<@string>(["foo@example.com"]),
+            ExcludedEmailAddresses: slice<@string>([".example.com", "example.com"]),
+            PermittedURIDomains: slice<@string>([".bar.com", "bar.com"]),
+            ExcludedURIDomains: slice<@string>([".bar2.com", "bar2.com"]),
 
-            CRLDistributionPoints: new @string[]{"http://crl1.example.com/ca1.crl"u8, "http://crl2.example.com/ca1.crl"u8}.slice(),
+            CRLDistributionPoints: slice<@string>(["http://crl1.example.com/ca1.crl", "http://crl2.example.com/ca1.crl"]),
 
-            ExtraExtensions: new pkix.Extension[]{
+            ExtraExtensions: slice<pkix.Extension>([
                 new(
-                    Id: new nint[]{1, 2, 3, 4}.slice(),
+                    Id: slice<nint>([1, 2, 3, 4]),
                     Value: extraExtensionData
                 ),
                 // This extension should override the SubjectKeyId, above.
                 new(
                     Id: oidExtensionSubjectKeyId,
                     Critical: false,
-                    Value: new byte[]{0x04, 0x04, 4, 3, 2, 1}.slice()
+                    Value: slice<byte>([0x04, 0x04, 4, 3, 2, 1])
                 )
-            }.slice()
-        );
+            ])
+        ), out var Ꮡtemplate);
 
         var (derBytes, errΔ1) = CreateCertificate(random, Ꮡtemplate, Ꮡtemplate, test.pub, test.priv);
-        if (errΔ1 != default!) {
-            Ꮡt.Errorf("%s: failed to create certificate: %s"u8, test.name, errΔ1);
+        if (errΔ1 != nil) {
+            t.Errorf("%s: failed to create certificate: %s", test.name, errΔ1);
             continue;
         }
 
         (var cert, errΔ1) = ParseCertificate(derBytes);
-        if (errΔ1 != default!) {
-            Ꮡt.Errorf("%s: failed to parse certificate: %s"u8, test.name, errΔ1);
+        if (errΔ1 != nil) {
+            t.Errorf("%s: failed to parse certificate: %s", test.name, errΔ1);
             continue;
         }
 
-        if (builtin.len((~cert).Policies) != 1 || !(~cert).Policies[0].Equal(template.Policies[0])) {
-            Ꮡt.Errorf("%s: failed to parse policy identifiers: got:%#v want:%#v"u8, test.name, (~cert).PolicyIdentifiers, template.Policies);
+        if (builtin.len(cert.Policies) != 1 || !cert.Policies[0].Equal(template.Policies[0])) {
+            t.Errorf("%s: failed to parse policy identifiers: got:%#v want:%#v", test.name, cert.PolicyIdentifiers, template.Policies);
         }
 
-        if (builtin.len((~cert).PermittedDNSDomains) != 2 || (~cert).PermittedDNSDomains[0] != ".example.com" || (~cert).PermittedDNSDomains[1] != "example.com") {
-            Ꮡt.Errorf("%s: failed to parse name constraints: %#v"u8, test.name, (~cert).PermittedDNSDomains);
+        if (builtin.len(cert.PermittedDNSDomains) != 2 || cert.PermittedDNSDomains[0] != ".example.com" || cert.PermittedDNSDomains[1] != "example.com") {
+            t.Errorf("%s: failed to parse name constraints: %#v", test.name, cert.PermittedDNSDomains);
         }
 
-        if (builtin.len((~cert).ExcludedDNSDomains) != 1 || (~cert).ExcludedDNSDomains[0] != "bar.example.com") {
-            Ꮡt.Errorf("%s: failed to parse name constraint exclusions: %#v"u8, test.name, (~cert).ExcludedDNSDomains);
+        if (builtin.len(cert.ExcludedDNSDomains) != 1 || cert.ExcludedDNSDomains[0] != "bar.example.com") {
+            t.Errorf("%s: failed to parse name constraint exclusions: %#v", test.name, cert.ExcludedDNSDomains);
         }
 
-        if (builtin.len((~cert).PermittedIPRanges) != 2 || (~cert).PermittedIPRanges[0].String() != "192.168.0.0/16"u8 || (~cert).PermittedIPRanges[1].String() != "1.0.0.0/8"u8) {
-            Ꮡt.Errorf("%s: failed to parse IP constraints: %#v"u8, test.name, (~cert).PermittedIPRanges);
+        if (builtin.len(cert.PermittedIPRanges) != 2 || cert.PermittedIPRanges[0].String() != "192.168.0.0/16"u8 || cert.PermittedIPRanges[1].String() != "1.0.0.0/8"u8) {
+            t.Errorf("%s: failed to parse IP constraints: %#v", test.name, cert.PermittedIPRanges);
         }
 
-        if (builtin.len((~cert).ExcludedIPRanges) != 1 || (~cert).ExcludedIPRanges[0].String() != "2001:db8::/48"u8) {
-            Ꮡt.Errorf("%s: failed to parse IP constraint exclusions: %#v"u8, test.name, (~cert).ExcludedIPRanges);
+        if (builtin.len(cert.ExcludedIPRanges) != 1 || cert.ExcludedIPRanges[0].String() != "2001:db8::/48"u8) {
+            t.Errorf("%s: failed to parse IP constraint exclusions: %#v", test.name, cert.ExcludedIPRanges);
         }
 
-        if (builtin.len((~cert).PermittedEmailAddresses) != 1 || (~cert).PermittedEmailAddresses[0] != "foo@example.com") {
-            Ꮡt.Errorf("%s: failed to parse permitted email addresses: %#v"u8, test.name, (~cert).PermittedEmailAddresses);
+        if (builtin.len(cert.PermittedEmailAddresses) != 1 || cert.PermittedEmailAddresses[0] != "foo@example.com") {
+            t.Errorf("%s: failed to parse permitted email addresses: %#v", test.name, cert.PermittedEmailAddresses);
         }
 
-        if (builtin.len((~cert).ExcludedEmailAddresses) != 2 || (~cert).ExcludedEmailAddresses[0] != ".example.com" || (~cert).ExcludedEmailAddresses[1] != "example.com") {
-            Ꮡt.Errorf("%s: failed to parse excluded email addresses: %#v"u8, test.name, (~cert).ExcludedEmailAddresses);
+        if (builtin.len(cert.ExcludedEmailAddresses) != 2 || cert.ExcludedEmailAddresses[0] != ".example.com" || cert.ExcludedEmailAddresses[1] != "example.com") {
+            t.Errorf("%s: failed to parse excluded email addresses: %#v", test.name, cert.ExcludedEmailAddresses);
         }
 
-        if (builtin.len((~cert).PermittedURIDomains) != 2 || (~cert).PermittedURIDomains[0] != ".bar.com" || (~cert).PermittedURIDomains[1] != "bar.com") {
-            Ꮡt.Errorf("%s: failed to parse permitted URIs: %#v"u8, test.name, (~cert).PermittedURIDomains);
+        if (builtin.len(cert.PermittedURIDomains) != 2 || cert.PermittedURIDomains[0] != ".bar.com" || cert.PermittedURIDomains[1] != "bar.com") {
+            t.Errorf("%s: failed to parse permitted URIs: %#v", test.name, cert.PermittedURIDomains);
         }
 
-        if (builtin.len((~cert).ExcludedURIDomains) != 2 || (~cert).ExcludedURIDomains[0] != ".bar2.com" || (~cert).ExcludedURIDomains[1] != "bar2.com") {
-            Ꮡt.Errorf("%s: failed to parse excluded URIs: %#v"u8, test.name, (~cert).ExcludedURIDomains);
+        if (builtin.len(cert.ExcludedURIDomains) != 2 || cert.ExcludedURIDomains[0] != ".bar2.com" || cert.ExcludedURIDomains[1] != "bar2.com") {
+            t.Errorf("%s: failed to parse excluded URIs: %#v", test.name, cert.ExcludedURIDomains);
         }
 
-        if ((~cert).Subject.CommonName != commonName) {
-            Ꮡt.Errorf("%s: subject wasn't correctly copied from the template. Got %s, want %s"u8, test.name, (~cert).Subject.CommonName, commonName);
+        if (cert.Subject.CommonName != commonName) {
+            t.Errorf("%s: subject wasn't correctly copied from the template. Got %s, want %s", test.name, cert.Subject.CommonName, commonName);
         }
 
-        if (builtin.len((~cert).Subject.Country) != 1 || (~cert).Subject.Country[0] != "NL") {
-            Ꮡt.Errorf("%s: ExtraNames didn't override Country"u8, test.name);
+        if (builtin.len(cert.Subject.Country) != 1 || cert.Subject.Country[0] != "NL") {
+            t.Errorf("%s: ExtraNames didn't override Country", test.name);
         }
 
-        foreach (var (_, ext) in (~cert).Extensions) {
+        foreach (var (_, ext) in cert.Extensions) {
             if (ext.Id.Equal(oidExtensionSubjectAltName)) {
                 if (ext.Critical) {
-                    Ꮡt.Fatal(sanExtensionIsMarkedˢ);
+                    t.Fatal(sanExtensionIsMarkedˢ);
                 }
             }
         }
 
         var found = false;
-        foreach (var (_, atv) in (~cert).Subject.Names) {
-            if (atv.Type.Equal(new nint[]{2, 5, 4, 42}.slice())) {
+        foreach (var (_, atv) in cert.Subject.Names) {
+            if (atv.Type.Equal(slice<nint>([2, 5, 4, 42]))) {
                 found = true;
                 break;
             }
         }
         if (!found) {
-            Ꮡt.Errorf("%s: Names didn't contain oid 2.5.4.42 from ExtraNames"u8, test.name);
+            t.Errorf("%s: Names didn't contain oid 2.5.4.42 from ExtraNames", test.name);
         }
 
-        if ((~cert).Issuer.CommonName != commonName) {
-            Ꮡt.Errorf("%s: issuer wasn't correctly copied from the template. Got %s, want %s"u8, test.name, (~cert).Issuer.CommonName, commonName);
+        if (cert.Issuer.CommonName != commonName) {
+            t.Errorf("%s: issuer wasn't correctly copied from the template. Got %s, want %s", test.name, cert.Issuer.CommonName, commonName);
         }
 
-        if ((~cert).SignatureAlgorithm != test.sigAlgo) {
-            Ꮡt.Errorf("%s: SignatureAlgorithm wasn't copied from template. Got %v, want %v"u8, test.name, (~cert).SignatureAlgorithm, test.sigAlgo);
+        if (cert.SignatureAlgorithm != test.sigAlgo) {
+            t.Errorf("%s: SignatureAlgorithm wasn't copied from template. Got %v, want %v", test.name, cert.SignatureAlgorithm, test.sigAlgo);
         }
 
-        if (!slices.Equal<slice<global::go.crypto.x509_package.ExtKeyUsage>, global::go.crypto.x509_package.ExtKeyUsage>((~cert).ExtKeyUsage, testExtKeyUsage)) {
-            Ꮡt.Errorf("%s: extkeyusage wasn't correctly copied from the template. Got %v, want %v"u8, test.name, (~cert).ExtKeyUsage, testExtKeyUsage);
+        if (!slices.Equal<slice<global::go.crypto.x509_package.ExtKeyUsage>, global::go.crypto.x509_package.ExtKeyUsage>(cert.ExtKeyUsage, testExtKeyUsage)) {
+            t.Errorf("%s: extkeyusage wasn't correctly copied from the template. Got %v, want %v", test.name, cert.ExtKeyUsage, testExtKeyUsage);
         }
 
-        if (!slices.EqualFunc<slice<asn1.ObjectIdentifier>, slice<asn1.ObjectIdentifier>, asn1.ObjectIdentifier, asn1.ObjectIdentifier>((~cert).UnknownExtKeyUsage, testUnknownExtKeyUsage, ((Func<asn1.ObjectIdentifier, asn1.ObjectIdentifier, bool>)(asn1.Equal)))) {
-            Ꮡt.Errorf("%s: unknown extkeyusage wasn't correctly copied from the template. Got %v, want %v"u8, test.name, (~cert).UnknownExtKeyUsage, testUnknownExtKeyUsage);
+        if (!slices.EqualFunc<slice<asn1.ObjectIdentifier>, slice<asn1.ObjectIdentifier>, asn1.ObjectIdentifier, asn1.ObjectIdentifier>(cert.UnknownExtKeyUsage, testUnknownExtKeyUsage, ((Func<asn1.ObjectIdentifier, asn1.ObjectIdentifier, bool>)(asn1.Equal)))) {
+            t.Errorf("%s: unknown extkeyusage wasn't correctly copied from the template. Got %v, want %v", test.name, cert.UnknownExtKeyUsage, testUnknownExtKeyUsage);
         }
 
-        if (!slices.Equal<slice<@string>, @string>((~cert).OCSPServer, template.OCSPServer)) {
-            Ꮡt.Errorf("%s: OCSP servers differ from template. Got %v, want %v"u8, test.name, (~cert).OCSPServer, template.OCSPServer);
+        if (!slices.Equal<slice<@string>, @string>(cert.OCSPServer, template.OCSPServer)) {
+            t.Errorf("%s: OCSP servers differ from template. Got %v, want %v", test.name, cert.OCSPServer, template.OCSPServer);
         }
 
-        if (!slices.Equal<slice<@string>, @string>((~cert).IssuingCertificateURL, template.IssuingCertificateURL)) {
-            Ꮡt.Errorf("%s: Issuing certificate URLs differ from template. Got %v, want %v"u8, test.name, (~cert).IssuingCertificateURL, template.IssuingCertificateURL);
+        if (!slices.Equal<slice<@string>, @string>(cert.IssuingCertificateURL, template.IssuingCertificateURL)) {
+            t.Errorf("%s: Issuing certificate URLs differ from template. Got %v, want %v", test.name, cert.IssuingCertificateURL, template.IssuingCertificateURL);
         }
 
-        if (!slices.Equal<slice<@string>, @string>((~cert).DNSNames, template.DNSNames)) {
-            Ꮡt.Errorf("%s: SAN DNS names differ from template. Got %v, want %v"u8, test.name, (~cert).DNSNames, template.DNSNames);
+        if (!slices.Equal<slice<@string>, @string>(cert.DNSNames, template.DNSNames)) {
+            t.Errorf("%s: SAN DNS names differ from template. Got %v, want %v", test.name, cert.DNSNames, template.DNSNames);
         }
 
-        if (!slices.Equal<slice<@string>, @string>((~cert).EmailAddresses, template.EmailAddresses)) {
-            Ꮡt.Errorf("%s: SAN emails differ from template. Got %v, want %v"u8, test.name, (~cert).EmailAddresses, template.EmailAddresses);
+        if (!slices.Equal<slice<@string>, @string>(cert.EmailAddresses, template.EmailAddresses)) {
+            t.Errorf("%s: SAN emails differ from template. Got %v, want %v", test.name, cert.EmailAddresses, template.EmailAddresses);
         }
 
-        if (builtin.len((~cert).URIs) != 1 || (~cert).URIs[0].String() != "https://foo.com/wibble#foo"u8) {
-            Ꮡt.Errorf("%s: URIs differ from template. Got %v, want %v"u8, test.name, (~cert).URIs, template.URIs);
+        if (builtin.len(cert.URIs) != 1 || cert.URIs[0].String() != "https://foo.com/wibble#foo"u8) {
+            t.Errorf("%s: URIs differ from template. Got %v, want %v", test.name, cert.URIs, template.URIs);
         }
 
-        if (!slices.EqualFunc<slice<net.IP>, slice<net.IP>, net.IP, net.IP>((~cert).IPAddresses, template.IPAddresses, ((Func<net.IP, net.IP, bool>)(net.Equal)))) {
-            Ꮡt.Errorf("%s: SAN IPs differ from template. Got %v, want %v"u8, test.name, (~cert).IPAddresses, template.IPAddresses);
+        if (!slices.EqualFunc<slice<net.IP>, slice<net.IP>, net.IP, net.IP>(cert.IPAddresses, template.IPAddresses, ((Func<net.IP, net.IP, bool>)(net.Equal)))) {
+            t.Errorf("%s: SAN IPs differ from template. Got %v, want %v", test.name, cert.IPAddresses, template.IPAddresses);
         }
 
-        if (!slices.Equal<slice<@string>, @string>((~cert).CRLDistributionPoints, template.CRLDistributionPoints)) {
-            Ꮡt.Errorf("%s: CRL distribution points differ from template. Got %v, want %v"u8, test.name, (~cert).CRLDistributionPoints, template.CRLDistributionPoints);
+        if (!slices.Equal<slice<@string>, @string>(cert.CRLDistributionPoints, template.CRLDistributionPoints)) {
+            t.Errorf("%s: CRL distribution points differ from template. Got %v, want %v", test.name, cert.CRLDistributionPoints, template.CRLDistributionPoints);
         }
 
-        if (!bytes.Equal((~cert).SubjectKeyId, new byte[]{4, 3, 2, 1}.slice())) {
-            Ꮡt.Errorf("%s: ExtraExtensions didn't override SubjectKeyId"u8, test.name);
+        if (!bytes.Equal(cert.SubjectKeyId, slice<byte>([4, 3, 2, 1]))) {
+            t.Errorf("%s: ExtraExtensions didn't override SubjectKeyId", test.name);
         }
 
         if (!bytes.Contains(derBytes, extraExtensionData)) {
-            Ꮡt.Errorf("%s: didn't find extra extension in DER output"u8, test.name);
+            t.Errorf("%s: didn't find extra extension in DER output", test.name);
         }
 
         if (test.checkSig) {
             errΔ1 = cert.CheckSignatureFrom(cert);
-            if (errΔ1 != default!) {
-                Ꮡt.Errorf("%s: signature verification failed: %s"u8, test.name, errΔ1);
+            if (errΔ1 != nil) {
+                t.Errorf("%s: signature verification failed: %s", test.name, errΔ1);
             }
         }
     }
@@ -1046,38 +1055,38 @@ partial struct ecdsaTestsᴛ1 /*dyn*/ {
     internal global::go.crypto.x509_package.SignatureAlgorithm sigAlgo;
     internal @string pemCert;
 }
-internal static slice<ecdsaTestsᴛ1> ecdsaTests = new ecdsaTestsᴛ1[]{
+internal static slice<ecdsaTestsᴛ1> ecdsaTests = slice<ecdsaTestsᴛ1>([
     new(ECDSAWithSHA256, ecdsaSHA256p256CertPem),
     new(ECDSAWithSHA256, ecdsaSHA256p384CertPem),
     new(ECDSAWithSHA384, ecdsaSHA384p521CertPem)
-}.slice();
+]);
 
-public static void TestECDSA(ж<testing.T> Ꮡt) {
+public static void TestECDSA(ж<testing.T> t) {
     foreach (var (i, test) in ecdsaTests) {
         var (pemBlock, _) = pem.Decode(slice<byte>(test.pemCert));
-        var (cert, err) = ParseCertificate((~pemBlock).Bytes);
-        if (err != default!) {
-            Ꮡt.Errorf("%d: failed to parse certificate: %s"u8, i, err);
+        var (cert, err) = ParseCertificate(pemBlock.Bytes);
+        if (err != nil) {
+            t.Errorf("%d: failed to parse certificate: %s", i, err);
             continue;
         }
         {
-            global::go.crypto.x509_package.SignatureAlgorithm sa = cert.Value.SignatureAlgorithm; if (sa != test.sigAlgo) {
-                Ꮡt.Errorf("%d: signature algorithm is %v, want %v"u8, i, sa, test.sigAlgo);
+            global::go.crypto.x509_package.SignatureAlgorithm sa = cert.SignatureAlgorithm; if (sa != test.sigAlgo) {
+                t.Errorf("%d: signature algorithm is %v, want %v", i, sa, test.sigAlgo);
             }
         }
         {
-            var (parsedKey, ok) = (~cert).PublicKey._<ж<ecdsa.PublicKey>>(ᐧ); if (!ok) {
-                Ꮡt.Errorf("%d: wanted an ECDSA public key but found: %#v"u8, i, parsedKey.OrTypedNil());
+            var (parsedKey, ok) = cert.PublicKey._<ж<ecdsa.PublicKey>>(ᐧ); if (!ok) {
+                t.Errorf("%d: wanted an ECDSA public key but found: %#v", i, parsedKey.OrTypedNil());
             }
         }
         {
-            global::go.crypto.x509_package.PublicKeyAlgorithm pka = cert.Value.PublicKeyAlgorithm; if (pka != ECDSA) {
-                Ꮡt.Errorf("%d: public key algorithm is %v, want ECDSA"u8, i, pka);
+            global::go.crypto.x509_package.PublicKeyAlgorithm pka = cert.PublicKeyAlgorithm; if (pka != ECDSA) {
+                t.Errorf("%d: public key algorithm is %v, want ECDSA", i, pka);
             }
         }
         {
-            err = cert.CheckSignatureFrom(cert); if (err != default!) {
-                Ꮡt.Errorf("%d: certificate verification failed: %s"u8, i, err);
+            err = cert.CheckSignatureFrom(cert); if (err != nil) {
+                t.Errorf("%d: certificate verification failed: %s", i, err);
             }
         }
     }
@@ -1115,53 +1124,53 @@ z4IWqMXg4TAMBgNVHRMEBTADAQH/MAkGByqGSM44BAMDLwAwLAIUPtn/5j8Q1jJI
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parsedKeyDiffersFromˢ = (@string)"Parsed key differs from expected key"u8;
 
-public static void TestParseCertificateWithDsaPublicKey(ж<testing.T> Ꮡt) {
+public static void TestParseCertificateWithDsaPublicKey(ж<testing.T> t) {
     var expectedKey = Ꮡ(new dsa.PublicKey(
         Parameters: new dsa.Parameters(
-            P: bigFromHexString("00BC84B52743B169158BB85974E3E832AF5EFCFC42B264349095313A4A013EEE069A1B937D92E51ACF297A1C77880DF25C8607D8204B4DC45651305EF4A63B40C7D8C42D91EDA397D8F51CBC9D0A531FE2C6F1E55E9357D205C39D395358968CBEDAC11320C607BE16CB9DB492B6E78163305A34DD99CE43C64927D13A0040EB97"u8),
-            Q: bigFromHexString("009A67067F66A323F5D4EC7902C73FE5D9E36FA74F"u8),
-            G: bigFromHexString("009147778295BF5893542BC41BA806898A29E43261DBC85441C37D92E97ED80D323D44825FDDE8374D0FF15877798812682599B216BBCC31B9DCCAD527465FEAFFD7FC2A193612E575E34E7A98AF4D10339FE47390A518CB9975B3160B1D0285D1418D0977C52994F43C29A053E3D685834104C9FAFDC221E38BE9F3989D7A8E42"u8)
+            P: bigFromHexString("00BC84B52743B169158BB85974E3E832AF5EFCFC42B264349095313A4A013EEE069A1B937D92E51ACF297A1C77880DF25C8607D8204B4DC45651305EF4A63B40C7D8C42D91EDA397D8F51CBC9D0A531FE2C6F1E55E9357D205C39D395358968CBEDAC11320C607BE16CB9DB492B6E78163305A34DD99CE43C64927D13A0040EB97"),
+            Q: bigFromHexString("009A67067F66A323F5D4EC7902C73FE5D9E36FA74F"),
+            G: bigFromHexString("009147778295BF5893542BC41BA806898A29E43261DBC85441C37D92E97ED80D323D44825FDDE8374D0FF15877798812682599B216BBCC31B9DCCAD527465FEAFFD7FC2A193612E575E34E7A98AF4D10339FE47390A518CB9975B3160B1D0285D1418D0977C52994F43C29A053E3D685834104C9FAFDC221E38BE9F3989D7A8E42")
         ),
-        Y: bigFromHexString("59A27C269FCDE45AA2160A5C980C19211A820095091AB9C5DC8309AB7EC1B3A48C2E267C6D35FEE9B71BCBB92F16AC8E559129347FB5C00BEEDD10BA8915C90698755CA965735A32DC7575BED806E1E38F768FFBC24E41123DC73F1C6E9E4D0C9E692128853AFE29DC665FA993DCA9C903B7BF00B6442B9A76A5DADC6186317A"u8)
+        Y: bigFromHexString("59A27C269FCDE45AA2160A5C980C19211A820095091AB9C5DC8309AB7EC1B3A48C2E267C6D35FEE9B71BCBB92F16AC8E559129347FB5C00BEEDD10BA8915C90698755CA965735A32DC7575BED806E1E38F768FFBC24E41123DC73F1C6E9E4D0C9E692128853AFE29DC665FA993DCA9C903B7BF00B6442B9A76A5DADC6186317A")
     ));
     var (pemBlock, _) = pem.Decode(slice<byte>(dsaCertPem));
-    var (cert, err) = ParseCertificate((~pemBlock).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to parse certificate: %s"u8, err);
+    var (cert, err) = ParseCertificate(pemBlock.Bytes);
+    if (err != nil) {
+        t.Fatalf("Failed to parse certificate: %s", err);
     }
-    if ((~cert).PublicKeyAlgorithm != DSA) {
-        Ꮡt.Errorf("Parsed key algorithm was not DSA"u8);
+    if (cert.PublicKeyAlgorithm != DSA) {
+        t.Errorf("Parsed key algorithm was not DSA");
     }
-    var (parsedKey, ok) = (~cert).PublicKey._<ж<dsa.PublicKey>>(ᐧ);
+    var (parsedKey, ok) = cert.PublicKey._<ж<dsa.PublicKey>>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatalf("Parsed key was not a DSA key: %s"u8, err);
+        t.Fatalf("Parsed key was not a DSA key: %s", err);
     }
-    if ((~expectedKey).Y.Cmp((~parsedKey).Y) != 0 || (~expectedKey).P.Cmp((~parsedKey).P) != 0 || (~expectedKey).Q.Cmp((~parsedKey).Q) != 0 || (~expectedKey).G.Cmp((~parsedKey).G) != 0) {
-        Ꮡt.Fatal(parsedKeyDiffersFromˢ);
-    }
-}
-
-public static void TestParseCertificateWithDSASignatureAlgorithm(ж<testing.T> Ꮡt) {
-    var (pemBlock, _) = pem.Decode(slice<byte>(dsaCertPem));
-    var (cert, err) = ParseCertificate((~pemBlock).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to parse certificate: %s"u8, err);
-    }
-    if ((~cert).SignatureAlgorithm != DSAWithSHA1) {
-        Ꮡt.Errorf("Parsed signature algorithm was not DSAWithSHA1"u8);
+    if (expectedKey.Y.Cmp(parsedKey.Y) != 0 || expectedKey.P.Cmp(parsedKey.P) != 0 || expectedKey.Q.Cmp(parsedKey.Q) != 0 || expectedKey.G.Cmp(parsedKey.G) != 0) {
+        t.Fatal(parsedKeyDiffersFromˢ);
     }
 }
 
-public static void TestVerifyCertificateWithDSASignature(ж<testing.T> Ꮡt) {
+public static void TestParseCertificateWithDSASignatureAlgorithm(ж<testing.T> t) {
     var (pemBlock, _) = pem.Decode(slice<byte>(dsaCertPem));
-    var (cert, err) = ParseCertificate((~pemBlock).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to parse certificate: %s"u8, err);
+    var (cert, err) = ParseCertificate(pemBlock.Bytes);
+    if (err != nil) {
+        t.Fatalf("Failed to parse certificate: %s", err);
+    }
+    if (cert.SignatureAlgorithm != DSAWithSHA1) {
+        t.Errorf("Parsed signature algorithm was not DSAWithSHA1");
+    }
+}
+
+public static void TestVerifyCertificateWithDSASignature(ж<testing.T> t) {
+    var (pemBlock, _) = pem.Decode(slice<byte>(dsaCertPem));
+    var (cert, err) = ParseCertificate(pemBlock.Bytes);
+    if (err != nil) {
+        t.Fatalf("Failed to parse certificate: %s", err);
     }
     // test cert is self-signed
     {
-        err = cert.CheckSignatureFrom(cert); if (err == default!) {
-            Ꮡt.Fatalf("Expected error verifying DSA certificate"u8);
+        err = cert.CheckSignatureFrom(cert); if (err == nil) {
+            t.Fatalf("Expected error verifying DSA certificate");
         }
     }
 }
@@ -1234,30 +1243,31 @@ Gs+ITJjKEnZgXmAQ25SLKVzkZkBcGANs2GsdHNJ370Puisy0FIPD2NXR5uASAf7J
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestRSAPSSSelfSigned(ж<testing.T> Ꮡt) {
-    foreach (var (i, pemBlock) in new @string[]{rsaPSSSelfSignedPEM, rsaPSSSelfSignedOpenSSL110PEM}.slice()) {
+public static void TestRSAPSSSelfSigned(ж<testing.T> t) {
+    foreach (var (i, pemBlock) in slice<@string>([rsaPSSSelfSignedPEM, rsaPSSSelfSignedOpenSSL110PEM])) {
         var (der, _) = pem.Decode(slice<byte>(pemBlock));
         if (der == nil) {
-            Ꮡt.Errorf("#%d: failed to find PEM block"u8, i);
+            t.Errorf("#%d: failed to find PEM block", i);
             continue;
         }
 
-        var (cert, err) = ParseCertificate((~der).Bytes);
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: failed to parse: %s"u8, i, err);
+        var (cert, err) = ParseCertificate(der.Bytes);
+        if (err != nil) {
+            t.Errorf("#%d: failed to parse: %s", i, err);
             continue;
         }
 
         {
-            err = cert.CheckSignatureFrom(cert); if (err != default!) {
-                Ꮡt.Errorf("#%d: signature check failed: %s"u8, i, err);
+            err = cert.CheckSignatureFrom(cert); if (err != nil) {
+                t.Errorf("#%d: signature check failed: %s", i, err);
                 continue;
             }
         }
     }
 }
 
-internal static readonly @string ed25519Certificate = """
+internal static ref readonly @string ed25519Certificate => ref ed25519Certificateᵇ;
+private static readonly @string ed25519Certificateᵇ = """
 
 Certificate:
     Data:
@@ -1302,36 +1312,37 @@ GtKoKNxgudT0eEs8HJEA
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestEd25519SelfSigned(ж<testing.T> Ꮡt) {
+public static void TestEd25519SelfSigned(ж<testing.T> t) {
     var (der, _) = pem.Decode(slice<byte>(ed25519Certificate));
     if (der == nil) {
-        Ꮡt.Fatalf("Failed to find PEM block"u8);
+        t.Fatalf("Failed to find PEM block");
     }
 
-    var (cert, err) = ParseCertificate((~der).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to parse: %s"u8, err);
+    var (cert, err) = ParseCertificate(der.Bytes);
+    if (err != nil) {
+        t.Fatalf("Failed to parse: %s", err);
     }
 
-    if ((~cert).PublicKeyAlgorithm != Ed25519) {
-        Ꮡt.Fatalf("Parsed key algorithm was not Ed25519"u8);
+    if (cert.PublicKeyAlgorithm != Ed25519) {
+        t.Fatalf("Parsed key algorithm was not Ed25519");
     }
-    var (parsedKey, ok) = (~cert).PublicKey._<ed25519.PublicKey>(ᐧ);
+    var (parsedKey, ok) = cert.PublicKey._<ed25519.PublicKey>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatalf("Parsed key was not an Ed25519 key: %s"u8, err);
+        t.Fatalf("Parsed key was not an Ed25519 key: %s", err);
     }
     if (builtin.len(parsedKey) != ed25519.PublicKeySize) {
-        Ꮡt.Fatalf("Invalid Ed25519 key"u8);
+        t.Fatalf("Invalid Ed25519 key");
     }
 
     {
-        err = cert.CheckSignatureFrom(cert); if (err != default!) {
-            Ꮡt.Fatalf("Signature check failed: %s"u8, err);
+        err = cert.CheckSignatureFrom(cert); if (err != nil) {
+            t.Fatalf("Signature check failed: %s", err);
         }
     }
 }
 
-internal static readonly @string pemCertificate = """
+internal static ref readonly @string pemCertificate => ref pemCertificateᵇ;
+private static readonly @string pemCertificateᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIDATCCAemgAwIBAgIRAKQkkrFx1T/dgB/Go/xBM5swDQYJKoZIhvcNAQELBQAw
 EjEQMA4GA1UEChMHQWNtZSBDbzAeFw0xNjA4MTcyMDM2MDdaFw0xNzA4MTcyMDM2
@@ -1353,7 +1364,8 @@ EhLrEqU=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string ed25519CRLCertificate = """
+internal static ref readonly @string ed25519CRLCertificate => ref ed25519CRLCertificateᵇ;
+private static readonly @string ed25519CRLCertificateᵇ = """
 
 Certificate:
 Data:
@@ -1410,7 +1422,8 @@ MC4CAQAwBQYDK2VwBCIEINdKh2096vUBYu4EIFpjShsUSh3vimKya1sQ1YTT4RZG
 """u8.Raw());
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ozAtlantisˢ = "Oz/Atlantis"u8;
+internal static ref readonly @string ozAtlantisˢ => ref ozAtlantisˢᵇ;
+private static readonly @string ozAtlantisˢᵇ = "Oz/Atlantis"u8;
 
 internal partial struct TestCRLCreation_tests /*dyn*/ {
     internal @string name;
@@ -1418,21 +1431,21 @@ internal partial struct TestCRLCreation_tests /*dyn*/ {
     internal ж<global::go.crypto.x509_package.Certificate> cert;
 }
 
-public static void TestCRLCreation(ж<testing.T> Ꮡt) {
+public static void TestCRLCreation(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(pemPrivateKey));
-    var (privRSA, _) = ParsePKCS1PrivateKey((~block).Bytes);
+    var (privRSA, _) = ParsePKCS1PrivateKey(block.Bytes);
     (block, _) = pem.Decode(slice<byte>(pemCertificate));
-    var (certRSA, _) = ParseCertificate((~block).Bytes);
+    var (certRSA, _) = ParseCertificate(block.Bytes);
 
     (block, _) = pem.Decode(slice<byte>(ed25519CRLKey));
-    var (privEd25519, _) = ParsePKCS8PrivateKey((~block).Bytes);
+    var (privEd25519, _) = ParsePKCS8PrivateKey(block.Bytes);
     (block, _) = pem.Decode(slice<byte>(ed25519CRLCertificate));
-    var (certEd25519, _) = ParseCertificate((~block).Bytes);
+    var (certEd25519, _) = ParseCertificate(block.Bytes);
 
-    var tests = new TestCRLCreation_tests[]{
-        new("RSA CA"u8, privRSA.OrTypedNil(), certRSA),
-        new("Ed25519 CA"u8, privEd25519, certEd25519)
-    }.slice();
+    var tests = slice<TestCRLCreation_tests>([
+        new("RSA CA", privRSA.OrTypedNil(), certRSA),
+        new("Ed25519 CA", privEd25519, certEd25519)
+    ]);
 
     var loc = time.FixedZone(ozAtlantisˢ, (nint)((time.Duration)(7200000000000L)).Seconds());
 
@@ -1440,7 +1453,7 @@ public static void TestCRLCreation(ж<testing.T> Ꮡt) {
     var nowUTC = now.UTC();
     var expiry = time.Unix(10000, 0);
 
-    var revokedCerts = new pkix.RevokedCertificate[]{
+    var revokedCerts = slice<pkix.RevokedCertificate>([
         new(
             SerialNumber: big.NewInt(1),
             RevocationTime: nowUTC
@@ -1450,8 +1463,8 @@ public static void TestCRLCreation(ж<testing.T> Ꮡt) {
             // RevocationTime should be converted to UTC before marshaling.
             RevocationTime: now
         )
-    }.slice();
-    var expectedCerts = new pkix.RevokedCertificate[]{
+    ]);
+    var expectedCerts = slice<pkix.RevokedCertificate>([
         new(
             SerialNumber: big.NewInt(1),
             RevocationTime: nowUTC
@@ -1460,23 +1473,23 @@ public static void TestCRLCreation(ж<testing.T> Ꮡt) {
             SerialNumber: big.NewInt(42),
             RevocationTime: nowUTC
         )
-    }.slice();
+    ]);
 
     foreach (var (_, test) in tests) {
         var (crlBytes, err) = test.cert.CreateCRL(rand.Reader, test.priv, revokedCerts, now, expiry);
-        if (err != default!) {
-            Ꮡt.Errorf("%s: error creating CRL: %s"u8, test.name, err);
+        if (err != nil) {
+            t.Errorf("%s: error creating CRL: %s", test.name, err);
             continue;
         }
 
         (var parsedCRL, err) = ParseDERCRL(crlBytes);
-        if (err != default!) {
-            Ꮡt.Errorf("%s: error reparsing CRL: %s"u8, test.name, err);
+        if (err != nil) {
+            t.Errorf("%s: error reparsing CRL: %s", test.name, err);
             continue;
         }
-        if (!reflect.DeepEqual((~parsedCRL).TBSCertList.RevokedCertificates, expectedCerts)) {
-            Ꮡt.Errorf("%s: RevokedCertificates mismatch: got %v; want %v."u8, test.name,
-                (~parsedCRL).TBSCertList.RevokedCertificates, expectedCerts);
+        if (!reflect.DeepEqual(parsedCRL.TBSCertList.RevokedCertificates, expectedCerts)) {
+            t.Errorf("%s: RevokedCertificates mismatch: got %v; want %v.", test.name,
+                parsedCRL.TBSCertList.RevokedCertificates, expectedCerts);
         }
     }
 }
@@ -1484,62 +1497,58 @@ public static void TestCRLCreation(ж<testing.T> Ꮡt) {
 internal static slice<byte> fromBase64(@string @in) {
     var @out = new slice<byte>(base64.StdEncoding.DecodedLen(builtin.len(@in)));
     var (n, err) = base64.StdEncoding.Decode(@out, slice<byte>(@in));
-    if (err != default!) {
+    if (err != nil) {
         throw panic("failed to base64 decode");
     }
     return @out.slice(0, n);
 }
 
-public static void TestParseDERCRL(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestParseDERCRL(ж<testing.T> t) {
     var derBytes = fromBase64(derCRLBase64);
     var (certList, err) = ParseDERCRL(derBytes);
-    if (err != default!) {
-        Ꮡt.Errorf("error parsing: %s"u8, err);
+    if (err != nil) {
+        t.Errorf("error parsing: %s", err);
         return;
     }
-    nint numCerts = builtin.len((~certList).TBSCertList.RevokedCertificates);
+    nint numCerts = builtin.len(certList.TBSCertList.RevokedCertificates);
     nint expected = 88;
     if (numCerts != expected) {
-        Ꮡt.Errorf("bad number of revoked certificates. got: %d want: %d"u8, numCerts, expected);
+        t.Errorf("bad number of revoked certificates. got: %d want: %d", numCerts, expected);
     }
 
     if (certList.HasExpired(time.Unix(1302517272, 0))) {
-        Ꮡt.Errorf("CRL has expired (but shouldn't have)"u8);
+        t.Errorf("CRL has expired (but shouldn't have)");
     }
 
     // Can't check the signature here without a package cycle.
 }
 
-public static void TestCRLWithoutExpiry(ж<testing.T> Ꮡt) {
-    var derBytes = fromBase64("MIHYMIGZMAkGByqGSM44BAMwEjEQMA4GA1UEAxMHQ2FybERTUxcNOTkwODI3MDcwMDAwWjBpMBMCAgDIFw05OTA4MjIwNzAwMDBaMBMCAgDJFw05OTA4MjIwNzAwMDBaMBMCAgDTFw05OTA4MjIwNzAwMDBaMBMCAgDSFw05OTA4MjIwNzAwMDBaMBMCAgDUFw05OTA4MjQwNzAwMDBaMAkGByqGSM44BAMDLwAwLAIUfmVSdjP+NHMX0feW+aDU2G1cfT0CFAJ6W7fVWxjBz4fvftok8yqDnDWh"u8);
+public static void TestCRLWithoutExpiry(ж<testing.T> t) {
+    var derBytes = fromBase64("MIHYMIGZMAkGByqGSM44BAMwEjEQMA4GA1UEAxMHQ2FybERTUxcNOTkwODI3MDcwMDAwWjBpMBMCAgDIFw05OTA4MjIwNzAwMDBaMBMCAgDJFw05OTA4MjIwNzAwMDBaMBMCAgDTFw05OTA4MjIwNzAwMDBaMBMCAgDSFw05OTA4MjIwNzAwMDBaMBMCAgDUFw05OTA4MjQwNzAwMDBaMAkGByqGSM44BAMDLwAwLAIUfmVSdjP+NHMX0feW+aDU2G1cfT0CFAJ6W7fVWxjBz4fvftok8yqDnDWh");
     var (certList, err) = ParseDERCRL(derBytes);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if (!(~certList).TBSCertList.NextUpdate.IsZero()) {
-        Ꮡt.Errorf("NextUpdate is not the zero value"u8);
+    if (!certList.TBSCertList.NextUpdate.IsZero()) {
+        t.Errorf("NextUpdate is not the zero value");
     }
 }
 
-public static void TestParsePEMCRL(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestParsePEMCRL(ж<testing.T> t) {
     var pemBytes = fromBase64(pemCRLBase64);
     var (certList, err) = ParseCRL(pemBytes);
-    if (err != default!) {
-        Ꮡt.Errorf("error parsing: %s"u8, err);
+    if (err != nil) {
+        t.Errorf("error parsing: %s", err);
         return;
     }
-    nint numCerts = builtin.len((~certList).TBSCertList.RevokedCertificates);
+    nint numCerts = builtin.len(certList.TBSCertList.RevokedCertificates);
     nint expected = 2;
     if (numCerts != expected) {
-        Ꮡt.Errorf("bad number of revoked certificates. got: %d want: %d"u8, numCerts, expected);
+        t.Errorf("bad number of revoked certificates. got: %d want: %d", numCerts, expected);
     }
 
     if (certList.HasExpired(time.Unix(1302517272, 0))) {
-        Ꮡt.Errorf("CRL has expired (but shouldn't have)"u8);
+        t.Errorf("CRL has expired (but shouldn't have)");
     }
 
     // Can't check the signature here without a package cycle.
@@ -1547,22 +1556,25 @@ public static void TestParsePEMCRL(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in -short mode"u8;
-internal static readonly @string x509TestImportGoˢ = "x509_test_import.go"u8;
+internal static ref readonly @string x509TestImportGoˢ => ref x509TestImportGoˢᵇ;
+private static readonly @string x509TestImportGoˢᵇ = "x509_test_import.go"u8;
 
-public static void TestImports(ж<testing.T> Ꮡt) {
+public static void TestImports(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     {
-        var (@out, err) = testenv.Command(new x509_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new x509_test_package.testing_TжTB(Ꮡt)), runˢ, x509TestImportGoˢ).CombinedOutput(); if (err != default!) {
-            Ꮡt.Errorf("failed to run x509_test_import.go: %s\n%s"u8, err, @out);
+        var (@out, err) = testenv.Command(new x509_test_package.testing_TжTB(t), testenv.GoToolPath(new x509_test_package.testing_TжTB(t)), runˢ, x509TestImportGoˢ).CombinedOutput(); if (err != nil) {
+            t.Errorf("failed to run x509_test_import.go: %s\n%s", err, @out);
         }
     }
 }
 
-internal static readonly @string derCRLBase64 = "MIINqzCCDJMCAQEwDQYJKoZIhvcNAQEFBQAwVjEZMBcGA1UEAxMQUEtJIEZJTk1FQ0NBTklDQTEVMBMGA1UEChMMRklOTUVDQ0FOSUNBMRUwEwYDVQQLEwxGSU5NRUNDQU5JQ0ExCzAJBgNVBAYTAklUFw0xMTA1MDQxNjU3NDJaFw0xMTA1MDQyMDU3NDJaMIIMBzAhAg4Ze1od49Lt1qIXBydAzhcNMDkwNzE2MDg0MzIyWjAAMCECDl0HSL9bcZ1Ci/UHJ0DPFw0wOTA3MTYwODQzMTNaMAAwIQIOESB9tVAmX3cY7QcnQNAXDTA5MDcxNjA4NDUyMlowADAhAg4S1tGAQ3mHt8uVBydA1RcNMDkwODA0MTUyNTIyWjAAMCECDlQ249Y7vtC25ScHJ0DWFw0wOTA4MDQxNTI1MzdaMAAwIQIOISMop3NkA4PfYwcnQNkXDTA5MDgwNDExMDAzNFowADAhAg56/BMoS29KEShTBydA2hcNMDkwODA0MTEwMTAzWjAAMCECDnBp/22HPH5CSWoHJ0DbFw0wOTA4MDQxMDU0NDlaMAAwIQIOV9IP+8CD8bK+XAcnQNwXDTA5MDgwNDEwNTcxN1owADAhAg4v5aRz0IxWqYiXBydA3RcNMDkwODA0MTA1NzQ1WjAAMCECDlOU34VzvZAybQwHJ0DeFw0wOTA4MDQxMDU4MjFaMAAwIAINO4CD9lluIxcwBydBAxcNMDkwNzIyMTUzMTU5WjAAMCECDgOllfO8Y1QA7/wHJ0ExFw0wOTA3MjQxMTQxNDNaMAAwIQIOJBX7jbiCdRdyjgcnQUQXDTA5MDkxNjA5MzAwOFowADAhAg5iYSAgmDrlH/RZBydBRRcNMDkwOTE2MDkzMDE3WjAAMCECDmu6k6srP3jcMaQHJ0FRFw0wOTA4MDQxMDU2NDBaMAAwIQIOX8aHlO0V+WVH4QcnQVMXDTA5MDgwNDEwNTcyOVowADAhAg5flK2rg3NnsRgDBydBzhcNMTEwMjAxMTUzMzQ2WjAAMCECDg35yJDL1jOPTgoHJ0HPFw0xMTAyMDExNTM0MjZaMAAwIQIOMyFJ6+e9iiGVBQcnQdAXDTA5MDkxODEzMjAwNVowADAhAg5Emb/Oykucmn8fBydB1xcNMDkwOTIxMTAxMDQ3WjAAMCECDjQKCncV+MnUavMHJ0HaFw0wOTA5MjIwODE1MjZaMAAwIQIOaxiFUt3dpd+tPwcnQfQXDTEwMDYxODA4NDI1MVowADAhAg5G7P8nO0tkrMt7BydB9RcNMTAwNjE4MDg0MjMwWjAAMCECDmTCC3SXhmDRst4HJ0H2Fw0wOTA5MjgxMjA3MjBaMAAwIQIOHoGhUr/pRwzTKgcnQfcXDTA5MDkyODEyMDcyNFowADAhAg50wrcrCiw8mQmPBydCBBcNMTAwMjE2MTMwMTA2WjAAMCECDifWmkvwyhEqwEcHJ0IFFw0xMDAyMTYxMzAxMjBaMAAwIQIOfgPmlW9fg+osNgcnQhwXDTEwMDQxMzA5NTIwMFowADAhAg4YHAGuA6LgCk7tBydCHRcNMTAwNDEzMDk1MTM4WjAAMCECDi1zH1bxkNJhokAHJ0IsFw0xMDA0MTMwOTU5MzBaMAAwIQIOMipNccsb/wo2fwcnQi0XDTEwMDQxMzA5NTkwMFowADAhAg46lCmvPl4GpP6ABydCShcNMTAwMTE5MDk1MjE3WjAAMCECDjaTcaj+wBpcGAsHJ0JLFw0xMDAxMTkwOTUyMzRaMAAwIQIOOMC13EOrBuxIOQcnQloXDTEwMDIwMTA5NDcwNVowADAhAg5KmZl+krz4RsmrBydCWxcNMTAwMjAxMDk0NjQwWjAAMCECDmLG3zQJ/fzdSsUHJ0JiFw0xMDAzMDEwOTUxNDBaMAAwIQIOP39ksgHdojf4owcnQmMXDTEwMDMwMTA5NTExN1owADAhAg4LDQzvWNRlD6v9BydCZBcNMTAwMzAxMDk0NjIyWjAAMCECDkmNfeclaFhIaaUHJ0JlFw0xMDAzMDEwOTQ2MDVaMAAwIQIOT/qWWfpH/m8NTwcnQpQXDTEwMDUxMTA5MTgyMVowADAhAg5m/ksYxvCEgJSvBydClRcNMTAwNTExMDkxODAxWjAAMCECDgvf3Ohq6JOPU9AHJ0KWFw0xMDA1MTEwOTIxMjNaMAAwIQIOKSPas10z4jNVIQcnQpcXDTEwMDUxMTA5MjEwMlowADAhAg4mCWmhoZ3lyKCDBydCohcNMTEwNDI4MTEwMjI1WjAAMCECDkeiyRsBMK0Gvr4HJ0KjFw0xMTA0MjgxMTAyMDdaMAAwIQIOa09b/nH2+55SSwcnQq4XDTExMDQwMTA4Mjk0NlowADAhAg5O7M7iq7gGplr1BydCrxcNMTEwNDAxMDgzMDE3WjAAMCECDjlT6mJxUjTvyogHJ0K1Fw0xMTAxMjcxNTQ4NTJaMAAwIQIODS/l4UUFLe21NAcnQrYXDTExMDEyNzE1NDgyOFowADAhAg5lPRA0XdOUF6lSBydDHhcNMTEwMTI4MTQzNTA1WjAAMCECDixKX4fFGGpENwgHJ0MfFw0xMTAxMjgxNDM1MzBaMAAwIQIORNBkqsPnpKTtbAcnQ08XDTEwMDkwOTA4NDg0MlowADAhAg5QL+EMM3lohedEBydDUBcNMTAwOTA5MDg0ODE5WjAAMCECDlhDnHK+HiTRAXcHJ0NUFw0xMDEwMTkxNjIxNDBaMAAwIQIOdBFqAzq/INz53gcnQ1UXDTEwMTAxOTE2MjA0NFowADAhAg4OjR7s8MgKles1BydDWhcNMTEwMTI3MTY1MzM2WjAAMCECDmfR/elHee+d0SoHJ0NbFw0xMTAxMjcxNjUzNTZaMAAwIQIOBTKv2ui+KFMI+wcnQ5YXDTEwMDkxNTEwMjE1N1owADAhAg49F3c/GSah+oRUBydDmxcNMTEwMTI3MTczMjMzWjAAMCECDggv4I61WwpKFMMHJ0OcFw0xMTAxMjcxNzMyNTVaMAAwIQIOXx/Y8sEvwS10LAcnQ6UXDTExMDEyODExMjkzN1owADAhAg5LSLbnVrSKaw/9BydDphcNMTEwMTI4MTEyOTIwWjAAMCECDmFFoCuhKUeACQQHJ0PfFw0xMTAxMTExMDE3MzdaMAAwIQIOQTDdFh2fSPF6AAcnQ+AXDTExMDExMTEwMTcxMFowADAhAg5B8AOXX61FpvbbBydD5RcNMTAxMDA2MTAxNDM2WjAAMCECDh41P2Gmi7PkwI4HJ0PmFw0xMDEwMDYxMDE2MjVaMAAwIQIOWUHGLQCd+Ale9gcnQ/0XDTExMDUwMjA3NTYxMFowADAhAg5Z2c9AYkikmgWOBydD/hcNMTEwNTAyMDc1NjM0WjAAMCECDmf/UD+/h8nf+74HJ0QVFw0xMTA0MTUwNzI4MzNaMAAwIQIOICvj4epy3MrqfwcnRBYXDTExMDQxNTA3Mjg1NlowADAhAg4bouRMfOYqgv4xBydEHxcNMTEwMzA4MTYyNDI1WjAAMCECDhebWHGoKiTp7pEHJ0QgFw0xMTAzMDgxNjI0NDhaMAAwIQIOX+qnxxAqJ8LtawcnRDcXDTExMDEzMTE1MTIyOFowADAhAg4j0fICqZ+wkOdqBydEOBcNMTEwMTMxMTUxMTQxWjAAMCECDhmXjsV4SUpWtAMHJ0RLFw0xMTAxMjgxMTI0MTJaMAAwIQIODno/w+zG43kkTwcnREwXDTExMDEyODExMjM1MlowADAhAg4b1gc88767Fr+LBydETxcNMTEwMTI4MTEwMjA4WjAAMCECDn+M3Pa1w2nyFeUHJ0RQFw0xMTAxMjgxMDU4NDVaMAAwIQIOaduoyIH61tqybAcnRJUXDTEwMTIxNTA5NDMyMlowADAhAg4nLqQPkyi3ESAKBydElhcNMTAxMjE1MDk0MzM2WjAAMCECDi504NIMH8578gQHJ0SbFw0xMTAyMTQxNDA1NDFaMAAwIQIOGuaM8PDaC5u1egcnRJwXDTExMDIxNDE0MDYwNFowADAhAg4ehYq/BXGnB5PWBydEnxcNMTEwMjA0MDgwOTUxWjAAMCECDkSD4eS4FxW5H20HJ0SgFw0xMTAyMDQwODA5MjVaMAAwIQIOOCcb6ilYObt1egcnRKEXDTExMDEyNjEwNDEyOVowADAhAg58tISWCCwFnKGnBydEohcNMTEwMjA0MDgxMzQyWjAAMCECDn5rjtabY/L/WL0HJ0TJFw0xMTAyMDQxMTAzNDFaMAAwDQYJKoZIhvcNAQEFBQADggEBAGnF2Gs0+LNiYCW1Ipm83OXQYP/bd5tFFRzyz3iepFqNfYs4D68/QihjFoRHQoXEB0OEe1tvaVnnPGnEOpi6krwekquMxo4H88B5SlyiFIqemCOIss0SxlCFs69LmfRYvPPvPEhoXtQ3ZThe0UvKG83GOklhvGl6OaiRf4Mt+m8zOT4Wox/j6aOBK6cw6qKCdmD+Yj1rrNqFGg1CnSWMoD6S6mwNgkzwdBUJZ22BwrzAAo4RHa2Uy3ef1FjwD0XtU5N3uDSxGGBEDvOe5z82rps3E22FpAA8eYl8kaXtmWqyvYU0epp4brGuTxCuBMCAsxt/OjIjeNNQbBGkwxgfYA0="u8;
+internal static ref readonly @string derCRLBase64 => ref derCRLBase64ᵇ;
+private static readonly @string derCRLBase64ᵇ = "MIINqzCCDJMCAQEwDQYJKoZIhvcNAQEFBQAwVjEZMBcGA1UEAxMQUEtJIEZJTk1FQ0NBTklDQTEVMBMGA1UEChMMRklOTUVDQ0FOSUNBMRUwEwYDVQQLEwxGSU5NRUNDQU5JQ0ExCzAJBgNVBAYTAklUFw0xMTA1MDQxNjU3NDJaFw0xMTA1MDQyMDU3NDJaMIIMBzAhAg4Ze1od49Lt1qIXBydAzhcNMDkwNzE2MDg0MzIyWjAAMCECDl0HSL9bcZ1Ci/UHJ0DPFw0wOTA3MTYwODQzMTNaMAAwIQIOESB9tVAmX3cY7QcnQNAXDTA5MDcxNjA4NDUyMlowADAhAg4S1tGAQ3mHt8uVBydA1RcNMDkwODA0MTUyNTIyWjAAMCECDlQ249Y7vtC25ScHJ0DWFw0wOTA4MDQxNTI1MzdaMAAwIQIOISMop3NkA4PfYwcnQNkXDTA5MDgwNDExMDAzNFowADAhAg56/BMoS29KEShTBydA2hcNMDkwODA0MTEwMTAzWjAAMCECDnBp/22HPH5CSWoHJ0DbFw0wOTA4MDQxMDU0NDlaMAAwIQIOV9IP+8CD8bK+XAcnQNwXDTA5MDgwNDEwNTcxN1owADAhAg4v5aRz0IxWqYiXBydA3RcNMDkwODA0MTA1NzQ1WjAAMCECDlOU34VzvZAybQwHJ0DeFw0wOTA4MDQxMDU4MjFaMAAwIAINO4CD9lluIxcwBydBAxcNMDkwNzIyMTUzMTU5WjAAMCECDgOllfO8Y1QA7/wHJ0ExFw0wOTA3MjQxMTQxNDNaMAAwIQIOJBX7jbiCdRdyjgcnQUQXDTA5MDkxNjA5MzAwOFowADAhAg5iYSAgmDrlH/RZBydBRRcNMDkwOTE2MDkzMDE3WjAAMCECDmu6k6srP3jcMaQHJ0FRFw0wOTA4MDQxMDU2NDBaMAAwIQIOX8aHlO0V+WVH4QcnQVMXDTA5MDgwNDEwNTcyOVowADAhAg5flK2rg3NnsRgDBydBzhcNMTEwMjAxMTUzMzQ2WjAAMCECDg35yJDL1jOPTgoHJ0HPFw0xMTAyMDExNTM0MjZaMAAwIQIOMyFJ6+e9iiGVBQcnQdAXDTA5MDkxODEzMjAwNVowADAhAg5Emb/Oykucmn8fBydB1xcNMDkwOTIxMTAxMDQ3WjAAMCECDjQKCncV+MnUavMHJ0HaFw0wOTA5MjIwODE1MjZaMAAwIQIOaxiFUt3dpd+tPwcnQfQXDTEwMDYxODA4NDI1MVowADAhAg5G7P8nO0tkrMt7BydB9RcNMTAwNjE4MDg0MjMwWjAAMCECDmTCC3SXhmDRst4HJ0H2Fw0wOTA5MjgxMjA3MjBaMAAwIQIOHoGhUr/pRwzTKgcnQfcXDTA5MDkyODEyMDcyNFowADAhAg50wrcrCiw8mQmPBydCBBcNMTAwMjE2MTMwMTA2WjAAMCECDifWmkvwyhEqwEcHJ0IFFw0xMDAyMTYxMzAxMjBaMAAwIQIOfgPmlW9fg+osNgcnQhwXDTEwMDQxMzA5NTIwMFowADAhAg4YHAGuA6LgCk7tBydCHRcNMTAwNDEzMDk1MTM4WjAAMCECDi1zH1bxkNJhokAHJ0IsFw0xMDA0MTMwOTU5MzBaMAAwIQIOMipNccsb/wo2fwcnQi0XDTEwMDQxMzA5NTkwMFowADAhAg46lCmvPl4GpP6ABydCShcNMTAwMTE5MDk1MjE3WjAAMCECDjaTcaj+wBpcGAsHJ0JLFw0xMDAxMTkwOTUyMzRaMAAwIQIOOMC13EOrBuxIOQcnQloXDTEwMDIwMTA5NDcwNVowADAhAg5KmZl+krz4RsmrBydCWxcNMTAwMjAxMDk0NjQwWjAAMCECDmLG3zQJ/fzdSsUHJ0JiFw0xMDAzMDEwOTUxNDBaMAAwIQIOP39ksgHdojf4owcnQmMXDTEwMDMwMTA5NTExN1owADAhAg4LDQzvWNRlD6v9BydCZBcNMTAwMzAxMDk0NjIyWjAAMCECDkmNfeclaFhIaaUHJ0JlFw0xMDAzMDEwOTQ2MDVaMAAwIQIOT/qWWfpH/m8NTwcnQpQXDTEwMDUxMTA5MTgyMVowADAhAg5m/ksYxvCEgJSvBydClRcNMTAwNTExMDkxODAxWjAAMCECDgvf3Ohq6JOPU9AHJ0KWFw0xMDA1MTEwOTIxMjNaMAAwIQIOKSPas10z4jNVIQcnQpcXDTEwMDUxMTA5MjEwMlowADAhAg4mCWmhoZ3lyKCDBydCohcNMTEwNDI4MTEwMjI1WjAAMCECDkeiyRsBMK0Gvr4HJ0KjFw0xMTA0MjgxMTAyMDdaMAAwIQIOa09b/nH2+55SSwcnQq4XDTExMDQwMTA4Mjk0NlowADAhAg5O7M7iq7gGplr1BydCrxcNMTEwNDAxMDgzMDE3WjAAMCECDjlT6mJxUjTvyogHJ0K1Fw0xMTAxMjcxNTQ4NTJaMAAwIQIODS/l4UUFLe21NAcnQrYXDTExMDEyNzE1NDgyOFowADAhAg5lPRA0XdOUF6lSBydDHhcNMTEwMTI4MTQzNTA1WjAAMCECDixKX4fFGGpENwgHJ0MfFw0xMTAxMjgxNDM1MzBaMAAwIQIORNBkqsPnpKTtbAcnQ08XDTEwMDkwOTA4NDg0MlowADAhAg5QL+EMM3lohedEBydDUBcNMTAwOTA5MDg0ODE5WjAAMCECDlhDnHK+HiTRAXcHJ0NUFw0xMDEwMTkxNjIxNDBaMAAwIQIOdBFqAzq/INz53gcnQ1UXDTEwMTAxOTE2MjA0NFowADAhAg4OjR7s8MgKles1BydDWhcNMTEwMTI3MTY1MzM2WjAAMCECDmfR/elHee+d0SoHJ0NbFw0xMTAxMjcxNjUzNTZaMAAwIQIOBTKv2ui+KFMI+wcnQ5YXDTEwMDkxNTEwMjE1N1owADAhAg49F3c/GSah+oRUBydDmxcNMTEwMTI3MTczMjMzWjAAMCECDggv4I61WwpKFMMHJ0OcFw0xMTAxMjcxNzMyNTVaMAAwIQIOXx/Y8sEvwS10LAcnQ6UXDTExMDEyODExMjkzN1owADAhAg5LSLbnVrSKaw/9BydDphcNMTEwMTI4MTEyOTIwWjAAMCECDmFFoCuhKUeACQQHJ0PfFw0xMTAxMTExMDE3MzdaMAAwIQIOQTDdFh2fSPF6AAcnQ+AXDTExMDExMTEwMTcxMFowADAhAg5B8AOXX61FpvbbBydD5RcNMTAxMDA2MTAxNDM2WjAAMCECDh41P2Gmi7PkwI4HJ0PmFw0xMDEwMDYxMDE2MjVaMAAwIQIOWUHGLQCd+Ale9gcnQ/0XDTExMDUwMjA3NTYxMFowADAhAg5Z2c9AYkikmgWOBydD/hcNMTEwNTAyMDc1NjM0WjAAMCECDmf/UD+/h8nf+74HJ0QVFw0xMTA0MTUwNzI4MzNaMAAwIQIOICvj4epy3MrqfwcnRBYXDTExMDQxNTA3Mjg1NlowADAhAg4bouRMfOYqgv4xBydEHxcNMTEwMzA4MTYyNDI1WjAAMCECDhebWHGoKiTp7pEHJ0QgFw0xMTAzMDgxNjI0NDhaMAAwIQIOX+qnxxAqJ8LtawcnRDcXDTExMDEzMTE1MTIyOFowADAhAg4j0fICqZ+wkOdqBydEOBcNMTEwMTMxMTUxMTQxWjAAMCECDhmXjsV4SUpWtAMHJ0RLFw0xMTAxMjgxMTI0MTJaMAAwIQIODno/w+zG43kkTwcnREwXDTExMDEyODExMjM1MlowADAhAg4b1gc88767Fr+LBydETxcNMTEwMTI4MTEwMjA4WjAAMCECDn+M3Pa1w2nyFeUHJ0RQFw0xMTAxMjgxMDU4NDVaMAAwIQIOaduoyIH61tqybAcnRJUXDTEwMTIxNTA5NDMyMlowADAhAg4nLqQPkyi3ESAKBydElhcNMTAxMjE1MDk0MzM2WjAAMCECDi504NIMH8578gQHJ0SbFw0xMTAyMTQxNDA1NDFaMAAwIQIOGuaM8PDaC5u1egcnRJwXDTExMDIxNDE0MDYwNFowADAhAg4ehYq/BXGnB5PWBydEnxcNMTEwMjA0MDgwOTUxWjAAMCECDkSD4eS4FxW5H20HJ0SgFw0xMTAyMDQwODA5MjVaMAAwIQIOOCcb6ilYObt1egcnRKEXDTExMDEyNjEwNDEyOVowADAhAg58tISWCCwFnKGnBydEohcNMTEwMjA0MDgxMzQyWjAAMCECDn5rjtabY/L/WL0HJ0TJFw0xMTAyMDQxMTAzNDFaMAAwDQYJKoZIhvcNAQEFBQADggEBAGnF2Gs0+LNiYCW1Ipm83OXQYP/bd5tFFRzyz3iepFqNfYs4D68/QihjFoRHQoXEB0OEe1tvaVnnPGnEOpi6krwekquMxo4H88B5SlyiFIqemCOIss0SxlCFs69LmfRYvPPvPEhoXtQ3ZThe0UvKG83GOklhvGl6OaiRf4Mt+m8zOT4Wox/j6aOBK6cw6qKCdmD+Yj1rrNqFGg1CnSWMoD6S6mwNgkzwdBUJZ22BwrzAAo4RHa2Uy3ef1FjwD0XtU5N3uDSxGGBEDvOe5z82rps3E22FpAA8eYl8kaXtmWqyvYU0epp4brGuTxCuBMCAsxt/OjIjeNNQbBGkwxgfYA0="u8;
 
-internal static readonly @string pemCRLBase64 = "LS0tLS1CRUdJTiBYNTA5IENSTC0tLS0tDQpNSUlCOWpDQ0FWOENBUUV3RFFZSktvWklodmNOQVFFRkJRQXdiREVhTUJnR0ExVUVDaE1SVWxOQklGTmxZM1Z5DQphWFI1SUVsdVl5NHhIakFjQmdOVkJBTVRGVkpUUVNCUWRXSnNhV01nVW05dmRDQkRRU0IyTVRFdU1Dd0dDU3FHDQpTSWIzRFFFSkFSWWZjbk5oYTJWdmJuSnZiM1J6YVdkdVFISnpZWE5sWTNWeWFYUjVMbU52YlJjTk1URXdNakl6DQpNVGt5T0RNd1doY05NVEV3T0RJeU1Ua3lPRE13V2pDQmpEQktBaEVBckRxb2g5RkhKSFhUN09QZ3V1bjQrQmNODQpNRGt4TVRBeU1UUXlOekE1V2pBbU1Bb0dBMVVkRlFRRENnRUpNQmdHQTFVZEdBUVJHQTh5TURBNU1URXdNakUwDQpNalExTlZvd1BnSVJBTEd6blowOTVQQjVhQU9MUGc1N2ZNTVhEVEF5TVRBeU16RTBOVEF4TkZvd0dqQVlCZ05WDQpIUmdFRVJnUE1qQXdNakV3TWpNeE5EVXdNVFJhb0RBd0xqQWZCZ05WSFNNRUdEQVdnQlQxVERGNlVRTS9MTmVMDQpsNWx2cUhHUXEzZzltekFMQmdOVkhSUUVCQUlDQUlRd0RRWUpLb1pJaHZjTkFRRUZCUUFEZ1lFQUZVNUFzNk16DQpxNVBSc2lmYW9iUVBHaDFhSkx5QytNczVBZ2MwYld5QTNHQWR4dXI1U3BQWmVSV0NCamlQL01FSEJXSkNsQkhQDQpHUmNxNXlJZDNFakRrYUV5eFJhK2k2N0x6dmhJNmMyOUVlNks5cFNZd2ppLzdSVWhtbW5Qclh0VHhsTDBsckxyDQptUVFKNnhoRFJhNUczUUE0Q21VZHNITnZicnpnbUNZcHZWRT0NCi0tLS0tRU5EIFg1MDkgQ1JMLS0tLS0NCg0K"u8;
+internal static ref readonly @string pemCRLBase64 => ref pemCRLBase64ᵇ;
+private static readonly @string pemCRLBase64ᵇ = "LS0tLS1CRUdJTiBYNTA5IENSTC0tLS0tDQpNSUlCOWpDQ0FWOENBUUV3RFFZSktvWklodmNOQVFFRkJRQXdiREVhTUJnR0ExVUVDaE1SVWxOQklGTmxZM1Z5DQphWFI1SUVsdVl5NHhIakFjQmdOVkJBTVRGVkpUUVNCUWRXSnNhV01nVW05dmRDQkRRU0IyTVRFdU1Dd0dDU3FHDQpTSWIzRFFFSkFSWWZjbk5oYTJWdmJuSnZiM1J6YVdkdVFISnpZWE5sWTNWeWFYUjVMbU52YlJjTk1URXdNakl6DQpNVGt5T0RNd1doY05NVEV3T0RJeU1Ua3lPRE13V2pDQmpEQktBaEVBckRxb2g5RkhKSFhUN09QZ3V1bjQrQmNODQpNRGt4TVRBeU1UUXlOekE1V2pBbU1Bb0dBMVVkRlFRRENnRUpNQmdHQTFVZEdBUVJHQTh5TURBNU1URXdNakUwDQpNalExTlZvd1BnSVJBTEd6blowOTVQQjVhQU9MUGc1N2ZNTVhEVEF5TVRBeU16RTBOVEF4TkZvd0dqQVlCZ05WDQpIUmdFRVJnUE1qQXdNakV3TWpNeE5EVXdNVFJhb0RBd0xqQWZCZ05WSFNNRUdEQVdnQlQxVERGNlVRTS9MTmVMDQpsNWx2cUhHUXEzZzltekFMQmdOVkhSUUVCQUlDQUlRd0RRWUpLb1pJaHZjTkFRRUZCUUFEZ1lFQUZVNUFzNk16DQpxNVBSc2lmYW9iUVBHaDFhSkx5QytNczVBZ2MwYld5QTNHQWR4dXI1U3BQWmVSV0NCamlQL01FSEJXSkNsQkhQDQpHUmNxNXlJZDNFakRrYUV5eFJhK2k2N0x6dmhJNmMyOUVlNks5cFNZd2ppLzdSVWhtbW5Qclh0VHhsTDBsckxyDQptUVFKNnhoRFJhNUczUUE0Q21VZHNITnZicnpnbUNZcHZWRT0NCi0tLS0tRU5EIFg1MDkgQ1JMLS0tLS0NCg0K"u8;
 
 internal partial struct TestCreateCertificateRequest_tests /*dyn*/ {
     internal @string name;
@@ -1570,170 +1582,162 @@ internal partial struct TestCreateCertificateRequest_tests /*dyn*/ {
     internal global::go.crypto.x509_package.SignatureAlgorithm sigAlgo;
 }
 
-public static void TestCreateCertificateRequest(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestCreateCertificateRequest(ж<testing.T> t) {
     var random = rand.Reader;
 
     var (ecdsa256Priv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to generate ECDSA key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Failed to generate ECDSA key: %s", err);
     }
 
     (var ecdsa384Priv, err) = ecdsa.GenerateKey(elliptic.P384(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to generate ECDSA key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Failed to generate ECDSA key: %s", err);
     }
 
     (var ecdsa521Priv, err) = ecdsa.GenerateKey(elliptic.P521(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to generate ECDSA key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Failed to generate ECDSA key: %s", err);
     }
 
     (_, var ed25519Priv, err) = ed25519.GenerateKey(random);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to generate Ed25519 key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Failed to generate Ed25519 key: %s", err);
     }
 
-    var tests = new TestCreateCertificateRequest_tests[]{
-        new("RSA"u8, testPrivateKey.OrTypedNil(), SHA256WithRSA),
-        new("RSA-PSS-SHA256"u8, testPrivateKey.OrTypedNil(), SHA256WithRSAPSS),
-        new("ECDSA-256"u8, ecdsa256Priv.OrTypedNil(), ECDSAWithSHA256),
-        new("ECDSA-384"u8, ecdsa384Priv.OrTypedNil(), ECDSAWithSHA256),
-        new("ECDSA-521"u8, ecdsa521Priv.OrTypedNil(), ECDSAWithSHA256),
-        new("Ed25519"u8, ed25519Priv, PureEd25519)
-    }.slice();
+    var tests = slice<TestCreateCertificateRequest_tests>([
+        new("RSA", testPrivateKey.OrTypedNil(), SHA256WithRSA),
+        new("RSA-PSS-SHA256", testPrivateKey.OrTypedNil(), SHA256WithRSAPSS),
+        new("ECDSA-256", ecdsa256Priv.OrTypedNil(), ECDSAWithSHA256),
+        new("ECDSA-384", ecdsa384Priv.OrTypedNil(), ECDSAWithSHA256),
+        new("ECDSA-521", ecdsa521Priv.OrTypedNil(), ECDSAWithSHA256),
+        new("Ed25519", ed25519Priv, PureEd25519)
+    ]);
 
     foreach (var (_, test) in tests) {
-        ref var template = ref heap<global::go.crypto.x509_package.CertificateRequest>(out var Ꮡtemplate);
-        template = new CertificateRequest(
+        ref var template = ref heap<global::go.crypto.x509_package.CertificateRequest>(new CertificateRequest(
             Subject: new pkix.Name(
-                CommonName: "test.example.com"u8,
-                Organization: new @string[]{"Σ Acme Co"u8}.slice()
+                CommonName: "test.example.com",
+                Organization: slice<@string>(["Σ Acme Co"])
             ),
             SignatureAlgorithm: test.sigAlgo,
-            DNSNames: new @string[]{"test.example.com"u8}.slice(),
-            EmailAddresses: new @string[]{"gopher@golang.org"u8}.slice(),
-            IPAddresses: new net.IP[]{net.IPv4(127, 0, 0, 1).To4(), net.ParseIP("2001:4860:0:2001::68"u8)}.slice()
-        );
+            DNSNames: slice<@string>(["test.example.com"]),
+            EmailAddresses: slice<@string>(["gopher@golang.org"]),
+            IPAddresses: slice<net.IP>([net.IPv4(127, 0, 0, 1).To4(), net.ParseIP("2001:4860:0:2001::68")])
+        ), out var Ꮡtemplate);
 
         var (derBytes, errΔ1) = CreateCertificateRequest(random, Ꮡtemplate, test.priv);
-        if (errΔ1 != default!) {
-            Ꮡt.Errorf("%s: failed to create certificate request: %s"u8, test.name, errΔ1);
+        if (errΔ1 != nil) {
+            t.Errorf("%s: failed to create certificate request: %s", test.name, errΔ1);
             continue;
         }
 
         (var @out, errΔ1) = ParseCertificateRequest(derBytes);
-        if (errΔ1 != default!) {
-            Ꮡt.Errorf("%s: failed to create certificate request: %s"u8, test.name, errΔ1);
+        if (errΔ1 != nil) {
+            t.Errorf("%s: failed to create certificate request: %s", test.name, errΔ1);
             continue;
         }
 
         errΔ1 = @out.CheckSignature();
-        if (errΔ1 != default!) {
-            Ꮡt.Errorf("%s: failed to check certificate request signature: %s"u8, test.name, errΔ1);
+        if (errΔ1 != nil) {
+            t.Errorf("%s: failed to check certificate request signature: %s", test.name, errΔ1);
             continue;
         }
 
-        if ((~@out).Subject.CommonName != template.Subject.CommonName){
-            Ꮡt.Errorf("%s: output subject common name and template subject common name don't match"u8, test.name);
-        } else 
-        if (builtin.len((~@out).Subject.Organization) != builtin.len(template.Subject.Organization)){
-            Ꮡt.Errorf("%s: output subject organisation and template subject organisation don't match"u8, test.name);
-        } else 
-        if (builtin.len((~@out).DNSNames) != builtin.len(template.DNSNames)){
-            Ꮡt.Errorf("%s: output DNS names and template DNS names don't match"u8, test.name);
-        } else 
-        if (builtin.len((~@out).EmailAddresses) != builtin.len(template.EmailAddresses)){
-            Ꮡt.Errorf("%s: output email addresses and template email addresses don't match"u8, test.name);
-        } else 
-        if (builtin.len((~@out).IPAddresses) != builtin.len(template.IPAddresses)) {
-            Ꮡt.Errorf("%s: output IP addresses and template IP addresses names don't match"u8, test.name);
+        if (@out.Subject.CommonName != template.Subject.CommonName) {
+            t.Errorf("%s: output subject common name and template subject common name don't match", test.name);
+        } else if (builtin.len(@out.Subject.Organization) != builtin.len(template.Subject.Organization)) {
+            t.Errorf("%s: output subject organisation and template subject organisation don't match", test.name);
+        } else if (builtin.len(@out.DNSNames) != builtin.len(template.DNSNames)) {
+            t.Errorf("%s: output DNS names and template DNS names don't match", test.name);
+        } else if (builtin.len(@out.EmailAddresses) != builtin.len(template.EmailAddresses)) {
+            t.Errorf("%s: output email addresses and template email addresses don't match", test.name);
+        } else if (builtin.len(@out.IPAddresses) != builtin.len(template.IPAddresses)) {
+            t.Errorf("%s: output IP addresses and template IP addresses names don't match", test.name);
         }
     }
 }
 
-internal static ж<global::go.crypto.x509_package.CertificateRequest> marshalAndParseCSR(ж<testing.T> Ꮡt, ж<global::go.crypto.x509_package.CertificateRequest> Ꮡtemplate) {
-    Ꮡt.Helper();
-    var (derBytes, err) = CreateCertificateRequest(rand.Reader, Ꮡtemplate, testPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+internal static ж<global::go.crypto.x509_package.CertificateRequest> marshalAndParseCSR(ж<testing.T> t, ж<global::go.crypto.x509_package.CertificateRequest> template) {
+    t.Helper();
+    var (derBytes, err) = CreateCertificateRequest(rand.Reader, template, testPrivateKey.OrTypedNil());
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     (var csr, err) = ParseCertificateRequest(derBytes);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     return csr;
 }
 
-public static void TestCertificateRequestOverrides(ж<testing.T> Ꮡt) {
-    var (sanContents, err) = marshalSANs(new @string[]{"foo.example.com"u8}.slice(), default!, default!, default!);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+public static void TestCertificateRequestOverrides(ж<testing.T> t) {
+    var (sanContents, err) = marshalSANs(slice<@string>(["foo.example.com"]), default, default, default);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    ref var template = ref heap<global::go.crypto.x509_package.CertificateRequest>(out var Ꮡtemplate);
-    template = new CertificateRequest(
+    ref var template = ref heap<global::go.crypto.x509_package.CertificateRequest>(new CertificateRequest(
         Subject: new pkix.Name(
-            CommonName: "test.example.com"u8,
-            Organization: new @string[]{"Σ Acme Co"u8}.slice()
+            CommonName: "test.example.com",
+            Organization: slice<@string>(["Σ Acme Co"])
         ),
-        DNSNames: new @string[]{"test.example.com"u8}.slice(),
+        DNSNames: slice<@string>(["test.example.com"]),
 
         // An explicit extension should override the DNSNames from the
         // template.
-        ExtraExtensions: new pkix.Extension[]{
+        ExtraExtensions: slice<pkix.Extension>([
             new(
                 Id: oidExtensionSubjectAltName,
                 Value: sanContents,
                 Critical: true
             )
-        }.slice()
-    );
+        ])
+    ), out var Ꮡtemplate);
 
-    var csr = marshalAndParseCSR(Ꮡt, Ꮡtemplate);
+    var csr = marshalAndParseCSR(t, Ꮡtemplate);
 
-    if (builtin.len((~csr).DNSNames) != 1 || (~csr).DNSNames[0] != "foo.example.com") {
-        Ꮡt.Errorf("Extension did not override template. Got %v\n"u8, (~csr).DNSNames);
+    if (builtin.len(csr.DNSNames) != 1 || csr.DNSNames[0] != "foo.example.com") {
+        t.Errorf("Extension did not override template. Got %v\n", csr.DNSNames);
     }
 
-    if (builtin.len((~csr).Extensions) != 1 || !(~csr).Extensions[0].Id.Equal(oidExtensionSubjectAltName) || !(~csr).Extensions[0].Critical) {
-        Ꮡt.Errorf("SAN extension was not faithfully copied, got %#v"u8, (~csr).Extensions);
+    if (builtin.len(csr.Extensions) != 1 || !csr.Extensions[0].Id.Equal(oidExtensionSubjectAltName) || !csr.Extensions[0].Critical) {
+        t.Errorf("SAN extension was not faithfully copied, got %#v", csr.Extensions);
     }
 
     // If there is already an attribute with X.509 extensions then the
     // extra extensions should be added to it rather than creating a CSR
     // with two extension attributes.
 
-    template.Attributes = new pkix.AttributeTypeAndValueSET[]{
+    template.Attributes = slice<pkix.AttributeTypeAndValueSET>([
         new(
             Type: oidExtensionRequest,
-            Value: new slice<pkix.AttributeTypeAndValue>[]{
-                new pkix.AttributeTypeAndValue[]{
+            Value: slice<slice<pkix.AttributeTypeAndValue>>([
+                slice<pkix.AttributeTypeAndValue>([
                     new(
                         Type: oidExtensionAuthorityInfoAccess,
                         Value: slice<byte>("foo"u8)
-                    )}.slice()
-            }.slice()
+                    )])
+            ])
         )
-    }.slice();
+    ]);
 
-    csr = marshalAndParseCSR(Ꮡt, Ꮡtemplate);
+    csr = marshalAndParseCSR(t, Ꮡtemplate);
     {
-        nint l = builtin.len((~csr).Attributes); if (l != 1) {
-            Ꮡt.Errorf("incorrect number of attributes: %d\n"u8, l);
+        nint l = builtin.len(csr.Attributes); if (l != 1) {
+            t.Errorf("incorrect number of attributes: %d\n", l);
         }
     }
 
-    if (!(~csr).Attributes[0].Type.Equal(oidExtensionRequest) || builtin.len((~csr).Attributes[0].Value) != 1 || builtin.len((~csr).Attributes[0].Value[0]) != 2) {
-        Ꮡt.Errorf("bad attributes: %#v\n"u8, (~csr).Attributes);
+    if (!csr.Attributes[0].Type.Equal(oidExtensionRequest) || builtin.len(csr.Attributes[0].Value) != 1 || builtin.len(csr.Attributes[0].Value[0]) != 2) {
+        t.Errorf("bad attributes: %#v\n", csr.Attributes);
     }
 
-    (var sanContents2, err) = marshalSANs(new @string[]{"foo2.example.com"u8}.slice(), default!, default!, default!);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var sanContents2, err) = marshalSANs(slice<@string>(["foo2.example.com"]), default, default, default);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // Extensions in Attributes should override those in ExtraExtensions.
@@ -1742,105 +1746,108 @@ public static void TestCertificateRequestOverrides(ж<testing.T> Ꮡt) {
         Value: sanContents2
     ));
 
-    csr = marshalAndParseCSR(Ꮡt, Ꮡtemplate);
+    csr = marshalAndParseCSR(t, Ꮡtemplate);
 
-    if (builtin.len((~csr).DNSNames) != 1 || (~csr).DNSNames[0] != "foo2.example.com") {
-        Ꮡt.Errorf("Attributes did not override ExtraExtensions. Got %v\n"u8, (~csr).DNSNames);
+    if (builtin.len(csr.DNSNames) != 1 || csr.DNSNames[0] != "foo2.example.com") {
+        t.Errorf("Attributes did not override ExtraExtensions. Got %v\n", csr.DNSNames);
     }
 }
 
-public static void TestParseCertificateRequest(ж<testing.T> Ꮡt) {
+public static void TestParseCertificateRequest(ж<testing.T> t) {
     foreach (var (_, csrBase64) in csrBase64Array.ΔRangeSnapshot()) {
         var csrBytes = fromBase64(csrBase64);
         var (csr, err) = ParseCertificateRequest(csrBytes);
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to parse CSR: %s"u8, err);
+        if (err != nil) {
+            t.Fatalf("failed to parse CSR: %s", err);
         }
 
-        if (builtin.len((~csr).EmailAddresses) != 1 || (~csr).EmailAddresses[0] != "gopher@golang.org") {
-            Ꮡt.Errorf("incorrect email addresses found: %v"u8, (~csr).EmailAddresses);
+        if (builtin.len(csr.EmailAddresses) != 1 || csr.EmailAddresses[0] != "gopher@golang.org") {
+            t.Errorf("incorrect email addresses found: %v", csr.EmailAddresses);
         }
 
-        if (builtin.len((~csr).DNSNames) != 1 || (~csr).DNSNames[0] != "test.example.com") {
-            Ꮡt.Errorf("incorrect DNS names found: %v"u8, (~csr).DNSNames);
+        if (builtin.len(csr.DNSNames) != 1 || csr.DNSNames[0] != "test.example.com") {
+            t.Errorf("incorrect DNS names found: %v", csr.DNSNames);
         }
 
-        if (builtin.len((~csr).Subject.Country) != 1 || (~csr).Subject.Country[0] != "AU") {
-            Ꮡt.Errorf("incorrect Subject name: %v"u8, (~csr).Subject);
+        if (builtin.len(csr.Subject.Country) != 1 || csr.Subject.Country[0] != "AU") {
+            t.Errorf("incorrect Subject name: %v", csr.Subject);
         }
 
         var found = false;
-        foreach (var (_, e) in (~csr).Extensions) {
+        foreach (var (_, e) in csr.Extensions) {
             if (e.Id.Equal(oidExtensionBasicConstraints)) {
                 found = true;
                 break;
             }
         }
         if (!found) {
-            Ꮡt.Errorf("basic constraints extension not found in CSR"u8);
+            t.Errorf("basic constraints extension not found in CSR");
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string maybAf8CAQAˢ = "MAYBAf8CAQA="u8;
-internal static readonly @string awIChAˢ = "AwIChA=="u8;
+internal static ref readonly @string maybAf8CAQAˢ => ref maybAf8CAQAˢᵇ;
+private static readonly @string maybAf8CAQAˢᵇ = "MAYBAf8CAQA="u8;
+internal static ref readonly @string awIChAˢ => ref awIChAˢᵇ;
+private static readonly @string awIChAˢᵇ = "AwIChA=="u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string csrBase64ᶜ = "MIICrTCCAZUCAQIwMzEgMB4GA1UEAwwXU0NFUCBDQSBmb3IgRGV2ZWxlciBTcmwxDzANBgNVBAsMBjQzNTk3MTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALFMAJ7Zy9YyfgbNlbUWAW0LalNRMPs7aXmLANsCpjhnw3lLlfDPaLeWyKh1nK5I5ojaJOW6KIOSAcJkDUe3rrE0wR0RVt3UxArqs0R/ND3u5Q+bDQY2X1HAFUHzUzcdm5JRAIA355v90teMckaWAIlkRQjDE22Lzc6NAl64KOd1rqOUNj8+PfX6fSo20jm94Pp1+a6mfk3G/RUWVuSm7owO5DZI/Fsi2ijdmb4NUar6K/bDKYTrDFkzcqAyMfP3TitUtBp19Mp3B1yAlHjlbp/r5fSSXfOGHZdgIvp0WkLuK2u5eQrX5l7HMB/5epgUs3HQxKY6ljhh5wAjDwz//LsCAwEAAaA1MDMGCSqGSIb3DQEJDjEmMCQwEgYDVR0TAQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQEFBQADggEBAAMq3bxJSPQEgzLYR/yaVvgjCDrc3zUbIwdOis6Go06Q4RnjH5yRaSZAqZQTDsPurQcnz2I39VMGEiSkFJFavf4QHIZ7QFLkyXadMtALc87tm17Ej719SbHcBSSZayR9VYJUNXRLayI6HvyUrmqcMKh+iX3WY3ICr59/wlM0tYa8DYN4yzmOa2Onb29gy3YlaF5A2AKAMmk003cRT9gY26mjpv7d21czOSSeNyVIoZ04IR9ee71vWTMdv0hu/af5kSjQ+ZG5/Qgc0+mnECLz/1gtxt1srLYbtYQ/qAY8oX1DCSGFS61tN/vl+4cxGMD/VGcGzADRLRHSlVqy2Qgss6Q="u8;
+internal static ref readonly @string csrBase64ᶜ => ref csrBase64ᶜᵇ;
+private static readonly @string csrBase64ᶜᵇ = "MIICrTCCAZUCAQIwMzEgMB4GA1UEAwwXU0NFUCBDQSBmb3IgRGV2ZWxlciBTcmwxDzANBgNVBAsMBjQzNTk3MTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALFMAJ7Zy9YyfgbNlbUWAW0LalNRMPs7aXmLANsCpjhnw3lLlfDPaLeWyKh1nK5I5ojaJOW6KIOSAcJkDUe3rrE0wR0RVt3UxArqs0R/ND3u5Q+bDQY2X1HAFUHzUzcdm5JRAIA355v90teMckaWAIlkRQjDE22Lzc6NAl64KOd1rqOUNj8+PfX6fSo20jm94Pp1+a6mfk3G/RUWVuSm7owO5DZI/Fsi2ijdmb4NUar6K/bDKYTrDFkzcqAyMfP3TitUtBp19Mp3B1yAlHjlbp/r5fSSXfOGHZdgIvp0WkLuK2u5eQrX5l7HMB/5epgUs3HQxKY6ljhh5wAjDwz//LsCAwEAAaA1MDMGCSqGSIb3DQEJDjEmMCQwEgYDVR0TAQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQEFBQADggEBAAMq3bxJSPQEgzLYR/yaVvgjCDrc3zUbIwdOis6Go06Q4RnjH5yRaSZAqZQTDsPurQcnz2I39VMGEiSkFJFavf4QHIZ7QFLkyXadMtALc87tm17Ej719SbHcBSSZayR9VYJUNXRLayI6HvyUrmqcMKh+iX3WY3ICr59/wlM0tYa8DYN4yzmOa2Onb29gy3YlaF5A2AKAMmk003cRT9gY26mjpv7d21czOSSeNyVIoZ04IR9ee71vWTMdv0hu/af5kSjQ+ZG5/Qgc0+mnECLz/1gtxt1srLYbtYQ/qAY8oX1DCSGFS61tN/vl+4cxGMD/VGcGzADRLRHSlVqy2Qgss6Q="u8;
 
 internal partial struct TestCriticalFlagInCSRRequestedExtensions_expected /*dyn*/ {
     public asn1.ObjectIdentifier Id;
     public slice<byte> Value;
 }
 
-public static void TestCriticalFlagInCSRRequestedExtensions(ж<testing.T> Ꮡt) {
+public static void TestCriticalFlagInCSRRequestedExtensions(ж<testing.T> t) {
     // This CSR contains an extension request where the extensions have a
     // critical flag in them. In the past we failed to handle this.
     @string csrBase64 = csrBase64ᶜ;
 
     var csrBytes = fromBase64(csrBase64);
     var (csr, err) = ParseCertificateRequest(csrBytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse CSR: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse CSR: %s", err);
     }
 
-    var expected = new TestCriticalFlagInCSRRequestedExtensions_expected[]{
+    var expected = slice<TestCriticalFlagInCSRRequestedExtensions_expected>([
         new(oidExtensionBasicConstraints, fromBase64(maybAf8CAQAˢ)),
         new(oidExtensionKeyUsage, fromBase64(awIChAˢ))
-    }.slice();
+    ]);
 
     {
-        nint n = builtin.len((~csr).Extensions); if (n != builtin.len(expected)) {
-            Ꮡt.Fatalf("expected to find %d extensions but found %d"u8, builtin.len(expected), n);
+        nint n = builtin.len(csr.Extensions); if (n != builtin.len(expected)) {
+            t.Fatalf("expected to find %d extensions but found %d", builtin.len(expected), n);
         }
     }
 
-    foreach (var (i, extension) in (~csr).Extensions) {
+    foreach (var (i, extension) in csr.Extensions) {
         if (!extension.Id.Equal(expected[i].Id)) {
-            Ꮡt.Fatalf("extension #%d has unexpected type %v (expected %v)"u8, i, extension.Id, expected[i].Id);
+            t.Fatalf("extension #%d has unexpected type %v (expected %v)", i, extension.Id, expected[i].Id);
         }
 
         if (!bytes.Equal(extension.Value, expected[i].Value)) {
-            Ꮡt.Fatalf("extension #%d has unexpected contents %x (expected %x)"u8, i, extension.Value, expected[i].Value);
+            t.Fatalf("extension #%d has unexpected contents %x (expected %x)", i, extension.Value, expected[i].Value);
         }
     }
 }
 
 // serialiseAndParse generates a self-signed certificate from template and
 // returns a parsed version of it.
-internal static ж<global::go.crypto.x509_package.Certificate> serialiseAndParse(ж<testing.T> Ꮡt, ж<global::go.crypto.x509_package.Certificate> Ꮡtemplate) {
-    Ꮡt.Helper();
-    var (derBytes, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create certificate: %s"u8, err);
-        return default!;
+internal static ж<global::go.crypto.x509_package.Certificate> serialiseAndParse(ж<testing.T> t, ж<global::go.crypto.x509_package.Certificate> template) {
+    t.Helper();
+    var (derBytes, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.ᏑPublicKey, testPrivateKey.OrTypedNil());
+    if (err != nil) {
+        t.Fatalf("failed to create certificate: %s", err);
+        return default;
     }
 
     (var cert, err) = ParseCertificate(derBytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
-        return default!;
+    if (err != nil) {
+        t.Fatalf("failed to parse certificate: %s", err);
+        return default;
     }
 
     return cert;
@@ -1850,11 +1857,11 @@ internal static ж<global::go.crypto.x509_package.Certificate> serialiseAndParse
 internal static readonly object specifyingAMaxPathLenˢ = (@string)"specifying a MaxPathLen when IsCA is false should fail"u8;
 internal static readonly object settingMaxPathLenZeroˢ = (@string)"setting MaxPathLenZero when IsCA is false should fail"u8;
 
-public static void TestMaxPathLenNotCA(ж<testing.T> Ꮡt) {
+public static void TestMaxPathLenNotCA(ж<testing.T> t) {
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(
-            CommonName: "Σ Acme Co"u8
+            CommonName: "Σ Acme Co"
         ),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
@@ -1863,48 +1870,46 @@ public static void TestMaxPathLenNotCA(ж<testing.T> Ꮡt) {
         IsCA: false
     ));
     {
-        nint m = serialiseAndParse(Ꮡt, template).Value.MaxPathLen; if (m != -1) {
-            Ꮡt.Errorf("MaxPathLen should be -1 when IsCa is false, got %d"u8, m);
+        nint m = serialiseAndParse(t, template).MaxPathLen; if (m != -1) {
+            t.Errorf("MaxPathLen should be -1 when IsCa is false, got %d", m);
         }
     }
 
-    template.Value.MaxPathLen = -1;
+    template.MaxPathLen = -1;
     {
-        nint m = serialiseAndParse(Ꮡt, template).Value.MaxPathLen; if (m != -1) {
-            Ꮡt.Errorf("MaxPathLen should be -1 when IsCa is false and MaxPathLen set to -1, got %d"u8, m);
+        nint m = serialiseAndParse(t, template).MaxPathLen; if (m != -1) {
+            t.Errorf("MaxPathLen should be -1 when IsCa is false and MaxPathLen set to -1, got %d", m);
         }
     }
 
-    template.Value.MaxPathLen = 5;
+    template.MaxPathLen = 5;
     {
-        var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil()); if (err == default!) {
-            Ꮡt.Error(specifyingAMaxPathLenˢ);
+        var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.ᏑPublicKey, testPrivateKey.OrTypedNil()); if (err == nil) {
+            t.Error(specifyingAMaxPathLenˢ);
         }
     }
 
-    template.Value.MaxPathLen = 0;
-    template.Value.MaxPathLenZero = true;
+    template.MaxPathLen = 0;
+    template.MaxPathLenZero = true;
     {
-        var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil()); if (err == default!) {
-            Ꮡt.Error(settingMaxPathLenZeroˢ);
+        var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.ᏑPublicKey, testPrivateKey.OrTypedNil()); if (err == nil) {
+            t.Error(settingMaxPathLenZeroˢ);
         }
     }
 
-    template.Value.BasicConstraintsValid = false;
+    template.BasicConstraintsValid = false;
     {
-        nint m = serialiseAndParse(Ꮡt, template).Value.MaxPathLen; if (m != 0) {
-            Ꮡt.Errorf("Bad MaxPathLen should be ignored if BasicConstraintsValid is false, got %d"u8, m);
+        nint m = serialiseAndParse(t, template).MaxPathLen; if (m != 0) {
+            t.Errorf("Bad MaxPathLen should be ignored if BasicConstraintsValid is false, got %d", m);
         }
     }
 }
 
-public static void TestMaxPathLen(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestMaxPathLen(ж<testing.T> t) {
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(
-            CommonName: "Σ Acme Co"u8
+            CommonName: "Σ Acme Co"
         ),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
@@ -1913,75 +1918,73 @@ public static void TestMaxPathLen(ж<testing.T> Ꮡt) {
         IsCA: true
     ));
 
-    var cert1 = serialiseAndParse(Ꮡt, template);
+    var cert1 = serialiseAndParse(t, template);
     {
-        nint m = cert1.Value.MaxPathLen; if (m != -1) {
-            Ꮡt.Errorf("Omitting MaxPathLen didn't turn into -1, got %d"u8, m);
+        nint m = cert1.MaxPathLen; if (m != -1) {
+            t.Errorf("Omitting MaxPathLen didn't turn into -1, got %d", m);
         }
     }
-    if ((~cert1).MaxPathLenZero) {
-        Ꮡt.Errorf("Omitting MaxPathLen resulted in MaxPathLenZero"u8);
+    if (cert1.MaxPathLenZero) {
+        t.Errorf("Omitting MaxPathLen resulted in MaxPathLenZero");
     }
 
-    template.Value.MaxPathLen = 1;
-    var cert2 = serialiseAndParse(Ꮡt, template);
+    template.MaxPathLen = 1;
+    var cert2 = serialiseAndParse(t, template);
     {
-        nint m = cert2.Value.MaxPathLen; if (m != 1) {
-            Ꮡt.Errorf("Setting MaxPathLen didn't work. Got %d but set 1"u8, m);
+        nint m = cert2.MaxPathLen; if (m != 1) {
+            t.Errorf("Setting MaxPathLen didn't work. Got %d but set 1", m);
         }
     }
-    if ((~cert2).MaxPathLenZero) {
-        Ꮡt.Errorf("Setting MaxPathLen resulted in MaxPathLenZero"u8);
+    if (cert2.MaxPathLenZero) {
+        t.Errorf("Setting MaxPathLen resulted in MaxPathLenZero");
     }
 
-    template.Value.MaxPathLen = 0;
-    template.Value.MaxPathLenZero = true;
-    var cert3 = serialiseAndParse(Ꮡt, template);
+    template.MaxPathLen = 0;
+    template.MaxPathLenZero = true;
+    var cert3 = serialiseAndParse(t, template);
     {
-        nint m = cert3.Value.MaxPathLen; if (m != 0) {
-            Ꮡt.Errorf("Setting MaxPathLenZero didn't work, got %d"u8, m);
+        nint m = cert3.MaxPathLen; if (m != 0) {
+            t.Errorf("Setting MaxPathLenZero didn't work, got %d", m);
         }
     }
-    if (!(~cert3).MaxPathLenZero) {
-        Ꮡt.Errorf("Setting MaxPathLen to zero didn't result in MaxPathLenZero"u8);
+    if (!cert3.MaxPathLenZero) {
+        t.Errorf("Setting MaxPathLen to zero didn't result in MaxPathLenZero");
     }
 }
 
-public static void TestNoAuthorityKeyIdInSelfSignedCert(ж<testing.T> Ꮡt) {
+public static void TestNoAuthorityKeyIdInSelfSignedCert(ж<testing.T> t) {
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(
-            CommonName: "Σ Acme Co"u8
+            CommonName: "Σ Acme Co"
         ),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
 
         BasicConstraintsValid: true,
         IsCA: true,
-        SubjectKeyId: new byte[]{1, 2, 3, 4}.slice()
+        SubjectKeyId: slice<byte>([1, 2, 3, 4])
     ));
 
     {
-        var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).AuthorityKeyId) != 0) {
-            Ꮡt.Fatalf("self-signed certificate contained default authority key id"u8);
+        var cert = serialiseAndParse(t, template); if (builtin.len(cert.AuthorityKeyId) != 0) {
+            t.Fatalf("self-signed certificate contained default authority key id");
         }
     }
 
-    template.Value.AuthorityKeyId = new byte[]{1, 2, 3, 4}.slice();
+    template.AuthorityKeyId = slice<byte>([1, 2, 3, 4]);
     {
-        var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).AuthorityKeyId) == 0) {
-            Ꮡt.Fatalf("self-signed certificate erased explicit authority key id"u8);
+        var cert = serialiseAndParse(t, template); if (builtin.len(cert.AuthorityKeyId) == 0) {
+            t.Fatalf("self-signed certificate erased explicit authority key id");
         }
     }
 }
 
-public static void TestNoSubjectKeyIdInCert(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestNoSubjectKeyIdInCert(ж<testing.T> t) {
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(
-            CommonName: "Σ Acme Co"u8
+            CommonName: "Σ Acme Co"
         ),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
@@ -1990,22 +1993,22 @@ public static void TestNoSubjectKeyIdInCert(ж<testing.T> Ꮡt) {
         IsCA: true
     ));
     {
-        var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).SubjectKeyId) == 0) {
-            Ꮡt.Fatalf("self-signed certificate did not generate subject key id using the public key"u8);
+        var cert = serialiseAndParse(t, template); if (builtin.len(cert.SubjectKeyId) == 0) {
+            t.Fatalf("self-signed certificate did not generate subject key id using the public key");
         }
     }
 
-    template.Value.IsCA = false;
+    template.IsCA = false;
     {
-        var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).SubjectKeyId) != 0) {
-            Ꮡt.Fatalf("self-signed certificate generated subject key id when it isn't a CA"u8);
+        var cert = serialiseAndParse(t, template); if (builtin.len(cert.SubjectKeyId) != 0) {
+            t.Fatalf("self-signed certificate generated subject key id when it isn't a CA");
         }
     }
 
-    template.Value.SubjectKeyId = new byte[]{1, 2, 3, 4}.slice();
+    template.SubjectKeyId = slice<byte>([1, 2, 3, 4]);
     {
-        var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).SubjectKeyId) == 0) {
-            Ꮡt.Fatalf("self-signed certificate erased explicit subject key id"u8);
+        var cert = serialiseAndParse(t, template); if (builtin.len(cert.SubjectKeyId) == 0) {
+            t.Fatalf("self-signed certificate erased explicit subject key id");
         }
     }
 }
@@ -2015,31 +2018,31 @@ internal partial struct TestASN1BitLength_tests /*dyn*/ {
     internal nint bitLen;
 }
 
-public static void TestASN1BitLength(ж<testing.T> Ꮡt) {
-    var tests = new TestASN1BitLength_tests[]{
-        new(default!, 0),
-        new(new byte[]{0x00}.slice(), 0),
-        new(new byte[]{0x00, 0x00}.slice(), 0),
-        new(new byte[]{0xf0}.slice(), 4),
-        new(new byte[]{0x88}.slice(), 5),
-        new(new byte[]{0xff}.slice(), 8),
-        new(new byte[]{0xff, 0x80}.slice(), 9),
-        new(new byte[]{0xff, 0x81}.slice(), 16)
-    }.slice();
+public static void TestASN1BitLength(ж<testing.T> t) {
+    var tests = slice<TestASN1BitLength_tests>([
+        new(default, 0),
+        new(slice<byte>([0x00]), 0),
+        new(slice<byte>([0x00, 0x00]), 0),
+        new(slice<byte>([0xf0]), 4),
+        new(slice<byte>([0x88]), 5),
+        new(slice<byte>([0xff]), 8),
+        new(slice<byte>([0xff, 0x80]), 9),
+        new(slice<byte>([0xff, 0x81]), 16)
+    ]);
 
     foreach (var (i, test) in tests) {
         {
             nint got = asn1BitLength(test.bytes); if (got != test.bitLen) {
-                Ꮡt.Errorf("#%d: calculated bit-length of %d for %x, wanted %d"u8, i, got, test.bytes, test.bitLen);
+                t.Errorf("#%d: calculated bit-length of %d for %x, wanted %d", i, got, test.bytes, test.bitLen);
             }
         }
     }
 }
 
-public static partial void TestVerifyEmptyCertificate(ж<testing.T> Ꮡt) {
+public static partial void TestVerifyEmptyCertificate(ж<testing.T> t) {
     {
-        var (_, err) = @new<global::go.crypto.x509_package.Certificate>().Verify(new VerifyOptions(nil)); if (!AreEqual(err, errNotParsed)) {
-            Ꮡt.Errorf("Verifying empty certificate resulted in unexpected error: %q (wanted %q)"u8, err, errNotParsed);
+        var (_, err) = @new<global::go.crypto.x509_package.Certificate>().Verify(new VerifyOptions()); if (!AreEqual(err, errNotParsed)) {
+            t.Errorf("Verifying empty certificate resulted in unexpected error: %q (wanted %q)", err, errNotParsed);
         }
     }
 }
@@ -2049,20 +2052,20 @@ internal partial struct TestInsecureAlgorithmErrorString_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestInsecureAlgorithmErrorString(ж<testing.T> Ꮡt) {
-    var tests = new TestInsecureAlgorithmErrorString_tests[]{
-        new(MD5WithRSA, "x509: cannot verify signature: insecure algorithm MD5-RSA"u8),
-        new(SHA1WithRSA, "x509: cannot verify signature: insecure algorithm SHA1-RSA"u8),
-        new(ECDSAWithSHA1, "x509: cannot verify signature: insecure algorithm ECDSA-SHA1"u8),
-        new(MD2WithRSA, "x509: cannot verify signature: insecure algorithm 1"u8),
-        new(-1, "x509: cannot verify signature: insecure algorithm -1"u8),
-        new(0, "x509: cannot verify signature: insecure algorithm 0"u8),
-        new(9999, "x509: cannot verify signature: insecure algorithm 9999"u8)
-    }.slice();
+public static void TestInsecureAlgorithmErrorString(ж<testing.T> t) {
+    var tests = slice<TestInsecureAlgorithmErrorString_tests>([
+        new(MD5WithRSA, "x509: cannot verify signature: insecure algorithm MD5-RSA"),
+        new(SHA1WithRSA, "x509: cannot verify signature: insecure algorithm SHA1-RSA"),
+        new(ECDSAWithSHA1, "x509: cannot verify signature: insecure algorithm ECDSA-SHA1"),
+        new(MD2WithRSA, "x509: cannot verify signature: insecure algorithm 1"),
+        new(-1, "x509: cannot verify signature: insecure algorithm -1"),
+        new(0, "x509: cannot verify signature: insecure algorithm 0"),
+        new(9999, "x509: cannot verify signature: insecure algorithm 9999")
+    ]);
     foreach (var (i, tt) in tests) {
         {
             @string got = fmt.Sprint((global::go.crypto.x509_package.InsecureAlgorithmError)(nint)tt.sa); if (got != tt.want) {
-                Ꮡt.Errorf("%d. mismatch.\n got: %s\nwant: %s\n"u8, i, got, tt.want);
+                t.Errorf("%d. mismatch.\n got: %s\nwant: %s\n", i, got, tt.want);
             }
         }
     }
@@ -2083,9 +2086,9 @@ public static void TestInsecureAlgorithmErrorString(ж<testing.T> Ꮡt) {
 //	unstructuredName  = ignored unstructured name
 internal static array<@string> csrBase64Array = new @string[]{
     // Just [ v3_req ]
-    "MIIDHDCCAgQCAQAwfjELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0BCQEWEnRlc3RAZW1haWwuYWRkcmVzczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK1GY4YFx2ujlZEOJxQVYmsjUnLsd5nFVnNpLE4cV+77sgv9NPNlB8uhn3MXt5leD34rm/2BisCHOifPucYlSrszo2beuKhvwn4+2FxDmWtBEMu/QA16L5IvoOfYZm/gJTsPwKDqvaR0tTU67a9OtxwNTBMI56YKtmwd/o8d3hYv9cg+9ZGAZ/gKONcg/OWYx/XRh6bd0g8DMbCikpWgXKDsvvK1Nk+VtkDO1JxuBaj4Lz/p/MifTfnHoqHxWOWl4EaTs4Ychxsv34/rSj1KD1tJqorIv5Xv2aqv4sjxfbrYzX4kvS5SC1goIovLnhj5UjmQ3Qy8u65eow/LLWw+YFcCAwEAAaBZMFcGCSqGSIb3DQEJDjFKMEgwCQYDVR0TBAIwADALBgNVHQ8EBAMCBeAwLgYDVR0RBCcwJYERZ29waGVyQGdvbGFuZy5vcmeCEHRlc3QuZXhhbXBsZS5jb20wDQYJKoZIhvcNAQELBQADggEBAB6VPMRrchvNW61Tokyq3ZvO6/NoGIbuwUn54q6l5VZW0Ep5Nq8juhegSSnaJ0jrovmUgKDN9vEo2KxuAtwG6udS6Ami3zP+hRd4k9Q8djJPb78nrjzWiindLK5Fps9U5mMoi1ER8ViveyAOTfnZt/jsKUaRsscY2FzE9t9/o5moE6LTcHUS4Ap1eheR+J72WOnQYn3cifYaemsA9MJuLko+kQ6xseqttbh9zjqd9fiCSh/LNkzos9c+mg2yMADitaZinAh+HZi50ooEbjaT3erNq9O6RqwJlgD00g6MQdoz9bTAryCUhCQfkIaepmQ7BxS0pqWNW3MMwfDwx/Snz6g="u8,
+    "MIIDHDCCAgQCAQAwfjELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0BCQEWEnRlc3RAZW1haWwuYWRkcmVzczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK1GY4YFx2ujlZEOJxQVYmsjUnLsd5nFVnNpLE4cV+77sgv9NPNlB8uhn3MXt5leD34rm/2BisCHOifPucYlSrszo2beuKhvwn4+2FxDmWtBEMu/QA16L5IvoOfYZm/gJTsPwKDqvaR0tTU67a9OtxwNTBMI56YKtmwd/o8d3hYv9cg+9ZGAZ/gKONcg/OWYx/XRh6bd0g8DMbCikpWgXKDsvvK1Nk+VtkDO1JxuBaj4Lz/p/MifTfnHoqHxWOWl4EaTs4Ychxsv34/rSj1KD1tJqorIv5Xv2aqv4sjxfbrYzX4kvS5SC1goIovLnhj5UjmQ3Qy8u65eow/LLWw+YFcCAwEAAaBZMFcGCSqGSIb3DQEJDjFKMEgwCQYDVR0TBAIwADALBgNVHQ8EBAMCBeAwLgYDVR0RBCcwJYERZ29waGVyQGdvbGFuZy5vcmeCEHRlc3QuZXhhbXBsZS5jb20wDQYJKoZIhvcNAQELBQADggEBAB6VPMRrchvNW61Tokyq3ZvO6/NoGIbuwUn54q6l5VZW0Ep5Nq8juhegSSnaJ0jrovmUgKDN9vEo2KxuAtwG6udS6Ami3zP+hRd4k9Q8djJPb78nrjzWiindLK5Fps9U5mMoi1ER8ViveyAOTfnZt/jsKUaRsscY2FzE9t9/o5moE6LTcHUS4Ap1eheR+J72WOnQYn3cifYaemsA9MJuLko+kQ6xseqttbh9zjqd9fiCSh/LNkzos9c+mg2yMADitaZinAh+HZi50ooEbjaT3erNq9O6RqwJlgD00g6MQdoz9bTAryCUhCQfkIaepmQ7BxS0pqWNW3MMwfDwx/Snz6g=",
     // Both [ v3_req ] and [ req_attributes ]
-    "MIIDaTCCAlECAQAwfjELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0BCQEWEnRlc3RAZW1haWwuYWRkcmVzczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK1GY4YFx2ujlZEOJxQVYmsjUnLsd5nFVnNpLE4cV+77sgv9NPNlB8uhn3MXt5leD34rm/2BisCHOifPucYlSrszo2beuKhvwn4+2FxDmWtBEMu/QA16L5IvoOfYZm/gJTsPwKDqvaR0tTU67a9OtxwNTBMI56YKtmwd/o8d3hYv9cg+9ZGAZ/gKONcg/OWYx/XRh6bd0g8DMbCikpWgXKDsvvK1Nk+VtkDO1JxuBaj4Lz/p/MifTfnHoqHxWOWl4EaTs4Ychxsv34/rSj1KD1tJqorIv5Xv2aqv4sjxfbrYzX4kvS5SC1goIovLnhj5UjmQ3Qy8u65eow/LLWw+YFcCAwEAAaCBpTAgBgkqhkiG9w0BCQcxEwwRaWdub3JlZCBjaGFsbGVuZ2UwKAYJKoZIhvcNAQkCMRsMGWlnbm9yZWQgdW5zdHJ1Y3R1cmVkIG5hbWUwVwYJKoZIhvcNAQkOMUowSDAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DAuBgNVHREEJzAlgRFnb3BoZXJAZ29sYW5nLm9yZ4IQdGVzdC5leGFtcGxlLmNvbTANBgkqhkiG9w0BAQsFAAOCAQEAgxe2N5O48EMsYE7o0rZBB0wi3Ov5/yYfnmmVI22Y3sP6VXbLDW0+UWIeSccOhzUCcZ/G4qcrfhhx6gTZTeA01nP7TdTJURvWAH5iFqj9sQ0qnLq6nEcVHij3sG6M5+BxAIVClQBk6lTCzgphc835Fjj6qSLuJ20XHdL5UfUbiJxx299CHgyBRL+hBUIPfz8p+ZgamyAuDLfnj54zzcRVyLlrmMLNPZNll1Q70RxoU6uWvLH8wB8vQe3Q/guSGubLyLRTUQVPh+dw1L4t8MKFWfX/48jwRM4gIRHFHPeAAE9D9YAoqdIvj/iFm/eQ++7DP8MDwOZWsXeB6jjwHuLmkQ=="u8
+    "MIIDaTCCAlECAQAwfjELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0BCQEWEnRlc3RAZW1haWwuYWRkcmVzczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK1GY4YFx2ujlZEOJxQVYmsjUnLsd5nFVnNpLE4cV+77sgv9NPNlB8uhn3MXt5leD34rm/2BisCHOifPucYlSrszo2beuKhvwn4+2FxDmWtBEMu/QA16L5IvoOfYZm/gJTsPwKDqvaR0tTU67a9OtxwNTBMI56YKtmwd/o8d3hYv9cg+9ZGAZ/gKONcg/OWYx/XRh6bd0g8DMbCikpWgXKDsvvK1Nk+VtkDO1JxuBaj4Lz/p/MifTfnHoqHxWOWl4EaTs4Ychxsv34/rSj1KD1tJqorIv5Xv2aqv4sjxfbrYzX4kvS5SC1goIovLnhj5UjmQ3Qy8u65eow/LLWw+YFcCAwEAAaCBpTAgBgkqhkiG9w0BCQcxEwwRaWdub3JlZCBjaGFsbGVuZ2UwKAYJKoZIhvcNAQkCMRsMGWlnbm9yZWQgdW5zdHJ1Y3R1cmVkIG5hbWUwVwYJKoZIhvcNAQkOMUowSDAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DAuBgNVHREEJzAlgRFnb3BoZXJAZ29sYW5nLm9yZ4IQdGVzdC5leGFtcGxlLmNvbTANBgkqhkiG9w0BAQsFAAOCAQEAgxe2N5O48EMsYE7o0rZBB0wi3Ov5/yYfnmmVI22Y3sP6VXbLDW0+UWIeSccOhzUCcZ/G4qcrfhhx6gTZTeA01nP7TdTJURvWAH5iFqj9sQ0qnLq6nEcVHij3sG6M5+BxAIVClQBk6lTCzgphc835Fjj6qSLuJ20XHdL5UfUbiJxx299CHgyBRL+hBUIPfz8p+ZgamyAuDLfnj54zzcRVyLlrmMLNPZNll1Q70RxoU6uWvLH8wB8vQe3Q/guSGubLyLRTUQVPh+dw1L4t8MKFWfX/48jwRM4gIRHFHPeAAE9D9YAoqdIvj/iFm/eQ++7DP8MDwOZWsXeB6jjwHuLmkQ=="
 }.array();
 
 internal static @string md5cert = """
@@ -2106,55 +2109,56 @@ qViorq4=
 
 """u8.Raw();
 
-public static void TestMD5(ж<testing.T> Ꮡt) {
+public static void TestMD5(ж<testing.T> t) {
     var (pemBlock, _) = pem.Decode(slice<byte>(md5cert));
-    var (cert, err) = ParseCertificate((~pemBlock).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
+    var (cert, err) = ParseCertificate(pemBlock.Bytes);
+    if (err != nil) {
+        t.Fatalf("failed to parse certificate: %s", err);
     }
     {
-        global::go.crypto.x509_package.SignatureAlgorithm sa = cert.Value.SignatureAlgorithm; if (sa != MD5WithRSA) {
-            Ꮡt.Errorf("signature algorithm is %v, want %v"u8, sa, MD5WithRSA);
+        global::go.crypto.x509_package.SignatureAlgorithm sa = cert.SignatureAlgorithm; if (sa != MD5WithRSA) {
+            t.Errorf("signature algorithm is %v, want %v", sa, MD5WithRSA);
         }
     }
     {
-        err = cert.CheckSignatureFrom(cert); if (err == default!) {
-            Ꮡt.Fatalf("certificate verification succeeded incorrectly"u8);
+        err = cert.CheckSignatureFrom(cert); if (err == nil) {
+            t.Fatalf("certificate verification succeeded incorrectly");
         }
     }
     {
         var (_, ok) = err._<InsecureAlgorithmError>(ᐧ); if (!ok) {
-            Ꮡt.Fatalf("certificate verification returned %v (%T), wanted InsecureAlgorithmError"u8, err, err);
+            t.Fatalf("certificate verification returned %v (%T), wanted InsecureAlgorithmError", err, err);
         }
     }
 }
 
-public static void TestSHA1(ж<testing.T> Ꮡt) {
+public static void TestSHA1(ж<testing.T> t) {
     var (pemBlock, _) = pem.Decode(slice<byte>(ecdsaSHA1CertPem));
-    var (cert, err) = ParseCertificate((~pemBlock).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
+    var (cert, err) = ParseCertificate(pemBlock.Bytes);
+    if (err != nil) {
+        t.Fatalf("failed to parse certificate: %s", err);
     }
     {
-        global::go.crypto.x509_package.SignatureAlgorithm sa = cert.Value.SignatureAlgorithm; if (sa != ECDSAWithSHA1) {
-            Ꮡt.Errorf("signature algorithm is %v, want %v"u8, sa, ECDSAWithSHA1);
+        global::go.crypto.x509_package.SignatureAlgorithm sa = cert.SignatureAlgorithm; if (sa != ECDSAWithSHA1) {
+            t.Errorf("signature algorithm is %v, want %v", sa, ECDSAWithSHA1);
         }
     }
     {
-        err = cert.CheckSignatureFrom(cert); if (err == default!) {
-            Ꮡt.Fatalf("certificate verification succeeded incorrectly"u8);
+        err = cert.CheckSignatureFrom(cert); if (err == nil) {
+            t.Fatalf("certificate verification succeeded incorrectly");
         }
     }
     {
         var (_, ok) = err._<InsecureAlgorithmError>(ᐧ); if (!ok) {
-            Ꮡt.Fatalf("certificate verification returned %v (%T), wanted InsecureAlgorithmError"u8, err, err);
+            t.Fatalf("certificate verification returned %v (%T), wanted InsecureAlgorithmError", err, err);
         }
     }
 }
 
 // certMissingRSANULL contains an RSA public key where the AlgorithmIdentifier
 // parameters are omitted rather than being an ASN.1 NULL.
-internal static readonly @string certMissingRSANULL = """
+internal static ref readonly @string certMissingRSANULL => ref certMissingRSANULLᵇ;
+private static readonly @string certMissingRSANULLᵇ = """
 
 -----BEGIN CERTIFICATE-----
 MIIB7TCCAVigAwIBAgIBADALBgkqhkiG9w0BAQUwJjEQMA4GA1UEChMHQWNtZSBD
@@ -2173,21 +2177,22 @@ GFGNEH5PlGffo05wc46QkYU=
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedSuccessWhenˢ = (@string)"unexpected success when parsing certificate with missing RSA NULL parameter"u8;
-internal static readonly @string missingNullˢ = "missing NULL"u8;
+internal static ref readonly @string missingNullˢ => ref missingNullˢᵇ;
+private static readonly @string missingNullˢᵇ = "missing NULL"u8;
 
-public static void TestRSAMissingNULLParameters(ж<testing.T> Ꮡt) {
+public static void TestRSAMissingNULLParameters(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(certMissingRSANULL));
     {
-        var (_, err) = ParseCertificate((~block).Bytes); if (err == default!){
-            Ꮡt.Error(unexpectedSuccessWhenˢ);
-        } else 
-        if (!strings.Contains(err.Error(), missingNullˢ)) {
-            Ꮡt.Errorf("unrecognised error when parsing certificate with missing RSA NULL parameter: %s"u8, err);
+        var (_, err) = ParseCertificate(block.Bytes); if (err == nil) {
+            t.Error(unexpectedSuccessWhenˢ);
+        } else if (!strings.Contains(err.Error(), missingNullˢ)) {
+            t.Errorf("unrecognised error when parsing certificate with missing RSA NULL parameter: %s", err);
         }
     }
 }
 
-internal static readonly @string certISOOID = """
+internal static ref readonly @string certISOOID => ref certISOOIDᵇ;
+private static readonly @string certISOOIDᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIB5TCCAVKgAwIBAgIQNwyL3RPWV7dJQp34HwZG9DAJBgUrDgMCHQUAMBExDzAN
 BgNVBAMTBm15dGVzdDAeFw0xNjA4MDkyMjExMDVaFw0zOTEyMzEyMzU5NTlaMBEx
@@ -2203,14 +2208,13 @@ MCRtdSdaM7g3
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestISOOIDInCertificate(ж<testing.T> Ꮡt) {
+public static void TestISOOIDInCertificate(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(certISOOID));
     {
-        var (cert, err) = ParseCertificate((~block).Bytes); if (err != default!){
-            Ꮡt.Errorf("certificate with ISO OID failed to parse: %s"u8, err);
-        } else 
-        if ((~cert).SignatureAlgorithm == UnknownSignatureAlgorithm) {
-            Ꮡt.Errorf("ISO OID not recognised in certificate"u8);
+        var (cert, err) = ParseCertificate(block.Bytes); if (err != nil) {
+            t.Errorf("certificate with ISO OID failed to parse: %s", err);
+        } else if (cert.SignatureAlgorithm == UnknownSignatureAlgorithm) {
+            t.Errorf("ISO OID not recognised in certificate");
         }
     }
 }
@@ -2218,7 +2222,8 @@ public static void TestISOOIDInCertificate(ж<testing.T> Ꮡt) {
 // certMultipleRDN contains a RelativeDistinguishedName with two elements (the
 // common name and serial number). This particular certificate was the first
 // such certificate in the “Pilot” Certificate Transparency log.
-internal static readonly @string certMultipleRDN = """
+internal static ref readonly @string certMultipleRDN => ref certMultipleRDNᵇ;
+private static readonly @string certMultipleRDNᵇ = """
 
 -----BEGIN CERTIFICATE-----
 MIIFRzCCBC+gAwIBAgIEOl59NTANBgkqhkiG9w0BAQUFADA9MQswCQYDVQQGEwJz
@@ -2254,24 +2259,25 @@ DF72IUofoVt7wo0=
 """u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string eportalMssEdusSiˢ = "eportal.mss.edus.si"u8;
+internal static ref readonly @string eportalMssEdusSiˢ => ref eportalMssEdusSiˢᵇ;
+private static readonly @string eportalMssEdusSiˢᵇ = "eportal.mss.edus.si"u8;
 
-public static void TestMultipleRDN(ж<testing.T> Ꮡt) {
+public static void TestMultipleRDN(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(certMultipleRDN));
-    var (cert, err) = ParseCertificate((~block).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("certificate with two elements in an RDN failed to parse: %v"u8, err);
+    var (cert, err) = ParseCertificate(block.Bytes);
+    if (err != nil) {
+        t.Fatalf("certificate with two elements in an RDN failed to parse: %v", err);
     }
 
     {
-        @string want = eportalMssEdusSiˢ; if ((~cert).Subject.CommonName != want) {
-            Ꮡt.Errorf("got common name of %q, but want %q"u8, (~cert).Subject.CommonName, want);
+        @string want = eportalMssEdusSiˢ; if (cert.Subject.CommonName != want) {
+            t.Errorf("got common name of %q, but want %q", cert.Subject.CommonName, want);
         }
     }
 
     {
-        @string want = "1236484010010"u8; if ((~cert).Subject.SerialNumber != want) {
-            Ꮡt.Errorf("got serial number of %q, but want %q"u8, (~cert).Subject.SerialNumber, want);
+        @string want = "1236484010010"; if (cert.Subject.SerialNumber != want) {
+            t.Errorf("got serial number of %q, but want %q", cert.Subject.SerialNumber, want);
         }
     }
 }
@@ -2282,20 +2288,20 @@ internal static readonly object twoCallsToSystemCertPoolˢ = (@string)"two calls
 internal static readonly object appendCertsFromPEMFailedˢ = (@string)"AppendCertsFromPEM failed"u8;
 internal static readonly object changingOnePoolModifiedˢ = (@string)"changing one pool modified the other"u8;
 
-public static void TestSystemCertPool(ж<testing.T> Ꮡt) {
+public static void TestSystemCertPool(ж<testing.T> t) {
     if (runtime.GOOS == "windows"u8 || runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) {
-        Ꮡt.Skip(notImplementedOnWindowsˢ);
+        t.Skip(notImplementedOnWindowsˢ);
     }
     var (a, err) = SystemCertPool();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var b, err) = SystemCertPool();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (!certPoolEqual(a, b)) {
-        Ꮡt.Fatal(twoCallsToSystemCertPoolˢ);
+        t.Fatal(twoCallsToSystemCertPoolˢ);
     }
     {
         var ok = b.AppendCertsFromPEM(slice<byte>("""
@@ -2321,15 +2327,16 @@ pa/O1nF0AfWOpw==
 -----END CERTIFICATE-----
 	
 """u8.Raw())); if (!ok) {
-            Ꮡt.Fatal(appendCertsFromPEMFailedˢ);
+            t.Fatal(appendCertsFromPEMFailedˢ);
         }
     }
     if (reflect.DeepEqual(a.OrTypedNil(), b.OrTypedNil())) {
-        Ꮡt.Fatal(changingOnePoolModifiedˢ);
+        t.Fatal(changingOnePoolModifiedˢ);
     }
 }
 
-internal static readonly @string emptyNameConstraintsPEM = """
+internal static ref readonly @string emptyNameConstraintsPEM => ref emptyNameConstraintsPEMᵇ;
+private static readonly @string emptyNameConstraintsPEMᵇ = """
 
 -----BEGIN CERTIFICATE-----
 MIIC1jCCAb6gAwIBAgICEjQwDQYJKoZIhvcNAQELBQAwKDEmMCQGA1UEAxMdRW1w
@@ -2352,160 +2359,172 @@ o+WoY6IsCKXV/g==
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectedᶜ = "empty name constraints"u8;
+internal static ref readonly @string expectedᶜ => ref expectedᶜᵇ;
+private static readonly @string expectedᶜᵇ = "empty name constraints"u8;
 
-public static void TestEmptyNameConstraints(ж<testing.T> Ꮡt) {
+public static void TestEmptyNameConstraints(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(emptyNameConstraintsPEM));
-    var (_, err) = ParseCertificate((~block).Bytes);
-    if (err == default!) {
-        Ꮡt.Fatal(unexpectedSuccessˢ);
+    var (_, err) = ParseCertificate(block.Bytes);
+    if (err == nil) {
+        t.Fatal(unexpectedSuccessˢ);
     }
 
     @string expected = expectedᶜ;
     {
         @string str = err.Error(); if (!strings.Contains(str, expected)) {
-            Ꮡt.Errorf("expected %q in error but got %q"u8, expected, str);
+            t.Errorf("expected %q in error but got %q", expected, str);
         }
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object golangOrgˢ = (@string)"golang.org"u8;
+internal static readonly object backingArrayˢ = (@string)"backing array"u8;
+internal static readonly object barComˢ = (@string)"bar.com"u8;
+internal static readonly object exampleComˢ = (@string)"example.com"u8;
 
 internal partial struct TestPKIXNameString_tests /*dyn*/ {
     internal pkix.Name dn;
     internal @string want;
 }
 
-public static void TestPKIXNameString(ж<testing.T> Ꮡt) {
+public static void TestPKIXNameString(ж<testing.T> t) {
     var (der, err) = base64.StdEncoding.DecodeString(certBytes);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var certs, err) = ParseCertificates(der);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // Check that parsed non-standard attributes are printed.
-    ref var rdns = ref heap<pkix.RDNSequence>(out var Ꮡrdns);
-    rdns = new pkix.Name(
-        Locality: new @string[]{"Gophertown"u8}.slice(),
-        ExtraNames: new pkix.AttributeTypeAndValue[]{
-            new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"golang.org"u8)}.slice()
-    ).ToRDNSequence();
-    var nn = new pkix.Name(nil);
+    ref var rdns = ref heap<pkix.RDNSequence>(new pkix.Name(
+        Locality: slice<@string>(["Gophertown"]),
+        ExtraNames: slice<pkix.AttributeTypeAndValue>([
+            new(Type: ((asn1.ObjectIdentifier)slice<nint>([1, 2, 3, 4, 5])), Value: golangOrgˢ)])
+    ).ToRDNSequence(), out var Ꮡrdns);
+    var nn = new pkix.Name();
     nn.FillFromRDNSequence(Ꮡrdns);
 
     // Check that zero-length non-nil ExtraNames hide Names.
-    var extra = new pkix.AttributeTypeAndValue[]{
-        new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"backing array"u8)}.slice();
+    var extra = slice<pkix.AttributeTypeAndValue>([
+        new(Type: ((asn1.ObjectIdentifier)slice<nint>([1, 2, 3, 4, 5])), Value: backingArrayˢ)]);
     var extraNotNil = new pkix.Name(
-        Locality: new @string[]{"Gophertown"u8}.slice(),
+        Locality: slice<@string>(["Gophertown"]),
         ExtraNames: extra[..0],
-        Names: new pkix.AttributeTypeAndValue[]{
-            new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"golang.org"u8)}.slice()
+        Names: slice<pkix.AttributeTypeAndValue>([
+            new(Type: ((asn1.ObjectIdentifier)slice<nint>([1, 2, 3, 4, 5])), Value: golangOrgˢ)])
     );
 
-    var tests = new TestPKIXNameString_tests[]{
-        new(nn, "L=Gophertown,1.2.3.4.5=#130a676f6c616e672e6f7267"u8),
-        new(extraNotNil, "L=Gophertown"u8),
+    var tests = slice<TestPKIXNameString_tests>([
+        new(nn, "L=Gophertown,1.2.3.4.5=#130a676f6c616e672e6f7267"),
+        new(extraNotNil, "L=Gophertown"),
         new(new pkix.Name(
-            CommonName: "Steve Kille"u8,
-            Organization: new @string[]{"Isode Limited"u8}.slice(),
-            OrganizationalUnit: new @string[]{"RFCs"u8}.slice(),
-            Locality: new @string[]{"Richmond"u8}.slice(),
-            Province: new @string[]{"Surrey"u8}.slice(),
-            StreetAddress: new @string[]{"The Square"u8}.slice(),
-            PostalCode: new @string[]{"TW9 1DT"u8}.slice(),
-            SerialNumber: "RFC 2253"u8,
-            Country: new @string[]{"GB"u8}.slice()
-        ), "SERIALNUMBER=RFC 2253,CN=Steve Kille,OU=RFCs,O=Isode Limited,POSTALCODE=TW9 1DT,STREET=The Square,L=Richmond,ST=Surrey,C=GB"u8),
-        new((~certs[0]).Subject,
-            "CN=mail.google.com,O=Google LLC,L=Mountain View,ST=California,C=US"u8),
+            CommonName: "Steve Kille",
+            Organization: slice<@string>(["Isode Limited"]),
+            OrganizationalUnit: slice<@string>(["RFCs"]),
+            Locality: slice<@string>(["Richmond"]),
+            Province: slice<@string>(["Surrey"]),
+            StreetAddress: slice<@string>(["The Square"]),
+            PostalCode: slice<@string>(["TW9 1DT"]),
+            SerialNumber: "RFC 2253",
+            Country: slice<@string>(["GB"])
+        ), "SERIALNUMBER=RFC 2253,CN=Steve Kille,OU=RFCs,O=Isode Limited,POSTALCODE=TW9 1DT,STREET=The Square,L=Richmond,ST=Surrey,C=GB"),
+        new(certs[0].Subject,
+            "CN=mail.google.com,O=Google LLC,L=Mountain View,ST=California,C=US"),
         new(new pkix.Name(
-            Organization: new @string[]{"#Google, Inc. \n-> 'Alphabet\" "u8}.slice(),
-            Country: new @string[]{"US"u8}.slice()
-        ), "O=\\#Google\\, Inc. \n-\\> 'Alphabet\\\"\\ ,C=US"u8),
+            Organization: slice<@string>(["#Google, Inc. \n-> 'Alphabet\" "]),
+            Country: slice<@string>(["US"])
+        ), "O=\\#Google\\, Inc. \n-\\> 'Alphabet\\\"\\ ,C=US"),
         new(new pkix.Name(
-            CommonName: "foo.com"u8,
-            Organization: new @string[]{"Gopher Industries"u8}.slice(),
-            ExtraNames: new pkix.AttributeTypeAndValue[]{
-                new(Type: ((asn1.ObjectIdentifier)new nint[]{2, 5, 4, 3}.slice()), Value: (@string)"bar.com"u8)}.slice()
-        ), "CN=bar.com,O=Gopher Industries"u8),
+            CommonName: "foo.com",
+            Organization: slice<@string>(["Gopher Industries"]),
+            ExtraNames: slice<pkix.AttributeTypeAndValue>([
+                new(Type: ((asn1.ObjectIdentifier)slice<nint>([2, 5, 4, 3])), Value: barComˢ)])
+        ), "CN=bar.com,O=Gopher Industries"),
         new(new pkix.Name(
-            Locality: new @string[]{"Gophertown"u8}.slice(),
-            ExtraNames: new pkix.AttributeTypeAndValue[]{
-                new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"golang.org"u8)}.slice()
-        ), "1.2.3.4.5=#130a676f6c616e672e6f7267,L=Gophertown"u8),
+            Locality: slice<@string>(["Gophertown"]),
+            ExtraNames: slice<pkix.AttributeTypeAndValue>([
+                new(Type: ((asn1.ObjectIdentifier)slice<nint>([1, 2, 3, 4, 5])), Value: golangOrgˢ)])
+        ), "1.2.3.4.5=#130a676f6c616e672e6f7267,L=Gophertown"),
         // If there are no ExtraNames, the Names are printed instead.
         new(new pkix.Name(
-            Locality: new @string[]{"Gophertown"u8}.slice(),
-            Names: new pkix.AttributeTypeAndValue[]{
-                new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"golang.org"u8)}.slice()
-        ), "L=Gophertown,1.2.3.4.5=#130a676f6c616e672e6f7267"u8),
+            Locality: slice<@string>(["Gophertown"]),
+            Names: slice<pkix.AttributeTypeAndValue>([
+                new(Type: ((asn1.ObjectIdentifier)slice<nint>([1, 2, 3, 4, 5])), Value: golangOrgˢ)])
+        ), "L=Gophertown,1.2.3.4.5=#130a676f6c616e672e6f7267"),
         // If there are both, print only the ExtraNames.
         new(new pkix.Name(
-            Locality: new @string[]{"Gophertown"u8}.slice(),
-            ExtraNames: new pkix.AttributeTypeAndValue[]{
-                new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"golang.org"u8)}.slice(),
-            Names: new pkix.AttributeTypeAndValue[]{
-                new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 6}.slice()), Value: (@string)"example.com"u8)}.slice()
-        ), "1.2.3.4.5=#130a676f6c616e672e6f7267,L=Gophertown"u8)
-    }.slice();
+            Locality: slice<@string>(["Gophertown"]),
+            ExtraNames: slice<pkix.AttributeTypeAndValue>([
+                new(Type: ((asn1.ObjectIdentifier)slice<nint>([1, 2, 3, 4, 5])), Value: golangOrgˢ)]),
+            Names: slice<pkix.AttributeTypeAndValue>([
+                new(Type: ((asn1.ObjectIdentifier)slice<nint>([1, 2, 3, 4, 6])), Value: exampleComˢ)])
+        ), "1.2.3.4.5=#130a676f6c616e672e6f7267,L=Gophertown")
+    ]);
 
     foreach (var (i, test) in tests) {
         {
             @string got = test.dn.String(); if (got != test.want) {
-                Ꮡt.Errorf("#%d: String() = \n%s\n, want \n%s"u8, i, got, test.want);
+                t.Errorf("#%d: String() = \n%s\n, want \n%s", i, got, test.want);
             }
         }
     }
 
     if (!AreEqual(extra[0].Value, (@string)("backing array"))) {
-        Ꮡt.Errorf("the backing array of an empty ExtraNames got modified by String"u8);
+        t.Errorf("the backing array of an empty ExtraNames got modified by String");
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object widgetIncˢ = (@string)"Widget Inc."u8;
+internal static readonly object salesˢ = (@string)"Sales"u8;
+internal static readonly object jSmithˢ = (@string)"J. Smith"u8;
 
 internal partial struct TestRDNSequenceString_tests /*dyn*/ {
     internal pkix.RDNSequence seq;
     internal @string want;
 }
 
-public static void TestRDNSequenceString(ж<testing.T> Ꮡt) {
+public static void TestRDNSequenceString(ж<testing.T> t) {
     // Test some extra cases that get lost in pkix.Name conversions such as
     // multi-valued attributes.
 
-    slice<nint> oidCountry = new nint[]{2, 5, 4, 6}.slice();
-    slice<nint> oidOrganization = new nint[]{2, 5, 4, 10}.slice();
-    slice<nint> oidOrganizationalUnit = new nint[]{2, 5, 4, 11}.slice();
-    slice<nint> oidCommonName = new nint[]{2, 5, 4, 3}.slice();
+    slice<nint> oidCountry = slice<nint>([2, 5, 4, 6]);
+    slice<nint> oidOrganization = slice<nint>([2, 5, 4, 10]);
+    slice<nint> oidOrganizationalUnit = slice<nint>([2, 5, 4, 11]);
+    slice<nint> oidCommonName = slice<nint>([2, 5, 4, 3]);
 
-    var tests = new TestRDNSequenceString_tests[]{
+    var tests = slice<TestRDNSequenceString_tests>([
         new(
             seq: new pkix.RDNSequence(new pkix.RelativeDistinguishedNameSET[]{
                 new pkix.RelativeDistinguishedNameSET(new pkix.AttributeTypeAndValue[]{
-                    new pkix.AttributeTypeAndValue(Type: oidCountry, Value: (@string)"US"u8)
+                    new pkix.AttributeTypeAndValue(Type: oidCountry, Value: (@string)"US")
                 }.slice()),
                 new pkix.RelativeDistinguishedNameSET(new pkix.AttributeTypeAndValue[]{
-                    new pkix.AttributeTypeAndValue(Type: oidOrganization, Value: (@string)"Widget Inc."u8)
+                    new pkix.AttributeTypeAndValue(Type: oidOrganization, Value: widgetIncˢ)
                 }.slice()),
                 new pkix.RelativeDistinguishedNameSET(new pkix.AttributeTypeAndValue[]{
-                    new pkix.AttributeTypeAndValue(Type: oidOrganizationalUnit, Value: (@string)"Sales"u8),
-                    new pkix.AttributeTypeAndValue(Type: oidCommonName, Value: (@string)"J. Smith"u8)
+                    new pkix.AttributeTypeAndValue(Type: oidOrganizationalUnit, Value: salesˢ),
+                    new pkix.AttributeTypeAndValue(Type: oidCommonName, Value: jSmithˢ)
                 }.slice())
             }.slice()),
-            want: "OU=Sales+CN=J. Smith,O=Widget Inc.,C=US"u8
+            want: "OU=Sales+CN=J. Smith,O=Widget Inc.,C=US"
         )
-    }.slice();
+    ]);
 
     foreach (var (i, test) in tests) {
         {
             @string got = test.seq.String(); if (got != test.want) {
-                Ꮡt.Errorf("#%d: String() = \n%s\n, want \n%s"u8, i, got, test.want);
+                t.Errorf("#%d: String() = \n%s\n, want \n%s", i, got, test.want);
             }
         }
     }
 }
 
-internal static readonly @string criticalNameConstraintWithUnknownTypePEM = """
+internal static ref readonly @string criticalNameConstraintWithUnknownTypePEM => ref criticalNameConstraintWithUnknownTypePEMᵇ;
+private static readonly @string criticalNameConstraintWithUnknownTypePEMᵇ = """
 
 -----BEGIN CERTIFICATE-----
 MIIC/TCCAeWgAwIBAgICEjQwDQYJKoZIhvcNAQELBQAwKDEmMCQGA1UEAxMdRW1w
@@ -2528,21 +2547,22 @@ ANYzpmuV+oIedAsPpIbfIzN8njYUs1zio+1IoI4o8ddM9sCbtPU8o+WoY6IsCKXV
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestCriticalNameConstraintWithUnknownType(ж<testing.T> Ꮡt) {
+public static void TestCriticalNameConstraintWithUnknownType(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(criticalNameConstraintWithUnknownTypePEM));
-    var (cert, err) = ParseCertificate((~block).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("unexpected parsing failure: %s"u8, err);
+    var (cert, err) = ParseCertificate(block.Bytes);
+    if (err != nil) {
+        t.Fatalf("unexpected parsing failure: %s", err);
     }
 
     {
-        nint l = builtin.len((~cert).UnhandledCriticalExtensions); if (l != 1) {
-            Ꮡt.Fatalf("expected one unhandled critical extension, but found %d"u8, l);
+        nint l = builtin.len(cert.UnhandledCriticalExtensions); if (l != 1) {
+            t.Fatalf("expected one unhandled critical extension, but found %d", l);
         }
     }
 }
 
-internal static readonly @string badIPMaskPEM = """
+internal static ref readonly @string badIPMaskPEM => ref badIPMaskPEMᵇ;
+private static readonly @string badIPMaskPEMᵇ = """
 
 -----BEGIN CERTIFICATE-----
 MIICzzCCAbegAwIBAgICEjQwDQYJKoZIhvcNAQELBQAwHTEbMBkGA1UEAxMSQmFk
@@ -2565,22 +2585,24 @@ pdX+
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectedᶜ1 = "contained invalid mask"u8;
+internal static ref readonly @string expectedᶜ1 => ref expectedᶜ1ᵇ;
+private static readonly @string expectedᶜ1ᵇ = "contained invalid mask"u8;
 
-public static void TestBadIPMask(ж<testing.T> Ꮡt) {
+public static void TestBadIPMask(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(badIPMaskPEM));
-    var (_, err) = ParseCertificate((~block).Bytes);
-    if (err == default!) {
-        Ꮡt.Fatalf("unexpected success"u8);
+    var (_, err) = ParseCertificate(block.Bytes);
+    if (err == nil) {
+        t.Fatalf("unexpected success");
     }
 
     @string expected = expectedᶜ1;
     if (!strings.Contains(err.Error(), expected)) {
-        Ꮡt.Fatalf("expected %q in error but got: %s"u8, expected, err);
+        t.Fatalf("expected %q in error but got: %s", expected, err);
     }
 }
 
-internal static readonly @string additionalGeneralSubtreePEM = """
+internal static ref readonly @string additionalGeneralSubtreePEM => ref additionalGeneralSubtreePEMᵇ;
+private static readonly @string additionalGeneralSubtreePEMᵇ = """
 
 -----BEGIN CERTIFICATE-----
 MIIG4TCCBMmgAwIBAgIRALss+4rLw2Ia7tFFhxE8g5cwDQYJKoZIhvcNAQELBQAw
@@ -2623,49 +2645,48 @@ xKK9CjUb7gzRUWSpB9jGHsvpEMHOzIFhufvH2Bz1XJw+Cl7khw==
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestAdditionFieldsInGeneralSubtree(ж<testing.T> Ꮡt) {
+public static void TestAdditionFieldsInGeneralSubtree(ж<testing.T> t) {
     // Very rarely, certificates can include additional fields in the
     // GeneralSubtree structure. This tests that such certificates can be
     // parsed.
     var (block, _) = pem.Decode(slice<byte>(additionalGeneralSubtreePEM));
     {
-        var (_, err) = ParseCertificate((~block).Bytes); if (err != default!) {
-            Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
+        var (_, err) = ParseCertificate(block.Bytes); if (err != nil) {
+            t.Fatalf("failed to parse certificate: %s", err);
         }
     }
 }
 
-public static void TestEmptySerialNumber(ж<testing.T> Ꮡt) {
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
-        DNSNames: new @string[]{"example.com"u8}.slice()
-    );
+public static void TestEmptySerialNumber(ж<testing.T> t) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
+        DNSNames: slice<@string>(["example.com"])
+    ), out var Ꮡtemplate);
 
     foreach (var _ᴛ1 in range(100)) {
-        var (derBytes, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil());
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to create certificate: %s"u8, err);
+        var (derBytes, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, testPrivateKey.ᏑPublicKey, testPrivateKey.OrTypedNil());
+        if (err != nil) {
+            t.Fatalf("failed to create certificate: %s", err);
         }
 
         (var cert, err) = ParseCertificate(derBytes);
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
+        if (err != nil) {
+            t.Fatalf("failed to parse certificate: %s", err);
         }
 
         {
-            nint sign = (~cert).SerialNumber.Sign(); if (sign != 1) {
-                Ꮡt.Fatalf("generated a non positive serial, sign: %d"u8, sign);
+            nint sign = cert.SerialNumber.Sign(); if (sign != 1) {
+                t.Fatalf("generated a non positive serial, sign: %d", sign);
             }
         }
 
-        (var b, err) = asn1.Marshal((~cert).SerialNumber.OrTypedNil());
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to marshal generated serial number: %s"u8, err);
+        (var b, err) = asn1.Marshal(cert.SerialNumber.OrTypedNil());
+        if (err != nil) {
+            t.Fatalf("failed to marshal generated serial number: %s", err);
         }
         // subtract 2 for tag and length
         {
             nint l = builtin.len(b) - 2; if (l > 20) {
-                Ꮡt.Fatalf("generated serial number larger than 20 octets when encoded: %d"u8, l);
+                t.Fatalf("generated serial number larger than 20 octets when encoded: %d", l);
             }
         }
     }
@@ -2675,38 +2696,38 @@ public static void TestEmptySerialNumber(ж<testing.T> Ꮡt) {
 internal static readonly object sanExtensionIsNotˢ = (@string)"SAN extension is not critical"u8;
 internal static readonly object sanExtensionIsMissingˢ = (@string)"SAN extension is missing"u8;
 
-public static void TestEmptySubject(ж<testing.T> Ꮡt) {
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
+public static void TestEmptySubject(ж<testing.T> t) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         SerialNumber: big.NewInt(1),
-        DNSNames: new @string[]{"example.com"u8}.slice()
-    );
+        DNSNames: slice<@string>(["example.com"])
+    ), out var Ꮡtemplate);
 
-    var (derBytes, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create certificate: %s"u8, err);
+    var (derBytes, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, testPrivateKey.ᏑPublicKey, testPrivateKey.OrTypedNil());
+    if (err != nil) {
+        t.Fatalf("failed to create certificate: %s", err);
     }
 
     (var cert, err) = ParseCertificate(derBytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse certificate: %s", err);
     }
 
-    foreach (var (_, ext) in (~cert).Extensions) {
+    foreach (var (_, ext) in cert.Extensions) {
         if (ext.Id.Equal(oidExtensionSubjectAltName)) {
             if (!ext.Critical) {
-                Ꮡt.Fatal(sanExtensionIsNotˢ);
+                t.Fatal(sanExtensionIsNotˢ);
             }
             return;
         }
     }
 
-    Ꮡt.Fatal(sanExtensionIsMissingˢ);
+    t.Fatal(sanExtensionIsMissingˢ);
 }
 
 // multipleURLsInCRLDPPEM contains two URLs in a single CRL DistributionPoint
 // structure. It is taken from https://crt.sh/?id=12721534.
-internal static readonly @string multipleURLsInCRLDPPEM = """
+internal static ref readonly @string multipleURLsInCRLDPPEM => ref multipleURLsInCRLDPPEMᵇ;
+private static readonly @string multipleURLsInCRLDPPEMᵇ = """
 
 -----BEGIN CERTIFICATE-----
 MIIF4TCCBMmgAwIBAgIQc+6uFePfrahUGpXs8lhiTzANBgkqhkiG9w0BAQsFADCB
@@ -2745,39 +2766,41 @@ eVxXDTCfs7GUlxnjOp5j559X/N0A
 
 """u8.Raw();
 
-public static void TestMultipleURLsInCRLDP(ж<testing.T> Ꮡt) {
+public static void TestMultipleURLsInCRLDP(ж<testing.T> t) {
     var (block, _) = pem.Decode(slice<byte>(multipleURLsInCRLDPPEM));
-    var (cert, err) = ParseCertificate((~block).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
+    var (cert, err) = ParseCertificate(block.Bytes);
+    if (err != nil) {
+        t.Fatalf("failed to parse certificate: %s", err);
     }
 
-    var want = new @string[]{
-        "http://epscd.catcert.net/crl/ec-acc.crl"u8,
-        "http://epscd2.catcert.net/crl/ec-acc.crl"u8
-    }.slice();
+    var want = slice<@string>([
+        "http://epscd.catcert.net/crl/ec-acc.crl",
+        "http://epscd2.catcert.net/crl/ec-acc.crl"
+    ]);
     {
-        var got = cert.Value.CRLDistributionPoints; if (!slices.Equal<slice<@string>, @string>(got, want)) {
-            Ꮡt.Errorf("CRL distribution points = %#v, want #%v"u8, got, want);
+        var got = cert.CRLDistributionPoints; if (!slices.Equal<slice<@string>, @string>(got, want)) {
+            t.Errorf("CRL distribution points = %#v, want #%v", got, want);
         }
     }
 }
 
-internal static readonly @string hexPKCS1TestPKCS8Key = "30820278020100300d06092a864886f70d0101010500048202623082025e02010002818100cfb1b5bf9685ffa97b4f99df4ff122b70e59ac9b992f3bc2b3dde17d53c1a34928719b02e8fd17839499bfbd515bd6ef99c7a1c47a239718fe36bfd824c0d96060084b5f67f0273443007a24dfaf5634f7772c9346e10eb294c2306671a5a5e719ae24b4de467291bc571014b0e02dec04534d66a9bb171d644b66b091780e8d020301000102818100b595778383c4afdbab95d2bfed12b3f93bb0a73a7ad952f44d7185fd9ec6c34de8f03a48770f2009c8580bcd275e9632714e9a5e3f32f29dc55474b2329ff0ebc08b3ffcb35bc96e6516b483df80a4a59cceb71918cbabf91564e64a39d7e35dce21cb3031824fdbc845dba6458852ec16af5dddf51a8397a8797ae0337b1439024100ea0eb1b914158c70db39031dd8904d6f18f408c85fbbc592d7d20dee7986969efbda081fdf8bc40e1b1336d6b638110c836bfdc3f314560d2e49cd4fbde1e20b024100e32a4e793b574c9c4a94c8803db5152141e72d03de64e54ef2c8ed104988ca780cd11397bc359630d01b97ebd87067c5451ba777cf045ca23f5912f1031308c702406dfcdbbd5a57c9f85abc4edf9e9e29153507b07ce0a7ef6f52e60dcfebe1b8341babd8b789a837485da6c8d55b29bbb142ace3c24a1f5b54b454d01b51e2ad03024100bd6a2b60dee01e1b3bfcef6a2f09ed027c273cdbbaf6ba55a80f6dcc64e4509ee560f84b4f3e076bd03b11e42fe71a3fdd2dffe7e0902c8584f8cad877cdc945024100aa512fa4ada69881f1d8bb8ad6614f192b83200aef5edf4811313d5ef30a86cbd0a90f7b025c71ea06ec6b34db6306c86b1040670fd8654ad7291d066d06d031"u8;
+internal static ref readonly @string hexPKCS1TestPKCS8Key => ref hexPKCS1TestPKCS8Keyᵇ;
+private static readonly @string hexPKCS1TestPKCS8Keyᵇ = "30820278020100300d06092a864886f70d0101010500048202623082025e02010002818100cfb1b5bf9685ffa97b4f99df4ff122b70e59ac9b992f3bc2b3dde17d53c1a34928719b02e8fd17839499bfbd515bd6ef99c7a1c47a239718fe36bfd824c0d96060084b5f67f0273443007a24dfaf5634f7772c9346e10eb294c2306671a5a5e719ae24b4de467291bc571014b0e02dec04534d66a9bb171d644b66b091780e8d020301000102818100b595778383c4afdbab95d2bfed12b3f93bb0a73a7ad952f44d7185fd9ec6c34de8f03a48770f2009c8580bcd275e9632714e9a5e3f32f29dc55474b2329ff0ebc08b3ffcb35bc96e6516b483df80a4a59cceb71918cbabf91564e64a39d7e35dce21cb3031824fdbc845dba6458852ec16af5dddf51a8397a8797ae0337b1439024100ea0eb1b914158c70db39031dd8904d6f18f408c85fbbc592d7d20dee7986969efbda081fdf8bc40e1b1336d6b638110c836bfdc3f314560d2e49cd4fbde1e20b024100e32a4e793b574c9c4a94c8803db5152141e72d03de64e54ef2c8ed104988ca780cd11397bc359630d01b97ebd87067c5451ba777cf045ca23f5912f1031308c702406dfcdbbd5a57c9f85abc4edf9e9e29153507b07ce0a7ef6f52e60dcfebe1b8341babd8b789a837485da6c8d55b29bbb142ace3c24a1f5b54b454d01b51e2ad03024100bd6a2b60dee01e1b3bfcef6a2f09ed027c273cdbbaf6ba55a80f6dcc64e4509ee560f84b4f3e076bd03b11e42fe71a3fdd2dffe7e0902c8584f8cad877cdc945024100aa512fa4ada69881f1d8bb8ad6614f192b83200aef5edf4811313d5ef30a86cbd0a90f7b025c71ea06ec6b34db6306c86b1040670fd8654ad7291d066d06d031"u8;
 
-internal static readonly @string hexPKCS1TestECKey = "3081a40201010430bdb9839c08ee793d1157886a7a758a3c8b2a17a4df48f17ace57c72c56b4723cf21dcda21d4e1ad57ff034f19fcfd98ea00706052b81040022a16403620004feea808b5ee2429cfcce13c32160e1c960990bd050bb0fdf7222f3decd0a55008e32a6aa3c9062051c4cba92a7a3b178b24567412d43cdd2f882fa5addddd726fe3e208d2c26d733a773a597abb749714df7256ead5105fa6e7b3650de236b50"u8;
+internal static ref readonly @string hexPKCS1TestECKey => ref hexPKCS1TestECKeyᵇ;
+private static readonly @string hexPKCS1TestECKeyᵇ = "3081a40201010430bdb9839c08ee793d1157886a7a758a3c8b2a17a4df48f17ace57c72c56b4723cf21dcda21d4e1ad57ff034f19fcfd98ea00706052b81040022a16403620004feea808b5ee2429cfcce13c32160e1c960990bd050bb0fdf7222f3decd0a55008e32a6aa3c9062051c4cba92a7a3b178b24567412d43cdd2f882fa5addddd726fe3e208d2c26d733a773a597abb749714df7256ead5105fa6e7b3650de236b50"u8;
 
-internal static slice<pkcs8MismatchKeyTestsᴛ1> pkcs1MismatchKeyTests = new pkcs8MismatchKeyTestsᴛ1[]{
-    new(hexKey: hexPKCS1TestPKCS8Key, errorContains: "use ParsePKCS8PrivateKey instead"u8),
-    new(hexKey: hexPKCS1TestECKey, errorContains: "use ParseECPrivateKey instead"u8)
-}.slice();
+internal static slice<pkcs8MismatchKeyTestsᴛ1> pkcs1MismatchKeyTests = slice<pkcs8MismatchKeyTestsᴛ1>([
+    new(hexKey: hexPKCS1TestPKCS8Key, errorContains: "use ParsePKCS8PrivateKey instead"),
+    new(hexKey: hexPKCS1TestECKey, errorContains: "use ParseECPrivateKey instead")
+]);
 
-public static void TestPKCS1MismatchKeyFormat(ж<testing.T> Ꮡt) {
+public static void TestPKCS1MismatchKeyFormat(ж<testing.T> t) {
     foreach (var (i, test) in pkcs1MismatchKeyTests) {
         var (derBytes, _) = hex.DecodeString(test.hexKey);
         var (_, err) = ParsePKCS1PrivateKey(derBytes);
         if (!strings.Contains(err.Error(), test.errorContains)) {
-            Ꮡt.Errorf("#%d: expected error containing %q, got %s"u8, i, test.errorContains, err);
+            t.Errorf("#%d: expected error containing %q, got %s", i, test.errorContains, err);
         }
     }
 }
@@ -2790,438 +2813,434 @@ internal partial struct TestCreateRevocationList_tests /*dyn*/ {
     internal @string expectedError;
 }
 
-public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestCreateRevocationList(ж<testing.T> t) {
     var (ec256Priv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to generate ECDSA P256 key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Failed to generate ECDSA P256 key: %s", err);
     }
     (_, var ed25519Priv, err) = ed25519.GenerateKey(rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to generate Ed25519 key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Failed to generate Ed25519 key: %s", err);
     }
 
     // Generation command:
     // openssl req -x509 -newkey rsa -keyout key.pem -out cert.pem -days 365 -nodes -subj '/C=US/ST=California/L=San Francisco/O=Internet Widgets, Inc./OU=WWW/CN=Root/emailAddress=admin@example.com' -sha256 -addext basicConstraints=CA:TRUE -addext "keyUsage = digitalSignature, keyEncipherment, dataEncipherment, cRLSign, keyCertSign" -utf8
-    @string utf8CAStr = "MIIEITCCAwmgAwIBAgIUXHXy7NdtDv+ClaHvIvlwCYiI4a4wDQYJKoZIhvcNAQELBQAwgZoxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMR8wHQYDVQQKDBZJbnRlcm5ldCBXaWRnZXRzLCBJbmMuMQwwCgYDVQQLDANXV1cxDTALBgNVBAMMBFJvb3QxIDAeBgkqhkiG9w0BCQEWEWFkbWluQGV4YW1wbGUuY29tMB4XDTIyMDcwODE1MzgyMFoXDTIzMDcwODE1MzgyMFowgZoxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMR8wHQYDVQQKDBZJbnRlcm5ldCBXaWRnZXRzLCBJbmMuMQwwCgYDVQQLDANXV1cxDTALBgNVBAMMBFJvb3QxIDAeBgkqhkiG9w0BCQEWEWFkbWluQGV4YW1wbGUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmXvp0WNjsZzySWT7Ce5zewQNKq8ujeZGphJ44Vdrwut/b6TcC4iYENds5+7/3PYwBllp3K5TRpCcafSxdhJsvA7/zWlHHNRcJhJLNt9qsKWP6ukI2Iw6OmFMg6kJQ8f67RXkT8HR3v0UqE+lWrA0g+oRuj4erLtfOtSpnl4nsE/Rs2qxbELFWAf7F5qMqH4dUyveWKrNT8eI6YQN+wBg0MAjoKRvDJnBhuo+IvvXX8Aq1QWUcBGPK3or/Ehxy5f/gEmSUXyEU1Ht/vATt2op+eRaEEpBdGRvO+DrKjlcQV2XMN18A9LAX6hCzH43sGye87dj7RZ9yj+waOYNaM7kFQIDAQABo10wWzAdBgNVHQ4EFgQUtbSlrW4hGL2kNjviM6wcCRwvOEEwHwYDVR0jBBgwFoAUtbSlrW4hGL2kNjviM6wcCRwvOEEwDAYDVR0TBAUwAwEB/zALBgNVHQ8EBAMCAbYwDQYJKoZIhvcNAQELBQADggEBAAko82YNNI2n/45L3ya21vufP6nZihIOIxgcRPUMX+IDJZk16qsFdcLgH3KAP8uiVLn8sULuCj35HpViR4IcAk2d+DqfG11l8kY+e5P7nYsViRfy0AatF59/sYlWf+3RdmPXfL70x4mE9OqlMdDm0kR2obps8rng83VLDNvj3R5sBnQwdw6LKLGzaE+RiCTmkH0+P6vnbOJ33su9+9al1+HvJUg3UM1Xq5Bw7TE8DQTetMV3c2Q35RQaJB9pQ4blJOnW9hfnt8yQzU6TU1bU4mRctTm1o1f8btPqUpi+/blhi5MUJK0/myj1XD00pmyfp8QAFl1EfqmTMIBMLg633A0="u8;
+    @string utf8CAStr = "MIIEITCCAwmgAwIBAgIUXHXy7NdtDv+ClaHvIvlwCYiI4a4wDQYJKoZIhvcNAQELBQAwgZoxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMR8wHQYDVQQKDBZJbnRlcm5ldCBXaWRnZXRzLCBJbmMuMQwwCgYDVQQLDANXV1cxDTALBgNVBAMMBFJvb3QxIDAeBgkqhkiG9w0BCQEWEWFkbWluQGV4YW1wbGUuY29tMB4XDTIyMDcwODE1MzgyMFoXDTIzMDcwODE1MzgyMFowgZoxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMR8wHQYDVQQKDBZJbnRlcm5ldCBXaWRnZXRzLCBJbmMuMQwwCgYDVQQLDANXV1cxDTALBgNVBAMMBFJvb3QxIDAeBgkqhkiG9w0BCQEWEWFkbWluQGV4YW1wbGUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmXvp0WNjsZzySWT7Ce5zewQNKq8ujeZGphJ44Vdrwut/b6TcC4iYENds5+7/3PYwBllp3K5TRpCcafSxdhJsvA7/zWlHHNRcJhJLNt9qsKWP6ukI2Iw6OmFMg6kJQ8f67RXkT8HR3v0UqE+lWrA0g+oRuj4erLtfOtSpnl4nsE/Rs2qxbELFWAf7F5qMqH4dUyveWKrNT8eI6YQN+wBg0MAjoKRvDJnBhuo+IvvXX8Aq1QWUcBGPK3or/Ehxy5f/gEmSUXyEU1Ht/vATt2op+eRaEEpBdGRvO+DrKjlcQV2XMN18A9LAX6hCzH43sGye87dj7RZ9yj+waOYNaM7kFQIDAQABo10wWzAdBgNVHQ4EFgQUtbSlrW4hGL2kNjviM6wcCRwvOEEwHwYDVR0jBBgwFoAUtbSlrW4hGL2kNjviM6wcCRwvOEEwDAYDVR0TBAUwAwEB/zALBgNVHQ8EBAMCAbYwDQYJKoZIhvcNAQELBQADggEBAAko82YNNI2n/45L3ya21vufP6nZihIOIxgcRPUMX+IDJZk16qsFdcLgH3KAP8uiVLn8sULuCj35HpViR4IcAk2d+DqfG11l8kY+e5P7nYsViRfy0AatF59/sYlWf+3RdmPXfL70x4mE9OqlMdDm0kR2obps8rng83VLDNvj3R5sBnQwdw6LKLGzaE+RiCTmkH0+P6vnbOJ33su9+9al1+HvJUg3UM1Xq5Bw7TE8DQTetMV3c2Q35RQaJB9pQ4blJOnW9hfnt8yQzU6TU1bU4mRctTm1o1f8btPqUpi+/blhi5MUJK0/myj1XD00pmyfp8QAFl1EfqmTMIBMLg633A0=";
     var (utf8CABytes, _) = base64.StdEncoding.DecodeString(utf8CAStr);
     var (utf8CA, _) = ParseCertificate(utf8CABytes);
 
-    @string utf8KeyStr = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCZe+nRY2OxnPJJZPsJ7nN7BA0qry6N5kamEnjhV2vC639vpNwLiJgQ12zn7v/c9jAGWWncrlNGkJxp9LF2Emy8Dv/NaUcc1FwmEks232qwpY/q6QjYjDo6YUyDqQlDx/rtFeRPwdHe/RSoT6VasDSD6hG6Ph6su1861KmeXiewT9GzarFsQsVYB/sXmoyofh1TK95Yqs1Px4jphA37AGDQwCOgpG8MmcGG6j4i+9dfwCrVBZRwEY8reiv8SHHLl/+ASZJRfIRTUe3+8BO3ain55FoQSkF0ZG874OsqOVxBXZcw3XwD0sBfqELMfjewbJ7zt2PtFn3KP7Bo5g1ozuQVAgMBAAECggEAIscjKiD9PAe2Fs9c2tk/LYazfRKI1/pv072nylfGwToffCq8+ZgP7PEDamKLc4QNScME685MbFbkOlYJyBlQriQv7lmGlY/A+Zd3l410XWaGf9IiAP91Sjk13zd0M/micApf23qtlXt/LMwvSadXnvRw4+SjirxCTdBWRt5K2/ZAN550v7bHFk1EZc3UBF6sOoNsjQWh9Ek79UmQYJBPiZDBHO7O2fh2GSIbUutTma+Tb2i1QUZzg+AG3cseF3p1i3uhNrCh+p+01bJSzGTQsRod2xpD1tpWwR3kIftCOmD1XnhpaBQi7PXjEuNbfucaftnoYj2ShDdmgD5RkkbTAQKBgQC8Ghu5MQ/yIeqXg9IpcSxuWtUEAEfK33/cC/IvuntgbNEnWQm5Lif4D6a9zjkxiCS+9HhrUu5U2EV8NxOyaqmtub3Np1Z5mPuI9oiZ119bjUJd4X+jKOTaePWvOv/rL/pTHYqzXohVMrXy+DaTIq4lOcv3n72SuhuTcKU95rhKtQKBgQDQ4t+HsRZd5fJzoCgRQhlNK3EbXQDv2zXqMW3GfpF7GaDP18I530inRURSJa++rvi7/MCFg/TXVS3QC4HXtbzTYTqhE+VHzSr+/OcsqpLE8b0jKBDv/SBkz811PUJDs3LsX31DT3K0zUpMpNSd/5SYTyJKef9L6mxmwlC1S2Yv4QKBgQC57SiYDdnQIRwrtZ2nXvlm/xttAAX2jqJoU9qIuNA4yHaYaRcGVowlUvsiw9OelQ6VPTpGA0wWy0src5lhkrKzSFRHEe+U89U1VVJCljLoYKFIAJvUH5jOJh/am/vYca0COMIfeAJUDHLyfcwb9XyiyRVGZzvP62tUelSq8gIZvQKBgCAHeaDzzWsudCO4ngwvZ3PGwnwgoaElqrmzRJLYG3SVtGvKOJTpINnNLDGwZ6dEaw1gLyEJ38QY4oJxEULDMiXzVasXQuPkmMAqhUP7D7A1JPw8C4TQ+mOa3XUppHx/CpMl/S4SA5OnmsnvyE5Fv0IveCGVXUkFtAN5rihuXEfhAoGANUkuGU3A0Upk2mzv0JTGP4H95JFG93cqnyPNrYs30M6RkZNgTW27yyr+Nhs4/cMdrg1AYTB0+6ItQWSDmYLs7JEbBE/8L8fdD1irIcygjIHE9nJh96TgZCt61kVGLE8758lOdmoB2rZOpGwi16QIhdQb+IyozYqfX+lQUojL/W0="u8;
+    @string utf8KeyStr = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCZe+nRY2OxnPJJZPsJ7nN7BA0qry6N5kamEnjhV2vC639vpNwLiJgQ12zn7v/c9jAGWWncrlNGkJxp9LF2Emy8Dv/NaUcc1FwmEks232qwpY/q6QjYjDo6YUyDqQlDx/rtFeRPwdHe/RSoT6VasDSD6hG6Ph6su1861KmeXiewT9GzarFsQsVYB/sXmoyofh1TK95Yqs1Px4jphA37AGDQwCOgpG8MmcGG6j4i+9dfwCrVBZRwEY8reiv8SHHLl/+ASZJRfIRTUe3+8BO3ain55FoQSkF0ZG874OsqOVxBXZcw3XwD0sBfqELMfjewbJ7zt2PtFn3KP7Bo5g1ozuQVAgMBAAECggEAIscjKiD9PAe2Fs9c2tk/LYazfRKI1/pv072nylfGwToffCq8+ZgP7PEDamKLc4QNScME685MbFbkOlYJyBlQriQv7lmGlY/A+Zd3l410XWaGf9IiAP91Sjk13zd0M/micApf23qtlXt/LMwvSadXnvRw4+SjirxCTdBWRt5K2/ZAN550v7bHFk1EZc3UBF6sOoNsjQWh9Ek79UmQYJBPiZDBHO7O2fh2GSIbUutTma+Tb2i1QUZzg+AG3cseF3p1i3uhNrCh+p+01bJSzGTQsRod2xpD1tpWwR3kIftCOmD1XnhpaBQi7PXjEuNbfucaftnoYj2ShDdmgD5RkkbTAQKBgQC8Ghu5MQ/yIeqXg9IpcSxuWtUEAEfK33/cC/IvuntgbNEnWQm5Lif4D6a9zjkxiCS+9HhrUu5U2EV8NxOyaqmtub3Np1Z5mPuI9oiZ119bjUJd4X+jKOTaePWvOv/rL/pTHYqzXohVMrXy+DaTIq4lOcv3n72SuhuTcKU95rhKtQKBgQDQ4t+HsRZd5fJzoCgRQhlNK3EbXQDv2zXqMW3GfpF7GaDP18I530inRURSJa++rvi7/MCFg/TXVS3QC4HXtbzTYTqhE+VHzSr+/OcsqpLE8b0jKBDv/SBkz811PUJDs3LsX31DT3K0zUpMpNSd/5SYTyJKef9L6mxmwlC1S2Yv4QKBgQC57SiYDdnQIRwrtZ2nXvlm/xttAAX2jqJoU9qIuNA4yHaYaRcGVowlUvsiw9OelQ6VPTpGA0wWy0src5lhkrKzSFRHEe+U89U1VVJCljLoYKFIAJvUH5jOJh/am/vYca0COMIfeAJUDHLyfcwb9XyiyRVGZzvP62tUelSq8gIZvQKBgCAHeaDzzWsudCO4ngwvZ3PGwnwgoaElqrmzRJLYG3SVtGvKOJTpINnNLDGwZ6dEaw1gLyEJ38QY4oJxEULDMiXzVasXQuPkmMAqhUP7D7A1JPw8C4TQ+mOa3XUppHx/CpMl/S4SA5OnmsnvyE5Fv0IveCGVXUkFtAN5rihuXEfhAoGANUkuGU3A0Upk2mzv0JTGP4H95JFG93cqnyPNrYs30M6RkZNgTW27yyr+Nhs4/cMdrg1AYTB0+6ItQWSDmYLs7JEbBE/8L8fdD1irIcygjIHE9nJh96TgZCt61kVGLE8758lOdmoB2rZOpGwi16QIhdQb+IyozYqfX+lQUojL/W0=";
     var (utf8KeyBytes, _) = base64.StdEncoding.DecodeString(utf8KeyStr);
     var (utf8KeyRaw, _) = ParsePKCS8PrivateKey(utf8KeyBytes);
     var utf8Key = utf8KeyRaw._<crypto.Signer>();
 
-    var tests = new TestCreateRevocationList_tests[]{
+    var tests = slice<TestCreateRevocationList_tests>([
         new(
-            name: "nil template"u8,
+            name: "nil template",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: nil,
             template: nil,
-            expectedError: "x509: template can not be nil"u8
+            expectedError: "x509: template can not be nil"
         ),
         new(
-            name: "nil issuer"u8,
+            name: "nil issuer",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: nil,
-            template: Ꮡ(new RevocationList(nil)),
-            expectedError: "x509: issuer can not be nil"u8
+            template: Ꮡ(new RevocationList()),
+            expectedError: "x509: issuer can not be nil"
         ),
         new(
-            name: "issuer doesn't have crlSign key usage bit set"u8,
+            name: "issuer doesn't have crlSign key usage bit set",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCertSign
             )),
-            template: Ꮡ(new RevocationList(nil)),
-            expectedError: "x509: issuer must have the crlSign key usage bit set"u8
+            template: Ꮡ(new RevocationList()),
+            expectedError: "x509: issuer must have the crlSign key usage bit set"
         ),
         new(
-            name: "issuer missing SubjectKeyId"u8,
+            name: "issuer missing SubjectKeyId",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign
             )),
-            template: Ꮡ(new RevocationList(nil)),
-            expectedError: "x509: issuer certificate doesn't contain a subject key identifier"u8
+            template: Ꮡ(new RevocationList()),
+            expectedError: "x509: issuer certificate doesn't contain a subject key identifier"
         ),
         new(
-            name: "nextUpdate before thisUpdate"u8,
+            name: "nextUpdate before thisUpdate",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                ThisUpdate: new time.Time(nil).Add(time.ΔHour),
-                NextUpdate: new time.Time(nil)
+                ThisUpdate: new time.Time().Add(time.ΔHour),
+                NextUpdate: new time.Time()
             )),
-            expectedError: "x509: template.ThisUpdate is after template.NextUpdate"u8
+            expectedError: "x509: template.ThisUpdate is after template.NextUpdate"
         ),
         new(
-            name: "nil Number"u8,
+            name: "nil Number",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             )),
-            expectedError: "x509: template contains nil Number field"u8
+            expectedError: "x509: template contains nil Number field"
         ),
         new(
-            name: "long Number"u8,
+            name: "long Number",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L)),
-                Number: big.NewInt(0).SetBytes(appendꓸꓸꓸ(new byte[]{1}.slice(), makeꓸꓸꓸ<byte>(20)))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L)),
+                Number: big.NewInt(0).SetBytes(appendꓸꓸꓸ(slice<byte>([1]), makeꓸꓸꓸ<byte>(20)))
             )),
-            expectedError: "x509: CRL number exceeds 20 octets"u8
+            expectedError: "x509: CRL number exceeds 20 octets"
         ),
         new(
-            name: "long Number (20 bytes, MSB set)"u8,
+            name: "long Number (20 bytes, MSB set)",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L)),
-                Number: big.NewInt(0).SetBytes(appendꓸꓸꓸ(new byte[]{255}.slice(), makeꓸꓸꓸ<byte>(19)))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L)),
+                Number: big.NewInt(0).SetBytes(appendꓸꓸꓸ(slice<byte>([255]), makeꓸꓸꓸ<byte>(19)))
             )),
-            expectedError: "x509: CRL number exceeds 20 octets"u8
+            expectedError: "x509: CRL number exceeds 20 octets"
         ),
         new(
-            name: "invalid signature algorithm"u8,
+            name: "invalid signature algorithm",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
                 SignatureAlgorithm: SHA256WithRSA,
-                RevokedCertificates: new pkix.RevokedCertificate[]{
+                RevokedCertificates: slice<pkix.RevokedCertificate>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time(nil).Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.ΔHour)
                     )
-                }.slice(),
+                ]),
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             )),
-            expectedError: "x509: requested SignatureAlgorithm does not match private key type"u8
+            expectedError: "x509: requested SignatureAlgorithm does not match private key type"
         ),
         new(
-            name: "valid"u8,
+            name: "valid",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                RevokedCertificateEntries: new global::go.crypto.x509_package.RevocationListEntry[]{
+                RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time(nil).Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.ΔHour)
                     )
-                }.slice(),
+                ]),
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             ))
         ),
         new(
-            name: "valid, reason code"u8,
+            name: "valid, reason code",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                RevokedCertificateEntries: new global::go.crypto.x509_package.RevocationListEntry[]{
+                RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time(nil).Add(time.ΔHour),
+                        RevocationTime: new time.Time().Add(time.ΔHour),
                         ReasonCode: 1
                     )
-                }.slice(),
+                ]),
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             ))
         ),
         new(
-            name: "valid, extra entry extension"u8,
+            name: "valid, extra entry extension",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                RevokedCertificateEntries: new global::go.crypto.x509_package.RevocationListEntry[]{
+                RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time(nil).Add(time.ΔHour),
-                        ExtraExtensions: new pkix.Extension[]{
+                        RevocationTime: new time.Time().Add(time.ΔHour),
+                        ExtraExtensions: slice<pkix.Extension>([
                             new(
-                                Id: new nint[]{2, 5, 29, 99}.slice(),
-                                Value: new byte[]{5, 0}.slice()
+                                Id: slice<nint>([2, 5, 29, 99]),
+                                Value: slice<byte>([5, 0])
                             )
-                        }.slice()
+                        ])
                     )
-                }.slice(),
+                ]),
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             ))
         ),
         new(
-            name: "valid, Ed25519 key"u8,
+            name: "valid, Ed25519 key",
             key: new x509_test_package.ed25519_PrivateKeyᴠSigner(ed25519Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                RevokedCertificateEntries: new global::go.crypto.x509_package.RevocationListEntry[]{
+                RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time(nil).Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.ΔHour)
                     )
-                }.slice(),
+                ]),
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             ))
         ),
         new(
-            name: "valid, non-default signature algorithm"u8,
+            name: "valid, non-default signature algorithm",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
                 SignatureAlgorithm: ECDSAWithSHA512,
-                RevokedCertificateEntries: new global::go.crypto.x509_package.RevocationListEntry[]{
+                RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time(nil).Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.ΔHour)
                     )
-                }.slice(),
+                ]),
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             ))
         ),
         new(
-            name: "valid, extra extension"u8,
+            name: "valid, extra extension",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                RevokedCertificateEntries: new global::go.crypto.x509_package.RevocationListEntry[]{
+                RevokedCertificateEntries: slice<global::go.crypto.x509_package.RevocationListEntry>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time(nil).Add(time.ΔHour)
+                        RevocationTime: new time.Time().Add(time.ΔHour)
                     )
-                }.slice(),
+                ]),
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L)),
-                ExtraExtensions: new pkix.Extension[]{
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L)),
+                ExtraExtensions: slice<pkix.Extension>([
                     new(
-                        Id: new nint[]{2, 5, 29, 99}.slice(),
-                        Value: new byte[]{5, 0}.slice()
+                        Id: slice<nint>([2, 5, 29, 99]),
+                        Value: slice<byte>([5, 0])
                     )
-                }.slice()
+                ])
             ))
         ),
         new(
-            name: "valid, deprecated entries with extension"u8,
+            name: "valid, deprecated entries with extension",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
-                RevokedCertificates: new pkix.RevokedCertificate[]{
+                RevokedCertificates: slice<pkix.RevokedCertificate>([
                     new(
                         SerialNumber: big.NewInt(2),
-                        RevocationTime: new time.Time(nil).Add(time.ΔHour),
-                        Extensions: new pkix.Extension[]{
+                        RevocationTime: new time.Time().Add(time.ΔHour),
+                        Extensions: slice<pkix.Extension>([
                             new(
-                                Id: new nint[]{2, 5, 29, 99}.slice(),
-                                Value: new byte[]{5, 0}.slice()
+                                Id: slice<nint>([2, 5, 29, 99]),
+                                Value: slice<byte>([5, 0])
                             )
-                        }.slice()
+                        ])
                     )
-                }.slice(),
+                ]),
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             ))
         ),
         new(
-            name: "valid, empty list"u8,
+            name: "valid, empty list",
             key: new x509_test_package.ecdsa_PrivateKeyжSigner(ec256Priv),
             issuer: Ꮡ(new Certificate(
                 KeyUsage: KeyUsageCRLSign,
                 Subject: new pkix.Name(
-                    CommonName: "testing"u8
+                    CommonName: "testing"
                 ),
-                SubjectKeyId: new byte[]{1, 2, 3}.slice()
+                SubjectKeyId: slice<byte>([1, 2, 3])
             )),
             template: Ꮡ(new RevocationList(
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             ))
         ),
         new(
-            name: "valid CA with utf8 Subject fields including Email, empty list"u8,
+            name: "valid CA with utf8 Subject fields including Email, empty list",
             key: utf8Key,
             issuer: utf8CA,
             template: Ꮡ(new RevocationList(
                 Number: big.NewInt(5),
-                ThisUpdate: new time.Time(nil).Add((time.Duration)(86400000000000L)),
-                NextUpdate: new time.Time(nil).Add((time.Duration)(172800000000000L))
+                ThisUpdate: new time.Time().Add((time.Duration)(86400000000000L)),
+                NextUpdate: new time.Time().Add((time.Duration)(172800000000000L))
             ))
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestCreateRevocationList_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (crl, errΔ1) = CreateRevocationList(rand.Reader, tcʗ1.template, tcʗ1.issuer, tcʗ1.key);
-            if (errΔ1 != default! && tcʗ1.expectedError == ""u8){
-                tΔ1.Fatalf("CreateRevocationList failed unexpectedly: %s"u8, errΔ1);
-            } else 
-            if (errΔ1 != default! && tcʗ1.expectedError != errΔ1.Error()){
-                tΔ1.Fatalf("CreateRevocationList failed unexpectedly, wanted: %s, got: %s"u8, tcʗ1.expectedError, errΔ1);
-            } else 
-            if (errΔ1 == default! && tcʗ1.expectedError != ""u8) {
-                tΔ1.Fatalf("CreateRevocationList didn't fail, expected: %s"u8, tcʗ1.expectedError);
+            if (errΔ1 != nil && tcʗ1.expectedError == ""u8) {
+                tΔ1.Fatalf("CreateRevocationList failed unexpectedly: %s", errΔ1);
+            } else if (errΔ1 != nil && tcʗ1.expectedError != errΔ1.Error()) {
+                tΔ1.Fatalf("CreateRevocationList failed unexpectedly, wanted: %s, got: %s", tcʗ1.expectedError, errΔ1);
+            } else if (errΔ1 == nil && tcʗ1.expectedError != ""u8) {
+                tΔ1.Fatalf("CreateRevocationList didn't fail, expected: %s", tcʗ1.expectedError);
             }
             if (tcʗ1.expectedError != ""u8) {
                 return;
             }
 
             (var parsedCRL, errΔ1) = ParseRevocationList(crl);
-            if (errΔ1 != default!) {
-                tΔ1.Fatalf("Failed to parse generated CRL: %s"u8, errΔ1);
+            if (errΔ1 != nil) {
+                tΔ1.Fatalf("Failed to parse generated CRL: %s", errΔ1);
             }
 
-            if ((~tcʗ1.template).SignatureAlgorithm != UnknownSignatureAlgorithm && (~parsedCRL).SignatureAlgorithm != (~tcʗ1.template).SignatureAlgorithm) {
-                tΔ1.Fatalf("SignatureAlgorithm mismatch: got %v; want %v."u8, (~parsedCRL).SignatureAlgorithm,
-                    (~tcʗ1.template).SignatureAlgorithm);
+            if (tcʗ1.template.SignatureAlgorithm != UnknownSignatureAlgorithm && parsedCRL.SignatureAlgorithm != tcʗ1.template.SignatureAlgorithm) {
+                tΔ1.Fatalf("SignatureAlgorithm mismatch: got %v; want %v.", parsedCRL.SignatureAlgorithm,
+                    tcʗ1.template.SignatureAlgorithm);
             }
 
-            if (builtin.len((~tcʗ1.template).RevokedCertificates) > 0){
-                if (!reflect.DeepEqual((~parsedCRL).RevokedCertificates, (~tcʗ1.template).RevokedCertificates)) {
-                    tΔ1.Fatalf("RevokedCertificates mismatch: got %v; want %v."u8,
-                        (~parsedCRL).RevokedCertificates, (~tcʗ1.template).RevokedCertificates);
+            if (builtin.len(tcʗ1.template.RevokedCertificates) > 0) {
+                if (!reflect.DeepEqual(parsedCRL.RevokedCertificates, tcʗ1.template.RevokedCertificates)) {
+                    tΔ1.Fatalf("RevokedCertificates mismatch: got %v; want %v.",
+                        parsedCRL.RevokedCertificates, tcʗ1.template.RevokedCertificates);
                 }
             } else {
-                if (builtin.len((~parsedCRL).RevokedCertificateEntries) != builtin.len((~tcʗ1.template).RevokedCertificateEntries)) {
-                    tΔ1.Fatalf("RevokedCertificateEntries length mismatch: got %d; want %d."u8,
-                        builtin.len((~parsedCRL).RevokedCertificateEntries),
-                        builtin.len((~tcʗ1.template).RevokedCertificateEntries));
+                if (builtin.len(parsedCRL.RevokedCertificateEntries) != builtin.len(tcʗ1.template.RevokedCertificateEntries)) {
+                    tΔ1.Fatalf("RevokedCertificateEntries length mismatch: got %d; want %d.",
+                        builtin.len(parsedCRL.RevokedCertificateEntries),
+                        builtin.len(tcʗ1.template.RevokedCertificateEntries));
                 }
-                foreach (var (i, rce) in (~parsedCRL).RevokedCertificateEntries) {
-                    var expected = (~tcʗ1.template).RevokedCertificateEntries[i];
+                foreach (var (i, rce) in parsedCRL.RevokedCertificateEntries) {
+                    var expected = tcʗ1.template.RevokedCertificateEntries[i];
                     if (rce.SerialNumber.Cmp(expected.SerialNumber) != 0) {
-                        tΔ1.Fatalf("RevocationListEntry serial mismatch: got %d; want %d."u8,
+                        tΔ1.Fatalf("RevocationListEntry serial mismatch: got %d; want %d.",
                             rce.SerialNumber.OrTypedNil(), expected.SerialNumber.OrTypedNil());
                     }
                     if (!rce.RevocationTime.Equal(expected.RevocationTime)) {
-                        tΔ1.Fatalf("RevocationListEntry revocation time mismatch: got %v; want %v."u8,
+                        tΔ1.Fatalf("RevocationListEntry revocation time mismatch: got %v; want %v.",
                             rce.RevocationTime, expected.RevocationTime);
                     }
                     if (rce.ReasonCode != expected.ReasonCode) {
-                        tΔ1.Fatalf("RevocationListEntry reason code mismatch: got %d; want %d."u8,
+                        tΔ1.Fatalf("RevocationListEntry reason code mismatch: got %d; want %d.",
                             rce.ReasonCode, expected.ReasonCode);
                     }
                 }
             }
 
-            if (builtin.len((~parsedCRL).Extensions) != 2 + builtin.len((~tcʗ1.template).ExtraExtensions)) {
-                tΔ1.Fatalf("Generated CRL has wrong number of extensions, wanted: %d, got: %d"u8, 2 + builtin.len((~tcʗ1.template).ExtraExtensions), builtin.len((~parsedCRL).Extensions));
+            if (builtin.len(parsedCRL.Extensions) != 2 + builtin.len(tcʗ1.template.ExtraExtensions)) {
+                tΔ1.Fatalf("Generated CRL has wrong number of extensions, wanted: %d, got: %d", 2 + builtin.len(tcʗ1.template.ExtraExtensions), builtin.len(parsedCRL.Extensions));
             }
-            (var expectedAKI, errΔ1) = asn1.Marshal(new authKeyId(Id: (~tcʗ1.issuer).SubjectKeyId));
-            if (errΔ1 != default!) {
-                tΔ1.Fatalf("asn1.Marshal failed: %s"u8, errΔ1);
+            (var expectedAKI, errΔ1) = asn1.Marshal(new authKeyId(Id: tcʗ1.issuer.SubjectKeyId));
+            if (errΔ1 != nil) {
+                tΔ1.Fatalf("asn1.Marshal failed: %s", errΔ1);
             }
             var akiExt = new pkix.Extension(
                 Id: oidExtensionAuthorityKeyId,
                 Value: expectedAKI
             );
-            if (!reflect.DeepEqual((~parsedCRL).Extensions[0], akiExt)) {
-                tΔ1.Fatalf("Unexpected first extension: got %v, want %v"u8,
-                    (~parsedCRL).Extensions[0], akiExt);
+            if (!reflect.DeepEqual(parsedCRL.Extensions[0], akiExt)) {
+                tΔ1.Fatalf("Unexpected first extension: got %v, want %v",
+                    parsedCRL.Extensions[0], akiExt);
             }
-            (var expectedNum, errΔ1) = asn1.Marshal((~tcʗ1.template).Number.OrTypedNil());
-            if (errΔ1 != default!) {
-                tΔ1.Fatalf("asn1.Marshal failed: %s"u8, errΔ1);
+            (var expectedNum, errΔ1) = asn1.Marshal(tcʗ1.template.Number.OrTypedNil());
+            if (errΔ1 != nil) {
+                tΔ1.Fatalf("asn1.Marshal failed: %s", errΔ1);
             }
             var crlExt = new pkix.Extension(
                 Id: oidExtensionCRLNumber,
                 Value: expectedNum
             );
-            if (!reflect.DeepEqual((~parsedCRL).Extensions[1], crlExt)) {
-                tΔ1.Fatalf("Unexpected second extension: got %v, want %v"u8,
-                    (~parsedCRL).Extensions[1], crlExt);
+            if (!reflect.DeepEqual(parsedCRL.Extensions[1], crlExt)) {
+                tΔ1.Fatalf("Unexpected second extension: got %v, want %v",
+                    parsedCRL.Extensions[1], crlExt);
             }
 
             // With Go 1.19's updated RevocationList, we can now directly compare
@@ -3229,70 +3248,70 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
             // However, this doesn't work with our hacked issuers above (that
             // aren't parsed from a proper DER bundle but are instead manually
             // constructed). Prefer RawSubject when it is set.
-            if (builtin.len((~tcʗ1.issuer).RawSubject) > 0){
+            if (builtin.len(tcʗ1.issuer.RawSubject) > 0) {
                 var (issuerSubj, errΔ2) = subjectBytes(ref (tcʗ1.issuer).DerefOrNull());
-                if (errΔ2 != default!) {
-                    tΔ1.Fatalf("failed to get issuer subject: %s"u8, errΔ2);
+                if (errΔ2 != nil) {
+                    tΔ1.Fatalf("failed to get issuer subject: %s", errΔ2);
                 }
-                if (!bytes.Equal(issuerSubj, (~parsedCRL).RawIssuer)) {
-                    tΔ1.Fatalf("Unexpected issuer subject; wanted: %v, got: %v"u8, hex.EncodeToString(issuerSubj), hex.EncodeToString((~parsedCRL).RawIssuer));
+                if (!bytes.Equal(issuerSubj, parsedCRL.RawIssuer)) {
+                    tΔ1.Fatalf("Unexpected issuer subject; wanted: %v, got: %v", hex.EncodeToString(issuerSubj), hex.EncodeToString(parsedCRL.RawIssuer));
                 }
             } else {
                 // When we hack our custom Subject in the test cases above,
                 // we don't set the additional fields (such as Names) in the
                 // hacked issuer. Round-trip a parsing of pkix.Name so that
                 // we add these missing fields for the comparison.
-                ref var issuerRDN = ref heap<pkix.RDNSequence>(out var ᏑissuerRDN);
-                issuerRDN = (~tcʗ1.issuer).Subject.ToRDNSequence();
-                pkix.Name caIssuer = default!;
+                ref var issuerRDN = ref heap<pkix.RDNSequence>(tcʗ1.issuer.Subject.ToRDNSequence(), out var ᏑissuerRDN);
+                pkix.Name caIssuer = default;
                 caIssuer.FillFromRDNSequence(ᏑissuerRDN);
-                if (!reflect.DeepEqual(caIssuer, (~parsedCRL).Issuer)) {
-                    tΔ1.Fatalf("Expected issuer.Subject, parsedCRL.Issuer to be the same; wanted: %#v, got: %#v"u8, caIssuer, (~parsedCRL).Issuer);
+                if (!reflect.DeepEqual(caIssuer, parsedCRL.Issuer)) {
+                    tΔ1.Fatalf("Expected issuer.Subject, parsedCRL.Issuer to be the same; wanted: %#v, got: %#v", caIssuer, parsedCRL.Issuer);
                 }
             }
 
-            if (builtin.len((~parsedCRL).Extensions[2..]) == 0 && builtin.len((~tcʗ1.template).ExtraExtensions) == 0) {
+            if (builtin.len(parsedCRL.Extensions[2..]) == 0 && builtin.len(tcʗ1.template.ExtraExtensions) == 0) {
                 // If we don't have anything to check return early so we don't
                 // hit a [] != nil false positive below.
                 return;
             }
-            if (!reflect.DeepEqual((~parsedCRL).Extensions[2..], (~tcʗ1.template).ExtraExtensions)) {
-                tΔ1.Fatalf("Extensions mismatch: got %v; want %v."u8,
-                    (~parsedCRL).Extensions[2..], (~tcʗ1.template).ExtraExtensions);
+            if (!reflect.DeepEqual(parsedCRL.Extensions[2..], tcʗ1.template.ExtraExtensions)) {
+                tΔ1.Fatalf("Extensions mismatch: got %v; want %v.",
+                    parsedCRL.Extensions[2..], tcʗ1.template.ExtraExtensions);
             }
 
-            if ((~tcʗ1.template).Number != nil && (~parsedCRL).Number == nil) {
-                tΔ1.Fatalf("Generated CRL missing Number: got nil, want %s"u8,
-                    (~tcʗ1.template).Number.String());
+            if (tcʗ1.template.Number != nil && parsedCRL.Number == nil) {
+                tΔ1.Fatalf("Generated CRL missing Number: got nil, want %s",
+                    tcʗ1.template.Number.String());
             }
-            if ((~tcʗ1.template).Number != nil && (~tcʗ1.template).Number.Cmp((~parsedCRL).Number) != 0) {
-                tΔ1.Fatalf("Generated CRL has wrong Number: got %s, want %s"u8,
-                    (~parsedCRL).Number.String(), (~tcʗ1.template).Number.String());
+            if (tcʗ1.template.Number != nil && tcʗ1.template.Number.Cmp(parsedCRL.Number) != 0) {
+                tΔ1.Fatalf("Generated CRL has wrong Number: got %s, want %s",
+                    parsedCRL.Number.String(), tcʗ1.template.Number.String());
             }
-            if (!bytes.Equal((~parsedCRL).AuthorityKeyId, (~tcʗ1.issuer).SubjectKeyId)) {
-                tΔ1.Fatalf("Generated CRL has wrong AuthorityKeyId: got %x, want %x"u8,
-                    (~parsedCRL).AuthorityKeyId, (~tcʗ1.issuer).SubjectKeyId);
+            if (!bytes.Equal(parsedCRL.AuthorityKeyId, tcʗ1.issuer.SubjectKeyId)) {
+                tΔ1.Fatalf("Generated CRL has wrong AuthorityKeyId: got %x, want %x",
+                    parsedCRL.AuthorityKeyId, tcʗ1.issuer.SubjectKeyId);
             }
         });
     }
 }
 
-public static void TestRSAPSAParameters(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestRSAPSAParameters(ж<testing.T> t) {
     slice<byte> generateParams(crypto.Hash hashFunc) {
-        asn1.ObjectIdentifier hashOID = default!;
+        asn1.ObjectIdentifier hashOID = default;
 
-        var exprᴛ1 = hashFunc;
-        if (exprᴛ1 == crypto.SHA256) {
+        switch (hashFunc) {
+        case var ᴛ when ᴛ == crypto.SHA256: {
             hashOID = oidSHA256;
+            break;
         }
-        else if (exprᴛ1 == crypto.SHA384) {
+        case var ᴛ when ᴛ == crypto.SHA384: {
             hashOID = oidSHA384;
+            break;
         }
-        else if (exprᴛ1 == crypto.SHA512) {
+        case var ᴛ when ᴛ == crypto.SHA512: {
             hashOID = oidSHA512;
-        }
+            break;
+        }}
 
         var @params = new pssParameters(
             Hash: new pkix.AlgorithmIdentifier(
@@ -3311,15 +3330,15 @@ public static void TestRSAPSAParameters(ж<testing.T> Ꮡt) {
             Parameters: asn1.NullRawValue
         );
 
-        error err = default!;
+        error err = default;
         (@params.MGF.Parameters.FullBytes, err) = asn1.Marshal(mgf1Params);
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to marshal MGF parameters: %s"u8, err);
+        if (err != nil) {
+            t.Fatalf("failed to marshal MGF parameters: %s", err);
         }
 
         (var serialized, err) = asn1.Marshal(@params);
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to marshal parameters: %s"u8, err);
+        if (err != nil) {
+            t.Fatalf("failed to marshal parameters: %s", err);
         }
 
         return serialized;
@@ -3331,31 +3350,33 @@ public static void TestRSAPSAParameters(ж<testing.T> Ꮡt) {
         }
         var generated = generateParams(detail.hash);
         if (!bytes.Equal(detail.@params.FullBytes, generated)) {
-            Ꮡt.Errorf("hardcoded parameters for %s didn't match generated parameters: got (generated) %x, wanted (hardcoded) %x"u8, detail.hash, generated, detail.@params.FullBytes);
+            t.Errorf("hardcoded parameters for %s didn't match generated parameters: got (generated) %x, wanted (hardcoded) %x", detail.hash, generated, detail.@params.FullBytes);
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string errorContainsᶜ2 = "unknown extended key usage"u8;
+internal static ref readonly @string errorContainsᶜ2 => ref errorContainsᶜ2ᵇ;
+private static readonly @string errorContainsᶜ2ᵇ = "unknown extended key usage"u8;
 
-public static void TestUnknownExtKey(ж<testing.T> Ꮡt) {
+public static void TestUnknownExtKey(ж<testing.T> t) {
     @string errorContains = errorContainsᶜ2;
 
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(10),
-        DNSNames: new @string[]{"foo"u8}.slice(),
-        ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{(global::go.crypto.x509_package.ExtKeyUsage)(-1)}.slice()
+        DNSNames: slice<@string>(["foo"]),
+        ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([(global::go.crypto.x509_package.ExtKeyUsage)(-1)])
     ));
 
     var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.Public(), testPrivateKey.OrTypedNil());
     if (!strings.Contains(err.Error(), errorContains)) {
-        Ꮡt.Errorf("expected error containing %q, got %s"u8, errorContains, err);
+        t.Errorf("expected error containing %q, got %s", errorContains, err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string httpsExampleComˢ = "https://example.com/"u8;
+internal static ref readonly @string httpsExampleComˢ => ref httpsExampleComˢᵇ;
+private static readonly @string httpsExampleComˢᵇ = "https://example.com/"u8;
 internal static readonly object expectedˢ4 = (@string)"expected CreateCertificate to fail"u8;
 
 internal partial struct TestIA5SANEnforcement_marshalTests /*dyn*/ {
@@ -3370,44 +3391,44 @@ internal partial struct TestIA5SANEnforcement_unmarshalTests /*dyn*/ {
     internal @string expectedError;
 }
 
-public static void TestIA5SANEnforcement(ж<testing.T> Ꮡt) {
+public static void TestIA5SANEnforcement(ж<testing.T> t) {
     var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("ecdsa.GenerateKey failed: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("ecdsa.GenerateKey failed: %s", err);
     }
 
     (var testURL, err) = url.Parse(httpsExampleComˢ);
-    if (err != default!) {
-        Ꮡt.Fatalf("url.Parse failed: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("url.Parse failed: %s", err);
     }
-    testURL.Value.RawQuery = "∞"u8;
+    testURL.RawQuery = "∞";
 
-    var marshalTests = new TestIA5SANEnforcement_marshalTests[]{
+    var marshalTests = slice<TestIA5SANEnforcement_marshalTests>([
         new(
-            name: "marshal: unicode dNSName"u8,
+            name: "marshal: unicode dNSName",
             template: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(0),
-                DNSNames: new @string[]{"∞"u8}.slice()
+                DNSNames: slice<@string>(["∞"])
             )),
-            expectedError: "x509: \"∞\" cannot be encoded as an IA5String"u8
+            expectedError: "x509: \"∞\" cannot be encoded as an IA5String"
         ),
         new(
-            name: "marshal: unicode rfc822Name"u8,
+            name: "marshal: unicode rfc822Name",
             template: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(0),
-                EmailAddresses: new @string[]{"∞"u8}.slice()
+                EmailAddresses: slice<@string>(["∞"])
             )),
-            expectedError: "x509: \"∞\" cannot be encoded as an IA5String"u8
+            expectedError: "x509: \"∞\" cannot be encoded as an IA5String"
         ),
         new(
-            name: "marshal: unicode uniformResourceIdentifier"u8,
+            name: "marshal: unicode uniformResourceIdentifier",
             template: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(0),
-                URIs: new ж<url.URL>[]{testURL}.slice()
+                URIs: slice<ж<url.URL>>([testURL])
             )),
-            expectedError: "x509: \"https://example.com/?∞\" cannot be encoded as an IA5String"u8
+            expectedError: "x509: \"https://example.com/?∞\" cannot be encoded as an IA5String"
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in marshalTests) {
         ref var tc = ref heap(new TestIA5SANEnforcement_marshalTests(), out var Ꮡtc);
@@ -3415,46 +3436,44 @@ public static void TestIA5SANEnforcement(ж<testing.T> Ꮡt) {
 
         var kʗ1 = k;
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (_, errΔ1) = CreateCertificate(rand.Reader, tcʗ1.template, tcʗ1.template, kʗ1.Public(), kʗ1.OrTypedNil());
-            if (errΔ1 == default!){
-                tΔ1.Errorf("expected CreateCertificate to fail with template: %v"u8, tcʗ1.template.OrTypedNil());
-            } else 
-            if (errΔ1.Error() != tcʗ1.expectedError) {
-                tΔ1.Errorf("unexpected error: got %q, want %q"u8, errΔ1.Error(), tcʗ1.expectedError);
+            if (errΔ1 == nil) {
+                tΔ1.Errorf("expected CreateCertificate to fail with template: %v", tcʗ1.template.OrTypedNil());
+            } else if (errΔ1.Error() != tcʗ1.expectedError) {
+                tΔ1.Errorf("unexpected error: got %q, want %q", errΔ1.Error(), tcʗ1.expectedError);
             }
         });
     }
 
-    var unmarshalTests = new TestIA5SANEnforcement_unmarshalTests[]{
+    var unmarshalTests = slice<TestIA5SANEnforcement_unmarshalTests>([
         new(
-            name: "unmarshal: unicode dNSName"u8,
-            cert: "308201083081aea003020102020100300a06082a8648ce3d04030230003022180f30303031303130313030303030305a180f30303031303130313030303030305a30003059301306072a8648ce3d020106082a8648ce3d0301070342000424bcc48180d8d9db794028f2575ebe3cac79f04d7b0d0151c5292e588aac3668c495f108c626168462e0668c9705e08a211dd103a659d2684e0adf8c2bfd47baa315301330110603551d110101ff040730058203e2889e300a06082a8648ce3d04030203490030460221008ac7827ac326a6ee0fa70b2afe99af575ec60b975f820f3c25f60fff43fbccd0022100bffeed93556722d43d13e461d5b3e33efc61f6349300327d3a0196cb6da501c2"u8,
-            expectedError: "x509: SAN dNSName is malformed"u8
+            name: "unmarshal: unicode dNSName",
+            cert: "308201083081aea003020102020100300a06082a8648ce3d04030230003022180f30303031303130313030303030305a180f30303031303130313030303030305a30003059301306072a8648ce3d020106082a8648ce3d0301070342000424bcc48180d8d9db794028f2575ebe3cac79f04d7b0d0151c5292e588aac3668c495f108c626168462e0668c9705e08a211dd103a659d2684e0adf8c2bfd47baa315301330110603551d110101ff040730058203e2889e300a06082a8648ce3d04030203490030460221008ac7827ac326a6ee0fa70b2afe99af575ec60b975f820f3c25f60fff43fbccd0022100bffeed93556722d43d13e461d5b3e33efc61f6349300327d3a0196cb6da501c2",
+            expectedError: "x509: SAN dNSName is malformed"
         ),
         new(
-            name: "unmarshal: unicode rfc822Name"u8,
-            cert: "308201083081aea003020102020100300a06082a8648ce3d04030230003022180f30303031303130313030303030305a180f30303031303130313030303030305a30003059301306072a8648ce3d020106082a8648ce3d0301070342000405cb4c4ba72aac980f7b11b0285191425e29e196ce7c5df1c83f56886566e517f196657cc1b73de89ab84ce503fd634e2f2af88fde24c63ca536dc3a5eed2665a315301330110603551d110101ff040730058103e2889e300a06082a8648ce3d0403020349003046022100ed1431cd4b9bb03d88d1511a0ec128a51204375764c716280dc36e2a60142c8902210088c96d25cfaf97eea851ff17d87bb6fe619d6546656e1739f35c3566051c3d0f"u8,
-            expectedError: "x509: SAN rfc822Name is malformed"u8
+            name: "unmarshal: unicode rfc822Name",
+            cert: "308201083081aea003020102020100300a06082a8648ce3d04030230003022180f30303031303130313030303030305a180f30303031303130313030303030305a30003059301306072a8648ce3d020106082a8648ce3d0301070342000405cb4c4ba72aac980f7b11b0285191425e29e196ce7c5df1c83f56886566e517f196657cc1b73de89ab84ce503fd634e2f2af88fde24c63ca536dc3a5eed2665a315301330110603551d110101ff040730058103e2889e300a06082a8648ce3d0403020349003046022100ed1431cd4b9bb03d88d1511a0ec128a51204375764c716280dc36e2a60142c8902210088c96d25cfaf97eea851ff17d87bb6fe619d6546656e1739f35c3566051c3d0f",
+            expectedError: "x509: SAN rfc822Name is malformed"
         ),
         new(
-            name: "unmarshal: unicode uniformResourceIdentifier"u8,
-            cert: "3082011b3081c3a003020102020100300a06082a8648ce3d04030230003022180f30303031303130313030303030305a180f30303031303130313030303030305a30003059301306072a8648ce3d020106082a8648ce3d03010703420004ce0a79b511701d9188e1ea76bcc5907f1db51de6cc1a037b803f256e8588145ca409d120288bfeb4e38f3088104674d374b35bb91fc80d768d1d519dbe2b0b5aa32a302830260603551d110101ff041c301a861868747470733a2f2f6578616d706c652e636f6d2f3fe2889e300a06082a8648ce3d0403020347003044022044f4697779fd1dae1e382d2452413c5c5ca67851e267d6bc64a8d164977c172c0220505015e657637aa1945d46e7650b6f59b968fc1508ca8b152c99f782446dfc81"u8,
-            expectedError: "x509: SAN uniformResourceIdentifier is malformed"u8
+            name: "unmarshal: unicode uniformResourceIdentifier",
+            cert: "3082011b3081c3a003020102020100300a06082a8648ce3d04030230003022180f30303031303130313030303030305a180f30303031303130313030303030305a30003059301306072a8648ce3d020106082a8648ce3d03010703420004ce0a79b511701d9188e1ea76bcc5907f1db51de6cc1a037b803f256e8588145ca409d120288bfeb4e38f3088104674d374b35bb91fc80d768d1d519dbe2b0b5aa32a302830260603551d110101ff041c301a861868747470733a2f2f6578616d706c652e636f6d2f3fe2889e300a06082a8648ce3d0403020347003044022044f4697779fd1dae1e382d2452413c5c5ca67851e267d6bc64a8d164977c172c0220505015e657637aa1945d46e7650b6f59b968fc1508ca8b152c99f782446dfc81",
+            expectedError: "x509: SAN uniformResourceIdentifier is malformed"
         )
-    }.slice();
+    ]);
 
     foreach (var (_, tc) in unmarshalTests) {
         var (der, errΔ2) = hex.DecodeString(tc.cert);
-        if (errΔ2 != default!) {
-            Ꮡt.Fatalf("failed to decode test cert: %s"u8, errΔ2);
+        if (errΔ2 != nil) {
+            t.Fatalf("failed to decode test cert: %s", errΔ2);
         }
         (_, errΔ2) = ParseCertificate(der);
-        if (errΔ2 == default!){
-            Ꮡt.Error(expectedˢ4);
-        } else 
-        if (errΔ2.Error() != tc.expectedError) {
-            Ꮡt.Errorf("unexpected error: got %q, want %q"u8, errΔ2.Error(), tc.expectedError);
+        if (errΔ2 == nil) {
+            t.Error(expectedˢ4);
+        } else if (errΔ2.Error() != tc.expectedError) {
+            t.Errorf("unexpected error: got %q, want %q", errΔ2.Error(), tc.expectedError);
         }
     }
 }
@@ -3469,30 +3488,30 @@ public static void BenchmarkCreateCertificate(ж<testing.B> Ꮡb) {
 
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(10),
-        DNSNames: new @string[]{"example.com"u8}.slice()
+        DNSNames: slice<@string>(["example.com"])
     ));
-    var tests = new BenchmarkCreateCertificate_tests[]{
+    var tests = slice<BenchmarkCreateCertificate_tests>([
         new(
-            name: "RSA 2048"u8,
+            name: "RSA 2048",
             gen: () => {
                 var (k, err) = rsa.GenerateKey(rand.Reader, 2048);
-                if (err != default!) {
-                    Ꮡb.Fatalf("failed to generate test key: %s"u8, err);
+                if (err != nil) {
+                    Ꮡb.Fatalf("failed to generate test key: %s", err);
                 }
                 return new x509_test_package.rsa_PrivateKeyжSigner(k);
             }
         ),
         new(
-            name: "ECDSA P256"u8,
+            name: "ECDSA P256",
             gen: () => {
                 var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-                if (err != default!) {
-                    Ꮡb.Fatalf("failed to generate test key: %s"u8, err);
+                if (err != nil) {
+                    Ꮡb.Fatalf("failed to generate test key: %s", err);
                 }
                 return new x509_test_package.ecdsa_PrivateKeyжSigner(k);
             }
         )
-    }.slice();
+    ]);
 
     foreach (var (_, tc) in tests) {
         var k = tc.gen();
@@ -3502,8 +3521,8 @@ public static void BenchmarkCreateCertificate(ж<testing.B> Ꮡb) {
         Ꮡb.Run(tc.name, (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 var (_, err) = CreateCertificate(rand.Reader, templateʗ1, templateʗ1, kʗ1.Public(), kʗ1);
-                if (err != default!) {
-                    bΔ1.Fatalf("failed to create certificate: %s"u8, err);
+                if (err != nil) {
+                    bΔ1.Fatalf("failed to create certificate: %s", err);
                 }
             }
         });
@@ -3519,59 +3538,58 @@ internal static cryptoꓸPublicKey Public(this ref brokenSigner bs) {
 }
 
 internal static (slice<byte>, error) Sign(this ref brokenSigner bs, io.Reader _Δp1, slice<byte> _Δp2, crypto.SignerOpts _Δp3) {
-    return (new byte[]{1, 2, 3}.slice(), default!);
+    return (slice<byte>([1, 2, 3]), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string signatureReturnedByˢ = "signature returned by signer is invalid"u8;
+internal static ref readonly @string signatureReturnedByˢ => ref signatureReturnedByˢᵇ;
+private static readonly @string signatureReturnedByˢᵇ = "signature returned by signer is invalid"u8;
 internal static readonly object expectedˢ5 = (@string)"expected CreateCertificate to fail with a broken signer"u8;
 
-public static void TestCreateCertificateBrokenSigner(ж<testing.T> Ꮡt) {
+public static void TestCreateCertificateBrokenSigner(ж<testing.T> t) {
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(10),
-        DNSNames: new @string[]{"example.com"u8}.slice()
+        DNSNames: slice<@string>(["example.com"])
     ));
     @string expectedErr = signatureReturnedByˢ;
     var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.Public(), Ꮡ(new brokenSigner(testPrivateKey.Public())));
-    if (err == default!){
-        Ꮡt.Fatal(expectedˢ5);
-    } else 
-    if (!strings.Contains(err.Error(), expectedErr)) {
-        Ꮡt.Fatalf("CreateCertificate returned an unexpected error: got %q, want %q"u8, err, expectedErr);
+    if (err == nil) {
+        t.Fatal(expectedˢ5);
+    } else if (!strings.Contains(err.Error(), expectedErr)) {
+        t.Fatalf("CreateCertificate returned an unexpected error: got %q, want %q", err, expectedErr);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object createCertificateDidnTˢ = (@string)"CreateCertificate didn't fail when SignatureAlgorithm = MD5WithRSA"u8;
 
-public static void TestCreateCertificateLegacy(ж<testing.T> Ꮡt) {
-    ref var sigAlg = ref heap<global::go.crypto.x509_package.SignatureAlgorithm>(out var ᏑsigAlg);
-    sigAlg = MD5WithRSA;
+public static void TestCreateCertificateLegacy(ж<testing.T> t) {
+    ref var sigAlg = ref heap<global::go.crypto.x509_package.SignatureAlgorithm>(MD5WithRSA, out var ᏑsigAlg);
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(10),
-        DNSNames: new @string[]{"example.com"u8}.slice(),
+        DNSNames: slice<@string>(["example.com"]),
         SignatureAlgorithm: sigAlg
     ));
     var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.Public(), Ꮡ(new brokenSigner(testPrivateKey.Public())));
-    if (err == default!) {
-        Ꮡt.Fatal(createCertificateDidnTˢ);
+    if (err == nil) {
+        t.Fatal(createCertificateDidnTˢ);
     }
 }
 
-internal static ж<global::go.crypto.x509_package.Certificate> mustCert(this ref global::go.crypto.x509_package.CertPool s, ж<testing.T> Ꮡt, nint n) {
+internal static ж<global::go.crypto.x509_package.Certificate> mustCert(this ref global::go.crypto.x509_package.CertPool s, ж<testing.T> t, nint n) {
     var (c, err) = s.lazyCerts[n].getCert();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to load cert %d: %v"u8, n, err);
+    if (err != nil) {
+        t.Fatalf("failed to load cert %d: %v", n, err);
     }
     return c;
 }
 
-internal static slice<ж<global::go.crypto.x509_package.Certificate>> allCerts(ж<testing.T> Ꮡt, ж<global::go.crypto.x509_package.CertPool> Ꮡp) {
+internal static slice<ж<global::go.crypto.x509_package.Certificate>> allCerts(ж<testing.T> t, ж<global::go.crypto.x509_package.CertPool> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var all = new slice<ж<global::go.crypto.x509_package.Certificate>>(Ꮡp.len());
     foreach (var i in range(all)) {
-        all[i] = p.mustCert(Ꮡt, i);
+        all[i] = p.mustCert(t, i);
     }
     return all;
 }
@@ -3597,11 +3615,11 @@ internal static bool certPoolEqual(ж<global::go.crypto.x509_package.CertPool> �
             return false;
         }
         var (ca, err) = la.getCert();
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
         (var cb, err) = la.getCert();
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
         if (!ca.Equal(cb)) {
@@ -3613,37 +3631,39 @@ internal static bool certPoolEqual(ж<global::go.crypto.x509_package.CertPool> �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string httpsExampleComˢ2 = "https://example.com/_"u8;
-internal static readonly @string httpsExampleOrgˢ = "https://example.org/_"u8;
+internal static ref readonly @string httpsExampleComˢ2 => ref httpsExampleComˢ2ᵇ;
+private static readonly @string httpsExampleComˢ2ᵇ = "https://example.com/_"u8;
+internal static ref readonly @string httpsExampleOrgˢ => ref httpsExampleOrgˢᵇ;
+private static readonly @string httpsExampleOrgˢᵇ = "https://example.org/_"u8;
 
-public static void TestCertificateRequestRoundtripFields(ж<testing.T> Ꮡt) {
+public static void TestCertificateRequestRoundtripFields(ж<testing.T> t) {
     var (urlA, err) = url.Parse(httpsExampleComˢ2);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var urlB, err) = url.Parse(httpsExampleOrgˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var @in = Ꮡ(new CertificateRequest(
-        DNSNames: new @string[]{"example.com"u8, "example.org"u8}.slice(),
-        EmailAddresses: new @string[]{"a@example.com"u8, "b@example.com"u8}.slice(),
-        IPAddresses: new net.IP[]{net.IPv4(192, 0, 2, 0), net.IPv6loopback}.slice(),
-        URIs: new ж<url.URL>[]{urlA, urlB}.slice()
+        DNSNames: slice<@string>(["example.com", "example.org"]),
+        EmailAddresses: slice<@string>(["a@example.com", "b@example.com"]),
+        IPAddresses: slice<net.IP>([net.IPv4(192, 0, 2, 0), net.IPv6loopback]),
+        URIs: slice<ж<url.URL>>([urlA, urlB])
     ));
-    var @out = marshalAndParseCSR(Ꮡt, @in);
+    var @out = marshalAndParseCSR(t, @in);
 
-    if (!slices.Equal<slice<@string>, @string>((~@in).DNSNames, (~@out).DNSNames)) {
-        Ꮡt.Fatalf("Unexpected DNSNames: got %v, want %v"u8, (~@out).DNSNames, (~@in).DNSNames);
+    if (!slices.Equal<slice<@string>, @string>(@in.DNSNames, @out.DNSNames)) {
+        t.Fatalf("Unexpected DNSNames: got %v, want %v", @out.DNSNames, @in.DNSNames);
     }
-    if (!slices.Equal<slice<@string>, @string>((~@in).EmailAddresses, (~@out).EmailAddresses)) {
-        Ꮡt.Fatalf("Unexpected EmailAddresses: got %v, want %v"u8, (~@out).EmailAddresses, (~@in).EmailAddresses);
+    if (!slices.Equal<slice<@string>, @string>(@in.EmailAddresses, @out.EmailAddresses)) {
+        t.Fatalf("Unexpected EmailAddresses: got %v, want %v", @out.EmailAddresses, @in.EmailAddresses);
     }
-    if (builtin.len((~@in).IPAddresses) != builtin.len((~@out).IPAddresses) || !(~@in).IPAddresses[0].Equal((~@out).IPAddresses[0]) || !(~@in).IPAddresses[1].Equal((~@out).IPAddresses[1])) {
-        Ꮡt.Fatalf("Unexpected IPAddresses: got %v, want %v"u8, (~@out).IPAddresses, (~@in).IPAddresses);
+    if (builtin.len(@in.IPAddresses) != builtin.len(@out.IPAddresses) || !@in.IPAddresses[0].Equal(@out.IPAddresses[0]) || !@in.IPAddresses[1].Equal(@out.IPAddresses[1])) {
+        t.Fatalf("Unexpected IPAddresses: got %v, want %v", @out.IPAddresses, @in.IPAddresses);
     }
-    if (!reflect.DeepEqual((~@in).URIs, (~@out).URIs)) {
-        Ꮡt.Fatalf("Unexpected URIs: got %v, want %v"u8, (~@out).URIs, (~@in).URIs);
+    if (!reflect.DeepEqual(@in.URIs, @out.URIs)) {
+        t.Fatalf("Unexpected URIs: got %v, want %v", @out.URIs, @in.URIs);
     }
 }
 
@@ -3652,10 +3672,10 @@ internal partial struct BenchmarkParseCertificate_cases /*dyn*/ {
     internal @string pem;
 }
 
-public static void BenchmarkParseCertificate(ж<testing.B> Ꮡb) {
-    var cases = new BenchmarkParseCertificate_cases[]{
+public static void BenchmarkParseCertificate(ж<testing.B> b) {
+    var cases = slice<BenchmarkParseCertificate_cases>([
         new(
-            name: "ecdsa leaf"u8,
+            name: "ecdsa leaf",
             pem: """
 -----BEGIN CERTIFICATE-----
 MIIINjCCBx6gAwIBAgIQHdQ6oBMoe/MJAAAAAEHzmTANBgkqhkiG9w0BAQsFADBG
@@ -3706,7 +3726,7 @@ svXC3HUd3apM2Yy3xJAlk/mUkzVXfdJZ+Zy1huNsUoJ+gM8rmpyGhYyx
 """u8.Raw()
         ),
         new(
-            name: "rsa leaf"u8,
+            name: "rsa leaf",
             pem: """
 -----BEGIN CERTIFICATE-----
 MIIJXjCCCEagAwIBAgIRAPYaTUsjP4iRBQAAAACHSSgwDQYJKoZIhvcNAQELBQAw
@@ -3763,19 +3783,19 @@ Qc4=
 -----END CERTIFICATE-----
 """u8.Raw()
         )
-    }.slice();
+    ]);
     foreach (var (_, vᴛ1) in cases) {
         ref var c = ref heap(new BenchmarkParseCertificate_cases(), out var Ꮡc);
         c = vᴛ1;
 
         var cʗ1 = c;
-        Ꮡb.Run(c.name, (ж<testing.B> bΔ1) => {
+        b.Run(c.name, (ж<testing.B> bΔ1) => {
             var (pemBlock, _) = pem.Decode(slice<byte>(cʗ1.pem));
             bΔ1.ReportAllocs();
             bΔ1.ResetTimer();
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                var (_, err) = ParseCertificate((~pemBlock).Bytes);
-                if (err != default!) {
+                var (_, err) = ParseCertificate(pemBlock.Bytes);
+                if (err != nil) {
                     bΔ1.Fatal(err);
                 }
             }
@@ -3783,21 +3803,22 @@ Qc4=
     }
 }
 
-public static void TestParseCertificateRawEquals(ж<testing.T> Ꮡt) {
+public static void TestParseCertificateRawEquals(ж<testing.T> t) {
     var (p, _) = pem.Decode(slice<byte>(pemCertificate));
-    var (cert, err) = ParseCertificate((~p).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
+    var (cert, err) = ParseCertificate(p.Bytes);
+    if (err != nil) {
+        t.Fatalf("failed to parse certificate: %s", err);
     }
-    if (!bytes.Equal((~p).Bytes, (~cert).Raw)) {
-        Ꮡt.Fatalf("unexpected Certificate.Raw\ngot: %x\nwant: %x\n"u8, (~cert).Raw, (~p).Bytes);
+    if (!bytes.Equal(p.Bytes, cert.Raw)) {
+        t.Fatalf("unexpected Certificate.Raw\ngot: %x\nwant: %x\n", cert.Raw, p.Bytes);
     }
 }
 
 // mismatchingSigAlgIDPEM contains a certificate where the Certificate
 // signatureAlgorithm and the TBSCertificate signature contain
 // mismatching OIDs
-internal static readonly @string mismatchingSigAlgIDPEM = """
+internal static ref readonly @string mismatchingSigAlgIDPEM => ref mismatchingSigAlgIDPEMᵇ;
+private static readonly @string mismatchingSigAlgIDPEMᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBBzCBrqADAgECAgEAMAoGCCqGSM49BAMCMAAwIhgPMDAwMTAxMDEwMDAwMDBa
 GA8wMDAxMDEwMTAwMDAwMFowADBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABOqV
@@ -3811,7 +3832,8 @@ tA+bq+55P3ntxTOVRq0nv1mwnkjwt9cQR9Fn
 // mismatchingSigAlgParamPEM contains a certificate where the Certificate
 // signatureAlgorithm and the TBSCertificate signature contain
 // mismatching parameters
-internal static readonly @string mismatchingSigAlgParamPEM = """
+internal static ref readonly @string mismatchingSigAlgParamPEM => ref mismatchingSigAlgParamPEMᵇ;
+private static readonly @string mismatchingSigAlgParamPEMᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBCTCBrqADAgECAgEAMAoGCCqGSM49BAMCMAAwIhgPMDAwMTAxMDEwMDAwMDBa
 GA8wMDAxMDEwMTAwMDAwMFowADBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABOqV
@@ -3822,26 +3844,25 @@ f5C0D5ur7nk/ee3FM5VGrSe/WbCeSPC31xBH0Wc=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestSigAlgMismatch(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    foreach (var (_, certPEM) in new @string[]{mismatchingSigAlgIDPEM, mismatchingSigAlgParamPEM}.slice()) {
+public static void TestSigAlgMismatch(ж<testing.T> t) {
+    foreach (var (_, certPEM) in slice<@string>([mismatchingSigAlgIDPEM, mismatchingSigAlgParamPEM])) {
         var (b, _) = pem.Decode(slice<byte>(certPEM));
         if (b == nil) {
-            Ꮡt.Fatalf("couldn't decode test certificate"u8);
+            t.Fatalf("couldn't decode test certificate");
         }
-        var (_, err) = ParseCertificate((~b).Bytes);
-        if (err == default!) {
-            Ꮡt.Fatalf("expected ParseCertificate to fail"u8);
+        var (_, err) = ParseCertificate(b.Bytes);
+        if (err == nil) {
+            t.Fatalf("expected ParseCertificate to fail");
         }
         @string expected = x509InnerAndOuterˢ;
         if (err.Error() != expected) {
-            Ꮡt.Errorf("unexpected error from ParseCertificate: got %q, want %q"u8, err.Error(), expected);
+            t.Errorf("unexpected error from ParseCertificate: got %q, want %q", err.Error(), expected);
         }
     }
 }
 
-internal static readonly @string optionalAuthKeyIDPEM = """
+internal static ref readonly @string optionalAuthKeyIDPEM => ref optionalAuthKeyIDPEMᵇ;
+private static readonly @string optionalAuthKeyIDPEMᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIFEjCCBHugAwIBAgICAQwwDQYJKoZIhvcNAQEFBQAwgbsxJDAiBgNVBAcTG1Zh
 bGlDZXJ0IFZhbGlkYXRpb24gTmV0d29yazEXMBUGA1UEChMOVmFsaUNlcnQsIElu
@@ -3874,20 +3895,19 @@ FxdzPcwl
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestAuthKeyIdOptional(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestAuthKeyIdOptional(ж<testing.T> t) {
     var (b, _) = pem.Decode(slice<byte>(optionalAuthKeyIDPEM));
     if (b == nil) {
-        Ꮡt.Fatalf("couldn't decode test certificate"u8);
+        t.Fatalf("couldn't decode test certificate");
     }
-    var (_, err) = ParseCertificate((~b).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("ParseCertificate to failed to parse certificate with optional authority key identifier fields: %s"u8, err);
+    var (_, err) = ParseCertificate(b.Bytes);
+    if (err != nil) {
+        t.Fatalf("ParseCertificate to failed to parse certificate with optional authority key identifier fields: %s", err);
     }
 }
 
-internal static readonly @string largeOIDPEM = """
+internal static ref readonly @string largeOIDPEM => ref largeOIDPEMᵇ;
+private static readonly @string largeOIDPEMᵇ = """
 
 Certificate:
     Data:
@@ -3972,21 +3992,20 @@ Emfp+Qc+eXWQQrjUtf3RfjUE9wAEz/E2vg8ngR+muohs
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestLargeOID(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestLargeOID(ж<testing.T> t) {
     // See Issue 49678.
     var (b, _) = pem.Decode(slice<byte>(largeOIDPEM));
     if (b == nil) {
-        Ꮡt.Fatalf("couldn't decode test certificate"u8);
+        t.Fatalf("couldn't decode test certificate");
     }
-    var (_, err) = ParseCertificate((~b).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("ParseCertificate to failed to parse certificate with large OID: %s"u8, err);
+    var (_, err) = ParseCertificate(b.Bytes);
+    if (err != nil) {
+        t.Fatalf("ParseCertificate to failed to parse certificate with large OID: %s", err);
     }
 }
 
-internal static readonly @string uniqueIDPEM = """
+internal static ref readonly @string uniqueIDPEM => ref uniqueIDPEMᵇ;
+private static readonly @string uniqueIDPEMᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIFsDCCBJigAwIBAgIILOyC1ydafZMwDQYJKoZIhvcNAQEFBQAwgY4xgYswgYgG
 A1UEAx6BgABNAGkAYwByAG8AcwBvAGYAdAAgAEYAbwByAGUAZgByAG8AbgB0ACAA
@@ -4022,27 +4041,25 @@ yYLwhUhg3PX5Co1VKYE+9TxloiE=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-public static void TestParseUniqueID(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestParseUniqueID(ж<testing.T> t) {
     var (b, _) = pem.Decode(slice<byte>(uniqueIDPEM));
     if (b == nil) {
-        Ꮡt.Fatalf("couldn't decode test certificate"u8);
+        t.Fatalf("couldn't decode test certificate");
     }
-    var (cert, err) = ParseCertificate((~b).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("ParseCertificate to failed to parse certificate with unique identifier id: %s"u8, err);
+    var (cert, err) = ParseCertificate(b.Bytes);
+    if (err != nil) {
+        t.Fatalf("ParseCertificate to failed to parse certificate with unique identifier id: %s", err);
     }
-    if (builtin.len((~cert).Extensions) != 7) {
-        Ꮡt.Fatalf("unexpected number of extensions (probably because the extension section was not parsed): got %d, want 7"u8, builtin.len((~cert).Extensions));
+    if (builtin.len(cert.Extensions) != 7) {
+        t.Fatalf("unexpected number of extensions (probably because the extension section was not parsed): got %d, want 7", builtin.len(cert.Extensions));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedˢ6 = (@string)"expected CheckSignatureFrom to fail"u8;
 
-public static void TestDisableSHA1ForCertOnly(ж<testing.T> Ꮡt) {
-    Ꮡt.Setenv(godebugˢ, ""u8);
+public static void TestDisableSHA1ForCertOnly(ж<testing.T> t) {
+    t.Setenv(godebugˢ, ""u8);
 
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
@@ -4054,21 +4071,20 @@ public static void TestDisableSHA1ForCertOnly(ж<testing.T> Ꮡt) {
         KeyUsage: (global::go.crypto.x509_package.KeyUsage)(KeyUsageCertSign | KeyUsageCRLSign)
     ));
     var (certDER, err) = CreateCertificate(rand.Reader, tmpl, tmpl, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate test cert: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate test cert: %s", err);
     }
     (var cert, err) = ParseCertificate(certDER);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse test cert: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse test cert: %s", err);
     }
 
     err = cert.CheckSignatureFrom(cert);
-    if (err == default!){
-        Ꮡt.Error(expectedˢ6);
-    } else 
-    {
+    if (err == nil) {
+        t.Error(expectedˢ6);
+    } else {
         var (_, ok) = err._<InsecureAlgorithmError>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("expected InsecureAlgorithmError error, got %T"u8, err);
+            t.Errorf("expected InsecureAlgorithmError error, got %T", err);
         }
     }
 
@@ -4078,47 +4094,47 @@ public static void TestDisableSHA1ForCertOnly(ж<testing.T> Ꮡt) {
         ThisUpdate: time.Now().Add(-time.ΔHour),
         NextUpdate: time.Now().Add(time.ΔHour)
     )), cert, new x509_test_package.rsa_PrivateKeyжSigner(rsaPrivateKey));
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate test CRL: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate test CRL: %s", err);
     }
     (var crl, err) = ParseRevocationList(crlDER);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse test CRL: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse test CRL: %s", err);
     }
 
     {
-        err = crl.CheckSignatureFrom(cert); if (err != default!) {
-            Ꮡt.Errorf("unexpected error: %s"u8, err);
+        err = crl.CheckSignatureFrom(cert); if (err != nil) {
+            t.Errorf("unexpected error: %s", err);
         }
     }
 
     // This is an unrelated OCSP response, which will fail signature verification
     // but shouldn't return an InsecureAlgorithmError, since SHA1 should be allowed
     // for OCSP.
-    @string ocspTBSHex = "30819fa2160414884451ff502a695e2d88f421bad90cf2cecbea7c180f32303133303631383037323434335a30743072304a300906052b0e03021a0500041448b60d38238df8456e4ee5843ea394111802979f0414884451ff502a695e2d88f421bad90cf2cecbea7c021100f78b13b946fc9635d8ab49de9d2148218000180f32303133303631383037323434335aa011180f32303133303632323037323434335a"u8;
+    @string ocspTBSHex = "30819fa2160414884451ff502a695e2d88f421bad90cf2cecbea7c180f32303133303631383037323434335a30743072304a300906052b0e03021a0500041448b60d38238df8456e4ee5843ea394111802979f0414884451ff502a695e2d88f421bad90cf2cecbea7c021100f78b13b946fc9635d8ab49de9d2148218000180f32303133303631383037323434335aa011180f32303133303632323037323434335a";
     (var ocspTBS, err) = hex.DecodeString(ocspTBSHex);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to decode OCSP response TBS hex: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to decode OCSP response TBS hex: %s", err);
     }
 
-    err = cert.CheckSignature(SHA1WithRSA, ocspTBS, default!);
+    err = cert.CheckSignature(SHA1WithRSA, ocspTBS, default);
     if (!AreEqual(err, rsa.ErrVerification)) {
-        Ꮡt.Errorf("unexpected error: %s"u8, err);
+        t.Errorf("unexpected error: %s", err);
     }
 }
 
-public static void TestParseRevocationList(ж<testing.T> Ꮡt) {
+public static void TestParseRevocationList(ж<testing.T> t) {
     var derBytes = fromBase64(derCRLBase64);
     var (certList, err) = ParseRevocationList(derBytes);
-    if (err != default!) {
-        Ꮡt.Errorf("error parsing: %s"u8, err);
+    if (err != nil) {
+        t.Errorf("error parsing: %s", err);
         return;
     }
-    nint numCerts = builtin.len((~certList).RevokedCertificateEntries);
-    nint numCertsDeprecated = builtin.len((~certList).RevokedCertificateEntries);
+    nint numCerts = builtin.len(certList.RevokedCertificateEntries);
+    nint numCertsDeprecated = builtin.len(certList.RevokedCertificateEntries);
     nint expected = 88;
     if (numCerts != expected || numCertsDeprecated != expected) {
-        Ꮡt.Errorf("bad number of revoked certificates. got: %d want: %d"u8, numCerts, expected);
+        t.Errorf("bad number of revoked certificates. got: %d want: %d", numCerts, expected);
     }
 }
 
@@ -4128,18 +4144,18 @@ internal partial struct TestRevocationListCheckSignatureFrom_tests /*dyn*/ {
     internal @string err;
 }
 
-public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
+public static void TestRevocationListCheckSignatureFrom(ж<testing.T> t) {
     var (goodKey, err) = ecdsa.GenerateKey(elliptic.P224(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate test key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate test key: %s", err);
     }
     (var badKey, err) = ecdsa.GenerateKey(elliptic.P224(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate test key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate test key: %s", err);
     }
-    var tests = new TestRevocationListCheckSignatureFrom_tests[]{
+    var tests = slice<TestRevocationListCheckSignatureFrom_tests>([
         new(
-            name: "valid"u8,
+            name: "valid",
             issuer: Ꮡ(new Certificate(
                 Version: 3,
                 BasicConstraintsValid: true,
@@ -4149,7 +4165,7 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
             ))
         ),
         new(
-            name: "valid, key usage set"u8,
+            name: "valid, key usage set",
             issuer: Ꮡ(new Certificate(
                 Version: 3,
                 BasicConstraintsValid: true,
@@ -4160,7 +4176,7 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
             ))
         ),
         new(
-            name: "invalid issuer, wrong key usage"u8,
+            name: "invalid issuer, wrong key usage",
             issuer: Ꮡ(new Certificate(
                 Version: 3,
                 BasicConstraintsValid: true,
@@ -4169,19 +4185,19 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
                 PublicKey: goodKey.Public(),
                 KeyUsage: KeyUsageCertSign
             )),
-            err: "x509: invalid signature: parent certificate cannot sign this kind of certificate"u8
+            err: "x509: invalid signature: parent certificate cannot sign this kind of certificate"
         ),
         new(
-            name: "invalid issuer, no basic constraints/ca"u8,
+            name: "invalid issuer, no basic constraints/ca",
             issuer: Ꮡ(new Certificate(
                 Version: 3,
                 PublicKeyAlgorithm: ECDSA,
                 PublicKey: goodKey.Public()
             )),
-            err: "x509: invalid signature: parent certificate cannot sign this kind of certificate"u8
+            err: "x509: invalid signature: parent certificate cannot sign this kind of certificate"
         ),
         new(
-            name: "invalid issuer, unsupported public key type"u8,
+            name: "invalid issuer, unsupported public key type",
             issuer: Ꮡ(new Certificate(
                 Version: 3,
                 BasicConstraintsValid: true,
@@ -4189,10 +4205,10 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
                 PublicKeyAlgorithm: UnknownPublicKeyAlgorithm,
                 PublicKey: goodKey.Public()
             )),
-            err: "x509: cannot verify signature: algorithm unimplemented"u8
+            err: "x509: cannot verify signature: algorithm unimplemented"
         ),
         new(
-            name: "wrong key"u8,
+            name: "wrong key",
             issuer: Ꮡ(new Certificate(
                 Version: 3,
                 BasicConstraintsValid: true,
@@ -4200,9 +4216,9 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
                 PublicKeyAlgorithm: ECDSA,
                 PublicKey: badKey.Public()
             )),
-            err: "x509: ECDSA verification failure"u8
+            err: "x509: ECDSA verification failure"
         )
-    }.slice();
+    ]);
 
     var crlIssuer = Ꮡ(new Certificate(
         BasicConstraintsValid: true,
@@ -4210,7 +4226,7 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
         PublicKeyAlgorithm: ECDSA,
         PublicKey: goodKey.Public(),
         KeyUsage: KeyUsageCRLSign,
-        SubjectKeyId: new byte[]{1, 2, 3}.slice()
+        SubjectKeyId: slice<byte>([1, 2, 3])
     ));
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestRevocationListCheckSignatureFrom_tests(), out var Ꮡtc);
@@ -4219,21 +4235,20 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
         var crlIssuerʗ1 = crlIssuer;
         var goodKeyʗ1 = goodKey;
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (crlDER, errΔ1) = CreateRevocationList(rand.Reader, Ꮡ(new RevocationList(Number: big.NewInt(1))), crlIssuerʗ1, new x509_test_package.ecdsa_PrivateKeyжSigner(goodKeyʗ1));
-            if (errΔ1 != default!) {
-                tΔ1.Fatalf("failed to generate CRL: %s"u8, errΔ1);
+            if (errΔ1 != nil) {
+                tΔ1.Fatalf("failed to generate CRL: %s", errΔ1);
             }
             (var crl, errΔ1) = ParseRevocationList(crlDER);
-            if (errΔ1 != default!) {
-                tΔ1.Fatalf("failed to parse test CRL: %s"u8, errΔ1);
+            if (errΔ1 != nil) {
+                tΔ1.Fatalf("failed to parse test CRL: %s", errΔ1);
             }
             errΔ1 = crl.CheckSignatureFrom(tcʗ1.issuer);
-            if (errΔ1 != default! && errΔ1.Error() != tcʗ1.err){
-                tΔ1.Errorf("unexpected error: got %s, want %s"u8, errΔ1, tcʗ1.err);
-            } else 
-            if (errΔ1 == default! && tcʗ1.err != ""u8) {
-                tΔ1.Errorf("CheckSignatureFrom did not fail: want %s"u8, tcʗ1.err);
+            if (errΔ1 != nil && errΔ1.Error() != tcʗ1.err) {
+                tΔ1.Errorf("unexpected error: got %s, want %s", errΔ1, tcʗ1.err);
+            } else if (errΔ1 == nil && tcʗ1.err != ""u8) {
+                tΔ1.Errorf("CheckSignatureFrom did not fail: want %s", tcʗ1.err);
             }
         });
     }
@@ -4242,27 +4257,27 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object derEncodingContainsTheAnˢ = (@string)"DER encoding contains the an empty extensions SEQUENCE"u8;
 
-public static void TestOmitEmptyExtensions(ж<testing.T> Ꮡt) {
+public static void TestOmitEmptyExtensions(ж<testing.T> t) {
     var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(
-            CommonName: ":)"u8
+            CommonName: ":)"
         ),
         NotAfter: time.Now().Add(time.ΔHour),
         NotBefore: time.Now().Add(-time.ΔHour)
     ));
     (var der, err) = CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    var emptyExtSeq = new byte[]{0xA3, 0x02, 0x30, 0x00}.slice();
+    var emptyExtSeq = slice<byte>([0xA3, 0x02, 0x30, 0x00]);
     if (bytes.Contains(der, emptyExtSeq)) {
-        Ꮡt.Error(derEncodingContainsTheAnˢ);
+        t.Error(derEncodingContainsTheAnˢ);
     }
 }
 
@@ -4280,35 +4295,36 @@ RqUAyJKFzqZxOlK2q4j2IYnuj5+LrLGbQA==
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parsedCertificateWithˢ = (@string)"parsed certificate with negative serial"u8;
 
-public static void TestParseNegativeSerial(ж<testing.T> Ꮡt) {
+public static void TestParseNegativeSerial(ж<testing.T> t) {
     var (pemBlock, _) = pem.Decode(slice<byte>(negativeSerialCert));
-    var (_, err) = ParseCertificate((~pemBlock).Bytes);
-    if (err == default!) {
-        Ꮡt.Fatal(parsedCertificateWithˢ);
+    var (_, err) = ParseCertificate(pemBlock.Bytes);
+    if (err == nil) {
+        t.Fatal(parsedCertificateWithˢ);
     }
 }
 
-public static void TestCreateNegativeSerial(ж<testing.T> Ꮡt) {
+public static void TestCreateNegativeSerial(ж<testing.T> t) {
     var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(-1),
         Subject: new pkix.Name(
-            CommonName: ":)"u8
+            CommonName: ":)"
         ),
         NotAfter: time.Now().Add(time.ΔHour),
         NotBefore: time.Now().Add(-time.ΔHour)
     ));
     @string expectedErr = x509SerialNumberMustBeˢ;
     (_, err) = CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
-    if (err == default! || err.Error() != expectedErr) {
-        Ꮡt.Errorf("CreateCertificate returned unexpected error: want %q, got %q"u8, expectedErr, err);
+    if (err == nil || err.Error() != expectedErr) {
+        t.Errorf("CreateCertificate returned unexpected error: want %q, got %q", expectedErr, err);
     }
 }
 
-internal static readonly @string dupExtCert = """
+internal static ref readonly @string dupExtCert => ref dupExtCertᵇ;
+private static readonly @string dupExtCertᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBrjCCARegAwIBAgIBATANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDEwR0ZXN0
 MCIYDzAwMDEwMTAxMDAwMDAwWhgPMDAwMTAxMDEwMDAwMDBaMA8xDTALBgNVBAMT
@@ -4326,20 +4342,19 @@ NZA=
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parseCertificateShouldˢ = (@string)"ParseCertificate should fail when parsing certificate with duplicate extensions"u8;
 
-public static void TestDuplicateExtensionsCert(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestDuplicateExtensionsCert(ж<testing.T> t) {
     var (b, _) = pem.Decode(slice<byte>(dupExtCert));
     if (b == nil) {
-        Ꮡt.Fatalf("couldn't decode test certificate"u8);
+        t.Fatalf("couldn't decode test certificate");
     }
-    var (_, err) = ParseCertificate((~b).Bytes);
-    if (err == default!) {
-        Ꮡt.Fatal(parseCertificateShouldˢ);
+    var (_, err) = ParseCertificate(b.Bytes);
+    if (err == nil) {
+        t.Fatal(parseCertificateShouldˢ);
     }
 }
 
-internal static readonly @string dupExtCSR = """
+internal static ref readonly @string dupExtCSR => ref dupExtCSRᵇ;
+private static readonly @string dupExtCSRᵇ = """
 -----BEGIN CERTIFICATE REQUEST-----
 MIIBczCB3QIBADAPMQ0wCwYDVQQDEwR0ZXN0MIGfMA0GCSqGSIb3DQEBAQUAA4GN
 ADCBiQKBgQC5PbxMGVJ8aLF9lq/EvGObXTRMB7ieiZL9N+DJZg1n/ECCnZLIvYrr
@@ -4355,20 +4370,19 @@ VLOVx0i+/Q7fikp3hbN1JwuMTU0v2KL/IKoUcZc02+5xiYrnOIt5
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parseCertificateRequestˢ = (@string)"ParseCertificateRequest should fail when parsing CSR with duplicate extensions"u8;
 
-public static void TestDuplicateExtensionsCSR(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestDuplicateExtensionsCSR(ж<testing.T> t) {
     var (b, _) = pem.Decode(slice<byte>(dupExtCSR));
     if (b == nil) {
-        Ꮡt.Fatalf("couldn't decode test CSR"u8);
+        t.Fatalf("couldn't decode test CSR");
     }
-    var (_, err) = ParseCertificateRequest((~b).Bytes);
-    if (err == default!) {
-        Ꮡt.Fatal(parseCertificateRequestˢ);
+    var (_, err) = ParseCertificateRequest(b.Bytes);
+    if (err == nil) {
+        t.Fatal(parseCertificateRequestˢ);
     }
 }
 
-internal static readonly @string dupAttCSR = """
+internal static ref readonly @string dupAttCSR => ref dupAttCSRᵇ;
+private static readonly @string dupAttCSRᵇ = """
 -----BEGIN CERTIFICATE REQUEST-----
 MIIBbDCB1gIBADAPMQ0wCwYDVQQDEwR0ZXN0MIGfMA0GCSqGSIb3DQEBAQUAA4GN
 ADCBiQKBgQCj5Po3PKO/JNuxr+B+WNfMIzqqYztdlv+mTQhT0jOR5rTkUvxeeHH8
@@ -4384,198 +4398,193 @@ UJ8hsHxtnIeqb2ufHnQFJO+wEJhx2Uxm/BTuzHOeffuQkwATez4skZ7SlX9exgb7
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parseCertificateRequestˢ2 = (@string)"ParseCertificateRequest should succeed when parsing CSR with duplicate attributes"u8;
 
-public static void TestDuplicateAttributesCSR(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestDuplicateAttributesCSR(ж<testing.T> t) {
     var (b, _) = pem.Decode(slice<byte>(dupAttCSR));
     if (b == nil) {
-        Ꮡt.Fatalf("couldn't decode test CSR"u8);
+        t.Fatalf("couldn't decode test CSR");
     }
-    var (_, err) = ParseCertificateRequest((~b).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatal(parseCertificateRequestˢ2);
+    var (_, err) = ParseCertificateRequest(b.Bytes);
+    if (err != nil) {
+        t.Fatal(parseCertificateRequestˢ2);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string x509usepolicies0ˢ = "x509usepolicies=0"u8;
+internal static ref readonly @string x509usepolicies0ˢ => ref x509usepolicies0ˢᵇ;
+private static readonly @string x509usepolicies0ˢᵇ = "x509usepolicies=0"u8;
 
-public static void TestCertificateOIDPoliciesGODEBUG(ж<testing.T> Ꮡt) {
-    Ꮡt.Setenv(godebugˢ, x509usepolicies0ˢ);
+public static void TestCertificateOIDPoliciesGODEBUG(ж<testing.T> t) {
+    t.Setenv(godebugˢ, x509usepolicies0ˢ);
 
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "Cert"u8),
+        Subject: new pkix.Name(CommonName: "Cert"),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
-        PolicyIdentifiers: new asn1.ObjectIdentifier[]{new nint[]{1, 2, 3}.slice()}.slice()
-    );
+        PolicyIdentifiers: slice<asn1.ObjectIdentifier>([slice<nint>([1, 2, 3])])
+    ), out var Ꮡtemplate);
 
-    slice<asn1.ObjectIdentifier> expectPolicyIdentifiers = new asn1.ObjectIdentifier[]{
-        new nint[]{1, 2, 3}.slice()
-    }.slice();
+    slice<asn1.ObjectIdentifier> expectPolicyIdentifiers = slice<asn1.ObjectIdentifier>([
+        slice<nint>([1, 2, 3])
+    ]);
 
-    slice<global::go.crypto.x509_package.ΔOID> expectPolicies = new global::go.crypto.x509_package.ΔOID[]{
-        mustNewOIDFromInts(new uint64[]{1, 2, 3}.slice())
-    }.slice();
+    slice<global::go.crypto.x509_package.ΔOID> expectPolicies = slice<global::go.crypto.x509_package.ΔOID>([
+        mustNewOIDFromInts(slice<uint64>([1, 2, 3]))
+    ]);
 
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("CreateCertificate() unexpected error: %v", err);
     }
 
     (var cert, err) = ParseCertificate(certDER);
-    if (err != default!) {
-        Ꮡt.Fatalf("ParseCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("ParseCertificate() unexpected error: %v", err);
     }
 
-    if (!slices.EqualFunc<slice<asn1.ObjectIdentifier>, slice<asn1.ObjectIdentifier>, asn1.ObjectIdentifier, asn1.ObjectIdentifier>((~cert).PolicyIdentifiers, expectPolicyIdentifiers, slices.Equal<asn1.ObjectIdentifier, nint>)) {
-        Ꮡt.Errorf("cert.PolicyIdentifiers = %v, want: %v"u8, (~cert).PolicyIdentifiers, expectPolicyIdentifiers);
+    if (!slices.EqualFunc<slice<asn1.ObjectIdentifier>, slice<asn1.ObjectIdentifier>, asn1.ObjectIdentifier, asn1.ObjectIdentifier>(cert.PolicyIdentifiers, expectPolicyIdentifiers, slices.Equal<asn1.ObjectIdentifier, nint>)) {
+        t.Errorf("cert.PolicyIdentifiers = %v, want: %v", cert.PolicyIdentifiers, expectPolicyIdentifiers);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
-        Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
+        t.Errorf("cert.Policies = %v, want: %v", cert.Policies, expectPolicies);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testReliesOnDefaultˢ = (@string)"test relies on default x509usepolicies GODEBUG"u8;
-internal static readonly @string x509usepolicies1ˢ = "x509usepolicies=1"u8;
+internal static ref readonly @string x509usepolicies1ˢ => ref x509usepolicies1ˢᵇ;
+private static readonly @string x509usepolicies1ˢᵇ = "x509usepolicies=1"u8;
 
-public static void TestCertificatePolicies(ж<testing.T> Ꮡt) {
+public static void TestCertificatePolicies(ж<testing.T> t) {
     if (x509usepolicies.Value() == "0"u8) {
-        Ꮡt.Skip(testReliesOnDefaultˢ);
+        t.Skip(testReliesOnDefaultˢ);
     }
 
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "Cert"u8),
+        Subject: new pkix.Name(CommonName: "Cert"),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
-        PolicyIdentifiers: new asn1.ObjectIdentifier[]{new nint[]{1, 2, 3}.slice()}.slice(),
-        Policies: new global::go.crypto.x509_package.ΔOID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice()
-    );
+        PolicyIdentifiers: slice<asn1.ObjectIdentifier>([slice<nint>([1, 2, 3])]),
+        Policies: slice<global::go.crypto.x509_package.ΔOID>([mustNewOIDFromInts(slice<uint64>([1, 2, math.MaxUint32 + 1]))])
+    ), out var Ꮡtemplate);
 
-    var expectPolicies = new global::go.crypto.x509_package.ΔOID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice();
+    var expectPolicies = slice<global::go.crypto.x509_package.ΔOID>([mustNewOIDFromInts(slice<uint64>([1, 2, math.MaxUint32 + 1]))]);
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("CreateCertificate() unexpected error: %v", err);
     }
 
     (var cert, err) = ParseCertificate(certDER);
-    if (err != default!) {
-        Ꮡt.Fatalf("ParseCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("ParseCertificate() unexpected error: %v", err);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
-        Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
+        t.Errorf("cert.Policies = %v, want: %v", cert.Policies, expectPolicies);
     }
 
-    Ꮡt.Setenv(godebugˢ, x509usepolicies1ˢ);
-    expectPolicies = new global::go.crypto.x509_package.ΔOID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice();
+    t.Setenv(godebugˢ, x509usepolicies1ˢ);
+    expectPolicies = slice<global::go.crypto.x509_package.ΔOID>([mustNewOIDFromInts(slice<uint64>([1, 2, math.MaxUint32 + 1]))]);
 
     (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("CreateCertificate() unexpected error: %v", err);
     }
 
     (cert, err) = ParseCertificate(certDER);
-    if (err != default!) {
-        Ꮡt.Fatalf("ParseCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("ParseCertificate() unexpected error: %v", err);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
-        Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>(cert.Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
+        t.Errorf("cert.Policies = %v, want: %v", cert.Policies, expectPolicies);
     }
 }
 
-public static void TestGob(ж<testing.T> Ꮡt) {
+public static void TestGob(ж<testing.T> t) {
     // Test that gob does not reject Certificate.
     // See go.dev/issue/65633.
     var cert = @new<global::go.crypto.x509_package.Certificate>();
     var err = gob.NewEncoder(io.Discard).Encode(cert.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 }
 
-public static void TestRejectCriticalAKI(ж<testing.T> Ꮡt) {
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
+public static void TestRejectCriticalAKI(ж<testing.T> t) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "Cert"u8),
+        Subject: new pkix.Name(CommonName: "Cert"),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
-        ExtraExtensions: new pkix.Extension[]{
+        ExtraExtensions: slice<pkix.Extension>([
             new(
                 Id: new asn1.ObjectIdentifier(new nint[]{2, 5, 29, 35}.slice()),
                 Critical: true,
-                Value: new byte[]{1, 2, 3}.slice()
+                Value: slice<byte>([1, 2, 3])
             )
-        }.slice()
-    );
+        ])
+    ), out var Ꮡtemplate);
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("CreateCertificate() unexpected error: %v", err);
     }
     @string expectedErr = x509AuthorityKeyˢ;
     (_, err) = ParseCertificate(certDER);
-    if (err == default! || err.Error() != expectedErr) {
-        Ꮡt.Fatalf("ParseCertificate() unexpected error: %v, want: %s"u8, err, expectedErr);
+    if (err == nil || err.Error() != expectedErr) {
+        t.Fatalf("ParseCertificate() unexpected error: %v, want: %s", err, expectedErr);
     }
 }
 
-public static void TestRejectCriticalAIA(ж<testing.T> Ꮡt) {
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
+public static void TestRejectCriticalAIA(ж<testing.T> t) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "Cert"u8),
+        Subject: new pkix.Name(CommonName: "Cert"),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
-        ExtraExtensions: new pkix.Extension[]{
+        ExtraExtensions: slice<pkix.Extension>([
             new(
                 Id: new asn1.ObjectIdentifier(new nint[]{1, 3, 6, 1, 5, 5, 7, 1, 1}.slice()),
                 Critical: true,
-                Value: new byte[]{1, 2, 3}.slice()
+                Value: slice<byte>([1, 2, 3])
             )
-        }.slice()
-    );
+        ])
+    ), out var Ꮡtemplate);
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("CreateCertificate() unexpected error: %v", err);
     }
     @string expectedErr = x509AuthorityInfoAccessˢ;
     (_, err) = ParseCertificate(certDER);
-    if (err == default! || err.Error() != expectedErr) {
-        Ꮡt.Fatalf("ParseCertificate() unexpected error: %v, want: %s"u8, err, expectedErr);
+    if (err == nil || err.Error() != expectedErr) {
+        t.Fatalf("ParseCertificate() unexpected error: %v, want: %s", err, expectedErr);
     }
 }
 
-public static void TestRejectCriticalSKI(ж<testing.T> Ꮡt) {
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
+public static void TestRejectCriticalSKI(ж<testing.T> t) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "Cert"u8),
+        Subject: new pkix.Name(CommonName: "Cert"),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
-        ExtraExtensions: new pkix.Extension[]{
+        ExtraExtensions: slice<pkix.Extension>([
             new(
                 Id: new asn1.ObjectIdentifier(new nint[]{2, 5, 29, 14}.slice()),
                 Critical: true,
-                Value: new byte[]{1, 2, 3}.slice()
+                Value: slice<byte>([1, 2, 3])
             )
-        }.slice()
-    );
+        ])
+    ), out var Ꮡtemplate);
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("CreateCertificate() unexpected error: %v", err);
     }
     @string expectedErr = x509SubjectKeyIdentifierˢ;
     (_, err) = ParseCertificate(certDER);
-    if (err == default! || err.Error() != expectedErr) {
-        Ꮡt.Fatalf("ParseCertificate() unexpected error: %v, want: %s"u8, err, expectedErr);
+    if (err == nil || err.Error() != expectedErr) {
+        t.Fatalf("ParseCertificate() unexpected error: %v, want: %s", err, expectedErr);
     }
 }
 
@@ -4587,58 +4596,58 @@ internal static cryptoꓸPublicKey Public(this ref messageSigner ms) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unimplementedˢ = "unimplemented"u8;
+internal static ref readonly @string unimplementedˢ => ref unimplementedˢᵇ;
+private static readonly @string unimplementedˢᵇ = "unimplemented"u8;
 
 internal static (slice<byte> signature, error err) Sign(this ref messageSigner ms, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
-    return (default!, errors.New(unimplementedˢ));
+    return (default, errors.New(unimplementedˢ));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pssOptionsPassedInsteadˢ = "PSSOptions passed instead of hash"u8;
+internal static ref readonly @string pssOptionsPassedInsteadˢ => ref pssOptionsPassedInsteadˢᵇ;
+private static readonly @string pssOptionsPassedInsteadˢᵇ = "PSSOptions passed instead of hash"u8;
 
 internal static (slice<byte> signature, error err) SignMessage(this ref messageSigner ms, io.Reader rand, slice<byte> msg, crypto.SignerOpts opts) {
     {
         var (_, ok) = opts._<ж<rsa.PSSOptions>>(ᐧ); if (ok) {
-            return (default!, errors.New(pssOptionsPassedInsteadˢ));
+            return (default, errors.New(pssOptionsPassedInsteadˢ));
         }
     }
     var h = opts.HashFunc().New();
     h.Write(msg);
-    var tbs = h.Sum(default!);
+    var tbs = h.Sum(default);
     return rsa.SignPKCS1v15(rand, rsaPrivateKey, opts.HashFunc(), tbs);
 }
 
-public static void TestMessageSigner(ж<testing.T> Ꮡt) {
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
+public static void TestMessageSigner(ж<testing.T> t) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         SignatureAlgorithm: SHA256WithRSA,
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "Cert"u8),
+        Subject: new pkix.Name(CommonName: "Cert"),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
         BasicConstraintsValid: true,
         IsCA: true
-    );
-    var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), Ꮡ(new messageSigner(nil)));
-    if (err != default!) {
-        Ꮡt.Fatalf("CreateCertificate failed: %s"u8, err);
+    ), out var Ꮡtemplate);
+    var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), Ꮡ(new messageSigner()));
+    if (err != nil) {
+        t.Fatalf("CreateCertificate failed: %s", err);
     }
     (var cert, err) = ParseCertificate(certDER);
-    if (err != default!) {
-        Ꮡt.Fatalf("ParseCertificate failed: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("ParseCertificate failed: %s", err);
     }
     {
-        var errΔ1 = cert.CheckSignatureFrom(cert); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("CheckSignatureFrom failed: %s"u8, errΔ1);
+        var errΔ1 = cert.CheckSignatureFrom(cert); if (errΔ1 != nil) {
+            t.Fatalf("CheckSignatureFrom failed: %s", errΔ1);
         }
     }
 }
 
-public static void TestCreateCertificateNegativeMaxPathLength(ж<testing.T> Ꮡt) {
-    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
-    template = new Certificate(
+public static void TestCreateCertificateNegativeMaxPathLength(ж<testing.T> t) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "TEST"u8),
+        Subject: new pkix.Name(CommonName: "TEST"),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
         BasicConstraintsValid: true,
@@ -4646,25 +4655,25 @@ public static void TestCreateCertificateNegativeMaxPathLength(ж<testing.T> Ꮡt
 
         // CreateCertificate treats -1 in the same way as: MaxPathLen == 0 && MaxPathLenZero == false.
         MaxPathLen: -1
-    );
+    ), out var Ꮡtemplate);
 
     var (_, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("CreateCertificate() unexpected error: %v", err);
     }
 
     template.MaxPathLen = -2;
     (_, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
-    if (err == default! || err.Error() != "x509: invalid MaxPathLen, must be greater or equal to -1"u8) {
-        Ꮡt.Fatalf(@"CreateCertificate() = %v; want = ""x509: invalid MaxPathLen, must be greater or equal to -1"""u8, err);
+    if (err == nil || err.Error() != "x509: invalid MaxPathLen, must be greater or equal to -1"u8) {
+        t.Fatalf(@"CreateCertificate() = %v; want = ""x509: invalid MaxPathLen, must be greater or equal to -1""", err);
     }
 }
 
-public static void TestEKUOIDS(ж<testing.T> Ꮡt) {
+public static void TestEKUOIDS(ж<testing.T> t) {
     foreach (var (_, eku) in extKeyUsageOIDs) {
         var oid = eku.extKeyUsage.OID();
         if (!oid.EqualASN1OID(eku.oid)) {
-            Ꮡt.Errorf("extKeyUsage %v: expected OID %v, got %v"u8, eku.extKeyUsage, eku.oid, oid);
+            t.Errorf("extKeyUsage %v: expected OID %v, got %v", eku.extKeyUsage, eku.oid, oid);
         }
     }
 }

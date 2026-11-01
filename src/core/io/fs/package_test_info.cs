@@ -1,55 +1,56 @@
-// go2cs metadata anchor for a production-reference test project: the test assembly
-// REFERENCES the colocated production project instead of
-// recompiling its sources, so the production assembly is the single identity for the
-// production types and no production class partial may be declared here. The first —
-// and only — class is the test metadata class the go2cs-gen generators anchor
-// generated adapters and partials to.
-global using static global::go.io.fs_package;
+// go2cs code converter defines `global using` statements here for imported type
+// aliases as package references are encountered via `import' statements. Exported
+// type aliases that need a `global using` declaration will be loaded from the
+// referenced package by parsing its 'package_info.cs' source file and reading its
+// defined `GoTypeAlias` attributes.
+
+// Package name separator "dot" used in imported type aliases is extended Unicode
+// character '\uA4F8' which is a valid character in a C# identifier name. This is
+// used to simulate Go's package level type aliases since C# does not yet support
+// importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
-using static global::go.io.fs_test_package;
+using static go.io.fs_package;
+using static go.io.fs_test_package;
+
+// For encountered type alias declarations, e.g., `type Table = map[string]int`,
+// go2cs code converter will generate a `global using` statement for the alias in
+// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
+// Although scope of `global using` is available to all files in the project, all
+// converted Go code for the project targets the same package, so `global using`
+// statements will effectively have package level scope.
+
+// Additionally, `GoTypeAlias` attributes will be generated here for exported type
+// aliases. This allows the type alias to be imported and used from other packages
+// when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b54696d656f7574282920626f6f6c7d", "Timeout_type")]
 [assembly: GoDynamicTypeLift("7374727563747b667320696f2f66732e46533b207061747465726e20737472696e673b20726573756c7420737472696e677d", "globTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e70757420696f2f66735f746573742e666f726d6174546573743b2077616e7446696c65496e666f20737472696e673b2077616e74446972456e74727920737472696e677d", "formatTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696f2f66732e46537d", "TestReadDirPath_fsys")]
 [assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b206f6b20626f6f6c7d", "isValidPathTestsᴛ1")]
 // </ExportedTypeAliases>
 
+// As types are cast to interfaces in Go source code, the go2cs code converter
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
+// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
+// this way is what keeps startup free of reflection.
+
 // <InterfaceImplementations>
-[assembly: GoImplement<TestReadDirPath_fsys, go.io.fs_package.FS>(Promoted = true)]
-[assembly: GoImplement<TestReadDirPath_fsys, go.io.fs_package.FS>]
-[assembly: GoImplement<formatTest, go.io.fs_package.DirEntry>(Pointer = true)]
-[assembly: GoImplement<formatTest, go.io.fs_package.FileInfo>(Pointer = true)]
-[assembly: GoImplement<globOnly, go.io.fs_package.FS>]
-[assembly: GoImplement<globOnly, go.io.fs_package.GlobFS>(Promoted = true)]
-[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.FS>]
-[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.GlobFS>]
-[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.ReadDirFS>]
-[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.ReadFileFS>]
-[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.StatFS>]
-[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.SubFS>]
-[assembly: GoImplement<openOnly, go.io.fs_package.FS>(Promoted = true)]
-[assembly: GoImplement<openOnly, go.io.fs_package.FS>]
-[assembly: GoImplement<readDirOnly, go.io.fs_package.FS>]
-[assembly: GoImplement<readDirOnly, go.io.fs_package.ReadDirFS>(Promoted = true)]
-[assembly: GoImplement<readFileOnly, go.io.fs_package.FS>]
-[assembly: GoImplement<readFileOnly, go.io.fs_package.ReadFileFS>(Promoted = true)]
-[assembly: GoImplement<statOnly, go.io.fs_package.FS>]
-[assembly: GoImplement<statOnly, go.io.fs_package.StatFS>(Promoted = true)]
-[assembly: GoImplement<subOnly, go.io.fs_package.FS>]
-[assembly: GoImplement<subOnly, go.io.fs_package.SubFS>(Promoted = true)]
+[assembly: GoImplement<PathError, error>(Pointer = true, Production = true)]
+[assembly: GoImplement<dirInfo, DirEntry>]
+[assembly: GoImplement<subFS, FS>(Pointer = true, Production = true)]
+[assembly: GoImplement<subFS, GlobFS>(Pointer = true, Production = true)]
+[assembly: GoImplement<subFS, ReadDirFS>(Pointer = true, Production = true)]
+[assembly: GoImplement<subFS, ReadFileFS>(Pointer = true, Production = true)]
+[assembly: GoImplement<subFS, ReadLinkFS>(Pointer = true, Production = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -59,7 +60,11 @@ using static global::go.io.fs_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(PathError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -69,21 +74,30 @@ using static global::go.io.fs_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaC9gAuZoKygoLKgrKCgg==", "", "", "61=Date/1/4/10,Date/2/4/21,Date/3/4/32,Date/4/4/43")]
-[assembly: go.GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA4YABo8goKCgg==")]
-[assembly: go.GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABUgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/ID0goKCgsqCpoI=", "74-79:1", "", "22=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
-[assembly: go.GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABckgNSCgoKCgoKUyoKmgqaCgpSCAAgGggAMHgAEErKigoKmgoCCpICSpICC7IKCgpQACQaCgoKCgJI=", "21-30:1;75-91:1", "", "67=Now/1/2/4,Now/2/2/10")]
-[assembly: go.GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmgAAKCJSCgriCgriCgpSCgriCgoKCgJI=", "", "", "17=Now/1/2/4,Now/2/2/10")]
-[assembly: go.GoPositionMap("io/fs/readlink_test.go", "readlink_test.cs", "ABsaggASMIKCgoK4goKmgoKmgqaCABIwgoKCgoKUgriCpoKClA==", "38-44:1;85-95:1")]
-[assembly: go.GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABMegOSCgoKCgoKUyoKmgg==", "18-27:1")]
-[assembly: go.GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEegAAKBIKCgoKClIKCpoKCgoKUyoKmgpSCgpSCgpSCpoKC", "18-37:1")]
-[assembly: go.GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKUgpKCmIKClIKUgoKUuILu7oKigoCCkoCCtIKUuIKClIKAggAJCqKCgoCCtoKAgqSCgoKClIKUlIKUgoK0", "58-64:1;73-77:1;94-96:1;105-110:2;129-140:1;167-175:1")]
+[assembly: GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
+[assembly: GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaC9gAuZoKygoLKgrKCgg==", "", "", "61=Date/1/4/10,Date/2/4/21,Date/3/4/32,Date/4/4/43")]
+[assembly: GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaAooCigKKAooAANV6CgoKCgoKCpoKClIKCgpSUlKqiqqKokqiSAAkUgKSA5pKC")]
+[assembly: GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA4YABo8goKCgg==")]
+[assembly: GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgsiAgqSCgIKkpoKUgriCpoKCgpSCgoKmqJKkpAADEPKCgoKmgoKCgpSCpqqigpSm")]
+[assembly: GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABUgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/IAACgSCgoKCyoKmgg==", "74-79:1", "", "22=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
+[assembly: GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABo6AAgCgIK2goKUpIKCpoKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1", "", "", "47:21")]
+[assembly: GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABckgOSCgoKCgoKUyoKmgqaCgpSCAAgGggAMHgAEErKigoKmgoCCpICSpICC7IKCgpQACgaCgoKCgJI=", "21-30:1;75-91:1", "", "68=Now/1/2/4,Now/2/2/10")]
+[assembly: GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgIK2goKUpIKAgoKCyIKCgoKUgoKCgpQ=", "", "", "", "47:21")]
+[assembly: GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmgAALCJSCgriCgriCgpSCgriCgoKCgJI=", "", "", "17=Now/1/2/4,Now/2/2/10")]
+[assembly: GoPositionMap("io/fs/readlink.go", "readlink.cs", "ABY0soKClAACENKCgpQ=")]
+[assembly: GoPositionMap("io/fs/readlink_test.go", "readlink_test.cs", "ACQaggASMIKCgoK4goKmgoKmgqaCABIwgoKCgoKUgriCpoKClA==", "38-44:1;85-95:1")]
+[assembly: GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oCCtoKClJI=", "", "", "", "35:21")]
+[assembly: GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABMegAAIBIKCgoKCgpTKgqaC", "18-27:1")]
+[assembly: GoPositionMap("io/fs/sub.go", "sub.cs", "ABJGAA8CgpSClICCpKaSkpKSAAYQkoKUqJKClIKUqJKAgoCCxuaCgoKUguaCgoKUgqaCgoKUguaCgoKUgoKU5oKCgpSCgpSmlICCpIKmgoKCgoKUlOaigpSSgpQ=")]
+[assembly: GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEegAAOBIKCgoKClIKCpoKCgoKUyoKmgpSCgpSCgpSCpoKC", "18-37:1")]
+[assembly: GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygAyaJKAgpSUtoKUgoKClLiCgoCCgpS2AAIeAAwCgoKUlIKU")]
+[assembly: GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKUgoKCmIKClIKUgoKUuILu7oKigoCCgoCCtIKUuIKClIKAggALCqKCgoCCtoKAgqSCgoKClIKUlIKUgoK0", "58-64:1;73-77:1;94-96:1;105-110:2;129-140:1;167-175:1")]
 // </GoSourcePositionMaps>
 
 namespace go.io;
 
-[GoPackage("fs_test")]
-public static partial class fs_test_package
+[GoPackage("fs")]
+public static partial class fs_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -92,19 +106,22 @@ public static partial class fs_test_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct TestFileInfoToDirEntry_tests {}
-    internal partial struct TestReadDirPath_fsys {}
-    internal partial struct formatTest {}
-    internal partial struct formatTestsᴛ1 {}
-    internal partial struct globOnly {}
-    internal partial struct globTestsᴛ1 {}
-    internal partial struct isValidPathTestsᴛ1 {}
-    internal partial struct openOnly {}
-    internal partial struct readDirOnly {}
-    internal partial struct readFileOnly {}
-    internal partial struct statOnly {}
-    internal partial struct subOnly {}
-    public partial struct Node {}
+    internal partial interface Timeout_type {}
+    internal partial struct dirInfo {}
+    internal partial struct subFS {}
+    public partial interface DirEntry {}
+    public partial interface FS {}
+    public partial interface File {}
+    public partial interface FileInfo {}
+    public partial interface GlobFS {}
+    public partial interface ReadDirFS {}
+    public partial interface ReadDirFile {}
+    public partial interface ReadFileFS {}
+    public partial interface ReadLinkFS {}
+    public partial interface StatFS {}
+    public partial interface SubFS {}
+    public partial struct FileMode {}
+    public partial struct PathError {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -116,7 +133,9 @@ public static partial class fs_test_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(go.io.fs_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸbytealg() => builtin.initPackage(typeof(@internal.bytealg_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸoserror() => builtin.initPackage(typeof(@internal.oserror_package));
+    [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpath() => builtin.initPackage(typeof(path_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(go.path.filepath_package));
@@ -125,12 +144,11 @@ public static partial class fs_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     [GoInit] internal static void initᴛᴛimportꓸtestingꓸfstest() => builtin.initPackage(typeof(go.testing.fstest_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
+    [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
-    // Go runs every `init` in the package under test - the production files' included -
-    // before the first test. The production package is a REFERENCED assembly here, whose
-    // module constructor .NET would not run until something in it is touched, so that
-    // initialization is forced before anything else in this test module runs.
-    [GoInit] internal static void initᴛᴛproduction() {
-        builtin.initPackage(typeof(global::go.io.fs_package));
-    }
+}
+
+[GoPackage("fs_test")]
+public static partial class fs_test_package
+{
 }

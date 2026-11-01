@@ -14,23 +14,25 @@ partial class slog_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testAllocatesWithAsanˢ = (@string)"test allocates with -asan"u8;
-internal static readonly @string keyˢ = "key"u8;
-internal static readonly @string fooˢ = "foo"u8;
+internal static ref readonly @string keyˢ => ref keyˢᵇ;
+private static readonly @string keyˢᵇ = "key"u8;
+internal static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "foo"u8;
 
-public static void TestAttrNoAlloc(ж<testing.T> Ꮡt) {
+public static void TestAttrNoAlloc(ж<testing.T> t) {
     if (asan.Enabled) {
-        Ꮡt.Skip(testAllocatesWithAsanˢ);
+        t.Skip(testAllocatesWithAsanˢ);
     }
-    testenv.SkipIfOptimizationOff(new slog_test_package.testing_TжTB(Ꮡt));
+    testenv.SkipIfOptimizationOff(new slog_test_package.testing_TжTB(t));
     // Assign values just to make sure the compiler doesn't optimize away the statements.
     ref var i = ref heap(new int64(), out var Ꮡi);
-    uint64 u = default!;
-    float64 f = default!;
-    bool b = default!;
-    @string s = default!;
+    uint64 u = default;
+    float64 f = default;
+    bool b = default;
+    @string s = default;
     ref var x = ref heap<any>(out var Ꮡx);
     ж<int64> p = Ꮡi;
-    time.Duration d = default!;
+    time.Duration d = default;
     var pʗ1 = p;
     nint a = (nint)testing.AllocsPerRun(5, () => {
         Ꮡi.Value = go.log.slog_package.Int64(keyˢ, 1).Value.Int64();
@@ -42,7 +44,7 @@ public static void TestAttrNoAlloc(ж<testing.T> Ꮡt) {
         Ꮡx.ValueSlot = go.log.slog_package.Any(keyˢ, pʗ1.OrTypedNil()).Value.Any();
     });
     if (a != 0) {
-        Ꮡt.Errorf("got %d allocs, want zero"u8, a);
+        t.Errorf("got %d allocs, want zero", a);
     }
     _ = u;
     _ = f;
@@ -55,14 +57,14 @@ public static void BenchmarkAttrString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ref var @is = ref heap(new @string(), out var Ꮡis);
-    @string u = default!;
-    @string f = default!;
-    @string bn = default!;
-    @string s = default!;
-    @string x = default!;
-    @string ds = default!;
+    @string u = default;
+    @string f = default;
+    @string bn = default;
+    @string s = default;
+    @string x = default;
+    @string ds = default;
     ж<@string> p = Ꮡis;
-    time.Duration d = default!;
+    time.Duration d = default;
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
         @is = go.log.slog_package.Int64(keyˢ, 1).String();

@@ -27,7 +27,7 @@ internal static readonly object formatˢ = (@string)"Format:"u8;
 public static void Example_decodeConfig() {
     var reader = base64.NewDecoder(base64.StdEncoding, new image_test_package.strings_ReaderжReader(strings.NewReader(data)));
     var (config, format, err) = Δimage.DecodeConfig(reader);
-    if (err != default!) {
+    if (err != nil) {
         Δlog.Fatal(err);
     }
     fmt.Println(widthˢ, config.Width, heightˢ, config.Height, formatˢ, format);
@@ -50,7 +50,7 @@ public static void Example() {
     // defer reader.Close()
     var reader = base64.NewDecoder(base64.StdEncoding, new image_test_package.strings_ReaderжReader(strings.NewReader(data)));
     var (m, _, err) = Δimage.Decode(reader);
-    if (err != default!) {
+    if (err != nil) {
         Δlog.Fatal(err);
     }
     var bounds = m.Bounds();
@@ -100,7 +100,8 @@ public static void Example() {
     // 0xf000-0xffff:   2785   1903   1773  15450
 }
 
-internal static readonly @string data = """
+internal static ref readonly @string data => ref dataᵇ;
+private static readonly @string dataᵇ = """
 
 /9j/4AAQSkZJRgABAQIAHAAcAAD/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdA
 SFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2Nj

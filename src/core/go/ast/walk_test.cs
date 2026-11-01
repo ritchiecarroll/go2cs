@@ -17,9 +17,10 @@ using static global::go.go.ast_internal_test_package;
 partial class ast_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePTypeTStructFIntˢ = "package p\ntype T struct {\n\tF int `json:\"f\"` // a field\n}\n"u8;
+internal static ref readonly @string packagePTypeTStructFIntˢ => ref packagePTypeTStructFIntˢᵇ;
+private static readonly @string packagePTypeTStructFIntˢᵇ = "package p\ntype T struct {\n\tF int `json:\"f\"` // a field\n}\n"u8;
 
-public static void TestPreorder_Break(ж<testing.T> Ꮡt) {
+public static void TestPreorder_Break(ж<testing.T> t) {
     // This test checks that Preorder correctly handles a break statement while
     // in the middle of walking a node. Previously, incorrect handling of the
     // boolean returned by the yield function resulted in the iterator calling
@@ -29,13 +30,13 @@ public static void TestPreorder_Break(ж<testing.T> Ꮡt) {
 
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, ""u8, src, 0);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
     foreach (var n in range<ast.Node>(ast.Preorder(new ast.FileжNode(f)).Invoke)) {
         {
-            var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && (~id).Name == "F"u8) {
+            var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && id.Name == "F"u8) {
                 break;
             }
         }
@@ -43,11 +44,14 @@ public static void TestPreorder_Break(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aGoˢ = "a.go"u8;
-internal static readonly @string astˢ = "*ast."u8;
+internal static ref readonly @string aGoˢ => ref aGoˢᵇ;
+private static readonly @string aGoˢᵇ = "a.go"u8;
+internal static ref readonly @string astˢ => ref astˢᵇ;
+private static readonly @string astˢᵇ = "*ast."u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ4 = """
+internal static ref readonly @string srcᶜ4 => ref srcᶜ4ᵇ;
+private static readonly @string srcᶜ4ᵇ = """
 package a
 func f() {
 	print("hello")
@@ -59,7 +63,7 @@ func g() {
 
 """u8.Raw();
 
-public static void TestPreorderStack(ж<testing.T> Ꮡt) {
+public static void TestPreorderStack(ж<testing.T> t) {
     @string src = srcᶜ4;
     var fset = token.NewFileSet();
     var (f, _) = parser.ParseFile(fset, aGoˢ, src, 0);
@@ -69,10 +73,10 @@ public static void TestPreorderStack(ж<testing.T> Ꮡt) {
     ref var events = ref heap<slice<@string>>(out var Ꮡevents);
     ref var gotStack = ref heap<slice<@string>>(out var ᏑgotStack);
     var strʗ1 = str;
-    ast.PreorderStack(new ast.FileжNode(f), default!, (ast.Node n, slice<ast.Node> stack) => {
+    ast.PreorderStack(new ast.FileжNode(f), default, (ast.Node n, slice<ast.Node> stack) => {
         Ꮡevents.ValueSlot = append(Ꮡevents.ValueSlot, strʗ1(n));
         {
-            var (decl, ok) = n._<ж<ast.FuncDecl>>(ᐧ); if (ok && (~(~decl).Name).Name == "f"u8) {
+            var (decl, ok) = n._<ж<ast.FuncDecl>>(ᐧ); if (ok && decl.Name.Name == "f"u8) {
                 return false; // skip subtree of f()
             }
         }
@@ -87,21 +91,21 @@ public static void TestPreorderStack(ж<testing.T> Ꮡt) {
     });
 
     // Check sequence of events.
-    var wantEvents = new @string[]{
-        "File"u8, "Ident"u8, // package a
-        "FuncDecl"u8, // func f()  [pruned]
-        "FuncDecl"u8, "Ident"u8, "FuncType"u8, "FieldList"u8, "BlockStmt"u8, // func g()
-        "ExprStmt"u8, "CallExpr"u8, "Ident"u8, "BasicLit"u8, // print...
-        "ExprStmt"u8, "CallExpr"u8, "Ident"u8, "BasicLit"u8 // panic...
-    }.slice();
+    var wantEvents = slice<@string>([
+        "File", "Ident", // package a
+        "FuncDecl",                                                // func f()  [pruned]
+        "FuncDecl", "Ident", "FuncType", "FieldList", "BlockStmt", // func g()
+        "ExprStmt", "CallExpr", "Ident", "BasicLit", // print...
+        "ExprStmt", "CallExpr", "Ident", "BasicLit"  // panic...
+    ]);
     if (!slices.Equal<slice<@string>, @string>(events, wantEvents)) {
-        Ꮡt.Errorf("PreorderStack events:\ngot:  %s\nwant: %s"u8, events, wantEvents);
+        t.Errorf("PreorderStack events:\ngot:  %s\nwant: %s", events, wantEvents);
     }
 
     // Check captured stack.
-    var wantStack = new @string[]{"File"u8, "FuncDecl"u8, "BlockStmt"u8, "ExprStmt"u8, "CallExpr"u8}.slice();
+    var wantStack = slice<@string>(["File", "FuncDecl", "BlockStmt", "ExprStmt", "CallExpr"]);
     if (!slices.Equal<slice<@string>, @string>(gotStack, wantStack)) {
-        Ꮡt.Errorf("PreorderStack stack:\ngot:  %s\nwant: %s"u8, gotStack, wantStack);
+        t.Errorf("PreorderStack stack:\ngot:  %s\nwant: %s", gotStack, wantStack);
     }
 }
 

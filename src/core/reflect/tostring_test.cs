@@ -14,46 +14,50 @@ using Δreflect = reflect_package;
 partial class reflect_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string zeroValueˢ = "<zero Value>"u8;
-internal static readonly @string trueˢ = "true"u8;
-internal static readonly @string falseˢ = "false"u8;
+internal static ref readonly @string zeroValueˢ => ref zeroValueˢᵇ;
+private static readonly @string zeroValueˢᵇ = "<zero Value>"u8;
+internal static ref readonly @string trueˢ => ref trueˢᵇ;
+private static readonly @string trueˢᵇ = "true"u8;
+internal static ref readonly @string falseˢ => ref falseˢᵇ;
+private static readonly @string falseˢᵇ = "false"u8;
 
 // valueToString returns a textual representation of the reflection value val.
 // For debugging only.
 internal static @string valueToString(reflectꓸValue val) {
-    @string str = default!;
+    @string str = default;
     if (!val.IsValid()) {
         return zeroValueˢ;
     }
     var typ = val.Type();
-    var exprᴛ1 = val.Kind();
-    if (exprᴛ1 == ΔInt || exprᴛ1 == Int8 || exprᴛ1 == Int16 || exprᴛ1 == Int32 || exprᴛ1 == Int64) {
+    switch (val.Kind()) {
+    case var ᴛ when ᴛ == ΔInt || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
         return strconv.FormatInt(val.Int(), 10);
     }
-    if (exprᴛ1 == ΔUint || exprᴛ1 == Uint8 || exprᴛ1 == Uint16 || exprᴛ1 == Uint32 || exprᴛ1 == Uint64 || exprᴛ1 == Uintptr) {
+    case var ᴛ when ᴛ == ΔUint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr: {
         return strconv.FormatUint(val.Uint(), 10);
     }
-    if (exprᴛ1 == Float32 || exprᴛ1 == Float64) {
-        return strconv.FormatFloat(val.Float(), (rune)'g', -1, 64);
+    case var ᴛ when ᴛ == Float32 || ᴛ == Float64: {
+        return strconv.FormatFloat(val.Float(), (byte)'g', -1, 64);
     }
-    if (exprᴛ1 == Complex64 || exprᴛ1 == Complex128) {
+    case var ᴛ when ᴛ == Complex64 || ᴛ == Complex128: {
         var c = val.Complex();
-        return strconv.FormatFloat(real(c), (rune)'g', -1, 64) + "+"u8 + strconv.FormatFloat(imag(c), (rune)'g', -1, 64) + "i"u8;
+        return strconv.FormatFloat(real(c), (byte)'g', -1, 64) + "+"u8 + strconv.FormatFloat(imag(c), (byte)'g', -1, 64) + "i"u8;
     }
-    if (exprᴛ1 == ΔString) {
+    case var ᴛ when ᴛ == ΔString: {
         return val.String();
     }
-    if (exprᴛ1 == ΔBool) {
-        if (val.Bool()){
+    case var ᴛ when ᴛ == ΔBool: {
+        if (val.Bool()) {
             return trueˢ;
         } else {
             return falseˢ;
         }
+        break;
     }
-    if (exprᴛ1 == ΔPointer) {
+    case var ᴛ when ᴛ == ΔPointer: {
         var v = val;
         str = typ.String() + "("u8;
-        if (v.IsNil()){
+        if (v.IsNil()) {
             str += "0"u8;
         } else {
             str += "&"u8 + valueToString(v.Elem());
@@ -61,7 +65,7 @@ internal static @string valueToString(reflectꓸValue val) {
         str += ")"u8;
         return str;
     }
-    if (exprᴛ1 == Array || exprᴛ1 == ΔSlice) {
+    case var ᴛ when ᴛ == Array || ᴛ == ΔSlice: {
         var v = val;
         str += typ.String();
         str += "{"u8;
@@ -74,7 +78,7 @@ internal static @string valueToString(reflectꓸValue val) {
         str += "}"u8;
         return str;
     }
-    if (exprᴛ1 == Map) {
+    case var ᴛ when ᴛ == Map: {
         var t = typ;
         str = t.String();
         str += "{"u8;
@@ -82,11 +86,11 @@ internal static @string valueToString(reflectꓸValue val) {
         str += "}"u8;
         return str;
     }
-    if (exprᴛ1 == Chan) {
+    case var ᴛ when ᴛ == Chan: {
         str = typ.String();
         return str;
     }
-    if (exprᴛ1 == Struct) {
+    case var ᴛ when ᴛ == Struct: {
         var t = typ;
         var v = val;
         str += t.String();
@@ -100,16 +104,17 @@ internal static @string valueToString(reflectꓸValue val) {
         str += "}"u8;
         return str;
     }
-    if (exprᴛ1 == ΔInterface) {
+    case var ᴛ when ᴛ == ΔInterface: {
         return typ.String() + "("u8 + valueToString(val.Elem()) + ")"u8;
     }
-    if (exprᴛ1 == Func) {
+    case var ᴛ when ᴛ == Func: {
         var v = val;
         return typ.String() + "("u8 + strconv.FormatUint((uint64)v.Pointer(), 10) + ")"u8;
     }
-    { /* default: */
+    default: {
         throw panic("valueToString: can't print type " + typ.String());
-    }
+        break;
+    }}
 }
 
 } // end reflect_test_package

@@ -45,7 +45,7 @@ internal partial struct conversionTest {
     internal @string wanterr;
     internal any wantiface;
     internal ж<int64> wantptr; // if non-nil, *d's pointed value must be equal to *wantptr
-    internal bool wantnil;   // if true, *d must be *int64(nil)
+    internal bool wantnil;     // if true, *d must be *int64(nil)
     internal userDefined wantusrdef;
     internal userDefinedString wantusrstr;
 }
@@ -77,39 +77,50 @@ internal static readonly ж<any> Ꮡscaniface = new StaticBox<any>(default(any))
 internal static ref any scaniface => ref ((StaticBox<any>)Ꮡscaniface).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string hereˢ = "here"u8;
+internal static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "foo"u8;
+internal static ref readonly @string stringˢ => ref stringˢᵇ;
+private static readonly @string stringˢᵇ = "string"u8;
+internal static ref readonly @string hereˢ => ref hereˢᵇ;
+private static readonly @string hereˢᵇ = "here"u8;
+internal static readonly object trueˢ = (@string)"True"u8;
+internal static readonly object trueˢ2 = (@string)"TRUE"u8;
+internal static readonly object falseˢ = (@string)"false"u8;
+internal static readonly object falseˢ2 = (@string)"FALSE"u8;
+internal static readonly object yupˢ = (@string)"yup"u8;
+internal static readonly object strˢ = (@string)"str"u8;
 
 internal static slice<conversionTest> conversionTests() {
     // Return a fresh instance to test so "go test -count 2" works correctly.
-    return new conversionTest[]{
+    return slice<conversionTest>([
         // Exact conversions (destination pointer type matches source type)
-        new(s: (@string)"foo"u8, d: Ꮡscanstr, wantstr: "foo"u8),
+        new(s: fooˢ, d: Ꮡscanstr, wantstr: "foo"),
         new(s: (nint)123, d: Ꮡscanint, wantint: 123),
         new(s: someTime, d: Ꮡscantime, wanttime: someTime),
 
         // To strings
-        new(s: (@string)"string"u8, d: Ꮡscanstr, wantstr: "string"u8),
-        new(s: slice<byte>("byteslice"u8), d: Ꮡscanstr, wantstr: "byteslice"u8),
-        new(s: (nint)123, d: Ꮡscanstr, wantstr: "123"u8),
-        new(s: (int8)123, d: Ꮡscanstr, wantstr: "123"u8),
-        new(s: (int64)123, d: Ꮡscanstr, wantstr: "123"u8),
-        new(s: (uint8)123, d: Ꮡscanstr, wantstr: "123"u8),
-        new(s: (uint16)123, d: Ꮡscanstr, wantstr: "123"u8),
-        new(s: (uint32)123, d: Ꮡscanstr, wantstr: "123"u8),
-        new(s: (uint64)123, d: Ꮡscanstr, wantstr: "123"u8),
-        new(s: 1.5D, d: Ꮡscanstr, wantstr: "1.5"u8),
+        new(s: stringˢ, d: Ꮡscanstr, wantstr: "string"),
+        new(s: slice<byte>("byteslice"u8), d: Ꮡscanstr, wantstr: "byteslice"),
+        new(s: (nint)123, d: Ꮡscanstr, wantstr: "123"),
+        new(s: (int8)123, d: Ꮡscanstr, wantstr: "123"),
+        new(s: (int64)123, d: Ꮡscanstr, wantstr: "123"),
+        new(s: (uint8)123, d: Ꮡscanstr, wantstr: "123"),
+        new(s: (uint16)123, d: Ꮡscanstr, wantstr: "123"),
+        new(s: (uint32)123, d: Ꮡscanstr, wantstr: "123"),
+        new(s: (uint64)123, d: Ꮡscanstr, wantstr: "123"),
+        new(s: 1.5D, d: Ꮡscanstr, wantstr: "1.5"),
 
         // From time.Time:
-        new(s: time.Unix(1, 0).UTC(), d: Ꮡscanstr, wantstr: "1970-01-01T00:00:01Z"u8),
-        new(s: time.Unix(1453874597, 0).In(time.FixedZone(hereˢ, -3600 * 8)), d: Ꮡscanstr, wantstr: "2016-01-26T22:03:17-08:00"u8),
-        new(s: time.Unix(1, 2).UTC(), d: Ꮡscanstr, wantstr: "1970-01-01T00:00:01.000000002Z"u8),
-        new(s: new time.Time(nil), d: Ꮡscanstr, wantstr: "0001-01-01T00:00:00Z"u8),
+        new(s: time.Unix(1, 0).UTC(), d: Ꮡscanstr, wantstr: "1970-01-01T00:00:01Z"),
+        new(s: time.Unix(1453874597, 0).In(time.FixedZone(hereˢ, -3600 * 8)), d: Ꮡscanstr, wantstr: "2016-01-26T22:03:17-08:00"),
+        new(s: time.Unix(1, 2).UTC(), d: Ꮡscanstr, wantstr: "1970-01-01T00:00:01.000000002Z"),
+        new(s: new time.Time(), d: Ꮡscanstr, wantstr: "0001-01-01T00:00:00Z"),
         new(s: time.Unix(1, 2).UTC(), d: Ꮡscanbytes, wantbytes: slice<byte>("1970-01-01T00:00:01.000000002Z"u8)),
         new(s: time.Unix(1, 2).UTC(), d: Ꮡscaniface, wantiface: time.Unix(1, 2).UTC()),
 
         // To []byte
-        new(s: default!, d: Ꮡscanbytes, wantbytes: default!),
-        new(s: (@string)"string"u8, d: Ꮡscanbytes, wantbytes: slice<byte>("string"u8)),
+        new(s: default, d: Ꮡscanbytes, wantbytes: default),
+        new(s: stringˢ, d: Ꮡscanbytes, wantbytes: slice<byte>("string"u8)),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscanbytes, wantbytes: slice<byte>("byteslice"u8)),
         new(s: (nint)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (int8)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
@@ -121,9 +132,9 @@ internal static slice<conversionTest> conversionTests() {
         new(s: 1.5D, d: Ꮡscanbytes, wantbytes: slice<byte>("1.5"u8)),
 
         // To RawBytes
-        new(s: default!, d: Ꮡscanraw, wantraw: default!),
+        new(s: default, d: Ꮡscanraw, wantraw: default),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"byteslice"u8))),
-        new(s: (@string)"string"u8, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"string"u8))),
+        new(s: stringˢ, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"string"u8))),
         new(s: (nint)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (int8)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (int64)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
@@ -137,70 +148,70 @@ internal static slice<conversionTest> conversionTests() {
         new(s: time.Unix(2, 5).UTC(), d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"1970-01-01T00:00:02.000000005Z"u8))),
 
         // Strings to integers
-        new(s: (@string)"255"u8, d: Ꮡscanuint8, wantuint: 255),
-        new(s: (@string)"256"u8, d: Ꮡscanuint8, wanterr: "converting driver.Value type string (\"256\") to a uint8: value out of range"u8),
-        new(s: (@string)"256"u8, d: Ꮡscanuint16, wantuint: 256),
-        new(s: (@string)"-1"u8, d: Ꮡscanint, wantint: -1),
-        new(s: (@string)"foo"u8, d: Ꮡscanint, wanterr: "converting driver.Value type string (\"foo\") to a int: invalid syntax"u8),
+        new(s: (@string)"255", d: Ꮡscanuint8, wantuint: 255),
+        new(s: (@string)"256", d: Ꮡscanuint8, wanterr: "converting driver.Value type string (\"256\") to a uint8: value out of range"),
+        new(s: (@string)"256", d: Ꮡscanuint16, wantuint: 256),
+        new(s: (@string)"-1", d: Ꮡscanint, wantint: -1),
+        new(s: fooˢ, d: Ꮡscanint, wanterr: "converting driver.Value type string (\"foo\") to a int: invalid syntax"),
 
         // int64 to smaller integers
         new(s: (int64)5, d: Ꮡscanuint8, wantuint: 5),
-        new(s: (int64)256, d: Ꮡscanuint8, wanterr: "converting driver.Value type int64 (\"256\") to a uint8: value out of range"u8),
+        new(s: (int64)256, d: Ꮡscanuint8, wanterr: "converting driver.Value type int64 (\"256\") to a uint8: value out of range"),
         new(s: (int64)256, d: Ꮡscanuint16, wantuint: 256),
-        new(s: (int64)65536, d: Ꮡscanuint16, wanterr: "converting driver.Value type int64 (\"65536\") to a uint16: value out of range"u8),
+        new(s: (int64)65536, d: Ꮡscanuint16, wanterr: "converting driver.Value type int64 (\"65536\") to a uint16: value out of range"),
 
         // True bools
         new(s: true, d: Ꮡscanbool, wantbool: true),
-        new(s: (@string)"True"u8, d: Ꮡscanbool, wantbool: true),
-        new(s: (@string)"TRUE"u8, d: Ꮡscanbool, wantbool: true),
-        new(s: (@string)"1"u8, d: Ꮡscanbool, wantbool: true),
+        new(s: trueˢ, d: Ꮡscanbool, wantbool: true),
+        new(s: trueˢ2, d: Ꮡscanbool, wantbool: true),
+        new(s: (@string)"1", d: Ꮡscanbool, wantbool: true),
         new(s: (nint)1, d: Ꮡscanbool, wantbool: true),
         new(s: (int64)1, d: Ꮡscanbool, wantbool: true),
         new(s: (uint16)1, d: Ꮡscanbool, wantbool: true),
 
         // False bools
         new(s: false, d: Ꮡscanbool, wantbool: false),
-        new(s: (@string)"false"u8, d: Ꮡscanbool, wantbool: false),
-        new(s: (@string)"FALSE"u8, d: Ꮡscanbool, wantbool: false),
-        new(s: (@string)"0"u8, d: Ꮡscanbool, wantbool: false),
+        new(s: falseˢ, d: Ꮡscanbool, wantbool: false),
+        new(s: falseˢ2, d: Ꮡscanbool, wantbool: false),
+        new(s: (@string)"0", d: Ꮡscanbool, wantbool: false),
         new(s: (nint)0, d: Ꮡscanbool, wantbool: false),
         new(s: (int64)0, d: Ꮡscanbool, wantbool: false),
         new(s: (uint16)0, d: Ꮡscanbool, wantbool: false),
 
         // Not bools
-        new(s: (@string)"yup"u8, d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert ""yup"" into type bool"u8),
-        new(s: (nint)2, d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert 2 into type bool"u8),
+        new(s: yupˢ, d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert ""yup"" into type bool"),
+        new(s: (nint)2, d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert 2 into type bool"),
 
         // Floats
         new(s: (float64)1.5D, d: Ꮡscanf64, wantf64: (float64)1.5D),
         new(s: (int64)1, d: Ꮡscanf64, wantf64: (float64)1D),
         new(s: (float64)1.5D, d: Ꮡscanf32, wantf32: (float32)1.5F),
-        new(s: (@string)"1.5"u8, d: Ꮡscanf32, wantf32: (float32)1.5F),
-        new(s: (@string)"1.5"u8, d: Ꮡscanf64, wantf64: (float64)1.5D),
+        new(s: (@string)"1.5", d: Ꮡscanf32, wantf32: (float32)1.5F),
+        new(s: (@string)"1.5", d: Ꮡscanf64, wantf64: (float64)1.5D),
 
         // Pointers
-        new(s: ((any)default!), d: Ꮡscanptr, wantnil: true),
+        new(s: ((any)default), d: Ꮡscanptr, wantnil: true),
         new(s: (int64)42, d: Ꮡscanptr, wantptr: Ꮡanswer),
 
         // To interface{}
         new(s: (float64)1.5D, d: Ꮡscaniface, wantiface: (float64)1.5D),
         new(s: (int64)1, d: Ꮡscaniface, wantiface: (int64)1),
-        new(s: (@string)"str"u8, d: Ꮡscaniface, wantiface: (@string)"str"u8),
+        new(s: strˢ, d: Ꮡscaniface, wantiface: strˢ),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscaniface, wantiface: slice<byte>("byteslice"u8)),
         new(s: true, d: Ꮡscaniface, wantiface: true),
-        new(s: default!, d: Ꮡscaniface),
-        new(s: slice<byte>(default!), d: Ꮡscaniface, wantiface: slice<byte>(default!)),
+        new(s: default, d: Ꮡscaniface),
+        new(s: slice<byte>(default), d: Ꮡscaniface, wantiface: slice<byte>(default)),
 
         // To a user-defined type
         new(s: 1.5D, d: @new<userDefined>(), wantusrdef: 1.5D),
         new(s: (int64)123, d: @new<userDefined>(), wantusrdef: 123D),
-        new(s: (@string)"1.5"u8, d: @new<userDefined>(), wantusrdef: 1.5D),
-        new(s: new byte[]{1, 2, 3}.slice(), d: @new<userDefinedSlice>(), wanterr: @"unsupported Scan, storing driver.Value type []uint8 into type *sql.userDefinedSlice"u8),
-        new(s: (@string)"str"u8, d: @new<userDefinedString>(), wantusrstr: "str"u8),
+        new(s: (@string)"1.5", d: @new<userDefined>(), wantusrdef: 1.5D),
+        new(s: slice<byte>([1, 2, 3]), d: @new<userDefinedSlice>(), wanterr: @"unsupported Scan, storing driver.Value type []uint8 into type *sql.userDefinedSlice"),
+        new(s: strˢ, d: @new<userDefinedString>(), wantusrstr: (@string)"str"),
 
         // Other errors
-        new(s: complex(1D, 2D), d: Ꮡscanstr, wanterr: @"unsupported Scan, storing driver.Value type complex128 into type *string"u8)
-    }.slice();
+        new(s: complex(1D, 2D), d: Ꮡscanstr, wanterr: @"unsupported Scan, storing driver.Value type complex128 into type *string")
+    ]);
 }
 
 internal static any intPtrValue(any intptr) {
@@ -227,107 +238,104 @@ internal static time.Time timeValue(any ptr) {
     return (ptr._<ж<time.Time>>()).Value;
 }
 
-public static void TestConversions(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestConversions(ж<testing.T> t) {
     foreach (var (n, vᴛ1) in conversionTests()) {
         ref var ct = ref heap(new conversionTest(), out var Ꮡct);
         ct = vᴛ1;
 
         var err = convertAssign(ct.d, ct.s);
         @string errstr = ""u8;
-        if (err != default!) {
+        if (err != nil) {
             errstr = err.Error();
         }
         var ctʗ1 = ct;
         void errf(@string format, params ꓸꓸꓸany argsʗp) {
             var args = argsʗp.sslice();
             @string @base = fmt.Sprintf("convertAssign #%d: for %v (%T) -> %T, "u8, n, ctʗ1.s, ctʗ1.s, ctʗ1.d);
-            Ꮡt.Errorf(@base + format, args.ꓸꓸꓸ);
+            t.Errorf(@base + format, args.ꓸꓸꓸ);
         }
         if (errstr != ct.wanterr) {
-            errf("got error %q, want error %q"u8, errstr, ct.wanterr);
+            errf("got error %q, want error %q", errstr, ct.wanterr);
         }
         if (ct.wantstr != ""u8 && ct.wantstr != scanstr) {
-            errf("want string %q, got %q"u8, ct.wantstr, scanstr);
+            errf("want string %q, got %q", ct.wantstr, scanstr);
         }
-        if (ct.wantbytes != default! && ((sstring)ct.wantbytes) != ((sstring)scanbytes)) {
-            errf("want byte %q, got %q"u8, ct.wantbytes, scanbytes);
+        if (ct.wantbytes != nil && ((sstring)ct.wantbytes) != ((sstring)scanbytes)) {
+            errf("want byte %q, got %q", ct.wantbytes, scanbytes);
         }
-        if (ct.wantraw != default! && ((@string)(slice<byte>)ct.wantraw) != ((@string)(slice<byte>)scanraw)) {
-            errf("want RawBytes %q, got %q"u8, ct.wantraw, scanraw);
+        if (ct.wantraw != nil && ((@string)(slice<byte>)ct.wantraw) != ((@string)(slice<byte>)scanraw)) {
+            errf("want RawBytes %q, got %q", ct.wantraw, scanraw);
         }
         if (ct.wantint != 0 && ct.wantint != intValue(ct.d)) {
-            errf("want int %d, got %d"u8, ct.wantint, intValue(ct.d));
+            errf("want int %d, got %d", ct.wantint, intValue(ct.d));
         }
         if (ct.wantuint != 0 && ct.wantuint != uintValue(ct.d)) {
-            errf("want uint %d, got %d"u8, ct.wantuint, uintValue(ct.d));
+            errf("want uint %d, got %d", ct.wantuint, uintValue(ct.d));
         }
         if (ct.wantf32 != 0F && ct.wantf32 != float32Value(ct.d)) {
-            errf("want float32 %v, got %v"u8, ct.wantf32, float32Value(ct.d));
+            errf("want float32 %v, got %v", ct.wantf32, float32Value(ct.d));
         }
         if (ct.wantf64 != 0D && ct.wantf64 != float64Value(ct.d)) {
-            errf("want float32 %v, got %v"u8, ct.wantf64, float64Value(ct.d));
+            errf("want float32 %v, got %v", ct.wantf64, float64Value(ct.d));
         }
         {
             var (bp, boolTest) = ct.d._<ж<bool>>(ᐧ); if (boolTest && bp.Value != ct.wantbool && ct.wanterr == ""u8) {
-                errf("want bool %v, got %v"u8, ct.wantbool, bp.Value);
+                errf("want bool %v, got %v", ct.wantbool, bp.Value);
             }
         }
         if (!ct.wanttime.IsZero() && !ct.wanttime.Equal(timeValue(ct.d))) {
-            errf("want time %v, got %v"u8, ct.wanttime, timeValue(ct.d));
+            errf("want time %v, got %v", ct.wanttime, timeValue(ct.d));
         }
         if (ct.wantnil && ct.d._<ж<ж<int64>>>().ValueSlot != nil) {
-            errf("want nil, got %v"u8, intPtrValue(ct.d));
+            errf("want nil, got %v", intPtrValue(ct.d));
         }
         if (ct.wantptr != nil) {
-            if (ct.d._<ж<ж<int64>>>().ValueSlot == nil){
-                errf("want pointer to %v, got nil"u8, ct.wantptr.Value);
-            } else 
-            if (!AreEqual(ct.wantptr.Value, intPtrValue(ct.d))) {
-                errf("want pointer to %v, got %v"u8, ct.wantptr.Value, intPtrValue(ct.d));
+            if (ct.d._<ж<ж<int64>>>().ValueSlot == nil) {
+                errf("want pointer to %v, got nil", ct.wantptr.Value);
+            } else if (!AreEqual(ct.wantptr.Value, intPtrValue(ct.d))) {
+                errf("want pointer to %v, got %v", ct.wantptr.Value, intPtrValue(ct.d));
             }
         }
         {
             var (ifptr, ok) = ct.d._<ж<any>>(ᐧ); if (ok) {
                 if (!reflect.DeepEqual(ct.wantiface, scaniface)) {
-                    errf("want interface %#v, got %#v"u8, ct.wantiface, scaniface);
+                    errf("want interface %#v, got %#v", ct.wantiface, scaniface);
                     continue;
                 }
                 {
                     var (srcBytes, okΔ1) = ct.s._<slice<byte>>(ᐧ); if (okΔ1) {
                         var dstBytes = (ifptr.ValueSlot)._<slice<byte>>();
-                        if (len(srcBytes) > 0 && Ꮡ(dstBytes, 0) == Ꮡ(srcBytes, 0)) {
-                            errf("copy into interface{} didn't copy []byte data"u8);
+                        if (len(srcBytes) > 0 && Ꮡelem(dstBytes, 0) == Ꮡelem(srcBytes, 0)) {
+                            errf("copy into interface{} didn't copy []byte data");
                         }
                     }
                 }
             }
         }
         if (ct.wantusrdef != 0D && ct.wantusrdef != ct.d._<ж<userDefined>>().Value) {
-            errf("want userDefined %f, got %f"u8, ct.wantusrdef, ct.d._<ж<userDefined>>().Value);
+            errf("want userDefined %f, got %f", ct.wantusrdef, ct.d._<ж<userDefined>>().Value);
         }
         if (len(ct.wantusrstr) != 0 && ct.wantusrstr != ct.d._<ж<userDefinedString>>().Value) {
-            errf("want userDefined %q, got %q"u8, ct.wantusrstr, ct.d._<ж<userDefinedString>>().Value);
+            errf("want userDefined %q, got %q", ct.wantusrstr, ct.d._<ж<userDefinedString>>().Value);
         }
     }
 }
 
-public static void TestNullString(ж<testing.T> Ꮡt) {
+public static void TestNullString(ж<testing.T> t) {
     ref var ns = ref heap(new global::go.database.sql_package.NullString(), out var Ꮡns);
     convertAssign(Ꮡns, slice<byte>("foo"u8));
     if (!ns.Valid) {
-        Ꮡt.Errorf("expecting not null"u8);
+        t.Errorf("expecting not null");
     }
     if (ns.String != "foo"u8) {
-        Ꮡt.Errorf("expecting foo; got %q"u8, ns.String);
+        t.Errorf("expecting foo; got %q", ns.String);
     }
-    convertAssign(Ꮡns, default!);
+    convertAssign(Ꮡns, default);
     if (ns.Valid) {
-        Ꮡt.Errorf("expecting null on nil"u8);
+        t.Errorf("expecting null on nil");
     }
     if (ns.String != ""u8) {
-        Ꮡt.Errorf("expecting blank on nil; got %q"u8, ns.String);
+        t.Errorf("expecting blank on nil; got %q", ns.String);
     }
 }
 
@@ -337,27 +345,27 @@ internal partial struct valueConverterTest {
     internal @string err;
 }
 
-internal static slice<valueConverterTest> valueConverterTests = new valueConverterTest[]{
-    new(driver.DefaultParameterConverter, new NullString("hi"u8, true), (@string)"hi"u8, ""u8),
-    new(driver.DefaultParameterConverter, new NullString(""u8, false), default!, ""u8)
-}.slice();
+internal static slice<valueConverterTest> valueConverterTests = slice<valueConverterTest>([
+    new(driver.DefaultParameterConverter, new NullString("hi", true), (@string)"hi", ""),
+    new(driver.DefaultParameterConverter, new NullString("", false), default, "")
+]);
 
-public static void TestValueConverters(ж<testing.T> Ꮡt) {
+public static void TestValueConverters(ж<testing.T> t) {
     foreach (var (i, tt) in valueConverterTests) {
         var (@out, err) = tt.c.ConvertValue(tt.@in);
         @string goterr = ""u8;
-        if (err != default!) {
+        if (err != nil) {
             goterr = err.Error();
         }
         if (goterr != tt.err) {
-            Ꮡt.Errorf("test %d: %T(%T(%v)) error = %q; want error = %q"u8,
+            t.Errorf("test %d: %T(%T(%v)) error = %q; want error = %q",
                 i, tt.c, tt.@in, tt.@in, goterr, tt.err);
         }
         if (tt.err != ""u8) {
             continue;
         }
         if (!reflect.DeepEqual(@out, tt.@out)) {
-            Ꮡt.Errorf("test %d: %T(%T(%v)) = %v (%T); want %v (%T)"u8,
+            t.Errorf("test %d: %T(%T(%v)) = %v (%T); want %v (%T)",
                 i, tt.c, tt.@in, tt.@in, @out, @out, tt.@out, tt.@out);
         }
     }
@@ -365,8 +373,6 @@ public static void TestValueConverters(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testAllocatesMoreWithˢ = (@string)"test allocates more with -asan; see #70079"u8;
-internal static readonly @string stringˢ = "string"u8;
-internal static readonly @string fooˢ = "foo"u8;
 
 internal partial struct TestRawBytesAllocs_type /*dyn*/ {
     internal @string name;
@@ -375,34 +381,34 @@ internal partial struct TestRawBytesAllocs_type /*dyn*/ {
 }
 
 // Tests that assigning to RawBytes doesn't allocate (and also works).
-public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
-    slice<TestRawBytesAllocs_type> tests = new TestRawBytesAllocs_type[]{
-        new("uint64"u8, (uint64)12345678, "12345678"u8),
-        new("uint32"u8, (uint32)1234, "1234"u8),
-        new("uint16"u8, (uint16)12, "12"u8),
-        new("uint8"u8, (uint8)1, "1"u8),
-        new("uint"u8, (nuint)123, "123"u8),
-        new("int"u8, (nint)123, "123"u8),
-        new("int8"u8, (int8)1, "1"u8),
-        new("int16"u8, (int16)12, "12"u8),
-        new("int32"u8, (int32)1234, "1234"u8),
-        new("int64"u8, (int64)12345678, "12345678"u8),
-        new("float32"u8, (float32)1.5F, "1.5"u8),
-        new("float64"u8, (float64)64D, "64"u8),
-        new("bool"u8, false, "false"u8),
-        new("time"u8, time.Unix(2, 5).UTC(), "1970-01-01T00:00:02.000000005Z"u8)
-    }.slice();
+public static void TestRawBytesAllocs(ж<testing.T> t) {
+    slice<TestRawBytesAllocs_type> tests = slice<TestRawBytesAllocs_type>([
+        new("uint64", (uint64)12345678, "12345678"),
+        new("uint32", (uint32)1234, "1234"),
+        new("uint16", (uint16)12, "12"),
+        new("uint8", (uint8)1, "1"),
+        new("uint", (nuint)123, "123"),
+        new("int", (nint)123, "123"),
+        new("int8", (int8)1, "1"),
+        new("int16", (int16)12, "12"),
+        new("int32", (int32)1234, "1234"),
+        new("int64", (int64)12345678, "12345678"),
+        new("float32", (float32)1.5F, "1.5"),
+        new("float64", (float64)64D, "64"),
+        new("bool", false, "false"),
+        new("time", time.Unix(2, 5).UTC(), "1970-01-01T00:00:02.000000005Z")
+    ]);
     if (asan.Enabled) {
-        Ꮡt.Skip(testAllocatesMoreWithˢ);
+        t.Skip(testAllocatesMoreWithˢ);
     }
 
     ref var buf = ref heap<global::go.database.sql_package.RawBytes>(out var Ꮡbuf);
-    var rows = Ꮡ(new Rows(nil));
+    var rows = Ꮡ(new Rows());
     var rowsʗ1 = rows;
     void test(@string name, any @in, @string want) {
         {
-            var err = convertAssignRows(Ꮡbuf, @in, rowsʗ1); if (err != default!) {
-                Ꮡt.Fatalf("%s: convertAssign = %v"u8, name, err);
+            var err = convertAssignRows(Ꮡbuf, @in, rowsʗ1); if (err != nil) {
+                t.Fatalf("%s: convertAssign = %v", name, err);
             }
         }
         var match = len(Ꮡbuf.ValueSlot) == len(want);
@@ -415,7 +421,7 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
             }
         }
         if (!match) {
-            Ꮡt.Fatalf("%s: got %q (len %d); want %q (len %d)"u8, name, Ꮡbuf.ValueSlot, len(Ꮡbuf.ValueSlot), want, len(want));
+            t.Fatalf("%s: got %q (len %d); want %q (len %d)", name, Ꮡbuf.ValueSlot, len(Ꮡbuf.ValueSlot), want, len(want));
         }
     }
 
@@ -424,7 +430,7 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
     var testsʗ1 = tests;
     var n = testing.AllocsPerRun(100, () => {
         foreach (var (_, tt) in testsʗ1) {
-            rowsʗ2.Value.raw = (~rowsʗ2).raw[..0];
+            rowsʗ2.raw = rowsʗ2.raw[..0];
             testʗ1(tt.name, tt.@in, tt.want);
         }
     });
@@ -435,12 +441,14 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
     // So only care on amd64 gc for now.
     var measureAllocs = false;
     var exprᴛ1 = runtime.GOARCH;
-    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8: {
         measureAllocs = runtime.Compiler == "gc";
-    }
+        break;
+    }}
 
     if (n > 0.5D && measureAllocs) {
-        Ꮡt.Fatalf("allocs = %v; want 0"u8, n);
+        t.Fatalf("allocs = %v; want 0", n);
     }
 
     // This one involves a convT2E allocation, string -> interface{}
@@ -449,7 +457,7 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
         testʗ2(stringˢ, fooˢ, fooˢ);
     });
     if (n > 1.5D && measureAllocs) {
-        Ꮡt.Fatalf("allocs = %v; want max 1"u8, n);
+        t.Fatalf("allocs = %v; want max 1", n);
     }
 }
 
@@ -459,20 +467,20 @@ internal static readonly object userDefinedBytesGotˢ = (@string)"userDefinedByt
 internal partial struct TestUserDefinedBytes_userDefinedBytes /*[]byte*/;
 
 // https://golang.org/issues/13905
-public static void TestUserDefinedBytes(ж<testing.T> Ꮡt) {
+public static void TestUserDefinedBytes(ж<testing.T> t) {
     ref var u = ref heap<TestUserDefinedBytes_userDefinedBytes>(out var Ꮡu);
     var v = slice<byte>("foo"u8);
 
     convertAssign(Ꮡu, v);
-    if (Ꮡ(u, 0) == Ꮡ(v, 0)) {
-        Ꮡt.Fatal(userDefinedBytesGotˢ);
+    if (Ꮡelem<byte>(u, 0) == Ꮡelem(v, 0)) {
+        t.Fatal(userDefinedBytesGotˢ);
     }
 }
 
 public partial struct Valuer_V /*@string*/;
 
 public static (driverꓸValue, error) Value(this Valuer_V v) {
-    return (strings.ToUpper((@string)v), default!);
+    return (strings.ToUpper((@string)v), default);
 }
 
 public partial struct Valuer_P /*@string*/;
@@ -484,76 +492,80 @@ public static (driverꓸValue, error) Value(this ж<Valuer_P> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil) {
-        return (nilToStrˢ, default!);
+        return (nilToStrˢ, default);
     }
-    return (strings.ToUpper((@string)(p)), default!);
+    return (strings.ToUpper((@string)(p)), default);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object fooˢ2 = (@string)"FOO"u8;
+internal static readonly object plainStrˢ = (@string)"plain-str"u8;
 
 internal partial struct TestDriverArgs_tests /*dyn*/ {
     internal slice<any> args;
     internal slice<driver.NamedValue> want;
 }
 
-public static void TestDriverArgs(ж<testing.T> Ꮡt) {
-    ж<Valuer_V> nilValuerVPtr = default!;
-    ж<Valuer_P> nilValuerPPtr = default!;
-    ж<@string> nilStrPtr = default!;
+public static void TestDriverArgs(ж<testing.T> t) {
+    ж<Valuer_V> nilValuerVPtr = default;
+    ж<Valuer_P> nilValuerPPtr = default;
+    ж<@string> nilStrPtr = default;
     var tests = new slice<TestDriverArgs_tests>(5){
         [0] = new(
-            args: new any[]{(Valuer_V)(@string)fooˢ}.slice(),
-            want: new driver.NamedValue[]{
+            args: slice<any>([(Valuer_V)(@string)fooˢ]),
+            want: slice<driver.NamedValue>([
                 new(
                     Ordinal: 1,
-                    Value: (@string)"FOO"u8
+                    Value: fooˢ2
                 )
-            }.slice()
+            ])
         ),
         [1] = new(
-            args: new any[]{nilValuerVPtr.OrTypedNil()}.slice(),
-            want: new driver.NamedValue[]{
+            args: slice<any>([nilValuerVPtr.OrTypedNil()]),
+            want: slice<driver.NamedValue>([
                 new(
                     Ordinal: 1,
-                    Value: default!
+                    Value: default
                 )
-            }.slice()
+            ])
         ),
         [2] = new(
-            args: new any[]{nilValuerPPtr.OrTypedNil()}.slice(),
-            want: new driver.NamedValue[]{
+            args: slice<any>([nilValuerPPtr.OrTypedNil()]),
+            want: slice<driver.NamedValue>([
                 new(
                     Ordinal: 1,
-                    Value: (@string)"nil-to-str"u8
+                    Value: nilToStrˢ
                 )
-            }.slice()
+            ])
         ),
         [3] = new(
-            args: new any[]{(@string)"plain-str"u8}.slice(),
-            want: new driver.NamedValue[]{
+            args: slice<any>([plainStrˢ]),
+            want: slice<driver.NamedValue>([
                 new(
                     Ordinal: 1,
-                    Value: (@string)"plain-str"u8
+                    Value: plainStrˢ
                 )
-            }.slice()
+            ])
         ),
         [4] = new(
-            args: new any[]{nilStrPtr.OrTypedNil()}.slice(),
-            want: new driver.NamedValue[]{
+            args: slice<any>([nilStrPtr.OrTypedNil()]),
+            want: slice<driver.NamedValue>([
                 new(
                     Ordinal: 1,
-                    Value: default!
+                    Value: default
                 )
-            }.slice()
+            ])
         )
     };
     foreach (var (i, tt) in tests) {
-        var ds = Ꮡ(new driverStmt(Locker: new sync.MutexжLocker(Ꮡ(new sync.Mutex(nil))), si: new stubDriverStmt((error)(default!))));
-        var (got, err) = driverArgsConnLocked(default!, ds, tt.args);
-        if (err != default!) {
-            Ꮡt.Errorf("test[%d]: %v"u8, i, err);
+        var ds = Ꮡ(new driverStmt(Locker: new sync.MutexжLocker(Ꮡ(new sync.Mutex())), si: new stubDriverStmt((error)(default))));
+        var (got, err) = driverArgsConnLocked(default, ds, tt.args);
+        if (err != nil) {
+            t.Errorf("test[%d]: %v", i, err);
             continue;
         }
         if (!reflect.DeepEqual(got, tt.want)) {
-            Ꮡt.Errorf("test[%d]: got %v, want %v"u8, i, got, tt.want);
+            t.Errorf("test[%d]: got %v, want %v", i, got, tt.want);
         }
     }
 }
@@ -581,7 +593,7 @@ internal static error Compose(this ref dec d, byte form, bool negative, slice<by
     case 1 or 2: {
         d.form = form;
         d.neg = negative;
-        return default!;
+        return default;
     }
     case 0: {
         break;
@@ -597,7 +609,7 @@ internal static error Compose(this ref dec d, byte form, bool negative, slice<by
     }
     copy(d.coefficient[..], coefficient);
 
-    return default!;
+    return default;
 }
 
 internal partial struct decFinite {
@@ -635,7 +647,7 @@ internal static error Compose(this ref decFinite d, byte form, bool negative, sl
     }
     copy(d.coefficient[..], coefficient);
 
-    return default!;
+    return default;
 }
 
 internal partial struct TestDecimal_list /*dyn*/ {
@@ -645,35 +657,34 @@ internal partial struct TestDecimal_list /*dyn*/ {
     internal bool err;
 }
 
-public static void TestDecimal(ж<testing.T> Ꮡt) {
-    var list = new TestDecimal_list[]{
-        new(name: "same"u8, @in: new dec(exponent: -6), @out: new dec(exponent: -6)),
+public static void TestDecimal(ж<testing.T> t) {
+    var list = slice<TestDecimal_list>([
+        new(name: "same", @in: new dec(exponent: -6), @out: new dec(exponent: -6)),
 
         // Ensure reflection is not used to assign the value by using different types.
-        new(name: "diff"u8, @in: new decFinite(exponent: -6), @out: new dec(exponent: -6)),
+        new(name: "diff", @in: new decFinite(exponent: -6), @out: new dec(exponent: -6)),
 
-        new(name: "bad-form"u8, @in: new dec(form: 200), err: true)
-    }.slice();
+        new(name: "bad-form", @in: new dec(form: 200), err: true)
+    ]);
     foreach (var (_, vᴛ1) in list) {
         ref var item = ref heap(new TestDecimal_list(), out var Ꮡitem);
         item = vᴛ1.ΔClone();
 
         var itemʗ1 = item;
-        Ꮡt.Run(item.name, (ж<testing.T> tΔ1) => {
-            ref var @out = ref heap<dec>(out var Ꮡout);
-            @out = new dec(nil);
+        t.Run(item.name, (ж<testing.T> tΔ1) => {
+            ref var @out = ref heap<dec>(new dec(), out var Ꮡout);
             var err = convertAssign(Ꮡout, itemʗ1.@in);
             if (itemʗ1.err) {
-                if (err == default!) {
-                    tΔ1.Fatalf("unexpected nil error"u8);
+                if (err == nil) {
+                    tΔ1.Fatalf("unexpected nil error");
                 }
                 return;
             }
-            if (err != default!) {
-                tΔ1.Fatalf("unexpected error: %v"u8, err);
+            if (err != nil) {
+                tΔ1.Fatalf("unexpected error: %v", err);
             }
             if (!reflect.DeepEqual(@out, itemʗ1.@out)) {
-                tΔ1.Fatalf("got %#v want %#v"u8, @out, itemʗ1.@out);
+                tΔ1.Fatalf("got %#v want %#v", @out, itemʗ1.@out);
             }
         });
     }

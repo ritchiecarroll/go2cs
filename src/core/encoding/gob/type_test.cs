@@ -20,14 +20,14 @@ internal partial struct typeT {
 }
 
 internal static slice<typeT> basicTypes;
-internal static void initᴛbasicTypes() { basicTypes = new typeT[]{
-    new(tBool, "bool"u8),
-    new(tInt, "int"u8),
-    new(tUint, "uint"u8),
-    new(tFloat, "float"u8),
-    new(tBytes, "bytes"u8),
-    new(tString, "string"u8)
-}.slice(); }
+internal static void initᴛbasicTypes() { basicTypes = slice<typeT>([
+    new(tBool, "bool"),
+    new(tInt, "int"),
+    new(tUint, "uint"),
+    new(tFloat, "float"),
+    new(tBytes, "bytes"),
+    new(tString, "string")
+]); }
 
 internal static global::go.encoding.gob_package.ΔgobType getTypeUnlocked(@string name, reflectꓸType rt) {
     GoFrame ᒐ = default;
@@ -35,122 +35,132 @@ internal static global::go.encoding.gob_package.ΔgobType getTypeUnlocked(@strin
         ᏑtypeLock.Lock();
         defer(ᏑtypeLock.Unlock, ref ᒐ);
         var (t, err) = getBaseType(name, rt);
-        if (err != default!) {
+        if (err != nil) {
             throw panic("getTypeUnlocked: " + err.Error());
         }
         return t;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Sanity checks
-public static void TestBasic(ж<testing.T> Ꮡt) {
+public static void TestBasic(ж<testing.T> t) {
     foreach (var (_, tt) in basicTypes) {
         if (tt.id.@string() != tt.str) {
-            Ꮡt.Errorf("checkType: expected %q got %s"u8, tt.str, tt.id.@string());
+            t.Errorf("checkType: expected %q got %s", tt.str, tt.id.@string());
         }
         if (tt.id == 0) {
-            Ꮡt.Errorf("id for %q is zero"u8, tt.str);
+            t.Errorf("id for %q is zero", tt.str);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string intˢ = "int"u8;
-internal static readonly @string uintˢ = "uint"u8;
+internal static ref readonly @string intˢ => ref intˢᵇ;
+private static readonly @string intˢᵇ = "int"u8;
+internal static ref readonly @string uintˢ => ref uintˢᵇ;
+private static readonly @string uintˢᵇ = "uint"u8;
 
 // Reregister some basic types to check registration is idempotent.
-public static void TestReregistration(ж<testing.T> Ꮡt) {
+public static void TestReregistration(ж<testing.T> t) {
     var newtyp = getTypeUnlocked(intˢ, reflect.TypeFor<nint>());
     if (!AreEqual(newtyp, tInt.gobType())) {
-        Ꮡt.Errorf("reregistration of %s got new type"u8, newtyp.@string());
+        t.Errorf("reregistration of %s got new type", newtyp.@string());
     }
     newtyp = getTypeUnlocked(uintˢ, reflect.TypeFor<nuint>());
     if (!AreEqual(newtyp, tUint.gobType())) {
-        Ꮡt.Errorf("reregistration of %s got new type"u8, newtyp.@string());
+        t.Errorf("reregistration of %s got new type", newtyp.@string());
     }
     newtyp = getTypeUnlocked(stringˢ, reflect.TypeFor<@string>());
     if (!AreEqual(newtyp, tString.gobType())) {
-        Ꮡt.Errorf("reregistration of %s got new type"u8, newtyp.@string());
+        t.Errorf("reregistration of %s got new type", newtyp.@string());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gooˢ = "goo"u8;
-internal static readonly @string boolˢ = "[3]bool"u8;
+internal static ref readonly @string gooˢ => ref gooˢᵇ;
+private static readonly @string gooˢᵇ = "goo"u8;
+internal static ref readonly @string boolˢ => ref boolˢᵇ;
+private static readonly @string boolˢᵇ = "[3]bool"u8;
 
-public static void TestArrayType(ж<testing.T> Ꮡt) {
+public static void TestArrayType(ж<testing.T> t) {
     array<nint> a3 = new(3);
     var a3int = getTypeUnlocked(fooˢ, reflect.TypeOf(a3));
     var newa3int = getTypeUnlocked(barˢ, reflect.TypeOf(a3));
     if (!AreEqual(a3int, newa3int)) {
-        Ꮡt.Errorf("second registration of [3]int creates new type"u8);
+        t.Errorf("second registration of [3]int creates new type");
     }
     array<nint> a4 = new(4);
     var a4int = getTypeUnlocked(gooˢ, reflect.TypeOf(a4));
     if (AreEqual(a3int, a4int)) {
-        Ꮡt.Errorf("registration of [3]int creates same type as [4]int"u8);
+        t.Errorf("registration of [3]int creates same type as [4]int");
     }
     array<bool> b3 = new(3);
     var a3bool = getTypeUnlocked(""u8, reflect.TypeOf(b3));
     if (AreEqual(a3int, a3bool)) {
-        Ꮡt.Errorf("registration of [3]bool creates same type as [3]int"u8);
+        t.Errorf("registration of [3]bool creates same type as [3]int");
     }
     @string str = a3bool.@string();
     @string expected = boolˢ;
     if (str != expected) {
-        Ꮡt.Errorf("array printed as %q; expected %q"u8, str, expected);
+        t.Errorf("array printed as %q; expected %q", str, expected);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sliceˢ = "slice"u8;
-internal static readonly @string slice1ˢ = "slice1"u8;
-internal static readonly @string boolˢ2 = "[]bool"u8;
+internal static ref readonly @string sliceˢ => ref sliceˢᵇ;
+private static readonly @string sliceˢᵇ = "slice"u8;
+internal static ref readonly @string slice1ˢ => ref slice1ˢᵇ;
+private static readonly @string slice1ˢᵇ = "slice1"u8;
+internal static ref readonly @string boolˢ2 => ref boolˢ2ᵇ;
+private static readonly @string boolˢ2ᵇ = "[]bool"u8;
 
-public static void TestSliceType(ж<testing.T> Ꮡt) {
-    slice<nint> s = default!;
+public static void TestSliceType(ж<testing.T> t) {
+    slice<nint> s = default;
     var sint = getTypeUnlocked(sliceˢ, reflect.TypeOf(s));
-    slice<nint> news = default!;
+    slice<nint> news = default;
     var newsint = getTypeUnlocked(slice1ˢ, reflect.TypeOf(news));
     if (!AreEqual(sint, newsint)) {
-        Ꮡt.Errorf("second registration of []int creates new type"u8);
+        t.Errorf("second registration of []int creates new type");
     }
-    slice<bool> b = default!;
+    slice<bool> b = default;
     var sbool = getTypeUnlocked(""u8, reflect.TypeOf(b));
     if (AreEqual(sbool, sint)) {
-        Ꮡt.Errorf("registration of []bool creates same type as []int"u8);
+        t.Errorf("registration of []bool creates same type as []int");
     }
     @string str = sbool.@string();
     @string expected = boolˢ2;
     if (str != expected) {
-        Ꮡt.Errorf("slice printed as %q; expected %q"u8, str, expected);
+        t.Errorf("slice printed as %q; expected %q", str, expected);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mapˢ = "map"u8;
-internal static readonly @string map1ˢ = "map1"u8;
-internal static readonly @string mapStringBoolˢ = "map[string]bool"u8;
+internal static ref readonly @string mapˢ => ref mapˢᵇ;
+private static readonly @string mapˢᵇ = "map"u8;
+internal static ref readonly @string map1ˢ => ref map1ˢᵇ;
+private static readonly @string map1ˢᵇ = "map1"u8;
+internal static ref readonly @string mapStringBoolˢ => ref mapStringBoolˢᵇ;
+private static readonly @string mapStringBoolˢᵇ = "map[string]bool"u8;
 
-public static void TestMapType(ж<testing.T> Ꮡt) {
-    map<@string, nint> m = default!;
+public static void TestMapType(ж<testing.T> t) {
+    map<@string, nint> m = default;
     var mapStringInt = getTypeUnlocked(mapˢ, reflect.TypeOf(m));
-    map<@string, nint> newm = default!;
+    map<@string, nint> newm = default;
     var newMapStringInt = getTypeUnlocked(map1ˢ, reflect.TypeOf(newm));
     if (!AreEqual(mapStringInt, newMapStringInt)) {
-        Ꮡt.Errorf("second registration of map[string]int creates new type"u8);
+        t.Errorf("second registration of map[string]int creates new type");
     }
-    map<@string, bool> b = default!;
+    map<@string, bool> b = default;
     var mapStringBool = getTypeUnlocked(""u8, reflect.TypeOf(b));
     if (AreEqual(mapStringBool, mapStringInt)) {
-        Ꮡt.Errorf("registration of map[string]bool creates same type as map[string]int"u8);
+        t.Errorf("registration of map[string]bool creates same type as map[string]int");
     }
     @string str = mapStringBool.@string();
     @string expected = mapStringBoolˢ;
     if (str != expected) {
-        Ꮡt.Errorf("map printed as %q; expected %q"u8, str, expected);
+        t.Errorf("map printed as %q; expected %q", str, expected);
     }
 }
 
@@ -164,7 +174,7 @@ public partial struct Foo {
     public int32 B; // will become int
     public @string C;
     public slice<byte> D;
-    public ж<float64> E; // will become float64
+    public ж<float64> E;          // will become float64
     public ж<ж<ж<ж<float64>>>> F; // will become float64
     public ж<Bar> G;
     public ж<Bar> H; // should not interpolate the definition of Bar again
@@ -172,16 +182,18 @@ public partial struct Foo {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooˢ2 = "Foo"u8;
-internal static readonly @string fooStructAIntBIntCStringˢ = "Foo = struct { A int; B int; C string; D bytes; E float; F float; G Bar = struct { X string; }; H Bar; I Foo; }"u8;
+internal static ref readonly @string fooˢ2 => ref fooˢ2ᵇ;
+private static readonly @string fooˢ2ᵇ = "Foo"u8;
+internal static ref readonly @string fooStructAIntBIntCStringˢ => ref fooStructAIntBIntCStringˢᵇ;
+private static readonly @string fooStructAIntBIntCStringˢᵇ = "Foo = struct { A int; B int; C string; D bytes; E float; F float; G Bar = struct { X string; }; H Bar; I Foo; }"u8;
 
-public static void TestStructType(ж<testing.T> Ꮡt) {
+public static void TestStructType(ж<testing.T> t) {
     var sstruct = getTypeUnlocked(fooˢ2, reflect.TypeFor<Foo>());
     @string str = sstruct.@string();
     // If we can print it correctly, we built it correctly.
     @string expected = fooStructAIntBIntCStringˢ;
     if (str != expected) {
-        Ꮡt.Errorf("struct printed as %q; expected %q"u8, str, expected);
+        t.Errorf("struct printed as %q; expected %q", str, expected);
     }
 }
 
@@ -191,7 +203,7 @@ internal partial struct TestRegistration_T /*dyn*/ {
 
 // Should be OK to register the same type multiple times, as long as they're
 // at the same level of indirection.
-public static void TestRegistration(ж<testing.T> Ꮡt) {
+public static void TestRegistration(ж<testing.T> t) {
     Register(@new<TestRegistration_T>());
     Register(@new<TestRegistration_T>());
 }
@@ -211,10 +223,10 @@ internal partial struct TestRegistrationNaming_testCases /*dyn*/ {
 public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var testCases = new TestRegistrationNaming_testCases[]{
-        new(Ꮡ(new N1(nil)), "*gob.N1"u8),
-        new(new N2(nil), "encoding/gob.N2"u8)
-    }.slice();
+    var testCases = slice<TestRegistrationNaming_testCases>([
+        new(Ꮡ(new N1()), "*gob.N1"),
+        new(new N2(), "encoding/gob.N2")
+    ]);
 
     foreach (var (_, tc) in testCases) {
         Register(tc.t);
@@ -222,7 +234,7 @@ public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
         var tct = reflect.TypeOf(tc.t);
         var (ct, _) = ᏑnameToConcreteType.Load(tc.name);
         if (!AreEqual(ct, tct)) {
-            Ꮡt.Errorf("nameToConcreteType[%q] = %v, want %v"u8, tc.name, ct, tct);
+            Ꮡt.Errorf("nameToConcreteType[%q] = %v, want %v", tc.name, ct, tct);
         }
         // concreteTypeToName is keyed off the base type.
         if (tct.Kind() == reflect.ΔPointer) {
@@ -230,7 +242,7 @@ public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
         }
         {
             var (n, _) = ᏑconcreteTypeToName.Load(tct); if (!AreEqual(n, tc.name)) {
-                Ꮡt.Errorf("concreteTypeToName[%v] got %v, want %v"u8, tct, n, tc.name);
+                Ꮡt.Errorf("concreteTypeToName[%v] got %v, want %v", tct, n, tc.name);
             }
         }
     }
@@ -240,7 +252,7 @@ internal partial struct TestStressParallel_T2 /*dyn*/ {
     public nint A;
 }
 
-public static partial void TestStressParallel(ж<testing.T> Ꮡt) {
+public static partial void TestStressParallel(ж<testing.T> t) {
     var c = new channel<bool>(0);
     const nint N = 10;
     for (nint i = 0; i < N; i++) {
@@ -251,13 +263,13 @@ public static partial void TestStressParallel(ж<testing.T> Ꮡt) {
             var b = @new<bytes.Buffer>();
             var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
             var err = enc.Encode(p.OrTypedNil());
-            if (err != default!) {
-                Ꮡt.Error(encoderFailˢ, err);
+            if (err != nil) {
+                t.Error(encoderFailˢ, err);
             }
             var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
             err = dec.Decode(p.OrTypedNil());
-            if (err != default!) {
-                Ꮡt.Error(decoderFailˢ, err);
+            if (err != nil) {
+                t.Error(decoderFailˢ, err);
             }
             cʗ1.ᐸꟷ(true);
         });
@@ -271,7 +283,7 @@ public static partial void TestStressParallel(ж<testing.T> Ꮡt) {
 internal static readonly object decodeUnexpectedlyˢ = (@string)"decode unexpectedly succeeded"u8;
 
 // Issue 23328. Note that this test name is known to cmd/dist/test.go.
-public static partial void TestTypeRace(ж<testing.T> Ꮡt) {
+public static partial void TestTypeRace(ж<testing.T> t) {
     var c = new channel<bool>(0);
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 2; i++) {
@@ -284,38 +296,37 @@ public static partial void TestTypeRace(ж<testing.T> Ꮡt) {
                 ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
                 var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡbuf));
                 var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡbuf));
-                any x = default!;
+                any x = default;
                 switch (iΔ1) {
                 case 0: {
-                    x = Ꮡ(new N1(nil));
+                    x = Ꮡ(new N1());
                     break;
                 }
                 case 1: {
-                    x = Ꮡ(new N2(nil));
+                    x = Ꮡ(new N2());
                     break;
                 }
                 default: {
-                    Ꮡt.Errorf("bad i %d"u8, iΔ1);
+                    t.Errorf("bad i %d", iΔ1);
                     return;
                 }}
-                ref var m = ref heap<map<@string, @string>>(out var Ꮡm);
-                m = new map<@string, @string>();
+                ref var m = ref heap<map<@string, @string>>(new map<@string, @string>(), out var Ꮡm);
                 ᐸꟷ(cʗ1);
                 {
-                    var err = enc.Encode(x); if (err != default!) {
-                        Ꮡt.Error(err);
+                    var err = enc.Encode(x); if (err != nil) {
+                        t.Error(err);
                         return;
                     }
                 }
                 {
-                    var err = enc.Encode(x); if (err != default!) {
-                        Ꮡt.Error(err);
+                    var err = enc.Encode(x); if (err != nil) {
+                        t.Error(err);
                         return;
                     }
                 }
                 {
-                    var err = dec.Decode(Ꮡm); if (err == default!) {
-                        Ꮡt.Error(decodeUnexpectedlyˢ);
+                    var err = dec.Decode(Ꮡm); if (err == nil) {
+                        t.Error(decodeUnexpectedlyˢ);
                         return;
                     }
                 }

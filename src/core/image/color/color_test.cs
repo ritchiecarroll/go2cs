@@ -10,18 +10,18 @@ using static go.image.color_package;
 
 partial class color_internal_test_package {
 
-public static void TestSqDiff(ж<testing.T> Ꮡt) {
+public static void TestSqDiff(ж<testing.T> t) {
     // canonical sqDiff implementation
     var orig = (uint32 x, uint32 y) => {
-        uint32 d = default!;
-        if (x > y){
+        uint32 d = default;
+        if (x > y) {
             d = (uint32)(x - y);
         } else {
             d = (uint32)(y - x);
         }
         return (d * d) >> 2;
     };
-    var testCases = new uint32[]{
+    var testCases = slice<uint32>([
         0,
         1,
         2,
@@ -34,19 +34,19 @@ public static void TestSqDiff(ж<testing.T> Ꮡt) {
         0xfffffffdU,
         0xfffffffeU,
         0xffffffffU
-    }.slice();
+    ]);
     foreach (var (_, x) in testCases) {
         foreach (var (_, y) in testCases) {
             {
                 var (got, want) = (sqDiff(x, y), orig(x, y)); if (got != want) {
-                    Ꮡt.Fatalf("sqDiff(%#x, %#x): got %d, want %d"u8, x, y, got, want);
+                    t.Fatalf("sqDiff(%#x, %#x): got %d, want %d", x, y, got, want);
                 }
             }
         }
     }
     {
-        var err = quick.CheckEqual((orig).OrTypedNilFunc(), sqDiff, Ꮡ(new quick.Config(MaxCountScale: 10D))); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = quick.CheckEqual((orig).OrTypedNilFunc(), sqDiff, Ꮡ(new quick.Config(MaxCountScale: 10D))); if (err != nil) {
+            t.Fatal(err);
         }
     }
 }

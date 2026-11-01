@@ -13,30 +13,30 @@ partial struct oldHeadingTestsᴛ1 /*dyn*/ {
     internal @string line;
     internal bool ok;
 }
-internal static slice<oldHeadingTestsᴛ1> oldHeadingTests = new oldHeadingTestsᴛ1[]{
-    new("Section"u8, true),
-    new("A typical usage"u8, true),
-    new("ΔΛΞ is Greek"u8, true),
-    new("Foo 42"u8, true),
-    new(""u8, false),
-    new("section"u8, false),
-    new("A typical usage:"u8, false),
-    new("This code:"u8, false),
-    new("δ is Greek"u8, false),
-    new("Foo §"u8, false),
-    new("Fermat's Last Sentence"u8, true),
-    new("Fermat's"u8, true),
-    new("'sX"u8, false),
-    new("Ted 'Too' Bar"u8, false),
-    new("Use n+m"u8, false),
-    new("Scanning:"u8, false),
-    new("N:M"u8, false)
-}.slice();
+internal static slice<oldHeadingTestsᴛ1> oldHeadingTests = slice<oldHeadingTestsᴛ1>([
+    new("Section", true),
+    new("A typical usage", true),
+    new("ΔΛΞ is Greek", true),
+    new("Foo 42", true),
+    new("", false),
+    new("section", false),
+    new("A typical usage:", false),
+    new("This code:", false),
+    new("δ is Greek", false),
+    new("Foo §", false),
+    new("Fermat's Last Sentence", true),
+    new("Fermat's", true),
+    new("'sX", false),
+    new("Ted 'Too' Bar", false),
+    new("Use n+m", false),
+    new("Scanning:", false),
+    new("N:M", false)
+]);
 
-public static void TestIsOldHeading(ж<testing.T> Ꮡt) {
+public static void TestIsOldHeading(ж<testing.T> t) {
     foreach (var (_, tt) in oldHeadingTests) {
-        if (isOldHeading(tt.line, new @string[]{"Text."u8, ""u8, tt.line, ""u8, "Text."u8}.slice(), 2) != tt.ok) {
-            Ꮡt.Errorf("isOldHeading(%q) = %v, want %v"u8, tt.line, !tt.ok, tt.ok);
+        if (isOldHeading(tt.line, slice<@string>(["Text.", "", tt.line, "", "Text."]), 2) != tt.ok) {
+            t.Errorf("isOldHeading(%q) = %v, want %v", tt.line, !tt.ok, tt.ok);
         }
     }
 }
@@ -44,40 +44,40 @@ public static void TestIsOldHeading(ж<testing.T> Ꮡt) {
 partial struct autoURLTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
-internal static slice<autoURLTestsᴛ1> autoURLTests = new autoURLTestsᴛ1[]{
-    new(""u8, ""u8),
-    new("http://[::1]:8080/foo.txt"u8, "http://[::1]:8080/foo.txt"u8),
-    new("https://www.google.com) after"u8, "https://www.google.com"u8),
-    new("https://www.google.com:30/x/y/z:b::c. After"u8, "https://www.google.com:30/x/y/z:b::c"u8),
-    new("http://www.google.com/path/:;!-/?query=%34b#093124"u8, "http://www.google.com/path/:;!-/?query=%34b#093124"u8),
-    new("http://www.google.com/path/:;!-/?query=%34bar#093124"u8, "http://www.google.com/path/:;!-/?query=%34bar#093124"u8),
-    new("http://www.google.com/index.html! After"u8, "http://www.google.com/index.html"u8),
-    new("http://www.google.com/"u8, "http://www.google.com/"u8),
-    new("https://www.google.com/"u8, "https://www.google.com/"u8),
-    new("http://www.google.com/path."u8, "http://www.google.com/path"u8),
-    new("http://en.wikipedia.org/wiki/Camellia_(cipher)"u8, "http://en.wikipedia.org/wiki/Camellia_(cipher)"u8),
-    new("http://www.google.com/)"u8, "http://www.google.com/"u8),
-    new("http://gmail.com)"u8, "http://gmail.com"u8),
-    new("http://gmail.com))"u8, "http://gmail.com"u8),
-    new("http://gmail.com ((http://gmail.com)) ()"u8, "http://gmail.com"u8),
-    new("http://example.com/ quux!"u8, "http://example.com/"u8),
-    new("http://example.com/%2f/ /world."u8, "http://example.com/%2f/"u8),
-    new("http: ipsum //host/path"u8, ""u8),
-    new("javascript://is/not/linked"u8, ""u8),
-    new("http://foo"u8, "http://foo"u8),
-    new("https://www.example.com/person/][Person Name]]"u8, "https://www.example.com/person/"u8),
-    new("http://golang.org/)"u8, "http://golang.org/"u8),
-    new("http://golang.org/hello())"u8, "http://golang.org/hello()"u8),
-    new("http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD"u8, "http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD"u8),
-    new("https://foo.bar/bal/x(])"u8, "https://foo.bar/bal/x"u8), // inner ] causes (]) to be cut off from URL
-    new("http://bar(])"u8, "http://bar"u8) // same
-}.slice();
+internal static slice<autoURLTestsᴛ1> autoURLTests = slice<autoURLTestsᴛ1>([
+    new("", ""),
+    new("http://[::1]:8080/foo.txt", "http://[::1]:8080/foo.txt"),
+    new("https://www.google.com) after", "https://www.google.com"),
+    new("https://www.google.com:30/x/y/z:b::c. After", "https://www.google.com:30/x/y/z:b::c"),
+    new("http://www.google.com/path/:;!-/?query=%34b#093124", "http://www.google.com/path/:;!-/?query=%34b#093124"),
+    new("http://www.google.com/path/:;!-/?query=%34bar#093124", "http://www.google.com/path/:;!-/?query=%34bar#093124"),
+    new("http://www.google.com/index.html! After", "http://www.google.com/index.html"),
+    new("http://www.google.com/", "http://www.google.com/"),
+    new("https://www.google.com/", "https://www.google.com/"),
+    new("http://www.google.com/path.", "http://www.google.com/path"),
+    new("http://en.wikipedia.org/wiki/Camellia_(cipher)", "http://en.wikipedia.org/wiki/Camellia_(cipher)"),
+    new("http://www.google.com/)", "http://www.google.com/"),
+    new("http://gmail.com)", "http://gmail.com"),
+    new("http://gmail.com))", "http://gmail.com"),
+    new("http://gmail.com ((http://gmail.com)) ()", "http://gmail.com"),
+    new("http://example.com/ quux!", "http://example.com/"),
+    new("http://example.com/%2f/ /world.", "http://example.com/%2f/"),
+    new("http: ipsum //host/path", ""),
+    new("javascript://is/not/linked", ""),
+    new("http://foo", "http://foo"),
+    new("https://www.example.com/person/][Person Name]]", "https://www.example.com/person/"),
+    new("http://golang.org/)", "http://golang.org/"),
+    new("http://golang.org/hello())", "http://golang.org/hello()"),
+    new("http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD", "http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD"),
+    new("https://foo.bar/bal/x(])", "https://foo.bar/bal/x"), // inner ] causes (]) to be cut off from URL
+    new("http://bar(])", "http://bar")                        // same
+]);
 
-public static void TestAutoURL(ж<testing.T> Ꮡt) {
+public static void TestAutoURL(ж<testing.T> t) {
     foreach (var (_, tt) in autoURLTests) {
         var (url, ok) = autoURL(tt.@in);
         if (url != tt.@out || ok != (tt.@out != ""u8)) {
-            Ꮡt.Errorf("autoURL(%q) = %q, %v, want %q, %v"u8, tt.@in, url, ok, tt.@out, tt.@out != ""u8);
+            t.Errorf("autoURL(%q) = %q, %v, want %q, %v", tt.@in, url, ok, tt.@out, tt.@out != ""u8);
         }
     }
 }

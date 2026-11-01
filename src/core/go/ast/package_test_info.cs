@@ -8,20 +8,9 @@ global using static global::go.go.ast_package;
 global using static global::go.go.ast_internal_test_package;
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using scannerꓸError = go.go.scanner_package.ΔError;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,11 +33,12 @@ using static global::go.go.ast_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: global::go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.go.ast_package.File))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.FuncDecl))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.GenDecl))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Ident))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,11 +48,11 @@ using static global::go.go.ast_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/ast/commentmap_test.go", "commentmap_test.cs", "AE6YAQATKIKCgpSmooKCgpSmgoKCgoLKgIK6ooKCgpSCgsqCgoKClKaCgIKCgtqCgoKCgoI=")]
-[assembly: global::go.GoPositionMap("go/ast/filter_test.go", "filter_test.cs", "AD1ylIKCgriCgoK4lpKAgqSUgg==")]
-[assembly: global::go.GoPositionMap("go/ast/import_test.go", "import_test.cs", "ADAcgoIAARCCgoKmpoKCuIK4ggABHoKCgqamgoKCyoIADQqCioKCgpQADAaCnoKCgpSCgriClII=", "15-42:1;44-80:2")]
-[assembly: global::go.GoPositionMap("go/ast/issues_test.go", "issues_test.cs", "AA4cotyCgoKokoKClJSClIIACQyyAGOiAYKCgqaCgg==", "29-32:1")]
-[assembly: global::go.GoPositionMap("go/ast/walk_test.go", "walk_test.cs", "ABUi3JSCgoKmgoCCABYKggAAEoKUmIKCkoKAgqSAgoK2uO6CuIKC", "51-53:1;57-68:2")]
+[assembly: GoPositionMap("go/ast/commentmap_test.go", "commentmap_test.cs", "AE+YAQATKIKCgpSmgoKCgpSmgoKCgoLKgIK6ooKCgpSCgsqCgoKClKaCgIKCgtqCgoKCgoI=")]
+[assembly: GoPositionMap("go/ast/filter_test.go", "filter_test.cs", "AD9ylIKCgriCgoK4lpKAgqSUgg==")]
+[assembly: GoPositionMap("go/ast/import_test.go", "import_test.cs", "ADUcgoIAARCCgoKmpoKCuIK4ggABHoKCgqamgoKCyoIADgqCioKCgpQADQaCnoKCgpSCgriClII=", "15-42:1;44-80:2")]
+[assembly: GoPositionMap("go/ast/issues_test.go", "issues_test.cs", "AA4cgtyCgoKokoKClJSClIIACQySAGOiAYKCgqaCgg==", "29-32:1")]
+[assembly: GoPositionMap("go/ast/walk_test.go", "walk_test.cs", "ABYi3JSCgoKmgoCCABkKggAAEoKUmIKCkoKAgqSAgoK2uO6CuIKC", "51-53:1;57-68:2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

@@ -7,10 +7,6 @@
 global using static global::go.crypto.@internal.fips140.subtle_package;
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +25,7 @@ using static global::go.crypto.@internal.fips140.subtle_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -39,7 +35,7 @@ using static global::go.crypto.@internal.fips140.subtle_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/subtle/constant_time_test.go", "constant_time_test.cs", "ABAegoKCgoKCgoKCgoKClICCpIKClICCpICCpICCpICCpICCpICCpIKUgoKUgIKkgIKkgIKkgIKkgoKCgoKUgoCCpICCpJSCgoCCpICCpICCpICC")]
+[assembly: GoPositionMap("crypto/internal/fips140/subtle/constant_time_test.go", "constant_time_test.cs", "ABAegoKCgoKCgoKCgoKClICCpIKClICCpICCpICCpICCpICCpICCpIKUgoKUgIKkgIKkgIKkgIKkgoKCgoKUgoCCpICCpJSCgoCCpICCpICCpICC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

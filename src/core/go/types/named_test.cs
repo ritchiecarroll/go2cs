@@ -15,12 +15,16 @@ using ꓸꓸꓸtypesꓸType = Span<typesꓸType>;
 partial class types_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string instˢ = "Inst"u8;
-internal static readonly @string underlyingˢ = "Underlying"u8;
-internal static readonly @string newMethodSetˢ = "NewMethodSet"u8;
+internal static ref readonly @string instˢ => ref instˢᵇ;
+private static readonly @string instˢᵇ = "Inst"u8;
+internal static ref readonly @string underlyingˢ => ref underlyingˢᵇ;
+private static readonly @string underlyingˢᵇ = "Underlying"u8;
+internal static ref readonly @string newMethodSetˢ => ref newMethodSetˢᵇ;
+private static readonly @string newMethodSetˢᵇ = "NewMethodSet"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ33 = """
+internal static ref readonly @string srcᶜ33 => ref srcᶜ33ᵇ;
+private static readonly @string srcᶜ33ᵇ = """
 
 package p
 
@@ -47,24 +51,24 @@ internal partial struct BenchmarkNamed_tests /*dyn*/ {
     internal typesꓸType typ;
 }
 
-public static void BenchmarkNamed(ж<testing.B> Ꮡb) {
+public static void BenchmarkNamed(ж<testing.B> b) {
     @string src = srcᶜ33;
     var pkg = mustTypecheck(src, nil, nil);
 
-    typesꓸType T = pkg.Scope().Lookup("T"u8).Type();
-    typesꓸType G = pkg.Scope().Lookup("G"u8).Type();
+    typesꓸType T = pkg.Scope().Lookup("T").Type();
+    typesꓸType G = pkg.Scope().Lookup("G").Type();
     typesꓸType SrcInst = pkg.Scope().Lookup(instˢ).Type();
-    typesꓸType UserInst = mustInstantiate(new types_test_package.testing_BжTB(Ꮡb), G, new types.BasicжΔType(Typ[Int]));
+    typesꓸType UserInst = mustInstantiate(new types_test_package.testing_BжTB(b), G, new types.BasicжΔType(Typ[Int]));
 
-    var tests = new BenchmarkNamed_tests[]{
-        new("nongeneric"u8, T),
-        new("generic"u8, G),
-        new("src instance"u8, SrcInst),
-        new("user instance"u8, UserInst)
-    }.slice();
+    var tests = slice<BenchmarkNamed_tests>([
+        new("nongeneric", T),
+        new("generic", G),
+        new("src instance", SrcInst),
+        new("user instance", UserInst)
+    ]);
 
     var testsʗ1 = tests;
-    Ꮡb.Run(underlyingˢ, (ж<testing.B> bΔ1) => {
+    b.Run(underlyingˢ, (ж<testing.B> bΔ1) => {
         foreach (var (_, vᴛ1) in testsʗ1) {
             ref var test = ref heap(new BenchmarkNamed_tests(), out var Ꮡtest);
             test = vᴛ1;
@@ -82,7 +86,7 @@ public static void BenchmarkNamed(ж<testing.B> Ꮡb) {
     });
 
     var testsʗ2 = tests;
-    Ꮡb.Run(newMethodSetˢ, (ж<testing.B> bΔ3) => {
+    b.Run(newMethodSetˢ, (ж<testing.B> bΔ3) => {
         foreach (var (_, vᴛ2) in testsʗ2) {
             ref var test = ref heap(new BenchmarkNamed_tests(), out var Ꮡtest);
             test = vᴛ2;
@@ -104,14 +108,15 @@ internal static typesꓸType mustInstantiate(testing.TB tb, typesꓸType orig, p
     var targs = targsʗp.slice();
 
     var (inst, err) = Instantiate(nil, orig, targs, true);
-    if (err != default!) {
+    if (err != nil) {
         tb.Fatal(err);
     }
     return inst;
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ34 = """
+internal static ref readonly @string srcᶜ34 => ref srcᶜ34ᵇ;
+private static readonly @string srcᶜ34ᵇ = """
 
 package p
 
@@ -132,15 +137,15 @@ type Inst = *Tree[int]
 """u8.Raw();
 
 // Test that types do not expand infinitely, as in go.dev/issue/52715.
-public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
+public static void TestFiniteTypeExpansion(ж<testing.T> t) {
     @string src = srcᶜ34;
 
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
-    var pkg = NewPackage("p"u8, (~(~f).Name).Name);
+    var pkg = NewPackage("p", f.Name.Name);
     {
-        var err = NewChecker(nil, fset, pkg, nil).Files(new ж<ast.File>[]{f}.slice()); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = NewChecker(nil, fset, pkg, nil).Files(slice<ж<ast.File>>([f])); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
@@ -150,15 +155,16 @@ public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
     var Node = firstFieldType(Inst);
     var Tree = firstFieldType(Node);
     if (!Identical(new types.NamedжΔType(Inst), new types.NamedжΔType(Tree))) {
-        Ꮡt.Fatalf("Not a cycle: got %v, want %v"u8, Tree.OrTypedNil(), Inst.OrTypedNil());
+        t.Fatalf("Not a cycle: got %v, want %v", Tree.OrTypedNil(), Inst.OrTypedNil());
     }
     if (Inst != Tree) {
-        Ꮡt.Errorf("Duplicate instances in cycle: %s (%p) -> %s (%p) -> %s (%p)"u8, Inst.OrTypedNil(), Inst.OrTypedNil(), Node.OrTypedNil(), Node.OrTypedNil(), Tree.OrTypedNil(), Tree.OrTypedNil());
+        t.Errorf("Duplicate instances in cycle: %s (%p) -> %s (%p) -> %s (%p)", Inst.OrTypedNil(), Inst.OrTypedNil(), Node.OrTypedNil(), Node.OrTypedNil(), Tree.OrTypedNil(), Tree.OrTypedNil());
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ35 = """
+internal static ref readonly @string srcᶜ35 => ref srcᶜ35ᵇ;
+private static readonly @string srcᶜ35ᵇ = """
 
 package p
 
@@ -173,23 +179,23 @@ func (T) b() {}
 // TestMethodOrdering is a simple test verifying that the indices of methods of
 // a named type remain the same as long as the same source and AddMethod calls
 // are presented to the type checker in the same order (go.dev/issue/61298).
-public static void TestMethodOrdering(ж<testing.T> Ꮡt) {
+public static void TestMethodOrdering(ж<testing.T> t) {
     @string src = srcᶜ35;
     // should get the same method order each time
-    slice<@string> methods = default!;
+    slice<@string> methods = default;
     for (nint i = 0; i < 5; i++) {
         // collect T methods as provided in src
         var pkg = mustTypecheck(src, nil, nil);
-        var T = pkg.Scope().Lookup("T"u8).Type()._<ж<types.Named>>();
+        var T = pkg.Scope().Lookup("T").Type()._<ж<types.Named>>();
 
         // add a few more methods manually
-        foreach (var (_, name) in new @string[]{"foo"u8, "bar"u8, "bal"u8}.slice()) {
+        foreach (var (_, name) in slice<@string>(["foo", "bar", "bal"])) {
             var m = NewFunc(nopos, pkg, name, nil /* don't care about signature */);
             T.AddMethod(m);
         }
 
         // check method order
-        if (i == 0){
+        if (i == 0) {
             // first round: collect methods in given order
             methods = new slice<@string>(T.NumMethods());
             foreach (var j in range(methods)) {
@@ -199,14 +205,14 @@ public static void TestMethodOrdering(ж<testing.T> Ꮡt) {
             // successive rounds: methods must appear in the same order
             {
                 nint got = T.NumMethods(); if (got != len(methods)) {
-                    Ꮡt.Errorf("got %d methods, want %d"u8, got, len(methods));
+                    t.Errorf("got %d methods, want %d", got, len(methods));
                     continue;
                 }
             }
             foreach (var (j, m) in methods) {
                 {
                     @string got = T.Method(j).Name(); if (got != m) {
-                        Ꮡt.Errorf("got method %s, want %s"u8, got, m);
+                        t.Errorf("got method %s, want %s", got, m);
                     }
                 }
             }

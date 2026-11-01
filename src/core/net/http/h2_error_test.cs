@@ -23,20 +23,20 @@ internal static @string Error(this externalStreamError e) {
     return fmt.Sprintf("ID %v, code %v"u8, e.StreamID, e.Code);
 }
 
-public static void TestStreamError(ж<testing.T> Ꮡt) {
+public static void TestStreamError(ж<testing.T> t) {
     var streamErr = http2streamError(42, http2ErrCodeProtocol);
     var (extStreamErr, ok) = errors.AsType<externalStreamError>(streamErr);
     if (!ok) {
-        Ꮡt.Fatalf("errors.AsType failed"u8);
+        t.Fatalf("errors.AsType failed");
     }
     if (extStreamErr.StreamID != streamErr.StreamID) {
-        Ꮡt.Errorf("got StreamID %v, expected %v"u8, extStreamErr.StreamID, streamErr.StreamID);
+        t.Errorf("got StreamID %v, expected %v", extStreamErr.StreamID, streamErr.StreamID);
     }
     if (!AreEqual(extStreamErr.Cause, streamErr.Cause)) {
-        Ꮡt.Errorf("got Cause %v, expected %v"u8, extStreamErr.Cause, streamErr.Cause);
+        t.Errorf("got Cause %v, expected %v", extStreamErr.Cause, streamErr.Cause);
     }
     if ((uint32)extStreamErr.Code != (uint32)streamErr.Code) {
-        Ꮡt.Errorf("got Code %v, expected %v"u8, extStreamErr.Code, streamErr.Code);
+        t.Errorf("got Code %v, expected %v", extStreamErr.Code, streamErr.Code);
     }
 }
 

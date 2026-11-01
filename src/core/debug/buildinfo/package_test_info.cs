@@ -8,23 +8,7 @@ global using static global::go.debug.buildinfo_package;
 global using static global::go.debug.buildinfo_internal_test_package;
 
 // <ImportedTypeAliases>
-global using BuildInfo = go.runtime.debug_package.BuildInfo;
 global using buildinfoꓸBuildInfo = go.runtime.debug_package.BuildInfo;
-global using elfꓸData = go.debug.elf_package.ΔData;
-global using elfꓸSection = go.debug.elf_package.ΔSection;
-global using execꓸError = go.os.exec_package.ΔError;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using machoꓸSection = go.debug.macho_package.ΔSection;
-global using machoꓸSegment = go.debug.macho_package.ΔSegment;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using peꓸSection = go.debug.pe_package.ΔSection;
-global using plan9objꓸSection = go.debug.plan9obj_package.ΔSection;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using xcoffꓸSection = go.@internal.xcoff_package.ΔSection;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +31,12 @@ using static global::go.debug.buildinfo_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(buildinfoꓸBuildInfo))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,7 +46,7 @@ using static global::go.debug.buildinfo_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/buildinfo/buildinfo_test.go", "buildinfo_test.cs", "ACI0ABoM8oKUhAAIFJKCgoKCpoKmgoK4mJKCgoKAgqSCgoCCpIKCgoKCgoCCgIKkpKaSgoKAgqSCgoCCpIKCgoKCgoCCgIKkpKaCgoKUgoKUgoCCyIKCgpSCgpSCgoCCyIKC6oKCgpSUpgASIIKCgIKkAAsegoLugoIACxyCgtyy0oKUgrKysoKCgIKCkoCCtoKUgoCCAA8YkoKCpoKCpoKUgpSC+pKCgqaCgsqCAAMQ9IKCAAMQ4pSYlqSClJSUlMqUlIKClICCyKSCpqKUgoKUlIKCkoCC7KKCgpSUgoKUlII=", "66-68:1;70-95:2;97-121:3;123-136:4;138-152:5;156-169:6;162-167:6.1;179-181:7;186-193:8;206-210:9;215-219:10;231-235:11;241-270:12;246-268:12.1;248-266:12.1.1;323-325:1;377-392:1;409-411:1", "", "444=Len/1/1/3")]
+[assembly: GoPositionMap("debug/buildinfo/buildinfo_test.go", "buildinfo_test.cs", "ACI0ACQM4oKUhAAIFIKCgoKCpoKmgoK4mJKCgoKAgqSCgoCCpIKCgoKCgoCCgIKkpKaSgoKAgqSCgoCCpIKCgoKCgoCCgIKkpKaCgoKUgoKUgoCCyIKCgpSCgpSCgoCCyIKC6oKCgpSUpgASIIKCgIKkAAsegoLugoIACxyCgtyy0oKUgrKysoKCgIKCgoCCtoKUgoCCABAYkoKCpoKCpoKUgpSCAAkKkoKCpoKCyoIAAxD0goIAAxDClJiWpIKUlJSUypSUgoKUgILIpIKmopSCgpSUgoKCgILsooKClJSCgpSUgg==", "66-68:1;70-95:2;97-121:3;123-136:4;138-152:5;156-169:6;162-167:6.1;179-181:7;186-193:8;206-210:9;215-219:10;231-235:11;241-270:12;246-268:12.1;248-266:12.1.1;323-325:1;377-392:1;409-411:1", "", "452=Len/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

@@ -142,7 +142,6 @@
     <ProjectReference Include="$(go2csPath)core/net/http/httptest/net.http.httptest.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/net.http.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/net.csproj" />
-    <ProjectReference Include="$(go2csPath)core/net/textproto/net.textproto.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/url/net.url.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />

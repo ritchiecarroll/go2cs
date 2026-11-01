@@ -36,9 +36,9 @@ internal partial struct TestSehLookupFunctionEntry_tests /*dyn*/ {
     internal bool hasframe;
 }
 
-public static void TestSehLookupFunctionEntry(ж<testing.T> Ꮡt) {
+public static void TestSehLookupFunctionEntry(ж<testing.T> t) {
     if (Δruntime.GOARCH != "amd64"u8) {
-        Ꮡt.Skip(skippingAmd64OnlyTestˢ);
+        t.Skip(skippingAmd64OnlyTestˢ);
     }
     // This test checks that Win32 is able to retrieve
     // function metadata stored in the .pdata section
@@ -54,26 +54,26 @@ public static void TestSehLookupFunctionEntry(ж<testing.T> Ꮡt) {
     };
     var fnwithoutframe = () => {
     };
-    var tests = new TestSehLookupFunctionEntry_tests[]{
-        new("no frame func"u8, abi.FuncPCABIInternal(sehf2), false),
-        new("no func"u8, sehf1pc - 1, false),
-        new("func at entry"u8, sehf1pc, true),
-        new("func in prologue"u8, sehf1pc + 1, true),
-        new("anonymous func with frame"u8, abi.FuncPCABIInternal((fnwithframe).OrTypedNilFunc()), true),
-        new("anonymous func without frame"u8, abi.FuncPCABIInternal((fnwithoutframe).OrTypedNilFunc()), false),
-        new("pc at func body"u8, sys.GetCallerPC(), true)
-    }.slice();
+    var tests = slice<TestSehLookupFunctionEntry_tests>([
+        new("no frame func", abi.FuncPCABIInternal(sehf2), false),
+        new("no func", sehf1pc - 1, false),
+        new("func at entry", sehf1pc, true),
+        new("func in prologue", sehf1pc + 1, true),
+        new("anonymous func with frame", abi.FuncPCABIInternal((fnwithframe).OrTypedNilFunc()), true),
+        new("anonymous func without frame", abi.FuncPCABIInternal((fnwithoutframe).OrTypedNilFunc()), false),
+        new("pc at func body", sys.GetCallerPC(), true)
+    ]);
     foreach (var (_, tt) in tests) {
         ref var @base = ref heap(new uintptr(), out var Ꮡbase);
         var fn = windows.RtlLookupFunctionEntry(tt.pc, Ꮡbase, nil);
         if (!tt.hasframe) {
             if (fn != nil) {
-                Ꮡt.Errorf("%s: unexpected frame"u8, tt.name);
+                t.Errorf("%s: unexpected frame", tt.name);
             }
             continue;
         }
         if (fn == nil) {
-            Ꮡt.Errorf("%s: missing frame"u8, tt.name);
+            t.Errorf("%s: missing frame", tt.name);
         }
     }
 }
@@ -96,7 +96,7 @@ internal static slice<uintptr> sehCallers() {
     var pcs = new slice<uintptr>(15);
     ref var @base = ref heap(new uintptr(), out var Ꮡbase);
     ref var frame = ref heap(new uintptr(), out var Ꮡframe);
-    nint n = default!;
+    nint n = default;
     for (nint i = 0; i < len(pcs); i++) {
         var fn = windows.RtlLookupFunctionEntry(ctx.PC(), Ꮡbase, nil);
         if (fn == nil) {
@@ -118,7 +118,7 @@ internal static partial slice<uintptr> sehf3(bool pan) {
 
 //go:noinline
 internal static partial slice<uintptr> sehf4(bool pan) {
-    slice<uintptr> pcs = default!;
+    slice<uintptr> pcs = default;
     if (pan) {
         throw panic("sehf4");
     }
@@ -126,8 +126,8 @@ internal static partial slice<uintptr> sehf4(bool pan) {
     return pcs;
 }
 
-internal static void testSehCallersEqual(ж<testing.T> Ꮡt, slice<uintptr> pcs, slice<@string> want) {
-    Ꮡt.Helper();
+internal static void testSehCallersEqual(ж<testing.T> t, slice<uintptr> pcs, slice<@string> want) {
+    t.Helper();
     var got = new slice<@string>(0, len(want));
     foreach (var (_, pc) in pcs) {
         var fn = Δruntime.FuncForPC(pc);
@@ -136,47 +136,50 @@ internal static void testSehCallersEqual(ж<testing.T> Ꮡt, slice<uintptr> pcs,
         }
         @string name = fn.Name();
         var exprᴛ1 = name;
-        if (exprᴛ1 == "runtime.panicmem"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "runtime.panicmem"u8: {
             // These functions are skipped as they appear inconsistently depending
             // whether inlining is on or off.
             continue;
+            break;
         }
-        else if (exprᴛ1 == "runtime_test.sehCallers"u8) {
+        case {} when exprᴛ1 == "runtime_test.sehCallers"u8: {
             // This is an artifact of the implementation of sehCallers.
             continue;
-        }
+            break;
+        }}
         got = append(got, name);
     }
     if (!slices.Equal<slice<@string>, @string>(want, got)) {
-        Ꮡt.Fatalf("wanted %v, got %v"u8, want, got);
+        t.Fatalf("wanted %v, got %v", want, got);
     }
 }
 
-public static void TestSehUnwind(ж<testing.T> Ꮡt) {
+public static void TestSehUnwind(ж<testing.T> t) {
     if (Δruntime.GOARCH != "amd64"u8) {
-        Ꮡt.Skip(skippingAmd64OnlyTestˢ);
+        t.Skip(skippingAmd64OnlyTestˢ);
     }
     var pcs = sehf3(false);
-    testSehCallersEqual(Ꮡt, pcs, new @string[]{"runtime_test.sehf4"u8, "runtime_test.sehf3"u8, "runtime_test.TestSehUnwind"u8}.slice());
+    testSehCallersEqual(t, pcs, slice<@string>(["runtime_test.sehf4", "runtime_test.sehf3", "runtime_test.TestSehUnwind"]));
 }
 
-public static void TestSehUnwindPanic(ж<testing.T> Ꮡt) {
+public static void TestSehUnwindPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOARCH != "amd64"u8) {
-            Ꮡt.Skip(skippingAmd64OnlyTestˢ);
+            t.Skip(skippingAmd64OnlyTestˢ);
         }
-        var want = new @string[]{"runtime_test.TestSehUnwindPanic.func1"u8, "runtime.gopanic"u8,
-            "runtime_test.sehf4"u8, "runtime_test.sehf3"u8, "runtime_test.TestSehUnwindPanic"u8}.slice();
+        var want = slice<@string>(["runtime_test.TestSehUnwindPanic.func1", "runtime.gopanic",
+            "runtime_test.sehf4", "runtime_test.sehf3", "runtime_test.TestSehUnwindPanic"]);
         var wantʗ1 = want;
         defer(() => {
             {
-                var r = recover(); if (r == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                var r = recover(); if (r == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
             }
             var pcs = sehCallers();
-            testSehCallersEqual(Ꮡt, pcs, wantʗ1);
+            testSehCallersEqual(t, pcs, wantʗ1);
         }, ref ᒐ);
         sehf3(true);
     }
@@ -184,28 +187,28 @@ public static void TestSehUnwindPanic(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestSehUnwindDoublePanic(ж<testing.T> Ꮡt) {
+public static void TestSehUnwindDoublePanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOARCH != "amd64"u8) {
-            Ꮡt.Skip(skippingAmd64OnlyTestˢ);
+            t.Skip(skippingAmd64OnlyTestˢ);
         }
-        var want = new @string[]{"runtime_test.TestSehUnwindDoublePanic.func1.1"u8, "runtime.gopanic"u8,
-            "runtime_test.TestSehUnwindDoublePanic.func1"u8, "runtime.gopanic"u8, "runtime_test.TestSehUnwindDoublePanic"u8}.slice();
+        var want = slice<@string>(["runtime_test.TestSehUnwindDoublePanic.func1.1", "runtime.gopanic",
+            "runtime_test.TestSehUnwindDoublePanic.func1", "runtime.gopanic", "runtime_test.TestSehUnwindDoublePanic"]);
         var wantʗ1 = want;
         defer(() => {
             GoFrame ᒐ = default;
             try {
                 var wantʗ2 = wantʗ1;
                 defer(() => {
-                    if (recover() == default!) {
-                        Ꮡt.Fatal(didNotPanicˢ);
+                    if (recover() == nil) {
+                        t.Fatal(didNotPanicˢ);
                     }
                     var pcs = sehCallers();
-                    testSehCallersEqual(Ꮡt, pcs, wantʗ2);
+                    testSehCallersEqual(t, pcs, wantʗ2);
                 }, ref ᒐ);
-                if (recover() == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                if (recover() == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
                 throw panic((nint)2);
             }
@@ -218,27 +221,27 @@ public static void TestSehUnwindDoublePanic(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestSehUnwindNilPointerPanic(ж<testing.T> Ꮡt) {
+public static void TestSehUnwindNilPointerPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOARCH != "amd64"u8) {
-            Ꮡt.Skip(skippingAmd64OnlyTestˢ);
+            t.Skip(skippingAmd64OnlyTestˢ);
         }
-        var want = new @string[]{"runtime_test.TestSehUnwindNilPointerPanic.func1"u8, "runtime.gopanic"u8,
-            "runtime.sigpanic"u8, "runtime_test.TestSehUnwindNilPointerPanic"u8}.slice();
+        var want = slice<@string>(["runtime_test.TestSehUnwindNilPointerPanic.func1", "runtime.gopanic",
+            "runtime.sigpanic", "runtime_test.TestSehUnwindNilPointerPanic"]);
         var wantʗ1 = want;
         defer(() => {
             {
-                var r = recover(); if (r == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                var r = recover(); if (r == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
             }
             var pcs = sehCallers();
-            testSehCallersEqual(Ꮡt, pcs, wantʗ1);
+            testSehCallersEqual(t, pcs, wantʗ1);
         }, ref ᒐ);
-        ж<nint> p = default!;
+        ж<nint> p = default;
         if (p.Value == 3) {
-            Ꮡt.Fatal(didNotSeeNilPointerPanicˢ);
+            t.Fatal(didNotSeeNilPointerPanicˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

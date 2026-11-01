@@ -13,22 +13,24 @@ partial class debug_test_package {
 
 // strip removes two leading tabs after each newline of s.
 internal static @string strip(@string s) {
-    @string replaced = strings.ReplaceAll(s, "\n\t\t"u8, "\n"u8);
-    if (len(replaced) > 0 && replaced[0] == (rune)'\n') {
+    @string replaced = strings.ReplaceAll(s, "\n\t\t", "\n");
+    if (len(replaced) > 0 && replaced[0] == '\n') {
         replaced = replaced[1..];
     }
     return replaced;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pathRscIoFortuneModRscIoˢ = """
+private static ref readonly @string pathRscIoFortuneModRscIoˢ => ref pathRscIoFortuneModRscIoˢᵇ;
+private static readonly @string pathRscIoFortuneModRscIoˢᵇ = """
 
 		path	rsc.io/fortune
 		mod	rsc.io/fortune	v1.0.0
 		
 """u8.Raw();
 private static readonly object pathCmdTest2jsonˢ = (@string)@"path	cmd/test2json"u8;
-private static readonly @string go118PathExampleComMModˢ = """
+private static ref readonly @string go118PathExampleComMModˢ => ref go118PathExampleComMModˢᵇ;
+private static readonly @string go118PathExampleComMModˢᵇ = """
 
 		go	1.18
 		path	example.com/m
@@ -36,14 +38,16 @@ private static readonly @string go118PathExampleComMModˢ = """
 		build	-compiler=gc
 		
 """u8.Raw();
-private static readonly @string go118PathExampleComMˢ = """
+private static ref readonly @string go118PathExampleComMˢ => ref go118PathExampleComMˢᵇ;
+private static readonly @string go118PathExampleComMˢᵇ = """
 
 		go	1.18
 		path	example.com/m
 		build	-compiler=gc
 		
 """u8.Raw();
-private static readonly @string go118PathExampleComMˢ2 = """
+private static ref readonly @string go118PathExampleComMˢ2 => ref go118PathExampleComMˢ2ᵇ;
+private static readonly @string go118PathExampleComMˢ2ᵇ = """
 
 		go 1.18
 		path example.com/m
@@ -71,7 +75,7 @@ public static void FuzzParseBuildInfoRoundTrip(ж<testing.F> Ꮡf) {
 
     Ꮡf.Fuzz((ж<testing.T> t, @string s) => {
         var (bi, err) = debug.ParseBuildInfo(s);
-        if (err != default!) {
+        if (err != nil) {
             // Not a round-trippable BuildInfo string.
             t.Log(err);
             return;
@@ -81,12 +85,12 @@ public static void FuzzParseBuildInfoRoundTrip(ж<testing.F> Ꮡf) {
         // However, it should parse to exactly the same contents.
         @string s2 = bi.String();
         (var bi2, err) = debug.ParseBuildInfo(s2);
-        if (err != default!) {
-            t.Fatalf("%v:\n%s"u8, err, s2);
+        if (err != nil) {
+            t.Fatalf("%v:\n%s", err, s2);
         }
 
         if (!reflect.DeepEqual(bi2.OrTypedNil(), bi.OrTypedNil())) {
-            t.Fatalf("Parsed representation differs.\ninput:\n%s\noutput:\n%s"u8, s, s2);
+            t.Fatalf("Parsed representation differs.\ninput:\n%s\noutput:\n%s", s, s2);
         }
     });
 }

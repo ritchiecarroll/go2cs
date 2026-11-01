@@ -24,28 +24,31 @@ public static @string ΔString(this URLValue v) {
 
 public static error ΔSet(this URLValue v, @string s) {
     {
-        var (u, err) = url.Parse(s); if (err != default!){
+        var (u, err) = url.Parse(s); if (err != nil) {
             return err;
         } else {
             v.URL.Value = u.Value;
         }
     }
-    return default!;
+    return default;
 }
 
-internal static ж<url.URL> u = Ꮡ(new url.URL(nil));
+internal static ж<url.URL> u = Ꮡ(new url.URL());
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string exampleValueˢ = "ExampleValue"u8;
-internal static readonly @string urlˢ = "url"u8;
-internal static readonly @string urlToParseˢ = "URL to parse"u8;
+internal static ref readonly @string exampleValueˢ => ref exampleValueˢᵇ;
+private static readonly @string exampleValueˢᵇ = "ExampleValue"u8;
+internal static ref readonly @string urlˢ => ref urlˢᵇ;
+private static readonly @string urlˢᵇ = "url"u8;
+internal static ref readonly @string urlToParseˢ => ref urlToParseˢᵇ;
+private static readonly @string urlToParseˢᵇ = "URL to parse"u8;
 
 public static void ExampleValue() {
     var fs = flag.NewFlagSet(exampleValueˢ, flag.ExitOnError);
     fs.Var(new flag_test_package.URLValueжValue(Ꮡ(new URLValue(u))), urlˢ, urlToParseˢ);
 
-    fs.Parse(new @string[]{"-url"u8, "https://golang.org/pkg/flag/"u8}.slice());
-    fmt.Printf(@"{scheme: %q, host: %q, path: %q}"u8, (~u).Scheme, (~u).Host, (~u).Path);
+    fs.Parse(slice<@string>(["-url", "https://golang.org/pkg/flag/"]));
+    fmt.Printf(@"{scheme: %q, host: %q, path: %q}"u8, u.Scheme, u.Host, u.Path);
 
     // Output:
     // {scheme: "https", host: "golang.org", path: "/pkg/flag/"}

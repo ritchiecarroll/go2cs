@@ -54,11 +54,11 @@ internal static ж<bigꓸInt> asBig(this ref global::go.crypto.@internal.fips140
 internal static @string String(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
     var limbsᴷ = new stackAppend<@string>();
 
-    slice<@string> limbs = default!;
+    slice<@string> limbs = default;
     foreach (var i in range(n.limbs)) {
         limbs = append(limbsᴷ, limbs, fmt.Sprintf("%016X"u8, n.limbs[len(n.limbs) - 1 - i]));
     }
-    return "{"u8 + strings.Join(limbs, " "u8) + "}"u8;
+    return "{"u8 + strings.Join(limbs, " ") + "}"u8;
 }
 
 // Generate generates an even nat. It's used by testing/quick to produce random
@@ -73,45 +73,45 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.@internal.fi
     return reflect.ValueOf(Ꮡ(new ΔNat(limbs)));
 }
 
-internal static bool testModAddCommutative(ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡa, ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡb) {
+internal static bool testModAddCommutative(ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡa, ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> b) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var m = maxModulus((nuint)len(a.limbs));
     var aPlusB = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(Ꮡa);
-    aPlusB.Add(Ꮡb, m);
-    var bPlusA = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(Ꮡb);
+    aPlusB.Add(b, m);
+    var bPlusA = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(b);
     bPlusA.Add(Ꮡa, m);
     return aPlusB.Equal(bPlusA) == 1;
 }
 
-public static partial void TestModAddCommutative(ж<testing.T> Ꮡt) {
-    var err = quick.Check(testModAddCommutative, Ꮡ(new quick.Config(nil)));
-    if (err != default!) {
-        Ꮡt.Error(err);
+public static partial void TestModAddCommutative(ж<testing.T> t) {
+    var err = quick.Check(testModAddCommutative, Ꮡ(new quick.Config()));
+    if (err != nil) {
+        t.Error(err);
     }
 }
 
-internal static bool testModSubThenAddIdentity(ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡa, ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡb) {
+internal static bool testModSubThenAddIdentity(ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡa, ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> b) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var m = maxModulus((nuint)len(a.limbs));
     var original = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(Ꮡa);
-    Ꮡa.Sub(Ꮡb, m);
-    Ꮡa.Add(Ꮡb, m);
+    Ꮡa.Sub(b, m);
+    Ꮡa.Add(b, m);
     return a.Equal(original) == 1;
 }
 
-public static partial void TestModSubThenAddIdentity(ж<testing.T> Ꮡt) {
-    var err = quick.Check(testModSubThenAddIdentity, Ꮡ(new quick.Config(nil)));
-    if (err != default!) {
-        Ꮡt.Error(err);
+public static partial void TestModSubThenAddIdentity(ж<testing.T> t) {
+    var err = quick.Check(testModSubThenAddIdentity, Ꮡ(new quick.Config()));
+    if (err != nil) {
+        t.Error(err);
     }
 }
 
-public static void TestMontgomeryRoundtrip(ж<testing.T> Ꮡt) {
+public static void TestMontgomeryRoundtrip(ж<testing.T> t) {
     var err = quick.Check(bool (ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> a) => {
-        var one = Ꮡ(new ΔNat(new slice<nuint>(len((~a).limbs))));
-        one.Value.limbs[0] = 1;
+        var one = Ꮡ(new ΔNat(new slice<nuint>(len(a.limbs))));
+        one.limbs[0] = 1;
         var aPlusOne = @new<bigꓸInt>().SetBytes(natBytes(a));
         aPlusOne.Add(aPlusOne, big.NewInt(1));
         var (m, _) = NewModulus(aPlusOne.Bytes());
@@ -120,13 +120,13 @@ public static void TestMontgomeryRoundtrip(ж<testing.T> Ꮡt) {
         var aAgain = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(monty);
         aAgain.montgomeryMul(monty, one, m);
         if (a.Equal(aAgain) != 1) {
-            Ꮡt.Errorf("%v != %v"u8, a.OrTypedNil(), aAgain.OrTypedNil());
+            t.Errorf("%v != %v", a.OrTypedNil(), aAgain.OrTypedNil());
             return false;
         }
         return true;
-    }, Ꮡ(new quick.Config(nil)));
-    if (err != default!) {
-        Ꮡt.Error(err);
+    }, Ꮡ(new quick.Config()));
+    if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -138,54 +138,54 @@ internal partial struct TestShiftIn_examples /*dyn*/ {
     internal uint64 y;
 }
 
-public static void TestShiftIn(ж<testing.T> Ꮡt) {
+public static void TestShiftIn(ж<testing.T> t) {
     if (bits.UintSize != 64) {
-        Ꮡt.Skip(examplesAreOnlyValidIn64ˢ);
+        t.Skip(examplesAreOnlyValidIn64ˢ);
     }
-    var examples = new TestShiftIn_examples[]{new(
-        m: new byte[]{13}.slice(),
-        x: new byte[]{0}.slice(),
+    var examples = slice<TestShiftIn_examples>([new(
+        m: slice<byte>([13]),
+        x: slice<byte>([0]),
         y: 0xFFFF_FFFF_FFFF_FFFFUL,
-        expected: new byte[]{2}.slice()
+        expected: slice<byte>([2])
     ), new(
-        m: new byte[]{13}.slice(),
-        x: new byte[]{7}.slice(),
+        m: slice<byte>([13]),
+        x: slice<byte>([7]),
         y: 0xFFFF_FFFF_FFFF_FFFFUL,
-        expected: new byte[]{10}.slice()
+        expected: slice<byte>([10])
     ), new(
-        m: new byte[]{0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d}.slice(),
+        m: slice<byte>([0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d]),
         x: new slice<byte>(9),
         y: 0xFFFF_FFFF_FFFF_FFFFUL,
-        expected: new byte[]{0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice()
+        expected: slice<byte>([0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])
     ), new(
-        m: new byte[]{0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d}.slice(),
-        x: new byte[]{0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
+        m: slice<byte>([0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d]),
+        x: slice<byte>([0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
         y: 0,
-        expected: new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06}.slice()
+        expected: slice<byte>([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06])
     )
-    }.slice();
+    ]);
 
     foreach (var (i, tt) in examples) {
         var m = modulusFromBytes(tt.m);
         var got = natFromBytes(tt.x).ExpandFor(m).shiftIn((nuint)tt.y, m);
         {
             var exp = natFromBytes(tt.expected).ExpandFor(m); if (got.Equal(exp) != 1) {
-                Ꮡt.Errorf("%d: got %v, expected %v"u8, i, got.OrTypedNil(), exp.OrTypedNil());
+                t.Errorf("%d: got %v, expected %v", i, got.OrTypedNil(), exp.OrTypedNil());
             }
         }
     }
 }
 
-public static void TestModulusAndNatSizes(ж<testing.T> Ꮡt) {
+public static void TestModulusAndNatSizes(ж<testing.T> t) {
     // These are 126 bit (2 * _W on 64-bit architectures) values, serialized as
     // 128 bits worth of bytes. If leading zeroes are stripped, they fit in two
     // limbs, if they are not, they fit in three. This can be a problem because
     // modulus strips leading zeroes and nat does not.
-    var m = modulusFromBytes(new byte[]{
+    var m = modulusFromBytes(slice<byte>([
         0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice());
-    var xb = new byte[]{0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}.slice();
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]));
+    var xb = slice<byte>([0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe]);
     natFromBytes(xb).ExpandFor(m); // must not panic for shrinking
     NewNat().SetBytes(xb, m);
 }
@@ -195,66 +195,66 @@ internal partial struct TestSetBytes_tests /*dyn*/ {
     internal bool fail;
 }
 
-public static void TestSetBytes(ж<testing.T> Ꮡt) {
-    var tests = new TestSetBytes_tests[]{new(
-        m: new byte[]{0xff, 0xff}.slice(),
-        b: new byte[]{0x00, 0x01}.slice()
+public static void TestSetBytes(ж<testing.T> t) {
+    var tests = slice<TestSetBytes_tests>([new(
+        m: slice<byte>([0xff, 0xff]),
+        b: slice<byte>([0x00, 0x01])
     ), new(
-        m: new byte[]{0xff, 0xff}.slice(),
-        b: new byte[]{0xff, 0xff}.slice(),
+        m: slice<byte>([0xff, 0xff]),
+        b: slice<byte>([0xff, 0xff]),
         fail: true
     ), new(
-        m: new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
-        b: new byte[]{0x00, 0x01}.slice()
+        m: slice<byte>([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+        b: slice<byte>([0x00, 0x01])
     ), new(
-        m: new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
-        b: new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}.slice()
+        m: slice<byte>([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+        b: slice<byte>([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe])
     ), new(
-        m: new byte[]{0xff, 0xff}.slice(),
-        b: new byte[]{0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}.slice(),
+        m: slice<byte>([0xff, 0xff]),
+        b: slice<byte>([0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
         fail: true
     ), new(
-        m: new byte[]{0xff, 0xff}.slice(),
-        b: new byte[]{0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}.slice(),
+        m: slice<byte>([0xff, 0xff]),
+        b: slice<byte>([0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
         fail: true
     ), new(
-        m: new byte[]{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
-        b: new byte[]{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}.slice()
+        m: slice<byte>([0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+        b: slice<byte>([0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe])
     ), new(
-        m: new byte[]{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
-        b: new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}.slice(),
+        m: slice<byte>([0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+        b: slice<byte>([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe]),
         fail: true
     ), new(
-        m: new byte[]{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
-        b: new byte[]{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
+        m: slice<byte>([0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+        b: slice<byte>([0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
         fail: true
     ), new(
-        m: new byte[]{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
-        b: new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}.slice(),
+        m: slice<byte>([0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+        b: slice<byte>([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe]),
         fail: true
     ), new(
-        m: new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfd}.slice(),
-        b: new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}.slice(),
+        m: slice<byte>([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfd]),
+        b: slice<byte>([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
         fail: true
     )
-    }.slice();
+    ]);
 
     foreach (var (i, tt) in tests) {
         var m = modulusFromBytes(tt.m);
         var (got, errΔ1) = NewNat().SetBytes(tt.b, m);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             if (!tt.fail) {
-                Ꮡt.Errorf("%d: unexpected error: %v"u8, i, errΔ1);
+                t.Errorf("%d: unexpected error: %v", i, errΔ1);
             }
             continue;
         }
         if (tt.fail) {
-            Ꮡt.Errorf("%d: unexpected success"u8, i);
+            t.Errorf("%d: unexpected success", i);
             continue;
         }
         {
             var expected = natFromBytes(tt.b).ExpandFor(m); if (got.Equal(expected) != yes) {
-                Ꮡt.Errorf("%d: got %v, expected %v"u8, i, got.OrTypedNil(), expected.OrTypedNil());
+                t.Errorf("%d: got %v, expected %v", i, got.OrTypedNil(), expected.OrTypedNil());
             }
         }
     }
@@ -262,15 +262,15 @@ public static void TestSetBytes(ж<testing.T> Ꮡt) {
     var f = (slice<byte> xBytes) => {
         var m = maxModulus((nuint)(len(xBytes) * 8 / (nint)_W + 1));
         var (got, errΔ2) = NewNat().SetBytes(xBytes, m);
-        if (errΔ2 != default!) {
+        if (errΔ2 != nil) {
             return false;
         }
         return got.Equal(natFromBytes(xBytes).ExpandFor(m)) == yes;
     };
 
-    var err = quick.Check((f).OrTypedNilFunc(), Ꮡ(new quick.Config(nil)));
-    if (err != default!) {
-        Ꮡt.Error(err);
+    var err = quick.Check((f).OrTypedNilFunc(), Ꮡ(new quick.Config()));
+    if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -280,93 +280,93 @@ internal partial struct TestExpand_examples /*dyn*/ {
     internal slice<nuint> @out;
 }
 
-public static void TestExpand(ж<testing.T> Ꮡt) {
-    var sliced = new nuint[]{1, 2, 3, 4}.slice();
-    var examples = new TestExpand_examples[]{new(
-        new nuint[]{1, 2}.slice(),
+public static void TestExpand(ж<testing.T> t) {
+    var sliced = slice<nuint>([1, 2, 3, 4]);
+    var examples = slice<TestExpand_examples>([new(
+        slice<nuint>([1, 2]),
         4,
-        new nuint[]{1, 2, 0, 0}.slice()
+        slice<nuint>([1, 2, 0, 0])
     ), new(
         sliced[..2],
         4,
-        new nuint[]{1, 2, 0, 0}.slice()
+        slice<nuint>([1, 2, 0, 0])
     ), new(
-        new nuint[]{1, 2}.slice(),
+        slice<nuint>([1, 2]),
         2,
-        new nuint[]{1, 2}.slice()
+        slice<nuint>([1, 2])
     )
-    }.slice();
+    ]);
 
     foreach (var (i, tt) in examples) {
         var got = (Ꮡ(new ΔNat(tt.@in))).expand(tt.n);
-        if (len((~got).limbs) != len(tt.@out) || got.Equal(Ꮡ(new ΔNat(tt.@out))) != 1) {
-            Ꮡt.Errorf("%d: got %v, expected %v"u8, i, got.OrTypedNil(), tt.@out);
+        if (len(got.limbs) != len(tt.@out) || got.Equal(Ꮡ(new ΔNat(tt.@out))) != 1) {
+            t.Errorf("%d: got %v, expected %v", i, got.OrTypedNil(), tt.@out);
         }
     }
 }
 
-public static void TestMod(ж<testing.T> Ꮡt) {
-    var m = modulusFromBytes(new byte[]{0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d}.slice());
-    var x = natFromBytes(new byte[]{0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01}.slice());
+public static void TestMod(ж<testing.T> t) {
+    var m = modulusFromBytes(slice<byte>([0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d]));
+    var x = natFromBytes(slice<byte>([0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01]));
     var @out = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>();
     @out.Mod(x, m);
-    var expected = natFromBytes(new byte[]{0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09}.slice());
+    var expected = natFromBytes(slice<byte>([0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09]));
     if (@out.Equal(expected) != 1) {
-        Ꮡt.Errorf("%+v != %+v"u8, @out.OrTypedNil(), expected.OrTypedNil());
+        t.Errorf("%+v != %+v", @out.OrTypedNil(), expected.OrTypedNil());
     }
 }
 
-public static void TestModSub(ж<testing.T> Ꮡt) {
-    var m = modulusFromBytes(new byte[]{13}.slice());
-    var x = Ꮡ(new ΔNat(new nuint[]{6}.slice()));
-    var y = Ꮡ(new ΔNat(new nuint[]{7}.slice()));
+public static void TestModSub(ж<testing.T> t) {
+    var m = modulusFromBytes(slice<byte>([13]));
+    var x = Ꮡ(new ΔNat(slice<nuint>([6])));
+    var y = Ꮡ(new ΔNat(slice<nuint>([7])));
     x.Sub(y, m);
-    var expected = Ꮡ(new ΔNat(new nuint[]{12}.slice()));
+    var expected = Ꮡ(new ΔNat(slice<nuint>([12])));
     if (x.Equal(expected) != 1) {
-        Ꮡt.Errorf("%+v != %+v"u8, x.OrTypedNil(), expected.OrTypedNil());
+        t.Errorf("%+v != %+v", x.OrTypedNil(), expected.OrTypedNil());
     }
     x.Sub(y, m);
-    expected = Ꮡ(new ΔNat(new nuint[]{5}.slice()));
+    expected = Ꮡ(new ΔNat(slice<nuint>([5])));
     if (x.Equal(expected) != 1) {
-        Ꮡt.Errorf("%+v != %+v"u8, x.OrTypedNil(), expected.OrTypedNil());
+        t.Errorf("%+v != %+v", x.OrTypedNil(), expected.OrTypedNil());
     }
 }
 
-public static void TestModAdd(ж<testing.T> Ꮡt) {
-    var m = modulusFromBytes(new byte[]{13}.slice());
-    var x = Ꮡ(new ΔNat(new nuint[]{6}.slice()));
-    var y = Ꮡ(new ΔNat(new nuint[]{7}.slice()));
+public static void TestModAdd(ж<testing.T> t) {
+    var m = modulusFromBytes(slice<byte>([13]));
+    var x = Ꮡ(new ΔNat(slice<nuint>([6])));
+    var y = Ꮡ(new ΔNat(slice<nuint>([7])));
     x.Add(y, m);
-    var expected = Ꮡ(new ΔNat(new nuint[]{0}.slice()));
+    var expected = Ꮡ(new ΔNat(slice<nuint>([0])));
     if (x.Equal(expected) != 1) {
-        Ꮡt.Errorf("%+v != %+v"u8, x.OrTypedNil(), expected.OrTypedNil());
+        t.Errorf("%+v != %+v", x.OrTypedNil(), expected.OrTypedNil());
     }
     x.Add(y, m);
-    expected = Ꮡ(new ΔNat(new nuint[]{7}.slice()));
+    expected = Ꮡ(new ΔNat(slice<nuint>([7])));
     if (x.Equal(expected) != 1) {
-        Ꮡt.Errorf("%+v != %+v"u8, x.OrTypedNil(), expected.OrTypedNil());
+        t.Errorf("%+v != %+v", x.OrTypedNil(), expected.OrTypedNil());
     }
 }
 
-public static void TestExp(ж<testing.T> Ꮡt) {
-    var m = modulusFromBytes(new byte[]{13}.slice());
-    var x = Ꮡ(new ΔNat(new nuint[]{3}.slice()));
-    var @out = Ꮡ(new ΔNat(new nuint[]{0}.slice()));
-    @out.Exp(x, new byte[]{12}.slice(), m);
-    var expected = Ꮡ(new ΔNat(new nuint[]{1}.slice()));
+public static void TestExp(ж<testing.T> t) {
+    var m = modulusFromBytes(slice<byte>([13]));
+    var x = Ꮡ(new ΔNat(slice<nuint>([3])));
+    var @out = Ꮡ(new ΔNat(slice<nuint>([0])));
+    @out.Exp(x, slice<byte>([12]), m);
+    var expected = Ꮡ(new ΔNat(slice<nuint>([1])));
     if (@out.Equal(expected) != 1) {
-        Ꮡt.Errorf("%+v != %+v"u8, @out.OrTypedNil(), expected.OrTypedNil());
+        t.Errorf("%+v != %+v", @out.OrTypedNil(), expected.OrTypedNil());
     }
 }
 
-public static void TestExpShort(ж<testing.T> Ꮡt) {
-    var m = modulusFromBytes(new byte[]{13}.slice());
-    var x = Ꮡ(new ΔNat(new nuint[]{3}.slice()));
-    var @out = Ꮡ(new ΔNat(new nuint[]{0}.slice()));
+public static void TestExpShort(ж<testing.T> t) {
+    var m = modulusFromBytes(slice<byte>([13]));
+    var x = Ꮡ(new ΔNat(slice<nuint>([3])));
+    var @out = Ꮡ(new ΔNat(slice<nuint>([0])));
     @out.ExpShortVarTime(x, 12, m);
-    var expected = Ꮡ(new ΔNat(new nuint[]{1}.slice()));
+    var expected = Ꮡ(new ΔNat(slice<nuint>([1])));
     if (@out.Equal(expected) != 1) {
-        Ꮡt.Errorf("%+v != %+v"u8, @out.OrTypedNil(), expected.OrTypedNil());
+        t.Errorf("%+v != %+v", @out.OrTypedNil(), expected.OrTypedNil());
     }
 }
 
@@ -377,10 +377,10 @@ internal static readonly object aInvAModB1ˢ = (@string)"a * inv(a) mod b != 1"u
 // TestMulReductions tests that Mul reduces results equal or slightly greater
 // than the modulus. Some Montgomery algorithms don't and need extra care to
 // return correct results. See https://go.dev/issue/13907.
-public static void TestMulReductions(ж<testing.T> Ꮡt) {
+public static void TestMulReductions(ж<testing.T> t) {
     // Two short but multi-limb primes.
-    var (a, _) = @new<bigꓸInt>().SetString("773608962677651230850240281261679752031633236267106044359907"u8, 10);
-    var (b, _) = @new<bigꓸInt>().SetString("180692823610368451951102211649591374573781973061758082626801"u8, 10);
+    var (a, _) = @new<bigꓸInt>().SetString("773608962677651230850240281261679752031633236267106044359907", 10);
+    var (b, _) = @new<bigꓸInt>().SetString("180692823610368451951102211649591374573781973061758082626801", 10);
     var n = @new<bigꓸInt>().Mul(a, b);
 
     var (N, _) = NewModulus(n.Bytes());
@@ -388,7 +388,7 @@ public static void TestMulReductions(ж<testing.T> Ꮡt) {
     var B = NewNat().setBig(b).ExpandFor(N);
 
     if (A.Mul(B, N).IsZero() != 1) {
-        Ꮡt.Error(aBModAB0ˢ);
+        t.Error(aBModAB0ˢ);
     }
 
     var i = @new<bigꓸInt>().ModInverse(a, b);
@@ -398,29 +398,30 @@ public static void TestMulReductions(ж<testing.T> Ꮡt) {
     var one = NewNat().setBig(big.NewInt(1)).ExpandFor(N);
 
     if (A.Mul(I, N).Equal(one) != 1) {
-        Ꮡt.Error(aInvAModB1ˢ);
+        t.Error(aInvAModB1ˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string smallˢ = "small"u8;
+internal static ref readonly @string smallˢ => ref smallˢᵇ;
+private static readonly @string smallˢᵇ = "small"u8;
 
-public static void TestMul(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(smallˢ, (ж<testing.T> tΔ1) => {
+public static void TestMul(ж<testing.T> t) {
+    t.Run(smallˢ, (ж<testing.T> tΔ1) => {
         testMul(tΔ1, 760 / 8);
     });
-    Ꮡt.Run("1024"u8, (ж<testing.T> tΔ2) => {
+    t.Run("1024", (ж<testing.T> tΔ2) => {
         testMul(tΔ2, 1024 / 8);
     });
-    Ꮡt.Run("1536"u8, (ж<testing.T> tΔ3) => {
+    t.Run("1536", (ж<testing.T> tΔ3) => {
         testMul(tΔ3, 1536 / 8);
     });
-    Ꮡt.Run("2048"u8, (ж<testing.T> tΔ4) => {
+    t.Run("2048", (ж<testing.T> tΔ4) => {
         testMul(tΔ4, 2048 / 8);
     });
 }
 
-internal static void testMul(ж<testing.T> Ꮡt, nint n) {
+internal static void testMul(ж<testing.T> t, nint n) {
     var (a, b, m) = (new slice<byte>(n), new slice<byte>(n), new slice<byte>(n));
     cryptorand.Read(a);
     cryptorand.Read(b);
@@ -435,16 +436,16 @@ internal static void testMul(ж<testing.T> Ꮡt, nint n) {
     }
 
     var (M, err) = NewModulus(m);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var A, err) = NewNat().SetBytes(a, M);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var B, err) = NewNat().SetBytes(b, M);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     A.Mul(B, M);
@@ -459,50 +460,70 @@ internal static void testMul(ж<testing.T> Ꮡt, nint n) {
     nBig.FillBytes(nBigBytes);
 
     if (!bytes.Equal(ABytes, nBigBytes)) {
-        Ꮡt.Errorf("got %x, want %x"u8, ABytes, nBigBytes);
+        t.Errorf("got %x, want %x", ABytes, nBigBytes);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string isNot1Mod4ˢ = "3 is not -1 mod 4"u8;
-internal static readonly @string isZeroˢ = "3 is zero"u8;
-internal static readonly @string isOneˢ = "3 is one"u8;
-internal static readonly @string isNotOddˢ = "3 is not odd"u8;
-internal static readonly @string is1Mod4ˢ = "2 is -1 mod 4"u8;
-internal static readonly @string isZeroˢ2 = "2 is zero"u8;
-internal static readonly @string isOneˢ2 = "2 is one"u8;
-internal static readonly @string isOddˢ = "2 is odd"u8;
-internal static readonly @string is1Mod4ˢ2 = "1 is -1 mod 4"u8;
-internal static readonly @string isZeroˢ3 = "1 is zero"u8;
-internal static readonly @string isNotOneˢ = "1 is not one"u8;
-internal static readonly @string isNotOddˢ2 = "1 is not odd"u8;
-internal static readonly @string is1Mod4ˢ3 = "0 is -1 mod 4"u8;
-internal static readonly @string isNotZeroˢ = "0 is not zero"u8;
-internal static readonly @string isOneˢ3 = "0 is one"u8;
-internal static readonly @string isOddˢ2 = "0 is odd"u8;
-internal static readonly @string isNot1Mod4ˢ2 = "-1 is not -1 mod 4"u8;
-internal static readonly @string isZeroˢ4 = "-1 is zero"u8;
-internal static readonly @string isOneˢ4 = "-1 is one"u8;
-internal static readonly @string mod4IsNotOddˢ = "-1 mod 4 is not odd"u8;
+internal static ref readonly @string isNot1Mod4ˢ => ref isNot1Mod4ˢᵇ;
+private static readonly @string isNot1Mod4ˢᵇ = "3 is not -1 mod 4"u8;
+internal static ref readonly @string isZeroˢ => ref isZeroˢᵇ;
+private static readonly @string isZeroˢᵇ = "3 is zero"u8;
+internal static ref readonly @string isOneˢ => ref isOneˢᵇ;
+private static readonly @string isOneˢᵇ = "3 is one"u8;
+internal static ref readonly @string isNotOddˢ => ref isNotOddˢᵇ;
+private static readonly @string isNotOddˢᵇ = "3 is not odd"u8;
+internal static ref readonly @string is1Mod4ˢ => ref is1Mod4ˢᵇ;
+private static readonly @string is1Mod4ˢᵇ = "2 is -1 mod 4"u8;
+internal static ref readonly @string isZeroˢ2 => ref isZeroˢ2ᵇ;
+private static readonly @string isZeroˢ2ᵇ = "2 is zero"u8;
+internal static ref readonly @string isOneˢ2 => ref isOneˢ2ᵇ;
+private static readonly @string isOneˢ2ᵇ = "2 is one"u8;
+internal static ref readonly @string isOddˢ => ref isOddˢᵇ;
+private static readonly @string isOddˢᵇ = "2 is odd"u8;
+internal static ref readonly @string is1Mod4ˢ2 => ref is1Mod4ˢ2ᵇ;
+private static readonly @string is1Mod4ˢ2ᵇ = "1 is -1 mod 4"u8;
+internal static ref readonly @string isZeroˢ3 => ref isZeroˢ3ᵇ;
+private static readonly @string isZeroˢ3ᵇ = "1 is zero"u8;
+internal static ref readonly @string isNotOneˢ => ref isNotOneˢᵇ;
+private static readonly @string isNotOneˢᵇ = "1 is not one"u8;
+internal static ref readonly @string isNotOddˢ2 => ref isNotOddˢ2ᵇ;
+private static readonly @string isNotOddˢ2ᵇ = "1 is not odd"u8;
+internal static ref readonly @string is1Mod4ˢ3 => ref is1Mod4ˢ3ᵇ;
+private static readonly @string is1Mod4ˢ3ᵇ = "0 is -1 mod 4"u8;
+internal static ref readonly @string isNotZeroˢ => ref isNotZeroˢᵇ;
+private static readonly @string isNotZeroˢᵇ = "0 is not zero"u8;
+internal static ref readonly @string isOneˢ3 => ref isOneˢ3ᵇ;
+private static readonly @string isOneˢ3ᵇ = "0 is one"u8;
+internal static ref readonly @string isOddˢ2 => ref isOddˢ2ᵇ;
+private static readonly @string isOddˢ2ᵇ = "0 is odd"u8;
+internal static ref readonly @string isNot1Mod4ˢ2 => ref isNot1Mod4ˢ2ᵇ;
+private static readonly @string isNot1Mod4ˢ2ᵇ = "-1 is not -1 mod 4"u8;
+internal static ref readonly @string isZeroˢ4 => ref isZeroˢ4ᵇ;
+private static readonly @string isZeroˢ4ᵇ = "-1 is zero"u8;
+internal static ref readonly @string isOneˢ4 => ref isOneˢ4ᵇ;
+private static readonly @string isOneˢ4ᵇ = "-1 is one"u8;
+internal static ref readonly @string mod4IsNotOddˢ => ref mod4IsNotOddˢᵇ;
+private static readonly @string mod4IsNotOddˢᵇ = "-1 mod 4 is not odd"u8;
 
-public static void TestIs(ж<testing.T> Ꮡt) {
+public static void TestIs(ж<testing.T> t) {
     void checkYes(global::go.crypto.@internal.fips140.bigmod_package.choice c, @string errΔ1) {
-        Ꮡt.Helper();
+        t.Helper();
         if (c != yes) {
-            Ꮡt.Error(errΔ1);
+            t.Error(errΔ1);
         }
     }
     void checkNot(global::go.crypto.@internal.fips140.bigmod_package.choice c, @string errΔ2) {
-        Ꮡt.Helper();
+        t.Helper();
         if (c != no) {
-            Ꮡt.Error(errΔ2);
+            t.Error(errΔ2);
         }
     }
 
-    var mFour = modulusFromBytes(new byte[]{4}.slice());
-    var (n, err) = NewNat().SetBytes(new byte[]{3}.slice(), mFour);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var mFour = modulusFromBytes(slice<byte>([4]));
+    var (n, err) = NewNat().SetBytes(slice<byte>([3]), mFour);
+    if (err != nil) {
+        t.Fatal(err);
     }
     checkYes(n.IsMinusOne(mFour), isNot1Mod4ˢ);
     checkNot(n.IsZero(), isZeroˢ);
@@ -530,58 +551,58 @@ public static void TestIs(ж<testing.T> Ꮡt) {
     checkYes(n.IsOdd(), mod4IsNotOddˢ);
 
     var mTwoLimbs = maxModulus(2);
-    (n, err) = NewNat().SetBytes(new byte[]{0x01}.slice(), mTwoLimbs);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (n, err) = NewNat().SetBytes(slice<byte>([0x01]), mTwoLimbs);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (n.IsOne() != 1) {
-        Ꮡt.Errorf("1 is not one"u8);
+        t.Errorf("1 is not one");
     }
 }
 
-public static void TestTrailingZeroBits(ж<testing.T> Ꮡt) {
-    var nb = @new<bigꓸInt>().SetBytes(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7e}.slice());
+public static void TestTrailingZeroBits(ж<testing.T> t) {
+    var nb = @new<bigꓸInt>().SetBytes(slice<byte>([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7e]));
     nb.Lsh(nb, 128);
     nint expected = 129;
     while (expected >= 0) {
         var n = NewNat().setBig(nb);
         if (n.TrailingZeroBitsVarTime() != (nuint)expected) {
-            Ꮡt.Errorf("%d != %d"u8, n.TrailingZeroBitsVarTime(), expected);
+            t.Errorf("%d != %d", n.TrailingZeroBitsVarTime(), expected);
         }
         nb.Rsh(nb, 1);
         expected--;
     }
 }
 
-public static void TestRightShift(ж<testing.T> Ꮡt) {
+public static void TestRightShift(ж<testing.T> t) {
     var (nb, err) = cryptorand.Int(cryptorand.Reader, @new<bigꓸInt>().Lsh(big.NewInt(1), 1024));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    foreach (var (_, shift) in new nuint[]{1, 32, 64, 128, 1024 - 128, 1024 - 64, 1024 - 32, 1024 - 1}.slice()) {
+    foreach (var (_, shift) in slice<nuint>([1, 32, 64, 128, 1024 - 128, 1024 - 64, 1024 - 32, 1024 - 1])) {
         var nbʗ1 = nb;
         void testShift(ж<testing.T> tΔ1, nuint shiftΔ1) {
             var n = NewNat().setBig(nbʗ1);
-            nint oldLen = len((~n).limbs);
+            nint oldLen = len(n.limbs);
             n.ShiftRightVarTime(shiftΔ1);
-            if (len((~n).limbs) != oldLen) {
-                tΔ1.Errorf("len(n.limbs) = %d, want %d"u8, len((~n).limbs), oldLen);
+            if (len(n.limbs) != oldLen) {
+                tΔ1.Errorf("len(n.limbs) = %d, want %d", len(n.limbs), oldLen);
             }
             var exp = @new<bigꓸInt>().Rsh(nbʗ1, shiftΔ1);
             if (n.asBig().Cmp(exp) != 0) {
-                tΔ1.Errorf("%v != %v"u8, n.asBig().OrTypedNil(), exp.OrTypedNil());
+                tΔ1.Errorf("%v != %v", n.asBig().OrTypedNil(), exp.OrTypedNil());
             }
         }
         var testShiftʗ1 = testShift;
-        Ꮡt.Run(fmt.Sprint(shift - 1), (ж<testing.T> tΔ2) => {
+        t.Run(fmt.Sprint(shift - 1), (ж<testing.T> tΔ2) => {
             testShiftʗ1(tΔ2, shift - 1);
         });
         var testShiftʗ2 = testShift;
-        Ꮡt.Run(fmt.Sprint(shift), (ж<testing.T> tΔ3) => {
+        t.Run(fmt.Sprint(shift), (ж<testing.T> tΔ3) => {
             testShiftʗ2(tΔ3, shift);
         });
         var testShiftʗ3 = testShift;
-        Ꮡt.Run(fmt.Sprint(shift + 1), (ж<testing.T> tΔ4) => {
+        t.Run(fmt.Sprint(shift + 1), (ж<testing.T> tΔ4) => {
             testShiftʗ3(tΔ4, shift + 1);
         });
     }
@@ -730,27 +751,27 @@ public static void BenchmarkExp(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void TestNewModulus(ж<testing.T> Ꮡt) {
+public static void TestNewModulus(ж<testing.T> t) {
     @string expected = modulusMustBe1ˢ;
-    var (_, err) = NewModulus(new byte[]{}.slice());
-    if (err == default! || err.Error() != expected) {
-        Ꮡt.Errorf("NewModulus(0) got %q, want %q"u8, err, expected);
+    var (_, err) = NewModulus(slice<byte>([]));
+    if (err == nil || err.Error() != expected) {
+        t.Errorf("NewModulus(0) got %q, want %q", err, expected);
     }
-    (_, err) = NewModulus(new byte[]{0}.slice());
-    if (err == default! || err.Error() != expected) {
-        Ꮡt.Errorf("NewModulus(0) got %q, want %q"u8, err, expected);
+    (_, err) = NewModulus(slice<byte>([0]));
+    if (err == nil || err.Error() != expected) {
+        t.Errorf("NewModulus(0) got %q, want %q", err, expected);
     }
-    (_, err) = NewModulus(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice());
-    if (err == default! || err.Error() != expected) {
-        Ꮡt.Errorf("NewModulus(0) got %q, want %q"u8, err, expected);
+    (_, err) = NewModulus(slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+    if (err == nil || err.Error() != expected) {
+        t.Errorf("NewModulus(0) got %q, want %q", err, expected);
     }
-    (_, err) = NewModulus(new byte[]{1}.slice());
-    if (err == default! || err.Error() != expected) {
-        Ꮡt.Errorf("NewModulus(1) got %q, want %q"u8, err, expected);
+    (_, err) = NewModulus(slice<byte>([1]));
+    if (err == nil || err.Error() != expected) {
+        t.Errorf("NewModulus(1) got %q, want %q", err, expected);
     }
-    (_, err) = NewModulus(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}.slice());
-    if (err == default! || err.Error() != expected) {
-        Ꮡt.Errorf("NewModulus(1) got %q, want %q"u8, err, expected);
+    (_, err) = NewModulus(slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]));
+    if (err == nil || err.Error() != expected) {
+        t.Errorf("NewModulus(1) got %q, want %q", err, expected);
     }
 }
 
@@ -768,76 +789,80 @@ internal partial struct TestAddMulVVWSized_tests /*dyn*/ {
     internal Func<ж<nuint>, ж<nuint>, nuint, nuint> f;
 }
 
-public static void TestAddMulVVWSized(ж<testing.T> Ꮡt) {
+public static void TestAddMulVVWSized(ж<testing.T> t) {
     // Sized addMulVVW have architecture-specific implementations on
     // a number of architectures. Test that they match the generic
     // implementation.
-    var tests = new TestAddMulVVWSized_tests[]{
+    var tests = slice<TestAddMulVVWSized_tests>([
         new(1024, addMulVVW1024),
         new(1536, addMulVVW1536),
         new(2048, addMulVVW2048)
-    }.slice();
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestAddMulVVWSized_tests(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(fmt.Sprint(test.n), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprint(test.n), (ж<testing.T> tΔ1) => {
             var x = makeTestValue(testʗ1.n);
             var z = makeTestValue(testʗ1.n);
             var z2 = slices.Clone<slice<nuint>, nuint>(z);
-            nuint y = default!;
+            nuint y = default;
             y--;
             nuint c = addMulVVW(z, x, y);
             nuint c2 = testʗ1.f(Ꮡ(z2, 0), Ꮡ(x, 0), y);
             if (!slices.Equal<slice<nuint>, nuint>(z, z2) || c != c2) {
-                tΔ1.Errorf("%016X, %016X != %016X, %016X"u8, z, c, z2, c2);
+                tΔ1.Errorf("%016X, %016X != %016X, %016X", z, c, z2, c2);
             }
         });
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataModInvTestsTxtˢ = "testdata/mod_inv_tests.txt"u8;
+internal static ref readonly @string testdataModInvTestsTxtˢ => ref testdataModInvTestsTxtˢᵇ;
+private static readonly @string testdataModInvTestsTxtˢᵇ = "testdata/mod_inv_tests.txt"u8;
 internal static readonly object modulus1ˢ = (@string)"modulus <= 1"u8;
 internal static readonly object notInvertibleˢ = (@string)"not invertible"u8;
 
-public static void TestInverse(ж<testing.T> Ꮡt) {
+public static void TestInverse(ж<testing.T> t) {
     var (f, err) = os.Open(testdataModInvTestsTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    @string ModInv = default!;
-    @string A = default!;
-    @string M = default!;
-    nint lineNum = default!;
+    @string ModInv = default;
+    @string A = default;
+    @string M = default;
+    nint lineNum = default;
     var scanner = bufio.NewScanner(new bigmod_internal_test_package.os_FileжReader(f));
     while (scanner.Scan()) {
         lineNum++;
         @string line = scanner.Text();
-        if (len(line) == 0 || line[0] == (rune)'#') {
+        if (len(line) == 0 || line[0] == '#') {
             continue;
         }
 
-        var (k, v, _) = strings.Cut(line, " = "u8);
+        var (k, v, _) = strings.Cut(line, " = ");
         var exprᴛ1 = k;
-        if (exprᴛ1 == "ModInv"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "ModInv"u8: {
             ModInv = v;
+            break;
         }
-        else if (exprᴛ1 == "A"u8) {
+        case {} when exprᴛ1 == "A"u8: {
             A = v;
+            break;
         }
-        else if (exprᴛ1 == "M"u8) {
+        case {} when exprᴛ1 == "M"u8: {
             M = v;
 
-            Ꮡt.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
+            t.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
                 var (m, errΔ2) = NewModulus(decodeHex(tΔ2, M));
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     tΔ2.Skip(modulus1ˢ);
                 }
                 (var a, errΔ2) = NewNat().SetBytes(decodeHex(tΔ2, A), m);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     tΔ2.Fatal(errΔ2);
                 }
 
@@ -846,33 +871,35 @@ public static void TestInverse(ж<testing.T> Ꮡt) {
                     tΔ2.Fatal(notInvertibleˢ);
                 }
                 (var exp, errΔ2) = NewNat().SetBytes(decodeHex(tΔ2, ModInv), m);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     tΔ2.Fatal(errΔ2);
                 }
                 if (got.Equal(exp) != 1) {
-                    tΔ2.Errorf("%v != %v"u8, got.OrTypedNil(), exp.OrTypedNil());
+                    tΔ2.Errorf("%v != %v", got.OrTypedNil(), exp.OrTypedNil());
                 }
             });
+            break;
         }
-        else { /* default: */
-            Ꮡt.Fatalf("unknown key %q on line %d"u8, k, lineNum);
-        }
+        default: {
+            t.Fatalf("unknown key %q on line %d", k, lineNum);
+            break;
+        }}
     }
     {
-        var errΔ3 = scanner.Err(); if (errΔ3 != default!) {
-            Ꮡt.Fatal(errΔ3);
+        var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
     }
 }
 
-internal static slice<byte> decodeHex(ж<testing.T> Ꮡt, @string s) {
-    Ꮡt.Helper();
+internal static slice<byte> decodeHex(ж<testing.T> t, @string s) {
+    t.Helper();
     if (len(s) % 2 != 0) {
         s = "0"u8 + s;
     }
     var (b, err) = hex.DecodeString(s);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to decode hex %q: %v"u8, s, err);
+    if (err != nil) {
+        t.Fatalf("failed to decode hex %q: %v", s, err);
     }
     return b;
 }

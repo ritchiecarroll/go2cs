@@ -14,32 +14,33 @@ using static go.math.big.@internal.asmgen_package;
 
 partial class asmgen_internal_test_package {
 
-internal static ж<bool> generateFlag = flag.Bool("generate"u8, false, "generate files"u8);
+internal static ж<bool> generateFlag = flag.Bool("generate", false, "generate files");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string regeneratedˢ = "regenerated"u8;
+internal static ref readonly @string regeneratedˢ => ref regeneratedˢᵇ;
+private static readonly @string regeneratedˢᵇ = "regenerated"u8;
 
-public static void Test(ж<testing.T> Ꮡt) {
+public static void Test(ж<testing.T> t) {
     foreach (var (_, arch) in arches) {
         var archʗ1 = arch;
-        Ꮡt.Run((~arch).Name, (ж<testing.T> tΔ1) => {
+        t.Run(arch.Name, (ж<testing.T> tΔ1) => {
             var (@file, data) = generate(archʗ1);
             var (old, err) = os.ReadFile("../../"u8 + @file);
-            if (err == default! && bytes.Equal(old, data)) {
+            if (err == nil && bytes.Equal(old, data)) {
                 return;
             }
             if (generateFlag.Value) {
                 {
-                    var errΔ1 = os.WriteFile("../../"u8 + @file, data, 438); if (errΔ1 != default!) {
+                    var errΔ1 = os.WriteFile("../../"u8 + @file, data, 438); if (errΔ1 != nil) {
                         tΔ1.Fatal(errΔ1);
                     }
                 }
                 return;
             }
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
-            tΔ1.Fatalf("generated assembly differs:\n%s\n"u8, diff.Diff("../../"u8 + @file, old, regeneratedˢ, data));
+            tΔ1.Fatalf("generated assembly differs:\n%s\n", diff.Diff("../../"u8 + @file, old, regeneratedˢ, data));
         });
     }
 }

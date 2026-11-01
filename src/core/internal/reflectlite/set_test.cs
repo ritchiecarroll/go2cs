@@ -16,7 +16,7 @@ using static global::go.@internal.reflectlite_internal_test_package;
 
 partial class reflectlite_test_package {
 
-public static void TestImplicitSetConversion(ж<testing.T> Ꮡt) {
+public static void TestImplicitSetConversion(ж<testing.T> t) {
     // Assume TestImplicitMapConversion covered the basics.
     // Just make sure conversions are being applied at all.
     ref var r = ref heap<io.Reader>(out var Ꮡr);
@@ -24,7 +24,7 @@ public static void TestImplicitSetConversion(ж<testing.T> Ꮡt) {
     var rv = ValueOf(Ꮡr).Elem();
     rv.Set(ValueOf(b.OrTypedNil()));
     if (!AreEqual(r, b)) {
-        Ꮡt.Errorf("after Set: r=%T(%v)"u8, r, r);
+        t.Errorf("after Set: r=%T(%v)", r, r);
     }
 }
 
@@ -33,7 +33,7 @@ partial struct implementsTestsᴛ1 /*dyn*/ {
     internal any t;
     internal bool b;
 }
-internal static slice<implementsTestsᴛ1> implementsTests = new implementsTestsᴛ1[]{
+internal static slice<implementsTestsᴛ1> implementsTests = slice<implementsTestsᴛ1>([
     new(@new<ж<bytes.Buffer>>(), @new<io.Reader>(), true),
     new(@new<bytes.Buffer>(), @new<io.Reader>(), false),
     new(@new<ж<bytes.Buffer>>(), @new<io.ReaderAt>(), false),
@@ -45,7 +45,7 @@ internal static slice<implementsTestsᴛ1> implementsTests = new implementsTests
     new(@new<ж<notAnExpr>>(), @new<notASTExpr>(), true),
     new(@new<mapError>(), @new<error>(), true),
     new(@new<ж<mapError>>(), @new<error>(), true)
-}.slice();
+]);
 
 partial struct notAnExpr {
 }
@@ -70,7 +70,8 @@ partial interface notASTExpr :
 partial struct mapError /*map[@string, @string]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mapErrorˢ = "mapError"u8;
+internal static ref readonly @string mapErrorˢ => ref mapErrorˢᵇ;
+private static readonly @string mapErrorˢᵇ = "mapError"u8;
 
 internal static @string Error(this mapError _) {
     return mapErrorˢ;
@@ -88,13 +89,13 @@ public static void TestImplements(ж<testing.T> Ꮡt) {
         var xt = TypeOf(tt.t).Elem();
         {
             var b = xv.Implements(xt); if (b != tt.b) {
-                Ꮡt.Errorf("(%s).Implements(%s) = %v, want %v"u8, TypeString(xv), TypeString(xt), b, tt.b);
+                Ꮡt.Errorf("(%s).Implements(%s) = %v, want %v", TypeString(xv), TypeString(xt), b, tt.b);
             }
         }
     }
 }
 
-internal static slice<implementsTestsᴛ1> assignableTests = new implementsTestsᴛ1[]{
+internal static slice<implementsTestsᴛ1> assignableTests = slice<implementsTestsᴛ1>([
     new(@new<channel<nint>>(), Ꮡ(/*<-*/channel<nint>.RecvOnly), true),
     new(Ꮡ(/*<-*/channel<nint>.RecvOnly), @new<channel<nint>>(), false),
     new(@new<ж<nint>>(), @new<IntPtr>(), true),
@@ -102,7 +103,7 @@ internal static slice<implementsTestsᴛ1> assignableTests = new implementsTests
     new(@new<IntPtr>(), @new<IntPtr1>(), false),
     new(@new<Ch>(), Ꮡ(/*<-*/channel<any>.RecvOnly), true)
     // test runs implementsTests too
-}.slice();
+]);
 
 partial class IntPtr /*ж<nint>*/;
 
@@ -118,7 +119,7 @@ public static void TestAssignableTo(ж<testing.T> Ꮡt) {
         var xt = TypeOf(tt.t).Elem();
         {
             var b = xv.AssignableTo(xt); if (b != tt.b) {
-                Ꮡt.Errorf("%d:AssignableTo: got %v, want %v"u8, i, b, tt.b);
+                Ꮡt.Errorf("%d:AssignableTo: got %v, want %v", i, b, tt.b);
             }
         }
     }

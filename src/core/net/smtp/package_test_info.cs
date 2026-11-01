@@ -9,15 +9,8 @@ global using static global::go.net.smtp_internal_test_package;
 
 // <ImportedTypeAliases>
 global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using smtpꓸAuth = go.net.smtp_package.ΔAuth;
-global using textprotoꓸError = go.net.textproto_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
-global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -43,7 +36,12 @@ using static global::go.net.smtp_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.net.smtp_package.Client))]
+[assembly: GoFieldAccess(typeof(go.crypto.tls_package.Config))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +51,7 @@ using static global::go.net.smtp_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/smtp/example_test.go", "example_test.cs", "ABMalIKCuICCpICCyIKClIKClIKCuIKCAAYQguaUgpSCgriUuIKIgoI=")]
+[assembly: GoPositionMap("net/smtp/example_test.go", "example_test.cs", "ABYalIKCuICCpICCyIKClIKClIKCuIKCAAYQggAJBpSClIKCuJS4goiCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

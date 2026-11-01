@@ -42,7 +42,7 @@ internal static bool IsDir(this ref formatTest fs) {
 }
 
 internal static any Sys(this ref formatTest fs) {
-    return default!;
+    return default;
 }
 
 internal static fs.FileMode Type(this ref formatTest fs) {
@@ -50,7 +50,7 @@ internal static fs.FileMode Type(this ref formatTest fs) {
 }
 
 internal static (fs.FileInfo, error) Info(this ж<formatTest> Ꮡfs) {
-    return (new formatTestжFileInfo(Ꮡfs), default!);
+    return (new formatTestжFileInfo(Ꮡfs), default);
 }
 
 partial struct formatTestsᴛ1 /*dyn*/ {
@@ -58,73 +58,73 @@ partial struct formatTestsᴛ1 /*dyn*/ {
     internal @string wantFileInfo;
     internal @string wantDirEntry;
 }
-internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
+internal static slice<formatTestsᴛ1> formatTests = slice<formatTestsᴛ1>([
     new(
         new formatTest(
-            name: "hello.go"u8,
+            name: "hello.go",
             size: 100,
             mode: 420,
             modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.ΔUTC),
             isDir: false
         ),
-        "-rw-r--r-- 100 1970-01-01 12:00:00 hello.go"u8,
-        "- hello.go"u8
+        "-rw-r--r-- 100 1970-01-01 12:00:00 hello.go",
+        "- hello.go"
     ),
     new(
         new formatTest(
-            name: "home/gopher"u8,
+            name: "home/gopher",
             size: 0,
             mode: (fs.FileMode)(ModeDir | 493),
             modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.ΔUTC),
             isDir: true
         ),
-        "drwxr-xr-x 0 1970-01-01 12:00:00 home/gopher/"u8,
-        "d home/gopher/"u8
+        "drwxr-xr-x 0 1970-01-01 12:00:00 home/gopher/",
+        "d home/gopher/"
     ),
     new(
         new formatTest(
-            name: "big"u8,
+            name: "big",
             size: 0x7fffffffffffffffL,
             mode: (fs.FileMode)(ModeIrregular | 420),
             modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.ΔUTC),
             isDir: false
         ),
-        "?rw-r--r-- 9223372036854775807 1970-01-01 12:00:00 big"u8,
-        "? big"u8
+        "?rw-r--r-- 9223372036854775807 1970-01-01 12:00:00 big",
+        "? big"
     ),
     new(
         new formatTest(
-            name: "small"u8,
+            name: "small",
             size: -9223372036854775808L,
             mode: (fs.FileMode)((fs.FileMode)(ModeSocket | ModeSetuid) | 420),
             modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.ΔUTC),
             isDir: false
         ),
-        "Surw-r--r-- -9223372036854775808 1970-01-01 12:00:00 small"u8,
-        "S small"u8
+        "Surw-r--r-- -9223372036854775808 1970-01-01 12:00:00 small",
+        "S small"
     )
-}.slice();
+]);
 
-public static void TestFormatFileInfo(ж<testing.T> Ꮡt) {
+public static void TestFormatFileInfo(ж<testing.T> t) {
     foreach (var (i, vᴛ1) in formatTests) {
         ref var test = ref heap(new formatTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
         @string got = FormatFileInfo(new formatTestжFileInfo(Ꮡtest.of(formatTestsᴛ1.Ꮡinput)));
         if (got != test.wantFileInfo) {
-            Ꮡt.Errorf("%d: FormatFileInfo(%#v) = %q, want %q"u8, i, test.input, got, test.wantFileInfo);
+            t.Errorf("%d: FormatFileInfo(%#v) = %q, want %q", i, test.input, got, test.wantFileInfo);
         }
     }
 }
 
-public static void TestFormatDirEntry(ж<testing.T> Ꮡt) {
+public static void TestFormatDirEntry(ж<testing.T> t) {
     foreach (var (i, vᴛ1) in formatTests) {
         ref var test = ref heap(new formatTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
         @string got = FormatDirEntry(new formatTestжDirEntry(Ꮡtest.of(formatTestsᴛ1.Ꮡinput)));
         if (got != test.wantDirEntry) {
-            Ꮡt.Errorf("%d: FormatDirEntry(%#v) = %q, want %q"u8, i, test.input, got, test.wantDirEntry);
+            t.Errorf("%d: FormatDirEntry(%#v) = %q, want %q", i, test.input, got, test.wantDirEntry);
         }
     }
 }

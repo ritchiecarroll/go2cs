@@ -26,8 +26,8 @@ internal partial struct TestConvertMemProfile_type /*dyn*/ {
     internal @string defaultSampleType;
 }
 
-public static void TestConvertMemProfile(ж<testing.T> Ꮡt) {
-    var (addr1, addr2, map1, map2) = testPCs(Ꮡt);
+public static void TestConvertMemProfile(ж<testing.T> t) {
+    var (addr1, addr2, map1, map2) = testPCs(t);
 
     // MemProfileRecord stacks are return PCs, so add one to the
     // addresses recorded in the "profile". The proto profile
@@ -35,47 +35,47 @@ public static void TestConvertMemProfile(ж<testing.T> Ꮡt) {
     // from these and get back to addr1 and addr2.
     var (a1, a2) = ((uintptr)addr1 + 1, (uintptr)addr2 + 1);
     var rate = (int64)(512 * 1024);
-    var rec = new profilerecord.MemProfileRecord[]{
-        new(AllocBytes: 4096, FreeBytes: 1024, AllocObjects: 4, FreeObjects: 1, Stack: new uintptr[]{a1, a2}.slice()),
-        new(AllocBytes: 512 * 1024, FreeBytes: 0, AllocObjects: 1, FreeObjects: 0, Stack: new uintptr[]{a2 + 1, a2 + 2}.slice()),
-        new(AllocBytes: 512 * 1024, FreeBytes: 512 * 1024, AllocObjects: 1, FreeObjects: 1, Stack: new uintptr[]{a1 + 1, a1 + 2, a2 + 3}.slice())
-    }.slice();
+    var rec = slice<profilerecord.MemProfileRecord>([
+        new(AllocBytes: 4096, FreeBytes: 1024, AllocObjects: 4, FreeObjects: 1, Stack: slice<uintptr>([a1, a2])),
+        new(AllocBytes: 512 * 1024, FreeBytes: 0, AllocObjects: 1, FreeObjects: 0, Stack: slice<uintptr>([a2 + 1, a2 + 2])),
+        new(AllocBytes: 512 * 1024, FreeBytes: 512 * 1024, AllocObjects: 1, FreeObjects: 1, Stack: slice<uintptr>([a1 + 1, a1 + 2, a2 + 3]))
+    ]);
 
-    var periodType = Ꮡ(new profile.ValueType(Type: "space"u8, Unit: "bytes"u8));
-    var sampleType = new ж<profile.ValueType>[]{
-        Ꮡ(new profile.ValueType(Type: "alloc_objects"u8, Unit: "count"u8)),
-        Ꮡ(new profile.ValueType(Type: "alloc_space"u8, Unit: "bytes"u8)),
-        Ꮡ(new profile.ValueType(Type: "inuse_objects"u8, Unit: "count"u8)),
-        Ꮡ(new profile.ValueType(Type: "inuse_space"u8, Unit: "bytes"u8))
-    }.slice();
-    var samples = new ж<profile.Sample>[]{
+    var periodType = Ꮡ(new profile.ValueType(Type: "space", Unit: "bytes"));
+    var sampleType = slice<ж<profile.ValueType>>([
+        Ꮡ(new profile.ValueType(Type: "alloc_objects", Unit: "count")),
+        Ꮡ(new profile.ValueType(Type: "alloc_space", Unit: "bytes")),
+        Ꮡ(new profile.ValueType(Type: "inuse_objects", Unit: "count")),
+        Ꮡ(new profile.ValueType(Type: "inuse_space", Unit: "bytes"))
+    ]);
+    var samples = slice<ж<profile.Sample>>([
         Ꮡ(new profile.Sample(
-            Value: new int64[]{2050, 2099200, 1537, 1574400}.slice(),
-            Location: new ж<profile.Location>[]{
+            Value: slice<int64>([2050, 2099200, 1537, 1574400]),
+            Location: slice<ж<profile.Location>>([
                 Ꮡ(new profile.Location(ID: 1, Mapping: map1, Address: addr1)),
                 Ꮡ(new profile.Location(ID: 2, Mapping: map2, Address: addr2))
-            }.slice(),
-            NumLabel: new map<@string, slice<int64>>{["bytes"u8] = new int64[]{1024}.slice()})),
+            ]),
+            NumLabel: new map<@string, slice<int64>>{["bytes"] = slice<int64>([1024])})),
         Ꮡ(new profile.Sample(
-            Value: new int64[]{1, 829411, 1, 829411}.slice(),
-            Location: new ж<profile.Location>[]{
+            Value: slice<int64>([1, 829411, 1, 829411]),
+            Location: slice<ж<profile.Location>>([
                 Ꮡ(new profile.Location(ID: 3, Mapping: map2, Address: addr2 + 1)),
                 Ꮡ(new profile.Location(ID: 4, Mapping: map2, Address: addr2 + 2))
-            }.slice(),
-            NumLabel: new map<@string, slice<int64>>{["bytes"u8] = new int64[]{512 * 1024}.slice()})),
+            ]),
+            NumLabel: new map<@string, slice<int64>>{["bytes"] = slice<int64>([512 * 1024])})),
         Ꮡ(new profile.Sample(
-            Value: new int64[]{1, 829411, 0, 0}.slice(),
-            Location: new ж<profile.Location>[]{
+            Value: slice<int64>([1, 829411, 0, 0]),
+            Location: slice<ж<profile.Location>>([
                 Ꮡ(new profile.Location(ID: 5, Mapping: map1, Address: addr1 + 1)),
                 Ꮡ(new profile.Location(ID: 6, Mapping: map1, Address: addr1 + 2)),
                 Ꮡ(new profile.Location(ID: 7, Mapping: map2, Address: addr2 + 3))
-            }.slice(),
-            NumLabel: new map<@string, slice<int64>>{["bytes"u8] = new int64[]{512 * 1024}.slice()}))
-    }.slice();
-    foreach (var (_, vᴛ1) in new TestConvertMemProfile_type[]{
-        new("heap"u8, ""u8),
-        new("allocs"u8, "alloc_space"u8)
-    }.slice()) {
+            ]),
+            NumLabel: new map<@string, slice<int64>>{["bytes"] = slice<int64>([512 * 1024])}))
+    ]);
+    foreach (var (_, vᴛ1) in slice<TestConvertMemProfile_type>([
+        new("heap", ""),
+        new("allocs", "alloc_space")
+    ])) {
         ref var tc = ref heap(new TestConvertMemProfile_type(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -84,17 +84,17 @@ public static void TestConvertMemProfile(ж<testing.T> Ꮡt) {
         var sampleTypeʗ1 = sampleType;
         var samplesʗ1 = samples;
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             {
-                var errΔ1 = writeHeapProto(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), recʗ1, rate, tcʗ1.defaultSampleType); if (errΔ1 != default!) {
-                    tΔ1.Fatalf("writing profile: %v"u8, errΔ1);
+                var errΔ1 = writeHeapProto(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), recʗ1, rate, tcʗ1.defaultSampleType); if (errΔ1 != nil) {
+                    tΔ1.Fatalf("writing profile: %v", errΔ1);
                 }
             }
 
             var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
-            if (err != default!) {
-                tΔ1.Fatalf("profile.Parse: %v"u8, err);
+            if (err != nil) {
+                tΔ1.Fatalf("profile.Parse: %v", err);
             }
 
             checkProfile(tΔ1, p, rate, periodTypeʗ1, sampleTypeʗ1, samplesʗ1, tcʗ1.defaultSampleType);
@@ -112,7 +112,7 @@ internal static slice<@string> profileToStrings(ж<profile.Profile> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
     var resᴷ = new stackAppend<@string>(moves: true);
 
-    slice<@string> res = default!;
+    slice<@string> res = default;
     foreach (var (_, s) in p.Sample) {
         res = append(resᴷ, res, sampleToString(s));
     }
@@ -123,12 +123,12 @@ internal static slice<@string> profileToStrings(ж<profile.Profile> Ꮡp) {
 internal static @string sampleToString(ж<profile.Sample> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    slice<@string> funcs = default!;
+    slice<@string> funcs = default;
     for (nint i = len(s.Location) - 1; i >= 0; i--) {
         var loc = s.Location[i];
         funcs = locationToStrings(loc, funcs);
     }
-    return fmt.Sprintf("%s %v"u8, strings_package.Join(funcs, ";"u8), s.Value);
+    return fmt.Sprintf("%s %v"u8, strings_package.Join(funcs, ";"), s.Value);
 }
 
 internal static slice<@string> locationToStrings(ж<profile.Location> Ꮡloc, slice<@string> funcs) {
@@ -137,54 +137,54 @@ internal static slice<@string> locationToStrings(ж<profile.Location> Ꮡloc, sl
 
     foreach (var j in range(loc.Line)) {
         var line = loc.Line[len(loc.Line) - 1 - j];
-        funcs = append(funcsᴷ, funcs, (~line.Function).Name);
+        funcs = append(funcsᴷ, funcs, line.Function.Name);
     }
     funcs = move2heap(funcsᴷ, funcs);
     return funcs;
 }
 
 // This is a regression test for https://go.dev/issue/64528.
-public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> Ꮡt) {
+public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (asan.Enabled) {
-            Ꮡt.Skip(extraAllocationsWithAsanˢ);
+            t.Skip(extraAllocationsWithAsanˢ);
         }
         nint previousRate = runtime.MemProfileRate;
         runtime.MemProfileRate = 1;
         defer(() => {
             runtime.MemProfileRate = previousRate;
         }, ref ᒐ);
-        foreach (var (_, sz) in new nint[]{128, 256}.slice()) {
+        foreach (var (_, sz) in slice<nint>([128, 256])) {
             genericAllocFunc<uint32>(sz / 4);
         }
-        foreach (var (_, sz) in new nint[]{64, 128}.slice()) {
+        foreach (var (_, sz) in slice<nint>([64, 128])) {
             genericAllocFunc<uint64>(sz / 8);
         }
 
         runtime.GC();
-        var buf = bytes.NewBuffer(default!);
+        var buf = bytes.NewBuffer(default);
         {
-            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != default!) {
-                Ꮡt.Fatalf("writing profile: %v"u8, errΔ1);
+            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
+                t.Fatalf("writing profile: %v", errΔ1);
             }
         }
         var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(buf));
-        if (err != default!) {
-            Ꮡt.Fatalf("profile.Parse: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("profile.Parse: %v", err);
         }
 
         var actual = profileToStrings(p);
-        var expected = new @string[]{
-            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint32] [1 128 0 0]"u8,
-            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint32] [1 256 0 0]"u8,
-            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 64 0 0]"u8,
-            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 128 0 0]"u8
-        }.slice();
+        var expected = slice<@string>([
+            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint32] [1 128 0 0]",
+            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint32] [1 256 0 0]",
+            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 64 0 0]",
+            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 128 0 0]"
+        ]);
 
         foreach (var (_, l) in expected) {
             if (!slices.Contains(actual, l)) {
-                Ꮡt.Errorf("profile = %v\nwant = %v"u8, strings_package.Join(actual, "\n"u8), l);
+                t.Errorf("profile = %v\nwant = %v", strings_package.Join(actual, "\n"), l);
             }
         }
     }
@@ -206,7 +206,7 @@ internal static partial void storeAlloc() {
 }
 
 internal static partial void nonRecursiveGenericAllocFunction<CurrentOp, OtherOp>(bool alloc) {
-    if (alloc){
+    if (alloc) {
         storeAlloc();
     } else {
         nonRecursiveGenericAllocFunction<OtherOp, CurrentOp>(true);
@@ -217,29 +217,32 @@ internal static partial void nonRecursiveGenericAllocFunction<CurrentOp, OtherOp
 internal static readonly object skippingTestWithˢ = (@string)"skipping test with optimizations disabled"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectedSampleᶜ = "testing.tRunner;runtime/pprof.TestGenericsInlineLocations;runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct {},go.shape.struct { runtime/pprof.buf [128]uint8 }];runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct { runtime/pprof.buf [128]uint8 },go.shape.struct {}];runtime/pprof.storeAlloc [1 16 1 16]"u8;
+internal static ref readonly @string expectedSampleᶜ => ref expectedSampleᶜᵇ;
+private static readonly @string expectedSampleᶜᵇ = "testing.tRunner;runtime/pprof.TestGenericsInlineLocations;runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct {},go.shape.struct { runtime/pprof.buf [128]uint8 }];runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct { runtime/pprof.buf [128]uint8 },go.shape.struct {}];runtime/pprof.storeAlloc [1 16 1 16]"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectedLocationᶜ = "runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct {},go.shape.struct { runtime/pprof.buf [128]uint8 }];runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct { runtime/pprof.buf [128]uint8 },go.shape.struct {}];runtime/pprof.storeAlloc"u8;
+internal static ref readonly @string expectedLocationᶜ => ref expectedLocationᶜᵇ;
+private static readonly @string expectedLocationᶜᵇ = "runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct {},go.shape.struct { runtime/pprof.buf [128]uint8 }];runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct { runtime/pprof.buf [128]uint8 },go.shape.struct {}];runtime/pprof.storeAlloc"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectedLocationNewInlinerᶜ = "runtime/pprof.TestGenericsInlineLocations;runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct {},go.shape.struct { runtime/pprof.buf [128]uint8 }];runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct { runtime/pprof.buf [128]uint8 },go.shape.struct {}];runtime/pprof.storeAlloc";
+internal static ref readonly @string expectedLocationNewInlinerᶜ => ref expectedLocationNewInlinerᶜᵇ;
+private static readonly @string expectedLocationNewInlinerᶜᵇ = "runtime/pprof.TestGenericsInlineLocations;runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct {},go.shape.struct { runtime/pprof.buf [128]uint8 }];runtime/pprof.nonRecursiveGenericAllocFunction[go.shape.struct { runtime/pprof.buf [128]uint8 },go.shape.struct {}];runtime/pprof.storeAlloc";
 
-public static void TestGenericsInlineLocations(ж<testing.T> Ꮡt) {
+public static void TestGenericsInlineLocations(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (asan.Enabled) {
-            Ꮡt.Skip(extraAllocationsWithAsanˢ);
+            t.Skip(extraAllocationsWithAsanˢ);
         }
         if (testenv.OptimizationOff()) {
-            Ꮡt.Skip(skippingTestWithˢ);
+            t.Skip(skippingTestWithˢ);
         }
 
         nint previousRate = runtime.MemProfileRate;
         runtime.MemProfileRate = 1;
         defer(() => {
             runtime.MemProfileRate = previousRate;
-            sink = default!;
+            sink = default;
         }, ref ᒐ);
 
         nonRecursiveGenericAllocFunction<opAlloc, opCall>(true);
@@ -247,34 +250,34 @@ public static void TestGenericsInlineLocations(ж<testing.T> Ꮡt) {
 
         runtime.GC();
 
-        var buf = bytes.NewBuffer(default!);
+        var buf = bytes.NewBuffer(default);
         {
-            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != default!) {
-                Ꮡt.Fatalf("writing profile: %v"u8, errΔ1);
+            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
+                t.Fatalf("writing profile: %v", errΔ1);
             }
         }
         var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(buf));
-        if (err != default!) {
-            Ꮡt.Fatalf("profile.Parse: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("profile.Parse: %v", err);
         }
 
         @string expectedSample = expectedSampleᶜ;
         @string expectedLocation = expectedLocationᶜ;
         @string expectedLocationNewInliner = expectedLocationNewInlinerᶜ;
-        ж<profile.Sample> s = default!;
-        foreach (var (_, sample) in (~p).Sample) {
+        ж<profile.Sample> s = default;
+        foreach (var (_, sample) in p.Sample) {
             if (sampleToString(sample) == expectedSample) {
                 s = sample;
                 break;
             }
         }
         if (s == nil) {
-            Ꮡt.Fatalf("expected \n%s\ngot\n%s"u8, expectedSample, strings_package.Join(profileToStrings(p), "\n"u8));
+            t.Fatalf("expected \n%s\ngot\n%s", expectedSample, strings_package.Join(profileToStrings(p), "\n"));
         }
-        var loc = (~s).Location[0];
-        @string actual = strings_package.Join(locationToStrings(loc, default!), ";"u8);
+        var loc = s.Location[0];
+        @string actual = strings_package.Join(locationToStrings(loc, default), ";");
         if (expectedLocation != actual && expectedLocationNewInliner != actual) {
-            Ꮡt.Errorf("expected a location with at least 3 functions\n%s\ngot\n%s\n"u8, expectedLocation, actual);
+            t.Errorf("expected a location with at least 3 functions\n%s\ngot\n%s\n", expectedLocation, actual);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -289,12 +292,14 @@ internal static void growMap() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimePprofGrowMapˢ = "runtime/pprof.growMap"u8;
-internal static readonly @string mapassignˢ = "mapassign"u8;
+internal static ref readonly @string runtimePprofGrowMapˢ => ref runtimePprofGrowMapˢᵇ;
+private static readonly @string runtimePprofGrowMapˢᵇ = "runtime/pprof.growMap"u8;
+internal static ref readonly @string mapassignˢ => ref mapassignˢᵇ;
+private static readonly @string mapassignˢᵇ = "mapassign"u8;
 
 // Runtime frames are hidden in heap profiles.
 // This is a regression test for https://go.dev/issue/71174.
-public static void TestHeapRuntimeFrames(ж<testing.T> Ꮡt) {
+public static void TestHeapRuntimeFrames(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         nint previousRate = runtime.MemProfileRate;
@@ -306,15 +311,15 @@ public static void TestHeapRuntimeFrames(ж<testing.T> Ꮡt) {
         growMap();
 
         runtime.GC();
-        var buf = bytes.NewBuffer(default!);
+        var buf = bytes.NewBuffer(default);
         {
-            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != default!) {
-                Ꮡt.Fatalf("writing profile: %v"u8, errΔ1);
+            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
+                t.Fatalf("writing profile: %v", errΔ1);
             }
         }
         var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(buf));
-        if (err != default!) {
-            Ꮡt.Fatalf("profile.Parse: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("profile.Parse: %v", err);
         }
 
         var actual = profileToStrings(p);
@@ -329,18 +334,18 @@ public static void TestHeapRuntimeFrames(ж<testing.T> Ꮡt) {
 
             // Runtime frames like mapassign and map internals should be hidden.
             if (strings_package.Contains(l, runtimeˢ)) {
-                Ꮡt.Errorf("Sample got %s, want no runtime frames"u8, l);
+                t.Errorf("Sample got %s, want no runtime frames", l);
             }
             if (strings_package.Contains(l, internalRuntimeˢ)) {
-                Ꮡt.Errorf("Sample got %s, want no runtime frames"u8, l);
+                t.Errorf("Sample got %s, want no runtime frames", l);
             }
             if (strings_package.Contains(l, mapassignˢ)) { // in case mapassign moves to a package not matching above paths.
-                Ꮡt.Errorf("Sample got %s, want no mapassign frames"u8, l);
+                t.Errorf("Sample got %s, want no mapassign frames", l);
             }
         }
 
         if (!foundGrowMap) {
-            Ꮡt.Errorf("Profile got:\n%s\nwant sample in runtime/pprof.growMap"u8, strings_package.Join(actual, "\n"u8));
+            t.Errorf("Profile got:\n%s\nwant sample in runtime/pprof.growMap", strings_package.Join(actual, "\n"));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

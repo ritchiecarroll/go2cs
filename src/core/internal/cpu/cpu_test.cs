@@ -15,57 +15,62 @@ using static go.@internal.cpu_internal_test_package;
 
 partial class cpu_test_package {
 
-public static void MustHaveDebugOptionsSupport(ж<testing.T> Ꮡt) {
+public static void MustHaveDebugOptionsSupport(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "linux"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "linux"u8: {
+        break;
     }
-    else { /* default: */
-        Ꮡt.Skipf("skipping test: cpu feature options not supported by OS"u8);
-    }
+    default: {
+        t.Skipf("skipping test: cpu feature options not supported by OS");
+        break;
+    }}
 }
 
-public static void MustSupportFeatureDetection(ж<testing.T> Ꮡt) {
+public static void MustSupportFeatureDetection(ж<testing.T> t) {
     // TODO: add platforms that do not have CPU feature detection support.
 }
 
-internal static void runDebugOptionsTest(ж<testing.T> Ꮡt, @string test, @string options) {
-    MustHaveDebugOptionsSupport(Ꮡt);
+internal static void runDebugOptionsTest(ж<testing.T> t, @string test, @string options) {
+    MustHaveDebugOptionsSupport(t);
 
     @string env = "GODEBUG="u8 + options;
 
-    var cmd = exec.Command(testenv.Executable(new cpu_test_package.testing_TжTB(Ꮡt)), "-test.run=^"u8 + test + "$"u8);
-    cmd.Value.Env = append((~cmd).Env, env);
+    var cmd = exec.Command(testenv.Executable(new cpu_test_package.testing_TжTB(t)), "-test.run=^"u8 + test + "$"u8);
+    cmd.Env = append(cmd.Env, env);
 
     var (output, err) = cmd.CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("%s with %s: run failed: %v output:\n%s\n"u8,
+    if (err != nil) {
+        t.Fatalf("%s with %s: run failed: %v output:\n%s\n",
             test, env, err, (@string)output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cpuAllOffˢ = "cpu.all=off"u8;
+internal static ref readonly @string cpuAllOffˢ => ref cpuAllOffˢᵇ;
+private static readonly @string cpuAllOffˢᵇ = "cpu.all=off"u8;
 
-public static void TestDisableAllCapabilities(ж<testing.T> Ꮡt) {
-    MustSupportFeatureDetection(Ꮡt);
-    runDebugOptionsTest(Ꮡt, "TestAllCapabilitiesDisabled"u8, cpuAllOffˢ);
+public static void TestDisableAllCapabilities(ж<testing.T> t) {
+    MustSupportFeatureDetection(t);
+    runDebugOptionsTest(t, "TestAllCapabilitiesDisabled", cpuAllOffˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cpuAllˢ = "#cpu.all"u8;
+internal static ref readonly @string cpuAllˢ => ref cpuAllˢᵇ;
+private static readonly @string cpuAllˢᵇ = "#cpu.all"u8;
 
-public static void TestAllCapabilitiesDisabled(ж<testing.T> Ꮡt) {
-    MustHaveDebugOptionsSupport(Ꮡt);
+public static void TestAllCapabilitiesDisabled(ж<testing.T> t) {
+    MustHaveDebugOptionsSupport(t);
 
     if (godebug.New(cpuAllˢ).Value() != "off"u8) {
-        Ꮡt.Skipf("skipping test: GODEBUG=cpu.all=off not set"u8);
+        t.Skipf("skipping test: GODEBUG=cpu.all=off not set");
     }
 
     foreach (var (_, o) in cpu_internal_test_package.Options) {
         var want = false;
         {
             var got = o.Feature.Value; if (got != want) {
-                Ꮡt.Errorf("%v: expected %v, got %v"u8, o.Name, want, got);
+                t.Errorf("%v: expected %v, got %v", o.Name, want, got);
             }
         }
     }

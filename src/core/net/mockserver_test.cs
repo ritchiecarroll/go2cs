@@ -26,7 +26,8 @@ using static go.net_package;
 partial class net_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sockˢ = "sock"u8;
+internal static ref readonly @string sockˢ => ref sockˢᵇ;
+private static readonly @string sockˢᵇ = "sock"u8;
 
 // testUnixAddr uses os.MkdirTemp to get a name that is unique.
 internal static @string testUnixAddr(testing.TB t) {
@@ -34,12 +35,12 @@ internal static @string testUnixAddr(testing.TB t) {
     // If we end up with a name longer than the sun_path field in the sockaddr_un
     // struct, we won't be able to make the syscall to open the socket.
     var (d, err) = Δos.MkdirTemp(""u8, ""u8);
-    if (err != default!) {
+    if (err != nil) {
         t.Fatal(err);
     }
     t.Cleanup(() => {
         {
-            var errΔ1 = Δos.RemoveAll(d); if (errΔ1 != default!) {
+            var errΔ1 = Δos.RemoveAll(d); if (errΔ1 != nil) {
                 t.Error(errΔ1);
             }
         }
@@ -53,7 +54,7 @@ internal static readonly object tooManyListenConfigsˢ = (@string)"too many List
 internal static global::go.net_package.Listener newLocalListener(testing.TB t, @string network, params Span<ж<global::go.net_package.ListenConfig>> lcOptʗp) {
     var lcOpt = lcOptʗp.sslice();
 
-    ж<global::go.net_package.ListenConfig> lc = default!;
+    ж<global::go.net_package.ListenConfig> lc = default;
     switch (len(lcOpt)) {
     case 0: {
         lc = @new<global::go.net_package.ListenConfig>();
@@ -72,7 +73,7 @@ internal static global::go.net_package.Listener newLocalListener(testing.TB t, @
     var lcʗ1 = lc;
     global::go.net_package.Listener listen(@string net, @string addr) {
         var (ln, err) = lcʗ1.Listen(context.Background(), net, addr);
-        if (err != default!) {
+        if (err != nil) {
             t.Helper();
             t.Fatal(err);
         }
@@ -80,35 +81,40 @@ internal static global::go.net_package.Listener newLocalListener(testing.TB t, @
     }
 
     var exprᴛ1 = network;
-    if (exprᴛ1 == "tcp"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "tcp"u8: {
         if (supportsIPv4()) {
-            return listen(tcp4ˢ, "127.0.0.1:0"u8);
+            return listen(tcp4ˢ, "127.0.0.1:0");
         }
         if (supportsIPv6()) {
-            return listen(tcp6ˢ, "[::1]:0"u8);
+            return listen(tcp6ˢ, "[::1]:0");
         }
+        break;
     }
-    else if (exprᴛ1 == "tcp4"u8) {
+    case {} when exprᴛ1 == "tcp4"u8: {
         if (supportsIPv4()) {
-            return listen(tcp4ˢ, "127.0.0.1:0"u8);
+            return listen(tcp4ˢ, "127.0.0.1:0");
         }
+        break;
     }
-    else if (exprᴛ1 == "tcp6"u8) {
+    case {} when exprᴛ1 == "tcp6"u8: {
         if (supportsIPv6()) {
-            return listen(tcp6ˢ, "[::1]:0"u8);
+            return listen(tcp6ˢ, "[::1]:0");
         }
+        break;
     }
-    else if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8) {
+    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8: {
         return listen(network, testUnixAddr(t));
-    }
+    }}
 
     t.Helper();
-    t.Fatalf("%s is not supported"u8, network);
-    return default!;
+    t.Fatalf("%s is not supported", network);
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noDualstackPortAvailableˢ = "no dualstack port available"u8;
+internal static ref readonly @string noDualstackPortAvailableˢ => ref noDualstackPortAvailableˢᵇ;
+private static readonly @string noDualstackPortAvailableˢᵇ = "no dualstack port available"u8;
 
 internal partial struct newDualStackListener_type /*dyn*/ {
     internal @string network;
@@ -116,23 +122,23 @@ internal partial struct newDualStackListener_type /*dyn*/ {
 }
 
 internal static (slice<ж<global::go.net_package.TCPListener>> lns, error err) newDualStackListener() {
-    slice<newDualStackListener_type> args = new newDualStackListener_type[]{
-        new("tcp4"u8, new TCPAddr(IP: IPv4(127, 0, 0, 1))),
-        new("tcp6"u8, new TCPAddr(IP: IPv6loopback))
-    }.slice();
+    slice<newDualStackListener_type> args = slice<newDualStackListener_type>([
+        new("tcp4", new TCPAddr(IP: IPv4(127, 0, 0, 1))),
+        new("tcp6", new TCPAddr(IP: IPv6loopback))
+    ]);
     for (nint i = 0; i < 64; i++) {
-        nint port = default!;
-        slice<ж<global::go.net_package.TCPListener>> lnsΔ1 = default!;
+        nint port = default;
+        slice<ж<global::go.net_package.TCPListener>> lnsΔ1 = default;
         foreach (var (_, vᴛ1) in args) {
             ref var arg = ref heap(new newDualStackListener_type(), out var Ꮡarg);
             arg = vᴛ1;
 
             arg.TCPAddr.Port = port;
             var (ln, errΔ1) = ListenTCP(arg.network, Ꮡarg.of(newDualStackListener_type.ᏑTCPAddr));
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 continue;
             }
-            port = ln.Addr()._<ж<global::go.net_package.TCPAddr>>().Value.Port;
+            port = ln.Addr()._<ж<global::go.net_package.TCPAddr>>().Port;
             lnsΔ1 = append(lnsΔ1, ln);
         }
         if (len(lnsΔ1) != len(args)) {
@@ -141,15 +147,15 @@ internal static (slice<ж<global::go.net_package.TCPListener>> lns, error err) n
             }
             continue;
         }
-        return (lnsΔ1, default!);
+        return (lnsΔ1, default);
     }
-    return (default!, errors.New(noDualstackPortAvailableˢ));
+    return (default, errors.New(noDualstackPortAvailableˢ));
 }
 
 internal partial struct localServer {
     internal Δsync.RWMutex lnmu;
     /*embed*/ public global::go.net_package.Listener Listener;
-    internal channel<bool> done; // signal that indicates server stopped
+    internal channel<bool> done;                    // signal that indicates server stopped
     internal slice<global::go.net_package.Conn> cl; // accepted connection list
 }
 
@@ -158,7 +164,7 @@ internal static partial error buildup(this ж<localServer> Ꮡls, Action<ж<loca
         handler(Ꮡls, Ꮡls.Value.Listener);
         builtin.close(Ꮡls.Value.done);
     });
-    return default!;
+    return default;
 }
 
 internal static error teardown(this ж<localServer> Ꮡls) {
@@ -167,30 +173,32 @@ internal static error teardown(this ж<localServer> Ꮡls) {
     try {
         ref var ls = ref Ꮡls.DerefOrNull();
 
-        Ꮡls.of(localServer.Ꮡlnmu).Lock();
+        Ꮡls.Ꮡlnmu.Lock();
         ᒐd1 = true;
-        if (ls.Listener != default!) {
+        if (ls.Listener != nil) {
             @string network = ls.Listener.Addr().Network();
             @string address = ls.Listener.Addr().String();
             ls.Listener.Close();
             foreach (var (_, c) in ls.cl) {
                 {
-                    var err = c.Close(); if (err != default!) {
+                    var err = c.Close(); if (err != nil) {
                         return err;
                     }
                 }
             }
             ᐸꟷ(ls.done);
-            ls.Listener = default!;
+            ls.Listener = default;
             var exprᴛ1 = network;
-            if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8: {
                 Δos.Remove(address);
-            }
+                break;
+            }}
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡls.of(localServer.Ꮡlnmu).Unlock(); ᒐ.Run(); }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
+    finally { if (ᒐd1) Ꮡls.Ꮡlnmu.Unlock(); ᒐ.Run(); }
 }
 
 internal static partial ж<localServer> newLocalServer(testing.TB t, @string network) {
@@ -226,64 +234,64 @@ internal static partial error buildup(this ж<dualStackServer> Ꮡdss, Action<ж
             builtin.close(Ꮡdss.Value.lns[iΔ1].done);
         }, i);
     }
-    return default!;
+    return default;
 }
 
 internal static error teardownNetwork(this ж<dualStackServer> Ꮡdss, @string network) {
     ref var dss = ref Ꮡdss.DerefOrNull();
 
-    Ꮡdss.of(dualStackServer.Ꮡlnmu).Lock();
+    Ꮡdss.Ꮡlnmu.Lock();
     foreach (var i in range(dss.lns)) {
-        if (network == dss.lns[i].network && dss.lns[i].Listener != default!) {
+        if (network == dss.lns[i].network && dss.lns[i].Listener != nil) {
             dss.lns[i].Listener.Close();
             ᐸꟷ(dss.lns[i].done);
-            dss.lns[i].Listener = default!;
+            dss.lns[i].Listener = default;
         }
     }
-    Ꮡdss.of(dualStackServer.Ꮡlnmu).Unlock();
-    return default!;
+    Ꮡdss.Ꮡlnmu.Unlock();
+    return default;
 }
 
 internal static error teardown(this ж<dualStackServer> Ꮡdss) {
     ref var dss = ref Ꮡdss.DerefOrNull();
 
-    Ꮡdss.of(dualStackServer.Ꮡlnmu).Lock();
+    Ꮡdss.Ꮡlnmu.Lock();
     foreach (var i in range(dss.lns)) {
-        if (dss.lns[i].Listener != default!) {
+        if (dss.lns[i].Listener != nil) {
             dss.lns[i].Listener.Close();
             ᐸꟷ(dss.lns[i].done);
         }
     }
     dss.lns = dss.lns[..0];
-    Ꮡdss.of(dualStackServer.Ꮡlnmu).Unlock();
-    Ꮡdss.of(dualStackServer.Ꮡcmu).Lock();
+    Ꮡdss.Ꮡlnmu.Unlock();
+    Ꮡdss.Ꮡcmu.Lock();
     foreach (var (_, c) in dss.cs) {
         c.Close();
     }
     dss.cs = dss.cs[..0];
-    Ꮡdss.of(dualStackServer.Ꮡcmu).Unlock();
-    return default!;
+    Ꮡdss.Ꮡcmu.Unlock();
+    return default;
 }
 
 internal static (ж<dualStackServer>, error) newDualStackServer() {
     var (lns, err) = newDualStackListener();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     ref var port = ref heap<@string>(out var Ꮡport);
     (_, port, err) = SplitHostPort(lns[0].Addr().String());
-    if (err != default!) {
+    if (err != nil) {
         lns[0].Close();
         lns[1].Close();
-        return (default!, err);
+        return (default, err);
     }
     return (Ꮡ(new dualStackServer(
-        lns: new streamListener[]{
-            new(network: "tcp4"u8, address: lns[0].Addr().String(), Listener: new global::go.net_package.TCPListenerжListener(lns[0]), done: new channel<bool>(0)),
-            new(network: "tcp6"u8, address: lns[1].Addr().String(), Listener: new global::go.net_package.TCPListenerжListener(lns[1]), done: new channel<bool>(0))
-        }.slice(),
+        lns: slice<streamListener>([
+            new(network: "tcp4", address: lns[0].Addr().String(), Listener: new global::go.net_package.TCPListenerжListener(lns[0]), done: new channel<bool>(0)),
+            new(network: "tcp6", address: lns[1].Addr().String(), Listener: new global::go.net_package.TCPListenerжListener(lns[1]), done: new channel<bool>(0))
+        ]),
         port: port
-    )), default!);
+    )), default);
 }
 
 internal static void transponder(this ж<localServer> Ꮡls, global::go.net_package.Listener ln, channel/*<-*/<error> ch) {
@@ -303,9 +311,9 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
             break;
         }}
         var (c, err) = ln.Accept();
-        if (err != default!) {
+        if (err != nil) {
             {
-                var perr = parseAcceptError(err); if (perr != default!) {
+                var perr = parseAcceptError(err); if (perr != nil) {
                     ch.ᐸꟷ(perr);
                 }
             }
@@ -325,9 +333,9 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
 
         var b = new slice<byte>(256);
         (var n, err) = c.Read(b);
-        if (err != default!) {
+        if (err != nil) {
             {
-                var perr = parseReadError(err); if (perr != default!) {
+                var perr = parseReadError(err); if (perr != nil) {
                     ch.ᐸꟷ(perr);
                 }
             }
@@ -335,9 +343,9 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
             return;
         }
         {
-            var (_, errΔ1) = c.Write(b.slice(0, n)); if (errΔ1 != default!) {
+            var (_, errΔ1) = c.Write(b.slice(0, n)); if (errΔ1 != nil) {
                 {
-                    var perr = parseWriteError(errΔ1); if (perr != default!) {
+                    var perr = parseWriteError(errΔ1); if (perr != nil) {
                         ch.ᐸꟷ(perr);
                     }
                 }
@@ -360,9 +368,9 @@ internal static void transceiver(global::go.net_package.Conn c, slice<byte> wb, 
         c.SetWriteDeadline(time.Now().Add(someTimeout));
 
         var (n, err) = c.Write(wb);
-        if (err != default!) {
+        if (err != nil) {
             {
-                var perr = parseWriteError(err); if (perr != default!) {
+                var perr = parseWriteError(err); if (perr != nil) {
                     ch.ᐸꟷ(perr);
                 }
             }
@@ -374,9 +382,9 @@ internal static void transceiver(global::go.net_package.Conn c, slice<byte> wb, 
         }
         var rb = new slice<byte>(len(wb));
         (n, err) = c.Read(rb);
-        if (err != default!) {
+        if (err != nil) {
             {
-                var perr = parseReadError(err); if (perr != default!) {
+                var perr = parseReadError(err); if (perr != nil) {
                     ch.ᐸꟷ(perr);
                 }
             }
@@ -392,13 +400,15 @@ internal static void transceiver(global::go.net_package.Conn c, slice<byte> wb, 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string udp4ˢ = "udp4"u8;
-internal static readonly @string udp6ˢ = "udp6"u8;
+internal static ref readonly @string udp4ˢ => ref udp4ˢᵇ;
+private static readonly @string udp4ˢᵇ = "udp4"u8;
+internal static ref readonly @string udp6ˢ => ref udp6ˢᵇ;
+private static readonly @string udp6ˢᵇ = "udp6"u8;
 
 internal static global::go.net_package.PacketConn newLocalPacketListener(testing.TB t, @string network, params Span<ж<global::go.net_package.ListenConfig>> lcOptʗp) {
     var lcOpt = lcOptʗp.sslice();
 
-    ж<global::go.net_package.ListenConfig> lc = default!;
+    ж<global::go.net_package.ListenConfig> lc = default;
     switch (len(lcOpt)) {
     case 0: {
         lc = @new<global::go.net_package.ListenConfig>();
@@ -417,7 +427,7 @@ internal static global::go.net_package.PacketConn newLocalPacketListener(testing
     var lcʗ1 = lc;
     global::go.net_package.PacketConn listenPacket(@string net, @string addr) {
         var (c, err) = lcʗ1.ListenPacket(context.Background(), net, addr);
-        if (err != default!) {
+        if (err != nil) {
             t.Helper();
             t.Fatal(err);
         }
@@ -426,30 +436,34 @@ internal static global::go.net_package.PacketConn newLocalPacketListener(testing
 
     t.Helper();
     var exprᴛ1 = network;
-    if (exprᴛ1 == "udp"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "udp"u8: {
         if (supportsIPv4()) {
-            return listenPacket(udp4ˢ, "127.0.0.1:0"u8);
+            return listenPacket(udp4ˢ, "127.0.0.1:0");
         }
         if (supportsIPv6()) {
-            return listenPacket(udp6ˢ, "[::1]:0"u8);
+            return listenPacket(udp6ˢ, "[::1]:0");
         }
+        break;
     }
-    else if (exprᴛ1 == "udp4"u8) {
+    case {} when exprᴛ1 == "udp4"u8: {
         if (supportsIPv4()) {
-            return listenPacket(udp4ˢ, "127.0.0.1:0"u8);
+            return listenPacket(udp4ˢ, "127.0.0.1:0");
         }
+        break;
     }
-    else if (exprᴛ1 == "udp6"u8) {
+    case {} when exprᴛ1 == "udp6"u8: {
         if (supportsIPv6()) {
-            return listenPacket(udp6ˢ, "[::1]:0"u8);
+            return listenPacket(udp6ˢ, "[::1]:0");
         }
+        break;
     }
-    else if (exprᴛ1 == "unixgram"u8) {
+    case {} when exprᴛ1 == "unixgram"u8: {
         return listenPacket(network, testUnixAddr(t));
-    }
+    }}
 
-    t.Fatalf("%s is not supported"u8, network);
-    return default!;
+    t.Fatalf("%s is not supported", network);
+    return default;
 }
 
 internal partial struct newDualStackPacketListener_type /*dyn*/ {
@@ -458,23 +472,23 @@ internal partial struct newDualStackPacketListener_type /*dyn*/ {
 }
 
 internal static (slice<ж<global::go.net_package.UDPConn>> cs, error err) newDualStackPacketListener() {
-    slice<newDualStackPacketListener_type> args = new newDualStackPacketListener_type[]{
-        new("udp4"u8, new UDPAddr(IP: IPv4(127, 0, 0, 1))),
-        new("udp6"u8, new UDPAddr(IP: IPv6loopback))
-    }.slice();
+    slice<newDualStackPacketListener_type> args = slice<newDualStackPacketListener_type>([
+        new("udp4", new UDPAddr(IP: IPv4(127, 0, 0, 1))),
+        new("udp6", new UDPAddr(IP: IPv6loopback))
+    ]);
     for (nint i = 0; i < 64; i++) {
-        nint port = default!;
-        slice<ж<global::go.net_package.UDPConn>> csΔ1 = default!;
+        nint port = default;
+        slice<ж<global::go.net_package.UDPConn>> csΔ1 = default;
         foreach (var (_, vᴛ1) in args) {
             ref var arg = ref heap(new newDualStackPacketListener_type(), out var Ꮡarg);
             arg = vᴛ1;
 
             arg.UDPAddr.Port = port;
             var (c, errΔ1) = ListenUDP(arg.network, Ꮡarg.of(newDualStackPacketListener_type.ᏑUDPAddr));
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 continue;
             }
-            port = c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr()._<ж<global::go.net_package.UDPAddr>>().Value.Port;
+            port = c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr()._<ж<global::go.net_package.UDPAddr>>().Port;
             csΔ1 = append(csΔ1, c);
         }
         if (len(csΔ1) != len(args)) {
@@ -483,9 +497,9 @@ internal static (slice<ж<global::go.net_package.UDPConn>> cs, error err) newDua
             }
             continue;
         }
-        return (csΔ1, default!);
+        return (csΔ1, default);
     }
-    return (default!, errors.New(noDualstackPortAvailableˢ));
+    return (default, errors.New(noDualstackPortAvailableˢ));
 }
 
 internal partial struct localPacketServer {
@@ -499,26 +513,28 @@ internal static partial error buildup(this ж<localPacketServer> Ꮡls, Action<�
         handler(Ꮡls, Ꮡls.Value.PacketConn);
         builtin.close(Ꮡls.Value.done);
     });
-    return default!;
+    return default;
 }
 
 internal static error teardown(this ж<localPacketServer> Ꮡls) {
     ref var ls = ref Ꮡls.DerefOrNull();
 
-    Ꮡls.of(localPacketServer.Ꮡpcmu).Lock();
-    if (ls.PacketConn != default!) {
+    Ꮡls.Ꮡpcmu.Lock();
+    if (ls.PacketConn != nil) {
         @string network = ls.PacketConn.LocalAddr().Network();
         @string address = ls.PacketConn.LocalAddr().String();
         ls.PacketConn.Close();
         ᐸꟷ(ls.done);
-        ls.PacketConn = default!;
+        ls.PacketConn = default;
         var exprᴛ1 = network;
-        if (exprᴛ1 == "unixgram"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "unixgram"u8: {
             Δos.Remove(address);
-        }
+            break;
+        }}
     }
-    Ꮡls.of(localPacketServer.Ꮡpcmu).Unlock();
-    return default!;
+    Ꮡls.Ꮡpcmu.Unlock();
+    return default;
 }
 
 internal static partial ж<localPacketServer> newLocalPacketServer(testing.TB t, @string network) {
@@ -546,34 +562,37 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
 
         var b = new slice<byte>(256);
         var (n, peer, err) = c.ReadFrom(b);
-        if (err != default!) {
+        if (err != nil) {
             {
-                var perr = parseReadError(err); if (perr != default!) {
+                var perr = parseReadError(err); if (perr != nil) {
                     ch.ᐸꟷ(perr);
                 }
             }
             ch.ᐸꟷ(err);
             return;
         }
-        if (peer == default!) { // for connected-mode sockets
+        if (peer == nil) { // for connected-mode sockets
             var exprᴛ1 = c.LocalAddr().Network();
-            if (exprᴛ1 == "udp"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "udp"u8: {
                 var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, (@string)(b.slice(0, n)));
                 (peer, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
+                break;
             }
-            else if (exprᴛ1 == "unixgram"u8) {
+            case {} when exprᴛ1 == "unixgram"u8: {
                 var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, (@string)(b.slice(0, n)));
                 (peer, err) = (new global::go.net_package.UnixAddrжΔAddr(ᴛ1), ᴛ2);
-            }
-            if (err != default!) {
+                break;
+            }}
+            if (err != nil) {
                 ch.ᐸꟷ(err);
                 return;
             }
         }
         {
-            var (_, errΔ1) = c.WriteTo(b.slice(0, n), peer); if (errΔ1 != default!) {
+            var (_, errΔ1) = c.WriteTo(b.slice(0, n), peer); if (errΔ1 != nil) {
                 {
-                    var perr = parseWriteError(errΔ1); if (perr != default!) {
+                    var perr = parseWriteError(errΔ1); if (perr != nil) {
                         ch.ᐸꟷ(perr);
                     }
                 }
@@ -596,9 +615,9 @@ internal static void packetTransceiver(global::go.net_package.PacketConn c, slic
         c.SetWriteDeadline(time.Now().Add(someTimeout));
 
         var (n, err) = c.WriteTo(wb, dst);
-        if (err != default!) {
+        if (err != nil) {
             {
-                var perr = parseWriteError(err); if (perr != default!) {
+                var perr = parseWriteError(err); if (perr != nil) {
                     ch.ᐸꟷ(perr);
                 }
             }
@@ -610,9 +629,9 @@ internal static void packetTransceiver(global::go.net_package.PacketConn c, slic
         }
         var rb = new slice<byte>(len(wb));
         (n, _, err) = c.ReadFrom(rb);
-        if (err != default!) {
+        if (err != nil) {
             {
-                var perr = parseReadError(err); if (perr != default!) {
+                var perr = parseReadError(err); if (perr != nil) {
                     ch.ᐸꟷ(perr);
                 }
             }
@@ -628,20 +647,20 @@ internal static void packetTransceiver(global::go.net_package.PacketConn c, slic
 }
 
 internal static partial (global::go.net_package.Conn client, global::go.net_package.Conn server) spawnTestSocketPair(testing.TB t, @string net) {
-    global::go.net_package.Conn client = default!;
-    global::go.net_package.Conn server = default!;
+    global::go.net_package.Conn client = default;
+    global::go.net_package.Conn server = default;
     GoFrame ᒐ = default;
     try {
         t.Helper();
 
         if (!testableNetwork(net)) {
-            t.Skipf("network %q not supported"u8, net);
+            t.Skipf("network %q not supported", net);
         }
 
         var ln = newLocalListener(t, net);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
-        error cerr = default!;
+        error cerr = default;
         ref var serr = ref heap<error>(out var Ꮡserr);
         var acceptDone = new channel<EmptyStruct>(0);
         var acceptDoneʗ1 = acceptDone;
@@ -652,14 +671,14 @@ internal static partial (global::go.net_package.Conn client, global::go.net_pack
         });
         (client, cerr) = Dial(ln.Addr().Network(), ln.Addr().String());
         ᐸꟷ(acceptDone);
-        if (cerr != default!) {
-            if (server != default!) {
+        if (cerr != nil) {
+            if (server != nil) {
                 server.Close();
             }
             t.Fatal(cerr);
         }
-        if (serr != default!) {
-            if (client != default!) {
+        if (serr != nil) {
+            if (client != nil) {
                 client.Close();
             }
             t.Fatal(serr);
@@ -671,7 +690,8 @@ internal static partial (global::go.net_package.Conn client, global::go.net_pack
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tmpdirˢ = "TMPDIR"u8;
+internal static ref readonly @string tmpdirˢ => ref tmpdirˢᵇ;
+private static readonly @string tmpdirˢᵇ = "TMPDIR"u8;
 
 internal partial interface startTestSocketPeer_type /*dyn*/ {
     (ж<Δos.File>, error) File();
@@ -680,32 +700,32 @@ internal partial interface startTestSocketPeer_type /*dyn*/ {
 internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.TB t, global::go.net_package.Conn conn, @string op, nint chunkSize, nint totalSize) {
     t.Helper();
     var (f, err) = conn._<startTestSocketPeer_type>().File();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var cmd = testenv.Command(t, testenv.Executable(t));
-    cmd.Value.Env = new @string[]{
-        "GO_NET_TEST_TRANSFER=1"u8,
+    cmd.Env = slice<@string>([
+        "GO_NET_TEST_TRANSFER=1",
         "GO_NET_TEST_TRANSFER_OP="u8 + op,
         "GO_NET_TEST_TRANSFER_CHUNK_SIZE="u8 + strconv.Itoa(chunkSize),
         "GO_NET_TEST_TRANSFER_TOTAL_SIZE="u8 + strconv.Itoa(totalSize),
         "TMPDIR="u8 + Δos.Getenv(tmpdirˢ)
-    }.slice();
-    if (Δruntime.GOOS == "windows"u8){
+    ]);
+    if (Δruntime.GOOS == "windows"u8) {
         // Windows doesn't support ExtraFiles
         var fd = f.Fd();
-        cmd.Value.Env = append((~cmd).Env, "GO_NET_TEST_TRANSFER_FD="u8 + strconv.FormatUint((uint64)fd, 10));
+        cmd.Env = append(cmd.Env, "GO_NET_TEST_TRANSFER_FD="u8 + strconv.FormatUint((uint64)fd, 10));
         addCmdInheritedHandle(cmd, fd);
     } else {
-        cmd.Value.ExtraFiles = append((~cmd).ExtraFiles, f);
+        cmd.ExtraFiles = append(cmd.ExtraFiles, f);
     }
-    cmd.Value.Stdout = new Δos.FileжWriter(Δos.Stdout);
-    cmd.Value.Stderr = new Δos.FileжWriter(Δos.Stderr);
+    cmd.Stdout = new Δos.FileжWriter(Δos.Stdout);
+    cmd.Stderr = new Δos.FileжWriter(Δos.Stderr);
 
     {
-        var errΔ1 = cmd.Start(); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
@@ -723,83 +743,87 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
     var cmdChʗ2 = cmdCh;
     return ((testing.TB tb) => {
         var errΔ3 = ᐸꟷ(cmdChʗ2);
-        if (errΔ3 != default!) {
-            tb.Errorf("process exited with error: %v"u8, errΔ3);
+        if (errΔ3 != nil) {
+            tb.Errorf("process exited with error: %v", errΔ3);
         }
-    }, default!);
+    }, default);
 }
 
 [GoInit] internal static void init() {
     GoFrame ᒐ = default;
     try {
-        if (Δos.Getenv("GO_NET_TEST_TRANSFER"u8) == ""u8) {
+        if (Δos.Getenv("GO_NET_TEST_TRANSFER") == ""u8) {
             return;
         }
         defer(Δos.Exit, (nint)0, ref ᒐ);
 
-        uintptr fd = default!;
-        if (Δruntime.GOOS == "windows"u8){
-            var (v, errΔ1) = strconv.ParseUint(Δos.Getenv("GO_NET_TEST_TRANSFER_FD"u8), 10, 0);
-            if (errΔ1 != default!) {
+        uintptr fd = default;
+        if (Δruntime.GOOS == "windows"u8) {
+            var (v, errΔ1) = strconv.ParseUint(Δos.Getenv("GO_NET_TEST_TRANSFER_FD"), 10, 0);
+            if (errΔ1 != nil) {
                 Δlog.Fatal(errΔ1);
             }
             fd = (uintptr)v;
         } else {
             fd = (uintptr)3;
         }
-        var f = Δos.NewFile(fd, "splice-test-conn"u8);
+        var f = Δos.NewFile(fd, "splice-test-conn");
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         var (conn, err) = FileConn(f);
-        if (err != default!) {
+        if (err != nil) {
             Δlog.Fatal(err);
         }
 
-        nint chunkSize = default!;
+        nint chunkSize = default;
         {
-            (chunkSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_CHUNK_SIZE"u8)); if (err != default!) {
+            (chunkSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_CHUNK_SIZE")); if (err != nil) {
                 Δlog.Fatal(err);
             }
         }
         var buf = new slice<byte>(chunkSize);
 
-        nint totalSize = default!;
+        nint totalSize = default;
         {
-            (totalSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_TOTAL_SIZE"u8)); if (err != default!) {
+            (totalSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_TOTAL_SIZE")); if (err != nil) {
                 Δlog.Fatal(err);
             }
         }
 
-        Func<slice<byte>, (nint, error)> fn = default!;
+        Func<slice<byte>, (nint, error)> fn = default;
         {
-            @string op = Δos.Getenv("GO_NET_TEST_TRANSFER_OP"u8);
+            @string op = Δos.Getenv("GO_NET_TEST_TRANSFER_OP");
             var exprᴛ1 = op;
-            if (exprᴛ1 == "r"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "r"u8: {
                 var connʗ1 = conn;
                                 fn = connʗ1.Read;
+                break;
             }
-            else if (exprᴛ1 == "w"u8) {
+            case {} when exprᴛ1 == "w"u8: {
                 var connʗ2 = conn;
                 defer(() => connʗ2.Close(), ref ᒐ);
 
                 var connʗ3 = conn;
                                 fn = connʗ3.Write;
+                break;
             }
-            else { /* default: */
-                Δlog.Fatalf("unknown op %q"u8, op);
-            }
+            default: {
+                Δlog.Fatalf("unknown op %q", op);
+                break;
+            }}
         }
 
-        nint n = default!;
+        nint n = default;
         for (nint count = 0; count < totalSize; count += n) {
             if (count + chunkSize > totalSize) {
                 buf = buf.slice(0, totalSize - count);
             }
 
-            error errΔ2 = default!;
+            error errΔ2 = default;
             {
-                (n, errΔ2) = fn(buf); if (errΔ2 != default!) {
+                (n, errΔ2) = fn(buf); if (errΔ2 != nil) {
                     return;
                 }
             }

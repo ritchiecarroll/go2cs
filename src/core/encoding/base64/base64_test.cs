@@ -26,31 +26,31 @@ internal partial struct testpair {
     internal @string decoded, encoded;
 }
 
-internal static slice<testpair> pairs = new testpair[]{
+internal static slice<testpair> pairs = slice<testpair>([
     // RFC 3548 examples
-    new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e})), "FPucA9l+"u8),
-    new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03, 0xd9})), "FPucA9k="u8),
-    new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03})), "FPucAw=="u8),
+    new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e})), "FPucA9l+"),
+    new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03, 0xd9})), "FPucA9k="),
+    new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03})), "FPucAw=="),
 
     // RFC 4648 examples
-    new(""u8, ""u8),
-    new("f"u8, "Zg=="u8),
-    new("fo"u8, "Zm8="u8),
-    new("foo"u8, "Zm9v"u8),
-    new("foob"u8, "Zm9vYg=="u8),
-    new("fooba"u8, "Zm9vYmE="u8),
-    new("foobar"u8, "Zm9vYmFy"u8),
+    new("", ""),
+    new("f", "Zg=="),
+    new("fo", "Zm8="),
+    new("foo", "Zm9v"),
+    new("foob", "Zm9vYg=="),
+    new("fooba", "Zm9vYmE="),
+    new("foobar", "Zm9vYmFy"),
 
     // Wikipedia examples
-    new("sure."u8, "c3VyZS4="u8),
-    new("sure"u8, "c3VyZQ=="u8),
-    new("sur"u8, "c3Vy"u8),
-    new("su"u8, "c3U="u8),
-    new("leasure."u8, "bGVhc3VyZS4="u8),
-    new("easure."u8, "ZWFzdXJlLg=="u8),
-    new("asure."u8, "YXN1cmUu"u8),
-    new("sure."u8, "c3VyZS4="u8)
-}.slice();
+    new("sure.", "c3VyZS4="),
+    new("sure", "c3VyZQ=="),
+    new("sur", "c3Vy"),
+    new("su", "c3U="),
+    new("leasure.", "bGVhc3VyZS4="),
+    new("easure.", "ZWFzdXJlLg=="),
+    new("asure.", "YXN1cmUu"),
+    new("sure.", "c3VyZS4=")
+]);
 
 // Do nothing to a reference base64 string (leave in standard format)
 internal static @string stdRef(@string @ref) {
@@ -59,14 +59,14 @@ internal static @string stdRef(@string @ref) {
 
 // Convert a reference string to URL-encoding
 internal static @string urlRef(@string @ref) {
-    @ref = strings.ReplaceAll(@ref, "+"u8, "-"u8);
-    @ref = strings.ReplaceAll(@ref, "/"u8, "_"u8);
+    @ref = strings.ReplaceAll(@ref, "+", "-");
+    @ref = strings.ReplaceAll(@ref, "/", "_");
     return @ref;
 }
 
 // Convert a reference string to raw, unpadded format
 internal static @string rawRef(@string @ref) {
-    return strings.TrimRight(@ref, "="u8);
+    return strings.TrimRight(@ref, "=");
 }
 
 // Both URL and unpadding conversions
@@ -74,23 +74,24 @@ internal static @string rawURLRef(@string @ref) {
     return rawRef(urlRef(@ref));
 }
 
-internal static readonly @string encodeStd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"u8;
+internal static ref readonly @string encodeStd => ref encodeStdᵇ;
+private static readonly @string encodeStdᵇ = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"u8;
 
 // A nonstandard encoding with a funny padding character, for testing
 internal static ж<global::go.encoding.base64_package.Encoding> funnyEncoding;
-internal static void initᴛfunnyEncoding() { funnyEncoding = (~NewEncoding(encodeStd)).WithPadding((rune)(rune)'@'); }
+internal static void initᴛfunnyEncoding() { funnyEncoding = (~NewEncoding(encodeStd)).WithPadding((rune)'@'); }
 
 internal static @string funnyRef(@string @ref) {
-    return strings.ReplaceAll(@ref, "="u8, "@"u8);
+    return strings.ReplaceAll(@ref, "=", "@");
 }
 
 internal partial struct encodingTest {
-    internal ж<global::go.encoding.base64_package.Encoding> enc;        // Encoding to test
-    internal Func<@string, @string> conv; // Reference string converter
+    internal ж<global::go.encoding.base64_package.Encoding> enc; // Encoding to test
+    internal Func<@string, @string> conv;                        // Reference string converter
 }
 
 internal static slice<encodingTest> encodingTests;
-internal static void initᴛencodingTests() { encodingTests = new encodingTest[]{
+internal static void initᴛencodingTests() { encodingTests = slice<encodingTest>([
     new(StdEncoding, stdRef),
     new(URLEncoding, urlRef),
     new(RawStdEncoding, rawRef),
@@ -101,59 +102,65 @@ internal static void initᴛencodingTests() { encodingTests = new encodingTest[]
     new((~RawStdEncoding).Strict(), rawRef),
     new((~RawURLEncoding).Strict(), rawURLRef),
     new((~funnyEncoding).Strict(), funnyRef)
-}.slice(); }
+]); }
 
 internal static testpair bigtest = new testpair(
-    "Twas brillig, and the slithy toves"u8,
-    "VHdhcyBicmlsbGlnLCBhbmQgdGhlIHNsaXRoeSB0b3Zlcw=="u8
+    "Twas brillig, and the slithy toves",
+    "VHdhcyBicmlsbGlnLCBhbmQgdGhlIHNsaXRoeSB0b3Zlcw=="
 );
 
-internal static bool testEqual(ж<testing.T> Ꮡt, @string msg, params ꓸꓸꓸany argsʗp) {
+internal static bool testEqual(ж<testing.T> t, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    Ꮡt.Helper();
+    t.Helper();
     if (!AreEqual(args[len(args) - 2], args[len(args) - 1])) {
-        Ꮡt.Errorf(msg, args.ꓸꓸꓸ);
+        t.Errorf(msg, args.ꓸꓸꓸ);
         return false;
     }
     return true;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string encodeQQWantQˢ = "Encode(%q) = %q, want %q"u8;
-internal static readonly @string appendEncodeLeadQQWantQˢ = @"AppendEncode(""lead"", %q) = %q, want %q"u8;
+internal static ref readonly @string encodeQQWantQˢ => ref encodeQQWantQˢᵇ;
+private static readonly @string encodeQQWantQˢᵇ = "Encode(%q) = %q, want %q"u8;
+internal static ref readonly @string appendEncodeLeadQQWantQˢ => ref appendEncodeLeadQQWantQˢᵇ;
+private static readonly @string appendEncodeLeadQQWantQˢᵇ = @"AppendEncode(""lead"", %q) = %q, want %q"u8;
 
-public static void TestEncode(ж<testing.T> Ꮡt) {
+public static void TestEncode(ж<testing.T> t) {
     foreach (var (_, p) in pairs) {
         foreach (var (_, tt) in encodingTests) {
             @string got = tt.enc.EncodeToString(slice<byte>(p.decoded));
-            testEqual(Ꮡt, encodeQQWantQˢ, p.decoded, got, tt.conv(p.encoded));
+            testEqual(t, encodeQQWantQˢ, p.decoded, got, tt.conv(p.encoded));
             var dst = tt.enc.AppendEncode(slice<byte>("lead"u8), slice<byte>(p.decoded));
-            testEqual(Ꮡt, appendEncodeLeadQQWantQˢ, p.decoded, (@string)dst, "lead" + tt.conv(p.encoded));
+            testEqual(t, appendEncodeLeadQQWantQˢ, p.decoded, (@string)dst, "lead" + tt.conv(p.encoded));
         }
     }
 }
 
-public static void TestEncoder(ж<testing.T> Ꮡt) {
+public static void TestEncoder(ж<testing.T> t) {
     foreach (var (_, p) in pairs) {
-        var bb = Ꮡ(new strings.Builder(nil));
+        var bb = Ꮡ(new strings.Builder());
         var encoder = NewEncoder(StdEncoding, new base64_test_package.strings_BuilderжWriter(bb));
         encoder.Write(slice<byte>(p.decoded));
         encoder.Close();
-        testEqual(Ꮡt, encodeQQWantQˢ, p.decoded, bb.String(), p.encoded);
+        testEqual(t, encodeQQWantQˢ, p.decoded, bb.String(), p.encoded);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string writeQGaveErrorVWantVˢ = "Write(%q) gave error %v, want %v"u8;
-internal static readonly @string writeQGaveLengthVWantVˢ = "Write(%q) gave length %v, want %v"u8;
-internal static readonly @string closeGaveErrorVWantVˢ = "Close gave error %v, want %v"u8;
-internal static readonly @string encodingDOfQQWantQˢ = "Encoding/%d of %q = %q, want %q"u8;
+internal static ref readonly @string writeQGaveErrorVWantVˢ => ref writeQGaveErrorVWantVˢᵇ;
+private static readonly @string writeQGaveErrorVWantVˢᵇ = "Write(%q) gave error %v, want %v"u8;
+internal static ref readonly @string writeQGaveLengthVWantVˢ => ref writeQGaveLengthVWantVˢᵇ;
+private static readonly @string writeQGaveLengthVWantVˢᵇ = "Write(%q) gave length %v, want %v"u8;
+internal static ref readonly @string closeGaveErrorVWantVˢ => ref closeGaveErrorVWantVˢᵇ;
+private static readonly @string closeGaveErrorVWantVˢᵇ = "Close gave error %v, want %v"u8;
+internal static ref readonly @string encodingDOfQQWantQˢ => ref encodingDOfQQWantQˢᵇ;
+private static readonly @string encodingDOfQQWantQˢᵇ = "Encoding/%d of %q = %q, want %q"u8;
 
-public static void TestEncoderBuffering(ж<testing.T> Ꮡt) {
+public static void TestEncoderBuffering(ж<testing.T> t) {
     var input = slice<byte>(bigtest.decoded);
     for (nint bs = 1; bs <= 12; bs++) {
-        var bb = Ꮡ(new strings.Builder(nil));
+        var bb = Ꮡ(new strings.Builder());
         var encoder = NewEncoder(StdEncoding, new base64_test_package.strings_BuilderжWriter(bb));
         for (nint pos = 0; pos < len(input); pos += bs) {
             nint end = pos + bs;
@@ -161,48 +168,56 @@ public static void TestEncoderBuffering(ж<testing.T> Ꮡt) {
                 end = len(input);
             }
             var (n, errΔ1) = encoder.Write(input.slice(pos, end));
-            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, (error)default!);
-            testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input.slice(pos, end), n, end - pos);
+            testEqual(t, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, (error)default);
+            testEqual(t, writeQGaveLengthVWantVˢ, input.slice(pos, end), n, end - pos);
         }
         var err = encoder.Close();
-        testEqual(Ꮡt, closeGaveErrorVWantVˢ, err, (error)default!);
-        testEqual(Ꮡt, encodingDOfQQWantQˢ, bs, bigtest.decoded, bb.String(), bigtest.encoded);
+        testEqual(t, closeGaveErrorVWantVˢ, err, (error)default);
+        testEqual(t, encodingDOfQQWantQˢ, bs, bigtest.decoded, bb.String(), bigtest.encoded);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string decodeQErrorVWantVˢ = "Decode(%q) = error %v, want %v"u8;
-internal static readonly @string decodeQLengthVWantVˢ = "Decode(%q) = length %v, want %v"u8;
-internal static readonly @string decodeQQWantQˢ = "Decode(%q) = %q, want %q"u8;
-internal static readonly @string decodeStringQErrorVWantVˢ = "DecodeString(%q) = error %v, want %v"u8;
-internal static readonly @string decodeStringQQWantQˢ = "DecodeString(%q) = %q, want %q"u8;
-internal static readonly @string appendDecodeQErrorVWantVˢ = "AppendDecode(%q) = error %v, want %v"u8;
-internal static readonly @string appendDecodeLeadQQWantQˢ = @"AppendDecode(""lead"", %q) = %q, want %q"u8;
-internal static readonly @string appendDecodeQQWantQˢ = @"AppendDecode("""", %q) = %q, want %q"u8;
+internal static ref readonly @string decodeQErrorVWantVˢ => ref decodeQErrorVWantVˢᵇ;
+private static readonly @string decodeQErrorVWantVˢᵇ = "Decode(%q) = error %v, want %v"u8;
+internal static ref readonly @string decodeQLengthVWantVˢ => ref decodeQLengthVWantVˢᵇ;
+private static readonly @string decodeQLengthVWantVˢᵇ = "Decode(%q) = length %v, want %v"u8;
+internal static ref readonly @string decodeQQWantQˢ => ref decodeQQWantQˢᵇ;
+private static readonly @string decodeQQWantQˢᵇ = "Decode(%q) = %q, want %q"u8;
+internal static ref readonly @string decodeStringQErrorVWantVˢ => ref decodeStringQErrorVWantVˢᵇ;
+private static readonly @string decodeStringQErrorVWantVˢᵇ = "DecodeString(%q) = error %v, want %v"u8;
+internal static ref readonly @string decodeStringQQWantQˢ => ref decodeStringQQWantQˢᵇ;
+private static readonly @string decodeStringQQWantQˢᵇ = "DecodeString(%q) = %q, want %q"u8;
+internal static ref readonly @string appendDecodeQErrorVWantVˢ => ref appendDecodeQErrorVWantVˢᵇ;
+private static readonly @string appendDecodeQErrorVWantVˢᵇ = "AppendDecode(%q) = error %v, want %v"u8;
+internal static ref readonly @string appendDecodeLeadQQWantQˢ => ref appendDecodeLeadQQWantQˢᵇ;
+private static readonly @string appendDecodeLeadQQWantQˢᵇ = @"AppendDecode(""lead"", %q) = %q, want %q"u8;
+internal static ref readonly @string appendDecodeQQWantQˢ => ref appendDecodeQQWantQˢᵇ;
+private static readonly @string appendDecodeQQWantQˢᵇ = @"AppendDecode("""", %q) = %q, want %q"u8;
 
-public static void TestDecode(ж<testing.T> Ꮡt) {
+public static void TestDecode(ж<testing.T> t) {
     foreach (var (_, p) in pairs) {
         foreach (var (_, tt) in encodingTests) {
             @string encoded = tt.conv(p.encoded);
             var dbuf = new slice<byte>(tt.enc.DecodedLen(len(encoded)));
             var (count, err) = tt.enc.Decode(dbuf, slice<byte>(encoded));
-            testEqual(Ꮡt, decodeQErrorVWantVˢ, encoded, err, (error)default!);
-            testEqual(Ꮡt, decodeQLengthVWantVˢ, encoded, count, len(p.decoded));
-            testEqual(Ꮡt, decodeQQWantQˢ, encoded, (@string)(dbuf.slice(0, count)), p.decoded);
+            testEqual(t, decodeQErrorVWantVˢ, encoded, err, (error)default);
+            testEqual(t, decodeQLengthVWantVˢ, encoded, count, len(p.decoded));
+            testEqual(t, decodeQQWantQˢ, encoded, (@string)(dbuf.slice(0, count)), p.decoded);
 
             (dbuf, err) = tt.enc.DecodeString(encoded);
-            testEqual(Ꮡt, decodeStringQErrorVWantVˢ, encoded, err, (error)default!);
-            testEqual(Ꮡt, decodeStringQQWantQˢ, encoded, (@string)dbuf, p.decoded);
+            testEqual(t, decodeStringQErrorVWantVˢ, encoded, err, (error)default);
+            testEqual(t, decodeStringQQWantQˢ, encoded, (@string)dbuf, p.decoded);
 
             (var dst, err) = tt.enc.AppendDecode(slice<byte>("lead"u8), slice<byte>(encoded));
-            testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, (error)default!);
-            testEqual(Ꮡt, appendDecodeLeadQQWantQˢ, p.encoded, (@string)dst, "lead" + p.decoded);
+            testEqual(t, appendDecodeQErrorVWantVˢ, p.encoded, err, (error)default);
+            testEqual(t, appendDecodeLeadQQWantQˢ, p.encoded, (@string)dst, "lead" + p.decoded);
 
             (var dst2, err) = tt.enc.AppendDecode(dst.slice(0, 0, len(p.decoded)), slice<byte>(encoded));
-            testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, (error)default!);
-            testEqual(Ꮡt, appendDecodeQQWantQˢ, p.encoded, (@string)dst2, p.decoded);
-            if (len(dst) > 0 && len(dst2) > 0 && Ꮡ(dst, 0) != Ꮡ(dst2, 0)) {
-                Ꮡt.Errorf("unexpected capacity growth: got %d, want %d"u8, cap(dst2), cap(dst));
+            testEqual(t, appendDecodeQErrorVWantVˢ, p.encoded, err, (error)default);
+            testEqual(t, appendDecodeQQWantQˢ, p.encoded, (@string)dst2, p.decoded);
+            if (len(dst) > 0 && len(dst2) > 0 && Ꮡelem(dst, 0) != Ꮡelem(dst2, 0)) {
+                t.Errorf("unexpected capacity growth: got %d, want %d", cap(dst2), cap(dst));
             }
         }
     }
@@ -210,51 +225,56 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readFailedˢ = (@string)"Read failed"u8;
-internal static readonly @string readFromQLengthVWantVˢ = "Read from %q = length %v, want %v"u8;
-internal static readonly @string decodingOfQQWantQˢ = "Decoding of %q = %q, want %q"u8;
-internal static readonly @string readFromQVWantVˢ = "Read from %q = %v, want %v"u8;
+internal static ref readonly @string readFromQLengthVWantVˢ => ref readFromQLengthVWantVˢᵇ;
+private static readonly @string readFromQLengthVWantVˢᵇ = "Read from %q = length %v, want %v"u8;
+internal static ref readonly @string decodingOfQQWantQˢ => ref decodingOfQQWantQˢᵇ;
+private static readonly @string decodingOfQQWantQˢᵇ = "Decoding of %q = %q, want %q"u8;
+internal static ref readonly @string readFromQVWantVˢ => ref readFromQVWantVˢᵇ;
+private static readonly @string readFromQVWantVˢᵇ = "Read from %q = %v, want %v"u8;
 
-public static void TestDecoder(ж<testing.T> Ꮡt) {
+public static void TestDecoder(ж<testing.T> t) {
     foreach (var (_, p) in pairs) {
         var decoder = NewDecoder(StdEncoding, new base64_test_package.strings_ReaderжReader(strings.NewReader(p.encoded)));
         var dbuf = new slice<byte>(StdEncoding.DecodedLen(len(p.encoded)));
         var (count, err) = decoder.Read(dbuf);
-        if (err != default! && !AreEqual(err, io.EOF)) {
-            Ꮡt.Fatal(readFailedˢ, err);
+        if (err != nil && !AreEqual(err, io.EOF)) {
+            t.Fatal(readFailedˢ, err);
         }
-        testEqual(Ꮡt, readFromQLengthVWantVˢ, p.encoded, count, len(p.decoded));
-        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, (@string)(dbuf.slice(0, count)), p.decoded);
+        testEqual(t, readFromQLengthVWantVˢ, p.encoded, count, len(p.decoded));
+        testEqual(t, decodingOfQQWantQˢ, p.encoded, (@string)(dbuf.slice(0, count)), p.decoded);
         if (!AreEqual(err, io.EOF)) {
             (_, err) = decoder.Read(dbuf);
         }
-        testEqual(Ꮡt, readFromQVWantVˢ, p.encoded, err, io.EOF);
+        testEqual(t, readFromQVWantVˢ, p.encoded, err, io.EOF);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string decodingDOfQQWantQˢ = "Decoding/%d of %q = %q, want %q"u8;
+internal static ref readonly @string decodingDOfQQWantQˢ => ref decodingDOfQQWantQˢᵇ;
+private static readonly @string decodingDOfQQWantQˢᵇ = "Decoding/%d of %q = %q, want %q"u8;
 
-public static void TestDecoderBuffering(ж<testing.T> Ꮡt) {
+public static void TestDecoderBuffering(ж<testing.T> t) {
     for (nint bs = 1; bs <= 12; bs++) {
         var decoder = NewDecoder(StdEncoding, new base64_test_package.strings_ReaderжReader(strings.NewReader(bigtest.encoded)));
         var buf = new slice<byte>(len(bigtest.decoded) + 12);
-        nint total = default!;
-        nint n = default!;
-        error err = default!;
-        for (total = 0; total < len(bigtest.decoded) && err == default!; ) {
+        nint total = default;
+        nint n = default;
+        error err = default;
+        for (total = 0; total < len(bigtest.decoded) && err == nil; ) {
             (n, err) = decoder.Read(buf.slice(total, total + bs));
             total += n;
         }
-        if (err != default! && !AreEqual(err, io.EOF)) {
-            Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, bigtest.encoded, total, n, err);
+        if (err != nil && !AreEqual(err, io.EOF)) {
+            t.Errorf("Read from %q at pos %d = %d, unexpected error %v", bigtest.encoded, total, n, err);
         }
-        testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, bigtest.encoded, (@string)(buf.slice(0, total)), bigtest.decoded);
+        testEqual(t, decodingDOfQQWantQˢ, bs, bigtest.encoded, (@string)(buf.slice(0, total)), bigtest.decoded);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object decoderWronglyDetectedˢ = (@string)"Decoder wrongly detected corruption in"u8;
-internal static readonly @string corruptionInQAtOffsetVˢ = "Corruption in %q at offset %v, want %v"u8;
+internal static ref readonly @string corruptionInQAtOffsetVˢ => ref corruptionInQAtOffsetVˢᵇ;
+private static readonly @string corruptionInQAtOffsetVˢᵇ = "Corruption in %q at offset %v, want %v"u8;
 internal static readonly object decoderFailedToDetectˢ = (@string)"Decoder failed to detect corruption in"u8;
 
 internal partial struct TestDecodeCorrupt_testCases /*dyn*/ {
@@ -262,70 +282,70 @@ internal partial struct TestDecodeCorrupt_testCases /*dyn*/ {
     internal nint offset; // -1 means no corruption.
 }
 
-public static void TestDecodeCorrupt(ж<testing.T> Ꮡt) {
-    var testCases = new TestDecodeCorrupt_testCases[]{
-        new(""u8, -1),
-        new("\n"u8, -1),
-        new("AAA=\n"u8, -1),
-        new("AAAA\n"u8, -1),
-        new("!!!!"u8, 0),
-        new("===="u8, 0),
-        new("x==="u8, 1),
-        new("=AAA"u8, 0),
-        new("A=AA"u8, 1),
-        new("AA=A"u8, 2),
-        new("AA==A"u8, 4),
-        new("AAA=AAAA"u8, 4),
-        new("AAAAA"u8, 4),
-        new("AAAAAA"u8, 4),
-        new("A="u8, 1),
-        new("A=="u8, 1),
-        new("AA="u8, 3),
-        new("AA=="u8, -1),
-        new("AAA="u8, -1),
-        new("AAAA"u8, -1),
-        new("AAAAAA="u8, 7),
-        new("YWJjZA====="u8, 8),
-        new("A!\n"u8, 1),
-        new("A=\n"u8, 1)
-    }.slice();
+public static void TestDecodeCorrupt(ж<testing.T> t) {
+    var testCases = slice<TestDecodeCorrupt_testCases>([
+        new("", -1),
+        new("\n", -1),
+        new("AAA=\n", -1),
+        new("AAAA\n", -1),
+        new("!!!!", 0),
+        new("====", 0),
+        new("x===", 1),
+        new("=AAA", 0),
+        new("A=AA", 1),
+        new("AA=A", 2),
+        new("AA==A", 4),
+        new("AAA=AAAA", 4),
+        new("AAAAA", 4),
+        new("AAAAAA", 4),
+        new("A=", 1),
+        new("A==", 1),
+        new("AA=", 3),
+        new("AA==", -1),
+        new("AAA=", -1),
+        new("AAAA", -1),
+        new("AAAAAA=", 7),
+        new("YWJjZA=====", 8),
+        new("A!\n", 1),
+        new("A=\n", 1)
+    ]);
     foreach (var (_, tc) in testCases) {
         var dbuf = new slice<byte>(StdEncoding.DecodedLen(len(tc.input)));
         var (_, err) = StdEncoding.Decode(dbuf, slice<byte>(tc.input));
         if (tc.offset == -1) {
-            if (err != default!) {
-                Ꮡt.Error(decoderWronglyDetectedˢ, tc.input);
+            if (err != nil) {
+                t.Error(decoderWronglyDetectedˢ, tc.input);
             }
             continue;
         }
         switch (err.type()) {
         case CorruptInputError errΔ1: {
-            testEqual(Ꮡt, corruptionInQAtOffsetVˢ, tc.input, (nint)(int64)errΔ1, tc.offset);
+            testEqual(t, corruptionInQAtOffsetVˢ, tc.input, (nint)errΔ1, tc.offset);
             break;
         }
         default: {
             var errΔ1 = err;
-            Ꮡt.Error(decoderFailedToDetectˢ, tc);
+            t.Error(decoderFailedToDetectˢ, tc);
             break;
         }}
     }
 }
 
-public static void TestDecodeBounds(ж<testing.T> Ꮡt) {
+public static void TestDecodeBounds(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         array<byte> buf = new(32);
         @string s = StdEncoding.EncodeToString(buf[..]);
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
-                var errΔ1 = recover(); if (errΔ1 != default!) {
-                    Ꮡt.Fatalf("Decode panicked unexpectedly: %v\n%s"u8, errΔ1, debug.Stack());
+                var errΔ1 = recover(); if (errΔ1 != nil) {
+                    t.Fatalf("Decode panicked unexpectedly: %v\n%s", errΔ1, debug.Stack());
                 }
             }
         }, ref ᒐ);
         var (n, err) = StdEncoding.Decode(buf[..], slice<byte>(s));
-        if (n != len(buf) || err != default!) {
-            Ꮡt.Fatalf("StdEncoding.Decode = %d, %v, want %d, nil"u8, n, err, len(buf));
+        if (n != len(buf) || err != nil) {
+            t.Fatalf("StdEncoding.Decode = %d, %v, want %d, nil", n, err, len(buf));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -338,10 +358,10 @@ internal partial struct TestEncodedLen_test /*dyn*/ {
     internal int64 want;
 }
 
-public static void TestEncodedLen(ж<testing.T> Ꮡt) {
+public static void TestEncodedLen(ж<testing.T> t) {
     var testsᴷ = new stackAppend<TestEncodedLen_test>();
 
-    var tests = new TestEncodedLen_test[]{
+    var tests = slice<TestEncodedLen_test>([
         new(RawStdEncoding, 0, 0),
         new(RawStdEncoding, 1, 2),
         new(RawStdEncoding, 2, 3),
@@ -353,21 +373,23 @@ public static void TestEncodedLen(ж<testing.T> Ꮡt) {
         new(StdEncoding, 3, 4),
         new(StdEncoding, 4, 8),
         new(StdEncoding, 7, 12)
-    }.slice();
+    ]);
     // check overflow
-    var exprᴛ1 = strconv.IntSize;
-    if (exprᴛ1 == 32) {
+    switch (strconv.IntSize) {
+    case var ᴛ when ᴛ == 32: {
         tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(1152921504606846976L)), 357913942));
         tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(6917529027641081855L)), math.MaxInt));
+        break;
     }
-    else if (exprᴛ1 == 64) {
+    case var ᴛ when ᴛ == 64: {
         tests = append(testsᴷ, tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(1152921504606846976L)), 1537228672809129302L));
         tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(6917529027641081855L)), math.MaxInt));
-    }
+        break;
+    }}
     foreach (var (_, tt) in tests) {
         {
             nint got = tt.enc.EncodedLen(tt.n); if ((int64)got != tt.want) {
-                Ꮡt.Errorf("EncodedLen(%d): got %d, want %d"u8, tt.n, got, tt.want);
+                t.Errorf("EncodedLen(%d): got %d, want %d", tt.n, got, tt.want);
             }
         }
     }
@@ -379,10 +401,10 @@ internal partial struct TestDecodedLen_test /*dyn*/ {
     internal int64 want;
 }
 
-public static void TestDecodedLen(ж<testing.T> Ꮡt) {
+public static void TestDecodedLen(ж<testing.T> t) {
     var testsᴷ = new stackAppend<TestDecodedLen_test>();
 
-    var tests = new TestDecodedLen_test[]{
+    var tests = slice<TestDecodedLen_test>([
         new(RawStdEncoding, 0, 0),
         new(RawStdEncoding, 2, 1),
         new(RawStdEncoding, 3, 2),
@@ -391,30 +413,33 @@ public static void TestDecodedLen(ж<testing.T> Ꮡt) {
         new(StdEncoding, 0, 0),
         new(StdEncoding, 4, 3),
         new(StdEncoding, 8, 6)
-    }.slice();
+    ]);
     // check overflow
-    var exprᴛ1 = strconv.IntSize;
-    if (exprᴛ1 == 32) {
+    switch (strconv.IntSize) {
+    case var ᴛ when ᴛ == 32: {
         tests = append(tests, new TestDecodedLen_test(RawStdEncoding, unchecked((nint)(1537228672809129302L)), 268435456));
         tests = append(tests, new TestDecodedLen_test(RawStdEncoding, math.MaxInt, 1610612735));
+        break;
     }
-    else if (exprᴛ1 == 64) {
+    case var ᴛ when ᴛ == 64: {
         tests = append(testsᴷ, tests, new TestDecodedLen_test(RawStdEncoding, unchecked((nint)(1537228672809129302L)), 1152921504606846976L));
         tests = append(tests, new TestDecodedLen_test(RawStdEncoding, math.MaxInt, 6917529027641081855L));
-    }
+        break;
+    }}
     foreach (var (_, tt) in tests) {
         {
             nint got = tt.enc.DecodedLen(tt.n); if ((int64)got != tt.want) {
-                Ꮡt.Errorf("DecodedLen(%d): got %d, want %d"u8, tt.n, got, tt.want);
+                t.Errorf("DecodedLen(%d): got %d, want %d", tt.n, got, tt.want);
             }
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string alphaᶜ = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"u8;
+internal static ref readonly @string alphaᶜ => ref alphaᶜᵇ;
+private static readonly @string alphaᶜᵇ = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"u8;
 
-public static void TestBig(ж<testing.T> Ꮡt) {
+public static void TestBig(ж<testing.T> t) {
     nint n = 3 * 1000 + 1;
     var raw = new slice<byte>(n);
     @string alpha = alphaᶜ;
@@ -424,64 +449,65 @@ public static void TestBig(ж<testing.T> Ꮡt) {
     var encoded = @new<bytes.Buffer>();
     var w = NewEncoder(StdEncoding, new base64_test_package.bytes_BufferжWriter(encoded));
     var (nn, err) = w.Write(raw);
-    if (nn != n || err != default!) {
-        Ꮡt.Fatalf("Encoder.Write(raw) = %d, %v want %d, nil"u8, nn, err, n);
+    if (nn != n || err != nil) {
+        t.Fatalf("Encoder.Write(raw) = %d, %v want %d, nil", nn, err, n);
     }
     err = w.Close();
-    if (err != default!) {
-        Ꮡt.Fatalf("Encoder.Close() = %v want nil"u8, err);
+    if (err != nil) {
+        t.Fatalf("Encoder.Close() = %v want nil", err);
     }
     (var decoded, err) = io.ReadAll(NewDecoder(StdEncoding, new base64_test_package.bytes_BufferжReader(encoded)));
-    if (err != default!) {
-        Ꮡt.Fatalf("io.ReadAll(NewDecoder(...)): %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("io.ReadAll(NewDecoder(...)): %v", err);
     }
 
     if (!bytes.Equal(raw, decoded)) {
-        nint i = default!;
+        nint i = default;
         for (i = 0; i < len(decoded) && i < len(raw); i++) {
             if (decoded[i] != raw[i]) {
                 break;
             }
         }
-        Ꮡt.Errorf("Decode(Encode(%d-byte string)) failed at offset %d"u8, n, i);
+        t.Errorf("Decode(Encode(%d-byte string)) failed at offset %d", n, i);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectedᶜ = "sure"u8;
+internal static ref readonly @string expectedᶜ => ref expectedᶜᵇ;
+private static readonly @string expectedᶜᵇ = "sure"u8;
 
-public static void TestNewLineCharacters(ж<testing.T> Ꮡt) {
+public static void TestNewLineCharacters(ж<testing.T> t) {
     // Each of these should decode to the string "sure", without errors.
     @string expected = expectedᶜ;
-    var examples = new @string[]{
-        "c3VyZQ=="u8,
-        "c3VyZQ==\r"u8,
-        "c3VyZQ==\n"u8,
-        "c3VyZQ==\r\n"u8,
-        "c3VyZ\r\nQ=="u8,
-        "c3V\ryZ\nQ=="u8,
-        "c3V\nyZ\rQ=="u8,
-        "c3VyZ\nQ=="u8,
-        "c3VyZQ\n=="u8,
-        "c3VyZQ=\n="u8,
-        "c3VyZQ=\r\n\r\n="u8
-    }.slice();
+    var examples = slice<@string>([
+        "c3VyZQ==",
+        "c3VyZQ==\r",
+        "c3VyZQ==\n",
+        "c3VyZQ==\r\n",
+        "c3VyZ\r\nQ==",
+        "c3V\ryZ\nQ==",
+        "c3V\nyZ\rQ==",
+        "c3VyZ\nQ==",
+        "c3VyZQ\n==",
+        "c3VyZQ=\n=",
+        "c3VyZQ=\r\n\r\n="
+    ]);
     foreach (var (_, e) in examples) {
         var (buf, err) = StdEncoding.DecodeString(e);
-        if (err != default!) {
-            Ꮡt.Errorf("Decode(%q) failed: %v"u8, e, err);
+        if (err != nil) {
+            t.Errorf("Decode(%q) failed: %v", e, err);
             continue;
         }
         {
             @string s = (@string)buf; if (s != expected) {
-                Ꮡt.Errorf("Decode(%q) = %q, want %q"u8, e, s, expected);
+                t.Errorf("Decode(%q) = %q, want %q", e, s, expected);
             }
         }
     }
 }
 
 internal partial struct nextRead {
-    internal nint n;  // bytes to return
+    internal nint n;    // bytes to return
     internal error err; // error to return
 }
 
@@ -503,17 +529,18 @@ internal static (nint, error) Read(this ref faultInjectReader r, slice<byte> p) 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string myErrorˢ = "my error"u8;
+internal static ref readonly @string myErrorˢ => ref myErrorˢᵇ;
+private static readonly @string myErrorˢᵇ = "my error"u8;
 
 // tests that we don't ignore errors from our underlying reader
-public static partial void TestDecoderIssue3577(ж<testing.T> Ꮡt) {
+public static partial void TestDecoderIssue3577(ж<testing.T> t) {
     var next = new channel<nextRead>(10);
     var wantErr = errors.New(myErrorˢ);
-    next.ᐸꟷ(new nextRead(5, default!));
+    next.ᐸꟷ(new nextRead(5, default));
     next.ᐸꟷ(new nextRead(10, wantErr));
     next.ᐸꟷ(new nextRead(0, wantErr));
     var d = NewDecoder(StdEncoding, new base64_internal_test_package.faultInjectReaderжReader(Ꮡ(new faultInjectReader(
-        source: "VHdhcyBicmlsbGlnLCBhbmQgdGhlIHNsaXRoeSB0b3Zlcw=="u8, // twas brillig...
+        source: "VHdhcyBicmlsbGlnLCBhbmQgdGhlIHNsaXRoeSB0b3Zlcw==", // twas brillig...
         nextc: next
     ))));
     var errc = new channel<error>(1);
@@ -528,18 +555,19 @@ public static partial void TestDecoderIssue3577(ж<testing.T> Ꮡt) {
     switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out var err): {
         if (!AreEqual(err, wantErr)) {
-            Ꮡt.Errorf("got error %v; want %v"u8, err, wantErr);
+            t.Errorf("got error %v; want %v", err, wantErr);
         }
         break;
     }
     case 1 when selᴛ2.ꟷᐳ(out _): {
-        Ꮡt.Errorf("timeout; Decoder blocked without returning an error"u8);
+        t.Errorf("timeout; Decoder blocked without returning an error");
         break;
     }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cpEat8aaaefˢ = """
+internal static ref readonly @string cpEat8aaaefˢ => ref cpEat8aaaefˢᵇ;
+private static readonly @string cpEat8aaaefˢᵇ = """
 CP/EAT8AAAEF
 AQEBAQEBAAAAAAAAAAMAAQIEBQYHCAkKCwEAAQUBAQEBAQEAAAAAAAAAAQACAwQFBgcICQoLEAAB
 BAEDAgQCBQcGCAUDDDMBAAIRAwQhEjEFQVFhEyJxgTIGFJGhsUIjJBVSwWIzNHKC0UMHJZJT8OHx
@@ -559,59 +587,62 @@ bqbPb06551Y4
 """u8.Raw();
 internal static readonly object decodedResultsNotEqualˢ = (@string)"Decoded results not equal"u8;
 
-public static void TestDecoderIssue4779(ж<testing.T> Ꮡt) {
+public static void TestDecoderIssue4779(ж<testing.T> t) {
     @string encoded = cpEat8aaaefˢ;
-    @string encodedShort = strings.ReplaceAll(encoded, "\n"u8, ""u8);
+    @string encodedShort = strings.ReplaceAll(encoded, "\n", ""u8);
 
     var dec = NewDecoder(StdEncoding, new base64_test_package.strings_ReaderжReader(strings.NewReader(encoded)));
     var (res1, err) = io.ReadAll(dec);
-    if (err != default!) {
-        Ꮡt.Errorf("ReadAll failed: %v"u8, err);
+    if (err != nil) {
+        t.Errorf("ReadAll failed: %v", err);
     }
 
     dec = NewDecoder(StdEncoding, new base64_test_package.strings_ReaderжReader(strings.NewReader(encodedShort)));
-    slice<byte> res2 = default!;
+    slice<byte> res2 = default;
     (res2, err) = io.ReadAll(dec);
-    if (err != default!) {
-        Ꮡt.Errorf("ReadAll failed: %v"u8, err);
+    if (err != nil) {
+        t.Errorf("ReadAll failed: %v", err);
     }
 
     if (!bytes.Equal(res1, res2)) {
-        Ꮡt.Error(decodedResultsNotEqualˢ);
+        t.Error(decodedResultsNotEqualˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ywJjZAˢ = "YWJjZA====="u8;
+internal static ref readonly @string ywJjZAˢ => ref ywJjZAˢᵇ;
+private static readonly @string ywJjZAˢᵇ = "YWJjZA====="u8;
 
-public static void TestDecoderIssue7733(ж<testing.T> Ꮡt) {
+public static void TestDecoderIssue7733(ж<testing.T> t) {
     var (s, err) = StdEncoding.DecodeString(ywJjZAˢ);
     var want = (global::go.encoding.base64_package.CorruptInputError)8;
     if (!reflect.DeepEqual(want, err)) {
-        Ꮡt.Errorf("Error = %v; want CorruptInputError(8)"u8, err);
+        t.Errorf("Error = %v; want CorruptInputError(8)", err);
     }
     if (((sstring)s) != "abcd"u8) {
-        Ꮡt.Errorf("DecodeString = %q; want abcd"u8, s);
+        t.Errorf("DecodeString = %q; want abcd", s);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string wvLTlMrX9NpYDQlEIFlnDBˢ = "WvLTlMrX9NpYDQlEIFlnDB=="u8;
-internal static readonly @string wvLTlMrX9NpYDQlEIFlnDAˢ = "WvLTlMrX9NpYDQlEIFlnDA=="u8;
+internal static ref readonly @string wvLTlMrX9NpYDQlEIFlnDBˢ => ref wvLTlMrX9NpYDQlEIFlnDBˢᵇ;
+private static readonly @string wvLTlMrX9NpYDQlEIFlnDBˢᵇ = "WvLTlMrX9NpYDQlEIFlnDB=="u8;
+internal static ref readonly @string wvLTlMrX9NpYDQlEIFlnDAˢ => ref wvLTlMrX9NpYDQlEIFlnDAˢᵇ;
+private static readonly @string wvLTlMrX9NpYDQlEIFlnDAˢᵇ = "WvLTlMrX9NpYDQlEIFlnDA=="u8;
 
-public static void TestDecoderIssue15656(ж<testing.T> Ꮡt) {
+public static void TestDecoderIssue15656(ж<testing.T> t) {
     var (_, err) = (~StdEncoding).Strict().DecodeString(wvLTlMrX9NpYDQlEIFlnDBˢ);
     var want = (global::go.encoding.base64_package.CorruptInputError)22;
     if (!reflect.DeepEqual(want, err)) {
-        Ꮡt.Errorf("Error = %v; want CorruptInputError(22)"u8, err);
+        t.Errorf("Error = %v; want CorruptInputError(22)", err);
     }
     (_, err) = (~StdEncoding).Strict().DecodeString(wvLTlMrX9NpYDQlEIFlnDAˢ);
-    if (err != default!) {
-        Ꮡt.Errorf("Error = %v; want nil"u8, err);
+    if (err != nil) {
+        t.Errorf("Error = %v; want nil", err);
     }
     (_, err) = StdEncoding.DecodeString(wvLTlMrX9NpYDQlEIFlnDBˢ);
-    if (err != default!) {
-        Ꮡt.Errorf("Error = %v; want nil"u8, err);
+    if (err != nil) {
+        t.Errorf("Error = %v; want nil", err);
     }
 }
 
@@ -625,8 +656,8 @@ public static void BenchmarkEncodeToString(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkDecodeString(ж<testing.B> Ꮡb) {
-    var sizes = new nint[]{2, 4, 8, 64, 8192}.slice();
+public static void BenchmarkDecodeString(ж<testing.B> b) {
+    var sizes = slice<nint>([2, 4, 8, 64, 8192]);
     void benchFunc(ж<testing.B> bΔ1, nint benchSize) {
         @string data = StdEncoding.EncodeToString(new slice<byte>(benchSize));
         bΔ1.SetBytes((int64)len(data));
@@ -637,7 +668,7 @@ public static void BenchmarkDecodeString(ж<testing.B> Ꮡb) {
     }
     foreach (var (_, size) in sizes) {
         var benchFuncʗ1 = benchFunc;
-        Ꮡb.Run(fmt.Sprintf("%d"u8, size), (ж<testing.B> bΔ2) => {
+        b.Run(fmt.Sprintf("%d"u8, size), (ж<testing.B> bΔ2) => {
             benchFuncʗ1(bΔ2, size);
         });
     }
@@ -646,40 +677,41 @@ public static void BenchmarkDecodeString(ж<testing.B> Ꮡb) {
 public static void BenchmarkNewEncoding(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    b.SetBytes((int64)len(new Encoding(nil).decodeMap));
+    b.SetBytes((int64)len(new Encoding().decodeMap));
     for (nint i = 0; i < b.N; i++) {
         var e = NewEncoding(encodeStd);
-        foreach (var (_, v) in (~e).decodeMap.ΔRangeSnapshot()) {
+        foreach (var (_, v) in e.decodeMap.ΔRangeSnapshot()) {
             _ = v;
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aaaaaaˢ = "AAAAAA"u8;
+internal static ref readonly @string aaaaaaˢ => ref aaaaaaˢᵇ;
+private static readonly @string aaaaaaˢᵇ = "AAAAAA"u8;
 
-public static void TestDecoderRaw(ж<testing.T> Ꮡt) {
+public static void TestDecoderRaw(ж<testing.T> t) {
     @string source = aaaaaaˢ;
-    var want = new byte[]{0, 0, 0, 0}.slice();
+    var want = slice<byte>([0, 0, 0, 0]);
 
     // Direct.
     var (dec1, err) = RawURLEncoding.DecodeString(source);
-    if (err != default! || !bytes.Equal(dec1, want)) {
-        Ꮡt.Errorf("RawURLEncoding.DecodeString(%q) = %x, %v, want %x, nil"u8, source, dec1, err, want);
+    if (err != nil || !bytes.Equal(dec1, want)) {
+        t.Errorf("RawURLEncoding.DecodeString(%q) = %x, %v, want %x, nil", source, dec1, err, want);
     }
 
     // Through reader. Used to fail.
     var r = NewDecoder(RawURLEncoding, new base64_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>(source))));
     (var dec2, err) = io.ReadAll(io.LimitReader(r, 100));
-    if (err != default! || !bytes.Equal(dec2, want)) {
-        Ꮡt.Errorf("reading NewDecoder(RawURLEncoding, %q) = %x, %v, want %x, nil"u8, source, dec2, err, want);
+    if (err != nil || !bytes.Equal(dec2, want)) {
+        t.Errorf("reading NewDecoder(RawURLEncoding, %q) = %x, %v, want %x, nil", source, dec2, err, want);
     }
 
     // Should work with padding.
     r = NewDecoder(URLEncoding, new base64_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>(source + "=="))));
     (var dec3, err) = io.ReadAll(r);
-    if (err != default! || !bytes.Equal(dec3, want)) {
-        Ꮡt.Errorf("reading NewDecoder(URLEncoding, %q) = %x, %v, want %x, nil"u8, source + "==", dec3, err, want);
+    if (err != nil || !bytes.Equal(dec3, want)) {
+        t.Errorf("reading NewDecoder(URLEncoding, %q) = %x, %v, want %x, nil", source + "==", dec3, err, want);
     }
 }
 

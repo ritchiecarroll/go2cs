@@ -111,8 +111,33 @@
     <Compile Include="at_windows_test.cs" />
     <Compile Include="exec_windows_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
+    <Compile Include="package_info_external_test.cs" />
     <Compile Include="package_test_info.cs" />
     <Compile Include="version_windows_test.cs" />
+    <Compile Include="windows/at_windows.cs" />
+    <Compile Include="windows/deadline_prepay_windows_impl.cs" />
+    <Compile Include="windows/net_windows.cs" />
+    <Compile Include="windows/net_windows_impl.cs" />
+    <Compile Include="windows/nonblocking_windows.cs" />
+    <Compile Include="windows/package_init.cs" />
+    <Compile Include="windows/psapi_windows.cs" />
+    <Compile Include="windows/reparse_windows.cs" />
+    <Compile Include="windows/security_windows.cs" />
+    <Compile Include="windows/security_windows_impl.cs" />
+    <Compile Include="windows/string_windows.cs" />
+    <Compile Include="windows/symlink_windows.cs" />
+    <Compile Include="windows/syscall_windows.cs" />
+    <Compile Include="windows/syscall_windows_impl.cs" />
+    <Compile Include="windows/types_windows.cs" />
+    <Compile Include="windows/version_windows.cs" />
+    <Compile Include="windows/zsyscall_windows.cs" />
+    <Compile Include="windows/zsyscall_windows_impl.cs" />
+    <Compile Include="windows/zsyscall_windows_module_impl.cs" />
+    <Compile Include="windows/zsyscall_windows_ntfile_impl.cs" />
+    <Compile Include="windows/zsyscall_windows_privilege_impl.cs" />
+    <Compile Include="windows/zsyscall_windows_ptrout_impl.cs" />
+    <Compile Include="windows/zsyscall_windows_version_impl.cs" />
+    <Compile Include="windows/zsyscall_windows_wsa_impl.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -139,18 +164,22 @@
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/oserror/internal.oserror.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/stringslite/internal.stringslite.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/sysdll/internal.syscall.windows.sysdll.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/structs/structs.csproj" />
+    <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
-    <ProjectReference Include="internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

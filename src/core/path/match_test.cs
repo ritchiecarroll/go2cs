@@ -15,82 +15,82 @@ partial struct MatchTest {
     internal error err;
 }
 
-internal static slice<MatchTest> matchTests = new MatchTest[]{
-    new("abc"u8, "abc"u8, true, default!),
-    new("*"u8, "abc"u8, true, default!),
-    new("*c"u8, "abc"u8, true, default!),
-    new("a*"u8, "a"u8, true, default!),
-    new("a*"u8, "abc"u8, true, default!),
-    new("a*"u8, "ab/c"u8, false, default!),
-    new("a*/b"u8, "abc/b"u8, true, default!),
-    new("a*/b"u8, "a/c/b"u8, false, default!),
-    new("a*b*c*d*e*/f"u8, "axbxcxdxe/f"u8, true, default!),
-    new("a*b*c*d*e*/f"u8, "axbxcxdxexxx/f"u8, true, default!),
-    new("a*b*c*d*e*/f"u8, "axbxcxdxe/xxx/f"u8, false, default!),
-    new("a*b*c*d*e*/f"u8, "axbxcxdxexxx/fff"u8, false, default!),
-    new("a*b?c*x"u8, "abxbbxdbxebxczzx"u8, true, default!),
-    new("a*b?c*x"u8, "abxbbxdbxebxczzy"u8, false, default!),
-    new("ab[c]"u8, "abc"u8, true, default!),
-    new("ab[b-d]"u8, "abc"u8, true, default!),
-    new("ab[e-g]"u8, "abc"u8, false, default!),
-    new("ab[^c]"u8, "abc"u8, false, default!),
-    new("ab[^b-d]"u8, "abc"u8, false, default!),
-    new("ab[^e-g]"u8, "abc"u8, true, default!),
-    new("a\\*b"u8, "a*b"u8, true, default!),
-    new("a\\*b"u8, "ab"u8, false, default!),
-    new("a?b"u8, "a☺b"u8, true, default!),
-    new("a[^a]b"u8, "a☺b"u8, true, default!),
-    new("a???b"u8, "a☺b"u8, false, default!),
-    new("a[^a][^a][^a]b"u8, "a☺b"u8, false, default!),
-    new("[a-ζ]*"u8, "α"u8, true, default!),
-    new("*[a-ζ]"u8, "A"u8, false, default!),
-    new("a?b"u8, "a/b"u8, false, default!),
-    new("a*b"u8, "a/b"u8, false, default!),
-    new("[\\]a]"u8, "]"u8, true, default!),
-    new("[\\-]"u8, "-"u8, true, default!),
-    new("[x\\-]"u8, "x"u8, true, default!),
-    new("[x\\-]"u8, "-"u8, true, default!),
-    new("[x\\-]"u8, "z"u8, false, default!),
-    new("[\\-x]"u8, "x"u8, true, default!),
-    new("[\\-x]"u8, "-"u8, true, default!),
-    new("[\\-x]"u8, "a"u8, false, default!),
-    new("[]a]"u8, "]"u8, false, ErrBadPattern),
-    new("[-]"u8, "-"u8, false, ErrBadPattern),
-    new("[x-]"u8, "x"u8, false, ErrBadPattern),
-    new("[x-]"u8, "-"u8, false, ErrBadPattern),
-    new("[x-]"u8, "z"u8, false, ErrBadPattern),
-    new("[-x]"u8, "x"u8, false, ErrBadPattern),
-    new("[-x]"u8, "-"u8, false, ErrBadPattern),
-    new("[-x]"u8, "a"u8, false, ErrBadPattern),
-    new("\\"u8, "a"u8, false, ErrBadPattern),
-    new("[a-b-c]"u8, "a"u8, false, ErrBadPattern),
-    new("["u8, "a"u8, false, ErrBadPattern),
-    new("[^"u8, "a"u8, false, ErrBadPattern),
-    new("[^bc"u8, "a"u8, false, ErrBadPattern),
-    new("a["u8, "a"u8, false, ErrBadPattern),
-    new("a["u8, "ab"u8, false, ErrBadPattern),
-    new("a["u8, "x"u8, false, ErrBadPattern),
-    new("a/b["u8, "x"u8, false, ErrBadPattern),
-    new("*x"u8, "xxx"u8, true, default!)
-}.slice();
+internal static slice<MatchTest> matchTests = slice<MatchTest>([
+    new("abc", "abc", true, default),
+    new("*", "abc", true, default),
+    new("*c", "abc", true, default),
+    new("a*", "a", true, default),
+    new("a*", "abc", true, default),
+    new("a*", "ab/c", false, default),
+    new("a*/b", "abc/b", true, default),
+    new("a*/b", "a/c/b", false, default),
+    new("a*b*c*d*e*/f", "axbxcxdxe/f", true, default),
+    new("a*b*c*d*e*/f", "axbxcxdxexxx/f", true, default),
+    new("a*b*c*d*e*/f", "axbxcxdxe/xxx/f", false, default),
+    new("a*b*c*d*e*/f", "axbxcxdxexxx/fff", false, default),
+    new("a*b?c*x", "abxbbxdbxebxczzx", true, default),
+    new("a*b?c*x", "abxbbxdbxebxczzy", false, default),
+    new("ab[c]", "abc", true, default),
+    new("ab[b-d]", "abc", true, default),
+    new("ab[e-g]", "abc", false, default),
+    new("ab[^c]", "abc", false, default),
+    new("ab[^b-d]", "abc", false, default),
+    new("ab[^e-g]", "abc", true, default),
+    new("a\\*b", "a*b", true, default),
+    new("a\\*b", "ab", false, default),
+    new("a?b", "a☺b", true, default),
+    new("a[^a]b", "a☺b", true, default),
+    new("a???b", "a☺b", false, default),
+    new("a[^a][^a][^a]b", "a☺b", false, default),
+    new("[a-ζ]*", "α", true, default),
+    new("*[a-ζ]", "A", false, default),
+    new("a?b", "a/b", false, default),
+    new("a*b", "a/b", false, default),
+    new("[\\]a]", "]", true, default),
+    new("[\\-]", "-", true, default),
+    new("[x\\-]", "x", true, default),
+    new("[x\\-]", "-", true, default),
+    new("[x\\-]", "z", false, default),
+    new("[\\-x]", "x", true, default),
+    new("[\\-x]", "-", true, default),
+    new("[\\-x]", "a", false, default),
+    new("[]a]", "]", false, ErrBadPattern),
+    new("[-]", "-", false, ErrBadPattern),
+    new("[x-]", "x", false, ErrBadPattern),
+    new("[x-]", "-", false, ErrBadPattern),
+    new("[x-]", "z", false, ErrBadPattern),
+    new("[-x]", "x", false, ErrBadPattern),
+    new("[-x]", "-", false, ErrBadPattern),
+    new("[-x]", "a", false, ErrBadPattern),
+    new("\\", "a", false, ErrBadPattern),
+    new("[a-b-c]", "a", false, ErrBadPattern),
+    new("[", "a", false, ErrBadPattern),
+    new("[^", "a", false, ErrBadPattern),
+    new("[^bc", "a", false, ErrBadPattern),
+    new("a[", "a", false, ErrBadPattern),
+    new("a[", "ab", false, ErrBadPattern),
+    new("a[", "x", false, ErrBadPattern),
+    new("a/b[", "x", false, ErrBadPattern),
+    new("*x", "xxx", true, default)
+]);
 
-public static void TestMatch(ж<testing.T> Ꮡt) {
+public static void TestMatch(ж<testing.T> t) {
     foreach (var (_, tt) in matchTests) {
         var (ok, err) = Match(tt.pattern, tt.s);
         if (ok != tt.match || !AreEqual(err, tt.err)) {
-            Ꮡt.Errorf("Match(%#q, %#q) = %v, %v want %v, %v"u8, tt.pattern, tt.s, ok, err, tt.match, tt.err);
+            t.Errorf("Match(%#q, %#q) = %v, %v want %v, %v", tt.pattern, tt.s, ok, err, tt.match, tt.err);
         }
     }
 }
 
-public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
+public static void BenchmarkMatch(ж<testing.B> b) {
     foreach (var (_, vᴛ1) in matchTests) {
         ref var tt = ref heap(new MatchTest(), out var Ꮡtt);
         tt = vᴛ1;
 
         @string name = fmt.Sprintf("%q %q"u8, tt.pattern, tt.s);
         var ttʗ1 = tt;
-        Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
+        b.Run(name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             foreach (var _ᴛ1 in range((~bΔ1).N)) {
                 (bSink, errSink) = Match(ttʗ1.pattern, ttʗ1.s);

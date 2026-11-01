@@ -19,8 +19,7 @@ using atomic = go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
 using weak = weak_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using exec = go.os.exec_package;
 using go;
 using go.@internal;
@@ -29,15 +28,14 @@ using go.sync;
 
 partial class synctest_test_package {
 
-public static void TestNow(ж<testing.T> Ꮡt) {
-    ref var start = ref heap<time.Time>(out var Ꮡstart);
-    start = time.Date(2000, 1, 1, 0, 0, 0, 0, time.ΔUTC).In(time.ΔLocal);
+public static void TestNow(ж<testing.T> t) {
+    ref var start = ref heap<time.Time>(time.Date(2000, 1, 1, 0, 0, 0, 0, time.ΔUTC).In(time.ΔLocal), out var Ꮡstart);
     var startʗ1 = start;
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         // Time starts at 2000-1-1 00:00:00.
         {
             var (got, want) = (time.Now(), startʗ1); if (!got.Equal(want)) {
-                Ꮡt.Errorf("at start: time.Now = %v, want %v"u8, got, want);
+                t.Errorf("at start: time.Now = %v, want %v", got, want);
             }
         }
         var startʗ2 = startʗ1;
@@ -48,7 +46,7 @@ public static void TestNow(ж<testing.T> Ꮡt) {
                 got = time.Now();
                 ref var want = ref heap<time.Time>(out var Ꮡwant);
                 want = startʗ2; if (!got.Equal(want)) {
-                    Ꮡt.Errorf("time.Now = %v, want %v"u8, got, want);
+                    t.Errorf("time.Now = %v, want %v", got, want);
                 }
             }
         });
@@ -56,7 +54,7 @@ public static void TestNow(ж<testing.T> Ꮡt) {
         time.Sleep(1 * time.ΔSecond);
         {
             var (got, want) = (time.Now(), startʗ1.Add(1 * time.ΔSecond)); if (!got.Equal(want)) {
-                Ꮡt.Errorf("after sleep: time.Now = %v, want %v"u8, got, want);
+                t.Errorf("after sleep: time.Now = %v, want %v", got, want);
             }
         }
     });
@@ -64,15 +62,14 @@ public static void TestNow(ж<testing.T> Ꮡt) {
 
 // TestMonotonicClock exercises comparing times from within a bubble
 // with ones from outside the bubble.
-public static void TestMonotonicClock(ж<testing.T> Ꮡt) {
-    ref var start = ref heap<time.Time>(out var Ꮡstart);
-    start = time.Now();
+public static void TestMonotonicClock(ж<testing.T> t) {
+    ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart);
     var startʗ1 = start;
     synctest.Run(() => {
         time.Sleep(time.Until(startʗ1.Round(0)));
         {
             var (got, want) = (time.Now().In(time.ΔUTC), startʗ1.In(time.ΔUTC)); if (!got.Equal(want)) {
-                Ꮡt.Fatalf("time.Now() = %v, want %v"u8, got, want);
+                t.Fatalf("time.Now() = %v, want %v", got, want);
             }
         }
 
@@ -80,39 +77,39 @@ public static void TestMonotonicClock(ж<testing.T> Ꮡt) {
         time.Sleep(wait);
         {
             var got = time.Since(startʗ1); if (got != wait) {
-                Ꮡt.Fatalf("time.Since(start) = %v, want %v"u8, got, wait);
+                t.Fatalf("time.Since(start) = %v, want %v", got, wait);
             }
         }
         {
             var got = time.Now().Sub(startʗ1); if (got != wait) {
-                Ꮡt.Fatalf("time.Now().Sub(start) = %v, want %v"u8, got, wait);
+                t.Fatalf("time.Now().Sub(start) = %v, want %v", got, wait);
             }
         }
     });
 }
 
-public static void TestRunEmpty(ж<testing.T> Ꮡt) {
+public static void TestRunEmpty(ж<testing.T> t) {
     synctest.Run(() => {
     });
 }
 
-public static void TestSimpleWait(ж<testing.T> Ꮡt) {
+public static void TestSimpleWait(ж<testing.T> t) {
     synctest.Run(() => {
         synctest.Wait();
     });
 }
 
-public static void TestGoroutineWait(ж<testing.T> Ꮡt) {
+public static void TestGoroutineWait(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         goǃ(() => {
-        });
+        }, GoStack.Bounded);
         synctest.Wait();
     });
 }
 
 // TestWait starts a collection of goroutines.
 // It checks that synctest.Wait waits for all goroutines to exit before returning.
-public static void TestWait(ж<testing.T> Ꮡt) {
+public static void TestWait(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var done = false;
         var ch = new channel<nint>(0);
@@ -120,7 +117,7 @@ public static void TestWait(ж<testing.T> Ꮡt) {
         var chʗ1 = ch;
         Ꮡf.ValueSlot = [MethodImpl(MethodImplOptions.NoInlining)] () => {
             nint count = ᐸꟷ(chʗ1);
-            if (count == 0){
+            if (count == 0) {
                 done = true;
             } else {
                 goǃ(Ꮡf.ValueSlot);
@@ -131,12 +128,12 @@ public static void TestWait(ж<testing.T> Ꮡt) {
         ch.ᐸꟷ(100);
         synctest.Wait();
         if (!done) {
-            Ꮡt.Fatalf("done = false, want true"u8);
+            t.Fatalf("done = false, want true");
         }
     });
 }
 
-public static void TestMallocs(ж<testing.T> Ꮡt) {
+public static void TestMallocs(ж<testing.T> t) {
     for (nint i = 0; i < 100; i++) {
         synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var done = false;
@@ -145,7 +142,7 @@ public static void TestMallocs(ж<testing.T> Ꮡt) {
             var chʗ1 = ch;
             Ꮡf.ValueSlot = [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 var b = ᐸꟷ(chʗ1);
-                if (len(b) == 0){
+                if (len(b) == 0) {
                     done = true;
                 } else {
                     goǃ(Ꮡf.ValueSlot);
@@ -156,52 +153,52 @@ public static void TestMallocs(ж<testing.T> Ꮡt) {
             ch.ᐸꟷ(new slice<byte>(100));
             synctest.Wait();
             if (!done) {
-                Ꮡt.Fatalf("done = false, want true"u8);
+                t.Fatalf("done = false, want true");
             }
         });
     }
 }
 
-public static void TestTimerReadBeforeDeadline(ж<testing.T> Ꮡt) {
+public static void TestTimerReadBeforeDeadline(ж<testing.T> t) {
     synctest.Run(() => {
         var start = time.Now();
         var tm = time.NewTimer((time.Duration)(5000000000L));
-        ᐸꟷ((~tm).C);
+        ᐸꟷ(tm.C);
         {
             var (got, want) = (time.Since(start), (time.Duration)(5000000000L)); if (got != want) {
-                Ꮡt.Errorf("after sleep: time.Since(start) = %v, want %v"u8, got, want);
+                t.Errorf("after sleep: time.Since(start) = %v, want %v", got, want);
             }
         }
     });
 }
 
-public static void TestTimerReadAfterDeadline(ж<testing.T> Ꮡt) {
+public static void TestTimerReadAfterDeadline(ж<testing.T> t) {
     synctest.Run(() => {
         var delay = 1 * time.ΔSecond;
         var want = time.Now().Add(delay);
         var tm = time.NewTimer(delay);
         time.Sleep(2 * delay);
-        var got = ᐸꟷ((~tm).C);
+        var got = ᐸꟷ(tm.C);
         if (got != want) {
-            Ꮡt.Errorf("<-tm.C = %v, want %v"u8, got, want);
+            t.Errorf("<-tm.C = %v, want %v", got, want);
         }
     });
 }
 
-public static void TestTimerReset(ж<testing.T> Ꮡt) {
+public static void TestTimerReset(ж<testing.T> t) {
     synctest.Run(() => {
         var start = time.Now();
         var tm = time.NewTimer(1 * time.ΔSecond);
         {
-            var (got, want) = (ᐸꟷ((~tm).C), start.Add(1 * time.ΔSecond)); if (got != want) {
-                Ꮡt.Errorf("first sleep: <-tm.C = %v, want %v"u8, got, want);
+            var (got, want) = (ᐸꟷ(tm.C), start.Add(1 * time.ΔSecond)); if (got != want) {
+                t.Errorf("first sleep: <-tm.C = %v, want %v", got, want);
             }
         }
 
         tm.Reset(2 * time.ΔSecond);
         {
-            var (got, want) = (ᐸꟷ((~tm).C), start.Add((time.Duration)(3000000000L))); if (got != want) {
-                Ꮡt.Errorf("second sleep: <-tm.C = %v, want %v"u8, got, want);
+            var (got, want) = (ᐸꟷ(tm.C), start.Add((time.Duration)(3000000000L))); if (got != want) {
+                t.Errorf("second sleep: <-tm.C = %v, want %v", got, want);
             }
         }
 
@@ -209,14 +206,14 @@ public static void TestTimerReset(ж<testing.T> Ꮡt) {
         time.Sleep(1 * time.ΔSecond);
         tm.Reset((time.Duration)(3000000000L));
         {
-            var (got, want) = (ᐸꟷ((~tm).C), start.Add((time.Duration)(7000000000L))); if (got != want) {
-                Ꮡt.Errorf("third sleep: <-tm.C = %v, want %v"u8, got, want);
+            var (got, want) = (ᐸꟷ(tm.C), start.Add((time.Duration)(7000000000L))); if (got != want) {
+                t.Errorf("third sleep: <-tm.C = %v, want %v", got, want);
             }
         }
     });
 }
 
-public static void TestTimeAfter(ж<testing.T> Ꮡt) {
+public static void TestTimeAfter(ж<testing.T> t) {
     synctest.Run(() => {
         nint i = 0;
         time.AfterFunc(1 * time.ΔSecond, [MethodImpl(MethodImplOptions.NoInlining)] () => {
@@ -225,20 +222,20 @@ public static void TestTimeAfter(ж<testing.T> Ꮡt) {
             goǃ(() => {
                 time.Sleep(1 * time.ΔSecond);
                 i++; // 2
-            });
+            }, GoStack.Bounded);
         });
         time.Sleep((time.Duration)(3000000000L));
         synctest.Wait();
         {
             nint got = i;
             nint want = 2; if (got != want) {
-                Ꮡt.Errorf("after sleep and wait: i = %v, want %v"u8, got, want);
+                t.Errorf("after sleep and wait: i = %v, want %v", got, want);
             }
         }
     });
 }
 
-public static void TestTimerAfterBubbleExit(ж<testing.T> Ꮡt) {
+public static void TestTimerAfterBubbleExit(ж<testing.T> t) {
     var run = false;
     synctest.Run(() => {
         time.AfterFunc(1 * time.ΔSecond, () => {
@@ -246,33 +243,33 @@ public static void TestTimerAfterBubbleExit(ж<testing.T> Ꮡt) {
         });
     });
     if (run) {
-        Ꮡt.Errorf("timer ran before bubble exit"u8);
+        t.Errorf("timer ran before bubble exit");
     }
 }
 
-public static void TestTimerFromOutsideBubble(ж<testing.T> Ꮡt) {
+public static void TestTimerFromOutsideBubble(ж<testing.T> t) {
     var tm = time.NewTimer(10 * time.Millisecond);
     var tmʗ1 = tm;
     synctest.Run(() => {
-        ᐸꟷ((~tmʗ1).C);
+        ᐸꟷ(tmʗ1.C);
     });
     if (tm.Stop()) {
-        Ꮡt.Errorf("synctest.Run unexpectedly returned before timer fired"u8);
+        t.Errorf("synctest.Run unexpectedly returned before timer fired");
     }
 }
 
 // TestTimerNondeterminism verifies that timers firing at the same instant
 // don't always fire in exactly the same order.
-public static void TestTimerNondeterminism(ж<testing.T> Ꮡt) {
+public static void TestTimerNondeterminism(ж<testing.T> t) {
     synctest.Run(() => {
         const nint iterations = 1000;
-        bool seen1 = default!;
-        bool seen2 = default!;
+        bool seen1 = default;
+        bool seen2 = default;
         foreach (var _ᴛ1 in range(iterations)) {
             var tm1 = time.NewTimer(1);
             var tm2 = time.NewTimer(1);
-            var selᴛ1 = (~tm1).C;
-            var selᴛ2 = (~tm2).C;
+            var selᴛ1 = tm1.C;
+            var selᴛ2 = tm2.C;
             switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out _): {
                 seen1 = true;
@@ -287,27 +284,27 @@ public static void TestTimerNondeterminism(ж<testing.T> Ꮡt) {
             }
             synctest.Wait();
         }
-        Ꮡt.Errorf("after %v iterations, seen timer1:%v, timer2:%v; want both"u8, (nint)(iterations), seen1, seen2);
+        t.Errorf("after %v iterations, seen timer1:%v, timer2:%v; want both", (nint)(iterations), seen1, seen2);
     });
 }
 
 // TestSleepNondeterminism verifies that goroutines sleeping to the same instant
 // don't always schedule in exactly the same order.
-public static void TestSleepNondeterminism(ж<testing.T> Ꮡt) {
+public static void TestSleepNondeterminism(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         const nint iterations = 1000;
-        bool seen1 = default!;
-        bool seen2 = default!;
+        bool seen1 = default;
+        bool seen2 = default;
         foreach (var _ᴛ1 in range(iterations)) {
             ref var first = ref heap(new atomic.Int32(), out var Ꮡfirst);
             goǃ(() => {
                 time.Sleep(1);
                 Ꮡfirst.CompareAndSwap(0, 1);
-            });
+            }, GoStack.Bounded);
             goǃ(() => {
                 time.Sleep(1);
                 Ꮡfirst.CompareAndSwap(0, 2);
-            });
+            }, GoStack.Bounded);
             time.Sleep(1);
             synctest.Wait();
             {
@@ -322,7 +319,7 @@ public static void TestSleepNondeterminism(ж<testing.T> Ꮡt) {
                     break;
                 }
                 default: {
-                    Ꮡt.Fatalf("first = %v, want 1 or 2"u8, v);
+                    t.Fatalf("first = %v, want 1 or 2", v);
                     break;
                 }}
             }
@@ -331,26 +328,26 @@ public static void TestSleepNondeterminism(ж<testing.T> Ꮡt) {
             }
             synctest.Wait();
         }
-        Ꮡt.Errorf("after %v iterations, seen goroutine 1:%v, 2:%v; want both"u8, (nint)(iterations), seen1, seen2);
+        t.Errorf("after %v iterations, seen goroutine 1:%v, 2:%v; want both", (nint)(iterations), seen1, seen2);
     });
 }
 
 // TestTimerRunsImmediately verifies that a 0-duration timer sends on its channel
 // without waiting for the bubble to block.
-public static void TestTimerRunsImmediately(ж<testing.T> Ꮡt) {
+public static void TestTimerRunsImmediately(ж<testing.T> t) {
     synctest.Run(() => {
         var start = time.Now();
         var tm = time.NewTimer(0);
-        var selᴛ3 = (~tm).C;
+        var selᴛ3 = tm.C;
         switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
         case 0 when selᴛ3.ꟷᐳ(out var got): {
             if (!got.Equal(start)) {
-                Ꮡt.Errorf("<-tm.C = %v, want %v"u8, got, start);
+                t.Errorf("<-tm.C = %v, want %v", got, start);
             }
             break;
         }
         default: {
-            Ꮡt.Errorf("0-duration timer channel is not readable; want it to be"u8);
+            t.Errorf("0-duration timer channel is not readable; want it to be");
             break;
         }}
     });
@@ -359,22 +356,22 @@ public static void TestTimerRunsImmediately(ж<testing.T> Ꮡt) {
 // TestTimerRunsLater verifies that reading from a timer's channel receives the
 // timer fired, even when that time is in reading from a timer's channel receives the
 // time the timer fired, even when that time is in the past.
-public static void TestTimerRanInPast(ж<testing.T> Ꮡt) {
+public static void TestTimerRanInPast(ж<testing.T> t) {
     synctest.Run(() => {
         var delay = 1 * time.ΔSecond;
         var want = time.Now().Add(delay);
         var tm = time.NewTimer(delay);
         time.Sleep(2 * delay);
-        var selᴛ4 = (~tm).C;
+        var selᴛ4 = tm.C;
         switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
         case 0 when selᴛ4.ꟷᐳ(out var got): {
             if (!got.Equal(want)) {
-                Ꮡt.Errorf("<-tm.C = %v, want %v"u8, got, want);
+                t.Errorf("<-tm.C = %v, want %v", got, want);
             }
             break;
         }
         default: {
-            Ꮡt.Errorf("0-duration timer channel is not readable; want it to be"u8);
+            t.Errorf("0-duration timer channel is not readable; want it to be");
             break;
         }}
     });
@@ -382,7 +379,7 @@ public static void TestTimerRanInPast(ж<testing.T> Ꮡt) {
 
 // TestAfterFuncRunsImmediately verifies that a 0-duration AfterFunc is scheduled
 // without waiting for the bubble to block.
-public static void TestAfterFuncRunsImmediately(ж<testing.T> Ꮡt) {
+public static void TestAfterFuncRunsImmediately(ж<testing.T> t) {
     synctest.Run(() => {
         ref var b = ref heap(new atomic.Bool(), out var Ꮡb);
         time.AfterFunc(0, () => {
@@ -396,7 +393,7 @@ public static void TestAfterFuncRunsImmediately(ж<testing.T> Ꮡt) {
 
 // TestTimerResetZeroDoNotHang verifies that using timer.Reset(0) does not
 // cause the test to hang indefinitely. See https://go.dev/issue/76052.
-public static void TestTimerResetZeroDoNotHang(ж<testing.T> Ꮡt) {
+public static void TestTimerResetZeroDoNotHang(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var timer = time.NewTimer(0);
         var (ctx, cancel) = context.WithCancel(context.Background());
@@ -404,9 +401,9 @@ public static void TestTimerResetZeroDoNotHang(ж<testing.T> Ꮡt) {
         var ctxʗ1 = ctx;
         var timerʗ1 = timer;
         goǃ(() => {
-            while (ᐧ) {
+            for (;;) {
                 var selᴛ5 = ctxʗ1.Done();
-                var selᴛ6 = (~timerʗ1).C;
+                var selᴛ6 = timerʗ1.C;
                 switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
                 case 0 when selᴛ5.ꟷᐳ(out _): {
                     return;
@@ -431,13 +428,13 @@ internal partial struct TestChannelFromOutsideBubble_type /*dyn*/ {
     internal Action<channel<nint>> inside;
 }
 
-public static void TestChannelFromOutsideBubble(ж<testing.T> Ꮡt) {
+public static void TestChannelFromOutsideBubble(ж<testing.T> t) {
     var choutside = new channel<EmptyStruct>(0);
         var choutsideʗ1 = choutside;
 
 
-    foreach (var (_, vᴛ1) in new TestChannelFromOutsideBubble_type[]{new(
-        desc: "read closed"u8,
+    foreach (var (_, vᴛ1) in slice<TestChannelFromOutsideBubble_type>([new(
+        desc: "read closed",
         outside: (channel<nint> ch) => {
             close(ch);
         },
@@ -445,7 +442,7 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> Ꮡt) {
             ᐸꟷ(ch);
         }
     ), new(
-        desc: "read value"u8,
+        desc: "read value",
         outside: (channel<nint> ch) => {
             ch.ᐸꟷ(0);
         },
@@ -453,7 +450,7 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> Ꮡt) {
             ᐸꟷ(ch);
         }
     ), new(
-        desc: "write value"u8,
+        desc: "write value",
         outside: (channel<nint> ch) => {
             ᐸꟷ(ch);
         },
@@ -461,7 +458,7 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> Ꮡt) {
             ch.ᐸꟷ(0);
         }
     ), new(
-        desc: "select outside only"u8,
+        desc: "select outside only",
         outside: (channel<nint> ch) => {
             close(ch);
         },
@@ -477,7 +474,7 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> Ꮡt) {
             }}
         }
     ), new(
-        desc: "select mixed"u8,
+        desc: "select mixed",
         outside: (channel<nint> ch) => {
             close(ch);
         },
@@ -494,12 +491,12 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> Ꮡt) {
             }}
         }
     )
-    }.slice()) {
+    ])) {
         ref var test = ref heap(new TestChannelFromOutsideBubble_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.desc, (ж<testing.T> tΔ1) => {
+        t.Run(test.desc, (ж<testing.T> tΔ1) => {
             var ch = new channel<nint>(0);
             var chʗ1 = ch;
             var testʗ2 = testʗ1;
@@ -516,8 +513,10 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string outsideBubbleˢ = "outside_bubble"u8;
-private static readonly @string differentBubbleˢ = "different_bubble"u8;
+private static ref readonly @string outsideBubbleˢ => ref outsideBubbleˢᵇ;
+private static readonly @string outsideBubbleˢᵇ = "outside_bubble"u8;
+private static ref readonly @string differentBubbleˢ => ref differentBubbleˢᵇ;
+private static readonly @string differentBubbleˢᵇ = "different_bubble"u8;
 
 internal partial struct TestChannelMovedOutOfBubble_type /*dyn*/ {
     internal @string desc;
@@ -525,32 +524,32 @@ internal partial struct TestChannelMovedOutOfBubble_type /*dyn*/ {
     internal @string wantFatal;
 }
 
-public static void TestChannelMovedOutOfBubble(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestChannelMovedOutOfBubble_type[]{new(
-        desc: "receive"u8,
+public static void TestChannelMovedOutOfBubble(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestChannelMovedOutOfBubble_type>([new(
+        desc: "receive",
         f: (channel<EmptyStruct> ch) => {
             ᐸꟷ(ch);
         },
-        wantFatal: "receive on synctest channel from outside bubble"u8
+        wantFatal: "receive on synctest channel from outside bubble"
     ), new(
-        desc: "send"u8,
+        desc: "send",
         f: (channel<EmptyStruct> ch) => {
             ch.ᐸꟷ(new EmptyStruct());
         },
-        wantFatal: "send on synctest channel from outside bubble"u8
+        wantFatal: "send on synctest channel from outside bubble"
     ), new(
-        desc: "close"u8,
+        desc: "close",
         f: (channel<EmptyStruct> ch) => {
             close(ch);
         },
-        wantFatal: "close of synctest channel from outside bubble"u8
+        wantFatal: "close of synctest channel from outside bubble"
     )
-    }.slice()) {
+    ])) {
         ref var test = ref heap(new TestChannelMovedOutOfBubble_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.desc, (ж<testing.T> tΔ1) => {
+        t.Run(test.desc, (ж<testing.T> tΔ1) => {
             // Bubbled channel accessed from outside any bubble.
             var testʗ2 = testʗ1;
             tΔ1.Run(outsideBubbleˢ, (ж<testing.T> tΔ2) => {
@@ -618,32 +617,32 @@ internal partial struct TestTimerFromInsideBubble_type /*dyn*/ {
     internal @string wantFatal;
 }
 
-public static void TestTimerFromInsideBubble(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestTimerFromInsideBubble_type[]{new(
-        desc: "read channel"u8,
+public static void TestTimerFromInsideBubble(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestTimerFromInsideBubble_type>([new(
+        desc: "read channel",
         f: (ж<time.Timer> tm) => {
-            ᐸꟷ((~tm).C);
+            ᐸꟷ(tm.C);
         },
-        wantFatal: "receive on synctest channel from outside bubble"u8
+        wantFatal: "receive on synctest channel from outside bubble"
     ), new(
-        desc: "Reset"u8,
+        desc: "Reset",
         f: (ж<time.Timer> tm) => {
             tm.Reset(1 * time.ΔSecond);
         },
-        wantFatal: "reset of synctest timer from outside bubble"u8
+        wantFatal: "reset of synctest timer from outside bubble"
     ), new(
-        desc: "Stop"u8,
+        desc: "Stop",
         f: (ж<time.Timer> tm) => {
             tm.Stop();
         },
-        wantFatal: "stop of synctest timer from outside bubble"u8
+        wantFatal: "stop of synctest timer from outside bubble"
     )
-    }.slice()) {
+    ])) {
         ref var test = ref heap(new TestTimerFromInsideBubble_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.desc, (ж<testing.T> tΔ1) => {
+        t.Run(test.desc, (ж<testing.T> tΔ1) => {
             var testʗ2 = testʗ1;
             wantFatal(tΔ1, testʗ1.wantFatal, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 var donec = new channel<EmptyStruct>(0);
@@ -672,12 +671,13 @@ public static void TestTimerFromInsideBubble(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string deadlockAllGoroutinesInˢ = "deadlock: all goroutines in bubble are blocked"u8;
+private static ref readonly @string deadlockAllGoroutinesInˢ => ref deadlockAllGoroutinesInˢᵇ;
+private static readonly @string deadlockAllGoroutinesInˢᵇ = "deadlock: all goroutines in bubble are blocked"u8;
 
-public static void TestDeadlockRoot(ж<testing.T> Ꮡt) {
+public static void TestDeadlockRoot(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        defer(wantPanic, Ꮡt, deadlockAllGoroutinesInˢ, ref ᒐ, recovers: true);
+        defer(wantPanic, t, deadlockAllGoroutinesInˢ, ref ᒐ, recovers: true);
         synctest.Run(() => {
             select();
         });
@@ -687,30 +687,31 @@ public static void TestDeadlockRoot(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string deadlockMainBubbleˢ = "deadlock: main bubble goroutine has exited but blocked goroutines remain"u8;
+private static ref readonly @string deadlockMainBubbleˢ => ref deadlockMainBubbleˢᵇ;
+private static readonly @string deadlockMainBubbleˢᵇ = "deadlock: main bubble goroutine has exited but blocked goroutines remain"u8;
 
-public static void TestDeadlockChild(ж<testing.T> Ꮡt) {
+public static void TestDeadlockChild(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        defer(wantPanic, Ꮡt, deadlockMainBubbleˢ, ref ᒐ, recovers: true);
+        defer(wantPanic, t, deadlockMainBubbleˢ, ref ᒐ, recovers: true);
         synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
                 select();
-            });
+            }, GoStack.Bounded);
         });
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestDeadlockTicker(ж<testing.T> Ꮡt) {
+public static void TestDeadlockTicker(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        defer(wantPanic, Ꮡt, deadlockMainBubbleˢ, ref ᒐ, recovers: true);
+        defer(wantPanic, t, deadlockMainBubbleˢ, ref ᒐ, recovers: true);
         synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
                 foreach (var _ᴛ1 in time.Tick(1 * time.ΔSecond)) {
-                    Ꮡt.Errorf("ticker unexpectedly ran"u8);
+                    t.Errorf("ticker unexpectedly ran");
                     return;
                 }
             });
@@ -720,7 +721,7 @@ public static void TestDeadlockTicker(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestCond(ж<testing.T> Ꮡt) {
+public static void TestCond(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
         var cond = sync.NewCond(new sync.MutexжLocker(Ꮡmu));
@@ -740,7 +741,7 @@ public static void TestCond(ж<testing.T> Ꮡt) {
             Ꮡmu.Lock();
             condʗ1.Broadcast();
             Ꮡmu.Unlock();
-        });
+        }, GoStack.Bounded);
 
         // Wait for cond.Signal.
         Ꮡmu.Lock();
@@ -748,7 +749,7 @@ public static void TestCond(ж<testing.T> Ꮡt) {
         Ꮡmu.Unlock();
         {
             var (got, want) = (time.Since(start), waitTime); if (got != want) {
-                Ꮡt.Errorf("after cond.Signal: time elapsed = %v, want %v"u8, got, want);
+                t.Errorf("after cond.Signal: time elapsed = %v, want %v", got, want);
             }
         }
 
@@ -766,17 +767,17 @@ public static void TestCond(ж<testing.T> Ꮡt) {
         Ꮡmu.Unlock();
         synctest.Wait();
         if (!waiterDone) {
-            Ꮡt.Errorf("after cond.Broadcast: waiter not done"u8);
+            t.Errorf("after cond.Broadcast: waiter not done");
         }
         {
             var (got, want) = (time.Since(start), 2 * waitTime); if (got != want) {
-                Ꮡt.Errorf("after cond.Broadcast: time elapsed = %v, want %v"u8, got, want);
+                t.Errorf("after cond.Broadcast: time elapsed = %v, want %v", got, want);
             }
         }
     });
 }
 
-public static void TestIteratorPush(ж<testing.T> Ꮡt) {
+public static void TestIteratorPush(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var seq = (Func<time.Time, bool> yield) => {
             while (yield(time.Now())) {
@@ -796,20 +797,20 @@ public static void TestIteratorPush(ж<testing.T> Ꮡt) {
                 }
             }
         });
-        var want = new time.Time[]{
+        var want = slice<time.Time>([
             time.Now(),
             time.Now().Add(1 * time.ΔSecond),
             time.Now().Add(2 * time.ΔSecond)
-        }.slice();
+        ]);
         time.Sleep((time.Duration)(5000000000L));
         synctest.Wait();
         if (!slices.Equal<slice<time.Time>, time.Time>(Ꮡgot.ValueSlot, want)) {
-            Ꮡt.Errorf("got: %v; want: %v"u8, Ꮡgot.ValueSlot, want);
+            t.Errorf("got: %v; want: %v", Ꮡgot.ValueSlot, want);
         }
     });
 }
 
-public static void TestIteratorPull(ж<testing.T> Ꮡt) {
+public static void TestIteratorPull(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var seq = (Func<time.Time, bool> yield) => {
             while (yield(time.Now())) {
@@ -833,43 +834,43 @@ public static void TestIteratorPull(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        var want = new time.Time[]{
+        var want = slice<time.Time>([
             time.Now(),
             time.Now().Add(1 * time.ΔSecond),
             time.Now().Add(2 * time.ΔSecond)
-        }.slice();
+        ]);
         time.Sleep((time.Duration)(5000000000L));
         synctest.Wait();
         if (!slices.Equal<slice<time.Time>, time.Time>(Ꮡgot.ValueSlot, want)) {
-            Ꮡt.Errorf("got: %v; want: %v"u8, Ꮡgot.ValueSlot, want);
+            t.Errorf("got: %v; want: %v", Ꮡgot.ValueSlot, want);
         }
     });
 }
 
-public static partial void TestReflectFuncOf(ж<testing.T> Ꮡt) {
+public static partial void TestReflectFuncOf(ж<testing.T> t) {
     void mkfunc(@string name, nint i) {
-        reflect.FuncOf(new reflectꓸType[]{reflect.StructOf(new reflect.StructField[]{new(
+        reflect.FuncOf(slice<reflectꓸType>([reflect.StructOf(slice<reflect.StructField>([new(
             Name: name + strconv.Itoa(i),
             Type: reflect.TypeOf((nint)0)
         )
-        }.slice())
-        }.slice(), default!, false);
+        ]))
+        ]), default, false);
     }
     var mkfuncʗ1 = mkfunc;
     goǃ(() => {
         for (nint i = 0; i < 100000; i++) {
-            mkfuncʗ1("A"u8, i);
+            mkfuncʗ1("A", i);
         }
     });
     var mkfuncʗ2 = mkfunc;
     synctest.Run(() => {
         for (nint i = 0; i < 100000; i++) {
-            mkfuncʗ2("A"u8, i);
+            mkfuncʗ2("A", i);
         }
     });
 }
 
-public static void TestWaitGroupInBubble(ж<testing.T> Ꮡt) {
+public static void TestWaitGroupInBubble(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);
@@ -877,19 +878,19 @@ public static void TestWaitGroupInBubble(ж<testing.T> Ꮡt) {
         goǃ(() => {
             time.Sleep(delay);
             Ꮡwg.Done();
-        });
+        }, GoStack.Bounded);
         var start = time.Now();
         Ꮡwg.Wait();
         {
             var got = time.Since(start); if (got != delay) {
-                Ꮡt.Fatalf("WaitGroup.Wait() took %v, want %v"u8, got, delay);
+                t.Fatalf("WaitGroup.Wait() took %v, want %v", got, delay);
             }
         }
     });
 }
 
 // https://go.dev/issue/74386
-public static void TestWaitGroupRacingAdds(ж<testing.T> Ꮡt) {
+public static void TestWaitGroupRacingAdds(ж<testing.T> t) {
     synctest.Run(() => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         foreach (var _ᴛ1 in range(100)) {
@@ -900,7 +901,7 @@ public static void TestWaitGroupRacingAdds(ж<testing.T> Ꮡt) {
     });
 }
 
-public static partial void TestWaitGroupOutOfBubble(ж<testing.T> Ꮡt) {
+public static partial void TestWaitGroupOutOfBubble(ж<testing.T> t) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(1);
     var donec = new channel<EmptyStruct>(0);
@@ -915,7 +916,7 @@ public static partial void TestWaitGroupOutOfBubble(ж<testing.T> Ꮡt) {
     var selᴛ12 = time.After(1 * time.Millisecond);
     switch (select(ᐸꟷ(selᴛ11, ꓸꓸꓸ), ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
     case 0 when selᴛ11.ꟷᐳ(out _): {
-        Ꮡt.Fatalf("synctest.Run finished before WaitGroup.Done called"u8);
+        t.Fatalf("synctest.Run finished before WaitGroup.Done called");
         break;
     }
     case 1 when selᴛ12.ꟷᐳ(out _): {
@@ -926,10 +927,11 @@ public static partial void TestWaitGroupOutOfBubble(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fatalErrorSyncWaitGroupˢ = "fatal error: sync: WaitGroup.Add called from inside and outside synctest bubble"u8;
+private static ref readonly @string fatalErrorSyncWaitGroupˢ => ref fatalErrorSyncWaitGroupˢᵇ;
+private static readonly @string fatalErrorSyncWaitGroupˢᵇ = "fatal error: sync: WaitGroup.Add called from inside and outside synctest bubble"u8;
 
-public static void TestWaitGroupMovedIntoBubble(ж<testing.T> Ꮡt) {
-    wantFatal(Ꮡt, fatalErrorSyncWaitGroupˢ, () => {
+public static void TestWaitGroupMovedIntoBubble(ж<testing.T> t) {
+    wantFatal(t, fatalErrorSyncWaitGroupˢ, () => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);
         synctest.Run(() => {
@@ -938,8 +940,8 @@ public static void TestWaitGroupMovedIntoBubble(ж<testing.T> Ꮡt) {
     });
 }
 
-public static void TestWaitGroupMovedOutOfBubble(ж<testing.T> Ꮡt) {
-    wantFatal(Ꮡt, fatalErrorSyncWaitGroupˢ, () => {
+public static void TestWaitGroupMovedOutOfBubble(ж<testing.T> t) {
+    wantFatal(t, fatalErrorSyncWaitGroupˢ, () => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         synctest.Run(() => {
             Ꮡwg.Add(1);
@@ -949,10 +951,11 @@ public static void TestWaitGroupMovedOutOfBubble(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fatalErrorSyncWaitGroupˢ2 = "fatal error: sync: WaitGroup.Add called from multiple synctest bubbles"u8;
+private static ref readonly @string fatalErrorSyncWaitGroupˢ2 => ref fatalErrorSyncWaitGroupˢ2ᵇ;
+private static readonly @string fatalErrorSyncWaitGroupˢ2ᵇ = "fatal error: sync: WaitGroup.Add called from multiple synctest bubbles"u8;
 
-public static void TestWaitGroupMovedBetweenBubblesWithNonZeroCount(ж<testing.T> Ꮡt) {
-    wantFatal(Ꮡt, fatalErrorSyncWaitGroupˢ2, () => {
+public static void TestWaitGroupMovedBetweenBubblesWithNonZeroCount(ж<testing.T> t) {
+    wantFatal(t, fatalErrorSyncWaitGroupˢ2, () => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         synctest.Run(() => {
             Ꮡwg.Add(1);
@@ -963,7 +966,7 @@ public static void TestWaitGroupMovedBetweenBubblesWithNonZeroCount(ж<testing.T
     });
 }
 
-public static void TestWaitGroupDisassociateInWait(ж<testing.T> Ꮡt) {
+public static void TestWaitGroupDisassociateInWait(ж<testing.T> t) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     synctest.Run(() => {
         Ꮡwg.Add(1);
@@ -978,11 +981,11 @@ public static void TestWaitGroupDisassociateInWait(ж<testing.T> Ꮡt) {
     });
 }
 
-public static void TestWaitGroupDisassociateInAdd(ж<testing.T> Ꮡt) {
+public static void TestWaitGroupDisassociateInAdd(ж<testing.T> t) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         Ꮡwg.Add(1);
-        goǃ(Ꮡwg.Wait);
+        goǃ(Ꮡwg.Wait, GoStack.Bounded);
         synctest.Wait(); // wait for Wait to block
         // Count is 0 and waiters != 0, so Done wakes the waiters and
         // disassociates the WaitGroup.
@@ -998,7 +1001,7 @@ public static void TestWaitGroupDisassociateInAdd(ж<testing.T> Ꮡt) {
 internal static readonly ж<sync.WaitGroup> ᏑtestWaitGroupLinkerAllocatedWG = new StaticBox<sync.WaitGroup>(default(sync.WaitGroup));
 internal static ref sync.WaitGroup testWaitGroupLinkerAllocatedWG => ref ((StaticBox<sync.WaitGroup>)ᏑtestWaitGroupLinkerAllocatedWG).ValueSlot;
 
-public static void TestWaitGroupLinkerAllocated(ж<testing.T> Ꮡt) {
+public static void TestWaitGroupLinkerAllocated(ж<testing.T> t) {
     synctest.Run(() => {
         // This WaitGroup is probably linker-allocated and has no span,
         // so we won't be able to add a special to it associating it with
@@ -1014,19 +1017,19 @@ public static void TestWaitGroupLinkerAllocated(ж<testing.T> Ꮡt) {
 
 internal static ж<sync.WaitGroup> testWaitGroupHeapAllocatedWG = @new<sync.WaitGroup>();
 
-public static void TestWaitGroupHeapAllocated(ж<testing.T> Ꮡt) {
+public static void TestWaitGroupHeapAllocated(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         // This package-scoped WaitGroup var should have been heap-allocated,
         // so we can associate it with a bubble.
         testWaitGroupHeapAllocatedWG.Add(1);
-        goǃ(testWaitGroupHeapAllocatedWG.Wait);
+        goǃ(testWaitGroupHeapAllocatedWG.Wait, GoStack.Bounded);
         synctest.Wait();
         testWaitGroupHeapAllocatedWG.Done();
     });
 }
 
 // Issue #75134: Many racing bubble associations.
-public static void TestWaitGroupManyBubbles(ж<testing.T> Ꮡt) {
+public static void TestWaitGroupManyBubbles(ж<testing.T> t) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     foreach (var _ᴛ1 in range(100)) {
         Ꮡwg.Go(() => {
@@ -1048,11 +1051,11 @@ public static void TestWaitGroupManyBubbles(ж<testing.T> Ꮡt) {
     Ꮡwg.Wait();
 }
 
-public static void TestHappensBefore(ж<testing.T> Ꮡt) {
+public static void TestHappensBefore(ж<testing.T> t) {
     // Use two parallel goroutines accessing different vars to ensure that
     // we correctly account for multiple goroutines in the bubble.
-    nint v1 = default!;
-    nint v2 = default!;
+    nint v1 = default;
+    nint v2 = default;
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         v1++; // 1
         v2++; // 1
@@ -1060,10 +1063,10 @@ public static void TestHappensBefore(ж<testing.T> Ꮡt) {
         // Wait returns after these goroutines exit.
         goǃ(() => {
             v1++; // 2
-        });
+        }, GoStack.Bounded);
         goǃ(() => {
             v2++; // 2
-        });
+        }, GoStack.Bounded);
         synctest.Wait();
 
         v1++; // 3
@@ -1075,12 +1078,12 @@ public static void TestHappensBefore(ж<testing.T> Ꮡt) {
         goǃ(() => {
             v1++; // 4
             ᐸꟷ(ch1ʗ1);
-        });
+        }, GoStack.Bounded);
         var ch1ʗ2 = ch1;
         goǃ(() => {
             v2++; // 4
             ᐸꟷ(ch1ʗ2);
-        });
+        }, GoStack.Bounded);
         synctest.Wait();
 
         v1++; // 5
@@ -1122,55 +1125,54 @@ public static void TestHappensBefore(ж<testing.T> Ꮡt) {
         goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
                 v1++; // 10
-            });
-        });
+            }, GoStack.Bounded);
+        }, GoStack.Bounded);
         goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
                 v2++; // 10
-            });
-        });
+            }, GoStack.Bounded);
+        }, GoStack.Bounded);
     });
     // These tests happen after Run returns.
     {
         nint got = v1;
         nint want = 10; if (got != want) {
-            Ꮡt.Errorf("v1 = %v, want %v"u8, got, want);
+            t.Errorf("v1 = %v, want %v", got, want);
         }
     }
     {
         nint got = v2;
         nint want = 10; if (got != want) {
-            Ꮡt.Errorf("v2 = %v, want %v"u8, got, want);
+            t.Errorf("v2 = %v, want %v", got, want);
         }
     }
 }
 
 // https://go.dev/issue/73817
-public static void TestWeak(ж<testing.T> Ꮡt) {
+public static void TestWeak(ж<testing.T> t) {
     synctest.Run(() => {
         foreach (var _ᴛ1 in range(5)) {
             Δruntime.GC();
-            ref var b = ref heap<slice<byte>>(out var Ꮡb);
-            b = new slice<byte>(1024);
+            ref var b = ref heap<slice<byte>>(new slice<byte>(1024), out var Ꮡb);
             weak.Make<slice<byte>>(Ꮡb);
         }
     });
 }
 
-internal static void wantPanic(ж<testing.T> Ꮡt, @string want) {
+internal static void wantPanic(ж<testing.T> t, @string want) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
         {
-            var e = recover(calledByDefer); if (e != default!){
+            var e = recover(calledByDefer); if (e != nil) {
                 {
                     @string got = fmt.Sprint(e); if (got != want) {
-                        Ꮡt.Errorf("got panic message %q, want %q"u8, got, want);
+                        t.Errorf("got panic message %q, want %q", got, want);
                     }
                 }
             } else {
-                Ꮡt.Errorf("got no panic, want one"u8);
+                t.Errorf("got no panic, want one");
             }
         }
     }
@@ -1179,25 +1181,26 @@ internal static void wantPanic(ж<testing.T> Ꮡt, @string want) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
+private static ref readonly @string goWantHelperProcessˢ => ref goWantHelperProcessˢᵇ;
+private static readonly @string goWantHelperProcessˢᵇ = "GO_WANT_HELPER_PROCESS"u8;
 
-internal static void wantFatal(ж<testing.T> Ꮡt, @string want, Action f) {
-    Ꮡt.Helper();
+internal static void wantFatal(ж<testing.T> t, @string want, Action f) {
+    t.Helper();
 
     if (os.Getenv(goWantHelperProcessˢ) == "1"u8) {
         f();
         return;
     }
 
-    var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), "-test.run=^"u8 + Ꮡt.Name() + "$"u8);
+    var cmd = testenv.Command(new testing_TжTB(t), testenv.Executable(new testing_TжTB(t)), "-test.run=^"u8 + t.Name() + "$"u8);
     cmd = testenv.CleanCmdEnv(cmd);
-    cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
+    cmd.Env = append(cmd.Env, (@string)"GO_WANT_HELPER_PROCESS=1");
     var (@out, err) = cmd.CombinedOutput();
-    if (err == default!) {
-        Ꮡt.Errorf("expected test function to panic, but test returned successfully"u8);
+    if (err == nil) {
+        t.Errorf("expected test function to panic, but test returned successfully");
     }
     if (!strings.Contains((@string)@out, want)) {
-        Ꮡt.Errorf("wanted test output contaiing %q; got %q"u8, want, (@string)@out);
+        t.Errorf("wanted test output contaiing %q; got %q", want, (@string)@out);
     }
 }
 

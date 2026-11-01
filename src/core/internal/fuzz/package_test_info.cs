@@ -8,30 +8,8 @@ global using static global::go.@internal.fuzz_package;
 
 // <ImportedTypeAliases>
 global using CorpusEntry = go.@internal.fuzz_package.CorpusEntryᴛ1;
-global using execꓸError = go.os.exec_package.ΔError;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -48,11 +26,13 @@ using static global::go.@internal.fuzz_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: global::go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.@internal.fuzz_package.mutator))]
+[assembly: GoFieldAccess(typeof(global::go.@internal.fuzz_package.sharedMemHeader))]
+[assembly: GoFieldAccess(typeof(global::go.@internal.fuzz_package.worker))]
+[assembly: GoFieldAccess(typeof(global::go.@internal.fuzz_package.workerServer))]
+[assembly: GoFieldAccess(typeof(mockRand))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,12 +42,12 @@ using static global::go.@internal.fuzz_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("internal/fuzz/encoding_test.go", "encoding_test.cs", "ACIcggDgAfgClKioAAkUspKCgoKUlIKUgoKmgoKUgoKCAAUSsoKCppKSgoIABRKygoKmkoKSgoLcgoKCgoKClIKCyoKCgoKCgpSCgsqigoKCgoKCgpSClIKUgoKUgpSCgoLKooKCgoKCgoKCgpSCgpSCgpSClIKCyqKCgpSCgpSCgpSClIKC", "202-215:1;224-249:2;263-268:1;283-288:1;332-350:1;365-380:1;388-403:1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/minimize_test.go", "minimize_test.cs", "AB4qggADFIKCgoKmgpQABxCCgpSClAAHEIKClIKUAAcQgoKUAAcQgoKCgqaClAAHEIKClAAHEIKCgpTuspKCuoKCgoKUgpSAgqSCAAkSspaCgoKCgpSClICC", "31-43:1;49-58:2;64-73:3;79-85:4;91-103:5;109-115:6;121-128:7;135-157:8;138-140:8.1;165-167:1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/mutator_test.go", "mutator_test.cs", "AA8eooKAkoKUAAcQkoKUlIKC2KSigoCSgpQABxCSgpSUgoLYpKKCgJKClAAQIoKigoLYpIKCgoKCgoKClII=", "17-17:1;29-39:2;45-45:1;57-67:2;73-73:1;95-100:2")]
-[assembly: global::go.GoPositionMap("internal/fuzz/mutators_byteslice_test.go", "mutators_byteslice_test.cs", "ABImgoKCpoKCgqaCgoKmgoKCpoKmggAKBoIAceoBkoKClIKCggAKDIIAFDCykpKSgoKC", "169-179:1;209-219:1;211-217:1.1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/queue_test.go", "queue_test.cs", "AAoStJKAgqSAgsiCgoKAgqSAgpKC7IKCgoKAgpKClKSCgIK2goKAgg==")]
-[assembly: global::go.GoPositionMap("internal/fuzz/worker_test.go", "worker_test.cs", "ABgslIKCgoKU1sKClIKAkpTKgoKUkoCCyIKClJSCgoKClLSowoKUgoKCgIIACA7CgpSCgoKCgriCgpSClIKUAAMQwoK4gpSCgoKCgoKUkoCCtoCCpJKAgramooKSgoCCxNSigqa4koKUgoCCtpSCgpKCgoKCgqKCgoKClJSCgtg=", "38-38:1;42-42:2;50-54:3;137-141:1;145-149:2;156-156:1;175-179:1;190-203:2;192-198:2.1", "", "149=TypeOf/1/1/1")]
+[assembly: GoPositionMap("internal/fuzz/encoding_test.go", "encoding_test.cs", "ACQcggDgAfgClKioAAoUspKCgoKUlIKUgoKmgoKUgoKCAAUSsoKCppKSgoIABRKygoKmkoKSgoLcgoKCgoKClIKCyoKCgoKCgpSCgsqigoKCgoKCgpSClIKUgoKUgpSCgoLKooKCgoKCgoKCgpSCgpSCgpSClIKCyqKCgpSCgpSCgpSClIKC", "202-215:1;224-249:2;263-268:1;283-288:1;332-350:1;365-380:1;388-403:1")]
+[assembly: GoPositionMap("internal/fuzz/minimize_test.go", "minimize_test.cs", "ACAqggADFIKCgoKmgpQABxCCgpSClAAHEIKClIKUAAcQgoKUAAcQgoKCgqaClAAHEIKClAAHEIKCgpTuspKCuoKCgoKUgpSAgqSCAAoSspaCgoKCgpSClICC", "31-43:1;49-58:2;64-73:3;79-85:4;91-103:5;109-115:6;121-128:7;135-157:8;138-140:8.1;165-167:1")]
+[assembly: GoPositionMap("internal/fuzz/mutator_test.go", "mutator_test.cs", "AA8eooKAkoKUAAcQkoKUlIKC2KSigoCSgpQABxCSgpSUgoLYpKKCgJKClAAQIoKigoLY1IKCgoKCgoKClII=", "17-17:1;29-39:2;45-45:1;57-67:2;73-73:1;95-100:2")]
+[assembly: GoPositionMap("internal/fuzz/mutators_byteslice_test.go", "mutators_byteslice_test.cs", "ABImgoKCpoKCgqaCgoKmgoKCpoKmggAKBoIAceoBkoKClIKCggAKDIIAFDCykpKSgoKC", "169-179:1;209-219:1;211-217:1.1")]
+[assembly: GoPositionMap("internal/fuzz/queue_test.go", "queue_test.cs", "AAoSpJKAgqSAgsiCgoKAgqSAgoKC7IKCgoKAgoKClKSCgIK2goKAgg==")]
+[assembly: GoPositionMap("internal/fuzz/worker_test.go", "worker_test.cs", "ABgslIKCgoKU1sKClIKAkpTKgoKUkoCCyIKClJSCgoKClLSowoKUgoKCgIIACA7CgpSCgoKCgriCgpSClIKUAAMQwoK4gpSCgoKCgoKUkoCCtoCCpJKAgramooKSgoCCxOSigqa4koKUgoCCtpSCgpKCgoKCgqKCgoKClJSCgtg=", "38-38:1;42-42:2;50-54:3;137-141:1;145-149:2;156-156:1;175-179:1;190-203:2;192-198:2.1", "", "149=TypeOf/1/1/1", "193:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

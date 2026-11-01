@@ -52,7 +52,7 @@ internal static bool nearEqual(float64 a, float64 b, float64 closeEnough, float6
     return absDiff / max(math.Abs(a), math.Abs(b)) < maxError;
 }
 
-internal static slice<uint64> testSeeds = new uint64[]{1, 1754801282, 1698661970, 1550503961}.slice();
+internal static slice<uint64> testSeeds = slice<uint64>([1, 1754801282, 1698661970, 1550503961]);
 
 // checkSimilarDistribution returns success if the mean and stddev of the
 // two statsResults are similar.
@@ -69,43 +69,43 @@ internal static error checkSimilarDistribution(this ref statsResults sr, ж<stat
         fmt.Println(s);
         return errors.New(s);
     }
-    return default!;
+    return default;
 }
 
 internal static ж<statsResults> getStatsResults(slice<float64> samples) {
     var res = @new<statsResults>();
-    float64 sum = default!;
-    float64 squaresum = default!;
+    float64 sum = default;
+    float64 squaresum = default;
     foreach (var (_, s) in samples) {
         sum += s;
         squaresum += s * s;
     }
-    res.Value.mean = sum / (float64)len(samples);
-    res.Value.stddev = math.Sqrt(squaresum / (float64)len(samples) - (~res).mean * (~res).mean);
+    res.mean = sum / (float64)len(samples);
+    res.stddev = math.Sqrt(squaresum / (float64)len(samples) - res.mean * res.mean);
     return res;
 }
 
-internal static void checkSampleDistribution(ж<testing.T> Ꮡt, slice<float64> samples, ж<statsResults> Ꮡexpected) {
-    Ꮡt.Helper();
+internal static void checkSampleDistribution(ж<testing.T> t, slice<float64> samples, ж<statsResults> expected) {
+    t.Helper();
     var actual = getStatsResults(samples);
-    var err = actual.checkSimilarDistribution(Ꮡexpected);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    var err = actual.checkSimilarDistribution(expected);
+    if (err != nil) {
+        t.Error(err);
     }
 }
 
-internal static void checkSampleSliceDistributions(ж<testing.T> Ꮡt, slice<float64> samples, nint nslices, ж<statsResults> Ꮡexpected) {
-    Ꮡt.Helper();
+internal static void checkSampleSliceDistributions(ж<testing.T> t, slice<float64> samples, nint nslices, ж<statsResults> expected) {
+    t.Helper();
     nint chunk = len(samples) / nslices;
     for (nint i = 0; i < nslices; i++) {
         nint low = i * chunk;
-        nint high = default!;
-        if (i == nslices - 1){
+        nint high = default;
+        if (i == nslices - 1) {
             high = len(samples) - 1;
         } else {
             high = (i + 1) * chunk;
         }
-        checkSampleDistribution(Ꮡt, samples.slice(low, high), Ꮡexpected);
+        checkSampleDistribution(t, samples.slice(low, high), expected);
     }
 }
 
@@ -121,7 +121,7 @@ internal static slice<float64> generateNormalSamples(nint nsamples, float64 mean
     return samples;
 }
 
-internal static void testNormalDistribution(ж<testing.T> Ꮡt, nint nsamples, float64 mean, float64 stddev, uint64 seed) {
+internal static void testNormalDistribution(ж<testing.T> t, nint nsamples, float64 mean, float64 stddev, uint64 seed) {
     //fmt.Printf("testing nsamples=%v mean=%v stddev=%v seed=%v\n", nsamples, mean, stddev, seed);
 
     var samples = generateNormalSamples(nsamples, mean, stddev, seed);
@@ -129,23 +129,23 @@ internal static void testNormalDistribution(ж<testing.T> Ꮡt, nint nsamples, f
     var expected = Ꮡ(new statsResults(mean, stddev, 0.10D * errorScale, 0.08D * errorScale));
 
     // Make sure that the entire set matches the expected distribution.
-    checkSampleDistribution(Ꮡt, samples, expected);
+    checkSampleDistribution(t, samples, expected);
 
     // Make sure that each half of the set matches the expected distribution.
-    checkSampleSliceDistributions(Ꮡt, samples, 2, expected);
+    checkSampleSliceDistributions(t, samples, 2, expected);
 
     // Make sure that each 7th of the set matches the expected distribution.
-    checkSampleSliceDistributions(Ꮡt, samples, 7, expected);
+    checkSampleSliceDistributions(t, samples, 7, expected);
 }
 
 // Actual tests
-public static void TestStandardNormalValues(ж<testing.T> Ꮡt) {
+public static void TestStandardNormalValues(ж<testing.T> t) {
     foreach (var (_, seed) in testSeeds) {
-        testNormalDistribution(Ꮡt, numTestSamples, 0D, 1D, seed);
+        testNormalDistribution(t, numTestSamples, 0D, 1D, seed);
     }
 }
 
-public static void TestNonStandardNormalValues(ж<testing.T> Ꮡt) {
+public static void TestNonStandardNormalValues(ж<testing.T> t) {
     var sdmax = 1000.0D;
     var mmax = 1000.0D;
     if (testing.Short()) {
@@ -155,7 +155,7 @@ public static void TestNonStandardNormalValues(ж<testing.T> Ꮡt) {
     for (var sd = 0.5D; sd < sdmax; sd *= 2D) {
         for (var m = 0.5D; m < mmax; m *= 2D) {
             foreach (var (_, seed) in testSeeds) {
-                testNormalDistribution(Ꮡt, numTestSamples, m, sd, seed);
+                testNormalDistribution(t, numTestSamples, m, sd, seed);
                 if (testing.Short()) {
                     break;
                 }
@@ -176,39 +176,37 @@ internal static slice<float64> generateExponentialSamples(nint nsamples, float64
     return samples;
 }
 
-internal static void testExponentialDistribution(ж<testing.T> Ꮡt, nint nsamples, float64 rate, uint64 seed) {
+internal static void testExponentialDistribution(ж<testing.T> t, nint nsamples, float64 rate, uint64 seed) {
     //fmt.Printf("testing nsamples=%v rate=%v seed=%v\n", nsamples, rate, seed);
 
-    ref var mean = ref heap<float64>(out var Ꮡmean);
-    mean = 1D / rate;
-    ref var stddev = ref heap<float64>(out var Ꮡstddev);
-    stddev = mean;
+    ref var mean = ref heap<float64>(1D / rate, out var Ꮡmean);
+    ref var stddev = ref heap<float64>(mean, out var Ꮡstddev);
 
     var samples = generateExponentialSamples(nsamples, rate, seed);
     var errorScale = max(1.0D, 1D / rate); // Error scales with the inverse of the rate
     var expected = Ꮡ(new statsResults(mean, stddev, 0.10D * errorScale, 0.20D * errorScale));
 
     // Make sure that the entire set matches the expected distribution.
-    checkSampleDistribution(Ꮡt, samples, expected);
+    checkSampleDistribution(t, samples, expected);
 
     // Make sure that each half of the set matches the expected distribution.
-    checkSampleSliceDistributions(Ꮡt, samples, 2, expected);
+    checkSampleSliceDistributions(t, samples, 2, expected);
 
     // Make sure that each 7th of the set matches the expected distribution.
-    checkSampleSliceDistributions(Ꮡt, samples, 7, expected);
+    checkSampleSliceDistributions(t, samples, 7, expected);
 }
 
 // Actual tests
-public static void TestStandardExponentialValues(ж<testing.T> Ꮡt) {
+public static void TestStandardExponentialValues(ж<testing.T> t) {
     foreach (var (_, seed) in testSeeds) {
-        testExponentialDistribution(Ꮡt, numTestSamples, 1D, seed);
+        testExponentialDistribution(t, numTestSamples, 1D, seed);
     }
 }
 
-public static void TestNonStandardExponentialValues(ж<testing.T> Ꮡt) {
+public static void TestNonStandardExponentialValues(ж<testing.T> t) {
     for (var rate = 0.05D; rate < 10D; rate *= 2D) {
         foreach (var (_, seed) in testSeeds) {
-            testExponentialDistribution(Ꮡt, numTestSamples, rate, seed);
+            testExponentialDistribution(t, numTestSamples, rate, seed);
             if (testing.Short()) {
                 break;
             }
@@ -220,9 +218,9 @@ public static void TestNonStandardExponentialValues(ж<testing.T> Ꮡt) {
 // Table generation tests
 //
 internal static (slice<uint32> testKn, slice<float32> testWn, slice<float32> testFn) initNorm() {
-    slice<uint32> testKn = default!;
-    slice<float32> testWn = default!;
-    slice<float32> testFn = default!;
+    slice<uint32> testKn = default;
+    slice<float32> testWn = default;
+    slice<float32> testFn = default;
 
     const float64 m1 = /* 1 << 31 */ 2147483648;
     float64 dn = rn;
@@ -251,9 +249,9 @@ internal static (slice<uint32> testKn, slice<float32> testWn, slice<float32> tes
 }
 
 internal static (slice<uint32> testKe, slice<float32> testWe, slice<float32> testFe) initExp() {
-    slice<uint32> testKe = default!;
-    slice<float32> testWe = default!;
-    slice<float32> testFe = default!;
+    slice<uint32> testKe = default;
+    slice<float32> testWe = default;
+    slice<float32> testFe = default;
 
     const float64 m2 = /* 1 << 32 */ 4294967296;
     float64 de = re;
@@ -317,65 +315,67 @@ internal static nint compareFloat32Slices(slice<float32> s1, slice<float32> s2) 
     return -1;
 }
 
-public static void TestNormTables(ж<testing.T> Ꮡt) {
+public static void TestNormTables(ж<testing.T> t) {
     var (testKn, testWn, testFn) = initNorm();
     {
         nint i = compareUint32Slices(kn[0..], testKn); if (i >= 0) {
-            Ꮡt.Errorf("kn disagrees at index %v; %v != %v"u8, i, kn[i], testKn[i]);
+            t.Errorf("kn disagrees at index %v; %v != %v", i, kn[i], testKn[i]);
         }
     }
     {
         nint i = compareFloat32Slices(wn[0..], testWn); if (i >= 0) {
-            Ꮡt.Errorf("wn disagrees at index %v; %v != %v"u8, i, wn[i], testWn[i]);
+            t.Errorf("wn disagrees at index %v; %v != %v", i, wn[i], testWn[i]);
         }
     }
     {
         nint i = compareFloat32Slices(fn[0..], testFn); if (i >= 0) {
-            Ꮡt.Errorf("fn disagrees at index %v; %v != %v"u8, i, fn[i], testFn[i]);
+            t.Errorf("fn disagrees at index %v; %v != %v", i, fn[i], testFn[i]);
         }
     }
 }
 
-public static void TestExpTables(ж<testing.T> Ꮡt) {
+public static void TestExpTables(ж<testing.T> t) {
     var (testKe, testWe, testFe) = initExp();
     {
         nint i = compareUint32Slices(ke[0..], testKe); if (i >= 0) {
-            Ꮡt.Errorf("ke disagrees at index %v; %v != %v"u8, i, ke[i], testKe[i]);
+            t.Errorf("ke disagrees at index %v; %v != %v", i, ke[i], testKe[i]);
         }
     }
     {
         nint i = compareFloat32Slices(we[0..], testWe); if (i >= 0) {
-            Ꮡt.Errorf("we disagrees at index %v; %v != %v"u8, i, we[i], testWe[i]);
+            t.Errorf("we disagrees at index %v; %v != %v", i, we[i], testWe[i]);
         }
     }
     {
         nint i = compareFloat32Slices(fe[0..], testFe); if (i >= 0) {
-            Ꮡt.Errorf("fe disagrees at index %v; %v != %v"u8, i, fe[i], testFe[i]);
+            t.Errorf("fe disagrees at index %v; %v != %v", i, fe[i], testFe[i]);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goarmˢ = "GOARM"u8;
+internal static ref readonly @string goarmˢ => ref goarmˢᵇ;
+private static readonly @string goarmˢᵇ = "GOARM"u8;
 
 internal static bool hasSlowFloatingPoint() {
     var exprᴛ1 = runtime.GOARCH;
-    if (exprᴛ1 == "arm"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "arm"u8: {
         return os.Getenv(goarmˢ) == "5"u8;
     }
-    if (exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
+    case {} when exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8: {
         // Be conservative and assume that all mips boards
         // have emulated floating point.
         // TODO: detect what it actually has.
         return true;
-    }
+    }}
     return false;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object float32ShouldBeInRange01ˢ = (@string)"Float32() should be in range [0,1). ct:"u8;
 
-public static void TestFloat32(ж<testing.T> Ꮡt) {
+public static void TestFloat32(ж<testing.T> t) {
     // For issue 6721, the problem came after 7533753 calls, so check 10e6.
     nint num = (nint)10000000;
     // But do the full amount only on builders (not locally).
@@ -389,18 +389,18 @@ public static void TestFloat32(ж<testing.T> Ꮡt) {
     for (nint ct = 0; ct < num; ct++) {
         var f = r.Float32();
         if (f >= 1F) {
-            Ꮡt.Fatal(float32ShouldBeInRange01ˢ, ct, (@string)"f:"u8, f);
+            t.Fatal(float32ShouldBeInRange01ˢ, ct, (@string)"f:", f);
         }
     }
 }
 
-public static void TestShuffleSmall(ж<testing.T> Ꮡt) {
+public static void TestShuffleSmall(ж<testing.T> t) {
     // Check that Shuffle allows n=0 and n=1, but that swap is never called for them.
     var r = testRand();
     for (nint nᴛ1 = 0; nᴛ1 <= 1; nᴛ1++) {
         var n = nᴛ1;
         r.Shuffle(n, (nint i, nint j) => {
-            Ꮡt.Fatalf("swap called, n=%d i=%d j=%d"u8, n, i, j);
+            t.Fatalf("swap called, n=%d i=%d j=%d", n, i, j);
         });
     }
 }
@@ -434,7 +434,7 @@ internal partial struct TestUniformFactorial_tests /*dyn*/ {
 }
 
 // TestUniformFactorial tests several ways of generating a uniform value in [0, n!).
-public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
+public static void TestUniformFactorial(ж<testing.T> t) {
     var r = New(new rand.PCGжSource(NewPCG(1, 2)));
     nint top = 6;
     if (testing.Short()) {
@@ -443,7 +443,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
     for (nint nᴛ1 = 3; nᴛ1 <= top; nᴛ1++) {
         var n = nᴛ1;
         var rʗ1 = r;
-        Ꮡt.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.T> tΔ1) => {
             // Calculate n!.
             nint nfact = 1;
             for (nint i = 2; i <= n; i++) {
@@ -459,9 +459,9 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                 var pʗ1 = p;
                 var rʗ4 = rʗ1;
             var tests = new TestUniformFactorial_tests[]{
-                new(name: "Int32N"u8, fn: () => (nint)rʗ2.Int32N((int32)nfact)),
-                new(name: "Perm"u8, fn: () => encodePerm(rʗ3.Perm(n))),
-                new(name: "Shuffle"u8, fn: () => {
+                new(name: "Int32N", fn: () => (nint)rʗ2.Int32N((int32)nfact)),
+                new(name: "Perm", fn: () => encodePerm(rʗ3.Perm(n))),
+                new(name: "Shuffle", fn: () => {
                     // Generate permutation using Shuffle.
                     foreach (var i in range(pʗ1)) {
                         pʗ1[i] = i;
@@ -498,7 +498,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                         }
                         // Calculate chi-squared and add to samples.
                         var want = (float64)iters / (float64)nfact;
-                        float64 χ2 = default!;
+                        float64 χ2 = default;
                         foreach (var (_, have) in counts) {
                             var err = (float64)have - want;
                             χ2 += err * err;
@@ -508,12 +508,11 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                     }
 
                     // Check that our samples approximate the appropriate normal distribution.
-                    ref var dof = ref heap<float64>(out var Ꮡdof);
-                    dof = (float64)(nfact - 1);
+                    ref var dof = ref heap<float64>((float64)(nfact - 1), out var Ꮡdof);
                     var expected = Ꮡ(new statsResults(mean: dof, stddev: math.Sqrt(2D * dof)));
-                    var errorScale = max(1.0D, (~expected).stddev);
-                    expected.Value.closeEnough = 0.10D * errorScale;
-                    expected.Value.maxError = 0.08D; // TODO: What is the right value here? See issue 21211.
+                    var errorScale = max(1.0D, expected.stddev);
+                    expected.closeEnough = 0.10D * errorScale;
+                    expected.maxError = 0.08D; // TODO: What is the right value here? See issue 21211.
                     checkSampleDistribution(tΔ2, samples, expected);
                 });
             }
@@ -533,7 +532,7 @@ public static void BenchmarkSourceUint64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var s = NewPCG(1, 2);
-    uint64 t = default!;
+    uint64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += s.Uint64();
     }
@@ -543,16 +542,16 @@ public static void BenchmarkSourceUint64(ж<testing.B> Ꮡb) {
 public static void BenchmarkGlobalInt64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    int64 t = default!;
+    int64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += Int64();
     }
     Sink = (uint64)t;
 }
 
-public static void BenchmarkGlobalInt64Parallel(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
-        int64 t = default!;
+public static void BenchmarkGlobalInt64Parallel(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
+        int64 t = default;
         while (pb.Next()) {
             t += Int64();
         }
@@ -563,16 +562,16 @@ public static void BenchmarkGlobalInt64Parallel(ж<testing.B> Ꮡb) {
 public static void BenchmarkGlobalUint64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    uint64 t = default!;
+    uint64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += Uint64();
     }
     Sink = t;
 }
 
-public static void BenchmarkGlobalUint64Parallel(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
-        uint64 t = default!;
+public static void BenchmarkGlobalUint64Parallel(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
+        uint64 t = default;
         while (pb.Next()) {
             t += Uint64();
         }
@@ -584,7 +583,7 @@ public static void BenchmarkInt64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int64 t = default!;
+    int64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += r.Int64();
     }
@@ -607,7 +606,7 @@ public static void BenchmarkUint64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    uint64 t = default!;
+    uint64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += r.Uint64();
     }
@@ -617,7 +616,7 @@ public static void BenchmarkUint64(ж<testing.B> Ꮡb) {
 public static void BenchmarkGlobalIntN1000(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    nint t = default!;
+    nint t = default;
     nint arg = keep<nint>(1000);
     for (nint n = b.N; n > 0; n--) {
         t += IntN(arg);
@@ -629,7 +628,7 @@ public static void BenchmarkIntN1000(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    nint t = default!;
+    nint t = default;
     nint arg = keep<nint>(1000);
     for (nint n = b.N; n > 0; n--) {
         t += r.IntN(arg);
@@ -641,7 +640,7 @@ public static void BenchmarkInt64N1000(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int64 t = default!;
+    int64 t = default;
     var arg = keep((int64)1000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int64N(arg);
@@ -653,7 +652,7 @@ public static void BenchmarkInt64N1e8(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int64 t = default!;
+    int64 t = default;
     var arg = keep((int64)100000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int64N(arg);
@@ -665,7 +664,7 @@ public static void BenchmarkInt64N1e9(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int64 t = default!;
+    int64 t = default;
     var arg = keep((int64)1000000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int64N(arg);
@@ -677,7 +676,7 @@ public static void BenchmarkInt64N2e9(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int64 t = default!;
+    int64 t = default;
     var arg = keep((int64)2000000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int64N(arg);
@@ -689,7 +688,7 @@ public static void BenchmarkInt64N1e18(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int64 t = default!;
+    int64 t = default;
     var arg = keep((int64)1000000000000000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int64N(arg);
@@ -701,7 +700,7 @@ public static void BenchmarkInt64N2e18(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int64 t = default!;
+    int64 t = default;
     var arg = keep((int64)2000000000000000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int64N(arg);
@@ -713,7 +712,7 @@ public static void BenchmarkInt64N4e18(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int64 t = default!;
+    int64 t = default;
     var arg = keep((int64)4000000000000000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int64N(arg);
@@ -725,7 +724,7 @@ public static void BenchmarkInt32N1000(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int32 t = default!;
+    int32 t = default;
     var arg = keep((int32)1000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int32N(arg);
@@ -737,7 +736,7 @@ public static void BenchmarkInt32N1e8(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int32 t = default!;
+    int32 t = default;
     var arg = keep((int32)100000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int32N(arg);
@@ -749,7 +748,7 @@ public static void BenchmarkInt32N1e9(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int32 t = default!;
+    int32 t = default;
     var arg = keep((int32)1000000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int32N(arg);
@@ -761,7 +760,7 @@ public static void BenchmarkInt32N2e9(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    int32 t = default!;
+    int32 t = default;
     var arg = keep((int32)2000000000);
     for (nint n = b.N; n > 0; n--) {
         t += r.Int32N(arg);
@@ -773,7 +772,7 @@ public static void BenchmarkFloat32(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    float32 t = default!;
+    float32 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += r.Float32();
     }
@@ -784,7 +783,7 @@ public static void BenchmarkFloat64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    float64 t = default!;
+    float64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += r.Float64();
     }
@@ -795,7 +794,7 @@ public static void BenchmarkExpFloat64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    float64 t = default!;
+    float64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += r.ExpFloat64();
     }
@@ -806,7 +805,7 @@ public static void BenchmarkNormFloat64(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    float64 t = default!;
+    float64 t = default;
     for (nint n = b.N; n > 0; n--) {
         t += r.NormFloat64();
     }
@@ -817,7 +816,7 @@ public static void BenchmarkPerm3(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    nint t = default!;
+    nint t = default;
     for (nint n = b.N; n > 0; n--) {
         t += r.Perm(3)[0];
     }
@@ -828,7 +827,7 @@ public static void BenchmarkPerm30(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    nint t = default!;
+    nint t = default;
     for (nint n = b.N; n > 0; n--) {
         t += r.Perm(30)[0];
     }
@@ -839,7 +838,7 @@ public static void BenchmarkPerm30ViaShuffle(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = testRand();
-    nint t = default!;
+    nint t = default;
     for (nint n = b.N; n > 0; n--) {
         var p = new slice<nint>(30);
         foreach (var i in range(p)) {
@@ -863,13 +862,13 @@ public static void BenchmarkShuffleOverhead(ж<testing.B> Ꮡb) {
     for (nint n = b.N; n > 0; n--) {
         r.Shuffle(30, (nint i, nint j) => {
             if (i < 0 || i >= 30 || j < 0 || j >= 30) {
-                Ꮡb.Fatalf("bad swap(%d, %d)"u8, i, j);
+                Ꮡb.Fatalf("bad swap(%d, %d)", i, j);
             }
         });
     }
 }
 
-public static partial void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkConcurrent(ж<testing.B> b) {
     const nint goroutines = 4;
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(goroutines);
@@ -878,7 +877,7 @@ public static partial void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                for (nint n = Ꮡb.Value.N; n > 0; n--) {
+                for (nint n = b.Value.N; n > 0; n--) {
                     Int64();
                 }
             }
@@ -889,11 +888,11 @@ public static partial void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
     Ꮡwg.Wait();
 }
 
-public static void TestN(ж<testing.T> Ꮡt) {
+public static void TestN(ж<testing.T> t) {
     for (nint i = 0; i < 1000; i++) {
         nint v = N<nint>(10);
         if (v < 0 || v >= 10) {
-            Ꮡt.Fatalf("N(10) returned %d"u8, v);
+            t.Fatalf("N(10) returned %d", v);
         }
     }
 }

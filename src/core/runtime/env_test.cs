@@ -11,21 +11,22 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gorootˢ = "GOROOT"u8;
+internal static ref readonly @string gorootˢ => ref gorootˢᵇ;
+private static readonly @string gorootˢᵇ = "GOROOT"u8;
 
-public static void TestFixedGOROOT(ж<testing.T> Ꮡt) {
+public static void TestFixedGOROOT(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Restore both the real GOROOT environment variable, and runtime's copies:
         {
-            var (orig, ok) = syscall.Getenv(gorootˢ); if (ok){
+            var (orig, ok) = syscall.Getenv(gorootˢ); if (ok) {
                 defer(syscall.Setenv, gorootˢ, orig, ref ᒐ);
             } else {
                 defer(syscall.Unsetenv, gorootˢ, ref ᒐ);
             }
         }
         var envs = runtime_internal_test_package.Envs();
-        var oldenvs = appendꓸꓸꓸ(new @string[]{}.slice(), envs);
+        var oldenvs = appendꓸꓸꓸ(slice<@string>([]), envs);
         defer(runtime_internal_test_package.SetEnvs, oldenvs, ref ᒐ);
 
         // attempt to reuse existing envs backing array.
@@ -34,27 +35,27 @@ public static void TestFixedGOROOT(ж<testing.T> Ꮡt) {
 
         {
             @string got = Δruntime.GOROOT(); if (got != want) {
-                Ꮡt.Errorf(@"initial runtime.GOROOT()=%q, want %q"u8, got, want);
+                t.Errorf(@"initial runtime.GOROOT()=%q, want %q", got, want);
             }
         }
         {
-            var err = syscall.Setenv(gorootˢ, "/os"u8); if (err != default!) {
-                Ꮡt.Fatal(err);
-            }
-        }
-        {
-            @string got = Δruntime.GOROOT(); if (got != want) {
-                Ꮡt.Errorf(@"after setenv runtime.GOROOT()=%q, want %q"u8, got, want);
-            }
-        }
-        {
-            var err = syscall.Unsetenv(gorootˢ); if (err != default!) {
-                Ꮡt.Fatal(err);
+            var err = syscall.Setenv(gorootˢ, "/os"); if (err != nil) {
+                t.Fatal(err);
             }
         }
         {
             @string got = Δruntime.GOROOT(); if (got != want) {
-                Ꮡt.Errorf(@"after unsetenv runtime.GOROOT()=%q, want %q"u8, got, want);
+                t.Errorf(@"after setenv runtime.GOROOT()=%q, want %q", got, want);
+            }
+        }
+        {
+            var err = syscall.Unsetenv(gorootˢ); if (err != nil) {
+                t.Fatal(err);
+            }
+        }
+        {
+            @string got = Δruntime.GOROOT(); if (got != want) {
+                t.Errorf(@"after unsetenv runtime.GOROOT()=%q, want %q", got, want);
             }
         }
     }

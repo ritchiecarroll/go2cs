@@ -21,10 +21,10 @@ internal partial struct TestTicker_type /*dyn*/ {
     internal Δtime.Duration delta;
 }
 
-public static void TestTicker(ж<Δtesting.T> Ꮡt) {
+public static void TestTicker(ж<Δtesting.T> t) {
     var errsᴷ = new stackAppend<@string>();
 
-    Ꮡt.Parallel();
+    t.Parallel();
 
     // We want to test that a ticker takes as much time as expected.
     // Since we don't want the test to run for too long, we don't
@@ -49,28 +49,28 @@ public static void TestTicker(ж<Δtesting.T> Ꮡt) {
     ref var errs = ref heap<slice<@string>>(out var Ꮡerrs);
     void logErrs() {
         foreach (var (_, e) in Ꮡerrs.ValueSlot) {
-            Ꮡt.Log(e);
+            t.Log(e);
         }
     }
 
-    foreach (var (_, test) in new TestTicker_type[]{new(
+    foreach (var (_, test) in slice<TestTicker_type>([new(
         count: baseCount,
         delta: baseDelta
     ), new(
         count: 8,
         delta: 1 * ΔSecond
     )
-    }.slice()) {
+    ])) {
         nint count = test.count;
         var delta = test.delta;
         var ticker = NewTicker(delta);
         var t0 = Now();
         foreach (var _ᴛ1 in range(count / 2)) {
-            ᐸꟷ((~ticker).C);
+            ᐸꟷ(ticker.C);
         }
         ticker.Reset(delta * 2);
         foreach (var _ᴛ2 in range(count - count / 2)) {
-            ᐸꟷ((~ticker).C);
+            ᐸꟷ(ticker.C);
         }
         ticker.Stop();
         var t1 = Now();
@@ -88,10 +88,10 @@ public static void TestTicker(ж<Δtesting.T> Ꮡt) {
         }
         // Now test that the ticker stopped.
         Sleep(2 * delta);
-        var selᴛ20 = (~ticker).C;
+        var selᴛ20 = ticker.C;
         switch (trySelect(ᐸꟷ(selᴛ20, ꓸꓸꓸ))) {
         case 0 when selᴛ20.ꟷᐳ(out _): {
-            errs = append(errs, "Ticker did not shut down"u8);
+            errs = append(errs, (@string)"Ticker did not shut down");
             continue;
             break;
         }
@@ -102,27 +102,27 @@ public static void TestTicker(ж<Δtesting.T> Ꮡt) {
 
         // Test passed, so all done.
         if (len(errs) > 0) {
-            Ꮡt.Logf("saw %d errors, ignoring to avoid flakiness"u8, len(errs));
+            t.Logf("saw %d errors, ignoring to avoid flakiness", len(errs));
             logErrs();
         }
 
         return;
     }
 
-    Ꮡt.Errorf("saw %d errors"u8, len(errs));
+    t.Errorf("saw %d errors", len(errs));
     logErrs();
 }
 
 // Issue 21874
-public static void TestTickerStopWithDirectInitialization(ж<Δtesting.T> Ꮡt) {
+public static void TestTickerStopWithDirectInitialization(ж<Δtesting.T> t) {
     var c = new channel<Δtime.Time>(0);
     var tk = Ꮡ(new Ticker(C: c));
     tk.Stop();
 }
 
 // Test that a bug tearing down a ticker has been fixed. This routine should not deadlock.
-public static void TestTeardown(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestTeardown(ж<Δtesting.T> t) {
+    t.Parallel();
 
     var Delta = 100 * Millisecond;
     if (Δtesting.Short()) {
@@ -130,29 +130,29 @@ public static void TestTeardown(ж<Δtesting.T> Ꮡt) {
     }
     foreach (var _ᴛ1 in range(3)) {
         var ticker = NewTicker(Delta);
-        ᐸꟷ((~ticker).C);
+        ᐸꟷ(ticker.C);
         ticker.Stop();
     }
 }
 
 // Test the Tick convenience wrapper.
-public static partial void TestTick(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTick(ж<Δtesting.T> t) {
     // Test that giving a negative duration returns nil.
     {
-        var got = Tick(-1); if (got != default!) {
-            Ꮡt.Errorf("Tick(-1) = %v; want nil"u8, got);
+        var got = Tick(-1); if (got != nil) {
+            t.Errorf("Tick(-1) = %v; want nil", got);
         }
     }
 }
 
 // Test that NewTicker panics when given a duration less than zero.
-public static void TestNewTickerLtZeroDuration(ж<Δtesting.T> Ꮡt) {
+public static void TestNewTickerLtZeroDuration(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var err = recover(); if (err == default!) {
-                    Ꮡt.Errorf("NewTicker(-1) should have panicked"u8);
+                var err = recover(); if (err == nil) {
+                    t.Errorf("NewTicker(-1) should have panicked");
                 }
             }
         }, ref ᒐ);
@@ -163,13 +163,13 @@ public static void TestNewTickerLtZeroDuration(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test that Ticker.Reset panics when given a duration less than zero.
-public static void TestTickerResetLtZeroDuration(ж<Δtesting.T> Ꮡt) {
+public static void TestTickerResetLtZeroDuration(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var err = recover(); if (err == default!) {
-                    Ꮡt.Errorf("Ticker.Reset(0) should have panicked"u8);
+                var err = recover(); if (err == nil) {
+                    t.Errorf("Ticker.Reset(0) should have panicked");
                 }
             }
         }, ref ᒐ);
@@ -184,17 +184,17 @@ public static void TestTickerResetLtZeroDuration(ж<Δtesting.T> Ꮡt) {
 internal static readonly object outputChannelIsClosedˢ = (@string)"output channel is closed"u8;
 internal static readonly object timerExpiredˢ = (@string)"timer expired"u8;
 
-public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
+public static partial void TestLongAdjustTimers(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOOS == "android"u8 || Δruntime.GOOS == "ios"u8 || Δruntime.GOOS == "plan9"u8) {
-            Ꮡt.Skipf("skipping on %s - too slow"u8, Δruntime.GOOS);
+            t.Skipf("skipping on %s - too slow", Δruntime.GOOS);
         }
         if (Δtesting.Short() && Δruntime.NumCPU() < 2) {
-            Ꮡt.Skipf("skipping in short mode, insufficient CPUs"u8);
+            t.Skipf("skipping in short mode, insufficient CPUs");
         }
 
-        Ꮡt.Parallel();
+        t.Parallel();
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
 
@@ -210,7 +210,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
-            });
+            }, GoStack.Bounded);
         }
         foreach (var _ᴛ2 in range(count)) {
             Sleep(1 * Microsecond);
@@ -243,10 +243,10 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
                 var qᴷ = new stackAppend<Action>();
                 defer(Ꮡwg.Done, ref ᒐ);
                 defer(ᴛ1 => close(ᴛ1), outQʗ1, ref ᒐ);
-                slice<Action> q = default!;
-                while (ᐧ) {
-                    channel<Action> sendTo = default!;
-                    Action send = default!;
+                slice<Action> q = default;
+                for (;;) {
+                    channel<Action> sendTo = default;
+                    Action send = default;
                     if (len(q) > 0) {
                         sendTo = outQʗ1;
                         send = q[0];
@@ -273,7 +273,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        });
+        }, GoStack.Bounded);
 
         foreach (var i in range(50000)) {
             const nint @try = 20;
@@ -288,16 +288,16 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
                 switch (select(ᐸꟷ(selᴛ24, ꓸꓸꓸ), ᐸꟷ(selᴛ25, ꓸꓸꓸ), ᐸꟷ(selᴛ26, ꓸꓸꓸ))) {
                 case 0 when selᴛ24.ꟷᐳ(out var _, out var ok): {
                     if (!ok) {
-                        Ꮡt.Fatal(outputChannelIsClosedˢ);
+                        t.Fatal(outputChannelIsClosedˢ);
                     }
                     break;
                 }
                 case 1 when selᴛ25.ꟷᐳ(out _): {
-                    Ꮡt.Fatalf("failed to read work, iteration %d"u8, i);
+                    t.Fatalf("failed to read work, iteration %d", i);
                     break;
                 }
                 case 2 when selᴛ26.ꟷᐳ(out _): {
-                    Ꮡt.Fatal(timerExpiredˢ);
+                    t.Fatal(timerExpiredˢ);
                     break;
                 }}
             }
@@ -307,18 +307,18 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkTicker(ж<Δtesting.B> Ꮡb) {
-    benchmark(Ꮡb, (ж<Δtesting.PB> pb) => {
+public static void BenchmarkTicker(ж<Δtesting.B> b) {
+    benchmark(b, (ж<Δtesting.PB> pb) => {
         var ticker = NewTicker(ΔNanosecond);
         while (pb.Next()) {
-            ᐸꟷ((~ticker).C);
+            ᐸꟷ(ticker.C);
         }
         ticker.Stop();
     });
 }
 
-public static void BenchmarkTickerReset(ж<Δtesting.B> Ꮡb) {
-    benchmark(Ꮡb, (ж<Δtesting.PB> pb) => {
+public static void BenchmarkTickerReset(ж<Δtesting.B> b) {
+    benchmark(b, (ж<Δtesting.PB> pb) => {
         var ticker = NewTicker(ΔNanosecond);
         while (pb.Next()) {
             ticker.Reset(ΔNanosecond * 2);
@@ -327,8 +327,8 @@ public static void BenchmarkTickerReset(ж<Δtesting.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkTickerResetNaive(ж<Δtesting.B> Ꮡb) {
-    benchmark(Ꮡb, (ж<Δtesting.PB> pb) => {
+public static void BenchmarkTickerResetNaive(ж<Δtesting.B> b) {
+    benchmark(b, (ж<Δtesting.PB> pb) => {
         var ticker = NewTicker(ΔNanosecond);
         while (pb.Next()) {
             ticker.Stop();
@@ -340,16 +340,22 @@ public static void BenchmarkTickerResetNaive(ж<Δtesting.B> Ꮡb) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestTimerGCWithˢ = (@string)"skipping TestTimerGC with asynctimerchan=1"u8;
-internal static readonly @string afterˢ = "After"u8;
-internal static readonly @string tickˢ = "Tick"u8;
-internal static readonly @string newTimerˢ = "NewTimer"u8;
-internal static readonly @string newTickerˢ = "NewTicker"u8;
-internal static readonly @string newTimerStopˢ = "NewTimerStop"u8;
-internal static readonly @string newTickerStopˢ = "NewTickerStop"u8;
+internal static ref readonly @string afterˢ => ref afterˢᵇ;
+private static readonly @string afterˢᵇ = "After"u8;
+internal static ref readonly @string tickˢ => ref tickˢᵇ;
+private static readonly @string tickˢᵇ = "Tick"u8;
+internal static ref readonly @string newTimerˢ => ref newTimerˢᵇ;
+private static readonly @string newTimerˢᵇ = "NewTimer"u8;
+internal static ref readonly @string newTickerˢ => ref newTickerˢᵇ;
+private static readonly @string newTickerˢᵇ = "NewTicker"u8;
+internal static ref readonly @string newTimerStopˢ => ref newTimerStopˢᵇ;
+private static readonly @string newTimerStopˢᵇ = "NewTimerStop"u8;
+internal static ref readonly @string newTickerStopˢ => ref newTickerStopˢᵇ;
+private static readonly @string newTickerStopˢᵇ = "NewTickerStop"u8;
 
-public static partial void TestTimerGC(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTimerGC(ж<Δtesting.T> t) {
     if (time_internal_test_package.AsynctimerChan.Value() == "1"u8) {
-        Ꮡt.Skip(skippingTestTimerGCWithˢ);
+        t.Skip(skippingTestTimerGCWithˢ);
     }
 
     void run(ж<Δtesting.T> tΔ1, @string what, Action f) {
@@ -377,52 +383,54 @@ public static partial void TestTimerGC(ж<Δtesting.T> Ꮡt) {
             // Allow some slack, but inuse >= N means at least 1 allocation per iteration.
             var inuse = after - before;
             if (inuse >= (int64)N) {
-                tΔ2.Errorf("%s did not get GC'ed: %d allocations"u8, what, inuse);
+                tΔ2.Errorf("%s did not get GC'ed: %d allocations", what, inuse);
 
                 Sleep(1 * ΔSecond);
                 Δruntime.ReadMemStats(Ꮡstats);
                 var afterΔ1 = (int64)(stats.Mallocs - stats.Frees);
                 inuse = afterΔ1 - before;
-                tΔ2.Errorf("after a sleep: %d allocations"u8, inuse);
+                tΔ2.Errorf("after a sleep: %d allocations", inuse);
             }
         });
     }
 
-    run(Ꮡt, afterˢ, () => {
+    run(t, afterˢ, () => {
         After(ΔHour);
     });
-    run(Ꮡt, tickˢ, () => {
+    run(t, tickˢ, () => {
         Tick(ΔHour);
     });
-    run(Ꮡt, newTimerˢ, () => {
+    run(t, newTimerˢ, () => {
         NewTimer(ΔHour);
     });
-    run(Ꮡt, newTickerˢ, () => {
+    run(t, newTickerˢ, () => {
         NewTicker(ΔHour);
     });
-    run(Ꮡt, newTimerStopˢ, () => {
+    run(t, newTimerStopˢ, () => {
         NewTimer(ΔHour).Stop();
     });
-    run(Ꮡt, newTickerStopˢ, () => {
+    run(t, newTickerStopˢ, () => {
         NewTicker(ΔHour).Stop();
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string timerˢ = "Timer"u8;
-internal static readonly @string tickerˢ = "Ticker"u8;
+internal static ref readonly @string timerˢ => ref timerˢᵇ;
+private static readonly @string timerˢᵇ = "Timer"u8;
+internal static ref readonly @string tickerˢ => ref tickerˢᵇ;
+private static readonly @string tickerˢᵇ = "Ticker"u8;
 
-public static void TestChan(ж<Δtesting.T> Ꮡt) {
-    foreach (var (_, name) in new @string[]{"0"u8, "1"u8, "2"u8}.slice()) {
-        Ꮡt.Run("asynctimerchan="u8 + name, (ж<Δtesting.T> tΔ1) => {
+public static void TestChan(ж<Δtesting.T> t) {
+    foreach (var (_, name) in slice<@string>(["0", "1", "2"])) {
+        t.Run("asynctimerchan="u8 + name, (ж<Δtesting.T> tΔ1) => {
             tΔ1.Setenv(godebugˢ, "asynctimerchan="u8 + name);
             tΔ1.Run(timerˢ, (ж<Δtesting.T> tΔ2) => {
                 var tim = NewTimer((Δtime.Duration)(10000000000000L));
-                testTimerChan(tΔ2, new time_test_package.time_Timerжtimer(tim), (~tim).C, name == "0"u8);
+                testTimerChan(tΔ2, new time_test_package.time_Timerжtimer(tim), tim.C, name == "0"u8);
             });
             tΔ1.Run(tickerˢ, (ж<Δtesting.T> tΔ3) => {
                 var tim = Ꮡ(new tickerTimer(Ticker: NewTicker((Δtime.Duration)(10000000000000L))));
-                testTimerChan(tΔ3, new time_test_package.tickerTimerжtimer(tim), (~tim).C, name == "0"u8);
+                testTimerChan(tΔ3, new time_test_package.tickerTimerжtimer(tim), tim.C, name == "0"u8);
             });
         });
     }
@@ -454,7 +462,7 @@ internal static bool Reset(this ref tickerTimer t, Δtime.Duration d) {
     return pending;
 }
 
-internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-*/channel<Δtime.Time> C, bool synctimerchan) {
+internal static partial void testTimerChan(ж<Δtesting.T> t, timer tim, /*<-*/channel<Δtime.Time> C, bool synctimerchan) {
     var (_, isTimer) = tim._<ж<Δtime.Timer>>(ᐧ);
     var isTicker = !isTimer;
 
@@ -514,11 +522,11 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     }
     var Cʗ2 = C;
     void noTick() {
-        Ꮡt.Helper();
+        t.Helper();
         var selᴛ28 = Cʗ2;
         switch (trySelect(ᐸꟷ(selᴛ28, ꓸꓸꓸ))) {
         case 0 when selᴛ28.ꟷᐳ(out _): {
-            Ꮡt.Errorf("extra tick"u8);
+            t.Errorf("extra tick");
             break;
         }
         default: {
@@ -527,7 +535,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     }
     var Cʗ3 = C;
     void assertTick() {
-        Ꮡt.Helper();
+        t.Helper();
         var selᴛ29 = Cʗ3;
         switch (trySelect(ᐸꟷ(selᴛ29, ꓸꓸꓸ))) {
         case 0 when selᴛ29.ꟷᐳ(out _): {
@@ -547,20 +555,20 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
                 break;
             }}
         }
-        Ꮡt.Errorf("missing tick"u8);
+        t.Errorf("missing tick");
     }
     var Cʗ4 = C;
     void assertLen() {
-        Ꮡt.Helper();
+        t.Helper();
         if (synctimerchan) {
             {
                 nint nΔ1 = len(Cʗ4); if (nΔ1 != 0) {
-                    Ꮡt.Errorf("synctimer has len(C) = %d, want 0 (always)"u8, nΔ1);
+                    t.Errorf("synctimer has len(C) = %d, want 0 (always)", nΔ1);
                 }
             }
             return;
         }
-        nint n = default!;
+        nint n = default;
         {
             n = len(Cʗ4); if (n == 1) {
                 return;
@@ -574,7 +582,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
                 }
             }
         }
-        Ꮡt.Errorf("len(C) = %d, want 1"u8, n);
+        t.Errorf("len(C) = %d, want 1", n);
     }
 
     // Test simple stop; timer never in heap.
@@ -585,7 +593,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     tim.Reset((Δtime.Duration)(10000000000000L));
     noTick();
 
-    if (synctimerchan){
+    if (synctimerchan) {
         // Test modify of timer in heap.
         tim.Reset(1);
         Sleep(sched);
@@ -628,11 +636,11 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     noTick();
 
     void notDone(channel<bool> doneΔ1) {
-        Ꮡt.Helper();
+        t.Helper();
         var selᴛ31 = doneΔ1;
         switch (trySelect(ᐸꟷ(selᴛ31, ꓸꓸꓸ))) {
         case 0 when selᴛ31.ꟷᐳ(out _): {
-            Ꮡt.Fatalf("early done"u8);
+            t.Fatalf("early done");
             break;
         }
         default: {
@@ -641,7 +649,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     }
 
     void waitDone(channel<bool> doneΔ2) {
-        Ꮡt.Helper();
+        t.Helper();
         foreach (var _ᴛ4 in range(tries)) {
             Sleep(sched);
             var selᴛ32 = doneΔ2;
@@ -653,7 +661,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
                 break;
             }}
         }
-        Ꮡt.Fatalf("never got done"u8);
+        t.Fatalf("never got done");
     }
 
     // Reset timer in heap (already reset above, but just in case).
@@ -661,14 +669,13 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     drainAsync();
 
     // Test stop while timer in heap (because goroutine is blocked on <-C).
-    ref var done = ref heap<channel<bool>>(out var Ꮡdone);
-    done = new channel<bool>(0);
+    ref var done = ref heap<channel<bool>>(new channel<bool>(0), out var Ꮡdone);
     notDone(done);
     var Cʗ5 = C;
     goǃ(() => {
         ᐸꟷ(Cʗ5);
         close(Ꮡdone.ValueSlot);
-    });
+    }, GoStack.Bounded);
     Sleep(sched);
     notDone(done);
 
@@ -683,7 +690,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
 
     // If this is a ticker, another tick should have come in already
     // (they are 1ns apart). If a timer, it should have stopped.
-    if (isTicker){
+    if (isTicker) {
         assertTick();
     } else {
         noTick();
@@ -699,8 +706,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     done = new channel<bool>(2);
     var done1 = new channel<bool>(0);
     var done2 = new channel<bool>(0);
-    ref var stop = ref heap<channel<bool>>(out var Ꮡstop);
-    stop = new channel<bool>(0);
+    ref var stop = ref heap<channel<bool>>(new channel<bool>(0), out var Ꮡstop);
     var Cʗ6 = C;
     var done1ʗ1 = done1;
     goǃ(() => {
@@ -715,7 +721,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
             break;
         }}
         close(done1ʗ1);
-    });
+    }, GoStack.Bounded);
     var Cʗ7 = C;
     var done2ʗ1 = done2;
     goǃ(() => {
@@ -730,7 +736,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
             break;
         }}
         close(done2ʗ1);
-    });
+    }, GoStack.Bounded);
     Sleep(sched);
     notDone(done);
     tim.Reset(sched / 2);
@@ -780,7 +786,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
                 break;
             }}
             Ꮡdone.ValueSlot.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
     }
     Sleep(sched);
     close(stop);
@@ -794,7 +800,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         Sleep(10 * Millisecond);
         {
             var pending = tim.Stop(); if (pending != true) {
-                Ꮡt.Errorf("tim.Stop() = %v, want true"u8, pending);
+                t.Errorf("tim.Stop() = %v, want true", pending);
             }
         }
         noTick();
@@ -803,12 +809,12 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         noTick();
         {
             var pending = tim.Reset(1); if (pending != true) {
-                Ꮡt.Errorf("tim.Stop() = %v, want true"u8, pending);
+                t.Errorf("tim.Stop() = %v, want true", pending);
             }
         }
         assertTick();
         Sleep(10 * Millisecond);
-        if (isTicker){
+        if (isTicker) {
             assertTick();
             Sleep(10 * Millisecond);
         } else {
@@ -816,14 +822,14 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         }
         {
             var (pending, want) = (tim.Reset(ΔHour), isTicker); if (pending != want) {
-                Ꮡt.Errorf("tim.Stop() = %v, want %v"u8, pending, want);
+                t.Errorf("tim.Stop() = %v, want %v", pending, want);
             }
         }
         noTick();
     }
 }
 
-public static void TestManualTicker(ж<Δtesting.T> Ꮡt) {
+public static void TestManualTicker(ж<Δtesting.T> t) {
     // Code should not do this, but some old code dating to Go 1.9 does.
     // Make sure this doesn't crash.
     // See go.dev/issue/21874.
@@ -832,8 +838,8 @@ public static void TestManualTicker(ж<Δtesting.T> Ꮡt) {
     tick.Stop();
 }
 
-public static void TestAfterTimes(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestAfterTimes(ж<Δtesting.T> t) {
+    t.Parallel();
     // Using After(10ms) but waiting for 500ms to read the channel
     // should produce a time from start+10ms, not start+500ms.
     // Make sure it does.
@@ -847,13 +853,13 @@ public static void TestAfterTimes(ж<Δtesting.T> Ꮡt) {
         if (dt < 400 * Millisecond) {
             return;
         }
-        Ꮡt.Logf("After(10ms) time is +%v, want <400ms"u8, dt);
+        t.Logf("After(10ms) time is +%v, want <400ms", dt);
     }
-    Ꮡt.Errorf("not working"u8);
+    t.Errorf("not working");
 }
 
-public static void TestTickTimes(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestTickTimes(ж<Δtesting.T> t) {
+    t.Parallel();
     // See comment in TestAfterTimes
     foreach (var _ᴛ1 in range(10)) {
         var start = Now();
@@ -863,9 +869,9 @@ public static void TestTickTimes(ж<Δtesting.T> Ꮡt) {
         if (dt < 400 * Millisecond) {
             return;
         }
-        Ꮡt.Logf("Tick(10ms) time is +%v, want <400ms"u8, dt);
+        t.Logf("Tick(10ms) time is +%v, want <400ms", dt);
     }
-    Ꮡt.Errorf("not working"u8);
+    t.Errorf("not working");
 }
 
 } // end time_test_package

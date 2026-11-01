@@ -22,43 +22,54 @@ internal static readonly object magic8BallSaysˢ = (@string)"Magic 8-Ball says:"
 // These tests serve as an example but also make sure we don't change
 // the output of the random number generator when given a fixed seed.
 public static void Example() {
-    var answers = new @string[]{
-        "It is certain"u8,
-        "It is decidedly so"u8,
-        "Without a doubt"u8,
-        "Yes definitely"u8,
-        "You may rely on it"u8,
-        "As I see it yes"u8,
-        "Most likely"u8,
-        "Outlook good"u8,
-        "Yes"u8,
-        "Signs point to yes"u8,
-        "Reply hazy try again"u8,
-        "Ask again later"u8,
-        "Better not tell you now"u8,
-        "Cannot predict now"u8,
-        "Concentrate and ask again"u8,
-        "Don't count on it"u8,
-        "My reply is no"u8,
-        "My sources say no"u8,
-        "Outlook not so good"u8,
-        "Very doubtful"u8
-    }.slice();
+    var answers = slice<@string>([
+        "It is certain",
+        "It is decidedly so",
+        "Without a doubt",
+        "Yes definitely",
+        "You may rely on it",
+        "As I see it yes",
+        "Most likely",
+        "Outlook good",
+        "Yes",
+        "Signs point to yes",
+        "Reply hazy try again",
+        "Ask again later",
+        "Better not tell you now",
+        "Cannot predict now",
+        "Concentrate and ask again",
+        "Don't count on it",
+        "My reply is no",
+        "My sources say no",
+        "Outlook not so good",
+        "Very doubtful"
+    ]);
     fmt.Println(magic8BallSaysˢ, answers[rand.IntN(len(answers))]);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string float32ˢ = "Float32"u8;
-internal static readonly @string float64ˢ = "Float64"u8;
-internal static readonly @string expFloat64ˢ = "ExpFloat64"u8;
-internal static readonly @string normFloat64ˢ = "NormFloat64"u8;
-internal static readonly @string int32ˢ = "Int32"u8;
-internal static readonly @string int64ˢ = "Int64"u8;
-internal static readonly @string uint32ˢ = "Uint32"u8;
-internal static readonly @string intN10ˢ = "IntN(10)"u8;
-internal static readonly @string int32N10ˢ = "Int32N(10)"u8;
-internal static readonly @string int64N10ˢ = "Int64N(10)"u8;
-internal static readonly @string permˢ = "Perm"u8;
+internal static ref readonly @string float32ˢ => ref float32ˢᵇ;
+private static readonly @string float32ˢᵇ = "Float32"u8;
+internal static ref readonly @string float64ˢ => ref float64ˢᵇ;
+private static readonly @string float64ˢᵇ = "Float64"u8;
+internal static ref readonly @string expFloat64ˢ => ref expFloat64ˢᵇ;
+private static readonly @string expFloat64ˢᵇ = "ExpFloat64"u8;
+internal static ref readonly @string normFloat64ˢ => ref normFloat64ˢᵇ;
+private static readonly @string normFloat64ˢᵇ = "NormFloat64"u8;
+internal static ref readonly @string int32ˢ => ref int32ˢᵇ;
+private static readonly @string int32ˢᵇ = "Int32"u8;
+internal static ref readonly @string int64ˢ => ref int64ˢᵇ;
+private static readonly @string int64ˢᵇ = "Int64"u8;
+internal static ref readonly @string uint32ˢ => ref uint32ˢᵇ;
+private static readonly @string uint32ˢᵇ = "Uint32"u8;
+internal static ref readonly @string intN10ˢ => ref intN10ˢᵇ;
+private static readonly @string intN10ˢᵇ = "IntN(10)"u8;
+internal static ref readonly @string int32N10ˢ => ref int32N10ˢᵇ;
+private static readonly @string int32N10ˢᵇ = "Int32N(10)"u8;
+internal static ref readonly @string int64N10ˢ => ref int64N10ˢᵇ;
+private static readonly @string int64N10ˢᵇ = "Int64N(10)"u8;
+internal static ref readonly @string permˢ => ref permˢᵇ;
+private static readonly @string permˢᵇ = "Perm"u8;
 
 // This example shows the use of each of the methods on a *Rand.
 // The use of the global functions is the same, without the receiver.
@@ -71,7 +82,7 @@ public static void Example_rand() {
         var r = rand.New(new rand.PCGжSource(rand.NewPCG(1, 2)));
 
         // The tabwriter here helps us generate aligned output.
-        var w = tabwriter.NewWriter(new os.FileжWriter(os.Stdout), 1, 1, 1, (rune)' ', 0);
+        var w = tabwriter.NewWriter(new os.FileжWriter(os.Stdout), 1, 1, 1, (byte)' ', 0);
         var wʗ1 = w;
         defer(() => wʗ1.Flush(), ref ᒐ);
         var wʗ2 = w;
@@ -140,7 +151,8 @@ public static void ExampleN() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inkRunsFromTheCornersOfˢ = "ink runs from the corners of my mouth"u8;
+internal static ref readonly @string inkRunsFromTheCornersOfˢ => ref inkRunsFromTheCornersOfˢᵇ;
+private static readonly @string inkRunsFromTheCornersOfˢᵇ = "ink runs from the corners of my mouth"u8;
 
 public static void ExampleShuffle() {
     var words = strings.Fields(inkRunsFromTheCornersOfˢ);

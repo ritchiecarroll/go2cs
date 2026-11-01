@@ -27,9 +27,9 @@ partial interface mapInterface {
     void Clear();
 }
 
-internal static mapInterface _ᴛ1ʗ = new sync_test_package.RWMutexMapжmapInterface(Ꮡ(new RWMutexMap(nil)));
-internal static mapInterface _ᴛ2ʗ = new sync_test_package.DeepCopyMapжmapInterface(Ꮡ(new DeepCopyMap(nil)));
-internal static mapInterface _ᴛ3ʗ = new sync_test_package.sync_HashTrieMapжmapInterface(Ꮡ(new isync.HashTrieMap<any, any>(nil)));
+internal static mapInterface _ᴛ1ʗ = new sync_test_package.RWMutexMapжmapInterface(Ꮡ(new RWMutexMap()));
+internal static mapInterface _ᴛ2ʗ = new sync_test_package.DeepCopyMapжmapInterface(Ꮡ(new DeepCopyMap()));
+internal static mapInterface _ᴛ3ʗ = new sync_test_package.sync_HashTrieMapжmapInterface(Ꮡ(new isync.HashTrieMap<any, any>()));
 
 // RWMutexMap is an implementation of mapInterface using a sync.RWMutex.
 partial struct RWMutexMap {
@@ -38,94 +38,94 @@ partial struct RWMutexMap {
 }
 
 public static (any value, bool ok) Load(this ж<RWMutexMap> Ꮡm, any key) {
-    any value = default!;
-    bool ok = default!;
+    any value = default;
+    bool ok = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
-    Ꮡm.of(RWMutexMap.Ꮡmu).RLock();
+    Ꮡm.Ꮡmu.RLock();
     (value, ok) = m.dirty[key, ꟷ];
-    Ꮡm.of(RWMutexMap.Ꮡmu).RUnlock();
+    Ꮡm.Ꮡmu.RUnlock();
     return (value, ok);
 }
 
 public static void Store(this ж<RWMutexMap> Ꮡm, any key, any value) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    Ꮡm.of(RWMutexMap.Ꮡmu).Lock();
-    if (m.dirty == default!) {
+    Ꮡm.Ꮡmu.Lock();
+    if (m.dirty == nil) {
         m.dirty = new map<any, any>();
     }
     m.dirty[key] = value;
-    Ꮡm.of(RWMutexMap.Ꮡmu).Unlock();
+    Ꮡm.Ꮡmu.Unlock();
 }
 
 public static (any actual, bool loaded) LoadOrStore(this ж<RWMutexMap> Ꮡm, any key, any value) {
-    any actual = default!;
-    bool loaded = default!;
+    any actual = default;
+    bool loaded = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
-    Ꮡm.of(RWMutexMap.Ꮡmu).Lock();
+    Ꮡm.Ꮡmu.Lock();
     (actual, loaded) = m.dirty[key, ꟷ];
     if (!loaded) {
         actual = value;
-        if (m.dirty == default!) {
+        if (m.dirty == nil) {
             m.dirty = new map<any, any>();
         }
         m.dirty[key] = value;
     }
-    Ꮡm.of(RWMutexMap.Ꮡmu).Unlock();
+    Ꮡm.Ꮡmu.Unlock();
     return (actual, loaded);
 }
 
 public static (any previous, bool loaded) Swap(this ж<RWMutexMap> Ꮡm, any key, any value) {
-    any previous = default!;
-    bool loaded = default!;
+    any previous = default;
+    bool loaded = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
-    Ꮡm.of(RWMutexMap.Ꮡmu).Lock();
-    if (m.dirty == default!) {
+    Ꮡm.Ꮡmu.Lock();
+    if (m.dirty == nil) {
         m.dirty = new map<any, any>();
     }
 
     (previous, loaded) = m.dirty[key, ꟷ];
     m.dirty[key] = value;
-    Ꮡm.of(RWMutexMap.Ꮡmu).Unlock();
+    Ꮡm.Ꮡmu.Unlock();
     return (previous, loaded);
 }
 
 public static (any value, bool loaded) LoadAndDelete(this ж<RWMutexMap> Ꮡm, any key) {
-    any value = default!;
-    bool loaded = default!;
+    any value = default;
+    bool loaded = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
-    Ꮡm.of(RWMutexMap.Ꮡmu).Lock();
+    Ꮡm.Ꮡmu.Lock();
     (value, loaded) = m.dirty[key, ꟷ];
     if (!loaded) {
-        Ꮡm.of(RWMutexMap.Ꮡmu).Unlock();
-        return (default!, false);
+        Ꮡm.Ꮡmu.Unlock();
+        return (default, false);
     }
     delete(m.dirty, key);
-    Ꮡm.of(RWMutexMap.Ꮡmu).Unlock();
+    Ꮡm.Ꮡmu.Unlock();
     return (value, loaded);
 }
 
 public static void Delete(this ж<RWMutexMap> Ꮡm, any key) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    Ꮡm.of(RWMutexMap.Ꮡmu).Lock();
+    Ꮡm.Ꮡmu.Lock();
     delete(m.dirty, key);
-    Ꮡm.of(RWMutexMap.Ꮡmu).Unlock();
+    Ꮡm.Ꮡmu.Unlock();
 }
 
 public static bool /*swapped*/ CompareAndSwap(this ж<RWMutexMap> Ꮡm, any key, any old, any @new) {
-    bool swapped = default!;
+    bool swapped = default;
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();
 
-        Ꮡm.of(RWMutexMap.Ꮡmu).Lock();
-        defer(Ꮡm.of(RWMutexMap.Ꮡmu).Unlock, ref ᒐ);
-        if (m.dirty == default!) {
+        Ꮡm.Ꮡmu.Lock();
+        defer(Ꮡm.Ꮡmu.Unlock, ref ᒐ);
+        if (m.dirty == nil) {
             swapped = false; goto ᒐdone;
         }
 
@@ -142,14 +142,14 @@ public static bool /*swapped*/ CompareAndSwap(this ж<RWMutexMap> Ꮡm, any key,
 }
 
 public static bool /*deleted*/ CompareAndDelete(this ж<RWMutexMap> Ꮡm, any key, any old) {
-    bool deleted = default!;
+    bool deleted = default;
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();
 
-        Ꮡm.of(RWMutexMap.Ꮡmu).Lock();
-        defer(Ꮡm.of(RWMutexMap.Ꮡmu).Unlock, ref ᒐ);
-        if (m.dirty == default!) {
+        Ꮡm.Ꮡmu.Lock();
+        defer(Ꮡm.Ꮡmu.Unlock, ref ᒐ);
+        if (m.dirty == nil) {
             deleted = false; goto ᒐdone;
         }
 
@@ -169,12 +169,12 @@ public static void Range(this ж<RWMutexMap> Ꮡm, Func<any, any, bool> f) {
     ref var m = ref Ꮡm.DerefOrNull();
     var keysᴷ = new stackAppend<any>();
 
-    Ꮡm.of(RWMutexMap.Ꮡmu).RLock();
+    Ꮡm.Ꮡmu.RLock();
     var keys = new slice<any>(0, len(m.dirty));
     foreach (var (k, _) in m.dirty) {
         keys = append(keysᴷ, keys, k);
     }
-    Ꮡm.of(RWMutexMap.Ꮡmu).RUnlock();
+    Ꮡm.Ꮡmu.RUnlock();
 
     foreach (var (_, k) in keys) {
         var (v, ok) = Ꮡm.Load(k);
@@ -193,13 +193,13 @@ public static void Clear(this ж<RWMutexMap> Ꮡm) {
     try {
         ref var m = ref Ꮡm.DerefOrNull();
 
-        Ꮡm.of(RWMutexMap.Ꮡmu).Lock();
+        Ꮡm.Ꮡmu.Lock();
         ᒐd1 = true;
 
         clear(m.dirty);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd1) Ꮡm.of(RWMutexMap.Ꮡmu).Unlock(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡm.Ꮡmu.Unlock(); ᒐ.Run(); }
 }
 
 // DeepCopyMap is an implementation of mapInterface using a Mutex and
@@ -211,10 +211,10 @@ partial struct DeepCopyMap {
 }
 
 public static (any value, bool ok) Load(this ж<DeepCopyMap> Ꮡm, any key) {
-    any value = default!;
-    bool ok = default!;
+    any value = default;
+    bool ok = default;
 
-    var (clean, _) = Ꮡm.of(DeepCopyMap.Ꮡclean).Load()._<map<any, any>>(ᐧ);
+    var (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
     (value, ok) = clean[key, ꟷ];
     return (value, ok);
 }
@@ -225,16 +225,16 @@ public static void Store(this ж<DeepCopyMap> Ꮡm, any key, any value) {
     m.mu.Lock();
     var dirty = Ꮡm.dirty();
     dirty[key] = value;
-    Ꮡm.of(DeepCopyMap.Ꮡclean).Store(dirty);
+    Ꮡm.Ꮡclean.Store(dirty);
     m.mu.Unlock();
 }
 
 public static (any actual, bool loaded) LoadOrStore(this ж<DeepCopyMap> Ꮡm, any key, any value) {
-    any actual = default!;
-    bool loaded = default!;
+    any actual = default;
+    bool loaded = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
-    var (clean, _) = Ꮡm.of(DeepCopyMap.Ꮡclean).Load()._<map<any, any>>(ᐧ);
+    var (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
     (actual, loaded) = clean[key, ꟷ];
     if (loaded) {
         return (actual, loaded);
@@ -242,42 +242,42 @@ public static (any actual, bool loaded) LoadOrStore(this ж<DeepCopyMap> Ꮡm, a
 
     m.mu.Lock();
     // Reload clean in case it changed while we were waiting on m.mu.
-    (clean, _) = Ꮡm.of(DeepCopyMap.Ꮡclean).Load()._<map<any, any>>(ᐧ);
+    (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
     (actual, loaded) = clean[key, ꟷ];
     if (!loaded) {
         var dirty = Ꮡm.dirty();
         dirty[key] = value;
         actual = value;
-        Ꮡm.of(DeepCopyMap.Ꮡclean).Store(dirty);
+        Ꮡm.Ꮡclean.Store(dirty);
     }
     m.mu.Unlock();
     return (actual, loaded);
 }
 
 public static (any previous, bool loaded) Swap(this ж<DeepCopyMap> Ꮡm, any key, any value) {
-    any previous = default!;
-    bool loaded = default!;
+    any previous = default;
+    bool loaded = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
     m.mu.Lock();
     var dirty = Ꮡm.dirty();
     (previous, loaded) = dirty[key, ꟷ];
     dirty[key] = value;
-    Ꮡm.of(DeepCopyMap.Ꮡclean).Store(dirty);
+    Ꮡm.Ꮡclean.Store(dirty);
     m.mu.Unlock();
     return (previous, loaded);
 }
 
 public static (any value, bool loaded) LoadAndDelete(this ж<DeepCopyMap> Ꮡm, any key) {
-    any value = default!;
-    bool loaded = default!;
+    any value = default;
+    bool loaded = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
     m.mu.Lock();
     var dirty = Ꮡm.dirty();
     (value, loaded) = dirty[key, ꟷ];
     delete(dirty, key);
-    Ꮡm.of(DeepCopyMap.Ꮡclean).Store(dirty);
+    Ꮡm.Ꮡclean.Store(dirty);
     m.mu.Unlock();
     return (value, loaded);
 }
@@ -288,17 +288,17 @@ public static void Delete(this ж<DeepCopyMap> Ꮡm, any key) {
     m.mu.Lock();
     var dirty = Ꮡm.dirty();
     delete(dirty, key);
-    Ꮡm.of(DeepCopyMap.Ꮡclean).Store(dirty);
+    Ꮡm.Ꮡclean.Store(dirty);
     m.mu.Unlock();
 }
 
 public static bool /*swapped*/ CompareAndSwap(this ж<DeepCopyMap> Ꮡm, any key, any old, any @new) {
-    bool swapped = default!;
+    bool swapped = default;
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();
 
-        var (clean, _) = Ꮡm.of(DeepCopyMap.Ꮡclean).Load()._<map<any, any>>(ᐧ);
+        var (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
         {
             var (previous, ok) = clean[key, ꟷ]; if (!ok || !AreEqual(previous, old)) {
                 swapped = false; goto ᒐdone;
@@ -306,12 +306,12 @@ public static bool /*swapped*/ CompareAndSwap(this ж<DeepCopyMap> Ꮡm, any key
         }
 
         m.mu.Lock();
-        defer(Ꮡm.of(DeepCopyMap.Ꮡmu).Unlock, ref ᒐ);
+        defer(Ꮡm.Ꮡmu.Unlock, ref ᒐ);
         var dirty = Ꮡm.dirty();
         var (value, loaded) = dirty[key, ꟷ];
         if (loaded && AreEqual(value, old)) {
             dirty[key] = @new;
-            Ꮡm.of(DeepCopyMap.Ꮡclean).Store(dirty);
+            Ꮡm.Ꮡclean.Store(dirty);
             swapped = true; goto ᒐdone;
         }
         swapped = false;
@@ -322,12 +322,12 @@ public static bool /*swapped*/ CompareAndSwap(this ж<DeepCopyMap> Ꮡm, any key
 }
 
 public static bool /*deleted*/ CompareAndDelete(this ж<DeepCopyMap> Ꮡm, any key, any old) {
-    bool deleted = default!;
+    bool deleted = default;
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();
 
-        var (clean, _) = Ꮡm.of(DeepCopyMap.Ꮡclean).Load()._<map<any, any>>(ᐧ);
+        var (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
         {
             var (previous, ok) = clean[key, ꟷ]; if (!ok || !AreEqual(previous, old)) {
                 deleted = false; goto ᒐdone;
@@ -335,13 +335,13 @@ public static bool /*deleted*/ CompareAndDelete(this ж<DeepCopyMap> Ꮡm, any k
         }
 
         m.mu.Lock();
-        defer(Ꮡm.of(DeepCopyMap.Ꮡmu).Unlock, ref ᒐ);
+        defer(Ꮡm.Ꮡmu.Unlock, ref ᒐ);
 
         var dirty = Ꮡm.dirty();
         var (value, loaded) = dirty[key, ꟷ];
         if (loaded && AreEqual(value, old)) {
             delete(dirty, key);
-            Ꮡm.of(DeepCopyMap.Ꮡclean).Store(dirty);
+            Ꮡm.Ꮡclean.Store(dirty);
             deleted = true; goto ᒐdone;
         }
         deleted = false;
@@ -352,7 +352,7 @@ public static bool /*deleted*/ CompareAndDelete(this ж<DeepCopyMap> Ꮡm, any k
 }
 
 public static void Range(this ж<DeepCopyMap> Ꮡm, Func<any, any, bool> f) {
-    var (clean, _) = Ꮡm.of(DeepCopyMap.Ꮡclean).Load()._<map<any, any>>(ᐧ);
+    var (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
     foreach (var (k, v) in clean) {
         if (!f(k, v)) {
             break;
@@ -361,7 +361,7 @@ public static void Range(this ж<DeepCopyMap> Ꮡm, Func<any, any, bool> f) {
 }
 
 internal static map<any, any> dirty(this ж<DeepCopyMap> Ꮡm) {
-    var (clean, _) = Ꮡm.of(DeepCopyMap.Ꮡclean).Load()._<map<any, any>>(ᐧ);
+    var (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
     var dirty = new map<any, any>(len(clean) + 1);
     foreach (var (k, v) in clean) {
         dirty[k] = v;
@@ -378,7 +378,7 @@ public static void Clear(this ж<DeepCopyMap> Ꮡm) {
         m.mu.Lock();
         ᒐd1 = true;
 
-        Ꮡm.of(DeepCopyMap.Ꮡclean).Store((map<any, any>)default!);
+        Ꮡm.Ꮡclean.Store((map<any, any>)default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡm.DerefOrNull().mu.Unlock(); ᒐ.Run(); }

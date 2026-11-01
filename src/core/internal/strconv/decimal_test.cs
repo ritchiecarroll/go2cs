@@ -17,29 +17,29 @@ partial struct shiftTest {
     internal @string @out;
 }
 
-internal static readonly ж<slice<shiftTest>> Ꮡshifttests = new StaticBox<slice<shiftTest>>(new shiftTest[]{
-    new(0, -100, "0"u8),
-    new(0, 100, "0"u8),
-    new(1, 100, "1267650600228229401496703205376"u8),
+internal static readonly ж<slice<shiftTest>> Ꮡshifttests = new StaticBox<slice<shiftTest>>(slice<shiftTest>([
+    new(0, -100, "0"),
+    new(0, 100, "0"),
+    new(1, 100, "1267650600228229401496703205376"),
     new(1, -100,
         "0.00000000000000000000000000000078886090522101180541"u8 + "17285652827862296732064351090230047702789306640625"u8
     ),
-    new(12345678, 8, "3160493568"u8),
-    new(12345678, -8, "48225.3046875"u8),
-    new(195312, 9, "99999744"u8),
-    new(1953125, 9, "1000000000"u8)
-}.slice());
+    new(12345678, 8, "3160493568"),
+    new(12345678, -8, "48225.3046875"),
+    new(195312, 9, "99999744"),
+    new(1953125, 9, "1000000000")
+]));
 internal static ref slice<shiftTest> shifttests => ref ((StaticBox<slice<shiftTest>>)Ꮡshifttests).ValueSlot;
 
-public static void TestDecimalShift(ж<testing.T> Ꮡt) {
+public static void TestDecimalShift(ж<testing.T> t) {
     for (nint i = 0; i < len(shifttests); i++) {
         var test = Ꮡ(shifttests, i);
-        var d = strconv_internal_test_package.NewDecimal((~test).i);
-        d.Shift((~test).shift);
+        var d = strconv_internal_test_package.NewDecimal(test.i);
+        d.Shift(test.shift);
         @string s = d.String();
-        if (s != (~test).@out) {
-            Ꮡt.Errorf("Decimal %v << %v = %v, want %v"u8,
-                (~test).i, (~test).shift, s, (~test).@out);
+        if (s != test.@out) {
+            t.Errorf("Decimal %v << %v = %v, want %v",
+                test.i, test.shift, s, test.@out);
         }
     }
 }
@@ -51,48 +51,48 @@ partial struct roundTest {
     internal uint64 @int;
 }
 
-internal static readonly ж<slice<roundTest>> Ꮡroundtests = new StaticBox<slice<roundTest>>(new roundTest[]{
-    new(0, 4, "0"u8, "0"u8, "0"u8, 0),
-    new(12344999, 4, "12340000"u8, "12340000"u8, "12350000"u8, 12340000),
-    new(12345000, 4, "12340000"u8, "12340000"u8, "12350000"u8, 12340000),
-    new(12345001, 4, "12340000"u8, "12350000"u8, "12350000"u8, 12350000),
-    new(23454999, 4, "23450000"u8, "23450000"u8, "23460000"u8, 23450000),
-    new(23455000, 4, "23450000"u8, "23460000"u8, "23460000"u8, 23460000),
-    new(23455001, 4, "23450000"u8, "23460000"u8, "23460000"u8, 23460000),
+internal static readonly ж<slice<roundTest>> Ꮡroundtests = new StaticBox<slice<roundTest>>(slice<roundTest>([
+    new(0, 4, "0", "0", "0", 0),
+    new(12344999, 4, "12340000", "12340000", "12350000", 12340000),
+    new(12345000, 4, "12340000", "12340000", "12350000", 12340000),
+    new(12345001, 4, "12340000", "12350000", "12350000", 12350000),
+    new(23454999, 4, "23450000", "23450000", "23460000", 23450000),
+    new(23455000, 4, "23450000", "23460000", "23460000", 23460000),
+    new(23455001, 4, "23450000", "23460000", "23460000", 23460000),
 
-    new(99994999, 4, "99990000"u8, "99990000"u8, "100000000"u8, 99990000),
-    new(99995000, 4, "99990000"u8, "100000000"u8, "100000000"u8, 100000000),
-    new(99999999, 4, "99990000"u8, "100000000"u8, "100000000"u8, 100000000),
+    new(99994999, 4, "99990000", "99990000", "100000000", 99990000),
+    new(99995000, 4, "99990000", "100000000", "100000000", 100000000),
+    new(99999999, 4, "99990000", "100000000", "100000000", 100000000),
 
-    new(12994999, 4, "12990000"u8, "12990000"u8, "13000000"u8, 12990000),
-    new(12995000, 4, "12990000"u8, "13000000"u8, "13000000"u8, 13000000),
-    new(12999999, 4, "12990000"u8, "13000000"u8, "13000000"u8, 13000000)
-}.slice());
+    new(12994999, 4, "12990000", "12990000", "13000000", 12990000),
+    new(12995000, 4, "12990000", "13000000", "13000000", 13000000),
+    new(12999999, 4, "12990000", "13000000", "13000000", 13000000)
+]));
 internal static ref slice<roundTest> roundtests => ref ((StaticBox<slice<roundTest>>)Ꮡroundtests).ValueSlot;
 
-public static void TestDecimalRound(ж<testing.T> Ꮡt) {
+public static void TestDecimalRound(ж<testing.T> t) {
     for (nint i = 0; i < len(roundtests); i++) {
         var test = Ꮡ(roundtests, i);
-        var d = strconv_internal_test_package.NewDecimal((~test).i);
-        d.RoundDown((~test).nd);
+        var d = strconv_internal_test_package.NewDecimal(test.i);
+        d.RoundDown(test.nd);
         @string s = d.String();
-        if (s != (~test).down) {
-            Ꮡt.Errorf("Decimal %v RoundDown %d = %v, want %v"u8,
-                (~test).i, (~test).nd, s, (~test).down);
+        if (s != test.down) {
+            t.Errorf("Decimal %v RoundDown %d = %v, want %v",
+                test.i, test.nd, s, test.down);
         }
-        d = strconv_internal_test_package.NewDecimal((~test).i);
-        d.Round((~test).nd);
+        d = strconv_internal_test_package.NewDecimal(test.i);
+        d.Round(test.nd);
         s = d.String();
-        if (s != (~test).round) {
-            Ꮡt.Errorf("Decimal %v Round %d = %v, want %v"u8,
-                (~test).i, (~test).nd, s, (~test).down);
+        if (s != test.round) {
+            t.Errorf("Decimal %v Round %d = %v, want %v",
+                test.i, test.nd, s, test.down);
         }
-        d = strconv_internal_test_package.NewDecimal((~test).i);
-        d.RoundUp((~test).nd);
+        d = strconv_internal_test_package.NewDecimal(test.i);
+        d.RoundUp(test.nd);
         s = d.String();
-        if (s != (~test).up) {
-            Ꮡt.Errorf("Decimal %v RoundUp %d = %v, want %v"u8,
-                (~test).i, (~test).nd, s, (~test).up);
+        if (s != test.up) {
+            t.Errorf("Decimal %v RoundUp %d = %v, want %v",
+                test.i, test.nd, s, test.up);
         }
     }
 }
@@ -103,7 +103,7 @@ partial struct roundIntTest {
     internal uint64 @int;
 }
 
-internal static slice<roundIntTest> roundinttests = new roundIntTest[]{
+internal static slice<roundIntTest> roundinttests = slice<roundIntTest>([
     new(0, 100, 0),
     new(512, -8, 2),
     new(513, -8, 2),
@@ -114,16 +114,16 @@ internal static slice<roundIntTest> roundinttests = new roundIntTest[]{
     new(383, -8, 1),
     new(1, 100, 18446744073709551615UL),
     new(1000, 0, 1000)
-}.slice();
+]);
 
-public static void TestDecimalRoundedInteger(ж<testing.T> Ꮡt) {
+public static void TestDecimalRoundedInteger(ж<testing.T> t) {
     for (nint i = 0; i < len(roundinttests); i++) {
         var test = roundinttests[i];
         var d = strconv_internal_test_package.NewDecimal(test.i);
         d.Shift(test.shift);
         var @int = d.RoundedInteger();
         if (@int != test.@int) {
-            Ꮡt.Errorf("Decimal %v >> %v RoundedInteger = %v, want %v"u8,
+            t.Errorf("Decimal %v >> %v RoundedInteger = %v, want %v",
                 test.i, test.shift, @int, test.@int);
         }
     }

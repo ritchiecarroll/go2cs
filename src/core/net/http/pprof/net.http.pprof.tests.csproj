@@ -129,13 +129,11 @@
     <ProjectReference Include="$(go2csPath)core/internal/profile/internal.profile.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/httptest/net.http.httptest.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/net.http.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/url/net.url.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />
-    <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/pprof/runtime.pprof.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />

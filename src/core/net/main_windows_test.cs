@@ -58,9 +58,9 @@ internal static void addCmdInheritedHandle(ж<exec.Cmd> Ꮡcmd, uintptr fd) {
     // See https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessa#parameters
     // for more details.
     if (cmd.SysProcAttr == nil) {
-        cmd.SysProcAttr = Ꮡ(new syscall.SysProcAttr(nil));
+        cmd.SysProcAttr = Ꮡ(new syscall.SysProcAttr());
     }
-    cmd.SysProcAttr.Value.AdditionalInheritedHandles = append((~cmd.SysProcAttr).AdditionalInheritedHandles, (syscallꓸHandle)fd);
+    cmd.SysProcAttr.AdditionalInheritedHandles = append(cmd.SysProcAttr.AdditionalInheritedHandles, (syscallꓸHandle)fd);
 }
 
 } // end net_internal_test_package

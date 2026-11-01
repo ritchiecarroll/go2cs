@@ -26,18 +26,18 @@ partial struct testsᴛ1 /*dyn*/ {
     partial struct Δtypeᴛ2 /*dyn*/ {
         public nint X, Y;
     }
-internal static slice<testsᴛ1> tests = new testsᴛ1[]{
+internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
     // basic types
-    new(default!, "0  nil"u8),
-    new(true, "0  true"u8),
-    new((nint)42, "0  42"u8),
-    new(3.14D, "0  3.14"u8),
-    new(1D + 2.718D.i(), "0  (1+2.718i)"u8),
-    new((@string)"foobar"u8, "0  \"foobar\""u8),
+    new(default, "0  nil"),
+    new(true, "0  true"),
+    new((nint)42, "0  42"),
+    new(3.14D, "0  3.14"),
+    new(1D + 2.718D.i(), "0  (1+2.718i)"),
+    new((@string)"foobar", "0  \"foobar\""),
 
     // maps
-    new(new map<global::go.go.ast_package.Expr, @string>{}, @"0  map[ast.Expr]string (len = 0) {}"u8),
-    new(new map<@string, nint>{["a"u8] = 1},
+    new(new map<global::go.go.ast_package.Expr, @string>{}, @"0  map[ast.Expr]string (len = 0) {}"),
+    new(new map<@string, nint>{["a"] = 1},
         """
 0  map[string]int (len = 1) {
 		1  .  "a": 1
@@ -45,10 +45,10 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 """u8.Raw()),
 
     // pointers
-    new(@new<nint>(), "0  *0"u8),
+    new(@new<nint>(), "0  *0"),
 
     // arrays
-    new(new nint[]{}.array(), @"0  [0]int {}"u8),
+    new(new nint[]{}.array(), @"0  [0]int {}"),
     new(new nint[]{1, 2, 3}.array(),
         """
 0  [3]int {
@@ -65,8 +65,8 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 """u8.Raw()),
 
     // slices
-    new(new nint[]{}.slice(), @"0  []int (len = 0) {}"u8),
-    new(new nint[]{1, 2, 3}.slice(),
+    new(slice<nint>([]), @"0  []int (len = 0) {}"),
+    new(slice<nint>([1, 2, 3]),
         """
 0  []int (len = 3) {
 		1  .  0: 1
@@ -76,8 +76,8 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 """u8.Raw()),
 
     // structs
-    new(new EmptyStruct(), @"0  struct {} {}"u8),
-    new(new Δtype(7), @"0  struct { x int } {}"u8),
+    new(new EmptyStruct(), @"0  struct {} {}"),
+    new(new Δtype(7), @"0  struct { x int } {}"),
     new(new Δtypeᴛ1(42, 991),
         """
 0  struct { X int; y int } {
@@ -91,12 +91,12 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 		2  .  Y: 991
 		3  }
 """u8.Raw())
-}.slice();
+]);
 
 // Split s into lines, trim whitespace from all lines, and return
 // the concatenated non-empty lines.
 internal static @string trim(@string s) {
-    var lines = strings.Split(s, "\n"u8);
+    var lines = strings.Split(s, "\n");
     nint i = 0;
     foreach (var (_, vᴛ1) in lines) {
         var line = vᴛ1;
@@ -107,22 +107,22 @@ internal static @string trim(@string s) {
             i++;
         }
     }
-    return strings.Join(lines.slice(0, i), "\n"u8);
+    return strings.Join(lines.slice(0, i), "\n");
 }
 
-public static void TestPrint(ж<testing.T> Ꮡt) {
+public static void TestPrint(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (_, test) in tests) {
         buf.Reset();
         {
-            var err = Fprint(new ast_test_package.strings_BuilderжWriter(Ꮡbuf), nil, test.x, default!); if (err != default!) {
-                Ꮡt.Errorf("Fprint failed: %s"u8, err);
+            var err = Fprint(new ast_test_package.strings_BuilderжWriter(Ꮡbuf), nil, test.x, default); if (err != nil) {
+                t.Errorf("Fprint failed: %s", err);
             }
         }
         {
             @string s = trim(buf.String());
             @string ts = trim(test.s); if (s != ts) {
-                Ꮡt.Errorf("got:\n%s\nexpected:\n%s\n"u8, s, ts);
+                t.Errorf("got:\n%s\nexpected:\n%s\n", s, ts);
             }
         }
     }

@@ -22,53 +22,64 @@ public static Animal Zebra => 2;
 public static error UnmarshalJSON(this ref Animal a, slice<byte> b) {
     ref var s = ref heap(new @string(), out var Ꮡs);
     {
-        var err = json.Unmarshal(b, Ꮡs); if (err != default!) {
+        var err = json.Unmarshal(b, Ꮡs); if (err != nil) {
             return err;
         }
     }
     var exprᴛ1 = strings.ToLower(s);
-    if (exprᴛ1 == "gopher"u8) {
-        a = Gopher;
-    }
-    else if (exprᴛ1 == "zebra"u8) {
-        a = Zebra;
-    }
-    else { /* default: */
+    switch (ᐧ) {
+    default: {
         a = Unknown;
+        break;
     }
+    case {} when exprᴛ1 == "gopher"u8: {
+        a = Gopher;
+        break;
+    }
+    case {} when exprᴛ1 == "zebra"u8: {
+        a = Zebra;
+        break;
+    }}
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unknownˢ = "unknown"u8;
-internal static readonly @string gopherˢ = "gopher"u8;
-internal static readonly @string zebraˢ = "zebra"u8;
+internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
+private static readonly @string unknownˢᵇ = "unknown"u8;
+internal static ref readonly @string gopherˢ => ref gopherˢᵇ;
+private static readonly @string gopherˢᵇ = "gopher"u8;
+internal static ref readonly @string zebraˢ => ref zebraˢᵇ;
+private static readonly @string zebraˢᵇ = "zebra"u8;
 
 public static (slice<byte>, error) MarshalJSON(this Animal a) {
-    @string s = default!;
-    var exprᴛ1 = a;
-    if (exprᴛ1 == Gopher) {
-        s = gopherˢ;
-    }
-    else if (exprᴛ1 == Zebra) {
-        s = zebraˢ;
-    }
-    else { /* default: */
+    @string s = default;
+    switch (a) {
+    default: {
         s = unknownˢ;
+        break;
     }
+    case var ᴛ when ᴛ == Gopher: {
+        s = gopherˢ;
+        break;
+    }
+    case var ᴛ when ᴛ == Zebra: {
+        s = zebraˢ;
+        break;
+    }}
 
     return json.Marshal(s);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gopherArmadilloZebraˢ = @"[""gopher"",""armadillo"",""zebra"",""unknown"",""gopher"",""bee"",""gopher"",""zebra""]"u8;
+internal static ref readonly @string gopherArmadilloZebraˢ => ref gopherArmadilloZebraˢᵇ;
+private static readonly @string gopherArmadilloZebraˢᵇ = @"[""gopher"",""armadillo"",""zebra"",""unknown"",""gopher"",""bee"",""gopher"",""zebra""]"u8;
 
 public static void Example_customMarshalJSON() {
     @string blob = gopherArmadilloZebraˢ;
     ref var zoo = ref heap<slice<Animal>>(out var Ꮡzoo);
     {
-        var err = json.Unmarshal(slice<byte>(blob), Ꮡzoo); if (err != default!) {
+        var err = json.Unmarshal(slice<byte>(blob), Ꮡzoo); if (err != nil) {
             log.Fatal(err);
         }
     }

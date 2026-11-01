@@ -38,56 +38,68 @@ internal static @string sbig = go.embed_package.ΔEmbedString(typeof(embedtest_t
 //go:embed testdata/ascii.txt
 internal static slice<byte> bbig = go.embed_package.ΔEmbedBytes<byte>(typeof(embedtest_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/ascii.txt");
 
-internal static void testFiles(ж<testing.T> Ꮡt, embed.FS f, @string name, @string data) {
-    Ꮡt.Helper();
+internal static void testFiles(ж<testing.T> t, embed.FS f, @string name, @string data) {
+    t.Helper();
     var (d, err) = f.ReadFile(name);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
         return;
     }
     if (((sstring)d) != data) {
-        Ꮡt.Errorf("read %v = %q, want %q"u8, name, d, data);
+        t.Errorf("read %v = %q, want %q", name, d, data);
     }
 }
 
-internal static partial void testString(ж<testing.T> Ꮡt, @string s, @string name, @string data) {
-    Ꮡt.Helper();
+internal static partial void testString(ж<testing.T> t, @string s, @string name, @string data) {
+    t.Helper();
     if (s != data) {
-        Ꮡt.Errorf("%v = %q, want %q"u8, name, s, data);
+        t.Errorf("%v = %q, want %q", name, s, data);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataHelloTxtˢ = "testdata/hello.txt"u8;
-internal static readonly @string helloWorldˢ = "hello, world\n"u8;
-internal static readonly @string concurrencyˢ = "concurrency"u8;
-internal static readonly @string concurrencyIsNotˢ = "Concurrency is not parallelism.\n"u8;
-internal static readonly @string glassˢ = "glass"u8;
-internal static readonly @string iCanEatGlassAndItDoesnTˢ = "I can eat glass and it doesn't hurt me.\n"u8;
-internal static readonly @string concurrency2ˢ = "concurrency2"u8;
-internal static readonly @string glass2ˢ = "glass2"u8;
-internal static readonly @string testdataAsciiTxtˢ = "testdata/ascii.txt"u8;
-internal static readonly @string sbigˢ = "sbig"u8;
-internal static readonly @string sbig2ˢ = "sbig2"u8;
-internal static readonly @string bbigˢ = "bbig"u8;
+internal static ref readonly @string testdataHelloTxtˢ => ref testdataHelloTxtˢᵇ;
+private static readonly @string testdataHelloTxtˢᵇ = "testdata/hello.txt"u8;
+internal static ref readonly @string helloWorldˢ => ref helloWorldˢᵇ;
+private static readonly @string helloWorldˢᵇ = "hello, world\n"u8;
+internal static ref readonly @string concurrencyˢ => ref concurrencyˢᵇ;
+private static readonly @string concurrencyˢᵇ = "concurrency"u8;
+internal static ref readonly @string concurrencyIsNotˢ => ref concurrencyIsNotˢᵇ;
+private static readonly @string concurrencyIsNotˢᵇ = "Concurrency is not parallelism.\n"u8;
+internal static ref readonly @string glassˢ => ref glassˢᵇ;
+private static readonly @string glassˢᵇ = "glass"u8;
+internal static ref readonly @string iCanEatGlassAndItDoesnTˢ => ref iCanEatGlassAndItDoesnTˢᵇ;
+private static readonly @string iCanEatGlassAndItDoesnTˢᵇ = "I can eat glass and it doesn't hurt me.\n"u8;
+internal static ref readonly @string concurrency2ˢ => ref concurrency2ˢᵇ;
+private static readonly @string concurrency2ˢᵇ = "concurrency2"u8;
+internal static ref readonly @string glass2ˢ => ref glass2ˢᵇ;
+private static readonly @string glass2ˢᵇ = "glass2"u8;
+internal static ref readonly @string testdataAsciiTxtˢ => ref testdataAsciiTxtˢᵇ;
+private static readonly @string testdataAsciiTxtˢᵇ = "testdata/ascii.txt"u8;
+internal static ref readonly @string sbigˢ => ref sbigˢᵇ;
+private static readonly @string sbigˢᵇ = "sbig"u8;
+internal static ref readonly @string sbig2ˢ => ref sbig2ˢᵇ;
+private static readonly @string sbig2ˢᵇ = "sbig2"u8;
+internal static ref readonly @string bbigˢ => ref bbigˢᵇ;
+private static readonly @string bbigˢᵇ = "bbig"u8;
 
-public static void TestXGlobal(ж<testing.T> Ꮡt) {
-    testFiles(Ꮡt, global, testdataHelloTxtˢ, helloWorldˢ);
-    testString(Ꮡt, concurrency, concurrencyˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, (@string)glass, glassˢ, iCanEatGlassAndItDoesnTˢ);
-    testString(Ꮡt, concurrency2, concurrency2ˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, (@string)glass2, glass2ˢ, iCanEatGlassAndItDoesnTˢ);
+public static void TestXGlobal(ж<testing.T> t) {
+    testFiles(t, global, testdataHelloTxtˢ, helloWorldˢ);
+    testString(t, concurrency, concurrencyˢ, concurrencyIsNotˢ);
+    testString(t, (@string)glass, glassˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(t, concurrency2, concurrency2ˢ, concurrencyIsNotˢ);
+    testString(t, (@string)glass2, glass2ˢ, iCanEatGlassAndItDoesnTˢ);
 
     var (big, err) = os.ReadFile(testdataAsciiTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    testString(Ꮡt, sbig, sbigˢ, (@string)big);
-    testString(Ꮡt, sbig2, sbig2ˢ, (@string)big);
-    testString(Ꮡt, (@string)bbig, bbigˢ, (@string)big);
-    testString(Ꮡt, (@string)bbig2, bbigˢ, (@string)big);
+    testString(t, sbig, sbigˢ, (@string)big);
+    testString(t, sbig2, sbig2ˢ, (@string)big);
+    testString(t, (@string)bbig, bbigˢ, (@string)big);
+    testString(t, (@string)bbig2, bbigˢ, (@string)big);
 
-    if (Ꮡt.Failed()) {
+    if (t.Failed()) {
         return;
     }
 
@@ -96,7 +108,7 @@ public static void TestXGlobal(ж<testing.T> Ꮡt) {
     var old = glass[0];
     glass[0]++;
     if (glass2[0] != glass[0]) {
-        Ꮡt.Fatalf("glass and glass2 do not share storage"u8);
+        t.Fatalf("glass and glass2 do not share storage");
     }
     glass[0] = old;
 
@@ -105,7 +117,7 @@ public static void TestXGlobal(ж<testing.T> Ꮡt) {
     old = bbig[0];
     bbig[0]++;
     if (bbig2[0] != bbig[0]) {
-        Ꮡt.Fatalf("bbig and bbig2 do not share storage"u8);
+        t.Fatalf("bbig and bbig2 do not share storage");
     }
     bbig[0] = old;
 }
