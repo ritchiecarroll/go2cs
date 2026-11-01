@@ -492,6 +492,12 @@ var errProductionAnchoredRecords = errors.New("test variant records production-a
 func recordsRequireProductionAnchor(productionClassName, productionPackageName string, handOwnHost bool) bool {
 	_, productionAnchored := splitExternalVariantRecords(productionClassName, handOwnHost)
 
+	// A [GoFieldAccess] record never needs the production class: go2cs-gen emits its field properties into the
+	// using compilation, a foreign struct's included. The split places it only to pick the FILE whose scope resolves
+	// its name under the recompile model. Counting it here sent 20 rows to recompile and refused the host
+	// `testing` (seat #45 follow-up).
+	productionAnchored.fieldAccess = hashset.HashSet[string]{}
+
 	if !productionAnchored.isEmpty() {
 		return true
 	}
@@ -743,7 +749,7 @@ func testImplCompanionAppliesTo(name, goos string) bool {
 	return true
 }
 
-func processTestConversion(inputPath, outputPath string, options Options) error {
+func processTestConversion(inputPath, outputPath string, options Options) (err error) {
 	// The sibling declarator names steer the PRODUCTION pass only (see siblingTestFuncMethodNames);
 	// that pass is complete by the time this runs. Each variant's own analysis then computes the
 	// shadow set from its own universe — the in-package variant already contains these names, and
@@ -764,7 +770,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	// requirement on this package at all.
 	siblingTestPublicizedTypeNames = nil
 
-	inputPath, err := filepath.Abs(inputPath)
+	inputPath, err = filepath.Abs(inputPath)
 	if err != nil {
 		return err
 	}
@@ -773,6 +779,25 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	if err != nil {
 		return err
 	}
+
+	// A conversion that refuses leaves the output as it found it. The variants write their files as they
+	// convert, so a refusal that comes later (a hand-owned host's records, a recompile fallback with no
+	// production metadata to read) used to leave the row's committed test files rewritten (seat #45
+	// follow-up: testing rewrote 8, internal/runtime/wasitest 3).
+	before, err := snapshotTestOutput(outputPath)
+	if err != nil {
+		return fmt.Errorf("snapshot the test output before converting: %w", err)
+	}
+
+	defer func() {
+		if err == nil {
+			return
+		}
+
+		if restoreErr := before.restore(outputPath); restoreErr != nil {
+			err = errors.Join(err, fmt.Errorf("restore the test output after the refusal: %w", restoreErr))
+		}
+	}()
 
 	targetParts := strings.Split(options.targetPlatform, "/")
 	if len(targetParts) != 2 {
@@ -1087,6 +1112,114 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	}
 
 	return writeJSONFile(filepath.Join(outputPath, testManifestFileName), manifest)
+}
+
+// testOutputSnapshot is a -tests conversion's output directory as it stood before the conversion wrote anything:
+// every file's bytes and mode, and every directory. Build output (bin, obj) is neither recorded nor restored.
+type testOutputSnapshot struct {
+	files map[string]testOutputFile
+	dirs  hashset.HashSet[string]
+}
+
+type testOutputFile struct {
+	body []byte
+	mode fs.FileMode
+}
+
+func isTestOutputBuildDir(name string) bool {
+	return strings.EqualFold(name, "bin") || strings.EqualFold(name, "obj")
+}
+
+// walkTestOutput visits every directory and file under root, build output aside. A root that does not exist yet
+// has nothing to visit.
+func walkTestOutput(root string, visit func(path string, entry fs.DirEntry) error) error {
+	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if entry.IsDir() && path != root && isTestOutputBuildDir(entry.Name()) {
+			return filepath.SkipDir
+		}
+
+		return visit(path, entry)
+	})
+
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+
+	return err
+}
+
+func snapshotTestOutput(root string) (testOutputSnapshot, error) {
+	snapshot := testOutputSnapshot{files: map[string]testOutputFile{}, dirs: hashset.HashSet[string]{}}
+
+	err := walkTestOutput(root, func(path string, entry fs.DirEntry) error {
+		if entry.IsDir() {
+			snapshot.dirs.Add(path)
+			return nil
+		}
+
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+
+		body, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		snapshot.files[path] = testOutputFile{body: body, mode: info.Mode().Perm()}
+
+		return nil
+	})
+
+	return snapshot, err
+}
+
+// restore puts root back as the snapshot found it: a file the conversion wrote is removed, one it changed or removed
+// is written back, and a directory it created is removed once empty.
+func (snapshot testOutputSnapshot) restore(root string) error {
+	var errs []error
+	var created []string
+
+	err := walkTestOutput(root, func(path string, entry fs.DirEntry) error {
+		if entry.IsDir() {
+			if !snapshot.dirs.Contains(path) {
+				created = append(created, path)
+			}
+
+			return nil
+		}
+
+		if _, ok := snapshot.files[path]; !ok {
+			errs = append(errs, os.Remove(path))
+		}
+
+		return nil
+	})
+	errs = append(errs, err)
+
+	for path, file := range snapshot.files {
+		if current, readErr := os.ReadFile(path); readErr == nil && bytes.Equal(current, file.body) {
+			continue
+		}
+
+		errs = append(errs, os.MkdirAll(filepath.Dir(path), 0755), os.WriteFile(path, file.body, file.mode))
+	}
+
+	// Deepest first, so a created parent is empty when its turn comes. One that holds build output stays.
+	sort.Slice(created, func(i, j int) bool { return len(created[i]) > len(created[j]) })
+
+	for _, dir := range created {
+		if entries, readErr := os.ReadDir(dir); readErr == nil && len(entries) == 0 {
+			errs = append(errs, os.Remove(dir))
+		}
+	}
+
+	return errors.Join(errs...)
 }
 
 // testVariantConversionResult carries everything one convertTestVariants pass produced — the
