@@ -3,12 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using errors = go.errors_package;
+using errors = errors_package;
 using fmt = fmt_package;
 using fs = io.fs_package;
 using os = os_package;
 using time = time_package;
-using go;
 using io;
 
 partial class errors_test_package {
@@ -116,6 +115,10 @@ private static readonly @string err2ˢᵇ = "err2"u8;
 private static readonly object errIsErr1ˢ = (@string)"err is err1"u8;
 private static readonly object errIsErr2ˢ = (@string)"err is err2"u8;
 
+internal partial interface ExampleJoin_type /*dyn*/ {
+    slice<error> Unwrap();
+}
+
 public static void ExampleJoin() {
     var err1 = errors.New(err1ˢ);
     var err2 = errors.New(err2ˢ);
@@ -127,7 +130,7 @@ public static void ExampleJoin() {
     if (errors.Is(err, err2)) {
         fmt.Println(errIsErr2ˢ);
     }
-    fmt.Println(err._<is_typeᴛ1>().Unwrap());
+    fmt.Println(err._<ExampleJoin_type>().Unwrap());
     // Output:
     // err1
     // err2

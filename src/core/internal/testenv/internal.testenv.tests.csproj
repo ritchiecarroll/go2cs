@@ -109,16 +109,8 @@
        can leak in because it is never listed. -->
   <ItemGroup>
     <Compile Include="go2cs_test_host.cs" />
-    <Compile Include="opt.cs" />
-    <Compile Include="package_info_external_test.cs" />
-    <Compile Include="package_init.cs" />
     <Compile Include="package_test_info.cs" />
-    <Compile Include="testenv.cs" />
-    <Compile Include="testenv_impl.cs" />
     <Compile Include="testenv_test.cs" />
-    <Compile Include="windows/exec.cs" />
-    <Compile Include="windows/testenv_notunix.cs" />
-    <Compile Include="windows/testenv_windows.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -134,28 +126,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
-    <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
-    <ProjectReference Include="$(go2csPath)core/flag/flag.csproj" />
-    <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/cfg/internal.cfg.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/goarch/internal.goarch.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/platform/internal.platform.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
-    <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
-    <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
-    <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
-    <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
-    <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
+    <ProjectReference Include="internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

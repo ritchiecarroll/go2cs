@@ -1,13 +1,10 @@
-// go2cs code converter defines `global using` statements here for imported type
-// aliases as package references are encountered via `import' statements. Exported
-// type aliases that need a `global using` declaration will be loaded from the
-// referenced package by parsing its 'package_info.cs' source file and reading its
-// defined `GoTypeAlias` attributes.
-
-// Package name separator "dot" used in imported type aliases is extended Unicode
-// character '\uA4F8' which is a valid character in a C# identifier name. This is
-// used to simulate Go's package level type aliases since C# does not yet support
-// importing type aliases at a namespace level.
+// go2cs metadata anchor for a production-reference test project: the test assembly
+// REFERENCES the colocated production project instead of
+// recompiling its sources, so the production assembly is the single identity for the
+// production types and no production class partial may be declared here. The first —
+// and only — class is the test metadata class the go2cs-gen generators anchor
+// generated adapters and partials to.
+global using static global::go.@internal.synctest_package;
 
 // <ImportedTypeAliases>
 global using reflectꓸType = go.reflect_package.ΔType;
@@ -16,30 +13,13 @@ global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
-using static go.@internal.synctest_package;
-using static go.@internal.synctest_test_package;
-
-// For encountered type alias declarations, e.g., `type Table = map[string]int`,
-// go2cs code converter will generate a `global using` statement for the alias in
-// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
-// Although scope of `global using` is available to all files in the project, all
-// converted Go code for the project targets the same package, so `global using`
-// statements will effectively have package level scope.
-
-// Additionally, `GoTypeAlias` attributes will be generated here for exported type
-// aliases. This allows the type alias to be imported and used from other packages
-// when referenced.
+using static global::go.@internal.synctest_test_package;
 
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-// As types are cast to interfaces in Go source code, the go2cs code converter
-// will generate an assembly level `GoImplement` attribute for each unique cast.
-// This allows the interface to be implemented in the C# source code using source
-// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
-// this way is what keeps startup free of reflection.
-
 // <InterfaceImplementations>
+[assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -64,14 +44,13 @@ using static go.@internal.synctest_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/synctest/synctest.go", "synctest.cs", "AA8gpqoACxq0gqimkqimkqimpqYACRaigIKkqsKClIKqwoKU")]
-[assembly: GoPositionMap("internal/synctest/synctest_test.go", "synctest_test.cs", "AB40goKkgIKkpICyyIKAgt6igpKCgIK2goKAgqSAgtqCuIKCuIKCkryigoKCgpKCgpSCpoKCgoLKgoKCgoKCkoKClIKmgoKCgtyCgoKCgoCC2oKCgoKCgoKCyoKCgoKAgraCgIK2goKCgILagoKClIKCgqaCgoCS2oKCgoKmgriCgpKUgryigoKSgoKCtLSkgpSUvKKCgpKCgoKClIKClIKCgKS0tLSClJS8ooKCgqSCxgAFELKCgoKCgqSCxt6igoKClILOooKClKKCtPyCgoKCAAkIgoLcosaixqLGpAAMDqSCAA4MkoKilKIAEQyCrtzc+KSSkoKC0oKikpKUuJKSgoLSgoKitJKSlAAMDoKu3Nz4kpKCgtKCopKSgpQACQyigoK05KKCgoLGpKKCgoKCgtikgoKCgoKUpIKCgqaCgoK4goKCgILIgpKCgoKUgoKCgoKUgILagoKCgqaCkrKCgrjKgoKCyoKCgoKmgrKCkoKStJLKgoKCyoKC7pKCppKCyoKCgoKCgoKUgoKAgtySgoKCpLiCgoKCtoKUtNaC5oKCgoKCyoKCgoKU+IKCgoKUgsqCgoKClJSUgriCgoKCgqaUlILsgu6SuJSCpoKCgrqSgoKCgoKCgpKmgoK4poaigoKCpoKUgpSUgqaCkoKUkoKUlIKCpoKUgpSUgqaCkoKUkoKUlIKCpoKCgqaCgsqAkqSAksqSgoKCgsrCgIKAgrbE5IKUgoKmgoKCgoKUgg==", "28-44:1;33-38:1.1;51-65:1;69-70:1;74-76:1;80-83:1;81-81:1.1;89-108:1;93-101:1.1;113-132:1;117-125:1.1;137-144:1;148-157:1;161-179:1;183-198:1;185-192:1.1;188-191:1.1.1;203-207:1;204-206:1.1;215-217:1;226-244:1;250-279:1;255-258:1.1;259-262:1.2;285-296:1;303-316:1;322-330:1;324-326:1.1;336-355:1;340-348:1.1;366-366:1;367-367:2;370-370:3;371-371:4;374-374:5;375-375:6;378-378:7;379-384:8;387-387:9;388-394:10;396-404:11;398-400:11.1;401-403:11.2;415-417:1;421-423:2;427-429:3;432-466:4;434-447:4.1;435-446:4.1.1;438-441:4.1.1.1;442-444:4.1.1.2;449-465:4.2;450-464:4.2.1;453-459:4.2.1.1;456-458:4.2.1.1.1;460-462:4.2.1.2;477-479:1;483-485:2;489-491:3;494-508:4;495-507:4.1;498-501:4.1.1;502-505:4.1.2;514-516:1;521-525:1;522-524:1.1;530-537:1;531-536:1.1;541-587:1;547-559:1.1;571-576:1.2;591-616:1;592-596:1.1;598-605:1.2;620-645:1;621-625:1.1;627-634:1.2;649-656:1;657-661:2;662-666:3;670-683:1;674-677:1.1;688-694:1;691-691:1.1;701-706:1;717-723:1;720-722:1.1;727-733:1;729-731:1.1;737-745:1;739-741:1.1;742-744:1.2;750-755:1;756-760:2;765-772:1;773-777:2;783-792:1;790-790:1.1;798-805:1;812-825:1;813-824:1.1;817-819:1.1.1;835-894:1;840-842:1.1;843-845:1.2;853-856:1.3;857-860:1.4;868-870:1.5;871-873:1.6;881-884:1.7;885-888:1.8;896-907:2;897-901:2.1;898-900:2.1.1;902-906:2.2;903-905:2.2.1;919-925:1", "", "800=Now/1/3/1,Now/2/3/2,Add/1/2/2,Now/3/3/3,Add/2/2/3;837=Now/1/3/1,Now/2/3/2,Add/1/2/2,Now/3/3/3,Add/2/2/3;852=Itoa/1/1/2,TypeOf/1/1/3,StructOf/1/1/1", "566:41,592:41,656:37")]
+[assembly: GoPositionMap("internal/synctest/synctest_test.go", "synctest_test.cs", "AB80goKkgIKkpICyyIKAgt6igpKCgIK2goKAgqSAgtqCuIKCuIKCkryigoKCgpKCgpSCpoKCgoLKgoKCgoKCkoKClIKmgoKCgtyCgoKCgoCC2oKCgoKCgoKCyoKCgoKAgraCgIK2goKCgILagoKClIKCgqaCgoCS2oKCgoKmgriCgpKUgryigoKSgoKCtLSkgpSUvKKCgpKCgoKClIKClIKCgKS0tLSClJS8ooKCgqSCxgAFELKCgoKCgqSCxt6igoKClILOooKClKKCtPyCgoKCAAkIgoLcosaixqLGpAAMDqSCAA4MkoKilKIAEQyCrtzc+KSSkoKC0oKikpKUuJKSgoLSgoKitJKSlAAMDoKu3Nz4kpKCgtKCopKSgpQACQyigoK05KKCgoLGpKKCgoKCgtikgoKCgoKUpIKCgqaCgoK4goKCgILIgpKCgoKUgoKCgoKUgILagoKCgqaCkrKCgrjKgoKCyoKCgoKmgrKCkoKStJLKgoKCyoKC7pKCppKCyoKCgoKCgoKUgoKAgtySgoKCpLiCgoKCtoKUtNaC5oKCgoKCyoKCgoKU+IKCgoKUgsqCgoKClJSUgriCgoKCgqaUlILsgu6SuJSCpoKCgrqSgoKCgoKCgpKmgoK4poaigoKCpoKUgpSUgqaCkoKUkoKUlIKCpoKUgpSUgqaCkoKUkoKUlIKCpoKCgqaCgsqAkqSAksqSgoKCgsrCgIKAgrbE5IKUgoKmgoKCgoKUgg==", "28-44:1;33-38:1.1;51-65:1;69-70:1;74-76:1;80-83:1;81-81:1.1;89-108:1;93-101:1.1;113-132:1;117-125:1.1;137-144:1;148-157:1;161-179:1;183-198:1;185-192:1.1;188-191:1.1.1;203-207:1;204-206:1.1;215-217:1;226-244:1;250-279:1;255-258:1.1;259-262:1.2;285-296:1;303-316:1;322-330:1;324-326:1.1;336-355:1;340-348:1.1;366-366:1;367-367:2;370-370:3;371-371:4;374-374:5;375-375:6;378-378:7;379-384:8;387-387:9;388-394:10;396-404:11;398-400:11.1;401-403:11.2;415-417:1;421-423:2;427-429:3;432-466:4;434-447:4.1;435-446:4.1.1;438-441:4.1.1.1;442-444:4.1.1.2;449-465:4.2;450-464:4.2.1;453-459:4.2.1.1;456-458:4.2.1.1.1;460-462:4.2.1.2;477-479:1;483-485:2;489-491:3;494-508:4;495-507:4.1;498-501:4.1.1;502-505:4.1.2;514-516:1;521-525:1;522-524:1.1;530-537:1;531-536:1.1;541-587:1;547-559:1.1;571-576:1.2;591-616:1;592-596:1.1;598-605:1.2;620-645:1;621-625:1.1;627-634:1.2;649-656:1;657-661:2;662-666:3;670-683:1;674-677:1.1;688-694:1;691-691:1.1;701-706:1;717-723:1;720-722:1.1;727-733:1;729-731:1.1;737-745:1;739-741:1.1;742-744:1.2;750-755:1;756-760:2;765-772:1;773-777:2;783-792:1;790-790:1.1;798-805:1;812-825:1;813-824:1.1;817-819:1.1.1;835-894:1;840-842:1.1;843-845:1.2;853-856:1.3;857-860:1.4;868-870:1.5;871-873:1.6;881-884:1.7;885-888:1.8;896-907:2;897-901:2.1;898-900:2.1.1;902-906:2.2;903-905:2.2.1;919-925:1", "", "801=Now/1/3/1,Now/2/3/2,Add/1/2/2,Now/3/3/3,Add/2/2/3;838=Now/1/3/1,Now/2/3/2,Add/1/2/2,Now/3/3/3,Add/2/2/3;853=Itoa/1/1/2,TypeOf/1/1/3,StructOf/1/1/1", "567:41,593:41,657:37")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
 
-[GoPackage("synctest")]
-public static partial class synctest_package
+[GoPackage("synctest_test")]
+public static partial class synctest_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -80,8 +59,9 @@ public static partial class synctest_package
     // via declarations below.
 
     // <TypeAccessibility>
-    public partial struct Association {}
-    public partial struct Bubble {}
+    internal partial struct TestChannelFromOutsideBubble_type {}
+    internal partial struct TestChannelMovedOutOfBubble_type {}
+    internal partial struct TestTimerFromInsideBubble_type {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -93,7 +73,7 @@ public static partial class synctest_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸcontext() => builtin.initPackage(typeof(context_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(go.@internal.abi_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsynctest() => builtin.initPackage(typeof(go.@internal.synctest_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸiter() => builtin.initPackage(typeof(iter_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
@@ -108,9 +88,11 @@ public static partial class synctest_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     [GoInit] internal static void initᴛᴛimportꓸweak() => builtin.initPackage(typeof(weak_package));
     // </ImportInitializers>
-}
-
-[GoPackage("synctest_test")]
-public static partial class synctest_test_package
-{
+    // Go runs every `init` in the package under test - the production files' included -
+    // before the first test. The production package is a REFERENCED assembly here, whose
+    // module constructor .NET would not run until something in it is touched, so that
+    // initialization is forced before anything else in this test module runs.
+    [GoInit] internal static void initᴛᴛproduction() {
+        builtin.initPackage(typeof(global::go.@internal.synctest_package));
+    }
 }

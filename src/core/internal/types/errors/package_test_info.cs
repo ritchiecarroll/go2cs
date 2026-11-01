@@ -1,13 +1,10 @@
-// go2cs code converter defines `global using` statements here for imported type
-// aliases as package references are encountered via `import' statements. Exported
-// type aliases that need a `global using` declaration will be loaded from the
-// referenced package by parsing its 'package_info.cs' source file and reading its
-// defined `GoTypeAlias` attributes.
-
-// Package name separator "dot" used in imported type aliases is extended Unicode
-// character '\uA4F8' which is a valid character in a C# identifier name. This is
-// used to simulate Go's package level type aliases since C# does not yet support
-// importing type aliases at a namespace level.
+// go2cs metadata anchor for a production-reference test project: the test assembly
+// REFERENCES the colocated production project instead of
+// recompiling its sources, so the production assembly is the single identity for the
+// production types and no production class partial may be declared here. The first —
+// and only — class is the test metadata class the go2cs-gen generators anchor
+// generated adapters and partials to.
+global using static global::go.@internal.types.errors_package;
 
 // <ImportedTypeAliases>
 global using typesꓸError = go.go.types_package.ΔError;
@@ -15,30 +12,13 @@ global using typesꓸInfo = go.go.types_package.ΔInfo;
 // </ImportedTypeAliases>
 
 using go;
-using static go.@internal.types.errors_package;
-using static go.@internal.types.errors_test_package;
-
-// For encountered type alias declarations, e.g., `type Table = map[string]int`,
-// go2cs code converter will generate a `global using` statement for the alias in
-// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
-// Although scope of `global using` is available to all files in the project, all
-// converted Go code for the project targets the same package, so `global using`
-// statements will effectively have package level scope.
-
-// Additionally, `GoTypeAlias` attributes will be generated here for exported type
-// aliases. This allows the type alias to be imported and used from other packages
-// when referenced.
+using static global::go.@internal.types.errors_test_package;
 
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-// As types are cast to interfaces in Go source code, the go2cs code converter
-// will generate an assembly level `GoImplement` attribute for each unique cast.
-// This allows the interface to be implemented in the C# source code using source
-// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
-// this way is what keeps startup free of reflection.
-
 // <InterfaceImplementations>
+[assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -65,14 +45,13 @@ using static go.@internal.types.errors_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/types/errors/code_string.go", "code_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggAPGoKCgoKWgpSkgqSCpIKkgqSCpA==")]
 [assembly: GoPositionMap("internal/types/errors/codes_test.go", "codes_test.cs", "ABosgpSCgoKCgoKCgpSCgpSAggANDoKCgoKClILKgoKUgoKClIKCgpSCgIKClIKCAAoMgoIACgaCgoKClIKClLiCpqYAGTQABxCCgpSygpSCgpSClIKUgoKCpoKCgoKUgoKCyoKSgoKUgoKCgg==", "25-44:1;26-43:1.1;151-183:1", "", "129=Default/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.types;
 
-[GoPackage("errors")]
-public static partial class errors_package
+[GoPackage("errors_test")]
+public static partial class errors_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -81,7 +60,6 @@ public static partial class errors_package
     // via declarations below.
 
     // <TypeAccessibility>
-    public partial struct Code {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -100,13 +78,14 @@ public static partial class errors_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtypes() => builtin.initPackage(typeof(global::go.go.types_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(global::go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
-}
-
-[GoPackage("errors_test")]
-public static partial class errors_test_package
-{
+    // Go runs every `init` in the package under test - the production files' included -
+    // before the first test. The production package is a REFERENCED assembly here, whose
+    // module constructor .NET would not run until something in it is touched, so that
+    // initialization is forced before anything else in this test module runs.
+    [GoInit] internal static void initᴛᴛproduction() {
+        builtin.initPackage(typeof(global::go.@internal.types.errors_package));
+    }
 }

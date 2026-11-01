@@ -109,10 +109,7 @@
        can leak in because it is never listed. -->
   <ItemGroup>
     <Compile Include="go2cs_test_host.cs" />
-    <Compile Include="package_info_external_test.cs" />
     <Compile Include="package_test_info.cs" />
-    <Compile Include="supported.cs" />
-    <Compile Include="zosarch.cs" />
     <Compile Include="zosarch_test.cs" />
   </ItemGroup>
 
@@ -136,6 +133,7 @@
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="$(go2csPath)core/text/template/text.template.csproj" />
+    <ProjectReference Include="internal.platform.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

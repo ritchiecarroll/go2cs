@@ -108,19 +108,12 @@
        shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
        can leak in because it is never listed. -->
   <ItemGroup>
-    <Compile Include="casetables.cs" />
-    <Compile Include="digit.cs" />
     <Compile Include="digit_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
-    <Compile Include="graphic.cs" />
     <Compile Include="graphic_test.cs" />
-    <Compile Include="letter.cs" />
     <Compile Include="letter_test.cs" />
-    <Compile Include="package_info_external_test.cs" />
-    <Compile Include="package_init.cs" />
     <Compile Include="package_test_info.cs" />
     <Compile Include="script_test.cs" />
-    <Compile Include="tables.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -146,6 +139,7 @@
     <ProjectReference Include="$(go2csPath)core/sort/sort.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
+    <ProjectReference Include="unicode.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

@@ -14,29 +14,29 @@ partial struct allocsPerRunTestsᴛ1 /*dyn*/ {
     internal Action fn;
     internal float64 allocs;
 }
-internal static slice<allocsPerRunTestsᴛ1> allocsPerRunTests = new allocsPerRunTestsᴛ1[]{
-    new("alloc *byte"u8, () => {
+internal static slice<allocsPerRunTestsᴛ1> allocsPerRunTests = slice<allocsPerRunTestsᴛ1>([
+    new("alloc *byte", () => {
         global = @new<ж<byte>>();
     }, 1D),
-    new("alloc complex128"u8, () => {
+    new("alloc complex128", () => {
         global = @new<complex128>();
     }, 1D),
-    new("alloc float64"u8, () => {
+    new("alloc float64", () => {
         global = @new<float64>();
     }, 1D),
-    new("alloc int32"u8, () => {
+    new("alloc int32", () => {
         global = @new<int32>();
     }, 1D),
-    new("alloc byte"u8, () => {
+    new("alloc byte", () => {
         global = @new<byte>();
     }, 1D)
-}.slice();
+]);
 
-public static void TestAllocsPerRun(ж<testing.T> Ꮡt) {
+public static void TestAllocsPerRun(ж<testing.T> t) {
     foreach (var (_, tt) in allocsPerRunTests) {
         {
             var allocs = testing.AllocsPerRun(100, tt.fn); if (allocs != tt.allocs) {
-                Ꮡt.Errorf("AllocsPerRun(100, %s) = %v, want %v"u8, tt.name, allocs, tt.allocs);
+                t.Errorf("AllocsPerRun(100, %s) = %v, want %v", tt.name, allocs, tt.allocs);
             }
         }
     }

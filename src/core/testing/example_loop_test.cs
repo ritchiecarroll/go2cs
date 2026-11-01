@@ -13,7 +13,7 @@ partial class testing_test_package {
 //
 // (If this were a real benchmark, not an example, this would be named
 // BenchmarkSomething.)
-public static void ExBenchmark(ж<testing.B> Ꮡb) {
+public static void ExBenchmark(ж<testing.B> b) {
     // Generate a large random slice to use as an input.
     // Since this is done before the first call to b.Loop(),
     // it doesn't count toward the benchmark time.
@@ -23,7 +23,7 @@ public static void ExBenchmark(ж<testing.B> Ꮡb) {
     }
 
     // Perform the benchmark.
-    while (Ꮡb.Loop()) {
+    while (b.Loop()) {
         // Normally, the compiler would be allowed to optimize away the call
         // to sum because it has no side effects and the result isn't used.
         // However, inside a b.Loop loop, the compiler ensures function calls

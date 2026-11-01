@@ -4,7 +4,7 @@
 namespace go;
 
 using bytes = bytes_package;
-using Δcrypto = global::go.crypto_package;
+using Δcrypto = crypto_package;
 using rand = global::go.crypto.rand_package;
 using rsa = global::go.crypto.rsa_package;
 using x509 = global::go.crypto.x509_package;
@@ -20,7 +20,6 @@ using strings = strings_package;
 using testing = testing_package;
 using @internal;
 using encoding;
-using global::go;
 using global::go.crypto;
 using global::go.io;
 using hash = hash_package;

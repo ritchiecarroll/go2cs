@@ -19,23 +19,28 @@ using math;
 partial class wasi_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string gowasienableracytestˢ = "GOWASIENABLERACYTEST"u8;
+private static ref readonly @string gowasienableracytestˢ => ref gowasienableracytestˢᵇ;
+private static readonly @string gowasienableracytestˢᵇ = "GOWASIENABLERACYTEST"u8;
 private static readonly object skippingWasiTestWithˢ = (@string)"skipping WASI test with unavoidable race condition"u8;
-private static readonly @string tcpˢ = "tcp"u8;
-private static readonly @string runˢ = "run"u8;
-private static readonly @string testdataTcpechoGoˢ = "./testdata/tcpecho.go"u8;
-private static readonly @string gowasiruntimeˢ = "GOWASIRUNTIME"u8;
+private static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
+private static ref readonly @string runˢ => ref runˢᵇ;
+private static readonly @string runˢᵇ = "run"u8;
+private static ref readonly @string testdataTcpechoGoˢ => ref testdataTcpechoGoˢᵇ;
+private static readonly @string testdataTcpechoGoˢᵇ = "./testdata/tcpecho.go"u8;
+private static ref readonly @string gowasiruntimeˢ => ref gowasiruntimeˢᵇ;
+private static readonly @string gowasiruntimeˢᵇ = "GOWASIRUNTIME"u8;
 private static readonly object wasiRuntimeDoesNotˢ = (@string)"WASI runtime does not support sockets"u8;
 private static readonly object unexpectedPayloadˢ = (@string)"unexpected payload"u8;
 
-public static void TestTCPEcho(ж<testing.T> Ꮡt) {
+public static void TestTCPEcho(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (target != "wasip1/wasm"u8) {
-            Ꮡt.Skip();
+            t.Skip();
         }
 
-        testenv.MustHaveGoRun(new testing_TжTB(Ꮡt));
+        testenv.MustHaveGoRun(new testing_TжTB(t));
 
         // We're unable to use port 0 here (let the OS choose a spare port).
         // Although the WASM runtime accepts port 0, and the WASM module listens
@@ -47,53 +52,57 @@ public static void TestTCPEcho(ж<testing.T> Ꮡt) {
         // Given there's an unavoidable race condition, the test is disabled by
         // default.
         if (os.Getenv(gowasienableracytestˢ) != "1"u8) {
-            Ꮡt.Skip(skippingWasiTestWithˢ);
+            t.Skip(skippingWasiTestWithˢ);
         }
-        @string host = default!;
+        @string host = default;
         nint port = rand.Intn(10000) + 40000;
         for (nint attempts = 0; attempts < 10; attempts++) {
             host = fmt.Sprintf("127.0.0.1:%d"u8, port);
             var (l, errΔ1) = net.Listen(tcpˢ, host);
-            if (errΔ1 == default!) {
+            if (errΔ1 == nil) {
                 l.Close();
                 break;
             }
             port++;
         }
 
-        var subProcess = exec.Command(testenv.GoToolPath(new testing_TжTB(Ꮡt)), runˢ, testdataTcpechoGoˢ);
+        var subProcess = exec.Command(testenv.GoToolPath(new testing_TжTB(t)), runˢ, testdataTcpechoGoˢ);
 
-        subProcess.Value.Env = append(os.Environ(), "GOOS=wasip1"u8, "GOARCH=wasm");
+        subProcess.Env = append(os.Environ(), (@string)"GOOS=wasip1", (@string)"GOARCH=wasm");
 
         var exprᴛ1 = os.Getenv(gowasiruntimeˢ);
-        if (exprᴛ1 == "wazero"u8) {
-            subProcess.Value.Env = append((~subProcess).Env, "GOWASIRUNTIMEARGS=--listen="u8 + host);
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "wazero"u8: {
+            subProcess.Env = append(subProcess.Env, "GOWASIRUNTIMEARGS=--listen="u8 + host);
+            break;
         }
-        else if (exprᴛ1 == "wasmtime"u8 || exprᴛ1 == ""u8) {
-            subProcess.Value.Env = append((~subProcess).Env, "GOWASIRUNTIMEARGS=--tcplisten="u8 + host);
+        case {} when exprᴛ1 == "wasmtime"u8 || exprᴛ1 == ""u8: {
+            subProcess.Env = append(subProcess.Env, "GOWASIRUNTIMEARGS=--tcplisten="u8 + host);
+            break;
         }
-        else { /* default: */
-            Ꮡt.Skip(wasiRuntimeDoesNotˢ);
-        }
+        default: {
+            t.Skip(wasiRuntimeDoesNotˢ);
+            break;
+        }}
 
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-        subProcess.Value.Stdout = new bytes_BufferжWriter(Ꮡb);
-        subProcess.Value.Stderr = new bytes_BufferжWriter(Ꮡb);
+        subProcess.Stdout = new bytes_BufferжWriter(Ꮡb);
+        subProcess.Stderr = new bytes_BufferжWriter(Ꮡb);
 
         {
-            var errΔ2 = subProcess.Start(); if (errΔ2 != default!) {
-                Ꮡt.Log(Ꮡb.String());
-                Ꮡt.Fatal(errΔ2);
+            var errΔ2 = subProcess.Start(); if (errΔ2 != nil) {
+                t.Log(Ꮡb.String());
+                t.Fatal(errΔ2);
             }
         }
         var subProcessʗ1 = subProcess;
-        defer(() => (~subProcessʗ1).Process.Kill(), ref ᒐ);
+        defer(ᴛ0 => ᴛ0.Kill(), subProcessʗ1.Process, ref ᒐ);
 
-        net.Conn conn = default!;
-        while (ᐧ) {
-            error errΔ3 = default!;
+        net.Conn conn = default;
+        for (;;) {
+            error errΔ3 = default;
             (conn, errΔ3) = net.Dial(tcpˢ, host);
-            if (errΔ3 == default!) {
+            if (errΔ3 == nil) {
                 break;
             }
             time.Sleep(500 * time.Millisecond);
@@ -103,19 +112,19 @@ public static void TestTCPEcho(ж<testing.T> Ꮡt) {
 
         var payload = slice<byte>("foobar"u8);
         {
-            var (_, errΔ4) = conn.Write(payload); if (errΔ4 != default!) {
-                Ꮡt.Fatal(errΔ4);
+            var (_, errΔ4) = conn.Write(payload); if (errΔ4 != nil) {
+                t.Fatal(errΔ4);
             }
         }
         array<byte> buf = new(256);
         var (n, err) = conn.Read(buf[..]);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         if (((sstring)(buf.slice(0, n))) != ((sstring)payload)) {
-            Ꮡt.Error(unexpectedPayloadˢ);
-            Ꮡt.Logf("expect: %d bytes (%v)"u8, len(payload), payload);
-            Ꮡt.Logf("actual: %d bytes (%v)"u8, n, buf.slice(0, n));
+            t.Error(unexpectedPayloadˢ);
+            t.Logf("expect: %d bytes (%v)", len(payload), payload);
+            t.Logf("actual: %d bytes (%v)", n, buf.slice(0, n));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

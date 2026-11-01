@@ -9,7 +9,7 @@ using Δruntime = runtime_package;
 using sort = sort_package;
 using strings = strings_package;
 using testing = testing_package;
-using static go.unicode_package;
+using static unicode_package;
 using Δunicode = unicode_package;
 
 partial class unicode_test_package {

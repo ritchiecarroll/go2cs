@@ -3,10 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using errors = go.errors_package;
+using errors = errors_package;
 using reflect = reflect_package;
 using testing = testing_package;
-using go;
 
 partial class errors_test_package {
 
@@ -55,7 +54,7 @@ public static void TestJoin(ж<testing.T> t) {
         want: slice<error>([merr])
     )
     ])) {
-        var got = errors.Join(test.errs.ꓸꓸꓸ)._<is_typeᴛ1>().Unwrap();
+        var got = errors.Join(test.errs.ꓸꓸꓸ)._<ExampleJoin_type>().Unwrap();
         if (!reflect.DeepEqual(got, test.want)) {
             t.Errorf("Join(%v) = %v; want %v", test.errs, got, test.want);
         }

@@ -3,13 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using errors = go.errors_package;
+using errors = errors_package;
 using fmt = fmt_package;
 using fs = io.fs_package;
 using os = os_package;
 using reflect = reflect_package;
 using testing = testing_package;
-using go;
 using io;
 
 partial class errors_test_package {

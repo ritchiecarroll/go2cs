@@ -109,9 +109,7 @@
        can leak in because it is never listed. -->
   <ItemGroup>
     <Compile Include="go2cs_test_host.cs" />
-    <Compile Include="godebug.cs" />
     <Compile Include="godebug_test.cs" />
-    <Compile Include="package_info_external_test.cs" />
     <Compile Include="package_test_info.cs" />
   </ItemGroup>
 
@@ -125,7 +123,6 @@
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/bisect/internal.bisect.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/godebugs/internal.godebugs.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
@@ -134,10 +131,9 @@
     <ProjectReference Include="$(go2csPath)core/runtime/metrics/runtime.metrics.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
-    <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
-    <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
+    <ProjectReference Include="internal.godebug.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

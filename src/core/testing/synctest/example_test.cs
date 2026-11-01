@@ -13,7 +13,8 @@ using strings = strings_package;
 using testing = testing_package;
 using synctest = go.testing.synctest_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using go.testing;
 

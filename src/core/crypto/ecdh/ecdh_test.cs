@@ -37,14 +37,14 @@ partial class ecdh_test_package {
 partial interface _ᴛ1 /*dyn*/ {
     bool Equal(cryptoꓸPublicKey x);
 }
-internal static _ᴛ1 _ᴛ1ʗ = new go.crypto.ecdh_package.ΔPublicKeyж_ᴛ1(Ꮡ(new go.crypto.ecdh_package.ΔPublicKey()));
+internal static _ᴛ1 _ᴛ1ʗ = new ecdh_ΔPublicKeyж_ᴛ1(Ꮡ(new ecdhꓸPublicKey()));
 
 
 partial interface _ᴛ2 /*dyn*/ {
     cryptoꓸPublicKey Public();
     bool Equal(cryptoꓸPrivateKey x);
 }
-internal static _ᴛ2 _ᴛ2ʗ = new ecdh.PrivateKeyж_ᴛ2(Ꮡ(new ecdh.PrivateKey()));
+internal static _ᴛ2 _ᴛ2ʗ = new ecdh_PrivateKeyж_ᴛ2(Ꮡ(new ecdh.PrivateKey()));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object encodedAndDecodedPublicˢ = (@string)"encoded and decoded public keys are different"u8;

@@ -4,7 +4,7 @@
 namespace go;
 
 using testing = testing_package;
-using static go.unicode_package;
+using static unicode_package;
 using Δunicode = unicode_package;
 
 partial class unicode_test_package {

@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using errors = go.errors_package;
+using errors = errors_package;
 using testing = testing_package;
-using System.Runtime.CompilerServices;
-using go;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 
 partial class errors_test_package {
 
