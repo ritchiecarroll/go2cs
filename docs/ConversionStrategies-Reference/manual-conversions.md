@@ -3842,6 +3842,24 @@ tier-0, tiering off and Tier1; #51's, which drops the u8 literals that kept `e` 
 false with tiering off only. The frames report IL 0 (native 810, 1127, 1446); the region [0,7) holds only the E
 constructor's newobj; line() is called 9 times and Info twice. At the report, S3's and S4's line() and S5's Info
 read 47. -->
+A second, at tier-0 only: where a slice literal's elements are calls of one callee, its lowering (`newarr`, then
+`dup` and `stelem` per element) keeps the array on the evaluation stack across the whole initializer. The stack is
+never empty between the elements, so the initializer is one region holding every element's call, every element's
+frame reports the same offset, and the rule settles nothing: each element keeps the literal's first line. Tiering off
+reads the same either way, so the configuration of record is unchanged. It shows in `CallerLineMultiLine`'s
+`GO2CS_CALLER_LINE_ALL_SHAPES` row, pkgSlice [60 60 60 60] against Go's [60 61 61 62], and in runtime `TestLineNumber`
+at the tiered default, where sliceLit[1], [2] and [3] read sliceLit[0]'s line.<!-- seat #54 x #55, COORD's ruling
+2026-10-31 (ledger 7191e7bd4c): not in-hop, a disclosure; post-hop, R scouts a per-element spill lowering that keeps
+#54's tiering-off gain. Measured windows Release, one axis: the same emission and build, golib's builtin.cs and
+SliceLiteral.cs at master 8b993b7b1d (#54, newarr/dup/stelem) against 2334e8949c (before #54, an InlineArray element
+ref stored with stind, the stack empty after each element), two readings per config, no spread. pkgSlice, read from
+the static constructor's frames by a probe in line() only: #54's frames all report IL 36 (native 213, 252, 294, 336),
+its calls of line() sit at 44, 52, 60 and 68, and its boundaries are [0,36,84,106,166], so [36,84) holds four calls
+and the settle returns -1; before #54 the boundaries were [0,36,44,58,72,86,100,...], the frames reported 44, 58, 72
+and 86, and the settle named 52, 66, 80 and 94, Go's lines. Tiering off, both arms' frames report IL 36: [60 60 60 60]
+either way. TestLineNumber at the tiered default: before #54 12 asserts fail and every sliceLit reads Go's line; at
+#54 11 fail, with sliceLit[1..3] at firstLine+24 (want +25, +25, +26), while compLit[0].lineA, compLit[0].lineB,
+compLit[1].lineA and compLit[2].lineB go wrong to right. Tiering off, #54 takes the row from 17 to the disclosed 12. -->
 
 **The two test-variant suffixes are NOT symmetric — `_internal_test` is stripped, `_test` is kept.**
 `goFrameName` derives the reported import path from the emitted namespace plus<!-- history: 2026-08-26 -->
