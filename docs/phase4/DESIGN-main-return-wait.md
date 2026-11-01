@@ -83,14 +83,63 @@ the batteries report.
 
 ## 7. Results
 
-To be recorded as the i9, R-WSL and C1 legs report. The windows tables land with the seat's DONE; one attempt is
-recorded here now, because its commit and its revert are both on this branch.
+Windows, on the i9 (i9-13900K, .NET 10.0.14, go1.26.10). Every run went through `start /affinity 0xF`, with the
+loads pinned to the same 4 CPUs:
+- n8: 8 spinners;
+- n32: 32 spinners;
+- hi: 8 spinners at above-normal priority.
 
-**The exit hold: tried, measured, reverted** (2026-11-01). Go's `exit` stops every thread at once; the CLR keeps
+Raw logs are on the i9's branches `claude/i9-mrw-r0` to `-r4`. Counts are of loaded runs only. In R0 the first
+spinner ran out before some arms did, and the i9 corrected the denominators. The linux and macOS legs report after this
+record.
+
+**GoroutinePanicAfterDeferredDone: runs that LOST the panic report (exit 0, empty stderr).**
+
+| | idle | n8 | n32 | hi |
+|:--|:--|:--|:--|:--|
+| R0, base, JIT | 0/100 | 1/100 | 2/211 | 2/45 |
+| R0, base, AOT | 0/50 | 0/400 | 0/219 | 0/121 |
+| R1, tip, JIT | 0/100 | 0/100 | 0/400 | 0/100 |
+| R1, tip, AOT | 0/100 | 0/100 | 0/100 | 0/100 |
+
+AOT never lost. Its panic path is precompiled and reaches the report in about a millisecond, so even the old 20 ms
+wall bound held. The JIT panicker compiles the path of its own first throw, and that is the arm this change fixed.
+
+**GoroutineRecoveringWhenMainReturns: runs that printed "recovered" after main returned** (every run exits 0).
+
+| shape | arm | n32 | hi |
+|:--|:--|:--|:--|
+| old (sleep 500 ms from wg.Done) | Go | 5/100 | 2/100 |
+| old | JIT | 3/100 | 7/100 |
+| old | AOT | 3/50 | 27/50 |
+| new (AfterFunc at main's return) | Go | 3/100 | 1/100 |
+| new | JIT | 0/100 | 5/100 |
+| new | AOT | 2/50 | 13/50 |
+| new + GOMAXPROCS(1) | Go | 0/400 | 0/100 |
+| new + GOMAXPROCS(1) | JIT | 0/100 | 3/100 |
+| new + GOMAXPROCS(1) | AOT | 5/50 | 16/50 |
+
+Idle and n8 read 0 in every arm. GOMAXPROCS(1) makes Go's side deterministic: 0 of 700 loaded runs. golib's
+GOMAXPROCS only records the setting, so the converted side does not move. The trace arm, below, says why it prints
+late.
+
+**The controls (R3).**
+- "Always runnable, no budget" printed "recovered" in 20/20 runs idle and 20/20 at n32 (held to the guard). The
+  regression shows.
+- "Always blocked" lost the report in 4/100 runs at hi, against the tip's 0/100, so it regressed there. At n32 it lost
+  0/100, then 1/400 in the re-read. Above-normal priority is where this control has power on that box.
+
+**P6, the windows trampoline's mark.** A SyscallN(GetCurrentProcessId) loop, 15 interleaved rounds, against the A/A
+band:
+- JIT: base 8.66 ns, tip 8.49 ns, ratio 0.992, inside the band;
+- AOT: base 9.41 ns, tip 9.66 ns, ratio 1.034, inside the band.
+
+**The exit hold: tried, measured, reverted** (2026-11-01). Go's `exit` stops every thread at once, while the CLR keeps
 goroutine threads running through `ProcessExit` and its own shutdown. The hold (`438c43dbab`) held a counted
-goroutine at its first system call after the exit was decided, for the hang guard, so a recovering deferred call's
-late print could not reach the OS. Its landing gate was the recovering test's late prints under Native AOT, 5/100 or
-fewer at hi. On the i9 (`claude/i9-mrw-r3`, `560e4aa82f`), the hold and its base ran interleaved, 100 runs per arm:
+goroutine at its first system call after the exit was decided, for the hang guard, so that a recovering deferred
+call's late print could not reach the OS. Its landing gate was the recovering test's late prints under Native AOT:
+5/100 or fewer at hi. On the i9 (`claude/i9-mrw-r3`, `560e4aa82f`), the hold and its base ran interleaved, 100 runs
+per arm:
 
 | AOT, late "recovered" | n32 | hi |
 |:--|:--|:--|
@@ -98,7 +147,69 @@ fewer at hi. On the i9 (`claude/i9-mrw-r3`, `560e4aa82f`), the hold and its base
 | with the hold | 10/100 | 25/100 |
 | Go | 0/100 | 0/100 |
 
-The hold did not move it, so the late print does not leave through the post-exit system-call path, and the hold was
-reverted on top (`12d5e3eb91`). It did not touch reporting: `GoroutinePanicAfterDeferredDone` exited 2 with the
-report in 100/100 at n32 and hi. COORD's next arm traces which release of the wait lets the print through
-(`kit/make-trace.sh`).
+The hold did not move the rate, so the late print does not leave through the post-exit system-call path. The hold was
+reverted on top (`12d5e3eb91`). It did not touch reporting: `GoroutinePanicAfterDeferredDone` exited 2 with the report
+in 100/100 runs at n32 and at hi.
+
+**The trace arm: which release lets the print through** (`claude/i9-mrw-r4`, `51067a72d4`). The build was
+`kit/make-trace.sh` on a checkout at `8914486591`, one Native AOT publish. Each load ran 100 traced and 100 untraced
+runs of that one binary, alternated.
+
+| AOT, late "recovered" | traced | untraced |
+|:--|:--|:--|
+| n32 | 11/100 | 11/100 |
+| hi | 45/100 | 40/100 |
+
+The two halves agree, so tracing does not move the race. The hi session ran hotter than r3's base of 28/100: hi has
+read between 25 and 45 per 100 across sessions on that box. The traces show:
+
+- **Main is starved for whole seconds at every step of its way out, late or not.** The goroutine parks a median 1.1 to
+  1.3 s before main's exit handler starts (0.3 ms in the i9's idle smoke run). In the three on-time runs shown, the
+  wait's 1 ms confirmation stretched to between 120 ms and 1.4 s.
+- **In 14 of the 45 late hi runs, the wait released as designed before the print, and main lost the CPU afterwards.**
+  Each of these releases names `blocked=True seq=1`: the original park. A counted system call moves the sequence
+  (`Goroutine.EnterCountedBlock`), so these samples were taken before the print. After the release, main's few
+  microseconds of work took seconds. In one run, from the handler's start: release at +180 ms, print at +1.26 s, exit
+  decision at +3.0 s. The i9 tables split these 14 runs by where the print falls against the release's write: 7
+  before the wait's derived start, 4 inside it and 3 after it. That start is derived from the write, so it is late by
+  however long main waited to write.
+- **In the other 38 late runs (27 at hi, all 11 at n32), the wait was still running when the goroutine printed and
+  ended.** By then the timer had readied it. Holding main for a runnable goroutine is Go's own rule.
+- At hi, 2 runs printed before the exit handler began, and 2 printed after it began but before the wait looked.
+
+**No release rule tightens this.** The release is not slow; main's thread is. Go avoids the race because, under one
+P, the timer cannot run while main holds the P. golib's goroutines and timers are OS threads, and its GOMAXPROCS is
+recorded, not modeled. An early release for a parked goroutine would not help either: the 14 releases above were
+already early, and main still waited seconds for the CPU after each. Of the late runs, such a rule could reach only
+the 38 wait-exit runs, and only those whose first sample saw the park; the trace does not log that sample. It would
+also drop a goroutine that a runnable peer is about to wake, which Go's 1000 turns still honor. The late print is
+therefore a watched divergence of the load, not a defect of the wait. The wait answers "can it run?" correctly in
+every traced run.
+
+**The predictions, scored** (posted before code; the windows legs):
+- P1, R0 at base: exit 0 in 2 to 10 per 100 runs under n32 and hi, 0 idle. Partly hit. JIT read about 1 per 100 at
+  n32 and 4 at hi. AOT read 0 everywhere, a miss: its precompiled panic path beats even the old bound.
+- P2, R1 at the tip: 0 losses in every arm. Hit on windows, JIT and AOT. linux and macOS are pending.
+- P3, R2: the recovering test never prints "recovered". Hit idle. Missed under load: Go needed GOMAXPROCS(1) to read
+  0, and the converted side prints late (the trace arm).
+- P4, the R3 controls. "Always runnable" hit, 20/20. "Always blocked" hit at hi (4/100 against R0's 2/45), and had no
+  power at n32.
+- P5, GolibTests: hit, except the green twin's first call in a JIT process, at 21 ms against < 20 ms. Later calls take
+  1.2 ms.
+- P6: the tip's delta is inside the A/A band, a hit. The base level of 25 to 60 ns missed: it is about 9 ns.
+- P7, the census: hit, 0 unclassified.
+- P8, the gates: hit.
+- The trace arm (B at least 70% of late runs, A the rest, C about 0): the counts hit, at 89% at hi, 100% at n32 and C
+  0. The mechanism missed. The prediction said the wait would be starved partway through its confirmation and then
+  hold for the woken goroutine. In 14 of the 45 hi runs the wait had already released correctly, and main was starved
+  after the release. 3 runs printed between the release and the exit decision, a window the prediction had not named.
+
+**G-LAPTOP gates.** At this record, golib, the generator, the converter and GolibTests are identical to
+`ba6550b337` and `971f018d7e`.
+- GolibTests Debug and Release: rc 0 at `ba6550b337`. GenTests: rc 0.
+- `go test ./...`: green at the tip.
+- Both solutions build at `971f018d7e`.
+- CNR: 0 tracked changes at `971f018d7e`.
+- BehavioralRunner (full): rc 0 at `971f018d7e`, and again at `438c43dbab` with the new test shape. The two changed
+  tests pass at the tip.
+- The first use of the wait in a JIT process costs about 21 ms, the JIT of its slow path. Later uses take 1.2 ms.
