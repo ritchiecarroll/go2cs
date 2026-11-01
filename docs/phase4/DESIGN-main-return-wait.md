@@ -83,4 +83,22 @@ the batteries report.
 
 ## 7. Results
 
-To be recorded as the i9, R-WSL and C1 legs report.
+To be recorded as the i9, R-WSL and C1 legs report. The windows tables land with the seat's DONE; one attempt is
+recorded here now, because its commit and its revert are both on this branch.
+
+**The exit hold: tried, measured, reverted** (2026-11-01). Go's `exit` stops every thread at once; the CLR keeps
+goroutine threads running through `ProcessExit` and its own shutdown. The hold (`438c43dbab`) held a counted
+goroutine at its first system call after the exit was decided, for the hang guard, so a recovering deferred call's
+late print could not reach the OS. Its landing gate was the recovering test's late prints under Native AOT, 5/100 or
+fewer at hi. On the i9 (`claude/i9-mrw-r3`, `560e4aa82f`), the hold and its base ran interleaved, 100 runs per arm:
+
+| AOT, late "recovered" | n32 | hi |
+|:--|:--|:--|
+| base `5d017630ae` | 11/100 | 28/100 |
+| with the hold | 10/100 | 25/100 |
+| Go | 0/100 | 0/100 |
+
+The hold did not move it, so the late print does not leave through the post-exit system-call path, and the hold was
+reverted on top (`12d5e3eb91`). It did not touch reporting: `GoroutinePanicAfterDeferredDone` exited 2 with the
+report in 100/100 at n32 and hi. COORD's next arm traces which release of the wait lets the print through
+(`kit/make-trace.sh`).
