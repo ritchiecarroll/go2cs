@@ -34,6 +34,12 @@ costs about 0.5 ns more than a field read on the JIT, and about 0.7 to 0.9 ns mo
 read through a same-named property the JIT and Native AOT inline; C# that uses one compiles unchanged, but an
 assembly built against an earlier package must be rebuilt.
 
+**Install go2cs as a .NET tool, with no Go installed.** `dotnet tool install -g go2cs` installs the converter, a
+native executable for Windows, Linux and macOS on x64 and Arm64. The first conversion that needs Go downloads the
+Go release go2cs converts with, checks it against hashes built into go2cs, and keeps it in your user cache folder.
+`go2cs toolchain` installs that Go ahead of time, or from a file on a machine with no network access.
+[The go2cs dotnet tool](DotnetTool.md) has the details. Building the converter from source still works as before.
+
 **Converted code reads closer to the Go.** Converted C# is meant to read like the Go it came from, and this release
 removes most of the remaining wrapping:
 
