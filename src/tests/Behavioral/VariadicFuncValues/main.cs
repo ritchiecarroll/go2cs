@@ -19,15 +19,15 @@ internal static @string gather(@string prefix, params ꓸꓸꓸnint valsʗp) {
 }
 
 internal static void apply(Funcꓸꓸꓸ<@string, nint, @string> f) {
-    fmt.Println(f("loose"u8, 1, 2, 3));
-    fmt.Println(f("empty"u8));
+    fmt.Println(f("loose", 1, 2, 3));
+    fmt.Println(f("empty"));
 
     var nums = slice<nint>([4, 5]);
     fmt.Println(f("spread"u8, nums.ꓸꓸꓸ));
 }
 
 internal static void report(Actionꓸꓸꓸ<@string, any> emit) {
-    emit("%s=%d", (@string)"x"u8, (nint)7);
+    emit("%s=%d", (@string)"x", (nint)7);
     emit("bare");
 }
 
@@ -77,7 +77,7 @@ internal static void Main() {
     }
 
     f = gather;
-    fmt.Println(f("var"u8, 10));
+    fmt.Println(f("var", 10));
 
     report((@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();

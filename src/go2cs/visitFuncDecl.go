@@ -1086,11 +1086,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				// though Go never touches the pointee (syscall's `writeFile(…, overlapped *Overlapped)`
 				// called with a nil overlapped, used only as `unsafe.Pointer(overlapped)`). Skipping an
 				// unreferenced alias is behavior-preserving and removes the spurious nil deref. The
-				// scan errs toward KEEPING the alias — a coincidental match in a field selector or
-				// string — so a genuinely live value alias is never dropped (no CS0103). Comments are
-				// not code: the scan reads the body without them, so `-comments` never changes it.
+				// scan errs toward KEEPING the alias — a coincidental match in a field selector — so a
+				// genuinely live value alias is never dropped (no CS0103). Comments and string literals
+				// are not code: the scan reads the body without them, so `-comments` never changes it,
+				// and neither does a plain literal's message spelling the parameter's name (seat #51).
 				if bodyCode == "" {
-					bodyCode = csharpCodeWithoutComments(bodyText)
+					bodyCode = csharpCodeWithoutCommentsOrLiterals(bodyText)
 				}
 
 				if !bodyReferencesIdentAsValue(bodyCode, getSanitizedIdentifier(analyzedName)) {
@@ -1740,6 +1741,18 @@ func (v *Visitor) isDerefdPointerParamIdent(ident *ast.Ident) bool {
 // ("…", backslash escapes), verbatim strings (@"…", $@"…", @$"…", doubled-quote escapes), raw strings
 // ("""…""", closed by as many quotes as opened them) and character literals.
 func csharpCodeWithoutComments(text string) string {
+	return csharpCode(text, false)
+}
+
+// csharpCodeWithoutCommentsOrLiterals is csharpCodeWithoutComments with every string and character literal's
+// contents removed too (`""`, `''` stand in for them): a literal's words are never code, and under plain literals
+// (seat #51) a message spells words a hoisted field's name had hidden. An interpolated string ($"…", $@"…", @$"…")
+// keeps its contents, whose holes are code.
+func csharpCodeWithoutCommentsOrLiterals(text string) string {
+	return csharpCode(text, true)
+}
+
+func csharpCode(text string, blankLiterals bool) string {
 	var code strings.Builder
 
 	for index := 0; index < len(text); {
@@ -1801,6 +1814,20 @@ func csharpCodeWithoutComments(text string) string {
 			}
 
 			end = min(end+1, len(text))
+		}
+
+		// A literal opens with its quote (or the verbatim `@`) and spans more than that one byte; an interpolated
+		// string ($"…", whose `$` the previous byte wrote, $@"…" or @$"…") keeps its contents.
+		if blankLiterals && end > index+1 && strings.ContainsRune(`"'@`, rune(remaining[0])) &&
+			!strings.HasPrefix(remaining, `@$`) && (index == 0 || text[index-1] != '$') {
+			if remaining[0] == '\'' {
+				code.WriteString(`''`)
+			} else {
+				code.WriteString(`""`)
+			}
+
+			index = end
+			continue
 		}
 
 		code.WriteString(text[index:end])

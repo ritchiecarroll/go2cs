@@ -98,7 +98,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Pointer-to-interface assignment through selector fields](nil-and-zero-values.md#pointer-to-interface-assignment-through-selector-fields)
 - **[Empty Interface (`any`)](empty-interface.md)**
   - [A named empty interface is an alias to `object`, whether it is spelled `any` or `interface{}`](empty-interface.md#a-named-empty-interface-is-an-alias-to-object-whether-it-is-spelled-any-or-interface)
-  - [A string literal in an `any` slot boxes through `@string` — as `(@string)"…"u8`](empty-interface.md#a-string-literal-in-an-any-slot-boxes-through-string--as-stringu8)
+  - [A string literal in an `any` slot boxes through `@string`](empty-interface.md#a-string-literal-in-an-any-slot-boxes-through-string)
   - [An untyped constant boxed as `any` boxes at Go's DEFAULT TYPE](empty-interface.md#an-untyped-constant-boxed-as-any-boxes-at-gos-default-type)
   - [An ELIDED inner literal of `any` elements boxes them as the typed literal does](empty-interface.md#an-elided-inner-literal-of-any-elements-boxes-them-as-the-typed-literal-does)
   - [Comparing two interfaces of one UNCOMPARABLE dynamic type panics, as Go does](empty-interface.md#comparing-two-interfaces-of-one-uncomparable-dynamic-type-panics-as-go-does)

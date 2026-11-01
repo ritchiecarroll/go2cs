@@ -1244,6 +1244,9 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	claimPositionMapTarget(testInfoPath)
 	claimPositionMapTarget(filepath.Join(outputPath, internalTestPackageInfoFileName))
 
+	// The stamp in package_test_info.cs is one decision over every variant this call converts.
+	testAssemblyBoxesBareLiterals = false
+
 	if model.referencesProduction() {
 		// The reference model must NOT declare the production package class: the production
 		// types' single identity is the referenced production assembly, and a local partial
@@ -3112,6 +3115,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	collectHoistedLiterals(prodEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform), nil, true)
 	productionHoistSeed := packageHoistNames
 	collectHoistedLiterals(allEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform), productionHoistSeed, false)
+	testAssemblyBoxesBareLiterals = testAssemblyBoxesBareLiterals || packageBoxesBareLiterals
 
 	// Find test-file package-level var initializers whose Go dependency order C#'s
 	// static-field-initializer order cannot reproduce — the same pass processConversion runs

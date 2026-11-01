@@ -87,7 +87,7 @@ internal static void Main() {
     var q = newDNS("z");
     d.permitted = q;
     var (t1, ok1) = q.query("z");
-    var (t2, ok2) = d.permitted.query("z"u8);
+    var (t2, ok2) = d.permitted.query((@string)"z");
     fmt.Println(t1, ok1, t2, ok2);
 
     any x = d.permitted;

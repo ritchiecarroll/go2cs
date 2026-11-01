@@ -247,10 +247,32 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
     {
         IMethodSymbol[] group = [.. semanticModel.GetMemberGroup(invocation.Expression, cancellationToken).OfType<IMethodSymbol>()];
 
+        // An sstring twin's group holds two members, the sstring body member and the @string forwarder under
+        // [OverloadResolutionPriority(-1)]; C# binds the higher priority, so that member is the binding.
+        if (group.Length > 1 && group.All(method => SymbolEqualityComparer.Default.Equals(method.ContainingType, group[0].ContainingType)))
+        {
+            int top = group.Max(Priority);
+            group = [.. group.Where(method => Priority(method) == top)];
+        }
+
         if (group is not [{ } only] || only.IsGenericMethod)
             return null;
 
         return only.ReducedFrom is { } definition ? (definition, 1) : (only, 0);
+    }
+
+    // A method's [OverloadResolutionPriority] (0 when it has none), read from the attribute: Roslyn 4.14 does not
+    // expose it on IMethodSymbol.
+    private static int Priority(IMethodSymbol method)
+    {
+        foreach (AttributeData attribute in (method.ReducedFrom ?? method).GetAttributes())
+        {
+            if (attribute.AttributeClass?.ToDisplayString() == "System.Runtime.CompilerServices.OverloadResolutionPriorityAttribute" &&
+                attribute.ConstructorArguments is [{ Value: int priority }])
+                return priority;
+        }
+
+        return 0;
     }
 
     // The boxed-literal slots of a call that does not bind, by argument position: a C# string literal (positional, no

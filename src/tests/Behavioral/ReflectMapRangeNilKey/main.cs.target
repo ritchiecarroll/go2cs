@@ -8,7 +8,7 @@ partial class main_package {
 partial struct namedAny /*map[any, nint]*/;
 
 internal static void Main() {
-    var anyKeys = new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2, [(nint)7] = 3};
+    var anyKeys = new map<any, nint>{[default] = 1, [(@string)"b"] = 2, [(nint)7] = 3};
     nint iface = 0;
     nint nils = 0;
     nint invalid = 0;
@@ -32,7 +32,7 @@ internal static void Main() {
     }
     fmt.Println("any:", iface, nils, invalid, sum, reflect.ValueOf(anyKeys).Len());
 
-    var named = new namedAny(new map<any, nint>{[default] = 4, [(@string)"b"u8] = 5});
+    var named = new namedAny(new map<any, nint>{[default] = 4, [(@string)"b"] = 5});
     (iface, nils, invalid, sum) = (0, 0, 0, 0);
     iter = reflect.ValueOf(named).MapRange();
     while (iter.Next()) {

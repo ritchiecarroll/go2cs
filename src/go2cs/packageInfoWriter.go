@@ -1037,7 +1037,12 @@ func applyHoistedLiteralsStamp(packageInfoLines []string, packageInfoFileName st
 		}
 	}
 
-	if base := filepath.Base(packageInfoFileName); !packageHoistsLiterals || base != PackageInfoFileName && base != testPackageInfoFileName {
+	// A hoist-mode package that boxes a bare literal in an any slot (the hybrid's degenerate-slug fallback,
+	// hoistedLiteralOperations.go) needs go2cs-gen's interceptor, which the stamp would turn off.
+	// The test assembly's info file answers for every variant it compiles (testAssemblyBoxesBareLiterals).
+	base := filepath.Base(packageInfoFileName)
+
+	if !packageHoistsLiterals || packageBoxesBareLiterals || base == testPackageInfoFileName && testAssemblyBoxesBareLiterals || base != PackageInfoFileName && base != testPackageInfoFileName {
 		return kept
 	}
 

@@ -127,6 +127,73 @@ func main() {
 	}
 }
 
+// A string literal never decides emitted code either. Plain literals (seat #51) put a message's words into the body
+// text, so runtime's lfnodeValidate(node *lfnode), which uses node only as a pointer, gained a dead dereferencing
+// alias and lost its Go name because its throw reads "lfstack node allocated from the heap": a hoisted field's name
+// had hidden the word. The same in crypto/tls's decodeInnerClientHello ("outer"), go/types' suspendedCall ("call")
+// and runtime's heapSetTypeNoHeaderStub ("span").
+func TestPointerParamAliasIgnoresStringLiterals(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	lines := convertWithComments(t, `package main
+
+import "fmt"
+
+func check(p *int) bool {
+	if p == nil {
+		fmt.Println("p is nil, so p.field is never read")
+		println("p:", "p")
+		return false
+	}
+	return true
+}
+
+func main() {
+	x := 1
+	fmt.Println(check(&x))
+}
+`)
+
+	found := false
+
+	for i, line := range lines {
+		if !strings.Contains(line, "static bool check(") {
+			continue
+		}
+
+		found = true
+
+		if !strings.Contains(line, "(ж<nint> p)") {
+			t.Errorf("check's p lost its Go name: %q", strings.TrimSpace(line))
+		}
+
+		if i+1 < len(lines) && strings.Contains(lines[i+1], "ref var p") {
+			t.Errorf("check's p gets a dereferencing alias that only its string literals name: %q", strings.TrimSpace(lines[i+1]))
+		}
+	}
+
+	if !found {
+		t.Fatalf("no check method emitted:\n%s", strings.Join(lines, "\n"))
+	}
+}
+
+// csharpCodeWithoutCommentsOrLiterals also empties every non-interpolated literal; an interpolated string keeps its
+// holes, which are code.
+func TestCSharpCodeWithoutCommentsOrLiterals(t *testing.T) {
+	for _, test := range []struct{ text, want string }{
+		{`f("p is nil"); // p`, `f("");  `},
+		{`c = 'p'; d = p;`, `c = ''; d = p;`},
+		{`s = @"p\" + p;`, `s = "" + p;`},
+		{"s = \"\"\"\np\n\"\"\" + p;", `s = "" + p;`},
+		{`s = (@string)"p"u8;`, `s = (@string)""u8;`},
+		{`s = $"{p}"; t = $@"{p}"; u = @$"{p}";`, `s = $"{p}"; t = $@"{p}"; u = @$"{p}";`},
+		{`@string @base = "";`, `@string @base = "";`},
+	} {
+		if got := csharpCodeWithoutCommentsOrLiterals(test.text); got != test.want {
+			t.Errorf("csharpCodeWithoutCommentsOrLiterals(%q) = %q, want %q", test.text, got, test.want)
+		}
+	}
+}
+
 // csharpCodeWithoutComments removes comments and nothing else: a `//` or `/*` inside each literal form
 // the converter emits is code, so a value use after it is still found.
 func TestCSharpCodeWithoutComments(t *testing.T) {

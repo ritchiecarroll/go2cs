@@ -99,7 +99,7 @@ internal static void Main() {
 
     fmt.Println("Total:", total);
 
-    foreach (var (iΔ3, c) in (@string)"go"u8) {
+    foreach (var (iΔ3, c) in (@string)"go") {
         fmt.Println(iΔ3, c);
     }
 

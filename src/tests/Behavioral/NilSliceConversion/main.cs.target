@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    var s = append(slice<@string>(default), "x"u8, "y");
+    var s = append(slice<@string>(default), (@string)"x", (@string)"y");
     fmt.Println(len(s), cap(s), s == nil);
 
     slice<byte> b = default;

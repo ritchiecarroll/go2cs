@@ -14,7 +14,7 @@ partial struct S {
 }
 
 public static ΔKind Kind(this S _) {
-    return (@string)"b"u8;
+    return (@string)"b";
 }
 
 } // end foo_package

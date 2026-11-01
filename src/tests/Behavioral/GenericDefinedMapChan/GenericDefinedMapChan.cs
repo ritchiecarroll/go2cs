@@ -145,7 +145,7 @@ internal static void Main() {
     fmt.Println("Set[int] after Reset:", len(ints), ints == nil);
 
     var words = NewSet<@string>((@string)"go", (@string)"cs");
-    fmt.Println("Set[string]:", len(words), words.Has("go"u8), sortedStrings(words.Keys()));
+    fmt.Println("Set[string]:", len(words), words.Has((@string)"go"), sortedStrings(words.Keys()));
 
     var bag = new Bag<nint>(2);
     bag.Put(7);
@@ -154,14 +154,14 @@ internal static void Main() {
     fmt.Println("Bag[int]:", len(bag), sortedInts(bag.Keys()));
 
     Bag<@string> names = new Bag<@string>(new map<@string, EmptyStruct>{["a"] = new()});
-    names.Put("b"u8);
+    names.Put((@string)"b");
     fmt.Println("Bag[string]:", sortedStrings(names.Keys()));
 
     Index<@string, nint> ages = default;
-    ages.Put("x"u8, 1);
-    ages.Put("y"u8, 2);
-    var (age, ok) = ages.Get("y"u8);
-    var (_, missing) = ages.Get("z"u8);
+    ages.Put((@string)"x", 1);
+    ages.Put((@string)"y", 2);
+    var (age, ok) = ages.Get((@string)"y");
+    var (_, missing) = ages.Get((@string)"z");
     fmt.Println("Index[string, int]:", age, ok, missing, sortedStrings(ages.Keys()));
 
     var labels = new Index<nint, @string>(new map<nint, @string>{[1] = "one"});
@@ -175,7 +175,7 @@ internal static void Main() {
     fmt.Println("Pipe[int]:", cap(pipe), len(pipe), pipe.Drain());
 
     var texts = new Pipe<@string>(1);
-    texts.Send("hi"u8);
+    texts.Send((@string)"hi");
     fmt.Println("Pipe[string]:", texts.Drain());
 
     var stack = new Stack<nint>(0, 4);
@@ -184,7 +184,7 @@ internal static void Main() {
     fmt.Println("Stack[int]:", len(stack), cap(stack), stack.Peek());
 
     Stack<@string> tags = default;
-    tags.Push("t"u8);
+    tags.Push((@string)"t");
     fmt.Println("Stack[string]:", tags.Peek(), len(tags));
 }
 

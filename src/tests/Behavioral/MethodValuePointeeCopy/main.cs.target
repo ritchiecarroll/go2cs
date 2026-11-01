@@ -108,7 +108,7 @@ internal static void Main() {
 
     fmt.Println("param   ", paramV());
 
-    var s9 = slice<ж<frame>>([Ꮡ(new frame(Name: "h"u8))]);
+    var s9 = slice<ж<frame>>([Ꮡ(new frame(Name: "h"))]);
     var recvʗ9 = ~s9[0];
     
     var s9ʗ1 = s9;

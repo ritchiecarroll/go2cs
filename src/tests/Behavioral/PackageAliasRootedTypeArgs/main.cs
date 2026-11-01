@@ -60,6 +60,9 @@ internal static nint Zed(this zed z) {
     return z.v;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object twoˢ = (@string)"two"u8;
+
 internal static void Main() {
     names a = slice<@string>(["x", "y"]);
     sizes b = new sizes{["k"] = 7};
@@ -80,7 +83,7 @@ internal static void Main() {
     nested l = new nested{["z"] = slice<Header>([new(Name: "q", Size: 2)])};
     hmap m = new hmap{["z"] = new(Name: "hm", Size: 3)};
     u8s n = slice<uint8>([7, 8]);
-    ifs o = slice<any>([(nint)1, (@string)"two"u8]);
+    ifs o = slice<any>([(nint)1, twoˢ]);
     direct p = new direct(Name: "dir", Size: 4);
     aliasOfAlias q = slice<Header>([new(Name: "aoa", Size: 5)]);
     anon r = new anon(A: 9);

@@ -164,7 +164,7 @@ var (v, ok) = m[default, ꟷ];
 …
 delete(m, default);
 …
-var lit = new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2};
+var lit = new map<any, nint>{[default] = 1, [(@string)"b"] = 2};
 ```
 
 golib's `map<TKey, TValue>` wraps a `Dictionary<TKey, TValue>`, which **rejects a null key** with
@@ -300,12 +300,12 @@ For source-generated named-map wrappers, the generator parses the `/*map[K, V]*/
 The named arm must also **carry the map type into the key/value slot emission**, exactly as the
 unnamed arm does. Every `MapSource` slot rule in `convKeyValueExpr` is gated on that type: a pointer
 KEY or VALUE boxes to `Ꮡx` rather than aliasing a deref'd value into a `ж<T>` slot (CS0029), an `any`
-key or value slot re-renders a string literal as `(@string)"…"u8` instead of the bare `u8` span (which
+key or value slot re-renders a string literal as `(@string)"…"` instead of the bare `u8` span (which
 has no conversion to an `object` slot — CS1503), an untyped-constant `any` key boxes at Go's default
 type so the store and every lookup agree on the boxed type, and an array-typed key clones into the
 map. Left nil, a *named* map type would silently opt out of all of them, so `type namedAny map[any]int`
-with `namedAny{nil: 1, "b": 2}` would emit `["b"u8] = 2` and fail to compile while the identical
-**unnamed** `map[any]int{nil: 1, "b": 2}` emits `[(@string)"b"u8] = 2`. (Guarded by
+with `namedAny{nil: 1, "b": 2}` would lose the `any` key's cast, while the identical
+**unnamed** `map[any]int{nil: 1, "b": 2}` emits `[(@string)"b"] = 2`. (Guarded by
 the `DeepEqual` behavioral test's named-map block, which is written over `map[any]int` precisely so
 the `any`-slot rule is exercised through a named type.)
 

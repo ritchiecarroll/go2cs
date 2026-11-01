@@ -189,10 +189,10 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
 }; }
 
 internal static void Main() {
-    probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"p="u8]), ["Set"] = slice<any>([(nint)9])});
-    probe("Box[int]", new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="u8]), ["Set"] = slice<any>([(nint)9])});
-    probe("Box[string]", new Box<@string>(v: "s"), Ꮡ(new Box<@string>(v: "t")), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="u8]), ["Set"] = slice<any>([(@string)"u"u8])});
-    probe("Box[[]int]", new Box<slice<nint>>(v: slice<nint>([1])), Ꮡ(new Box<slice<nint>>(v: slice<nint>([2]))), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="u8]), ["Set"] = slice<any>([slice<nint>([3, 4])])});
+    probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"p="]), ["Set"] = slice<any>([(nint)9])});
+    probe("Box[int]", new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="]), ["Set"] = slice<any>([(nint)9])});
+    probe("Box[string]", new Box<@string>(v: "s"), Ꮡ(new Box<@string>(v: "t")), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="]), ["Set"] = slice<any>([(@string)"u"])});
+    probe("Box[[]int]", new Box<slice<nint>>(v: slice<nint>([1])), Ꮡ(new Box<slice<nint>>(v: slice<nint>([2]))), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="]), ["Set"] = slice<any>([slice<nint>([3, 4])])});
     probe("Pair[string,int]", new Pair<@string, nint>(k: "a", v: 1), Ꮡ(new Pair<@string, nint>(k: "b", v: 2)), new map<@string, slice<any>>{["Swap"] = slice<any>([(nint)5])});
     probe("Ord2[age]", new Ord2<age>(a: 1, b: 2), Ꮡ(new Ord2<age>(a: 3, b: 2)), default);
 

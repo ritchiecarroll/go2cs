@@ -51,11 +51,12 @@ type rewrite struct {
 
 // joinRule folds a removed two-line form into the one line the seat emits: when line i matches First and line i+1
 // matches Second, and every Same pair of submatches (First's, Second's) is equal, the two become Fold(first's
-// submatches, second's submatches).
+// submatches, second's submatches). A line matching Between may stand between First and Second; it is kept, after
+// the folded line (PR's StaticBox, whose ref property sits between its declaration and its init method).
 type joinRule struct {
-	First, Second *regexp.Regexp
-	Same          [][2]int
-	Fold          func(f, s []string) string
+	First, Second, Between *regexp.Regexp
+	Same                   [][2]int
+	Fold                   func(f, s []string) string
 }
 
 // blockRule admits a structural rewrite across a FILE: a real diff keeps the unchanged lines between as context, so
@@ -596,6 +597,142 @@ var items = []item{
 		Block:    &blockRule{PerSide: true, NewAnchor: fieldAccessRecordAnchor, Insert: fieldAccessRecordInserts},
 	},
 	{
+		// The standard library emits plain literals (seat #51, owner order 2026-10-30): every spelling of one string
+		// literal -- a hoisted field `helloWorldˢ2`, the u8 span `"hello world"u8`, the boxed `(@string)"…"u8`, the cached
+		// cast `(@string)"…"` and the bare `"…"` -- reads as its slug (plainslug.go, the converter's own), so a pair
+		// explains only when the literal that moved is the one the field stood for, and the rest of the line is equal.
+		// A function-local string const's local copies its value from the const's field (`@string fnAtoi = fnAtoiᶜ;`)
+		// or from the plain literal; the field is named for the const, not the literal, so that line reads the const's
+		// name only. A field the seat keeps may change type (`@string` -> `object`, its value uses gone plain) or drop
+		// its collision ordinal. The pair must lose a field, a const field, a `u8` or an `@string` field declaration,
+		// or an ordinal. The fields and their banner are deleted where they stood, often a hunk of their own above the
+		// function (Standalone), and a pre-boxed field the seat newly claims is inserted the same way. This item is
+		// listed ahead of GD, whose Standalone block reads the same declarations: a file's whole-file rewrite is the
+		// first item whose anchors its diff shows, and in #51's footprint the fields are this seat's.
+		ID: "PL", Seat: "#51", Title: "the standard library emits plain string literals",
+		Measures: []measure{m("PL", "hoisted-field", `static readonly (?:object|@string) \w+ˢ\d* = `)},
+		// A go/defer statement's own argument is GD's (#33), whose canon reads the statement whole, so PL leaves those
+		// lines; a literal nested in another call's argument there is an ordinary argument (goDeferOwnsLine).
+		Canon: []rewrite{
+			{re: rx(`^.*$`), fn: func(line string) string {
+				if goDeferOwnsLine(line) {
+					return line
+				}
+				return canonPlainLiterals(line)
+			}},
+			rw(`static readonly (?:object|@string) ⟪`, "static readonly ⟪T⟫ ⟪"),
+		},
+		Old:  rx(`"u8`),
+		Olds: []*regexp.Regexp{rx(`ˢ`), rx(`ᶜ`), rx(`static readonly @string \w+ˢ`), rx(`ˢ\d`)},
+		// A bare C# literal the base already passed (append's later arguments) gains the cached cast.
+		New: rx(`\(@string\)@?"`),
+		Block: &blockRule{
+			OldAnchor:  rx(`^\s*(?:private|internal) static readonly (?:object|@string) \w+[ˢᶜ]\d* = `),
+			Standalone: true,
+			Moves:      true,
+			Delete: []*regexp.Regexp{
+				rx(`^\s*(?:private|internal) static readonly (?:object|@string) \w+[ˢᶜ]\d* = .*;$`),
+				rx(`^\s*// Hoisted @string literals \(single allocation; Go keeps these in RODATA\)$`),
+				rx(`^\s*// Hoisted Go string constants? \(single allocation; Go keeps (?:it|these) in RODATA\)$`),
+				rx(`^\s*$`),
+			},
+			Insert: []*regexp.Regexp{
+				rx(`^\s*(?:private|internal) static readonly (?:object|@string) \w+ˢ\d* = .*;$`),
+				rx(`^\s*// Hoisted @string literals \(single allocation; Go keeps these in RODATA\)$`),
+				rx(`^\s*$`),
+			},
+		},
+	},
+	{
+		// #51's function-local string const: hoisted, its C# local copies the const's own field, which is named for the
+		// const (`@string fnAtoi = fnAtoiᶜ;`); plain, the local takes the literal (`@string fnAtoi = "Atoi";`), so the
+		// field's name says nothing about the value and the pair reads the local's name only. The removed line must copy
+		// a const field named for its own local; the field's declaration goes with PL's block.
+		ID: "PC", Seat: "#51", Title: "a function-local string const's local takes its plain literal",
+		Canon: []rewrite{rwf(`^(\s*@string )(`+id+`) = (`+id+`ᶜ\d*|(?:\(@string\))?@?"(?:[^"\\]|\\.)*"(?:u8)?);$`, func(sub []string) string {
+			if base := strings.TrimRight(sub[3], "0123456789"); strings.HasSuffix(base, "ᶜ") && strings.TrimSuffix(base, "ᶜ") != sub[2] {
+				return sub[0]
+			}
+			return sub[1] + sub[2] + " = ⟪const⟫;"
+		})},
+		Guard: rx(`^\s*@string ` + id + ` = ` + id + `ᶜ\d*;$`),
+		Old:   rx(`ᶜ`),
+	},
+	{
+		// #51's dead-alias scan reads a body without its string literals (visitFuncDecl.go), so a pointer parameter whose
+		// only "use" was a word in a message keeps its Go name (R5 renames the box) and loses its dead dereferencing
+		// alias, which this item deletes, with the blank line after it.
+		ID: "PA", Seat: "#51", Title: "a dead pointer alias a string literal kept is deleted",
+		Block: &blockRule{
+			PerSide:   true,
+			OldAnchor: rx(`^\s*ref var ` + id + ` = ref Ꮡ` + id + `\.DerefOrNull\(\);$`),
+			Delete:    []*regexp.Regexp{rx(`^\s*ref var ` + id + ` = ref Ꮡ` + id + `\.DerefOrNull\(\);$`), rx(`^\s*$`)},
+		},
+	},
+	{
+		// #51's other package_info.cs line: a package that no longer hoists drops the [GoHoistedLiterals] stamp and the
+		// note above it (packageInfoWriter.go applyHoistedLiteralsStamp). Only deleted, and only there.
+		ID: "PS", Seat: "#51", Title: "the [GoHoistedLiterals] stamp and its note leave package_info.cs",
+		Block: &blockRule{
+			PerSide:   true,
+			File:      rx(`(^|/)package(?:_test)?_info\.cs$`),
+			OldAnchor: rx(`^\[assembly: (?:global::)?(?:go\.)?GoHoistedLiterals\]$`),
+			Delete: []*regexp.Regexp{
+				rx(`^\[assembly: (?:global::)?(?:go\.)?GoHoistedLiterals\]$`),
+				rx(`^// This package's string literals are hoisted to ` + "`static readonly`" + ` fields \(the standard$`),
+				rx(`^// library's form, or -hoist-literals\), so no converted file passes a bare literal for$`),
+				rx(`^// go2cs-gen's literal interceptor to box\. The stamp below tells the generator to skip$`),
+				rx(`^// the assembly\.$`),
+				rx(`^$`),
+			},
+		},
+	},
+	{
+		// #51's initialization-order effect: a package-level var whose initializer reached a hoisted field was relocated
+		// into package_init.cs's ordered static constructor (initOrderOperations.go); plain, it reads no field and is a
+		// field initializer again. Its declaration and its `initᴛX()` method fold into the initialized declaration (the
+		// Join), the method's closing ` }` goes from the initializer's last line, and the static constructor's
+		// `initᴛX();` call is deleted. A package_init.cs left with no relocation is deleted whole (DELETED-FILE). An
+		// address-taken var is a StaticBox (`ᏑX = new StaticBox<T>(default(T));`), whose initializer goes inside the
+		// box's constructor, so its last line closes one parenthesis more.
+		ID: "PR", Seat: "#51", Title: "an initializer that read a hoisted field is no longer relocated",
+		Join: &joinRule{
+			First: rx(`^(?:((?:internal|public|private) static (?:.+) (` + id + `))|((?:internal|public|private) static readonly ж<.+> Ꮡ(` +
+				id + `) = new StaticBox<.+>\()default\(.+\)\));$`),
+			Second:  rx(`^(?:internal|public|private) static void initᴛ(` + id + `)\(\) \{ (` + id + `) = (.*)$`),
+			Between: rx(`^(?:internal|public|private) static ref .+ => ref \(\(StaticBox<.+>\)Ꮡ` + id + `\)\.ValueSlot;$`),
+			Fold: func(f, s []string) string {
+				value := strings.TrimSuffix(s[3], " }")
+				switch {
+				case f[2] != "" && f[2] == s[1] && s[1] == s[2]:
+					return f[1] + " = " + value
+				case f[4] != "" && f[4] == s[1] && s[1] == s[2]:
+					return f[3] + value
+				}
+				return f[0] + "⦃PR: a different var's init method⦄"
+			},
+		},
+		Canon: []rewrite{rw(`^(.*?)\)+;(?: \})?$`, "$1⦃)⦄;")},
+		Guard: rx(`\); \}$|^(?:internal|public|private) static `),
+		Old:   rx(`; \}$`),
+		// In the declaring file a StaticBox's ref property moves below the initializer, which Moves pairs; the init
+		// method anchors the rewrite. The static constructor's call is PI's.
+		Block: &blockRule{
+			OldAnchor:  rx(`^(?:internal|public|private) static void initᴛ` + id + `\(\) \{ `),
+			Standalone: true,
+			Moves:      true,
+		},
+	},
+	{
+		// PR's other half: the ordered static constructor's `initᴛX();` call leaves package_init.cs, and only there.
+		ID: "PI", Seat: "#51", Title: "a relocated initializer's call leaves package_init.cs",
+		Block: &blockRule{
+			PerSide: true,
+			File:    rx(`(^|/)package_init\.cs$`),
+			Delete:  []*regexp.Regexp{rx(`^\s+initᴛ` + id + `\(\);$`)},
+		},
+	},
+	{
 		ID: "GD", Seat: "#33", Title: "a go/defer statement's constant argument moves into the thunk's call",
 		Measures: []measure{m("GD", "hoisted-godefer-arg", `\b(?:goǃ|defer)\(.*\wˢ\d*[,)]`)},
 		// The seat rewrites a go/defer statement's argument list: a constant leaves the capture list for the
@@ -609,14 +746,19 @@ var items = []item{
 		// A statement whose argument is a multi-line func literal ends on a continuation line, which loses the
 		// eager constants it carried: `}), (nint)80, ref ᒐ);` -> `}), ref ᒐ);`. Such a line reduces to its
 		// indentation, and it must lose a LITERAL constant (a named constant there is refused rather than
-		// read, so a line that loses a variable can never classify).
+		// read, so a line that loses a variable can never classify). On the statement's own line a NAMED constant
+		// may move too (seat #51 brought the standard library's go/defer statements in: runtime/trace's
+		// `defer(userRegion, id, regionEndCode, regionType, ref ᒐ)` -> `defer((ᴛ1, ᴛ2) => userRegion(ᴛ1,
+		// regionEndCode, ᴛ2), id, regionType, ref ᒐ)`): every non-constant argument stays an eager `ᴛN` temp, so a bare
+		// identifier inside the thunk's call is a moved constant.
 		Canon: []rewrite{
 			rw(`^(\s*)(goǃ|defer)\((?:(?:\([^()]*\)|ᴛ\d+) => )?(@?[\p{L}_][\p{L}\p{N}_ʗ.]*)\b.*$`, "$1$2 ⦃$3⦄"),
 			rw(`^(\s*)\}[)}]*(?:, .*)?\);$`, "$1⦃go/defer continuation⦄"),
 		},
 		Guard: rx(`^\s*(?:goǃ|defer)\(|^\s*\}[)}]*(?:, .*)?\);$`),
 		Old:   rx(`ᴛ\d|ˢ\d*[,)]|^\s*\}[)}]*, (?:\([\p{L}\p{N}_<>]+\))?(?:-?\d|"|'|true\b|false\b)`),
-		New:   rx(`\(\) => |=> @?[\p{L}_][\p{L}\p{N}_ʗ.]*\((?:[^()]*, )?(?:\([\p{L}\p{N}_<>]+\))?(?:"|'|-?\d|true\b|false\b)`),
+		New: rx(`\(\) => |=> @?[\p{L}_][\p{L}\p{N}_ʗ.]*\((?:[^()]*, )?(?:\([\p{L}\p{N}_<>]+\))?(?:"|'|-?\d|true\b|false\b)` +
+			`|=> @?[\p{L}_][\p{L}\p{N}_ʗ.]*\((?:[^()]*, )?[^ᴛ\s(),"'\d-][\p{L}\p{N}_.]*(?:, |\))`),
 		Block: &blockRule{
 			OldAnchor:  rx(`^\s*(?:private|internal) static readonly (?:object|@string) \w+ˢ\d* = `),
 			Standalone: true,

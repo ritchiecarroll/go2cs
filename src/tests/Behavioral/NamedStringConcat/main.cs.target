@@ -31,7 +31,7 @@ internal static void Main() {
     version acc = @base;
     acc += "-acc"u8;
 
-    version joined = @short + ((version)(@string)"/x"u8);
+    version joined = @short + ((version)(@string)"/x");
 
     var typed = slice<version>([@base + "-t1"u8, @base + "-t2"u8]);
     var elided = slice<slice<version>>([slice<version>([@base + "-e1"u8])]);

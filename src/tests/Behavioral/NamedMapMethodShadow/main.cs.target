@@ -112,7 +112,7 @@ internal static void Main() {
     fmt.Println("pointer Set:", pe["LOW"], len(pe), "nested raw:", penvs["z"]["low"], len(penvs["z"]));
 
     var u = new Uniq<@string>(new map<@string, EmptyStruct>{["a"] = new()});
-    fmt.Println("generic Remove:", u.Remove("a"u8), u.Remove("a"u8), len(u));
+    fmt.Println("generic Remove:", u.Remove((@string)"a"), u.Remove((@string)"a"), len(u));
 
     var p = new Pipe(1);
     p.Send(4);

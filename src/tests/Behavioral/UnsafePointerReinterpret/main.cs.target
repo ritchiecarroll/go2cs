@@ -50,7 +50,7 @@ internal static void Main() {
     var next = (linkaddr)((uintptr)@base + 32);
     println(throughPointer(@base) == 0x4000, throughPointer(next) - throughPointer(@base));
 
-    println((@string)"compiled"u8);
+    println((@string)"compiled");
 }
 
 } // end main_package

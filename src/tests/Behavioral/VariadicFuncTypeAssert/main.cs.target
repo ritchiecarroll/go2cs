@@ -60,7 +60,7 @@ internal static void Main() {
     var funcMap = new map<@string, any>{["esc"] = ((Funcꓸꓸꓸ<any, @string>)(escaper))};
     {
         var (f, ok) = funcMap["esc"]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
-            fmt.Println("mapped:", f((@string)"a"u8, (@string)"b"u8));
+            fmt.Println("mapped:", f((@string)"a", (@string)"b"));
         } else {
             fmt.Println("mapped: no match");
         }
@@ -69,7 +69,7 @@ internal static void Main() {
     any assigned = ((Funcꓸꓸꓸ<any, @string>)(escaper));
     {
         var (f, ok) = assigned._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
-            fmt.Println("assigned:", f((@string)"x"u8));
+            fmt.Println("assigned:", f((@string)"x"));
         } else {
             fmt.Println("assigned: no match");
         }
@@ -78,7 +78,7 @@ internal static void Main() {
     var slots = slice<any>([(Funcꓸꓸꓸ<any, @string>)(escaper)]);
     {
         var (f, ok) = slots[0]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
-            fmt.Println("element:", f((@string)"y"u8));
+            fmt.Println("element:", f((@string)"y"));
         } else {
             fmt.Println("element: no match");
         }

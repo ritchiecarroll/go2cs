@@ -565,6 +565,12 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 			return name
 		}
 
+		// A plain-mode literal whose slot takes neither the bare C# literal nor a field renders the cached
+		// cast, `(@string)"…"`: one conversion per literal, and the C# type fixed at @string.
+		if isCastStringLiteral(exprType) {
+			return "(@string)" + v.convBasicLit(exprType, plainBasicLitContext())
+		}
+
 		context := getExprContext[BasicLitContext](contexts)
 
 		// A PLAIN literal (the pre-pass proved its slot is typed exactly `string`) renders as the

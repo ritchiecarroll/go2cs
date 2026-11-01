@@ -276,9 +276,9 @@ internal static void Main() {
     any i3 = (nint)6;
     fmt.Println("int:      ", AreEqual(i1, i2), AreEqual(i1, i3));
 
-    any s1 = (@string)"hi"u8;
-    any s2 = (@string)"hi"u8;
-    any s3 = (@string)"ho"u8;
+    any s1 = (@string)"hi";
+    any s2 = (@string)"hi";
+    any s3 = (@string)"ho";
     fmt.Println("string:   ", AreEqual(s1, s2), AreEqual(s1, s3));
 
     any b1 = true;

@@ -95,7 +95,7 @@ internal static void panicValues() {
         throw panic(s);
     }));
     fmt.Println(panicValueKind(() => {
-        throw panic(((panicValues_label)(@string)"x"u8));
+        throw panic(((panicValues_label)(@string)"x"));
     }));
     fmt.Println(panicValueKind(() => {
         throw panic((nint)42);

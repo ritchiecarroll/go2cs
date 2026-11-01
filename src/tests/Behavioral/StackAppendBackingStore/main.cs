@@ -61,9 +61,9 @@ internal static partial void stringCaps() {
     var sᴷ = new stackAppend<@string>();
 
     slice<@string> s = default;
-    s = append(sᴷ, s, "x"u8);
+    s = append(sᴷ, s, (@string)"x");
     fmt.Print(cap(s), " ");
-    s = append(s, "y"u8);
+    s = append(s, (@string)"y");
     fmt.Println(cap(s));
 }
 

@@ -108,7 +108,7 @@ internal static void Main() {
     fmt.Println("outer Zeta:", reflect.ValueOf(new outer()).MethodByName("Zeta").Call(default)[0].Interface());
 
     ref var s = ref heap<fmt.Stringer>(out var Ꮡs);
-    s = ((stringish)(@string)"hi"u8);
+    s = ((stringish)(@string)"hi");
     var st = reflect.TypeOf(Ꮡs).Elem();
     fmt.Println("iface NumMethod:", st.NumMethod(), "name:", st.Method(0).Name);
     fmt.Println("iface dispatch:", reflect.ValueOf(s).MethodByName("String").Call(default)[0].Interface());

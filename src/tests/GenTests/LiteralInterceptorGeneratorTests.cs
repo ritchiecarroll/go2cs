@@ -53,6 +53,11 @@ public class LiteralInterceptorGeneratorTests
                 public static implicit operator @string(System.ReadOnlySpan<byte> value) => default;
             }
 
+            public readonly ref struct sstring
+            {
+                public static implicit operator sstring(System.ReadOnlySpan<byte> value) => default;
+            }
+
             public sealed class ж<T>
             {
                 public T val = default!;
@@ -114,6 +119,12 @@ public class LiteralInterceptorGeneratorTests
                 public static string Overloaded(@string v) => "go.string-overload";
                 public static string Get(this ж<Counter> m, object key) => Seen(key);
                 public static string Get(this ж<Counter> m, @string key) => "go.string-overload";
+
+                // An sstring twin (sstringTwinOperations.go): the body member takes the sstring, and the @string member
+                // forwards to it under a lower overload-resolution priority, so a call binds the sstring member.
+                public static string Printf(sstring format, params System.Span<object> a) => Println(a);
+                [System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+                public static string Printf(@string format, params System.Span<object> a) => "go.string-member";
             }
         }
         """;
@@ -234,9 +245,12 @@ public class LiteralInterceptorGeneratorTests
     // The call does not bind in the generator's compilation, so its one-member method group decides: the final binding
     // can only be that member. RED before the fallback: the literal went un-intercepted, and the analyzer's GO2CS0004
     // failed the build (measured on DefinedArrayChainSlice, whose fmt.Println names a defined array's generated Value).
+    // An sstring twin's group holds two members, and the one of highest overload-resolution priority is the binding
+    // (seat #51: RED before, GO2CS0004 at internal/coverage/cformat's fmt.Fprintf through a generated writer adapter).
     [TestMethod]
     [DataRow("""return Println("x", Added);""", "go.string,System.Int32", DisplayName = "a params span call naming a sibling generator's member")]
     [DataRow("""return Pair("k", AddedText);""", "go.string", DisplayName = "a fixed object slot beside an argument the sibling supplies")]
+    [DataRow("""return Printf("%v %v"u8, "x", Added);""", "go.string,System.Int32", DisplayName = "an sstring twin's call naming a sibling generator's member")]
     public void ACallThatBindsOnlyAfterASiblingGeneratorIsStillIntercepted(string body, string expected)
     {
         Run run = Generate(body, sibling: new AddsAMember());

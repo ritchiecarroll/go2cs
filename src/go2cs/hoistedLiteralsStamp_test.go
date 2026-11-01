@@ -15,6 +15,9 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
+	"golang.org/x/tools/go/packages"
 )
 
 // The [GoHoistedLiterals] stamp: a package whose literals are hoisted passes no bare literal to an any slot, so the
@@ -124,4 +127,86 @@ func applyHoistedLiteralsStampFor(t *testing.T, lines []string) []string {
 	defer func() { packageHoistsLiterals = saved }()
 
 	return applyHoistedLiteralsStamp(lines, "package_info.cs")
+}
+
+// convertStampTestsFixture runs the real -tests wiring (convertTestVariants, as processTestConversion calls it) over
+// a hoisting package with an INTERNAL and an EXTERNAL test variant, and returns package_test_info.cs and the internal
+// test's emission, LF-normalized. The internal test prints internalLiteral; the external one prints nothing.
+func convertStampTestsFixture(t *testing.T, internalLiteral string) (testInfo, internalTest string) {
+	t.Helper()
+
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod":              "module example/stamptests\n\ngo 1.23\n",
+		"stamp/stamp.go":      "package stamp\n\nfunc Name() string { return \"name\" }\n",
+		"stamp/stamp_test.go": "package stamp\n\nimport (\n\t\"fmt\"\n\t\"testing\"\n)\n\nfunc TestShow(t *testing.T) { fmt.Println(" + internalLiteral + ") }\n",
+		"stamp/ext_test.go":   "package stamp_test\n\nimport (\n\t\"testing\"\n\n\t\"example/stamptests/stamp\"\n)\n\nfunc TestName(t *testing.T) { _ = stamp.Name() }\n",
+	})
+
+	inputPath := filepath.Join(dir, "stamp")
+
+	loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: inputPath, Tests: true}, ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	production := findProductionPackage(loaded, inputPath)
+	internal, external := findTestVariants(loaded, production)
+
+	if production == nil || internal == nil || external == nil {
+		t.Fatal("the fixture must load a production package and both test variants")
+	}
+
+	outputPath := t.TempDir()
+
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	options := Options{
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+		convertTests:        true,
+		hoistLiterals:       true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		testPackagePath:     production.PkgPath,
+		testPackageName:     production.Name,
+	}
+
+	model := selectTestProjectModel(internal, external)
+
+	if _, err = convertTestVariants(model, production, internal, external, selectCompileExcludedTestFiles(internal, external),
+		inputPath, outputPath, "go", hashset.NewHashSet(supportedTestCapabilities()), options); err != nil {
+		t.Fatalf("convertTestVariants: %v", err)
+	}
+
+	return strings.ReplaceAll(readGenerated(t, filepath.Join(outputPath, testPackageInfoFileName)), "\r\n", "\n"),
+		strings.ReplaceAll(readGenerated(t, filepath.Join(outputPath, "stamp_test.cs")), "\r\n", "\n")
+}
+
+// TestHoistedLiteralsStampSpansTheTestAssembly: the test assembly's stamp is one decision over every variant it
+// compiles. A degenerate slug (`"0x"`) in the internal test renders bare at fmt.Println's any slot (the hybrid's
+// fallback), so go2cs-gen's interceptor must box it, and package_test_info.cs may carry no stamp. RED before the
+// assembly-wide flag: each variant rewrites the file from its OWN collection, and the external variant, written last
+// and boxing nothing, stamped the assembly (encoding/json's tests: GO2CS0004 at decode_test.cs and encode_test.cs).
+// The control, a healthy slug, keeps its field and the stamp, so the refusal is not the stamp going missing.
+func TestHoistedLiteralsStampSpansTheTestAssembly(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	testInfo, internalTest := convertStampTestsFixture(t, `"0x"`)
+
+	if !strings.Contains(internalTest, `fmt.Println("0x")`) {
+		t.Fatalf("the degenerate slug should render bare at the any slot:\n%s", internalTest)
+	}
+
+	if strings.Contains(testInfo, "GoHoistedLiterals") {
+		t.Errorf("package_test_info.cs carries the stamp, but the internal test boxes a bare literal:\n%s", testInfo)
+	}
+
+	testInfo, internalTest = convertStampTestsFixture(t, `"hello"`)
+
+	if !strings.Contains(internalTest, "helloˢ") || strings.Count(testInfo, "[assembly: GoHoistedLiterals]") != 1 {
+		t.Errorf("control: a healthy slug keeps its field and the assembly keeps one stamp:\n%s\n----\n%s", internalTest, testInfo)
+	}
 }

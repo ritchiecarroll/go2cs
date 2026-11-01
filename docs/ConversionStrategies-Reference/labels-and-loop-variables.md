@@ -322,7 +322,7 @@ at landing: 570 behavioral packages, and exactly one non-`int` range operand in 
 is re-measured by a guard. -->
 
 ## An index-only range over a slice or array reads no element
-<!-- src/go2cs/visitRangeStmt.go:744 `} else if (isSlice || isArray) && valExpr == "_" {`;
+<!-- src/go2cs/visitRangeStmt.go:745 `} else if (isSlice || isArray) && valExpr == "_" {`;
 src/core/golib/RangeIndexOnly.cs:38 `range<T>(slice<T> s) => range(s.Length)`, :50 `range<T>(sslice<T> s)`,
 :58 `range<T>(array<T> a)`, :72 `range<TArray>(ж<TArray> p)`, :82 `range<TArray>(ж<TArray> p, nint length)`,
 :97 `range<TSeq>(in TSeq x) where TSeq : IArray`. -->
@@ -376,7 +376,7 @@ pointer and faults where Go ranges `N` times. Neither needs evaluating, because 
 a constant length Go does not evaluate the range operand at all. So each ranges the count itself, `range(N)`, a
 pointer to a named array type included; the box overload, which cannot bind a `ref` (CS0411), is never asked to.
 <!-- src/go2cs/visitRangeStmt.go:801-802 `case isArrayPointee && rangedThroughPointer && derefdValue:` then
-`foreach (%s%s in range(%d))`, and :804 `foreach (%s%s in range(%s, %d))` for the box form; Go spec, For statements
+`foreach (%s%s in range(%d))`, and :805 `foreach (%s%s in range(%s, %d))` for the box form; Go spec, For statements
 with range clause: "if at most one iteration variable is present and len(x) is constant, the range expression is
 not evaluated". Ruled 2026-10-25 (COORD, H's diagnosis of C2's H12 finding): before it a nil pointer parameter or
 receiver faulted at `range(p)`; runtime's pageBits.setAll and image/jpeg's differ are the corpus sites. src/core/golib/RangeIndexOnly.cs:82

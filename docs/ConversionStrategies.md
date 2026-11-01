@@ -276,7 +276,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 | [Multiple results](#multi-result-values-and-comma-ok-forms) | `func Atoi(s string) (int, error)` | `public static (nint, error) Atoi(@string s)` | converter |
 | [Comma-ok](#multi-result-values-and-comma-ok-forms) | `v, ok := m["a"]` | `var (v, ok) = m["a", ꟷ];` | golib |
 | [Slices and arrays](#slices-and-arrays) | `[]int{2, 3, 4}` · `[N]T` | `slice<nint>([2, 3, 4])` · `array<T>` | golib |
-| [Strings](#strings-string-and-sstring) | `string` · `"Atoi"` | `@string` · `"Atoi"`, a plain C# literal golib converts once; `"Atoi"u8` where the bytes are read in place, and in the standard library | golib |
+| [Strings](#strings-string-and-sstring) | `string` · `"Atoi"` | `@string` · `"Atoi"`, a plain C# literal golib converts once; `"Atoi"u8` where the bytes are read in place; in the standard library, a `static readonly` field `atoiˢ`, read through a same-named accessor, when the literal's words name it | golib |
 | [Maps](#maps) | `map[string]int{"a": 1, "b": 2}` | `new map<@string, nint>{["a"] = 1, ["b"] = 2}` | golib |
 | [Generics](#generics) | `func Swap[T any](a, b T) (T, T)` · `[S Shape]` | `public static (T, T) Swap<T>(T a, T b)` · `where S : Shape` | converter |
 | [Type aliasing](#type-aliasing) | `type P = *bool` | `global using P = go.ж<bool>;` | converter |
@@ -330,7 +330,7 @@ Overload discriminators: the comma-ok overloads take a `bool _` whose value is u
 Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; ᐧ U+1427 CANADIAN SYLLABICS FINAL MIDDLE DOT; ꟷ U+A7F7 LATIN EPIGRAPHIC LETTER SIDEWAYS I; ᴛ U+1D1B LATIN LETTER SMALL CAPITAL T. All are letter categories (Lm/Lo/Ll), so C# reads them as identifier characters.
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:9 `var xᴷ = new stackAppend<int64>();` and :13 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:193-204#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:14#ee6601).
-_ΔpN: src/go2cs/visitFuncDecl.go:1393-1407#03b3c7 and :2922-2930#701c82; :60-68#c625cd and :2013#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); in a function declaration, UnnamedParams/main.cs.target:20 `internal static void discard(nint _) {` (Go UnnamedParams/main.go:14 `func discard(int)`) and UnnamedParams/main.cs.target:32 `internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {`; a body-less signature (a function type, or an interface method) takes its discard test from the function being converted or last converted, src/go2cs/visitFuncDecl.go:2014 `dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)`, set at src/go2cs/visitFuncDecl.go:515 `v.currentFuncDecl = funcDecl` and never cleared; a lone `_`: CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (Go CaptureHoistThroughConversion/main.go:23 `type Handler func(int)`, converted before any function); a lone `_Δp0`: BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);` (converted after BlankIdentifierCollision/main.go:40 `_, _, _, _ = a, b, c, d`) and AnonymousInterfaces.cs.target:40 `(nint, error) Read(slice<byte> _Δp0);` (lifted from AnonymousInterfaces.go:28 `func takesReader(r interface{ Read([]byte) (int, error) }) {`, whose body has AnonymousInterfaces.go:30 `n, _ := r.Read(buf)`); several: GenericTypeInstantiation.cs.target:45#f1c413.
+_ΔpN: src/go2cs/visitFuncDecl.go:1394-1408#03b3c7 and :2949-2957#701c82; :60-68#c625cd and :2040#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); in a function declaration, UnnamedParams/main.cs.target:20 `internal static void discard(nint _) {` (Go UnnamedParams/main.go:14 `func discard(int)`) and UnnamedParams/main.cs.target:32 `internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {`; a body-less signature (a function type, or an interface method) takes its discard test from the function being converted or last converted, src/go2cs/visitFuncDecl.go:2041 `dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)`, set at src/go2cs/visitFuncDecl.go:515 `v.currentFuncDecl = funcDecl` and never cleared; a lone `_`: CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (Go CaptureHoistThroughConversion/main.go:23 `type Handler func(int)`, converted before any function); a lone `_Δp0`: BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);` (converted after BlankIdentifierCollision/main.go:40 `_, _, _, _ = a, b, c, d`) and AnonymousInterfaces.cs.target:40 `(nint, error) Read(slice<byte> _Δp0);` (lifted from AnonymousInterfaces.go:28 `func takesReader(r interface{ Read([]byte) (int, error) }) {`, whose body has AnonymousInterfaces.go:30 `n, _ := r.Read(buf)`); several: GenericTypeInstantiation.cs.target:45#f1c413.
 Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:512#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:368-376#853c51).
 A member golib adds itself: src/core/golib/array.cs:571 `public array<T> ΔClone()`.
@@ -536,7 +536,7 @@ exported type, or an unexported type that an exported signature exposes
 struct such as `accum` shows no modifier, because the [source generator](#source-generators) adds it on the
 generated half of the `partial` type.
 
-<!-- receiver clamp: src/go2cs/visitFuncDecl.go:876-884#d781c1 (receiverAccess from :2013-2030#fc124b; getAccess at src/go2cs/identifierNaming.go:381#c6c426); example src/core/errors/join.cs:47 `internal static @string Error(this ref joinError e) {` -->
+<!-- receiver clamp: src/go2cs/visitFuncDecl.go:876-884#d781c1 (receiverAccess from :2040-2057#fc124b; getAccess at src/go2cs/identifierNaming.go:381#c6c426); example src/core/errors/join.cs:47 `internal static @string Error(this ref joinError e) {` -->
 <!-- generator adds the modifier: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:134 (`{{Scope}} partial struct`), Templates/InterfaceType/InterfaceTypeTemplate.cs:50 (`{{Scope}} partial interface`). "usually": lifted local types carry `internal` (LiftedLocalTypes/main.cs.target:38#24371b) and an unexported type an exported field exposes carries `public` (PublicizedFieldType/main.cs.target:9#6ba0fc); package-level declarations otherwise emit `partial` bare (src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5 `partial struct reg {`). A named function type becomes a delegate that carries its own modifier: src/tests/Behavioral/CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (Go main.go:23 `type Handler func(int)`); GenericTypeInstantiation.cs.target:45 `public delegate bool Seq2Like<K, V>(K _Δp0, V _Δp1);` -->
 <!-- new accum(): the generated parameterless constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2161#ff2b44, whose body is the NilType constructor's (:2147#653c7a); "an empty struct literal reads new T()" is the Struct Types section's rule (parity seat #21). Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
 
@@ -1847,7 +1847,7 @@ rules further down this section):
   reference it can inline; every use still spells the constant's name. Other packages keep the one field.
 <!-- forms: src/go2cs/visitValueSpec.go:1449 `else if constExpr == "const"`, :1472 `static %s %s =>%s %s;`,
      :1267 `structStaticReadAccessorDecl(access, strTypeName, csIDName`; the accessor:
-     src/go2cs/hoistedLiteralOperations.go:1493 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
+     src/go2cs/hoistedLiteralOperations.go:1737 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
      int-kind value that fits neither int64 nor uint64: src/go2cs/visitValueSpec.go:1192-1199 `writeUntypedConst(true)`, e.g.
      src/core/math/big/arith.cs:23 `internal static readonly GoBigConst _B` (the committed corpus, which takes the
      accessor at the 1.26.10.2 regeneration); the alias: src/go2cs/csproj-template.xml:154 `Alias="GoBigConst"`. -->
@@ -3408,15 +3408,17 @@ would panic. The same rule lets a [type switch](#type-switch-statements) pick `c
 **A string literal boxes as a Go `string`.** Go's `string` is golib's
 [`@string`](#strings-string-and-sstring), a byte string; the `@` only escapes the C# keyword. A literal
 stored in an `any` holds an `@string`, never a C# `string`, so `x.(string)` and `case string:` match it.
-Where the converter writes that value out, it is `(@string)"hello"u8`: `"hello"u8` is a C# UTF-8 literal,
-and the cast turns it into a Go string. The next two paragraphs say where that form appears.
+Where the converter writes that value out inline, it is `(@string)"hi"`: the cast turns the C# literal into a
+Go string, which golib converts once and shares. The next two paragraphs say where that form appears.
 
-**A literal stored in an `any` is also created only once.** The converter [hoists](#strings-string-and-sstring)
-it into one `static readonly` field, as the standard library does for every literal used as a value. The
-field is declared just above the first function in the package that uses it, and its generated name ends
-in `ˢ`. So `"hello"` becomes the field `helloˢ`. Some literals stay inline, such as an element of a composite literal: `[]any{"keep"}` keeps
-`(@string)"keep"u8` in place. The generated comment gives the reason for hoisting. Go keeps string
-literals in read-only memory (RODATA) at no run-time cost, so the C# allocates each literal only once.
+**A literal stored in an `any` is also boxed only once when its words name it.** The converter
+[hoists](#strings-string-and-sstring) it into one `static readonly` field. The field is declared just above
+the first function in the package that uses it, and its generated name ends in `ˢ`. So `"hello"` becomes the
+field `helloˢ`, initialized once from `(@string)"hello"u8`, a C# UTF-8 literal cast to a Go string, and an
+element of a composite literal reads its field too: `[]any{"keep"}` reads `keepˢ`. A literal whose name
+would say less than its value, such as `"hi"`, stays inline as `(@string)"hi"` and is boxed at
+each use. The generated comment gives the reason for hoisting. Go keeps string literals in read-only memory
+(RODATA) at no run-time cost, so the C# allocates each hoisted literal only once.
 
 **A hoisted literal whose every use in the package is an `any` is stored already boxed.** Its field has
 type `object`. If any use needs a plain `string`, the field is a `@string` instead
@@ -4860,14 +4862,17 @@ fmt.Println(len(rs), (@string)rs);
 A `[]byte` conversion takes the `u8` bytes directly. A `[]rune` conversion first makes the literal an
 `@string`, because `@string` is what decodes UTF-8 into runes.
 
-**The standard library stores each literal used as a value in a field.** Go keeps literals in read-only
-memory, so they cost nothing at run time. A standard-library package matches that by storing such a
-literal in a `static readonly` field of the package's class
+**The standard library stores a literal used as a value in a field when its words name it.** Go keeps
+literals in read-only memory, so they cost nothing at run time. A standard-library package matches that by
+storing such a literal in a `static readonly` field of the package's class
 ([Package Conversion](#package-conversion)), declared just before the first function that uses it, named
-from the literal's words, with the suffix `ˢ` marking it as generated: `return "zero value return"`
-becomes `return zeroValueReturnˢ;`. Reading a field skips the cache lookup a plain literal makes, so
-`-hoist-literals` gives any other package this form, and it is recommended for
-performance-critical code ([Command Line](CommandLine.md)). By default the same function reads as Go does:
+from the literal's words, with the suffix `ˢ` marking it as generated, and read through an accessor under
+the same name: `return "zero value return"` becomes `return zeroValueReturnˢ;`. Reading the field skips the
+cache lookup a plain literal makes, so `-hoist-literals` gives any other package this form, and it is
+recommended for performance-critical code ([Command Line](CommandLine.md)). Every other value site, a
+composite element or an `init` body among them, takes the cached plain form in both modes, and a format string
+at an `sstring` twin keeps its `u8` span, so no literal is copied on each evaluation. By default the
+same function reads as Go does:
 
 <!-- source: src/tests/Behavioral/StringLiteralHoisting/main.go:12-18 -->
 ```go
@@ -4879,7 +4884,7 @@ func kind(n int) string {
 	return "other value return"
 }
 ```
-<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:6-14 and :102 -->
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:6-14 and :103 -->
 ```csharp
 partial class main_package {
 
@@ -4908,7 +4913,7 @@ nothing ([Source Generators](#source-generators), [Empty Interface (`any`)](#emp
 ```go
 fmt.Println("pre boxed any target")
 ```
-<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:50, 69, 100 -->
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:51, 70, 101 -->
 ```csharp
 internal static void Main() {
 …
@@ -5138,7 +5143,7 @@ fmt.Println(f("via local %s", "ok"))
 <!-- source: src/tests/Behavioral/SStringTwinPilot/main.cs.target:33-34 -->
 ```csharp
 Funcꓸꓸꓸ<@string, any, @string> f = fmt.Sprintfᶠ;
-fmt.Println(f("via local %s"u8, (@string)"ok"u8));
+fmt.Println(f("via local %s", (@string)"ok"));
 ```
 
 `Funcꓸꓸꓸ<@string, any, @string>` is the C# type for Go's `func(string, ...any) string`
@@ -6605,11 +6610,11 @@ func init() {
 internal static slice<@string> order;
 
 [GoInit] internal static void init() {
-    order = append(order, "a_first#1"u8);
+    order = append(order, (@string)"a_first#1");
 }
 
 [GoInit] internal static void initΔ1() {
-    order = append(order, "a_first#2"u8);
+    order = append(order, (@string)"a_first#2");
 }
 ```
 
@@ -6681,8 +6686,8 @@ func apply(f func(prefix string, vals ...int) string) {
 <!-- source: src/tests/Behavioral/VariadicFuncValues/main.cs.target:21-27 -->
 ```csharp
 internal static void apply(Funcꓸꓸꓸ<@string, nint, @string> f) {
-    fmt.Println(f("loose"u8, 1, 2, 3));
-    fmt.Println(f("empty"u8));
+    fmt.Println(f("loose", 1, 2, 3));
+    fmt.Println(f("empty"));
 
     var nums = slice<nint>([4, 5]);
     fmt.Println(f("spread"u8, nums.ꓸꓸꓸ));
@@ -6771,7 +6776,7 @@ internal static void p2() {
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)). `fmt.Println` takes `any` arguments. The
 literal `"P2:"` stays a plain C# literal, and go2cs-gen, go2cs's [source generators](#source-generators),
 intercepts the call to pass it as a Go `@string` boxed once per file ([Strings](#strings-string-and-sstring)).
-<!-- src/gen/go2cs-gen/LiteralInterceptorGenerator.cs:25-36 `the box the interceptor substitutes is allocated once per … literal per file`; plain literals outside the standard library unless -hoist-literals: src/go2cs/hoistedLiteralOperations.go:42-54 `PLAIN LITERALS … opt-in for everything else (-hoist-literals)` -->
+<!-- src/gen/go2cs-gen/LiteralInterceptorGenerator.cs:25-36 `the box the interceptor substitutes is allocated once per … literal per file`; plain literals outside the standard library unless -hoist-literals: src/go2cs/hoistedLiteralOperations.go:42 `PLAIN LITERALS … Hoisting is the STANDARD LIBRARY's mode` -->
 
 **A literal whose name is also used as a value stays a lambda.** A local function allocates nothing only
 while it is only ever called: C# makes one used as a value into a delegate, which allocates as a lambda does.
@@ -7079,7 +7084,7 @@ VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
 The string control: src/go2cs/rangeIndexOnly_test.go:280 `expect("overString", "foreach (var (i, _) in str)")`;
 the nil pointer: :260 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`. -->
 <!-- The count range: src/go2cs/visitRangeStmt.go:801-802 `case isArrayPointee && rangedThroughPointer && derefdValue:`
-then `foreach (%s%s in range(%d))`, and :804 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
+then `foreach (%s%s in range(%d))`, and :805 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
 src/go2cs/rangeIndexOnly_test.go:266 `expect("overPointerParam", "foreach (var i in range(2))")` and :268
 `expect("setAll", "foreach (var i in range(4))")`; src/go2cs/rangeNilPointerArray_test.go:24
 `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`; the behavioral PointerArrayRange ranges a nil
@@ -8220,7 +8225,7 @@ spells Go's `nil` and zero values as `default!`, so `r != default!` is Go's `r !
 ([Nil and Zero Values](#nil-and-zero-values)). The extra braces keep `r` scoped to the `if`, as Go's
 `if r := …; r != nil` does.
 
-<!-- Plain literals: docs/ConversionStrategies-Reference/strings.md:73#0b25b7 (assignments take the plain form). The C# string
+<!-- Plain literals: docs/ConversionStrategies-Reference/strings.md:74#0b25b7 (assignments take the plain form). The C# string
 to Go string normalization: src/core/golib/builtin.cs:291#09e845. -->
 `"recovered"` and `"ok"` are assigned to a `string` result, so each is a plain C# literal that golib
 converts once ([Strings](#strings-string-and-sstring)). The literal passed to `panic` stays a plain C#
@@ -9486,7 +9491,7 @@ keeps a plain field (reverse below is built as `new reverse(data)`), and a zero 
 `default(T)` (a missing-key map read, a fresh `make`d slice's elements) runs no constructor. See
 docs/ConversionStrategies-Reference/struct-embedding.md, "Zero values of promoted-embed structs construct
 through a generated constructor". Hoisting rules: docs/ConversionStrategies-Reference/strings.md, "What
-stays inline" (3 characters or fewer; comparisons; composite-literal elements). -->
+claims no field" (2 characters or fewer; comparisons; composite-literal elements). -->
 
 **The embedded struct is stored inline, so copying the outer struct copies it.** An embed is a field
 like any other, not a separate heap object. After `b := a`, `b` has its own `inner`, and writing `b.n`
@@ -11241,7 +11246,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3850-3871#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#22dcf6, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3855-3876#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#22dcf6, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
@@ -12057,8 +12062,8 @@ targets are themselves assembly. So it forwards only to targets on a list, kept 
 functions known to have one. Any other pull keeps the throwing stub described at the end of this section.
 A target on the list can be converted Go, as here, or hand-written C#: `testing/cryptotest` pulls
 `testing.checkParallel`, which the hand-written `testing` package provides, and its forwarder calls that.
-<!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2402 (`"time.registerLoadFromEmbeddedTZData": true`),
-     :2410 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
+<!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2429 (`"time.registerLoadFromEmbeddedTZData": true`),
+     :2437 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
      (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:1003
      (`public static void checkParallel(ж<T> t)`). -->
 
@@ -12598,7 +12603,7 @@ result is unpacked with `var (p, err) = …`. `crypto/elliptic`'s `ScalarBaseMul
      asm ordinv and returns a valid inverse; crypto/ecdsa handles the same error with a fallback, so
      ECDSA is unaffected. Inverse is reached via the deprecated `invertible` interface. The inline panic
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
-     (src/go2cs/hoistedLiteralOperations.go:845-847#0b8d4e), since it costs nothing until a panic fires. -->
+     (src/go2cs/hoistedLiteralOperations.go:964-966#0b8d4e), since it costs nothing until a panic fires. -->
 
 **A module converts with `-tags safe`, for a different reason.** Some libraries reach into Go's runtime with
 unsafe pointer arithmetic, adding a byte offset to a value to read one of its private fields. Converted code
@@ -13056,11 +13061,11 @@ func init() {
 internal static slice<@string> order;
 
 [GoInit] internal static void init() {
-    order = append(order, "a_first#1"u8);
+    order = append(order, (@string)"a_first#1");
 }
 
 [GoInit] internal static void initΔ1() {
-    order = append(order, "a_first#2"u8);
+    order = append(order, (@string)"a_first#2");
 }
 ```
 
@@ -13090,11 +13095,11 @@ func init() {
 <!-- source: src/tests/Behavioral/MultiFileInitOrder/b_second.cs.target:5-11 -->
 ```csharp
 [GoInit] internal static void initΔ2() {
-    order = append(order, "b_second#1"u8);
+    order = append(order, (@string)"b_second#1");
 }
 
 [GoInit] internal static void initΔ3() {
-    order = append(order, "b_second#2"u8);
+    order = append(order, (@string)"b_second#2");
 }
 ```
 
@@ -13109,7 +13114,7 @@ func init() {
 <!-- source: src/tests/Behavioral/MultiFileInitOrder/main.cs.target:7-9 -->
 ```csharp
 [GoInit] internal static void initΔ4() {
-    order = append(order, "main#1"u8);
+    order = append(order, (@string)"main#1");
 }
 ```
 

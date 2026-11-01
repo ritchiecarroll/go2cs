@@ -16,7 +16,7 @@ internal static void Main() {
     var m = new map<any, @string>();
 
     m[default] = "nil-key";
-    m[(@string)"a"u8] = "alpha";
+    m[(@string)"a"] = "alpha";
     m[(nint)7] = "seven";
 
     fmt.Println("len:", len(m));
@@ -39,7 +39,7 @@ internal static void Main() {
     m[default] = "again";
     fmt.Println("overwrite:", len(m), m[default]);
 
-    fmt.Println("neighbors:", m[(@string)"a"u8], m[(nint)7]);
+    fmt.Println("neighbors:", m[(@string)"a"], m[(nint)7]);
 
     delete(m, default);
     (v, ok) = m[default, ꟷ];
@@ -54,8 +54,8 @@ internal static void Main() {
     (_, ok) = m[default, ꟷ];
     fmt.Println("after clear:", len(m), ok);
 
-    var lit = new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2};
-    fmt.Println("literal:", len(lit), lit[default], lit[(@string)"b"u8]);
+    var lit = new map<any, nint>{[default] = 1, [(@string)"b"] = 2};
+    fmt.Println("literal:", len(lit), lit[default], lit[(@string)"b"]);
 
     var em = new map<error, nint>();
     em[default] = 10;
@@ -77,7 +77,7 @@ internal static void Main() {
     var (_, eok2) = empty[default, ꟷ];
     fmt.Println("empty map:", len(empty), eok2);
 
-    var pm = new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2};
+    var pm = new map<any, nint>{[default] = 1, [(@string)"b"] = 2};
     fmt.Println("print:", pm);
     fmt.Printf("printf: %v\n"u8, pm);
 

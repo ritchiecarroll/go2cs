@@ -62,7 +62,7 @@ internal static partial void Main() {
         foreach (var (_, pc) in r.Stack()) {
             var f = runtime.FuncForPC(pc - 1);
             if (f == nil) {
-                names = append(namesᴷ, names, "?"u8);
+                names = append(namesᴷ, names, (@string)"?");
                 continue;
             }
             @string name = f.Name();

@@ -95,7 +95,7 @@ internal static void Main() {
     uintptr p = 6;
     kind(u);
     kind(p);
-    kind((@string)"x"u8);
+    kind((@string)"x");
     kind(3.14D);
     fmt.Println(sizeOf((int32)5), sizeOf((int64)7));
 

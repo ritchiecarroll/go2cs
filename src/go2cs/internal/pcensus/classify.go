@@ -430,7 +430,14 @@ func (c *classifier) fold(lines []string) ([]string, []string) {
 				if j == nil {
 					continue
 				}
-				f, s := j.First.FindStringSubmatch(lines[i]), j.Second.FindStringSubmatch(lines[i+1])
+				// A Between line may stand between the two; it is kept, after the folded line.
+				between := ""
+				second := i + 1
+				if j.Between != nil && j.Between.MatchString(lines[second]) && second+1 < len(lines) &&
+					j.First.MatchString(lines[i]) && j.Second.MatchString(lines[second+1]) {
+					between, second = lines[second], second+1
+				}
+				f, s := j.First.FindStringSubmatch(lines[i]), j.Second.FindStringSubmatch(lines[second])
 				if f == nil || s == nil {
 					continue
 				}
@@ -442,7 +449,10 @@ func (c *classifier) fold(lines []string) ([]string, []string) {
 				}
 				if ok {
 					out, by = append(out, j.Fold(f, s)), append(by, it.ID)
-					i++
+					if between != "" {
+						out, by = append(out, between), append(by, "")
+					}
+					i = second
 					joined = true
 					break
 				}
