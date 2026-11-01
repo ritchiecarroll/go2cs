@@ -1,0 +1,10 @@
+arm	mode	N	exit0	exit2	other	empty_stderr	exit2_with_panic_line	stdout_recovered	spinner_alive
+m2-aot-rec-n32	load	50	50	0	0	50	0	5	50
+m2-aot-rec-n8	loadhi	50	50	0	0	50	0	16	50
+m2-blocked-pad-n32	load	400	1	399	0	1	399	0	400
+m2-go-rec-n32	load	400	400	0	0	400	0	0	400
+m2-go-rec-n8	idle	100	100	0	0	100	0	0	100
+m2-go-rec-n8	load	100	100	0	0	100	0	0	100
+m2-go-rec-n8	loadhi	100	100	0	0	100	0	0	100
+m2-jit-rec-n32	load	100	100	0	0	100	0	0	100
+m2-jit-rec-n8	loadhi	100	100	0	0	100	0	3	100

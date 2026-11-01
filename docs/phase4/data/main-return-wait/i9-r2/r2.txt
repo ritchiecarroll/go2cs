@@ -1,0 +1,31 @@
+2026-11-01 01:12:07 START r2 a=5d017630ae0fdf15149981219da5edf0dd04dcc0 b=5d017630ae0fdf15149981219da5edf0dd04dcc0 tracked-changes a=0 b=0 MainExit.cs blob=218301c588de04454cfa471ce06833583dbdd1f1
+2026-11-01 01:12:07 START runner-rec
+2026-11-01 01:17:25 END runner-rec rc=0 elapsed=318s runner: PASS  (1 projects, 315.1s) [WHEA 0 since 2026-11-01T01:12:07.2087176-06:00]
+2026-11-01 01:17:26 COPY rec jit=95649a5a5508f352 golib=4d4fef7038ca30bd go=ba33bd17dded1299
+patched src/core/golib/runtime/MainExit.cs: blocked (rebuild golib and the behavioral project before running)
+2026-11-01 01:17:27 PATCH blocked diff-lines=1: + sample = sample with { Blocked = true, BlockSequence = 0 }; // RED: always blocked
+2026-11-01 01:17:27 START rebuild-red-blocked
+2026-11-01 01:19:51 END rebuild-red-blocked rc=0 elapsed=144s runner: PASS  (1 projects, 142.7s) [WHEA 0 since 2026-11-01T01:17:27.1742389-06:00]
+2026-11-01 01:19:52 COPY red blocked golib=7407dfb2239b7b96 reference-golib=4d4fef7038ca30bd
+2026-11-01 01:19:53 STARTS jit-red-blocked-pad rc=2
+warning: in the working copy of 'src/core/golib/runtime/MainExit.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/core/golib/runtime/MainExit.cs', LF will be replaced by CRLF the next time Git touches it
+restored: src/core/golib/runtime/MainExit.cs matches HEAD
+2026-11-01 01:19:53 RESTORE hash=218301c588de04454cfa471ce06833583dbdd1f1 committed=218301c588de04454cfa471ce06833583dbdd1f1
+2026-11-01 01:19:53 START aot-rec
+2026-11-01 01:31:28 END aot-rec rc=0 elapsed=694s exe-sha=58699f9b3d8bc877 [WHEA 0 since 2026-11-01T01:19:53.4436009-06:00]
+2026-11-01 01:31:28 STARTS aot-rec rc=0
+2026-11-01 01:31:28 STARTS jit-rec rc=0
+2026-11-01 01:31:28 STARTS go-rec rc=0
+2026-11-01 01:31:29 ARM m2-rec idle n8 runs=100 START
+2026-11-01 01:31:42 ARM m2-rec idle n8 END elapsed=13s m2-go-rec-n8:{N=100 exit0=100 alive=100 recovered=0} [WHEA 0 since 2026-11-01T01:31:29.0927872-06:00]
+2026-11-01 01:31:42 ARM m2-rec load n8 runs=100 START
+2026-11-01 01:32:48 ARM m2-rec load n8 END elapsed=66s m2-go-rec-n8:{N=100 exit0=100 alive=100 recovered=0} [WHEA 0 since 2026-11-01T01:31:42.6224680-06:00]
+2026-11-01 01:32:48 ARM m2-rec load n32 runs=400 START
+2026-11-01 02:03:22 ARM m2-rec load n32 END elapsed=1833s m2-go-rec-n32:{N=400 exit0=400 alive=400 recovered=0} m2-jit-rec-n32:{N=100 exit0=100 alive=100 recovered=0} m2-aot-rec-n32:{N=50 exit0=50 alive=50 recovered=5} [WHEA 0 since 2026-11-01T01:32:48.7116012-06:00]
+2026-11-01 02:03:22 ARM m2-rec loadhi n8 runs=100 START
+2026-11-01 02:42:36 ARM m2-rec loadhi n8 END elapsed=2354s m2-go-rec-n8:{N=100 exit0=100 alive=100 recovered=0} m2-jit-rec-n8:{N=100 exit0=100 alive=100 recovered=3} m2-aot-rec-n8:{N=50 exit0=50 alive=50 recovered=16} [WHEA 0 since 2026-11-01T02:03:22.3741776-06:00]
+2026-11-01 02:42:36 ARM m2-blocked load n32 runs=400 START
+2026-11-01 03:20:19 ARM m2-blocked load n32 END elapsed=2263s m2-blocked-pad-n32:{N=400 exit0=1 alive=400 recovered=0} [WHEA 0 since 2026-11-01T02:42:36.7969101-06:00]
+2026-11-01 03:20:20 END r2 tracked-changes a=0 b=0 [WHEA 0 since 2026-11-01T01:12:06.4608772-06:00]
+2026-11-01 03:20:20 DONE-R2-RUN
