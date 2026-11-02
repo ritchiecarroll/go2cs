@@ -1,0 +1,82 @@
+# The main-return wait seat's macOS leg (docs/phase4/data/main-return-wait/leg-briefs.md), run once on both hosted mac
+# runners when this branch is pushed. It lives on claude/c1-mrw-macos only and is never merged: the measurement is
+# docs/phase4/data/main-return-wait/c1-macos/run-leg.sh, and each runner pushes its raw logs to its own branch,
+# claude/c1-mrw-macos-raw-<rid>, because this lane's session cannot download artifacts.
+name: C1 main-return wait (macOS leg)
+
+on:
+  push:
+    branches: [claude/c1-mrw-macos]
+    paths:
+      - .github/workflows/c1-mrw-macos.yml
+      - docs/phase4/data/main-return-wait/c1-macos/run-leg.sh
+
+permissions:
+  contents: write
+
+jobs:
+  leg:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: macos-15, rid: osx-arm64 }
+          - { runner: macos-15-intel, rid: osx-x64 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 330
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+      # The corpus flavor this host runs: without it every build links the windows flavor (os-matrix sets the same).
+      GoTargetOS: darwin
+      TIP: bbf1725aa7
+      BASE: c5a4637bba
+      N: '50'
+    steps:
+      - name: Checkout (full history, for the base)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Trees at the tip and the base
+        run: |
+          set -eu
+          git worktree add "$RUNNER_TEMP/tip" "$TIP"
+          git worktree add "$RUNNER_TEMP/base" "$BASE"
+
+      - name: The leg
+        run: |
+          set +e
+          # macOS's own bash is 3.2; the script is written for it, and runs under Homebrew's bash when there is one.
+          B=/bin/bash; for c in /opt/homebrew/bin/bash /usr/local/bin/bash; do [ -x "$c" ] && B=$c && break; done
+          echo "bash: $B $("$B" -c 'echo $BASH_VERSION')"
+          "$B" docs/phase4/data/main-return-wait/c1-macos/run-leg.sh "$RUNNER_TEMP/tip" "$RUNNER_TEMP/base" \
+            "${{ matrix.rid }}" "$N" "$RUNNER_TEMP/out"
+          echo "leg exit $?"
+          grep -E '^(==|ARM|built|BUILD|golibtests)' "$RUNNER_TEMP/out/leg.log" > "$RUNNER_TEMP/summary.txt"
+          echo "::notice title=mrw ${{ matrix.rid }}::$(sed 's/%/%25/g' "$RUNNER_TEMP/summary.txt" | awk '{printf "%s%%0A", $0}')"
+
+      - name: Push the raw logs to claude/c1-mrw-macos-raw-${{ matrix.rid }}
+        if: always()
+        run: |
+          set -eu
+          OUT="$RUNNER_TEMP/out"
+          [ -d "$OUT" ] || exit 0
+          # Text logs only: no executables, no build output.
+          rm -rf "$OUT"/aot-*
+          D="$RUNNER_TEMP/raw"
+          mkdir -p "$D"
+          cp -R "$OUT" "$D/${{ matrix.rid }}"
+          cd "$D"
+          git init -q -b raw
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "main-return wait macOS leg: raw logs, ${{ matrix.rid }}, run ${{ github.run_id }}"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
+            "HEAD:refs/heads/claude/c1-mrw-macos-raw-${{ matrix.rid }}"
