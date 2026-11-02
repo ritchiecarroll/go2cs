@@ -33034,4 +33034,71 @@ had validated. `TestTBHelper` reads Go's `helperfuncs_test.go:86` and `:87` as `
 
 — G (2026-11-01)
 
+## 2026-11-01 — G (in-hop seat, claude/g-aot-frozen-token-holder): darwin Native AOT failed in ILC on a frozen-object name collision from seat #32's field tokens — FIXED by a nested token holder
+
+**The failure.** C1's macOS leg (run 41351205394) failed every Native AOT publish, base and tip, on osx-arm64 and
+osx-x64, inside ILC:
+`An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23`.
+The linux-flavour AOT publish of the same programs succeeded.
+
+**The mechanism** (dotnet/runtime `v10.0.11`).
+- `SerializedFrozenObjectNode.AppendMangledName` names a preinitialized object `__FrozenObj_`, then the owning type's
+  mangled name, then the allocation site id, with no separator.
+- `TypePreinit`'s allocation site id is the interpreted instruction counter in the owning type's static constructor,
+  unique only within that type.
+- **The origin is seat #32** (`f5e6a25155`, 2026-10-29). Its per-field token,
+  `static readonly FieldRefFunc<S, F> ᏑF‿ = ᏑF;`, compiles to `ldnull`, `ldftn`, `newobj`, `stsfld`, so a struct's
+  tokens are allocated at instructions 3, 7, 11, and so on.
+- darwin's `syscall.IfmaMsghdr` has 7 fields, so its sixth token sits at 23. `IfmaMsghdr2`'s first sits at 3, and
+  `IfmaMsghdr` + `23` spells the same symbol as `IfmaMsghdr2` + `3`.
+- **A standalone C# repro** fails the same way with no go2cs code: static class `A` with six `Func<int>` statics and
+  `A2` with one give `Key: __FrozenObj_FrozenRepro_A23`. Renamed `AB`, it publishes, runs and exits 8.
+
+**In-hop by measurement.** The failure reproduces on win-x64 with `-p:GoTargetOS=darwin`: the collision is in
+managed code, so no Mac is needed. GoroutinePanicAfterDeferredDone's Native AOT publish:
+
+| Tree | Result |
+|:--|:--|
+| `nuget-1.26.10.1` (`b6ccfa80a5`) | rc 0, executable |
+| master `64d145b2c4` | rc 1, C1's key |
+
+**Reach, by census** (`docs/phase4/data/aot-frozen-collision/frozen-census.pl` over `src/core` at `64d145b2c4`,
+per package and GOOS flavour): 158 same-package struct pairs `X` / `X<digits>`, and one predicted collision, darwin
+`syscall`'s `IfmaMsghdr` / `IfmaMsghdr2` (ids 23 and 27). Every darwin Native AOT publish that reaches `syscall` failed,
+which is effectively every program. JIT, ReadyToRun, and linux and windows Native AOT were unaffected.
+
+**RULED (COORD, 2026-11-01).**
+- **(A), in-hop:** the generator moves the tokens into a nested holder.
+- **(B), refused:** an app-wide `--nopreinitstatics`, an unmeasured startup cost.
+- **(C):** an upstream issue, drafted at `docs/phase4/data/aot-frozen-collision/ilc-issue-DRAFT.md` and not posted;
+  the owner decides.
+
+**The fix (A).**
+- StructTypeTemplate emits a struct's tokens inside a nested `public static class Field‿Tokens`, and
+  FieldAccessGenerator's address property reads `S.Field‿Tokens.ᏑF‿`. The converter never names the token, so
+  visible emission is unchanged.
+- **The name.** Go cannot write U+203F, so no Go member can take it. ILC sanitizes it to `_` and deduplicates mangled
+  type names within a module. The ILC map reads `syscall_go_syscall_package_IfmaMsghdr_Field_Tokens` and
+  `..._IfmaMsghdr2_Field_Tokens`, which end in a letter.
+- **No new collision class.** A census over `src/core` finds no type or identifier spelled `*Field_Tokens*`, which is
+  the only Go spelling that could alias a holder's mangled name; the control pattern finds 318 `*_package`
+  identifiers.
+- **Preinitialization is kept**, read from the ILC map:
+  - every holder with GC statics (644) carries `GCStaticsPreInitData`, with a zero-length `NonGCStatics`, so it has
+    no class-constructor context;
+  - on the windows flavour, base against fix: runtime cctors 18,637 = 18,637;
+  - the six shared-canonical generic cctors (`atomic.Pointer`, `iter.Pull`/`Pull2`, `internal/sync.HashTrieMap`,
+    `gc/scan.unsafeBuf`) move from the struct to its holder one for one;
+  - five class-init contexts disappear, and none are added. A holder whose tokens a program never reads is not
+    built at all.
+- **Red-first.**
+  - The darwin-flavour probe: rc 1 at base with C1's key, rc 0 at the fix with an executable.
+  - GenTests' `EveryTokenLivesInTheStructsHolderAndNoneOnTheStruct` fails at the base template with
+    "ᏑCount‿ is declared on Plain", and passes at the fix; the template was restored byte-identical.
+
+C1 confirms on the runners: an osx-arm64 and osx-x64 Native AOT publish and run of the amplifier, which also closes the
+main-return-wait leg's darwin AOT arms.
+
+— G (2026-11-01)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
