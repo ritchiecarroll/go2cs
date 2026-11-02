@@ -472,9 +472,12 @@ public class FieldAccessGenerator : ISourceGenerator
         if (s_collisionNames.Contains(accessor) || declared.Contains(accessor))
             return;
 
-        string token = $"{accessor}{FieldAccessTokenSuffix}";
+        // The struct's token, in its holder class (StructTypeTemplate's FieldReferences). A foreign struct whose holder
+        // carries no token for this field hands the cache the accessor's method group instead.
+        string token = $"{FieldAccessTokenHolder}.{accessor}{FieldAccessTokenSuffix}";
 
-        if (foreign && !type.GetMembers(token).OfType<IFieldSymbol>().Any(field => field.IsStatic))
+        if (foreign && !type.GetTypeMembers(FieldAccessTokenHolder)
+                .Any(holder => holder.GetMembers($"{accessor}{FieldAccessTokenSuffix}").OfType<IFieldSymbol>().Any(field => field.IsStatic)))
             token = accessor;
 
         properties.Add($"public global::go.{PointerPrefix}<{fieldType}> {accessor} {{ [{GetterAttributes}] get => {ReceiverName}.of({typeName}.{token}); }}");

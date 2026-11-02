@@ -95,12 +95,19 @@ const ChannelRightOp = "\uA7F7\u1433"            // Example: `ch.ꟷᐳ(out var 
 // punctuation character: legal in C#, illegal in Go).
 const MapWrapperSet = "Set\u203F"
 
-// FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.Ꮡf‿`: the
-// `static readonly FieldRefFunc<T, F>` the TypeGenerator emits beside the field's `Ꮡf` accessor, which
+// FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.Field‿Tokens.Ꮡf‿`:
+// the `static readonly FieldRefFunc<T, F>` the TypeGenerator emits for the field's `Ꮡf` accessor, which
 // the generated `p.Ꮡf` property (`&p.f`, parity seat #32) hands golib's view cache, so every site in
 // every assembly passes one delegate object and the cache compares by reference. U+203F keeps the
 // name out of reach of every Go field's accessor, as MapWrapperSet's door does.
 const FieldAccessTokenSuffix = "\u203F"
+
+// FieldAccessTokenHolder names the nested static class that holds a struct's field accessor tokens. Native
+// AOT names a preinitialized object by its owning type and then an allocation number, with no separator, so
+// tokens held on the struct itself let `IfmaMsghdr` + 23 meet `IfmaMsghdr2` + 3 (darwin's syscall). The
+// holder's name ends in a letter, so no type name runs into a number, and U+203F keeps it out of reach of
+// every Go identifier.
+const FieldAccessTokenHolder = "Field\u203FTokens"
 const PointerDerefOp = "~" // Example: `~ptr` for dereferencing a pointer
 
 // NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.Value` to re-alias a
