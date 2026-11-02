@@ -1,0 +1,28 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+# plan 2026-11-02: P1-2 run as separate kit invocations (12 rows, then the rest) with the kit's shard-end purge between, after P1-1's floor stop; host as P1-1's ledger (bind9-dnsutils, NXDOMAIN, .NET symlink); each invocation rebuilds the converter at the same commit (new mtime)
+bytes	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:50:00Z
+crypto/internal/boring	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:50:28Z
+go/ast	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:51:12Z
+crypto/sha256	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:51:43Z
+crypto/hpke	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:52:53Z
+net/mail	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:53:44Z
+go/doc/comment	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:54:21Z
+crypto/internal/fips140/edwards25519/field	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:55:10Z
+encoding/binary	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:55:33Z
+fmt	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:56:34Z
+crypto/sha3	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:57:36Z
+net/url	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641468	PASS	0	2026-11-02T17:58:14Z
+crypto/internal/fips140only	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793642320	PASS	0	2026-11-02T18:04:49Z
+syscall	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793642320	PASS	0	2026-11-02T18:05:43Z
+regexp	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793642320	PASS	0	2026-11-02T18:07:44Z
+net/rpc/jsonrpc	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793642320	PASS	0	2026-11-02T18:10:50Z
+# abort 2026-11-02 18:10:51Z: the kit's floor guard stopped before crypto/rsa (free 14G < 15G; about 6 GB of src/core build output over 4 rows). Purged by git clean -fdXq -- src (the kit's shard-end purge), 0 tracked deletions, go build cache cleared, free 22G; re-entered at crypto/rsa as a third kit invocation (COORD's standing remedy)
+crypto/rsa	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793643114	PASS	0	2026-11-02T18:19:26Z
+encoding/json	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793643114	PASS	0	2026-11-02T18:22:43Z
+os/exec	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793643114	PASS	0	2026-11-02T18:24:39Z
+internal/testenv	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793643114	PASS	0	2026-11-02T18:25:01Z
+internal/runtime/gc/scan	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793643114	DIVERGED	1	2026-11-02T18:25:21Z
+runtime/pprof	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793643114	PASS	0	2026-11-02T18:37:07Z
+testing	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793643114	PASS	0	2026-11-02T18:38:22Z
+# finding internal/runtime/gc/scan DIVERGED (rc 1): this host's CPU reports avx512f/bw/vl/vbmi and gfni, so Go runs TestExpandAVX512, TestFilterNilAVX512 and TestScanSpanPackedAVX512 (9261 verdicts) while C# skips them (3095; HasAVX512BITALG unmapped); 6169 differ, all Go=pass C#=skip; the 3095 shared verdicts agree. The BOARD's 2026-10-16 host-conditional FEATURE GAP
+# end 2026-11-02 18:38:35Z: 23 of 23 rows read; PASS 22, DIVERGED 1 (gc/scan above); all invocations ended with residue-after 0 and tracked-deleted 0; container restarts during the shard: 0
