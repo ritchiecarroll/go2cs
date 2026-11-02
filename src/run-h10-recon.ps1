@@ -784,6 +784,13 @@ function Test-GoPinContract {
 function Get-ComparisonWord($Diverged, $Rc) {
     if     ($Diverged -isnot [int]) { return 'NOVERDICT' }
     elseif ($Diverged -gt 0)        { return 'DIVERGED' }
+    # ⚠ PASS?rc: NO DIVERGENCE, BUT THE ROW EXITED NON-ZERO, AND IT DOES NOT BANK. The arms before this
+    # function catch a non-zero exit only when its output names a conversion failure or a CS error, so a
+    # row whose -tests run failed some other way and still wrote a clean, fresh comparison read PASS and
+    # banked (R's linux finding, the same chain on windows). Every consumer banks on PASS and DIVERGED by
+    # name only (run-h10-dispatch.ps1 `banked`, annotate_linux.py), so the `?rc` spelling is what keeps
+    # the row out of the bank while its readings stay in the TSV.
+    elseif ($Rc -ne 0)              { return 'PASS?rc' }
     else                            { return 'PASS' }
 }
 
@@ -1584,9 +1591,9 @@ foreach ($row in $rows) {
     # worse fact than never having produced one. UNREAD is set INSIDE the derivation and reaches
     # NOVERDICT through the `-isnot [int]` guard, so it is excluded by name here.
     #
-    # PASS and DIVERGED are the only two words the derivation produces; every other word means it
-    # never ran, whatever the initialiser holds.
-    if ($word -ne 'PASS' -and $word -ne 'DIVERGED' -and $diverged -ne 'UNREAD') { $diverged = 'n/a' }
+    # PASS, PASS?rc and DIVERGED are the only words the derivation produces; every other word means it
+    # never ran, whatever the initialiser holds. PASS?rc keeps its 0: the comparison was read.
+    if ($word -ne 'PASS' -and $word -ne 'PASS?rc' -and $word -ne 'DIVERGED' -and $diverged -ne 'UNREAD') { $diverged = 'n/a' }
 
     # ⚠ AND THE SAME RULE FOR rc. A row that threw has no exit code; emitting an empty cell would read
     # as a zero, which is the SUCCESS value -- the worst possible default for the one row that failed
