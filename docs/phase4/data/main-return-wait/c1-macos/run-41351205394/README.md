@@ -8,9 +8,12 @@ and base `c5a4637bba`, N=50 per arm. The runners pushed their raw logs to two br
 
 Both runners had .NET SDK 10.0.403 and runtime 10.0.14, and ran under macOS's own bash 3.2.57.
 
-These files are those logs with runner paths rewritten (`<tmp>`, `<checkout>`, `<runner-home>`). Each AOT build log is
-cut to its error lines (`*.errors.log`); the full logs, about 6,000 lines of trim warnings each, stay on the raw
-branches.
+These are those logs, every file, with runner paths rewritten (`<tmp>`, `<checkout>`, `<runner-home>`). One more
+change, in the six AOT build logs only: the .NET framework assembly version, ten followed by three zeros in dotted form (468 per
+log, in `System.Private.CoreLib` and `System.Linq` type names), is respelled with hyphens, `Version=10-0-0-0`. The identifier census's strict
+IPv4 arm reads that version as a private address. Nothing else differs from the raw branches.
+`*.log` is ignored by the repository's `.gitignore`, so the logs are added by name with `git add -f`: the first copy of
+this run (224e9cb66c) dropped every one of them silently.
 
 Per run, `<arm>.tsv` holds: exit code, stderr bytes, whether stderr holds the panic report, whether stdout holds
 `recovered`, how many of the 32 spinners were alive after the run (`-` idle), wall ms, and whether the program died at

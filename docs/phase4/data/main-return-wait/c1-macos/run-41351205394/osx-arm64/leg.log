@@ -1,0 +1,90 @@
+== host: Apple M1 (Virtual) cpus=3 rid=osx-arm64 os=15.8.2
+== dotnet: 10.0.403; runtime: Microsoft.NETCore.App 10.0.14 [<runner-home>/.dotnet/shared/Microsoft.NETCore.App]; bash 3.2.57(1)-release
+== tip bbf1725aa7, base c5a4637bba, N=50, GoTargetOS=darwin
+== GolibTests (MainExit*, ThreadCpuTime*) at the tip, GoTargetOS unset
+golibtests exit=1 Total tests: 21      Passed: 20      Failed: 1 
+   1 Failed ASleepingThreadsCpuTimeStaysFlat [245 ms]
+   1 Passed ABusyDeferredCallIsReleasedByItsCpuBudgetNotTheGuard [34 ms]
+   1 Passed AGoexitDuringAPanicEndsTheCountWithTheGoroutine [< 1 ms]
+   1 Passed AGoroutineCountsWhileAPanicRunsItsDeferredCalls [300 ms]
+   1 Passed AMainReturnIsReleasedByADeferredCallInASystemCall [3 ms]
+   1 Passed AMainReturnIsReleasedByADeferredCallParkedOnAChannel [21 ms]
+   1 Passed ANestedRecoveryDoesNotEndTheOuterPanicsCount [< 1 ms]
+   1 Passed ANewBlockRestartsTheConfirmation [< 1 ms]
+   1 Passed ANonOwnerNeverComesBackToPrintASecondReport [629 ms]
+   1 Passed AnUnmarkedBlockHoldsMainToTheHangGuard [320 ms]
+   1 Passed APanicACSharpCatchStoppedEndsTheCountWithTheGoroutine [< 1 ms]
+   1 Passed ARunnableGoroutineHoldsMainUntilItsCpuBudgetIsUsed [< 1 ms]
+   1 Passed ASpinningThreadsCpuTimeAdvancesWithItsWallTime [209 ms]
+   1 Passed AStarvedGoroutineHoldsMainForAsLongAsItGetsNoCpu [< 1 ms]
+   1 Passed AThreadThatExitedReadsAsASeamFailure [113 ms]
+   1 Passed RepeatedWaitsLeaveTheProcessHandleCountUnchanged [2 s]
+   1 Passed TheCallingThreadsTokenIsStable [< 1 ms]
+   1 Passed TheFirstFatalPathOwnsTheReportAndGoesOnToPrint [1 ms]
+   1 Passed TheMainGoroutineIsNeverCounted [< 1 ms]
+   1 Passed TheSameBlockReleasesMainOnceItHasLastedTheConfirmation [< 1 ms]
+   1 Passed WithoutACpuReadingTheWaitFallsBackToItsWallClockBound [< 1 ms]
+built base GoroutinePanicAfterDeferredDone jit in 167s
+BUILD FAILED: base GoroutinePanicAfterDeferredDone aot (see build-base-GoroutinePanicAfterDeferredDone-aot.log)
+  ILC: Method '[golib]go.StandardBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,go.slice`1<uint8>>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, go.slice`1<Byte>>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.NativeArrayBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.FieldRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.FieldRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.NativeBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.StandardBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+EXEC : error : An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23 [<tmp>/base/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+  System.ArgumentException: An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+     at System.Collections.Generic.Dictionary`2.TryInsert(TKey, TValue, InsertionBehavior) + 0x2e4
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, IObjectDumper, Logger) + 0x96c
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, NodeFactory, ObjectWritingOptions, IObjectDumper, Logger) + 0xe0
+     at ILCompiler.Compilation.ILCompiler.ICompilation.Compile(String, ObjectDumper) + 0x54
+     at ILCompiler.Program.Run() + 0x2a48
+     at ILCompiler.ILCompilerRootCommand.<>c__DisplayClass261_0.<.ctor>b__0(ParseResult) + 0x2f8
+<runner-home>/.nuget/packages/microsoft.dotnet.ilcompiler/10.0.14/build/Microsoft.NETCore.Native.targets(330,5): error MSB3073: The command ""<runner-home>/.nuget/packages/runtime.osx-arm64.microsoft.dotnet.ilcompiler/10.0.14/tools/ilc" @"obj/Release/net10.0/osx-arm64/native/GoroutinePanicAfterDeferredDone.ilc.rsp"" exited with code 1. [<tmp>/base/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+built tip GoroutinePanicAfterDeferredDone jit in 207s
+BUILD FAILED: tip GoroutinePanicAfterDeferredDone aot (see build-tip-GoroutinePanicAfterDeferredDone-aot.log)
+  ILC: Method '[golib]go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,go.slice`1<uint8>>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, go.slice`1<Byte>>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.NativeArrayBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.FieldRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.FieldRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.NativeBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.StandardBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+EXEC : error : An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23 [<tmp>/tip/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+  System.ArgumentException: An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+     at System.Collections.Generic.Dictionary`2.TryInsert(TKey, TValue, InsertionBehavior) + 0x2e4
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, IObjectDumper, Logger) + 0x96c
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, NodeFactory, ObjectWritingOptions, IObjectDumper, Logger) + 0xe0
+     at ILCompiler.Compilation.ILCompiler.ICompilation.Compile(String, ObjectDumper) + 0x54
+     at ILCompiler.Program.Run() + 0x2a48
+     at ILCompiler.ILCompilerRootCommand.<>c__DisplayClass261_0.<.ctor>b__0(ParseResult) + 0x2f8
+<runner-home>/.nuget/packages/microsoft.dotnet.ilcompiler/10.0.14/build/Microsoft.NETCore.Native.targets(330,5): error MSB3073: The command ""<runner-home>/.nuget/packages/runtime.osx-arm64.microsoft.dotnet.ilcompiler/10.0.14/tools/ilc" @"obj/Release/net10.0/osx-arm64/native/GoroutinePanicAfterDeferredDone.ilc.rsp"" exited with code 1. [<tmp>/tip/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+built tip GoroutineRecoveringWhenMainReturns jit in 18s
+BUILD FAILED: tip GoroutineRecoveringWhenMainReturns aot (see build-tip-GoroutineRecoveringWhenMainReturns-aot.log)
+  ILC: Method '[golib]go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,go.slice`1<uint8>>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, go.slice`1<Byte>>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ElemRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.NativeArrayBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.FieldRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.FieldRefBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.NativeBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.StandardBox`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.GetHashCode()' will always throw because: Failed to load type 'go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon, Boolean>>>>>>>' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+EXEC : error : An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23 [<tmp>/tip/src/tests/Behavioral/GoroutineRecoveringWhenMainReturns/GoroutineRecoveringWhenMainReturns.csproj]
+  System.ArgumentException: An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+     at System.Collections.Generic.Dictionary`2.TryInsert(TKey, TValue, InsertionBehavior) + 0x2e4
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, IObjectDumper, Logger) + 0x96c
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, NodeFactory, ObjectWritingOptions, IObjectDumper, Logger) + 0xe0
+     at ILCompiler.Compilation.ILCompiler.ICompilation.Compile(String, ObjectDumper) + 0x54
+     at ILCompiler.Program.Run() + 0x2a48
+     at ILCompiler.ILCompilerRootCommand.<>c__DisplayClass261_0.<.ctor>b__0(ParseResult) + 0x2f8
+<runner-home>/.nuget/packages/microsoft.dotnet.ilcompiler/10.0.14/build/Microsoft.NETCore.Native.targets(330,5): error MSB3073: The command ""<runner-home>/.nuget/packages/runtime.osx-arm64.microsoft.dotnet.ilcompiler/10.0.14/tools/ilc" @"obj/Release/net10.0/osx-arm64/native/GoroutineRecoveringWhenMainReturns.ilc.rsp"" exited with code 1. [<tmp>/tip/src/tests/Behavioral/GoroutineRecoveringWhenMainReturns/GoroutineRecoveringWhenMainReturns.csproj]
+ARM r0-jit-idle load=idle N=50 loss= pass=50 late=0 invalid=0 spinners_all_alive=- exits=[2x50 ] mean_ms=527
+ARM r0-jit-n32 load=n32 N=50 loss= pass=50 late=0 invalid=0 spinners_all_alive=yes 50/50 exits=[2x50 ] mean_ms=4981
+ARM r0-aot-idle: NOT MEASURED (no executable)
+ARM r0-aot-n32: NOT MEASURED (no executable)
+ARM r1-jit-idle load=idle N=50 loss= pass=50 late=0 invalid=0 spinners_all_alive=- exits=[2x50 ] mean_ms=438
+ARM r1-jit-n32 load=n32 N=50 loss= pass=50 late=0 invalid=0 spinners_all_alive=yes 50/50 exits=[2x50 ] mean_ms=4979
+ARM r1-aot-idle: NOT MEASURED (no executable)
+ARM r1-aot-n32: NOT MEASURED (no executable)
+ARM r2-jit-idle load=idle N=50 loss=- pass=- late=0 invalid=0 spinners_all_alive=- exits=[0x50 ] mean_ms=420
+ARM r2-jit-n32 load=n32 N=50 loss=- pass=- late=0 invalid=0 spinners_all_alive=yes 50/50 exits=[0x50 ] mean_ms=5080
+ARM r2-aot-idle: NOT MEASURED (no executable)
+ARM r2-aot-n32: NOT MEASURED (no executable)
+== done

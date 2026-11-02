@@ -1,0 +1,131 @@
+  Determining projects to restore...
+  Restored <tmp>/tip/src/core/unsafe/unsafe.csproj (in 165 ms).
+  Restored <tmp>/tip/src/core/unicode/utf8/unicode.utf8.csproj (in 5 ms).
+  Restored <tmp>/tip/src/core/unicode/unicode.csproj (in 5 ms).
+  Restored <tmp>/tip/src/core/time/time.csproj (in 24 ms).
+  Restored <tmp>/tip/src/core/syscall/syscall.csproj (in 47 ms).
+  Restored <tmp>/tip/src/core/internal/msan/internal.msan.csproj (in 5 ms).
+  Restored <tmp>/tip/src/core/internal/goos/internal.goos.csproj (in 6 ms).
+  Restored <tmp>/tip/src/core/internal/goexperiment/internal.goexperiment.csproj (in 7 ms).
+  Restored <tmp>/tip/src/core/internal/godebugs/internal.godebugs.csproj (in 27 ms).
+  Restored <tmp>/tip/src/core/internal/godebug/internal.godebug.csproj (in 66 ms).
+  Restored <tmp>/tip/src/gen/go2cs-gen/go2cs-gen.csproj (in 748 ms).
+  Restored <tmp>/tip/src/core/internal/goarch/internal.goarch.csproj (in 12 ms).
+  Restored <tmp>/tip/src/tests/Behavioral/GoroutineRecoveringWhenMainReturns/GoroutineRecoveringWhenMainReturns.csproj (in 676 ms).
+  Restored <tmp>/tip/src/core/internal/cpu/internal.cpu.csproj (in 4 ms).
+  Restored <tmp>/tip/src/core/internal/filepathlite/internal.filepathlite.csproj (in 26 ms).
+  Restored <tmp>/tip/src/core/internal/coverage/rtcov/internal.coverage.rtcov.csproj (in 5 ms).
+  Restored <tmp>/tip/src/core/internal/chacha8rand/internal.chacha8rand.csproj (in 4 ms).
+  Restored <tmp>/tip/src/core/internal/fmtsort/internal.fmtsort.csproj (in 66 ms).
+  Restored <tmp>/tip/src/core/internal/byteorder/internal.byteorder.csproj (in 2 ms).
+  Restored <tmp>/tip/src/core/internal/asan/internal.asan.csproj (in 7 ms).
+  Restored <tmp>/tip/src/core/internal/bytealg/internal.bytealg.csproj (in 12 ms).
+  Restored <tmp>/tip/src/core/golib/golib.csproj (in 6 ms).
+  Restored <tmp>/tip/src/core/internal/abi/internal.abi.csproj (in 8 ms).
+  Restored <tmp>/tip/src/core/internal/bisect/internal.bisect.csproj (in 21 ms).
+  Restored <tmp>/tip/src/core/cmp/cmp.csproj (in 4 ms).
+  Restored <tmp>/tip/src/core/errors/errors.csproj (in 22 ms).
+  Restored <tmp>/tip/src/core/fmt/fmt.csproj (in 39 ms).
+  Restored <tmp>/tip/src/core/internal/testlog/internal.testlog.csproj (in 25 ms).
+  Restored <tmp>/tip/src/core/internal/syscall/unix/internal.syscall.unix.csproj (in 23 ms).
+  Restored <tmp>/tip/src/core/internal/syscall/execenv/internal.syscall.execenv.csproj (in 29 ms).
+  Restored <tmp>/tip/src/core/internal/synctest/internal.synctest.csproj (in 5 ms).
+  Restored <tmp>/tip/src/core/internal/sync/internal.sync.csproj (in 8 ms).
+  Restored <tmp>/tip/src/core/internal/stringslite/internal.stringslite.csproj (in 6 ms).
+  Restored <tmp>/tip/src/core/internal/strconv/internal.strconv.csproj (in 4 ms).
+  Restored <tmp>/tip/src/core/internal/runtime/pprof/label/internal.runtime.pprof.label.csproj (in 4 ms).
+  Restored <tmp>/tip/src/core/internal/runtime/sys/internal.runtime.sys.csproj (in 6 ms).
+  Restored <tmp>/tip/src/core/internal/runtime/math/internal.runtime.math.csproj (in 8 ms).
+  Restored <tmp>/tip/src/core/internal/runtime/gc/internal.runtime.gc.csproj (in 4 ms).
+  Restored <tmp>/tip/src/core/internal/runtime/maps/internal.runtime.maps.csproj (in 17 ms).
+  Restored <tmp>/tip/src/core/internal/runtime/gc/scan/internal.runtime.gc.scan.csproj (in 12 ms).
+  Restored <tmp>/tip/src/core/internal/runtime/exithook/internal.runtime.exithook.csproj (in 10 ms).
+  Restored <tmp>/tip/src/core/internal/runtime/atomic/internal.runtime.atomic.csproj (in 7 ms).
+  Restored <tmp>/tip/src/core/internal/reflectlite/internal.reflectlite.csproj (in 14 ms).
+  Restored <tmp>/tip/src/core/internal/profilerecord/internal.profilerecord.csproj (in 2 ms).
+  Restored <tmp>/tip/src/core/internal/race/internal.race.csproj (in 21 ms).
+  Restored <tmp>/tip/src/core/internal/oserror/internal.oserror.csproj (in 20 ms).
+  Restored <tmp>/tip/src/core/internal/poll/internal.poll.csproj (in 18 ms).
+  Restored <tmp>/tip/src/core/sync/sync.csproj (in 16 ms).
+  Restored <tmp>/tip/src/core/sync/atomic/sync.atomic.csproj (in 6 ms).
+  Restored <tmp>/tip/src/core/strconv/strconv.csproj (in 16 ms).
+  Restored <tmp>/tip/src/core/slices/slices.csproj (in 25 ms).
+  Restored <tmp>/tip/src/core/runtime/runtime.csproj (in 21 ms).
+  Restored <tmp>/tip/src/core/path/path.csproj (in 22 ms).
+  Restored <tmp>/tip/src/core/reflect/reflect.csproj (in 18 ms).
+  Restored <tmp>/tip/src/core/math/bits/math.bits.csproj (in 3 ms).
+  Restored <tmp>/tip/src/core/math/math.csproj (in 3 ms).
+  Restored <tmp>/tip/src/core/os/os.csproj (in 43 ms).
+  Restored <tmp>/tip/src/core/iter/iter.csproj (in 29 ms).
+  Restored <tmp>/tip/src/core/io/io.csproj (in 29 ms).
+  Restored <tmp>/tip/src/core/internal/trace/tracev2/internal.trace.tracev2.csproj (in 3 ms).
+  Restored <tmp>/tip/src/core/internal/unsafeheader/internal.unsafeheader.csproj (in 4 ms).
+  Restored <tmp>/tip/src/core/io/fs/io.fs.csproj (in 39 ms).
+  go2cs-gen -> <tmp>/tip/src/gen/go2cs-gen/bin/Release/netstandard2.0/go2cs-gen.dll
+  golib -> <tmp>/tip/src/core/golib/bin/Release/net10.0/golib.dll
+  unsafe -> <tmp>/tip/src/core/unsafe/bin/Release/net10.0/unsafe.dll
+  internal.goarch -> <tmp>/tip/src/core/internal/goarch/bin/Release/net10.0/internal.goarch.dll
+  internal.goos -> <tmp>/tip/src/core/internal/goos/bin/Release/net10.0/internal.goos.dll
+  internal.runtime.atomic -> <tmp>/tip/src/core/internal/runtime/atomic/bin/Release/net10.0/internal.runtime.atomic.dll
+  internal.abi -> <tmp>/tip/src/core/internal/abi/bin/Release/net10.0/internal.abi.dll
+  math.bits -> <tmp>/tip/src/core/math/bits/bin/Release/net10.0/math.bits.dll
+  internal.strconv -> <tmp>/tip/src/core/internal/strconv/bin/Release/net10.0/internal.strconv.dll
+  internal.runtime.pprof.label -> <tmp>/tip/src/core/internal/runtime/pprof/label/bin/Release/net10.0/internal.runtime.pprof.label.dll
+  internal.trace.tracev2 -> <tmp>/tip/src/core/internal/trace/tracev2/bin/Release/net10.0/internal.trace.tracev2.dll
+  internal.goexperiment -> <tmp>/tip/src/core/internal/goexperiment/bin/Release/net10.0/internal.goexperiment.dll
+  unicode.utf8 -> <tmp>/tip/src/core/unicode/utf8/bin/Release/net10.0/unicode.utf8.dll
+  internal.profilerecord -> <tmp>/tip/src/core/internal/profilerecord/bin/Release/net10.0/internal.profilerecord.dll
+  internal.godebugs -> <tmp>/tip/src/core/internal/godebugs/bin/Release/net10.0/internal.godebugs.dll
+  internal.byteorder -> <tmp>/tip/src/core/internal/byteorder/bin/Release/net10.0/internal.byteorder.dll
+  cmp -> <tmp>/tip/src/core/cmp/bin/Release/net10.0/cmp.dll
+  unicode -> <tmp>/tip/src/core/unicode/bin/Release/net10.0/unicode.dll
+  internal.asan -> <tmp>/tip/src/core/internal/asan/bin/Release/net10.0/internal.asan.dll
+  internal.cpu -> <tmp>/tip/src/core/internal/cpu/bin/Release/net10.0/internal.cpu.dll
+  internal.runtime.gc -> <tmp>/tip/src/core/internal/runtime/gc/bin/Release/net10.0/internal.runtime.gc.dll
+  internal.race -> <tmp>/tip/src/core/internal/race/bin/Release/net10.0/internal.race.dll
+  internal.synctest -> <tmp>/tip/src/core/internal/synctest/bin/Release/net10.0/internal.synctest.dll
+  internal.bytealg -> <tmp>/tip/src/core/internal/bytealg/bin/Release/net10.0/internal.bytealg.dll
+  internal.msan -> <tmp>/tip/src/core/internal/msan/bin/Release/net10.0/internal.msan.dll
+  internal.unsafeheader -> <tmp>/tip/src/core/internal/unsafeheader/bin/Release/net10.0/internal.unsafeheader.dll
+  internal.coverage.rtcov -> <tmp>/tip/src/core/internal/coverage/rtcov/bin/Release/net10.0/internal.coverage.rtcov.dll
+  internal.stringslite -> <tmp>/tip/src/core/internal/stringslite/bin/Release/net10.0/internal.stringslite.dll
+  sync.atomic -> <tmp>/tip/src/core/sync/atomic/bin/Release/net10.0/sync.atomic.dll
+  internal.runtime.math -> <tmp>/tip/src/core/internal/runtime/math/bin/Release/net10.0/internal.runtime.math.dll
+  math -> <tmp>/tip/src/core/math/bin/Release/net10.0/math.dll
+  internal.runtime.sys -> <tmp>/tip/src/core/internal/runtime/sys/bin/Release/net10.0/internal.runtime.sys.dll
+  internal.runtime.exithook -> <tmp>/tip/src/core/internal/runtime/exithook/bin/Release/net10.0/internal.runtime.exithook.dll
+  internal.runtime.maps -> <tmp>/tip/src/core/internal/runtime/maps/bin/Release/net10.0/internal.runtime.maps.dll
+  internal.runtime.gc.scan -> <tmp>/tip/src/core/internal/runtime/gc/scan/bin/Release/net10.0/internal.runtime.gc.scan.dll
+  internal.sync -> <tmp>/tip/src/core/internal/sync/bin/Release/net10.0/internal.sync.dll
+  internal.chacha8rand -> <tmp>/tip/src/core/internal/chacha8rand/bin/Release/net10.0/internal.chacha8rand.dll
+  runtime -> <tmp>/tip/src/core/runtime/bin/Release/net10.0/runtime.dll
+  iter -> <tmp>/tip/src/core/iter/bin/Release/net10.0/iter.dll
+  internal.reflectlite -> <tmp>/tip/src/core/internal/reflectlite/bin/Release/net10.0/internal.reflectlite.dll
+  sync -> <tmp>/tip/src/core/sync/bin/Release/net10.0/sync.dll
+  errors -> <tmp>/tip/src/core/errors/bin/Release/net10.0/errors.dll
+  internal.testlog -> <tmp>/tip/src/core/internal/testlog/bin/Release/net10.0/internal.testlog.dll
+  internal.bisect -> <tmp>/tip/src/core/internal/bisect/bin/Release/net10.0/internal.bisect.dll
+  internal.godebug -> <tmp>/tip/src/core/internal/godebug/bin/Release/net10.0/internal.godebug.dll
+  strconv -> <tmp>/tip/src/core/strconv/bin/Release/net10.0/strconv.dll
+  io -> <tmp>/tip/src/core/io/bin/Release/net10.0/io.dll
+  internal.oserror -> <tmp>/tip/src/core/internal/oserror/bin/Release/net10.0/internal.oserror.dll
+  slices -> <tmp>/tip/src/core/slices/bin/Release/net10.0/slices.dll
+  path -> <tmp>/tip/src/core/path/bin/Release/net10.0/path.dll
+  reflect -> <tmp>/tip/src/core/reflect/bin/Release/net10.0/reflect.dll
+  syscall -> <tmp>/tip/src/core/syscall/bin/Release/net10.0/syscall.dll
+  internal.syscall.execenv -> <tmp>/tip/src/core/internal/syscall/execenv/bin/Release/net10.0/internal.syscall.execenv.dll
+  internal.syscall.unix -> <tmp>/tip/src/core/internal/syscall/unix/bin/Release/net10.0/internal.syscall.unix.dll
+  internal.fmtsort -> <tmp>/tip/src/core/internal/fmtsort/bin/Release/net10.0/internal.fmtsort.dll
+  time -> <tmp>/tip/src/core/time/bin/Release/net10.0/time.dll
+  internal.poll -> <tmp>/tip/src/core/internal/poll/bin/Release/net10.0/internal.poll.dll
+  io.fs -> <tmp>/tip/src/core/io/fs/bin/Release/net10.0/io.fs.dll
+  internal.filepathlite -> <tmp>/tip/src/core/internal/filepathlite/bin/Release/net10.0/internal.filepathlite.dll
+  os -> <tmp>/tip/src/core/os/bin/Release/net10.0/os.dll
+  fmt -> <tmp>/tip/src/core/fmt/bin/Release/net10.0/fmt.dll
+  GoroutineRecoveringWhenMainReturns -> <tmp>/tip/src/tests/Behavioral/GoroutineRecoveringWhenMainReturns/bin/Release/net10.0/GoroutineRecoveringWhenMainReturns.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:16.94
