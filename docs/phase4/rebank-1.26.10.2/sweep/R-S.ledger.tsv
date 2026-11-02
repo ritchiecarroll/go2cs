@@ -1,0 +1,10 @@
+f6666d98a21ad4c3f992c959769f844ee6422ceb
+ended_utc	row	tree	word	count	banked	rc	wall_s	sweep_row_s	timing_tsv	guard2_before_restore	restored
+2026-11-02T16:33:01Z	net/smtp	f6666d98a21ad4c3f992c959769f844ee6422ceb	PASS	20	20	0	502	471	20261102-102508-sweep.tsv	empty	modified=0 untracked=0 deleted=0 left=0
+2026-11-02T16:37:26Z	net/http/httptest	f6666d98a21ad4c3f992c959769f844ee6422ceb	PASS	62	62	0	221	217	20261102-103347-sweep.tsv	empty	modified=0 untracked=0 deleted=0 left=0
+2026-11-02T16:38:35Z	net/http/httptrace	f6666d98a21ad4c3f992c959769f844ee6422ceb	FAIL	-	2	1	64	-	20261102-103732-sweep.tsv	empty	modified=0 untracked=0 deleted=0 left=0
+2026-11-02T16:41:43Z	net/http/cgi	f6666d98a21ad4c3f992c959769f844ee6422ceb	PASS	39	39	0	183	181	20261102-103841-sweep.tsv	empty	modified=0 untracked=0 deleted=0 left=0
+2026-11-02T16:49:27Z	crypto/x509	f6666d98a21ad4c3f992c959769f844ee6422ceb	PASS	540	540	0	459	457	20261102-104149-sweep.tsv	empty	modified=0 untracked=0 deleted=0 left=0
+2026-11-02T16:54:55Z	os/exec	f6666d98a21ad4c3f992c959769f844ee6422ceb	PASS	117	117	0	320	315	20261102-104933-sweep.tsv	empty	modified=0 untracked=0 deleted=0 left=0
+2026-11-02T17:05:06Z	net/http	f6666d98a21ad4c3f992c959769f844ee6422ceb	PASS	1526	1526	0	597	592	20261102-105512-sweep.tsv	empty	modified=0 untracked=0 deleted=0 left=0
+2026-11-02T17:31:46Z	crypto/tls	f6666d98a21ad4c3f992c959769f844ee6422ceb	PASS	1393	1393	0	1593	1590	20261102-110514-sweep.tsv	empty	modified=0 untracked=0 deleted=0 left=0

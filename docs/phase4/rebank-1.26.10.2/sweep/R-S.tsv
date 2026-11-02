@@ -1,0 +1,9 @@
+row	word	count	banked	rc	wall_s	real_drift	oracle_rerun
+net/smtp	PASS	20	20	0	502	0	no
+net/http/httptest	PASS	62	62	0	221	0	no
+net/http/httptrace	FAIL	-	2	1	64	0	no
+net/http/cgi	PASS	39	39	0	183	0	no
+crypto/x509	PASS	540	540	0	459	0	no
+os/exec	PASS	117	117	0	320	0	no
+net/http	PASS	1526	1526	0	597	0	no
+crypto/tls	PASS	1393	1393	0	1593	0	no
