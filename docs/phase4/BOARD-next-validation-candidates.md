@@ -33034,4 +33034,67 @@ had validated. `TestTBHelper` reads Go's `helperfuncs_test.go:86` and `:87` as `
 
 — G (2026-11-01)
 
+## 2026-11-01 — H (restore probe, measured on H): the behavioral runner's restore phase costs 46 minutes on H because RestoreAll issues one MSBuild Restore per target; one static-graph restore of the same 887 runs in 82 s — post-hop runner change, owner H
+
+**The finding.** On H (15.8 GB RAM, 8 logical processors) the behavioral runner's restore phase read 2,748 s and
+2,809 s over 887 targets in the build-wall pair (`8b993b7b1d` and `59b0798e4c`, purged trees). That is above the
+runner's default 2,400 s budget, so every default-budget run on H times out its restore. The one-shot build of the
+same 887 reads about 335 s. The restore WORK is not the cost: the runner's `RestoreAll` target is
+`<MSBuild Projects="@(ProjectToBuild)" Targets="Restore" BuildInParallel="true" />` (Program.cs,
+`WriteTraversalProject`), so each target gets its own Restore. Each Restore repeats the graph walk and the no-op
+checks over that target's closure.
+
+**The slice pair (prediction MISSED, as worded).** Master `d95801abf7`, purged before each arm, runner
+`--phase compile --build-timeout 3600`, every line timestamped. S99 is a superset of S50.
+
+| arm | targets | pre-build deps | transpile | pre-build | restore | one-shot |
+|:--|--:|--:|--:|--:|--:|--:|
+| S50 (`--slice 1/18`) | 50 | 17 | 88 s | 353 s | 52 s | 47 s |
+| S99 (`--slice 1/9`) | 99 | 22 | 144 s | 391 s | 76 s | 60 s |
+| 887 (build-wall pair) | 887 | 124 | ~1,220 s | ~1,780 s | 2,748–2,809 s | ~335 s |
+
+- **Predicted** (per project, from the mechanism): restore(S99)/restore(S50) = 1.98 (band 1.7–2.3), and
+  restore(S50) about 160 s (band 100–260 s).
+- **Measured:** 1.46, inside the 1.4–1.7 band stated beforehand as ambiguous, and 52 s, which MISSED low.
+- **Superlinear past 99.** The line through the two points, 27.5 s + 0.49 s × N, extrapolates to about 460 s at
+  887. The measured restore is about 6x that. Restore runs 1.1x the one-shot at S50, 1.3x at S99 and 8x at 887.
+
+**Second instrument: the static closure** (each target's transitive ProjectReference closure, read from the csprojs):
+
+| set | mean closure per target | max | union |
+|:--|--:|--:|--:|
+| S50 | 68.2 | 72 | 77 |
+| S99 | 68.3 | 72 | 83 |
+| all 887 | 68.4 | 150 | 267 |
+
+- The mean is flat, so the sum of closures is linear in N. "Later targets are heavier" does not explain the 887.
+- A two-term fit (a × N + b × union) from S50 and S99 predicts about 500 s at 887, so that model fails too.
+
+**Cross-box line (COORD, i7, 31.9 GB, 12 logical).** The i7 runs the WHOLE 887 battery (transpile, pre-build,
+restore, one-shot, run) in 5,530 s at batch 120. That is about twice H's restore phase alone. The runner logs no
+per-phase walls, so the i7's restore cannot be split out.
+
+**The discriminating arm (RULED (b), one arm, memory telemetry).** Master `d95801abf7`, the tree purged (0 bin/obj
+left). The 887 targets were restored as ONE static graph: `dotnet restore` of a scratch `.slnx` listing them, with
+`-p:RestoreUseStaticGraphEvaluation=true` and the runner's global properties (Configuration=Release,
+go2csPath=`<src>/`). No runner change.
+- **82 s,** rc 0, 0 errors, MSB4166 0. It wrote 1,134 `project.assets.json`: 954 under Behavioral (the 887 and
+  their nested sub-libraries) and 180 in core, golib and gen.
+- **Conservative.** This arm restored the whole 267-project union cold. The runner's restore phase runs after its
+  pre-build, which has already restored the shared deps.
+- **Memory clear.** Read once a minute: at least 5,179 MB available; committed peak 15,605 MB of a 34,912 MB limit.
+- **Tree clean** after the arm.
+
+**Reading.** The graph restore collapses the wall about 34x with memory clear, so by the rule stated before the arm
+the runner's `RestoreAll` shape is the cost, not H's RAM. M's 887 reading lost 34 targets' assets to an MSB4166
+node crash. That crash rides the per-target shape, whose cost grows past 99 targets in a way neither the target
+count nor the closure explains.
+
+**RULED (COORD, 2026-11-01): post-hop, owner H.** `RestoreAll` becomes one static-graph restore of a generated
+`.slnx`, in its own process, with the same common arguments. It gates on the full runner on H, building against
+the graph-restored assets; the expected restore phase is about 80–100 s. Not built against here: this arm measured
+the restore only. No gate-instrument change goes in during the freeze window.
+
+— H (2026-11-01)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
