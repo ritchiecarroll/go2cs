@@ -33163,4 +33163,76 @@ main-return-wait leg's darwin AOT arms.
 
 — G (2026-11-01)
 
+
+## 2026-11-02 — G (in-hop seat, claude/g-heap-byvalue): crypto/internal/fips140cache's TestCache hung at the 1.26.10.2 freeze because heap<T>'s initial value stayed rooted for the caller's whole frame — FIXED IN GOLIB
+
+**The finding.** At the freeze tip `f6666d98a2`, crypto/internal/fips140cache read FAIL on the i9's windows sweep:
+TestCache was still in flight at the 10-minute package deadline. At `f75e0c53ec` it passed in 14 s. It hangs
+deterministically: 9 of 9 runs, at TC0 and tiered alike. TestCache drops a key and loops `runtime.GC()` until the
+key's AddCleanup callback runs. Go collects the key; the converted test never did.
+
+**The emission that exposed it.** Seat #29 (H2, `29bead80f1`, batch 87) folds a heap-boxed `x := rhs` into one call,
+`ref var k1 = ref heap<ж<key>>(newKey(), out var Ꮡk1);`. Batch 127's end regen carried the fold into this test. The
+fold itself is sound and STAYS (COORD's ruling): the defect is golib's parameter.
+
+**Two roots, both found by measurement.**
+- **The call site.** `heap<T>(in T target, out ж<T>)` takes `in`, and an `in` parameter needs an address. For the
+  rvalue `newKey()` the compiler spilled the value into a hidden local of the caller and passed `ldloca`. In the
+  converted TestCache's IL, each of k1, k2 and k3 had a second `ldloca` (V_27, V_29, V_30) beside its out box. That
+  local is never cleared, and address-taken, so the JIT reports it live for the whole frame unless heap inlines.
+- **Inside heap, once heap took its value by value.** The row still hung. Three dumps of the spinning test, with
+  dotnet-dump `gcroot`, found exactly one live key and one root: TestCache's own frame at `rsp+1d8`. `gcinfo` lists that
+  slot among the frame's 49 UNTRACKED slots. `DOTNET_JitDisasm=TestCache` (FullOpts) named it: heap was INLINED, its
+  by-value parameter became `[rsp+0x1D8]`, and `lea rdx, [rsp+0x1D8]` fed `Ꮡ[__Canon](byref)`, which is not inlined
+  (a shared generic). So by-value alone moved the spill from the call site into heap's own inlined body. The cleanup
+  path was not involved (COORD's fork B): the key was rooted, so its cleanup could not run.
+
+**The fix, golib only:** `heap<T>(T target, out ж<T>)` takes its value by value, and clears `target = default!` once
+`Ꮡ(target)` holds it. A cleared address-exposed slot holds nothing, and where the JIT drops the store as dead, the
+slot was tracked and dead already. No call passes `in` explicitly, so every caller rebinds unchanged. The converter is
+byte-identical to master's when built with `-ldflags=-buildid=` (sha256 `5cbd892b…`), so the emission cannot move.
+
+**Guards** (`src/tests/GolibTests/HeapInitRootingTests.cs`):
+- the IL guard: a folded frame declares exactly its split twin's IL locals. It is red at master for a reference T and
+  for a struct T;
+- `HeapClearsItsParameterOnceTheBoxHoldsTheValue`: heap's IL must hold `ldarga.s 0; initobj` (`0F 00 FE 15`). It is
+  red with the by-value-only golib;
+- two reachability arms, measured only under `DOTNET_JitNoInline=1`, which is the condition that reproduces the
+  call-site spill in a small frame. The reference arm is red at master and green at the fix.
+
+**Measured.**
+- **The row, through the sweep, at TC0:** PASS 1 in 36 s and 191 s (cold). It hung to the deadline at the
+  by-value-only commit.
+- **Copy cost of by-value:** an rvalue costs within 1% at 8, 32 and 128 B; an lvalue costs within 1% up to 32 B, and
+  +16% (about 4 ns) at 128 B. 232 of the 1,185 folds pass an lvalue, almost all small types.
+- **The 16-file lead:** of the test files that use both the fold and a GC-reachability API, only fips140cache waits
+  on a folded value to die.
+
+**Gates, at `390e9b8bda`:**
+- GolibTests Release 2,327 passed / 0 failed / 27 skipped, and Debug 2,309 / 0 / 45;
+- GenTests rc 0; go test every package ok, after this seat's re-cites for repoguard;
+- go2cs.slnx Debug and go2cs-stdlib.slnx Release both 0 errors;
+- CNR byte-identical across all 954 packages;
+- behavioral 887 transpile, compile and target, Output 858 pass / 0 fail / 29 skip.
+
+**The sibling, ruled in-hop as its own seat:** `Ꮡ<T>(in T)` has the same shape. The same disassembly shows
+`Ꮡ(new value())` spilled to `[rsp+0x288]` and passed by `lea`; it is harmless there, but it roots any rvalue struct
+holding references.
+
+— G (2026-11-02)
+
+## 2026-11-02 — G (post-hop, measured in the heap seat): with nothing inlined, a struct constructor's `newobj` temp roots the struct's reference fields for the whole frame — POST-HOP QUEUE
+
+**The shape.** Go `x := S{p: obj}` converts to `new S(obj, …)`, a positional constructor. Under
+`DOTNET_JitNoInline=1`, the constructor is not inlined, so the JIT builds the value in a temp and passes its address
+as `this`. That temp is address-exposed and reported live for the frame, so `obj` stays reachable after `x.p = nil`.
+
+**Evidence** (HeapInitRootingTests' struct arm, measured with its gates lifted, the file restored byte-identical):
+under no-inline, the field stays rooted in BOTH the folded `heap<S>(new S(…), out …)` shape and the split
+`heap<S>(out …); x = new S(…);` shape. At default inlining both shapes collect.
+
+**Ruled (COORD, 2026-11-02):** not a shipping configuration and pre-existing JIT behaviour, so no seat in this hop. It
+goes to the post-hop queue.
+
+— G (2026-11-02)
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
