@@ -1,0 +1,30 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+# host 2026-11-02: bind9-dnsutils 1:9.18.39-0ubuntu0.24.04.8 installed by apt (owner yes in P1's thread 16:41Z; COORD relay 16:42Z 'p1 and p2 cleared to install')
+# host: nslookup invalid.invalid -> NXDOMAIN (real resolver); the kit's .NET path symlinked to this box's .NET root (SDK 10.0.113, runtime 10.0.13)
+# canary: math PASS 76, rc 0, 379 s at f6666d98a2 (separate run, evidence ev-P1-1-canary); this shard re-reads math as row 1
+# restart 2026-11-02 16:50Z: first P1-1 launch stopped by P1 during row 1 (math), launcher was bound to a 2 h task limit; tree clean, math's build output purged; relaunched detached
+math	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T16:55:30Z
+io	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:00:57Z
+mime/multipart	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:02:39Z
+os/user	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:03:01Z
+os/signal	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:04:14Z
+encoding/gob	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:05:33Z
+bufio	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:06:08Z
+crypto	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:07:33Z
+net/http/httptest	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:10:58Z
+go/internal/srcimporter	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:12:29Z
+context	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:12:59Z
+net/netip	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:14:05Z
+go/build	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:14:57Z
+debug/pe	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:15:42Z
+internal/synctest	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:16:50Z
+net/http/cgi	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:21:38Z
+os	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:24:26Z
+net/http/pprof	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:28:04Z
+net/rpc	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:29:11Z
+net/http/httputil	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:30:17Z
+internal/trace	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793638201	PASS	0	2026-11-02T17:34:19Z
+# abort 2026-11-02 17:34:20Z: the kit's floor guard stopped before row 22 (free 14G < 15G); rows 1-21 recorded. Ignored build output under src/core (about 7 GB) purged by git clean -fdXq -- src/core, 0 tracked deletions; rows 22-23 re-entered as a second kit invocation (its converter rebuilt at the same commit, new mtime), evidence merged below
+mime/quotedprintable	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793640934	PASS	0	2026-11-02T17:40:51Z
+log/slog	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793640934	PASS	0	2026-11-02T17:42:03Z
+# end 2026-11-02 17:42:07Z: 23 of 23 rows, all PASS, each equal to its linux: segment; both invocations ended with residue-after 0 and tracked-deleted 0; container restarts during the shard: 0
